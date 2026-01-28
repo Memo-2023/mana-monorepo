@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { contactsApi, photoApi } from '$lib/api/contacts';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import SocialMediaFields from './forms/SocialMediaFields.svelte';
 	import DateFields from './forms/DateFields.svelte';
@@ -119,6 +120,12 @@
 	}
 
 	async function handleSave() {
+		// Demo mode: show auth gate
+		if (!authStore.isAuthenticated) {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
+			return;
+		}
+
 		if (!firstName && !lastName && !email) {
 			error = 'Bitte mindestens Name oder E-Mail angeben';
 			return;

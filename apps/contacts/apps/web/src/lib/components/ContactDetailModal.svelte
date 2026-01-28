@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { contactsApi, photoApi, type Contact } from '$lib/api/contacts';
+	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import ContactNotes from './ContactNotes.svelte';
 	import ContactTasks from './ContactTasks.svelte';
 	import { ContactDetailSkeleton } from '$lib/components/skeletons';
@@ -134,6 +135,12 @@
 	}
 
 	async function handleSave() {
+		// Demo contact: show auth gate
+		if (contactsStore.isDemoContact(contactId)) {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
+			return;
+		}
+
 		saving = true;
 		error = null;
 		try {
@@ -177,6 +184,12 @@
 	}
 
 	async function handleDelete() {
+		// Demo contact: show auth gate
+		if (contactsStore.isDemoContact(contactId)) {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
+			return;
+		}
+
 		if (!confirm('Kontakt wirklich löschen?')) return;
 		deleting = true;
 		try {
@@ -190,6 +203,13 @@
 
 	async function handleToggleFavorite() {
 		if (!contact) return;
+
+		// Demo contact: show auth gate
+		if (contactsStore.isDemoContact(contactId)) {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
+			return;
+		}
+
 		try {
 			contact = await contactsApi.toggleFavorite(contactId);
 		} catch (e) {

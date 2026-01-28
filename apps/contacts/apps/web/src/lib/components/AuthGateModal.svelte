@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { sessionContactsStore } from '$lib/stores/session-contacts.svelte';
 
 	interface Props {
 		visible: boolean;
@@ -16,7 +15,7 @@
 		save: {
 			title: 'Anmelden um zu speichern',
 			description:
-				'Melde dich an, um deine Kontakte in der Cloud zu speichern und auf allen Geräten zu synchronisieren.',
+				'Im Demo-Modus kannst du die App erkunden. Melde dich an, um eigene Kontakte zu erstellen und zu speichern.',
 			icon: 'cloud',
 		},
 		sync: {
@@ -33,7 +32,6 @@
 	};
 
 	let currentMessage = $derived(messages[action]);
-	let sessionContactCount = $derived(sessionContactsStore.count);
 
 	function handleLogin() {
 		// Store return URL for redirect after login
@@ -121,20 +119,6 @@
 				{currentMessage.description}
 			</p>
 
-			<!-- Session contacts info -->
-			{#if sessionContactCount > 0}
-				<div class="bg-muted/50 mb-6 rounded-lg p-3 text-center text-sm">
-					<span class="text-muted-foreground">
-						Du hast <strong class="text-foreground">{sessionContactCount}</strong>
-						{sessionContactCount === 1 ? 'Kontakt' : 'Kontakte'} in dieser Sitzung erstellt.
-					</span>
-					<br />
-					<span class="text-muted-foreground text-xs">
-						Diese werden nach der Anmeldung in deinen Account übernommen.
-					</span>
-				</div>
-			{/if}
-
 			<!-- Buttons -->
 			<div class="flex flex-col gap-3">
 				<button
@@ -159,8 +143,8 @@
 
 			<!-- Info text -->
 			<p class="text-muted-foreground mt-4 text-center text-xs">
-				Du kannst weiterhin Kontakte erstellen. Diese werden lokal gespeichert und gehen beim
-				Schließen des Tabs verloren.
+				Im Demo-Modus werden Beispielkontakte angezeigt. Melde dich an, um eigene Kontakte zu
+				erstellen.
 			</p>
 		</div>
 	</div>

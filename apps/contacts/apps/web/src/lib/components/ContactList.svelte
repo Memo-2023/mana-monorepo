@@ -7,12 +7,7 @@
 	import { goto } from '$app/navigation';
 	import ContactGridView from '$lib/components/views/ContactGridView.svelte';
 	import ContactAlphabetView from '$lib/components/views/ContactAlphabetView.svelte';
-	import ContactNetworkView from '$lib/components/views/ContactNetworkView.svelte';
-	import {
-		ContactListSkeleton,
-		ContactGridSkeleton,
-		NetworkGraphSkeleton,
-	} from '$lib/components/skeletons';
+	import { ContactListSkeleton, ContactGridSkeleton } from '$lib/components/skeletons';
 	import { batchApi } from '$lib/api/batch';
 	import { toasts } from '$lib/stores/toast';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
@@ -140,7 +135,12 @@
 
 	async function handleToggleFavorite(e: MouseEvent, id: string) {
 		e.stopPropagation();
-		await contactsStore.toggleFavorite(id);
+		const result = await contactsStore.toggleFavorite(id);
+
+		// Show auth gate if authentication required (demo mode)
+		if (result && 'error' in result && result.error === 'auth_required') {
+			window.dispatchEvent(new CustomEvent('show-auth-gate'));
+		}
 	}
 
 	function handleContactClick(id: string) {
@@ -374,9 +374,7 @@
 
 	<!-- Loading state with skeleton -->
 	{#if contactsStore.loading}
-		{#if viewModeStore.mode === 'network'}
-			<NetworkGraphSkeleton />
-		{:else if viewModeStore.mode === 'grid'}
+		{#if viewModeStore.mode === 'grid'}
 			<ContactGridSkeleton count={8} />
 		{:else}
 			<ContactListSkeleton count={10} />
@@ -393,9 +391,7 @@
 		</div>
 	{:else}
 		<!-- Contacts View -->
-		{#if viewModeStore.mode === 'network'}
-			<ContactNetworkView />
-		{:else if viewModeStore.mode === 'grid'}
+		{#if viewModeStore.mode === 'grid'}
 			<ContactGridView
 				contacts={sortedContacts}
 				onContactClick={handleContactClick}
@@ -416,8 +412,8 @@
 			/>
 		{/if}
 
-		<!-- Infinite scroll trigger & loading more indicator (not for network view) -->
-		{#if viewModeStore.mode !== 'network' && contactsStore.hasMore}
+		<!-- Infinite scroll trigger & loading more indicator -->
+		{#if contactsStore.hasMore}
 			<div bind:this={loadMoreTrigger} class="load-more-trigger">
 				{#if contactsStore.loadingMore}
 					<div class="loading-more">
@@ -428,13 +424,11 @@
 			</div>
 		{/if}
 
-		<!-- Total count (not for network view) -->
-		{#if viewModeStore.mode !== 'network'}
-			<p class="text-sm text-muted-foreground text-center">
-				{contactsStore.contacts.length} / {contactsStore.total}
-				{contactsStore.total === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
-			</p>
-		{/if}
+		<!-- Total count -->
+		<p class="text-sm text-muted-foreground text-center">
+			{contactsStore.contacts.length} / {contactsStore.total}
+			{contactsStore.total === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
+		</p>
 	{/if}
 </div>
 

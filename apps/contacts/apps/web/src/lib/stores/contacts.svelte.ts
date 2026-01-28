@@ -1,9 +1,13 @@
 /**
  * Contacts Store - Manages contacts state using Svelte 5 runes
+ * Authenticated users: contacts from API
+ * Demo mode: static sample contacts to showcase the app
  */
 
 import { contactsApi } from '$lib/api/contacts';
 import type { Contact, ContactFilters } from '$lib/api/contacts';
+import { authStore } from './auth.svelte';
+import { generateDemoContacts, isDemoContact } from '$lib/data/demo-contacts';
 
 // Default page size for pagination
 const DEFAULT_PAGE_SIZE = 50;
@@ -48,6 +52,7 @@ export const contactsStore = {
 
 	/**
 	 * Load contacts with optional filters (resets to first page)
+	 * In demo mode, loads static sample contacts
 	 */
 	async loadContacts(newFilters?: ContactFilters) {
 		if (newFilters) {
@@ -58,6 +63,35 @@ export const contactsStore = {
 		error = null;
 		currentOffset = 0;
 
+		// Demo mode: load static demo contacts
+		if (!authStore.isAuthenticated) {
+			let demoContacts = generateDemoContacts();
+
+			// Apply filters to demo contacts
+			if (filters.search) {
+				const search = filters.search.toLowerCase();
+				demoContacts = demoContacts.filter(
+					(c) =>
+						c.displayName?.toLowerCase().includes(search) ||
+						c.email?.toLowerCase().includes(search) ||
+						c.company?.toLowerCase().includes(search)
+				);
+			}
+			if (filters.isFavorite !== undefined) {
+				demoContacts = demoContacts.filter((c) => c.isFavorite === filters.isFavorite);
+			}
+			if (filters.isArchived !== undefined) {
+				demoContacts = demoContacts.filter((c) => c.isArchived === filters.isArchived);
+			}
+
+			contacts = demoContacts;
+			total = demoContacts.length;
+			hasMore = false;
+			loading = false;
+			return;
+		}
+
+		// Authenticated: fetch from API
 		try {
 			const result = await contactsApi.list({
 				...filters,
@@ -127,8 +161,14 @@ export const contactsStore = {
 
 	/**
 	 * Create a new contact
+	 * Requires authentication - demo mode shows auth gate
 	 */
 	async createContact(data: Partial<Contact>) {
+		// Demo mode: require authentication
+		if (!authStore.isAuthenticated) {
+			return { error: 'auth_required' as const };
+		}
+
 		loading = true;
 		error = null;
 
@@ -149,8 +189,14 @@ export const contactsStore = {
 
 	/**
 	 * Update a contact
+	 * Demo contacts require authentication
 	 */
 	async updateContact(id: string, data: Partial<Contact>) {
+		// Demo contact: require authentication
+		if (isDemoContact(id)) {
+			return { error: 'auth_required' as const };
+		}
+
 		loading = true;
 		error = null;
 
@@ -173,8 +219,14 @@ export const contactsStore = {
 
 	/**
 	 * Delete a contact
+	 * Demo contacts require authentication
 	 */
 	async deleteContact(id: string) {
+		// Demo contact: require authentication
+		if (isDemoContact(id)) {
+			return { error: 'auth_required' as const };
+		}
+
 		loading = true;
 		error = null;
 
@@ -197,8 +249,14 @@ export const contactsStore = {
 
 	/**
 	 * Toggle favorite status
+	 * Demo contacts require authentication
 	 */
 	async toggleFavorite(id: string) {
+		// Demo contact: require authentication
+		if (isDemoContact(id)) {
+			return { error: 'auth_required' as const };
+		}
+
 		try {
 			const contact = await contactsApi.toggleFavorite(id);
 			// Update in local state
@@ -215,8 +273,14 @@ export const contactsStore = {
 
 	/**
 	 * Toggle archive status
+	 * Demo contacts require authentication
 	 */
 	async toggleArchive(id: string) {
+		// Demo contact: require authentication
+		if (isDemoContact(id)) {
+			return { error: 'auth_required' as const };
+		}
+
 		try {
 			const contact = await contactsApi.toggleArchive(id);
 			// Remove from current view if archived/unarchived
@@ -259,5 +323,12 @@ export const contactsStore = {
 	 */
 	clearSelected() {
 		selectedContact = null;
+	},
+
+	/**
+	 * Check if a contact is a demo contact (static sample data)
+	 */
+	isDemoContact(contactId: string) {
+		return isDemoContact(contactId);
 	},
 };

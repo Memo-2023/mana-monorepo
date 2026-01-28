@@ -47,8 +47,8 @@
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
 	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
-	import { sessionContactsStore } from '$lib/stores/session-contacts.svelte';
 	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { browser } from '$app/environment';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -140,7 +140,6 @@
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Kontakte', icon: 'users' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
-		{ href: '/statistics', label: 'Statistiken', icon: 'bar-chart-3' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
@@ -227,8 +226,17 @@
 		showAuthGateModal = true;
 	}
 
-	// Session contacts indicator
-	let sessionContactCount = $derived(sessionContactsStore.count);
+	// Listen for show-auth-gate events from child components
+	$effect(() => {
+		if (browser) {
+			const handler = (e: Event) => {
+				const customEvent = e as CustomEvent<{ action?: 'save' | 'sync' | 'feature' }>;
+				showAuthGate(customEvent.detail?.action || 'save');
+			};
+			window.addEventListener('show-auth-gate', handler);
+			return () => window.removeEventListener('show-auth-gate', handler);
+		}
+	});
 
 	async function handleCloseContactModal() {
 		// Refresh contacts list in case something was changed
@@ -298,9 +306,6 @@
 		viewModeStore.initialize();
 		contactsFilterStore.initialize();
 
-		// Initialize session contacts for guest mode
-		sessionContactsStore.initialize();
-
 		// Show guest welcome modal for unauthenticated users
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('contacts')) {
 			showGuestWelcome = true;
@@ -317,23 +322,6 @@
 				availableTags = (tagsResult.tags || []).map((t) => ({ id: t.id, name: t.name }));
 			} catch (e) {
 				console.error('Failed to load tags:', e);
-			}
-
-			// Check for session contacts to migrate after login
-			if (sessionContactsStore.hasContacts) {
-				// Migrate session contacts to cloud
-				const sessionContacts = sessionContactsStore.getAllContacts();
-				for (const contact of sessionContacts) {
-					try {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const { id, userId, createdAt, updatedAt, ...contactData } = contact;
-						await contactsStore.createContact(contactData);
-					} catch (e) {
-						console.error('Failed to migrate session contact:', e);
-					}
-				}
-				// Clear session contacts after migration
-				sessionContactsStore.clear();
 			}
 		}
 
@@ -366,7 +354,7 @@
 <SplitPaneContainer>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
-		<!-- Guest Mode Banner -->
+		<!-- Demo Mode Banner -->
 		{#if !authStore.isAuthenticated}
 			<div
 				class="guest-banner bg-primary/10 border-primary/20 fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b px-4 py-2"
@@ -377,21 +365,24 @@
 							stroke-linecap="round"
 							stroke-linejoin="round"
 							stroke-width="2"
-							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+						/>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
 						/>
 					</svg>
 					<span class="text-foreground">
-						<strong>Gast-Modus</strong>
-						{#if sessionContactCount > 0}
-							- {sessionContactCount}
-							{sessionContactCount === 1 ? 'Kontakt' : 'Kontakte'} lokal gespeichert
-						{:else}
-							- Kontakte werden nur in diesem Tab gespeichert
-						{/if}
+						<strong>Demo-Modus</strong>
+						<span class="text-muted-foreground hidden sm:inline">
+							- Beispiel-Kontakte zum Ausprobieren
+						</span>
 					</span>
 				</div>
 				<button
-					onclick={() => showAuthGate('sync')}
+					onclick={() => showAuthGate('save')}
 					class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm font-medium transition-colors"
 				>
 					Anmelden
