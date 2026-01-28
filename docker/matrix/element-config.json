@@ -1,0 +1,47 @@
+{
+  "default_server_config": {
+    "m.homeserver": {
+      "base_url": "https://matrix.mana.how",
+      "server_name": "mana.how"
+    },
+    "m.identity_server": {
+      "base_url": ""
+    }
+  },
+  "brand": "ManaCore Chat",
+  "integrations_ui_url": "",
+  "integrations_rest_url": "",
+  "integrations_widgets_urls": [],
+  "disable_guests": true,
+  "disable_3pid_login": true,
+  "default_country_code": "DE",
+  "show_labs_settings": false,
+  "features": {
+    "feature_video_rooms": true,
+    "feature_group_calls": true,
+    "feature_thread": true
+  },
+  "room_directory": {
+    "servers": ["mana.how"]
+  },
+  "setting_defaults": {
+    "breadcrumbs": true,
+    "custom_themes": []
+  },
+  "default_theme": "dark",
+  "permalink_prefix": "https://element.mana.how",
+  "terms_and_conditions_links": [],
+  "privacy_policy_url": "https://mana.how/privacy",
+  "sso_redirect_options": {
+    "immediate": false
+  },
+  "posthog": {
+    "disabled": true
+  },
+  "sentry": {
+    "disabled": true
+  },
+  "bug_report_endpoint_url": "",
+  "help_url": "https://mana.how/help",
+  "help_encryption_url": "https://element.io/help#encryption"
+}
