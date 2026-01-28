@@ -44,7 +44,6 @@
 		isNavCollapsed as collapsedStore,
 		isToolbarCollapsed as toolbarCollapsedStore,
 	} from '$lib/stores/navigation';
-	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -66,6 +65,9 @@
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
+	import VoiceRecordButton from '$lib/components/voice/VoiceRecordButton.svelte';
+	import VoiceRecordingModal from '$lib/components/voice/VoiceRecordingModal.svelte';
+	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import { sessionEventsStore } from '$lib/stores/session-events.svelte';
 	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
@@ -366,37 +368,21 @@
 		return viewLabels[view];
 	}
 
-	// Handle view/mode change - switches between calendar views and network mode
-	function handleViewModeChange(id: string) {
-		if (id === 'network') {
-			viewModeStore.setMode('network');
-		} else {
-			// Switch to calendar mode and set the view type
-			viewModeStore.setMode('calendar');
-			viewStore.setViewType(id as CalendarViewType);
-		}
+	// Handle view change
+	function handleViewChange(id: string) {
+		viewStore.setViewType(id as CalendarViewType);
 	}
 
-	// Current view value - shows 'network' when in network mode, otherwise the calendar view type
-	let currentViewValue = $derived(
-		viewModeStore.mode === 'network' ? 'network' : viewStore.viewType
-	);
-
 	// View switcher tab group (only shown on calendar main page)
-	// Includes calendar views + network option
 	let viewSwitcherTabGroup = $derived<PillTabGroupConfig>({
 		type: 'tabs',
-		options: [
-			...enabledViews.map((view) => ({
-				id: view,
-				label: getViewLabel(view),
-				title:
-					view === 'custom' ? `${settingsStore.customDayCount}-Tage-Ansicht` : viewTitles[view],
-			})),
-			{ id: 'network', label: 'N', title: 'Netzwerk-Ansicht' },
-		],
-		value: currentViewValue,
-		onChange: handleViewModeChange,
+		options: enabledViews.map((view) => ({
+			id: view,
+			label: getViewLabel(view),
+			title: view === 'custom' ? `${settingsStore.customDayCount}-Tage-Ansicht` : viewTitles[view],
+		})),
+		value: viewStore.viewType,
+		onChange: handleViewChange,
 		onContextMenu: handleViewContextMenu,
 	});
 
@@ -570,6 +556,31 @@
 	// Session events indicator
 	let hasSessionEvents = $derived(sessionEventsStore.hasEvents);
 	let sessionEventCount = $derived(sessionEventsStore.count);
+
+	// Voice recording result handler
+	function handleVoiceResult(transcription: string) {
+		if (!browser) return;
+
+		// Parse the transcribed text to extract event data
+		const parsed = parseEventInput(transcription);
+
+		// Dispatch custom event for +page.svelte to handle
+		// The event data includes parsed info plus original transcription as description
+		window.dispatchEvent(
+			new CustomEvent('voice-event-create', {
+				detail: {
+					title: parsed.title || transcription,
+					startTime: parsed.startTime,
+					endTime: parsed.endTime,
+					location: parsed.location,
+					isAllDay: parsed.isAllDay,
+					tagNames: parsed.tagNames,
+					calendarName: parsed.calendarName,
+					description: transcription, // Original transcription as description
+				},
+			})
+		);
+	}
 
 	onMount(async () => {
 		// Initialize split-panel from URL/localStorage
@@ -753,39 +764,59 @@
 			{/if}
 		{/if}
 
-		<!-- Global Input Bar (hidden via CSS in immersive mode to prevent re-mount focus) -->
+		<!-- Global Input Bar with Voice Button (hidden via CSS in immersive mode to prevent re-mount focus) -->
 		<div class="input-bar-wrapper" class:hidden={settingsStore.immersiveModeEnabled}>
-			<QuickInputBar
-				onSearch={handleSearch}
-				onSelect={handleSelect}
-				onSearchChange={handleSearchChange}
-				placeholder="Neuer Termin oder suchen..."
-				emptyText="Keine Termine gefunden"
-				searchingText="Suche..."
-				onCreate={handleCreate}
-				onParseCreate={handleParseCreate}
-				createText="Erstellen"
-				appIcon="calendar"
-				bottomOffset={isMobile
-					? `${70 + tagStripOffset}px`
-					: isSidebarMode
-						? `${tagStripOffset}px`
-						: showCalendarToolbar && !isToolbarCollapsed
-							? `${140 + tagStripOffset}px`
-							: `${70 + tagStripOffset}px`}
-				hasFabRight={showCalendarToolbar && !isSidebarMode}
-				hasFabLeft={!isMobile &&
-					showCalendarToolbar &&
-					!isSidebarMode &&
-					settingsStore.dateStripCollapsed}
-				defaultOptions={calendarOptions}
-				selectedDefaultId={selectedDefaultCalendarId}
-				defaultOptionLabel="Standard-Kalender"
-				onDefaultChange={handleDefaultCalendarChange}
-				onShowShortcuts={handleShowShortcuts}
-				onShowSyntaxHelp={handleShowSyntaxHelp}
-			/>
+			<div class="input-bar-row">
+				<QuickInputBar
+					onSearch={handleSearch}
+					onSelect={handleSelect}
+					onSearchChange={handleSearchChange}
+					placeholder="Neuer Termin oder suchen..."
+					emptyText="Keine Termine gefunden"
+					searchingText="Suche..."
+					onCreate={handleCreate}
+					onParseCreate={handleParseCreate}
+					createText="Erstellen"
+					appIcon="calendar"
+					bottomOffset={isMobile
+						? `${70 + tagStripOffset}px`
+						: isSidebarMode
+							? `${tagStripOffset}px`
+							: showCalendarToolbar && !isToolbarCollapsed
+								? `${140 + tagStripOffset}px`
+								: `${70 + tagStripOffset}px`}
+					hasFabRight={showCalendarToolbar && !isSidebarMode}
+					hasFabLeft={!isMobile &&
+						showCalendarToolbar &&
+						!isSidebarMode &&
+						settingsStore.dateStripCollapsed}
+					defaultOptions={calendarOptions}
+					selectedDefaultId={selectedDefaultCalendarId}
+					defaultOptionLabel="Standard-Kalender"
+					onDefaultChange={handleDefaultCalendarChange}
+					onShowShortcuts={handleShowShortcuts}
+					onShowSyntaxHelp={handleShowSyntaxHelp}
+				/>
+				<!-- Voice Record Button -->
+				{#if voiceRecordingStore.isSupported}
+					<div
+						class="voice-button-wrapper"
+						style="--bottom-offset: {isMobile
+							? `${70 + tagStripOffset}px`
+							: isSidebarMode
+								? `${tagStripOffset}px`
+								: showCalendarToolbar && !isToolbarCollapsed
+									? `${140 + tagStripOffset}px`
+									: `${70 + tagStripOffset}px`}"
+					>
+						<VoiceRecordButton onResult={handleVoiceResult} size={40} />
+					</div>
+				{/if}
+			</div>
 		</div>
+
+		<!-- Voice Recording Modal -->
+		<VoiceRecordingModal onResult={handleVoiceResult} />
 
 		<!-- Immersive Mode Toggle (always visible on main calendar page) -->
 		<ImmersiveModeToggle
@@ -1057,6 +1088,57 @@
 		:global(.quick-input-bar.has-fab-right) {
 			padding-left: 1rem;
 			padding-right: calc(54px + 1rem + 8px); /* FAB width + margin + gap */
+		}
+	}
+
+	/* Voice Button Wrapper */
+	.input-bar-row {
+		position: relative;
+	}
+
+	.voice-button-wrapper {
+		position: fixed;
+		bottom: calc(var(--bottom-offset, 70px) + env(safe-area-inset-bottom, 0px) + 7px);
+		left: 50%;
+		transform: translateX(calc(-50% + 260px)); /* Position to the right of centered InputBar */
+		z-index: 91;
+		background: hsl(var(--color-surface) / 0.85);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 50%;
+		padding: 0.25rem;
+		box-shadow:
+			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
+			0 2px 4px -1px hsl(var(--color-foreground) / 0.06);
+		transition:
+			bottom 0.3s ease,
+			transform 0.15s ease;
+	}
+
+	.voice-button-wrapper:hover {
+		transform: translateX(calc(-50% + 260px)) scale(1.05);
+	}
+
+	/* Adjust voice button position on smaller screens */
+	@media (max-width: 900px) {
+		.voice-button-wrapper {
+			right: calc(1rem + 54px + 8px); /* FAB width + margin + gap from right FAB */
+			left: auto;
+			transform: none;
+		}
+
+		.voice-button-wrapper:hover {
+			transform: scale(1.05);
+		}
+	}
+
+	/* Mobile: Hide voice button (use modal instead) */
+	@media (max-width: 640px) {
+		.voice-button-wrapper {
+			right: calc(54px + 1rem + 54px + 8px); /* Right FAB + margin + voice btn + gap */
+			left: auto;
+			transform: none;
 		}
 	}
 </style>

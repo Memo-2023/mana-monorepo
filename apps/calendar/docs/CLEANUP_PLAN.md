@@ -1,0 +1,223 @@
+# Calendar App - Cleanup Plan
+
+Dieser Plan dokumentiert Features und Code, die überdurchschnittlich viel Komplexität erzeugen bei geringem Nutzen. Ziel ist eine schlankere, wartbarere Codebase.
+
+## Status-Legende
+
+- ✅ Erledigt
+- 🔄 In Bearbeitung
+- ⏳ Geplant
+- ❌ Abgelehnt
+
+---
+
+## Erledigte Aufräumarbeiten
+
+### ✅ Statistiken & Heatmap (2024-01-28)
+
+**Commit:** `2f3473b7`
+
+**Entfernte Dateien:**
+- `src/lib/stores/statistics.svelte.ts` (270 Zeilen)
+- `src/lib/stores/heatmap.svelte.ts` (190 Zeilen)
+- `src/lib/components/calendar/StatsSidebarSection.svelte` (434 Zeilen)
+- `src/lib/components/calendar/StatsOverlay.svelte` (257 Zeilen)
+
+**Geänderte Dateien:**
+- Heatmap-CSS aus allen View-Komponenten entfernt
+- Nav-Item "Statistiken" entfernt
+- Toolbar Heatmap-Toggle entfernt
+
+**Ersparnis:** ~1.450 Zeilen
+
+---
+
+## Geplante Aufräumarbeiten
+
+### Priorität 1: Quick Wins (Hoher ROI)
+
+#### ⏳ 1.1 Network View entfernen
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~800 Zeilen
+**Komplexität:** HOCH | **Nutzen:** NIEDRIG
+
+**Beschreibung:**
+D3 Force-Simulation für Event-Graph-Visualisierung. Kalendereinträge sind keine natürliche Graph-Struktur. Nutzer navigieren nach Datum, nicht nach "Event-Beziehungen".
+
+**Zu entfernende Dateien:**
+- `src/lib/components/calendar/NetworkView.svelte` (~416 Zeilen)
+- `src/lib/stores/network.svelte.ts` (~372 Zeilen)
+
+**Zu ändernde Dateien:**
+- `src/lib/stores/view-mode.svelte.ts` - Network-Mode entfernen
+- `src/routes/(app)/+page.svelte` - Network-View Conditional entfernen
+- `src/routes/(app)/+layout.svelte` - Network-Tab aus ViewSwitcher entfernen
+
+---
+
+#### ⏳ 1.2 Session Events (Guest Mode) entfernen
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~150 Zeilen
+**Komplexität:** MITTEL | **Nutzen:** NIEDRIG
+
+**Beschreibung:**
+Event-Management für unauthentifizierte Nutzer via sessionStorage. Events verschwinden bei Tab-Schließung - frustrierendes UX. Vereinfacht den events-Store erheblich.
+
+**Zu entfernende Dateien:**
+- `src/lib/stores/session-events.svelte.ts` (~154 Zeilen)
+
+**Zu ändernde Dateien:**
+- `src/lib/stores/events.svelte.ts` - Session-Event-Logik entfernen
+- `src/routes/(app)/+layout.svelte` - Guest-Banner/Modal anpassen
+- `src/lib/api/events.ts` - Session-Fallback entfernen
+
+---
+
+#### ⏳ 1.3 Event Parser (NLP) entfernen
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~260 Zeilen
+**Komplexität:** MITTEL | **Nutzen:** NIEDRIG
+
+**Beschreibung:**
+Natural Language Parsing für Termineinträge (nur Deutsch). Regex-basiert und fehleranfällig. Die meisten Nutzer verwenden strukturierte Formulare.
+
+**Zu entfernende Dateien:**
+- `src/lib/utils/event-parser.ts` (~261 Zeilen)
+
+**Zu ändernde Dateien:**
+- `src/routes/(app)/+layout.svelte` - QuickInputBar onCreate/onParseCreate entfernen
+- QuickInputBar-Integration vereinfachen (nur Suche, kein Quick-Create)
+
+---
+
+### Priorität 2: Mittlerer Aufwand
+
+#### ⏳ 2.1 Swipe Navigation entfernen
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~180 Zeilen
+**Komplexität:** MITTEL | **Nutzen:** NIEDRIG
+
+**Beschreibung:**
+Trackpad-/Touch-Swipe für horizontale Kalendernavigation. Pfeiltasten und Buttons reichen völlig aus.
+
+**Zu entfernende Dateien:**
+- `src/lib/composables/useSwipeNavigation.svelte.ts` (~183 Zeilen)
+
+**Zu ändernde Dateien:**
+- `src/lib/components/calendar/ViewCarousel.svelte` - Swipe-Integration entfernen
+
+---
+
+#### ⏳ 2.2 Context Menus entfernen
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~400 Zeilen
+**Komplexität:** MITTEL | **Nutzen:** NIEDRIG
+
+**Beschreibung:**
+4+ verschiedene Context-Menus mit duplizierten Aktionen. Mobile unterstützt keine Context-Menus. Aktionen besser in sichtbare Buttons verschieben.
+
+**Zu entfernende Dateien:**
+- `src/lib/components/event/EventContextMenu.svelte`
+- `src/lib/components/calendar/CalendarHeaderContextMenu.svelte`
+- `src/lib/components/calendar/DateStripContextMenu.svelte`
+- `src/lib/components/calendar/ViewModePillContextMenu.svelte`
+- `src/lib/stores/eventContextMenu.svelte.ts`
+
+---
+
+#### ⏳ 2.3 Settings vereinfachen
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~200 Zeilen
+**Komplexität:** MITTEL | **Nutzen:** NIEDRIG
+
+**Beschreibung:**
+Aktuell ~42 Einstellungen - die meisten Nutzer verwenden Defaults. Reduzieren auf ~8 Kern-Einstellungen.
+
+**Zu entfernende Settings:**
+- Mondphasen-Anzeige
+- DateStrip-Varianten (compact, eventIndicators, etc.)
+- Header-Format-Optionen
+- Zeitfilter-Optionen
+
+---
+
+### Priorität 3: Größere Refactorings
+
+#### ⏳ 3.1 Calendar Views reduzieren (7 → 3)
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~1.500 Zeilen
+**Komplexität:** HOCH | **Nutzen:** HOCH (Vereinfachung)
+
+**Beschreibung:**
+7 verschiedene View-Typen sind zu viel. Die meisten Nutzer brauchen nur Week, Month, Agenda.
+
+**Behalten:**
+- `WeekView.svelte` (Standard)
+- `MonthView.svelte`
+- `AgendaView.svelte`
+
+**Entfernen:**
+- `YearView.svelte` (~420 Zeilen)
+- `DayView.svelte` (~1.104 Zeilen) - Week-View für einzelne Tage nutzen
+- `MultiDayView.svelte` (~1.594 Zeilen) - Week-View mit variablem dayCount
+
+---
+
+#### ⏳ 3.2 Tag-System vereinfachen
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~1.600 Zeilen
+**Komplexität:** HOCH | **Nutzen:** MITTEL
+
+**Beschreibung:**
+Tag-Gruppen-Hierarchie entfernen → nur flache Tags. Drag-Drop-Sortierung entfernen → alphabetisch sortieren.
+
+**Zu vereinfachende Dateien:**
+- `src/lib/components/calendar/TagStripModal.svelte` (1.463 Zeilen → ~300 Zeilen)
+- `src/lib/stores/event-tag-groups.svelte.ts` (entfernen)
+- `src/lib/stores/event-tags.svelte.ts` (vereinfachen)
+
+---
+
+#### ⏳ 3.3 Birthday-Integration vereinfachen
+
+**Status:** Geplant
+**Geschätzte Ersparnis:** ~350 Zeilen
+**Komplexität:** MITTEL | **Nutzen:** MITTEL-NIEDRIG
+
+**Beschreibung:**
+Cross-App API-Integration für Geburtstage. Ersetzbar durch manuelles Eintragen oder einfachen Import.
+
+**Zu entfernende/vereinfachende Dateien:**
+- `src/lib/stores/birthdays.svelte.ts` (~220 Zeilen)
+- `src/lib/api/birthdays.ts` (~101 Zeilen)
+- `src/lib/components/birthday/BirthdayPopover.svelte`
+
+---
+
+## Zusammenfassung
+
+| Phase | Features | LOC Ersparnis | Status |
+|-------|----------|---------------|--------|
+| ✅ Done | Statistiken/Heatmap | ~1.450 | Erledigt |
+| 🟢 Prio 1 | Network, Sessions, Parser | ~1.200 | Geplant |
+| 🟡 Prio 2 | Swipe, Context, Settings | ~780 | Geplant |
+| 🔴 Prio 3 | Views, Tags, Birthdays | ~3.450 | Geplant |
+| **Gesamt** | | **~6.880** | |
+
+**Ziel:** ~30% Code-Reduktion bei gleichem/besserem Nutzererlebnis
+
+---
+
+## Changelog
+
+| Datum | Aktion | Commit |
+|-------|--------|--------|
+| 2024-01-28 | Statistiken & Heatmap entfernt | `2f3473b7` |
