@@ -1203,6 +1203,7 @@ export class BetterAuthService {
 		headers: Record<string, string>;
 		body: unknown;
 	}> {
+		console.log('[handleOidcRequest] Received request:', req.method, req.originalUrl);
 		try {
 			// Convert Express request to Fetch Request
 			const url = new URL(
@@ -1210,6 +1211,7 @@ export class BetterAuthService {
 				this.configService.get<string>('BASE_URL') ||
 					`http://localhost:${this.configService.get<number>('PORT') || 3001}`
 			);
+			console.log('[handleOidcRequest] Constructed URL:', url.toString());
 
 			const headers = new Headers();
 			for (const [key, value] of Object.entries(req.headers)) {

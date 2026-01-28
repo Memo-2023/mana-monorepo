@@ -82,8 +82,10 @@ export class OidcController {
 	 * Handle OIDC request by forwarding to Better Auth
 	 */
 	private async handleOidcRequest(req: Request, res: Response) {
+		console.log('[OIDC Controller] Handling request:', req.method, req.originalUrl);
 		try {
 			const response = await this.betterAuthService.handleOidcRequest(req);
+			console.log('[OIDC Controller] Better Auth response status:', response.status);
 
 			// Set status code
 			res.status(response.status || HttpStatus.OK);
