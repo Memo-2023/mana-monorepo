@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # ================================
+  # NestJS API Service
+  # ================================
+  mana-search:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mana-search
+    ports:
+      - "3021:3021"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3021
+      SEARXNG_URL: http://searxng:8080
+      SEARXNG_TIMEOUT: 15000
+      SEARXNG_DEFAULT_LANGUAGE: de-DE
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_SEARCH_TTL: 3600
+      CACHE_EXTRACT_TTL: 86400
+      EXTRACT_TIMEOUT: 10000
+      EXTRACT_MAX_LENGTH: 50000
+    depends_on:
+      searxng:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mana-search-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3021/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ================================
+  # SearXNG Meta Search Engine
+  # ================================
+  searxng:
+    image: searxng/searxng:latest
+    container_name: mana-searxng
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - ./searxng/limiter.toml:/etc/searxng/limiter.toml:ro
+    environment:
+      SEARXNG_BASE_URL: http://localhost:8080
+      SEARXNG_SECRET: ${SEARXNG_SECRET:-change-me-in-production-please}
+    networks:
+      - mana-search-network
+    # Internal only - no external port mapping in production
+    # Uncomment for debugging:
+    # ports:
+    #   - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ================================
+  # Redis Cache
+  # ================================
+  redis:
+    image: redis:7-alpine
+    container_name: mana-search-redis
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - mana-search-network
+    # Internal only - no external port mapping
+    # Uncomment for debugging:
+    # ports:
+    #   - "6380:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  redis-data:
+    name: mana-search-redis-data
+
+networks:
+  mana-search-network:
+    name: mana-search-network
+    driver: bridge
