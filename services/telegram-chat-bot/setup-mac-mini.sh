@@ -29,7 +29,7 @@ PORT=3305
 NODE_ENV=production
 TZ=Europe/Berlin
 
-TELEGRAM_BOT_TOKEN=YOUR_TOKEN_HERE
+TELEGRAM_BOT_TOKEN=8559479868:AAHF3g7vYLs0eOvDLh7hFVnIB-V8CKehUOM
 TELEGRAM_ALLOWED_USERS=
 
 CHAT_API_URL=http://localhost:3002
@@ -72,6 +72,8 @@ cat > ~/Library/LaunchAgents/com.manacore.telegram-chat-bot.plist << 'EOF'
         <string>3305</string>
         <key>TZ</key>
         <string>Europe/Berlin</string>
+        <key>TELEGRAM_BOT_TOKEN</key>
+        <string>8559479868:AAHF3g7vYLs0eOvDLh7hFVnIB-V8CKehUOM</string>
         <key>CHAT_API_URL</key>
         <string>http://localhost:3002</string>
         <key>MANA_CORE_AUTH_URL</key>
@@ -95,18 +97,23 @@ EOF
 
 mkdir -p logs
 
-echo -e "${GREEN}✅ Setup abgeschlossen!${NC}"
-echo ""
-echo "⚠️ NÄCHSTE SCHRITTE:"
-echo "1. Telegram Bot Token in .env eintragen"
-echo "2. Token auch im LaunchAgent plist eintragen:"
-echo "   nano ~/Library/LaunchAgents/com.manacore.telegram-chat-bot.plist"
-echo "   (füge TELEGRAM_BOT_TOKEN key/string Paar hinzu)"
-echo ""
-echo "3. Service starten:"
-echo "   launchctl load ~/Library/LaunchAgents/com.manacore.telegram-chat-bot.plist"
-echo ""
-echo "Nützliche Befehle:"
-echo "  View logs:    tail -f logs/stdout.log"
-echo "  Stop bot:     launchctl unload ~/Library/LaunchAgents/com.manacore.telegram-chat-bot.plist"
-echo "  Health check: curl http://localhost:3305/health"
+echo -e "${YELLOW}▶️ Starting service...${NC}"
+launchctl unload ~/Library/LaunchAgents/com.manacore.telegram-chat-bot.plist 2>/dev/null || true
+launchctl load ~/Library/LaunchAgents/com.manacore.telegram-chat-bot.plist
+
+sleep 3
+
+echo -e "${YELLOW}🔍 Checking status...${NC}"
+if curl -s http://localhost:3305/health | grep -q "ok"; then
+    echo -e "${GREEN}✅ Telegram Chat Bot is running!${NC}"
+    echo -e "${GREEN}🤖 Bot URL: https://t.me/chat_mana_bot${NC}"
+    echo ""
+    echo "Useful commands:"
+    echo "  View logs:    tail -f ~/projects/manacore-monorepo/services/telegram-chat-bot/logs/stdout.log"
+    echo "  Stop bot:     launchctl unload ~/Library/LaunchAgents/com.manacore.telegram-chat-bot.plist"
+    echo "  Start bot:    launchctl load ~/Library/LaunchAgents/com.manacore.telegram-chat-bot.plist"
+    echo "  Health check: curl http://localhost:3305/health"
+else
+    echo -e "${YELLOW}⚠️ Bot may still be starting. Check logs:${NC}"
+    echo "  tail -f ~/projects/manacore-monorepo/services/telegram-chat-bot/logs/stderr.log"
+fi
