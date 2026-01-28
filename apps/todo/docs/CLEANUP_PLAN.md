@@ -113,4 +113,4 @@ Cross-App Integration mit Contacts-App. Geringe Nutzung wenn Contacts-App nicht 
 
 | Datum | Aktion | Commit |
 |-------|--------|--------|
-| 2026-01-28 | Statistiken, Network View, Session Tasks entfernt; Demo-Modus implementiert | f4d6201a |
+| 2026-01-28 | Statistiken, Network View, Session Tasks entfernt; Demo-Modus implementiert | 99fdf1d1 |
