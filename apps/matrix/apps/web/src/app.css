@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+@import '@manacore/shared-tailwind/themes.css';
+
+/* Scan shared packages for Tailwind classes */
+@source '../../../packages/shared/src';
+@source '../../../../../packages/shared-ui/src';
+@source '../../../../../packages/shared-icons/src';
+
+@layer base {
+	:root {
+		--spacing-xs: 0.25rem;
+		--spacing-sm: 0.5rem;
+		--spacing-md: 1rem;
+		--spacing-lg: 1.5rem;
+		--spacing-xl: 2rem;
+	}
+
+	body {
+		@apply bg-base-100 text-base-content;
+	}
+}
+
+/* Custom scrollbar for chat */
+.chat-scrollbar::-webkit-scrollbar {
+	width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+	background: oklch(var(--bc) / 0.2);
+	border-radius: 3px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: oklch(var(--bc) / 0.3);
+}
