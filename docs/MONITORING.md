@@ -1,0 +1,308 @@
+# Monitoring Stack Documentation
+
+This document describes the ManaCore monitoring infrastructure, including metrics collection, business analytics, and long-term data retention.
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           ManaCore Monitoring Stack                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────┐     ┌──────────────────┐     ┌──────────────────┐        │
+│  │   Services   │────▶│  VictoriaMetrics │────▶│     Grafana      │        │
+│  │  (Backends)  │     │   (2yr retention) │     │   (Dashboards)   │        │
+│  └──────────────┘     └──────────────────┘     └──────────────────┘        │
+│         │                                              ▲                    │
+│         │                                              │                    │
+│         ▼                                              │                    │
+│  ┌──────────────┐     ┌──────────────────┐            │                    │
+│  │  PostgreSQL  │────▶│      DuckDB      │────────────┘                    │
+│  │   (Source)   │     │  (Business KPIs) │                                 │
+│  └──────────────┘     └──────────────────┘                                 │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Components
+
+### 1. VictoriaMetrics (Operative Metrics)
+
+**Purpose:** High-performance time-series database for operational metrics (CPU, memory, request latency, etc.)
+
+| Property | Value |
+|----------|-------|
+| Image | `victoriametrics/victoria-metrics:v1.99.0` |
+| Port | 8428 |
+| Retention | 2 years |
+| Storage | Docker volume `manacore-victoriametrics` |
+
+**Why VictoriaMetrics instead of Prometheus?**
+- 3-10x better compression
+- Lower memory usage
+- Faster queries over long time ranges
+- Drop-in replacement (PromQL compatible)
+- Better suited for long-term retention
+
+**Endpoints:**
+```bash
+# Health check
+curl http://localhost:8428/health
+
+# Query metrics (PromQL)
+curl "http://localhost:8428/api/v1/query?query=up"
+
+# Query range
+curl "http://localhost:8428/api/v1/query_range?query=auth_users_total&start=-1h&step=1m"
+```
+
+### 2. DuckDB Analytics (Business KPIs)
+
+**Purpose:** Embedded OLAP database for business metrics with unlimited retention.
+
+| Property | Value |
+|----------|-------|
+| Location | `/data/analytics/metrics.duckdb` (in mana-core-auth container) |
+| Storage | Docker volume `manacore-analytics` |
+| Retention | Unlimited |
+| Snapshot | Daily at midnight UTC |
+
+**Tracked Metrics:**
+- Total users
+- Verified users
+- New users (today, this week, this month)
+- Database size
+- Growth rates
+
+**API Endpoints:**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/analytics/health` | GET | Service health and database status |
+| `/api/v1/analytics/latest` | GET | Latest metrics snapshot |
+| `/api/v1/analytics/growth` | GET | User growth over time |
+| `/api/v1/analytics/monthly` | GET | Monthly aggregated metrics |
+| `/api/v1/analytics/summary` | GET | Dashboard summary with trends |
+| `/api/v1/analytics/snapshot` | POST | Trigger manual snapshot |
+
+**Example Responses:**
+
+```bash
+# Health
+curl https://auth.mana.how/api/v1/analytics/health
+```
+```json
+{
+  "status": "healthy",
+  "database_path": "/data/analytics/metrics.duckdb",
+  "total_records": 30,
+  "latest_snapshot": "2026-01-28"
+}
+```
+
+```bash
+# Latest metrics
+curl https://auth.mana.how/api/v1/analytics/latest
+```
+```json
+{
+  "date": "2026-01-28",
+  "total_users": 9,
+  "verified_users": 1,
+  "new_users_today": 0,
+  "new_users_week": 9,
+  "new_users_month": 9,
+  "total_db_size_bytes": 9613795,
+  "recorded_at": "2026-01-28 11:46:45.440934"
+}
+```
+
+```bash
+# Growth data
+curl "https://auth.mana.how/api/v1/analytics/growth?days=30"
+```
+```json
+[
+  {"date": "2026-01-01", "total_users": 5, "growth": null, "growth_percent": null},
+  {"date": "2026-01-02", "total_users": 6, "growth": 1, "growth_percent": 20.0},
+  {"date": "2026-01-03", "total_users": 9, "growth": 3, "growth_percent": 50.0}
+]
+```
+
+### 3. Grafana (Visualization)
+
+**Purpose:** Dashboard visualization for both operative and business metrics.
+
+| Property | Value |
+|----------|-------|
+| Image | `grafana/grafana:10.4.1` |
+| Port | 3100 (external), 3000 (internal) |
+| URL | https://grafana.mana.how |
+
+**Available Dashboards:**
+
+| Dashboard | Description |
+|-----------|-------------|
+| Master Overview | Combined view of all key metrics |
+| Business Metrics | User growth, KPIs from DuckDB |
+| System Overview | Infrastructure health |
+| Backends | Backend service metrics |
+| Application Details | Detailed app metrics |
+| Database Details | PostgreSQL metrics |
+| User Statistics | User-related metrics |
+
+## Data Retention Strategy
+
+| Data Type | Storage | Retention | Use Case |
+|-----------|---------|-----------|----------|
+| Operative Metrics | VictoriaMetrics | 2 years | CPU, memory, latency, request rates |
+| Business KPIs | DuckDB | Unlimited | User growth, feature usage, revenue |
+| Raw Logs | External (optional) | 30 days | Debugging, auditing |
+
+## Deployment
+
+### Starting the Monitoring Stack
+
+```bash
+# On Mac Mini server
+cd ~/projects/manacore-monorepo
+
+# Start all monitoring services
+docker compose -f docker-compose.macmini.yml up -d victoriametrics grafana mana-core-auth
+
+# Check status
+docker compose -f docker-compose.macmini.yml ps | grep -E "(victoria|grafana|auth)"
+```
+
+### Rebuilding mana-core-auth (with Analytics)
+
+```bash
+# Build from monorepo root
+docker build -t ghcr.io/memo-2023/mana-core-auth:latest -f services/mana-core-auth/Dockerfile .
+
+# Restart container
+docker compose -f docker-compose.macmini.yml up -d mana-core-auth
+```
+
+### Volume Permissions
+
+If DuckDB fails with permission errors, fix the volume ownership:
+
+```bash
+docker exec -u root mana-core-auth chown -R nestjs:nodejs /data/analytics
+docker restart mana-core-auth
+```
+
+## Backup
+
+### Manual Backup
+
+```bash
+./scripts/backup-monitoring.sh
+```
+
+This script backs up:
+1. **VictoriaMetrics**: Creates a snapshot and compresses it
+2. **DuckDB**: Copies the database file and exports to Parquet
+
+### Backup Location
+
+Default: `/backup/monitoring/`
+
+Files created:
+- `victoriametrics-YYYY-MM-DD.tar.gz`
+- `analytics-YYYY-MM-DD.duckdb`
+- `analytics-YYYY-MM-DD.parquet`
+
+### Automated Backups
+
+Add to crontab for daily backups:
+
+```bash
+# Daily backup at 2 AM
+0 2 * * * /path/to/manacore-monorepo/scripts/backup-monitoring.sh
+```
+
+## Troubleshooting
+
+### VictoriaMetrics not scraping targets
+
+```bash
+# Check scrape config
+docker exec manacore-victoriametrics cat /etc/prometheus/prometheus.yml
+
+# Check targets status
+curl http://localhost:8428/api/v1/targets
+```
+
+### DuckDB initialization fails
+
+1. Check permissions:
+```bash
+docker exec mana-core-auth ls -la /data/analytics/
+```
+
+2. Fix if needed:
+```bash
+docker exec -u root mana-core-auth chown -R nestjs:nodejs /data/analytics
+```
+
+3. Restart:
+```bash
+docker restart mana-core-auth
+```
+
+### Grafana can't connect to VictoriaMetrics
+
+1. Check VictoriaMetrics is running:
+```bash
+curl http://localhost:8428/health
+```
+
+2. Check datasource configuration:
+```bash
+cat docker/grafana/provisioning/datasources/prometheus.yml
+```
+
+3. Restart Grafana:
+```bash
+docker restart manacore-grafana
+```
+
+### Missing metrics in Grafana
+
+1. Check if VictoriaMetrics has the data:
+```bash
+curl "http://localhost:8428/api/v1/query?query=auth_users_total"
+```
+
+2. Check service is exposing metrics:
+```bash
+curl http://localhost:3001/metrics
+```
+
+## Environment Variables
+
+### mana-core-auth
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DUCKDB_PATH` | Path to DuckDB file | `/data/analytics/metrics.duckdb` |
+| `DATABASE_URL` | PostgreSQL connection string | Required |
+
+### VictoriaMetrics
+
+Configured via command-line arguments in docker-compose:
+- `-retentionPeriod=2y`
+- `-storageDataPath=/storage`
+- `-promscrape.config=/etc/prometheus/prometheus.yml`
+
+## Architecture Decision Record
+
+For the full decision rationale, see: [docs/decisions/001-monitoring-stack-upgrade.md](decisions/001-monitoring-stack-upgrade.md)
+
+## Related Documentation
+
+- [Local Development](LOCAL_DEVELOPMENT.md)
+- [Mac Mini Server](MAC_MINI_SERVER.md)
+- [Database Migrations](DATABASE_MIGRATIONS.md)
