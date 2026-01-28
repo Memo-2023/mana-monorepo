@@ -2,9 +2,9 @@
  * Search Store - manages search state for highlighting events in calendar views
  */
 
-interface SearchItem {
+// Accept any object with at least an id property
+interface SearchableItem {
 	id: string;
-	[key: string]: unknown;
 }
 
 // State
@@ -15,7 +15,7 @@ let isSearching = $state(false);
 /**
  * Set search query and matching items (events or any items with an id)
  */
-function setSearch(newQuery: string, matchingItems: SearchItem[]) {
+function setSearch<T extends SearchableItem>(newQuery: string, matchingItems: T[]) {
 	query = newQuery;
 	matchingEventIds = new Set(matchingItems.map((item) => item.id));
 	isSearching = newQuery.trim().length > 0;

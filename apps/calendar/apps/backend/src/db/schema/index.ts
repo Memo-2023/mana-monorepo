@@ -6,3 +6,4 @@ export * from './event-tag-groups.schema';
 export * from './calendar-shares.schema';
 export * from './reminders.schema';
 export * from './external-calendars.schema';
+export * from './device-tokens.schema';

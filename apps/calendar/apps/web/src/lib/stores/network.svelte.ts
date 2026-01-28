@@ -196,10 +196,11 @@ export const networkStore = {
 			}));
 
 			// Convert to simulation links
+			// Cast type to be compatible with SimulationLink (calendar API has extended types)
 			links = response.links.map((link) => ({
 				source: link.source,
 				target: link.target,
-				type: link.type,
+				type: link.type as SimulationLink['type'],
 				strength: link.strength,
 				sharedTags: link.sharedTags,
 			}));

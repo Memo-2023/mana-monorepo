@@ -22,6 +22,9 @@ export const reminders = pgTable(
 			.references(() => events.id, { onDelete: 'cascade' }),
 		userId: text('user_id').notNull(),
 
+		// User email for email notifications (stored at creation time)
+		userEmail: varchar('user_email', { length: 255 }),
+
 		// Timing
 		minutesBefore: integer('minutes_before').notNull(),
 		reminderTime: timestamp('reminder_time', { withTimezone: true }).notNull(),

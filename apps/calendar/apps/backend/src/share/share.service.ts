@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { eq, and, or } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
 import { DATABASE_CONNECTION } from '../db/database.module';
@@ -9,13 +9,17 @@ import {
 	type NewCalendarShare,
 } from '../db/schema/calendar-shares.schema';
 import { CalendarService } from '../calendar/calendar.service';
+import { EmailService } from '../email/email.service';
 import { CreateShareDto, UpdateShareDto } from './dto';
 
 @Injectable()
 export class ShareService {
+	private readonly logger = new Logger(ShareService.name);
+
 	constructor(
 		@Inject(DATABASE_CONNECTION) private db: Database,
-		private calendarService: CalendarService
+		private calendarService: CalendarService,
+		private emailService: EmailService
 	) {}
 
 	async findByCalendar(calendarId: string, userId: string): Promise<CalendarShare[]> {
@@ -42,9 +46,9 @@ export class ShareService {
 			);
 	}
 
-	async create(userId: string, dto: CreateShareDto): Promise<CalendarShare> {
+	async create(userId: string, inviterEmail: string, dto: CreateShareDto): Promise<CalendarShare> {
 		// Verify user owns the calendar
-		await this.calendarService.findByIdOrThrow(dto.calendarId, userId);
+		const calendar = await this.calendarService.findByIdOrThrow(dto.calendarId, userId);
 
 		const newShare: NewCalendarShare = {
 			calendarId: dto.calendarId,
@@ -68,6 +72,28 @@ export class ShareService {
 		}
 
 		const [created] = await this.db.insert(calendarShares).values(newShare).returning();
+
+		// Send invitation email if sharing with specific email
+		if (dto.email && !dto.createLink) {
+			const inviterName = inviterEmail.split('@')[0];
+			const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5179';
+			const acceptUrl = `${baseUrl}/shares/${created.id}/accept`;
+
+			try {
+				await this.emailService.sendCalendarInvitationEmail(
+					dto.email,
+					calendar.name,
+					inviterName,
+					dto.permission,
+					acceptUrl
+				);
+				this.logger.log(`Invitation email sent to ${dto.email} for calendar ${calendar.name}`);
+			} catch (error) {
+				this.logger.error(`Failed to send invitation email to ${dto.email}:`, error);
+				// Don't fail the share creation if email fails
+			}
+		}
+
 		return created;
 	}
 

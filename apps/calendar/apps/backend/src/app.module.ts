@@ -11,6 +11,8 @@ import { ReminderModule } from './reminder/reminder.module';
 import { ShareModule } from './share/share.module';
 import { NetworkModule } from './network/network.module';
 import { MetricsModule } from './metrics';
+import { EmailModule } from './email/email.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
 	imports: [
@@ -22,6 +24,8 @@ import { MetricsModule } from './metrics';
 		MetricsModule,
 		DatabaseModule,
 		HealthModule,
+		EmailModule,
+		NotificationModule,
 		CalendarModule,
 		EventModule,
 		EventTagModule,

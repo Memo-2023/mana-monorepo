@@ -132,7 +132,7 @@
 						style="height: {(day.count / maxTrendValue) * 100}%"
 						class:has-events={day.count > 0}
 					></div>
-					<span class="trend-label">{day.label.charAt(0)}</span>
+					<span class="trend-label">{day.label?.charAt(0) ?? ''}</span>
 				</div>
 			{/each}
 		</div>

@@ -23,7 +23,7 @@ export class ShareController {
 		@Param('calendarId') calendarId: string,
 		@Body() dto: Omit<CreateShareDto, 'calendarId'>
 	) {
-		const share = await this.shareService.create(user.userId, {
+		const share = await this.shareService.create(user.userId, user.email, {
 			...dto,
 			calendarId,
 		});

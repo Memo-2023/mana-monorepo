@@ -20,7 +20,7 @@ export class ReminderController {
 		@Param('eventId') eventId: string,
 		@Body() dto: Omit<CreateReminderDto, 'eventId'>
 	) {
-		const reminder = await this.reminderService.create(user.userId, {
+		const reminder = await this.reminderService.create(user.userId, user.email, {
 			...dto,
 			eventId,
 		});
