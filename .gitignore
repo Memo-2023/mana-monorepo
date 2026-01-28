@@ -100,3 +100,16 @@ yarn.lock
 # Mac Mini deployment
 .env.macmini
 ssh-key-command.txt
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ML Models (large files, downloaded on demand)
+mlx_models/
