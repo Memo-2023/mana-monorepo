@@ -27,7 +27,7 @@ database:
   txn_limit: 10000
   args:
     user: synapse
-    password: "${SYNAPSE_DB_PASSWORD:-synapse-secure-password}"
+    password: "synapse-secure-password"
     database: matrix
     host: postgres
     port: 5432
