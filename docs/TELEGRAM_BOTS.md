@@ -10,6 +10,7 @@ Dokumentation aller Telegram-Bots im ManaCore Monorepo.
 | [telegram-ollama-bot](#telegram-ollama-bot) | 3301 | Lokale LLM-Inferenz via Ollama | ✅ Aktiv |
 | [telegram-project-doc-bot](#telegram-project-doc-bot) | 3302 | Projektdokumentation & Blogpost-Generierung | ✅ Aktiv |
 | [telegram-calendar-bot](#telegram-calendar-bot) | 3303 | Kalender-Termine & Erinnerungen | 🚧 In Entwicklung |
+| [telegram-contacts-bot](#telegram-contacts-bot) | 3304 | Kontaktsuche & Geburtstags-Erinnerungen | 🚧 In Entwicklung |
 
 ## Gemeinsame Architektur
 
