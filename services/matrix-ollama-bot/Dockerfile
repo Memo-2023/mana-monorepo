@@ -9,8 +9,8 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile || pnpm install
+# Install dependencies (ignore optional native modules)
+RUN pnpm install --frozen-lockfile --ignore-scripts || pnpm install --ignore-scripts
 
 # Copy source
 COPY . .
@@ -32,8 +32,8 @@ RUN mkdir -p /app/data
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
 
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile || pnpm install --prod
+# Install production dependencies only (ignore optional native modules)
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts || pnpm install --prod --ignore-scripts
 
 # Copy built files
 COPY --from=builder /app/dist ./dist
