@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
 	import {
 		PillToolbarButton,
@@ -9,7 +8,6 @@
 		PillTimeRangeSelector,
 		PillViewSwitcher,
 	} from '@manacore/shared-ui';
-	import { Flame } from 'lucide-svelte';
 	import PillCalendarSelector from './PillCalendarSelector.svelte';
 
 	interface Props {
@@ -84,15 +82,6 @@
 		title="Nur Wochentage anzeigen (Mo-Fr)"
 	>
 		Mo-Fr
-	</PillToolbarButton>
-
-	<!-- Heatmap toggle -->
-	<PillToolbarButton
-		onclick={() => heatmapStore.toggle()}
-		active={heatmapStore.enabled}
-		title="Heatmap ein/aus - zeigt Event-Dichte"
-	>
-		<Flame size={16} />
 	</PillToolbarButton>
 
 	<!-- Hours filter with time range selector -->

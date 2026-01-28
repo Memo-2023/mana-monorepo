@@ -6,7 +6,6 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
-	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import {
 		useVisibleHours,
 		useCurrentTimeIndicator,
@@ -837,23 +836,11 @@
 		<div class="day-headers">
 			<div class="time-gutter"></div>
 			{#each days as day}
-				{@const heatmapLevel = heatmapStore.enabled ? heatmapStore.getLevel(day) : 0}
-				<div
-					class="day-header"
-					class:today={isToday(day)}
-					class:heatmap-1={heatmapLevel === 1}
-					class:heatmap-2={heatmapLevel === 2}
-					class:heatmap-3={heatmapLevel === 3}
-					class:heatmap-4={heatmapLevel === 4}
-					class:heatmap-5={heatmapLevel === 5}
-				>
+				<div class="day-header" class:today={isToday(day)}>
 					<span class="day-name"
 						>{format(day, columnClass === 'very-compact' ? 'EEEEE' : 'EEE', { locale: de })}</span
 					>
 					<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
-					{#if heatmapStore.enabled && heatmapLevel > 0 && columnClass !== 'ultra-compact'}
-						<span class="heatmap-badge">{heatmapStore.getDisplayValue(day)}</span>
-					{/if}
 				</div>
 			{/each}
 		</div>
@@ -1220,40 +1207,6 @@
 
 	.very-compact .day-header {
 		padding: 0.125rem;
-	}
-
-	/* Heatmap level colors for day headers */
-	.day-header.heatmap-1 {
-		background-color: hsl(var(--color-primary) / 0.1);
-	}
-	.day-header.heatmap-2 {
-		background-color: hsl(var(--color-primary) / 0.2);
-	}
-	.day-header.heatmap-3 {
-		background-color: hsl(var(--color-primary) / 0.35);
-	}
-	.day-header.heatmap-4 {
-		background-color: hsl(var(--color-primary) / 0.5);
-	}
-	.day-header.heatmap-5 {
-		background-color: hsl(var(--color-primary) / 0.65);
-	}
-
-	.heatmap-badge {
-		font-size: 0.5rem;
-		font-weight: 600;
-		color: hsl(var(--color-muted-foreground));
-		padding: 1px 4px;
-		background: hsl(var(--color-muted) / 0.5);
-		border-radius: var(--radius-sm);
-		margin-top: 0.125rem;
-	}
-
-	/* Better contrast for higher heatmap levels */
-	.day-header.heatmap-4 .heatmap-badge,
-	.day-header.heatmap-5 .heatmap-badge {
-		background: hsl(var(--color-background) / 0.8);
-		color: hsl(var(--color-foreground));
 	}
 
 	.day-name {

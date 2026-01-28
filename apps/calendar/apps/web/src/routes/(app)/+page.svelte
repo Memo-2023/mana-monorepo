@@ -6,11 +6,9 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
-	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import ViewCarousel from '$lib/components/calendar/ViewCarousel.svelte';
 	import NetworkView from '$lib/components/calendar/NetworkView.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
-	import StatsSidebarSection from '$lib/components/calendar/StatsSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
 	import type { CalendarEvent } from '@calendar/shared';
@@ -130,11 +128,7 @@
 				</svg>
 			</button>
 
-			{#if heatmapStore.enabled}
-				<StatsSidebarSection />
-			{:else}
-				<TodoSidebarSection maxItems={5} />
-			{/if}
+			<TodoSidebarSection maxItems={5} />
 		</aside>
 
 		<!-- Main Calendar Area -->
@@ -153,11 +147,7 @@
 			class="calendar-sidebar-mobile mobile-only"
 			class:collapsed={settingsStore.sidebarCollapsed}
 		>
-			{#if heatmapStore.enabled}
-				<StatsSidebarSection />
-			{:else}
-				<TodoSidebarSection maxItems={3} />
-			{/if}
+			<TodoSidebarSection maxItems={3} />
 		</aside>
 
 		<!-- Quick Event Overlay (for both create and edit) -->

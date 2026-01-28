@@ -32,12 +32,6 @@ const CALENDAR_SHORTCUTS: ShortcutCategory[] = [
 			{
 				keys: ['Cmd', '3'],
 				altKeys: ['Ctrl', '3'],
-				description: 'Statistiken öffnen',
-				category: 'navigation',
-			},
-			{
-				keys: ['Cmd', '4'],
-				altKeys: ['Ctrl', '4'],
 				description: 'Einstellungen öffnen',
 				category: 'navigation',
 			},

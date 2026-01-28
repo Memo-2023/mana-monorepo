@@ -64,11 +64,9 @@
 	import TagStrip from '$lib/components/calendar/TagStrip.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
-	import StatsOverlay from '$lib/components/calendar/StatsOverlay.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
-	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import { sessionEventsStore } from '$lib/stores/session-events.svelte';
 	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import type { CalendarViewType } from '@calendar/shared';
@@ -278,7 +276,6 @@
 
 	// Base navigation items for Calendar (without Kalender/Aufgaben - handled by tab group)
 	// Note: Tags uses onClick to toggle TagStrip visibility instead of navigating
-	// Note: Statistiken uses onClick to toggle heatmap mode (shows stats overlay + event density)
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/tags',
@@ -286,13 +283,6 @@
 			icon: 'tag',
 			onClick: handleTagsToggle,
 			active: isTagStripVisible,
-		},
-		{
-			href: '/',
-			label: 'Statistiken',
-			icon: 'flame',
-			onClick: () => heatmapStore.toggle(),
-			active: heatmapStore.enabled,
 		},
 		{
 			href: '/',
@@ -830,9 +820,6 @@
 
 <!-- InputBar Help Modal -->
 <InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />
-
-<!-- Stats Overlay (shown when heatmap is enabled) -->
-<StatsOverlay />
 
 <!-- Settings Modal -->
 <SettingsModal

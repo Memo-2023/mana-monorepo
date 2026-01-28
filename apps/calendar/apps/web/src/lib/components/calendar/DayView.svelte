@@ -7,7 +7,6 @@
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
-	import { heatmapStore } from '$lib/stores/heatmap.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import { useVisibleHours, useCurrentTimeIndicator, useBirthdayPopover } from '$lib/composables';
 	import { toDate } from '$lib/utils/eventDateHelpers';
@@ -39,9 +38,6 @@
 
 	// Use provided date or fall back to viewStore
 	let effectiveDate = $derived(date ?? viewStore.currentDate);
-
-	// Heatmap level for this day
-	let heatmapLevel = $derived(heatmapStore.enabled ? heatmapStore.getLevel(effectiveDate) : 0);
 
 	// Use shared constants
 	const HOUR_HEIGHT = HOUR_HEIGHT_PX;
@@ -767,11 +763,6 @@
 			class="day-column"
 			class:today={isToday(effectiveDate)}
 			class:drop-target={isSidebarDropTarget}
-			class:heatmap-1={heatmapLevel === 1}
-			class:heatmap-2={heatmapLevel === 2}
-			class:heatmap-3={heatmapLevel === 3}
-			class:heatmap-4={heatmapLevel === 4}
-			class:heatmap-5={heatmapLevel === 5}
 			bind:this={dayColumnRef}
 			ondragover={handleSidebarDragOver}
 			ondragleave={handleSidebarDragLeave}
@@ -1025,47 +1016,6 @@
 		background: hsl(var(--color-primary) / 0.15);
 		outline: 2px dashed hsl(var(--color-primary));
 		outline-offset: -2px;
-	}
-
-	/* Heatmap levels - subtle background tint */
-	.day-column.heatmap-1 {
-		background: hsl(var(--color-primary) / 0.08);
-	}
-	.day-column.heatmap-2 {
-		background: hsl(var(--color-primary) / 0.15);
-	}
-	.day-column.heatmap-3 {
-		background: hsl(var(--color-primary) / 0.22);
-	}
-	.day-column.heatmap-4 {
-		background: hsl(var(--color-primary) / 0.3);
-	}
-	.day-column.heatmap-5 {
-		background: hsl(var(--color-primary) / 0.4);
-	}
-
-	/* Override today background when heatmap is active */
-	.day-column.today.heatmap-1,
-	.day-column.today.heatmap-2,
-	.day-column.today.heatmap-3,
-	.day-column.today.heatmap-4,
-	.day-column.today.heatmap-5 {
-		background: hsl(var(--color-primary) / var(--heatmap-opacity, 0.1));
-	}
-	.day-column.today.heatmap-1 {
-		--heatmap-opacity: 0.12;
-	}
-	.day-column.today.heatmap-2 {
-		--heatmap-opacity: 0.2;
-	}
-	.day-column.today.heatmap-3 {
-		--heatmap-opacity: 0.28;
-	}
-	.day-column.today.heatmap-4 {
-		--heatmap-opacity: 0.36;
-	}
-	.day-column.today.heatmap-5 {
-		--heatmap-opacity: 0.45;
 	}
 
 	/* Time indicator */
