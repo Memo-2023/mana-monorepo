@@ -832,6 +832,8 @@ services:
       SYNAPSE_FORM_SECRET: ${SYNAPSE_FORM_SECRET:-change-me-form-secret}
       SYNAPSE_MACAROON_SECRET: ${SYNAPSE_MACAROON_SECRET:-change-me-macaroon-secret}
       SYNAPSE_REGISTRATION_SECRET: ${SYNAPSE_REGISTRATION_SECRET:-change-me-registration-secret}
+      # OIDC SSO with Mana Core Auth
+      SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET}
     volumes:
       - ./docker/matrix/homeserver.yaml:/config/homeserver.yaml:ro
       - ./docker/matrix/log.config.yaml:/config/log.config.yaml:ro
@@ -1067,6 +1069,37 @@ services:
       start_period: 40s
 
   # ============================================
+  # Matrix Zitare Bot (GDPR-compliant Quotes)
+  # ============================================
+
+  matrix-zitare-bot:
+    image: matrix-zitare-bot:latest
+    container_name: manacore-matrix-zitare-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3317
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_ZITARE_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_ZITARE_BOT_ROOMS:-}
+      ZITARE_BACKEND_URL: http://zitare-backend:3007
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+    volumes:
+      - matrix_zitare_bot_data:/app/data
+    ports:
+      - "3317:3317"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3317/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
   # Auto-Update (Watchtower)
   # ============================================
 
@@ -1120,3 +1153,5 @@ volumes:
     name: manacore-matrix-todo-bot
   matrix_nutriphi_bot_data:
     name: manacore-matrix-nutriphi-bot
+  matrix_zitare_bot_data:
+    name: manacore-matrix-zitare-bot
