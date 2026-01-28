@@ -1195,6 +1195,14 @@ export class BetterAuthService {
 	 * This method converts an Express request to a Fetch Request,
 	 * passes it to Better Auth's handler, and returns the response.
 	 *
+	 * Better Auth's OIDC Provider uses routes under /api/auth/oauth2/
+	 * so we need to map incoming routes accordingly:
+	 * - /.well-known/openid-configuration → /api/auth/.well-known/openid-configuration
+	 * - /api/oidc/authorize → /api/auth/oauth2/authorize
+	 * - /api/oidc/token → /api/auth/oauth2/token
+	 * - /api/oidc/userinfo → /api/auth/oauth2/userinfo
+	 * - /api/oidc/jwks → /api/auth/oauth2/jwks
+	 *
 	 * @param req - Express request
 	 * @returns Response data from Better Auth
 	 */
@@ -1205,9 +1213,23 @@ export class BetterAuthService {
 	}> {
 		console.log('[handleOidcRequest] Received request:', req.method, req.originalUrl);
 		try {
+			// Map incoming paths to Better Auth's expected paths
+			let mappedPath = req.originalUrl;
+
+			// Map .well-known to Better Auth's basePath
+			if (mappedPath.startsWith('/.well-known/')) {
+				mappedPath = `/api/auth${mappedPath}`;
+			}
+			// Map /api/oidc/* to /api/auth/oauth2/*
+			else if (mappedPath.startsWith('/api/oidc/')) {
+				mappedPath = mappedPath.replace('/api/oidc/', '/api/auth/oauth2/');
+			}
+
+			console.log('[handleOidcRequest] Mapped path:', mappedPath);
+
 			// Convert Express request to Fetch Request
 			const url = new URL(
-				req.originalUrl,
+				mappedPath,
 				this.configService.get<string>('BASE_URL') ||
 					`http://localhost:${this.configService.get<number>('PORT') || 3001}`
 			);
