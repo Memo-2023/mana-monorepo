@@ -71,6 +71,8 @@ Cloudflare Tunnel (cloudflared)
 | Todo | https://todo.mana.how |
 | Calendar | https://calendar.mana.how |
 | Clock | https://clock.mana.how |
+| Matrix (Synapse) | https://matrix.mana.how |
+| Element Web | https://element.mana.how |
 
 ## SSH-Zugang
 
@@ -260,6 +262,8 @@ curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" 
 | manacore-calendar-web | Calendar Frontend |
 | manacore-clock-backend | Clock API |
 | manacore-clock-web | Clock Frontend |
+| manacore-synapse | Matrix Homeserver |
+| manacore-element | Element Web Client |
 
 ### Nützliche Docker-Befehle
 
@@ -597,6 +601,35 @@ launchctl stop com.manacore.telegram-ollama-bot
 launchctl start com.manacore.telegram-ollama-bot
 ```
 
+## Matrix (DSGVO-konformes Messaging)
+
+Matrix ist eine DSGVO-konforme Alternative zu Telegram für Bot-Kommunikation.
+
+### Komponenten
+
+| Service | Port | Beschreibung |
+|---------|------|--------------|
+| Synapse | 8008 | Matrix Homeserver |
+| Element Web | 8087 | Web-Client |
+
+### Setup
+
+```bash
+# Matrix initialisieren
+./scripts/mac-mini/setup-matrix.sh
+
+# Services starten
+docker compose -f docker-compose.macmini.yml up -d synapse element-web
+
+# Admin-User erstellen
+docker exec -it manacore-synapse register_new_matrix_user \
+  -c /data/homeserver.yaml http://localhost:8008 -a
+```
+
+### Dokumentation
+
+Siehe [MATRIX_SELF_HOSTING.md](./MATRIX_SELF_HOSTING.md) für detaillierte Anleitung.
+
 ## Chronologie der Einrichtung
 
 1. **Docker Setup** - PostgreSQL, Redis, App-Container
@@ -608,3 +641,4 @@ launchctl start com.manacore.telegram-ollama-bot
 7. **Email Notifications** - Redundante Benachrichtigung
 8. **Ollama** - Lokale LLM-Inferenz (Gemma 3 4B)
 9. **Telegram Ollama Bot** - Chat-Interface für Ollama
+10. **Matrix Synapse** - DSGVO-konformes Messaging

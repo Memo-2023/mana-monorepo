@@ -230,6 +230,11 @@ check_service "Presi Backend" "http://localhost:3008/api/v1/health"
 check_service "Presi Web" "http://localhost:5178/health"
 
 echo ""
+echo "Matrix (DSGVO-konform):"
+check_service "Synapse" "http://localhost:8008/health"
+check_service "Element Web" "http://localhost:8087/"
+
+echo ""
 echo "Cloudflare Tunnel:"
 if pgrep -x "cloudflared" >/dev/null; then
     echo -e "  ${GREEN}[OK]${NC} cloudflared running"
