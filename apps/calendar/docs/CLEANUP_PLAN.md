@@ -36,23 +36,20 @@ Dieser Plan dokumentiert Features und Code, die überdurchschnittlich viel Kompl
 
 ### Priorität 1: Quick Wins (Hoher ROI)
 
-#### ⏳ 1.1 Network View entfernen
+#### ✅ 1.1 Network View entfernen (2024-01-28)
 
-**Status:** Geplant
-**Geschätzte Ersparnis:** ~800 Zeilen
-**Komplexität:** HOCH | **Nutzen:** NIEDRIG
+**Commit:** `9a93ca0c`
+**Ersparnis:** ~910 Zeilen
 
-**Beschreibung:**
-D3 Force-Simulation für Event-Graph-Visualisierung. Kalendereinträge sind keine natürliche Graph-Struktur. Nutzer navigieren nach Datum, nicht nach "Event-Beziehungen".
-
-**Zu entfernende Dateien:**
+**Entfernte Dateien:**
 - `src/lib/components/calendar/NetworkView.svelte` (~416 Zeilen)
-- `src/lib/stores/network.svelte.ts` (~372 Zeilen)
+- `src/lib/stores/network.svelte.ts` (~371 Zeilen)
+- `src/lib/api/network.ts` (~47 Zeilen)
+- `src/lib/stores/view-mode.svelte.ts` (~76 Zeilen)
 
-**Zu ändernde Dateien:**
-- `src/lib/stores/view-mode.svelte.ts` - Network-Mode entfernen
-- `src/routes/(app)/+page.svelte` - Network-View Conditional entfernen
-- `src/routes/(app)/+layout.svelte` - Network-Tab aus ViewSwitcher entfernen
+**Geänderte Dateien:**
+- `src/routes/(app)/+page.svelte` - Network-View Conditional entfernt
+- `src/routes/(app)/+layout.svelte` - Network-Tab aus ViewSwitcher entfernt
 
 ---
 
@@ -207,12 +204,15 @@ Cross-App API-Integration für Geburtstage. Ersetzbar durch manuelles Eintragen 
 | Phase | Features | LOC Ersparnis | Status |
 |-------|----------|---------------|--------|
 | ✅ Done | Statistiken/Heatmap | ~1.450 | Erledigt |
-| 🟢 Prio 1 | Network, Sessions, Parser | ~1.200 | Geplant |
+| ✅ Done | Network View | ~910 | Erledigt |
+| 🟢 Prio 1 | Sessions, Parser | ~410 | Geplant |
 | 🟡 Prio 2 | Swipe, Context, Settings | ~780 | Geplant |
 | 🔴 Prio 3 | Views, Tags, Birthdays | ~3.450 | Geplant |
-| **Gesamt** | | **~6.880** | |
+| **Gesamt** | | **~7.000** | |
 
 **Ziel:** ~30% Code-Reduktion bei gleichem/besserem Nutzererlebnis
+
+**Bisherige Ersparnis:** ~2.360 LOC (Statistiken + Network)
 
 ---
 
@@ -220,4 +220,5 @@ Cross-App API-Integration für Geburtstage. Ersetzbar durch manuelles Eintragen 
 
 | Datum | Aktion | Commit |
 |-------|--------|--------|
+| 2024-01-28 | Network View entfernt | `9a93ca0c` |
 | 2024-01-28 | Statistiken & Heatmap entfernt | `2f3473b7` |

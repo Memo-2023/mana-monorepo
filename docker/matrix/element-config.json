@@ -28,7 +28,9 @@
 		"breadcrumbs": true,
 		"custom_themes": [],
 		"UIFeature.e2eeDefault": false,
-		"FTUE.userOnboardingButton": false
+		"FTUE.userOnboardingButton": false,
+		"analyticsOptIn": false,
+		"pseudonymousAnalyticsOptIn": false
 	},
 	"ui_features": {
 		"UIFeature.RoomEncryptionSettings": false
@@ -38,7 +40,6 @@
 	"default_theme": "dark",
 	"permalink_prefix": "https://element.mana.how",
 	"terms_and_conditions_links": [],
-	"privacy_policy_url": "https://mana.how/privacy",
 	"sso_redirect_options": {
 		"immediate": false
 	},
@@ -48,6 +49,9 @@
 	"sentry": {
 		"disabled": true
 	},
+	"analytics_owner": "",
+	"privacy_policy_url": "",
+	"show_analytics_setting": false,
 	"bug_report_endpoint_url": "",
 	"help_url": "https://mana.how/help",
 	"help_encryption_url": "https://element.io/help#encryption"
