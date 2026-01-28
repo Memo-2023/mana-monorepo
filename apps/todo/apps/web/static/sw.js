@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todo-v2';
+const CACHE_NAME = 'todo-v3';
 const OFFLINE_URL = '/offline.html';
 
 // Assets, die immer gecacht werden sollen
@@ -17,7 +17,7 @@ const CACHE_STRATEGIES = {
 		/\.ico$/,
 	],
 	// Nur Netzwerk (für API-Calls und Dev-Server)
-	networkOnly: [/\/api\//, /localhost:3018/, /^\/src\//, /^\/@/, /^\/node_modules\//],
+	networkOnly: [/\/api\//, /^\/src\//, /^\/@/, /^\/node_modules\//],
 };
 
 // Service Worker Installation
