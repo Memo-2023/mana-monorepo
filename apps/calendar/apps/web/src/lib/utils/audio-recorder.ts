@@ -35,7 +35,12 @@ export interface AudioRecorder {
  * Check if the browser supports audio recording
  */
 export function isAudioRecordingSupported(): boolean {
-	return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+	return !!(
+		typeof navigator !== 'undefined' &&
+		navigator.mediaDevices &&
+		typeof navigator.mediaDevices.getUserMedia === 'function' &&
+		typeof MediaRecorder !== 'undefined'
+	);
 }
 
 /**

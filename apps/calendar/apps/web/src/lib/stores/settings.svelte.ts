@@ -14,6 +14,7 @@ export type WeekStartDay = 0 | 1; // 0 = Sunday, 1 = Monday
 export type TimeFormat = '24h' | '12h';
 export type AllDayDisplayMode = 'header' | 'block'; // header = separate row, block = full day block in grid
 export type WeekdayFormat = 'full' | 'short' | 'hidden';
+export type SttLanguage = 'de' | 'auto'; // Speech-to-text language setting
 
 export interface CalendarAppSettings {
 	// View settings
@@ -64,6 +65,9 @@ export interface CalendarAppSettings {
 	// Event defaults
 	defaultEventDuration: number; // in minutes
 	defaultReminder: number; // in minutes before event
+
+	// Voice input settings
+	sttLanguage: SttLanguage; // Speech-to-text language ('de' or 'auto')
 }
 
 const DEFAULT_SETTINGS: CalendarAppSettings = {
@@ -106,6 +110,8 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	// Event defaults
 	defaultEventDuration: 60,
 	defaultReminder: 15,
+	// Voice input defaults
+	sttLanguage: 'de',
 };
 
 const STORAGE_KEY = 'calendar-settings';
@@ -274,6 +280,9 @@ export const settingsStore = {
 	},
 	get customDayCount() {
 		return settings.customDayCount;
+	},
+	get sttLanguage() {
+		return settings.sttLanguage;
 	},
 	get cloudSyncEnabled() {
 		return cloudSyncEnabled;

@@ -4,7 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import type { TimeFormat, AllDayDisplayMode } from '$lib/stores/settings.svelte';
+	import type { TimeFormat, AllDayDisplayMode, SttLanguage } from '$lib/stores/settings.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 	import {
@@ -615,6 +615,48 @@
 								onChange={(v) => handleReminderChange(Number(v))}
 								placeholder="Erinnerung wählen"
 							/>
+						</div>
+					</div>
+				</SettingsCard>
+			</SettingsSection>
+
+			<!-- Spracheingabe -->
+			<SettingsSection title="Spracheingabe">
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+						/>
+					</svg>
+				{/snippet}
+				<SettingsCard>
+					<div class="p-4 space-y-3">
+						<div class="setting-item">
+							<div class="setting-info">
+								<span class="setting-label">Sprache der Spracherkennung</span>
+								<span class="setting-description"
+									>Sprache für die Transkription von Sprachaufnahmen</span
+								>
+							</div>
+							<div class="button-group">
+								<button
+									class="group-button"
+									class:active={settingsStore.sttLanguage === 'de'}
+									onclick={() => settingsStore.set('sttLanguage', 'de' as SttLanguage)}
+								>
+									Deutsch
+								</button>
+								<button
+									class="group-button"
+									class:active={settingsStore.sttLanguage === 'auto'}
+									onclick={() => settingsStore.set('sttLanguage', 'auto' as SttLanguage)}
+								>
+									Automatisch
+								</button>
+							</div>
 						</div>
 					</div>
 				</SettingsCard>

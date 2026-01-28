@@ -11,6 +11,7 @@ const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
 	process.env.PUBLIC_MANA_CORE_AUTH_URL_CLIENT || process.env.PUBLIC_MANA_CORE_AUTH_URL || '';
 const PUBLIC_BACKEND_URL_CLIENT =
 	process.env.PUBLIC_BACKEND_URL_CLIENT || process.env.PUBLIC_BACKEND_URL || '';
+const PUBLIC_STT_URL = process.env.PUBLIC_STT_URL || 'https://stt-api.mana.how';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	return resolve(event, {
@@ -20,6 +21,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			const envScript = `<script>
 window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
 window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
+window.__PUBLIC_STT_URL__ = "${PUBLIC_STT_URL}";
 </script>`;
 			return html.replace('<head>', `<head>${envScript}`);
 		},

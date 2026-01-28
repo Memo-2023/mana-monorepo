@@ -391,6 +391,8 @@ const APP_CONFIGS = [
 			// Cross-app integration: Contacts service for birthdays
 			PUBLIC_CONTACTS_API_URL: (env) => `http://localhost:${env.CONTACTS_BACKEND_PORT || '3015'}`,
 			PUBLIC_CONTACTS_WEB_URL: () => 'http://localhost:5184',
+			// Speech-to-Text Service
+			PUBLIC_STT_URL: (env) => env.STT_URL || 'http://localhost:3020',
 		},
 	},
 

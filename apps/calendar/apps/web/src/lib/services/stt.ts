@@ -7,11 +7,18 @@
 import { browser } from '$app/environment';
 
 /**
- * STT service URL - defaults to localhost for development
+ * STT service URL - uses runtime injection for production, env var for dev
  */
-const STT_URL = browser
-	? import.meta.env.PUBLIC_STT_URL || 'http://localhost:3020'
-	: 'http://localhost:3020';
+function getSttUrl(): string {
+	if (!browser) return 'http://localhost:3020';
+	// Check runtime-injected variable first (production Docker)
+	const runtimeUrl = (window as any).__PUBLIC_STT_URL__;
+	if (runtimeUrl) return runtimeUrl;
+	// Fall back to build-time env var or default
+	return import.meta.env.PUBLIC_STT_URL || 'https://stt-api.mana.how';
+}
+
+const STT_URL = getSttUrl();
 
 export interface TranscriptionResult {
 	/** The transcribed text */
