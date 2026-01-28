@@ -78,6 +78,7 @@ ALL_DATABASES=(
     "zitare_bot"
     "todo_bot"
     "nutriphi_bot"
+    "questions"
 )
 
 # Check if specific service requested
@@ -175,9 +176,13 @@ setup_service() {
             create_db_if_not_exists "nutriphi_bot"
             push_schema "@manacore/telegram-nutriphi-bot" "nutriphi-bot"
             ;;
+        questions)
+            create_db_if_not_exists "questions"
+            push_schema "@questions/backend" "questions"
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions"
             exit 1
             ;;
     esac
@@ -201,7 +206,7 @@ echo -e "\n${GREEN}Step 2: Pushing schemas${NC}"
 echo "--------------------------------------"
 
 # Push schemas for all known services
-for service in auth chat zitare contacts calendar clock todo manadeck picture mail moodlit finance voxel-lava figgos planta nutriphi presi storage; do
+for service in auth chat zitare contacts calendar clock todo manadeck picture mail moodlit finance voxel-lava figgos planta nutriphi presi storage questions; do
     setup_service "$service" 2>/dev/null || true
 done
 
