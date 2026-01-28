@@ -80,8 +80,8 @@ password_config:
   localdb_enabled: true
   pepper: "${SYNAPSE_PASSWORD_PEPPER:-change-me-pepper}"
 
-# Session lifetime
-session_lifetime: 24h
+# Session lifetime (must be >= refresh_token_lifetime)
+session_lifetime: 168h
 refresh_token_lifetime: 168h
 
 # ============================================
