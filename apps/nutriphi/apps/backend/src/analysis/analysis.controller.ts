@@ -24,7 +24,6 @@ export class AnalysisController {
 
 	@Post('photo')
 	async analyzePhoto(@CurrentUser() _user: CurrentUserData, @Body() dto: AnalyzePhotoDto) {
-		// TODO: Deduct credits from user account
 		try {
 			return await this.analysisService.analyzePhoto(dto.imageBase64, dto.mimeType);
 		} catch (error) {
@@ -36,7 +35,6 @@ export class AnalysisController {
 
 	@Post('text')
 	async analyzeText(@CurrentUser() _user: CurrentUserData, @Body() dto: AnalyzeTextDto) {
-		// TODO: Deduct credits from user account
 		try {
 			return await this.analysisService.analyzeText(dto.description);
 		} catch (error) {

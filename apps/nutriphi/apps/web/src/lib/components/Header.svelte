@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { User, Settings } from 'lucide-svelte';
+	import { Settings } from 'lucide-svelte';
 </script>
 
 <header
@@ -14,20 +14,13 @@
 				<span class="font-semibold text-[var(--color-text-primary)]">NutriPhi</span>
 			</div>
 
-			<div class="flex items-center gap-2">
-				<a
-					href="/settings"
-					class="p-2 rounded-lg hover:bg-[var(--color-background-card)] transition-colors"
-				>
-					<Settings class="w-5 h-5 text-[var(--color-text-secondary)]" />
-				</a>
-				<a
-					href="/profile"
-					class="p-2 rounded-lg hover:bg-[var(--color-background-card)] transition-colors"
-				>
-					<User class="w-5 h-5 text-[var(--color-text-secondary)]" />
-				</a>
-			</div>
+			<a
+				href="/settings"
+				class="p-2 rounded-lg hover:bg-[var(--color-background-card)] transition-colors"
+				title="Einstellungen"
+			>
+				<Settings class="w-5 h-5 text-[var(--color-text-secondary)]" />
+			</a>
 		</div>
 	</div>
 </header>

@@ -6,7 +6,7 @@
 	import { apiClient } from '$lib/api/client';
 	import { suggestMealType, MEAL_TYPE_LABELS } from '@nutriphi/shared';
 	import type { AIAnalysisResult } from '@nutriphi/shared';
-	import { Camera, ArrowLeft, Loader2, Check } from 'lucide-svelte';
+	import { Camera, ArrowLeft, Loader2, Check, AlertCircle, X } from 'lucide-svelte';
 
 	let inputType = $derived($page.url.searchParams.get('type') || 'photo');
 	let mealType = $state(suggestMealType());
@@ -177,7 +177,18 @@
 		{/if}
 
 		{#if error}
-			<p class="text-red-400 text-sm mb-4">{error}</p>
+			<div
+				class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-4 flex items-center gap-2 text-red-400"
+			>
+				<AlertCircle class="w-4 h-4 flex-shrink-0" />
+				<span class="flex-1 text-sm">{error}</span>
+				<button
+					onclick={() => (error = '')}
+					class="p-1 hover:bg-red-500/20 rounded transition-colors"
+				>
+					<X class="w-4 h-4" />
+				</button>
+			</div>
 		{/if}
 
 		{#if !analysisResult}

@@ -2,7 +2,9 @@
 	import { mealsStore } from '$lib/stores/meals.svelte';
 	import { onMount } from 'svelte';
 	import { MEAL_TYPE_LABELS } from '@nutriphi/shared';
-	import { Trash2, Camera, PenLine } from 'lucide-svelte';
+	import { Trash2, Camera, PenLine, AlertCircle, RefreshCw, Loader2 } from 'lucide-svelte';
+
+	let deleting = $state<string | null>(null);
 
 	onMount(() => {
 		mealsStore.fetchTodaysMeals();
@@ -10,15 +12,48 @@
 
 	async function deleteMeal(id: string) {
 		if (confirm('Mahlzeit wirklich löschen?')) {
-			await mealsStore.deleteMeal(id);
+			deleting = id;
+			try {
+				await mealsStore.deleteMeal(id);
+			} catch {
+				// Error is handled in store
+			} finally {
+				deleting = null;
+			}
 		}
+	}
+
+	function retry() {
+		mealsStore.clearErrors();
+		mealsStore.fetchTodaysMeals();
 	}
 </script>
 
 <div class="space-y-3">
+	{#if mealsStore.error}
+		<div
+			class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400"
+		>
+			<AlertCircle class="w-5 h-5 flex-shrink-0" />
+			<span class="flex-1 text-sm">{mealsStore.error}</span>
+			<button onclick={retry} class="p-2 hover:bg-red-500/20 rounded-lg transition-colors">
+				<RefreshCw class="w-4 h-4" />
+			</button>
+		</div>
+	{/if}
+
+	{#if mealsStore.deleteError}
+		<div
+			class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-2 text-red-400 text-sm"
+		>
+			<AlertCircle class="w-4 h-4 flex-shrink-0" />
+			<span>{mealsStore.deleteError}</span>
+		</div>
+	{/if}
+
 	{#if mealsStore.loading}
 		<div class="text-center py-8 text-[var(--color-text-secondary)]">Laden...</div>
-	{:else if mealsStore.meals.length === 0}
+	{:else if !mealsStore.error && mealsStore.meals.length === 0}
 		<div class="text-center py-8">
 			<p class="text-[var(--color-text-secondary)] mb-2">Noch keine Mahlzeiten heute</p>
 			<p class="text-sm text-[var(--color-text-muted)]">
@@ -65,9 +100,14 @@
 					</div>
 					<button
 						onclick={() => deleteMeal(meal.id)}
-						class="p-2 rounded-lg hover:bg-[var(--color-background-elevated)] text-[var(--color-text-muted)] hover:text-red-400 transition-colors"
+						disabled={deleting === meal.id}
+						class="p-2 rounded-lg hover:bg-[var(--color-background-elevated)] text-[var(--color-text-muted)] hover:text-red-400 transition-colors disabled:opacity-50"
 					>
-						<Trash2 class="w-4 h-4" />
+						{#if deleting === meal.id}
+							<Loader2 class="w-4 h-4 animate-spin" />
+						{:else}
+							<Trash2 class="w-4 h-4" />
+						{/if}
 					</button>
 				</div>
 			</div>

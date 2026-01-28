@@ -10,7 +10,12 @@
 		"dev:landing": "pnpm --filter @nutriphi/landing dev",
 		"db:push": "pnpm --filter @nutriphi/backend db:push",
 		"db:studio": "pnpm --filter @nutriphi/backend db:studio",
-		"db:seed": "pnpm --filter @nutriphi/backend db:seed"
+		"db:seed": "pnpm --filter @nutriphi/backend db:seed",
+		"test": "pnpm --filter @nutriphi/backend test && pnpm --filter @nutriphi/shared test && pnpm --filter @nutriphi/web test",
+		"test:backend": "pnpm --filter @nutriphi/backend test",
+		"test:web": "pnpm --filter @nutriphi/web test",
+		"test:shared": "pnpm --filter @nutriphi/shared test",
+		"test:cov": "pnpm --filter @nutriphi/backend test:cov"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3"
