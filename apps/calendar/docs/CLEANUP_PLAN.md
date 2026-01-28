@@ -53,22 +53,29 @@ Dieser Plan dokumentiert Features und Code, die überdurchschnittlich viel Kompl
 
 ---
 
-#### ⏳ 1.2 Session Events (Guest Mode) entfernen
+#### ✅ 1.2 Session Events → Demo-Modus (2024-01-28)
 
-**Status:** Geplant
-**Geschätzte Ersparnis:** ~150 Zeilen
-**Komplexität:** MITTEL | **Nutzen:** NIEDRIG
+**Ersparnis:** ~150 Zeilen (netto, nach Abzug der neuen Demo-Events-Datei)
 
 **Beschreibung:**
-Event-Management für unauthentifizierte Nutzer via sessionStorage. Events verschwinden bei Tab-Schließung - frustrierendes UX. Vereinfacht den events-Store erheblich.
+Session-basiertes Event-Management (sessionStorage) durch statischen Demo-Modus ersetzt. Statt frustrierender UX (Events verschwinden bei Tab-Schließung) zeigt die App jetzt Beispiel-Termine, die das Feature demonstrieren.
 
-**Zu entfernende Dateien:**
+**Entfernte Dateien:**
 - `src/lib/stores/session-events.svelte.ts` (~154 Zeilen)
 
-**Zu ändernde Dateien:**
-- `src/lib/stores/events.svelte.ts` - Session-Event-Logik entfernen
-- `src/routes/(app)/+layout.svelte` - Guest-Banner/Modal anpassen
-- `src/lib/api/events.ts` - Session-Fallback entfernen
+**Neue Dateien:**
+- `src/lib/data/demo-events.ts` (~100 Zeilen) - Statische Demo-Termine
+
+**Geänderte Dateien:**
+- `src/lib/stores/events.svelte.ts` - Session-Logik durch Demo-Events ersetzt
+- `src/lib/components/AuthGateModal.svelte` - Session-Anzeige entfernt
+- `src/routes/(app)/+layout.svelte` - Demo-Banner statt Gast-Banner
+- `src/routes/(app)/+page.svelte` - Auth-Gate bei Event-Erstellung/Bearbeitung
+
+**Verbesserungen:**
+- Nutzer sehen realistische Beispiel-Termine beim ersten Besuch
+- Klick auf Event oder "Neuer Termin" öffnet Login-Dialog
+- Kein Datenverlust mehr möglich (Demo-Events sind readonly)
 
 ---
 
@@ -205,14 +212,15 @@ Cross-App API-Integration für Geburtstage. Ersetzbar durch manuelles Eintragen 
 |-------|----------|---------------|--------|
 | ✅ Done | Statistiken/Heatmap | ~1.450 | Erledigt |
 | ✅ Done | Network View | ~910 | Erledigt |
-| 🟢 Prio 1 | Sessions, Parser | ~410 | Geplant |
+| ✅ Done | Session Events → Demo | ~150 | Erledigt |
+| 🟢 Prio 1 | Parser | ~260 | Geplant |
 | 🟡 Prio 2 | Swipe, Context, Settings | ~780 | Geplant |
 | 🔴 Prio 3 | Views, Tags, Birthdays | ~3.450 | Geplant |
 | **Gesamt** | | **~7.000** | |
 
 **Ziel:** ~30% Code-Reduktion bei gleichem/besserem Nutzererlebnis
 
-**Bisherige Ersparnis:** ~2.360 LOC (Statistiken + Network)
+**Bisherige Ersparnis:** ~2.510 LOC (Statistiken + Network + Sessions)
 
 ---
 
@@ -220,5 +228,6 @@ Cross-App API-Integration für Geburtstage. Ersetzbar durch manuelles Eintragen 
 
 | Datum | Aktion | Commit |
 |-------|--------|--------|
+| 2024-01-28 | Session Events → Demo-Modus | pending |
 | 2024-01-28 | Network View entfernt | `9a93ca0c` |
 | 2024-01-28 | Statistiken & Heatmap entfernt | `2f3473b7` |

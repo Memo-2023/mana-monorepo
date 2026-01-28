@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { sessionEventsStore } from '$lib/stores/session-events.svelte';
 
 	interface Props {
 		visible: boolean;
@@ -14,13 +13,13 @@
 	// Action-specific messages
 	const messages = {
 		save: {
-			title: 'Anmelden um zu speichern',
+			title: 'Eigene Termine erstellen',
 			description:
-				'Melde dich an, um deine Termine in der Cloud zu speichern und auf allen Geräten zu synchronisieren.',
+				'Melde dich an, um deine eigenen Termine zu erstellen und auf allen Geräten zu synchronisieren.',
 			icon: 'cloud',
 		},
 		sync: {
-			title: 'Anmelden für Cloud-Sync',
+			title: 'Kostenlos anmelden',
 			description:
 				'Mit einem Account werden deine Termine automatisch synchronisiert und bleiben erhalten.',
 			icon: 'refresh-cw',
@@ -33,7 +32,6 @@
 	};
 
 	let currentMessage = $derived(messages[action]);
-	let sessionEventCount = $derived(sessionEventsStore.count);
 
 	function handleLogin() {
 		// Store return URL for redirect after login
@@ -121,20 +119,6 @@
 				{currentMessage.description}
 			</p>
 
-			<!-- Session events info -->
-			{#if sessionEventCount > 0}
-				<div class="bg-muted/50 mb-6 rounded-lg p-3 text-center text-sm">
-					<span class="text-muted-foreground">
-						Du hast <strong class="text-foreground">{sessionEventCount}</strong>
-						{sessionEventCount === 1 ? 'Termin' : 'Termine'} in dieser Sitzung erstellt.
-					</span>
-					<br />
-					<span class="text-muted-foreground text-xs">
-						Diese werden nach der Anmeldung in deinen Account übernommen.
-					</span>
-				</div>
-			{/if}
-
 			<!-- Buttons -->
 			<div class="flex flex-col gap-3">
 				<button
@@ -159,8 +143,7 @@
 
 			<!-- Info text -->
 			<p class="text-muted-foreground mt-4 text-center text-xs">
-				Du kannst weiterhin Termine erstellen. Diese werden lokal gespeichert und gehen beim
-				Schließen des Tabs verloren.
+				Du kannst im Demo-Modus die Beispiel-Termine ansehen, aber keine eigenen erstellen.
 			</p>
 		</div>
 	</div>

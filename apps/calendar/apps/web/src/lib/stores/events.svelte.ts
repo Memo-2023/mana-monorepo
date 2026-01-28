@@ -1,6 +1,7 @@
 /**
  * Events Store - Manages calendar events using Svelte 5 runes
- * Supports both authenticated (cloud) and guest (session) modes
+ * Authenticated users: events from API
+ * Demo mode: static sample events to showcase the app
  */
 
 import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
@@ -8,8 +9,8 @@ import * as api from '$lib/api/events';
 import { format, isWithinInterval, isSameDay } from 'date-fns';
 import { toDate } from '$lib/utils/eventDateHelpers';
 import { toastStore } from './toast.svelte';
-import { sessionEventsStore } from './session-events.svelte';
 import { authStore } from './auth.svelte';
+import { generateDemoEvents, isDemoEvent } from '$lib/data/demo-events';
 
 // State
 let events = $state<CalendarEvent[]>([]);
@@ -37,28 +38,28 @@ export const eventsStore = {
 
 	/**
 	 * Fetch events for a date range
-	 * In guest mode, only shows session events
+	 * Demo mode: shows static sample events
+	 * Authenticated: fetches from API
 	 */
 	async fetchEvents(startDate: Date, endDate: Date, calendarIds?: string[]) {
 		loading = true;
 		error = null;
 
-		// Guest mode: load session events only
+		// Demo mode: load demo events
 		if (!authStore.isAuthenticated) {
-			// Initialize session events store if needed
-			sessionEventsStore.initialize();
+			const demoEvents = generateDemoEvents();
 
-			// Filter session events by date range
-			const sessionEvents = sessionEventsStore.events.filter((event) => {
+			// Filter demo events by date range
+			const filteredEvents = demoEvents.filter((event) => {
 				const eventStart = toDate(event.startTime);
 				const eventEnd = toDate(event.endTime);
 				return eventStart <= endDate && eventEnd >= startDate;
 			});
 
-			events = sessionEvents;
+			events = filteredEvents;
 			loadedRange = { start: startDate, end: endDate };
 			loading = false;
-			return { data: sessionEvents, error: null };
+			return { data: filteredEvents, error: null };
 		}
 
 		// Authenticated: fetch from API
@@ -136,19 +137,13 @@ export const eventsStore = {
 
 	/**
 	 * Create a new event
-	 * If not authenticated, creates a session event (local only)
+	 * Demo mode: returns auth_required error
+	 * Authenticated: creates via API
 	 */
 	async createEvent(data: CreateEventInput) {
-		// Guest mode: create session event
+		// Demo mode: require authentication
 		if (!authStore.isAuthenticated) {
-			const sessionEvent = sessionEventsStore.createEvent({
-				...data,
-				calendarId: data.calendarId || 'session-calendar',
-			});
-			// Add to local events array for immediate display
-			events = [...events, sessionEvent];
-			toastStore.success('Termin erstellt (lokal gespeichert)');
-			return { data: sessionEvent, error: null };
+			return { data: null, error: { code: 'auth_required', message: 'Anmeldung erforderlich' } };
 		}
 
 		// Authenticated: create via API
@@ -163,17 +158,13 @@ export const eventsStore = {
 
 	/**
 	 * Update an event
-	 * Handles both session events (local) and cloud events
+	 * Demo mode: returns auth_required error
+	 * Authenticated: updates via API
 	 */
 	async updateEvent(id: string, data: UpdateEventInput) {
-		// Session event: update locally
-		if (sessionEventsStore.isSessionEvent(id)) {
-			const updated = sessionEventsStore.updateEvent(id, data);
-			if (updated) {
-				events = events.map((e) => (e.id === id ? updated : e));
-				return { data: updated, error: null };
-			}
-			return { data: null, error: new Error('Event not found') };
+		// Demo event: require authentication
+		if (isDemoEvent(id) || !authStore.isAuthenticated) {
+			return { data: null, error: { code: 'auth_required', message: 'Anmeldung erforderlich' } };
 		}
 
 		// Cloud event: update via API
@@ -190,15 +181,13 @@ export const eventsStore = {
 
 	/**
 	 * Delete an event (optimistic update)
-	 * Handles both session events (local) and cloud events
+	 * Demo mode: returns auth_required error
+	 * Authenticated: deletes via API
 	 */
 	async deleteEvent(id: string) {
-		// Session event: delete locally
-		if (sessionEventsStore.isSessionEvent(id)) {
-			sessionEventsStore.deleteEvent(id);
-			events = events.filter((e) => e.id !== id);
-			toastStore.success('Termin gelöscht');
-			return { data: null, error: null };
+		// Demo event: require authentication
+		if (isDemoEvent(id) || !authStore.isAuthenticated) {
+			return { data: null, error: { code: 'auth_required', message: 'Anmeldung erforderlich' } };
 		}
 
 		// Cloud event: delete via API
@@ -295,68 +284,9 @@ export const eventsStore = {
 	},
 
 	/**
-	 * Check if an event is a session event (local only)
+	 * Check if an event is a demo event
 	 */
-	isSessionEvent(eventId: string) {
-		return sessionEventsStore.isSessionEvent(eventId);
-	},
-
-	/**
-	 * Migrate session events to cloud after login
-	 * Call this after successful authentication
-	 */
-	async migrateSessionEvents(defaultCalendarId?: string) {
-		const sessionEvents = sessionEventsStore.getAllEvents();
-		if (sessionEvents.length === 0) return { migrated: 0, failed: 0 };
-
-		let migrated = 0;
-		let failed = 0;
-
-		for (const sessionEvent of sessionEvents) {
-			try {
-				const result = await api.createEvent({
-					calendarId: defaultCalendarId || sessionEvent.calendarId,
-					title: sessionEvent.title,
-					description: sessionEvent.description || undefined,
-					location: sessionEvent.location || undefined,
-					startTime: sessionEvent.startTime,
-					endTime: sessionEvent.endTime,
-					isAllDay: sessionEvent.isAllDay,
-					color: sessionEvent.color || undefined,
-				});
-
-				if (result.data) {
-					migrated++;
-				} else {
-					failed++;
-				}
-			} catch {
-				failed++;
-			}
-		}
-
-		// Clear session events after migration
-		if (migrated > 0) {
-			sessionEventsStore.clear();
-			toastStore.success(
-				`${migrated} ${migrated === 1 ? 'Termin' : 'Termine'} in die Cloud übernommen`
-			);
-		}
-
-		return { migrated, failed };
-	},
-
-	/**
-	 * Get count of pending session events
-	 */
-	get sessionEventCount() {
-		return sessionEventsStore.count;
-	},
-
-	/**
-	 * Check if there are pending session events to migrate
-	 */
-	get hasSessionEvents() {
-		return sessionEventsStore.hasEvents;
+	isDemoEvent(eventId: string) {
+		return isDemoEvent(eventId);
 	},
 };
