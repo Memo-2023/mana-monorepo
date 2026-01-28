@@ -836,6 +836,82 @@ services:
       start_period: 40s
 
   # ============================================
+  # Matrix Stats Bot (GDPR-compliant Analytics)
+  # ============================================
+
+  matrix-stats-bot:
+    image: ghcr.io/memo-2023/matrix-stats-bot:latest
+    container_name: manacore-matrix-stats-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+      umami:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3312
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_STATS_BOT_TOKEN}
+      MATRIX_REPORT_ROOM_ID: ${MATRIX_STATS_REPORT_ROOM:-}
+      UMAMI_API_URL: http://umami:3000
+      UMAMI_USERNAME: ${UMAMI_USERNAME:-admin}
+      UMAMI_PASSWORD: ${UMAMI_PASSWORD}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/manacore_auth
+    volumes:
+      - matrix_stats_bot_data:/app/data
+    ports:
+      - "3312:3312"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3312/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Matrix Project Doc Bot (GDPR-compliant Documentation)
+  # ============================================
+
+  matrix-project-doc-bot:
+    image: ghcr.io/memo-2023/matrix-project-doc-bot:latest
+    container_name: manacore-matrix-project-doc-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3313
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_PROJECT_DOC_BOT_TOKEN}
+      MATRIX_ALLOWED_USERS: ${MATRIX_PROJECT_DOC_ALLOWED_USERS:-}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/project_doc_bot
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      S3_BUCKET: project-doc-bot
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: gpt-4o-mini
+    volumes:
+      - matrix_project_doc_bot_data:/app/data
+    ports:
+      - "3313:3313"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3313/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
   # Auto-Update (Watchtower)
   # ============================================
 
@@ -877,3 +953,7 @@ volumes:
     name: manacore-synapse
   matrix_ollama_bot_data:
     name: manacore-matrix-ollama-bot
+  matrix_stats_bot_data:
+    name: manacore-matrix-stats-bot
+  matrix_project_doc_bot_data:
+    name: manacore-matrix-project-doc-bot

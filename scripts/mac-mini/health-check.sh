@@ -234,6 +234,8 @@ echo "Matrix (DSGVO-konform):"
 check_service "Synapse" "http://localhost:8008/health"
 check_service "Element Web" "http://localhost:8087/"
 check_service "Matrix Ollama Bot" "http://localhost:3311/health"
+check_service "Matrix Stats Bot" "http://localhost:3312/health"
+check_service "Matrix Project Doc Bot" "http://localhost:3313/health"
 
 echo ""
 echo "Cloudflare Tunnel:"
