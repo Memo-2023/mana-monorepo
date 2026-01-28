@@ -70,9 +70,14 @@ export class ExtractService {
 		}
 
 		try {
-			const article = await extract(request.url, {
-				signal: AbortSignal.timeout(request.options?.timeout || this.defaultTimeout),
-			});
+			// Use Promise.race for timeout since extract doesn't support AbortSignal
+			const timeout = request.options?.timeout || this.defaultTimeout;
+			const extractPromise = extract(request.url);
+			const timeoutPromise = new Promise<null>((_, reject) =>
+				setTimeout(() => reject(new Error('Extraction timeout')), timeout),
+			);
+
+			const article = await Promise.race([extractPromise, timeoutPromise]);
 
 			if (!article) {
 				return this.buildErrorResponse(
@@ -102,7 +107,6 @@ export class ExtractService {
 				readingTime: Math.ceil(this.countWords(text) / 200),
 
 				ogImage: article.image,
-				language: article.language,
 			};
 
 			// Optional: Markdown conversion
