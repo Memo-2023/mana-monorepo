@@ -22,4 +22,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3313/health || exit 1
 
 EXPOSE 3313
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
