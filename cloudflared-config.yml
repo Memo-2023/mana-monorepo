@@ -46,5 +46,11 @@ ingress:
   - hostname: n8n.mana.how
     service: http://localhost:5678
 
+  # Matrix (DSGVO-konformes Messaging)
+  - hostname: matrix.mana.how
+    service: http://localhost:8008
+  - hostname: element.mana.how
+    service: http://localhost:8087
+
   # Catch-all
   - service: http_status:404

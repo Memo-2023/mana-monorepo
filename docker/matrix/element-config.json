@@ -41,7 +41,8 @@
 	"permalink_prefix": "https://element.mana.how",
 	"terms_and_conditions_links": [],
 	"sso_redirect_options": {
-		"immediate": false
+		"immediate": false,
+		"on_welcome_page": true
 	},
 	"posthog": {
 		"disabled": true

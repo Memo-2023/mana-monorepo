@@ -126,6 +126,67 @@ export const jwks = authSchema.table('jwks', {
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+// OIDC Provider tables (Better Auth OIDC Provider plugin)
+// OAuth Applications (OIDC Clients like Matrix/Synapse)
+export const oauthApplications = authSchema.table('oauth_applications', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	icon: text('icon'),
+	metadata: text('metadata'),
+	clientId: text('client_id').unique().notNull(),
+	clientSecret: text('client_secret').notNull(),
+	redirectURLs: text('redirect_urls').notNull(), // JSON array as text
+	type: text('type').notNull().default('web'), // web, native, spa
+	disabled: boolean('disabled').default(false).notNull(),
+	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// OAuth Access Tokens
+export const oauthAccessTokens = authSchema.table('oauth_access_tokens', {
+	id: text('id').primaryKey(),
+	accessToken: text('access_token').unique().notNull(),
+	refreshToken: text('refresh_token').unique(),
+	accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }).notNull(),
+	refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
+	clientId: text('client_id').notNull(),
+	userId: text('user_id')
+		.references(() => users.id, { onDelete: 'cascade' })
+		.notNull(),
+	scopes: text('scopes').notNull(), // JSON array as text
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// OAuth Authorization Codes
+export const oauthAuthorizationCodes = authSchema.table('oauth_authorization_codes', {
+	id: text('id').primaryKey(),
+	code: text('code').unique().notNull(),
+	clientId: text('client_id').notNull(),
+	userId: text('user_id')
+		.references(() => users.id, { onDelete: 'cascade' })
+		.notNull(),
+	scopes: text('scopes').notNull(), // JSON array as text
+	redirectUri: text('redirect_uri').notNull(),
+	codeChallenge: text('code_challenge'),
+	codeChallengeMethod: text('code_challenge_method'),
+	expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+// OAuth Consents (user consent records for OIDC scopes)
+export const oauthConsents = authSchema.table('oauth_consents', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.references(() => users.id, { onDelete: 'cascade' })
+		.notNull(),
+	clientId: text('client_id').notNull(),
+	scopes: text('scopes').notNull(), // JSON array as text
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 // User settings table (synced across all apps)
 export const userSettings = authSchema.table('user_settings', {
 	userId: text('user_id')

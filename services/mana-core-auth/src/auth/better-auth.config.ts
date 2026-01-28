@@ -18,9 +18,20 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins/jwt';
 import { organization } from 'better-auth/plugins/organization';
+import { oidcProvider } from 'better-auth/plugins/oidc-provider';
 import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations.schema';
-import { users, sessions, accounts, verificationTokens, jwks } from '../db/schema/auth.schema';
+import {
+	users,
+	sessions,
+	accounts,
+	verificationTokens,
+	jwks,
+	oauthApplications,
+	oauthAccessTokens,
+	oauthAuthorizationCodes,
+	oauthConsents,
+} from '../db/schema/auth.schema';
 import type { JWTPayloadContext } from './types/better-auth.types';
 import {
 	sendPasswordResetEmail,
@@ -84,6 +95,12 @@ export function createBetterAuth(databaseUrl: string) {
 
 				// JWT plugin table
 				jwks: jwks,
+
+				// OIDC Provider tables
+				oauthApplication: oauthApplications,
+				oauthAccessToken: oauthAccessTokens,
+				oauthAuthorizationCode: oauthAuthorizationCodes,
+				oauthConsent: oauthConsents,
 			},
 		}),
 
@@ -266,6 +283,30 @@ export function createBetterAuth(databaseUrl: string) {
 							sid: session.id,
 						};
 					},
+				},
+			}),
+
+			/**
+			 * OIDC Provider Plugin
+			 *
+			 * Enables Mana Core Auth to act as an OpenID Connect Provider.
+			 * This allows Matrix/Synapse and other services to use SSO.
+			 *
+			 * Endpoints provided:
+			 * - GET /.well-known/openid-configuration
+			 * - GET /api/oidc/authorize
+			 * - POST /api/oidc/token
+			 * - GET /api/oidc/userinfo
+			 * - GET /api/oidc/jwks
+			 */
+			oidcProvider({
+				// Login page for OIDC authorization
+				loginPage: '/login',
+				// Consent page (skipped for trusted clients)
+				consentPage: '/consent',
+				// Use JWT plugin for token signing
+				metadata: {
+					issuer: process.env.BASE_URL || 'http://localhost:3001',
 				},
 			}),
 		],
