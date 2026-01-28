@@ -976,6 +976,35 @@ services:
       start_period: 40s
 
   # ============================================
+  # Matrix Calendar Bot (GDPR-compliant Calendar)
+  # ============================================
+
+  matrix-calendar-bot:
+    image: matrix-calendar-bot:latest
+    container_name: manacore-matrix-calendar-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3315
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_CALENDAR_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_CALENDAR_BOT_ROOMS:-}
+    volumes:
+      - matrix_calendar_bot_data:/app/data
+    ports:
+      - "3315:3315"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3315/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
   # Matrix Todo Bot (GDPR-compliant Task Management)
   # ============================================
 
@@ -999,6 +1028,39 @@ services:
       - "3314:3314"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3314/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Matrix NutriPhi Bot (GDPR-compliant Nutrition Tracking)
+  # ============================================
+
+  matrix-nutriphi-bot:
+    image: matrix-nutriphi-bot:latest
+    container_name: manacore-matrix-nutriphi-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+      nutriphi-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3316
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_NUTRIPHI_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_NUTRIPHI_BOT_ROOMS:-}
+      NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3023
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+    volumes:
+      - matrix_nutriphi_bot_data:/app/data
+    ports:
+      - "3316:3316"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3316/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1052,5 +1114,9 @@ volumes:
     name: manacore-matrix-stats-bot
   matrix_project_doc_bot_data:
     name: manacore-matrix-project-doc-bot
+  matrix_calendar_bot_data:
+    name: manacore-matrix-calendar-bot
   matrix_todo_bot_data:
     name: manacore-matrix-todo-bot
+  matrix_nutriphi_bot_data:
+    name: manacore-matrix-nutriphi-bot
