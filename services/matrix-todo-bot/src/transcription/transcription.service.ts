@@ -35,13 +35,20 @@ export class TranscriptionService {
 			}
 
 			const result: SttResponse = await response.json();
-			this.logger.log(
-				`Transcription completed (${result.model || 'whisper'}): ${result.text.substring(0, 50)}...`
-			);
+			this.logger.log(`Transcription completed: ${result.text.substring(0, 50)}...`);
 			return result.text;
 		} catch (error) {
 			this.logger.error('Transcription failed:', error);
 			throw error;
+		}
+	}
+
+	async checkHealth(): Promise<boolean> {
+		try {
+			const response = await fetch(`${this.sttUrl}/health`);
+			return response.ok;
+		} catch {
+			return false;
 		}
 	}
 }

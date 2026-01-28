@@ -10,12 +10,16 @@ export default () => ({
 		apiUrl: process.env.TODO_API_URL || 'http://localhost:3010/api/v1',
 		serviceKey: process.env.TODO_SERVICE_KEY || '',
 	},
+	stt: {
+		url: process.env.STT_URL || 'http://localhost:3020',
+	},
 });
 
 export const HELP_TEXT = `🎯 **Todo Bot - Hilfe**
 
 **Aufgaben verwalten:**
 • \`!add [Aufgabe]\` - Neue Aufgabe hinzufügen
+• Sprachnotiz senden - Aufgabe per Sprache erstellen
 • \`!list\` oder \`!heute\` - Heutige Aufgaben anzeigen
 • \`!inbox\` - Aufgaben ohne Datum anzeigen
 • \`!done [Nr]\` - Aufgabe als erledigt markieren
@@ -34,7 +38,8 @@ export const HELP_TEXT = `🎯 **Todo Bot - Hilfe**
 • \`!help\` oder \`hilfe\` - Diese Hilfe anzeigen
 
 **Natürliche Sprache:**
-Du kannst auch einfach "hilfe", "zeige aufgaben", "was muss ich heute machen?" schreiben.`;
+Du kannst auch einfach "hilfe", "zeige aufgaben", "was muss ich heute machen?" schreiben.
+Oder sende eine Sprachnotiz mit deiner Aufgabe!`;
 
 export const WELCOME_TEXT = `👋 **Willkommen beim Todo Bot!**
 

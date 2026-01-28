@@ -16,10 +16,12 @@ export default () => ({
 		secretKey: process.env.S3_SECRET_KEY || 'minioadmin',
 		bucket: process.env.S3_BUCKET || 'project-doc-bot',
 	},
+	stt: {
+		url: process.env.STT_URL || 'http://localhost:3020',
+	},
 	openai: {
 		apiKey: process.env.OPENAI_API_KEY || '',
 		model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-		whisperModel: process.env.OPENAI_WHISPER_MODEL || 'whisper-1',
 	},
 });
 

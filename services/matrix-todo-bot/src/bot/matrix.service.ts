@@ -9,6 +9,7 @@ import {
 import * as path from 'path';
 import * as fs from 'fs';
 import { TodoService, Task } from '../todo/todo.service';
+import { TranscriptionService } from '../transcription/transcription.service';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
 // Natural language keywords that trigger commands (German + English)
@@ -35,7 +36,8 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 
 	constructor(
 		private configService: ConfigService,
-		private todoService: TodoService
+		private todoService: TodoService,
+		private transcriptionService: TranscriptionService
 	) {
 		this.homeserverUrl = this.configService.get<string>(
 			'matrix.homeserverUrl',
@@ -141,13 +143,20 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 			return;
 		}
 
+		const userId = event.sender;
+		const msgtype = event.content?.msgtype;
+
+		// Handle audio/voice messages
+		if (msgtype === 'm.audio' && event.content?.url) {
+			await this.handleAudioMessage(roomId, event, userId);
+			return;
+		}
+
 		// Only handle text messages
-		if (event.content?.msgtype !== 'm.text') return;
+		if (msgtype !== 'm.text') return;
 
 		const body = event.content.body?.trim();
 		if (!body) return;
-
-		const userId = event.sender;
 
 		try {
 			// Check for natural language keywords first
@@ -543,6 +552,64 @@ Bot: ✅ Online`;
 			this.logger.log(`Pinned help message in ${roomId}`);
 		} catch (error) {
 			this.logger.debug(`Could not pin help (might lack permissions): ${error}`);
+		}
+	}
+
+	private async handleAudioMessage(roomId: string, event: any, userId: string) {
+		try {
+			await this.sendReply(roomId, event, 'Verarbeite Sprachnotiz...');
+
+			// Download audio from Matrix
+			const mxcUrl = event.content.url;
+			const httpUrl = this.client.mxcToHttp(mxcUrl);
+			this.logger.log(`Downloading audio from ${httpUrl}`);
+
+			const response = await fetch(httpUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to download audio: ${response.status}`);
+			}
+
+			const buffer = Buffer.from(await response.arrayBuffer());
+
+			// Transcribe audio
+			const transcription = await this.transcriptionService.transcribe(buffer);
+			this.logger.log(`Transcription: ${transcription.substring(0, 50)}...`);
+
+			if (!transcription.trim()) {
+				await this.sendReply(
+					roomId,
+					event,
+					'Konnte keine Sprache erkennen. Bitte versuche es erneut.'
+				);
+				return;
+			}
+
+			// Parse the transcription as a task input
+			const { title, priority, dueDate, project } = this.todoService.parseTaskInput(transcription);
+
+			// Create the task
+			const task = await this.todoService.createTask(userId, title, {
+				priority,
+				dueDate,
+				project,
+			});
+
+			let responseText = `Transkription: "${transcription}"\n\n✅ Aufgabe erstellt: **${task.title}**`;
+
+			const details: string[] = [];
+			if (priority < 4) details.push(`Prioritat ${priority}`);
+			if (dueDate) details.push(`Datum: ${this.formatDate(dueDate)}`);
+			if (project) details.push(`Projekt: ${project}`);
+
+			if (details.length > 0) {
+				responseText += `\n${details.join(' | ')}`;
+			}
+
+			await this.sendReply(roomId, event, responseText);
+		} catch (error) {
+			this.logger.error('Audio processing failed:', error);
+			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+			await this.sendReply(roomId, event, `Fehler bei der Verarbeitung: ${errorMsg}`);
 		}
 	}
 

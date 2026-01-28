@@ -14,6 +14,7 @@ import {
 	WeeklyStats,
 } from '../nutriphi/nutriphi.service';
 import { SessionService } from '../session/session.service';
+import { TranscriptionService } from '../transcription/transcription.service';
 import { HELP_MESSAGE, MEAL_TYPE_LABELS } from '../config/configuration';
 
 // Natural language keywords that trigger commands (German + English)
@@ -37,7 +38,8 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 	constructor(
 		private configService: ConfigService,
 		private nutriphiService: NutriPhiService,
-		private sessionService: SessionService
+		private sessionService: SessionService,
+		private transcriptionService: TranscriptionService
 	) {
 		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
 	}
@@ -129,7 +131,7 @@ Sag "hilfe" fur alle Befehle!`;
 			msgtype?: string;
 			body?: string;
 			url?: string;
-			info?: { mimetype?: string };
+			info?: { mimetype?: string; duration?: number };
 		};
 
 		// Handle image messages
@@ -144,6 +146,12 @@ Sag "hilfe" fur alle Befehle!`;
 				roomId,
 				`Bild empfangen! Nutze jetzt \`!analyze\` um es zu analysieren, oder \`!analyze Beschreibung\` um zusatzlichen Kontext zu geben.`
 			);
+			return;
+		}
+
+		// Handle audio/voice messages
+		if (content.msgtype === 'm.audio' && content.url) {
+			await this.handleAudioMessage(roomId, event.sender, content);
 			return;
 		}
 
@@ -658,6 +666,63 @@ ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 		} catch (error) {
 			this.logger.error(`Failed to pin help message:`, error);
 			await this.sendMessage(roomId, 'Fehler beim Pinnen der Hilfe.');
+		}
+	}
+
+	private async handleAudioMessage(
+		roomId: string,
+		sender: string,
+		content: { url?: string; info?: { mimetype?: string; duration?: number } }
+	) {
+		const token = this.sessionService.getToken(sender);
+		if (!token) {
+			await this.sendMessage(
+				roomId,
+				`Du bist nicht angemeldet. Nutze \`!login email passwort\` um dich anzumelden.`
+			);
+			return;
+		}
+
+		await this.sendMessage(roomId, 'Verarbeite Sprachnotiz...');
+		await this.client.setTyping(roomId, true, 60000);
+
+		try {
+			// Download audio from Matrix
+			const mxcUrl = content.url!;
+			const httpUrl = this.client.mxcToHttp(mxcUrl);
+			this.logger.log(`Downloading audio from ${httpUrl}`);
+
+			const response = await fetch(httpUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to download audio: ${response.status}`);
+			}
+
+			const buffer = Buffer.from(await response.arrayBuffer());
+
+			// Transcribe audio
+			const transcription = await this.transcriptionService.transcribe(buffer);
+			this.logger.log(`Transcription: ${transcription.substring(0, 50)}...`);
+
+			if (!transcription.trim()) {
+				await this.client.setTyping(roomId, false);
+				await this.sendMessage(roomId, 'Konnte keine Sprache erkennen. Bitte versuche es erneut.');
+				return;
+			}
+
+			// Analyze the transcribed text as a meal
+			await this.sendMessage(roomId, `Transkription: "${transcription}"\n\nAnalysiere...`);
+
+			const result = await this.nutriphiService.analyzeText(transcription, token);
+			await this.client.setTyping(roomId, false);
+
+			// Format and send result
+			const formattedResult = this.formatAnalysisResult(result);
+			await this.sendMessage(roomId, formattedResult);
+		} catch (error) {
+			await this.client.setTyping(roomId, false);
+			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+			this.logger.error('Audio processing failed:', error);
+			await this.sendMessage(roomId, `Fehler bei der Verarbeitung: ${errorMsg}`);
 		}
 	}
 

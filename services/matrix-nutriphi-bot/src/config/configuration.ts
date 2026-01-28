@@ -15,6 +15,9 @@ export default () => ({
 		devBypass: process.env.DEV_BYPASS_AUTH === 'true',
 		devUserId: process.env.DEV_USER_ID || '',
 	},
+	stt: {
+		url: process.env.STT_URL || 'http://localhost:3020',
+	},
 });
 
 export const HELP_MESSAGE = `**NutriPhi Bot - KI-Ernahrungsassistent**
@@ -22,7 +25,7 @@ export const HELP_MESSAGE = `**NutriPhi Bot - KI-Ernahrungsassistent**
 **Befehle:**
 - \`!help\` - Diese Hilfe anzeigen
 - \`!login email passwort\` - Bei NutriPhi anmelden
-- \`!analyze [beschreibung]\` - Foto/Text analysieren
+- \`!analyze [beschreibung]\` - Foto/Text/Sprache analysieren
 - \`!today\` / \`heute\` - Tages-Zusammenfassung
 - \`!week\` / \`woche\` - Wochen-Statistik
 - \`!goals\` / \`ziele\` - Aktuelle Ziele
@@ -31,9 +34,10 @@ export const HELP_MESSAGE = `**NutriPhi Bot - KI-Ernahrungsassistent**
 - \`!tips\` / \`tipps\` - KI-Empfehlungen
 - \`!status\` - Bot-Status
 
-**Bild-Analyse:**
-1. Sende ein Foto deiner Mahlzeit
-2. Dann: \`!analyze\` oder \`!analyze Spaghetti mit Sauce\`
+**Mahlzeit erfassen:**
+- Foto senden + \`!analyze\`
+- Sprachnotiz senden (wird automatisch transkribiert & analysiert)
+- \`!analyze Spaghetti mit Sauce\` (Textbeschreibung)
 
 **Beispiele:**
 - "heute" - Zeigt Tages-Ubersicht
