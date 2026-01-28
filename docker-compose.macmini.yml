@@ -817,7 +817,7 @@ services:
   # ============================================
 
   matrix-ollama-bot:
-    image: ghcr.io/memo-2023/matrix-ollama-bot:latest
+    image: matrix-ollama-bot:latest
     container_name: manacore-matrix-ollama-bot
     restart: always
     depends_on:
@@ -849,7 +849,7 @@ services:
   # ============================================
 
   matrix-stats-bot:
-    image: ghcr.io/memo-2023/matrix-stats-bot:latest
+    image: matrix-stats-bot:latest
     container_name: manacore-matrix-stats-bot
     restart: always
     depends_on:
@@ -884,7 +884,7 @@ services:
   # ============================================
 
   matrix-project-doc-bot:
-    image: ghcr.io/memo-2023/matrix-project-doc-bot:latest
+    image: matrix-project-doc-bot:latest
     container_name: manacore-matrix-project-doc-bot
     restart: always
     depends_on:
