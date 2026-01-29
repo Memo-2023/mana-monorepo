@@ -89,7 +89,7 @@ services:
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: ManaCore <noreply@mana.how>
-      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how,https://nutriphi.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how,https://nutriphi.mana.how,https://skilltree.mana.how
       # DuckDB Analytics (Business Metrics)
       DUCKDB_PATH: /data/analytics/metrics.duckdb
     volumes:
@@ -584,6 +584,60 @@ services:
       - "5189:5189"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5189/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # SkillTree App (Gamified Skill Tracking)
+  # ============================================
+
+  skilltree-backend:
+    image: ghcr.io/memo-2023/skilltree-backend:latest
+    container_name: skilltree-backend
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3024
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/skilltree
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      CORS_ORIGINS: https://skilltree.mana.how,https://mana.how
+    ports:
+      - "3024:3024"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3024/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  skilltree-web:
+    image: ghcr.io/memo-2023/skilltree-web:latest
+    container_name: skilltree-web
+    restart: always
+    depends_on:
+      skilltree-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5195
+      PUBLIC_BACKEND_URL: http://skilltree-backend:3024
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://skilltree-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5195:5195"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5195/health"]
       interval: 30s
       timeout: 10s
       retries: 3
