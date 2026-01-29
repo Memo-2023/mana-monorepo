@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { questionsStore, collectionsStore } from '$lib/stores';
+	import { QuestionSkeleton, ErrorAlert } from '$lib/components';
 	import { Search, Filter, Clock, CheckCircle, Loader2, Archive } from 'lucide-svelte';
 	import type { QuestionStatus, ResearchDepth } from '$lib/types';
 
@@ -90,11 +91,20 @@
 		</button>
 	</div>
 
+	<!-- Error -->
+	{#if questionsStore.error}
+		<div class="mb-6">
+			<ErrorAlert
+				message={questionsStore.error}
+				onRetry={() => questionsStore.load(questionsStore.filters)}
+				onDismiss={() => {}}
+			/>
+		</div>
+	{/if}
+
 	<!-- Questions List -->
 	{#if questionsStore.loading}
-		<div class="flex items-center justify-center py-12">
-			<Loader2 class="h-8 w-8 animate-spin text-primary" />
-		</div>
+		<QuestionSkeleton count={5} />
 	{:else if questionsStore.questions.length === 0}
 		<div class="py-12 text-center">
 			<div class="mb-4 text-6xl">🤔</div>

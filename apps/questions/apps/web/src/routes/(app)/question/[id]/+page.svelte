@@ -4,6 +4,7 @@
 	import { questionsApi } from '$lib/api/questions';
 	import { researchApi } from '$lib/api/research';
 	import { sourcesApi } from '$lib/api/sources';
+	import { QuestionDetailSkeleton, ErrorAlert } from '$lib/components';
 	import {
 		ArrowLeft,
 		Clock,
@@ -95,16 +96,14 @@
 	}
 </script>
 
+{#if loading}
+	<QuestionDetailSkeleton />
+{:else if error}
+	<div class="p-6">
+		<ErrorAlert message={error} onRetry={loadQuestion} />
+	</div>
+{:else if question}
 <div class="p-6">
-	{#if loading}
-		<div class="flex items-center justify-center py-12">
-			<Loader2 class="h-8 w-8 animate-spin text-primary" />
-		</div>
-	{:else if error}
-		<div class="rounded-lg bg-destructive/10 p-4 text-destructive">
-			{error}
-		</div>
-	{:else if question}
 		<!-- Header -->
 		<div class="mb-6">
 			<a
@@ -312,5 +311,5 @@
 				</div>
 			</div>
 		{/if}
-	{/if}
 </div>
+{/if}

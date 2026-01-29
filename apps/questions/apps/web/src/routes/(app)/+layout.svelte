@@ -119,11 +119,11 @@
 
 			{#if sidebarOpen}
 				<a
-					href="/collections/new"
+					href="/collections"
 					class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
 				>
 					<Plus class="h-5 w-5" />
-					<span>Add Collection</span>
+					<span>Manage Collections</span>
 				</a>
 			{/if}
 		</nav>

@@ -4,6 +4,7 @@
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { apiClient } from '$lib/api/client';
+	import { AppLoadingSkeleton } from '$lib/components/skeletons';
 
 	let { children } = $props();
 
@@ -24,14 +25,7 @@
 </script>
 
 {#if loading}
-	<div class="flex min-h-screen items-center justify-center bg-background">
-		<div class="flex flex-col items-center gap-4">
-			<div
-				class="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"
-			></div>
-			<p class="text-muted-foreground">Loading...</p>
-		</div>
-	</div>
+	<AppLoadingSkeleton />
 {:else}
 	<div class="min-h-screen bg-background text-foreground">
 		{@render children()}
