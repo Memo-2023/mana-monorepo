@@ -47,9 +47,9 @@ export const alarmsStore = {
 		const response = await api.get<Alarm[]>('/alarms');
 
 		if (response.error) {
-			error = response.error;
+			error = response.error.message;
 			loading = false;
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		alarms = response.data || [];
@@ -73,7 +73,7 @@ export const alarmsStore = {
 		const response = await api.post<Alarm>('/alarms', input);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		if (response.data) {
@@ -101,7 +101,7 @@ export const alarmsStore = {
 		const response = await api.patch<Alarm>(`/alarms/${id}`, input);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		if (response.data) {
@@ -136,7 +136,7 @@ export const alarmsStore = {
 		const response = await api.delete(`/alarms/${id}`);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		alarms = alarms.filter((a) => a.id !== id);

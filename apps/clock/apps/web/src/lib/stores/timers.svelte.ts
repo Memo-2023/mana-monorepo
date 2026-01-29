@@ -47,9 +47,9 @@ export const timersStore = {
 		const response = await api.get<Timer[]>('/timers');
 
 		if (response.error) {
-			error = response.error;
+			error = response.error.message;
 			loading = false;
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		timers = response.data || [];
@@ -73,7 +73,7 @@ export const timersStore = {
 		const response = await api.post<Timer>('/timers', input);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		if (response.data) {
@@ -101,7 +101,7 @@ export const timersStore = {
 		const response = await api.patch<Timer>(`/timers/${id}`, input);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		if (response.data) {
@@ -129,7 +129,7 @@ export const timersStore = {
 		const response = await api.post<Timer>(`/timers/${id}/start`);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		if (response.data) {
@@ -157,7 +157,7 @@ export const timersStore = {
 		const response = await api.post<Timer>(`/timers/${id}/pause`);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		if (response.data) {
@@ -185,7 +185,7 @@ export const timersStore = {
 		const response = await api.post<Timer>(`/timers/${id}/reset`);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		if (response.data) {
@@ -210,7 +210,7 @@ export const timersStore = {
 		const response = await api.delete(`/timers/${id}`);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		timers = timers.filter((t) => t.id !== id);

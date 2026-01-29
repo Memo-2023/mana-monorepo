@@ -32,9 +32,9 @@ export const worldClocksStore = {
 		const response = await api.get<WorldClock[]>('/world-clocks');
 
 		if (response.error) {
-			error = response.error;
+			error = response.error.message;
 			loading = false;
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		worldClocks = response.data || [];
@@ -49,7 +49,7 @@ export const worldClocksStore = {
 		const response = await api.post<WorldClock>('/world-clocks', input);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		if (response.data) {
@@ -65,7 +65,7 @@ export const worldClocksStore = {
 		const response = await api.delete(`/world-clocks/${id}`);
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		worldClocks = worldClocks.filter((wc) => wc.id !== id);
@@ -79,7 +79,7 @@ export const worldClocksStore = {
 		const response = await api.put('/world-clocks/reorder', { ids });
 
 		if (response.error) {
-			return { success: false, error: response.error };
+			return { success: false, error: response.error.message };
 		}
 
 		// Update local order

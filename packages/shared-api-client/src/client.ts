@@ -1,218 +1,305 @@
 /**
- * Shared API Client Factory
- * Creates a configured API client for making authenticated requests.
+ * API Client Factory
+ * Creates a configured API client with consistent error handling
  */
 
-import type { ApiResponse, FetchOptions } from './types';
+import type { ApiClient, ApiClientConfig, ApiResult, RequestOptions } from './types';
+import {
+	buildQueryString,
+	createApiError,
+	getBaseUrl,
+	getErrorCodeFromStatus,
+	isRetryableError,
+	parseErrorResponse,
+	sleep,
+} from './utils';
 
-export interface ApiClientConfig {
-	/** Base URL for the API (e.g., 'http://localhost:3002') */
-	baseUrl: string;
-	/** Optional API prefix (default: '/api') */
-	apiPrefix?: string;
-	/** Function to get the current auth token */
-	getToken?: () => Promise<string | null> | string | null;
-	/** Whether running in browser environment */
-	isBrowser?: boolean;
-	/** Local storage key for token fallback */
-	tokenStorageKey?: string;
-}
-
-export interface ApiClient {
-	/** Make a GET request */
-	get: <T>(endpoint: string, options?: Omit<FetchOptions, 'method'>) => Promise<ApiResponse<T>>;
-	/** Make a POST request */
-	post: <T>(
-		endpoint: string,
-		body?: unknown,
-		options?: Omit<FetchOptions, 'method' | 'body'>
-	) => Promise<ApiResponse<T>>;
-	/** Make a PUT request */
-	put: <T>(
-		endpoint: string,
-		body?: unknown,
-		options?: Omit<FetchOptions, 'method' | 'body'>
-	) => Promise<ApiResponse<T>>;
-	/** Make a PATCH request */
-	patch: <T>(
-		endpoint: string,
-		body?: unknown,
-		options?: Omit<FetchOptions, 'method' | 'body'>
-	) => Promise<ApiResponse<T>>;
-	/** Make a DELETE request */
-	delete: <T>(endpoint: string, options?: Omit<FetchOptions, 'method'>) => Promise<ApiResponse<T>>;
-	/** Make a request with any method */
-	request: <T>(endpoint: string, options?: FetchOptions) => Promise<ApiResponse<T>>;
-	/** Upload a single file */
-	uploadFile: <T>(endpoint: string, file: File, token?: string) => Promise<ApiResponse<T>>;
-	/** Upload multiple files */
-	uploadFiles: <T>(endpoint: string, files: File[], token?: string) => Promise<ApiResponse<T>>;
-}
+const DEFAULT_TIMEOUT = 30000;
+const DEFAULT_RETRIES = 0;
+const DEFAULT_RETRY_DELAY = 1000;
 
 /**
- * Create an API client with the given configuration.
+ * Create a configured API client instance
+ *
+ * @example
+ * ```typescript
+ * import { createApiClient } from '@manacore/shared-api-client';
+ * import { authStore } from '$lib/stores/auth.svelte';
+ *
+ * export const api = createApiClient({
+ *   baseUrl: 'http://localhost:3014',
+ *   apiPrefix: '/api/v1',
+ *   getAuthToken: () => authStore.getValidToken(),
+ * });
+ *
+ * // Usage
+ * const { data, error } = await api.get<User[]>('/users');
+ * if (error) {
+ *   console.error('Failed:', error.message);
+ *   return;
+ * }
+ * // data is typed as User[]
+ * ```
  */
 export function createApiClient(config: ApiClientConfig): ApiClient {
-	const { baseUrl, apiPrefix = '/api', getToken, isBrowser = true, tokenStorageKey } = config;
+	const {
+		apiPrefix = '',
+		getAuthToken,
+		timeout = DEFAULT_TIMEOUT,
+		retries = DEFAULT_RETRIES,
+		retryDelay = DEFAULT_RETRY_DELAY,
+		onError,
+		debug = false,
+	} = config;
 
-	async function getAuthToken(providedToken?: string): Promise<string | undefined> {
-		if (providedToken) return providedToken;
+	/**
+	 * Internal fetch with error handling, timeout, and retries
+	 */
+	async function fetchWithRetry<T>(
+		endpoint: string,
+		init: RequestInit,
+		options: RequestOptions = {},
+		attemptNum = 0
+	): Promise<ApiResult<T>> {
+		const baseUrl = getBaseUrl(config.baseUrl);
+		const queryString = options.params ? buildQueryString(options.params) : '';
+		const url = baseUrl + apiPrefix + endpoint + queryString;
+		const requestTimeout = options.timeout ?? timeout;
+		const maxRetries = options.retries ?? retries;
 
-		if (getToken) {
-			const token = await getToken();
-			if (token) return token;
-		}
-
-		// Fallback to localStorage if in browser and key provided
-		if (isBrowser && tokenStorageKey && typeof localStorage !== 'undefined') {
-			return localStorage.getItem(tokenStorageKey) || undefined;
-		}
-
-		return undefined;
-	}
-
-	async function request<T>(endpoint: string, options: FetchOptions = {}): Promise<ApiResponse<T>> {
-		const { method = 'GET', body, token, isFormData = false, headers: customHeaders } = options;
-
-		const authToken = await getAuthToken(token);
+		// Create abort controller for timeout
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
 
 		try {
-			const headers: Record<string, string> = { ...customHeaders };
+			// Get auth token if not skipping
+			const headers: Record<string, string> = {
+				...((init.headers as Record<string, string>) || {}),
+				...(options.headers || {}),
+			};
 
-			// Don't set Content-Type for FormData - browser sets it automatically with boundary
-			if (!isFormData) {
-				headers['Content-Type'] = 'application/json';
+			if (!options.skipAuth && getAuthToken) {
+				const token = await getAuthToken();
+				if (token) {
+					headers['Authorization'] = 'Bearer ' + token;
+				}
 			}
 
-			if (authToken) {
-				headers['Authorization'] = `Bearer ${authToken}`;
+			if (debug) {
+				console.log('[API] ' + init.method + ' ' + url);
 			}
 
-			const url = `${baseUrl}${apiPrefix}${endpoint}`;
 			const response = await fetch(url, {
-				method,
+				...init,
 				headers,
-				body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
+				signal: controller.signal,
 			});
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				return {
-					data: null,
-					error: new Error(errorData.message || `API error: ${response.status}`),
-				};
-			}
+			clearTimeout(timeoutId);
 
-			// Handle empty responses (204 No Content)
+			// Handle 204 No Content
 			if (response.status === 204) {
-				return { data: null, error: null };
+				return { data: null as T, error: null };
 			}
 
-			const data = await response.json();
-			return { data, error: null };
-		} catch (error) {
-			return {
-				data: null,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			};
+			// Handle error responses
+			if (!response.ok) {
+				const errorMessage = await parseErrorResponse(response);
+				const error = createApiError(
+					errorMessage,
+					getErrorCodeFromStatus(response.status),
+					response.status
+				);
+
+				// Retry on server errors
+				if (isRetryableError(error) && attemptNum < maxRetries) {
+					if (debug) {
+						console.log('[API] Retry ' + (attemptNum + 1) + '/' + maxRetries + ' for ' + url);
+					}
+					await sleep(retryDelay * (attemptNum + 1)); // Exponential backoff
+					return fetchWithRetry<T>(endpoint, init, options, attemptNum + 1);
+				}
+
+				if (onError) {
+					onError(error, endpoint);
+				}
+
+				return { data: null, error };
+			}
+
+			// Parse JSON response
+			const contentType = response.headers.get('content-type');
+			if (contentType?.includes('application/json')) {
+				const data = await response.json();
+				return { data, error: null };
+			}
+
+			// Handle non-JSON responses (e.g., text, blob)
+			const text = await response.text();
+			return { data: text as T, error: null };
+		} catch (err) {
+			clearTimeout(timeoutId);
+
+			// Handle abort (timeout)
+			if (err instanceof DOMException && err.name === 'AbortError') {
+				const error = createApiError('Request timed out after ' + requestTimeout + 'ms', 'TIMEOUT');
+
+				if (attemptNum < maxRetries) {
+					if (debug) {
+						console.log(
+							'[API] Retry ' + (attemptNum + 1) + '/' + maxRetries + ' after timeout for ' + url
+						);
+					}
+					await sleep(retryDelay * (attemptNum + 1));
+					return fetchWithRetry<T>(endpoint, init, options, attemptNum + 1);
+				}
+
+				if (onError) {
+					onError(error, endpoint);
+				}
+				return { data: null, error };
+			}
+
+			// Handle network errors
+			const error = createApiError(
+				err instanceof Error ? err.message : 'Network error',
+				'NETWORK_ERROR'
+			);
+
+			if (attemptNum < maxRetries) {
+				if (debug) {
+					console.log(
+						'[API] Retry ' + (attemptNum + 1) + '/' + maxRetries + ' after network error for ' + url
+					);
+				}
+				await sleep(retryDelay * (attemptNum + 1));
+				return fetchWithRetry<T>(endpoint, init, options, attemptNum + 1);
+			}
+
+			if (onError) {
+				onError(error, endpoint);
+			}
+			return { data: null, error };
 		}
 	}
 
-	async function uploadFile<T>(
-		endpoint: string,
-		file: File,
-		token?: string
-	): Promise<ApiResponse<T>> {
-		const authToken = await getAuthToken(token);
-
-		try {
-			const formData = new FormData();
-			formData.append('file', file);
-
-			const headers: Record<string, string> = {};
-			if (authToken) {
-				headers['Authorization'] = `Bearer ${authToken}`;
-			}
-
-			const response = await fetch(`${baseUrl}${apiPrefix}${endpoint}`, {
-				method: 'POST',
-				headers,
-				body: formData,
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				return {
-					data: null,
-					error: new Error(errorData.message || `Upload error: ${response.status}`),
-				};
-			}
-
-			const data = await response.json();
-			return { data, error: null };
-		} catch (error) {
-			return {
-				data: null,
-				error: error instanceof Error ? error : new Error('Upload failed'),
-			};
+	/**
+	 * Prepare request body and headers
+	 */
+	function prepareBody(body: unknown): { body?: string; contentType?: string } {
+		if (body === undefined || body === null) {
+			return {};
 		}
-	}
 
-	async function uploadFiles<T>(
-		endpoint: string,
-		files: File[],
-		token?: string
-	): Promise<ApiResponse<T>> {
-		const authToken = await getAuthToken(token);
-
-		try {
-			const formData = new FormData();
-			files.forEach((file) => {
-				formData.append('files', file);
-			});
-
-			const headers: Record<string, string> = {};
-			if (authToken) {
-				headers['Authorization'] = `Bearer ${authToken}`;
-			}
-
-			const response = await fetch(`${baseUrl}${apiPrefix}${endpoint}`, {
-				method: 'POST',
-				headers,
-				body: formData,
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				return {
-					data: null,
-					error: new Error(errorData.message || `Upload error: ${response.status}`),
-				};
-			}
-
-			const data = await response.json();
-			return { data, error: null };
-		} catch (error) {
-			return {
-				data: null,
-				error: error instanceof Error ? error : new Error('Upload failed'),
-			};
+		if (body instanceof FormData) {
+			// Don't set Content-Type for FormData - browser handles it
+			return {};
 		}
+
+		return {
+			body: JSON.stringify(body),
+			contentType: 'application/json',
+		};
 	}
 
 	return {
-		get: <T>(endpoint: string, options?: Omit<FetchOptions, 'method'>) =>
-			request<T>(endpoint, { ...options, method: 'GET' }),
-		post: <T>(endpoint: string, body?: unknown, options?: Omit<FetchOptions, 'method' | 'body'>) =>
-			request<T>(endpoint, { ...options, method: 'POST', body }),
-		put: <T>(endpoint: string, body?: unknown, options?: Omit<FetchOptions, 'method' | 'body'>) =>
-			request<T>(endpoint, { ...options, method: 'PUT', body }),
-		patch: <T>(endpoint: string, body?: unknown, options?: Omit<FetchOptions, 'method' | 'body'>) =>
-			request<T>(endpoint, { ...options, method: 'PATCH', body }),
-		delete: <T>(endpoint: string, options?: Omit<FetchOptions, 'method'>) =>
-			request<T>(endpoint, { ...options, method: 'DELETE' }),
-		request,
-		uploadFile,
-		uploadFiles,
+		async get<T>(endpoint: string, options?: RequestOptions): Promise<ApiResult<T>> {
+			return fetchWithRetry<T>(
+				endpoint,
+				{
+					method: 'GET',
+					headers: { Accept: 'application/json' },
+				},
+				options
+			);
+		},
+
+		async post<T>(
+			endpoint: string,
+			body?: unknown,
+			options?: RequestOptions
+		): Promise<ApiResult<T>> {
+			const { body: jsonBody, contentType } = prepareBody(body);
+			return fetchWithRetry<T>(
+				endpoint,
+				{
+					method: 'POST',
+					headers: {
+						Accept: 'application/json',
+						...(contentType ? { 'Content-Type': contentType } : {}),
+					},
+					body: jsonBody,
+				},
+				options
+			);
+		},
+
+		async put<T>(
+			endpoint: string,
+			body?: unknown,
+			options?: RequestOptions
+		): Promise<ApiResult<T>> {
+			const { body: jsonBody, contentType } = prepareBody(body);
+			return fetchWithRetry<T>(
+				endpoint,
+				{
+					method: 'PUT',
+					headers: {
+						Accept: 'application/json',
+						...(contentType ? { 'Content-Type': contentType } : {}),
+					},
+					body: jsonBody,
+				},
+				options
+			);
+		},
+
+		async patch<T>(
+			endpoint: string,
+			body?: unknown,
+			options?: RequestOptions
+		): Promise<ApiResult<T>> {
+			const { body: jsonBody, contentType } = prepareBody(body);
+			return fetchWithRetry<T>(
+				endpoint,
+				{
+					method: 'PATCH',
+					headers: {
+						Accept: 'application/json',
+						...(contentType ? { 'Content-Type': contentType } : {}),
+					},
+					body: jsonBody,
+				},
+				options
+			);
+		},
+
+		async delete<T>(endpoint: string, options?: RequestOptions): Promise<ApiResult<T>> {
+			return fetchWithRetry<T>(
+				endpoint,
+				{
+					method: 'DELETE',
+					headers: { Accept: 'application/json' },
+				},
+				options
+			);
+		},
+
+		async upload<T>(
+			endpoint: string,
+			formData: FormData,
+			options?: RequestOptions
+		): Promise<ApiResult<T>> {
+			return fetchWithRetry<T>(
+				endpoint,
+				{
+					method: 'POST',
+					// Don't set Content-Type - browser handles multipart boundary
+					headers: { Accept: 'application/json' },
+					body: formData,
+				},
+				options
+			);
+		},
 	};
 }

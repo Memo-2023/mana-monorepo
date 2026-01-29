@@ -855,6 +855,9 @@ importers:
       '@clock/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -4435,7 +4438,7 @@ importers:
   packages/shared-api-client:
     devDependencies:
       typescript:
-        specifier: ^5.0.0
+        specifier: ^5.9.3
         version: 5.9.3
 
   packages/shared-auth:
