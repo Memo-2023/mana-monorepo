@@ -1,0 +1,22 @@
+# Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+python-multipart>=0.0.20
+
+# TTS Models (MLX optimized for Apple Silicon)
+f5-tts-mlx>=0.2.6
+mlx-audio>=0.1.0
+mlx>=0.21.0
+
+# Kokoro dependencies (phonemizer)
+misaki[en]>=0.9.0
+
+# Audio Processing
+soundfile>=0.13.0
+scipy>=1.11.0
+numpy>=1.26.0
+pydub>=0.25.1
+tqdm>=4.67.0
+
+# Utilities
+aiofiles>=24.1.0

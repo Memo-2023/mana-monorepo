@@ -1,7 +1,9 @@
 <script lang="ts">
 	import '../app.css';
+	import '$lib/i18n';
 	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
+	import { isLoading as i18nLoading, _ as t } from 'svelte-i18n';
 	import { theme } from '$lib/stores/theme';
 	import { ToastContainer } from '@manacore/shared-ui';
 
@@ -18,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>Mana Matrix</title>
+	<title>{$t('app.name')}</title>
 	<meta name="description" content="Self-hosted Matrix chat client" />
 </svelte:head>
 

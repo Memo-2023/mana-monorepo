@@ -11,8 +11,8 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 |---------|------------|-----------|--------|
 | Dependencies & Versionen | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
 | Toast System | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
-| API Client Patterns | ⚠️ Mittel | **Hoch** | 🚧 In Arbeit |
-| i18n Implementation | ⚠️ Mittel | Mittel | Offen |
+| API Client Patterns | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
+| i18n Implementation | ✅ Gut | ~~Mittel~~ | ✅ Erledigt |
 | Auth Implementation | ✅ Gut | Niedrig | - |
 | Styling & Tailwind | ✅ Sehr gut | Niedrig | - |
 | Komponenten & Layouts | ⚠️ Mittel | Mittel | Offen |
@@ -23,7 +23,8 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 2. ✅ **SvelteKit, Svelte, TypeScript Versionen vereinheitlicht** - Alle 15 Web-Apps auf gleicher Version
 3. ✅ **Toast System zentralisiert** - `@manacore/shared-ui` Toast für 6 Apps (calendar, chat, clock, contacts, picture, storage)
 4. ✅ **lucide-svelte entfernt** - shared-ui nutzt jetzt nur noch `@manacore/shared-icons`
-5. 🚧 **@manacore/shared-api-client Package erstellt** - Clock App als erstes migriert
+5. ✅ **@manacore/shared-api-client Package erstellt** - 10 Apps migriert (clock, todo, contacts, storage, calendar, picture, nutriphi, planta, questions, skilltree)
+6. ✅ **i18n zu 6 Apps hinzugefügt** - todo, skilltree, nutriphi, planta, questions, matrix (jeweils DE + EN)
 
 ---
 
@@ -48,12 +49,12 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 
 ---
 
-## 2. API Client Patterns 🚧
+## 2. API Client Patterns ✅
 
-> **Status: In Arbeit (29.01.2026)**
+> **Status: Erledigt (29.01.2026)**
 > - ✅ `@manacore/shared-api-client` Package erstellt
-> - ✅ Clock App migriert (Proof of Concept)
-> - ⏳ Verbleibende Apps: calendar, chat, contacts, manadeck, manacore, nutriphi, picture, planta, presi, questions, skilltree, storage, todo
+> - ✅ 10 Apps migriert: clock, todo, contacts, storage, calendar, picture, nutriphi, planta, questions, skilltree
+> - ⏭️ Nicht migriert (komplexe Custom-Logik): chat, manadeck, manacore, presi
 
 ### Kritische Inkonsistenzen (vor Migration)
 
@@ -107,45 +108,42 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 
 ---
 
-## 3. i18n Implementation
+## 3. i18n Implementation ✅
 
-### Status
+> **Status: Erledigt (29.01.2026)**
+> - ✅ 6 Apps mit i18n hinzugefügt: todo, skilltree, nutriphi, planta, questions, matrix
+> - ⏭️ Nicht migriert: zitare (unvollständiges Web-App Setup)
 
-#### Apps MIT i18n (10)
+### Apps MIT i18n (15)
 
-| App | Sprachen |
-|-----|----------|
-| chat | DE, EN, IT, FR, ES |
-| picture | DE, EN, IT, FR, ES |
-| calendar | DE, EN, IT, FR, ES |
-| presi | DE, EN, IT, FR, ES |
-| manadeck | DE, EN, IT, FR, ES |
-| manacore | DE, EN, IT, FR, ES |
-| contacts | DE, EN |
-| storage | DE, EN |
-| clock | DE, EN |
+| App | Sprachen | localStorage Key |
+|-----|----------|------------------|
+| chat | DE, EN, IT, FR, ES | `chat_locale` |
+| picture | DE, EN, IT, FR, ES | `picture_locale` |
+| calendar | DE, EN, IT, FR, ES | `calendar_locale` |
+| presi | DE, EN, IT, FR, ES | `presi_locale` |
+| manadeck | DE, EN, IT, FR, ES | `manadeck_locale` |
+| manacore | DE, EN, IT, FR, ES | `manacore_locale` |
+| contacts | DE, EN | `contacts_locale` |
+| storage | DE, EN | `storage_locale` |
+| clock | DE, EN | `clock_locale` |
+| todo | DE, EN | `todo_locale` |
+| skilltree | DE, EN | `skilltree_locale` |
+| nutriphi | DE, EN | `nutriphi_locale` |
+| planta | DE, EN | `planta_locale` |
+| questions | DE, EN | `questions_locale` |
+| matrix | DE, EN | `matrix_locale` |
 
-#### Apps OHNE i18n (7)
+### Apps OHNE i18n (1)
 
-- zitare
-- skilltree
-- planta
-- nutriphi
-- todo
-- matrix
-- questions
+- zitare (Web-App nicht vollständig eingerichtet)
 
-### Inkonsistenzen
+### Durchgeführte Änderungen
 
-- Verschiedene localStorage Keys: `chat_locale`, `picture_locale`, `locale`
-- Unterschiedliche Sprachanzahl (2-5 Sprachen)
-- Manacore Landing nutzt Custom-Implementation statt svelte-i18n
-
-### Empfehlungen
-
-1. **i18n zu allen 7 fehlenden Apps hinzufügen**
-2. **Storage Key vereinheitlichen** auf `{app}_locale`
-3. **Mindestens DE + EN** für alle Apps
+- ✅ Einheitlicher localStorage Key Pattern: `{app}_locale`
+- ✅ Mindestens DE + EN für alle neuen Apps
+- ✅ Konsistentes `svelte-i18n` Setup mit SSR-Support
+- ✅ i18n-Loading State in +layout.svelte integriert
 
 ---
 
@@ -247,18 +245,17 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 | ~~Toast System vereinheitlichen~~ | ✅ Erledigt |
 | ~~Dependencies aktualisieren~~ | ✅ Erledigt |
 | ~~lucide-svelte aus shared-ui entfernen~~ | ✅ Erledigt |
+| ~~API Client Package erstellen~~ | ✅ Erledigt (10 Apps migriert) |
+| ~~i18n zu 6 Apps hinzufügen~~ | ✅ Erledigt |
 
 ### 🔴 Hohe Priorität
 
-| Aufgabe | Aufwand | Impact |
-|---------|---------|--------|
-| API Client Package erstellen | Hoch | Alle Apps |
+_(Keine offenen Aufgaben mit hoher Priorität)_
 
 ### 🟡 Mittlere Priorität
 
 | Aufgabe | Aufwand | Impact |
 |---------|---------|--------|
-| i18n zu 7 Apps hinzufügen | Mittel | Internationalisierung |
 | AuthGateModal in Shared Package | Niedrig | Code-Reduktion |
 | Global Error Handler extrahieren | Niedrig | Error UX |
 
@@ -273,10 +270,11 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 
 ## Nächste Schritte
 
-1. **API Client Package** als nächstes angehen (höchster Impact)
-2. **i18n** zu fehlenden 7 Apps hinzufügen
+1. ~~**API Client Package** als nächstes angehen (höchster Impact)~~ ✅ Erledigt
+2. ~~**i18n** zu fehlenden Apps hinzufügen~~ ✅ Erledigt (6 Apps)
 3. **AuthGateModal** in Shared Package extrahieren
-4. Schrittweise weitere Punkte abarbeiten
+4. **Global Error Handler** extrahieren
+5. Schrittweise weitere Punkte abarbeiten
 
 ---
 
