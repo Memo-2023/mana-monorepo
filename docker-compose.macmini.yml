@@ -924,6 +924,31 @@ services:
       retries: 3
 
   # ============================================
+  # Matrix Web App (Custom SvelteKit Client)
+  # ============================================
+
+  matrix-web:
+    image: ghcr.io/memo-2023/matrix-web:latest
+    container_name: manacore-matrix-web
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+      mana-core-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5180
+      PUBLIC_MANA_CORE_AUTH_URL: https://auth.mana.how
+    ports:
+      - "5180:5180"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5180/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
   # Matrix Mana Bot (Unified Gateway - All Features)
   # ============================================
 
