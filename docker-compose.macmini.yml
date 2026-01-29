@@ -870,6 +870,42 @@ services:
       retries: 3
 
   # ============================================
+  # Matrix Mana Bot (Unified Gateway - All Features)
+  # ============================================
+
+  matrix-mana-bot:
+    image: matrix-mana-bot:latest
+    container_name: manacore-matrix-mana-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3310
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_MANA_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_MANA_BOT_ROOMS:-}
+      MATRIX_STORAGE_PATH: /app/data/mana-bot-storage.json
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
+      OLLAMA_TIMEOUT: 120000
+      CLOCK_API_URL: http://matrix-clock-bot:3318/api/v1
+      TODO_STORAGE_PATH: /app/data/todos.json
+      CALENDAR_STORAGE_PATH: /app/data/calendar.json
+    volumes:
+      - matrix_mana_bot_data:/app/data
+    ports:
+      - "3310:3310"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3310/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
   # Matrix Ollama Bot (GDPR-compliant AI Chat)
   # ============================================
 
@@ -1172,6 +1208,8 @@ volumes:
     name: manacore-n8n
   synapse_data:
     name: manacore-synapse
+  matrix_mana_bot_data:
+    name: manacore-matrix-mana-bot
   matrix_ollama_bot_data:
     name: manacore-matrix-ollama-bot
   matrix_stats_bot_data:
