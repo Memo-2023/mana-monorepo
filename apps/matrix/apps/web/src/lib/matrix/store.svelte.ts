@@ -570,6 +570,21 @@ class MatrixStore {
 	}
 
 	/**
+	 * Send a message to a specific room (for forwarding)
+	 */
+	async sendMessageToRoom(roomId: string, body: string): Promise<boolean> {
+		if (!this._client) return false;
+
+		try {
+			await this._client.sendTextMessage(roomId, body);
+			return true;
+		} catch (err) {
+			this._error = err instanceof Error ? err.message : 'Failed to send message';
+			return false;
+		}
+	}
+
+	/**
 	 * Send typing indicator
 	 */
 	async sendTyping(typing: boolean): Promise<void> {

@@ -8,9 +8,10 @@
 	interface Props {
 		onReply?: (message: SimpleMessage) => void;
 		onEdit?: (message: SimpleMessage) => void;
+		onForward?: (message: SimpleMessage) => void;
 	}
 
-	let { onReply, onEdit }: Props = $props();
+	let { onReply, onEdit, onForward }: Props = $props();
 
 	// Check if current room is encrypted
 	let isRoomEncrypted = $derived(matrixStore.currentSimpleRoom?.isEncrypted ?? false);
@@ -105,6 +106,7 @@
 					showEncryptionBadge={isRoomEncrypted}
 					{onReply}
 					{onEdit}
+					{onForward}
 				/>
 			{:else}
 				<div class="flex h-full flex-col items-center justify-center text-base-content/50">

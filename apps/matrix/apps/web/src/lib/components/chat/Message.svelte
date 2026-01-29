@@ -5,6 +5,7 @@
 	import { de } from 'date-fns/locale';
 	import {
 		ArrowBendUpLeft,
+		ArrowBendUpRight,
 		PencilSimple,
 		Trash,
 		DotsThree,
@@ -27,6 +28,7 @@
 		showEncryptionBadge?: boolean;
 		onReply?: (message: SimpleMessage) => void;
 		onEdit?: (message: SimpleMessage) => void;
+		onForward?: (message: SimpleMessage) => void;
 	}
 
 	let {
@@ -36,6 +38,7 @@
 		showEncryptionBadge = false,
 		onReply,
 		onEdit,
+		onForward,
 	}: Props = $props();
 
 	// Check if message is a decryption error (body starts with "Unable to decrypt:")
@@ -622,6 +625,13 @@
 					onclick={() => onReply?.(message)}
 				>
 					<ArrowBendUpLeft class="h-4 w-4 text-muted-foreground" />
+				</button>
+				<button
+					class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+					title="Weiterleiten"
+					onclick={() => onForward?.(message)}
+				>
+					<ArrowBendUpRight class="h-4 w-4 text-muted-foreground" />
 				</button>
 				{#if message.isOwn && message.type === 'm.text'}
 					<button

@@ -4,6 +4,7 @@
 	import CreateRoomDialog from '$lib/components/chat/CreateRoomDialog.svelte';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
 	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
+	import ForwardMessageDialog from '$lib/components/chat/ForwardMessageDialog.svelte';
 	import { CallView, IncomingCallDialog } from '$lib/components/call';
 	import { ChatCircle, Plus, Gear } from '@manacore/shared-icons';
 	import { browser } from '$app/environment';
@@ -17,10 +18,12 @@
 	let showCreateRoom = $state(false);
 	let showRoomSettings = $state(false);
 	let showSearch = $state(false);
+	let showForward = $state(false);
 
-	// Reply/Edit state
+	// Reply/Edit/Forward state
 	let replyTo = $state<SimpleMessage | null>(null);
 	let editMessage = $state<SimpleMessage | null>(null);
+	let forwardMessage = $state<SimpleMessage | null>(null);
 
 	// Check if mobile
 	let isMobile = $state(browser ? window.innerWidth < 1024 : false);
@@ -69,6 +72,11 @@
 	function handleEdit(message: SimpleMessage) {
 		replyTo = null;
 		editMessage = message;
+	}
+
+	function handleForward(message: SimpleMessage) {
+		forwardMessage = message;
+		showForward = true;
 	}
 
 	function handleRoomCreated(roomId: string) {
@@ -174,7 +182,7 @@
 			/>
 
 			<!-- Timeline -->
-			<Timeline onReply={handleReply} onEdit={handleEdit} />
+			<Timeline onReply={handleReply} onEdit={handleEdit} onForward={handleForward} />
 
 			<!-- Message Input -->
 			<MessageInput
@@ -244,3 +252,13 @@
 {#if incomingCall && !activeCall}
 	<IncomingCallDialog call={incomingCall} onAnswer={handleCallAnswer} onReject={handleCallReject} />
 {/if}
+
+<!-- Forward Message Dialog -->
+<ForwardMessageDialog
+	open={showForward}
+	message={forwardMessage}
+	onClose={() => {
+		showForward = false;
+		forwardMessage = null;
+	}}
+/>

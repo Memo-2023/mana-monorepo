@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { matrixStore, type SimpleMessage } from '$lib/matrix';
+	import { matrixStore, type SimpleMessage, type RoomMember } from '$lib/matrix';
 	import {
 		PaperPlaneTilt,
 		Paperclip,
@@ -10,6 +10,7 @@
 		CircleNotch,
 		Microphone,
 		Stop,
+		User,
 	} from '@manacore/shared-icons';
 
 	interface Props {
@@ -36,6 +37,13 @@
 	let mediaRecorder: MediaRecorder | null = null;
 	let audioChunks: Blob[] = [];
 	let recordingInterval: ReturnType<typeof setInterval> | null = null;
+
+	// @mention autocomplete state
+	let showMentionPicker = $state(false);
+	let mentionQuery = $state('');
+	let mentionStartPos = $state(0);
+	let mentionResults = $state<RoomMember[]>([]);
+	let selectedMentionIndex = $state(0);
 
 	// Set message content when editing
 	$effect(() => {
@@ -87,6 +95,76 @@
 		// Reset typing timeout
 		clearTimeout(typingTimeout);
 		typingTimeout = setTimeout(stopTyping, 3000);
+
+		// Check for @mention trigger
+		checkForMention();
+	}
+
+	function checkForMention() {
+		if (!textarea) return;
+
+		const cursorPos = textarea.selectionStart;
+		const textBeforeCursor = message.slice(0, cursorPos);
+
+		// Find the last @ before cursor
+		const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+		if (lastAtIndex !== -1) {
+			// Check if there's a space before @ (or it's at the start)
+			const charBefore = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
+			if (charBefore === ' ' || charBefore === '\n' || lastAtIndex === 0) {
+				const query = textBeforeCursor.slice(lastAtIndex + 1);
+				// No space in the query = still typing the mention
+				if (!query.includes(' ') && query.length <= 50) {
+					mentionStartPos = lastAtIndex;
+					mentionQuery = query;
+					showMentionPicker = true;
+					updateMentionResults(query);
+					return;
+				}
+			}
+		}
+
+		// Close mention picker if conditions not met
+		showMentionPicker = false;
+		mentionQuery = '';
+	}
+
+	function updateMentionResults(query: string) {
+		const members = matrixStore.getRoomMembers();
+		const lowerQuery = query.toLowerCase();
+
+		// Filter members by display name or user ID
+		mentionResults = members
+			.filter(
+				(m) =>
+					m.membership === 'join' &&
+					(m.displayName.toLowerCase().includes(lowerQuery) ||
+						m.userId.toLowerCase().includes(lowerQuery))
+			)
+			.slice(0, 6); // Limit to 6 results
+
+		selectedMentionIndex = 0;
+	}
+
+	function insertMention(member: RoomMember) {
+		const beforeMention = message.slice(0, mentionStartPos);
+		const afterMention = message.slice(textarea.selectionStart);
+
+		// Insert pill format: @displayName (the actual Matrix pill is sent as formatted HTML)
+		const mentionText = `@${member.displayName} `;
+		message = beforeMention + mentionText + afterMention;
+
+		// Close picker
+		showMentionPicker = false;
+		mentionQuery = '';
+
+		// Focus and set cursor position
+		setTimeout(() => {
+			textarea.focus();
+			const newPos = mentionStartPos + mentionText.length;
+			textarea.setSelectionRange(newPos, newPos);
+		}, 0);
 	}
 
 	function stopTyping() {
@@ -98,6 +176,31 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
+		// Handle mention picker navigation
+		if (showMentionPicker && mentionResults.length > 0) {
+			if (e.key === 'ArrowDown') {
+				e.preventDefault();
+				selectedMentionIndex = (selectedMentionIndex + 1) % mentionResults.length;
+				return;
+			}
+			if (e.key === 'ArrowUp') {
+				e.preventDefault();
+				selectedMentionIndex =
+					selectedMentionIndex === 0 ? mentionResults.length - 1 : selectedMentionIndex - 1;
+				return;
+			}
+			if (e.key === 'Enter' || e.key === 'Tab') {
+				e.preventDefault();
+				insertMention(mentionResults[selectedMentionIndex]);
+				return;
+			}
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				showMentionPicker = false;
+				return;
+			}
+		}
+
 		// Send on Enter (without Shift)
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
@@ -305,6 +408,44 @@
 			>
 				<X class="h-4 w-4 text-red-500" />
 			</button>
+		</div>
+	{/if}
+
+	<!-- @Mention Picker -->
+	{#if showMentionPicker && mentionResults.length > 0}
+		<div
+			class="mb-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 shadow-xl overflow-hidden"
+		>
+			<div class="px-3 py-1.5 text-xs text-muted-foreground border-b border-black/5 dark:border-white/5">
+				Erwähne jemanden
+			</div>
+			{#each mentionResults as member, i}
+				<button
+					class="flex items-center gap-3 w-full px-3 py-2 transition-colors text-left
+					       {i === selectedMentionIndex ? 'bg-violet-500/10 dark:bg-violet-500/20' : 'hover:bg-black/5 dark:hover:bg-white/5'}"
+					onclick={() => insertMention(member)}
+				>
+					<!-- Avatar -->
+					{#if member.avatarUrl}
+						<img
+							src={member.avatarUrl}
+							alt={member.displayName}
+							class="w-8 h-8 rounded-full object-cover"
+						/>
+					{:else}
+						<div
+							class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center"
+						>
+							<User class="w-4 h-4 text-white" />
+						</div>
+					{/if}
+					<!-- Name and ID -->
+					<div class="flex-1 min-w-0">
+						<p class="font-medium text-sm truncate">{member.displayName}</p>
+						<p class="text-xs text-muted-foreground truncate">{member.userId}</p>
+					</div>
+				</button>
+			{/each}
 		</div>
 	{/if}
 
