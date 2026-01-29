@@ -29,6 +29,20 @@
 				sidebarOpen = false;
 			}
 		});
+
+		// Keyboard shortcuts
+		window.addEventListener('keydown', (e) => {
+			// Cmd/Ctrl + K = Search
+			if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+				e.preventDefault();
+				showSearch = true;
+			}
+			// Cmd/Ctrl + N = New chat
+			if ((e.metaKey || e.ctrlKey) && e.key === 'n' && !e.shiftKey) {
+				e.preventDefault();
+				showCreateRoom = true;
+			}
+		});
 	}
 
 	function toggleSidebar() {
