@@ -36,7 +36,7 @@ export class NotifyClient {
 	 * Send an email notification
 	 */
 	async sendEmail(options: SendEmailOptions): Promise<NotificationResponse> {
-		return this.send({
+		const payload: Record<string, unknown> = {
 			channel: 'email',
 			appId: this.appId,
 			recipient: options.to,
@@ -44,13 +44,19 @@ export class NotifyClient {
 			subject: options.subject,
 			body: options.body,
 			data: options.data,
-			emailOptions: {
-				from: options.from,
-				replyTo: options.replyTo,
-			},
 			priority: options.priority,
 			externalId: options.externalId,
-		});
+		};
+
+		// Only include emailOptions if from or replyTo is provided
+		if (options.from || options.replyTo) {
+			payload.emailOptions = {
+				...(options.from && { from: options.from }),
+				...(options.replyTo && { replyTo: options.replyTo }),
+			};
+		}
+
+		return this.send(payload);
 	}
 
 	/**
@@ -117,7 +123,7 @@ export class NotifyClient {
 	 * Schedule an email notification
 	 */
 	async scheduleEmail(options: SendEmailOptions & ScheduleOptions): Promise<NotificationResponse> {
-		return this.schedule({
+		const payload: Record<string, unknown> = {
 			channel: 'email',
 			appId: this.appId,
 			recipient: options.to,
@@ -125,17 +131,23 @@ export class NotifyClient {
 			subject: options.subject,
 			body: options.body,
 			data: options.data,
-			emailOptions: {
-				from: options.from,
-				replyTo: options.replyTo,
-			},
 			priority: options.priority,
 			externalId: options.externalId,
 			scheduledFor:
 				options.scheduledFor instanceof Date
 					? options.scheduledFor.toISOString()
 					: options.scheduledFor,
-		});
+		};
+
+		// Only include emailOptions if from or replyTo is provided
+		if (options.from || options.replyTo) {
+			payload.emailOptions = {
+				...(options.from && { from: options.from }),
+				...(options.replyTo && { replyTo: options.replyTo }),
+			};
+		}
+
+		return this.schedule(payload);
 	}
 
 	/**
