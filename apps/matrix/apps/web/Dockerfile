@@ -28,7 +28,6 @@ COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
-COPY packages/shared-vite-config ./packages/shared-vite-config
 
 # Copy matrix web app
 COPY apps/matrix/apps/web ./apps/matrix/apps/web
