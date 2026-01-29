@@ -93,6 +93,19 @@ export default defineConfig({
 						content: 'https://docs.manacore.app/og-image.png',
 					},
 				},
+				{
+					tag: 'script',
+					content: `
+						// Set dark mode as default
+						(function() {
+							const stored = localStorage.getItem('starlight-theme');
+							if (!stored) {
+								document.documentElement.dataset.theme = 'dark';
+								localStorage.setItem('starlight-theme', 'dark');
+							}
+						})();
+					`,
+				},
 			],
 		}),
 		tailwind({ applyBaseStyles: false }),
