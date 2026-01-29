@@ -47,6 +47,7 @@ Cloudflare Tunnel (cloudflared)
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  Native Services                                    │   │
 │  │  ├── Ollama             (Port 11434) - LLM          │   │
+│  │  ├── Mana Image Gen     (Port 3025)  - FLUX.2 klein │   │
 │  │  └── Telegram Ollama Bot (Port 3301) - Chat Bot     │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
@@ -54,6 +55,7 @@ Cloudflare Tunnel (cloudflared)
 │  │  LaunchAgents (Autostart)                           │   │
 │  │  ├── cloudflared            (Tunnel)                │   │
 │  │  ├── ollama                 (LLM Service)           │   │
+│  │  ├── mana-image-gen         (Bildgenerierung)       │   │
 │  │  ├── telegram-ollama-bot    (Chat Bot)              │   │
 │  │  ├── docker-startup         (Container beim Boot)   │   │
 │  │  └── health-check           (alle 5 Minuten)        │   │
@@ -526,6 +528,79 @@ curl http://localhost:11434/api/version
 
 # Bei Problemen: Service neustarten
 /opt/homebrew/bin/brew services restart ollama
+```
+
+## Mana Image Generation (FLUX.2 klein)
+
+Lokale Bildgenerierung mit FLUX.2 klein 4B via flux2.c.
+
+### Service-Info
+
+| | |
+|--|--|
+| **Port** | 3025 |
+| **Health** | http://localhost:3025/health |
+| **Code** | `services/mana-image-gen/` |
+| **Model** | FLUX.2 klein 4B (4 Milliarden Parameter) |
+| **Lizenz** | Apache 2.0 (kommerziell nutzbar) |
+
+### Installation
+
+```bash
+# Setup-Script ausführen (installiert flux2.c + Modell)
+./scripts/mac-mini/setup-image-gen.sh
+```
+
+Das Script:
+1. Kompiliert flux2.c mit MPS-Unterstützung
+2. Lädt das FLUX.2 klein 4B Modell herunter (~16 GB)
+3. Richtet Python-Umgebung ein
+4. Erstellt LaunchAgent für Autostart
+
+### Performance
+
+| Auflösung | Schritte | Zeit |
+|-----------|----------|------|
+| 512x512 | 4 | ~0.3s |
+| 1024x1024 | 4 | ~0.8s |
+| 1024x1024 | 8 | ~1.5s |
+
+### API-Zugriff
+
+**Lokaler Endpunkt:** `http://localhost:3025`
+
+```bash
+# Health Check
+curl http://localhost:3025/health
+
+# Bild generieren
+curl -X POST http://localhost:3025/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "A cat in space", "width": 1024, "height": 1024}'
+
+# Bild abrufen
+curl http://localhost:3025/images/{filename} --output image.png
+```
+
+### Zugriff aus Docker-Containern
+
+```yaml
+environment:
+  IMAGE_GEN_SERVICE_URL: http://host.docker.internal:3025
+```
+
+### Management
+
+```bash
+# Logs anzeigen
+tail -f /tmp/manacore-image-gen.log
+
+# Service neustarten
+launchctl unload ~/Library/LaunchAgents/com.manacore.image-gen.plist
+launchctl load ~/Library/LaunchAgents/com.manacore.image-gen.plist
+
+# Status prüfen
+launchctl list | grep image-gen
 ```
 
 ## Telegram Ollama Bot

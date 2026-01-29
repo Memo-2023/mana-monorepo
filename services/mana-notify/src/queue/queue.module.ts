@@ -6,11 +6,10 @@ import { MatrixProcessor } from './processors/matrix.processor';
 import { WebhookProcessor } from './processors/webhook.processor';
 import { ChannelsModule } from '../channels/channels.module';
 import { MetricsModule } from '../metrics/metrics.module';
+import { EMAIL_QUEUE, PUSH_QUEUE, MATRIX_QUEUE, WEBHOOK_QUEUE } from './queue-names';
 
-export const EMAIL_QUEUE = 'email';
-export const PUSH_QUEUE = 'push';
-export const MATRIX_QUEUE = 'matrix';
-export const WEBHOOK_QUEUE = 'webhook';
+// Re-export for convenience
+export { EMAIL_QUEUE, PUSH_QUEUE, MATRIX_QUEUE, WEBHOOK_QUEUE } from './queue-names';
 
 @Module({
 	imports: [

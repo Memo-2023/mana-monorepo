@@ -2,7 +2,7 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Logger, Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { eq } from 'drizzle-orm';
-import { PUSH_QUEUE } from '../queue.module';
+import { PUSH_QUEUE } from '../queue-names';
 import { PushService } from '../../channels/push/push.service';
 import { MetricsService } from '../../metrics/metrics.service';
 import { DATABASE_CONNECTION } from '../../db/database.module';
