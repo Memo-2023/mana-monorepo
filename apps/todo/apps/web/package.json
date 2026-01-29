@@ -30,6 +30,7 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
+		"@manacore/shared-api-client": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-splitscreen": "workspace:*",
 		"@manacore/shared-types": "workspace:*",

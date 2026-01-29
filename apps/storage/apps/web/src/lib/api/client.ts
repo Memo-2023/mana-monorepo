@@ -1,48 +1,68 @@
 /**
  * API Client for Storage Backend
+ * Uses @manacore/shared-api-client for consistent error handling
  */
 
+import { createApiClient, type ApiResult } from '@manacore/shared-api-client';
 import { authStore } from '$lib/stores/auth.svelte';
 
-const API_BASE_URL = 'http://localhost:3016/api/v1';
+const API_URL = 'http://localhost:3016';
 
+/**
+ * Storage API client instance
+ * - Auto token handling via authStore.getValidToken()
+ * - Consistent ApiResult<T> response format
+ */
+const api = createApiClient({
+	baseUrl: API_URL,
+	apiPrefix: '/api/v1',
+	getAuthToken: () => authStore.getAccessToken(),
+	timeout: 30000,
+	debug: import.meta.env.DEV,
+});
+
+// Legacy type alias for backward compatibility
 export interface ApiResponse<T> {
 	data?: T;
 	error?: string;
 }
 
-async function getHeaders(): Promise<HeadersInit> {
-	const token = await authStore.getAccessToken();
-	const headers: HeadersInit = {
-		'Content-Type': 'application/json',
-	};
-	if (token) {
-		headers['Authorization'] = `Bearer ${token}`;
+/**
+ * Convert ApiResult to legacy ApiResponse format
+ */
+function toLegacyResponse<T>(result: ApiResult<T>): ApiResponse<T> {
+	if (result.error) {
+		return { error: result.error.message };
 	}
-	return headers;
+	return { data: result.data ?? undefined };
 }
 
+/**
+ * Legacy request wrapper for backward compatibility
+ */
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-	try {
-		const headers = await getHeaders();
-		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-			...options,
-			headers: {
-				...headers,
-				...(options.headers || {}),
-			},
-		});
+	const method = options.method || 'GET';
+	const body = options.body ? JSON.parse(options.body as string) : undefined;
 
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			return { error: errorData.message || `HTTP ${response.status}` };
-		}
-
-		const data = await response.json();
-		return { data };
-	} catch (error) {
-		return { error: error instanceof Error ? error.message : 'Unknown error' };
+	let result: ApiResult<T>;
+	switch (method) {
+		case 'POST':
+			result = await api.post<T>(endpoint, body);
+			break;
+		case 'PUT':
+			result = await api.put<T>(endpoint, body);
+			break;
+		case 'PATCH':
+			result = await api.patch<T>(endpoint, body);
+			break;
+		case 'DELETE':
+			result = await api.delete<T>(endpoint);
+			break;
+		default:
+			result = await api.get<T>(endpoint);
 	}
+
+	return toLegacyResponse(result);
 }
 
 // File Types
@@ -112,38 +132,20 @@ export const filesApi = {
 	get: (id: string) => request<StorageFile>(`/files/${id}`),
 
 	upload: async (file: File, folderId?: string): Promise<ApiResponse<StorageFile>> => {
-		const token = await authStore.getAccessToken();
 		const formData = new FormData();
 		formData.append('file', file);
 		if (folderId) {
 			formData.append('parentFolderId', folderId);
 		}
 
-		try {
-			const response = await fetch(`${API_BASE_URL}/files/upload`, {
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				return { error: errorData.message || `HTTP ${response.status}` };
-			}
-
-			const data = await response.json();
-			return { data };
-		} catch (error) {
-			return { error: error instanceof Error ? error.message : 'Unknown error' };
-		}
+		const result = await api.upload<StorageFile>('/files/upload', formData);
+		return toLegacyResponse(result);
 	},
 
 	download: async (id: string): Promise<Blob | null> => {
 		const token = await authStore.getAccessToken();
 		try {
-			const response = await fetch(`${API_BASE_URL}/files/${id}/download`, {
+			const response = await fetch(`${API_URL}/api/v1/files/${id}/download`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},

@@ -1,71 +1,80 @@
 /**
- * Centralized API client with authentication
+ * API Client for Contacts backend
+ * Uses @manacore/shared-api-client for consistent error handling
  */
 
+import { createApiClient, type ApiResult } from '@manacore/shared-api-client';
 import { authStore } from '$lib/stores/auth.svelte';
-import { API_BASE } from './config';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+
+const API_URL = PUBLIC_BACKEND_URL || 'http://localhost:3015';
 
 /**
- * Make an authenticated API request
- * @param url API endpoint (will be prefixed with API_BASE)
- * @param options Fetch options
- * @returns Parsed JSON response
+ * Contacts API client instance
+ * - Auto token handling via authStore.getValidToken()
+ * - Consistent ApiResult<T> response format
+ */
+export const api = createApiClient({
+	baseUrl: API_URL,
+	apiPrefix: '/api/v1',
+	getAuthToken: () => authStore.getValidToken(),
+	timeout: 30000,
+	debug: import.meta.env.DEV,
+});
+
+/**
+ * Legacy fetchWithAuth wrapper for backward compatibility
+ * Converts ApiResult to throw-based pattern
  */
 export async function fetchWithAuth<T = unknown>(
 	url: string,
 	options: RequestInit = {}
 ): Promise<T> {
-	const token = await authStore.getAccessToken();
+	const method = options.method || 'GET';
+	const body = options.body ? JSON.parse(options.body as string) : undefined;
 
-	const headers: HeadersInit = {
-		'Content-Type': 'application/json',
-		...(options.headers || {}),
-	};
-
-	if (token) {
-		(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+	let result: ApiResult<T>;
+	switch (method) {
+		case 'POST':
+			result = await api.post<T>(url, body);
+			break;
+		case 'PUT':
+			result = await api.put<T>(url, body);
+			break;
+		case 'PATCH':
+			result = await api.patch<T>(url, body);
+			break;
+		case 'DELETE':
+			result = await api.delete<T>(url);
+			break;
+		default:
+			result = await api.get<T>(url);
 	}
 
-	const response = await fetch(`${API_BASE}${url}`, {
-		...options,
-		headers,
-	});
-
-	if (!response.ok) {
-		const error = await response.json().catch(() => ({ message: 'Request failed' }));
-		throw new Error(error.message || 'Request failed');
+	if (result.error) {
+		throw new Error(result.error.message);
 	}
 
-	return response.json();
+	return result.data as T;
 }
 
 /**
- * Make an authenticated API request without JSON content type
- * Used for file uploads (FormData)
+ * Legacy fetchWithAuthFormData for file uploads
+ * Uses the shared API client's upload method
  */
 export async function fetchWithAuthFormData<T = unknown>(
 	url: string,
 	options: RequestInit = {}
 ): Promise<T> {
-	const token = await authStore.getAccessToken();
+	const formData = options.body as FormData;
+	const result = await api.upload<T>(url, formData);
 
-	const headers: HeadersInit = {
-		...(options.headers || {}),
-	};
-
-	if (token) {
-		(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+	if (result.error) {
+		throw new Error(result.error.message);
 	}
 
-	const response = await fetch(`${API_BASE}${url}`, {
-		...options,
-		headers,
-	});
-
-	if (!response.ok) {
-		const error = await response.json().catch(() => ({ message: 'Request failed' }));
-		throw new Error(error.message || 'Request failed');
-	}
-
-	return response.json();
+	return result.data as T;
 }
+
+// Re-export types for convenience
+export type { ApiResult };

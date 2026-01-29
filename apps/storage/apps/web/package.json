@@ -27,6 +27,7 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
+		"@manacore/shared-api-client": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",

@@ -1085,6 +1085,9 @@ importers:
 
   apps/contacts/apps/web:
     dependencies:
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -3866,6 +3869,9 @@ importers:
 
   apps/storage/apps/web:
     dependencies:
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -4094,6 +4100,9 @@ importers:
 
   apps/todo/apps/web:
     dependencies:
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
