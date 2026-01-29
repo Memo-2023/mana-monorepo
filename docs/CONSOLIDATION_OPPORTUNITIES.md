@@ -12,7 +12,7 @@
 | ~~**HOCH**~~ | ~~App Settings Stores~~ | ~~600-700 LOC~~ ✅ **323 LOC entfernt** | ~~Mittel~~ |
 | **HOCH** | Main.ts/CORS Patterns | 1.800 LOC | Mittel |
 | ~~**MITTEL**~~ | ~~TypeScript Configs~~ | ~~400 LOC~~ ✅ **~280 LOC entfernt** | ~~Niedrig~~ |
-| **MITTEL** | UI Component Cleanup | 400 LOC | Niedrig |
+| ~~**MITTEL**~~ | ~~UI Component Cleanup~~ | ~~400 LOC~~ ✅ **~74 LOC entfernt** | ~~Niedrig~~ |
 | ~~**MITTEL**~~ | ~~Vite Configs~~ | ~~300 LOC~~ ✅ **~350 LOC entfernt** | ~~Niedrig~~ |
 | ~~**MITTEL**~~ | ~~Navigation Stores~~ | ~~50 LOC~~ ✅ **~50 LOC entfernt** | ~~Niedrig~~ |
 | ~~**NIEDRIG**~~ | ~~Drizzle Configs~~ | ~~200 LOC~~ ✅ **~160 LOC entfernt** | ~~Niedrig~~ |
@@ -238,17 +238,18 @@ export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores({
 
 ---
 
-### 3.2 MITTEL: Sofort löschbare Duplikate (144 LOC)
+### ~~3.2 MITTEL: Sofort löschbare Duplikate~~ ✅ TEILWEISE ERLEDIGT
 
-**Picture App hat lokale Kopien von shared-ui Komponenten:**
+**Picture App - Status (29.01.2026):**
 
-| Datei | LOC | shared-ui Alternative |
-|-------|-----|----------------------|
-| `apps/picture/apps/web/src/lib/components/ui/Button.svelte` | 53 | `@manacore/shared-ui/Button` |
-| `apps/picture/apps/web/src/lib/components/ui/Input.svelte` | 70 | `@manacore/shared-ui/Input` |
-| `apps/picture/apps/web/src/lib/components/ui/Card.svelte` | 21 | `@manacore/shared-ui/Card` |
+| Datei | LOC | Status |
+|-------|-----|--------|
+| ~~`Button.svelte`~~ | ~~53~~ | ✅ Migriert zu `@manacore/shared-ui` |
+| ~~`Card.svelte`~~ | ~~21~~ | ✅ Gelöscht (unbenutzt) |
+| ~~`Input.svelte`~~ | ~~70~~ | ✅ Bereits vorher gelöscht |
 
-**Aktion:** Lösche lokale Dateien, importiere aus shared-ui.
+**Verbleibendes:**
+- `Modal.svelte` könnte migriert werden, aber hat unterschiedliche API (`open` vs `visible`)
 
 ---
 
@@ -430,7 +431,7 @@ export default createDrizzleConfig({ dbName: 'chat' });
 | ~~Metrics zu shared-nestjs-metrics migrieren (6 Backends)~~ | ~~350~~ → **709** | ~~Niedrig~~ | ✅ Erledigt |
 | ~~Picture Input.svelte löschen (unbenutzt)~~ | ~~70~~ | ~~Niedrig~~ | ✅ Erledigt |
 | ~~Sleep-Duplikat entfernen~~ | ~~8~~ | ~~Minimal~~ | ✅ Erledigt |
-| Picture UI-Komponenten (Button/Card) | 74 | Niedrig | Offen |
+| ~~Picture UI-Komponenten (Button/Card)~~ | ~~74~~ → **74** | ~~Niedrig~~ | ✅ Erledigt |
 | AppSlider Wrapper evaluieren (8 Apps) | - | Niedrig | Nicht nötig (sind Lokalisierungs-Wrapper) |
 
 ### Phase 2: Stores & Configs (3-5 Tage, ~1.500 LOC)

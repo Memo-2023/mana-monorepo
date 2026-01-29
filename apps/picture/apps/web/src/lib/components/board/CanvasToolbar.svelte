@@ -17,7 +17,7 @@
 		deselectAll,
 	} from '$lib/stores/canvas';
 	import { boardSettings } from '$lib/stores/boards';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { Button } from '@manacore/shared-ui';
 	import Konva from 'konva';
 	import {
 		CaretLeft,

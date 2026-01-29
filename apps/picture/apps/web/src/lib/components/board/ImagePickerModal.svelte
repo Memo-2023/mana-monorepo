@@ -5,9 +5,7 @@
 	import { canvasItems, addCanvasItem } from '$lib/stores/canvas';
 	import { getImages } from '$lib/api/images';
 	import { addBoardItem } from '$lib/api/boardItems';
-	import { toastStore } from '@manacore/shared-ui';
-	import Modal from '$lib/components/ui/Modal.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { toastStore, Modal, Button } from '@manacore/shared-ui';
 	import { MagnifyingGlass, Image as ImageIcon, Check } from '@manacore/shared-icons';
 
 	interface Props {

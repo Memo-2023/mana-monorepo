@@ -14,10 +14,7 @@
 		removeBoardFromList,
 	} from '$lib/stores/boards';
 	import { getBoards, deleteBoard, duplicateBoard } from '$lib/api/boards';
-	import { PageHeader } from '@manacore/shared-ui';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Modal from '$lib/components/ui/Modal.svelte';
-	import { toastStore } from '@manacore/shared-ui';
+	import { PageHeader, Button, Modal, toastStore } from '@manacore/shared-ui';
 	import { Plus, SquaresFour, Image, Trash } from '@manacore/shared-icons';
 
 	let loadingMore = $state(false);

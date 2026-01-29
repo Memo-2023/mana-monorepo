@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { selectedItems, updateCanvasItem, removeSelectedItems } from '$lib/stores/canvas';
 	import { updateBoardItem, changeBoardItemZIndex, isImageItem } from '$lib/api/boardItems';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { toastStore } from '@manacore/shared-ui';
+	import { Button, toastStore } from '@manacore/shared-ui';
 	import {
 		Image,
 		CaretDoubleUp,
