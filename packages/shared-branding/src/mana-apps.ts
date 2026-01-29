@@ -292,6 +292,22 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'questions',
+		name: 'Questions',
+		description: {
+			de: 'KI Recherche-Assistent',
+			en: 'AI Research Assistant',
+		},
+		longDescription: {
+			de: 'Sammle Fragen und erhalte umfassende Antworten durch KI-gestützte Web-Recherche.',
+			en: 'Collect questions and get comprehensive answers through AI-powered web research.',
+		},
+		icon: APP_ICONS.questions,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -378,6 +394,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	todo: { dev: 'http://localhost:5189', prod: 'https://todo.manacore.app' },
 	mail: { dev: 'http://localhost:5186', prod: 'https://mail.manacore.app' },
 	inventory: { dev: 'http://localhost:5188', prod: 'https://inventory.manacore.app' },
+	questions: { dev: 'http://localhost:5111', prod: 'https://questions.manacore.app' },
 };
 
 /**

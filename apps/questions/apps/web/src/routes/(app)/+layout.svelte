@@ -1,23 +1,44 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 	import { authStore, collectionsStore, questionsStore } from '$lib/stores';
 	import { apiClient } from '$lib/api/client';
-	import {
-		MagnifyingGlass,
-		Plus,
-		FolderOpen,
-		Gear,
-		SignOut,
-		Moon,
-		Sun,
-		Question,
-		CaretRight,
-	} from '@manacore/shared-icons';
+	import { questionsApi } from '$lib/api/questions';
 	import { theme } from '$lib/stores/theme';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		QuickInputItem,
+		CreatePreview,
+	} from '@manacore/shared-ui';
+	import { getPillAppItems } from '@manacore/shared-branding';
 
 	let { children } = $props();
-	let sidebarOpen = $state(true);
+
+	// App switcher items
+	const appItems = getPillAppItems('questions');
+
+	// Mobile detection
+	let isMobile = $state(false);
+
+	function updateMobileState() {
+		if (browser) {
+			isMobile = window.innerWidth <= 640;
+		}
+	}
+
+	// Navigation mode state
+	let isSidebarMode = $state(false);
+	let isCollapsed = $state(false);
+
+	// Theme state
+	let isDark = $derived(theme.current === 'dark');
+
+	// User email for nav
+	let userEmail = $derived(authStore.user?.email || 'Menu');
 
 	onMount(async () => {
 		if (!authStore.isAuthenticated) {
@@ -31,6 +52,20 @@
 		// Load initial data
 		await collectionsStore.load();
 		await questionsStore.load();
+
+		// Initialize mobile state
+		updateMobileState();
+
+		// Restore nav mode from localStorage
+		const savedSidebar = localStorage.getItem('questions-nav-sidebar');
+		if (savedSidebar === 'true') {
+			isSidebarMode = true;
+		}
+
+		const savedCollapsed = localStorage.getItem('questions-nav-collapsed');
+		if (savedCollapsed === 'true') {
+			isCollapsed = true;
+		}
 	});
 
 	async function handleSignOut() {
@@ -38,6 +73,93 @@
 		apiClient.setAccessToken(null);
 		goto('/login');
 	}
+
+	function handleToggleTheme() {
+		theme.toggle();
+	}
+
+	function handleModeChange(isSidebar: boolean) {
+		isSidebarMode = isSidebar;
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('questions-nav-sidebar', String(isSidebar));
+		}
+	}
+
+	function handleCollapsedChange(collapsed: boolean) {
+		isCollapsed = collapsed;
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('questions-nav-collapsed', String(collapsed));
+		}
+	}
+
+	// InputBar search - search questions
+	async function handleSearch(query: string): Promise<QuickInputItem[]> {
+		if (!query.trim()) return [];
+
+		try {
+			const response = await questionsApi.getAll({ search: query, limit: 10 });
+			return response.data.map((q) => ({
+				id: q.id,
+				title: q.title,
+				subtitle: q.status || 'pending',
+			}));
+		} catch {
+			return [];
+		}
+	}
+
+	function handleSelect(item: QuickInputItem) {
+		goto(`/question/${item.id}`);
+	}
+
+	// Quick-create handler - parse question input
+	function handleParseCreate(query: string): CreatePreview | null {
+		if (!query.trim() || query.length < 3) return null;
+
+		// Simple parsing: the entire query is the question title
+		return {
+			title: `Create: "${query}"`,
+			subtitle: 'New question',
+		};
+	}
+
+	async function handleCreate(query: string): Promise<void> {
+		if (!query.trim()) return;
+
+		const question = await questionsStore.create({
+			title: query,
+			collectionId: collectionsStore.selectedId || undefined,
+		});
+
+		if (question) {
+			goto(`/question/${question.id}`);
+		}
+	}
+
+	// Collection dropdown items
+	let collectionItems = $derived<PillDropdownItem[]>([
+		{
+			id: 'all',
+			label: 'All Questions',
+			icon: 'help-circle',
+			onClick: () => selectCollection(null),
+			active: !collectionsStore.selectedId,
+		},
+		...collectionsStore.collections.map((c) => ({
+			id: c.id,
+			label: c.name,
+			icon: 'folder',
+			onClick: () => selectCollection(c.id),
+			active: collectionsStore.selectedId === c.id,
+		})),
+	]);
+
+	let currentCollectionLabel = $derived(
+		collectionsStore.selectedId
+			? collectionsStore.collections.find((c) => c.id === collectionsStore.selectedId)?.name ||
+					'Collection'
+			: 'All Questions'
+	);
 
 	function selectCollection(id: string | null) {
 		collectionsStore.select(id);
@@ -47,128 +169,111 @@
 			questionsStore.load();
 		}
 	}
+
+	// Navigation items
+	let navItems = $derived<PillNavItem[]>([
+		{ href: '/', label: 'Questions', icon: 'help-circle' },
+		{ href: '/collections', label: 'Collections', icon: 'folder' },
+		{ href: '/settings', label: 'Settings', icon: 'settings' },
+	]);
 </script>
 
-<div class="flex min-h-screen">
-	<!-- Sidebar -->
-	<aside
-		class="flex w-64 flex-col border-r border-border bg-card transition-all duration-200"
-		class:w-64={sidebarOpen}
-		class:w-16={!sidebarOpen}
-	>
-		<!-- Header -->
-		<div class="flex h-16 items-center justify-between border-b border-border px-4">
-			{#if sidebarOpen}
-				<h1 class="text-xl font-bold text-primary">Questions</h1>
-			{/if}
-			<button
-				onclick={() => (sidebarOpen = !sidebarOpen)}
-				class="rounded-lg p-2 text-muted-foreground hover:bg-secondary"
-			>
-				<CaretRight class="h-5 w-5 transition-transform {sidebarOpen ? 'rotate-180' : ''}" />
-			</button>
-		</div>
+<svelte:window onresize={updateMobileState} />
 
-		<!-- New Question Button -->
-		<div class="p-4">
-			<a
-				href="/new"
-				class="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
-			>
-				<Plus class="h-5 w-5" />
-				{#if sidebarOpen}
-					<span>New Question</span>
-				{/if}
-			</a>
-		</div>
+<div class="layout-container">
+	<!-- Navigation -->
+	<PillNavigation
+		items={navItems}
+		currentPath={$page.url.pathname}
+		appName="Questions"
+		homeRoute="/"
+		onToggleTheme={handleToggleTheme}
+		{isDark}
+		{isSidebarMode}
+		onModeChange={handleModeChange}
+		{isCollapsed}
+		onCollapsedChange={handleCollapsedChange}
+		desktopPosition="bottom"
+		showThemeToggle={true}
+		showLogout={authStore.isAuthenticated}
+		onLogout={handleSignOut}
+		loginHref="/login"
+		primaryColor="#8b5cf6"
+		showAppSwitcher={true}
+		{appItems}
+		{userEmail}
+		settingsHref="/settings"
+	/>
 
-		<!-- Navigation -->
-		<nav class="flex-1 space-y-1 px-2">
-			<button
-				onclick={() => selectCollection(null)}
-				class="collection-item flex w-full items-center gap-3 rounded-lg px-3 py-2 text-foreground"
-				class:active={!collectionsStore.selectedId}
-			>
-				<Question class="h-5 w-5" />
-				{#if sidebarOpen}
-					<span>All Questions</span>
-					<span class="ml-auto text-xs text-muted-foreground">{questionsStore.total}</span>
-				{/if}
-			</button>
-
-			{#if sidebarOpen}
-				<div class="my-4 px-3 text-xs font-semibold uppercase text-muted-foreground">
-					Collections
-				</div>
-			{/if}
-
-			{#each collectionsStore.collections as collection}
-				<button
-					onclick={() => selectCollection(collection.id)}
-					class="collection-item flex w-full items-center gap-3 rounded-lg px-3 py-2 text-foreground"
-					class:active={collectionsStore.selectedId === collection.id}
-				>
-					<FolderOpen class="h-5 w-5" style="color: {collection.color}" />
-					{#if sidebarOpen}
-						<span class="truncate">{collection.name}</span>
-						<span class="ml-auto text-xs text-muted-foreground"
-							>{collection.questionCount || 0}</span
-						>
-					{/if}
-				</button>
-			{/each}
-
-			{#if sidebarOpen}
-				<a
-					href="/collections"
-					class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
-				>
-					<Plus class="h-5 w-5" />
-					<span>Manage Collections</span>
-				</a>
-			{/if}
-		</nav>
-
-		<!-- Footer -->
-		<div class="border-t border-border p-2">
-			<button
-				onclick={() => theme.toggle()}
-				class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
-			>
-				{#if theme.current === 'dark'}
-					<Sun class="h-5 w-5" />
-				{:else}
-					<Moon class="h-5 w-5" />
-				{/if}
-				{#if sidebarOpen}
-					<span>Toggle Theme</span>
-				{/if}
-			</button>
-
-			<a
-				href="/settings"
-				class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
-			>
-				<Gear class="h-5 w-5" />
-				{#if sidebarOpen}
-					<span>Settings</span>
-				{/if}
-			</a>
-
-			<button
-				onclick={handleSignOut}
-				class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
-			>
-				<SignOut class="h-5 w-5" />
-				{#if sidebarOpen}
-					<span>Sign Out</span>
-				{/if}
-			</button>
-		</div>
-	</aside>
+	<!-- Quick Input Bar -->
+	<QuickInputBar
+		onSearch={handleSearch}
+		onSelect={handleSelect}
+		placeholder="New question or search..."
+		emptyText="No questions found"
+		searchingText="Searching..."
+		onCreate={handleCreate}
+		onParseCreate={handleParseCreate}
+		createText="Create"
+		appIcon="help-circle"
+		bottomOffset={isMobile ? '70px' : isSidebarMode ? '0px' : '70px'}
+	/>
 
 	<!-- Main Content -->
-	<main class="flex-1 overflow-auto">
-		{@render children()}
+	<main class="main-content bg-background" class:sidebar-mode={isSidebarMode && !isCollapsed}>
+		<div class="content-wrapper">
+			{@render children()}
+		</div>
 	</main>
 </div>
+
+<style>
+	.layout-container {
+		display: flex;
+		flex-direction: column;
+		height: 100vh;
+		overflow: hidden;
+	}
+
+	.main-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		padding-bottom: calc(80px + env(safe-area-inset-bottom));
+		transition: all 300ms ease;
+	}
+
+	.main-content.sidebar-mode {
+		padding-left: 180px;
+		padding-bottom: 0;
+	}
+
+	.content-wrapper {
+		flex: 1;
+		overflow-y: auto;
+		padding: 1rem;
+	}
+
+	@media (min-width: 640px) {
+		.content-wrapper {
+			padding: 1.5rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.content-wrapper {
+			padding: 2rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.main-content {
+			padding-bottom: calc(150px + env(safe-area-inset-bottom));
+		}
+
+		.content-wrapper {
+			padding: 0.75rem;
+		}
+	}
+</style>

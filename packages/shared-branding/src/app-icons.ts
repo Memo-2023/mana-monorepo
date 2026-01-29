@@ -63,6 +63,9 @@ const mailSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="n
 // Inventory icon (box/package with gradient)
 const inventorySvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#inventoryGrad)"/><path d="M280 380L512 260L744 380V644L512 764L280 644V380Z" fill="white"/><path d="M512 500V764M280 380L512 500L744 380" stroke="#14b8a6" stroke-width="24" stroke-linejoin="round"/><path d="M396 320L628 440" stroke="#14b8a6" stroke-width="16" stroke-linecap="round"/><rect x="460" y="560" width="104" height="80" rx="8" fill="#14b8a6" fill-opacity="0.3"/><defs><linearGradient id="inventoryGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#14b8a6"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs></svg>`;
 
+// Questions icon (question mark with magnifying glass)
+const questionsSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#questionsGrad)"/><circle cx="480" cy="440" r="180" stroke="white" stroke-width="40"/><path d="M620 580L740 700" stroke="white" stroke-width="48" stroke-linecap="round"/><path d="M440 360C440 332 462 310 490 310C520 310 550 330 550 370C550 420 490 430 490 480" stroke="white" stroke-width="32" stroke-linecap="round"/><circle cx="490" cy="540" r="20" fill="white"/><defs><linearGradient id="questionsGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -86,6 +89,7 @@ export const APP_ICONS = {
 	todo: svgToDataUrl(todoSvg),
 	mail: svgToDataUrl(mailSvg),
 	inventory: svgToDataUrl(inventorySvg),
+	questions: svgToDataUrl(questionsSvg),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;
