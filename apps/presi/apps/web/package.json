@@ -14,17 +14,17 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-node": "^5.0.0",
-		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/kit": "^2.47.1",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/vite": "^4.1.7",
 		"@types/node": "^20.0.0",
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
-		"svelte": "^5.0.0",
-		"svelte-check": "^4.0.0",
+		"svelte": "^5.41.0",
+		"svelte-check": "^4.3.3",
 		"tailwindcss": "^4.1.17",
 		"tslib": "^2.4.1",
-		"typescript": "^5.0.0",
+		"typescript": "^5.9.3",
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
