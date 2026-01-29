@@ -20,6 +20,7 @@
 	"dependencies": {
 		"@clock/shared": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
+		"@manacore/shared-nestjs-health": "workspace:*",
 		"@manacore/shared-nestjs-metrics": "workspace:*",
 		"@manacore/shared-nestjs-setup": "workspace:*",
 		"@nestjs/common": "^10.4.15",

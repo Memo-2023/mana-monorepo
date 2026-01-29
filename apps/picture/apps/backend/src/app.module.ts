@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { DatabaseModule } from './db/database.module';
-import { HealthModule } from './health/health.module';
+import { HealthModule } from '@manacore/shared-nestjs-health';
 import { ModelModule } from './model/model.module';
 import { TagModule } from './tag/tag.module';
 import { ImageModule } from './image/image.module';
@@ -31,7 +31,7 @@ import { BatchModule } from './batch/batch.module';
 			inject: [ConfigService],
 		}),
 		DatabaseModule,
-		HealthModule,
+		HealthModule.forRoot({ serviceName: 'picture-backend' }),
 		ModelModule,
 		TagModule,
 		ImageModule,

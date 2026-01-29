@@ -68,6 +68,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
@@ -388,6 +391,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
@@ -730,6 +736,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
@@ -1000,6 +1009,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
@@ -2210,6 +2222,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-setup':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-setup
@@ -2517,6 +2532,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-storage':
         specifier: workspace:*
         version: link:../../../../packages/shared-storage
@@ -3030,6 +3048,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-setup':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-setup
@@ -3233,6 +3254,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-setup':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-setup
@@ -3715,6 +3739,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
@@ -3878,6 +3905,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-storage':
         specifier: workspace:*
         version: link:../../../../packages/shared-storage
@@ -4075,6 +4105,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
@@ -4337,6 +4370,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-health':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-health
       '@manacore/shared-nestjs-setup':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-setup
@@ -4866,14 +4902,10 @@ importers:
         version: 5.9.3
 
   packages/shared-nestjs-health:
-    dependencies:
-      '@nestjs/common':
-        specifier: ^10.0.0 || ^11.0.0
-        version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
     devDependencies:
-      '@manacore/shared-tsconfig':
-        specifier: workspace:*
-        version: link:../shared-tsconfig
+      '@nestjs/common':
+        specifier: ^10.0.0
+        version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@types/node':
         specifier: ^22.10.2
         version: 22.19.1

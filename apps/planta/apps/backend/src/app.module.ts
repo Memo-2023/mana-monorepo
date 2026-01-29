@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './db/database.module';
-import { HealthModule } from './health/health.module';
+import { HealthModule } from '@manacore/shared-nestjs-health';
 import { PlantModule } from './plant/plant.module';
 import { PhotoModule } from './photo/photo.module';
 import { AnalysisModule } from './analysis/analysis.module';
@@ -14,7 +14,7 @@ import { WateringModule } from './watering/watering.module';
 			envFilePath: '.env',
 		}),
 		DatabaseModule,
-		HealthModule,
+		HealthModule.forRoot({ serviceName: 'planta-backend' }),
 		PlantModule,
 		PhotoModule,
 		AnalysisModule,

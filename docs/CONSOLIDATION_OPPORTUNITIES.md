@@ -133,14 +133,25 @@ bootstrap();
 
 ---
 
-### 1.3 MITTEL: Health Endpoints (170 LOC)
+### ~~1.3 MITTEL: Health Endpoints~~ ✅ ERLEDIGT (~300 LOC gespart)
 
-**Problem:** 13 Backends haben identische Health-Controller.
+**Status:** `@manacore/shared-nestjs-health` Package erstellt und 12 Backends migriert (29.01.2026)
 
-**Empfehlung:** Erstelle `@manacore/shared-nestjs-health`
+**Erstelltes Package:** `packages/shared-nestjs-health/`
+- `HealthModule.forRoot({ serviceName, version?, includeUptime?, route? })`
+- Dynamischer Controller mit konfigurierbarer Route (default: 'health')
+- Einheitliche HealthCheckResponse mit timestamp
 
+**Migrierte Backends (12 von 13):**
+- ✅ calendar, chat, clock, contacts, nutriphi, picture, planta, presi, skilltree, storage, todo, zitare
+- ⏭️ questions (übersprungen - hat erweiterten DB-Health-Check)
+
+**Besonderheiten:**
+- storage: Custom route `api/v1/health`
+- zitare: serviceName `quote-backend`
+
+**Vorher (14 LOC pro Backend):**
 ```typescript
-// Vorher (14 LOC pro Backend)
 @Controller('health')
 export class HealthController {
   @Get()
@@ -148,11 +159,15 @@ export class HealthController {
     return { status: 'ok', timestamp: new Date().toISOString(), service: 'chat' };
   }
 }
-
-// Nachher (1 LOC)
-import { HealthModule } from '@manacore/shared-nestjs-health';
-@Module({ imports: [HealthModule.forRoot('chat-backend')] })
 ```
+
+**Nachher (1 LOC):**
+```typescript
+import { HealthModule } from '@manacore/shared-nestjs-health';
+@Module({ imports: [HealthModule.forRoot({ serviceName: 'chat-backend' })] })
+```
+
+**Einsparung:** 12 Backends × 26 LOC (Controller + Module) = ~312 LOC gelöscht
 
 ---
 
@@ -470,7 +485,7 @@ export default createDrizzleConfig({ dbName: 'chat' });
 | Aufgabe | LOC | Aufwand | Status |
 |---------|-----|---------|--------|
 | ~~`@manacore/shared-nestjs-setup` erstellen~~ | ~~1.800~~ → **280** | ~~Mittel~~ | ✅ 8 Backends migriert |
-| `@manacore/shared-nestjs-health` erstellen | 170 | Niedrig | Offen |
+| ~~`@manacore/shared-nestjs-health` erstellen~~ | ~~170~~ → **312** | ~~Niedrig~~ | ✅ 12 Backends migriert |
 | ~~Drizzle Config Factory erstellen~~ | ~~200~~ → **160** | ~~Niedrig~~ | ✅ Erledigt |
 
 ### ~~Phase 4: Skeleton Refactoring~~ ✅ ANALYSIERT

@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { DatabaseModule } from './db/database.module';
-import { HealthModule } from './health/health.module';
+import { HealthModule } from '@manacore/shared-nestjs-health';
 import { CalendarModule } from './calendar/calendar.module';
 import { EventModule } from './event/event.module';
 import { EventTagModule } from './event-tag/event-tag.module';
@@ -27,7 +27,7 @@ import { NotificationModule } from './notification/notification.module';
 			excludePaths: ['/health'],
 		}),
 		DatabaseModule,
-		HealthModule,
+		HealthModule.forRoot({ serviceName: 'calendar-backend' }),
 		EmailModule,
 		NotificationModule,
 		CalendarModule,

@@ -6,7 +6,7 @@ import { ContactModule } from './contact/contact.module';
 import { TagModule } from './tag/tag.module';
 import { NoteModule } from './note/note.module';
 import { ActivityModule } from './activity/activity.module';
-import { HealthModule } from './health/health.module';
+import { HealthModule } from '@manacore/shared-nestjs-health';
 import { ImportModule } from './import/import.module';
 import { ExportModule } from './export/export.module';
 import { GoogleModule } from './google/google.module';
@@ -30,7 +30,7 @@ import { NetworkModule } from './network/network.module';
 		TagModule,
 		NoteModule,
 		ActivityModule,
-		HealthModule,
+		HealthModule.forRoot({ serviceName: 'contacts-backend' }),
 		ImportModule,
 		ExportModule,
 		GoogleModule,

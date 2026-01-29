@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { DatabaseModule } from './db/database.module';
-import { HealthModule } from './health/health.module';
+import { HealthModule } from '@manacore/shared-nestjs-health';
 import { ProjectModule } from './project/project.module';
 import { TaskModule } from './task/task.module';
 import { LabelModule } from './label/label.module';
@@ -23,7 +23,7 @@ import { NetworkModule } from './network/network.module';
 			excludePaths: ['/health'],
 		}),
 		DatabaseModule,
-		HealthModule,
+		HealthModule.forRoot({ serviceName: 'todo-backend' }),
 		ProjectModule,
 		TaskModule,
 		LabelModule,

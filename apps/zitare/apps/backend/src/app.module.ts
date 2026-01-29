@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './db/database.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { ListModule } from './list/list.module';
-import { HealthModule } from './health/health.module';
+import { HealthModule } from '@manacore/shared-nestjs-health';
 
 @Module({
 	imports: [
@@ -14,7 +14,7 @@ import { HealthModule } from './health/health.module';
 		DatabaseModule,
 		FavoriteModule,
 		ListModule,
-		HealthModule,
+		HealthModule.forRoot({ serviceName: 'quote-backend' }),
 	],
 })
 export class AppModule {}

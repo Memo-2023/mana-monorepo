@@ -114,6 +114,8 @@ services:
     depends_on:
       mana-core-auth:
         condition: service_healthy
+      mana-search:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
@@ -134,6 +136,59 @@ services:
       - "3030:3030"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Search Service (SearXNG + NestJS)
+  # ============================================
+
+  searxng:
+    image: searxng/searxng:latest
+    container_name: mana-searxng
+    restart: always
+    volumes:
+      - ./services/mana-search/searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - ./services/mana-search/searxng/limiter.toml:/etc/searxng/limiter.toml:ro
+    environment:
+      SEARXNG_BASE_URL: http://searxng:8080
+      SEARXNG_SECRET: ${SEARXNG_SECRET:-change-me-searxng-secret}
+    # Internal only - no external port mapping
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  mana-search:
+    image: ghcr.io/memo-2023/mana-search:latest
+    container_name: mana-search
+    restart: always
+    depends_on:
+      searxng:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3021
+      SEARXNG_URL: http://searxng:8080
+      SEARXNG_TIMEOUT: 15000
+      SEARXNG_DEFAULT_LANGUAGE: de-DE
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      CACHE_SEARCH_TTL: 3600
+      CACHE_EXTRACT_TTL: 86400
+      EXTRACT_TIMEOUT: 10000
+      EXTRACT_MAX_LENGTH: 50000
+    ports:
+      - "3021:3021"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3021/health"]
       interval: 30s
       timeout: 10s
       retries: 3
