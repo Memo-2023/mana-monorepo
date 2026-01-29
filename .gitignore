@@ -55,6 +55,16 @@ coverage/
 # TypeScript
 *.tsbuildinfo
 
+# Drizzle compiled config files
+drizzle.config.js
+drizzle.config.d.ts
+drizzle.config.js.map
+
+# Compiled JS in packages (src should be TS only)
+packages/*/src/**/*.js
+packages/*/src/**/*.js.map
+packages/*/src/**/*.d.ts
+
 # Cache
 .cache/
 .parcel-cache/
