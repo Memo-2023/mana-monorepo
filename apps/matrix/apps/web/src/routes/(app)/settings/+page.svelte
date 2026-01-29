@@ -14,12 +14,40 @@
 		Key,
 		DeviceMobile,
 		CircleNotch,
+		BellRinging,
+		SpeakerHigh,
+		Eye,
 	} from '@manacore/shared-icons';
 	import { VerificationDialog, RecoveryKeyDialog } from '$lib/components/crypto';
+	import {
+		getNotificationSettings,
+		saveNotificationSettings,
+		getNotificationPermission,
+		requestNotificationPermission,
+		isNotificationSupported,
+	} from '$lib/notifications';
+	import { browser } from '$app/environment';
 
 	let verificationDialogOpen = $state(false);
 	let recoveryDialogOpen = $state(false);
 	let recoveryDialogMode = $state<'setup' | 'restore'>('setup');
+
+	// Notification settings
+	let notificationSettings = $state(getNotificationSettings());
+	let notificationPermission = $state<NotificationPermission | 'unsupported'>(
+		browser ? getNotificationPermission() : 'default'
+	);
+	let notificationsSupported = browser && isNotificationSupported();
+
+	async function handleRequestPermission() {
+		const permission = await requestNotificationPermission();
+		notificationPermission = permission;
+	}
+
+	function updateNotificationSetting(key: keyof typeof notificationSettings, value: boolean) {
+		notificationSettings = { ...notificationSettings, [key]: value };
+		saveNotificationSettings({ [key]: value });
+	}
 
 	// Crypto status derived
 	let cryptoReady = $derived(matrixStore.cryptoReady);
@@ -191,14 +219,107 @@
 				</div>
 			</section>
 
-			<!-- Notifications Section (Placeholder) -->
+			<!-- Notifications Section -->
 			<section class="card">
-				<div class="space-y-2">
+				<div class="space-y-4">
 					<h2 class="flex items-center gap-2 text-lg font-semibold">
 						<Bell class="h-5 w-5" />
 						Benachrichtigungen
 					</h2>
-					<p class="text-sm text-muted-foreground">Benachrichtigungseinstellungen folgen bald...</p>
+
+					{#if !notificationsSupported}
+						<p class="text-sm text-muted-foreground">
+							Dein Browser unterstützt keine Benachrichtigungen.
+						</p>
+					{:else if notificationPermission === 'denied'}
+						<div class="rounded-lg bg-error/10 p-4 text-sm">
+							<p class="font-medium text-error">Benachrichtigungen blockiert</p>
+							<p class="mt-1 text-muted-foreground">
+								Du hast Benachrichtigungen für diese Seite blockiert. Bitte ändere die Einstellung
+								in deinem Browser.
+							</p>
+						</div>
+					{:else if notificationPermission === 'default'}
+						<div class="flex items-center justify-between rounded-lg bg-muted p-4">
+							<div class="flex items-center gap-3">
+								<BellRinging class="h-8 w-8 text-primary" />
+								<div>
+									<p class="font-medium">Benachrichtigungen aktivieren</p>
+									<p class="text-sm text-muted-foreground">
+										Erhalte Benachrichtigungen für neue Nachrichten
+									</p>
+								</div>
+							</div>
+							<button class="btn-primary text-sm" onclick={handleRequestPermission}>
+								Erlauben
+							</button>
+						</div>
+					{:else}
+						<div class="space-y-3">
+							<!-- Enable/Disable Toggle -->
+							<label class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer">
+								<div class="flex items-center gap-3">
+									<BellRinging class="h-6 w-6" />
+									<div>
+										<p class="font-medium">Benachrichtigungen</p>
+										<p class="text-sm text-muted-foreground">
+											Desktop-Benachrichtigungen für neue Nachrichten
+										</p>
+									</div>
+								</div>
+								<input
+									type="checkbox"
+									class="toggle toggle-primary"
+									checked={notificationSettings.enabled}
+									onchange={() =>
+										updateNotificationSetting('enabled', !notificationSettings.enabled)}
+								/>
+							</label>
+
+							<!-- Sound Toggle -->
+							<label
+								class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer {!notificationSettings.enabled ? 'opacity-50' : ''}"
+							>
+								<div class="flex items-center gap-3">
+									<SpeakerHigh class="h-6 w-6" />
+									<div>
+										<p class="font-medium">Ton</p>
+										<p class="text-sm text-muted-foreground">Ton bei neuen Nachrichten abspielen</p>
+									</div>
+								</div>
+								<input
+									type="checkbox"
+									class="toggle toggle-primary"
+									checked={notificationSettings.sound}
+									disabled={!notificationSettings.enabled}
+									onchange={() => updateNotificationSetting('sound', !notificationSettings.sound)}
+								/>
+							</label>
+
+							<!-- Preview Toggle -->
+							<label
+								class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer {!notificationSettings.enabled ? 'opacity-50' : ''}"
+							>
+								<div class="flex items-center gap-3">
+									<Eye class="h-6 w-6" />
+									<div>
+										<p class="font-medium">Vorschau anzeigen</p>
+										<p class="text-sm text-muted-foreground">
+											Nachrichteninhalt in Benachrichtigung anzeigen
+										</p>
+									</div>
+								</div>
+								<input
+									type="checkbox"
+									class="toggle toggle-primary"
+									checked={notificationSettings.showPreview}
+									disabled={!notificationSettings.enabled}
+									onchange={() =>
+										updateNotificationSetting('showPreview', !notificationSettings.showPreview)}
+								/>
+							</label>
+						</div>
+					{/if}
 				</div>
 			</section>
 

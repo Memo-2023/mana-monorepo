@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import type { MatrixClient, Room, MatrixEvent, RoomMember as SDKRoomMember } from 'matrix-js-sdk';
+import { showMessageNotification, canShowNotifications, isDocumentFocused } from '$lib/notifications';
 import type {
 	SyncState,
 	MatrixCredentials,
@@ -247,6 +248,27 @@ class MatrixStore {
 			// Update timeline if we're in this room
 			if (room?.roomId === this._currentRoomId) {
 				this._timeline = [...(room.getLiveTimeline().getEvents() || [])];
+			}
+
+			// Show browser notification for new messages from others
+			if (
+				browser &&
+				event.getType() === 'm.room.message' &&
+				event.getSender() !== this._client!.getUserId() &&
+				!isDocumentFocused()
+			) {
+				const content = event.getContent();
+				const body = content?.body || '';
+				const senderName = this.getSenderName(event);
+				const roomName = room?.name || 'Unbekannt';
+
+				showMessageNotification(senderName, body, roomName, {
+					onClick: () => {
+						if (room) {
+							this.selectRoom(room.roomId);
+						}
+					},
+				});
 			}
 		});
 
