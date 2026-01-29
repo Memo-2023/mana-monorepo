@@ -39,6 +39,10 @@
 		}
 		return result;
 	}
+
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
+	}
 </script>
 
 <svelte:head>
@@ -50,6 +54,7 @@
 	logo={QuestionsLogo}
 	primaryColor="#8b5cf6"
 	onSignIn={handleSignIn}
+	onResendVerification={handleResendVerification}
 	{goto}
 	enableGoogle={false}
 	enableApple={false}

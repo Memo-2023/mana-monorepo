@@ -21,7 +21,12 @@
 		"signInFailed": "Sign in failed",
 		"googleSignInFailed": "Google sign in failed",
 		"signInSuccess": "Successfully signed in. Redirecting...",
-		"googleSignInSuccess": "Successfully signed in with Google. Redirecting..."
+		"googleSignInSuccess": "Successfully signed in with Google. Redirecting...",
+		"emailVerified": "Email successfully verified! Please sign in.",
+		"emailNotVerified": "Email not verified.",
+		"resendVerification": "Resend verification email",
+		"resendingVerification": "Sending...",
+		"verificationEmailSent": "Verification email sent! Please check your inbox."
 	},
 	"register": {
 		"title": "Create Account",

@@ -231,6 +231,31 @@ export const authStore = {
 	},
 
 	/**
+	 * Resend verification email
+	 */
+	async resendVerificationEmail(email: string) {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
+
+		try {
+			// Pass the current app URL for post-verification redirect
+			const sourceAppUrl = browser ? window.location.origin : undefined;
+			const result = await authService.resendVerificationEmail(email, sourceAppUrl);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Failed to resend verification email' };
+			}
+
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	/**
 	 * Get access token for API calls (raw token, no refresh)
 	 * @deprecated Use getValidToken() instead for automatic refresh
 	 */

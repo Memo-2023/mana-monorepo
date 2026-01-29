@@ -21,7 +21,12 @@
 		"signInFailed": "Error al iniciar sesión",
 		"googleSignInFailed": "Error al iniciar sesión con Google",
 		"signInSuccess": "Sesión iniciada correctamente. Redirigiendo...",
-		"googleSignInSuccess": "Sesión iniciada con Google correctamente. Redirigiendo..."
+		"googleSignInSuccess": "Sesión iniciada con Google correctamente. Redirigiendo...",
+		"emailVerified": "¡Correo verificado exitosamente! Por favor inicia sesión.",
+		"emailNotVerified": "Correo no verificado.",
+		"resendVerification": "Reenviar correo de verificación",
+		"resendingVerification": "Enviando...",
+		"verificationEmailSent": "¡Correo de verificación enviado! Por favor revisa tu bandeja de entrada."
 	},
 	"register": {
 		"title": "Crear Cuenta",

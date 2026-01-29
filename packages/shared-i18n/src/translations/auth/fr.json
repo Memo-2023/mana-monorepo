@@ -21,7 +21,12 @@
 		"signInFailed": "Échec de la connexion",
 		"googleSignInFailed": "Échec de la connexion Google",
 		"signInSuccess": "Connexion réussie. Redirection...",
-		"googleSignInSuccess": "Connexion Google réussie. Redirection..."
+		"googleSignInSuccess": "Connexion Google réussie. Redirection...",
+		"emailVerified": "Email vérifié avec succès ! Veuillez vous connecter.",
+		"emailNotVerified": "Email non vérifié.",
+		"resendVerification": "Renvoyer l'email de vérification",
+		"resendingVerification": "Envoi en cours...",
+		"verificationEmailSent": "Email de vérification envoyé ! Veuillez vérifier votre boîte de réception."
 	},
 	"register": {
 		"title": "Créer un compte",

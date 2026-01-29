@@ -40,6 +40,7 @@ const DEFAULT_ENDPOINTS: AuthEndpoints = {
 	validate: '/api/v1/auth/validate',
 	forgotPassword: '/api/v1/auth/forgot-password',
 	resetPassword: '/api/v1/auth/reset-password',
+	resendVerification: '/api/v1/auth/resend-verification',
 	googleSignIn: '/api/v1/auth/google-signin',
 	appleSignIn: '/api/v1/auth/apple-signin',
 	credits: '/api/v1/credits/balance',
@@ -243,6 +244,37 @@ export function createAuthService(config: AuthServiceConfig) {
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error during password reset',
+				};
+			}
+		},
+
+		/**
+		 * Resend verification email
+		 * @param email - User's email address
+		 * @param sourceAppUrl - Optional URL to redirect after verification (current app origin)
+		 */
+		async resendVerificationEmail(email: string, sourceAppUrl?: string): Promise<AuthResult> {
+			try {
+				const response = await fetch(`${baseUrl}${endpoints.resendVerification}`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email, sourceAppUrl }),
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json();
+					return {
+						success: false,
+						error: errorData.message || 'Failed to resend verification email',
+					};
+				}
+
+				return { success: true };
+			} catch (error) {
+				console.error('Error resending verification email:', error);
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Unknown error',
 				};
 			}
 		},

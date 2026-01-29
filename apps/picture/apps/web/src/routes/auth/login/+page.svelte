@@ -24,6 +24,10 @@
 		return authStore.signIn(email, password);
 	}
 
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
+	}
+
 	async function handleSignInWithGoogle() {
 		// TODO: Implement OAuth with Mana Core Auth when ready
 		return { success: false, error: 'Google Sign-In not yet implemented' };
@@ -48,6 +52,7 @@
 	logo={PictureLogo}
 	primaryColor="#3b82f6"
 	onSignIn={handleSignIn}
+	onResendVerification={handleResendVerification}
 	onSignInWithGoogle={PUBLIC_GOOGLE_CLIENT_ID ? handleSignInWithGoogle : undefined}
 	onSignInWithApple={PUBLIC_APPLE_CLIENT_ID ? handleSignInWithApple : undefined}
 	{goto}

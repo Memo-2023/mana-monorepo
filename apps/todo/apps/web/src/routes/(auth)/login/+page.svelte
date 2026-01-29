@@ -38,6 +38,10 @@
 	async function handleSignIn(email: string, password: string) {
 		return authStore.signIn(email, password);
 	}
+
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
+	}
 </script>
 
 <svelte:head>
@@ -49,6 +53,7 @@
 	logo={TodoLogo}
 	primaryColor="#8b5cf6"
 	onSignIn={handleSignIn}
+	onResendVerification={handleResendVerification}
 	{goto}
 	enableGoogle={false}
 	enableApple={false}

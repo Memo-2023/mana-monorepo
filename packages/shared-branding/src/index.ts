@@ -33,6 +33,7 @@ export {
 	ClockLogo,
 	QuestionsLogo,
 	SkillTreeLogo,
+	PlantaLogo,
 } from './logos';
 
 // Configuration

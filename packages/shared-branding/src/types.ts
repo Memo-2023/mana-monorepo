@@ -20,7 +20,8 @@ export type AppId =
 	| 'moodlit'
 	| 'inventory'
 	| 'questions'
-	| 'skilltree';
+	| 'skilltree'
+	| 'planta';
 
 /**
  * App branding configuration

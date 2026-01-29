@@ -37,6 +37,11 @@ export interface AuthTranslations {
 		googleSignInFailed: string;
 		signInSuccess: string;
 		googleSignInSuccess: string;
+		emailVerified?: string;
+		emailNotVerified?: string;
+		resendVerification?: string;
+		resendingVerification?: string;
+		verificationEmailSent?: string;
 	};
 	register: {
 		title: string;

@@ -20,6 +20,7 @@ import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { SetActiveOrganizationDto } from './dto/set-active-organization.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 /**
@@ -170,6 +171,21 @@ export class AuthController {
 		return this.betterAuthService.resetPassword(
 			resetPasswordDto.token,
 			resetPasswordDto.newPassword
+		);
+	}
+
+	/**
+	 * Resend verification email
+	 *
+	 * Sends a new verification email to the user.
+	 * Always returns success to prevent email enumeration attacks.
+	 */
+	@Post('resend-verification')
+	@HttpCode(HttpStatus.OK)
+	async resendVerification(@Body() resendVerificationDto: ResendVerificationDto) {
+		return this.betterAuthService.resendVerificationEmail(
+			resendVerificationDto.email,
+			resendVerificationDto.sourceAppUrl
 		);
 	}
 

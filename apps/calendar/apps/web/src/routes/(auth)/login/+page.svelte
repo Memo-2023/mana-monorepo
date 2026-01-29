@@ -39,6 +39,10 @@
 	async function handleSignIn(email: string, password: string) {
 		return authStore.signIn(email, password);
 	}
+
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
+	}
 </script>
 
 <svelte:head>
@@ -50,6 +54,7 @@
 	logo={CalendarLogo}
 	primaryColor="#0ea5e9"
 	onSignIn={handleSignIn}
+	onResendVerification={handleResendVerification}
 	{goto}
 	enableGoogle={false}
 	enableApple={false}

@@ -23,6 +23,10 @@
 	async function handleSignIn(email: string, password: string) {
 		return auth.login(email, password);
 	}
+
+	async function handleResendVerification(email: string) {
+		return auth.resendVerificationEmail(email);
+	}
 </script>
 
 <svelte:head>
@@ -34,6 +38,7 @@
 	logo={PresiLogo}
 	primaryColor="#f97316"
 	onSignIn={handleSignIn}
+	onResendVerification={handleResendVerification}
 	{goto}
 	enableGoogle={false}
 	enableApple={false}

@@ -21,7 +21,12 @@
 		"signInFailed": "Anmeldung fehlgeschlagen",
 		"googleSignInFailed": "Google-Anmeldung fehlgeschlagen",
 		"signInSuccess": "Erfolgreich angemeldet. Weiterleitung...",
-		"googleSignInSuccess": "Erfolgreich mit Google angemeldet. Weiterleitung..."
+		"googleSignInSuccess": "Erfolgreich mit Google angemeldet. Weiterleitung...",
+		"emailVerified": "E-Mail erfolgreich bestätigt! Bitte melde dich an.",
+		"emailNotVerified": "E-Mail nicht bestätigt.",
+		"resendVerification": "Bestätigungs-E-Mail erneut senden",
+		"resendingVerification": "Wird gesendet...",
+		"verificationEmailSent": "Bestätigungs-E-Mail wurde gesendet! Bitte überprüfe deinen Posteingang."
 	},
 	"register": {
 		"title": "Konto erstellen",

@@ -21,7 +21,12 @@
 		"signInFailed": "Accesso fallito",
 		"googleSignInFailed": "Accesso con Google fallito",
 		"signInSuccess": "Accesso effettuato. Reindirizzamento...",
-		"googleSignInSuccess": "Accesso con Google effettuato. Reindirizzamento..."
+		"googleSignInSuccess": "Accesso con Google effettuato. Reindirizzamento...",
+		"emailVerified": "Email verificata con successo! Effettua l'accesso.",
+		"emailNotVerified": "Email non verificata.",
+		"resendVerification": "Invia di nuovo l'email di verifica",
+		"resendingVerification": "Invio in corso...",
+		"verificationEmailSent": "Email di verifica inviata! Controlla la tua casella di posta."
 	},
 	"register": {
 		"title": "Crea Account",

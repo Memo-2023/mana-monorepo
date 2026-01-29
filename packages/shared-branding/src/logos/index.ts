@@ -20,3 +20,4 @@ export { default as InventoryLogo } from './InventoryLogo.svelte';
 export { default as ClockLogo } from './ClockLogo.svelte';
 export { default as QuestionsLogo } from './QuestionsLogo.svelte';
 export { default as SkillTreeLogo } from './SkillTreeLogo.svelte';
+export { default as PlantaLogo } from './PlantaLogo.svelte';

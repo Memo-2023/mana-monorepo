@@ -199,6 +199,32 @@ export const authStore = {
 		return await tokenManager.getValidToken();
 	},
 
+	/**
+	 * Resend verification email
+	 */
+	async resendVerificationEmail(email: string) {
+		const authService = await getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth service not available' };
+		}
+
+		try {
+			const sourceAppUrl = browser ? window.location.origin : undefined;
+			const result = await authService.resendVerificationEmail(email, sourceAppUrl);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Failed to resend verification email' };
+			}
+
+			return { success: true };
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Failed to resend verification email',
+			};
+		}
+	},
+
 	// For compatibility with old code that reads user store directly
 	setUser(userData: UserData | null) {
 		user = userData;

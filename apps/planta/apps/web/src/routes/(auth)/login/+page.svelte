@@ -1,107 +1,63 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
+	import { LoginPage } from '@manacore/shared-auth-ui';
+	import { getLoginTranslations } from '@manacore/shared-i18n';
+	import { PlantaLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+
+	// Get redirect URL from query params or sessionStorage
+	const redirectTo = $derived.by(() => {
+		const queryRedirect = $page.url.searchParams.get('redirectTo');
+		if (queryRedirect) return queryRedirect;
+
+		if (browser) {
+			const sessionRedirect = sessionStorage.getItem('auth-return-url');
+			if (sessionRedirect) {
+				sessionStorage.removeItem('auth-return-url');
+				return sessionRedirect;
+			}
+		}
+
+		return '/dashboard';
+	});
+
+	// German translations (Planta is German-focused)
+	const translations = $derived(getLoginTranslations('de'));
 
 	// Read verification status from query params (set after email verification)
 	const verified = $derived($page.url.searchParams.get('verified') === 'true');
-	const initialEmailFromUrl = $derived($page.url.searchParams.get('email') || '');
+	const initialEmail = $derived($page.url.searchParams.get('email') || '');
 
-	let email = $state('');
-	let password = $state('');
-	let error = $state('');
-	let loading = $state(false);
-	let showVerifiedBanner = $state(false);
-
-	// Initialize email from URL if provided
-	$effect(() => {
-		if (initialEmailFromUrl && !email) {
-			email = initialEmailFromUrl;
-		}
-		if (verified) {
-			showVerifiedBanner = true;
-		}
-	});
-
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-		error = '';
-		loading = true;
-
-		const result = await authStore.signIn(email, password);
-
-		if (result.success) {
-			goto('/dashboard');
-		} else {
-			error = result.error || 'Login fehlgeschlagen';
-		}
-
-		loading = false;
+	async function handleSignIn(email: string, password: string) {
+		return authStore.signIn(email, password);
 	}
 
-	function dismissBanner() {
-		showVerifiedBanner = false;
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
 	}
 </script>
 
-<form onsubmit={handleSubmit} class="space-y-4">
-	{#if showVerifiedBanner}
-		<div
-			class="relative rounded-md bg-green-100 p-3 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-200"
-		>
-			<button
-				type="button"
-				onclick={dismissBanner}
-				class="absolute right-2 top-2 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200"
-			>
-				×
-			</button>
-			E-Mail erfolgreich bestätigt! Du kannst dich jetzt anmelden.
-		</div>
-	{/if}
+<svelte:head>
+	<title>{translations.title} | Planta</title>
+</svelte:head>
 
-	{#if error}
-		<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-			{error}
-		</div>
-	{/if}
-
-	<div>
-		<label for="email" class="block text-sm font-medium text-foreground">E-Mail</label>
-		<input
-			id="email"
-			type="email"
-			bind:value={email}
-			required
-			class="input mt-1 w-full"
-			placeholder="deine@email.de"
-		/>
-	</div>
-
-	<div>
-		<label for="password" class="block text-sm font-medium text-foreground">Passwort</label>
-		<input
-			id="password"
-			type="password"
-			bind:value={password}
-			required
-			class="input mt-1 w-full"
-			placeholder="••••••••"
-		/>
-	</div>
-
-	<button type="submit" class="btn btn-primary w-full" disabled={loading}>
-		{#if loading}
-			<span
-				class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"
-			></span>
-		{:else}
-			Anmelden
-		{/if}
-	</button>
-
-	<p class="text-center text-sm text-muted-foreground">
-		Noch kein Konto?
-		<a href="/register" class="text-primary hover:underline">Registrieren</a>
-	</p>
-</form>
+<LoginPage
+	appName="Planta"
+	logo={PlantaLogo}
+	primaryColor="#22c55e"
+	onSignIn={handleSignIn}
+	onResendVerification={handleResendVerification}
+	{goto}
+	enableGoogle={false}
+	enableApple={false}
+	successRedirect={redirectTo}
+	registerPath="/register"
+	forgotPasswordPath="/forgot-password"
+	lightBackground="#dcfce7"
+	darkBackground="#052e16"
+	{translations}
+	{verified}
+	{initialEmail}
+/>

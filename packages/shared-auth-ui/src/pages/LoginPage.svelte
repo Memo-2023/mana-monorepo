@@ -30,6 +30,10 @@
 		signInSuccess: string;
 		googleSignInSuccess: string;
 		emailVerified?: string;
+		emailNotVerified?: string;
+		resendVerification?: string;
+		resendingVerification?: string;
+		verificationEmailSent?: string;
 	}
 
 	const defaultTranslations: LoginTranslations = {
@@ -56,6 +60,10 @@
 		signInSuccess: 'Successfully signed in. Redirecting...',
 		googleSignInSuccess: 'Successfully signed in with Google. Redirecting...',
 		emailVerified: 'Email successfully verified! Please sign in.',
+		emailNotVerified: 'Email not verified.',
+		resendVerification: 'Resend verification email',
+		resendingVerification: 'Sending...',
+		verificationEmailSent: 'Verification email sent! Please check your inbox.',
 	};
 
 	interface Props {
@@ -65,6 +73,7 @@
 		onSignIn: (email: string, password: string) => Promise<AuthResult>;
 		onSignInWithGoogle?: (idToken: string) => Promise<AuthResult>;
 		onSignInWithApple?: (identityToken: string) => Promise<AuthResult>;
+		onResendVerification?: (email: string) => Promise<AuthResult>;
 		goto: (path: string) => void;
 		enableGoogle?: boolean;
 		enableApple?: boolean;
@@ -91,6 +100,7 @@
 		onSignIn,
 		onSignInWithGoogle,
 		onSignInWithApple,
+		onResendVerification,
 		goto,
 		enableGoogle = false,
 		enableApple = false,
@@ -122,6 +132,9 @@
 	let passwordInput: HTMLInputElement;
 	let successAnnouncement = $state('');
 	let showVerifiedBanner = $state(verified);
+	let showEmailNotVerified = $state(false);
+	let resendingVerification = $state(false);
+	let verificationEmailSent = $state(false);
 
 	// Theme state - can be toggled manually, defaults to system preference
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -192,6 +205,8 @@
 	async function handleLogin() {
 		loading = true;
 		clearError();
+		showEmailNotVerified = false;
+		verificationEmailSent = false;
 
 		if (!email) {
 			setError(t.emailRequired, 'email');
@@ -216,6 +231,26 @@
 			showSuccess = true;
 			successAnnouncement = t.signInSuccess;
 			setTimeout(() => goto(successRedirect), 600);
+		} else if (result.error === 'EMAIL_NOT_VERIFIED') {
+			showEmailNotVerified = true;
+			setError(t.emailNotVerified || 'Email not verified.', 'general');
+		} else {
+			setError(result.error || t.signInFailed, 'general');
+		}
+	}
+
+	async function handleResendVerification() {
+		if (!onResendVerification || !email || resendingVerification) return;
+
+		resendingVerification = true;
+		clearError();
+
+		const result = await onResendVerification(email);
+		resendingVerification = false;
+
+		if (result.success) {
+			verificationEmailSent = true;
+			showEmailNotVerified = false;
 		} else {
 			setError(result.error || t.signInFailed, 'general');
 		}
@@ -333,10 +368,38 @@
 					<p class="form-subtitle">{t.subtitle}</p>
 				</div>
 
+				{#if verificationEmailSent}
+					<div class="verified-banner" role="status" aria-live="polite">
+						<Check size={18} class="text-green-500 shrink-0" />
+						<p>{t.verificationEmailSent}</p>
+						<button
+							type="button"
+							class="verified-banner-close"
+							onclick={() => (verificationEmailSent = false)}
+							aria-label="Close"
+						>
+							&times;
+						</button>
+					</div>
+				{/if}
+
 				{#if error}
 					<div class="error-message" id="form-error" role="alert" aria-live="assertive">
 						<Warning size={18} class="text-red-500 shrink-0" />
-						<p>{error}</p>
+						<div class="error-content">
+							<p>{error}</p>
+							{#if showEmailNotVerified && onResendVerification}
+								<button
+									type="button"
+									class="resend-link"
+									onclick={handleResendVerification}
+									disabled={resendingVerification}
+									style:color={primaryColor}
+								>
+									{resendingVerification ? t.resendingVerification : t.resendVerification}
+								</button>
+							{/if}
+						</div>
 					</div>
 				{/if}
 
@@ -679,7 +742,7 @@
 
 	.error-message {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: 0.5rem;
 		padding: 0.75rem;
 		margin-bottom: 1rem;
@@ -688,6 +751,32 @@
 		border: 1px solid rgba(239, 68, 68, 0.3);
 		color: #ef4444;
 		font-size: 0.875rem;
+	}
+
+	.error-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.resend-link {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		font-size: 0.875rem;
+		padding: 0;
+		text-align: left;
+		text-decoration: underline;
+	}
+
+	.resend-link:hover {
+		opacity: 0.8;
+	}
+
+	.resend-link:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 
 	.input-group {

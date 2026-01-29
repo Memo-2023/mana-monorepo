@@ -114,6 +114,14 @@ export const authStore = {
 	},
 
 	/**
+	 * Resend verification email
+	 */
+	async resendVerificationEmail(email: string) {
+		const sourceAppUrl = browser ? window.location.origin : undefined;
+		return authService.resendVerificationEmail(email, sourceAppUrl);
+	},
+
+	/**
 	 * Get access token for API calls (raw token, no refresh)
 	 * @deprecated Use getValidToken() instead for automatic refresh
 	 */

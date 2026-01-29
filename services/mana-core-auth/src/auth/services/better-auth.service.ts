@@ -997,6 +997,49 @@ export class BetterAuthService {
 	}
 
 	/**
+	 * Resend verification email
+	 *
+	 * Sends a new verification email to the user.
+	 * Uses Better Auth's sendVerificationEmail API.
+	 *
+	 * @param email - User's email address
+	 * @param sourceAppUrl - Optional URL to redirect after verification
+	 * @returns Success status (always returns success to prevent email enumeration)
+	 */
+	async resendVerificationEmail(
+		email: string,
+		sourceAppUrl?: string
+	): Promise<{ success: boolean; message: string }> {
+		try {
+			// Store source app URL for email verification redirect
+			if (sourceAppUrl) {
+				sourceAppStore.set(email, sourceAppUrl);
+			}
+
+			// Better Auth's sendVerificationEmail method
+			// See: https://www.better-auth.com/docs/authentication/email-verification
+			const api = this.auth.api as any;
+
+			await api.sendVerificationEmail({
+				body: { email },
+			});
+
+			// Always return success to prevent email enumeration
+			return {
+				success: true,
+				message: 'If an account with that email exists, a verification email has been sent',
+			};
+		} catch (error) {
+			console.error('[resendVerificationEmail] Error:', error);
+			// Always return success to prevent email enumeration attacks
+			return {
+				success: true,
+				message: 'If an account with that email exists, a verification email has been sent',
+			};
+		}
+	}
+
+	/**
 	 * Get JWKS (JSON Web Key Set)
 	 *
 	 * Returns public keys for JWT verification.
