@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X } from 'lucide-svelte';
+	import { X } from '@manacore/shared-icons';
 
 	interface Props {
 		open: boolean;

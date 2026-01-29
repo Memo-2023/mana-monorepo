@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { collectionsStore } from '$lib/stores';
 	import CollectionModal from '$lib/components/CollectionModal.svelte';
-	import { ArrowLeft, Plus, Edit2, Trash2, FolderOpen, GripVertical } from 'lucide-svelte';
+	import {
+		ArrowLeft,
+		Plus,
+		PencilSimple,
+		Trash,
+		FolderOpen,
+		DotsSixVertical,
+	} from '@manacore/shared-icons';
 	import type { Collection } from '$lib/types';
 
 	let showModal = $state(false);
@@ -47,9 +54,7 @@
 				Back to questions
 			</a>
 			<h1 class="text-2xl font-bold text-foreground">Collections</h1>
-			<p class="mt-1 text-muted-foreground">
-				Organize your questions into collections
-			</p>
+			<p class="mt-1 text-muted-foreground">Organize your questions into collections</p>
 		</div>
 		<button
 			onclick={openCreateModal}
@@ -84,7 +89,7 @@
 				>
 					<!-- Drag Handle -->
 					<div class="cursor-grab text-muted-foreground">
-						<GripVertical class="h-5 w-5" />
+						<DotsSixVertical class="h-5 w-5" />
 					</div>
 
 					<!-- Icon & Color -->
@@ -122,7 +127,7 @@
 							class="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
 							title="Edit"
 						>
-							<Edit2 class="h-4 w-4" />
+							<PencilSimple class="h-4 w-4" />
 						</button>
 
 						{#if deleteConfirm === collection.id}
@@ -146,7 +151,7 @@
 								class="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
 								title="Delete"
 							>
-								<Trash2 class="h-4 w-4" />
+								<Trash class="h-4 w-4" />
 							</button>
 						{/if}
 					</div>

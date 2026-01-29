@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { questionsStore, collectionsStore } from '$lib/stores';
 	import { QuestionSkeleton, ErrorAlert } from '$lib/components';
-	import { Search, Filter, Clock, CheckCircle, Loader2, Archive } from 'lucide-svelte';
+	import {
+		MagnifyingGlass,
+		Funnel,
+		Clock,
+		CheckCircle,
+		CircleNotch,
+		Archive,
+	} from '@manacore/shared-icons';
 	import type { QuestionStatus, ResearchDepth } from '$lib/types';
 
 	let searchQuery = $state('');
@@ -9,7 +16,7 @@
 
 	const statusIcons = {
 		open: { icon: Clock, color: 'text-gray-500' },
-		researching: { icon: Loader2, color: 'text-blue-500' },
+		researching: { icon: CircleNotch, color: 'text-blue-500' },
 		answered: { icon: CheckCircle, color: 'text-green-500' },
 		archived: { icon: Archive, color: 'text-gray-400' },
 	};
@@ -60,7 +67,9 @@
 	<!-- Search and Filters -->
 	<div class="mb-6 flex gap-4">
 		<div class="relative flex-1">
-			<Search class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+			<MagnifyingGlass
+				class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+			/>
 			<input
 				type="text"
 				bind:value={searchQuery}
@@ -86,7 +95,7 @@
 			onclick={handleSearch}
 			class="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-foreground hover:bg-secondary-hover"
 		>
-			<Filter class="h-5 w-5" />
+			<Funnel class="h-5 w-5" />
 			<span>Filter</span>
 		</button>
 	</div>

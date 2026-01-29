@@ -2,7 +2,16 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { loginWithPassword, discoverHomeserver, checkHomeserver, matrixStore } from '$lib/matrix';
-	import { Eye, EyeOff, Loader2, Server, User, Lock, AlertCircle, LogIn } from 'lucide-svelte';
+	import {
+		Eye,
+		EyeSlash,
+		CircleNotch,
+		HardDrive,
+		User,
+		Lock,
+		WarningCircle,
+		SignIn,
+	} from '@manacore/shared-icons';
 
 	// Form state
 	let homeserver = $state('matrix.mana.how');
@@ -100,7 +109,7 @@
 		<!-- Error Alert -->
 		{#if error}
 			<div class="alert alert-error mb-4">
-				<AlertCircle class="h-5 w-5" />
+				<WarningCircle class="h-5 w-5" />
 				<span>{error}</span>
 			</div>
 		{/if}
@@ -111,12 +120,12 @@
 			<div class="form-control">
 				<label class="label" for="homeserver">
 					<span class="label-text flex items-center gap-2">
-						<Server class="h-4 w-4" />
+						<HardDrive class="h-4 w-4" />
 						Homeserver
 					</span>
 					{#if checkingServer}
 						<span class="label-text-alt">
-							<Loader2 class="h-4 w-4 animate-spin" />
+							<CircleNotch class="h-4 w-4 animate-spin" />
 						</span>
 					{:else if serverValid === true}
 						<span class="label-text-alt text-success">Connected</span>
@@ -182,7 +191,7 @@
 						tabindex={-1}
 					>
 						{#if showPassword}
-							<EyeOff class="h-5 w-5" />
+							<EyeSlash class="h-5 w-5" />
 						{:else}
 							<Eye class="h-5 w-5" />
 						{/if}
@@ -193,7 +202,7 @@
 			<!-- Submit Button -->
 			<button type="submit" class="btn btn-primary w-full" disabled={loading}>
 				{#if loading}
-					<Loader2 class="h-5 w-5 animate-spin" />
+					<CircleNotch class="h-5 w-5 animate-spin" />
 					Signing in...
 				{:else}
 					Sign In
@@ -212,10 +221,10 @@
 			disabled={loadingSSO}
 		>
 			{#if loadingSSO}
-				<Loader2 class="h-5 w-5 animate-spin" />
+				<CircleNotch class="h-5 w-5 animate-spin" />
 				Redirecting...
 			{:else}
-				<LogIn class="h-5 w-5" />
+				<SignIn class="h-5 w-5" />
 				Sign in with Mana Core
 			{/if}
 		</button>

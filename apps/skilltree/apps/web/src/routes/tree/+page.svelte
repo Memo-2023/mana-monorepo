@@ -2,7 +2,7 @@
 	import { skillStore } from '$lib/stores/skills.svelte';
 	import { BRANCH_INFO, LEVEL_NAMES } from '$lib/types';
 	import type { SkillBranch } from '$lib/types';
-	import { ArrowLeft, Star } from 'lucide-svelte';
+	import { ArrowLeft, Star } from '@manacore/shared-icons';
 
 	// Group skills by branch for radial layout
 	const branches = Object.keys(BRANCH_INFO) as SkillBranch[];
@@ -31,7 +31,9 @@
 		const radiusStep = 60;
 
 		// Spread skills in a small arc
-		const skillAngle = branchAngle + (skillIndex - (skillCount - 1) / 2) * (spreadAngle / Math.max(skillCount - 1, 1));
+		const skillAngle =
+			branchAngle +
+			(skillIndex - (skillCount - 1) / 2) * (spreadAngle / Math.max(skillCount - 1, 1));
 		const radius = baseRadius + skillIndex * radiusStep * 0.3;
 
 		return {
@@ -104,9 +106,33 @@
 					style="min-width: 600px; height: auto; max-height: 80vh;"
 				>
 					<!-- Background circles -->
-					<circle cx="400" cy="400" r="120" fill="none" stroke="#374151" stroke-width="1" stroke-dasharray="4" />
-					<circle cx="400" cy="400" r="200" fill="none" stroke="#374151" stroke-width="1" stroke-dasharray="4" />
-					<circle cx="400" cy="400" r="280" fill="none" stroke="#374151" stroke-width="1" stroke-dasharray="4" />
+					<circle
+						cx="400"
+						cy="400"
+						r="120"
+						fill="none"
+						stroke="#374151"
+						stroke-width="1"
+						stroke-dasharray="4"
+					/>
+					<circle
+						cx="400"
+						cy="400"
+						r="200"
+						fill="none"
+						stroke="#374151"
+						stroke-width="1"
+						stroke-dasharray="4"
+					/>
+					<circle
+						cx="400"
+						cy="400"
+						r="280"
+						fill="none"
+						stroke="#374151"
+						stroke-width="1"
+						stroke-dasharray="4"
+					/>
 
 					<!-- Center node -->
 					<circle cx="400" cy="400" r="50" fill="#10b981" opacity="0.2" />
@@ -162,7 +188,10 @@
 								/>
 
 								<!-- Skill node -->
-								<g class="tree-node cursor-pointer" transform="translate({skillPos.x}, {skillPos.y})">
+								<g
+									class="tree-node cursor-pointer"
+									transform="translate({skillPos.x}, {skillPos.y})"
+								>
 									<!-- Glow effect for high level -->
 									{#if skill.level >= 4}
 										<circle

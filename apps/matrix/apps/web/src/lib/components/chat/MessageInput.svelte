@@ -1,6 +1,14 @@
 <script lang="ts">
 	import { matrixStore, type SimpleMessage } from '$lib/matrix';
-	import { Send, Paperclip, Smile, X, Image, File, Loader2 } from 'lucide-svelte';
+	import {
+		PaperPlaneTilt,
+		Paperclip,
+		Smiley,
+		X,
+		Image,
+		File,
+		CircleNotch,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		replyTo?: SimpleMessage | null;
@@ -163,7 +171,7 @@
 	<!-- Upload Progress -->
 	{#if uploading}
 		<div class="flex items-center gap-3 px-4 py-2">
-			<Loader2 class="h-5 w-5 animate-spin text-primary" />
+			<CircleNotch class="h-5 w-5 animate-spin text-primary" />
 			<div class="flex-1">
 				<div class="h-2 overflow-hidden rounded-full bg-base-300">
 					<div
@@ -242,7 +250,7 @@
 					title="Emoji hinzufügen"
 					disabled
 				>
-					<Smile class="h-5 w-5" />
+					<Smiley class="h-5 w-5" />
 				</button>
 			</div>
 
@@ -253,7 +261,7 @@
 				disabled={!message.trim() || uploading}
 				title={editMessage ? 'Speichern' : 'Senden'}
 			>
-				<Send class="h-5 w-5" />
+				<PaperPlaneTilt class="h-5 w-5" />
 			</button>
 		</div>
 

@@ -39,7 +39,6 @@
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
-		"lucide-svelte": "^0.509.0",
 		"date-fns": "^4.1.0",
 		"svelte-i18n": "^4.0.1"
 	}

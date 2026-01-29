@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
-	import { ArrowLeft, User, Moon, Sun, Monitor, Bell, Shield, Trash2 } from 'lucide-svelte';
+	import { ArrowLeft, User, Moon, Sun, Desktop, Bell, Shield, Trash } from '@manacore/shared-icons';
 
 	let currentTheme = $state(theme.current);
 	let deleteConfirm = $state(false);
@@ -14,7 +14,7 @@
 	const themeOptions = [
 		{ value: 'light', label: 'Light', icon: Sun },
 		{ value: 'dark', label: 'Dark', icon: Moon },
-		{ value: 'system', label: 'System', icon: Monitor },
+		{ value: 'system', label: 'System', icon: Desktop },
 	] as const;
 </script>
 
@@ -156,7 +156,7 @@
 							onclick={() => (deleteConfirm = true)}
 							class="flex items-center gap-2 rounded-lg border border-destructive px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
 						>
-							<Trash2 class="h-4 w-4" />
+							<Trash class="h-4 w-4" />
 							Delete Account
 						</button>
 					{/if}

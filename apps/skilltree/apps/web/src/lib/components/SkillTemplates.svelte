@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Skill, SkillBranch } from '$lib/types';
 	import { BRANCH_INFO } from '$lib/types';
-	import { X, Plus, Sparkles } from 'lucide-svelte';
+	import { X, Plus, Sparkle } from '@manacore/shared-icons';
 
 	interface Props {
 		onClose: () => void;
@@ -41,14 +41,14 @@
 			{ name: 'Schreiben', description: 'Kreatives Schreiben', branch: 'creativity' },
 			{ name: 'Design', description: 'Visuelles Design', branch: 'creativity' },
 		],
-		'Sprachen': [
+		Sprachen: [
 			{ name: 'Englisch', description: 'Die Weltsprache', branch: 'intellect' },
 			{ name: 'Spanisch', description: 'Spanisch sprechen', branch: 'intellect' },
 			{ name: 'Französisch', description: 'La langue française', branch: 'intellect' },
 			{ name: 'Japanisch', description: '日本語', branch: 'intellect' },
 			{ name: 'Deutsch', description: 'Deutsche Sprache', branch: 'intellect' },
 		],
-		'Produktivität': [
+		Produktivität: [
 			{ name: 'Zeitmanagement', description: 'Zeit effektiv nutzen', branch: 'mindset' },
 			{ name: 'Fokus', description: 'Konzentration verbessern', branch: 'mindset' },
 			{ name: 'Organisation', description: 'Ordnung und Struktur', branch: 'practical' },
@@ -114,7 +114,7 @@
 		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
 			<div class="flex items-center gap-2">
-				<Sparkles class="h-6 w-6 text-yellow-500" />
+				<Sparkle class="h-6 w-6 text-yellow-500" />
 				<h2 class="text-xl font-bold text-white">Skill-Vorlagen</h2>
 			</div>
 			<button
@@ -126,7 +126,8 @@
 		</div>
 
 		<p class="mb-6 text-gray-400">
-			Starte schnell mit vorgefertigten Skill-Sets. Wähle eine Vorlage und füge einzelne Skills oder alle auf einmal hinzu.
+			Starte schnell mit vorgefertigten Skill-Sets. Wähle eine Vorlage und füge einzelne Skills oder
+			alle auf einmal hinzu.
 		</p>
 
 		<!-- Template List -->
@@ -184,7 +185,12 @@
 									>
 										{#if isAdded}
 											<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M5 13l4 4L19 7"
+												/>
 											</svg>
 										{:else}
 											<Plus class="h-4 w-4" />

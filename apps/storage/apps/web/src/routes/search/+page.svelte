@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { Search, Grid, List } from 'lucide-svelte';
+	import { MagnifyingGlass, GridFour, List } from '@manacore/shared-icons';
 	import { searchApi } from '$lib/api/client';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { filesStore } from '$lib/stores/files.svelte';
@@ -68,7 +68,7 @@
 <div class="search-page">
 	<div class="page-header">
 		<h1>
-			<Search size={24} />
+			<MagnifyingGlass size={24} />
 			Suche
 		</h1>
 
@@ -79,7 +79,7 @@
 				onclick={() => filesStore.setViewMode('grid')}
 				aria-label="Rasteransicht"
 			>
-				<Grid size={18} />
+				<GridFour size={18} />
 			</button>
 			<button
 				class="view-btn"
@@ -93,7 +93,7 @@
 	</div>
 
 	<div class="search-bar">
-		<Search size={20} />
+		<MagnifyingGlass size={20} />
 		<input
 			type="text"
 			bind:value={query}
@@ -113,7 +113,7 @@
 		</div>
 	{:else if searched && files.length === 0 && folders.length === 0}
 		<div class="empty-state">
-			<Search size={48} />
+			<MagnifyingGlass size={48} />
 			<h2>Keine Ergebnisse</h2>
 			<p>Keine Dateien oder Ordner für "{query}" gefunden.</p>
 		</div>
@@ -129,7 +129,7 @@
 		{/if}
 	{:else}
 		<div class="empty-state">
-			<Search size={48} />
+			<MagnifyingGlass size={48} />
 			<h2>Dateien durchsuchen</h2>
 			<p>Gib einen Suchbegriff ein, um Dateien und Ordner zu finden.</p>
 		</div>

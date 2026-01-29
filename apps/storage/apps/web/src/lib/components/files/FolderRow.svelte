@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { StorageFolder } from '$lib/api/client';
-	import { Folder, Heart, MoreVertical } from 'lucide-svelte';
+	import { Folder, Heart, DotsThreeVertical } from '@manacore/shared-icons';
 
 	interface Props {
 		folder: StorageFolder;
@@ -52,7 +52,7 @@
 	<span class="col-date">{formatDate(folder.updatedAt)}</span>
 	<span class="col-actions">
 		<button class="menu-button" onclick={handleMenuClick} type="button">
-			<MoreVertical size={16} />
+			<DotsThreeVertical size={16} />
 		</button>
 		{#if showMenu}
 			<div class="menu-dropdown">

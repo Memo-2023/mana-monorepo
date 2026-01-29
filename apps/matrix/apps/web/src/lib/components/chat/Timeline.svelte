@@ -3,7 +3,7 @@
 	import Message from './Message.svelte';
 	import TypingIndicator from './TypingIndicator.svelte';
 	import { onMount, tick } from 'svelte';
-	import { Loader2, ArrowDown } from 'lucide-svelte';
+	import { CircleNotch, ArrowDown } from '@manacore/shared-icons';
 
 	interface Props {
 		onReply?: (message: SimpleMessage) => void;
@@ -87,7 +87,7 @@
 		<!-- Loading indicator at top -->
 		{#if loadingMore}
 			<div class="flex justify-center py-4">
-				<Loader2 class="h-6 w-6 animate-spin text-base-content/50" />
+				<CircleNotch class="h-6 w-6 animate-spin text-base-content/50" />
 			</div>
 		{/if}
 

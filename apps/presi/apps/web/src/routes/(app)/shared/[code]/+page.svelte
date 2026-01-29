@@ -4,16 +4,16 @@
 	import { shareApi } from '$lib/api/client';
 	import type { Slide } from '@presi/shared';
 	import {
-		ChevronLeft,
-		ChevronRight,
+		CaretLeft,
+		CaretRight,
 		Play,
 		Pause,
-		Maximize,
-		Minimize,
+		ArrowsOut,
+		ArrowsIn,
 		Clock,
 		Presentation,
-		AlertCircle,
-	} from 'lucide-svelte';
+		WarningCircle,
+	} from '@manacore/shared-icons';
 
 	let deck = $state<any>(null);
 	let slides = $state<Slide[]>([]);
@@ -151,7 +151,7 @@
 	{:else if error}
 		<div class="flex-1 flex flex-col items-center justify-center px-4">
 			<div class="p-4 bg-red-900/30 rounded-full mb-4">
-				<AlertCircle class="w-12 h-12 text-red-400" />
+				<WarningCircle class="w-12 h-12 text-red-400" />
 			</div>
 			<h1 class="text-2xl font-bold mb-2">Unable to load presentation</h1>
 			<p class="text-slate-400 text-center max-w-md mb-6">{error}</p>
@@ -257,7 +257,7 @@
 						class="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30"
 						aria-label="Previous slide"
 					>
-						<ChevronLeft class="w-6 h-6" />
+						<CaretLeft class="w-6 h-6" />
 					</button>
 
 					<!-- Slide Dots -->
@@ -280,7 +280,7 @@
 						class="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30"
 						aria-label="Next slide"
 					>
-						<ChevronRight class="w-6 h-6" />
+						<CaretRight class="w-6 h-6" />
 					</button>
 				</div>
 
@@ -292,9 +292,9 @@
 						aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
 					>
 						{#if isFullscreen}
-							<Minimize class="w-5 h-5" />
+							<ArrowsIn class="w-5 h-5" />
 						{:else}
-							<Maximize class="w-5 h-5" />
+							<ArrowsOut class="w-5 h-5" />
 						{/if}
 					</button>
 				</div>

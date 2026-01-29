@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Trash2, RotateCcw, AlertTriangle } from 'lucide-svelte';
+	import { Trash, ArrowCounterClockwise, Warning } from '@manacore/shared-icons';
 	import { trashApi } from '$lib/api/client';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { toast } from '$lib/stores/toast';
@@ -89,13 +89,13 @@
 <div class="trash-page">
 	<div class="page-header">
 		<h1>
-			<Trash2 size={24} />
+			<Trash size={24} />
 			Papierkorb
 		</h1>
 
 		{#if files.length > 0 || folders.length > 0}
 			<button class="empty-btn" onclick={handleEmptyTrash}>
-				<AlertTriangle size={16} />
+				<Warning size={16} />
 				Papierkorb leeren
 			</button>
 		{/if}
@@ -113,7 +113,7 @@
 		</div>
 	{:else if files.length === 0 && folders.length === 0}
 		<div class="empty-state">
-			<Trash2 size={48} />
+			<Trash size={48} />
 			<h2>Papierkorb ist leer</h2>
 			<p>Gelöschte Dateien und Ordner erscheinen hier.</p>
 		</div>
@@ -130,7 +130,7 @@
 					</div>
 					<div class="item-actions">
 						<button class="restore-btn" onclick={() => handleRestore(folder.id, 'folder')}>
-							<RotateCcw size={16} />
+							<ArrowCounterClockwise size={16} />
 							Wiederherstellen
 						</button>
 						<button class="delete-btn" onclick={() => handlePermanentDelete(folder.id, 'folder')}>
@@ -150,7 +150,7 @@
 					</div>
 					<div class="item-actions">
 						<button class="restore-btn" onclick={() => handleRestore(file.id, 'file')}>
-							<RotateCcw size={16} />
+							<ArrowCounterClockwise size={16} />
 							Wiederherstellen
 						</button>
 						<button class="delete-btn" onclick={() => handlePermanentDelete(file.id, 'file')}>

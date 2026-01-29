@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { ArrowLeft } from 'lucide-svelte';
+	import { ArrowLeft } from '@manacore/shared-icons';
 
 	let email = $state('');
 	let error = $state<string | null>(null);

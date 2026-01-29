@@ -3,7 +3,14 @@
 	import { goto } from '$app/navigation';
 	import { decksStore } from '$lib/stores/decks.svelte';
 	import { PageHeader } from '@manacore/shared-ui';
-	import { Plus, Presentation, Trash2, MoreVertical, Clock, Layers } from 'lucide-svelte';
+	import {
+		Plus,
+		Presentation,
+		Trash,
+		DotsThreeVertical,
+		Clock,
+		Stack,
+	} from '@manacore/shared-icons';
 
 	let showCreateModal = $state(false);
 	let showDeleteModal = $state(false);
@@ -132,7 +139,7 @@
 							class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
 							aria-label="Delete deck"
 						>
-							<Trash2 class="w-4 h-4" />
+							<Trash class="w-4 h-4" />
 						</button>
 					</div>
 				</div>

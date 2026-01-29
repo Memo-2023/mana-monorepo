@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import type { VerificationRequest, SasVerification } from '$lib/matrix/types';
-	import { Check, X, Loader2, ShieldCheck } from 'lucide-svelte';
+	import { Check, X, CircleNotch, ShieldCheck } from '@manacore/shared-icons';
 
 	interface Props {
 		request: VerificationRequest;
@@ -82,7 +82,7 @@
 <div class="space-y-6">
 	{#if phase === 'waiting'}
 		<div class="flex flex-col items-center gap-4 py-8">
-			<Loader2 class="h-12 w-12 animate-spin text-primary" />
+			<CircleNotch class="h-12 w-12 animate-spin text-primary" />
 			<p class="text-center text-muted-foreground">Warte auf Antwort vom anderen Gerät...</p>
 			<p class="text-sm text-muted-foreground/70">
 				Öffne die Verifizierungsanfrage auf deinem anderen Gerät.
@@ -128,7 +128,7 @@
 		</div>
 	{:else if phase === 'confirming'}
 		<div class="flex flex-col items-center gap-4 py-8">
-			<Loader2 class="h-12 w-12 animate-spin text-primary" />
+			<CircleNotch class="h-12 w-12 animate-spin text-primary" />
 			<p class="text-center text-muted-foreground">Bestätige Verifizierung...</p>
 		</div>
 	{:else if phase === 'done'}

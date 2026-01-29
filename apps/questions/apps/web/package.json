@@ -41,7 +41,6 @@
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"date-fns": "^4.1.0",
-		"lucide-svelte": "^0.556.0",
 		"svelte-i18n": "^4.0.1"
 	},
 	"type": "module"

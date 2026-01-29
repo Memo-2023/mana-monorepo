@@ -2,7 +2,7 @@
 	import type { EventAttendee, AttendeeStatus } from '@calendar/shared';
 	import type { ContactSummary, ContactOrManual, ManualContactEntry } from '@manacore/shared-types';
 	import { ContactSelector, ContactAvatar } from '@manacore/shared-ui';
-	import { Check, X, HelpCircle, Clock, ChevronDown } from 'lucide-svelte';
+	import { Check, X, Question, Clock, CaretDown } from '@manacore/shared-icons';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 
 	interface Props {
@@ -178,12 +178,12 @@
 							{:else if attendee.status === 'declined'}
 								<X size={12} />
 							{:else if attendee.status === 'tentative'}
-								<HelpCircle size={12} />
+								<Question size={12} />
 							{:else}
 								<Clock size={12} />
 							{/if}
 							<span class="hidden sm:inline">{getStatusLabel(attendee.status)}</span>
-							<ChevronDown size={12} />
+							<CaretDown size={12} />
 						</button>
 
 						{#if showStatusDropdown === attendee.email}
@@ -213,7 +213,7 @@
 											{:else if option.value === 'declined'}
 												<X size={12} />
 											{:else if option.value === 'tentative'}
-												<HelpCircle size={12} />
+												<Question size={12} />
 											{:else}
 												<Clock size={12} />
 											{/if}

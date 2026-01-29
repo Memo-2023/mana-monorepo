@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Skill } from '$lib/types';
 	import { LEVEL_NAMES } from '$lib/types';
-	import { X, Zap, Clock, Star } from 'lucide-svelte';
+	import { X, Lightning, Clock, Star } from '@manacore/shared-icons';
 
 	interface Props {
 		skill: Skill;
@@ -75,15 +75,14 @@
 		<form onsubmit={handleSubmit} class="space-y-4">
 			<!-- Quick XP Presets -->
 			<div>
-				<label class="mb-2 block text-sm font-medium text-gray-300">
-					Schnellauswahl
-				</label>
+				<label class="mb-2 block text-sm font-medium text-gray-300"> Schnellauswahl </label>
 				<div class="flex flex-wrap gap-2">
 					{#each xpPresets as preset}
 						<button
 							type="button"
 							onclick={() => selectPreset(preset)}
-							class="rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors {xp === preset.value
+							class="rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors {xp ===
+							preset.value
 								? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
 								: 'border-gray-600 bg-gray-700/50 text-gray-300 hover:border-gray-500'}"
 						>
@@ -96,7 +95,7 @@
 			<!-- Custom XP -->
 			<div>
 				<label for="xp" class="mb-1 block text-sm font-medium text-gray-300">
-					<Zap class="mr-1 inline h-4 w-4 text-yellow-500" />
+					<Lightning class="mr-1 inline h-4 w-4 text-yellow-500" />
 					XP Menge
 				</label>
 				<input

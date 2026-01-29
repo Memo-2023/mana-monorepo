@@ -5,7 +5,7 @@
 	import { auth } from '$lib/stores/auth.svelte';
 	import { decksStore } from '$lib/stores/decks.svelte';
 	import { goto } from '$app/navigation';
-	import { FolderOpen, Layers, Calendar } from 'lucide-svelte';
+	import { FolderOpen, Stack, Calendar } from '@manacore/shared-icons';
 
 	let isLoading = $state(true);
 
@@ -87,7 +87,7 @@
 					</div>
 					<div class="text-center p-4 bg-black/5 dark:bg-white/5 rounded-xl">
 						<div class="flex justify-center mb-2">
-							<Layers class="w-6 h-6 text-primary" />
+							<Stack class="w-6 h-6 text-primary" />
 						</div>
 						<div class="text-2xl font-bold text-foreground">-</div>
 						<div class="text-sm text-muted-foreground">Folien</div>

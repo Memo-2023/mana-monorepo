@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Skill } from '$lib/types';
 	import { BRANCH_INFO, LEVEL_NAMES, xpProgress, xpForNextLevel } from '$lib/types';
-	import { Plus, Trash2, Edit, Star } from 'lucide-svelte';
+	import { Plus, Trash, PencilSimple, Star } from '@manacore/shared-icons';
 
 	interface Props {
 		skill: Skill;
@@ -31,7 +31,9 @@
 	}
 </script>
 
-<div class="skill-card group relative overflow-hidden rounded-xl border border-gray-700 bg-gray-800/50 p-4">
+<div
+	class="skill-card group relative overflow-hidden rounded-xl border border-gray-700 bg-gray-800/50 p-4"
+>
 	<!-- Branch Indicator -->
 	<div
 		class="branch-indicator absolute left-0 top-0 h-full"
@@ -56,7 +58,11 @@
 
 	<!-- Level Badge -->
 	<div class="mb-3 pl-3">
-		<span class="inline-flex items-center gap-1 rounded-full bg-gray-700/50 px-3 py-1 text-sm {getLevelColor(skill.level)}">
+		<span
+			class="inline-flex items-center gap-1 rounded-full bg-gray-700/50 px-3 py-1 text-sm {getLevelColor(
+				skill.level
+			)}"
+		>
 			Lvl {skill.level} - {levelName}
 		</span>
 	</div>
@@ -96,14 +102,14 @@
 			class="rounded-lg bg-gray-600/20 p-2 text-gray-400 opacity-0 transition-all hover:bg-gray-600/30 hover:text-white group-hover:opacity-100"
 			title="Bearbeiten"
 		>
-			<Edit class="h-4 w-4" />
+			<PencilSimple class="h-4 w-4" />
 		</button>
 		<button
 			onclick={onDelete}
 			class="rounded-lg bg-red-600/20 p-2 text-red-400 opacity-0 transition-all hover:bg-red-600/30 group-hover:opacity-100"
 			title="Löschen"
 		>
-			<Trash2 class="h-4 w-4" />
+			<Trash class="h-4 w-4" />
 		</button>
 	</div>
 </div>

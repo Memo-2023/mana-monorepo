@@ -7,14 +7,14 @@
 		Bell,
 		Palette,
 		Shield,
-		LogOut,
-		Server,
+		SignOut,
+		HardDrive,
 		ShieldCheck,
-		ShieldAlert,
+		ShieldWarning,
 		Key,
-		Smartphone,
-		Loader2,
-	} from 'lucide-svelte';
+		DeviceMobile,
+		CircleNotch,
+	} from '@manacore/shared-icons';
 	import { VerificationDialog, RecoveryKeyDialog } from '$lib/components/crypto';
 
 	let verificationDialogOpen = $state(false);
@@ -77,7 +77,7 @@
 			<section class="card">
 				<div class="space-y-4">
 					<h2 class="flex items-center gap-2 text-lg font-semibold">
-						<Server class="h-5 w-5" />
+						<HardDrive class="h-5 w-5" />
 						Server
 					</h2>
 					<div class="space-y-2 text-sm">
@@ -109,7 +109,7 @@
 
 					{#if !cryptoReady}
 						<div class="flex items-center gap-3 text-warning">
-							<Loader2 class="h-5 w-5 animate-spin" />
+							<CircleNotch class="h-5 w-5 animate-spin" />
 							<span>Verschlüsselung wird initialisiert...</span>
 						</div>
 					{:else}
@@ -120,7 +120,7 @@
 									{#if verificationStatus === 'verified'}
 										<ShieldCheck class="h-8 w-8 text-success" />
 									{:else}
-										<ShieldAlert class="h-8 w-8 text-warning" />
+										<ShieldWarning class="h-8 w-8 text-warning" />
 									{/if}
 									<div>
 										<p class="font-medium">
@@ -137,7 +137,7 @@
 									class="btn-primary flex items-center gap-2 text-sm"
 									onclick={() => (verificationDialogOpen = true)}
 								>
-									<Smartphone class="h-4 w-4" />
+									<DeviceMobile class="h-4 w-4" />
 									Geräte
 								</button>
 							</div>
@@ -208,7 +208,7 @@
 					class="flex w-full items-center justify-center gap-2 rounded-lg bg-error p-3 text-white hover:brightness-90"
 					onclick={handleLogout}
 				>
-					<LogOut class="h-5 w-5" />
+					<SignOut class="h-5 w-5" />
 					Abmelden
 				</button>
 			</section>

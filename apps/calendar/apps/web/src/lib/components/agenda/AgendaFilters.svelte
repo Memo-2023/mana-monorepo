@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Calendar, CheckSquare, Filter } from 'lucide-svelte';
+	import { Calendar, CheckSquare, Funnel } from '@manacore/shared-icons';
 	import { FilterDropdown, type FilterDropdownOption } from '@manacore/shared-ui';
 
 	interface Props {
@@ -53,7 +53,7 @@
 
 	<div class="filter-group">
 		<div class="range-selector">
-			<Filter size={14} />
+			<Funnel size={14} />
 			<FilterDropdown
 				options={rangeOptions}
 				value={timeRange}

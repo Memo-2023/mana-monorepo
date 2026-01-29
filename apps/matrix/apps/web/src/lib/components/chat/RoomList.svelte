@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import RoomItem from './RoomItem.svelte';
-	import { Search, Plus, Users, MessageCircle } from 'lucide-svelte';
+	import { MagnifyingGlass, Plus, Users, ChatCircle } from '@manacore/shared-icons';
 
 	interface Props {
 		onCreateRoom?: () => void;
@@ -23,7 +23,9 @@
 	<!-- Search -->
 	<div class="p-3">
 		<div class="relative">
-			<Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50" />
+			<MagnifyingGlass
+				class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50"
+			/>
 			<input
 				type="text"
 				bind:value={search}
@@ -36,7 +38,7 @@
 	<!-- Tabs -->
 	<div class="tabs tabs-boxed mx-3 mb-2">
 		<button class="tab flex-1" class:tab-active={showDMs} onclick={() => (showDMs = true)}>
-			<MessageCircle class="mr-1 h-4 w-4" />
+			<ChatCircle class="mr-1 h-4 w-4" />
 			Direct
 			{#if matrixStore.directRooms.length > 0}
 				<span class="badge badge-sm ml-1">{matrixStore.directRooms.length}</span>
@@ -62,10 +64,10 @@
 		{:else}
 			<div class="flex flex-col items-center justify-center p-8 text-base-content/50">
 				{#if search}
-					<Search class="mb-2 h-8 w-8" />
+					<MagnifyingGlass class="mb-2 h-8 w-8" />
 					<p>No rooms match "{search}"</p>
 				{:else}
-					<MessageCircle class="mb-2 h-8 w-8" />
+					<ChatCircle class="mb-2 h-8 w-8" />
 					<p>No {showDMs ? 'direct messages' : 'rooms'} yet</p>
 				{/if}
 			</div>

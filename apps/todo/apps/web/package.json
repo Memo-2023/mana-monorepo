@@ -50,7 +50,6 @@
 		"@todo/shared": "workspace:*",
 		"d3-force": "^3.0.0",
 		"date-fns": "^4.1.0",
-		"lucide-svelte": "^0.556.0",
 		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.1"
 	},

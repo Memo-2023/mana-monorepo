@@ -4,7 +4,15 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { apiClient } from '$lib/api/client';
 	import { DEFAULT_DAILY_VALUES } from '@nutriphi/shared';
-	import { ArrowLeft, Save, Loader2, AlertCircle, LogOut, User, Target } from 'lucide-svelte';
+	import {
+		ArrowLeft,
+		FloppyDisk,
+		CircleNotch,
+		WarningCircle,
+		SignOut,
+		User,
+		Target,
+	} from '@manacore/shared-icons';
 
 	interface UserGoals {
 		dailyCalories: number;
@@ -117,7 +125,7 @@
 				onclick={handleLogout}
 				class="w-full py-2.5 px-4 bg-[var(--color-background-elevated)] hover:bg-red-500/20 text-[var(--color-text-secondary)] hover:text-red-400 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
 			>
-				<LogOut class="w-4 h-4" />
+				<SignOut class="w-4 h-4" />
 				Abmelden
 			</button>
 		</section>
@@ -140,7 +148,7 @@
 
 			{#if loading}
 				<div class="flex items-center justify-center py-8">
-					<Loader2 class="w-6 h-6 animate-spin text-[var(--color-text-muted)]" />
+					<CircleNotch class="w-6 h-6 animate-spin text-[var(--color-text-muted)]" />
 				</div>
 			{:else}
 				<div class="space-y-4">
@@ -238,7 +246,7 @@
 						<div
 							class="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center gap-2 text-red-400 text-sm"
 						>
-							<AlertCircle class="w-4 h-4 flex-shrink-0" />
+							<WarningCircle class="w-4 h-4 flex-shrink-0" />
 							<span>{error}</span>
 						</div>
 					{/if}
@@ -257,10 +265,10 @@
 						class="w-full py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-medium rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
 					>
 						{#if saving}
-							<Loader2 class="w-5 h-5 animate-spin" />
+							<CircleNotch class="w-5 h-5 animate-spin" />
 							Speichern...
 						{:else}
-							<Save class="w-5 h-5" />
+							<FloppyDisk class="w-5 h-5" />
 							Ziele speichern
 						{/if}
 					</button>

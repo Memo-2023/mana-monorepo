@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Share2, Link, Copy, Trash2 } from 'lucide-svelte';
+	import { ShareNetwork, Link, Copy, Trash } from '@manacore/shared-icons';
 	import { sharesApi } from '$lib/api/client';
 	import type { Share } from '$lib/api/client';
 	import { toast } from '$lib/stores/toast';
@@ -75,7 +75,7 @@
 <div class="shared-page">
 	<div class="page-header">
 		<h1>
-			<Share2 size={24} />
+			<ShareNetwork size={24} />
 			Geteilte Links
 		</h1>
 	</div>
@@ -92,7 +92,7 @@
 		</div>
 	{:else if shares.length === 0}
 		<div class="empty-state">
-			<Share2 size={48} />
+			<ShareNetwork size={48} />
 			<h2>Keine geteilten Links</h2>
 			<p>Teile Dateien oder Ordner, um Links hier zu verwalten.</p>
 		</div>
@@ -128,7 +128,7 @@
 							Link kopieren
 						</button>
 						<button class="delete-btn" onclick={() => deleteShare(share.id)}>
-							<Trash2 size={16} />
+							<Trash size={16} />
 						</button>
 					</div>
 				</div>

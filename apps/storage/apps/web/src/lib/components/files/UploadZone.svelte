@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Upload, X } from 'lucide-svelte';
+	import { UploadSimple } from '@manacore/shared-icons';
 
 	interface Props {
 		onUpload: (files: FileList) => void;
@@ -74,7 +74,7 @@
 		</div>
 	{:else}
 		<div class="upload-content">
-			<Upload size={32} />
+			<UploadSimple size={32} />
 			<span class="upload-text">
 				Dateien hierher ziehen oder <strong>klicken</strong> zum Auswählen
 			</span>

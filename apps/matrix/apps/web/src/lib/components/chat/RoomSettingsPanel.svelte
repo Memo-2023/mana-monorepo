@@ -3,15 +3,15 @@
 	import {
 		X,
 		Users,
-		Settings,
+		Gear,
 		UserPlus,
-		LogOut,
+		SignOut,
 		Crown,
 		Shield,
 		Bell,
-		BellOff,
-		Loader2,
-	} from 'lucide-svelte';
+		BellSlash,
+		CircleNotch,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		open: boolean;
@@ -79,7 +79,9 @@
 
 {#if open && room}
 	<!-- Slide-in Panel -->
-	<div class="fixed inset-y-0 right-0 z-40 flex w-80 flex-col border-l border-base-300 bg-base-100 shadow-xl">
+	<div
+		class="fixed inset-y-0 right-0 z-40 flex w-80 flex-col border-l border-base-300 bg-base-100 shadow-xl"
+	>
 		<!-- Header -->
 		<header class="flex items-center justify-between border-b border-base-300 px-4 py-3">
 			<h2 class="font-semibold">Raum-Details</h2>
@@ -126,7 +128,7 @@
 				class:tab-active={activeTab === 'settings'}
 				onclick={() => (activeTab = 'settings')}
 			>
-				<Settings class="mr-1 h-4 w-4" />
+				<Gear class="mr-1 h-4 w-4" />
 				Einstellungen
 			</button>
 		</div>
@@ -145,7 +147,7 @@
 							placeholder="Benutzer einladen..."
 						/>
 						{#if searching}
-							<Loader2 class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />
+							<CircleNotch class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />
 						{/if}
 					</div>
 
@@ -215,7 +217,7 @@
 
 					<!-- Leave Room -->
 					<button class="btn btn-ghost w-full justify-start text-error" onclick={leaveRoom}>
-						<LogOut class="h-4 w-4" />
+						<SignOut class="h-4 w-4" />
 						Raum verlassen
 					</button>
 				</div>

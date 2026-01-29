@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { questionsStore, collectionsStore } from '$lib/stores';
 	import { researchApi } from '$lib/api/research';
-	import { ArrowLeft, Zap, Clock, Sparkles } from 'lucide-svelte';
+	import { ArrowLeft, Lightning, Clock, Sparkle } from '@manacore/shared-icons';
 	import type { ResearchDepth, QuestionPriority } from '$lib/types';
 
 	let title = $state('');
@@ -17,10 +17,15 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 
-	const depthOptions: { value: ResearchDepth; label: string; description: string; icon: typeof Zap }[] = [
-		{ value: 'quick', label: 'Quick', description: '5 sources, fast results', icon: Zap },
+	const depthOptions: {
+		value: ResearchDepth;
+		label: string;
+		description: string;
+		icon: typeof Lightning;
+	}[] = [
+		{ value: 'quick', label: 'Quick', description: '5 sources, fast results', icon: Lightning },
 		{ value: 'standard', label: 'Standard', description: '15 sources, balanced', icon: Clock },
-		{ value: 'deep', label: 'Deep', description: '30+ sources, comprehensive', icon: Sparkles },
+		{ value: 'deep', label: 'Deep', description: '30+ sources, comprehensive', icon: Sparkle },
 	];
 
 	function addTag() {
@@ -79,9 +84,7 @@
 			Back to questions
 		</a>
 		<h1 class="text-2xl font-bold text-foreground">Ask a Question</h1>
-		<p class="mt-1 text-muted-foreground">
-			Enter your question and let AI research it for you
-		</p>
+		<p class="mt-1 text-muted-foreground">Enter your question and let AI research it for you</p>
 	</div>
 
 	<form onsubmit={handleSubmit} class="space-y-6">

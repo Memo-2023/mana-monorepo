@@ -4,7 +4,7 @@
 	import { PRIORITY_COLORS } from '$lib/api/todos';
 	import TodoCheckbox from '$lib/components/todo/TodoCheckbox.svelte';
 	import TodoDetailModal from '$lib/components/todo/TodoDetailModal.svelte';
-	import { Check } from 'lucide-svelte';
+	import { Check } from '@manacore/shared-icons';
 
 	interface Props {
 		date: Date;

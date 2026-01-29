@@ -2,7 +2,7 @@
 	import { env } from '$env/dynamic/public';
 	import type { BirthdayEvent } from '$lib/api/birthdays';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { X, User, ExternalLink, Cake } from 'lucide-svelte';
+	import { X, User, ArrowSquareOut, Cake } from '@manacore/shared-icons';
 	import { format, parseISO } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -124,7 +124,7 @@
 			<a href={contactUrl} target="_blank" rel="noopener noreferrer" class="action-btn primary">
 				<User size={16} />
 				<span>Kontakt öffnen</span>
-				<ExternalLink size={14} class="external-icon" />
+				<ArrowSquareOut size={14} class="external-icon" />
 			</a>
 		</div>
 	</div>

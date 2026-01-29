@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { Heart, Grid, List } from 'lucide-svelte';
+	import { Heart, GridFour, List } from '@manacore/shared-icons';
 	import { searchApi } from '$lib/api/client';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { filesStore } from '$lib/stores/files.svelte';
@@ -81,7 +81,7 @@
 				onclick={() => filesStore.setViewMode('grid')}
 				aria-label="Rasteransicht"
 			>
-				<Grid size={18} />
+				<GridFour size={18} />
 			</button>
 			<button
 				class="view-btn"

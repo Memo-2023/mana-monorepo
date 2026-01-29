@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronRight, Home } from 'lucide-svelte';
+	import { CaretRight, House } from '@manacore/shared-icons';
 
 	interface BreadcrumbItem {
 		id: string | null;
@@ -18,13 +18,13 @@
 	<ol class="breadcrumb-list">
 		<li class="breadcrumb-item">
 			<button onclick={() => onNavigate(null)} class="breadcrumb-link" aria-label="Home">
-				<Home size={16} />
+				<House size={16} />
 				<span>Meine Dateien</span>
 			</button>
 		</li>
 		{#each items as item, index (item.id)}
 			<li class="breadcrumb-item">
-				<ChevronRight size={16} class="separator" />
+				<CaretRight size={16} class="separator" />
 				{#if index === items.length - 1}
 					<span class="breadcrumb-current">{item.name}</span>
 				{:else}

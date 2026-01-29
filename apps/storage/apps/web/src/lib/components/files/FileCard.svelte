@@ -6,10 +6,10 @@
 		FileText,
 		FileVideo,
 		FileAudio,
-		FileArchive,
+		FileZip,
 		Heart,
-		MoreVertical,
-	} from 'lucide-svelte';
+		DotsThreeVertical,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		file: StorageFile;
@@ -26,7 +26,7 @@
 		if (mimeType.startsWith('video/')) return FileVideo;
 		if (mimeType.startsWith('audio/')) return FileAudio;
 		if (mimeType.startsWith('text/')) return FileText;
-		if (mimeType.includes('zip') || mimeType.includes('archive')) return FileArchive;
+		if (mimeType.includes('zip') || mimeType.includes('archive')) return FileZip;
 		return File;
 	}
 
@@ -65,7 +65,7 @@
 		<span class="file-size">{formatFileSize(file.size)}</span>
 	</div>
 	<button class="menu-button" onclick={handleMenuClick} type="button">
-		<MoreVertical size={16} />
+		<DotsThreeVertical size={16} />
 	</button>
 
 	{#if showMenu}

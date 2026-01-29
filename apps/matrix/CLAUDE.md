@@ -13,7 +13,7 @@ A minimal, privacy-focused Matrix client that connects to your self-hosted Synap
 | Frontend | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
 | Matrix SDK | matrix-js-sdk |
 | State Management | Svelte 5 runes ($state, $derived) |
-| Icons | lucide-svelte |
+| Icons | @manacore/shared-icons (Phosphor) |
 | Date Handling | date-fns |
 
 ## Project Structure

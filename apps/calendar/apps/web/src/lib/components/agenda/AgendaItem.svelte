@@ -6,7 +6,7 @@
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import TodoCheckbox from '$lib/components/todo/TodoCheckbox.svelte';
 	import PriorityBadge from '$lib/components/todo/PriorityBadge.svelte';
-	import { Calendar, MapPin, Clock } from 'lucide-svelte';
+	import { Calendar, MapPin, Clock } from '@manacore/shared-icons';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';

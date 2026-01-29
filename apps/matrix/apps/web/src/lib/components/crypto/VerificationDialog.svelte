@@ -6,12 +6,12 @@
 		X,
 		Shield,
 		ShieldCheck,
-		ShieldAlert,
-		Smartphone,
+		ShieldWarning,
+		DeviceMobile,
 		Monitor,
-		Loader2,
-		RefreshCw,
-	} from 'lucide-svelte';
+		CircleNotch,
+		ArrowsClockwise,
+	} from '@manacore/shared-icons';
 	import EmojiVerification from './EmojiVerification.svelte';
 
 	interface Props {
@@ -98,7 +98,7 @@
 			name.includes('android') ||
 			name.includes('ios')
 		) {
-			return Smartphone;
+			return DeviceMobile;
 		}
 		return Monitor;
 	}
@@ -151,7 +151,7 @@
 
 						{#if loading}
 							<div class="flex justify-center py-8">
-								<Loader2 class="h-8 w-8 animate-spin text-primary" />
+								<CircleNotch class="h-8 w-8 animate-spin text-primary" />
 							</div>
 						{:else if devices.length === 0}
 							<div class="py-8 text-center text-muted-foreground">
@@ -175,12 +175,12 @@
 											{:else if device.blocked}
 												<div class="relative">
 													<DeviceIcon class="h-10 w-10 text-muted-foreground" />
-													<ShieldAlert class="absolute -right-1 -bottom-1 h-5 w-5 text-error" />
+													<ShieldWarning class="absolute -right-1 -bottom-1 h-5 w-5 text-error" />
 												</div>
 											{:else}
 												<div class="relative">
 													<DeviceIcon class="h-10 w-10 text-muted-foreground" />
-													<ShieldAlert class="absolute -right-1 -bottom-1 h-5 w-5 text-warning" />
+													<ShieldWarning class="absolute -right-1 -bottom-1 h-5 w-5 text-warning" />
 												</div>
 											{/if}
 										</div>
@@ -225,7 +225,7 @@
 								onclick={loadDevices}
 								disabled={loading}
 							>
-								<RefreshCw class={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+								<ArrowsClockwise class={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
 								Aktualisieren
 							</button>
 						</div>

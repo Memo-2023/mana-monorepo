@@ -2,7 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
 	import { PillViewSwitcher, FilterDropdown, type FilterDropdownOption } from '@manacore/shared-ui';
-	import { X } from 'lucide-svelte';
+	import { X } from '@manacore/shared-icons';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 	import { tagsApi, type ContactTag, type Contact } from '$lib/api/contacts';
 	import type { ContactFilter, BirthdayFilter } from '$lib/components/FilterBar.svelte';

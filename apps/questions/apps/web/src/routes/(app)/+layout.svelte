@@ -4,16 +4,16 @@
 	import { authStore, collectionsStore, questionsStore } from '$lib/stores';
 	import { apiClient } from '$lib/api/client';
 	import {
-		Search,
+		MagnifyingGlass,
 		Plus,
 		FolderOpen,
-		Settings,
-		LogOut,
+		Gear,
+		SignOut,
 		Moon,
 		Sun,
-		HelpCircle,
-		ChevronRight,
-	} from 'lucide-svelte';
+		Question,
+		CaretRight,
+	} from '@manacore/shared-icons';
 	import { theme } from '$lib/stores/theme';
 
 	let { children } = $props();
@@ -65,7 +65,7 @@
 				onclick={() => (sidebarOpen = !sidebarOpen)}
 				class="rounded-lg p-2 text-muted-foreground hover:bg-secondary"
 			>
-				<ChevronRight class="h-5 w-5 transition-transform" class:rotate-180={sidebarOpen} />
+				<CaretRight class="h-5 w-5 transition-transform" class:rotate-180={sidebarOpen} />
 			</button>
 		</div>
 
@@ -89,7 +89,7 @@
 				class="collection-item flex w-full items-center gap-3 rounded-lg px-3 py-2 text-foreground"
 				class:active={!collectionsStore.selectedId}
 			>
-				<HelpCircle class="h-5 w-5" />
+				<Question class="h-5 w-5" />
 				{#if sidebarOpen}
 					<span>All Questions</span>
 					<span class="ml-auto text-xs text-muted-foreground">{questionsStore.total}</span>
@@ -111,7 +111,8 @@
 					<FolderOpen class="h-5 w-5" style="color: {collection.color}" />
 					{#if sidebarOpen}
 						<span class="truncate">{collection.name}</span>
-						<span class="ml-auto text-xs text-muted-foreground">{collection.questionCount || 0}</span
+						<span class="ml-auto text-xs text-muted-foreground"
+							>{collection.questionCount || 0}</span
 						>
 					{/if}
 				</button>
@@ -148,7 +149,7 @@
 				href="/settings"
 				class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
 			>
-				<Settings class="h-5 w-5" />
+				<Gear class="h-5 w-5" />
 				{#if sidebarOpen}
 					<span>Settings</span>
 				{/if}
@@ -158,7 +159,7 @@
 				onclick={handleSignOut}
 				class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
 			>
-				<LogOut class="h-5 w-5" />
+				<SignOut class="h-5 w-5" />
 				{#if sidebarOpen}
 					<span>Sign Out</span>
 				{/if}

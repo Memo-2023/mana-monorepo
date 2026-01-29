@@ -2,7 +2,14 @@
 	import { mealsStore } from '$lib/stores/meals.svelte';
 	import { onMount } from 'svelte';
 	import { MEAL_TYPE_LABELS } from '@nutriphi/shared';
-	import { Trash2, Camera, PenLine, AlertCircle, RefreshCw, Loader2 } from 'lucide-svelte';
+	import {
+		Trash,
+		Camera,
+		PencilLine,
+		WarningCircle,
+		ArrowsClockwise,
+		CircleNotch,
+	} from '@manacore/shared-icons';
 
 	let deleting = $state<string | null>(null);
 
@@ -34,10 +41,10 @@
 		<div
 			class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400"
 		>
-			<AlertCircle class="w-5 h-5 flex-shrink-0" />
+			<WarningCircle class="w-5 h-5 flex-shrink-0" />
 			<span class="flex-1 text-sm">{mealsStore.error}</span>
 			<button onclick={retry} class="p-2 hover:bg-red-500/20 rounded-lg transition-colors">
-				<RefreshCw class="w-4 h-4" />
+				<ArrowsClockwise class="w-4 h-4" />
 			</button>
 		</div>
 	{/if}
@@ -46,7 +53,7 @@
 		<div
 			class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-2 text-red-400 text-sm"
 		>
-			<AlertCircle class="w-4 h-4 flex-shrink-0" />
+			<WarningCircle class="w-4 h-4 flex-shrink-0" />
 			<span>{mealsStore.deleteError}</span>
 		</div>
 	{/if}
@@ -71,7 +78,7 @@
 							{#if meal.inputType === 'photo'}
 								<Camera class="w-4 h-4 text-[var(--color-text-muted)]" />
 							{:else}
-								<PenLine class="w-4 h-4 text-[var(--color-text-muted)]" />
+								<PencilLine class="w-4 h-4 text-[var(--color-text-muted)]" />
 							{/if}
 							<span class="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
 								{MEAL_TYPE_LABELS[meal.mealType as keyof typeof MEAL_TYPE_LABELS]?.de ??
@@ -104,9 +111,9 @@
 						class="p-2 rounded-lg hover:bg-[var(--color-background-elevated)] text-[var(--color-text-muted)] hover:text-red-400 transition-colors disabled:opacity-50"
 					>
 						{#if deleting === meal.id}
-							<Loader2 class="w-4 h-4 animate-spin" />
+							<CircleNotch class="w-4 h-4 animate-spin" />
 						{:else}
-							<Trash2 class="w-4 h-4" />
+							<Trash class="w-4 h-4" />
 						{/if}
 					</button>
 				</div>

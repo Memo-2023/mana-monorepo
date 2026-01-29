@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
-	import { X, Users, MessageCircle, Lock, Globe, Loader2 } from 'lucide-svelte';
+	import { X, Users, ChatCircle, Lock, Globe, CircleNotch } from '@manacore/shared-icons';
 
 	interface Props {
 		open: boolean;
@@ -102,7 +102,10 @@
 
 {#if open}
 	<!-- Backdrop -->
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick={handleClose}>
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		onclick={handleClose}
+	>
 		<!-- Dialog -->
 		<div
 			class="w-full max-w-md rounded-xl bg-base-100 shadow-xl"
@@ -128,7 +131,7 @@
 						class:btn-ghost={!isDirect}
 						onclick={() => (isDirect = true)}
 					>
-						<MessageCircle class="h-4 w-4" />
+						<ChatCircle class="h-4 w-4" />
 						Direktnachricht
 					</button>
 					<button
@@ -182,11 +185,7 @@
 									Öffentlicher Raum
 								{/if}
 							</span>
-							<input
-								type="checkbox"
-								class="toggle"
-								bind:checked={isPrivate}
-							/>
+							<input type="checkbox" class="toggle" bind:checked={isPrivate} />
 						</label>
 						<p class="text-xs text-base-content/60 ml-1">
 							{isPrivate
@@ -213,7 +212,7 @@
 							placeholder="@benutzer:server.de oder Name"
 						/>
 						{#if searching}
-							<Loader2 class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />
+							<CircleNotch class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />
 						{/if}
 					</div>
 
@@ -222,10 +221,7 @@
 						<ul class="menu mt-2 max-h-40 overflow-y-auto rounded-lg bg-base-200 p-2">
 							{#each searchResults as user}
 								<li>
-									<button
-										class="flex items-center gap-2"
-										onclick={() => selectUser(user)}
-									>
+									<button class="flex items-center gap-2" onclick={() => selectUser(user)}>
 										<div class="avatar placeholder">
 											<div class="w-8 rounded-full bg-neutral text-neutral-content">
 												{#if user.avatarUrl}
@@ -275,7 +271,7 @@
 				<button class="btn btn-ghost" onclick={handleClose}>Abbrechen</button>
 				<button class="btn btn-primary" onclick={handleCreate} disabled={loading}>
 					{#if loading}
-						<Loader2 class="h-4 w-4 animate-spin" />
+						<CircleNotch class="h-4 w-4 animate-spin" />
 					{/if}
 					{isDirect ? 'Chat starten' : 'Raum erstellen'}
 				</button>

@@ -2,7 +2,7 @@
 	import type { SimpleRoom } from '$lib/matrix';
 	import { formatDistanceToNow } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import { Lock, Users } from 'lucide-svelte';
+	import { Lock, Users } from '@manacore/shared-icons';
 
 	interface Props {
 		room: SimpleRoom;

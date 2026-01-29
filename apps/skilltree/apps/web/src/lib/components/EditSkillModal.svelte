@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Skill, SkillBranch } from '$lib/types';
 	import { BRANCH_INFO } from '$lib/types';
-	import { X, Trash2 } from 'lucide-svelte';
+	import { X, Trash } from '@manacore/shared-icons';
 
 	interface Props {
 		skill: Skill;
@@ -68,8 +68,10 @@
 		{#if showDeleteConfirm}
 			<!-- Delete Confirmation -->
 			<div class="text-center">
-				<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20">
-					<Trash2 class="h-8 w-8 text-red-500" />
+				<div
+					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20"
+				>
+					<Trash class="h-8 w-8 text-red-500" />
 				</div>
 				<h3 class="mb-2 text-lg font-semibold text-white">Skill löschen?</h3>
 				<p class="mb-6 text-gray-400">
@@ -94,9 +96,7 @@
 			<form onsubmit={handleSubmit} class="space-y-4">
 				<!-- Name -->
 				<div>
-					<label for="name" class="mb-1 block text-sm font-medium text-gray-300">
-						Name *
-					</label>
+					<label for="name" class="mb-1 block text-sm font-medium text-gray-300"> Name * </label>
 					<input
 						id="name"
 						type="text"
@@ -123,22 +123,18 @@
 
 				<!-- Branch -->
 				<div>
-					<label class="mb-2 block text-sm font-medium text-gray-300">
-						Kategorie
-					</label>
+					<label class="mb-2 block text-sm font-medium text-gray-300"> Kategorie </label>
 					<div class="grid grid-cols-2 gap-2">
 						{#each Object.entries(BRANCH_INFO) as [key, info]}
 							<button
 								type="button"
 								onclick={() => (branch = key as SkillBranch)}
-								class="flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors {branch === key
+								class="flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors {branch ===
+								key
 									? 'border-emerald-500 bg-emerald-500/20 text-white'
 									: 'border-gray-600 bg-gray-700/50 text-gray-300 hover:border-gray-500'}"
 							>
-								<span
-									class="h-3 w-3 rounded-full"
-									style="background-color: {info.color}"
-								></span>
+								<span class="h-3 w-3 rounded-full" style="background-color: {info.color}"></span>
 								{info.name}
 							</button>
 						{/each}
@@ -173,7 +169,7 @@
 						class="rounded-lg bg-red-600/20 p-2 text-red-400 transition-colors hover:bg-red-600/30"
 						title="Löschen"
 					>
-						<Trash2 class="h-5 w-5" />
+						<Trash class="h-5 w-5" />
 					</button>
 					<button
 						type="button"

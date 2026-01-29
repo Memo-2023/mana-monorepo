@@ -6,16 +6,16 @@
 	import type { Slide } from '@presi/shared';
 	import {
 		X,
-		ChevronLeft,
-		ChevronRight,
+		CaretLeft,
+		CaretRight,
 		Play,
 		Pause,
 		Eye,
-		EyeOff,
-		Maximize,
-		Minimize,
+		EyeSlash,
+		ArrowsOut,
+		ArrowsIn,
 		Clock,
-	} from 'lucide-svelte';
+	} from '@manacore/shared-icons';
 
 	let currentSlideIndex = $state(0);
 	let isFullscreen = $state(false);
@@ -248,7 +248,7 @@
 						class="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30"
 						aria-label="Previous slide"
 					>
-						<ChevronLeft class="w-6 h-6" />
+						<CaretLeft class="w-6 h-6" />
 					</button>
 
 					<!-- Slide Dots -->
@@ -271,7 +271,7 @@
 						class="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30"
 						aria-label="Next slide"
 					>
-						<ChevronRight class="w-6 h-6" />
+						<CaretRight class="w-6 h-6" />
 					</button>
 				</div>
 
@@ -283,7 +283,7 @@
 						aria-label={showNotes ? 'Hide notes' : 'Show notes'}
 					>
 						{#if showNotes}
-							<EyeOff class="w-5 h-5" />
+							<EyeSlash class="w-5 h-5" />
 						{:else}
 							<Eye class="w-5 h-5" />
 						{/if}
@@ -294,9 +294,9 @@
 						aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
 					>
 						{#if isFullscreen}
-							<Minimize class="w-5 h-5" />
+							<ArrowsIn class="w-5 h-5" />
 						{:else}
-							<Maximize class="w-5 h-5" />
+							<ArrowsOut class="w-5 h-5" />
 						{/if}
 					</button>
 				</div>

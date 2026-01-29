@@ -11,22 +11,22 @@
 		ArrowLeft,
 		Play,
 		Plus,
-		Trash2,
-		GripVertical,
-		ChevronUp,
-		ChevronDown,
+		Trash,
+		DotsSixVertical,
+		CaretUp,
+		CaretDown,
 		Image,
-		Type,
+		TextT,
 		List,
-		Edit3,
+		PencilSimple,
 		X,
-		Save,
-		Share2,
+		FloppyDisk,
+		ShareNetwork,
 		Link,
 		Copy,
 		Check,
-		ExternalLink,
-	} from 'lucide-svelte';
+		ArrowSquareOut,
+	} from '@manacore/shared-icons';
 
 	let showSlideModal = $state(false);
 	let editingSlide = $state<Slide | null>(null);
@@ -250,7 +250,7 @@
 					onclick={openShareModal}
 					class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-colors"
 				>
-					<Share2 class="w-5 h-5" />
+					<ShareNetwork class="w-5 h-5" />
 					Share
 				</button>
 				{#if decksStore.currentSlides.length > 0}
@@ -271,7 +271,7 @@
 				<div
 					class="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4"
 				>
-					<Type class="w-8 h-8 text-slate-400" />
+					<TextT class="w-8 h-8 text-slate-400" />
 				</div>
 				<h2 class="text-lg font-medium text-slate-900 dark:text-white mb-2">No slides yet</h2>
 				<p class="text-slate-600 dark:text-slate-400 mb-4">Add your first slide to get started</p>
@@ -339,7 +339,7 @@
 									class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded disabled:opacity-30"
 									aria-label="Move up"
 								>
-									<ChevronUp class="w-4 h-4 text-slate-600 dark:text-slate-400" />
+									<CaretUp class="w-4 h-4 text-slate-600 dark:text-slate-400" />
 								</button>
 								<button
 									onclick={() => moveSlide(slide, 'down')}
@@ -347,21 +347,21 @@
 									class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded disabled:opacity-30"
 									aria-label="Move down"
 								>
-									<ChevronDown class="w-4 h-4 text-slate-600 dark:text-slate-400" />
+									<CaretDown class="w-4 h-4 text-slate-600 dark:text-slate-400" />
 								</button>
 								<button
 									onclick={() => openEditSlide(slide)}
 									class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
 									aria-label="Edit"
 								>
-									<Edit3 class="w-4 h-4 text-slate-600 dark:text-slate-400" />
+									<PencilSimple class="w-4 h-4 text-slate-600 dark:text-slate-400" />
 								</button>
 								<button
 									onclick={() => confirmDeleteSlide(slide)}
 									class="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
 									aria-label="Delete"
 								>
-									<Trash2 class="w-4 h-4 text-red-500" />
+									<Trash class="w-4 h-4 text-red-500" />
 								</button>
 							</div>
 						</div>
@@ -517,7 +517,7 @@
 						disabled={isSaving}
 						class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
 					>
-						<Save class="w-4 h-4" />
+						<FloppyDisk class="w-4 h-4" />
 						{isSaving ? 'Saving...' : 'Save'}
 					</button>
 				</div>
@@ -564,7 +564,7 @@
 			>
 				<div class="flex items-center gap-3">
 					<div class="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-						<Share2 class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+						<ShareNetwork class="w-5 h-5 text-primary-600 dark:text-primary-400" />
 					</div>
 					<h2 class="text-xl font-semibold text-slate-900 dark:text-white">Share Presentation</h2>
 				</div>
@@ -624,7 +624,7 @@
 												class="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
 												title="Open in new tab"
 											>
-												<ExternalLink class="w-4 h-4 text-slate-600 dark:text-slate-400" />
+												<ArrowSquareOut class="w-4 h-4 text-slate-600 dark:text-slate-400" />
 											</a>
 											<button
 												onclick={() => copyShareLink(share)}
@@ -642,7 +642,7 @@
 												class="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
 												title="Delete link"
 											>
-												<Trash2 class="w-4 h-4 text-red-500" />
+												<Trash class="w-4 h-4 text-red-500" />
 											</button>
 										</div>
 									</div>

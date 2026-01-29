@@ -2,7 +2,7 @@
 	import type { Task } from '$lib/api/todos';
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import { _ } from 'svelte-i18n';
-	import { CheckSquare, Square } from 'lucide-svelte';
+	import { CheckSquare, Square } from '@manacore/shared-icons';
 
 	interface Props {
 		task: Task;

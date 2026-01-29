@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { User } from 'lucide-svelte';
+	import { User } from '@manacore/shared-icons';
 	import { authStore } from '$lib/stores/auth.svelte';
 </script>
 

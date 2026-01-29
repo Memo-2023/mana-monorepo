@@ -4,7 +4,7 @@
 	import TodoItem from '$lib/components/todo/TodoItem.svelte';
 	import TodoDetailModal from '$lib/components/todo/TodoDetailModal.svelte';
 	import QuickAddTodo from '$lib/components/todo/QuickAddTodo.svelte';
-	import { ChevronDown, ChevronRight, Plus, CheckSquare, AlertTriangle } from 'lucide-svelte';
+	import { CaretDown, CaretRight, Plus, CheckSquare, Warning } from '@manacore/shared-icons';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
@@ -67,9 +67,9 @@
 		<button type="button" class="header-toggle" onclick={toggleExpanded}>
 			<div class="header-left">
 				{#if isExpanded}
-					<ChevronDown size={16} />
+					<CaretDown size={16} />
 				{:else}
-					<ChevronRight size={16} />
+					<CaretRight size={16} />
 				{/if}
 				<CheckSquare size={16} class="section-icon" />
 				<span class="section-title">Aufgaben</span>
@@ -78,7 +78,7 @@
 				{/if}
 				{#if overdueCount > 0}
 					<span class="overdue-badge" title="{overdueCount} überfällig">
-						<AlertTriangle size={12} />
+						<Warning size={12} />
 					</span>
 				{/if}
 			</div>
@@ -98,7 +98,7 @@
 		<div class="section-content">
 			{#if !todosStore.serviceAvailable}
 				<div class="service-unavailable">
-					<AlertTriangle size={16} />
+					<Warning size={16} />
 					<span>Todo-Service nicht erreichbar</span>
 				</div>
 			{:else if todosStore.loading}

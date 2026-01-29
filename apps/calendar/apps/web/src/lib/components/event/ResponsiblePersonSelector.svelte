@@ -2,7 +2,7 @@
 	import type { ResponsiblePerson } from '@calendar/shared';
 	import type { ContactSummary, ContactOrManual, ManualContactEntry } from '@manacore/shared-types';
 	import { ContactSelector, ContactAvatar } from '@manacore/shared-ui';
-	import { X, ExternalLink } from 'lucide-svelte';
+	import { X, ArrowSquareOut } from '@manacore/shared-icons';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 
 	interface Props {
@@ -139,7 +139,7 @@
 					"
 					title="Kontakt öffnen"
 				>
-					<ExternalLink size={16} />
+					<ArrowSquareOut size={16} />
 				</button>
 			{/if}
 

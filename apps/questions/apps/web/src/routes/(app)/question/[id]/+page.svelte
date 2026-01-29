@@ -8,14 +8,14 @@
 	import {
 		ArrowLeft,
 		Clock,
-		Loader2,
+		CircleNotch,
 		CheckCircle,
 		Archive,
 		Play,
-		ExternalLink,
-		ChevronDown,
-		ChevronUp,
-	} from 'lucide-svelte';
+		ArrowSquareOut,
+		CaretDown,
+		CaretUp,
+	} from '@manacore/shared-icons';
 	import type { Question, ResearchResult, Source } from '$lib/types';
 
 	let question = $state<Question | null>(null);
@@ -103,7 +103,7 @@
 		<ErrorAlert message={error} onRetry={loadQuestion} />
 	</div>
 {:else if question}
-<div class="p-6">
+	<div class="p-6">
 		<!-- Header -->
 		<div class="mb-6">
 			<a
@@ -160,7 +160,7 @@
 							class="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
 						>
 							{#if researchLoading}
-								<Loader2 class="h-5 w-5 animate-spin" />
+								<CircleNotch class="h-5 w-5 animate-spin" />
 								Researching...
 							{:else}
 								<Play class="h-5 w-5" />
@@ -252,7 +252,7 @@
 										>
 											{source.title}
 										</a>
-										<ExternalLink class="h-4 w-4 text-muted-foreground" />
+										<ArrowSquareOut class="h-4 w-4 text-muted-foreground" />
 									</div>
 
 									<p class="mt-1 text-sm text-muted-foreground">{source.domain}</p>
@@ -299,9 +299,9 @@
 										class="rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
 									>
 										{#if expandedSources.has(source.id)}
-											<ChevronUp class="h-5 w-5" />
+											<CaretUp class="h-5 w-5" />
 										{:else}
-											<ChevronDown class="h-5 w-5" />
+											<CaretDown class="h-5 w-5" />
 										{/if}
 									</button>
 								{/if}
@@ -311,5 +311,5 @@
 				</div>
 			</div>
 		{/if}
-</div>
+	</div>
 {/if}

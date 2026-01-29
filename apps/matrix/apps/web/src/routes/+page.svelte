@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { matrixStore } from '$lib/matrix';
-	import { Loader2 } from 'lucide-svelte';
+	import { CircleNotch } from '@manacore/shared-icons';
 
 	let checking = $state(true);
 
@@ -27,7 +27,7 @@
 
 <div class="flex h-screen items-center justify-center">
 	<div class="text-center">
-		<Loader2 class="mx-auto h-8 w-8 animate-spin text-primary" />
+		<CircleNotch class="mx-auto h-8 w-8 animate-spin text-primary" />
 		<p class="mt-4 text-base-content/60">Loading...</p>
 	</div>
 </div>

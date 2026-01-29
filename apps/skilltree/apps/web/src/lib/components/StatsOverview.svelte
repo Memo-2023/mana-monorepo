@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { skillStore } from '$lib/stores/skills.svelte';
-	import { Trophy, Zap, Target, Flame } from 'lucide-svelte';
+	import { Trophy, Lightning, Target, Fire } from '@manacore/shared-icons';
 </script>
 
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -8,7 +8,7 @@
 	<div class="rounded-xl border border-gray-700 bg-gray-800/50 p-4">
 		<div class="flex items-center gap-3">
 			<div class="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-500/20">
-				<Zap class="h-6 w-6 text-yellow-500" />
+				<Lightning class="h-6 w-6 text-yellow-500" />
 			</div>
 			<div>
 				<p class="text-sm text-gray-400">Gesamt-XP</p>
@@ -53,7 +53,7 @@
 	<div class="rounded-xl border border-gray-700 bg-gray-800/50 p-4">
 		<div class="flex items-center gap-3">
 			<div class="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/20">
-				<Flame class="h-6 w-6 text-orange-500" />
+				<Fire class="h-6 w-6 text-orange-500" />
 			</div>
 			<div>
 				<p class="text-sm text-gray-400">Streak</p>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { todosStore } from '$lib/stores/todos.svelte';
-	import { Plus, X } from 'lucide-svelte';
+	import { Plus, X } from '@manacore/shared-icons';
 
 	interface Props {
 		placeholder?: string;

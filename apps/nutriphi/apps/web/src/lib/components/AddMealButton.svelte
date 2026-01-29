@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Camera, PenLine, Plus, X } from 'lucide-svelte';
+	import { Camera, PencilLine, Plus, X } from '@manacore/shared-icons';
 	import { goto } from '$app/navigation';
 
 	let isOpen = $state(false);
@@ -43,7 +43,7 @@
 				onclick={handleText}
 				class="flex items-center gap-3 px-5 py-3 bg-[var(--color-background-card)] border border-[var(--color-border)] rounded-full shadow-lg hover:bg-[var(--color-background-elevated)] transition-all"
 			>
-				<PenLine class="w-5 h-5 text-[var(--color-secondary)]" />
+				<PencilLine class="w-5 h-5 text-[var(--color-secondary)]" />
 				<span class="text-[var(--color-text-primary)] font-medium">Text</span>
 			</button>
 		</div>

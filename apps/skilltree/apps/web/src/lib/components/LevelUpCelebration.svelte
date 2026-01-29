@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LEVEL_NAMES } from '$lib/types';
-	import { Star, Trophy, Sparkles } from 'lucide-svelte';
+	import { Star, Trophy, Sparkle } from '@manacore/shared-icons';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -42,11 +42,8 @@
 		<!-- Sparkle effects -->
 		<div class="sparkles">
 			{#each Array(12) as _, i}
-				<div
-					class="sparkle"
-					style="--delay: {i * 0.1}s; --angle: {i * 30}deg"
-				>
-					<Sparkles class="h-6 w-6 text-yellow-400" />
+				<div class="sparkle" style="--delay: {i * 0.1}s; --angle: {i * 30}deg">
+					<Sparkle class="h-6 w-6 text-yellow-400" />
 				</div>
 			{/each}
 		</div>
@@ -54,20 +51,26 @@
 		<!-- Main content -->
 		<div class="relative z-10">
 			<!-- Trophy icon -->
-			<div class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br {getLevelColor(newLevel)} level-up-bounce shadow-lg shadow-yellow-500/30">
+			<div
+				class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br {getLevelColor(
+					newLevel
+				)} level-up-bounce shadow-lg shadow-yellow-500/30"
+			>
 				<Trophy class="h-12 w-12 text-white" />
 			</div>
 
 			<!-- Level up text -->
-			<h2 class="mb-2 text-3xl font-bold text-white level-up-text">
-				LEVEL UP!
-			</h2>
+			<h2 class="mb-2 text-3xl font-bold text-white level-up-text">LEVEL UP!</h2>
 
 			<!-- Skill name -->
 			<p class="mb-4 text-xl text-gray-300">{skillName}</p>
 
 			<!-- New level badge -->
-			<div class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r {getLevelColor(newLevel)} px-6 py-3 text-lg font-bold text-white shadow-lg">
+			<div
+				class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r {getLevelColor(
+					newLevel
+				)} px-6 py-3 text-lg font-bold text-white shadow-lg"
+			>
 				<Star class="h-5 w-5 fill-current" />
 				Level {newLevel} - {levelName}
 				<Star class="h-5 w-5 fill-current" />
@@ -149,7 +152,9 @@
 			text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
 		}
 		to {
-			text-shadow: 0 0 30px rgba(251, 191, 36, 0.8), 0 0 60px rgba(251, 191, 36, 0.4);
+			text-shadow:
+				0 0 30px rgba(251, 191, 36, 0.8),
+				0 0 60px rgba(251, 191, 36, 0.4);
 		}
 	}
 

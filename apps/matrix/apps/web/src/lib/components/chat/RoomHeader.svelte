@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import {
-		Menu,
+		List,
 		Phone,
-		Video,
+		VideoCamera,
 		Info,
 		LockOpen,
 		ShieldCheck,
-		ShieldAlert,
+		ShieldWarning,
 		Users,
-	} from 'lucide-svelte';
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		onMenuClick?: () => void;
@@ -44,7 +44,7 @@
 	<header class="flex items-center gap-3 border-b border-border bg-surface px-4 py-3">
 		<!-- Mobile menu button -->
 		<button class="btn-ghost rounded p-2 lg:hidden" onclick={onMenuClick}>
-			<Menu class="h-5 w-5" />
+			<List class="h-5 w-5" />
 		</button>
 
 		<!-- Room avatar -->
@@ -72,7 +72,7 @@
 							class="flex-shrink-0"
 							title="Verschlüsselt - {encryptionStatus.unverifiedDevices} unverifizierte Geräte"
 						>
-							<ShieldAlert class="h-4 w-4 text-warning" />
+							<ShieldWarning class="h-4 w-4 text-warning" />
 						</div>
 					{/if}
 				{:else}
@@ -99,7 +99,7 @@
 				<Phone class="h-5 w-5" />
 			</button>
 			<button class="btn-ghost rounded p-2" title="Videoanruf" disabled>
-				<Video class="h-5 w-5" />
+				<VideoCamera class="h-5 w-5" />
 			</button>
 			<button class="btn-ghost rounded p-2" title="Rauminfo" onclick={onInfoClick}>
 				<Info class="h-5 w-5" />

@@ -32,11 +32,11 @@
 	},
 	"dependencies": {
 		"@manacore/shared-auth": "workspace:*",
+		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
 		"idb": "^8.0.0",
-		"lucide-svelte": "^0.556.0",
 		"uuid": "^11.0.0"
 	},
 	"type": "module"

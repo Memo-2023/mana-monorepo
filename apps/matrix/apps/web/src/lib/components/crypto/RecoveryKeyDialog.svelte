@@ -4,13 +4,13 @@
 	import {
 		X,
 		Key,
-		Download,
+		DownloadSimple,
 		Copy,
 		Check,
-		Loader2,
-		AlertTriangle,
+		CircleNotch,
+		Warning,
 		ShieldCheck,
-	} from 'lucide-svelte';
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		open: boolean;
@@ -185,7 +185,7 @@
 							</p>
 
 							<div class="flex items-start gap-3 rounded-lg bg-warning/10 p-3 text-warning">
-								<AlertTriangle class="h-5 w-5 flex-shrink-0 mt-0.5" />
+								<Warning class="h-5 w-5 flex-shrink-0 mt-0.5" />
 								<span class="text-sm">
 									Ohne Recovery Key verlierst du den Zugriff auf deine verschlüsselten Nachrichten,
 									wenn du dich abmeldest.
@@ -267,7 +267,7 @@
 				{:else if step === 'show-key'}
 					<div class="space-y-4">
 						<div class="flex items-start gap-3 rounded-lg bg-warning/10 p-3 text-warning">
-							<AlertTriangle class="h-5 w-5 flex-shrink-0 mt-0.5" />
+							<Warning class="h-5 w-5 flex-shrink-0 mt-0.5" />
 							<span class="text-sm">
 								Speichere diesen Schlüssel an einem sicheren Ort. Du benötigst ihn, um deine
 								Nachrichten wiederherzustellen.
@@ -298,7 +298,7 @@
 								class="btn-secondary flex-1 flex items-center justify-center gap-2"
 								onclick={downloadKey}
 							>
-								<Download class="h-4 w-4" />
+								<DownloadSimple class="h-4 w-4" />
 								Herunterladen
 							</button>
 						</div>
@@ -333,7 +333,7 @@
 							disabled={loading}
 						>
 							{#if loading}
-								<Loader2 class="h-4 w-4 animate-spin" />
+								<CircleNotch class="h-4 w-4 animate-spin" />
 							{/if}
 							Weiter
 						</button>
@@ -344,7 +344,7 @@
 							disabled={loading || !inputRecoveryKey.trim()}
 						>
 							{#if loading}
-								<Loader2 class="h-4 w-4 animate-spin" />
+								<CircleNotch class="h-4 w-4 animate-spin" />
 							{/if}
 							Wiederherstellen
 						</button>
@@ -357,7 +357,7 @@
 						disabled={loading || !passphrase || passphrase !== passphraseConfirm}
 					>
 						{#if loading}
-							<Loader2 class="h-4 w-4 animate-spin" />
+							<CircleNotch class="h-4 w-4 animate-spin" />
 						{/if}
 						Schlüssel erstellen
 					</button>

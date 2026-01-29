@@ -11,13 +11,13 @@
 	import SkillTemplates from '$lib/components/SkillTemplates.svelte';
 	import {
 		Plus,
-		TreeDeciduous,
-		Zap,
-		Download,
-		Upload,
-		Sparkles,
-		Network,
-	} from 'lucide-svelte';
+		Tree,
+		Lightning,
+		DownloadSimple,
+		UploadSimple,
+		Sparkle,
+		Graph,
+	} from '@manacore/shared-icons';
 
 	// Modal states
 	let showAddSkillModal = $state(false);
@@ -114,7 +114,7 @@
 		<div class="mx-auto max-w-7xl px-4 py-4">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
-					<TreeDeciduous class="h-8 w-8 text-emerald-500" />
+					<Tree class="h-8 w-8 text-emerald-500" />
 					<h1 class="text-2xl font-bold text-white">SkillTree</h1>
 				</div>
 				<div class="flex items-center gap-2">
@@ -124,7 +124,7 @@
 						class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-emerald-400"
 						title="Skill-Tree Ansicht"
 					>
-						<Network class="h-5 w-5" />
+						<Graph class="h-5 w-5" />
 					</a>
 					<!-- Templates -->
 					<button
@@ -132,7 +132,7 @@
 						class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-yellow-500"
 						title="Skill-Vorlagen"
 					>
-						<Sparkles class="h-5 w-5" />
+						<Sparkle class="h-5 w-5" />
 					</button>
 					<!-- Export/Import -->
 					<button
@@ -140,14 +140,14 @@
 						class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
 						title="Daten exportieren"
 					>
-						<Download class="h-5 w-5" />
+						<DownloadSimple class="h-5 w-5" />
 					</button>
 					<button
 						onclick={handleImport}
 						class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
 						title="Daten importieren"
 					>
-						<Upload class="h-5 w-5" />
+						<UploadSimple class="h-5 w-5" />
 					</button>
 					<!-- Add Skill -->
 					<button
@@ -171,7 +171,8 @@
 			<div class="flex flex-wrap gap-2">
 				<button
 					onclick={() => (selectedBranch = 'all')}
-					class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch === 'all'
+					class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch ===
+					'all'
 						? 'bg-emerald-600 text-white'
 						: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
 				>
@@ -182,7 +183,8 @@
 					{#if count > 0 || branch !== 'custom'}
 						<button
 							onclick={() => (selectedBranch = branch as SkillBranch)}
-							class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch === branch
+							class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedBranch ===
+							branch
 								? 'bg-emerald-600 text-white'
 								: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
 						>
@@ -196,13 +198,13 @@
 		<!-- Skills Grid -->
 		{#if filteredSkills().length === 0}
 			<div class="mt-16 text-center">
-				<div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-800">
-					<TreeDeciduous class="h-12 w-12 text-gray-600" />
+				<div
+					class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-800"
+				>
+					<Tree class="h-12 w-12 text-gray-600" />
 				</div>
 				<h2 class="mb-2 text-xl font-semibold text-gray-300">Noch keine Skills</h2>
-				<p class="mb-6 text-gray-500">
-					Füge deinen ersten Skill hinzu und beginne dein Abenteuer!
-				</p>
+				<p class="mb-6 text-gray-500">Füge deinen ersten Skill hinzu und beginne dein Abenteuer!</p>
 				<button
 					onclick={() => (showAddSkillModal = true)}
 					class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 font-medium text-white transition-colors hover:bg-emerald-500"
@@ -228,7 +230,7 @@
 		{#if skillStore.recentActivities().length > 0}
 			<div class="mt-12">
 				<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
-					<Zap class="h-5 w-5 text-yellow-500" />
+					<Lightning class="h-5 w-5 text-yellow-500" />
 					Letzte Aktivitäten
 				</h2>
 				<div class="space-y-2">
@@ -237,7 +239,9 @@
 						{#if skill}
 							<div class="flex items-center justify-between rounded-lg bg-gray-800/50 px-4 py-3">
 								<div class="flex items-center gap-3">
-									<div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900/50 text-sm font-medium text-emerald-400">
+									<div
+										class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-900/50 text-sm font-medium text-emerald-400"
+									>
 										+{activity.xpEarned}
 									</div>
 									<div>
@@ -269,11 +273,7 @@
 {/if}
 
 {#if showAddXpModal && selectedSkill}
-	<AddXpModal
-		skill={selectedSkill}
-		onClose={closeModals}
-		onSave={handleAddXp}
-	/>
+	<AddXpModal skill={selectedSkill} onClose={closeModals} onSave={handleAddXp} />
 {/if}
 
 {#if showEditSkillModal && selectedSkill}

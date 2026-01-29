@@ -2,7 +2,7 @@
 	import { mealsStore } from '$lib/stores/meals.svelte';
 	import { onMount } from 'svelte';
 	import ProgressRing from './ProgressRing.svelte';
-	import { AlertCircle, RefreshCw } from 'lucide-svelte';
+	import { WarningCircle, ArrowsClockwise } from '@manacore/shared-icons';
 
 	onMount(() => {
 		mealsStore.fetchDailySummary();
@@ -30,10 +30,10 @@
 		<div
 			class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-2 text-red-400 text-sm"
 		>
-			<AlertCircle class="w-4 h-4 flex-shrink-0" />
+			<WarningCircle class="w-4 h-4 flex-shrink-0" />
 			<span class="flex-1">{mealsStore.summaryError}</span>
 			<button onclick={retry} class="p-1 hover:bg-red-500/20 rounded transition-colors">
-				<RefreshCw class="w-4 h-4" />
+				<ArrowsClockwise class="w-4 h-4" />
 			</button>
 		</div>
 	{:else if mealsStore.summaryLoading}

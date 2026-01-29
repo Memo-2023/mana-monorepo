@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { Grid, List, Plus, FolderPlus, Upload } from 'lucide-svelte';
+	import { GridFour, List, Plus, FolderPlus, UploadSimple } from '@manacore/shared-icons';
 	import { filesStore } from '$lib/stores/files.svelte';
 	import { toast } from '$lib/stores/toast';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
@@ -178,7 +178,7 @@
 					onclick={() => filesStore.setViewMode('grid')}
 					aria-label="Rasteransicht"
 				>
-					<Grid size={18} />
+					<GridFour size={18} />
 				</button>
 				<button
 					class="view-btn"
@@ -196,7 +196,7 @@
 			</button>
 
 			<button class="action-btn primary" onclick={() => (showUploadZone = !showUploadZone)}>
-				<Upload size={18} />
+				<UploadSimple size={18} />
 				<span>Hochladen</span>
 			</button>
 		</div>
@@ -218,7 +218,7 @@
 		</div>
 	{:else if filesStore.files.length === 0 && filesStore.folders.length === 0}
 		<div class="empty-state">
-			<Upload size={48} />
+			<UploadSimple size={48} />
 			<h2>Noch keine Dateien</h2>
 			<p>Lade deine ersten Dateien hoch oder erstelle einen Ordner.</p>
 			<div class="empty-actions">
@@ -227,7 +227,7 @@
 					<span>Neuer Ordner</span>
 				</button>
 				<button class="action-btn primary" onclick={() => (showUploadZone = true)}>
-					<Upload size={18} />
+					<UploadSimple size={18} />
 					<span>Hochladen</span>
 				</button>
 			</div>

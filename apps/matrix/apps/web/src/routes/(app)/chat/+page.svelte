@@ -4,7 +4,7 @@
 	import CreateRoomDialog from '$lib/components/chat/CreateRoomDialog.svelte';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
 	import { goto } from '$app/navigation';
-	import { Settings, LogOut, MessageSquare, Plus } from 'lucide-svelte';
+	import { Gear, SignOut, ChatCircle, Plus } from '@manacore/shared-icons';
 
 	let sidebarOpen = $state(true);
 	let showCreateRoom = $state(false);
@@ -48,7 +48,7 @@
 		<!-- Sidebar Header -->
 		<header class="flex items-center justify-between border-b border-base-300 p-4">
 			<div class="flex items-center gap-2">
-				<MessageSquare class="h-6 w-6 text-primary" />
+				<ChatCircle class="h-6 w-6 text-primary" />
 				<h1 class="text-xl font-bold">Mana Matrix</h1>
 			</div>
 			<div class="flex items-center gap-1">
@@ -61,7 +61,7 @@
 				</button>
 				<div class="dropdown dropdown-end">
 					<button tabindex="0" class="btn btn-ghost btn-sm btn-circle">
-						<Settings class="h-5 w-5" />
+						<Gear class="h-5 w-5" />
 					</button>
 					<ul
 						tabindex="0"
@@ -69,13 +69,13 @@
 					>
 						<li>
 							<a href="/settings">
-								<Settings class="h-4 w-4" />
+								<Gear class="h-4 w-4" />
 								Einstellungen
 							</a>
 						</li>
 						<li>
 							<button onclick={handleLogout} class="text-error">
-								<LogOut class="h-4 w-4" />
+								<SignOut class="h-4 w-4" />
 								Abmelden
 							</button>
 						</li>
@@ -121,7 +121,7 @@
 		{:else}
 			<!-- No Room Selected -->
 			<div class="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-base-content/50">
-				<MessageSquare class="h-16 w-16" />
+				<ChatCircle class="h-16 w-16" />
 				<div class="text-center">
 					<h2 class="text-xl font-semibold text-base-content">Willkommen bei Mana Matrix</h2>
 					<p class="mt-2">

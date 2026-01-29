@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Skill, SkillBranch } from '$lib/types';
 	import { BRANCH_INFO } from '$lib/types';
-	import { X } from 'lucide-svelte';
+	import { X } from '@manacore/shared-icons';
 
 	interface Props {
 		onClose: () => void;
@@ -59,9 +59,7 @@
 		<form onsubmit={handleSubmit} class="space-y-4">
 			<!-- Name -->
 			<div>
-				<label for="name" class="mb-1 block text-sm font-medium text-gray-300">
-					Name *
-				</label>
+				<label for="name" class="mb-1 block text-sm font-medium text-gray-300"> Name * </label>
 				<input
 					id="name"
 					type="text"
@@ -88,22 +86,18 @@
 
 			<!-- Branch -->
 			<div>
-				<label for="branch" class="mb-2 block text-sm font-medium text-gray-300">
-					Kategorie
-				</label>
+				<label for="branch" class="mb-2 block text-sm font-medium text-gray-300"> Kategorie </label>
 				<div class="grid grid-cols-2 gap-2">
 					{#each Object.entries(BRANCH_INFO) as [key, info]}
 						<button
 							type="button"
 							onclick={() => (branch = key as SkillBranch)}
-							class="flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors {branch === key
+							class="flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors {branch ===
+							key
 								? 'border-emerald-500 bg-emerald-500/20 text-white'
 								: 'border-gray-600 bg-gray-700/50 text-gray-300 hover:border-gray-500'}"
 						>
-							<span
-								class="h-3 w-3 rounded-full"
-								style="background-color: {info.color}"
-							></span>
+							<span class="h-3 w-3 rounded-full" style="background-color: {info.color}"></span>
 							{info.name}
 						</button>
 					{/each}

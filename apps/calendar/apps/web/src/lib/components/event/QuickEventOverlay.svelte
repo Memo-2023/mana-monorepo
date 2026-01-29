@@ -18,7 +18,7 @@
 		FilterDropdown,
 		type FilterDropdownOption,
 	} from '@manacore/shared-ui';
-	import { Users } from 'lucide-svelte';
+	import { Users } from '@manacore/shared-icons';
 	import { format, addMinutes } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';

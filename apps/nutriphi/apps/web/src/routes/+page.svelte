@@ -5,7 +5,7 @@
 	import DailySummary from '$lib/components/DailySummary.svelte';
 	import MealList from '$lib/components/MealList.svelte';
 	import AddMealButton from '$lib/components/AddMealButton.svelte';
-	import { Camera, PenLine } from 'lucide-svelte';
+	import { Camera, PencilLine } from '@manacore/shared-icons';
 
 	// Redirect to login if not authenticated
 	$effect(() => {

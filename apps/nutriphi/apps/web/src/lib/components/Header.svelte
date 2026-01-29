@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Settings } from 'lucide-svelte';
+	import { Gear } from '@manacore/shared-icons';
 </script>
 
 <header
@@ -19,7 +19,7 @@
 				class="p-2 rounded-lg hover:bg-[var(--color-background-card)] transition-colors"
 				title="Einstellungen"
 			>
-				<Settings class="w-5 h-5 text-[var(--color-text-secondary)]" />
+				<Gear class="w-5 h-5 text-[var(--color-text-secondary)]" />
 			</a>
 		</div>
 	</div>

@@ -4,17 +4,17 @@
 	import { format, isToday, isYesterday } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import {
-		Reply,
-		Pencil,
-		Trash2,
-		MoreHorizontal,
-		Download,
-		FileIcon,
+		ArrowBendUpLeft,
+		PencilSimple,
+		Trash,
+		DotsThree,
+		DownloadSimple,
+		File as FileIcon,
 		Play,
 		Image as ImageIcon,
 		Lock,
-		AlertTriangle,
-	} from 'lucide-svelte';
+		Warning,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		message: SimpleMessage;
@@ -141,7 +141,7 @@
 			<div
 				class="mb-1 flex items-center gap-2 rounded border-l-2 border-primary/50 bg-muted px-2 py-1 text-sm"
 			>
-				<Reply class="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+				<ArrowBendUpLeft class="h-3 w-3 flex-shrink-0 text-muted-foreground" />
 				<span class="truncate text-muted-foreground">{message.replyToBody}</span>
 			</div>
 		{/if}
@@ -153,7 +153,7 @@
 			{:else if isDecryptionError}
 				<!-- Decryption error -->
 				<div class="flex items-center gap-2 rounded-lg bg-warning/10 px-3 py-2 text-warning">
-					<AlertTriangle class="h-4 w-4 flex-shrink-0" />
+					<Warning class="h-4 w-4 flex-shrink-0" />
 					<span class="text-sm">
 						Nachricht kann nicht entschlüsselt werden. Möglicherweise fehlen Schlüssel.
 					</span>
@@ -224,7 +224,7 @@
 							{/if}
 						</p>
 					</div>
-					<Download class="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+					<DownloadSimple class="h-5 w-5 flex-shrink-0 text-muted-foreground" />
 				</a>
 			{:else if message.type === 'm.emote'}
 				<p class="italic text-muted-foreground">* {message.senderName} {message.body}</p>
@@ -251,16 +251,16 @@
 			class="absolute -top-2 right-2 flex items-center gap-1 rounded-lg border border-border bg-surface p-1 shadow-sm"
 		>
 			<button class="btn-ghost rounded p-1" title="Antworten" onclick={() => onReply?.(message)}>
-				<Reply class="h-4 w-4" />
+				<ArrowBendUpLeft class="h-4 w-4" />
 			</button>
 			{#if message.isOwn && message.type === 'm.text'}
 				<button class="btn-ghost rounded p-1" title="Bearbeiten" onclick={() => onEdit?.(message)}>
-					<Pencil class="h-4 w-4" />
+					<PencilSimple class="h-4 w-4" />
 				</button>
 			{/if}
 			{#if message.isOwn}
 				<button class="btn-ghost rounded p-1 text-error" title="Löschen" onclick={handleDelete}>
-					<Trash2 class="h-4 w-4" />
+					<Trash class="h-4 w-4" />
 				</button>
 			{/if}
 		</div>

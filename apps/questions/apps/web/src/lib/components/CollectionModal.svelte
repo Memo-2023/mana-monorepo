@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X } from 'lucide-svelte';
+	import { X } from '@manacore/shared-icons';
 	import { collectionsStore } from '$lib/stores';
 	import type { Collection, CreateCollectionDto, UpdateCollectionDto } from '$lib/types';
 

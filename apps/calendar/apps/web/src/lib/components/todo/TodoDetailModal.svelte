@@ -11,12 +11,12 @@
 		Clock,
 		Folder,
 		Tag,
-		Trash2,
+		Trash,
 		CheckSquare,
-		AlertCircle,
-		CalendarClock,
+		WarningCircle,
+		CalendarCheck,
 		Timer,
-	} from 'lucide-svelte';
+	} from '@manacore/shared-icons';
 	import { format, parseISO } from 'date-fns';
 	import { de } from 'date-fns/locale';
 
@@ -239,7 +239,7 @@
 					<!-- Time-Blocking Section -->
 					<div class="form-section">
 						<span class="section-label">
-							<CalendarClock size={16} />
+							<CalendarCheck size={16} />
 							Zeitplanung (Time-Blocking)
 						</span>
 						<div class="form-row">
@@ -313,7 +313,7 @@
 						<!-- Time-Blocking Display -->
 						{#if task.scheduledDate}
 							<div class="detail-item scheduled">
-								<CalendarClock size={16} />
+								<CalendarCheck size={16} />
 								<span>
 									Geplant: {formatDisplayDate(task.scheduledDate)}
 									{#if task.scheduledStartTime}
@@ -334,7 +334,7 @@
 						{/if}
 
 						<div class="detail-item">
-							<AlertCircle size={16} />
+							<WarningCircle size={16} />
 							<PriorityBadge {priority} variant="pill" showLabel />
 						</div>
 
@@ -397,7 +397,7 @@
 				</button>
 			{:else}
 				<button type="button" class="btn btn-danger" onclick={handleDelete} disabled={isDeleting}>
-					<Trash2 size={16} />
+					<Trash size={16} />
 					{#if isDeleting}
 						Löschen...
 					{:else}

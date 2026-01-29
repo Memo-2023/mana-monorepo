@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { MessageSquare, Send } from 'lucide-svelte';
+	import { ChatCircle, PaperPlaneTilt } from '@manacore/shared-icons';
 	import { toast } from '$lib/stores/toast';
 
 	let type = $state<'bug' | 'feature' | 'other'>('feature');
@@ -28,7 +28,7 @@
 <div class="feedback-page">
 	<div class="page-header">
 		<h1>
-			<MessageSquare size={24} />
+			<ChatCircle size={24} />
 			Feedback
 		</h1>
 	</div>
@@ -86,7 +86,7 @@
 			</div>
 
 			<button type="submit" class="submit-btn" disabled={!message.trim() || sending}>
-				<Send size={18} />
+				<PaperPlaneTilt size={18} />
 				{sending ? 'Wird gesendet...' : 'Feedback senden'}
 			</button>
 		</form>

@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
 	import type { Snippet } from 'svelte';
-	import { Loader2, AlertCircle, RefreshCw } from 'lucide-svelte';
+	import { CircleNotch, WarningCircle, ArrowsClockwise } from '@manacore/shared-icons';
 
 	interface Props {
 		children: Snippet;
@@ -60,7 +60,7 @@
 {#if loading}
 	<!-- Loading State -->
 	<div class="flex h-screen flex-col items-center justify-center gap-4">
-		<Loader2 class="h-12 w-12 animate-spin text-primary" />
+		<CircleNotch class="h-12 w-12 animate-spin text-primary" />
 		<div class="text-center">
 			<p class="font-medium">Connecting to Matrix...</p>
 			<p class="text-sm text-base-content/60">
@@ -80,7 +80,7 @@
 	<!-- Error State -->
 	<div class="flex h-screen flex-col items-center justify-center gap-4 p-4">
 		<div class="rounded-full bg-error/10 p-4">
-			<AlertCircle class="h-12 w-12 text-error" />
+			<WarningCircle class="h-12 w-12 text-error" />
 		</div>
 		<div class="text-center">
 			<h2 class="text-xl font-semibold">Connection Failed</h2>
@@ -88,7 +88,7 @@
 		</div>
 		<div class="flex gap-2">
 			<button class="btn btn-primary" onclick={retry}>
-				<RefreshCw class="h-4 w-4" />
+				<ArrowsClockwise class="h-4 w-4" />
 				Retry
 			</button>
 			<button class="btn btn-ghost" onclick={logout}> Sign Out </button>
