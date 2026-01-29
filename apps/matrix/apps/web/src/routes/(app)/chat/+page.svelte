@@ -32,10 +32,10 @@
 	}
 </script>
 
-<div class="chat-layout flex h-full overflow-hidden bg-background">
+<div class="chat-layout flex h-full min-h-0 overflow-hidden bg-background">
 	<!-- Sidebar -->
 	<aside
-		class="flex w-80 flex-shrink-0 flex-col border-r border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm transition-all duration-300 ease-in-out pb-20"
+		class="flex w-80 flex-shrink-0 flex-col border-r border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm transition-all duration-300 ease-in-out"
 		class:hidden={!sidebarOpen}
 		class:lg:flex={true}
 	>
@@ -65,13 +65,13 @@
 		</div>
 
 		<!-- Room List -->
-		<div class="flex-1 overflow-hidden">
+		<div class="flex-1 min-h-0 overflow-hidden">
 			<RoomList onCreateRoom={() => (showCreateRoom = true)} />
 		</div>
 	</aside>
 
 	<!-- Main Chat Area -->
-	<main class="flex flex-1 flex-col overflow-hidden bg-background">
+	<main class="flex flex-1 min-h-0 flex-col overflow-hidden bg-background">
 		{#if matrixStore.currentRoom}
 			<!-- Room Header -->
 			<RoomHeader onMenuClick={toggleSidebar} onInfoClick={() => (showRoomSettings = true)} />
@@ -88,7 +88,9 @@
 			/>
 		{:else}
 			<!-- No Room Selected -->
-			<div class="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-muted-foreground">
+			<div
+				class="flex flex-1 flex-col items-center justify-center gap-4 p-8 pb-24 text-muted-foreground"
+			>
 				<div class="p-4 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-600/20">
 					<ChatCircle class="h-12 w-12 text-violet-500" />
 				</div>

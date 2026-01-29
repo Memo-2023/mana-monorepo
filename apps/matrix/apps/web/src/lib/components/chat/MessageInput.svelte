@@ -6,7 +6,7 @@
 		Smiley,
 		X,
 		Image,
-		File,
+		File as FileIcon,
 		CircleNotch,
 		Microphone,
 		Stop,
@@ -215,7 +215,8 @@
 		uploadProgress = 0;
 
 		// Create a File from the Blob
-		const file = new File([blob], `voice-${Date.now()}.webm`, { type: 'audio/webm' });
+		const filename = `voice-${Date.now()}.webm`;
+		const file = new File([blob], filename, { type: 'audio/webm' });
 
 		const success = await matrixStore.sendFile(file, (progress) => {
 			uploadProgress = progress;
@@ -236,10 +237,12 @@
 	}
 </script>
 
-<div class="p-3">
+<div class="p-3 pb-20">
 	<!-- Reply/Edit Preview -->
 	{#if replyTo || editMessage}
-		<div class="mb-2 flex items-center gap-2 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 px-3 py-2">
+		<div
+			class="mb-2 flex items-center gap-2 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 px-3 py-2"
+		>
 			<div class="flex-1">
 				{#if editMessage}
 					<p class="text-xs text-muted-foreground">Nachricht bearbeiten</p>
@@ -269,7 +272,9 @@
 
 	<!-- Upload Progress -->
 	{#if uploading}
-		<div class="mb-2 flex items-center gap-3 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 px-3 py-2">
+		<div
+			class="mb-2 flex items-center gap-3 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 px-3 py-2"
+		>
 			<CircleNotch class="h-4 w-4 animate-spin text-primary" />
 			<div class="flex-1">
 				<div class="h-1.5 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
@@ -285,10 +290,14 @@
 
 	<!-- Recording Indicator -->
 	{#if isRecording}
-		<div class="mb-2 flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-3 py-2">
+		<div
+			class="mb-2 flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-3 py-2"
+		>
 			<div class="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></div>
 			<p class="flex-1 text-sm font-medium text-red-700 dark:text-red-400">Aufnahme...</p>
-			<span class="text-sm font-mono text-red-600 dark:text-red-400">{formatDuration(recordingDuration)}</span>
+			<span class="text-sm font-mono text-red-600 dark:text-red-400"
+				>{formatDuration(recordingDuration)}</span
+			>
 			<button
 				class="p-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors"
 				onclick={cancelRecording}
@@ -300,7 +309,9 @@
 	{/if}
 
 	<!-- Input Area -->
-	<div class="flex items-end gap-2 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/5 dark:border-white/10 p-2 shadow-lg">
+	<div
+		class="flex items-end gap-2 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/5 dark:border-white/10 p-2 shadow-lg"
+	>
 		<!-- Attachment button with custom dropdown -->
 		<div class="relative">
 			<button
@@ -320,19 +331,27 @@
 					aria-label="Menü schließen"
 				></button>
 				<!-- Dropdown menu -->
-				<div class="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-1.5 shadow-xl">
+				<div
+					class="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-1.5 shadow-xl"
+				>
 					<button
-						onclick={() => { openFilePicker(); showAttachMenu = false; }}
+						onclick={() => {
+							openFilePicker();
+							showAttachMenu = false;
+						}}
 						class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-sm"
 					>
 						<Image class="h-4 w-4" />
 						Bild oder Video
 					</button>
 					<button
-						onclick={() => { openFilePicker(); showAttachMenu = false; }}
+						onclick={() => {
+							openFilePicker();
+							showAttachMenu = false;
+						}}
 						class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-sm"
 					>
-						<File class="h-4 w-4" />
+						<FileIcon class="h-4 w-4" />
 						Datei
 					</button>
 				</div>

@@ -78,7 +78,7 @@
 	});
 </script>
 
-<div class="relative flex-1 overflow-hidden">
+<div class="relative flex-1 min-h-0 overflow-hidden">
 	<div
 		bind:this={container}
 		onscroll={handleScroll}

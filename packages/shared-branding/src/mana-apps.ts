@@ -308,6 +308,22 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'matrix',
+		name: 'Mana Matrix',
+		description: {
+			de: 'Matrix Chat Client',
+			en: 'Matrix Chat Client',
+		},
+		longDescription: {
+			de: 'Verbinde dich mit dem dezentralen Matrix-Netzwerk für sichere, föderierte Kommunikation.',
+			en: 'Connect to the decentralized Matrix network for secure, federated communication.',
+		},
+		icon: APP_ICONS.matrix,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -395,6 +411,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	mail: { dev: 'http://localhost:5186', prod: 'https://mail.manacore.app' },
 	inventory: { dev: 'http://localhost:5188', prod: 'https://inventory.manacore.app' },
 	questions: { dev: 'http://localhost:5111', prod: 'https://questions.manacore.app' },
+	matrix: { dev: 'http://localhost:5180', prod: 'https://matrix.mana.how' },
 };
 
 /**

@@ -279,13 +279,9 @@
 
 	.main-content {
 		flex: 1;
+		min-height: 0;
 		overflow: hidden;
 		transition: all 300ms ease;
-	}
-
-	/* Floating nav mode - add bottom padding for bottom nav */
-	.main-content.floating-mode {
-		padding-bottom: 80px;
 	}
 
 	/* Sidebar mode - add left padding for sidebar nav */

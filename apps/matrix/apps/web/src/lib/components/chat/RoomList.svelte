@@ -20,15 +20,11 @@
 	let search = $state('');
 
 	let filteredDirectRooms = $derived(
-		matrixStore.directRooms.filter((room) =>
-			room.name.toLowerCase().includes(search.toLowerCase())
-		)
+		matrixStore.directRooms.filter((room) => room.name.toLowerCase().includes(search.toLowerCase()))
 	);
 
 	let filteredGroupRooms = $derived(
-		matrixStore.groupRooms.filter((room) =>
-			room.name.toLowerCase().includes(search.toLowerCase())
-		)
+		matrixStore.groupRooms.filter((room) => room.name.toLowerCase().includes(search.toLowerCase()))
 	);
 
 	let filteredInvites = $derived(
@@ -70,10 +66,14 @@
 		<!-- Invites Section -->
 		{#if filteredInvites.length > 0}
 			<div class="mb-4">
-				<div class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground">
+				<div
+					class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground"
+				>
 					<Envelope class="h-3.5 w-3.5" />
 					Einladungen
-					<span class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]">
+					<span
+						class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]"
+					>
 						{filteredInvites.length}
 					</span>
 				</div>
@@ -128,7 +128,9 @@
 		<!-- Direct Messages Section -->
 		{#if filteredDirectRooms.length > 0 || !search}
 			<div class="mb-2">
-				<div class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground">
+				<div
+					class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground"
+				>
 					<ChatCircle class="h-3.5 w-3.5" />
 					Direktnachrichten
 					{#if matrixStore.directRooms.length > 0}
@@ -154,7 +156,9 @@
 		<!-- Group Rooms Section -->
 		{#if filteredGroupRooms.length > 0 || !search}
 			<div class="mb-2">
-				<div class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground">
+				<div
+					class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground"
+				>
 					<Users class="h-3.5 w-3.5" />
 					Räume
 					{#if matrixStore.groupRooms.length > 0}
@@ -187,7 +191,7 @@
 	</div>
 
 	<!-- New Room Button -->
-	<div class="border-t border-black/10 dark:border-white/10 p-3">
+	<div class="border-t border-black/10 dark:border-white/10 p-3 pb-20">
 		<button
 			class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
 			       bg-gradient-to-r from-violet-500 to-purple-600 text-white font-medium
