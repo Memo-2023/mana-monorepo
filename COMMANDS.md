@@ -14,6 +14,7 @@ pnpm dev:todo:full
 pnpm dev:presi:full
 pnpm dev:storage:full
 pnpm dev:skilltree:full
+pnpm dev:questions:full
 
 pnpm dev:manacore:app # Nur ManaCore Web
 pnpm dev:manacore:backends # Alle 7 Backends für Dashboard-Widgets
@@ -51,6 +52,9 @@ pnpm deploy:landing:all
 - [Chat](#chat)
 - [Picture](#picture)
 - [Manadeck](#manadeck)
+- [SkillTree](#skilltree)
+- [Questions](#questions)
+- [Mana Search](#mana-search)
 - [Manacore](#manacore)
 - [Mana Games](#mana-games)
 - [Allgemeine Befehle](#allgemeine-befehle)
@@ -221,6 +225,78 @@ pnpm skilltree:db:studio  # Drizzle Studio
 
 ---
 
+## Questions
+
+AI-powered Research Assistant - sammelt Fragen und führt Web-Recherche durch.
+
+| App     | Port | Befehl                       |
+| ------- | ---- | ---------------------------- |
+| Web     | 5111 | `pnpm dev:questions:web`     |
+| Backend | 3011 | `pnpm dev:questions:backend` |
+
+```bash
+# Web + Backend zusammen starten
+pnpm dev:questions:app
+
+# Mit Auth + Search Service + automatischem DB-Setup (empfohlen)
+pnpm dev:questions:full
+
+# Datenbank
+cd apps/questions/apps/backend
+pnpm drizzle-kit push     # Schema pushen
+pnpm drizzle-kit studio   # Drizzle Studio
+```
+
+**Hinweis:** Questions benötigt den mana-search Service für Web-Recherche.
+
+---
+
+## Mana Search
+
+Zentraler Such-Microservice mit SearXNG für Web-Suche und Content-Extraktion.
+
+| Service  | Port | Befehl                    |
+| -------- | ---- | ------------------------- |
+| API      | 3021 | `pnpm dev:search`         |
+| SearXNG  | 8080 | (Docker)                  |
+| Redis    | 6380 | (Docker)                  |
+
+```bash
+# SearXNG + Redis in Docker starten
+pnpm dev:search:docker
+
+# NestJS API starten
+pnpm dev:search
+
+# Beides zusammen (empfohlen)
+pnpm dev:search:full
+
+# Docker stoppen
+pnpm dev:search:docker:down
+
+# Logs anzeigen
+pnpm dev:search:docker:logs
+```
+
+### API testen
+
+```bash
+# Health Check
+curl http://localhost:3021/api/v1/health
+
+# Web-Suche
+curl -X POST http://localhost:3021/api/v1/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "TypeScript tutorial", "options": {"limit": 5}}'
+
+# Content extrahieren
+curl -X POST http://localhost:3021/api/v1/extract \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com", "options": {"includeMarkdown": true}}'
+```
+
+---
+
 ## Manacore
 
 | App      | Port | Befehl                       |
@@ -380,7 +456,7 @@ pnpm --filter @manacore/shared-ui build
 
 ## App-Übersicht
 
-### Aktive Apps (apps/) - 11 Apps
+### Aktive Apps (apps/) - 12 Apps
 
 - **calendar** - Kalender-App für persönliches und geteiltes Zeitmanagement mit wiederkehrenden Terminen, CalDAV/iCal-Sync und Erinnerungen
 - **chat** - KI-Chat-Anwendung mit verschiedenen KI-Modellen und Konversationsverlauf
@@ -390,6 +466,7 @@ pnpm --filter @manacore/shared-ui build
 - **manadeck** - Karteikarten-/Lernkarten-Management für Spaced Repetition Learning
 - **nutriphi** - Nutrition tracking (geplant, noch kein Backend)
 - **picture** - KI-Bildgenerierung mit verschiedenen Modellen und Galerie-Verwaltung
+- **questions** - AI-powered Research Assistant mit Web-Recherche über mana-search
 - **skilltree** - Gamified Skill-Tracking mit XP-System, Leveln und 6 Skill-Branches
 - **storage** - Cloud storage (geplant, noch kein Backend)
 - **todo** - Task-Management mit Projekten, Subtasks, Labels und wiederkehrenden Aufgaben
@@ -402,9 +479,10 @@ pnpm --filter @manacore/shared-ui build
 - **whopixels** - Pixel-Art-Editor-Spiel mit Phaser.js
 - **worldream** - Text-first World-Building-Plattform für fiktive Welten mit @slug-Referenzen
 
-### Services (services/) - 1 Service
+### Services (services/) - 2 Services
 
-mana-core-auth - Zentraler Authentifizierungs-Service für alle Apps (Better Auth + EdDSA JWT)
+- **mana-core-auth** - Zentraler Authentifizierungs-Service für alle Apps (Better Auth + EdDSA JWT)
+- **mana-search** - Zentraler Such-Service mit SearXNG für Web-Suche und Content-Extraktion (Port 3021)
 
 ### Shared Packages (packages/) - 4 Kern-Packages
 
