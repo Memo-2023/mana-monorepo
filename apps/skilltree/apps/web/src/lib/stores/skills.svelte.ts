@@ -1,11 +1,9 @@
 import type { Skill, Activity, UserStats, SkillBranch } from '$lib/types';
-import {
-	calculateLevel,
-	createDefaultSkill,
-	createActivity,
-	BRANCH_INFO,
-} from '$lib/types';
+import { calculateLevel, createDefaultSkill, createActivity, BRANCH_INFO } from '$lib/types';
 import * as storage from '$lib/services/storage';
+import * as skillsApi from '$lib/api/skills';
+import * as activitiesApi from '$lib/api/activities';
+import { authStore } from './auth.svelte';
 
 // Reactive state using Svelte 5 runes
 let skills = $state<Skill[]>([]);
@@ -19,6 +17,7 @@ let userStats = $state<UserStats>({
 });
 let isLoading = $state(true);
 let initialized = $state(false);
+let useApi = $state(false);
 
 // Derived values
 const skillsByBranch = $derived(() => {
@@ -42,13 +41,14 @@ const topSkills = $derived(() => {
 });
 
 const recentActivities = $derived(() => {
-	return [...activities].sort((a, b) =>
-		new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-	).slice(0, 10);
+	return [...activities]
+		.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+		.slice(0, 10);
 });
 
 const branchStats = $derived(() => {
-	const stats: Record<SkillBranch, { count: number; totalXp: number; avgLevel: number }> = {} as any;
+	const stats: Record<SkillBranch, { count: number; totalXp: number; avgLevel: number }> =
+		{} as Record<SkillBranch, { count: number; totalXp: number; avgLevel: number }>;
 	for (const branch of Object.keys(BRANCH_INFO) as SkillBranch[]) {
 		const branchSkills = skills.filter((s) => s.branch === branch);
 		stats[branch] = {
@@ -69,81 +69,171 @@ async function initialize() {
 
 	isLoading = true;
 	try {
-		const [loadedSkills, loadedActivities, loadedStats] = await Promise.all([
-			storage.getAllSkills(),
-			storage.getAllActivities(),
-			storage.getUserStats(),
-		]);
-		skills = loadedSkills;
-		activities = loadedActivities;
-		userStats = loadedStats;
+		// Check if user is authenticated
+		if (authStore.isAuthenticated) {
+			useApi = true;
+			const [loadedSkills, loadedActivities, loadedStats] = await Promise.all([
+				skillsApi.getSkills(),
+				activitiesApi.getRecentActivities(50),
+				skillsApi.getStats(),
+			]);
+			skills = loadedSkills;
+			activities = loadedActivities;
+			userStats = loadedStats;
+		} else {
+			// Fallback to IndexedDB for offline/unauthenticated use
+			useApi = false;
+			const [loadedSkills, loadedActivities, loadedStats] = await Promise.all([
+				storage.getAllSkills(),
+				storage.getAllActivities(),
+				storage.getUserStats(),
+			]);
+			skills = loadedSkills;
+			activities = loadedActivities;
+			userStats = loadedStats;
+		}
 		initialized = true;
 	} catch (error) {
 		console.error('Failed to initialize skills store:', error);
+		// On error, try IndexedDB as fallback
+		if (useApi) {
+			try {
+				useApi = false;
+				const [loadedSkills, loadedActivities, loadedStats] = await Promise.all([
+					storage.getAllSkills(),
+					storage.getAllActivities(),
+					storage.getUserStats(),
+				]);
+				skills = loadedSkills;
+				activities = loadedActivities;
+				userStats = loadedStats;
+			} catch (fallbackError) {
+				console.error('Fallback to IndexedDB also failed:', fallbackError);
+			}
+		}
 	} finally {
 		isLoading = false;
 	}
 }
 
 async function addSkill(data: Partial<Skill>): Promise<Skill> {
-	const skill = createDefaultSkill(data);
-	await storage.saveSkill(skill);
-	skills = [...skills, skill];
-	await updateStats();
-	return skill;
+	if (useApi && authStore.isAuthenticated) {
+		const skill = await skillsApi.createSkill({
+			name: data.name || '',
+			description: data.description,
+			branch: data.branch || 'custom',
+			parentId: data.parentId ?? undefined,
+			icon: data.icon,
+			color: data.color ?? undefined,
+		});
+		skills = [...skills, skill];
+		await updateStats();
+		return skill;
+	} else {
+		const skill = createDefaultSkill(data);
+		await storage.saveSkill(skill);
+		skills = [...skills, skill];
+		await updateStats();
+		return skill;
+	}
 }
 
 async function updateSkill(id: string, updates: Partial<Skill>): Promise<void> {
 	const index = skills.findIndex((s) => s.id === id);
 	if (index === -1) return;
 
-	const updatedSkill = { ...skills[index], ...updates, updatedAt: new Date().toISOString() };
-	await storage.saveSkill(updatedSkill);
-	skills = [...skills.slice(0, index), updatedSkill, ...skills.slice(index + 1)];
+	if (useApi && authStore.isAuthenticated) {
+		const skill = await skillsApi.updateSkill(id, {
+			name: updates.name,
+			description: updates.description,
+			branch: updates.branch,
+			parentId: updates.parentId,
+			icon: updates.icon,
+			color: updates.color,
+		});
+		skills = [...skills.slice(0, index), skill, ...skills.slice(index + 1)];
+	} else {
+		const updatedSkill = { ...skills[index], ...updates, updatedAt: new Date().toISOString() };
+		await storage.saveSkill(updatedSkill);
+		skills = [...skills.slice(0, index), updatedSkill, ...skills.slice(index + 1)];
+	}
 	await updateStats();
 }
 
 async function deleteSkill(id: string): Promise<void> {
-	await storage.deleteSkill(id);
+	if (useApi && authStore.isAuthenticated) {
+		await skillsApi.deleteSkill(id);
+	} else {
+		await storage.deleteSkill(id);
+	}
 	skills = skills.filter((s) => s.id !== id);
 	activities = activities.filter((a) => a.skillId !== id);
 	await updateStats();
 }
 
-async function addXp(skillId: string, xp: number, description: string, duration?: number): Promise<{ leveledUp: boolean; newLevel: number }> {
+async function addXp(
+	skillId: string,
+	xp: number,
+	description: string,
+	duration?: number
+): Promise<{ leveledUp: boolean; newLevel: number }> {
 	const index = skills.findIndex((s) => s.id === skillId);
 	if (index === -1) return { leveledUp: false, newLevel: 0 };
 
-	const skill = skills[index];
-	const newTotalXp = skill.totalXp + xp;
-	const newCurrentXp = skill.currentXp + xp;
-	const newLevel = calculateLevel(newTotalXp);
-	const leveledUp = newLevel > skill.level;
+	if (useApi && authStore.isAuthenticated) {
+		const result = await skillsApi.addXp(skillId, { xp, description, duration });
+		skills = [...skills.slice(0, index), result.skill, ...skills.slice(index + 1)];
+		activities = [...activities, result.activity];
+		await updateStats();
+		return { leveledUp: result.leveledUp, newLevel: result.newLevel };
+	} else {
+		const skill = skills[index];
+		const newTotalXp = skill.totalXp + xp;
+		const newCurrentXp = skill.currentXp + xp;
+		const newLevel = calculateLevel(newTotalXp);
+		const leveledUp = newLevel > skill.level;
 
-	const updatedSkill: Skill = {
-		...skill,
-		totalXp: newTotalXp,
-		currentXp: newCurrentXp,
-		level: newLevel,
-		updatedAt: new Date().toISOString(),
-	};
+		const updatedSkill: Skill = {
+			...skill,
+			totalXp: newTotalXp,
+			currentXp: newCurrentXp,
+			level: newLevel,
+			updatedAt: new Date().toISOString(),
+		};
 
-	const activity = createActivity(skillId, xp, description, duration);
+		const activity = createActivity(skillId, xp, description, duration);
 
-	await Promise.all([
-		storage.saveSkill(updatedSkill),
-		storage.saveActivity(activity),
-	]);
+		await Promise.all([storage.saveSkill(updatedSkill), storage.saveActivity(activity)]);
 
-	skills = [...skills.slice(0, index), updatedSkill, ...skills.slice(index + 1)];
-	activities = [...activities, activity];
-	await updateStats();
+		skills = [...skills.slice(0, index), updatedSkill, ...skills.slice(index + 1)];
+		activities = [...activities, activity];
+		await updateStats();
 
-	return { leveledUp, newLevel };
+		return { leveledUp, newLevel };
+	}
 }
 
 async function updateStats(): Promise<void> {
-	userStats = await storage.recalculateStats();
+	if (useApi && authStore.isAuthenticated) {
+		try {
+			userStats = await skillsApi.getStats();
+		} catch {
+			// Calculate locally as fallback
+			userStats = calculateLocalStats();
+		}
+	} else {
+		userStats = await storage.recalculateStats();
+	}
+}
+
+function calculateLocalStats(): UserStats {
+	return {
+		totalXp: skills.reduce((sum, s) => sum + s.totalXp, 0),
+		totalSkills: skills.length,
+		highestLevel: skills.reduce((max, s) => Math.max(max, s.level), 0),
+		streakDays: 0,
+		lastActivityDate: activities.length > 0 ? activities[activities.length - 1].timestamp : null,
+	};
 }
 
 function getSkill(id: string): Skill | undefined {
@@ -154,19 +244,56 @@ function getSkillActivities(skillId: string): Activity[] {
 	return activities.filter((a) => a.skillId === skillId);
 }
 
+// Reinitialize when auth state changes
+async function reinitialize() {
+	initialized = false;
+	skills = [];
+	activities = [];
+	userStats = {
+		totalXp: 0,
+		totalSkills: 0,
+		highestLevel: 0,
+		streakDays: 0,
+		lastActivityDate: null,
+	};
+	await initialize();
+}
+
 // Export store as object with getters for reactive access
 export const skillStore = {
-	get skills() { return skills; },
-	get activities() { return activities; },
-	get userStats() { return userStats; },
-	get isLoading() { return isLoading; },
-	get initialized() { return initialized; },
-	get skillsByBranch() { return skillsByBranch; },
-	get topSkills() { return topSkills; },
-	get recentActivities() { return recentActivities; },
-	get branchStats() { return branchStats; },
+	get skills() {
+		return skills;
+	},
+	get activities() {
+		return activities;
+	},
+	get userStats() {
+		return userStats;
+	},
+	get isLoading() {
+		return isLoading;
+	},
+	get initialized() {
+		return initialized;
+	},
+	get skillsByBranch() {
+		return skillsByBranch;
+	},
+	get topSkills() {
+		return topSkills;
+	},
+	get recentActivities() {
+		return recentActivities;
+	},
+	get branchStats() {
+		return branchStats;
+	},
+	get useApi() {
+		return useApi;
+	},
 
 	initialize,
+	reinitialize,
 	addSkill,
 	updateSkill,
 	deleteSkill,

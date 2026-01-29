@@ -25,6 +25,7 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
+		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
