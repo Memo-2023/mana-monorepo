@@ -101,80 +101,75 @@
 
 <!-- Message -->
 <div
-	class="group relative flex gap-3 rounded-lg px-2 py-1 hover:bg-surface-hover"
-	class:mt-2={showAvatar}
+	class="group flex gap-3 mb-4 animate-fade-in {message.isOwn ? 'flex-row-reverse' : 'flex-row'}"
 	class:opacity-50={message.redacted}
 	role="article"
 	onmouseenter={() => (showActions = true)}
 	onmouseleave={() => (showActions = false)}
 >
-	<!-- Avatar Column -->
-	<div class="w-10 flex-shrink-0">
-		{#if showAvatar && !message.isOwn}
-			<div
-				class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"
-			>
-				<span class="text-xs">{initials}</span>
-			</div>
-		{/if}
-	</div>
+	<!-- Avatar -->
+	{#if showAvatar}
+		<div
+			class="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center shadow-md
+				   {message.isOwn
+				? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+				: 'bg-gradient-to-br from-violet-500 to-purple-600 text-white'}"
+		>
+			<span class="text-xs font-semibold">{initials}</span>
+		</div>
+	{:else}
+		<div class="w-9 flex-shrink-0"></div>
+	{/if}
 
-	<!-- Content -->
-	<div class="min-w-0 flex-1">
-		{#if showAvatar}
-			<div class="mb-0.5 flex items-baseline gap-2">
-				<span class="font-medium" class:text-primary={message.isOwn}>
-					{message.isOwn ? 'Du' : message.senderName}
-				</span>
-				<span class="text-xs text-muted-foreground">{formattedTime}</span>
-				{#if message.edited}
-					<span class="text-xs text-muted-foreground">(bearbeitet)</span>
-				{/if}
-				{#if showEncryptionBadge}
-					<span title="Verschlüsselt"><Lock class="h-3 w-3 text-success" /></span>
-				{/if}
-			</div>
+	<!-- Message Content -->
+	<div class="flex flex-col {message.isOwn ? 'items-end' : 'items-start'} max-w-[75%] relative">
+		<!-- Sender name (for others only) -->
+		{#if showAvatar && !message.isOwn}
+			<span class="text-xs text-muted-foreground mb-1 px-1">{message.senderName}</span>
 		{/if}
 
 		<!-- Reply preview -->
 		{#if message.replyTo && message.replyToBody}
 			<div
-				class="mb-1 flex items-center gap-2 rounded border-l-2 border-primary/50 bg-muted px-2 py-1 text-sm"
+				class="mb-1 flex items-center gap-2 rounded-lg glass-card px-3 py-1.5 text-sm max-w-full"
 			>
 				<ArrowBendUpLeft class="h-3 w-3 flex-shrink-0 text-muted-foreground" />
-				<span class="truncate text-muted-foreground">{message.replyToBody}</span>
+				<span class="truncate text-muted-foreground text-xs">{message.replyToBody}</span>
 			</div>
 		{/if}
 
-		<!-- Message body -->
-		<div class="relative">
+		<!-- Message Bubble -->
+		<div
+			class="relative px-4 py-3 shadow-md
+				   {message.isOwn
+				? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl rounded-tr-md'
+				: 'bg-white dark:bg-white/10 text-foreground border border-black/5 dark:border-white/10 rounded-2xl rounded-tl-md'}"
+		>
 			{#if message.redacted}
-				<p class="italic text-muted-foreground">Nachricht wurde gelöscht</p>
+				<p class="italic text-white/70">Nachricht wurde gelöscht</p>
 			{:else if isDecryptionError}
 				<!-- Decryption error -->
-				<div class="flex items-center gap-2 rounded-lg bg-warning/10 px-3 py-2 text-warning">
+				<div class="flex items-center gap-2 text-amber-200">
 					<Warning class="h-4 w-4 flex-shrink-0" />
-					<span class="text-sm">
-						Nachricht kann nicht entschlüsselt werden. Möglicherweise fehlen Schlüssel.
-					</span>
+					<span class="text-sm"> Kann nicht entschlüsselt werden </span>
 				</div>
 			{:else if message.type === 'm.image' && thumbnailUrl}
 				<!-- Image message -->
-				<div class="relative max-w-sm">
+				<div class="relative">
 					{#if imageLoading}
-						<div class="flex h-48 w-full items-center justify-center rounded-lg bg-muted">
-							<ImageIcon class="h-8 w-8 animate-pulse text-muted-foreground" />
+						<div class="flex h-48 w-full items-center justify-center rounded-lg bg-black/10">
+							<ImageIcon class="h-8 w-8 animate-pulse text-white/50" />
 						</div>
 					{/if}
 					{#if imageError}
-						<div class="flex h-32 w-full items-center justify-center rounded-lg bg-muted">
-							<p class="text-sm text-muted-foreground">Bild konnte nicht geladen werden</p>
+						<div class="flex h-32 w-full items-center justify-center rounded-lg bg-black/10">
+							<p class="text-sm text-white/70">Bild konnte nicht geladen werden</p>
 						</div>
 					{:else}
 						<img
 							src={thumbnailUrl}
 							alt={message.body}
-							class="max-h-80 cursor-pointer rounded-lg object-contain"
+							class="max-h-80 max-w-xs cursor-pointer rounded-lg object-contain"
 							class:hidden={imageLoading}
 							onload={() => (imageLoading = false)}
 							onerror={() => {
@@ -187,17 +182,19 @@
 				</div>
 			{:else if message.type === 'm.video' && thumbnailUrl}
 				<!-- Video message -->
-				<div class="relative max-w-sm">
+				<div class="relative">
 					<div class="group/video relative">
-						<img src={thumbnailUrl} alt={message.body} class="rounded-lg" />
+						<img src={thumbnailUrl} alt={message.body} class="rounded-lg max-w-xs" />
 						<div
-							class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover/video:opacity-100"
+							class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover/video:opacity-100 rounded-lg"
 						>
 							<Play class="h-12 w-12 text-white" />
 						</div>
 					</div>
 					{#if message.media?.duration}
-						<span class="absolute bottom-2 right-2 rounded bg-black/60 px-1 text-xs text-white">
+						<span
+							class="absolute bottom-2 right-2 rounded bg-black/60 px-1.5 py-0.5 text-xs text-white"
+						>
 							{Math.floor(message.media.duration / 60)}:{(message.media.duration % 60)
 								.toString()
 								.padStart(2, '0')}
@@ -210,59 +207,92 @@
 					href={mediaUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="flex items-center gap-3 rounded-lg border border-border bg-muted p-3 transition-colors hover:bg-surface-hover"
+					class="flex items-center gap-3 rounded-lg {message.isOwn
+						? 'bg-white/20 hover:bg-white/30'
+						: 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'} p-3 transition-colors"
 				>
-					<div class="rounded-lg bg-primary/10 p-2">
-						<FileIcon class="h-6 w-6 text-primary" />
+					<div class="rounded-lg {message.isOwn ? 'bg-white/20' : 'bg-primary/10'} p-2">
+						<FileIcon class="h-5 w-5 {message.isOwn ? 'text-white' : 'text-primary'}" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate font-medium">{message.media?.filename || message.body}</p>
-						<p class="text-sm text-muted-foreground">
+						<p class="truncate font-medium text-sm">{message.media?.filename || message.body}</p>
+						<p class="text-xs {message.isOwn ? 'text-white/70' : 'text-muted-foreground'}">
 							{formatFileSize(message.media?.size)}
 							{#if message.media?.mimetype}
 								• {message.media.mimetype.split('/')[1]?.toUpperCase()}
 							{/if}
 						</p>
 					</div>
-					<DownloadSimple class="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+					<DownloadSimple
+						class="h-4 w-4 flex-shrink-0 {message.isOwn
+							? 'text-white/70'
+							: 'text-muted-foreground'}"
+					/>
 				</a>
 			{:else if message.type === 'm.emote'}
-				<p class="italic text-muted-foreground">* {message.senderName} {message.body}</p>
+				<p class="italic {message.isOwn ? 'text-white/80' : 'text-muted-foreground'}">
+					* {message.senderName}
+					{message.body}
+				</p>
 			{:else if message.type === 'm.notice'}
-				<p class="text-sm text-muted-foreground">{message.body}</p>
+				<p class="text-sm {message.isOwn ? 'text-white/80' : 'text-muted-foreground'}">
+					{message.body}
+				</p>
 			{:else}
-				<p class="whitespace-pre-wrap break-words">{message.body}</p>
+				<p class="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{message.body}</p>
 			{/if}
 
-			<!-- Hover timestamp for grouped messages -->
-			{#if !showAvatar}
-				<span
-					class="absolute -left-12 top-0 hidden text-xs text-muted-foreground group-hover:inline"
+			{#if message.edited}
+				<span class="text-xs {message.isOwn ? 'text-white/60' : 'text-muted-foreground'} mt-1 block"
+					>(bearbeitet)</span
 				>
-					{formattedTime}
-				</span>
 			{/if}
-		</div>
-	</div>
 
-	<!-- Message actions (hover) -->
-	{#if showActions && !message.redacted}
-		<div
-			class="absolute -top-2 right-2 flex items-center gap-1 rounded-lg border border-border bg-surface p-1 shadow-sm"
-		>
-			<button class="btn-ghost rounded p-1" title="Antworten" onclick={() => onReply?.(message)}>
-				<ArrowBendUpLeft class="h-4 w-4" />
-			</button>
-			{#if message.isOwn && message.type === 'm.text'}
-				<button class="btn-ghost rounded p-1" title="Bearbeiten" onclick={() => onEdit?.(message)}>
-					<PencilSimple class="h-4 w-4" />
-				</button>
-			{/if}
-			{#if message.isOwn}
-				<button class="btn-ghost rounded p-1 text-error" title="Löschen" onclick={handleDelete}>
-					<Trash class="h-4 w-4" />
-				</button>
+			{#if showEncryptionBadge}
+				<Lock class="absolute -bottom-1 -right-1 h-3 w-3 text-green-500" />
 			{/if}
 		</div>
-	{/if}
+
+		<!-- Time (shown on hover) -->
+		<div
+			class="flex items-center gap-2 mt-1.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity"
+		>
+			<span class="text-xs text-muted-foreground">{formattedTime}</span>
+		</div>
+
+		<!-- Message actions (hover) -->
+		{#if showActions && !message.redacted}
+			<div
+				class="absolute {message.isOwn
+					? '-left-24'
+					: '-right-24'} top-0 flex items-center gap-1 rounded-xl glass p-1.5 shadow-lg"
+			>
+				<button
+					class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+					title="Antworten"
+					onclick={() => onReply?.(message)}
+				>
+					<ArrowBendUpLeft class="h-4 w-4 text-muted-foreground" />
+				</button>
+				{#if message.isOwn && message.type === 'm.text'}
+					<button
+						class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						title="Bearbeiten"
+						onclick={() => onEdit?.(message)}
+					>
+						<PencilSimple class="h-4 w-4 text-muted-foreground" />
+					</button>
+				{/if}
+				{#if message.isOwn}
+					<button
+						class="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+						title="Löschen"
+						onclick={handleDelete}
+					>
+						<Trash class="h-4 w-4 text-red-500" />
+					</button>
+				{/if}
+			</div>
+		{/if}
+	</div>
 </div>

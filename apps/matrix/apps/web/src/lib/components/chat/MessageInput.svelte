@@ -137,23 +137,23 @@
 	}
 </script>
 
-<div class="border-t border-base-300 bg-base-100">
+<div class="p-4">
 	<!-- Reply/Edit Preview -->
 	{#if replyTo || editMessage}
-		<div class="flex items-center gap-2 border-b border-base-300 bg-base-200/50 px-4 py-2">
+		<div class="mb-3 flex items-center gap-2 rounded-xl glass-card px-4 py-2">
 			<div class="flex-1">
 				{#if editMessage}
-					<p class="text-xs text-base-content/60">Nachricht bearbeiten</p>
+					<p class="text-xs text-muted-foreground">Nachricht bearbeiten</p>
 					<p class="truncate text-sm">{editMessage.body}</p>
 				{:else if replyTo}
-					<p class="text-xs text-base-content/60">
+					<p class="text-xs text-muted-foreground">
 						Antwort auf <span class="font-medium">{replyTo.senderName}</span>
 					</p>
 					<p class="truncate text-sm">{replyTo.body}</p>
 				{/if}
 			</div>
 			<button
-				class="btn btn-ghost btn-xs"
+				class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
 				onclick={() => {
 					if (editMessage) {
 						onCancelEdit?.();
@@ -170,45 +170,49 @@
 
 	<!-- Upload Progress -->
 	{#if uploading}
-		<div class="flex items-center gap-3 px-4 py-2">
+		<div class="mb-3 flex items-center gap-3 rounded-xl glass-card px-4 py-3">
 			<CircleNotch class="h-5 w-5 animate-spin text-primary" />
 			<div class="flex-1">
-				<div class="h-2 overflow-hidden rounded-full bg-base-300">
+				<div class="h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
 					<div
-						class="h-full bg-primary transition-all duration-300"
+						class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300"
 						style="width: {uploadProgress}%"
 					></div>
 				</div>
 			</div>
-			<span class="text-sm text-base-content/60">{uploadProgress}%</span>
+			<span class="text-sm text-muted-foreground">{uploadProgress}%</span>
 		</div>
 	{/if}
 
-	<!-- Input Area -->
-	<div class="p-4">
-		<div class="flex items-end gap-2">
+	<!-- Input Area - Glassmorphic Pill -->
+	<div class="flex flex-col gap-2 rounded-2xl glass p-2 shadow-lg">
+		<!-- Input Row -->
+		<div class="flex items-end gap-3">
 			<!-- Attachment button -->
 			<div class="dropdown dropdown-top">
 				<button
 					tabindex="0"
-					class="btn btn-ghost btn-sm"
+					class="p-2.5 rounded-xl glass-button shadow-sm"
 					title="Datei anhängen"
 					disabled={uploading}
 				>
-					<Paperclip class="h-5 w-5" />
+					<Paperclip class="h-5 w-5 text-muted-foreground" />
 				</button>
-				<ul
-					tabindex="0"
-					class="dropdown-content menu rounded-box z-50 w-48 bg-base-100 p-2 shadow-lg"
-				>
+				<ul tabindex="0" class="dropdown-content z-50 w-48 rounded-xl glass p-2 shadow-xl mb-2">
 					<li>
-						<button onclick={openFilePicker}>
+						<button
+							onclick={openFilePicker}
+							class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						>
 							<Image class="h-4 w-4" />
 							Bild oder Video
 						</button>
 					</li>
 					<li>
-						<button onclick={openFilePicker}>
+						<button
+							onclick={openFilePicker}
+							class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						>
 							<File class="h-4 w-4" />
 							Datei
 						</button>
@@ -226,7 +230,7 @@
 			/>
 
 			<!-- Text input -->
-			<div class="relative flex-1">
+			<div class="flex-1 relative">
 				<textarea
 					bind:this={textarea}
 					bind:value={message}
@@ -239,39 +243,35 @@
 							? 'Antwort schreiben...'
 							: 'Nachricht schreiben...'}
 					rows="1"
-					class="textarea textarea-bordered w-full resize-none pr-10"
+					class="w-full resize-none rounded-xl border-0 bg-transparent
+					       px-4 py-3 text-sm text-foreground
+					       focus:outline-none focus:ring-0
+					       disabled:opacity-50 disabled:cursor-not-allowed
+					       placeholder:text-muted-foreground"
 					style="max-height: 200px; min-height: 48px;"
 					disabled={uploading}
 				></textarea>
-
-				<!-- Emoji button (inside textarea) -->
-				<button
-					class="absolute bottom-2 right-2 text-base-content/50 hover:text-base-content"
-					title="Emoji hinzufügen"
-					disabled
-				>
-					<Smiley class="h-5 w-5" />
-				</button>
 			</div>
 
 			<!-- Send button -->
 			<button
-				class="btn btn-primary"
+				class="flex-shrink-0 p-3 rounded-xl glass-button shadow-md text-primary
+				       disabled:opacity-50 disabled:cursor-not-allowed"
 				onclick={handleSend}
 				disabled={!message.trim() || uploading}
 				title={editMessage ? 'Speichern' : 'Senden'}
 			>
-				<PaperPlaneTilt class="h-5 w-5" />
+				<PaperPlaneTilt class="h-5 w-5" weight="bold" />
 			</button>
 		</div>
-
-		<!-- Hint -->
-		<p class="mt-1 text-xs text-base-content/40">
-			{#if editMessage}
-				Enter zum Speichern, Escape zum Abbrechen
-			{:else}
-				Enter zum Senden, Shift+Enter für neue Zeile
-			{/if}
-		</p>
 	</div>
+
+	<!-- Hint -->
+	<p class="text-xs text-muted-foreground text-center mt-2 opacity-70">
+		{#if editMessage}
+			Enter zum Speichern, Escape zum Abbrechen
+		{:else}
+			Enter zum Senden, Shift+Enter für neue Zeile
+		{/if}
+	</p>
 </div>

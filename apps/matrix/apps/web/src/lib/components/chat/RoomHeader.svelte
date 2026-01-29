@@ -41,38 +41,44 @@
 </script>
 
 {#if room}
-	<header class="flex items-center gap-3 border-b border-border bg-surface px-4 py-3">
+	<header
+		class="flex items-center gap-3 border-b border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm px-4 py-3"
+	>
 		<!-- Mobile menu button -->
-		<button class="btn-ghost rounded p-2 lg:hidden" onclick={onMenuClick}>
+		<button
+			class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors lg:hidden"
+			onclick={onMenuClick}
+		>
 			<List class="h-5 w-5" />
 		</button>
 
 		<!-- Room avatar -->
 		<div
-			class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"
+			class="flex h-10 w-10 items-center justify-center rounded-full shadow-md
+			       bg-gradient-to-br from-violet-500 to-purple-600 text-white"
 		>
 			{#if room.avatar}
 				<img src={room.avatar} alt={room.name} class="h-10 w-10 rounded-full object-cover" />
 			{:else}
-				<span class="text-sm">{room.name.charAt(0).toUpperCase()}</span>
+				<span class="text-sm font-semibold">{room.name.charAt(0).toUpperCase()}</span>
 			{/if}
 		</div>
 
 		<!-- Room info -->
 		<div class="min-w-0 flex-1">
 			<div class="flex items-center gap-2">
-				<h2 class="truncate font-semibold">{room.name}</h2>
+				<h2 class="truncate font-semibold text-foreground">{room.name}</h2>
 				{#if room.isEncrypted}
 					{#if encryptionStatus.allDevicesVerified}
 						<div class="flex-shrink-0" title="Verschlüsselt - Alle Geräte verifiziert">
-							<ShieldCheck class="h-4 w-4 text-success" />
+							<ShieldCheck class="h-4 w-4 text-green-500" />
 						</div>
 					{:else}
 						<div
 							class="flex-shrink-0"
 							title="Verschlüsselt - {encryptionStatus.unverifiedDevices} unverifizierte Geräte"
 						>
-							<ShieldWarning class="h-4 w-4 text-warning" />
+							<ShieldWarning class="h-4 w-4 text-amber-500" />
 						</div>
 					{/if}
 				{:else}
@@ -95,14 +101,26 @@
 
 		<!-- Actions -->
 		<div class="flex items-center gap-1">
-			<button class="btn-ghost rounded p-2" title="Sprachanruf" disabled>
-				<Phone class="h-5 w-5" />
+			<button
+				class="p-2.5 rounded-xl glass-button shadow-sm disabled:opacity-40"
+				title="Sprachanruf"
+				disabled
+			>
+				<Phone class="h-5 w-5 text-muted-foreground" />
 			</button>
-			<button class="btn-ghost rounded p-2" title="Videoanruf" disabled>
-				<VideoCamera class="h-5 w-5" />
+			<button
+				class="p-2.5 rounded-xl glass-button shadow-sm disabled:opacity-40"
+				title="Videoanruf"
+				disabled
+			>
+				<VideoCamera class="h-5 w-5 text-muted-foreground" />
 			</button>
-			<button class="btn-ghost rounded p-2" title="Rauminfo" onclick={onInfoClick}>
-				<Info class="h-5 w-5" />
+			<button
+				class="p-2.5 rounded-xl glass-button shadow-sm"
+				title="Rauminfo"
+				onclick={onInfoClick}
+			>
+				<Info class="h-5 w-5 text-muted-foreground" />
 			</button>
 		</div>
 	</header>
