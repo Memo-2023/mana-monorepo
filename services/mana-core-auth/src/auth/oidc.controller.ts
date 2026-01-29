@@ -61,12 +61,23 @@ export class OidcController {
 	}
 
 	/**
-	 * JWKS Endpoint
+	 * JWKS Endpoint (via /api/oidc/jwks)
 	 *
 	 * Returns JSON Web Key Set for token verification.
 	 */
 	@Get('api/oidc/jwks')
 	async jwks(@Req() req: Request, @Res() res: Response) {
+		return this.handleOidcRequest(req, res);
+	}
+
+	/**
+	 * JWKS Endpoint (via /api/auth/jwks)
+	 *
+	 * Better Auth's discovery document points to this path,
+	 * so we need to expose it directly as well.
+	 */
+	@Get('api/auth/jwks')
+	async jwksAlt(@Req() req: Request, @Res() res: Response) {
 		return this.handleOidcRequest(req, res);
 	}
 
