@@ -142,7 +142,8 @@ manacore-monorepo/
 ├── games/                   # Game projects
 │   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
-│   └── mana-core-auth/      # Central authentication service
+│   ├── mana-core-auth/      # Central authentication service
+│   └── mana-search/         # Central search & content extraction service
 ├── packages/                # Monorepo-wide shared packages
 └── docker/                  # Docker configuration files
 ```
@@ -366,6 +367,116 @@ curl http://localhost:3007/api/favorites \
 | Zitare   | `@manacore/shared-nestjs-auth`  | 3007 |
 | Presi    | Custom (same pattern)           | 3008 |
 | ManaDeck | `@mana-core/nestjs-integration` | 3009 |
+
+### Search Architecture
+
+Projects requiring web search and content extraction use **mana-search** as the central search service:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 Consumer Apps                                │
+│   Questions │ Chat │ Project Doc Bot │ Future Apps          │
+└─────────────────────────┬───────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│              mana-search (Port 3021)                         │
+│   Search API │ Extract API │ Redis Cache                    │
+└─────────────────────────┬───────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│              SearXNG (Port 8080, internal)                   │
+│   Google │ Bing │ DuckDuckGo │ Wikipedia │ arXiv │ ...      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Key Components
+
+| Component | Purpose |
+|-----------|---------|
+| `services/mana-search` | NestJS search service with SearXNG + Redis |
+| SearXNG | Meta-search engine aggregating multiple sources |
+| Redis | Caching layer (search: 1h TTL, extract: 24h TTL) |
+
+#### API Endpoints
+
+```bash
+# Web search
+POST /api/v1/search
+{
+  "query": "quantum computing",
+  "options": {
+    "categories": ["general", "science"],
+    "engines": ["google", "wikipedia"],
+    "limit": 10
+  }
+}
+
+# Extract content from URL
+POST /api/v1/extract
+{
+  "url": "https://example.com/article",
+  "options": { "includeMarkdown": true }
+}
+
+# Bulk extract (max 20 URLs)
+POST /api/v1/extract/bulk
+
+# Health & metrics
+GET /health
+GET /metrics
+```
+
+#### Search Categories
+
+| Category | Engines |
+|----------|---------|
+| `general` | Google, Bing, DuckDuckGo, Brave, Wikipedia |
+| `news` | Google News, Bing News |
+| `science` | arXiv, Google Scholar, PubMed, Semantic Scholar |
+| `it` | GitHub, StackOverflow, NPM, MDN |
+
+#### Starting the Service
+
+```bash
+# Start SearXNG + Redis (for local NestJS development)
+cd services/mana-search && docker-compose -f docker-compose.dev.yml up -d
+
+# Start NestJS API
+pnpm --filter @mana-search/service dev
+
+# Or start everything via Docker
+cd services/mana-search && docker-compose up -d
+```
+
+#### Environment Variables
+
+```env
+# Consumer apps need this
+MANA_SEARCH_URL=http://localhost:3021
+
+# mana-search service config
+SEARXNG_URL=http://localhost:8080
+REDIS_HOST=localhost
+REDIS_PORT=6379
+CACHE_SEARCH_TTL=3600
+CACHE_EXTRACT_TTL=86400
+```
+
+#### Usage in Backend
+
+```typescript
+// Direct fetch
+const response = await fetch('http://mana-search:3021/api/v1/search', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: 'machine learning basics',
+    options: { categories: ['general', 'science'], limit: 5 }
+  })
+});
+
+const { results, meta } = await response.json();
+```
 
 ### Svelte 5 Runes Mode (Web Apps)
 
@@ -662,6 +773,7 @@ Each project has its own `CLAUDE.md` with detailed information:
 - `apps/chat/CLAUDE.md` - Chat API endpoints, AI models
 - `apps/picture/CLAUDE.md` - AI image generation
 - `services/mana-core-auth/` - Central authentication service
+- `services/mana-search/CLAUDE.md` - Search & content extraction service
 
 Navigate to the specific project directory to work on it.
 
