@@ -1,0 +1,48 @@
+{
+	"name": "@matrix/web",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"type-check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"format": "prettier --write .",
+		"lint": "eslint ."
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-node": "^5.2.12",
+		"@sveltejs/kit": "^2.21.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.3",
+		"@tailwindcss/vite": "^4.1.7",
+		"@types/node": "^22.15.21",
+		"prettier": "^3.5.3",
+		"prettier-plugin-svelte": "^3.4.0",
+		"svelte": "^5.33.0",
+		"svelte-check": "^4.2.1",
+		"tailwindcss": "^4.1.7",
+		"tslib": "^2.8.1",
+		"typescript": "^5.8.3",
+		"vite": "^6.3.5"
+	},
+	"dependencies": {
+		"matrix-js-sdk": "^37.1.0",
+		"buffer": "^6.0.3",
+		"events": "^3.3.0",
+		"@manacore/shared-auth": "workspace:*",
+		"@manacore/shared-theme": "workspace:*",
+		"@manacore/shared-tailwind": "workspace:*",
+		"@manacore/shared-i18n": "workspace:*",
+		"@manacore/shared-icons": "workspace:*",
+		"lucide-svelte": "^0.509.0",
+		"date-fns": "^4.1.0",
+		"svelte-i18n": "^4.0.1"
+	},
+	"overrides": {
+		"@matrix-org/matrix-sdk-crypto-nodejs": "npm:empty-npm-package@1.0.0"
+	}
+}
