@@ -3,7 +3,7 @@
 	import { RoomList, RoomHeader, Timeline, MessageInput } from '$lib/components/chat';
 	import CreateRoomDialog from '$lib/components/chat/CreateRoomDialog.svelte';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
-	import { ChatCircle, Plus } from '@manacore/shared-icons';
+	import { ChatCircle, Plus, Gear } from '@manacore/shared-icons';
 	import { browser } from '$app/environment';
 
 	// Start with sidebar closed on mobile
@@ -76,13 +76,22 @@
 		<div class="border-b border-black/10 dark:border-white/10 px-4 py-3">
 			<div class="flex items-center justify-between">
 				<p class="truncate text-sm font-medium">{matrixStore.userId}</p>
-				<button
-					class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-					title="Neuer Chat"
-					onclick={() => (showCreateRoom = true)}
-				>
-					<Plus class="h-4 w-4" />
-				</button>
+				<div class="flex items-center gap-1">
+					<a
+						href="/settings"
+						class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						title="Einstellungen"
+					>
+						<Gear class="h-4 w-4" />
+					</a>
+					<button
+						class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						title="Neuer Chat"
+						onclick={() => (showCreateRoom = true)}
+					>
+						<Plus class="h-4 w-4" />
+					</button>
+				</div>
 			</div>
 			<p class="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
 				<span class="h-2 w-2 rounded-full bg-green-500"></span>
