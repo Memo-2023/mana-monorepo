@@ -54,6 +54,45 @@
 		await matrixStore.reactToMessage(message.id, emoji);
 	}
 
+	// URL detection regex
+	const urlRegex = /(https?:\/\/[^\s<>"']+)/gi;
+
+	// Escape HTML entities to prevent XSS
+	function escapeHtml(text: string): string {
+		return text
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
+
+	// Convert URLs to clickable links
+	function linkifyText(text: string, isOwn: boolean): string {
+		const escaped = escapeHtml(text);
+		const linkClass = isOwn
+			? 'underline underline-offset-2 hover:opacity-80'
+			: 'text-primary underline underline-offset-2 hover:opacity-80';
+		return escaped.replace(urlRegex, (url) => {
+			return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="${linkClass}">${url}</a>`;
+		});
+	}
+
+	// Extract first URL for preview
+	let firstUrl = $derived(() => {
+		const match = message.body.match(urlRegex);
+		return match ? match[0] : null;
+	});
+
+	// Get domain from URL
+	function getDomain(url: string): string {
+		try {
+			return new URL(url).hostname;
+		} catch {
+			return url;
+		}
+	}
+
 	// Audio player state
 	let audioElement: HTMLAudioElement | null = $state(null);
 	let isPlaying = $state(false);
@@ -363,7 +402,30 @@
 					{message.body}
 				</p>
 			{:else}
-				<p class="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{message.body}</p>
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				<p class="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{@html linkifyText(message.body, message.isOwn)}</p>
+
+				<!-- Link Preview Card -->
+				{#if firstUrl()}
+					<a
+						href={firstUrl()}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="mt-2 flex items-center gap-2 rounded-lg {message.isOwn
+							? 'bg-white/10 hover:bg-white/20'
+							: 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'} p-2 transition-colors"
+					>
+						<img
+							src="https://www.google.com/s2/favicons?domain={getDomain(firstUrl() || '')}&sz=32"
+							alt=""
+							class="h-5 w-5 rounded-sm"
+							onerror={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')}
+						/>
+						<span class="text-xs truncate {message.isOwn ? 'text-white/80' : 'text-muted-foreground'}">
+							{getDomain(firstUrl() || '')}
+						</span>
+					</a>
+				{/if}
 			{/if}
 
 			{#if message.edited}
