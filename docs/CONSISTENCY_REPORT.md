@@ -11,7 +11,7 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 |---------|------------|-----------|--------|
 | Dependencies & Versionen | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
 | Toast System | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
-| API Client Patterns | ❌ Niedrig | **Hoch** | Offen |
+| API Client Patterns | ⚠️ Mittel | **Hoch** | 🚧 In Arbeit |
 | i18n Implementation | ⚠️ Mittel | Mittel | Offen |
 | Auth Implementation | ✅ Gut | Niedrig | - |
 | Styling & Tailwind | ✅ Sehr gut | Niedrig | - |
@@ -23,6 +23,7 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 2. ✅ **SvelteKit, Svelte, TypeScript Versionen vereinheitlicht** - Alle 15 Web-Apps auf gleicher Version
 3. ✅ **Toast System zentralisiert** - `@manacore/shared-ui` Toast für 6 Apps (calendar, chat, clock, contacts, picture, storage)
 4. ✅ **lucide-svelte entfernt** - shared-ui nutzt jetzt nur noch `@manacore/shared-icons`
+5. 🚧 **@manacore/shared-api-client Package erstellt** - Clock App als erstes migriert
 
 ---
 
@@ -47,9 +48,14 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 
 ---
 
-## 2. API Client Patterns
+## 2. API Client Patterns 🚧
 
-### Kritische Inkonsistenzen
+> **Status: In Arbeit (29.01.2026)**
+> - ✅ `@manacore/shared-api-client` Package erstellt
+> - ✅ Clock App migriert (Proof of Concept)
+> - ⏳ Verbleibende Apps: calendar, chat, contacts, manadeck, manacore, nutriphi, picture, planta, presi, questions, skilltree, storage, todo
+
+### Kritische Inkonsistenzen (vor Migration)
 
 #### 3 verschiedene Architektur-Patterns
 
