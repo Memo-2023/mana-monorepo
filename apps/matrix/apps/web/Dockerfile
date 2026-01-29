@@ -20,12 +20,15 @@ COPY pnpm-lock.yaml ./
 # Copy shared packages needed by matrix web
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-branding ./packages/shared-branding
+COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
+COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/shared-vite-config ./packages/shared-vite-config
 
 # Copy matrix web app
 COPY apps/matrix/apps/web ./apps/matrix/apps/web
