@@ -96,11 +96,17 @@ class MatrixStore {
 			.sort((a, b) => (b.lastMessageTime || 0) - (a.lastMessageTime || 0))
 	);
 
-	/** Direct message rooms */
-	directRooms = $derived(this.rooms.filter((r) => r.isDirect));
+	/** Joined rooms only */
+	joinedRooms = $derived(this.rooms.filter((r) => r.membership === 'join'));
 
-	/** Group rooms (non-DM) */
-	groupRooms = $derived(this.rooms.filter((r) => !r.isDirect));
+	/** Invited rooms */
+	invitedRooms = $derived(this.rooms.filter((r) => r.membership === 'invite'));
+
+	/** Direct message rooms (joined only) */
+	directRooms = $derived(this.joinedRooms.filter((r) => r.isDirect));
+
+	/** Group rooms (non-DM, joined only) */
+	groupRooms = $derived(this.joinedRooms.filter((r) => !r.isDirect));
 
 	/** Current selected room */
 	currentRoom = $derived(
@@ -1173,6 +1179,25 @@ class MatrixStore {
 		const topicEvent = room.currentState.getStateEvents('m.room.topic', '');
 		const topic = (topicEvent as MatrixEvent | null)?.getContent()?.topic;
 
+		// Get membership status
+		const myUserId = this._client?.getUserId();
+		const myMember = myUserId ? room.getMember(myUserId) : null;
+		const membership = (myMember?.membership || 'leave') as SimpleRoom['membership'];
+
+		// Get inviter if this is an invite
+		let inviter: string | undefined;
+		if (membership === 'invite' && myMember) {
+			// The events array contains the invite event
+			const inviteEvent = room.currentState.getStateEvents('m.room.member', myUserId || '');
+			if (inviteEvent) {
+				const sender = (inviteEvent as MatrixEvent).getSender();
+				if (sender) {
+					const senderMember = room.getMember(sender);
+					inviter = senderMember?.name || sender;
+				}
+			}
+		}
+
 		return {
 			id: room.roomId,
 			name: room.name || 'Unnamed Room',
@@ -1186,6 +1211,8 @@ class MatrixStore {
 			isDirect: this.isDirectRoom(room),
 			isEncrypted: room.hasEncryptionStateEvent(),
 			memberCount: room.getJoinedMemberCount(),
+			membership,
+			inviter,
 		};
 	}
 

@@ -1,7 +1,15 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import RoomItem from './RoomItem.svelte';
-	import { MagnifyingGlass, Plus, Users, ChatCircle } from '@manacore/shared-icons';
+	import {
+		MagnifyingGlass,
+		Plus,
+		Users,
+		ChatCircle,
+		Envelope,
+		Check,
+		X,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		onCreateRoom?: () => void;
@@ -22,6 +30,20 @@
 			room.name.toLowerCase().includes(search.toLowerCase())
 		)
 	);
+
+	let filteredInvites = $derived(
+		matrixStore.invitedRooms.filter((room) =>
+			room.name.toLowerCase().includes(search.toLowerCase())
+		)
+	);
+
+	async function acceptInvite(roomId: string) {
+		await matrixStore.joinRoom(roomId);
+	}
+
+	async function declineInvite(roomId: string) {
+		await matrixStore.leaveRoom(roomId);
+	}
 </script>
 
 <div class="flex h-full flex-col">
@@ -45,6 +67,64 @@
 
 	<!-- Room List with Sections -->
 	<div class="chat-scrollbar flex-1 overflow-y-auto px-3">
+		<!-- Invites Section -->
+		{#if filteredInvites.length > 0}
+			<div class="mb-4">
+				<div class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground">
+					<Envelope class="h-3.5 w-3.5" />
+					Einladungen
+					<span class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px]">
+						{filteredInvites.length}
+					</span>
+				</div>
+				{#each filteredInvites as room (room.id)}
+					<div
+						class="flex items-center gap-3 px-3 py-2.5 mb-1 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20"
+					>
+						<!-- Avatar -->
+						<div
+							class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-sm"
+						>
+							<span class="text-sm font-semibold">
+								{room.name
+									.split(' ')
+									.map((w) => w[0])
+									.join('')
+									.substring(0, 2)
+									.toUpperCase()}
+							</span>
+						</div>
+						<!-- Info -->
+						<div class="flex-1 min-w-0">
+							<p class="font-medium text-foreground truncate">{room.name}</p>
+							{#if room.inviter}
+								<p class="text-xs text-muted-foreground truncate">
+									Eingeladen von {room.inviter}
+								</p>
+							{/if}
+						</div>
+						<!-- Actions -->
+						<div class="flex gap-1.5">
+							<button
+								class="p-2 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors"
+								title="Annehmen"
+								onclick={() => acceptInvite(room.id)}
+							>
+								<Check class="h-4 w-4" weight="bold" />
+							</button>
+							<button
+								class="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors"
+								title="Ablehnen"
+								onclick={() => declineInvite(room.id)}
+							>
+								<X class="h-4 w-4" weight="bold" />
+							</button>
+						</div>
+					</div>
+				{/each}
+			</div>
+		{/if}
+
 		<!-- Direct Messages Section -->
 		{#if filteredDirectRooms.length > 0 || !search}
 			<div class="mb-2">

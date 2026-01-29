@@ -58,6 +58,11 @@ export type MessageType =
 	| 'm.notice';
 
 /**
+ * Room membership status
+ */
+export type RoomMembership = 'join' | 'invite' | 'leave' | 'ban' | 'knock';
+
+/**
  * Simplified room for UI rendering
  */
 export interface SimpleRoom {
@@ -73,6 +78,8 @@ export interface SimpleRoom {
 	isDirect: boolean;
 	isEncrypted: boolean;
 	memberCount: number;
+	membership: RoomMembership;
+	inviter?: string; // User who sent the invite
 }
 
 /**
