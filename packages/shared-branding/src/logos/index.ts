@@ -18,3 +18,4 @@ export { default as MailLogo } from './MailLogo.svelte';
 export { default as MoodlitLogo } from './MoodlitLogo.svelte';
 export { default as InventoryLogo } from './InventoryLogo.svelte';
 export { default as ClockLogo } from './ClockLogo.svelte';
+export { default as QuestionsLogo } from './QuestionsLogo.svelte';

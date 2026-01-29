@@ -31,6 +31,7 @@ export {
 	MoodlitLogo,
 	InventoryLogo,
 	ClockLogo,
+	QuestionsLogo,
 } from './logos';
 
 // Configuration

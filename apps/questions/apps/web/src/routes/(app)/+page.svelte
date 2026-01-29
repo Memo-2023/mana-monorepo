@@ -142,8 +142,9 @@
 						<!-- Status Icon -->
 						<div class="mt-1">
 							<StatusIcon
-								class="h-5 w-5 {statusColor}"
-								class:animate-spin={question.status === 'researching'}
+								class="h-5 w-5 {statusColor} {question.status === 'researching'
+									? 'animate-spin'
+									: ''}"
 							/>
 						</div>
 
