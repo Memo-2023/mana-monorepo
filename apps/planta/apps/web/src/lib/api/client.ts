@@ -1,19 +1,31 @@
 /**
  * API Client for Planta backend
+ * Uses @manacore/shared-api-client for consistent error handling
  */
 
-import { browser } from '$app/environment';
+import { createApiClient, type ApiResult } from '@manacore/shared-api-client';
 import { authStore } from '$lib/stores/auth.svelte';
 
-function getBackendUrl(): string {
-	if (browser && typeof window !== 'undefined') {
-		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
-			.__PUBLIC_BACKEND_URL__;
-		return injectedUrl || 'http://localhost:3022';
-	}
-	return 'http://localhost:3022';
-}
+const BASE_URL = 'http://localhost:3022';
 
+/**
+ * Planta API client instance
+ * - Auto token handling via authStore.getValidToken()
+ * - Runtime URL injection via window.__PUBLIC_BACKEND_URL__
+ * - Consistent ApiResult<T> response format
+ */
+const api = createApiClient({
+	baseUrl: BASE_URL,
+	apiPrefix: '/api/v1',
+	getAuthToken: () => authStore.getValidToken(),
+	timeout: 30000,
+	debug: import.meta.env.DEV,
+});
+
+/**
+ * Legacy fetchApi wrapper for backward compatibility
+ * Returns { data, error } format
+ */
 export async function fetchApi<T>(
 	endpoint: string,
 	options: {
@@ -27,36 +39,28 @@ export async function fetchApi<T>(
 		return { data: null, error: 'Not authenticated' };
 	}
 
-	const headers: Record<string, string> = {
-		Authorization: `Bearer ${token}`,
-	};
+	let result: ApiResult<T>;
 
-	// Don't set Content-Type for FormData - browser will set it with boundary
-	if (!options.formData) {
-		headers['Content-Type'] = 'application/json';
-	}
-
-	try {
-		const response = await fetch(`${getBackendUrl()}/api/v1${endpoint}`, {
-			method: options.method || 'GET',
-			headers,
-			body: options.formData || (options.body ? JSON.stringify(options.body) : undefined),
-		});
-
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			return {
-				data: null,
-				error: errorData.message || `API error: ${response.status}`,
-			};
+	if (options.formData) {
+		result = await api.upload<T>(endpoint, options.formData);
+	} else {
+		switch (options.method) {
+			case 'POST':
+				result = await api.post<T>(endpoint, options.body);
+				break;
+			case 'PUT':
+				result = await api.put<T>(endpoint, options.body);
+				break;
+			case 'DELETE':
+				result = await api.delete<T>(endpoint);
+				break;
+			default:
+				result = await api.get<T>(endpoint);
 		}
-
-		const data = await response.json();
-		return { data, error: null };
-	} catch (error) {
-		return {
-			data: null,
-			error: error instanceof Error ? error.message : 'Unknown error',
-		};
 	}
+
+	if (result.error) {
+		return { data: null, error: result.error.message };
+	}
+	return { data: result.data, error: null };
 }

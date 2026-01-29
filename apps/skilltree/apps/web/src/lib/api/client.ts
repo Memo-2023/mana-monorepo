@@ -1,97 +1,86 @@
-import { browser } from '$app/environment';
+/**
+ * API Client for SkillTree backend
+ * Uses @manacore/shared-api-client for consistent error handling
+ */
+
+import { createApiClient, type ApiResult } from '@manacore/shared-api-client';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
-interface ApiOptions {
-	method?: string;
-	body?: unknown;
-	headers?: Record<string, string>;
-}
+const BASE_URL = PUBLIC_BACKEND_URL || 'http://localhost:3024';
 
-interface ApiError {
-	message: string;
-	statusCode: number;
-}
+// Token storage for manual token management
+let currentToken: string | null = null;
 
 /**
- * Get the backend URL, preferring runtime-injected value in browser
- * This allows Docker to inject PUBLIC_BACKEND_URL_CLIENT at runtime
+ * SkillTree API client instance
+ * - Supports manual token setting via setAccessToken()
+ * - Runtime URL injection via window.__PUBLIC_BACKEND_URL__
+ * - Consistent ApiResult<T> response format
  */
-function getBackendUrl(): string {
-	if (browser && typeof window !== 'undefined') {
-		const runtimeUrl = (window as Window & { __PUBLIC_BACKEND_URL__?: string })
-			.__PUBLIC_BACKEND_URL__;
-		if (runtimeUrl) {
-			return runtimeUrl;
-		}
-	}
-	return PUBLIC_BACKEND_URL || 'http://localhost:3024';
-}
+const api = createApiClient({
+	baseUrl: BASE_URL,
+	apiPrefix: '',
+	getAuthToken: async () => currentToken,
+	timeout: 30000,
+	debug: import.meta.env.DEV,
+});
 
+/**
+ * Legacy ApiClient class wrapper for backward compatibility
+ * Maintains throw-based error handling for existing code
+ */
 class ApiClient {
-	private accessToken: string | null = null;
-
-	private get baseUrl(): string {
-		return getBackendUrl();
-	}
-
 	setAccessToken(token: string | null) {
-		this.accessToken = token;
+		currentToken = token;
 	}
 
 	getAccessToken(): string | null {
-		return this.accessToken;
+		return currentToken;
 	}
 
-	async fetch<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
-		const { method = 'GET', body, headers = {} } = options;
+	async fetch<T>(endpoint: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
+		const { method = 'GET', body } = options;
 
-		const requestHeaders: Record<string, string> = {
-			'Content-Type': 'application/json',
-			...headers,
-		};
-
-		if (this.accessToken) {
-			requestHeaders['Authorization'] = `Bearer ${this.accessToken}`;
+		let result: ApiResult<T>;
+		switch (method) {
+			case 'POST':
+				result = await api.post<T>(endpoint, body);
+				break;
+			case 'PUT':
+				result = await api.put<T>(endpoint, body);
+				break;
+			case 'DELETE':
+				result = await api.delete<T>(endpoint);
+				break;
+			default:
+				result = await api.get<T>(endpoint);
 		}
 
-		const response = await fetch(`${this.baseUrl}${endpoint}`, {
-			method,
-			headers: requestHeaders,
-			body: body ? JSON.stringify(body) : undefined,
-		});
-
-		if (!response.ok) {
-			let errorMessage = 'An error occurred';
-			try {
-				const errorData = (await response.json()) as ApiError;
-				errorMessage = errorData.message || errorMessage;
-			} catch {
-				errorMessage = response.statusText || errorMessage;
-			}
-			throw new Error(errorMessage);
+		if (result.error) {
+			throw new Error(result.error.message);
 		}
 
-		if (response.status === 204) {
+		if (result.data === null) {
 			return {} as T;
 		}
 
-		return response.json() as Promise<T>;
+		return result.data;
 	}
 
 	get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
-		return this.fetch<T>(endpoint, { method: 'GET', headers });
+		return this.fetch<T>(endpoint, { method: 'GET' });
 	}
 
 	post<T>(endpoint: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
-		return this.fetch<T>(endpoint, { method: 'POST', body, headers });
+		return this.fetch<T>(endpoint, { method: 'POST', body });
 	}
 
 	put<T>(endpoint: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
-		return this.fetch<T>(endpoint, { method: 'PUT', body, headers });
+		return this.fetch<T>(endpoint, { method: 'PUT', body });
 	}
 
 	delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
-		return this.fetch<T>(endpoint, { method: 'DELETE', headers });
+		return this.fetch<T>(endpoint, { method: 'DELETE' });
 	}
 }
 

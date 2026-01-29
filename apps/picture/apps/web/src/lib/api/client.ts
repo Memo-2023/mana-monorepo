@@ -1,17 +1,30 @@
 /**
  * API Client for Picture Backend
- * Replaces direct Supabase calls with backend API calls.
+ * Uses @manacore/shared-api-client for consistent error handling
  *
  * Token handling:
  * - Uses authStore.getValidToken() which automatically refreshes expired tokens
- * - The fetch interceptor (setupFetchInterceptor) handles 401 responses by refreshing and retrying
- * - If refresh fails, the request fails and user should be redirected to login
+ * - Consistent ApiResult<T> response format
  */
 
 import { env } from '$env/dynamic/public';
+import { createApiClient, type ApiResult } from '@manacore/shared-api-client';
 import { authStore } from '$lib/stores/auth.svelte';
 
 const API_BASE = env.PUBLIC_BACKEND_URL || 'http://localhost:3006';
+
+/**
+ * Picture API client instance
+ * - Auto token handling via authStore.getValidToken()
+ * - Consistent ApiResult<T> response format
+ */
+const api = createApiClient({
+	baseUrl: API_BASE,
+	apiPrefix: '/api/v1',
+	getAuthToken: () => authStore.getValidToken(),
+	timeout: 30000,
+	debug: import.meta.env.DEV,
+});
 
 type FetchOptions = {
 	method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
@@ -20,54 +33,44 @@ type FetchOptions = {
 	isFormData?: boolean;
 };
 
+/**
+ * Legacy fetchApi wrapper for backward compatibility
+ * Returns { data, error } format where error is Error | null
+ */
 export async function fetchApi<T>(
 	endpoint: string,
 	options: FetchOptions = {}
 ): Promise<{ data: T | null; error: Error | null }> {
-	const { method = 'GET', body, token, isFormData = false } = options;
+	const { method = 'GET', body, isFormData = false } = options;
 
-	// Get a valid token (auto-refreshes if expired)
-	const authToken = token || (await authStore.getValidToken());
+	let result: ApiResult<T>;
 
-	try {
-		const headers: Record<string, string> = {};
-
-		// Don't set Content-Type for FormData - browser sets it automatically with boundary
-		if (!isFormData) {
-			headers['Content-Type'] = 'application/json';
+	if (isFormData && body instanceof FormData) {
+		result = await api.upload<T>(endpoint, body);
+	} else {
+		switch (method) {
+			case 'POST':
+				result = await api.post<T>(endpoint, body);
+				break;
+			case 'PATCH':
+				result = await api.patch<T>(endpoint, body);
+				break;
+			case 'DELETE':
+				result = await api.delete<T>(endpoint);
+				break;
+			default:
+				result = await api.get<T>(endpoint);
 		}
+	}
 
-		if (authToken) {
-			headers['Authorization'] = `Bearer ${authToken}`;
-		}
-
-		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
-			method,
-			headers,
-			body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
-		});
-
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			return {
-				data: null,
-				error: new Error(errorData.message || `API error: ${response.status}`),
-			};
-		}
-
-		// Handle empty responses (204 No Content)
-		if (response.status === 204) {
-			return { data: null, error: null };
-		}
-
-		const data = await response.json();
-		return { data, error: null };
-	} catch (error) {
+	// Convert ApiResult to legacy format
+	if (result.error) {
 		return {
 			data: null,
-			error: error instanceof Error ? error : new Error('Unknown error'),
+			error: new Error(result.error.message),
 		};
 	}
+	return { data: result.data, error: null };
 }
 
 /**
@@ -78,40 +81,18 @@ export async function uploadFile(
 	file: File,
 	token?: string
 ): Promise<{ data: any; error: Error | null }> {
-	// Get a valid token (auto-refreshes if expired)
-	const authToken = token || (await authStore.getValidToken());
+	const formData = new FormData();
+	formData.append('file', file);
 
-	try {
-		const formData = new FormData();
-		formData.append('file', file);
+	const result = await api.upload<any>(endpoint, formData);
 
-		const headers: Record<string, string> = {};
-		if (authToken) {
-			headers['Authorization'] = `Bearer ${authToken}`;
-		}
-
-		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
-			method: 'POST',
-			headers,
-			body: formData,
-		});
-
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			return {
-				data: null,
-				error: new Error(errorData.message || `Upload error: ${response.status}`),
-			};
-		}
-
-		const data = await response.json();
-		return { data, error: null };
-	} catch (error) {
+	if (result.error) {
 		return {
 			data: null,
-			error: error instanceof Error ? error : new Error('Upload failed'),
+			error: new Error(result.error.message),
 		};
 	}
+	return { data: result.data, error: null };
 }
 
 /**
@@ -122,40 +103,18 @@ export async function uploadFiles(
 	files: File[],
 	token?: string
 ): Promise<{ data: any; error: Error | null }> {
-	// Get a valid token (auto-refreshes if expired)
-	const authToken = token || (await authStore.getValidToken());
+	const formData = new FormData();
+	files.forEach((file) => {
+		formData.append('files', file);
+	});
 
-	try {
-		const formData = new FormData();
-		files.forEach((file) => {
-			formData.append('files', file);
-		});
+	const result = await api.upload<any>(endpoint, formData);
 
-		const headers: Record<string, string> = {};
-		if (authToken) {
-			headers['Authorization'] = `Bearer ${authToken}`;
-		}
-
-		const response = await fetch(`${API_BASE}/api/v1${endpoint}`, {
-			method: 'POST',
-			headers,
-			body: formData,
-		});
-
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			return {
-				data: null,
-				error: new Error(errorData.message || `Upload error: ${response.status}`),
-			};
-		}
-
-		const data = await response.json();
-		return { data, error: null };
-	} catch (error) {
+	if (result.error) {
 		return {
 			data: null,
-			error: error instanceof Error ? error : new Error('Upload failed'),
+			error: new Error(result.error.message),
 		};
 	}
+	return { data: result.data, error: null };
 }

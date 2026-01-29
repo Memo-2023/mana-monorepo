@@ -244,6 +244,9 @@ importers:
       '@calendar/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -2286,6 +2289,9 @@ importers:
 
   apps/nutriphi/apps/web:
     dependencies:
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -2765,6 +2771,9 @@ importers:
 
   apps/picture/apps/web:
     dependencies:
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -3054,6 +3063,9 @@ importers:
 
   apps/planta/apps/web:
     dependencies:
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -3530,6 +3542,9 @@ importers:
 
   apps/questions/apps/web:
     dependencies:
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -3694,6 +3709,9 @@ importers:
 
   apps/skilltree/apps/web:
     dependencies:
+      '@manacore/shared-api-client':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-api-client
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth

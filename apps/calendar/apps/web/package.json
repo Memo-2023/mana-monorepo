@@ -32,6 +32,7 @@
 	},
 	"dependencies": {
 		"@calendar/shared": "workspace:*",
+		"@manacore/shared-api-client": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-splitscreen": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",

@@ -4,13 +4,17 @@
  */
 
 import { env } from '$env/dynamic/public';
-import { createApiClient } from './base-client';
+import { createApiClient } from '@manacore/shared-api-client';
+import { authStore } from '$lib/stores/auth.svelte';
 
 const CONTACTS_API_BASE = env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015';
 
 const contactsClient = createApiClient({
 	baseUrl: CONTACTS_API_BASE,
 	apiPrefix: '/api/v1',
+	getAuthToken: () => authStore.getValidToken(),
+	timeout: 30000,
+	debug: import.meta.env.DEV,
 });
 
 // ============================================
@@ -61,8 +65,6 @@ interface BirthdaysResponse {
 // API Functions
 // ============================================
 
-const fetchContactsApi = contactsClient.fetchApi;
-
 /**
  * Fetch all contacts with birthdays from Contacts service
  */
@@ -70,10 +72,13 @@ export async function getBirthdays(): Promise<{
 	data: ContactBirthdaySummary[] | null;
 	error: Error | null;
 }> {
-	const result = await fetchContactsApi<BirthdaysResponse>('/contacts/birthdays');
+	const result = await contactsClient.get<BirthdaysResponse>('/contacts/birthdays');
+	if (result.error) {
+		return { data: null, error: new Error(result.error.message) };
+	}
 	return {
 		data: result.data?.contacts || null,
-		error: result.error,
+		error: null,
 	};
 }
 

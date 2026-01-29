@@ -16,6 +16,7 @@
 		"clean": "rm -rf .svelte-kit build node_modules"
 	},
 	"dependencies": {
+		"@manacore/shared-api-client": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",

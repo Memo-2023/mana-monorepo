@@ -4,13 +4,17 @@
  */
 
 import { env } from '$env/dynamic/public';
-import { createApiClient, buildQueryString } from './base-client';
+import { createApiClient, buildQueryString, type ApiResult } from '@manacore/shared-api-client';
+import { authStore } from '$lib/stores/auth.svelte';
 
 const TODO_API_BASE = env.PUBLIC_TODO_BACKEND_URL || 'http://localhost:3018';
 
 const todoClient = createApiClient({
 	baseUrl: TODO_API_BASE,
 	apiPrefix: '/api/v1',
+	getAuthToken: () => authStore.getValidToken(),
+	timeout: 30000,
+	debug: import.meta.env.DEV,
 });
 
 // ============================================
@@ -173,7 +177,35 @@ interface LabelsResponse {
 // API Client (using shared base client)
 // ============================================
 
-const fetchTodoApi = todoClient.fetchApi;
+async function fetchTodoApi<T>(
+	endpoint: string,
+	options: { method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; body?: unknown } = {}
+): Promise<{ data: T | null; error: Error | null }> {
+	const { method = 'GET', body } = options;
+
+	let result: ApiResult<T>;
+	switch (method) {
+		case 'POST':
+			result = await todoClient.post<T>(endpoint, body);
+			break;
+		case 'PUT':
+			result = await todoClient.put<T>(endpoint, body);
+			break;
+		case 'PATCH':
+			result = await todoClient.patch<T>(endpoint, body);
+			break;
+		case 'DELETE':
+			result = await todoClient.delete<T>(endpoint);
+			break;
+		default:
+			result = await todoClient.get<T>(endpoint);
+	}
+
+	if (result.error) {
+		return { data: null, error: new Error(result.error.message) };
+	}
+	return { data: result.data, error: null };
+}
 
 // ============================================
 // Task API Functions
@@ -182,7 +214,9 @@ const fetchTodoApi = todoClient.fetchApi;
 export async function getTasks(
 	query: TaskQuery = {}
 ): Promise<{ data: Task[] | null; error: Error | null }> {
-	const queryString = buildQueryString(query as Record<string, unknown>);
+	const queryString = buildQueryString(
+		query as Record<string, string | number | boolean | undefined>
+	);
 	const result = await fetchTodoApi<TasksResponse>(`/tasks${queryString}`);
 	return {
 		data: result.data?.tasks || null,
