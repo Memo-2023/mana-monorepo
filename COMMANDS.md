@@ -13,6 +13,7 @@ pnpm dev:contacts:full
 pnpm dev:todo:full
 pnpm dev:presi:full
 pnpm dev:storage:full
+pnpm dev:skilltree:full
 
 pnpm dev:manacore:app # Nur ManaCore Web
 pnpm dev:manacore:backends # Alle 7 Backends für Dashboard-Widgets
@@ -197,6 +198,29 @@ pnpm manadeck:dev
 
 ---
 
+## SkillTree
+
+Gamified Skill-Tracking App - wie ein RPG Skill Tree für echte Fähigkeiten.
+
+| App     | Port | Befehl                       |
+| ------- | ---- | ---------------------------- |
+| Web     | 5195 | `pnpm dev:skilltree:web`     |
+| Backend | 3024 | `pnpm dev:skilltree:backend` |
+
+```bash
+# Web + Backend zusammen starten
+pnpm dev:skilltree:app
+
+# Mit Auth + automatischem DB-Setup (empfohlen)
+pnpm dev:skilltree:full
+
+# Datenbank
+pnpm skilltree:db:push    # Schema pushen
+pnpm skilltree:db:studio  # Drizzle Studio
+```
+
+---
+
 ## Manacore
 
 | App      | Port | Befehl                       |
@@ -356,7 +380,7 @@ pnpm --filter @manacore/shared-ui build
 
 ## App-Übersicht
 
-### Aktive Apps (apps/) - 10 Apps
+### Aktive Apps (apps/) - 11 Apps
 
 - **calendar** - Kalender-App für persönliches und geteiltes Zeitmanagement mit wiederkehrenden Terminen, CalDAV/iCal-Sync und Erinnerungen
 - **chat** - KI-Chat-Anwendung mit verschiedenen KI-Modellen und Konversationsverlauf
@@ -366,6 +390,7 @@ pnpm --filter @manacore/shared-ui build
 - **manadeck** - Karteikarten-/Lernkarten-Management für Spaced Repetition Learning
 - **nutriphi** - Nutrition tracking (geplant, noch kein Backend)
 - **picture** - KI-Bildgenerierung mit verschiedenen Modellen und Galerie-Verwaltung
+- **skilltree** - Gamified Skill-Tracking mit XP-System, Leveln und 6 Skill-Branches
 - **storage** - Cloud storage (geplant, noch kein Backend)
 - **todo** - Task-Management mit Projekten, Subtasks, Labels und wiederkehrenden Aufgaben
 
