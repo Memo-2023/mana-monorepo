@@ -48,8 +48,21 @@
 	let imageLoading = $state(true);
 	let imageError = $state(false);
 
-	// Quick reaction emojis
+	// Quick reaction emojis (always visible)
 	const quickEmojis = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
+
+	// Extended emoji categories for full picker
+	const emojiCategories = [
+		{ name: 'Häufig', emojis: ['👍', '👎', '❤️', '😂', '😮', '😢', '🎉', '🔥', '💯', '✨'] },
+		{ name: 'Smileys', emojis: ['😀', '😃', '😄', '😁', '😆', '🥹', '😅', '🤣', '😊', '😇', '🙂', '😉', '😌', '😍', '🥰', '😘'] },
+		{ name: 'Gesten', emojis: ['👏', '🙌', '👐', '🤝', '🙏', '✌️', '🤞', '🤟', '🤘', '👌', '🤌', '👋', '💪', '👀'] },
+		{ name: 'Symbole', emojis: ['✅', '❌', '⭐', '💫', '🌟', '💡', '🎯', '🚀', '💎', '🏆', '🔑', '📌', '🔔', '💬'] },
+		{ name: 'Tiere', emojis: ['🐱', '🐶', '🐻', '🦊', '🐼', '🐨', '🦁', '🐸', '🐵', '🦄', '🐝', '🦋'] },
+		{ name: 'Essen', emojis: ['🍕', '🍔', '🍟', '🌮', '🍜', '🍣', '🍦', '🍩', '🍪', '☕', '🍺', '🍷'] },
+	];
+
+	let showFullPicker = $state(false);
+	let selectedCategory = $state(0);
 
 	async function handleReaction(emoji: string) {
 		showEmojiPicker = false;
@@ -539,23 +552,67 @@
 						<!-- Emoji picker backdrop -->
 						<button
 							class="fixed inset-0 z-40"
-							onclick={() => (showEmojiPicker = false)}
+							onclick={() => {
+								showEmojiPicker = false;
+								showFullPicker = false;
+							}}
 							aria-label="Schließen"
 						></button>
 						<!-- Emoji picker dropdown -->
 						<div
-							class="absolute z-50 flex gap-1 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-2 shadow-xl
+							class="absolute z-50 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 shadow-xl
 							       left-0 top-full mt-2 lg:bottom-full lg:top-auto lg:mt-0 lg:mb-2
-							       {message.isOwn ? 'lg:right-0 lg:left-auto' : ''}"
+							       {message.isOwn ? 'lg:right-0 lg:left-auto' : ''}
+							       {showFullPicker ? 'w-72' : ''}"
 						>
-							{#each quickEmojis as emoji}
-								<button
-									class="text-xl hover:scale-125 transition-transform p-1"
-									onclick={() => handleReaction(emoji)}
-								>
-									{emoji}
-								</button>
-							{/each}
+							{#if showFullPicker}
+								<!-- Full emoji picker with categories -->
+								<div class="p-2">
+									<!-- Category tabs -->
+									<div class="flex gap-1 mb-2 border-b border-black/10 dark:border-white/10 pb-2 overflow-x-auto">
+										{#each emojiCategories as category, i}
+											<button
+												class="px-2 py-1 text-xs rounded-md whitespace-nowrap transition-colors
+												       {selectedCategory === i ? 'bg-violet-500 text-white' : 'hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground'}"
+												onclick={() => (selectedCategory = i)}
+											>
+												{category.name}
+											</button>
+										{/each}
+									</div>
+									<!-- Emoji grid -->
+									<div class="grid grid-cols-8 gap-1 max-h-40 overflow-y-auto">
+										{#each emojiCategories[selectedCategory].emojis as emoji}
+											<button
+												class="text-xl hover:scale-110 hover:bg-black/5 dark:hover:bg-white/10 rounded p-1 transition-all"
+												onclick={() => handleReaction(emoji)}
+											>
+												{emoji}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{:else}
+								<!-- Quick emoji bar -->
+								<div class="flex items-center gap-1 p-2">
+									{#each quickEmojis as emoji}
+										<button
+											class="text-xl hover:scale-125 transition-transform p-1"
+											onclick={() => handleReaction(emoji)}
+										>
+											{emoji}
+										</button>
+									{/each}
+									<!-- Expand button -->
+									<button
+										class="ml-1 p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+										onclick={() => (showFullPicker = true)}
+										title="Mehr Emojis"
+									>
+										<DotsThree class="h-4 w-4 text-muted-foreground" />
+									</button>
+								</div>
+							{/if}
 						</div>
 					{/if}
 				</div>

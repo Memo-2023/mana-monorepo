@@ -1486,6 +1486,39 @@ class MatrixStore {
 	}
 
 	/**
+	 * Toggle screen sharing
+	 */
+	async toggleScreenShare(): Promise<boolean> {
+		if (!this._matrixCall || !this._activeCall) return false;
+
+		try {
+			const isSharing = this._activeCall.isScreenSharing;
+
+			if (isSharing) {
+				// Stop screen sharing - switch back to camera
+				await this._matrixCall.setScreensharingEnabled(false);
+				this._activeCall = { ...this._activeCall, isScreenSharing: false };
+			} else {
+				// Start screen sharing
+				const success = await this._matrixCall.setScreensharingEnabled(true, {
+					audio: true, // Include system audio if available
+				});
+				if (success) {
+					this._activeCall = { ...this._activeCall, isScreenSharing: true };
+				} else {
+					console.warn('Screen sharing was denied or failed');
+					return false;
+				}
+			}
+			return true;
+		} catch (err) {
+			console.error('Error toggling screen share:', err);
+			this._error = 'Bildschirmfreigabe fehlgeschlagen';
+			return false;
+		}
+	}
+
+	/**
 	 * Set up call event handlers
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

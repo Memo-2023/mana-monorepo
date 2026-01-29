@@ -6,6 +6,7 @@
 		MicrophoneSlash,
 		VideoCamera,
 		VideoCameraSlash,
+		Screencast,
 		User,
 	} from '@manacore/shared-icons';
 	import { onDestroy } from 'svelte';
@@ -66,6 +67,10 @@
 		matrixStore.toggleCameraMute();
 	}
 
+	async function handleScreenShare() {
+		await matrixStore.toggleScreenShare();
+	}
+
 	function handleHangup() {
 		matrixStore.hangupCall();
 		onHangup?.();
@@ -108,8 +113,14 @@
 			{/if}
 			<div>
 				<p class="font-medium text-white">{call.opponentName || 'Unbekannt'}</p>
-				<p class="text-sm text-white/70">
-					{call.type === 'video' ? 'Videoanruf' : 'Sprachanruf'} · {getStateText(call.state)}
+				<p class="text-sm text-white/70 flex items-center gap-2">
+					<span>{call.type === 'video' ? 'Videoanruf' : 'Sprachanruf'} · {getStateText(call.state)}</span>
+					{#if call.isScreenSharing}
+						<span class="flex items-center gap-1 px-2 py-0.5 bg-violet-500/30 rounded-full text-violet-300 text-xs">
+							<Screencast class="w-3 h-3" />
+							Bildschirmfreigabe
+						</span>
+					{/if}
 				</p>
 			</div>
 		</div>
@@ -188,6 +199,16 @@
 				{:else}
 					<VideoCamera class="w-6 h-6 text-white" />
 				{/if}
+			</button>
+
+			<!-- Screen share -->
+			<button
+				class="w-14 h-14 rounded-full flex items-center justify-center transition-colors
+				       {call.isScreenSharing ? 'bg-violet-500 hover:bg-violet-600' : 'bg-white/20 hover:bg-white/30'}"
+				onclick={handleScreenShare}
+				title={call.isScreenSharing ? 'Bildschirmfreigabe beenden' : 'Bildschirm freigeben'}
+			>
+				<Screencast class="w-6 h-6 text-white" />
 			</button>
 		{/if}
 

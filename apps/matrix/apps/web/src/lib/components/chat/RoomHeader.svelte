@@ -45,6 +45,23 @@
 			});
 		}
 	});
+
+	// Presence for DMs
+	let isOnline = $derived(room?.isDirect && room?.presence === 'online');
+
+	// Format last active time
+	let presenceText = $derived(() => {
+		if (!room?.isDirect) return '';
+		if (room.presence === 'online') return 'Online';
+		if (!room.lastActiveAgo) return 'Offline';
+		const minutes = Math.floor(room.lastActiveAgo / 60000);
+		if (minutes < 1) return 'Gerade aktiv';
+		if (minutes < 60) return `Vor ${minutes} Min. aktiv`;
+		const hours = Math.floor(minutes / 60);
+		if (hours < 24) return `Vor ${hours} Std. aktiv`;
+		const days = Math.floor(hours / 24);
+		return `Vor ${days} Tag${days > 1 ? 'en' : ''} aktiv`;
+	});
 </script>
 
 {#if room}
@@ -59,15 +76,25 @@
 			<List class="h-5 w-5" />
 		</button>
 
-		<!-- Room avatar -->
-		<div
-			class="flex h-10 w-10 items-center justify-center rounded-full shadow-md
-			       bg-gradient-to-br from-violet-500 to-purple-600 text-white"
-		>
-			{#if room.avatar}
-				<img src={room.avatar} alt={room.name} class="h-10 w-10 rounded-full object-cover" />
-			{:else}
-				<span class="text-sm font-semibold">{room.name.charAt(0).toUpperCase()}</span>
+		<!-- Room avatar with online indicator -->
+		<div class="relative flex-shrink-0">
+			<div
+				class="flex h-10 w-10 items-center justify-center rounded-full shadow-md
+				       bg-gradient-to-br from-violet-500 to-purple-600 text-white"
+			>
+				{#if room.avatar}
+					<img src={room.avatar} alt={room.name} class="h-10 w-10 rounded-full object-cover" />
+				{:else}
+					<span class="text-sm font-semibold">{room.name.charAt(0).toUpperCase()}</span>
+				{/if}
+			</div>
+			<!-- Online indicator for DMs -->
+			{#if room.isDirect}
+				<div
+					class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900
+					       {isOnline ? 'bg-green-500' : 'bg-zinc-400 dark:bg-zinc-600'}"
+					title={presenceText()}
+				></div>
 			{/if}
 		</div>
 
@@ -94,11 +121,19 @@
 					</div>
 				{/if}
 			</div>
-			<p class="flex items-center gap-1 text-sm text-muted-foreground">
+			<p class="flex items-center gap-1.5 text-sm text-muted-foreground">
 				{#if room.topic}
 					<span class="truncate">{room.topic}</span>
 				{:else if room.isDirect}
-					<span>Direktnachricht</span>
+					<span class="flex items-center gap-1.5">
+						{#if isOnline}
+							<span class="w-2 h-2 rounded-full bg-green-500"></span>
+							<span class="text-green-600 dark:text-green-400">Online</span>
+						{:else}
+							<span class="w-2 h-2 rounded-full bg-zinc-400"></span>
+							<span>{presenceText() || 'Offline'}</span>
+						{/if}
+					</span>
 				{:else}
 					<Users class="h-3 w-3" />
 					<span>{room.memberCount} Mitglieder</span>
