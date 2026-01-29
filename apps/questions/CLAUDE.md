@@ -5,7 +5,8 @@ AI-powered research assistant that collects user questions and performs comprehe
 ## Overview
 
 - **Backend Port**: 3011
-- **Technology**: NestJS + Drizzle ORM + PostgreSQL
+- **Web Port**: 5111
+- **Technology**: NestJS + Drizzle ORM + PostgreSQL + SvelteKit
 - **Search**: mana-search microservice (SearXNG)
 
 ## Architecture
@@ -33,15 +34,24 @@ AI-powered research assistant that collects user questions and performs comprehe
 # 1. Start infrastructure (PostgreSQL, Redis, mana-search dependencies)
 pnpm docker:up
 
-# 2. Start mana-search service
-pnpm dev:search:full
-
-# 3. Start questions backend
-pnpm dev:questions:backend
-
-# Or use the combined command:
+# 2. Start everything (auth, search, backend, web):
 pnpm dev:questions:full
+
+# Or start components individually:
+pnpm dev:questions:backend  # Just backend (port 3011)
+pnpm dev:questions:web      # Just web (port 5111)
+pnpm dev:search:full        # Just search service (port 3021)
 ```
+
+## Web App
+
+The SvelteKit web app provides:
+
+- **Question Management**: Create, edit, and organize questions
+- **Collection Organization**: Group questions into collections with colors/icons
+- **Research Interface**: Start research and view results with sources
+- **Source Viewer**: Explore extracted content from web sources
+- **Dark Mode**: Full theme support
 
 ## API Endpoints
 

@@ -222,7 +222,7 @@
 		"dev:questions:backend": "pnpm --filter @questions/backend dev",
 		"dev:questions:web": "pnpm --filter @questions/web dev",
 		"dev:questions:app": "turbo run dev --filter=@questions/web --filter=@questions/backend",
-		"dev:questions:full": "./scripts/setup-databases.sh questions && ./scripts/setup-databases.sh auth && pnpm dev:search:docker && concurrently -n auth,search,backend -c blue,yellow,green \"pnpm dev:auth\" \"pnpm dev:search\" \"pnpm dev:questions:backend\"",
+		"dev:questions:full": "./scripts/setup-databases.sh questions && ./scripts/setup-databases.sh auth && pnpm dev:search:docker && concurrently -n auth,search,backend,web -c blue,yellow,green,cyan \"pnpm dev:auth\" \"pnpm dev:search\" \"pnpm dev:questions:backend\" \"pnpm dev:questions:web\"",
 		"questions:db:push": "pnpm --filter @questions/backend db:push",
 		"questions:db:studio": "pnpm --filter @questions/backend db:studio",
 		"dev:projectdoc": "pnpm --filter @manacore/telegram-project-doc-bot start:dev",
