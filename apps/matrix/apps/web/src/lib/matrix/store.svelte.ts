@@ -804,6 +804,78 @@ class MatrixStore {
 	}
 
 	/**
+	 * Search messages in the current room
+	 */
+	async searchMessages(
+		query: string,
+		roomId?: string
+	): Promise<
+		{
+			eventId: string;
+			sender: string;
+			senderName: string;
+			body: string;
+			timestamp: number;
+			roomId: string;
+			roomName: string;
+		}[]
+	> {
+		if (!this._client || !query.trim()) return [];
+
+		const targetRoomId = roomId || this._currentRoomId;
+
+		try {
+			// Use Matrix search API
+			const searchResult = await this._client.searchRoomEvents({
+				term: query,
+				filter: targetRoomId
+					? {
+							rooms: [targetRoomId],
+						}
+					: undefined,
+			});
+
+			const results: {
+				eventId: string;
+				sender: string;
+				senderName: string;
+				body: string;
+				timestamp: number;
+				roomId: string;
+				roomName: string;
+			}[] = [];
+
+			// Process search results - cast to any since SDK types are incomplete
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const searchData = searchResult as any;
+			const searchResults = searchData?.search_categories?.room_events?.results || [];
+			for (const result of searchResults) {
+				const event = result.result;
+				if (!event) continue;
+
+				const eventRoomId = event.room_id;
+				const room = this._client.getRoom(eventRoomId);
+				const content = event.content as { body?: string };
+
+				results.push({
+					eventId: event.event_id || '',
+					sender: event.sender || '',
+					senderName: room?.getMember(event.sender || '')?.name || event.sender || 'Unbekannt',
+					body: content?.body || '',
+					timestamp: event.origin_server_ts || 0,
+					roomId: eventRoomId || '',
+					roomName: room?.name || 'Unbekannt',
+				});
+			}
+
+			return results;
+		} catch (e) {
+			console.error('Search failed:', e);
+			return [];
+		}
+	}
+
+	/**
 	 * Get room members
 	 */
 	getRoomMembers(roomId?: string): RoomMember[] {

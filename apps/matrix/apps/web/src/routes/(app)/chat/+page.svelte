@@ -3,6 +3,7 @@
 	import { RoomList, RoomHeader, Timeline, MessageInput } from '$lib/components/chat';
 	import CreateRoomDialog from '$lib/components/chat/CreateRoomDialog.svelte';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
+	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
 	import { ChatCircle, Plus, Gear } from '@manacore/shared-icons';
 	import { browser } from '$app/environment';
 
@@ -10,6 +11,7 @@
 	let sidebarOpen = $state(browser ? window.innerWidth >= 1024 : true);
 	let showCreateRoom = $state(false);
 	let showRoomSettings = $state(false);
+	let showSearch = $state(false);
 
 	// Reply/Edit state
 	let replyTo = $state<SimpleMessage | null>(null);
@@ -119,7 +121,11 @@
 	<main class="flex flex-1 min-h-0 flex-col overflow-hidden bg-background">
 		{#if matrixStore.currentRoom}
 			<!-- Room Header -->
-			<RoomHeader onMenuClick={toggleSidebar} onInfoClick={() => (showRoomSettings = true)} />
+			<RoomHeader
+				onMenuClick={toggleSidebar}
+				onInfoClick={() => (showRoomSettings = true)}
+				onSearchClick={() => (showSearch = true)}
+			/>
 
 			<!-- Timeline -->
 			<Timeline onReply={handleReply} onEdit={handleEdit} />
@@ -179,3 +185,6 @@
 	onClose={() => (showCreateRoom = false)}
 	onCreated={handleRoomCreated}
 />
+
+<!-- Search Dialog -->
+<SearchDialog open={showSearch} onClose={() => (showSearch = false)} />
