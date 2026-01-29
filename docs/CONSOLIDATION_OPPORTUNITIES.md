@@ -11,7 +11,7 @@
 | **HOCH** | Skeleton Components | 800-1.000 LOC | Mittel |
 | ~~**HOCH**~~ | ~~App Settings Stores~~ | ~~600-700 LOC~~ ✅ **323 LOC entfernt** | ~~Mittel~~ |
 | **HOCH** | Main.ts/CORS Patterns | 1.800 LOC | Mittel |
-| **MITTEL** | TypeScript Configs | 400 LOC | Niedrig |
+| ~~**MITTEL**~~ | ~~TypeScript Configs~~ | ~~400 LOC~~ ✅ **~280 LOC entfernt** | ~~Niedrig~~ |
 | **MITTEL** | UI Component Cleanup | 400 LOC | Niedrig |
 | **MITTEL** | Vite Configs | 300 LOC | Niedrig |
 | **MITTEL** | Navigation Stores | 50 LOC | Niedrig |
@@ -264,32 +264,28 @@ export function createNavigationStore(options?: {
 
 ## 4. Konfigurationsdateien
 
-### 4.1 MITTEL: TypeScript Configs (400 LOC)
+### ~~4.1 MITTEL: TypeScript Configs~~ ✅ ERLEDIGT (~280 LOC gespart)
 
-**Problem:** Identische tsconfig.json in:
-- 12+ NestJS Backends (95% identisch)
-- 15+ SvelteKit Web Apps (99% identisch)
-- 6 Expo Mobile Apps (99% identisch)
-- 6+ Astro Landing Pages (95% identisch)
+**Status:** `@manacore/shared-tsconfig` Package erstellt und 13 Backends migriert (29.01.2026)
 
-**Empfehlung:** Erstelle `@manacore/shared-tsconfig`
+**Erstelltes Package:** `packages/shared-tsconfig/`
+- `base.json` - Gemeinsame Basis-Optionen
+- `nestjs.json` - NestJS Backend Config (erweitert base)
+- `sveltekit.json` - SvelteKit Web Config
+- `expo.json` - Expo Mobile Config
+- `astro.json` - Astro Landing Config
 
-```
-packages/shared-tsconfig/
-├── nestjs.json
-├── sveltekit.json
-├── expo.json
-├── astro.json
-└── base.json
-```
+**Migrierte Backends (13 von 14):**
+- ✅ calendar, chat, clock, contacts, nutriphi, picture, planta, presi, questions, skilltree, storage, todo, zitare
+- ⏭️ manadeck (übersprungen - verwendet `nodenext` statt `commonjs`)
 
-**Vorher (30 LOC pro App):**
+**Vorher (25 LOC pro Backend):**
 ```json
 {
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
-    // ... 25 weitere Zeilen
+    // ... 20+ weitere Zeilen
   }
 }
 ```
@@ -300,6 +296,8 @@ packages/shared-tsconfig/
   "extends": "@manacore/shared-tsconfig/nestjs"
 }
 ```
+
+**Einsparung:** 13 Backends × ~22 LOC = ~280 LOC
 
 ---
 
@@ -390,7 +388,7 @@ export default createDrizzleConfig('chat');
 | Aufgabe | LOC | Aufwand | Status |
 |---------|-----|---------|--------|
 | ~~`createAppSettingsStore()` Factory erstellen~~ | ~~600~~ → **323** | ~~Mittel~~ | ✅ Erledigt |
-| `@manacore/shared-tsconfig` Package erstellen | 400 | Niedrig | Offen |
+| ~~`@manacore/shared-tsconfig` Package erstellen~~ | ~~400~~ → **280** | ~~Niedrig~~ | ✅ Erledigt |
 | `@manacore/shared-vite-config` Factory erstellen | 300 | Niedrig | Offen |
 | Navigation Store Factory erstellen | 50 | Niedrig | Offen |
 
