@@ -2,7 +2,7 @@
 	import { selectedItems, updateCanvasItem, removeSelectedItems } from '$lib/stores/canvas';
 	import { updateBoardItem, changeBoardItemZIndex, isImageItem } from '$lib/api/boardItems';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import {
 		Image,
 		CaretDoubleUp,
@@ -51,7 +51,7 @@
 			await updateBoardItem(selectedItem.id, updates);
 		} catch (error) {
 			console.error('Error updating position:', error);
-			showToast('Fehler beim Speichern', 'error');
+			toastStore.show('Fehler beim Speichern', 'error');
 		}
 	}
 
@@ -75,7 +75,7 @@
 			await updateBoardItem(selectedItem.id, updates);
 		} catch (error) {
 			console.error('Error updating scale:', error);
-			showToast('Fehler beim Speichern', 'error');
+			toastStore.show('Fehler beim Speichern', 'error');
 		}
 	}
 
@@ -89,7 +89,7 @@
 			await updateBoardItem(selectedItem.id, updates);
 		} catch (error) {
 			console.error('Error updating rotation:', error);
-			showToast('Fehler beim Speichern', 'error');
+			toastStore.show('Fehler beim Speichern', 'error');
 		}
 	}
 
@@ -104,7 +104,7 @@
 			await updateBoardItem(selectedItem.id, updates);
 		} catch (error) {
 			console.error('Error updating opacity:', error);
-			showToast('Fehler beim Speichern', 'error');
+			toastStore.show('Fehler beim Speichern', 'error');
 		}
 	}
 
@@ -113,10 +113,10 @@
 
 		try {
 			await changeBoardItemZIndex(selectedItem.id, direction);
-			showToast('Layer-Reihenfolge geändert', 'success');
+			toastStore.show('Layer-Reihenfolge geändert', 'success');
 		} catch (error) {
 			console.error('Error changing layer:', error);
-			showToast('Fehler beim Ändern der Layer-Reihenfolge', 'error');
+			toastStore.show('Fehler beim Ändern der Layer-Reihenfolge', 'error');
 		}
 	}
 
@@ -139,7 +139,7 @@
 
 	function handleDelete() {
 		removeSelectedItems();
-		showToast('Bild entfernt', 'success');
+		toastStore.show('Bild entfernt', 'success');
 	}
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
-	import { toast } from '$lib/stores/toast.svelte';
+	import { toastStore as toast } from '@manacore/shared-ui';
 
 	function handleSubscribe(planId: string) {
 		toast.info(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`);

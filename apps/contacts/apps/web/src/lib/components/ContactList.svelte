@@ -9,7 +9,7 @@
 	import ContactAlphabetView from '$lib/components/views/ContactAlphabetView.svelte';
 	import { ContactListSkeleton, ContactGridSkeleton } from '$lib/components/skeletons';
 	import { batchApi } from '$lib/api/batch';
-	import { toasts } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 
 	// Infinite scroll
@@ -183,12 +183,12 @@
 		batchLoading = true;
 		try {
 			const result = await batchApi.deleteMany([...selectedIds]);
-			toasts.success(`${result.success} Kontakte gelöscht`);
+			toastStore.success(`${result.success} Kontakte gelöscht`);
 			selectedIds = new Set();
 			selectionMode = false;
 			await contactsStore.loadContacts();
 		} catch (e) {
-			toasts.error(e instanceof Error ? e.message : 'Fehler beim Löschen');
+			toastStore.error(e instanceof Error ? e.message : 'Fehler beim Löschen');
 		} finally {
 			batchLoading = false;
 		}
@@ -200,12 +200,12 @@
 		batchLoading = true;
 		try {
 			const result = await batchApi.archiveMany([...selectedIds], true);
-			toasts.success(`${result.success} Kontakte archiviert`);
+			toastStore.success(`${result.success} Kontakte archiviert`);
 			selectedIds = new Set();
 			selectionMode = false;
 			await contactsStore.loadContacts();
 		} catch (e) {
-			toasts.error(e instanceof Error ? e.message : 'Fehler beim Archivieren');
+			toastStore.error(e instanceof Error ? e.message : 'Fehler beim Archivieren');
 		} finally {
 			batchLoading = false;
 		}
@@ -217,12 +217,12 @@
 		batchLoading = true;
 		try {
 			const result = await batchApi.favoriteMany([...selectedIds], true);
-			toasts.success(`${result.success} Kontakte zu Favoriten hinzugefügt`);
+			toastStore.success(`${result.success} Kontakte zu Favoriten hinzugefügt`);
 			selectedIds = new Set();
 			selectionMode = false;
 			await contactsStore.loadContacts();
 		} catch (e) {
-			toasts.error(e instanceof Error ? e.message : 'Fehler');
+			toastStore.error(e instanceof Error ? e.message : 'Fehler');
 		} finally {
 			batchLoading = false;
 		}

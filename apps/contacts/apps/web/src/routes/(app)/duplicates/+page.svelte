@@ -4,7 +4,7 @@
 	import { duplicatesApi, type DuplicateGroup } from '$lib/api/duplicates';
 	import MergeModal from '$lib/components/duplicates/MergeModal.svelte';
 	import { DuplicateListSkeleton } from '$lib/components/skeletons';
-	import { toasts } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 
 	let duplicates = $state<DuplicateGroup[]>([]);
 	let loading = $state(true);
@@ -75,14 +75,14 @@
 	async function handleMerge(primaryId: string, mergeIds: string[]) {
 		try {
 			await duplicatesApi.mergeContacts(primaryId, mergeIds);
-			toasts.success(`${mergeIds.length + 1} Kontakte wurden zusammengeführt`);
+			toastStore.success(`${mergeIds.length + 1} Kontakte wurden zusammengeführt`);
 			// Remove the merged group from the list
 			if (selectedGroup) {
 				duplicates = duplicates.filter((d) => d.id !== selectedGroup!.id);
 			}
 			handleCloseMergeModal();
 		} catch (e) {
-			toasts.error(e instanceof Error ? e.message : 'Fehler beim Zusammenführen');
+			toastStore.error(e instanceof Error ? e.message : 'Fehler beim Zusammenführen');
 		}
 	}
 
@@ -91,10 +91,10 @@
 		try {
 			await duplicatesApi.dismissDuplicate(selectedGroup.id);
 			duplicates = duplicates.filter((d) => d.id !== selectedGroup!.id);
-			toasts.info('Duplikat-Gruppe wurde ignoriert');
+			toastStore.info('Duplikat-Gruppe wurde ignoriert');
 			handleCloseMergeModal();
 		} catch (e) {
-			toasts.error('Fehler beim Ignorieren');
+			toastStore.error('Fehler beim Ignorieren');
 		}
 	}
 

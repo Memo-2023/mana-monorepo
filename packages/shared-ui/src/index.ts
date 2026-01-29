@@ -195,3 +195,7 @@ export type {
 
 // Immersive Mode
 export { default as ImmersiveModeToggle } from './components/ImmersiveModeToggle.svelte';
+
+// Toast
+export { toastStore, toast, handleApiError, ToastContainer } from './toast';
+export type { Toast, ToastType } from './toast';

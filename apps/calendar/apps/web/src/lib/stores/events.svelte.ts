@@ -8,7 +8,7 @@ import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calenda
 import * as api from '$lib/api/events';
 import { format, isWithinInterval, isSameDay } from 'date-fns';
 import { toDate } from '$lib/utils/eventDateHelpers';
-import { toastStore } from './toast.svelte';
+import { toastStore } from '@manacore/shared-ui';
 import { authStore } from './auth.svelte';
 import { generateDemoEvents, isDemoEvent } from '$lib/data/demo-events';
 

@@ -2,9 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
 	import EventForm from './EventForm.svelte';
-	import { TagBadge } from '@manacore/shared-ui';
+	import { TagBadge, toastStore as toast } from '@manacore/shared-ui';
 	import type { CalendarEvent, UpdateEventInput } from '@calendar/shared';
 	import * as api from '$lib/api/events';
 	import { format } from 'date-fns';

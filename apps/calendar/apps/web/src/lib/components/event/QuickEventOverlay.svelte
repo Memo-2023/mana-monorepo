@@ -3,7 +3,6 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
 	import type {
 		LocationDetails,
 		CalendarEvent,
@@ -16,6 +15,7 @@
 		ContactAvatar,
 		ConfirmationPopover,
 		FilterDropdown,
+		toastStore as toast,
 		type FilterDropdownOption,
 	} from '@manacore/shared-ui';
 	import { Users } from '@manacore/shared-icons';

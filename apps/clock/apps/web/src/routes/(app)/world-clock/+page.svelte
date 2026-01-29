@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { PageHeader } from '@manacore/shared-ui';
+	import { PageHeader, toast } from '@manacore/shared-ui';
 	import { worldClocksStore } from '$lib/stores/world-clocks.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { toast } from '$lib/stores/toast';
 	import { POPULAR_TIMEZONES } from '@clock/shared';
 	import WorldMap from '$lib/components/WorldMap.svelte';
 	import { WorldClockSkeleton } from '$lib/components/skeletons';

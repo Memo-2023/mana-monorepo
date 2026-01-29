@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { GridFour, List, FolderPlus, UploadSimple, ArrowLeft } from '@manacore/shared-icons';
 	import { filesStore } from '$lib/stores/files.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
 	import FileList from '$lib/components/files/FileList.svelte';
@@ -48,40 +48,40 @@
 		switch (action) {
 			case 'download':
 				await filesStore.downloadFile(file.id, file.name);
-				toast.success('Download gestartet');
+				toastStore.success('Download gestartet');
 				break;
 			case 'rename':
 				const newName = prompt('Neuer Name:', file.name);
 				if (newName && newName !== file.name) {
 					const result = await filesStore.renameFile(file.id, newName);
 					if (result.error) {
-						toast.error(result.error);
+						toastStore.error(result.error);
 					} else {
-						toast.success('Datei umbenannt');
+						toastStore.success('Datei umbenannt');
 					}
 				}
 				break;
 			case 'favorite':
 				const favResult = await filesStore.toggleFileFavorite(file.id);
 				if (!favResult.error) {
-					toast.success(file.isFavorite ? 'Favorit entfernt' : 'Als Favorit markiert');
+					toastStore.success(file.isFavorite ? 'Favorit entfernt' : 'Als Favorit markiert');
 				}
 				break;
 			case 'delete':
 				if (confirm('Datei in den Papierkorb verschieben?')) {
 					const delResult = await filesStore.deleteFile(file.id);
 					if (delResult.error) {
-						toast.error(delResult.error);
+						toastStore.error(delResult.error);
 					} else {
-						toast.success('In den Papierkorb verschoben');
+						toastStore.success('In den Papierkorb verschoben');
 					}
 				}
 				break;
 			case 'share':
-				toast.info('Teilen-Funktion kommt bald');
+				toastStore.info('Teilen-Funktion kommt bald');
 				break;
 			case 'move':
-				toast.info('Verschieben-Funktion kommt bald');
+				toastStore.info('Verschieben-Funktion kommt bald');
 				break;
 		}
 	}
@@ -93,33 +93,33 @@
 				if (newName && newName !== folder.name) {
 					const result = await filesStore.renameFolder(folder.id, newName);
 					if (result.error) {
-						toast.error(result.error);
+						toastStore.error(result.error);
 					} else {
-						toast.success('Ordner umbenannt');
+						toastStore.success('Ordner umbenannt');
 					}
 				}
 				break;
 			case 'favorite':
 				const favResult = await filesStore.toggleFolderFavorite(folder.id);
 				if (!favResult.error) {
-					toast.success(folder.isFavorite ? 'Favorit entfernt' : 'Als Favorit markiert');
+					toastStore.success(folder.isFavorite ? 'Favorit entfernt' : 'Als Favorit markiert');
 				}
 				break;
 			case 'delete':
 				if (confirm('Ordner und Inhalt in den Papierkorb verschieben?')) {
 					const delResult = await filesStore.deleteFolder(folder.id);
 					if (delResult.error) {
-						toast.error(delResult.error);
+						toastStore.error(delResult.error);
 					} else {
-						toast.success('In den Papierkorb verschoben');
+						toastStore.success('In den Papierkorb verschoben');
 					}
 				}
 				break;
 			case 'share':
-				toast.info('Teilen-Funktion kommt bald');
+				toastStore.info('Teilen-Funktion kommt bald');
 				break;
 			case 'move':
-				toast.info('Verschieben-Funktion kommt bald');
+				toastStore.info('Verschieben-Funktion kommt bald');
 				break;
 		}
 	}
@@ -134,7 +134,7 @@
 		for (const file of files) {
 			const result = await filesStore.uploadFile(file);
 			if (result.error) {
-				toast.error(`Fehler beim Hochladen von ${file.name}: ${result.error}`);
+				toastStore.error(`Fehler beim Hochladen von ${file.name}: ${result.error}`);
 			}
 			completed++;
 			uploadProgress = Math.round((completed / totalFiles) * 100);
@@ -143,15 +143,15 @@
 		uploading = false;
 		uploadProgress = 0;
 		showUploadZone = false;
-		toast.success(`${totalFiles} Datei(en) hochgeladen`);
+		toastStore.success(`${totalFiles} Datei(en) hochgeladen`);
 	}
 
 	async function handleCreateFolder(name: string, color?: string) {
 		const result = await filesStore.createFolder(name, color);
 		if (result.error) {
-			toast.error(result.error);
+			toastStore.error(result.error);
 		} else {
-			toast.success('Ordner erstellt');
+			toastStore.success('Ordner erstellt');
 		}
 	}
 

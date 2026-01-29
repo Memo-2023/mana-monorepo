@@ -17,7 +17,7 @@
 	import { PageHeader } from '@manacore/shared-ui';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import { Plus, SquaresFour, Image, Trash } from '@manacore/shared-icons';
 
 	let loadingMore = $state(false);
@@ -70,7 +70,7 @@
 			hasBoardsMore.set(data.length === 20);
 		} catch (error) {
 			console.error('Error loading boards:', error);
-			showToast('Fehler beim Laden der Boards', 'error');
+			toastStore.show('Fehler beim Laden der Boards', 'error');
 		} finally {
 			isLoadingBoards.set(false);
 		}
@@ -112,10 +112,10 @@
 			showCreateBoardModal.set(false);
 			boardName = '';
 			boardDescription = '';
-			showToast('Board erstellt', 'success');
+			toastStore.show('Board erstellt', 'success');
 		} catch (error) {
 			console.error('Error creating board:', error);
-			showToast('Fehler beim Erstellen', 'error');
+			toastStore.show('Fehler beim Erstellen', 'error');
 		} finally {
 			isCreating = false;
 		}
@@ -129,10 +129,10 @@
 			removeBoardFromList(deletingBoard);
 			showDeleteModal = false;
 			deletingBoard = null;
-			showToast('Board gelöscht', 'success');
+			toastStore.show('Board gelöscht', 'success');
 		} catch (error) {
 			console.error('Error deleting board:', error);
-			showToast('Fehler beim Löschen', 'error');
+			toastStore.show('Fehler beim Löschen', 'error');
 		}
 	}
 
@@ -142,10 +142,10 @@
 		try {
 			const newBoard = await duplicateBoard(boardId);
 			addBoard({ ...newBoard, itemCount: 0 });
-			showToast('Board dupliziert', 'success');
+			toastStore.show('Board dupliziert', 'success');
 		} catch (error) {
 			console.error('Error duplicating board:', error);
-			showToast('Fehler beim Duplizieren', 'error');
+			toastStore.show('Fehler beim Duplizieren', 'error');
 		}
 	}
 

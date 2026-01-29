@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { uploadMultipleImages } from '$lib/api/upload';
 	import type { UploadProgress } from '$lib/api/upload';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import { PageHeader } from '@manacore/shared-ui';
 	import DropZone from '$lib/components/upload/DropZone.svelte';
 	import { images } from '$lib/stores/images';
@@ -15,7 +15,7 @@
 
 	async function handleFilesSelected(files: File[]) {
 		if (!authStore.user) {
-			showToast('Bitte melde dich an', 'error');
+			toastStore.show('Bitte melde dich an', 'error');
 			return;
 		}
 
@@ -33,12 +33,15 @@
 			images.update((current) => [...uploadedImages, ...current]);
 
 			if (successCount === files.length) {
-				showToast(
+				toastStore.show(
 					`${successCount} ${successCount === 1 ? 'Bild' : 'Bilder'} erfolgreich hochgeladen`,
 					'success'
 				);
 			} else {
-				showToast(`${successCount} von ${files.length} Bildern erfolgreich hochgeladen`, 'warning');
+				toastStore.show(
+					`${successCount} von ${files.length} Bildern erfolgreich hochgeladen`,
+					'warning'
+				);
 			}
 
 			// Redirect to gallery after successful upload
@@ -47,7 +50,7 @@
 			}, 2000);
 		} catch (error) {
 			console.error('Upload error:', error);
-			showToast('Fehler beim Hochladen der Bilder', 'error');
+			toastStore.show('Fehler beim Hochladen der Bilder', 'error');
 		} finally {
 			uploading = false;
 		}

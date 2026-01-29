@@ -5,7 +5,7 @@
 	import { searchApi } from '$lib/api/client';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { filesStore } from '$lib/stores/files.svelte';
-	import { toast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
 	import FileList from '$lib/components/files/FileList.svelte';
 
@@ -47,7 +47,7 @@
 			const result = await filesStore.toggleFileFavorite(file.id);
 			if (!result.error) {
 				files = files.filter((f) => f.id !== file.id);
-				toast.success('Favorit entfernt');
+				toastStore.success('Favorit entfernt');
 			}
 		}
 	}
@@ -57,7 +57,7 @@
 			const result = await filesStore.toggleFolderFavorite(folder.id);
 			if (!result.error) {
 				folders = folders.filter((f) => f.id !== folder.id);
-				toast.success('Favorit entfernt');
+				toastStore.success('Favorit entfernt');
 			}
 		}
 	}

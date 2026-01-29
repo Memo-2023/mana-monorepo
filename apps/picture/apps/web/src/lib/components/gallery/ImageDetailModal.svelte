@@ -9,7 +9,7 @@
 		unpublishImage,
 	} from '$lib/api/images';
 	import { images, selectedImage } from '$lib/stores/images';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import { fade, fly } from 'svelte/transition';
 	import { getImageTags, getAllTags, addTagToImage, removeTagFromImage } from '$lib/api/tags';
 	import {
@@ -104,11 +104,11 @@
 			await archiveImage(imageId);
 			// Update store
 			images.update((current) => current.filter((img) => img.id !== imageId));
-			showToast('Bild erfolgreich archiviert', 'success');
+			toastStore.show('Bild erfolgreich archiviert', 'success');
 			onClose();
 		} catch (error) {
 			console.error('Error archiving image:', error);
-			showToast('Fehler beim Archivieren des Bildes', 'error');
+			toastStore.show('Fehler beim Archivieren des Bildes', 'error');
 		} finally {
 			isArchiving = false;
 		}
@@ -129,11 +129,11 @@
 			await deleteImage(imageId);
 			// Update store
 			images.update((current) => current.filter((img) => img.id !== imageId));
-			showToast('Bild erfolgreich gelöscht', 'success');
+			toastStore.show('Bild erfolgreich gelöscht', 'success');
 			onClose();
 		} catch (error) {
 			console.error('Error deleting image:', error);
-			showToast('Fehler beim Löschen des Bildes', 'error');
+			toastStore.show('Fehler beim Löschen des Bildes', 'error');
 		} finally {
 			isDeleting = false;
 		}
@@ -143,7 +143,7 @@
 		if (!image || !image.publicUrl) return;
 		const filename = `picture-${image.id}.png`;
 		downloadImage(image.publicUrl, filename);
-		showToast('Download gestartet', 'success');
+		toastStore.show('Download gestartet', 'success');
 	}
 
 	function formatDate(dateString: string) {
@@ -164,7 +164,7 @@
 			allTags = await getAllTags();
 		} catch (error) {
 			console.error('Error loading tags:', error);
-			showToast('Fehler beim Laden der Tags', 'error');
+			toastStore.show('Fehler beim Laden der Tags', 'error');
 		} finally {
 			isLoadingTags = false;
 		}
@@ -183,15 +183,15 @@
 			if (isTagged) {
 				await removeTagFromImage(image.id, tag.id);
 				imageTags = imageTags.filter((t) => t.id !== tag.id);
-				showToast('Tag entfernt', 'success');
+				toastStore.show('Tag entfernt', 'success');
 			} else {
 				await addTagToImage(image.id, tag.id);
 				imageTags = [...imageTags, tag];
-				showToast('Tag hinzugefügt', 'success');
+				toastStore.show('Tag hinzugefügt', 'success');
 			}
 		} catch (error) {
 			console.error('Error toggling tag:', error);
-			showToast('Fehler beim Aktualisieren des Tags', 'error');
+			toastStore.show('Fehler beim Aktualisieren des Tags', 'error');
 		}
 	}
 
@@ -213,11 +213,11 @@
 			if (image) {
 				image = { ...image, isPublic: true };
 			}
-			showToast('Bild erfolgreich veröffentlicht!', 'success');
+			toastStore.show('Bild erfolgreich veröffentlicht!', 'success');
 			closePublishModal();
 		} catch (error) {
 			console.error('Error publishing image:', error);
-			showToast('Fehler beim Veröffentlichen des Bildes', 'error');
+			toastStore.show('Fehler beim Veröffentlichen des Bildes', 'error');
 		} finally {
 			isPublishing = false;
 		}
@@ -233,11 +233,11 @@
 			if (image) {
 				image = { ...image, isPublic: false };
 			}
-			showToast('Bild nicht mehr öffentlich', 'success');
+			toastStore.show('Bild nicht mehr öffentlich', 'success');
 			closePublishModal();
 		} catch (error) {
 			console.error('Error unpublishing image:', error);
-			showToast('Fehler beim Entfernen der Veröffentlichung', 'error');
+			toastStore.show('Fehler beim Entfernen der Veröffentlichung', 'error');
 		} finally {
 			isPublishing = false;
 		}

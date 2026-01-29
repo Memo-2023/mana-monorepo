@@ -6,8 +6,7 @@
 	import { isLoading as i18nLoading } from 'svelte-i18n';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { toasts } from '$lib/stores/toast';
-	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import { toastStore, ToastContainer } from '@manacore/shared-ui';
 	import { AppLoadingSkeleton } from '$lib/components/skeletons';
 
 	let { children } = $props();
@@ -49,7 +48,7 @@
 			}
 
 			// Show toast notification
-			toasts.error(message);
+			toastStore.error(message);
 
 			// Prevent default browser error handling
 			event.preventDefault();
@@ -59,17 +58,17 @@
 		window.addEventListener('error', (event) => {
 			// Only handle non-script errors (network failures for resources, etc.)
 			if (event.message && !event.filename) {
-				toasts.error('Ein Fehler ist aufgetreten');
+				toastStore.error('Ein Fehler ist aufgetreten');
 			}
 		});
 
 		// Handle offline/online status
 		window.addEventListener('offline', () => {
-			toasts.warning('Keine Internetverbindung', 10000);
+			toastStore.warning('Keine Internetverbindung', 10000);
 		});
 
 		window.addEventListener('online', () => {
-			toasts.success('Verbindung wiederhergestellt');
+			toastStore.success('Verbindung wiederhergestellt');
 		});
 	}
 

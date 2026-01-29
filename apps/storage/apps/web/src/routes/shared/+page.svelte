@@ -3,7 +3,7 @@
 	import { ShareNetwork, Link, Copy, Trash } from '@manacore/shared-icons';
 	import { sharesApi } from '$lib/api/client';
 	import type { Share } from '$lib/api/client';
-	import { toast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 
 	let shares = $state<Share[]>([]);
 	let loading = $state(true);
@@ -30,7 +30,7 @@
 	async function copyShareLink(token: string) {
 		const url = `${window.location.origin}/s/${token}`;
 		await navigator.clipboard.writeText(url);
-		toast.success('Link kopiert!');
+		toastStore.success('Link kopiert!');
 	}
 
 	async function deleteShare(id: string) {
@@ -38,10 +38,10 @@
 
 		const result = await sharesApi.delete(id);
 		if (result.error) {
-			toast.error(result.error);
+			toastStore.error(result.error);
 		} else {
 			shares = shares.filter((s) => s.id !== id);
-			toast.success('Share-Link gelöscht');
+			toastStore.success('Share-Link gelöscht');
 		}
 	}
 

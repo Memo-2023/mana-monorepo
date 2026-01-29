@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 
 	function handleSubscribe(planId: string) {
 		console.log('Subscribe to plan:', planId);
-		showToast(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`, 'info', 5000);
+		toastStore.show(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`, 'info', 5000);
 	}
 
 	function handleBuyPackage(packageId: string) {
 		console.log('Buy package:', packageId);
-		showToast(`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`, 'info', 5000);
+		toastStore.show(
+			`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`,
+			'info',
+			5000
+		);
 	}
 </script>
 

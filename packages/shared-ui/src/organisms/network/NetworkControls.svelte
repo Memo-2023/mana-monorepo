@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Search, ZoomIn, ZoomOut, RotateCcw, Filter, X, Focus, Keyboard } from 'lucide-svelte';
+	import {
+		MagnifyingGlass,
+		MagnifyingGlassPlus,
+		MagnifyingGlassMinus,
+		ArrowCounterClockwise,
+		Funnel,
+		X,
+		Crosshair,
+		Keyboard,
+	} from '@manacore/shared-icons';
 	import type { NetworkTag } from './network.types';
 
 	interface Props {
@@ -126,7 +135,7 @@
 	<!-- Search bar -->
 	{#if showSearch}
 		<div class="search-container">
-			<Search size={18} class="search-icon" />
+			<MagnifyingGlass size={18} class="search-icon" />
 			<input
 				bind:this={searchInputElement}
 				type="text"
@@ -152,7 +161,7 @@
 			aria-label="Filter anzeigen"
 			title="Filter"
 		>
-			<Filter size={18} />
+			<Funnel size={18} />
 			{#if hasActiveFilters}
 				<span class="filter-badge"></span>
 			{/if}
@@ -162,7 +171,7 @@
 	<!-- Zoom controls -->
 	<div class="zoom-controls">
 		<button onclick={onZoomIn} class="control-btn" aria-label="Vergrößern" title="Vergrößern (+)">
-			<ZoomIn size={18} />
+			<MagnifyingGlassPlus size={18} />
 		</button>
 		<button
 			onclick={onZoomOut}
@@ -170,7 +179,7 @@
 			aria-label="Verkleinern"
 			title="Verkleinern (-)"
 		>
-			<ZoomOut size={18} />
+			<MagnifyingGlassMinus size={18} />
 		</button>
 		<button
 			onclick={onResetZoom}
@@ -178,7 +187,7 @@
 			aria-label="Ansicht zurücksetzen"
 			title="Zurücksetzen (0)"
 		>
-			<RotateCcw size={18} />
+			<ArrowCounterClockwise size={18} />
 		</button>
 		<button
 			onclick={onFocusSelected}
@@ -186,7 +195,7 @@
 			aria-label="Auf Auswahl fokussieren"
 			title="Fokus auf Auswahl (F)"
 		>
-			<Focus size={18} />
+			<Crosshair size={18} />
 		</button>
 	</div>
 

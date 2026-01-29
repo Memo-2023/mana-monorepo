@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores/theme';
-	import Toast from '$lib/components/Toast.svelte';
+	import { ToastContainer } from '@manacore/shared-ui';
 
 	let { children } = $props();
 
@@ -17,4 +17,4 @@
 </div>
 
 <!-- Global Toast notifications -->
-<Toast />
+<ToastContainer />

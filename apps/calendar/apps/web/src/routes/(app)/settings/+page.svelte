@@ -6,8 +6,8 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import type { TimeFormat, AllDayDisplayMode } from '$lib/stores/settings.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
 	import {
+		toastStore as toast,
 		GlobalSettingsSection,
 		SettingsSection,
 		SettingsCard,

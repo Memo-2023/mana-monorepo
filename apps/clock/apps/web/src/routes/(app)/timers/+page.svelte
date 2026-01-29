@@ -2,10 +2,9 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { browser } from '$app/environment';
-	import { PageHeader } from '@manacore/shared-ui';
+	import { PageHeader, toast } from '@manacore/shared-ui';
 	import { timersStore } from '$lib/stores/timers.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { toast } from '$lib/stores/toast';
 	import { QUICK_TIMER_PRESETS, formatDuration } from '@clock/shared';
 	import { TimersSkeleton } from '$lib/components/skeletons';
 

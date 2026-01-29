@@ -4,7 +4,7 @@
  */
 
 import { conversationService } from '$lib/services/conversation';
-import { toastStore } from './toast.svelte';
+import { toastStore } from '@manacore/shared-ui';
 import { sessionConversationsStore } from './session-conversations.svelte';
 import { authStore } from './auth.svelte';
 import type { Conversation } from '@chat/types';

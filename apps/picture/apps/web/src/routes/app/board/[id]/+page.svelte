@@ -14,7 +14,7 @@
 	} from '$lib/stores/canvas';
 	import { getBoardById } from '$lib/api/boards';
 	import { getBoardItems, addTextToBoard } from '$lib/api/boardItems';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import BoardCanvas from '$lib/components/board/BoardCanvas.svelte';
 	import CanvasToolbar from '$lib/components/board/CanvasToolbar.svelte';
 	import ImagePickerModal from '$lib/components/board/ImagePickerModal.svelte';
@@ -50,7 +50,7 @@
 
 			// Check if user has access
 			if (board.userId !== authStore.user.id && !board.isPublic) {
-				showToast('Zugriff verweigert', 'error');
+				toastStore.show('Zugriff verweigert', 'error');
 				goto('/app/board');
 				return;
 			}
@@ -63,7 +63,7 @@
 			canvasItems.set(items);
 		} catch (error) {
 			console.error('Error loading board:', error);
-			showToast('Fehler beim Laden des Boards', 'error');
+			toastStore.show('Fehler beim Laden des Boards', 'error');
 			goto('/app/board');
 		} finally {
 			isLoading = false;
@@ -88,10 +88,10 @@
 
 			// Add to canvas
 			addCanvasItem(text);
-			showToast('Text hinzugefügt', 'success');
+			toastStore.show('Text hinzugefügt', 'success');
 		} catch (error) {
 			console.error('Error adding text:', error);
-			showToast('Fehler beim Hinzufügen des Textes', 'error');
+			toastStore.show('Fehler beim Hinzufügen des Textes', 'error');
 		}
 	}
 

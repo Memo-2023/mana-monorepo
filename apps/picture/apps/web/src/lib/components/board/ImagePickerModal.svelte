@@ -5,7 +5,7 @@
 	import { canvasItems, addCanvasItem } from '$lib/stores/canvas';
 	import { getImages } from '$lib/api/images';
 	import { addBoardItem } from '$lib/api/boardItems';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { MagnifyingGlass, Image as ImageIcon, Check } from '@manacore/shared-icons';
@@ -47,7 +47,7 @@
 			hasMore = data.length === 50;
 		} catch (error) {
 			console.error('Error loading images:', error);
-			showToast('Fehler beim Laden der Bilder', 'error');
+			toastStore.show('Fehler beim Laden der Bilder', 'error');
 		} finally {
 			isLoadingImages.set(false);
 		}
@@ -104,11 +104,14 @@
 
 			selectedImages.clear();
 			selectedImages = new Set();
-			showToast(`${addedCount} ${addedCount === 1 ? 'Bild' : 'Bilder'} hinzugefügt`, 'success');
+			toastStore.show(
+				`${addedCount} ${addedCount === 1 ? 'Bild' : 'Bilder'} hinzugefügt`,
+				'success'
+			);
 			onClose();
 		} catch (error) {
 			console.error('Error adding images:', error);
-			showToast('Fehler beim Hinzufügen', 'error');
+			toastStore.show('Fehler beim Hinzufügen', 'error');
 		} finally {
 			isAdding = false;
 		}

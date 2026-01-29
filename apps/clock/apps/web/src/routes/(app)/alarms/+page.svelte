@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { PageHeader } from '@manacore/shared-ui';
+	import { PageHeader, toast } from '@manacore/shared-ui';
 	import { alarmsStore } from '$lib/stores/alarms.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { toast } from '$lib/stores/toast';
 	import type { CreateAlarmInput, Alarm } from '@clock/shared';
 	import { ALARM_SOUNDS, DEFAULT_ALARM_PRESETS } from '@clock/shared';
 	import { AlarmsSkeleton } from '$lib/components/skeletons';

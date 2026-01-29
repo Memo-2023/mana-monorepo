@@ -3,7 +3,7 @@
 	import { tags, isLoadingTags } from '$lib/stores/tags';
 	import { getAllTags, createTag, updateTag, deleteTag } from '$lib/api/tags';
 	import type { Tag } from '$lib/api/tags';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import { PageHeader } from '@manacore/shared-ui';
 	import { Plus, Tag as TagIcon, PencilSimple, Trash } from '@manacore/shared-icons';
 
@@ -37,7 +37,7 @@
 			tags.set(data);
 		} catch (error) {
 			console.error('Error loading tags:', error);
-			showToast('Fehler beim Laden der Tags', 'error');
+			toastStore.show('Fehler beim Laden der Tags', 'error');
 		} finally {
 			isLoadingTags.set(false);
 		}
@@ -52,13 +52,13 @@
 				color: newTagColor,
 			});
 			await loadTags();
-			showToast('Tag erfolgreich erstellt', 'success');
+			toastStore.show('Tag erfolgreich erstellt', 'success');
 			newTagName = '';
 			newTagColor = '#3B82F6';
 			showCreateModal = false;
 		} catch (error) {
 			console.error('Error creating tag:', error);
-			showToast('Fehler beim Erstellen des Tags', 'error');
+			toastStore.show('Fehler beim Erstellen des Tags', 'error');
 		}
 	}
 
@@ -78,12 +78,12 @@
 				color: editTagColor,
 			});
 			await loadTags();
-			showToast('Tag erfolgreich aktualisiert', 'success');
+			toastStore.show('Tag erfolgreich aktualisiert', 'success');
 			showEditModal = false;
 			editingTag = null;
 		} catch (error) {
 			console.error('Error updating tag:', error);
-			showToast('Fehler beim Aktualisieren des Tags', 'error');
+			toastStore.show('Fehler beim Aktualisieren des Tags', 'error');
 		}
 	}
 
@@ -93,10 +93,10 @@
 		try {
 			await deleteTag(tagId);
 			await loadTags();
-			showToast('Tag erfolgreich gelöscht', 'success');
+			toastStore.show('Tag erfolgreich gelöscht', 'success');
 		} catch (error) {
 			console.error('Error deleting tag:', error);
-			showToast('Fehler beim Löschen des Tags', 'error');
+			toastStore.show('Fehler beim Löschen des Tags', 'error');
 		}
 	}
 </script>

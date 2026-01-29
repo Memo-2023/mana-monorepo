@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import { ContextMenu, type ContextMenuItem, toastStore } from '@manacore/shared-ui';
 	import { Pencil, Copy, Trash, Palette, CalendarBlank, Export } from '@manacore/shared-icons';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
-	import { toastStore } from '$lib/stores/toast.svelte';
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {

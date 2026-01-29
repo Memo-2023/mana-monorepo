@@ -6,7 +6,7 @@
 	import { isSidebarCollapsed } from '$lib/stores/sidebar';
 	import { getActiveModels } from '$lib/api/models';
 	import { generateImageAsync, subscribeToGenerationUpdates } from '$lib/api/generate-async';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import { onMount } from 'svelte';
 	import AdvancedSettingsModal, {
 		type AdvancedSettings,
@@ -59,7 +59,7 @@
 			}
 		} catch (error) {
 			console.error('Error loading models:', error);
-			showToast('Fehler beim Laden der Modelle', 'error');
+			toastStore.show('Fehler beim Laden der Modelle', 'error');
 		} finally {
 			isLoadingModels.set(false);
 		}
@@ -124,7 +124,7 @@
 
 			// Success
 			generationProgress.set('Fertig!');
-			showToast(
+			toastStore.show(
 				totalImages > 1
 					? `${totalImages} Bilder erfolgreich generiert!`
 					: 'Bild erfolgreich generiert!',
@@ -137,7 +137,7 @@
 			console.error('Generation error:', error);
 			const errorMessage = error instanceof Error ? error.message : 'Generierung fehlgeschlagen';
 			generationError.set(errorMessage);
-			showToast(errorMessage, 'error');
+			toastStore.show(errorMessage, 'error');
 		} finally {
 			setTimeout(() => {
 				isGenerating.set(false);

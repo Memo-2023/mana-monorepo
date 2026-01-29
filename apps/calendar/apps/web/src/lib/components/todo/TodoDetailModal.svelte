@@ -2,7 +2,7 @@
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import type { Task, UpdateTaskInput, TaskPriority } from '$lib/api/todos';
 	import { PRIORITY_LABELS, PRIORITY_COLORS } from '$lib/api/todos';
-	import { toast } from '$lib/stores/toast.svelte';
+	import { toastStore as toast } from '@manacore/shared-ui';
 	import TodoCheckbox from './TodoCheckbox.svelte';
 	import PriorityBadge from './PriorityBadge.svelte';
 	import {

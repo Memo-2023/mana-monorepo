@@ -12,7 +12,7 @@
 	import { archiveImage, unarchiveImage, deleteImage, toggleFavorite } from '$lib/api/images';
 	import { images } from '$lib/stores/images';
 	import { archivedImages } from '$lib/stores/archive';
-	import { showToast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 	import type { Tag } from '$lib/api/tags';
 	import {
 		DownloadSimple,
@@ -76,10 +76,10 @@
 		try {
 			await addTagToImage($contextMenu.image.id, tag.id);
 			await loadImageTags($contextMenu.image.id);
-			showToast(`Tag "${tag.name}" hinzugefügt`, 'success');
+			toastStore.show(`Tag "${tag.name}" hinzugefügt`, 'success');
 		} catch (error) {
 			console.error('Error adding tag:', error);
-			showToast('Fehler beim Hinzufügen des Tags', 'error');
+			toastStore.show('Fehler beim Hinzufügen des Tags', 'error');
 		}
 	}
 
@@ -89,10 +89,10 @@
 		try {
 			await removeTagFromImage($contextMenu.image.id, tag.id);
 			await loadImageTags($contextMenu.image.id);
-			showToast(`Tag "${tag.name}" entfernt`, 'success');
+			toastStore.show(`Tag "${tag.name}" entfernt`, 'success');
 		} catch (error) {
 			console.error('Error removing tag:', error);
-			showToast('Fehler beim Entfernen des Tags', 'error');
+			toastStore.show('Fehler beim Entfernen des Tags', 'error');
 		}
 	}
 
@@ -104,7 +104,7 @@
 		link.download = $contextMenu.image.filename || 'image.png';
 		link.click();
 		hideContextMenu();
-		showToast('Download gestartet', 'success');
+		toastStore.show('Download gestartet', 'success');
 	}
 
 	function handleCopyLink() {
@@ -112,7 +112,7 @@
 
 		navigator.clipboard.writeText($contextMenu.image.publicUrl);
 		hideContextMenu();
-		showToast('Link kopiert', 'success');
+		toastStore.show('Link kopiert', 'success');
 	}
 
 	async function handleDelete() {
@@ -124,10 +124,10 @@
 				// Remove from store
 				images.update((current) => current.filter((img) => img.id !== $contextMenu.image?.id));
 				hideContextMenu();
-				showToast('Bild gelöscht', 'success');
+				toastStore.show('Bild gelöscht', 'success');
 			} catch (error) {
 				console.error('Error deleting image:', error);
-				showToast('Fehler beim Löschen des Bildes', 'error');
+				toastStore.show('Fehler beim Löschen des Bildes', 'error');
 			}
 		}
 	}
@@ -144,18 +144,18 @@
 					current.filter((img) => img.id !== $contextMenu.image?.id)
 				);
 				hideContextMenu();
-				showToast('Bild wiederhergestellt', 'success');
+				toastStore.show('Bild wiederhergestellt', 'success');
 			} else {
 				// Archive: Move to archive
 				await archiveImage($contextMenu.image.id);
 				// Remove from gallery store
 				images.update((current) => current.filter((img) => img.id !== $contextMenu.image?.id));
 				hideContextMenu();
-				showToast('Bild archiviert', 'success');
+				toastStore.show('Bild archiviert', 'success');
 			}
 		} catch (error) {
 			console.error('Error archiving/unarchiving image:', error);
-			showToast('Fehler beim Archivieren des Bildes', 'error');
+			toastStore.show('Fehler beim Archivieren des Bildes', 'error');
 		}
 	}
 
@@ -179,13 +179,13 @@
 			);
 
 			hideContextMenu();
-			showToast(
+			toastStore.show(
 				newFavoriteStatus ? 'Zu Favoriten hinzugefügt' : 'Aus Favoriten entfernt',
 				'success'
 			);
 		} catch (error) {
 			console.error('Error toggling favorite:', error);
-			showToast('Fehler beim Aktualisieren der Favoriten', 'error');
+			toastStore.show('Fehler beim Aktualisieren der Favoriten', 'error');
 		}
 	}
 

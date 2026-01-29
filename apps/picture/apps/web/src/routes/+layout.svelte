@@ -2,7 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import Toast from '$lib/components/ui/Toast.svelte';
+	import { ToastContainer } from '@manacore/shared-ui';
 	import { onMount } from 'svelte';
 
 	// Import and initialize theme
@@ -43,4 +43,4 @@
 {@render children?.()}
 
 <!-- Global Toast Notifications -->
-<Toast />
+<ToastContainer />

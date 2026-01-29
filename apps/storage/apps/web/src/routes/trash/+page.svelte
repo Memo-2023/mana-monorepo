@@ -3,7 +3,7 @@
 	import { Trash, ArrowCounterClockwise, Warning } from '@manacore/shared-icons';
 	import { trashApi } from '$lib/api/client';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
-	import { toast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 
 	let files = $state<StorageFile[]>([]);
 	let folders = $state<StorageFolder[]>([]);
@@ -32,14 +32,14 @@
 	async function handleRestore(id: string, type: 'file' | 'folder') {
 		const result = await trashApi.restore(id, type);
 		if (result.error) {
-			toast.error(result.error);
+			toastStore.error(result.error);
 		} else {
 			if (type === 'file') {
 				files = files.filter((f) => f.id !== id);
 			} else {
 				folders = folders.filter((f) => f.id !== id);
 			}
-			toast.success('Wiederhergestellt');
+			toastStore.success('Wiederhergestellt');
 		}
 	}
 
@@ -48,14 +48,14 @@
 
 		const result = await trashApi.permanentDelete(id, type);
 		if (result.error) {
-			toast.error(result.error);
+			toastStore.error(result.error);
 		} else {
 			if (type === 'file') {
 				files = files.filter((f) => f.id !== id);
 			} else {
 				folders = folders.filter((f) => f.id !== id);
 			}
-			toast.success('Endgültig gelöscht');
+			toastStore.success('Endgültig gelöscht');
 		}
 	}
 
@@ -64,11 +64,11 @@
 
 		const result = await trashApi.empty();
 		if (result.error) {
-			toast.error(result.error);
+			toastStore.error(result.error);
 		} else {
 			files = [];
 			folders = [];
-			toast.success('Papierkorb geleert');
+			toastStore.success('Papierkorb geleert');
 		}
 	}
 

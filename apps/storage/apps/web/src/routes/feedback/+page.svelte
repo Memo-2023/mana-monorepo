@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ChatCircle, PaperPlaneTilt } from '@manacore/shared-icons';
-	import { toast } from '$lib/stores/toast';
+	import { toastStore } from '@manacore/shared-ui';
 
 	let type = $state<'bug' | 'feature' | 'other'>('feature');
 	let message = $state('');
@@ -14,7 +14,7 @@
 		// Simulate sending feedback
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		toast.success('Feedback gesendet! Vielen Dank.');
+		toastStore.success('Feedback gesendet! Vielen Dank.');
 		message = '';
 		type = 'feature';
 		sending = false;

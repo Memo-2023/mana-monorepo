@@ -16,7 +16,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import { ToastContainer } from '@manacore/shared-ui';
 	import '../app.css';
 
 	// App switcher items

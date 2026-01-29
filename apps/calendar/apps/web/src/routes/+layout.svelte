@@ -3,8 +3,7 @@
 	import '$lib/i18n';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { toastStore } from '$lib/stores/toast.svelte';
-	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import { ToastContainer } from '@manacore/shared-ui';
 	import { AppLoadingSkeleton } from '$lib/components/skeletons';
 	import { isLoading as i18nLoading } from 'svelte-i18n';
 	import { onMount } from 'svelte';
