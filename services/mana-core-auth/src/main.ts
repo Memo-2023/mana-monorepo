@@ -81,18 +81,25 @@ async function bootstrap() {
 
 	// Global prefix (exclude metrics, health, Better Auth native routes, and OIDC routes)
 	// Better Auth generates verification URLs with /api/auth/* prefix
-	// OIDC Provider requires routes without prefix: /.well-known/*, /api/oidc/*
+	// OIDC Provider requires routes without prefix: /.well-known/*, /api/auth/oauth2/*, /api/oidc/*
 	app.setGlobalPrefix('api/v1', {
 		exclude: [
 			{ path: 'metrics', method: RequestMethod.ALL },
 			{ path: 'health', method: RequestMethod.ALL },
-			// Better Auth routes - use path-to-regexp wildcards
-			{ path: 'api/auth/(.*)', method: RequestMethod.ALL },
+			// Better Auth routes (verification emails, password reset)
+			{ path: 'api/auth/verify-email', method: RequestMethod.ALL },
+			{ path: 'api/auth/reset-password/(.*)', method: RequestMethod.ALL },
+			// Better Auth OIDC/OAuth2 routes (native paths from discovery document)
 			{ path: 'api/auth/jwks', method: RequestMethod.ALL },
-			{ path: 'api/auth/:path*', method: RequestMethod.ALL },
-			// OIDC routes
+			{ path: 'api/auth/oauth2/(.*)', method: RequestMethod.ALL },
+			{ path: 'api/auth/oauth2/authorize', method: RequestMethod.ALL },
+			{ path: 'api/auth/oauth2/token', method: RequestMethod.ALL },
+			{ path: 'api/auth/oauth2/userinfo', method: RequestMethod.ALL },
+			{ path: 'api/auth/oauth2/:path*', method: RequestMethod.ALL },
+			// OIDC discovery
 			{ path: '.well-known/(.*)', method: RequestMethod.ALL },
 			{ path: '.well-known/openid-configuration', method: RequestMethod.ALL },
+			// Alternative OIDC routes
 			{ path: 'api/oidc/(.*)', method: RequestMethod.ALL },
 			{ path: 'api/oidc/:path*', method: RequestMethod.ALL },
 		],

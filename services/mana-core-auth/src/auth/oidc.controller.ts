@@ -4,12 +4,17 @@
  * Exposes Better Auth's OIDC Provider endpoints for external services
  * like Matrix/Synapse to use SSO authentication.
  *
+ * Better Auth exposes OIDC endpoints at /api/auth/oauth2/* paths.
+ * This controller provides routes at both:
+ * - /api/auth/oauth2/* (native Better Auth paths from discovery document)
+ * - /api/oidc/* (alternative paths for convenience)
+ *
  * Endpoints:
  * - GET /.well-known/openid-configuration - OIDC Discovery
- * - GET /api/oidc/authorize - Authorization endpoint
- * - POST /api/oidc/token - Token endpoint
- * - GET /api/oidc/userinfo - UserInfo endpoint
- * - GET /api/oidc/jwks - JWKS endpoint
+ * - GET /api/auth/oauth2/authorize - Authorization endpoint
+ * - POST /api/auth/oauth2/token - Token endpoint
+ * - GET /api/auth/oauth2/userinfo - UserInfo endpoint
+ * - GET /api/auth/jwks - JWKS endpoint
  */
 
 import { Controller, Get, Post, All, Req, Res, HttpStatus } from '@nestjs/common';
@@ -30,10 +35,58 @@ export class OidcController {
 		return this.handleOidcRequest(req, res);
 	}
 
+	// ============================================
+	// Better Auth Native OAuth2 Endpoints
+	// These match the paths in the discovery document
+	// ============================================
+
 	/**
-	 * Authorization Endpoint
-	 *
-	 * Handles OAuth2 authorization requests.
+	 * Authorization Endpoint (Better Auth native path)
+	 */
+	@Get('api/auth/oauth2/authorize')
+	async authorizeOauth2(@Req() req: Request, @Res() res: Response) {
+		return this.handleOidcRequest(req, res);
+	}
+
+	/**
+	 * Token Endpoint (Better Auth native path)
+	 */
+	@Post('api/auth/oauth2/token')
+	async tokenOauth2(@Req() req: Request, @Res() res: Response) {
+		return this.handleOidcRequest(req, res);
+	}
+
+	/**
+	 * UserInfo Endpoint (Better Auth native path)
+	 */
+	@Get('api/auth/oauth2/userinfo')
+	async userinfoOauth2(@Req() req: Request, @Res() res: Response) {
+		return this.handleOidcRequest(req, res);
+	}
+
+	/**
+	 * JWKS Endpoint (Better Auth native path)
+	 */
+	@Get('api/auth/jwks')
+	async jwksAuth(@Req() req: Request, @Res() res: Response) {
+		return this.handleOidcRequest(req, res);
+	}
+
+	/**
+	 * Catch-all for other Better Auth OAuth2 endpoints
+	 */
+	@All('api/auth/oauth2/*')
+	async catchAllOauth2(@Req() req: Request, @Res() res: Response) {
+		return this.handleOidcRequest(req, res);
+	}
+
+	// ============================================
+	// Alternative /api/oidc/* paths
+	// For backwards compatibility and convenience
+	// ============================================
+
+	/**
+	 * Authorization Endpoint (alternative path)
 	 */
 	@Get('api/oidc/authorize')
 	async authorize(@Req() req: Request, @Res() res: Response) {
@@ -41,9 +94,7 @@ export class OidcController {
 	}
 
 	/**
-	 * Token Endpoint
-	 *
-	 * Exchanges authorization codes for tokens.
+	 * Token Endpoint (alternative path)
 	 */
 	@Post('api/oidc/token')
 	async token(@Req() req: Request, @Res() res: Response) {
@@ -51,9 +102,7 @@ export class OidcController {
 	}
 
 	/**
-	 * UserInfo Endpoint
-	 *
-	 * Returns user information for the authenticated user.
+	 * UserInfo Endpoint (alternative path)
 	 */
 	@Get('api/oidc/userinfo')
 	async userinfo(@Req() req: Request, @Res() res: Response) {
@@ -61,9 +110,7 @@ export class OidcController {
 	}
 
 	/**
-	 * JWKS Endpoint (via /api/oidc/jwks)
-	 *
-	 * Returns JSON Web Key Set for token verification.
+	 * JWKS Endpoint (alternative path)
 	 */
 	@Get('api/oidc/jwks')
 	async jwks(@Req() req: Request, @Res() res: Response) {
@@ -71,18 +118,7 @@ export class OidcController {
 	}
 
 	/**
-	 * JWKS Endpoint (via /api/auth/jwks)
-	 *
-	 * Better Auth's discovery document points to this path,
-	 * so we need to expose it directly as well.
-	 */
-	@Get('api/auth/jwks')
-	async jwksAlt(@Req() req: Request, @Res() res: Response) {
-		return this.handleOidcRequest(req, res);
-	}
-
-	/**
-	 * Catch-all for other OIDC endpoints
+	 * Catch-all for other OIDC endpoints (alternative path)
 	 */
 	@All('api/oidc/*')
 	async catchAll(@Req() req: Request, @Res() res: Response) {
