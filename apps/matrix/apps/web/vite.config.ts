@@ -22,7 +22,6 @@ const MANACORE_SHARED_PACKAGES = [
 	'@manacore/shared-splitscreen',
 	'@manacore/shared-utils',
 	'@manacore/shared-tags',
-	'@manacore/shared-stores',
 	'@manacore/shared-help-types',
 	'@manacore/shared-help-content',
 	'@manacore/shared-help-ui',
