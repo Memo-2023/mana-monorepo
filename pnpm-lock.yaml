@@ -4901,9 +4901,6 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
-      lucide-svelte:
-        specifier: ^0.468.0
-        version: 0.468.0(svelte@5.44.0)
       svelte:
         specifier: ^5.0.0
         version: 5.44.0
@@ -17222,11 +17219,6 @@ packages:
 
   lru-queue@0.1.0:
     resolution: {integrity: sha512-BpdYkt9EvGl8OfWHDQPISVpcl5xZthb+XPsbELj5AQXxIC8IriDZIQYjBJPEm5rS420sjZ0TLEzRcq5KdBhYrQ==}
-
-  lucide-svelte@0.468.0:
-    resolution: {integrity: sha512-n0ecAFtCY5LEeL+PJ1Xj4n3c2gzj8tMpak0KMGnvoSJEjCsCnRB0mekBtJZAo7beyynW9Qj5Um1KfMBAeTNplw==}
-    peerDependencies:
-      svelte: ^3 || ^4 || ^5.0.0-next.42
 
   luxon@3.5.0:
     resolution: {integrity: sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==}
@@ -40476,10 +40468,6 @@ snapshots:
   lru-queue@0.1.0:
     dependencies:
       es5-ext: 0.10.64
-
-  lucide-svelte@0.468.0(svelte@5.44.0):
-    dependencies:
-      svelte: 5.44.0
 
   luxon@3.5.0: {}
 

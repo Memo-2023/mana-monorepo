@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown, ChevronUp } from 'lucide-svelte';
+	import { CaretDown, CaretUp } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Whether immersive mode is currently enabled */
@@ -21,9 +21,9 @@
 		title={isImmersive ? 'UI anzeigen (F)' : 'UI verstecken (F)'}
 	>
 		{#if isImmersive}
-			<ChevronUp size={20} />
+			<CaretUp size={20} />
 		{:else}
-			<ChevronDown size={20} />
+			<CaretDown size={20} />
 		{/if}
 	</button>
 {/if}

@@ -43,8 +43,7 @@
 		"d3-selection": "^3.0.0",
 		"d3-transition": "^3.0.0",
 		"d3-zoom": "^3.0.0",
-		"date-fns": "^4.1.0",
-		"lucide-svelte": "^0.468.0"
+		"date-fns": "^4.1.0"
 	},
 	"devDependencies": {
 		"@types/d3-force": "^3.0.10",
