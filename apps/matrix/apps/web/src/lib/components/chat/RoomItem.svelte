@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SimpleRoom } from '$lib/matrix';
-	import { formatDistanceToNow } from 'date-fns';
+	import { formatDistanceToNow, isValid } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { Lock, Users } from '@manacore/shared-icons';
 
@@ -12,11 +12,12 @@
 
 	let { room, selected, onclick }: Props = $props();
 
-	let timeAgo = $derived(
-		room.lastMessageTime
-			? formatDistanceToNow(room.lastMessageTime, { addSuffix: false, locale: de })
-			: ''
-	);
+	let timeAgo = $derived(() => {
+		if (!room.lastMessageTime) return '';
+		const date = new Date(room.lastMessageTime);
+		if (!isValid(date) || date.getTime() === 0) return '';
+		return formatDistanceToNow(date, { addSuffix: false, locale: de });
+	});
 
 	let initials = $derived(
 		room.name
@@ -75,8 +76,8 @@
 
 	<!-- Meta -->
 	<div class="flex flex-shrink-0 flex-col items-end gap-1">
-		{#if timeAgo}
-			<span class="text-xs text-muted-foreground">{timeAgo}</span>
+		{#if timeAgo()}
+			<span class="text-xs text-muted-foreground">{timeAgo()}</span>
 		{/if}
 		{#if room.unreadCount > 0}
 			<span
