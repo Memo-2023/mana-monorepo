@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SimpleMessage } from '$lib/matrix';
 	import { matrixStore } from '$lib/matrix';
-	import { format, isToday, isYesterday } from 'date-fns';
+	import { format, isToday, isYesterday, isValid } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import {
 		ArrowBendUpLeft,
@@ -88,10 +88,15 @@
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}
 
-	let formattedTime = $derived(format(message.timestamp, 'HH:mm'));
+	let formattedTime = $derived(() => {
+		const date = new Date(message.timestamp);
+		if (!isValid(date)) return '--:--';
+		return format(date, 'HH:mm');
+	});
 
 	let formattedDate = $derived(() => {
 		const date = new Date(message.timestamp);
+		if (!isValid(date)) return '';
 		if (isToday(date)) return 'Heute';
 		if (isYesterday(date)) return 'Gestern';
 		return format(date, 'EEEE, d. MMMM', { locale: de });
@@ -366,7 +371,7 @@
 		<div
 			class="flex items-center gap-2 mt-1.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity"
 		>
-			<span class="text-xs text-muted-foreground">{formattedTime}</span>
+			<span class="text-xs text-muted-foreground">{formattedTime()}</span>
 		</div>
 
 		<!-- Message actions (hover) -->
