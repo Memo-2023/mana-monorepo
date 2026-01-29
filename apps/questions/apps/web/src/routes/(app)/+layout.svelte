@@ -65,7 +65,7 @@
 				onclick={() => (sidebarOpen = !sidebarOpen)}
 				class="rounded-lg p-2 text-muted-foreground hover:bg-secondary"
 			>
-				<CaretRight class="h-5 w-5 transition-transform" class:rotate-180={sidebarOpen} />
+				<CaretRight class="h-5 w-5 transition-transform {sidebarOpen ? 'rotate-180' : ''}" />
 			</button>
 		</div>
 
