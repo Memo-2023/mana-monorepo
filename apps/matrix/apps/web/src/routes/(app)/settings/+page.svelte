@@ -17,6 +17,9 @@
 		BellRinging,
 		SpeakerHigh,
 		Eye,
+		Sun,
+		Moon,
+		Desktop,
 	} from '@manacore/shared-icons';
 	import { VerificationDialog, RecoveryKeyDialog } from '$lib/components/crypto';
 	import {
@@ -27,6 +30,7 @@
 		isNotificationSupported,
 	} from '$lib/notifications';
 	import { browser } from '$app/environment';
+	import { theme } from '$lib/stores/theme';
 
 	let verificationDialogOpen = $state(false);
 	let recoveryDialogOpen = $state(false);
@@ -208,14 +212,62 @@
 				</div>
 			</section>
 
-			<!-- Appearance Section (Placeholder) -->
+			<!-- Appearance Section -->
 			<section class="card">
-				<div class="space-y-2">
+				<div class="space-y-4">
 					<h2 class="flex items-center gap-2 text-lg font-semibold">
 						<Palette class="h-5 w-5" />
 						Erscheinungsbild
 					</h2>
-					<p class="text-sm text-muted-foreground">Theme-Einstellungen folgen bald...</p>
+
+					<div class="space-y-3">
+						<p class="text-sm text-muted-foreground">Wähle dein bevorzugtes Farbschema</p>
+
+						<!-- Theme Mode Selection -->
+						<div class="grid grid-cols-3 gap-2">
+							<button
+								class="flex flex-col items-center gap-2 rounded-xl p-4 transition-all
+								       {theme.mode === 'light'
+									       ? 'bg-primary text-primary-foreground ring-2 ring-primary'
+									       : 'bg-muted hover:bg-muted/80'}"
+								onclick={() => theme.setMode('light')}
+							>
+								<Sun class="h-6 w-6" />
+								<span class="text-sm font-medium">Hell</span>
+							</button>
+
+							<button
+								class="flex flex-col items-center gap-2 rounded-xl p-4 transition-all
+								       {theme.mode === 'dark'
+									       ? 'bg-primary text-primary-foreground ring-2 ring-primary'
+									       : 'bg-muted hover:bg-muted/80'}"
+								onclick={() => theme.setMode('dark')}
+							>
+								<Moon class="h-6 w-6" />
+								<span class="text-sm font-medium">Dunkel</span>
+							</button>
+
+							<button
+								class="flex flex-col items-center gap-2 rounded-xl p-4 transition-all
+								       {theme.mode === 'system'
+									       ? 'bg-primary text-primary-foreground ring-2 ring-primary'
+									       : 'bg-muted hover:bg-muted/80'}"
+								onclick={() => theme.setMode('system')}
+							>
+								<Desktop class="h-6 w-6" />
+								<span class="text-sm font-medium">System</span>
+							</button>
+						</div>
+
+						<!-- Current Status -->
+						<div class="flex items-center gap-2 text-sm text-muted-foreground">
+							{#if theme.mode === 'system'}
+								<span>Aktuell: {theme.isDark ? 'Dunkel' : 'Hell'} (basierend auf System)</span>
+							{:else}
+								<span>Aktuell: {theme.isDark ? 'Dunkel' : 'Hell'}</span>
+							{/if}
+						</div>
+					</div>
 				</div>
 			</section>
 

@@ -27,7 +27,8 @@
 			>
 				<div
 					class="theme-preview"
-					style="background: linear-gradient(135deg, {def.colors.primary}, {def.colors.accent})"
+					style="background: linear-gradient(135deg, hsl({def.light.primary}), hsl({def.light
+						.secondary}))"
 				>
 					{#if theme.variant === variant}
 						<div class="check-badge">

@@ -1,61 +1,47 @@
-import { browser } from '$app/environment';
+/**
+ * Theme Store - Manages theme state
+ * Uses shared theme store from @manacore/shared-theme
+ */
 
-type Theme = 'light' | 'dark' | 'system';
+import { createThemeStore, type ThemeMode } from '@manacore/shared-theme';
 
-function getInitialTheme(): Theme {
-	if (!browser) return 'system';
+const sharedTheme = createThemeStore({ appId: 'questions' });
 
-	const stored = localStorage.getItem('theme') as Theme | null;
-	if (stored && ['light', 'dark', 'system'].includes(stored)) {
-		return stored;
-	}
-	return 'system';
-}
-
-function applyTheme(theme: Theme) {
-	if (!browser) return;
-
-	const root = document.documentElement;
-	const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-	const isDark = theme === 'dark' || (theme === 'system' && systemDark);
-
-	if (isDark) {
-		root.classList.add('dark');
-	} else {
-		root.classList.remove('dark');
-	}
-}
-
-let currentTheme: Theme = 'system';
-
+// Wrapper to maintain backward-compatible API
 export const theme = {
+	// Legacy API (current → mode)
 	get current() {
-		return currentTheme;
+		return sharedTheme.mode;
 	},
 
-	initialize() {
-		currentTheme = getInitialTheme();
-		applyTheme(currentTheme);
-
-		if (browser) {
-			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-				if (currentTheme === 'system') {
-					applyTheme('system');
-				}
-			});
-		}
+	// Forward all other getters
+	get mode() {
+		return sharedTheme.mode;
+	},
+	get isDark() {
+		return sharedTheme.isDark;
+	},
+	get variant() {
+		return sharedTheme.variant;
+	},
+	get variants() {
+		return sharedTheme.variants;
 	},
 
-	set(newTheme: Theme) {
-		currentTheme = newTheme;
-		if (browser) {
-			localStorage.setItem('theme', newTheme);
-		}
-		applyTheme(newTheme);
+	// Legacy API (set → setMode)
+	set(newTheme: ThemeMode) {
+		sharedTheme.setMode(newTheme);
 	},
 
+	// Legacy API (toggle → toggleMode)
 	toggle() {
-		const next = currentTheme === 'light' ? 'dark' : 'light';
-		this.set(next);
+		sharedTheme.toggleMode();
 	},
+
+	// Forward new API
+	initialize: sharedTheme.initialize,
+	setMode: sharedTheme.setMode,
+	setVariant: sharedTheme.setVariant,
+	toggleMode: sharedTheme.toggleMode,
+	cycleMode: sharedTheme.cycleMode,
 };

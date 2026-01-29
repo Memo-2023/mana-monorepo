@@ -235,13 +235,30 @@ export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores({
 
 ---
 
-### 2.3 NIEDRIG: Theme Stores Migration
+### ~~2.3 NIEDRIG: Theme Stores Migration~~ ✅ ERLEDIGT (~150 LOC gespart)
 
-**Problem:** 2 Apps nutzen nicht `@manacore/shared-theme`:
-- `apps/storage/apps/web/src/lib/stores/theme.svelte.ts` (96 LOC - custom)
-- `apps/questions/apps/web/src/lib/stores/theme.ts` (custom)
+**Status:** 2 Apps zu `createThemeStore()` aus `@manacore/shared-theme` migriert (29.01.2026)
 
-**Aktion:** Migriere zu `createThemeStore()` aus `@manacore/shared-theme`
+**Migrierte Apps:**
+- ✅ `apps/storage/apps/web/src/lib/stores/theme.svelte.ts` (96 → 7 LOC = 89 LOC)
+- ✅ `apps/questions/apps/web/src/lib/stores/theme.ts` (62 → 47 LOC = 15 LOC, mit Rückwärtskompatibilität)
+
+**Zusätzlich gefixt:**
+- ✅ `apps/storage/apps/web/src/routes/themes/+page.svelte` - Bug mit `def.colors.primary` → `def.light.primary`
+
+**Questions Wrapper (Rückwärtskompatibilität):**
+```typescript
+// Legacy API (current, set, toggle) wird auf neue API gemappt
+export const theme = {
+  get current() { return sharedTheme.mode; },  // Legacy
+  get mode() { return sharedTheme.mode; },     // New
+  set(newTheme) { sharedTheme.setMode(newTheme); },  // Legacy
+  toggle() { sharedTheme.toggleMode(); },      // Legacy
+  // ... new API forwarded
+};
+```
+
+**Einsparung:** ~104 LOC (158 → 54 LOC)
 
 ---
 
@@ -290,13 +307,37 @@ export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores({
 
 ---
 
-### 3.3 MITTEL: AppSlider Cleanup (240 LOC)
+### ~~3.3 MITTEL: AppSlider Cleanup~~ ✅ ANALYSIERT (Keine Aktion nötig)
 
-**Problem:** 8 Apps haben lokale `AppSlider.svelte` Kopien, obwohl shared-ui Version existiert.
+**Status:** Nach Analyse: Die lokalen AppSlider.svelte Dateien sind KEINE Duplikate (29.01.2026)
 
-**Betroffene Apps:** calendar, chat, contacts, manadeck, manacore, picture, presi, todo
+**Ergebnis der Analyse:**
+Die 8 lokalen `AppSlider.svelte` Dateien sind **Lokalisierungs-Wrapper**, nicht Duplikate:
+- Sie importieren `AppSlider` aus `@manacore/shared-ui`
+- Sie mappen `MANA_APPS` aus `@manacore/shared-branding` zu deutschen Labels
+- Sie übergeben deutsche Lokalisierung (`APP_STATUS_LABELS.de`, `APP_SLIDER_LABELS.de`) an die shared Komponente
 
-**Aktion:** Verifiziere Import aus `@manacore/shared-ui`, lösche lokale Kopien.
+**Beispiel (apps/chat/apps/web):**
+```svelte
+<script lang="ts">
+  import { AppSlider } from '@manacore/shared-ui';
+  import { MANA_APPS, APP_STATUS_LABELS, APP_SLIDER_LABELS } from '@manacore/shared-branding';
+
+  const apps = MANA_APPS.map((app) => ({
+    name: app.name,
+    description: app.description.de,  // German localization
+    longDescription: app.longDescription.de,
+    // ...
+  }));
+
+  const statusLabels = APP_STATUS_LABELS.de;
+  const labels = APP_SLIDER_LABELS.de;
+</script>
+
+<AppSlider {apps} title={labels.title} {statusLabels} ... />
+```
+
+**Fazit:** Korrekte Architektur - shared-ui stellt die Komponente bereit, Apps liefern lokalisierte Daten.
 
 ---
 
