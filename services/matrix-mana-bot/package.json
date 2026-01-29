@@ -1,0 +1,37 @@
+{
+	"name": "matrix-mana-bot",
+	"version": "1.0.0",
+	"description": "Unified Matrix Gateway Bot - All features in one",
+	"private": true,
+	"main": "dist/main.js",
+	"scripts": {
+		"build": "nest build",
+		"start": "nest start",
+		"start:dev": "nest start --watch",
+		"start:debug": "nest start --debug --watch",
+		"start:prod": "node dist/main",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@manacore/bot-services": "workspace:*",
+		"@nestjs/common": "^10.0.0",
+		"@nestjs/config": "^3.0.0",
+		"@nestjs/core": "^10.0.0",
+		"@nestjs/platform-express": "^10.0.0",
+		"matrix-bot-sdk": "^0.7.1",
+		"reflect-metadata": "^0.1.13",
+		"rxjs": "^7.8.1"
+	},
+	"devDependencies": {
+		"@nestjs/cli": "^10.0.0",
+		"@types/node": "^20.0.0",
+		"typescript": "^5.0.0"
+	},
+	"pnpm": {
+		"neverBuiltDependencies": ["cpu-features", "ssh2"],
+		"overrides": {
+			"cpu-features": "npm:empty-npm-package@1.0.0",
+			"ssh2": "npm:empty-npm-package@1.0.0"
+		}
+	}
+}

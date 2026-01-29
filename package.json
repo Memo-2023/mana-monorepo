@@ -228,6 +228,16 @@
 		"dev:nutriphi-bot:full": "./scripts/setup-databases.sh nutriphi_bot && pnpm dev:nutriphi-bot",
 		"nutriphi-bot:db:push": "pnpm --filter @manacore/telegram-nutriphi-bot db:push",
 		"nutriphi-bot:db:studio": "pnpm --filter @manacore/telegram-nutriphi-bot db:studio",
+		"dev:matrix:mana": "pnpm --filter matrix-mana-bot start:dev",
+		"dev:matrix:ollama": "pnpm --filter matrix-ollama-bot start:dev",
+		"dev:matrix:todo": "pnpm --filter matrix-todo-bot start:dev",
+		"dev:matrix:calendar": "pnpm --filter matrix-calendar-bot start:dev",
+		"dev:matrix:clock": "pnpm --filter matrix-clock-bot start:dev",
+		"dev:matrix:stats": "pnpm --filter matrix-stats-bot start:dev",
+		"dev:matrix:zitare": "pnpm --filter matrix-zitare-bot start:dev",
+		"dev:matrix:nutriphi": "pnpm --filter matrix-nutriphi-bot start:dev",
+		"build:matrix:mana": "pnpm --filter matrix-mana-bot build",
+		"build:matrix:all": "pnpm --filter 'matrix-*-bot' build",
 		"prepare": "husky"
 	},
 	"devDependencies": {
