@@ -39,4 +39,9 @@ export default () => ({
 		rateLimit: parseInt(process.env.DEFAULT_RATE_LIMIT || '10', 10),
 		monthlyCredits: parseInt(process.env.DEFAULT_MONTHLY_CREDITS || '100', 10),
 	},
+
+	admin: {
+		// Comma-separated list of user IDs that have admin access
+		userIds: process.env.ADMIN_USER_IDS || '',
+	},
 });

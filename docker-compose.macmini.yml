@@ -104,6 +104,42 @@ services:
       start_period: 40s
 
   # ============================================
+  # API Gateway (Monetization)
+  # ============================================
+
+  api-gateway:
+    image: ghcr.io/memo-2023/api-gateway:latest
+    container_name: mana-api-gateway
+    restart: always
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3030
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/manacore
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      SEARCH_SERVICE_URL: http://mana-search:3021
+      STT_SERVICE_URL: http://mana-stt:3020
+      TTS_SERVICE_URL: http://mana-tts:3022
+      CORS_ORIGINS: https://api.mana.how,https://mana.how
+    ports:
+      - "3030:3030"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
   # ManaCore Dashboard
   # ============================================
 

@@ -85,12 +85,24 @@ pnpm start
 | GET | `/api-keys/:id/usage` | Get usage statistics |
 | GET | `/api-keys/:id/usage/summary` | Get usage summary |
 
+### Admin API (with JWT + Admin Role)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/admin/api-keys` | List all API keys (paginated) |
+| GET | `/admin/api-keys/:id` | Get any API key details |
+| PATCH | `/admin/api-keys/:id` | Update any key (tier, credits, limits) |
+| DELETE | `/admin/api-keys/:id` | Delete any API key |
+| GET | `/admin/usage/summary` | System-wide usage stats |
+| GET | `/admin/usage/top-users` | Top users by usage |
+
 ### System
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
 | GET | `/metrics` | Prometheus metrics |
+| GET | `/docs` | Swagger/OpenAPI documentation |
 
 ## Pricing Tiers
 
@@ -173,6 +185,7 @@ curl http://localhost:3030/api-keys/{id}/usage \
 | `STT_SERVICE_URL` | http://localhost:3020 | mana-stt URL |
 | `TTS_SERVICE_URL` | http://localhost:3022 | mana-tts URL |
 | `MANA_CORE_AUTH_URL` | http://localhost:3001 | Auth service URL |
+| `ADMIN_USER_IDS` | - | Comma-separated admin user IDs |
 
 ## Development Commands
 

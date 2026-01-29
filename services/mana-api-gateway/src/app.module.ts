@@ -8,6 +8,8 @@ import { UsageModule } from './usage/usage.module';
 import { ProxyModule } from './proxy/proxy.module';
 import { CreditsModule } from './credits/credits.module';
 import { MetricsModule } from './metrics/metrics.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -22,6 +24,8 @@ import { MetricsModule } from './metrics/metrics.module';
 		ProxyModule,
 		CreditsModule,
 		MetricsModule,
+		SchedulerModule,
+		AdminModule,
 	],
 })
 export class AppModule {}

@@ -1,7 +1,16 @@
-import { IsString, IsOptional, IsBoolean, IsArray, IsDateString } from 'class-validator';
+import {
+	IsString,
+	IsOptional,
+	IsBoolean,
+	IsArray,
+	IsDateString,
+	IsInt,
+	IsEnum,
+	Min,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class UpdateApiKeyDto {
+export class AdminUpdateKeyDto {
 	@ApiPropertyOptional({
 		description: 'Update the display name',
 		example: 'Updated API Key Name',
@@ -12,11 +21,46 @@ export class UpdateApiKeyDto {
 
 	@ApiPropertyOptional({
 		description: 'Update the description',
-		example: 'Updated description for this key',
+		example: 'Updated description',
 	})
 	@IsString()
 	@IsOptional()
 	description?: string;
+
+	@ApiPropertyOptional({
+		description: 'Change the pricing tier',
+		enum: ['free', 'pro', 'enterprise'],
+	})
+	@IsString()
+	@IsOptional()
+	@IsEnum(['free', 'pro', 'enterprise'])
+	tier?: 'free' | 'pro' | 'enterprise';
+
+	@ApiPropertyOptional({
+		description: 'Custom rate limit (requests per minute)',
+		example: 100,
+	})
+	@IsInt()
+	@IsOptional()
+	@Min(1)
+	rateLimit?: number;
+
+	@ApiPropertyOptional({
+		description: 'Custom monthly credits limit',
+		example: 5000,
+	})
+	@IsInt()
+	@IsOptional()
+	@Min(0)
+	monthlyCredits?: number;
+
+	@ApiPropertyOptional({
+		description: 'Reset credits used to 0',
+		example: true,
+	})
+	@IsBoolean()
+	@IsOptional()
+	resetCredits?: boolean;
 
 	@ApiPropertyOptional({
 		description: 'Update allowed endpoints',
