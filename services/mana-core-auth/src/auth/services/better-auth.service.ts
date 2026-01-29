@@ -1211,7 +1211,6 @@ export class BetterAuthService {
 		headers: Record<string, string>;
 		body: unknown;
 	}> {
-		console.log('[handleOidcRequest] Received request:', req.method, req.originalUrl);
 		try {
 			// Map incoming paths to Better Auth's expected paths
 			let mappedPath = req.originalUrl;
@@ -1229,15 +1228,12 @@ export class BetterAuthService {
 				mappedPath = mappedPath.replace('/api/oidc/', '/api/auth/oauth2/');
 			}
 
-			console.log('[handleOidcRequest] Mapped path:', mappedPath);
-
 			// Convert Express request to Fetch Request
 			const url = new URL(
 				mappedPath,
 				this.configService.get<string>('BASE_URL') ||
 					`http://localhost:${this.configService.get<number>('PORT') || 3001}`
 			);
-			console.log('[handleOidcRequest] Constructed URL:', url.toString());
 
 			const headers = new Headers();
 			for (const [key, value] of Object.entries(req.headers)) {
@@ -1255,11 +1251,6 @@ export class BetterAuthService {
 
 			// Call Better Auth's handler
 			const response = await this.auth.handler(fetchRequest);
-			console.log('[handleOidcRequest] Better Auth status:', response.status);
-			console.log(
-				'[handleOidcRequest] Better Auth headers:',
-				Object.fromEntries(response.headers.entries())
-			);
 
 			// Convert Response to our format
 			const responseHeaders: Record<string, string> = {};
@@ -1267,18 +1258,15 @@ export class BetterAuthService {
 				responseHeaders[key] = value;
 			});
 
-			// Get body - handle empty responses
+			// Get body - handle empty responses gracefully
 			let body: unknown;
 			const contentType = response.headers.get('content-type');
 			const textBody = await response.text();
-			console.log('[handleOidcRequest] Response body length:', textBody.length);
-			console.log('[handleOidcRequest] Response body preview:', textBody.substring(0, 500));
 
 			if (contentType?.includes('application/json') && textBody.length > 0) {
 				try {
 					body = JSON.parse(textBody);
 				} catch {
-					console.warn('[handleOidcRequest] Failed to parse JSON, using text body');
 					body = textBody;
 				}
 			} else {
