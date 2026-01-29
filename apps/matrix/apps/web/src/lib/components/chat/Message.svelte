@@ -11,6 +11,7 @@
 		DownloadSimple,
 		File as FileIcon,
 		Play,
+		Pause,
 		Image as ImageIcon,
 		Lock,
 		Warning,
@@ -42,6 +43,50 @@
 	let showActions = $state(false);
 	let imageLoading = $state(true);
 	let imageError = $state(false);
+
+	// Audio player state
+	let audioElement: HTMLAudioElement | null = $state(null);
+	let isPlaying = $state(false);
+	let audioProgress = $state(0);
+	let audioDuration = $state(0);
+
+	function toggleAudio() {
+		if (!audioElement) return;
+		if (isPlaying) {
+			audioElement.pause();
+		} else {
+			audioElement.play();
+		}
+	}
+
+	function handleAudioTimeUpdate() {
+		if (!audioElement) return;
+		audioProgress = audioElement.currentTime;
+	}
+
+	function handleAudioLoadedMetadata() {
+		if (!audioElement) return;
+		audioDuration = audioElement.duration;
+	}
+
+	function handleAudioEnded() {
+		isPlaying = false;
+		audioProgress = 0;
+	}
+
+	function seekAudio(e: MouseEvent) {
+		if (!audioElement || !audioDuration) return;
+		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		const percent = (e.clientX - rect.left) / rect.width;
+		audioElement.currentTime = percent * audioDuration;
+	}
+
+	function formatAudioTime(seconds: number): string {
+		if (!seconds || isNaN(seconds)) return '0:00';
+		const mins = Math.floor(seconds / 60);
+		const secs = Math.floor(seconds % 60);
+		return `${mins}:${secs.toString().padStart(2, '0')}`;
+	}
 
 	let formattedTime = $derived(format(message.timestamp, 'HH:mm'));
 
@@ -201,8 +246,72 @@
 						</span>
 					{/if}
 				</div>
-			{:else if message.type === 'm.file' || message.type === 'm.audio'}
-				<!-- File/Audio message -->
+			{:else if message.type === 'm.audio'}
+				<!-- Audio message (voice note) -->
+				<div
+					class="flex items-center gap-3 rounded-lg {message.isOwn
+						? 'bg-white/20'
+						: 'bg-black/5 dark:bg-white/5'} p-3 min-w-[220px]"
+				>
+					<!-- Hidden audio element -->
+					{#if mediaUrl}
+						<audio
+							bind:this={audioElement}
+							src={mediaUrl}
+							onplay={() => (isPlaying = true)}
+							onpause={() => (isPlaying = false)}
+							ontimeupdate={handleAudioTimeUpdate}
+							onloadedmetadata={handleAudioLoadedMetadata}
+							onended={handleAudioEnded}
+						></audio>
+					{/if}
+
+					<!-- Play/Pause button -->
+					<button
+						class="flex-shrink-0 rounded-full {message.isOwn
+							? 'bg-white/20 hover:bg-white/30'
+							: 'bg-primary/10 hover:bg-primary/20'} p-2.5 transition-colors"
+						onclick={toggleAudio}
+					>
+						{#if isPlaying}
+							<Pause
+								class="h-5 w-5 {message.isOwn ? 'text-white' : 'text-primary'}"
+								weight="fill"
+							/>
+						{:else}
+							<Play class="h-5 w-5 {message.isOwn ? 'text-white' : 'text-primary'}" weight="fill" />
+						{/if}
+					</button>
+
+					<!-- Waveform/Progress -->
+					<div class="flex-1 flex flex-col gap-1">
+						<!-- Progress bar -->
+						<button
+							class="relative h-1.5 w-full rounded-full {message.isOwn
+								? 'bg-white/20'
+								: 'bg-black/10 dark:bg-white/10'} overflow-hidden cursor-pointer"
+							onclick={seekAudio}
+						>
+							<div
+								class="absolute inset-y-0 left-0 {message.isOwn
+									? 'bg-white'
+									: 'bg-primary'} rounded-full transition-all"
+								style="width: {audioDuration > 0 ? (audioProgress / audioDuration) * 100 : 0}%"
+							></div>
+						</button>
+						<!-- Duration -->
+						<div
+							class="flex justify-between text-xs {message.isOwn
+								? 'text-white/70'
+								: 'text-muted-foreground'}"
+						>
+							<span>{formatAudioTime(audioProgress)}</span>
+							<span>{formatAudioTime(audioDuration || message.media?.duration || 0)}</span>
+						</div>
+					</div>
+				</div>
+			{:else if message.type === 'm.file'}
+				<!-- File message -->
 				<a
 					href={mediaUrl}
 					target="_blank"

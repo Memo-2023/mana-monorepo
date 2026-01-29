@@ -8,6 +8,8 @@
 		Image,
 		File,
 		CircleNotch,
+		Microphone,
+		Stop,
 	} from '@manacore/shared-icons';
 
 	interface Props {
@@ -26,6 +28,13 @@
 	let isTyping = $state(false);
 	let uploading = $state(false);
 	let uploadProgress = $state(0);
+
+	// Voice recording state
+	let isRecording = $state(false);
+	let recordingDuration = $state(0);
+	let mediaRecorder: MediaRecorder | null = null;
+	let audioChunks: Blob[] = [];
+	let recordingInterval: ReturnType<typeof setInterval> | null = null;
 
 	// Set message content when editing
 	$effect(() => {
@@ -135,6 +144,95 @@
 			console.error('Failed to upload file');
 		}
 	}
+
+	// Voice recording functions
+	async function startRecording() {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+			audioChunks = [];
+
+			mediaRecorder.ondataavailable = (event) => {
+				if (event.data.size > 0) {
+					audioChunks.push(event.data);
+				}
+			};
+
+			mediaRecorder.onstop = async () => {
+				// Stop all tracks
+				stream.getTracks().forEach((track) => track.stop());
+
+				// Create blob and send
+				const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+				await sendVoiceMessage(audioBlob);
+			};
+
+			mediaRecorder.start(100); // Collect data every 100ms
+			isRecording = true;
+			recordingDuration = 0;
+
+			// Start duration counter
+			recordingInterval = setInterval(() => {
+				recordingDuration++;
+			}, 1000);
+		} catch (err) {
+			console.error('Failed to start recording:', err);
+		}
+	}
+
+	function stopRecording() {
+		if (mediaRecorder && isRecording) {
+			mediaRecorder.stop();
+			isRecording = false;
+
+			if (recordingInterval) {
+				clearInterval(recordingInterval);
+				recordingInterval = null;
+			}
+		}
+	}
+
+	function cancelRecording() {
+		if (mediaRecorder && isRecording) {
+			// Stop without sending
+			mediaRecorder.ondataavailable = null;
+			mediaRecorder.onstop = () => {
+				// Just clean up, don't send
+			};
+			mediaRecorder.stop();
+			isRecording = false;
+
+			if (recordingInterval) {
+				clearInterval(recordingInterval);
+				recordingInterval = null;
+			}
+		}
+	}
+
+	async function sendVoiceMessage(blob: Blob) {
+		uploading = true;
+		uploadProgress = 0;
+
+		// Create a File from the Blob
+		const file = new File([blob], `voice-${Date.now()}.webm`, { type: 'audio/webm' });
+
+		const success = await matrixStore.sendFile(file, (progress) => {
+			uploadProgress = progress;
+		});
+
+		uploading = false;
+		uploadProgress = 0;
+
+		if (!success) {
+			console.error('Failed to send voice message');
+		}
+	}
+
+	function formatDuration(seconds: number): string {
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return `${mins}:${secs.toString().padStart(2, '0')}`;
+	}
 </script>
 
 <div class="p-4">
@@ -181,6 +279,26 @@
 				</div>
 			</div>
 			<span class="text-sm text-muted-foreground">{uploadProgress}%</span>
+		</div>
+	{/if}
+
+	<!-- Recording Indicator -->
+	{#if isRecording}
+		<div class="mb-3 flex items-center gap-3 rounded-xl glass-card px-4 py-3">
+			<div class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></div>
+			<div class="flex-1">
+				<p class="text-sm font-medium">Aufnahme läuft...</p>
+			</div>
+			<span class="text-sm font-mono text-muted-foreground"
+				>{formatDuration(recordingDuration)}</span
+			>
+			<button
+				class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				onclick={cancelRecording}
+				title="Abbrechen"
+			>
+				<X class="h-4 w-4" />
+			</button>
 		</div>
 	{/if}
 
@@ -253,16 +371,36 @@
 				></textarea>
 			</div>
 
-			<!-- Send button -->
-			<button
-				class="flex-shrink-0 p-3 rounded-xl glass-button shadow-md text-primary
-				       disabled:opacity-50 disabled:cursor-not-allowed"
-				onclick={handleSend}
-				disabled={!message.trim() || uploading}
-				title={editMessage ? 'Speichern' : 'Senden'}
-			>
-				<PaperPlaneTilt class="h-5 w-5" weight="bold" />
-			</button>
+			<!-- Voice/Send button -->
+			{#if isRecording}
+				<button
+					class="flex-shrink-0 p-3 rounded-xl glass-button shadow-md text-red-500"
+					onclick={stopRecording}
+					title="Aufnahme beenden und senden"
+				>
+					<Stop class="h-5 w-5" weight="fill" />
+				</button>
+			{:else if message.trim()}
+				<button
+					class="flex-shrink-0 p-3 rounded-xl glass-button shadow-md text-primary
+					       disabled:opacity-50 disabled:cursor-not-allowed"
+					onclick={handleSend}
+					disabled={uploading}
+					title={editMessage ? 'Speichern' : 'Senden'}
+				>
+					<PaperPlaneTilt class="h-5 w-5" weight="bold" />
+				</button>
+			{:else}
+				<button
+					class="flex-shrink-0 p-3 rounded-xl glass-button shadow-md text-primary
+					       disabled:opacity-50 disabled:cursor-not-allowed"
+					onclick={startRecording}
+					disabled={uploading}
+					title="Sprachnotiz aufnehmen"
+				>
+					<Microphone class="h-5 w-5" weight="bold" />
+				</button>
+			{/if}
 		</div>
 	</div>
 
