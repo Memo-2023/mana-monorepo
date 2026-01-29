@@ -928,7 +928,10 @@ services:
   # ============================================
 
   matrix-web:
-    image: ghcr.io/memo-2023/matrix-web:latest
+    build:
+      context: .
+      dockerfile: apps/matrix/apps/web/Dockerfile
+    image: matrix-web:latest
     container_name: manacore-matrix-web
     restart: always
     depends_on:
