@@ -143,7 +143,9 @@ manacore-monorepo/
 │   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
 │   ├── mana-core-auth/      # Central authentication service
-│   └── mana-search/         # Central search & content extraction service
+│   ├── mana-search/         # Central search & content extraction service
+│   ├── mana-crawler/        # Web crawler service
+│   └── mana-llm/            # Central LLM abstraction service
 ├── packages/                # Monorepo-wide shared packages
 └── docker/                  # Docker configuration files
 ```
@@ -774,6 +776,8 @@ Each project has its own `CLAUDE.md` with detailed information:
 - `apps/picture/CLAUDE.md` - AI image generation
 - `services/mana-core-auth/` - Central authentication service
 - `services/mana-search/CLAUDE.md` - Search & content extraction service
+- `services/mana-crawler/CLAUDE.md` - Web crawler service
+- `services/mana-llm/CLAUDE.md` - Central LLM abstraction service
 
 Navigate to the specific project directory to work on it.
 
