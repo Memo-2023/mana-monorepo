@@ -34,6 +34,7 @@ export {
 	SkeletonList,
 	SkeletonCard,
 	SkeletonGrid,
+	AppLoadingSkeleton,
 } from './molecules';
 
 // Feedback

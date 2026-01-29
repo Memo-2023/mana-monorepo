@@ -22,8 +22,8 @@ export { default as TagGridSkeleton } from './TagGridSkeleton.svelte';
 export { default as DuplicateGroupSkeleton } from './DuplicateGroupSkeleton.svelte';
 export { default as DuplicateListSkeleton } from './DuplicateListSkeleton.svelte';
 
-// App Loading Skeleton
-export { default as AppLoadingSkeleton } from './AppLoadingSkeleton.svelte';
+// App Loading Skeleton (from shared-ui)
+export { AppLoadingSkeleton } from '@manacore/shared-ui';
 
 // Import Preview Skeleton
 export { default as ImportPreviewSkeleton } from './ImportPreviewSkeleton.svelte';

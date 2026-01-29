@@ -24,7 +24,7 @@
 </script>
 
 {#if !appReady}
-	<AppLoadingSkeleton />
+	<AppLoadingSkeleton layout="tasks" listItemCount={4} />
 {:else}
 	<div class="min-h-screen bg-background text-foreground">
 		{@render children()}

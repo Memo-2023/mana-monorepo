@@ -27,6 +27,7 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 6. ✅ **i18n zu 6 Apps hinzugefügt** - todo, skilltree, nutriphi, planta, questions, matrix (jeweils DE + EN)
 7. ✅ **AuthGateModal zentralisiert** - `@manacore/shared-auth-ui` für 4 Apps (chat, todo, contacts, calendar)
 8. ✅ **Global Error Handler zentralisiert** - `@manacore/shared-ui` für 7 Apps (calendar, chat, clock, contacts, matrix, picture, storage)
+9. ✅ **AppLoadingSkeleton zentralisiert** - `@manacore/shared-ui` für 3 Apps (contacts, todo, questions) - Apps mit spezifischen Layouts (calendar, clock) behalten lokale Version
 
 ---
 
@@ -216,10 +217,15 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 - i18n: DE + EN eingebaut
 - Optionale Migration-Info für Session-Daten
 
-#### AppLoadingSkeleton
+#### AppLoadingSkeleton ✅
 
-- Jede App hat eigene Version
-- Könnte mit `@manacore/shared-ui` Skeletons vereinheitlicht werden
+> **Status: Erledigt (29.01.2026)**
+
+- ✅ Zentrales `AppLoadingSkeleton` in `@manacore/shared-ui`
+- ✅ Migrierte Apps: contacts, todo, questions
+- ⏭️ Behalten lokale Version (spezifische Layouts): calendar, clock
+- Layout-Presets: `list`, `tasks`, `sidebar`, `centered`, `minimal`
+- Slot-Support für benutzerdefinierte Inhalte
 
 #### Global Error Handler ✅
 
@@ -275,7 +281,7 @@ _(Keine offenen Aufgaben mit mittlerer Priorität)_
 
 | Aufgabe | Aufwand | Impact |
 |---------|---------|--------|
-| App-Skeletons vereinheitlichen | Niedrig | Code-Reduktion |
+| ~~App-Skeletons vereinheitlichen~~ | ~~Niedrig~~ | ✅ Erledigt |
 | Auth Store Pattern dokumentieren | Niedrig | Onboarding |
 
 ---
@@ -286,7 +292,7 @@ _(Keine offenen Aufgaben mit mittlerer Priorität)_
 2. ~~**i18n** zu fehlenden Apps hinzufügen~~ ✅ Erledigt (6 Apps)
 3. ~~**AuthGateModal** in Shared Package extrahieren~~ ✅ Erledigt (4 Apps)
 4. ~~**Global Error Handler** extrahieren~~ ✅ Erledigt (7 Apps)
-5. **App-Skeletons vereinheitlichen** (niedrige Priorität)
+5. ~~**App-Skeletons vereinheitlichen**~~ ✅ Erledigt (3 Apps)
 6. **Auth Store Pattern dokumentieren** (niedrige Priorität)
 
 ---

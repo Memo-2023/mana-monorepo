@@ -1,3 +1,5 @@
 export { default as QuestionSkeleton } from './QuestionSkeleton.svelte';
 export { default as QuestionDetailSkeleton } from './QuestionDetailSkeleton.svelte';
-export { default as AppLoadingSkeleton } from './AppLoadingSkeleton.svelte';
+
+// App Loading Skeleton (from shared-ui with 'sidebar' layout)
+export { AppLoadingSkeleton } from '@manacore/shared-ui';

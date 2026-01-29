@@ -5,8 +5,8 @@
  * Built on top of @manacore/shared-ui skeleton primitives.
  */
 
-// App Loading Skeleton
-export { default as AppLoadingSkeleton } from './AppLoadingSkeleton.svelte';
+// App Loading Skeleton (from shared-ui with 'tasks' layout)
+export { AppLoadingSkeleton } from '@manacore/shared-ui';
 
 // Task List Skeletons
 export { default as TaskItemSkeleton } from './TaskItemSkeleton.svelte';

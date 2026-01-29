@@ -36,6 +36,7 @@ export {
 	SkeletonList,
 	SkeletonCard,
 	SkeletonGrid,
+	AppLoadingSkeleton,
 } from './loaders';
 
 // Feedback components
