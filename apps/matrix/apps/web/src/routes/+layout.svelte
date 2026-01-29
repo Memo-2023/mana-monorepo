@@ -25,13 +25,20 @@
 </script>
 
 <svelte:head>
-	<title>{$t('app.name')}</title>
+	<title>{$i18nLoading ? 'Matrix Chat' : $t('app.name')}</title>
 	<meta name="description" content="Self-hosted Matrix chat client" />
 </svelte:head>
 
-<div class="min-h-screen bg-background text-foreground">
-	{@render children()}
-</div>
+{#if $i18nLoading}
+	<!-- Loading state while i18n initializes -->
+	<div class="min-h-screen bg-background flex items-center justify-center">
+		<div class="animate-pulse text-muted-foreground">Laden...</div>
+	</div>
+{:else}
+	<div class="min-h-screen bg-background text-foreground">
+		{@render children()}
+	</div>
 
-<!-- Global Toast notifications -->
-<ToastContainer />
+	<!-- Global Toast notifications -->
+	<ToastContainer />
+{/if}
