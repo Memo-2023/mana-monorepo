@@ -341,11 +341,33 @@ Die 8 lokalen `AppSlider.svelte` Dateien sind **Lokalisierungs-Wrapper**, nicht 
 
 ---
 
-### 3.4 NIEDRIG: LanguageSelector (75 LOC)
+### ~~3.4 NIEDRIG: LanguageSelector~~ ✅ ANALYSIERT (Korrekte Architektur)
 
-**Problem:** 5+ Apps haben identische LanguageSelector Implementierungen.
+**Status:** Die lokalen LanguageSelector sind korrekte Wrapper, keine Duplikate (29.01.2026)
 
-**Empfehlung:** Verschiebe nach `@manacore/shared-ui/navigation/LanguageSelector.svelte`
+**Ergebnis der Analyse:**
+- 9 Apps haben lokale `LanguageSelector.svelte` (~19 LOC jede)
+- Diese sind **Wrapper** die app-spezifisches i18n mit shared Helpers verbinden
+
+**Architektur ist korrekt:**
+```svelte
+<script lang="ts">
+  import { PillDropdown } from '@manacore/shared-ui';          // Shared UI
+  import { getLanguageDropdownItems } from '@manacore/shared-i18n';  // Shared Helper
+  import { setLocale, supportedLocales } from '$lib/i18n';     // App-spezifisch
+
+  // ... connect the pieces
+</script>
+
+<PillDropdown items={languageItems} label={currentLabel} />
+```
+
+**Shared-i18n hat bereits:**
+- `LanguageSelector.svelte` (242 LOC) - Standalone Komponente für andere Anwendungsfälle
+- `getLanguageDropdownItems()` - Helper für PillDropdown-Items
+- `getCurrentLanguageLabel()` - Helper für aktuelle Sprache
+
+**Fazit:** Keine Konsolidierung nötig - jede App braucht ihren eigenen Wrapper für app-spezifisches i18n Setup.
 
 ---
 
@@ -490,13 +512,16 @@ export default createDrizzleConfig({ dbName: 'chat' });
 
 ---
 
-### 5.2 NIEDRIG: Sleep Function Duplikat
+### ~~5.2 NIEDRIG: Sleep Function Duplikat~~ ✅ BEREITS ERLEDIGT
 
-**Problem:** `sleep()` existiert in:
-- `packages/shared-utils/src/async.ts` (8 LOC)
-- `packages/shared-api-client/src/utils.ts` (3 LOC)
+**Status:** `shared-api-client` importiert bereits `sleep` aus `@manacore/shared-utils` (29.01.2026)
 
-**Aktion:** Entferne aus shared-api-client, importiere aus shared-utils.
+```typescript
+// packages/shared-api-client/src/client.ts
+import { sleep } from '@manacore/shared-utils';
+```
+
+**Fazit:** Kein Duplikat vorhanden - Dokumentation war veraltet.
 
 ---
 
