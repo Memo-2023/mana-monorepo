@@ -233,6 +233,19 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 1.5,
 	},
+	skilltree: {
+		id: 'skilltree',
+		name: 'SkillTree',
+		tagline: 'Level Up Your Life',
+		primaryColor: '#10b981',
+		secondaryColor: '#34d399',
+		// Tree/branch icon representing skill progression
+		logoPath:
+			'M12 3v1.5M12 21v-1.5M12 9a3 3 0 100-6 3 3 0 000 6zm0 0v3m0 6a3 3 0 100-6 3 3 0 000 6zm-6-3h1.5m10.5 0h1.5M6 12a3 3 0 100-6 3 3 0 000 6zm0 0h3m6 0h3m-3 0a3 3 0 100-6 3 3 0 000 6z',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
 };
 
 /**

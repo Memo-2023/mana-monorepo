@@ -2,13 +2,14 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { skillStore } from '$lib/stores/skills.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	let { children } = $props();
 
 	let loading = $state(true);
 
 	onMount(async () => {
-		await skillStore.initialize();
+		await Promise.all([authStore.initialize(), skillStore.initialize()]);
 		loading = false;
 	});
 </script>

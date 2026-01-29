@@ -32,6 +32,7 @@ export {
 	InventoryLogo,
 	ClockLogo,
 	QuestionsLogo,
+	SkillTreeLogo,
 } from './logos';
 
 // Configuration
