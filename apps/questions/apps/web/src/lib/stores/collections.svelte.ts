@@ -1,9 +1,13 @@
 /**
  * Collections Store - Manages collections state using Svelte 5 runes
+ * Authenticated users: collections from API
+ * Demo mode: static sample collection to showcase the app
  */
 
 import { collectionsApi } from '$lib/api/collections';
 import type { Collection, CreateCollectionDto, UpdateCollectionDto } from '$lib/types';
+import { authStore } from './auth.svelte';
+import { DEMO_COLLECTION, isDemoCollection } from '$lib/data/demo-questions';
 
 let collections = $state<Collection[]>([]);
 let loading = $state(false);
@@ -27,10 +31,23 @@ export const collectionsStore = {
 		return selectedId ? collections.find((c) => c.id === selectedId) : null;
 	},
 
+	/**
+	 * Load collections
+	 * Demo mode: shows static sample collection
+	 * Authenticated: fetches from API
+	 */
 	async load() {
 		loading = true;
 		error = null;
 
+		// Demo mode: load demo collection
+		if (!authStore.isAuthenticated) {
+			collections = [DEMO_COLLECTION];
+			loading = false;
+			return;
+		}
+
+		// Authenticated: fetch from API
 		try {
 			collections = await collectionsApi.getAll();
 		} catch (e) {
@@ -41,7 +58,18 @@ export const collectionsStore = {
 		}
 	},
 
+	/**
+	 * Create a new collection
+	 * Demo mode: returns auth_required error
+	 * Authenticated: creates via API
+	 */
 	async create(data: CreateCollectionDto): Promise<Collection | null> {
+		// Demo mode: require authentication
+		if (!authStore.isAuthenticated) {
+			error = 'Login required to create collections';
+			return null;
+		}
+
 		loading = true;
 		error = null;
 
@@ -57,7 +85,18 @@ export const collectionsStore = {
 		}
 	},
 
+	/**
+	 * Update a collection
+	 * Demo mode: returns auth_required error
+	 * Authenticated: updates via API
+	 */
 	async update(id: string, data: UpdateCollectionDto): Promise<Collection | null> {
+		// Demo collection or not authenticated: require authentication
+		if (isDemoCollection(id) || !authStore.isAuthenticated) {
+			error = 'Login required to update collections';
+			return null;
+		}
+
 		error = null;
 
 		try {
@@ -70,7 +109,18 @@ export const collectionsStore = {
 		}
 	},
 
+	/**
+	 * Delete a collection
+	 * Demo mode: returns auth_required error
+	 * Authenticated: deletes via API
+	 */
 	async delete(id: string): Promise<boolean> {
+		// Demo collection or not authenticated: require authentication
+		if (isDemoCollection(id) || !authStore.isAuthenticated) {
+			error = 'Login required to delete collections';
+			return false;
+		}
+
 		error = null;
 
 		try {
@@ -86,7 +136,18 @@ export const collectionsStore = {
 		}
 	},
 
+	/**
+	 * Reorder collections
+	 * Demo mode: returns auth_required error
+	 * Authenticated: reorders via API
+	 */
 	async reorder(orderedIds: string[]): Promise<boolean> {
+		// Demo mode: require authentication
+		if (!authStore.isAuthenticated) {
+			error = 'Login required to reorder collections';
+			return false;
+		}
+
 		error = null;
 
 		try {
@@ -109,6 +170,13 @@ export const collectionsStore = {
 
 	getById(id: string): Collection | undefined {
 		return collections.find((c) => c.id === id);
+	},
+
+	/**
+	 * Check if a collection is a demo collection
+	 */
+	isDemoCollection(id: string): boolean {
+		return isDemoCollection(id);
 	},
 
 	clear() {

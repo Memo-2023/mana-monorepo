@@ -1,9 +1,13 @@
 /**
  * Questions Store - Manages questions state using Svelte 5 runes
+ * Authenticated users: questions from API
+ * Demo mode: static sample questions to showcase the app
  */
 
 import { questionsApi, type QuestionFilters } from '$lib/api/questions';
 import type { Question, CreateQuestionDto, UpdateQuestionDto } from '$lib/types';
+import { authStore } from './auth.svelte';
+import { generateDemoQuestions, isDemoQuestion } from '$lib/data/demo-questions';
 
 let questions = $state<Question[]>([]);
 let loading = $state(false);
@@ -28,11 +32,46 @@ export const questionsStore = {
 		return currentFilters;
 	},
 
+	/**
+	 * Load questions
+	 * Demo mode: shows static sample questions
+	 * Authenticated: fetches from API
+	 */
 	async load(filters?: QuestionFilters) {
 		loading = true;
 		error = null;
 		currentFilters = filters || {};
 
+		// Demo mode: load demo questions
+		if (!authStore.isAuthenticated) {
+			let demoQuestions = generateDemoQuestions();
+
+			// Apply filters
+			if (filters?.collectionId) {
+				demoQuestions = demoQuestions.filter(
+					(q: Question) => q.collectionId === filters.collectionId
+				);
+			}
+			if (filters?.status) {
+				demoQuestions = demoQuestions.filter((q: Question) => q.status === filters.status);
+			}
+			if (filters?.search) {
+				const search = filters.search.toLowerCase();
+				demoQuestions = demoQuestions.filter(
+					(q: Question) =>
+						q.title.toLowerCase().includes(search) ||
+						q.description?.toLowerCase().includes(search) ||
+						q.tags?.some((t: string) => t.toLowerCase().includes(search))
+				);
+			}
+
+			questions = demoQuestions;
+			total = demoQuestions.length;
+			loading = false;
+			return;
+		}
+
+		// Authenticated: fetch from API
 		try {
 			const response = await questionsApi.getAll(filters);
 			questions = response.data;
@@ -46,7 +85,18 @@ export const questionsStore = {
 		}
 	},
 
+	/**
+	 * Create a new question
+	 * Demo mode: returns auth_required error
+	 * Authenticated: creates via API
+	 */
 	async create(data: CreateQuestionDto): Promise<Question | null> {
+		// Demo mode: require authentication
+		if (!authStore.isAuthenticated) {
+			error = 'Login required to create questions';
+			return null;
+		}
+
 		loading = true;
 		error = null;
 
@@ -63,7 +113,18 @@ export const questionsStore = {
 		}
 	},
 
+	/**
+	 * Update a question
+	 * Demo mode: returns auth_required error
+	 * Authenticated: updates via API
+	 */
 	async update(id: string, data: UpdateQuestionDto): Promise<Question | null> {
+		// Demo question or not authenticated: require authentication
+		if (isDemoQuestion(id) || !authStore.isAuthenticated) {
+			error = 'Login required to update questions';
+			return null;
+		}
+
 		error = null;
 
 		try {
@@ -76,7 +137,18 @@ export const questionsStore = {
 		}
 	},
 
+	/**
+	 * Delete a question
+	 * Demo mode: returns auth_required error
+	 * Authenticated: deletes via API
+	 */
 	async delete(id: string): Promise<boolean> {
+		// Demo question or not authenticated: require authentication
+		if (isDemoQuestion(id) || !authStore.isAuthenticated) {
+			error = 'Login required to delete questions';
+			return false;
+		}
+
 		error = null;
 
 		try {
@@ -90,7 +162,18 @@ export const questionsStore = {
 		}
 	},
 
+	/**
+	 * Update question status
+	 * Demo mode: returns auth_required error
+	 * Authenticated: updates via API
+	 */
 	async updateStatus(id: string, status: string): Promise<Question | null> {
+		// Demo question or not authenticated: require authentication
+		if (isDemoQuestion(id) || !authStore.isAuthenticated) {
+			error = 'Login required to update question status';
+			return null;
+		}
+
 		error = null;
 
 		try {
@@ -105,6 +188,13 @@ export const questionsStore = {
 
 	getById(id: string): Question | undefined {
 		return questions.find((q) => q.id === id);
+	},
+
+	/**
+	 * Check if a question is a demo question
+	 */
+	isDemoQuestion(id: string): boolean {
+		return isDemoQuestion(id);
 	},
 
 	clear() {
