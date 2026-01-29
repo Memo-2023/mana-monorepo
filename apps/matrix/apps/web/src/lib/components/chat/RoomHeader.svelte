@@ -16,9 +16,14 @@
 		onMenuClick?: () => void;
 		onInfoClick?: () => void;
 		onSearchClick?: () => void;
+		onVoiceCall?: () => void;
+		onVideoCall?: () => void;
 	}
 
-	let { onMenuClick, onInfoClick, onSearchClick }: Props = $props();
+	let { onMenuClick, onInfoClick, onSearchClick, onVoiceCall, onVideoCall }: Props = $props();
+
+	// Check if calls are possible (DMs only for now)
+	let canCall = $derived(matrixStore.currentSimpleRoom?.isDirect ?? false);
 
 	let room = $derived(matrixStore.currentSimpleRoom);
 	let cryptoReady = $derived(matrixStore.cryptoReady);
@@ -111,18 +116,22 @@
 				<MagnifyingGlass class="h-5 w-5 text-muted-foreground" />
 			</button>
 			<button
-				class="hidden sm:flex p-2.5 rounded-xl glass-button shadow-sm disabled:opacity-40"
-				title="Sprachanruf"
-				disabled
+				class="hidden sm:flex p-2.5 rounded-xl glass-button shadow-sm transition-colors
+				       {canCall ? 'hover:bg-green-500/10 hover:text-green-500' : 'opacity-40 cursor-not-allowed'}"
+				title={canCall ? 'Sprachanruf' : 'Anrufe nur in Direktnachrichten verfügbar'}
+				disabled={!canCall}
+				onclick={onVoiceCall}
 			>
-				<Phone class="h-5 w-5 text-muted-foreground" />
+				<Phone class="h-5 w-5" />
 			</button>
 			<button
-				class="hidden sm:flex p-2.5 rounded-xl glass-button shadow-sm disabled:opacity-40"
-				title="Videoanruf"
-				disabled
+				class="hidden sm:flex p-2.5 rounded-xl glass-button shadow-sm transition-colors
+				       {canCall ? 'hover:bg-violet-500/10 hover:text-violet-500' : 'opacity-40 cursor-not-allowed'}"
+				title={canCall ? 'Videoanruf' : 'Anrufe nur in Direktnachrichten verfügbar'}
+				disabled={!canCall}
+				onclick={onVideoCall}
 			>
-				<VideoCamera class="h-5 w-5 text-muted-foreground" />
+				<VideoCamera class="h-5 w-5" />
 			</button>
 			<button
 				class="p-2.5 rounded-xl glass-button shadow-sm"

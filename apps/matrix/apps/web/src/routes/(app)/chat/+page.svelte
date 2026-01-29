@@ -4,8 +4,13 @@
 	import CreateRoomDialog from '$lib/components/chat/CreateRoomDialog.svelte';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
 	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
+	import { CallView, IncomingCallDialog } from '$lib/components/call';
 	import { ChatCircle, Plus, Gear } from '@manacore/shared-icons';
 	import { browser } from '$app/environment';
+
+	// Call state
+	let activeCall = $derived(matrixStore.activeCall);
+	let incomingCall = $derived(matrixStore.incomingCall);
 
 	// Start with sidebar closed on mobile
 	let sidebarOpen = $state(browser ? window.innerWidth >= 1024 : true);
@@ -68,6 +73,31 @@
 
 	function handleRoomCreated(roomId: string) {
 		matrixStore.selectRoom(roomId);
+	}
+
+	// Call handlers
+	async function handleVoiceCall() {
+		if (matrixStore.currentRoom) {
+			await matrixStore.placeVoiceCall(matrixStore.currentRoom.roomId);
+		}
+	}
+
+	async function handleVideoCall() {
+		if (matrixStore.currentRoom) {
+			await matrixStore.placeVideoCall(matrixStore.currentRoom.roomId);
+		}
+	}
+
+	function handleCallHangup() {
+		// Call ended - UI will update automatically
+	}
+
+	function handleCallAnswer() {
+		// Call answered - UI will update automatically
+	}
+
+	function handleCallReject() {
+		// Call rejected - UI will update automatically
 	}
 </script>
 
@@ -139,6 +169,8 @@
 				onMenuClick={toggleSidebar}
 				onInfoClick={() => (showRoomSettings = true)}
 				onSearchClick={() => (showSearch = true)}
+				onVoiceCall={handleVoiceCall}
+				onVideoCall={handleVideoCall}
 			/>
 
 			<!-- Timeline -->
@@ -202,3 +234,13 @@
 
 <!-- Search Dialog -->
 <SearchDialog open={showSearch} onClose={() => (showSearch = false)} />
+
+<!-- Active Call View -->
+{#if activeCall}
+	<CallView call={activeCall} onHangup={handleCallHangup} />
+{/if}
+
+<!-- Incoming Call Dialog -->
+{#if incomingCall && !activeCall}
+	<IncomingCallDialog call={incomingCall} onAnswer={handleCallAnswer} onReject={handleCallReject} />
+{/if}

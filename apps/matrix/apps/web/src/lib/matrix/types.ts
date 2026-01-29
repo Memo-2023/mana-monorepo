@@ -247,3 +247,62 @@ export interface CrossSigningStatus {
 	privateKeysInSecretStorage: boolean;
 	privateKeysCachedLocally: boolean;
 }
+
+// ─────────────────────────────────────────────────────────
+// VoIP / Call Types
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Call state
+ */
+export type CallState =
+	| 'fledgling'
+	| 'invite_sent'
+	| 'wait_local_media'
+	| 'create_offer'
+	| 'create_answer'
+	| 'connecting'
+	| 'connected'
+	| 'ringing'
+	| 'ended';
+
+/**
+ * Call type (voice or video)
+ */
+export type CallType = 'voice' | 'video';
+
+/**
+ * Call direction
+ */
+export type CallDirection = 'inbound' | 'outbound';
+
+/**
+ * Simplified call info for UI
+ */
+export interface SimpleCall {
+	callId: string;
+	roomId: string;
+	state: CallState;
+	type: CallType;
+	direction: CallDirection;
+	opponentUserId?: string;
+	opponentName?: string;
+	opponentAvatar?: string;
+	startTime?: number;
+	duration?: number;
+	isMicMuted: boolean;
+	isCameraMuted: boolean;
+	isScreenSharing: boolean;
+	isRemoteOnHold: boolean;
+	localStream?: MediaStream;
+	remoteStream?: MediaStream;
+}
+
+/**
+ * Call event callbacks for UI handling
+ */
+export interface CallCallbacks {
+	onIncomingCall?: (call: SimpleCall) => void;
+	onCallStateChange?: (call: SimpleCall) => void;
+	onCallEnded?: (call: SimpleCall, reason?: string) => void;
+}

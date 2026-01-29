@@ -1,6 +1,10 @@
 import { browser } from '$app/environment';
 import type { MatrixClient, Room, MatrixEvent, RoomMember as SDKRoomMember } from 'matrix-js-sdk';
-import { showMessageNotification, canShowNotifications, isDocumentFocused } from '$lib/notifications';
+import {
+	showMessageNotification,
+	canShowNotifications,
+	isDocumentFocused,
+} from '$lib/notifications';
 import type {
 	SyncState,
 	MatrixCredentials,
@@ -17,6 +21,11 @@ import type {
 	CrossSigningStatus,
 	PresenceState,
 	UserPresence,
+	SimpleCall,
+	CallCallbacks,
+	CallState as CallStateType,
+	CallType,
+	CallDirection,
 } from './types';
 
 const STORAGE_KEY = 'matrix_credentials';
@@ -45,6 +54,13 @@ class MatrixStore {
 	private _keyBackupEnabled = $state(false);
 	private _crossSigningReady = $state(false);
 	private _cryptoCallbacks: CryptoCallbacks = {};
+
+	// VoIP / Call State
+	private _activeCall = $state<SimpleCall | null>(null);
+	private _incomingCall = $state<SimpleCall | null>(null);
+	private _callCallbacks: CallCallbacks = {};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private _matrixCall: any = null; // The actual MatrixCall object
 
 	// ─────────────────────────────────────────────────────────
 	// Public Getters
@@ -80,6 +96,20 @@ class MatrixStore {
 	}
 	get crossSigningReady() {
 		return this._crossSigningReady;
+	}
+
+	// VoIP Getters
+	get activeCall() {
+		return this._activeCall;
+	}
+	get incomingCall() {
+		return this._incomingCall;
+	}
+	get hasActiveCall() {
+		return this._activeCall !== null;
+	}
+	get hasIncomingCall() {
+		return this._incomingCall !== null;
 	}
 
 	/**
@@ -329,6 +359,19 @@ class MatrixStore {
 			// Update timeline if we're in this room to refresh read receipts
 			if (room.roomId === this._currentRoomId) {
 				this._timeline = [...(room.getLiveTimeline().getEvents() || [])];
+			}
+		});
+
+		// Incoming calls
+		// CallEvent is exported from matrix-js-sdk, but CallState needs dynamic import from webrtc module
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		this._client.on('Call.incoming' as any, async (call: any) => {
+			console.log('Incoming call:', call.callId);
+			try {
+				const webrtc = await import('matrix-js-sdk/lib/webrtc/call');
+				this.handleIncomingCall(call, webrtc.CallEvent, webrtc.CallState);
+			} catch (err) {
+				console.error('Error handling incoming call:', err);
 			}
 		});
 	}
@@ -1271,6 +1314,283 @@ class MatrixStore {
 	}
 
 	// ─────────────────────────────────────────────────────────
+	// VoIP / Call Actions
+	// ─────────────────────────────────────────────────────────
+
+	/**
+	 * Set call callbacks for UI notifications
+	 */
+	setCallCallbacks(callbacks: CallCallbacks) {
+		this._callCallbacks = callbacks;
+	}
+
+	/**
+	 * Place a voice call to the current room
+	 */
+	async placeVoiceCall(roomId?: string): Promise<boolean> {
+		const targetRoomId = roomId || this._currentRoomId;
+		if (!this._client || !targetRoomId) return false;
+
+		try {
+			// Import WebRTC types from the submodule
+			const webrtc = await import('matrix-js-sdk/lib/webrtc/call');
+			const { CallEvent, CallState } = webrtc;
+
+			// Create the call
+			const call = this._client.createCall(targetRoomId);
+			if (!call) {
+				console.error('Failed to create call');
+				return false;
+			}
+
+			this._matrixCall = call;
+
+			// Set up event handlers
+			this.setupCallEventHandlers(call, CallEvent, CallState);
+
+			// Place the voice call
+			await call.placeVoiceCall();
+
+			// Update active call state
+			this._activeCall = this.matrixCallToSimpleCall(call, 'voice', 'outbound');
+
+			return true;
+		} catch (err) {
+			console.error('Error placing voice call:', err);
+			this._error = 'Failed to start voice call';
+			return false;
+		}
+	}
+
+	/**
+	 * Place a video call to the current room
+	 */
+	async placeVideoCall(roomId?: string): Promise<boolean> {
+		const targetRoomId = roomId || this._currentRoomId;
+		if (!this._client || !targetRoomId) return false;
+
+		try {
+			// Import WebRTC types from the submodule
+			const webrtc = await import('matrix-js-sdk/lib/webrtc/call');
+			const { CallEvent, CallState } = webrtc;
+
+			// Create the call
+			const call = this._client.createCall(targetRoomId);
+			if (!call) {
+				console.error('Failed to create call');
+				return false;
+			}
+
+			this._matrixCall = call;
+
+			// Set up event handlers
+			this.setupCallEventHandlers(call, CallEvent, CallState);
+
+			// Place the video call
+			await call.placeVideoCall();
+
+			// Update active call state
+			this._activeCall = this.matrixCallToSimpleCall(call, 'video', 'outbound');
+
+			return true;
+		} catch (err) {
+			console.error('Error placing video call:', err);
+			this._error = 'Failed to start video call';
+			return false;
+		}
+	}
+
+	/**
+	 * Answer an incoming call
+	 */
+	async answerCall(): Promise<boolean> {
+		if (!this._matrixCall || !this._incomingCall) return false;
+
+		try {
+			await this._matrixCall.answer();
+			this._activeCall = { ...this._incomingCall };
+			this._incomingCall = null;
+			return true;
+		} catch (err) {
+			console.error('Error answering call:', err);
+			return false;
+		}
+	}
+
+	/**
+	 * Reject an incoming call
+	 */
+	rejectCall(): boolean {
+		if (!this._matrixCall || !this._incomingCall) return false;
+
+		try {
+			this._matrixCall.reject();
+			this._incomingCall = null;
+			this._matrixCall = null;
+			return true;
+		} catch (err) {
+			console.error('Error rejecting call:', err);
+			return false;
+		}
+	}
+
+	/**
+	 * Hang up the current call
+	 */
+	hangupCall(): boolean {
+		if (!this._matrixCall) return false;
+
+		try {
+			this._matrixCall.hangup('user_hangup', false);
+			this._activeCall = null;
+			this._matrixCall = null;
+			return true;
+		} catch (err) {
+			console.error('Error hanging up call:', err);
+			return false;
+		}
+	}
+
+	/**
+	 * Toggle microphone mute
+	 */
+	toggleMicMute(): boolean {
+		if (!this._matrixCall || !this._activeCall) return false;
+
+		try {
+			const muted = this._matrixCall.isMicrophoneMuted();
+			this._matrixCall.setMicrophoneMuted(!muted);
+			this._activeCall = { ...this._activeCall, isMicMuted: !muted };
+			return true;
+		} catch (err) {
+			console.error('Error toggling mic mute:', err);
+			return false;
+		}
+	}
+
+	/**
+	 * Toggle camera mute (for video calls)
+	 */
+	toggleCameraMute(): boolean {
+		if (!this._matrixCall || !this._activeCall) return false;
+
+		try {
+			const muted = this._matrixCall.isLocalVideoMuted();
+			this._matrixCall.setLocalVideoMuted(!muted);
+			this._activeCall = { ...this._activeCall, isCameraMuted: !muted };
+			return true;
+		} catch (err) {
+			console.error('Error toggling camera mute:', err);
+			return false;
+		}
+	}
+
+	/**
+	 * Set up call event handlers
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private setupCallEventHandlers(call: any, CallEvent: any, CallState: any) {
+		// State changes
+		call.on(CallEvent.State, (state: string, oldState: string) => {
+			console.log(`Call state: ${oldState} -> ${state}`);
+
+			if (this._activeCall) {
+				this._activeCall = {
+					...this._activeCall,
+					state: state as CallStateType,
+				};
+				this._callCallbacks.onCallStateChange?.(this._activeCall);
+			}
+
+			// Handle call ending
+			if (state === CallState.Ended) {
+				const reason = call.hangupReason;
+				const endedCall = this._activeCall;
+				this._activeCall = null;
+				this._matrixCall = null;
+				if (endedCall) {
+					this._callCallbacks.onCallEnded?.(endedCall, reason);
+				}
+			}
+		});
+
+		// Feeds changed (audio/video streams)
+		call.on(CallEvent.FeedsChanged, (feeds: any[]) => {
+			if (this._activeCall) {
+				const localFeed = feeds.find((f) => f.isLocal());
+				const remoteFeed = feeds.find((f) => !f.isLocal());
+
+				this._activeCall = {
+					...this._activeCall,
+					localStream: localFeed?.stream,
+					remoteStream: remoteFeed?.stream,
+				};
+			}
+		});
+
+		// Error handling
+		call.on(CallEvent.Error, (error: any) => {
+			console.error('Call error:', error);
+			this._error = `Call error: ${error.message || 'Unknown error'}`;
+		});
+
+		// Hangup
+		call.on(CallEvent.Hangup, () => {
+			const endedCall = this._activeCall;
+			this._activeCall = null;
+			this._matrixCall = null;
+			if (endedCall) {
+				this._callCallbacks.onCallEnded?.(endedCall, call.hangupReason);
+			}
+		});
+	}
+
+	/**
+	 * Handle incoming call from the SDK
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private handleIncomingCall(call: any, CallEvent: any, CallState: any) {
+		this._matrixCall = call;
+
+		// Determine call type from the call object
+		const callType: CallType = call.type === 'video' ? 'video' : 'voice';
+
+		// Create simple call representation
+		const simpleCall = this.matrixCallToSimpleCall(call, callType, 'inbound');
+		this._incomingCall = simpleCall;
+
+		// Set up event handlers
+		this.setupCallEventHandlers(call, CallEvent, CallState);
+
+		// Notify UI
+		this._callCallbacks.onIncomingCall?.(simpleCall);
+	}
+
+	/**
+	 * Convert MatrixCall to SimpleCall
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private matrixCallToSimpleCall(call: any, type: CallType, direction: CallDirection): SimpleCall {
+		const opponent = call.getOpponentMember?.();
+		const room = this._client?.getRoom(call.roomId);
+
+		return {
+			callId: call.callId,
+			roomId: call.roomId,
+			state: (call.state || 'fledgling') as CallStateType,
+			type,
+			direction,
+			opponentUserId: opponent?.userId,
+			opponentName: opponent?.name || room?.name || 'Unbekannt',
+			opponentAvatar: opponent?.getAvatarUrl?.(this._client?.baseUrl || '', 48, 48, 'scale'),
+			isMicMuted: call.isMicrophoneMuted?.() || false,
+			isCameraMuted: call.isLocalVideoMuted?.() || false,
+			isScreenSharing: false,
+			isRemoteOnHold: call.isRemoteOnHold?.() || false,
+		};
+	}
+
+	// ─────────────────────────────────────────────────────────
 	// Cleanup
 	// ─────────────────────────────────────────────────────────
 
@@ -1278,6 +1598,15 @@ class MatrixStore {
 	 * Stop the client and clean up
 	 */
 	destroy() {
+		// Hang up any active call
+		if (this._matrixCall) {
+			try {
+				this._matrixCall.hangup('user_hangup', false);
+			} catch {
+				// Ignore errors during cleanup
+			}
+		}
+
 		this._client?.stopClient();
 		this._client = null;
 		this._syncState = 'STOPPED';
@@ -1293,6 +1622,11 @@ class MatrixStore {
 		this._keyBackupEnabled = false;
 		this._crossSigningReady = false;
 		this._cryptoCallbacks = {};
+		// Reset call state
+		this._activeCall = null;
+		this._incomingCall = null;
+		this._matrixCall = null;
+		this._callCallbacks = {};
 	}
 
 	/**
