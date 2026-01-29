@@ -134,30 +134,30 @@
 			{#each Object.entries(templates) as [name, skills]}
 				<div class="rounded-xl border border-gray-700 bg-gray-900/50 overflow-hidden">
 					<!-- Template Header -->
-					<button
-						onclick={() => (selectedTemplate = selectedTemplate === name ? null : name)}
-						class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-800/50 transition-colors"
-					>
-						<div>
+					<div class="flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors">
+						<button
+							onclick={() => (selectedTemplate = selectedTemplate === name ? null : name)}
+							class="flex-1 text-left"
+						>
 							<h3 class="font-semibold text-white">{name}</h3>
 							<p class="text-sm text-gray-400">{skills.length} Skills</p>
-						</div>
+						</button>
 						<div class="flex items-center gap-2">
 							<button
-								onclick={(e) => {
-									e.stopPropagation();
-									addAllFromTemplate(name);
-								}}
+								onclick={() => addAllFromTemplate(name)}
 								disabled={adding}
 								class="rounded-lg bg-emerald-600/20 px-3 py-1.5 text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-600/30 disabled:opacity-50"
 							>
 								Alle hinzufügen
 							</button>
-							<span class="text-gray-500 text-xl">
+							<button
+								onclick={() => (selectedTemplate = selectedTemplate === name ? null : name)}
+								class="text-gray-500 text-xl px-2"
+							>
 								{selectedTemplate === name ? '−' : '+'}
-							</span>
+							</button>
 						</div>
-					</button>
+					</div>
 
 					<!-- Expanded Skills -->
 					{#if selectedTemplate === name}

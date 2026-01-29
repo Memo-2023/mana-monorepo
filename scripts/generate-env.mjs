@@ -327,6 +327,30 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// SkillTree Backend (NestJS)
+	{
+		path: 'apps/skilltree/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.SKILLTREE_BACKEND_PORT || '3024',
+			DATABASE_URL: (env) => env.SKILLTREE_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			JWT_PUBLIC_KEY: (env) => env.JWT_PUBLIC_KEY,
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// SkillTree Web (SvelteKit)
+	{
+		path: 'apps/skilltree/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.SKILLTREE_BACKEND_PORT || '3024'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
 	// Mana Games Backend (NestJS)
 	{
 		path: 'games/mana-games/apps/backend/.env',
