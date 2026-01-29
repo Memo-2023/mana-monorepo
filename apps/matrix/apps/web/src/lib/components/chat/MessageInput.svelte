@@ -28,6 +28,7 @@
 	let isTyping = $state(false);
 	let uploading = $state(false);
 	let uploadProgress = $state(0);
+	let showAttachMenu = $state(false);
 
 	// Voice recording state
 	let isRecording = $state(false);
@@ -235,10 +236,10 @@
 	}
 </script>
 
-<div class="p-4">
+<div class="p-3">
 	<!-- Reply/Edit Preview -->
 	{#if replyTo || editMessage}
-		<div class="mb-3 flex items-center gap-2 rounded-xl glass-card px-4 py-2">
+		<div class="mb-2 flex items-center gap-2 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 px-3 py-2">
 			<div class="flex-1">
 				{#if editMessage}
 					<p class="text-xs text-muted-foreground">Nachricht bearbeiten</p>
@@ -268,148 +269,144 @@
 
 	<!-- Upload Progress -->
 	{#if uploading}
-		<div class="mb-3 flex items-center gap-3 rounded-xl glass-card px-4 py-3">
-			<CircleNotch class="h-5 w-5 animate-spin text-primary" />
+		<div class="mb-2 flex items-center gap-3 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 px-3 py-2">
+			<CircleNotch class="h-4 w-4 animate-spin text-primary" />
 			<div class="flex-1">
-				<div class="h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+				<div class="h-1.5 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
 					<div
-						class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300"
+						class="h-full bg-primary transition-all duration-300"
 						style="width: {uploadProgress}%"
 					></div>
 				</div>
 			</div>
-			<span class="text-sm text-muted-foreground">{uploadProgress}%</span>
+			<span class="text-xs text-muted-foreground">{uploadProgress}%</span>
 		</div>
 	{/if}
 
 	<!-- Recording Indicator -->
 	{#if isRecording}
-		<div class="mb-3 flex items-center gap-3 rounded-xl glass-card px-4 py-3">
-			<div class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></div>
-			<div class="flex-1">
-				<p class="text-sm font-medium">Aufnahme läuft...</p>
-			</div>
-			<span class="text-sm font-mono text-muted-foreground"
-				>{formatDuration(recordingDuration)}</span
-			>
+		<div class="mb-2 flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-3 py-2">
+			<div class="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></div>
+			<p class="flex-1 text-sm font-medium text-red-700 dark:text-red-400">Aufnahme...</p>
+			<span class="text-sm font-mono text-red-600 dark:text-red-400">{formatDuration(recordingDuration)}</span>
 			<button
-				class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				class="p-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors"
 				onclick={cancelRecording}
 				title="Abbrechen"
 			>
-				<X class="h-4 w-4" />
+				<X class="h-4 w-4 text-red-500" />
 			</button>
 		</div>
 	{/if}
 
-	<!-- Input Area - Glassmorphic Pill -->
-	<div class="flex flex-col gap-2 rounded-2xl glass p-2 shadow-lg">
-		<!-- Input Row -->
-		<div class="flex items-end gap-3">
-			<!-- Attachment button -->
-			<div class="dropdown dropdown-top">
-				<button
-					tabindex="0"
-					class="p-2.5 rounded-xl glass-button shadow-sm"
-					title="Datei anhängen"
-					disabled={uploading}
-				>
-					<Paperclip class="h-5 w-5 text-muted-foreground" />
-				</button>
-				<ul tabindex="0" class="dropdown-content z-50 w-48 rounded-xl glass p-2 shadow-xl mb-2">
-					<li>
-						<button
-							onclick={openFilePicker}
-							class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-						>
-							<Image class="h-4 w-4" />
-							Bild oder Video
-						</button>
-					</li>
-					<li>
-						<button
-							onclick={openFilePicker}
-							class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-						>
-							<File class="h-4 w-4" />
-							Datei
-						</button>
-					</li>
-				</ul>
-			</div>
+	<!-- Input Area -->
+	<div class="flex items-end gap-2 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/5 dark:border-white/10 p-2 shadow-lg">
+		<!-- Attachment button with custom dropdown -->
+		<div class="relative">
+			<button
+				class="p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				title="Datei anhängen"
+				disabled={uploading}
+				onclick={() => (showAttachMenu = !showAttachMenu)}
+			>
+				<Paperclip class="h-5 w-5 text-muted-foreground" />
+			</button>
 
-			<!-- Hidden file input -->
-			<input
-				bind:this={fileInput}
-				type="file"
-				class="hidden"
-				accept="*/*"
-				onchange={handleFileSelect}
-			/>
-
-			<!-- Text input -->
-			<div class="flex-1 relative">
-				<textarea
-					bind:this={textarea}
-					bind:value={message}
-					oninput={handleInput}
-					onkeydown={handleKeydown}
-					onblur={stopTyping}
-					placeholder={editMessage
-						? 'Nachricht bearbeiten...'
-						: replyTo
-							? 'Antwort schreiben...'
-							: 'Nachricht schreiben...'}
-					rows="1"
-					class="w-full resize-none rounded-xl border-0 bg-transparent
-					       px-4 py-3 text-sm text-foreground
-					       focus:outline-none focus:ring-0
-					       disabled:opacity-50 disabled:cursor-not-allowed
-					       placeholder:text-muted-foreground"
-					style="max-height: 200px; min-height: 48px;"
-					disabled={uploading}
-				></textarea>
-			</div>
-
-			<!-- Voice/Send button -->
-			{#if isRecording}
+			{#if showAttachMenu}
+				<!-- Backdrop -->
 				<button
-					class="flex-shrink-0 p-3 rounded-xl glass-button shadow-md text-red-500"
-					onclick={stopRecording}
-					title="Aufnahme beenden und senden"
-				>
-					<Stop class="h-5 w-5" weight="fill" />
-				</button>
-			{:else if message.trim()}
-				<button
-					class="flex-shrink-0 p-3 rounded-xl glass-button shadow-md text-primary
-					       disabled:opacity-50 disabled:cursor-not-allowed"
-					onclick={handleSend}
-					disabled={uploading}
-					title={editMessage ? 'Speichern' : 'Senden'}
-				>
-					<PaperPlaneTilt class="h-5 w-5" weight="bold" />
-				</button>
-			{:else}
-				<button
-					class="flex-shrink-0 p-3 rounded-xl glass-button shadow-md text-primary
-					       disabled:opacity-50 disabled:cursor-not-allowed"
-					onclick={startRecording}
-					disabled={uploading}
-					title="Sprachnotiz aufnehmen"
-				>
-					<Microphone class="h-5 w-5" weight="bold" />
-				</button>
+					class="fixed inset-0 z-40"
+					onclick={() => (showAttachMenu = false)}
+					aria-label="Menü schließen"
+				></button>
+				<!-- Dropdown menu -->
+				<div class="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-1.5 shadow-xl">
+					<button
+						onclick={() => { openFilePicker(); showAttachMenu = false; }}
+						class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-sm"
+					>
+						<Image class="h-4 w-4" />
+						Bild oder Video
+					</button>
+					<button
+						onclick={() => { openFilePicker(); showAttachMenu = false; }}
+						class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-sm"
+					>
+						<File class="h-4 w-4" />
+						Datei
+					</button>
+				</div>
 			{/if}
 		</div>
+
+		<!-- Hidden file input -->
+		<input
+			bind:this={fileInput}
+			type="file"
+			class="hidden"
+			accept="*/*"
+			onchange={handleFileSelect}
+		/>
+
+		<!-- Text input -->
+		<div class="flex-1">
+			<textarea
+				bind:this={textarea}
+				bind:value={message}
+				oninput={handleInput}
+				onkeydown={handleKeydown}
+				onblur={stopTyping}
+				placeholder={editMessage
+					? 'Nachricht bearbeiten...'
+					: replyTo
+						? 'Antwort schreiben...'
+						: 'Nachricht schreiben...'}
+				rows="1"
+				class="w-full resize-none bg-transparent px-2 py-2.5 text-sm text-foreground
+				       focus:outline-none placeholder:text-muted-foreground"
+				style="max-height: 150px; min-height: 40px;"
+				disabled={uploading}
+			></textarea>
+		</div>
+
+		<!-- Voice/Send button -->
+		{#if isRecording}
+			<button
+				class="flex-shrink-0 p-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white transition-colors"
+				onclick={stopRecording}
+				title="Aufnahme beenden und senden"
+			>
+				<Stop class="h-5 w-5" weight="fill" />
+			</button>
+		{:else if message.trim()}
+			<button
+				class="flex-shrink-0 p-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white transition-colors
+				       disabled:opacity-50 disabled:cursor-not-allowed"
+				onclick={handleSend}
+				disabled={uploading}
+				title={editMessage ? 'Speichern' : 'Senden'}
+			>
+				<PaperPlaneTilt class="h-5 w-5" weight="bold" />
+			</button>
+		{:else}
+			<button
+				class="flex-shrink-0 p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-primary transition-colors
+				       disabled:opacity-50 disabled:cursor-not-allowed"
+				onclick={startRecording}
+				disabled={uploading}
+				title="Sprachnotiz aufnehmen"
+			>
+				<Microphone class="h-5 w-5" weight="bold" />
+			</button>
+		{/if}
 	</div>
 
 	<!-- Hint -->
-	<p class="text-xs text-muted-foreground text-center mt-2 opacity-70">
+	<p class="text-[10px] text-muted-foreground/60 text-center mt-1.5">
 		{#if editMessage}
-			Enter zum Speichern, Escape zum Abbrechen
+			Enter = Speichern · Escape = Abbrechen
 		{:else}
-			Enter zum Senden, Shift+Enter für neue Zeile
+			Enter = Senden · Shift+Enter = Neue Zeile
 		{/if}
 	</p>
 </div>

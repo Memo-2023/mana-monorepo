@@ -32,10 +32,10 @@
 	}
 </script>
 
-<div class="flex h-full overflow-hidden bg-background">
+<div class="chat-layout flex h-full overflow-hidden bg-background">
 	<!-- Sidebar -->
 	<aside
-		class="flex w-80 flex-shrink-0 flex-col border-r border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm transition-all duration-300 ease-in-out"
+		class="flex w-80 flex-shrink-0 flex-col border-r border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm transition-all duration-300 ease-in-out pb-20"
 		class:hidden={!sidebarOpen}
 		class:lg:flex={true}
 	>
