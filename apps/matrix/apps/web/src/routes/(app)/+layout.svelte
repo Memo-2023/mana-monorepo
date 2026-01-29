@@ -281,9 +281,9 @@
 		transition: all 300ms ease;
 	}
 
-	/* Floating nav mode - add top padding for fixed nav */
+	/* Floating nav mode - add bottom padding for bottom nav */
 	.main-content.floating-mode {
-		padding-top: 80px;
+		padding-bottom: 80px;
 	}
 
 	/* Sidebar mode - add left padding for sidebar nav */
