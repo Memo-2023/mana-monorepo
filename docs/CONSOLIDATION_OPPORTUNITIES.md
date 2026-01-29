@@ -13,7 +13,7 @@
 | **HOCH** | Main.ts/CORS Patterns | 1.800 LOC | Mittel |
 | ~~**MITTEL**~~ | ~~TypeScript Configs~~ | ~~400 LOC~~ ✅ **~280 LOC entfernt** | ~~Niedrig~~ |
 | **MITTEL** | UI Component Cleanup | 400 LOC | Niedrig |
-| **MITTEL** | Vite Configs | 300 LOC | Niedrig |
+| ~~**MITTEL**~~ | ~~Vite Configs~~ | ~~300 LOC~~ ✅ **~350 LOC entfernt** | ~~Niedrig~~ |
 | **MITTEL** | Navigation Stores | 50 LOC | Niedrig |
 | **NIEDRIG** | Drizzle Configs | 200 LOC | Niedrig |
 | **NIEDRIG** | Logger Utilities | 130 LOC | Niedrig |
@@ -301,26 +301,45 @@ export function createNavigationStore(options?: {
 
 ---
 
-### 4.2 MITTEL: Vite Configs (300 LOC)
+### ~~4.2 MITTEL: Vite Configs~~ ✅ ERLEDIGT (~350 LOC gespart)
 
-**Problem:** 15 SvelteKit Apps haben 70% identische vite.config.ts.
+**Status:** `@manacore/shared-vite-config` erweitert und 15 SvelteKit Apps migriert (29.01.2026)
 
-**Empfehlung:** Factory-Funktion in `@manacore/shared-vite-config`
+**Erweitertes Package:** `packages/shared-vite-config/`
+- `createViteConfig()` - Factory mit Port und additionalPackages
+- `mergeViteConfig()` - Deep-merge für App-spezifische Overrides
+- `MANACORE_SHARED_PACKAGES` - 22+ Pakete für SSR/optimizeDeps
 
+**Migrierte Apps (15 von 15):**
+- ✅ calendar, chat, clock, contacts, manadeck, manacore, matrix, nutriphi, picture, planta, presi, questions, skilltree, storage, todo
+
+**Vorher (30-60 LOC pro App):**
 ```typescript
-// packages/shared-vite-config/src/sveltekit.ts
-export function createSvelteKitConfig(options: {
-  port: number;
-  packages?: string[];
-}) {
-  return defineConfig({
-    plugins: [sveltekit(), tailwindcss()],
-    server: { port: options.port, strictPort: true },
-    ssr: { noExternal: options.packages || [] },
-    optimizeDeps: { exclude: options.packages || [] },
-  });
-}
+export default defineConfig({
+  plugins: [tailwindcss(), sveltekit()],
+  server: { port: 5174, strictPort: true },
+  ssr: { noExternal: ['@manacore/shared-icons', ...] },
+  optimizeDeps: { exclude: ['@manacore/shared-icons', ...] },
+});
 ```
+
+**Nachher (12-14 LOC):**
+```typescript
+import { createViteConfig, mergeViteConfig } from '@manacore/shared-vite-config';
+
+const baseConfig = createViteConfig({
+  port: 5174,
+  additionalPackages: ['@app/shared'], // optional
+});
+
+export default defineConfig(mergeViteConfig(baseConfig, {
+  plugins: [tailwindcss(), sveltekit()],
+}));
+```
+
+**Hinweis:** Matrix behält spezielle WASM-Konfiguration für matrix-js-sdk crypto.
+
+**Einsparung:** 15 Apps × ~23 LOC = ~350 LOC
 
 ---
 
@@ -389,7 +408,7 @@ export default createDrizzleConfig('chat');
 |---------|-----|---------|--------|
 | ~~`createAppSettingsStore()` Factory erstellen~~ | ~~600~~ → **323** | ~~Mittel~~ | ✅ Erledigt |
 | ~~`@manacore/shared-tsconfig` Package erstellen~~ | ~~400~~ → **280** | ~~Niedrig~~ | ✅ Erledigt |
-| `@manacore/shared-vite-config` Factory erstellen | 300 | Niedrig | Offen |
+| ~~`@manacore/shared-vite-config` erweitern (15 Apps)~~ | ~~300~~ → **350** | ~~Niedrig~~ | ✅ Erledigt |
 | Navigation Store Factory erstellen | 50 | Niedrig | Offen |
 
 ### Phase 3: Backend Setup (5-7 Tage, ~2.000 LOC)

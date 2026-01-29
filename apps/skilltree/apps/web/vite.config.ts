@@ -1,17 +1,14 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
+import { createViteConfig, mergeViteConfig } from '@manacore/shared-vite-config';
 
-export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
-	server: {
-		port: 5195,
-		strictPort: true,
-	},
-	ssr: {
-		noExternal: ['@manacore/shared-tailwind', '@manacore/shared-theme'],
-	},
-	optimizeDeps: {
-		exclude: ['@manacore/shared-tailwind', '@manacore/shared-theme'],
-	},
+const baseConfig = createViteConfig({
+	port: 5195,
 });
+
+export default defineConfig(
+	mergeViteConfig(baseConfig, {
+		plugins: [tailwindcss(), sveltekit()],
+	})
+);

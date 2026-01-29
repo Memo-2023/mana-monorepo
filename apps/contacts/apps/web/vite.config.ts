@@ -1,59 +1,14 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
+import { createViteConfig, mergeViteConfig } from '@manacore/shared-vite-config';
 
-export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
-	server: {
-		port: 5184,
-		strictPort: true,
-	},
-	ssr: {
-		noExternal: [
-			'@manacore/shared-icons',
-			'@manacore/shared-ui',
-			'@manacore/shared-tailwind',
-			'@manacore/shared-theme',
-			'@manacore/shared-theme-ui',
-			'@manacore/shared-feedback-ui',
-			'@manacore/shared-feedback-service',
-			'@manacore/shared-feedback-types',
-			'@manacore/shared-auth',
-			'@manacore/shared-auth-ui',
-			'@manacore/shared-branding',
-			'@manacore/shared-subscription-ui',
-			'@manacore/shared-utils',
-			'@manacore/shared-splitscreen',
-			'@manacore/shared-i18n',
-			'@manacore/shared-profile-ui',
-			'@manacore/shared-tags',
-			'@manacore/shared-help-types',
-			'@manacore/shared-help-content',
-			'@manacore/shared-help-ui',
-		],
-	},
-	optimizeDeps: {
-		exclude: [
-			'@manacore/shared-icons',
-			'@manacore/shared-ui',
-			'@manacore/shared-tailwind',
-			'@manacore/shared-theme',
-			'@manacore/shared-theme-ui',
-			'@manacore/shared-feedback-ui',
-			'@manacore/shared-feedback-service',
-			'@manacore/shared-feedback-types',
-			'@manacore/shared-auth',
-			'@manacore/shared-auth-ui',
-			'@manacore/shared-branding',
-			'@manacore/shared-subscription-ui',
-			'@manacore/shared-utils',
-			'@manacore/shared-splitscreen',
-			'@manacore/shared-i18n',
-			'@manacore/shared-profile-ui',
-			'@manacore/shared-tags',
-			'@manacore/shared-help-types',
-			'@manacore/shared-help-content',
-			'@manacore/shared-help-ui',
-		],
-	},
+const baseConfig = createViteConfig({
+	port: 5184,
 });
+
+export default defineConfig(
+	mergeViteConfig(baseConfig, {
+		plugins: [tailwindcss(), sveltekit()],
+	})
+);

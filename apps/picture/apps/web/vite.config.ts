@@ -1,15 +1,14 @@
-import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
+import { createViteConfig, mergeViteConfig } from '@manacore/shared-vite-config';
 
-export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
-	server: {
-		port: 5175,
-		strictPort: true,
-	},
-	ssr: {
-		// Process @manacore packages that contain .svelte.ts files with runes
-		noExternal: ['@manacore/shared-theme', '@manacore/shared-auth'],
-	},
+const baseConfig = createViteConfig({
+	port: 5175,
 });
+
+export default defineConfig(
+	mergeViteConfig(baseConfig, {
+		plugins: [tailwindcss(), sveltekit()],
+	})
+);
