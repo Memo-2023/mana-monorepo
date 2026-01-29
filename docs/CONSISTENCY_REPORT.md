@@ -13,7 +13,7 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 | Toast System | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
 | API Client Patterns | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
 | i18n Implementation | ✅ Gut | ~~Mittel~~ | ✅ Erledigt |
-| Auth Implementation | ✅ Gut | Niedrig | - |
+| Auth Implementation | ✅ Gut | ~~Niedrig~~ | ✅ Dokumentiert |
 | Styling & Tailwind | ✅ Sehr gut | Niedrig | - |
 | Komponenten & Layouts | ✅ Gut | ~~Mittel~~ | ✅ Erledigt |
 
@@ -28,6 +28,7 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 7. ✅ **AuthGateModal zentralisiert** - `@manacore/shared-auth-ui` für 4 Apps (chat, todo, contacts, calendar)
 8. ✅ **Global Error Handler zentralisiert** - `@manacore/shared-ui` für 7 Apps (calendar, chat, clock, contacts, matrix, picture, storage)
 9. ✅ **AppLoadingSkeleton zentralisiert** - `@manacore/shared-ui` für 3 Apps (contacts, todo, questions) - Apps mit spezifischen Layouts (calendar, clock) behalten lokale Version
+10. ✅ **Auth Store Pattern dokumentiert** - `.claude/guidelines/authentication.md` erweitert mit Runtime URL Injection, getValidToken(), Best Practices
 
 ---
 
@@ -268,6 +269,7 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 | ~~i18n zu 6 Apps hinzufügen~~ | ✅ Erledigt |
 | ~~AuthGateModal zentralisieren~~ | ✅ Erledigt (4 Apps migriert) |
 | ~~Global Error Handler extrahieren~~ | ✅ Erledigt (7 Apps migriert) |
+| ~~Auth Store Pattern dokumentieren~~ | ✅ Erledigt |
 
 ### 🔴 Hohe Priorität
 
@@ -282,7 +284,7 @@ _(Keine offenen Aufgaben mit mittlerer Priorität)_
 | Aufgabe | Aufwand | Impact |
 |---------|---------|--------|
 | ~~App-Skeletons vereinheitlichen~~ | ~~Niedrig~~ | ✅ Erledigt |
-| Auth Store Pattern dokumentieren | Niedrig | Onboarding |
+| ~~Auth Store Pattern dokumentieren~~ | ~~Niedrig~~ | ✅ Erledigt |
 
 ---
 
@@ -293,7 +295,7 @@ _(Keine offenen Aufgaben mit mittlerer Priorität)_
 3. ~~**AuthGateModal** in Shared Package extrahieren~~ ✅ Erledigt (4 Apps)
 4. ~~**Global Error Handler** extrahieren~~ ✅ Erledigt (7 Apps)
 5. ~~**App-Skeletons vereinheitlichen**~~ ✅ Erledigt (3 Apps)
-6. **Auth Store Pattern dokumentieren** (niedrige Priorität)
+6. ~~**Auth Store Pattern dokumentieren**~~ ✅ Erledigt
 
 ---
 

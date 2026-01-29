@@ -202,7 +202,206 @@ APP_ID=your-app-id
 
 ## Client Integration (Web)
 
-### Setup
+### Runtime URL Injection (Recommended for Docker)
+
+For Docker deployments, use runtime URL injection instead of build-time environment variables:
+
+**Step 1: Server Hook (`hooks.server.ts`)**
+
+```typescript
+// src/hooks.server.ts
+import type { Handle } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
+
+export const handle: Handle = async ({ event, resolve }) => {
+  return resolve(event, {
+    transformPageChunk: ({ html }) =>
+      html.replace(
+        '%RUNTIME_ENV%',
+        `<script>
+          window.__PUBLIC_AUTH_URL__ = "${env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001'}";
+          window.__PUBLIC_BACKEND_URL__ = "${env.PUBLIC_BACKEND_URL || 'http://localhost:3000'}";
+        </script>`
+      ),
+  });
+};
+```
+
+**Step 2: Update `app.html`**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    %sveltekit.head%
+    %RUNTIME_ENV%
+  </head>
+  <body>
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>
+```
+
+**Step 3: URL Helper (`url.ts`)**
+
+```typescript
+// src/lib/config/url.ts
+import { browser } from '$app/environment';
+import { PUBLIC_MANA_CORE_AUTH_URL, PUBLIC_BACKEND_URL } from '$env/static/public';
+
+declare global {
+  interface Window {
+    __PUBLIC_AUTH_URL__?: string;
+    __PUBLIC_BACKEND_URL__?: string;
+  }
+}
+
+export function getAuthUrl(): string {
+  if (browser && window.__PUBLIC_AUTH_URL__) {
+    return window.__PUBLIC_AUTH_URL__;
+  }
+  return PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
+
+export function getBackendUrl(): string {
+  if (browser && window.__PUBLIC_BACKEND_URL__) {
+    return window.__PUBLIC_BACKEND_URL__;
+  }
+  return PUBLIC_BACKEND_URL || 'http://localhost:3000';
+}
+```
+
+### Standard Auth Store Pattern (Svelte 5)
+
+```typescript
+// src/lib/stores/auth.svelte.ts
+import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
+import { initializeWebAuth } from '@manacore/shared-auth';
+import { getAuthUrl } from '$lib/config/url';
+
+// Lazy initialization - only create when needed (browser only)
+let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
+
+function getAuthService() {
+  if (!browser) return null;
+  if (!_authService) {
+    const auth = initializeWebAuth({ baseUrl: getAuthUrl() });
+    _authService = auth.authService;
+  }
+  return _authService;
+}
+
+// Svelte 5 reactive state
+let user = $state<User | null>(null);
+let accessToken = $state<string | null>(null);
+let loading = $state(true);
+let initialized = $state(false);
+
+// Initialize auth on app start
+async function initialize() {
+  if (!browser || initialized) return;
+
+  const authService = getAuthService();
+  if (!authService) {
+    loading = false;
+    return;
+  }
+
+  try {
+    const currentUser = await authService.getCurrentUser();
+    if (currentUser) {
+      user = currentUser;
+      // Use getValidToken() for auto-refresh, NOT getAccessToken()
+      accessToken = await authService.getValidToken();
+    }
+  } catch (error) {
+    console.error('Auth initialization failed:', error);
+    user = null;
+    accessToken = null;
+  } finally {
+    loading = false;
+    initialized = true;
+  }
+}
+
+// Get a valid token (with auto-refresh if expired)
+async function getValidToken(): Promise<string | null> {
+  const authService = getAuthService();
+  if (!authService) return null;
+
+  try {
+    return await authService.getValidToken();
+  } catch {
+    // Token refresh failed, user needs to re-login
+    await logout();
+    return null;
+  }
+}
+
+// DEPRECATED: Use getValidToken() instead
+function getAccessToken(): string | null {
+  console.warn('getAccessToken() is deprecated. Use getValidToken() for auto-refresh.');
+  return accessToken;
+}
+
+async function login(email: string, password: string): Promise<boolean> {
+  const authService = getAuthService();
+  if (!authService) return false;
+
+  try {
+    const result = await authService.signIn({ email, password });
+    user = result.user;
+    accessToken = result.accessToken;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function logout() {
+  const authService = getAuthService();
+  if (authService) {
+    try {
+      await authService.signOut();
+    } catch {
+      // Ignore logout errors
+    }
+  }
+  user = null;
+  accessToken = null;
+  goto('/login');
+}
+
+export const authStore = {
+  // Getters (reactive)
+  get user() { return user; },
+  get loading() { return loading; },
+  get isAuthenticated() { return !!accessToken && !!user; },
+  get initialized() { return initialized; },
+
+  // Methods
+  initialize,
+  login,
+  logout,
+  getValidToken,      // RECOMMENDED
+  getAccessToken,     // DEPRECATED
+};
+```
+
+### Key Best Practices
+
+| Practice | Description |
+|----------|-------------|
+| **Lazy Initialization** | Only create auth service when needed (browser check) |
+| **Use `getValidToken()`** | Auto-refreshes expired tokens, unlike `getAccessToken()` |
+| **Runtime URL Injection** | Enables Docker deployments without rebuild |
+| **SSR Guard** | Always check `browser` before accessing auth service |
+| **Initialized Flag** | Prevents double initialization |
+
+### Basic Setup (Static URLs)
+
+For simpler deployments without Docker, use static environment variables:
 
 ```typescript
 // src/lib/stores/auth.svelte.ts
