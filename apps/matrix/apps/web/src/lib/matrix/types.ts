@@ -30,6 +30,16 @@ export interface MediaInfo {
 }
 
 /**
+ * Reaction on a message
+ */
+export interface MessageReaction {
+	key: string; // The emoji
+	count: number;
+	users: string[]; // User IDs who reacted
+	includesMe: boolean;
+}
+
+/**
  * Simplified message for UI rendering
  */
 export interface SimpleMessage {
@@ -46,6 +56,7 @@ export interface SimpleMessage {
 	edited?: boolean;
 	redacted?: boolean;
 	media?: MediaInfo;
+	reactions?: MessageReaction[];
 }
 
 export type MessageType =

@@ -6,6 +6,7 @@ import type {
 	SimpleRoom,
 	SimpleMessage,
 	MessageType,
+	MessageReaction,
 	RoomMember,
 	VerificationStatus,
 	DeviceInfo,
@@ -120,7 +121,7 @@ class MatrixStore {
 	messages = $derived<SimpleMessage[]>(
 		this._timeline
 			.filter((e) => e.getType() === 'm.room.message')
-			.map((e) => this.eventToSimpleMessage(e))
+			.map((e) => this.eventToSimpleMessage(e, this._timeline))
 	);
 
 	/** Users currently typing in current room */
@@ -1219,7 +1220,7 @@ class MatrixStore {
 	/**
 	 * Convert SDK MatrixEvent to SimpleMessage
 	 */
-	private eventToSimpleMessage(event: MatrixEvent): SimpleMessage {
+	private eventToSimpleMessage(event: MatrixEvent, timeline?: MatrixEvent[]): SimpleMessage {
 		const content = event.getContent();
 		const relatesTo = content['m.relates_to'];
 		const msgtype = content.msgtype || 'm.text';
@@ -1254,6 +1255,9 @@ class MatrixStore {
 			}
 		}
 
+		// Collect reactions for this message
+		const reactions = this.getReactionsForEvent(event.getId() || '', timeline);
+
 		return {
 			id: event.getId() || '',
 			sender: event.getSender() || '',
@@ -1268,7 +1272,60 @@ class MatrixStore {
 			edited: !!event.replacingEvent(),
 			redacted: isRedacted,
 			media,
+			reactions: reactions.length > 0 ? reactions : undefined,
 		};
+	}
+
+	/**
+	 * Get reactions for a specific event
+	 */
+	private getReactionsForEvent(eventId: string, timeline?: MatrixEvent[]): MessageReaction[] {
+		if (!timeline || !eventId) return [];
+
+		const myUserId = this._client?.getUserId();
+		const reactionMap = new Map<string, { users: string[]; senders: Set<string> }>();
+
+		// Find all m.reaction events that relate to this event
+		for (const event of timeline) {
+			if (event.getType() !== 'm.reaction') continue;
+
+			const content = event.getContent();
+			const relatesTo = content['m.relates_to'];
+
+			if (
+				relatesTo?.rel_type === 'm.annotation' &&
+				relatesTo?.event_id === eventId &&
+				relatesTo?.key
+			) {
+				const emoji = relatesTo.key;
+				const sender = event.getSender() || '';
+
+				if (!reactionMap.has(emoji)) {
+					reactionMap.set(emoji, { users: [], senders: new Set() });
+				}
+
+				const entry = reactionMap.get(emoji)!;
+				// Avoid duplicates from same user
+				if (!entry.senders.has(sender)) {
+					entry.senders.add(sender);
+					entry.users.push(sender);
+				}
+			}
+		}
+
+		// Convert to MessageReaction array
+		const reactions: MessageReaction[] = [];
+		for (const [key, data] of reactionMap) {
+			reactions.push({
+				key,
+				count: data.users.length,
+				users: data.users,
+				includesMe: myUserId ? data.senders.has(myUserId) : false,
+			});
+		}
+
+		// Sort by count descending
+		return reactions.sort((a, b) => b.count - a.count);
 	}
 
 	/**

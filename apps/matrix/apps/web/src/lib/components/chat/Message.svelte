@@ -15,6 +15,7 @@
 		Image as ImageIcon,
 		Lock,
 		Warning,
+		Smiley,
 	} from '@manacore/shared-icons';
 
 	interface Props {
@@ -41,8 +42,17 @@
 	);
 
 	let showActions = $state(false);
+	let showEmojiPicker = $state(false);
 	let imageLoading = $state(true);
 	let imageError = $state(false);
+
+	// Quick reaction emojis
+	const quickEmojis = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
+
+	async function handleReaction(emoji: string) {
+		showEmojiPicker = false;
+		await matrixStore.reactToMessage(message.id, emoji);
+	}
 
 	// Audio player state
 	let audioElement: HTMLAudioElement | null = $state(null);
@@ -367,6 +377,25 @@
 			{/if}
 		</div>
 
+		<!-- Reactions display -->
+		{#if message.reactions && message.reactions.length > 0}
+			<div class="flex flex-wrap gap-1 mt-1.5 {message.isOwn ? 'justify-end' : 'justify-start'}">
+				{#each message.reactions as reaction}
+					<button
+						class="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors
+							   {reaction.includesMe
+							? 'bg-primary/20 border border-primary/40 text-primary'
+							: 'bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/20'}"
+						title={reaction.users.join(', ')}
+						onclick={() => handleReaction(reaction.key)}
+					>
+						<span>{reaction.key}</span>
+						<span class="font-medium">{reaction.count}</span>
+					</button>
+				{/each}
+			</div>
+		{/if}
+
 		<!-- Time (shown on hover) -->
 		<div
 			class="flex items-center gap-2 mt-1.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -378,9 +407,42 @@
 		{#if showActions && !message.redacted}
 			<div
 				class="absolute {message.isOwn
-					? '-left-24'
-					: '-right-24'} top-0 flex items-center gap-1 rounded-xl glass p-1.5 shadow-lg"
+					? '-left-28'
+					: '-right-28'} top-0 flex items-center gap-1 rounded-xl glass p-1.5 shadow-lg"
 			>
+				<!-- Emoji reaction button -->
+				<div class="relative">
+					<button
+						class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						title="Reaktion"
+						onclick={() => (showEmojiPicker = !showEmojiPicker)}
+					>
+						<Smiley class="h-4 w-4 text-muted-foreground" />
+					</button>
+					{#if showEmojiPicker}
+						<!-- Emoji picker backdrop -->
+						<button
+							class="fixed inset-0 z-40"
+							onclick={() => (showEmojiPicker = false)}
+							aria-label="Schließen"
+						></button>
+						<!-- Emoji picker dropdown -->
+						<div
+							class="absolute {message.isOwn
+								? 'right-0'
+								: 'left-0'} bottom-full mb-2 z-50 flex gap-1 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-2 shadow-xl"
+						>
+							{#each quickEmojis as emoji}
+								<button
+									class="text-xl hover:scale-125 transition-transform p-1"
+									onclick={() => handleReaction(emoji)}
+								>
+									{emoji}
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
 				<button
 					class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
 					title="Antworten"
