@@ -10,3 +10,8 @@ export {
 	type NavigationStore,
 } from './navigation.svelte';
 export { createThemeStore, type ThemeStore, type ThemeMode } from './theme.svelte';
+export {
+	createAppSettingsStore,
+	type AppSettingsStore,
+	type AppSettingsStoreOptions,
+} from './settings.svelte';

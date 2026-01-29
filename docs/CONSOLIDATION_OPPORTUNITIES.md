@@ -9,7 +9,7 @@
 |-----------|---------|----------------------|---------|
 | ~~**KRITISCH**~~ | ~~Backend Metrics Migration~~ | ~~350 LOC~~ ✅ **709 LOC entfernt** | ~~Niedrig~~ |
 | **HOCH** | Skeleton Components | 800-1.000 LOC | Mittel |
-| **HOCH** | App Settings Stores | 600-700 LOC | Mittel |
+| ~~**HOCH**~~ | ~~App Settings Stores~~ | ~~600-700 LOC~~ ✅ **323 LOC entfernt** | ~~Mittel~~ |
 | **HOCH** | Main.ts/CORS Patterns | 1.800 LOC | Mittel |
 | **MITTEL** | TypeScript Configs | 400 LOC | Niedrig |
 | **MITTEL** | UI Component Cleanup | 400 LOC | Niedrig |
@@ -146,53 +146,31 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 
 ## 2. Frontend Stores (Svelte 5)
 
-### 2.1 HOCH: App Settings Stores (600-700 LOC)
+### ~~2.1 HOCH: App Settings Stores~~ ✅ ERLEDIGT (323 LOC gespart)
 
-**Problem:** 3 Apps (todo, calendar, contacts) haben fast identische Settings-Store Implementierungen mit localStorage Persistenz.
+**Status:** `createAppSettingsStore<T>()` Factory erstellt und 3 Apps migriert (29.01.2026)
 
-**Betroffene Dateien:**
-- `apps/todo/apps/web/src/lib/stores/settings.svelte.ts` (259 LOC)
-- `apps/calendar/apps/web/src/lib/stores/settings.svelte.ts` (433 LOC)
-- `apps/contacts/apps/web/src/lib/stores/settings.svelte.ts` (278 LOC)
+**Erstellte Factory:** `packages/shared-stores/src/settings.svelte.ts`
+- Type-safe Settings Store mit localStorage Persistenz
+- Optional: `onSettingsChange` Callback für Cloud-Sync
+- Reduziert Boilerplate von ~100 LOC pro App auf ~20 LOC
 
-**Dupliziertes Pattern (100% identisch):**
-```typescript
-// Boilerplate in jedem (80-100 LOC):
-- TypeScript Interface für Settings
-- DEFAULT_SETTINGS Konstante
-- STORAGE_KEY
-- loadSettings() - localStorage laden + merge mit defaults
-- saveSettings() - localStorage speichern
-- let settings = $state(...)
-- toggleImmersiveMode(), initialize(), set(), update(), reset(), getDefaults()
-```
-
-**Empfehlung:** Erstelle `createAppSettingsStore<T>()` Factory in `@manacore/shared-stores`
+**Migrierte Apps:**
+- ~~`apps/todo/apps/web/src/lib/stores/settings.svelte.ts`~~ ✅ (259 → 159 LOC = 100 LOC)
+- ~~`apps/contacts/apps/web/src/lib/stores/settings.svelte.ts`~~ ✅ (278 → 173 LOC = 105 LOC)
+- ~~`apps/calendar/apps/web/src/lib/stores/settings.svelte.ts`~~ ✅ (433 → 315 LOC = 118 LOC)
 
 ```typescript
-// packages/shared-stores/src/createAppSettingsStore.ts
-export function createAppSettingsStore<T extends Record<string, any>>(
-  storageKey: string,
-  defaultSettings: T,
-  options?: { cloudSync?: boolean }
-) {
-  let settings = $state<T>(defaultSettings);
-
-  function loadSettings(): T { /* localStorage logic */ }
-  function saveSettings(newSettings: T): void { /* localStorage logic */ }
-
-  return {
-    get value() { return settings; },
-    initialize() { settings = loadSettings(); },
-    set<K extends keyof T>(key: K, value: T[K]) { /* ... */ },
-    update(updates: Partial<T>) { /* ... */ },
-    reset() { settings = defaultSettings; saveSettings(settings); },
-    getDefaults() { return defaultSettings; },
-  };
-}
+// Nachher (Beispiel Todo)
+import { createAppSettingsStore } from '@manacore/shared-stores';
+const baseStore = createAppSettingsStore<TodoAppSettings>('todo-settings', DEFAULT_SETTINGS);
+export const todoSettings = {
+  get settings() { return baseStore.settings; },
+  initialize: baseStore.initialize,
+  set: baseStore.set,
+  // ... convenience getters
+};
 ```
-
-**Einsparung:** ~200 LOC Boilerplate pro App = 600 LOC
 
 ---
 
@@ -409,12 +387,12 @@ export default createDrizzleConfig('chat');
 
 ### Phase 2: Stores & Configs (3-5 Tage, ~1.500 LOC)
 
-| Aufgabe | LOC | Aufwand |
-|---------|-----|---------|
-| `createAppSettingsStore()` Factory erstellen | 600 | Mittel |
-| `@manacore/shared-tsconfig` Package erstellen | 400 | Niedrig |
-| `@manacore/shared-vite-config` Factory erstellen | 300 | Niedrig |
-| Navigation Store Factory erstellen | 50 | Niedrig |
+| Aufgabe | LOC | Aufwand | Status |
+|---------|-----|---------|--------|
+| ~~`createAppSettingsStore()` Factory erstellen~~ | ~~600~~ → **323** | ~~Mittel~~ | ✅ Erledigt |
+| `@manacore/shared-tsconfig` Package erstellen | 400 | Niedrig | Offen |
+| `@manacore/shared-vite-config` Factory erstellen | 300 | Niedrig | Offen |
+| Navigation Store Factory erstellen | 50 | Niedrig | Offen |
 
 ### Phase 3: Backend Setup (5-7 Tage, ~2.000 LOC)
 

@@ -1,9 +1,9 @@
 /**
  * Settings Store - Manages user preferences for the Contacts app
- * Uses Svelte 5 runes and localStorage for persistence
+ * Uses @manacore/shared-stores createAppSettingsStore factory
  */
 
-import { browser } from '$app/environment';
+import { createAppSettingsStore } from '@manacore/shared-stores';
 
 // Settings types
 export type ContactSortBy = 'name' | 'company' | 'created' | 'updated';
@@ -13,61 +13,39 @@ export type DateFormat = 'dd.MM.yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
 
 export interface ContactsAppSettings {
 	// Display Settings
-	/** Default view mode for contacts list */
 	defaultView: ContactView;
-	/** Default sort field */
 	sortBy: ContactSortBy;
-	/** Default sort order */
 	sortOrder: ContactSortOrder;
-	/** Show contact photos in list */
 	showPhotos: boolean;
-	/** Show company name in list */
 	showCompany: boolean;
-	/** Contacts per page in list view */
 	contactsPerPage: number;
 
 	// Contact Display
-	/** Display name format: 'first-last' or 'last-first' */
 	nameFormat: 'first-last' | 'last-first';
-	/** Date format for birthdays etc. */
 	dateFormat: DateFormat;
-	/** Show birthday reminders */
 	showBirthdayReminders: boolean;
-	/** Days before birthday to remind */
 	birthdayReminderDays: number;
 
 	// Import/Export
-	/** Default export format */
 	defaultExportFormat: 'vcf' | 'csv' | 'json';
-	/** Include notes in export */
 	includeNotesInExport: boolean;
-	/** Include photos in export */
 	includePhotosInExport: boolean;
 
 	// Duplicates
-	/** Auto-detect duplicates on import */
 	autoDetectDuplicates: boolean;
-	/** Duplicate detection sensitivity: 'strict' | 'normal' | 'loose' */
 	duplicateSensitivity: 'strict' | 'normal' | 'loose';
 
 	// Privacy
-	/** Blur contact photos by default (privacy mode) */
 	privacyMode: boolean;
-	/** Require confirmation before sharing contact */
 	confirmBeforeSharing: boolean;
 
 	// Alphabet Navigation Settings
-	/** Hide letters that have no contacts */
 	alphabetNavHideInactive: boolean;
-	/** Use compact/smaller alphabet buttons */
 	alphabetNavCompact: boolean;
-	/** Reverse letter order (Z-A instead of A-Z) */
 	alphabetNavReverseOrder: boolean;
-	/** Show # symbol for non-letter names */
 	alphabetNavShowHash: boolean;
 
 	// Immersive Mode
-	/** Fullscreen mode - hides all UI elements */
 	immersiveModeEnabled: boolean;
 }
 
@@ -109,170 +87,90 @@ const DEFAULT_SETTINGS: ContactsAppSettings = {
 	immersiveModeEnabled: false,
 };
 
-const STORAGE_KEY = 'contacts-settings';
+// Create base store using factory
+const baseStore = createAppSettingsStore<ContactsAppSettings>(
+	'contacts-settings',
+	DEFAULT_SETTINGS
+);
 
-// Load settings from localStorage
-function loadSettings(): ContactsAppSettings {
-	if (!browser) return DEFAULT_SETTINGS;
-
-	try {
-		const stored = localStorage.getItem(STORAGE_KEY);
-		if (stored) {
-			const parsed = JSON.parse(stored);
-			// Merge with defaults to handle new settings added in updates
-			return { ...DEFAULT_SETTINGS, ...parsed };
-		}
-	} catch (e) {
-		console.error('Failed to load contacts settings:', e);
-	}
-
-	return DEFAULT_SETTINGS;
-}
-
-// Save settings to localStorage
-function saveSettings(settings: ContactsAppSettings) {
-	if (!browser) return;
-
-	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-	} catch (e) {
-		console.error('Failed to save contacts settings:', e);
-	}
-}
-
-// State
-let settings = $state<ContactsAppSettings>(loadSettings());
-
+// Export with convenience getters for backwards compatibility
 export const contactsSettings = {
-	// Full settings object
+	// Base store methods
 	get settings() {
-		return settings;
+		return baseStore.settings;
 	},
+	initialize: baseStore.initialize,
+	set: baseStore.set,
+	update: baseStore.update,
+	reset: baseStore.reset,
+	getDefaults: baseStore.getDefaults,
+	toggleImmersiveMode: baseStore.toggleImmersiveMode,
 
-	// Display Settings
+	// Convenience getters (backwards compatible)
 	get defaultView() {
-		return settings.defaultView;
+		return baseStore.settings.defaultView;
 	},
 	get sortBy() {
-		return settings.sortBy;
+		return baseStore.settings.sortBy;
 	},
 	get sortOrder() {
-		return settings.sortOrder;
+		return baseStore.settings.sortOrder;
 	},
 	get showPhotos() {
-		return settings.showPhotos;
+		return baseStore.settings.showPhotos;
 	},
 	get showCompany() {
-		return settings.showCompany;
+		return baseStore.settings.showCompany;
 	},
 	get contactsPerPage() {
-		return settings.contactsPerPage;
+		return baseStore.settings.contactsPerPage;
 	},
-
-	// Contact Display
 	get nameFormat() {
-		return settings.nameFormat;
+		return baseStore.settings.nameFormat;
 	},
 	get dateFormat() {
-		return settings.dateFormat;
+		return baseStore.settings.dateFormat;
 	},
 	get showBirthdayReminders() {
-		return settings.showBirthdayReminders;
+		return baseStore.settings.showBirthdayReminders;
 	},
 	get birthdayReminderDays() {
-		return settings.birthdayReminderDays;
+		return baseStore.settings.birthdayReminderDays;
 	},
-
-	// Import/Export
 	get defaultExportFormat() {
-		return settings.defaultExportFormat;
+		return baseStore.settings.defaultExportFormat;
 	},
 	get includeNotesInExport() {
-		return settings.includeNotesInExport;
+		return baseStore.settings.includeNotesInExport;
 	},
 	get includePhotosInExport() {
-		return settings.includePhotosInExport;
+		return baseStore.settings.includePhotosInExport;
 	},
-
-	// Duplicates
 	get autoDetectDuplicates() {
-		return settings.autoDetectDuplicates;
+		return baseStore.settings.autoDetectDuplicates;
 	},
 	get duplicateSensitivity() {
-		return settings.duplicateSensitivity;
+		return baseStore.settings.duplicateSensitivity;
 	},
-
-	// Privacy
 	get privacyMode() {
-		return settings.privacyMode;
+		return baseStore.settings.privacyMode;
 	},
 	get confirmBeforeSharing() {
-		return settings.confirmBeforeSharing;
+		return baseStore.settings.confirmBeforeSharing;
 	},
-
-	// Alphabet Navigation
 	get alphabetNavHideInactive() {
-		return settings.alphabetNavHideInactive;
+		return baseStore.settings.alphabetNavHideInactive;
 	},
 	get alphabetNavCompact() {
-		return settings.alphabetNavCompact;
+		return baseStore.settings.alphabetNavCompact;
 	},
 	get alphabetNavReverseOrder() {
-		return settings.alphabetNavReverseOrder;
+		return baseStore.settings.alphabetNavReverseOrder;
 	},
 	get alphabetNavShowHash() {
-		return settings.alphabetNavShowHash;
+		return baseStore.settings.alphabetNavShowHash;
 	},
-
-	// Immersive Mode
 	get immersiveModeEnabled() {
-		return settings.immersiveModeEnabled;
-	},
-
-	/**
-	 * Toggle Immersive Mode (fullscreen, hide all UI)
-	 */
-	toggleImmersiveMode() {
-		settings = { ...settings, immersiveModeEnabled: !settings.immersiveModeEnabled };
-		saveSettings(settings);
-	},
-
-	/**
-	 * Initialize settings from localStorage
-	 */
-	initialize() {
-		if (!browser) return;
-		settings = loadSettings();
-	},
-
-	/**
-	 * Update a single setting
-	 */
-	set<K extends keyof ContactsAppSettings>(key: K, value: ContactsAppSettings[K]) {
-		settings = { ...settings, [key]: value };
-		saveSettings(settings);
-	},
-
-	/**
-	 * Update multiple settings at once
-	 */
-	update(updates: Partial<ContactsAppSettings>) {
-		settings = { ...settings, ...updates };
-		saveSettings(settings);
-	},
-
-	/**
-	 * Reset all settings to defaults
-	 */
-	reset() {
-		settings = { ...DEFAULT_SETTINGS };
-		saveSettings(settings);
-	},
-
-	/**
-	 * Get default settings (for reference)
-	 */
-	getDefaults() {
-		return DEFAULT_SETTINGS;
+		return baseStore.settings.immersiveModeEnabled;
 	},
 };

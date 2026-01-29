@@ -35,6 +35,7 @@
 		"@manacore/shared-api-client": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-splitscreen": "workspace:*",
+		"@manacore/shared-stores": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-feedback-service": "workspace:*",
