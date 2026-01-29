@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { DatabaseModule } from './db/database.module';
 import { ContactModule } from './contact/contact.module';
 import { TagModule } from './tag/tag.module';
@@ -13,7 +14,6 @@ import { DuplicatesModule } from './duplicates/duplicates.module';
 import { PhotoModule } from './photo/photo.module';
 import { BatchModule } from './batch/batch.module';
 import { NetworkModule } from './network/network.module';
-import { MetricsModule } from './metrics';
 
 @Module({
 	imports: [
@@ -21,7 +21,10 @@ import { MetricsModule } from './metrics';
 			isGlobal: true,
 			envFilePath: '.env',
 		}),
-		MetricsModule,
+		MetricsModule.register({
+			prefix: 'contacts_',
+			excludePaths: ['/health'],
+		}),
 		DatabaseModule,
 		ContactModule,
 		TagModule,

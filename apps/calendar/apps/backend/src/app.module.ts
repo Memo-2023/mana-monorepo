@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from './health/health.module';
 import { CalendarModule } from './calendar/calendar.module';
@@ -11,7 +12,6 @@ import { ReminderModule } from './reminder/reminder.module';
 import { ShareModule } from './share/share.module';
 import { SyncModule } from './sync/sync.module';
 import { NetworkModule } from './network/network.module';
-import { MetricsModule } from './metrics';
 import { EmailModule } from './email/email.module';
 import { NotificationModule } from './notification/notification.module';
 
@@ -22,7 +22,10 @@ import { NotificationModule } from './notification/notification.module';
 			envFilePath: '.env',
 		}),
 		ScheduleModule.forRoot(),
-		MetricsModule,
+		MetricsModule.register({
+			prefix: 'calendar_',
+			excludePaths: ['/health'],
+		}),
 		DatabaseModule,
 		HealthModule,
 		EmailModule,

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from './health/health.module';
-import { MetricsModule } from './metrics';
 import { SkillModule } from './skill/skill.module';
 import { ActivityModule } from './activity/activity.module';
 
@@ -12,7 +12,10 @@ import { ActivityModule } from './activity/activity.module';
 			isGlobal: true,
 			envFilePath: '.env',
 		}),
-		MetricsModule,
+		MetricsModule.register({
+			prefix: 'skilltree_',
+			excludePaths: ['/health'],
+		}),
 		DatabaseModule,
 		HealthModule,
 		SkillModule,

@@ -1,50 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
 import { AppModule } from './app.module';
-import { MetricsService } from './metrics/metrics.service';
-
-// Normalize route paths to prevent high cardinality
-function normalizeRoute(path: string): string {
-	return path
-		.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id')
-		.replace(/\/\d+/g, '/:id');
-}
 
 async function bootstrap() {
 	const logger = new Logger('Bootstrap');
 	const app = await NestFactory.create(AppModule);
-
-	// Get MetricsService for request tracking
-	const metricsService = app.get(MetricsService);
-
-	// Global Express middleware to track ALL HTTP requests
-	// This runs before guards/interceptors, so it catches auth failures etc.
-	app.use((req: Request, res: Response, next: NextFunction) => {
-		// Skip metrics endpoint
-		if (req.path === '/metrics') {
-			return next();
-		}
-
-		const startTime = Date.now();
-		const method = req.method;
-		const route = normalizeRoute(req.path);
-
-		res.once('finish', () => {
-			const duration = (Date.now() - startTime) / 1000;
-			metricsService.httpRequestsTotal.inc({
-				method,
-				route,
-				status: res.statusCode.toString(),
-			});
-			metricsService.httpRequestDuration.observe(
-				{ method, route, status: res.statusCode.toString() },
-				duration
-			);
-		});
-
-		next();
-	});
 
 	// Enable CORS for all platforms
 	app.enableCors({
