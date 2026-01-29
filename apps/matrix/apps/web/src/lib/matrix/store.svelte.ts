@@ -13,6 +13,8 @@ import type {
 	VerificationRequest,
 	CryptoCallbacks,
 	CrossSigningStatus,
+	PresenceState,
+	UserPresence,
 } from './types';
 
 const STORAGE_KEY = 'matrix_credentials';
@@ -30,6 +32,7 @@ class MatrixStore {
 	private _currentRoomId = $state<string | null>(null);
 	private _timeline = $state<MatrixEvent[]>([]);
 	private _typingUsers = $state<Map<string, string[]>>(new Map());
+	private _userPresence = $state<Map<string, UserPresence>>(new Map());
 	private _error = $state<string | null>(null);
 	private _initialized = $state(false);
 
@@ -75,6 +78,21 @@ class MatrixStore {
 	}
 	get crossSigningReady() {
 		return this._crossSigningReady;
+	}
+
+	/**
+	 * Get presence for a specific user
+	 */
+	getUserPresence(userId: string): UserPresence | undefined {
+		return this._userPresence.get(userId);
+	}
+
+	/**
+	 * Check if a user is currently online
+	 */
+	isUserOnline(userId: string): boolean {
+		const presence = this._userPresence.get(userId);
+		return presence?.presence === 'online' || presence?.currentlyActive === true;
 	}
 
 	// ─────────────────────────────────────────────────────────
@@ -258,6 +276,28 @@ class MatrixStore {
 		// Room name/state changes
 		this._client.on(sdk.RoomStateEvent.Events, (event, state, prevEvent) => {
 			// Trigger reactivity for room updates
+			this._rooms = this._client!.getRooms();
+		});
+
+		// User presence changes
+		this._client.on(sdk.UserEvent.Presence, (event, user) => {
+			if (!user) return;
+
+			const userId = user.userId;
+			const presence: UserPresence = {
+				userId,
+				presence: (user.presence as PresenceState) || 'offline',
+				lastActiveAgo: user.lastActiveAgo,
+				statusMessage: user.presenceStatusMsg,
+				currentlyActive: user.currentlyActive,
+			};
+
+			// Trigger reactivity by creating new Map
+			const newMap = new Map(this._userPresence);
+			newMap.set(userId, presence);
+			this._userPresence = newMap;
+
+			// Also trigger room list update for DMs
 			this._rooms = this._client!.getRooms();
 		});
 	}
@@ -1199,6 +1239,33 @@ class MatrixStore {
 			}
 		}
 
+		// Get DM user presence info
+		const isDirect = this.isDirectRoom(room);
+		let dmUserId: string | undefined;
+		let presence: SimpleRoom['presence'];
+		let lastActiveAgo: number | undefined;
+
+		if (isDirect && myUserId) {
+			// Find the other user in the DM
+			const members = room.getJoinedMembers();
+			const otherMember = members.find((m) => m.userId !== myUserId);
+			if (otherMember) {
+				dmUserId = otherMember.userId;
+				const userPresence = this._userPresence.get(dmUserId);
+				if (userPresence) {
+					presence = userPresence.presence;
+					lastActiveAgo = userPresence.lastActiveAgo;
+				} else {
+					// Try to get from user object directly
+					const user = this._client?.getUser(dmUserId);
+					if (user) {
+						presence = (user.presence as SimpleRoom['presence']) || 'offline';
+						lastActiveAgo = user.lastActiveAgo;
+					}
+				}
+			}
+		}
+
 		return {
 			id: room.roomId,
 			name: room.name || 'Unnamed Room',
@@ -1209,11 +1276,14 @@ class MatrixStore {
 			lastMessageTime: room.getLastActiveTimestamp() || undefined,
 			unreadCount: room.getUnreadNotificationCount('total' as any) || 0,
 			highlightCount: room.getUnreadNotificationCount('highlight' as any) || 0,
-			isDirect: this.isDirectRoom(room),
+			isDirect,
 			isEncrypted: room.hasEncryptionStateEvent(),
 			memberCount: room.getJoinedMemberCount(),
 			membership,
 			inviter,
+			dmUserId,
+			presence,
+			lastActiveAgo,
 		};
 	}
 

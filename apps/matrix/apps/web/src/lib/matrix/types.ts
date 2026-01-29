@@ -74,6 +74,22 @@ export type MessageType =
 export type RoomMembership = 'join' | 'invite' | 'leave' | 'ban' | 'knock';
 
 /**
+ * User presence state
+ */
+export type PresenceState = 'online' | 'offline' | 'unavailable';
+
+/**
+ * User presence info
+ */
+export interface UserPresence {
+	userId: string;
+	presence: PresenceState;
+	lastActiveAgo?: number; // milliseconds since last active
+	statusMessage?: string;
+	currentlyActive?: boolean;
+}
+
+/**
  * Simplified room for UI rendering
  */
 export interface SimpleRoom {
@@ -91,6 +107,10 @@ export interface SimpleRoom {
 	memberCount: number;
 	membership: RoomMembership;
 	inviter?: string; // User who sent the invite
+	// Presence info for DMs
+	dmUserId?: string; // The other user's ID in a DM
+	presence?: PresenceState;
+	lastActiveAgo?: number;
 }
 
 /**

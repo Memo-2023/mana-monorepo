@@ -27,6 +27,22 @@
 			.substring(0, 2)
 			.toUpperCase()
 	);
+
+	// Online status for DMs
+	let isOnline = $derived(room.isDirect && room.presence === 'online');
+
+	// Format last active time
+	let lastActiveText = $derived(() => {
+		if (!room.isDirect || !room.lastActiveAgo) return '';
+		if (room.presence === 'online') return 'Online';
+		const minutes = Math.floor(room.lastActiveAgo / 60000);
+		if (minutes < 1) return 'Gerade aktiv';
+		if (minutes < 60) return `Vor ${minutes} Min.`;
+		const hours = Math.floor(minutes / 60);
+		if (hours < 24) return `Vor ${hours} Std.`;
+		const days = Math.floor(hours / 24);
+		return `Vor ${days} Tag${days > 1 ? 'en' : ''}`;
+	});
 </script>
 
 <button
@@ -36,17 +52,27 @@
 		: 'hover:bg-white/60 dark:hover:bg-white/5 hover:-translate-y-0.5'}"
 	{onclick}
 >
-	<!-- Avatar -->
-	<div
-		class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm
-		       {selected
-			? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
-			: 'bg-gradient-to-br from-violet-500 to-purple-600 text-white'}"
-	>
-		{#if room.avatar}
-			<img src={room.avatar} alt={room.name} class="w-11 h-11 rounded-full object-cover" />
-		{:else}
-			<span class="text-sm font-semibold">{initials}</span>
+	<!-- Avatar with online indicator -->
+	<div class="relative flex-shrink-0">
+		<div
+			class="w-11 h-11 rounded-full flex items-center justify-center shadow-sm
+			       {selected
+				? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+				: 'bg-gradient-to-br from-violet-500 to-purple-600 text-white'}"
+		>
+			{#if room.avatar}
+				<img src={room.avatar} alt={room.name} class="w-11 h-11 rounded-full object-cover" />
+			{:else}
+				<span class="text-sm font-semibold">{initials}</span>
+			{/if}
+		</div>
+		<!-- Online indicator dot -->
+		{#if room.isDirect}
+			<div
+				class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900
+				       {isOnline ? 'bg-green-500' : 'bg-zinc-400 dark:bg-zinc-600'}"
+				title={lastActiveText()}
+			></div>
 		{/if}
 	</div>
 
