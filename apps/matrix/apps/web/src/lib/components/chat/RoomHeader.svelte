@@ -102,14 +102,14 @@
 		<!-- Actions -->
 		<div class="flex items-center gap-1">
 			<button
-				class="p-2.5 rounded-xl glass-button shadow-sm disabled:opacity-40"
+				class="hidden sm:flex p-2.5 rounded-xl glass-button shadow-sm disabled:opacity-40"
 				title="Sprachanruf"
 				disabled
 			>
 				<Phone class="h-5 w-5 text-muted-foreground" />
 			</button>
 			<button
-				class="p-2.5 rounded-xl glass-button shadow-sm disabled:opacity-40"
+				class="hidden sm:flex p-2.5 rounded-xl glass-button shadow-sm disabled:opacity-40"
 				title="Videoanruf"
 				disabled
 			>

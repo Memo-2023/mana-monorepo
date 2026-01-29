@@ -74,7 +74,10 @@
 		const codeColor = isOwn ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10';
 
 		// Inline code (backticks) - process first to avoid conflicts
-		text = text.replace(/`([^`]+)`/g, `<code class="px-1 py-0.5 rounded text-sm font-mono ${codeColor}">$1</code>`);
+		text = text.replace(
+			/`([^`]+)`/g,
+			`<code class="px-1 py-0.5 rounded text-sm font-mono ${codeColor}">$1</code>`
+		);
 
 		// Bold (**text** or __text__)
 		text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -251,7 +254,11 @@
 	{/if}
 
 	<!-- Message Content -->
-	<div class="flex flex-col {message.isOwn ? 'items-end' : 'items-start'} max-w-[75%] relative">
+	<div
+		class="flex flex-col {message.isOwn
+			? 'items-end'
+			: 'items-start'} max-w-[85%] sm:max-w-[75%] relative"
+	>
 		<!-- Sender name (for others only) -->
 		{#if showAvatar && !message.isOwn}
 			<span class="text-xs text-muted-foreground mb-1 px-1">{message.senderName}</span>
@@ -433,7 +440,9 @@
 				</p>
 			{:else}
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				<p class="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{@html formatMessageBody(message.body, message.isOwn)}</p>
+				<p class="whitespace-pre-wrap break-words text-[15px] leading-relaxed">
+					{@html formatMessageBody(message.body, message.isOwn)}
+				</p>
 
 				<!-- Link Preview Card -->
 				{#if firstUrl()}
@@ -451,7 +460,9 @@
 							class="h-5 w-5 rounded-sm"
 							onerror={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')}
 						/>
-						<span class="text-xs truncate {message.isOwn ? 'text-white/80' : 'text-muted-foreground'}">
+						<span
+							class="text-xs truncate {message.isOwn ? 'text-white/80' : 'text-muted-foreground'}"
+						>
 							{getDomain(firstUrl() || '')}
 						</span>
 					</a>
@@ -489,34 +500,31 @@
 		{/if}
 
 		<!-- Time and read status -->
-		<div
-			class="flex items-center gap-1.5 mt-1.5 px-1 {message.isOwn ? 'justify-end' : ''}"
-		>
-			<span class="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">{formattedTime()}</span>
+		<div class="flex items-center gap-1.5 mt-1.5 px-1 {message.isOwn ? 'justify-end' : ''}">
+			<span
+				class="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+				>{formattedTime()}</span
+			>
 			<!-- Read receipt indicator (for own messages) -->
 			{#if message.isOwn}
 				{#if message.readBy && message.readBy.length > 0}
 					<Checks
 						class="h-4 w-4 text-blue-500"
 						weight="bold"
-						title="Gelesen von: {message.readBy.map(r => r.userName).join(', ')}"
+						title="Gelesen von: {message.readBy.map((r) => r.userName).join(', ')}"
 					/>
 				{:else}
-					<Check
-						class="h-4 w-4 text-muted-foreground/50"
-						weight="bold"
-						title="Gesendet"
-					/>
+					<Check class="h-4 w-4 text-muted-foreground/50" weight="bold" title="Gesendet" />
 				{/if}
 			{/if}
 		</div>
 
-		<!-- Message actions (hover) -->
+		<!-- Message actions (hover/tap) -->
 		{#if showActions && !message.redacted}
 			<div
-				class="absolute {message.isOwn
-					? '-left-28'
-					: '-right-28'} top-0 flex items-center gap-1 rounded-xl glass p-1.5 shadow-lg"
+				class="absolute flex items-center gap-1 rounded-xl glass p-1.5 shadow-lg z-20
+				       {message.isOwn ? 'right-0 lg:-left-28 lg:right-auto' : 'left-0 lg:-right-28 lg:left-auto'}
+				       top-full mt-1 lg:top-0 lg:mt-0"
 			>
 				<!-- Emoji reaction button -->
 				<div class="relative">
@@ -536,9 +544,9 @@
 						></button>
 						<!-- Emoji picker dropdown -->
 						<div
-							class="absolute {message.isOwn
-								? 'right-0'
-								: 'left-0'} bottom-full mb-2 z-50 flex gap-1 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-2 shadow-xl"
+							class="absolute z-50 flex gap-1 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-2 shadow-xl
+							       left-0 top-full mt-2 lg:bottom-full lg:top-auto lg:mt-0 lg:mb-2
+							       {message.isOwn ? 'lg:right-0 lg:left-auto' : ''}"
 						>
 							{#each quickEmojis as emoji}
 								<button

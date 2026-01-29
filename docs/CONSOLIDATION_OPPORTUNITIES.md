@@ -8,7 +8,7 @@
 | Priorität | Bereich | Geschätzte Einsparung | Aufwand |
 |-----------|---------|----------------------|---------|
 | ~~**KRITISCH**~~ | ~~Backend Metrics Migration~~ | ~~350 LOC~~ ✅ **709 LOC entfernt** | ~~Niedrig~~ |
-| **HOCH** | Skeleton Components | 800-1.000 LOC | Mittel |
+| ~~**HOCH**~~ | ~~Skeleton Components~~ | ~~800-1.000 LOC~~ → **20 LOC** | ~~Mittel~~ → Analysiert ✅ |
 | ~~**HOCH**~~ | ~~App Settings Stores~~ | ~~600-700 LOC~~ ✅ **323 LOC entfernt** | ~~Mittel~~ |
 | ~~**HOCH**~~ | ~~Main.ts/CORS Patterns~~ | ~~1.800 LOC~~ ✅ **~280 LOC entfernt** | ~~Mittel~~ |
 | ~~**MITTEL**~~ | ~~TypeScript Configs~~ | ~~400 LOC~~ ✅ **~280 LOC entfernt** | ~~Niedrig~~ |
@@ -232,21 +232,31 @@ export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores({
 
 ## 3. UI Components
 
-### 3.1 HOCH: Skeleton Components (800-1.000 LOC)
+### ~~3.1 HOCH: Skeleton Components~~ ✅ ANALYSIERT (Minimal ~20 LOC gespart)
 
-**Problem:** 31 Skeleton-Komponenten über Apps verteilt, obwohl shared-ui Primitives hat.
+**Status:** Nach detaillierter Analyse: Die meisten Skeletons sind legitime Domain-Customizations (29.01.2026)
 
-**Betroffene Apps:**
-- `apps/contacts/` - 11 Skeletons (925 LOC)
-- `apps/calendar/` - 5 Skeletons (338 LOC)
-- `apps/todo/` - 5 Skeletons
+**Ergebnis der Analyse:**
+- 29 Skeleton-Dateien über 5 Apps (calendar, clock, contacts, todo, questions)
+- **Fazit:** Skeletons nutzen bereits shared-ui Primitives (`SkeletonBox`) korrekt
+- Domain-spezifische Layouts (Kalender-Grid, Uhr-Circle) gehören NICHT in shared-ui
+
+**Durchgeführte Konsolidierung:**
+- ✅ `calculateFadeOpacity()` Utility nach `@manacore/shared-ui` verschoben
+- ✅ Contacts App nutzt jetzt die shared-ui Utility
+- ✅ Lokale `utils.ts` in contacts gelöscht (~20 LOC gespart)
+
+**Warum KEINE weitere Konsolidierung:**
+| Skeleton | LOC | Status |
+|----------|-----|--------|
+| Calendar AppLoadingSkeleton | 56 | Keep - 7-Spalten Kalender-Grid Layout |
+| Clock AppLoadingSkeleton | 91 | Keep - 300px kreisförmiger Uhr-Platzhalter |
+| ContactRowSkeleton, TaskItemSkeleton, etc. | ~800 | Keep - Legitime Domain-spezifische Komponenten |
 
 **Shared-UI hat bereits:**
 - `SkeletonBox`, `SkeletonAvatar`, `SkeletonCard`, `SkeletonGrid`, `SkeletonList`, `SkeletonRow`, `SkeletonText`
-
-**Empfehlung:**
-1. Dokumentation für Skeleton-Komposition aus Primitives
-2. Page-Level Presets erstellen: `ListPageSkeleton`, `DetailPageSkeleton`, `GridPageSkeleton`
+- `AppLoadingSkeleton` mit 5 Layout-Presets (list, centered, sidebar, tasks, minimal)
+- `calculateFadeOpacity()` Utility für Fade-Effekte
 
 ---
 
@@ -463,12 +473,14 @@ export default createDrizzleConfig({ dbName: 'chat' });
 | `@manacore/shared-nestjs-health` erstellen | 170 | Niedrig | Offen |
 | ~~Drizzle Config Factory erstellen~~ | ~~200~~ → **160** | ~~Niedrig~~ | ✅ Erledigt |
 
-### Phase 4: Skeleton Refactoring (Optional, ~800 LOC)
+### ~~Phase 4: Skeleton Refactoring~~ ✅ ANALYSIERT
 
-| Aufgabe | LOC | Aufwand |
-|---------|-----|---------|
-| Page-Level Skeleton Presets erstellen | 400 | Mittel |
-| Bestehende Skeletons refactoren | 400 | Mittel |
+| Aufgabe | LOC | Aufwand | Status |
+|---------|-----|---------|--------|
+| ~~Page-Level Skeleton Presets~~ | ~~400~~ → **0** | ~~Mittel~~ | Nicht nötig - Shared-UI hat bereits 5 Presets |
+| ~~Bestehende Skeletons refactoren~~ | ~~400~~ → **20** | ~~Mittel~~ | ✅ Nur `calculateFadeOpacity` Utility |
+
+**Ergebnis:** Domain-spezifische Skeletons sind korrekt designed. Keine große Konsolidierung nötig.
 
 ---
 

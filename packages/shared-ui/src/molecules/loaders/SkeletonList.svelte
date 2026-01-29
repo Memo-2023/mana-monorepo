@@ -10,6 +10,7 @@
 	 */
 
 	import SkeletonRow from './SkeletonRow.svelte';
+	import { calculateFadeOpacity } from './utils';
 
 	interface Props {
 		/** Number of rows to show */
@@ -38,15 +39,13 @@
 		class: className = '',
 	}: Props = $props();
 
-	function calculateOpacity(index: number): number {
-		if (!fadeEffect) return 1;
-		const fadeStep = (1 - minOpacity) / Math.max(count - 1, 1);
-		return Math.max(minOpacity, 1 - index * fadeStep);
+	function getOpacity(index: number): number {
+		return fadeEffect ? calculateFadeOpacity(index, count, minOpacity) : 1;
 	}
 </script>
 
 <div class="skeleton-list flex flex-col {className}" style="gap: {gap};">
 	{#each Array(count) as _, i}
-		<SkeletonRow {showAvatar} {avatarSize} opacity={calculateOpacity(i)} />
+		<SkeletonRow {showAvatar} {avatarSize} opacity={getOpacity(i)} />
 	{/each}
 </div>

@@ -5,8 +5,8 @@
  * Built on top of @manacore/shared-ui skeleton primitives.
  */
 
-// Utilities
-export { calculateFadeOpacity } from './utils';
+// Utilities (re-exported from shared-ui)
+export { calculateFadeOpacity } from '@manacore/shared-ui';
 
 // Contact List/Grid Skeletons
 export { default as ContactRowSkeleton } from './ContactRowSkeleton.svelte';

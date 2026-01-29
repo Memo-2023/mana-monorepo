@@ -4,7 +4,7 @@
 	 */
 
 	import TagCardSkeleton from './TagCardSkeleton.svelte';
-	import { calculateFadeOpacity } from './utils';
+	import { calculateFadeOpacity } from '@manacore/shared-ui';
 
 	interface Props {
 		/** Number of skeleton cards to show */

@@ -4,8 +4,10 @@
 	import CreateRoomDialog from '$lib/components/chat/CreateRoomDialog.svelte';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
 	import { ChatCircle, Plus } from '@manacore/shared-icons';
+	import { browser } from '$app/environment';
 
-	let sidebarOpen = $state(true);
+	// Start with sidebar closed on mobile
+	let sidebarOpen = $state(browser ? window.innerWidth >= 1024 : true);
 	let showCreateRoom = $state(false);
 	let showRoomSettings = $state(false);
 
@@ -13,8 +15,29 @@
 	let replyTo = $state<SimpleMessage | null>(null);
 	let editMessage = $state<SimpleMessage | null>(null);
 
+	// Check if mobile
+	let isMobile = $state(browser ? window.innerWidth < 1024 : false);
+
+	// Update on resize
+	if (browser) {
+		window.addEventListener('resize', () => {
+			isMobile = window.innerWidth < 1024;
+			// Auto-close sidebar on resize to mobile
+			if (isMobile && sidebarOpen) {
+				sidebarOpen = false;
+			}
+		});
+	}
+
 	function toggleSidebar() {
 		sidebarOpen = !sidebarOpen;
+	}
+
+	function selectRoomAndCloseSidebar(roomId: string) {
+		matrixStore.selectRoom(roomId);
+		if (isMobile) {
+			sidebarOpen = false;
+		}
 	}
 
 	function handleReply(message: SimpleMessage) {
@@ -32,12 +55,22 @@
 	}
 </script>
 
-<div class="chat-layout flex h-full min-h-0 overflow-hidden bg-background">
+<div class="chat-layout flex h-full min-h-0 overflow-hidden bg-background relative">
+	<!-- Mobile Sidebar Backdrop -->
+	{#if sidebarOpen && isMobile}
+		<button
+			class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+			onclick={() => (sidebarOpen = false)}
+			aria-label="Sidebar schließen"
+		></button>
+	{/if}
+
 	<!-- Sidebar -->
 	<aside
-		class="flex w-80 flex-shrink-0 flex-col border-r border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm transition-all duration-300 ease-in-out"
-		class:hidden={!sidebarOpen}
-		class:lg:flex={true}
+		class="flex flex-col border-r border-black/10 dark:border-white/10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl transition-all duration-300 ease-in-out
+		       fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto
+		       w-[85vw] max-w-[320px] lg:w-80 lg:max-w-none
+		       {sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}"
 	>
 		<!-- User Info / Status Bar -->
 		<div class="border-b border-black/10 dark:border-white/10 px-4 py-3">
@@ -66,7 +99,10 @@
 
 		<!-- Room List -->
 		<div class="flex-1 min-h-0 overflow-hidden">
-			<RoomList onCreateRoom={() => (showCreateRoom = true)} />
+			<RoomList
+				onCreateRoom={() => (showCreateRoom = true)}
+				onSelectRoom={selectRoomAndCloseSidebar}
+			/>
 		</div>
 	</aside>
 

@@ -4,9 +4,8 @@
 	 * Shows stats cards and duplicate groups with fade effect
 	 */
 
-	import { SkeletonBox } from '@manacore/shared-ui';
+	import { SkeletonBox, calculateFadeOpacity } from '@manacore/shared-ui';
 	import DuplicateGroupSkeleton from './DuplicateGroupSkeleton.svelte';
-	import { calculateFadeOpacity } from './utils';
 
 	interface Props {
 		/** Number of duplicate groups to show */

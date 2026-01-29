@@ -78,9 +78,15 @@
 </script>
 
 {#if open && room}
+	<!-- Backdrop for mobile -->
+	<button
+		class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+		onclick={onClose}
+		aria-label="Schließen"
+	></button>
 	<!-- Slide-in Panel -->
 	<div
-		class="fixed inset-y-0 right-0 z-40 flex w-80 flex-col border-l border-base-300 bg-base-100 shadow-xl"
+		class="fixed inset-y-0 right-0 z-50 flex w-[90vw] max-w-[320px] lg:w-80 flex-col border-l border-base-300 bg-base-100 shadow-xl"
 	>
 		<!-- Header -->
 		<header class="flex items-center justify-between border-b border-base-300 px-4 py-3">

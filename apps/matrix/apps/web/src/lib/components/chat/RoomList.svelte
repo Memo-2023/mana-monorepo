@@ -13,9 +13,18 @@
 
 	interface Props {
 		onCreateRoom?: () => void;
+		onSelectRoom?: (roomId: string) => void;
 	}
 
-	let { onCreateRoom }: Props = $props();
+	let { onCreateRoom, onSelectRoom }: Props = $props();
+
+	function handleSelectRoom(roomId: string) {
+		if (onSelectRoom) {
+			onSelectRoom(roomId);
+		} else {
+			matrixStore.selectRoom(roomId);
+		}
+	}
 
 	let search = $state('');
 
@@ -143,7 +152,7 @@
 					<RoomItem
 						{room}
 						selected={room.id === matrixStore.currentRoomId}
-						onclick={() => matrixStore.selectRoom(room.id)}
+						onclick={() => handleSelectRoom(room.id)}
 					/>
 				{:else}
 					{#if !search}
@@ -171,7 +180,7 @@
 					<RoomItem
 						{room}
 						selected={room.id === matrixStore.currentRoomId}
-						onclick={() => matrixStore.selectRoom(room.id)}
+						onclick={() => handleSelectRoom(room.id)}
 					/>
 				{:else}
 					{#if !search}
@@ -191,7 +200,7 @@
 	</div>
 
 	<!-- New Room Button -->
-	<div class="border-t border-black/10 dark:border-white/10 p-3 pb-20">
+	<div class="border-t border-black/10 dark:border-white/10 p-3 pb-4 lg:pb-20">
 		<button
 			class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
 			       bg-gradient-to-r from-violet-500 to-purple-600 text-white font-medium

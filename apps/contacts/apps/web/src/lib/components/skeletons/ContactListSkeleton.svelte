@@ -5,7 +5,7 @@
 	 */
 
 	import ContactRowSkeleton from './ContactRowSkeleton.svelte';
-	import { calculateFadeOpacity } from './utils';
+	import { calculateFadeOpacity } from '@manacore/shared-ui';
 
 	interface Props {
 		/** Number of skeleton rows to show */

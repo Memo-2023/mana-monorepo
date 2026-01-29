@@ -103,12 +103,12 @@
 {#if open}
 	<!-- Backdrop -->
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
 		onclick={handleClose}
 	>
 		<!-- Dialog -->
 		<div
-			class="w-full max-w-md rounded-xl bg-base-100 shadow-xl"
+			class="w-full max-w-md rounded-xl bg-base-100 shadow-xl max-h-[90vh] overflow-y-auto"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"

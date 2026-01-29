@@ -29,3 +29,6 @@ export { default as SkeletonGrid } from './SkeletonGrid.svelte';
 
 // Full Page
 export { default as AppLoadingSkeleton } from './AppLoadingSkeleton.svelte';
+
+// Utilities
+export { calculateFadeOpacity } from './utils';
