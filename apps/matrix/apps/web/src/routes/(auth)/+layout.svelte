@@ -8,6 +8,14 @@
 	let { children }: Props = $props();
 </script>
 
-<div class="flex min-h-screen items-center justify-center bg-base-100 p-4">
+<div class="auth-layout">
 	{@render children()}
 </div>
+
+<style>
+	.auth-layout {
+		min-height: 100vh;
+		min-height: 100dvh;
+		width: 100%;
+	}
+</style>

@@ -16,6 +16,8 @@
 		"@nestjs/core": "^10.0.0 || ^11.0.0"
 	},
 	"devDependencies": {
+		"@manacore/shared-tsconfig": "workspace:*",
+		"@types/node": "^22.10.2",
 		"typescript": "^5.0.0"
 	},
 	"peerDependencies": {
