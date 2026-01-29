@@ -1255,6 +1255,11 @@ export class BetterAuthService {
 
 			// Call Better Auth's handler
 			const response = await this.auth.handler(fetchRequest);
+			console.log('[handleOidcRequest] Better Auth status:', response.status);
+			console.log(
+				'[handleOidcRequest] Better Auth headers:',
+				Object.fromEntries(response.headers.entries())
+			);
 
 			// Convert Response to our format
 			const responseHeaders: Record<string, string> = {};
@@ -1262,13 +1267,22 @@ export class BetterAuthService {
 				responseHeaders[key] = value;
 			});
 
-			// Get body
+			// Get body - handle empty responses
 			let body: unknown;
 			const contentType = response.headers.get('content-type');
-			if (contentType?.includes('application/json')) {
-				body = await response.json();
+			const textBody = await response.text();
+			console.log('[handleOidcRequest] Response body length:', textBody.length);
+			console.log('[handleOidcRequest] Response body preview:', textBody.substring(0, 500));
+
+			if (contentType?.includes('application/json') && textBody.length > 0) {
+				try {
+					body = JSON.parse(textBody);
+				} catch {
+					console.warn('[handleOidcRequest] Failed to parse JSON, using text body');
+					body = textBody;
+				}
 			} else {
-				body = await response.text();
+				body = textBody;
 			}
 
 			return {
