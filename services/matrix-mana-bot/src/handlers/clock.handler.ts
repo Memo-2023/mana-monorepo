@@ -21,7 +21,7 @@ export class ClockHandler {
 		}
 
 		try {
-			const result = await this.clockService.startTimer(ctx.userId, input);
+			const result = await this.clockService.startTimerForUser(ctx.userId, input);
 			this.logger.log(`Started timer for ${ctx.userId}: ${result.name}`);
 
 			const durationStr = this.formatDuration(result.durationSeconds);
@@ -33,7 +33,12 @@ export class ClockHandler {
 
 	async listTimers(ctx: CommandContext): Promise<string> {
 		try {
-			const timers = await this.clockService.getTimers(ctx.userId);
+			const token = this.clockService.getUserToken(ctx.userId);
+			if (!token) {
+				return '❌ Nicht authentifiziert. Bitte zuerst anmelden.';
+			}
+
+			const timers = await this.clockService.getTimers(token);
 
 			if (timers.length === 0) {
 				return '⏱️ Keine aktiven Timer.\n\nStarte einen mit `!timer [Dauer]`';
@@ -42,8 +47,8 @@ export class ClockHandler {
 			let response = '⏱️ **Aktive Timer:**\n\n';
 			for (const timer of timers) {
 				const remaining = this.formatDuration(timer.remainingSeconds);
-				const status = timer.isPaused ? '⏸️' : '▶️';
-				response += `${status} **${timer.name || 'Timer'}** - ${remaining} verbleibend\n`;
+				const status = timer.status === 'paused' ? '⏸️' : '▶️';
+				response += `${status} **${timer.label || 'Timer'}** - ${remaining} verbleibend\n`;
 			}
 
 			response += '\n`!stop` zum Beenden';
@@ -55,7 +60,7 @@ export class ClockHandler {
 
 	async stopTimer(ctx: CommandContext, args: string): Promise<string> {
 		try {
-			const result = await this.clockService.stopTimer(ctx.userId, args.trim() || undefined);
+			const result = await this.clockService.stopTimerForUser(ctx.userId, args.trim() || undefined);
 			return `⏹️ Timer gestoppt: **${result.name || 'Timer'}**`;
 		} catch (error) {
 			return `❌ ${error instanceof Error ? error.message : 'Kein aktiver Timer gefunden'}`;
@@ -73,7 +78,7 @@ export class ClockHandler {
 		}
 
 		try {
-			const result = await this.clockService.setAlarm(ctx.userId, input);
+			const result = await this.clockService.setAlarmForUser(ctx.userId, input);
 			this.logger.log(`Set alarm for ${ctx.userId}: ${result.name} at ${result.time}`);
 
 			return `⏰ Alarm gesetzt: **${result.name || 'Alarm'}**\nZeit: ${result.time}`;
@@ -84,7 +89,12 @@ export class ClockHandler {
 
 	async listAlarms(ctx: CommandContext): Promise<string> {
 		try {
-			const alarms = await this.clockService.getAlarms(ctx.userId);
+			const token = this.clockService.getUserToken(ctx.userId);
+			if (!token) {
+				return '❌ Nicht authentifiziert. Bitte zuerst anmelden.';
+			}
+
+			const alarms = await this.clockService.getAlarms(token);
 
 			if (alarms.length === 0) {
 				return '⏰ Keine aktiven Alarme.\n\nSetze einen mit `!alarm [Zeit]`';
@@ -93,7 +103,7 @@ export class ClockHandler {
 			let response = '⏰ **Aktive Alarme:**\n\n';
 			for (const alarm of alarms) {
 				const status = alarm.enabled ? '🔔' : '🔕';
-				response += `${status} **${alarm.name || 'Alarm'}** - ${alarm.time}\n`;
+				response += `${status} **${alarm.label || 'Alarm'}** - ${alarm.time}\n`;
 			}
 
 			return response;
@@ -130,7 +140,7 @@ export class ClockHandler {
 		}
 
 		try {
-			const result = await this.clockService.getWorldClock(city);
+			const result = await this.clockService.getWorldClockTime(city);
 			return `🕐 **${result.city}:** ${result.time}\n📅 ${result.date}`;
 		} catch (error) {
 			return `❌ Stadt "${city}" nicht gefunden.\n\nVersuche: Berlin, London, New York, Tokyo, Sydney`;

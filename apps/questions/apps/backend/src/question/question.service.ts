@@ -8,7 +8,7 @@ import { CreateQuestionDto, UpdateQuestionDto } from './dto';
 export class QuestionService {
 	constructor(
 		@Inject('DATABASE_CONNECTION')
-		private readonly db: NodePgDatabase,
+		private readonly db: NodePgDatabase
 	) {}
 
 	async create(userId: string, dto: CreateQuestionDto): Promise<Question> {
@@ -35,7 +35,7 @@ export class QuestionService {
 			tags?: string[];
 			limit?: number;
 			offset?: number;
-		},
+		}
 	): Promise<{ data: Question[]; total: number }> {
 		const conditions = [eq(questions.userId, userId), isNull(questions.deletedAt)];
 
@@ -48,12 +48,13 @@ export class QuestionService {
 		}
 
 		if (options?.search) {
-			conditions.push(
-				or(
-					ilike(questions.title, `%${options.search}%`),
-					ilike(questions.description, `%${options.search}%`),
-				),
+			const searchCondition = or(
+				ilike(questions.title, `%${options.search}%`),
+				ilike(questions.description, `%${options.search}%`)
 			);
+			if (searchCondition) {
+				conditions.push(searchCondition);
+			}
 		}
 
 		const limit = options?.limit || 20;
@@ -137,8 +138,8 @@ export class QuestionService {
 				and(
 					eq(questions.userId, userId),
 					eq(questions.collectionId, collectionId),
-					isNull(questions.deletedAt),
-				),
+					isNull(questions.deletedAt)
+				)
 			)
 			.orderBy(desc(questions.createdAt));
 	}

@@ -1,4 +1,4 @@
-import { UserEntity } from '../shared/types';
+import { type UserEntity } from '../shared/types';
 
 /**
  * Calendar event entity
@@ -38,7 +38,7 @@ export interface CalendarData {
 export interface CreateEventInput {
 	title: string;
 	startTime: Date;
-	endTime: Date;
+	endTime?: Date; // Optional - defaults to startTime + 1 hour, or end of day for all-day events
 	description?: string | null;
 	location?: string | null;
 	isAllDay?: boolean;

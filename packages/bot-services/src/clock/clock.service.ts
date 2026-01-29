@@ -267,4 +267,116 @@ export class ClockService {
 
 		return parts.join(' ');
 	}
+
+	// ===== Convenience Methods for Bot Handlers =====
+
+	/**
+	 * Start a timer from natural language input
+	 * Parses duration and optional label from input like "25m Pomodoro"
+	 */
+	async startTimerForUser(userId: string, input: string): Promise<Timer & { name?: string }> {
+		const token = this.getUserToken(userId);
+		if (!token) {
+			throw new Error('Nicht authentifiziert. Bitte zuerst anmelden.');
+		}
+
+		// Parse duration from input
+		const durationSeconds = this.parseDuration(input);
+		if (!durationSeconds) {
+			throw new Error('Ungültiges Dauer-Format. Beispiele: 25m, 1h30m, 90s');
+		}
+
+		// Extract label (everything after duration pattern)
+		const label = input.replace(/\d+\s*[hms]?(?:in)?/gi, '').trim() || null;
+
+		const timer = await this.createTimer({ durationSeconds, label }, token);
+		// Start the timer immediately
+		const started = await this.startTimer(timer.id, token);
+		return { ...started, name: started.label ?? undefined };
+	}
+
+	/**
+	 * Stop the running timer for a user
+	 */
+	async stopTimerForUser(userId: string, timerName?: string): Promise<Timer & { name?: string }> {
+		const token = this.getUserToken(userId);
+		if (!token) {
+			throw new Error('Nicht authentifiziert. Bitte zuerst anmelden.');
+		}
+
+		const timers = await this.getTimers(token);
+		let timer: Timer | undefined;
+
+		if (timerName) {
+			timer = timers.find(
+				(t) =>
+					(t.status === 'running' || t.status === 'paused') &&
+					t.label?.toLowerCase().includes(timerName.toLowerCase())
+			);
+		} else {
+			timer = timers.find((t) => t.status === 'running' || t.status === 'paused');
+		}
+
+		if (!timer) {
+			throw new Error('Kein aktiver Timer gefunden.');
+		}
+
+		await this.deleteTimer(timer.id, token);
+		return { ...timer, name: timer.label ?? undefined };
+	}
+
+	/**
+	 * Set an alarm from natural language input
+	 * Parses time and optional label from input like "14:30 Meeting"
+	 */
+	async setAlarmForUser(userId: string, input: string): Promise<Alarm & { name?: string }> {
+		const token = this.getUserToken(userId);
+		if (!token) {
+			throw new Error('Nicht authentifiziert. Bitte zuerst anmelden.');
+		}
+
+		const time = this.parseAlarmTime(input);
+		if (!time) {
+			throw new Error('Ungültiges Zeit-Format. Beispiele: 14:30, 9:00, 14 Uhr 30');
+		}
+
+		// Extract label (everything after time pattern)
+		const label =
+			input
+				.replace(/\d{1,2}:\d{2}(:\d{2})?/g, '')
+				.replace(/\d{1,2}\s*uhr(\s*\d{1,2})?/gi, '')
+				.trim() || null;
+
+		const alarm = await this.createAlarm({ time, label }, token);
+		return { ...alarm, name: alarm.label ?? undefined };
+	}
+
+	/**
+	 * Get time for a specific city/timezone
+	 */
+	async getWorldClockTime(city: string): Promise<{ city: string; time: string; date: string }> {
+		// Search for timezone
+		const results = await this.searchTimezones(city);
+		if (results.length === 0) {
+			throw new Error(`Stadt "${city}" nicht gefunden.`);
+		}
+
+		const tz = results[0];
+		const now = new Date();
+
+		const time = now.toLocaleTimeString('de-DE', {
+			timeZone: tz.timezone,
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+
+		const date = now.toLocaleDateString('de-DE', {
+			timeZone: tz.timezone,
+			weekday: 'long',
+			day: 'numeric',
+			month: 'long',
+		});
+
+		return { city: tz.city, time, date };
+	}
 }

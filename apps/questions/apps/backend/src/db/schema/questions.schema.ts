@@ -32,6 +32,7 @@ export const questions = pgTable('questions', {
 	// Soft delete
 	isArchived: boolean('is_archived').default(false),
 	archivedAt: timestamp('archived_at', { withTimezone: true }),
+	deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
 export type Question = typeof questions.$inferSelect;

@@ -1,7 +1,7 @@
-import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import { openDB, type IDBPDatabase } from 'idb';
 import type { Skill, Activity, UserStats } from '$lib/types';
 
-interface SkillTreeDB extends DBSchema {
+interface SkillTreeDB {
 	skills: {
 		key: string;
 		value: Skill;

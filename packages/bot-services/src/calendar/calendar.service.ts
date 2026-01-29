@@ -36,7 +36,10 @@ export class CalendarService implements OnModuleInit {
 	) {
 		this.storage =
 			storage ||
-			new FileStorageProvider<CalendarData>('./data/calendar-data.json', { events: [], calendars: [] });
+			new FileStorageProvider<CalendarData>('./data/calendar-data.json', {
+				events: [],
+				calendars: [],
+			});
 	}
 
 	async onModuleInit() {
@@ -46,7 +49,9 @@ export class CalendarService implements OnModuleInit {
 	private async loadData(): Promise<void> {
 		try {
 			this.data = await this.storage.load();
-			this.logger.log(`Loaded ${this.data.events.length} events, ${this.data.calendars.length} calendars`);
+			this.logger.log(
+				`Loaded ${this.data.events.length} events, ${this.data.calendars.length} calendars`
+			);
 		} catch (error) {
 			this.logger.error('Failed to load calendar data:', error);
 			this.data = { events: [], calendars: [] };
@@ -81,6 +86,19 @@ export class CalendarService implements OnModuleInit {
 	async createEvent(userId: string, input: CreateEventInput): Promise<CalendarEvent> {
 		const calendar = this.ensureDefaultCalendar(userId);
 
+		// Calculate endTime if not provided
+		let endTime: Date;
+		if (input.endTime) {
+			endTime = input.endTime;
+		} else if (input.isAllDay) {
+			// For all-day events, end at end of the same day
+			endTime = new Date(input.startTime);
+			endTime.setHours(23, 59, 59, 999);
+		} else {
+			// Default to 1 hour after start
+			endTime = new Date(input.startTime.getTime() + 60 * 60 * 1000);
+		}
+
 		const event: CalendarEvent = {
 			id: generateId(),
 			userId,
@@ -88,7 +106,7 @@ export class CalendarService implements OnModuleInit {
 			description: input.description ?? null,
 			location: input.location ?? null,
 			startTime: input.startTime.toISOString(),
-			endTime: input.endTime.toISOString(),
+			endTime: endTime.toISOString(),
 			isAllDay: input.isAllDay ?? false,
 			calendarId: input.calendarId ?? calendar.id,
 			calendarName: calendar.name,
@@ -101,7 +119,11 @@ export class CalendarService implements OnModuleInit {
 		return event;
 	}
 
-	async updateEvent(userId: string, eventId: string, input: UpdateEventInput): Promise<CalendarEvent | null> {
+	async updateEvent(
+		userId: string,
+		eventId: string,
+		input: UpdateEventInput
+	): Promise<CalendarEvent | null> {
 		const event = this.data.events.find((e) => e.id === eventId && e.userId === userId);
 		if (!event) return null;
 
@@ -197,7 +219,7 @@ export class CalendarService implements OnModuleInit {
 		return this.getEventsInRange(userId, today, weekEnd);
 	}
 
-	async getUpcomingEvents(userId: string, days: number = 7): Promise<CalendarEvent[]> {
+	async getUpcomingEvents(userId: string, days = 7): Promise<CalendarEvent[]> {
 		const now = new Date();
 		const endDate = addDays(now, days);
 		return this.getEventsInRange(userId, now, endDate);

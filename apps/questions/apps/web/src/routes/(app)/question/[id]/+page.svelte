@@ -43,6 +43,9 @@
 
 		try {
 			const id = page.params.id;
+			if (!id) {
+				throw new Error('Question ID is required');
+			}
 			question = await questionsApi.getById(id);
 			researchResults = await researchApi.getByQuestion(id);
 			sources = await sourcesApi.getByQuestion(id);

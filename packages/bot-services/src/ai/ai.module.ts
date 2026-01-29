@@ -1,8 +1,13 @@
-import { Module, DynamicModule } from '@nestjs/common';
+import { Module, DynamicModule, Provider, Type, ModuleMetadata } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { AiServiceConfig } from './types';
 
-export interface AiModuleOptions extends Partial<AiServiceConfig> {}
+export type AiModuleOptions = Partial<AiServiceConfig>;
+
+export interface AiModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+	useFactory: (...args: unknown[]) => Promise<AiModuleOptions> | AiModuleOptions;
+	inject?: (Type<unknown> | string | symbol)[];
+}
 
 @Module({})
 export class AiModule {
@@ -37,6 +42,31 @@ export class AiModule {
 				{
 					provide: AiService,
 					useFactory: () => new AiService(config),
+				},
+			],
+			exports: [AiService],
+		};
+	}
+
+	/**
+	 * Register asynchronously with factory function
+	 */
+	static registerAsync(options: AiModuleAsyncOptions): DynamicModule {
+		const configProvider: Provider = {
+			provide: 'AI_SERVICE_CONFIG',
+			useFactory: options.useFactory,
+			inject: options.inject || [],
+		};
+
+		return {
+			module: AiModule,
+			imports: options.imports || [],
+			providers: [
+				configProvider,
+				{
+					provide: AiService,
+					useFactory: (config: Partial<AiServiceConfig>) => new AiService(config),
+					inject: ['AI_SERVICE_CONFIG'],
 				},
 			],
 			exports: [AiService],

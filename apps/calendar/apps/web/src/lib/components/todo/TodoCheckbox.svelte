@@ -53,7 +53,7 @@
 	{#if loading}
 		<span class="spinner"></span>
 	{:else if checked}
-		<Check size={sizes[size].icon} strokeWidth={3} />
+		<Check size={sizes[size].icon} weight="bold" />
 	{/if}
 </button>
 
