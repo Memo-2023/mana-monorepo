@@ -1,58 +1,49 @@
 # Monorepo Konsistenz-Bericht
 
 > Erstellt: 29. Januar 2026
+> Zuletzt aktualisiert: 29. Januar 2026
 
 ## Übersicht
 
 Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf Inkonsistenzen untersucht:
 
-| Bereich | Konsistenz | Priorität |
-|---------|------------|-----------|
-| Dependencies & Versionen | ⚠️ Mittel | **Hoch** |
-| API Client Patterns | ❌ Niedrig | **Hoch** |
-| i18n Implementation | ⚠️ Mittel | Mittel |
-| Auth Implementation | ✅ Gut | Niedrig |
-| Styling & Tailwind | ✅ Sehr gut | Niedrig |
-| Komponenten & Layouts | ⚠️ Mittel | Mittel |
+| Bereich | Konsistenz | Priorität | Status |
+|---------|------------|-----------|--------|
+| Dependencies & Versionen | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
+| Toast System | ✅ Gut | ~~Hoch~~ | ✅ Erledigt |
+| API Client Patterns | ❌ Niedrig | **Hoch** | Offen |
+| i18n Implementation | ⚠️ Mittel | Mittel | Offen |
+| Auth Implementation | ✅ Gut | Niedrig | - |
+| Styling & Tailwind | ✅ Sehr gut | Niedrig | - |
+| Komponenten & Layouts | ⚠️ Mittel | Mittel | Offen |
+
+### Erledigte Aufgaben (29.01.2026)
+
+1. ✅ **Tailwind auf Vite-Plugin migrieren** - Alle 4 Apps (manadeck, chat, manacore, presi) migriert
+2. ✅ **SvelteKit, Svelte, TypeScript Versionen vereinheitlicht** - Alle 15 Web-Apps auf gleicher Version
+3. ✅ **Toast System zentralisiert** - `@manacore/shared-ui` Toast für 6 Apps (calendar, chat, clock, contacts, picture, storage)
+4. ✅ **lucide-svelte entfernt** - shared-ui nutzt jetzt nur noch `@manacore/shared-icons`
 
 ---
 
-## 1. Dependencies & Versionen
+## 1. Dependencies & Versionen ✅
 
-### Kritische Inkonsistenzen
+> **Status: Erledigt (29.01.2026)**
 
-#### Tailwind CSS Ansatz (2 verschiedene Methoden)
+### Durchgeführte Änderungen
 
-| Methode | Apps |
-|---------|------|
-| `@tailwindcss/postcss` | manadeck, chat, manacore, presi |
-| `@tailwindcss/vite` | clock, planta, skilltree, todo, contacts, nutriphi, questions, calendar, storage, matrix |
+#### Tailwind CSS
+- ✅ Alle Apps nutzen jetzt `@tailwindcss/vite` (manadeck, chat, manacore, presi migriert)
+- PostCSS-Konfigurationen entfernt
 
-#### SvelteKit Versionen
+#### Dependency Versionen standardisiert
+- ✅ `@sveltejs/kit`: `^2.47.1` (alle 15 Web-Apps)
+- ✅ `svelte`: `^5.41.0` (alle 15 Web-Apps)
+- ✅ `svelte-check`: `^4.3.3` (alle 15 Web-Apps)
+- ✅ `typescript`: `^5.9.3` (alle 15 Web-Apps)
 
-| Version | Apps |
-|---------|------|
-| ^2.0.0 (minimal) | planta, clock, skilltree, todo, contacts, nutriphi, presi, questions, calendar, storage |
-| ^2.15.7 - ^2.47.1 | manadeck, chat, manacore, picture, matrix |
-
-#### Vite Major Version Split
-
-| Version | Apps |
-|---------|------|
-| v6.0.x | clock, skilltree, todo, contacts, nutriphi, questions, calendar, storage, manacore |
-| v7.1.x | manadeck, chat, picture |
-
-#### TypeScript Versionen
-
-- `^5.9.x` (spezifisch): manadeck, chat, manacore, picture
-- `^5.0.0` (locker): planta, clock, skilltree, todo, contacts, nutriphi, presi, questions, calendar, storage
-
-### Empfehlungen
-
-1. **Tailwind auf Vite-Plugin vereinheitlichen** - alle 4 PostCSS-Apps migrieren
-2. **SvelteKit auf ^2.47.1** für alle Apps aktualisieren
-3. **TypeScript auf ^5.9.3** festlegen
-4. **Vite auf eine Major-Version** (v7.x empfohlen)
+#### Verbleibende Unterschiede (akzeptabel)
+- Vite v6.x vs v7.x - Kann bei nächstem Major-Update vereinheitlicht werden
 
 ---
 
@@ -200,12 +191,14 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 
 ### Duplikationen gefunden
 
-#### Toast System (2 Versionen)
+#### Toast System ✅
 
-| Version | Apps | Status |
-|---------|------|--------|
-| Svelte 5 Runes | chat, etc. | ✅ Modern |
-| Writable Store | contacts, etc. | ⚠️ Legacy |
+> **Status: Erledigt (29.01.2026)**
+
+- ✅ Zentrales Toast-System in `@manacore/shared-ui`
+- ✅ Migrierte Apps: calendar, chat, clock, contacts, picture, storage
+- API: `toastStore.success()`, `.error()`, `.warning()`, `.info()`
+- `ToastContainer` Komponente mit Phosphor Icons
 
 #### AuthGateModal
 
@@ -240,13 +233,20 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 
 ## Zusammenfassung der Prioritäten
 
+### ✅ Erledigt
+
+| Aufgabe | Status |
+|---------|--------|
+| ~~Tailwind auf Vite-Plugin migrieren (4 Apps)~~ | ✅ Erledigt |
+| ~~Toast System vereinheitlichen~~ | ✅ Erledigt |
+| ~~Dependencies aktualisieren~~ | ✅ Erledigt |
+| ~~lucide-svelte aus shared-ui entfernen~~ | ✅ Erledigt |
+
 ### 🔴 Hohe Priorität
 
 | Aufgabe | Aufwand | Impact |
 |---------|---------|--------|
 | API Client Package erstellen | Hoch | Alle Apps |
-| Tailwind auf Vite-Plugin migrieren (4 Apps) | Mittel | Build-Konsistenz |
-| Toast System vereinheitlichen | Niedrig | UX Konsistenz |
 
 ### 🟡 Mittlere Priorität
 
@@ -255,13 +255,11 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 | i18n zu 7 Apps hinzufügen | Mittel | Internationalisierung |
 | AuthGateModal in Shared Package | Niedrig | Code-Reduktion |
 | Global Error Handler extrahieren | Niedrig | Error UX |
-| Dependencies aktualisieren | Mittel | Maintenance |
 
 ### 🟢 Niedrige Priorität
 
 | Aufgabe | Aufwand | Impact |
 |---------|---------|--------|
-| SvelteKit/Vite Versionen angleichen | Niedrig | Konsistenz |
 | App-Skeletons vereinheitlichen | Niedrig | Code-Reduktion |
 | Auth Store Pattern dokumentieren | Niedrig | Onboarding |
 
@@ -269,9 +267,9 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 
 ## Nächste Schritte
 
-1. **API Client Package** als erstes angehen (höchster Impact)
-2. **Tailwind Migration** für 4 Apps durchführen
-3. **Toast System** konsolidieren
+1. **API Client Package** als nächstes angehen (höchster Impact)
+2. **i18n** zu fehlenden 7 Apps hinzufügen
+3. **AuthGateModal** in Shared Package extrahieren
 4. Schrittweise weitere Punkte abarbeiten
 
 ---
