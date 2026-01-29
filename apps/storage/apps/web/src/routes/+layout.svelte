@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
+	import { PillNavigation, setupGlobalErrorHandler } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -140,31 +140,41 @@
 		goto('/login');
 	}
 
-	onMount(async () => {
-		// Initialize theme
-		theme.initialize();
+	onMount(() => {
+		// Setup global error handling
+		const cleanupErrorHandler = setupGlobalErrorHandler();
 
-		// Initialize auth
-		await authStore.initialize();
+		// Initialize async operations
+		const init = async () => {
+			// Initialize theme
+			theme.initialize();
 
-		// Load user settings
-		await userSettings.load();
+			// Initialize auth
+			await authStore.initialize();
 
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('storage-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
-		}
+			// Load user settings
+			await userSettings.load();
 
-		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem('storage-nav-collapsed');
-		if (savedCollapsed === 'true') {
-			isCollapsed = true;
-			collapsedStore.set(true);
-		}
+			// Initialize sidebar mode from localStorage
+			const savedSidebar = localStorage.getItem('storage-nav-sidebar');
+			if (savedSidebar === 'true') {
+				isSidebarMode = true;
+				sidebarModeStore.set(true);
+			}
 
-		loading = false;
+			// Initialize collapsed state from localStorage
+			const savedCollapsed = localStorage.getItem('storage-nav-collapsed');
+			if (savedCollapsed === 'true') {
+				isCollapsed = true;
+				collapsedStore.set(true);
+			}
+
+			loading = false;
+		};
+
+		init();
+
+		return cleanupErrorHandler;
 	});
 </script>
 

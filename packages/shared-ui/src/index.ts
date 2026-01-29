@@ -196,6 +196,18 @@ export type {
 // Immersive Mode
 export { default as ImmersiveModeToggle } from './components/ImmersiveModeToggle.svelte';
 
-// Toast
-export { toastStore, toast, handleApiError, ToastContainer } from './toast';
-export type { Toast, ToastType } from './toast';
+// Toast & Global Error Handling
+export {
+	toastStore,
+	toast,
+	handleApiError,
+	ToastContainer,
+	setupGlobalErrorHandler,
+	GLOBAL_ERROR_TRANSLATIONS,
+} from './toast';
+export type {
+	Toast,
+	ToastType,
+	GlobalErrorHandlerOptions,
+	GlobalErrorHandlerTranslations,
+} from './toast';

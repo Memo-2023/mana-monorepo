@@ -5,24 +5,34 @@
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { waitLocale } from '$lib/i18n';
-	import { ToastContainer } from '@manacore/shared-ui';
+	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
 	import { AppLoadingSkeleton } from '$lib/components/skeletons';
 
 	let { children } = $props();
 
 	let loading = $state(true);
 
-	onMount(async () => {
-		// Wait for locale to be loaded
-		await waitLocale();
+	onMount(() => {
+		// Setup global error handling
+		const cleanupErrorHandler = setupGlobalErrorHandler();
 
-		// Initialize theme
-		theme.initialize();
+		// Initialize async operations
+		const init = async () => {
+			// Wait for locale to be loaded
+			await waitLocale();
 
-		// Initialize auth
-		await authStore.initialize();
+			// Initialize theme
+			theme.initialize();
 
-		loading = false;
+			// Initialize auth
+			await authStore.initialize();
+
+			loading = false;
+		};
+
+		init();
+
+		return cleanupErrorHandler;
 	});
 </script>
 

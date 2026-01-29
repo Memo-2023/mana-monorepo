@@ -3,7 +3,7 @@
 	import '$lib/i18n';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { ToastContainer } from '@manacore/shared-ui';
+	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
 	import { AppLoadingSkeleton } from '$lib/components/skeletons';
 	import { isLoading as i18nLoading } from 'svelte-i18n';
 	import { onMount } from 'svelte';
@@ -13,10 +13,16 @@
 	let loading = $state(true);
 	let appReady = $derived(!loading && !$i18nLoading);
 
-	onMount(async () => {
+	onMount(() => {
+		// Setup global error handling
+		const cleanupErrorHandler = setupGlobalErrorHandler();
+
 		theme.initialize();
-		await authStore.initialize();
-		loading = false;
+		authStore.initialize().then(() => {
+			loading = false;
+		});
+
+		return cleanupErrorHandler;
 	});
 </script>
 

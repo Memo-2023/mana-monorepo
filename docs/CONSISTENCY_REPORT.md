@@ -26,6 +26,7 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 5. ✅ **@manacore/shared-api-client Package erstellt** - 10 Apps migriert (clock, todo, contacts, storage, calendar, picture, nutriphi, planta, questions, skilltree)
 6. ✅ **i18n zu 6 Apps hinzugefügt** - todo, skilltree, nutriphi, planta, questions, matrix (jeweils DE + EN)
 7. ✅ **AuthGateModal zentralisiert** - `@manacore/shared-auth-ui` für 4 Apps (chat, todo, contacts, calendar)
+8. ✅ **Global Error Handler zentralisiert** - `@manacore/shared-ui` für 7 Apps (calendar, chat, clock, contacts, matrix, picture, storage)
 
 ---
 
@@ -220,18 +221,24 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 - Jede App hat eigene Version
 - Könnte mit `@manacore/shared-ui` Skeletons vereinheitlicht werden
 
-#### Global Error Handler
+#### Global Error Handler ✅
 
-- Nur in Contacts App vollständig implementiert
-- Sollte extrahiert werden
+> **Status: Erledigt (29.01.2026)**
+
+- ✅ Zentraler Global Error Handler in `@manacore/shared-ui`
+- ✅ Migrierte Apps: calendar, chat, clock, contacts, matrix, picture, storage
+- Funktion: `setupGlobalErrorHandler(options?)`
+- Behandelt: Unhandled Promise Rejections, JS Errors, Offline/Online Status
+- i18n: DE + EN eingebaut, erweiterbar
+- Optional: `onAuthError` Callback für Redirect
 
 ### Empfehlungen (nach Priorität)
 
 #### Hoch
 
-1. **Toast Store & Component vereinheitlichen** - Svelte 5 Runes Standard
-2. **AuthGateModal nach shared-auth-ui** verschieben
-3. **Global Error Handler** als Composable extrahieren
+1. ~~**Toast Store & Component vereinheitlichen**~~ ✅ Erledigt
+2. ~~**AuthGateModal nach shared-auth-ui**~~ ✅ Erledigt
+3. ~~**Global Error Handler**~~ ✅ Erledigt
 
 #### Mittel
 
@@ -254,6 +261,7 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 | ~~API Client Package erstellen~~ | ✅ Erledigt (10 Apps migriert) |
 | ~~i18n zu 6 Apps hinzufügen~~ | ✅ Erledigt |
 | ~~AuthGateModal zentralisieren~~ | ✅ Erledigt (4 Apps migriert) |
+| ~~Global Error Handler extrahieren~~ | ✅ Erledigt (7 Apps migriert) |
 
 ### 🔴 Hohe Priorität
 
@@ -261,10 +269,7 @@ _(Keine offenen Aufgaben mit hoher Priorität)_
 
 ### 🟡 Mittlere Priorität
 
-| Aufgabe | Aufwand | Impact |
-|---------|---------|--------|
-| ~~AuthGateModal in Shared Package~~ | ~~Niedrig~~ | ✅ Erledigt |
-| Global Error Handler extrahieren | Niedrig | Error UX |
+_(Keine offenen Aufgaben mit mittlerer Priorität)_
 
 ### 🟢 Niedrige Priorität
 
@@ -280,8 +285,9 @@ _(Keine offenen Aufgaben mit hoher Priorität)_
 1. ~~**API Client Package** als nächstes angehen (höchster Impact)~~ ✅ Erledigt
 2. ~~**i18n** zu fehlenden Apps hinzufügen~~ ✅ Erledigt (6 Apps)
 3. ~~**AuthGateModal** in Shared Package extrahieren~~ ✅ Erledigt (4 Apps)
-4. **Global Error Handler** extrahieren
-5. Schrittweise weitere Punkte abarbeiten
+4. ~~**Global Error Handler** extrahieren~~ ✅ Erledigt (7 Apps)
+5. **App-Skeletons vereinheitlichen** (niedrige Priorität)
+6. **Auth Store Pattern dokumentieren** (niedrige Priorität)
 
 ---
 

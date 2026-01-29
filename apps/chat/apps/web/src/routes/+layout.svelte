@@ -2,13 +2,18 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores/theme';
-	import { ToastContainer } from '@manacore/shared-ui';
+	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
 
 	let { children } = $props();
 
 	onMount(() => {
-		const cleanup = theme.initialize();
-		return cleanup;
+		const cleanupErrorHandler = setupGlobalErrorHandler();
+		const cleanupTheme = theme.initialize();
+
+		return () => {
+			cleanupErrorHandler();
+			cleanupTheme();
+		};
 	});
 </script>
 

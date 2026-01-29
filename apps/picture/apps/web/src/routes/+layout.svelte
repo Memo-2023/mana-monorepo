@@ -2,7 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { ToastContainer } from '@manacore/shared-ui';
+	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
 	import { onMount } from 'svelte';
 
 	// Import and initialize theme
@@ -14,6 +14,9 @@
 	let { children, data } = $props();
 
 	onMount(() => {
+		// Setup global error handling
+		const cleanupErrorHandler = setupGlobalErrorHandler();
+
 		// Initialize theme (applies CSS variables and loads from localStorage)
 		const cleanupTheme = theme.initialize();
 
@@ -21,6 +24,7 @@
 		authStore.initialize();
 
 		return () => {
+			cleanupErrorHandler();
 			cleanupTheme();
 		};
 	});
