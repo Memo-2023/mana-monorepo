@@ -39,8 +39,11 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getTasks } from '$lib/api/tasks';
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
-	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
-	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import {
+		AuthGateModal,
+		GuestWelcomeModal,
+		shouldShowGuestWelcome,
+	} from '@manacore/shared-auth-ui';
 	import { browser } from '$app/environment';
 
 	// App switcher items
@@ -515,7 +518,23 @@
 <AuthGateModal
 	visible={showAuthGateModal}
 	onClose={() => (showAuthGateModal = false)}
+	onLogin={() => {
+		showAuthGateModal = false;
+		if (typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem('auth-return-url', window.location.pathname);
+		}
+		goto('/login');
+	}}
+	onRegister={() => {
+		showAuthGateModal = false;
+		if (typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem('auth-return-url', window.location.pathname);
+		}
+		goto('/register');
+	}}
 	action={authGateAction}
+	locale={currentLocale === 'en' ? 'en' : 'de'}
+	infoText="Du kannst die Demo-Aufgaben ansehen, aber um eigene Aufgaben zu erstellen benötigst du ein Konto."
 />
 
 <!-- Guest Welcome Modal -->

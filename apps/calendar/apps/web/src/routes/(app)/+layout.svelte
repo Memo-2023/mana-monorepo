@@ -64,7 +64,7 @@
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
-	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
+	import { AuthGateModal } from '@manacore/shared-auth-ui';
 	import VoiceRecordButton from '$lib/components/voice/VoiceRecordButton.svelte';
 	import VoiceRecordingModal from '$lib/components/voice/VoiceRecordingModal.svelte';
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
@@ -864,7 +864,23 @@
 <AuthGateModal
 	visible={showAuthGateModal}
 	onClose={() => (showAuthGateModal = false)}
+	onLogin={() => {
+		showAuthGateModal = false;
+		if (typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem('auth-return-url', window.location.pathname);
+		}
+		goto('/login');
+	}}
+	onRegister={() => {
+		showAuthGateModal = false;
+		if (typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem('auth-return-url', window.location.pathname);
+		}
+		goto('/register');
+	}}
 	action={authGateAction}
+	locale={currentLocale === 'en' ? 'en' : 'de'}
+	infoText="Du kannst im Demo-Modus die Beispiel-Termine ansehen, aber keine eigenen erstellen."
 />
 
 <!-- Guest Welcome Modal -->

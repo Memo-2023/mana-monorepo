@@ -7,6 +7,7 @@ export { default as ForgotPasswordPage } from './pages/ForgotPasswordPage.svelte
 export { default as GoogleSignInButton } from './components/GoogleSignInButton.svelte';
 export { default as AppleSignInButton } from './components/AppleSignInButton.svelte';
 export { default as GuestWelcomeModal } from './components/GuestWelcomeModal.svelte';
+export { default as AuthGateModal } from './components/AuthGateModal.svelte';
 
 // Utilities
 export {
@@ -42,4 +43,6 @@ export type {
 	AuthServiceInterface,
 	AuthResult,
 	GuestWelcomeTranslations,
+	AuthGateAction,
+	AuthGateTranslations,
 } from './types';

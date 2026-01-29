@@ -46,8 +46,11 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
-	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
-	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import {
+		AuthGateModal,
+		GuestWelcomeModal,
+		shouldShowGuestWelcome,
+	} from '@manacore/shared-auth-ui';
 	import { browser } from '$app/environment';
 
 	// Tags state for Quick-Create
@@ -483,7 +486,23 @@
 <AuthGateModal
 	visible={showAuthGateModal}
 	onClose={() => (showAuthGateModal = false)}
+	onLogin={() => {
+		showAuthGateModal = false;
+		if (typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem('auth-return-url', window.location.pathname);
+		}
+		goto('/login');
+	}}
+	onRegister={() => {
+		showAuthGateModal = false;
+		if (typeof sessionStorage !== 'undefined') {
+			sessionStorage.setItem('auth-return-url', window.location.pathname);
+		}
+		goto('/register');
+	}}
 	action={authGateAction}
+	locale={currentLocale === 'en' ? 'en' : 'de'}
+	infoText="Im Demo-Modus werden Beispielkontakte angezeigt. Melde dich an, um eigene Kontakte zu erstellen."
 />
 
 <!-- Guest Welcome Modal -->

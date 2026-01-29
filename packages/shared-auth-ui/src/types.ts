@@ -77,3 +77,19 @@ export interface GuestWelcomeTranslations {
 	/** App-specific feature list (array of strings) */
 	features?: string[];
 }
+
+/**
+ * Action types for the AuthGateModal
+ */
+export type AuthGateAction = 'save' | 'sync' | 'feature' | 'ai';
+
+/**
+ * Translation strings for the auth gate modal
+ */
+export interface AuthGateTranslations {
+	loginButton: string;
+	registerButton: string;
+	laterButton: string;
+	/** Function to generate migration info text */
+	migrationInfo: (count: number) => string;
+}

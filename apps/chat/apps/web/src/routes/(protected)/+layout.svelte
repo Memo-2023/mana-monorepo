@@ -24,8 +24,11 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
-	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import {
+		AuthGateModal,
+		GuestWelcomeModal,
+		shouldShowGuestWelcome,
+	} from '@manacore/shared-auth-ui';
 	import type { LayoutData } from './$types';
 
 	// App switcher items
@@ -296,10 +299,25 @@
 
 	<!-- Auth Gate Modal -->
 	<AuthGateModal
-		open={showAuthGateModal}
-		action={authGateAction}
-		conversationCount={sessionConversationCount}
+		visible={showAuthGateModal}
 		onClose={() => (showAuthGateModal = false)}
+		onLogin={() => {
+			showAuthGateModal = false;
+			if (typeof sessionStorage !== 'undefined') {
+				sessionStorage.setItem('auth-return-url', window.location.pathname);
+			}
+			goto('/login');
+		}}
+		onRegister={() => {
+			showAuthGateModal = false;
+			if (typeof sessionStorage !== 'undefined') {
+				sessionStorage.setItem('auth-return-url', window.location.pathname);
+			}
+			goto('/register');
+		}}
+		action={authGateAction}
+		migrationCount={sessionConversationCount}
+		locale={currentLocale === 'en' ? 'en' : 'de'}
 	/>
 
 	<!-- Guest Welcome Modal -->

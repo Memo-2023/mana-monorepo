@@ -15,7 +15,7 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 | i18n Implementation | ✅ Gut | ~~Mittel~~ | ✅ Erledigt |
 | Auth Implementation | ✅ Gut | Niedrig | - |
 | Styling & Tailwind | ✅ Sehr gut | Niedrig | - |
-| Komponenten & Layouts | ⚠️ Mittel | Mittel | Offen |
+| Komponenten & Layouts | ✅ Gut | ~~Mittel~~ | ✅ Erledigt |
 
 ### Erledigte Aufgaben (29.01.2026)
 
@@ -25,6 +25,7 @@ Nach eingehender Analyse aller Web-Apps im Monorepo wurden folgende Bereiche auf
 4. ✅ **lucide-svelte entfernt** - shared-ui nutzt jetzt nur noch `@manacore/shared-icons`
 5. ✅ **@manacore/shared-api-client Package erstellt** - 10 Apps migriert (clock, todo, contacts, storage, calendar, picture, nutriphi, planta, questions, skilltree)
 6. ✅ **i18n zu 6 Apps hinzugefügt** - todo, skilltree, nutriphi, planta, questions, matrix (jeweils DE + EN)
+7. ✅ **AuthGateModal zentralisiert** - `@manacore/shared-auth-ui` für 4 Apps (chat, todo, contacts, calendar)
 
 ---
 
@@ -204,10 +205,15 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 - API: `toastStore.success()`, `.error()`, `.warning()`, `.info()`
 - `ToastContainer` Komponente mit Phosphor Icons
 
-#### AuthGateModal
+#### AuthGateModal ✅
 
-- Dupliziert in: chat, todo, contacts, calendar
-- Sollte in `@manacore/shared-auth-ui`
+> **Status: Erledigt (29.01.2026)**
+
+- ✅ Zentrales AuthGateModal in `@manacore/shared-auth-ui`
+- ✅ Migrierte Apps: chat, todo, contacts, calendar
+- Unterstützt: 'save', 'sync', 'feature', 'ai' Actions
+- i18n: DE + EN eingebaut
+- Optionale Migration-Info für Session-Daten
 
 #### AppLoadingSkeleton
 
@@ -247,6 +253,7 @@ Alle Apps nutzen **Mana Core Auth** mit `@manacore/shared-auth`.
 | ~~lucide-svelte aus shared-ui entfernen~~ | ✅ Erledigt |
 | ~~API Client Package erstellen~~ | ✅ Erledigt (10 Apps migriert) |
 | ~~i18n zu 6 Apps hinzufügen~~ | ✅ Erledigt |
+| ~~AuthGateModal zentralisieren~~ | ✅ Erledigt (4 Apps migriert) |
 
 ### 🔴 Hohe Priorität
 
@@ -256,7 +263,7 @@ _(Keine offenen Aufgaben mit hoher Priorität)_
 
 | Aufgabe | Aufwand | Impact |
 |---------|---------|--------|
-| AuthGateModal in Shared Package | Niedrig | Code-Reduktion |
+| ~~AuthGateModal in Shared Package~~ | ~~Niedrig~~ | ✅ Erledigt |
 | Global Error Handler extrahieren | Niedrig | Error UX |
 
 ### 🟢 Niedrige Priorität
@@ -272,7 +279,7 @@ _(Keine offenen Aufgaben mit hoher Priorität)_
 
 1. ~~**API Client Package** als nächstes angehen (höchster Impact)~~ ✅ Erledigt
 2. ~~**i18n** zu fehlenden Apps hinzufügen~~ ✅ Erledigt (6 Apps)
-3. **AuthGateModal** in Shared Package extrahieren
+3. ~~**AuthGateModal** in Shared Package extrahieren~~ ✅ Erledigt (4 Apps)
 4. **Global Error Handler** extrahieren
 5. Schrittweise weitere Punkte abarbeiten
 
