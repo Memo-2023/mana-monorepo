@@ -1246,6 +1246,39 @@ services:
       start_period: 40s
 
   # ============================================
+  # Matrix TTS Bot (Text-to-Speech)
+  # ============================================
+
+  matrix-tts-bot:
+    image: matrix-tts-bot:latest
+    container_name: manacore-matrix-tts-bot
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3023
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_TTS_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_TTS_BOT_ROOMS:-}
+      TTS_URL: http://host.docker.internal:3022
+      DEFAULT_VOICE: af_heart
+      DEFAULT_SPEED: 1.0
+      MAX_TEXT_LENGTH: 500
+    volumes:
+      - matrix_tts_bot_data:/app/data
+    ports:
+      - "3023:3023"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3023/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
   # Auto-Update (Watchtower)
   # ============================================
 
@@ -1305,3 +1338,5 @@ volumes:
     name: manacore-matrix-zitare-bot
   matrix_clock_bot_data:
     name: manacore-matrix-clock-bot
+  matrix_tts_bot_data:
+    name: manacore-matrix-tts-bot
