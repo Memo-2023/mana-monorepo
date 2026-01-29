@@ -11,8 +11,8 @@ import {
 	getErrorCodeFromStatus,
 	isRetryableError,
 	parseErrorResponse,
-	sleep,
 } from './utils';
+import { sleep } from '@manacore/shared-utils';
 
 const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_RETRIES = 0;
