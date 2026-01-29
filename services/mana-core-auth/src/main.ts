@@ -86,9 +86,15 @@ async function bootstrap() {
 		exclude: [
 			{ path: 'metrics', method: RequestMethod.ALL },
 			{ path: 'health', method: RequestMethod.ALL },
+			// Better Auth routes - use path-to-regexp wildcards
 			{ path: 'api/auth/(.*)', method: RequestMethod.ALL },
+			{ path: 'api/auth/jwks', method: RequestMethod.ALL },
+			{ path: 'api/auth/:path*', method: RequestMethod.ALL },
+			// OIDC routes
 			{ path: '.well-known/(.*)', method: RequestMethod.ALL },
+			{ path: '.well-known/openid-configuration', method: RequestMethod.ALL },
 			{ path: 'api/oidc/(.*)', method: RequestMethod.ALL },
+			{ path: 'api/oidc/:path*', method: RequestMethod.ALL },
 		],
 	});
 
