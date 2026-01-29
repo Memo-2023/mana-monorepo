@@ -1,13 +1,4 @@
-import { defineConfig } from 'drizzle-kit';
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
+import { createDrizzleConfig } from '@manacore/shared-drizzle-config';
 
-dotenv.config();
-
-export default defineConfig({
-	schema: './src/db/schema/index.ts',
-	out: './src/db/migrations',
-	dialect: 'postgresql',
-	dbCredentials: {
-		url: process.env.DATABASE_URL || 'postgresql://picture:password@localhost:5432/picture',
-	},
-});
+export default createDrizzleConfig({ dbName: 'picture' });

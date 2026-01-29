@@ -277,6 +277,9 @@ importers:
       '@manacore/shared-splitscreen':
         specifier: workspace:*
         version: link:../../../../packages/shared-splitscreen
+      '@manacore/shared-stores':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-stores
       '@manacore/shared-subscription-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-subscription-ui
@@ -1139,6 +1142,9 @@ importers:
       '@manacore/shared-splitscreen':
         specifier: workspace:*
         version: link:../../../../packages/shared-splitscreen
+      '@manacore/shared-stores':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-stores
       '@manacore/shared-subscription-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-subscription-ui
@@ -4175,6 +4181,9 @@ importers:
       '@manacore/shared-splitscreen':
         specifier: workspace:*
         version: link:../../../../packages/shared-splitscreen
+      '@manacore/shared-stores':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-stores
       '@manacore/shared-subscription-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-subscription-ui
@@ -4585,6 +4594,16 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  packages/shared-drizzle-config:
+    dependencies:
+      drizzle-kit:
+        specifier: ^0.30.4
+        version: 0.30.6
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   packages/shared-errors:
     devDependencies:
       '@nestjs/common':
@@ -4926,6 +4945,8 @@ importers:
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
+
+  packages/shared-tsconfig: {}
 
   packages/shared-types:
     devDependencies:

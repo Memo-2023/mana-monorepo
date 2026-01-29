@@ -1,10 +1,9 @@
-import { defineConfig } from 'drizzle-kit';
+import { createDrizzleConfig } from '@manacore/shared-drizzle-config';
 
-export default defineConfig({
-	schema: './src/database/schema.ts',
-	out: './drizzle',
-	dialect: 'postgresql',
-	dbCredentials: {
-		url: process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/zitare_bot',
-	},
+export default createDrizzleConfig({
+	dbName: 'zitare_bot',
+	schemaPath: './src/database/schema.ts',
+	outDir: './drizzle',
+	verbose: false,
+	strict: false,
 });

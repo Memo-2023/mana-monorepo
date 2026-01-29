@@ -1,11 +1,8 @@
 import 'dotenv/config';
-import { defineConfig } from 'drizzle-kit';
+import { createDrizzleConfig } from '@manacore/shared-drizzle-config';
 
-export default defineConfig({
-	out: './drizzle',
-	schema: './src/db/schema/*.ts',
-	dialect: 'postgresql',
-	dbCredentials: {
-		url: process.env.DATABASE_URL!,
-	},
+export default createDrizzleConfig({
+	dbName: 'questions',
+	schemaPath: './src/db/schema/*.ts',
+	outDir: './drizzle',
 });

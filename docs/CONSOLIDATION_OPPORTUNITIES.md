@@ -15,7 +15,7 @@
 | **MITTEL** | UI Component Cleanup | 400 LOC | Niedrig |
 | ~~**MITTEL**~~ | ~~Vite Configs~~ | ~~300 LOC~~ ✅ **~350 LOC entfernt** | ~~Niedrig~~ |
 | **MITTEL** | Navigation Stores | 50 LOC | Niedrig |
-| **NIEDRIG** | Drizzle Configs | 200 LOC | Niedrig |
+| ~~**NIEDRIG**~~ | ~~Drizzle Configs~~ | ~~200 LOC~~ ✅ **~160 LOC entfernt** | ~~Niedrig~~ |
 | **NIEDRIG** | Logger Utilities | 130 LOC | Niedrig |
 
 ---
@@ -343,25 +343,43 @@ export default defineConfig(mergeViteConfig(baseConfig, {
 
 ---
 
-### 4.3 NIEDRIG: Drizzle Configs (200 LOC)
+### ~~4.3 NIEDRIG: Drizzle Configs~~ ✅ ERLEDIGT (~160 LOC gespart)
 
-**Problem:** 12 Backends haben 90% identische drizzle.config.ts.
+**Status:** `@manacore/shared-drizzle-config` Package erstellt und 16 Configs migriert (29.01.2026)
 
-**Empfehlung:** Factory-Funktion
+**Erstelltes Package:** `packages/shared-drizzle-config/`
+- `createDrizzleConfig()` - Factory mit dbName, schemaPath, outDir, schemaFilter, etc.
+- Standardwerte: schema `./src/db/schema/index.ts`, out `./src/db/migrations`
+- Fallback URL: `postgresql://manacore:devpassword@localhost:5432/{dbName}`
 
+**Migrierte Configs (16 von 20):**
+- ✅ Backends: calendar, chat, clock, contacts, nutriphi, picture, planta, presi, questions, skilltree, storage, todo
+- ✅ Services: mana-core-auth, telegram-zitare-bot, telegram-todo-bot, telegram-nutriphi-bot
+
+**Nicht migriert (Sonderfälle):**
+- ⏭️ telegram-project-doc-bot (postgres:postgres Credentials)
+- ⏭️ matrix-project-doc-bot (leere Fallback-URL)
+- ⏭️ manadeck-database, nutriphi-database (Packages mit kompiliertem JS-Pfad)
+
+**Vorher (10-15 LOC):**
 ```typescript
-// Vorher (17 LOC pro Backend)
 export default defineConfig({
   schema: './src/db/schema/index.ts',
   out: './src/db/migrations',
   dialect: 'postgresql',
   dbCredentials: { url: process.env.DATABASE_URL || '...' },
+  verbose: true,
+  strict: true,
 });
-
-// Nachher (5 LOC)
-import { createDrizzleConfig } from '@manacore/shared-drizzle-config';
-export default createDrizzleConfig('chat');
 ```
+
+**Nachher (1-5 LOC):**
+```typescript
+import { createDrizzleConfig } from '@manacore/shared-drizzle-config';
+export default createDrizzleConfig({ dbName: 'chat' });
+```
+
+**Einsparung:** 16 Configs × ~10 LOC = ~160 LOC
 
 ---
 
@@ -415,9 +433,9 @@ export default createDrizzleConfig('chat');
 
 | Aufgabe | LOC | Aufwand |
 |---------|-----|---------|
-| `@manacore/shared-nestjs-setup` erstellen | 1.800 | Mittel |
-| `@manacore/shared-nestjs-health` erstellen | 170 | Niedrig |
-| Drizzle Config Factory erstellen | 200 | Niedrig |
+| `@manacore/shared-nestjs-setup` erstellen | 1.800 | Mittel | Offen |
+| `@manacore/shared-nestjs-health` erstellen | 170 | Niedrig | Offen |
+| ~~Drizzle Config Factory erstellen~~ | ~~200~~ → **160** | ~~Niedrig~~ | ✅ Erledigt |
 
 ### Phase 4: Skeleton Refactoring (Optional, ~800 LOC)
 

@@ -1,12 +1,3 @@
-import { defineConfig } from 'drizzle-kit';
+import { createDrizzleConfig } from '@manacore/shared-drizzle-config';
 
-export default defineConfig({
-	dialect: 'postgresql',
-	schema: './src/db/schema/index.ts',
-	out: './src/db/migrations',
-	dbCredentials: {
-		url: process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/calendar',
-	},
-	verbose: true,
-	strict: true,
-});
+export default createDrizzleConfig({ dbName: 'calendar' });
