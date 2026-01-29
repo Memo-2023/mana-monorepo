@@ -32,6 +32,9 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 	// User settings storage (in-memory)
 	private userSettings: Map<string, UserSettings> = new Map();
 
+	// Track processed events to prevent duplicates
+	private processedEvents: Set<string> = new Set();
+
 	constructor(
 		private configService: ConfigService,
 		private ttsService: TtsService
@@ -102,6 +105,20 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 	private async handleMessage(roomId: string, event: any) {
 		// Ignore own messages
 		if (event.sender === this.botUserId) return;
+
+		// Prevent duplicate processing
+		const eventId = event.event_id;
+		if (eventId && this.processedEvents.has(eventId)) {
+			return;
+		}
+		if (eventId) {
+			this.processedEvents.add(eventId);
+			// Clean up old events (keep last 1000)
+			if (this.processedEvents.size > 1000) {
+				const iterator = this.processedEvents.values();
+				this.processedEvents.delete(iterator.next().value);
+			}
+		}
 
 		// Check room allowlist
 		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
@@ -294,8 +311,8 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 			// Stop typing indicator
 			await this.client.setTyping(roomId, false);
 
-			// Upload audio to Matrix
-			const mxcUrl = await this.client.uploadContent(audioBuffer, 'audio/wav', 'speech.wav');
+			// Upload audio to Matrix (MP3 for better browser compatibility)
+			const mxcUrl = await this.client.uploadContent(audioBuffer, 'audio/mpeg', 'speech.mp3');
 
 			// Calculate approximate duration (rough estimate based on text length and speed)
 			const estimatedDuration = Math.round(((text.length / 15) * 1000) / settings.speed);
@@ -303,10 +320,10 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 			// Send audio message
 			await this.client.sendMessage(roomId, {
 				msgtype: 'm.audio',
-				body: 'speech.wav',
+				body: 'speech.mp3',
 				url: mxcUrl,
 				info: {
-					mimetype: 'audio/wav',
+					mimetype: 'audio/mpeg',
 					size: audioBuffer.length,
 					duration: estimatedDuration,
 				},
