@@ -1,4 +1,3 @@
-import { writable } from 'svelte/store';
+import { createSimpleNavigationStores } from '@manacore/shared-stores';
 
-export const isSidebarMode = writable(false);
-export const isNavCollapsed = writable(false);
+export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores();

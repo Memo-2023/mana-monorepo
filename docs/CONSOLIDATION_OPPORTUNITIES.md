@@ -14,7 +14,7 @@
 | ~~**MITTEL**~~ | ~~TypeScript Configs~~ | ~~400 LOC~~ ✅ **~280 LOC entfernt** | ~~Niedrig~~ |
 | **MITTEL** | UI Component Cleanup | 400 LOC | Niedrig |
 | ~~**MITTEL**~~ | ~~Vite Configs~~ | ~~300 LOC~~ ✅ **~350 LOC entfernt** | ~~Niedrig~~ |
-| **MITTEL** | Navigation Stores | 50 LOC | Niedrig |
+| ~~**MITTEL**~~ | ~~Navigation Stores~~ | ~~50 LOC~~ ✅ **~50 LOC entfernt** | ~~Niedrig~~ |
 | ~~**NIEDRIG**~~ | ~~Drizzle Configs~~ | ~~200 LOC~~ ✅ **~160 LOC entfernt** | ~~Niedrig~~ |
 | **NIEDRIG** | Logger Utilities | 130 LOC | Niedrig |
 
@@ -174,29 +174,37 @@ export const todoSettings = {
 
 ---
 
-### 2.2 MITTEL: Navigation Stores (50 LOC)
+### ~~2.2 MITTEL: Navigation Stores~~ ✅ ERLEDIGT (~50 LOC gespart)
 
-**Problem:** 9 Apps haben fast identische Navigation-Stores.
+**Status:** `createSimpleNavigationStores()` Factory erstellt und 10 Apps migriert (29.01.2026)
 
-**Pattern (5-6 LOC pro App):**
+**Erstellte Factory:** `packages/shared-stores/src/navigation-simple.ts`
+- Erstellt `isSidebarMode`, `isNavCollapsed` writable Stores
+- Optional: `isToolbarCollapsed` mit `withToolbar: true`
+- Optional: localStorage Persistenz mit `storageKey`
+
+**Migrierte Apps (10 von 10):**
+- ✅ Einfach: chat, contacts, manacore, manadeck, matrix, presi, storage
+- ✅ Mit Toolbar: calendar, todo
+- ✅ Mit Persistenz: clock
+
+**Vorher (5-36 LOC):**
 ```typescript
 import { writable } from 'svelte/store';
 export const isSidebarMode = writable(false);
 export const isNavCollapsed = writable(false);
+// + optional localStorage handling (30+ LOC)
 ```
 
-**Ausnahme:** Clock (36 LOC) mit localStorage Persistenz + Media Query Listeners
-
-**Empfehlung:** Factory in `@manacore/shared-stores`
-
+**Nachher (3-5 LOC):**
 ```typescript
-export function createNavigationStore(options?: {
-  persist?: boolean;
-  mediaQueryCollapse?: string;
-}) {
-  // ...
-}
+import { createSimpleNavigationStores } from '@manacore/shared-stores';
+export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores({
+  storageKey: 'clock', // optional
+});
 ```
+
+**Einsparung:** ~50 LOC (besonders Clock: 36 → 4 LOC)
 
 ---
 
@@ -427,7 +435,7 @@ export default createDrizzleConfig({ dbName: 'chat' });
 | ~~`createAppSettingsStore()` Factory erstellen~~ | ~~600~~ → **323** | ~~Mittel~~ | ✅ Erledigt |
 | ~~`@manacore/shared-tsconfig` Package erstellen~~ | ~~400~~ → **280** | ~~Niedrig~~ | ✅ Erledigt |
 | ~~`@manacore/shared-vite-config` erweitern (15 Apps)~~ | ~~300~~ → **350** | ~~Niedrig~~ | ✅ Erledigt |
-| Navigation Store Factory erstellen | 50 | Niedrig | Offen |
+| ~~Navigation Store Factory erstellen~~ | ~~50~~ → **50** | ~~Niedrig~~ | ✅ Erledigt |
 
 ### Phase 3: Backend Setup (5-7 Tage, ~2.000 LOC)
 

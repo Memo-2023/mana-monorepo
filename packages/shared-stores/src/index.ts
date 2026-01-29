@@ -15,3 +15,8 @@ export {
 	type AppSettingsStore,
 	type AppSettingsStoreOptions,
 } from './settings.svelte';
+export {
+	createSimpleNavigationStores,
+	type SimpleNavigationStores,
+	type SimpleNavigationOptions,
+} from './navigation-simple';

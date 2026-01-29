@@ -1,8 +1,3 @@
-/**
- * Navigation Store - Manages sidebar and navigation state
- */
+import { createSimpleNavigationStores } from '@manacore/shared-stores';
 
-import { writable } from 'svelte/store';
-
-export const isSidebarMode = writable(false);
-export const isNavCollapsed = writable(false);
+export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores();
