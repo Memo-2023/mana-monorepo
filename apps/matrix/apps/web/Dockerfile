@@ -26,6 +26,7 @@ COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-types ./packages/shared-types
+COPY packages/shared-stores ./packages/shared-stores
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 
