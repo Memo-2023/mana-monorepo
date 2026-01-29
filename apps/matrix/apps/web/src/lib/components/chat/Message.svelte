@@ -67,15 +67,43 @@
 			.replace(/'/g, '&#039;');
 	}
 
-	// Convert URLs to clickable links
-	function linkifyText(text: string, isOwn: boolean): string {
+	// Apply markdown formatting (bold, italic, code, strikethrough)
+	function applyMarkdown(text: string, isOwn: boolean): string {
+		const codeColor = isOwn ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10';
+
+		// Inline code (backticks) - process first to avoid conflicts
+		text = text.replace(/`([^`]+)`/g, `<code class="px-1 py-0.5 rounded text-sm font-mono ${codeColor}">$1</code>`);
+
+		// Bold (**text** or __text__)
+		text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+		text = text.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+
+		// Italic (*text* or _text_) - be careful not to match inside URLs
+		text = text.replace(/(?<![*_])\*(?!\*)([^*]+)\*(?!\*)/g, '<em>$1</em>');
+		text = text.replace(/(?<![*_])_(?!_)([^_]+)_(?!_)/g, '<em>$1</em>');
+
+		// Strikethrough (~~text~~)
+		text = text.replace(/~~([^~]+)~~/g, '<del class="opacity-70">$1</del>');
+
+		return text;
+	}
+
+	// Convert URLs to clickable links and apply markdown
+	function formatMessageBody(text: string, isOwn: boolean): string {
 		const escaped = escapeHtml(text);
 		const linkClass = isOwn
 			? 'underline underline-offset-2 hover:opacity-80'
 			: 'text-primary underline underline-offset-2 hover:opacity-80';
-		return escaped.replace(urlRegex, (url) => {
+
+		// First apply markdown
+		let formatted = applyMarkdown(escaped, isOwn);
+
+		// Then linkify URLs
+		formatted = formatted.replace(urlRegex, (url) => {
 			return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="${linkClass}">${url}</a>`;
 		});
+
+		return formatted;
 	}
 
 	// Extract first URL for preview
@@ -403,7 +431,7 @@
 				</p>
 			{:else}
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				<p class="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{@html linkifyText(message.body, message.isOwn)}</p>
+				<p class="whitespace-pre-wrap break-words text-[15px] leading-relaxed">{@html formatMessageBody(message.body, message.isOwn)}</p>
 
 				<!-- Link Preview Card -->
 				{#if firstUrl()}
