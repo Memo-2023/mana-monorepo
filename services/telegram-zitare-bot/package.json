@@ -32,6 +32,7 @@
 		"telegraf": "^4.16.3"
 	},
 	"devDependencies": {
+		"@manacore/shared-drizzle-config": "workspace:*",
 		"@nestjs/cli": "^10.4.9",
 		"@nestjs/schematics": "^10.2.3",
 		"@types/node": "^22.10.5",

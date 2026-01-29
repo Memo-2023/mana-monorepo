@@ -6201,6 +6201,9 @@ importers:
         specifier: ^4.16.3
         version: 4.16.3(encoding@0.1.13)
     devDependencies:
+      '@manacore/shared-drizzle-config':
+        specifier: workspace:*
+        version: link:../../packages/shared-drizzle-config
       '@nestjs/cli':
         specifier: ^10.4.9
         version: 10.4.9(esbuild@0.27.0)
