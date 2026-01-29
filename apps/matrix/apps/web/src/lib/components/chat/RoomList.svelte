@@ -10,10 +10,15 @@
 	let { onCreateRoom }: Props = $props();
 
 	let search = $state('');
-	let showDMs = $state(true);
 
-	let filteredRooms = $derived(
-		(showDMs ? matrixStore.directRooms : matrixStore.groupRooms).filter((room) =>
+	let filteredDirectRooms = $derived(
+		matrixStore.directRooms.filter((room) =>
+			room.name.toLowerCase().includes(search.toLowerCase())
+		)
+	);
+
+	let filteredGroupRooms = $derived(
+		matrixStore.groupRooms.filter((room) =>
 			room.name.toLowerCase().includes(search.toLowerCase())
 		)
 	);
@@ -38,71 +43,79 @@
 		</div>
 	</div>
 
-	<!-- Tabs -->
-	<div class="flex mx-3 mb-2 p-1 rounded-xl bg-black/5 dark:bg-white/5">
-		<button
-			class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all duration-200
-			       {showDMs
-				? 'bg-white dark:bg-white/20 shadow-sm text-foreground'
-				: 'text-muted-foreground hover:text-foreground'}"
-			onclick={() => (showDMs = true)}
-		>
-			<ChatCircle class="h-4 w-4" weight={showDMs ? 'fill' : 'regular'} />
-			Direkt
-			{#if matrixStore.directRooms.length > 0}
-				<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-xs">
-					{matrixStore.directRooms.length}
-				</span>
-			{/if}
-		</button>
-		<button
-			class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all duration-200
-			       {!showDMs
-				? 'bg-white dark:bg-white/20 shadow-sm text-foreground'
-				: 'text-muted-foreground hover:text-foreground'}"
-			onclick={() => (showDMs = false)}
-		>
-			<Users class="h-4 w-4" weight={!showDMs ? 'fill' : 'regular'} />
-			Räume
-			{#if matrixStore.groupRooms.length > 0}
-				<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-xs">
-					{matrixStore.groupRooms.length}
-				</span>
-			{/if}
-		</button>
-	</div>
-
-	<!-- Room List -->
+	<!-- Room List with Sections -->
 	<div class="chat-scrollbar flex-1 overflow-y-auto px-3">
-		{#each filteredRooms as room (room.id)}
-			<RoomItem
-				{room}
-				selected={room.id === matrixStore.currentRoomId}
-				onclick={() => matrixStore.selectRoom(room.id)}
-			/>
-		{:else}
-			<div class="flex flex-col items-center justify-center p-8 text-muted-foreground">
-				{#if search}
-					<MagnifyingGlass class="mb-2 h-8 w-8 opacity-50" />
-					<p class="text-sm">Keine Ergebnisse für "{search}"</p>
+		<!-- Direct Messages Section -->
+		{#if filteredDirectRooms.length > 0 || !search}
+			<div class="mb-2">
+				<div class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground">
+					<ChatCircle class="h-3.5 w-3.5" />
+					Direktnachrichten
+					{#if matrixStore.directRooms.length > 0}
+						<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px]">
+							{matrixStore.directRooms.length}
+						</span>
+					{/if}
+				</div>
+				{#each filteredDirectRooms as room (room.id)}
+					<RoomItem
+						{room}
+						selected={room.id === matrixStore.currentRoomId}
+						onclick={() => matrixStore.selectRoom(room.id)}
+					/>
 				{:else}
-					<ChatCircle class="mb-2 h-8 w-8 opacity-50" />
-					<p class="text-sm">Noch keine {showDMs ? 'Direktnachrichten' : 'Räume'}</p>
-				{/if}
+					{#if !search}
+						<p class="px-2 py-3 text-sm text-muted-foreground">Keine Direktnachrichten</p>
+					{/if}
+				{/each}
 			</div>
-		{/each}
+		{/if}
+
+		<!-- Group Rooms Section -->
+		{#if filteredGroupRooms.length > 0 || !search}
+			<div class="mb-2">
+				<div class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground">
+					<Users class="h-3.5 w-3.5" />
+					Räume
+					{#if matrixStore.groupRooms.length > 0}
+						<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px]">
+							{matrixStore.groupRooms.length}
+						</span>
+					{/if}
+				</div>
+				{#each filteredGroupRooms as room (room.id)}
+					<RoomItem
+						{room}
+						selected={room.id === matrixStore.currentRoomId}
+						onclick={() => matrixStore.selectRoom(room.id)}
+					/>
+				{:else}
+					{#if !search}
+						<p class="px-2 py-3 text-sm text-muted-foreground">Keine Räume</p>
+					{/if}
+				{/each}
+			</div>
+		{/if}
+
+		<!-- No search results -->
+		{#if search && filteredDirectRooms.length === 0 && filteredGroupRooms.length === 0}
+			<div class="flex flex-col items-center justify-center p-8 text-muted-foreground">
+				<MagnifyingGlass class="mb-2 h-8 w-8 opacity-50" />
+				<p class="text-sm">Keine Ergebnisse für "{search}"</p>
+			</div>
+		{/if}
 	</div>
 
 	<!-- New Room Button -->
 	<div class="border-t border-black/10 dark:border-white/10 p-3">
 		<button
 			class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
-			       bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium
+			       bg-gradient-to-r from-violet-500 to-purple-600 text-white font-medium
 			       shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
 			onclick={onCreateRoom}
 		>
 			<Plus class="h-4 w-4" />
-			{showDMs ? 'Neuen Chat starten' : 'Raum erstellen'}
+			Neuer Chat
 		</button>
 	</div>
 </div>
