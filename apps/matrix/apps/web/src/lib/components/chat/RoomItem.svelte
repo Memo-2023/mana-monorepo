@@ -29,9 +29,9 @@
 </script>
 
 <button
-	class="flex w-full items-center gap-3 px-3 py-2 transition-colors hover:bg-base-300"
-	class:bg-primary/10={selected}
-	class:hover:bg-primary/20={selected}
+	class="flex w-full items-center gap-3 px-3 py-2 transition-colors hover:bg-surface-hover {selected
+		? 'bg-primary/10 hover:bg-primary/20'
+		: ''}"
 	{onclick}
 >
 	<!-- Avatar -->

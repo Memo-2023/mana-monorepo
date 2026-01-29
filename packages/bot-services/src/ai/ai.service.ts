@@ -9,6 +9,9 @@ import {
 	SYSTEM_PROMPTS,
 	VISION_MODELS,
 	NON_CHAT_MODELS,
+	OllamaVersionResponse,
+	OllamaTagsResponse,
+	OllamaChatResponse,
 } from './types';
 
 @Injectable()
@@ -36,7 +39,7 @@ export class AiService implements OnModuleInit {
 			const response = await fetch(`${this.config.baseUrl}/api/version`, {
 				signal: AbortSignal.timeout(5000),
 			});
-			const data = await response.json();
+			const data = (await response.json()) as OllamaVersionResponse;
 			this.logger.log(`Ollama connected: v${data.version}`);
 			return true;
 		} catch (error) {
@@ -50,7 +53,7 @@ export class AiService implements OnModuleInit {
 	async listModels(): Promise<OllamaModel[]> {
 		try {
 			const response = await fetch(`${this.config.baseUrl}/api/tags`);
-			const data = await response.json();
+			const data = (await response.json()) as OllamaTagsResponse;
 			return data.models || [];
 		} catch (error) {
 			this.logger.error('Failed to list models:', error);
@@ -97,18 +100,22 @@ export class AiService implements OnModuleInit {
 				throw new Error(`Ollama API error: ${response.status}`);
 			}
 
-			const data = await response.json();
+			const data = (await response.json()) as OllamaChatResponse;
 
 			const meta = {
 				model,
 				evalCount: data.eval_count,
 				evalDuration: data.eval_duration,
 				tokensPerSecond:
-					data.eval_count && data.eval_duration ? (data.eval_count / data.eval_duration) * 1e9 : undefined,
+					data.eval_count && data.eval_duration
+						? (data.eval_count / data.eval_duration) * 1e9
+						: undefined,
 			};
 
 			if (meta.tokensPerSecond) {
-				this.logger.debug(`Generated ${meta.evalCount} tokens at ${meta.tokensPerSecond.toFixed(1)} t/s`);
+				this.logger.debug(
+					`Generated ${meta.evalCount} tokens at ${meta.tokensPerSecond.toFixed(1)} t/s`
+				);
 			}
 
 			return {
@@ -140,7 +147,10 @@ export class AiService implements OnModuleInit {
 			...session.history,
 		];
 
-		const result = await this.chat(messages, { ...options, model: options?.model ?? session.model });
+		const result = await this.chat(messages, {
+			...options,
+			model: options?.model ?? session.model,
+		});
 
 		// Add assistant response to history
 		session.history.push({ role: 'assistant', content: result.content });
@@ -175,14 +185,16 @@ export class AiService implements OnModuleInit {
 				throw new Error(`Ollama API error: ${response.status}`);
 			}
 
-			const data = await response.json();
+			const data = (await response.json()) as OllamaChatResponse;
 
 			const meta = {
 				model: selectedModel,
 				evalCount: data.eval_count,
 				evalDuration: data.eval_duration,
 				tokensPerSecond:
-					data.eval_count && data.eval_duration ? (data.eval_count / data.eval_duration) * 1e9 : undefined,
+					data.eval_count && data.eval_duration
+						? (data.eval_count / data.eval_duration) * 1e9
+						: undefined,
 			};
 
 			return {

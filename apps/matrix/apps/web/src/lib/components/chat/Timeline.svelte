@@ -12,6 +12,9 @@
 
 	let { onReply, onEdit }: Props = $props();
 
+	// Check if current room is encrypted
+	let isRoomEncrypted = $derived(matrixStore.currentSimpleRoom?.isEncrypted ?? false);
+
 	let container: HTMLDivElement;
 	let showScrollButton = $state(false);
 	let loadingMore = $state(false);
@@ -21,7 +24,8 @@
 	$effect(() => {
 		const messageCount = matrixStore.messages.length;
 		if (messageCount > prevMessageCount && container) {
-			const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+			const isAtBottom =
+				container.scrollHeight - container.scrollTop - container.clientHeight < 100;
 			if (isAtBottom) {
 				tick().then(() => {
 					container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
@@ -35,7 +39,8 @@
 		if (!container) return;
 
 		// Show scroll button if not at bottom
-		const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+		const distanceFromBottom =
+			container.scrollHeight - container.scrollTop - container.clientHeight;
 		showScrollButton = distanceFromBottom > 200;
 
 		// Load more when scrolled to top
@@ -93,11 +98,18 @@
 				{@const showAvatar = !prevMessage || prevMessage.sender !== message.sender}
 				{@const showTimestamp =
 					!prevMessage || message.timestamp - prevMessage.timestamp > 5 * 60 * 1000}
-				<Message {message} {showAvatar} {showTimestamp} {onReply} {onEdit} />
+				<Message
+					{message}
+					{showAvatar}
+					{showTimestamp}
+					showEncryptionBadge={isRoomEncrypted}
+					{onReply}
+					{onEdit}
+				/>
 			{:else}
 				<div class="flex h-full flex-col items-center justify-center text-base-content/50">
-					<p>No messages yet</p>
-					<p class="text-sm">Start the conversation!</p>
+					<p>Noch keine Nachrichten</p>
+					<p class="text-sm">Starte die Konversation!</p>
 				</div>
 			{/each}
 		</div>

@@ -122,7 +122,9 @@ export async function discoverHomeserver(userIdOrDomain: string): Promise<string
 /**
  * Check if a homeserver is reachable
  */
-export async function checkHomeserver(homeserver: string): Promise<{ ok: boolean; error?: string }> {
+export async function checkHomeserver(
+	homeserver: string
+): Promise<{ ok: boolean; error?: string }> {
 	let baseUrl = homeserver.trim();
 	if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
 		baseUrl = `https://${baseUrl}`;
@@ -168,7 +170,7 @@ export async function register(
 	try {
 		const response = await tempClient.register(username, password, null, {
 			initial_device_display_name: 'Mana Matrix Client',
-		});
+		} as any);
 
 		return {
 			success: true,

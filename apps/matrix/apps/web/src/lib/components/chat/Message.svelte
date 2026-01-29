@@ -12,17 +12,32 @@
 		FileIcon,
 		Play,
 		Image as ImageIcon,
+		Lock,
+		AlertTriangle,
 	} from 'lucide-svelte';
 
 	interface Props {
 		message: SimpleMessage;
 		showAvatar?: boolean;
 		showTimestamp?: boolean;
+		showEncryptionBadge?: boolean;
 		onReply?: (message: SimpleMessage) => void;
 		onEdit?: (message: SimpleMessage) => void;
 	}
 
-	let { message, showAvatar = true, showTimestamp = false, onReply, onEdit }: Props = $props();
+	let {
+		message,
+		showAvatar = true,
+		showTimestamp = false,
+		showEncryptionBadge = false,
+		onReply,
+		onEdit,
+	}: Props = $props();
+
+	// Check if message is a decryption error (body starts with "Unable to decrypt:")
+	let isDecryptionError = $derived(
+		message.body.startsWith('Unable to decrypt:') || message.body.includes('** Unable to decrypt')
+	);
 
 	let showActions = $state(false);
 	let imageLoading = $state(true);
@@ -78,15 +93,15 @@
 <!-- Date separator -->
 {#if showTimestamp}
 	<div class="my-4 flex items-center gap-4">
-		<div class="h-px flex-1 bg-base-300"></div>
-		<span class="text-xs text-base-content/50">{formattedDate()}</span>
-		<div class="h-px flex-1 bg-base-300"></div>
+		<div class="h-px flex-1 bg-border"></div>
+		<span class="text-xs text-muted-foreground">{formattedDate()}</span>
+		<div class="h-px flex-1 bg-border"></div>
 	</div>
 {/if}
 
 <!-- Message -->
 <div
-	class="group relative flex gap-3 rounded-lg px-2 py-1 hover:bg-base-200/50"
+	class="group relative flex gap-3 rounded-lg px-2 py-1 hover:bg-surface-hover"
 	class:mt-2={showAvatar}
 	class:opacity-50={message.redacted}
 	role="article"
@@ -96,10 +111,10 @@
 	<!-- Avatar Column -->
 	<div class="w-10 flex-shrink-0">
 		{#if showAvatar && !message.isOwn}
-			<div class="avatar placeholder">
-				<div class="w-10 rounded-full bg-neutral text-neutral-content">
-					<span class="text-xs">{initials}</span>
-				</div>
+			<div
+				class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"
+			>
+				<span class="text-xs">{initials}</span>
 			</div>
 		{/if}
 	</div>
@@ -111,9 +126,12 @@
 				<span class="font-medium" class:text-primary={message.isOwn}>
 					{message.isOwn ? 'Du' : message.senderName}
 				</span>
-				<span class="text-xs text-base-content/40">{formattedTime}</span>
+				<span class="text-xs text-muted-foreground">{formattedTime}</span>
 				{#if message.edited}
-					<span class="text-xs text-base-content/40">(bearbeitet)</span>
+					<span class="text-xs text-muted-foreground">(bearbeitet)</span>
+				{/if}
+				{#if showEncryptionBadge}
+					<span title="Verschlüsselt"><Lock class="h-3 w-3 text-success" /></span>
 				{/if}
 			</div>
 		{/if}
@@ -121,28 +139,36 @@
 		<!-- Reply preview -->
 		{#if message.replyTo && message.replyToBody}
 			<div
-				class="mb-1 flex items-center gap-2 rounded border-l-2 border-primary/50 bg-base-200 px-2 py-1 text-sm"
+				class="mb-1 flex items-center gap-2 rounded border-l-2 border-primary/50 bg-muted px-2 py-1 text-sm"
 			>
-				<Reply class="h-3 w-3 flex-shrink-0 text-base-content/50" />
-				<span class="truncate text-base-content/60">{message.replyToBody}</span>
+				<Reply class="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+				<span class="truncate text-muted-foreground">{message.replyToBody}</span>
 			</div>
 		{/if}
 
 		<!-- Message body -->
 		<div class="relative">
 			{#if message.redacted}
-				<p class="italic text-base-content/50">Nachricht wurde gelöscht</p>
+				<p class="italic text-muted-foreground">Nachricht wurde gelöscht</p>
+			{:else if isDecryptionError}
+				<!-- Decryption error -->
+				<div class="flex items-center gap-2 rounded-lg bg-warning/10 px-3 py-2 text-warning">
+					<AlertTriangle class="h-4 w-4 flex-shrink-0" />
+					<span class="text-sm">
+						Nachricht kann nicht entschlüsselt werden. Möglicherweise fehlen Schlüssel.
+					</span>
+				</div>
 			{:else if message.type === 'm.image' && thumbnailUrl}
 				<!-- Image message -->
 				<div class="relative max-w-sm">
 					{#if imageLoading}
-						<div class="flex h-48 w-full items-center justify-center rounded-lg bg-base-200">
-							<ImageIcon class="h-8 w-8 animate-pulse text-base-content/30" />
+						<div class="flex h-48 w-full items-center justify-center rounded-lg bg-muted">
+							<ImageIcon class="h-8 w-8 animate-pulse text-muted-foreground" />
 						</div>
 					{/if}
 					{#if imageError}
-						<div class="flex h-32 w-full items-center justify-center rounded-lg bg-base-200">
-							<p class="text-sm text-base-content/50">Bild konnte nicht geladen werden</p>
+						<div class="flex h-32 w-full items-center justify-center rounded-lg bg-muted">
+							<p class="text-sm text-muted-foreground">Bild konnte nicht geladen werden</p>
 						</div>
 					{:else}
 						<img
@@ -184,33 +210,35 @@
 					href={mediaUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="flex items-center gap-3 rounded-lg border border-base-300 bg-base-200 p-3 transition-colors hover:bg-base-300"
+					class="flex items-center gap-3 rounded-lg border border-border bg-muted p-3 transition-colors hover:bg-surface-hover"
 				>
 					<div class="rounded-lg bg-primary/10 p-2">
 						<FileIcon class="h-6 w-6 text-primary" />
 					</div>
 					<div class="min-w-0 flex-1">
 						<p class="truncate font-medium">{message.media?.filename || message.body}</p>
-						<p class="text-sm text-base-content/60">
+						<p class="text-sm text-muted-foreground">
 							{formatFileSize(message.media?.size)}
 							{#if message.media?.mimetype}
 								• {message.media.mimetype.split('/')[1]?.toUpperCase()}
 							{/if}
 						</p>
 					</div>
-					<Download class="h-5 w-5 flex-shrink-0 text-base-content/50" />
+					<Download class="h-5 w-5 flex-shrink-0 text-muted-foreground" />
 				</a>
 			{:else if message.type === 'm.emote'}
-				<p class="italic text-base-content/80">* {message.senderName} {message.body}</p>
+				<p class="italic text-muted-foreground">* {message.senderName} {message.body}</p>
 			{:else if message.type === 'm.notice'}
-				<p class="text-sm text-base-content/60">{message.body}</p>
+				<p class="text-sm text-muted-foreground">{message.body}</p>
 			{:else}
 				<p class="whitespace-pre-wrap break-words">{message.body}</p>
 			{/if}
 
 			<!-- Hover timestamp for grouped messages -->
 			{#if !showAvatar}
-				<span class="absolute -left-12 top-0 hidden text-xs text-base-content/40 group-hover:inline">
+				<span
+					class="absolute -left-12 top-0 hidden text-xs text-muted-foreground group-hover:inline"
+				>
 					{formattedTime}
 				</span>
 			{/if}
@@ -219,25 +247,19 @@
 
 	<!-- Message actions (hover) -->
 	{#if showActions && !message.redacted}
-		<div class="absolute -top-2 right-2 flex items-center gap-1 rounded-lg border border-base-300 bg-base-100 p-1 shadow-sm">
-			<button
-				class="btn btn-ghost btn-xs"
-				title="Antworten"
-				onclick={() => onReply?.(message)}
-			>
+		<div
+			class="absolute -top-2 right-2 flex items-center gap-1 rounded-lg border border-border bg-surface p-1 shadow-sm"
+		>
+			<button class="btn-ghost rounded p-1" title="Antworten" onclick={() => onReply?.(message)}>
 				<Reply class="h-4 w-4" />
 			</button>
 			{#if message.isOwn && message.type === 'm.text'}
-				<button
-					class="btn btn-ghost btn-xs"
-					title="Bearbeiten"
-					onclick={() => onEdit?.(message)}
-				>
+				<button class="btn-ghost rounded p-1" title="Bearbeiten" onclick={() => onEdit?.(message)}>
 					<Pencil class="h-4 w-4" />
 				</button>
 			{/if}
 			{#if message.isOwn}
-				<button class="btn btn-ghost btn-xs text-error" title="Löschen" onclick={handleDelete}>
+				<button class="btn-ghost rounded p-1 text-error" title="Löschen" onclick={handleDelete}>
 					<Trash2 class="h-4 w-4" />
 				</button>
 			{/if}

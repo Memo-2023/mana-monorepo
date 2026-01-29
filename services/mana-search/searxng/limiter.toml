@@ -2,14 +2,8 @@
 # Documentation: https://docs.searxng.org/admin/settings/limiter.html
 
 [botdetection.ip_limit]
-# Enable link token for bot detection
-link_token = true
-
-# Maximum searches per minute per IP
-limit = 60
-
-# Burst limit (requests before rate limiting kicks in)
-burst = 20
+# Disable link token for API usage
+link_token = false
 
 [botdetection.ip_lists]
 # Allow internal Docker network IPs (no rate limiting for internal services)
@@ -22,6 +16,3 @@ pass_ip = [
     "127.0.0.1",
     "::1",
 ]
-
-# Block known bad actors (add IPs as needed)
-block_ip = []

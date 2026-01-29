@@ -36,7 +36,12 @@ export class ClockService {
 
 	// ===== API Helper =====
 
-	private async apiCall<T>(endpoint: string, method: string = 'GET', token?: string, body?: unknown): Promise<T> {
+	private async apiCall<T>(
+		endpoint: string,
+		method = 'GET',
+		token?: string,
+		body?: unknown
+	): Promise<T> {
 		const headers: Record<string, string> = {
 			'Content-Type': 'application/json',
 		};
@@ -56,7 +61,7 @@ export class ClockService {
 			throw new Error(`Clock API error: ${response.status} - ${errorText}`);
 		}
 
-		return response.json();
+		return response.json() as Promise<T>;
 	}
 
 	// ===== Health =====
@@ -167,7 +172,10 @@ export class ClockService {
 			return finishedAt.toDateString() === today.toDateString();
 		});
 
-		const totalMinutes = finishedToday.reduce((sum, t) => sum + Math.floor(t.durationSeconds / 60), 0);
+		const totalMinutes = finishedToday.reduce(
+			(sum, t) => sum + Math.floor(t.durationSeconds / 60),
+			0
+		);
 
 		return {
 			totalMinutes,

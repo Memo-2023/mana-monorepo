@@ -123,6 +123,30 @@ Passe deinen Stil an die gewünschte Textart an.`,
 export const VISION_MODELS = ['llava', 'llava:7b', 'llava:13b', 'bakllava', 'moondream'];
 
 /**
+ * Ollama API response types
+ */
+export interface OllamaVersionResponse {
+	version: string;
+}
+
+export interface OllamaTagsResponse {
+	models: OllamaModel[];
+}
+
+export interface OllamaChatResponse {
+	model: string;
+	message?: {
+		role: string;
+		content: string;
+	};
+	eval_count?: number;
+	eval_duration?: number;
+	total_duration?: number;
+	load_duration?: number;
+	prompt_eval_count?: number;
+}
+
+/**
  * Models excluded from comparison (specialized, not for general chat)
  */
 export const NON_CHAT_MODELS = ['deepseek-r1:1.5b'];

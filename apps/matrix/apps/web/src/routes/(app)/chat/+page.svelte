@@ -106,13 +106,10 @@
 	<main class="flex flex-1 flex-col overflow-hidden">
 		{#if matrixStore.currentRoom}
 			<!-- Room Header -->
-			<RoomHeader
-				onMenuClick={toggleSidebar}
-				onInfoClick={() => (showRoomSettings = true)}
-			/>
+			<RoomHeader onMenuClick={toggleSidebar} onInfoClick={() => (showRoomSettings = true)} />
 
 			<!-- Timeline -->
-			<Timeline {onReply} onEdit={handleEdit} />
+			<Timeline onReply={handleReply} onEdit={handleEdit} />
 
 			<!-- Message Input -->
 			<MessageInput
@@ -127,7 +124,9 @@
 				<MessageSquare class="h-16 w-16" />
 				<div class="text-center">
 					<h2 class="text-xl font-semibold text-base-content">Willkommen bei Mana Matrix</h2>
-					<p class="mt-2">Wähle eine Unterhaltung aus der Seitenleiste oder starte einen neuen Chat</p>
+					<p class="mt-2">
+						Wähle eine Unterhaltung aus der Seitenleiste oder starte einen neuen Chat
+					</p>
 				</div>
 
 				<button class="btn btn-primary mt-4" onclick={() => (showCreateRoom = true)}>

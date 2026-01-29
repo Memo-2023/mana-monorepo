@@ -1,123 +1,228 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, User, Bell, Palette, Shield, LogOut, Server } from 'lucide-svelte';
+	import {
+		ArrowLeft,
+		User,
+		Bell,
+		Palette,
+		Shield,
+		LogOut,
+		Server,
+		ShieldCheck,
+		ShieldAlert,
+		Key,
+		Smartphone,
+		Loader2,
+	} from 'lucide-svelte';
+	import { VerificationDialog, RecoveryKeyDialog } from '$lib/components/crypto';
+
+	let verificationDialogOpen = $state(false);
+	let recoveryDialogOpen = $state(false);
+	let recoveryDialogMode = $state<'setup' | 'restore'>('setup');
+
+	// Crypto status derived
+	let cryptoReady = $derived(matrixStore.cryptoReady);
+	let verificationStatus = $derived(matrixStore.verificationStatus);
+	let keyBackupEnabled = $derived(matrixStore.keyBackupEnabled);
+	let deviceId = $derived(matrixStore.getDeviceId());
 
 	function handleLogout() {
 		matrixStore.logout();
 		goto('/login');
 	}
+
+	function openRecoveryDialog(mode: 'setup' | 'restore') {
+		recoveryDialogMode = mode;
+		recoveryDialogOpen = true;
+	}
 </script>
 
-<div class="flex h-screen flex-col bg-base-100">
+<div class="flex h-screen flex-col bg-background">
 	<!-- Header -->
-	<header class="flex items-center gap-4 border-b border-base-300 p-4">
-		<a href="/chat" class="btn btn-ghost btn-sm btn-circle">
+	<header class="flex items-center gap-4 border-b border-border p-4">
+		<a href="/chat" class="btn-ghost rounded-full p-2">
 			<ArrowLeft class="h-5 w-5" />
 		</a>
-		<h1 class="text-xl font-bold">Settings</h1>
+		<h1 class="text-xl font-bold">Einstellungen</h1>
 	</header>
 
 	<!-- Content -->
 	<div class="flex-1 overflow-y-auto p-4">
 		<div class="mx-auto max-w-2xl space-y-6">
 			<!-- Profile Section -->
-			<section class="card bg-base-200">
-				<div class="card-body">
-					<h2 class="card-title">
+			<section class="card">
+				<div class="space-y-4">
+					<h2 class="flex items-center gap-2 text-lg font-semibold">
 						<User class="h-5 w-5" />
-						Profile
+						Profil
 					</h2>
-					<div class="mt-4 flex items-center gap-4">
-						<div class="avatar placeholder">
-							<div class="w-16 rounded-full bg-neutral text-neutral-content">
-								<span class="text-2xl">
-									{matrixStore.userId?.charAt(1).toUpperCase() || '?'}
-								</span>
-							</div>
+					<div class="flex items-center gap-4">
+						<div
+							class="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground"
+						>
+							<span class="text-2xl">
+								{matrixStore.userId?.charAt(1).toUpperCase() || '?'}
+							</span>
 						</div>
 						<div>
 							<p class="font-medium">{matrixStore.userId}</p>
-							<p class="text-sm text-base-content/60">Matrix ID</p>
+							<p class="text-sm text-muted-foreground">Matrix ID</p>
 						</div>
 					</div>
 				</div>
 			</section>
 
 			<!-- Server Section -->
-			<section class="card bg-base-200">
-				<div class="card-body">
-					<h2 class="card-title">
+			<section class="card">
+				<div class="space-y-4">
+					<h2 class="flex items-center gap-2 text-lg font-semibold">
 						<Server class="h-5 w-5" />
 						Server
 					</h2>
-					<div class="mt-2 space-y-2 text-sm">
+					<div class="space-y-2 text-sm">
 						<div class="flex justify-between">
-							<span class="text-base-content/60">Homeserver</span>
-							<span class="font-mono">{matrixStore.client?.getHomeserverUrl() || 'Unknown'}</span>
+							<span class="text-muted-foreground">Homeserver</span>
+							<span class="font-mono">{matrixStore.client?.getHomeserverUrl() || 'Unbekannt'}</span>
 						</div>
 						<div class="flex justify-between">
-							<span class="text-base-content/60">Sync Status</span>
-							<span
-								class="badge"
-								class:badge-success={matrixStore.isReady}
-								class:badge-warning={!matrixStore.isReady}
-							>
+							<span class="text-muted-foreground">Sync Status</span>
+							<span class={matrixStore.isReady ? 'badge badge-success' : 'badge badge-warning'}>
 								{matrixStore.syncState}
 							</span>
 						</div>
 						<div class="flex justify-between">
-							<span class="text-base-content/60">Rooms</span>
+							<span class="text-muted-foreground">Räume</span>
 							<span>{matrixStore.rooms.length}</span>
 						</div>
 					</div>
 				</div>
 			</section>
 
-			<!-- Appearance Section (Placeholder) -->
-			<section class="card bg-base-200">
-				<div class="card-body">
-					<h2 class="card-title">
-						<Palette class="h-5 w-5" />
-						Appearance
+			<!-- Security Section -->
+			<section class="card">
+				<div class="space-y-4">
+					<h2 class="flex items-center gap-2 text-lg font-semibold">
+						<Shield class="h-5 w-5" />
+						Sicherheit & Verschlüsselung
 					</h2>
-					<p class="text-sm text-base-content/60">Theme and display settings coming soon...</p>
+
+					{#if !cryptoReady}
+						<div class="flex items-center gap-3 text-warning">
+							<Loader2 class="h-5 w-5 animate-spin" />
+							<span>Verschlüsselung wird initialisiert...</span>
+						</div>
+					{:else}
+						<div class="space-y-4">
+							<!-- Verification Status -->
+							<div class="flex items-center justify-between rounded-lg bg-muted p-4">
+								<div class="flex items-center gap-3">
+									{#if verificationStatus === 'verified'}
+										<ShieldCheck class="h-8 w-8 text-success" />
+									{:else}
+										<ShieldAlert class="h-8 w-8 text-warning" />
+									{/if}
+									<div>
+										<p class="font-medium">
+											{verificationStatus === 'verified' ? 'Verifiziert' : 'Nicht verifiziert'}
+										</p>
+										<p class="text-sm text-muted-foreground">
+											{verificationStatus === 'verified'
+												? 'Dein Gerät ist verifiziert'
+												: 'Verifiziere dein Gerät für bessere Sicherheit'}
+										</p>
+									</div>
+								</div>
+								<button
+									class="btn-primary flex items-center gap-2 text-sm"
+									onclick={() => (verificationDialogOpen = true)}
+								>
+									<Smartphone class="h-4 w-4" />
+									Geräte
+								</button>
+							</div>
+
+							<!-- Current Device -->
+							<div class="text-sm">
+								<div class="flex justify-between">
+									<span class="text-muted-foreground">Geräte-ID</span>
+									<span class="font-mono">{deviceId || 'Unbekannt'}</span>
+								</div>
+							</div>
+
+							<!-- Key Backup -->
+							<div class="flex items-center justify-between rounded-lg bg-muted p-4">
+								<div class="flex items-center gap-3">
+									<Key class={`h-8 w-8 ${keyBackupEnabled ? 'text-success' : 'text-warning'}`} />
+									<div>
+										<p class="font-medium">
+											{keyBackupEnabled ? 'Schlüssel-Backup aktiv' : 'Kein Schlüssel-Backup'}
+										</p>
+										<p class="text-sm text-muted-foreground">
+											{keyBackupEnabled
+												? 'Deine Nachrichten werden gesichert'
+												: 'Richte ein Backup ein, um Nachrichten wiederherzustellen'}
+										</p>
+									</div>
+								</div>
+								{#if keyBackupEnabled}
+									<button class="btn-ghost text-sm" onclick={() => openRecoveryDialog('restore')}>
+										Wiederherstellen
+									</button>
+								{:else}
+									<button class="btn-primary text-sm" onclick={() => openRecoveryDialog('setup')}>
+										Einrichten
+									</button>
+								{/if}
+							</div>
+						</div>
+					{/if}
+				</div>
+			</section>
+
+			<!-- Appearance Section (Placeholder) -->
+			<section class="card">
+				<div class="space-y-2">
+					<h2 class="flex items-center gap-2 text-lg font-semibold">
+						<Palette class="h-5 w-5" />
+						Erscheinungsbild
+					</h2>
+					<p class="text-sm text-muted-foreground">Theme-Einstellungen folgen bald...</p>
 				</div>
 			</section>
 
 			<!-- Notifications Section (Placeholder) -->
-			<section class="card bg-base-200">
-				<div class="card-body">
-					<h2 class="card-title">
+			<section class="card">
+				<div class="space-y-2">
+					<h2 class="flex items-center gap-2 text-lg font-semibold">
 						<Bell class="h-5 w-5" />
-						Notifications
+						Benachrichtigungen
 					</h2>
-					<p class="text-sm text-base-content/60">Notification settings coming soon...</p>
-				</div>
-			</section>
-
-			<!-- Security Section (Placeholder) -->
-			<section class="card bg-base-200">
-				<div class="card-body">
-					<h2 class="card-title">
-						<Shield class="h-5 w-5" />
-						Security
-					</h2>
-					<p class="text-sm text-base-content/60">
-						End-to-end encryption settings coming in Phase 2...
-					</p>
+					<p class="text-sm text-muted-foreground">Benachrichtigungseinstellungen folgen bald...</p>
 				</div>
 			</section>
 
 			<!-- Logout -->
-			<section class="card bg-base-200">
-				<div class="card-body">
-					<button class="btn btn-error w-full" onclick={handleLogout}>
-						<LogOut class="h-5 w-5" />
-						Sign Out
-					</button>
-				</div>
+			<section class="card">
+				<button
+					class="flex w-full items-center justify-center gap-2 rounded-lg bg-error p-3 text-white hover:brightness-90"
+					onclick={handleLogout}
+				>
+					<LogOut class="h-5 w-5" />
+					Abmelden
+				</button>
 			</section>
 		</div>
 	</div>
 </div>
+
+<!-- Dialogs -->
+<VerificationDialog
+	open={verificationDialogOpen}
+	onClose={() => (verificationDialogOpen = false)}
+/>
+<RecoveryKeyDialog
+	open={recoveryDialogOpen}
+	mode={recoveryDialogMode}
+	onClose={() => (recoveryDialogOpen = false)}
+/>
