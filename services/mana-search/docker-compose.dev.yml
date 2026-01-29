@@ -1,0 +1,58 @@
+version: '3.8'
+
+# Development setup - SearXNG and Redis only
+# Run mana-search with `pnpm dev` locally
+
+services:
+  # ================================
+  # SearXNG Meta Search Engine
+  # ================================
+  searxng:
+    image: searxng/searxng:latest
+    container_name: mana-searxng-dev
+    ports:
+      - "8080:8080"  # Exposed for development
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - ./searxng/limiter.toml:/etc/searxng/limiter.toml:ro
+    environment:
+      SEARXNG_BASE_URL: http://localhost:8080
+      SEARXNG_SECRET: dev-secret-change-in-production
+    networks:
+      - mana-search-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ================================
+  # Redis Cache
+  # ================================
+  redis:
+    image: redis:7-alpine
+    container_name: mana-search-redis-dev
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    command: redis-server --appendonly yes --maxmemory 64mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - mana-search-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  redis-dev-data:
+    name: mana-search-redis-dev-data
+
+networks:
+  mana-search-dev:
+    name: mana-search-dev
+    driver: bridge

@@ -1,0 +1,242 @@
+use_default_settings: true
+
+general:
+  instance_name: "ManaCore Search"
+  debug: false
+  privacypolicy_url: false
+  donation_url: false
+  contact_url: false
+  enable_metrics: true
+
+search:
+  safe_search: 0
+  autocomplete: "google"
+  default_lang: "de-DE"
+  formats:
+    - html
+    - json
+
+server:
+  secret_key: "${SEARXNG_SECRET}"
+  limiter: true
+  image_proxy: false
+  method: "GET"
+  bind_address: "0.0.0.0"
+  port: 8080
+
+ui:
+  static_use_hash: true
+  default_theme: simple
+  theme_args:
+    simple_style: dark
+
+outgoing:
+  request_timeout: 5.0
+  max_request_timeout: 15.0
+  useragent_suffix: ""
+
+# Search engine configuration
+engines:
+  # =====================================
+  # WEB SEARCH (General)
+  # =====================================
+  - name: google
+    engine: google
+    shortcut: g
+    disabled: false
+    weight: 1.2
+
+  - name: bing
+    engine: bing
+    shortcut: b
+    disabled: false
+    weight: 1.0
+
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: d
+    disabled: false
+    weight: 0.9
+
+  - name: brave
+    engine: brave
+    shortcut: br
+    disabled: false
+    weight: 1.0
+
+  - name: qwant
+    engine: qwant
+    shortcut: q
+    disabled: false
+    weight: 0.8
+
+  - name: startpage
+    engine: startpage
+    shortcut: sp
+    disabled: false
+    weight: 0.8
+
+  # =====================================
+  # WIKIPEDIA
+  # =====================================
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: w
+    disabled: false
+    weight: 1.1
+
+  - name: wikidata
+    engine: wikidata
+    shortcut: wd
+    disabled: false
+    weight: 0.8
+
+  # =====================================
+  # IT / DEVELOPER
+  # =====================================
+  - name: github
+    engine: github
+    shortcut: gh
+    disabled: false
+    categories: [it]
+
+  - name: stackoverflow
+    engine: stackoverflow
+    shortcut: so
+    disabled: false
+    categories: [it]
+
+  - name: npm
+    engine: npm
+    shortcut: npm
+    disabled: false
+    categories: [it, packages]
+
+  - name: pypi
+    engine: pypi
+    shortcut: pip
+    disabled: false
+    categories: [it, packages]
+
+  - name: crates.io
+    engine: crates
+    shortcut: crates
+    disabled: false
+    categories: [it, packages]
+
+  - name: dockerhub
+    engine: dockerhub
+    shortcut: dh
+    disabled: false
+    categories: [it]
+
+  - name: mdn
+    engine: mdn
+    shortcut: mdn
+    disabled: false
+    categories: [it]
+
+  # =====================================
+  # SCIENCE / ACADEMIC
+  # =====================================
+  - name: arxiv
+    engine: arxiv
+    shortcut: ar
+    disabled: false
+    categories: [science]
+
+  - name: google scholar
+    engine: google_scholar
+    shortcut: gs
+    disabled: false
+    categories: [science]
+
+  - name: semantic scholar
+    engine: semantic_scholar
+    shortcut: ss
+    disabled: false
+    categories: [science]
+
+  - name: pubmed
+    engine: pubmed
+    shortcut: pm
+    disabled: false
+    categories: [science, health]
+
+  - name: crossref
+    engine: crossref
+    shortcut: cr
+    disabled: false
+    categories: [science]
+
+  # =====================================
+  # NEWS
+  # =====================================
+  - name: google news
+    engine: google_news
+    shortcut: gn
+    disabled: false
+    categories: [news]
+
+  - name: bing news
+    engine: bing_news
+    shortcut: bn
+    disabled: false
+    categories: [news]
+
+  - name: duckduckgo news
+    engine: duckduckgo
+    shortcut: ddn
+    disabled: false
+    categories: [news]
+
+  # =====================================
+  # IMAGES
+  # =====================================
+  - name: google images
+    engine: google_images
+    shortcut: gi
+    disabled: false
+    categories: [images]
+
+  - name: bing images
+    engine: bing_images
+    shortcut: bi
+    disabled: false
+    categories: [images]
+
+  - name: unsplash
+    engine: unsplash
+    shortcut: us
+    disabled: false
+    categories: [images]
+
+  # =====================================
+  # VIDEOS
+  # =====================================
+  - name: youtube
+    engine: youtube_noapi
+    shortcut: yt
+    disabled: false
+    categories: [videos]
+
+  - name: vimeo
+    engine: vimeo
+    shortcut: vim
+    disabled: false
+    categories: [videos]
+
+  - name: peertube
+    engine: peertube
+    shortcut: pt
+    disabled: false
+    categories: [videos]
+
+# Category tabs
+categories_as_tabs:
+  general:
+  images:
+  videos:
+  news:
+  science:
+  it:
