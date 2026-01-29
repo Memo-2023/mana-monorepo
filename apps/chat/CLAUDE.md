@@ -70,7 +70,7 @@ pnpm preview                     # Preview production build
 - **Mobile**: React Native 0.76.7 + Expo SDK 52, NativeWind, Expo Router
 - **Web**: SvelteKit 2.x, Svelte 5, Tailwind CSS 4
 - **Landing**: Astro 5.16, Tailwind CSS
-- **Backend**: NestJS 10, OpenRouter AI + Ollama (local), Drizzle ORM, PostgreSQL
+- **Backend**: NestJS 10, OpenRouter AI + mana-llm (local), Drizzle ORM, PostgreSQL
 - **Auth**: Mana Core Auth (JWT)
 - **Types**: TypeScript 5.x
 
@@ -97,9 +97,9 @@ pnpm preview                     # Preview production build
 # Cloud AI models via OpenRouter (optional if using only local models)
 OPENROUTER_API_KEY=sk-or-v1-xxx    # Get at https://openrouter.ai/keys
 
-# Local AI via Ollama (optional, defaults to localhost:11434)
-OLLAMA_URL=http://localhost:11434  # Or http://host.docker.internal:11434 in Docker
-OLLAMA_TIMEOUT=120000              # Timeout in ms (default: 120s)
+# Local AI via mana-llm service
+MANA_LLM_URL=http://localhost:3025 # mana-llm service URL
+LLM_TIMEOUT=120000                 # Timeout in ms (default: 120s)
 
 # Database (uses shared Docker PostgreSQL)
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/chat

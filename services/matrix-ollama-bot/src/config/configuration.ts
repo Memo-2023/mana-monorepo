@@ -6,10 +6,10 @@ export default () => ({
 		allowedRooms: process.env.MATRIX_ALLOWED_ROOMS?.split(',').filter(Boolean) || [],
 		storagePath: process.env.MATRIX_STORAGE_PATH || './data/bot-storage.json',
 	},
-	ollama: {
-		url: process.env.OLLAMA_URL || 'http://localhost:11434',
-		model: process.env.OLLAMA_MODEL || 'gemma3:4b',
-		timeout: parseInt(process.env.OLLAMA_TIMEOUT || '120000', 10),
+	llm: {
+		url: process.env.MANA_LLM_URL || 'http://localhost:3025',
+		model: process.env.LLM_MODEL || 'ollama/gemma3:4b',
+		timeout: parseInt(process.env.LLM_TIMEOUT || '120000', 10),
 	},
 });
 

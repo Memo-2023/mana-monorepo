@@ -9,7 +9,7 @@ Telegram Bot zum Sammeln von Projektdokumentation (Fotos, Sprachnotizen, Text) u
 - **Database**: PostgreSQL + Drizzle ORM
 - **Storage**: S3 (MinIO lokal, Hetzner in Produktion)
 - **AI - Transcription**: OpenAI Whisper
-- **AI - Generation**: Ollama (lokal) oder OpenAI GPT
+- **AI - Generation**: mana-llm service oder OpenAI GPT
 
 ## Commands
 
@@ -90,9 +90,9 @@ S3_BUCKET=projectdoc-storage
 OPENAI_API_KEY=sk-xxx
 
 # AI - Generation
-LLM_PROVIDER=ollama                 # ollama oder openai
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=gemma3:4b
+LLM_PROVIDER=mana-llm               # mana-llm oder openai
+MANA_LLM_URL=http://localhost:3025  # mana-llm service URL
+LLM_MODEL=ollama/gemma3:4b          # Model with provider prefix
 ```
 
 ## Projekt-Struktur

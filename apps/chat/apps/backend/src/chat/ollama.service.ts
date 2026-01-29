@@ -3,22 +3,28 @@ import { ConfigService } from '@nestjs/config';
 import { AsyncResult, ok, err, ServiceError } from '@manacore/shared-errors';
 import type { ChatCompletionResponseDto } from './dto/chat-completion.dto';
 
-interface OllamaChatMessage {
+interface ChatMessage {
 	role: 'system' | 'user' | 'assistant';
 	content: string;
 }
 
-interface OllamaChatResponse {
+interface ChatCompletionResponse {
+	id: string;
 	model: string;
-	message: {
-		role: string;
-		content: string;
+	choices: {
+		message: { role: string; content: string };
+		finish_reason: string;
+	}[];
+	usage: {
+		prompt_tokens: number;
+		completion_tokens: number;
+		total_tokens: number;
 	};
-	done: boolean;
-	total_duration?: number;
-	eval_count?: number;
-	eval_duration?: number;
-	prompt_eval_count?: number;
+}
+
+interface LlmModel {
+	id: string;
+	owned_by: string;
 }
 
 @Injectable()
@@ -29,8 +35,8 @@ export class OllamaService {
 	private isConnected = false;
 
 	constructor(private configService: ConfigService) {
-		this.baseUrl = this.configService.get<string>('OLLAMA_URL') || 'http://localhost:11434';
-		this.timeout = this.configService.get<number>('OLLAMA_TIMEOUT') || 120000;
+		this.baseUrl = this.configService.get<string>('MANA_LLM_URL') || 'http://localhost:3025';
+		this.timeout = this.configService.get<number>('LLM_TIMEOUT') || 120000;
 
 		// Check connection on startup
 		this.checkConnection();
@@ -38,20 +44,23 @@ export class OllamaService {
 
 	async checkConnection(): Promise<boolean> {
 		try {
-			const response = await fetch(`${this.baseUrl}/api/version`, {
+			const response = await fetch(`${this.baseUrl}/health`, {
 				signal: AbortSignal.timeout(5000),
 			});
 			if (response.ok) {
 				const data = await response.json();
-				this.isConnected = true;
-				this.logger.log(`Ollama connected: v${data.version} at ${this.baseUrl}`);
-				return true;
+				this.isConnected = data.status === 'healthy' || data.status === 'degraded';
+				if (this.isConnected) {
+					const providers = Object.keys(data.providers || {}).join(', ');
+					this.logger.log(`mana-llm connected: ${data.status}, providers: ${providers}`);
+				}
+				return this.isConnected;
 			}
 			this.isConnected = false;
 			return false;
 		} catch (error) {
 			this.isConnected = false;
-			this.logger.warn(`Ollama not available at ${this.baseUrl} - local models will not work`);
+			this.logger.warn(`mana-llm not available at ${this.baseUrl} - local models will not work`);
 			return false;
 		}
 	}
@@ -62,7 +71,7 @@ export class OllamaService {
 
 	async createChatCompletion(
 		modelName: string,
-		messages: OllamaChatMessage[],
+		messages: ChatMessage[],
 		temperature?: number,
 		maxTokens?: number
 	): AsyncResult<ChatCompletionResponseDto> {
@@ -71,33 +80,31 @@ export class OllamaService {
 			await this.checkConnection();
 			if (!this.isConnected) {
 				return err(
-					ServiceError.externalError('Ollama', `Ollama server not available at ${this.baseUrl}`)
+					ServiceError.externalError('mana-llm', `mana-llm server not available at ${this.baseUrl}`)
 				);
 			}
 		}
 
-		this.logger.log(`Sending request to Ollama model: ${modelName}`);
+		// Normalize model name to include ollama/ prefix if it doesn't have a provider
+		const normalizedModel = modelName.includes('/') ? modelName : `ollama/${modelName}`;
+		this.logger.log(`Sending request to mana-llm model: ${normalizedModel}`);
 
 		try {
 			const requestBody: Record<string, unknown> = {
-				model: modelName,
+				model: normalizedModel,
 				messages,
 				stream: false,
 			};
 
-			// Add options if provided
-			const options: Record<string, unknown> = {};
+			// Add optional parameters
 			if (temperature !== undefined) {
-				options.temperature = temperature;
+				requestBody.temperature = temperature;
 			}
 			if (maxTokens !== undefined) {
-				options.num_predict = maxTokens;
-			}
-			if (Object.keys(options).length > 0) {
-				requestBody.options = options;
+				requestBody.max_tokens = maxTokens;
 			}
 
-			const response = await fetch(`${this.baseUrl}/api/chat`, {
+			const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(requestBody),
@@ -106,45 +113,44 @@ export class OllamaService {
 
 			if (!response.ok) {
 				const errorText = await response.text();
-				this.logger.error(`Ollama API error: ${response.status} - ${errorText}`);
-				return err(ServiceError.externalError('Ollama', `API error: ${response.status}`));
+				this.logger.error(`mana-llm API error: ${response.status} - ${errorText}`);
+				return err(ServiceError.externalError('mana-llm', `API error: ${response.status}`));
 			}
 
-			const data: OllamaChatResponse = await response.json();
+			const data: ChatCompletionResponse = await response.json();
 
-			if (!data.message?.content) {
-				this.logger.warn('No message content in Ollama response');
-				return err(ServiceError.generationFailed('Ollama', 'No response generated'));
+			if (!data.choices?.[0]?.message?.content) {
+				this.logger.warn('No message content in mana-llm response');
+				return err(ServiceError.generationFailed('mana-llm', 'No response generated'));
 			}
 
-			// Calculate token usage from Ollama metrics
-			const promptTokens = data.prompt_eval_count || 0;
-			const completionTokens = data.eval_count || 0;
+			const usage = data.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
 
 			// Log performance metrics
-			if (data.eval_count && data.eval_duration) {
-				const tokensPerSec = (data.eval_count / data.eval_duration) * 1e9;
-				this.logger.debug(`Generated ${data.eval_count} tokens at ${tokensPerSec.toFixed(1)} t/s`);
+			if (usage.completion_tokens) {
+				this.logger.debug(
+					`Generated ${usage.completion_tokens} tokens (total: ${usage.total_tokens})`
+				);
 			}
 
 			return ok({
-				content: data.message.content,
+				content: data.choices[0].message.content,
 				usage: {
-					prompt_tokens: promptTokens,
-					completion_tokens: completionTokens,
-					total_tokens: promptTokens + completionTokens,
+					prompt_tokens: usage.prompt_tokens,
+					completion_tokens: usage.completion_tokens,
+					total_tokens: usage.total_tokens,
 				},
 			});
 		} catch (error) {
 			if (error instanceof Error && error.name === 'TimeoutError') {
-				this.logger.error('Ollama request timed out');
-				return err(ServiceError.generationFailed('Ollama', 'Request timed out'));
+				this.logger.error('mana-llm request timed out');
+				return err(ServiceError.generationFailed('mana-llm', 'Request timed out'));
 			}
 
-			this.logger.error('Error calling Ollama API', error);
+			this.logger.error('Error calling mana-llm API', error);
 			return err(
 				ServiceError.generationFailed(
-					'Ollama',
+					'mana-llm',
 					error instanceof Error ? error.message : 'Unknown error',
 					error instanceof Error ? error : undefined
 				)
@@ -154,14 +160,14 @@ export class OllamaService {
 
 	async listModels(): Promise<string[]> {
 		try {
-			const response = await fetch(`${this.baseUrl}/api/tags`, {
+			const response = await fetch(`${this.baseUrl}/v1/models`, {
 				signal: AbortSignal.timeout(5000),
 			});
 			if (!response.ok) {
 				return [];
 			}
 			const data = await response.json();
-			return (data.models || []).map((m: { name: string }) => m.name);
+			return (data.data || []).map((m: LlmModel) => m.id);
 		} catch {
 			return [];
 		}

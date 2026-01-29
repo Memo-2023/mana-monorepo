@@ -26,10 +26,10 @@ export default () => ({
 		model: process.env.STT_MODEL || 'whisper', // 'whisper' or 'voxtral'
 	},
 	llm: {
-		provider: process.env.LLM_PROVIDER || 'ollama',
-		ollama: {
-			url: process.env.OLLAMA_URL || 'http://localhost:11434',
-			model: process.env.OLLAMA_MODEL || 'gemma3:4b',
+		provider: process.env.LLM_PROVIDER || 'mana-llm',
+		manaLlm: {
+			url: process.env.MANA_LLM_URL || 'http://localhost:3025',
+			model: process.env.LLM_MODEL || 'ollama/gemma3:4b',
 		},
 	},
 });

@@ -6,7 +6,7 @@ Telegram Bot für lokale LLM-Inferenz via Ollama auf dem Mac Mini Server.
 
 - **Framework**: NestJS 10
 - **Telegram**: nestjs-telegraf + Telegraf
-- **LLM**: Ollama API (Gemma 3 4B)
+- **LLM**: mana-llm service (supports Ollama + cloud providers)
 
 ## Commands
 
@@ -53,10 +53,10 @@ PORT=3301
 TELEGRAM_BOT_TOKEN=xxx              # Bot Token von @BotFather
 TELEGRAM_ALLOWED_USERS=123,456      # Optional: Nur diese User IDs erlauben
 
-# Ollama
-OLLAMA_URL=http://localhost:11434   # Ollama API URL
-OLLAMA_MODEL=gemma3:4b              # Standard-Modell
-OLLAMA_TIMEOUT=120000               # Timeout in ms
+# LLM (via mana-llm service)
+MANA_LLM_URL=http://localhost:3025  # mana-llm service URL
+LLM_MODEL=ollama/gemma3:4b          # Standard-Modell (provider/model format)
+LLM_TIMEOUT=120000                  # Timeout in ms
 ```
 
 ## Projekt-Struktur
@@ -91,20 +91,20 @@ telegram-ollama-bot:
   environment:
     PORT: 3301
     TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-    OLLAMA_URL: http://host.docker.internal:11434
-    OLLAMA_MODEL: gemma3:4b
+    MANA_LLM_URL: http://mana-llm:3025
+    LLM_MODEL: ollama/gemma3:4b
   ports:
     - "3301:3301"
 ```
 
-### Option 2: Nativ (empfohlen für beste Ollama-Performance)
+### Option 2: Nativ
 
 ```bash
 # Auf dem Mac Mini
 cd ~/projects/manacore-monorepo/services/telegram-ollama-bot
 pnpm install
 pnpm build
-TELEGRAM_BOT_TOKEN=xxx OLLAMA_URL=http://localhost:11434 pnpm start:prod
+TELEGRAM_BOT_TOKEN=xxx MANA_LLM_URL=http://localhost:3025 pnpm start:prod
 ```
 
 ## Neuen Bot erstellen

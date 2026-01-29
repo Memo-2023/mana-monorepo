@@ -14,8 +14,8 @@ type BlogStyle = keyof typeof BLOG_STYLES;
 export class GenerationService {
 	private readonly logger = new Logger(GenerationService.name);
 	private readonly llmProvider: string;
-	private readonly ollamaUrl: string;
-	private readonly ollamaModel: string;
+	private readonly manaLlmUrl: string;
+	private readonly manaLlmModel: string;
 	private readonly openai: OpenAI | null;
 
 	constructor(
@@ -23,9 +23,10 @@ export class GenerationService {
 		private db: PostgresJsDatabase<typeof schema>,
 		private configService: ConfigService
 	) {
-		this.llmProvider = this.configService.get<string>('llm.provider') || 'ollama';
-		this.ollamaUrl = this.configService.get<string>('llm.ollama.url') || 'http://localhost:11434';
-		this.ollamaModel = this.configService.get<string>('llm.ollama.model') || 'gemma3:4b';
+		this.llmProvider = this.configService.get<string>('llm.provider') || 'mana-llm';
+		this.manaLlmUrl = this.configService.get<string>('llm.manaLlm.url') || 'http://localhost:3025';
+		this.manaLlmModel =
+			this.configService.get<string>('llm.manaLlm.model') || 'ollama/gemma3:4b';
 
 		const apiKey = this.configService.get<string>('openai.apiKey');
 		this.openai = apiKey ? new OpenAI({ apiKey }) : null;
@@ -148,7 +149,7 @@ Beginne direkt mit dem Blogbeitrag (ohne Einleitung wie "Hier ist der Blogbeitra
 			return this.callOpenAI(prompt);
 		}
 
-		return this.callOllama(prompt);
+		return this.callManaLlm(prompt);
 	}
 
 	private async callOpenAI(prompt: string): Promise<string> {
@@ -166,24 +167,27 @@ Beginne direkt mit dem Blogbeitrag (ohne Einleitung wie "Hier ist der Blogbeitra
 		return response.choices[0]?.message?.content || '';
 	}
 
-	private async callOllama(prompt: string): Promise<string> {
-		const response = await fetch(`${this.ollamaUrl}/api/generate`, {
+	private async callManaLlm(prompt: string): Promise<string> {
+		const response = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				model: this.ollamaModel,
-				prompt,
+				model: this.manaLlmModel,
+				messages: [{ role: 'user', content: prompt }],
+				temperature: 0.7,
+				max_tokens: 4000,
 				stream: false,
 			}),
 			signal: AbortSignal.timeout(180000), // 3 minutes timeout
 		});
 
 		if (!response.ok) {
-			throw new Error(`Ollama API error: ${response.status}`);
+			const errorText = await response.text();
+			throw new Error(`mana-llm API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		return data.response || '';
+		return data.choices?.[0]?.message?.content || '';
 	}
 
 	async getLatestGeneration(projectId: string): Promise<Generation | undefined> {

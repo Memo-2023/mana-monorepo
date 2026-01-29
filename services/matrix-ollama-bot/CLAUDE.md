@@ -8,7 +8,7 @@ Matrix Ollama Bot provides a GDPR-compliant chat interface to local LLM inferenc
 
 - **Framework**: NestJS 10
 - **Matrix**: matrix-bot-sdk
-- **LLM**: Ollama (local inference)
+- **LLM**: mana-llm service (supports Ollama + cloud providers)
 
 ## Commands
 
@@ -77,10 +77,10 @@ MATRIX_ACCESS_TOKEN=syt_xxx
 MATRIX_ALLOWED_ROOMS=#ollama-bot:mana.how
 MATRIX_STORAGE_PATH=./data/bot-storage.json
 
-# Ollama
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=gemma3:4b
-OLLAMA_TIMEOUT=120000
+# LLM (via mana-llm service)
+MANA_LLM_URL=http://localhost:3025
+LLM_MODEL=ollama/gemma3:4b
+LLM_TIMEOUT=120000
 ```
 
 ## Docker
@@ -93,7 +93,7 @@ docker build -f services/matrix-ollama-bot/Dockerfile -t matrix-ollama-bot servi
 docker run -p 3311:3311 \
   -e MATRIX_HOMESERVER_URL=http://synapse:8008 \
   -e MATRIX_ACCESS_TOKEN=syt_xxx \
-  -e OLLAMA_URL=http://host.docker.internal:11434 \
+  -e MANA_LLM_URL=http://mana-llm:3025 \
   -v matrix-ollama-bot-data:/app/data \
   matrix-ollama-bot
 ```

@@ -5,10 +5,10 @@ export default () => ({
 		allowedUsers:
 			process.env.TELEGRAM_ALLOWED_USERS?.split(',').map((id) => parseInt(id, 10)) || [],
 	},
-	ollama: {
-		url: process.env.OLLAMA_URL || 'http://localhost:11434',
-		model: process.env.OLLAMA_MODEL || 'gemma3:4b',
-		timeout: parseInt(process.env.OLLAMA_TIMEOUT || '120000', 10),
+	llm: {
+		url: process.env.MANA_LLM_URL || 'http://localhost:3025',
+		model: process.env.LLM_MODEL || 'ollama/gemma3:4b',
+		timeout: parseInt(process.env.LLM_TIMEOUT || '120000', 10),
 	},
 });
 
