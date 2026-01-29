@@ -7,7 +7,7 @@
 
 | Priorität | Bereich | Geschätzte Einsparung | Aufwand |
 |-----------|---------|----------------------|---------|
-| **KRITISCH** | Backend Metrics Migration | 350 LOC | Niedrig |
+| ~~**KRITISCH**~~ | ~~Backend Metrics Migration~~ | ~~350 LOC~~ ✅ **709 LOC entfernt** | ~~Niedrig~~ |
 | **HOCH** | Skeleton Components | 800-1.000 LOC | Mittel |
 | **HOCH** | App Settings Stores | 600-700 LOC | Mittel |
 | **HOCH** | Main.ts/CORS Patterns | 1.800 LOC | Mittel |
@@ -22,20 +22,19 @@
 
 ## 1. Backend Patterns (NestJS)
 
-### 1.1 KRITISCH: Metrics Migration (350 LOC)
+### 1.1 ~~KRITISCH: Metrics Migration~~ ✅ ERLEDIGT (709 LOC entfernt)
 
-**Problem:** 7 Backends haben lokale `MetricsService` Implementierungen, obwohl `@manacore/shared-nestjs-metrics` existiert.
+**Status:** 6 Backends zu `@manacore/shared-nestjs-metrics` migriert (29.01.2026)
 
-**Betroffene Backends:**
-- `apps/chat/apps/backend/src/metrics/` (50 LOC)
-- `apps/calendar/apps/backend/src/metrics/` (50 LOC)
-- `apps/todo/apps/backend/src/metrics/` (68 LOC)
-- `apps/contacts/apps/backend/src/metrics/` (50 LOC)
-- `apps/skilltree/apps/backend/src/metrics/` (50 LOC)
-- `apps/clock/apps/backend/src/metrics/` (50 LOC)
-- `apps/planta/apps/backend/src/metrics/` (50 LOC)
+**Migrierte Backends:**
+- ~~`apps/chat/apps/backend/src/metrics/`~~ ✅
+- ~~`apps/calendar/apps/backend/src/metrics/`~~ ✅
+- ~~`apps/todo/apps/backend/src/metrics/`~~ ✅
+- ~~`apps/contacts/apps/backend/src/metrics/`~~ ✅
+- ~~`apps/skilltree/apps/backend/src/metrics/`~~ ✅
+- ~~`apps/clock/apps/backend/src/metrics/`~~ ✅
 
-**Aktion:** Migriere zu `@manacore/shared-nestjs-metrics` (bereits vorhanden!)
+**Hinweis:** planta hatte keine lokale Metrics-Implementation.
 
 ```typescript
 // Vorher (50 LOC pro Backend)
@@ -400,12 +399,13 @@ export default createDrizzleConfig('chat');
 
 ### Phase 1: Quick Wins (1-2 Tage, ~1.000 LOC)
 
-| Aufgabe | LOC | Aufwand |
-|---------|-----|---------|
-| Metrics zu shared-nestjs-metrics migrieren (7 Backends) | 350 | Niedrig |
-| Picture UI-Komponenten löschen (Button/Input/Card) | 144 | Niedrig |
-| AppSlider lokale Kopien entfernen (8 Apps) | 240 | Niedrig |
-| Sleep-Duplikat entfernen | 3 | Minimal |
+| Aufgabe | LOC | Aufwand | Status |
+|---------|-----|---------|--------|
+| ~~Metrics zu shared-nestjs-metrics migrieren (6 Backends)~~ | ~~350~~ → **709** | ~~Niedrig~~ | ✅ Erledigt |
+| ~~Picture Input.svelte löschen (unbenutzt)~~ | ~~70~~ | ~~Niedrig~~ | ✅ Erledigt |
+| ~~Sleep-Duplikat entfernen~~ | ~~8~~ | ~~Minimal~~ | ✅ Erledigt |
+| Picture UI-Komponenten (Button/Card) | 74 | Niedrig | Offen |
+| AppSlider Wrapper evaluieren (8 Apps) | - | Niedrig | Nicht nötig (sind Lokalisierungs-Wrapper) |
 
 ### Phase 2: Stores & Configs (3-5 Tage, ~1.500 LOC)
 
