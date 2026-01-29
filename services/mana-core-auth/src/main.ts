@@ -86,6 +86,8 @@ async function bootstrap() {
 		exclude: [
 			{ path: 'metrics', method: RequestMethod.ALL },
 			{ path: 'health', method: RequestMethod.ALL },
+			// OIDC login page
+			{ path: 'login', method: RequestMethod.ALL },
 			// Better Auth routes (verification emails, password reset)
 			{ path: 'api/auth/verify-email', method: RequestMethod.ALL },
 			{ path: 'api/auth/reset-password/(.*)', method: RequestMethod.ALL },
