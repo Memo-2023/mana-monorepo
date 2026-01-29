@@ -7,6 +7,7 @@
 @source '../../../../../packages/shared-icons/src';
 @source '../../../../../packages/shared-auth-ui/src';
 @source '../../../../../packages/shared-theme-ui/src';
+@source '../../../../../packages/shared-branding/src';
 
 @layer base {
 	:root {

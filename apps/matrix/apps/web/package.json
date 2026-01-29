@@ -35,10 +35,12 @@
 		"buffer": "^6.0.3",
 		"events": "^3.3.0",
 		"@manacore/shared-auth": "workspace:*",
-		"@manacore/shared-theme": "workspace:*",
-		"@manacore/shared-tailwind": "workspace:*",
+		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
+		"@manacore/shared-tailwind": "workspace:*",
+		"@manacore/shared-theme": "workspace:*",
+		"@manacore/shared-ui": "workspace:*",
 		"date-fns": "^4.1.0",
 		"svelte-i18n": "^4.0.1"
 	}

@@ -1,0 +1,25 @@
+{
+	"app": {
+		"name": "Mana Matrix",
+		"description": "Secure Matrix chat"
+	},
+	"nav": {
+		"chat": "Chat",
+		"settings": "Settings"
+	},
+	"auth": {
+		"login": "Sign in",
+		"logout": "Sign out",
+		"connecting": "Connecting to Matrix...",
+		"connectionFailed": "Connection failed",
+		"retry": "Retry"
+	},
+	"chat": {
+		"newChat": "New Chat",
+		"createRoom": "Create Room",
+		"sendMessage": "Send message",
+		"typeMessage": "Type a message...",
+		"noRooms": "No rooms yet",
+		"noMessages": "No messages yet"
+	}
+}

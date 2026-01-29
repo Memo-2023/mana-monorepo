@@ -3,8 +3,7 @@
 	import { RoomList, RoomHeader, Timeline, MessageInput } from '$lib/components/chat';
 	import CreateRoomDialog from '$lib/components/chat/CreateRoomDialog.svelte';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
-	import { goto } from '$app/navigation';
-	import { Gear, SignOut, ChatCircle, Plus } from '@manacore/shared-icons';
+	import { ChatCircle, Plus } from '@manacore/shared-icons';
 
 	let sidebarOpen = $state(true);
 	let showCreateRoom = $state(false);
@@ -16,11 +15,6 @@
 
 	function toggleSidebar() {
 		sidebarOpen = !sidebarOpen;
-	}
-
-	function handleLogout() {
-		matrixStore.logout();
-		goto('/login');
 	}
 
 	function handleReply(message: SimpleMessage) {
@@ -38,65 +32,25 @@
 	}
 </script>
 
-<div class="flex h-screen overflow-hidden bg-background">
+<div class="flex h-full overflow-hidden bg-background">
 	<!-- Sidebar -->
 	<aside
 		class="flex w-80 flex-shrink-0 flex-col border-r border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm transition-all duration-300 ease-in-out"
 		class:hidden={!sidebarOpen}
 		class:lg:flex={true}
 	>
-		<!-- Sidebar Header -->
-		<header
-			class="flex items-center justify-between border-b border-black/10 dark:border-white/10 p-4"
-		>
-			<div class="flex items-center gap-2">
-				<div class="p-1.5 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600">
-					<ChatCircle class="h-5 w-5 text-white" weight="fill" />
-				</div>
-				<h1 class="text-lg font-bold">Mana Matrix</h1>
-			</div>
-			<div class="flex items-center gap-1">
+		<!-- User Info / Status Bar -->
+		<div class="border-b border-black/10 dark:border-white/10 px-4 py-3">
+			<div class="flex items-center justify-between">
+				<p class="truncate text-sm font-medium">{matrixStore.userId}</p>
 				<button
-					class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+					class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
 					title="Neuer Chat"
 					onclick={() => (showCreateRoom = true)}
 				>
-					<Plus class="h-5 w-5" />
+					<Plus class="h-4 w-4" />
 				</button>
-				<div class="dropdown dropdown-end">
-					<button
-						tabindex="0"
-						class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-					>
-						<Gear class="h-5 w-5" />
-					</button>
-					<ul tabindex="0" class="dropdown-content z-50 w-52 rounded-xl glass p-2 shadow-xl mt-2">
-						<li>
-							<a
-								href="/settings"
-								class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-							>
-								<Gear class="h-4 w-4" />
-								Einstellungen
-							</a>
-						</li>
-						<li>
-							<button
-								onclick={handleLogout}
-								class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors"
-							>
-								<SignOut class="h-4 w-4" />
-								Abmelden
-							</button>
-						</li>
-					</ul>
-				</div>
 			</div>
-		</header>
-
-		<!-- User Info -->
-		<div class="border-b border-black/10 dark:border-white/10 px-4 py-3">
-			<p class="truncate text-sm font-medium">{matrixStore.userId}</p>
 			<p class="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
 				<span class="h-2 w-2 rounded-full bg-green-500"></span>
 				{matrixStore.syncState === 'SYNCING' ? 'Verbunden' : matrixStore.syncState}
