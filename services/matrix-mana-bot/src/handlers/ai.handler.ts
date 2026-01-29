@@ -51,7 +51,7 @@ export class AiHandler {
 			return `❌ Modell "${modelName}" nicht gefunden.\n\nVerfügbar: ${available}`;
 		}
 
-		this.aiService.setModel(ctx.userId, modelName);
+		this.aiService.setSessionModel(ctx.userId, modelName);
 		this.logger.log(`User ${ctx.userId} switched to model ${modelName}`);
 
 		return `✅ Modell gewechselt zu: \`${modelName}\``;
@@ -62,25 +62,10 @@ export class AiHandler {
 			return `**Verwendung:** \`!all [Deine Frage]\`\n\nBeispiel: \`!all Was ist 2+2?\``;
 		}
 
-		const models = await this.aiService.listModels();
-		if (models.length === 0) {
+		const results = await this.aiService.compareModels(question);
+
+		if (results.length === 0) {
 			return '❌ Keine Modelle gefunden. Ist Ollama gestartet?';
-		}
-
-		const results: { model: string; response: string; duration: number; error?: string }[] = [];
-
-		for (const model of models) {
-			const startTime = Date.now();
-			try {
-				this.logger.debug(`Querying model ${model.name}...`);
-				const response = await this.aiService.chat(ctx.userId, question, model.name);
-				const duration = Date.now() - startTime;
-				results.push({ model: model.name, response, duration });
-			} catch (error) {
-				const duration = Date.now() - startTime;
-				const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
-				results.push({ model: model.name, response: '', duration, error: errorMessage });
-			}
 		}
 
 		let resultText = `**📊 Modellvergleich**\n\n**Frage:** "${question}"\n\n---\n\n`;
@@ -102,7 +87,7 @@ export class AiHandler {
 	}
 
 	async clearHistory(ctx: CommandContext): Promise<string> {
-		this.aiService.clearHistory(ctx.userId);
+		this.aiService.clearSessionHistory(ctx.userId);
 		this.logger.log(`User ${ctx.userId} cleared chat history`);
 		return '✅ Chat-Verlauf gelöscht.';
 	}

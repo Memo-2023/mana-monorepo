@@ -68,7 +68,7 @@ export class TodoHandler {
 			return '❌ Bitte gib eine gültige Aufgabennummer an.\n\nBeispiel: `!done 1`';
 		}
 
-		const task = await this.todoService.completeTask(ctx.userId, taskNumber);
+		const task = await this.todoService.completeTaskByIndex(ctx.userId, taskNumber);
 
 		if (!task) {
 			return `❌ Aufgabe #${taskNumber} nicht gefunden.`;
@@ -85,7 +85,7 @@ export class TodoHandler {
 			return '❌ Bitte gib eine gültige Aufgabennummer an.\n\nBeispiel: `!delete 1`';
 		}
 
-		const task = await this.todoService.deleteTask(ctx.userId, taskNumber);
+		const task = await this.todoService.deleteTaskByIndex(ctx.userId, taskNumber);
 
 		if (!task) {
 			return `❌ Aufgabe #${taskNumber} nicht gefunden.`;
