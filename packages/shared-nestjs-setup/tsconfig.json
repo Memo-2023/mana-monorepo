@@ -1,0 +1,3 @@
+{
+	"extends": "@manacore/shared-tsconfig/nestjs"
+}

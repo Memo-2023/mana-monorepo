@@ -71,6 +71,9 @@ importers:
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
+      '@manacore/shared-nestjs-setup':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-setup
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -388,6 +391,9 @@ importers:
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
+      '@manacore/shared-nestjs-setup':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-setup
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -727,6 +733,9 @@ importers:
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
+      '@manacore/shared-nestjs-setup':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-setup
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -994,6 +1003,9 @@ importers:
       '@manacore/shared-nestjs-metrics':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-metrics
+      '@manacore/shared-nestjs-setup':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-setup
       '@manacore/shared-storage':
         specifier: workspace:*
         version: link:../../../../packages/shared-storage
@@ -2164,6 +2176,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-setup':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-setup
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -2981,6 +2996,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-setup':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-setup
       '@manacore/shared-storage':
         specifier: workspace:*
         version: link:../../../../packages/shared-storage
@@ -3181,6 +3199,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-setup':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-setup
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -4282,6 +4303,9 @@ importers:
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
+      '@manacore/shared-nestjs-setup':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-nestjs-setup
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -4819,6 +4843,19 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.25
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
+  packages/shared-nestjs-setup:
+    dependencies:
+      '@nestjs/common':
+        specifier: ^10.0.0 || ^11.0.0
+        version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^10.0.0 || ^11.0.0
+        version: 10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@10.4.20)(@nestjs/websockets@10.4.20)(encoding@0.1.13)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+    devDependencies:
       typescript:
         specifier: ^5.0.0
         version: 5.9.3

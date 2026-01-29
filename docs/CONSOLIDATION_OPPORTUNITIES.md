@@ -10,7 +10,7 @@
 | ~~**KRITISCH**~~ | ~~Backend Metrics Migration~~ | ~~350 LOC~~ ✅ **709 LOC entfernt** | ~~Niedrig~~ |
 | **HOCH** | Skeleton Components | 800-1.000 LOC | Mittel |
 | ~~**HOCH**~~ | ~~App Settings Stores~~ | ~~600-700 LOC~~ ✅ **323 LOC entfernt** | ~~Mittel~~ |
-| **HOCH** | Main.ts/CORS Patterns | 1.800 LOC | Mittel |
+| ~~**HOCH**~~ | ~~Main.ts/CORS Patterns~~ | ~~1.800 LOC~~ ✅ **~280 LOC entfernt** | ~~Mittel~~ |
 | ~~**MITTEL**~~ | ~~TypeScript Configs~~ | ~~400 LOC~~ ✅ **~280 LOC entfernt** | ~~Niedrig~~ |
 | ~~**MITTEL**~~ | ~~UI Component Cleanup~~ | ~~400 LOC~~ ✅ **~74 LOC entfernt** | ~~Niedrig~~ |
 | ~~**MITTEL**~~ | ~~Vite Configs~~ | ~~300 LOC~~ ✅ **~350 LOC entfernt** | ~~Niedrig~~ |
@@ -51,11 +51,23 @@ import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 
 ---
 
-### 1.2 HOCH: Main.ts/CORS Setup (1.800 LOC)
+### ~~1.2 HOCH: Main.ts/CORS Setup~~ ✅ TEILWEISE ERLEDIGT (~280 LOC gespart)
 
-**Problem:** 14 Backends haben fast identische `main.ts` mit CORS, ValidationPipe, GlobalPrefix.
+**Status:** `@manacore/shared-nestjs-setup` Package erstellt und 8 Backends migriert (29.01.2026)
 
-**Empfehlung:** Erstelle `@manacore/shared-nestjs-setup`
+**Migrierte Backends (8 von 14):**
+- ✅ chat (3002), calendar (3014), contacts (3015), zitare (3007)
+- ✅ clock (3017), planta (3022), presi (3008), nutriphi (3023)
+
+**Nicht migriert (komplexe Anforderungen):**
+- ⏭️ manadeck - ConfigService, AppExceptionFilter
+- ⏭️ picture - NestExpressApplication, Static Assets
+- ⏭️ todo, skilltree - CORS Callback mit Logger
+- ⏭️ questions, storage - ConfigService
+
+**Einsparung:** 8 Backends × ~35 LOC = ~280 LOC
+
+**Empfehlung für komplexe Backends:** Erstelle `@manacore/shared-nestjs-setup`
 
 ```typescript
 // packages/shared-nestjs-setup/src/bootstrap.ts
@@ -445,9 +457,9 @@ export default createDrizzleConfig({ dbName: 'chat' });
 
 ### Phase 3: Backend Setup (5-7 Tage, ~2.000 LOC)
 
-| Aufgabe | LOC | Aufwand |
-|---------|-----|---------|
-| `@manacore/shared-nestjs-setup` erstellen | 1.800 | Mittel | Offen |
+| Aufgabe | LOC | Aufwand | Status |
+|---------|-----|---------|--------|
+| ~~`@manacore/shared-nestjs-setup` erstellen~~ | ~~1.800~~ → **280** | ~~Mittel~~ | ✅ 8 Backends migriert |
 | `@manacore/shared-nestjs-health` erstellen | 170 | Niedrig | Offen |
 | ~~Drizzle Config Factory erstellen~~ | ~~200~~ → **160** | ~~Niedrig~~ | ✅ Erledigt |
 
