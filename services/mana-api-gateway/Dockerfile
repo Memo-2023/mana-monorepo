@@ -1,20 +1,32 @@
+# ================================
+# Build Stage (Monorepo-aware)
+# ================================
 FROM node:20-alpine AS base
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile --prod=false
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY services/mana-api-gateway/package.json ./services/mana-api-gateway/
+COPY packages/shared-nestjs-auth/package.json ./packages/shared-nestjs-auth/
+RUN pnpm install --frozen-lockfile --filter @manacore/api-gateway...
 
 # Build the application
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY --from=deps /app/services/mana-api-gateway/node_modules ./services/mana-api-gateway/node_modules
+COPY --from=deps /app/packages/shared-nestjs-auth/node_modules ./packages/shared-nestjs-auth/node_modules 2>/dev/null || true
+COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY services/mana-api-gateway ./services/mana-api-gateway
+WORKDIR /app/services/mana-api-gateway
 RUN pnpm build
 
-# Production image
-FROM base AS runner
+# ================================
+# Production Stage
+# ================================
+FROM node:20-alpine AS runner
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 ENV NODE_ENV=production
 
 # Create non-root user
@@ -22,10 +34,12 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 USER nestjs
 
+WORKDIR /app
+
 # Copy built application
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/package.json ./
+COPY --from=builder --chown=nestjs:nodejs /app/services/mana-api-gateway/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/services/mana-api-gateway/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/services/mana-api-gateway/package.json ./
 
 EXPOSE 3030
 
