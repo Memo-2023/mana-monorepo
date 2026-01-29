@@ -40,6 +40,15 @@ export interface MessageReaction {
 }
 
 /**
+ * Read receipt info for a message
+ */
+export interface ReadReceipt {
+	userId: string;
+	userName: string;
+	timestamp: number;
+}
+
+/**
  * Simplified message for UI rendering
  */
 export interface SimpleMessage {
@@ -57,6 +66,8 @@ export interface SimpleMessage {
 	redacted?: boolean;
 	media?: MediaInfo;
 	reactions?: MessageReaction[];
+	// Read receipts
+	readBy?: ReadReceipt[];
 }
 
 export type MessageType =

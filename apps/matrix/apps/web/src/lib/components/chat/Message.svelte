@@ -16,6 +16,8 @@
 		Lock,
 		Warning,
 		Smiley,
+		Check,
+		Checks,
 	} from '@manacore/shared-icons';
 
 	interface Props {
@@ -486,11 +488,27 @@
 			</div>
 		{/if}
 
-		<!-- Time (shown on hover) -->
+		<!-- Time and read status -->
 		<div
-			class="flex items-center gap-2 mt-1.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity"
+			class="flex items-center gap-1.5 mt-1.5 px-1 {message.isOwn ? 'justify-end' : ''}"
 		>
-			<span class="text-xs text-muted-foreground">{formattedTime()}</span>
+			<span class="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">{formattedTime()}</span>
+			<!-- Read receipt indicator (for own messages) -->
+			{#if message.isOwn}
+				{#if message.readBy && message.readBy.length > 0}
+					<Checks
+						class="h-4 w-4 text-blue-500"
+						weight="bold"
+						title="Gelesen von: {message.readBy.map(r => r.userName).join(', ')}"
+					/>
+				{:else}
+					<Check
+						class="h-4 w-4 text-muted-foreground/50"
+						weight="bold"
+						title="Gesendet"
+					/>
+				{/if}
+			{/if}
 		</div>
 
 		<!-- Message actions (hover) -->

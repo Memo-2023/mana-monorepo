@@ -7,6 +7,7 @@ import type {
 	SimpleMessage,
 	MessageType,
 	MessageReaction,
+	ReadReceipt,
 	RoomMember,
 	VerificationStatus,
 	DeviceInfo,
@@ -299,6 +300,14 @@ class MatrixStore {
 
 			// Also trigger room list update for DMs
 			this._rooms = this._client!.getRooms();
+		});
+
+		// Read receipt updates
+		this._client.on(sdk.RoomEvent.Receipt, (event, room) => {
+			// Update timeline if we're in this room to refresh read receipts
+			if (room.roomId === this._currentRoomId) {
+				this._timeline = [...(room.getLiveTimeline().getEvents() || [])];
+			}
 		});
 	}
 
@@ -1328,6 +1337,10 @@ class MatrixStore {
 		// Collect reactions for this message
 		const reactions = this.getReactionsForEvent(event.getId() || '', timeline);
 
+		// Get read receipts for this message (only for own messages)
+		const isOwn = event.getSender() === this._client?.getUserId();
+		const readBy = isOwn ? this.getReadReceiptsForEvent(event) : undefined;
+
 		return {
 			id: event.getId() || '',
 			sender: event.getSender() || '',
@@ -1336,13 +1349,14 @@ class MatrixStore {
 			formattedBody: content.formatted_body,
 			timestamp: event.getTs(),
 			type: msgtype as MessageType,
-			isOwn: event.getSender() === this._client?.getUserId(),
+			isOwn,
 			replyTo: replyToId,
 			replyToBody,
 			edited: !!event.replacingEvent(),
 			redacted: isRedacted,
 			media,
 			reactions: reactions.length > 0 ? reactions : undefined,
+			readBy: readBy && readBy.length > 0 ? readBy : undefined,
 		};
 	}
 
@@ -1396,6 +1410,44 @@ class MatrixStore {
 
 		// Sort by count descending
 		return reactions.sort((a, b) => b.count - a.count);
+	}
+
+	/**
+	 * Get read receipts for a specific event
+	 */
+	private getReadReceiptsForEvent(event: MatrixEvent): ReadReceipt[] {
+		const eventId = event.getId();
+		const roomId = event.getRoomId();
+		if (!eventId || !roomId || !this._client) return [];
+
+		const room = this._client.getRoom(roomId);
+		if (!room) return [];
+
+		const myUserId = this._client.getUserId();
+		const receipts: ReadReceipt[] = [];
+
+		// Get all members who have read up to or past this event
+		const members = room.getJoinedMembers();
+		for (const member of members) {
+			// Skip self
+			if (member.userId === myUserId) continue;
+
+			// Get the user's read receipt
+			const receiptEvent = room.getEventReadUpTo(member.userId);
+			if (!receiptEvent) continue;
+
+			// Check if their read receipt is at or after this event
+			const receiptEventObj = room.findEventById(receiptEvent);
+			if (receiptEventObj && receiptEventObj.getTs() >= event.getTs()) {
+				receipts.push({
+					userId: member.userId,
+					userName: member.name || member.userId.split(':')[0].substring(1),
+					timestamp: receiptEventObj.getTs(),
+				});
+			}
+		}
+
+		return receipts;
 	}
 
 	/**
