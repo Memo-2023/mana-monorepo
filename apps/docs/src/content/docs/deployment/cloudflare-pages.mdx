@@ -1,0 +1,242 @@
+---
+title: Cloudflare Pages
+description: Deploying static sites and landing pages to Cloudflare Pages.
+---
+
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+# Cloudflare Pages
+
+All landing pages and static sites are deployed to **Cloudflare Pages** using Direct Upload via Wrangler CLI.
+
+## Deployed Sites
+
+| Project | Package | Cloudflare Project | URL |
+|---------|---------|-------------------|-----|
+| Chat | `@chat/landing` | `chat-landing` | chat.manacore.app |
+| Picture | `@picture/landing` | `picture-landing` | picture.manacore.app |
+| Manacore | `@manacore/landing` | `manacore-landing` | manacore.app |
+| ManaDeck | `@manadeck/landing` | `manadeck-landing` | manadeck.manacore.app |
+| Zitare | `@zitare/landing` | `zitare-landing` | zitare.manacore.app |
+| Docs | `@manacore/docs` | `manacore-docs` | docs.manacore.app |
+
+## Quick Deploy
+
+```bash
+# Login to Cloudflare (first time only)
+pnpm cf:login
+
+# Deploy a landing page
+pnpm deploy:landing:chat
+pnpm deploy:landing:picture
+
+# Deploy documentation
+pnpm deploy:docs
+
+# Deploy all landing pages
+pnpm deploy:landing:all
+```
+
+## Setup Guide
+
+<Steps>
+1. **Login to Cloudflare**
+
+   ```bash
+   npx wrangler login
+   ```
+
+   This opens a browser to authenticate with your Cloudflare account.
+
+2. **Create a project** (first time only)
+
+   ```bash
+   npx wrangler pages project create chat-landing --production-branch=main
+   ```
+
+3. **Configure wrangler.toml**
+
+   Each landing page needs a `wrangler.toml`:
+
+   ```toml
+   name = "chat-landing"
+   compatibility_date = "2024-12-01"
+   pages_build_output_dir = "dist"
+   ```
+
+4. **Deploy**
+
+   ```bash
+   # Build and deploy
+   pnpm --filter @chat/landing build
+   npx wrangler pages deploy apps/chat/apps/landing/dist --project-name=chat-landing
+   ```
+</Steps>
+
+## Project Configuration
+
+### wrangler.toml
+
+```toml
+# Cloudflare Pages configuration
+name = "project-landing"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "dist"
+```
+
+### Deploy Script Pattern
+
+Each project has a deploy script in root `package.json`:
+
+```json
+{
+  "scripts": {
+    "deploy:landing:chat": "pnpm --filter @chat/landing build && npx wrangler pages deploy apps/chat/apps/landing/dist --project-name=chat-landing"
+  }
+}
+```
+
+## Custom Domains
+
+### Add a Custom Domain
+
+```bash
+# Via CLI
+npx wrangler pages project add-domain chat-landing chat.manacore.app
+
+# Or via Cloudflare Dashboard:
+# 1. Go to Pages > chat-landing > Custom domains
+# 2. Add domain: chat.manacore.app
+# 3. Configure DNS (automatic if using Cloudflare DNS)
+```
+
+### DNS Configuration
+
+If using Cloudflare DNS (recommended):
+
+| Type | Name | Content | Proxy |
+|------|------|---------|-------|
+| CNAME | chat | chat-landing.pages.dev | Proxied |
+
+If using external DNS:
+
+| Type | Name | Content |
+|------|------|---------|
+| CNAME | chat | chat-landing.pages.dev |
+
+## Environment Variables
+
+### Build-time Variables
+
+Set in Cloudflare Dashboard or via `wrangler.toml`:
+
+```toml
+[vars]
+PUBLIC_API_URL = "https://api.manacore.app"
+```
+
+### Via Dashboard
+
+1. Go to Pages > Project > Settings > Environment variables
+2. Add variables for Production and Preview environments
+
+## Deployment Previews
+
+Every push to a branch creates a preview deployment:
+
+- **Production**: `https://chat-landing.pages.dev`
+- **Preview**: `https://<branch>.<project>.pages.dev`
+
+## Rollback
+
+### Via CLI
+
+```bash
+# List deployments
+npx wrangler pages deployment list --project-name=chat-landing
+
+# Promote a previous deployment to production
+npx wrangler pages deployment promote <deployment-id> --project-name=chat-landing
+```
+
+### Via Dashboard
+
+1. Go to Pages > Project > Deployments
+2. Find the deployment to rollback to
+3. Click "..." > "Rollback to this deployment"
+
+## Adding a New Landing Page
+
+<Steps>
+1. **Create the landing page**
+
+   ```
+   apps/{project}/apps/landing/
+   ├── src/
+   ├── public/
+   ├── astro.config.mjs
+   ├── wrangler.toml
+   └── package.json
+   ```
+
+2. **Add wrangler.toml**
+
+   ```toml
+   name = "{project}-landing"
+   compatibility_date = "2024-12-01"
+   pages_build_output_dir = "dist"
+   ```
+
+3. **Create Cloudflare project**
+
+   ```bash
+   npx wrangler pages project create {project}-landing --production-branch=main
+   ```
+
+4. **Add deploy script to root package.json**
+
+   ```json
+   "deploy:landing:{project}": "pnpm --filter @{project}/landing build && npx wrangler pages deploy apps/{project}/apps/landing/dist --project-name={project}-landing"
+   ```
+
+5. **Deploy**
+
+   ```bash
+   pnpm deploy:landing:{project}
+   ```
+
+6. **Add custom domain** (optional)
+
+   ```bash
+   npx wrangler pages project add-domain {project}-landing {project}.manacore.app
+   ```
+</Steps>
+
+## Troubleshooting
+
+### "Project not found"
+
+Create the project first:
+```bash
+npx wrangler pages project create project-name --production-branch=main
+```
+
+### Build Fails
+
+Check the build locally:
+```bash
+pnpm --filter @project/landing build
+```
+
+### Domain Not Working
+
+1. Verify DNS records are correct
+2. Check SSL/TLS mode is "Full" in Cloudflare
+3. Wait for DNS propagation (up to 24 hours)
+
+<Aside type="tip">
+Use `dig` to check DNS propagation:
+```bash
+dig chat.manacore.app
+```
+</Aside>

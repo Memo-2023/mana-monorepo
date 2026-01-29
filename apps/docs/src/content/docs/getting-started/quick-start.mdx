@@ -1,0 +1,128 @@
+---
+title: Quick Start
+description: Get up and running with Manacore in minutes.
+---
+
+import { Steps, Tabs, TabItem, Code } from '@astrojs/starlight/components';
+
+# Quick Start
+
+Get the Manacore monorepo running locally in just a few steps.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **Node.js** 20 or higher
+- **pnpm** 9.15.0 (`npm install -g pnpm@9.15.0`)
+- **Docker** and Docker Compose
+- **Git**
+
+## Installation
+
+<Steps>
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/manacore/manacore-monorepo.git
+   cd manacore-monorepo
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Start infrastructure services**
+
+   This starts PostgreSQL, Redis, and MinIO (S3-compatible storage):
+
+   ```bash
+   pnpm docker:up
+   ```
+
+4. **Setup environment variables**
+
+   Generate environment files for all apps:
+
+   ```bash
+   pnpm setup:env
+   ```
+
+5. **Start an application**
+
+   Use `dev:*:full` commands for the best experience - they automatically set up databases:
+
+   <Tabs>
+     <TabItem label="Chat">
+       ```bash
+       pnpm dev:chat:full
+       ```
+       Opens at `http://localhost:5173` (web) and `http://localhost:3002` (API)
+     </TabItem>
+     <TabItem label="Zitare">
+       ```bash
+       pnpm dev:zitare:full
+       ```
+       Opens at `http://localhost:5174` (web) and `http://localhost:3007` (API)
+     </TabItem>
+     <TabItem label="Picture">
+       ```bash
+       pnpm dev:picture:full
+       ```
+       Opens at `http://localhost:5175` (web)
+     </TabItem>
+   </Tabs>
+</Steps>
+
+## What `dev:*:full` Does
+
+The `full` commands automatically:
+
+1. **Create the database** if it doesn't exist
+2. **Push the latest schema** with Drizzle
+3. **Start Mana Core Auth** (authentication service)
+4. **Start the backend** (NestJS API)
+5. **Start the web app** (SvelteKit)
+
+All processes run concurrently with color-coded output.
+
+## Verify Installation
+
+Once running, you should be able to:
+
+1. **Open the web app** at the URL shown in the terminal
+2. **Check the API health** endpoint:
+   ```bash
+   curl http://localhost:3002/api/v1/health
+   ```
+3. **Access MinIO console** at `http://localhost:9001` (user: `minioadmin`, password: `minioadmin`)
+
+## Next Steps
+
+- Learn about the [Project Structure](/getting-started/project-structure)
+- Configure [Environment Variables](/development/environment-variables)
+- Understand the [Architecture](/architecture/overview)
+
+## Troubleshooting
+
+### Docker not running
+```bash
+# Make sure Docker Desktop is running, then:
+pnpm docker:up
+```
+
+### Port already in use
+Check what's using the port and stop it:
+```bash
+lsof -i :3002  # Check port 3002
+kill -9 <PID>  # Stop the process
+```
+
+### Database connection issues
+Ensure PostgreSQL is running:
+```bash
+docker ps  # Should show postgres container
+pnpm docker:logs postgres  # Check logs
+```

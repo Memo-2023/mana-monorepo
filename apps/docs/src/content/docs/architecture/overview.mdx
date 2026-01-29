@@ -1,0 +1,159 @@
+---
+title: Architecture Overview
+description: High-level architecture of the Manacore ecosystem.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+# Architecture Overview
+
+Manacore is a multi-app ecosystem with shared infrastructure, enabling rapid development of interconnected applications.
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Client Layer                              │
+├─────────────────┬─────────────────┬─────────────────────────────┤
+│   Mobile Apps   │    Web Apps     │      Landing Pages          │
+│   (Expo/RN)     │   (SvelteKit)   │         (Astro)             │
+└────────┬────────┴────────┬────────┴──────────────┬──────────────┘
+         │                 │                       │
+         └─────────────────┼───────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        API Gateway                               │
+│                  (Individual NestJS backends)                    │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         │                    │                    │
+         ▼                    ▼                    ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│  Mana Core Auth │  │   Mana Search   │  │  Mana Storage   │
+│    (Port 3001)  │  │   (Port 3021)   │  │    (S3/MinIO)   │
+└────────┬────────┘  └────────┬────────┘  └─────────────────┘
+         │                    │
+         ▼                    ▼
+┌─────────────────┐  ┌─────────────────┐
+│   PostgreSQL    │  │     Redis       │
+│                 │  │                 │
+└─────────────────┘  └─────────────────┘
+```
+
+## Core Principles
+
+<CardGrid>
+  <Card title="Shared Authentication" icon="shield">
+    All apps authenticate through **Mana Core Auth** using EdDSA JWT tokens.
+  </Card>
+  <Card title="Independent Databases" icon="database">
+    Each service has its own PostgreSQL database for isolation.
+  </Card>
+  <Card title="Shared Packages" icon="puzzle">
+    Common code lives in `packages/` for reuse across apps.
+  </Card>
+  <Card title="Consistent Patterns" icon="document">
+    All apps follow the same architectural patterns and conventions.
+  </Card>
+</CardGrid>
+
+## Technology Stack
+
+### Frontend
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Mobile** | Expo SDK 52+, React Native | iOS & Android apps |
+| **Web** | SvelteKit 2, Svelte 5 | Web applications |
+| **Landing** | Astro 5 | Marketing pages |
+| **Styling** | Tailwind CSS, NativeWind | Consistent design |
+
+### Backend
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **API** | NestJS 10-11 | REST APIs |
+| **ORM** | Drizzle ORM | Database access |
+| **Database** | PostgreSQL | Data persistence |
+| **Cache** | Redis | Sessions, caching |
+| **Storage** | MinIO/Hetzner S3 | File storage |
+
+### Infrastructure
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Package Manager** | pnpm 9.15+ | Dependency management |
+| **Build System** | Turborepo | Monorepo orchestration |
+| **Containerization** | Docker | Local dev & deployment |
+| **CDN** | Cloudflare Pages | Static hosting |
+
+## Service Communication
+
+### Authentication Flow
+
+```
+┌──────────┐     ┌──────────┐     ┌─────────────────┐
+│  Client  │────>│  Backend │────>│  Mana Core Auth │
+└──────────┘     └──────────┘     └─────────────────┘
+      │               │                    │
+      │ Bearer JWT    │ POST /validate     │
+      │               │ {token}            │
+      │               │<───────────────────│
+      │               │ {valid, payload}   │
+      │<──────────────│                    │
+      │ Response      │                    │
+```
+
+### Service Ports
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| mana-core-auth | 3001 | Authentication |
+| chat-backend | 3002 | Chat API |
+| picture-backend | 3006 | Image generation |
+| zitare-backend | 3007 | Quotes API |
+| manadeck-backend | 3009 | Card management |
+| contacts-backend | 3015 | Contacts API |
+| calendar-backend | 3014 | Calendar API |
+| mana-search | 3021 | Search service |
+
+## Data Flow
+
+### Request Lifecycle
+
+1. **Client** sends request with JWT token
+2. **Backend** validates token with Mana Core Auth
+3. **Service** processes request with Drizzle ORM
+4. **Database** returns data
+5. **Backend** transforms and returns response
+6. **Client** receives and displays data
+
+### Caching Strategy
+
+- **Redis**: Session tokens, rate limiting
+- **CDN**: Static assets, landing pages
+- **Application**: In-memory caches for hot data
+
+## Deployment Architecture
+
+### Development
+
+- Local Docker containers
+- Hot reload on all services
+- MinIO for S3-compatible storage
+
+### Production
+
+- Docker Compose on Mac Mini server
+- Cloudflare Pages for static sites
+- Hetzner Object Storage for files
+- PostgreSQL for persistence
+
+## Next Steps
+
+- [Authentication](/architecture/authentication) - How auth works
+- [Backend (NestJS)](/architecture/backend) - API patterns
+- [Web (SvelteKit)](/architecture/web) - Frontend patterns
+- [Storage](/architecture/storage) - File handling

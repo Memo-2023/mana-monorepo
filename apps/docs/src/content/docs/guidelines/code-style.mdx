@@ -1,0 +1,305 @@
+---
+title: Code Style
+description: Coding standards and formatting conventions for Manacore.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Code Style
+
+Consistent code style across the monorepo ensures readability and maintainability.
+
+## Formatting
+
+All projects use the same base formatting rules:
+
+| Setting | Value |
+|---------|-------|
+| Indentation | Tabs (displayed as 2 spaces) |
+| Quotes | Single quotes |
+| Line width | 100 characters |
+| Semicolons | Yes |
+| Trailing commas | ES5 style |
+
+### Prettier Configuration
+
+```json
+{
+  "useTabs": true,
+  "tabWidth": 2,
+  "singleQuote": true,
+  "printWidth": 100,
+  "semi": true,
+  "trailingComma": "es5"
+}
+```
+
+## Naming Conventions
+
+### Files and Directories
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Components | PascalCase | `UserProfile.tsx`, `Button.svelte` |
+| Utilities | camelCase | `formatDate.ts`, `cn.ts` |
+| Types | camelCase | `user.types.ts` |
+| Constants | SCREAMING_SNAKE | `constants.ts` (values inside) |
+| Test files | `*.spec.ts` or `*.test.ts` | `users.service.spec.ts` |
+
+### Code
+
+<Tabs>
+  <TabItem label="TypeScript">
+    ```typescript
+    // Classes - PascalCase
+    class UserService {}
+
+    // Interfaces - PascalCase, no "I" prefix
+    interface User {}
+    interface CreateUserDto {}
+
+    // Types - PascalCase
+    type UserRole = 'admin' | 'user';
+
+    // Functions - camelCase
+    function getUserById(id: string) {}
+
+    // Variables - camelCase
+    const currentUser = null;
+
+    // Constants - SCREAMING_SNAKE_CASE
+    const MAX_RETRIES = 3;
+    const API_BASE_URL = '/api';
+
+    // Enums - PascalCase (values too)
+    enum UserStatus {
+      Active = 'active',
+      Inactive = 'inactive',
+    }
+    ```
+  </TabItem>
+  <TabItem label="Svelte">
+    ```svelte
+    <script lang="ts">
+      // Props - camelCase
+      let { userName, onUpdate }: Props = $props();
+
+      // State - camelCase
+      let isLoading = $state(false);
+      let userData = $state<User | null>(null);
+
+      // Derived - camelCase
+      let fullName = $derived(`${userData?.first} ${userData?.last}`);
+
+      // Functions - camelCase
+      function handleSubmit() {}
+    </script>
+
+    <!-- Events - on:eventname (lowercase) -->
+    <button onclick={handleSubmit}>Submit</button>
+    ```
+  </TabItem>
+  <TabItem label="React Native">
+    ```tsx
+    // Components - PascalCase
+    function UserProfile({ user }: Props) {
+      // Hooks - use prefix
+      const [isLoading, setIsLoading] = useState(false);
+      const queryClient = useQueryClient();
+
+      // Handlers - handle prefix
+      const handlePress = () => {};
+
+      return <View />;
+    }
+
+    // Styles - camelCase
+    const styles = StyleSheet.create({
+      container: {},
+      headerText: {},
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+## TypeScript Guidelines
+
+### Strict Mode
+
+All projects use TypeScript strict mode:
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  }
+}
+```
+
+### Type Annotations
+
+```typescript
+// Prefer explicit return types for public functions
+function getUser(id: string): Promise<User | null> {
+  // ...
+}
+
+// Use inference for simple cases
+const users = []; // Inferred as never[], be explicit!
+const users: User[] = []; // Better
+
+// Prefer interfaces for objects
+interface User {
+  id: string;
+  name: string;
+}
+
+// Use types for unions/intersections
+type UserRole = 'admin' | 'user' | 'guest';
+type UserWithRole = User & { role: UserRole };
+```
+
+### Avoid `any`
+
+```typescript
+// Bad
+function processData(data: any) {}
+
+// Good
+function processData<T>(data: T) {}
+function processData(data: unknown) {}
+function processData(data: Record<string, unknown>) {}
+```
+
+## Import Organization
+
+Organize imports in this order:
+
+```typescript
+// 1. Node.js built-ins
+import { readFile } from 'fs/promises';
+
+// 2. External packages
+import { Injectable } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
+
+// 3. Monorepo packages
+import { JwtAuthGuard } from '@manacore/shared-nestjs-auth';
+
+// 4. Relative imports - parent directories
+import { AppModule } from '../app.module';
+
+// 5. Relative imports - same directory
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+```
+
+## Comments
+
+### When to Comment
+
+```typescript
+// Good - explains WHY, not WHAT
+// We retry 3 times because the external API has occasional timeouts
+const MAX_RETRIES = 3;
+
+// Bad - explains WHAT (obvious from code)
+// Set max retries to 3
+const MAX_RETRIES = 3;
+```
+
+### JSDoc for Public APIs
+
+```typescript
+/**
+ * Fetches a user by their ID.
+ *
+ * @param id - The user's UUID
+ * @returns The user object or null if not found
+ * @throws {UnauthorizedException} If the caller lacks permission
+ */
+async function getUserById(id: string): Promise<User | null> {
+  // ...
+}
+```
+
+### TODO Comments
+
+```typescript
+// TODO: Implement pagination (issue #123)
+// FIXME: This breaks when user.name is null
+// HACK: Workaround for library bug, remove after v2.0
+```
+
+## Error Handling
+
+### Use Result Types
+
+```typescript
+type Result<T, E = Error> =
+  | { ok: true; value: T }
+  | { ok: false; error: E };
+
+// Usage
+async function findUser(id: string): Promise<Result<User, 'NOT_FOUND'>> {
+  const user = await db.users.find(id);
+  if (!user) {
+    return { ok: false, error: 'NOT_FOUND' };
+  }
+  return { ok: true, value: user };
+}
+```
+
+### Throw Only for Exceptional Cases
+
+```typescript
+// Good - expected case, use Result
+const result = await findUser(id);
+if (!result.ok) {
+  return res.status(404).json({ error: 'User not found' });
+}
+
+// Good - truly exceptional, throw
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is required');
+}
+```
+
+## Best Practices
+
+<Aside type="tip">
+1. **Keep functions small** - Under 50 lines ideally
+2. **Single responsibility** - One function, one job
+3. **Descriptive names** - `getUserByEmail` not `getUser2`
+4. **Early returns** - Reduce nesting
+5. **Avoid magic numbers** - Use named constants
+6. **Immutability** - Prefer `const`, avoid mutations
+</Aside>
+
+### Early Returns
+
+```typescript
+// Bad - nested
+function processUser(user: User | null) {
+  if (user) {
+    if (user.isActive) {
+      if (user.hasPermission) {
+        // actual logic
+      }
+    }
+  }
+}
+
+// Good - early returns
+function processUser(user: User | null) {
+  if (!user) return;
+  if (!user.isActive) return;
+  if (!user.hasPermission) return;
+
+  // actual logic
+}
+```

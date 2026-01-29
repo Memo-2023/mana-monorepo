@@ -1,0 +1,316 @@
+---
+title: Mac Mini Server
+description: Production server setup and management for Manacore backends.
+---
+
+import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Mac Mini Server
+
+The production environment runs on a Mac Mini, accessible via Cloudflare Tunnel.
+
+## Server Access
+
+**Domain**: mana.how
+
+### SSH Configuration
+
+Add to `~/.ssh/config`:
+
+```
+Host mana-server
+    HostName mac-mini.mana.how
+    User till
+    ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h
+```
+
+### Connect
+
+```bash
+ssh mana-server
+```
+
+<Aside type="note">
+Requires `cloudflared` installed: `brew install cloudflare/cloudflare/cloudflared`
+</Aside>
+
+## Directory Structure
+
+```
+~/projects/manacore-monorepo/
+├── docker-compose.macmini.yml    # Production compose file
+├── .env.production               # Production environment
+├── scripts/mac-mini/             # Server management scripts
+│   ├── status.sh                 # Check all services
+│   ├── deploy.sh                 # Pull & restart
+│   └── health-check.sh           # Run health checks
+└── ...
+```
+
+## Common Operations
+
+### Check Status
+
+```bash
+ssh mana-server
+cd ~/projects/manacore-monorepo
+./scripts/mac-mini/status.sh
+```
+
+Output:
+```
+=== Service Status ===
+postgres    running  (healthy)
+redis       running  (healthy)
+mana-auth   running  (healthy)
+chat-backend running (healthy)
+...
+```
+
+### Deploy Updates
+
+```bash
+ssh mana-server
+cd ~/projects/manacore-monorepo
+./scripts/mac-mini/deploy.sh
+```
+
+This script:
+1. Pulls latest code from git
+2. Rebuilds Docker images
+3. Restarts containers with zero-downtime
+
+### View Logs
+
+```bash
+# All services
+docker compose -f docker-compose.macmini.yml logs -f
+
+# Specific service
+docker compose -f docker-compose.macmini.yml logs -f chat-backend
+
+# Last 100 lines
+docker compose -f docker-compose.macmini.yml logs --tail=100 mana-auth
+```
+
+### Restart Services
+
+```bash
+# Single service
+docker compose -f docker-compose.macmini.yml restart chat-backend
+
+# All services
+docker compose -f docker-compose.macmini.yml restart
+
+# Full rebuild
+docker compose -f docker-compose.macmini.yml up -d --build
+```
+
+## Docker Compose Configuration
+
+### docker-compose.macmini.yml
+
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: manacore
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U manacore"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mana-auth:
+    build:
+      context: .
+      dockerfile: services/mana-core-auth/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://manacore:${POSTGRES_PASSWORD}@postgres:5432/manacore
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  chat-backend:
+    build:
+      context: .
+      dockerfile: apps/chat/apps/backend/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://manacore:${POSTGRES_PASSWORD}@postgres:5432/chat
+      - MANA_CORE_AUTH_URL=http://mana-auth:3001
+    depends_on:
+      - mana-auth
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+## Health Checks
+
+### Run Health Checks
+
+```bash
+./scripts/mac-mini/health-check.sh
+```
+
+### Check Individual Service
+
+```bash
+# Auth service
+curl http://localhost:3001/health
+
+# Chat backend
+curl http://localhost:3002/api/v1/health
+
+# From outside via tunnel
+curl https://api.mana.how/health
+```
+
+## Cloudflare Tunnel
+
+### Configuration
+
+The tunnel routes traffic from Cloudflare to local services:
+
+```yaml
+# ~/.cloudflared/config.yml
+tunnel: mana-tunnel
+credentials-file: ~/.cloudflared/mana-tunnel.json
+
+ingress:
+  - hostname: api.mana.how
+    service: http://localhost:3001
+  - hostname: chat-api.mana.how
+    service: http://localhost:3002
+  - hostname: mac-mini.mana.how
+    service: ssh://localhost:22
+  - service: http_status:404
+```
+
+### Manage Tunnel
+
+```bash
+# Check tunnel status
+cloudflared tunnel info mana-tunnel
+
+# Restart tunnel
+sudo launchctl stop com.cloudflare.cloudflared
+sudo launchctl start com.cloudflare.cloudflared
+
+# View tunnel logs
+tail -f /var/log/cloudflared.log
+```
+
+## Backup & Recovery
+
+### Database Backup
+
+```bash
+# Manual backup
+docker exec postgres pg_dump -U manacore manacore > backup_$(date +%Y%m%d).sql
+
+# Automated daily backups (via cron)
+0 2 * * * /home/till/scripts/backup-databases.sh
+```
+
+### Restore Database
+
+```bash
+# Stop services
+docker compose -f docker-compose.macmini.yml stop chat-backend
+
+# Restore
+docker exec -i postgres psql -U manacore manacore < backup_20240115.sql
+
+# Start services
+docker compose -f docker-compose.macmini.yml start chat-backend
+```
+
+## Monitoring
+
+### Resource Usage
+
+```bash
+# Container stats
+docker stats
+
+# Disk usage
+docker system df
+
+# System resources
+htop
+```
+
+### Alerts
+
+<Aside type="note">
+Monitoring with Prometheus/Grafana is planned. Currently using manual checks.
+</Aside>
+
+## Troubleshooting
+
+### Container Won't Start
+
+```bash
+# Check logs
+docker compose -f docker-compose.macmini.yml logs service-name
+
+# Check container status
+docker ps -a
+
+# Restart with fresh build
+docker compose -f docker-compose.macmini.yml up -d --build service-name
+```
+
+### Out of Disk Space
+
+```bash
+# Check disk usage
+df -h
+
+# Clean Docker
+docker system prune -a --volumes
+
+# Remove old images
+docker image prune -a
+```
+
+### Database Connection Issues
+
+```bash
+# Check postgres is running
+docker compose -f docker-compose.macmini.yml ps postgres
+
+# Test connection
+docker exec -it postgres psql -U manacore -c "SELECT 1"
+
+# Check logs
+docker compose -f docker-compose.macmini.yml logs postgres
+```

@@ -1,0 +1,151 @@
+---
+title: Deployment Overview
+description: Deployment strategies and infrastructure for Manacore applications.
+---
+
+import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
+
+# Deployment Overview
+
+Manacore uses multiple deployment strategies depending on the application type.
+
+## Deployment Targets
+
+<CardGrid>
+  <Card title="Cloudflare Pages" icon="cloud">
+    Static sites: Landing pages, documentation
+  </Card>
+  <Card title="Mac Mini Server" icon="server">
+    Docker containers: Backends, databases
+  </Card>
+  <Card title="Hetzner Storage" icon="document">
+    S3-compatible object storage for files
+  </Card>
+</CardGrid>
+
+## Application Types
+
+| Type | Deployment Target | Method |
+|------|-------------------|--------|
+| Landing Pages (Astro) | Cloudflare Pages | Direct Upload |
+| Web Apps (SvelteKit) | Cloudflare Pages | Adapter |
+| Backends (NestJS) | Mac Mini / Docker | Docker Compose |
+| Databases | Mac Mini / Docker | Docker Compose |
+| Static Assets | Hetzner S3 | Direct Upload |
+
+## Infrastructure Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Cloudflare                                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ chat.mana   │  │ docs.mana   │  │ picture.mana│   ...   │
+│  │   core.app  │  │   core.app  │  │   core.app  │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│         │                │                │                 │
+│         └────────────────┼────────────────┘                 │
+│                          │                                  │
+│              Cloudflare Tunnel                              │
+└──────────────────────────┼──────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Mac Mini Server                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ mana-core-  │  │ chat-       │  │ zitare-     │   ...   │
+│  │ auth:3001   │  │ backend:3002│  │ backend:3007│         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│         │                │                │                 │
+│         └────────────────┼────────────────┘                 │
+│                          ▼                                  │
+│  ┌─────────────────────────────────────────────────┐       │
+│  │  PostgreSQL:5432  │  Redis:6379  │  MinIO:9000  │       │
+│  └─────────────────────────────────────────────────┘       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Deployment Commands
+
+### Landing Pages
+
+```bash
+# Deploy individual landing page
+pnpm deploy:landing:chat
+pnpm deploy:landing:picture
+pnpm deploy:landing:zitare
+
+# Deploy all landing pages
+pnpm deploy:landing:all
+```
+
+### Documentation
+
+```bash
+# Deploy documentation site
+pnpm deploy:docs
+```
+
+### Backends (via SSH)
+
+```bash
+# Connect to server
+ssh mana-server
+
+# Pull latest changes
+cd ~/projects/manacore-monorepo
+git pull
+
+# Restart services
+./scripts/mac-mini/deploy.sh
+```
+
+## Environments
+
+| Environment | Purpose | URL Pattern |
+|-------------|---------|-------------|
+| **Development** | Local testing | `localhost:*` |
+| **Staging** | Pre-production testing | `staging.*.manacore.app` |
+| **Production** | Live users | `*.manacore.app` |
+
+## CI/CD
+
+<Aside type="note">
+Full CI/CD pipelines are planned. Currently deployment is manual.
+</Aside>
+
+### Planned Pipeline
+
+1. **On PR**: Run tests, type-check, lint
+2. **On merge to main**: Deploy to staging
+3. **On release tag**: Deploy to production
+
+## Rollback Procedures
+
+### Cloudflare Pages
+
+```bash
+# View deployments
+npx wrangler pages deployment list --project-name=chat-landing
+
+# Rollback to previous
+npx wrangler pages deployment tail <deployment-id> --project-name=chat-landing
+```
+
+### Docker Services
+
+```bash
+ssh mana-server
+cd ~/projects/manacore-monorepo
+
+# Revert to previous commit
+git checkout HEAD~1
+
+# Rebuild and restart
+./scripts/mac-mini/deploy.sh
+```
+
+## Next Steps
+
+- [Cloudflare Pages](/deployment/cloudflare-pages) - Static site deployment
+- [Mac Mini Server](/deployment/mac-mini-server) - Backend deployment
+- [Self-Hosting](/deployment/self-hosting) - Host your own instance

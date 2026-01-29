@@ -1,0 +1,353 @@
+---
+title: Backend (NestJS)
+description: NestJS backend architecture patterns in Manacore.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Backend Architecture
+
+All Manacore backends use **NestJS 10-11** with consistent patterns for structure, validation, and error handling.
+
+## Project Structure
+
+```
+apps/{project}/apps/backend/
+├── src/
+│   ├── main.ts                 # Application entry point
+│   ├── app.module.ts           # Root module
+│   ├── app.controller.ts       # Health check, root routes
+│   ├── config/
+│   │   └── configuration.ts    # Environment config
+│   ├── drizzle/
+│   │   ├── schema.ts           # Database schema
+│   │   └── drizzle.module.ts   # Drizzle ORM setup
+│   ├── {feature}/
+│   │   ├── {feature}.module.ts
+│   │   ├── {feature}.controller.ts
+│   │   ├── {feature}.service.ts
+│   │   ├── dto/
+│   │   │   ├── create-{feature}.dto.ts
+│   │   │   └── update-{feature}.dto.ts
+│   │   └── entities/
+│   │       └── {feature}.entity.ts
+│   └── common/
+│       ├── filters/
+│       ├── guards/
+│       ├── interceptors/
+│       └── decorators/
+├── drizzle/
+│   └── migrations/             # Generated migrations
+├── drizzle.config.ts           # Drizzle CLI config
+└── package.json
+```
+
+## Module Pattern
+
+Each feature is a self-contained module:
+
+```typescript
+// users/users.module.ts
+import { Module } from '@nestjs/common';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+@Module({
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService], // Export for use in other modules
+})
+export class UsersModule {}
+```
+
+## Controllers
+
+Controllers handle HTTP requests and delegate to services:
+
+```typescript
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+
+@Controller('api/v1/users')
+@UseGuards(JwtAuthGuard)
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  findAll(@CurrentUser() user: CurrentUserData) {
+    return this.usersService.findAllForUser(user.userId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findById(id);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() dto: CreateUserDto, @CurrentUser() user: CurrentUserData) {
+    return this.usersService.create(dto, user.userId);
+  }
+}
+```
+
+## Services
+
+Services contain business logic and database operations:
+
+```typescript
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
+import { DRIZZLE } from '@manacore/shared-drizzle';
+import { eq, and } from 'drizzle-orm';
+import { users } from '../drizzle/schema';
+
+@Injectable()
+export class UsersService {
+  constructor(@Inject(DRIZZLE) private db: DrizzleDB) {}
+
+  async findAllForUser(userId: string) {
+    return this.db
+      .select()
+      .from(users)
+      .where(eq(users.ownerId, userId));
+  }
+
+  async findById(id: string) {
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.id, id));
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return user;
+  }
+
+  async create(data: CreateUserDto, ownerId: string) {
+    const [user] = await this.db
+      .insert(users)
+      .values({ ...data, ownerId })
+      .returning();
+
+    return user;
+  }
+}
+```
+
+## DTOs and Validation
+
+Use class-validator for input validation:
+
+```typescript
+// dto/create-user.dto.ts
+import { IsString, IsEmail, IsOptional, MinLength, MaxLength } from 'class-validator';
+
+export class CreateUserDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(100)
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  bio?: string;
+}
+
+// dto/update-user.dto.ts
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateUserDto } from './create-user.dto';
+
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
+```
+
+Enable validation globally:
+
+```typescript
+// main.ts
+import { ValidationPipe } from '@nestjs/common';
+
+app.useGlobalPipes(
+  new ValidationPipe({
+    whitelist: true,        // Strip unknown properties
+    forbidNonWhitelisted: true, // Error on unknown properties
+    transform: true,        // Auto-transform types
+  }),
+);
+```
+
+## Error Handling
+
+Use Go-style Result types for explicit error handling:
+
+```typescript
+// common/result.ts
+export type Result<T, E = Error> =
+  | { ok: true; value: T }
+  | { ok: false; error: E };
+
+export const ok = <T>(value: T): Result<T, never> => ({ ok: true, value });
+export const err = <E>(error: E): Result<never, E> => ({ ok: false, error });
+```
+
+```typescript
+// Usage in service
+async findById(id: string): Promise<Result<User, 'NOT_FOUND'>> {
+  const [user] = await this.db
+    .select()
+    .from(users)
+    .where(eq(users.id, id));
+
+  if (!user) {
+    return err('NOT_FOUND');
+  }
+
+  return ok(user);
+}
+
+// Usage in controller
+@Get(':id')
+async findOne(@Param('id') id: string) {
+  const result = await this.usersService.findById(id);
+
+  if (!result.ok) {
+    throw new NotFoundException('User not found');
+  }
+
+  return result.value;
+}
+```
+
+## Configuration
+
+Use NestJS ConfigModule for environment variables:
+
+```typescript
+// config/configuration.ts
+export default () => ({
+  port: parseInt(process.env.PORT, 10) || 3000,
+  database: {
+    url: process.env.DATABASE_URL,
+  },
+  auth: {
+    url: process.env.MANA_CORE_AUTH_URL,
+  },
+});
+
+// app.module.ts
+import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true,
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+## Database Setup
+
+Use Drizzle ORM with PostgreSQL:
+
+```typescript
+// drizzle/drizzle.module.ts
+import { Module, Global } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import * as schema from './schema';
+
+export const DRIZZLE = Symbol('DRIZZLE');
+
+@Global()
+@Module({
+  providers: [
+    {
+      provide: DRIZZLE,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const client = postgres(config.get('DATABASE_URL'));
+        return drizzle(client, { schema });
+      },
+    },
+  ],
+  exports: [DRIZZLE],
+})
+export class DrizzleModule {}
+```
+
+## API Response Format
+
+Consistent response structure:
+
+```typescript
+// Success
+{
+  "data": { ... },
+  "meta": {
+    "total": 100,
+    "page": 1,
+    "limit": 10
+  }
+}
+
+// Error
+{
+  "statusCode": 404,
+  "message": "User not found",
+  "error": "Not Found"
+}
+```
+
+## Health Checks
+
+Every backend should have a health endpoint:
+
+```typescript
+@Controller()
+export class AppController {
+  @Get('health')
+  health() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Get('api/v1/health')
+  healthApi() {
+    return this.health();
+  }
+}
+```
+
+## Best Practices
+
+<Aside type="tip">
+1. **Keep controllers thin** - Delegate logic to services
+2. **Use DTOs** - Never trust raw input
+3. **Handle errors explicitly** - Use Result types
+4. **Inject dependencies** - Don't instantiate services manually
+5. **Write tests** - Unit test services, integration test controllers
+</Aside>

@@ -1,0 +1,274 @@
+---
+title: Database Migrations
+description: Managing database schemas with Drizzle ORM in the Manacore monorepo.
+---
+
+import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Database Migrations
+
+Manacore uses **Drizzle ORM** for database management with PostgreSQL.
+
+## Overview
+
+Each backend service has its own database and schema:
+
+| Service | Database | Port |
+|---------|----------|------|
+| mana-core-auth | manacore | 3001 |
+| chat | chat | 3002 |
+| zitare | zitare | 3007 |
+| contacts | contacts | 3015 |
+| calendar | calendar | 3014 |
+
+## Quick Commands
+
+```bash
+# Push schema changes (development)
+pnpm --filter @chat/backend db:push
+
+# Generate migration files
+pnpm --filter @chat/backend db:generate
+
+# Run migrations
+pnpm --filter @chat/backend db:migrate
+
+# Open Drizzle Studio (database GUI)
+pnpm --filter @chat/backend db:studio
+```
+
+## Development Workflow
+
+For local development, use `db:push` to quickly sync schema changes:
+
+<Steps>
+1. **Modify your schema**
+
+   Edit the schema file (e.g., `src/drizzle/schema.ts`):
+
+   ```typescript
+   export const users = pgTable('users', {
+     id: uuid('id').primaryKey().defaultRandom(),
+     email: varchar('email', { length: 255 }).notNull().unique(),
+     name: varchar('name', { length: 255 }),
+     createdAt: timestamp('created_at').defaultNow(),
+     // Add new field
+     avatarUrl: varchar('avatar_url', { length: 500 }),
+   });
+   ```
+
+2. **Push changes**
+
+   ```bash
+   pnpm --filter @chat/backend db:push
+   ```
+
+3. **Verify in Studio**
+
+   ```bash
+   pnpm --filter @chat/backend db:studio
+   ```
+</Steps>
+
+<Aside type="tip">
+`db:push` is fast for development but doesn't create migration files. Use `db:generate` for production migrations.
+</Aside>
+
+## Production Migrations
+
+For production, use proper migration files:
+
+<Steps>
+1. **Generate migration**
+
+   ```bash
+   pnpm --filter @chat/backend db:generate
+   ```
+
+   This creates a timestamped SQL file in `drizzle/migrations/`.
+
+2. **Review migration**
+
+   Check the generated SQL:
+
+   ```sql
+   -- 0001_add_avatar_url.sql
+   ALTER TABLE "users" ADD COLUMN "avatar_url" varchar(500);
+   ```
+
+3. **Run migration**
+
+   ```bash
+   pnpm --filter @chat/backend db:migrate
+   ```
+</Steps>
+
+## Schema Patterns
+
+### Basic Table
+
+```typescript
+import { pgTable, uuid, varchar, timestamp, boolean } from 'drizzle-orm/pg-core';
+
+export const posts = pgTable('posts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  content: text('content'),
+  published: boolean('published').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+```
+
+### Foreign Keys
+
+```typescript
+export const comments = pgTable('comments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  postId: uuid('post_id')
+    .notNull()
+    .references(() => posts.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+```
+
+### Indexes
+
+```typescript
+import { pgTable, uuid, varchar, index } from 'drizzle-orm/pg-core';
+
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  organizationId: uuid('organization_id'),
+}, (table) => ({
+  emailIdx: index('users_email_idx').on(table.email),
+  orgIdx: index('users_org_idx').on(table.organizationId),
+}));
+```
+
+### Enums
+
+```typescript
+import { pgEnum } from 'drizzle-orm/pg-core';
+
+export const roleEnum = pgEnum('role', ['user', 'admin', 'moderator']);
+
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  role: roleEnum('role').default('user'),
+});
+```
+
+## Drizzle Configuration
+
+Each backend has a `drizzle.config.ts`:
+
+```typescript
+import { defineConfig } from 'drizzle-kit';
+
+export default defineConfig({
+  schema: './src/drizzle/schema.ts',
+  out: './drizzle/migrations',
+  dialect: 'postgresql',
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
+  verbose: true,
+  strict: true,
+});
+```
+
+## Connecting in Services
+
+### NestJS Module
+
+```typescript
+import { DrizzleModule } from '@manacore/shared-drizzle';
+
+@Module({
+  imports: [
+    DrizzleModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        connectionString: config.get('DATABASE_URL'),
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+### Using in Services
+
+```typescript
+import { Inject, Injectable } from '@nestjs/common';
+import { DRIZZLE } from '@manacore/shared-drizzle';
+import { eq } from 'drizzle-orm';
+import { users } from '../drizzle/schema';
+
+@Injectable()
+export class UsersService {
+  constructor(@Inject(DRIZZLE) private db: DrizzleDB) {}
+
+  async findById(id: string) {
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.id, id));
+    return user;
+  }
+
+  async create(data: { email: string; name: string }) {
+    const [user] = await this.db
+      .insert(users)
+      .values(data)
+      .returning();
+    return user;
+  }
+}
+```
+
+## Troubleshooting
+
+### "relation does not exist"
+
+Schema not pushed:
+
+```bash
+pnpm --filter @chat/backend db:push --force
+```
+
+### Migration conflicts
+
+Reset and regenerate:
+
+```bash
+# Delete old migrations
+rm -rf apps/chat/apps/backend/drizzle/migrations/*
+
+# Regenerate
+pnpm --filter @chat/backend db:generate
+```
+
+### Connection refused
+
+Check PostgreSQL is running:
+
+```bash
+pnpm docker:up
+docker ps | grep postgres
+```
+
+## Best Practices
+
+1. **Always review generated migrations** before running in production
+2. **Use transactions** for multi-step operations
+3. **Test migrations** on a copy of production data
+4. **Keep schemas in sync** across services that share data
+5. **Use `db:push` for development**, `db:migrate` for production

@@ -1,0 +1,313 @@
+---
+title: Storage
+description: S3-compatible object storage for files and media in Manacore.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+# Storage
+
+Manacore uses S3-compatible object storage for file uploads, generated images, and other media.
+
+## Architecture
+
+| Environment | Service | Purpose |
+|-------------|---------|---------|
+| **Local** | MinIO (Docker) | S3-compatible local storage |
+| **Production** | Hetzner Object Storage | Cost-effective cloud storage |
+
+## Local Development
+
+```bash
+# Start infrastructure (includes MinIO)
+pnpm docker:up
+
+# MinIO Web Console
+open http://localhost:9001
+
+# Credentials
+# Username: minioadmin
+# Password: minioadmin
+```
+
+## Pre-configured Buckets
+
+| Bucket | Project | Purpose |
+|--------|---------|---------|
+| `picture-storage` | Picture | AI-generated images |
+| `chat-storage` | Chat | User file uploads |
+| `manadeck-storage` | ManaDeck | Card/deck assets |
+| `nutriphi-storage` | NutriPhi | Meal photos |
+| `contacts-storage` | Contacts | Contact avatars |
+| `calendar-storage` | Calendar | Event attachments |
+
+## Usage
+
+### Backend Integration
+
+```typescript
+import {
+  createPictureStorage,
+  generateUserFileKey,
+  getContentType,
+} from '@manacore/shared-storage';
+
+const storage = createPictureStorage();
+
+// Upload a file
+async function uploadImage(userId: string, file: Buffer, filename: string) {
+  const key = generateUserFileKey(userId, filename);
+
+  const result = await storage.upload(key, file, {
+    contentType: getContentType(filename),
+    public: true,
+  });
+
+  return result.url;
+}
+
+// Download a file
+async function downloadImage(key: string) {
+  const data = await storage.download(key);
+  return data;
+}
+
+// Generate presigned URLs
+async function getUploadUrl(key: string) {
+  return storage.getUploadUrl(key, { expiresIn: 3600 });
+}
+
+async function getDownloadUrl(key: string) {
+  return storage.getDownloadUrl(key, { expiresIn: 3600 });
+}
+
+// Delete a file
+async function deleteImage(key: string) {
+  await storage.delete(key);
+}
+
+// List files
+async function listUserFiles(userId: string) {
+  const prefix = `users/${userId}/`;
+  return storage.list(prefix);
+}
+```
+
+### Factory Functions
+
+```typescript
+import {
+  createPictureStorage,
+  createChatStorage,
+  createManaDeckStorage,
+  createContactsStorage,
+} from '@manacore/shared-storage';
+
+// Each creates a client configured for that bucket
+const pictureStorage = createPictureStorage();
+const chatStorage = createChatStorage();
+```
+
+### Custom Storage Client
+
+```typescript
+import { createStorageClient } from '@manacore/shared-storage';
+
+const customStorage = createStorageClient({
+  bucket: 'my-custom-bucket',
+  region: process.env.S3_REGION,
+  endpoint: process.env.S3_ENDPOINT,
+  accessKeyId: process.env.S3_ACCESS_KEY,
+  secretAccessKey: process.env.S3_SECRET_KEY,
+});
+```
+
+## File Key Patterns
+
+```typescript
+// User-specific files
+const key = generateUserFileKey(userId, 'photo.jpg');
+// → users/{userId}/photo.jpg
+
+// With subfolder
+const key = generateUserFileKey(userId, 'avatars/profile.jpg');
+// → users/{userId}/avatars/profile.jpg
+
+// Public assets
+const key = `public/assets/${filename}`;
+
+// Temporary files
+const key = `temp/${Date.now()}-${filename}`;
+```
+
+## Environment Variables
+
+<Tabs>
+  <TabItem label="Local (.env.development)">
+    ```env
+    S3_ENDPOINT=http://localhost:9000
+    S3_REGION=us-east-1
+    S3_ACCESS_KEY=minioadmin
+    S3_SECRET_KEY=minioadmin
+    ```
+  </TabItem>
+  <TabItem label="Production">
+    ```env
+    S3_ENDPOINT=https://fsn1.your-objectstorage.com
+    S3_REGION=fsn1
+    S3_ACCESS_KEY=your-access-key
+    S3_SECRET_KEY=your-secret-key
+    ```
+  </TabItem>
+</Tabs>
+
+## Direct Upload (Presigned URLs)
+
+For large files, use presigned URLs to upload directly from the client:
+
+### Backend: Generate URL
+
+```typescript
+@Post('upload-url')
+async getUploadUrl(
+  @CurrentUser() user: CurrentUserData,
+  @Body() dto: { filename: string; contentType: string }
+) {
+  const key = generateUserFileKey(user.userId, dto.filename);
+
+  const uploadUrl = await storage.getUploadUrl(key, {
+    expiresIn: 300, // 5 minutes
+    contentType: dto.contentType,
+  });
+
+  return { uploadUrl, key };
+}
+```
+
+### Client: Upload File
+
+```typescript
+// 1. Get presigned URL from backend
+const { uploadUrl, key } = await api.getUploadUrl({
+  filename: file.name,
+  contentType: file.type,
+});
+
+// 2. Upload directly to S3
+await fetch(uploadUrl, {
+  method: 'PUT',
+  body: file,
+  headers: {
+    'Content-Type': file.type,
+  },
+});
+
+// 3. Notify backend of completed upload
+await api.confirmUpload({ key });
+```
+
+## Public vs Private Files
+
+### Public Files
+
+```typescript
+// Upload as public (anyone can access)
+await storage.upload(key, buffer, {
+  contentType: 'image/png',
+  public: true,
+});
+
+// Access via direct URL
+const url = `${S3_ENDPOINT}/${bucket}/${key}`;
+```
+
+### Private Files
+
+```typescript
+// Upload as private (default)
+await storage.upload(key, buffer, {
+  contentType: 'image/png',
+});
+
+// Access via presigned URL
+const url = await storage.getDownloadUrl(key, {
+  expiresIn: 3600, // 1 hour
+});
+```
+
+## Image Processing
+
+For image uploads, consider processing:
+
+```typescript
+import sharp from 'sharp';
+
+async function processAndUpload(userId: string, buffer: Buffer, filename: string) {
+  // Create thumbnail
+  const thumbnail = await sharp(buffer)
+    .resize(200, 200, { fit: 'cover' })
+    .jpeg({ quality: 80 })
+    .toBuffer();
+
+  // Create optimized version
+  const optimized = await sharp(buffer)
+    .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: 85 })
+    .toBuffer();
+
+  // Upload both
+  const [thumbResult, fullResult] = await Promise.all([
+    storage.upload(
+      generateUserFileKey(userId, `thumbs/${filename}`),
+      thumbnail,
+      { contentType: 'image/jpeg', public: true }
+    ),
+    storage.upload(
+      generateUserFileKey(userId, filename),
+      optimized,
+      { contentType: 'image/jpeg', public: true }
+    ),
+  ]);
+
+  return {
+    thumbnailUrl: thumbResult.url,
+    fullUrl: fullResult.url,
+  };
+}
+```
+
+## Best Practices
+
+<Aside type="tip">
+1. **Use presigned URLs** for large file uploads
+2. **Generate unique keys** to avoid collisions
+3. **Set appropriate content types** for proper browser handling
+4. **Use private by default** - only make public what needs to be
+5. **Clean up orphaned files** - delete when parent records are deleted
+6. **Validate file types** before uploading
+</Aside>
+
+## Troubleshooting
+
+### Connection Refused
+
+Check MinIO is running:
+```bash
+docker ps | grep minio
+pnpm docker:logs minio
+```
+
+### Access Denied
+
+Verify credentials in `.env`:
+```bash
+echo $S3_ACCESS_KEY
+echo $S3_SECRET_KEY
+```
+
+### Bucket Not Found
+
+Create the bucket in MinIO console or via CLI:
+```bash
+docker exec minio mc mb /data/my-bucket
+```

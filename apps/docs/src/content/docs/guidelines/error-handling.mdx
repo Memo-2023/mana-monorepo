@@ -1,0 +1,312 @@
+---
+title: Error Handling
+description: Go-style Result types and error handling patterns in Manacore.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Error Handling
+
+Manacore uses **Go-style Result types** for explicit error handling, avoiding unexpected exceptions.
+
+## Result Type Pattern
+
+### Definition
+
+```typescript
+// types/result.ts
+export type Result<T, E = Error> =
+  | { ok: true; value: T }
+  | { ok: false; error: E };
+
+// Helper functions
+export const ok = <T>(value: T): Result<T, never> => ({
+  ok: true,
+  value,
+});
+
+export const err = <E>(error: E): Result<never, E> => ({
+  ok: false,
+  error,
+});
+```
+
+### Usage
+
+```typescript
+import { Result, ok, err } from '../types/result';
+
+// Define error types
+type UserError = 'NOT_FOUND' | 'INVALID_EMAIL' | 'ALREADY_EXISTS';
+
+// Function with Result return type
+async function findUserByEmail(email: string): Promise<Result<User, UserError>> {
+  if (!isValidEmail(email)) {
+    return err('INVALID_EMAIL');
+  }
+
+  const user = await db.users.findByEmail(email);
+
+  if (!user) {
+    return err('NOT_FOUND');
+  }
+
+  return ok(user);
+}
+
+// Calling the function
+const result = await findUserByEmail('user@example.com');
+
+if (!result.ok) {
+  switch (result.error) {
+    case 'NOT_FOUND':
+      throw new NotFoundException('User not found');
+    case 'INVALID_EMAIL':
+      throw new BadRequestException('Invalid email format');
+    case 'ALREADY_EXISTS':
+      throw new ConflictException('User already exists');
+  }
+}
+
+// TypeScript knows result.value is User here
+return result.value;
+```
+
+## Why Result Types?
+
+### Problems with Exceptions
+
+```typescript
+// Bad - caller doesn't know what can throw
+async function getUser(id: string): Promise<User> {
+  const user = await db.users.find(id);
+  if (!user) throw new Error('Not found'); // Hidden!
+  return user;
+}
+
+// Caller has no idea this can throw
+const user = await getUser(id); // 💥 might explode
+```
+
+### Benefits of Results
+
+```typescript
+// Good - explicit about possible failures
+async function getUser(id: string): Promise<Result<User, 'NOT_FOUND'>> {
+  const user = await db.users.find(id);
+  if (!user) return err('NOT_FOUND');
+  return ok(user);
+}
+
+// Caller MUST handle the error
+const result = await getUser(id);
+if (!result.ok) {
+  // Handle error
+}
+// TypeScript ensures result.value exists here
+```
+
+## Error Type Design
+
+### Use String Literals
+
+```typescript
+// Good - specific, exhaustive
+type CreateUserError =
+  | 'EMAIL_TAKEN'
+  | 'INVALID_EMAIL'
+  | 'WEAK_PASSWORD'
+  | 'RATE_LIMITED';
+
+// Bad - too generic
+type CreateUserError = Error | string;
+```
+
+### Include Context When Needed
+
+```typescript
+type ValidationError = {
+  code: 'VALIDATION_FAILED';
+  field: string;
+  message: string;
+};
+
+type DatabaseError = {
+  code: 'DATABASE_ERROR';
+  originalError: Error;
+};
+
+type CreateUserError = ValidationError | DatabaseError | 'EMAIL_TAKEN';
+
+// Usage
+function validateUser(data: unknown): Result<UserDto, ValidationError> {
+  if (!data.email) {
+    return err({
+      code: 'VALIDATION_FAILED',
+      field: 'email',
+      message: 'Email is required',
+    });
+  }
+  // ...
+}
+```
+
+## Pattern in Services
+
+### Service Layer
+
+```typescript
+@Injectable()
+export class UsersService {
+  async create(dto: CreateUserDto): Promise<Result<User, CreateUserError>> {
+    // Check for existing user
+    const existing = await this.findByEmail(dto.email);
+    if (existing.ok) {
+      return err('EMAIL_TAKEN');
+    }
+
+    // Validate password
+    if (!this.isStrongPassword(dto.password)) {
+      return err('WEAK_PASSWORD');
+    }
+
+    // Create user
+    try {
+      const user = await this.db.insert(users).values(dto).returning();
+      return ok(user[0]);
+    } catch (e) {
+      return err('DATABASE_ERROR');
+    }
+  }
+
+  async findById(id: string): Promise<Result<User, 'NOT_FOUND'>> {
+    const [user] = await this.db.select().from(users).where(eq(users.id, id));
+    return user ? ok(user) : err('NOT_FOUND');
+  }
+}
+```
+
+### Controller Layer
+
+```typescript
+@Controller('api/v1/users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  async create(@Body() dto: CreateUserDto) {
+    const result = await this.usersService.create(dto);
+
+    if (!result.ok) {
+      switch (result.error) {
+        case 'EMAIL_TAKEN':
+          throw new ConflictException('Email already registered');
+        case 'WEAK_PASSWORD':
+          throw new BadRequestException('Password too weak');
+        case 'DATABASE_ERROR':
+          throw new InternalServerErrorException('Failed to create user');
+      }
+    }
+
+    return result.value;
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const result = await this.usersService.findById(id);
+
+    if (!result.ok) {
+      throw new NotFoundException('User not found');
+    }
+
+    return result.value;
+  }
+}
+```
+
+## Combining Results
+
+### Sequential Operations
+
+```typescript
+async function processOrder(orderId: string): Promise<Result<Order, OrderError>> {
+  // Step 1: Find order
+  const orderResult = await findOrder(orderId);
+  if (!orderResult.ok) return orderResult;
+
+  // Step 2: Validate
+  const validationResult = validateOrder(orderResult.value);
+  if (!validationResult.ok) return validationResult;
+
+  // Step 3: Process payment
+  const paymentResult = await processPayment(orderResult.value);
+  if (!paymentResult.ok) return paymentResult;
+
+  // All successful
+  return ok(orderResult.value);
+}
+```
+
+### Parallel Operations
+
+```typescript
+async function getUserWithPosts(
+  userId: string
+): Promise<Result<{ user: User; posts: Post[] }, 'USER_NOT_FOUND' | 'POSTS_FAILED'>> {
+  const [userResult, postsResult] = await Promise.all([
+    findUser(userId),
+    findPosts(userId),
+  ]);
+
+  if (!userResult.ok) return err('USER_NOT_FOUND');
+  if (!postsResult.ok) return err('POSTS_FAILED');
+
+  return ok({
+    user: userResult.value,
+    posts: postsResult.value,
+  });
+}
+```
+
+## When to Throw
+
+<Aside type="caution">
+Use exceptions only for **truly exceptional** situations:
+</Aside>
+
+```typescript
+// Throw - configuration/programming errors
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL must be set');
+}
+
+// Throw - assertion violations (should never happen)
+if (user.id !== request.userId) {
+  throw new Error('Invariant violated: user mismatch');
+}
+
+// Result - expected business cases
+if (!user) {
+  return err('NOT_FOUND'); // Expected - user might not exist
+}
+```
+
+## HTTP Error Mapping
+
+| Result Error | HTTP Status | NestJS Exception |
+|--------------|-------------|------------------|
+| `NOT_FOUND` | 404 | `NotFoundException` |
+| `UNAUTHORIZED` | 401 | `UnauthorizedException` |
+| `FORBIDDEN` | 403 | `ForbiddenException` |
+| `VALIDATION_FAILED` | 400 | `BadRequestException` |
+| `CONFLICT` / `ALREADY_EXISTS` | 409 | `ConflictException` |
+| `RATE_LIMITED` | 429 | `ThrottlerException` |
+| `DATABASE_ERROR` | 500 | `InternalServerErrorException` |
+
+## Best Practices
+
+1. **Be specific** - Use descriptive error codes, not generic strings
+2. **Exhaustive handling** - Handle all error cases with `switch`
+3. **Don't swallow errors** - Always handle or propagate
+4. **Document errors** - List possible errors in JSDoc
+5. **Keep errors at boundaries** - Convert Results to HTTP errors in controllers

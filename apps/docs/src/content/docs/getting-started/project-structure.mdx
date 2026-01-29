@@ -1,0 +1,146 @@
+---
+title: Project Structure
+description: Understand how the Manacore monorepo is organized.
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+
+# Project Structure
+
+Manacore uses a pnpm workspace monorepo with Turborepo for build orchestration.
+
+## Overview
+
+<FileTree>
+- apps/ Main product applications
+  - chat/
+    - apps/
+      - backend/ NestJS API
+      - mobile/ Expo React Native
+      - web/ SvelteKit app
+      - landing/ Astro marketing page
+    - packages/ Chat-specific packages
+  - picture/
+  - zitare/
+  - contacts/
+  - calendar/
+  - ...
+- services/ Standalone microservices
+  - mana-core-auth/ Central authentication
+  - mana-search/ Search & content extraction
+  - mana-tts/ Text-to-speech
+  - mana-stt/ Speech-to-text
+- packages/ Shared packages
+  - shared-auth/ Client auth utilities
+  - shared-nestjs-auth/ NestJS auth guards
+  - shared-storage/ S3 storage utilities
+  - shared-ui/ React Native components
+  - shared-types/ TypeScript types
+  - shared-utils/ Utility functions
+  - ...
+- docker/ Docker configurations
+- docs/ Documentation source files
+- .claude/ Claude Code guidelines
+</FileTree>
+
+## Apps Structure
+
+Each application in `apps/` follows a consistent structure:
+
+```
+apps/{project}/
+├── apps/
+│   ├── backend/     # NestJS API (optional)
+│   ├── mobile/      # Expo app (optional)
+│   ├── web/         # SvelteKit app
+│   └── landing/     # Astro landing page
+├── packages/        # Project-specific packages
+├── package.json     # Project root (for turbo)
+└── CLAUDE.md        # Project documentation
+```
+
+### App Types
+
+| Type | Framework | Purpose |
+|------|-----------|---------|
+| `backend` | NestJS 10-11 | REST API, business logic, database access |
+| `web` | SvelteKit 2 + Svelte 5 | Main web application |
+| `mobile` | Expo SDK 52+ | iOS and Android app |
+| `landing` | Astro 5 | Marketing/landing page |
+
+## Services
+
+The `services/` directory contains standalone microservices:
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| `mana-core-auth` | 3001 | Central authentication (EdDSA JWT) |
+| `mana-search` | 3021 | Web search & content extraction |
+| `mana-tts` | 3031 | Text-to-speech generation |
+| `mana-stt` | 3032 | Speech-to-text transcription |
+
+## Shared Packages
+
+Packages in `packages/` are shared across all applications:
+
+### Authentication
+- `@manacore/shared-auth` - Client-side auth utilities
+- `@manacore/shared-nestjs-auth` - NestJS JWT guards
+- `@mana-core/nestjs-integration` - Full NestJS auth + credits module
+
+### UI & Styling
+- `@manacore/shared-ui` - React Native components
+- `@manacore/shared-landing-ui` - Astro landing page components
+- `@manacore/shared-theme` - Theme configuration
+- `@manacore/shared-tailwind` - Tailwind presets
+
+### Data & Utilities
+- `@manacore/shared-types` - Common TypeScript types
+- `@manacore/shared-utils` - Utility functions
+- `@manacore/shared-storage` - S3 storage utilities
+- `@manacore/shared-i18n` - Internationalization
+
+## Workspace Configuration
+
+### pnpm-workspace.yaml
+
+```yaml
+packages:
+  - 'apps/*'
+  - 'apps/*/apps/*'
+  - 'apps/*/packages/*'
+  - 'services/*'
+  - 'packages/*'
+```
+
+### turbo.json
+
+Turborepo handles task orchestration with:
+- **Parallel execution** for independent tasks
+- **Dependency ordering** for build tasks
+- **Caching** for faster rebuilds
+
+## Naming Conventions
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| App package | `@{project}/{app}` | `@chat/backend` |
+| Shared package | `@manacore/shared-{name}` | `@manacore/shared-auth` |
+| Service | `@mana-{name}/service` | `@mana-search/service` |
+
+## Adding a New Project
+
+1. Create the directory structure:
+   ```bash
+   mkdir -p apps/myproject/apps/{backend,web,landing}
+   ```
+
+2. Add a `CLAUDE.md` with project documentation
+
+3. Create `package.json` files for each app
+
+4. Add commands to root `package.json`
+
+5. Configure in `turbo.json` if needed
+
+See the existing projects as templates.

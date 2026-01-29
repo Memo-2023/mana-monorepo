@@ -1,0 +1,274 @@
+---
+title: Search Service
+description: Centralized web search and content extraction with Mana Search.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+# Search Service
+
+**Mana Search** provides web search and content extraction capabilities for Manacore applications.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 Consumer Apps                                │
+│   Questions │ Chat │ Project Doc Bot │ Future Apps          │
+└─────────────────────────┬───────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│              mana-search (Port 3021)                         │
+│   Search API │ Extract API │ Redis Cache                    │
+└─────────────────────────┬───────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│              SearXNG (Port 8080, internal)                   │
+│   Google │ Bing │ DuckDuckGo │ Wikipedia │ arXiv │ ...      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Quick Start
+
+```bash
+# Start SearXNG + Redis (for local development)
+cd services/mana-search
+docker-compose -f docker-compose.dev.yml up -d
+
+# Start NestJS API
+pnpm --filter @mana-search/service dev
+
+# Or start everything via Docker
+cd services/mana-search
+docker-compose up -d
+```
+
+## API Endpoints
+
+### Web Search
+
+```bash
+POST /api/v1/search
+Content-Type: application/json
+
+{
+  "query": "quantum computing basics",
+  "options": {
+    "categories": ["general", "science"],
+    "engines": ["google", "wikipedia"],
+    "limit": 10
+  }
+}
+```
+
+Response:
+```json
+{
+  "results": [
+    {
+      "title": "Quantum Computing - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Quantum_computing",
+      "snippet": "Quantum computing is a type of computation...",
+      "engine": "wikipedia"
+    }
+  ],
+  "meta": {
+    "query": "quantum computing basics",
+    "totalResults": 10,
+    "searchTime": 0.523
+  }
+}
+```
+
+### Content Extraction
+
+```bash
+POST /api/v1/extract
+Content-Type: application/json
+
+{
+  "url": "https://example.com/article",
+  "options": {
+    "includeMarkdown": true
+  }
+}
+```
+
+Response:
+```json
+{
+  "title": "Article Title",
+  "content": "Full article text...",
+  "markdown": "# Article Title\n\nFull article text...",
+  "metadata": {
+    "author": "John Doe",
+    "publishedAt": "2024-01-15"
+  }
+}
+```
+
+### Bulk Extract
+
+```bash
+POST /api/v1/extract/bulk
+Content-Type: application/json
+
+{
+  "urls": [
+    "https://example.com/article1",
+    "https://example.com/article2"
+  ],
+  "options": {
+    "includeMarkdown": true
+  }
+}
+```
+
+## Search Categories
+
+| Category | Engines |
+|----------|---------|
+| `general` | Google, Bing, DuckDuckGo, Brave, Wikipedia |
+| `news` | Google News, Bing News |
+| `science` | arXiv, Google Scholar, PubMed, Semantic Scholar |
+| `it` | GitHub, StackOverflow, NPM, MDN |
+
+## Usage in Backend
+
+### Direct Fetch
+
+```typescript
+const response = await fetch('http://mana-search:3021/api/v1/search', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: 'machine learning basics',
+    options: {
+      categories: ['general', 'science'],
+      limit: 5,
+    },
+  }),
+});
+
+const { results, meta } = await response.json();
+```
+
+### Service Class
+
+```typescript
+// src/services/search.service.ts
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
+export class SearchService {
+  private readonly baseUrl: string;
+
+  constructor(config: ConfigService) {
+    this.baseUrl = config.get('MANA_SEARCH_URL');
+  }
+
+  async search(query: string, options?: SearchOptions) {
+    const response = await fetch(`${this.baseUrl}/api/v1/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, options }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Search failed: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async extract(url: string, options?: ExtractOptions) {
+    const response = await fetch(`${this.baseUrl}/api/v1/extract`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, options }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Extract failed: ${response.status}`);
+    }
+
+    return response.json();
+  }
+}
+```
+
+## Caching
+
+Mana Search uses Redis for caching:
+
+| Cache | TTL | Purpose |
+|-------|-----|---------|
+| Search results | 1 hour | Reduce API calls to search engines |
+| Extracted content | 24 hours | Cache parsed articles |
+
+<Aside type="tip">
+Caching significantly reduces load on external services and improves response times for repeated queries.
+</Aside>
+
+## Environment Variables
+
+<Tabs>
+  <TabItem label="Consumer Apps">
+    ```env
+    MANA_SEARCH_URL=http://localhost:3021
+    ```
+  </TabItem>
+  <TabItem label="Mana Search Service">
+    ```env
+    SEARXNG_URL=http://localhost:8080
+    REDIS_HOST=localhost
+    REDIS_PORT=6379
+    CACHE_SEARCH_TTL=3600
+    CACHE_EXTRACT_TTL=86400
+    ```
+  </TabItem>
+</Tabs>
+
+## Health Check
+
+```bash
+GET /health
+
+# Response
+{
+  "status": "ok",
+  "searxng": "connected",
+  "redis": "connected"
+}
+```
+
+## Rate Limiting
+
+The service includes built-in rate limiting:
+
+- **Search**: 30 requests/minute per IP
+- **Extract**: 60 requests/minute per IP
+- **Bulk Extract**: 10 requests/minute per IP
+
+## Error Handling
+
+```typescript
+try {
+  const results = await searchService.search('query');
+} catch (error) {
+  if (error.status === 429) {
+    // Rate limited - wait and retry
+  } else if (error.status === 503) {
+    // Search engines unavailable
+  }
+}
+```
+
+## Best Practices
+
+1. **Cache aggressively** - Search results rarely change
+2. **Use appropriate categories** - More specific = better results
+3. **Limit results** - Only fetch what you need
+4. **Handle failures gracefully** - External services can be unreliable
+5. **Respect rate limits** - Implement backoff strategies

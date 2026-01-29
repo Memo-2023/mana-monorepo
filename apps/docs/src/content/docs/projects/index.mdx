@@ -1,0 +1,99 @@
+---
+title: Projects
+description: Overview of all projects in the Manacore ecosystem.
+---
+
+import { Card, CardGrid, Badge } from '@astrojs/starlight/components';
+
+# Projects
+
+Manacore contains multiple interconnected applications, each serving a specific purpose.
+
+## Active Projects
+
+<CardGrid>
+  <Card title="Chat" icon="comment">
+    AI chat with multiple models (Ollama, OpenRouter)
+
+    **Stack**: NestJS, SvelteKit, Expo
+
+    [View Details](/projects/chat)
+  </Card>
+
+  <Card title="Picture" icon="image">
+    AI image generation
+
+    **Stack**: NestJS, SvelteKit, Expo
+
+    [View Details](/projects/picture)
+  </Card>
+
+  <Card title="Zitare" icon="quote">
+    Daily inspiration quotes
+
+    **Stack**: NestJS, SvelteKit, Expo
+
+    [View Details](/projects/zitare)
+  </Card>
+
+  <Card title="ManaDeck" icon="card">
+    Card & deck management
+
+    **Stack**: NestJS, SvelteKit, Expo
+
+    [View Details](/projects/manadeck)
+  </Card>
+
+  <Card title="Contacts" icon="person">
+    Contact management
+
+    **Stack**: NestJS, SvelteKit
+
+    [View Details](/projects/contacts)
+  </Card>
+
+  <Card title="Calendar" icon="calendar">
+    Calendar & scheduling
+
+    **Stack**: NestJS, SvelteKit
+
+    [View Details](/projects/calendar)
+  </Card>
+</CardGrid>
+
+## Project Status
+
+| Project | Backend | Web | Mobile | Status |
+|---------|---------|-----|--------|--------|
+| Chat | 3002 | 5173 | Yes | Stable |
+| Picture | 3006 | 5175 | Yes | Stable |
+| Zitare | 3007 | 5177 | Yes | Stable |
+| ManaDeck | 3009 | 5178 | Yes | Beta |
+| Contacts | 3015 | 5184 | No | Beta |
+| Calendar | 3014 | 5179 | No | Alpha |
+| Clock | 3017 | 5187 | No | Alpha |
+| Todo | 3018 | 5188 | No | Alpha |
+| Matrix | - | 5180 | No | Alpha |
+| Mail | - | 5190 | No | Alpha |
+
+## Microservices
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| mana-core-auth | 3001 | Central authentication |
+| mana-search | 3021 | Web search & extraction |
+| mana-tts | 3031 | Text-to-speech |
+| mana-stt | 3032 | Speech-to-text |
+
+## Start Any Project
+
+```bash
+# Use dev:*:full for the best experience
+pnpm dev:chat:full
+pnpm dev:picture:full
+pnpm dev:zitare:full
+pnpm dev:contacts:full
+pnpm dev:calendar:full
+```
+
+These commands automatically set up databases and start all required services.

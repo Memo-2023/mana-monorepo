@@ -1,0 +1,285 @@
+---
+title: Testing
+description: Testing patterns and practices in the Manacore monorepo.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+# Testing
+
+Manacore uses Jest for backend testing and Vitest for frontend testing.
+
+## Quick Start
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests for specific project
+pnpm --filter @chat/backend test
+
+# Run tests in watch mode
+pnpm --filter @chat/backend test:watch
+
+# Run with coverage
+pnpm --filter @chat/backend test:cov
+```
+
+## Test Structure
+
+Tests are colocated with source files:
+
+```
+src/
+├── users/
+│   ├── users.service.ts
+│   ├── users.service.spec.ts    # Unit test
+│   ├── users.controller.ts
+│   └── users.controller.spec.ts
+└── __tests__/
+    └── users.e2e.spec.ts        # E2E test
+```
+
+## Unit Testing
+
+### NestJS Services
+
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from './users.service';
+import { DRIZZLE } from '@manacore/shared-drizzle';
+
+describe('UsersService', () => {
+  let service: UsersService;
+  let mockDb: any;
+
+  beforeEach(async () => {
+    mockDb = {
+      select: jest.fn().mockReturnThis(),
+      from: jest.fn().mockReturnThis(),
+      where: jest.fn().mockResolvedValue([{ id: '1', email: 'test@example.com' }]),
+      insert: jest.fn().mockReturnThis(),
+      values: jest.fn().mockReturnThis(),
+      returning: jest.fn().mockResolvedValue([{ id: '1', email: 'test@example.com' }]),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        { provide: DRIZZLE, useValue: mockDb },
+      ],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+  });
+
+  it('should find user by id', async () => {
+    const user = await service.findById('1');
+    expect(user).toEqual({ id: '1', email: 'test@example.com' });
+  });
+
+  it('should create user', async () => {
+    const user = await service.create({ email: 'new@example.com', name: 'Test' });
+    expect(mockDb.insert).toHaveBeenCalled();
+    expect(user.email).toBe('test@example.com');
+  });
+});
+```
+
+### NestJS Controllers
+
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+describe('UsersController', () => {
+  let controller: UsersController;
+  let mockService: Partial<UsersService>;
+
+  beforeEach(async () => {
+    mockService = {
+      findById: jest.fn().mockResolvedValue({ id: '1', email: 'test@example.com' }),
+      create: jest.fn().mockResolvedValue({ id: '2', email: 'new@example.com' }),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [UsersController],
+      providers: [{ provide: UsersService, useValue: mockService }],
+    }).compile();
+
+    controller = module.get<UsersController>(UsersController);
+  });
+
+  it('should get user', async () => {
+    const user = await controller.getUser('1');
+    expect(user.email).toBe('test@example.com');
+    expect(mockService.findById).toHaveBeenCalledWith('1');
+  });
+});
+```
+
+## Frontend Testing
+
+### SvelteKit Components (Vitest)
+
+```typescript
+import { render, screen } from '@testing-library/svelte';
+import { describe, it, expect } from 'vitest';
+import Button from './Button.svelte';
+
+describe('Button', () => {
+  it('renders with text', () => {
+    render(Button, { props: { label: 'Click me' } });
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+
+  it('handles click', async () => {
+    const { component } = render(Button, { props: { label: 'Click' } });
+    let clicked = false;
+    component.$on('click', () => { clicked = true; });
+
+    await screen.getByText('Click').click();
+    expect(clicked).toBe(true);
+  });
+});
+```
+
+### React Native (Jest)
+
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react-native';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('renders correctly', () => {
+    render(<Button title="Press me" onPress={() => {}} />);
+    expect(screen.getByText('Press me')).toBeTruthy();
+  });
+
+  it('calls onPress when pressed', () => {
+    const onPress = jest.fn();
+    render(<Button title="Press" onPress={onPress} />);
+
+    fireEvent.press(screen.getByText('Press'));
+    expect(onPress).toHaveBeenCalled();
+  });
+});
+```
+
+## E2E Testing
+
+### NestJS with Supertest
+
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../src/app.module';
+
+describe('Users (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('/users (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/users')
+      .expect(200)
+      .expect((res) => {
+        expect(Array.isArray(res.body)).toBe(true);
+      });
+  });
+
+  it('/users (POST)', () => {
+    return request(app.getHttpServer())
+      .post('/users')
+      .send({ email: 'test@example.com', name: 'Test User' })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.email).toBe('test@example.com');
+      });
+  });
+});
+```
+
+## Mock Factories
+
+Create reusable mock factories:
+
+```typescript
+// test/factories/user.factory.ts
+export const createMockUser = (overrides = {}) => ({
+  id: 'user-123',
+  email: 'test@example.com',
+  name: 'Test User',
+  createdAt: new Date(),
+  ...overrides,
+});
+
+// Usage
+const user = createMockUser({ name: 'Custom Name' });
+```
+
+## Test Configuration
+
+### Jest Config (Backend)
+
+```javascript
+// jest.config.js
+module.exports = {
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  rootDir: 'src',
+  testRegex: '.*\\.spec\\.ts$',
+  transform: {
+    '^.+\\.(t|j)s$': 'ts-jest',
+  },
+  collectCoverageFrom: ['**/*.(t|j)s'],
+  coverageDirectory: '../coverage',
+  testEnvironment: 'node',
+};
+```
+
+### Vitest Config (Frontend)
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+
+export default defineConfig({
+  plugins: [svelte({ hot: !process.env.VITEST })],
+  test: {
+    include: ['src/**/*.{test,spec}.{js,ts}'],
+    environment: 'jsdom',
+    globals: true,
+  },
+});
+```
+
+## Best Practices
+
+<Aside type="tip" title="Testing Guidelines">
+1. **Test behavior, not implementation** - Focus on what the code does, not how
+2. **Use descriptive test names** - `it('should return 404 when user not found')`
+3. **One assertion per test** - Makes failures easier to diagnose
+4. **Mock external dependencies** - Database, APIs, file system
+5. **Keep tests fast** - Unit tests should run in milliseconds
+</Aside>
+
+### Coverage Goals
+
+- **Unit tests**: 80% coverage for business logic
+- **Integration tests**: Critical paths and API endpoints
+- **E2E tests**: Happy path user flows

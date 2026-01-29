@@ -1,0 +1,322 @@
+---
+title: Design & UX
+description: UI patterns, animations, and accessibility guidelines for Manacore.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Design & UX
+
+Consistent design patterns across all Manacore applications for a unified user experience.
+
+## Design Principles
+
+1. **Consistency** - Same patterns across all apps
+2. **Simplicity** - Clean, uncluttered interfaces
+3. **Accessibility** - Usable by everyone
+4. **Performance** - Fast, responsive interactions
+5. **Feedback** - Clear system status communication
+
+## Color System
+
+### Semantic Colors
+
+| Purpose | Light Mode | Dark Mode | Usage |
+|---------|------------|-----------|-------|
+| **Primary** | `blue-500` | `blue-400` | CTAs, links, active states |
+| **Success** | `green-500` | `green-400` | Confirmations, completed |
+| **Warning** | `amber-500` | `amber-400` | Caution, attention |
+| **Error** | `red-500` | `red-400` | Errors, destructive actions |
+| **Neutral** | `gray-*` | `gray-*` | Text, backgrounds, borders |
+
+### Tailwind Usage
+
+```tsx
+// Primary actions
+<button className="bg-blue-500 hover:bg-blue-600 text-white">
+  Submit
+</button>
+
+// Success state
+<div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+  Success!
+</div>
+
+// Error state
+<span className="text-red-500">Error message</span>
+
+// Neutral backgrounds
+<div className="bg-white dark:bg-gray-900">
+  <p className="text-gray-900 dark:text-gray-100">Content</p>
+</div>
+```
+
+## Typography
+
+### Scale
+
+| Size | Class | Usage |
+|------|-------|-------|
+| xs | `text-xs` | Labels, captions |
+| sm | `text-sm` | Secondary text, metadata |
+| base | `text-base` | Body text |
+| lg | `text-lg` | Emphasis, subheadings |
+| xl | `text-xl` | Section headings |
+| 2xl | `text-2xl` | Page headings |
+| 3xl+ | `text-3xl` | Hero text, landing pages |
+
+### Font Weights
+
+```tsx
+// Regular content
+<p className="font-normal">Body text</p>
+
+// Emphasis
+<p className="font-medium">Important text</p>
+
+// Headings
+<h2 className="font-semibold">Section Title</h2>
+
+// Strong emphasis
+<h1 className="font-bold">Page Title</h1>
+```
+
+## Spacing
+
+Use Tailwind's spacing scale consistently:
+
+| Space | Class | Pixels | Usage |
+|-------|-------|--------|-------|
+| 1 | `p-1`, `m-1` | 4px | Tight spacing |
+| 2 | `p-2`, `m-2` | 8px | Compact elements |
+| 3 | `p-3`, `m-3` | 12px | Default padding |
+| 4 | `p-4`, `m-4` | 16px | Card padding |
+| 6 | `p-6`, `m-6` | 24px | Section spacing |
+| 8 | `p-8`, `m-8` | 32px | Large sections |
+
+```tsx
+// Card with consistent spacing
+<div className="p-4 space-y-3">
+  <h3 className="text-lg font-semibold">Title</h3>
+  <p className="text-gray-600">Description</p>
+  <button className="mt-4">Action</button>
+</div>
+
+// List with gaps
+<ul className="space-y-2">
+  <li>Item 1</li>
+  <li>Item 2</li>
+</ul>
+```
+
+## Components
+
+### Buttons
+
+<Tabs>
+  <TabItem label="Variants">
+    ```tsx
+    // Primary - main actions
+    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+      Primary
+    </button>
+
+    // Secondary - alternative actions
+    <button className="bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-lg">
+      Secondary
+    </button>
+
+    // Ghost - subtle actions
+    <button className="hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-lg">
+      Ghost
+    </button>
+
+    // Destructive - dangerous actions
+    <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+      Delete
+    </button>
+    ```
+  </TabItem>
+  <TabItem label="States">
+    ```tsx
+    // Disabled
+    <button className="bg-gray-300 text-gray-500 cursor-not-allowed" disabled>
+      Disabled
+    </button>
+
+    // Loading
+    <button className="bg-blue-500 text-white flex items-center gap-2" disabled>
+      <Spinner className="w-4 h-4 animate-spin" />
+      Loading...
+    </button>
+    ```
+  </TabItem>
+</Tabs>
+
+### Cards
+
+```tsx
+// Basic card
+<div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+  <h3 className="font-semibold">Card Title</h3>
+  <p className="text-gray-600 dark:text-gray-400 mt-2">Card content</p>
+</div>
+
+// Interactive card
+<button className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md hover:border-blue-300 transition-all w-full text-left">
+  <h3 className="font-semibold">Clickable Card</h3>
+</button>
+```
+
+### Forms
+
+```tsx
+// Input
+<input
+  type="text"
+  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  placeholder="Enter text..."
+/>
+
+// With label and error
+<div className="space-y-1">
+  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+    Email
+  </label>
+  <input
+    type="email"
+    className="w-full px-3 py-2 border border-red-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+  />
+  <p className="text-sm text-red-500">Invalid email address</p>
+</div>
+```
+
+## Loading States
+
+### Skeletons
+
+```tsx
+// Text skeleton
+<div className="animate-pulse">
+  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mt-2"></div>
+</div>
+
+// Card skeleton
+<div className="animate-pulse p-4 border rounded-xl">
+  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+  <div className="space-y-2">
+    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+  </div>
+</div>
+```
+
+### Spinners
+
+```tsx
+// Simple spinner
+<div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+
+// Full page loading
+<div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center">
+  <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+</div>
+```
+
+## Animations
+
+### Transitions
+
+```tsx
+// Fade in
+<div className="transition-opacity duration-200 opacity-0 data-[visible=true]:opacity-100">
+
+// Slide up
+<div className="transition-all duration-200 translate-y-2 opacity-0 data-[visible=true]:translate-y-0 data-[visible=true]:opacity-100">
+
+// Scale
+<button className="transition-transform hover:scale-105 active:scale-95">
+```
+
+### Motion Guidelines
+
+- **Duration**: 150-300ms for micro-interactions, 300-500ms for larger transitions
+- **Easing**: Use `ease-out` for entrances, `ease-in` for exits
+- **Purpose**: Every animation should have a purpose (feedback, guidance, delight)
+
+## Accessibility
+
+<Aside type="caution">
+Accessibility is not optional. All apps must meet WCAG 2.1 AA standards.
+</Aside>
+
+### Requirements
+
+1. **Color contrast** - 4.5:1 for text, 3:1 for large text
+2. **Focus indicators** - Visible focus rings on all interactive elements
+3. **Keyboard navigation** - All features usable without mouse
+4. **Screen readers** - Proper ARIA labels and semantic HTML
+5. **Motion** - Respect `prefers-reduced-motion`
+
+### Implementation
+
+```tsx
+// Focus visible
+<button className="focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+
+// Screen reader text
+<button aria-label="Close menu">
+  <XIcon className="w-5 h-5" aria-hidden="true" />
+</button>
+
+// Reduced motion
+<div className="motion-safe:animate-bounce motion-reduce:animate-none">
+
+// Skip link
+<a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4">
+  Skip to main content
+</a>
+```
+
+## Dark Mode
+
+All components must support dark mode:
+
+```tsx
+// Background
+<div className="bg-white dark:bg-gray-900">
+
+// Text
+<p className="text-gray-900 dark:text-gray-100">
+
+// Borders
+<div className="border-gray-200 dark:border-gray-700">
+
+// Hover states
+<button className="hover:bg-gray-100 dark:hover:bg-gray-800">
+```
+
+## Responsive Design
+
+Mobile-first approach with breakpoints:
+
+| Breakpoint | Min Width | Usage |
+|------------|-----------|-------|
+| (default) | 0px | Mobile |
+| `sm:` | 640px | Large phones |
+| `md:` | 768px | Tablets |
+| `lg:` | 1024px | Laptops |
+| `xl:` | 1280px | Desktops |
+
+```tsx
+// Responsive grid
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+// Responsive padding
+<div className="p-4 md:p-6 lg:p-8">
+
+// Hide/show
+<div className="hidden md:block">Desktop only</div>
+<div className="md:hidden">Mobile only</div>
+```

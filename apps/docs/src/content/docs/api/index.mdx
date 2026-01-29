@@ -1,0 +1,151 @@
+---
+title: API Reference
+description: API documentation for Manacore services.
+---
+
+# API Reference
+
+This section contains API documentation for all Manacore backend services.
+
+## Authentication
+
+All API endpoints (except public ones) require authentication via JWT bearer token:
+
+```bash
+curl -X GET https://api.manacore.app/v1/users/me \
+  -H "Authorization: Bearer <your-token>"
+```
+
+### Getting a Token
+
+```bash
+# Login
+curl -X POST https://api.manacore.app/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "password"}'
+
+# Response
+{
+  "accessToken": "eyJ...",
+  "refreshToken": "eyJ...",
+  "expiresIn": 900
+}
+```
+
+## Base URLs
+
+| Service | Development | Production |
+|---------|-------------|------------|
+| Auth | `http://localhost:3001` | `https://auth.manacore.app` |
+| Chat | `http://localhost:3002` | `https://chat-api.manacore.app` |
+| Picture | `http://localhost:3006` | `https://picture-api.manacore.app` |
+| Zitare | `http://localhost:3007` | `https://zitare-api.manacore.app` |
+
+## Common Response Format
+
+### Success Response
+
+```json
+{
+  "data": { ... },
+  "meta": {
+    "total": 100,
+    "page": 1,
+    "limit": 20
+  }
+}
+```
+
+### Error Response
+
+```json
+{
+  "statusCode": 400,
+  "message": "Validation failed",
+  "error": "Bad Request",
+  "details": [
+    {
+      "field": "email",
+      "message": "Invalid email format"
+    }
+  ]
+}
+```
+
+## HTTP Status Codes
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 201 | Created |
+| 204 | No Content |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 409 | Conflict |
+| 422 | Unprocessable Entity |
+| 429 | Too Many Requests |
+| 500 | Internal Server Error |
+
+## Rate Limiting
+
+API endpoints are rate limited:
+
+| Endpoint Type | Limit |
+|---------------|-------|
+| Auth endpoints | 10 req/min |
+| Read endpoints | 100 req/min |
+| Write endpoints | 30 req/min |
+
+Rate limit headers are included in responses:
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640000000
+```
+
+## Pagination
+
+List endpoints support pagination:
+
+```bash
+GET /api/v1/items?page=2&limit=20
+```
+
+Response includes pagination metadata:
+
+```json
+{
+  "data": [...],
+  "meta": {
+    "total": 150,
+    "page": 2,
+    "limit": 20,
+    "totalPages": 8
+  }
+}
+```
+
+## Filtering & Sorting
+
+```bash
+# Filter by status
+GET /api/v1/items?status=active
+
+# Sort by date descending
+GET /api/v1/items?sort=-createdAt
+
+# Multiple filters
+GET /api/v1/items?status=active&category=tech&sort=-createdAt
+```
+
+## Service APIs
+
+Select a service from the sidebar to view its API documentation:
+
+- **Auth API** - Authentication and user management
+- **Chat API** - Conversations and AI completions
+- **Picture API** - Image generation
+- **Zitare API** - Quotes and favorites

@@ -1,0 +1,74 @@
+---
+title: Introduction
+description: Welcome to the Manacore documentation - learn about our multi-app ecosystem platform.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+# Welcome to Manacore
+
+Manacore is a **multi-app ecosystem platform** built as a pnpm monorepo. It provides shared infrastructure, authentication, and common patterns for building modern web and mobile applications.
+
+## What is Manacore?
+
+Manacore is designed to streamline the development of multiple interconnected applications:
+
+- **Shared Authentication** via Mana Core Auth (EdDSA JWT)
+- **Unified Database Patterns** with Drizzle ORM and PostgreSQL
+- **Cross-Platform Apps** with SvelteKit (web), Expo (mobile), and NestJS (backend)
+- **Shared UI Components** for consistent design across all apps
+- **Centralized Services** for search, storage, and more
+
+## Quick Links
+
+<CardGrid>
+  <Card title="Quick Start" icon="rocket">
+    Get up and running in minutes with our [Quick Start Guide](/getting-started/quick-start).
+  </Card>
+  <Card title="Project Structure" icon="folder">
+    Understand the [monorepo organization](/getting-started/project-structure).
+  </Card>
+  <Card title="Local Development" icon="laptop">
+    Set up your [local development environment](/development/local-development).
+  </Card>
+  <Card title="Architecture" icon="puzzle">
+    Learn about the [system architecture](/architecture/overview).
+  </Card>
+</CardGrid>
+
+## Projects in the Ecosystem
+
+| Project | Description | Status |
+|---------|-------------|--------|
+| **Chat** | AI chat application with multiple models | Stable |
+| **Picture** | AI image generation | Stable |
+| **Zitare** | Daily inspiration quotes | Stable |
+| **ManaDeck** | Card/deck management | Beta |
+| **Contacts** | Contact management | Beta |
+| **Calendar** | Calendar & scheduling | Alpha |
+| **Matrix** | Matrix chat client | Alpha |
+
+## Technology Stack
+
+### Frontend
+- **Web**: SvelteKit 2.x + Svelte 5 (Runes mode)
+- **Mobile**: Expo SDK 52+ with React Native
+- **Landing Pages**: Astro 5.x
+
+### Backend
+- **API**: NestJS 10-11
+- **Database**: PostgreSQL with Drizzle ORM
+- **Cache**: Redis
+- **Storage**: S3-compatible (MinIO local, Hetzner production)
+
+### Infrastructure
+- **Package Manager**: pnpm 9.15+
+- **Build System**: Turborepo
+- **Deployment**: Cloudflare Pages, Docker
+- **Auth**: Mana Core Auth (Better Auth + EdDSA JWT)
+
+## Getting Help
+
+- Check the [FAQ](/faq) for common questions
+- Browse the [API Reference](/api) for endpoint details
+- Join our community on Discord

@@ -1,0 +1,399 @@
+---
+title: Mobile (Expo)
+description: Expo React Native mobile application patterns in Manacore.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Mobile Architecture
+
+Manacore mobile apps use **Expo SDK 52+** with React Native, Expo Router, and NativeWind for styling.
+
+## Project Structure
+
+```
+apps/{project}/apps/mobile/
+├── app/                        # Expo Router routes
+│   ├── _layout.tsx             # Root layout
+│   ├── index.tsx               # Home screen
+│   ├── (auth)/                 # Auth screens
+│   │   ├── _layout.tsx
+│   │   ├── login.tsx
+│   │   └── register.tsx
+│   └── (tabs)/                 # Tab navigation
+│       ├── _layout.tsx
+│       ├── index.tsx
+│       ├── settings.tsx
+│       └── profile.tsx
+├── src/
+│   ├── components/             # React components
+│   │   ├── ui/                 # Base UI components
+│   │   └── features/           # Feature components
+│   ├── hooks/                  # Custom hooks
+│   ├── stores/                 # Zustand stores
+│   ├── services/               # API clients
+│   ├── utils/                  # Helper functions
+│   └── types/                  # TypeScript types
+├── assets/                     # Images, fonts
+├── app.json                    # Expo config
+├── tailwind.config.js          # NativeWind config
+└── package.json
+```
+
+## Expo Router
+
+### Root Layout
+
+```tsx
+// app/_layout.tsx
+import { Stack } from 'expo-router';
+import { useEffect } from 'react';
+import { useAuth } from '../src/hooks/useAuth';
+import '../global.css'; // NativeWind styles
+
+export default function RootLayout() {
+  const { isLoading, isAuthenticated } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(tabs)" />
+    </Stack>
+  );
+}
+```
+
+### Tab Navigation
+
+```tsx
+// app/(tabs)/_layout.tsx
+import { Tabs } from 'expo-router';
+import { Home, Settings, User } from 'lucide-react-native';
+
+export default function TabLayout() {
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: '#3b82f6',
+        headerShown: false,
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color, size }) => <Settings color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+        }}
+      />
+    </Tabs>
+  );
+}
+```
+
+### Protected Routes
+
+```tsx
+// app/(tabs)/_layout.tsx
+import { Redirect, Tabs } from 'expo-router';
+import { useAuth } from '../../src/hooks/useAuth';
+
+export default function TabLayout() {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Redirect href="/login" />;
+  }
+
+  return (
+    <Tabs>
+      {/* ... */}
+    </Tabs>
+  );
+}
+```
+
+## NativeWind (Tailwind)
+
+### Setup
+
+```tsx
+// tailwind.config.js
+module.exports = {
+  content: [
+    './app/**/*.{js,jsx,ts,tsx}',
+    './src/**/*.{js,jsx,ts,tsx}',
+  ],
+  presets: [require('nativewind/preset')],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+### Usage
+
+```tsx
+import { View, Text, Pressable } from 'react-native';
+
+export function Button({ title, onPress }) {
+  return (
+    <Pressable
+      className="bg-blue-500 px-4 py-2 rounded-lg active:bg-blue-600"
+      onPress={onPress}
+    >
+      <Text className="text-white font-semibold text-center">
+        {title}
+      </Text>
+    </Pressable>
+  );
+}
+```
+
+## State Management (Zustand)
+
+```tsx
+// src/stores/auth.ts
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  setAuth: (user: User, token: string) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      setAuth: (user, token) => set({ user, token }),
+      logout: () => set({ user: null, token: null }),
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+```
+
+### Usage in Components
+
+```tsx
+import { useAuthStore } from '../stores/auth';
+
+export function ProfileScreen() {
+  const { user, logout } = useAuthStore();
+
+  return (
+    <View className="flex-1 p-4">
+      <Text className="text-xl font-bold">{user?.name}</Text>
+      <Text className="text-gray-500">{user?.email}</Text>
+
+      <Pressable
+        className="mt-4 bg-red-500 p-3 rounded-lg"
+        onPress={logout}
+      >
+        <Text className="text-white text-center">Logout</Text>
+      </Pressable>
+    </View>
+  );
+}
+```
+
+## API Integration
+
+### API Client
+
+```tsx
+// src/services/api.ts
+import { useAuthStore } from '../stores/auth';
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+class ApiClient {
+  private async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const token = useAuthStore.getState().token;
+
+    const response = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        useAuthStore.getState().logout();
+      }
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // API methods
+  getUser = () => this.fetch<User>('/api/v1/me');
+  getItems = () => this.fetch<Item[]>('/api/v1/items');
+  createItem = (data: CreateItemDto) =>
+    this.fetch<Item>('/api/v1/items', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+}
+
+export const api = new ApiClient();
+```
+
+### React Query Integration
+
+```tsx
+// src/hooks/useItems.ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../services/api';
+
+export function useItems() {
+  return useQuery({
+    queryKey: ['items'],
+    queryFn: api.getItems,
+  });
+}
+
+export function useCreateItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.createItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+}
+```
+
+## Components
+
+### Base Component Pattern
+
+```tsx
+// src/components/ui/Card.tsx
+import { View, ViewProps } from 'react-native';
+import { cn } from '../../utils/cn';
+
+interface CardProps extends ViewProps {
+  variant?: 'default' | 'elevated';
+}
+
+export function Card({
+  variant = 'default',
+  className,
+  children,
+  ...props
+}: CardProps) {
+  return (
+    <View
+      className={cn(
+        'bg-white rounded-xl p-4',
+        variant === 'elevated' && 'shadow-lg',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </View>
+  );
+}
+```
+
+### List Component
+
+```tsx
+// src/components/features/ItemList.tsx
+import { FlatList, View, Text, ActivityIndicator } from 'react-native';
+import { useItems } from '../../hooks/useItems';
+import { Card } from '../ui/Card';
+
+export function ItemList() {
+  const { data: items, isLoading, error } = useItems();
+
+  if (isLoading) {
+    return <ActivityIndicator className="flex-1" />;
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-red-500">Error loading items</Text>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <Card className="mb-3">
+          <Text className="font-semibold">{item.title}</Text>
+          <Text className="text-gray-500">{item.description}</Text>
+        </Card>
+      )}
+      contentContainerClassName="p-4"
+    />
+  );
+}
+```
+
+## Best Practices
+
+<Aside type="tip">
+1. **Use Expo Router** for file-based navigation
+2. **NativeWind** for consistent Tailwind-style styling
+3. **Zustand** for global state (persisted with AsyncStorage)
+4. **React Query** for server state and caching
+5. **Organize by feature** in the `src/` directory
+6. **Type everything** with TypeScript
+</Aside>
+
+## Common Commands
+
+```bash
+# Start development server
+pnpm dev
+
+# Run on iOS simulator
+pnpm ios
+
+# Run on Android emulator
+pnpm android
+
+# Build development version
+pnpm build:dev
+
+# Build production version
+pnpm build:prod
+```

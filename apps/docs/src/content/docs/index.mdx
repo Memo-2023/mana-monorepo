@@ -1,0 +1,57 @@
+---
+title: Manacore Documentation
+description: Documentation for the Manacore ecosystem - a multi-app platform with shared infrastructure.
+template: splash
+hero:
+  tagline: Build modern applications with shared infrastructure
+  image:
+    file: ../../assets/logo-light.svg
+  actions:
+    - text: Get Started
+      link: /getting-started/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/manacore/manacore-monorepo
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Quick Start
+
+```bash
+git clone https://github.com/manacore/manacore-monorepo.git
+cd manacore-monorepo
+pnpm install
+pnpm docker:up
+pnpm dev:chat:full
+```
+
+## Features
+
+<CardGrid stagger>
+  <Card title="Shared Authentication" icon="shield">
+    Central auth service with EdDSA JWT tokens across all apps.
+  </Card>
+  <Card title="Multiple Apps" icon="puzzle">
+    Chat, Picture, Zitare, ManaDeck, and more - all sharing infrastructure.
+  </Card>
+  <Card title="Modern Stack" icon="rocket">
+    SvelteKit, Expo, NestJS, Drizzle ORM, Tailwind CSS.
+  </Card>
+  <Card title="Easy Deployment" icon="cloud">
+    Deploy to Cloudflare Pages, Docker, or self-host.
+  </Card>
+</CardGrid>
+
+## Projects
+
+| Project | Description |
+|---------|-------------|
+| **Chat** | AI chat with multiple models |
+| **Picture** | AI image generation |
+| **Zitare** | Daily inspiration quotes |
+| **ManaDeck** | Card & deck management |
+| **Contacts** | Contact management |
+| **Calendar** | Calendar & scheduling |

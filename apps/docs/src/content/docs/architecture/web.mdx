@@ -1,0 +1,386 @@
+---
+title: Web (SvelteKit)
+description: SvelteKit web application patterns in Manacore.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Web Architecture
+
+All Manacore web applications use **SvelteKit 2** with **Svelte 5** (runes mode) and Tailwind CSS.
+
+## Project Structure
+
+```
+apps/{project}/apps/web/
+├── src/
+│   ├── app.html                # HTML template
+│   ├── app.css                 # Global styles (Tailwind)
+│   ├── lib/
+│   │   ├── components/         # Reusable components
+│   │   │   ├── ui/             # Base UI components
+│   │   │   └── features/       # Feature-specific components
+│   │   ├── stores/             # Svelte stores
+│   │   ├── services/           # API clients, auth
+│   │   ├── utils/              # Helper functions
+│   │   └── types/              # TypeScript types
+│   └── routes/
+│       ├── +layout.svelte      # Root layout
+│       ├── +page.svelte        # Home page
+│       ├── (auth)/             # Auth route group
+│       │   ├── login/
+│       │   └── register/
+│       └── (app)/              # App route group (protected)
+│           ├── +layout.svelte
+│           ├── dashboard/
+│           └── settings/
+├── static/                     # Static assets
+├── svelte.config.js
+├── vite.config.ts
+└── tailwind.config.js
+```
+
+## Svelte 5 Runes
+
+<Aside type="caution">
+Always use Svelte 5 runes mode. Never use the old `$:` reactive syntax.
+</Aside>
+
+### State Management
+
+```svelte
+<script lang="ts">
+  // Reactive state
+  let count = $state(0);
+
+  // Derived values
+  let doubled = $derived(count * 2);
+
+  // Deep reactive objects
+  let user = $state({
+    name: 'John',
+    settings: { theme: 'dark' }
+  });
+
+  // Effects (side effects on state change)
+  $effect(() => {
+    console.log('Count changed:', count);
+    // Cleanup function (optional)
+    return () => console.log('Cleanup');
+  });
+
+  function increment() {
+    count++;
+  }
+</script>
+
+<button onclick={increment}>
+  Count: {count} (doubled: {doubled})
+</button>
+```
+
+### Props
+
+```svelte
+<script lang="ts">
+  interface Props {
+    title: string;
+    count?: number;
+    onUpdate?: (value: number) => void;
+  }
+
+  let { title, count = 0, onUpdate }: Props = $props();
+</script>
+
+<h1>{title}</h1>
+<p>Count: {count}</p>
+<button onclick={() => onUpdate?.(count + 1)}>Update</button>
+```
+
+### Bindings
+
+```svelte
+<script lang="ts">
+  let value = $state('');
+  let checked = $state(false);
+</script>
+
+<input bind:value />
+<input type="checkbox" bind:checked />
+```
+
+## Routing
+
+### Route Groups
+
+Use route groups for layout organization:
+
+```
+routes/
+├── (marketing)/          # Public pages
+│   ├── +layout.svelte    # Marketing layout
+│   ├── +page.svelte      # Landing page
+│   └── pricing/
+├── (auth)/               # Auth pages (no sidebar)
+│   ├── +layout.svelte
+│   ├── login/
+│   └── register/
+└── (app)/                # Protected app pages
+    ├── +layout.svelte    # App layout with sidebar
+    ├── +layout.server.ts # Auth check
+    └── dashboard/
+```
+
+### Layout Data
+
+```typescript
+// routes/(app)/+layout.server.ts
+import { redirect } from '@sveltejs/kit';
+import type { LayoutServerLoad } from './$types';
+
+export const load: LayoutServerLoad = async ({ locals }) => {
+  if (!locals.user) {
+    throw redirect(302, '/login');
+  }
+
+  return {
+    user: locals.user,
+  };
+};
+```
+
+### Page Data
+
+```typescript
+// routes/(app)/dashboard/+page.server.ts
+import type { PageServerLoad } from './$types';
+import { api } from '$lib/services/api';
+
+export const load: PageServerLoad = async ({ locals }) => {
+  const stats = await api.getStats(locals.user.id);
+
+  return {
+    stats,
+  };
+};
+```
+
+```svelte
+<!-- routes/(app)/dashboard/+page.svelte -->
+<script lang="ts">
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
+</script>
+
+<h1>Dashboard</h1>
+<p>Total items: {data.stats.total}</p>
+```
+
+## API Integration
+
+### API Client
+
+```typescript
+// src/lib/services/api.ts
+import { PUBLIC_API_URL } from '$env/static/public';
+
+class ApiClient {
+  private baseUrl = PUBLIC_API_URL;
+  private token: string | null = null;
+
+  setToken(token: string) {
+    this.token = token;
+  }
+
+  private async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.token && { Authorization: `Bearer ${this.token}` }),
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async getUsers() {
+    return this.fetch<User[]>('/api/v1/users');
+  }
+
+  async createUser(data: CreateUserDto) {
+    return this.fetch<User>('/api/v1/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+}
+
+export const api = new ApiClient();
+```
+
+## Stores
+
+Use Svelte stores for global state:
+
+```typescript
+// src/lib/stores/auth.ts
+import { writable, derived } from 'svelte/store';
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+}
+
+function createAuthStore() {
+  const { subscribe, set, update } = writable<AuthState>({
+    user: null,
+    token: null,
+    loading: true,
+  });
+
+  return {
+    subscribe,
+    setUser: (user: User, token: string) => {
+      update((state) => ({ ...state, user, token, loading: false }));
+    },
+    logout: () => {
+      set({ user: null, token: null, loading: false });
+    },
+    setLoading: (loading: boolean) => {
+      update((state) => ({ ...state, loading }));
+    },
+  };
+}
+
+export const auth = createAuthStore();
+export const isAuthenticated = derived(auth, ($auth) => !!$auth.user);
+```
+
+## Components
+
+### Base Component Pattern
+
+```svelte
+<!-- src/lib/components/ui/Button.svelte -->
+<script lang="ts">
+  import { cn } from '$lib/utils';
+
+  interface Props {
+    variant?: 'primary' | 'secondary' | 'ghost';
+    size?: 'sm' | 'md' | 'lg';
+    disabled?: boolean;
+    class?: string;
+    onclick?: () => void;
+  }
+
+  let {
+    variant = 'primary',
+    size = 'md',
+    disabled = false,
+    class: className,
+    onclick,
+    ...rest
+  }: Props = $props();
+
+  const variants = {
+    primary: 'bg-blue-500 text-white hover:bg-blue-600',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
+    ghost: 'bg-transparent hover:bg-gray-100',
+  };
+
+  const sizes = {
+    sm: 'px-2 py-1 text-sm',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-3 text-lg',
+  };
+</script>
+
+<button
+  class={cn(
+    'rounded-md font-medium transition-colors',
+    variants[variant],
+    sizes[size],
+    disabled && 'opacity-50 cursor-not-allowed',
+    className
+  )}
+  {disabled}
+  {onclick}
+  {...rest}
+>
+  <slot />
+</button>
+```
+
+### Utility Function
+
+```typescript
+// src/lib/utils/cn.ts
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+## Forms
+
+### Form Actions
+
+```typescript
+// routes/settings/+page.server.ts
+import type { Actions } from './$types';
+import { fail } from '@sveltejs/kit';
+
+export const actions: Actions = {
+  updateProfile: async ({ request, locals }) => {
+    const data = await request.formData();
+    const name = data.get('name') as string;
+
+    if (!name || name.length < 2) {
+      return fail(400, { error: 'Name must be at least 2 characters' });
+    }
+
+    await api.updateUser(locals.user.id, { name });
+
+    return { success: true };
+  },
+};
+```
+
+```svelte
+<!-- routes/settings/+page.svelte -->
+<script lang="ts">
+  import { enhance } from '$app/forms';
+  import type { ActionData } from './$types';
+
+  let { form }: { form: ActionData } = $props();
+</script>
+
+<form method="POST" action="?/updateProfile" use:enhance>
+  <input name="name" required minlength="2" />
+
+  {#if form?.error}
+    <p class="text-red-500">{form.error}</p>
+  {/if}
+
+  <button type="submit">Save</button>
+</form>
+```
+
+## Best Practices
+
+1. **Use runes** - Always use `$state`, `$derived`, `$effect`
+2. **Type everything** - Use TypeScript for all components
+3. **Server-side data loading** - Use `+page.server.ts` for API calls
+4. **Form actions** - Use SvelteKit form actions for mutations
+5. **Tailwind** - Use utility classes, avoid custom CSS
+6. **Component composition** - Build small, reusable components

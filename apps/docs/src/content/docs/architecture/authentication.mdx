@@ -1,0 +1,283 @@
+---
+title: Authentication
+description: Central authentication architecture using Mana Core Auth.
+---
+
+import { Aside, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+# Authentication
+
+All Manacore applications use **Mana Core Auth** as the central authentication service, providing EdDSA JWT-based authentication.
+
+## Overview
+
+```
+┌─────────────┐     ┌─────────────┐     ┌────────────────┐
+│   Client    │────>│  Backend    │────>│ mana-core-auth │
+│ (Web/Mobile)│     │  (NestJS)   │     │  (port 3001)   │
+└─────────────┘     └─────────────┘     └────────────────┘
+      │                   │                     │
+      │ Bearer token      │ POST /validate      │
+      │                   │ {token}             │
+      │                   │<────────────────────│
+      │                   │ {valid, payload}    │
+      │<──────────────────│                     │
+      │ Response          │                     │
+```
+
+## JWT Token Structure
+
+Mana Core Auth uses **EdDSA (Ed25519)** for JWT signing:
+
+```json
+{
+  "sub": "user-uuid",
+  "email": "user@example.com",
+  "role": "user",
+  "sid": "session-uuid",
+  "exp": 1764606251,
+  "iss": "manacore",
+  "aud": "manacore"
+}
+```
+
+| Claim | Description |
+|-------|-------------|
+| `sub` | User ID (UUID) |
+| `email` | User's email address |
+| `role` | User role (`user`, `admin`) |
+| `sid` | Session ID for invalidation |
+| `exp` | Expiration timestamp |
+| `iss` | Issuer (`manacore`) |
+| `aud` | Audience (`manacore`) |
+
+## Backend Integration
+
+### Option 1: Simple Auth Only
+
+Use `@manacore/shared-nestjs-auth` for JWT validation:
+
+```typescript
+// app.module.ts
+import { JwtAuthModule } from '@manacore/shared-nestjs-auth';
+
+@Module({
+  imports: [
+    JwtAuthModule.register({
+      authServiceUrl: process.env.MANA_CORE_AUTH_URL,
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+```typescript
+// controller.ts
+import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+
+@Controller('api')
+@UseGuards(JwtAuthGuard)
+export class MyController {
+  @Get('profile')
+  getProfile(@CurrentUser() user: CurrentUserData) {
+    return { userId: user.userId, email: user.email };
+  }
+}
+```
+
+### Option 2: Auth + Credits
+
+Use `@mana-core/nestjs-integration` for full integration:
+
+```typescript
+// app.module.ts
+import { ManaCoreModule } from '@mana-core/nestjs-integration';
+
+@Module({
+  imports: [
+    ManaCoreModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        appId: config.get('APP_ID'),
+        serviceKey: config.get('MANA_CORE_SERVICE_KEY'),
+        debug: config.get('NODE_ENV') === 'development',
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+```typescript
+// controller.ts
+import { AuthGuard } from '@mana-core/nestjs-integration/guards';
+import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
+import { CreditClientService } from '@mana-core/nestjs-integration';
+
+@Controller('api')
+@UseGuards(AuthGuard)
+export class ApiController {
+  constructor(private creditClient: CreditClientService) {}
+
+  @Post('generate')
+  async generate(@CurrentUser() user: any) {
+    // Consume credits for the operation
+    await this.creditClient.consumeCredits(
+      user.sub,
+      'generation',
+      10,
+      'AI generation'
+    );
+    // ... perform operation
+  }
+}
+```
+
+## Client Integration
+
+### Web (SvelteKit)
+
+```typescript
+// src/lib/auth.ts
+import { createAuthService } from '@manacore/shared-auth';
+
+export const auth = createAuthService({
+  authUrl: import.meta.env.PUBLIC_MANA_CORE_AUTH_URL,
+});
+
+// Usage in component
+const { data, error } = await auth.login(email, password);
+if (data) {
+  // Store token, redirect to app
+}
+```
+
+### Mobile (Expo)
+
+```typescript
+// src/services/auth.ts
+import { createAuthService } from '@manacore/shared-auth';
+
+export const auth = createAuthService({
+  authUrl: process.env.EXPO_PUBLIC_MANA_CORE_AUTH_URL,
+  storage: AsyncStorage, // Expo AsyncStorage
+});
+```
+
+## API Endpoints
+
+### Public Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/auth/register` | POST | Create new account |
+| `/api/v1/auth/login` | POST | Login with credentials |
+| `/api/v1/auth/refresh` | POST | Refresh access token |
+| `/api/v1/auth/logout` | POST | Invalidate session |
+
+### Protected Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/auth/me` | GET | Get current user |
+| `/api/v1/auth/sessions` | GET | List active sessions |
+| `/api/v1/auth/sessions/:id` | DELETE | Revoke session |
+
+## Environment Variables
+
+### Backend Services
+
+```env
+# Required
+MANA_CORE_AUTH_URL=http://localhost:3001
+
+# For development bypass (optional)
+NODE_ENV=development
+DEV_BYPASS_AUTH=true
+DEV_USER_ID=test-user-uuid
+
+# For credit operations
+MANA_CORE_SERVICE_KEY=your-service-key
+APP_ID=your-app-id
+```
+
+### Client Apps
+
+<Tabs>
+  <TabItem label="SvelteKit">
+    ```env
+    PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+    ```
+  </TabItem>
+  <TabItem label="Expo">
+    ```env
+    EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+    ```
+  </TabItem>
+</Tabs>
+
+## Testing Authentication
+
+<Steps>
+1. **Start Mana Core Auth**
+
+   ```bash
+   pnpm dev:auth
+   ```
+
+2. **Get a token**
+
+   ```bash
+   TOKEN=$(curl -s -X POST http://localhost:3001/api/v1/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "password"}' \
+     | jq -r '.accessToken')
+   ```
+
+3. **Call protected endpoint**
+
+   ```bash
+   curl http://localhost:3002/api/v1/profile \
+     -H "Authorization: Bearer $TOKEN"
+   ```
+</Steps>
+
+## Development Bypass
+
+For faster development, you can bypass authentication:
+
+```typescript
+// Only in development!
+if (process.env.DEV_BYPASS_AUTH === 'true') {
+  // Use mock user
+  return {
+    userId: process.env.DEV_USER_ID,
+    email: 'dev@example.com',
+    role: 'admin',
+  };
+}
+```
+
+<Aside type="danger">
+Never enable auth bypass in production!
+</Aside>
+
+## Security Best Practices
+
+1. **Always use HTTPS** in production
+2. **Rotate JWT keys** periodically
+3. **Keep tokens short-lived** (15m access, 7d refresh)
+4. **Validate on every request** - don't trust client storage
+5. **Implement rate limiting** on auth endpoints
+6. **Log authentication events** for audit trails
+
+## Integrated Services
+
+| Backend | Package | Port |
+|---------|---------|------|
+| Chat | `@mana-core/nestjs-integration` | 3002 |
+| Picture | `@manacore/shared-nestjs-auth` | 3006 |
+| Zitare | `@manacore/shared-nestjs-auth` | 3007 |
+| ManaDeck | `@mana-core/nestjs-integration` | 3009 |
+| Contacts | `@manacore/shared-nestjs-auth` | 3015 |

@@ -1,0 +1,292 @@
+---
+title: Docker Setup
+description: Working with Docker for local development and production in Manacore.
+---
+
+import { Tabs, TabItem, Aside, Steps } from '@astrojs/starlight/components';
+
+# Docker Setup
+
+Manacore uses Docker for local development services and production deployment.
+
+## Overview
+
+Docker provides:
+
+- **Development**: Local PostgreSQL, Redis, MinIO (S3-compatible storage)
+- **CI/CD**: Automated builds and tests
+- **Production**: Container deployment
+
+## Quick Start
+
+```bash
+# Start all development infrastructure
+pnpm docker:up
+
+# View logs
+pnpm docker:logs
+
+# Stop services
+pnpm docker:down
+
+# Complete reset (removes volumes)
+pnpm docker:clean
+```
+
+## Services Included
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| PostgreSQL | 5432 | Database |
+| Redis | 6379 | Caching, sessions |
+| MinIO | 9000 (API), 9001 (Console) | S3-compatible storage |
+
+### MinIO Access
+
+- **Console**: http://localhost:9001
+- **Username**: `minioadmin`
+- **Password**: `minioadmin`
+
+## Docker Templates
+
+Templates are in `docker/templates/` for creating new Dockerfiles:
+
+### NestJS Backend
+
+```bash
+# Copy template
+cp docker/templates/Dockerfile.nestjs apps/myproject/apps/backend/Dockerfile
+```
+
+Build arguments:
+- `SERVICE_PATH`: Path to service
+- `PORT`: Service port
+- `HEALTH_PATH`: Health check endpoint
+
+```bash
+docker build \
+  --build-arg SERVICE_PATH=apps/chat/apps/backend \
+  --build-arg PORT=3002 \
+  --build-arg HEALTH_PATH=/api/health \
+  -t chat-backend:latest \
+  -f docker/templates/Dockerfile.nestjs \
+  .
+```
+
+### SvelteKit Web
+
+```bash
+docker build \
+  --build-arg SERVICE_PATH=apps/chat/apps/web \
+  --build-arg PORT=3000 \
+  -t chat-web:latest \
+  -f docker/templates/Dockerfile.sveltekit \
+  .
+```
+
+### Astro Landing
+
+Static site served with Nginx:
+
+```bash
+docker build \
+  --build-arg SERVICE_PATH=apps/chat/apps/landing \
+  -t chat-landing:latest \
+  -f docker/templates/Dockerfile.astro \
+  .
+```
+
+## Building Images
+
+### Development Build
+
+```bash
+# Build single service
+docker build -t service-name:dev -f apps/project/apps/service/Dockerfile .
+
+# Build with cache
+docker build --cache-from service-name:latest -t service-name:dev .
+```
+
+### Production Build
+
+```bash
+# Multi-platform build
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t service-name:latest \
+  .
+```
+
+## Running Containers
+
+```bash
+# Run with environment file
+docker run -d \
+  --name chat-backend \
+  --env-file .env.production \
+  -p 3002:3002 \
+  chat-backend:latest
+
+# View logs
+docker logs -f chat-backend
+
+# Execute shell in container
+docker exec -it chat-backend sh
+```
+
+## Docker Compose
+
+### Development
+
+```bash
+# Start services
+pnpm docker:up
+
+# View status
+docker compose -f docker-compose.dev.yml ps
+
+# View specific service logs
+docker compose -f docker-compose.dev.yml logs -f postgres
+```
+
+### Production
+
+```bash
+# Deploy to production
+docker compose -f docker-compose.production.yml up -d
+
+# Rolling update
+docker compose -f docker-compose.production.yml up -d --no-deps service-name
+
+# Scale service
+docker compose up -d --scale service=3 service
+```
+
+## Best Practices
+
+### 1. Optimize Layer Caching
+
+```dockerfile
+# Good - cache dependencies
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
+COPY . .
+
+# Bad - invalidates cache on every change
+COPY . .
+RUN pnpm install
+```
+
+### 2. Use Multi-Stage Builds
+
+```dockerfile
+# Build stage
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN pnpm install && pnpm build
+
+# Production stage
+FROM node:20-alpine AS production
+COPY --from=builder /app/dist ./dist
+CMD ["node", "dist/main.js"]
+```
+
+### 3. Security
+
+```dockerfile
+# Use non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+USER nestjs
+```
+
+### 4. Health Checks
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+```
+
+### 5. Resource Limits
+
+```yaml
+services:
+  backend:
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+```
+
+## Troubleshooting
+
+### Container Won't Start
+
+```bash
+# View logs
+docker logs container-name
+
+# Check exit code
+docker inspect --format='{{.State.ExitCode}}' container-name
+
+# Run interactively
+docker run -it --rm image-name sh
+```
+
+### Out of Disk Space
+
+```bash
+# Check usage
+docker system df
+
+# Clean everything unused
+docker system prune -a --volumes
+```
+
+### Network Issues
+
+```bash
+# List networks
+docker network ls
+
+# Test connectivity
+docker exec container1 ping container2
+```
+
+### Permission Issues
+
+```bash
+# Check ownership
+docker exec container-name ls -la /app
+
+# Fix in Dockerfile
+RUN chown -R nodejs:nodejs /app
+```
+
+## Advanced
+
+### BuildKit
+
+```bash
+export DOCKER_BUILDKIT=1
+docker build .
+```
+
+### Custom Networks
+
+```bash
+docker network create --driver bridge my-network
+docker run --network my-network image-name
+```
+
+### Volume Backup
+
+```bash
+docker run --rm \
+  -v my-data:/data \
+  -v $(pwd):/backup \
+  alpine tar czf /backup/backup.tar.gz /data
+```

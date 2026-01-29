@@ -1,0 +1,171 @@
+---
+title: Chat
+description: AI chat application with multiple models.
+---
+
+import { Aside, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
+
+# Chat
+
+<Badge text="Stable" variant="success" />
+
+AI chat application supporting multiple language models including local (Ollama) and cloud providers (OpenRouter).
+
+## Overview
+
+| Component | Technology | Port |
+|-----------|------------|------|
+| Backend | NestJS | 3002 |
+| Web | SvelteKit | 5173 |
+| Mobile | Expo | - |
+| Landing | Astro | - |
+
+## Quick Start
+
+```bash
+# Start everything (auth + database + backend + web)
+pnpm dev:chat:full
+
+# Or individual components
+pnpm dev:chat:backend
+pnpm dev:chat:web
+pnpm dev:chat:mobile
+```
+
+## Architecture
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Client    │────>│   Backend   │────>│  AI Models  │
+│ (Web/Mobile)│     │   (NestJS)  │     │ Ollama/API  │
+└─────────────┘     └──────┬──────┘     └─────────────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │  PostgreSQL │
+                    └─────────────┘
+```
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/health` | GET | Health check |
+| `/api/v1/chat/models` | GET | List available AI models |
+| `/api/v1/chat/completions` | POST | Create chat completion |
+| `/api/v1/conversations` | GET | List user conversations |
+| `/api/v1/conversations/:id` | GET | Get conversation details |
+| `/api/v1/conversations/:id/messages` | GET | Get conversation messages |
+| `/api/v1/conversations` | POST | Create new conversation |
+| `/api/v1/conversations/:id/messages` | POST | Add message to conversation |
+
+## AI Models
+
+### Local Models (Ollama - Free)
+
+| Model | Best For |
+|-------|----------|
+| Gemma 3 4B | Everyday tasks (default) |
+| Llama 3.2 | General conversation |
+| Mistral | Code assistance |
+
+### Cloud Models (OpenRouter - Paid)
+
+| Model | Price | Best For |
+|-------|-------|----------|
+| Llama 3.1 8B | $0.05/M | Fast cloud alternative |
+| Llama 3.1 70B | $0.35/M | Complex reasoning |
+| DeepSeek V3 | $0.14/M | Reasoning at low cost |
+| Claude 3.5 Sonnet | $3/M | Best quality |
+| GPT-4o Mini | $0.15/M | Balanced performance |
+
+## Environment Variables
+
+### Backend
+
+```env
+# AI Models
+OPENROUTER_API_KEY=sk-or-v1-xxx
+OLLAMA_URL=http://localhost:11434
+OLLAMA_TIMEOUT=120000
+
+# Database
+DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/chat
+
+# Auth
+MANA_CORE_AUTH_URL=http://localhost:3001
+
+# Server
+PORT=3002
+```
+
+### Web
+
+```env
+PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+PUBLIC_BACKEND_URL=http://localhost:3002
+```
+
+## Database Schema
+
+```typescript
+// Conversations
+export const conversations = pgTable('conversations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull(),
+  title: varchar('title', { length: 255 }),
+  modelId: varchar('model_id', { length: 100 }),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// Messages
+export const messages = pgTable('messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  conversationId: uuid('conversation_id')
+    .notNull()
+    .references(() => conversations.id, { onDelete: 'cascade' }),
+  role: varchar('role', { length: 20 }).notNull(), // 'user' | 'assistant'
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+```
+
+## Features
+
+- **Multi-model support** - Switch between local and cloud models
+- **Conversation history** - Persistent chat history
+- **Streaming responses** - Real-time AI responses
+- **Code highlighting** - Syntax highlighting in responses
+- **Markdown rendering** - Rich text formatting
+- **Mobile app** - Native iOS and Android app
+
+## Development
+
+### Seed Database
+
+First time setup requires seeding AI models:
+
+```bash
+pnpm --filter @chat/backend db:push
+pnpm --filter @chat/backend db:seed
+```
+
+### Run Tests
+
+```bash
+pnpm --filter @chat/backend test
+pnpm --filter @chat/backend test:e2e
+```
+
+### Open Database GUI
+
+```bash
+pnpm --filter @chat/backend db:studio
+```
+
+## Links
+
+- **Web App**: http://localhost:5173
+- **API**: http://localhost:3002
+- **Drizzle Studio**: http://localhost:4983

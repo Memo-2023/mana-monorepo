@@ -1,0 +1,412 @@
+---
+title: Database Patterns
+description: Drizzle ORM patterns and database best practices in Manacore.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# Database Patterns
+
+Manacore uses **Drizzle ORM** with PostgreSQL for type-safe database access.
+
+## Schema Design
+
+### Basic Table
+
+```typescript
+import {
+  pgTable,
+  uuid,
+  varchar,
+  text,
+  timestamp,
+  boolean,
+  integer,
+} from 'drizzle-orm/pg-core';
+
+export const users = pgTable('users', {
+  // Primary key - always UUID
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  // Required fields
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  name: varchar('name', { length: 100 }).notNull(),
+
+  // Optional fields
+  bio: text('bio'),
+  avatarUrl: varchar('avatar_url', { length: 500 }),
+
+  // Soft delete pattern
+  deletedAt: timestamp('deleted_at'),
+
+  // Audit fields - always include
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+```
+
+### Foreign Keys
+
+```typescript
+export const posts = pgTable('posts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: varchar('title', { length: 255 }).notNull(),
+  content: text('content'),
+
+  // Foreign key with cascade delete
+  authorId: uuid('author_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+
+  // Foreign key with set null
+  categoryId: uuid('category_id')
+    .references(() => categories.id, { onDelete: 'set null' }),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+```
+
+### Indexes
+
+```typescript
+import { pgTable, uuid, varchar, index, uniqueIndex } from 'drizzle-orm/pg-core';
+
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).notNull(),
+  organizationId: uuid('organization_id'),
+  status: varchar('status', { length: 20 }),
+}, (table) => ({
+  // Single column index
+  emailIdx: uniqueIndex('users_email_idx').on(table.email),
+
+  // Composite index
+  orgStatusIdx: index('users_org_status_idx').on(table.organizationId, table.status),
+}));
+```
+
+### Enums
+
+```typescript
+import { pgEnum, pgTable, uuid } from 'drizzle-orm/pg-core';
+
+// Define enum
+export const userRoleEnum = pgEnum('user_role', ['admin', 'user', 'guest']);
+export const statusEnum = pgEnum('status', ['active', 'inactive', 'pending']);
+
+// Use in table
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  role: userRoleEnum('role').default('user').notNull(),
+  status: statusEnum('status').default('pending').notNull(),
+});
+```
+
+### JSON Columns
+
+```typescript
+import { pgTable, uuid, jsonb } from 'drizzle-orm/pg-core';
+
+// Type for JSON structure
+interface UserSettings {
+  theme: 'light' | 'dark';
+  notifications: boolean;
+  language: string;
+}
+
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  settings: jsonb('settings').$type<UserSettings>().default({
+    theme: 'light',
+    notifications: true,
+    language: 'en',
+  }),
+});
+```
+
+## Query Patterns
+
+### Basic Queries
+
+```typescript
+import { eq, and, or, like, ilike, isNull, isNotNull } from 'drizzle-orm';
+
+// Select all
+const allUsers = await db.select().from(users);
+
+// Select with condition
+const activeUsers = await db
+  .select()
+  .from(users)
+  .where(eq(users.status, 'active'));
+
+// Select specific columns
+const emails = await db
+  .select({ email: users.email, name: users.name })
+  .from(users);
+
+// Multiple conditions
+const result = await db
+  .select()
+  .from(users)
+  .where(
+    and(
+      eq(users.status, 'active'),
+      isNull(users.deletedAt),
+      or(
+        eq(users.role, 'admin'),
+        eq(users.role, 'moderator')
+      )
+    )
+  );
+
+// Pattern matching
+const matched = await db
+  .select()
+  .from(users)
+  .where(ilike(users.name, '%john%'));
+```
+
+### Joins
+
+```typescript
+import { eq } from 'drizzle-orm';
+
+// Inner join
+const postsWithAuthors = await db
+  .select({
+    post: posts,
+    author: users,
+  })
+  .from(posts)
+  .innerJoin(users, eq(posts.authorId, users.id));
+
+// Left join
+const usersWithPosts = await db
+  .select()
+  .from(users)
+  .leftJoin(posts, eq(users.id, posts.authorId));
+```
+
+### Ordering and Pagination
+
+```typescript
+import { desc, asc } from 'drizzle-orm';
+
+// Order by
+const sorted = await db
+  .select()
+  .from(users)
+  .orderBy(desc(users.createdAt));
+
+// Pagination
+const page = 1;
+const pageSize = 20;
+
+const paginated = await db
+  .select()
+  .from(users)
+  .orderBy(desc(users.createdAt))
+  .limit(pageSize)
+  .offset((page - 1) * pageSize);
+```
+
+### Aggregations
+
+```typescript
+import { count, sum, avg, min, max } from 'drizzle-orm';
+
+// Count
+const [{ total }] = await db
+  .select({ total: count() })
+  .from(users)
+  .where(eq(users.status, 'active'));
+
+// Group by
+const countByRole = await db
+  .select({
+    role: users.role,
+    count: count(),
+  })
+  .from(users)
+  .groupBy(users.role);
+```
+
+### Insert
+
+```typescript
+// Single insert
+const [newUser] = await db
+  .insert(users)
+  .values({
+    email: 'user@example.com',
+    name: 'John Doe',
+  })
+  .returning();
+
+// Bulk insert
+const newUsers = await db
+  .insert(users)
+  .values([
+    { email: 'user1@example.com', name: 'User 1' },
+    { email: 'user2@example.com', name: 'User 2' },
+  ])
+  .returning();
+
+// Upsert (insert or update)
+await db
+  .insert(users)
+  .values({ email: 'user@example.com', name: 'John' })
+  .onConflictDoUpdate({
+    target: users.email,
+    set: { name: 'John Updated' },
+  });
+```
+
+### Update
+
+```typescript
+// Update with returning
+const [updated] = await db
+  .update(users)
+  .set({
+    name: 'New Name',
+    updatedAt: new Date(),
+  })
+  .where(eq(users.id, userId))
+  .returning();
+
+// Conditional update
+await db
+  .update(users)
+  .set({ status: 'inactive' })
+  .where(
+    and(
+      eq(users.status, 'active'),
+      lt(users.lastLoginAt, thirtyDaysAgo)
+    )
+  );
+```
+
+### Delete
+
+```typescript
+// Hard delete
+await db.delete(users).where(eq(users.id, userId));
+
+// Soft delete (preferred)
+await db
+  .update(users)
+  .set({ deletedAt: new Date() })
+  .where(eq(users.id, userId));
+```
+
+## Transactions
+
+```typescript
+import { db } from './drizzle';
+
+// Basic transaction
+await db.transaction(async (tx) => {
+  const [user] = await tx
+    .insert(users)
+    .values({ email: 'user@example.com', name: 'John' })
+    .returning();
+
+  await tx
+    .insert(profiles)
+    .values({ userId: user.id, bio: 'Hello!' });
+
+  // If anything throws, entire transaction rolls back
+});
+
+// With savepoints
+await db.transaction(async (tx) => {
+  await tx.insert(users).values({ /* ... */ });
+
+  try {
+    await tx.insert(optionalData).values({ /* ... */ });
+  } catch (e) {
+    // This specific insert failed, but transaction continues
+    console.log('Optional insert failed, continuing...');
+  }
+
+  await tx.insert(requiredData).values({ /* ... */ });
+});
+```
+
+## Service Pattern
+
+```typescript
+@Injectable()
+export class UsersService {
+  constructor(@Inject(DRIZZLE) private db: DrizzleDB) {}
+
+  async findAll(options?: { status?: string; page?: number; limit?: number }) {
+    const { status, page = 1, limit = 20 } = options || {};
+
+    const query = this.db
+      .select()
+      .from(users)
+      .where(
+        and(
+          isNull(users.deletedAt),
+          status ? eq(users.status, status) : undefined
+        )
+      )
+      .orderBy(desc(users.createdAt))
+      .limit(limit)
+      .offset((page - 1) * limit);
+
+    return query;
+  }
+
+  async findById(id: string) {
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, id), isNull(users.deletedAt)));
+
+    return user || null;
+  }
+
+  async create(data: CreateUserDto) {
+    const [user] = await this.db
+      .insert(users)
+      .values(data)
+      .returning();
+
+    return user;
+  }
+
+  async update(id: string, data: UpdateUserDto) {
+    const [user] = await this.db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+
+    return user;
+  }
+
+  async softDelete(id: string) {
+    await this.db
+      .update(users)
+      .set({ deletedAt: new Date() })
+      .where(eq(users.id, id));
+  }
+}
+```
+
+## Best Practices
+
+<Aside type="tip">
+1. **Always use UUIDs** for primary keys
+2. **Include audit fields** (createdAt, updatedAt) on all tables
+3. **Prefer soft deletes** for important data
+4. **Use transactions** for multi-step operations
+5. **Add indexes** for frequently queried columns
+6. **Use enums** for fixed sets of values
+7. **Type your JSON columns** with `$type<T>()`
+</Aside>

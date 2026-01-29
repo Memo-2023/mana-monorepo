@@ -1,0 +1,101 @@
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+import tailwind from '@astrojs/tailwind';
+import sitemap from '@astrojs/sitemap';
+
+export default defineConfig({
+	site: 'https://docs.manacore.app',
+	integrations: [
+		starlight({
+			title: 'Manacore Docs',
+			description:
+				'Documentation for the Manacore ecosystem - a multi-app platform with shared infrastructure.',
+			logo: {
+				light: './src/assets/logo-light.svg',
+				dark: './src/assets/logo-dark.svg',
+				replacesTitle: false,
+			},
+			social: {
+				github: 'https://github.com/manacore/manacore-monorepo',
+			},
+			editLink: {
+				baseUrl: 'https://github.com/manacore/manacore-monorepo/edit/main/apps/docs/',
+			},
+			customCss: ['./src/styles/custom.css'],
+			sidebar: [
+				{
+					label: 'Getting Started',
+					items: [
+						{ label: 'Introduction', slug: 'getting-started/introduction' },
+						{ label: 'Quick Start', slug: 'getting-started/quick-start' },
+						{ label: 'Project Structure', slug: 'getting-started/project-structure' },
+					],
+				},
+				{
+					label: 'Development',
+					items: [
+						{ label: 'Local Development', slug: 'development/local-development' },
+						{ label: 'Environment Variables', slug: 'development/environment-variables' },
+						{ label: 'Docker Setup', slug: 'development/docker' },
+						{ label: 'Database Migrations', slug: 'development/database-migrations' },
+						{ label: 'Testing', slug: 'development/testing' },
+					],
+				},
+				{
+					label: 'Architecture',
+					items: [
+						{ label: 'Overview', slug: 'architecture/overview' },
+						{ label: 'Authentication', slug: 'architecture/authentication' },
+						{ label: 'Backend (NestJS)', slug: 'architecture/backend' },
+						{ label: 'Web (SvelteKit)', slug: 'architecture/web' },
+						{ label: 'Mobile (Expo)', slug: 'architecture/mobile' },
+						{ label: 'Search Service', slug: 'architecture/search' },
+						{ label: 'Storage', slug: 'architecture/storage' },
+					],
+				},
+				{
+					label: 'Guidelines',
+					items: [
+						{ label: 'Code Style', slug: 'guidelines/code-style' },
+						{ label: 'Error Handling', slug: 'guidelines/error-handling' },
+						{ label: 'Database Patterns', slug: 'guidelines/database' },
+						{ label: 'Design & UX', slug: 'guidelines/design-ux' },
+					],
+				},
+				{
+					label: 'Deployment',
+					items: [
+						{ label: 'Overview', slug: 'deployment/overview' },
+						{ label: 'Cloudflare Pages', slug: 'deployment/cloudflare-pages' },
+						{ label: 'Mac Mini Server', slug: 'deployment/mac-mini-server' },
+						{ label: 'Self-Hosting', slug: 'deployment/self-hosting' },
+					],
+				},
+				{
+					label: 'Projects',
+					collapsed: true,
+					items: [
+						{ label: 'Overview', slug: 'projects' },
+						{ label: 'Chat', slug: 'projects/chat' },
+					],
+				},
+				{
+					label: 'API Reference',
+					collapsed: true,
+					items: [{ label: 'Overview', slug: 'api' }],
+				},
+			],
+			head: [
+				{
+					tag: 'meta',
+					attrs: {
+						property: 'og:image',
+						content: 'https://docs.manacore.app/og-image.png',
+					},
+				},
+			],
+		}),
+		tailwind({ applyBaseStyles: false }),
+		sitemap(),
+	],
+});
