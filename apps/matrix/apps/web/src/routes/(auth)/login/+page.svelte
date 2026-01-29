@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { loginWithPassword, discoverHomeserver, checkHomeserver, matrixStore } from '$lib/matrix';
-	import { Eye, EyeOff, Loader2, Server, User, Lock, AlertCircle } from 'lucide-svelte';
+	import { Eye, EyeOff, Loader2, Server, User, Lock, AlertCircle, LogIn } from 'lucide-svelte';
 
 	// Form state
 	let homeserver = $state('matrix.mana.how');
@@ -11,9 +12,19 @@
 
 	// UI state
 	let loading = $state(false);
+	let loadingSSO = $state(false);
 	let checkingServer = $state(false);
 	let error = $state<string | null>(null);
 	let serverValid = $state<boolean | null>(null);
+
+	// SSO Login via Mana Core
+	function handleSSOLogin() {
+		if (!browser) return;
+		loadingSSO = true;
+		// Redirect to Matrix SSO endpoint which will redirect to Mana Core Auth
+		const redirectUrl = encodeURIComponent(window.location.origin + '/chat');
+		window.location.href = `https://matrix.mana.how/_matrix/client/v3/login/sso/redirect/oidc-manacore?redirectUrl=${redirectUrl}`;
+	}
 
 	// Auto-discover homeserver when username looks like a full Matrix ID
 	let discoverTimeout: ReturnType<typeof setTimeout>;
@@ -189,6 +200,25 @@
 				{/if}
 			</button>
 		</form>
+
+		<!-- Divider -->
+		<div class="divider my-4 text-base-content/40">OR</div>
+
+		<!-- SSO Login -->
+		<button
+			type="button"
+			class="btn btn-outline w-full gap-2"
+			onclick={handleSSOLogin}
+			disabled={loadingSSO}
+		>
+			{#if loadingSSO}
+				<Loader2 class="h-5 w-5 animate-spin" />
+				Redirecting...
+			{:else}
+				<LogIn class="h-5 w-5" />
+				Sign in with Mana Core
+			{/if}
+		</button>
 
 		<!-- Footer -->
 		<div class="mt-4 text-center text-sm text-base-content/60">
