@@ -15,7 +15,6 @@
 		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
-	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 
 	let { children } = $props();
 
@@ -41,22 +40,19 @@
 	// User email for nav
 	let userEmail = $derived(authStore.user?.email || 'Menu');
 
-	// Guest welcome modal state
-	let showGuestWelcome = $state(false);
-
 	onMount(async () => {
-		// Set API token if authenticated
-		if (authStore.isAuthenticated) {
-			const token = await authStore.getValidToken();
-			apiClient.setAccessToken(token);
-		} else {
-			// Show guest welcome modal for unauthenticated users
-			if (shouldShowGuestWelcome('questions')) {
-				showGuestWelcome = true;
-			}
+		// Initialize auth and redirect if not authenticated
+		await authStore.initialize();
+		if (!authStore.isAuthenticated) {
+			goto('/login');
+			return;
 		}
 
-		// Load initial data (works in both guest and authenticated mode)
+		// Set API token
+		const token = await authStore.getValidToken();
+		apiClient.setAccessToken(token);
+
+		// Load initial data
 		await collectionsStore.load();
 		await questionsStore.load();
 
@@ -146,12 +142,6 @@
 	async function handleCreate(query: string): Promise<void> {
 		if (!query.trim()) return;
 
-		// Demo mode: show login prompt
-		if (!authStore.isAuthenticated) {
-			showGuestWelcome = true;
-			return;
-		}
-
 		const question = await questionsStore.create({
 			title: query,
 			collectionId: collectionsStore.selectedId || undefined,
@@ -202,54 +192,11 @@
 		{ href: '/collections', label: 'Collections', icon: 'folder' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
 	]);
-
-	// Guest features for welcome modal
-	const guestFeatures = [
-		'Browse sample research questions',
-		'Explore the app interface',
-		'See how AI research works',
-	];
 </script>
 
 <svelte:window onresize={updateMobileState} />
 
 <div class="layout-container">
-	<!-- Demo Mode Banner -->
-	{#if !authStore.isAuthenticated}
-		<div
-			class="guest-banner fixed left-0 right-0 top-0 z-50 flex items-center justify-between border-b border-primary/20 bg-primary/10 px-4 py-2"
-		>
-			<div class="flex items-center gap-2 text-sm">
-				<svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-					/>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-					/>
-				</svg>
-				<span class="text-foreground">
-					<strong>Demo Mode</strong>
-					<span class="hidden text-muted-foreground sm:inline">
-						- Sample questions to explore
-					</span>
-				</span>
-			</div>
-			<button
-				onclick={() => goto('/login')}
-				class="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-			>
-				Sign In
-			</button>
-		</div>
-	{/if}
-
 	<!-- Navigation -->
 	<PillNavigation
 		items={navItems}
@@ -264,7 +211,7 @@
 		onCollapsedChange={handleCollapsedChange}
 		desktopPosition="bottom"
 		showThemeToggle={true}
-		showLogout={authStore.isAuthenticated}
+		showLogout={true}
 		onLogout={handleSignOut}
 		loginHref="/login"
 		primaryColor="#8b5cf6"
@@ -289,34 +236,12 @@
 	/>
 
 	<!-- Main Content -->
-	<main
-		class="main-content bg-background"
-		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:has-banner={!authStore.isAuthenticated}
-	>
+	<main class="main-content bg-background" class:sidebar-mode={isSidebarMode && !isCollapsed}>
 		<div class="content-wrapper">
 			{@render children()}
 		</div>
 	</main>
 </div>
-
-<!-- Guest Welcome Modal -->
-<GuestWelcomeModal
-	appId="questions"
-	visible={showGuestWelcome}
-	onClose={() => (showGuestWelcome = false)}
-	onLogin={() => {
-		showGuestWelcome = false;
-		goto('/login');
-	}}
-	onRegister={() => {
-		showGuestWelcome = false;
-		goto('/register');
-	}}
-	helpHref="/help"
-	locale="en"
-	features={guestFeatures}
-/>
 
 <style>
 	.layout-container {
@@ -326,12 +251,6 @@
 		overflow: hidden;
 	}
 
-	/* Guest banner styling */
-	.guest-banner {
-		height: 40px;
-		min-height: 40px;
-	}
-
 	.main-content {
 		flex: 1;
 		display: flex;
@@ -339,10 +258,6 @@
 		min-height: 0;
 		padding-bottom: calc(80px + env(safe-area-inset-bottom));
 		transition: all 300ms ease;
-	}
-
-	.main-content.has-banner {
-		padding-top: 40px;
 	}
 
 	.main-content.sidebar-mode {
@@ -371,10 +286,6 @@
 	@media (max-width: 640px) {
 		.main-content {
 			padding-bottom: calc(150px + env(safe-area-inset-bottom));
-		}
-
-		.main-content.has-banner {
-			padding-top: 40px;
 		}
 
 		.content-wrapper {

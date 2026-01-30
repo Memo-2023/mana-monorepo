@@ -46,12 +46,6 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
-	import {
-		AuthGateModal,
-		GuestWelcomeModal,
-		shouldShowGuestWelcome,
-	} from '@manacore/shared-auth-ui';
-	import { browser } from '$app/environment';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -216,31 +210,6 @@
 		goto('/login');
 	}
 
-	// Auth gate modal state
-	let showAuthGateModal = $state(false);
-	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
-
-	// Guest welcome modal state
-	let showGuestWelcome = $state(false);
-
-	// Show auth gate modal (can be called from child components)
-	function showAuthGate(action: 'save' | 'sync' | 'feature' = 'save') {
-		authGateAction = action;
-		showAuthGateModal = true;
-	}
-
-	// Listen for show-auth-gate events from child components
-	$effect(() => {
-		if (browser) {
-			const handler = (e: Event) => {
-				const customEvent = e as CustomEvent<{ action?: 'save' | 'sync' | 'feature' }>;
-				showAuthGate(customEvent.detail?.action || 'save');
-			};
-			window.addEventListener('show-auth-gate', handler);
-			return () => window.removeEventListener('show-auth-gate', handler);
-		}
-	});
-
 	async function handleCloseContactModal() {
 		// Refresh contacts list in case something was changed
 		await contactsStore.loadContacts();
@@ -301,6 +270,13 @@
 	}
 
 	onMount(async () => {
+		// Initialize auth and redirect if not authenticated
+		await authStore.initialize();
+		if (!authStore.isAuthenticated) {
+			goto('/login');
+			return;
+		}
+
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
@@ -309,13 +285,7 @@
 		viewModeStore.initialize();
 		contactsFilterStore.initialize();
 
-		// Show guest welcome modal for unauthenticated users
-		if (!authStore.isAuthenticated && shouldShowGuestWelcome('contacts')) {
-			showGuestWelcome = true;
-		}
-
-		// Only fetch user data if authenticated
-		if (authStore.isAuthenticated) {
+		// Fetch user data
 			// Load user settings and tags
 			await userSettings.load();
 
@@ -357,41 +327,6 @@
 <SplitPaneContainer>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
-		<!-- Demo Mode Banner -->
-		{#if !authStore.isAuthenticated}
-			<div
-				class="guest-banner bg-primary/10 border-primary/20 fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b px-4 py-2"
-			>
-				<div class="flex items-center gap-2 text-sm">
-					<svg class="text-primary h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-						/>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-						/>
-					</svg>
-					<span class="text-foreground">
-						<strong>Demo-Modus</strong>
-						<span class="text-muted-foreground hidden sm:inline">
-							- Beispiel-Kontakte zum Ausprobieren
-						</span>
-					</span>
-				</div>
-				<button
-					onclick={() => showAuthGate('save')}
-					class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm font-medium transition-colors"
-				>
-					Anmelden
-				</button>
-			</div>
-		{/if}
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !contactsSettings.immersiveModeEnabled}
 			<!-- Floating/Sidebar Pill Navigation (at bottom) -->
@@ -416,7 +351,7 @@
 				showLanguageSwitcher={true}
 				{languageItems}
 				{currentLanguageLabel}
-				showLogout={authStore.isAuthenticated}
+				showLogout={true}
 				onLogout={handleLogout}
 				loginHref="/login"
 				primaryColor="#3b82f6"
@@ -482,58 +417,7 @@
 	</div>
 </SplitPaneContainer>
 
-<!-- Auth Gate Modal -->
-<AuthGateModal
-	visible={showAuthGateModal}
-	onClose={() => (showAuthGateModal = false)}
-	onLogin={() => {
-		showAuthGateModal = false;
-		if (typeof sessionStorage !== 'undefined') {
-			sessionStorage.setItem('auth-return-url', window.location.pathname);
-		}
-		goto('/login');
-	}}
-	onRegister={() => {
-		showAuthGateModal = false;
-		if (typeof sessionStorage !== 'undefined') {
-			sessionStorage.setItem('auth-return-url', window.location.pathname);
-		}
-		goto('/register');
-	}}
-	action={authGateAction}
-	locale={currentLocale === 'en' ? 'en' : 'de'}
-	infoText="Im Demo-Modus werden Beispielkontakte angezeigt. Melde dich an, um eigene Kontakte zu erstellen."
-/>
-
-<!-- Guest Welcome Modal -->
-<GuestWelcomeModal
-	appId="contacts"
-	visible={showGuestWelcome}
-	onClose={() => (showGuestWelcome = false)}
-	onLogin={() => {
-		showGuestWelcome = false;
-		goto('/login');
-	}}
-	onRegister={() => {
-		showGuestWelcome = false;
-		goto('/register');
-	}}
-	helpHref="/help"
-	locale={currentLocale === 'en' ? 'en' : 'de'}
-/>
-
 <style>
-	/* Guest banner styling */
-	.guest-banner {
-		height: 40px;
-		min-height: 40px;
-	}
-
-	/* Offset content when guest banner is visible */
-	.layout-container:has(.guest-banner) .main-content {
-		padding-top: 40px;
-	}
-
 	.layout-container {
 		display: flex;
 		flex-direction: column;

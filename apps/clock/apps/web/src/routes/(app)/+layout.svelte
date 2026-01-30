@@ -33,8 +33,6 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { alarmsApi } from '$lib/api/alarms';
 	import { timersApi } from '$lib/api/timers';
-	import AuthGateModal from '$lib/components/AuthGateModal.svelte';
-	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('clock');
@@ -119,20 +117,6 @@
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
-	// Guest mode state
-	let showAuthGateModal = $state(false);
-	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
-
-	// Guest welcome modal state
-	let showGuestWelcome = $state(false);
-
-	// Check if in guest mode
-	let isGuestMode = $derived(!authStore.isAuthenticated);
-	let sessionItemCount = $derived(sessionAlarmsStore.count + sessionTimersStore.count);
-
-	// Language for GuestWelcomeModal
-	let currentLocale = $derived($locale || 'de');
-
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
 
@@ -195,7 +179,7 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation items filtered by visibility settings (with fallback for guest mode)
+	// Navigation items filtered by visibility settings
 	const navItems = $derived(
 		filterHiddenNavItems('clock', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
@@ -259,6 +243,13 @@
 	}
 
 	onMount(async () => {
+		// Initialize auth and redirect if not authenticated
+		await authStore.initialize();
+		if (!authStore.isAuthenticated) {
+			goto('/login');
+			return;
+		}
+
 		// Initialize sidebar mode from localStorage
 		const savedSidebar = localStorage.getItem('clock-nav-sidebar');
 		if (savedSidebar === 'true') {
@@ -273,49 +264,28 @@
 			collapsedStore.set(true);
 		}
 
-		// Show guest welcome modal for unauthenticated users
-		if (!authStore.isAuthenticated && shouldShowGuestWelcome('clock')) {
-			showGuestWelcome = true;
+		// Load user settings
+		await userSettings.load();
+
+		// Check for session data to migrate
+		if (alarmsStore.hasSessionAlarms) {
+			await alarmsStore.migrateSessionAlarms();
+		}
+		if (timersStore.hasSessionTimers) {
+			await timersStore.migrateSessionTimers();
 		}
 
-		// Load user settings if authenticated
-		if (authStore.isAuthenticated) {
-			await userSettings.load();
-
-			// Check for session data to migrate
-			if (alarmsStore.hasSessionAlarms) {
-				await alarmsStore.migrateSessionAlarms();
-			}
-			if (timersStore.hasSessionTimers) {
-				await timersStore.migrateSessionTimers();
-			}
-
-			// Redirect to start page if on root and a custom start page is set
-			const currentPath = window.location.pathname;
-			if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
-				goto(userSettings.startPage, { replaceState: true });
-			}
+		// Redirect to start page if on root and a custom start page is set
+		const currentPath = window.location.pathname;
+		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+			goto(userSettings.startPage, { replaceState: true });
 		}
 	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<!-- Guest Mode Banner -->
-{#if isGuestMode}
-	<div class="guest-banner">
-		<span>
-			Du bist im Gast-Modus.
-			{#if sessionItemCount > 0}
-				{sessionItemCount}
-				{sessionItemCount === 1 ? 'Element' : 'Elemente'} in dieser Session.
-			{/if}
-		</span>
-		<button onclick={() => goto('/login')}>Anmelden</button>
-	</div>
-{/if}
-
-<div class="layout-container" class:has-guest-banner={isGuestMode}>
+<div class="layout-container">
 	<PillNavigation
 		items={navItems}
 		currentPath={$page.url.pathname}
@@ -337,7 +307,7 @@
 		showLanguageSwitcher={true}
 		{languageItems}
 		{currentLanguageLabel}
-		showLogout={authStore.isAuthenticated}
+		showLogout={true}
 		onLogout={handleLogout}
 		loginHref="/login"
 		primaryColor="#f59e0b"
@@ -371,74 +341,13 @@
 		emptyText="Keine Ergebnisse"
 		searchingText="Suche..."
 	/>
-
-	<!-- Auth Gate Modal -->
-	<AuthGateModal
-		open={showAuthGateModal}
-		action={authGateAction}
-		itemCount={sessionItemCount}
-		onClose={() => (showAuthGateModal = false)}
-	/>
-
-	<!-- Guest Welcome Modal -->
-	<GuestWelcomeModal
-		appId="clock"
-		visible={showGuestWelcome}
-		onClose={() => (showGuestWelcome = false)}
-		onLogin={() => {
-			showGuestWelcome = false;
-			goto('/login');
-		}}
-		onRegister={() => {
-			showGuestWelcome = false;
-			goto('/register');
-		}}
-		helpHref="/help"
-		locale={currentLocale === 'en' ? 'en' : 'de'}
-	/>
 </div>
 
 <style>
-	.guest-banner {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		z-index: 60;
-		background-color: #f59e0b;
-		color: white;
-		padding: 0.5rem 1rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-		font-size: 0.875rem;
-	}
-
-	.guest-banner button {
-		background-color: white;
-		color: #f59e0b;
-		padding: 0.25rem 0.75rem;
-		border-radius: 0.375rem;
-		font-weight: 500;
-		font-size: 0.875rem;
-		border: none;
-		cursor: pointer;
-		transition: background-color 0.15s;
-	}
-
-	.guest-banner button:hover {
-		background-color: #fef3c7;
-	}
-
 	.layout-container {
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
-	}
-
-	.layout-container.has-guest-banner {
-		padding-top: 40px;
 	}
 
 	.main-content {
