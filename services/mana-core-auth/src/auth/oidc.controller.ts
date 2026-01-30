@@ -45,6 +45,9 @@ export class OidcController {
 	 */
 	@Get('api/auth/oauth2/authorize')
 	async authorizeOauth2(@Req() req: Request, @Res() res: Response) {
+		console.log('[OIDC Authorize] URL:', req.originalUrl);
+		console.log('[OIDC Authorize] Query:', req.query);
+		console.log('[OIDC Authorize] redirect_uri:', req.query.redirect_uri);
 		return this.handleOidcRequest(req, res);
 	}
 
