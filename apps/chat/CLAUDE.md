@@ -135,11 +135,17 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 
 ## AI Models Available
 
-### Local Models (Ollama - Free)
+### Local Models (Ollama - Free, runs on Mac Mini)
 
-| Model ID | Name | Provider | Best For |
-| -------- | ---- | -------- | -------- |
-| ...440101 | Gemma 3 4B (Lokal) | ollama | Everyday tasks (default) - runs on Mac Mini |
+| Model ID | Name | Best For |
+| -------- | ---- | -------- |
+| ...440101 | Gemma 3 4B (Lokal) | Everyday tasks (default) |
+| ...440102 | Qwen2.5 Coder 7B (Lokal) | Code generation (92.7% HumanEval) |
+| ...440103 | LLaVA 7B Vision (Lokal) | Image/screenshot analysis |
+| ...440104 | Qwen3 VL 4B (Lokal) | Fast image analysis |
+| ...440105 | DeepSeek OCR (Lokal) | Text recognition in images |
+| ...440106 | Phi 3.5 (Lokal) | Compact, efficient |
+| ...440107 | Ministral 3B (Lokal) | Very fast, simple tasks |
 
 ### Cloud Models (OpenRouter - Paid)
 
@@ -151,6 +157,13 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 | ...440204 | Mistral Small | $0.10/M | General tasks |
 | ...440205 | Claude 3.5 Sonnet | $3/M | Best quality |
 | ...440206 | GPT-4o Mini | $0.15/M | Balanced performance |
+
+### Adding New Local Models
+
+```bash
+# Add new models to existing database
+pnpm --filter @chat/backend db:add-local-models
+```
 
 ## Quick Start
 
