@@ -31,6 +31,7 @@
 	},
 	"dependencies": {
 		"@chat/types": "workspace:*",
+		"@manacore/shared-api-client": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
@@ -39,6 +40,7 @@
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
+		"@manacore/shared-stores": "workspace:*",
 		"@manacore/shared-subscription-ui": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",

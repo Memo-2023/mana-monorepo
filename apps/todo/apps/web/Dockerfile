@@ -40,6 +40,8 @@ COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-tags ./packages/shared-tags
 COPY packages/shared-vite-config ./packages/shared-vite-config
+COPY packages/shared-api-client ./packages/shared-api-client
+COPY packages/shared-stores ./packages/shared-stores
 
 # Copy todo packages and web
 COPY apps/todo/packages ./apps/todo/packages
