@@ -23,12 +23,28 @@ export class OidcLoginController {
 	 */
 	@Get('login')
 	async getLoginPage(@Query() query: Record<string, string>, @Res() res: Response) {
-		const queryString = new URLSearchParams(query).toString();
-		const returnUrl = queryString ? `/api/auth/oauth2/authorize?${queryString}` : '/';
+		// Handle returnUrl parameter (when redirected from authorization endpoint)
+		let returnUrl = query.returnUrl || '/';
+		let clientId = query.client_id;
+
+		// If no direct client_id but we have returnUrl, extract client_id from it
+		if (!clientId && query.returnUrl) {
+			try {
+				const returnUrlParams = new URLSearchParams(query.returnUrl.split('?')[1] || '');
+				clientId = returnUrlParams.get('client_id') || undefined;
+			} catch {
+				// Ignore parsing errors
+			}
+		}
+
+		// If no returnUrl was provided, build one from query params (direct OIDC flow)
+		if (!query.returnUrl && Object.keys(query).length > 0) {
+			const queryString = new URLSearchParams(query).toString();
+			returnUrl = `/api/auth/oauth2/authorize?${queryString}`;
+		}
 
 		// Get client name for display
-		const clientId = query.client_id || 'Unknown';
-		const clientName = this.getClientDisplayName(clientId);
+		const clientName = this.getClientDisplayName(clientId || 'Unknown');
 
 		const html = `
 <!DOCTYPE html>
