@@ -41,6 +41,7 @@ COPY packages/shared-tags ./packages/shared-tags
 COPY packages/shared-splitscreen ./packages/shared-splitscreen
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
+COPY packages/shared-stores ./packages/shared-stores
 
 # Copy calendar packages and web
 COPY apps/calendar/packages ./apps/calendar/packages
