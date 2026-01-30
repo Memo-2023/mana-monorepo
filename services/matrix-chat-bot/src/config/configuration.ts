@@ -1,5 +1,5 @@
 export default () => ({
-	port: parseInt(process.env.PORT, 10) || 3327,
+	port: parseInt(process.env.PORT || '3327', 10),
 	matrix: {
 		homeserverUrl: process.env.MATRIX_HOMESERVER_URL || 'http://localhost:8008',
 		accessToken: process.env.MATRIX_ACCESS_TOKEN,

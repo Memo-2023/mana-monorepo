@@ -93,10 +93,10 @@ export class SessionService {
 	}
 
 	// Current conversation management
-	setCurrentConversation(matrixUserId: string, conversationId: string): void {
+	setCurrentConversation(matrixUserId: string, conversationId: string | null): void {
 		const session = this.sessions.get(matrixUserId);
 		if (session) {
-			session.currentConversationId = conversationId;
+			session.currentConversationId = conversationId || undefined;
 		}
 	}
 

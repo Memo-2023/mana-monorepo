@@ -33,8 +33,8 @@ export class MatrixService implements OnModuleInit {
 			return;
 		}
 
-		const storage = new SimpleFsStorageProvider(storagePath);
-		this.client = new MatrixClient(homeserverUrl, accessToken, storage);
+		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
+		this.client = new MatrixClient(homeserverUrl || 'http://localhost:8008', accessToken, storage);
 		AutojoinRoomsMixin.setupOnClient(this.client);
 
 		this.client.on('room.message', this.handleMessage.bind(this));
@@ -245,9 +245,9 @@ export class MatrixService implements OnModuleInit {
 			return `Fehler: ${result.error}`;
 		}
 
-		let response = result.data.content;
-		if (result.data.usage) {
-			response += `\n\n_Tokens: ${result.data.usage.total_tokens}_`;
+		let response = result.data!.content;
+		if (result.data!.usage) {
+			response += `\n\n_Tokens: ${result.data!.usage.total_tokens}_`;
 		}
 		return response;
 	}
@@ -279,8 +279,8 @@ export class MatrixService implements OnModuleInit {
 			return `Fehler: ${result.error}`;
 		}
 
-		this.sessionService.setCurrentConversation(sender, result.data.id);
-		return `Neues Gespraech erstellt: **${result.data.title}**\nNutze \`!senden [nachricht]\` um zu chatten.`;
+		this.sessionService.setCurrentConversation(sender, result.data!.id);
+		return `Neues Gespraech erstellt: **${result.data!.title}**\nNutze \`!senden [nachricht]\` um zu chatten.`;
 	}
 
 	private async handleListConversations(sender: string): Promise<string> {
@@ -342,7 +342,7 @@ export class MatrixService implements OnModuleInit {
 				return `Fehler: ${result.error}`;
 			}
 
-			return this.formatConversationDetails(result.data);
+			return this.formatConversationDetails(result.data!);
 		}
 
 		const number = parseInt(numberStr, 10);
@@ -361,7 +361,7 @@ export class MatrixService implements OnModuleInit {
 		}
 
 		this.sessionService.setCurrentConversation(sender, conversationId);
-		return `Gespraech ausgewaehlt: **${result.data.title}**\n\n${this.formatConversationDetails(result.data)}`;
+		return `Gespraech ausgewaehlt: **${result.data!.title}**\n\n${this.formatConversationDetails(result.data!)}`;
 	}
 
 	private formatConversationDetails(conv: Conversation): string {
@@ -413,17 +413,17 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 		}));
 
 		// Get AI response
-		const completionResult = await this.chatService.createCompletion(token, messages, convResult.data.modelId);
+		const completionResult = await this.chatService.createCompletion(token, messages, convResult.data!.modelId);
 		if (completionResult.error) {
 			return `Fehler bei AI-Antwort: ${completionResult.error}`;
 		}
 
 		// Save assistant response
-		await this.chatService.addMessage(token, conversationId, completionResult.data.content, 'assistant');
+		await this.chatService.addMessage(token, conversationId, completionResult.data!.content, 'assistant');
 
-		let response = completionResult.data.content;
-		if (completionResult.data.usage) {
-			response += `\n\n_Tokens: ${completionResult.data.usage.total_tokens}_`;
+		let response = completionResult.data!.content;
+		if (completionResult.data!.usage) {
+			response += `\n\n_Tokens: ${completionResult.data!.usage.total_tokens}_`;
 		}
 		return response;
 	}
@@ -499,7 +499,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return `Fehler: ${result.error}`;
 		}
 
-		return `Titel geaendert zu: **${result.data.title}**`;
+		return `Titel geaendert zu: **${result.data!.title}**`;
 	}
 
 	private async handleArchive(sender: string, numberStr: string): Promise<string> {
@@ -527,7 +527,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return `Fehler: ${result.error}`;
 		}
 
-		return `Gespraech **${result.data.title}** archiviert.`;
+		return `Gespraech **${result.data!.title}** archiviert.`;
 	}
 
 	private async handleListArchived(sender: string): Promise<string> {
@@ -586,7 +586,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return `Fehler: ${result.error}`;
 		}
 
-		return `Gespraech **${result.data.title}** wiederhergestellt.`;
+		return `Gespraech **${result.data!.title}** wiederhergestellt.`;
 	}
 
 	private async handlePin(sender: string, numberStr: string): Promise<string> {
@@ -614,7 +614,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return `Fehler: ${result.error}`;
 		}
 
-		return `Gespraech **${result.data.title}** angepinnt. 📌`;
+		return `Gespraech **${result.data!.title}** angepinnt. 📌`;
 	}
 
 	private async handleUnpin(sender: string, numberStr: string): Promise<string> {
@@ -642,7 +642,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return `Fehler: ${result.error}`;
 		}
 
-		return `Pin fuer **${result.data.title}** entfernt.`;
+		return `Pin fuer **${result.data!.title}** entfernt.`;
 	}
 
 	private async handleDelete(sender: string, numberStr: string): Promise<string> {
@@ -728,8 +728,8 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 				return 'Ausgewaehltes Modell nicht gefunden.';
 			}
 
-			const icon = BRANCH_ICONS[result.data.provider] || BRANCH_ICONS.default;
-			return `Aktuelles Modell: ${icon} **${result.data.name}**`;
+			const icon = BRANCH_ICONS[result.data!.provider] || BRANCH_ICONS.default;
+			return `Aktuelles Modell: ${icon} **${result.data!.name}**`;
 		}
 
 		const number = parseInt(numberStr, 10);
@@ -748,7 +748,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 		}
 
 		this.sessionService.setSelectedModel(sender, modelId);
-		const icon = BRANCH_ICONS[result.data.provider] || BRANCH_ICONS.default;
-		return `Modell gewaehlt: ${icon} **${result.data.name}**\nWird fuer neue Gespraeche und Quick-Chat verwendet.`;
+		const icon = BRANCH_ICONS[result.data!.provider] || BRANCH_ICONS.default;
+		return `Modell gewaehlt: ${icon} **${result.data!.name}**\nWird fuer neue Gespraeche und Quick-Chat verwendet.`;
 	}
 }

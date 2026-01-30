@@ -41,8 +41,8 @@ export class MatrixService implements OnModuleInit {
 			return;
 		}
 
-		const storage = new SimpleFsStorageProvider(storagePath);
-		this.client = new MatrixClient(homeserverUrl, accessToken, storage);
+		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
+		this.client = new MatrixClient(homeserverUrl || 'http://localhost:8008', accessToken, storage);
 
 		AutojoinRoomsMixin.setupOnClient(this.client);
 
