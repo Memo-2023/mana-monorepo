@@ -285,17 +285,15 @@
 		viewModeStore.initialize();
 		contactsFilterStore.initialize();
 
-		// Fetch user data
-			// Load user settings and tags
-			await userSettings.load();
+		// Load user settings and tags
+		await userSettings.load();
 
-			// Load tags for Quick-Create
-			try {
-				const tagsResult = await tagsApi.list();
-				availableTags = (tagsResult.tags || []).map((t) => ({ id: t.id, name: t.name }));
-			} catch (e) {
-				console.error('Failed to load tags:', e);
-			}
+		// Load tags for Quick-Create
+		try {
+			const tagsResult = await tagsApi.list();
+			availableTags = (tagsResult.tags || []).map((t) => ({ id: t.id, name: t.name }));
+		} catch (e) {
+			console.error('Failed to load tags:', e);
 		}
 
 		// Initialize sidebar mode from localStorage
