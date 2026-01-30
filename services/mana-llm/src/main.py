@@ -120,7 +120,7 @@ async def get_model(model_id: str) -> ModelInfo:
 
 
 # Chat completions endpoint
-@app.post("/v1/chat/completions")
+@app.post("/v1/chat/completions", response_model=None)
 async def chat_completions(
     request: ChatCompletionRequest,
     http_request: Request,

@@ -220,11 +220,21 @@ class OllamaProvider(LLMProvider):
         models = []
         for model_data in data.get("models", []):
             name = model_data.get("name", "")
+            # Parse modified_at datetime string to Unix timestamp
+            created = None
+            if modified_at := model_data.get("modified_at"):
+                try:
+                    from datetime import datetime
+                    # Handle ISO format with timezone
+                    dt = datetime.fromisoformat(modified_at.replace("Z", "+00:00"))
+                    created = int(dt.timestamp())
+                except (ValueError, TypeError):
+                    pass
             models.append(
                 ModelInfo(
                     id=f"ollama/{name}",
                     owned_by="ollama",
-                    created=int(model_data.get("modified_at", 0)) or None,
+                    created=created,
                 )
             )
         return models

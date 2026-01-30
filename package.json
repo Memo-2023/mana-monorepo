@@ -262,6 +262,8 @@
 		"dev:matrix:nutriphi": "pnpm --filter matrix-nutriphi-bot start:dev",
 		"build:matrix:mana": "pnpm --filter matrix-mana-bot build",
 		"build:matrix:all": "pnpm --filter 'matrix-*-bot' build",
+		"dev:llm-playground": "pnpm --filter @mana-llm/playground dev",
+		"build:llm-playground": "pnpm --filter @mana-llm/playground build",
 		"prepare": "husky"
 	},
 	"devDependencies": {

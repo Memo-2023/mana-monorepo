@@ -634,6 +634,14 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// LLM Playground (SvelteKit)
+	{
+		path: 'services/llm-playground/.env',
+		vars: {
+			PUBLIC_MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
+		},
+	},
+
 	// Zitare Telegram Bot
 	{
 		path: 'services/telegram-zitare-bot/.env',
