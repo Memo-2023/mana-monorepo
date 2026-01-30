@@ -37,6 +37,7 @@ COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/shared-vite-config ./packages/shared-vite-config
 
 # Copy chat packages
 COPY apps/chat/packages ./apps/chat/packages
@@ -46,6 +47,9 @@ COPY apps/chat/apps/web ./apps/chat/apps/web
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages that need building
+WORKDIR /app/packages/shared-vite-config
+RUN pnpm build
+
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 

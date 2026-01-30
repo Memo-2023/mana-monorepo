@@ -37,6 +37,7 @@ COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/shared-vite-config ./packages/shared-vite-config
 
 # Copy clock packages and web
 COPY apps/clock/packages ./apps/clock/packages
@@ -46,6 +47,9 @@ COPY apps/clock/apps/web ./apps/clock/apps/web
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages that need building
+WORKDIR /app/packages/shared-vite-config
+RUN pnpm build
+
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 

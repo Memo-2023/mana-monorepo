@@ -39,6 +39,7 @@ COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-tags ./packages/shared-tags
+COPY packages/shared-vite-config ./packages/shared-vite-config
 
 # Copy todo packages and web
 COPY apps/todo/packages ./apps/todo/packages
@@ -48,6 +49,9 @@ COPY apps/todo/apps/web ./apps/todo/apps/web
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages that need building
+WORKDIR /app/packages/shared-vite-config
+RUN pnpm build
+
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
