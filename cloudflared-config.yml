@@ -36,6 +36,12 @@ ingress:
   - hostname: nutriphi-api.mana.how
     service: http://localhost:3023
 
+  # LLM Services
+  - hostname: playground.mana.how
+    service: http://localhost:5190
+  - hostname: llm.mana.how
+    service: http://localhost:3025
+
   # Monitoring & Tools
   - hostname: grafana.mana.how
     service: http://localhost:3100

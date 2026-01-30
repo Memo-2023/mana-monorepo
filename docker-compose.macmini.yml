@@ -736,6 +736,37 @@ services:
       start_period: 40s
 
   # ============================================
+  # LLM Playground (Web)
+  # ============================================
+
+  llm-playground:
+    build:
+      context: .
+      dockerfile: services/llm-playground/Dockerfile
+    container_name: llm-playground
+    restart: unless-stopped
+    ports:
+      - "5190:5190"
+    environment:
+      - NODE_ENV=production
+      - PORT=5190
+      - PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
+      - PUBLIC_MANA_CORE_AUTH_URL_CLIENT=https://auth.mana.how
+      - PUBLIC_MANA_LLM_URL=http://host.docker.internal:3025
+      - PUBLIC_MANA_LLM_URL_CLIENT=https://llm.mana.how
+    depends_on:
+      mana-core-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5190/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ============================================
   # Monitoring Stack
   # ============================================
 

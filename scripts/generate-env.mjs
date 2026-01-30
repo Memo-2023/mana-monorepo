@@ -639,6 +639,7 @@ const APP_CONFIGS = [
 		path: 'services/llm-playground/.env',
 		vars: {
 			PUBLIC_MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL || 'http://localhost:3001',
 		},
 	},
 

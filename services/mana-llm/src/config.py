@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     cache_ttl: int = 3600
 
     # CORS
-    cors_origins: str = "http://localhost:5173,http://localhost:5190,https://mana.how"
+    cors_origins: str = "http://localhost:5173,http://localhost:5190,https://mana.how,https://playground.mana.how"
 
     @property
     def cors_origins_list(self) -> list[str]:

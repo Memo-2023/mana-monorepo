@@ -6,11 +6,21 @@ import type {
 	StreamChunk,
 } from '$lib/types';
 import { env } from '$env/dynamic/public';
+import { browser } from '$app/environment';
 
-const API_BASE = env.PUBLIC_MANA_LLM_URL || 'http://localhost:3025';
+function getApiBase(): string {
+	if (browser) {
+		return (
+			(window as unknown as { __PUBLIC_MANA_LLM_URL__?: string }).__PUBLIC_MANA_LLM_URL__ ||
+			env.PUBLIC_MANA_LLM_URL ||
+			'http://localhost:3025'
+		);
+	}
+	return env.PUBLIC_MANA_LLM_URL || 'http://localhost:3025';
+}
 
 export async function getHealth(): Promise<HealthResponse> {
-	const response = await fetch(`${API_BASE}/health`);
+	const response = await fetch(`${getApiBase()}/health`);
 	if (!response.ok) {
 		throw new Error(`Health check failed: ${response.statusText}`);
 	}
@@ -18,7 +28,7 @@ export async function getHealth(): Promise<HealthResponse> {
 }
 
 export async function getModels(): Promise<ModelsResponse> {
-	const response = await fetch(`${API_BASE}/v1/models`);
+	const response = await fetch(`${getApiBase()}/v1/models`);
 	if (!response.ok) {
 		throw new Error(`Failed to fetch models: ${response.statusText}`);
 	}
@@ -28,7 +38,7 @@ export async function getModels(): Promise<ModelsResponse> {
 export async function sendCompletion(
 	request: ChatCompletionRequest
 ): Promise<ChatCompletionResponse> {
-	const response = await fetch(`${API_BASE}/v1/chat/completions`, {
+	const response = await fetch(`${getApiBase()}/v1/chat/completions`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ ...request, stream: false }),
@@ -42,7 +52,7 @@ export async function sendCompletion(
 export async function* streamCompletion(
 	request: ChatCompletionRequest
 ): AsyncGenerator<string, void, unknown> {
-	const response = await fetch(`${API_BASE}/v1/chat/completions`, {
+	const response = await fetch(`${getApiBase()}/v1/chat/completions`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ ...request, stream: true }),

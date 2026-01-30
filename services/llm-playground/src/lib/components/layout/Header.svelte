@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getHealth } from '$lib/api/llm';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { onMount } from 'svelte';
 
 	let healthStatus = $state<'loading' | 'healthy' | 'error'>('loading');
@@ -74,6 +75,14 @@
 					d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
 				/>
 			</svg>
+		</button>
+		<button
+			onclick={() => authStore.signOut()}
+			class="rounded px-3 py-1.5 text-sm transition-colors hover:bg-white/10"
+			style="color: var(--color-text-muted);"
+			title="Abmelden"
+		>
+			Abmelden
 		</button>
 	</div>
 </header>
