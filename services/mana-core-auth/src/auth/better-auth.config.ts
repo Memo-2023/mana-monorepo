@@ -323,6 +323,17 @@ export function createBetterAuth(databaseUrl: string) {
 				metadata: {
 					issuer: process.env.BASE_URL || 'http://localhost:3001',
 				},
+				// Trusted clients that skip consent screen
+				// These clients are considered first-party and don't need user consent
+				trustedClients: [
+					{
+						clientId: 'matrix-synapse',
+						clientSecret: process.env.SYNAPSE_OIDC_CLIENT_SECRET || '',
+						name: 'Matrix Synapse',
+						redirectUrls: ['https://matrix.mana.how/_synapse/client/oidc/callback'],
+						skipConsent: true,
+					},
+				],
 			}),
 		],
 	});
