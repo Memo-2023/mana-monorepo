@@ -590,6 +590,9 @@
 	}
 
 	onMount(async () => {
+		// Initialize auth state from stored tokens
+		await authStore.initialize();
+
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
