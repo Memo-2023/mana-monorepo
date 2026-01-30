@@ -1,12 +1,11 @@
 {
-	"name": "@manacore/matrix-contacts-bot",
+	"name": "@mana-bots/matrix-contacts-bot",
 	"version": "1.0.0",
 	"description": "Matrix bot for contact management via Contacts backend",
 	"private": true,
+	"main": "dist/main.js",
 	"pnpm": {
-		"neverBuiltDependencies": [
-			"@matrix-org/matrix-sdk-crypto-nodejs"
-		],
+		"neverBuiltDependencies": ["@matrix-org/matrix-sdk-crypto-nodejs"],
 		"overrides": {
 			"@matrix-org/matrix-sdk-crypto-nodejs": "npm:empty-npm-package@1.0.0"
 		}
@@ -19,7 +18,7 @@
 		"build": "nest build",
 		"start": "nest start",
 		"start:dev": "nest start --watch",
-		"start:prod": "node dist/main",
+		"start:prod": "node dist/main.js",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
