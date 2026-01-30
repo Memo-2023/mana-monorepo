@@ -48,11 +48,23 @@ async function bootstrap() {
 		next();
 	});
 
-	// Security middleware - configure helmet to allow CORS
+	// Security middleware - configure helmet to allow CORS and inline scripts for login page
 	app.use(
 		helmet({
 			crossOriginResourcePolicy: { policy: 'cross-origin' },
 			crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+			contentSecurityPolicy: {
+				directives: {
+					defaultSrc: ["'self'"],
+					scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for login page
+					styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+					imgSrc: ["'self'", 'data:', 'https:'],
+					connectSrc: ["'self'"],
+					fontSrc: ["'self'"],
+					objectSrc: ["'none'"],
+					frameAncestors: ["'none'"],
+				},
+			},
 		})
 	);
 	app.use(cookieParser());
