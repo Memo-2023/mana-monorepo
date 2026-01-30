@@ -100,9 +100,10 @@ async function bootstrap() {
 			{ path: 'health', method: RequestMethod.ALL },
 			// OIDC login page
 			{ path: 'login', method: RequestMethod.ALL },
-			// Better Auth routes (verification emails, password reset)
+			// Better Auth routes (verification emails, password reset, sign-in)
 			{ path: 'api/auth/verify-email', method: RequestMethod.ALL },
 			{ path: 'api/auth/reset-password/(.*)', method: RequestMethod.ALL },
+			{ path: 'api/auth/sign-in/(.*)', method: RequestMethod.ALL },
 			// Better Auth OIDC/OAuth2 routes (native paths from discovery document)
 			{ path: 'api/auth/jwks', method: RequestMethod.ALL },
 			{ path: 'api/auth/oauth2/(.*)', method: RequestMethod.ALL },

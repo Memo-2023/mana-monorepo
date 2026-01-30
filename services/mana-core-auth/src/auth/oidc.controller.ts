@@ -80,6 +80,18 @@ export class OidcController {
 		return this.handleOidcRequest(req, res);
 	}
 
+	/**
+	 * Better Auth Sign-in Endpoint
+	 *
+	 * This endpoint is needed for OIDC login flow.
+	 * When users log in via the /login page, it posts to this endpoint
+	 * which sets the session cookie needed for the OAuth2 flow.
+	 */
+	@Post('api/auth/sign-in/email')
+	async signInEmail(@Req() req: Request, @Res() res: Response) {
+		return this.handleOidcRequest(req, res);
+	}
+
 	// ============================================
 	// Alternative /api/oidc/* paths
 	// For backwards compatibility and convenience

@@ -223,7 +223,8 @@ export class OidcLoginController {
             submitBtn.textContent = 'Signing in...';
 
             try {
-                const response = await fetch('/api/v1/auth/login', {
+                // Use Better Auth's native sign-in endpoint which sets session cookies
+                const response = await fetch('/api/auth/sign-in/email', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -232,13 +233,12 @@ export class OidcLoginController {
                     credentials: 'include',
                 });
 
-                const data = await response.json();
-
-                if (response.ok && data.accessToken) {
-                    // Login successful - redirect to authorization endpoint
-                    // The oidc_login_prompt cookie will be used to continue the flow
+                if (response.ok) {
+                    // Login successful - session cookie is now set
+                    // Redirect to authorization endpoint to continue OIDC flow
                     window.location.href = returnUrl;
                 } else {
+                    const data = await response.json().catch(() => ({}));
                     throw new Error(data.message || 'Invalid email or password');
                 }
             } catch (error) {
