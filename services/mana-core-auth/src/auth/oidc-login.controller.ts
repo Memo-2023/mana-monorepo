@@ -25,13 +25,13 @@ export class OidcLoginController {
 	async getLoginPage(@Query() query: Record<string, string>, @Res() res: Response) {
 		// Handle returnUrl parameter (when redirected from authorization endpoint)
 		let returnUrl = query.returnUrl || '/';
-		let clientId = query.client_id;
+		let clientId: string | undefined = query.client_id;
 
 		// If no direct client_id but we have returnUrl, extract client_id from it
 		if (!clientId && query.returnUrl) {
 			try {
 				const returnUrlParams = new URLSearchParams(query.returnUrl.split('?')[1] || '');
-				clientId = returnUrlParams.get('client_id') || undefined;
+				clientId = returnUrlParams.get('client_id') ?? undefined;
 			} catch {
 				// Ignore parsing errors
 			}
