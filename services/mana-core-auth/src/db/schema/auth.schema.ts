@@ -135,7 +135,7 @@ export const oauthApplications = authSchema.table('oauth_applications', {
 	metadata: text('metadata'),
 	clientId: text('client_id').unique().notNull(),
 	clientSecret: text('client_secret').notNull(),
-	redirectURLs: text('redirect_urls').notNull(), // Comma-separated URLs (Better Auth expects this format, NOT JSON)
+	redirectUrls: text('redirect_urls').notNull(), // Comma-separated URLs (Better Auth expects 'redirectUrls' property name)
 	type: text('type').notNull().default('web'), // web, native, spa
 	disabled: boolean('disabled').default(false).notNull(),
 	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),

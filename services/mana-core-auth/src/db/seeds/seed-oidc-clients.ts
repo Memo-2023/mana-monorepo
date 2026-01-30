@@ -63,7 +63,7 @@ async function seed() {
 			.set({
 				clientSecret: synapseClientSecret,
 				// Better Auth expects comma-separated string, NOT JSON array
-				redirectURLs: 'https://matrix.mana.how/_synapse/client/oidc/callback',
+				redirectUrls: 'https://matrix.mana.how/_synapse/client/oidc/callback',
 				updatedAt: new Date(),
 			})
 			.where(eq(oauthApplications.clientId, 'synapse'));
@@ -79,7 +79,7 @@ async function seed() {
 			clientId: 'synapse',
 			clientSecret: synapseClientSecret,
 			// Better Auth expects comma-separated string, NOT JSON array
-			redirectURLs: 'https://matrix.mana.how/_synapse/client/oidc/callback',
+			redirectUrls: 'https://matrix.mana.how/_synapse/client/oidc/callback',
 			type: 'web',
 			disabled: false,
 			metadata: JSON.stringify({
