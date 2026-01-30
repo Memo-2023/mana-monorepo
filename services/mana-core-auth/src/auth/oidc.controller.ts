@@ -89,7 +89,73 @@ export class OidcController {
 	 */
 	@Post('api/auth/sign-in/email')
 	async signInEmail(@Req() req: Request, @Res() res: Response) {
-		return this.handleOidcRequest(req, res);
+		return this.handleBetterAuthRequest(req, res);
+	}
+
+	/**
+	 * Handle Better Auth requests by forwarding to Better Auth's handler
+	 * This is a simpler handler that just passes through to Better Auth
+	 */
+	private async handleBetterAuthRequest(req: Request, res: Response) {
+		try {
+			const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
+			const url = new URL(req.originalUrl, baseUrl);
+
+			const headers = new Headers();
+			for (const [key, value] of Object.entries(req.headers)) {
+				if (value && typeof value === 'string') {
+					headers.set(key, value);
+				} else if (Array.isArray(value)) {
+					headers.set(key, value[0]);
+				}
+			}
+
+			// Create Fetch Request
+			const fetchRequest = new Request(url.toString(), {
+				method: req.method,
+				headers,
+				body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+			});
+
+			// Get Better Auth handler and call it directly
+			const handler = this.betterAuthService.getHandler();
+			const response = await handler(fetchRequest);
+
+			// Copy status
+			res.status(response.status);
+
+			// Copy headers including Set-Cookie for session
+			response.headers.forEach((value: string, key: string) => {
+				// Handle multiple Set-Cookie headers
+				if (key.toLowerCase() === 'set-cookie') {
+					res.append(key, value);
+				} else {
+					res.setHeader(key, value);
+				}
+			});
+
+			// Handle redirects
+			if (response.status === 302 || response.status === 301) {
+				const location = response.headers.get('location');
+				if (location) {
+					return res.redirect(response.status, location);
+				}
+			}
+
+			// Return body
+			const body = await response.text();
+			if (body) {
+				return res.send(body);
+			}
+
+			return res.end();
+		} catch (error) {
+			console.error('[BetterAuth] Error handling request:', error);
+			return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+				error: 'server_error',
+				error_description: 'Internal server error',
+			});
+		}
 	}
 
 	// ============================================

@@ -99,6 +99,14 @@ export class BetterAuthService {
 		return this.auth.api as unknown as BetterAuthAPI;
 	}
 
+	/**
+	 * Get the Better Auth handler for processing requests
+	 * Used by controllers that need to forward requests to Better Auth
+	 */
+	getHandler() {
+		return this.auth.handler;
+	}
+
 	constructor(
 		private configService: ConfigService,
 		@Optional()

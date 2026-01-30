@@ -190,6 +190,21 @@ export function createBetterAuth(databaseUrl: string) {
 		// Base URL for callbacks and redirects
 		baseURL: process.env.BASE_URL || 'http://localhost:3001',
 
+		// Trusted origins for cross-origin requests
+		trustedOrigins: [
+			'https://auth.mana.how',
+			'https://mana.how',
+			'https://mchat.mana.how',
+			'https://matrix.mana.how',
+			'https://chat.mana.how',
+			'https://calendar.mana.how',
+			'https://contacts.mana.how',
+			'https://picture.mana.how',
+			'https://zitare.mana.how',
+			'http://localhost:3001',
+			'http://localhost:5173',
+		],
+
 		// Plugins
 		plugins: [
 			/**
