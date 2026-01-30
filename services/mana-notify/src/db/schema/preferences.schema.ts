@@ -19,7 +19,7 @@ export const preferences = notifySchema.table(
 		userId: text('user_id').notNull(),
 
 		// Global settings
-		emailEnabled: boolean('email_enabled').notNull().default(true),
+		emailEnabled: boolean('email_enabled').notNull().default(false),
 		pushEnabled: boolean('push_enabled').notNull().default(true),
 
 		// Quiet hours

@@ -40,7 +40,7 @@ export class PreferencesService {
 			.insert(preferences)
 			.values({
 				userId,
-				emailEnabled: true,
+				emailEnabled: false,
 				pushEnabled: true,
 				quietHoursEnabled: false,
 				timezone: 'Europe/Berlin',
