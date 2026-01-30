@@ -1,7 +1,5 @@
 /**
  * Events Store - Manages calendar events using Svelte 5 runes
- * Authenticated users: events from API
- * Demo mode: static sample events to showcase the app
  */
 
 import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
@@ -9,8 +7,6 @@ import * as api from '$lib/api/events';
 import { format, isWithinInterval, isSameDay } from 'date-fns';
 import { toDate } from '$lib/utils/eventDateHelpers';
 import { toastStore } from '@manacore/shared-ui';
-import { authStore } from './auth.svelte';
-import { generateDemoEvents, isDemoEvent } from '$lib/data/demo-events';
 
 // State
 let events = $state<CalendarEvent[]>([]);
@@ -38,31 +34,11 @@ export const eventsStore = {
 
 	/**
 	 * Fetch events for a date range
-	 * Demo mode: shows static sample events
-	 * Authenticated: fetches from API
 	 */
 	async fetchEvents(startDate: Date, endDate: Date, calendarIds?: string[]) {
 		loading = true;
 		error = null;
 
-		// Demo mode: load demo events
-		if (!authStore.isAuthenticated) {
-			const demoEvents = generateDemoEvents();
-
-			// Filter demo events by date range
-			const filteredEvents = demoEvents.filter((event) => {
-				const eventStart = toDate(event.startTime);
-				const eventEnd = toDate(event.endTime);
-				return eventStart <= endDate && eventEnd >= startDate;
-			});
-
-			events = filteredEvents;
-			loadedRange = { start: startDate, end: endDate };
-			loading = false;
-			return { data: filteredEvents, error: null };
-		}
-
-		// Authenticated: fetch from API
 		const result = await api.getEvents({
 			startDate: format(startDate, "yyyy-MM-dd'T'HH:mm:ss"),
 			endDate: format(endDate, "yyyy-MM-dd'T'HH:mm:ss"),
@@ -137,16 +113,8 @@ export const eventsStore = {
 
 	/**
 	 * Create a new event
-	 * Demo mode: returns auth_required error
-	 * Authenticated: creates via API
 	 */
 	async createEvent(data: CreateEventInput) {
-		// Demo mode: require authentication
-		if (!authStore.isAuthenticated) {
-			return { data: null, error: { code: 'auth_required', message: 'Anmeldung erforderlich' } };
-		}
-
-		// Authenticated: create via API
 		const result = await api.createEvent(data);
 
 		if (result.data) {
@@ -158,16 +126,8 @@ export const eventsStore = {
 
 	/**
 	 * Update an event
-	 * Demo mode: returns auth_required error
-	 * Authenticated: updates via API
 	 */
 	async updateEvent(id: string, data: UpdateEventInput) {
-		// Demo event: require authentication
-		if (isDemoEvent(id) || !authStore.isAuthenticated) {
-			return { data: null, error: { code: 'auth_required', message: 'Anmeldung erforderlich' } };
-		}
-
-		// Cloud event: update via API
 		const result = await api.updateEvent(id, data);
 
 		if (result.error) {
@@ -181,16 +141,8 @@ export const eventsStore = {
 
 	/**
 	 * Delete an event (optimistic update)
-	 * Demo mode: returns auth_required error
-	 * Authenticated: deletes via API
 	 */
 	async deleteEvent(id: string) {
-		// Demo event: require authentication
-		if (isDemoEvent(id) || !authStore.isAuthenticated) {
-			return { data: null, error: { code: 'auth_required', message: 'Anmeldung erforderlich' } };
-		}
-
-		// Cloud event: delete via API
 		// Optimistic: remove event immediately
 		const eventToDelete = events.find((e) => e.id === id);
 		events = events.filter((e) => e.id !== id);
@@ -281,12 +233,5 @@ export const eventsStore = {
 	 */
 	isDraftEvent(eventId: string) {
 		return eventId === '__draft__';
-	},
-
-	/**
-	 * Check if an event is a demo event
-	 */
-	isDemoEvent(eventId: string) {
-		return isDemoEvent(eventId);
 	},
 };

@@ -5,7 +5,6 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import ViewCarousel from '$lib/components/calendar/ViewCarousel.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
@@ -24,20 +23,7 @@
 	// Generate a unique key for the overlay to force remount
 	let overlayKey = $state(0);
 
-	// Helper to show auth gate modal (dispatch event to layout)
-	function showAuthGate() {
-		if (browser) {
-			window.dispatchEvent(new CustomEvent('show-auth-gate', { detail: { action: 'save' } }));
-		}
-	}
-
 	function handleQuickCreate(date: Date, position: { x: number; y: number }) {
-		// Demo mode: show auth gate instead of creating event
-		if (!authStore.isAuthenticated) {
-			showAuthGate();
-			return;
-		}
-
 		// Close any existing overlay first
 		editingEvent = null;
 
@@ -60,12 +46,6 @@
 	}
 
 	function handleEventClick(event: CalendarEvent) {
-		// Demo mode: show auth gate for demo events
-		if (eventsStore.isDemoEvent(event.id)) {
-			showAuthGate();
-			return;
-		}
-
 		// Close any existing overlay/draft first
 		eventsStore.clearDraftEvent();
 
@@ -106,12 +86,6 @@
 	}
 
 	function handleVoiceEventCreate(event: CustomEvent<VoiceEventData>) {
-		// Demo mode: show auth gate instead of creating event
-		if (!authStore.isAuthenticated) {
-			showAuthGate();
-			return;
-		}
-
 		const data = event.detail;
 
 		// Close any existing overlay first

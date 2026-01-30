@@ -64,12 +64,10 @@
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
-	import { AuthGateModal } from '@manacore/shared-auth-ui';
 	import VoiceRecordButton from '$lib/components/voice/VoiceRecordButton.svelte';
 	import VoiceRecordingModal from '$lib/components/voice/VoiceRecordingModal.svelte';
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
-	import { GuestWelcomeModal, shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import type { CalendarViewType } from '@calendar/shared';
 
 	// App switcher items
@@ -539,31 +537,6 @@
 		}
 	});
 
-	// Auth gate modal state
-	let showAuthGateModal = $state(false);
-	let authGateAction = $state<'save' | 'sync' | 'feature'>('save');
-
-	// Guest welcome modal state
-	let showGuestWelcome = $state(false);
-
-	// Show auth gate modal (can be called from child components)
-	function showAuthGate(action: 'save' | 'sync' | 'feature' = 'save') {
-		authGateAction = action;
-		showAuthGateModal = true;
-	}
-
-	// Listen for show-auth-gate events from child components
-	$effect(() => {
-		if (browser) {
-			const handler = (e: Event) => {
-				const customEvent = e as CustomEvent<{ action?: 'save' | 'sync' | 'feature' }>;
-				showAuthGate(customEvent.detail?.action || 'save');
-			};
-			window.addEventListener('show-auth-gate', handler);
-			return () => window.removeEventListener('show-auth-gate', handler);
-		}
-	});
-
 	// Voice recording result handler
 	function handleVoiceResult(transcription: string) {
 		if (!browser) return;
@@ -593,25 +566,24 @@
 		// Initialize auth state from stored tokens
 		await authStore.initialize();
 
+		// Redirect to login if not authenticated
+		if (!authStore.isAuthenticated) {
+			goto('/login');
+			return;
+		}
+
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
 		// Initialize view state
 		viewStore.initialize();
 
-		// Show guest welcome modal for unauthenticated users
-		if (!authStore.isAuthenticated && shouldShowGuestWelcome('calendar')) {
-			showGuestWelcome = true;
-		}
-
-		// Load calendars and tags (works in both guest and authenticated mode)
+		// Load calendars and tags
 		await calendarsStore.fetchCalendars();
 
-		// Only fetch tags and user settings if authenticated
-		if (authStore.isAuthenticated) {
-			await eventTagsStore.fetchTags();
-			await userSettings.load();
-		}
+		// Fetch tags and user settings
+		await eventTagsStore.fetchTags();
+		await userSettings.load();
 
 		// Note: Birthdays are loaded via reactive $effect when showBirthdays is enabled
 
@@ -653,41 +625,6 @@
 
 <SplitPaneContainer>
 	<div class="layout-container">
-		<!-- Demo Mode Banner -->
-		{#if !authStore.isAuthenticated}
-			<div
-				class="guest-banner bg-primary/10 border-primary/20 fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b px-4 py-2"
-			>
-				<div class="flex items-center gap-2 text-sm">
-					<svg class="text-primary h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-						/>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-						/>
-					</svg>
-					<span class="text-foreground">
-						<strong>Demo-Modus</strong>
-						<span class="text-muted-foreground hidden sm:inline">
-							- Beispiel-Termine zum Ausprobieren
-						</span>
-					</span>
-				</div>
-				<button
-					onclick={() => showAuthGate('save')}
-					class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm font-medium transition-colors"
-				>
-					Anmelden
-				</button>
-			</div>
-		{/if}
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !settingsStore.immersiveModeEnabled}
 			<PillNavigation
@@ -863,45 +800,6 @@
 	{isSidebarMode}
 />
 
-<!-- Auth Gate Modal -->
-<AuthGateModal
-	visible={showAuthGateModal}
-	onClose={() => (showAuthGateModal = false)}
-	onLogin={() => {
-		showAuthGateModal = false;
-		if (typeof sessionStorage !== 'undefined') {
-			sessionStorage.setItem('auth-return-url', window.location.pathname);
-		}
-		goto('/login');
-	}}
-	onRegister={() => {
-		showAuthGateModal = false;
-		if (typeof sessionStorage !== 'undefined') {
-			sessionStorage.setItem('auth-return-url', window.location.pathname);
-		}
-		goto('/register');
-	}}
-	action={authGateAction}
-	locale={currentLocale === 'en' ? 'en' : 'de'}
-	infoText="Du kannst im Demo-Modus die Beispiel-Termine ansehen, aber keine eigenen erstellen."
-/>
-
-<!-- Guest Welcome Modal -->
-<GuestWelcomeModal
-	appId="calendar"
-	visible={showGuestWelcome}
-	onClose={() => (showGuestWelcome = false)}
-	onLogin={() => {
-		showGuestWelcome = false;
-		goto('/login');
-	}}
-	onRegister={() => {
-		showGuestWelcome = false;
-		goto('/register');
-	}}
-	helpHref="/help"
-	locale={currentLocale === 'en' ? 'en' : 'de'}
-/>
 
 <style>
 	.layout-container {
@@ -911,31 +809,12 @@
 		overflow: hidden;
 	}
 
-	/* Guest banner styling */
-	.guest-banner {
-		height: 40px;
-		min-height: 40px;
-	}
-
-	/* Offset content when guest banner is visible */
-	.layout-container:has(.guest-banner) {
-		padding-top: 40px;
-	}
-
-	/* Floating mode already has padding-top, no extra adjustment needed since container handles banner offset */
-
 	/* Mobile: Fixed viewport, no scroll */
 	@media (max-width: 768px) {
 		.layout-container {
 			height: 100vh;
 			max-height: 100vh;
 			overflow: hidden;
-		}
-
-		.layout-container:has(.guest-banner) {
-			height: calc(100vh - 40px);
-			margin-top: 40px;
-			padding-top: 0;
 		}
 	}
 
