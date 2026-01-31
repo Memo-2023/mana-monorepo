@@ -4,7 +4,7 @@ import { browser } from '$app/environment';
 const STORAGE_KEY = 'llm-playground-settings';
 
 const defaultSettings: Settings = {
-	model: 'ollama/llama3.2:3b',
+	model: 'ollama/gemma3:4b',
 	temperature: 0.7,
 	maxTokens: 2048,
 	topP: 1.0,

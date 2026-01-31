@@ -1,10 +1,18 @@
 <script lang="ts">
-	import { modelsStore } from '$lib/stores/models.svelte';
+	import { modelsStore, MODEL_METADATA } from '$lib/stores/models.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
 		modelsStore.loadModels();
+	});
+
+	// Get description for currently selected model
+	const selectedModelDescription = $derived(() => {
+		const modelName = settingsStore.model.includes('/')
+			? settingsStore.model.split('/').slice(1).join('/')
+			: settingsStore.model;
+		return MODEL_METADATA[modelName]?.description;
 	});
 </script>
 
@@ -48,8 +56,11 @@
 				</optgroup>
 			{/each}
 		</select>
-		<p class="mt-1.5 text-xs" style="color: var(--color-text-muted);">
-			{modelsStore.models.length} models available
-		</p>
+		<div class="mt-1.5 text-xs" style="color: var(--color-text-muted);">
+			{#if selectedModelDescription()}
+				<p class="mb-0.5">{selectedModelDescription()}</p>
+			{/if}
+			<p>{modelsStore.models.length} models available</p>
+		</div>
 	{/if}
 </div>

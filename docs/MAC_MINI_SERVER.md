@@ -428,6 +428,49 @@ Ollama läuft nativ auf dem Mac Mini für lokale LLM-Inferenz (Klassifizierung, 
 
 - **Chip:** Apple M4 (10 Cores)
 - **RAM:** 16 GB Unified Memory
+- **Interne SSD:** 228 GB
+- **Externe SSD:** 4 TB (TillJakob-S04)
+
+## Externe 4TB SSD
+
+Die externe SSD wird für große Dateien verwendet, um die interne SSD zu entlasten.
+
+### Mount-Punkt
+
+- **Volume:** `/Volumes/TillJakob-S04`
+- **Geschwindigkeit:** ~1 GB/s (USB-C/Thunderbolt)
+
+### Verzeichnisstruktur
+
+```
+/Volumes/TillJakob-S04/ManaData/
+├── ollama/          # LLM Modelle (~60 GB)
+├── stt-models/      # Speech-to-Text Modelle (~19 GB)
+├── flux2/           # FLUX.2 Bildgenerierung (~15 GB)
+├── backups/         # PostgreSQL Backups
+└── docker/          # (Optional) Docker Data
+```
+
+### Symlinks
+
+| Original | Symlink |
+|----------|---------|
+| `~/.ollama` | `/Volumes/TillJakob-S04/ManaData/ollama` |
+| `~/stt-models` | `/Volumes/TillJakob-S04/ManaData/stt-models` |
+| `~/flux2` | `/Volumes/TillJakob-S04/ManaData/flux2` |
+
+### SSD prüfen
+
+```bash
+# Mount-Status
+df -h /Volumes/TillJakob-S04
+
+# Nutzung
+du -sh /Volumes/TillJakob-S04/ManaData/*
+
+# Speed-Test
+dd if=/dev/zero of=/Volumes/TillJakob-S04/test bs=1m count=1024 && rm /Volumes/TillJakob-S04/test
+```
 
 ### Installation
 
@@ -445,11 +488,28 @@ Optimierungen bereits aktiviert:
 - `OLLAMA_FLASH_ATTENTION=1` - Schnellere Attention-Berechnung
 - `OLLAMA_KV_CACHE_TYPE=q8_0` - Effizienterer KV-Cache
 
+### Speicherort
+
+Die Modelle liegen auf der externen 4TB SSD für mehr Platz:
+- **Pfad:** `/Volumes/TillJakob-S04/ManaData/ollama/models`
+- **Symlink:** `~/.ollama -> /Volumes/TillJakob-S04/ManaData/ollama`
+
 ### Verfügbare Modelle
 
-| Modell | Größe | Zweck |
-|--------|-------|-------|
-| gemma3:4b | 3.3 GB | Klassifizierung, kurze Antworten |
+| Modell | Größe | Typ | Performance | Zweck |
+|--------|-------|-----|-------------|-------|
+| gemma3:4b | 3.3 GB | Text | ~53 t/s | Standard - schnell |
+| gemma3:12b | 8 GB | Text | ~30 t/s | Empfohlen - gute Balance |
+| gemma3:27b | 16 GB | Text | ~15 t/s | Beste Qualität |
+| phi3.5:latest | 2.2 GB | Text | ~60 t/s | Microsoft - kompakt |
+| ministral-3:3b | 3 GB | Text | ~55 t/s | Mistral Mini |
+| llava:7b | 4.7 GB | Vision | ~25 t/s | Bildverständnis |
+| qwen3-vl:4b | 3.3 GB | Vision | ~40 t/s | Vision-Language |
+| deepseek-ocr:latest | 6.7 GB | Vision | ~20 t/s | OCR & Dokumente |
+| qwen2.5-coder:7b | 4.7 GB | Code | ~35 t/s | Code-Generierung |
+| qwen2.5-coder:14b | 10 GB | Code | ~20 t/s | Erweiterte Code-Gen |
+
+Siehe [OLLAMA_MODELS.md](./OLLAMA_MODELS.md) für Details zum Hinzufügen neuer Modelle.
 
 ```bash
 # Modelle auflisten

@@ -42,6 +42,7 @@
 					class="flex cursor-pointer items-center gap-2 rounded p-2 transition-colors hover:bg-zinc-800"
 					class:opacity-50={isDisabled}
 					class:cursor-not-allowed={isDisabled}
+					title={model.description || ''}
 				>
 					<input
 						type="checkbox"
@@ -50,9 +51,16 @@
 						disabled={isDisabled}
 						class="rounded"
 					/>
-					<span class="truncate text-sm" style="color: var(--color-text);">
-						{getModelDisplayName(model.id)}
-					</span>
+					<div class="min-w-0 flex-1">
+						<span class="block truncate text-sm" style="color: var(--color-text);">
+							{getModelDisplayName(model.id)}
+						</span>
+						{#if model.description}
+							<span class="block truncate text-xs" style="color: var(--color-text-muted);">
+								{model.description}
+							</span>
+						{/if}
+					</div>
 				</label>
 			{/each}
 		</div>
