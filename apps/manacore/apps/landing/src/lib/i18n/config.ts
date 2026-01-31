@@ -35,6 +35,7 @@ export const ui = {
 		'nav.references': 'Referenzen',
 		'nav.privacy': 'Datenschutz',
 		'nav.devlog': 'Devlog',
+		'nav.blueprints': 'Blueprints',
 
 		// Buttons
 		'button.startFree': 'Kostenlos testen',
@@ -115,6 +116,7 @@ export const ui = {
 		'nav.references': 'References',
 		'nav.privacy': 'Privacy',
 		'nav.devlog': 'Devlog',
+		'nav.blueprints': 'Blueprints',
 
 		// Buttons
 		'button.startFree': 'Start for free',
@@ -194,6 +196,7 @@ export const ui = {
 		'nav.references': 'Referenze',
 		'nav.privacy': 'Privacy',
 		'nav.devlog': 'Devlog',
+		'nav.blueprints': 'Blueprints',
 
 		// Buttons
 		'button.startFree': 'Prova gratuita',
@@ -276,6 +279,7 @@ export const ui = {
 		'nav.references': 'Références',
 		'nav.privacy': 'Confidentialité',
 		'nav.devlog': 'Devlog',
+		'nav.blueprints': 'Blueprints',
 
 		// Buttons
 		'button.startFree': 'Essai gratuit',
@@ -360,6 +364,7 @@ export const ui = {
 		'nav.references': 'Referencias',
 		'nav.privacy': 'Privacidad',
 		'nav.devlog': 'Devlog',
+		'nav.blueprints': 'Blueprints',
 
 		// Buttons
 		'button.startFree': 'Prueba gratuita',

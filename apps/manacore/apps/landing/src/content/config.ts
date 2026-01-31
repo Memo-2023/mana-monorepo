@@ -157,6 +157,33 @@ const devlogCollection = defineCollection({
 	}),
 });
 
+const blueprintsCollection = defineCollection({
+	type: 'content',
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		date: z.date(),
+		author: z.string().default('Till Schneider'),
+		category: z.enum([
+			'architecture',
+			'infrastructure',
+			'database',
+			'security',
+			'federation',
+			'licensing',
+			'business-model',
+		]),
+		status: z
+			.enum(['draft', 'proposal', 'accepted', 'implemented', 'superseded'])
+			.default('proposal'),
+		tags: z.array(z.string()).optional(),
+		featured: z.boolean().default(false),
+		readTime: z.number().optional(),
+		relatedBlueprints: z.array(z.string()).optional(),
+		decisionDate: z.date().optional(),
+	}),
+});
+
 export const collections = {
 	apps: appsCollection,
 	branchen: targetGroupsCollection,
@@ -166,4 +193,5 @@ export const collections = {
 	mission: missionCollection,
 	context: contextCollection,
 	devlog: devlogCollection,
+	blueprints: blueprintsCollection,
 };
