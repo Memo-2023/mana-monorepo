@@ -35,16 +35,30 @@ This package provides **transport-agnostic** services that contain all business 
 
 ## Available Services
 
+### Business Logic Services
+
 | Service | Storage | Description |
 |---------|---------|-------------|
 | `TodoService` | File (JSON) | Task management with projects, priorities, dates |
 | `CalendarService` | File (JSON) | Events, calendars, reminders |
 | `AiService` | In-memory | Ollama LLM integration, chat sessions, vision |
 | `ClockService` | External API | Timers, alarms, world clocks |
-| `NutritionService` | Placeholder | Meal tracking (to be implemented) |
-| `QuotesService` | Placeholder | Daily quotes (to be implemented) |
-| `StatsService` | Placeholder | Analytics reports (to be implemented) |
-| `DocsService` | Placeholder | Documentation generation (to be implemented) |
+
+### Infrastructure Services
+
+| Service | Storage | Description |
+|---------|---------|-------------|
+| `SessionService` | In-memory | User authentication via mana-core-auth |
+| `TranscriptionService` | External API | Speech-to-text via mana-stt service |
+
+### Placeholder Services (to be implemented)
+
+| Service | Description |
+|---------|-------------|
+| `NutritionService` | Meal tracking |
+| `QuotesService` | Daily quotes |
+| `StatsService` | Analytics reports |
+| `DocsService` | Documentation generation |
 
 ## Usage
 
@@ -52,7 +66,14 @@ This package provides **transport-agnostic** services that contain all business 
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { TodoModule, CalendarModule, AiModule, ClockModule } from '@manacore/bot-services';
+import {
+  TodoModule,
+  CalendarModule,
+  AiModule,
+  ClockModule,
+  SessionModule,
+  TranscriptionModule,
+} from '@manacore/bot-services';
 
 @Module({
   imports: [
@@ -63,9 +84,57 @@ import { TodoModule, CalendarModule, AiModule, ClockModule } from '@manacore/bot
     // External services
     AiModule.register({ baseUrl: 'http://ollama:11434' }),
     ClockModule.register({ apiUrl: 'http://clock-backend:3017/api/v1' }),
+
+    // Infrastructure services (use ConfigService by default)
+    SessionModule.forRoot(),
+    TranscriptionModule.forRoot(),
   ],
 })
 export class AppModule {}
+```
+
+### Session Service (Authentication)
+
+```typescript
+import { SessionService } from '@manacore/bot-services';
+
+// Login a Matrix user
+const result = await sessionService.login(
+  '@user:matrix.org',
+  'email@example.com',
+  'password'
+);
+
+if (result.success) {
+  // Get token for API calls
+  const token = sessionService.getToken('@user:matrix.org');
+
+  // Check if logged in
+  const isLoggedIn = sessionService.isLoggedIn('@user:matrix.org');
+}
+
+// Logout
+sessionService.logout('@user:matrix.org');
+
+// Store custom session data
+sessionService.setSessionData('@user:matrix.org', 'currentConversationId', 'abc123');
+const convId = sessionService.getSessionData<string>('@user:matrix.org', 'currentConversationId');
+```
+
+### Transcription Service (Speech-to-Text)
+
+```typescript
+import { TranscriptionService } from '@manacore/bot-services';
+
+// Transcribe audio buffer
+const text = await transcriptionService.transcribe(audioBuffer, { language: 'de' });
+
+// Get full response with metadata
+const result = await transcriptionService.transcribeWithMetadata(audioBuffer);
+console.log(result.text, result.language, result.model);
+
+// Health check
+const isHealthy = await transcriptionService.checkHealth();
 ```
 
 ### Direct Service Usage
@@ -162,15 +231,86 @@ packages/bot-services/
 │   │   ├── utils.ts          # Utility functions
 │   │   └── index.ts
 │   ├── todo/
-│   │   ├── types.ts
-│   │   ├── todo.service.ts
-│   │   ├── todo.module.ts
-│   │   └── index.ts
 │   ├── calendar/
 │   ├── ai/
 │   ├── clock/
+│   ├── session/              # NEW: User authentication
+│   │   ├── types.ts
+│   │   ├── session.service.ts
+│   │   ├── session.module.ts
+│   │   └── index.ts
+│   ├── transcription/        # NEW: Speech-to-text
+│   │   ├── types.ts
+│   │   ├── transcription.service.ts
+│   │   ├── transcription.module.ts
+│   │   └── index.ts
 │   └── ...
 ├── package.json
 ├── tsconfig.json
 └── CLAUDE.md
 ```
+
+## Migrating Bots to Shared Services
+
+To migrate a bot from local services to shared services:
+
+### 1. Add dependency
+
+```bash
+# In package.json
+"dependencies": {
+  "@manacore/bot-services": "workspace:*",
+  ...
+}
+```
+
+### 2. Update module imports
+
+```typescript
+// bot.module.ts - BEFORE
+import { SessionModule } from '../session/session.module';
+import { TranscriptionModule } from '../transcription/transcription.module';
+
+@Module({
+  imports: [SessionModule, TranscriptionModule],
+})
+
+// bot.module.ts - AFTER
+import { SessionModule, TranscriptionModule } from '@manacore/bot-services';
+
+@Module({
+  imports: [SessionModule.forRoot(), TranscriptionModule.forRoot()],
+})
+```
+
+### 3. Update service imports
+
+```typescript
+// matrix.service.ts - BEFORE
+import { SessionService } from '../session/session.service';
+import { TranscriptionService } from '../transcription/transcription.service';
+
+// matrix.service.ts - AFTER
+import { SessionService, TranscriptionService } from '@manacore/bot-services';
+```
+
+### 4. Delete local modules
+
+```bash
+rm -rf src/session/
+rm -rf src/transcription/
+```
+
+### Migrated Bots
+
+| Bot | SessionService | TranscriptionService |
+|-----|----------------|---------------------|
+| matrix-todo-bot | - | ✅ |
+| matrix-picture-bot | ✅ | - |
+| matrix-clock-bot | - | ✅ |
+| matrix-zitare-bot | ✅ | ✅ |
+| matrix-chat-bot | TODO | - |
+| matrix-contacts-bot | TODO | - |
+| matrix-nutriphi-bot | TODO | TODO |
+| matrix-project-doc-bot | - | TODO |
+| ... | ... | ... |

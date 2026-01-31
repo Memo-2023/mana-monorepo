@@ -40,7 +40,12 @@ export type {
 } from './todo';
 
 // Calendar
-export { CalendarModule, CalendarModuleOptions, CalendarService, CALENDAR_STORAGE_PROVIDER } from './calendar';
+export {
+	CalendarModule,
+	CalendarModuleOptions,
+	CalendarService,
+	CALENDAR_STORAGE_PROVIDER,
+} from './calendar';
 export type {
 	CalendarEvent,
 	Calendar,
@@ -79,6 +84,23 @@ export type {
 	TimeTrackingSummary,
 } from './clock';
 
+// Session (User authentication via mana-core-auth)
+export {
+	SessionModule,
+	SessionService,
+	SESSION_MODULE_OPTIONS,
+	DEFAULT_SESSION_EXPIRY_MS,
+} from './session';
+export type { UserSession, LoginResult, SessionStats, SessionModuleOptions } from './session';
+
+// Transcription (Speech-to-Text via mana-stt)
+export { TranscriptionModule, TranscriptionService, STT_MODULE_OPTIONS } from './transcription';
+export type {
+	SttResponse,
+	TranscriptionOptions,
+	TranscriptionModuleOptions,
+} from './transcription';
+
 // ===== Placeholder Services (to be implemented) =====
 
 export { NutritionModule } from './nutrition';
@@ -96,7 +118,18 @@ export type { DocsServiceConfig, ProjectDoc } from './docs';
 // ===== Shared Utilities =====
 
 export { FileStorageProvider, MemoryStorageProvider } from './shared';
-export type { StorageProvider, BaseEntity, UserEntity, ServiceConfig, Result, PaginationOptions, PaginatedResult, DateRange, Priority, ServiceStats } from './shared';
+export type {
+	StorageProvider,
+	BaseEntity,
+	UserEntity,
+	ServiceConfig,
+	Result,
+	PaginationOptions,
+	PaginatedResult,
+	DateRange,
+	Priority,
+	ServiceStats,
+} from './shared';
 export {
 	generateId,
 	getTodayISO,

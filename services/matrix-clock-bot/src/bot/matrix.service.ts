@@ -9,7 +9,7 @@ import {
 import * as path from 'path';
 import * as fs from 'fs';
 import { ClockService, Timer, Alarm } from '../clock/clock.service';
-import { TranscriptionService } from '../transcription/transcription.service';
+import { TranscriptionService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
 
 // Natural language keywords

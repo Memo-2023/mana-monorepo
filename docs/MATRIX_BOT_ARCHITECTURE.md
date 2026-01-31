@@ -181,11 +181,15 @@ User → matrix-mana-bot → @manacore/bot-services → Multiple Backends
 Das Package `@manacore/bot-services` stellt transport-agnostische Geschäftslogik bereit:
 
 ```typescript
-// Exportierte Services
+// Business Logic Services
 export { TodoModule, TodoService } from './todo';
 export { CalendarModule, CalendarService } from './calendar';
 export { AiModule, AiService } from './ai';
 export { ClockModule, ClockService } from './clock';
+
+// Infrastructure Services (NEU: Konsolidiert aus 11+ Bots)
+export { SessionModule, SessionService } from './session';      // Auth via mana-core-auth
+export { TranscriptionModule, TranscriptionService } from './transcription'; // STT via mana-stt
 
 // Storage Provider (pluggable)
 export { FileStorageProvider } from './shared/storage/file-storage.provider';
@@ -195,6 +199,15 @@ export { MemoryStorageProvider } from './shared/storage/memory-storage.provider'
 export { generateId, getTodayISO, formatDateDE } from './shared/utils';
 export { parseGermanDateKeyword } from './shared/date-parser';
 ```
+
+### 3.1.1 Konsolidierte Services
+
+Die folgenden Services wurden aus den einzelnen Bots konsolidiert:
+
+| Service | Vorher | Nachher | Bots |
+|---------|--------|---------|------|
+| `SessionService` | 11x dupliziert | 1x in bot-services | picture, contacts, chat, zitare, ... |
+| `TranscriptionService` | 6x dupliziert | 1x in bot-services | todo, clock, zitare, nutriphi, ... |
 
 ### 3.2 TodoService
 

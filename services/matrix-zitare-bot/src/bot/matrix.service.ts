@@ -9,8 +9,7 @@ import {
 } from 'matrix-bot-sdk';
 import { QuotesService } from '../quotes/quotes.service';
 import { ZitareService } from '../quotes/zitare.service';
-import { SessionService } from '../session/session.service';
-import { TranscriptionService } from '../transcription/transcription.service';
+import { SessionService, TranscriptionService } from '@manacore/bot-services';
 import { HELP_MESSAGE, Category } from '../config/configuration';
 
 // Natural language keywords that trigger commands

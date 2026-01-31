@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MatrixService } from './matrix.service';
 import { QuotesModule } from '../quotes/quotes.module';
-import { SessionModule } from '../session/session.module';
-import { TranscriptionModule } from '../transcription/transcription.module';
+import { SessionModule, TranscriptionModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [QuotesModule, SessionModule, TranscriptionModule],
+	imports: [QuotesModule, SessionModule.forRoot(), TranscriptionModule.forRoot()],
 	providers: [MatrixService],
 	exports: [MatrixService],
 })

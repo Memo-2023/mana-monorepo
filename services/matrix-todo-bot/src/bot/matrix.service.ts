@@ -9,7 +9,7 @@ import {
 import * as path from 'path';
 import * as fs from 'fs';
 import { TodoService, Task } from '../todo/todo.service';
-import { TranscriptionService } from '../transcription/transcription.service';
+import { TranscriptionService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
 // Natural language keywords that trigger commands (German + English)

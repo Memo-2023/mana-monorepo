@@ -8,7 +8,7 @@ import {
 	LogLevel,
 } from 'matrix-bot-sdk';
 import { PictureService } from '../picture/picture.service';
-import { SessionService } from '../session/session.service';
+import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 // Natural language keywords that trigger commands

@@ -11,6 +11,8 @@
 		"./calendar": "./src/calendar/index.ts",
 		"./clock": "./src/clock/index.ts",
 		"./ai": "./src/ai/index.ts",
+		"./session": "./src/session/index.ts",
+		"./transcription": "./src/transcription/index.ts",
 		"./nutrition": "./src/nutrition/index.ts",
 		"./quotes": "./src/quotes/index.ts",
 		"./stats": "./src/stats/index.ts",
