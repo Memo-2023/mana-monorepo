@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { chatStore } from '$lib/stores/chat.svelte';
+	import type { ChatMessage, ComparisonMessage } from '$lib/types';
 	import MessageBubble from './MessageBubble.svelte';
+	import ComparisonMessageBubble from './ComparisonMessageBubble.svelte';
 
 	let scrollContainer: HTMLDivElement | undefined = $state();
 
@@ -15,11 +17,14 @@
 <div bind:this={scrollContainer} class="flex-1 overflow-y-auto p-4">
 	{#if chatStore.messages.length === 0}
 		<div class="flex h-full flex-col items-center justify-center">
-			<div
-				class="mb-4 rounded-full p-4"
-				style="background-color: var(--color-surface);"
-			>
-				<svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-text-muted);">
+			<div class="mb-4 rounded-full p-4" style="background-color: var(--color-surface);">
+				<svg
+					class="h-12 w-12"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					style="color: var(--color-text-muted);"
+				>
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -36,7 +41,11 @@
 	{:else}
 		<div class="space-y-4">
 			{#each chatStore.messages as message (message.id)}
-				<MessageBubble {message} />
+				{#if message.role === 'comparison'}
+					<ComparisonMessageBubble message={message as ComparisonMessage} />
+				{:else}
+					<MessageBubble message={message as ChatMessage} />
+				{/if}
 			{/each}
 		</div>
 	{/if}

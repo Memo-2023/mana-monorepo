@@ -2,7 +2,9 @@
 	import ModelSelector from '$lib/components/settings/ModelSelector.svelte';
 	import ParameterPanel from '$lib/components/settings/ParameterPanel.svelte';
 	import SystemPromptEditor from '$lib/components/settings/SystemPromptEditor.svelte';
+	import ModelComparisonSelector from '$lib/components/comparison/ModelComparisonSelector.svelte';
 	import { chatStore } from '$lib/stores/chat.svelte';
+	import { modelsStore } from '$lib/stores/models.svelte';
 
 	function handleExport() {
 		const data = chatStore.exportMessages();
@@ -34,6 +36,8 @@
 			<SystemPromptEditor />
 		</div>
 	</div>
+
+	<ModelComparisonSelector models={modelsStore.modelsWithModality} />
 
 	<div class="border-t p-4" style="border-color: var(--color-border);">
 		<div class="flex gap-2">

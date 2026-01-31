@@ -1,12 +1,23 @@
 <script lang="ts">
 	import { chatStore } from '$lib/stores/chat.svelte';
+	import { comparisonStore } from '$lib/stores/comparison.svelte';
 
 	let input = $state('');
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
 
+	const isComparisonReady = $derived(
+		comparisonStore.comparisonMode && comparisonStore.selectedModels.length >= 2
+	);
+
 	function handleSubmit() {
 		if (!input.trim() || chatStore.isStreaming) return;
-		chatStore.sendMessage(input);
+
+		if (isComparisonReady) {
+			chatStore.sendComparisonMessage(input);
+		} else {
+			chatStore.sendMessage(input);
+		}
+
 		input = '';
 		if (textareaEl) {
 			textareaEl.style.height = 'auto';

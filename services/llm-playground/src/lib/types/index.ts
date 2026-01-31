@@ -86,3 +86,40 @@ export interface Settings {
 }
 
 export type Provider = 'ollama' | 'openrouter' | 'groq' | 'together';
+
+// Modality types for model comparison
+export type Modality = 'text' | 'vision' | 'code';
+
+export interface ModelWithModality extends Model {
+	modality: Modality;
+	description?: string;
+}
+
+// Comparison response from a single model
+export interface ComparisonResponse {
+	modelId: string;
+	content: string;
+	isStreaming: boolean;
+	startTime: number;
+	endTime?: number;
+	metrics?: {
+		promptTokens: number;
+		completionTokens: number;
+		totalTokens: number;
+		durationMs: number;
+		tokensPerSecond: number;
+	};
+	error?: string;
+}
+
+// Comparison message containing multiple model responses
+export interface ComparisonMessage {
+	id: string;
+	role: 'comparison';
+	userContent: string;
+	responses: ComparisonResponse[];
+	timestamp: Date;
+}
+
+// Union type for all message types
+export type AnyMessage = ChatMessage | ComparisonMessage;
