@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { StorageService } from './storage.service';
-import { TranscriptionModule } from '../transcription/transcription.module';
+import { TranscriptionModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [TranscriptionModule],
+	imports: [TranscriptionModule.forRoot()],
 	providers: [MediaService, StorageService],
 	exports: [MediaService, StorageService],
 })

@@ -13,8 +13,7 @@ import {
 	DailySummary,
 	WeeklyStats,
 } from '../nutriphi/nutriphi.service';
-import { SessionService } from '../session/session.service';
-import { TranscriptionService } from '../transcription/transcription.service';
+import { SessionService, TranscriptionService } from '@manacore/bot-services';
 import { HELP_MESSAGE, MEAL_TYPE_LABELS } from '../config/configuration';
 
 // Natural language keywords that trigger commands (German + English)
@@ -136,11 +135,10 @@ Sag "hilfe" fur alle Befehle!`;
 
 		// Handle image messages
 		if (content.msgtype === 'm.image' && content.url) {
-			this.sessionService.setPendingImage(
-				event.sender,
-				content.url,
-				content.info?.mimetype || 'image/png'
-			);
+			this.sessionService.setSessionData(event.sender, 'pendingImage', {
+				url: content.url,
+				mimeType: content.info?.mimetype || 'image/png',
+			});
 			this.logger.log(`Image received from ${event.sender}`);
 			await this.sendMessage(
 				roomId,
@@ -298,7 +296,10 @@ Sag "hilfe" fur alle Befehle!`;
 			return;
 		}
 
-		const pendingImage = this.sessionService.getPendingImage(sender);
+		const pendingImage = this.sessionService.getSessionData<{ url: string; mimeType: string }>(
+			sender,
+			'pendingImage'
+		);
 
 		// If no image and no description, show help
 		if (!pendingImage && !description.trim()) {
@@ -319,7 +320,7 @@ Sag "hilfe" fur alle Befehle!`;
 				await this.sendMessage(roomId, 'Analysiere Bild...');
 				const imageData = await this.downloadMatrixImage(pendingImage.url);
 				result = await this.nutriphiService.analyzePhoto(imageData, pendingImage.mimeType, token);
-				this.sessionService.clearPendingImage(sender);
+				this.sessionService.setSessionData(sender, 'pendingImage', null);
 			} else {
 				// Analyze text
 				await this.sendMessage(roomId, `Analysiere: "${description}"...`);
@@ -634,7 +635,7 @@ Sag "hilfe" fur alle Befehle!`;
 		const backendHealthy = await this.nutriphiService.checkHealth();
 		const isLoggedIn = this.sessionService.isLoggedIn(sender);
 		const sessionCount = this.sessionService.getSessionCount();
-		const loggedInCount = this.sessionService.getLoggedInCount();
+		const loggedInCount = this.sessionService.getActiveSessionCount();
 
 		const statusText = `**NutriPhi Bot Status**
 

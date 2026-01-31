@@ -6,7 +6,7 @@ import {
 	AutojoinRoomsMixin,
 } from 'matrix-bot-sdk';
 import { PresiService, Deck, Theme, SlideContent } from '../presi/presi.service';
-import { SessionService } from '../session/session.service';
+import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()

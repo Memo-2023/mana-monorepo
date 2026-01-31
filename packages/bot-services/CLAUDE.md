@@ -309,8 +309,15 @@ rm -rf src/transcription/
 | matrix-picture-bot | ✅ | - |
 | matrix-clock-bot | - | ✅ |
 | matrix-zitare-bot | ✅ | ✅ |
-| matrix-chat-bot | TODO | - |
-| matrix-contacts-bot | TODO | - |
-| matrix-nutriphi-bot | TODO | TODO |
-| matrix-project-doc-bot | - | TODO |
-| ... | ... | ... |
+| matrix-chat-bot | ✅ | - |
+| matrix-contacts-bot | ✅ | - |
+| matrix-nutriphi-bot | ✅ | ✅ |
+| matrix-project-doc-bot | - | ✅ |
+| matrix-skilltree-bot | ✅ | - |
+| matrix-presi-bot | ✅ | - |
+| matrix-questions-bot | ✅ | - |
+| matrix-storage-bot | ✅ | - |
+| matrix-planta-bot | ✅ | - |
+| matrix-manadeck-bot | ✅ | - |
+
+**All bots with SessionService and TranscriptionService have been migrated.**

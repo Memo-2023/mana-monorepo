@@ -6,7 +6,7 @@ import {
 	AutojoinRoomsMixin,
 } from 'matrix-bot-sdk';
 import { StorageService, StorageFile, Folder, ShareLink, TrashItem } from '../storage/storage.service';
-import { SessionService } from '../session/session.service';
+import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 type ListItem = StorageFile | Folder;

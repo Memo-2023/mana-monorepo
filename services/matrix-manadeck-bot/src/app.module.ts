@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { HealthController } from './health.controller';
 import { BotModule } from './bot/bot.module';
 import { ManadeckModule } from './manadeck/manadeck.module';
-import { SessionModule } from './session/session.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -14,7 +13,6 @@ import configuration from './config/configuration';
 		}),
 		BotModule,
 		ManadeckModule,
-		SessionModule,
 	],
 	controllers: [HealthController],
 })

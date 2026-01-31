@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import { projectItems } from '../database/schema';
 import { StorageService } from './storage.service';
-import { TranscriptionService } from '../transcription/transcription.service';
+import { TranscriptionService } from '@manacore/bot-services';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import type * as schema from '../database/schema';
 

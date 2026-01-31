@@ -204,10 +204,12 @@ export { parseGermanDateKeyword } from './shared/date-parser';
 
 Die folgenden Services wurden aus den einzelnen Bots konsolidiert:
 
-| Service | Vorher | Nachher | Bots |
-|---------|--------|---------|------|
-| `SessionService` | 11x dupliziert | 1x in bot-services | picture, contacts, chat, zitare, ... |
-| `TranscriptionService` | 6x dupliziert | 1x in bot-services | todo, clock, zitare, nutriphi, ... |
+| Service | Vorher | Nachher | Migrierte Bots |
+|---------|--------|---------|----------------|
+| `SessionService` | 11x dupliziert | 1x in bot-services | picture, contacts, chat, zitare, skilltree, presi, questions, storage, planta, manadeck, nutriphi |
+| `TranscriptionService` | 6x dupliziert | 1x in bot-services | todo, clock, zitare, nutriphi, project-doc |
+
+**Status: Vollständig migriert** - Alle 11 Bots mit SessionService und alle 5 Bots mit TranscriptionService nutzen jetzt die gemeinsamen Services aus `@manacore/bot-services`.
 
 ### 3.2 TodoService
 

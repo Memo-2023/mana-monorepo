@@ -7,7 +7,7 @@ import {
 	RichReply,
 } from 'matrix-bot-sdk';
 import { ChatService, Model, Conversation, Message } from '../chat/chat.service';
-import { SessionService } from '../session/session.service';
+import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE, BRANCH_ICONS } from '../config/configuration';
 
 @Injectable()
@@ -21,6 +21,43 @@ export class MatrixService implements OnModuleInit {
 		private chatService: ChatService,
 		private sessionService: SessionService
 	) {}
+
+	// Session data helper methods (wrapping the generic setSessionData/getSessionData)
+	private getCurrentConversation(sender: string): string | null {
+		return this.sessionService.getSessionData<string>(sender, 'currentConversationId');
+	}
+
+	private setCurrentConversation(sender: string, conversationId: string | null): void {
+		this.sessionService.setSessionData(sender, 'currentConversationId', conversationId);
+	}
+
+	private getSelectedModel(sender: string): string | null {
+		return this.sessionService.getSessionData<string>(sender, 'selectedModelId');
+	}
+
+	private setSelectedModel(sender: string, modelId: string): void {
+		this.sessionService.setSessionData(sender, 'selectedModelId', modelId);
+	}
+
+	private setConversationMapping(sender: string, ids: string[]): void {
+		this.sessionService.setSessionData(sender, 'conversationMapping', ids);
+	}
+
+	private getConversationId(sender: string, number: number): string | null {
+		const ids = this.sessionService.getSessionData<string[]>(sender, 'conversationMapping');
+		if (!ids || number < 1 || number > ids.length) return null;
+		return ids[number - 1];
+	}
+
+	private setModelMapping(sender: string, ids: string[]): void {
+		this.sessionService.setSessionData(sender, 'modelMapping', ids);
+	}
+
+	private getModelId(sender: string, number: number): string | null {
+		const ids = this.sessionService.getSessionData<string[]>(sender, 'modelMapping');
+		if (!ids || number < 1 || number > ids.length) return null;
+		return ids[number - 1];
+	}
 
 	async onModuleInit() {
 		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
@@ -200,8 +237,8 @@ export class MatrixService implements OnModuleInit {
 
 	private handleStatus(sender: string): string {
 		const isLoggedIn = this.sessionService.isLoggedIn(sender);
-		const currentConv = this.sessionService.getCurrentConversation(sender);
-		const selectedModel = this.sessionService.getSelectedModel(sender);
+		const currentConv = this.getCurrentConversation(sender);
+		const selectedModel = this.getSelectedModel(sender);
 
 		let status = `**Bot Status**\n`;
 		status += `- Angemeldet: ${isLoggedIn ? 'Ja' : 'Nein'}\n`;
@@ -232,7 +269,7 @@ export class MatrixService implements OnModuleInit {
 			return 'Keine AI-Modelle verfuegbar.';
 		}
 
-		const selectedModelId = this.sessionService.getSelectedModel(sender);
+		const selectedModelId = this.getSelectedModel(sender);
 		const modelId = selectedModelId || modelsResult.data.find((m) => m.isDefault)?.id || modelsResult.data[0].id;
 
 		const result = await this.chatService.createCompletion(
@@ -265,7 +302,7 @@ export class MatrixService implements OnModuleInit {
 			return 'Keine AI-Modelle verfuegbar.';
 		}
 
-		const selectedModelId = this.sessionService.getSelectedModel(sender);
+		const selectedModelId = this.getSelectedModel(sender);
 		const modelId = selectedModelId || modelsResult.data.find((m) => m.isDefault)?.id || modelsResult.data[0].id;
 
 		const convTitle = title || `Matrix Chat ${new Date().toLocaleDateString('de-DE')}`;
@@ -279,7 +316,7 @@ export class MatrixService implements OnModuleInit {
 			return `Fehler: ${result.error}`;
 		}
 
-		this.sessionService.setCurrentConversation(sender, result.data!.id);
+		this.setCurrentConversation(sender, result.data!.id);
 		return `Neues Gespraech erstellt: **${result.data!.title}**\nNutze \`!senden [nachricht]\` um zu chatten.`;
 	}
 
@@ -305,12 +342,12 @@ export class MatrixService implements OnModuleInit {
 		});
 
 		// Store mapping
-		this.sessionService.setConversationMapping(
+		this.setConversationMapping(
 			sender,
 			sorted.map((c) => c.id)
 		);
 
-		const currentId = this.sessionService.getCurrentConversation(sender);
+		const currentId = this.getCurrentConversation(sender);
 
 		let response = '**Deine Gespraeche:**\n\n';
 		sorted.forEach((conv, index) => {
@@ -332,7 +369,7 @@ export class MatrixService implements OnModuleInit {
 
 		if (!numberStr) {
 			// Show current conversation
-			const currentId = this.sessionService.getCurrentConversation(sender);
+			const currentId = this.getCurrentConversation(sender);
 			if (!currentId) {
 				return 'Kein Gespraech ausgewaehlt. Nutze `!gespraeche` und dann `!gespraech [nr]`';
 			}
@@ -350,7 +387,7 @@ export class MatrixService implements OnModuleInit {
 			return 'Bitte eine gueltige Nummer angeben.';
 		}
 
-		const conversationId = this.sessionService.getConversationId(sender, number);
+		const conversationId = this.getConversationId(sender, number);
 		if (!conversationId) {
 			return 'Ungueltige Nummer. Nutze `!gespraeche` fuer eine aktuelle Liste.';
 		}
@@ -360,7 +397,7 @@ export class MatrixService implements OnModuleInit {
 			return `Fehler: ${result.error}`;
 		}
 
-		this.sessionService.setCurrentConversation(sender, conversationId);
+		this.setCurrentConversation(sender, conversationId);
 		return `Gespraech ausgewaehlt: **${result.data!.title}**\n\n${this.formatConversationDetails(result.data!)}`;
 	}
 
@@ -388,7 +425,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte zuerst anmelden mit `!login email passwort`';
 		}
 
-		const conversationId = this.sessionService.getCurrentConversation(sender);
+		const conversationId = this.getCurrentConversation(sender);
 		if (!conversationId) {
 			return 'Kein Gespraech ausgewaehlt. Nutze `!gespraeche` und `!gespraech [nr]` oder `!neu [titel]`';
 		}
@@ -434,12 +471,12 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte zuerst anmelden mit `!login email passwort`';
 		}
 
-		let conversationId = this.sessionService.getCurrentConversation(sender);
+		let conversationId = this.getCurrentConversation(sender);
 
 		if (numberStr) {
 			const number = parseInt(numberStr, 10);
 			if (!isNaN(number)) {
-				const id = this.sessionService.getConversationId(sender, number);
+				const id = this.getConversationId(sender, number);
 				if (id) conversationId = id;
 			}
 		}
@@ -489,7 +526,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte eine gueltige Nummer angeben.';
 		}
 
-		const conversationId = this.sessionService.getConversationId(sender, number);
+		const conversationId = this.getConversationId(sender, number);
 		if (!conversationId) {
 			return 'Ungueltige Nummer. Nutze `!gespraeche` fuer eine aktuelle Liste.';
 		}
@@ -517,7 +554,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte eine gueltige Nummer angeben.';
 		}
 
-		const conversationId = this.sessionService.getConversationId(sender, number);
+		const conversationId = this.getConversationId(sender, number);
 		if (!conversationId) {
 			return 'Ungueltige Nummer. Nutze `!gespraeche` fuer eine aktuelle Liste.';
 		}
@@ -546,7 +583,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 		}
 
 		// Store mapping for restore
-		this.sessionService.setConversationMapping(
+		this.setConversationMapping(
 			sender,
 			result.data.map((c) => c.id)
 		);
@@ -576,7 +613,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte eine gueltige Nummer angeben.';
 		}
 
-		const conversationId = this.sessionService.getConversationId(sender, number);
+		const conversationId = this.getConversationId(sender, number);
 		if (!conversationId) {
 			return 'Ungueltige Nummer. Nutze `!archiviert` fuer eine aktuelle Liste.';
 		}
@@ -604,7 +641,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte eine gueltige Nummer angeben.';
 		}
 
-		const conversationId = this.sessionService.getConversationId(sender, number);
+		const conversationId = this.getConversationId(sender, number);
 		if (!conversationId) {
 			return 'Ungueltige Nummer. Nutze `!gespraeche` fuer eine aktuelle Liste.';
 		}
@@ -632,7 +669,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte eine gueltige Nummer angeben.';
 		}
 
-		const conversationId = this.sessionService.getConversationId(sender, number);
+		const conversationId = this.getConversationId(sender, number);
 		if (!conversationId) {
 			return 'Ungueltige Nummer. Nutze `!gespraeche` fuer eine aktuelle Liste.';
 		}
@@ -660,7 +697,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte eine gueltige Nummer angeben.';
 		}
 
-		const conversationId = this.sessionService.getConversationId(sender, number);
+		const conversationId = this.getConversationId(sender, number);
 		if (!conversationId) {
 			return 'Ungueltige Nummer. Nutze `!gespraeche` fuer eine aktuelle Liste.';
 		}
@@ -675,8 +712,8 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 		}
 
 		// Clear current conversation if it was the deleted one
-		if (this.sessionService.getCurrentConversation(sender) === conversationId) {
-			this.sessionService.setCurrentConversation(sender, null);
+		if (this.getCurrentConversation(sender) === conversationId) {
+			this.setCurrentConversation(sender, null);
 		}
 
 		return `Gespraech **${title}** geloescht.`;
@@ -696,12 +733,12 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 		const activeModels = result.data.filter((m) => m.isActive);
 
 		// Store mapping
-		this.sessionService.setModelMapping(
+		this.setModelMapping(
 			sender,
 			activeModels.map((m) => m.id)
 		);
 
-		const selectedModelId = this.sessionService.getSelectedModel(sender);
+		const selectedModelId = this.getSelectedModel(sender);
 
 		let response = '**Verfuegbare AI-Modelle:**\n\n';
 		activeModels.forEach((model, index) => {
@@ -718,7 +755,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 
 	private async handleSelectModel(sender: string, numberStr: string): Promise<string> {
 		if (!numberStr) {
-			const selectedModelId = this.sessionService.getSelectedModel(sender);
+			const selectedModelId = this.getSelectedModel(sender);
 			if (!selectedModelId) {
 				return 'Kein Modell ausgewaehlt (Standard wird verwendet). Nutze `!modelle` und `!modell [nr]`';
 			}
@@ -737,7 +774,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return 'Bitte eine gueltige Nummer angeben.';
 		}
 
-		const modelId = this.sessionService.getModelId(sender, number);
+		const modelId = this.getModelId(sender, number);
 		if (!modelId) {
 			return 'Ungueltige Nummer. Nutze `!modelle` fuer eine aktuelle Liste.';
 		}
@@ -747,7 +784,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 			return `Fehler: ${result.error}`;
 		}
 
-		this.sessionService.setSelectedModel(sender, modelId);
+		this.setSelectedModel(sender, modelId);
 		const icon = BRANCH_ICONS[result.data!.provider] || BRANCH_ICONS.default;
 		return `Modell gewaehlt: ${icon} **${result.data!.name}**\nWird fuer neue Gespraeche und Quick-Chat verwendet.`;
 	}
