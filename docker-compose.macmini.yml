@@ -1,19 +1,30 @@
-# ManaCore Mac Mini Configuration
+# Mana Mac Mini Configuration
 # Domain: mana.how (via Cloudflare Tunnel)
+#
+# Port Schema:
+#   3000-3099: Core Services & Backends
+#   4000-4099: Matrix Stack
+#   5000-5099: Web Frontends
+#   6000-6099: Automation & Workflows
+#   8000-8099: Monitoring Dashboards
+#   9000-9199: Infrastructure & Exporters
+#
+# Naming Convention: mana-{category}-{service}
+#   Categories: infra, core, app, matrix, mon, auto
 
 services:
   # ============================================
-  # Infrastructure Services
+  # Tier 0: Infrastructure Services
   # ============================================
 
   postgres:
     image: postgres:16-alpine
-    container_name: manacore-postgres
+    container_name: mana-infra-postgres
     restart: always
     environment:
-      POSTGRES_DB: manacore
+      POSTGRES_DB: mana
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-manacore123}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mana123}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -26,7 +37,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: manacore-redis
+    container_name: mana-infra-redis
     restart: always
     command: redis-server --requirepass ${REDIS_PASSWORD:-redis123}
     volumes:
@@ -41,7 +52,7 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: manacore-minio
+    container_name: mana-infra-minio
     restart: always
     command: server /data --console-address ":9001"
     environment:
@@ -59,10 +70,10 @@ services:
       retries: 3
 
   # ============================================
-  # Auth Service
+  # Tier 1: Core Auth Service (Port 3001)
   # ============================================
 
-  mana-core-auth:
+  mana-auth:
     image: ghcr.io/memo-2023/mana-core-auth:latest
     container_name: mana-core-auth
     restart: always
@@ -74,7 +85,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/manacore_auth
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_auth
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
@@ -83,14 +94,12 @@ services:
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
       BASE_URL: https://auth.mana.how
-      # SMTP for transactional emails (Brevo)
       SMTP_HOST: smtp-relay.brevo.com
       SMTP_PORT: 587
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
-      SMTP_FROM: ManaCore <noreply@mana.how>
+      SMTP_FROM: Mana <noreply@mana.how>
       CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how,https://nutriphi.mana.how,https://skilltree.mana.how
-      # DuckDB Analytics (Business Metrics)
       DUCKDB_PATH: /data/analytics/metrics.duckdb
     volumes:
       - analytics_data:/data/analytics
@@ -104,51 +113,45 @@ services:
       start_period: 40s
 
   # ============================================
-  # API Gateway (Monetization)
+  # Tier 2: Gateway & Search Services (Ports 3010-3029)
   # ============================================
 
   api-gateway:
     image: ghcr.io/memo-2023/api-gateway:latest
-    container_name: mana-api-gateway
+    container_name: mana-core-gateway
     restart: always
     depends_on:
-      mana-core-auth:
+      mana-auth:
         condition: service_healthy
-      mana-search:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      # Removed: postgres, redis, mana-search - lazy connect with retry
     environment:
       NODE_ENV: production
-      PORT: 3030
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/manacore
+      PORT: 3010
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      SEARCH_SERVICE_URL: http://mana-search:3021
-      STT_SERVICE_URL: http://mana-stt:3020
-      TTS_SERVICE_URL: http://mana-tts:3022
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      SEARCH_SERVICE_URL: http://mana-search:3020
+      STT_SERVICE_URL: http://host.docker.internal:3021
+      TTS_SERVICE_URL: http://host.docker.internal:3022
       IMAGE_GEN_SERVICE_URL: http://host.docker.internal:3025
       CORS_ORIGINS: https://api.mana.how,https://mana.how
+      # Retry config for lazy dependencies
+      DB_RETRY_ATTEMPTS: 5
+      DB_RETRY_DELAY: 3000
     ports:
-      - "3030:3030"
+      - "3010:3010"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3010/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
-  # ============================================
-  # Search Service (SearXNG + NestJS)
-  # ============================================
-
   searxng:
     image: searxng/searxng:latest
-    container_name: mana-searxng
+    container_name: mana-core-searxng
     restart: always
     volumes:
       - ./services/mana-search/searxng/settings.yml:/etc/searxng/settings.yml:ro
@@ -166,16 +169,15 @@ services:
 
   mana-search:
     image: ghcr.io/memo-2023/mana-search:latest
-    container_name: mana-search
+    container_name: mana-core-search
     restart: always
     depends_on:
       searxng:
         condition: service_healthy
-      redis:
-        condition: service_healthy
+      # Removed: redis - lazy connect
     environment:
       NODE_ENV: production
-      PORT: 3021
+      PORT: 3020
       SEARXNG_URL: http://searxng:8080
       SEARXNG_TIMEOUT: 15000
       SEARXNG_DEFAULT_LANGUAGE: de-DE
@@ -187,69 +189,33 @@ services:
       EXTRACT_TIMEOUT: 10000
       EXTRACT_MAX_LENGTH: 50000
     ports:
-      - "3021:3021"
+      - "3020:3020"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3021/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3020/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
   # ============================================
-  # ManaCore Dashboard
-  # ============================================
-
-  manacore-web:
-    image: ghcr.io/memo-2023/manacore-web:latest
-    container_name: manacore-web
-    restart: always
-    depends_on:
-      mana-core-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5173
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_TODO_API_URL: http://todo-backend:3018
-      PUBLIC_TODO_API_URL_CLIENT: https://todo-api.mana.how
-      PUBLIC_CALENDAR_API_URL: http://calendar-backend:3016
-      PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.mana.how
-      PUBLIC_CLOCK_API_URL: http://clock-backend:3017
-      PUBLIC_CLOCK_API_URL_CLIENT: https://clock-api.mana.how
-      PUBLIC_CONTACTS_API_URL: http://contacts-backend:3015
-      PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.mana.how
-    ports:
-      - "5173:5173"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5173/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Chat App
+  # Tier 3: App Backends (Ports 3030-3049)
   # ============================================
 
   chat-backend:
     image: ghcr.io/memo-2023/chat-backend:latest
-    container_name: chat-backend
+    container_name: mana-app-chat-backend
     restart: always
     depends_on:
-      mana-core-auth:
+      mana-auth:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
+      # Removed: postgres - lazy connect
     environment:
       NODE_ENV: production
-      PORT: 3002
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/chat
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      # Local Ollama for Gemma 3 4B (runs natively on Mac Mini)
+      PORT: 3030
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/chat
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
       OLLAMA_URL: http://host.docker.internal:11434
       OLLAMA_TIMEOUT: 120000
-      # Cloud providers (optional)
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
@@ -258,334 +224,130 @@ services:
       AZURE_OPENAI_API_VERSION: 2024-12-01-preview
       CORS_ORIGINS: https://chat.mana.how,https://mana.how
     ports:
-      - "3002:3002"
+      - "3030:3030"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3002/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  chat-web:
-    image: ghcr.io/memo-2023/chat-web:latest
-    container_name: chat-web
-    restart: always
-    depends_on:
-      chat-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      PUBLIC_BACKEND_URL: http://chat-backend:3002
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://chat-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "3000:3000"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Todo App
-  # ============================================
 
   todo-backend:
     image: ghcr.io/memo-2023/todo-backend:latest
-    container_name: todo-backend
+    container_name: mana-app-todo-backend
     restart: always
     depends_on:
-      mana-core-auth:
-        condition: service_healthy
-      postgres:
+      mana-auth:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3018
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/todo
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PORT: 3031
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/todo
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://todo.mana.how,https://mana.how
     ports:
-      - "3018:3018"
+      - "3031:3031"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3018/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3031/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  todo-web:
-    image: ghcr.io/memo-2023/todo-web:latest
-    container_name: todo-web
-    restart: always
-    depends_on:
-      todo-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5188
-      PUBLIC_BACKEND_URL: http://todo-backend:3018
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://todo-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5188:5188"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5188/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Calendar App
-  # ============================================
 
   calendar-backend:
     image: ghcr.io/memo-2023/calendar-backend:latest
-    container_name: calendar-backend
+    container_name: mana-app-calendar-backend
     restart: always
     depends_on:
-      mana-core-auth:
-        condition: service_healthy
-      postgres:
+      mana-auth:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3016
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/calendar
+      PORT: 3032
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/calendar
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://calendar.mana.how,https://mana.how
     ports:
-      - "3016:3016"
+      - "3032:3032"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3016/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3032/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  calendar-web:
-    image: ghcr.io/memo-2023/calendar-web:latest
-    container_name: calendar-web
-    restart: always
-    depends_on:
-      calendar-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5186
-      PUBLIC_BACKEND_URL: http://calendar-backend:3016
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://calendar-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      # Cross-app integrations
-      PUBLIC_TODO_BACKEND_URL: https://todo-api.mana.how
-      PUBLIC_CONTACTS_API_URL: https://contacts-api.mana.how
-    ports:
-      - "5186:5186"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5186/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Clock App
-  # ============================================
 
   clock-backend:
     image: ghcr.io/memo-2023/clock-backend:latest
-    container_name: clock-backend
+    container_name: mana-app-clock-backend
     restart: always
     depends_on:
-      mana-core-auth:
-        condition: service_healthy
-      postgres:
+      mana-auth:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3017
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/clock
+      PORT: 3033
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/clock
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://clock.mana.how,https://mana.how
     ports:
-      - "3017:3017"
+      - "3033:3033"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3017/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3033/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  clock-web:
-    image: ghcr.io/memo-2023/clock-web:latest
-    container_name: clock-web
-    restart: always
-    depends_on:
-      clock-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5187
-      PUBLIC_BACKEND_URL: http://clock-backend:3017
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://clock-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5187:5187"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5187/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Contacts App
-  # ============================================
 
   contacts-backend:
     image: ghcr.io/memo-2023/contacts-backend:latest
-    container_name: contacts-backend
+    container_name: mana-app-contacts-backend
     restart: always
     depends_on:
-      mana-core-auth:
+      mana-auth:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
+      # Removed: minio - lazy connect
     environment:
       NODE_ENV: production
-      PORT: 3015
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/contacts
+      PORT: 3034
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/contacts
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://contacts.mana.how,https://mana.how,https://calendar.mana.how
-      # S3/MinIO Storage for contact photos
       S3_ENDPOINT: http://minio:9000
       S3_REGION: us-east-1
       S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       S3_BUCKET: contacts-photos
     ports:
-      - "3015:3015"
+      - "3034:3034"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3015/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3034/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  contacts-web:
-    image: ghcr.io/memo-2023/contacts-web:latest
-    container_name: contacts-web
-    restart: always
-    depends_on:
-      contacts-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5184
-      PUBLIC_BACKEND_URL: http://contacts-backend:3015
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://contacts-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5184:5184"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5184/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Presi App (Presentations)
-  # ============================================
-
-  presi-backend:
-    image: ghcr.io/memo-2023/presi-backend:latest
-    container_name: presi-backend
-    restart: always
-    depends_on:
-      mana-core-auth:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3008
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/presi
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      CORS_ORIGINS: https://presi.mana.how,https://mana.how
-    ports:
-      - "3008:3008"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3008/api/v1/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  presi-web:
-    image: ghcr.io/memo-2023/presi-web:latest
-    container_name: presi-web
-    restart: always
-    depends_on:
-      presi-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5178
-      PUBLIC_BACKEND_URL: http://presi-backend:3008
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://presi-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5178:5178"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5178/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Storage App (Cloud Drive)
-  # ============================================
 
   storage-backend:
     image: ghcr.io/memo-2023/storage-backend:latest
-    container_name: storage-backend
+    container_name: mana-app-storage-backend
     restart: always
     depends_on:
-      mana-core-auth:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      minio:
+      mana-auth:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3019
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/storage
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PORT: 3035
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/storage
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://storage.mana.how,https://mana.how
-      # S3/MinIO Storage
       S3_ENDPOINT: http://minio:9000
       S3_REGION: us-east-1
       S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
@@ -595,9 +357,588 @@ services:
       MAX_FILE_SIZE: 104857600
       MAX_FILES_PER_UPLOAD: 10
     ports:
-      - "3019:3019"
+      - "3035:3035"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3019/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3035/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  presi-backend:
+    image: ghcr.io/memo-2023/presi-backend:latest
+    container_name: mana-app-presi-backend
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3036
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/presi
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      CORS_ORIGINS: https://presi.mana.how,https://mana.how
+    ports:
+      - "3036:3036"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3036/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nutriphi-backend:
+    image: ghcr.io/memo-2023/nutriphi-backend:latest
+    container_name: mana-app-nutriphi-backend
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3037
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/nutriphi
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      CORS_ORIGINS: https://nutriphi.mana.how,https://mana.how
+    ports:
+      - "3037:3037"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3037/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  skilltree-backend:
+    image: ghcr.io/memo-2023/skilltree-backend:latest
+    container_name: mana-app-skilltree-backend
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3038
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/skilltree
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      CORS_ORIGINS: https://skilltree.mana.how,https://mana.how
+    ports:
+      - "3038:3038"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3038/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Tier 4: Matrix Stack (Ports 4000-4099)
+  # ============================================
+
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: mana-matrix-synapse
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SYNAPSE_CONFIG_PATH: /config/homeserver.yaml
+      TZ: Europe/Berlin
+      SYNAPSE_DB_PASSWORD: ${SYNAPSE_DB_PASSWORD:-synapse-secure-password}
+      SYNAPSE_PASSWORD_PEPPER: ${SYNAPSE_PASSWORD_PEPPER:-change-me-pepper}
+      SYNAPSE_FORM_SECRET: ${SYNAPSE_FORM_SECRET:-change-me-form-secret}
+      SYNAPSE_MACAROON_SECRET: ${SYNAPSE_MACAROON_SECRET:-change-me-macaroon-secret}
+      SYNAPSE_REGISTRATION_SECRET: ${SYNAPSE_REGISTRATION_SECRET:-change-me-registration-secret}
+      SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET}
+    volumes:
+      - ./docker/matrix/homeserver.yaml:/config/homeserver.yaml:ro
+      - ./docker/matrix/log.config.yaml:/config/log.config.yaml:ro
+      - ./docker/matrix/data:/data
+    ports:
+      - "4000:8008"
+      - "9002:9002"  # Metrics
+    healthcheck:
+      test: ["CMD", "curl", "-fSs", "http://localhost:8008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  element-web:
+    image: vectorim/element-web:latest
+    container_name: mana-matrix-element
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    volumes:
+      - ./docker/matrix/element-config.json:/app/config.json:ro
+    ports:
+      - "4080:80"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  matrix-web:
+    build:
+      context: .
+      dockerfile: apps/matrix/apps/web/Dockerfile
+    image: matrix-web:latest
+    container_name: mana-matrix-web
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4090
+      PUBLIC_MANA_CORE_AUTH_URL: https://auth.mana.how
+    ports:
+      - "4090:4090"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Matrix Bots (Ports 4010-4029)
+  matrix-mana-bot:
+    image: matrix-mana-bot:latest
+    container_name: mana-matrix-bot-mana
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4010
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_MANA_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_MANA_BOT_ROOMS:-}
+      MATRIX_STORAGE_PATH: /app/data/mana-bot-storage.json
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
+      OLLAMA_TIMEOUT: 120000
+      CLOCK_API_URL: http://mana-matrix-bot-clock:4018/api/v1
+      TODO_STORAGE_PATH: /app/data/todos.json
+      CALENDAR_STORAGE_PATH: /app/data/calendar.json
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4010:4010"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-ollama-bot:
+    image: matrix-ollama-bot:latest
+    container_name: mana-matrix-bot-ollama
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4011
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_OLLAMA_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_OLLAMA_BOT_ROOMS:-}
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
+      OLLAMA_TIMEOUT: 120000
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4011:4011"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-stats-bot:
+    image: matrix-stats-bot:latest
+    container_name: mana-matrix-bot-stats
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4012
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_STATS_BOT_TOKEN}
+      MATRIX_REPORT_ROOM_ID: ${MATRIX_STATS_REPORT_ROOM:-}
+      UMAMI_API_URL: http://umami:3000
+      UMAMI_USERNAME: ${UMAMI_USERNAME:-admin}
+      UMAMI_PASSWORD: ${UMAMI_PASSWORD}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_auth
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4012:4012"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-project-doc-bot:
+    image: matrix-project-doc-bot:latest
+    container_name: mana-matrix-bot-projectdoc
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4013
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_PROJECT_DOC_BOT_TOKEN}
+      MATRIX_ALLOWED_USERS: ${MATRIX_PROJECT_DOC_ALLOWED_USERS:-}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/project_doc_bot
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      S3_BUCKET: project-doc-bot
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: gpt-4o-mini
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4013:4013"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4013/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-todo-bot:
+    image: matrix-todo-bot:latest
+    container_name: mana-matrix-bot-todo
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4014
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_TODO_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_TODO_BOT_ROOMS:-}
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4014:4014"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4014/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-calendar-bot:
+    image: matrix-calendar-bot:latest
+    container_name: mana-matrix-bot-calendar
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4015
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_CALENDAR_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_CALENDAR_BOT_ROOMS:-}
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4015:4015"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4015/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-nutriphi-bot:
+    image: matrix-nutriphi-bot:latest
+    container_name: mana-matrix-bot-nutriphi
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4016
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_NUTRIPHI_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_NUTRIPHI_BOT_ROOMS:-}
+      NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3037
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4016:4016"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4016/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-zitare-bot:
+    image: matrix-zitare-bot:latest
+    container_name: mana-matrix-bot-zitare
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4017
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_ZITARE_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_ZITARE_BOT_ROOMS:-}
+      ZITARE_BACKEND_URL: http://zitare-backend:3007
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4017:4017"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4017/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-clock-bot:
+    image: matrix-clock-bot:latest
+    container_name: mana-matrix-bot-clock
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4018
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_CLOCK_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_CLOCK_BOT_ROOMS:-}
+      CLOCK_API_URL: http://clock-backend:3033/api/v1
+      STT_URL: http://host.docker.internal:3021
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4018:4018"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4018/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-tts-bot:
+    image: matrix-tts-bot:latest
+    container_name: mana-matrix-bot-tts
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4019
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_TTS_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_TTS_BOT_ROOMS:-}
+      TTS_URL: http://host.docker.internal:3022
+      DEFAULT_VOICE: af_heart
+      DEFAULT_SPEED: 1.0
+      MAX_TEXT_LENGTH: 500
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4019:4019"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4019/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Tier 5: Web Frontends (Ports 5000-5099)
+  # ============================================
+
+  mana-web:
+    image: ghcr.io/memo-2023/manacore-web:latest
+    container_name: mana-app-web
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_TODO_API_URL: http://todo-backend:3031
+      PUBLIC_TODO_API_URL_CLIENT: https://todo-api.mana.how
+      PUBLIC_CALENDAR_API_URL: http://calendar-backend:3032
+      PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.mana.how
+      PUBLIC_CLOCK_API_URL: http://clock-backend:3033
+      PUBLIC_CLOCK_API_URL_CLIENT: https://clock-api.mana.how
+      PUBLIC_CONTACTS_API_URL: http://contacts-backend:3034
+      PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.mana.how
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  chat-web:
+    image: ghcr.io/memo-2023/chat-web:latest
+    container_name: mana-app-chat-web
+    restart: always
+    depends_on:
+      chat-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5010
+      PUBLIC_BACKEND_URL: http://chat-backend:3030
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://chat-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5010:5010"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  todo-web:
+    image: ghcr.io/memo-2023/todo-web:latest
+    container_name: mana-app-todo-web
+    restart: always
+    depends_on:
+      todo-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5011
+      PUBLIC_BACKEND_URL: http://todo-backend:3031
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://todo-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5011:5011"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  calendar-web:
+    image: ghcr.io/memo-2023/calendar-web:latest
+    container_name: mana-app-calendar-web
+    restart: always
+    depends_on:
+      calendar-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5012
+      PUBLIC_BACKEND_URL: http://calendar-backend:3032
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://calendar-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_TODO_BACKEND_URL: https://todo-api.mana.how
+      PUBLIC_CONTACTS_API_URL: https://contacts-api.mana.how
+    ports:
+      - "5012:5012"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  clock-web:
+    image: ghcr.io/memo-2023/clock-web:latest
+    container_name: mana-app-clock-web
+    restart: always
+    depends_on:
+      clock-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5013
+      PUBLIC_BACKEND_URL: http://clock-backend:3033
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://clock-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5013:5013"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5013/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  contacts-web:
+    image: ghcr.io/memo-2023/contacts-web:latest
+    container_name: mana-app-contacts-web
+    restart: always
+    depends_on:
+      contacts-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5014
+      PUBLIC_BACKEND_URL: http://contacts-backend:3034
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://contacts-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5014:5014"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5014/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -605,54 +946,45 @@ services:
 
   storage-web:
     image: ghcr.io/memo-2023/storage-web:latest
-    container_name: storage-web
+    container_name: mana-app-storage-web
     restart: always
     depends_on:
       storage-backend:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5185
-      PUBLIC_BACKEND_URL: http://storage-backend:3019
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PORT: 5015
+      PUBLIC_BACKEND_URL: http://storage-backend:3035
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://storage-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
-      - "5185:5185"
+      - "5015:5015"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5185/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5015/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
-  # ============================================
-  # NutriPhi App (AI Nutrition Tracking)
-  # ============================================
-
-  nutriphi-backend:
-    image: ghcr.io/memo-2023/nutriphi-backend:latest
-    container_name: nutriphi-backend
+  presi-web:
+    image: ghcr.io/memo-2023/presi-web:latest
+    container_name: mana-app-presi-web
     restart: always
     depends_on:
-      mana-core-auth:
-        condition: service_healthy
-      postgres:
+      presi-backend:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3023
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/nutriphi
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      CORS_ORIGINS: https://nutriphi.mana.how,https://mana.how
+      PORT: 5016
+      PUBLIC_BACKEND_URL: http://presi-backend:3036
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://presi-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
-      - "3023:3023"
+      - "5016:5016"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3023/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5016/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -660,53 +992,22 @@ services:
 
   nutriphi-web:
     image: ghcr.io/memo-2023/nutriphi-web:latest
-    container_name: nutriphi-web
+    container_name: mana-app-nutriphi-web
     restart: always
     depends_on:
       nutriphi-backend:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5189
-      PUBLIC_BACKEND_URL: http://nutriphi-backend:3023
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PORT: 5017
+      PUBLIC_BACKEND_URL: http://nutriphi-backend:3037
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://nutriphi-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
-      - "5189:5189"
+      - "5017:5017"
     healthcheck:
-      test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://127.0.0.1:5189/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # SkillTree App (Gamified Skill Tracking)
-  # ============================================
-
-  skilltree-backend:
-    image: ghcr.io/memo-2023/skilltree-backend:latest
-    container_name: skilltree-backend
-    restart: always
-    depends_on:
-      mana-core-auth:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3024
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/skilltree
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      CORS_ORIGINS: https://skilltree.mana.how,https://mana.how
-    ports:
-      - "3024:3024"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3024/health"]
+      test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://127.0.0.1:5017/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -714,51 +1015,47 @@ services:
 
   skilltree-web:
     image: ghcr.io/memo-2023/skilltree-web:latest
-    container_name: skilltree-web
+    container_name: mana-app-skilltree-web
     restart: always
     depends_on:
       skilltree-backend:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5195
-      PUBLIC_BACKEND_URL: http://skilltree-backend:3024
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      PORT: 5018
+      PUBLIC_BACKEND_URL: http://skilltree-backend:3038
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://skilltree-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
-      - "5195:5195"
+      - "5018:5018"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5195/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5018/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
-  # ============================================
-  # LLM Playground (Web)
-  # ============================================
-
   llm-playground:
     build:
       context: .
       dockerfile: services/llm-playground/Dockerfile
-    container_name: llm-playground
+    container_name: mana-app-llm-playground
     restart: unless-stopped
-    ports:
-      - "5190:5190"
-    environment:
-      - NODE_ENV=production
-      - PORT=5190
-      - PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
-      - PUBLIC_MANA_CORE_AUTH_URL_CLIENT=https://auth.mana.how
-      - PUBLIC_MANA_LLM_URL=http://host.docker.internal:3025
-      - PUBLIC_MANA_LLM_URL_CLIENT=https://llm.mana.how
     depends_on:
-      mana-core-auth:
+      mana-auth:
         condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5090
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_MANA_LLM_URL: http://host.docker.internal:3025
+      PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
+    ports:
+      - "5090:5090"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5190/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5090/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -767,50 +1064,52 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
 
   # ============================================
-  # Monitoring Stack
+  # Tier 6: Automation & Workflows (Ports 6000-6099)
   # ============================================
 
-  # VictoriaMetrics - High-performance Prometheus replacement
-  # See docs/decisions/001-monitoring-stack-upgrade.md for details
-  victoriametrics:
-    image: victoriametrics/victoria-metrics:v1.99.0
-    container_name: manacore-victoriametrics
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: mana-auto-n8n
     restart: always
-    command:
-      - '-storageDataPath=/storage'
-      - '-retentionPeriod=2y'
-      - '-httpListenAddr=:8428'
-      - '-promscrape.config=/etc/prometheus/prometheus.yml'
-      - '-promscrape.config.strictParse=false'
-      - '-selfScrapeInterval=15s'
-      - '-search.latencyOffset=0s'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: postgres
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-mana123}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-change-me-n8n-encryption-key}
+      N8N_USER_MANAGEMENT_JWT_SECRET: ${N8N_JWT_SECRET:-change-me-n8n-jwt-secret}
+      N8N_HOST: n8n.mana.how
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://n8n.mana.how/
+      N8N_BASIC_AUTH_ACTIVE: "false"
+      N8N_PORT: 6000
+      GENERIC_TIMEZONE: Europe/Berlin
+      TZ: Europe/Berlin
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
-      - victoriametrics_data:/storage
+      - n8n_data:/home/node/.n8n
     ports:
-      - "8428:8428"
+      - "6000:6000"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8428/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:6000/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
-  pushgateway:
-    image: prom/pushgateway:v1.7.0
-    container_name: manacore-pushgateway
-    restart: always
-    ports:
-      - "9091:9091"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9091/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # ============================================
+  # Tier 7: Monitoring Dashboards (Ports 8000-8099)
+  # ============================================
 
   grafana:
     image: grafana/grafana:10.4.1
-    container_name: manacore-grafana
+    container_name: mana-mon-grafana
     restart: always
     depends_on:
       victoriametrics:
@@ -820,21 +1119,83 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: false
       GF_SERVER_ROOT_URL: https://grafana.mana.how
+      GF_SERVER_HTTP_PORT: 8000
     volumes:
       - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
       - grafana_data:/var/lib/grafana
     ports:
-      - "3100:3000"
+      - "8000:8000"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: mana-mon-umami
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/umami
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${UMAMI_APP_SECRET:-change-me-umami-secret}
+      DISABLE_TELEMETRY: 1
+    ports:
+      - "8010:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # Tier 8: Metrics & Exporters (Ports 9000-9199)
+  # ============================================
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.99.0
+    container_name: mana-mon-victoria
+    restart: always
+    command:
+      - '-storageDataPath=/storage'
+      - '-retentionPeriod=2y'
+      - '-httpListenAddr=:9090'
+      - '-promscrape.config=/etc/prometheus/prometheus.yml'
+      - '-promscrape.config.strictParse=false'
+      - '-selfScrapeInterval=15s'
+      - '-search.latencyOffset=0s'
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - victoriametrics_data:/storage
+    ports:
+      - "9090:9090"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  pushgateway:
+    image: prom/pushgateway:v1.7.0
+    container_name: mana-mon-pushgateway
+    restart: always
+    ports:
+      - "9091:9091"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9091/-/healthy"]
       interval: 30s
       timeout: 10s
       retries: 3
 
   node-exporter:
     image: prom/node-exporter:v1.7.0
-    container_name: manacore-node-exporter
+    container_name: mana-mon-node-exporter
     restart: always
     command:
       - '--path.procfs=/host/proc'
@@ -850,7 +1211,7 @@ services:
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
-    container_name: manacore-cadvisor
+    container_name: mana-mon-cadvisor
     restart: always
     privileged: true
     volumes:
@@ -860,23 +1221,23 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     ports:
-      - "8080:8080"
+      - "9110:8080"
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:v0.15.0
-    container_name: manacore-postgres-exporter
+    container_name: mana-mon-postgres-exporter
     restart: always
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      DATA_SOURCE_NAME: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/postgres?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/postgres?sslmode=disable
     ports:
       - "9187:9187"
 
   redis-exporter:
     image: oliver006/redis_exporter:v1.58.0
-    container_name: manacore-redis-exporter
+    container_name: mana-mon-redis-exporter
     restart: always
     depends_on:
       redis:
@@ -888,549 +1249,41 @@ services:
       - "9121:9121"
 
   # ============================================
-  # Web Analytics (Umami)
-  # ============================================
-
-  umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
-    container_name: manacore-umami
-    restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/umami
-      DATABASE_TYPE: postgresql
-      APP_SECRET: ${UMAMI_APP_SECRET:-change-me-umami-secret}
-      DISABLE_TELEMETRY: 1
-    ports:
-      - "3200:3000"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/heartbeat"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # n8n Workflow Automation
-  # ============================================
-
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: manacore-n8n
-    restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      # Database
-      DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: postgres
-      DB_POSTGRESDB_PORT: 5432
-      DB_POSTGRESDB_DATABASE: n8n
-      DB_POSTGRESDB_USER: postgres
-      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-manacore123}
-      # Security
-      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-change-me-n8n-encryption-key}
-      N8N_USER_MANAGEMENT_JWT_SECRET: ${N8N_JWT_SECRET:-change-me-n8n-jwt-secret}
-      # URLs
-      N8N_HOST: n8n.mana.how
-      N8N_PROTOCOL: https
-      WEBHOOK_URL: https://n8n.mana.how/
-      # Settings
-      N8N_BASIC_AUTH_ACTIVE: "false"
-      N8N_PORT: 5678
-      GENERIC_TIMEZONE: Europe/Berlin
-      TZ: Europe/Berlin
-      # Disable telemetry
-      N8N_DIAGNOSTICS_ENABLED: "false"
-      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
-    volumes:
-      - n8n_data:/home/node/.n8n
-    ports:
-      - "5678:5678"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5678/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix Synapse (Homeserver) - DSGVO-konform
-  # ============================================
-
-  synapse:
-    image: matrixdotorg/synapse:latest
-    container_name: manacore-synapse
-    restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      SYNAPSE_CONFIG_PATH: /config/homeserver.yaml
-      TZ: Europe/Berlin
-      # Secrets (override in .env)
-      SYNAPSE_DB_PASSWORD: ${SYNAPSE_DB_PASSWORD:-synapse-secure-password}
-      SYNAPSE_PASSWORD_PEPPER: ${SYNAPSE_PASSWORD_PEPPER:-change-me-pepper}
-      SYNAPSE_FORM_SECRET: ${SYNAPSE_FORM_SECRET:-change-me-form-secret}
-      SYNAPSE_MACAROON_SECRET: ${SYNAPSE_MACAROON_SECRET:-change-me-macaroon-secret}
-      SYNAPSE_REGISTRATION_SECRET: ${SYNAPSE_REGISTRATION_SECRET:-change-me-registration-secret}
-      # OIDC SSO with Mana Core Auth
-      SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET}
-    volumes:
-      - ./docker/matrix/homeserver.yaml:/config/homeserver.yaml:ro
-      - ./docker/matrix/log.config.yaml:/config/log.config.yaml:ro
-      - ./docker/matrix/data:/data
-    ports:
-      - "8008:8008"
-      - "9002:9002"  # Metrics (9000 used by MinIO)
-    healthcheck:
-      test: ["CMD", "curl", "-fSs", "http://localhost:8008/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # ============================================
-  # Element Web (Matrix Client)
-  # ============================================
-
-  element-web:
-    image: vectorim/element-web:latest
-    container_name: manacore-element
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    volumes:
-      - ./docker/matrix/element-config.json:/app/config.json:ro
-    ports:
-      - "8087:80"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # ============================================
-  # Matrix Web App (Custom SvelteKit Client)
-  # ============================================
-
-  matrix-web:
-    build:
-      context: .
-      dockerfile: apps/matrix/apps/web/Dockerfile
-    image: matrix-web:latest
-    container_name: manacore-matrix-web
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      mana-core-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5180
-      PUBLIC_MANA_CORE_AUTH_URL: https://auth.mana.how
-    ports:
-      - "5180:5180"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5180/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # ============================================
-  # Matrix Mana Bot (Unified Gateway - All Features)
-  # ============================================
-
-  matrix-mana-bot:
-    image: matrix-mana-bot:latest
-    container_name: manacore-matrix-mana-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3310
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_MANA_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_MANA_BOT_ROOMS:-}
-      MATRIX_STORAGE_PATH: /app/data/mana-bot-storage.json
-      OLLAMA_URL: http://host.docker.internal:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
-      OLLAMA_TIMEOUT: 120000
-      CLOCK_API_URL: http://matrix-clock-bot:3318/api/v1
-      TODO_STORAGE_PATH: /app/data/todos.json
-      CALENDAR_STORAGE_PATH: /app/data/calendar.json
-    volumes:
-      - matrix_mana_bot_data:/app/data
-    ports:
-      - "3310:3310"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3310/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix Ollama Bot (GDPR-compliant AI Chat)
-  # ============================================
-
-  matrix-ollama-bot:
-    image: matrix-ollama-bot:latest
-    container_name: manacore-matrix-ollama-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3311
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_OLLAMA_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_OLLAMA_BOT_ROOMS:-}
-      OLLAMA_URL: http://host.docker.internal:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
-      OLLAMA_TIMEOUT: 120000
-    volumes:
-      - matrix_ollama_bot_data:/app/data
-    ports:
-      - "3311:3311"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3311/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix Stats Bot (GDPR-compliant Analytics)
-  # ============================================
-
-  matrix-stats-bot:
-    image: matrix-stats-bot:latest
-    container_name: manacore-matrix-stats-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      umami:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3312
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_STATS_BOT_TOKEN}
-      MATRIX_REPORT_ROOM_ID: ${MATRIX_STATS_REPORT_ROOM:-}
-      UMAMI_API_URL: http://umami:3000
-      UMAMI_USERNAME: ${UMAMI_USERNAME:-admin}
-      UMAMI_PASSWORD: ${UMAMI_PASSWORD}
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/manacore_auth
-    volumes:
-      - matrix_stats_bot_data:/app/data
-    ports:
-      - "3312:3312"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3312/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix Project Doc Bot (GDPR-compliant Documentation)
-  # ============================================
-
-  matrix-project-doc-bot:
-    image: matrix-project-doc-bot:latest
-    container_name: manacore-matrix-project-doc-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3313
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_PROJECT_DOC_BOT_TOKEN}
-      MATRIX_ALLOWED_USERS: ${MATRIX_PROJECT_DOC_ALLOWED_USERS:-}
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-manacore123}@postgres:5432/project_doc_bot
-      S3_ENDPOINT: http://minio:9000
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      S3_BUCKET: project-doc-bot
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: gpt-4o-mini
-    volumes:
-      - matrix_project_doc_bot_data:/app/data
-    ports:
-      - "3313:3313"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3313/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix Calendar Bot (GDPR-compliant Calendar)
-  # ============================================
-
-  matrix-calendar-bot:
-    image: matrix-calendar-bot:latest
-    container_name: manacore-matrix-calendar-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3315
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_CALENDAR_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_CALENDAR_BOT_ROOMS:-}
-    volumes:
-      - matrix_calendar_bot_data:/app/data
-    ports:
-      - "3315:3315"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3315/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix Todo Bot (GDPR-compliant Task Management)
-  # ============================================
-
-  matrix-todo-bot:
-    image: matrix-todo-bot:latest
-    container_name: manacore-matrix-todo-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3314
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_TODO_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_TODO_BOT_ROOMS:-}
-    volumes:
-      - matrix_todo_bot_data:/app/data
-    ports:
-      - "3314:3314"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3314/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix NutriPhi Bot (GDPR-compliant Nutrition Tracking)
-  # ============================================
-
-  matrix-nutriphi-bot:
-    image: matrix-nutriphi-bot:latest
-    container_name: manacore-matrix-nutriphi-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      nutriphi-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3316
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_NUTRIPHI_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_NUTRIPHI_BOT_ROOMS:-}
-      NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3023
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-    volumes:
-      - matrix_nutriphi_bot_data:/app/data
-    ports:
-      - "3316:3316"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3316/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix Zitare Bot (GDPR-compliant Quotes)
-  # ============================================
-
-  matrix-zitare-bot:
-    image: matrix-zitare-bot:latest
-    container_name: manacore-matrix-zitare-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3317
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_ZITARE_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_ZITARE_BOT_ROOMS:-}
-      ZITARE_BACKEND_URL: http://zitare-backend:3007
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-    volumes:
-      - matrix_zitare_bot_data:/app/data
-    ports:
-      - "3317:3317"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3317/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix Clock Bot (GDPR-compliant Time Tracking)
-  # ============================================
-
-  matrix-clock-bot:
-    image: matrix-clock-bot:latest
-    container_name: manacore-matrix-clock-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3318
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_CLOCK_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_CLOCK_BOT_ROOMS:-}
-      CLOCK_API_URL: http://host.docker.internal:3017/api/v1
-      STT_URL: http://mana-stt:3020
-    volumes:
-      - matrix_clock_bot_data:/app/data
-    ports:
-      - "3318:3318"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3318/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
-  # Matrix TTS Bot (Text-to-Speech)
-  # ============================================
-
-  matrix-tts-bot:
-    image: matrix-tts-bot:latest
-    container_name: manacore-matrix-tts-bot
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3033
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_TTS_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_TTS_BOT_ROOMS:-}
-      TTS_URL: http://host.docker.internal:3022
-      DEFAULT_VOICE: af_heart
-      DEFAULT_SPEED: 1.0
-      MAX_TEXT_LENGTH: 500
-    volumes:
-      - matrix_tts_bot_data:/app/data
-    ports:
-      - "3033:3033"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3033/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # ============================================
   # Auto-Update (Watchtower)
   # ============================================
 
   watchtower:
     image: nickfedor/watchtower:latest
-    container_name: manacore-watchtower
+    container_name: mana-auto-watchtower
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - TZ=Europe/Berlin
-      - DOCKER_API_VERSION=1.45
-      - WATCHTOWER_POLL_INTERVAL=300
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_INCLUDE_STOPPED=false
-      # Notifications disabled (Telegram removed)
-      # Configure Matrix notifications if needed:
-      # - WATCHTOWER_NOTIFICATIONS=shoutrrr
-      # - WATCHTOWER_NOTIFICATION_URL=matrix://user:password@matrix.mana.how:8008/!roomid:mana.how
+      TZ: Europe/Berlin
+      DOCKER_API_VERSION: 1.45
+      WATCHTOWER_POLL_INTERVAL: 300
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_INCLUDE_STOPPED: "false"
+      # Notifications disabled - configure Matrix if needed
 
 # ============================================
-# Volumes
+# Volumes (Naming: mana-{service}-data)
 # ============================================
 
 volumes:
   postgres_data:
-    name: manacore-postgres
+    name: mana-postgres-data
   redis_data:
-    name: manacore-redis
+    name: mana-redis-data
   minio_data:
-    name: manacore-minio
+    name: mana-minio-data
   victoriametrics_data:
-    name: manacore-victoriametrics
+    name: mana-victoria-data
   grafana_data:
-    name: manacore-grafana
+    name: mana-grafana-data
   analytics_data:
-    name: manacore-analytics
+    name: mana-analytics-data
   n8n_data:
-    name: manacore-n8n
-  synapse_data:
-    name: manacore-synapse
-  matrix_mana_bot_data:
-    name: manacore-matrix-mana-bot
-  matrix_ollama_bot_data:
-    name: manacore-matrix-ollama-bot
-  matrix_stats_bot_data:
-    name: manacore-matrix-stats-bot
-  matrix_project_doc_bot_data:
-    name: manacore-matrix-project-doc-bot
-  matrix_calendar_bot_data:
-    name: manacore-matrix-calendar-bot
-  matrix_todo_bot_data:
-    name: manacore-matrix-todo-bot
-  matrix_nutriphi_bot_data:
-    name: manacore-matrix-nutriphi-bot
-  matrix_zitare_bot_data:
-    name: manacore-matrix-zitare-bot
-  matrix_clock_bot_data:
-    name: manacore-matrix-clock-bot
-  matrix_tts_bot_data:
-    name: manacore-matrix-tts-bot
+    name: mana-n8n-data
+  matrix_bots_data:
+    name: mana-matrix-bots-data
