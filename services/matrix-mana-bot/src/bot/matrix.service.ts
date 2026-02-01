@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { CommandRouterService, CommandContext } from './command-router.service';
 import { VoiceService } from '../voice/voice.service';
+import { VoiceFormatterService } from '../voice/voice-formatter.service';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
 @Injectable()
@@ -14,7 +15,8 @@ export class MatrixService extends BaseMatrixService {
 		@Inject(forwardRef(() => CommandRouterService))
 		private commandRouter: CommandRouterService,
 		@Inject(forwardRef(() => VoiceService))
-		private voiceService: VoiceService
+		private voiceService: VoiceService,
+		private voiceFormatter: VoiceFormatterService
 	) {
 		super(configService);
 		this.voiceEnabled = configService.get('voice.enabled') !== false;
@@ -196,19 +198,15 @@ export class MatrixService extends BaseMatrixService {
 		userId: string
 	): Promise<void> {
 		try {
-			// Prepare text for speech (remove markdown, emojis, etc.)
-			const speechText = this.prepareTextForSpeech(text);
+			// Format text for natural German speech
+			const speechText = this.voiceFormatter.format(text);
 
 			// Skip if text is too short or empty
 			if (!speechText || speechText.length < 5) {
 				return;
 			}
 
-			// Skip if text is very long (summarize would be better)
-			if (speechText.length > 800) {
-				this.logger.debug(`Text too long for audio (${speechText.length} chars), skipping`);
-				return;
-			}
+			this.logger.debug(`Formatted for speech: ${speechText.length} chars`);
 
 			// Generate audio
 			const audioBuffer = await this.voiceService.synthesize(speechText, userId);
@@ -232,63 +230,6 @@ export class MatrixService extends BaseMatrixService {
 			this.logger.error(`Failed to generate audio response: ${error}`);
 			// Don't throw - audio is optional
 		}
-	}
-
-	/**
-	 * Prepare text for text-to-speech
-	 * Removes markdown formatting, excessive whitespace, and formats for natural speech
-	 */
-	private prepareTextForSpeech(text: string): string {
-		let result = text;
-
-		// Remove code blocks
-		result = result.replace(/```[\s\S]*?```/g, '');
-		result = result.replace(/`[^`]+`/g, '');
-
-		// Remove markdown formatting
-		result = result.replace(/\*\*(.+?)\*\*/g, '$1'); // Bold
-		result = result.replace(/\*(.+?)\*/g, '$1'); // Italic
-		result = result.replace(/~~(.+?)~~/g, '$1'); // Strikethrough
-		result = result.replace(/^#+\s*/gm, ''); // Headers
-
-		// Remove common emojis (keep some for context)
-		result = result.replace(/[📋📅⏱️🔮💡❌✅🎤🔊☀️💪🔔]/g, '');
-
-		// Convert bullet points to natural speech
-		result = result.replace(/^[•\-]\s*/gm, '');
-
-		// Convert numbered lists
-		result = result.replace(/^\d+\.\s*/gm, '');
-
-		// Clean up time formats for German speech
-		result = result.replace(/(\d{1,2}):(\d{2})/g, (_, h, m) => {
-			const hour = parseInt(h);
-			const min = parseInt(m);
-			if (min === 0) {
-				return `${hour} Uhr`;
-			} else if (min === 30) {
-				return `halb ${hour + 1}`;
-			} else if (min === 15) {
-				return `viertel nach ${hour}`;
-			} else if (min === 45) {
-				return `viertel vor ${hour + 1}`;
-			}
-			return `${hour} Uhr ${min}`;
-		});
-
-		// Clean up multiple newlines and spaces
-		result = result.replace(/\n{2,}/g, '. ');
-		result = result.replace(/\n/g, ' ');
-		result = result.replace(/\s{2,}/g, ' ');
-
-		// Remove URLs
-		result = result.replace(/https?:\/\/[^\s]+/g, '');
-
-		// Clean up punctuation
-		result = result.replace(/\s+([.,!?])/g, '$1');
-		result = result.replace(/([.,!?])\s*([.,!?])/g, '$1');
-
-		return result.trim();
 	}
 
 	private async sendWelcomeMessage(roomId: string, userId: string) {
