@@ -502,12 +502,12 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 4090
+      PORT: 5180
       PUBLIC_MANA_CORE_AUTH_URL: https://auth.mana.how
     ports:
-      - "4090:4090"
+      - "4090:5180"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4090/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5180/health"]
       interval: 30s
       timeout: 10s
       retries: 3
