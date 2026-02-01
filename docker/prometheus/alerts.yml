@@ -243,3 +243,116 @@ groups:
         annotations:
           summary: "Container {{ $labels.name }} restarted"
           description: "Container {{ $labels.name }} has restarted."
+
+  - name: auth_service_alerts
+    rules:
+      # Auth Service Down
+      - alert: AuthServiceDown
+        expr: up{job="mana-core-auth"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Auth Service is down"
+          description: "mana-core-auth has been down for more than 30 seconds. All authentication will fail."
+
+      # High Login Failure Rate (> 50% of logins fail with 401)
+      - alert: HighLoginFailureRate
+        expr: |
+          sum(rate(http_requests_total{job="mana-core-auth",route="/auth/login",status="401"}[5m]))
+          / sum(rate(http_requests_total{job="mana-core-auth",route="/auth/login"}[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High login failure rate"
+          description: "{{ $value | humanizePercentage }} of login attempts are failing."
+
+      # Rate Limiting Triggered Frequently
+      - alert: HighRateLimitHits
+        expr: |
+          sum(rate(http_requests_total{job="mana-core-auth",status="429"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Frequent rate limiting on Auth Service"
+          description: "Rate limit (429) is being hit {{ $value | humanize }} times/second. Possible attack or misconfiguration."
+
+      # Brute Force Detection (> 100 failed logins in 5 min)
+      - alert: PossibleBruteForce
+        expr: |
+          sum(increase(http_requests_total{job="mana-core-auth",route="/auth/login",status="401"}[5m])) > 100
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Possible brute force attack detected"
+          description: "{{ $value | humanize }} failed login attempts in the last 5 minutes."
+
+      # Registration Spike (unusual registration activity)
+      - alert: RegistrationSpike
+        expr: |
+          sum(rate(http_requests_total{job="mana-core-auth",route="/auth/register",status="201"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "High registration activity"
+          description: "{{ $value | humanize }} registrations per second. Verify this is expected."
+
+      # Token Refresh Failures
+      - alert: HighTokenRefreshFailures
+        expr: |
+          sum(rate(http_requests_total{job="mana-core-auth",route="/auth/refresh",status=~"4.."}[5m]))
+          / sum(rate(http_requests_total{job="mana-core-auth",route="/auth/refresh"}[5m])) > 0.3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High token refresh failure rate"
+          description: "{{ $value | humanizePercentage }} of token refresh attempts are failing."
+
+      # Password Reset Flood (possible enumeration attack)
+      - alert: PasswordResetFlood
+        expr: |
+          sum(increase(http_requests_total{job="mana-core-auth",route="/auth/forgot-password"}[5m])) > 50
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unusual password reset activity"
+          description: "{{ $value | humanize }} password reset requests in the last 5 minutes."
+
+      # Low User Verification Rate (less than 50% verified after 1 week)
+      - alert: LowVerificationRate
+        expr: |
+          auth_users_verified{job="mana-core-auth"} / auth_users_total{job="mana-core-auth"} < 0.5
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "Low email verification rate"
+          description: "Only {{ $value | humanizePercentage }} of users have verified their email."
+
+      # Auth Service Slow (p95 > 500ms)
+      - alert: AuthServiceSlow
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="mana-core-auth"}[5m])) by (le)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Auth Service responding slowly"
+          description: "Auth service p95 latency is {{ $value | humanizeDuration }}. This may impact all services."
+
+      # OIDC Token Endpoint Errors
+      - alert: OIDCTokenErrors
+        expr: |
+          sum(rate(http_requests_total{job="mana-core-auth",route=~"/api/auth/oauth2/token|/api/oidc/token",status=~"5.."}[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OIDC token endpoint errors"
+          description: "OIDC token endpoint is returning 5xx errors. SSO may be affected."

@@ -466,7 +466,7 @@ export class FraudDetectionService {
 	/**
 	 * Get pending review items
 	 */
-	async getPendingReviews(limit: number = 50, offset: number = 0): Promise<ReviewQueueItem[]> {
+	async getPendingReviews(limit = 50, offset = 0): Promise<ReviewQueueItem[]> {
 		const db = this.getDb();
 
 		return db

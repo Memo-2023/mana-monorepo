@@ -148,7 +148,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
 	/**
 	 * Get user growth over time
 	 */
-	async getUserGrowth(days: number = 90): Promise<GrowthData[]> {
+	async getUserGrowth(days = 90): Promise<GrowthData[]> {
 		if (!this.duckdb) return [];
 
 		const result = await this.duckdb.all(
@@ -171,7 +171,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
 	/**
 	 * Get monthly aggregated metrics
 	 */
-	async getMonthlyMetrics(months: number = 12): Promise<MonthlyMetrics[]> {
+	async getMonthlyMetrics(months = 12): Promise<MonthlyMetrics[]> {
 		if (!this.duckdb) return [];
 
 		const result = await this.duckdb.all(

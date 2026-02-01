@@ -501,8 +501,8 @@ export class ReferralTrackingService {
 	async getReferredUsers(
 		userId: string,
 		status?: string,
-		limit: number = 20,
-		offset: number = 0
+		limit = 20,
+		offset = 0
 	): Promise<PaginatedResponse<ReferredUser>> {
 		const db = this.getDb();
 
@@ -734,7 +734,7 @@ export class ReferralTrackingService {
 	): Promise<number> {
 		// Basic fraud score calculation
 		// Full fraud detection will be implemented in Phase 3
-		let score = 0;
+		const score = 0;
 
 		// For now, just return 0 (no fraud detected)
 		// TODO: Implement full fraud detection in Phase 3

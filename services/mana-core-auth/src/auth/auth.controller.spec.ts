@@ -139,7 +139,8 @@ describe('AuthController', () => {
 			expect(betterAuthService.registerB2C).toHaveBeenCalledWith({
 				email: registerDto.email,
 				password: registerDto.password,
-				name: undefined, // Controller passes undefined when name is not provided
+				name: '', // Controller passes empty string as fallback when name is not provided
+				sourceAppUrl: undefined,
 			});
 		});
 

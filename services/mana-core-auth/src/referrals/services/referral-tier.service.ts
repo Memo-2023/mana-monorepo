@@ -107,7 +107,7 @@ export class ReferralTierService {
 	calculateBonus(
 		eventType: keyof typeof BONUS_AMOUNTS,
 		tier: TierName,
-		isReferrer: boolean = true
+		isReferrer = true
 	): { base: number; multiplier: number; final: number } {
 		const bonusConfig = BONUS_AMOUNTS[eventType];
 		const base = isReferrer ? bonusConfig.referrer : bonusConfig.referee;

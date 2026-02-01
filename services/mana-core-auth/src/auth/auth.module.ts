@@ -8,7 +8,12 @@ import { ReferralsModule } from '../referrals/referrals.module';
 
 @Module({
 	imports: [forwardRef(() => ReferralsModule)],
-	controllers: [AuthController, BetterAuthPassthroughController, OidcController, OidcLoginController],
+	controllers: [
+		AuthController,
+		BetterAuthPassthroughController,
+		OidcController,
+		OidcLoginController,
+	],
 	providers: [BetterAuthService],
 	exports: [BetterAuthService],
 })

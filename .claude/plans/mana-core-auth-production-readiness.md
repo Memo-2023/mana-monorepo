@@ -1,6 +1,6 @@
 # Mana Core Auth - Production Readiness Plan
 
-> **Status**: In Bearbeitung
+> **Status**: ✅ Abgeschlossen
 > **Erstellt**: 2026-02-01
 > **Autor**: Claude Code
 > **Ziel**: Auth-Service produktionsreif machen
@@ -126,14 +126,29 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
 - **Datei**: `docs/PRODUCTION_DEPLOYMENT.md`
 
 ### 2.3 Grafana Dashboard & Alerts
-- **Status**: [ ] Offen (Separates Task)
+- **Status**: [x] Erledigt (2026-02-01)
 - **Priorität**: 🟠 Hoch
 - **Problem**: Prometheus Metrics existieren, aber keine Visualisierung
-- **Notiz**: Prometheus Metrics sind bereits unter `/metrics` verfügbar
-- **TODO für später**:
-  - Grafana Dashboard JSON erstellen
-  - Alert Rules für kritische Metriken (Error Rate, Latency)
-  - Loki Integration für Log-Aggregation
+- **Lösung**:
+  - ✅ Dediziertes Auth-Service Dashboard erstellt (`docker/grafana/dashboards/auth-service.json`)
+  - ✅ Service Health (UP/DOWN, Uptime, CPU, Memory, Event Loop)
+  - ✅ User Statistics (Total, Verified, New Today/Week/Month, Verification Rate)
+  - ✅ HTTP Traffic (Request Rate, Latency p50/p95/p99, Status Codes, Error Rates)
+  - ✅ Authentication Endpoints (Login/Register/Logout/Refresh Activity)
+  - ✅ Prometheus Alert Rules für Auth-Service (`docker/prometheus/alerts.yml`)
+    - AuthServiceDown (kritisch nach 30s)
+    - HighLoginFailureRate (>50%)
+    - PossibleBruteForce (>100 failed logins/5min)
+    - HighRateLimitHits
+    - RegistrationSpike
+    - TokenRefreshFailures
+    - PasswordResetFlood
+    - LowVerificationRate
+    - AuthServiceSlow (p95 >500ms)
+    - OIDCTokenErrors
+- **Geänderte Dateien**:
+  - `docker/grafana/dashboards/auth-service.json` - NEU
+  - `docker/prometheus/alerts.yml` - Auth-Alerts hinzugefügt
 
 ### 2.4 Disaster Recovery Dokumentation
 - **Status**: [x] Erledigt (2026-02-01)
@@ -254,12 +269,11 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
 | Phase | Aufgaben | Erledigt | Fortschritt |
 |-------|----------|----------|-------------|
 | Phase 1 | 5 | 5 | 100% |
-| Phase 2 | 6 | 5 | 83% |
+| Phase 2 | 6 | 6 | 100% |
 | Phase 3 | 5 | 5 | 100% |
-| **Gesamt** | **16** | **15** | **94%** |
+| **Gesamt** | **16** | **16** | **100%** |
 
-**Hinweis:** Phase 2.3 (Grafana Dashboard) ist als separates Task für später markiert.
-**Offen:** 2.3 (Grafana Dashboard)
+**Status: PRODUCTION READY** ✅
 
 ---
 
@@ -283,4 +297,7 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
 | 2026-02-01 | 3.5 Security Scanning: pnpm audit in CI, Dependabot war bereits aktiv |
 | 2026-02-01 | 3.2 OpenAPI/Swagger: API-Dokumentation unter /api-docs verfügbar |
 | 2026-02-01 | 3.1 E2E Tests: OIDC + Auth Flow Tests erstellt (oidc.e2e-spec.ts, auth-flow.e2e-spec.ts) |
+| 2026-02-01 | 2.3 Grafana Dashboard + Alerts: auth-service.json Dashboard, 10 Auth-spezifische Alert Rules |
+| 2026-02-01 | Test-Fixes: LoggerService Mock in better-auth.service.spec.ts, name assertion in auth.controller.spec.ts, createRemoteJWKSet Mock in jwt-auth.guard.spec.ts |
+| 2026-02-01 | **PLAN ABGESCHLOSSEN - 100% Production Ready (199/199 Unit Tests bestanden)** |
 

@@ -14,6 +14,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { BetterAuthService } from './better-auth.service';
+import { LoggerService } from '../../common/logger';
 import { createMockConfigService } from '../../__tests__/utils/test-helpers';
 import { silentError } from '../../__tests__/utils/silent-error.decorator';
 
@@ -68,6 +69,15 @@ const mockReferralTrackingService = {
 	applyReferral: jest.fn().mockResolvedValue({ success: true }),
 };
 
+const mockLoggerService = {
+	setContext: jest.fn().mockReturnThis(),
+	log: jest.fn(),
+	debug: jest.fn(),
+	warn: jest.fn(),
+	error: jest.fn(),
+	verbose: jest.fn(),
+};
+
 describe('BetterAuthService', () => {
 	let service: BetterAuthService;
 	let configService: ConfigService;
@@ -115,6 +125,10 @@ describe('BetterAuthService', () => {
 				{
 					provide: ReferralTrackingService,
 					useValue: mockReferralTrackingService,
+				},
+				{
+					provide: LoggerService,
+					useValue: mockLoggerService,
 				},
 			],
 		}).compile();

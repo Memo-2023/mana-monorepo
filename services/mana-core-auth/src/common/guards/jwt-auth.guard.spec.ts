@@ -17,10 +17,15 @@ import { LoggerService } from '../logger';
 import { createMockConfigService, httpMockHelpers } from '../../__tests__/utils/test-helpers';
 import { mockTokenFactory } from '../../__tests__/utils/mock-factories';
 import { silentError } from '../../__tests__/utils/silent-error.decorator';
-import { jwtVerify } from 'jose';
+import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 // Mock jose (auto-mocked via jest.config.js moduleNameMapper)
 jest.mock('jose');
+
+// Setup mock for createRemoteJWKSet to return a defined JWKS function
+const mockJWKS = jest.fn();
+const mockCreateRemoteJWKSet = createRemoteJWKSet as jest.MockedFunction<typeof createRemoteJWKSet>;
+mockCreateRemoteJWKSet.mockReturnValue(mockJWKS as any);
 
 // Mock LoggerService
 const createMockLoggerService = (): LoggerService =>
@@ -42,6 +47,9 @@ describe('JwtAuthGuard', () => {
 	beforeEach(async () => {
 		// Reset mocks
 		jest.clearAllMocks();
+
+		// Ensure createRemoteJWKSet returns a defined value after clearing
+		mockCreateRemoteJWKSet.mockReturnValue(mockJWKS as any);
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [

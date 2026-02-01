@@ -23,7 +23,7 @@ import { BadRequestException, ForbiddenException, NotFoundException } from '@nes
 import { CreditsController } from './credits.controller';
 import { CreditsService } from './credits.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { CurrentUserData } from '../common/decorators/current-user.decorator';
+import { type CurrentUserData } from '../common/decorators/current-user.decorator';
 import {
 	mockBalanceFactory,
 	mockTransactionFactory,
