@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -16,8 +16,8 @@ COPY packages/matrix-bot-common ./packages/matrix-bot-common
 # Copy this bot
 COPY services/matrix-mana-bot ./services/matrix-mana-bot
 
-# Install all dependencies
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# Install all dependencies (allow scripts for native modules)
+RUN pnpm install --frozen-lockfile
 
 # Build shared packages first (in dependency order)
 RUN pnpm --filter @manacore/bot-services build
@@ -27,7 +27,7 @@ RUN pnpm --filter @manacore/matrix-bot-common build
 RUN pnpm --filter matrix-mana-bot build
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 
 WORKDIR /app
 
@@ -47,15 +47,15 @@ COPY --from=builder /app/packages/matrix-bot-common/package.json ./packages/matr
 COPY --from=builder /app/services/matrix-mana-bot/dist ./services/matrix-mana-bot/dist
 COPY --from=builder /app/services/matrix-mana-bot/package.json ./services/matrix-mana-bot/
 
-# Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+# Install production dependencies (allow scripts for native modules)
+RUN pnpm install --frozen-lockfile --prod
 
 # Create data directory
 RUN mkdir -p /app/data
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nestjs && \
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 -g nodejs nestjs && \
     chown -R nestjs:nodejs /app
 
 USER nestjs
