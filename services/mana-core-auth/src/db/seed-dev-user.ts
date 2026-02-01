@@ -29,7 +29,7 @@ const DEV_USERS = [
 	},
 	{
 		email: 't@t.de',
-		password: '+üp+üp+üp',
+		password: 'test1234',
 		name: 'Test User',
 	},
 ];
