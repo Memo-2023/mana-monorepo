@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import { locale } from 'svelte-i18n';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
+	import { getRegisterTranslations } from '@manacore/shared-i18n';
+	import { ClockLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import '$lib/i18n';
-
-	let error = $state('');
-	let loading = $state(false);
 
 	// Get redirect URL from sessionStorage (set by AuthGateModal in guest mode)
 	const redirectTo = $derived.by(() => {
@@ -21,32 +21,32 @@
 		return '/';
 	});
 
-	async function handleRegister(email: string, password: string) {
-		loading = true;
-		error = '';
+	// Get translations based on current locale
+	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
-		const result = await authStore.signUp(email, password);
+	async function handleSignUp(email: string, password: string) {
+		return authStore.signUp(email, password);
+	}
 
-		if (result.success) {
-			if (result.needsVerification) {
-				// Show verification message or redirect to verification page
-				goto('/login?registered=true');
-			} else {
-				goto(redirectTo);
-			}
-		} else {
-			error = result.error || 'Registrierung fehlgeschlagen';
-		}
-
-		loading = false;
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
 	}
 </script>
 
+<svelte:head>
+	<title>{translations.title} | Clock</title>
+</svelte:head>
+
 <RegisterPage
 	appName="Clock"
-	appLogo=""
-	{loading}
-	{error}
-	onSubmit={handleRegister}
-	loginHref="/login"
+	logo={ClockLogo}
+	primaryColor="#f59e0b"
+	onSignUp={handleSignUp}
+	onResendVerification={handleResendVerification}
+	{goto}
+	successRedirect={redirectTo}
+	loginPath="/login"
+	lightBackground="#fffbeb"
+	darkBackground="#1c1917"
+	{translations}
 />
