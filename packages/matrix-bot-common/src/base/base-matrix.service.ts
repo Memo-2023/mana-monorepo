@@ -221,11 +221,41 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 	}
 
 	/**
-	 * Download media from Matrix
+	 * Download media from Matrix using authenticated media API (v1)
+	 * Newer Synapse versions require authenticated downloads via /_matrix/client/v1/media/download/
 	 */
 	protected async downloadMedia(mxcUrl: string): Promise<Buffer> {
-		const result = await this.client.downloadContent(mxcUrl);
-		return result.data;
+		// Parse mxc:// URL -> mxc://server/mediaId
+		const match = mxcUrl.match(/^mxc:\/\/([^/]+)\/(.+)$/);
+		if (!match) {
+			throw new Error(`Invalid mxc URL: ${mxcUrl}`);
+		}
+
+		const [, serverName, mediaId] = match;
+		const config = this.getConfig();
+
+		// Use the new authenticated media API (Matrix spec v1.11+)
+		const downloadUrl = `${config.homeserverUrl}/_matrix/client/v1/media/download/${serverName}/${mediaId}`;
+
+		const response = await fetch(downloadUrl, {
+			headers: {
+				Authorization: `Bearer ${config.accessToken}`,
+			},
+		});
+
+		if (!response.ok) {
+			// Fallback to old API for older servers
+			this.logger.debug(`v1 media API failed (${response.status}), trying legacy API...`);
+			try {
+				const result = await this.client.downloadContent(mxcUrl);
+				return result.data;
+			} catch {
+				throw new Error(`Failed to download media: ${response.status} ${response.statusText}`);
+			}
+		}
+
+		const arrayBuffer = await response.arrayBuffer();
+		return Buffer.from(arrayBuffer);
 	}
 
 	/**
