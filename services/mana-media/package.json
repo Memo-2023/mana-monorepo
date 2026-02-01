@@ -1,0 +1,11 @@
+{
+	"name": "@mana-media/root",
+	"private": true,
+	"scripts": {
+		"dev": "pnpm --filter @mana-media/api dev",
+		"build": "pnpm --filter @mana-media/api build",
+		"start": "pnpm --filter @mana-media/api start:prod",
+		"type-check": "pnpm -r type-check",
+		"lint": "pnpm -r lint"
+	}
+}
