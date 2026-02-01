@@ -514,7 +514,7 @@ services:
 
   # Matrix Bots (Ports 4010-4029)
   matrix-mana-bot:
-    image: matrix-mana-bot:latest
+    image: ghcr.io/memo-2023/matrix-mana-bot:latest
     container_name: mana-matrix-bot-mana
     restart: always
     depends_on:
@@ -546,7 +546,7 @@ services:
       start_period: 40s
 
   matrix-ollama-bot:
-    image: matrix-ollama-bot:latest
+    image: ghcr.io/memo-2023/matrix-ollama-bot:latest
     container_name: mana-matrix-bot-ollama
     restart: always
     depends_on:
@@ -574,7 +574,7 @@ services:
       start_period: 40s
 
   matrix-stats-bot:
-    image: matrix-stats-bot:latest
+    image: ghcr.io/memo-2023/matrix-stats-bot:latest
     container_name: mana-matrix-bot-stats
     restart: always
     depends_on:
@@ -603,7 +603,7 @@ services:
       start_period: 40s
 
   matrix-project-doc-bot:
-    image: matrix-project-doc-bot:latest
+    image: ghcr.io/memo-2023/matrix-project-doc-bot:latest
     container_name: mana-matrix-bot-projectdoc
     restart: always
     depends_on:
@@ -636,7 +636,7 @@ services:
       start_period: 40s
 
   matrix-todo-bot:
-    image: matrix-todo-bot:latest
+    image: ghcr.io/memo-2023/matrix-todo-bot:latest
     container_name: mana-matrix-bot-todo
     restart: always
     depends_on:
@@ -661,7 +661,7 @@ services:
       start_period: 40s
 
   matrix-calendar-bot:
-    image: matrix-calendar-bot:latest
+    image: ghcr.io/memo-2023/matrix-calendar-bot:latest
     container_name: mana-matrix-bot-calendar
     restart: always
     depends_on:
@@ -686,7 +686,7 @@ services:
       start_period: 40s
 
   matrix-nutriphi-bot:
-    image: matrix-nutriphi-bot:latest
+    image: ghcr.io/memo-2023/matrix-nutriphi-bot:latest
     container_name: mana-matrix-bot-nutriphi
     restart: always
     depends_on:
@@ -713,7 +713,7 @@ services:
       start_period: 40s
 
   matrix-zitare-bot:
-    image: matrix-zitare-bot:latest
+    image: ghcr.io/memo-2023/matrix-zitare-bot:latest
     container_name: mana-matrix-bot-zitare
     restart: always
     depends_on:
@@ -740,7 +740,7 @@ services:
       start_period: 40s
 
   matrix-clock-bot:
-    image: matrix-clock-bot:latest
+    image: ghcr.io/memo-2023/matrix-clock-bot:latest
     container_name: mana-matrix-bot-clock
     restart: always
     depends_on:
@@ -767,7 +767,7 @@ services:
       start_period: 40s
 
   matrix-tts-bot:
-    image: matrix-tts-bot:latest
+    image: ghcr.io/memo-2023/matrix-tts-bot:latest
     container_name: mana-matrix-bot-tts
     restart: always
     depends_on:
