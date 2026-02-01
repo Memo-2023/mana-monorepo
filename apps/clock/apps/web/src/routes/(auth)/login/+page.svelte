@@ -2,12 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
+	import { locale } from 'svelte-i18n';
 	import { LoginPage } from '@manacore/shared-auth-ui';
+	import { getLoginTranslations } from '@manacore/shared-i18n';
+	import { ClockLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import '$lib/i18n';
-
-	let error = $state('');
-	let loading = $state(false);
 
 	// Read verification status from query params (set after email verification)
 	const verified = $derived($page.url.searchParams.get('verified') === 'true');
@@ -31,30 +31,37 @@
 		return '/';
 	});
 
-	async function handleLogin(email: string, password: string) {
-		loading = true;
-		error = '';
+	// Get translations based on current locale
+	const translations = $derived(getLoginTranslations($locale || 'de'));
 
-		const result = await authStore.signIn(email, password);
+	async function handleSignIn(email: string, password: string) {
+		return authStore.signIn(email, password);
+	}
 
-		if (result.success) {
-			goto(redirectTo);
-		} else {
-			error = result.error || 'Anmeldung fehlgeschlagen';
-		}
-
-		loading = false;
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
 	}
 </script>
 
+<svelte:head>
+	<title>{translations.title} | Clock</title>
+</svelte:head>
+
 <LoginPage
 	appName="Clock"
-	appLogo=""
-	{loading}
-	{error}
-	onSubmit={handleLogin}
-	registerHref="/register"
-	forgotPasswordHref="/forgot-password"
+	logo={ClockLogo}
+	primaryColor="#f59e0b"
+	onSignIn={handleSignIn}
+	onResendVerification={handleResendVerification}
+	{goto}
+	enableGoogle={false}
+	enableApple={false}
+	successRedirect={redirectTo}
+	registerPath="/register"
+	forgotPasswordPath="/forgot-password"
+	lightBackground="#fffbeb"
+	darkBackground="#1c1917"
+	{translations}
 	{verified}
 	{initialEmail}
 />

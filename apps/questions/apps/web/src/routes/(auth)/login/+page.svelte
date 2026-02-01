@@ -4,9 +4,11 @@
 	import { browser } from '$app/environment';
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { getLoginTranslations } from '@manacore/shared-i18n';
+	import { locale } from 'svelte-i18n';
 	import { QuestionsLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { apiClient } from '$lib/api/client';
+	import '$lib/i18n';
 
 	// Get redirect URL from query params or sessionStorage
 	const redirectTo = $derived.by(() => {
@@ -24,8 +26,8 @@
 		return '/';
 	});
 
-	// Get translations (default to English)
-	const translations = $derived(getLoginTranslations('en'));
+	// Get translations based on current locale
+	const translations = $derived(getLoginTranslations($locale || 'en'));
 
 	// Read verification status from query params
 	const verified = $derived($page.url.searchParams.get('verified') === 'true');

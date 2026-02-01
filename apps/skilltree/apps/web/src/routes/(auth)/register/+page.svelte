@@ -3,8 +3,10 @@
 	import { browser } from '$app/environment';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
 	import { getRegisterTranslations } from '@manacore/shared-i18n';
+	import { locale } from 'svelte-i18n';
 	import { SkillTreeLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import '$lib/i18n';
 
 	// Get redirect URL from sessionStorage
 	const redirectTo = $derived.by(() => {
@@ -18,8 +20,8 @@
 		return '/';
 	});
 
-	// Get translations (default to German for this app)
-	const translations = $derived(getRegisterTranslations('de'));
+	// Get translations based on current locale
+	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
 	async function handleSignUp(email: string, password: string) {
 		return authStore.signUp(email, password);

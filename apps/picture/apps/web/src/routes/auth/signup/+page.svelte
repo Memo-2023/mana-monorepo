@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { locale } from 'svelte-i18n';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
 	import { getRegisterTranslations } from '@manacore/shared-i18n';
 	import PictureLogo from '$lib/components/branding/PictureLogo.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import '$lib/i18n';
 
-	// Default to German
-	const translations = getRegisterTranslations('de');
+	// Get translations based on current locale
+	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
 	async function handleSignUp(email: string, password: string) {
 		return authStore.signUp(email, password);
@@ -18,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>Registrieren - Picture</title>
+	<title>{translations.title} | Picture</title>
 </svelte:head>
 
 <RegisterPage
