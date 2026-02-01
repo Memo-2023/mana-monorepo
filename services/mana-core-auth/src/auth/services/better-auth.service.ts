@@ -1293,11 +1293,34 @@ export class BetterAuthService {
 				}
 			}
 
+			// Prepare body based on content type
+			let requestBody: string | undefined;
+			if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
+				const contentType = req.headers['content-type'] || '';
+				if (contentType.includes('application/x-www-form-urlencoded')) {
+					// Convert object to URL-encoded form data
+					const params = new URLSearchParams();
+					for (const [key, value] of Object.entries(req.body)) {
+						if (value !== undefined && value !== null) {
+							params.append(key, String(value));
+						}
+					}
+					requestBody = params.toString();
+				} else {
+					// Default to JSON
+					requestBody = JSON.stringify(req.body);
+					// Ensure content-type is set for JSON
+					if (!headers.has('content-type')) {
+						headers.set('content-type', 'application/json');
+					}
+				}
+			}
+
 			// Create Fetch Request
 			const fetchRequest = new Request(url.toString(), {
 				method: req.method,
 				headers,
-				body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+				body: requestBody,
 			});
 
 			// Call Better Auth's handler
