@@ -104,7 +104,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	/**
-	 * Handle voice note messages - transcribe and process as text
+	 * Handle voice note messages - transcribe, process, and respond with audio
 	 */
 	protected async handleAudioMessage(
 		roomId: string,
@@ -165,7 +165,16 @@ export class MatrixService extends BaseMatrixService {
 			await this.client.setTyping(roomId, false);
 
 			if (response) {
+				// Send text response first
 				await this.sendReply(roomId, event, response);
+
+				// Then generate and send audio response (non-blocking)
+				const prefs = this.voiceService.getUserPreferences(sender);
+				if (prefs.voiceEnabled) {
+					this.generateAndSendAudioResponse(roomId, response, sender).catch((err) =>
+						this.logger.error(`Failed to send audio response: ${err}`)
+					);
+				}
 			}
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
@@ -176,6 +185,110 @@ export class MatrixService extends BaseMatrixService {
 				'❌ Spracherkennung fehlgeschlagen. Bitte versuche es noch einmal.'
 			);
 		}
+	}
+
+	/**
+	 * Generate TTS audio and send as Matrix audio message
+	 */
+	private async generateAndSendAudioResponse(
+		roomId: string,
+		text: string,
+		userId: string
+	): Promise<void> {
+		try {
+			// Prepare text for speech (remove markdown, emojis, etc.)
+			const speechText = this.prepareTextForSpeech(text);
+
+			// Skip if text is too short or empty
+			if (!speechText || speechText.length < 5) {
+				return;
+			}
+
+			// Skip if text is very long (summarize would be better)
+			if (speechText.length > 800) {
+				this.logger.debug(`Text too long for audio (${speechText.length} chars), skipping`);
+				return;
+			}
+
+			// Generate audio
+			const audioBuffer = await this.voiceService.synthesize(speechText, userId);
+
+			// Upload to Matrix
+			const mxcUrl = await this.uploadMedia(audioBuffer, 'audio/mpeg', 'response.mp3');
+
+			// Send audio message
+			await this.client.sendMessage(roomId, {
+				msgtype: 'm.audio',
+				body: 'Sprachantwort',
+				url: mxcUrl,
+				info: {
+					mimetype: 'audio/mpeg',
+					size: audioBuffer.length,
+				},
+			});
+
+			this.logger.debug(`Sent audio response (${audioBuffer.length} bytes)`);
+		} catch (error) {
+			this.logger.error(`Failed to generate audio response: ${error}`);
+			// Don't throw - audio is optional
+		}
+	}
+
+	/**
+	 * Prepare text for text-to-speech
+	 * Removes markdown formatting, excessive whitespace, and formats for natural speech
+	 */
+	private prepareTextForSpeech(text: string): string {
+		let result = text;
+
+		// Remove code blocks
+		result = result.replace(/```[\s\S]*?```/g, '');
+		result = result.replace(/`[^`]+`/g, '');
+
+		// Remove markdown formatting
+		result = result.replace(/\*\*(.+?)\*\*/g, '$1'); // Bold
+		result = result.replace(/\*(.+?)\*/g, '$1'); // Italic
+		result = result.replace(/~~(.+?)~~/g, '$1'); // Strikethrough
+		result = result.replace(/^#+\s*/gm, ''); // Headers
+
+		// Remove common emojis (keep some for context)
+		result = result.replace(/[📋📅⏱️🔮💡❌✅🎤🔊☀️💪🔔]/g, '');
+
+		// Convert bullet points to natural speech
+		result = result.replace(/^[•\-]\s*/gm, '');
+
+		// Convert numbered lists
+		result = result.replace(/^\d+\.\s*/gm, '');
+
+		// Clean up time formats for German speech
+		result = result.replace(/(\d{1,2}):(\d{2})/g, (_, h, m) => {
+			const hour = parseInt(h);
+			const min = parseInt(m);
+			if (min === 0) {
+				return `${hour} Uhr`;
+			} else if (min === 30) {
+				return `halb ${hour + 1}`;
+			} else if (min === 15) {
+				return `viertel nach ${hour}`;
+			} else if (min === 45) {
+				return `viertel vor ${hour + 1}`;
+			}
+			return `${hour} Uhr ${min}`;
+		});
+
+		// Clean up multiple newlines and spaces
+		result = result.replace(/\n{2,}/g, '. ');
+		result = result.replace(/\n/g, ' ');
+		result = result.replace(/\s{2,}/g, ' ');
+
+		// Remove URLs
+		result = result.replace(/https?:\/\/[^\s]+/g, '');
+
+		// Clean up punctuation
+		result = result.replace(/\s+([.,!?])/g, '$1');
+		result = result.replace(/([.,!?])\s*([.,!?])/g, '$1');
+
+		return result.trim();
 	}
 
 	private async sendWelcomeMessage(roomId: string, userId: string) {

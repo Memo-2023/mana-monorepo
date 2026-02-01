@@ -4,6 +4,7 @@ import { TodoHandler } from '../handlers/todo.handler';
 import { CalendarHandler } from '../handlers/calendar.handler';
 import { ClockHandler } from '../handlers/clock.handler';
 import { HelpHandler } from '../handlers/help.handler';
+import { VoiceHandler } from '../handlers/voice.handler';
 import { OrchestrationService } from '../orchestration/orchestration.service';
 
 export interface CommandContext {
@@ -50,6 +51,8 @@ export class CommandRouterService {
 		private clockHandler: ClockHandler,
 		@Inject(forwardRef(() => HelpHandler))
 		private helpHandler: HelpHandler,
+		@Inject(forwardRef(() => VoiceHandler))
+		private voiceHandler: VoiceHandler,
 		@Inject(forwardRef(() => OrchestrationService))
 		private orchestration: OrchestrationService
 	) {
@@ -195,6 +198,23 @@ export class CommandRouterService {
 				patterns: ['!status'],
 				handler: (ctx) => this.helpHandler.showStatus(ctx),
 				description: 'Show status',
+			},
+
+			// Voice Commands
+			{
+				patterns: ['!voice', '!sprache'],
+				handler: (ctx, args) => this.voiceHandler.voiceSettings(ctx, args),
+				description: 'Voice settings',
+			},
+			{
+				patterns: ['!stimmen', '!voices'],
+				handler: (ctx) => this.voiceHandler.listVoices(ctx),
+				description: 'List voices',
+			},
+			{
+				patterns: ['!stimme'],
+				handler: (ctx, args) => this.voiceHandler.setVoice(ctx, args),
+				description: 'Set voice',
 			},
 		];
 	}
