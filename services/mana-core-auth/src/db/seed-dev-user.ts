@@ -21,11 +21,18 @@ import { eq } from 'drizzle-orm';
 // Load environment variables
 config();
 
-const DEV_USER = {
-	email: 'dev@manacore.local',
-	password: 'devpassword123',
-	name: 'Dev User',
-};
+const DEV_USERS = [
+	{
+		email: 'dev@manacore.local',
+		password: 'devpassword123',
+		name: 'Dev User',
+	},
+	{
+		email: 't@t.de',
+		password: '+üp+üp+üp',
+		name: 'Test User',
+	},
+];
 
 const AUTH_URL = process.env.BASE_URL || 'http://localhost:3001';
 
@@ -33,56 +40,60 @@ async function seedDevUser() {
 	const databaseUrl =
 		process.env.DATABASE_URL || 'postgresql://manacore:devpassword@localhost:5432/manacore';
 
-	console.log('🌱 Seeding dev user...');
-	console.log(`   Email: ${DEV_USER.email}`);
-	console.log(`   Password: ${DEV_USER.password}`);
+	console.log('🌱 Seeding dev users...');
 	console.log('');
 
 	const connection = postgres(databaseUrl, { max: 1 });
 	const db = drizzle(connection);
 
 	try {
-		// Check if user already exists
-		const existingUsers = await db.select().from(users).where(eq(users.email, DEV_USER.email));
+		for (const devUser of DEV_USERS) {
+			console.log(`Processing: ${devUser.email}`);
 
-		if (existingUsers.length > 0) {
-			// User exists - just make sure email is verified
-			await db.update(users).set({ emailVerified: true }).where(eq(users.email, DEV_USER.email));
+			// Check if user already exists
+			const existingUsers = await db.select().from(users).where(eq(users.email, devUser.email));
 
-			console.log('✅ Dev user already exists, email verification ensured.');
-			await connection.end();
-			return;
+			if (existingUsers.length > 0) {
+				// User exists - just make sure email is verified
+				await db.update(users).set({ emailVerified: true }).where(eq(users.email, devUser.email));
+				console.log(`   ✅ User already exists, email verification ensured.`);
+				continue;
+			}
+
+			// Register user via HTTP API (auth server must be running)
+			console.log(`   📡 Registering via API at ${AUTH_URL}...`);
+
+			const response = await fetch(`${AUTH_URL}/api/v1/auth/register`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: devUser.email,
+					password: devUser.password,
+					name: devUser.name,
+				}),
+			});
+
+			if (!response.ok) {
+				const error = await response.text();
+				console.error(`   ❌ Registration failed: ${response.status} - ${error}`);
+				continue;
+			}
+
+			const result = await response.json();
+			console.log(`   User created with ID: ${result.user?.id || 'unknown'}`);
+
+			// Set emailVerified to true (skip email verification for dev user)
+			await db.update(users).set({ emailVerified: true }).where(eq(users.email, devUser.email));
+			console.log(`   ✅ User created and email verified!`);
 		}
 
-		// Register user via HTTP API (auth server must be running)
-		console.log(`📡 Registering user via API at ${AUTH_URL}...`);
-
-		const response = await fetch(`${AUTH_URL}/api/v1/auth/register`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				email: DEV_USER.email,
-				password: DEV_USER.password,
-				name: DEV_USER.name,
-			}),
-		});
-
-		if (!response.ok) {
-			const error = await response.text();
-			throw new Error(`Registration failed: ${response.status} - ${error}`);
-		}
-
-		const result = await response.json();
-		console.log(`   User created with ID: ${result.user?.id || 'unknown'}`);
-
-		// Set emailVerified to true (skip email verification for dev user)
-		await db.update(users).set({ emailVerified: true }).where(eq(users.email, DEV_USER.email));
-
-		console.log('✅ Dev user created and email verified!');
 		console.log('');
-		console.log('You can now login with:');
-		console.log(`   Email: ${DEV_USER.email}`);
-		console.log(`   Password: ${DEV_USER.password}`);
+		console.log('Dev users ready:');
+		for (const devUser of DEV_USERS) {
+			console.log(`   Email: ${devUser.email}`);
+			console.log(`   Password: ${devUser.password}`);
+			console.log('');
+		}
 	} catch (error) {
 		if (error instanceof Error && error.message.includes('fetch')) {
 			console.error('');
@@ -91,7 +102,7 @@ async function seedDevUser() {
 			console.error('   pnpm dev:auth');
 			console.error('');
 		} else {
-			console.error('❌ Error seeding dev user:', error);
+			console.error('❌ Error seeding dev users:', error);
 		}
 		throw error;
 	} finally {
