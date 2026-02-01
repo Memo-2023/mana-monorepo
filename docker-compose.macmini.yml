@@ -1241,11 +1241,18 @@ services:
     image: prom/node-exporter:v1.7.0
     container_name: mana-mon-node-exporter
     restart: always
+    # macOS Docker runs in a Linux VM, so we can only monitor the VM's metrics
+    # For full host metrics on macOS, install node_exporter natively
     command:
-      - '--path.rootfs=/host'
+      - '--collector.disable-defaults'
+      - '--collector.cpu'
+      - '--collector.meminfo'
+      - '--collector.loadavg'
+      - '--collector.filesystem'
+      - '--collector.netdev'
+      - '--collector.time'
+      - '--collector.uname'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    volumes:
-      - '/:/host:ro,rslave'
     ports:
       - "9100:9100"
     healthcheck:
