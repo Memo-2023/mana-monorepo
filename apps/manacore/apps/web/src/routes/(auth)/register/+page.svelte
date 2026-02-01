@@ -16,6 +16,10 @@
 	async function handleValidateReferralCode(code: string) {
 		return authStore.validateReferralCode(code);
 	}
+
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
+	}
 </script>
 
 <RegisterPage
@@ -23,6 +27,7 @@
 	logo={ManaCoreLogo}
 	primaryColor="#6366f1"
 	onSignUp={handleSignUp}
+	onResendVerification={handleResendVerification}
 	onValidateReferralCode={handleValidateReferralCode}
 	{initialReferralCode}
 	baseSignupCredits={25}

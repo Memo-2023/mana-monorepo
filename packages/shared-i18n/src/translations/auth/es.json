@@ -46,7 +46,11 @@
 		"passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
 		"passwordStrengthError": "La contraseña debe incluir minúsculas, mayúsculas, números y caracteres especiales",
 		"registrationFailed": "Error en el registro",
-		"accountCreated": "¡Cuenta creada! Por favor revisa tu correo para verificar tu cuenta."
+		"accountCreated": "¡Cuenta creada! Por favor revisa tu correo para verificar tu cuenta.",
+		"resendVerification": "Reenviar correo de verificación",
+		"resendingVerification": "Enviando...",
+		"verificationEmailSent": "¡Correo de verificación enviado! Por favor revisa tu bandeja de entrada.",
+		"checkYourEmail": "Revisa tu correo"
 	},
 	"forgotPassword": {
 		"titleForm": "Restablecer Contraseña",

@@ -23,6 +23,10 @@
 	async function handleSignUp(email: string, password: string) {
 		return authStore.signUp(email, password);
 	}
+
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
+	}
 </script>
 
 <svelte:head>
@@ -34,6 +38,7 @@
 	logo={NutriPhiLogo}
 	primaryColor="#22C55E"
 	onSignUp={handleSignUp}
+	onResendVerification={handleResendVerification}
 	{goto}
 	successRedirect={redirectTo}
 	loginPath="/login"

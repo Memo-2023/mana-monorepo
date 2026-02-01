@@ -46,7 +46,11 @@
 		"passwordTooShort": "Password must be at least 8 characters",
 		"passwordStrengthError": "Password must include lowercase, uppercase, number, and special character",
 		"registrationFailed": "Registration failed",
-		"accountCreated": "Account created! Please check your email to verify your account."
+		"accountCreated": "Account created! Please check your email to verify your account.",
+		"resendVerification": "Resend verification email",
+		"resendingVerification": "Sending...",
+		"verificationEmailSent": "Verification email sent! Please check your inbox.",
+		"checkYourEmail": "Check your email"
 	},
 	"forgotPassword": {
 		"titleForm": "Reset Password",

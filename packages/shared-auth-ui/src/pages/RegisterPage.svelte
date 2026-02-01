@@ -33,6 +33,11 @@
 		registrationFailed: string;
 		// Success messages
 		accountCreated: string;
+		// Verification resend
+		resendVerification?: string;
+		resendingVerification?: string;
+		verificationEmailSent?: string;
+		checkYourEmail?: string;
 	}
 
 	/** Referral code validation result */
@@ -72,6 +77,11 @@
 			'Password must include lowercase, uppercase, number, and special character',
 		registrationFailed: 'Registration failed',
 		accountCreated: 'Account created! Please check your email to verify your account.',
+		// Verification resend
+		resendVerification: 'Resend verification email',
+		resendingVerification: 'Sending...',
+		verificationEmailSent: 'Verification email sent! Please check your inbox.',
+		checkYourEmail: 'Check your email',
 	};
 
 	interface Props {
@@ -85,6 +95,8 @@
 		onSignUp: (email: string, password: string, referralCode?: string) => Promise<AuthResult>;
 		/** Navigation function */
 		goto: (path: string) => void;
+		/** Resend verification email function */
+		onResendVerification?: (email: string) => Promise<AuthResult>;
 		/** Success redirect path */
 		successRedirect?: string;
 		/** Login page path */
@@ -113,6 +125,7 @@
 		primaryColor,
 		onSignUp,
 		goto,
+		onResendVerification,
 		successRedirect = '/dashboard',
 		loginPath = '/login',
 		lightBackground = '#f5f5f5',
@@ -137,6 +150,8 @@
 	let confirmPassword = $state('');
 	let showPassword = $state(false);
 	let showConfirmPassword = $state(false);
+	let resendingVerification = $state(false);
+	let verificationEmailSent = $state(false);
 
 	// Referral state
 	let referralCode = $state(initialReferralCode);
@@ -310,6 +325,22 @@
 			error = result.error || t.registrationFailed;
 		}
 	}
+
+	async function handleResendVerification() {
+		if (!onResendVerification || !email || resendingVerification) return;
+
+		resendingVerification = true;
+		error = null;
+
+		const result = await onResendVerification(email);
+		resendingVerification = false;
+
+		if (result.success) {
+			verificationEmailSent = true;
+		} else {
+			error = result.error || t.registrationFailed;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -390,12 +421,110 @@
 				</div>
 			{/if}
 
-			<!-- Success Message -->
-			{#if success && needsVerification}
-				<div class="mb-4 rounded-xl bg-green-500/20 border border-green-500/30 p-3">
-					<p class="text-sm text-green-500">
-						{t.accountCreated}
+			<!-- Verification Email Sent Confirmation -->
+			{#if verificationEmailSent}
+				<div class="mb-4 rounded-xl bg-green-500/20 border border-green-500/30 p-4">
+					<p class="text-sm text-green-500 font-medium">
+						{t.verificationEmailSent}
 					</p>
+				</div>
+			{/if}
+
+			<!-- Success Message with Resend Option -->
+			{#if success && needsVerification}
+				<div
+					class="mb-6 rounded-xl p-5"
+					style="background-color: {isDark
+						? 'rgba(34, 197, 94, 0.15)'
+						: 'rgba(34, 197, 94, 0.1)'}; border: 2px solid rgba(34, 197, 94, 0.4);"
+				>
+					<div class="flex items-start gap-3 mb-4">
+						<div
+							class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+							style="background-color: rgba(34, 197, 94, 0.2);"
+						>
+							<svg
+								class="w-5 h-5 text-green-500"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+								></path>
+							</svg>
+						</div>
+						<div>
+							<h3
+								class="font-semibold text-base mb-1"
+								style="color: {isDark ? '#22c55e' : '#16a34a'};"
+							>
+								{t.checkYourEmail || 'Check your email'}
+							</h3>
+							<p
+								class="text-sm"
+								style="color: {isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'};"
+							>
+								{t.accountCreated}
+							</p>
+						</div>
+					</div>
+
+					{#if onResendVerification}
+						<div
+							class="pt-3 border-t"
+							style="border-color: {isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};"
+						>
+							<p
+								class="text-xs mb-2"
+								style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};"
+							>
+								Didn't receive the email?
+							</p>
+							<button
+								type="button"
+								onclick={handleResendVerification}
+								disabled={resendingVerification}
+								class="w-full flex items-center justify-center gap-2 h-11 rounded-lg font-medium transition-all hover:opacity-80 disabled:opacity-50"
+								style="background-color: {primaryColor}40; border: 1.5px solid {primaryColor}; color: {isDark
+									? '#ffffff'
+									: '#000000'};"
+							>
+								{#if resendingVerification}
+									<svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+										<circle
+											class="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											stroke-width="4"
+											fill="none"
+										></circle>
+										<path
+											class="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										></path>
+									</svg>
+									{t.resendingVerification}
+								{:else}
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+										></path>
+									</svg>
+									{t.resendVerification}
+								{/if}
+							</button>
+						</div>
+					{/if}
 				</div>
 			{/if}
 
@@ -405,9 +534,9 @@
 					e.preventDefault();
 					handleRegister();
 				}}
-				class="pb-4"
+				class="space-y-4"
 			>
-				<div class="mb-2">
+				<div>
 					<input
 						type="email"
 						bind:value={email}
@@ -424,7 +553,7 @@
 					/>
 				</div>
 
-				<div class="mb-2">
+				<div>
 					<div class="relative">
 						<input
 							type={showPassword ? 'text' : 'password'}
@@ -456,7 +585,7 @@
 					</div>
 				</div>
 
-				<div class="mb-2">
+				<div>
 					<div class="relative">
 						<input
 							type={showConfirmPassword ? 'text' : 'password'}
@@ -490,15 +619,15 @@
 
 				<!-- Password Requirements -->
 				<p
-					class="mb-4 mt-2 text-xs"
-					style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
+					class="text-xs -mt-2"
+					style="color: {isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'};"
 				>
 					{t.passwordRequirements}
 				</p>
 
 				<!-- Referral Code Input -->
 				{#if onValidateReferralCode}
-					<div class="mb-4">
+					<div>
 						<div class="relative">
 							<input
 								type="text"
@@ -551,7 +680,7 @@
 				<button
 					type="submit"
 					disabled={loading}
-					class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2"
+					class="flex h-14 w-full items-center justify-center gap-2 rounded-xl font-medium transition-all hover:opacity-80 disabled:opacity-50 border-2 mt-2"
 					style="background-color: {primaryColor}60; border-color: {primaryColor}; color: {isDark
 						? '#ffffff'
 						: '#000000'};"

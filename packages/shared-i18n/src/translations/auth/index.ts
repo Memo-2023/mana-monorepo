@@ -62,6 +62,10 @@ export interface AuthTranslations {
 		passwordStrengthError: string;
 		registrationFailed: string;
 		accountCreated: string;
+		resendVerification?: string;
+		resendingVerification?: string;
+		verificationEmailSent?: string;
+		checkYourEmail?: string;
 	};
 	forgotPassword: {
 		titleForm: string;

@@ -26,6 +26,10 @@
 	async function handleSignUp(email: string, password: string) {
 		return authStore.signUp(email, password);
 	}
+
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
+	}
 </script>
 
 <svelte:head>
@@ -37,6 +41,7 @@
 	logo={ContactsLogo}
 	primaryColor="#3b82f6"
 	onSignUp={handleSignUp}
+	onResendVerification={handleResendVerification}
 	{goto}
 	successRedirect={redirectTo}
 	loginPath="/login"

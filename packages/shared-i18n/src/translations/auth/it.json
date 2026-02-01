@@ -46,7 +46,11 @@
 		"passwordTooShort": "La password deve contenere almeno 8 caratteri",
 		"passwordStrengthError": "La password deve contenere minuscole, maiuscole, numeri e caratteri speciali",
 		"registrationFailed": "Registrazione fallita",
-		"accountCreated": "Account creato! Controlla la tua email per verificare il tuo account."
+		"accountCreated": "Account creato! Controlla la tua email per verificare il tuo account.",
+		"resendVerification": "Invia di nuovo l'email di verifica",
+		"resendingVerification": "Invio in corso...",
+		"verificationEmailSent": "Email di verifica inviata! Controlla la tua casella di posta.",
+		"checkYourEmail": "Controlla la tua email"
 	},
 	"forgotPassword": {
 		"titleForm": "Reimposta Password",
