@@ -193,28 +193,27 @@ run_background_tasks_on: synapse
 # OIDC / SSO Configuration (Mana Core Auth)
 # ============================================
 
-# TEMPORARILY DISABLED - Fix OIDC client registration first
 # Enable SSO via Mana Core Auth OIDC Provider
-# oidc_providers:
-#   - idp_id: manacore
-#     idp_name: "Mana Core"
-#     idp_brand: "org.matrix.custom"
-#     discover: true
-#     issuer: "https://auth.mana.how"
-#     client_id: "matrix-synapse"
-#     client_secret: "ms-1ac3cfdd636e4688c927aa36feb1dfa79d84da73099a1dd9c9ceacb79a77e7cd"
-#     scopes: ["openid", "profile", "email"]
-#     user_mapping_provider:
-#       config:
-#         subject_claim: "sub"
-#         localpart_template: "{{ user.email.split('@')[0] }}"
-#         display_name_template: "{{ user.name }}"
-#         email_template: "{{ user.email }}"
-#     allow_existing_users: true
-#     enable_registration: true
+oidc_providers:
+  - idp_id: manacore
+    idp_name: "Mana Core"
+    idp_brand: "org.matrix.custom"
+    discover: true
+    issuer: "https://auth.mana.how"
+    client_id: "matrix-synapse"
+    client_secret: "6dc67d2dbea5c19409d21cbaec5ba77265b0296796d4ebb015d70209c68f3fd5"
+    scopes: ["openid", "profile", "email"]
+    user_mapping_provider:
+      config:
+        subject_claim: "sub"
+        localpart_template: "{{ user.email.split('@')[0] }}"
+        display_name_template: "{{ user.name }}"
+        email_template: "{{ user.email }}"
+    allow_existing_users: true
+    enable_registration: true
 
 # SSO UI Settings
-# sso:
-#   client_whitelist:
-#     - "https://element.mana.how"
-#     - "https://matrix.mana.how"
+sso:
+  client_whitelist:
+    - "https://element.mana.how"
+    - "https://matrix.mana.how"
