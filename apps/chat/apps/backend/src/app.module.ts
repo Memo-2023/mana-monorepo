@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
+import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { DatabaseModule } from './db/database.module';
 import { ChatModule } from './chat/chat.module';
 import { ConversationModule } from './conversation/conversation.module';
@@ -15,6 +16,15 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: '.env',
+		}),
+		ManaCoreModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (configService: ConfigService) => ({
+				appId: configService.get<string>('APP_ID', 'chat'),
+				serviceKey: configService.get<string>('MANA_CORE_SERVICE_KEY', ''),
+				debug: configService.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
 		}),
 		MetricsModule.register({
 			prefix: 'chat_',

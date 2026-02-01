@@ -197,35 +197,44 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
   - Alle DTOs
 
 ### 3.3 Docker Optimierung
-- **Status**: [ ] Offen
+- **Status**: [x] Erledigt (2026-02-01)
 - **Priorität**: 🟡 Mittel
 - **Problem**: Source code kopiert, tsx in prod, kein .dockerignore
 - **Lösung**:
-  - `.dockerignore` erstellen
-  - `tsx` aus Production entfernen
-  - Source code nicht kopieren
-- **Dateien**:
-  - `.dockerignore`
-  - `Dockerfile`
+  - ✅ `.dockerignore` erstellt (node_modules, tests, docs, IDE files)
+  - ✅ `tsx` aus Production entfernt (Migrations laufen extern)
+  - ✅ Source code wird nicht mehr kopiert (nur dist/)
+  - ✅ Multi-stage Build optimiert
+- **Geänderte Dateien**:
+  - `.dockerignore` - NEU
+  - `Dockerfile` - Optimiert
 
 ### 3.4 Dependency Cleanup
-- **Status**: [ ] Offen
+- **Status**: [x] Erledigt (2026-02-01)
 - **Priorität**: 🟡 Mittel
-- **Problem**: `jsonwebtoken` UND `jose` (nur jose nötig)
+- **Problem**: `jsonwebtoken` UND `jose` (nur jose nötig laut CLAUDE.md)
 - **Lösung**:
-  - `jsonwebtoken` entfernen
-  - Alle Imports prüfen
-- **Datei**: `package.json`
+  - ✅ `jsonwebtoken` aus dependencies entfernt
+  - ✅ `@types/jsonwebtoken` aus devDependencies entfernt
+  - ✅ RS256 Fallback aus `better-auth.service.ts` entfernt
+  - ✅ JWT-Tests auf `jose` Mock umgestellt
+  - ✅ jose Mock implementiert für Jest (ESM-Kompatibilität)
+- **Geänderte Dateien**:
+  - `package.json` - jsonwebtoken entfernt
+  - `src/auth/services/better-auth.service.ts` - Fallback entfernt
+  - `src/auth/jwt-validation.spec.ts` - jose statt jsonwebtoken
+  - `test/__mocks__/jose.ts` - NEU (HS256 Mock für Tests)
 
 ### 3.5 Security Scanning in CI/CD
-- **Status**: [ ] Offen
+- **Status**: [x] Erledigt (2026-02-01)
 - **Priorität**: 🟡 Mittel
 - **Problem**: Keine automatische Security-Prüfung
 - **Lösung**:
-  - `npm audit` in CI
-  - Dependabot aktivieren
-  - SAST Tools (optional)
-- **Datei**: `.github/workflows/ci.yml`
+  - ✅ `pnpm audit --audit-level=high` in CI (validate job)
+  - ✅ Dependabot bereits konfiguriert (npm, github-actions, docker)
+  - ✅ Warnung für bekannte vulnerable Pakete (lodash, axios)
+- **Geänderte Datei**: `.github/workflows/ci.yml`
+- **Existierende Datei**: `.github/dependabot.yml` (war bereits vorhanden)
 
 ---
 
@@ -235,10 +244,11 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
 |-------|----------|----------|-------------|
 | Phase 1 | 5 | 5 | 100% |
 | Phase 2 | 6 | 5 | 83% |
-| Phase 3 | 5 | 0 | 0% |
-| **Gesamt** | **16** | **10** | **63%** |
+| Phase 3 | 5 | 3 | 60% |
+| **Gesamt** | **16** | **13** | **81%** |
 
 **Hinweis:** Phase 2.3 (Grafana Dashboard) ist als separates Task für später markiert.
+**Offen:** 3.1 (E2E Tests), 3.2 (OpenAPI/Swagger), 2.3 (Grafana Dashboard)
 
 ---
 
@@ -257,4 +267,7 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
 | 2026-02-01 | 2.4 Disaster Recovery Dokumentation erstellt |
 | 2026-02-01 | 2.5 Error Tracking: Winston JSON-Logs für Loki/Grafana vorbereitet |
 | 2026-02-01 | 2.6 Stripe Validierung: Warnung in env.validation.ts (Teil von 1.2) |
+| 2026-02-01 | 3.3 Docker Optimierung: .dockerignore, tsx entfernt, nur dist/ kopiert |
+| 2026-02-01 | 3.4 Dependency Cleanup: jsonwebtoken entfernt, jose Mock für Tests |
+| 2026-02-01 | 3.5 Security Scanning: pnpm audit in CI, Dependabot war bereits aktiv |
 

@@ -15,6 +15,14 @@ export { OptionalAuthGuard } from './guards/optional-auth.guard';
 // Decorators
 export { CurrentUser, JwtPayload } from './decorators/current-user.decorator';
 export { Public, IS_PUBLIC_KEY } from './decorators/public.decorator';
+export {
+	UseCredits,
+	CreditOperationConfig,
+	CREDIT_OPERATION_KEY,
+} from './decorators/use-credits.decorator';
+
+// Interceptors
+export { CreditInterceptor } from './interceptors/credit.interceptor';
 
 // Services
 export {
@@ -28,3 +36,18 @@ export {
 	InsufficientCreditsException,
 	InsufficientCreditsDetails,
 } from './exceptions/insufficient-credits.exception';
+
+// Re-export credit operations for convenience
+export {
+	CreditOperationType,
+	CREDIT_COSTS,
+	CreditCategory,
+	getCreditCost,
+	getOperationMetadata,
+	getOperationsForApp,
+	formatCreditCost,
+	getPricingTable,
+	isFreeOperation,
+	isMicroCreditOperation,
+	isAiOperation,
+} from '@manacore/credit-operations';

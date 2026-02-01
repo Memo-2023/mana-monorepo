@@ -281,7 +281,9 @@ export function createBetterAuth(databaseUrl: string) {
 			 */
 			jwt({
 				jwt: {
-					issuer: process.env.JWT_ISSUER || 'manacore',
+					// For OIDC compatibility, issuer MUST match the discovery document
+					// Use BASE_URL to match /.well-known/openid-configuration issuer
+					issuer: process.env.BASE_URL || process.env.JWT_ISSUER || 'http://localhost:3001',
 					audience: process.env.JWT_AUDIENCE || 'manacore',
 					expirationTime: '15m',
 

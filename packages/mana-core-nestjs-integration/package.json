@@ -20,6 +20,11 @@
 			"types": "./dist/decorators/index.d.ts",
 			"import": "./dist/decorators/index.js",
 			"require": "./dist/decorators/index.js"
+		},
+		"./interceptors": {
+			"types": "./dist/interceptors/index.d.ts",
+			"import": "./dist/interceptors/index.js",
+			"require": "./dist/interceptors/index.js"
 		}
 	},
 	"scripts": {
@@ -30,10 +35,12 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@manacore/credit-operations": "workspace:*",
 		"@nestjs/common": "^10.0.0 || ^11.0.0",
 		"@nestjs/config": "^3.0.0 || ^4.0.0",
 		"@nestjs/core": "^10.0.0 || ^11.0.0",
-		"reflect-metadata": "^0.1.13 || ^0.2.0"
+		"reflect-metadata": "^0.1.13 || ^0.2.0",
+		"rxjs": "^7.0.0"
 	},
 	"devDependencies": {
 		"@types/node": "^20.0.0",

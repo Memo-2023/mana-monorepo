@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, RequestMethod } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import type { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -128,12 +129,69 @@ async function bootstrap() {
 		],
 	});
 
+	// Swagger/OpenAPI documentation
+	const swaggerConfig = new DocumentBuilder()
+		.setTitle('Mana Core Auth API')
+		.setDescription(
+			`
+## Authentication & Authorization Service
+
+Mana Core Auth provides centralized authentication for the Mana ecosystem.
+
+### Features
+- **User Authentication**: Registration, login, password reset
+- **JWT Tokens**: EdDSA-signed access tokens via JWKS
+- **Organizations (B2B)**: Multi-tenant support with roles
+- **Credits**: Usage-based credit system
+- **OIDC Provider**: OAuth2/OpenID Connect for SSO
+
+### Authentication
+Most endpoints require a Bearer token in the Authorization header:
+\`\`\`
+Authorization: Bearer <access_token>
+\`\`\`
+
+### Rate Limits
+- Registration: 5 req/min
+- Login: 10 req/min
+- Password Reset: 3 req/min
+`
+		)
+		.setVersion('1.0')
+		.addBearerAuth(
+			{
+				type: 'http',
+				scheme: 'bearer',
+				bearerFormat: 'JWT',
+				description: 'Enter your JWT access token',
+			},
+			'JWT-auth'
+		)
+		.addTag('auth', 'User authentication (login, register, logout)')
+		.addTag('organizations', 'B2B organization management')
+		.addTag('credits', 'Credit balance and transactions')
+		.addTag('health', 'Service health checks')
+		.addServer('http://localhost:3001', 'Local Development')
+		.addServer('https://auth.mana.how', 'Production')
+		.build();
+
+	const document = SwaggerModule.createDocument(app, swaggerConfig);
+	SwaggerModule.setup('api-docs', app, document, {
+		swaggerOptions: {
+			persistAuthorization: true,
+			tagsSorter: 'alpha',
+			operationsSorter: 'alpha',
+		},
+		customSiteTitle: 'Mana Core Auth API',
+	});
+
 	const port = configService.get<number>('port') || 3001;
 	await app.listen(port);
 
 	logger.info(`Mana Core Auth running on http://localhost:${port}`, {
 		port,
 		environment: configService.get<string>('nodeEnv'),
+		docs: `http://localhost:${port}/api-docs`,
 	});
 }
 

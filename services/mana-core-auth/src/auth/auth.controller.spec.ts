@@ -30,6 +30,7 @@ import {
 	ForbiddenException,
 	NotFoundException,
 } from '@nestjs/common';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthController } from './auth.controller';
 import { BetterAuthService } from './services/better-auth.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -63,6 +64,7 @@ describe('AuthController', () => {
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
+			imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }])],
 			controllers: [AuthController],
 			providers: [
 				{
@@ -72,6 +74,8 @@ describe('AuthController', () => {
 			],
 		})
 			.overrideGuard(JwtAuthGuard)
+			.useValue({ canActivate: jest.fn(() => true) })
+			.overrideGuard(ThrottlerGuard)
 			.useValue({ canActivate: jest.fn(() => true) })
 			.compile();
 

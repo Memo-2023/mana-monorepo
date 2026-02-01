@@ -26,6 +26,8 @@
 		"docker:clean": "docker compose down -v --rmi local"
 	},
 	"dependencies": {
+		"@manacore/credit-operations": "workspace:*",
+		"@manacore/nestjs-integration": "workspace:*",
 		"@manacore/shared-errors": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",

@@ -558,6 +558,26 @@ jobs:
       - name: Lint
         run: pnpm run lint || echo "Lint warnings found"
 
+      - name: Security Audit
+        run: |
+          # Run pnpm audit and capture exit code
+          # Exit 0 if only moderate/low vulnerabilities
+          pnpm audit --audit-level=high || {
+            echo "::warning::Security vulnerabilities found. Run 'pnpm audit' locally for details."
+            exit 0  # Don't fail build on audit issues (just warn)
+          }
+
+      - name: Check for known vulnerable packages
+        run: |
+          # Check for packages with known critical vulnerabilities
+          # This is a basic check - for production, consider Snyk or similar
+          if grep -r "lodash@[0-3]\." pnpm-lock.yaml 2>/dev/null; then
+            echo "::warning::Potentially vulnerable lodash version detected"
+          fi
+          if grep -r "axios@0\.[0-9]\." pnpm-lock.yaml 2>/dev/null; then
+            echo "::warning::Potentially vulnerable axios version detected"
+          fi
+
   # ===========================================
   # Build Docker images - only changed services
   # ===========================================
