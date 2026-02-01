@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent, UserListMapper } from '@manacore/matrix-bot-common';
 import { QuestionsService, Question, Collection, Answer } from '../questions/questions.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
@@ -8,9 +8,9 @@ import { HELP_MESSAGE } from '../config/configuration';
 @Injectable()
 export class MatrixService extends BaseMatrixService {
 	// Store last shown items per user for reference by number
-	private lastQuestionsList: Map<string, Question[]> = new Map();
-	private lastCollectionsList: Map<string, Collection[]> = new Map();
-	private lastAnswersList: Map<string, Answer[]> = new Map();
+	private questionsMapper = new UserListMapper<Question>();
+	private collectionsMapper = new UserListMapper<Collection>();
+	private answersMapper = new UserListMapper<Answer>();
 
 	constructor(
 		configService: ConfigService,
@@ -220,7 +220,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const questions = result.data || [];
-		this.lastQuestionsList.set(sender, questions);
+		this.questionsMapper.setList(sender, questions);
 
 		if (questions.length === 0) {
 			await this.sendMessage(
@@ -292,7 +292,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastQuestionsList.delete(sender);
+		this.questionsMapper.clearList(sender);
 		await this.sendMessage(
 			roomId,
 			`<p>Frage erstellt: <strong>${result.data!.title}</strong></p>
@@ -316,7 +316,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastQuestionsList.delete(sender);
+		this.questionsMapper.clearList(sender);
 		await this.sendMessage(roomId, `<p>Frage geloescht: <strong>${question.title}</strong></p>`);
 	}
 
@@ -496,7 +496,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const answers = result.data || [];
-		this.lastAnswersList.set(sender, answers);
+		this.answersMapper.setList(sender, answers);
 
 		if (answers.length === 0) {
 			await this.sendMessage(
@@ -532,9 +532,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleRateAnswer(roomId: string, sender: string, numberStr: string, ratingStr: string) {
 		const token = this.requireAuth(sender);
-		const answers = this.lastAnswersList.get(sender);
 
-		if (!answers || answers.length === 0) {
+		if (!this.answersMapper.hasList(sender)) {
 			await this.sendMessage(roomId, '<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>');
 			return;
 		}
@@ -545,7 +544,12 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const answer = answers[0];
+		// Get first answer (most recent)
+		const answer = this.answersMapper.getByNumber(sender, 1);
+		if (!answer) {
+			await this.sendMessage(roomId, '<p>Keine Antwort gefunden.</p>');
+			return;
+		}
 		const result = await this.questionsService.rateAnswer(token, answer.id, rating);
 
 		if (result.error) {
@@ -558,14 +562,18 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleAcceptAnswer(roomId: string, sender: string, numberStr: string) {
 		const token = this.requireAuth(sender);
-		const answers = this.lastAnswersList.get(sender);
 
-		if (!answers || answers.length === 0) {
+		if (!this.answersMapper.hasList(sender)) {
 			await this.sendMessage(roomId, '<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>');
 			return;
 		}
 
-		const answer = answers[0];
+		// Get first answer (most recent)
+		const answer = this.answersMapper.getByNumber(sender, 1);
+		if (!answer) {
+			await this.sendMessage(roomId, '<p>Keine Antwort gefunden.</p>');
+			return;
+		}
 		const result = await this.questionsService.acceptAnswer(token, answer.id);
 
 		if (result.error) {
@@ -587,7 +595,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const collections = result.data || [];
-		this.lastCollectionsList.set(sender, collections);
+		this.collectionsMapper.setList(sender, collections);
 
 		if (collections.length === 0) {
 			await this.sendMessage(
@@ -622,7 +630,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastCollectionsList.delete(sender);
+		this.collectionsMapper.clearList(sender);
 		await this.sendMessage(roomId, `<p>Sammlung <strong>${result.data!.name}</strong> erstellt.</p>`);
 	}
 
@@ -642,7 +650,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const questions = result.data || [];
-		this.lastQuestionsList.set(sender, questions);
+		this.questionsMapper.setList(sender, questions);
 
 		if (questions.length === 0) {
 			await this.sendMessage(roomId, `<p>Keine Fragen gefunden fuer "${query}"</p>`);
@@ -661,13 +669,9 @@ export class MatrixService extends BaseMatrixService {
 
 	// Helper methods
 	private getQuestionByNumber(sender: string, numberStr: string): Question | null {
-		const questions = this.lastQuestionsList.get(sender);
-		if (!questions) return null;
-
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= questions.length) return null;
-
-		return questions[index];
+		const num = parseInt(numberStr, 10);
+		if (isNaN(num)) return null;
+		return this.questionsMapper.getByNumber(sender, num);
 	}
 
 	private getStatusEmoji(status: string): string {

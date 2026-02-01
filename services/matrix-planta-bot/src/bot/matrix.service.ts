@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent, UserListMapper } from '@manacore/matrix-bot-common';
 import { PlantaService, Plant } from '../planta/planta.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
@@ -8,7 +8,7 @@ import { HELP_MESSAGE } from '../config/configuration';
 @Injectable()
 export class MatrixService extends BaseMatrixService {
 	// Store last shown plants per user for reference by number
-	private lastPlantsList: Map<string, Plant[]> = new Map();
+	private plantsMapper = new UserListMapper<Plant>();
 
 	// Field mappings for edit command
 	private readonly fieldMappings: Record<string, string> = {
@@ -196,7 +196,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const plants = result.data || [];
-		this.lastPlantsList.set(sender, plants);
+		this.plantsMapper.setList(sender, plants);
 
 		if (plants.length === 0) {
 			await this.sendMessage(
@@ -274,7 +274,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		// Clear cached list
-		this.lastPlantsList.delete(sender);
+		this.plantsMapper.clearList(sender);
 		await this.sendMessage(
 			roomId,
 			`<p>Pflanze <strong>${result.data!.name}</strong> hinzugefuegt!</p>
@@ -302,7 +302,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		// Clear cached list
-		this.lastPlantsList.delete(sender);
+		this.plantsMapper.clearList(sender);
 		await this.sendMessage(roomId, `<p>Pflanze <strong>${plant.name}</strong> entfernt.</p>`);
 	}
 
@@ -448,7 +448,7 @@ export class MatrixService extends BaseMatrixService {
 		html += '</ul>';
 
 		// Store plants for reference
-		this.lastPlantsList.set(sender, upcoming.map(u => u.plant));
+		this.plantsMapper.setList(sender, upcoming.map(u => u.plant));
 
 		await this.sendMessage(roomId, html);
 	}
@@ -544,13 +544,9 @@ export class MatrixService extends BaseMatrixService {
 
 	// Helper methods
 	private getPlantByNumber(sender: string, numberStr: string): Plant | null {
-		const plants = this.lastPlantsList.get(sender);
-		if (!plants) return null;
-
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= plants.length) return null;
-
-		return plants[index];
+		const num = parseInt(numberStr, 10);
+		if (isNaN(num)) return null;
+		return this.plantsMapper.getByNumber(sender, num);
 	}
 
 	private getHealthEmoji(status?: string): string {

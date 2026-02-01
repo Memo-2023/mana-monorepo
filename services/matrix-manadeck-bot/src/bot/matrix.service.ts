@@ -4,6 +4,7 @@ import {
 	BaseMatrixService,
 	MatrixBotConfig,
 	MatrixRoomEvent,
+	UserListMapper,
 } from '@manacore/matrix-bot-common';
 import { ManadeckService, Deck, Card } from '../manadeck/manadeck.service';
 import { SessionService } from '@manacore/bot-services';
@@ -12,8 +13,9 @@ import { HELP_MESSAGE } from '../config/configuration';
 @Injectable()
 export class MatrixService extends BaseMatrixService {
 	// Store last shown decks/cards per user for reference by number
-	private lastDecksList: Map<string, Deck[]> = new Map();
-	private lastCardsList: Map<string, { deckId: string; cards: Card[] }> = new Map();
+	private decksMapper = new UserListMapper<Deck>();
+	private cardsMapper = new UserListMapper<Card>();
+	private currentDeckId: Map<string, string> = new Map();
 
 	constructor(
 		configService: ConfigService,
@@ -206,7 +208,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const decks = result.data || [];
-		this.lastDecksList.set(sender, decks);
+		this.decksMapper.setList(sender, decks);
 
 		if (decks.length === 0) {
 			await this.sendHtml(
@@ -304,7 +306,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		// Clear cached list
-		this.lastDecksList.delete(sender);
+		this.decksMapper.clearList(sender);
 		await this.sendHtml(roomId, `<p>Deck <strong>${deck.title}</strong> geloescht.</p>`);
 	}
 
@@ -329,7 +331,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const cards = result.data || [];
-		this.lastCardsList.set(sender, { deckId: deck.id, cards });
+		this.cardsMapper.setList(sender, cards);
+		this.currentDeckId.set(sender, deck.id);
 
 		if (cards.length === 0) {
 			await this.sendHtml(
@@ -358,10 +361,7 @@ export class MatrixService extends BaseMatrixService {
 		cardNumStr: string
 	) {
 		const token = this.requireAuth(sender);
-
-		// Try to get from cache first
-		let cachedCards = this.lastCardsList.get(sender);
-		const deck = this.getDeckByNumber(sender, deckNumStr);
+		const deck = this.decksMapper.getByNumber(sender, parseInt(deckNumStr, 10));
 
 		if (!deck) {
 			await this.sendHtml(
@@ -372,26 +372,26 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		// Refresh cards if needed
-		if (!cachedCards || cachedCards.deckId !== deck.id) {
+		const cachedDeckId = this.currentDeckId.get(sender);
+		if (!cachedDeckId || cachedDeckId !== deck.id || !this.cardsMapper.hasList(sender)) {
 			const result = await this.manadeckService.getCards(token, deck.id);
 			if (result.error) {
 				await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
 				return;
 			}
-			cachedCards = { deckId: deck.id, cards: result.data || [] };
-			this.lastCardsList.set(sender, cachedCards);
+			this.cardsMapper.setList(sender, result.data || []);
+			this.currentDeckId.set(sender, deck.id);
 		}
 
-		const cardIndex = parseInt(cardNumStr, 10) - 1;
-		if (isNaN(cardIndex) || cardIndex < 0 || cardIndex >= cachedCards.cards.length) {
+		const cardNum = parseInt(cardNumStr, 10);
+		const card = this.cardsMapper.getByNumber(sender, cardNum);
+		if (!card) {
 			await this.sendHtml(
 				roomId,
 				`<p>Ungueltige Kartennummer. Nutze <code>!karten ${deckNumStr}</code></p>`
 			);
 			return;
 		}
-
-		const card = cachedCards.cards[cardIndex];
 		let html = `<h3>Karte #${cardNumStr}</h3>`;
 		html += `<p><strong>Typ:</strong> ${card.cardType}</p>`;
 
@@ -618,13 +618,9 @@ export class MatrixService extends BaseMatrixService {
 
 	// Helper methods
 	private getDeckByNumber(sender: string, numberStr: string): Deck | null {
-		const decks = this.lastDecksList.get(sender);
-		if (!decks) return null;
-
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= decks.length) return null;
-
-		return decks[index];
+		const num = parseInt(numberStr, 10);
+		if (isNaN(num)) return null;
+		return this.decksMapper.getByNumber(sender, num);
 	}
 
 	private getCardPreview(card: Card): string {

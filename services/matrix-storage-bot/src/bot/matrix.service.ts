@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent, UserListMapper } from '@manacore/matrix-bot-common';
 import { StorageService, StorageFile, Folder, ShareLink, TrashItem } from '../storage/storage.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
@@ -8,10 +8,10 @@ import { HELP_MESSAGE } from '../config/configuration';
 @Injectable()
 export class MatrixService extends BaseMatrixService {
 	// Store last shown items per user for reference by number
-	private lastFilesList: Map<string, StorageFile[]> = new Map();
-	private lastFoldersList: Map<string, Folder[]> = new Map();
-	private lastSharesList: Map<string, ShareLink[]> = new Map();
-	private lastTrashList: Map<string, TrashItem[]> = new Map();
+	private filesMapper = new UserListMapper<StorageFile>();
+	private foldersMapper = new UserListMapper<Folder>();
+	private sharesMapper = new UserListMapper<ShareLink>();
+	private trashMapper = new UserListMapper<TrashItem>();
 	private currentFolder: Map<string, string | null> = new Map();
 
 	constructor(
@@ -245,7 +245,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const files = result.data || [];
-		this.lastFilesList.set(sender, files);
+		this.filesMapper.setList(sender, files);
 
 		if (files.length === 0) {
 			await this.sendMessage(roomId, '<p>Keine Dateien vorhanden.</p>');
@@ -331,7 +331,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastFilesList.delete(sender);
+		this.filesMapper.clearList(sender);
 		await this.sendMessage(roomId, `<p><strong>${file.name}</strong> in Papierkorb verschoben.</p>`);
 	}
 
@@ -413,7 +413,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const folders = result.data || [];
-		this.lastFoldersList.set(sender, folders);
+		this.foldersMapper.setList(sender, folders);
 
 		if (folders.length === 0) {
 			await this.sendMessage(roomId, '<p>Keine Ordner vorhanden.</p>');
@@ -460,7 +460,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastFoldersList.delete(sender);
+		this.foldersMapper.clearList(sender);
 		await this.sendMessage(roomId, `<p>Ordner <strong>${result.data!.name}</strong> erstellt.</p>`);
 	}
 
@@ -480,7 +480,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastFoldersList.delete(sender);
+		this.foldersMapper.clearList(sender);
 		await this.sendMessage(roomId, `<p>Ordner <strong>${folder.name}</strong> in Papierkorb verschoben.</p>`);
 	}
 
@@ -547,7 +547,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const shares = result.data || [];
-		this.lastSharesList.set(sender, shares);
+		this.sharesMapper.setList(sender, shares);
 
 		if (shares.length === 0) {
 			await this.sendMessage(roomId, '<p>Keine Share-Links vorhanden.</p>');
@@ -568,20 +568,18 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleDeleteShare(roomId: string, sender: string, numberStr: string) {
 		const token = this.requireAuth(sender);
-		const shares = this.lastSharesList.get(sender);
 
-		if (!shares) {
+		if (!this.sharesMapper.hasList(sender)) {
 			await this.sendMessage(roomId, '<p>Nutze zuerst <code>!links</code></p>');
 			return;
 		}
 
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= shares.length) {
+		const num = parseInt(numberStr, 10);
+		const share = isNaN(num) ? null : this.sharesMapper.getByNumber(sender, num);
+		if (!share) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer.</p>');
 			return;
 		}
-
-		const share = shares[index];
 		const result = await this.storageService.deleteShare(token, share.id);
 
 		if (result.error) {
@@ -589,7 +587,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastSharesList.delete(sender);
+		this.sharesMapper.clearList(sender);
 		await this.sendMessage(roomId, '<p>Share-Link geloescht.</p>');
 	}
 
@@ -609,8 +607,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const { files, folders } = result.data!;
-		this.lastFilesList.set(sender, files);
-		this.lastFoldersList.set(sender, folders);
+		this.filesMapper.setList(sender, files);
+		this.foldersMapper.setList(sender, folders);
 
 		if (files.length === 0 && folders.length === 0) {
 			await this.sendMessage(roomId, `<p>Keine Ergebnisse fuer "${query}"</p>`);
@@ -648,8 +646,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const { files, folders } = result.data!;
-		this.lastFilesList.set(sender, files);
-		this.lastFoldersList.set(sender, folders);
+		this.filesMapper.setList(sender, files);
+		this.foldersMapper.setList(sender, folders);
 
 		if (files.length === 0 && folders.length === 0) {
 			await this.sendMessage(roomId, '<p>Keine Favoriten vorhanden.</p>');
@@ -720,7 +718,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const items = result.data || [];
-		this.lastTrashList.set(sender, items);
+		this.trashMapper.setList(sender, items);
 
 		if (items.length === 0) {
 			await this.sendMessage(roomId, '<p>Papierkorb ist leer.</p>');
@@ -741,20 +739,18 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleRestore(roomId: string, sender: string, numberStr: string) {
 		const token = this.requireAuth(sender);
-		const items = this.lastTrashList.get(sender);
 
-		if (!items) {
+		if (!this.trashMapper.hasList(sender)) {
 			await this.sendMessage(roomId, '<p>Nutze zuerst <code>!papierkorb</code></p>');
 			return;
 		}
 
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= items.length) {
+		const num = parseInt(numberStr, 10);
+		const item = isNaN(num) ? null : this.trashMapper.getByNumber(sender, num);
+		if (!item) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer.</p>');
 			return;
 		}
-
-		const item = items[index];
 		const result = await this.storageService.restoreFromTrash(token, item.id, item.type);
 
 		if (result.error) {
@@ -762,7 +758,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastTrashList.delete(sender);
+		this.trashMapper.clearList(sender);
 		await this.sendMessage(roomId, `<p><strong>${item.name}</strong> wiederhergestellt.</p>`);
 	}
 
@@ -775,29 +771,21 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastTrashList.delete(sender);
+		this.trashMapper.clearList(sender);
 		await this.sendMessage(roomId, '<p>Papierkorb geleert.</p>');
 	}
 
 	// Helper methods
 	private getFileByNumber(sender: string, numberStr: string): StorageFile | null {
-		const files = this.lastFilesList.get(sender);
-		if (!files) return null;
-
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= files.length) return null;
-
-		return files[index];
+		const num = parseInt(numberStr, 10);
+		if (isNaN(num)) return null;
+		return this.filesMapper.getByNumber(sender, num);
 	}
 
 	private getFolderByNumber(sender: string, numberStr: string): Folder | null {
-		const folders = this.lastFoldersList.get(sender);
-		if (!folders) return null;
-
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= folders.length) return null;
-
-		return folders[index];
+		const num = parseInt(numberStr, 10);
+		if (isNaN(num)) return null;
+		return this.foldersMapper.getByNumber(sender, num);
 	}
 
 	private formatSize(bytes: number): string {
