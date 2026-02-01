@@ -515,6 +515,7 @@ services:
   # Matrix Bots (Ports 4010-4029)
   matrix-mana-bot:
     image: ghcr.io/memo-2023/matrix-mana-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-mana
     restart: always
     depends_on:
@@ -547,6 +548,7 @@ services:
 
   matrix-ollama-bot:
     image: ghcr.io/memo-2023/matrix-ollama-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-ollama
     restart: always
     depends_on:
@@ -575,6 +577,7 @@ services:
 
   matrix-stats-bot:
     image: ghcr.io/memo-2023/matrix-stats-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-stats
     restart: always
     depends_on:
@@ -604,6 +607,7 @@ services:
 
   matrix-project-doc-bot:
     image: ghcr.io/memo-2023/matrix-project-doc-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-projectdoc
     restart: always
     depends_on:
@@ -637,6 +641,7 @@ services:
 
   matrix-todo-bot:
     image: ghcr.io/memo-2023/matrix-todo-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-todo
     restart: always
     depends_on:
@@ -662,6 +667,7 @@ services:
 
   matrix-calendar-bot:
     image: ghcr.io/memo-2023/matrix-calendar-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-calendar
     restart: always
     depends_on:
@@ -687,6 +693,7 @@ services:
 
   matrix-nutriphi-bot:
     image: ghcr.io/memo-2023/matrix-nutriphi-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-nutriphi
     restart: always
     depends_on:
@@ -714,6 +721,7 @@ services:
 
   matrix-zitare-bot:
     image: ghcr.io/memo-2023/matrix-zitare-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-zitare
     restart: always
     depends_on:
@@ -741,6 +749,7 @@ services:
 
   matrix-clock-bot:
     image: ghcr.io/memo-2023/matrix-clock-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-clock
     restart: always
     depends_on:
@@ -768,6 +777,7 @@ services:
 
   matrix-tts-bot:
     image: ghcr.io/memo-2023/matrix-tts-bot:latest
+    platform: linux/amd64
     container_name: mana-matrix-bot-tts
     restart: always
     depends_on:
