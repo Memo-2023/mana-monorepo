@@ -16,12 +16,16 @@ export default () => ({
 
 export const HELP_TEXT = `**Clock Bot - Zeiterfassung per Chat**
 
+**Account:**
+- \`!login email passwort\` - Anmelden
+- \`!logout\` - Abmelden
+- \`!status\` - Account & Timer Status
+
 **Timer (Stoppuhr):**
 - \`!timer 25m\` oder \`!timer 1h30m\` - Timer erstellen & starten
 - \`!stop\` - Laufenden Timer pausieren
 - \`!resume\` - Pausierten Timer fortsetzen
 - \`!reset\` - Timer zurucksetzen
-- \`!status\` - Aktuellen Timer-Status anzeigen
 - \`!timers\` - Alle Timer anzeigen
 
 **Alarme (Wecker):**

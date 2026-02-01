@@ -59,7 +59,7 @@ export class ChatService {
 		path: string,
 		token: string,
 		options: RequestInit = {}
-	): Promise<{ data?: T; error?: string }> {
+	): Promise<{ data?: T; error?: string; statusCode?: number }> {
 		try {
 			const response = await fetch(this.getUrl(path), {
 				...options,
@@ -72,7 +72,10 @@ export class ChatService {
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
-				return { error: errorData.message || `HTTP ${response.status}` };
+				return {
+					error: errorData.message || `HTTP ${response.status}`,
+					statusCode: response.status,
+				};
 			}
 
 			const data = await response.json();
@@ -118,7 +121,7 @@ export class ChatService {
 		messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
 		modelId: string,
 		options?: { temperature?: number; maxTokens?: number }
-	): Promise<{ data?: ChatCompletionResponse; error?: string }> {
+	): Promise<{ data?: ChatCompletionResponse; error?: string; statusCode?: number }> {
 		return this.request<ChatCompletionResponse>('/chat/completions', token, {
 			method: 'POST',
 			body: JSON.stringify({

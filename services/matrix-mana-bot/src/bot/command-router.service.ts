@@ -67,6 +67,18 @@ export class CommandRouterService {
 				description: 'Show help',
 			},
 
+			// Auth Commands
+			{
+				patterns: ['!login'],
+				handler: (ctx, args) => this.helpHandler.handleLogin(ctx, args),
+				description: 'Login with email and password',
+			},
+			{
+				patterns: ['!logout'],
+				handler: (ctx) => this.helpHandler.handleLogout(ctx),
+				description: 'Logout',
+			},
+
 			// AI Commands
 			{
 				patterns: ['!models', '!modelle'],

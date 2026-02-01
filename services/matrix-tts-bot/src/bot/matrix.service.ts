@@ -8,7 +8,7 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { TtsService } from '../tts/tts.service';
-import { TranscriptionService } from '@manacore/bot-services';
+import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
 
 interface UserSettings {
@@ -38,7 +38,9 @@ export class MatrixService extends BaseMatrixService {
 	constructor(
 		configService: ConfigService,
 		private ttsService: TtsService,
-		private readonly transcriptionService: TranscriptionService
+		private readonly transcriptionService: TranscriptionService,
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 		this.defaultVoice = this.configService.get<string>('tts.defaultVoice') || 'af_heart';
@@ -277,12 +279,21 @@ export class MatrixService extends BaseMatrixService {
 	private async handleStatusCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		const settings = this.getUserSettings(userId);
 		const ttsHealthy = await this.ttsService.isHealthy();
+		const loggedIn = this.sessionService.isLoggedIn(userId);
+		const session = this.sessionService.getSession(userId);
+		const token = this.sessionService.getToken(userId);
 
 		let response = '**Aktuelle Einstellungen:**\n\n';
 		response += `Stimme: \`${settings.voice}\`\n`;
 		response += `Geschwindigkeit: ${settings.speed}x\n`;
 		response += `Max. Textlaenge: ${this.maxTextLength} Zeichen\n\n`;
-		response += `TTS-Service: ${ttsHealthy ? 'Online' : 'Offline'}`;
+		response += `TTS-Service: ${ttsHealthy ? 'Online' : 'Offline'}\n`;
+
+		if (loggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			response += `\n👤 Angemeldet als: ${session.email}\n`;
+			response += `⚡ Credits: ${balance.balance.toFixed(2)}`;
+		}
 
 		await this.sendReply(roomId, event, response);
 	}

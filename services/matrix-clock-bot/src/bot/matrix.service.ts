@@ -8,7 +8,7 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { ClockService } from '../clock/clock.service';
-import { TranscriptionService } from '@manacore/bot-services';
+import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
 
 @Injectable()
@@ -28,7 +28,9 @@ export class MatrixService extends BaseMatrixService {
 	constructor(
 		configService: ConfigService,
 		private clockService: ClockService,
-		private transcriptionService: TranscriptionService
+		private transcriptionService: TranscriptionService,
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -154,6 +156,14 @@ export class MatrixService extends BaseMatrixService {
 			case 'help':
 			case 'hilfe':
 				await this.sendReply(roomId, event, HELP_TEXT);
+				break;
+
+			case 'login':
+				await this.handleLogin(roomId, event, userId, args);
+				break;
+
+			case 'logout':
+				await this.handleLogout(roomId, event, userId);
 				break;
 
 			case 'timer':
@@ -337,34 +347,76 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private async handleStatusCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
-		try {
-			const token = this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
-
-			const timer = await this.clockService.getRunningTimer(token);
-			if (!timer) {
-				await this.sendReply(roomId, event, 'Kein aktiver Timer.\n\nStarte einen mit `!timer 25m`');
-				return;
-			}
-
-			const remaining = this.clockService.formatDuration(timer.remainingSeconds);
-			const total = this.clockService.formatDuration(timer.durationSeconds);
-			const statusIcon = timer.status === 'running' ? '' : '';
-			const statusText = timer.status === 'running' ? 'Lauft' : 'Pausiert';
-
-			let response = `**${statusIcon} Timer ${statusText}**\n\n`;
-			response += `Verbleibend: ${remaining} / ${total}`;
-			if (timer.label) response += `\nLabel: ${timer.label}`;
-
-			await this.sendReply(roomId, event, response);
-		} catch (error) {
-			this.logger.error('Status failed:', error);
-			await this.sendReply(roomId, event, 'Fehler beim Abrufen des Status.');
+	private async handleLogin(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+		const parts = args.split(' ');
+		if (parts.length < 2 || !parts[0] || !parts[1]) {
+			await this.sendReply(roomId, event, 'Verwendung: `!login email passwort`');
+			return;
 		}
+		const [email, password] = parts;
+		const result = await this.sessionService.login(userId, email, password);
+
+		if (result.success) {
+			const token = this.sessionService.getToken(userId);
+			if (token) {
+				const balance = await this.creditService.getBalance(token);
+				await this.sendReply(roomId, event,
+					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`);
+			} else {
+				await this.sendReply(roomId, event, `✅ Erfolgreich angemeldet als **${email}**`);
+			}
+		} else {
+			await this.sendReply(roomId, event, `❌ Anmeldung fehlgeschlagen: ${result.error}`);
+		}
+	}
+
+	private async handleLogout(roomId: string, event: MatrixRoomEvent, userId: string) {
+		this.sessionService.logout(userId);
+		await this.sendReply(roomId, event, '👋 Erfolgreich abgemeldet.');
+	}
+
+	private async handleStatusCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
+		// Auth-Status zuerst
+		const loggedIn = this.sessionService.isLoggedIn(userId);
+		const session = this.sessionService.getSession(userId);
+		const token = this.sessionService.getToken(userId);
+
+		let response = '**🕐 Clock Bot Status**\n\n';
+
+		if (loggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			response += `👤 Angemeldet als: ${session.email}\n`;
+			response += `⚡ Credits: ${balance.balance.toFixed(2)}\n\n`;
+		} else {
+			response += `❌ Nicht angemeldet\n`;
+			response += `Nutze \`!login email passwort\` zum Anmelden.\n\n`;
+		}
+
+		// Timer-Status
+		try {
+			const timerToken = this.getToken(userId);
+			if (timerToken) {
+				const timer = await this.clockService.getRunningTimer(timerToken);
+				if (timer) {
+					const remaining = this.clockService.formatDuration(timer.remainingSeconds);
+					const total = this.clockService.formatDuration(timer.durationSeconds);
+					const statusIcon = timer.status === 'running' ? '▶️' : '⏸️';
+					const statusText = timer.status === 'running' ? 'Läuft' : 'Pausiert';
+					response += `**${statusIcon} Timer ${statusText}**\n`;
+					response += `Verbleibend: ${remaining} / ${total}`;
+					if (timer.label) response += `\nLabel: ${timer.label}`;
+				} else {
+					response += `Kein aktiver Timer.\n\nStarte einen mit \`!timer 25m\``;
+				}
+			} else {
+				response += `Timer-Status nicht verfügbar (nicht angemeldet).`;
+			}
+		} catch (error) {
+			this.logger.error('Timer status failed:', error);
+			response += `Timer-Status nicht verfügbar.`;
+		}
+
+		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleTimersCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
@@ -603,11 +655,15 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private getToken(userId: string): string | null {
-		// First check if user has a stored token
+		// SessionService hat Priorität (Login via mana-core-auth)
+		const sessionToken = this.sessionService.getToken(userId);
+		if (sessionToken) return sessionToken;
+
+		// Fallback auf clockService Token
 		const storedToken = this.clockService.getUserToken(userId);
 		if (storedToken) return storedToken;
 
-		// Fall back to demo token for development
+		// Entwicklungs-Fallback
 		return this.demoToken || null;
 	}
 }

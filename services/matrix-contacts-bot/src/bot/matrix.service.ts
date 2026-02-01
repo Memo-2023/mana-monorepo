@@ -9,8 +9,10 @@ import {
 	UserListMapper,
 } from '@manacore/matrix-bot-common';
 import { ContactsService, Contact } from '../contacts/contacts.service';
-import { SessionService, TranscriptionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
+
+const CONTACT_CREATE_CREDITS = 0.02;
 
 // Natural language keyword detector
 const keywordDetector = new KeywordCommandDetector([
@@ -29,7 +31,8 @@ export class MatrixService extends BaseMatrixService {
 		configService: ConfigService,
 		private readonly transcriptionService: TranscriptionService,
 		private contactsService: ContactsService,
-		private sessionService: SessionService
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -414,6 +417,18 @@ Sag "hilfe" fur alle Befehle!`;
 			return;
 		}
 
+		// Validate credits
+		const validation = await this.creditService.validateCredits(token, CONTACT_CREATE_CREDITS);
+		if (!validation.hasCredits) {
+			const errorMsg = this.creditService.formatInsufficientCreditsError(
+				CONTACT_CREATE_CREDITS,
+				validation.availableCredits,
+				'Kontakt erstellen'
+			);
+			await this.sendReply(roomId, event, errorMsg.text);
+			return;
+		}
+
 		if (args.length < 1) {
 			await this.sendReply(
 				roomId,
@@ -433,10 +448,11 @@ Sag "hilfe" fur alle Befehle!`;
 			});
 
 			const name = contact.displayName || `${firstName} ${lastName || ''}`.trim();
+			const balance = await this.creditService.getBalance(token);
 			await this.sendReply(
 				roomId,
 				event,
-				`Kontakt **${name}** erstellt!\n\nNutze \`!kontakte\` um die Liste zu sehen oder \`!edit\` um weitere Daten hinzuzufugen.`
+				`Kontakt **${name}** erstellt!\n⚡ -${CONTACT_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)\n\nNutze \`!kontakte\` um die Liste zu sehen oder \`!edit\` um weitere Daten hinzuzufugen.`
 			);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
@@ -693,13 +709,23 @@ Sag "hilfe" fur alle Befehle!`;
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			await this.sendReply(
-				roomId,
-				event,
-				`Erfolgreich angemeldet!\n\nNutze \`!kontakte\` um deine Kontakte zu sehen.`
-			);
+			const token = this.sessionService.getToken(sender);
+			if (token) {
+				const balance = await this.creditService.getBalance(token);
+				await this.sendReply(
+					roomId,
+					event,
+					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}\n\nNutze \`!kontakte\` um deine Kontakte zu sehen.`
+				);
+			} else {
+				await this.sendReply(
+					roomId,
+					event,
+					`✅ Erfolgreich angemeldet!\n\nNutze \`!kontakte\` um deine Kontakte zu sehen.`
+				);
+			}
 		} else {
-			await this.sendReply(roomId, event, `Anmeldung fehlgeschlagen: ${result.error}`);
+			await this.sendReply(roomId, event, `❌ Anmeldung fehlgeschlagen: ${result.error}`);
 		}
 	}
 
@@ -707,14 +733,21 @@ Sag "hilfe" fur alle Befehle!`;
 		const backendHealthy = await this.contactsService.checkHealth();
 		const isLoggedIn = this.sessionService.isLoggedIn(sender);
 		const sessionCount = this.sessionService.getSessionCount();
+		const session = this.sessionService.getSession(sender);
+		const token = this.sessionService.getToken(sender);
 
-		const statusText = `**Contacts Bot Status**
+		let statusText = `**Contacts Bot Status**\n\n`;
+		statusText += `**Backend:** ${backendHealthy ? '✅ Online' : '❌ Offline'}\n`;
+		statusText += `**Aktive Sessions:** ${sessionCount}\n\n`;
 
-**Backend:** ${backendHealthy ? 'Online' : 'Offline'}
-**Dein Status:** ${isLoggedIn ? 'Angemeldet' : 'Nicht angemeldet'}
-**Aktive Sessions:** ${sessionCount}
-
-${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
+		if (isLoggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			statusText += `👤 Angemeldet als: ${session.email}\n`;
+			statusText += `⚡ Credits: ${balance.balance.toFixed(2)}\n`;
+		} else {
+			statusText += `👤 Nicht angemeldet\n`;
+			statusText += `💡 Login: \`!login email passwort\``;
+		}
 
 		await this.sendReply(roomId, event, statusText);
 	}

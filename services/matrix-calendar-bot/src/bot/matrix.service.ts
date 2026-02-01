@@ -7,9 +7,11 @@ import {
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
-import { TranscriptionService } from '@manacore/bot-services';
+import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
 import { CalendarService, CalendarEvent } from '../calendar/calendar.service';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
+
+const EVENT_CREATE_CREDITS = 0.02;
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
@@ -29,7 +31,9 @@ export class MatrixService extends BaseMatrixService {
 	constructor(
 		configService: ConfigService,
 		private readonly transcriptionService: TranscriptionService,
-		private calendarService: CalendarService
+		private calendarService: CalendarService,
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -157,6 +161,14 @@ export class MatrixService extends BaseMatrixService {
 				await this.handlePinHelp(roomId, event);
 				break;
 
+			case 'login':
+				await this.handleLogin(roomId, event, userId, args);
+				break;
+
+			case 'logout':
+				await this.handleLogout(roomId, event, userId);
+				break;
+
 			default:
 				// Unknown command - ignore silently
 				break;
@@ -237,6 +249,21 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
+		// Validate credits if user is logged in
+		const token = this.sessionService.getToken(userId);
+		if (token) {
+			const validation = await this.creditService.validateCredits(token, EVENT_CREATE_CREDITS);
+			if (!validation.hasCredits) {
+				const errorMsg = this.creditService.formatInsufficientCreditsError(
+					EVENT_CREATE_CREDITS,
+					validation.availableCredits,
+					'Termin erstellen'
+				);
+				await this.sendReply(roomId, event, errorMsg.text);
+				return;
+			}
+		}
+
 		const { title, startTime, endTime, isAllDay } = this.calendarService.parseEventInput(input);
 
 		if (!startTime || !endTime) {
@@ -264,7 +291,15 @@ export class MatrixService extends BaseMatrixService {
 		);
 
 		const timeStr = this.calendarService.formatEventTime(calendarEvent);
-		await this.sendReply(roomId, event, `✅ Termin erstellt: **${title}**\n📆 ${timeStr}`);
+		let response = `✅ Termin erstellt: **${title}**\n📆 ${timeStr}`;
+
+		// Show credit deduction if logged in
+		if (token) {
+			const balance = await this.creditService.getBalance(token);
+			response += `\n⚡ -${EVENT_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)`;
+		}
+
+		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleEventDetails(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
@@ -339,14 +374,69 @@ export class MatrixService extends BaseMatrixService {
 		const events = await this.calendarService.getUpcomingEvents(userId, 7);
 		const todayEvents = await this.calendarService.getTodayEvents(userId);
 
-		const response = `📊 **Status**
+		// Check login status and credits
+		const token = this.sessionService.getToken(userId);
+		const session = this.sessionService.getSession(userId);
 
-• Termine heute: ${todayEvents.length}
-• Termine nächste 7 Tage: ${events.length}
+		let response = `📊 **Status**\n\n`;
+		response += `• Termine heute: ${todayEvents.length}\n`;
+		response += `• Termine nächste 7 Tage: ${events.length}\n\n`;
 
-Bot: ✅ Online`;
+		if (token && session) {
+			const balance = await this.creditService.getBalance(token);
+			response += `👤 Angemeldet als: ${session.email}\n`;
+			response += `⚡ Credits: ${balance.balance.toFixed(2)}\n\n`;
+		} else {
+			response += `👤 Nicht angemeldet\n`;
+			response += `💡 Login: \`!login email passwort\`\n\n`;
+		}
+
+		response += `Bot: ✅ Online`;
 
 		await this.sendReply(roomId, event, response);
+	}
+
+	private async handleLogin(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+		const parts = args.trim().split(/\s+/);
+		if (parts.length < 2) {
+			await this.sendReply(
+				roomId,
+				event,
+				'❌ Bitte gib Email und Passwort an.\n\nBeispiel: `!login email@example.com passwort`'
+			);
+			return;
+		}
+
+		const [email, password] = parts;
+		const result = await this.sessionService.login(userId, email, password);
+
+		if (!result.success) {
+			await this.sendReply(roomId, event, `❌ Login fehlgeschlagen: ${result.error}`);
+			return;
+		}
+
+		const token = this.sessionService.getToken(userId);
+		if (token) {
+			const balance = await this.creditService.getBalance(token);
+			await this.sendReply(
+				roomId,
+				event,
+				`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`
+			);
+		} else {
+			await this.sendReply(roomId, event, `✅ Erfolgreich angemeldet als **${email}**`);
+		}
+	}
+
+	private async handleLogout(roomId: string, event: MatrixRoomEvent, userId: string) {
+		const session = this.sessionService.getSession(userId);
+		if (!session) {
+			await this.sendReply(roomId, event, '❌ Du bist nicht angemeldet.');
+			return;
+		}
+
+		this.sessionService.logout(userId);
+		await this.sendReply(roomId, event, '✅ Erfolgreich abgemeldet.');
 	}
 
 	private async handlePinHelp(roomId: string, event: MatrixRoomEvent) {

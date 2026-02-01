@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { matrixStore } from '$lib/matrix';
+	import { matrixStore, loginWithLoginToken } from '$lib/matrix';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount, onDestroy } from 'svelte';
@@ -143,7 +143,45 @@
 			return;
 		}
 
-		// Try to initialize Matrix
+		// Check for SSO loginToken in URL (Matrix SSO callback)
+		const urlParams = new URLSearchParams(window.location.search);
+		const loginToken = urlParams.get('loginToken');
+
+		if (loginToken) {
+			console.log('Found loginToken in URL, exchanging for credentials...');
+
+			// Exchange loginToken for Matrix credentials
+			const result = await loginWithLoginToken('matrix.mana.how', loginToken);
+
+			if (result.success && result.credentials) {
+				console.log('SSO login successful, initializing Matrix client...');
+
+				// Remove loginToken from URL to prevent re-processing on refresh
+				const cleanUrl = window.location.pathname;
+				window.history.replaceState({}, '', cleanUrl);
+
+				// Initialize with the new credentials
+				const initialized = await matrixStore.initialize(result.credentials);
+
+				if (!initialized) {
+					initError = matrixStore.error || 'Failed to initialize Matrix client';
+				}
+
+				loading = false;
+				return;
+			} else {
+				// SSO token exchange failed
+				initError = result.error || 'SSO login failed';
+				loading = false;
+
+				// Clear the URL and redirect to login
+				window.history.replaceState({}, '', '/login');
+				goto('/login');
+				return;
+			}
+		}
+
+		// Try to initialize Matrix with stored credentials
 		const success = await matrixStore.initialize();
 
 		if (!success) {

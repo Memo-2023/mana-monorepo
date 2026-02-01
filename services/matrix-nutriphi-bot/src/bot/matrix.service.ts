@@ -13,8 +13,10 @@ import {
 	DailySummary,
 	WeeklyStats,
 } from '../nutriphi/nutriphi.service';
-import { SessionService, TranscriptionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
 import { HELP_MESSAGE, MEAL_TYPE_LABELS } from '../config/configuration';
+
+const PHOTO_ANALYSIS_CREDITS = 3;
 
 // Natural language keyword detector
 const keywordDetector = new KeywordCommandDetector([
@@ -33,7 +35,8 @@ export class MatrixService extends BaseMatrixService {
 		configService: ConfigService,
 		private nutriphiService: NutriPhiService,
 		private sessionService: SessionService,
-		private transcriptionService: TranscriptionService
+		private transcriptionService: TranscriptionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -256,10 +259,19 @@ Sag "hilfe" fur alle Befehle!`;
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			await this.sendMessage(
-				roomId,
-				`Erfolgreich angemeldet!\n\nDu kannst jetzt Fotos analysieren und deine Ernahrung tracken.`
-			);
+			const token = this.sessionService.getToken(sender);
+			if (token) {
+				const balance = await this.creditService.getBalance(token);
+				await this.sendMessage(
+					roomId,
+					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}\n\nDu kannst jetzt Fotos analysieren und deine Ernahrung tracken.`
+				);
+			} else {
+				await this.sendMessage(
+					roomId,
+					`✅ Erfolgreich angemeldet!\n\nDu kannst jetzt Fotos analysieren und deine Ernahrung tracken.`
+				);
+			}
 		} else {
 			await this.sendMessage(roomId, `Anmeldung fehlgeschlagen: ${result.error}`);
 		}
@@ -614,15 +626,21 @@ Sag "hilfe" fur alle Befehle!`;
 		const backendHealthy = await this.nutriphiService.checkHealth();
 		const isLoggedIn = this.sessionService.isLoggedIn(sender);
 		const sessionCount = this.sessionService.getSessionCount();
-		const loggedInCount = this.sessionService.getActiveSessionCount();
+		const session = this.sessionService.getSession(sender);
+		const token = this.sessionService.getToken(sender);
 
-		const statusText = `**NutriPhi Bot Status**
+		let statusText = `**NutriPhi Bot Status**\n\n`;
+		statusText += `**Backend:** ${backendHealthy ? '✅ Online' : '❌ Offline'}\n`;
+		statusText += `**Aktive Sessions:** ${sessionCount}\n\n`;
 
-**Backend:** ${backendHealthy ? 'Online' : 'Offline'}
-**Dein Status:** ${isLoggedIn ? 'Angemeldet' : 'Nicht angemeldet'}
-**Aktive Sessions:** ${sessionCount} (${loggedInCount} angemeldet)
-
-${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
+		if (isLoggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			statusText += `👤 Angemeldet als: ${session.email}\n`;
+			statusText += `⚡ Credits: ${balance.balance.toFixed(2)}\n`;
+		} else {
+			statusText += `👤 Nicht angemeldet\n`;
+			statusText += `💡 Login: \`!login email passwort\``;
+		}
 
 		await this.sendMessage(roomId, statusText);
 	}

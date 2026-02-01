@@ -101,6 +101,16 @@ export type {
 	TranscriptionModuleOptions,
 } from './transcription/index.js';
 
+// Credit (Credit balance and formatting for Matrix bots)
+export { CreditModule, CreditService, CREDIT_MODULE_OPTIONS, CreditErrorCode } from './credit/index.js';
+export type {
+	CreditBalance,
+	CreditValidationResult,
+	CreditConsumeResult,
+	CreditModuleOptions,
+	CreditStatusMessage,
+} from './credit/index.js';
+
 // ===== Placeholder Services (to be implemented) =====
 
 export { NutritionModule } from './nutrition/index.js';

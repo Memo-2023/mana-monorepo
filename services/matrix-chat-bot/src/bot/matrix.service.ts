@@ -8,7 +8,7 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { ChatService, Conversation } from '../chat/chat.service';
-import { SessionService, TranscriptionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService, CreditService, CreditErrorCode } from '@manacore/bot-services';
 import { HELP_MESSAGE, BRANCH_ICONS } from '../config/configuration';
 
 @Injectable()
@@ -27,7 +27,8 @@ export class MatrixService extends BaseMatrixService {
 		configService: ConfigService,
 		private readonly transcriptionService: TranscriptionService,
 		private chatService: ChatService,
-		private sessionService: SessionService
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -136,7 +137,7 @@ export class MatrixService extends BaseMatrixService {
 				break;
 
 			case 'status':
-				response = this.handleStatus(sender);
+				response = await this.handleStatus(sender);
 				break;
 
 			case 'chat':
@@ -248,21 +249,38 @@ export class MatrixService extends BaseMatrixService {
 		return 'Erfolgreich abgemeldet.';
 	}
 
-	private handleStatus(sender: string): string {
+	private async handleStatus(sender: string): Promise<string> {
 		const isLoggedIn = this.sessionService.isLoggedIn(sender);
+		const email = this.sessionService.getEmail(sender);
+		const token = this.sessionService.getToken(sender);
 		const currentConv = this.getCurrentConversation(sender);
 		const selectedModel = this.getSelectedModel(sender);
 
-		let status = `**Bot Status**\n`;
-		status += `- Angemeldet: ${isLoggedIn ? 'Ja' : 'Nein'}\n`;
+		// Get credit balance if logged in
+		let creditBalance = { balance: 0, hasCredits: false };
+		if (token) {
+			creditBalance = await this.creditService.getBalance(token);
+		}
+
+		const additionalInfo: Record<string, string> = {};
 		if (currentConv) {
-			status += `- Aktuelles Gespraech: ${currentConv.substring(0, 8)}...\n`;
+			additionalInfo['🗨️ Gespraech'] = `${currentConv.substring(0, 8)}...`;
 		}
 		if (selectedModel) {
-			status += `- Gewaehltes Modell: ${selectedModel.substring(0, 8)}...\n`;
+			additionalInfo['🧠 Modell'] = `${selectedModel.substring(0, 8)}...`;
 		}
-		status += `- Aktive Sessions: ${this.sessionService.getSessionCount()}`;
-		return status;
+
+		if (!isLoggedIn) {
+			return `🤖 **Bot Status**\n\n❌ Nicht angemeldet.\n\nNutze \`!login email passwort\` zum Anmelden.`;
+		}
+
+		const statusMessage = this.creditService.formatStatusMessage(
+			email || 'Unbekannt',
+			creditBalance,
+			additionalInfo
+		);
+
+		return statusMessage.text;
 	}
 
 	// Quick chat (stateless)
@@ -292,6 +310,16 @@ export class MatrixService extends BaseMatrixService {
 		);
 
 		if (result.error) {
+			// Handle 402 Payment Required (insufficient credits)
+			if (result.statusCode === 402) {
+				const balance = await this.creditService.getBalance(token);
+				const errorMsg = this.creditService.formatInsufficientCreditsError(
+					2, // AI Chat costs ~2 credits
+					balance.balance,
+					'AI Chat'
+				);
+				return errorMsg.text;
+			}
 			return `Fehler: ${result.error}`;
 		}
 
@@ -465,6 +493,16 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 		// Get AI response
 		const completionResult = await this.chatService.createCompletion(token, messages, convResult.data!.modelId);
 		if (completionResult.error) {
+			// Handle 402 Payment Required (insufficient credits)
+			if (completionResult.statusCode === 402) {
+				const balance = await this.creditService.getBalance(token);
+				const errorMsg = this.creditService.formatInsufficientCreditsError(
+					2, // AI Chat costs ~2 credits
+					balance.balance,
+					'AI Chat'
+				);
+				return errorMsg.text;
+			}
 			return `Fehler bei AI-Antwort: ${completionResult.error}`;
 		}
 

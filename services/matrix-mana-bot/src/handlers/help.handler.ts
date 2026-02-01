@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AiService, TodoService } from '@manacore/bot-services';
+import { AiService, TodoService, SessionService, CreditService } from '@manacore/bot-services';
 import { CommandContext } from '../bot/command-router.service';
 import { VoiceService } from '../voice/voice.service';
 import { HELP_TEXT } from '../config/configuration';
@@ -9,14 +9,61 @@ export class HelpHandler {
 	constructor(
 		private aiService: AiService,
 		private todoService: TodoService,
-		private voiceService: VoiceService
+		private voiceService: VoiceService,
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {}
 
 	async showHelp(ctx: CommandContext): Promise<string> {
 		return HELP_TEXT;
 	}
 
+	async handleLogin(ctx: CommandContext, args: string): Promise<string> {
+		const parts = args.split(' ');
+		if (parts.length < 2 || !parts[0] || !parts[1]) {
+			return 'Verwendung: `!login email passwort`';
+		}
+		const [email, password] = parts;
+		const result = await this.sessionService.login(ctx.userId, email, password);
+
+		if (result.success) {
+			const token = this.sessionService.getToken(ctx.userId);
+			if (token) {
+				const balance = await this.creditService.getBalance(token);
+				return `✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`;
+			}
+			return `✅ Erfolgreich angemeldet als **${email}**`;
+		}
+		return `❌ Anmeldung fehlgeschlagen: ${result.error}`;
+	}
+
+	async handleLogout(ctx: CommandContext): Promise<string> {
+		this.sessionService.logout(ctx.userId);
+		return '👋 Erfolgreich abgemeldet.';
+	}
+
 	async showStatus(ctx: CommandContext): Promise<string> {
+		// Auth-Status zuerst
+		const loggedIn = this.sessionService.isLoggedIn(ctx.userId);
+		const session = this.sessionService.getSession(ctx.userId);
+		const token = this.sessionService.getToken(ctx.userId);
+
+		let authSection = '';
+		if (loggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			authSection = `**👤 Account**
+• Angemeldet als: ${session.email}
+• Credits: ⚡ ${balance.balance.toFixed(2)}
+
+`;
+		} else {
+			authSection = `**👤 Account**
+• Nicht angemeldet
+• Nutze \`!login email passwort\`
+
+`;
+		}
+
 		// Check services in parallel
 		const [aiConnected, todoStats, voiceHealth] = await Promise.all([
 			this.aiService.checkConnection(),
@@ -36,7 +83,7 @@ export class HelpHandler {
 
 		return `**📊 Status**
 
-**AI/Ollama**
+${authSection}**AI/Ollama**
 • Verbindung: ${aiStatus}
 • Modell: \`${currentModel}\`
 

@@ -9,8 +9,13 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { QuestionsService, Question, Collection, Answer } from '../questions/questions.service';
-import { SessionService, TranscriptionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
+
+const QUESTION_CREATE_CREDITS = 0.02;
+const QUICK_RESEARCH_CREDITS = 5;
+const STANDARD_RESEARCH_CREDITS = 10;
+const DEEP_RESEARCH_CREDITS = 25;
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
@@ -34,7 +39,8 @@ export class MatrixService extends BaseMatrixService {
 		configService: ConfigService,
 		private questionsService: QuestionsService,
 		private sessionService: SessionService,
-		private readonly transcriptionService: TranscriptionService
+		private readonly transcriptionService: TranscriptionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -220,9 +226,15 @@ export class MatrixService extends BaseMatrixService {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			await this.sendMessage(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+			const token = this.sessionService.getToken(sender);
+			if (token) {
+				const balance = await this.creditService.getBalance(token);
+				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`);
+			} else {
+				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+			}
 		} else {
-			await this.sendMessage(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>❌ Login fehlgeschlagen: ${result.error}</p>`);
 		}
 	}
 
@@ -230,16 +242,24 @@ export class MatrixService extends BaseMatrixService {
 		const backendOk = await this.questionsService.checkHealth();
 		const loggedIn = this.sessionService.isLoggedIn(sender);
 		const sessions = this.sessionService.getSessionCount();
+		const session = this.sessionService.getSession(sender);
+		const token = this.sessionService.getToken(sender);
 
-		await this.sendMessage(
-			roomId,
-			`<h3>Questions Bot Status</h3>
-<ul>
-<li>Backend: ${backendOk ? 'Online' : 'Offline'}</li>
-<li>Angemeldet: ${loggedIn ? 'Ja' : 'Nein'}</li>
-<li>Aktive Sessions: ${sessions}</li>
-</ul>`
-		);
+		let statusHtml = `<h3>Questions Bot Status</h3><ul>`;
+		statusHtml += `<li>Backend: ${backendOk ? '✅ Online' : '❌ Offline'}</li>`;
+		statusHtml += `<li>Aktive Sessions: ${sessions}</li>`;
+
+		if (loggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			statusHtml += `<li>👤 Angemeldet als: ${session.email}</li>`;
+			statusHtml += `<li>⚡ Credits: ${balance.balance.toFixed(2)}</li>`;
+		} else {
+			statusHtml += `<li>👤 Nicht angemeldet</li>`;
+			statusHtml += `<li>💡 Login: <code>!login email passwort</code></li>`;
+		}
+		statusHtml += `</ul>`;
+
+		await this.sendMessage(roomId, statusHtml);
 	}
 
 	// Question handlers

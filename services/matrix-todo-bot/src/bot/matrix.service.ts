@@ -8,8 +8,11 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { TodoService, Task } from '../todo/todo.service';
-import { TranscriptionService } from '@manacore/bot-services';
+import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
+
+// Credit cost for task creation (micro-credits)
+const TASK_CREATE_CREDITS = 0.02;
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
@@ -29,7 +32,9 @@ export class MatrixService extends BaseMatrixService {
 	constructor(
 		configService: ConfigService,
 		private todoService: TodoService,
-		private transcriptionService: TranscriptionService
+		private transcriptionService: TranscriptionService,
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -113,6 +118,21 @@ export class MatrixService extends BaseMatrixService {
 				return;
 			}
 
+			// Check credits if user is logged in
+			const token = this.sessionService.getToken(sender);
+			if (token) {
+				const validation = await this.creditService.validateCredits(token, TASK_CREATE_CREDITS);
+				if (!validation.hasCredits) {
+					const errorMsg = this.creditService.formatInsufficientCreditsError(
+						TASK_CREATE_CREDITS,
+						validation.availableCredits,
+						'Aufgabe erstellen'
+					);
+					await this.sendReply(roomId, event, `Transkription: "${transcription}"\n\n${errorMsg.text}`);
+					return;
+				}
+			}
+
 			// Parse the transcription as a task input
 			const { title, priority, dueDate, project } = this.todoService.parseTaskInput(transcription);
 
@@ -134,6 +154,12 @@ export class MatrixService extends BaseMatrixService {
 				responseText += `\n${details.join(' | ')}`;
 			}
 
+			// Show credit deduction if logged in
+			if (token) {
+				const balance = await this.creditService.getBalance(token);
+				responseText += `\n\n⚡ -${TASK_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)`;
+			}
+
 			await this.sendReply(roomId, event, responseText);
 		} catch (error) {
 			this.logger.error('Audio processing failed:', error);
@@ -153,6 +179,14 @@ export class MatrixService extends BaseMatrixService {
 			case 'help':
 			case 'hilfe':
 				await this.sendReply(roomId, event, HELP_TEXT);
+				break;
+
+			case 'login':
+				await this.handleLogin(roomId, event, userId, args);
+				break;
+
+			case 'logout':
+				await this.handleLogout(roomId, event, userId);
 				break;
 
 			case 'add':
@@ -223,6 +257,21 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
+		// Check credits if user is logged in
+		const token = this.sessionService.getToken(userId);
+		if (token) {
+			const validation = await this.creditService.validateCredits(token, TASK_CREATE_CREDITS);
+			if (!validation.hasCredits) {
+				const errorMsg = this.creditService.formatInsufficientCreditsError(
+					TASK_CREATE_CREDITS,
+					validation.availableCredits,
+					'Aufgabe erstellen'
+				);
+				await this.sendReply(roomId, event, errorMsg.text);
+				return;
+			}
+		}
+
 		const { title, priority, dueDate, project } = this.todoService.parseTaskInput(input);
 
 		const task = await this.todoService.createTask(userId, title, {
@@ -240,6 +289,12 @@ export class MatrixService extends BaseMatrixService {
 
 		if (details.length > 0) {
 			response += `\n${details.join(' | ')}`;
+		}
+
+		// Show credit deduction if logged in
+		if (token) {
+			const balance = await this.creditService.getBalance(token);
+			response += `\n\n⚡ -${TASK_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)`;
 		}
 
 		await this.sendReply(roomId, event, response);
@@ -379,17 +434,58 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleStatus(roomId: string, event: MatrixRoomEvent, userId: string) {
 		const stats = await this.todoService.getStats(userId);
+		const isLoggedIn = this.sessionService.isLoggedIn(userId);
+		const email = this.sessionService.getEmail(userId);
+		const token = this.sessionService.getToken(userId);
+
+		// Get credit balance if logged in
+		let creditInfo = '';
+		if (token) {
+			const balance = await this.creditService.getBalance(token);
+			const creditIcon = balance.hasCredits ? '⚡' : '⚠️';
+			creditInfo = `\n${creditIcon} Credits: ${balance.balance.toFixed(2)}`;
+			if (balance.balance < 10 && balance.balance > 0) {
+				creditInfo += '\n⚠️ Nur noch wenig Credits!';
+			}
+			if (!balance.hasCredits) {
+				creditInfo += '\n👉 Credits kaufen: https://mana.how/credits';
+			}
+		}
 
 		const response = `**Status**
+
+👤 Angemeldet: ${isLoggedIn ? `Ja (${email})` : 'Nein'}${creditInfo}
 
 - Offene Aufgaben: ${stats.pending}
 - Heute faellig: ${stats.today}
 - Erledigt: ${stats.completed}
 - Gesamt: ${stats.total}
 
-Bot: Online`;
+Bot: Online${!isLoggedIn ? '\n\nTipp: Mit `!login email passwort` anmelden fuer Credit-Tracking' : ''}`;
 
 		await this.sendReply(roomId, event, response);
+	}
+
+	private async handleLogin(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+		const parts = args.trim().split(/\s+/);
+		if (parts.length < 2) {
+			await this.sendReply(roomId, event, 'Verwendung: `!login email passwort`');
+			return;
+		}
+
+		const [email, password] = parts;
+		const result = await this.sessionService.login(userId, email, password);
+
+		if (result.success) {
+			await this.sendReply(roomId, event, `Erfolgreich angemeldet als **${email}**`);
+		} else {
+			await this.sendReply(roomId, event, `Anmeldung fehlgeschlagen: ${result.error}`);
+		}
+	}
+
+	private async handleLogout(roomId: string, event: MatrixRoomEvent, userId: string) {
+		this.sessionService.logout(userId);
+		await this.sendReply(roomId, event, 'Erfolgreich abgemeldet.');
 	}
 
 	private async handlePinHelp(roomId: string, event: MatrixRoomEvent) {

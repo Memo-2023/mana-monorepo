@@ -4,6 +4,7 @@ import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/m
 import { CommandRouterService, CommandContext } from './command-router.service';
 import { VoiceService, VoiceServiceError } from '../voice/voice.service';
 import { VoiceFormatterService } from '../voice/voice-formatter.service';
+import { SessionService, CreditService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
 @Injectable()
@@ -16,7 +17,9 @@ export class MatrixService extends BaseMatrixService {
 		private commandRouter: CommandRouterService,
 		@Inject(forwardRef(() => VoiceService))
 		private voiceService: VoiceService,
-		private voiceFormatter: VoiceFormatterService
+		private voiceFormatter: VoiceFormatterService,
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 		this.voiceEnabled = configService.get('voice.enabled') !== false;

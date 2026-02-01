@@ -9,7 +9,7 @@ import {
 } from '@manacore/matrix-bot-common';
 import { QuotesService } from '../quotes/quotes.service';
 import { ZitareService } from '../quotes/zitare.service';
-import { SessionService, TranscriptionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
 import { HELP_MESSAGE, Category } from '../config/configuration';
 
 @Injectable()
@@ -33,7 +33,8 @@ export class MatrixService extends BaseMatrixService {
 		private quotesService: QuotesService,
 		private zitareService: ZitareService,
 		private sessionService: SessionService,
-		private transcriptionService: TranscriptionService
+		private transcriptionService: TranscriptionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -361,10 +362,19 @@ Sag "hilfe" fuer alle Befehle!`;
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			await this.sendMessage(
-				roomId,
-				`Erfolgreich angemeldet!\n\nDu kannst jetzt Favoriten speichern und Listen verwalten.`
-			);
+			const token = this.sessionService.getToken(sender);
+			if (token) {
+				const balance = await this.creditService.getBalance(token);
+				await this.sendMessage(
+					roomId,
+					`✅ Erfolgreich angemeldet!\n⚡ Credits: ${balance.balance.toFixed(2)}\n\nDu kannst jetzt Favoriten speichern und Listen verwalten.`
+				);
+			} else {
+				await this.sendMessage(
+					roomId,
+					`Erfolgreich angemeldet!\n\nDu kannst jetzt Favoriten speichern und Listen verwalten.`
+				);
+			}
 		} else {
 			await this.sendMessage(roomId, `Anmeldung fehlgeschlagen: ${result.error}`);
 		}
@@ -556,15 +566,22 @@ Sag "hilfe" fuer alle Befehle!`;
 		const isLoggedIn = this.sessionService.isLoggedIn(sender);
 		const sessionCount = this.sessionService.getSessionCount();
 		const totalQuotes = this.quotesService.getTotalCount();
+		const session = this.sessionService.getSession(sender);
+		const token = this.sessionService.getToken(sender);
 
-		const statusText = `**Zitare Bot Status**
+		let statusText = `**Zitare Bot Status**\n\n`;
+		statusText += `**Backend:** ${backendHealthy ? 'Online' : 'Offline'}\n`;
+		statusText += `**Dein Status:** ${isLoggedIn ? 'Angemeldet' : 'Nicht angemeldet'}\n`;
 
-**Backend:** ${backendHealthy ? 'Online' : 'Offline'}
-**Dein Status:** ${isLoggedIn ? 'Angemeldet' : 'Nicht angemeldet'}
-**Aktive Sessions:** ${sessionCount}
-**Verfuegbare Zitate:** ${totalQuotes}
+		if (isLoggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			statusText += `**👤 Angemeldet als:** ${session.email}\n`;
+			statusText += `**⚡ Credits:** ${balance.balance.toFixed(2)}\n`;
+		}
 
-${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
+		statusText += `**Aktive Sessions:** ${sessionCount}\n`;
+		statusText += `**Verfuegbare Zitate:** ${totalQuotes}\n`;
+		statusText += `\n${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 
 		await this.sendMessage(roomId, statusText);
 	}

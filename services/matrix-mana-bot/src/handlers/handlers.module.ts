@@ -7,9 +7,10 @@ import { HelpHandler } from './help.handler';
 import { VoiceHandler } from './voice.handler';
 import { BotModule } from '../bot/bot.module';
 import { VoiceModule } from '../voice/voice.module';
+import { SessionModule, CreditModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [forwardRef(() => BotModule), VoiceModule],
+	imports: [forwardRef(() => BotModule), VoiceModule, SessionModule.forRoot(), CreditModule.forRoot()],
 	providers: [AiHandler, TodoHandler, CalendarHandler, ClockHandler, HelpHandler, VoiceHandler],
 	exports: [AiHandler, TodoHandler, CalendarHandler, ClockHandler, HelpHandler, VoiceHandler],
 })

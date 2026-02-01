@@ -3,6 +3,7 @@ export { matrixStore } from './store.svelte';
 export {
 	loginWithPassword,
 	loginWithToken,
+	loginWithLoginToken,
 	discoverHomeserver,
 	checkHomeserver,
 	register,

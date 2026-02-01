@@ -34,6 +34,10 @@
 			"types": "./dist/transcription/index.d.ts",
 			"default": "./dist/transcription/index.js"
 		},
+		"./credit": {
+			"types": "./dist/credit/index.d.ts",
+			"default": "./dist/credit/index.js"
+		},
 		"./nutrition": {
 			"types": "./dist/nutrition/index.d.ts",
 			"default": "./dist/nutrition/index.js"

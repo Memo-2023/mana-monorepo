@@ -8,8 +8,11 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { PictureService } from '../picture/picture.service';
-import { SessionService, TranscriptionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
+
+// Credit cost for image generation
+const IMAGE_GENERATION_CREDITS = 10;
 
 interface ParsedPrompt {
 	prompt: string;
@@ -38,7 +41,8 @@ export class MatrixService extends BaseMatrixService {
 		configService: ConfigService,
 		private readonly transcriptionService: TranscriptionService,
 		private pictureService: PictureService,
-		private sessionService: SessionService
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -236,6 +240,18 @@ Sag "hilfe" fur alle Befehle!`;
 				roomId,
 				`Du musst angemeldet sein, um Bilder zu generieren.\n\nNutze \`!login email passwort\` zum Anmelden.`
 			);
+			return;
+		}
+
+		// Validate credits before generating
+		const validation = await this.creditService.validateCredits(token, IMAGE_GENERATION_CREDITS);
+		if (!validation.hasCredits) {
+			const errorMsg = this.creditService.formatInsufficientCreditsError(
+				IMAGE_GENERATION_CREDITS,
+				validation.availableCredits,
+				'Bildgenerierung'
+			);
+			await this.sendMessage(roomId, errorMsg.text);
 			return;
 		}
 
@@ -461,11 +477,17 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		try {
-			const balance = await this.pictureService.getCredits(token);
-			await this.sendMessage(
-				roomId,
-				`**Dein Credit-Guthaben:** ${balance} Credits\n\nEine Bildgenerierung kostet 10 Credits.`
-			);
+			const balance = await this.creditService.getBalance(token);
+			const creditIcon = balance.hasCredits ? '⚡' : '⚠️';
+			let text = `${creditIcon} **Dein Credit-Guthaben:** ${balance.balance.toFixed(2)} Credits\n\n`;
+			text += `Eine Bildgenerierung kostet **${IMAGE_GENERATION_CREDITS} Credits**.`;
+
+			if (balance.balance < IMAGE_GENERATION_CREDITS) {
+				text += '\n\n⚠️ Nicht genug Credits fur eine Generierung!';
+				text += '\n👉 Credits kaufen: https://mana.how/credits';
+			}
+
+			await this.sendMessage(roomId, text);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
 			await this.sendMessage(roomId, `Fehler: ${errorMsg}`);
@@ -514,14 +536,30 @@ Sag "hilfe" fur alle Befehle!`;
 	private async handleStatus(roomId: string, sender: string) {
 		const backendHealthy = await this.pictureService.checkHealth();
 		const isLoggedIn = this.sessionService.isLoggedIn(sender);
+		const email = this.sessionService.getEmail(sender);
+		const token = this.sessionService.getToken(sender);
 		const sessionCount = this.sessionService.getSessionCount();
 		const currentModel = this.userModels.get(sender);
 		const hasActiveGeneration = this.activeGenerations.has(sender);
 
+		// Get credit balance if logged in
+		let creditInfo = '';
+		if (token) {
+			const balance = await this.creditService.getBalance(token);
+			const creditIcon = balance.hasCredits ? '⚡' : '⚠️';
+			creditInfo = `\n${creditIcon} **Credits:** ${balance.balance.toFixed(2)}`;
+			if (balance.balance < IMAGE_GENERATION_CREDITS && balance.balance > 0) {
+				creditInfo += '\n⚠️ Nicht genug Credits fur eine Generierung!';
+			}
+			if (!balance.hasCredits) {
+				creditInfo += '\n👉 Credits kaufen: https://mana.how/credits';
+			}
+		}
+
 		const statusText = `**Picture Bot Status**
 
 **Backend:** ${backendHealthy ? 'Online' : 'Offline'}
-**Dein Status:** ${isLoggedIn ? 'Angemeldet' : 'Nicht angemeldet'}
+**Dein Status:** ${isLoggedIn ? `Angemeldet (${email})` : 'Nicht angemeldet'}${creditInfo}
 **Ausgewahltes Modell:** ${currentModel || 'Standard'}
 **Aktive Generierung:** ${hasActiveGeneration ? 'Ja' : 'Nein'}
 **Aktive Sessions:** ${sessionCount}

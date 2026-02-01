@@ -149,6 +149,58 @@ export async function checkHomeserver(
 }
 
 /**
+ * Login with a Matrix SSO login token (for SSO/OAuth callback)
+ * This exchanges the loginToken from SSO redirect for proper credentials
+ */
+export async function loginWithLoginToken(
+	homeserver: string,
+	loginToken: string
+): Promise<LoginResult> {
+	// Load polyfills first
+	await import('./polyfills');
+	const { createClient } = await import('matrix-js-sdk');
+
+	// Normalize homeserver URL
+	let baseUrl = homeserver.trim();
+	if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+		baseUrl = `https://${baseUrl}`;
+	}
+	// Remove trailing slash
+	baseUrl = baseUrl.replace(/\/$/, '');
+
+	const tempClient = createClient({ baseUrl });
+
+	try {
+		const response = await tempClient.login('m.login.token', {
+			token: loginToken,
+			initial_device_display_name: 'Manalink',
+		});
+
+		return {
+			success: true,
+			credentials: {
+				homeserver: baseUrl,
+				accessToken: response.access_token,
+				userId: response.user_id,
+				deviceId: response.device_id,
+			},
+		};
+	} catch (err) {
+		const message = err instanceof Error ? err.message : 'Login failed';
+
+		// Provide more helpful error messages
+		if (message.includes('M_UNKNOWN_TOKEN') || message.includes('M_FORBIDDEN')) {
+			return { success: false, error: 'Login token expired or invalid. Please try again.' };
+		}
+		if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+			return { success: false, error: 'Could not connect to homeserver' };
+		}
+
+		return { success: false, error: message };
+	}
+}
+
+/**
  * Register a new account (if registration is open)
  */
 export async function register(

@@ -10,6 +10,7 @@ import {
 import { ProjectService } from '../project/project.service';
 import { MediaService } from '../media/media.service';
 import { GenerationService } from '../generation/generation.service';
+import { SessionService, CreditService } from '@manacore/bot-services';
 import { BLOG_STYLES } from '../config/configuration';
 
 @Injectable()
@@ -34,7 +35,9 @@ export class MatrixService extends BaseMatrixService {
 		configService: ConfigService,
 		private projectService: ProjectService,
 		private mediaService: MediaService,
-		private generationService: GenerationService
+		private generationService: GenerationService,
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 		this.allowedUsers = this.configService.get<string[]>('matrix.allowedUsers') || [];
@@ -116,6 +119,16 @@ export class MatrixService extends BaseMatrixService {
 			case 'start':
 				await this.sendHelp(roomId);
 				break;
+			case 'login':
+				await this.handleLogin(roomId, sender, argString);
+				break;
+			case 'logout':
+				await this.handleLogout(roomId, sender);
+				break;
+			case 'auth':
+			case 'account':
+				await this.handleAuthStatus(roomId, sender);
+				break;
 			case 'new':
 				await this.createProject(roomId, sender, argString);
 				break;
@@ -154,6 +167,11 @@ export class MatrixService extends BaseMatrixService {
 
 Sammle Fotos, Sprachnotizen und Text für deine Projekte und erstelle daraus Blogbeiträge.
 
+**Account:**
+- \`!login email passwort\` - Anmelden
+- \`!logout\` - Abmelden
+- \`!auth\` - Account Status
+
 **Projekt-Commands:**
 - \`!new [Name]\` - Neues Projekt starten
 - \`!projects\` - Alle Projekte anzeigen
@@ -178,6 +196,53 @@ ${styles}
 **Tipp:** Starte mit \`!new Projektname\``;
 
 		await this.sendMessage(roomId, helpText);
+	}
+
+	private async handleLogin(roomId: string, sender: string, args: string) {
+		const parts = args.split(' ');
+		if (parts.length < 2 || !parts[0] || !parts[1]) {
+			await this.sendMessage(roomId, 'Verwendung: `!login email passwort`');
+			return;
+		}
+		const [email, password] = parts;
+		const result = await this.sessionService.login(sender, email, password);
+
+		if (result.success) {
+			const token = this.sessionService.getToken(sender);
+			if (token) {
+				const balance = await this.creditService.getBalance(token);
+				await this.sendMessage(roomId,
+					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`);
+			} else {
+				await this.sendMessage(roomId, `✅ Erfolgreich angemeldet als **${email}**`);
+			}
+		} else {
+			await this.sendMessage(roomId, `❌ Anmeldung fehlgeschlagen: ${result.error}`);
+		}
+	}
+
+	private async handleLogout(roomId: string, sender: string) {
+		this.sessionService.logout(sender);
+		await this.sendMessage(roomId, '👋 Erfolgreich abgemeldet.');
+	}
+
+	private async handleAuthStatus(roomId: string, sender: string) {
+		const loggedIn = this.sessionService.isLoggedIn(sender);
+		const session = this.sessionService.getSession(sender);
+		const token = this.sessionService.getToken(sender);
+
+		let response = '**📋 Account Status**\n\n';
+
+		if (loggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			response += `👤 Angemeldet als: ${session.email}\n`;
+			response += `⚡ Credits: ${balance.balance.toFixed(2)}`;
+		} else {
+			response += `❌ Nicht angemeldet\n`;
+			response += `Nutze \`!login email passwort\` zum Anmelden.`;
+		}
+
+		await this.sendMessage(roomId, response);
 	}
 
 	private async createProject(roomId: string, sender: string, name: string) {
@@ -262,23 +327,34 @@ ${styles}
 	}
 
 	private async showStatus(roomId: string, sender: string) {
+		// Auth info
+		const loggedIn = this.sessionService.isLoggedIn(sender);
+		const session = this.sessionService.getSession(sender);
+		const token = this.sessionService.getToken(sender);
+
+		let authInfo = '';
+		if (loggedIn && session && token) {
+			const balance = await this.creditService.getBalance(token);
+			authInfo = `**👤 Account**\n${session.email} | ⚡ ${balance.balance.toFixed(2)} Credits\n\n`;
+		}
+
 		const projectId = this.activeProjects.get(sender);
 		if (!projectId) {
-			await this.sendMessage(roomId, 'Kein aktives Projekt.\n\nStarte mit: `!new Projektname`');
+			await this.sendMessage(roomId, `${authInfo}Kein aktives Projekt.\n\nStarte mit: \`!new Projektname\``);
 			return;
 		}
 
 		const project = await this.projectService.findById(projectId);
 		if (!project) {
 			this.activeProjects.delete(sender);
-			await this.sendMessage(roomId, 'Projekt nicht gefunden. Starte ein neues mit `!new`');
+			await this.sendMessage(roomId, `${authInfo}Projekt nicht gefunden. Starte ein neues mit \`!new\``);
 			return;
 		}
 
 		const stats = await this.projectService.getStats(projectId);
 		const latest = await this.generationService.getLatestGeneration(projectId);
 
-		let statusText = `**Projekt-Status**\n\n**Name:** ${project.name}\n**Status:** ${project.status}\n**Erstellt:** ${project.createdAt.toLocaleDateString('de-DE')}\n\n**Inhalte:**\n${stats.photos} Fotos\n${stats.voices} Sprachnotizen\n${stats.texts} Textnotizen\n**Gesamt:** ${stats.total} Einträge`;
+		let statusText = `${authInfo}**Projekt-Status**\n\n**Name:** ${project.name}\n**Status:** ${project.status}\n**Erstellt:** ${project.createdAt.toLocaleDateString('de-DE')}\n\n**Inhalte:**\n${stats.photos} Fotos\n${stats.voices} Sprachnotizen\n${stats.texts} Textnotizen\n**Gesamt:** ${stats.total} Einträge`;
 
 		if (latest) {
 			statusText += `\n\n**Letzte Generierung:**\n${latest.createdAt.toLocaleString('de-DE')} (${latest.style})`;

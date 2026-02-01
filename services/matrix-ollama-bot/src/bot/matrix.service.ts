@@ -7,9 +7,12 @@ import {
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
-import { TranscriptionService } from '@manacore/bot-services';
+import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
 import { OllamaService } from '../ollama/ollama.service';
 import { SYSTEM_PROMPTS } from '../config/configuration';
+
+// Ollama is local, so credits are minimal
+const OLLAMA_CHAT_CREDITS = 0.1;
 
 interface UserSession {
 	systemPrompt: string;
@@ -39,7 +42,9 @@ export class MatrixService extends BaseMatrixService {
 	constructor(
 		configService: ConfigService,
 		private readonly transcriptionService: TranscriptionService,
-		private ollamaService: OllamaService
+		private ollamaService: OllamaService,
+		private sessionService: SessionService,
+		private creditService: CreditService
 	) {
 		super(configService);
 	}
@@ -382,14 +387,23 @@ Schreibe einfach eine Nachricht und ich antworte!
 		const connected = await this.ollamaService.checkConnection();
 		const models = await this.ollamaService.listModels();
 		const session = this.getSession(sender);
+		const loggedIn = this.sessionService.isLoggedIn(sender);
+		const authSession = this.sessionService.getSession(sender);
+		const token = this.sessionService.getToken(sender);
 
-		const statusText = `**Ollama Status**
+		let statusText = `**Ollama Status**\n\n`;
+		statusText += `**Verbindung:** ${connected ? 'Online' : 'Offline'}\n`;
+		statusText += `**Modelle:** ${models.length}\n`;
+		statusText += `**Dein Modell:** \`${session.model}\`\n`;
+		statusText += `**Chat-Verlauf:** ${session.history.length} Nachrichten\n`;
 
-**Verbindung:** ${connected ? 'Online' : 'Offline'}
-**Modelle:** ${models.length}
-**Dein Modell:** \`${session.model}\`
-**Chat-Verlauf:** ${session.history.length} Nachrichten
-**DSGVO:** Alle Daten lokal`;
+		if (loggedIn && authSession && token) {
+			const balance = await this.creditService.getBalance(token);
+			statusText += `**👤 Angemeldet als:** ${authSession.email}\n`;
+			statusText += `**⚡ Credits:** ${balance.balance.toFixed(2)}\n`;
+		}
+
+		statusText += `**DSGVO:** Alle Daten lokal`;
 
 		await this.sendMessage(roomId, statusText);
 	}
