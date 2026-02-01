@@ -53,6 +53,9 @@ export class OidcController {
 
 	/**
 	 * Token Endpoint (Better Auth native path)
+	 *
+	 * Accepts both JSON and form-urlencoded body (OAuth2 spec requires form-urlencoded).
+	 * The body-parser middleware in main.ts parses form data into req.body object.
 	 */
 	@Post('api/auth/oauth2/token')
 	async tokenOauth2(@Req() req: Request, @Res() res: Response) {
