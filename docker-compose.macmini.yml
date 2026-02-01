@@ -1290,6 +1290,7 @@ volumes:
     name: mana-redis-data
   minio_data:
     name: mana-minio-data
+    external: true
   victoriametrics_data:
     name: mana-victoria-data
   grafana_data:

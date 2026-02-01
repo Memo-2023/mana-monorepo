@@ -1,20 +1,19 @@
 /**
- * Jose Mock - Re-exports the real module functions
+ * Jose Mock - Uses jest.requireActual to get the real module
  *
  * We use the real jose library for JWT validation tests
  * since we're testing actual JWT creation and verification.
- *
- * Note: We need to explicitly require and re-export because
- * jest module mocking doesn't handle ESM re-exports well.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const jose = require('jose');
+// Use jest.requireActual to bypass the mock and get the real module
+const actualJose = jest.requireActual('jose');
 
-export const SignJWT = jose.SignJWT;
-export const jwtVerify = jose.jwtVerify;
-export const createRemoteJWKSet = jose.createRemoteJWKSet;
-export const errors = jose.errors;
-export const generateKeyPair = jose.generateKeyPair;
-export const exportJWK = jose.exportJWK;
-export const importJWK = jose.importJWK;
+export const SignJWT = actualJose.SignJWT;
+export const jwtVerify = actualJose.jwtVerify;
+export const createRemoteJWKSet = actualJose.createRemoteJWKSet;
+export const errors = actualJose.errors;
+export const generateKeyPair = actualJose.generateKeyPair;
+export const exportJWK = actualJose.exportJWK;
+export const importJWK = actualJose.importJWK;
+export const decodeJwt = actualJose.decodeJwt;
+export const decodeProtectedHeader = actualJose.decodeProtectedHeader;
