@@ -16,8 +16,8 @@ COPY packages/matrix-bot-common ./packages/matrix-bot-common
 # Copy this bot
 COPY services/matrix-mana-bot ./services/matrix-mana-bot
 
-# Install all dependencies (allow scripts for native modules)
-RUN pnpm install --frozen-lockfile
+# Install all dependencies (--ignore-scripts to skip root postinstall hooks)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 RUN pnpm --filter @manacore/bot-services build
@@ -47,8 +47,8 @@ COPY --from=builder /app/packages/matrix-bot-common/package.json ./packages/matr
 COPY --from=builder /app/services/matrix-mana-bot/dist ./services/matrix-mana-bot/dist
 COPY --from=builder /app/services/matrix-mana-bot/package.json ./services/matrix-mana-bot/
 
-# Install production dependencies (allow scripts for native modules)
-RUN pnpm install --frozen-lockfile --prod
+# Install production dependencies only (--ignore-scripts to skip root postinstall hooks)
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Create data directory
 RUN mkdir -p /app/data

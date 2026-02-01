@@ -17,7 +17,7 @@ COPY packages/matrix-bot-common ./packages/matrix-bot-common
 COPY services/matrix-todo-bot ./services/matrix-todo-bot
 
 # Install all dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 RUN pnpm --filter @manacore/bot-services build
@@ -48,7 +48,7 @@ COPY --from=builder /app/services/matrix-todo-bot/dist ./services/matrix-todo-bo
 COPY --from=builder /app/services/matrix-todo-bot/package.json ./services/matrix-todo-bot/
 
 # Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Create data directory
 RUN mkdir -p /app/data
