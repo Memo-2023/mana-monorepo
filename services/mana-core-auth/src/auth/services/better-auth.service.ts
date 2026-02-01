@@ -66,6 +66,7 @@ import type {
 	BetterAuthSession,
 } from '../types/better-auth.types';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
+import * as jwt from 'jsonwebtoken';
 
 // Re-export DTOs and result types for external use
 export type {
