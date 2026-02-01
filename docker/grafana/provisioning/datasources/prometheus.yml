@@ -8,7 +8,7 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://victoriametrics:8428
+    url: http://victoriametrics:9090
     isDefault: true
     editable: true
     jsonData:
