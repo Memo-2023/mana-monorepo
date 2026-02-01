@@ -27,7 +27,7 @@
 // ===== Core Services =====
 
 // Todo
-export { TodoModule, TodoModuleOptions, TodoService, TODO_STORAGE_PROVIDER } from './todo';
+export { TodoModule, TodoModuleOptions, TodoService, TODO_STORAGE_PROVIDER } from './todo/index.js';
 export type {
 	Task,
 	Project,
@@ -37,7 +37,7 @@ export type {
 	TaskFilter,
 	TodoStats,
 	ParsedTaskInput,
-} from './todo';
+} from './todo/index.js';
 
 // Calendar
 export {
@@ -45,7 +45,7 @@ export {
 	CalendarModuleOptions,
 	CalendarService,
 	CALENDAR_STORAGE_PROVIDER,
-} from './calendar';
+} from './calendar/index.js';
 export type {
 	CalendarEvent,
 	Calendar,
@@ -54,10 +54,10 @@ export type {
 	UpdateEventInput,
 	EventFilter,
 	ParsedEventInput,
-} from './calendar';
+} from './calendar/index.js';
 
 // AI (Ollama)
-export { AiModule, AiModuleOptions, AiService } from './ai';
+export { AiModule, AiModuleOptions, AiService } from './ai/index.js';
 export type {
 	OllamaModel,
 	ChatMessage,
@@ -67,11 +67,11 @@ export type {
 	AiServiceConfig,
 	UserAiSession,
 	SystemPromptPreset,
-} from './ai';
-export { SYSTEM_PROMPTS, VISION_MODELS, NON_CHAT_MODELS } from './ai';
+} from './ai/index.js';
+export { SYSTEM_PROMPTS, VISION_MODELS, NON_CHAT_MODELS } from './ai/index.js';
 
 // Clock
-export { ClockModule, ClockModuleOptions, ClockService } from './clock';
+export { ClockModule, ClockModuleOptions, ClockService } from './clock/index.js';
 export type {
 	Timer,
 	Alarm,
@@ -82,7 +82,7 @@ export type {
 	CreateWorldClockInput,
 	ClockServiceConfig,
 	TimeTrackingSummary,
-} from './clock';
+} from './clock/index.js';
 
 // Session (User authentication via mana-core-auth)
 export {
@@ -90,34 +90,34 @@ export {
 	SessionService,
 	SESSION_MODULE_OPTIONS,
 	DEFAULT_SESSION_EXPIRY_MS,
-} from './session';
-export type { UserSession, LoginResult, SessionStats, SessionModuleOptions } from './session';
+} from './session/index.js';
+export type { UserSession, LoginResult, SessionStats, SessionModuleOptions } from './session/index.js';
 
 // Transcription (Speech-to-Text via mana-stt)
-export { TranscriptionModule, TranscriptionService, STT_MODULE_OPTIONS } from './transcription';
+export { TranscriptionModule, TranscriptionService, STT_MODULE_OPTIONS } from './transcription/index.js';
 export type {
 	SttResponse,
 	TranscriptionOptions,
 	TranscriptionModuleOptions,
-} from './transcription';
+} from './transcription/index.js';
 
 // ===== Placeholder Services (to be implemented) =====
 
-export { NutritionModule } from './nutrition';
-export type { NutritionServiceConfig, Meal, NutritionSummary } from './nutrition';
+export { NutritionModule } from './nutrition/index.js';
+export type { NutritionServiceConfig, Meal, NutritionSummary } from './nutrition/index.js';
 
-export { QuotesModule } from './quotes';
-export type { QuotesServiceConfig, Quote } from './quotes';
+export { QuotesModule } from './quotes/index.js';
+export type { QuotesServiceConfig, Quote } from './quotes/index.js';
 
-export { StatsModule } from './stats';
-export type { StatsServiceConfig, AnalyticsReport } from './stats';
+export { StatsModule } from './stats/index.js';
+export type { StatsServiceConfig, AnalyticsReport } from './stats/index.js';
 
-export { DocsModule } from './docs';
-export type { DocsServiceConfig, ProjectDoc } from './docs';
+export { DocsModule } from './docs/index.js';
+export type { DocsServiceConfig, ProjectDoc } from './docs/index.js';
 
 // ===== Shared Utilities =====
 
-export { FileStorageProvider, MemoryStorageProvider } from './shared';
+export { FileStorageProvider, MemoryStorageProvider } from './shared/index.js';
 export type {
 	StorageProvider,
 	BaseEntity,
@@ -129,7 +129,7 @@ export type {
 	DateRange,
 	Priority,
 	ServiceStats,
-} from './shared';
+} from './shared/index.js';
 export {
 	generateId,
 	getTodayISO,
@@ -142,5 +142,5 @@ export {
 	isTomorrow,
 	parseGermanDateKeyword,
 	getRelativeDateLabel,
-} from './shared';
-export { PRIORITY_VALUES } from './shared';
+} from './shared/index.js';
+export { PRIORITY_VALUES } from './shared/index.js';
