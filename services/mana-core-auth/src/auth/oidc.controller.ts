@@ -59,6 +59,9 @@ export class OidcController {
 	 */
 	@Post('api/auth/oauth2/token')
 	async tokenOauth2(@Req() req: Request, @Res() res: Response) {
+		console.log('[Token Endpoint] Content-Type:', req.headers['content-type']);
+		console.log('[Token Endpoint] Body:', req.body);
+		console.log('[Token Endpoint] Body keys:', Object.keys(req.body || {}));
 		return this.handleOidcRequest(req, res);
 	}
 
