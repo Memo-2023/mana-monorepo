@@ -31,8 +31,9 @@ FROM node:20-slim AS runner
 
 WORKDIR /app
 
-# Enable pnpm via corepack
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# Install wget for health checks and enable pnpm
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/* \
+    && corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 # Copy workspace configuration
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
