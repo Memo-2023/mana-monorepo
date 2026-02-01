@@ -59,7 +59,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
     volumes:
-      - minio-ssd-data:/data
+      - /Volumes/TillJakob-S04/ManaData/minio:/data
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -1288,8 +1288,6 @@ volumes:
     name: mana-postgres-data
   redis_data:
     name: mana-redis-data
-  minio-ssd-data:
-    external: true  # Bound to /Volumes/TillJakob-S04/ManaData/minio
   victoriametrics_data:
     name: mana-victoria-data
   grafana_data:

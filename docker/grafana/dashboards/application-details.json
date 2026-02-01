@@ -389,11 +389,12 @@
 			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
 			"id": 9,
 			"panels": [],
-			"title": "Node.js Runtime",
+			"title": "Auth Service Runtime (Node.js)",
 			"type": "row"
 		},
 		{
 			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"description": "Note: Only mana-core-auth exposes Node.js runtime metrics",
 			"fieldConfig": {
 				"defaults": {
 					"color": { "mode": "palette-classic" },
@@ -441,14 +442,14 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "nodejs_heap_size_used_bytes{job=~\"$service\"}",
-					"legendFormat": "{{job}} used",
+					"expr": "auth_nodejs_heap_size_used_bytes",
+					"legendFormat": "Used",
 					"refId": "A"
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "nodejs_heap_size_total_bytes{job=~\"$service\"}",
-					"legendFormat": "{{job}} total",
+					"expr": "auth_nodejs_heap_size_total_bytes",
+					"legendFormat": "Total",
 					"refId": "B"
 				}
 			],
@@ -504,9 +505,15 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "nodejs_eventloop_lag_seconds{job=~\"$service\"}",
-					"legendFormat": "{{job}}",
+					"expr": "auth_nodejs_eventloop_lag_mean_seconds",
+					"legendFormat": "Mean",
 					"refId": "A"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "auth_nodejs_eventloop_lag_p99_seconds",
+					"legendFormat": "p99",
+					"refId": "B"
 				}
 			],
 			"title": "Event Loop Lag",
@@ -561,14 +568,14 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "nodejs_active_handles_total{job=~\"$service\"}",
-					"legendFormat": "{{job}} handles",
+					"expr": "auth_nodejs_active_handles_total",
+					"legendFormat": "Handles",
 					"refId": "A"
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "nodejs_active_requests_total{job=~\"$service\"}",
-					"legendFormat": "{{job}} requests",
+					"expr": "auth_nodejs_active_requests_total",
+					"legendFormat": "Requests",
 					"refId": "B"
 				}
 			],
@@ -624,8 +631,8 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "rate(nodejs_gc_duration_seconds_sum{job=~\"$service\"}[5m])",
-					"legendFormat": "{{job}} {{kind}}",
+					"expr": "rate(auth_nodejs_gc_duration_seconds_sum[5m])",
+					"legendFormat": "{{kind}}",
 					"refId": "A"
 				}
 			],
@@ -681,14 +688,14 @@
 			"targets": [
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "rate(process_cpu_user_seconds_total{job=~\"$service\"}[5m]) * 100",
-					"legendFormat": "{{job}} user",
+					"expr": "rate(auth_process_cpu_user_seconds_total[5m]) * 100",
+					"legendFormat": "User",
 					"refId": "A"
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
-					"expr": "rate(process_cpu_system_seconds_total{job=~\"$service\"}[5m]) * 100",
-					"legendFormat": "{{job}} system",
+					"expr": "rate(auth_process_cpu_system_seconds_total[5m]) * 100",
+					"legendFormat": "System",
 					"refId": "B"
 				}
 			],
