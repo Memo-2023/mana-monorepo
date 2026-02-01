@@ -35,9 +35,7 @@
 	// Theme state
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
 	let systemIsDark = $state(
-		typeof window !== 'undefined'
-			? window.matchMedia('(prefers-color-scheme: dark)').matches
-			: true
+		typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)').matches : true
 	);
 
 	let isDark = $derived(
@@ -142,14 +140,10 @@
 </script>
 
 <svelte:head>
-	<title>Login - Mana Matrix</title>
+	<title>Login - Manalink</title>
 </svelte:head>
 
-<div
-	class="page-container"
-	class:dark={isDark}
-	class:light={!isDark}
->
+<div class="page-container" class:dark={isDark} class:light={!isDark}>
 	<!-- Theme Toggle -->
 	<button
 		type="button"
@@ -167,17 +161,14 @@
 	<main class="main-content">
 		<!-- Logo Section -->
 		<div class="logo-section">
-			<div
-				class="logo-button"
-				class:success-pulse={showSuccess}
-			>
+			<div class="logo-button" class:success-pulse={showSuccess}>
 				{#if showSuccess}
 					<Check size={55} class="text-green-500" />
 				{:else}
 					<ChatCircle size={55} weight="duotone" class="text-violet-500" />
 				{/if}
 			</div>
-			<h1 class="app-name">Mana Matrix</h1>
+			<h1 class="app-name">Manalink</h1>
 			<p class="app-subtitle">Sichere Matrix-Kommunikation</p>
 		</div>
 
@@ -274,11 +265,7 @@
 					</div>
 
 					<!-- Submit Button -->
-					<button
-						type="submit"
-						disabled={loading || showSuccess}
-						class="submit-button"
-					>
+					<button type="submit" disabled={loading || showSuccess} class="submit-button">
 						{#if loading}
 							<CircleNotch size={20} class="animate-spin" />
 							<span>Anmelden...</span>
@@ -298,12 +285,7 @@
 				</div>
 
 				<!-- SSO Login -->
-				<button
-					type="button"
-					class="sso-button"
-					onclick={handleSSOLogin}
-					disabled={loadingSSO}
-				>
+				<button type="button" class="sso-button" onclick={handleSSOLogin} disabled={loadingSSO}>
 					{#if loadingSSO}
 						<CircleNotch size={20} class="animate-spin" />
 						<span>Weiterleiten...</span>
@@ -514,7 +496,9 @@
 		border: 1px solid rgba(255, 255, 255, 0.2);
 		border-radius: 0.75rem;
 		font-size: 1rem;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
 		background-color: rgba(0, 0, 0, 0.2);
 		color: #fff;
 		box-sizing: border-box;
@@ -712,9 +696,23 @@
 	}
 
 	@keyframes shake {
-		0%, 100% { transform: translateX(0); }
-		10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-		20%, 40%, 60%, 80% { transform: translateX(4px); }
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		10%,
+		30%,
+		50%,
+		70%,
+		90% {
+			transform: translateX(-4px);
+		}
+		20%,
+		40%,
+		60%,
+		80% {
+			transform: translateX(4px);
+		}
 	}
 
 	.shake {
@@ -722,8 +720,13 @@
 	}
 
 	@keyframes success-pulse {
-		0%, 100% { transform: scale(1); }
-		50% { transform: scale(1.05); }
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.05);
+		}
 	}
 
 	.success-pulse {
@@ -737,7 +740,9 @@
 	}
 
 	@keyframes spin {
-		to { transform: rotate(360deg); }
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	/* Mobile adjustments */

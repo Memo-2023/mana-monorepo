@@ -1,19 +1,20 @@
-# Matrix Client
+# Manalink
 
-Self-hosted Matrix chat client built with SvelteKit and matrix-js-sdk.
+Secure Matrix messaging client - a bridge to decentralized communication.
 
 ## Project Overview
 
-A minimal, privacy-focused Matrix client that connects to your self-hosted Synapse server (matrix.mana.how).
+Manalink is a privacy-focused Matrix client built with SvelteKit. It connects to Matrix homeservers (default: matrix.mana.how) and supports PWA installation for mobile devices.
 
 ### Tech Stack
 
 | Layer | Technology |
 |-------|------------|
 | Frontend | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
-| Matrix SDK | matrix-js-sdk |
+| Matrix SDK | matrix-js-sdk + matrix-sdk-crypto-wasm |
 | State Management | Svelte 5 runes ($state, $derived) |
 | Icons | @manacore/shared-icons (Phosphor) |
+| PWA | @vite-pwa/sveltekit + Workbox |
 | Date Handling | date-fns |
 
 ## Project Structure
@@ -21,7 +22,7 @@ A minimal, privacy-focused Matrix client that connects to your self-hosted Synap
 ```
 apps/matrix/
 ├── apps/
-│   └── web/                      # SvelteKit web client
+│   └── web/                      # SvelteKit web client (PWA)
 │       ├── src/
 │       │   ├── routes/
 │       │   │   ├── (auth)/       # Login flow
@@ -31,10 +32,16 @@ apps/matrix/
 │       │       ├── matrix/       # Matrix SDK integration
 │       │       │   ├── store.svelte.ts  # Reactive Matrix store
 │       │       │   ├── client.ts        # Login/auth functions
+│       │       │   ├── crypto.ts        # E2EE utilities
 │       │       │   ├── types.ts         # TypeScript types
 │       │       │   └── polyfills.ts     # Browser polyfills
 │       │       └── components/
-│       │           └── chat/     # Chat UI components
+│       │           ├── chat/     # Chat UI components
+│       │           ├── call/     # VoIP call components
+│       │           └── crypto/   # E2EE verification UI
+│       ├── static/               # PWA icons and assets
+│       ├── scripts/
+│       │   └── generate-icons.mjs  # Icon generation script
 │       └── package.json
 └── packages/
     └── shared/                   # Shared types
@@ -43,14 +50,41 @@ apps/matrix/
 ## Development
 
 ```bash
-# Start the Matrix web client
+# Start the web client
 pnpm dev:matrix:web
 
 # Or from monorepo root
 pnpm matrix:dev
+
+# Generate PWA icons (after changing favicon.svg)
+cd apps/matrix/apps/web && node scripts/generate-icons.mjs
 ```
 
 The client runs on **http://localhost:5180**
+
+## PWA Features
+
+Manalink is a Progressive Web App with:
+
+- **Installable** on iOS/Android homescreen
+- **Offline support** via Service Worker caching
+- **Push notifications** (Web Push API)
+- **App shortcuts** for quick actions
+
+### Caching Strategy
+
+| Content | Strategy | TTL |
+|---------|----------|-----|
+| Matrix API | NetworkFirst | 5 min |
+| Images/Avatars | CacheFirst | 30 days |
+| Fonts | CacheFirst | 1 year |
+| App Shell | StaleWhileRevalidate | - |
+
+### Installation
+
+1. Open https://[your-domain] in a mobile browser
+2. Tap "Add to Home Screen" (iOS) or install prompt (Android/Chrome)
+3. Launch from homescreen for fullscreen app experience
 
 ## Key Files
 
@@ -90,26 +124,30 @@ if (result.success) {
 ## Features
 
 ### Phase 1 (Current)
-- [x] Password login
+- [x] Password login + SSO (Mana Core)
 - [x] Room list (DMs and groups)
-- [x] Message timeline
+- [x] Message timeline with pagination
 - [x] Send text messages
 - [x] Typing indicators
 - [x] Read receipts
-- [x] Unread counts
-- [x] Message pagination (load more)
+- [x] Unread/highlight counts
+- [x] Room creation
+- [x] Room settings
+- [x] Message search
+- [x] PWA support
 
-### Phase 2 (Planned)
+### Phase 2 (In Progress)
 - [ ] End-to-end encryption (E2EE)
 - [ ] File/image uploads
 - [ ] Message editing/deletion
-- [ ] Room creation
 - [ ] User search/invite
+- [ ] Message reactions
 
 ### Phase 3 (Future)
 - [ ] VoIP calls (WebRTC)
 - [ ] Video calls
 - [ ] Screen sharing
+- [ ] Capacitor native wrapper
 
 ## Configuration
 
@@ -133,15 +171,24 @@ matrix-js-sdk requires polyfills for browser usage. These are automatically load
 
 ### Vite Configuration
 
-Special Vite config in `vite.config.ts`:
+Special Vite config for Matrix SDK + PWA:
 
 ```typescript
-define: {
-  global: 'globalThis',
+// WASM headers for crypto
+server: {
+  headers: {
+    'Cross-Origin-Opener-Policy': 'same-origin',
+    'Cross-Origin-Embedder-Policy': 'require-corp',
+  },
 },
-optimizeDeps: {
-  include: ['buffer', 'events'],
-}
+// PWA plugin
+plugins: [
+  SvelteKitPWA({
+    registerType: 'autoUpdate',
+    manifest: { ... },
+    workbox: { ... },
+  }),
+],
 ```
 
 ### Client-Side Only
@@ -172,8 +219,16 @@ This is a known issue with typed-event-emitter. Make sure polyfills are loaded b
 
 The initial sync can take time depending on room history. Check `matrixStore.syncState` for status.
 
+### PWA not installing
+
+1. Ensure HTTPS is enabled
+2. Check manifest.json is served correctly
+3. Verify icons exist at specified paths
+4. Check DevTools > Application > Manifest for errors
+
 ## Related Documentation
 
 - [Matrix Client-Server API](https://spec.matrix.org/latest/client-server-api/)
 - [matrix-js-sdk docs](https://matrix-org.github.io/matrix-js-sdk/)
 - [Synapse Admin API](https://element-hq.github.io/synapse/latest/admin_api/)
+- [Vite PWA Plugin](https://vite-pwa-org.netlify.app/frameworks/sveltekit.html)

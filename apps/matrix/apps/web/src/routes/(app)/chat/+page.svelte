@@ -200,7 +200,7 @@
 					<ChatCircle class="h-12 w-12 text-violet-500" />
 				</div>
 				<div class="text-center">
-					<h2 class="text-xl font-semibold text-foreground">Willkommen bei Mana Matrix</h2>
+					<h2 class="text-xl font-semibold text-foreground">Willkommen bei Manalink</h2>
 					<p class="mt-2 max-w-sm">
 						Wähle eine Unterhaltung aus der Seitenleiste oder starte einen neuen Chat
 					</p>

@@ -26,7 +26,7 @@ export async function loginWithPassword(
 		const response = await tempClient.login('m.login.password', {
 			user: username,
 			password: password,
-			initial_device_display_name: 'Mana Matrix Client',
+			initial_device_display_name: 'Manalink',
 		});
 
 		return {
@@ -169,7 +169,7 @@ export async function register(
 
 	try {
 		const response = await tempClient.register(username, password, null, {
-			initial_device_display_name: 'Mana Matrix Client',
+			initial_device_display_name: 'Manalink',
 		} as any);
 
 		return {

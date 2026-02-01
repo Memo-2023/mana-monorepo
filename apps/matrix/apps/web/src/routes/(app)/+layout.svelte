@@ -225,7 +225,7 @@
 		<PillNavigation
 			items={navItems}
 			currentPath={$page.url.pathname}
-			appName="Mana Matrix"
+			appName="Manalink"
 			homeRoute="/chat"
 			onToggleTheme={handleToggleTheme}
 			{isDark}

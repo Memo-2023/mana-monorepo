@@ -83,7 +83,7 @@ export function getEncryptionWarningLevel(
  * Generate a device display name based on browser/OS info
  */
 export function generateDeviceName(): string {
-	if (typeof navigator === 'undefined') return 'Mana Matrix Client';
+	if (typeof navigator === 'undefined') return 'Manalink';
 
 	const ua = navigator.userAgent;
 	let browser = 'Browser';
@@ -102,7 +102,7 @@ export function generateDeviceName(): string {
 	else if (ua.includes('Android')) os = 'Android';
 	else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
 
-	return `Mana Matrix (${browser} on ${os})`;
+	return `Manalink (${browser} on ${os})`;
 }
 
 /**
