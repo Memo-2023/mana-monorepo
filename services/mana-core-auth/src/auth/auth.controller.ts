@@ -11,6 +11,7 @@ import {
 	HttpStatus,
 } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { BetterAuthService } from './services/better-auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -45,6 +46,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
  * - DELETE /auth/organizations/:id/members/:memberId - Remove member
  * - POST /auth/organizations/set-active - Switch active organization
  */
+@ApiTags('auth')
 @Controller('auth')
 @UseGuards(ThrottlerGuard)
 export class AuthController {
@@ -62,6 +64,15 @@ export class AuthController {
 	 */
 	@Post('register')
 	@Throttle({ default: { ttl: 60000, limit: 5 } })
+	@ApiOperation({
+		summary: 'Register new user',
+		description: 'Create a new B2C user account. Rate limited to 5 requests/minute.',
+	})
+	@ApiBody({ type: RegisterDto })
+	@ApiResponse({ status: 201, description: 'User created successfully' })
+	@ApiResponse({ status: 400, description: 'Invalid input data' })
+	@ApiResponse({ status: 409, description: 'Email already exists' })
+	@ApiResponse({ status: 429, description: 'Rate limit exceeded' })
 	async register(@Body() registerDto: RegisterDto) {
 		return this.betterAuthService.registerB2C({
 			email: registerDto.email,
@@ -80,6 +91,33 @@ export class AuthController {
 	@Post('login')
 	@Throttle({ default: { ttl: 60000, limit: 10 } })
 	@HttpCode(HttpStatus.OK)
+	@ApiOperation({
+		summary: 'User login',
+		description: 'Authenticate with email and password. Returns JWT access token.',
+	})
+	@ApiBody({ type: LoginDto })
+	@ApiResponse({
+		status: 200,
+		description: 'Login successful',
+		schema: {
+			type: 'object',
+			properties: {
+				user: {
+					type: 'object',
+					properties: {
+						id: { type: 'string' },
+						email: { type: 'string' },
+						name: { type: 'string' },
+					},
+				},
+				accessToken: { type: 'string' },
+				refreshToken: { type: 'string' },
+				expiresIn: { type: 'number', example: 900 },
+			},
+		},
+	})
+	@ApiResponse({ status: 401, description: 'Invalid credentials' })
+	@ApiResponse({ status: 429, description: 'Rate limit exceeded' })
 	async login(@Body() loginDto: LoginDto) {
 		return this.betterAuthService.signIn({
 			email: loginDto.email,
@@ -97,6 +135,13 @@ export class AuthController {
 	@Post('logout')
 	@UseGuards(JwtAuthGuard)
 	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({
+		summary: 'User logout',
+		description: 'Invalidate the current session',
+	})
+	@ApiResponse({ status: 200, description: 'Logout successful' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
 	async logout(@Headers('authorization') authorization: string) {
 		const token = this.extractToken(authorization);
 		return this.betterAuthService.signOut(token);

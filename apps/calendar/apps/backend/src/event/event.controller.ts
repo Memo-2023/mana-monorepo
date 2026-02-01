@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { UseCredits } from '@manacore/nestjs-integration';
+import { CreditOperationType } from '@manacore/credit-operations';
 import { EventService } from './event.service';
 import { CreateEventDto, UpdateEventDto, QueryEventsDto } from './dto';
 
@@ -31,6 +33,7 @@ export class EventController {
 	}
 
 	@Post()
+	@UseCredits(CreditOperationType.EVENT_CREATE)
 	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateEventDto) {
 		const event = await this.eventService.create(user.userId, dto);
 		return { event };

@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { UseCredits } from '@manacore/nestjs-integration';
+import { CreditOperationType } from '@manacore/credit-operations';
 import { TaskService } from './task.service';
 import { CreateTaskDto, UpdateTaskDto, QueryTasksDto } from './dto';
 
@@ -63,6 +65,7 @@ export class TaskController {
 	}
 
 	@Post()
+	@UseCredits(CreditOperationType.TASK_CREATE)
 	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateTaskDto) {
 		const task = await this.taskService.create(user.userId, dto);
 		return { task };

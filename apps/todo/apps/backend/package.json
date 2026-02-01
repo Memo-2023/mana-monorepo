@@ -18,6 +18,8 @@
 		"db:generate": "drizzle-kit generate"
 	},
 	"dependencies": {
+		"@manacore/credit-operations": "workspace:*",
+		"@manacore/nestjs-integration": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",
 		"@manacore/shared-nestjs-metrics": "workspace:*",

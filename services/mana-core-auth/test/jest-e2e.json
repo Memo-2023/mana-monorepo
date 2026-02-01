@@ -20,7 +20,8 @@
 		"^better-auth$": "<rootDir>/__mocks__/better-auth.ts",
 		"^better-auth/plugins$": "<rootDir>/__mocks__/better-auth-plugins.ts",
 		"^better-auth/plugins/(.*)$": "<rootDir>/__mocks__/better-auth-plugins.ts",
-		"^better-auth/adapters/(.*)$": "<rootDir>/__mocks__/better-auth-adapters.ts"
+		"^better-auth/adapters/(.*)$": "<rootDir>/__mocks__/better-auth-adapters.ts",
+		"^jose$": "<rootDir>/__mocks__/jose.ts"
 	},
 	"testTimeout": 30000,
 	"setupFilesAfterEnv": ["./setup-e2e.ts"]

@@ -12,6 +12,7 @@
 
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/connection';
 
@@ -25,6 +26,7 @@ interface HealthStatus {
 	};
 }
 
+@ApiTags('health')
 @Controller('health')
 export class HealthController {
 	private readonly startTime = Date.now();
@@ -36,6 +38,8 @@ export class HealthController {
 	 * Returns ok if the server is running
 	 */
 	@Get()
+	@ApiOperation({ summary: 'Basic health check', description: 'Returns ok if server is running' })
+	@ApiResponse({ status: 200, description: 'Service is healthy' })
 	check(): HealthStatus {
 		return {
 			status: 'ok',
@@ -50,6 +54,11 @@ export class HealthController {
 	 * Only checks if the process is alive, not if dependencies are healthy
 	 */
 	@Get('live')
+	@ApiOperation({
+		summary: 'Liveness probe',
+		description: 'Kubernetes liveness check - returns ok if process is alive',
+	})
+	@ApiResponse({ status: 200, description: 'Process is alive' })
 	live(): { status: 'ok' } {
 		return { status: 'ok' };
 	}
@@ -60,6 +69,12 @@ export class HealthController {
 	 * Checks database connectivity before marking as ready
 	 */
 	@Get('ready')
+	@ApiOperation({
+		summary: 'Readiness probe',
+		description: 'Kubernetes readiness check - verifies database and Redis connectivity',
+	})
+	@ApiResponse({ status: 200, description: 'Service is ready to accept traffic' })
+	@ApiResponse({ status: 503, description: 'Service is not ready (database or Redis unreachable)' })
 	async ready(): Promise<HealthStatus> {
 		const checks: HealthStatus['checks'] = {};
 		let allHealthy = true;

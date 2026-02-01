@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { UseCredits } from '@manacore/nestjs-integration';
+import { CreditOperationType } from '@manacore/credit-operations';
 import { ProjectService } from './project.service';
 import { CreateProjectDto, UpdateProjectDto, ReorderProjectsDto } from './dto';
 
@@ -23,6 +25,7 @@ export class ProjectController {
 	}
 
 	@Post()
+	@UseCredits(CreditOperationType.PROJECT_CREATE)
 	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateProjectDto) {
 		const project = await this.projectService.create(user.userId, dto);
 		return { project };

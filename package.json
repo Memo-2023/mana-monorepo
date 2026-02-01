@@ -281,6 +281,14 @@
 				"@sveltejs/vite-plugin-svelte>vite": ">=6.0.0",
 				"@sveltejs/vite-plugin-svelte-inspector>vite": ">=6.0.0"
 			}
+		},
+		"neverBuiltDependencies": [
+			"cpu-features",
+			"ssh2"
+		],
+		"overrides": {
+			"cpu-features": "npm:empty-npm-package@1.0.0",
+			"ssh2": "npm:empty-npm-package@1.0.0"
 		}
 	}
 }

@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { UseCredits } from '@manacore/nestjs-integration';
+import { CreditOperationType } from '@manacore/credit-operations';
 import { CalendarService } from './calendar.service';
 import { CreateCalendarDto, UpdateCalendarDto } from './dto';
 
@@ -28,6 +30,7 @@ export class CalendarController {
 	}
 
 	@Post()
+	@UseCredits(CreditOperationType.CALENDAR_CREATE)
 	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateCalendarDto) {
 		const calendar = await this.calendarService.create(user.userId, dto);
 		return { calendar };

@@ -173,28 +173,39 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
 ## Phase 3: Testing & Polish
 
 ### 3.1 E2E Tests für OAuth2/OIDC
-- **Status**: [ ] Offen
+- **Status**: [x] Erledigt (2026-02-01)
 - **Priorität**: 🟡 Mittel
 - **Problem**: ~35% Test Coverage, OIDC Flows nicht getestet
 - **Lösung**:
-  - E2E Tests mit Supertest
-  - OIDC Authorization Flow testen
-  - Token Refresh testen
+  - ✅ E2E Tests mit Supertest erstellt
+  - ✅ OIDC Authorization Flow Tests (Discovery, JWKS, Authorize, Token, UserInfo)
+  - ✅ Token Refresh Tests
+  - ✅ Auth Flow Tests (Registration, Login, Logout, Session, Validation)
+  - ✅ Rate Limiting Tests
+  - ✅ Security Tests (redirect_uri validation, token validation)
 - **Neue Dateien**:
-  - `test/e2e/oidc.e2e-spec.ts`
-  - `test/e2e/auth-flow.e2e-spec.ts`
+  - `test/e2e/oidc.e2e-spec.ts` - OIDC Provider Tests
+  - `test/e2e/auth-flow.e2e-spec.ts` - Authentication Flow Tests
+- **Hinweis**: Tests erfordern DATABASE_URL für Ausführung
 
 ### 3.2 OpenAPI/Swagger Dokumentation
-- **Status**: [ ] Offen
+- **Status**: [x] Erledigt (2026-02-01)
 - **Priorität**: 🟡 Mittel
 - **Problem**: Keine API-Dokumentation
 - **Lösung**:
-  - `@nestjs/swagger` integrieren
-  - DTOs mit Swagger Decorators
-  - `/api-docs` Endpoint
-- **Dateien**:
-  - `src/main.ts`
-  - Alle DTOs
+  - ✅ `@nestjs/swagger` zu dependencies hinzugefügt
+  - ✅ Swagger in main.ts konfiguriert
+  - ✅ `/api-docs` Endpoint unter http://localhost:3001/api-docs
+  - ✅ DTOs mit ApiProperty decorators (register, login)
+  - ✅ Controller mit ApiTags, ApiOperation, ApiResponse (auth, health)
+  - ✅ JWT Bearer Auth im Swagger UI konfiguriert
+- **Geänderte Dateien**:
+  - `package.json` - @nestjs/swagger hinzugefügt
+  - `src/main.ts` - Swagger Konfiguration
+  - `src/auth/auth.controller.ts` - API Decorators
+  - `src/auth/dto/register.dto.ts` - ApiProperty
+  - `src/auth/dto/login.dto.ts` - ApiProperty
+  - `src/health/health.controller.ts` - API Decorators
 
 ### 3.3 Docker Optimierung
 - **Status**: [x] Erledigt (2026-02-01)
@@ -244,11 +255,11 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
 |-------|----------|----------|-------------|
 | Phase 1 | 5 | 5 | 100% |
 | Phase 2 | 6 | 5 | 83% |
-| Phase 3 | 5 | 3 | 60% |
-| **Gesamt** | **16** | **13** | **81%** |
+| Phase 3 | 5 | 5 | 100% |
+| **Gesamt** | **16** | **15** | **94%** |
 
 **Hinweis:** Phase 2.3 (Grafana Dashboard) ist als separates Task für später markiert.
-**Offen:** 3.1 (E2E Tests), 3.2 (OpenAPI/Swagger), 2.3 (Grafana Dashboard)
+**Offen:** 2.3 (Grafana Dashboard)
 
 ---
 
@@ -270,4 +281,6 @@ Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-
 | 2026-02-01 | 3.3 Docker Optimierung: .dockerignore, tsx entfernt, nur dist/ kopiert |
 | 2026-02-01 | 3.4 Dependency Cleanup: jsonwebtoken entfernt, jose Mock für Tests |
 | 2026-02-01 | 3.5 Security Scanning: pnpm audit in CI, Dependabot war bereits aktiv |
+| 2026-02-01 | 3.2 OpenAPI/Swagger: API-Dokumentation unter /api-docs verfügbar |
+| 2026-02-01 | 3.1 E2E Tests: OIDC + Auth Flow Tests erstellt (oidc.e2e-spec.ts, auth-flow.e2e-spec.ts) |
 
