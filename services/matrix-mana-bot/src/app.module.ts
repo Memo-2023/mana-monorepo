@@ -16,40 +16,52 @@ import { TodoModule, CalendarModule, AiModule, ClockModule } from '@manacore/bot
 			load: [configuration],
 		}),
 
-		// Business Logic Modules from shared package
-		TodoModule.registerAsync({
-			imports: [ConfigModule],
-			useFactory: (config: ConfigService) => ({
-				storagePath: config.get('services.todo.storagePath'),
+		// Business Logic Modules from shared package (global: true makes them available everywhere)
+		{
+			...TodoModule.registerAsync({
+				imports: [ConfigModule],
+				useFactory: (config: ConfigService) => ({
+					storagePath: config.get('services.todo.storagePath'),
+				}),
+				inject: [ConfigService],
 			}),
-			inject: [ConfigService],
-		}),
+			global: true,
+		},
 
-		CalendarModule.registerAsync({
-			imports: [ConfigModule],
-			useFactory: (config: ConfigService) => ({
-				storagePath: config.get('services.calendar.storagePath'),
+		{
+			...CalendarModule.registerAsync({
+				imports: [ConfigModule],
+				useFactory: (config: ConfigService) => ({
+					storagePath: config.get('services.calendar.storagePath'),
+				}),
+				inject: [ConfigService],
 			}),
-			inject: [ConfigService],
-		}),
+			global: true,
+		},
 
-		AiModule.registerAsync({
-			imports: [ConfigModule],
-			useFactory: (config: ConfigService) => ({
-				baseUrl: config.get('services.ai.baseUrl'),
-				defaultModel: config.get('services.ai.defaultModel'),
-				timeout: config.get('services.ai.timeout'),
+		{
+			...AiModule.registerAsync({
+				imports: [ConfigModule],
+				useFactory: (config: ConfigService) => ({
+					baseUrl: config.get('services.ai.baseUrl'),
+					defaultModel: config.get('services.ai.defaultModel'),
+					timeout: config.get('services.ai.timeout'),
+				}),
+				inject: [ConfigService],
 			}),
-			inject: [ConfigService],
-		}),
+			global: true,
+		},
 
-		ClockModule.registerAsync({
-			imports: [ConfigModule],
-			useFactory: (config: ConfigService) => ({
-				apiUrl: config.get('services.clock.apiUrl'),
+		{
+			...ClockModule.registerAsync({
+				imports: [ConfigModule],
+				useFactory: (config: ConfigService) => ({
+					apiUrl: config.get('services.clock.apiUrl'),
+				}),
+				inject: [ConfigService],
 			}),
-			inject: [ConfigService],
-		}),
+			global: true,
+		},
 
 		// Gateway-specific modules
 		BotModule,
