@@ -24,6 +24,13 @@ export default () => ({
 			storagePath: process.env.CALENDAR_STORAGE_PATH || './data/calendar.json',
 		},
 	},
+	voice: {
+		sttUrl: process.env.STT_URL || 'http://localhost:3020',
+		voiceBotUrl: process.env.VOICE_BOT_URL || 'http://localhost:3050',
+		defaultVoice: process.env.DEFAULT_VOICE || 'de-DE-ConradNeural',
+		defaultSpeed: parseFloat(process.env.DEFAULT_SPEED) || 1.0,
+		enabled: process.env.VOICE_ENABLED !== 'false',
+	},
 });
 
 // Help text for the unified bot
@@ -57,6 +64,12 @@ Schreib einfach eine Nachricht - ich antworte!
 • \`!summary\` - Tages-Zusammenfassung (AI)
 • \`!ai-todo [text]\` - AI extrahiert Todos aus Text
 
+**🎤 Spracheingabe**
+Sende eine Sprachnachricht - ich verstehe dich!
+• Natürliche Befehle: "Was steht heute an?"
+• Aufgaben: "Neue Aufgabe: Einkaufen gehen"
+• Timer: "Timer 25 Minuten"
+
 **💡 Tipps**
 • Natürliche Sprache funktioniert: "Was sind meine Todos?"
 • Prioritäten: \`!todo Wichtig !p1\`
@@ -73,8 +86,9 @@ Ich bin dein persönlicher Assistent mit vielen Funktionen:
 • 📋 Todo-Verwaltung
 • 📅 Kalender
 • ⏱️ Timer & Alarme
+• 🎤 Spracherkennung
 
-Schreib einfach eine Nachricht oder sag "hilfe" für alle Befehle!`;
+Schreib einfach eine Nachricht, sende eine Sprachnachricht, oder sag "hilfe" für alle Befehle!`;
 
 export const BOT_INTRODUCTION = `🤖 **Hallo! Ich bin Mana, euer All-in-One Assistent.**
 

@@ -53,6 +53,7 @@ Unified Matrix bot that combines all features in one. Users can interact with a 
 | **Calendar** | `!cal`, `!week`, `!event`, `!calendars` | Event scheduling |
 | **Timers** | `!timer`, `!timers`, `!stop`, `!alarm`, `!alarms` | Time management |
 | **Smart** | `!summary`, `!ai-todo` | Cross-feature AI features |
+| **Voice** | Send voice note | Speech-to-text via Whisper |
 
 ## Commands
 
@@ -143,6 +144,20 @@ Was ist TypeScript?
 !time tokyo
 ```
 
+### Voice Input
+
+```
+# Send a voice note in Matrix - bot transcribes and responds
+🎤 "Was steht heute an?"
+→ Bot shows: 🎤 *"Was steht heute an?"*
+→ Bot responds with today's events and tasks
+
+# Voice commands work naturally
+🎤 "Neue Aufgabe: Einkaufen gehen"
+🎤 "Timer 25 Minuten"
+🎤 "Was sind meine Termine diese Woche?"
+```
+
 ### Smart Features (Cross-Feature)
 
 ```
@@ -211,6 +226,9 @@ src/
 │   ├── bot.module.ts
 │   ├── matrix.service.ts      # Matrix connection
 │   └── command-router.service.ts  # Command routing
+├── voice/
+│   ├── voice.module.ts
+│   └── voice.service.ts       # STT/TTS integration
 ├── handlers/
 │   ├── handlers.module.ts
 │   ├── ai.handler.ts          # AI/Ollama commands
@@ -304,3 +322,7 @@ All bots share the same `@manacore/bot-services` package, so data is consistent.
 | `CLOCK_API_URL` | No | localhost:3017 | Clock backend |
 | `TODO_STORAGE_PATH` | No | ./data/todos.json | Todo storage |
 | `CALENDAR_STORAGE_PATH` | No | ./data/calendar.json | Calendar storage |
+| `STT_URL` | No | localhost:3020 | Speech-to-text (Whisper) |
+| `VOICE_BOT_URL` | No | localhost:3050 | Voice bot (TTS) |
+| `DEFAULT_VOICE` | No | de-DE-ConradNeural | Default TTS voice |
+| `VOICE_ENABLED` | No | true | Enable voice processing |

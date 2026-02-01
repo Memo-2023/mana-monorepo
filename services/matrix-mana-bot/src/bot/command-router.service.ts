@@ -11,6 +11,7 @@ export interface CommandContext {
 	userId: string;
 	message: string;
 	event: any;
+	isVoice?: boolean; // True if message came from voice input
 }
 
 interface CommandRoute {
@@ -23,7 +24,10 @@ interface CommandRoute {
 const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
 	{ keywords: ['hilfe', 'help', 'was kannst du', 'befehle'], command: '!help' },
 	{ keywords: ['modelle', 'models', 'welche modelle'], command: '!models' },
-	{ keywords: ['meine aufgaben', 'zeige aufgaben', 'todo liste', 'was muss ich'], command: '!list' },
+	{
+		keywords: ['meine aufgaben', 'zeige aufgaben', 'todo liste', 'was muss ich'],
+		command: '!list',
+	},
 	{ keywords: ['heute', 'was steht heute an'], command: '!today' },
 	{ keywords: ['termine', 'kalender', 'meine termine'], command: '!cal' },
 	{ keywords: ['timer', 'stoppuhr'], command: '!timers' },
@@ -97,7 +101,7 @@ export class CommandRouterService {
 			{
 				patterns: ['!today', '!heute'],
 				handler: (ctx) => this.todoHandler.today(ctx),
-				description: 'Today\'s todos',
+				description: "Today's todos",
 			},
 			{
 				patterns: ['!inbox'],
@@ -124,7 +128,7 @@ export class CommandRouterService {
 			{
 				patterns: ['!cal', '!termine'],
 				handler: (ctx) => this.calendarHandler.today(ctx),
-				description: 'Today\'s events',
+				description: "Today's events",
 			},
 			{
 				patterns: ['!week', '!woche'],

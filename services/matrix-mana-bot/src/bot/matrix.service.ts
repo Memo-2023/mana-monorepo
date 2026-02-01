@@ -1,28 +1,32 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	BaseMatrixService,
-	MatrixBotConfig,
-	MatrixRoomEvent,
-} from '@manacore/matrix-bot-common';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { CommandRouterService, CommandContext } from './command-router.service';
+import { VoiceService } from '../voice/voice.service';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
+	private voiceEnabled: boolean;
+
 	constructor(
 		configService: ConfigService,
 		@Inject(forwardRef(() => CommandRouterService))
-		private commandRouter: CommandRouterService
+		private commandRouter: CommandRouterService,
+		@Inject(forwardRef(() => VoiceService))
+		private voiceService: VoiceService
 	) {
 		super(configService);
+		this.voiceEnabled = configService.get('voice.enabled') !== false;
 	}
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/mana-bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/mana-bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -95,6 +99,81 @@ export class MatrixService extends BaseMatrixService {
 				roomId,
 				event,
 				'❌ Ein Fehler ist aufgetreten. Bitte versuche es erneut.'
+			);
+		}
+	}
+
+	/**
+	 * Handle voice note messages - transcribe and process as text
+	 */
+	protected async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
+		if (!this.voiceEnabled) {
+			return;
+		}
+
+		const audioUrl = event.content?.url;
+		if (!audioUrl) {
+			this.logger.warn('Audio message without URL');
+			return;
+		}
+
+		try {
+			// Set typing indicator
+			await this.client.setTyping(roomId, true, 60000);
+
+			// Download audio from Matrix
+			this.logger.debug(`Downloading audio from ${audioUrl}`);
+			const audioBuffer = await this.downloadMedia(audioUrl);
+
+			// Transcribe audio
+			this.logger.debug(`Transcribing ${audioBuffer.length} bytes`);
+			const transcription = await this.voiceService.transcribe(audioBuffer);
+
+			if (!transcription.text || transcription.text.trim() === '') {
+				await this.client.setTyping(roomId, false);
+				await this.sendReply(
+					roomId,
+					event,
+					'🎤 Ich konnte leider nichts verstehen. Bitte versuche es noch einmal.'
+				);
+				return;
+			}
+
+			const message = transcription.text.trim();
+			this.logger.log(`Transcribed from ${sender}: "${message}"`);
+
+			// Show what was understood
+			await this.sendReply(roomId, event, `🎤 *"${message}"*`);
+
+			// Create context and route
+			const ctx: CommandContext = {
+				roomId,
+				userId: sender,
+				message,
+				event,
+				isVoice: true, // Flag for voice input
+			};
+
+			// Route the transcribed message
+			const response = await this.commandRouter.route(ctx);
+
+			// Stop typing
+			await this.client.setTyping(roomId, false);
+
+			if (response) {
+				await this.sendReply(roomId, event, response);
+			}
+		} catch (error) {
+			await this.client.setTyping(roomId, false);
+			this.logger.error(`Error handling voice message:`, error);
+			await this.sendReply(
+				roomId,
+				event,
+				'❌ Spracherkennung fehlgeschlagen. Bitte versuche es noch einmal.'
 			);
 		}
 	}
