@@ -1,4 +1,4 @@
-export { BaseMatrixService } from './base-matrix.service';
+export { BaseMatrixService, type IConfigService } from './base-matrix.service';
 export {
 	type MatrixBotConfig,
 	type MatrixRoomEvent,

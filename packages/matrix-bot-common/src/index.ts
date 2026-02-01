@@ -21,6 +21,7 @@
 // Base Matrix Service
 export {
 	BaseMatrixService,
+	type IConfigService,
 	type MatrixBotConfig,
 	type MatrixRoomEvent,
 	type MatrixMessageEvent,
@@ -46,12 +47,7 @@ export {
 } from './message';
 
 // Markdown Utilities
-export {
-	markdownToHtml,
-	escapeHtml,
-	formatNumberedList,
-	formatBulletList,
-} from './markdown';
+export { markdownToHtml, escapeHtml, formatNumberedList, formatBulletList } from './markdown';
 
 // Keyword Detection
 export {

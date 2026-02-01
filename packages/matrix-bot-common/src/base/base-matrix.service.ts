@@ -1,5 +1,4 @@
-import { Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Logger, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
 import {
 	MatrixClient,
 	SimpleFsStorageProvider,
@@ -8,7 +7,7 @@ import {
 } from 'matrix-bot-sdk';
 import * as path from 'path';
 import * as fs from 'fs';
-import { MatrixBotConfig, MatrixRoomEvent, isTextMessage, isAudioMessage } from './types';
+import { type MatrixBotConfig, type MatrixRoomEvent, isTextMessage, isAudioMessage } from './types';
 import { markdownToHtml } from '../markdown/markdown-formatter';
 
 /**
@@ -42,13 +41,20 @@ import { markdownToHtml } from '../markdown/markdown-formatter';
  * }
  * ```
  */
+/**
+ * Interface for config service to support both @nestjs/config v3 and v4
+ */
+export interface IConfigService {
+	get<T = unknown>(propertyPath: string): T | undefined;
+}
+
 export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy {
 	protected readonly logger = new Logger(this.constructor.name);
 	protected client!: MatrixClient;
-	protected botUserId: string = '';
+	protected botUserId = '';
 	protected readonly allowedRooms: string[];
 
-	constructor(protected configService: ConfigService) {
+	constructor(protected configService: IConfigService) {
 		this.allowedRooms = this.getConfig().allowedRooms;
 	}
 

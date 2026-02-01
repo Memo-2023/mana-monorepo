@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { HealthController, createHealthProvider } from '@manacore/matrix-bot-common';
 import configuration from './config/configuration';
 import { BotModule } from './bot/bot.module';
 import { HandlersModule } from './handlers/handlers.module';
 import { OrchestrationModule } from './orchestration/orchestration.module';
-import { HealthController } from './health/health.controller';
 
 // Import shared services from bot-services package
 import { TodoModule, CalendarModule, AiModule, ClockModule } from '@manacore/bot-services';
@@ -57,5 +57,6 @@ import { TodoModule, CalendarModule, AiModule, ClockModule } from '@manacore/bot
 		OrchestrationModule,
 	],
 	controllers: [HealthController],
+	providers: [createHealthProvider('matrix-mana-bot')],
 })
 export class AppModule {}

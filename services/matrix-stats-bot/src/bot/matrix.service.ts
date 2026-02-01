@@ -1,75 +1,41 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-	RichConsoleLogger,
-	LogService,
-	LogLevel,
-} from 'matrix-bot-sdk';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
-export class MatrixService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(MatrixService.name);
-	private client!: MatrixClient;
-	private botUserId: string = '';
+export class MatrixService extends BaseMatrixService {
 	private reportRoomId: string = '';
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private analyticsService: AnalyticsService,
 		private usersService: UsersService
 	) {
+		super(configService);
 		this.reportRoomId = this.configService.get<string>('matrix.reportRoomId') || '';
 	}
 
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-
-		if (!accessToken) {
-			this.logger.error('MATRIX_ACCESS_TOKEN is required');
-			return;
-		}
-
-		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogLevel.INFO);
-
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
-
-		AutojoinRoomsMixin.setupOnClient(this.client);
-
-		this.botUserId = await this.client.getUserId();
-		this.logger.log(`Bot user ID: ${this.botUserId}`);
-
-		this.client.on('room.message', this.handleRoomMessage.bind(this));
-
-		await this.client.start();
-		this.logger.log('Matrix Stats Bot started successfully');
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || '',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: [], // No room restrictions
+		};
 	}
 
-	async onModuleDestroy() {
-		if (this.client) {
-			await this.client.stop();
-			this.logger.log('Matrix Stats Bot stopped');
-		}
-	}
+	protected async handleTextMessage(
+		roomId: string,
+		_event: MatrixRoomEvent,
+		message: string,
+		_sender: string
+	): Promise<void> {
+		if (!message.startsWith('!')) return;
 
-	private async handleRoomMessage(roomId: string, event: any) {
-		if (event.sender === this.botUserId) return;
-
-		const content = event.content as { msgtype?: string; body?: string };
-		if (content.msgtype !== 'm.text') return;
-
-		const body = content.body;
-		if (!body || !body.startsWith('!')) return;
-
-		const [command] = body.slice(1).split(' ');
+		const [command] = message.slice(1).split(' ');
 		await this.handleCommand(roomId, command.toLowerCase());
 	}
 
@@ -172,24 +138,5 @@ Daten von Umami Analytics (self-hosted).`;
 		}
 
 		await this.sendMessage(this.reportRoomId, report);
-	}
-
-	private async sendMessage(roomId: string, message: string) {
-		const htmlBody = this.markdownToHtml(message);
-
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: message,
-			format: 'org.matrix.custom.html',
-			formatted_body: htmlBody,
-		});
-	}
-
-	private markdownToHtml(markdown: string): string {
-		return markdown
-			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-			.replace(/\*([^*]+)\*/g, '<em>$1</em>')
-			.replace(/`([^`]+)`/g, '<code>$1</code>')
-			.replace(/\n/g, '<br/>');
 	}
 }

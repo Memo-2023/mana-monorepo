@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { HealthController, createHealthProvider } from '@manacore/matrix-bot-common';
 import { DatabaseModule } from './database/database.module';
 import { BotModule } from './bot/bot.module';
-import { HealthController } from './health.controller';
 import configuration from './config/configuration';
 
 @Module({
@@ -15,5 +15,6 @@ import configuration from './config/configuration';
 		BotModule,
 	],
 	controllers: [HealthController],
+	providers: [createHealthProvider('matrix-project-doc-bot')],
 })
 export class AppModule {}
