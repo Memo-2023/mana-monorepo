@@ -37,7 +37,7 @@ export class ListService {
 	): Promise<UserList> {
 		const [list] = await this.db
 			.update(userLists)
-			.set({ ...data, updatedAt: new Date() })
+			.set(data)
 			.where(and(eq(userLists.id, listId), eq(userLists.userId, userId)))
 			.returning();
 

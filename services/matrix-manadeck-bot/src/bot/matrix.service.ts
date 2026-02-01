@@ -5,6 +5,8 @@ import {
 	MatrixBotConfig,
 	MatrixRoomEvent,
 	UserListMapper,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { ManadeckService, Deck, Card } from '../manadeck/manadeck.service';
 import { SessionService } from '@manacore/bot-services';
@@ -16,6 +18,19 @@ export class MatrixService extends BaseMatrixService {
 	private decksMapper = new UserListMapper<Deck>();
 	private cardsMapper = new UserListMapper<Card>();
 	private currentDeckId: Map<string, string> = new Map();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['decks', 'meine decks', 'kartendecks', 'liste'], command: 'decks' },
+		{ keywords: ['karten', 'cards', 'meine karten'], command: 'karten' },
+		{ keywords: ['lernen', 'study', 'ueben', 'wiederholen'], command: 'lernen' },
+		{ keywords: ['faellig', 'due', 'anstehend', 'zu lernen'], command: 'faellig' },
+		{ keywords: ['mana', 'credits', 'guthaben', 'punkte'], command: 'mana' },
+		{ keywords: ['stats', 'statistik', 'fortschritt', 'statistiken'], command: 'stats' },
+		{ keywords: ['generieren', 'generate', 'erstellen', 'ai'], command: 'generate' },
+		{ keywords: ['featured', 'empfohlen', 'beliebte decks'], command: 'featured' },
+		{ keywords: ['rangliste', 'leaderboard', 'bestenliste'], command: 'leaderboard' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -40,6 +55,12 @@ export class MatrixService extends BaseMatrixService {
 		message: string,
 		sender: string
 	): Promise<void> {
+		// Check for keyword commands first
+		const keywordCommand = this.keywordDetector.detect(message);
+		if (keywordCommand) {
+			message = `!${keywordCommand}`;
+		}
+
 		if (!message.startsWith('!')) return;
 
 		const parts = message.slice(1).split(/\s+/);

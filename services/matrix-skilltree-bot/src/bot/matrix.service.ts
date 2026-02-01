@@ -5,6 +5,8 @@ import {
 	MatrixBotConfig,
 	MatrixRoomEvent,
 	UserListMapper,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { SkilltreeService, Skill, SkillBranch } from '../skilltree/skilltree.service';
 import { SessionService } from '@manacore/bot-services';
@@ -14,6 +16,15 @@ import { HELP_MESSAGE } from '../config/configuration';
 export class MatrixService extends BaseMatrixService {
 	// User list mapper for number-based reference
 	private skillsMapper = new UserListMapper<Skill>();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['skills', 'faehigkeiten', 'meine skills', 'liste'], command: 'skills' },
+		{ keywords: ['xp', 'punkte', 'erfahrung', 'erfahrungspunkte'], command: 'xp' },
+		{ keywords: ['stats', 'statistik', 'statistiken', 'fortschritt'], command: 'stats' },
+		{ keywords: ['aktivitaeten', 'activities', 'verlauf', 'historie'], command: 'aktivitaeten' },
+		{ keywords: ['neu', 'new', 'neuer skill', 'skill erstellen'], command: 'neu' },
+	]);
 
 	// Branch name mappings (German/English)
 	private readonly branchMappings: Record<string, SkillBranch> = {
@@ -64,6 +75,12 @@ export class MatrixService extends BaseMatrixService {
 		event: MatrixRoomEvent,
 		body: string
 	): Promise<void> {
+		// Check for keyword commands first
+		const keywordCommand = this.keywordDetector.detect(body);
+		if (keywordCommand) {
+			body = `!${keywordCommand}`;
+		}
+
 		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;

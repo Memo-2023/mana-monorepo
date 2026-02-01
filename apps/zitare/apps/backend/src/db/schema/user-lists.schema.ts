@@ -7,7 +7,10 @@ export const userLists = pgTable('user_lists', {
 	description: text('description'),
 	quoteIds: jsonb('quote_ids').$type<string[]>().default([]), // References static quote IDs from shared package
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
 });
 
 export type UserList = typeof userLists.$inferSelect;

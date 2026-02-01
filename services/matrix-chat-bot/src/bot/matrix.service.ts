@@ -1,12 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
+} from '@manacore/matrix-bot-common';
 import { ChatService, Conversation } from '../chat/chat.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE, BRANCH_ICONS } from '../config/configuration';
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['gespraeche', 'conversations', 'liste', 'chats'], command: 'gespraeche' },
+		{ keywords: ['modelle', 'models', 'ki modelle', 'ai models'], command: 'modelle' },
+		{ keywords: ['neu', 'new', 'neues gespraech', 'new conversation'], command: 'neu' },
+		{ keywords: ['verlauf', 'history', 'nachrichten', 'messages'], command: 'verlauf' },
+		{ keywords: ['archiviert', 'archived', 'archiv liste'], command: 'archiviert' },
+		{ keywords: ['chat', 'fragen', 'ask', 'frage'], command: 'chat' },
+	]);
+
 	constructor(
 		configService: ConfigService,
 		private chatService: ChatService,
@@ -67,6 +83,12 @@ export class MatrixService extends BaseMatrixService {
 		message: string,
 		sender: string
 	): Promise<void> {
+		// Check for keyword commands first
+		const keywordCommand = this.keywordDetector.detect(message);
+		if (keywordCommand) {
+			message = `!${keywordCommand}`;
+		}
+
 		if (!message.startsWith('!')) return;
 
 		const [command, ...args] = message.slice(1).split(/\s+/);

@@ -4,6 +4,8 @@ import {
 	BaseMatrixService,
 	MatrixBotConfig,
 	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { TtsService } from '../tts/tts.service';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
@@ -24,6 +26,13 @@ export class MatrixService extends BaseMatrixService {
 
 	// Track processed events to prevent duplicates
 	private processedEvents: Set<string> = new Set();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['voice', 'stimme', 'stimme aendern'], command: 'voice' },
+		{ keywords: ['voices', 'stimmen', 'verfuegbare stimmen'], command: 'voices' },
+		{ keywords: ['speed', 'geschwindigkeit', 'tempo'], command: 'speed' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -93,6 +102,12 @@ export class MatrixService extends BaseMatrixService {
 		const userId = event.sender;
 
 		try {
+			// Check for keyword commands first
+			const keywordCommand = this.keywordDetector.detect(body);
+			if (keywordCommand) {
+				body = `!${keywordCommand}`;
+			}
+
 			// Handle ! commands
 			if (body.startsWith('!')) {
 				const [command, ...args] = body.slice(1).split(' ');

@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent, UserListMapper } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	UserListMapper,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
+} from '@manacore/matrix-bot-common';
 import { PlantaService, Plant } from '../planta/planta.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
@@ -9,6 +16,16 @@ import { HELP_MESSAGE } from '../config/configuration';
 export class MatrixService extends BaseMatrixService {
 	// Store last shown plants per user for reference by number
 	private plantsMapper = new UserListMapper<Plant>();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['pflanzen', 'plants', 'meine pflanzen', 'liste'], command: 'pflanzen' },
+		{ keywords: ['giessen', 'water', 'bewaessern', 'wasser geben'], command: 'giessen' },
+		{ keywords: ['faellig', 'due', 'anstehend', 'upcoming'], command: 'faellig' },
+		{ keywords: ['neu', 'new', 'neue pflanze', 'add'], command: 'neu' },
+		{ keywords: ['historie', 'history', 'verlauf', 'giess historie'], command: 'historie' },
+		{ keywords: ['intervall', 'interval', 'frequenz', 'wie oft'], command: 'intervall' },
+	]);
 
 	// Field mappings for edit command
 	private readonly fieldMappings: Record<string, string> = {
@@ -52,6 +69,12 @@ export class MatrixService extends BaseMatrixService {
 		event: MatrixRoomEvent,
 		body: string
 	): Promise<void> {
+		// Check for keyword commands first
+		const keywordCommand = this.keywordDetector.detect(body);
+		if (keywordCommand) {
+			body = `!${keywordCommand}`;
+		}
+
 		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;

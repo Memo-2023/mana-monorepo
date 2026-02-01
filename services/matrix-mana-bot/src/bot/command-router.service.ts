@@ -1,4 +1,5 @@
 import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { KeywordCommandDetector, COMMON_KEYWORDS } from '@manacore/matrix-bot-common';
 import { AiHandler } from '../handlers/ai.handler';
 import { TodoHandler } from '../handlers/todo.handler';
 import { CalendarHandler } from '../handlers/calendar.handler';
@@ -21,22 +22,20 @@ interface CommandRoute {
 	description: string;
 }
 
-// Natural language keywords (German + English)
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'was kannst du', 'befehle'], command: '!help' },
-	{ keywords: ['modelle', 'models', 'welche modelle'], command: '!models' },
-	{
-		keywords: ['meine aufgaben', 'zeige aufgaben', 'todo liste', 'was muss ich'],
-		command: '!list',
-	},
-	{ keywords: ['heute', 'was steht heute an'], command: '!today' },
-	{ keywords: ['termine', 'kalender', 'meine termine'], command: '!cal' },
-	{ keywords: ['timer', 'stoppuhr'], command: '!timers' },
-	{ keywords: ['zusammenfassung', 'wie war mein tag', 'tagesrückblick'], command: '!summary' },
-];
-
 @Injectable()
 export class CommandRouterService {
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['modelle', 'models', 'welche modelle', 'ai models'], command: 'models' },
+		{ keywords: ['meine aufgaben', 'zeige aufgaben', 'todo liste', 'was muss ich', 'aufgaben'], command: 'list' },
+		{ keywords: ['heute', 'was steht heute an', 'today'], command: 'today' },
+		{ keywords: ['termine', 'kalender', 'meine termine', 'calendar'], command: 'cal' },
+		{ keywords: ['timer', 'stoppuhr', 'zeitmesser'], command: 'timers' },
+		{ keywords: ['zusammenfassung', 'wie war mein tag', 'tagesrueckblick', 'summary'], command: 'summary' },
+		{ keywords: ['todo', 'aufgabe', 'neue aufgabe', 'task'], command: 'todo' },
+		{ keywords: ['alarm', 'wecker', 'alarme'], command: 'alarms' },
+		{ keywords: ['clear', 'loeschen', 'verlauf loeschen', 'reset'], command: 'clear' },
+	]);
 	private readonly logger = new Logger(CommandRouterService.name);
 	private routes: CommandRoute[] = [];
 
@@ -262,20 +261,11 @@ export class CommandRouterService {
 	}
 
 	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-
-		// Only check short messages
-		if (lowerMessage.length > 60) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (lowerMessage === keyword || lowerMessage.includes(keyword)) {
-					this.logger.debug(`Detected keyword "${keyword}" -> "${command}"`);
-					return command;
-				}
-			}
+		const command = this.keywordDetector.detect(message);
+		if (command) {
+			this.logger.debug(`Detected keyword -> "!${command}"`);
+			return `!${command}`;
 		}
-
 		return null;
 	}
 

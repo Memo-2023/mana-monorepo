@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent, UserListMapper } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	UserListMapper,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
+} from '@manacore/matrix-bot-common';
 import { QuestionsService, Question, Collection, Answer } from '../questions/questions.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
@@ -11,6 +18,17 @@ export class MatrixService extends BaseMatrixService {
 	private questionsMapper = new UserListMapper<Question>();
 	private collectionsMapper = new UserListMapper<Collection>();
 	private answersMapper = new UserListMapper<Answer>();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['fragen', 'questions', 'meine fragen', 'liste'], command: 'fragen' },
+		{ keywords: ['recherche', 'research', 'suchen', 'untersuchen'], command: 'recherche' },
+		{ keywords: ['antwort', 'answer', 'antworten', 'ergebnis'], command: 'antwort' },
+		{ keywords: ['quellen', 'sources', 'referenzen', 'links'], command: 'quellen' },
+		{ keywords: ['sammlungen', 'collections', 'ordner', 'kategorien'], command: 'sammlungen' },
+		{ keywords: ['suche', 'search', 'finde', 'durchsuchen'], command: 'suche' },
+		{ keywords: ['neu', 'new', 'neue frage', 'frage stellen'], command: 'neu' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -34,6 +52,12 @@ export class MatrixService extends BaseMatrixService {
 		event: MatrixRoomEvent,
 		body: string
 	): Promise<void> {
+		// Check for keyword commands first
+		const keywordCommand = this.keywordDetector.detect(body);
+		if (keywordCommand) {
+			body = `!${keywordCommand}`;
+		}
+
 		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;

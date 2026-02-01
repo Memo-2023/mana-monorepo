@@ -5,6 +5,8 @@ import {
 	MatrixBotConfig,
 	MatrixRoomEvent,
 	UserListMapper,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { PresiService, Deck, Theme, SlideContent } from '../presi/presi.service';
 import { SessionService } from '@manacore/bot-services';
@@ -15,6 +17,16 @@ export class MatrixService extends BaseMatrixService {
 	// User list mappers for number-based reference
 	private decksMapper = new UserListMapper<Deck>();
 	private themesMapper = new UserListMapper<Theme>();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['presis', 'decks', 'praesentationen', 'liste'], command: 'presis' },
+		{ keywords: ['folien', 'slides', 'folie hinzufuegen'], command: 'folie' },
+		{ keywords: ['themes', 'designs', 'vorlagen', 'stile'], command: 'themes' },
+		{ keywords: ['teilen', 'share', 'freigeben', 'link'], command: 'teilen' },
+		{ keywords: ['links', 'shares', 'freigaben', 'geteilte'], command: 'links' },
+		{ keywords: ['neu', 'new', 'neue praesentation', 'erstellen'], command: 'neu' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -40,6 +52,12 @@ export class MatrixService extends BaseMatrixService {
 		event: MatrixRoomEvent,
 		body: string
 	): Promise<void> {
+		// Check for keyword commands first
+		const keywordCommand = this.keywordDetector.detect(body);
+		if (keywordCommand) {
+			body = `!${keywordCommand}`;
+		}
+
 		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;

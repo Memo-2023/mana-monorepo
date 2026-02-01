@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
+} from '@manacore/matrix-bot-common';
 import { ProjectService } from '../project/project.service';
 import { MediaService } from '../media/media.service';
 import { GenerationService } from '../generation/generation.service';
@@ -12,6 +18,17 @@ export class MatrixService extends BaseMatrixService {
 
 	// Active project per user (matrixUserId -> projectId)
 	private activeProjects: Map<string, string> = new Map();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['projekte', 'projects', 'meine projekte', 'liste'], command: 'projects' },
+		{ keywords: ['archiv', 'archive', 'archivieren'], command: 'archive' },
+		{ keywords: ['generieren', 'generate', 'erstellen', 'blogbeitrag'], command: 'generate' },
+		{ keywords: ['exportieren', 'export', 'herunterladen', 'download'], command: 'export' },
+		{ keywords: ['stile', 'styles', 'vorlagen', 'formate'], command: 'styles' },
+		{ keywords: ['neu', 'new', 'neues projekt', 'projekt starten'], command: 'new' },
+		{ keywords: ['wechseln', 'switch', 'umschalten'], command: 'switch' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -77,6 +94,12 @@ export class MatrixService extends BaseMatrixService {
 		body: string,
 		sender: string
 	): Promise<void> {
+		// Check for keyword commands first
+		const keywordCommand = this.keywordDetector.detect(body);
+		if (keywordCommand) {
+			body = `!${keywordCommand}`;
+		}
+
 		if (body.startsWith('!')) {
 			await this.handleCommand(roomId, sender, body);
 		} else {

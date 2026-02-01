@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent, UserListMapper } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	UserListMapper,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
+} from '@manacore/matrix-bot-common';
 import { StorageService, StorageFile, Folder, ShareLink, TrashItem } from '../storage/storage.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
@@ -13,6 +20,17 @@ export class MatrixService extends BaseMatrixService {
 	private sharesMapper = new UserListMapper<ShareLink>();
 	private trashMapper = new UserListMapper<TrashItem>();
 	private currentFolder: Map<string, string | null> = new Map();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['dateien', 'files', 'meine dateien', 'liste'], command: 'dateien' },
+		{ keywords: ['ordner', 'folders', 'verzeichnisse', 'dirs'], command: 'ordner' },
+		{ keywords: ['teilen', 'share', 'freigeben', 'link erstellen'], command: 'teilen' },
+		{ keywords: ['suche', 'search', 'finde', 'durchsuchen'], command: 'suche' },
+		{ keywords: ['favoriten', 'favorites', 'favs', 'gemerkte'], command: 'favoriten' },
+		{ keywords: ['papierkorb', 'trash', 'geloeschte', 'muell'], command: 'papierkorb' },
+		{ keywords: ['links', 'shares', 'freigaben', 'geteilte'], command: 'links' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -36,6 +54,12 @@ export class MatrixService extends BaseMatrixService {
 		event: MatrixRoomEvent,
 		body: string
 	): Promise<void> {
+		// Check for keyword commands first
+		const keywordCommand = this.keywordDetector.detect(body);
+		if (keywordCommand) {
+			body = `!${keywordCommand}`;
+		}
+
 		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;
