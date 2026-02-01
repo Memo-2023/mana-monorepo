@@ -1297,6 +1297,8 @@ export class BetterAuthService {
 			let requestBody: string | undefined;
 			if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
 				const contentType = req.headers['content-type'] || '';
+				console.log('[handleOidcRequest] Processing body with content-type:', contentType);
+				console.log('[handleOidcRequest] req.body:', JSON.stringify(req.body, null, 2));
 				if (contentType.includes('application/x-www-form-urlencoded')) {
 					// Convert object to URL-encoded form data
 					const params = new URLSearchParams();
@@ -1306,6 +1308,7 @@ export class BetterAuthService {
 						}
 					}
 					requestBody = params.toString();
+					console.log('[handleOidcRequest] Converted to URLSearchParams:', requestBody);
 				} else {
 					// Default to JSON
 					requestBody = JSON.stringify(req.body);
@@ -1317,6 +1320,9 @@ export class BetterAuthService {
 			}
 
 			// Create Fetch Request
+			console.log('[handleOidcRequest] Creating Fetch Request to:', url.toString());
+			console.log('[handleOidcRequest] Method:', req.method);
+			console.log('[handleOidcRequest] Headers content-type:', headers.get('content-type'));
 			const fetchRequest = new Request(url.toString(), {
 				method: req.method,
 				headers,
@@ -1325,6 +1331,7 @@ export class BetterAuthService {
 
 			// Call Better Auth's handler
 			const response = await this.auth.handler(fetchRequest);
+			console.log('[handleOidcRequest] Better Auth response status:', response.status);
 
 			// Convert Response to our format
 			const responseHeaders: Record<string, string> = {};
@@ -1336,6 +1343,7 @@ export class BetterAuthService {
 			let body: unknown;
 			const contentType = response.headers.get('content-type');
 			const textBody = await response.text();
+			console.log('[handleOidcRequest] Response body:', textBody);
 
 			if (contentType?.includes('application/json') && textBody.length > 0) {
 				try {
