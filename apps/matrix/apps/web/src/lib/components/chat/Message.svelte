@@ -57,11 +57,43 @@
 	// Extended emoji categories for full picker
 	const emojiCategories = [
 		{ name: 'Häufig', emojis: ['👍', '👎', '❤️', '😂', '😮', '😢', '🎉', '🔥', '💯', '✨'] },
-		{ name: 'Smileys', emojis: ['😀', '😃', '😄', '😁', '😆', '🥹', '😅', '🤣', '😊', '😇', '🙂', '😉', '😌', '😍', '🥰', '😘'] },
-		{ name: 'Gesten', emojis: ['👏', '🙌', '👐', '🤝', '🙏', '✌️', '🤞', '🤟', '🤘', '👌', '🤌', '👋', '💪', '👀'] },
-		{ name: 'Symbole', emojis: ['✅', '❌', '⭐', '💫', '🌟', '💡', '🎯', '🚀', '💎', '🏆', '🔑', '📌', '🔔', '💬'] },
-		{ name: 'Tiere', emojis: ['🐱', '🐶', '🐻', '🦊', '🐼', '🐨', '🦁', '🐸', '🐵', '🦄', '🐝', '🦋'] },
-		{ name: 'Essen', emojis: ['🍕', '🍔', '🍟', '🌮', '🍜', '🍣', '🍦', '🍩', '🍪', '☕', '🍺', '🍷'] },
+		{
+			name: 'Smileys',
+			emojis: [
+				'😀',
+				'😃',
+				'😄',
+				'😁',
+				'😆',
+				'🥹',
+				'😅',
+				'🤣',
+				'😊',
+				'😇',
+				'🙂',
+				'😉',
+				'😌',
+				'😍',
+				'🥰',
+				'😘',
+			],
+		},
+		{
+			name: 'Gesten',
+			emojis: ['👏', '🙌', '👐', '🤝', '🙏', '✌️', '🤞', '🤟', '🤘', '👌', '🤌', '👋', '💪', '👀'],
+		},
+		{
+			name: 'Symbole',
+			emojis: ['✅', '❌', '⭐', '💫', '🌟', '💡', '🎯', '🚀', '💎', '🏆', '🔑', '📌', '🔔', '💬'],
+		},
+		{
+			name: 'Tiere',
+			emojis: ['🐱', '🐶', '🐻', '🦊', '🐼', '🐨', '🦁', '🐸', '🐵', '🦄', '🐝', '🦋'],
+		},
+		{
+			name: 'Essen',
+			emojis: ['🍕', '🍔', '🍟', '🌮', '🍜', '🍣', '🍦', '🍩', '🍪', '☕', '🍺', '🍷'],
+		},
 	];
 
 	let showFullPicker = $state(false);
@@ -524,13 +556,13 @@
 			<!-- Read receipt indicator (for own messages) -->
 			{#if message.isOwn}
 				{#if message.readBy && message.readBy.length > 0}
-					<Checks
-						class="h-4 w-4 text-blue-500"
-						weight="bold"
-						title="Gelesen von: {message.readBy.map((r) => r.userName).join(', ')}"
-					/>
+					<span title="Gelesen von: {message.readBy.map((r) => r.userName).join(', ')}">
+						<Checks class="h-4 w-4 text-blue-500" weight="bold" />
+					</span>
 				{:else}
-					<Check class="h-4 w-4 text-muted-foreground/50" weight="bold" title="Gesendet" />
+					<span title="Gesendet">
+						<Check class="h-4 w-4 text-muted-foreground/50" weight="bold" />
+					</span>
 				{/if}
 			{/if}
 		</div>
@@ -572,11 +604,15 @@
 								<!-- Full emoji picker with categories -->
 								<div class="p-2">
 									<!-- Category tabs -->
-									<div class="flex gap-1 mb-2 border-b border-black/10 dark:border-white/10 pb-2 overflow-x-auto">
+									<div
+										class="flex gap-1 mb-2 border-b border-black/10 dark:border-white/10 pb-2 overflow-x-auto"
+									>
 										{#each emojiCategories as category, i}
 											<button
 												class="px-2 py-1 text-xs rounded-md whitespace-nowrap transition-colors
-												       {selectedCategory === i ? 'bg-violet-500 text-white' : 'hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground'}"
+												       {selectedCategory === i
+													? 'bg-violet-500 text-white'
+													: 'hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground'}"
 												onclick={() => (selectedCategory = i)}
 											>
 												{category.name}
