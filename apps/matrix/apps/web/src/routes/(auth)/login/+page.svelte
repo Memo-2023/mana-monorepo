@@ -15,6 +15,7 @@
 		Moon,
 		Check,
 		ChatCircle,
+		CaretDown,
 	} from '@manacore/shared-icons';
 
 	// Form state
@@ -31,6 +32,7 @@
 	let serverValid = $state<boolean | null>(null);
 	let showSuccess = $state(false);
 	let shakeError = $state(false);
+	let showAdvanced = $state(false);
 
 	// Theme state
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -177,7 +179,7 @@
 			<div class="form-card" class:shake={shakeError}>
 				<div class="form-header">
 					<h2 class="form-title">Anmelden</h2>
-					<p class="form-subtitle">Mit deinem Matrix-Konto anmelden</p>
+					<p class="form-subtitle">Sichere Kommunikation mit Matrix</p>
 				</div>
 
 				{#if error}
@@ -187,119 +189,135 @@
 					</div>
 				{/if}
 
-				<form onsubmit={handleLogin}>
-					<!-- Homeserver -->
-					<div class="input-group">
-						<label for="homeserver" class="input-label">
-							<HardDrive size={16} />
-							Homeserver
-							{#if checkingServer}
-								<CircleNotch size={14} class="animate-spin ml-auto" />
-							{:else if serverValid === true}
-								<span class="ml-auto text-green-500 text-xs">Verbunden</span>
-							{:else if serverValid === false}
-								<span class="ml-auto text-red-500 text-xs">Nicht erreichbar</span>
-							{/if}
-						</label>
-						<input
-							id="homeserver"
-							type="text"
-							bind:value={homeserver}
-							onblur={validateServer}
-							class="input-field"
-							class:input-success={serverValid === true}
-							class:input-error={serverValid === false}
-							placeholder="matrix.org"
-							disabled={loading}
-						/>
-					</div>
-
-					<!-- Username -->
-					<div class="input-group">
-						<label for="username" class="input-label">
-							<User size={16} />
-							Benutzername
-						</label>
-						<input
-							id="username"
-							type="text"
-							bind:value={username}
-							oninput={handleUsernameInput}
-							class="input-field"
-							placeholder="@user:matrix.org oder username"
-							disabled={loading}
-							autocomplete="username"
-						/>
-					</div>
-
-					<!-- Password -->
-					<div class="input-group">
-						<label for="password" class="input-label">
-							<Lock size={16} />
-							Passwort
-						</label>
-						<div class="input-wrapper">
-							<input
-								id="password"
-								type={showPassword ? 'text' : 'password'}
-								bind:value={password}
-								class="input-field has-icon"
-								placeholder="Dein Passwort"
-								disabled={loading}
-								autocomplete="current-password"
-							/>
-							<button
-								type="button"
-								class="password-toggle"
-								onclick={() => (showPassword = !showPassword)}
-								tabindex={-1}
-								aria-label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
-							>
-								{#if showPassword}
-									<EyeSlash size={20} />
-								{:else}
-									<Eye size={20} />
-								{/if}
-							</button>
-						</div>
-					</div>
-
-					<!-- Submit Button -->
-					<button type="submit" disabled={loading || showSuccess} class="submit-button">
-						{#if loading}
-							<CircleNotch size={20} class="animate-spin" />
-							<span>Anmelden...</span>
-						{:else if showSuccess}
-							<Check size={20} />
-							<span>Erfolgreich!</span>
-						{:else}
-							<SignIn size={20} />
-							<span>Anmelden</span>
-						{/if}
-					</button>
-				</form>
-
-				<!-- Divider -->
-				<div class="divider">
-					<span>oder</span>
-				</div>
-
-				<!-- SSO Login -->
-				<button type="button" class="sso-button" onclick={handleSSOLogin} disabled={loadingSSO}>
+				<!-- Primary: SSO Login -->
+				<button
+					type="button"
+					class="sso-button-primary"
+					onclick={handleSSOLogin}
+					disabled={loadingSSO || showSuccess}
+				>
 					{#if loadingSSO}
 						<CircleNotch size={20} class="animate-spin" />
 						<span>Weiterleiten...</span>
+					{:else if showSuccess}
+						<Check size={20} />
+						<span>Erfolgreich!</span>
 					{:else}
 						<SignIn size={20} />
 						<span>Mit Mana Core anmelden</span>
 					{/if}
 				</button>
 
-				<!-- Footer -->
-				<p class="register-link">
-					Noch kein Konto?
-					<a href="/register">Registrieren</a>
-				</p>
+				<p class="sso-hint">Login oder Registrierung über dein Mana-Konto</p>
+
+				<!-- Advanced: Other Server -->
+				<button
+					type="button"
+					class="advanced-toggle"
+					onclick={() => (showAdvanced = !showAdvanced)}
+					aria-expanded={showAdvanced}
+				>
+					<span>Anderen Server nutzen</span>
+					<span class="caret" class:rotated={showAdvanced}>
+						<CaretDown size={16} />
+					</span>
+				</button>
+
+				{#if showAdvanced}
+					<div class="advanced-section">
+						<form onsubmit={handleLogin}>
+							<!-- Homeserver -->
+							<div class="input-group">
+								<label for="homeserver" class="input-label">
+									<HardDrive size={16} />
+									Homeserver
+									{#if checkingServer}
+										<CircleNotch size={14} class="animate-spin ml-auto" />
+									{:else if serverValid === true}
+										<span class="ml-auto text-green-500 text-xs">Verbunden</span>
+									{:else if serverValid === false}
+										<span class="ml-auto text-red-500 text-xs">Nicht erreichbar</span>
+									{/if}
+								</label>
+								<input
+									id="homeserver"
+									type="text"
+									bind:value={homeserver}
+									onblur={validateServer}
+									class="input-field"
+									class:input-success={serverValid === true}
+									class:input-error={serverValid === false}
+									placeholder="matrix.org"
+									disabled={loading}
+								/>
+							</div>
+
+							<!-- Username -->
+							<div class="input-group">
+								<label for="username" class="input-label">
+									<User size={16} />
+									Benutzername
+								</label>
+								<input
+									id="username"
+									type="text"
+									bind:value={username}
+									oninput={handleUsernameInput}
+									class="input-field"
+									placeholder="@user:matrix.org oder username"
+									disabled={loading}
+									autocomplete="username"
+								/>
+							</div>
+
+							<!-- Password -->
+							<div class="input-group">
+								<label for="password" class="input-label">
+									<Lock size={16} />
+									Passwort
+								</label>
+								<div class="input-wrapper">
+									<input
+										id="password"
+										type={showPassword ? 'text' : 'password'}
+										bind:value={password}
+										class="input-field has-icon"
+										placeholder="Dein Passwort"
+										disabled={loading}
+										autocomplete="current-password"
+									/>
+									<button
+										type="button"
+										class="password-toggle"
+										onclick={() => (showPassword = !showPassword)}
+										tabindex={-1}
+										aria-label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+									>
+										{#if showPassword}
+											<EyeSlash size={20} />
+										{:else}
+											<Eye size={20} />
+										{/if}
+									</button>
+								</div>
+							</div>
+
+							<!-- Submit Button -->
+							<button type="submit" disabled={loading || showSuccess} class="submit-button">
+								{#if loading}
+									<CircleNotch size={20} class="animate-spin" />
+									<span>Anmelden...</span>
+								{:else if showSuccess}
+									<Check size={20} />
+									<span>Erfolgreich!</span>
+								{:else}
+									<SignIn size={20} />
+									<span>Anmelden</span>
+								{/if}
+							</button>
+						</form>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</main>
@@ -616,60 +634,114 @@
 		color: rgba(0, 0, 0, 0.5);
 	}
 
-	.sso-button {
+	/* Primary SSO Button */
+	.sso-button-primary {
 		width: 100%;
-		height: 3rem;
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		height: 3.5rem;
+		border: 2px solid #8b5cf6;
 		border-radius: 0.75rem;
-		font-weight: 500;
+		font-weight: 600;
+		font-size: 1rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
 		cursor: pointer;
 		transition: all 0.2s;
-		color: rgba(255, 255, 255, 0.8);
-		background: rgba(255, 255, 255, 0.05);
+		color: #fff;
+		background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+		box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
 	}
 
-	.light .sso-button {
-		border-color: rgba(0, 0, 0, 0.2);
-		color: rgba(0, 0, 0, 0.8);
-		background: rgba(0, 0, 0, 0.05);
+	.light .sso-button-primary {
+		color: #fff;
 	}
 
-	.sso-button:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.1);
+	.sso-button-primary:hover:not(:disabled) {
+		background: linear-gradient(135deg, #9d6ffa, #8b5cf6);
+		transform: translateY(-2px);
+		box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
 	}
 
-	.light .sso-button:hover:not(:disabled) {
-		background: rgba(0, 0, 0, 0.1);
+	.sso-button-primary:active:not(:disabled) {
+		transform: translateY(0);
 	}
 
-	.sso-button:disabled {
-		opacity: 0.5;
+	.sso-button-primary:disabled {
+		opacity: 0.7;
 		cursor: not-allowed;
+		transform: none;
 	}
 
-	.register-link {
+	.sso-hint {
 		text-align: center;
+		font-size: 0.8rem;
+		margin-top: 0.75rem;
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	.light .sso-hint {
+		color: rgba(0, 0, 0, 0.5);
+	}
+
+	/* Advanced Toggle */
+	.advanced-toggle {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-top: 1.5rem;
+		padding: 0.75rem;
+		background: none;
+		border: none;
+		cursor: pointer;
 		font-size: 0.875rem;
-		margin-top: 1.25rem;
-		color: rgba(255, 255, 255, 0.6);
+		color: rgba(255, 255, 255, 0.5);
+		transition: color 0.2s;
 	}
 
-	.light .register-link {
-		color: rgba(0, 0, 0, 0.6);
+	.light .advanced-toggle {
+		color: rgba(0, 0, 0, 0.5);
 	}
 
-	.register-link a {
-		color: #8b5cf6;
-		font-weight: 500;
-		text-decoration: none;
+	.advanced-toggle:hover {
+		color: rgba(255, 255, 255, 0.8);
 	}
 
-	.register-link a:hover {
-		text-decoration: underline;
+	.light .advanced-toggle:hover {
+		color: rgba(0, 0, 0, 0.8);
+	}
+
+	.advanced-toggle .caret {
+		transition: transform 0.2s ease;
+	}
+
+	.advanced-toggle .caret.rotated {
+		transform: rotate(180deg);
+	}
+
+	/* Advanced Section */
+	.advanced-section {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		animation: slideDown 0.2s ease-out;
+	}
+
+	.light .advanced-section {
+		border-top-color: rgba(0, 0, 0, 0.1);
+	}
+
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	/* Animations */
