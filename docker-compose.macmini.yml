@@ -1253,6 +1253,23 @@ services:
     ports:
       - "9121:9121"
 
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: mana-mon-node-exporter
+    restart: always
+    command:
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - '/:/host:ro,rslave'
+    ports:
+      - "9100:9100"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9100/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # ============================================
   # Auto-Update (Watchtower)
   # ============================================

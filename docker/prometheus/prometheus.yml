@@ -21,14 +21,14 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # Host system metrics via node-exporter (disabled - container not deployed)
-  # - job_name: 'node'
-  #   static_configs:
-  #     - targets: ['node-exporter:9100']
-  #   relabel_configs:
-  #     - source_labels: [__address__]
-  #       target_label: instance
-  #       replacement: 'mac-mini'
+  # Host system metrics via node-exporter
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'mac-mini'
 
   # Docker container metrics via cAdvisor (disabled - container not deployed)
   # - job_name: 'cadvisor'
