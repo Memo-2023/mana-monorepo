@@ -19,6 +19,9 @@ COPY services/matrix-nutriphi-bot ./services/matrix-nutriphi-bot
 # Install all dependencies
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
+# Rebuild native modules to ensure platform-specific binaries are selected
+RUN pnpm rebuild @matrix-org/matrix-sdk-crypto-nodejs || true
+
 # Build shared packages first (in dependency order)
 RUN pnpm --filter @manacore/bot-services build
 RUN pnpm --filter @manacore/matrix-bot-common build
@@ -49,6 +52,9 @@ COPY --from=builder /app/services/matrix-nutriphi-bot/package.json ./services/ma
 
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+
+# Rebuild native modules to ensure platform-specific binaries are selected
+RUN pnpm rebuild @matrix-org/matrix-sdk-crypto-nodejs || true
 
 # Create data directory
 RUN mkdir -p /app/data
