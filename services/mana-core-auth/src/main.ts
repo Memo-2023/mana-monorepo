@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, RequestMethod } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, urlencoded, json } from 'express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
@@ -68,6 +68,10 @@ async function bootstrap() {
 		})
 	);
 	app.use(cookieParser());
+
+	// Explicit body parsers for form-urlencoded (needed for OAuth2 token endpoint)
+	app.use(json());
+	app.use(urlencoded({ extended: true }));
 
 	// CORS configuration
 	const corsOrigins = configService.get<string[]>('cors.origin') || [];

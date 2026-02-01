@@ -3,7 +3,7 @@
  * Provides consistent SSR and optimization settings.
  */
 
-import type { UserConfig } from 'vite';
+import type { UserConfig, UserConfigExport } from 'vite';
 
 /**
  * Common ManaCore shared packages that need SSR configuration.
@@ -108,7 +108,7 @@ export function createViteConfig(options: ViteConfigOptions): Partial<UserConfig
 export function mergeViteConfig(
 	baseConfig: Partial<UserConfig>,
 	appConfig: Partial<UserConfig>
-): UserConfig {
+): UserConfigExport {
 	return {
 		...baseConfig,
 		...appConfig,

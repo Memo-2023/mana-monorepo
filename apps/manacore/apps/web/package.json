@@ -16,6 +16,7 @@
 		"test:e2e": "playwright test"
 	},
 	"devDependencies": {
+		"@manacore/shared-vite-config": "workspace:*",
 		"@playwright/test": "^1.51.0",
 		"@sveltejs/adapter-node": "^5.0.0",
 		"@sveltejs/kit": "^2.47.1",

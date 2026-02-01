@@ -37,6 +37,7 @@
 		"svelte-i18n": "^4.0.1"
 	},
 	"devDependencies": {
+		"@manacore/shared-vite-config": "workspace:*",
 		"@eslint/compat": "^1.4.0",
 		"@eslint/js": "^9.36.0",
 		"@sveltejs/adapter-netlify": "^5.2.3",
