@@ -4,6 +4,8 @@ import {
 	BaseMatrixService,
 	MatrixBotConfig,
 	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { OllamaService } from '../ollama/ollama.service';
 import { SYSTEM_PROMPTS } from '../config/configuration';
@@ -21,13 +23,13 @@ const NON_CHAT_MODELS = ['deepseek-r1:1.5b'];
 // Models that support vision/image input
 const VISION_MODELS = ['llava', 'llava:7b', 'llava:13b', 'bakllava', 'moondream'];
 
-// Natural language keywords that trigger commands (German + English)
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'was kannst du', 'befehle', 'commands'], command: 'help' },
+// Natural language keyword detector
+const keywordDetector = new KeywordCommandDetector([
+	...COMMON_KEYWORDS,
 	{ keywords: ['modelle', 'models', 'welche modelle', 'liste modelle'], command: 'models' },
-	{ keywords: ['status', 'verbindung', 'connection', 'online'], command: 'status' },
+	{ keywords: ['verbindung', 'connection', 'online'], command: 'status' },
 	{ keywords: ['lösche verlauf', 'clear', 'neustart', 'reset', 'vergiss alles'], command: 'clear' },
-];
+]);
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
@@ -42,9 +44,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -159,31 +163,15 @@ Viel Spass!`;
 		}
 
 		// Check for natural language keywords
-		const keywordCommand = this.detectKeywordCommand(message);
-		if (keywordCommand) {
-			await this.handleCommand(roomId, sender, `!${keywordCommand}`);
+		const detectedCommand = keywordDetector.detect(message);
+		if (detectedCommand) {
+			this.logger.log(`Detected keyword command: ${detectedCommand}`);
+			await this.handleCommand(roomId, sender, `!${detectedCommand}`);
 			return;
 		}
 
 		// Regular chat message
 		await this.handleChat(roomId, sender, message);
-	}
-
-	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-
-		// Only match if the message is short (likely a command, not a question containing a keyword)
-		if (lowerMessage.length > 50) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (lowerMessage === keyword || lowerMessage.startsWith(keyword + ' ')) {
-					this.logger.log(`Detected keyword "${keyword}" -> command "${command}"`);
-					return command;
-				}
-			}
-		}
-		return null;
 	}
 
 	private async handleCommand(roomId: string, sender: string, body: string) {

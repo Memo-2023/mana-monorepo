@@ -4,6 +4,8 @@ import {
 	BaseMatrixService,
 	MatrixBotConfig,
 	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import {
 	NutriPhiService,
@@ -14,16 +16,16 @@ import {
 import { SessionService, TranscriptionService } from '@manacore/bot-services';
 import { HELP_MESSAGE, MEAL_TYPE_LABELS } from '../config/configuration';
 
-// Natural language keywords that trigger commands (German + English)
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'was kannst du', 'befehle', 'commands'], command: 'help' },
+// Natural language keyword detector
+const keywordDetector = new KeywordCommandDetector([
+	...COMMON_KEYWORDS,
 	{ keywords: ['heute', 'today', 'tages', 'tagesübersicht'], command: 'today' },
 	{ keywords: ['woche', 'week', 'wochen', 'wochenübersicht'], command: 'week' },
 	{ keywords: ['ziele', 'goals', 'meine ziele'], command: 'goals' },
 	{ keywords: ['favoriten', 'favorites', 'lieblings'], command: 'favorites' },
 	{ keywords: ['tipps', 'tips', 'empfehlungen', 'ratschläge'], command: 'tips' },
-	{ keywords: ['status', 'verbindung'], command: 'status' },
-];
+	{ keywords: ['verbindung'], command: 'status' },
+]);
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
@@ -38,9 +40,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -65,7 +69,7 @@ Sag "hilfe" fur alle Befehle!`;
 
 		// Handle image messages
 		this.client.on('room.message', async (roomId: string, event: any) => {
-			if (event.sender === await this.client.getUserId()) return;
+			if (event.sender === (await this.client.getUserId())) return;
 
 			const content = event.content as {
 				msgtype?: string;
@@ -159,30 +163,14 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		// Check for natural language keywords
-		const keywordCommand = this.detectKeywordCommand(message);
-		if (keywordCommand) {
-			await this.handleCommand(roomId, sender, `!${keywordCommand}`);
+		const detectedCommand = keywordDetector.detect(message);
+		if (detectedCommand) {
+			this.logger.log(`Detected keyword command: ${detectedCommand}`);
+			await this.handleCommand(roomId, sender, `!${detectedCommand}`);
 			return;
 		}
 
 		// Don't respond to random messages - only commands
-	}
-
-	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-
-		// Only match if the message is short
-		if (lowerMessage.length > 50) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (lowerMessage === keyword || lowerMessage.startsWith(keyword + ' ')) {
-					this.logger.log(`Detected keyword "${keyword}" -> command "${command}"`);
-					return command;
-				}
-			}
-		}
-		return null;
 	}
 
 	private async handleCommand(roomId: string, sender: string, body: string) {

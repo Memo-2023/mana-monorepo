@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	UserListMapper,
+} from '@manacore/matrix-bot-common';
 import { SkilltreeService, Skill, SkillBranch } from '../skilltree/skilltree.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
-	// Store last shown skills per user for reference by number
-	private lastSkillsList: Map<string, Skill[]> = new Map();
+	// User list mapper for number-based reference
+	private skillsMapper = new UserListMapper<Skill>();
 
 	// Branch name mappings (German/English)
 	private readonly branchMappings: Record<string, SkillBranch> = {
@@ -45,9 +50,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -204,7 +211,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const skills = result.data?.skills || [];
-		this.lastSkillsList.set(sender, skills);
+		this.skillsMapper.setList(sender, skills);
 
 		if (skills.length === 0) {
 			await this.sendMessage(
@@ -222,14 +229,16 @@ export class MatrixService extends BaseMatrixService {
 			html += `<li>${branchIcon} <strong>${skill.name}</strong> - Lvl ${skill.level} (${levelName}) ${progress}</li>`;
 		}
 		html += '</ol>';
-		html += '<p><em>Nutze <code>!skill [nr]</code> fuer Details oder <code>!xp [nr] 50 Aktivitaet</code></em></p>';
+		html +=
+			'<p><em>Nutze <code>!skill [nr]</code> fuer Details oder <code>!xp [nr] 50 Aktivitaet</code></em></p>';
 
 		await this.sendMessage(roomId, html);
 	}
 
 	private async handleSkillDetails(roomId: string, sender: string, numberStr: string) {
 		const token = this.requireAuth(sender);
-		const skill = this.getSkillByNumber(sender, numberStr);
+		const number = parseInt(numberStr, 10);
+		const skill = this.skillsMapper.getByNumber(sender, number);
 
 		if (!skill) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
@@ -296,7 +305,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastSkillsList.delete(sender);
+		this.skillsMapper.clearList(sender);
 		const branchIcon = this.getBranchIcon(branch);
 		await this.sendMessage(
 			roomId,
@@ -307,7 +316,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleDeleteSkill(roomId: string, sender: string, numberStr: string) {
 		const token = this.requireAuth(sender);
-		const skill = this.getSkillByNumber(sender, numberStr);
+		const number = parseInt(numberStr, 10);
+		const skill = this.skillsMapper.getByNumber(sender, number);
 
 		if (!skill) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
@@ -321,7 +331,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastSkillsList.delete(sender);
+		this.skillsMapper.clearList(sender);
 		await this.sendMessage(roomId, `<p>Skill <strong>${skill.name}</strong> geloescht.</p>`);
 	}
 
@@ -338,7 +348,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const token = this.requireAuth(sender);
-		const skill = this.getSkillByNumber(sender, args[0]);
+		const number = parseInt(args[0], 10);
+		const skill = this.skillsMapper.getByNumber(sender, number);
 
 		if (!skill) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
@@ -417,9 +428,13 @@ export class MatrixService extends BaseMatrixService {
 		let skillName = '';
 
 		if (numberStr) {
-			const skill = this.getSkillByNumber(sender, numberStr);
+			const number = parseInt(numberStr, 10);
+			const skill = this.skillsMapper.getByNumber(sender, number);
 			if (!skill) {
-				await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
+				await this.sendMessage(
+					roomId,
+					'<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>'
+				);
 				return;
 			}
 			result = await this.skilltreeService.getSkillActivities(token, skill.id);
@@ -459,16 +474,6 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	// Helper methods
-	private getSkillByNumber(sender: string, numberStr: string): Skill | null {
-		const skills = this.lastSkillsList.get(sender);
-		if (!skills) return null;
-
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= skills.length) return null;
-
-		return skills[index];
-	}
-
 	private getLevelName(level: number): string {
 		const names: Record<number, string> = {
 			0: 'Unbekannt',
@@ -494,13 +499,13 @@ export class MatrixService extends BaseMatrixService {
 
 	private getBranchIcon(branch: string): string {
 		const icons: Record<string, string> = {
-			intellect: '&#129504;',  // Brain
-			body: '&#128170;',       // Flexed biceps
+			intellect: '&#129504;', // Brain
+			body: '&#128170;', // Flexed biceps
 			creativity: '&#127912;', // Artist palette
-			social: '&#128101;',     // Busts in silhouette
-			practical: '&#128295;',  // Wrench
-			mindset: '&#128150;',    // Heart
-			custom: '&#11088;',      // Star
+			social: '&#128101;', // Busts in silhouette
+			practical: '&#128295;', // Wrench
+			mindset: '&#128150;', // Heart
+			custom: '&#11088;', // Star
 		};
 		return icons[branch] || '&#11088;';
 	}

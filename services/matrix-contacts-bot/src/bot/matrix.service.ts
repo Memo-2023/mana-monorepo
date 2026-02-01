@@ -1,23 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
+	UserListMapper,
+} from '@manacore/matrix-bot-common';
 import { ContactsService, Contact } from '../contacts/contacts.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
-// Natural language keywords
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'befehle', 'commands'], command: 'help' },
+// Natural language keyword detector
+const keywordDetector = new KeywordCommandDetector([
+	...COMMON_KEYWORDS,
 	{ keywords: ['kontakte', 'contacts', 'alle'], command: 'kontakte' },
 	{ keywords: ['favoriten', 'favorites', 'favs'], command: 'favoriten' },
 	{ keywords: ['suche', 'search', 'finde'], command: 'suche' },
-	{ keywords: ['status', 'info'], command: 'status' },
-];
+]);
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
-	// Store last shown contacts per user for reference by number
-	private lastContactsList: Map<string, Contact[]> = new Map();
+	// User list mapper for number-based reference
+	private contactsMapper = new UserListMapper<Contact>();
 
 	constructor(
 		configService: ConfigService,
@@ -29,9 +35,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -60,29 +68,20 @@ Sag "hilfe" fur alle Befehle!`;
 			return;
 		}
 
-		const keywordCommand = this.detectKeywordCommand(message);
-		if (keywordCommand) {
-			await this.handleCommand(roomId, event, sender, `!${keywordCommand}`);
+		const detectedCommand = keywordDetector.detect(message);
+		if (detectedCommand) {
+			this.logger.log(`Detected keyword command: ${detectedCommand}`);
+			await this.handleCommand(roomId, event, sender, `!${detectedCommand}`);
 			return;
 		}
 	}
 
-	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-
-		if (lowerMessage.length > 30) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (lowerMessage === keyword || lowerMessage.startsWith(keyword + ' ')) {
-					return command;
-				}
-			}
-		}
-		return null;
-	}
-
-	private async handleCommand(roomId: string, event: MatrixRoomEvent, sender: string, body: string) {
+	private async handleCommand(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		body: string
+	) {
 		const [command, ...args] = body.slice(1).split(' ');
 		const argString = args.join(' ');
 
@@ -191,12 +190,13 @@ Sag "hilfe" fur alle Befehle!`;
 			}
 
 			// Store for reference
-			this.lastContactsList.set(sender, contacts);
+			this.contactsMapper.setList(sender, contacts);
 
 			let text = `**Deine Kontakte (${result.total}):**\n\n`;
 			for (let i = 0; i < contacts.length; i++) {
 				const c = contacts[i];
-				const name = c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Unbenannt';
+				const name =
+					c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Unbenannt';
 				const favIcon = c.isFavorite ? ' ★' : '';
 				const company = c.company ? ` - ${c.company}` : '';
 				text += `**${i + 1}.** ${name}${favIcon}${company}\n`;
@@ -215,7 +215,12 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleSearch(roomId: string, event: MatrixRoomEvent, sender: string, searchTerm: string) {
+	private async handleSearch(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		searchTerm: string
+	) {
 		const token = this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
@@ -223,12 +228,19 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		if (!searchTerm.trim()) {
-			await this.sendReply(roomId, event, `**Verwendung:** \`!suche [text]\`\n\nBeispiel: \`!suche Max\``);
+			await this.sendReply(
+				roomId,
+				event,
+				`**Verwendung:** \`!suche [text]\`\n\nBeispiel: \`!suche Max\``
+			);
 			return;
 		}
 
 		try {
-			const result = await this.contactsService.getContacts(token, { search: searchTerm, limit: 20 });
+			const result = await this.contactsService.getContacts(token, {
+				search: searchTerm,
+				limit: 20,
+			});
 			const contacts = result.contacts;
 
 			if (contacts.length === 0) {
@@ -236,12 +248,13 @@ Sag "hilfe" fur alle Befehle!`;
 				return;
 			}
 
-			this.lastContactsList.set(sender, contacts);
+			this.contactsMapper.setList(sender, contacts);
 
 			let text = `**Suchergebnisse fur "${searchTerm}" (${contacts.length}):**\n\n`;
 			for (let i = 0; i < contacts.length; i++) {
 				const c = contacts[i];
-				const name = c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Unbenannt';
+				const name =
+					c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Unbenannt';
 				const favIcon = c.isFavorite ? ' ★' : '';
 				const email = c.email ? ` (${c.email})` : '';
 				text += `**${i + 1}.** ${name}${favIcon}${email}\n`;
@@ -274,12 +287,13 @@ Sag "hilfe" fur alle Befehle!`;
 				return;
 			}
 
-			this.lastContactsList.set(sender, contacts);
+			this.contactsMapper.setList(sender, contacts);
 
 			let text = `**Deine Favoriten (${contacts.length}):**\n\n`;
 			for (let i = 0; i < contacts.length; i++) {
 				const c = contacts[i];
-				const name = c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Unbenannt';
+				const name =
+					c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Unbenannt';
 				const phone = c.phone || c.mobile || '';
 				text += `**${i + 1}.** ★ ${name}${phone ? ` - ${phone}` : ''}\n`;
 			}
@@ -291,7 +305,12 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleContactDetails(roomId: string, event: MatrixRoomEvent, sender: string, args: string[]) {
+	private async handleContactDetails(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		args: string[]
+	) {
 		const token = this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
@@ -299,23 +318,25 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		if (args.length < 1) {
-			await this.sendReply(roomId, event, `**Verwendung:** \`!kontakt [nr]\`\n\nNutze \`!kontakte\` um die Liste zu sehen.`);
+			await this.sendReply(
+				roomId,
+				event,
+				`**Verwendung:** \`!kontakt [nr]\`\n\nNutze \`!kontakte\` um die Liste zu sehen.`
+			);
 			return;
 		}
 
-		const index = parseInt(args[0], 10);
-		if (isNaN(index) || index < 1) {
-			await this.sendReply(roomId, event, `Ungultige Nummer.`);
+		const number = parseInt(args[0], 10);
+		const contact = this.contactsMapper.getByNumber(sender, number);
+
+		if (!contact) {
+			await this.sendReply(
+				roomId,
+				event,
+				`Kontakt ${args[0]} nicht gefunden. Nutze \`!kontakte\` zuerst.`
+			);
 			return;
 		}
-
-		const contacts = this.lastContactsList.get(sender);
-		if (!contacts || index > contacts.length) {
-			await this.sendReply(roomId, event, `Kontakt ${index} nicht gefunden. Nutze \`!kontakte\` zuerst.`);
-			return;
-		}
-
-		const contact = contacts[index - 1];
 
 		try {
 			const details = await this.contactsService.getContact(token, contact.id);
@@ -334,14 +355,19 @@ Sag "hilfe" fur alle Befehle!`;
 			if (details.mobile) text += `**Mobil:** ${details.mobile}\n`;
 
 			if (details.street || details.city) {
-				const address = [details.street, `${details.postalCode || ''} ${details.city || ''}`.trim(), details.country]
+				const address = [
+					details.street,
+					`${details.postalCode || ''} ${details.city || ''}`.trim(),
+					details.country,
+				]
 					.filter(Boolean)
 					.join(', ');
 				if (address) text += `**Adresse:** ${address}\n`;
 			}
 
 			if (details.website) text += `**Website:** ${details.website}\n`;
-			if (details.birthday) text += `**Geburtstag:** ${new Date(details.birthday).toLocaleDateString('de-DE')}\n`;
+			if (details.birthday)
+				text += `**Geburtstag:** ${new Date(details.birthday).toLocaleDateString('de-DE')}\n`;
 			if (details.notes) text += `\n**Notizen:** ${details.notes}\n`;
 
 			await this.sendReply(roomId, event, text);
@@ -351,7 +377,12 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleCreateContact(roomId: string, event: MatrixRoomEvent, sender: string, args: string[]) {
+	private async handleCreateContact(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		args: string[]
+	) {
 		const token = this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
@@ -388,7 +419,12 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleEditContact(roomId: string, event: MatrixRoomEvent, sender: string, args: string[]) {
+	private async handleEditContact(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		args: string[]
+	) {
 		const token = this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
@@ -404,22 +440,19 @@ Sag "hilfe" fur alle Befehle!`;
 			return;
 		}
 
-		const index = parseInt(args[0], 10);
+		const number = parseInt(args[0], 10);
 		const field = args[1].toLowerCase();
 		const value = args.slice(2).join(' ');
 
-		if (isNaN(index) || index < 1) {
-			await this.sendReply(roomId, event, `Ungultige Nummer.`);
+		const contact = this.contactsMapper.getByNumber(sender, number);
+		if (!contact) {
+			await this.sendReply(
+				roomId,
+				event,
+				`Kontakt ${args[0]} nicht gefunden. Nutze \`!kontakte\` zuerst.`
+			);
 			return;
 		}
-
-		const contacts = this.lastContactsList.get(sender);
-		if (!contacts || index > contacts.length) {
-			await this.sendReply(roomId, event, `Kontakt ${index} nicht gefunden. Nutze \`!kontakte\` zuerst.`);
-			return;
-		}
-
-		const contact = contacts[index - 1];
 
 		const fieldMap: Record<string, string> = {
 			email: 'email',
@@ -455,7 +488,11 @@ Sag "hilfe" fur alle Befehle!`;
 
 		const mappedField = fieldMap[field];
 		if (!mappedField) {
-			await this.sendReply(roomId, event, `Unbekanntes Feld: ${field}\n\n**Gultige Felder:** email, phone, mobile, company, job, website, street, city, zip, country, notes, birthday`);
+			await this.sendReply(
+				roomId,
+				event,
+				`Unbekanntes Feld: ${field}\n\n**Gultige Felder:** email, phone, mobile, company, job, website, street, city, zip, country, notes, birthday`
+			);
 			return;
 		}
 
@@ -464,15 +501,25 @@ Sag "hilfe" fur alle Befehle!`;
 				[mappedField]: value,
 			});
 
-			const name = updated.displayName || `${updated.firstName || ''} ${updated.lastName || ''}`.trim();
-			await this.sendReply(roomId, event, `Kontakt **${name}** aktualisiert!\n\n**${field}:** ${value}`);
+			const name =
+				updated.displayName || `${updated.firstName || ''} ${updated.lastName || ''}`.trim();
+			await this.sendReply(
+				roomId,
+				event,
+				`Kontakt **${name}** aktualisiert!\n\n**${field}:** ${value}`
+			);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
 			await this.sendReply(roomId, event, `Fehler: ${errorMsg}`);
 		}
 	}
 
-	private async handleDeleteContact(roomId: string, event: MatrixRoomEvent, sender: string, args: string[]) {
+	private async handleDeleteContact(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		args: string[]
+	) {
 		const token = this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
@@ -480,24 +527,27 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		if (args.length < 1) {
-			await this.sendReply(roomId, event, `**Verwendung:** \`!loeschen [nr]\`\n\nNutze \`!kontakte\` um die Liste zu sehen.`);
+			await this.sendReply(
+				roomId,
+				event,
+				`**Verwendung:** \`!loeschen [nr]\`\n\nNutze \`!kontakte\` um die Liste zu sehen.`
+			);
 			return;
 		}
 
-		const index = parseInt(args[0], 10);
-		if (isNaN(index) || index < 1) {
-			await this.sendReply(roomId, event, `Ungultige Nummer.`);
+		const number = parseInt(args[0], 10);
+		const contact = this.contactsMapper.getByNumber(sender, number);
+		if (!contact) {
+			await this.sendReply(
+				roomId,
+				event,
+				`Kontakt ${args[0]} nicht gefunden. Nutze \`!kontakte\` zuerst.`
+			);
 			return;
 		}
 
-		const contacts = this.lastContactsList.get(sender);
-		if (!contacts || index > contacts.length) {
-			await this.sendReply(roomId, event, `Kontakt ${index} nicht gefunden. Nutze \`!kontakte\` zuerst.`);
-			return;
-		}
-
-		const contact = contacts[index - 1];
-		const name = contact.displayName || `${contact.firstName || ''} ${contact.lastName || ''}`.trim();
+		const name =
+			contact.displayName || `${contact.firstName || ''} ${contact.lastName || ''}`.trim();
 
 		try {
 			await this.contactsService.deleteContact(token, contact.id);
@@ -508,7 +558,12 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleToggleFavorite(roomId: string, event: MatrixRoomEvent, sender: string, args: string[]) {
+	private async handleToggleFavorite(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		args: string[]
+	) {
 		const token = this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
@@ -516,27 +571,29 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		if (args.length < 1) {
-			await this.sendReply(roomId, event, `**Verwendung:** \`!fav [nr]\`\n\nNutze \`!kontakte\` um die Liste zu sehen.`);
+			await this.sendReply(
+				roomId,
+				event,
+				`**Verwendung:** \`!fav [nr]\`\n\nNutze \`!kontakte\` um die Liste zu sehen.`
+			);
 			return;
 		}
 
-		const index = parseInt(args[0], 10);
-		if (isNaN(index) || index < 1) {
-			await this.sendReply(roomId, event, `Ungultige Nummer.`);
+		const number = parseInt(args[0], 10);
+		const contact = this.contactsMapper.getByNumber(sender, number);
+		if (!contact) {
+			await this.sendReply(
+				roomId,
+				event,
+				`Kontakt ${args[0]} nicht gefunden. Nutze \`!kontakte\` zuerst.`
+			);
 			return;
 		}
-
-		const contacts = this.lastContactsList.get(sender);
-		if (!contacts || index > contacts.length) {
-			await this.sendReply(roomId, event, `Kontakt ${index} nicht gefunden. Nutze \`!kontakte\` zuerst.`);
-			return;
-		}
-
-		const contact = contacts[index - 1];
 
 		try {
 			const updated = await this.contactsService.toggleFavorite(token, contact.id);
-			const name = updated.displayName || `${updated.firstName || ''} ${updated.lastName || ''}`.trim();
+			const name =
+				updated.displayName || `${updated.firstName || ''} ${updated.lastName || ''}`.trim();
 			const status = updated.isFavorite ? 'als Favorit markiert ★' : 'aus Favoriten entfernt';
 			await this.sendReply(roomId, event, `**${name}** ${status}`);
 		} catch (error) {
@@ -545,7 +602,12 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleToggleArchive(roomId: string, event: MatrixRoomEvent, sender: string, args: string[]) {
+	private async handleToggleArchive(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		args: string[]
+	) {
 		const token = this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
@@ -553,27 +615,29 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		if (args.length < 1) {
-			await this.sendReply(roomId, event, `**Verwendung:** \`!archiv [nr]\`\n\nNutze \`!kontakte\` um die Liste zu sehen.`);
+			await this.sendReply(
+				roomId,
+				event,
+				`**Verwendung:** \`!archiv [nr]\`\n\nNutze \`!kontakte\` um die Liste zu sehen.`
+			);
 			return;
 		}
 
-		const index = parseInt(args[0], 10);
-		if (isNaN(index) || index < 1) {
-			await this.sendReply(roomId, event, `Ungultige Nummer.`);
+		const number = parseInt(args[0], 10);
+		const contact = this.contactsMapper.getByNumber(sender, number);
+		if (!contact) {
+			await this.sendReply(
+				roomId,
+				event,
+				`Kontakt ${args[0]} nicht gefunden. Nutze \`!kontakte\` zuerst.`
+			);
 			return;
 		}
-
-		const contacts = this.lastContactsList.get(sender);
-		if (!contacts || index > contacts.length) {
-			await this.sendReply(roomId, event, `Kontakt ${index} nicht gefunden. Nutze \`!kontakte\` zuerst.`);
-			return;
-		}
-
-		const contact = contacts[index - 1];
 
 		try {
 			const updated = await this.contactsService.toggleArchive(token, contact.id);
-			const name = updated.displayName || `${updated.firstName || ''} ${updated.lastName || ''}`.trim();
+			const name =
+				updated.displayName || `${updated.firstName || ''} ${updated.lastName || ''}`.trim();
 			const status = updated.isArchived ? 'archiviert' : 'aus dem Archiv geholt';
 			await this.sendReply(roomId, event, `**${name}** ${status}`);
 		} catch (error) {
@@ -582,7 +646,12 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleLogin(roomId: string, event: MatrixRoomEvent, sender: string, args: string[]) {
+	private async handleLogin(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		args: string[]
+	) {
 		if (args.length < 2) {
 			await this.sendReply(
 				roomId,

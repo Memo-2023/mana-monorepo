@@ -1,15 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	UserListMapper,
+} from '@manacore/matrix-bot-common';
 import { PresiService, Deck, Theme, SlideContent } from '../presi/presi.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
-	// Store last shown items per user for reference by number
-	private lastDecksList: Map<string, Deck[]> = new Map();
-	private lastThemesList: Map<string, Theme[]> = new Map();
+	// User list mappers for number-based reference
+	private decksMapper = new UserListMapper<Deck>();
+	private themesMapper = new UserListMapper<Theme>();
 
 	constructor(
 		configService: ConfigService,
@@ -21,9 +26,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -187,7 +194,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const decks = result.data || [];
-		this.lastDecksList.set(sender, decks);
+		this.decksMapper.setList(sender, decks);
 
 		if (decks.length === 0) {
 			await this.sendMessage(
@@ -211,7 +218,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleDeckDetails(roomId: string, sender: string, numberStr: string) {
 		const token = this.requireAuth(sender);
-		const deck = this.getDeckByNumber(sender, numberStr);
+		const number = parseInt(numberStr, 10);
+		const deck = this.decksMapper.getByNumber(sender, number);
 
 		if (!deck) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!presis</code></p>');
@@ -238,7 +246,8 @@ export class MatrixService extends BaseMatrixService {
 		if (d.slides && d.slides.length > 0) {
 			html += '<p><strong>Folien:</strong></p><ol>';
 			for (const slide of d.slides) {
-				const title = slide.content.title || slide.content.body?.substring(0, 30) || `(${slide.content.type})`;
+				const title =
+					slide.content.title || slide.content.body?.substring(0, 30) || `(${slide.content.type})`;
 				html += `<li>${title}</li>`;
 			}
 			html += '</ol>';
@@ -267,7 +276,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastDecksList.delete(sender);
+		this.decksMapper.clearList(sender);
 		await this.sendMessage(
 			roomId,
 			`<p>Praesentation <strong>${result.data!.title}</strong> erstellt!</p>
@@ -277,7 +286,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleDeleteDeck(roomId: string, sender: string, numberStr: string) {
 		const token = this.requireAuth(sender);
-		const deck = this.getDeckByNumber(sender, numberStr);
+		const number = parseInt(numberStr, 10);
+		const deck = this.decksMapper.getByNumber(sender, number);
 
 		if (!deck) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!presis</code></p>');
@@ -291,18 +301,30 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		this.lastDecksList.delete(sender);
-		await this.sendMessage(roomId, `<p>Praesentation <strong>${deck.title}</strong> geloescht.</p>`);
+		this.decksMapper.clearList(sender);
+		await this.sendMessage(
+			roomId,
+			`<p>Praesentation <strong>${deck.title}</strong> geloescht.</p>`
+		);
 	}
 
-	private async handleRenameDeck(roomId: string, sender: string, numberStr: string, newTitle: string) {
+	private async handleRenameDeck(
+		roomId: string,
+		sender: string,
+		numberStr: string,
+		newTitle: string
+	) {
 		if (!newTitle) {
-			await this.sendMessage(roomId, '<p>Verwendung: <code>!umbenennen [nr] Neuer Titel</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Verwendung: <code>!umbenennen [nr] Neuer Titel</code></p>'
+			);
 			return;
 		}
 
 		const token = this.requireAuth(sender);
-		const deck = this.getDeckByNumber(sender, numberStr);
+		const number = parseInt(numberStr, 10);
+		const deck = this.decksMapper.getByNumber(sender, number);
 
 		if (!deck) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!presis</code></p>');
@@ -338,7 +360,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const token = this.requireAuth(sender);
-		const deck = this.getDeckByNumber(sender, args[0]);
+		const number = parseInt(args[0], 10);
+		const deck = this.decksMapper.getByNumber(sender, number);
 
 		if (!deck) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!presis</code></p>');
@@ -412,14 +435,23 @@ export class MatrixService extends BaseMatrixService {
 		);
 	}
 
-	private async handleDeleteSlide(roomId: string, sender: string, deckNumStr: string, slideNumStr: string) {
+	private async handleDeleteSlide(
+		roomId: string,
+		sender: string,
+		deckNumStr: string,
+		slideNumStr: string
+	) {
 		if (!deckNumStr || !slideNumStr) {
-			await this.sendMessage(roomId, '<p>Verwendung: <code>!folieloeschen [presi-nr] [folien-nr]</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Verwendung: <code>!folieloeschen [presi-nr] [folien-nr]</code></p>'
+			);
 			return;
 		}
 
 		const token = this.requireAuth(sender);
-		const deck = this.getDeckByNumber(sender, deckNumStr);
+		const deckNumber = parseInt(deckNumStr, 10);
+		const deck = this.decksMapper.getByNumber(sender, deckNumber);
 
 		if (!deck) {
 			await this.sendMessage(roomId, '<p>Ungueltige Praesentation-Nummer.</p>');
@@ -447,7 +479,10 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		await this.sendMessage(roomId, `<p>Folie ${slideNumStr} aus <strong>${deck.title}</strong> geloescht.</p>`);
+		await this.sendMessage(
+			roomId,
+			`<p>Folie ${slideNumStr} aus <strong>${deck.title}</strong> geloescht.</p>`
+		);
 	}
 
 	// Theme handlers
@@ -460,7 +495,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const themes = result.data || [];
-		this.lastThemesList.set(sender, themes);
+		this.themesMapper.setList(sender, themes);
 
 		if (themes.length === 0) {
 			await this.sendMessage(roomId, '<p>Keine Themes verfuegbar.</p>');
@@ -478,15 +513,25 @@ export class MatrixService extends BaseMatrixService {
 		await this.sendMessage(roomId, html);
 	}
 
-	private async handleApplyTheme(roomId: string, sender: string, deckNumStr: string, themeNumStr: string) {
+	private async handleApplyTheme(
+		roomId: string,
+		sender: string,
+		deckNumStr: string,
+		themeNumStr: string
+	) {
 		if (!deckNumStr || !themeNumStr) {
-			await this.sendMessage(roomId, '<p>Verwendung: <code>!theme [presi-nr] [theme-nr]</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Verwendung: <code>!theme [presi-nr] [theme-nr]</code></p>'
+			);
 			return;
 		}
 
 		const token = this.requireAuth(sender);
-		const deck = this.getDeckByNumber(sender, deckNumStr);
-		const theme = this.getThemeByNumber(sender, themeNumStr);
+		const deckNumber = parseInt(deckNumStr, 10);
+		const themeNumber = parseInt(themeNumStr, 10);
+		const deck = this.decksMapper.getByNumber(sender, deckNumber);
+		const theme = this.themesMapper.getByNumber(sender, themeNumber);
 
 		if (!deck) {
 			await this.sendMessage(roomId, '<p>Ungueltige Praesentation-Nummer.</p>');
@@ -494,7 +539,10 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		if (!theme) {
-			await this.sendMessage(roomId, '<p>Ungueltige Theme-Nummer. Nutze zuerst <code>!themes</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Ungueltige Theme-Nummer. Nutze zuerst <code>!themes</code></p>'
+			);
 			return;
 		}
 
@@ -517,7 +565,8 @@ export class MatrixService extends BaseMatrixService {
 		const numberStr = args[0];
 
 		const token = this.requireAuth(sender);
-		const deck = this.getDeckByNumber(sender, numberStr);
+		const number = parseInt(numberStr, 10);
+		const deck = this.decksMapper.getByNumber(sender, number);
 
 		if (!deck) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!presis</code></p>');
@@ -559,7 +608,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		const token = this.requireAuth(sender);
-		const deck = this.getDeckByNumber(sender, numberStr);
+		const number = parseInt(numberStr, 10);
+		const deck = this.decksMapper.getByNumber(sender, number);
 
 		if (!deck) {
 			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!presis</code></p>');
@@ -594,26 +644,5 @@ export class MatrixService extends BaseMatrixService {
 		html += '</ol>';
 
 		await this.sendMessage(roomId, html);
-	}
-
-	// Helper methods
-	private getDeckByNumber(sender: string, numberStr: string): Deck | null {
-		const decks = this.lastDecksList.get(sender);
-		if (!decks) return null;
-
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= decks.length) return null;
-
-		return decks[index];
-	}
-
-	private getThemeByNumber(sender: string, numberStr: string): Theme | null {
-		const themes = this.lastThemesList.get(sender);
-		if (!themes) return null;
-
-		const index = parseInt(numberStr, 10) - 1;
-		if (isNaN(index) || index < 0 || index >= themes.length) return null;
-
-		return themes[index];
 	}
 }
