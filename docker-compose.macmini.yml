@@ -99,7 +99,7 @@ services:
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: Mana <noreply@mana.how>
-      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how,https://nutriphi.mana.how,https://skilltree.mana.how,https://matrix.mana.how,https://element.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how,https://nutriphi.mana.how,https://skilltree.mana.how,https://matrix.mana.how,https://element.mana.how,https://link.mana.how,https://playground.mana.how
       DUCKDB_PATH: /data/analytics/metrics.duckdb
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET:-}
     volumes:
