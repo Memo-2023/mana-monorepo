@@ -1,23 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
+} from '@manacore/matrix-bot-common';
 import { ClockService } from '../clock/clock.service';
 import { TranscriptionService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
-
-// Natural language keywords
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'befehle', 'commands'], command: 'help' },
-	{ keywords: ['status', 'timer status', 'laufend'], command: 'status' },
-	{ keywords: ['stop', 'stopp', 'pause', 'anhalten'], command: 'stop' },
-	{ keywords: ['weiter', 'resume', 'fortsetzen'], command: 'resume' },
-	{ keywords: ['zeit', 'time', 'uhrzeit', 'wie spat'], command: 'time' },
-];
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
 	// Demo token for development (TODO: implement proper auth)
 	private readonly demoToken = process.env.CLOCK_API_TOKEN || '';
+
+	// Note: We override COMMON_KEYWORDS' cancel->cancel with stop->stop for this bot
+	private readonly keywordDetector = new KeywordCommandDetector([
+		{ keywords: ['hilfe', 'help', 'befehle', 'commands'], command: 'help' },
+		{ keywords: ['status', 'timer status', 'laufend'], command: 'status' },
+		{ keywords: ['stop', 'stopp', 'pause', 'anhalten'], command: 'stop' },
+		{ keywords: ['weiter', 'resume', 'fortsetzen'], command: 'resume' },
+		{ keywords: ['zeit', 'time', 'uhrzeit', 'wie spat'], command: 'time' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -47,7 +53,7 @@ export class MatrixService extends BaseMatrixService {
 		sender: string
 	): Promise<void> {
 		// Check keywords first
-		const keywordCommand = this.detectKeywordCommand(message);
+		const keywordCommand = this.keywordDetector.detect(message);
 		if (keywordCommand) {
 			await this.executeCommand(roomId, event, sender, keywordCommand, '');
 			return;
@@ -135,20 +141,6 @@ export class MatrixService extends BaseMatrixService {
 			this.logger.error('Audio processing failed:', error);
 			await this.sendReply(roomId, event, 'Fehler bei der Sprachverarbeitung.');
 		}
-	}
-
-	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-		if (lowerMessage.length > 50) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (lowerMessage === keyword || lowerMessage.startsWith(keyword + ' ')) {
-					return command;
-				}
-			}
-		}
-		return null;
 	}
 
 	private async executeCommand(

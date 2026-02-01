@@ -4,29 +4,29 @@ import {
 	BaseMatrixService,
 	MatrixBotConfig,
 	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { QuotesService } from '../quotes/quotes.service';
 import { ZitareService } from '../quotes/zitare.service';
 import { SessionService, TranscriptionService } from '@manacore/bot-services';
 import { HELP_MESSAGE, Category } from '../config/configuration';
 
-// Natural language keywords that trigger commands
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'befehle', 'commands'], command: 'help' },
-	{ keywords: ['zitat', 'quote', 'inspiration', 'inspiriere'], command: 'zitat' },
-	{ keywords: ['heute', 'today', 'tages', 'tageszitat'], command: 'heute' },
-	{ keywords: ['motiviere', 'motivation', 'motivier mich'], command: 'motivation' },
-	{ keywords: ['guten morgen', 'morgen', 'good morning'], command: 'morgen' },
-	{ keywords: ['kategorien', 'categories', 'themen'], command: 'kategorien' },
-	{ keywords: ['favoriten', 'favorites', 'meine favoriten'], command: 'favoriten' },
-	{ keywords: ['listen', 'lists', 'meine listen'], command: 'listen' },
-	{ keywords: ['status', 'info'], command: 'status' },
-];
-
 @Injectable()
 export class MatrixService extends BaseMatrixService {
 	// Track last shown quote per user for favorites
 	private lastQuotes: Map<string, string> = new Map();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['zitat', 'quote', 'inspiration', 'inspiriere'], command: 'zitat' },
+		{ keywords: ['heute', 'today', 'tages', 'tageszitat'], command: 'heute' },
+		{ keywords: ['motiviere', 'motivation', 'motivier mich'], command: 'motivation' },
+		{ keywords: ['guten morgen', 'morgen', 'good morning'], command: 'morgen' },
+		{ keywords: ['kategorien', 'categories', 'themen'], command: 'kategorien' },
+		{ keywords: ['favoriten', 'favorites', 'meine favoriten'], command: 'favoriten' },
+		{ keywords: ['listen', 'lists', 'meine listen'], command: 'listen' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -76,7 +76,7 @@ Sag "hilfe" fuer alle Befehle!`;
 		}
 
 		// Check for natural language keywords
-		const keywordCommand = this.detectKeywordCommand(body);
+		const keywordCommand = this.keywordDetector.detect(body);
 		if (keywordCommand) {
 			await this.handleCommand(roomId, sender, `!${keywordCommand}`);
 			return;
@@ -124,7 +124,7 @@ Sag "hilfe" fuer alle Befehle!`;
 			const cleanText = transcription.trim();
 
 			// Check for keyword commands in the transcription
-			const keywordCommand = this.detectKeywordCommand(cleanText);
+			const keywordCommand = this.keywordDetector.detect(cleanText);
 			if (keywordCommand) {
 				await this.handleCommand(roomId, sender, `!${keywordCommand}`);
 				return;
@@ -151,23 +151,6 @@ Sag "hilfe" fuer alle Befehle!`;
 			this.logger.error('Failed to process audio message:', error);
 			await this.sendMessage(roomId, 'Fehler bei der Verarbeitung der Sprachnotiz.');
 		}
-	}
-
-	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-
-		// Only match if the message is short
-		if (lowerMessage.length > 50) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (lowerMessage === keyword || lowerMessage.startsWith(keyword + ' ')) {
-					this.logger.log(`Detected keyword "${keyword}" -> command "${command}"`);
-					return command;
-				}
-			}
-		}
-		return null;
 	}
 
 	private async handleCommand(roomId: string, sender: string, body: string) {

@@ -4,26 +4,28 @@ import {
 	BaseMatrixService,
 	MatrixBotConfig,
 	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { TodoService, Task } from '../todo/todo.service';
 import { TranscriptionService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
-// Natural language keywords that trigger commands (German + English)
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'was kannst du', 'befehle', 'commands'], command: 'help' },
-	{
-		keywords: ['zeige aufgaben', 'meine aufgaben', 'was muss ich', 'show tasks', 'list'],
-		command: 'list',
-	},
-	{ keywords: ['heute', 'today', 'was steht an'], command: 'today' },
-	{ keywords: ['inbox', 'eingang', 'ohne datum'], command: 'inbox' },
-	{ keywords: ['projekte', 'projects'], command: 'projects' },
-	{ keywords: ['status', 'verbindung', 'connection'], command: 'status' },
-];
-
 @Injectable()
 export class MatrixService extends BaseMatrixService {
+	private readonly keywordDetector = new KeywordCommandDetector(
+		[
+			...COMMON_KEYWORDS,
+			{ keywords: ['was kannst du'], command: 'help' },
+			{ keywords: ['zeige aufgaben', 'meine aufgaben', 'was muss ich', 'show tasks', 'list'], command: 'list' },
+			{ keywords: ['heute', 'today', 'was steht an'], command: 'today' },
+			{ keywords: ['inbox', 'eingang', 'ohne datum'], command: 'inbox' },
+			{ keywords: ['projekte', 'projects'], command: 'projects' },
+			{ keywords: ['verbindung', 'connection'], command: 'status' },
+		],
+		{ partialMatch: true }
+	);
+
 	constructor(
 		configService: ConfigService,
 		private todoService: TodoService,
@@ -54,7 +56,7 @@ export class MatrixService extends BaseMatrixService {
 
 		try {
 			// Check for natural language keywords first
-			const keywordCommand = this.detectKeywordCommand(body);
+			const keywordCommand = this.keywordDetector.detect(body);
 			if (keywordCommand) {
 				await this.executeCommand(roomId, event, userId, keywordCommand, '');
 				return;
@@ -138,27 +140,6 @@ export class MatrixService extends BaseMatrixService {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
 			await this.sendReply(roomId, event, `Fehler bei der Verarbeitung: ${errorMsg}`);
 		}
-	}
-
-	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-
-		// Only check short messages for keywords
-		if (lowerMessage.length > 50) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (
-					lowerMessage === keyword ||
-					lowerMessage.startsWith(keyword + ' ') ||
-					lowerMessage.includes(keyword)
-				) {
-					this.logger.log(`Detected keyword "${keyword}" -> command "${command}"`);
-					return command;
-				}
-			}
-		}
-		return null;
 	}
 
 	private async executeCommand(

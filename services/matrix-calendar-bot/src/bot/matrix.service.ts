@@ -1,27 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import {
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
+} from '@manacore/matrix-bot-common';
 import { CalendarService, CalendarEvent } from '../calendar/calendar.service';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
-// Natural language keywords that trigger commands (German + English)
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'was kannst du', 'befehle', 'commands'], command: 'help' },
-	{
-		keywords: ['was steht heute an', 'termine heute', 'heute termine', "today's events"],
-		command: 'today',
-	},
-	{ keywords: ['termine morgen', 'morgen termine', 'was ist morgen'], command: 'tomorrow' },
-	{
-		keywords: ['diese woche', 'wochenübersicht', 'week', 'woche'],
-		command: 'week',
-	},
-	{ keywords: ['zeige kalender', 'meine kalender', 'calendars'], command: 'calendars' },
-	{ keywords: ['status', 'verbindung', 'connection'], command: 'status' },
-];
-
 @Injectable()
 export class MatrixService extends BaseMatrixService {
+	private readonly keywordDetector = new KeywordCommandDetector(
+		[
+			...COMMON_KEYWORDS,
+			{ keywords: ['was kannst du'], command: 'help' },
+			{ keywords: ['was steht heute an', 'termine heute', 'heute termine', "today's events"], command: 'today' },
+			{ keywords: ['termine morgen', 'morgen termine', 'was ist morgen'], command: 'tomorrow' },
+			{ keywords: ['diese woche', 'wochenübersicht', 'week', 'woche'], command: 'week' },
+			{ keywords: ['zeige kalender', 'meine kalender', 'calendars'], command: 'calendars' },
+			{ keywords: ['verbindung', 'connection'], command: 'status' },
+		],
+		{ partialMatch: true }
+	);
+
 	constructor(
 		configService: ConfigService,
 		private calendarService: CalendarService
@@ -56,32 +59,11 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		// Check for natural language keywords
-		const keywordCommand = this.detectKeywordCommand(message);
+		const keywordCommand = this.keywordDetector.detect(message);
 		if (keywordCommand) {
 			await this.executeCommand(roomId, event, sender, keywordCommand, '');
 			return;
 		}
-	}
-
-	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-
-		// Only check short messages for keywords
-		if (lowerMessage.length > 60) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (
-					lowerMessage === keyword ||
-					lowerMessage.startsWith(keyword + ' ') ||
-					lowerMessage.includes(keyword)
-				) {
-					this.logger.log(`Detected keyword "${keyword}" -> command "${command}"`);
-					return command;
-				}
-			}
-		}
-		return null;
 	}
 
 	private async executeCommand(

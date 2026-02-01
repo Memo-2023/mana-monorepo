@@ -4,19 +4,12 @@ import {
 	BaseMatrixService,
 	MatrixBotConfig,
 	MatrixRoomEvent,
+	KeywordCommandDetector,
+	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { PictureService } from '../picture/picture.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
-
-// Natural language keywords that trigger commands
-const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
-	{ keywords: ['hilfe', 'help', 'befehle', 'commands'], command: 'help' },
-	{ keywords: ['modelle', 'models'], command: 'models' },
-	{ keywords: ['verlauf', 'history', 'bilder'], command: 'history' },
-	{ keywords: ['credits', 'guthaben'], command: 'credits' },
-	{ keywords: ['status', 'info'], command: 'status' },
-];
 
 interface ParsedPrompt {
 	prompt: string;
@@ -33,6 +26,13 @@ export class MatrixService extends BaseMatrixService {
 	private activeGenerations: Map<string, string> = new Map();
 	// Track selected model per user
 	private userModels: Map<string, string> = new Map();
+
+	private readonly keywordDetector = new KeywordCommandDetector([
+		...COMMON_KEYWORDS,
+		{ keywords: ['modelle', 'models'], command: 'models' },
+		{ keywords: ['verlauf', 'history', 'bilder'], command: 'history' },
+		{ keywords: ['credits', 'guthaben'], command: 'credits' },
+	]);
 
 	constructor(
 		configService: ConfigService,
@@ -76,30 +76,13 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		// Check for natural language keywords
-		const keywordCommand = this.detectKeywordCommand(message);
+		const keywordCommand = this.keywordDetector.detect(message);
 		if (keywordCommand) {
 			await this.handleCommand(roomId, sender, `!${keywordCommand}`);
 			return;
 		}
 
 		// Don't respond to random messages
-	}
-
-	private detectKeywordCommand(message: string): string | null {
-		const lowerMessage = message.toLowerCase().trim();
-
-		// Only match if the message is short
-		if (lowerMessage.length > 30) return null;
-
-		for (const { keywords, command } of KEYWORD_COMMANDS) {
-			for (const keyword of keywords) {
-				if (lowerMessage === keyword || lowerMessage.startsWith(keyword + ' ')) {
-					this.logger.log(`Detected keyword "${keyword}" -> command "${command}"`);
-					return command;
-				}
-			}
-		}
-		return null;
 	}
 
 	private async handleCommand(roomId: string, sender: string, body: string) {

@@ -2,7 +2,7 @@ import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { CommandRouterService, CommandContext } from './command-router.service';
-import { VoiceService } from '../voice/voice.service';
+import { VoiceService, VoiceServiceError } from '../voice/voice.service';
 import { VoiceFormatterService } from '../voice/voice-formatter.service';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
@@ -180,6 +180,33 @@ export class MatrixService extends BaseMatrixService {
 			}
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
+
+			// Handle specific voice service errors
+			if (error instanceof VoiceServiceError) {
+				this.logger.warn(`Voice service error (${error.code}): ${error.message}`);
+
+				let userMessage: string;
+				switch (error.code) {
+					case 'STT_UNAVAILABLE':
+						userMessage = '🎤 Spracherkennung momentan nicht verfügbar. Bitte schreibe deine Nachricht.';
+						break;
+					case 'TTS_UNAVAILABLE':
+						userMessage = '🔊 Sprachausgabe momentan nicht verfügbar.';
+						break;
+					case 'TIMEOUT':
+						userMessage = '⏱️ Die Verarbeitung dauert zu lange. Bitte versuche eine kürzere Nachricht.';
+						break;
+					case 'INVALID_AUDIO':
+						userMessage = `🎤 ${error.message}`;
+						break;
+					default:
+						userMessage = '❌ Spracherkennung fehlgeschlagen. Bitte versuche es erneut.';
+				}
+
+				await this.sendReply(roomId, event, userMessage);
+				return;
+			}
+
 			this.logger.error(`Error handling voice message:`, error);
 			await this.sendReply(
 				roomId,

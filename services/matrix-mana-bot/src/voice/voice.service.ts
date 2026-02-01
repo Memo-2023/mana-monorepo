@@ -8,14 +8,44 @@ export interface TranscriptionResult {
 	duration?: number;
 }
 
+export class VoiceServiceError extends Error {
+	constructor(
+		message: string,
+		public readonly code: 'STT_UNAVAILABLE' | 'TTS_UNAVAILABLE' | 'TIMEOUT' | 'INVALID_AUDIO' | 'UNKNOWN'
+	) {
+		super(message);
+		this.name = 'VoiceServiceError';
+	}
+}
+
 // Re-export for convenience
 export { VoicePreferences };
+
+// Simple LRU cache for TTS responses
+interface CacheEntry {
+	buffer: Buffer;
+	timestamp: number;
+}
 
 @Injectable()
 export class VoiceService {
 	private readonly logger = new Logger(VoiceService.name);
 	private readonly sttUrl: string;
 	private readonly voiceBotUrl: string;
+
+	// Timeouts in milliseconds
+	private readonly STT_TIMEOUT = 60000; // 60s for transcription (can be slow)
+	private readonly TTS_TIMEOUT = 30000; // 30s for synthesis
+	private readonly HEALTH_TIMEOUT = 5000; // 5s for health checks
+
+	// Audio size limits
+	private readonly MIN_AUDIO_SIZE = 1000; // 1KB minimum
+	private readonly MAX_AUDIO_SIZE = 25 * 1024 * 1024; // 25MB maximum
+
+	// TTS cache for common short responses
+	private readonly ttsCache = new Map<string, CacheEntry>();
+	private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+	private readonly MAX_CACHE_SIZE = 50;
 
 	constructor(
 		private configService: ConfigService,
@@ -35,6 +65,21 @@ export class VoiceService {
 	async transcribe(audioBuffer: Buffer, language = 'de'): Promise<TranscriptionResult> {
 		const startTime = Date.now();
 
+		// Validate audio size
+		if (audioBuffer.length < this.MIN_AUDIO_SIZE) {
+			throw new VoiceServiceError(
+				'Audio zu kurz - bitte länger sprechen.',
+				'INVALID_AUDIO'
+			);
+		}
+
+		if (audioBuffer.length > this.MAX_AUDIO_SIZE) {
+			throw new VoiceServiceError(
+				'Audio zu groß (max 25MB). Bitte kürzere Nachricht senden.',
+				'INVALID_AUDIO'
+			);
+		}
+
 		try {
 			const formData = new FormData();
 			// Convert Buffer to Uint8Array for Blob compatibility
@@ -45,11 +90,15 @@ export class VoiceService {
 			const response = await fetch(`${this.sttUrl}/transcribe`, {
 				method: 'POST',
 				body: formData,
+				signal: AbortSignal.timeout(this.STT_TIMEOUT),
 			});
 
 			if (!response.ok) {
 				const error = await response.text();
-				throw new Error(`STT error: ${response.status} - ${error}`);
+				throw new VoiceServiceError(
+					`Spracherkennung fehlgeschlagen: ${response.status}`,
+					'STT_UNAVAILABLE'
+				);
 			}
 
 			const result = await response.json();
@@ -63,17 +112,43 @@ export class VoiceService {
 				duration,
 			};
 		} catch (error) {
+			if (error instanceof VoiceServiceError) {
+				throw error;
+			}
+
+			if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+				this.logger.error(`STT timeout after ${this.STT_TIMEOUT}ms`);
+				throw new VoiceServiceError(
+					'Spracherkennung dauert zu lange. Bitte versuche es erneut.',
+					'TIMEOUT'
+				);
+			}
+
 			this.logger.error(`Transcription failed: ${error}`);
-			throw error;
+			throw new VoiceServiceError(
+				'Spracherkennung nicht erreichbar.',
+				'STT_UNAVAILABLE'
+			);
 		}
 	}
 
 	/**
 	 * Synthesize speech from text using mana-voice-bot (Edge TTS)
+	 * Includes caching for common short responses
 	 */
 	async synthesize(text: string, userId?: string): Promise<Buffer> {
 		const prefs = this.getUserPreferences(userId);
 		const startTime = Date.now();
+
+		// Check cache for short texts (< 100 chars)
+		if (text.length < 100) {
+			const cacheKey = `${prefs.voice}:${text}`;
+			const cached = this.getCached(cacheKey);
+			if (cached) {
+				this.logger.debug(`TTS cache hit for "${text.substring(0, 30)}..."`);
+				return cached;
+			}
+		}
 
 		try {
 			const formData = new FormData();
@@ -83,11 +158,15 @@ export class VoiceService {
 			const response = await fetch(`${this.voiceBotUrl}/tts`, {
 				method: 'POST',
 				body: formData,
+				signal: AbortSignal.timeout(this.TTS_TIMEOUT),
 			});
 
 			if (!response.ok) {
 				const error = await response.text();
-				throw new Error(`TTS error: ${response.status} - ${error}`);
+				throw new VoiceServiceError(
+					`Sprachsynthese fehlgeschlagen: ${response.status}`,
+					'TTS_UNAVAILABLE'
+				);
 			}
 
 			const arrayBuffer = await response.arrayBuffer();
@@ -96,11 +175,67 @@ export class VoiceService {
 
 			this.logger.debug(`Synthesized ${buffer.length} bytes in ${duration}ms`);
 
+			// Cache short responses
+			if (text.length < 100) {
+				const cacheKey = `${prefs.voice}:${text}`;
+				this.setCache(cacheKey, buffer);
+			}
+
 			return buffer;
 		} catch (error) {
+			if (error instanceof VoiceServiceError) {
+				throw error;
+			}
+
+			if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+				this.logger.error(`TTS timeout after ${this.TTS_TIMEOUT}ms`);
+				throw new VoiceServiceError(
+					'Sprachsynthese dauert zu lange.',
+					'TIMEOUT'
+				);
+			}
+
 			this.logger.error(`Synthesis failed: ${error}`);
-			throw error;
+			throw new VoiceServiceError(
+				'Sprachsynthese nicht erreichbar.',
+				'TTS_UNAVAILABLE'
+			);
 		}
+	}
+
+	/**
+	 * Get cached TTS response
+	 */
+	private getCached(key: string): Buffer | null {
+		const entry = this.ttsCache.get(key);
+		if (!entry) return null;
+
+		// Check if expired
+		if (Date.now() - entry.timestamp > this.CACHE_TTL) {
+			this.ttsCache.delete(key);
+			return null;
+		}
+
+		return entry.buffer;
+	}
+
+	/**
+	 * Cache TTS response
+	 */
+	private setCache(key: string, buffer: Buffer): void {
+		// Enforce max cache size
+		if (this.ttsCache.size >= this.MAX_CACHE_SIZE) {
+			// Remove oldest entry
+			const oldestKey = this.ttsCache.keys().next().value;
+			if (oldestKey) {
+				this.ttsCache.delete(oldestKey);
+			}
+		}
+
+		this.ttsCache.set(key, {
+			buffer,
+			timestamp: Date.now(),
+		});
 	}
 
 	/**
@@ -108,7 +243,9 @@ export class VoiceService {
 	 */
 	async getVoices(): Promise<Record<string, string>> {
 		try {
-			const response = await fetch(`${this.voiceBotUrl}/voices`);
+			const response = await fetch(`${this.voiceBotUrl}/voices`, {
+				signal: AbortSignal.timeout(this.HEALTH_TIMEOUT),
+			});
 			if (!response.ok) {
 				throw new Error(`Failed to get voices: ${response.status}`);
 			}
@@ -118,6 +255,24 @@ export class VoiceService {
 			this.logger.error(`Failed to get voices: ${error}`);
 			return {};
 		}
+	}
+
+	/**
+	 * Clear the TTS cache
+	 */
+	clearCache(): void {
+		this.ttsCache.clear();
+		this.logger.debug('TTS cache cleared');
+	}
+
+	/**
+	 * Get cache statistics
+	 */
+	getCacheStats(): { size: number; maxSize: number } {
+		return {
+			size: this.ttsCache.size,
+			maxSize: this.MAX_CACHE_SIZE,
+		};
 	}
 
 	/**
