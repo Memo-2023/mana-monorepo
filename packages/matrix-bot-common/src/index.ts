@@ -29,7 +29,7 @@ export {
 	isAudioMessage,
 	isImageMessage,
 	isFileMessage,
-} from './base';
+} from './base/index.js';
 
 // Health Controller
 export {
@@ -37,17 +37,17 @@ export {
 	HEALTH_SERVICE_NAME,
 	createHealthProvider,
 	type HealthResponse,
-} from './health';
+} from './health/index.js';
 
 // Message Service
 export {
 	MatrixMessageService,
 	type MatrixMessageContent,
 	type SendMessageOptions,
-} from './message';
+} from './message/index.js';
 
 // Markdown Utilities
-export { markdownToHtml, escapeHtml, formatNumberedList, formatBulletList } from './markdown';
+export { markdownToHtml, escapeHtml, formatNumberedList, formatBulletList } from './markdown/index.js';
 
 // Keyword Detection
 export {
@@ -55,10 +55,10 @@ export {
 	COMMON_KEYWORDS,
 	type KeywordCommand,
 	type KeywordDetectorOptions,
-} from './keywords';
+} from './keywords/index.js';
 
 // Session Helper
-export { SessionHelper, createSessionHelper } from './session';
+export { SessionHelper, createSessionHelper } from './session/index.js';
 
 // List Mapper
-export { UserListMapper, UserIdListMapper } from './list-mapper';
+export { UserListMapper, UserIdListMapper } from './list-mapper/index.js';
