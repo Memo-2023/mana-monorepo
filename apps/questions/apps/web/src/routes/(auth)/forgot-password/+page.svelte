@@ -8,7 +8,7 @@
 	import '$lib/i18n';
 
 	// Get translations based on current locale
-	const translations = $derived(getForgotPasswordTranslations($locale || 'en'));
+	const translations = $derived(getForgotPasswordTranslations($locale || 'de'));
 
 	async function handleForgotPassword(email: string) {
 		return authStore.resetPassword(email);

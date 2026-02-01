@@ -21,7 +21,7 @@
 	});
 
 	// Get translations based on current locale
-	const translations = $derived(getRegisterTranslations($locale || 'en'));
+	const translations = $derived(getRegisterTranslations($locale || 'de'));
 
 	async function handleSignUp(email: string, password: string) {
 		return authStore.signUp(email, password);

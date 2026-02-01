@@ -27,7 +27,7 @@
 	});
 
 	// Get translations based on current locale
-	const translations = $derived(getLoginTranslations($locale || 'en'));
+	const translations = $derived(getLoginTranslations($locale || 'de'));
 
 	// Read verification status from query params
 	const verified = $derived($page.url.searchParams.get('verified') === 'true');
