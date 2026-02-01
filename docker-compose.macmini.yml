@@ -26,7 +26,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mana123}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - /Volumes/ManaData/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -1294,8 +1294,6 @@ services:
 # ============================================
 
 volumes:
-  postgres_data:
-    name: mana-postgres-data
   redis_data:
     name: mana-redis-data
   victoriametrics_data:
