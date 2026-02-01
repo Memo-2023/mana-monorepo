@@ -288,7 +288,8 @@
 		],
 		"overrides": {
 			"cpu-features": "npm:empty-npm-package@1.0.0",
-			"ssh2": "npm:empty-npm-package@1.0.0"
+			"ssh2": "npm:empty-npm-package@1.0.0",
+			"@matrix-org/matrix-sdk-crypto-nodejs": "npm:empty-npm-package@1.0.0"
 		}
 	}
 }
