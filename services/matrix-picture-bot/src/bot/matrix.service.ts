@@ -1,12 +1,10 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	RichConsoleLogger,
-	LogService,
-	LogLevel,
-} from 'matrix-bot-sdk';
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+} from '@manacore/matrix-bot-common';
 import { PictureService } from '../picture/picture.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
@@ -30,80 +28,31 @@ interface ParsedPrompt {
 }
 
 @Injectable()
-export class MatrixService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(MatrixService.name);
-	private client!: MatrixClient;
-	private readonly allowedRooms: string[];
-	private botUserId: string = '';
-
+export class MatrixService extends BaseMatrixService {
 	// Track active generations per user
 	private activeGenerations: Map<string, string> = new Map();
 	// Track selected model per user
 	private userModels: Map<string, string> = new Map();
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private pictureService: PictureService,
 		private sessionService: SessionService
 	) {
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
+		super(configService);
 	}
 
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-
-		if (!accessToken) {
-			this.logger.error('MATRIX_ACCESS_TOKEN is required');
-			return;
-		}
-
-		// Setup logging
-		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogLevel.INFO);
-
-		// Storage for sync token persistence
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-
-		// Create Matrix client
-		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
-
-		// Auto-join rooms when invited
-		this.client.on('room.invite', async (roomId: string) => {
-			this.logger.log(`Invited to room ${roomId}, joining...`);
-			await this.client.joinRoom(roomId);
-
-			setTimeout(async () => {
-				try {
-					await this.sendBotIntroduction(roomId);
-				} catch (error) {
-					this.logger.error(`Failed to send introduction to ${roomId}:`, error);
-				}
-			}, 2000);
-		});
-
-		// Get bot's user ID
-		this.botUserId = await this.client.getUserId();
-		this.logger.log(`Bot user ID: ${this.botUserId}`);
-
-		// Setup message handler
-		this.client.on('room.message', this.handleRoomMessage.bind(this));
-
-		// Start the client
-		await this.client.start();
-		this.logger.log('Matrix Picture Bot started successfully');
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
 	}
 
-	async onModuleDestroy() {
-		if (this.client) {
-			await this.client.stop();
-			this.logger.log('Matrix bot stopped');
-		}
-	}
-
-	private async sendBotIntroduction(roomId: string) {
-		const introText = `**Picture Bot - AI-Bildgenerierung**
+	protected getIntroductionMessage(): string | null {
+		return `**Picture Bot - AI-Bildgenerierung**
 
 Ich generiere Bilder mit AI fur dich!
 
@@ -112,45 +61,24 @@ Ich generiere Bilder mit AI fur dich!
 \`!bild Ein niedlicher Hund\`
 
 Sag "hilfe" fur alle Befehle!`;
-
-		await this.sendMessage(roomId, introText);
 	}
 
-	private isRoomAllowed(roomId: string): boolean {
-		if (this.allowedRooms.length === 0) return true;
-		return this.allowedRooms.some((allowed) => roomId === allowed || roomId.includes(allowed));
-	}
-
-	private async handleRoomMessage(roomId: string, event: any) {
-		// Ignore messages from self
-		if (event.sender === this.botUserId) return;
-
-		// Check if room is allowed
-		if (!this.isRoomAllowed(roomId)) {
-			this.logger.debug(`Ignoring message from non-allowed room: ${roomId}`);
-			return;
-		}
-
-		const content = event.content as { msgtype?: string; body?: string };
-
-		// Only handle text messages
-		if (content.msgtype !== 'm.text') return;
-
-		const body = content.body;
-		if (!body) return;
-
-		this.logger.log(`Message from ${event.sender} in ${roomId}: ${body.substring(0, 50)}...`);
-
+	protected async handleTextMessage(
+		roomId: string,
+		_event: MatrixRoomEvent,
+		message: string,
+		sender: string
+	): Promise<void> {
 		// Handle commands with ! prefix
-		if (body.startsWith('!')) {
-			await this.handleCommand(roomId, event.sender, body);
+		if (message.startsWith('!')) {
+			await this.handleCommand(roomId, sender, message);
 			return;
 		}
 
 		// Check for natural language keywords
-		const keywordCommand = this.detectKeywordCommand(body);
+		const keywordCommand = this.detectKeywordCommand(message);
 		if (keywordCommand) {
-			await this.handleCommand(roomId, event.sender, `!${keywordCommand}`);
+			await this.handleCommand(roomId, sender, `!${keywordCommand}`);
 			return;
 		}
 
@@ -597,7 +525,7 @@ ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 
 	private async pinHelpMessage(roomId: string) {
 		try {
-			const htmlBody = this.markdownToHtml(HELP_MESSAGE);
+			const htmlBody = this.markdownToHtmlLocal(HELP_MESSAGE);
 
 			const eventId = await this.client.sendMessage(roomId, {
 				msgtype: 'm.text',
@@ -617,18 +545,7 @@ ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 		}
 	}
 
-	private async sendMessage(roomId: string, message: string) {
-		const htmlBody = this.markdownToHtml(message);
-
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: message,
-			format: 'org.matrix.custom.html',
-			formatted_body: htmlBody,
-		});
-	}
-
-	private markdownToHtml(markdown: string): string {
+	private markdownToHtmlLocal(markdown: string): string {
 		return (
 			markdown
 				// Code blocks

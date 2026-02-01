@@ -1,68 +1,35 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-	RichConsoleLogger,
-	LogService,
-	LogLevel,
-} from 'matrix-bot-sdk';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { ProjectService } from '../project/project.service';
 import { MediaService } from '../media/media.service';
 import { GenerationService } from '../generation/generation.service';
 import { BLOG_STYLES } from '../config/configuration';
 
 @Injectable()
-export class MatrixService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(MatrixService.name);
-	private client!: MatrixClient;
-	private botUserId: string = '';
+export class MatrixService extends BaseMatrixService {
 	private readonly allowedUsers: string[];
 
 	// Active project per user (matrixUserId -> projectId)
 	private activeProjects: Map<string, string> = new Map();
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private projectService: ProjectService,
 		private mediaService: MediaService,
 		private generationService: GenerationService
 	) {
+		super(configService);
 		this.allowedUsers = this.configService.get<string[]>('matrix.allowedUsers') || [];
 	}
 
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-
-		if (!accessToken) {
-			this.logger.error('MATRIX_ACCESS_TOKEN is required');
-			return;
-		}
-
-		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogLevel.INFO);
-
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
-
-		AutojoinRoomsMixin.setupOnClient(this.client);
-
-		this.botUserId = await this.client.getUserId();
-		this.logger.log(`Bot user ID: ${this.botUserId}`);
-
-		this.client.on('room.message', this.handleRoomMessage.bind(this));
-
-		await this.client.start();
-		this.logger.log('Matrix Project Doc Bot started successfully');
-	}
-
-	async onModuleDestroy() {
-		if (this.client) {
-			await this.client.stop();
-		}
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: [], // This bot uses allowedUsers instead
+		};
 	}
 
 	private isAllowed(userId: string): boolean {
@@ -70,24 +37,50 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		return this.allowedUsers.includes(userId);
 	}
 
-	private async handleRoomMessage(roomId: string, event: any) {
+	/**
+	 * Override onRoomMessage to handle images and audio in addition to text
+	 */
+	protected async onRoomMessage(roomId: string, event: MatrixRoomEvent): Promise<void> {
+		// Ignore own messages
 		if (event.sender === this.botUserId) return;
+
+		// Check user permissions
 		if (!this.isAllowed(event.sender)) return;
 
-		const content = event.content as { msgtype?: string; body?: string; url?: string; info?: any };
-		const msgtype = content.msgtype;
+		const msgtype = event.content?.msgtype;
 
-		if (msgtype === 'm.text') {
-			const body = content.body || '';
-			if (body.startsWith('!')) {
-				await this.handleCommand(roomId, event.sender, body);
-			} else {
-				await this.handleTextMessage(roomId, event.sender, body);
+		try {
+			if (msgtype === 'm.text') {
+				const body = event.content.body || '';
+				await this.handleTextMessage(roomId, event, body, event.sender);
+			} else if (msgtype === 'm.image') {
+				await this.handleImage(roomId, event.sender, {
+					url: event.content.url || '',
+					info: event.content.info as { mimetype?: string } | undefined,
+					body: event.content.body,
+				});
+			} else if (msgtype === 'm.audio') {
+				await this.handleAudio(roomId, event.sender, {
+					url: event.content.url || '',
+					info: event.content.info as { mimetype?: string; duration?: number } | undefined,
+				});
 			}
-		} else if (msgtype === 'm.image') {
-			await this.handleImage(roomId, event.sender, content);
-		} else if (msgtype === 'm.audio') {
-			await this.handleAudio(roomId, event.sender, content);
+		} catch (error) {
+			this.logger.error(`Error handling message: ${error}`);
+			await this.sendMessage(roomId, 'Fehler bei der Verarbeitung der Nachricht.');
+		}
+	}
+
+	protected async handleTextMessage(
+		roomId: string,
+		_event: MatrixRoomEvent,
+		body: string,
+		sender: string
+	): Promise<void> {
+		if (body.startsWith('!')) {
+			await this.handleCommand(roomId, sender, body);
+		} else {
+			await this.handleTextNote(roomId, sender, body);
 		}
 	}
 
@@ -134,7 +127,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 			.map(([key, value]) => `- \`${key}\` - ${value.name}`)
 			.join('\n');
 
-		const helpText = `**📸 Project Doc Bot (DSGVO-konform)**
+		const helpText = `**Project Doc Bot (DSGVO-konform)**
 
 Sammle Fotos, Sprachnotizen und Text für deine Projekte und erstelle daraus Blogbeiträge.
 
@@ -146,9 +139,9 @@ Sammle Fotos, Sprachnotizen und Text für deine Projekte und erstelle daraus Blo
 - \`!archive\` - Aktives Projekt archivieren
 
 **Content:**
-📷 Foto senden - Wird gespeichert
-🎤 Sprachnotiz - Wird transkribiert
-💬 Text-Nachricht - Als Notiz gespeichert
+Foto senden - Wird gespeichert
+Sprachnotiz - Wird transkribiert
+Text-Nachricht - Als Notiz gespeichert
 
 **Generierung:**
 - \`!generate\` - Blogbeitrag erstellen
@@ -183,13 +176,13 @@ ${styles}
 
 			await this.sendMessage(
 				roomId,
-				`✅ **Projekt erstellt!**\n\n**Name:** ${project.name}\n**ID:** \`${project.id.slice(0, 8)}\`\n\nSende jetzt:\n📷 Fotos\n🎤 Sprachnotizen\n💬 Text-Nachrichten\n\nMit \`!generate\` erstellst du den Blogbeitrag.`
+				`**Projekt erstellt!**\n\n**Name:** ${project.name}\n**ID:** \`${project.id.slice(0, 8)}\`\n\nSende jetzt:\nFotos\nSprachnotizen\nText-Nachrichten\n\nMit \`!generate\` erstellst du den Blogbeitrag.`
 			);
 		} catch (error) {
 			this.logger.error('Failed to create project:', error);
 			await this.sendMessage(
 				roomId,
-				`❌ Fehler: ${error instanceof Error ? error.message : 'Unbekannt'}`
+				`Fehler: ${error instanceof Error ? error.message : 'Unbekannt'}`
 			);
 		}
 	}
@@ -207,15 +200,15 @@ ${styles}
 		const projectList = await Promise.all(
 			projects.map(async (p) => {
 				const stats = await this.projectService.getStats(p.id);
-				const active = p.id === activeId ? ' ✓' : '';
-				const status = p.status === 'archived' ? ' 📦' : '';
+				const active = p.id === activeId ? ' (aktiv)' : '';
+				const status = p.status === 'archived' ? ' [archiviert]' : '';
 				return `- **${p.name}**${active}${status}\n  ID: \`${p.id.slice(0, 8)}\` | ${stats.total} Einträge`;
 			})
 		);
 
 		await this.sendMessage(
 			roomId,
-			`**📂 Deine Projekte:**\n\n${projectList.join('\n\n')}\n\nWechseln mit: \`!switch [ID]\``
+			`**Deine Projekte:**\n\n${projectList.join('\n\n')}\n\nWechseln mit: \`!switch [ID]\``
 		);
 	}
 
@@ -241,7 +234,7 @@ ${styles}
 
 		await this.sendMessage(
 			roomId,
-			`✅ Gewechselt zu: **${project.name}**\n\n📷 ${stats.photos} Fotos\n🎤 ${stats.voices} Sprachnotizen\n📝 ${stats.texts} Textnotizen`
+			`Gewechselt zu: **${project.name}**\n\n${stats.photos} Fotos\n${stats.voices} Sprachnotizen\n${stats.texts} Textnotizen`
 		);
 	}
 
@@ -262,7 +255,7 @@ ${styles}
 		const stats = await this.projectService.getStats(projectId);
 		const latest = await this.generationService.getLatestGeneration(projectId);
 
-		let statusText = `**📊 Projekt-Status**\n\n**Name:** ${project.name}\n**Status:** ${project.status}\n**Erstellt:** ${project.createdAt.toLocaleDateString('de-DE')}\n\n**Inhalte:**\n📷 ${stats.photos} Fotos\n🎤 ${stats.voices} Sprachnotizen\n📝 ${stats.texts} Textnotizen\n**Gesamt:** ${stats.total} Einträge`;
+		let statusText = `**Projekt-Status**\n\n**Name:** ${project.name}\n**Status:** ${project.status}\n**Erstellt:** ${project.createdAt.toLocaleDateString('de-DE')}\n\n**Inhalte:**\n${stats.photos} Fotos\n${stats.voices} Sprachnotizen\n${stats.texts} Textnotizen\n**Gesamt:** ${stats.total} Einträge`;
 
 		if (latest) {
 			statusText += `\n\n**Letzte Generierung:**\n${latest.createdAt.toLocaleString('de-DE')} (${latest.style})`;
@@ -281,7 +274,7 @@ ${styles}
 		await this.projectService.update(projectId, { status: 'archived' });
 		this.activeProjects.delete(sender);
 
-		await this.sendMessage(roomId, '📦 Projekt archiviert.\n\nStarte ein neues mit `!new`');
+		await this.sendMessage(roomId, 'Projekt archiviert.\n\nStarte ein neues mit `!new`');
 	}
 
 	private async showStyles(roomId: string) {
@@ -291,7 +284,7 @@ ${styles}
 
 		await this.sendMessage(
 			roomId,
-			`**📝 Verfügbare Blog-Stile:**\n\n${styles}\n\nVerwendung: \`!generate [stil]\``
+			`**Verfügbare Blog-Stile:**\n\n${styles}\n\nVerwendung: \`!generate [stil]\``
 		);
 	}
 
@@ -313,7 +306,7 @@ ${styles}
 			return;
 		}
 
-		await this.sendMessage(roomId, '🚀 Generiere Blogbeitrag...\n\nDas kann einen Moment dauern.');
+		await this.sendMessage(roomId, 'Generiere Blogbeitrag...\n\nDas kann einen Moment dauern.');
 		await this.client.setTyping(roomId, true, 60000);
 
 		try {
@@ -321,13 +314,13 @@ ${styles}
 			await this.client.setTyping(roomId, false);
 
 			await this.sendMessage(roomId, content);
-			await this.sendMessage(roomId, '✅ Blogbeitrag erstellt!\n\nExportieren mit `!export`');
+			await this.sendMessage(roomId, 'Blogbeitrag erstellt!\n\nExportieren mit `!export`');
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
 			this.logger.error('Generation failed:', error);
 			await this.sendMessage(
 				roomId,
-				`❌ Fehler: ${error instanceof Error ? error.message : 'Unbekannt'}`
+				`Fehler: ${error instanceof Error ? error.message : 'Unbekannt'}`
 			);
 		}
 	}
@@ -366,24 +359,24 @@ ${styles}
 		});
 	}
 
-	private async handleTextMessage(roomId: string, sender: string, text: string) {
+	private async handleTextNote(roomId: string, sender: string, text: string) {
 		const projectId = this.activeProjects.get(sender);
 		if (!projectId) {
-			await this.sendMessage(roomId, '💡 Tipp: Starte ein Projekt mit `!new Projektname`');
+			await this.sendMessage(roomId, 'Tipp: Starte ein Projekt mit `!new Projektname`');
 			return;
 		}
 
 		try {
 			await this.mediaService.addTextNote(projectId, text);
 			const stats = await this.projectService.getStats(projectId);
-			await this.sendMessage(roomId, `📝 Notiz gespeichert! (${stats.texts} Notizen gesamt)`);
+			await this.sendMessage(roomId, `Notiz gespeichert! (${stats.texts} Notizen gesamt)`);
 		} catch (error) {
 			this.logger.error('Failed to add text note:', error);
-			await this.sendMessage(roomId, '❌ Fehler beim Speichern der Notiz.');
+			await this.sendMessage(roomId, 'Fehler beim Speichern der Notiz.');
 		}
 	}
 
-	private async handleImage(roomId: string, sender: string, content: any) {
+	private async handleImage(roomId: string, sender: string, content: { url: string; info?: { mimetype?: string }; body?: string }) {
 		const projectId = this.activeProjects.get(sender);
 		if (!projectId) {
 			await this.sendMessage(roomId, 'Kein aktives Projekt.\n\nStarte mit: `!new Projektname`');
@@ -400,21 +393,21 @@ ${styles}
 			await this.mediaService.processPhoto(projectId, buffer, contentType, mxcUrl, content.body);
 
 			const stats = await this.projectService.getStats(projectId);
-			await this.sendMessage(roomId, `📷 Foto gespeichert! (${stats.photos} Fotos gesamt)`);
+			await this.sendMessage(roomId, `Foto gespeichert! (${stats.photos} Fotos gesamt)`);
 		} catch (error) {
 			this.logger.error('Failed to process image:', error);
-			await this.sendMessage(roomId, '❌ Fehler beim Speichern des Fotos.');
+			await this.sendMessage(roomId, 'Fehler beim Speichern des Fotos.');
 		}
 	}
 
-	private async handleAudio(roomId: string, sender: string, content: any) {
+	private async handleAudio(roomId: string, sender: string, content: { url: string; info?: { mimetype?: string; duration?: number } }) {
 		const projectId = this.activeProjects.get(sender);
 		if (!projectId) {
 			await this.sendMessage(roomId, 'Kein aktives Projekt.\n\nStarte mit: `!new Projektname`');
 			return;
 		}
 
-		await this.sendMessage(roomId, '🎤 Verarbeite Sprachnotiz...');
+		await this.sendMessage(roomId, 'Verarbeite Sprachnotiz...');
 
 		try {
 			const mxcUrl = content.url;
@@ -433,36 +426,16 @@ ${styles}
 			);
 
 			const stats = await this.projectService.getStats(projectId);
-			let reply = `✅ Sprachnotiz gespeichert! (${stats.voices} gesamt)`;
+			let reply = `Sprachnotiz gespeichert! (${stats.voices} gesamt)`;
 
 			if (item.content) {
-				reply += `\n\n📝 Transkription:\n"${item.content}"`;
+				reply += `\n\nTranskription:\n"${item.content}"`;
 			}
 
 			await this.sendMessage(roomId, reply);
 		} catch (error) {
 			this.logger.error('Failed to process audio:', error);
-			await this.sendMessage(roomId, '❌ Fehler beim Verarbeiten der Sprachnotiz.');
+			await this.sendMessage(roomId, 'Fehler beim Verarbeiten der Sprachnotiz.');
 		}
-	}
-
-	private async sendMessage(roomId: string, message: string) {
-		const htmlBody = this.markdownToHtml(message);
-
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: message,
-			format: 'org.matrix.custom.html',
-			formatted_body: htmlBody,
-		});
-	}
-
-	private markdownToHtml(markdown: string): string {
-		return markdown
-			.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-			.replace(/`([^`]+)`/g, '<code>$1</code>')
-			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-			.replace(/_([^_]+)_/g, '<em>$1</em>')
-			.replace(/\n/g, '<br/>');
 	}
 }

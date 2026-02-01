@@ -1,13 +1,10 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-	RichReply,
-} from 'matrix-bot-sdk';
-import * as path from 'path';
-import * as fs from 'fs';
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+} from '@manacore/matrix-bot-common';
 import { TtsService } from '../tts/tts.service';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
 
@@ -17,17 +14,10 @@ interface UserSettings {
 }
 
 @Injectable()
-export class MatrixService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(MatrixService.name);
-	private client!: MatrixClient;
-	private readonly homeserverUrl: string;
-	private readonly accessToken: string;
-	private readonly allowedRooms: string[];
-	private readonly storagePath: string;
+export class MatrixService extends BaseMatrixService {
 	private readonly defaultVoice: string;
 	private readonly defaultSpeed: number;
 	private readonly maxTextLength: number;
-	private botUserId: string = '';
 
 	// User settings storage (in-memory)
 	private userSettings: Map<string, UserSettings> = new Map();
@@ -36,73 +26,29 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 	private processedEvents: Set<string> = new Set();
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private ttsService: TtsService
 	) {
-		this.homeserverUrl = this.configService.get<string>(
-			'matrix.homeserverUrl',
-			'http://localhost:8008'
-		);
-		this.accessToken = this.configService.get<string>('matrix.accessToken', '');
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms', []);
-		this.storagePath = this.configService.get<string>(
-			'matrix.storagePath',
-			'./data/bot-storage.json'
-		);
-		this.defaultVoice = this.configService.get<string>('tts.defaultVoice', 'af_heart');
-		this.defaultSpeed = this.configService.get<number>('tts.defaultSpeed', 1.0);
-		this.maxTextLength = this.configService.get<number>('tts.maxTextLength', 500);
+		super(configService);
+		this.defaultVoice = this.configService.get<string>('tts.defaultVoice') || 'af_heart';
+		this.defaultSpeed = this.configService.get<number>('tts.defaultSpeed') || 1.0;
+		this.maxTextLength = this.configService.get<number>('tts.maxTextLength') || 500;
 	}
 
-	async onModuleInit() {
-		if (!this.accessToken) {
-			this.logger.warn('No Matrix access token configured. Bot will not start.');
-			return;
-		}
-
-		await this.initializeClient();
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
 	}
 
-	async onModuleDestroy() {
-		if (this.client) {
-			await this.client.stop();
-		}
+	protected getIntroductionMessage(): string {
+		return WELCOME_TEXT;
 	}
 
-	private async initializeClient() {
-		try {
-			const storageDir = path.dirname(this.storagePath);
-			if (!fs.existsSync(storageDir)) {
-				fs.mkdirSync(storageDir, { recursive: true });
-			}
-
-			const storage = new SimpleFsStorageProvider(this.storagePath);
-			this.client = new MatrixClient(this.homeserverUrl, this.accessToken, storage);
-
-			AutojoinRoomsMixin.setupOnClient(this.client);
-
-			this.client.on('room.invite', async (roomId: string) => {
-				this.logger.log(`Invited to room ${roomId}, joining...`);
-				await this.client.joinRoom(roomId);
-
-				setTimeout(async () => {
-					await this.sendWelcome(roomId);
-				}, 2000);
-			});
-
-			this.client.on('room.message', async (roomId: string, event: any) => {
-				await this.handleMessage(roomId, event);
-			});
-
-			await this.client.start();
-			this.botUserId = await this.client.getUserId();
-			this.logger.log(`Matrix TTS Bot connected as ${this.botUserId}`);
-		} catch (error) {
-			this.logger.error('Failed to initialize Matrix client:', error);
-		}
-	}
-
-	private async handleMessage(roomId: string, event: any) {
+	protected async onRoomMessage(roomId: string, event: MatrixRoomEvent): Promise<void> {
 		// Ignore own messages
 		if (event.sender === this.botUserId) return;
 
@@ -116,23 +62,35 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 			// Clean up old events (keep last 1000)
 			if (this.processedEvents.size > 1000) {
 				const iterator = this.processedEvents.values();
-				this.processedEvents.delete(iterator.next().value);
+				const firstValue = iterator.next().value;
+				if (firstValue) {
+					this.processedEvents.delete(firstValue);
+				}
 			}
 		}
 
 		// Check room allowlist
-		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
+		if (!this.isRoomAllowed(roomId)) {
 			return;
 		}
 
-		const userId = event.sender;
 		const msgtype = event.content?.msgtype;
 
 		// Only handle text messages
 		if (msgtype !== 'm.text') return;
 
-		const body = event.content.body?.trim();
+		const body = event.content?.body?.trim();
 		if (!body) return;
+
+		await this.handleTextMessage(roomId, event, body);
+	}
+
+	protected async handleTextMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		body: string
+	): Promise<void> {
+		const userId = event.sender;
 
 		try {
 			// Handle ! commands
@@ -152,7 +110,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 
 	private async executeCommand(
 		roomId: string,
-		event: any,
+		event: MatrixRoomEvent,
 		userId: string,
 		command: string,
 		args: string
@@ -188,7 +146,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleVoiceCommand(roomId: string, event: any, userId: string, args: string) {
+	private async handleVoiceCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
 		if (!args.trim()) {
 			await this.sendReply(
 				roomId,
@@ -216,14 +174,14 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		settings.voice = voiceName;
 		this.userSettings.set(userId, settings);
 
-		await this.sendReply(roomId, event, `Stimme geandert zu: **${voiceName}**`);
+		await this.sendReply(roomId, event, `Stimme geaendert zu: **${voiceName}**`);
 	}
 
-	private async handleVoicesCommand(roomId: string, event: any) {
+	private async handleVoicesCommand(roomId: string, event: MatrixRoomEvent) {
 		try {
 			const voices = await this.ttsService.getVoices();
 
-			let response = '**Verfugbare Stimmen:**\n\n';
+			let response = '**Verfuegbare Stimmen:**\n\n';
 
 			if (voices.kokoro_voices.length > 0) {
 				response += '**Kokoro (schnell):**\n';
@@ -252,7 +210,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleSpeedCommand(roomId: string, event: any, userId: string, args: string) {
+	private async handleSpeedCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
 		if (!args.trim()) {
 			await this.sendReply(
 				roomId,
@@ -272,23 +230,23 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		settings.speed = speed;
 		this.userSettings.set(userId, settings);
 
-		await this.sendReply(roomId, event, `Geschwindigkeit geandert zu: **${speed}x**`);
+		await this.sendReply(roomId, event, `Geschwindigkeit geaendert zu: **${speed}x**`);
 	}
 
-	private async handleStatusCommand(roomId: string, event: any, userId: string) {
+	private async handleStatusCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		const settings = this.getUserSettings(userId);
 		const ttsHealthy = await this.ttsService.isHealthy();
 
 		let response = '**Aktuelle Einstellungen:**\n\n';
 		response += `Stimme: \`${settings.voice}\`\n`;
 		response += `Geschwindigkeit: ${settings.speed}x\n`;
-		response += `Max. Textlange: ${this.maxTextLength} Zeichen\n\n`;
+		response += `Max. Textlaenge: ${this.maxTextLength} Zeichen\n\n`;
 		response += `TTS-Service: ${ttsHealthy ? 'Online' : 'Offline'}`;
 
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleTextToSpeech(roomId: string, event: any, userId: string, text: string) {
+	private async handleTextToSpeech(roomId: string, event: MatrixRoomEvent, userId: string, text: string) {
 		// Check text length
 		if (text.length > this.maxTextLength) {
 			await this.sendReply(
@@ -349,32 +307,5 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 			});
 		}
 		return this.userSettings.get(userId)!;
-	}
-
-	private async sendWelcome(roomId: string) {
-		try {
-			await this.client.sendMessage(roomId, {
-				msgtype: 'm.text',
-				body: WELCOME_TEXT,
-				format: 'org.matrix.custom.html',
-				formatted_body: this.markdownToHtml(WELCOME_TEXT),
-			});
-		} catch (error) {
-			this.logger.error('Failed to send welcome:', error);
-		}
-	}
-
-	private async sendReply(roomId: string, event: any, message: string) {
-		const reply = RichReply.createFor(roomId, event, message, this.markdownToHtml(message));
-		reply.msgtype = 'm.text';
-		await this.client.sendMessage(roomId, reply);
-	}
-
-	private markdownToHtml(text: string): string {
-		return text
-			.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-			.replace(/\*(.+?)\*/g, '<em>$1</em>')
-			.replace(/`(.+?)`/g, '<code>$1</code>')
-			.replace(/\n/g, '<br>');
 	}
 }

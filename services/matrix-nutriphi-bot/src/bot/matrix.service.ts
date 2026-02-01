@@ -1,12 +1,10 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	RichConsoleLogger,
-	LogService,
-	LogLevel,
-} from 'matrix-bot-sdk';
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+} from '@manacore/matrix-bot-common';
 import {
 	NutriPhiService,
 	AIAnalysisResult,
@@ -28,76 +26,27 @@ const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
 ];
 
 @Injectable()
-export class MatrixService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(MatrixService.name);
-	private client!: MatrixClient;
-	private readonly allowedRooms: string[];
-	private botUserId: string = '';
-
+export class MatrixService extends BaseMatrixService {
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private nutriphiService: NutriPhiService,
 		private sessionService: SessionService,
 		private transcriptionService: TranscriptionService
 	) {
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
+		super(configService);
 	}
 
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-
-		if (!accessToken) {
-			this.logger.error('MATRIX_ACCESS_TOKEN is required');
-			return;
-		}
-
-		// Setup logging
-		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogLevel.INFO);
-
-		// Storage for sync token persistence
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-
-		// Create Matrix client
-		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
-
-		// Auto-join rooms when invited
-		this.client.on('room.invite', async (roomId: string) => {
-			this.logger.log(`Invited to room ${roomId}, joining...`);
-			await this.client.joinRoom(roomId);
-
-			setTimeout(async () => {
-				try {
-					await this.sendBotIntroduction(roomId);
-				} catch (error) {
-					this.logger.error(`Failed to send introduction to ${roomId}:`, error);
-				}
-			}, 2000);
-		});
-
-		// Get bot's user ID
-		this.botUserId = await this.client.getUserId();
-		this.logger.log(`Bot user ID: ${this.botUserId}`);
-
-		// Setup message handler
-		this.client.on('room.message', this.handleRoomMessage.bind(this));
-
-		// Start the client
-		await this.client.start();
-		this.logger.log('Matrix NutriPhi Bot started successfully');
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
 	}
 
-	async onModuleDestroy() {
-		if (this.client) {
-			await this.client.stop();
-			this.logger.log('Matrix bot stopped');
-		}
-	}
-
-	private async sendBotIntroduction(roomId: string) {
-		const introText = `**NutriPhi Bot - KI-Ernahrungsassistent**
+	protected getIntroductionMessage(): string | null {
+		return `**NutriPhi Bot - KI-Ernahrungsassistent**
 
 Analysiere deine Mahlzeiten mit KI und tracke deine Ernahrung!
 
@@ -107,70 +56,112 @@ Analysiere deine Mahlzeiten mit KI und tracke deine Ernahrung!
 3. \`!analyze\` - Nahrwerte erhalten
 
 Sag "hilfe" fur alle Befehle!`;
-
-		await this.sendMessage(roomId, introText);
 	}
 
-	private isRoomAllowed(roomId: string): boolean {
-		if (this.allowedRooms.length === 0) return true;
-		return this.allowedRooms.some((allowed) => roomId === allowed || roomId.includes(allowed));
-	}
+	async onModuleInit() {
+		await super.onModuleInit();
 
-	private async handleRoomMessage(roomId: string, event: any) {
-		// Ignore messages from self
-		if (event.sender === this.botUserId) return;
-
-		// Check if room is allowed
-		if (!this.isRoomAllowed(roomId)) {
-			this.logger.debug(`Ignoring message from non-allowed room: ${roomId}`);
-			return;
-		}
-
-		const content = event.content as {
-			msgtype?: string;
-			body?: string;
-			url?: string;
-			info?: { mimetype?: string; duration?: number };
-		};
+		if (!this.client) return;
 
 		// Handle image messages
-		if (content.msgtype === 'm.image' && content.url) {
-			this.sessionService.setSessionData(event.sender, 'pendingImage', {
-				url: content.url,
-				mimeType: content.info?.mimetype || 'image/png',
-			});
-			this.logger.log(`Image received from ${event.sender}`);
+		this.client.on('room.message', async (roomId: string, event: any) => {
+			if (event.sender === await this.client.getUserId()) return;
+
+			const content = event.content as {
+				msgtype?: string;
+				body?: string;
+				url?: string;
+				info?: { mimetype?: string; duration?: number };
+			};
+
+			// Handle image messages
+			if (content.msgtype === 'm.image' && content.url) {
+				this.sessionService.setSessionData(event.sender, 'pendingImage', {
+					url: content.url,
+					mimeType: content.info?.mimetype || 'image/png',
+				});
+				this.logger.log(`Image received from ${event.sender}`);
+				await this.sendMessage(
+					roomId,
+					`Bild empfangen! Nutze jetzt \`!analyze\` um es zu analysieren, oder \`!analyze Beschreibung\` um zusatzlichen Kontext zu geben.`
+				);
+			}
+		});
+	}
+
+	protected async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
+		const token = this.sessionService.getToken(sender);
+		if (!token) {
 			await this.sendMessage(
 				roomId,
-				`Bild empfangen! Nutze jetzt \`!analyze\` um es zu analysieren, oder \`!analyze Beschreibung\` um zusatzlichen Kontext zu geben.`
+				`Du bist nicht angemeldet. Nutze \`!login email passwort\` um dich anzumelden.`
 			);
 			return;
 		}
 
-		// Handle audio/voice messages
-		if (content.msgtype === 'm.audio' && content.url) {
-			await this.handleAudioMessage(roomId, event.sender, content);
-			return;
+		await this.sendMessage(roomId, 'Verarbeite Sprachnotiz...');
+		await this.client.setTyping(roomId, true, 60000);
+
+		try {
+			// Download audio from Matrix
+			const mxcUrl = event.content.url!;
+			const httpUrl = this.client.mxcToHttp(mxcUrl);
+			this.logger.log(`Downloading audio from ${httpUrl}`);
+
+			const response = await fetch(httpUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to download audio: ${response.status}`);
+			}
+
+			const buffer = Buffer.from(await response.arrayBuffer());
+
+			// Transcribe audio
+			const transcription = await this.transcriptionService.transcribe(buffer);
+			this.logger.log(`Transcription: ${transcription.substring(0, 50)}...`);
+
+			if (!transcription.trim()) {
+				await this.client.setTyping(roomId, false);
+				await this.sendMessage(roomId, 'Konnte keine Sprache erkennen. Bitte versuche es erneut.');
+				return;
+			}
+
+			// Analyze the transcribed text as a meal
+			await this.sendMessage(roomId, `Transkription: "${transcription}"\n\nAnalysiere...`);
+
+			const result = await this.nutriphiService.analyzeText(transcription, token);
+			await this.client.setTyping(roomId, false);
+
+			// Format and send result
+			const formattedResult = this.formatAnalysisResult(result);
+			await this.sendMessage(roomId, formattedResult);
+		} catch (error) {
+			await this.client.setTyping(roomId, false);
+			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+			this.logger.error('Audio processing failed:', error);
+			await this.sendMessage(roomId, `Fehler bei der Verarbeitung: ${errorMsg}`);
 		}
+	}
 
-		// Only handle text messages
-		if (content.msgtype !== 'm.text') return;
-
-		const body = content.body;
-		if (!body) return;
-
-		this.logger.log(`Message from ${event.sender} in ${roomId}: ${body.substring(0, 50)}...`);
-
+	protected async handleTextMessage(
+		roomId: string,
+		_event: MatrixRoomEvent,
+		message: string,
+		sender: string
+	): Promise<void> {
 		// Handle commands with ! prefix
-		if (body.startsWith('!')) {
-			await this.handleCommand(roomId, event.sender, body);
+		if (message.startsWith('!')) {
+			await this.handleCommand(roomId, sender, message);
 			return;
 		}
 
 		// Check for natural language keywords
-		const keywordCommand = this.detectKeywordCommand(body);
+		const keywordCommand = this.detectKeywordCommand(message);
 		if (keywordCommand) {
-			await this.handleCommand(roomId, event.sender, `!${keywordCommand}`);
+			await this.handleCommand(roomId, sender, `!${keywordCommand}`);
 			return;
 		}
 
@@ -650,7 +641,7 @@ ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 
 	private async pinHelpMessage(roomId: string) {
 		try {
-			const htmlBody = this.markdownToHtml(HELP_MESSAGE);
+			const htmlBody = this.markdownToHtmlLocal(HELP_MESSAGE);
 
 			const eventId = await this.client.sendMessage(roomId, {
 				msgtype: 'm.text',
@@ -670,63 +661,6 @@ ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 		}
 	}
 
-	private async handleAudioMessage(
-		roomId: string,
-		sender: string,
-		content: { url?: string; info?: { mimetype?: string; duration?: number } }
-	) {
-		const token = this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(
-				roomId,
-				`Du bist nicht angemeldet. Nutze \`!login email passwort\` um dich anzumelden.`
-			);
-			return;
-		}
-
-		await this.sendMessage(roomId, 'Verarbeite Sprachnotiz...');
-		await this.client.setTyping(roomId, true, 60000);
-
-		try {
-			// Download audio from Matrix
-			const mxcUrl = content.url!;
-			const httpUrl = this.client.mxcToHttp(mxcUrl);
-			this.logger.log(`Downloading audio from ${httpUrl}`);
-
-			const response = await fetch(httpUrl);
-			if (!response.ok) {
-				throw new Error(`Failed to download audio: ${response.status}`);
-			}
-
-			const buffer = Buffer.from(await response.arrayBuffer());
-
-			// Transcribe audio
-			const transcription = await this.transcriptionService.transcribe(buffer);
-			this.logger.log(`Transcription: ${transcription.substring(0, 50)}...`);
-
-			if (!transcription.trim()) {
-				await this.client.setTyping(roomId, false);
-				await this.sendMessage(roomId, 'Konnte keine Sprache erkennen. Bitte versuche es erneut.');
-				return;
-			}
-
-			// Analyze the transcribed text as a meal
-			await this.sendMessage(roomId, `Transkription: "${transcription}"\n\nAnalysiere...`);
-
-			const result = await this.nutriphiService.analyzeText(transcription, token);
-			await this.client.setTyping(roomId, false);
-
-			// Format and send result
-			const formattedResult = this.formatAnalysisResult(result);
-			await this.sendMessage(roomId, formattedResult);
-		} catch (error) {
-			await this.client.setTyping(roomId, false);
-			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
-			this.logger.error('Audio processing failed:', error);
-			await this.sendMessage(roomId, `Fehler bei der Verarbeitung: ${errorMsg}`);
-		}
-	}
-
 	private async downloadMatrixImage(mxcUrl: string): Promise<string> {
 		const httpUrl = this.client.mxcToHttp(mxcUrl);
 		this.logger.log(`Downloading image from ${httpUrl}`);
@@ -741,18 +675,7 @@ ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 		return base64;
 	}
 
-	private async sendMessage(roomId: string, message: string) {
-		const htmlBody = this.markdownToHtml(message);
-
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: message,
-			format: 'org.matrix.custom.html',
-			formatted_body: htmlBody,
-		});
-	}
-
-	private markdownToHtml(markdown: string): string {
+	private markdownToHtmlLocal(markdown: string): string {
 		return (
 			markdown
 				// Code blocks

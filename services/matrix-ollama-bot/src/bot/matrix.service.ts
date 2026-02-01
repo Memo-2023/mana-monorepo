@@ -1,13 +1,10 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-	RichConsoleLogger,
-	LogService,
-	LogLevel,
-} from 'matrix-bot-sdk';
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+} from '@manacore/matrix-bot-common';
 import { OllamaService } from '../ollama/ollama.service';
 import { SYSTEM_PROMPTS } from '../config/configuration';
 
@@ -33,68 +30,72 @@ const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
 ];
 
 @Injectable()
-export class MatrixService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(MatrixService.name);
-	private client!: MatrixClient;
+export class MatrixService extends BaseMatrixService {
 	private sessions: Map<string, UserSession> = new Map();
-	private readonly allowedRooms: string[];
-	private botUserId: string = '';
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private ollamaService: OllamaService
 	) {
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
+		super(configService);
+	}
+
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
+	}
+
+	protected getIntroductionMessage(): string | null {
+		return `**Hallo! Ich bin Manai, eure lokale KI-Assistentin.**
+
+Alle Daten bleiben auf diesem Server - 100% DSGVO-konform!
+
+**Quick Start:**
+- Schreibt einfach eine Nachricht
+- Sagt "hilfe" für alle Befehle
+- Sagt "modelle" um KI-Modelle zu sehen`;
 	}
 
 	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
+		await super.onModuleInit();
 
-		if (!accessToken) {
-			this.logger.error('MATRIX_ACCESS_TOKEN is required');
-			return;
-		}
+		if (!this.client) return;
 
-		// Setup logging
-		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogLevel.INFO);
-
-		// Storage for sync token persistence
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-
-		// Create Matrix client
-		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
-
-		// Auto-join rooms when invited and send welcome
-		this.client.on('room.invite', async (roomId: string) => {
-			this.logger.log(`Invited to room ${roomId}, joining...`);
-			await this.client.joinRoom(roomId);
-
-			// Wait a bit for the join to complete, then send intro and pin help
-			setTimeout(async () => {
-				try {
-					await this.sendBotIntroduction(roomId);
-				} catch (error) {
-					this.logger.error(`Failed to send introduction to ${roomId}:`, error);
-				}
-			}, 2000);
-		});
-
-		// Get bot's user ID
 		this.botUserId = await this.client.getUserId();
 		this.logger.log(`Bot user ID: ${this.botUserId}`);
-
-		// Setup message handler
-		this.client.on('room.message', this.handleRoomMessage.bind(this));
 
 		// Setup room join handler for welcome message
 		this.client.on('room.join', this.handleRoomJoin.bind(this));
 
-		// Start the client
-		await this.client.start();
-		this.logger.log('Matrix bot started successfully');
+		// Handle image messages
+		this.client.on('room.message', async (roomId: string, event: any) => {
+			if (event.sender === this.botUserId) return;
+
+			const content = event.content as {
+				msgtype?: string;
+				body?: string;
+				url?: string;
+				info?: { mimetype?: string };
+			};
+
+			// Handle image messages - store for later use with !vision
+			if (content.msgtype === 'm.image' && content.url) {
+				const session = this.getSession(event.sender);
+				session.pendingImage = {
+					url: content.url,
+					mimeType: content.info?.mimetype || 'image/png',
+				};
+				this.logger.log(`Image received from ${event.sender}, stored for !vision command`);
+				await this.sendMessage(
+					roomId,
+					`Bild empfangen! Nutze jetzt:\n- \`!vision [Frage zum Bild]\` - Bild mit einem Modell analysieren\n- \`!vision:all [Frage]\` - Bild mit allen Vision-Modellen vergleichen`
+				);
+			}
+		});
 	}
 
 	private async handleRoomJoin(roomId: string, event: any) {
@@ -109,21 +110,21 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 	}
 
 	private async sendWelcomeMessage(roomId: string, userId: string) {
-		const welcomeText = `👋 **Willkommen im Mana Chat, ${this.extractUsername(userId)}!**
+		const welcomeText = `**Willkommen im Mana Chat, ${this.extractUsername(userId)}!**
 
 Ich bin **Manai**, deine lokale KI-Assistentin (100% DSGVO-konform).
 
 **So nutzt du mich:**
-• Schreib einfach eine Nachricht - ich antworte!
-• Sag "hilfe" oder "modelle" für mehr Infos
-• Oder nutze Befehle wie \`!help\`
+- Schreib einfach eine Nachricht - ich antworte!
+- Sag "hilfe" oder "modelle" für mehr Infos
+- Oder nutze Befehle wie \`!help\`
 
 **Quick Start:**
-• "Was ist TypeScript?" → Ich erkläre es dir
-• "modelle" → Zeigt verfügbare KI-Modelle
-• \`!all Erkläre Recursion\` → Vergleicht alle Modelle
+- "Was ist TypeScript?" -> Ich erkläre es dir
+- "modelle" -> Zeigt verfügbare KI-Modelle
+- \`!all Erkläre Recursion\` -> Vergleicht alle Modelle
 
-Viel Spaß! 🚀`;
+Viel Spass!`;
 
 		await this.sendMessage(roomId, welcomeText);
 	}
@@ -132,77 +133,6 @@ Viel Spaß! 🚀`;
 		// Extract username from @user:server.com format
 		const match = userId.match(/@([^:]+)/);
 		return match ? match[1] : userId;
-	}
-
-	private async sendBotIntroduction(roomId: string) {
-		const introText = `🤖 **Hallo! Ich bin Manai, eure lokale KI-Assistentin.**
-
-Alle Daten bleiben auf diesem Server - 100% DSGVO-konform!
-
-**Quick Start:**
-• Schreibt einfach eine Nachricht
-• Sagt "hilfe" für alle Befehle
-• Sagt "modelle" um KI-Modelle zu sehen
-
-Ich pinne jetzt die Hilfe für euch an! 📌`;
-
-		await this.sendMessage(roomId, introText);
-
-		// Pin the help message
-		await this.pinHelpMessage(roomId);
-	}
-
-	private async pinHelpMessage(roomId: string) {
-		try {
-			// Send the help message and get its event ID
-			const helpContent = this.getHelpContent();
-			const htmlBody = this.markdownToHtml(helpContent);
-
-			const eventId = await this.client.sendMessage(roomId, {
-				msgtype: 'm.text',
-				body: helpContent,
-				format: 'org.matrix.custom.html',
-				formatted_body: htmlBody,
-			});
-
-			// Pin the message
-			await this.client.sendStateEvent(roomId, 'm.room.pinned_events', '', {
-				pinned: [eventId],
-			});
-
-			this.logger.log(`Pinned help message in room ${roomId}`);
-		} catch (error) {
-			this.logger.error(`Failed to pin help message in ${roomId}:`, error);
-		}
-	}
-
-	private getHelpContent(): string {
-		return `📌 **Manai - Befehls-Übersicht**
-
-**Einfach sagen:**
-• "hilfe" - Diese Übersicht
-• "modelle" - Verfügbare KI-Modelle
-• "status" - Bot-Status
-• "lösche verlauf" - Chat zurücksetzen
-
-**Power-User (mit !):**
-• \`!model [name]\` - Modell wechseln
-• \`!all [frage]\` - Alle Modelle vergleichen
-• \`!vision [frage]\` - Bild analysieren
-
-**Nutzung:** Einfach schreiben und ich antworte!`;
-	}
-
-	async onModuleDestroy() {
-		if (this.client) {
-			await this.client.stop();
-			this.logger.log('Matrix bot stopped');
-		}
-	}
-
-	private isRoomAllowed(roomId: string): boolean {
-		if (this.allowedRooms.length === 0) return true;
-		return this.allowedRooms.some((allowed) => roomId === allowed || roomId.includes(allowed));
 	}
 
 	private getSession(senderId: string): UserSession {
@@ -216,61 +146,27 @@ Ich pinne jetzt die Hilfe für euch an! 📌`;
 		return this.sessions.get(senderId)!;
 	}
 
-	private async handleRoomMessage(roomId: string, event: any) {
-		// Ignore messages from self
-		if (event.sender === this.botUserId) return;
-
-		// Check if room is allowed
-		if (!this.isRoomAllowed(roomId)) {
-			this.logger.debug(`Ignoring message from non-allowed room: ${roomId}`);
-			return;
-		}
-
-		const content = event.content as {
-			msgtype?: string;
-			body?: string;
-			url?: string;
-			info?: { mimetype?: string };
-		};
-
-		// Handle image messages - store for later use with !vision
-		if (content.msgtype === 'm.image' && content.url) {
-			const session = this.getSession(event.sender);
-			session.pendingImage = {
-				url: content.url,
-				mimeType: content.info?.mimetype || 'image/png',
-			};
-			this.logger.log(`Image received from ${event.sender}, stored for !vision command`);
-			await this.sendMessage(
-				roomId,
-				`📷 Bild empfangen! Nutze jetzt:\n- \`!vision [Frage zum Bild]\` - Bild mit einem Modell analysieren\n- \`!vision:all [Frage]\` - Bild mit allen Vision-Modellen vergleichen`
-			);
-			return;
-		}
-
-		// Only handle text messages
-		if (content.msgtype !== 'm.text') return;
-
-		const body = content.body;
-		if (!body) return;
-
-		this.logger.log(`Message from ${event.sender} in ${roomId}: ${body.substring(0, 50)}...`);
-
+	protected async handleTextMessage(
+		roomId: string,
+		_event: MatrixRoomEvent,
+		message: string,
+		sender: string
+	): Promise<void> {
 		// Handle commands with ! prefix
-		if (body.startsWith('!')) {
-			await this.handleCommand(roomId, event.sender, body);
+		if (message.startsWith('!')) {
+			await this.handleCommand(roomId, sender, message);
 			return;
 		}
 
 		// Check for natural language keywords
-		const keywordCommand = this.detectKeywordCommand(body);
+		const keywordCommand = this.detectKeywordCommand(message);
 		if (keywordCommand) {
-			await this.handleCommand(roomId, event.sender, `!${keywordCommand}`);
+			await this.handleCommand(roomId, sender, `!${keywordCommand}`);
 			return;
 		}
 
 		// Regular chat message
-		await this.handleChat(roomId, event.sender, body);
+		await this.handleChat(roomId, sender, message);
 	}
 
 	private detectKeywordCommand(message: string): string | null {
@@ -334,7 +230,7 @@ Ich pinne jetzt die Hilfe für euch an! 📌`;
 
 			case 'pin':
 				await this.pinHelpMessage(roomId);
-				await this.sendMessage(roomId, '📌 Hilfe wurde angepinnt!');
+				await this.sendMessage(roomId, 'Hilfe wurde angepinnt!');
 				break;
 
 			default:
@@ -349,15 +245,15 @@ Ich pinne jetzt die Hilfe für euch an! 📌`;
 		const helpText = `**Manai - Lokale KI (100% DSGVO-konform)**
 
 **Einfache Befehle** (sag einfach):
-• "hilfe" - Diese Hilfe
-• "modelle" - Verfügbare KI-Modelle
-• "status" - Verbindungsstatus
-• "lösche verlauf" - Chat zurücksetzen
+- "hilfe" - Diese Hilfe
+- "modelle" - Verfügbare KI-Modelle
+- "status" - Verbindungsstatus
+- "lösche verlauf" - Chat zurücksetzen
 
 **Power-User Befehle** (mit !):
-• \`!model [name]\` - Modell wechseln
-• \`!all [frage]\` - Alle Modelle vergleichen
-• \`!mode [modus]\` - Modus ändern (default/code/translate/summarize)
+- \`!model [name]\` - Modell wechseln
+- \`!all [frage]\` - Alle Modelle vergleichen
+- \`!mode [modus]\` - Modus ändern (default/code/translate/summarize)
 
 **Bild-Analyse:**
 1. Sende ein Bild
@@ -367,9 +263,9 @@ Ich pinne jetzt die Hilfe für euch an! 📌`;
 Schreibe einfach eine Nachricht und ich antworte!
 
 **Beispiele:**
-• "Was ist Kubernetes?" → Direkte Antwort
-• "modelle" → Zeigt alle Modelle
-• \`!all Erkläre Docker\` → Vergleicht alle Modelle
+- "Was ist Kubernetes?" -> Direkte Antwort
+- "modelle" -> Zeigt alle Modelle
+- \`!all Erkläre Docker\` -> Vergleicht alle Modelle
 
 **Aktuelles Modell:** \`${this.ollamaService.getDefaultModel()}\``;
 
@@ -475,11 +371,11 @@ Schreibe einfach eine Nachricht und ich antworte!
 
 		const statusText = `**Ollama Status**
 
-**Verbindung:** ${connected ? '✅ Online' : '❌ Offline'}
+**Verbindung:** ${connected ? 'Online' : 'Offline'}
 **Modelle:** ${models.length}
 **Dein Modell:** \`${session.model}\`
 **Chat-Verlauf:** ${session.history.length} Nachrichten
-**DSGVO:** ✅ Alle Daten lokal`;
+**DSGVO:** Alle Daten lokal`;
 
 		await this.sendMessage(roomId, statusText);
 	}
@@ -498,7 +394,7 @@ Schreibe einfach eine Nachricht und ich antworte!
 		const models = allModels.filter((m) => !NON_CHAT_MODELS.includes(m.name));
 
 		if (models.length === 0) {
-			await this.sendMessage(roomId, '❌ Keine Chat-Modelle gefunden. Ist Ollama gestartet?');
+			await this.sendMessage(roomId, 'Keine Chat-Modelle gefunden. Ist Ollama gestartet?');
 			return;
 		}
 
@@ -507,7 +403,7 @@ Schreibe einfach eine Nachricht und ich antworte!
 
 		await this.sendMessage(
 			roomId,
-			`🔄 **Vergleiche ${models.length} Chat-Modelle...**${skippedNote}\n\nFrage: "${message}"`
+			`**Vergleiche ${models.length} Chat-Modelle...**${skippedNote}\n\nFrage: "${message}"`
 		);
 
 		// Send typing indicator
@@ -538,19 +434,19 @@ Schreibe einfach eine Nachricht und ich antworte!
 		await this.client.setTyping(roomId, false);
 
 		// Format results
-		let resultText = `**📊 Modellvergleich**\n\n**Frage:** "${message}"\n\n---\n\n`;
+		let resultText = `**Modellvergleich**\n\n**Frage:** "${message}"\n\n---\n\n`;
 
 		for (const result of results) {
 			const durationSec = (result.duration / 1000).toFixed(1);
 			if (result.error) {
-				resultText += `**${result.model}** ⏱️ ${durationSec}s\n❌ Fehler: ${result.error}\n\n---\n\n`;
+				resultText += `**${result.model}** ${durationSec}s\nFehler: ${result.error}\n\n---\n\n`;
 			} else {
 				// Truncate long responses for readability
 				const truncatedResponse =
 					result.response.length > 500
 						? result.response.substring(0, 500) + '...'
 						: result.response;
-				resultText += `**${result.model}** ⏱️ ${durationSec}s\n${truncatedResponse}\n\n---\n\n`;
+				resultText += `**${result.model}** ${durationSec}s\n${truncatedResponse}\n\n---\n\n`;
 			}
 		}
 
@@ -592,7 +488,7 @@ Schreibe einfach eine Nachricht und ich antworte!
 			await this.client.setTyping(roomId, false);
 			this.logger.error(`Error processing message:`, error);
 			const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
-			await this.sendMessage(roomId, `❌ Fehler: ${errorMessage}`);
+			await this.sendMessage(roomId, `Fehler: ${errorMessage}`);
 		}
 	}
 
@@ -602,7 +498,7 @@ Schreibe einfach eine Nachricht und ich antworte!
 		if (!session.pendingImage) {
 			await this.sendMessage(
 				roomId,
-				`❌ Kein Bild vorhanden!\n\nSende zuerst ein Bild, dann nutze \`!vision [Frage zum Bild]\``
+				`Kein Bild vorhanden!\n\nSende zuerst ein Bild, dann nutze \`!vision [Frage zum Bild]\``
 			);
 			return;
 		}
@@ -622,13 +518,13 @@ Schreibe einfach eine Nachricht und ich antworte!
 		if (visionModels.length === 0) {
 			await this.sendMessage(
 				roomId,
-				`❌ Keine Vision-Modelle gefunden!\n\nInstalliere ein Vision-Modell mit:\n\`ollama pull llava\``
+				`Keine Vision-Modelle gefunden!\n\nInstalliere ein Vision-Modell mit:\n\`ollama pull llava\``
 			);
 			return;
 		}
 
 		const model = visionModels[0].name;
-		await this.sendMessage(roomId, `🔍 Analysiere Bild mit \`${model}\`...`);
+		await this.sendMessage(roomId, `Analysiere Bild mit \`${model}\`...`);
 		await this.client.setTyping(roomId, true, 120000);
 
 		try {
@@ -642,7 +538,7 @@ Schreibe einfach eine Nachricht und ich antworte!
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
-			await this.sendMessage(roomId, `❌ Fehler bei der Bildanalyse: ${errorMsg}`);
+			await this.sendMessage(roomId, `Fehler bei der Bildanalyse: ${errorMsg}`);
 		}
 	}
 
@@ -652,7 +548,7 @@ Schreibe einfach eine Nachricht und ich antworte!
 		if (!session.pendingImage) {
 			await this.sendMessage(
 				roomId,
-				`❌ Kein Bild vorhanden!\n\nSende zuerst ein Bild, dann nutze \`!vision:all [Frage zum Bild]\``
+				`Kein Bild vorhanden!\n\nSende zuerst ein Bild, dann nutze \`!vision:all [Frage zum Bild]\``
 			);
 			return;
 		}
@@ -672,14 +568,14 @@ Schreibe einfach eine Nachricht und ich antworte!
 		if (visionModels.length === 0) {
 			await this.sendMessage(
 				roomId,
-				`❌ Keine Vision-Modelle gefunden!\n\nInstalliere Vision-Modelle mit:\n\`ollama pull llava\`\n\`ollama pull moondream\``
+				`Keine Vision-Modelle gefunden!\n\nInstalliere Vision-Modelle mit:\n\`ollama pull llava\`\n\`ollama pull moondream\``
 			);
 			return;
 		}
 
 		await this.sendMessage(
 			roomId,
-			`🔄 **Vergleiche ${visionModels.length} Vision-Modelle...**\n\nFrage: "${prompt}"`
+			`**Vergleiche ${visionModels.length} Vision-Modelle...**\n\nFrage: "${prompt}"`
 		);
 		await this.client.setTyping(roomId, true, 300000);
 
@@ -706,18 +602,18 @@ Schreibe einfach eine Nachricht und ich antworte!
 			await this.client.setTyping(roomId, false);
 
 			// Format results
-			let resultText = `**📊 Vision-Modellvergleich**\n\n**Frage:** "${prompt}"\n\n---\n\n`;
+			let resultText = `**Vision-Modellvergleich**\n\n**Frage:** "${prompt}"\n\n---\n\n`;
 
 			for (const result of results) {
 				const durationSec = (result.duration / 1000).toFixed(1);
 				if (result.error) {
-					resultText += `**${result.model}** ⏱️ ${durationSec}s\n❌ Fehler: ${result.error}\n\n---\n\n`;
+					resultText += `**${result.model}** ${durationSec}s\nFehler: ${result.error}\n\n---\n\n`;
 				} else {
 					const truncatedResponse =
 						result.response.length > 500
 							? result.response.substring(0, 500) + '...'
 							: result.response;
-					resultText += `**${result.model}** ⏱️ ${durationSec}s\n${truncatedResponse}\n\n---\n\n`;
+					resultText += `**${result.model}** ${durationSec}s\n${truncatedResponse}\n\n---\n\n`;
 				}
 			}
 
@@ -725,7 +621,7 @@ Schreibe einfach eine Nachricht und ich antworte!
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
-			await this.sendMessage(roomId, `❌ Fehler: ${errorMsg}`);
+			await this.sendMessage(roomId, `Fehler: ${errorMsg}`);
 		}
 	}
 
@@ -744,19 +640,46 @@ Schreibe einfach eine Nachricht und ich antworte!
 		return base64;
 	}
 
-	private async sendMessage(roomId: string, message: string) {
-		// Convert markdown to basic HTML for Matrix
-		const htmlBody = this.markdownToHtml(message);
+	private async pinHelpMessage(roomId: string) {
+		try {
+			const helpContent = this.getHelpContent();
+			const htmlBody = this.markdownToHtmlLocal(helpContent);
 
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: message,
-			format: 'org.matrix.custom.html',
-			formatted_body: htmlBody,
-		});
+			const eventId = await this.client.sendMessage(roomId, {
+				msgtype: 'm.text',
+				body: helpContent,
+				format: 'org.matrix.custom.html',
+				formatted_body: htmlBody,
+			});
+
+			await this.client.sendStateEvent(roomId, 'm.room.pinned_events', '', {
+				pinned: [eventId],
+			});
+
+			this.logger.log(`Pinned help message in room ${roomId}`);
+		} catch (error) {
+			this.logger.error(`Failed to pin help message in ${roomId}:`, error);
+		}
 	}
 
-	private markdownToHtml(markdown: string): string {
+	private getHelpContent(): string {
+		return `**Manai - Befehls-Übersicht**
+
+**Einfach sagen:**
+- "hilfe" - Diese Übersicht
+- "modelle" - Verfügbare KI-Modelle
+- "status" - Bot-Status
+- "lösche verlauf" - Chat zurücksetzen
+
+**Power-User (mit !):**
+- \`!model [name]\` - Modell wechseln
+- \`!all [frage]\` - Alle Modelle vergleichen
+- \`!vision [frage]\` - Bild analysieren
+
+**Nutzung:** Einfach schreiben und ich antworte!`;
+	}
+
+	private markdownToHtmlLocal(markdown: string): string {
 		return (
 			markdown
 				// Code blocks

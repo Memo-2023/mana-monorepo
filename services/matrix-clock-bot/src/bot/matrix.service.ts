@@ -1,14 +1,7 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-	RichReply,
-} from 'matrix-bot-sdk';
-import * as path from 'path';
-import * as fs from 'fs';
-import { ClockService, Timer, Alarm } from '../clock/clock.service';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import { ClockService } from '../clock/clock.service';
 import { TranscriptionService } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
 
@@ -22,124 +15,125 @@ const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
 ];
 
 @Injectable()
-export class MatrixService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(MatrixService.name);
-	private client!: MatrixClient;
-	private readonly homeserverUrl: string;
-	private readonly accessToken: string;
-	private readonly allowedRooms: string[];
-	private readonly storagePath: string;
-	private botUserId: string = '';
-
+export class MatrixService extends BaseMatrixService {
 	// Demo token for development (TODO: implement proper auth)
 	private readonly demoToken = process.env.CLOCK_API_TOKEN || '';
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private clockService: ClockService,
 		private transcriptionService: TranscriptionService
 	) {
-		this.homeserverUrl = this.configService.get<string>(
-			'matrix.homeserverUrl',
-			'http://localhost:8008'
-		);
-		this.accessToken = this.configService.get<string>('matrix.accessToken', '');
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms', []);
-		this.storagePath = this.configService.get<string>(
-			'matrix.storagePath',
-			'./data/bot-storage.json'
-		);
+		super(configService);
 	}
 
-	async onModuleInit() {
-		if (!this.accessToken) {
-			this.logger.warn('No Matrix access token configured. Bot will not start.');
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
+	}
+
+	protected getIntroductionMessage(): string | null {
+		return WELCOME_TEXT;
+	}
+
+	protected async handleTextMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		message: string,
+		sender: string
+	): Promise<void> {
+		// Check keywords first
+		const keywordCommand = this.detectKeywordCommand(message);
+		if (keywordCommand) {
+			await this.executeCommand(roomId, event, sender, keywordCommand, '');
 			return;
 		}
 
-		await this.initializeClient();
-	}
-
-	async onModuleDestroy() {
-		if (this.client) {
-			await this.client.stop();
+		// Handle ! commands
+		if (message.startsWith('!')) {
+			const [command, ...args] = message.slice(1).split(' ');
+			await this.executeCommand(roomId, event, sender, command.toLowerCase(), args.join(' '));
+			return;
 		}
+
+		// Try to parse as natural timer/alarm command
+		await this.handleNaturalLanguage(roomId, event, sender, message);
 	}
 
-	private async initializeClient() {
+	protected async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
 		try {
-			const storageDir = path.dirname(this.storagePath);
-			if (!fs.existsSync(storageDir)) {
-				fs.mkdirSync(storageDir, { recursive: true });
-			}
+			await this.sendReply(roomId, event, 'Verarbeite Sprachnotiz...');
 
-			const storage = new SimpleFsStorageProvider(this.storagePath);
-			this.client = new MatrixClient(this.homeserverUrl, this.accessToken, storage);
-
-			AutojoinRoomsMixin.setupOnClient(this.client);
-
-			this.client.on('room.invite', async (roomId: string) => {
-				this.logger.log(`Invited to room ${roomId}, joining...`);
-				await this.client.joinRoom(roomId);
-
-				setTimeout(async () => {
-					await this.sendWelcome(roomId);
-				}, 2000);
-			});
-
-			this.client.on('room.message', async (roomId: string, event: any) => {
-				await this.handleMessage(roomId, event);
-			});
-
-			await this.client.start();
-			this.botUserId = await this.client.getUserId();
-			this.logger.log(`Matrix Clock Bot connected as ${this.botUserId}`);
-		} catch (error) {
-			this.logger.error('Failed to initialize Matrix client:', error);
-		}
-	}
-
-	private async handleMessage(roomId: string, event: any) {
-		if (event.sender === this.botUserId) return;
-
-		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
-			return;
-		}
-
-		const userId = event.sender;
-		const msgtype = event.content?.msgtype;
-
-		// Handle audio messages
-		if (msgtype === 'm.audio' && event.content?.url) {
-			await this.handleAudioMessage(roomId, event, userId);
-			return;
-		}
-
-		if (msgtype !== 'm.text') return;
-
-		const body = event.content.body?.trim();
-		if (!body) return;
-
-		try {
-			// Check keywords first
-			const keywordCommand = this.detectKeywordCommand(body);
-			if (keywordCommand) {
-				await this.executeCommand(roomId, event, userId, keywordCommand, '');
+			const mxcUrl = event.content.url;
+			if (!mxcUrl) {
+				await this.sendReply(roomId, event, 'Keine Audio-URL gefunden.');
 				return;
 			}
 
-			// Handle ! commands
-			if (body.startsWith('!')) {
-				const [command, ...args] = body.slice(1).split(' ');
-				await this.executeCommand(roomId, event, userId, command.toLowerCase(), args.join(' '));
+			const buffer = await this.downloadMedia(mxcUrl);
+			const transcription = await this.transcriptionService.transcribe(buffer);
+
+			if (!transcription.trim()) {
+				await this.sendReply(roomId, event, 'Konnte keine Sprache erkennen.');
 				return;
 			}
 
-			// Try to parse as natural timer/alarm command
-			await this.handleNaturalLanguage(roomId, event, userId, body);
+			this.logger.log(`Transcription: ${transcription}`);
+
+			// Try to parse as command
+			const lower = transcription.toLowerCase();
+
+			// Check for timer
+			const duration = this.clockService.parseDuration(transcription);
+			if (
+				duration &&
+				(lower.includes('timer') ||
+					lower.includes('minute') ||
+					lower.includes('stunde') ||
+					lower.match(/\d+\s*(m|min|h)/))
+			) {
+				await this.sendReply(roomId, event, `"${transcription}"`);
+				await this.handleTimerCommand(roomId, event, sender, transcription);
+				return;
+			}
+
+			// Check for alarm
+			const time = this.clockService.parseAlarmTime(transcription);
+			if (time && (lower.includes('wecker') || lower.includes('alarm') || lower.includes('uhr'))) {
+				await this.sendReply(roomId, event, `"${transcription}"`);
+				await this.handleAlarmCommand(roomId, event, sender, transcription);
+				return;
+			}
+
+			// Check for stop/status commands
+			if (lower.includes('stop') || lower.includes('stopp') || lower.includes('pause')) {
+				await this.sendReply(roomId, event, `"${transcription}"`);
+				await this.handleStopCommand(roomId, event, sender);
+				return;
+			}
+
+			if (lower.includes('status') || lower.includes('wie viel')) {
+				await this.sendReply(roomId, event, `"${transcription}"`);
+				await this.handleStatusCommand(roomId, event, sender);
+				return;
+			}
+
+			await this.sendReply(
+				roomId,
+				event,
+				`"${transcription}"\n\nKonnte Befehl nicht verstehen. Versuche "Timer 25 Minuten" oder "Wecker 7 Uhr".`
+			);
 		} catch (error) {
-			this.logger.error(`Error handling message: ${error}`);
-			await this.sendReply(roomId, event, 'Ein Fehler ist aufgetreten.');
+			this.logger.error('Audio processing failed:', error);
+			await this.sendReply(roomId, event, 'Fehler bei der Sprachverarbeitung.');
 		}
 	}
 
@@ -159,7 +153,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 
 	private async executeCommand(
 		roomId: string,
-		event: any,
+		event: MatrixRoomEvent,
 		userId: string,
 		command: string,
 		args: string
@@ -226,7 +220,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleTimerCommand(roomId: string, event: any, userId: string, args: string) {
+	private async handleTimerCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
 		if (!args.trim()) {
 			await this.sendReply(
 				roomId,
@@ -254,7 +248,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 
 			// Create and start timer
 			const timer = await this.clockService.createTimer(durationSeconds, label, token);
-			const startedTimer = await this.clockService.startTimer(timer.id, token);
+			await this.clockService.startTimer(timer.id, token);
 
 			const durationStr = this.clockService.formatDuration(durationSeconds);
 			let response = `**Timer gestartet!**\n\nDauer: ${durationStr}`;
@@ -268,7 +262,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleStopCommand(roomId: string, event: any, userId: string) {
+	private async handleStopCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
 			const token = this.getToken(userId);
 			if (!token) {
@@ -305,7 +299,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleResumeCommand(roomId: string, event: any, userId: string) {
+	private async handleResumeCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
 			const token = this.getToken(userId);
 			if (!token) {
@@ -329,7 +323,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleResetCommand(roomId: string, event: any, userId: string) {
+	private async handleResetCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
 			const token = this.getToken(userId);
 			if (!token) {
@@ -351,7 +345,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleStatusCommand(roomId: string, event: any, userId: string) {
+	private async handleStatusCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
 			const token = this.getToken(userId);
 			if (!token) {
@@ -381,7 +375,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleTimersCommand(roomId: string, event: any, userId: string) {
+	private async handleTimersCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
 			const token = this.getToken(userId);
 			if (!token) {
@@ -410,7 +404,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleAlarmCommand(roomId: string, event: any, userId: string, args: string) {
+	private async handleAlarmCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
 		const parts = args.trim().split(' ');
 
 		// Handle !alarm off/on/delete commands
@@ -440,7 +434,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 				return;
 			}
 
-			const alarm = await this.clockService.createAlarm(time, label, token);
+			await this.clockService.createAlarm(time, label, token);
 			let response = `**Alarm gestellt!**\n\nZeit: ${time.substring(0, 5)} Uhr`;
 			if (label) response += `\nLabel: ${label}`;
 
@@ -451,7 +445,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleAlarmsCommand(roomId: string, event: any, userId: string) {
+	private async handleAlarmsCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
 			const token = this.getToken(userId);
 			if (!token) {
@@ -480,7 +474,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleTimeCommand(roomId: string, event: any, userId: string) {
+	private async handleTimeCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		const now = new Date();
 		const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 		const dateStr = now.toLocaleDateString('de-DE', {
@@ -514,7 +508,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleWorldClockCommand(roomId: string, event: any, userId: string, args: string) {
+	private async handleWorldClockCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
 		if (!args.trim()) {
 			await this.sendReply(
 				roomId,
@@ -546,7 +540,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleWorldClocksCommand(roomId: string, event: any, userId: string) {
+	private async handleWorldClocksCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
 			const token = this.getToken(userId);
 			if (!token) {
@@ -581,7 +575,7 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	private async handleNaturalLanguage(roomId: string, event: any, userId: string, text: string) {
+	private async handleNaturalLanguage(roomId: string, event: MatrixRoomEvent, userId: string, text: string) {
 		const lower = text.toLowerCase();
 
 		// Try to detect timer intent
@@ -616,77 +610,6 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 		// No match - don't respond to random messages
 	}
 
-	private async handleAudioMessage(roomId: string, event: any, userId: string) {
-		try {
-			await this.sendReply(roomId, event, 'Verarbeite Sprachnotiz...');
-
-			const mxcUrl = event.content.url;
-			const httpUrl = this.client.mxcToHttp(mxcUrl);
-
-			const response = await fetch(httpUrl);
-			if (!response.ok) {
-				throw new Error(`Failed to download audio: ${response.status}`);
-			}
-
-			const buffer = Buffer.from(await response.arrayBuffer());
-			const transcription = await this.transcriptionService.transcribe(buffer);
-
-			if (!transcription.trim()) {
-				await this.sendReply(roomId, event, 'Konnte keine Sprache erkennen.');
-				return;
-			}
-
-			this.logger.log(`Transcription: ${transcription}`);
-
-			// Try to parse as command
-			const lower = transcription.toLowerCase();
-
-			// Check for timer
-			const duration = this.clockService.parseDuration(transcription);
-			if (
-				duration &&
-				(lower.includes('timer') ||
-					lower.includes('minute') ||
-					lower.includes('stunde') ||
-					lower.match(/\d+\s*(m|min|h)/))
-			) {
-				await this.sendReply(roomId, event, `"${transcription}"`);
-				await this.handleTimerCommand(roomId, event, userId, transcription);
-				return;
-			}
-
-			// Check for alarm
-			const time = this.clockService.parseAlarmTime(transcription);
-			if (time && (lower.includes('wecker') || lower.includes('alarm') || lower.includes('uhr'))) {
-				await this.sendReply(roomId, event, `"${transcription}"`);
-				await this.handleAlarmCommand(roomId, event, userId, transcription);
-				return;
-			}
-
-			// Check for stop/status commands
-			if (lower.includes('stop') || lower.includes('stopp') || lower.includes('pause')) {
-				await this.sendReply(roomId, event, `"${transcription}"`);
-				await this.handleStopCommand(roomId, event, userId);
-				return;
-			}
-
-			if (lower.includes('status') || lower.includes('wie viel')) {
-				await this.sendReply(roomId, event, `"${transcription}"`);
-				await this.handleStatusCommand(roomId, event, userId);
-				return;
-			}
-
-			await this.sendReply(
-				roomId,
-				event,
-				`"${transcription}"\n\nKonnte Befehl nicht verstehen. Versuche "Timer 25 Minuten" oder "Wecker 7 Uhr".`
-			);
-		} catch (error) {
-			this.logger.error('Audio processing failed:', error);
-			await this.sendReply(roomId, event, 'Fehler bei der Sprachverarbeitung.');
-		}
-	}
-
 	private getToken(userId: string): string | null {
 		// First check if user has a stored token
 		const storedToken = this.clockService.getUserToken(userId);
@@ -694,32 +617,5 @@ export class MatrixService implements OnModuleInit, OnModuleDestroy {
 
 		// Fall back to demo token for development
 		return this.demoToken || null;
-	}
-
-	private async sendWelcome(roomId: string) {
-		try {
-			await this.client.sendMessage(roomId, {
-				msgtype: 'm.text',
-				body: WELCOME_TEXT,
-				format: 'org.matrix.custom.html',
-				formatted_body: this.markdownToHtml(WELCOME_TEXT),
-			});
-		} catch (error) {
-			this.logger.error('Failed to send welcome:', error);
-		}
-	}
-
-	private async sendReply(roomId: string, event: any, message: string) {
-		const reply = RichReply.createFor(roomId, event, message, this.markdownToHtml(message));
-		reply.msgtype = 'm.text';
-		await this.client.sendMessage(roomId, reply);
-	}
-
-	private markdownToHtml(text: string): string {
-		return text
-			.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-			.replace(/\*(.+?)\*/g, '<em>$1</em>')
-			.replace(/`(.+?)`/g, '<code>$1</code>')
-			.replace(/\n/g, '<br>');
 	}
 }

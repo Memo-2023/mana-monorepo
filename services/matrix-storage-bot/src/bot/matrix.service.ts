@@ -1,22 +1,12 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-} from 'matrix-bot-sdk';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { StorageService, StorageFile, Folder, ShareLink, TrashItem } from '../storage/storage.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
-type ListItem = StorageFile | Folder;
-
 @Injectable()
-export class MatrixService implements OnModuleInit {
-	private readonly logger = new Logger(MatrixService.name);
-	private client: MatrixClient;
-	private allowedRooms: string[];
-
+export class MatrixService extends BaseMatrixService {
 	// Store last shown items per user for reference by number
 	private lastFilesList: Map<string, StorageFile[]> = new Map();
 	private lastFoldersList: Map<string, Folder[]> = new Map();
@@ -25,44 +15,28 @@ export class MatrixService implements OnModuleInit {
 	private currentFolder: Map<string, string | null> = new Map();
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private storageService: StorageService,
 		private sessionService: SessionService
-	) {}
-
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
-
-		if (!accessToken) {
-			this.logger.warn('No Matrix access token configured, bot disabled');
-			return;
-		}
-
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-		this.client = new MatrixClient(homeserverUrl || 'http://localhost:8008', accessToken, storage);
-
-		AutojoinRoomsMixin.setupOnClient(this.client);
-
-		this.client.on('room.message', this.handleMessage.bind(this));
-
-		await this.client.start();
-		this.logger.log('Matrix Storage Bot started');
+	) {
+		super(configService);
 	}
 
-	private async handleMessage(roomId: string, event: any) {
-		if (event.sender === (await this.client.getUserId())) return;
-		if (event.content?.msgtype !== 'm.text') return;
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
+	}
 
-		const body = event.content.body?.trim();
-		if (!body?.startsWith('!')) return;
-
-		// Check allowed rooms
-		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
-			return;
-		}
+	protected async handleTextMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		body: string
+	): Promise<void> {
+		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;
 		const parts = body.slice(1).split(/\s+/);
@@ -74,7 +48,7 @@ export class MatrixService implements OnModuleInit {
 			switch (command) {
 				case 'help':
 				case 'hilfe':
-					await this.sendHtml(roomId, HELP_MESSAGE);
+					await this.sendMessage(roomId, HELP_MESSAGE);
 					break;
 
 				case 'login':
@@ -83,7 +57,7 @@ export class MatrixService implements OnModuleInit {
 
 				case 'logout':
 					this.sessionService.logout(sender);
-					await this.sendHtml(roomId, '<p>Erfolgreich abgemeldet.</p>');
+					await this.sendMessage(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
 				case 'status':
@@ -194,24 +168,15 @@ export class MatrixService implements OnModuleInit {
 					break;
 
 				default:
-					await this.sendHtml(
+					await this.sendMessage(
 						roomId,
 						`<p>Unbekannter Befehl: <code>${command}</code>. Nutze <code>!help</code> fuer Hilfe.</p>`
 					);
 			}
 		} catch (error) {
 			this.logger.error(`Error handling command ${command}:`, error);
-			await this.sendHtml(roomId, `<p>Fehler: ${error.message}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${(error as Error).message}</p>`);
 		}
-	}
-
-	private async sendHtml(roomId: string, html: string) {
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: html.replace(/<[^>]*>/g, ''),
-			format: 'org.matrix.custom.html',
-			formatted_body: html,
-		});
 	}
 
 	private requireAuth(sender: string): string {
@@ -225,7 +190,7 @@ export class MatrixService implements OnModuleInit {
 	// Auth handlers
 	private async handleLogin(roomId: string, sender: string, args: string[]) {
 		if (args.length < 2) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
 			return;
 		}
 
@@ -233,9 +198,9 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			await this.sendHtml(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+			await this.sendMessage(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
 		} else {
-			await this.sendHtml(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
 		}
 	}
 
@@ -244,7 +209,7 @@ export class MatrixService implements OnModuleInit {
 		const loggedIn = this.sessionService.isLoggedIn(sender);
 		const sessions = this.sessionService.getSessionCount();
 
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<h3>Storage Bot Status</h3>
 <ul>
@@ -263,7 +228,7 @@ export class MatrixService implements OnModuleInit {
 		if (folderNumStr) {
 			const folder = this.getFolderByNumber(sender, folderNumStr);
 			if (!folder) {
-				await this.sendHtml(roomId, '<p>Ungueltige Ordner-Nummer.</p>');
+				await this.sendMessage(roomId, '<p>Ungueltige Ordner-Nummer.</p>');
 				return;
 			}
 			parentFolderId = folder.id;
@@ -275,7 +240,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.getFiles(token, parentFolderId);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -283,7 +248,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastFilesList.set(sender, files);
 
 		if (files.length === 0) {
-			await this.sendHtml(roomId, '<p>Keine Dateien vorhanden.</p>');
+			await this.sendMessage(roomId, '<p>Keine Dateien vorhanden.</p>');
 			return;
 		}
 
@@ -296,7 +261,7 @@ export class MatrixService implements OnModuleInit {
 		html += '</ol>';
 		html += '<p><em>Nutze <code>!datei [nr]</code> fuer Details oder <code>!download [nr]</code></em></p>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleFileDetails(roomId: string, sender: string, numberStr: string) {
@@ -304,13 +269,13 @@ export class MatrixService implements OnModuleInit {
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
 			return;
 		}
 
 		const result = await this.storageService.getFile(token, file.id);
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -325,7 +290,7 @@ export class MatrixService implements OnModuleInit {
 		html += '</ul>';
 		html += `<p><em>Nutze <code>!download ${numberStr}</code> fuer Download-Link</em></p>`;
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleDownload(roomId: string, sender: string, numberStr: string) {
@@ -333,18 +298,18 @@ export class MatrixService implements OnModuleInit {
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
 			return;
 		}
 
 		const result = await this.storageService.getDownloadUrl(token, file.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<p><strong>${file.name}</strong></p><p>Download: <a href="${result.data!.url}">${result.data!.url}</a></p>`
 		);
@@ -355,24 +320,24 @@ export class MatrixService implements OnModuleInit {
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
 			return;
 		}
 
 		const result = await this.storageService.deleteFile(token, file.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastFilesList.delete(sender);
-		await this.sendHtml(roomId, `<p><strong>${file.name}</strong> in Papierkorb verschoben.</p>`);
+		await this.sendMessage(roomId, `<p><strong>${file.name}</strong> in Papierkorb verschoben.</p>`);
 	}
 
 	private async handleRenameFile(roomId: string, sender: string, numberStr: string, newName: string) {
 		if (!newName) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!umbenennen [nr] neuer name</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!umbenennen [nr] neuer name</code></p>');
 			return;
 		}
 
@@ -380,18 +345,18 @@ export class MatrixService implements OnModuleInit {
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
 			return;
 		}
 
 		const result = await this.storageService.renameFile(token, file.id, newName);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
-		await this.sendHtml(roomId, `<p><strong>${file.name}</strong> umbenannt zu <strong>${newName}</strong></p>`);
+		await this.sendMessage(roomId, `<p><strong>${file.name}</strong> umbenannt zu <strong>${newName}</strong></p>`);
 	}
 
 	private async handleMoveFile(roomId: string, sender: string, fileNumStr: string, folderNumStr: string) {
@@ -399,7 +364,7 @@ export class MatrixService implements OnModuleInit {
 		const file = this.getFileByNumber(sender, fileNumStr);
 
 		if (!file) {
-			await this.sendHtml(roomId, '<p>Ungueltige Datei-Nummer.</p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Datei-Nummer.</p>');
 			return;
 		}
 
@@ -409,7 +374,7 @@ export class MatrixService implements OnModuleInit {
 		if (folderNumStr && folderNumStr !== '0' && folderNumStr.toLowerCase() !== 'root') {
 			const folder = this.getFolderByNumber(sender, folderNumStr);
 			if (!folder) {
-				await this.sendHtml(roomId, '<p>Ungueltige Ordner-Nummer. Nutze 0 oder root fuer Root.</p>');
+				await this.sendMessage(roomId, '<p>Ungueltige Ordner-Nummer. Nutze 0 oder root fuer Root.</p>');
 				return;
 			}
 			parentFolderId = folder.id;
@@ -419,11 +384,11 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.moveFile(token, file.id, parentFolderId);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
-		await this.sendHtml(roomId, `<p><strong>${file.name}</strong> nach <strong>${folderName}</strong> verschoben.</p>`);
+		await this.sendMessage(roomId, `<p><strong>${file.name}</strong> nach <strong>${folderName}</strong> verschoben.</p>`);
 	}
 
 	// Folder handlers
@@ -434,7 +399,7 @@ export class MatrixService implements OnModuleInit {
 		if (folderNumStr) {
 			const folder = this.getFolderByNumber(sender, folderNumStr);
 			if (!folder) {
-				await this.sendHtml(roomId, '<p>Ungueltige Ordner-Nummer.</p>');
+				await this.sendMessage(roomId, '<p>Ungueltige Ordner-Nummer.</p>');
 				return;
 			}
 			parentFolderId = folder.id;
@@ -443,7 +408,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.getFolders(token, parentFolderId);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -451,7 +416,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastFoldersList.set(sender, folders);
 
 		if (folders.length === 0) {
-			await this.sendHtml(roomId, '<p>Keine Ordner vorhanden.</p>');
+			await this.sendMessage(roomId, '<p>Keine Ordner vorhanden.</p>');
 			return;
 		}
 
@@ -464,12 +429,12 @@ export class MatrixService implements OnModuleInit {
 		html += '</ol>';
 		html += '<p><em>Nutze <code>!dateien [nr]</code> um Dateien im Ordner zu sehen</em></p>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleCreateFolder(roomId: string, sender: string, args: string[]) {
 		if (args.length === 0) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!neuordner Name [in-ordner-nr]</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!neuordner Name [in-ordner-nr]</code></p>');
 			return;
 		}
 
@@ -491,12 +456,12 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.createFolder(token, name, parentFolderId);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastFoldersList.delete(sender);
-		await this.sendHtml(roomId, `<p>Ordner <strong>${result.data!.name}</strong> erstellt.</p>`);
+		await this.sendMessage(roomId, `<p>Ordner <strong>${result.data!.name}</strong> erstellt.</p>`);
 	}
 
 	private async handleDeleteFolder(roomId: string, sender: string, numberStr: string) {
@@ -504,19 +469,19 @@ export class MatrixService implements OnModuleInit {
 		const folder = this.getFolderByNumber(sender, numberStr);
 
 		if (!folder) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!ordner</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!ordner</code></p>');
 			return;
 		}
 
 		const result = await this.storageService.deleteFolder(token, folder.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastFoldersList.delete(sender);
-		await this.sendHtml(roomId, `<p>Ordner <strong>${folder.name}</strong> in Papierkorb verschoben.</p>`);
+		await this.sendMessage(roomId, `<p>Ordner <strong>${folder.name}</strong> in Papierkorb verschoben.</p>`);
 	}
 
 	// Share handlers
@@ -529,11 +494,11 @@ export class MatrixService implements OnModuleInit {
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
 			return;
 		}
 
-		const options: any = {};
+		const options: { expiresInDays?: number; password?: string; maxDownloads?: number } = {};
 
 		// Parse --tage N
 		const daysMatch = argString.match(/--tage\s+(\d+)/i);
@@ -556,7 +521,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.createShare(token, file.id, options);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -569,7 +534,7 @@ export class MatrixService implements OnModuleInit {
 		if (options.password) html += `<p><em>Passwort geschuetzt</em></p>`;
 		if (options.maxDownloads) html += `<p><em>Max Downloads: ${options.maxDownloads}</em></p>`;
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleListShares(roomId: string, sender: string) {
@@ -577,7 +542,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.getShares(token);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -585,7 +550,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastSharesList.set(sender, shares);
 
 		if (shares.length === 0) {
-			await this.sendHtml(roomId, '<p>Keine Share-Links vorhanden.</p>');
+			await this.sendMessage(roomId, '<p>Keine Share-Links vorhanden.</p>');
 			return;
 		}
 
@@ -598,7 +563,7 @@ export class MatrixService implements OnModuleInit {
 		html += '</ol>';
 		html += '<p><em>Nutze <code>!linkloeschen [nr]</code> zum Loeschen</em></p>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleDeleteShare(roomId: string, sender: string, numberStr: string) {
@@ -606,13 +571,13 @@ export class MatrixService implements OnModuleInit {
 		const shares = this.lastSharesList.get(sender);
 
 		if (!shares) {
-			await this.sendHtml(roomId, '<p>Nutze zuerst <code>!links</code></p>');
+			await this.sendMessage(roomId, '<p>Nutze zuerst <code>!links</code></p>');
 			return;
 		}
 
 		const index = parseInt(numberStr, 10) - 1;
 		if (isNaN(index) || index < 0 || index >= shares.length) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer.</p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer.</p>');
 			return;
 		}
 
@@ -620,18 +585,18 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.deleteShare(token, share.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastSharesList.delete(sender);
-		await this.sendHtml(roomId, '<p>Share-Link geloescht.</p>');
+		await this.sendMessage(roomId, '<p>Share-Link geloescht.</p>');
 	}
 
 	// Search & Favorites
 	private async handleSearch(roomId: string, sender: string, query: string) {
 		if (!query) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!suche Begriff</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!suche Begriff</code></p>');
 			return;
 		}
 
@@ -639,7 +604,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.search(token, query);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -648,7 +613,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastFoldersList.set(sender, folders);
 
 		if (files.length === 0 && folders.length === 0) {
-			await this.sendHtml(roomId, `<p>Keine Ergebnisse fuer "${query}"</p>`);
+			await this.sendMessage(roomId, `<p>Keine Ergebnisse fuer "${query}"</p>`);
 			return;
 		}
 
@@ -670,7 +635,7 @@ export class MatrixService implements OnModuleInit {
 			html += '</ol>';
 		}
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleFavorites(roomId: string, sender: string) {
@@ -678,7 +643,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.getFavorites(token);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -687,7 +652,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastFoldersList.set(sender, folders);
 
 		if (files.length === 0 && folders.length === 0) {
-			await this.sendHtml(roomId, '<p>Keine Favoriten vorhanden.</p>');
+			await this.sendMessage(roomId, '<p>Keine Favoriten vorhanden.</p>');
 			return;
 		}
 
@@ -709,7 +674,7 @@ export class MatrixService implements OnModuleInit {
 			html += '</ol>';
 		}
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleToggleFavorite(roomId: string, sender: string, numberStr: string) {
@@ -720,11 +685,11 @@ export class MatrixService implements OnModuleInit {
 		if (file) {
 			const result = await this.storageService.toggleFileFavorite(token, file.id);
 			if (result.error) {
-				await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+				await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 				return;
 			}
 			const status = result.data!.isFavorite ? 'hinzugefuegt' : 'entfernt';
-			await this.sendHtml(roomId, `<p><strong>${file.name}</strong>: Favorit ${status}</p>`);
+			await this.sendMessage(roomId, `<p><strong>${file.name}</strong>: Favorit ${status}</p>`);
 			return;
 		}
 
@@ -733,15 +698,15 @@ export class MatrixService implements OnModuleInit {
 		if (folder) {
 			const result = await this.storageService.toggleFolderFavorite(token, folder.id);
 			if (result.error) {
-				await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+				await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 				return;
 			}
 			const status = result.data!.isFavorite ? 'hinzugefuegt' : 'entfernt';
-			await this.sendHtml(roomId, `<p><strong>${folder.name}</strong>: Favorit ${status}</p>`);
+			await this.sendMessage(roomId, `<p><strong>${folder.name}</strong>: Favorit ${status}</p>`);
 			return;
 		}
 
-		await this.sendHtml(roomId, '<p>Ungueltige Nummer.</p>');
+		await this.sendMessage(roomId, '<p>Ungueltige Nummer.</p>');
 	}
 
 	// Trash handlers
@@ -750,7 +715,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.getTrash(token);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -758,7 +723,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastTrashList.set(sender, items);
 
 		if (items.length === 0) {
-			await this.sendHtml(roomId, '<p>Papierkorb ist leer.</p>');
+			await this.sendMessage(roomId, '<p>Papierkorb ist leer.</p>');
 			return;
 		}
 
@@ -771,7 +736,7 @@ export class MatrixService implements OnModuleInit {
 		html += '</ol>';
 		html += '<p><em>Nutze <code>!wiederherstellen [nr]</code> oder <code>!leeren</code></em></p>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleRestore(roomId: string, sender: string, numberStr: string) {
@@ -779,13 +744,13 @@ export class MatrixService implements OnModuleInit {
 		const items = this.lastTrashList.get(sender);
 
 		if (!items) {
-			await this.sendHtml(roomId, '<p>Nutze zuerst <code>!papierkorb</code></p>');
+			await this.sendMessage(roomId, '<p>Nutze zuerst <code>!papierkorb</code></p>');
 			return;
 		}
 
 		const index = parseInt(numberStr, 10) - 1;
 		if (isNaN(index) || index < 0 || index >= items.length) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer.</p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer.</p>');
 			return;
 		}
 
@@ -793,12 +758,12 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.restoreFromTrash(token, item.id, item.type);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastTrashList.delete(sender);
-		await this.sendHtml(roomId, `<p><strong>${item.name}</strong> wiederhergestellt.</p>`);
+		await this.sendMessage(roomId, `<p><strong>${item.name}</strong> wiederhergestellt.</p>`);
 	}
 
 	private async handleEmptyTrash(roomId: string, sender: string) {
@@ -806,12 +771,12 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.storageService.emptyTrash(token);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastTrashList.delete(sender);
-		await this.sendHtml(roomId, '<p>Papierkorb geleert.</p>');
+		await this.sendMessage(roomId, '<p>Papierkorb geleert.</p>');
 	}
 
 	// Helper methods

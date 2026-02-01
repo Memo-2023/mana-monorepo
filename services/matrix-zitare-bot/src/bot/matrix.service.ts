@@ -1,12 +1,10 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	RichConsoleLogger,
-	LogService,
-	LogLevel,
-} from 'matrix-bot-sdk';
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+} from '@manacore/matrix-bot-common';
 import { QuotesService } from '../quotes/quotes.service';
 import { ZitareService } from '../quotes/zitare.service';
 import { SessionService, TranscriptionService } from '@manacore/bot-services';
@@ -26,138 +24,133 @@ const KEYWORD_COMMANDS: { keywords: string[]; command: string }[] = [
 ];
 
 @Injectable()
-export class MatrixService implements OnModuleInit, OnModuleDestroy {
-	private readonly logger = new Logger(MatrixService.name);
-	private client!: MatrixClient;
-	private readonly allowedRooms: string[];
-	private botUserId: string = '';
-
+export class MatrixService extends BaseMatrixService {
 	// Track last shown quote per user for favorites
 	private lastQuotes: Map<string, string> = new Map();
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private quotesService: QuotesService,
 		private zitareService: ZitareService,
 		private sessionService: SessionService,
 		private transcriptionService: TranscriptionService
 	) {
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
+		super(configService);
 	}
 
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-
-		if (!accessToken) {
-			this.logger.error('MATRIX_ACCESS_TOKEN is required');
-			return;
-		}
-
-		// Setup logging
-		LogService.setLogger(new RichConsoleLogger());
-		LogService.setLevel(LogLevel.INFO);
-
-		// Storage for sync token persistence
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-
-		// Create Matrix client
-		this.client = new MatrixClient(homeserverUrl!, accessToken, storage);
-
-		// Auto-join rooms when invited
-		this.client.on('room.invite', async (roomId: string) => {
-			this.logger.log(`Invited to room ${roomId}, joining...`);
-			await this.client.joinRoom(roomId);
-
-			setTimeout(async () => {
-				try {
-					await this.sendBotIntroduction(roomId);
-				} catch (error) {
-					this.logger.error(`Failed to send introduction to ${roomId}:`, error);
-				}
-			}, 2000);
-		});
-
-		// Get bot's user ID
-		this.botUserId = await this.client.getUserId();
-		this.logger.log(`Bot user ID: ${this.botUserId}`);
-
-		// Setup message handler
-		this.client.on('room.message', this.handleRoomMessage.bind(this));
-
-		// Start the client
-		await this.client.start();
-		this.logger.log('Matrix Zitare Bot started successfully');
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
 	}
 
-	async onModuleDestroy() {
-		if (this.client) {
-			await this.client.stop();
-			this.logger.log('Matrix bot stopped');
-		}
-	}
-
-	private async sendBotIntroduction(roomId: string) {
+	protected getIntroductionMessage(): string {
 		const dailyQuote = this.quotesService.getDailyQuote();
 
-		const introText = `**Zitare Bot - Tagliche Inspiration**
+		return `**Zitare Bot - Taegliche Inspiration**
 
 Ich bringe dir jeden Tag neue Inspiration!
 
 **Zitat des Tages:**
 ${this.quotesService.formatQuote(dailyQuote)}
 
-Sag "hilfe" fur alle Befehle!`;
-
-		await this.sendMessage(roomId, introText);
+Sag "hilfe" fuer alle Befehle!`;
 	}
 
-	private isRoomAllowed(roomId: string): boolean {
-		if (this.allowedRooms.length === 0) return true;
-		return this.allowedRooms.some((allowed) => roomId === allowed || roomId.includes(allowed));
-	}
+	protected async handleTextMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		body: string
+	): Promise<void> {
+		const sender = event.sender;
 
-	private async handleRoomMessage(roomId: string, event: any) {
-		// Ignore messages from self
-		if (event.sender === this.botUserId) return;
-
-		// Check if room is allowed
-		if (!this.isRoomAllowed(roomId)) {
-			this.logger.debug(`Ignoring message from non-allowed room: ${roomId}`);
-			return;
-		}
-
-		const content = event.content as { msgtype?: string; body?: string; url?: string };
-
-		// Handle audio/voice messages
-		if (content.msgtype === 'm.audio') {
-			await this.handleAudioMessage(roomId, event.sender, content);
-			return;
-		}
-
-		// Only handle text messages
-		if (content.msgtype !== 'm.text') return;
-
-		const body = content.body;
-		if (!body) return;
-
-		this.logger.log(`Message from ${event.sender} in ${roomId}: ${body.substring(0, 50)}...`);
+		this.logger.log(`Message from ${sender} in ${roomId}: ${body.substring(0, 50)}...`);
 
 		// Handle commands with ! prefix
 		if (body.startsWith('!')) {
-			await this.handleCommand(roomId, event.sender, body);
+			await this.handleCommand(roomId, sender, body);
 			return;
 		}
 
 		// Check for natural language keywords
 		const keywordCommand = this.detectKeywordCommand(body);
 		if (keywordCommand) {
-			await this.handleCommand(roomId, event.sender, `!${keywordCommand}`);
+			await this.handleCommand(roomId, sender, `!${keywordCommand}`);
 			return;
 		}
 
 		// Don't respond to random messages
+	}
+
+	protected async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
+		const content = event.content;
+		if (!content?.url) {
+			this.logger.warn('Audio message without URL');
+			return;
+		}
+
+		this.logger.log(`Processing voice message from ${sender}`);
+
+		try {
+			// Download audio from Matrix
+			const httpUrl = this.client.mxcToHttp(content.url);
+			const response = await fetch(httpUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to download audio: ${response.status}`);
+			}
+
+			const audioBuffer = Buffer.from(await response.arrayBuffer());
+
+			// Transcribe
+			await this.sendMessage(roomId, 'Transkribiere Sprachnotiz...');
+			const transcription = await this.transcriptionService.transcribe(audioBuffer);
+
+			if (!transcription || transcription.trim().length === 0) {
+				await this.sendMessage(roomId, 'Konnte keine Sprache erkennen.');
+				return;
+			}
+
+			this.logger.log(`Transcription: ${transcription}`);
+			await this.sendMessage(roomId, `"${transcription}"`);
+
+			// Check for commands in transcription
+			const cleanText = transcription.trim();
+
+			// Check for keyword commands in the transcription
+			const keywordCommand = this.detectKeywordCommand(cleanText);
+			if (keywordCommand) {
+				await this.handleCommand(roomId, sender, `!${keywordCommand}`);
+				return;
+			}
+
+			// Check for category names
+			const category = this.quotesService.getCategoryByName(cleanText);
+			if (category) {
+				await this.handleCategoryQuote(roomId, sender, category);
+				return;
+			}
+
+			// Search for the transcribed text
+			const results = this.quotesService.searchQuotes(cleanText);
+			if (results.length > 0) {
+				const quote = results[0];
+				this.lastQuotes.set(sender, quote.id);
+				await this.sendMessage(roomId, `**Gefunden:**\n\n${this.quotesService.formatQuote(quote)}`);
+			} else {
+				// Default to a random quote
+				await this.handleRandomQuote(roomId, sender);
+			}
+		} catch (error) {
+			this.logger.error('Failed to process audio message:', error);
+			await this.sendMessage(roomId, 'Fehler bei der Verarbeitung der Sprachnotiz.');
+		}
 	}
 
 	private detectKeywordCommand(message: string): string | null {
@@ -263,75 +256,8 @@ Sag "hilfe" fur alle Befehle!`;
 			default:
 				await this.sendMessage(
 					roomId,
-					`Unbekannter Befehl: !${command}\n\nSag "hilfe" fur alle Befehle.`
+					`Unbekannter Befehl: !${command}\n\nSag "hilfe" fuer alle Befehle.`
 				);
-		}
-	}
-
-	private async handleAudioMessage(
-		roomId: string,
-		sender: string,
-		content: { url?: string; body?: string }
-	) {
-		if (!content.url) {
-			this.logger.warn('Audio message without URL');
-			return;
-		}
-
-		this.logger.log(`Processing voice message from ${sender}`);
-
-		try {
-			// Download audio from Matrix
-			const httpUrl = this.client.mxcToHttp(content.url);
-			const response = await fetch(httpUrl);
-			if (!response.ok) {
-				throw new Error(`Failed to download audio: ${response.status}`);
-			}
-
-			const audioBuffer = Buffer.from(await response.arrayBuffer());
-
-			// Transcribe
-			await this.sendMessage(roomId, '🎤 Transkribiere Sprachnotiz...');
-			const transcription = await this.transcriptionService.transcribe(audioBuffer);
-
-			if (!transcription || transcription.trim().length === 0) {
-				await this.sendMessage(roomId, 'Konnte keine Sprache erkennen.');
-				return;
-			}
-
-			this.logger.log(`Transcription: ${transcription}`);
-			await this.sendMessage(roomId, `📝 "${transcription}"`);
-
-			// Check for commands in transcription
-			const cleanText = transcription.trim();
-
-			// Check for keyword commands in the transcription
-			const keywordCommand = this.detectKeywordCommand(cleanText);
-			if (keywordCommand) {
-				await this.handleCommand(roomId, sender, `!${keywordCommand}`);
-				return;
-			}
-
-			// Check for category names
-			const category = this.quotesService.getCategoryByName(cleanText);
-			if (category) {
-				await this.handleCategoryQuote(roomId, sender, category);
-				return;
-			}
-
-			// Search for the transcribed text
-			const results = this.quotesService.searchQuotes(cleanText);
-			if (results.length > 0) {
-				const quote = results[0];
-				this.lastQuotes.set(sender, quote.id);
-				await this.sendMessage(roomId, `**Gefunden:**\n\n${this.quotesService.formatQuote(quote)}`);
-			} else {
-				// Default to a random quote
-				await this.handleRandomQuote(roomId, sender);
-			}
-		} catch (error) {
-			this.logger.error('Failed to process audio message:', error);
-			await this.sendMessage(roomId, 'Fehler bei der Verarbeitung der Sprachnotiz.');
 		}
 	}
 
@@ -363,23 +289,23 @@ Sag "hilfe" fur alle Befehle!`;
 
 	private async handleSearch(roomId: string, sender: string, searchText: string) {
 		if (!searchText.trim()) {
-			await this.sendMessage(roomId, '**Verwendung:** `!suche [text]`\n\nBeispiel: `!suche Gluck`');
+			await this.sendMessage(roomId, '**Verwendung:** `!suche [text]`\n\nBeispiel: `!suche Glueck`');
 			return;
 		}
 
 		const results = this.quotesService.searchQuotes(searchText);
 
 		if (results.length === 0) {
-			await this.sendMessage(roomId, `Keine Zitate gefunden fur: "${searchText}"`);
+			await this.sendMessage(roomId, `Keine Zitate gefunden fuer: "${searchText}"`);
 			return;
 		}
 
-		let text = `**Suchergebnisse fur "${searchText}" (${results.length}):**\n\n`;
+		let text = `**Suchergebnisse fuer "${searchText}" (${results.length}):**\n\n`;
 
 		const maxResults = Math.min(results.length, 5);
 		for (let i = 0; i < maxResults; i++) {
 			const quote = results[i];
-			text += `**${i + 1}.** "${quote.text.substring(0, 80)}${quote.text.length > 80 ? '...' : ''}"\n— *${quote.author}*\n\n`;
+			text += `**${i + 1}.** "${quote.text.substring(0, 80)}${quote.text.length > 80 ? '...' : ''}"\n-- *${quote.author}*\n\n`;
 		}
 
 		if (results.length > 5) {
@@ -404,7 +330,7 @@ Sag "hilfe" fur alle Befehle!`;
 		if (!category) {
 			await this.sendMessage(
 				roomId,
-				`Kategorie "${categoryName}" nicht gefunden.\n\nNutze \`!kategorien\` fur alle Kategorien.`
+				`Kategorie "${categoryName}" nicht gefunden.\n\nNutze \`!kategorien\` fuer alle Kategorien.`
 			);
 			return;
 		}
@@ -426,7 +352,7 @@ Sag "hilfe" fur alle Befehle!`;
 	private async handleCategories(roomId: string) {
 		const categories = this.quotesService.getAllCategories();
 
-		let text = `**Verfugbare Kategorien:**\n\n`;
+		let text = `**Verfuegbare Kategorien:**\n\n`;
 		for (const { category, label, count } of categories) {
 			text += `- **${label}** (\`!kategorie ${category}\`) - ${count} Zitate\n`;
 		}
@@ -447,7 +373,7 @@ Sag "hilfe" fur alle Befehle!`;
 
 		const [email, password] = args;
 
-		await this.sendMessage(roomId, 'Anmeldung lauft...');
+		await this.sendMessage(roomId, 'Anmeldung laeuft...');
 
 		const result = await this.sessionService.login(sender, email, password);
 
@@ -482,7 +408,7 @@ Sag "hilfe" fur alle Befehle!`;
 			const quote = this.quotesService.getQuoteById(lastQuoteId);
 			await this.sendMessage(
 				roomId,
-				`Zu Favoriten hinzugefugt!\n\n"${quote?.text.substring(0, 50)}..."`
+				`Zu Favoriten hinzugefuegt!\n\n"${quote?.text.substring(0, 50)}..."`
 			);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
@@ -514,7 +440,7 @@ Sag "hilfe" fur alle Befehle!`;
 				const fav = favorites[i];
 				const quote = this.quotesService.getQuoteById(fav.quoteId);
 				if (quote) {
-					text += `**${i + 1}.** "${quote.text.substring(0, 60)}${quote.text.length > 60 ? '...' : ''}"\n— *${quote.author}*\n\n`;
+					text += `**${i + 1}.** "${quote.text.substring(0, 60)}${quote.text.length > 60 ? '...' : ''}"\n-- *${quote.author}*\n\n`;
 				}
 			}
 
@@ -583,7 +509,7 @@ Sag "hilfe" fur alle Befehle!`;
 			const list = await this.zitareService.createList(name.trim(), undefined, token);
 			await this.sendMessage(
 				roomId,
-				`Liste "${list.name}" erstellt!\n\nNutze \`!addliste 1 [zitat-id]\` um Zitate hinzuzufugen.`
+				`Liste "${list.name}" erstellt!\n\nNutze \`!addliste 1 [zitat-id]\` um Zitate hinzuzufuegen.`
 			);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
@@ -601,14 +527,14 @@ Sag "hilfe" fur alle Befehle!`;
 		if (args.length < 1) {
 			await this.sendMessage(
 				roomId,
-				`**Verwendung:** \`!addliste [listen-nr]\`\n\nFugt das letzte angezeigte Zitat zur Liste hinzu.`
+				`**Verwendung:** \`!addliste [listen-nr]\`\n\nFuegt das letzte angezeigte Zitat zur Liste hinzu.`
 			);
 			return;
 		}
 
 		const listIndex = parseInt(args[0], 10);
 		if (isNaN(listIndex) || listIndex < 1) {
-			await this.sendMessage(roomId, `Ungultige Listennummer.`);
+			await this.sendMessage(roomId, `Ungueltige Listennummer.`);
 			return;
 		}
 
@@ -616,7 +542,7 @@ Sag "hilfe" fur alle Befehle!`;
 		if (!lastQuoteId) {
 			await this.sendMessage(
 				roomId,
-				`Kein Zitat zum Hinzufugen. Lass dir erst ein Zitat anzeigen.`
+				`Kein Zitat zum Hinzufuegen. Lass dir erst ein Zitat anzeigen.`
 			);
 			return;
 		}
@@ -634,7 +560,7 @@ Sag "hilfe" fur alle Befehle!`;
 			const quote = this.quotesService.getQuoteById(lastQuoteId);
 			await this.sendMessage(
 				roomId,
-				`Zitat zu "${list.name}" hinzugefugt!\n\n"${quote?.text.substring(0, 50)}..."`
+				`Zitat zu "${list.name}" hinzugefuegt!\n\n"${quote?.text.substring(0, 50)}..."`
 			);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
@@ -653,7 +579,7 @@ Sag "hilfe" fur alle Befehle!`;
 **Backend:** ${backendHealthy ? 'Online' : 'Offline'}
 **Dein Status:** ${isLoggedIn ? 'Angemeldet' : 'Nicht angemeldet'}
 **Aktive Sessions:** ${sessionCount}
-**Verfugbare Zitate:** ${totalQuotes}
+**Verfuegbare Zitate:** ${totalQuotes}
 
 ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 
@@ -662,14 +588,7 @@ ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 
 	private async pinHelpMessage(roomId: string) {
 		try {
-			const htmlBody = this.markdownToHtml(HELP_MESSAGE);
-
-			const eventId = await this.client.sendMessage(roomId, {
-				msgtype: 'm.text',
-				body: HELP_MESSAGE,
-				format: 'org.matrix.custom.html',
-				formatted_body: htmlBody,
-			});
+			const eventId = await this.sendMessage(roomId, HELP_MESSAGE);
 
 			await this.client.sendStateEvent(roomId, 'm.room.pinned_events', '', {
 				pinned: [eventId],
@@ -680,34 +599,5 @@ ${!isLoggedIn ? 'Nutze `!login email passwort` um dich anzumelden.' : ''}`;
 			this.logger.error(`Failed to pin help message:`, error);
 			await this.sendMessage(roomId, 'Fehler beim Pinnen der Hilfe.');
 		}
-	}
-
-	private async sendMessage(roomId: string, message: string) {
-		const htmlBody = this.markdownToHtml(message);
-
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: message,
-			format: 'org.matrix.custom.html',
-			formatted_body: htmlBody,
-		});
-	}
-
-	private markdownToHtml(markdown: string): string {
-		return (
-			markdown
-				// Code blocks
-				.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-				// Inline code
-				.replace(/`([^`]+)`/g, '<code>$1</code>')
-				// Bold
-				.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-				// Italic
-				.replace(/\*([^*]+)\*/g, '<em>$1</em>')
-				// Underscore italic
-				.replace(/_([^_]+)_/g, '<em>$1</em>')
-				// Line breaks
-				.replace(/\n/g, '<br/>')
-		);
 	}
 }

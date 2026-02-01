@@ -1,64 +1,40 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-} from 'matrix-bot-sdk';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { QuestionsService, Question, Collection, Answer } from '../questions/questions.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
-export class MatrixService implements OnModuleInit {
-	private readonly logger = new Logger(MatrixService.name);
-	private client: MatrixClient;
-	private allowedRooms: string[];
-
+export class MatrixService extends BaseMatrixService {
 	// Store last shown items per user for reference by number
 	private lastQuestionsList: Map<string, Question[]> = new Map();
 	private lastCollectionsList: Map<string, Collection[]> = new Map();
 	private lastAnswersList: Map<string, Answer[]> = new Map();
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private questionsService: QuestionsService,
 		private sessionService: SessionService
-	) {}
-
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
-
-		if (!accessToken) {
-			this.logger.warn('No Matrix access token configured, bot disabled');
-			return;
-		}
-
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-		this.client = new MatrixClient(homeserverUrl || 'http://localhost:8008', accessToken, storage);
-
-		AutojoinRoomsMixin.setupOnClient(this.client);
-
-		this.client.on('room.message', this.handleMessage.bind(this));
-
-		await this.client.start();
-		this.logger.log('Matrix Questions Bot started');
+	) {
+		super(configService);
 	}
 
-	private async handleMessage(roomId: string, event: any) {
-		if (event.sender === (await this.client.getUserId())) return;
-		if (event.content?.msgtype !== 'm.text') return;
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
+	}
 
-		const body = event.content.body?.trim();
-		if (!body?.startsWith('!')) return;
-
-		// Check allowed rooms
-		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
-			return;
-		}
+	protected async handleTextMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		body: string
+	): Promise<void> {
+		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;
 		const parts = body.slice(1).split(/\s+/);
@@ -70,7 +46,7 @@ export class MatrixService implements OnModuleInit {
 			switch (command) {
 				case 'help':
 				case 'hilfe':
-					await this.sendHtml(roomId, HELP_MESSAGE);
+					await this.sendMessage(roomId, HELP_MESSAGE);
 					break;
 
 				case 'login':
@@ -79,7 +55,7 @@ export class MatrixService implements OnModuleInit {
 
 				case 'logout':
 					this.sessionService.logout(sender);
-					await this.sendHtml(roomId, '<p>Erfolgreich abgemeldet.</p>');
+					await this.sendMessage(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
 				case 'status':
@@ -165,24 +141,15 @@ export class MatrixService implements OnModuleInit {
 					break;
 
 				default:
-					await this.sendHtml(
+					await this.sendMessage(
 						roomId,
 						`<p>Unbekannter Befehl: <code>${command}</code>. Nutze <code>!help</code> fuer Hilfe.</p>`
 					);
 			}
 		} catch (error) {
 			this.logger.error(`Error handling command ${command}:`, error);
-			await this.sendHtml(roomId, `<p>Fehler: ${error.message}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${(error as Error).message}</p>`);
 		}
-	}
-
-	private async sendHtml(roomId: string, html: string) {
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: html.replace(/<[^>]*>/g, ''),
-			format: 'org.matrix.custom.html',
-			formatted_body: html,
-		});
 	}
 
 	private requireAuth(sender: string): string {
@@ -196,7 +163,7 @@ export class MatrixService implements OnModuleInit {
 	// Auth handlers
 	private async handleLogin(roomId: string, sender: string, args: string[]) {
 		if (args.length < 2) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
 			return;
 		}
 
@@ -204,9 +171,9 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			await this.sendHtml(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+			await this.sendMessage(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
 		} else {
-			await this.sendHtml(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
 		}
 	}
 
@@ -215,7 +182,7 @@ export class MatrixService implements OnModuleInit {
 		const loggedIn = this.sessionService.isLoggedIn(sender);
 		const sessions = this.sessionService.getSessionCount();
 
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<h3>Questions Bot Status</h3>
 <ul>
@@ -230,7 +197,7 @@ export class MatrixService implements OnModuleInit {
 	private async handleListQuestions(roomId: string, sender: string, statusFilter?: string) {
 		const token = this.requireAuth(sender);
 
-		const options: any = {};
+		const options: Record<string, string> = {};
 		if (statusFilter) {
 			const statusMap: Record<string, string> = {
 				offen: 'open',
@@ -248,7 +215,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.questionsService.getQuestions(token, options);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -256,7 +223,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastQuestionsList.set(sender, questions);
 
 		if (questions.length === 0) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Keine Fragen vorhanden. Stelle eine mit <code>!neu Frage?</code></p>'
 			);
@@ -272,7 +239,7 @@ export class MatrixService implements OnModuleInit {
 		html += '</ol>';
 		html += '<p><em>Nutze <code>!frage [nr]</code> fuer Details oder <code>!recherche [nr]</code></em></p>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleQuestionDetails(roomId: string, sender: string, numberStr: string) {
@@ -280,13 +247,13 @@ export class MatrixService implements OnModuleInit {
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
 			return;
 		}
 
 		const result = await this.questionsService.getQuestion(token, question.id);
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -308,12 +275,12 @@ export class MatrixService implements OnModuleInit {
 
 		html += `<p><em>Nutze <code>!recherche ${numberStr}</code> um eine Recherche zu starten</em></p>`;
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleCreateQuestion(roomId: string, sender: string, title: string) {
 		if (!title) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!neu Deine Frage?</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!neu Deine Frage?</code></p>');
 			return;
 		}
 
@@ -321,12 +288,12 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.questionsService.createQuestion(token, title);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastQuestionsList.delete(sender);
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<p>Frage erstellt: <strong>${result.data!.title}</strong></p>
 <p><em>Nutze <code>!fragen</code> und dann <code>!recherche [nr]</code> um zu recherchieren.</em></p>`
@@ -338,19 +305,19 @@ export class MatrixService implements OnModuleInit {
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
 			return;
 		}
 
 		const result = await this.questionsService.deleteQuestion(token, question.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastQuestionsList.delete(sender);
-		await this.sendHtml(roomId, `<p>Frage geloescht: <strong>${question.title}</strong></p>`);
+		await this.sendMessage(roomId, `<p>Frage geloescht: <strong>${question.title}</strong></p>`);
 	}
 
 	private async handleArchiveQuestion(roomId: string, sender: string, numberStr: string) {
@@ -358,18 +325,18 @@ export class MatrixService implements OnModuleInit {
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
 			return;
 		}
 
 		const result = await this.questionsService.updateQuestionStatus(token, question.id, 'archived');
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
-		await this.sendHtml(roomId, `<p>Frage archiviert: <strong>${question.title}</strong></p>`);
+		await this.sendMessage(roomId, `<p>Frage archiviert: <strong>${question.title}</strong></p>`);
 	}
 
 	// Research handlers
@@ -378,7 +345,7 @@ export class MatrixService implements OnModuleInit {
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
 			return;
 		}
 
@@ -392,12 +359,12 @@ export class MatrixService implements OnModuleInit {
 		};
 		const depth = depthMap[depthStr?.toLowerCase() || ''] || 'quick';
 
-		await this.sendHtml(roomId, `<p>Starte ${depth}-Recherche fuer: <strong>${question.title}</strong>...</p>`);
+		await this.sendMessage(roomId, `<p>Starte ${depth}-Recherche fuer: <strong>${question.title}</strong>...</p>`);
 
 		const result = await this.questionsService.startResearch(token, question.id, depth);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -426,7 +393,7 @@ export class MatrixService implements OnModuleInit {
 
 		html += `<p><em>Nutze <code>!quellen ${numberStr}</code> fuer die Quellen</em></p>`;
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleResearchResult(roomId: string, sender: string, numberStr: string) {
@@ -434,21 +401,21 @@ export class MatrixService implements OnModuleInit {
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
 			return;
 		}
 
 		const result = await this.questionsService.getResearchResults(token, question.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		const results = result.data || [];
 
 		if (results.length === 0) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				`<p>Keine Recherche-Ergebnisse. Nutze <code>!recherche ${numberStr}</code></p>`
 			);
@@ -471,7 +438,7 @@ export class MatrixService implements OnModuleInit {
 			html += '</ul>';
 		}
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleSources(roomId: string, sender: string, numberStr: string) {
@@ -479,21 +446,21 @@ export class MatrixService implements OnModuleInit {
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
 			return;
 		}
 
 		const result = await this.questionsService.getSources(token, question.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		const sources = result.data || [];
 
 		if (sources.length === 0) {
-			await this.sendHtml(roomId, '<p>Keine Quellen vorhanden.</p>');
+			await this.sendMessage(roomId, '<p>Keine Quellen vorhanden.</p>');
 			return;
 		}
 
@@ -508,7 +475,7 @@ export class MatrixService implements OnModuleInit {
 			html += `<p><em>...und ${sources.length - 10} weitere Quellen</em></p>`;
 		}
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	// Answer handlers
@@ -517,14 +484,14 @@ export class MatrixService implements OnModuleInit {
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!fragen</code></p>');
 			return;
 		}
 
 		const result = await this.questionsService.getAnswers(token, question.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -532,7 +499,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastAnswersList.set(sender, answers);
 
 		if (answers.length === 0) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				`<p>Keine Antworten. Starte zuerst eine Recherche mit <code>!recherche ${numberStr}</code></p>`
 			);
@@ -560,7 +527,7 @@ export class MatrixService implements OnModuleInit {
 
 		html += `<p><em>Nutze <code>!bewerten ${numberStr} 1-5</code> zum Bewerten</em></p>`;
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleRateAnswer(roomId: string, sender: string, numberStr: string, ratingStr: string) {
@@ -568,13 +535,13 @@ export class MatrixService implements OnModuleInit {
 		const answers = this.lastAnswersList.get(sender);
 
 		if (!answers || answers.length === 0) {
-			await this.sendHtml(roomId, '<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>');
+			await this.sendMessage(roomId, '<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>');
 			return;
 		}
 
 		const rating = parseInt(ratingStr, 10);
 		if (isNaN(rating) || rating < 1 || rating > 5) {
-			await this.sendHtml(roomId, '<p>Bewertung muss zwischen 1 und 5 sein.</p>');
+			await this.sendMessage(roomId, '<p>Bewertung muss zwischen 1 und 5 sein.</p>');
 			return;
 		}
 
@@ -582,11 +549,11 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.questionsService.rateAnswer(token, answer.id, rating);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
-		await this.sendHtml(roomId, `<p>Antwort mit ${rating} Sternen bewertet.</p>`);
+		await this.sendMessage(roomId, `<p>Antwort mit ${rating} Sternen bewertet.</p>`);
 	}
 
 	private async handleAcceptAnswer(roomId: string, sender: string, numberStr: string) {
@@ -594,7 +561,7 @@ export class MatrixService implements OnModuleInit {
 		const answers = this.lastAnswersList.get(sender);
 
 		if (!answers || answers.length === 0) {
-			await this.sendHtml(roomId, '<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>');
+			await this.sendMessage(roomId, '<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>');
 			return;
 		}
 
@@ -602,11 +569,11 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.questionsService.acceptAnswer(token, answer.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
-		await this.sendHtml(roomId, '<p>Antwort als Loesung akzeptiert. &#9989;</p>');
+		await this.sendMessage(roomId, '<p>Antwort als Loesung akzeptiert. &#9989;</p>');
 	}
 
 	// Collection handlers
@@ -615,7 +582,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.questionsService.getCollections(token);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -623,7 +590,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastCollectionsList.set(sender, collections);
 
 		if (collections.length === 0) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Keine Sammlungen. Erstelle eine mit <code>!sammlung Name</code></p>'
 			);
@@ -638,12 +605,12 @@ export class MatrixService implements OnModuleInit {
 		}
 		html += '</ol>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleCreateCollection(roomId: string, sender: string, name: string) {
 		if (!name) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!sammlung Name</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!sammlung Name</code></p>');
 			return;
 		}
 
@@ -651,18 +618,18 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.questionsService.createCollection(token, name);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastCollectionsList.delete(sender);
-		await this.sendHtml(roomId, `<p>Sammlung <strong>${result.data!.name}</strong> erstellt.</p>`);
+		await this.sendMessage(roomId, `<p>Sammlung <strong>${result.data!.name}</strong> erstellt.</p>`);
 	}
 
 	// Search handler
 	private async handleSearch(roomId: string, sender: string, query: string) {
 		if (!query) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!suche Begriff</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!suche Begriff</code></p>');
 			return;
 		}
 
@@ -670,7 +637,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.questionsService.getQuestions(token, { search: query });
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -678,7 +645,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastQuestionsList.set(sender, questions);
 
 		if (questions.length === 0) {
-			await this.sendHtml(roomId, `<p>Keine Fragen gefunden fuer "${query}"</p>`);
+			await this.sendMessage(roomId, `<p>Keine Fragen gefunden fuer "${query}"</p>`);
 			return;
 		}
 
@@ -689,7 +656,7 @@ export class MatrixService implements OnModuleInit {
 		}
 		html += '</ol>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	// Helper methods

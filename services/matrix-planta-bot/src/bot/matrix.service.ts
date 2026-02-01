@@ -1,20 +1,12 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-} from 'matrix-bot-sdk';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { PlantaService, Plant } from '../planta/planta.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
-export class MatrixService implements OnModuleInit {
-	private readonly logger = new Logger(MatrixService.name);
-	private client: MatrixClient;
-	private allowedRooms: string[];
-
+export class MatrixService extends BaseMatrixService {
 	// Store last shown plants per user for reference by number
 	private lastPlantsList: Map<string, Plant[]> = new Map();
 
@@ -39,44 +31,28 @@ export class MatrixService implements OnModuleInit {
 	};
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private plantaService: PlantaService,
 		private sessionService: SessionService
-	) {}
-
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
-
-		if (!accessToken) {
-			this.logger.warn('No Matrix access token configured, bot disabled');
-			return;
-		}
-
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-		this.client = new MatrixClient(homeserverUrl || 'http://localhost:8008', accessToken, storage);
-
-		AutojoinRoomsMixin.setupOnClient(this.client);
-
-		this.client.on('room.message', this.handleMessage.bind(this));
-
-		await this.client.start();
-		this.logger.log('Matrix Planta Bot started');
+	) {
+		super(configService);
 	}
 
-	private async handleMessage(roomId: string, event: any) {
-		if (event.sender === (await this.client.getUserId())) return;
-		if (event.content?.msgtype !== 'm.text') return;
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
+	}
 
-		const body = event.content.body?.trim();
-		if (!body?.startsWith('!')) return;
-
-		// Check allowed rooms
-		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
-			return;
-		}
+	protected async handleTextMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		body: string
+	): Promise<void> {
+		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;
 		const parts = body.slice(1).split(/\s+/);
@@ -88,7 +64,7 @@ export class MatrixService implements OnModuleInit {
 			switch (command) {
 				case 'help':
 				case 'hilfe':
-					await this.sendHtml(roomId, HELP_MESSAGE);
+					await this.sendMessage(roomId, HELP_MESSAGE);
 					break;
 
 				case 'login':
@@ -97,7 +73,7 @@ export class MatrixService implements OnModuleInit {
 
 				case 'logout':
 					this.sessionService.logout(sender);
-					await this.sendHtml(roomId, '<p>Erfolgreich abgemeldet.</p>');
+					await this.sendMessage(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
 				case 'status':
@@ -157,24 +133,15 @@ export class MatrixService implements OnModuleInit {
 					break;
 
 				default:
-					await this.sendHtml(
+					await this.sendMessage(
 						roomId,
 						`<p>Unbekannter Befehl: <code>${command}</code>. Nutze <code>!help</code> fuer Hilfe.</p>`
 					);
 			}
 		} catch (error) {
 			this.logger.error(`Error handling command ${command}:`, error);
-			await this.sendHtml(roomId, `<p>Fehler: ${error.message}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${(error as Error).message}</p>`);
 		}
-	}
-
-	private async sendHtml(roomId: string, html: string) {
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: html.replace(/<[^>]*>/g, ''),
-			format: 'org.matrix.custom.html',
-			formatted_body: html,
-		});
 	}
 
 	private requireAuth(sender: string): string {
@@ -188,7 +155,7 @@ export class MatrixService implements OnModuleInit {
 	// Auth handlers
 	private async handleLogin(roomId: string, sender: string, args: string[]) {
 		if (args.length < 2) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
 			return;
 		}
 
@@ -196,9 +163,9 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			await this.sendHtml(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+			await this.sendMessage(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
 		} else {
-			await this.sendHtml(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
 		}
 	}
 
@@ -207,7 +174,7 @@ export class MatrixService implements OnModuleInit {
 		const loggedIn = this.sessionService.isLoggedIn(sender);
 		const sessions = this.sessionService.getSessionCount();
 
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<h3>Planta Bot Status</h3>
 <ul>
@@ -224,7 +191,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.plantaService.getPlants(token);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -232,7 +199,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastPlantsList.set(sender, plants);
 
 		if (plants.length === 0) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Keine Pflanzen vorhanden. Fuege eine mit <code>!neu Name</code> hinzu.</p>'
 			);
@@ -248,7 +215,7 @@ export class MatrixService implements OnModuleInit {
 		html += '</ol>';
 		html += '<p><em>Nutze <code>!pflanze [nr]</code> fuer Details oder <code>!faellig</code> fuer Giess-Status</em></p>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handlePlantDetails(roomId: string, sender: string, numberStr: string) {
@@ -256,7 +223,7 @@ export class MatrixService implements OnModuleInit {
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Ungueltige Nummer. Nutze zuerst <code>!pflanzen</code></p>'
 			);
@@ -265,7 +232,7 @@ export class MatrixService implements OnModuleInit {
 
 		const result = await this.plantaService.getPlant(token, plant.id);
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -289,12 +256,12 @@ export class MatrixService implements OnModuleInit {
 			html += `<p><strong>Notizen:</strong> ${p.careNotes}</p>`;
 		}
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleAddPlant(roomId: string, sender: string, name: string) {
 		if (!name) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!neu Pflanzenname</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!neu Pflanzenname</code></p>');
 			return;
 		}
 
@@ -302,13 +269,13 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.plantaService.createPlant(token, name);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		// Clear cached list
 		this.lastPlantsList.delete(sender);
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<p>Pflanze <strong>${result.data!.name}</strong> hinzugefuegt!</p>
 <p><em>Nutze <code>!edit</code> um Details wie Licht, Wasser etc. zu setzen.</em></p>`
@@ -320,7 +287,7 @@ export class MatrixService implements OnModuleInit {
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Ungueltige Nummer. Nutze zuerst <code>!pflanzen</code></p>'
 			);
@@ -330,18 +297,18 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.plantaService.deletePlant(token, plant.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		// Clear cached list
 		this.lastPlantsList.delete(sender);
-		await this.sendHtml(roomId, `<p>Pflanze <strong>${plant.name}</strong> entfernt.</p>`);
+		await this.sendMessage(roomId, `<p>Pflanze <strong>${plant.name}</strong> entfernt.</p>`);
 	}
 
 	private async handleEditPlant(roomId: string, sender: string, args: string[]) {
 		if (args.length < 3) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Verwendung: <code>!edit [nr] [feld] [wert]</code></p><p>Felder: name, art, licht, wasser, notizen</p>'
 			);
@@ -352,7 +319,7 @@ export class MatrixService implements OnModuleInit {
 		const plant = this.getPlantByNumber(sender, args[0]);
 
 		if (!plant) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Ungueltige Nummer. Nutze zuerst <code>!pflanzen</code></p>'
 			);
@@ -364,7 +331,7 @@ export class MatrixService implements OnModuleInit {
 		const value = args.slice(2).join(' ');
 
 		if (!field) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				`<p>Unbekanntes Feld: <code>${fieldInput}</code></p><p>Verfuegbar: name, art, licht, wasser, notizen</p>`
 			);
@@ -372,11 +339,11 @@ export class MatrixService implements OnModuleInit {
 		}
 
 		// Validate and convert values
-		let updateValue: any = value;
+		let updateValue: string | number = value;
 		if (field === 'wateringFrequencyDays') {
 			updateValue = parseInt(value, 10);
 			if (isNaN(updateValue) || updateValue < 1) {
-				await this.sendHtml(roomId, '<p>Wasser-Intervall muss eine positive Zahl sein.</p>');
+				await this.sendMessage(roomId, '<p>Wasser-Intervall muss eine positive Zahl sein.</p>');
 				return;
 			}
 		} else if (field === 'lightRequirements') {
@@ -388,7 +355,7 @@ export class MatrixService implements OnModuleInit {
 			};
 			updateValue = lightMap[value.toLowerCase()];
 			if (!updateValue) {
-				await this.sendHtml(
+				await this.sendMessage(
 					roomId,
 					'<p>Licht-Werte: wenig/low, mittel/medium, hell/bright, direkt/direct</p>'
 				);
@@ -402,7 +369,7 @@ export class MatrixService implements OnModuleInit {
 			};
 			updateValue = humidityMap[value.toLowerCase()];
 			if (!updateValue) {
-				await this.sendHtml(
+				await this.sendMessage(
 					roomId,
 					'<p>Feuchtigkeits-Werte: niedrig/low, mittel/medium, hoch/high</p>'
 				);
@@ -415,11 +382,11 @@ export class MatrixService implements OnModuleInit {
 		});
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<p><strong>${plant.name}</strong>: ${fieldInput} aktualisiert.</p>`
 		);
@@ -431,7 +398,7 @@ export class MatrixService implements OnModuleInit {
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Ungueltige Nummer. Nutze zuerst <code>!pflanzen</code></p>'
 			);
@@ -441,7 +408,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.plantaService.waterPlant(token, plant.id, notes || undefined);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -450,7 +417,7 @@ export class MatrixService implements OnModuleInit {
 			html += `<p><em>Notiz: ${notes}</em></p>`;
 		}
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleUpcomingWaterings(roomId: string, sender: string) {
@@ -458,14 +425,14 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.plantaService.getUpcomingWaterings(token);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		const upcoming = result.data || [];
 
 		if (upcoming.length === 0) {
-			await this.sendHtml(roomId, '<p>Keine Pflanzen muessen in den naechsten Tagen gegossen werden.</p>');
+			await this.sendMessage(roomId, '<p>Keine Pflanzen muessen in den naechsten Tagen gegossen werden.</p>');
 			return;
 		}
 
@@ -483,7 +450,7 @@ export class MatrixService implements OnModuleInit {
 		// Store plants for reference
 		this.lastPlantsList.set(sender, upcoming.map(u => u.plant));
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleWateringHistory(roomId: string, sender: string, numberStr: string) {
@@ -491,7 +458,7 @@ export class MatrixService implements OnModuleInit {
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Ungueltige Nummer. Nutze zuerst <code>!pflanzen</code></p>'
 			);
@@ -501,14 +468,14 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.plantaService.getWateringHistory(token, plant.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		const logs = result.data || [];
 
 		if (logs.length === 0) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				`<p><strong>${plant.name}</strong> wurde noch nie gegossen.</p>`
 			);
@@ -533,12 +500,12 @@ export class MatrixService implements OnModuleInit {
 			html += `<p><em>...und ${logs.length - 10} weitere Eintraege</em></p>`;
 		}
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleSetInterval(roomId: string, sender: string, numberStr: string, daysStr: string) {
 		if (!numberStr || !daysStr) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Verwendung: <code>!intervall [nr] [tage]</code></p>'
 			);
@@ -549,7 +516,7 @@ export class MatrixService implements OnModuleInit {
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Ungueltige Nummer. Nutze zuerst <code>!pflanzen</code></p>'
 			);
@@ -558,18 +525,18 @@ export class MatrixService implements OnModuleInit {
 
 		const days = parseInt(daysStr, 10);
 		if (isNaN(days) || days < 1) {
-			await this.sendHtml(roomId, '<p>Tage muss eine positive Zahl sein.</p>');
+			await this.sendMessage(roomId, '<p>Tage muss eine positive Zahl sein.</p>');
 			return;
 		}
 
 		const result = await this.plantaService.updateWateringSchedule(token, plant.id, days);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<p>Giess-Intervall fuer <strong>${plant.name}</strong> auf ${days} Tage gesetzt.</p>`
 		);

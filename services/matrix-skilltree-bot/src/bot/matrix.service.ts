@@ -1,20 +1,12 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-} from 'matrix-bot-sdk';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
 import { SkilltreeService, Skill, SkillBranch } from '../skilltree/skilltree.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
-export class MatrixService implements OnModuleInit {
-	private readonly logger = new Logger(MatrixService.name);
-	private client: MatrixClient;
-	private allowedRooms: string[];
-
+export class MatrixService extends BaseMatrixService {
 	// Store last shown skills per user for reference by number
 	private lastSkillsList: Map<string, Skill[]> = new Map();
 
@@ -44,43 +36,28 @@ export class MatrixService implements OnModuleInit {
 	};
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private skilltreeService: SkilltreeService,
 		private sessionService: SessionService
-	) {}
-
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
-
-		if (!accessToken) {
-			this.logger.warn('No Matrix access token configured, bot disabled');
-			return;
-		}
-
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-		this.client = new MatrixClient(homeserverUrl || 'http://localhost:8008', accessToken, storage);
-
-		AutojoinRoomsMixin.setupOnClient(this.client);
-
-		this.client.on('room.message', this.handleMessage.bind(this));
-
-		await this.client.start();
-		this.logger.log('Matrix Skilltree Bot started');
+	) {
+		super(configService);
 	}
 
-	private async handleMessage(roomId: string, event: any) {
-		if (event.sender === (await this.client.getUserId())) return;
-		if (event.content?.msgtype !== 'm.text') return;
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
+	}
 
-		const body = event.content.body?.trim();
-		if (!body?.startsWith('!')) return;
-
-		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
-			return;
-		}
+	protected async handleTextMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		body: string
+	): Promise<void> {
+		if (!body.startsWith('!')) return;
 
 		const sender = event.sender;
 		const parts = body.slice(1).split(/\s+/);
@@ -92,7 +69,7 @@ export class MatrixService implements OnModuleInit {
 			switch (command) {
 				case 'help':
 				case 'hilfe':
-					await this.sendHtml(roomId, HELP_MESSAGE);
+					await this.sendMessage(roomId, HELP_MESSAGE);
 					break;
 
 				case 'login':
@@ -101,7 +78,7 @@ export class MatrixService implements OnModuleInit {
 
 				case 'logout':
 					this.sessionService.logout(sender);
-					await this.sendHtml(roomId, '<p>Erfolgreich abgemeldet.</p>');
+					await this.sendMessage(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
 				case 'status':
@@ -151,24 +128,15 @@ export class MatrixService implements OnModuleInit {
 					break;
 
 				default:
-					await this.sendHtml(
+					await this.sendMessage(
 						roomId,
 						`<p>Unbekannter Befehl: <code>${command}</code>. Nutze <code>!help</code> fuer Hilfe.</p>`
 					);
 			}
 		} catch (error) {
 			this.logger.error(`Error handling command ${command}:`, error);
-			await this.sendHtml(roomId, `<p>Fehler: ${error.message}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${(error as Error).message}</p>`);
 		}
-	}
-
-	private async sendHtml(roomId: string, html: string) {
-		await this.client.sendMessage(roomId, {
-			msgtype: 'm.text',
-			body: html.replace(/<[^>]*>/g, ''),
-			format: 'org.matrix.custom.html',
-			formatted_body: html,
-		});
 	}
 
 	private requireAuth(sender: string): string {
@@ -182,7 +150,7 @@ export class MatrixService implements OnModuleInit {
 	// Auth handlers
 	private async handleLogin(roomId: string, sender: string, args: string[]) {
 		if (args.length < 2) {
-			await this.sendHtml(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
 			return;
 		}
 
@@ -190,9 +158,9 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			await this.sendHtml(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+			await this.sendMessage(roomId, `<p>Erfolgreich angemeldet als <strong>${email}</strong></p>`);
 		} else {
-			await this.sendHtml(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
 		}
 	}
 
@@ -201,7 +169,7 @@ export class MatrixService implements OnModuleInit {
 		const loggedIn = this.sessionService.isLoggedIn(sender);
 		const sessions = this.sessionService.getSessionCount();
 
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<h3>Skilltree Bot Status</h3>
 <ul>
@@ -220,7 +188,7 @@ export class MatrixService implements OnModuleInit {
 		if (branchFilter) {
 			branch = this.branchMappings[branchFilter.toLowerCase()];
 			if (!branch) {
-				await this.sendHtml(
+				await this.sendMessage(
 					roomId,
 					'<p>Unbekannter Branch. Verfuegbar: intellect, body, creativity, social, practical, mindset, custom</p>'
 				);
@@ -231,7 +199,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.skilltreeService.getSkills(token, branch);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -239,7 +207,7 @@ export class MatrixService implements OnModuleInit {
 		this.lastSkillsList.set(sender, skills);
 
 		if (skills.length === 0) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Keine Skills vorhanden. Erstelle einen mit <code>!neu Name | Branch</code></p>'
 			);
@@ -256,7 +224,7 @@ export class MatrixService implements OnModuleInit {
 		html += '</ol>';
 		html += '<p><em>Nutze <code>!skill [nr]</code> fuer Details oder <code>!xp [nr] 50 Aktivitaet</code></em></p>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleSkillDetails(roomId: string, sender: string, numberStr: string) {
@@ -264,13 +232,13 @@ export class MatrixService implements OnModuleInit {
 		const skill = this.getSkillByNumber(sender, numberStr);
 
 		if (!skill) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
 			return;
 		}
 
 		const result = await this.skilltreeService.getSkill(token, skill.id);
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -293,12 +261,12 @@ export class MatrixService implements OnModuleInit {
 
 		html += `<p><em>Nutze <code>!xp ${numberStr} [xp] [aktivitaet]</code> um XP hinzuzufuegen</em></p>`;
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	private async handleCreateSkill(roomId: string, sender: string, input: string) {
 		if (!input) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Verwendung: <code>!neu Name | Branch</code></p><p>Branches: intellect, body, creativity, social, practical, mindset, custom</p>'
 			);
@@ -312,7 +280,7 @@ export class MatrixService implements OnModuleInit {
 
 		const branch = this.branchMappings[branchInput];
 		if (!branch) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Unbekannter Branch. Verfuegbar: intellect, body, creativity, social, practical, mindset, custom</p>'
 			);
@@ -324,13 +292,13 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.skilltreeService.createSkill(token, name, branch, description);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastSkillsList.delete(sender);
 		const branchIcon = this.getBranchIcon(branch);
-		await this.sendHtml(
+		await this.sendMessage(
 			roomId,
 			`<p>${branchIcon} Skill <strong>${result.data!.skill.name}</strong> erstellt!</p>
 <p><em>Nutze <code>!skills</code> und dann <code>!xp [nr] [xp] [aktivitaet]</code></em></p>`
@@ -342,19 +310,19 @@ export class MatrixService implements OnModuleInit {
 		const skill = this.getSkillByNumber(sender, numberStr);
 
 		if (!skill) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
 			return;
 		}
 
 		const result = await this.skilltreeService.deleteSkill(token, skill.id);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		this.lastSkillsList.delete(sender);
-		await this.sendHtml(roomId, `<p>Skill <strong>${skill.name}</strong> geloescht.</p>`);
+		await this.sendMessage(roomId, `<p>Skill <strong>${skill.name}</strong> geloescht.</p>`);
 	}
 
 	// XP handler
@@ -362,7 +330,7 @@ export class MatrixService implements OnModuleInit {
 		const args = argString.split(/\s+/);
 
 		if (args.length < 3) {
-			await this.sendHtml(
+			await this.sendMessage(
 				roomId,
 				'<p>Verwendung: <code>!xp [nr] [xp] [aktivitaet]</code></p><p>Optional: <code>--min 60</code> fuer Dauer</p>'
 			);
@@ -373,13 +341,13 @@ export class MatrixService implements OnModuleInit {
 		const skill = this.getSkillByNumber(sender, args[0]);
 
 		if (!skill) {
-			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
+			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
 			return;
 		}
 
 		const xp = parseInt(args[1], 10);
 		if (isNaN(xp) || xp < 1 || xp > 10000) {
-			await this.sendHtml(roomId, '<p>XP muss zwischen 1 und 10000 liegen.</p>');
+			await this.sendMessage(roomId, '<p>XP muss zwischen 1 und 10000 liegen.</p>');
 			return;
 		}
 
@@ -401,7 +369,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.skilltreeService.addXp(token, skill.id, xp, description, duration);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -414,7 +382,7 @@ export class MatrixService implements OnModuleInit {
 			html += `<p>&#127881; <strong>LEVEL UP!</strong> Du bist jetzt Level ${newLevel} (${levelName})!</p>`;
 		}
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	// Stats handler
@@ -423,7 +391,7 @@ export class MatrixService implements OnModuleInit {
 		const result = await this.skilltreeService.getStats(token);
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
@@ -438,7 +406,7 @@ export class MatrixService implements OnModuleInit {
 		}
 		html += '</ul>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	// Activities handler
@@ -451,7 +419,7 @@ export class MatrixService implements OnModuleInit {
 		if (numberStr) {
 			const skill = this.getSkillByNumber(sender, numberStr);
 			if (!skill) {
-				await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
+				await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!skills</code></p>');
 				return;
 			}
 			result = await this.skilltreeService.getSkillActivities(token, skill.id);
@@ -461,14 +429,14 @@ export class MatrixService implements OnModuleInit {
 		}
 
 		if (result.error) {
-			await this.sendHtml(roomId, `<p>Fehler: ${result.error}</p>`);
+			await this.sendMessage(roomId, `<p>Fehler: ${result.error}</p>`);
 			return;
 		}
 
 		const activities = result.data?.activities || [];
 
 		if (activities.length === 0) {
-			await this.sendHtml(roomId, '<p>Keine Aktivitaeten vorhanden.</p>');
+			await this.sendMessage(roomId, '<p>Keine Aktivitaeten vorhanden.</p>');
 			return;
 		}
 
@@ -487,7 +455,7 @@ export class MatrixService implements OnModuleInit {
 		}
 		html += '</ol>';
 
-		await this.sendHtml(roomId, html);
+		await this.sendMessage(roomId, html);
 	}
 
 	// Helper methods

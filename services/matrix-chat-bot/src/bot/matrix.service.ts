@@ -1,26 +1,28 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-	RichReply,
-} from 'matrix-bot-sdk';
-import { ChatService, Model, Conversation, Message } from '../chat/chat.service';
+import { BaseMatrixService, MatrixBotConfig, MatrixRoomEvent } from '@manacore/matrix-bot-common';
+import { ChatService, Conversation } from '../chat/chat.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE, BRANCH_ICONS } from '../config/configuration';
 
 @Injectable()
-export class MatrixService implements OnModuleInit {
-	private readonly logger = new Logger(MatrixService.name);
-	private client: MatrixClient;
-	private allowedRooms: string[];
-
+export class MatrixService extends BaseMatrixService {
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private chatService: ChatService,
 		private sessionService: SessionService
-	) {}
+	) {
+		super(configService);
+	}
+
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
+	}
 
 	// Session data helper methods (wrapping the generic setSessionData/getSessionData)
 	private getCurrentConversation(sender: string): string | null {
@@ -59,160 +61,124 @@ export class MatrixService implements OnModuleInit {
 		return ids[number - 1];
 	}
 
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
+	protected async handleTextMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		message: string,
+		sender: string
+	): Promise<void> {
+		if (!message.startsWith('!')) return;
 
-		if (!accessToken) {
-			this.logger.warn('No Matrix access token configured, bot disabled');
-			return;
-		}
-
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-		this.client = new MatrixClient(homeserverUrl || 'http://localhost:8008', accessToken, storage);
-		AutojoinRoomsMixin.setupOnClient(this.client);
-
-		this.client.on('room.message', this.handleMessage.bind(this));
-
-		await this.client.start();
-		this.logger.log('Matrix Chat Bot started');
-	}
-
-	private async handleMessage(roomId: string, event: any) {
-		if (event.sender === (await this.client.getUserId())) return;
-		if (event.content?.msgtype !== 'm.text') return;
-
-		const body = event.content.body?.trim();
-		if (!body?.startsWith('!')) return;
-
-		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
-			return;
-		}
-
-		const sender = event.sender;
-		const [command, ...args] = body.slice(1).split(/\s+/);
+		const [command, ...args] = message.slice(1).split(/\s+/);
 		const argString = args.join(' ');
 
-		try {
-			let response: string;
+		let response: string;
 
-			switch (command.toLowerCase()) {
-				case 'help':
-				case 'hilfe':
-					response = HELP_MESSAGE;
-					break;
+		switch (command.toLowerCase()) {
+			case 'help':
+			case 'hilfe':
+				response = HELP_MESSAGE;
+				break;
 
-				case 'login':
-					response = await this.handleLogin(sender, args);
-					break;
+			case 'login':
+				response = await this.handleLogin(sender, args);
+				break;
 
-				case 'logout':
-					response = this.handleLogout(sender);
-					break;
+			case 'logout':
+				response = this.handleLogout(sender);
+				break;
 
-				case 'status':
-					response = this.handleStatus(sender);
-					break;
+			case 'status':
+				response = this.handleStatus(sender);
+				break;
 
-				case 'chat':
-				case 'fragen':
-				case 'ask':
-					response = await this.handleQuickChat(sender, argString);
-					break;
+			case 'chat':
+			case 'fragen':
+			case 'ask':
+				response = await this.handleQuickChat(sender, argString);
+				break;
 
-				case 'neu':
-				case 'new':
-					response = await this.handleNewConversation(sender, argString);
-					break;
+			case 'neu':
+			case 'new':
+				response = await this.handleNewConversation(sender, argString);
+				break;
 
-				case 'gespraeche':
-				case 'gespräche':
-				case 'conversations':
-				case 'liste':
-					response = await this.handleListConversations(sender);
-					break;
+			case 'gespraeche':
+			case 'gespräche':
+			case 'conversations':
+			case 'liste':
+				response = await this.handleListConversations(sender);
+				break;
 
-				case 'gespraech':
-				case 'gespräch':
-				case 'conversation':
-				case 'select':
-					response = await this.handleSelectConversation(sender, args[0]);
-					break;
+			case 'gespraech':
+			case 'gespräch':
+			case 'conversation':
+			case 'select':
+				response = await this.handleSelectConversation(sender, args[0]);
+				break;
 
-				case 'senden':
-				case 'send':
-				case 's':
-					response = await this.handleSendMessage(sender, argString);
-					break;
+			case 'senden':
+			case 'send':
+			case 's':
+				response = await this.handleSendMessage(sender, argString);
+				break;
 
-				case 'verlauf':
-				case 'history':
-				case 'nachrichten':
-					response = await this.handleShowHistory(sender, args[0]);
-					break;
+			case 'verlauf':
+			case 'history':
+			case 'nachrichten':
+				response = await this.handleShowHistory(sender, args[0]);
+				break;
 
-				case 'titel':
-				case 'title':
-					response = await this.handleUpdateTitle(sender, args[0], args.slice(1).join(' '));
-					break;
+			case 'titel':
+			case 'title':
+				response = await this.handleUpdateTitle(sender, args[0], args.slice(1).join(' '));
+				break;
 
-				case 'archiv':
-				case 'archive':
-					response = await this.handleArchive(sender, args[0]);
-					break;
+			case 'archiv':
+			case 'archive':
+				response = await this.handleArchive(sender, args[0]);
+				break;
 
-				case 'archiviert':
-				case 'archived':
-					response = await this.handleListArchived(sender);
-					break;
+			case 'archiviert':
+			case 'archived':
+				response = await this.handleListArchived(sender);
+				break;
 
-				case 'wiederherstellen':
-				case 'restore':
-				case 'unarchive':
-					response = await this.handleUnarchive(sender, args[0]);
-					break;
+			case 'wiederherstellen':
+			case 'restore':
+			case 'unarchive':
+				response = await this.handleUnarchive(sender, args[0]);
+				break;
 
-				case 'pin':
-					response = await this.handlePin(sender, args[0]);
-					break;
+			case 'pin':
+				response = await this.handlePin(sender, args[0]);
+				break;
 
-				case 'unpin':
-					response = await this.handleUnpin(sender, args[0]);
-					break;
+			case 'unpin':
+				response = await this.handleUnpin(sender, args[0]);
+				break;
 
-				case 'loeschen':
-				case 'löschen':
-				case 'delete':
-					response = await this.handleDelete(sender, args[0]);
-					break;
+			case 'loeschen':
+			case 'löschen':
+			case 'delete':
+				response = await this.handleDelete(sender, args[0]);
+				break;
 
-				case 'modelle':
-				case 'models':
-					response = await this.handleListModels(sender);
-					break;
+			case 'modelle':
+			case 'models':
+				response = await this.handleListModels(sender);
+				break;
 
-				case 'modell':
-				case 'model':
-					response = await this.handleSelectModel(sender, args[0]);
-					break;
+			case 'modell':
+			case 'model':
+				response = await this.handleSelectModel(sender, args[0]);
+				break;
 
-				default:
-					response = `Unbekannter Befehl: ${command}\nNutze \`!help\` fuer eine Uebersicht.`;
-			}
-
-			await this.sendReply(roomId, event, response);
-		} catch (error) {
-			this.logger.error(`Error handling command ${command}:`, error);
-			await this.sendReply(roomId, event, 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
+			default:
+				response = `Unbekannter Befehl: ${command}\nNutze \`!help\` fuer eine Uebersicht.`;
 		}
-	}
 
-	private async sendReply(roomId: string, event: any, message: string) {
-		const reply = RichReply.createFor(roomId, event, message, message);
-		reply.msgtype = 'm.text';
-		await this.client.sendMessage(roomId, reply);
+		await this.sendReply(roomId, event, response);
 	}
 
 	// Auth handlers

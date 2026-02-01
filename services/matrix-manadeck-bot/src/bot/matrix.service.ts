@@ -1,66 +1,46 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-	MatrixClient,
-	SimpleFsStorageProvider,
-	AutojoinRoomsMixin,
-} from 'matrix-bot-sdk';
+	BaseMatrixService,
+	MatrixBotConfig,
+	MatrixRoomEvent,
+} from '@manacore/matrix-bot-common';
 import { ManadeckService, Deck, Card } from '../manadeck/manadeck.service';
 import { SessionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
-export class MatrixService implements OnModuleInit {
-	private readonly logger = new Logger(MatrixService.name);
-	private client: MatrixClient;
-	private allowedRooms: string[];
-
+export class MatrixService extends BaseMatrixService {
 	// Store last shown decks/cards per user for reference by number
 	private lastDecksList: Map<string, Deck[]> = new Map();
 	private lastCardsList: Map<string, { deckId: string; cards: Card[] }> = new Map();
 
 	constructor(
-		private configService: ConfigService,
+		configService: ConfigService,
 		private manadeckService: ManadeckService,
 		private sessionService: SessionService
-	) {}
-
-	async onModuleInit() {
-		const homeserverUrl = this.configService.get<string>('matrix.homeserverUrl');
-		const accessToken = this.configService.get<string>('matrix.accessToken');
-		const storagePath = this.configService.get<string>('matrix.storagePath');
-		this.allowedRooms = this.configService.get<string[]>('matrix.allowedRooms') || [];
-
-		if (!accessToken) {
-			this.logger.warn('No Matrix access token configured, bot disabled');
-			return;
-		}
-
-		const storage = new SimpleFsStorageProvider(storagePath || './data/bot-storage.json');
-		this.client = new MatrixClient(homeserverUrl || 'http://localhost:8008', accessToken, storage);
-
-		AutojoinRoomsMixin.setupOnClient(this.client);
-
-		this.client.on('room.message', this.handleMessage.bind(this));
-
-		await this.client.start();
-		this.logger.log('Matrix ManaDeck Bot started');
+	) {
+		super(configService);
 	}
 
-	private async handleMessage(roomId: string, event: any) {
-		if (event.sender === (await this.client.getUserId())) return;
-		if (event.content?.msgtype !== 'm.text') return;
+	protected getConfig(): MatrixBotConfig {
+		return {
+			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			accessToken: this.configService.get<string>('matrix.accessToken') || '',
+			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
+		};
+	}
 
-		const body = event.content.body?.trim();
-		if (!body?.startsWith('!')) return;
+	protected async handleTextMessage(
+		roomId: string,
+		_event: MatrixRoomEvent,
+		message: string,
+		sender: string
+	): Promise<void> {
+		if (!message.startsWith('!')) return;
 
-		// Check allowed rooms
-		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
-			return;
-		}
-
-		const sender = event.sender;
-		const parts = body.slice(1).split(/\s+/);
+		const parts = message.slice(1).split(/\s+/);
 		const command = parts[0].toLowerCase();
 		const args = parts.slice(1);
 		const argString = args.join(' ');
@@ -161,7 +141,7 @@ export class MatrixService implements OnModuleInit {
 			}
 		} catch (error) {
 			this.logger.error(`Error handling command ${command}:`, error);
-			await this.sendHtml(roomId, `<p>Fehler: ${error.message}</p>`);
+			await this.sendHtml(roomId, `<p>Fehler: ${(error as Error).message}</p>`);
 		}
 	}
 
