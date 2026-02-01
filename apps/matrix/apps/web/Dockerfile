@@ -32,8 +32,8 @@ COPY packages/shared-utils ./packages/shared-utils
 # Copy matrix web app
 COPY apps/matrix/apps/web ./apps/matrix/apps/web
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (--no-frozen-lockfile due to workspace overrides)
+RUN pnpm install --no-frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-auth

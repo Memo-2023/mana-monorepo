@@ -1306,7 +1306,8 @@ jobs:
         with:
           context: .
           file: services/matrix-ollama-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
@@ -1335,7 +1336,8 @@ jobs:
         with:
           context: .
           file: services/matrix-stats-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
@@ -1364,7 +1366,8 @@ jobs:
         with:
           context: .
           file: services/matrix-project-doc-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
@@ -1393,7 +1396,8 @@ jobs:
         with:
           context: .
           file: services/matrix-todo-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
@@ -1422,7 +1426,8 @@ jobs:
         with:
           context: .
           file: services/matrix-calendar-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
@@ -1451,7 +1456,8 @@ jobs:
         with:
           context: .
           file: services/matrix-nutriphi-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
@@ -1480,7 +1486,8 @@ jobs:
         with:
           context: .
           file: services/matrix-zitare-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
@@ -1509,7 +1516,8 @@ jobs:
         with:
           context: .
           file: services/matrix-clock-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
@@ -1538,7 +1546,8 @@ jobs:
         with:
           context: .
           file: services/matrix-tts-bot/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
