@@ -6,51 +6,71 @@ ingress:
   - hostname: ssh.mana.how
     service: ssh://localhost:22
 
-  # Web Services
+  # ManaCore Dashboard (Main)
+  - hostname: mana.how
+    service: http://localhost:5000
+
+  # Auth Service
   - hostname: auth.mana.how
     service: http://localhost:3001
-  - hostname: mana.how
-    service: http://localhost:5173
+
+  # Chat App
   - hostname: chat.mana.how
-    service: http://localhost:3000
+    service: http://localhost:5010
   - hostname: chat-api.mana.how
-    service: http://localhost:3002
+    service: http://localhost:3030
+
+  # Todo App
   - hostname: todo.mana.how
-    service: http://localhost:5188
+    service: http://localhost:5011
   - hostname: todo-api.mana.how
-    service: http://localhost:3018
+    service: http://localhost:3031
+
+  # Calendar App
   - hostname: calendar.mana.how
-    service: http://localhost:5186
+    service: http://localhost:5012
   - hostname: calendar-api.mana.how
-    service: http://localhost:3016
+    service: http://localhost:3032
+
+  # Clock App
   - hostname: clock.mana.how
-    service: http://localhost:5187
+    service: http://localhost:5013
   - hostname: clock-api.mana.how
-    service: http://localhost:3017
+    service: http://localhost:3033
+
+  # Contacts App
   - hostname: contacts.mana.how
-    service: http://localhost:5184
+    service: http://localhost:5014
   - hostname: contacts-api.mana.how
-    service: http://localhost:3015
+    service: http://localhost:3034
+
+  # Storage App
+  - hostname: storage.mana.how
+    service: http://localhost:5015
+  - hostname: storage-api.mana.how
+    service: http://localhost:3035
+
+  # Presi App
+  - hostname: presi.mana.how
+    service: http://localhost:5016
+  - hostname: presi-api.mana.how
+    service: http://localhost:3036
+
+  # NutriPhi App
   - hostname: nutriphi.mana.how
-    service: http://localhost:5189
+    service: http://localhost:5017
   - hostname: nutriphi-api.mana.how
-    service: http://localhost:3023
+    service: http://localhost:3037
 
   # LLM Services
   - hostname: playground.mana.how
-    service: http://localhost:5190
-  - hostname: llm.mana.how
-    service: http://localhost:3025
+    service: http://localhost:5090
 
   # Monitoring & Tools
   - hostname: grafana.mana.how
-    service: http://localhost:3100
+    service: http://localhost:8000
   - hostname: stats.mana.how
-    service: http://localhost:3200
-  - hostname: pushgateway.mana.how
-    service: http://localhost:9091
-  - hostname: n8n.mana.how
-    service: http://localhost:5678
+    service: http://localhost:8010
 
   # Matrix (DSGVO-konformes Messaging)
   - hostname: matrix.mana.how
