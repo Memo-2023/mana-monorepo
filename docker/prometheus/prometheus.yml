@@ -59,34 +59,55 @@ scrape_configs:
   # Chat Backend
   - job_name: 'chat-backend'
     static_configs:
-      - targets: ['chat-backend:3002']
+      - targets: ['chat-backend:3030']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Todo Backend
   - job_name: 'todo-backend'
     static_configs:
-      - targets: ['todo-backend:3018']
+      - targets: ['todo-backend:3031']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Calendar Backend
   - job_name: 'calendar-backend'
     static_configs:
-      - targets: ['calendar-backend:3016']
+      - targets: ['calendar-backend:3032']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Clock Backend
   - job_name: 'clock-backend'
     static_configs:
-      - targets: ['clock-backend:3017']
+      - targets: ['clock-backend:3033']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Contacts Backend
   - job_name: 'contacts-backend'
     static_configs:
-      - targets: ['contacts-backend:3015']
+      - targets: ['contacts-backend:3034']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Storage Backend
+  - job_name: 'storage-backend'
+    static_configs:
+      - targets: ['storage-backend:3035']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Presi Backend
+  - job_name: 'presi-backend'
+    static_configs:
+      - targets: ['presi-backend:3036']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Nutriphi Backend
+  - job_name: 'nutriphi-backend'
+    static_configs:
+      - targets: ['nutriphi-backend:3037']
     metrics_path: '/metrics'
     scrape_interval: 30s
