@@ -24,6 +24,9 @@ export const isSidebarMode = {
 	get value() {
 		return _isSidebarMode;
 	},
+	set(value: boolean) {
+		_isSidebarMode = value;
+	},
 };
 
 export const isNavCollapsed = {
