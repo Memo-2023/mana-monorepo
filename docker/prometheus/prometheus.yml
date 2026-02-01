@@ -21,19 +21,19 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # Host system metrics via node-exporter
-  - job_name: 'node'
-    static_configs:
-      - targets: ['node-exporter:9100']
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: instance
-        replacement: 'mac-mini'
+  # Host system metrics via node-exporter (disabled - container not deployed)
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: instance
+  #       replacement: 'mac-mini'
 
-  # Docker container metrics via cAdvisor
-  - job_name: 'cadvisor'
-    static_configs:
-      - targets: ['cadvisor:8080']
+  # Docker container metrics via cAdvisor (disabled - container not deployed)
+  # - job_name: 'cadvisor'
+  #   static_configs:
+  #     - targets: ['cadvisor:8080']
 
   # PostgreSQL metrics
   - job_name: 'postgres'
@@ -91,23 +91,23 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Storage Backend
-  - job_name: 'storage-backend'
-    static_configs:
-      - targets: ['storage-backend:3035']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+  # Storage Backend (disabled - no /metrics endpoint yet)
+  # - job_name: 'storage-backend'
+  #   static_configs:
+  #     - targets: ['storage-backend:3035']
+  #   metrics_path: '/metrics'
+  #   scrape_interval: 30s
 
-  # Presi Backend
-  - job_name: 'presi-backend'
-    static_configs:
-      - targets: ['presi-backend:3036']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+  # Presi Backend (disabled - no /metrics endpoint yet)
+  # - job_name: 'presi-backend'
+  #   static_configs:
+  #     - targets: ['presi-backend:3036']
+  #   metrics_path: '/metrics'
+  #   scrape_interval: 30s
 
-  # Nutriphi Backend
-  - job_name: 'nutriphi-backend'
-    static_configs:
-      - targets: ['nutriphi-backend:3037']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+  # Nutriphi Backend (disabled - no /metrics endpoint yet)
+  # - job_name: 'nutriphi-backend'
+  #   static_configs:
+  #     - targets: ['nutriphi-backend:3037']
+  #   metrics_path: '/metrics'
+  #   scrape_interval: 30s
