@@ -429,47 +429,90 @@ Ollama läuft nativ auf dem Mac Mini für lokale LLM-Inferenz (Klassifizierung, 
 - **Chip:** Apple M4 (10 Cores)
 - **RAM:** 16 GB Unified Memory
 - **Interne SSD:** 228 GB
-- **Externe SSD:** 4 TB (TillJakob-S04)
+- **Externe SSD:** 4 TB (ManaData)
 
 ## Externe 4TB SSD
 
-Die externe SSD wird für große Dateien verwendet, um die interne SSD zu entlasten.
+Die externe SSD wird für persistente Daten verwendet - sowohl für große Dateien (AI-Modelle) als auch für kritische Datenbanken (PostgreSQL, MinIO).
 
 ### Mount-Punkt
 
-- **Volume:** `/Volumes/TillJakob-S04`
+- **Volume:** `/Volumes/ManaData`
 - **Geschwindigkeit:** ~1 GB/s (USB-C/Thunderbolt)
 
 ### Verzeichnisstruktur
 
 ```
-/Volumes/TillJakob-S04/ManaData/
-├── ollama/          # LLM Modelle (~60 GB)
-├── stt-models/      # Speech-to-Text Modelle (~19 GB)
+/Volumes/ManaData/
+├── postgres/        # PostgreSQL Datenbank (~200 MB) ⭐ Kritisch
+├── minio/           # MinIO Object Storage (Storage App)
+├── backups/         # PostgreSQL Backups (täglich 3:00)
+├── ollama/          # LLM Modelle (~58 GB)
 ├── flux2/           # FLUX.2 Bildgenerierung (~15 GB)
-├── backups/         # PostgreSQL Backups
-└── docker/          # (Optional) Docker Data
+├── stt-models/      # Speech-to-Text Modelle (~19 GB)
+├── matrix/          # Matrix Synapse Daten
+└── docker/          # (Reserviert)
 ```
 
-### Symlinks
+### Vorteile der SSD-Speicherung
+
+| Aspekt | Docker VM | Externe SSD |
+|--------|-----------|-------------|
+| **Bei Docker-Reset** | ❌ Daten weg | ✅ Daten bleiben |
+| **Bei macOS-Neuinstall** | ❌ Daten weg | ✅ Daten bleiben |
+| **Performance** | Langsamer | ~20-30% schneller |
+| **Backup** | Schwieriger | Einfacher |
+
+### Docker-Integration
+
+Die folgenden Services nutzen direkte SSD-Mounts (kein Docker Volume):
+
+| Service | SSD-Pfad | docker-compose.macmini.yml |
+|---------|----------|---------------------------|
+| PostgreSQL | `/Volumes/ManaData/postgres` | `volumes: - /Volumes/ManaData/postgres:/var/lib/postgresql/data` |
+| MinIO | `/Volumes/ManaData/minio` | `volumes: - /Volumes/ManaData/minio:/data` |
+
+### Symlinks (für native Services)
 
 | Original | Symlink |
 |----------|---------|
-| `~/.ollama` | `/Volumes/TillJakob-S04/ManaData/ollama` |
-| `~/stt-models` | `/Volumes/TillJakob-S04/ManaData/stt-models` |
-| `~/flux2` | `/Volumes/TillJakob-S04/ManaData/flux2` |
+| `~/.ollama` | `/Volumes/ManaData/ollama` |
+| `~/stt-models` | `/Volumes/ManaData/stt-models` |
+| `~/flux2` | `/Volumes/ManaData/flux2` |
 
 ### SSD prüfen
 
 ```bash
 # Mount-Status
-df -h /Volumes/TillJakob-S04
+df -h /Volumes/ManaData
 
 # Nutzung
-du -sh /Volumes/TillJakob-S04/ManaData/*
+du -sh /Volumes/ManaData/*/
 
 # Speed-Test
-dd if=/dev/zero of=/Volumes/TillJakob-S04/test bs=1m count=1024 && rm /Volumes/TillJakob-S04/test
+dd if=/dev/zero of=/Volumes/ManaData/test bs=1m count=1024 && rm /Volumes/ManaData/test
+```
+
+### Automatische Backups
+
+PostgreSQL-Backups laufen täglich um 3:00 Uhr:
+
+```bash
+# Backup-Skript
+/Users/mana/backup-postgres.sh
+
+# Backup-Verzeichnis
+/Volumes/ManaData/backups/postgres/
+
+# Retention: 30 Tage
+```
+
+### Docker Desktop Voraussetzung
+
+Docker Desktop benötigt "Full Disk Access" für SSD-Mounts:
+
+```
+Systemeinstellungen → Datenschutz & Sicherheit → Voller Festplattenzugriff → Docker.app ✅
 ```
 
 ### Installation
@@ -491,8 +534,8 @@ Optimierungen bereits aktiviert:
 ### Speicherort
 
 Die Modelle liegen auf der externen 4TB SSD für mehr Platz:
-- **Pfad:** `/Volumes/TillJakob-S04/ManaData/ollama/models`
-- **Symlink:** `~/.ollama -> /Volumes/TillJakob-S04/ManaData/ollama`
+- **Pfad:** `/Volumes/ManaData/ollama/models`
+- **Symlink:** `~/.ollama -> /Volumes/ManaData/ollama`
 
 ### Verfügbare Modelle
 
