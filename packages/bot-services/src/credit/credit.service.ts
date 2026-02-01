@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import {
 	CreditBalance,
 	CreditValidationResult,
-	CreditConsumeResult,
 	CreditModuleOptions,
 	CreditStatusMessage,
 	CreditErrorCode,
