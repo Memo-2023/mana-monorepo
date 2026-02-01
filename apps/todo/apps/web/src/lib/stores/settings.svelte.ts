@@ -10,7 +10,7 @@ import type { TaskPriority } from '@todo/shared';
 export type TodoView = 'inbox' | 'today' | 'upcoming' | 'kanban' | 'completed';
 export type KanbanCardSize = 'compact' | 'normal' | 'large';
 
-export interface TodoAppSettings {
+export interface TodoAppSettings extends Record<string, unknown> {
 	// Task Behavior
 	defaultPriority: TaskPriority;
 	defaultDueTime: string | null;

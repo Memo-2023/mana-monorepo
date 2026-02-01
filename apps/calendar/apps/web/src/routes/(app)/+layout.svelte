@@ -506,7 +506,7 @@
 
 	function handleToolbarCollapsedChange(collapsed: boolean) {
 		isToolbarCollapsed = collapsed;
-		toolbarCollapsedStore.set(collapsed);
+		toolbarCollapsedStore?.set(collapsed);
 		if (typeof localStorage !== 'undefined') {
 			localStorage.setItem('calendar-toolbar-collapsed', String(collapsed));
 		}
@@ -613,7 +613,7 @@
 		const savedToolbarCollapsed = localStorage.getItem('calendar-toolbar-collapsed');
 		if (savedToolbarCollapsed === 'false') {
 			isToolbarCollapsed = false;
-			toolbarCollapsedStore.set(false);
+			toolbarCollapsedStore?.set(false);
 		}
 
 		// Initialize mobile state
@@ -799,7 +799,6 @@
 	onClose={() => (showSettingsModal = false)}
 	{isSidebarMode}
 />
-
 
 <style>
 	.layout-container {

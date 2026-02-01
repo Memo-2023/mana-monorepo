@@ -15,7 +15,7 @@ export type AllDayDisplayMode = 'header' | 'block';
 export type WeekdayFormat = 'full' | 'short' | 'hidden';
 export type SttLanguage = 'de' | 'auto';
 
-export interface CalendarAppSettings {
+export interface CalendarAppSettings extends Record<string, unknown> {
 	// View settings
 	defaultView: CalendarViewType;
 	weekStartsOn: WeekStartDay;

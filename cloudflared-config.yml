@@ -56,7 +56,9 @@ ingress:
   - hostname: matrix.mana.how
     service: http://localhost:8008
   - hostname: element.mana.how
-    service: http://localhost:8087
+    service: http://localhost:4080
+  - hostname: link.mana.how
+    service: http://localhost:4090
 
   # Catch-all
   - service: http_status:404

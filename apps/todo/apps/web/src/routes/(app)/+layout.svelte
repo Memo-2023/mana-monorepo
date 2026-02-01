@@ -245,7 +245,7 @@
 
 	function handleToolbarCollapsedChange(collapsed: boolean) {
 		isToolbarCollapsed = collapsed;
-		toolbarCollapsedStore.set(collapsed);
+		toolbarCollapsedStore?.set(collapsed);
 		try {
 			localStorage?.setItem('todo-toolbar-collapsed', String(collapsed));
 		} catch {
@@ -319,7 +319,7 @@
 			const savedToolbarCollapsed = localStorage?.getItem('todo-toolbar-collapsed');
 			if (savedToolbarCollapsed === 'false') {
 				isToolbarCollapsed = false;
-				toolbarCollapsedStore.set(false);
+				toolbarCollapsedStore?.set(false);
 			}
 		} catch {
 			// localStorage not available
