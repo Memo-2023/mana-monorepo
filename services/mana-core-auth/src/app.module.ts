@@ -14,6 +14,7 @@ import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics';
 import { AnalyticsModule } from './analytics';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { LoggerModule } from './common/logger';
 
 @Module({
 	imports: [
@@ -27,6 +28,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 				limit: 100, // 100 requests per minute
 			},
 		]),
+		LoggerModule,
 		MetricsModule,
 		AnalyticsModule,
 		AiModule,

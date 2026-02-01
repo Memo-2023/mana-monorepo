@@ -8,6 +8,9 @@
  */
 
 import * as nodemailer from 'nodemailer';
+import { getLogger } from '../common/logger';
+
+const logger = getLogger('EmailService');
 
 interface EmailOptions {
 	to: string;
@@ -30,7 +33,7 @@ function getTransporter(): nodemailer.Transporter {
 	const pass = process.env.SMTP_PASSWORD;
 
 	if (!user || !pass) {
-		console.warn('[Email] SMTP credentials not configured, emails will be logged only');
+		logger.warn('SMTP credentials not configured, emails will be logged only');
 		return null as any;
 	}
 
@@ -54,15 +57,12 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 	const { to, subject, html, text } = options;
 	const from = process.env.SMTP_FROM || 'ManaCore <noreply@mana.how>';
 
-	console.log(`[Email] Sending to: ${to}, subject: ${subject}`);
+	logger.info('Sending email', { to, subject });
 
 	const transport = getTransporter();
 
 	if (!transport) {
-		console.log('[Email] No SMTP configured, logging email content:');
-		console.log(`  To: ${to}`);
-		console.log(`  Subject: ${subject}`);
-		console.log(`  HTML: ${html.substring(0, 200)}...`);
+		logger.debug('No SMTP configured, email not sent', { to, subject });
 		return false;
 	}
 
@@ -75,10 +75,10 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 			text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML for text version
 		});
 
-		console.log(`[Email] Sent successfully, messageId: ${result.messageId}`);
+		logger.info('Email sent successfully', { to, messageId: result.messageId });
 		return true;
 	} catch (error) {
-		console.error('[Email] Failed to send:', error);
+		logger.error('Failed to send email', error instanceof Error ? error.stack : undefined, { to });
 		return false;
 	}
 }

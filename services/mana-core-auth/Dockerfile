@@ -33,13 +33,11 @@ WORKDIR /app
 # Copy package files
 COPY --from=builder /app/package.json ./
 
-# Install production dependencies + tsx for migrations
-RUN pnpm install --prod && pnpm add tsx
+# Install production dependencies only (no tsx needed - migrations run externally)
+RUN pnpm install --prod
 
-# Copy built application
+# Copy built application only (no source code)
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/db ./src/db
-COPY services/mana-core-auth/drizzle.config.ts ./
 COPY services/mana-core-auth/docker-entrypoint.sh ./
 
 # Make entrypoint executable
@@ -58,9 +56,9 @@ USER nestjs
 # Expose port
 EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Health check - uses /health/ready to verify database connectivity
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/health/ready', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1))"
 
-# Start the application with entrypoint that runs migrations
+# Start the application
 ENTRYPOINT ["./docker-entrypoint.sh"]

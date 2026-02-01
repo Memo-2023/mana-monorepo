@@ -23,6 +23,7 @@ import {
 	forwardRef,
 	Optional,
 } from '@nestjs/common';
+import { LoggerService } from '../../common/logger';
 import { ConfigService } from '@nestjs/config';
 import { createBetterAuth } from '../better-auth.config';
 import type { BetterAuthInstance } from '../better-auth.config';
@@ -64,7 +65,6 @@ import type {
 	BetterAuthUser,
 	BetterAuthSession,
 } from '../types/better-auth.types';
-import * as jwt from 'jsonwebtoken';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 // Re-export DTOs and result types for external use
@@ -89,6 +89,7 @@ export type {
 export class BetterAuthService {
 	private auth: BetterAuthInstance;
 	private databaseUrl: string;
+	private readonly logger: LoggerService;
 
 	/**
 	 * Typed accessor for organization plugin API methods
@@ -117,8 +118,10 @@ export class BetterAuthService {
 		private referralTierService: ReferralTierService,
 		@Optional()
 		@Inject(forwardRef(() => ReferralTrackingService))
-		private referralTrackingService: ReferralTrackingService
+		private referralTrackingService: ReferralTrackingService,
+		loggerService: LoggerService
 	) {
+		this.logger = loggerService.setContext('BetterAuthService');
 		this.databaseUrl = this.configService.get<string>('database.url')!;
 		this.auth = createBetterAuth(this.databaseUrl);
 	}
@@ -346,7 +349,10 @@ export class BetterAuthService {
 			// Use type guard for safe access
 			return hasMembers(result) ? result.members : [];
 		} catch (error) {
-			console.error('Error fetching organization members:', error);
+			this.logger.error(
+				'Failed to fetch organization members',
+				error instanceof Error ? error.stack : undefined
+			);
 			return [];
 		}
 	}
@@ -477,43 +483,13 @@ export class BetterAuthService {
 					throw new Error('Better Auth signJWT returned empty token');
 				}
 			} catch (jwtError) {
-				console.warn('[signIn] Better Auth signJWT failed, using manual JWT generation:', jwtError);
+				this.logger.warn('Better Auth signJWT failed, using session token as fallback', {
+					error: jwtError instanceof Error ? jwtError.message : 'Unknown error',
+				});
 
-				// Fallback: Generate JWT manually using jsonwebtoken
-				const privateKey = this.configService.get<string>('jwt.privateKey');
-				const issuer = this.configService.get<string>('jwt.issuer') || 'manacore';
-				const audience = this.configService.get<string>('jwt.audience') || 'manacore';
-
-				console.log('[signIn] Private key exists:', !!privateKey);
-				console.log('[signIn] Private key length:', privateKey?.length);
-				console.log('[signIn] Private key starts with:', privateKey?.substring(0, 30));
-				console.log('[signIn] Issuer:', issuer);
-				console.log('[signIn] Audience:', audience);
-
-				if (privateKey) {
-					const payload = {
-						sub: user.id,
-						email: user.email,
-						role: (user as BetterAuthUser).role || 'user',
-						sid: session?.id || '',
-					};
-
-					accessToken = jwt.sign(payload, privateKey, {
-						algorithm: 'RS256',
-						expiresIn: '15m',
-						issuer,
-						audience,
-					});
-
-					console.log('[signIn] Generated JWT (first 50 chars):', accessToken?.substring(0, 50));
-					// Decode to verify
-					const decoded = jwt.decode(accessToken, { complete: true });
-					console.log('[signIn] Generated JWT header:', decoded?.header);
-					console.log('[signIn] Generated JWT payload:', decoded?.payload);
-				} else {
-					console.error('[signIn] No JWT private key configured');
-					accessToken = sessionToken;
-				}
+				// Fallback: Use session token (Better Auth manages JWT signing via JWKS)
+				// NOTE: If signJWT fails repeatedly, check that the auth.jwks table has valid EdDSA keys
+				accessToken = sessionToken;
 			}
 
 			return {
@@ -562,7 +538,9 @@ export class BetterAuthService {
 		} catch (error: unknown) {
 			// Even if signOut fails, we treat it as success for the user
 			// The session will expire naturally
-			console.error('Error during sign out:', error);
+			this.logger.warn('Sign out error (session will expire naturally)', {
+				error: error instanceof Error ? error.message : 'Unknown error',
+			});
 			return { success: true, message: 'Signed out successfully' };
 		}
 	}
@@ -628,7 +606,10 @@ export class BetterAuthService {
 
 			return { organizations };
 		} catch (error: unknown) {
-			console.error('Error listing organizations:', error);
+			this.logger.error(
+				'Failed to list organizations',
+				error instanceof Error ? error.stack : undefined
+			);
 			return { organizations: [] };
 		}
 	}
@@ -821,17 +802,12 @@ export class BetterAuthService {
 	 */
 	async validateToken(token: string): Promise<ValidateTokenResult> {
 		try {
-			console.log('[validateToken] Token (first 50 chars):', token?.substring(0, 50));
-
 			// Decode to check the algorithm
 			const decoded = jwt.decode(token, { complete: true });
-			console.log('[validateToken] Decoded header:', decoded?.header);
 
 			// Use our JWKS endpoint (NestJS prefix: /api/v1)
 			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
 			const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
-
-			console.log('[validateToken] Using JWKS from:', jwksUrl.toString());
 
 			// Create JWKS fetcher
 			const JWKS = createRemoteJWKSet(jwksUrl);
@@ -840,17 +816,13 @@ export class BetterAuthService {
 			const issuer = this.configService.get<string>('jwt.issuer') || baseUrl;
 			const audience = this.configService.get<string>('jwt.audience') || baseUrl;
 
-			console.log('[validateToken] Issuer:', issuer);
-			console.log('[validateToken] Audience:', audience);
-
 			// Verify using jose library with Better Auth's JWKS
 			const { payload } = await jwtVerify(token, JWKS, {
 				issuer,
 				audience,
 			});
 
-			console.log('[validateToken] Verification SUCCESS');
-			console.log('[validateToken] Payload:', payload);
+			this.logger.debug('Token validation successful', { userId: payload.sub });
 
 			return {
 				valid: true,
@@ -858,7 +830,7 @@ export class BetterAuthService {
 			};
 		} catch (error: unknown) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-			console.error('[validateToken] Verification FAILED:', errorMessage);
+			this.logger.warn('Token validation failed', { error: errorMessage });
 			return {
 				valid: false,
 				error: errorMessage,
@@ -906,7 +878,10 @@ export class BetterAuthService {
 				message: 'If an account with that email exists, a password reset link has been sent',
 			};
 		} catch (error) {
-			console.error('[requestPasswordReset] Error:', error);
+			this.logger.error(
+				'Password reset request failed',
+				error instanceof Error ? error.stack : undefined
+			);
 			// Always return success to prevent email enumeration attacks
 			return {
 				success: true,
@@ -977,10 +952,9 @@ export class BetterAuthService {
 				query: { token },
 			});
 
-			console.log('[verifyEmail] Result:', result);
-
 			// Extract email from result if available
 			const email = result?.user?.email || result?.email;
+			this.logger.debug('Email verification successful', { email });
 
 			return {
 				success: true,
@@ -988,7 +962,7 @@ export class BetterAuthService {
 			};
 		} catch (error: unknown) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-			console.error('[verifyEmail] Error:', errorMessage);
+			this.logger.warn('Email verification failed', { error: errorMessage });
 
 			if (errorMessage.includes('invalid') || errorMessage.includes('expired')) {
 				return {
@@ -1038,7 +1012,10 @@ export class BetterAuthService {
 				message: 'If an account with that email exists, a verification email has been sent',
 			};
 		} catch (error) {
-			console.error('[resendVerificationEmail] Error:', error);
+			this.logger.error(
+				'Resend verification email failed',
+				error instanceof Error ? error.stack : undefined
+			);
 			// Always return success to prevent email enumeration attacks
 			return {
 				success: true,
@@ -1082,7 +1059,7 @@ export class BetterAuthService {
 				}),
 			};
 		} catch (error) {
-			console.error('[getJwks] Error:', error);
+			this.logger.error('Failed to get JWKS', error instanceof Error ? error.stack : undefined);
 			return { keys: [] };
 		}
 	}
@@ -1132,7 +1109,9 @@ export class BetterAuthService {
 				totalSpent: 0,
 			});
 		} catch (error) {
-			console.error('Error creating personal credit balance:', error);
+			this.logger.warn('Failed to create personal credit balance (non-critical)', {
+				error: error instanceof Error ? error.message : 'Unknown error',
+			});
 			// Don't throw - this is a non-critical operation
 		}
 	}
@@ -1163,7 +1142,9 @@ export class BetterAuthService {
 				totalAllocated: 0,
 			});
 		} catch (error) {
-			console.error('Error creating organization credit balance:', error);
+			this.logger.warn('Failed to create organization credit balance (non-critical)', {
+				error: error instanceof Error ? error.message : 'Unknown error',
+			});
 			// Don't throw - this is a non-critical operation
 		}
 	}
@@ -1227,12 +1208,15 @@ export class BetterAuthService {
 				});
 
 				if (!result.success) {
-					console.warn('[initializeUserReferrals] Failed to apply referral code:', result.error);
+					this.logger.warn('Failed to apply referral code', { error: result.error, referralCode });
 				}
 			}
 		} catch (error) {
 			// Log but don't fail registration if referral setup fails
-			console.error('[initializeUserReferrals] Error setting up referrals:', error);
+			this.logger.error(
+				'Error setting up referrals',
+				error instanceof Error ? error.stack : undefined
+			);
 		}
 	}
 
@@ -1353,7 +1337,10 @@ export class BetterAuthService {
 				body,
 			};
 		} catch (error) {
-			console.error('[handleOidcRequest] Error:', error);
+			this.logger.error(
+				'OIDC request handling failed',
+				error instanceof Error ? error.stack : undefined
+			);
 			throw error;
 		}
 	}

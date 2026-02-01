@@ -1,52 +1,76 @@
+/**
+ * Application Configuration
+ *
+ * Loads and validates environment variables.
+ * Fails fast at startup if required variables are missing.
+ */
+
+import { validateEnv, isDevelopment } from './env.validation';
+
+// Validate environment on module load
+const env = validateEnv();
+
 export default () => ({
-	port: parseInt(process.env.PORT || '3001', 10),
-	nodeEnv: process.env.NODE_ENV || 'development',
+	port: parseInt(env.PORT, 10),
+	nodeEnv: env.NODE_ENV,
 
 	database: {
-		url: process.env.DATABASE_URL || 'postgresql://manacore:password@localhost:5432/manacore',
+		// In development, allow fallback to local database
+		// In production, DATABASE_URL is validated as required
+		url:
+			env.DATABASE_URL ||
+			(isDevelopment() ? 'postgresql://manacore:manacore@localhost:5432/manacore_auth' : ''),
 	},
 
 	jwt: {
-		// Convert \n string literals to actual newlines for PEM format
-		publicKey: (process.env.JWT_PUBLIC_KEY || '').replace(/\\n/g, '\n'),
-		privateKey: (process.env.JWT_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-		accessTokenExpiry: process.env.JWT_ACCESS_TOKEN_EXPIRY || '15m',
-		refreshTokenExpiry: process.env.JWT_REFRESH_TOKEN_EXPIRY || '7d',
-		issuer: process.env.JWT_ISSUER || 'manacore',
-		audience: process.env.JWT_AUDIENCE || 'manacore',
+		// Better Auth uses JWKS from database, these are legacy/fallback
+		publicKey: (env.JWT_PUBLIC_KEY || '').replace(/\\n/g, '\n'),
+		privateKey: (env.JWT_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+		accessTokenExpiry: env.JWT_ACCESS_TOKEN_EXPIRY,
+		refreshTokenExpiry: env.JWT_REFRESH_TOKEN_EXPIRY,
+		issuer: env.JWT_ISSUER,
+		audience: env.JWT_AUDIENCE,
 	},
 
 	redis: {
-		host: process.env.REDIS_HOST || 'localhost',
-		port: parseInt(process.env.REDIS_PORT || '6379', 10),
-		password: process.env.REDIS_PASSWORD,
+		host: env.REDIS_HOST || 'localhost',
+		port: parseInt(env.REDIS_PORT || '6379', 10),
+		password: env.REDIS_PASSWORD,
 	},
 
 	stripe: {
-		secretKey: process.env.STRIPE_SECRET_KEY || '',
-		webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
-		publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+		secretKey: env.STRIPE_SECRET_KEY || '',
+		webhookSecret: env.STRIPE_WEBHOOK_SECRET || '',
+		publishableKey: env.STRIPE_PUBLISHABLE_KEY || '',
 	},
 
 	cors: {
-		origin: process.env.CORS_ORIGINS?.split(',') || [
-			'http://localhost:3000',
-			'http://localhost:8081',
-		],
+		origin:
+			env.CORS_ORIGINS?.split(',').map((o) => o.trim()) ||
+			(isDevelopment()
+				? [
+						'http://localhost:3000',
+						'http://localhost:5173',
+						'http://localhost:5174',
+						'http://localhost:8081',
+					]
+				: []),
 		credentials: true,
 	},
 
 	rateLimit: {
-		ttl: parseInt(process.env.RATE_LIMIT_TTL || '60', 10),
-		limit: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
+		ttl: parseInt(env.RATE_LIMIT_TTL || '60', 10),
+		limit: parseInt(env.RATE_LIMIT_MAX || '100', 10),
 	},
 
 	credits: {
-		signupBonus: parseInt(process.env.CREDITS_SIGNUP_BONUS || '150', 10),
-		dailyFreeCredits: parseInt(process.env.CREDITS_DAILY_FREE || '5', 10),
+		signupBonus: parseInt(env.CREDITS_SIGNUP_BONUS || '150', 10),
+		dailyFreeCredits: parseInt(env.CREDITS_DAILY_FREE || '5', 10),
 	},
 
 	ai: {
-		geminiApiKey: process.env.GOOGLE_GENAI_API_KEY || '',
+		geminiApiKey: env.GOOGLE_GENAI_API_KEY || '',
 	},
+
+	baseUrl: env.BASE_URL || (isDevelopment() ? 'http://localhost:3001' : ''),
 });

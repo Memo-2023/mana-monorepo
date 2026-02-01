@@ -7,6 +7,9 @@ import cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import { AppModule } from './app.module';
 import { MetricsService } from './metrics/metrics.service';
+import { getLogger } from './common/logger';
+
+const logger = getLogger('Bootstrap');
 
 // Normalize route paths to prevent high cardinality
 function normalizeRoute(path: string): string {
@@ -76,7 +79,7 @@ async function bootstrap() {
 
 	// CORS configuration
 	const corsOrigins = configService.get<string[]>('cors.origin') || [];
-	console.log('📋 CORS Origins configured:', corsOrigins);
+	logger.info('CORS Origins configured', { origins: corsOrigins });
 	app.enableCors({
 		origin: corsOrigins,
 		credentials: true,
@@ -128,8 +131,10 @@ async function bootstrap() {
 	const port = configService.get<number>('port') || 3001;
 	await app.listen(port);
 
-	console.log(`🚀 Mana Core Auth running on: http://localhost:${port}`);
-	console.log(`📚 Environment: ${configService.get<string>('nodeEnv')}`);
+	logger.info(`Mana Core Auth running on http://localhost:${port}`, {
+		port,
+		environment: configService.get<string>('nodeEnv'),
+	});
 }
 
 bootstrap();

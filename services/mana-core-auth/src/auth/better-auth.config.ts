@@ -319,7 +319,9 @@ export function createBetterAuth(databaseUrl: string) {
 				loginPage: '/login',
 				// Consent page (skipped for trusted clients)
 				consentPage: '/consent',
-				// Use JWT plugin for token signing
+				// Use JWT plugin for token signing (EdDSA instead of HS256)
+				// This is required for Synapse OIDC which verifies via JWKS
+				useJWTPlugin: true,
 				metadata: {
 					issuer: process.env.BASE_URL || 'http://localhost:3001',
 				},

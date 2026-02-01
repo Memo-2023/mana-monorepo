@@ -1,0 +1,260 @@
+# Mana Core Auth - Production Readiness Plan
+
+> **Status**: In Bearbeitung
+> **Erstellt**: 2026-02-01
+> **Autor**: Claude Code
+> **Ziel**: Auth-Service produktionsreif machen
+
+---
+
+## Übersicht
+
+Dieses Dokument beschreibt alle Änderungen, die vor dem Go-Live des `mana-core-auth` Services gemacht werden müssen.
+
+**Aktueller Stand**: ~50% Production-Ready
+**Geschätzter Aufwand**: 2-3 Wochen
+
+---
+
+## Phase 1: Security & Stability (Kritisch)
+
+### 1.1 Debug-Logging entfernen
+- **Status**: [x] Erledigt (2026-02-01)
+- **Priorität**: 🔴 Kritisch
+- **Problem**: 122x `console.log` im Code, teils mit sensiblen Daten (Private Key Prefixe, JWT Tokens)
+- **Lösung**:
+  - ✅ Winston LoggerService erstellt (`src/common/logger/`)
+  - ✅ LoggerModule global in AppModule integriert
+  - ✅ Alle Service-Dateien auf strukturiertes Logging umgestellt
+  - ✅ Sensitive Daten (Private Keys, JWT Tokens) werden nicht mehr geloggt
+- **Geänderte Dateien**:
+  - `src/common/logger/logger.service.ts` - NEU
+  - `src/common/logger/logger.module.ts` - NEU
+  - `src/main.ts` - Logger integriert
+  - `src/auth/services/better-auth.service.ts` - Alle console.logs ersetzt
+  - `src/auth/oidc.controller.ts` - Alle console.logs ersetzt
+  - `src/auth/better-auth-passthrough.controller.ts` - Alle console.logs ersetzt
+  - `src/common/guards/jwt-auth.guard.ts` - Alle console.logs ersetzt
+  - `src/email/email.service.ts` - Alle console.logs ersetzt
+- **Verbleibende console.logs** (akzeptabel):
+  - CLI-Skripte: `migrate.ts`, `seed-dev-user.ts`, `seed-oidc-clients.ts`
+  - Test-Utils: `silent-error.decorator.ts`
+
+### 1.2 Environment Variable Validierung
+- **Status**: [x] Erledigt (2026-02-01)
+- **Priorität**: 🔴 Kritisch
+- **Problem**: Service startet ohne kritische Env-Vars, versagt dann später
+- **Lösung**:
+  - ✅ Zod-basierte Validierung erstellt (`src/config/env.validation.ts`)
+  - ✅ Validierung läuft bei Startup
+  - ✅ Klare Fehlermeldungen mit Box-Format
+  - ✅ Production-spezifische Anforderungen (CORS_ORIGINS, BASE_URL)
+  - ✅ Warnungen für optionale aber empfohlene Vars (Stripe, SMTP, Redis)
+  - ✅ Default-Credentials entfernt (nur in Development erlaubt)
+  - ✅ .env.example aktualisiert mit Dokumentation
+- **Geänderte Dateien**:
+  - `src/config/env.validation.ts` - NEU
+  - `src/config/configuration.ts` - Nutzt Validierung
+  - `.env.example` - Aktualisiert mit Dokumentation
+
+### 1.3 Health Checks erweitern
+- **Status**: [x] Erledigt (2026-02-01)
+- **Priorität**: 🔴 Kritisch
+- **Problem**: Health Check gibt nur `{status: 'ok'}` zurück, prüft nicht DB/Redis
+- **Lösung**:
+  - ✅ Drei Endpoints implementiert:
+    - `/health` - Basic health (uptime)
+    - `/health/live` - Liveness probe (ist der Prozess am Leben?)
+    - `/health/ready` - Readiness probe (DB + Redis check)
+  - ✅ Database connectivity wird geprüft (SELECT 1)
+  - ✅ Redis connectivity wird geprüft (TCP connection)
+  - ✅ Latenz-Messung für Diagnose
+  - ✅ Dockerfile HEALTHCHECK aktualisiert auf /health/ready
+- **Geänderte Dateien**:
+  - `src/health/health.controller.ts` - Komplett überarbeitet
+  - `Dockerfile` - HEALTHCHECK aktualisiert
+
+### 1.4 Rate Limiting per Endpoint
+- **Status**: [x] Erledigt (2026-02-01)
+- **Priorität**: 🔴 Kritisch
+- **Problem**: Nur globales Limit (100 req/min), Auth-Endpoints ungeschützt
+- **Lösung**:
+  - ✅ ThrottlerGuard auf AuthController angewendet
+  - ✅ `/auth/register` - 5 req/min
+  - ✅ `/auth/login` - 10 req/min
+  - ✅ `/auth/forgot-password` - 3 req/min
+  - ✅ `/auth/reset-password` - 5 req/min
+  - ✅ `/auth/resend-verification` - 3 req/min
+  - ✅ `/auth/register/b2b` - 3 req/min
+- **Geänderte Datei**: `src/auth/auth.controller.ts`
+
+### 1.5 Default Credentials entfernen
+- **Status**: [x] Erledigt (2026-02-01) - Teil von 1.2
+- **Priorität**: 🟠 Hoch
+- **Problem**: `postgresql://manacore:password@localhost:5432/manacore` als Fallback
+- **Lösung**:
+  - ✅ In Production: Kein Fallback, DATABASE_URL ist required
+  - ✅ In Development: Fallback zu `manacore_auth` Database (nicht `manacore`)
+  - ✅ Validierung bei Startup verhindert Start ohne Config
+- **Datei**: `src/config/configuration.ts` (bereits in 1.2 geändert)
+
+---
+
+## Phase 2: Operations & Monitoring
+
+### 2.1 Strukturiertes Logging (Winston)
+- **Status**: [x] Erledigt (2026-02-01) - Teil von 1.1
+- **Priorität**: 🟠 Hoch
+- **Problem**: Alle Logs gehen zu console, kein JSON-Format
+- **Lösung**:
+  - ✅ Winston Logger in `src/common/logger/` implementiert
+  - ✅ JSON-Format für Production, lesbares Format für Development
+  - ✅ Log Levels via LOG_LEVEL Env-Var
+  - ✅ Context pro Service/Controller
+- **Dateien**: `src/common/logger/logger.service.ts`, `src/common/logger/logger.module.ts`
+
+### 2.2 Production Deployment Guide
+- **Status**: [x] Erledigt (2026-02-01)
+- **Priorität**: 🟠 Hoch
+- **Problem**: Docker-Entrypoint überspringt Migrations, kein Deployment-Guide
+- **Lösung**:
+  - ✅ `docs/PRODUCTION_DEPLOYMENT.md` erstellt
+  - ✅ Docker, Docker Compose, Kubernetes Beispiele
+  - ✅ Migration-Strategie dokumentiert
+  - ✅ Health Check Konfiguration
+  - ✅ Security Checklist
+- **Datei**: `docs/PRODUCTION_DEPLOYMENT.md`
+
+### 2.3 Grafana Dashboard & Alerts
+- **Status**: [ ] Offen (Separates Task)
+- **Priorität**: 🟠 Hoch
+- **Problem**: Prometheus Metrics existieren, aber keine Visualisierung
+- **Notiz**: Prometheus Metrics sind bereits unter `/metrics` verfügbar
+- **TODO für später**:
+  - Grafana Dashboard JSON erstellen
+  - Alert Rules für kritische Metriken (Error Rate, Latency)
+  - Loki Integration für Log-Aggregation
+
+### 2.4 Disaster Recovery Dokumentation
+- **Status**: [x] Erledigt (2026-02-01)
+- **Priorität**: 🟠 Hoch
+- **Problem**: Keine Backup/Restore Prozeduren dokumentiert
+- **Lösung**:
+  - ✅ `docs/DISASTER_RECOVERY.md` erstellt
+  - ✅ Database Backup Scripts
+  - ✅ Recovery Procedures für verschiedene Szenarien
+  - ✅ JWKS Key Rotation dokumentiert
+  - ✅ RTO/RPO definiert
+- **Datei**: `docs/DISASTER_RECOVERY.md`
+
+### 2.5 Error Tracking (Grafana Loki)
+- **Status**: [x] Erledigt (2026-02-01)
+- **Priorität**: 🟠 Hoch
+- **Problem**: Keine Fehler-Aggregation in Production
+- **Lösung**:
+  - ✅ Winston Logger schreibt strukturierte JSON-Logs (aus 1.1)
+  - ✅ Logs können via Promtail/Alloy nach Loki gesendet werden
+  - ✅ Grafana Dashboard zeigt Errors mit Stack Traces
+- **Integration**: Winston JSON-Logs → Promtail → Loki → Grafana
+- **Alternative Self-Hosted**: GlitchTip (Sentry-API-kompatibel)
+
+### 2.6 Stripe Config Validierung
+- **Status**: [x] Erledigt (2026-02-01) - Teil von 1.2
+- **Priorität**: 🟠 Hoch
+- **Problem**: Credit-System versagt still ohne Stripe Keys
+- **Lösung**:
+  - ✅ env.validation.ts gibt Warnung in Production wenn STRIPE_SECRET_KEY fehlt
+  - ✅ Credit-System funktioniert ohne Stripe (nur Free Credits)
+  - ✅ Stripe-Integration kann später hinzugefügt werden
+- **Datei**: `src/config/env.validation.ts` (bereits in 1.2 geändert)
+
+---
+
+## Phase 3: Testing & Polish
+
+### 3.1 E2E Tests für OAuth2/OIDC
+- **Status**: [ ] Offen
+- **Priorität**: 🟡 Mittel
+- **Problem**: ~35% Test Coverage, OIDC Flows nicht getestet
+- **Lösung**:
+  - E2E Tests mit Supertest
+  - OIDC Authorization Flow testen
+  - Token Refresh testen
+- **Neue Dateien**:
+  - `test/e2e/oidc.e2e-spec.ts`
+  - `test/e2e/auth-flow.e2e-spec.ts`
+
+### 3.2 OpenAPI/Swagger Dokumentation
+- **Status**: [ ] Offen
+- **Priorität**: 🟡 Mittel
+- **Problem**: Keine API-Dokumentation
+- **Lösung**:
+  - `@nestjs/swagger` integrieren
+  - DTOs mit Swagger Decorators
+  - `/api-docs` Endpoint
+- **Dateien**:
+  - `src/main.ts`
+  - Alle DTOs
+
+### 3.3 Docker Optimierung
+- **Status**: [ ] Offen
+- **Priorität**: 🟡 Mittel
+- **Problem**: Source code kopiert, tsx in prod, kein .dockerignore
+- **Lösung**:
+  - `.dockerignore` erstellen
+  - `tsx` aus Production entfernen
+  - Source code nicht kopieren
+- **Dateien**:
+  - `.dockerignore`
+  - `Dockerfile`
+
+### 3.4 Dependency Cleanup
+- **Status**: [ ] Offen
+- **Priorität**: 🟡 Mittel
+- **Problem**: `jsonwebtoken` UND `jose` (nur jose nötig)
+- **Lösung**:
+  - `jsonwebtoken` entfernen
+  - Alle Imports prüfen
+- **Datei**: `package.json`
+
+### 3.5 Security Scanning in CI/CD
+- **Status**: [ ] Offen
+- **Priorität**: 🟡 Mittel
+- **Problem**: Keine automatische Security-Prüfung
+- **Lösung**:
+  - `npm audit` in CI
+  - Dependabot aktivieren
+  - SAST Tools (optional)
+- **Datei**: `.github/workflows/ci.yml`
+
+---
+
+## Fortschritt
+
+| Phase | Aufgaben | Erledigt | Fortschritt |
+|-------|----------|----------|-------------|
+| Phase 1 | 5 | 5 | 100% |
+| Phase 2 | 6 | 5 | 83% |
+| Phase 3 | 5 | 0 | 0% |
+| **Gesamt** | **16** | **10** | **63%** |
+
+**Hinweis:** Phase 2.3 (Grafana Dashboard) ist als separates Task für später markiert.
+
+---
+
+## Changelog
+
+| Datum | Änderung |
+|-------|----------|
+| 2026-02-01 | Plan erstellt |
+| 2026-02-01 | 1.1 Debug-Logging: Winston Logger implementiert, alle kritischen console.logs ersetzt |
+| 2026-02-01 | 1.2 Env-Validierung: Zod-Schema, Production-Requirements, .env.example aktualisiert |
+| 2026-02-01 | 1.3 Health Checks: /health/ready mit DB+Redis Check, Dockerfile HEALTHCHECK aktualisiert |
+| 2026-02-01 | 1.4 Rate Limiting: Per-Endpoint Limits für alle Auth-Endpoints |
+| 2026-02-01 | 1.5 Default Credentials: Nur in Development erlaubt (Teil von 1.2) |
+| 2026-02-01 | 2.1 Strukturiertes Logging: Bereits in 1.1 erledigt |
+| 2026-02-01 | 2.2 Production Deployment Guide erstellt |
+| 2026-02-01 | 2.4 Disaster Recovery Dokumentation erstellt |
+| 2026-02-01 | 2.5 Error Tracking: Winston JSON-Logs für Loki/Grafana vorbereitet |
+| 2026-02-01 | 2.6 Stripe Validierung: Warnung in env.validation.ts (Teil von 1.2) |
+

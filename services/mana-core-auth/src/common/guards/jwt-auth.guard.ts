@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { LoggerService } from '../logger';
 
 /**
  * JWT Auth Guard using JWKS (Better Auth compatible)
@@ -16,17 +17,20 @@ import { jwtVerify, createRemoteJWKSet } from 'jose';
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
 	private jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+	private readonly logger: LoggerService;
 
-	constructor(private configService: ConfigService) {}
+	constructor(
+		private configService: ConfigService,
+		loggerService: LoggerService
+	) {
+		this.logger = loggerService.setContext('JwtAuthGuard');
+	}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
 		const token = this.extractTokenFromHeader(request);
 
-		console.log('[JwtAuthGuard] Token (first 50 chars):', token?.substring(0, 50));
-
 		if (!token) {
-			console.log('[JwtAuthGuard] No token provided');
 			throw new UnauthorizedException('No token provided');
 		}
 
@@ -35,21 +39,18 @@ export class JwtAuthGuard implements CanActivate {
 			if (!this.jwks) {
 				const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
 				const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
-				console.log('[JwtAuthGuard] Initializing JWKS from:', jwksUrl.toString());
 				this.jwks = createRemoteJWKSet(jwksUrl);
 			}
 
 			const issuer = this.configService.get<string>('jwt.issuer') || 'manacore';
 			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
 
-			console.log('[JwtAuthGuard] Verifying with issuer:', issuer, 'audience:', audience);
-
 			const { payload } = await jwtVerify(token, this.jwks, {
 				issuer,
 				audience,
 			});
 
-			console.log('[JwtAuthGuard] Verification SUCCESS, user:', payload.sub);
+			this.logger.debug('Token verification successful', { userId: payload.sub });
 
 			// Attach user to request
 			request.user = {
@@ -60,7 +61,9 @@ export class JwtAuthGuard implements CanActivate {
 
 			return true;
 		} catch (error) {
-			console.error('[JwtAuthGuard] Token verification FAILED:', error);
+			this.logger.warn('Token verification failed', {
+				error: error instanceof Error ? error.message : 'Unknown error',
+			});
 			throw new UnauthorizedException('Invalid token');
 		}
 	}

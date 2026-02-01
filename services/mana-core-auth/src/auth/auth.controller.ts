@@ -10,6 +10,7 @@ import {
 	HttpCode,
 	HttpStatus,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { BetterAuthService } from './services/better-auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -45,6 +46,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
  * - POST /auth/organizations/set-active - Switch active organization
  */
 @Controller('auth')
+@UseGuards(ThrottlerGuard)
 export class AuthController {
 	constructor(private readonly betterAuthService: BetterAuthService) {}
 
@@ -56,8 +58,10 @@ export class AuthController {
 	 * Register a new B2C user (individual)
 	 *
 	 * Creates a user account and initializes their credit balance.
+	 * Rate limited to 5 requests per minute to prevent abuse.
 	 */
 	@Post('register')
+	@Throttle({ default: { ttl: 60000, limit: 5 } })
 	async register(@Body() registerDto: RegisterDto) {
 		return this.betterAuthService.registerB2C({
 			email: registerDto.email,
@@ -71,8 +75,10 @@ export class AuthController {
 	 * Sign in with email and password
 	 *
 	 * Returns user data and JWT token.
+	 * Rate limited to 10 requests per minute to prevent brute force.
 	 */
 	@Post('login')
+	@Throttle({ default: { ttl: 60000, limit: 10 } })
 	@HttpCode(HttpStatus.OK)
 	async login(@Body() loginDto: LoginDto) {
 		return this.betterAuthService.signIn({
@@ -150,8 +156,10 @@ export class AuthController {
 	 *
 	 * Initiates the password reset flow by sending an email with a reset link.
 	 * Always returns success to prevent email enumeration attacks.
+	 * Rate limited to 3 requests per minute to prevent abuse.
 	 */
 	@Post('forgot-password')
+	@Throttle({ default: { ttl: 60000, limit: 3 } })
 	@HttpCode(HttpStatus.OK)
 	async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
 		return this.betterAuthService.requestPasswordReset(
@@ -164,8 +172,10 @@ export class AuthController {
 	 * Reset password with token
 	 *
 	 * Completes the password reset using the token from the email link.
+	 * Rate limited to 5 requests per minute.
 	 */
 	@Post('reset-password')
+	@Throttle({ default: { ttl: 60000, limit: 5 } })
 	@HttpCode(HttpStatus.OK)
 	async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
 		return this.betterAuthService.resetPassword(
@@ -179,8 +189,10 @@ export class AuthController {
 	 *
 	 * Sends a new verification email to the user.
 	 * Always returns success to prevent email enumeration attacks.
+	 * Rate limited to 3 requests per minute to prevent abuse.
 	 */
 	@Post('resend-verification')
+	@Throttle({ default: { ttl: 60000, limit: 3 } })
 	@HttpCode(HttpStatus.OK)
 	async resendVerification(@Body() resendVerificationDto: ResendVerificationDto) {
 		return this.betterAuthService.resendVerificationEmail(
@@ -198,8 +210,10 @@ export class AuthController {
 	 *
 	 * Creates an organization with the registering user as owner.
 	 * Also creates organization credit balance.
+	 * Rate limited to 3 requests per minute.
 	 */
 	@Post('register/b2b')
+	@Throttle({ default: { ttl: 60000, limit: 3 } })
 	async registerB2B(@Body() registerDto: RegisterB2BDto) {
 		return this.betterAuthService.registerB2B(registerDto);
 	}

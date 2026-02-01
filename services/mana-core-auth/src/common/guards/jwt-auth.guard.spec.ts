@@ -13,6 +13,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { LoggerService } from '../logger';
 import { createMockConfigService, httpMockHelpers } from '../../__tests__/utils/test-helpers';
 import { mockTokenFactory } from '../../__tests__/utils/mock-factories';
 import { silentError } from '../../__tests__/utils/silent-error.decorator';
@@ -20,6 +21,18 @@ import { jwtVerify } from 'jose';
 
 // Mock jose (auto-mocked via jest.config.js moduleNameMapper)
 jest.mock('jose');
+
+// Mock LoggerService
+const createMockLoggerService = (): LoggerService =>
+	({
+		setContext: jest.fn().mockReturnThis(),
+		log: jest.fn(),
+		info: jest.fn(),
+		error: jest.fn(),
+		warn: jest.fn(),
+		debug: jest.fn(),
+		verbose: jest.fn(),
+	}) as unknown as LoggerService;
 
 describe('JwtAuthGuard', () => {
 	let guard: JwtAuthGuard;
@@ -40,6 +53,10 @@ describe('JwtAuthGuard', () => {
 						'jwt.issuer': 'manacore',
 						'jwt.audience': 'manacore',
 					}),
+				},
+				{
+					provide: LoggerService,
+					useValue: createMockLoggerService(),
 				},
 			],
 		}).compile();
@@ -344,7 +361,8 @@ describe('JwtAuthGuard', () => {
 				createMockConfigService({
 					'jwt.issuer': 'manacore',
 					'jwt.audience': 'manacore',
-				})
+				}),
+				createMockLoggerService()
 			);
 
 			const mockRequest = httpMockHelpers.createMockRequest({
@@ -375,7 +393,8 @@ describe('JwtAuthGuard', () => {
 					BASE_URL: 'http://localhost:3001',
 					'jwt.issuer': 'custom-issuer',
 					'jwt.audience': 'custom-audience',
-				})
+				}),
+				createMockLoggerService()
 			);
 
 			const mockRequest = httpMockHelpers.createMockRequest({

@@ -15,12 +15,19 @@
 import { Controller, Get, Param, Query, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { BetterAuthService } from './services/better-auth.service';
+import { LoggerService } from '../common/logger';
 
 @Controller('api/auth')
 export class BetterAuthPassthroughController {
 	private readonly defaultFrontendUrl = 'https://mana.how';
+	private readonly logger: LoggerService;
 
-	constructor(private readonly betterAuthService: BetterAuthService) {}
+	constructor(
+		private readonly betterAuthService: BetterAuthService,
+		loggerService: LoggerService
+	) {
+		this.logger = loggerService.setContext('BetterAuthPassthrough');
+	}
 
 	/**
 	 * Validate redirect URL for security
@@ -113,7 +120,10 @@ export class BetterAuthPassthroughController {
 				return res.redirect(`${fallbackUrl}/verification-failed?error=${result.error}`);
 			}
 		} catch (error) {
-			console.error('[verify-email] Error:', error);
+			this.logger.error(
+				'Email verification failed',
+				error instanceof Error ? error.stack : undefined
+			);
 			return res.redirect(`${fallbackUrl}/verification-failed?error=verification_failed`);
 		}
 	}
@@ -156,10 +166,13 @@ export class BetterAuthPassthroughController {
 			const resetUrl = new URL('/reset-password', baseUrl);
 			resetUrl.searchParams.set('token', token);
 
-			console.log(`[reset-password] Redirecting to: ${resetUrl.toString()}`);
+			this.logger.debug('Password reset redirect', { destination: baseUrl });
 			return res.redirect(resetUrl.toString());
 		} catch (error) {
-			console.error('[reset-password] Error:', error);
+			this.logger.error(
+				'Password reset redirect failed',
+				error instanceof Error ? error.stack : undefined
+			);
 			return res.redirect(`${fallbackUrl}/login?error=reset_failed`);
 		}
 	}

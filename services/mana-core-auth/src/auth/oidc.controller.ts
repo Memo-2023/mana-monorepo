@@ -20,10 +20,18 @@
 import { Controller, Get, Post, All, Req, Res, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { BetterAuthService } from './services/better-auth.service';
+import { LoggerService } from '../common/logger';
 
 @Controller()
 export class OidcController {
-	constructor(private readonly betterAuthService: BetterAuthService) {}
+	private readonly logger: LoggerService;
+
+	constructor(
+		private readonly betterAuthService: BetterAuthService,
+		loggerService: LoggerService
+	) {
+		this.logger = loggerService.setContext('OidcController');
+	}
 
 	/**
 	 * OIDC Discovery Document
@@ -45,9 +53,7 @@ export class OidcController {
 	 */
 	@Get('api/auth/oauth2/authorize')
 	async authorizeOauth2(@Req() req: Request, @Res() res: Response) {
-		console.log('[OIDC Authorize] URL:', req.originalUrl);
-		console.log('[OIDC Authorize] Query:', req.query);
-		console.log('[OIDC Authorize] redirect_uri:', req.query.redirect_uri);
+		this.logger.debug('OIDC authorize request', { clientId: req.query.client_id });
 		return this.handleOidcRequest(req, res);
 	}
 
@@ -156,7 +162,7 @@ export class OidcController {
 
 			return res.end();
 		} catch (error) {
-			console.error('[BetterAuth] Error handling request:', error);
+			this.logger.error('OIDC request failed', error instanceof Error ? error.stack : undefined);
 			return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
 				error: 'server_error',
 				error_description: 'Internal server error',
@@ -243,7 +249,10 @@ export class OidcController {
 
 			return res.end();
 		} catch (error) {
-			console.error('[OIDC] Error handling request:', error);
+			this.logger.error(
+				'OIDC alternative path request failed',
+				error instanceof Error ? error.stack : undefined
+			);
 			return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
 				error: 'server_error',
 				error_description: 'Internal server error',
