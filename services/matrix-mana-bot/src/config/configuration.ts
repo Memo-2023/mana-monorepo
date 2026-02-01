@@ -30,6 +30,7 @@ export default () => ({
 		defaultVoice: process.env.DEFAULT_VOICE || 'de-DE-ConradNeural',
 		defaultSpeed: parseFloat(process.env.DEFAULT_SPEED) || 1.0,
 		enabled: process.env.VOICE_ENABLED !== 'false',
+		preferencesPath: process.env.VOICE_PREFERENCES_PATH || './data/voice-preferences.json',
 	},
 });
 
@@ -64,11 +65,14 @@ Schreib einfach eine Nachricht - ich antworte!
 • \`!summary\` - Tages-Zusammenfassung (AI)
 • \`!ai-todo [text]\` - AI extrahiert Todos aus Text
 
-**🎤 Spracheingabe**
+**🎤 Sprache & Voice**
 Sende eine Sprachnachricht - ich verstehe dich!
 • Natürliche Befehle: "Was steht heute an?"
-• Aufgaben: "Neue Aufgabe: Einkaufen gehen"
-• Timer: "Timer 25 Minuten"
+• \`!voice\` - Voice-Einstellungen anzeigen
+• \`!voice an/aus\` - Sprachantworten aktivieren
+• \`!stimmen\` - Verfügbare Stimmen
+• \`!stimme [name]\` - Stimme wählen
+• \`!speed [0.5-2.0]\` - Geschwindigkeit ändern
 
 **💡 Tipps**
 • Natürliche Sprache funktioniert: "Was sind meine Todos?"

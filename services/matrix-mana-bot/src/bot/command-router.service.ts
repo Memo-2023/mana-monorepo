@@ -216,6 +216,11 @@ export class CommandRouterService {
 				handler: (ctx, args) => this.voiceHandler.setVoice(ctx, args),
 				description: 'Set voice',
 			},
+			{
+				patterns: ['!speed', '!tempo', '!geschwindigkeit'],
+				handler: (ctx, args) => this.voiceHandler.setSpeed(ctx, args),
+				description: 'Set speech speed',
+			},
 		];
 	}
 

@@ -24,19 +24,34 @@ export class VoiceHandler {
 			return '🔇 Sprachantworten deaktiviert.';
 		}
 
+		// Toggle auto-reply
+		if (arg === 'auto an' || arg === 'auto on') {
+			this.voiceService.setAutoVoiceReply(ctx.userId, true);
+			return '🔊 Auto-Sprachantwort aktiviert (bei Sprachnachrichten).';
+		}
+
+		if (arg === 'auto aus' || arg === 'auto off') {
+			this.voiceService.setAutoVoiceReply(ctx.userId, false);
+			return '🔇 Auto-Sprachantwort deaktiviert.';
+		}
+
 		// Show current settings
 		const status = prefs.voiceEnabled ? '✅ Aktiviert' : '❌ Deaktiviert';
+		const autoReply = prefs.autoVoiceReply ? '✅ Aktiviert' : '❌ Deaktiviert';
 
 		return `**🎤 Voice-Einstellungen**
 
 **Status:** ${status}
+**Auto-Antwort:** ${autoReply}
 **Stimme:** ${prefs.voice}
 **Geschwindigkeit:** ${prefs.speed}x
 
 **Befehle:**
 • \`!voice an\` / \`!voice aus\` - Aktivieren/Deaktivieren
+• \`!voice auto an/aus\` - Auto-Antwort bei Sprachnachrichten
 • \`!stimme [name]\` - Stimme wählen
-• \`!stimmen\` - Verfügbare Stimmen anzeigen`;
+• \`!stimmen\` - Verfügbare Stimmen anzeigen
+• \`!speed [0.5-2.0]\` - Geschwindigkeit ändern`;
 	}
 
 	/**
@@ -97,6 +112,31 @@ ${voiceList}
 
 		this.voiceService.setVoice(ctx.userId, voiceName);
 		return `✅ Stimme geändert zu **${voiceName}**`;
+	}
+
+	/**
+	 * Set speech speed
+	 */
+	async setSpeed(ctx: CommandContext, args: string): Promise<string> {
+		const speedStr = args.trim();
+
+		if (!speedStr) {
+			const prefs = this.voiceService.getUserPreferences(ctx.userId);
+			return `Aktuelle Geschwindigkeit: **${prefs.speed}x**\n\nNutze \`!speed [0.5-2.0]\` zum Ändern.\n• 0.5 = langsam\n• 1.0 = normal\n• 1.5 = schnell\n• 2.0 = sehr schnell`;
+		}
+
+		const speed = parseFloat(speedStr);
+
+		if (isNaN(speed)) {
+			return '❌ Bitte gib eine Zahl zwischen 0.5 und 2.0 an.';
+		}
+
+		if (speed < 0.5 || speed > 2.0) {
+			return '❌ Die Geschwindigkeit muss zwischen 0.5 und 2.0 liegen.';
+		}
+
+		this.voiceService.setSpeed(ctx.userId, speed);
+		return `✅ Geschwindigkeit geändert zu **${speed}x**`;
 	}
 
 	/**

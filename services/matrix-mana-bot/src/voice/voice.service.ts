@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { VoicePreferencesStore, VoicePreferences } from './voice-preferences.store';
 
 export interface TranscriptionResult {
 	text: string;
@@ -7,28 +8,21 @@ export interface TranscriptionResult {
 	duration?: number;
 }
 
-export interface VoicePreferences {
-	voiceEnabled: boolean;
-	voice: string;
-	speed: number;
-}
+// Re-export for convenience
+export { VoicePreferences };
 
 @Injectable()
 export class VoiceService {
 	private readonly logger = new Logger(VoiceService.name);
 	private readonly sttUrl: string;
 	private readonly voiceBotUrl: string;
-	private readonly defaultVoice: string;
-	private readonly defaultSpeed: number;
 
-	// User preferences (in-memory for now)
-	private userPreferences = new Map<string, VoicePreferences>();
-
-	constructor(private configService: ConfigService) {
+	constructor(
+		private configService: ConfigService,
+		private preferencesStore: VoicePreferencesStore
+	) {
 		this.sttUrl = this.configService.get('voice.sttUrl') || 'http://localhost:3020';
 		this.voiceBotUrl = this.configService.get('voice.voiceBotUrl') || 'http://localhost:3050';
-		this.defaultVoice = this.configService.get('voice.defaultVoice') || 'de-DE-ConradNeural';
-		this.defaultSpeed = this.configService.get('voice.defaultSpeed') || 1.0;
 
 		this.logger.log(`Voice Service initialized`);
 		this.logger.log(`STT URL: ${this.sttUrl}`);
@@ -154,57 +148,47 @@ export class VoiceService {
 	}
 
 	/**
-	 * Get user voice preferences
+	 * Get user voice preferences (persistent)
 	 */
 	getUserPreferences(userId?: string): VoicePreferences {
 		if (!userId) {
-			return {
-				voiceEnabled: true,
-				voice: this.defaultVoice,
-				speed: this.defaultSpeed,
-			};
+			return this.preferencesStore.getDefaults();
 		}
-
-		const prefs = this.userPreferences.get(userId);
-		if (prefs) {
-			return prefs;
-		}
-
-		// Default preferences
-		return {
-			voiceEnabled: true,
-			voice: this.defaultVoice,
-			speed: this.defaultSpeed,
-		};
+		return this.preferencesStore.get(userId);
 	}
 
 	/**
-	 * Update user voice preferences
+	 * Update user voice preferences (persistent)
 	 */
-	setUserPreferences(userId: string, prefs: Partial<VoicePreferences>): void {
-		const current = this.getUserPreferences(userId);
-		this.userPreferences.set(userId, { ...current, ...prefs });
+	setUserPreferences(userId: string, prefs: Partial<VoicePreferences>): VoicePreferences {
+		return this.preferencesStore.set(userId, prefs);
 	}
 
 	/**
 	 * Enable/disable voice responses for user
 	 */
 	setVoiceEnabled(userId: string, enabled: boolean): void {
-		this.setUserPreferences(userId, { voiceEnabled: enabled });
+		this.preferencesStore.setVoiceEnabled(userId, enabled);
 	}
 
 	/**
 	 * Set user's preferred voice
 	 */
 	setVoice(userId: string, voice: string): void {
-		this.setUserPreferences(userId, { voice });
+		this.preferencesStore.setVoice(userId, voice);
 	}
 
 	/**
 	 * Set user's preferred speed
 	 */
 	setSpeed(userId: string, speed: number): void {
-		const clampedSpeed = Math.max(0.5, Math.min(2.0, speed));
-		this.setUserPreferences(userId, { speed: clampedSpeed });
+		this.preferencesStore.setSpeed(userId, speed);
+	}
+
+	/**
+	 * Set auto voice reply setting
+	 */
+	setAutoVoiceReply(userId: string, enabled: boolean): void {
+		this.preferencesStore.setAutoVoiceReply(userId, enabled);
 	}
 }
