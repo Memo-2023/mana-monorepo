@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MatrixService } from './matrix.service';
 import { ChatModule } from '../chat/chat.module';
-import { SessionModule } from '@manacore/bot-services';
+import { SessionModule, TranscriptionModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [ChatModule, SessionModule.forRoot()],
+	imports: [
+		ChatModule,
+		SessionModule.forRoot(),
+		TranscriptionModule.register({
+			sttUrl: process.env.STT_URL || 'http://localhost:3020',
+		}),
+	],
 	providers: [MatrixService],
 	exports: [MatrixService],
 })

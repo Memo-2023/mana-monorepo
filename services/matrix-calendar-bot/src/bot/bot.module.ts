@@ -1,9 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MatrixService } from './matrix.service';
 import { CalendarModule } from '../calendar/calendar.module';
+import { TranscriptionModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [CalendarModule],
+	imports: [
+		CalendarModule,
+		TranscriptionModule.register({
+			sttUrl: process.env.STT_URL || 'http://localhost:3020',
+		}),
+	],
 	providers: [MatrixService],
 	exports: [MatrixService],
 })

@@ -8,7 +8,7 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { ChatService, Conversation } from '../chat/chat.service';
-import { SessionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService } from '@manacore/bot-services';
 import { HELP_MESSAGE, BRANCH_ICONS } from '../config/configuration';
 
 @Injectable()
@@ -25,10 +25,35 @@ export class MatrixService extends BaseMatrixService {
 
 	constructor(
 		configService: ConfigService,
+		private readonly transcriptionService: TranscriptionService,
 		private chatService: ChatService,
 		private sessionService: SessionService
 	) {
 		super(configService);
+	}
+
+	protected override async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
+		try {
+			const mxcUrl = event.content.url;
+			if (!mxcUrl) return;
+
+			const audioBuffer = await this.downloadMedia(mxcUrl);
+			const text = await this.transcriptionService.transcribe(audioBuffer);
+			if (!text) {
+				await this.sendReply(roomId, event, '❌ Sprachnachricht konnte nicht erkannt werden.');
+				return;
+			}
+
+			await this.sendMessage(roomId, `🎤 *"${text}"*`);
+			await this.handleTextMessage(roomId, event, text, sender);
+		} catch (error) {
+			this.logger.error(`Audio transcription error: ${error}`);
+			await this.sendReply(roomId, event, '❌ Fehler bei der Spracherkennung.');
+		}
 	}
 
 	protected getConfig(): MatrixBotConfig {

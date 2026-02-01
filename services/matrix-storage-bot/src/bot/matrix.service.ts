@@ -9,7 +9,7 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { StorageService, StorageFile, Folder, ShareLink, TrashItem } from '../storage/storage.service';
-import { SessionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
@@ -35,7 +35,8 @@ export class MatrixService extends BaseMatrixService {
 	constructor(
 		configService: ConfigService,
 		private storageService: StorageService,
-		private sessionService: SessionService
+		private sessionService: SessionService,
+		private readonly transcriptionService: TranscriptionService
 	) {
 		super(configService);
 	}
@@ -200,6 +201,30 @@ export class MatrixService extends BaseMatrixService {
 		} catch (error) {
 			this.logger.error(`Error handling command ${command}:`, error);
 			await this.sendMessage(roomId, `<p>Fehler: ${(error as Error).message}</p>`);
+		}
+	}
+
+	protected override async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		_sender: string
+	): Promise<void> {
+		try {
+			const mxcUrl = event.content.url;
+			if (!mxcUrl) return;
+
+			const audioBuffer = await this.downloadMedia(mxcUrl);
+			const text = await this.transcriptionService.transcribe(audioBuffer);
+			if (!text) {
+				await this.sendReply(roomId, event, '<p>Sprachnachricht konnte nicht erkannt werden.</p>');
+				return;
+			}
+
+			await this.sendMessage(roomId, `<p><em>"${text}"</em></p>`);
+			await this.handleTextMessage(roomId, event, text);
+		} catch (error) {
+			this.logger.error(`Audio transcription error: ${error}`);
+			await this.sendReply(roomId, event, '<p>Fehler bei der Spracherkennung.</p>');
 		}
 	}
 

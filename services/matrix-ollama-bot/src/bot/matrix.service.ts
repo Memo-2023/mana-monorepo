@@ -7,6 +7,7 @@ import {
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
+import { TranscriptionService } from '@manacore/bot-services';
 import { OllamaService } from '../ollama/ollama.service';
 import { SYSTEM_PROMPTS } from '../config/configuration';
 
@@ -37,9 +38,34 @@ export class MatrixService extends BaseMatrixService {
 
 	constructor(
 		configService: ConfigService,
+		private readonly transcriptionService: TranscriptionService,
 		private ollamaService: OllamaService
 	) {
 		super(configService);
+	}
+
+	protected override async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
+		try {
+			const mxcUrl = event.content.url;
+			if (!mxcUrl) return;
+
+			const audioBuffer = await this.downloadMedia(mxcUrl);
+			const text = await this.transcriptionService.transcribe(audioBuffer);
+			if (!text) {
+				await this.sendMessage(roomId, '❌ Sprachnachricht konnte nicht erkannt werden.');
+				return;
+			}
+
+			await this.sendMessage(roomId, `🎤 *"${text}"*`);
+			await this.handleTextMessage(roomId, event, text, sender);
+		} catch (error) {
+			this.logger.error(`Audio transcription error: ${error}`);
+			await this.sendMessage(roomId, '❌ Fehler bei der Spracherkennung.');
+		}
 	}
 
 	protected getConfig(): MatrixBotConfig {

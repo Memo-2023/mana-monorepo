@@ -9,6 +9,7 @@ import {
 } from '@manacore/matrix-bot-common';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { UsersService } from '../users/users.service';
+import { TranscriptionService } from '@manacore/bot-services';
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
@@ -26,7 +27,8 @@ export class MatrixService extends BaseMatrixService {
 	constructor(
 		configService: ConfigService,
 		private analyticsService: AnalyticsService,
-		private usersService: UsersService
+		private usersService: UsersService,
+		private readonly transcriptionService: TranscriptionService
 	) {
 		super(configService);
 		this.reportRoomId = this.configService.get<string>('matrix.reportRoomId') || '';
@@ -58,6 +60,30 @@ export class MatrixService extends BaseMatrixService {
 
 		const [command] = message.slice(1).split(' ');
 		await this.handleCommand(roomId, command.toLowerCase());
+	}
+
+	protected override async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
+		try {
+			const mxcUrl = event.content.url;
+			if (!mxcUrl) return;
+
+			const audioBuffer = await this.downloadMedia(mxcUrl);
+			const text = await this.transcriptionService.transcribe(audioBuffer);
+			if (!text) {
+				await this.sendReply(roomId, event, 'Sprachnachricht konnte nicht erkannt werden.');
+				return;
+			}
+
+			await this.sendMessage(roomId, `*"${text}"*`);
+			await this.handleTextMessage(roomId, event, text, sender);
+		} catch (error) {
+			this.logger.error(`Audio transcription error: ${error}`);
+			await this.sendReply(roomId, event, 'Fehler bei der Spracherkennung.');
+		}
 	}
 
 	private async handleCommand(roomId: string, command: string) {

@@ -9,7 +9,7 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { PresiService, Deck, Theme, SlideContent } from '../presi/presi.service';
-import { SessionService } from '@manacore/bot-services';
+import { SessionService, TranscriptionService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
@@ -30,10 +30,35 @@ export class MatrixService extends BaseMatrixService {
 
 	constructor(
 		configService: ConfigService,
+		private readonly transcriptionService: TranscriptionService,
 		private presiService: PresiService,
 		private sessionService: SessionService
 	) {
 		super(configService);
+	}
+
+	protected override async handleAudioMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
+		try {
+			const mxcUrl = event.content.url;
+			if (!mxcUrl) return;
+
+			const audioBuffer = await this.downloadMedia(mxcUrl);
+			const text = await this.transcriptionService.transcribe(audioBuffer);
+			if (!text) {
+				await this.sendMessage(roomId, '<p>❌ Sprachnachricht konnte nicht erkannt werden.</p>');
+				return;
+			}
+
+			await this.sendMessage(roomId, `<p>🎤 <em>"${text}"</em></p>`);
+			await this.handleTextMessage(roomId, event, text);
+		} catch (error) {
+			this.logger.error(`Audio transcription error: ${error}`);
+			await this.sendMessage(roomId, '<p>❌ Fehler bei der Spracherkennung.</p>');
+		}
 	}
 
 	protected getConfig(): MatrixBotConfig {
