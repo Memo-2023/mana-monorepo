@@ -7,11 +7,10 @@
 	import type { Contact } from '$lib/api/contacts';
 
 	interface Props {
-		isSidebarMode?: boolean;
 		contacts: Contact[];
 	}
 
-	let { isSidebarMode = false, contacts }: Props = $props();
+	let { contacts }: Props = $props();
 
 	// Use store for collapsed state
 	let isCollapsed = $derived(contactsFilterStore.isToolbarCollapsed);
@@ -25,7 +24,6 @@
 <ExpandableToolbar
 	{isCollapsed}
 	onCollapsedChange={handleCollapsedChange}
-	{isSidebarMode}
 	collapsedTitle="Filter & Optionen"
 	expandedTitle="Schließen"
 >
@@ -33,58 +31,56 @@
 </ExpandableToolbar>
 
 <!-- View Mode Pill - positioned to the LEFT of the FAB -->
-{#if !isSidebarMode}
-	<div class="view-mode-pill" class:expanded={!isCollapsed}>
-		<button
-			type="button"
-			class="view-btn"
-			class:active={viewModeStore.mode === 'grid'}
-			onclick={() => viewModeStore.setMode('grid')}
-			title={$_('views.grid')}
-		>
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
-				/>
-			</svg>
-		</button>
-		<button
-			type="button"
-			class="view-btn"
-			class:active={viewModeStore.mode === 'alphabet'}
-			onclick={() => viewModeStore.setMode('alphabet')}
-			title={$_('views.alphabet')}
-		>
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-				/>
-			</svg>
-		</button>
-		<button
-			type="button"
-			class="view-btn"
-			class:active={viewModeStore.mode === 'network'}
-			onclick={() => viewModeStore.setMode('network')}
-			title={$_('views.network')}
-		>
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-				/>
-			</svg>
-		</button>
-	</div>
-{/if}
+<div class="view-mode-pill" class:toolbar-expanded={!isCollapsed}>
+	<button
+		type="button"
+		class="view-btn"
+		class:active={viewModeStore.mode === 'grid'}
+		onclick={() => viewModeStore.setMode('grid')}
+		title={$_('views.grid')}
+	>
+		<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+			/>
+		</svg>
+	</button>
+	<button
+		type="button"
+		class="view-btn"
+		class:active={viewModeStore.mode === 'alphabet'}
+		onclick={() => viewModeStore.setMode('alphabet')}
+		title={$_('views.alphabet')}
+	>
+		<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+			/>
+		</svg>
+	</button>
+	<button
+		type="button"
+		class="view-btn"
+		class:active={viewModeStore.mode === 'network'}
+		onclick={() => viewModeStore.setMode('network')}
+		title={$_('views.network')}
+	>
+		<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+			/>
+		</svg>
+	</button>
+</div>
 
 <style>
 	/* View Mode Pill - positioned to the LEFT of the FAB (which is at right: calc(50% - 350px - 70px)) */
@@ -109,7 +105,7 @@
 	}
 
 	/* When toolbar is expanded, move pill up with FAB */
-	.view-mode-pill.expanded {
+	.view-mode-pill.toolbar-expanded {
 		bottom: calc(70px + 70px + 9px + env(safe-area-inset-bottom, 0px));
 	}
 

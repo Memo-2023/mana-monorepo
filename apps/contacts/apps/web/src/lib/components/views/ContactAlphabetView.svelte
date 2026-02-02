@@ -3,7 +3,6 @@
 	import type { Contact } from '$lib/api/contacts';
 	import type { SortField } from '$lib/components/SortToggle.svelte';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
-	import { isSidebarMode } from '$lib/stores/navigation';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 	import { contactsSettings } from '$lib/stores/settings.svelte';
 	import AlphabetNavContextMenu from '$lib/components/AlphabetNavContextMenu.svelte';
@@ -279,11 +278,7 @@
 	</div>
 
 	<!-- Alphabet FAB (when collapsed) - positioned left of InputBar -->
-	<div
-		class="alphabet-fab-container"
-		class:sidebar-mode={$isSidebarMode}
-		class:toolbar-expanded={isToolbarExpanded}
-	>
+	<div class="alphabet-fab-container" class:toolbar-expanded={isToolbarExpanded}>
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<button
 			onclick={toggleAlphabetNav}
@@ -315,11 +310,7 @@
 
 	<!-- Alphabet Quick Jump (like DateStrip) - hidden when collapsed -->
 	{#if !isAlphabetNavCollapsed}
-		<div
-			class="alphabet-nav"
-			class:sidebar-mode={$isSidebarMode}
-			class:toolbar-expanded={isToolbarExpanded}
-		>
+		<div class="alphabet-nav" class:toolbar-expanded={isToolbarExpanded}>
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				class="alphabet-nav-container"
@@ -583,16 +574,6 @@
 		bottom: calc(210px + env(safe-area-inset-bottom, 0px));
 	}
 
-	/* When PillNav is in sidebar mode, only InputBar at bottom */
-	.alphabet-nav.sidebar-mode {
-		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
-	}
-
-	/* Sidebar mode + toolbar expanded */
-	.alphabet-nav.sidebar-mode.toolbar-expanded {
-		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
-	}
-
 	.alphabet-nav-container {
 		display: flex;
 		flex-direction: row;
@@ -726,11 +707,6 @@
 			left 0.2s ease;
 	}
 
-	/* Sidebar mode - InputBar is 700px wide, position accordingly */
-	.alphabet-fab-container.sidebar-mode {
-		left: calc(50% - 350px - 8px - 54px); /* Left of 700px InputBar */
-	}
-
 	/* Responsive positioning for FAB */
 	@media (max-width: 900px) {
 		.alphabet-fab-container {
@@ -741,15 +717,6 @@
 	/* When toolbar is expanded, move FAB up */
 	.alphabet-fab-container.toolbar-expanded {
 		bottom: calc(140px + 9px + env(safe-area-inset-bottom, 0px));
-	}
-
-	/* Sidebar mode */
-	.alphabet-fab-container.sidebar-mode {
-		bottom: calc(9px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.alphabet-fab-container.sidebar-mode.toolbar-expanded {
-		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.alphabet-fab {

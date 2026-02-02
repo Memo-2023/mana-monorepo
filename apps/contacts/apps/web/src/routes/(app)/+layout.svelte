@@ -25,10 +25,6 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-	} from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -68,11 +64,8 @@
 
 	let { children } = $props();
 
-	let isSidebarMode = $state(false);
-	let isCollapsed = $state(false);
-
 	// Show toolbar only on main contacts page
-	const showContactsToolbar = $derived($page.url.pathname === '/' && !isSidebarMode);
+	const showContactsToolbar = $derived($page.url.pathname === '/');
 
 	// Check if toolbar is expanded
 	const isToolbarExpanded = $derived(
@@ -80,9 +73,7 @@
 	);
 
 	// Dynamic bottom offset based on toolbar state
-	const inputBarBottomOffset = $derived(
-		isSidebarMode ? '0px' : isToolbarExpanded ? '140px' : '70px'
-	);
+	const inputBarBottomOffset = $derived(isToolbarExpanded ? '140px' : '70px');
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -178,22 +169,6 @@
 		) {
 			event.preventDefault();
 			contactsSettings.toggleImmersiveMode();
-		}
-	}
-
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('contacts-nav-sidebar', String(isSidebar));
-		}
-	}
-
-	function handleCollapsedChange(collapsed: boolean) {
-		isCollapsed = collapsed;
-		collapsedStore.set(collapsed);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('contacts-nav-collapsed', String(collapsed));
 		}
 	}
 
@@ -295,28 +270,6 @@
 		} catch (e) {
 			console.error('Failed to load tags:', e);
 		}
-
-		// Initialize sidebar mode from localStorage
-		try {
-			const savedSidebar = localStorage?.getItem('contacts-nav-sidebar');
-			if (savedSidebar === 'true') {
-				isSidebarMode = true;
-				sidebarModeStore.set(true);
-			}
-		} catch {
-			// localStorage not available (private browsing, quota exceeded, etc.)
-		}
-
-		// Initialize collapsed state from localStorage
-		try {
-			const savedCollapsed = localStorage?.getItem('contacts-nav-collapsed');
-			if (savedCollapsed === 'true') {
-				isCollapsed = true;
-				collapsedStore.set(true);
-			}
-		} catch {
-			// localStorage not available
-		}
 	});
 </script>
 
@@ -327,7 +280,7 @@
 	<div class="layout-container">
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !contactsSettings.immersiveModeEnabled}
-			<!-- Floating/Sidebar Pill Navigation (at bottom) -->
+			<!-- Floating Pill Navigation (at bottom) -->
 			<PillNavigation
 				items={navItems}
 				currentPath={$page.url.pathname}
@@ -335,10 +288,6 @@
 				homeRoute="/"
 				onToggleTheme={handleToggleTheme}
 				{isDark}
-				{isSidebarMode}
-				onModeChange={handleModeChange}
-				{isCollapsed}
-				onCollapsedChange={handleCollapsedChange}
 				desktopPosition="bottom"
 				showThemeToggle={true}
 				showThemeVariants={true}
@@ -381,7 +330,7 @@
 
 			<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
 			{#if showContactsToolbar}
-				<ContactsToolbar {isSidebarMode} contacts={contactsStore.contacts} />
+				<ContactsToolbar contacts={contactsStore.contacts} />
 			{/if}
 		{/if}
 
@@ -391,11 +340,9 @@
 			onToggle={() => contactsSettings.toggleImmersiveMode()}
 		/>
 
-		<!-- Main Content with dynamic padding based on nav mode -->
+		<!-- Main Content -->
 		<main
 			class="main-content bg-background"
-			class:sidebar-mode={isSidebarMode && !isCollapsed}
-			class:floating-mode={!isSidebarMode}
 			class:immersive={contactsSettings.immersiveModeEnabled}
 		>
 			<div class="content-wrapper" class:immersive={contactsSettings.immersiveModeEnabled}>
@@ -429,21 +376,11 @@
 		padding-bottom: calc(150px + env(safe-area-inset-bottom));
 	}
 
-	/* Floating nav mode - nav is at bottom, no top padding needed */
-	.main-content.floating-mode {
-		padding-top: 0;
-	}
-
 	/* Extra bottom padding on mobile */
 	@media (max-width: 768px) {
 		.main-content {
 			padding-bottom: calc(160px + env(safe-area-inset-bottom));
 		}
-	}
-
-	/* Sidebar mode - add left padding for sidebar nav */
-	.main-content.sidebar-mode {
-		padding-left: 180px;
 	}
 
 	/* Immersive mode - fullscreen, no padding */

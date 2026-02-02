@@ -22,11 +22,7 @@
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { theme } from '$lib/stores/theme';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-		isToolbarCollapsed as toolbarCollapsedStore,
-	} from '$lib/stores/navigation';
+	import { isToolbarCollapsed as toolbarCollapsedStore } from '$lib/stores/navigation';
 	import TodoToolbar from '$lib/components/TodoToolbar.svelte';
 	import {
 		THEME_DEFINITIONS,
@@ -106,8 +102,6 @@
 		});
 	}
 
-	let isSidebarMode = $state(false);
-	let isCollapsed = $state(false);
 	let isToolbarCollapsed = $state(true);
 
 	// Use theme store's isDark directly
@@ -166,28 +160,10 @@
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
-	// Navigation items (base items + dynamic label items in sidebar mode, filtered by visibility settings)
-	const navItems = $derived.by(() => {
-		// Start with base items, filter out hidden ones (with fallback for guest mode)
-		let items = filterHiddenNavItems('todo', baseNavItems, userSettings.nav?.hiddenNavItems || {});
-
-		// In sidebar mode, add tags as sub-items if available
-		if (isSidebarMode && labelsStore.labels.length > 0) {
-			const tagItems: PillNavItem[] = labelsStore.labels.slice(0, 5).map((label) => ({
-				href: `/tag/${label.id}`,
-				label: label.name,
-				icon: 'tag',
-			}));
-
-			// Insert tag items after "Tags" nav item
-			const tagsIndex = items.findIndex((i) => i.href === '/tags');
-			if (tagsIndex !== -1 && tagItems.length > 0) {
-				items = [...items];
-				items.splice(tagsIndex + 1, 0, ...tagItems);
-			}
-		}
-		return items;
-	});
+	// Navigation items filtered by visibility settings (with fallback for guest mode)
+	const navItems = $derived(
+		filterHiddenNavItems('todo', baseNavItems, userSettings.nav?.hiddenNavItems || {})
+	);
 
 	// Navigation shortcuts (Ctrl+1-6) - use base items for consistent shortcuts
 	const navRoutes = baseNavItems.map((item) => item.href);
@@ -220,26 +196,6 @@
 		) {
 			event.preventDefault();
 			todoSettings.toggleImmersiveMode();
-		}
-	}
-
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		try {
-			localStorage?.setItem('todo-nav-sidebar', String(isSidebar));
-		} catch {
-			// localStorage not available or quota exceeded
-		}
-	}
-
-	function handleCollapsedChange(collapsed: boolean) {
-		isCollapsed = collapsed;
-		collapsedStore.set(collapsed);
-		try {
-			localStorage?.setItem('todo-nav-collapsed', String(collapsed));
-		} catch {
-			// localStorage not available or quota exceeded
 		}
 	}
 
@@ -290,28 +246,6 @@
 		const currentPath = window.location.pathname;
 		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
 			goto(userSettings.startPage, { replaceState: true });
-		}
-
-		// Initialize sidebar mode from localStorage (with error handling for private browsing)
-		try {
-			const savedSidebar = localStorage?.getItem('todo-nav-sidebar');
-			if (savedSidebar === 'true') {
-				isSidebarMode = true;
-				sidebarModeStore.set(true);
-			}
-		} catch {
-			// localStorage not available (private browsing, quota exceeded, etc.)
-		}
-
-		// Initialize collapsed state from localStorage
-		try {
-			const savedCollapsed = localStorage?.getItem('todo-nav-collapsed');
-			if (savedCollapsed === 'true') {
-				isCollapsed = true;
-				collapsedStore.set(true);
-			}
-		} catch {
-			// localStorage not available
 		}
 
 		// Initialize toolbar collapsed state from localStorage
@@ -365,10 +299,6 @@
 				homeRoute="/"
 				onToggleTheme={handleToggleTheme}
 				{isDark}
-				{isSidebarMode}
-				onModeChange={handleModeChange}
-				{isCollapsed}
-				onCollapsedChange={handleCollapsedChange}
 				desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 				showThemeToggle={true}
 				showThemeVariants={true}
@@ -410,10 +340,8 @@
 
 			<!-- Todo Toolbar (ExpandableToolbar FAB) -->
 			<TodoToolbar
-				{isSidebarMode}
 				isCollapsed={isToolbarCollapsed}
 				onCollapsedChange={handleToolbarCollapsedChange}
-				onModeChange={handleModeChange}
 				bottomOffset="70px"
 			/>
 		{/if}
@@ -424,12 +352,7 @@
 			onToggle={() => todoSettings.toggleImmersiveMode()}
 		/>
 
-		<main
-			class="main-content bg-background"
-			class:sidebar-mode={isSidebarMode && !isCollapsed}
-			class:floating-mode={!isSidebarMode && !isCollapsed}
-			class:immersive={todoSettings.immersiveModeEnabled}
-		>
+		<main class="main-content bg-background" class:immersive={todoSettings.immersiveModeEnabled}>
 			<div
 				class="content-wrapper"
 				class:full-width={$page.url.pathname === '/kanban'}
@@ -453,14 +376,6 @@
 		position: relative;
 		/* Space for QuickInputBar at bottom */
 		padding-bottom: calc(80px + env(safe-area-inset-bottom));
-	}
-
-	.main-content.floating-mode {
-		padding-top: 70px;
-	}
-
-	.main-content.sidebar-mode {
-		padding-left: 180px;
 	}
 
 	/* Immersive mode - fullscreen, no padding */
