@@ -3,19 +3,44 @@
  * Allows Calendar app to fetch contact birthdays for display
  */
 
+import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
 import { createApiClient } from '@manacore/shared-api-client';
 import { authStore } from '$lib/stores/auth.svelte';
 
-const CONTACTS_API_BASE = env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015';
+// Get contacts API base URL from injected window variable (browser) or env (SSR)
+function getContactsApiBase(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_CONTACTS_API_URL__?: string })
+			.__PUBLIC_CONTACTS_API_URL__;
+		if (injectedUrl) return injectedUrl;
+	}
+	return env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015';
+}
 
-const contactsClient = createApiClient({
-	baseUrl: CONTACTS_API_BASE,
-	apiPrefix: '/api/v1',
-	getAuthToken: () => authStore.getValidToken(),
-	timeout: 30000,
-	debug: import.meta.env.DEV,
-});
+let _contactsClient: ReturnType<typeof createApiClient> | null = null;
+
+function getContactsClient() {
+	if (!_contactsClient) {
+		_contactsClient = createApiClient({
+			baseUrl: getContactsApiBase(),
+			apiPrefix: '/api/v1',
+			getAuthToken: () => authStore.getValidToken(),
+			timeout: 30000,
+			debug: import.meta.env.DEV,
+		});
+	}
+	return _contactsClient;
+}
+
+// For backwards compatibility
+const contactsClient = {
+	get: <T>(endpoint: string) => getContactsClient().get<T>(endpoint),
+	post: <T>(endpoint: string, body?: unknown) => getContactsClient().post<T>(endpoint, body),
+	put: <T>(endpoint: string, body?: unknown) => getContactsClient().put<T>(endpoint, body),
+	patch: <T>(endpoint: string, body?: unknown) => getContactsClient().patch<T>(endpoint, body),
+	delete: <T>(endpoint: string) => getContactsClient().delete<T>(endpoint),
+};
 
 // ============================================
 // Types for Birthday Integration

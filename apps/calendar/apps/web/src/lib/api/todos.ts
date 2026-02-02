@@ -3,19 +3,44 @@
  * Allows Calendar app to fetch/manage todos from the Todo service
  */
 
+import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
 import { createApiClient, buildQueryString, type ApiResult } from '@manacore/shared-api-client';
 import { authStore } from '$lib/stores/auth.svelte';
 
-const TODO_API_BASE = env.PUBLIC_TODO_BACKEND_URL || 'http://localhost:3018';
+// Get todo API base URL from injected window variable (browser) or env (SSR)
+function getTodoApiBase(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_TODO_BACKEND_URL__?: string })
+			.__PUBLIC_TODO_BACKEND_URL__;
+		if (injectedUrl) return injectedUrl;
+	}
+	return env.PUBLIC_TODO_BACKEND_URL || 'http://localhost:3018';
+}
 
-const todoClient = createApiClient({
-	baseUrl: TODO_API_BASE,
-	apiPrefix: '/api/v1',
-	getAuthToken: () => authStore.getValidToken(),
-	timeout: 30000,
-	debug: import.meta.env.DEV,
-});
+let _todoClient: ReturnType<typeof createApiClient> | null = null;
+
+function getTodoClient() {
+	if (!_todoClient) {
+		_todoClient = createApiClient({
+			baseUrl: getTodoApiBase(),
+			apiPrefix: '/api/v1',
+			getAuthToken: () => authStore.getValidToken(),
+			timeout: 30000,
+			debug: import.meta.env.DEV,
+		});
+	}
+	return _todoClient;
+}
+
+// For backwards compatibility
+const todoClient = {
+	get: <T>(endpoint: string) => getTodoClient().get<T>(endpoint),
+	post: <T>(endpoint: string, body?: unknown) => getTodoClient().post<T>(endpoint, body),
+	put: <T>(endpoint: string, body?: unknown) => getTodoClient().put<T>(endpoint, body),
+	patch: <T>(endpoint: string, body?: unknown) => getTodoClient().patch<T>(endpoint, body),
+	delete: <T>(endpoint: string) => getTodoClient().delete<T>(endpoint),
+};
 
 // ============================================
 // Types (mirrored from @todo/shared for cross-app use)

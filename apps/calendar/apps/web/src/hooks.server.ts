@@ -13,6 +13,10 @@ const PUBLIC_BACKEND_URL_CLIENT =
 	process.env.PUBLIC_BACKEND_URL_CLIENT || process.env.PUBLIC_BACKEND_URL || '';
 const PUBLIC_STT_URL = process.env.PUBLIC_STT_URL || 'https://stt-api.mana.how';
 
+// Cross-app integration URLs (for todo and contacts APIs)
+const PUBLIC_TODO_BACKEND_URL = process.env.PUBLIC_TODO_BACKEND_URL || 'http://localhost:3018';
+const PUBLIC_CONTACTS_API_URL = process.env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015';
+
 export const handle: Handle = async ({ event, resolve }) => {
 	return resolve(event, {
 		transformPageChunk: ({ html }) => {
@@ -22,6 +26,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
 window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
 window.__PUBLIC_STT_URL__ = "${PUBLIC_STT_URL}";
+window.__PUBLIC_TODO_BACKEND_URL__ = "${PUBLIC_TODO_BACKEND_URL}";
+window.__PUBLIC_CONTACTS_API_URL__ = "${PUBLIC_CONTACTS_API_URL}";
 </script>`;
 			return html.replace('<head>', `<head>${envScript}`);
 		},
