@@ -74,7 +74,10 @@ services:
   # ============================================
 
   mana-auth:
-    image: ghcr.io/memo-2023/mana-core-auth:latest
+    build:
+      context: ./services/mana-core-auth
+      dockerfile: Dockerfile
+    image: mana-core-auth:local
     container_name: mana-core-auth
     restart: always
     depends_on:
@@ -537,6 +540,8 @@ services:
       CLOCK_API_URL: http://mana-matrix-bot-clock:4018/api/v1
       TODO_STORAGE_PATH: /app/data/todos.json
       CALENDAR_STORAGE_PATH: /app/data/calendar.json
+      STT_URL: http://host.docker.internal:3020
+      TTS_URL: http://host.docker.internal:3022
     volumes:
       - matrix_bots_data:/app/data
     ports:
