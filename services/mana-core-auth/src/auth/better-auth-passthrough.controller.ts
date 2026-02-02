@@ -5,6 +5,7 @@
  * with the `/api/auth/*` prefix (without the NestJS `/api/v1` prefix).
  *
  * Routes handled:
+ * - GET /api/auth/get-session - SSO session check (cookie-based)
  * - GET /api/auth/verify-email - Email verification from verification emails
  * - GET /api/auth/reset-password/:token - Password reset from reset emails
  *
@@ -12,8 +13,9 @@
  * but our NestJS API uses `/api/v1/*` as the global prefix.
  */
 
-import { Controller, Get, Param, Query, Res, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Param, Query, Req, Res, HttpStatus } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { BetterAuthService } from './services/better-auth.service';
 import { LoggerService } from '../common/logger';
 
@@ -24,9 +26,51 @@ export class BetterAuthPassthroughController {
 
 	constructor(
 		private readonly betterAuthService: BetterAuthService,
+		private readonly configService: ConfigService,
 		loggerService: LoggerService
 	) {
 		this.logger = loggerService.setContext('BetterAuthPassthrough');
+	}
+
+	/**
+	 * Handle SSO get-session request
+	 *
+	 * This endpoint is called by client apps to check if the user has a valid
+	 * session cookie (set by auth.mana.how). Used for cross-subdomain SSO.
+	 *
+	 * The request includes cookies, and we forward them to Better Auth's handler.
+	 */
+	@Get('get-session')
+	async getSession(@Req() req: Request, @Res() res: Response) {
+		try {
+			// Build the cookie header from Express request
+			const cookieHeader = req.headers.cookie || '';
+
+			// Get the base URL from config
+			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
+			const url = new URL('/api/auth/get-session', baseUrl);
+
+			// Create a fetch Request with the cookies
+			const headers = new Headers({
+				Cookie: cookieHeader,
+			});
+
+			const fetchRequest = new Request(url.toString(), {
+				method: 'GET',
+				headers,
+			});
+
+			// Forward to Better Auth's handler
+			const handler = this.betterAuthService.getHandler();
+			const response = await handler(fetchRequest);
+
+			// Copy status and body to Express response
+			const body = await response.json();
+			return res.status(response.status).json(body);
+		} catch (error) {
+			this.logger.error('SSO get-session failed', error instanceof Error ? error.stack : undefined);
+			return res.status(401).json({ error: 'Session check failed' });
+		}
 	}
 
 	/**
