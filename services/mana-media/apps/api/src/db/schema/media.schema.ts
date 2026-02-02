@@ -65,8 +65,8 @@ export const mediaReferences = pgTable(
 		mediaId: uuid('media_id')
 			.references(() => media.id, { onDelete: 'cascade' })
 			.notNull(),
-		// Owner info
-		userId: uuid('user_id').notNull(),
+		// Owner info (can be UUID or Matrix user ID like @user:matrix.org)
+		userId: text('user_id').notNull(),
 		// Source app (nutriphi, contacts, chat, etc.)
 		app: text('app').notNull(),
 		// Optional: reference to the source (e.g., mxc:// URL from Matrix)
