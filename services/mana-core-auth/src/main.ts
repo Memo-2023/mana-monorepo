@@ -109,7 +109,8 @@ async function bootstrap() {
 			{ path: 'health', method: RequestMethod.ALL },
 			// OIDC login page
 			{ path: 'login', method: RequestMethod.ALL },
-			// Better Auth routes (verification emails, password reset, sign-in)
+			// Better Auth routes (verification emails, password reset, sign-in, SSO)
+			{ path: 'api/auth/get-session', method: RequestMethod.ALL },
 			{ path: 'api/auth/verify-email', method: RequestMethod.ALL },
 			{ path: 'api/auth/reset-password/(.*)', method: RequestMethod.ALL },
 			{ path: 'api/auth/sign-in/(.*)', method: RequestMethod.ALL },
