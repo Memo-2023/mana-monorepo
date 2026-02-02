@@ -1479,6 +1479,46 @@ export class BetterAuthService {
 				email: user.email,
 			});
 
+			// Get the actual session from database to retrieve the real refreshToken
+			const db = getDb(this.databaseUrl);
+			const { sessions } = await import('../../db/schema');
+			const { eq } = await import('drizzle-orm');
+			const { nanoid } = await import('nanoid');
+
+			// Find the session by its token (session.token is the cookie token)
+			const [dbSession] = await db
+				.select()
+				.from(sessions)
+				.where(eq(sessions.token, session.token || sessionToken))
+				.limit(1);
+
+			let actualRefreshToken: string;
+
+			if (dbSession?.refreshToken) {
+				// Session already has a refreshToken - use it
+				actualRefreshToken = dbSession.refreshToken;
+				this.logger.debug('SSO: Using existing refreshToken from session');
+			} else if (dbSession) {
+				// Session exists but no refreshToken - generate one and update the session
+				actualRefreshToken = nanoid(64);
+				const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+				await db
+					.update(sessions)
+					.set({
+						refreshToken: actualRefreshToken,
+						refreshTokenExpiresAt,
+						updatedAt: new Date(),
+					})
+					.where(eq(sessions.id, dbSession.id));
+
+				this.logger.debug('SSO: Generated new refreshToken for existing session');
+			} else {
+				// No session found in DB - this shouldn't happen, but handle it
+				this.logger.warn('SSO: Session not found in database, using session token as fallback');
+				actualRefreshToken = session.token || sessionToken;
+			}
+
 			// Generate JWT access token using Better Auth's JWT plugin
 			let accessToken = '';
 			try {
@@ -1520,7 +1560,7 @@ export class BetterAuthService {
 					role: user.role,
 				},
 				accessToken,
-				refreshToken: session.token || sessionToken,
+				refreshToken: actualRefreshToken,
 				expiresIn: 15 * 60, // 15 minutes in seconds
 			};
 		} catch (error) {
