@@ -1,8 +1,17 @@
 import { browser } from '$app/environment';
 import { authStore } from '$lib/stores/auth.svelte';
-import { MANA_AUTH_URL } from './config';
 import { fetchWithAuth, fetchWithAuthFormData } from './client';
 import { createTagsClient, type Tag } from '@manacore/shared-tags';
+
+// Get auth URL dynamically at runtime
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return 'http://localhost:3001';
+}
 
 export interface Contact {
 	id: string;
@@ -164,7 +173,7 @@ function getTagsClient() {
 	if (!browser) return null;
 	if (!_tagsClient) {
 		_tagsClient = createTagsClient({
-			authUrl: MANA_AUTH_URL,
+			authUrl: getAuthUrl(),
 			getToken: async () => {
 				const token = await authStore.getAccessToken();
 				return token || '';

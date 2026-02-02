@@ -2,12 +2,22 @@
  * Feedback Service Instance for Contacts Web App
  */
 
+import { browser } from '$app/environment';
 import { createFeedbackService } from '@manacore/shared-feedback-service';
 import { authStore } from '$lib/stores/auth.svelte';
-import { MANA_AUTH_URL } from '$lib/api/config';
+
+// Get auth URL dynamically at runtime
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return 'http://localhost:3001';
+}
 
 export const feedbackService = createFeedbackService({
-	apiUrl: MANA_AUTH_URL,
+	apiUrl: getAuthUrl(),
 	appId: 'contacts',
 	getAuthToken: async () => authStore.getAccessToken(),
 });
