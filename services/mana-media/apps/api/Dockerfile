@@ -11,19 +11,12 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/shared-drizzle-config/package.json ./packages/shared-drizzle-config/
 COPY services/mana-media/apps/api/package.json ./services/mana-media/apps/api/
 COPY services/mana-media/packages/client/package.json ./services/mana-media/packages/client/
-RUN pnpm install --frozen-lockfile
-
-# Build shared packages
-FROM base AS shared-builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
-WORKDIR /app/packages/shared-drizzle-config
-RUN pnpm build
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build the application
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=shared-builder /app/packages/shared-drizzle-config ./packages/shared-drizzle-config
+COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY services/mana-media ./services/mana-media
 WORKDIR /app/services/mana-media/apps/api
 RUN pnpm build
@@ -54,7 +47,7 @@ EXPOSE 3015
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3015/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3015/api/v1/health || exit 1
 
 # Start the application
 CMD ["node", "dist/main"]
