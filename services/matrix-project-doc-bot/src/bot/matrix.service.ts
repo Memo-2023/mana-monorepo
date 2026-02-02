@@ -45,9 +45,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: [], // This bot uses allowedUsers instead
 		};
 	}
@@ -208,11 +210,13 @@ ${styles}
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(roomId,
-					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`);
+				await this.sendMessage(
+					roomId,
+					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`
+				);
 			} else {
 				await this.sendMessage(roomId, `✅ Erfolgreich angemeldet als **${email}**`);
 			}
@@ -222,14 +226,14 @@ ${styles}
 	}
 
 	private async handleLogout(roomId: string, sender: string) {
-		this.sessionService.logout(sender);
+		await this.sessionService.logout(sender);
 		await this.sendMessage(roomId, '👋 Erfolgreich abgemeldet.');
 	}
 
 	private async handleAuthStatus(roomId: string, sender: string) {
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let response = '**📋 Account Status**\n\n';
 
@@ -328,9 +332,9 @@ ${styles}
 
 	private async showStatus(roomId: string, sender: string) {
 		// Auth info
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let authInfo = '';
 		if (loggedIn && session && token) {
@@ -340,14 +344,20 @@ ${styles}
 
 		const projectId = this.activeProjects.get(sender);
 		if (!projectId) {
-			await this.sendMessage(roomId, `${authInfo}Kein aktives Projekt.\n\nStarte mit: \`!new Projektname\``);
+			await this.sendMessage(
+				roomId,
+				`${authInfo}Kein aktives Projekt.\n\nStarte mit: \`!new Projektname\``
+			);
 			return;
 		}
 
 		const project = await this.projectService.findById(projectId);
 		if (!project) {
 			this.activeProjects.delete(sender);
-			await this.sendMessage(roomId, `${authInfo}Projekt nicht gefunden. Starte ein neues mit \`!new\``);
+			await this.sendMessage(
+				roomId,
+				`${authInfo}Projekt nicht gefunden. Starte ein neues mit \`!new\``
+			);
 			return;
 		}
 
@@ -475,7 +485,11 @@ ${styles}
 		}
 	}
 
-	private async handleImage(roomId: string, sender: string, content: { url: string; info?: { mimetype?: string }; body?: string }) {
+	private async handleImage(
+		roomId: string,
+		sender: string,
+		content: { url: string; info?: { mimetype?: string }; body?: string }
+	) {
 		const projectId = this.activeProjects.get(sender);
 		if (!projectId) {
 			await this.sendMessage(roomId, 'Kein aktives Projekt.\n\nStarte mit: `!new Projektname`');
@@ -499,7 +513,11 @@ ${styles}
 		}
 	}
 
-	private async handleAudio(roomId: string, sender: string, content: { url: string; info?: { mimetype?: string; duration?: number } }) {
+	private async handleAudio(
+		roomId: string,
+		sender: string,
+		content: { url: string; info?: { mimetype?: string; duration?: number } }
+	) {
 		const projectId = this.activeProjects.get(sender);
 		if (!projectId) {
 			await this.sendMessage(roomId, 'Kein aktives Projekt.\n\nStarte mit: `!new Projektname`');

@@ -41,9 +41,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -200,7 +202,7 @@ Sag "hilfe" fuer alle Befehle!`;
 				break;
 
 			case 'logout':
-				this.sessionService.logout(sender);
+				await this.sessionService.logout(sender);
 				await this.sendMessage(roomId, 'Du wurdest abgemeldet.');
 				break;
 
@@ -273,7 +275,10 @@ Sag "hilfe" fuer alle Befehle!`;
 
 	private async handleSearch(roomId: string, sender: string, searchText: string) {
 		if (!searchText.trim()) {
-			await this.sendMessage(roomId, '**Verwendung:** `!suche [text]`\n\nBeispiel: `!suche Glueck`');
+			await this.sendMessage(
+				roomId,
+				'**Verwendung:** `!suche [text]`\n\nBeispiel: `!suche Glueck`'
+			);
 			return;
 		}
 
@@ -362,7 +367,7 @@ Sag "hilfe" fuer alle Befehle!`;
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
 				await this.sendMessage(
@@ -381,7 +386,7 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleAddFavorite(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -410,7 +415,7 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleFavorites(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -449,7 +454,7 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleLists(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -484,7 +489,7 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleCreateList(roomId: string, sender: string, name: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -511,7 +516,7 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleAddToList(roomId: string, sender: string, args: string[]) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -563,11 +568,11 @@ Sag "hilfe" fuer alle Befehle!`;
 
 	private async handleStatus(roomId: string, sender: string) {
 		const backendHealthy = await this.zitareService.checkHealth();
-		const isLoggedIn = this.sessionService.isLoggedIn(sender);
+		const isLoggedIn = await this.sessionService.isLoggedIn(sender);
 		const sessionCount = this.sessionService.getSessionCount();
 		const totalQuotes = this.quotesService.getTotalCount();
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusText = `**Zitare Bot Status**\n\n`;
 		statusText += `**Backend:** ${backendHealthy ? 'Online' : 'Offline'}\n`;

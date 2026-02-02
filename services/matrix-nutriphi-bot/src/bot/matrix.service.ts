@@ -101,7 +101,7 @@ Sag "hilfe" fur alle Befehle!`;
 		event: MatrixRoomEvent,
 		sender: string
 	): Promise<void> {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(
 				roomId,
@@ -191,7 +191,7 @@ Sag "hilfe" fur alle Befehle!`;
 				break;
 
 			case 'logout':
-				this.sessionService.logout(sender);
+				await this.sessionService.logout(sender);
 				await this.sendMessage(roomId, 'Du wurdest abgemeldet.');
 				break;
 
@@ -259,7 +259,7 @@ Sag "hilfe" fur alle Befehle!`;
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
 				await this.sendMessage(
@@ -278,7 +278,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleAnalyze(roomId: string, sender: string, description: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(
 				roomId,
@@ -287,10 +287,10 @@ Sag "hilfe" fur alle Befehle!`;
 			return;
 		}
 
-		const pendingImage = this.sessionService.getSessionData<{ url: string; mimeType: string }>(
-			sender,
-			'pendingImage'
-		);
+		const pendingImage = await this.sessionService.getSessionData<{
+			url: string;
+			mimeType: string;
+		}>(sender, 'pendingImage');
 
 		// If no image and no description, show help
 		if (!pendingImage && !description.trim()) {
@@ -368,7 +368,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleToday(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -428,7 +428,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleWeek(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -481,7 +481,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleGoals(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -512,7 +512,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleSetGoals(roomId: string, sender: string, args: string[]) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -564,7 +564,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleFavorites(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -592,7 +592,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleTips(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -624,10 +624,10 @@ Sag "hilfe" fur alle Befehle!`;
 
 	private async handleStatus(roomId: string, sender: string) {
 		const backendHealthy = await this.nutriphiService.checkHealth();
-		const isLoggedIn = this.sessionService.isLoggedIn(sender);
+		const isLoggedIn = await this.sessionService.isLoggedIn(sender);
 		const sessionCount = this.sessionService.getSessionCount();
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusText = `**NutriPhi Bot Status**\n\n`;
 		statusText += `**Backend:** ${backendHealthy ? '✅ Online' : '❌ Offline'}\n`;

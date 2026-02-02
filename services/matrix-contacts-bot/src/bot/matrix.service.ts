@@ -176,7 +176,7 @@ Sag "hilfe" fur alle Befehle!`;
 				break;
 
 			case 'logout':
-				this.sessionService.logout(sender);
+				await this.sessionService.logout(sender);
 				await this.sendReply(roomId, event, 'Du wurdest abgemeldet.');
 				break;
 
@@ -198,7 +198,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleListContacts(roomId: string, event: MatrixRoomEvent, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -249,7 +249,7 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		searchTerm: string
 	) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -296,7 +296,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleFavorites(roomId: string, event: MatrixRoomEvent, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -339,7 +339,7 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -411,7 +411,7 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -466,7 +466,7 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -561,7 +561,7 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -605,7 +605,7 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -649,7 +649,7 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -709,7 +709,7 @@ Sag "hilfe" fur alle Befehle!`;
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
 				await this.sendReply(
@@ -731,10 +731,10 @@ Sag "hilfe" fur alle Befehle!`;
 
 	private async handleStatus(roomId: string, event: MatrixRoomEvent, sender: string) {
 		const backendHealthy = await this.contactsService.checkHealth();
-		const isLoggedIn = this.sessionService.isLoggedIn(sender);
+		const isLoggedIn = await this.sessionService.isLoggedIn(sender);
 		const sessionCount = this.sessionService.getSessionCount();
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusText = `**Contacts Bot Status**\n\n`;
 		statusText += `**Backend:** ${backendHealthy ? '✅ Online' : '❌ Offline'}\n`;

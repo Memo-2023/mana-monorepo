@@ -8,7 +8,13 @@ import {
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
-import { StorageService, StorageFile, Folder, ShareLink, TrashItem } from '../storage/storage.service';
+import {
+	StorageService,
+	StorageFile,
+	Folder,
+	ShareLink,
+	TrashItem,
+} from '../storage/storage.service';
 import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
@@ -44,9 +50,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -82,7 +90,7 @@ export class MatrixService extends BaseMatrixService {
 					break;
 
 				case 'logout':
-					this.sessionService.logout(sender);
+					await this.sessionService.logout(sender);
 					await this.sendMessage(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
@@ -229,8 +237,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private requireAuth(sender: string): string {
-		const token = this.sessionService.getToken(sender);
+	private async requireAuth(sender: string): Promise<string> {
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			throw new Error('Nicht angemeldet. Nutze <code>!login email passwort</code>');
 		}
@@ -248,12 +256,18 @@ export class MatrixService extends BaseMatrixService {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`);
+				await this.sendMessage(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`
+				);
 			} else {
-				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+				await this.sendMessage(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`
+				);
 			}
 		} else {
 			await this.sendMessage(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
@@ -262,10 +276,10 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleStatus(roomId: string, sender: string) {
 		const backendOk = await this.storageService.checkHealth();
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const sessions = this.sessionService.getSessionCount();
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const sessions = await this.sessionService.getSessionCount();
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusHtml = '<h3>Storage Bot Status</h3><ul>';
 		statusHtml += `<li>Backend: ${backendOk ? 'Online' : 'Offline'}</li>`;
@@ -285,7 +299,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// File handlers
 	private async handleListFiles(roomId: string, sender: string, folderNumStr?: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		let parentFolderId: string | undefined;
 		if (folderNumStr) {
@@ -322,17 +336,21 @@ export class MatrixService extends BaseMatrixService {
 			html += `<li><strong>${file.name}</strong> (${size})${fav}</li>`;
 		}
 		html += '</ol>';
-		html += '<p><em>Nutze <code>!datei [nr]</code> fuer Details oder <code>!download [nr]</code></em></p>';
+		html +=
+			'<p><em>Nutze <code>!datei [nr]</code> fuer Details oder <code>!download [nr]</code></em></p>';
 
 		await this.sendMessage(roomId, html);
 	}
 
 	private async handleFileDetails(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>'
+			);
 			return;
 		}
 
@@ -357,11 +375,14 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDownload(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>'
+			);
 			return;
 		}
 
@@ -379,11 +400,14 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDeleteFile(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>'
+			);
 			return;
 		}
 
@@ -395,20 +419,31 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		this.filesMapper.clearList(sender);
-		await this.sendMessage(roomId, `<p><strong>${file.name}</strong> in Papierkorb verschoben.</p>`);
+		await this.sendMessage(
+			roomId,
+			`<p><strong>${file.name}</strong> in Papierkorb verschoben.</p>`
+		);
 	}
 
-	private async handleRenameFile(roomId: string, sender: string, numberStr: string, newName: string) {
+	private async handleRenameFile(
+		roomId: string,
+		sender: string,
+		numberStr: string,
+		newName: string
+	) {
 		if (!newName) {
 			await this.sendMessage(roomId, '<p>Verwendung: <code>!umbenennen [nr] neuer name</code></p>');
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>'
+			);
 			return;
 		}
 
@@ -419,11 +454,19 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		await this.sendMessage(roomId, `<p><strong>${file.name}</strong> umbenannt zu <strong>${newName}</strong></p>`);
+		await this.sendMessage(
+			roomId,
+			`<p><strong>${file.name}</strong> umbenannt zu <strong>${newName}</strong></p>`
+		);
 	}
 
-	private async handleMoveFile(roomId: string, sender: string, fileNumStr: string, folderNumStr: string) {
-		const token = this.requireAuth(sender);
+	private async handleMoveFile(
+		roomId: string,
+		sender: string,
+		fileNumStr: string,
+		folderNumStr: string
+	) {
+		const token = await this.requireAuth(sender);
 		const file = this.getFileByNumber(sender, fileNumStr);
 
 		if (!file) {
@@ -437,7 +480,10 @@ export class MatrixService extends BaseMatrixService {
 		if (folderNumStr && folderNumStr !== '0' && folderNumStr.toLowerCase() !== 'root') {
 			const folder = this.getFolderByNumber(sender, folderNumStr);
 			if (!folder) {
-				await this.sendMessage(roomId, '<p>Ungueltige Ordner-Nummer. Nutze 0 oder root fuer Root.</p>');
+				await this.sendMessage(
+					roomId,
+					'<p>Ungueltige Ordner-Nummer. Nutze 0 oder root fuer Root.</p>'
+				);
 				return;
 			}
 			parentFolderId = folder.id;
@@ -451,12 +497,15 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		await this.sendMessage(roomId, `<p><strong>${file.name}</strong> nach <strong>${folderName}</strong> verschoben.</p>`);
+		await this.sendMessage(
+			roomId,
+			`<p><strong>${file.name}</strong> nach <strong>${folderName}</strong> verschoben.</p>`
+		);
 	}
 
 	// Folder handlers
 	private async handleListFolders(roomId: string, sender: string, folderNumStr?: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		let parentFolderId: string | undefined;
 		if (folderNumStr) {
@@ -497,11 +546,14 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleCreateFolder(roomId: string, sender: string, args: string[]) {
 		if (args.length === 0) {
-			await this.sendMessage(roomId, '<p>Verwendung: <code>!neuordner Name [in-ordner-nr]</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Verwendung: <code>!neuordner Name [in-ordner-nr]</code></p>'
+			);
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		// Check if last arg is a number (parent folder)
 		let parentFolderId: string | undefined;
@@ -528,7 +580,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDeleteFolder(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const folder = this.getFolderByNumber(sender, numberStr);
 
 		if (!folder) {
@@ -544,12 +596,15 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		this.foldersMapper.clearList(sender);
-		await this.sendMessage(roomId, `<p>Ordner <strong>${folder.name}</strong> in Papierkorb verschoben.</p>`);
+		await this.sendMessage(
+			roomId,
+			`<p>Ordner <strong>${folder.name}</strong> in Papierkorb verschoben.</p>`
+		);
 	}
 
 	// Share handlers
 	private async handleShareFile(roomId: string, sender: string, argString: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		// Parse arguments
 		const args = argString.split(/\s+/);
@@ -557,7 +612,10 @@ export class MatrixService extends BaseMatrixService {
 		const file = this.getFileByNumber(sender, numberStr);
 
 		if (!file) {
-			await this.sendMessage(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Ungueltige Nummer. Nutze zuerst <code>!dateien</code></p>'
+			);
 			return;
 		}
 
@@ -601,7 +659,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleListShares(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.storageService.getShares(token);
 
 		if (result.error) {
@@ -619,8 +677,12 @@ export class MatrixService extends BaseMatrixService {
 
 		let html = '<h3>Share-Links</h3><ol>';
 		for (const share of shares) {
-			const expires = share.expiresAt ? ` (bis ${new Date(share.expiresAt).toLocaleDateString('de-DE')})` : '';
-			const downloads = share.maxDownloads ? ` [${share.downloadCount}/${share.maxDownloads}]` : ` [${share.downloadCount} DL]`;
+			const expires = share.expiresAt
+				? ` (bis ${new Date(share.expiresAt).toLocaleDateString('de-DE')})`
+				: '';
+			const downloads = share.maxDownloads
+				? ` [${share.downloadCount}/${share.maxDownloads}]`
+				: ` [${share.downloadCount} DL]`;
 			html += `<li>${share.shareType}${expires}${downloads}</li>`;
 		}
 		html += '</ol>';
@@ -630,7 +692,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDeleteShare(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		if (!this.sharesMapper.hasList(sender)) {
 			await this.sendMessage(roomId, '<p>Nutze zuerst <code>!links</code></p>');
@@ -661,7 +723,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.storageService.search(token, query);
 
 		if (result.error) {
@@ -700,7 +762,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleFavorites(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.storageService.getFavorites(token);
 
 		if (result.error) {
@@ -739,7 +801,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleToggleFavorite(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		// Try file first
 		const file = this.getFileByNumber(sender, numberStr);
@@ -772,7 +834,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Trash handlers
 	private async handleTrash(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.storageService.getTrash(token);
 
 		if (result.error) {
@@ -801,7 +863,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleRestore(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		if (!this.trashMapper.hasList(sender)) {
 			await this.sendMessage(roomId, '<p>Nutze zuerst <code>!papierkorb</code></p>');
@@ -826,7 +888,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleEmptyTrash(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.storageService.emptyTrash(token);
 
 		if (result.error) {

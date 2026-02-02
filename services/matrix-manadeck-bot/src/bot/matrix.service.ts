@@ -71,9 +71,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -109,7 +111,7 @@ export class MatrixService extends BaseMatrixService {
 					break;
 
 				case 'logout':
-					this.sessionService.logout(sender);
+					await this.sessionService.logout(sender);
 					await this.sendHtml(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
@@ -206,8 +208,8 @@ export class MatrixService extends BaseMatrixService {
 		});
 	}
 
-	private requireAuth(sender: string): string {
-		const token = this.sessionService.getToken(sender);
+	private async requireAuth(sender: string): Promise<string> {
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			throw new Error('Nicht angemeldet. Nutze <code>!login email passwort</code>');
 		}
@@ -225,12 +227,18 @@ export class MatrixService extends BaseMatrixService {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
-				await this.sendHtml(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`);
+				await this.sendHtml(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`
+				);
 			} else {
-				await this.sendHtml(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+				await this.sendHtml(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`
+				);
 			}
 		} else {
 			await this.sendHtml(roomId, `<p>❌ Login fehlgeschlagen: ${result.error}</p>`);
@@ -239,10 +247,10 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleStatus(roomId: string, sender: string) {
 		const backendOk = await this.manadeckService.checkHealth();
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const sessions = this.sessionService.getSessionCount();
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const sessions = await this.sessionService.getSessionCount();
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusHtml = `<h3>ManaDeck Bot Status</h3><ul>`;
 		statusHtml += `<li>Backend: ${backendOk ? '✅ Online' : '❌ Offline'}</li>`;
@@ -263,7 +271,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Deck handlers
 	private async handleListDecks(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.manadeckService.getDecks(token);
 
 		if (result.error) {
@@ -295,14 +303,11 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDeckDetails(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const deck = this.getDeckByNumber(sender, numberStr);
 
 		if (!deck) {
-			await this.sendHtml(
-				roomId,
-				'<p>Ungueltige Nummer. Nutze zuerst <code>!decks</code></p>'
-			);
+			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!decks</code></p>');
 			return;
 		}
 
@@ -332,7 +337,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const parts = title.split('|').map((s) => s.trim());
 		const deckTitle = parts[0];
 		const description = parts[1];
@@ -351,14 +356,11 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDeleteDeck(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const deck = this.getDeckByNumber(sender, numberStr);
 
 		if (!deck) {
-			await this.sendHtml(
-				roomId,
-				'<p>Ungueltige Nummer. Nutze zuerst <code>!decks</code></p>'
-			);
+			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!decks</code></p>');
 			return;
 		}
 
@@ -376,14 +378,11 @@ export class MatrixService extends BaseMatrixService {
 
 	// Card handlers
 	private async handleListCards(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const deck = this.getDeckByNumber(sender, numberStr);
 
 		if (!deck) {
-			await this.sendHtml(
-				roomId,
-				'<p>Ungueltige Nummer. Nutze zuerst <code>!decks</code></p>'
-			);
+			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!decks</code></p>');
 			return;
 		}
 
@@ -399,10 +398,7 @@ export class MatrixService extends BaseMatrixService {
 		this.currentDeckId.set(sender, deck.id);
 
 		if (cards.length === 0) {
-			await this.sendHtml(
-				roomId,
-				`<p>Keine Karten in <strong>${deck.title}</strong>.</p>`
-			);
+			await this.sendHtml(roomId, `<p>Keine Karten in <strong>${deck.title}</strong>.</p>`);
 			return;
 		}
 
@@ -424,7 +420,7 @@ export class MatrixService extends BaseMatrixService {
 		deckNumStr: string,
 		cardNumStr: string
 	) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const deck = this.decksMapper.getByNumber(sender, parseInt(deckNumStr, 10));
 
 		if (!deck) {
@@ -486,7 +482,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// AI generation
 	private async handleGenerate(roomId: string, sender: string, argString: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		// Parse options from argString
 		const options: any = {};
@@ -540,14 +536,11 @@ export class MatrixService extends BaseMatrixService {
 
 	// Study
 	private async handleStartStudy(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const deck = this.getDeckByNumber(sender, numberStr);
 
 		if (!deck) {
-			await this.sendHtml(
-				roomId,
-				'<p>Ungueltige Nummer. Nutze zuerst <code>!decks</code></p>'
-			);
+			await this.sendHtml(roomId, '<p>Ungueltige Nummer. Nutze zuerst <code>!decks</code></p>');
 			return;
 		}
 
@@ -568,7 +561,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDueCards(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.manadeckService.getDueCards(token);
 
 		if (result.error) {
@@ -592,7 +585,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Stats
 	private async handleStats(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.manadeckService.getStats(token);
 
 		if (result.error) {
@@ -615,7 +608,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleCredits(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.manadeckService.getCredits(token);
 
 		if (result.error) {

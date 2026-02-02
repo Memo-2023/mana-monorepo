@@ -73,9 +73,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -161,7 +163,7 @@ Sag "hilfe" fur alle Befehle!`;
 				break;
 
 			case 'logout':
-				this.sessionService.logout(sender);
+				await this.sessionService.logout(sender);
 				await this.sendMessage(roomId, 'Du wurdest abgemeldet.');
 				break;
 
@@ -234,7 +236,7 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		// Check if user is logged in
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(
 				roomId,
@@ -400,7 +402,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleHistory(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -432,7 +434,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleDelete(roomId: string, sender: string, args: string[]) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -470,7 +472,7 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleCredits(roomId: string, sender: string) {
-		const token = this.sessionService.getToken(sender);
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
 			return;
@@ -535,9 +537,9 @@ Sag "hilfe" fur alle Befehle!`;
 
 	private async handleStatus(roomId: string, sender: string) {
 		const backendHealthy = await this.pictureService.checkHealth();
-		const isLoggedIn = this.sessionService.isLoggedIn(sender);
-		const email = this.sessionService.getEmail(sender);
-		const token = this.sessionService.getToken(sender);
+		const isLoggedIn = await this.sessionService.isLoggedIn(sender);
+		const email = await this.sessionService.getEmail(sender);
+		const token = await this.sessionService.getToken(sender);
 		const sessionCount = this.sessionService.getSessionCount();
 		const currentModel = this.userModels.get(sender);
 		const hasActiveGeneration = this.activeGenerations.has(sender);

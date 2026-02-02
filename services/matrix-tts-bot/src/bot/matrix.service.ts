@@ -50,9 +50,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -189,7 +191,12 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private async handleVoiceCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleVoiceCommand(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		if (!args.trim()) {
 			await this.sendReply(
 				roomId,
@@ -253,7 +260,12 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private async handleSpeedCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleSpeedCommand(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		if (!args.trim()) {
 			await this.sendReply(
 				roomId,
@@ -279,9 +291,9 @@ export class MatrixService extends BaseMatrixService {
 	private async handleStatusCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		const settings = this.getUserSettings(userId);
 		const ttsHealthy = await this.ttsService.isHealthy();
-		const loggedIn = this.sessionService.isLoggedIn(userId);
-		const session = this.sessionService.getSession(userId);
-		const token = this.sessionService.getToken(userId);
+		const loggedIn = await this.sessionService.isLoggedIn(userId);
+		const session = await this.sessionService.getSession(userId);
+		const token = await this.sessionService.getToken(userId);
 
 		let response = '**Aktuelle Einstellungen:**\n\n';
 		response += `Stimme: \`${settings.voice}\`\n`;
@@ -298,7 +310,12 @@ export class MatrixService extends BaseMatrixService {
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleTextToSpeech(roomId: string, event: MatrixRoomEvent, userId: string, text: string) {
+	private async handleTextToSpeech(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		text: string
+	) {
 		// Check text length
 		if (text.length > this.maxTextLength) {
 			await this.sendReply(

@@ -387,9 +387,9 @@ Schreibe einfach eine Nachricht und ich antworte!
 		const connected = await this.ollamaService.checkConnection();
 		const models = await this.ollamaService.listModels();
 		const session = this.getSession(sender);
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const authSession = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const authSession = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusText = `**Ollama Status**\n\n`;
 		statusText += `**Verbindung:** ${connected ? 'Online' : 'Offline'}\n`;

@@ -37,9 +37,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -222,7 +224,12 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private async handleTimerCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleTimerCommand(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		if (!args.trim()) {
 			await this.sendReply(
 				roomId,
@@ -242,7 +249,7 @@ export class MatrixService extends BaseMatrixService {
 		const label = args.replace(/[\d\s]*[hms]+/gi, '').trim() || null;
 
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung. Bitte zuerst `!login`.');
 				return;
@@ -266,7 +273,7 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleStopCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
 				return;
@@ -303,7 +310,7 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleResumeCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
 				return;
@@ -327,7 +334,7 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleResetCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
 				return;
@@ -357,11 +364,14 @@ export class MatrixService extends BaseMatrixService {
 		const result = await this.sessionService.login(userId, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(userId);
+			const token = await this.sessionService.getToken(userId);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
-				await this.sendReply(roomId, event,
-					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`);
+				await this.sendReply(
+					roomId,
+					event,
+					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`
+				);
 			} else {
 				await this.sendReply(roomId, event, `✅ Erfolgreich angemeldet als **${email}**`);
 			}
@@ -371,15 +381,15 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleLogout(roomId: string, event: MatrixRoomEvent, userId: string) {
-		this.sessionService.logout(userId);
+		await this.sessionService.logout(userId);
 		await this.sendReply(roomId, event, '👋 Erfolgreich abgemeldet.');
 	}
 
 	private async handleStatusCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		// Auth-Status zuerst
-		const loggedIn = this.sessionService.isLoggedIn(userId);
-		const session = this.sessionService.getSession(userId);
-		const token = this.sessionService.getToken(userId);
+		const loggedIn = await this.sessionService.isLoggedIn(userId);
+		const session = await this.sessionService.getSession(userId);
+		const token = await this.sessionService.getToken(userId);
 
 		let response = '**🕐 Clock Bot Status**\n\n';
 
@@ -394,7 +404,7 @@ export class MatrixService extends BaseMatrixService {
 
 		// Timer-Status
 		try {
-			const timerToken = this.getToken(userId);
+			const timerToken = await this.getToken(userId);
 			if (timerToken) {
 				const timer = await this.clockService.getRunningTimer(timerToken);
 				if (timer) {
@@ -421,7 +431,7 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleTimersCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
 				return;
@@ -448,7 +458,12 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private async handleAlarmCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleAlarmCommand(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		const parts = args.trim().split(' ');
 
 		// Handle !alarm off/on/delete commands
@@ -472,7 +487,7 @@ export class MatrixService extends BaseMatrixService {
 		const label = args.replace(/[\d:]+\s*(uhr\s*\d*)?/gi, '').trim() || null;
 
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
 				return;
@@ -491,7 +506,7 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleAlarmsCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
 				return;
@@ -530,7 +545,7 @@ export class MatrixService extends BaseMatrixService {
 		let response = `**${timeStr} Uhr**\n${dateStr}`;
 
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (token) {
 				const worldClocks = await this.clockService.getWorldClocks(token);
 				if (worldClocks.length > 0) {
@@ -552,7 +567,12 @@ export class MatrixService extends BaseMatrixService {
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleWorldClockCommand(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleWorldClockCommand(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		if (!args.trim()) {
 			await this.sendReply(
 				roomId,
@@ -569,7 +589,7 @@ export class MatrixService extends BaseMatrixService {
 				return;
 			}
 
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
 				return;
@@ -586,7 +606,7 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleWorldClocksCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = this.getToken(userId);
+			const token = await this.getToken(userId);
 			if (!token) {
 				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
 				return;
@@ -619,7 +639,12 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private async handleNaturalLanguage(roomId: string, event: MatrixRoomEvent, userId: string, text: string) {
+	private async handleNaturalLanguage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		text: string
+	) {
 		const lower = text.toLowerCase();
 
 		// Try to detect timer intent
@@ -654,9 +679,9 @@ export class MatrixService extends BaseMatrixService {
 		// No match - don't respond to random messages
 	}
 
-	private getToken(userId: string): string | null {
+	private async getToken(userId: string): Promise<string | null> {
 		// SessionService hat Priorität (Login via mana-core-auth)
-		const sessionToken = this.sessionService.getToken(userId);
+		const sessionToken = await this.sessionService.getToken(userId);
 		if (sessionToken) return sessionToken;
 
 		// Fallback auf clockService Token

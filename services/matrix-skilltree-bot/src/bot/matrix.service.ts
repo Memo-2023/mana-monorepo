@@ -103,7 +103,7 @@ export class MatrixService extends BaseMatrixService {
 					break;
 
 				case 'logout':
-					this.sessionService.logout(sender);
+					await this.sessionService.logout(sender);
 					await this.sendMessage(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
@@ -189,8 +189,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private requireAuth(sender: string): string {
-		const token = this.sessionService.getToken(sender);
+	private async requireAuth(sender: string): Promise<string> {
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			throw new Error('Nicht angemeldet. Nutze <code>!login email passwort</code>');
 		}
@@ -208,12 +208,18 @@ export class MatrixService extends BaseMatrixService {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`);
+				await this.sendMessage(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`
+				);
 			} else {
-				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+				await this.sendMessage(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`
+				);
 			}
 		} else {
 			await this.sendMessage(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
@@ -222,10 +228,10 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleStatus(roomId: string, sender: string) {
 		const backendOk = await this.skilltreeService.checkHealth();
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const sessions = this.sessionService.getSessionCount();
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const sessions = await this.sessionService.getSessionCount();
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusHtml = '<h3>Skilltree Bot Status</h3><ul>';
 		statusHtml += `<li>Backend: ${backendOk ? 'Online' : 'Offline'}</li>`;
@@ -245,7 +251,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Skill handlers
 	private async handleListSkills(roomId: string, sender: string, branchFilter?: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		let branch: string | undefined;
 		if (branchFilter) {
@@ -292,7 +298,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleSkillDetails(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const number = parseInt(numberStr, 10);
 		const skill = this.skillsMapper.getByNumber(sender, number);
 
@@ -338,7 +344,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const parts = input.split('|').map((s) => s.trim());
 		const name = parts[0];
 		const branchInput = parts[1]?.toLowerCase() || 'custom';
@@ -371,7 +377,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDeleteSkill(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const number = parseInt(numberStr, 10);
 		const skill = this.skillsMapper.getByNumber(sender, number);
 
@@ -403,7 +409,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const number = parseInt(args[0], 10);
 		const skill = this.skillsMapper.getByNumber(sender, number);
 
@@ -454,7 +460,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Stats handler
 	private async handleStats(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.skilltreeService.getStats(token);
 
 		if (result.error) {
@@ -478,7 +484,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Activities handler
 	private async handleActivities(roomId: string, sender: string, numberStr?: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		let result;
 		let skillName = '';

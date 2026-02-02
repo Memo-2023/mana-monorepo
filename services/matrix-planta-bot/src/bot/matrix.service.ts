@@ -83,9 +83,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -121,7 +123,7 @@ export class MatrixService extends BaseMatrixService {
 					break;
 
 				case 'logout':
-					this.sessionService.logout(sender);
+					await this.sessionService.logout(sender);
 					await this.sendMessage(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
@@ -193,8 +195,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private requireAuth(sender: string): string {
-		const token = this.sessionService.getToken(sender);
+	private async requireAuth(sender: string): Promise<string> {
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			throw new Error('Nicht angemeldet. Nutze <code>!login email passwort</code>');
 		}
@@ -212,12 +214,18 @@ export class MatrixService extends BaseMatrixService {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`);
+				await this.sendMessage(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`
+				);
 			} else {
-				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+				await this.sendMessage(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`
+				);
 			}
 		} else {
 			await this.sendMessage(roomId, `<p>❌ Login fehlgeschlagen: ${result.error}</p>`);
@@ -226,10 +234,10 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleStatus(roomId: string, sender: string) {
 		const backendOk = await this.plantaService.checkHealth();
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const sessions = this.sessionService.getSessionCount();
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const sessions = await this.sessionService.getSessionCount();
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusHtml = `<h3>Planta Bot Status</h3><ul>`;
 		statusHtml += `<li>Backend: ${backendOk ? '✅ Online' : '❌ Offline'}</li>`;
@@ -250,7 +258,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Plant handlers
 	private async handleListPlants(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.plantaService.getPlants(token);
 
 		if (result.error) {
@@ -276,13 +284,14 @@ export class MatrixService extends BaseMatrixService {
 			html += `<li>${health} <strong>${plant.name}</strong>${scientific}</li>`;
 		}
 		html += '</ol>';
-		html += '<p><em>Nutze <code>!pflanze [nr]</code> fuer Details oder <code>!faellig</code> fuer Giess-Status</em></p>';
+		html +=
+			'<p><em>Nutze <code>!pflanze [nr]</code> fuer Details oder <code>!faellig</code> fuer Giess-Status</em></p>';
 
 		await this.sendMessage(roomId, html);
 	}
 
 	private async handlePlantDetails(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
@@ -312,7 +321,8 @@ export class MatrixService extends BaseMatrixService {
 		if (p.temperature) html += `<li>Temperatur: ${p.temperature}</li>`;
 		if (p.soilType) html += `<li>Erde: ${p.soilType}</li>`;
 		if (p.healthStatus) html += `<li>Gesundheit: ${this.translateHealth(p.healthStatus)}</li>`;
-		if (p.acquiredAt) html += `<li>Erworben: ${new Date(p.acquiredAt).toLocaleDateString('de-DE')}</li>`;
+		if (p.acquiredAt)
+			html += `<li>Erworben: ${new Date(p.acquiredAt).toLocaleDateString('de-DE')}</li>`;
 		html += '</ul>';
 
 		if (p.careNotes) {
@@ -328,7 +338,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.plantaService.createPlant(token, name);
 
 		if (result.error) {
@@ -346,7 +356,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDeletePlant(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
@@ -378,7 +388,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const plant = this.getPlantByNumber(sender, args[0]);
 
 		if (!plant) {
@@ -411,10 +421,17 @@ export class MatrixService extends BaseMatrixService {
 			}
 		} else if (field === 'lightRequirements') {
 			const lightMap: Record<string, string> = {
-				wenig: 'low', low: 'low', gering: 'low',
-				mittel: 'medium', medium: 'medium',
-				hell: 'bright', bright: 'bright', viel: 'bright',
-				direkt: 'direct', direct: 'direct', sonne: 'direct',
+				wenig: 'low',
+				low: 'low',
+				gering: 'low',
+				mittel: 'medium',
+				medium: 'medium',
+				hell: 'bright',
+				bright: 'bright',
+				viel: 'bright',
+				direkt: 'direct',
+				direct: 'direct',
+				sonne: 'direct',
 			};
 			updateValue = lightMap[value.toLowerCase()];
 			if (!updateValue) {
@@ -426,9 +443,16 @@ export class MatrixService extends BaseMatrixService {
 			}
 		} else if (field === 'humidity') {
 			const humidityMap: Record<string, string> = {
-				niedrig: 'low', low: 'low', gering: 'low', trocken: 'low',
-				mittel: 'medium', medium: 'medium', normal: 'medium',
-				hoch: 'high', high: 'high', feucht: 'high',
+				niedrig: 'low',
+				low: 'low',
+				gering: 'low',
+				trocken: 'low',
+				mittel: 'medium',
+				medium: 'medium',
+				normal: 'medium',
+				hoch: 'high',
+				high: 'high',
+				feucht: 'high',
 			};
 			updateValue = humidityMap[value.toLowerCase()];
 			if (!updateValue) {
@@ -456,8 +480,13 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	// Watering handlers
-	private async handleWaterPlant(roomId: string, sender: string, numberStr: string, notes?: string) {
-		const token = this.requireAuth(sender);
+	private async handleWaterPlant(
+		roomId: string,
+		sender: string,
+		numberStr: string,
+		notes?: string
+	) {
+		const token = await this.requireAuth(sender);
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
@@ -484,7 +513,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleUpcomingWaterings(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.plantaService.getUpcomingWaterings(token);
 
 		if (result.error) {
@@ -495,7 +524,10 @@ export class MatrixService extends BaseMatrixService {
 		const upcoming = result.data || [];
 
 		if (upcoming.length === 0) {
-			await this.sendMessage(roomId, '<p>Keine Pflanzen muessen in den naechsten Tagen gegossen werden.</p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Keine Pflanzen muessen in den naechsten Tagen gegossen werden.</p>'
+			);
 			return;
 		}
 
@@ -511,13 +543,16 @@ export class MatrixService extends BaseMatrixService {
 		html += '</ul>';
 
 		// Store plants for reference
-		this.plantsMapper.setList(sender, upcoming.map(u => u.plant));
+		this.plantsMapper.setList(
+			sender,
+			upcoming.map((u) => u.plant)
+		);
 
 		await this.sendMessage(roomId, html);
 	}
 
 	private async handleWateringHistory(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
@@ -566,16 +601,18 @@ export class MatrixService extends BaseMatrixService {
 		await this.sendMessage(roomId, html);
 	}
 
-	private async handleSetInterval(roomId: string, sender: string, numberStr: string, daysStr: string) {
+	private async handleSetInterval(
+		roomId: string,
+		sender: string,
+		numberStr: string,
+		daysStr: string
+	) {
 		if (!numberStr || !daysStr) {
-			await this.sendMessage(
-				roomId,
-				'<p>Verwendung: <code>!intervall [nr] [tage]</code></p>'
-			);
+			await this.sendMessage(roomId, '<p>Verwendung: <code>!intervall [nr] [tage]</code></p>');
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const plant = this.getPlantByNumber(sender, numberStr);
 
 		if (!plant) {
@@ -614,10 +651,14 @@ export class MatrixService extends BaseMatrixService {
 
 	private getHealthEmoji(status?: string): string {
 		switch (status) {
-			case 'healthy': return '&#127793;'; // Seedling
-			case 'needs_attention': return '&#9888;&#65039;'; // Warning
-			case 'sick': return '&#129314;'; // Wilted
-			default: return '&#127793;';
+			case 'healthy':
+				return '&#127793;'; // Seedling
+			case 'needs_attention':
+				return '&#9888;&#65039;'; // Warning
+			case 'sick':
+				return '&#129314;'; // Wilted
+			default:
+				return '&#127793;';
 		}
 	}
 

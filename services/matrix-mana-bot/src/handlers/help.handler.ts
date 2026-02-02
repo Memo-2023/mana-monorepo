@@ -27,7 +27,7 @@ export class HelpHandler {
 		const result = await this.sessionService.login(ctx.userId, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(ctx.userId);
+			const token = await this.sessionService.getToken(ctx.userId);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
 				return `✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`;
@@ -38,15 +38,15 @@ export class HelpHandler {
 	}
 
 	async handleLogout(ctx: CommandContext): Promise<string> {
-		this.sessionService.logout(ctx.userId);
+		await this.sessionService.logout(ctx.userId);
 		return '👋 Erfolgreich abgemeldet.';
 	}
 
 	async showStatus(ctx: CommandContext): Promise<string> {
 		// Auth-Status zuerst
-		const loggedIn = this.sessionService.isLoggedIn(ctx.userId);
-		const session = this.sessionService.getSession(ctx.userId);
-		const token = this.sessionService.getToken(ctx.userId);
+		const loggedIn = await this.sessionService.isLoggedIn(ctx.userId);
+		const session = await this.sessionService.getSession(ctx.userId);
+		const token = await this.sessionService.getToken(ctx.userId);
 
 		let authSection = '';
 		if (loggedIn && session && token) {
