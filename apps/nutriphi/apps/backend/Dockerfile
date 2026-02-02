@@ -13,6 +13,7 @@ COPY pnpm-lock.yaml ./
 
 # Copy shared packages
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 
 # Copy nutriphi packages and backend
 COPY apps/nutriphi/packages ./apps/nutriphi/packages
@@ -23,6 +24,9 @@ RUN pnpm install --frozen-lockfile
 
 # Build shared packages first
 WORKDIR /app/packages/shared-nestjs-auth
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-setup
 RUN pnpm build
 
 # Build the backend
