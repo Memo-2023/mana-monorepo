@@ -18,6 +18,9 @@ export default () => ({
 	stt: {
 		url: process.env.STT_URL || 'http://localhost:3020',
 	},
+	media: {
+		url: process.env.MANA_MEDIA_URL || 'http://localhost:3015',
+	},
 });
 
 export const HELP_MESSAGE = `**NutriPhi Bot - KI-Ernahrungsassistent**

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MatrixService } from './matrix.service';
 import { NutriPhiModule } from '../nutriphi/nutriphi.module';
 import { SessionModule, TranscriptionModule, CreditModule } from '@manacore/bot-services';
+import { MediaModule } from '../media/media.module';
 
 @Module({
 	imports: [
@@ -9,6 +10,7 @@ import { SessionModule, TranscriptionModule, CreditModule } from '@manacore/bot-
 		SessionModule.forRoot({ storageMode: 'redis' }),
 		TranscriptionModule.forRoot(),
 		CreditModule.forRoot(),
+		MediaModule,
 	],
 	providers: [MatrixService],
 	exports: [MatrixService],

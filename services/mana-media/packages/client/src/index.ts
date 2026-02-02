@@ -1,9 +1,10 @@
 export interface MediaResult {
 	id: string;
 	status: 'uploading' | 'processing' | 'ready' | 'failed';
-	originalName: string;
+	originalName: string | null;
 	mimeType: string;
 	size: number;
+	hash: string;
 	urls: {
 		original: string;
 		thumbnail?: string;
@@ -11,6 +12,13 @@ export interface MediaResult {
 		large?: string;
 	};
 	createdAt: Date;
+}
+
+export interface ImportFromMatrixOptions {
+	mxcUrl: string;
+	app: string;
+	userId: string;
+	skipProcessing?: boolean;
 }
 
 export interface UploadOptions {
@@ -72,6 +80,53 @@ export class MediaClient {
 
 		if (!response.ok) {
 			throw new Error(`Upload failed: ${response.statusText}`);
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Import media from a Matrix MXC URL
+	 * Copies the file from Matrix to mana-media storage with deduplication
+	 */
+	async importFromMatrix(options: ImportFromMatrixOptions): Promise<MediaResult> {
+		const response = await fetch(`${this.baseUrl}/api/v1/media/import/matrix`, {
+			method: 'POST',
+			headers: {
+				...this.getHeaders(),
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				mxcUrl: options.mxcUrl,
+				app: options.app,
+				userId: options.userId,
+				skipProcessing: options.skipProcessing,
+			}),
+		});
+
+		if (!response.ok) {
+			const error = await response.text();
+			throw new Error(`Import from Matrix failed: ${response.statusText} - ${error}`);
+		}
+
+		return response.json();
+	}
+
+	/**
+	 * Get media by content hash (SHA-256)
+	 * Useful for checking if a file already exists before uploading
+	 */
+	async getByHash(hash: string): Promise<MediaResult | null> {
+		const response = await fetch(`${this.baseUrl}/api/v1/media/hash/${hash}`, {
+			headers: this.getHeaders(),
+		});
+
+		if (response.status === 404) {
+			return null;
+		}
+
+		if (!response.ok) {
+			throw new Error(`Get by hash failed: ${response.statusText}`);
 		}
 
 		return response.json();

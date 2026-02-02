@@ -1,4 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { ProcessService } from './process.service';
 import { UploadService } from '../upload/upload.service';
@@ -12,6 +13,8 @@ interface ProcessJobData {
 
 @Processor(PROCESS_QUEUE)
 export class ProcessWorker extends WorkerHost {
+	private readonly logger = new Logger(ProcessWorker.name);
+
 	constructor(
 		private processService: ProcessService,
 		private uploadService: UploadService
@@ -22,7 +25,7 @@ export class ProcessWorker extends WorkerHost {
 	async process(job: Job<ProcessJobData>): Promise<void> {
 		const { mediaId, mimeType, originalKey } = job.data;
 
-		console.log(`Processing media ${mediaId} (${mimeType})`);
+		this.logger.log(`Processing media ${mediaId} (${mimeType})`);
 
 		try {
 			if (SUPPORTED_IMAGE_TYPES.includes(mimeType)) {
@@ -32,7 +35,7 @@ export class ProcessWorker extends WorkerHost {
 				await this.uploadService.update(mediaId, { status: 'ready' });
 			}
 		} catch (error) {
-			console.error(`Failed to process media ${mediaId}:`, error);
+			this.logger.error(`Failed to process media ${mediaId}:`, error);
 			await this.uploadService.update(mediaId, { status: 'failed' });
 			throw error;
 		}
@@ -47,16 +50,16 @@ export class ProcessWorker extends WorkerHost {
 
 		await this.uploadService.update(mediaId, {
 			status: 'ready',
-			keys: {
-				original: originalKey,
-				thumbnail: result.thumbnail,
-				medium: result.medium,
-				large: result.large,
-			},
-			metadata: result.metadata,
+			thumbnailKey: result.thumbnail,
+			mediumKey: result.medium,
+			largeKey: result.large,
+			width: result.metadata?.width,
+			height: result.metadata?.height,
+			format: result.metadata?.format,
+			hasAlpha: result.metadata?.hasAlpha,
 		});
 
-		console.log(
+		this.logger.log(
 			`Processed image ${mediaId}: thumbnail=${!!result.thumbnail}, medium=${!!result.medium}, large=${!!result.large}`
 		);
 	}

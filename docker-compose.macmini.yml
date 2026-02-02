@@ -99,6 +99,7 @@ services:
       BASE_URL: https://auth.mana.how
       # Cross-domain SSO: share session cookies across all *.mana.how subdomains
       COOKIE_DOMAIN: .mana.how
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       SMTP_HOST: smtp-relay.brevo.com
       SMTP_PORT: 587
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
@@ -746,15 +747,21 @@ services:
     depends_on:
       synapse:
         condition: service_healthy
+      mana-media:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 4016
       TZ: Europe/Berlin
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
       MATRIX_HOMESERVER_URL: http://synapse:8008
       MATRIX_ACCESS_TOKEN: ${MATRIX_NUTRIPHI_BOT_TOKEN}
       MATRIX_ALLOWED_ROOMS: ${MATRIX_NUTRIPHI_BOT_ROOMS:-}
       NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3037
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_MEDIA_URL: http://mana-media:3015
     volumes:
       - matrix_bots_data:/app/data
     ports:

@@ -14,6 +14,7 @@ import {
 	WeeklyStats,
 } from '../nutriphi/nutriphi.service';
 import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
+import { MediaService } from '../media/media.service';
 import { HELP_MESSAGE, MEAL_TYPE_LABELS } from '../config/configuration';
 
 const PHOTO_ANALYSIS_CREDITS = 3;
@@ -36,7 +37,8 @@ export class MatrixService extends BaseMatrixService {
 		private nutriphiService: NutriPhiService,
 		private sessionService: SessionService,
 		private transcriptionService: TranscriptionService,
-		private creditService: CreditService
+		private creditService: CreditService,
+		private mediaService: MediaService
 	) {
 		super(configService);
 	}
@@ -114,6 +116,19 @@ Sag "hilfe" fur alle Befehle!`;
 
 			const response = this.formatAnalysisResult(result);
 			await this.sendMessage(roomId, response);
+
+			// Store image in mana-media for persistent storage (non-blocking)
+			// Use Matrix sender ID as user identifier
+			this.mediaService
+				.storeFromMatrix(mxcUrl, sender)
+				.then((mediaResult) => {
+					if (mediaResult) {
+						this.logger.log(`Image stored in mana-media: ${mediaResult.id}`);
+					}
+				})
+				.catch((error) => {
+					this.logger.warn(`Failed to store image in mana-media: ${error}`);
+				});
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';

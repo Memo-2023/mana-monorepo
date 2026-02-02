@@ -20,6 +20,12 @@ packages:
   # Standalone microservices
   - 'services/*'
 
+  # Sub-apps within services (for services with nested structure like mana-media)
+  - 'services/*/apps/*'
+
+  # Service-specific packages
+  - 'services/*/packages/*'
+
   # Monorepo-wide shared packages
   - 'packages/*'
 

@@ -17,9 +17,10 @@ import { UploadService, MediaRecord } from './upload.service';
 interface UploadResponse {
 	id: string;
 	status: MediaRecord['status'];
-	originalName: string;
+	originalName: string | null;
 	mimeType: string;
 	size: number;
+	hash: string;
 	urls: {
 		original: string;
 		thumbnail?: string;
@@ -27,6 +28,13 @@ interface UploadResponse {
 		large?: string;
 	};
 	createdAt: Date;
+}
+
+interface ImportFromMatrixDto {
+	mxcUrl: string;
+	app: string;
+	userId: string;
+	skipProcessing?: boolean;
 }
 
 @Controller('media')
@@ -60,9 +68,53 @@ export class UploadController {
 		return this.toResponse(record);
 	}
 
+	/**
+	 * Import media from a Matrix MXC URL
+	 * Copies the file from Matrix to our storage with deduplication
+	 */
+	@Post('import/matrix')
+	async importFromMatrix(@Body() dto: ImportFromMatrixDto): Promise<UploadResponse> {
+		if (!dto.mxcUrl) {
+			throw new BadRequestException('mxcUrl is required');
+		}
+		if (!dto.app) {
+			throw new BadRequestException('app is required');
+		}
+		if (!dto.userId) {
+			throw new BadRequestException('userId is required');
+		}
+
+		const record = await this.uploadService.importFromMatrix(dto.mxcUrl, {
+			app: dto.app,
+			userId: dto.userId,
+			skipProcessing: dto.skipProcessing,
+		});
+
+		if (!record) {
+			throw new BadRequestException(
+				'Failed to import from Matrix. Invalid MXC URL or download failed.'
+			);
+		}
+
+		return this.toResponse(record);
+	}
+
 	@Get(':id')
 	async get(@Param('id') id: string): Promise<UploadResponse> {
 		const record = await this.uploadService.get(id);
+		if (!record) {
+			throw new NotFoundException('Media not found');
+		}
+		return this.toResponse(record);
+	}
+
+	/**
+	 * Get media by content hash (SHA-256)
+	 * Useful for checking if a file already exists before uploading
+	 */
+	@Get('hash/:hash')
+	async getByHash(@Param('hash') hash: string): Promise<UploadResponse> {
+		const record = await this.uploadService.getByHash(hash);
 		if (!record) {
 			throw new NotFoundException('Media not found');
 		}
@@ -93,7 +145,7 @@ export class UploadController {
 	}
 
 	private toResponse(record: MediaRecord): UploadResponse {
-		const baseUrl = process.env.PUBLIC_URL || 'http://localhost:3050/api/v1';
+		const baseUrl = process.env.PUBLIC_URL || 'http://localhost:3015/api/v1';
 
 		return {
 			id: record.id,
@@ -101,6 +153,7 @@ export class UploadController {
 			originalName: record.originalName,
 			mimeType: record.mimeType,
 			size: record.size,
+			hash: record.hash,
 			urls: {
 				original: `${baseUrl}/media/${record.id}/file`,
 				thumbnail: record.keys.thumbnail ? `${baseUrl}/media/${record.id}/file/thumb` : undefined,

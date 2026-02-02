@@ -10,6 +10,7 @@ Matrix NutriPhi Bot is a Matrix chat bot for AI-powered nutrition tracking. It i
 - **Matrix**: matrix-bot-sdk
 - **Backend**: NutriPhi API (port 3023)
 - **Auth**: Mana Core Auth (JWT)
+- **Media Storage**: mana-media (port 3015)
 
 ## Commands
 
@@ -41,9 +42,9 @@ services/matrix-nutriphi-bot/
 │   ├── nutriphi/
 │   │   ├── nutriphi.module.ts
 │   │   └── nutriphi.service.ts # NutriPhi API client
-│   └── session/
-│       ├── session.module.ts
-│       └── session.service.ts  # User session & auth management
+│   └── media/
+│       ├── media.module.ts
+│       └── media.service.ts  # mana-media client for persistent storage
 ├── Dockerfile
 └── package.json
 ```
@@ -67,10 +68,10 @@ services/matrix-nutriphi-bot/
 ## Image Analysis Flow
 
 1. User sends image to room
-2. Bot stores image URL: "Bild empfangen!"
-3. User sends `!analyze` or `!analyze Beschreibung`
-4. Bot downloads image, sends to NutriPhi API
-5. Bot displays nutrition results
+2. Bot acknowledges: "Bild empfangen! Analysiere..."
+3. Bot downloads image, sends to NutriPhi API for analysis
+4. Bot displays nutrition results
+5. (Background) Image is stored in mana-media for persistent storage with deduplication
 
 ## Environment Variables
 
@@ -91,6 +92,9 @@ NUTRIPHI_API_PREFIX=/api/v1
 # Mana Core Auth
 MANA_CORE_AUTH_URL=http://localhost:3001
 
+# Mana Media (optional - for persistent image storage)
+MANA_MEDIA_URL=http://localhost:3015
+
 # Development bypass (optional)
 DEV_BYPASS_AUTH=false
 DEV_USER_ID=
@@ -108,6 +112,7 @@ docker run -p 3315:3315 \
   -e MATRIX_ACCESS_TOKEN=syt_xxx \
   -e NUTRIPHI_BACKEND_URL=http://nutriphi-backend:3023 \
   -e MANA_CORE_AUTH_URL=http://mana-core-auth:3001 \
+  -e MANA_MEDIA_URL=http://mana-media:3015 \
   -v matrix-nutriphi-bot-data:/app/data \
   matrix-nutriphi-bot
 ```
