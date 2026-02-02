@@ -20,6 +20,7 @@
 import { Controller, Get, Post, All, Req, Res, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { BetterAuthService } from './services/better-auth.service';
+import { MatrixSessionService } from './services/matrix-session.service';
 import { LoggerService } from '../common/logger';
 
 @Controller()
@@ -28,6 +29,7 @@ export class OidcController {
 
 	constructor(
 		private readonly betterAuthService: BetterAuthService,
+		private readonly matrixSessionService: MatrixSessionService,
 		loggerService: LoggerService
 	) {
 		this.logger = loggerService.setContext('OidcController');
@@ -70,10 +72,14 @@ export class OidcController {
 
 	/**
 	 * UserInfo Endpoint (Better Auth native path)
+	 *
+	 * When Matrix/Synapse calls this endpoint, we automatically create
+	 * the Matrix user link so bots can recognize the user without
+	 * requiring a separate !login command.
 	 */
 	@Get('api/auth/oauth2/userinfo')
 	async userinfoOauth2(@Req() req: Request, @Res() res: Response) {
-		return this.handleOidcRequest(req, res);
+		return this.handleOidcRequestWithMatrixLink(req, res);
 	}
 
 	/**
@@ -193,10 +199,13 @@ export class OidcController {
 
 	/**
 	 * UserInfo Endpoint (alternative path)
+	 *
+	 * When Matrix/Synapse calls this endpoint, we automatically create
+	 * the Matrix user link so bots can recognize the user.
 	 */
 	@Get('api/oidc/userinfo')
 	async userinfo(@Req() req: Request, @Res() res: Response) {
-		return this.handleOidcRequest(req, res);
+		return this.handleOidcRequestWithMatrixLink(req, res);
 	}
 
 	/**
@@ -251,6 +260,69 @@ export class OidcController {
 		} catch (error) {
 			this.logger.error(
 				'OIDC alternative path request failed',
+				error instanceof Error ? error.stack : undefined
+			);
+			return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+				error: 'server_error',
+				error_description: 'Internal server error',
+			});
+		}
+	}
+
+	/**
+	 * Handle OIDC userinfo request with automatic Matrix user linking
+	 *
+	 * This method forwards the request to Better Auth, and if successful,
+	 * automatically creates a Matrix user link so bots can recognize
+	 * the user without requiring a separate !login command.
+	 */
+	private async handleOidcRequestWithMatrixLink(req: Request, res: Response) {
+		try {
+			const response = await this.betterAuthService.handleOidcRequest(req);
+
+			// Set status code
+			res.status(response.status || HttpStatus.OK);
+
+			// Copy headers from Better Auth response
+			if (response.headers) {
+				for (const [key, value] of Object.entries(response.headers)) {
+					if (value) {
+						res.setHeader(key, value as string);
+					}
+				}
+			}
+
+			// If userinfo was successful, create the Matrix user link
+			if (response.status === 200 && response.body) {
+				try {
+					const userInfo = response.body as { sub?: string; email?: string };
+					if (userInfo.sub && userInfo.email) {
+						// Create Matrix user link asynchronously (don't block the response)
+						this.matrixSessionService
+							.autoLinkOnOidcLogin(userInfo.sub, userInfo.email)
+							.catch((err) => {
+								this.logger.warn('Failed to auto-link Matrix user on OIDC login', {
+									error: err instanceof Error ? err.message : 'Unknown error',
+								});
+							});
+					}
+				} catch (linkError) {
+					// Log but don't fail the request
+					this.logger.warn('Error parsing userinfo for Matrix link', {
+						error: linkError instanceof Error ? linkError.message : 'Unknown error',
+					});
+				}
+			}
+
+			// Return body
+			if (response.body) {
+				return res.send(response.body);
+			}
+
+			return res.end();
+		} catch (error) {
+			this.logger.error(
+				'OIDC userinfo request failed',
 				error instanceof Error ? error.stack : undefined
 			);
 			return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({

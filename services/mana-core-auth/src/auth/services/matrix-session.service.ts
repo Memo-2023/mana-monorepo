@@ -188,4 +188,73 @@ export class MatrixSessionService {
 
 		return links.length > 0;
 	}
+
+	/**
+	 * Auto-link Matrix user during OIDC login
+	 *
+	 * Called when a user logs into Matrix via OIDC (Sign in with Mana Core).
+	 * Creates the Matrix user link automatically so bots can recognize them.
+	 *
+	 * @param manaUserId - Mana Core Auth user ID
+	 * @param email - User's email address
+	 * @param matrixDomain - Matrix homeserver domain (default: matrix.mana.how)
+	 */
+	async autoLinkOnOidcLogin(
+		manaUserId: string,
+		email: string,
+		matrixDomain = 'matrix.mana.how'
+	): Promise<void> {
+		try {
+			// Calculate Matrix user ID from email using Synapse's template:
+			// localpart_template: "{{ user.email.split('@')[0] }}"
+			const localpart = email.split('@')[0].toLowerCase();
+			const matrixUserId = `@${localpart}:${matrixDomain}`;
+
+			// Check if link already exists
+			const existing = await this.db
+				.select()
+				.from(matrixUserLinks)
+				.where(eq(matrixUserLinks.matrixUserId, matrixUserId))
+				.limit(1);
+
+			if (existing.length > 0) {
+				// Update existing link (in case user ID changed)
+				if (existing[0].userId !== manaUserId) {
+					await this.db
+						.update(matrixUserLinks)
+						.set({
+							userId: manaUserId,
+							email,
+							lastUsedAt: new Date(),
+						})
+						.where(eq(matrixUserLinks.matrixUserId, matrixUserId));
+					this.logger.log(`Updated Matrix auto-link: ${matrixUserId} -> ${manaUserId}`);
+				} else {
+					// Just update lastUsedAt
+					await this.db
+						.update(matrixUserLinks)
+						.set({ lastUsedAt: new Date() })
+						.where(eq(matrixUserLinks.matrixUserId, matrixUserId));
+				}
+				return;
+			}
+
+			// Create new link
+			await this.db.insert(matrixUserLinks).values({
+				id: nanoid(),
+				matrixUserId,
+				userId: manaUserId,
+				email,
+				linkedAt: new Date(),
+			});
+
+			this.logger.log(`Created Matrix auto-link on OIDC login: ${matrixUserId} -> ${manaUserId}`);
+		} catch (error) {
+			// Log but don't throw - this is a best-effort operation
+			this.logger.error(
+				'Failed to auto-link Matrix user on OIDC login',
+				error instanceof Error ? error.stack : undefined
+			);
+		}
+	}
 }
