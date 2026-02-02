@@ -21,6 +21,10 @@ COPY pnpm-lock.yaml ./
 
 # Copy shared packages needed by llm-playground
 COPY packages/shared-auth ./packages/shared-auth
+COPY packages/shared-auth-ui ./packages/shared-auth-ui
+COPY packages/shared-branding ./packages/shared-branding
+COPY packages/shared-i18n ./packages/shared-i18n
+COPY packages/shared-icons ./packages/shared-icons
 
 # Copy llm-playground service
 COPY services/llm-playground ./services/llm-playground
