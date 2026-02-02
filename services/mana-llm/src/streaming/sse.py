@@ -13,22 +13,21 @@ logger = logging.getLogger(__name__)
 async def stream_chat_completion(
     router: ProviderRouter,
     request: ChatCompletionRequest,
-) -> AsyncIterator[str]:
+) -> AsyncIterator[dict]:
     """
-    Stream chat completion responses as SSE data lines.
+    Stream chat completion responses for SSE.
 
-    Yields strings in SSE format:
+    Yields dicts that EventSourceResponse will serialize as:
         data: {"choices":[{"delta":{"content":"Hello"}}]}
         data: [DONE]
     """
     try:
         async for chunk in router.chat_completion_stream(request):
-            # Convert to OpenAI-compatible SSE format
-            data = chunk.model_dump(exclude_none=True)
-            yield f"data: {json.dumps(data)}\n\n"
+            # Yield dict for EventSourceResponse to serialize
+            yield {"data": json.dumps(chunk.model_dump(exclude_none=True))}
 
         # Send final [DONE] marker
-        yield "data: [DONE]\n\n"
+        yield {"data": "[DONE]"}
 
     except Exception as e:
         logger.error(f"Streaming error: {e}")
@@ -39,5 +38,5 @@ async def stream_chat_completion(
                 "type": "server_error",
             }
         }
-        yield f"data: {json.dumps(error_data)}\n\n"
-        yield "data: [DONE]\n\n"
+        yield {"data": json.dumps(error_data)}
+        yield {"data": "[DONE]"}
