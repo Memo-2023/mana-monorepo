@@ -21,7 +21,8 @@ export type AppId =
 	| 'inventory'
 	| 'questions'
 	| 'skilltree'
-	| 'planta';
+	| 'planta'
+	| 'playground';
 
 /**
  * App branding configuration

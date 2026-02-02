@@ -5361,9 +5361,24 @@ importers:
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../packages/shared-auth
+      '@manacore/shared-auth-ui':
+        specifier: workspace:*
+        version: link:../../packages/shared-auth-ui
+      '@manacore/shared-branding':
+        specifier: workspace:*
+        version: link:../../packages/shared-branding
+      '@manacore/shared-i18n':
+        specifier: workspace:*
+        version: link:../../packages/shared-i18n
+      '@manacore/shared-icons':
+        specifier: workspace:*
+        version: link:../../packages/shared-icons
       marked:
         specifier: ^17.0.0
         version: 17.0.1
+      svelte-i18n:
+        specifier: ^4.0.1
+        version: 4.0.1(svelte@5.44.0)
     devDependencies:
       '@sveltejs/adapter-node':
         specifier: ^5.4.0

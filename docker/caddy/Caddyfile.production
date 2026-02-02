@@ -79,6 +79,13 @@ contacts-api.mana.how {
 }
 
 # ============================================
+# LLM Playground
+# ============================================
+playground.mana.how {
+    reverse_proxy localhost:5090
+}
+
+# ============================================
 # Monitoring & Analytics
 # ============================================
 grafana.mana.how {

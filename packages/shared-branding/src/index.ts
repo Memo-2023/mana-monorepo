@@ -34,6 +34,7 @@ export {
 	QuestionsLogo,
 	SkillTreeLogo,
 	PlantaLogo,
+	PlaygroundLogo,
 } from './logos';
 
 // Configuration

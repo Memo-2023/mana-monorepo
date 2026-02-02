@@ -69,6 +69,9 @@ const questionsSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fi
 // Matrix icon (network/federated chat with purple gradient)
 const matrixSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#matrixGrad)"/><circle cx="512" cy="400" r="80" fill="white"/><circle cx="340" cy="580" r="60" fill="white" fill-opacity="0.8"/><circle cx="684" cy="580" r="60" fill="white" fill-opacity="0.8"/><circle cx="420" cy="720" r="50" fill="white" fill-opacity="0.6"/><circle cx="604" cy="720" r="50" fill="white" fill-opacity="0.6"/><path d="M512 480V640M512 640L420 700M512 640L604 700" stroke="white" stroke-width="16" stroke-linecap="round"/><path d="M450 440L370 540M574 440L654 540" stroke="white" stroke-width="16" stroke-linecap="round"/><path d="M340 640L400 700M684 640L624 700" stroke="white" stroke-width="12" stroke-linecap="round" stroke-opacity="0.6"/><defs><linearGradient id="matrixGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs></svg>`;
 
+// Playground icon (code/terminal with cyan gradient)
+const playgroundSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#playgroundGrad)"/><path d="M380 340L260 512L380 684" stroke="white" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/><path d="M644 340L764 512L644 684" stroke="white" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/><path d="M560 280L464 744" stroke="white" stroke-width="40" stroke-linecap="round"/><defs><linearGradient id="playgroundGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#06b6d4"/><stop offset="1" stop-color="#0891b2"/></linearGradient></defs></svg>`;
+
 /**
  * App icons as data URLs
  * Use these directly in <img src={APP_ICONS.memoro}> or CSS background-image
@@ -94,6 +97,7 @@ export const APP_ICONS = {
 	inventory: svgToDataUrl(inventorySvg),
 	questions: svgToDataUrl(questionsSvg),
 	matrix: svgToDataUrl(matrixSvg),
+	playground: svgToDataUrl(playgroundSvg),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

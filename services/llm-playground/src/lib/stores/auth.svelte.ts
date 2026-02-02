@@ -82,10 +82,31 @@ export const authStore = {
 		return result;
 	},
 
-	async signUp(email: string, password: string, name?: string) {
+	async signUp(email: string, password: string) {
 		const authService = getAuthService();
-		if (!authService) throw new Error('Auth not initialized');
-		return authService.signUp(email, password, name);
+		if (!authService) {
+			return { success: false, error: 'Auth not available', needsVerification: false };
+		}
+
+		try {
+			const sourceAppUrl = browser ? window.location.origin : undefined;
+			const result = await authService.signUp(email, password, undefined, sourceAppUrl);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Signup failed', needsVerification: false };
+			}
+
+			if (result.needsVerification) {
+				return { success: true, needsVerification: true };
+			}
+
+			// Auto sign in after successful signup
+			const signInResult = await this.signIn(email, password);
+			return { ...signInResult, needsVerification: false };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage, needsVerification: false };
+		}
 	},
 
 	async signOut() {
@@ -101,5 +122,26 @@ export const authStore = {
 		const authService = getAuthService();
 		if (!authService) return null;
 		return authService.getAppToken();
+	},
+
+	async resendVerificationEmail(email: string) {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available' };
+		}
+
+		try {
+			const sourceAppUrl = typeof window !== 'undefined' ? window.location.origin : undefined;
+			const result = await authService.resendVerificationEmail(email, sourceAppUrl);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Failed to resend verification email' };
+			}
+
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
 	},
 };

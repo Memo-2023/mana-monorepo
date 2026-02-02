@@ -25,6 +25,11 @@
 	},
 	"dependencies": {
 		"@manacore/shared-auth": "workspace:*",
-		"marked": "^17.0.0"
+		"@manacore/shared-auth-ui": "workspace:*",
+		"@manacore/shared-branding": "workspace:*",
+		"@manacore/shared-i18n": "workspace:*",
+		"@manacore/shared-icons": "workspace:*",
+		"marked": "^17.0.0",
+		"svelte-i18n": "^4.0.1"
 	}
 }

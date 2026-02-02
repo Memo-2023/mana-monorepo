@@ -412,6 +412,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	inventory: { dev: 'http://localhost:5188', prod: 'https://inventory.manacore.app' },
 	questions: { dev: 'http://localhost:5111', prod: 'https://questions.manacore.app' },
 	matrix: { dev: 'http://localhost:5180', prod: 'https://matrix.mana.how' },
+	playground: { dev: 'http://localhost:5190', prod: 'https://playground.mana.how' },
 };
 
 /**
