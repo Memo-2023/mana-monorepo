@@ -35,6 +35,7 @@ export {
 	SkeletonCard,
 	SkeletonGrid,
 	AppLoadingSkeleton,
+	calculateFadeOpacity,
 } from './molecules';
 
 // Feedback

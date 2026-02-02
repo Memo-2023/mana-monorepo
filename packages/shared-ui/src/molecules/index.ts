@@ -37,6 +37,7 @@ export {
 	SkeletonCard,
 	SkeletonGrid,
 	AppLoadingSkeleton,
+	calculateFadeOpacity,
 } from './loaders';
 
 // Feedback components
