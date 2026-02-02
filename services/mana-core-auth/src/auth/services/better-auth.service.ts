@@ -1347,6 +1347,66 @@ export class BetterAuthService {
 	}
 
 	// =========================================================================
+	// Matrix Bot SSO Methods
+	// =========================================================================
+
+	/**
+	 * Generate a JWT token for a specific user (used by Matrix bots)
+	 *
+	 * This method generates a fresh JWT token for an existing user,
+	 * without requiring password authentication. It's used by the
+	 * Matrix-SSO-Link system to auto-authenticate bot users.
+	 *
+	 * @param userId - Mana Core Auth user ID
+	 * @returns JWT access token or null if user not found
+	 */
+	async generateTokenForUser(userId: string): Promise<string | null> {
+		try {
+			const db = getDb(this.databaseUrl);
+			const { users } = await import('../../db/schema/auth.schema');
+			const { eq } = await import('drizzle-orm');
+
+			// Get user from database
+			const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+
+			if (!user || user.deletedAt) {
+				this.logger.warn('generateTokenForUser: User not found', { userId });
+				return null;
+			}
+
+			// Generate JWT using Better Auth's signJWT
+			const api = this.auth.api as any;
+
+			const jwtResult = await api.signJWT({
+				body: {
+					payload: {
+						sub: user.id,
+						email: user.email,
+						role: user.role || 'user',
+						sid: `bot-session-${Date.now()}`, // Pseudo session ID for bots
+					},
+				},
+			});
+
+			const token = jwtResult?.token;
+
+			if (!token) {
+				this.logger.error('generateTokenForUser: signJWT returned empty token');
+				return null;
+			}
+
+			this.logger.debug('Generated token for user via Matrix-SSO-Link', { userId });
+			return token;
+		} catch (error) {
+			this.logger.error(
+				'generateTokenForUser failed',
+				error instanceof Error ? error.stack : undefined
+			);
+			return null;
+		}
+	}
+
+	// =========================================================================
 	// SSO Methods
 	// =========================================================================
 

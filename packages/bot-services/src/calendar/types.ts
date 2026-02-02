@@ -75,4 +75,5 @@ export interface ParsedEventInput {
 	startTime: Date | null;
 	endTime: Date | null;
 	isAllDay: boolean;
+	location: string | null;
 }

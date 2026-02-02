@@ -8,7 +8,13 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { TodoService, Task } from '../todo/todo.service';
-import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
+import {
+	TranscriptionService,
+	SessionService,
+	CreditService,
+	TodoApiService,
+	Task as ApiTask,
+} from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
 // Credit cost for task creation (micro-credits)
@@ -20,7 +26,10 @@ export class MatrixService extends BaseMatrixService {
 		[
 			...COMMON_KEYWORDS,
 			{ keywords: ['was kannst du'], command: 'help' },
-			{ keywords: ['zeige aufgaben', 'meine aufgaben', 'was muss ich', 'show tasks', 'list'], command: 'list' },
+			{
+				keywords: ['zeige aufgaben', 'meine aufgaben', 'was muss ich', 'show tasks', 'list'],
+				command: 'list',
+			},
 			{ keywords: ['heute', 'today', 'was steht an'], command: 'today' },
 			{ keywords: ['inbox', 'eingang', 'ohne datum'], command: 'inbox' },
 			{ keywords: ['projekte', 'projects'], command: 'projects' },
@@ -32,6 +41,7 @@ export class MatrixService extends BaseMatrixService {
 	constructor(
 		configService: ConfigService,
 		private todoService: TodoService,
+		private todoApiService: TodoApiService,
 		private transcriptionService: TranscriptionService,
 		private sessionService: SessionService,
 		private creditService: CreditService
@@ -39,11 +49,38 @@ export class MatrixService extends BaseMatrixService {
 		super(configService);
 	}
 
+	/**
+	 * Check if user is logged in and has a valid token for API access
+	 */
+	private async getToken(userId: string): Promise<string | null> {
+		return this.sessionService.getToken(userId);
+	}
+
+	/**
+	 * Normalize task from API or local format to common format
+	 */
+	private normalizeTask(task: Task | ApiTask): Task {
+		return {
+			id: task.id,
+			title: task.title,
+			completed: task.completed,
+			priority: task.priority,
+			dueDate: task.dueDate,
+			project: task.project,
+			labels: task.labels || [],
+			createdAt: task.createdAt,
+			completedAt: task.completedAt || null,
+			userId: task.userId,
+		};
+	}
+
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -74,11 +111,7 @@ export class MatrixService extends BaseMatrixService {
 			}
 		} catch (error) {
 			this.logger.error(`Error handling message: ${error}`);
-			await this.sendReply(
-				roomId,
-				event,
-				'Ein Fehler ist aufgetreten. Bitte versuche es erneut.'
-			);
+			await this.sendReply(roomId, event, 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
 		}
 	}
 
@@ -118,8 +151,10 @@ export class MatrixService extends BaseMatrixService {
 				return;
 			}
 
+			// Check if user is logged in
+			const token = await this.getToken(sender);
+
 			// Check credits if user is logged in
-			const token = this.sessionService.getToken(sender);
 			if (token) {
 				const validation = await this.creditService.validateCredits(token, TASK_CREATE_CREDITS);
 				if (!validation.hasCredits) {
@@ -128,36 +163,59 @@ export class MatrixService extends BaseMatrixService {
 						validation.availableCredits,
 						'Aufgabe erstellen'
 					);
-					await this.sendReply(roomId, event, `Transkription: "${transcription}"\n\n${errorMsg.text}`);
+					await this.sendReply(
+						roomId,
+						event,
+						`Transkription: "${transcription}"\n\n${errorMsg.text}`
+					);
 					return;
 				}
 			}
 
-			// Parse the transcription as a task input
-			const { title, priority, dueDate, project } = this.todoService.parseTaskInput(transcription);
+			let task: Task;
 
-			// Create the task
-			const task = await this.todoService.createTask(sender, title, {
-				priority,
-				dueDate,
-				project,
-			});
+			if (token) {
+				// Use API service (syncs with todo-web and mobile)
+				const { title, priority, dueDate, project } =
+					this.todoApiService.parseTaskInput(transcription);
+				const apiTask = await this.todoApiService.createTask(token, { title, priority, dueDate });
+				if (!apiTask) {
+					await this.sendReply(
+						roomId,
+						event,
+						`Transkription: "${transcription}"\n\nFehler beim Erstellen der Aufgabe.`
+					);
+					return;
+				}
+				task = this.normalizeTask(apiTask);
+				task.project = project;
+			} else {
+				// Use local storage (offline mode)
+				const { title, priority, dueDate, project } =
+					this.todoService.parseTaskInput(transcription);
+				task = await this.todoService.createTask(sender, title, {
+					priority,
+					dueDate,
+					project,
+				});
+			}
 
 			let responseText = `Transkription: "${transcription}"\n\nAufgabe erstellt: **${task.title}**`;
 
 			const details: string[] = [];
-			if (priority < 4) details.push(`Prioritat ${priority}`);
-			if (dueDate) details.push(`Datum: ${this.formatDate(dueDate)}`);
-			if (project) details.push(`Projekt: ${project}`);
+			if (task.priority < 4) details.push(`Prioritat ${task.priority}`);
+			if (task.dueDate) details.push(`Datum: ${this.formatDate(task.dueDate)}`);
+			if (task.project) details.push(`Projekt: ${task.project}`);
 
 			if (details.length > 0) {
 				responseText += `\n${details.join(' | ')}`;
 			}
 
-			// Show credit deduction if logged in
+			// Show credit deduction and sync status if logged in
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
 				responseText += `\n\n⚡ -${TASK_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)`;
+				responseText += '\n🔄 Synchronisiert mit todo-backend';
 			}
 
 			await this.sendReply(roomId, event, responseText);
@@ -247,7 +305,12 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private async handleAddTask(roomId: string, event: MatrixRoomEvent, userId: string, input: string) {
+	private async handleAddTask(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		input: string
+	) {
 		if (!input.trim()) {
 			await this.sendReply(
 				roomId,
@@ -257,8 +320,10 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
+		// Check if user is logged in
+		const token = await this.getToken(userId);
+
 		// Check credits if user is logged in
-		const token = this.sessionService.getToken(userId);
 		if (token) {
 			const validation = await this.creditService.validateCredits(token, TASK_CREATE_CREDITS);
 			if (!validation.hasCredits) {
@@ -272,36 +337,65 @@ export class MatrixService extends BaseMatrixService {
 			}
 		}
 
-		const { title, priority, dueDate, project } = this.todoService.parseTaskInput(input);
+		let task: Task;
 
-		const task = await this.todoService.createTask(userId, title, {
-			priority,
-			dueDate,
-			project,
-		});
+		if (token) {
+			// Use API service (syncs with todo-web and mobile)
+			const { title, priority, dueDate, project } = this.todoApiService.parseTaskInput(input);
+			const apiTask = await this.todoApiService.createTask(token, { title, priority, dueDate });
+			if (!apiTask) {
+				await this.sendReply(
+					roomId,
+					event,
+					'Fehler beim Erstellen der Aufgabe. Bitte versuche es erneut.'
+				);
+				return;
+			}
+			task = this.normalizeTask(apiTask);
+			task.project = project; // Note: project handling via API needs project ID lookup
+		} else {
+			// Use local storage (offline mode)
+			const { title, priority, dueDate, project } = this.todoService.parseTaskInput(input);
+			task = await this.todoService.createTask(userId, title, {
+				priority,
+				dueDate,
+				project,
+			});
+		}
 
 		let response = `Aufgabe erstellt: **${task.title}**`;
 
 		const details: string[] = [];
-		if (priority < 4) details.push(`Prioritaet ${priority}`);
-		if (dueDate) details.push(`Datum: ${this.formatDate(dueDate)}`);
-		if (project) details.push(`Projekt: ${project}`);
+		if (task.priority < 4) details.push(`Prioritaet ${task.priority}`);
+		if (task.dueDate) details.push(`Datum: ${this.formatDate(task.dueDate)}`);
+		if (task.project) details.push(`Projekt: ${task.project}`);
 
 		if (details.length > 0) {
 			response += `\n${details.join(' | ')}`;
 		}
 
-		// Show credit deduction if logged in
+		// Show credit deduction and sync status if logged in
 		if (token) {
 			const balance = await this.creditService.getBalance(token);
 			response += `\n\n⚡ -${TASK_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)`;
+			response += '\n🔄 Synchronisiert mit todo-backend';
 		}
 
 		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleListTasks(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const tasks = await this.todoService.getAllPendingTasks(userId);
+		const token = await this.getToken(userId);
+		let tasks: Task[];
+
+		if (token) {
+			// Use API service
+			const apiTasks = await this.todoApiService.getTasks(token, { completed: false });
+			tasks = apiTasks.map((t) => this.normalizeTask(t));
+		} else {
+			// Use local storage
+			tasks = await this.todoService.getAllPendingTasks(userId);
+		}
 
 		if (tasks.length === 0) {
 			await this.sendReply(
@@ -312,12 +406,25 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const response = this.formatTaskList('**Alle offenen Aufgaben:**', tasks);
+		let response = this.formatTaskList('**Alle offenen Aufgaben:**', tasks);
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleTodayTasks(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const tasks = await this.todoService.getTodayTasks(userId);
+		const token = await this.getToken(userId);
+		let tasks: Task[];
+
+		if (token) {
+			// Use API service
+			const apiTasks = await this.todoApiService.getTodayTasks(token);
+			tasks = apiTasks.map((t) => this.normalizeTask(t));
+		} else {
+			// Use local storage
+			tasks = await this.todoService.getTodayTasks(userId);
+		}
 
 		if (tasks.length === 0) {
 			await this.sendReply(
@@ -328,23 +435,44 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const response = this.formatTaskList('**Aufgaben fuer heute:**', tasks);
+		let response = this.formatTaskList('**Aufgaben fuer heute:**', tasks);
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleInboxTasks(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const tasks = await this.todoService.getInboxTasks(userId);
+		const token = await this.getToken(userId);
+		let tasks: Task[];
+
+		if (token) {
+			// Use API service
+			const apiTasks = await this.todoApiService.getInboxTasks(token);
+			tasks = apiTasks.map((t) => this.normalizeTask(t));
+		} else {
+			// Use local storage
+			tasks = await this.todoService.getInboxTasks(userId);
+		}
 
 		if (tasks.length === 0) {
 			await this.sendReply(roomId, event, 'Inbox ist leer.\n\nAufgaben ohne Datum landen hier.');
 			return;
 		}
 
-		const response = this.formatTaskList('**Inbox (ohne Datum):**', tasks);
+		let response = this.formatTaskList('**Inbox (ohne Datum):**', tasks);
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleCompleteTask(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleCompleteTask(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		const taskNumber = parseInt(args.trim());
 
 		if (isNaN(taskNumber) || taskNumber < 1) {
@@ -356,17 +484,42 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const task = await this.todoService.completeTask(userId, taskNumber);
+		const token = await this.getToken(userId);
+		let task: Task | null = null;
+
+		if (token) {
+			// Use API service - need to get task list first to find task by index
+			const apiTasks = await this.todoApiService.getTasks(token, { completed: false });
+			if (taskNumber > 0 && taskNumber <= apiTasks.length) {
+				const targetTask = apiTasks[taskNumber - 1];
+				const completedTask = await this.todoApiService.completeTask(token, targetTask.id);
+				if (completedTask) {
+					task = this.normalizeTask(completedTask);
+				}
+			}
+		} else {
+			// Use local storage
+			task = await this.todoService.completeTask(userId, taskNumber);
+		}
 
 		if (!task) {
 			await this.sendReply(roomId, event, `Aufgabe #${taskNumber} nicht gefunden.`);
 			return;
 		}
 
-		await this.sendReply(roomId, event, `Erledigt: ~~${task.title}~~`);
+		let response = `Erledigt: ~~${task.title}~~`;
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
+		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleDeleteTask(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleDeleteTask(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		const taskNumber = parseInt(args.trim());
 
 		if (isNaN(taskNumber) || taskNumber < 1) {
@@ -378,18 +531,48 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const task = await this.todoService.deleteTask(userId, taskNumber);
+		const token = await this.getToken(userId);
+		let task: Task | null = null;
+
+		if (token) {
+			// Use API service - need to get task list first to find task by index
+			const apiTasks = await this.todoApiService.getTasks(token, { completed: false });
+			if (taskNumber > 0 && taskNumber <= apiTasks.length) {
+				const targetTask = apiTasks[taskNumber - 1];
+				const deleted = await this.todoApiService.deleteTask(token, targetTask.id);
+				if (deleted) {
+					task = this.normalizeTask(targetTask);
+				}
+			}
+		} else {
+			// Use local storage
+			task = await this.todoService.deleteTask(userId, taskNumber);
+		}
 
 		if (!task) {
 			await this.sendReply(roomId, event, `Aufgabe #${taskNumber} nicht gefunden.`);
 			return;
 		}
 
-		await this.sendReply(roomId, event, `Geloescht: ${task.title}`);
+		let response = `Geloescht: ${task.title}`;
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
+		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleProjects(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const projects = await this.todoService.getProjects(userId);
+		const token = await this.getToken(userId);
+		let projects: { name: string }[];
+
+		if (token) {
+			// Use API service
+			const apiProjects = await this.todoApiService.getProjects(token);
+			projects = apiProjects;
+		} else {
+			// Use local storage
+			projects = await this.todoService.getProjects(userId);
+		}
 
 		if (projects.length === 0) {
 			await this.sendReply(
@@ -405,11 +588,19 @@ export class MatrixService extends BaseMatrixService {
 			response += `- ${project.name}\n`;
 		}
 		response += '\nZeige Projektaufgaben mit `!project [Name]`';
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleProjectTasks(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleProjectTasks(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		const projectName = args.trim();
 
 		if (!projectName) {
@@ -421,22 +612,50 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const tasks = await this.todoService.getProjectTasks(userId, projectName);
+		const token = await this.getToken(userId);
+		let tasks: Task[];
+
+		if (token) {
+			// Use API service - need to find project ID first
+			const projects = await this.todoApiService.getProjects(token);
+			const project = projects.find((p) => p.name.toLowerCase() === projectName.toLowerCase());
+			if (project) {
+				const apiTasks = await this.todoApiService.getProjectTasks(token, project.id);
+				tasks = apiTasks.map((t) => this.normalizeTask(t));
+			} else {
+				tasks = [];
+			}
+		} else {
+			// Use local storage
+			tasks = await this.todoService.getProjectTasks(userId, projectName);
+		}
 
 		if (tasks.length === 0) {
 			await this.sendReply(roomId, event, `Keine Aufgaben im Projekt "${projectName}".`);
 			return;
 		}
 
-		const response = this.formatTaskList(`**Projekt: ${projectName}**`, tasks);
+		let response = this.formatTaskList(`**Projekt: ${projectName}**`, tasks);
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleStatus(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const stats = await this.todoService.getStats(userId);
-		const isLoggedIn = this.sessionService.isLoggedIn(userId);
+		const token = await this.getToken(userId);
+		const isLoggedIn = await this.sessionService.isLoggedIn(userId);
 		const email = this.sessionService.getEmail(userId);
-		const token = this.sessionService.getToken(userId);
+
+		let stats: { total: number; completed: number; pending: number; today: number };
+
+		if (token) {
+			// Use API service
+			stats = await this.todoApiService.getStats(token);
+		} else {
+			// Use local storage
+			stats = await this.todoService.getStats(userId);
+		}
 
 		// Get credit balance if logged in
 		let creditInfo = '';
@@ -452,6 +671,8 @@ export class MatrixService extends BaseMatrixService {
 			}
 		}
 
+		const syncStatus = token ? '🔄 Synchronisiert mit todo-backend' : '💾 Lokaler Speicher';
+
 		const response = `**Status**
 
 👤 Angemeldet: ${isLoggedIn ? `Ja (${email})` : 'Nein'}${creditInfo}
@@ -461,7 +682,8 @@ export class MatrixService extends BaseMatrixService {
 - Erledigt: ${stats.completed}
 - Gesamt: ${stats.total}
 
-Bot: Online${!isLoggedIn ? '\n\nTipp: Mit `!login email passwort` anmelden fuer Credit-Tracking' : ''}`;
+${syncStatus}
+Bot: Online${!isLoggedIn ? '\n\nTipp: Mit `!login email passwort` anmelden fuer Synchronisation mit todo-web' : ''}`;
 
 		await this.sendReply(roomId, event, response);
 	}
@@ -501,11 +723,7 @@ Bot: Online${!isLoggedIn ? '\n\nTipp: Mit `!login email passwort` anmelden fuer 
 			await this.sendReply(roomId, event, 'Hilfe wurde angepinnt!');
 		} catch (error) {
 			this.logger.error('Failed to pin help:', error);
-			await this.sendReply(
-				roomId,
-				event,
-				'Konnte Hilfe nicht anpinnen (fehlende Berechtigung?)'
-			);
+			await this.sendReply(roomId, event, 'Konnte Hilfe nicht anpinnen (fehlende Berechtigung?)');
 		}
 	}
 

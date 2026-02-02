@@ -1,4 +1,4 @@
-import { SessionService } from '@manacore/bot-services';
+import { type SessionService } from '@manacore/bot-services';
 
 /**
  * Typed session helper for bot-specific session data
@@ -14,8 +14,8 @@ import { SessionService } from '@manacore/bot-services';
  * }
  *
  * const session = new SessionHelper<ChatSessionData>(sessionService, matrixUserId);
- * session.set('currentConversationId', 'abc123');
- * const convId = session.get('currentConversationId'); // string | null
+ * await session.set('currentConversationId', 'abc123');
+ * const convId = await session.get('currentConversationId'); // string | null
  * ```
  */
 export class SessionHelper<T extends Record<string, unknown>> {
@@ -27,29 +27,29 @@ export class SessionHelper<T extends Record<string, unknown>> {
 	/**
 	 * Set a session value
 	 */
-	set<K extends keyof T>(key: K, value: T[K]): void {
-		this.sessionService.setSessionData(this.userId, key as string, value);
+	async set<K extends keyof T>(key: K, value: T[K]): Promise<void> {
+		await this.sessionService.setSessionData(this.userId, key as string, value);
 	}
 
 	/**
 	 * Get a session value
 	 */
-	get<K extends keyof T>(key: K): T[K] | null {
+	async get<K extends keyof T>(key: K): Promise<T[K] | null> {
 		return this.sessionService.getSessionData<T[K]>(this.userId, key as string);
 	}
 
 	/**
 	 * Delete a session value
 	 */
-	delete<K extends keyof T>(key: K): void {
-		this.sessionService.setSessionData(this.userId, key as string, null);
+	async delete<K extends keyof T>(key: K): Promise<void> {
+		await this.sessionService.setSessionData(this.userId, key as string, null);
 	}
 
 	/**
 	 * Check if a session value exists
 	 */
-	has<K extends keyof T>(key: K): boolean {
-		return this.get(key) !== null;
+	async has<K extends keyof T>(key: K): Promise<boolean> {
+		return (await this.get(key)) !== null;
 	}
 
 	/**
@@ -62,14 +62,14 @@ export class SessionHelper<T extends Record<string, unknown>> {
 	/**
 	 * Check if user is logged in
 	 */
-	isLoggedIn(): boolean {
+	async isLoggedIn(): Promise<boolean> {
 		return this.sessionService.isLoggedIn(this.userId);
 	}
 
 	/**
 	 * Get JWT token for API calls
 	 */
-	getToken(): string | null {
+	async getToken(): Promise<string | null> {
 		return this.sessionService.getToken(this.userId);
 	}
 }

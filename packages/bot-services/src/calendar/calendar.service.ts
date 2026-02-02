@@ -345,6 +345,6 @@ export class CalendarService implements OnModuleInit {
 		// Clean up title
 		title = title.replace(/\s+/g, ' ').trim();
 
-		return { title, startTime, endTime, isAllDay };
+		return { title, startTime, endTime, isAllDay, location: null };
 	}
 }

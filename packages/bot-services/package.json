@@ -69,13 +69,15 @@
 	"dependencies": {
 		"@nestjs/common": "^11.0.20",
 		"@nestjs/config": "^4.0.2",
-		"date-fns": "^4.1.0"
+		"date-fns": "^4.1.0",
+		"ioredis": "^5.4.2"
 	},
 	"peerDependencies": {
 		"@nestjs/common": "^10.0.0 || ^11.0.0",
 		"@nestjs/config": "^3.0.0 || ^4.0.0"
 	},
 	"devDependencies": {
+		"@types/ioredis": "^5.0.0",
 		"@types/node": "^24.10.1",
 		"typescript": "^5.9.3"
 	}

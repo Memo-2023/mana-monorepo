@@ -206,11 +206,13 @@ Daten von Umami Analytics (self-hosted).`;
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(roomId,
-					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`);
+				await this.sendMessage(
+					roomId,
+					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`
+				);
 			} else {
 				await this.sendMessage(roomId, `✅ Erfolgreich angemeldet als **${email}**`);
 			}
@@ -220,14 +222,14 @@ Daten von Umami Analytics (self-hosted).`;
 	}
 
 	private async handleLogout(roomId: string, sender: string) {
-		this.sessionService.logout(sender);
+		await this.sessionService.logout(sender);
 		await this.sendMessage(roomId, '👋 Erfolgreich abgemeldet.');
 	}
 
 	private async handleStatus(roomId: string, sender: string) {
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let response = '**📊 Stats Bot Status**\n\n';
 

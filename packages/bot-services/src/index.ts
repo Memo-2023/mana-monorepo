@@ -27,7 +27,13 @@
 // ===== Core Services =====
 
 // Todo
-export { TodoModule, TodoModuleOptions, TodoService, TODO_STORAGE_PROVIDER } from './todo/index.js';
+export {
+	TodoModule,
+	TodoModuleOptions,
+	TodoService,
+	TODO_STORAGE_PROVIDER,
+	TodoApiService,
+} from './todo/index.js';
 export type {
 	Task,
 	Project,
@@ -44,6 +50,7 @@ export {
 	CalendarModule,
 	CalendarModuleOptions,
 	CalendarService,
+	CalendarApiService,
 	CALENDAR_STORAGE_PROVIDER,
 } from './calendar/index.js';
 export type {
@@ -88,13 +95,26 @@ export type {
 export {
 	SessionModule,
 	SessionService,
+	RedisSessionProvider,
+	REDIS_SESSION_PROVIDER,
+	REDIS_CLIENT,
 	SESSION_MODULE_OPTIONS,
 	DEFAULT_SESSION_EXPIRY_MS,
 } from './session/index.js';
-export type { UserSession, LoginResult, SessionStats, SessionModuleOptions } from './session/index.js';
+export type {
+	UserSession,
+	LoginResult,
+	SessionStats,
+	SessionModuleOptions,
+	SessionStorageMode,
+} from './session/index.js';
 
 // Transcription (Speech-to-Text via mana-stt)
-export { TranscriptionModule, TranscriptionService, STT_MODULE_OPTIONS } from './transcription/index.js';
+export {
+	TranscriptionModule,
+	TranscriptionService,
+	STT_MODULE_OPTIONS,
+} from './transcription/index.js';
 export type {
 	SttResponse,
 	TranscriptionOptions,
@@ -102,7 +122,12 @@ export type {
 } from './transcription/index.js';
 
 // Credit (Credit balance and formatting for Matrix bots)
-export { CreditModule, CreditService, CREDIT_MODULE_OPTIONS, CreditErrorCode } from './credit/index.js';
+export {
+	CreditModule,
+	CreditService,
+	CREDIT_MODULE_OPTIONS,
+	CreditErrorCode,
+} from './credit/index.js';
 export type {
 	CreditBalance,
 	CreditValidationResult,

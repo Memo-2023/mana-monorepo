@@ -187,6 +187,26 @@ export const oauthConsents = authSchema.table('oauth_consents', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+// Matrix User Links table (for Bot SSO)
+// Links Matrix user IDs to Mana user accounts for automatic bot authentication
+export const matrixUserLinks = authSchema.table(
+	'matrix_user_links',
+	{
+		id: text('id').primaryKey(), // nanoid
+		matrixUserId: text('matrix_user_id').unique().notNull(), // e.g., @user:matrix.mana.how
+		userId: text('user_id')
+			.references(() => users.id, { onDelete: 'cascade' })
+			.notNull(),
+		linkedAt: timestamp('linked_at', { withTimezone: true }).defaultNow().notNull(),
+		lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+		// Optional: store email for convenience (denormalized from users table)
+		email: text('email'),
+	},
+	(table) => ({
+		userIdIdx: index('matrix_user_links_user_id_idx').on(table.userId),
+	})
+);
+
 // User settings table (synced across all apps)
 export const userSettings = authSchema.table('user_settings', {
 	userId: text('user_id')

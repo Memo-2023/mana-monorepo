@@ -47,9 +47,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -207,8 +209,8 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private requireAuth(sender: string): string {
-		const token = this.sessionService.getToken(sender);
+	private async requireAuth(sender: string): Promise<string> {
+		const token = await this.sessionService.getToken(sender);
 		if (!token) {
 			throw new Error('Nicht angemeldet. Nutze <code>!login email passwort</code>');
 		}
@@ -226,12 +228,18 @@ export class MatrixService extends BaseMatrixService {
 		const result = await this.sessionService.login(sender, email, password);
 
 		if (result.success) {
-			const token = this.sessionService.getToken(sender);
+			const token = await this.sessionService.getToken(sender);
 			if (token) {
 				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`);
+				await this.sendMessage(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`
+				);
 			} else {
-				await this.sendMessage(roomId, `<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`);
+				await this.sendMessage(
+					roomId,
+					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`
+				);
 			}
 		} else {
 			await this.sendMessage(roomId, `<p>❌ Login fehlgeschlagen: ${result.error}</p>`);
@@ -240,10 +248,10 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleStatus(roomId: string, sender: string) {
 		const backendOk = await this.questionsService.checkHealth();
-		const loggedIn = this.sessionService.isLoggedIn(sender);
-		const sessions = this.sessionService.getSessionCount();
-		const session = this.sessionService.getSession(sender);
-		const token = this.sessionService.getToken(sender);
+		const loggedIn = await this.sessionService.isLoggedIn(sender);
+		const sessions = await this.sessionService.getSessionCount();
+		const session = await this.sessionService.getSession(sender);
+		const token = await this.sessionService.getToken(sender);
 
 		let statusHtml = `<h3>Questions Bot Status</h3><ul>`;
 		statusHtml += `<li>Backend: ${backendOk ? '✅ Online' : '❌ Offline'}</li>`;
@@ -264,7 +272,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Question handlers
 	private async handleListQuestions(roomId: string, sender: string, statusFilter?: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		const options: Record<string, string> = {};
 		if (statusFilter) {
@@ -306,13 +314,14 @@ export class MatrixService extends BaseMatrixService {
 			html += `<li>${status} ${priority}<strong>${q.title}</strong></li>`;
 		}
 		html += '</ol>';
-		html += '<p><em>Nutze <code>!frage [nr]</code> fuer Details oder <code>!recherche [nr]</code></em></p>';
+		html +=
+			'<p><em>Nutze <code>!frage [nr]</code> fuer Details oder <code>!recherche [nr]</code></em></p>';
 
 		await this.sendMessage(roomId, html);
 	}
 
 	private async handleQuestionDetails(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
@@ -339,7 +348,8 @@ export class MatrixService extends BaseMatrixService {
 		if (q.tags?.length) html += `<li>Tags: ${q.tags.join(', ')}</li>`;
 		if (q.category) html += `<li>Kategorie: ${q.category}</li>`;
 		html += `<li>Erstellt: ${new Date(q.createdAt).toLocaleDateString('de-DE')}</li>`;
-		if (q.answeredAt) html += `<li>Beantwortet: ${new Date(q.answeredAt).toLocaleDateString('de-DE')}</li>`;
+		if (q.answeredAt)
+			html += `<li>Beantwortet: ${new Date(q.answeredAt).toLocaleDateString('de-DE')}</li>`;
 		html += '</ul>';
 
 		html += `<p><em>Nutze <code>!recherche ${numberStr}</code> um eine Recherche zu starten</em></p>`;
@@ -353,7 +363,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.questionsService.createQuestion(token, title);
 
 		if (result.error) {
@@ -370,7 +380,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleDeleteQuestion(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
@@ -390,7 +400,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleArchiveQuestion(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
@@ -409,8 +419,13 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	// Research handlers
-	private async handleStartResearch(roomId: string, sender: string, numberStr: string, depthStr?: string) {
-		const token = this.requireAuth(sender);
+	private async handleStartResearch(
+		roomId: string,
+		sender: string,
+		numberStr: string,
+		depthStr?: string
+	) {
+		const token = await this.requireAuth(sender);
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
@@ -428,7 +443,10 @@ export class MatrixService extends BaseMatrixService {
 		};
 		const depth = depthMap[depthStr?.toLowerCase() || ''] || 'quick';
 
-		await this.sendMessage(roomId, `<p>Starte ${depth}-Recherche fuer: <strong>${question.title}</strong>...</p>`);
+		await this.sendMessage(
+			roomId,
+			`<p>Starte ${depth}-Recherche fuer: <strong>${question.title}</strong>...</p>`
+		);
 
 		const result = await this.questionsService.startResearch(token, question.id, depth);
 
@@ -466,7 +484,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleResearchResult(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
@@ -511,7 +529,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleSources(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
@@ -535,7 +553,9 @@ export class MatrixService extends BaseMatrixService {
 
 		let html = `<h3>Quellen fuer: ${question.title}</h3><ol>`;
 		for (const source of sources.slice(0, 10)) {
-			const relevance = source.relevanceScore ? ` (${Math.round(source.relevanceScore * 100)}%)` : '';
+			const relevance = source.relevanceScore
+				? ` (${Math.round(source.relevanceScore * 100)}%)`
+				: '';
 			html += `<li><a href="${source.url}">${source.title}</a>${relevance}<br/><em>${source.domain}</em></li>`;
 		}
 		html += '</ol>';
@@ -549,7 +569,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Answer handlers
 	private async handleAnswer(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const question = this.getQuestionByNumber(sender, numberStr);
 
 		if (!question) {
@@ -579,7 +599,9 @@ export class MatrixService extends BaseMatrixService {
 		const answer = answers[0];
 		const accepted = answer.isAccepted ? ' &#9989;' : '';
 		const rating = answer.rating ? ` (${answer.rating}/5 Sterne)` : '';
-		const confidence = answer.confidence ? ` [${Math.round(answer.confidence * 100)}% Konfidenz]` : '';
+		const confidence = answer.confidence
+			? ` [${Math.round(answer.confidence * 100)}% Konfidenz]`
+			: '';
 
 		let html = `<h3>Antwort${accepted}${rating}</h3>`;
 		html += `<p><em>Model: ${answer.modelId}${confidence}</em></p>`;
@@ -599,11 +621,19 @@ export class MatrixService extends BaseMatrixService {
 		await this.sendMessage(roomId, html);
 	}
 
-	private async handleRateAnswer(roomId: string, sender: string, numberStr: string, ratingStr: string) {
-		const token = this.requireAuth(sender);
+	private async handleRateAnswer(
+		roomId: string,
+		sender: string,
+		numberStr: string,
+		ratingStr: string
+	) {
+		const token = await this.requireAuth(sender);
 
 		if (!this.answersMapper.hasList(sender)) {
-			await this.sendMessage(roomId, '<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>'
+			);
 			return;
 		}
 
@@ -630,10 +660,13 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleAcceptAnswer(roomId: string, sender: string, numberStr: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 
 		if (!this.answersMapper.hasList(sender)) {
-			await this.sendMessage(roomId, '<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>');
+			await this.sendMessage(
+				roomId,
+				'<p>Zeige zuerst eine Antwort mit <code>!antwort [nr]</code></p>'
+			);
 			return;
 		}
 
@@ -655,7 +688,7 @@ export class MatrixService extends BaseMatrixService {
 
 	// Collection handlers
 	private async handleListCollections(roomId: string, sender: string) {
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.questionsService.getCollections(token);
 
 		if (result.error) {
@@ -691,7 +724,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.questionsService.createCollection(token, name);
 
 		if (result.error) {
@@ -700,7 +733,10 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		this.collectionsMapper.clearList(sender);
-		await this.sendMessage(roomId, `<p>Sammlung <strong>${result.data!.name}</strong> erstellt.</p>`);
+		await this.sendMessage(
+			roomId,
+			`<p>Sammlung <strong>${result.data!.name}</strong> erstellt.</p>`
+		);
 	}
 
 	// Search handler
@@ -710,7 +746,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.requireAuth(sender);
+		const token = await this.requireAuth(sender);
 		const result = await this.questionsService.getQuestions(token, { search: query });
 
 		if (result.error) {
@@ -745,10 +781,10 @@ export class MatrixService extends BaseMatrixService {
 
 	private getStatusEmoji(status: string): string {
 		const map: Record<string, string> = {
-			open: '&#10067;',        // Question mark
+			open: '&#10067;', // Question mark
 			researching: '&#128269;', // Magnifying glass
-			answered: '&#9989;',      // Check mark
-			archived: '&#128230;',    // Package
+			answered: '&#9989;', // Check mark
+			archived: '&#128230;', // Package
 		};
 		return map[status] || '&#10067;';
 	}
@@ -765,8 +801,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private getPriorityIndicator(priority: string): string {
 		const map: Record<string, string> = {
-			urgent: '&#128308; ',  // Red circle
-			high: '&#128992; ',    // Orange circle
+			urgent: '&#128308; ', // Red circle
+			high: '&#128992; ', // Orange circle
 			normal: '',
 			low: '',
 		};

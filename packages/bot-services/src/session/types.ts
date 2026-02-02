@@ -33,7 +33,16 @@ export interface SessionStats {
 	total: number;
 	/** Active (non-expired) sessions */
 	active: number;
+	/** Storage mode being used */
+	storageMode?: 'memory' | 'redis';
+	/** Whether Matrix-SSO-Link is enabled */
+	matrixSsoLinkEnabled?: boolean;
 }
+
+/**
+ * Session storage mode
+ */
+export type SessionStorageMode = 'memory' | 'redis';
 
 /**
  * Session module configuration options
@@ -45,6 +54,22 @@ export interface SessionModuleOptions {
 	sessionExpiryMs?: number;
 	/** Custom login endpoint path */
 	loginPath?: string;
+
+	// Redis configuration (for cross-bot SSO)
+	/** Storage mode: 'memory' (default) or 'redis' */
+	storageMode?: SessionStorageMode;
+	/** Redis host (default: localhost) */
+	redisHost?: string;
+	/** Redis port (default: 6379) */
+	redisPort?: number;
+	/** Redis password (optional) */
+	redisPassword?: string;
+
+	// Matrix-SSO-Link configuration (automatic login via Matrix OIDC)
+	/** Enable Matrix-SSO-Link lookup (default: true when using Redis) */
+	enableMatrixSsoLink?: boolean;
+	/** Service key for internal API calls to mana-core-auth */
+	serviceKey?: string;
 }
 
 export const SESSION_MODULE_OPTIONS = 'SESSION_MODULE_OPTIONS';

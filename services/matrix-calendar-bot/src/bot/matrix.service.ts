@@ -7,7 +7,13 @@ import {
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
-import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
+import {
+	TranscriptionService,
+	SessionService,
+	CreditService,
+	CalendarApiService,
+	CalendarEvent as ApiCalendarEvent,
+} from '@manacore/bot-services';
 import { CalendarService, CalendarEvent } from '../calendar/calendar.service';
 import { HELP_TEXT, WELCOME_TEXT, BOT_INTRODUCTION } from '../config/configuration';
 
@@ -19,7 +25,10 @@ export class MatrixService extends BaseMatrixService {
 		[
 			...COMMON_KEYWORDS,
 			{ keywords: ['was kannst du'], command: 'help' },
-			{ keywords: ['was steht heute an', 'termine heute', 'heute termine', "today's events"], command: 'today' },
+			{
+				keywords: ['was steht heute an', 'termine heute', 'heute termine', "today's events"],
+				command: 'today',
+			},
 			{ keywords: ['termine morgen', 'morgen termine', 'was ist morgen'], command: 'tomorrow' },
 			{ keywords: ['diese woche', 'wochenübersicht', 'week', 'woche'], command: 'week' },
 			{ keywords: ['zeige kalender', 'meine kalender', 'calendars'], command: 'calendars' },
@@ -32,10 +41,37 @@ export class MatrixService extends BaseMatrixService {
 		configService: ConfigService,
 		private readonly transcriptionService: TranscriptionService,
 		private calendarService: CalendarService,
+		private calendarApiService: CalendarApiService,
 		private sessionService: SessionService,
 		private creditService: CreditService
 	) {
 		super(configService);
+	}
+
+	/**
+	 * Check if user is logged in and has a valid token for API access
+	 */
+	private async getToken(userId: string): Promise<string | null> {
+		return this.sessionService.getToken(userId);
+	}
+
+	/**
+	 * Normalize event from API or local format to common format
+	 */
+	private normalizeEvent(event: CalendarEvent | ApiCalendarEvent): CalendarEvent {
+		return {
+			id: event.id,
+			title: event.title,
+			description: event.description || null,
+			location: event.location || null,
+			startTime: event.startTime,
+			endTime: event.endTime,
+			isAllDay: event.isAllDay,
+			calendarId: event.calendarId || '',
+			calendarName: (event as CalendarEvent).calendarName || 'Kalender',
+			createdAt: event.createdAt || new Date().toISOString(),
+			userId: event.userId || '',
+		};
 	}
 
 	protected override async handleAudioMessage(
@@ -64,9 +100,11 @@ export class MatrixService extends BaseMatrixService {
 
 	protected getConfig(): MatrixBotConfig {
 		return {
-			homeserverUrl: this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
+			homeserverUrl:
+				this.configService.get<string>('matrix.homeserverUrl') || 'http://localhost:8008',
 			accessToken: this.configService.get<string>('matrix.accessToken') || '',
-			storagePath: this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
+			storagePath:
+				this.configService.get<string>('matrix.storagePath') || './data/bot-storage.json',
 			allowedRooms: this.configService.get<string[]>('matrix.allowedRooms') || [],
 		};
 	}
@@ -176,7 +214,17 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleTodayEvents(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const events = await this.calendarService.getTodayEvents(userId);
+		const token = await this.getToken(userId);
+		let events: CalendarEvent[];
+
+		if (token) {
+			// Use API service
+			const apiEvents = await this.calendarApiService.getTodayEvents(token);
+			events = apiEvents.map((e) => this.normalizeEvent(e));
+		} else {
+			// Use local storage
+			events = await this.calendarService.getTodayEvents(userId);
+		}
 
 		if (events.length === 0) {
 			await this.sendReply(
@@ -187,12 +235,31 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const response = this.formatEventList('📅 **Termine heute:**', events);
+		let response = this.formatEventList('📅 **Termine heute:**', events);
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleTomorrowEvents(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const events = await this.calendarService.getTomorrowEvents(userId);
+		const token = await this.getToken(userId);
+		let events: CalendarEvent[];
+
+		if (token) {
+			// Use API service - get events for tomorrow
+			const tomorrow = new Date();
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			const tomorrowStr = tomorrow.toISOString().split('T')[0];
+			const apiEvents = await this.calendarApiService.getEvents(token, {
+				start: tomorrowStr,
+				end: tomorrowStr,
+			});
+			events = apiEvents.map((e) => this.normalizeEvent(e));
+		} else {
+			// Use local storage
+			events = await this.calendarService.getTomorrowEvents(userId);
+		}
 
 		if (events.length === 0) {
 			await this.sendReply(
@@ -203,12 +270,25 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const response = this.formatEventList('📅 **Termine morgen:**', events);
+		let response = this.formatEventList('📅 **Termine morgen:**', events);
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleWeekEvents(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const events = await this.calendarService.getWeekEvents(userId);
+		const token = await this.getToken(userId);
+		let events: CalendarEvent[];
+
+		if (token) {
+			// Use API service
+			const apiEvents = await this.calendarApiService.getUpcomingEvents(token, 7);
+			events = apiEvents.map((e) => this.normalizeEvent(e));
+		} else {
+			// Use local storage
+			events = await this.calendarService.getWeekEvents(userId);
+		}
 
 		if (events.length === 0) {
 			await this.sendReply(
@@ -219,12 +299,25 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const response = this.formatEventList('📅 **Termine diese Woche:**', events);
+		let response = this.formatEventList('📅 **Termine diese Woche:**', events);
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleUpcomingEvents(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const events = await this.calendarService.getUpcomingEvents(userId, 14);
+		const token = await this.getToken(userId);
+		let events: CalendarEvent[];
+
+		if (token) {
+			// Use API service
+			const apiEvents = await this.calendarApiService.getUpcomingEvents(token, 14);
+			events = apiEvents.map((e) => this.normalizeEvent(e));
+		} else {
+			// Use local storage
+			events = await this.calendarService.getUpcomingEvents(userId, 14);
+		}
 
 		if (events.length === 0) {
 			await this.sendReply(
@@ -235,11 +328,19 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const response = this.formatEventList('📅 **Anstehende Termine:**', events);
+		let response = this.formatEventList('📅 **Anstehende Termine:**', events);
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleCreateEvent(roomId: string, event: MatrixRoomEvent, userId: string, input: string) {
+	private async handleCreateEvent(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		input: string
+	) {
 		if (!input.trim()) {
 			await this.sendReply(
 				roomId,
@@ -249,8 +350,10 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
+		// Check if user is logged in
+		const token = await this.getToken(userId);
+
 		// Validate credits if user is logged in
-		const token = this.sessionService.getToken(userId);
 		if (token) {
 			const validation = await this.creditService.validateCredits(token, EVENT_CREATE_CREDITS);
 			if (!validation.hasCredits) {
@@ -264,45 +367,87 @@ export class MatrixService extends BaseMatrixService {
 			}
 		}
 
-		const { title, startTime, endTime, isAllDay } = this.calendarService.parseEventInput(input);
+		let calendarEvent: CalendarEvent;
 
-		if (!startTime || !endTime) {
-			await this.sendReply(
-				roomId,
-				event,
-				'❌ Konnte Datum/Uhrzeit nicht erkennen.\n\nBeispiele:\n• `!termin Meeting morgen um 14:00`\n• `!termin Arzt am 15.02. um 10:00`\n• `!termin Urlaub am 01.03. ganztägig`'
-			);
-			return;
-		}
+		if (token) {
+			// Use API service
+			const { title, startTime, endTime, isAllDay, location } =
+				this.calendarApiService.parseEventInput(input);
 
-		if (!title) {
-			await this.sendReply(roomId, event, '❌ Bitte gib einen Titel für den Termin an.');
-			return;
-		}
-
-		const calendarEvent = await this.calendarService.createEvent(
-			userId,
-			title,
-			startTime,
-			endTime,
-			{
-				isAllDay,
+			if (!startTime || !endTime) {
+				await this.sendReply(
+					roomId,
+					event,
+					'❌ Konnte Datum/Uhrzeit nicht erkennen.\n\nBeispiele:\n• `!termin Meeting morgen um 14:00`\n• `!termin Arzt am 15.02. um 10:00`\n• `!termin Urlaub am 01.03. ganztägig`'
+				);
+				return;
 			}
-		);
+
+			if (!title) {
+				await this.sendReply(roomId, event, '❌ Bitte gib einen Titel für den Termin an.');
+				return;
+			}
+
+			const apiEvent = await this.calendarApiService.createEvent(token, {
+				title,
+				startTime,
+				endTime,
+				isAllDay,
+				location: location || undefined,
+			});
+
+			if (!apiEvent) {
+				await this.sendReply(
+					roomId,
+					event,
+					'❌ Fehler beim Erstellen des Termins. Bitte versuche es erneut.'
+				);
+				return;
+			}
+
+			calendarEvent = this.normalizeEvent(apiEvent);
+		} else {
+			// Use local storage
+			const { title, startTime, endTime, isAllDay } = this.calendarService.parseEventInput(input);
+
+			if (!startTime || !endTime) {
+				await this.sendReply(
+					roomId,
+					event,
+					'❌ Konnte Datum/Uhrzeit nicht erkennen.\n\nBeispiele:\n• `!termin Meeting morgen um 14:00`\n• `!termin Arzt am 15.02. um 10:00`\n• `!termin Urlaub am 01.03. ganztägig`'
+				);
+				return;
+			}
+
+			if (!title) {
+				await this.sendReply(roomId, event, '❌ Bitte gib einen Titel für den Termin an.');
+				return;
+			}
+
+			calendarEvent = await this.calendarService.createEvent(userId, title, startTime, endTime, {
+				isAllDay,
+			});
+		}
 
 		const timeStr = this.calendarService.formatEventTime(calendarEvent);
-		let response = `✅ Termin erstellt: **${title}**\n📆 ${timeStr}`;
+		let response = `✅ Termin erstellt: **${calendarEvent.title}**\n📆 ${timeStr}`;
 
-		// Show credit deduction if logged in
+		// Show credit deduction and sync status if logged in
 		if (token) {
 			const balance = await this.creditService.getBalance(token);
 			response += `\n⚡ -${EVENT_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)`;
+			response += '\n🔄 Synchronisiert mit calendar-backend';
 		}
 
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleEventDetails(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleEventDetails(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		const eventNumber = parseInt(args.trim());
 
 		if (isNaN(eventNumber) || eventNumber < 1) {
@@ -314,7 +459,19 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const calendarEvent = await this.calendarService.getEventByIndex(userId, eventNumber);
+		const token = await this.getToken(userId);
+		let calendarEvent: CalendarEvent | null = null;
+
+		if (token) {
+			// Use API service - get event list first
+			const apiEvents = await this.calendarApiService.getUpcomingEvents(token, 30);
+			if (eventNumber > 0 && eventNumber <= apiEvents.length) {
+				calendarEvent = this.normalizeEvent(apiEvents[eventNumber - 1]);
+			}
+		} else {
+			// Use local storage
+			calendarEvent = await this.calendarService.getEventByIndex(userId, eventNumber);
+		}
 
 		if (!calendarEvent) {
 			await this.sendReply(roomId, event, `❌ Termin #${eventNumber} nicht gefunden.`);
@@ -334,10 +491,19 @@ export class MatrixService extends BaseMatrixService {
 			response += `\n📝 ${calendarEvent.description}`;
 		}
 
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
+
 		await this.sendReply(roomId, event, response);
 	}
 
-	private async handleDeleteEvent(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
+	private async handleDeleteEvent(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
 		const eventNumber = parseInt(args.trim());
 
 		if (isNaN(eventNumber) || eventNumber < 1) {
@@ -349,34 +515,80 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const deletedEvent = await this.calendarService.deleteEvent(userId, eventNumber);
+		const token = await this.getToken(userId);
+		let deletedEvent: CalendarEvent | null = null;
+
+		if (token) {
+			// Use API service - get event list first to find event by index
+			const apiEvents = await this.calendarApiService.getUpcomingEvents(token, 30);
+			if (eventNumber > 0 && eventNumber <= apiEvents.length) {
+				const targetEvent = apiEvents[eventNumber - 1];
+				const success = await this.calendarApiService.deleteEvent(token, targetEvent.id);
+				if (success) {
+					deletedEvent = this.normalizeEvent(targetEvent);
+				}
+			}
+		} else {
+			// Use local storage
+			deletedEvent = await this.calendarService.deleteEvent(userId, eventNumber);
+		}
 
 		if (!deletedEvent) {
 			await this.sendReply(roomId, event, `❌ Termin #${eventNumber} nicht gefunden.`);
 			return;
 		}
 
-		await this.sendReply(roomId, event, `🗑️ Gelöscht: ${deletedEvent.title}`);
+		let response = `🗑️ Gelöscht: ${deletedEvent.title}`;
+		if (token) {
+			response += '\n\n🔄 Synchronisiert';
+		}
+		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleCalendars(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const calendars = await this.calendarService.getCalendars(userId);
+		const token = await this.getToken(userId);
+		let calendars: { name: string }[];
+
+		if (token) {
+			// Use API service
+			calendars = await this.calendarApiService.getCalendars(token);
+		} else {
+			// Use local storage
+			calendars = await this.calendarService.getCalendars(userId);
+		}
 
 		let response = '📁 **Deine Kalender:**\n\n';
 		for (const calendar of calendars) {
 			response += `• ${calendar.name}\n`;
 		}
 
+		if (token) {
+			response += '\n🔄 Synchronisiert';
+		}
+
 		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleStatus(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const events = await this.calendarService.getUpcomingEvents(userId, 7);
-		const todayEvents = await this.calendarService.getTodayEvents(userId);
+		const token = await this.getToken(userId);
+		const session = await this.sessionService.getSession(userId);
 
-		// Check login status and credits
-		const token = this.sessionService.getToken(userId);
-		const session = this.sessionService.getSession(userId);
+		let todayEvents: CalendarEvent[];
+		let events: CalendarEvent[];
+
+		if (token) {
+			// Use API service
+			const apiTodayEvents = await this.calendarApiService.getTodayEvents(token);
+			const apiEvents = await this.calendarApiService.getUpcomingEvents(token, 7);
+			todayEvents = apiTodayEvents.map((e) => this.normalizeEvent(e));
+			events = apiEvents.map((e) => this.normalizeEvent(e));
+		} else {
+			// Use local storage
+			todayEvents = await this.calendarService.getTodayEvents(userId);
+			events = await this.calendarService.getUpcomingEvents(userId, 7);
+		}
+
+		const syncStatus = token ? '🔄 Synchronisiert mit calendar-backend' : '💾 Lokaler Speicher';
 
 		let response = `📊 **Status**\n\n`;
 		response += `• Termine heute: ${todayEvents.length}\n`;
@@ -388,9 +600,10 @@ export class MatrixService extends BaseMatrixService {
 			response += `⚡ Credits: ${balance.balance.toFixed(2)}\n\n`;
 		} else {
 			response += `👤 Nicht angemeldet\n`;
-			response += `💡 Login: \`!login email passwort\`\n\n`;
+			response += `💡 Login: \`!login email passwort\` für Synchronisation mit calendar-web\n\n`;
 		}
 
+		response += `${syncStatus}\n`;
 		response += `Bot: ✅ Online`;
 
 		await this.sendReply(roomId, event, response);
@@ -415,7 +628,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const token = this.sessionService.getToken(userId);
+		const token = await this.sessionService.getToken(userId);
 		if (token) {
 			const balance = await this.creditService.getBalance(token);
 			await this.sendReply(
@@ -429,7 +642,7 @@ export class MatrixService extends BaseMatrixService {
 	}
 
 	private async handleLogout(roomId: string, event: MatrixRoomEvent, userId: string) {
-		const session = this.sessionService.getSession(userId);
+		const session = await this.sessionService.getSession(userId);
 		if (!session) {
 			await this.sendReply(roomId, event, '❌ Du bist nicht angemeldet.');
 			return;

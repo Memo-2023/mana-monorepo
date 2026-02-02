@@ -1,18 +1,35 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MatrixService } from './matrix.service';
 import { CalendarModule } from '../calendar/calendar.module';
-import { TranscriptionModule, SessionModule, CreditModule } from '@manacore/bot-services';
+import {
+	TranscriptionModule,
+	SessionModule,
+	CreditModule,
+	CalendarApiService,
+} from '@manacore/bot-services';
+
+// Factory provider for CalendarApiService
+const calendarApiServiceProvider = {
+	provide: CalendarApiService,
+	useFactory: (configService: ConfigService) => {
+		const baseUrl = configService.get<string>('CALENDAR_BACKEND_URL', 'http://localhost:3014');
+		return new CalendarApiService(baseUrl);
+	},
+	inject: [ConfigService],
+};
 
 @Module({
 	imports: [
+		ConfigModule,
 		CalendarModule,
 		TranscriptionModule.register({
 			sttUrl: process.env.STT_URL || 'http://localhost:3020',
 		}),
-		SessionModule.forRoot(),
+		SessionModule.forRoot({ storageMode: 'redis' }),
 		CreditModule.forRoot(),
 	],
-	providers: [MatrixService],
+	providers: [MatrixService, calendarApiServiceProvider],
 	exports: [MatrixService],
 })
 export class BotModule {}
