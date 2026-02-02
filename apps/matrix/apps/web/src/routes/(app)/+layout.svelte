@@ -67,6 +67,7 @@
 	// Navigation items for Matrix
 	const navItems: PillNavItem[] = [
 		{ href: '/chat', label: 'Chat', icon: 'home' },
+		{ href: '/bots', label: 'Bots', icon: 'robot' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 	];
 

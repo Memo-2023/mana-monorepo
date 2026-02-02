@@ -5,6 +5,7 @@
 	},
 	"nav": {
 		"chat": "Chat",
+		"bots": "Bots",
 		"settings": "Settings"
 	},
 	"auth": {
@@ -21,5 +22,25 @@
 		"typeMessage": "Type a message...",
 		"noRooms": "No rooms yet",
 		"noMessages": "No messages yet"
+	},
+	"bots": {
+		"title": "Bots",
+		"subtitle": "Discover all available bot assistants",
+		"search": "Search bots...",
+		"startChat": "Start Chat",
+		"commands": "Commands",
+		"example": "Example",
+		"free": "Free",
+		"requiresLogin": "Requires login",
+		"noResults": "No bots found",
+		"found": "found",
+		"categories": {
+			"all": "All",
+			"productivity": "Productivity",
+			"ai": "AI & Chat",
+			"media": "Media",
+			"lifestyle": "Lifestyle",
+			"tools": "Tools"
+		}
 	}
 }
