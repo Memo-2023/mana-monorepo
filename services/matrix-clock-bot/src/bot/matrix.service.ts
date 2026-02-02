@@ -8,7 +8,14 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { ClockService } from '../clock/clock.service';
-import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
+import {
+	TranscriptionService,
+	SessionService,
+	CreditService,
+	I18nService,
+	Language,
+	LANGUAGE_NAMES,
+} from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
 
 @Injectable()
@@ -30,7 +37,8 @@ export class MatrixService extends BaseMatrixService {
 		private clockService: ClockService,
 		private transcriptionService: TranscriptionService,
 		private sessionService: SessionService,
-		private creditService: CreditService
+		private creditService: CreditService,
+		private i18nService: I18nService
 	) {
 		super(configService);
 	}
@@ -216,6 +224,12 @@ export class MatrixService extends BaseMatrixService {
 
 			case 'weltuhren':
 				await this.handleWorldClocksCommand(roomId, event, userId);
+				break;
+
+			case 'language':
+			case 'sprache':
+			case 'lang':
+				await this.handleLanguage(roomId, event, userId, args);
 				break;
 
 			default:
@@ -676,7 +690,12 @@ export class MatrixService extends BaseMatrixService {
 			}
 		}
 
-		// No match - don't respond to random messages
+		// Fallback: try to parse any message as a timer duration
+		const duration = this.clockService.parseDuration(text);
+		if (duration) {
+			await this.handleTimerCommand(roomId, event, userId, text);
+			return;
+		}
 	}
 
 	private async getToken(userId: string): Promise<string | null> {
@@ -690,5 +709,48 @@ export class MatrixService extends BaseMatrixService {
 
 		// Entwicklungs-Fallback
 		return this.demoToken || null;
+	}
+
+	private async handleLanguage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
+		const lang = args.trim().toLowerCase();
+
+		if (!lang) {
+			const currentLang = await this.i18nService.getLanguage(userId);
+			const langName = LANGUAGE_NAMES[currentLang];
+			const available = this.i18nService
+				.getAvailableLanguages()
+				.map((l) => `${l} (${LANGUAGE_NAMES[l]})`)
+				.join(', ');
+			await this.sendReply(
+				roomId,
+				event,
+				`**Sprache / Language:** ${langName}\n\n**Verfügbar / Available:** ${available}\n\nÄndern / Change: \`!language de\` oder / or \`!language en\``
+			);
+			return;
+		}
+
+		if (!this.i18nService.isValidLanguage(lang)) {
+			const available = this.i18nService.getAvailableLanguages().join(', ');
+			await this.sendReply(
+				roomId,
+				event,
+				`Unbekannte Sprache / Unknown language: ${lang}\n\nVerfügbar / Available: ${available}`
+			);
+			return;
+		}
+
+		await this.i18nService.setLanguage(userId, lang as Language);
+		const langName = LANGUAGE_NAMES[lang as Language];
+
+		if (lang === 'de') {
+			await this.sendReply(roomId, event, `Sprache geändert zu: **${langName}**`);
+		} else {
+			await this.sendReply(roomId, event, `Language changed to: **${langName}**`);
+		}
 	}
 }

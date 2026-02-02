@@ -186,27 +186,27 @@ export class ClockService {
 	parseDuration(input: string): number | null {
 		let totalSeconds = 0;
 
-		// Match hours
-		const hoursMatch = input.match(/(\d+)\s*h/i);
+		// Match hours: 1h, 1 h, 1 stunde, 1 stunden, 1 hour, 1 hours
+		const hoursMatch = input.match(/(\d+)\s*(?:h|stunde[n]?|hour[s]?)\b/i);
 		if (hoursMatch) {
 			totalSeconds += parseInt(hoursMatch[1], 10) * 3600;
 		}
 
-		// Match minutes
-		const minutesMatch = input.match(/(\d+)\s*m(?:in)?/i);
+		// Match minutes: 25m, 25 m, 25min, 25 min, 25 minuten, 25 minute, 25 minutes
+		const minutesMatch = input.match(/(\d+)\s*(?:m|min|minute[n]?|minutes?)\b/i);
 		if (minutesMatch) {
 			totalSeconds += parseInt(minutesMatch[1], 10) * 60;
 		}
 
-		// Match seconds
-		const secondsMatch = input.match(/(\d+)\s*s(?:ec)?/i);
+		// Match seconds: 30s, 30 s, 30sec, 30 sec, 30 sekunden, 30 seconds
+		const secondsMatch = input.match(/(\d+)\s*(?:s|sec|sekunde[n]?|seconds?)\b/i);
 		if (secondsMatch) {
 			totalSeconds += parseInt(secondsMatch[1], 10);
 		}
 
-		// If just a number, assume minutes
+		// If just a number (with optional whitespace), assume minutes
 		if (totalSeconds === 0) {
-			const justNumber = input.match(/^(\d+)$/);
+			const justNumber = input.trim().match(/^(\d+)$/);
 			if (justNumber) {
 				totalSeconds = parseInt(justNumber[1], 10) * 60;
 			}

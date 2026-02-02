@@ -136,6 +136,20 @@ export type {
 	CreditStatusMessage,
 } from './credit/index.js';
 
+// I18n (Multi-language support for Matrix bots)
+export { I18nModule, I18nService, I18N_OPTIONS, LANGUAGE_NAMES } from './i18n/index.js';
+export type {
+	Language,
+	I18nOptions,
+	BotTranslations,
+	CommonTranslations,
+	TodoTranslations,
+	CalendarTranslations,
+	ContactsTranslations,
+	ClockTranslations,
+} from './i18n/index.js';
+export { de as deTranslations, en as enTranslations } from './i18n/index.js';
+
 // ===== Placeholder Services (to be implemented) =====
 
 export { NutritionModule } from './nutrition/index.js';

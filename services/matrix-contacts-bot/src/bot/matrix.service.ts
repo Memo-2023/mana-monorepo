@@ -9,7 +9,14 @@ import {
 	UserListMapper,
 } from '@manacore/matrix-bot-common';
 import { ContactsService, Contact } from '../contacts/contacts.service';
-import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
+import {
+	SessionService,
+	TranscriptionService,
+	CreditService,
+	I18nService,
+	Language,
+	LANGUAGE_NAMES,
+} from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 const CONTACT_CREATE_CREDITS = 0.02;
@@ -32,7 +39,8 @@ export class MatrixService extends BaseMatrixService {
 		private readonly transcriptionService: TranscriptionService,
 		private contactsService: ContactsService,
 		private sessionService: SessionService,
-		private creditService: CreditService
+		private creditService: CreditService,
+		private i18nService: I18nService
 	) {
 		super(configService);
 	}
@@ -102,6 +110,10 @@ Sag "hilfe" fur alle Befehle!`;
 			await this.handleCommand(roomId, event, sender, `!${detectedCommand}`);
 			return;
 		}
+
+		// Fallback: treat any message as a new contact
+		const args = message.trim().split(/\s+/);
+		await this.handleCreateContact(roomId, event, sender, args);
 	}
 
 	private async handleCommand(
@@ -186,6 +198,12 @@ Sag "hilfe" fur alle Befehle!`;
 
 			case 'pin':
 				await this.pinHelpMessage(roomId, event);
+				break;
+
+			case 'language':
+			case 'sprache':
+			case 'lang':
+				await this.handleLanguage(roomId, event, sender, argString);
 				break;
 
 			default:
@@ -764,6 +782,49 @@ Sag "hilfe" fur alle Befehle!`;
 		} catch (error) {
 			this.logger.error(`Failed to pin help message:`, error);
 			await this.sendReply(roomId, event, 'Fehler beim Pinnen der Hilfe.');
+		}
+	}
+
+	private async handleLanguage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string,
+		args: string
+	) {
+		const lang = args.trim().toLowerCase();
+
+		if (!lang) {
+			const currentLang = await this.i18nService.getLanguage(userId);
+			const langName = LANGUAGE_NAMES[currentLang];
+			const available = this.i18nService
+				.getAvailableLanguages()
+				.map((l) => `${l} (${LANGUAGE_NAMES[l]})`)
+				.join(', ');
+			await this.sendReply(
+				roomId,
+				event,
+				`**Sprache / Language:** ${langName}\n\n**Verfügbar / Available:** ${available}\n\nÄndern / Change: \`!language de\` oder / or \`!language en\``
+			);
+			return;
+		}
+
+		if (!this.i18nService.isValidLanguage(lang)) {
+			const available = this.i18nService.getAvailableLanguages().join(', ');
+			await this.sendReply(
+				roomId,
+				event,
+				`Unbekannte Sprache / Unknown language: ${lang}\n\nVerfügbar / Available: ${available}`
+			);
+			return;
+		}
+
+		await this.i18nService.setLanguage(userId, lang as Language);
+		const langName = LANGUAGE_NAMES[lang as Language];
+
+		if (lang === 'de') {
+			await this.sendReply(roomId, event, `Sprache geändert zu: **${langName}**`);
+		} else {
+			await this.sendReply(roomId, event, `Language changed to: **${langName}**`);
 		}
 	}
 }

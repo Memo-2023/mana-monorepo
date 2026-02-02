@@ -7,6 +7,7 @@ import {
 	SessionModule,
 	CreditModule,
 	CalendarApiService,
+	I18nModule,
 } from '@manacore/bot-services';
 
 // Factory provider for CalendarApiService
@@ -28,6 +29,7 @@ const calendarApiServiceProvider = {
 		}),
 		SessionModule.forRoot({ storageMode: 'redis' }),
 		CreditModule.forRoot(),
+		I18nModule.forRoot(),
 	],
 	providers: [MatrixService, calendarApiServiceProvider],
 	exports: [MatrixService],

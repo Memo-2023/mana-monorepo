@@ -38,6 +38,10 @@
 			"types": "./dist/credit/index.d.ts",
 			"default": "./dist/credit/index.js"
 		},
+		"./i18n": {
+			"types": "./dist/i18n/index.d.ts",
+			"default": "./dist/i18n/index.js"
+		},
 		"./nutrition": {
 			"types": "./dist/nutrition/index.d.ts",
 			"default": "./dist/nutrition/index.js"

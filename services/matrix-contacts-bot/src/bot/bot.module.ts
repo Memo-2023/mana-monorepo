@@ -1,7 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MatrixService } from './matrix.service';
 import { ContactsModule } from '../contacts/contacts.module';
-import { SessionModule, TranscriptionModule, CreditModule } from '@manacore/bot-services';
+import {
+	SessionModule,
+	TranscriptionModule,
+	CreditModule,
+	I18nModule,
+} from '@manacore/bot-services';
 
 @Module({
 	imports: [
@@ -11,6 +16,7 @@ import { SessionModule, TranscriptionModule, CreditModule } from '@manacore/bot-
 			sttUrl: process.env.STT_URL || 'http://localhost:3020',
 		}),
 		CreditModule.forRoot(),
+		I18nModule.forRoot(),
 	],
 	providers: [MatrixService],
 	exports: [MatrixService],
