@@ -856,9 +856,10 @@ export class BetterAuthService {
 			// Create JWKS fetcher
 			const JWKS = createRemoteJWKSet(jwksUrl);
 
-			// Get issuer/audience from config (Better Auth uses BASE_URL by default)
-			const issuer = this.configService.get<string>('jwt.issuer') || baseUrl;
-			const audience = this.configService.get<string>('jwt.audience') || baseUrl;
+			// IMPORTANT: Match Better Auth signing config exactly (better-auth.config.ts)
+			// Signing uses: issuer = BASE_URL, audience = JWT_AUDIENCE || 'manacore'
+			const issuer = baseUrl; // Better Auth uses BASE_URL as issuer for OIDC compatibility
+			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
 
 			// Verify using jose library with Better Auth's JWKS
 			const { payload } = await jwtVerify(token, JWKS, {

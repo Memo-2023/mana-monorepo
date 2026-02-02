@@ -33,7 +33,10 @@ export class OptionalAuthGuard implements CanActivate {
 				this.jwks = createRemoteJWKSet(jwksUrl);
 			}
 
-			const issuer = this.configService.get<string>('jwt.issuer') || 'manacore';
+			// IMPORTANT: Match Better Auth signing config exactly (better-auth.config.ts)
+			// Signing uses: issuer = BASE_URL, audience = JWT_AUDIENCE || 'manacore'
+			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
+			const issuer = baseUrl; // Better Auth uses BASE_URL as issuer for OIDC compatibility
 			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
 
 			const { payload } = await jwtVerify(token, this.jwks, {
