@@ -778,30 +778,33 @@ export class BetterAuthService {
 				rememberMe: wasRememberMe, // Preserve remember me flag
 			});
 
-			// Generate new JWT
-			const privateKey = this.configService.get<string>('jwt.privateKey');
-			if (!privateKey) {
-				throw new Error('JWT private key not configured');
+			// Generate new JWT using Better Auth's signJWT (uses JWKS/EdDSA keys)
+			let accessToken = '';
+			try {
+				const api = this.auth.api as any;
+				const jwtResult = await api.signJWT({
+					body: {
+						payload: {
+							sub: user.id,
+							email: user.email,
+							role: user.role || 'user',
+							sid: sessionId,
+						},
+					},
+				});
+
+				accessToken = jwtResult?.token || '';
+
+				if (!accessToken) {
+					throw new Error('Better Auth signJWT returned empty token');
+				}
+			} catch (jwtError) {
+				this.logger.error(
+					'Token refresh: JWT generation failed',
+					jwtError instanceof Error ? jwtError.message : 'Unknown error'
+				);
+				throw new Error('Failed to generate access token');
 			}
-
-			const accessTokenExpiry = this.configService.get<string>('jwt.accessTokenExpiry') || '15m';
-			const issuer = this.configService.get<string>('jwt.issuer');
-			const audience = this.configService.get<string>('jwt.audience');
-
-			const tokenPayload: Record<string, unknown> = {
-				sub: user.id,
-				email: user.email,
-				role: user.role,
-				sessionId,
-				...(session.deviceId && { deviceId: session.deviceId }),
-			};
-
-			const accessToken = jwt.sign(tokenPayload, privateKey, {
-				algorithm: 'RS256' as const,
-				expiresIn: accessTokenExpiry as jwt.SignOptions['expiresIn'],
-				...(issuer && { issuer }),
-				...(audience && { audience }),
-			});
 
 			return {
 				user: {
