@@ -1049,6 +1049,37 @@ services:
       retries: 3
       start_period: 40s
 
+  mana-llm:
+    build:
+      context: ./services/mana-llm
+      dockerfile: Dockerfile
+    container_name: mana-service-llm
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      PORT: 3025
+      LOG_LEVEL: info
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_DEFAULT_MODEL: gemma3:4b
+      OLLAMA_TIMEOUT: 120
+      REDIS_URL: redis://redis:6379
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      TOGETHER_API_KEY: ${TOGETHER_API_KEY:-}
+      CORS_ORIGINS: https://playground.mana.how,https://mana.how,https://chat.mana.how
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3025:3025"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:3025/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   llm-playground:
     build:
       context: .
@@ -1058,12 +1089,14 @@ services:
     depends_on:
       mana-auth:
         condition: service_healthy
+      mana-llm:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 5090
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_MANA_LLM_URL: http://host.docker.internal:3025
+      PUBLIC_MANA_LLM_URL: http://mana-llm:3025
       PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
     ports:
       - "5090:5090"
