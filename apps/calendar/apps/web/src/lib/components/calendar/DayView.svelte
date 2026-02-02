@@ -813,24 +813,26 @@
 				/>
 			{/each}
 
-			<!-- Scheduled Tasks (Time-Blocking) -->
-			{#each getScheduledTasks() as task (task.id)}
-				{@const isTaskBeingDragged = isTaskDragging && draggedTask?.id === task.id}
-				{@const isTaskBeingResized = isTaskResizing && resizeTask?.id === task.id}
-				<TaskBlock
-					{task}
-					style={isTaskBeingDragged
-						? `top: ${taskDragPreviewTop}%; height: ${taskDragPreviewHeight}%;`
-						: isTaskBeingResized
-							? `top: ${taskResizePreviewTop}%; height: ${taskResizePreviewHeight}%;`
-							: getTaskStyle(task)}
-					{onTaskClick}
-					onDragStart={handleTaskDragStart}
-					onResizeStart={handleTaskResizeStart}
-					isDragging={isTaskBeingDragged}
-					isResizing={isTaskBeingResized}
-				/>
-			{/each}
+			<!-- Scheduled Tasks (Time-Blocking) - only shown if enabled in settings -->
+			{#if settingsStore.showTasksInCalendar}
+				{#each getScheduledTasks() as task (task.id)}
+					{@const isTaskBeingDragged = isTaskDragging && draggedTask?.id === task.id}
+					{@const isTaskBeingResized = isTaskResizing && resizeTask?.id === task.id}
+					<TaskBlock
+						{task}
+						style={isTaskBeingDragged
+							? `top: ${taskDragPreviewTop}%; height: ${taskDragPreviewHeight}%;`
+							: isTaskBeingResized
+								? `top: ${taskResizePreviewTop}%; height: ${taskResizePreviewHeight}%;`
+								: getTaskStyle(task)}
+						{onTaskClick}
+						onDragStart={handleTaskDragStart}
+						onResizeStart={handleTaskResizeStart}
+						isDragging={isTaskBeingDragged}
+						isResizing={isTaskBeingResized}
+					/>
+				{/each}
+			{/if}
 
 			<!-- Overflow indicators for events outside visible time range -->
 			{#if overflowEvents.before.length > 0}

@@ -1003,37 +1003,39 @@
 						/>
 					{/each}
 
-					<!-- Scheduled Tasks (Time-Blocking) -->
-					{#each getScheduledTasksForDay(day) as task (task.id)}
-						{@const isTaskBeingDragged = isTaskDragging && draggedTask?.id === task.id}
-						{@const isTaskBeingResized = isTaskResizing && resizeTask?.id === task.id}
-						{@const isTaskCrossDayDrag =
-							isTaskBeingDragged &&
-							taskDragTargetDay !== null &&
-							!isSameDay(day, taskDragTargetDay)}
-						<TaskBlock
-							{task}
-							style={isTaskBeingDragged && !isTaskCrossDayDrag
-								? `top: ${taskDragPreviewTop}%; height: ${taskDragPreviewHeight}%;`
-								: isTaskBeingResized
-									? `top: ${taskResizePreviewTop}%; height: ${taskResizePreviewHeight}%;`
-									: getTaskStyle(task)}
-							{onTaskClick}
-							onDragStart={handleTaskDragStart}
-							onResizeStart={handleTaskResizeStart}
-							isDragging={isTaskBeingDragged && !isTaskCrossDayDrag}
-							isResizing={isTaskBeingResized}
-							isDraggingSource={isTaskCrossDayDrag}
-						/>
-					{/each}
+					<!-- Scheduled Tasks (Time-Blocking) - only shown if enabled in settings -->
+					{#if settingsStore.showTasksInCalendar}
+						{#each getScheduledTasksForDay(day) as task (task.id)}
+							{@const isTaskBeingDragged = isTaskDragging && draggedTask?.id === task.id}
+							{@const isTaskBeingResized = isTaskResizing && resizeTask?.id === task.id}
+							{@const isTaskCrossDayDrag =
+								isTaskBeingDragged &&
+								taskDragTargetDay !== null &&
+								!isSameDay(day, taskDragTargetDay)}
+							<TaskBlock
+								{task}
+								style={isTaskBeingDragged && !isTaskCrossDayDrag
+									? `top: ${taskDragPreviewTop}%; height: ${taskDragPreviewHeight}%;`
+									: isTaskBeingResized
+										? `top: ${taskResizePreviewTop}%; height: ${taskResizePreviewHeight}%;`
+										: getTaskStyle(task)}
+								{onTaskClick}
+								onDragStart={handleTaskDragStart}
+								onResizeStart={handleTaskResizeStart}
+								isDragging={isTaskBeingDragged && !isTaskCrossDayDrag}
+								isResizing={isTaskBeingResized}
+								isDraggingSource={isTaskCrossDayDrag}
+							/>
+						{/each}
 
-					<!-- Task Drag preview (solid) for cross-day dragging - shows where task will be -->
-					{#if isTaskDragging && draggedTask && taskDragTargetDay && isSameDay(day, taskDragTargetDay) && !getScheduledTasksForDay(day).some((t) => t.id === draggedTask!.id)}
-						<TaskBlock
-							task={draggedTask}
-							style="top: {taskDragPreviewTop}%; height: {taskDragPreviewHeight}%;"
-							isDragging={true}
-						/>
+						<!-- Task Drag preview (solid) for cross-day dragging - shows where task will be -->
+						{#if isTaskDragging && draggedTask && taskDragTargetDay && isSameDay(day, taskDragTargetDay) && !getScheduledTasksForDay(day).some((t) => t.id === draggedTask!.id)}
+							<TaskBlock
+								task={draggedTask}
+								style="top: {taskDragPreviewTop}%; height: {taskDragPreviewHeight}%;"
+								isDragging={true}
+							/>
+						{/if}
 					{/if}
 
 					<!-- Drag preview (solid) for cross-day dragging - shows where event will be -->

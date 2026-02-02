@@ -54,6 +54,9 @@ export interface CalendarAppSettings extends Record<string, unknown> {
 	showBirthdays: boolean;
 	showBirthdayAge: boolean;
 
+	// Task settings
+	showTasksInCalendar: boolean;
+
 	// UI settings
 	sidebarCollapsed: boolean;
 
@@ -96,6 +99,7 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	immersiveModeEnabled: false,
 	showBirthdays: true,
 	showBirthdayAge: true,
+	showTasksInCalendar: false,
 	sidebarCollapsed: false,
 	quickViewPillViews: ['week', 'month', 'agenda'],
 	customDayCount: 30,
@@ -231,6 +235,9 @@ export const settingsStore = {
 	get showBirthdayAge() {
 		return baseStore.settings.showBirthdayAge;
 	},
+	get showTasksInCalendar() {
+		return baseStore.settings.showTasksInCalendar;
+	},
 	get defaultEventDuration() {
 		return baseStore.settings.defaultEventDuration;
 	},
@@ -293,6 +300,10 @@ export const settingsStore = {
 
 	clearTagSelection() {
 		baseStore.set('selectedTagIds', []);
+	},
+
+	toggleTasksInCalendar() {
+		baseStore.set('showTasksInCalendar', !baseStore.settings.showTasksInCalendar);
 	},
 
 	// Time formatting helpers

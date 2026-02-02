@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { getOffsetDate } from '$lib/utils/dateNavigation';
+	import { HOUR_HEIGHT_PX } from '$lib/utils/calendarConstants';
 	import WeekView from './WeekView.svelte';
 	import DayView from './DayView.svelte';
 	import MonthView from './MonthView.svelte';
@@ -37,6 +39,7 @@
 
 	// Container refs
 	let viewportEl: HTMLDivElement;
+	let currentPageEl: HTMLDivElement;
 	let viewportWidth = $state(0);
 
 	// Threshold: 15% of viewport width or high velocity triggers navigation
@@ -284,6 +287,39 @@
 
 	// Computed styles
 	let trackStyle = $derived(`transform: translateX(calc(-33.333% + ${offsetX}px))`);
+
+	// Scroll to center of day (around 12:00) on initial mount
+	// Only for time-grid views (day, week, multi-day)
+	onMount(() => {
+		if (!browser) return;
+
+		// Small delay to ensure views are rendered
+		setTimeout(() => {
+			if (!currentPageEl) return;
+
+			// Only scroll for time-grid views (not month, year, agenda)
+			const timeGridViews = [
+				'day',
+				'3day',
+				'5day',
+				'week',
+				'10day',
+				'14day',
+				'30day',
+				'60day',
+				'90day',
+				'365day',
+				'custom',
+			];
+			if (!timeGridViews.includes(viewStore.viewType)) return;
+
+			// Calculate scroll position to center around 12:00 (noon)
+			const targetHour = 12;
+			const targetScrollTop = targetHour * HOUR_HEIGHT_PX - currentPageEl.clientHeight / 2;
+
+			currentPageEl.scrollTop = Math.max(0, targetScrollTop);
+		}, 150);
+	});
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -331,7 +367,7 @@
 		</div>
 
 		<!-- Current View (main interactive view) -->
-		<div class="carousel-page current">
+		<div class="carousel-page current" bind:this={currentPageEl}>
 			{#if viewStore.viewType === 'day'}
 				<DayView {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === '3day'}
