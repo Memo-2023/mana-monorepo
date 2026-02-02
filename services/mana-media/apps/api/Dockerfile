@@ -9,7 +9,6 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/shared-drizzle-config/package.json ./packages/shared-drizzle-config/
-COPY services/mana-media/package.json ./services/mana-media/
 COPY services/mana-media/apps/api/package.json ./services/mana-media/apps/api/
 COPY services/mana-media/packages/client/package.json ./services/mana-media/packages/client/
 RUN pnpm install --frozen-lockfile
@@ -17,7 +16,6 @@ RUN pnpm install --frozen-lockfile
 # Build shared packages
 FROM base AS shared-builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/shared-drizzle-config/node_modules ./packages/shared-drizzle-config/node_modules
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 WORKDIR /app/packages/shared-drizzle-config
 RUN pnpm build
@@ -25,8 +23,6 @@ RUN pnpm build
 # Build the application
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/services/mana-media/node_modules ./services/mana-media/node_modules
-COPY --from=deps /app/services/mana-media/apps/api/node_modules ./services/mana-media/apps/api/node_modules
 COPY --from=shared-builder /app/packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY services/mana-media ./services/mana-media
 WORKDIR /app/services/mana-media/apps/api
