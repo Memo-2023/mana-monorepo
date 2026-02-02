@@ -18,46 +18,48 @@ export default () => ({
 export const HELP_TEXT = `🎯 **Todo Bot - Hilfe**
 
 **Aufgaben verwalten:**
-• \`!add [Aufgabe]\` - Neue Aufgabe hinzufügen
+• \`neu [Aufgabe]\` - Neue Aufgabe hinzufügen
 • Sprachnotiz senden - Aufgabe per Sprache erstellen
-• \`!list\` oder \`!heute\` - Heutige Aufgaben anzeigen
-• \`!inbox\` - Aufgaben ohne Datum anzeigen
-• \`!done [Nr]\` - Aufgabe als erledigt markieren
-• \`!delete [Nr]\` - Aufgabe löschen
+• \`heute\` - Heutige Aufgaben + Inbox anzeigen
+• \`liste\` - Alle offenen Aufgaben
+• \`inbox\` - Nur Aufgaben ohne Datum
+• \`erledigt [Nr]\` - Aufgabe als erledigt markieren
+• \`löschen [Nr]\` - Aufgabe löschen
 
 **Projekte:**
-• \`!projects\` - Alle Projekte anzeigen
-• \`!project [Name]\` - Aufgaben eines Projekts anzeigen
+• \`projekte\` - Alle Projekte anzeigen
+• \`projekt [Name]\` - Aufgaben eines Projekts anzeigen
 
-**Prioritäten:**
-• \`!add Wichtige Aufgabe !p1\` - Höchste Priorität (1-4)
-• \`!add Morgen machen @morgen\` - Datum setzen
+**Prioritäten & Datum:**
+• \`neu Wichtige Aufgabe !p1\` - Höchste Priorität (1-4)
+• \`neu Morgen machen @morgen\` - Datum setzen
+• \`neu Heute erledigen @heute\` - Heute fällig
 
 **Sonstiges:**
-• \`!status\` - Verbindungsstatus prüfen
-• \`!help\` oder \`hilfe\` - Diese Hilfe anzeigen
+• \`status\` - Verbindungsstatus prüfen
+• \`hilfe\` - Diese Hilfe anzeigen
+• \`login email passwort\` - Anmelden für Synchronisation
+• \`logout\` - Abmelden
 
-**Natürliche Sprache:**
-Du kannst auch einfach "hilfe", "zeige aufgaben", "was muss ich heute machen?" schreiben.
-Oder sende eine Sprachnotiz mit deiner Aufgabe!`;
+**Tipp:** Alle Befehle funktionieren auch mit \`!\` davor (z.B. \`!neu\`)`;
 
 export const WELCOME_TEXT = `👋 **Willkommen beim Todo Bot!**
 
 Ich helfe dir, deine Aufgaben zu verwalten. Hier sind die wichtigsten Befehle:
 
-• \`!add [Aufgabe]\` - Neue Aufgabe erstellen
-• \`!list\` - Heutige Aufgaben anzeigen
-• \`!done [Nr]\` - Aufgabe abhaken
+• \`neu [Aufgabe]\` - Neue Aufgabe erstellen
+• \`heute\` - Heutige Aufgaben + Inbox anzeigen
+• \`erledigt [Nr]\` - Aufgabe abhaken
 
-Schreibe \`!help\` oder einfach "hilfe" für alle Befehle.`;
+Schreibe einfach "hilfe" für alle Befehle.`;
 
 export const BOT_INTRODUCTION = `🎯 **Hallo! Ich bin der Todo Bot.**
 
 Ich bin jetzt diesem Raum beigetreten und kann dir bei der Aufgabenverwaltung helfen.
 
 **Schnellstart:**
-• \`!add Einkaufen gehen\` - Aufgabe erstellen
-• \`!list\` - Deine Aufgaben sehen
-• \`!done 1\` - Erste Aufgabe abhaken
+• \`neu Einkaufen gehen\` - Aufgabe erstellen
+• \`heute\` - Deine Aufgaben sehen
+• \`erledigt 1\` - Erste Aufgabe abhaken
 
-Schreibe \`!help\` für alle Befehle!`;
+Schreibe "hilfe" für alle Befehle!`;

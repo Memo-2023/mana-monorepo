@@ -28,15 +28,31 @@ export class MatrixService extends BaseMatrixService {
 	private readonly keywordDetector = new KeywordCommandDetector(
 		[
 			...COMMON_KEYWORDS,
-			{ keywords: ['was kannst du'], command: 'help' },
+			{ keywords: ['was kannst du', 'hilfe', 'help'], command: 'help' },
 			{
-				keywords: ['zeige aufgaben', 'meine aufgaben', 'was muss ich', 'show tasks', 'list'],
+				keywords: [
+					'zeige aufgaben',
+					'meine aufgaben',
+					'was muss ich',
+					'show tasks',
+					'list',
+					'liste',
+					'alle',
+				],
 				command: 'list',
 			},
 			{ keywords: ['heute', 'today', 'was steht an'], command: 'today' },
 			{ keywords: ['inbox', 'eingang', 'ohne datum'], command: 'inbox' },
 			{ keywords: ['projekte', 'projects'], command: 'projects' },
-			{ keywords: ['verbindung', 'connection'], command: 'status' },
+			{ keywords: ['verbindung', 'connection', 'status'], command: 'status' },
+			{ keywords: ['neu', 'neue', 'add'], command: 'add' },
+			{ keywords: ['erledigt', 'fertig', 'done'], command: 'done' },
+			{ keywords: ['löschen', 'entfernen', 'delete'], command: 'delete' },
+			{ keywords: ['projekt', 'project'], command: 'project' },
+			{ keywords: ['pin'], command: 'pin' },
+			{ keywords: ['login', 'anmelden'], command: 'login' },
+			{ keywords: ['logout', 'abmelden'], command: 'logout' },
+			{ keywords: ['sprache', 'language', 'lang'], command: 'language' },
 		],
 		{ partialMatch: true }
 	);
@@ -93,6 +109,39 @@ export class MatrixService extends BaseMatrixService {
 		return BOT_INTRODUCTION;
 	}
 
+	// Commands that can be used without ! prefix
+	private readonly directCommands = [
+		'help',
+		'hilfe',
+		'add',
+		'neu',
+		'neue',
+		'list',
+		'liste',
+		'alle',
+		'heute',
+		'today',
+		'inbox',
+		'eingang',
+		'done',
+		'erledigt',
+		'fertig',
+		'delete',
+		'löschen',
+		'entfernen',
+		'projects',
+		'projekte',
+		'project',
+		'projekt',
+		'status',
+		'pin',
+		'login',
+		'logout',
+		'language',
+		'sprache',
+		'lang',
+	];
+
 	protected async handleTextMessage(
 		roomId: string,
 		event: MatrixRoomEvent,
@@ -101,17 +150,30 @@ export class MatrixService extends BaseMatrixService {
 		const userId = event.sender;
 
 		try {
-			// Check for natural language keywords first
-			const keywordCommand = this.keywordDetector.detect(body);
-			if (keywordCommand) {
-				await this.executeCommand(roomId, event, userId, keywordCommand, '');
-				return;
-			}
-
-			// Check for ! commands
+			// Check for ! commands first
 			if (body.startsWith('!')) {
 				const [command, ...args] = body.slice(1).split(' ');
 				await this.executeCommand(roomId, event, userId, command.toLowerCase(), args.join(' '));
+				return;
+			}
+
+			// Check for direct commands (without ! prefix)
+			const trimmedBody = body.trim();
+			const words = trimmedBody.split(/\s+/);
+			const firstWord = words[0].toLowerCase();
+
+			if (this.directCommands.includes(firstWord)) {
+				const args = words.slice(1).join(' ');
+				await this.executeCommand(roomId, event, userId, firstWord, args);
+				return;
+			}
+
+			// Check for natural language keywords
+			const keywordCommand = this.keywordDetector.detect(body);
+			if (keywordCommand) {
+				// For commands that need args, try to extract from the message
+				const args = this.extractArgsAfterKeyword(body, keywordCommand);
+				await this.executeCommand(roomId, event, userId, keywordCommand, args);
 				return;
 			}
 
@@ -121,6 +183,33 @@ export class MatrixService extends BaseMatrixService {
 			this.logger.error(`Error handling message: ${error}`);
 			await this.sendReply(roomId, event, 'Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
 		}
+	}
+
+	/**
+	 * Extract arguments after a keyword match
+	 */
+	private extractArgsAfterKeyword(body: string, command: string): string {
+		// Map commands to their trigger keywords
+		const commandKeywords: Record<string, string[]> = {
+			add: ['neu', 'neue', 'add'],
+			done: ['erledigt', 'fertig', 'done'],
+			delete: ['löschen', 'entfernen', 'delete'],
+			project: ['projekt', 'project'],
+			login: ['login', 'anmelden'],
+			language: ['sprache', 'language', 'lang'],
+		};
+
+		const keywords = commandKeywords[command];
+		if (!keywords) return '';
+
+		const lowerBody = body.toLowerCase();
+		for (const keyword of keywords) {
+			const index = lowerBody.indexOf(keyword);
+			if (index !== -1) {
+				return body.substring(index + keyword.length).trim();
+			}
+		}
+		return '';
 	}
 
 	protected async handleAudioMessage(
@@ -338,7 +427,7 @@ export class MatrixService extends BaseMatrixService {
 			await this.sendReply(
 				roomId,
 				event,
-				`**Sprache / Language:** ${langName}\n\n**Verfügbar / Available:** ${available}\n\nÄndern / Change: \`!language de\` oder / or \`!language en\``
+				`**Sprache / Language:** ${langName}\n\n**Verfügbar / Available:** ${available}\n\nÄndern / Change: \`sprache de\` oder / or \`sprache en\``
 			);
 			return;
 		}
@@ -375,7 +464,7 @@ export class MatrixService extends BaseMatrixService {
 			await this.sendReply(
 				roomId,
 				event,
-				'Bitte gib eine Aufgabe an.\n\nBeispiel: `!add Einkaufen gehen`'
+				'Bitte gib eine Aufgabe an.\n\nBeispiel: `neu Einkaufen gehen`'
 			);
 			return;
 		}
@@ -461,7 +550,7 @@ export class MatrixService extends BaseMatrixService {
 			await this.sendReply(
 				roomId,
 				event,
-				'Keine offenen Aufgaben.\n\nErstelle eine mit `!add [Aufgabe]`'
+				'Keine offenen Aufgaben.\n\nErstelle eine mit `neu [Aufgabe]`'
 			);
 			return;
 		}
@@ -475,27 +564,46 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleTodayTasks(roomId: string, event: MatrixRoomEvent, userId: string) {
 		const token = await this.getToken(userId);
-		let tasks: Task[];
+		let todayTasks: Task[];
+		let inboxTasks: Task[];
 
 		if (token) {
 			// Use API service
-			const apiTasks = await this.todoApiService.getTodayTasks(token);
-			tasks = apiTasks.map((t) => this.normalizeTask(t));
+			const apiTodayTasks = await this.todoApiService.getTodayTasks(token);
+			const apiInboxTasks = await this.todoApiService.getInboxTasks(token);
+			todayTasks = apiTodayTasks.map((t) => this.normalizeTask(t));
+			inboxTasks = apiInboxTasks.map((t) => this.normalizeTask(t));
 		} else {
 			// Use local storage
-			tasks = await this.todoService.getTodayTasks(userId);
+			todayTasks = await this.todoService.getTodayTasks(userId);
+			inboxTasks = await this.todoService.getInboxTasks(userId);
 		}
 
-		if (tasks.length === 0) {
+		const hasTodayTasks = todayTasks.length > 0;
+		const hasInboxTasks = inboxTasks.length > 0;
+
+		if (!hasTodayTasks && !hasInboxTasks) {
 			await this.sendReply(
 				roomId,
 				event,
-				'Keine Aufgaben fuer heute.\n\nErstelle eine mit `!add Aufgabe @heute`'
+				'Keine Aufgaben.\n\nErstelle eine mit `neu Aufgabe` oder `neu Aufgabe @heute`'
 			);
 			return;
 		}
 
-		let response = this.formatTaskList('**Aufgaben fuer heute:**', tasks);
+		let response = '';
+
+		if (hasTodayTasks) {
+			response += this.formatTaskList('**Aufgaben fuer heute:**', todayTasks);
+		}
+
+		if (hasInboxTasks) {
+			if (hasTodayTasks) {
+				response += '\n\n';
+			}
+			response += this.formatTaskList('**Inbox (ohne Datum):**', inboxTasks);
+		}
+
 		if (token) {
 			response += '\n\n🔄 Synchronisiert';
 		}
@@ -539,7 +647,7 @@ export class MatrixService extends BaseMatrixService {
 			await this.sendReply(
 				roomId,
 				event,
-				'Bitte gib eine gueltige Aufgabennummer an.\n\nBeispiel: `!done 1`'
+				'Bitte gib eine gueltige Aufgabennummer an.\n\nBeispiel: `erledigt 1`'
 			);
 			return;
 		}
@@ -586,7 +694,7 @@ export class MatrixService extends BaseMatrixService {
 			await this.sendReply(
 				roomId,
 				event,
-				'Bitte gib eine gueltige Aufgabennummer an.\n\nBeispiel: `!delete 1`'
+				'Bitte gib eine gueltige Aufgabennummer an.\n\nBeispiel: `löschen 1`'
 			);
 			return;
 		}
@@ -638,7 +746,7 @@ export class MatrixService extends BaseMatrixService {
 			await this.sendReply(
 				roomId,
 				event,
-				'Keine Projekte.\n\nErstelle eine Aufgabe mit Projekt: `!add Aufgabe #projektname`'
+				'Keine Projekte.\n\nErstelle eine Aufgabe mit Projekt: `neu Aufgabe #projektname`'
 			);
 			return;
 		}
@@ -647,7 +755,7 @@ export class MatrixService extends BaseMatrixService {
 		for (const project of projects) {
 			response += `- ${project.name}\n`;
 		}
-		response += '\nZeige Projektaufgaben mit `!project [Name]`';
+		response += '\nZeige Projektaufgaben mit `projekt [Name]`';
 		if (token) {
 			response += '\n\n🔄 Synchronisiert';
 		}
@@ -667,7 +775,7 @@ export class MatrixService extends BaseMatrixService {
 			await this.sendReply(
 				roomId,
 				event,
-				'Bitte gib einen Projektnamen an.\n\nBeispiel: `!project Arbeit`'
+				'Bitte gib einen Projektnamen an.\n\nBeispiel: `projekt Arbeit`'
 			);
 			return;
 		}
@@ -743,7 +851,7 @@ export class MatrixService extends BaseMatrixService {
 - Gesamt: ${stats.total}
 
 ${syncStatus}
-Bot: Online${!isLoggedIn ? '\n\nTipp: Mit `!login email passwort` anmelden fuer Synchronisation mit todo-web' : ''}`;
+Bot: Online${!isLoggedIn ? '\n\nTipp: Mit `login email passwort` anmelden fuer Synchronisation mit todo-web' : ''}`;
 
 		await this.sendReply(roomId, event, response);
 	}
@@ -751,7 +859,7 @@ Bot: Online${!isLoggedIn ? '\n\nTipp: Mit `!login email passwort` anmelden fuer 
 	private async handleLogin(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
 		const parts = args.trim().split(/\s+/);
 		if (parts.length < 2) {
-			await this.sendReply(roomId, event, 'Verwendung: `!login email passwort`');
+			await this.sendReply(roomId, event, 'Verwendung: `login email passwort`');
 			return;
 		}
 
@@ -799,7 +907,7 @@ Bot: Online${!isLoggedIn ? '\n\nTipp: Mit `!login email passwort` anmelden fuer 
 			response += `**${num}.** ${task.title}${priority}${date}${project}\n`;
 		});
 
-		response += `\nErledigen: \`!done [Nr]\` | Loeschen: \`!delete [Nr]\``;
+		response += `\nErledigen: \`erledigt [Nr]\` | Loeschen: \`löschen [Nr]\``;
 		return response;
 	}
 
