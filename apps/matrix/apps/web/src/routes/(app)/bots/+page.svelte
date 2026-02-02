@@ -66,7 +66,7 @@
 </svelte:head>
 
 <div class="h-full overflow-y-auto bg-background">
-	<div class="max-w-6xl mx-auto px-4 py-6 pb-24 md:pb-6">
+	<div class="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-6">
 		<!-- Header -->
 		<div class="mb-6">
 			<div class="flex items-center gap-3 mb-2">
@@ -120,7 +120,7 @@
 				<p class="text-muted-foreground">{$t('bots.noResults')}</p>
 			</div>
 		{:else}
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div class="flex flex-col gap-3">
 				{#each filteredBots as bot (bot.id)}
 					<div class="relative">
 						<BotCard {bot} onStartChat={() => startChat(bot)} />
