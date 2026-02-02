@@ -456,9 +456,49 @@ export class BetterAuthService {
 
 			const { user } = result;
 
-			// Get session token (used as refresh token)
+			// Get session token (the cookie token, not the refresh token)
 			const session = hasSession(result) ? result.session : null;
 			const sessionToken = session?.token || (hasToken(result) ? result.token : '');
+
+			// Get the actual refreshToken from the database
+			const db = getDb(this.databaseUrl);
+			const { sessions } = await import('../../db/schema');
+			const { eq } = await import('drizzle-orm');
+			const { nanoid } = await import('nanoid');
+
+			// Find the session by its token to get the real refreshToken
+			const [dbSession] = await db
+				.select()
+				.from(sessions)
+				.where(eq(sessions.token, sessionToken))
+				.limit(1);
+
+			let actualRefreshToken: string;
+
+			if (dbSession?.refreshToken) {
+				// Session already has a refreshToken - use it
+				actualRefreshToken = dbSession.refreshToken;
+				this.logger.debug('SignIn: Using existing refreshToken from session');
+			} else if (dbSession) {
+				// Session exists but no refreshToken - generate one and update the session
+				actualRefreshToken = nanoid(64);
+				const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+				await db
+					.update(sessions)
+					.set({
+						refreshToken: actualRefreshToken,
+						refreshTokenExpiresAt,
+						updatedAt: new Date(),
+					})
+					.where(eq(sessions.id, dbSession.id));
+
+				this.logger.debug('SignIn: Generated new refreshToken for session');
+			} else {
+				// No session found in DB - this shouldn't happen, but handle it
+				this.logger.warn('SignIn: Session not found in database, using session token as fallback');
+				actualRefreshToken = sessionToken;
+			}
 
 			// Generate JWT access token using Better Auth's JWT plugin
 			let accessToken = '';
@@ -501,7 +541,7 @@ export class BetterAuthService {
 					role: (user as BetterAuthUser).role,
 				},
 				accessToken,
-				refreshToken: sessionToken,
+				refreshToken: actualRefreshToken,
 				expiresIn: 15 * 60, // 15 minutes in seconds
 			};
 		} catch (error: unknown) {
