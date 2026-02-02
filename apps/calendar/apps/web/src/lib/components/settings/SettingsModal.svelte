@@ -20,10 +20,9 @@
 	interface Props {
 		visible: boolean;
 		onClose: () => void;
-		isSidebarMode?: boolean;
 	}
 
-	let { visible, onClose, isSidebarMode = false }: Props = $props();
+	let { visible, onClose }: Props = $props();
 
 	// Calendar management state
 	let editingCalendar = $state<Calendar | null>(null);
@@ -220,13 +219,7 @@
 	<div class="modal-backdrop" onclick={onClose}></div>
 
 	<!-- Modal -->
-	<div
-		class="settings-modal"
-		class:sidebar-mode={isSidebarMode}
-		role="dialog"
-		aria-modal="true"
-		aria-label="Einstellungen"
-	>
+	<div class="settings-modal" role="dialog" aria-modal="true" aria-label="Einstellungen">
 		<!-- Header -->
 		<div class="modal-header">
 			<h2 class="modal-title">Einstellungen</h2>
@@ -790,10 +783,6 @@
 	:global(.dark) .settings-modal {
 		background: rgba(30, 30, 30, 0.98);
 		border: 1px solid rgba(255, 255, 255, 0.1);
-	}
-
-	.settings-modal.sidebar-mode {
-		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.modal-header {

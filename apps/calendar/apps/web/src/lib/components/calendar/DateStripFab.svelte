@@ -5,18 +5,12 @@
 	import DateStripContextMenu from './DateStripContextMenu.svelte';
 
 	interface Props {
-		isSidebarMode?: boolean;
 		isToolbarExpanded?: boolean;
 		isMobile?: boolean;
 		hasTagStrip?: boolean;
 	}
 
-	let {
-		isSidebarMode = false,
-		isToolbarExpanded = false,
-		isMobile = false,
-		hasTagStrip = false,
-	}: Props = $props();
+	let { isToolbarExpanded = false, isMobile = false, hasTagStrip = false }: Props = $props();
 
 	let contextMenu: DateStripContextMenu;
 
@@ -35,7 +29,6 @@
 
 <div
 	class="datestrip-fab-container"
-	class:sidebar-mode={isSidebarMode}
 	class:toolbar-expanded={isToolbarExpanded}
 	class:mobile={isMobile}
 	class:has-tag-strip={hasTagStrip}
@@ -66,20 +59,8 @@
 			left 0.2s ease;
 	}
 
-	.datestrip-fab-container.sidebar-mode {
-		bottom: calc(9px + env(safe-area-inset-bottom, 0px));
-		/* In sidebar mode, InputBar is 700px wide, so position accordingly */
-		left: calc(50% - 350px - 8px - 54px);
-	}
-
 	.datestrip-fab-container.toolbar-expanded {
 		bottom: calc(140px + 9px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.datestrip-fab-container.sidebar-mode.toolbar-expanded {
-		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px));
-		/* In sidebar mode, InputBar is 700px wide */
-		left: calc(50% - 350px - 8px - 54px);
 	}
 
 	@media (max-width: 900px) {
@@ -107,10 +88,6 @@
 
 	.datestrip-fab-container.has-tag-strip.toolbar-expanded {
 		bottom: calc(210px + 9px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.datestrip-fab-container.has-tag-strip.sidebar-mode {
-		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.datestrip-fab-container.has-tag-strip.mobile {

@@ -5,12 +5,11 @@
 	import ViewModePillContextMenu from './ViewModePillContextMenu.svelte';
 
 	interface Props {
-		isSidebarMode?: boolean;
 		isToolbarExpanded?: boolean;
 		isMobile?: boolean;
 	}
 
-	let { isSidebarMode = false, isToolbarExpanded = false, isMobile = false }: Props = $props();
+	let { isToolbarExpanded = false, isMobile = false }: Props = $props();
 
 	let contextMenu: ViewModePillContextMenu;
 
@@ -66,7 +65,6 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="view-mode-pill"
-	class:sidebar-mode={isSidebarMode}
 	class:toolbar-expanded={isToolbarExpanded}
 	class:mobile={isMobile}
 	oncontextmenu={handleContextMenu}
@@ -163,16 +161,6 @@
 	/* When toolbar is expanded, move pill up */
 	.view-mode-pill.toolbar-expanded {
 		bottom: calc(140px + 9px + env(safe-area-inset-bottom, 0px));
-	}
-
-	/* Sidebar mode positioning */
-	.view-mode-pill.sidebar-mode {
-		bottom: calc(9px + env(safe-area-inset-bottom, 0px));
-		right: calc(50% - 350px - 70px + 54px + 8px);
-	}
-
-	.view-mode-pill.sidebar-mode.toolbar-expanded {
-		bottom: calc(70px + 9px + env(safe-area-inset-bottom, 0px));
 	}
 
 	/* Responsive - on smaller screens, FAB is at right: 1rem */

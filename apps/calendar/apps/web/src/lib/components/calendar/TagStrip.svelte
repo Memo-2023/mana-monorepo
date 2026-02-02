@@ -7,12 +7,6 @@
 	import { DotsThree, Plus, X } from '@manacore/shared-icons';
 	import TagStripModal from './TagStripModal.svelte';
 
-	interface Props {
-		isSidebarMode?: boolean;
-	}
-
-	let { isSidebarMode = false }: Props = $props();
-
 	let showModal = $state(false);
 
 	function handleTagClick(tagId: string) {
@@ -62,7 +56,7 @@
 	});
 </script>
 
-<div class="tag-strip-wrapper" class:sidebar-mode={isSidebarMode}>
+<div class="tag-strip-wrapper">
 	<div class="tag-strip-container">
 		<!-- Clear Filter Button (always rendered to prevent layout shift) -->
 		<button
@@ -117,7 +111,7 @@
 </div>
 
 <!-- Tags Modal -->
-<TagStripModal visible={showModal} onClose={handleCloseModal} {isSidebarMode} />
+<TagStripModal visible={showModal} onClose={handleCloseModal} />
 
 <style>
 	.tag-strip-wrapper {
@@ -131,11 +125,6 @@
 		align-items: stretch;
 		pointer-events: none;
 		transition: bottom 0.2s ease;
-	}
-
-	/* When PillNav is in sidebar mode, TagStrip at very bottom */
-	.tag-strip-wrapper.sidebar-mode {
-		bottom: calc(0px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.tag-strip-container {

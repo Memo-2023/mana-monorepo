@@ -39,11 +39,7 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-		isToolbarCollapsed as toolbarCollapsedStore,
-	} from '$lib/stores/navigation';
+	import { isToolbarCollapsed as toolbarCollapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -160,8 +156,6 @@
 		}
 	}
 
-	let isSidebarMode = $state(false);
-	let isCollapsed = $state(false);
 	let isToolbarCollapsed = $state(true); // Default to collapsed - FAB next to InputBar
 
 	// Mobile detection for responsive layout
@@ -483,27 +477,6 @@
 		}
 	}
 
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('calendar-nav-sidebar', String(isSidebar));
-		}
-	}
-
-	function handleCollapsedChange(collapsed: boolean) {
-		isCollapsed = collapsed;
-		collapsedStore.set(collapsed);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('calendar-nav-collapsed', String(collapsed));
-		}
-	}
-
-	function handleToolbarModeChange(isSidebar: boolean) {
-		// Sync toolbar mode with nav mode
-		handleModeChange(isSidebar);
-	}
-
 	function handleToolbarCollapsedChange(collapsed: boolean) {
 		isToolbarCollapsed = collapsed;
 		toolbarCollapsedStore?.set(collapsed);
@@ -595,20 +568,6 @@
 			}
 		}
 
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('calendar-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
-		}
-
-		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem('calendar-nav-collapsed');
-		if (savedCollapsed === 'true') {
-			isCollapsed = true;
-			collapsedStore.set(true);
-		}
-
 		// Initialize toolbar collapsed state from localStorage (default is now collapsed)
 		const savedToolbarCollapsed = localStorage.getItem('calendar-toolbar-collapsed');
 		if (savedToolbarCollapsed === 'false') {
@@ -635,10 +594,6 @@
 				homeRoute="/"
 				onToggleTheme={handleToggleTheme}
 				{isDark}
-				{isSidebarMode}
-				onModeChange={handleModeChange}
-				{isCollapsed}
-				onCollapsedChange={handleCollapsedChange}
 				desktopPosition="bottom"
 				showThemeToggle={true}
 				showThemeVariants={true}
@@ -673,14 +628,12 @@
 			{#if showCalendarToolbar}
 				{#if settingsStore.dateStripCollapsed}
 					<DateStripFab
-						{isSidebarMode}
 						isToolbarExpanded={!isToolbarCollapsed}
 						{isMobile}
 						hasTagStrip={!settingsStore.tagStripCollapsed}
 					/>
 				{:else}
 					<DateStrip
-						{isSidebarMode}
 						isToolbarExpanded={!isToolbarCollapsed}
 						hasTagStrip={!settingsStore.tagStripCollapsed}
 					/>
@@ -689,17 +642,15 @@
 
 			<!-- Tag strip (only on main calendar page, when not collapsed) - directly above PillNav -->
 			{#if showCalendarToolbar && !settingsStore.tagStripCollapsed}
-				<TagStrip {isSidebarMode} />
+				<TagStrip />
 			{/if}
 
-			<!-- Calendar toolbar (only on main calendar page, not in sidebar mode) -->
-			{#if showCalendarToolbar && !isSidebarMode}
+			<!-- Calendar toolbar (only on main calendar page) -->
+			{#if showCalendarToolbar}
 				<CalendarToolbar
-					{isSidebarMode}
 					isCollapsed={isToolbarCollapsed}
 					{isMobile}
 					bottomOffset={settingsStore.tagStripCollapsed ? '70px' : '140px'}
-					onModeChange={handleToolbarModeChange}
 					onCollapsedChange={handleToolbarCollapsedChange}
 				/>
 			{/if}
@@ -721,16 +672,11 @@
 					appIcon="calendar"
 					bottomOffset={isMobile
 						? `${70 + tagStripOffset}px`
-						: isSidebarMode
-							? `${tagStripOffset}px`
-							: showCalendarToolbar && !isToolbarCollapsed
-								? `${140 + tagStripOffset}px`
-								: `${70 + tagStripOffset}px`}
-					hasFabRight={showCalendarToolbar && !isSidebarMode}
-					hasFabLeft={!isMobile &&
-						showCalendarToolbar &&
-						!isSidebarMode &&
-						settingsStore.dateStripCollapsed}
+						: showCalendarToolbar && !isToolbarCollapsed
+							? `${140 + tagStripOffset}px`
+							: `${70 + tagStripOffset}px`}
+					hasFabRight={showCalendarToolbar}
+					hasFabLeft={!isMobile && showCalendarToolbar && settingsStore.dateStripCollapsed}
 					defaultOptions={calendarOptions}
 					selectedDefaultId={selectedDefaultCalendarId}
 					defaultOptionLabel="Standard-Kalender"
@@ -744,11 +690,9 @@
 						class="voice-button-wrapper"
 						style="--bottom-offset: {isMobile
 							? `${70 + tagStripOffset}px`
-							: isSidebarMode
-								? `${tagStripOffset}px`
-								: showCalendarToolbar && !isToolbarCollapsed
-									? `${140 + tagStripOffset}px`
-									: `${70 + tagStripOffset}px`}"
+							: showCalendarToolbar && !isToolbarCollapsed
+								? `${140 + tagStripOffset}px`
+								: `${70 + tagStripOffset}px`}"
 					>
 						<VoiceRecordButton onResult={handleVoiceResult} size={40} />
 					</div>
@@ -768,8 +712,6 @@
 
 		<main
 			class="main-content bg-background"
-			class:sidebar-mode={isSidebarMode && !isCollapsed}
-			class:floating-mode={!isSidebarMode && !isCollapsed}
 			class:has-toolbar={showCalendarToolbar}
 			class:immersive={settingsStore.immersiveModeEnabled}
 		>
@@ -794,11 +736,7 @@
 <InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />
 
 <!-- Settings Modal -->
-<SettingsModal
-	visible={showSettingsModal}
-	onClose={() => (showSettingsModal = false)}
-	{isSidebarMode}
-/>
+<SettingsModal visible={showSettingsModal} onClose={() => (showSettingsModal = false)} />
 
 <style>
 	.layout-container {
@@ -820,8 +758,6 @@
 	.main-content {
 		transition: all 300ms ease;
 		position: relative;
-		/* Space for QuickInputBar at bottom */
-		padding-bottom: calc(80px + env(safe-area-inset-bottom));
 		/* Flex container for children */
 		flex: 1;
 		display: flex;
@@ -829,13 +765,8 @@
 		min-height: 0;
 	}
 
-	.main-content.floating-mode {
-		padding-top: 70px;
-	}
-
 	/* Extra padding when DateStrip is at bottom (toolbar is now a FAB) */
-	.main-content.floating-mode.has-toolbar {
-		padding-top: 0;
+	.main-content.has-toolbar {
 		padding-bottom: calc(
 			220px + env(safe-area-inset-bottom)
 		); /* DateStrip + PillNav + QuickInputBar */
@@ -854,9 +785,6 @@
 			height: calc(100vh - 70px);
 			padding-bottom: 0;
 		}
-		.main-content.floating-mode {
-			padding-top: 0; /* No top padding on mobile - everything is at bottom */
-		}
 	}
 
 	/* Mobile: Fixed height, internal scrolling only */
@@ -870,10 +798,6 @@
 			height: calc(100vh - 70px);
 			padding-bottom: 0;
 		}
-	}
-
-	.main-content.sidebar-mode {
-		padding-left: 180px;
 	}
 
 	.content-wrapper {
@@ -949,7 +873,6 @@
 	/* Adjust InputBar when FABs are visible (toolbar FAB on right, DateStripFab on left) */
 	/* For a centered InputBar with max-width 450px, left edge is at 50% - 225px */
 	/* DateStripFab is positioned at: 50% - 225px - 8px gap - 54px fab width */
-	/* Note: In sidebar mode, InputBar uses default 700px max-width */
 	:global(.quick-input-bar.has-fab-right .input-container),
 	:global(.quick-input-bar.has-fab-left .input-container) {
 		max-width: 450px;

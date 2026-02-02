@@ -19,10 +19,9 @@
 	interface Props {
 		visible: boolean;
 		onClose: () => void;
-		isSidebarMode?: boolean;
 	}
 
-	let { visible, onClose, isSidebarMode = false }: Props = $props();
+	let { visible, onClose }: Props = $props();
 
 	// Search state
 	let searchQuery = $state('');
@@ -376,13 +375,7 @@
 	<div class="modal-backdrop" onclick={onClose}></div>
 
 	<!-- Modal -->
-	<div
-		class="tag-modal"
-		class:sidebar-mode={isSidebarMode}
-		role="dialog"
-		aria-modal="true"
-		aria-label="Tags"
-	>
+	<div class="tag-modal" role="dialog" aria-modal="true" aria-label="Tags">
 		<!-- Header -->
 		<div class="modal-header">
 			<h2 class="modal-title">Tags</h2>
@@ -795,10 +788,6 @@
 	:global(.dark) .tag-modal {
 		background: rgba(30, 30, 30, 0.95);
 		border: 1px solid rgba(255, 255, 255, 0.1);
-	}
-
-	.tag-modal.sidebar-mode {
-		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.modal-header {

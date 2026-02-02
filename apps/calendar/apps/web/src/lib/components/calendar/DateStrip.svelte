@@ -27,12 +27,11 @@
 	}
 
 	interface Props {
-		isSidebarMode?: boolean;
 		isToolbarExpanded?: boolean;
 		hasTagStrip?: boolean; // Whether TagStrip is visible below
 	}
 
-	let { isSidebarMode = false, isToolbarExpanded = false, hasTagStrip = false }: Props = $props();
+	let { isToolbarExpanded = false, hasTagStrip = false }: Props = $props();
 
 	// Get event count for a day (max 5 dots displayed)
 	function getEventCount(date: Date): number {
@@ -245,7 +244,6 @@
 
 <div
 	class="date-strip-wrapper"
-	class:sidebar-mode={isSidebarMode}
 	class:toolbar-expanded={isToolbarExpanded}
 	class:compact={settingsStore.dateStripCompact}
 	class:has-tag-strip={hasTagStrip}
@@ -340,15 +338,6 @@
 		bottom: calc(210px + env(safe-area-inset-bottom, 0px)); /* Extra space for toolbar */
 	}
 
-	/* When PillNav is in sidebar mode, no PillNav at bottom - just InputBar */
-	.date-strip-wrapper.sidebar-mode {
-		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.date-strip-wrapper.sidebar-mode.toolbar-expanded {
-		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
-	}
-
 	/* When TagStrip is visible below, add extra offset */
 	.date-strip-wrapper.has-tag-strip {
 		bottom: calc(210px + env(safe-area-inset-bottom, 0px)); /* +70px for TagStrip */
@@ -356,14 +345,6 @@
 
 	.date-strip-wrapper.has-tag-strip.toolbar-expanded {
 		bottom: calc(280px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.date-strip-wrapper.has-tag-strip.sidebar-mode {
-		bottom: calc(140px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.date-strip-wrapper.has-tag-strip.sidebar-mode.toolbar-expanded {
-		bottom: calc(210px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.today-button {
