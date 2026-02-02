@@ -190,19 +190,65 @@ export function createBetterAuth(databaseUrl: string) {
 		// Base URL for callbacks and redirects
 		baseURL: process.env.BASE_URL || 'http://localhost:3001',
 
-		// Trusted origins for cross-origin requests
+		/**
+		 * Advanced Cookie Configuration for Cross-Domain SSO
+		 *
+		 * By setting the cookie domain to '.mana.how', session cookies are shared
+		 * across all subdomains (calendar.mana.how, todo.mana.how, etc.).
+		 * This enables Single Sign-On: login once, authenticated everywhere.
+		 *
+		 * For local development (localhost), leave domain undefined to use default behavior.
+		 */
+		advanced: {
+			// Cookie prefix for all auth cookies
+			cookiePrefix: 'mana',
+
+			// Cross-subdomain cookie configuration
+			crossSubDomainCookies: {
+				// Enable cross-subdomain cookies in production
+				enabled: !!process.env.COOKIE_DOMAIN,
+				// Domain for cookies (e.g., '.mana.how' - note the leading dot)
+				domain: process.env.COOKIE_DOMAIN || undefined,
+			},
+
+			// Default cookie options for all auth cookies
+			defaultCookieAttributes: {
+				// Secure in production, allow http in development
+				secure: process.env.NODE_ENV === 'production',
+				// Protect against CSRF while allowing cross-site navigation
+				sameSite: 'lax' as const,
+				// Cookies accessible to all paths
+				path: '/',
+				// Prevent JavaScript access to cookies
+				httpOnly: true,
+			},
+		},
+
+		// Trusted origins for cross-origin requests (must match CORS_ORIGINS in production)
 		trustedOrigins: [
+			// Production domains
 			'https://auth.mana.how',
 			'https://mana.how',
-			'https://mchat.mana.how',
-			'https://matrix.mana.how',
 			'https://chat.mana.how',
+			'https://todo.mana.how',
 			'https://calendar.mana.how',
+			'https://clock.mana.how',
 			'https://contacts.mana.how',
+			'https://storage.mana.how',
 			'https://picture.mana.how',
 			'https://zitare.mana.how',
+			'https://presi.mana.how',
+			'https://nutriphi.mana.how',
+			'https://skilltree.mana.how',
+			'https://matrix.mana.how',
+			'https://mchat.mana.how',
+			'https://element.mana.how',
+			'https://link.mana.how',
+			'https://playground.mana.how',
+			// Local development
 			'http://localhost:3001',
 			'http://localhost:5173',
+			'http://localhost:5174',
 		],
 
 		// Plugins

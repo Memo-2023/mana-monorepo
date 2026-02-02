@@ -94,6 +94,8 @@ services:
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
       BASE_URL: https://auth.mana.how
+      # Cross-domain SSO: share session cookies across all *.mana.how subdomains
+      COOKIE_DOMAIN: .mana.how
       SMTP_HOST: smtp-relay.brevo.com
       SMTP_PORT: 587
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
