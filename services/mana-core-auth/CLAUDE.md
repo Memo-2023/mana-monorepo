@@ -172,7 +172,58 @@ For dynamic data (credits, org info), create API endpoints instead.
 2. Check `auth.users` table exists
 3. Check `auth.accounts` table for credential record
 
-## Testing Auth Flow
+## Cross-Domain SSO
+
+Session cookies are shared across all `*.mana.how` subdomains via `COOKIE_DOMAIN=.mana.how`.
+
+**How it works:**
+1. User logs in on any app (e.g., `calendar.mana.how`)
+2. Session cookie set with `Domain=.mana.how`
+3. User navigates to another app (e.g., `todo.mana.how`)
+4. Browser sends the same cookie → User is already authenticated
+
+**Configuration** (`better-auth.config.ts`):
+```typescript
+advanced: {
+  cookiePrefix: 'mana',
+  crossSubDomainCookies: {
+    enabled: !!process.env.COOKIE_DOMAIN,
+    domain: process.env.COOKIE_DOMAIN,  // '.mana.how' in production
+  },
+}
+```
+
+**Environment Variable:**
+- Production: `COOKIE_DOMAIN=.mana.how`
+- Development: Leave empty (cookies domain-specific)
+
+## Test Credentials (Production)
+
+For automated testing against `auth.mana.how`:
+
+| Field    | Value                      |
+| -------- | -------------------------- |
+| Email    | `claude-test@mana.how`     |
+| Password | `ClaudeTest2024`           |
+| User ID  | `kxMeQZSM1HhdiM1ed5EOQ9z0o0aCiXux` |
+
+**Usage:**
+```bash
+# Login (returns JWT tokens)
+curl -X POST https://auth.mana.how/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"claude-test@mana.how","password":"ClaudeTest2024"}'
+
+# Login with cookies (Better Auth native - for SSO testing)
+curl -c cookies.txt -X POST https://auth.mana.how/api/auth/sign-in/email \
+  -H "Content-Type: application/json" \
+  -d '{"email":"claude-test@mana.how","password":"ClaudeTest2024"}'
+
+# Verify cookie has Domain=.mana.how
+cat cookies.txt | grep mana.how
+```
+
+## Testing Auth Flow (Local Development)
 
 ```bash
 # Register

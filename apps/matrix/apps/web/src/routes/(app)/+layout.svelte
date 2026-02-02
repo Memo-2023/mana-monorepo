@@ -16,7 +16,7 @@
 	import {
 		isSidebarMode as sidebarModeStore,
 		isNavCollapsed as collapsedStore,
-	} from '$lib/stores/navigation';
+	} from '$lib/stores/navigation.svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';

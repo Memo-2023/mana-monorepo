@@ -2,6 +2,8 @@
 
 Secure Matrix messaging client - a bridge to decentralized communication.
 
+**Production URL:** https://link.mana.how
+
 ## Project Overview
 
 Manalink is a privacy-focused Matrix client built with SvelteKit. It connects to Matrix homeservers (default: matrix.mana.how) and supports PWA installation for mobile devices.
@@ -159,6 +161,15 @@ No environment variables required for basic usage. The client stores credentials
 
 The login page defaults to `matrix.mana.how` but any Matrix homeserver can be used.
 
+### Test Account
+
+For testing the SSO login flow:
+- **Email:** t@t.de
+- **Password:** test1234
+- **Auth URL:** https://auth.mana.how
+- **Matrix Homeserver:** matrix.mana.how
+- **Web Client:** https://link.mana.how
+
 ## Matrix SDK Notes
 
 ### Browser Polyfills
@@ -204,6 +215,20 @@ if (browser) {
 ```
 
 ## Troubleshooting
+
+### Can't see the login page / stuck on loading
+
+The app auto-logs in if credentials are stored in localStorage. To reset:
+
+1. **Browser console method:**
+   ```javascript
+   localStorage.removeItem('matrix_credentials');
+   location.reload();
+   ```
+
+2. **Direct URL:** Navigate to `https://link.mana.how/login` directly
+
+3. **If logged in:** Use the logout button in settings or navigation
 
 ### "super.off is not a function"
 
