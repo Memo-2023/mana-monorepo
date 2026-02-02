@@ -9,7 +9,10 @@ import {
 	Headers,
 	HttpCode,
 	HttpStatus,
+	Req,
+	Res,
 } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { BetterAuthService } from './services/better-auth.service';
@@ -179,6 +182,51 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	async validate(@Body() body: { token: string }) {
 		return this.betterAuthService.validateToken(body.token);
+	}
+
+	/**
+	 * Exchange session cookie for JWT tokens (SSO)
+	 *
+	 * This endpoint enables cross-domain Single Sign-On (SSO).
+	 * If the user has a valid session cookie (from logging in on another app),
+	 * this returns JWT tokens that the app can use for API calls.
+	 *
+	 * The session cookie is set on .mana.how domain, so it's shared across:
+	 * - calendar.mana.how
+	 * - todo.mana.how
+	 * - contacts.mana.how
+	 * - etc.
+	 */
+	@Post('session-to-token')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({
+		summary: 'Exchange session cookie for JWT tokens',
+		description:
+			'SSO endpoint: If user has a valid session cookie, returns JWT access and refresh tokens.',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'Tokens generated successfully',
+		schema: {
+			type: 'object',
+			properties: {
+				user: {
+					type: 'object',
+					properties: {
+						id: { type: 'string' },
+						email: { type: 'string' },
+						name: { type: 'string' },
+					},
+				},
+				accessToken: { type: 'string' },
+				refreshToken: { type: 'string' },
+				expiresIn: { type: 'number', example: 900 },
+			},
+		},
+	})
+	@ApiResponse({ status: 401, description: 'No valid session cookie' })
+	async sessionToToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+		return this.betterAuthService.sessionToToken(req, res);
 	}
 
 	/**

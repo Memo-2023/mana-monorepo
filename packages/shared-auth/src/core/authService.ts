@@ -44,6 +44,8 @@ const DEFAULT_ENDPOINTS: AuthEndpoints = {
 	googleSignIn: '/api/v1/auth/google-signin',
 	appleSignIn: '/api/v1/auth/apple-signin',
 	credits: '/api/v1/credits/balance',
+	// Better Auth native endpoints for SSO
+	getSession: '/api/auth/get-session',
 };
 
 /**
@@ -612,6 +614,90 @@ export function createAuthService(config: AuthServiceConfig) {
 		 */
 		getStorageKeys(): StorageKeys {
 			return storageKeys;
+		},
+
+		/**
+		 * Try to authenticate using SSO session cookie
+		 *
+		 * This enables cross-domain SSO: If the user is logged in on another app
+		 * (e.g., calendar.mana.how), they will automatically be logged in here
+		 * via the shared session cookie on .mana.how
+		 *
+		 * @returns AuthResult with success=true if SSO succeeded
+		 */
+		async trySSO(): Promise<AuthResult> {
+			try {
+				const storage = getStorageAdapter();
+
+				// Check if we already have valid tokens - skip SSO if so
+				const existingToken = await storage.getItem<string>(storageKeys.APP_TOKEN);
+				if (existingToken && isTokenValidLocally(existingToken)) {
+					return { success: true };
+				}
+
+				// Try to get session from cookie (credentials: 'include' sends cookies)
+				const response = await fetch(`${baseUrl}${endpoints.getSession}`, {
+					method: 'GET',
+					credentials: 'include', // Send cookies cross-origin
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
+
+				if (!response.ok) {
+					// No valid session cookie - user needs to login manually
+					return { success: false, error: 'No SSO session found' };
+				}
+
+				const data = await response.json();
+
+				// Better Auth returns session with user info
+				if (!data.session || !data.user) {
+					return { success: false, error: 'Invalid session response' };
+				}
+
+				// Now get tokens by signing in with the session
+				// We need to exchange the session for JWT tokens
+				const tokenResponse = await fetch(`${baseUrl}/api/v1/auth/session-to-token`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
+
+				if (!tokenResponse.ok) {
+					// Fallback: Session exists but no token endpoint
+					// Store session info for display, but user may need to re-authenticate for API calls
+					console.warn('SSO: Session found but token exchange not available');
+					return { success: false, error: 'Token exchange not available' };
+				}
+
+				const tokenData = await tokenResponse.json();
+				const appToken = tokenData.accessToken;
+				const refreshToken = tokenData.refreshToken;
+
+				if (!appToken || !refreshToken) {
+					return { success: false, error: 'Invalid token response' };
+				}
+
+				// Store the tokens
+				await Promise.all([
+					storage.setItem(storageKeys.APP_TOKEN, appToken),
+					storage.setItem(storageKeys.REFRESH_TOKEN, refreshToken),
+					storage.setItem(storageKeys.USER_EMAIL, data.user.email || ''),
+				]);
+
+				console.log('SSO: Successfully authenticated via session cookie');
+				return { success: true };
+			} catch (error) {
+				// SSO failed - this is expected if user hasn't logged in anywhere
+				console.debug('SSO check failed:', error);
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'SSO check failed',
+				};
+			}
 		},
 	};
 

@@ -133,6 +133,8 @@ export interface AuthEndpoints {
 	googleSignIn: string;
 	appleSignIn: string;
 	credits: string;
+	/** Better Auth native endpoint for SSO session check */
+	getSession: string;
 }
 
 /**

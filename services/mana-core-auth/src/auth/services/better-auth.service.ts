@@ -1345,4 +1345,134 @@ export class BetterAuthService {
 			throw error;
 		}
 	}
+
+	// =========================================================================
+	// SSO Methods
+	// =========================================================================
+
+	/**
+	 * Exchange session cookie for JWT tokens (SSO)
+	 *
+	 * This enables cross-domain Single Sign-On. When a user is logged in
+	 * on one app (e.g., calendar.mana.how), they have a session cookie on
+	 * .mana.how domain. This method allows other apps to exchange that
+	 * cookie for JWT tokens they can use for API calls.
+	 *
+	 * @param req - Express request with cookies
+	 * @param res - Express response for setting headers
+	 * @returns JWT tokens or throws UnauthorizedException
+	 */
+	async sessionToToken(
+		req: import('express').Request,
+		res: import('express').Response
+	): Promise<SignInResult> {
+		try {
+			// Get session cookie name (Better Auth uses this format with our prefix)
+			const cookiePrefix = process.env.COOKIE_DOMAIN ? 'mana' : 'better-auth';
+			const sessionCookieName = `__Secure-${cookiePrefix}.session_token`;
+			const fallbackCookieName = `${cookiePrefix}.session_token`;
+
+			// Try to get session token from cookies
+			const sessionToken = req.cookies?.[sessionCookieName] || req.cookies?.[fallbackCookieName];
+
+			if (!sessionToken) {
+				this.logger.debug('SSO: No session cookie found', {
+					cookies: Object.keys(req.cookies || {}),
+				});
+				throw new UnauthorizedException('No session cookie found');
+			}
+
+			this.logger.debug('SSO: Found session cookie, validating...');
+
+			// Use Better Auth's getSession to validate the cookie
+			// We need to create a Request object that Better Auth can process
+			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
+			const url = new URL('/api/auth/get-session', baseUrl);
+
+			const headers = new Headers({
+				Cookie: `${sessionCookieName}=${sessionToken}`,
+			});
+
+			const fetchRequest = new Request(url.toString(), {
+				method: 'GET',
+				headers,
+			});
+
+			const response = await this.auth.handler(fetchRequest);
+
+			if (!response.ok) {
+				this.logger.debug('SSO: Session validation failed', { status: response.status });
+				throw new UnauthorizedException('Invalid or expired session');
+			}
+
+			const sessionData = await response.json();
+
+			if (!sessionData?.user || !sessionData?.session) {
+				this.logger.debug('SSO: Invalid session response', { sessionData });
+				throw new UnauthorizedException('Invalid session data');
+			}
+
+			const { user, session } = sessionData;
+
+			this.logger.debug('SSO: Session validated, generating JWT tokens', {
+				userId: user.id,
+				email: user.email,
+			});
+
+			// Generate JWT access token using Better Auth's JWT plugin
+			let accessToken = '';
+			try {
+				const api = this.auth.api as any;
+
+				const jwtResult = await api.signJWT({
+					body: {
+						payload: {
+							sub: user.id,
+							email: user.email,
+							role: user.role || 'user',
+							sid: session.id || '',
+						},
+					},
+				});
+
+				accessToken = jwtResult?.token || '';
+
+				if (!accessToken) {
+					throw new Error('Better Auth signJWT returned empty token');
+				}
+			} catch (jwtError) {
+				this.logger.warn('SSO: JWT generation failed, using session token', {
+					error: jwtError instanceof Error ? jwtError.message : 'Unknown error',
+				});
+				// Use session token as fallback
+				accessToken = session.token || sessionToken;
+			}
+
+			this.logger.info('SSO: Successfully exchanged session cookie for JWT tokens', {
+				userId: user.id,
+			});
+
+			return {
+				user: {
+					id: user.id,
+					email: user.email,
+					name: user.name,
+					role: user.role,
+				},
+				accessToken,
+				refreshToken: session.token || sessionToken,
+				expiresIn: 15 * 60, // 15 minutes in seconds
+			};
+		} catch (error) {
+			if (error instanceof UnauthorizedException) {
+				throw error;
+			}
+
+			this.logger.error(
+				'SSO: Token exchange failed',
+				error instanceof Error ? error.stack : undefined
+			);
+			throw new UnauthorizedException('Failed to exchange session for tokens');
+		}
+	}
 }

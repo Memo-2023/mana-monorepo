@@ -32,11 +32,24 @@ export const authStore = {
 
 	/**
 	 * Initialize auth state from stored tokens
+	 * Also tries SSO if no local tokens exist (cross-domain authentication)
 	 */
 	async initialize() {
 		loading = true;
 		try {
-			const isAuth = await authService.isAuthenticated();
+			// First, check if we have valid local tokens
+			let isAuth = await authService.isAuthenticated();
+
+			// If not authenticated locally, try SSO (shared session cookie)
+			if (!isAuth) {
+				console.log('No local tokens, trying SSO...');
+				const ssoResult = await authService.trySSO();
+				if (ssoResult.success) {
+					console.log('SSO successful, user authenticated via shared session');
+					isAuth = true;
+				}
+			}
+
 			if (isAuth) {
 				const userData = await authService.getUserFromToken();
 				user = toManaUser(userData);
