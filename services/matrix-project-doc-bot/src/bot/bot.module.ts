@@ -6,7 +6,13 @@ import { GenerationModule } from '../generation/generation.module';
 import { SessionModule, CreditModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [ProjectModule, MediaModule, GenerationModule, SessionModule.forRoot(), CreditModule.forRoot()],
+	imports: [
+		ProjectModule,
+		MediaModule,
+		GenerationModule,
+		SessionModule.forRoot({ storageMode: 'redis' }),
+		CreditModule.forRoot(),
+	],
 	providers: [MatrixService],
 	exports: [MatrixService],
 })

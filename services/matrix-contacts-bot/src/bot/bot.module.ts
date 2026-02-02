@@ -11,7 +11,7 @@ import {
 @Module({
 	imports: [
 		ContactsModule,
-		SessionModule.forRoot(),
+		SessionModule.forRoot({ storageMode: 'redis' }),
 		TranscriptionModule.register({
 			sttUrl: process.env.STT_URL || 'http://localhost:3020',
 		}),

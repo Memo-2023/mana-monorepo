@@ -12,7 +12,7 @@ import {
 	imports: [
 		ClockModule,
 		TranscriptionModule.forRoot(),
-		SessionModule.forRoot(),
+		SessionModule.forRoot({ storageMode: 'redis' }),
 		CreditModule.forRoot(),
 		I18nModule.forRoot(),
 	],

@@ -4,7 +4,12 @@ import { NutriPhiModule } from '../nutriphi/nutriphi.module';
 import { SessionModule, TranscriptionModule, CreditModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [NutriPhiModule, SessionModule.forRoot(), TranscriptionModule.forRoot(), CreditModule.forRoot()],
+	imports: [
+		NutriPhiModule,
+		SessionModule.forRoot({ storageMode: 'redis' }),
+		TranscriptionModule.forRoot(),
+		CreditModule.forRoot(),
+	],
 	providers: [MatrixService],
 	exports: [MatrixService],
 })

@@ -6,7 +6,7 @@ import { SessionModule, TranscriptionModule, CreditModule } from '@manacore/bot-
 @Module({
 	imports: [
 		PlantaModule,
-		SessionModule.forRoot(),
+		SessionModule.forRoot({ storageMode: 'redis' }),
 		TranscriptionModule.register({
 			sttUrl: process.env.STT_URL || 'http://localhost:3020',
 		}),

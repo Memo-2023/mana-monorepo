@@ -11,7 +11,7 @@ import { SessionModule, CreditModule } from '@manacore/bot-services';
 		forwardRef(() => HandlersModule),
 		forwardRef(() => OrchestrationModule),
 		VoiceModule,
-		SessionModule.forRoot(),
+		SessionModule.forRoot({ storageMode: 'redis' }),
 		CreditModule.forRoot(),
 	],
 	providers: [MatrixService, CommandRouterService],

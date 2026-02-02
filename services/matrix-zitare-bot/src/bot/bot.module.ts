@@ -4,7 +4,12 @@ import { QuotesModule } from '../quotes/quotes.module';
 import { SessionModule, TranscriptionModule, CreditModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [QuotesModule, SessionModule.forRoot(), TranscriptionModule.forRoot(), CreditModule.forRoot()],
+	imports: [
+		QuotesModule,
+		SessionModule.forRoot({ storageMode: 'redis' }),
+		TranscriptionModule.forRoot(),
+		CreditModule.forRoot(),
+	],
 	providers: [MatrixService],
 	exports: [MatrixService],
 })

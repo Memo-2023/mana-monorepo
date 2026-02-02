@@ -11,7 +11,7 @@ import { TranscriptionModule, SessionModule, CreditModule } from '@manacore/bot-
 		TranscriptionModule.register({
 			sttUrl: process.env.STT_URL || 'http://localhost:3020',
 		}),
-		SessionModule.forRoot(),
+		SessionModule.forRoot({ storageMode: 'redis' }),
 		CreditModule.forRoot(),
 	],
 	providers: [MatrixService],
