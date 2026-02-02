@@ -12,8 +12,10 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages
+COPY packages/shared-tsconfig ./packages/shared-tsconfig
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
+COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 
 # Copy nutriphi packages and backend
 COPY apps/nutriphi/packages ./apps/nutriphi/packages
@@ -27,6 +29,9 @@ WORKDIR /app/packages/shared-nestjs-auth
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-setup
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-health
 RUN pnpm build
 
 # Build the backend
