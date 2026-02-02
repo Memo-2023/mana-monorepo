@@ -444,15 +444,32 @@ Die externe SSD wird für persistente Daten verwendet - sowohl für große Datei
 
 ```
 /Volumes/ManaData/
+├── Docker/          # Docker Desktop Daten (~228 GB) ⭐ Kritisch
+│   └── com.docker.docker/  # Symlink von ~/Library/Containers/
 ├── postgres/        # PostgreSQL Datenbank (~200 MB) ⭐ Kritisch
 ├── minio/           # MinIO Object Storage (Storage App)
 ├── backups/         # PostgreSQL Backups (täglich 3:00)
 ├── ollama/          # LLM Modelle (~58 GB)
 ├── flux2/           # FLUX.2 Bildgenerierung (~15 GB)
 ├── stt-models/      # Speech-to-Text Modelle (~19 GB)
-├── matrix/          # Matrix Synapse Daten
-└── docker/          # (Reserviert)
+└── matrix/          # Matrix Synapse Daten
 ```
+
+### Docker auf externer SSD
+
+Docker Desktop läuft komplett von der externen SSD um die interne SSD zu entlasten:
+
+**Symlink:**
+```
+~/Library/Containers/com.docker.docker -> /Volumes/ManaData/Docker/com.docker.docker
+```
+
+**Vorteile:**
+- Interne SSD hat ~80GB mehr freien Speicher
+- Docker kann unbegrenzt wachsen (3.5TB verfügbar)
+- Keine Speicherprobleme beim Pullen großer Images
+
+**Wichtig:** Die externe SSD muss IMMER angeschlossen sein, wenn Docker läuft!
 
 ### Vorteile der SSD-Speicherung
 
@@ -789,6 +806,52 @@ Matrix ist eine DSGVO-konforme Alternative zu Telegram für Bot-Kommunikation.
 |---------|------|--------------|
 | Synapse | 8008 | Matrix Homeserver |
 | Element Web | 8087 | Web-Client |
+
+### Matrix Bots
+
+Alle Matrix Bots laufen als Docker Container und werden via GHCR (GitHub Container Registry) deployed. Watchtower aktualisiert sie automatisch bei neuen Images.
+
+| Bot | Port | Beschreibung |
+|-----|------|--------------|
+| matrix-mana-bot | 4010 | Gateway - alle Features in einem Bot |
+| matrix-ollama-bot | 4011 | KI-Chat via lokalem Ollama |
+| matrix-stats-bot | 4012 | Server-Statistiken & Monitoring |
+| matrix-project-doc-bot | 4013 | Projekt-Dokumentation aus Fotos/Voice/Text |
+| matrix-todo-bot | 4014 | Aufgabenverwaltung |
+| matrix-calendar-bot | 4015 | Termine & Events |
+| matrix-nutriphi-bot | 4016 | Ernährungstracking |
+| matrix-zitare-bot | 4017 | Tägliche Zitate |
+| matrix-clock-bot | 4018 | Timer & Wecker |
+| matrix-tts-bot | 4019 | Text-to-Speech |
+
+**Health Checks:**
+```bash
+# Alle Bots prüfen
+for port in 4010 4011 4012 4013 4014 4015 4016 4017 4018 4019; do
+  echo -n "Port $port: "
+  curl -s http://localhost:$port/health | jq -r '.status // "error"'
+done
+```
+
+**Logs:**
+```bash
+# Logs eines Bots
+docker logs matrix-mana-bot -f
+
+# Alle Matrix Bots
+docker ps | grep matrix-.*-bot
+```
+
+**Bot neu starten:**
+```bash
+docker compose -f docker-compose.macmini.yml restart matrix-mana-bot
+```
+
+**Images manuell aktualisieren:**
+```bash
+docker compose -f docker-compose.macmini.yml pull matrix-mana-bot
+docker compose -f docker-compose.macmini.yml up -d matrix-mana-bot
+```
 
 ### Setup
 
