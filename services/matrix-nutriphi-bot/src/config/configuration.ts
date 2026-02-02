@@ -25,7 +25,7 @@ export const HELP_MESSAGE = `**NutriPhi Bot - KI-Ernahrungsassistent**
 **Befehle:**
 - \`!help\` - Diese Hilfe anzeigen
 - \`!login email passwort\` - Bei NutriPhi anmelden
-- \`!analyze [beschreibung]\` - Foto/Text/Sprache analysieren
+- \`!analyze beschreibung\` - Text analysieren
 - \`!today\` / \`heute\` - Tages-Zusammenfassung
 - \`!week\` / \`woche\` - Wochen-Statistik
 - \`!goals\` / \`ziele\` - Aktuelle Ziele
@@ -35,7 +35,7 @@ export const HELP_MESSAGE = `**NutriPhi Bot - KI-Ernahrungsassistent**
 - \`!status\` - Bot-Status
 
 **Mahlzeit erfassen:**
-- Foto senden + \`!analyze\`
+- Foto senden (wird automatisch analysiert!)
 - Sprachnotiz senden (wird automatisch transkribiert & analysiert)
 - \`!analyze Spaghetti mit Sauce\` (Textbeschreibung)
 

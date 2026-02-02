@@ -59,8 +59,7 @@ Analysiere deine Mahlzeiten mit KI und tracke deine Ernahrung!
 
 **Quick Start:**
 1. \`!login email passwort\` - Anmelden
-2. Sende ein Foto deiner Mahlzeit
-3. \`!analyze\` - Nahrwerte erhalten
+2. Sende ein Foto deiner Mahlzeit - wird automatisch analysiert!
 
 Sag "hilfe" fur alle Befehle!`;
 	}
@@ -70,7 +69,7 @@ Sag "hilfe" fur alle Befehle!`;
 
 		if (!this.client) return;
 
-		// Handle image messages
+		// Handle image messages - auto-analyze
 		this.client.on('room.message', async (roomId: string, event: any) => {
 			if (event.sender === (await this.client.getUserId())) return;
 
@@ -81,19 +80,46 @@ Sag "hilfe" fur alle Befehle!`;
 				info?: { mimetype?: string; duration?: number };
 			};
 
-			// Handle image messages
+			// Handle image messages - automatically analyze
 			if (content.msgtype === 'm.image' && content.url) {
-				this.sessionService.setSessionData(event.sender, 'pendingImage', {
-					url: content.url,
-					mimeType: content.info?.mimetype || 'image/png',
-				});
-				this.logger.log(`Image received from ${event.sender}`);
-				await this.sendMessage(
+				this.logger.log(`Image received from ${event.sender}, auto-analyzing...`);
+				await this.autoAnalyzeImage(
 					roomId,
-					`Bild empfangen! Nutze jetzt \`!analyze\` um es zu analysieren, oder \`!analyze Beschreibung\` um zusatzlichen Kontext zu geben.`
+					event.sender,
+					content.url,
+					content.info?.mimetype || 'image/png'
 				);
 			}
 		});
+	}
+
+	private async autoAnalyzeImage(roomId: string, sender: string, mxcUrl: string, mimeType: string) {
+		const token = await this.sessionService.getToken(sender);
+		if (!token) {
+			await this.sendMessage(
+				roomId,
+				`Bild empfangen, aber du bist nicht angemeldet.\n\nNutze \`!login email passwort\` um dich anzumelden, dann sende das Bild erneut.`
+			);
+			return;
+		}
+
+		await this.sendMessage(roomId, 'Bild empfangen! Analysiere...');
+		await this.client.setTyping(roomId, true, 60000);
+
+		try {
+			const imageData = await this.downloadMatrixImage(mxcUrl);
+			const result = await this.nutriphiService.analyzePhoto(imageData, mimeType, token);
+
+			await this.client.setTyping(roomId, false);
+
+			const response = this.formatAnalysisResult(result);
+			await this.sendMessage(roomId, response);
+		} catch (error) {
+			await this.client.setTyping(roomId, false);
+			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+			this.logger.error('Auto-analyze failed:', error);
+			await this.sendMessage(roomId, `Fehler bei der Analyse: ${errorMsg}`);
+		}
 	}
 
 	protected async handleAudioMessage(
