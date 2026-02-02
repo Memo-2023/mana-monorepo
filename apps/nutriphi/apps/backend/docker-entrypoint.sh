@@ -13,10 +13,13 @@ echo "PostgreSQL is up!"
 
 cd /app/apps/nutriphi/apps/backend
 
-# Run schema push
+# Run schema push (non-fatal - app can still start if this fails)
 echo "Pushing database schema..."
-npx drizzle-kit push --force
-echo "Schema push completed!"
+if npx drizzle-kit push --force; then
+  echo "Schema push completed!"
+else
+  echo "Warning: Schema push failed, continuing anyway..."
+fi
 
 # Execute the main command
 echo "Starting application..."

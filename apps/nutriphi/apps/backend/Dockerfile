@@ -16,6 +16,7 @@ COPY packages/shared-tsconfig ./packages/shared-tsconfig
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
+COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 
 # Copy nutriphi packages and backend
 COPY apps/nutriphi/packages ./apps/nutriphi/packages
