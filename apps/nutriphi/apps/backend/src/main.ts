@@ -6,4 +6,5 @@ bootstrapApp(AppModule, {
 	serviceName: 'NutriPhi',
 	additionalCorsOrigins: ['http://localhost:5180', 'http://localhost:4323'],
 	excludeFromPrefix: [], // no exclusions
+	bodyLimit: '50mb', // Large limit for Base64 image uploads
 });

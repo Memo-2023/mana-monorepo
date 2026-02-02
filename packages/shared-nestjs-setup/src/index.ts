@@ -5,8 +5,9 @@
  * across all backend applications.
  */
 
-import { INestApplication, ValidationPipe, Type } from '@nestjs/common';
+import { type INestApplication, ValidationPipe, type Type } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { json, urlencoded } from 'express';
 
 /**
  * Default CORS origins for local development
@@ -36,6 +37,8 @@ export interface BootstrapOptions {
 	excludeFromPrefix?: string[];
 	/** HTTP methods for CORS (default: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) */
 	corsMethods?: string[];
+	/** Body size limit for JSON/urlencoded payloads (default: '100kb'). Use '50mb' for image uploads. */
+	bodyLimit?: string;
 }
 
 /**
@@ -110,6 +113,11 @@ export async function bootstrapApp(
 	options: BootstrapOptions
 ): Promise<INestApplication> {
 	const app = await NestFactory.create(AppModule);
+
+	// Configure body size limit (important for services handling image uploads)
+	const bodyLimit = options.bodyLimit ?? '100kb';
+	app.use(json({ limit: bodyLimit }));
+	app.use(urlencoded({ extended: true, limit: bodyLimit }));
 
 	// Configure CORS
 	configureCors(app, {
