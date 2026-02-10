@@ -1,3 +1,85 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* =============================================================================
+   Figgos Design System — Toy Collectible Theme
+
+   Color strategy:
+   - Primary: Vibrant purple — playful, gaming, fun
+   - Secondary: Electric blue — action, energy
+   - Accent: Teal green — success, highlights
+   - Rarity colors: Common(gray), Rare(blue), Epic(purple), Legendary(gold)
+
+   Values are RGB triplets for Tailwind alpha support:
+   rgb(var(--color) / <alpha-value>)
+   ============================================================================= */
+
+/* Light Mode */
+:root {
+  --background: 248 249 250;
+  --foreground: 45 52 54;
+  --surface: 255 255 255;
+  --surface-elevated: 255 255 255;
+  --muted: 223 230 233;
+  --muted-foreground: 99 110 114;
+
+  --primary: 108 92 231;
+  --primary-foreground: 255 255 255;
+  --secondary: 9 132 227;
+  --secondary-foreground: 255 255 255;
+  --accent: 0 184 148;
+  --accent-foreground: 255 255 255;
+  --destructive: 231 76 60;
+  --destructive-foreground: 255 255 255;
+
+  --border: 223 230 233;
+  --input: 223 230 233;
+  --ring: 108 92 231;
+
+  /* Rarity System */
+  --rarity-common: 178 190 195;
+  --rarity-rare: 9 132 227;
+  --rarity-epic: 108 92 231;
+  --rarity-legendary: 248 214 43;
+
+  /* Rarity Text (on rarity background) */
+  --rarity-common-foreground: 45 52 54;
+  --rarity-rare-foreground: 255 255 255;
+  --rarity-epic-foreground: 255 255 255;
+  --rarity-legendary-foreground: 30 30 30;
+}
+
+/* Dark Mode */
+.dark {
+  --background: 26 26 46;
+  --foreground: 255 255 255;
+  --surface: 22 33 62;
+  --surface-elevated: 31 52 96;
+  --muted: 45 52 54;
+  --muted-foreground: 178 190 195;
+
+  --primary: 162 155 254;
+  --primary-foreground: 26 26 46;
+  --secondary: 116 185 255;
+  --secondary-foreground: 26 26 46;
+  --accent: 85 239 196;
+  --accent-foreground: 26 26 46;
+  --destructive: 255 107 107;
+  --destructive-foreground: 26 26 46;
+
+  --border: 45 52 54;
+  --input: 45 52 54;
+  --ring: 162 155 254;
+
+  /* Rarity System (brighter in dark mode) */
+  --rarity-common: 99 110 114;
+  --rarity-rare: 116 185 255;
+  --rarity-epic: 162 155 254;
+  --rarity-legendary: 248 214 43;
+
+  --rarity-common-foreground: 255 255 255;
+  --rarity-rare-foreground: 26 26 46;
+  --rarity-epic-foreground: 26 26 46;
+  --rarity-legendary-foreground: 30 30 30;
+}

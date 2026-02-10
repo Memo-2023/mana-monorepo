@@ -29,21 +29,21 @@ export default function LoginScreen() {
 	};
 
 	return (
-		<SafeAreaView className="flex-1 bg-background dark:bg-dark-background">
+		<SafeAreaView className="flex-1 bg-background">
 			<KeyboardAvoidingView
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				className="flex-1 justify-center px-6"
 			>
 				<View className="items-center mb-12">
 					<Text className="text-4xl font-bold text-primary">Figgos</Text>
-					<Text className="text-base text-muted mt-2">Collect your fantasy figures</Text>
+					<Text className="text-base text-muted-foreground mt-2">Collect your action figures</Text>
 				</View>
 
 				<View className="space-y-4">
 					<TextInput
-						className="bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-lg px-4 py-3 text-textColor dark:text-dark-textColor"
+						className="bg-surface border border-border rounded-lg px-4 py-3 text-foreground"
 						placeholder="Email"
-						placeholderTextColor="#B2BEC3"
+						placeholderTextColor="rgb(99 110 114)"
 						value={email}
 						onChangeText={setEmail}
 						autoCapitalize="none"
@@ -51,15 +51,15 @@ export default function LoginScreen() {
 					/>
 
 					<TextInput
-						className="bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-lg px-4 py-3 text-textColor dark:text-dark-textColor mt-3"
+						className="bg-surface border border-border rounded-lg px-4 py-3 text-foreground mt-3"
 						placeholder="Password"
-						placeholderTextColor="#B2BEC3"
+						placeholderTextColor="rgb(99 110 114)"
 						value={password}
 						onChangeText={setPassword}
 						secureTextEntry
 					/>
 
-					{error && <Text className="text-red-500 text-center mt-2">{error}</Text>}
+					{error && <Text className="text-destructive text-center mt-2">{error}</Text>}
 
 					<Pressable
 						onPress={handleLogin}
@@ -68,7 +68,7 @@ export default function LoginScreen() {
 							`bg-primary rounded-lg py-3 mt-4 ${pressed ? 'opacity-80' : ''} ${loading ? 'opacity-50' : ''}`
 						}
 					>
-						<Text className="text-white text-center font-semibold text-base">
+						<Text className="text-primary-foreground text-center font-semibold text-base">
 							{loading ? 'Signing in...' : 'Sign In'}
 						</Text>
 					</Pressable>

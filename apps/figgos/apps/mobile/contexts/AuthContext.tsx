@@ -199,10 +199,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					flex: 1,
 					justifyContent: 'center',
 					alignItems: 'center',
-					backgroundColor: '#1A1A2E',
+					backgroundColor: 'rgb(26, 26, 46)',
 				}}
 			>
-				<ActivityIndicator size="large" color="#6C5CE7" />
+				<ActivityIndicator size="large" color="rgb(108, 92, 231)" />
 				<Text style={{ marginTop: 16, color: '#fff' }}>Loading...</Text>
 			</View>
 		);
