@@ -87,7 +87,9 @@ services:
       mc mb --ignore-existing myminio/inventory-storage;
       mc mb --ignore-existing myminio/planta-storage;
       mc mb --ignore-existing myminio/projectdoc-storage;
+      mc mb --ignore-existing myminio/figgos-storage;
       mc anonymous set download myminio/picture-storage;
+      mc anonymous set download myminio/figgos-storage;
       mc anonymous set download myminio/planta-storage;
       mc anonymous set download myminio/inventory-storage;
       echo 'Buckets created successfully';

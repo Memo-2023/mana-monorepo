@@ -145,6 +145,7 @@
 		"dev:figgos:android": "pnpm --filter @figgos/mobile android",
 		"figgos:db:push": "pnpm --filter @figgos/backend db:push",
 		"figgos:db:studio": "pnpm --filter @figgos/backend db:studio",
+		"dev:figgos:full": "./scripts/setup-databases.sh figgos && ./scripts/setup-databases.sh auth && concurrently -n auth,backend -c blue,green \"pnpm dev:auth\" \"pnpm dev:figgos:backend\"",
 		"worldream:dev": "turbo run dev --filter=worldream...",
 		"dev:worldream:web": "pnpm --filter @worldream/web dev",
 		"context:dev": "turbo run dev --filter=context...",

@@ -601,6 +601,34 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Figgos Backend (NestJS)
+	{
+		path: 'apps/figgos/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.FIGGOS_BACKEND_PORT || '3025',
+			DATABASE_URL: (env) => env.FIGGOS_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: () => '00000000-0000-0000-0000-000000000000',
+			S3_ENDPOINT: (env) => env.S3_ENDPOINT || 'http://localhost:9000',
+			S3_REGION: (env) => env.S3_REGION || 'us-east-1',
+			S3_ACCESS_KEY: (env) => env.S3_ACCESS_KEY || 'minioadmin',
+			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY || 'minioadmin',
+			S3_BUCKET: () => 'figgos-storage',
+			CORS_ORIGINS: () => 'http://localhost:5181,http://localhost:8081',
+		},
+	},
+
+	// Figgos Mobile (Expo)
+	{
+		path: 'apps/figgos/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.FIGGOS_BACKEND_PORT || '3025'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
 	// Worldream Web (SvelteKit)
 	{
 		path: 'games/worldream/apps/web/.env',
