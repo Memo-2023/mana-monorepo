@@ -1,4 +1,5 @@
 import { authService } from '~/contexts/AuthContext';
+import type { FigureResponse } from '@figgos/shared';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3025';
 
@@ -23,4 +24,19 @@ export async function fetchApi<T = any>(path: string, options?: RequestInit): Pr
 
 export const api = {
 	health: () => fetchApi('/health'),
+
+	figures: {
+		create: (name: string, description: string) =>
+			fetchApi<{ figure: FigureResponse }>('/api/v1/figures', {
+				method: 'POST',
+				body: JSON.stringify({ name, description }),
+			}),
+
+		list: () => fetchApi<{ figures: FigureResponse[] }>('/api/v1/figures'),
+
+		get: (id: string) => fetchApi<{ figure: FigureResponse }>(`/api/v1/figures/${id}`),
+
+		delete: (id: string) =>
+			fetchApi<{ success: boolean }>(`/api/v1/figures/${id}`, { method: 'DELETE' }),
+	},
 };

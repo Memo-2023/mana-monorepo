@@ -64,9 +64,7 @@ export default function LoginScreen() {
 					<Pressable
 						onPress={handleLogin}
 						disabled={loading}
-						className={({ pressed }) =>
-							`bg-primary rounded-lg py-3 mt-4 ${pressed ? 'opacity-80' : ''} ${loading ? 'opacity-50' : ''}`
-						}
+						className={`bg-primary rounded-lg py-3 mt-4 active:opacity-80 ${loading ? 'opacity-50' : ''}`}
 					>
 						<Text className="text-primary-foreground text-center font-semibold text-base">
 							{loading ? 'Signing in...' : 'Sign In'}
