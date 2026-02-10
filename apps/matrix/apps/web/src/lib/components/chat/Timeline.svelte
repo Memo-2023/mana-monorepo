@@ -2,7 +2,7 @@
 	import { matrixStore, type SimpleMessage } from '$lib/matrix';
 	import Message from './Message.svelte';
 	import TypingIndicator from './TypingIndicator.svelte';
-	import { onMount, tick } from 'svelte';
+	import { tick } from 'svelte';
 	import { CircleNotch, ArrowDown } from '@manacore/shared-icons';
 
 	interface Props {
@@ -20,16 +20,46 @@
 	let showScrollButton = $state(false);
 	let loadingMore = $state(false);
 	let prevMessageCount = $state(0);
+	let hasInitiallyScrolled = $state(false);
+	let currentRoomId = $state<string | null>(null);
 
-	// Auto-scroll to bottom on new messages (if already at bottom)
+	// Reset state when room changes
+	$effect(() => {
+		const roomId = matrixStore.currentRoomId;
+		if (roomId !== currentRoomId) {
+			currentRoomId = roomId;
+			hasInitiallyScrolled = false;
+			prevMessageCount = 0;
+			loadingMore = false;
+			showScrollButton = false;
+		}
+	});
+
+	// Initial scroll to bottom when messages first load, and auto-scroll on new messages
 	$effect(() => {
 		const messageCount = matrixStore.messages.length;
-		if (messageCount > prevMessageCount && container) {
+
+		// Initial scroll when messages first appear for this room
+		if (messageCount > 0 && !hasInitiallyScrolled && container) {
+			tick().then(() => {
+				if (container) {
+					container.scrollTop = container.scrollHeight;
+					hasInitiallyScrolled = true;
+					prevMessageCount = messageCount;
+				}
+			});
+			return;
+		}
+
+		// Auto-scroll on new messages (if already at bottom)
+		if (messageCount > prevMessageCount && container && hasInitiallyScrolled) {
 			const isAtBottom =
 				container.scrollHeight - container.scrollTop - container.clientHeight < 100;
 			if (isAtBottom) {
 				tick().then(() => {
-					container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+					if (container) {
+						container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+					}
 				});
 			}
 		}
@@ -44,8 +74,13 @@
 			container.scrollHeight - container.scrollTop - container.clientHeight;
 		showScrollButton = distanceFromBottom > 200;
 
-		// Load more when scrolled to top
-		if (container.scrollTop < 100 && !loadingMore) {
+		// Load more when scrolled to top (only after initial scroll and with messages present)
+		if (
+			container.scrollTop < 100 &&
+			!loadingMore &&
+			hasInitiallyScrolled &&
+			matrixStore.messages.length > 0
+		) {
 			loadMore();
 		}
 	}
@@ -59,10 +94,11 @@
 		await matrixStore.loadMoreMessages(50);
 
 		// Maintain scroll position after loading
-		tick().then(() => {
+		await tick();
+		if (container) {
 			const newScrollHeight = container.scrollHeight;
 			container.scrollTop = newScrollHeight - prevScrollHeight;
-		});
+		}
 
 		loadingMore = false;
 	}
@@ -70,13 +106,6 @@
 	function scrollToBottom() {
 		container?.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 	}
-
-	onMount(() => {
-		// Scroll to bottom on mount
-		if (container) {
-			container.scrollTop = container.scrollHeight;
-		}
-	});
 </script>
 
 <div class="relative flex-1 min-h-0 overflow-hidden">
@@ -93,16 +122,24 @@
 		{/if}
 
 		<!-- Messages -->
-		<div class="space-y-1">
+		<div class="space-y-0">
 			{#each matrixStore.messages as message, index (message.id)}
 				{@const prevMessage = matrixStore.messages[index - 1]}
-				{@const showAvatar = !prevMessage || prevMessage.sender !== message.sender}
-				{@const showTimestamp =
-					!prevMessage || message.timestamp - prevMessage.timestamp > 5 * 60 * 1000}
+				{@const nextMessage = matrixStore.messages[index + 1]}
+				{@const isSameSender = Boolean(prevMessage && prevMessage.sender === message.sender)}
+				{@const isNextSameSender = Boolean(nextMessage && nextMessage.sender === message.sender)}
+				{@const prevDate = prevMessage ? new Date(prevMessage.timestamp).toDateString() : null}
+				{@const currentDate = new Date(message.timestamp).toDateString()}
+				{@const nextDate = nextMessage ? new Date(nextMessage.timestamp).toDateString() : null}
+				{@const showDateSeparator = Boolean(prevMessage && prevDate !== currentDate)}
+				{@const showAvatar = !isSameSender || showDateSeparator}
+				{@const isLastInGroup = !isNextSameSender || Boolean(nextDate && nextDate !== currentDate)}
 				<Message
 					{message}
 					{showAvatar}
-					{showTimestamp}
+					showTimestamp={showDateSeparator}
+					{isSameSender}
+					{isLastInGroup}
 					showEncryptionBadge={isRoomEncrypted}
 					{onReply}
 					{onEdit}

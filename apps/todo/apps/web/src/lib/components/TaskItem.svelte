@@ -589,39 +589,6 @@
 </div>
 
 <style>
-	/* DEBUG BORDERS - REMOVE AFTER DEBUGGING */
-	.task-item-wrapper {
-		outline: 2px dashed red !important;
-	}
-	.task-item {
-		outline: 2px solid blue !important;
-	}
-	.drag-handle {
-		outline: 2px solid green !important;
-	}
-	.task-checkbox {
-		outline: 2px solid orange !important;
-	}
-	.task-content {
-		outline: 2px solid purple !important;
-	}
-	.expand-btn {
-		outline: 2px solid cyan !important;
-	}
-	.priority-dot {
-		outline: 1px solid yellow !important;
-	}
-	.contacts-display {
-		outline: 1px solid pink !important;
-	}
-	.due-date {
-		outline: 1px solid lime !important;
-	}
-	.project-dot {
-		outline: 1px solid magenta !important;
-	}
-	/* END DEBUG BORDERS */
-
 	/* Wrapper for expanded state */
 	.task-item-wrapper {
 		margin-bottom: 0;
@@ -839,12 +806,14 @@
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		gap: 0.25rem;
 		background: none;
 		border: none;
 		padding: 0;
 		text-align: left;
 		cursor: pointer;
+		align-self: stretch;
 	}
 
 	.task-title {
