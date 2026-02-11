@@ -11,21 +11,31 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages
+# Copy shared packages (all required dependencies)
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
+COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
+COPY packages/shared-tsconfig ./packages/shared-tsconfig
 
-# Copy presi backend
+# Copy presi packages and backend
+COPY apps/presi/packages ./apps/presi/packages
 COPY apps/presi/apps/backend ./apps/presi/apps/backend
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build shared packages first
+# Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-auth
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-health
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-setup
 RUN pnpm build
 
 # Build the backend

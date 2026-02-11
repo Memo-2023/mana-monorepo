@@ -11,10 +11,16 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages
+# Copy shared packages (all required dependencies)
+COPY packages/credit-operations ./packages/credit-operations
+COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
+COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
+COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 COPY packages/shared-storage ./packages/shared-storage
+COPY packages/shared-tsconfig ./packages/shared-tsconfig
 
 # Copy chat backend
 COPY apps/chat/apps/backend ./apps/chat/apps/backend
@@ -22,14 +28,29 @@ COPY apps/chat/apps/backend ./apps/chat/apps/backend
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build shared packages first
+# Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-auth
 RUN pnpm build
 
+WORKDIR /app/packages/shared-nestjs-health
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-metrics
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-setup
+RUN pnpm build
+
 WORKDIR /app/packages/shared-storage
+RUN pnpm build
+
+WORKDIR /app/packages/credit-operations
+RUN pnpm build
+
+WORKDIR /app/packages/mana-core-nestjs-integration
 RUN pnpm build
 
 # Build the backend

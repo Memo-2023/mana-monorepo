@@ -11,10 +11,12 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages
+# Copy shared packages (all required dependencies)
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 COPY packages/shared-storage ./packages/shared-storage
+COPY packages/shared-tsconfig ./packages/shared-tsconfig
 
 # Copy storage backend
 COPY apps/storage/apps/backend ./apps/storage/apps/backend
@@ -22,11 +24,14 @@ COPY apps/storage/apps/backend ./apps/storage/apps/backend
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build shared packages first
+# Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-auth
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-health
 RUN pnpm build
 
 WORKDIR /app/packages/shared-storage

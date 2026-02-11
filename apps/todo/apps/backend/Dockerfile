@@ -11,21 +11,39 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages
+# Copy shared packages (all required dependencies)
+COPY packages/credit-operations ./packages/credit-operations
+COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
+COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
+COPY packages/shared-tsconfig ./packages/shared-tsconfig
 
-# Copy todo backend
+# Copy todo shared package and backend
+COPY apps/todo/packages ./apps/todo/packages
 COPY apps/todo/apps/backend ./apps/todo/apps/backend
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build shared packages first
+# Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-auth
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-health
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-metrics
+RUN pnpm build
+
+WORKDIR /app/packages/credit-operations
+RUN pnpm build
+
+WORKDIR /app/packages/mana-core-nestjs-integration
 RUN pnpm build
 
 # Build the backend
@@ -47,7 +65,7 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/todo/apps/backend ./apps/todo/apps/backend
+COPY --from=builder /app/apps/todo ./apps/todo
 
 # Copy entrypoint script
 COPY apps/todo/apps/backend/docker-entrypoint.sh /usr/local/bin/

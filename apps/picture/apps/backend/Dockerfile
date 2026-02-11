@@ -11,8 +11,14 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages
+# Copy shared packages (all required dependencies)
+COPY packages/credit-operations ./packages/credit-operations
+COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
 COPY packages/shared-errors ./packages/shared-errors
+COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
+COPY packages/shared-storage ./packages/shared-storage
+COPY packages/shared-tsconfig ./packages/shared-tsconfig
 
 # Copy picture backend
 COPY apps/picture/apps/backend ./apps/picture/apps/backend
@@ -20,8 +26,23 @@ COPY apps/picture/apps/backend ./apps/picture/apps/backend
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build shared packages first
+# Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-auth
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-health
+RUN pnpm build
+
+WORKDIR /app/packages/shared-storage
+RUN pnpm build
+
+WORKDIR /app/packages/credit-operations
+RUN pnpm build
+
+WORKDIR /app/packages/mana-core-nestjs-integration
 RUN pnpm build
 
 # Build the backend
@@ -52,11 +73,11 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 WORKDIR /app/apps/picture/apps/backend
 
 # Expose port
-EXPOSE 3003
+EXPOSE 3006
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3003/api/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3006/api/health || exit 1
 
 # Run entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]
