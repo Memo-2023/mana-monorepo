@@ -1,14 +1,31 @@
 # ManaCore STT Service
 
-Speech-to-Text API service with **Whisper (Lightning MLX)** and **Voxtral Mini**.
+Speech-to-Text API service with **Whisper (Lightning MLX)** and **Voxtral (Mistral API)**.
 
 Optimized for Mac Mini M4 (Apple Silicon).
 
+## Architecture
+
+```
+                    ┌─────────────────────┐
+                    │   mana-stt (3020)   │
+                    │    FastAPI          │
+                    └─────────┬───────────┘
+                              │
+            ┌─────────────────┼─────────────────┐
+            ▼                 ▼                 ▼
+    ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+    │   Whisper    │  │  Voxtral API │  │   vLLM       │
+    │  MLX (Local) │  │  (Mistral)   │  │ (Optional)   │
+    └──────────────┘  └──────────────┘  └──────────────┘
+```
+
 ## Features
 
-- **Whisper Large V3 Turbo** - Best quality, 99+ languages, German WER 6-9%
-- **Voxtral Mini (3B)** - Mistral AI, Apache 2.0, 8 languages including German
-- **Apple Silicon Optimized** - Uses MLX for 10x faster inference
+- **Whisper Large V3** - Best quality, 99+ languages, German WER 6-9% (local, MLX)
+- **Voxtral Mini** - Mistral API, speaker diarization support (cloud)
+- **Apple Silicon Optimized** - Uses MLX for fast local inference
+- **Automatic Fallback** - Falls back between backends automatically
 - **REST API** - Simple HTTP endpoints for integration
 
 ## Quick Start
@@ -85,9 +102,12 @@ Environment variables:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `3020` | API server port |
-| `WHISPER_MODEL` | `large-v3-turbo` | Default Whisper model |
+| `WHISPER_MODEL` | `large-v3` | Default Whisper model |
 | `PRELOAD_MODELS` | `false` | Load models on startup |
 | `CORS_ORIGINS` | `https://mana.how,...` | Allowed CORS origins |
+| `MISTRAL_API_KEY` | - | Required for Voxtral API |
+| `USE_VLLM` | `false` | Enable vLLM backend (experimental) |
+| `VLLM_URL` | `http://localhost:8100` | vLLM server URL |
 
 ## Supported Audio Formats
 

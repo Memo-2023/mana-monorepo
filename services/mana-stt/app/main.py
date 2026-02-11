@@ -32,9 +32,9 @@ CORS_ORIGINS = os.getenv(
     "https://mana.how,https://chat.mana.how,http://localhost:5173"
 ).split(",")
 
-# vLLM configuration
+# vLLM configuration (disabled by default - has issues on macOS CPU)
 VLLM_URL = os.getenv("VLLM_URL", "http://localhost:8100")
-USE_VLLM = os.getenv("USE_VLLM", "true").lower() == "true"
+USE_VLLM = os.getenv("USE_VLLM", "false").lower() == "true"
 
 
 # Response models
