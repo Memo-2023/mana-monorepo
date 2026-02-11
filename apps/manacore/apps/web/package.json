@@ -49,6 +49,7 @@
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
+		"@manacore/shared-stores": "workspace:*",
 		"@manacore/shared-subscription-types": "workspace:*",
 		"@manacore/shared-subscription-ui": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
