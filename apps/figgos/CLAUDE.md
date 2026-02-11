@@ -45,8 +45,8 @@ npx expo start --clear       # Start with clean cache
 - **Backend**: NestJS 10, Drizzle ORM, PostgreSQL
 - **Auth**: Mana Core Auth (JWT via @manacore/shared-nestjs-auth)
 - **Shared**: `@figgos/shared` — all types inlined in `src/index.ts` (Node v24 ESM compat)
-- **AI**: Google Gemini API (planned)
-- **Storage**: MinIO (local) / Hetzner S3 (production)
+- **AI**: Google Gemini API (`gemini-3-flash-preview` for text, `gemini-2.5-flash-image` for images)
+- **Storage**: MinIO (local) / Hetzner S3 (production) via `@manacore/shared-storage`
 
 ## Ports
 
@@ -64,7 +64,15 @@ PORT=3025
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/figgos
 MANA_CORE_AUTH_URL=http://localhost:3001
 DEV_BYPASS_AUTH=true
-DEV_USER_ID=test-user-id
+DEV_USER_ID=00000000-0000-0000-0000-000000000000
+GEMINI_API_KEY=<your-gemini-api-key>
+FIGGOS_STORAGE_PUBLIC_URL=http://localhost:9000/figgos-storage
+S3_ENDPOINT=http://localhost:9000
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+S3_BUCKET=figgos-storage
+CORS_ORIGINS=http://localhost:5196,http://localhost:8081
+BG_REMOVAL_METHOD=feathered    # optional, see below
 ```
 
 ### Mobile (.env)
@@ -74,42 +82,43 @@ EXPO_PUBLIC_BACKEND_URL=http://localhost:3025
 EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 ```
 
+### Background Removal (`BG_REMOVAL_METHOD`)
+
+Two methods available for removing white backgrounds from generated card images:
+
+| Method | Env Value | Speed | Quality | Dependencies |
+|--------|-----------|-------|---------|--------------|
+| **Feathered Threshold** | `feathered` (default) | ~77ms | Good for white/near-white backgrounds | `sharp` only |
+| **RMBG-1.4 AI** | `rmbg` | ~1s (first run downloads model) | Better for complex backgrounds | `@huggingface/transformers` |
+
+- **Feathered** (default): Removes near-white pixels (threshold=240) with a soft 10px feather edge. Fast, no model download needed. Works well because Gemini generates cards on white backgrounds.
+- **RMBG**: Uses the RMBG-1.4 segmentation model via Hugging Face Transformers. Model is lazy-loaded and cached after first use. Better quality but slower.
+
+Set in `.env`:
+```env
+BG_REMOVAL_METHOD=feathered   # fast, sharp-based (default)
+BG_REMOVAL_METHOD=rmbg        # AI-based, higher quality
+```
+
 ## Game Concept
 
 - Users create fantasy figures by providing a name + description
-- Backend rolls rarity (common 60%, rare 25%, epic 12%, legendary 3%) and generates random stats
-- AI generates character info + image (planned V2)
+- Backend rolls rarity (common 60%, rare 25%, epic 12%, legendary 3%)
+- AI generates character profile (subtitle, backstory, stats, items, specialAttack) + card image
+- Card style derived from rarity (common gets random variant: kraft/white/mint/warm)
 - Figures have rarities: common, rare, epic, legendary
-- Users can browse public figures, like them, and collect their own
+- Stats (attack, defense, special) are clamped to rarity-based ranges
 
-## Current Status (V1 — Figure Generation)
+## Generation Pipeline
 
-### Done
+`POST /api/v1/figures` triggers synchronous generation:
 
-- **Backend CRUD**: `POST/GET/DELETE /api/v1/figures` — working, tested via curl
-- **DB Schema**: `figures` table with JSONB columns (`userInput`, `stats`)
-- **Shared Types**: `@figgos/shared` with `FigureRarity`, `FigureResponse`, rarity weights/ranges
-- **Mobile Scaffold**: Expo SDK 54, NativeWind 4 design system, tab navigation (Create, Shelf)
-- **Mobile Screens**: Create form (name + description), result card with rarity badge, shelf grid
-- **API Service**: `services/api.ts` with typed fetch wrapper + auth token injection
-
-### Known Issues / TODOs
-
-- **Mobile app not yet verified on device** — Expo Go had `PlatformConstants` TurboModule errors with SDK 54. Reanimated downgraded to v3, worklets plugin disabled. Needs testing with `npx expo start --clear`
-- **Auth disabled** — `_layout.tsx` currently skips AuthGuard/AuthProvider for faster iteration. Login screen exists at `app/(auth)/login.tsx` but is not wired up
-- **No AI image generation** — `imageUrl` is always null, placeholder emoji shown
-- **No stats display** — Stats are generated server-side but not shown in the mobile UI
-- **Placeholder assets** — icon/splash are default Expo template images
-
-### Next Steps (V2)
-
-1. **Fix mobile runtime** — verify app loads in Expo Go or create a dev build
-2. **Wire up auth** — re-enable AuthGuard in `_layout.tsx`, test login flow
-3. **Stats display** — show attack/defense/special bars on figure card
-4. **AI character generation** — integrate Gemini to populate `characterInfo` JSONB
-5. **AI image generation** — generate figure artwork, store in S3, populate `imageUrl`
-6. **Shelf improvements** — pull-to-refresh, empty state, delete swipe
-7. **Public feed** — browse community figures, like system
+1. **Roll rarity** — weighted random (common 60%, rare 25%, epic 12%, legendary 3%)
+2. **Generate profile** — Gemini text model creates subtitle, backstory, visualDescription, items, stats, specialAttack
+3. **Generate image** — Gemini image model creates card artwork based on visual description + card style
+4. **Remove background** — Strip white background (feathered threshold or RMBG-1.4)
+5. **Upload to S3** — Store as WebP in `figgos-storage` bucket
+6. **Update DB** — Save generatedProfile, imageUrl, status='completed'
 
 ## Architecture Notes
 
@@ -123,7 +132,8 @@ EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 
 - Global prefix `api/v1` set by `@manacore/shared-nestjs-setup` — controllers use resource-only names (e.g. `@Controller('figures')`)
 - `DEV_BYPASS_AUTH=true` skips JWT validation in development
-- Rarity + stats rolled server-side in `figures.service.ts`
+- Rarity rolled server-side, `cardStyle` derived at generation time (not persisted)
+- Generation is synchronous — client waits ~10-15s for full pipeline
 
 ### Mobile (Expo SDK 54)
 
@@ -132,3 +142,9 @@ EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 - `babel-preset-expo` configured with `worklets: false` (using Reanimated v3 for Expo Go compat)
 - `newArchEnabled: false` in app.json (Expo Go doesn't fully support new architecture)
 - Path alias: `~/` maps to project root via tsconfig
+
+### Web (SvelteKit)
+
+- API service at `$lib/api.ts` — simple fetch wrapper, no auth for dev
+- Svelte 5 runes (`$state`, `$derived`, `$effect`)
+- Neo-brutalist design with 3D flip card detail view
