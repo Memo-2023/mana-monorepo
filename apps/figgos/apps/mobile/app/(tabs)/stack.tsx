@@ -1,9 +1,18 @@
 import { useState, useRef, useCallback } from 'react';
-import { View, Text, Image, Pressable, Animated, Dimensions, PanResponder } from 'react-native';
+import {
+	View,
+	Text,
+	Image,
+	Pressable,
+	Animated,
+	Dimensions,
+	PanResponder,
+	ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { CARDS } from '../../data/cards';
-import type { FigureRarity } from '@figgos/shared';
+import { useRouter, useFocusEffect } from 'expo-router';
+import type { FigureResponse, FigureRarity } from '@figgos/shared';
+import { api } from '../../services/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.72;
@@ -21,13 +30,28 @@ const RARITY_COLORS: Record<FigureRarity, string> = {
 
 export default function StackScreen() {
 	const router = useRouter();
-	const [order, setOrder] = useState(() => CARDS.map((_, i) => i));
+	const [figures, setFigures] = useState<FigureResponse[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [order, setOrder] = useState<number[]>([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const swipeY = useRef(new Animated.Value(0)).current;
 	const isAnimating = useRef(false);
 
+	useFocusEffect(
+		useCallback(() => {
+			api.figures
+				.list()
+				.then(({ figures }) => {
+					setFigures(figures);
+					setOrder(figures.map((_, i) => i));
+					setCurrentIndex(0);
+				})
+				.finally(() => setLoading(false));
+		}, [])
+	);
+
 	const dismissTop = useCallback(() => {
-		if (isAnimating.current) return;
+		if (isAnimating.current || figures.length === 0) return;
 		isAnimating.current = true;
 
 		Animated.timing(swipeY, {
@@ -36,11 +60,11 @@ export default function StackScreen() {
 			useNativeDriver: true,
 		}).start(() => {
 			setOrder((prev) => [...prev.slice(1), prev[0]]);
-			setCurrentIndex((prev) => (prev + 1) % CARDS.length);
+			setCurrentIndex((prev) => (prev + 1) % figures.length);
 			swipeY.setValue(0);
 			isAnimating.current = false;
 		});
-	}, [swipeY]);
+	}, [swipeY, figures.length]);
 
 	const snapBack = useCallback(() => {
 		Animated.spring(swipeY, {
@@ -70,7 +94,25 @@ export default function StackScreen() {
 		})
 	).current;
 
-	const topCard = CARDS[order[0]];
+	if (loading) {
+		return (
+			<SafeAreaView className="flex-1 bg-background items-center justify-center" edges={['top']}>
+				<ActivityIndicator color="rgb(255, 204, 0)" size="large" />
+			</SafeAreaView>
+		);
+	}
+
+	if (figures.length === 0) {
+		return (
+			<SafeAreaView className="flex-1 bg-background items-center justify-center" edges={['top']}>
+				<Text className="text-muted-foreground" style={{ fontSize: 16, fontWeight: '700' }}>
+					No figures yet
+				</Text>
+			</SafeAreaView>
+		);
+	}
+
+	const topFigure = figures[order[0]];
 
 	const topOpacity = swipeY.interpolate({
 		inputRange: [-200, 0],
@@ -78,7 +120,6 @@ export default function StackScreen() {
 		extrapolate: 'clamp',
 	});
 
-	// Total height needed: card + stack peek area
 	const stackHeight = CARD_HEIGHT + (VISIBLE_STACK - 1) * STACK_OFFSET;
 
 	return (
@@ -97,17 +138,17 @@ export default function StackScreen() {
 
 			<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 20 }}>
 				<View style={{ width: CARD_WIDTH, height: stackHeight }}>
-					{/* Background cards — each peeks out below the one above */}
 					{order
 						.slice(1, VISIBLE_STACK)
 						.reverse()
 						.map((cardIdx, reverseI) => {
-							const depth = VISIBLE_STACK - 1 - reverseI; // 3, 2, 1
-							const card = CARDS[cardIdx];
-							const shrink = depth * 8; // each card slightly narrower
+							const depth = VISIBLE_STACK - 1 - reverseI;
+							const figure = figures[cardIdx];
+							if (!figure) return null;
+							const shrink = depth * 8;
 							return (
 								<View
-									key={`bg-${depth}-${card.id}`}
+									key={`bg-${depth}-${figure.id}`}
 									style={{
 										position: 'absolute',
 										top: depth * STACK_OFFSET,
@@ -118,69 +159,93 @@ export default function StackScreen() {
 									}}
 								>
 									<View
-										style={{
-											width: '100%',
-											height: '100%',
-											borderRadius: 14,
-											overflow: 'hidden',
-										}}
+										style={{ width: '100%', height: '100%', borderRadius: 14, overflow: 'hidden' }}
 									>
-										<Image
-											source={card.image}
-											style={{ width: '100%', height: '100%' }}
-											resizeMode="cover"
-										/>
+										{figure.imageUrl ? (
+											<Image
+												source={{ uri: figure.imageUrl }}
+												style={{ width: '100%', height: '100%' }}
+												resizeMode="cover"
+											/>
+										) : (
+											<View
+												className="bg-surface items-center justify-center"
+												style={{
+													width: '100%',
+													height: '100%',
+													borderRadius: 14,
+													borderWidth: 1,
+													borderColor: 'rgb(50,50,80)',
+												}}
+											>
+												<Text className="text-muted-foreground" style={{ fontSize: 11 }}>
+													{figure.name}
+												</Text>
+											</View>
+										)}
 									</View>
 								</View>
 							);
 						})}
 
-					{/* Top card */}
-					<Animated.View
-						{...panResponder.panHandlers}
-						style={{
-							position: 'absolute',
-							top: 0,
-							width: CARD_WIDTH,
-							height: CARD_HEIGHT,
-							transform: [{ translateY: swipeY }],
-							opacity: topOpacity,
-						}}
-					>
-						<Pressable
-							onPress={() => router.push(`/card/v2/${topCard.id}` as any)}
-							className="active:opacity-90"
-							style={{ width: '100%', height: '100%' }}
+					{topFigure && (
+						<Animated.View
+							{...panResponder.panHandlers}
+							style={{
+								position: 'absolute',
+								top: 0,
+								width: CARD_WIDTH,
+								height: CARD_HEIGHT,
+								transform: [{ translateY: swipeY }],
+								opacity: topOpacity,
+							}}
 						>
-							<View
-								style={{
-									width: '100%',
-									height: '100%',
-									borderRadius: 14,
-									overflow: 'hidden',
-								}}
+							<Pressable
+								onPress={() => router.push(`/card/v2/${topFigure.id}` as any)}
+								className="active:opacity-90"
+								style={{ width: '100%', height: '100%' }}
 							>
-								<Image
-									source={topCard.image}
-									style={{ width: '100%', height: '100%' }}
-									resizeMode="cover"
-								/>
-							</View>
-						</Pressable>
-					</Animated.View>
+								<View
+									style={{ width: '100%', height: '100%', borderRadius: 14, overflow: 'hidden' }}
+								>
+									{topFigure.imageUrl ? (
+										<Image
+											source={{ uri: topFigure.imageUrl }}
+											style={{ width: '100%', height: '100%' }}
+											resizeMode="cover"
+										/>
+									) : (
+										<View
+											className="bg-surface items-center justify-center"
+											style={{
+												width: '100%',
+												height: '100%',
+												borderRadius: 14,
+												borderWidth: 2,
+												borderColor: RARITY_COLORS[topFigure.rarity],
+											}}
+										>
+											<Text className="text-foreground" style={{ fontSize: 16, fontWeight: '800' }}>
+												{topFigure.name}
+											</Text>
+										</View>
+									)}
+								</View>
+							</Pressable>
+						</Animated.View>
+					)}
 				</View>
 
-				{/* Dot indicator */}
 				<View className="flex-row items-center" style={{ marginTop: 20, gap: 6 }}>
-					{CARDS.map((card, i) => (
+					{figures.map((figure, i) => (
 						<View
-							key={card.id}
+							key={figure.id}
 							style={{
 								width: i === currentIndex ? 20 : 8,
 								height: 8,
 								borderRadius: 4,
 								backgroundColor:
-									i === currentIndex ? RARITY_COLORS[card.rarity] : 'rgb(50, 50, 80)',
+									i === currentIndex ? RARITY_COLORS[figure.rarity] : 'rgb(50, 50, 80)',
 							}}
 						/>
 					))}

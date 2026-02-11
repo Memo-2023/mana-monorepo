@@ -26,10 +26,10 @@ export const api = {
 	health: () => fetchApi('/health'),
 
 	figures: {
-		create: (name: string, description: string) =>
+		create: (name: string, description: string, language: string = 'en') =>
 			fetchApi<{ figure: FigureResponse }>('/api/v1/figures', {
 				method: 'POST',
-				body: JSON.stringify({ name, description }),
+				body: JSON.stringify({ name, description, language }),
 			}),
 
 		list: () => fetchApi<{ figures: FigureResponse[] }>('/api/v1/figures'),

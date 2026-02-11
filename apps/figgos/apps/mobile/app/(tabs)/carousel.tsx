@@ -1,9 +1,17 @@
-import { useRef } from 'react';
-import { View, Text, Image, Pressable, Animated, Dimensions } from 'react-native';
+import { useRef, useState, useCallback } from 'react';
+import {
+	View,
+	Text,
+	Image,
+	Pressable,
+	Animated,
+	Dimensions,
+	ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { CARDS } from '../../data/cards';
-import type { FigureRarity } from '@figgos/shared';
+import { useRouter, useFocusEffect } from 'expo-router';
+import type { FigureResponse, FigureRarity } from '@figgos/shared';
+import { api } from '../../services/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.65;
@@ -21,6 +29,35 @@ const RARITY_COLORS: Record<FigureRarity, string> = {
 export default function CarouselScreen() {
 	const router = useRouter();
 	const scrollX = useRef(new Animated.Value(0)).current;
+	const [figures, setFigures] = useState<FigureResponse[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useFocusEffect(
+		useCallback(() => {
+			api.figures
+				.list()
+				.then(({ figures }) => setFigures(figures))
+				.finally(() => setLoading(false));
+		}, [])
+	);
+
+	if (loading) {
+		return (
+			<SafeAreaView className="flex-1 bg-background items-center justify-center" edges={['top']}>
+				<ActivityIndicator color="rgb(255, 204, 0)" size="large" />
+			</SafeAreaView>
+		);
+	}
+
+	if (figures.length === 0) {
+		return (
+			<SafeAreaView className="flex-1 bg-background items-center justify-center" edges={['top']}>
+				<Text className="text-muted-foreground" style={{ fontSize: 16, fontWeight: '700' }}>
+					No figures yet
+				</Text>
+			</SafeAreaView>
+		);
+	}
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -35,7 +72,7 @@ export default function CarouselScreen() {
 
 			<View style={{ flex: 1, justifyContent: 'center' }}>
 				<Animated.FlatList
-					data={CARDS}
+					data={figures}
 					keyExtractor={(item) => item.id}
 					horizontal
 					showsHorizontalScrollIndicator={false}
@@ -94,11 +131,31 @@ export default function CarouselScreen() {
 											overflow: 'hidden',
 										}}
 									>
-										<Image
-											source={item.image}
-											style={{ width: '100%', height: '100%' }}
-											resizeMode="cover"
-										/>
+										{item.imageUrl ? (
+											<Image
+												source={{ uri: item.imageUrl }}
+												style={{ width: '100%', height: '100%' }}
+												resizeMode="cover"
+											/>
+										) : (
+											<View
+												className="bg-surface items-center justify-center"
+												style={{
+													width: '100%',
+													height: '100%',
+													borderWidth: 2,
+													borderColor: RARITY_COLORS[item.rarity],
+													borderRadius: 14,
+												}}
+											>
+												<Text
+													className="text-foreground"
+													style={{ fontSize: 14, fontWeight: '800' }}
+												>
+													{item.name}
+												</Text>
+											</View>
+										)}
 									</View>
 								</Pressable>
 							</Animated.View>
@@ -108,7 +165,7 @@ export default function CarouselScreen() {
 			</View>
 
 			<View className="flex-row items-center justify-center" style={{ paddingBottom: 24, gap: 8 }}>
-				{CARDS.map((card, i) => {
+				{figures.map((figure, i) => {
 					const inputRange = [
 						(i - 1) * (CARD_WIDTH + SPACING),
 						i * (CARD_WIDTH + SPACING),
@@ -129,12 +186,12 @@ export default function CarouselScreen() {
 
 					return (
 						<Animated.View
-							key={card.id}
+							key={figure.id}
 							style={{
 								width: 8,
 								height: 8,
 								borderRadius: 4,
-								backgroundColor: RARITY_COLORS[card.rarity],
+								backgroundColor: RARITY_COLORS[figure.rarity],
 								transform: [{ scale: dotScale }],
 								opacity: dotOpacity,
 							}}

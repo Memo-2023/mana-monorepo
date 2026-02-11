@@ -1,5 +1,16 @@
 <script lang="ts">
-	import { CARDS } from '$lib/data/cards';
+	import type { FigureResponse } from '@figgos/shared';
+	import { api } from '$lib/api';
+
+	let figures = $state<FigureResponse[]>([]);
+	let loading = $state(true);
+
+	$effect(() => {
+		api.figures
+			.list()
+			.then(({ figures: f }) => (figures = f))
+			.finally(() => (loading = false));
+	});
 
 	let activeIndex = $state(0);
 	let scrollContainer: HTMLDivElement;
@@ -31,7 +42,6 @@
 	let hasDragged = $state(false);
 
 	function handlePointerDown(e: PointerEvent) {
-		// Only for mouse (touch already scrolls natively)
 		if (e.pointerType !== 'mouse') return;
 		e.preventDefault();
 		isDragging = true;
@@ -55,7 +65,6 @@
 		scrollContainer.releasePointerCapture(e.pointerId);
 		scrollContainer.style.scrollSnapType = '';
 
-		// Re-snap to nearest card
 		const children = Array.from(scrollContainer.querySelectorAll('[data-card]'));
 		const scrollCenter = scrollContainer.scrollLeft + scrollContainer.clientWidth / 2;
 		let closest: HTMLElement | null = null;
@@ -72,7 +81,8 @@
 		}
 
 		if (closest) {
-			const targetScroll = closest.offsetLeft - (scrollContainer.clientWidth - closest.clientWidth) / 2;
+			const targetScroll =
+				closest.offsetLeft - (scrollContainer.clientWidth - closest.clientWidth) / 2;
 			scrollContainer.scrollTo({ left: targetScroll, behavior: 'smooth' });
 		}
 	}
@@ -83,6 +93,69 @@
 		}
 	}
 </script>
+
+{#if loading}
+	<div class="flex h-[calc(100dvh-72px)] items-center justify-center">
+		<svg class="h-8 w-8 animate-spin text-primary" viewBox="0 0 24 24" fill="none">
+			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+			></circle>
+			<path
+				class="opacity-75"
+				fill="currentColor"
+				d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+			></path>
+		</svg>
+	</div>
+{:else if figures.length === 0}
+	<div class="flex h-[calc(100dvh-72px)] items-center justify-center">
+		<p class="text-lg font-bold text-muted-foreground">No figures yet</p>
+	</div>
+{:else}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="showcase-scroll h-[calc(100dvh-72px)] w-full"
+		class:cursor-grabbing={isDragging}
+		bind:this={scrollContainer}
+		onscroll={handleScroll}
+		onpointerdown={handlePointerDown}
+		onpointermove={handlePointerMove}
+		onpointerup={handlePointerUp}
+		onpointercancel={handlePointerUp}
+	>
+		{#each figures as figure, i (figure.id)}
+			<a
+				href="/card/{figure.id}"
+				class="showcase-card h-full transition-all duration-300"
+				data-card
+				onclick={handleClick}
+				style="
+					transform: scale({i === activeIndex ? 1 : 0.8}) rotate({i === activeIndex
+					? 0
+					: i < activeIndex
+						? -3
+						: 3}deg);
+					opacity: {i === activeIndex ? 1 : 0.45};
+				"
+			>
+				{#if figure.imageUrl}
+					<img
+						src={figure.imageUrl}
+						alt={figure.name}
+						class="max-h-[85%] w-auto max-w-full object-contain"
+						draggable="false"
+					/>
+				{:else}
+					<div
+						class="flex h-[60%] w-[80%] flex-col items-center justify-center rounded-xl border-2 border-border-muted bg-surface"
+					>
+						<span class="text-lg font-black text-foreground">{figure.name}</span>
+						<span class="mt-1 text-sm text-muted-foreground">No image</span>
+					</div>
+				{/if}
+			</a>
+		{/each}
+	</div>
+{/if}
 
 <style>
 	.showcase-scroll {
@@ -99,7 +172,6 @@
 	.showcase-scroll::-webkit-scrollbar {
 		display: none;
 	}
-	/* Side padding so first/last card can center */
 	.showcase-scroll::before,
 	.showcase-scroll::after {
 		content: '';
@@ -116,35 +188,3 @@
 		touch-action: pan-x;
 	}
 </style>
-
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	class="showcase-scroll h-[calc(100dvh-72px)] w-full"
-	class:cursor-grabbing={isDragging}
-	bind:this={scrollContainer}
-	onscroll={handleScroll}
-	onpointerdown={handlePointerDown}
-	onpointermove={handlePointerMove}
-	onpointerup={handlePointerUp}
-	onpointercancel={handlePointerUp}
->
-	{#each CARDS as card, i (card.id)}
-		<a
-			href="/card/{card.id}"
-			class="showcase-card h-full transition-all duration-300"
-			data-card
-			onclick={handleClick}
-			style="
-				transform: scale({i === activeIndex ? 1 : 0.8}) rotate({i === activeIndex ? 0 : i < activeIndex ? -3 : 3}deg);
-				opacity: {i === activeIndex ? 1 : 0.45};
-			"
-		>
-			<img
-				src={card.image}
-				alt={card.name}
-				class="max-h-[85%] w-auto max-w-full object-contain"
-				draggable="false"
-			/>
-		</a>
-	{/each}
-</div>

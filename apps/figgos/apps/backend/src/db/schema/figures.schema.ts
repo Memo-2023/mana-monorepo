@@ -8,7 +8,13 @@ import {
 	jsonb,
 	index,
 } from 'drizzle-orm/pg-core';
-import type { FigureRarity, FigureUserInput } from '@figgos/shared';
+import type {
+	FigureRarity,
+	FigureUserInput,
+	GeneratedProfile,
+	FigureLanguage,
+	FigureStatus,
+} from '@figgos/shared';
 
 export const figures = pgTable(
 	'figures',
@@ -17,8 +23,12 @@ export const figures = pgTable(
 		userId: text('user_id').notNull(),
 		name: varchar('name', { length: 200 }).notNull(),
 		userInput: jsonb('user_input').$type<FigureUserInput>().notNull(),
+		generatedProfile: jsonb('generated_profile').$type<GeneratedProfile>(),
 		imageUrl: text('image_url'),
 		rarity: varchar('rarity', { length: 20 }).default('common').notNull().$type<FigureRarity>(),
+		language: varchar('language', { length: 5 }).default('en').notNull().$type<FigureLanguage>(),
+		status: varchar('status', { length: 20 }).default('pending').notNull().$type<FigureStatus>(),
+		errorMessage: text('error_message'),
 		isPublic: boolean('is_public').default(false).notNull(),
 		isArchived: boolean('is_archived').default(false).notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

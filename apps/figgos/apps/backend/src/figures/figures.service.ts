@@ -4,11 +4,20 @@ import { DATABASE_CONNECTION } from '../db/database.module';
 import type { Database } from '../db/connection';
 import { figures } from '../db/schema';
 import type { Figure } from '../db/schema';
-import { RARITY_WEIGHTS, type FigureRarity } from '@figgos/shared';
+import {
+	RARITY_WEIGHTS,
+	getCardStyle,
+	type FigureRarity,
+	type FigureLanguage,
+} from '@figgos/shared';
+import { GenerationService } from '../generation/generation.service';
 
 @Injectable()
 export class FiguresService {
-	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
+	constructor(
+		@Inject(DATABASE_CONNECTION) private db: Database,
+		private readonly generationService: GenerationService
+	) {}
 
 	rollRarity(): FigureRarity {
 		const total = Object.values(RARITY_WEIGHTS).reduce((sum, w) => sum + w, 0);
@@ -20,20 +29,38 @@ export class FiguresService {
 		return 'common';
 	}
 
-	async create(userId: string, name: string, description: string): Promise<Figure> {
+	async create(
+		userId: string,
+		name: string,
+		description: string,
+		language: FigureLanguage = 'en'
+	): Promise<Figure> {
 		const rarity = this.rollRarity();
+		const cardStyle = getCardStyle(rarity);
 
+		// Insert with status pending
 		const [figure] = await this.db
 			.insert(figures)
 			.values({
 				userId,
 				name,
-				userInput: { description },
 				rarity,
+				language,
+				userInput: { description, language },
+				status: 'pending',
 			})
 			.returning();
 
-		return figure;
+		// Run full generation pipeline (synchronous)
+		const completed = await this.generationService.generateFigure(figure.id, userId, {
+			name,
+			description,
+			language,
+			rarity,
+			cardStyle,
+		});
+
+		return completed;
 	}
 
 	async findByUserId(userId: string): Promise<Figure[]> {

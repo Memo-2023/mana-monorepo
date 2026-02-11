@@ -1,8 +1,17 @@
-import { View, Text, Image, Pressable, ScrollView, Dimensions } from 'react-native';
+import { useState, useCallback } from 'react';
+import {
+	View,
+	Text,
+	Image,
+	Pressable,
+	ScrollView,
+	Dimensions,
+	ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { CARDS, type CardData } from '../../data/cards';
-import type { FigureRarity } from '@figgos/shared';
+import { useRouter, useFocusEffect } from 'expo-router';
+import type { FigureResponse, FigureRarity } from '@figgos/shared';
+import { api } from '../../services/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.32;
@@ -24,11 +33,11 @@ const RARITY_LABELS: Record<FigureRarity, string> = {
 	common: 'COMMON',
 };
 
-function ShelfRow({ rarity, cards }: { rarity: FigureRarity; cards: CardData[] }) {
+function ShelfRow({ rarity, figures }: { rarity: FigureRarity; figures: FigureResponse[] }) {
 	const router = useRouter();
 	const color = RARITY_COLORS[rarity];
 
-	if (cards.length === 0) return null;
+	if (figures.length === 0) return null;
 
 	return (
 		<View style={{ marginBottom: 28 }}>
@@ -51,12 +60,12 @@ function ShelfRow({ rarity, cards }: { rarity: FigureRarity; cards: CardData[] }
 				showsHorizontalScrollIndicator={false}
 				contentContainerStyle={{ paddingHorizontal: 20 }}
 			>
-				{cards.map((card, i) => (
+				{figures.map((figure, i) => (
 					<Pressable
-						key={card.id}
-						onPress={() => router.push(`/card/v2/${card.id}` as any)}
+						key={figure.id}
+						onPress={() => router.push(`/card/v2/${figure.id}` as any)}
 						className="active:opacity-80"
-						style={{ marginRight: i < cards.length - 1 ? OVERLAP : 0 }}
+						style={{ marginRight: i < figures.length - 1 ? OVERLAP : 0 }}
 					>
 						<View
 							style={{
@@ -66,11 +75,31 @@ function ShelfRow({ rarity, cards }: { rarity: FigureRarity; cards: CardData[] }
 								overflow: 'hidden',
 							}}
 						>
-							<Image
-								source={card.image}
-								style={{ width: '100%', height: '100%' }}
-								resizeMode="cover"
-							/>
+							{figure.imageUrl ? (
+								<Image
+									source={{ uri: figure.imageUrl }}
+									style={{ width: '100%', height: '100%' }}
+									resizeMode="cover"
+								/>
+							) : (
+								<View
+									className="bg-surface items-center justify-center"
+									style={{
+										width: '100%',
+										height: '100%',
+										borderWidth: 1,
+										borderColor: color,
+										borderRadius: 10,
+									}}
+								>
+									<Text
+										className="text-muted-foreground"
+										style={{ fontSize: 9, textAlign: 'center' }}
+									>
+										{figure.name}
+									</Text>
+								</View>
+							)}
 						</View>
 					</Pressable>
 				))}
@@ -91,10 +120,30 @@ function ShelfRow({ rarity, cards }: { rarity: FigureRarity; cards: CardData[] }
 }
 
 export default function ShelfScreen() {
+	const [figures, setFigures] = useState<FigureResponse[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useFocusEffect(
+		useCallback(() => {
+			api.figures
+				.list()
+				.then(({ figures }) => setFigures(figures))
+				.finally(() => setLoading(false));
+		}, [])
+	);
+
 	const grouped = RARITY_ORDER.map((rarity) => ({
 		rarity,
-		cards: CARDS.filter((c) => c.rarity === rarity),
+		figures: figures.filter((f) => f.rarity === rarity),
 	}));
+
+	if (loading) {
+		return (
+			<SafeAreaView className="flex-1 bg-background items-center justify-center" edges={['top']}>
+				<ActivityIndicator color="rgb(255, 204, 0)" size="large" />
+			</SafeAreaView>
+		);
+	}
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -108,8 +157,8 @@ export default function ShelfScreen() {
 					</Text>
 				</View>
 
-				{grouped.map(({ rarity, cards }) => (
-					<ShelfRow key={rarity} rarity={rarity} cards={cards} />
+				{grouped.map(({ rarity, figures }) => (
+					<ShelfRow key={rarity} rarity={rarity} figures={figures} />
 				))}
 			</ScrollView>
 		</SafeAreaView>

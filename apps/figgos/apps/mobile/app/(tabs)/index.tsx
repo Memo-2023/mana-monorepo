@@ -8,9 +8,11 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 	ActivityIndicator,
+	Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { FigureResponse, FigureRarity } from '@figgos/shared';
+import { api } from '../../services/api';
 
 // ── Rarity ──
 
@@ -58,6 +60,46 @@ function RarityBadge({ rarity }: { rarity: FigureRarity }) {
 	);
 }
 
+// ── Stat Bar ──
+
+const STAT_COLORS = {
+	attack: 'rgb(255, 51, 102)',
+	defense: 'rgb(0, 210, 170)',
+	special: 'rgb(180, 130, 255)',
+};
+
+function StatBar({ label, value, color }: { label: string; value: number; color: string }) {
+	return (
+		<View className="flex-row items-center mb-1.5" style={{ gap: 6 }}>
+			<Text
+				className="text-muted-foreground"
+				style={{ fontSize: 10, fontWeight: '900', width: 26, letterSpacing: 1 }}
+			>
+				{label}
+			</Text>
+			<View
+				className="flex-1 bg-input rounded-full"
+				style={{ height: 8, borderWidth: 1, borderColor: 'rgb(50, 50, 80)' }}
+			>
+				<View
+					style={{
+						width: `${value}%`,
+						height: '100%',
+						backgroundColor: color,
+						borderRadius: 999,
+					}}
+				/>
+			</View>
+			<Text
+				className="text-foreground"
+				style={{ fontSize: 10, fontWeight: '800', width: 22, textAlign: 'right' }}
+			>
+				{value}
+			</Text>
+		</View>
+	);
+}
+
 // ── Screen ──
 
 export default function CreateScreen() {
@@ -75,28 +117,8 @@ export default function CreateScreen() {
 		setLoading(true);
 		setError(null);
 		try {
-			await new Promise((r) => setTimeout(r, 1500));
-			const rarities: FigureRarity[] = [
-				'common',
-				'common',
-				'common',
-				'rare',
-				'rare',
-				'epic',
-				'legendary',
-			];
-			setResult({
-				id: 'mock-id',
-				userId: 'mock-user',
-				name: name.trim(),
-				userInput: { description: description.trim() },
-				imageUrl: null,
-				rarity: rarities[Math.floor(Math.random() * rarities.length)],
-				isPublic: false,
-				isArchived: false,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			});
+			const { figure } = await api.figures.create(name.trim(), description.trim());
+			setResult(figure);
 		} catch (e: any) {
 			setError(e.message || 'Something went wrong');
 		} finally {
@@ -110,6 +132,8 @@ export default function CreateScreen() {
 		setResult(null);
 		setError(null);
 	};
+
+	const profile = result?.generatedProfile;
 
 	// ── Result ──
 	if (result) {
@@ -150,19 +174,33 @@ export default function CreateScreen() {
 								style={{ borderWidth: 3, borderColor: 'rgb(255, 204, 0)', padding: 24 }}
 							>
 								{/* Image */}
-								<View
-									className="bg-input rounded-lg self-center items-center justify-center mb-5"
-									style={{
-										width: 200,
-										height: 200,
-										borderWidth: 2,
-										borderColor: 'rgb(50, 50, 80)',
-									}}
-								>
-									<Text className="text-muted-foreground" style={{ fontSize: 12 }}>
-										Image coming soon
-									</Text>
-								</View>
+								{result.imageUrl ? (
+									<Image
+										source={{ uri: result.imageUrl }}
+										style={{
+											width: 200,
+											height: 200,
+											alignSelf: 'center',
+											marginBottom: 20,
+											borderRadius: 12,
+										}}
+										resizeMode="contain"
+									/>
+								) : (
+									<View
+										className="bg-input rounded-lg self-center items-center justify-center mb-5"
+										style={{
+											width: 200,
+											height: 200,
+											borderWidth: 2,
+											borderColor: 'rgb(50, 50, 80)',
+										}}
+									>
+										<Text className="text-muted-foreground" style={{ fontSize: 12 }}>
+											{result.status === 'failed' ? 'Generation failed' : 'No image'}
+										</Text>
+									</View>
+								)}
 
 								<Text
 									className="text-foreground text-center"
@@ -170,16 +208,80 @@ export default function CreateScreen() {
 								>
 									{result.name}
 								</Text>
-								<Text
-									className="text-muted-foreground text-center mt-3"
-									style={{ fontSize: 14, lineHeight: 20 }}
-								>
-									{result.userInput.description}
-								</Text>
+
+								{profile?.subtitle && (
+									<Text
+										className="text-muted-foreground text-center mt-1"
+										style={{
+											fontSize: 13,
+											fontWeight: '700',
+											letterSpacing: 1,
+											textTransform: 'uppercase',
+										}}
+									>
+										{profile.subtitle}
+									</Text>
+								)}
+
+								{profile?.backstory && (
+									<Text
+										className="text-muted-foreground text-center mt-3"
+										style={{ fontSize: 14, lineHeight: 20 }}
+									>
+										{profile.backstory}
+									</Text>
+								)}
+
+								{/* Stats */}
+								{profile?.stats && (
+									<View className="mt-4 w-full">
+										<StatBar label="ATK" value={profile.stats.attack} color={STAT_COLORS.attack} />
+										<StatBar
+											label="DEF"
+											value={profile.stats.defense}
+											color={STAT_COLORS.defense}
+										/>
+										<StatBar
+											label="SPL"
+											value={profile.stats.special}
+											color={STAT_COLORS.special}
+										/>
+									</View>
+								)}
+
+								{/* Special Attack */}
+								{profile?.specialAttack && (
+									<View className="mt-3 bg-input rounded-lg" style={{ padding: 12 }}>
+										<Text
+											className="text-primary"
+											style={{
+												fontSize: 11,
+												fontWeight: '900',
+												letterSpacing: 1,
+												textTransform: 'uppercase',
+											}}
+										>
+											{profile.specialAttack.name}
+										</Text>
+										<Text
+											className="text-muted-foreground mt-1"
+											style={{ fontSize: 12, lineHeight: 16 }}
+										>
+											{profile.specialAttack.description}
+										</Text>
+									</View>
+								)}
 
 								<View className="mt-4">
 									<RarityBadge rarity={result.rarity} />
 								</View>
+
+								{/* Error message */}
+								{result.status === 'failed' && result.errorMessage && (
+									<Text className="text-destructive text-center mt-3" style={{ fontSize: 12 }}>
+										{result.errorMessage}
+									</Text>
+								)}
 							</View>
 						</View>
 
@@ -385,7 +487,7 @@ export default function CreateScreen() {
 													textTransform: 'uppercase',
 												}}
 											>
-												Rolling...
+												Generating...
 											</Text>
 										</View>
 									) : (

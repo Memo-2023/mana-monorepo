@@ -147,3 +147,13 @@ export function createInventoryStorage(publicUrl?: string): StorageClient {
 		publicUrl: publicUrl ?? process.env.INVENTORY_S3_PUBLIC_URL,
 	});
 }
+
+/**
+ * Create a storage client for the Figgos project
+ */
+export function createFiggosStorage(publicUrl?: string): StorageClient {
+	return createStorageClient({
+		name: BUCKETS.FIGGOS,
+		publicUrl: publicUrl ?? process.env.FIGGOS_STORAGE_PUBLIC_URL,
+	});
+}

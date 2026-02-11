@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { FigureResponse, FigureRarity } from '@figgos/shared';
+	import { api } from '$lib/api';
 
 	let name = $state('');
 	let description = $state('');
@@ -14,6 +15,12 @@
 		legendary: 'rgb(180, 130, 20)',
 	};
 
+	const STAT_COLORS = {
+		attack: 'rgb(255, 51, 102)',
+		defense: 'rgb(0, 210, 170)',
+		special: 'rgb(180, 130, 255)',
+	};
+
 	async function handleGenerate() {
 		if (!name.trim() || !description.trim()) {
 			error = 'Give your figure a name and a story';
@@ -22,20 +29,8 @@
 		loading = true;
 		error = null;
 		try {
-			await new Promise((r) => setTimeout(r, 1500));
-			const rarities: FigureRarity[] = ['common', 'common', 'common', 'rare', 'rare', 'epic', 'legendary'];
-			result = {
-				id: 'mock-id',
-				userId: 'mock-user',
-				name: name.trim(),
-				userInput: { description: description.trim() },
-				imageUrl: null,
-				rarity: rarities[Math.floor(Math.random() * rarities.length)],
-				isPublic: false,
-				isArchived: false,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			};
+			const { figure } = await api.figures.create(name.trim(), description.trim());
+			result = figure;
 		} catch (e: any) {
 			error = e.message || 'Something went wrong';
 		} finally {
@@ -49,6 +44,8 @@
 		result = null;
 		error = null;
 	}
+
+	let profile = $derived(result?.generatedProfile);
 </script>
 
 {#if result}
@@ -66,29 +63,100 @@
 
 		<!-- Figure Card -->
 		<div class="brutal-shadow rounded-xl">
-			<div
-				class="rounded-xl border-3 border-border bg-surface p-8"
-			>
-				<!-- Image placeholder -->
-				<div
-					class="mx-auto mb-6 flex h-[260px] w-[260px] items-center justify-center rounded-xl border-2 border-border-muted bg-input"
-				>
-					<span class="text-base text-muted-foreground">Image coming soon</span>
-				</div>
+			<div class="rounded-xl border-3 border-border bg-surface p-8">
+				<!-- Image -->
+				{#if result.imageUrl}
+					<img
+						src={result.imageUrl}
+						alt={result.name}
+						class="mx-auto mb-6 h-[260px] w-[260px] rounded-xl object-contain"
+					/>
+				{:else}
+					<div
+						class="mx-auto mb-6 flex h-[260px] w-[260px] items-center justify-center rounded-xl border-2 border-border-muted bg-input"
+					>
+						<span class="text-base text-muted-foreground">
+							{result.status === 'failed' ? 'Generation failed' : 'No image'}
+						</span>
+					</div>
+				{/if}
 
 				<h2 class="text-center text-3xl font-black tracking-tight text-foreground">
 					{result.name}
 				</h2>
-				<p class="mt-4 text-center text-lg leading-6 text-muted-foreground">
-					{result.userInput.description}
-				</p>
+
+				{#if profile?.subtitle}
+					<p
+						class="mt-1 text-center text-sm font-bold uppercase tracking-wider text-muted-foreground"
+					>
+						{profile.subtitle}
+					</p>
+				{/if}
+
+				{#if profile?.backstory}
+					<p class="mt-4 text-center text-lg leading-6 text-muted-foreground">
+						{profile.backstory}
+					</p>
+				{/if}
+
+				<!-- Stats -->
+				{#if profile?.stats}
+					<div class="mt-5">
+						{#each [{ label: 'ATK', value: profile.stats.attack, color: STAT_COLORS.attack }, { label: 'DEF', value: profile.stats.defense, color: STAT_COLORS.defense }, { label: 'SPL', value: profile.stats.special, color: STAT_COLORS.special }] as stat (stat.label)}
+							<div class="mb-2.5 flex items-center gap-3">
+								<span class="w-10 text-sm font-black tracking-wider text-muted-foreground">
+									{stat.label}
+								</span>
+								<div
+									class="h-3 flex-1 overflow-hidden rounded-full border border-border-muted bg-input"
+								>
+									<div
+										class="h-full rounded-full"
+										style="width: {stat.value}%; background-color: {stat.color}"
+									></div>
+								</div>
+								<span class="w-8 text-right text-sm font-extrabold text-foreground">
+									{stat.value}
+								</span>
+							</div>
+						{/each}
+					</div>
+				{/if}
+
+				<!-- Special Attack -->
+				{#if profile?.specialAttack}
+					<div class="mt-4 rounded-lg bg-input p-4">
+						<p class="text-xs font-black uppercase tracking-wider text-primary">
+							⚡ {profile.specialAttack.name}
+						</p>
+						<p class="mt-1 text-sm text-muted-foreground">
+							{profile.specialAttack.description}
+						</p>
+					</div>
+				{/if}
+
+				<!-- Items -->
+				{#if profile?.items && profile.items.length > 0}
+					<div class="mt-4 space-y-2">
+						{#each profile.items as item (item.name)}
+							<div class="rounded-lg border border-border-muted bg-input/50 p-3">
+								<p class="text-xs font-black uppercase tracking-wider text-foreground">
+									{item.name}
+								</p>
+								<p class="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
+							</div>
+						{/each}
+					</div>
+				{/if}
 
 				<!-- Rarity Badge -->
 				<div class="mt-6 flex justify-center">
 					<div class="relative">
 						<div
 							class="absolute rounded-full"
-							style="top: 3px; left: 2px; right: -2px; bottom: -3px; background-color: {RARITY_SHADOW[result.rarity]}"
+							style="top: 3px; left: 2px; right: -2px; bottom: -3px; background-color: {RARITY_SHADOW[
+								result.rarity
+							]}"
 						></div>
 						<span
 							class="relative inline-block rounded-full border-2 border-white/20 px-6 py-2.5 text-sm font-black uppercase tracking-[2px]"
@@ -98,6 +166,11 @@
 						</span>
 					</div>
 				</div>
+
+				<!-- Error message -->
+				{#if result.status === 'failed' && result.errorMessage}
+					<p class="mt-4 text-center text-sm text-destructive">{result.errorMessage}</p>
+				{/if}
 			</div>
 		</div>
 
@@ -198,10 +271,21 @@
 						{#if loading}
 							<span class="inline-flex items-center gap-2">
 								<svg class="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none">
-									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									></circle>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
 								</svg>
-								Rolling...
+								Generating...
 							</span>
 						{:else}
 							Generate Figgo

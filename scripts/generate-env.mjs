@@ -616,7 +616,9 @@ const APP_CONFIGS = [
 			S3_ACCESS_KEY: (env) => env.S3_ACCESS_KEY || 'minioadmin',
 			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY || 'minioadmin',
 			S3_BUCKET: () => 'figgos-storage',
-			CORS_ORIGINS: () => 'http://localhost:5181,http://localhost:8081',
+			CORS_ORIGINS: () => 'http://localhost:5196,http://localhost:8081',
+			GEMINI_API_KEY: (env) => env.GEMINI_API_KEY,
+			FIGGOS_STORAGE_PUBLIC_URL: () => 'http://localhost:9000/figgos-storage',
 		},
 	},
 

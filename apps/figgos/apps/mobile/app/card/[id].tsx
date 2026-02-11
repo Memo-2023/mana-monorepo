@@ -1,4 +1,5 @@
-import { View, Text, Pressable, Image, Dimensions } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, Pressable, Image, Dimensions, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated, {
@@ -8,8 +9,8 @@ import Animated, {
 	interpolate,
 	Easing,
 } from 'react-native-reanimated';
-import { CARDS } from '../../data/cards';
-import type { FigureRarity } from '@figgos/shared';
+import type { FigureResponse, FigureRarity } from '@figgos/shared';
+import { api } from '../../services/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 48;
@@ -31,7 +32,17 @@ const STAT_COLORS = {
 export default function CardDetailScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
-	const card = CARDS.find((c) => c.id === id);
+	const [figure, setFigure] = useState<FigureResponse | null>(null);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		if (!id) return;
+		api.figures
+			.get(id)
+			.then(({ figure }) => setFigure(figure))
+			.catch(() => setFigure(null))
+			.finally(() => setLoading(false));
+	}, [id]);
 
 	const rotation = useSharedValue(0);
 	const isFlipped = useSharedValue(false);
@@ -61,7 +72,15 @@ export default function CardDetailScreen() {
 		};
 	});
 
-	if (!card) {
+	if (loading) {
+		return (
+			<SafeAreaView className="flex-1 bg-background items-center justify-center">
+				<ActivityIndicator color="rgb(255, 204, 0)" size="large" />
+			</SafeAreaView>
+		);
+	}
+
+	if (!figure) {
 		return (
 			<SafeAreaView className="flex-1 bg-background items-center justify-center">
 				<Text className="text-foreground" style={{ fontSize: 16 }}>
@@ -71,9 +90,10 @@ export default function CardDetailScreen() {
 		);
 	}
 
+	const profile = figure.generatedProfile;
+
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={['top']}>
-			{/* Back button */}
 			<Pressable
 				onPress={() => router.back()}
 				className="active:opacity-70"
@@ -87,36 +107,37 @@ export default function CardDetailScreen() {
 			<View className="flex-1 items-center justify-center">
 				<Pressable onPress={handleFlip}>
 					<View style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}>
-						{/* ── Front: just the image ── */}
+						{/* Front */}
 						<Animated.View
-							style={[
-								{
-									position: 'absolute',
-									width: CARD_WIDTH,
-									height: CARD_HEIGHT,
-								},
-								frontStyle,
-							]}
+							style={[{ position: 'absolute', width: CARD_WIDTH, height: CARD_HEIGHT }, frontStyle]}
 						>
-							<Image
-								source={card.image}
-								style={{ width: '100%', height: '100%' }}
-								resizeMode="contain"
-							/>
+							{figure.imageUrl ? (
+								<Image
+									source={{ uri: figure.imageUrl }}
+									style={{ width: '100%', height: '100%' }}
+									resizeMode="contain"
+								/>
+							) : (
+								<View
+									className="bg-surface items-center justify-center rounded-2xl"
+									style={{
+										width: '100%',
+										height: '100%',
+										borderWidth: 3,
+										borderColor: RARITY_COLORS[figure.rarity],
+									}}
+								>
+									<Text className="text-foreground" style={{ fontSize: 18, fontWeight: '800' }}>
+										{figure.name}
+									</Text>
+								</View>
+							)}
 						</Animated.View>
 
-						{/* ── Back ── */}
+						{/* Back */}
 						<Animated.View
-							style={[
-								{
-									position: 'absolute',
-									width: CARD_WIDTH,
-									height: CARD_HEIGHT,
-								},
-								backStyle,
-							]}
+							style={[{ position: 'absolute', width: CARD_WIDTH, height: CARD_HEIGHT }, backStyle]}
 						>
-							{/* Shadow layer */}
 							<View
 								style={{
 									position: 'absolute',
@@ -125,22 +146,20 @@ export default function CardDetailScreen() {
 									right: -6,
 									bottom: -6,
 									borderRadius: 16,
-									backgroundColor: RARITY_COLORS[card.rarity],
+									backgroundColor: RARITY_COLORS[figure.rarity],
 									opacity: 0.4,
 								}}
 							/>
-							{/* Card back */}
 							<View
 								className="bg-surface rounded-2xl"
 								style={{
 									flex: 1,
 									borderWidth: 3,
-									borderColor: RARITY_COLORS[card.rarity],
+									borderColor: RARITY_COLORS[figure.rarity],
 									padding: 24,
 									justifyContent: 'space-between',
 								}}
 							>
-								{/* Header */}
 								<View>
 									<View
 										className="bg-secondary rounded self-start mb-3"
@@ -166,56 +185,65 @@ export default function CardDetailScreen() {
 										className="text-foreground"
 										style={{ fontSize: 22, fontWeight: '900', letterSpacing: -0.5 }}
 									>
-										{card.name}
+										{figure.name}
 									</Text>
-									<Text
-										style={{
-											fontSize: 11,
-											fontWeight: '800',
-											letterSpacing: 2,
-											textTransform: 'uppercase',
-											marginTop: 2,
-											color: RARITY_COLORS[card.rarity],
-										}}
-									>
-										{card.subtitle}
-									</Text>
+									{profile?.subtitle && (
+										<Text
+											style={{
+												fontSize: 11,
+												fontWeight: '800',
+												letterSpacing: 2,
+												textTransform: 'uppercase',
+												marginTop: 2,
+												color: RARITY_COLORS[figure.rarity],
+											}}
+										>
+											{profile.subtitle}
+										</Text>
+									)}
 								</View>
 
-								{/* Description */}
 								<View>
 									<Text className="text-muted-foreground" style={{ fontSize: 14, lineHeight: 22 }}>
-										{card.description}
+										{profile?.backstory || figure.userInput.description}
 									</Text>
 								</View>
 
-								{/* Stats */}
-								<View>
-									<Text
-										className="mb-2"
-										style={{
-											fontSize: 11,
-											fontWeight: '900',
-											letterSpacing: 3,
-											textTransform: 'uppercase',
-											color: RARITY_COLORS[card.rarity],
-										}}
-									>
-										Stats
-									</Text>
-									<StatBar label="ATK" value={card.stats.attack} color={STAT_COLORS.attack} />
-									<StatBar label="DEF" value={card.stats.defense} color={STAT_COLORS.defense} />
-									<StatBar label="SPL" value={card.stats.special} color={STAT_COLORS.special} />
-								</View>
+								{profile?.stats && (
+									<View>
+										<Text
+											className="mb-2"
+											style={{
+												fontSize: 11,
+												fontWeight: '900',
+												letterSpacing: 3,
+												textTransform: 'uppercase',
+												color: RARITY_COLORS[figure.rarity],
+											}}
+										>
+											Stats
+										</Text>
+										<StatBar label="ATK" value={profile.stats.attack} color={STAT_COLORS.attack} />
+										<StatBar
+											label="DEF"
+											value={profile.stats.defense}
+											color={STAT_COLORS.defense}
+										/>
+										<StatBar
+											label="SPL"
+											value={profile.stats.special}
+											color={STAT_COLORS.special}
+										/>
+									</View>
+								)}
 
-								{/* Bottom: rarity + ID */}
 								<View className="flex-row items-center justify-between">
 									<View
 										className="rounded-full"
 										style={{
 											paddingHorizontal: 12,
 											paddingVertical: 4,
-											backgroundColor: RARITY_COLORS[card.rarity],
+											backgroundColor: RARITY_COLORS[figure.rarity],
 										}}
 									>
 										<Text
@@ -227,14 +255,14 @@ export default function CardDetailScreen() {
 												color: 'rgb(15, 15, 30)',
 											}}
 										>
-											{card.rarity}
+											{figure.rarity}
 										</Text>
 									</View>
 									<Text
 										className="text-muted-foreground"
 										style={{ fontSize: 10, fontWeight: '600', letterSpacing: 1 }}
 									>
-										#{card.id.split('-').pop()?.toUpperCase()}
+										#{figure.id.split('-').pop()?.toUpperCase()}
 									</Text>
 								</View>
 							</View>
@@ -260,12 +288,7 @@ function StatBar({ label, value, color }: { label: string; value: number; color:
 				style={{ height: 10, borderWidth: 1, borderColor: 'rgb(50, 50, 80)' }}
 			>
 				<View
-					style={{
-						width: `${value}%`,
-						height: '100%',
-						backgroundColor: color,
-						borderRadius: 999,
-					}}
+					style={{ width: `${value}%`, height: '100%', backgroundColor: color, borderRadius: 999 }}
 				/>
 			</View>
 			<Text

@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { View, Text, Pressable, Image, Dimensions } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, Pressable, Image, Dimensions, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { CARDS } from '../../../data/cards';
-import type { FigureRarity } from '@figgos/shared';
+import type { FigureResponse, FigureRarity } from '@figgos/shared';
+import { api } from '../../../services/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CONTAINER_WIDTH = SCREEN_WIDTH - 48;
@@ -29,17 +29,21 @@ const SPRING_CONFIG = { damping: 20, stiffness: 200, mass: 0.8 };
 export default function CardDetailV2Screen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
-	const card = CARDS.find((c) => c.id === id);
+	const [figure, setFigure] = useState<FigureResponse | null>(null);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		if (!id) return;
+		api.figures
+			.get(id)
+			.then(({ figure }) => setFigure(figure))
+			.catch(() => setFigure(null))
+			.finally(() => setLoading(false));
+	}, [id]);
 
 	// Track the actual rendered image size
 	const [imageSize, setImageSize] = useState({ width: CONTAINER_WIDTH, height: CONTAINER_HEIGHT });
 
-	const handleImageLayout = (e: { nativeEvent: { layout: { width: number; height: number } } }) => {
-		// Image uses contain, so we can read the actual layout
-		// But we need the source dimensions to compute the real rendered area
-	};
-
-	// Use Image.resolveAssetSource to get original dimensions, then compute contain size
 	const computeContainSize = (srcW: number, srcH: number) => {
 		const ratio = Math.min(CONTAINER_WIDTH / srcW, CONTAINER_HEIGHT / srcH);
 		setImageSize({
@@ -72,7 +76,6 @@ export default function CardDetailV2Screen() {
 			rotateY.value = withSpring(snapTo, SPRING_CONFIG);
 		});
 
-	// Double tap to do a full flip
 	const doubleTap = Gesture.Tap()
 		.numberOfTaps(2)
 		.onEnd(() => {
@@ -93,7 +96,15 @@ export default function CardDetailV2Screen() {
 		backfaceVisibility: 'hidden' as const,
 	}));
 
-	if (!card) {
+	if (loading) {
+		return (
+			<SafeAreaView className="flex-1 bg-background items-center justify-center">
+				<ActivityIndicator color="rgb(255, 204, 0)" size="large" />
+			</SafeAreaView>
+		);
+	}
+
+	if (!figure) {
 		return (
 			<SafeAreaView className="flex-1 bg-background items-center justify-center">
 				<Text className="text-foreground" style={{ fontSize: 16 }}>
@@ -102,6 +113,8 @@ export default function CardDetailV2Screen() {
 			</SafeAreaView>
 		);
 	}
+
+	const profile = figure.generatedProfile;
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -116,14 +129,14 @@ export default function CardDetailV2Screen() {
 					</Text>
 				</Pressable>
 				<Text className="text-muted-foreground" style={{ fontSize: 12, fontWeight: '600' }}>
-					V2 — Gesture 3D
+					Drag to rotate · Double-tap to flip
 				</Text>
 			</View>
 
 			<View className="flex-1 items-center justify-center">
 				<GestureDetector gesture={composed}>
 					<View style={{ width: imageSize.width, height: imageSize.height }}>
-						{/* ── Front: just the image ── */}
+						{/* ── Front: the image ── */}
 						<Animated.View
 							style={[
 								{
@@ -134,15 +147,34 @@ export default function CardDetailV2Screen() {
 								frontStyle,
 							]}
 						>
-							<Image
-								source={card.image}
-								style={{ width: '100%', height: '100%' }}
-								resizeMode="contain"
-								onLoad={(e) => {
-									const { width: srcW, height: srcH } = e.nativeEvent.source;
-									computeContainSize(srcW, srcH);
-								}}
-							/>
+							{figure.imageUrl ? (
+								<Image
+									source={{ uri: figure.imageUrl }}
+									style={{ width: '100%', height: '100%' }}
+									resizeMode="contain"
+									onLoad={(e) => {
+										const { width: srcW, height: srcH } = e.nativeEvent.source;
+										computeContainSize(srcW, srcH);
+									}}
+								/>
+							) : (
+								<View
+									className="bg-surface items-center justify-center rounded-2xl"
+									style={{
+										width: '100%',
+										height: '100%',
+										borderWidth: 3,
+										borderColor: RARITY_COLORS[figure.rarity],
+									}}
+								>
+									<Text className="text-foreground" style={{ fontSize: 18, fontWeight: '800' }}>
+										{figure.name}
+									</Text>
+									<Text className="text-muted-foreground mt-2" style={{ fontSize: 12 }}>
+										No image
+									</Text>
+								</View>
+							)}
 						</Animated.View>
 
 						{/* ── Back ── */}
@@ -165,7 +197,7 @@ export default function CardDetailV2Screen() {
 									right: -5,
 									bottom: -5,
 									borderRadius: 16,
-									backgroundColor: RARITY_COLORS[card.rarity],
+									backgroundColor: RARITY_COLORS[figure.rarity],
 									opacity: 0.3,
 								}}
 							/>
@@ -175,7 +207,7 @@ export default function CardDetailV2Screen() {
 								style={{
 									flex: 1,
 									borderWidth: 3,
-									borderColor: RARITY_COLORS[card.rarity],
+									borderColor: RARITY_COLORS[figure.rarity],
 									padding: 20,
 									justifyContent: 'space-between',
 								}}
@@ -206,20 +238,22 @@ export default function CardDetailV2Screen() {
 										className="text-foreground"
 										style={{ fontSize: 20, fontWeight: '900', letterSpacing: -0.5 }}
 									>
-										{card.name}
+										{figure.name}
 									</Text>
-									<Text
-										style={{
-											fontSize: 10,
-											fontWeight: '800',
-											letterSpacing: 2,
-											textTransform: 'uppercase',
-											marginTop: 2,
-											color: RARITY_COLORS[card.rarity],
-										}}
-									>
-										{card.subtitle}
-									</Text>
+									{profile?.subtitle && (
+										<Text
+											style={{
+												fontSize: 10,
+												fontWeight: '800',
+												letterSpacing: 2,
+												textTransform: 'uppercase',
+												marginTop: 2,
+												color: RARITY_COLORS[figure.rarity],
+											}}
+										>
+											{profile.subtitle}
+										</Text>
+									)}
 								</View>
 
 								{/* Description */}
@@ -228,27 +262,54 @@ export default function CardDetailV2Screen() {
 									style={{ fontSize: 13, lineHeight: 20 }}
 									numberOfLines={5}
 								>
-									{card.description}
+									{profile?.backstory || figure.userInput.description}
 								</Text>
 
 								{/* Stats */}
-								<View>
-									<Text
-										style={{
-											fontSize: 10,
-											fontWeight: '900',
-											letterSpacing: 3,
-											textTransform: 'uppercase',
-											color: RARITY_COLORS[card.rarity],
-											marginBottom: 6,
-										}}
-									>
-										Stats
-									</Text>
-									<StatBar label="ATK" value={card.stats.attack} color={STAT_COLORS.attack} />
-									<StatBar label="DEF" value={card.stats.defense} color={STAT_COLORS.defense} />
-									<StatBar label="SPL" value={card.stats.special} color={STAT_COLORS.special} />
-								</View>
+								{profile?.stats && (
+									<View>
+										<Text
+											style={{
+												fontSize: 10,
+												fontWeight: '900',
+												letterSpacing: 3,
+												textTransform: 'uppercase',
+												color: RARITY_COLORS[figure.rarity],
+												marginBottom: 6,
+											}}
+										>
+											Stats
+										</Text>
+										<StatBar label="ATK" value={profile.stats.attack} color={STAT_COLORS.attack} />
+										<StatBar
+											label="DEF"
+											value={profile.stats.defense}
+											color={STAT_COLORS.defense}
+										/>
+										<StatBar
+											label="SPL"
+											value={profile.stats.special}
+											color={STAT_COLORS.special}
+										/>
+									</View>
+								)}
+
+								{/* Special Attack */}
+								{profile?.specialAttack && (
+									<View className="bg-input rounded" style={{ padding: 8 }}>
+										<Text
+											className="text-primary"
+											style={{
+												fontSize: 9,
+												fontWeight: '900',
+												letterSpacing: 1,
+												textTransform: 'uppercase',
+											}}
+										>
+											⚡ {profile.specialAttack.name}
+										</Text>
+									</View>
+								)}
 
 								{/* Bottom: rarity + ID */}
 								<View className="flex-row items-center justify-between">
@@ -257,7 +318,7 @@ export default function CardDetailV2Screen() {
 										style={{
 											paddingHorizontal: 10,
 											paddingVertical: 3,
-											backgroundColor: RARITY_COLORS[card.rarity],
+											backgroundColor: RARITY_COLORS[figure.rarity],
 										}}
 									>
 										<Text
@@ -269,28 +330,20 @@ export default function CardDetailV2Screen() {
 												color: 'rgb(15, 15, 30)',
 											}}
 										>
-											{card.rarity}
+											{figure.rarity}
 										</Text>
 									</View>
 									<Text
 										className="text-muted-foreground"
 										style={{ fontSize: 9, fontWeight: '600', letterSpacing: 1 }}
 									>
-										#{card.id.split('-').pop()?.toUpperCase()}
+										#{figure.id.split('-').pop()?.toUpperCase()}
 									</Text>
 								</View>
 							</View>
 						</Animated.View>
 					</View>
 				</GestureDetector>
-
-				{/* Hint */}
-				<Text
-					className="text-muted-foreground mt-6"
-					style={{ fontSize: 11, fontWeight: '600', letterSpacing: 1 }}
-				>
-					Drag to rotate · Double-tap to flip
-				</Text>
 			</View>
 		</SafeAreaView>
 	);

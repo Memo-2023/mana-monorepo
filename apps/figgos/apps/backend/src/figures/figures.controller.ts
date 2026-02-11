@@ -19,7 +19,12 @@ export class FiguresController {
 
 	@Post()
 	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateFigureDto) {
-		const figure = await this.figuresService.create(user.userId, dto.name, dto.description);
+		const figure = await this.figuresService.create(
+			user.userId,
+			dto.name,
+			dto.description,
+			dto.language || 'en'
+		);
 		return { figure };
 	}
 

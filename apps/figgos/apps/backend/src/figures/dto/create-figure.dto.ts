@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, MinLength, IsOptional, IsIn } from 'class-validator';
+import type { FigureLanguage } from '@figgos/shared';
 
 export class CreateFigureDto {
 	@IsString()
@@ -12,4 +13,9 @@ export class CreateFigureDto {
 	@MinLength(1)
 	@MaxLength(2000)
 	description!: string;
+
+	@IsOptional()
+	@IsString()
+	@IsIn(['en', 'de'])
+	language?: FigureLanguage = 'en';
 }
