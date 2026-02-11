@@ -4,10 +4,10 @@
 
 **Photos** is a unified photo gallery application for the ManaCore ecosystem. It aggregates photos from all apps (Picture, Chat, Contacts, NutriPhi, etc.) via the mana-media service, providing a central place to view, organize, and manage photos.
 
-| App | Port | URL |
-|-----|------|-----|
-| Backend | 3019 | http://localhost:3019 |
-| Web App | 5189 | http://localhost:5189 |
+| App | Dev Port | Prod Port | Prod URL |
+|-----|----------|-----------|----------|
+| Backend | 3019 | 3039 | https://photos-api.mana.how |
+| Web App | 5189 | 5019 | https://photos.mana.how |
 
 ## Project Structure
 
@@ -15,7 +15,7 @@
 apps/photos/
 ├── apps/
 │   ├── backend/      # NestJS API server (@photos/backend)
-│   └── web/          # SvelteKit web application (@photos/web) [TODO]
+│   └── web/          # SvelteKit web application (@photos/web)
 ├── packages/
 │   └── shared/       # Shared types (@photos/shared)
 ├── package.json
