@@ -11,10 +11,12 @@ import time
 from typing import Optional
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+
+from app.auth import verify_api_key, AuthResult, get_api_key_stats, REQUIRE_AUTH
 
 # Configure logging
 logging.basicConfig(
@@ -52,6 +54,7 @@ class HealthResponse(BaseModel):
     vllm_available: bool
     vllm_url: Optional[str] = None
     mistral_api_available: bool
+    auth_required: bool
     models: dict
 
 
@@ -136,6 +139,7 @@ async def health_check():
         vllm_available=vllm_health.get("status") == "healthy",
         vllm_url=VLLM_URL if USE_VLLM else None,
         mistral_api_available=api_available(),
+        auth_required=REQUIRE_AUTH,
         models={
             "default_whisper": DEFAULT_WHISPER_MODEL,
         },
@@ -143,7 +147,7 @@ async def health_check():
 
 
 @app.get("/models", response_model=ModelsResponse)
-async def list_models():
+async def list_models(auth: AuthResult = Depends(verify_api_key)):
     """List available models."""
     from app.whisper_service import AVAILABLE_MODELS as whisper_models
     from app.vllm_service import get_models
@@ -159,9 +163,11 @@ async def list_models():
 
 @app.post("/transcribe", response_model=TranscriptionResponse)
 async def transcribe_whisper(
+    response: Response,
     file: UploadFile = File(..., description="Audio file to transcribe"),
     language: Optional[str] = Form(None, description="Language code (auto-detect if not provided)"),
     model: Optional[str] = Form(None, description="Whisper model to use"),
+    auth: AuthResult = Depends(verify_api_key),
 ):
     """
     Transcribe audio using Whisper (Lightning MLX).
@@ -170,6 +176,10 @@ async def transcribe_whisper(
     Supported formats: mp3, wav, m4a, flac, ogg, webm
     Max file size: 100MB
     """
+    # Add rate limit headers
+    if auth.rate_limit_remaining is not None:
+        response.headers["X-RateLimit-Remaining"] = str(auth.rate_limit_remaining)
+
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
@@ -216,9 +226,11 @@ async def transcribe_whisper(
 
 @app.post("/transcribe/voxtral", response_model=TranscriptionResponse)
 async def transcribe_voxtral(
+    response: Response,
     file: UploadFile = File(..., description="Audio file to transcribe"),
     language: str = Form("de", description="Language code"),
     use_realtime: bool = Form(False, description="Use Realtime 4B model for lower latency"),
+    auth: AuthResult = Depends(verify_api_key),
 ):
     """
     Transcribe audio using Voxtral via vLLM server.
@@ -232,6 +244,10 @@ async def transcribe_voxtral(
     Supported formats: mp3, wav, m4a, flac, ogg, webm
     Max file size: 100MB
     """
+    # Add rate limit headers
+    if auth.rate_limit_remaining is not None:
+        response.headers["X-RateLimit-Remaining"] = str(auth.rate_limit_remaining)
+
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
@@ -315,9 +331,11 @@ async def transcribe_voxtral(
 
 @app.post("/transcribe/voxtral/api", response_model=TranscriptionResponse)
 async def transcribe_voxtral_api(
+    response: Response,
     file: UploadFile = File(..., description="Audio file to transcribe"),
     language: Optional[str] = Form(None, description="Language code (auto-detect if not provided)"),
     diarization: bool = Form(False, description="Enable speaker diarization"),
+    auth: AuthResult = Depends(verify_api_key),
 ):
     """
     Transcribe audio using Mistral's Voxtral API directly.
@@ -329,6 +347,10 @@ async def transcribe_voxtral_api(
 
     Requires MISTRAL_API_KEY environment variable.
     """
+    # Add rate limit headers
+    if auth.rate_limit_remaining is not None:
+        response.headers["X-RateLimit-Remaining"] = str(auth.rate_limit_remaining)
+
     from app.voxtral_api_service import is_available, transcribe_audio_bytes
 
     if not is_available():
@@ -366,9 +388,11 @@ async def transcribe_voxtral_api(
 
 @app.post("/transcribe/auto", response_model=TranscriptionResponse)
 async def transcribe_auto(
+    response: Response,
     file: UploadFile = File(..., description="Audio file to transcribe"),
     language: Optional[str] = Form(None, description="Language hint"),
     prefer: str = Form("whisper", description="Preferred: 'whisper' or 'voxtral'"),
+    auth: AuthResult = Depends(verify_api_key),
 ):
     """
     Transcribe with automatic model selection and fallback.
@@ -378,6 +402,10 @@ async def transcribe_auto(
     2. Alternative model
     3. Mistral API
     """
+    # Add rate limit headers
+    if auth.rate_limit_remaining is not None:
+        response.headers["X-RateLimit-Remaining"] = str(auth.rate_limit_remaining)
+
     if prefer == "voxtral":
         try:
             return await transcribe_voxtral(file, language or "de", False)

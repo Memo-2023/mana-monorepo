@@ -14,9 +14,11 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Response
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+from .auth import verify_api_key, AuthResult, REQUIRE_AUTH
 
 from .audio_utils import convert_audio, SUPPORTED_FORMATS, cleanup_temp_file, save_temp_audio
 from .kokoro_service import (
@@ -142,6 +144,7 @@ class HealthResponse(BaseModel):
     status: str
     service: str
     models_loaded: dict
+    auth_required: bool
 
 
 class ModelsResponse(BaseModel):
@@ -196,11 +199,12 @@ async def health_check():
             "kokoro": is_kokoro_loaded(),
             "f5": is_f5_loaded(),
         },
+        auth_required=REQUIRE_AUTH,
     )
 
 
 @app.get("/models", response_model=ModelsResponse)
-async def get_models():
+async def get_models(auth: AuthResult = Depends(verify_api_key)):
     """Get information about available models."""
     return ModelsResponse(
         kokoro={
@@ -226,7 +230,7 @@ async def get_models():
 
 
 @app.get("/voices", response_model=VoicesResponse)
-async def get_voices():
+async def get_voices(auth: AuthResult = Depends(verify_api_key)):
     """Get all available voices."""
     # Kokoro preset voices
     kokoro_voices = [
@@ -264,6 +268,7 @@ async def register_voice(
     description: str = Form("", description="Voice description"),
     transcript: str = Form(..., description="Transcript of the reference audio"),
     reference_audio: UploadFile = File(..., description="Reference audio file"),
+    auth: AuthResult = Depends(verify_api_key),
 ):
     """
     Register a new custom voice for F5-TTS voice cloning.
@@ -313,7 +318,7 @@ async def register_voice(
 
 
 @app.delete("/voices/{voice_id}", response_model=VoiceDeletedResponse)
-async def delete_voice(voice_id: str):
+async def delete_voice(voice_id: str, auth: AuthResult = Depends(verify_api_key)):
     """Delete a registered custom voice."""
     voice_manager = get_voice_manager()
 
@@ -332,7 +337,10 @@ async def delete_voice(voice_id: str):
 
 
 @app.post("/synthesize/kokoro")
-async def synthesize_with_kokoro(request: KokoroRequest):
+async def synthesize_with_kokoro(
+    request: KokoroRequest,
+    auth: AuthResult = Depends(verify_api_key),
+):
     """
     Synthesize speech using Kokoro with preset voices.
 
@@ -403,6 +411,7 @@ async def synthesize_with_f5(
     output_format: str = Form("wav", description="Output format (wav, mp3)"),
     speed: float = Form(1.0, ge=0.5, le=2.0, description="Speech speed"),
     steps: int = Form(32, ge=8, le=64, description="Diffusion steps"),
+    auth: AuthResult = Depends(verify_api_key),
 ):
     """
     Synthesize speech using F5-TTS with voice cloning.
@@ -520,7 +529,10 @@ async def synthesize_with_f5(
 
 
 @app.post("/synthesize/auto")
-async def synthesize_auto(request: AutoRequest):
+async def synthesize_auto(
+    request: AutoRequest,
+    auth: AuthResult = Depends(verify_api_key),
+):
     """
     Auto-select the best TTS model based on voice parameter.
 
