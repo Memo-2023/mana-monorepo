@@ -1069,7 +1069,8 @@ jobs:
         with:
           context: .
           file: apps/storage/apps/backend/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          # Note: arm64 disabled due to QEMU emulation issues with native deps
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
