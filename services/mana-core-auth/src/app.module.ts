@@ -13,6 +13,7 @@ import { AiModule } from './ai/ai.module';
 import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics';
 import { AnalyticsModule } from './analytics';
+import { AdminModule } from './admin/admin.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggerModule } from './common/logger';
 
@@ -39,6 +40,7 @@ import { LoggerModule } from './common/logger';
 		ReferralsModule,
 		SettingsModule,
 		TagsModule,
+		AdminModule,
 	],
 	providers: [
 		{

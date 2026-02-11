@@ -4,6 +4,7 @@ import { DatabaseModule } from './db/database.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { ListModule } from './list/list.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -15,6 +16,7 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 		FavoriteModule,
 		ListModule,
 		HealthModule.forRoot({ serviceName: 'quote-backend' }),
+		AdminModule,
 	],
 })
 export class AppModule {}

@@ -11,6 +11,7 @@ import { LabelModule } from './label/label.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { KanbanModule } from './kanban/kanban.module';
 import { NetworkModule } from './network/network.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -40,6 +41,7 @@ import { NetworkModule } from './network/network.module';
 		ReminderModule,
 		KanbanModule,
 		NetworkModule,
+		AdminModule,
 	],
 })
 export class AppModule {}

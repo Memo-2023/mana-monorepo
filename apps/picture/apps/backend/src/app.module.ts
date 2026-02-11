@@ -13,6 +13,7 @@ import { GenerateModule } from './generate/generate.module';
 import { ExploreModule } from './explore/explore.module';
 import { ProfileModule } from './profile/profile.module';
 import { BatchModule } from './batch/batch.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -42,6 +43,7 @@ import { BatchModule } from './batch/batch.module';
 		ExploreModule,
 		ProfileModule,
 		BatchModule,
+		AdminModule,
 	],
 })
 export class AppModule {}

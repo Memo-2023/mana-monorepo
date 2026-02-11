@@ -5,6 +5,7 @@ import { DeckModule } from './deck/deck.module';
 import { SlideModule } from './slide/slide.module';
 import { ThemeModule } from './theme/theme.module';
 import { ShareModule } from './share/share.module';
+import { AdminModule } from './admin/admin.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
 
 @Module({
@@ -18,6 +19,7 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 		SlideModule,
 		ThemeModule,
 		ShareModule,
+		AdminModule,
 		HealthModule.forRoot({ serviceName: 'presi-backend' }),
 	],
 })

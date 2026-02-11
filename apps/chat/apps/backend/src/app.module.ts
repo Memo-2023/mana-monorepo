@@ -9,6 +9,7 @@ import { TemplateModule } from './template/template.module';
 import { SpaceModule } from './space/space.module';
 import { DocumentModule } from './document/document.module';
 import { ModelModule } from './model/model.module';
+import { AdminModule } from './admin/admin.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
 
 @Module({
@@ -37,6 +38,7 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 		SpaceModule,
 		DocumentModule,
 		ModelModule,
+		AdminModule,
 		HealthModule.forRoot({ serviceName: 'chat-backend' }),
 	],
 })

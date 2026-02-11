@@ -6,7 +6,7 @@ import { sharedDecks } from './shared-decks.schema';
 
 export const decks = pgTable('decks', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(), // TEXT for Better Auth nanoid user IDs
 	title: text('title').notNull(),
 	description: text('description'),
 	themeId: uuid('theme_id').references(() => themes.id),

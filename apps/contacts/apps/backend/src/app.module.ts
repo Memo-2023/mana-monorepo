@@ -14,6 +14,7 @@ import { DuplicatesModule } from './duplicates/duplicates.module';
 import { PhotoModule } from './photo/photo.module';
 import { BatchModule } from './batch/batch.module';
 import { NetworkModule } from './network/network.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -38,6 +39,7 @@ import { NetworkModule } from './network/network.module';
 		PhotoModule,
 		BatchModule,
 		NetworkModule,
+		AdminModule,
 	],
 })
 export class AppModule {}

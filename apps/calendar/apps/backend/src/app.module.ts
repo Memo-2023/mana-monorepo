@@ -15,6 +15,7 @@ import { SyncModule } from './sync/sync.module';
 import { NetworkModule } from './network/network.module';
 import { EmailModule } from './email/email.module';
 import { NotificationModule } from './notification/notification.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -48,6 +49,7 @@ import { NotificationModule } from './notification/notification.module';
 		ShareModule,
 		SyncModule,
 		NetworkModule,
+		AdminModule,
 	],
 })
 export class AppModule {}
