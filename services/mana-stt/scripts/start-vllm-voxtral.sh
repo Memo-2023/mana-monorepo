@@ -23,14 +23,19 @@ if [[ "$MODEL" == "4b" || "$MODEL" == "realtime" ]]; then
     exec vllm serve mistralai/Voxtral-Mini-4B-Realtime-2602 \
         --host 0.0.0.0 \
         --port "$PORT" \
-        --max-model-len 8192
+        --max-model-len 4096 \
+        --max-num-batched-tokens 4096 \
+        --enforce-eager
 else
     echo "Model: Voxtral Mini 3B"
+    # CPU mode needs smaller context and batched tokens
     exec vllm serve mistralai/Voxtral-Mini-3B-2507 \
         --tokenizer_mode mistral \
         --config_format mistral \
         --load_format mistral \
         --host 0.0.0.0 \
         --port "$PORT" \
-        --max-model-len 32768
+        --max-model-len 4096 \
+        --max-num-batched-tokens 4096 \
+        --enforce-eager
 fi
