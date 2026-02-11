@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   Figgos Design System — Neo-Brutalist Game UI (Tailwind v4)
+
+   Color strategy:
+   - Primary: Electric Yellow — bold, in-your-face, action
+   - Secondary: Hot Pink — accents, badges, highlights
+   - Surface: Deep navy — dark but warm enough for contrast
+   - Borders: Thick, visible, part of the design language
+   - Shadows: Hard offset layers, not soft blurs
+   ============================================================================= */
+
+@theme {
+	--color-background: rgb(15, 15, 30);
+	--color-foreground: rgb(245, 245, 245);
+
+	--color-surface: rgb(26, 26, 53);
+	--color-surface-elevated: rgb(35, 35, 65);
+
+	--color-muted: rgb(55, 55, 80);
+	--color-muted-foreground: rgb(136, 136, 170);
+
+	/* Electric Yellow */
+	--color-primary: rgb(255, 204, 0);
+	--color-primary-foreground: rgb(15, 15, 30);
+	--color-primary-dark: rgb(179, 143, 0);
+
+	/* Hot Pink */
+	--color-secondary: rgb(255, 51, 102);
+	--color-secondary-foreground: rgb(255, 255, 255);
+	--color-secondary-dark: rgb(179, 35, 74);
+
+	/* Teal */
+	--color-accent: rgb(0, 210, 170);
+	--color-accent-foreground: rgb(15, 15, 30);
+	--color-accent-dark: rgb(0, 150, 120);
+
+	--color-destructive: rgb(255, 80, 80);
+	--color-destructive-foreground: rgb(15, 15, 30);
+
+	--color-border: rgb(255, 204, 0);
+	--color-border-muted: rgb(50, 50, 80);
+
+	--color-input: rgb(20, 20, 40);
+	--color-ring: rgb(255, 204, 0);
+
+	/* Rarity */
+	--color-rarity-common: rgb(136, 136, 170);
+	--color-rarity-common-foreground: rgb(245, 245, 245);
+	--color-rarity-rare: rgb(100, 180, 255);
+	--color-rarity-rare-foreground: rgb(15, 15, 30);
+	--color-rarity-epic: rgb(180, 130, 255);
+	--color-rarity-epic-foreground: rgb(15, 15, 30);
+	--color-rarity-legendary: rgb(255, 185, 30);
+	--color-rarity-legendary-foreground: rgb(25, 25, 25);
+}
+
+/* Base */
+body {
+	background-color: var(--color-background);
+	color: var(--color-foreground);
+	font-family: system-ui, -apple-system, sans-serif;
+	min-height: 100dvh;
+}
+
+/* Neo-Brutalist utilities */
+.brutal-shadow {
+	position: relative;
+}
+
+.brutal-shadow::before {
+	content: "";
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	right: -5px;
+	bottom: -5px;
+	background-color: var(--color-primary-dark);
+	border-radius: inherit;
+	z-index: -1;
+}

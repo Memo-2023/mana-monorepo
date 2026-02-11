@@ -8,7 +8,8 @@ A collectible figure game where users create and collect AI-generated fantasy fi
 apps/figgos/
 ├── apps/
 │   ├── backend/     # @figgos/backend - NestJS API (port 3025)
-│   └── mobile/      # @figgos/mobile - Expo React Native app
+│   ├── mobile/      # @figgos/mobile - Expo React Native app
+│   └── web/         # @figgos/web - SvelteKit web app (port 5196)
 ├── packages/
 │   └── shared/      # @figgos/shared - Shared types & constants
 └── package.json
@@ -20,6 +21,7 @@ apps/figgos/
 
 ```bash
 pnpm dev:figgos:mobile       # Start mobile app
+pnpm dev:figgos:web          # Start web app (port 5196)
 pnpm dev:figgos:backend      # Start backend
 pnpm dev:figgos:app          # Start web + backend together
 pnpm dev:figgos:full         # Start with auth + auto DB setup
@@ -39,6 +41,7 @@ npx expo start --clear       # Start with clean cache
 ## Technology Stack
 
 - **Mobile**: React Native 0.81 + Expo SDK 54, NativeWind 4, Expo Router
+- **Web**: SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4
 - **Backend**: NestJS 10, Drizzle ORM, PostgreSQL
 - **Auth**: Mana Core Auth (JWT via @manacore/shared-nestjs-auth)
 - **Shared**: `@figgos/shared` — all types inlined in `src/index.ts` (Node v24 ESM compat)
@@ -50,7 +53,7 @@ npx expo start --clear       # Start with clean cache
 | App | Port |
 |-----|------|
 | Backend | 3025 |
-| Web (planned) | 5181 |
+| Web | 5196 |
 
 ## Environment Variables
 
