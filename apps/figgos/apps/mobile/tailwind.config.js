@@ -6,7 +6,6 @@ module.exports = {
 	theme: {
 		extend: {
 			colors: {
-				// Semantic tokens
 				background: 'rgb(var(--background) / <alpha-value>)',
 				foreground: 'rgb(var(--foreground) / <alpha-value>)',
 				surface: {
@@ -20,24 +19,29 @@ module.exports = {
 				primary: {
 					DEFAULT: 'rgb(var(--primary) / <alpha-value>)',
 					foreground: 'rgb(var(--primary-foreground) / <alpha-value>)',
+					dark: 'rgb(var(--primary-dark) / <alpha-value>)',
 				},
 				secondary: {
 					DEFAULT: 'rgb(var(--secondary) / <alpha-value>)',
 					foreground: 'rgb(var(--secondary-foreground) / <alpha-value>)',
+					dark: 'rgb(var(--secondary-dark) / <alpha-value>)',
 				},
 				accent: {
 					DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
 					foreground: 'rgb(var(--accent-foreground) / <alpha-value>)',
+					dark: 'rgb(var(--accent-dark) / <alpha-value>)',
 				},
 				destructive: {
 					DEFAULT: 'rgb(var(--destructive) / <alpha-value>)',
 					foreground: 'rgb(var(--destructive-foreground) / <alpha-value>)',
 				},
-				border: 'rgb(var(--border) / <alpha-value>)',
+				border: {
+					DEFAULT: 'rgb(var(--border) / <alpha-value>)',
+					muted: 'rgb(var(--border-muted) / <alpha-value>)',
+				},
 				input: 'rgb(var(--input) / <alpha-value>)',
 				ring: 'rgb(var(--ring) / <alpha-value>)',
 
-				// Rarity system (game-specific)
 				rarity: {
 					common: {
 						DEFAULT: 'rgb(var(--rarity-common) / <alpha-value>)',
@@ -56,6 +60,9 @@ module.exports = {
 						foreground: 'rgb(var(--rarity-legendary-foreground) / <alpha-value>)',
 					},
 				},
+			},
+			borderWidth: {
+				3: '3px',
 			},
 		},
 	},
