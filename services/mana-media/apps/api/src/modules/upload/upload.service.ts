@@ -3,7 +3,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import * as mime from 'mime-types';
 import * as crypto from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, and, or, gte, lte, like, isNotNull, sql, desc, asc, inArray } from 'drizzle-orm';
 import { StorageService } from '../storage/storage.service';
 import { MatrixService } from '../matrix/matrix.service';
 import { PROCESS_QUEUE } from '../process/process.constants';
@@ -38,8 +38,45 @@ export interface MediaRecord {
 		format?: string;
 		hasAlpha?: boolean;
 	};
+	exif?: {
+		cameraMake?: string;
+		cameraModel?: string;
+		dateTaken?: Date;
+		focalLength?: string;
+		aperture?: string;
+		iso?: number;
+		exposureTime?: string;
+		gpsLatitude?: string;
+		gpsLongitude?: string;
+	};
 	createdAt: Date;
 	updatedAt: Date;
+}
+
+export interface ListAllOptions {
+	userId: string;
+	apps?: string[];
+	mimeType?: string;
+	dateFrom?: Date;
+	dateTo?: Date;
+	hasLocation?: boolean;
+	limit?: number;
+	offset?: number;
+	sortBy?: 'createdAt' | 'dateTaken' | 'size';
+	sortOrder?: 'asc' | 'desc';
+}
+
+export interface ListAllResult {
+	items: MediaRecord[];
+	total: number;
+	hasMore: boolean;
+}
+
+export interface StatsResult {
+	totalCount: number;
+	totalSize: number;
+	byApp: Record<string, { count: number; size: number }>;
+	byYear: Record<string, number>;
 }
 
 @Injectable()
@@ -208,6 +245,16 @@ export class UploadService {
 				| 'height'
 				| 'format'
 				| 'hasAlpha'
+				| 'exifData'
+				| 'dateTaken'
+				| 'cameraMake'
+				| 'cameraModel'
+				| 'focalLength'
+				| 'aperture'
+				| 'iso'
+				| 'exposureTime'
+				| 'gpsLatitude'
+				| 'gpsLongitude'
 			>
 		>
 	): Promise<MediaRecord | null> {
@@ -277,6 +324,136 @@ export class UploadService {
 		return results.map((r) => this.toMediaRecord(r));
 	}
 
+	/**
+	 * List media across all apps for a user with advanced filtering
+	 */
+	async listAll(options: ListAllOptions): Promise<ListAllResult> {
+		const conditions = [eq(mediaReferences.userId, options.userId)];
+
+		// Filter by multiple apps
+		if (options.apps && options.apps.length > 0) {
+			conditions.push(inArray(mediaReferences.app, options.apps));
+		}
+
+		// Filter by MIME type (supports wildcards like "image/*")
+		if (options.mimeType) {
+			if (options.mimeType.endsWith('/*')) {
+				const prefix = options.mimeType.slice(0, -1);
+				conditions.push(like(media.mimeType, `${prefix}%`));
+			} else {
+				conditions.push(eq(media.mimeType, options.mimeType));
+			}
+		}
+
+		// Filter by date range
+		if (options.dateFrom) {
+			conditions.push(gte(media.createdAt, options.dateFrom));
+		}
+		if (options.dateTo) {
+			conditions.push(lte(media.createdAt, options.dateTo));
+		}
+
+		// Filter by location
+		if (options.hasLocation) {
+			conditions.push(isNotNull(media.gpsLatitude));
+			conditions.push(isNotNull(media.gpsLongitude));
+		}
+
+		// Only show ready media
+		conditions.push(eq(media.status, 'ready'));
+
+		// Build order by
+		const orderColumn =
+			options.sortBy === 'dateTaken'
+				? media.dateTaken
+				: options.sortBy === 'size'
+					? media.size
+					: media.createdAt;
+		const orderFn = options.sortOrder === 'asc' ? asc : desc;
+
+		// Get total count
+		const countResult = await this.db
+			.select({ count: sql<number>`count(distinct ${media.id})` })
+			.from(media)
+			.innerJoin(mediaReferences, eq(media.id, mediaReferences.mediaId))
+			.where(and(...conditions));
+		const total = Number(countResult[0]?.count || 0);
+
+		// Get paginated results
+		const limit = options.limit || 50;
+		const offset = options.offset || 0;
+
+		const results = await this.db
+			.selectDistinct({ media: media })
+			.from(media)
+			.innerJoin(mediaReferences, eq(media.id, mediaReferences.mediaId))
+			.where(and(...conditions))
+			.orderBy(orderFn(orderColumn))
+			.limit(limit)
+			.offset(offset);
+
+		return {
+			items: results.map((r) => this.toMediaRecord(r.media)),
+			total,
+			hasMore: offset + results.length < total,
+		};
+	}
+
+	/**
+	 * Get media statistics for a user
+	 */
+	async getStats(userId: string): Promise<StatsResult> {
+		// Total count and size
+		const totalResult = await this.db
+			.select({
+				count: sql<number>`count(distinct ${media.id})`,
+				size: sql<number>`sum(${media.size})`,
+			})
+			.from(media)
+			.innerJoin(mediaReferences, eq(media.id, mediaReferences.mediaId))
+			.where(eq(mediaReferences.userId, userId));
+
+		// By app
+		const byAppResult = await this.db
+			.select({
+				app: mediaReferences.app,
+				count: sql<number>`count(distinct ${media.id})`,
+				size: sql<number>`sum(${media.size})`,
+			})
+			.from(media)
+			.innerJoin(mediaReferences, eq(media.id, mediaReferences.mediaId))
+			.where(eq(mediaReferences.userId, userId))
+			.groupBy(mediaReferences.app);
+
+		// By year
+		const byYearResult = await this.db
+			.select({
+				year: sql<string>`extract(year from ${media.createdAt})::text`,
+				count: sql<number>`count(distinct ${media.id})`,
+			})
+			.from(media)
+			.innerJoin(mediaReferences, eq(media.id, mediaReferences.mediaId))
+			.where(eq(mediaReferences.userId, userId))
+			.groupBy(sql`extract(year from ${media.createdAt})`);
+
+		const byApp: Record<string, { count: number; size: number }> = {};
+		for (const row of byAppResult) {
+			byApp[row.app] = { count: Number(row.count), size: Number(row.size) };
+		}
+
+		const byYear: Record<string, number> = {};
+		for (const row of byYearResult) {
+			byYear[row.year] = Number(row.count);
+		}
+
+		return {
+			totalCount: Number(totalResult[0]?.count || 0),
+			totalSize: Number(totalResult[0]?.size || 0),
+			byApp,
+			byYear,
+		};
+	}
+
 	private async findByHash(hash: string): Promise<Media | null> {
 		const [result] = await this.db.select().from(media).where(eq(media.contentHash, hash)).limit(1);
 		return result || null;
@@ -322,6 +499,20 @@ export class UploadService {
 						hasAlpha: m.hasAlpha || undefined,
 					}
 				: undefined,
+			exif:
+				m.cameraMake || m.dateTaken || m.gpsLatitude
+					? {
+							cameraMake: m.cameraMake || undefined,
+							cameraModel: m.cameraModel || undefined,
+							dateTaken: m.dateTaken || undefined,
+							focalLength: m.focalLength || undefined,
+							aperture: m.aperture || undefined,
+							iso: m.iso || undefined,
+							exposureTime: m.exposureTime || undefined,
+							gpsLatitude: m.gpsLatitude || undefined,
+							gpsLongitude: m.gpsLongitude || undefined,
+						}
+					: undefined,
 			createdAt: m.createdAt,
 			updatedAt: m.updatedAt,
 		};

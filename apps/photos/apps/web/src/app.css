@@ -1,0 +1,202 @@
+@import "tailwindcss";
+@import "@manacore/shared-tailwind/themes.css";
+
+/* Scan shared packages for Tailwind classes */
+@source "../../../packages/shared/src";
+@source "../../../../../packages/shared-ui/src";
+@source "../../../../../packages/shared-theme-ui/src";
+@source "../../../../../packages/shared-theme-ui/src/components";
+@source "../../../../../packages/shared-theme-ui/src/pages";
+
+/* Photos-specific CSS Variables */
+@layer base {
+	:root {
+		/* Spacing */
+		--spacing-xs: 0.25rem;
+		--spacing-sm: 0.5rem;
+		--spacing-md: 1rem;
+		--spacing-lg: 1.5rem;
+		--spacing-xl: 2rem;
+		--spacing-2xl: 3rem;
+
+		/* Border Radius */
+		--radius-sm: 0.25rem;
+		--radius-md: 0.5rem;
+		--radius-lg: 0.75rem;
+		--radius-xl: 1rem;
+		--radius-full: 9999px;
+
+		/* Transitions */
+		--transition-fast: 150ms ease;
+		--transition-base: 200ms ease;
+		--transition-slow: 300ms ease;
+
+		/* Gallery specific */
+		--gallery-gap: 4px;
+		--thumbnail-size: 200px;
+	}
+}
+
+/* Utility Classes */
+@layer components {
+	/* Photo card styles */
+	.photo-card {
+		position: relative;
+		aspect-ratio: 1;
+		overflow: hidden;
+		border-radius: var(--radius-md);
+		background-color: var(--color-muted);
+		transition: transform var(--transition-base), box-shadow var(--transition-base);
+	}
+
+	.photo-card:hover {
+		transform: scale(1.02);
+		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+		z-index: 10;
+	}
+
+	.photo-card img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	/* Photo overlay */
+	.photo-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 50%);
+		opacity: 0;
+		transition: opacity var(--transition-fast);
+	}
+
+	.photo-card:hover .photo-overlay {
+		opacity: 1;
+	}
+
+	/* Album card styles */
+	.album-card {
+		position: relative;
+		aspect-ratio: 4/3;
+		overflow: hidden;
+		border-radius: var(--radius-lg);
+		background-color: var(--color-muted);
+		transition: transform var(--transition-base), box-shadow var(--transition-base);
+	}
+
+	.album-card:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Upload dropzone */
+	.dropzone {
+		border: 2px dashed var(--color-border);
+		border-radius: var(--radius-xl);
+		padding: var(--spacing-2xl);
+		text-align: center;
+		background-color: var(--color-card);
+		transition: all var(--transition-base);
+	}
+
+	.dropzone.active {
+		border-color: var(--color-primary);
+		background-color: var(--color-accent);
+	}
+
+	/* Tag styles */
+	.tag {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.125rem 0.5rem;
+		border-radius: var(--radius-full);
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+
+	/* Button styles */
+	.btn {
+		padding: var(--spacing-sm) var(--spacing-lg);
+		border-radius: var(--radius-md);
+		font-weight: 500;
+		transition: all var(--transition-base);
+		cursor: pointer;
+		border: none;
+	}
+
+	.btn-primary {
+		background: var(--color-primary);
+		color: var(--color-primary-foreground);
+	}
+
+	.btn-primary:hover {
+		filter: brightness(0.9);
+	}
+
+	.btn-secondary {
+		background: var(--color-secondary);
+		color: var(--color-secondary-foreground);
+	}
+
+	.btn-ghost {
+		background: transparent;
+		color: var(--color-foreground);
+	}
+
+	.btn-ghost:hover {
+		background: var(--color-accent);
+	}
+
+	/* Icon button */
+	.icon-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: var(--radius-full);
+		background: transparent;
+		color: var(--color-foreground);
+		transition: all var(--transition-fast);
+		border: none;
+		cursor: pointer;
+	}
+
+	.icon-btn:hover {
+		background: var(--color-accent);
+	}
+
+	/* Lightbox styles */
+	.lightbox-backdrop {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.95);
+		z-index: 50;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.lightbox-image {
+		max-width: 90vw;
+		max-height: 90vh;
+		object-fit: contain;
+	}
+}
+
+/* Shadow variables */
+@layer base {
+	:root {
+		--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+		--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+		--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+	}
+
+	.dark {
+		--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+		--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+		--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+		--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+	}
+}

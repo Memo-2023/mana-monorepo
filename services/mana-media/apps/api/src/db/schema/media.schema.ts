@@ -38,6 +38,17 @@ export const media = pgTable(
 		height: integer('height'),
 		format: text('format'),
 		hasAlpha: boolean('has_alpha'),
+		// EXIF metadata
+		exifData: jsonb('exif_data'),
+		dateTaken: timestamp('date_taken', { withTimezone: true }),
+		cameraMake: text('camera_make'),
+		cameraModel: text('camera_model'),
+		focalLength: text('focal_length'),
+		aperture: text('aperture'),
+		iso: integer('iso'),
+		exposureTime: text('exposure_time'),
+		gpsLatitude: text('gps_latitude'),
+		gpsLongitude: text('gps_longitude'),
 		// Generated variants
 		thumbnailKey: text('thumbnail_key'),
 		mediumKey: text('medium_key'),
@@ -50,6 +61,8 @@ export const media = pgTable(
 		index('media_content_hash_idx').on(table.contentHash),
 		index('media_status_idx').on(table.status),
 		index('media_created_at_idx').on(table.createdAt),
+		index('media_date_taken_idx').on(table.dateTaken),
+		index('media_camera_idx').on(table.cameraMake, table.cameraModel),
 	]
 );
 

@@ -57,10 +57,21 @@ export class ProcessWorker extends WorkerHost {
 			height: result.metadata?.height,
 			format: result.metadata?.format,
 			hasAlpha: result.metadata?.hasAlpha,
+			// EXIF data
+			exifData: result.exif?.raw,
+			dateTaken: result.exif?.dateTaken,
+			cameraMake: result.exif?.cameraMake,
+			cameraModel: result.exif?.cameraModel,
+			focalLength: result.exif?.focalLength,
+			aperture: result.exif?.aperture,
+			iso: result.exif?.iso,
+			exposureTime: result.exif?.exposureTime,
+			gpsLatitude: result.exif?.gpsLatitude,
+			gpsLongitude: result.exif?.gpsLongitude,
 		});
 
 		this.logger.log(
-			`Processed image ${mediaId}: thumbnail=${!!result.thumbnail}, medium=${!!result.medium}, large=${!!result.large}`
+			`Processed image ${mediaId}: thumbnail=${!!result.thumbnail}, medium=${!!result.medium}, large=${!!result.large}, exif=${!!result.exif}`
 		);
 	}
 }

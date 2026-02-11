@@ -27,7 +27,8 @@
 		"reflect-metadata": "^0.2.0",
 		"rxjs": "^7.8.0",
 		"sharp": "^0.33.0",
-		"uuid": "^11.0.0"
+		"uuid": "^11.0.0",
+		"exifr": "^7.1.3"
 	},
 	"devDependencies": {
 		"@manacore/shared-drizzle-config": "workspace:*",

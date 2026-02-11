@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import sharp from 'sharp';
 import { StorageService } from '../storage/storage.service';
+import { ExifService, type ExifData } from '../exif/exif.service';
 import { IMAGE_VARIANTS, SUPPORTED_IMAGE_TYPES } from './process.constants';
 
 export interface ProcessResult {
@@ -13,11 +14,15 @@ export interface ProcessResult {
 		format?: string;
 		hasAlpha?: boolean;
 	};
+	exif?: ExifData;
 }
 
 @Injectable()
 export class ProcessService {
-	constructor(private storage: StorageService) {}
+	constructor(
+		private storage: StorageService,
+		private exifService: ExifService
+	) {}
 
 	async processImage(
 		mediaId: string,
@@ -35,6 +40,9 @@ export class ProcessService {
 		const image = sharp(originalBuffer);
 		const metadata = await image.metadata();
 
+		// Extract EXIF data
+		const exifData = await this.exifService.extract(originalBuffer);
+
 		const result: ProcessResult = {
 			metadata: {
 				width: metadata.width,
@@ -42,6 +50,7 @@ export class ProcessService {
 				format: metadata.format,
 				hasAlpha: metadata.hasAlpha,
 			},
+			exif: exifData || undefined,
 		};
 
 		// Generate variants

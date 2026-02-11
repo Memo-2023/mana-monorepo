@@ -27,7 +27,36 @@ interface UploadResponse {
 		medium?: string;
 		large?: string;
 	};
+	metadata?: {
+		width?: number;
+		height?: number;
+		format?: string;
+	};
+	exif?: {
+		cameraMake?: string;
+		cameraModel?: string;
+		dateTaken?: Date;
+		focalLength?: string;
+		aperture?: string;
+		iso?: number;
+		exposureTime?: string;
+		gpsLatitude?: string;
+		gpsLongitude?: string;
+	};
 	createdAt: Date;
+}
+
+interface ListAllResponse {
+	items: UploadResponse[];
+	total: number;
+	hasMore: boolean;
+}
+
+interface StatsResponse {
+	totalCount: number;
+	totalSize: number;
+	byApp: Record<string, { count: number; size: number }>;
+	byYear: Record<string, number>;
 }
 
 interface ImportFromMatrixDto {
@@ -135,6 +164,58 @@ export class UploadController {
 		return records.map((r) => this.toResponse(r));
 	}
 
+	/**
+	 * List media across all apps for a user with advanced filtering
+	 * Supports filtering by multiple apps, date range, MIME type, etc.
+	 */
+	@Get('list/all')
+	async listAll(
+		@Query('userId') userId: string,
+		@Query('apps') apps?: string,
+		@Query('mimeType') mimeType?: string,
+		@Query('dateFrom') dateFrom?: string,
+		@Query('dateTo') dateTo?: string,
+		@Query('hasLocation') hasLocation?: string,
+		@Query('limit') limit?: string,
+		@Query('offset') offset?: string,
+		@Query('sortBy') sortBy?: 'createdAt' | 'dateTaken' | 'size',
+		@Query('sortOrder') sortOrder?: 'asc' | 'desc'
+	): Promise<ListAllResponse> {
+		if (!userId) {
+			throw new BadRequestException('userId is required');
+		}
+
+		const result = await this.uploadService.listAll({
+			userId,
+			apps: apps ? apps.split(',').map((a) => a.trim()) : undefined,
+			mimeType,
+			dateFrom: dateFrom ? new Date(dateFrom) : undefined,
+			dateTo: dateTo ? new Date(dateTo) : undefined,
+			hasLocation: hasLocation === 'true',
+			limit: limit ? parseInt(limit) : 50,
+			offset: offset ? parseInt(offset) : 0,
+			sortBy: sortBy || 'createdAt',
+			sortOrder: sortOrder || 'desc',
+		});
+
+		return {
+			items: result.items.map((r) => this.toResponse(r)),
+			total: result.total,
+			hasMore: result.hasMore,
+		};
+	}
+
+	/**
+	 * Get media statistics for a user
+	 */
+	@Get('stats')
+	async stats(@Query('userId') userId: string): Promise<StatsResponse> {
+		if (!userId) {
+			throw new BadRequestException('userId is required');
+		}
+		return this.uploadService.getStats(userId);
+	}
+
 	@Delete(':id')
 	async delete(@Param('id') id: string): Promise<{ success: boolean }> {
 		const deleted = await this.uploadService.delete(id);
@@ -160,6 +241,8 @@ export class UploadController {
 				medium: record.keys.medium ? `${baseUrl}/media/${record.id}/file/medium` : undefined,
 				large: record.keys.large ? `${baseUrl}/media/${record.id}/file/large` : undefined,
 			},
+			metadata: record.metadata,
+			exif: record.exif,
 			createdAt: record.createdAt,
 		};
 	}
