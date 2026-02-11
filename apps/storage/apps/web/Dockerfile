@@ -49,6 +49,9 @@ COPY apps/storage/apps/web ./apps/storage/apps/web
 RUN pnpm install --frozen-lockfile
 
 # Build shared packages that need building
+WORKDIR /app/packages/shared-vite-config
+RUN pnpm build
+
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
