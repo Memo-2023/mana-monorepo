@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.manacore.mana-stt</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>cd /Users/mana/projects/manacore-monorepo/services/mana-stt &amp;&amp; .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 3020</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/mana/projects/manacore-monorepo/services/mana-stt</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>PORT</key>
+        <string>3020</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/mana/logs/mana-stt.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/mana/logs/mana-stt.error.log</string>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+</dict>
+</plist>
