@@ -66,6 +66,12 @@ ingress:
   - hostname: playground.mana.how
     service: http://localhost:5090
 
+  # AI Voice Services
+  - hostname: stt-api.mana.how
+    service: http://localhost:3020
+  - hostname: tts-api.mana.how
+    service: http://localhost:3021
+
   # Monitoring & Tools
   - hostname: grafana.mana.how
     service: http://localhost:8000
