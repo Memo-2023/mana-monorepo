@@ -29,6 +29,7 @@ import type {
 } from './types';
 
 const STORAGE_KEY = 'matrix_credentials';
+const LAST_ROOM_KEY = 'matrix_last_room';
 
 /**
  * Reactive Matrix store using Svelte 5 runes
@@ -260,6 +261,14 @@ class MatrixStore {
 			if (state === 'PREPARED') {
 				this._rooms = this._client!.getRooms();
 				console.log(`Matrix sync prepared, ${this._rooms.length} rooms loaded`);
+
+				// Restore last selected room
+				if (browser && !this._currentRoomId) {
+					const lastRoomId = localStorage.getItem(LAST_ROOM_KEY);
+					if (lastRoomId && this._client!.getRoom(lastRoomId)) {
+						this.selectRoom(lastRoomId);
+					}
+				}
 			}
 
 			if (state === 'ERROR') {
@@ -470,6 +479,11 @@ class MatrixStore {
 			const lastEvent = this._timeline[this._timeline.length - 1];
 			if (lastEvent) {
 				this._client?.sendReadReceipt(lastEvent).catch(console.error);
+			}
+
+			// Save last room to localStorage
+			if (browser) {
+				localStorage.setItem(LAST_ROOM_KEY, roomId);
 			}
 		} else {
 			this._timeline = [];
@@ -1684,6 +1698,7 @@ class MatrixStore {
 		this.destroy();
 		if (browser) {
 			localStorage.removeItem(STORAGE_KEY);
+			localStorage.removeItem(LAST_ROOM_KEY);
 		}
 	}
 
