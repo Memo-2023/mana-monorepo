@@ -22,12 +22,17 @@ export function buildProfileUserPrompt(
 	description: string,
 	rarity: string,
 	statRange: { min: number; max: number },
-	language: FigureLanguage
+	language: FigureLanguage,
+	hasFace: boolean = false
 ): string {
 	const langInstruction =
 		language === 'de'
 			? '\n\nIMPORTANT: Generate ALL text content (subtitle, backstory, items, specialAttack) in German. Only the visualDescription should remain in English (it feeds into an image generation prompt).'
 			: '';
+
+	const faceInstruction = hasFace
+		? '\n\nA reference photo of the person will be used for the figure\'s face. In the visualDescription, do NOT describe facial features, skin tone, or face shape — only describe clothing, pose, expression mood, and body. The face will come from the photo.'
+		: '';
 
 	return `Generate a full character profile for this collectible figure:
 
@@ -37,7 +42,7 @@ export function buildProfileUserPrompt(
 
 **Stats range for ${rarity}:** each stat (attack, defense, special) must be between ${statRange.min} and ${statRange.max}.
 
-Generate: subtitle, 3 items, backstory, stats, special attack, and a detailed visual description of the figure.${langInstruction}`;
+Generate: subtitle, 3 items, backstory, stats, special attack, and a detailed visual description of the figure.${langInstruction}${faceInstruction}`;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -201,11 +206,11 @@ export function buildImagePrompt(
 		.map((item) => `  - ${item}`)
 		.join('\n');
 
-	const faceInstruction = hasFace
-		? `\n\nCRITICAL — FACE TRANSFER: The provided reference photo shows the person's real face. The miniature figure MUST have this EXACT face — same facial structure, same features, same expression — but rendered in the miniature figure style. Preserve the likeness perfectly while matching the figure's aesthetic.`
+	const faceBlock = hasFace
+		? `\n\nFACE REFERENCE: The attached photo shows the person this figure is based on. The figure's face must closely resemble this person — preserve their identity, face shape, and overall appearance. Adapt clothing and body to match the character description, but keep the face true to the photo.`
 		: '';
 
-	return `Product photograph of a premium collectible figure in sealed blister packaging on a pure white background. Package fills 95% of frame.
+	return `Product photograph of a premium collectible figure in sealed blister packaging on a pure white background. Package fills 95% of frame.${faceBlock}
 
 ${style.card} Hanging hole at top center. Clear plastic blister with molded compartments.
 
@@ -216,7 +221,7 @@ Name in ${style.textStyle}: "${name.toUpperCase()}" large at the top. "${subtitl
 In the left compartment stands the figure: ${visualDescription}
 
 ${REALISM_BLOCK}
-${style.vibe}${faceInstruction}
+${style.vibe}
 
 Three accessories in separate molded blister compartments on the right side, stacked vertically:
 ${itemsText}

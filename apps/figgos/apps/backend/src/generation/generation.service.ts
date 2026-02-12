@@ -45,7 +45,8 @@ export class GenerationService {
 				input.name,
 				input.description,
 				input.rarity,
-				input.language
+				input.language,
+				!!input.faceImage
 			);
 
 			// Save profile immediately (even if image gen fails, we keep the text)

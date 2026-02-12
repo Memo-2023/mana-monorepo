@@ -43,10 +43,11 @@ export class GeminiService {
 		name: string,
 		description: string,
 		rarity: FigureRarity,
-		language: FigureLanguage
+		language: FigureLanguage,
+		hasFace: boolean = false
 	): Promise<GeneratedProfile> {
 		const statRange = STAT_RANGES[rarity];
-		const userPrompt = buildProfileUserPrompt(name, description, rarity, statRange, language);
+		const userPrompt = buildProfileUserPrompt(name, description, rarity, statRange, language, hasFace);
 
 		this.logger.log(`Generating profile for "${name}" (${rarity})...`);
 
