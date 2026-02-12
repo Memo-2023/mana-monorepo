@@ -249,7 +249,10 @@ services:
   # ============================================
 
   chat-backend:
-    image: ghcr.io/memo-2023/chat-backend:latest
+    build:
+      context: .
+      dockerfile: apps/chat/apps/backend/Dockerfile
+    image: chat-backend:local
     container_name: mana-app-chat-backend
     restart: always
     depends_on:
@@ -280,7 +283,10 @@ services:
       start_period: 40s
 
   todo-backend:
-    image: ghcr.io/memo-2023/todo-backend:latest
+    build:
+      context: .
+      dockerfile: apps/todo/apps/backend/Dockerfile
+    image: todo-backend:local
     container_name: mana-app-todo-backend
     restart: always
     depends_on:
@@ -302,7 +308,10 @@ services:
       start_period: 40s
 
   calendar-backend:
-    image: ghcr.io/memo-2023/calendar-backend:latest
+    build:
+      context: .
+      dockerfile: apps/calendar/apps/backend/Dockerfile
+    image: calendar-backend:local
     container_name: mana-app-calendar-backend
     restart: always
     depends_on:
@@ -327,7 +336,10 @@ services:
       start_period: 40s
 
   clock-backend:
-    image: ghcr.io/memo-2023/clock-backend:latest
+    build:
+      context: .
+      dockerfile: apps/clock/apps/backend/Dockerfile
+    image: clock-backend:local
     container_name: mana-app-clock-backend
     restart: always
     depends_on:
@@ -352,7 +364,10 @@ services:
       start_period: 40s
 
   contacts-backend:
-    image: ghcr.io/memo-2023/contacts-backend:latest
+    build:
+      context: .
+      dockerfile: apps/contacts/apps/backend/Dockerfile
+    image: contacts-backend:local
     container_name: mana-app-contacts-backend
     restart: always
     depends_on:
