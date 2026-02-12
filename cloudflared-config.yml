@@ -62,6 +62,12 @@ ingress:
   - hostname: nutriphi-api.mana.how
     service: http://localhost:3037
 
+  # Photos App
+  - hostname: photos.mana.how
+    service: http://localhost:5019
+  - hostname: photos-api.mana.how
+    service: http://localhost:3039
+
   # LLM Services
   - hostname: playground.mana.how
     service: http://localhost:5090
