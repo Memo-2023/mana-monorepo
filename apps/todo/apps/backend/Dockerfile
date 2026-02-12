@@ -14,6 +14,7 @@ COPY pnpm-lock.yaml ./
 # Copy shared packages (all required dependencies)
 COPY packages/credit-operations ./packages/credit-operations
 COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
+COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
