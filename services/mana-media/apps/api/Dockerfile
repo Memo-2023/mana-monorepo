@@ -10,8 +10,8 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY services/mana-media ./services/mana-media
 
-# Install all dependencies (ignore client build errors)
-RUN pnpm install --frozen-lockfile || pnpm install --frozen-lockfile --ignore-scripts
+# Install all dependencies
+RUN pnpm install --frozen-lockfile
 
 # Build the API
 WORKDIR /app/services/mana-media/apps/api
@@ -27,15 +27,24 @@ ENV NODE_ENV=production
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs
-USER nestjs
 
-WORKDIR /app
+# Keep same directory structure so pnpm symlinks work
+WORKDIR /app/services/mana-media/apps/api
 
-# Copy built application and dependencies
+# Copy the pnpm store that symlinks point to
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules/.pnpm /app/node_modules/.pnpm
+
+# Copy the app's node_modules (contains symlinks to pnpm store)
+COPY --from=builder --chown=nestjs:nodejs /app/services/mana-media/apps/api/node_modules ./node_modules
+
+# Copy shared packages that are symlinked
+COPY --from=builder --chown=nestjs:nodejs /app/packages/shared-drizzle-config /app/packages/shared-drizzle-config
+
+# Copy built application
 COPY --from=builder --chown=nestjs:nodejs /app/services/mana-media/apps/api/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/services/mana-media/apps/api/package.json ./
-COPY --from=builder --chown=nestjs:nodejs /app/packages/shared-drizzle-config ./packages/shared-drizzle-config
+
+USER nestjs
 
 # Expose port
 EXPOSE 3015
