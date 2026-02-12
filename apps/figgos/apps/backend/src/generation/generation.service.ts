@@ -207,9 +207,11 @@ export class GenerationService {
 		}
 	}
 
-	private async downloadAndConvertImage(imageUrl: string): Promise<Buffer> {
-		const res = await fetch(imageUrl);
-		if (!res.ok) throw new Error(`Failed to download image: ${res.status}`);
+	private async downloadAndConvertImage(imageKey: string): Promise<Buffer> {
+		const url = this.storageService.getPublicUrl(imageKey);
+		this.logger.log(`Downloading image: ${url}`);
+		const res = await fetch(url);
+		if (!res.ok) throw new Error(`Failed to download image: ${res.status} from ${url}`);
 		const webpBuffer = Buffer.from(await res.arrayBuffer());
 		return sharp(webpBuffer).jpeg({ quality: 85 }).toBuffer();
 	}
