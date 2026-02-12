@@ -46,7 +46,7 @@ function CardThumbnail({
 				<Image
 					source={{ uri: figure.imageUrl! }}
 					style={{ width: '100%', height: '100%' }}
-					resizeMode="cover"
+					resizeMode="contain"
 				/>
 			</View>
 		</Pressable>
