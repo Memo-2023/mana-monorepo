@@ -23,8 +23,8 @@ COPY packages/shared-tsconfig ./packages/shared-tsconfig
 COPY apps/presi/packages ./apps/presi/packages
 COPY apps/presi/apps/backend ./apps/presi/apps/backend
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors

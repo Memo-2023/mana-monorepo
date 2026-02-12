@@ -25,8 +25,8 @@ COPY packages/shared-tsconfig ./packages/shared-tsconfig
 COPY apps/todo/packages ./apps/todo/packages
 COPY apps/todo/apps/backend ./apps/todo/apps/backend
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors

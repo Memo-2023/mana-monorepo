@@ -26,8 +26,8 @@ COPY apps/photos/packages/shared ./apps/photos/packages/shared
 # Copy photos backend
 COPY apps/photos/apps/backend ./apps/photos/apps/backend
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors

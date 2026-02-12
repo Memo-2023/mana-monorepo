@@ -26,8 +26,8 @@ COPY packages/shared-tsconfig ./packages/shared-tsconfig
 # Copy chat backend
 COPY apps/chat/apps/backend ./apps/chat/apps/backend
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors

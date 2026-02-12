@@ -22,8 +22,8 @@ COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY apps/nutriphi/packages ./apps/nutriphi/packages
 COPY apps/nutriphi/apps/backend ./apps/nutriphi/apps/backend
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first
 WORKDIR /app/packages/shared-nestjs-auth

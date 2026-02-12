@@ -22,8 +22,8 @@ COPY packages/shared-tsconfig ./packages/shared-tsconfig
 # Copy manadeck backend
 COPY apps/manadeck/apps/backend ./apps/manadeck/apps/backend
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors

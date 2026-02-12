@@ -26,8 +26,8 @@ COPY packages/shared-tsconfig ./packages/shared-tsconfig
 COPY apps/calendar/packages ./apps/calendar/packages
 COPY apps/calendar/apps/backend ./apps/calendar/apps/backend
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors
