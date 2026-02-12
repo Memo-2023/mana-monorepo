@@ -11,7 +11,7 @@ import { CurrentUser, type CurrentUserData } from '../common/decorators/current-
  * All endpoints require authentication via JwtAuthGuard.
  * User ID is extracted from the JWT token - no userId parameter needed.
  */
-@Controller('api/v1/me')
+@Controller('me')
 @UseGuards(JwtAuthGuard)
 export class MeController {
 	constructor(private readonly meService: MeService) {}
