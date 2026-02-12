@@ -55,7 +55,6 @@ export type FigureStatus =
 
 export interface FigureUserInput {
 	description: string;
-	faceImageUrl?: string | null;
 	language: FigureLanguage;
 }
 
@@ -100,6 +99,7 @@ export interface FigureResponse {
 	language: FigureLanguage;
 	status: FigureStatus;
 	isPublic: boolean;
+	errorMessage: string | null;
 	isArchived: boolean;
 	createdAt: string;
 	updatedAt: string;

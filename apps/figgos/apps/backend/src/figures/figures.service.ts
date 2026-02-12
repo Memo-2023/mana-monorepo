@@ -33,7 +33,8 @@ export class FiguresService {
 		userId: string,
 		name: string,
 		description: string,
-		language: FigureLanguage = 'en'
+		language: FigureLanguage = 'en',
+		faceImage?: string
 	): Promise<Figure> {
 		const rarity = this.rollRarity();
 		const cardStyle = getCardStyle(rarity);
@@ -58,6 +59,7 @@ export class FiguresService {
 			language,
 			rarity,
 			cardStyle,
+			faceImage,
 		});
 
 		return completed;

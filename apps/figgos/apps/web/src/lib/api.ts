@@ -16,10 +16,10 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
 	figures: {
-		create: (name: string, description: string, language = 'en') =>
+		create: (name: string, description: string, language = 'en', faceImage?: string) =>
 			fetchApi<{ figure: FigureResponse }>('/api/v1/figures', {
 				method: 'POST',
-				body: JSON.stringify({ name, description, language }),
+				body: JSON.stringify({ name, description, language, ...(faceImage && { faceImage }) }),
 			}),
 		list: () => fetchApi<{ figures: FigureResponse[] }>('/api/v1/figures'),
 		get: (id: string) => fetchApi<{ figure: FigureResponse }>(`/api/v1/figures/${id}`),

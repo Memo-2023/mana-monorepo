@@ -35,6 +35,7 @@ export class GenerationService {
 			language: FigureLanguage;
 			rarity: FigureRarity;
 			cardStyle: CardStyle;
+			faceImage?: string;
 		}
 	): Promise<Figure> {
 		try {
@@ -58,7 +59,8 @@ export class GenerationService {
 				profile.subtitle,
 				profile.visualDescription,
 				itemLabels,
-				input.cardStyle
+				input.cardStyle,
+				input.faceImage
 			);
 
 			// Phase 3: Process image (bg removal + WebP)

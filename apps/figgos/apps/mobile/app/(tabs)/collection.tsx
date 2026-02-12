@@ -7,11 +7,13 @@ import {
 	FlatList,
 	Dimensions,
 	ActivityIndicator,
+	Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import type { FigureResponse } from '@figgos/shared';
 import { api } from '../../services/api';
+import FlippableCard from '../../components/FlippableCard';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GAP = 10;
@@ -20,12 +22,16 @@ const COLUMNS = 2;
 const CARD_WIDTH = (SCREEN_WIDTH - PADDING * 2 - GAP * (COLUMNS - 1)) / COLUMNS;
 const CARD_HEIGHT = CARD_WIDTH * 1.45;
 
-function CardThumbnail({ figure }: { figure: FigureResponse }) {
-	const router = useRouter();
-
+function CardThumbnail({
+	figure,
+	onPress,
+}: {
+	figure: FigureResponse;
+	onPress: (f: FigureResponse) => void;
+}) {
 	return (
 		<Pressable
-			onPress={() => router.push(`/card/v2/${figure.id}` as any)}
+			onPress={() => onPress(figure)}
 			style={{ width: CARD_WIDTH }}
 			className="active:opacity-80"
 		>
@@ -37,28 +43,11 @@ function CardThumbnail({ figure }: { figure: FigureResponse }) {
 					overflow: 'hidden',
 				}}
 			>
-				{figure.imageUrl ? (
-					<Image
-						source={{ uri: figure.imageUrl }}
-						style={{ width: '100%', height: '100%' }}
-						resizeMode="cover"
-					/>
-				) : (
-					<View
-						className="bg-surface items-center justify-center"
-						style={{
-							width: '100%',
-							height: '100%',
-							borderWidth: 2,
-							borderColor: 'rgb(50, 50, 80)',
-							borderRadius: 12,
-						}}
-					>
-						<Text className="text-muted-foreground" style={{ fontSize: 11 }}>
-							{figure.name}
-						</Text>
-					</View>
-				)}
+				<Image
+					source={{ uri: figure.imageUrl! }}
+					style={{ width: '100%', height: '100%' }}
+					resizeMode="cover"
+				/>
 			</View>
 		</Pressable>
 	);
@@ -68,14 +57,26 @@ export default function CollectionScreen() {
 	const [figures, setFigures] = useState<FigureResponse[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [selected, setSelected] = useState<FigureResponse | null>(null);
 
 	useFocusEffect(
 		useCallback(() => {
 			setLoading(true);
 			api.figures
 				.list()
-				.then(({ figures }) => {
-					setFigures(figures);
+				.then(async ({ figures }) => {
+					const withImages = figures.filter((f) => f.imageUrl);
+					const checks = await Promise.all(
+						withImages.map(async (f) => {
+							try {
+								await Image.prefetch(f.imageUrl!);
+								return f;
+							} catch {
+								return null;
+							}
+						})
+					);
+					setFigures(checks.filter((f): f is FigureResponse => f !== null));
 					setError(null);
 				})
 				.catch((e) => setError(e.message))
@@ -126,9 +127,41 @@ export default function CollectionScreen() {
 					keyExtractor={(item) => item.id}
 					contentContainerStyle={{ paddingHorizontal: PADDING, paddingBottom: 40 }}
 					columnWrapperStyle={{ gap: GAP, marginBottom: GAP }}
-					renderItem={({ item }) => <CardThumbnail figure={item} />}
+					renderItem={({ item }) => <CardThumbnail figure={item} onPress={setSelected} />}
 				/>
 			)}
+
+			{/* Card Detail Overlay */}
+			<Modal
+				visible={selected !== null}
+				transparent
+				animationType="fade"
+				onRequestClose={() => setSelected(null)}
+			>
+				<Pressable
+					onPress={() => setSelected(null)}
+					style={{
+						flex: 1,
+						backgroundColor: 'rgba(5, 5, 15, 0.92)',
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					<Pressable onPress={() => {}}>
+						{selected && (
+							<View style={{ alignItems: 'center' }}>
+								<Text
+									className="text-muted-foreground"
+									style={{ fontSize: 12, fontWeight: '600', marginBottom: 12 }}
+								>
+									Drag to rotate · Double-tap to flip
+								</Text>
+								<FlippableCard figure={selected} maxWidth={SCREEN_WIDTH - 48} />
+							</View>
+						)}
+					</Pressable>
+				</Pressable>
+			</Modal>
 		</SafeAreaView>
 	);
 }

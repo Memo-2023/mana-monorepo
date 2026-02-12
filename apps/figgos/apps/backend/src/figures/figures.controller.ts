@@ -23,7 +23,8 @@ export class FiguresController {
 			user.userId,
 			dto.name,
 			dto.description,
-			dto.language || 'en'
+			dto.language || 'en',
+			dto.faceImage
 		);
 		return { figure };
 	}

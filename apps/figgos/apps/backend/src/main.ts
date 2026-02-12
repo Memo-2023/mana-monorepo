@@ -5,4 +5,5 @@ bootstrapApp(AppModule, {
 	defaultPort: 3025,
 	serviceName: 'Figgos',
 	additionalCorsOrigins: ['http://localhost:5196'],
+	bodyLimit: '5mb',
 });

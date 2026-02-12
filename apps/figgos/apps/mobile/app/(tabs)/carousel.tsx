@@ -7,16 +7,18 @@ import {
 	Animated,
 	Dimensions,
 	ActivityIndicator,
+	Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import type { FigureResponse, FigureRarity } from '@figgos/shared';
 import { api } from '../../services/api';
+import FlippableCard from '../../components/FlippableCard';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH * 0.65;
+const CARD_WIDTH = SCREEN_WIDTH * 0.8;
 const CARD_HEIGHT = CARD_WIDTH * 1.45;
-const SPACING = 14;
+const SPACING = 12;
 const SIDE_SPACE = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 
 const RARITY_COLORS: Record<FigureRarity, string> = {
@@ -27,16 +29,29 @@ const RARITY_COLORS: Record<FigureRarity, string> = {
 };
 
 export default function CarouselScreen() {
-	const router = useRouter();
 	const scrollX = useRef(new Animated.Value(0)).current;
 	const [figures, setFigures] = useState<FigureResponse[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [selected, setSelected] = useState<FigureResponse | null>(null);
 
 	useFocusEffect(
 		useCallback(() => {
 			api.figures
 				.list()
-				.then(({ figures }) => setFigures(figures))
+				.then(async ({ figures }) => {
+					const withImages = figures.filter((f) => f.imageUrl);
+					const checks = await Promise.all(
+						withImages.map(async (f) => {
+							try {
+								await Image.prefetch(f.imageUrl!);
+								return f;
+							} catch {
+								return null;
+							}
+						})
+					);
+					setFigures(checks.filter((f): f is FigureResponse => f !== null));
+				})
 				.finally(() => setLoading(false));
 		}, [])
 	);
@@ -61,7 +76,7 @@ export default function CarouselScreen() {
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={['top']}>
-			<View style={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 16 }}>
+			<View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 }}>
 				<Text
 					className="text-foreground"
 					style={{ fontSize: 28, fontWeight: '900', letterSpacing: -0.5 }}
@@ -69,8 +84,7 @@ export default function CarouselScreen() {
 					Showcase
 				</Text>
 			</View>
-
-			<View style={{ flex: 1, justifyContent: 'center' }}>
+			<View style={{ flex: 1, justifyContent: 'center', marginTop: -80 }}>
 				<Animated.FlatList
 					data={figures}
 					keyExtractor={(item) => item.id}
@@ -119,10 +133,7 @@ export default function CarouselScreen() {
 									opacity,
 								}}
 							>
-								<Pressable
-									onPress={() => router.push(`/card/v2/${item.id}` as any)}
-									className="active:opacity-90"
-								>
+								<Pressable onPress={() => setSelected(item)} className="active:opacity-90">
 									<View
 										style={{
 											width: CARD_WIDTH,
@@ -131,31 +142,11 @@ export default function CarouselScreen() {
 											overflow: 'hidden',
 										}}
 									>
-										{item.imageUrl ? (
-											<Image
-												source={{ uri: item.imageUrl }}
-												style={{ width: '100%', height: '100%' }}
-												resizeMode="cover"
-											/>
-										) : (
-											<View
-												className="bg-surface items-center justify-center"
-												style={{
-													width: '100%',
-													height: '100%',
-													borderWidth: 2,
-													borderColor: RARITY_COLORS[item.rarity],
-													borderRadius: 14,
-												}}
-											>
-												<Text
-													className="text-foreground"
-													style={{ fontSize: 14, fontWeight: '800' }}
-												>
-													{item.name}
-												</Text>
-											</View>
-										)}
+										<Image
+											source={{ uri: item.imageUrl! }}
+											style={{ width: '100%', height: '100%' }}
+											resizeMode="cover"
+										/>
 									</View>
 								</Pressable>
 							</Animated.View>
@@ -164,41 +155,41 @@ export default function CarouselScreen() {
 				/>
 			</View>
 
-			<View className="flex-row items-center justify-center" style={{ paddingBottom: 24, gap: 8 }}>
-				{figures.map((figure, i) => {
-					const inputRange = [
-						(i - 1) * (CARD_WIDTH + SPACING),
-						i * (CARD_WIDTH + SPACING),
-						(i + 1) * (CARD_WIDTH + SPACING),
-					];
-
-					const dotScale = scrollX.interpolate({
-						inputRange,
-						outputRange: [1, 1.4, 1],
-						extrapolate: 'clamp',
-					});
-
-					const dotOpacity = scrollX.interpolate({
-						inputRange,
-						outputRange: [0.3, 1, 0.3],
-						extrapolate: 'clamp',
-					});
-
-					return (
-						<Animated.View
-							key={figure.id}
-							style={{
-								width: 8,
-								height: 8,
-								borderRadius: 4,
-								backgroundColor: RARITY_COLORS[figure.rarity],
-								transform: [{ scale: dotScale }],
-								opacity: dotOpacity,
-							}}
-						/>
-					);
-				})}
-			</View>
+			{/* Card Detail Overlay */}
+			<Modal
+				visible={selected !== null}
+				transparent
+				animationType="fade"
+				onRequestClose={() => setSelected(null)}
+			>
+				<Pressable
+					onPress={() => setSelected(null)}
+					style={{
+						flex: 1,
+						backgroundColor: 'rgba(5, 5, 15, 0.92)',
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					<Pressable onPress={() => {}}>
+						{selected && (
+							<View style={{ alignItems: 'center' }}>
+								<Text
+									className="text-muted-foreground"
+									style={{
+										fontSize: 12,
+										fontWeight: '600',
+										marginBottom: 12,
+									}}
+								>
+									Drag to rotate · Double-tap to flip
+								</Text>
+								<FlippableCard figure={selected} maxWidth={SCREEN_WIDTH - 48} />
+							</View>
+						)}
+					</Pressable>
+				</Pressable>
+			</Modal>
 		</SafeAreaView>
 	);
 }

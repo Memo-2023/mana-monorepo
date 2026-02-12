@@ -18,4 +18,8 @@ export class CreateFigureDto {
 	@IsString()
 	@IsIn(['en', 'de'])
 	language?: FigureLanguage = 'en';
+
+	@IsOptional()
+	@IsString()
+	faceImage?: string;
 }

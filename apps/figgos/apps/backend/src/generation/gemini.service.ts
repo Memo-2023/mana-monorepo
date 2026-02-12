@@ -1,6 +1,6 @@
 import type { CardStyle, FigureLanguage, FigureRarity, GeneratedProfile } from '@figgos/shared';
 import { STAT_RANGES } from '@figgos/shared';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -17,6 +17,19 @@ const IMAGE_MODEL = 'gemini-2.5-flash-image';
 export class GeminiService {
 	private readonly logger = new Logger(GeminiService.name);
 	private readonly client: GoogleGenAI;
+
+	private readonly safetySettings = [
+		{ category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+		{ category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+		{
+			category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+			threshold: HarmBlockThreshold.BLOCK_NONE,
+		},
+		{
+			category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+			threshold: HarmBlockThreshold.BLOCK_NONE,
+		},
+	];
 
 	constructor(private config: ConfigService) {
 		const apiKey = this.config.get<string>('GEMINI_API_KEY');
@@ -46,6 +59,7 @@ export class GeminiService {
 				responseSchema: PROFILE_JSON_SCHEMA,
 				temperature: 1.0,
 				thinkingConfig: { thinkingBudget: 0 },
+				safetySettings: this.safetySettings,
 			},
 		});
 
@@ -87,26 +101,28 @@ export class GeminiService {
 		visualDescription: string,
 		items: string[],
 		cardStyle: CardStyle,
-		faceImageUrl?: string | null
+		faceImage?: string | null
 	): Promise<Buffer> {
-		const prompt = buildImagePrompt(
-			name,
-			subtitle,
-			visualDescription,
-			items,
-			cardStyle,
-			!!faceImageUrl
+		const hasFace = !!faceImage;
+		const prompt = buildImagePrompt(name, subtitle, visualDescription, items, cardStyle, hasFace);
+
+		this.logger.log(
+			`Generating image for "${name}" (${cardStyle})${hasFace ? ' with face reference' : ''}...`
 		);
 
-		this.logger.log(`Generating image for "${name}" (${cardStyle})...`);
-
-		// Build contents array — if face image provided, include it
+		// Build contents array — if face image provided, include it as inline data
 		const contents: Array<string | { inlineData: { mimeType: string; data: string } }> = [];
 
-		if (faceImageUrl) {
-			// TODO: Download face image from S3, convert to base64, add as inline data
-			// For now, face transfer is not yet supported in the backend
-			this.logger.warn('Face transfer not yet implemented in backend');
+		if (faceImage) {
+			// Strip data URL prefix if present (e.g. "data:image/jpeg;base64,...")
+			const base64Data = faceImage.includes(',') ? faceImage.split(',')[1] : faceImage;
+			contents.push({
+				inlineData: {
+					mimeType: 'image/jpeg',
+					data: base64Data,
+				},
+			});
+			this.logger.log('Face reference image attached to generation request');
 		}
 
 		contents.push(prompt);
@@ -116,13 +132,16 @@ export class GeminiService {
 			contents,
 			config: {
 				responseModalities: ['IMAGE', 'TEXT'],
+				safetySettings: this.safetySettings,
 			},
 		});
 
 		// Extract image from response
 		const parts = response.candidates?.[0]?.content?.parts;
 		if (!parts) {
-			throw new Error('Gemini returned no content parts');
+			throw new Error(
+				'The AI could not generate this figure — try a different description or photo'
+			);
 		}
 
 		for (const part of parts) {

@@ -53,6 +53,7 @@ export class ImageProcessingService implements OnModuleInit {
 		}
 
 		return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+			.trim()
 			.webp({ quality: 85 })
 			.toBuffer();
 	}
@@ -84,7 +85,10 @@ export class ImageProcessingService implements OnModuleInit {
 			const { data, width, height, channels } = img;
 			const buf = Buffer.from(data);
 
-			return sharp(buf, { raw: { width, height, channels } }).webp({ quality: 85 }).toBuffer();
+			return sharp(buf, { raw: { width, height, channels } })
+				.trim()
+				.webp({ quality: 85 })
+				.toBuffer();
 		} finally {
 			await unlink(tmpPath).catch(() => {});
 		}
