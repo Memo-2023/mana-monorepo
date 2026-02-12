@@ -81,7 +81,7 @@
 			</svg>
 		</div>
 		<p class="dropzone-text">{$_('upload.dropzone')}</p>
-		<button type="button" class="btn btn-primary mt-4" onclick|stopPropagation={openFilePicker}>
+		<button type="button" class="btn btn-primary mt-4" onclick={(e) => { e.stopPropagation(); openFilePicker(); }}>
 			{$_('upload.selectFiles')}
 		</button>
 	</div>
