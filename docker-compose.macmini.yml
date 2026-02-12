@@ -455,7 +455,10 @@ services:
       start_period: 40s
 
   presi-backend:
-    image: ghcr.io/memo-2023/presi-backend:latest
+    build:
+      context: .
+      dockerfile: apps/presi/apps/backend/Dockerfile
+    image: presi-backend:local
     container_name: mana-app-presi-backend
     restart: always
     depends_on:
