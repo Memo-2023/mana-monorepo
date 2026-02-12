@@ -265,8 +265,12 @@ class MatrixStore {
 				// Restore last selected room
 				if (browser && !this._currentRoomId) {
 					const lastRoomId = localStorage.getItem(LAST_ROOM_KEY);
-					if (lastRoomId && this._client!.getRoom(lastRoomId)) {
-						this.selectRoom(lastRoomId);
+					if (lastRoomId) {
+						// Check if room exists in loaded rooms
+						const roomExists = this._rooms.some((r) => r.roomId === lastRoomId);
+						if (roomExists) {
+							this.selectRoom(lastRoomId);
+						}
 					}
 				}
 			}
