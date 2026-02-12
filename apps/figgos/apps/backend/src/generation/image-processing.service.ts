@@ -82,15 +82,54 @@ export class ImageProcessingService implements OnModuleInit {
 			await writeFile(tmpPath, inputBuffer);
 			const result = await this.segmenter(tmpPath);
 			const img = Array.isArray(result) ? result[0] : result;
-			const { data, width, height, channels } = img;
-			const buf = Buffer.from(data);
 
-			return sharp(buf, { raw: { width, height, channels } })
+			// Trim transparent borders first so peg-hole coordinates are accurate
+			const trimmed = await sharp(Buffer.from(img.data), {
+				raw: { width: img.width, height: img.height, channels: img.channels },
+			})
 				.trim()
+				.ensureAlpha()
+				.raw()
+				.toBuffer({ resolveWithObject: true });
+
+			// RMBG sometimes keeps the peg hole (hang tab) at the top of the card.
+			// Apply white-threshold cleanup to the top 12%, middle 50% of the trimmed image.
+			this.cleanPegHole(trimmed.data, trimmed.info.width, trimmed.info.height);
+
+			return sharp(trimmed.data, {
+				raw: { width: trimmed.info.width, height: trimmed.info.height, channels: 4 },
+			})
 				.webp({ quality: 85 })
 				.toBuffer();
 		} finally {
 			await unlink(tmpPath).catch(() => {});
+		}
+	}
+
+	/**
+	 * Remove leftover white pixels in the peg-hole region (top 12%, middle 50%).
+	 * Same threshold logic as feathered method but scoped to that zone only.
+	 */
+	private cleanPegHole(data: Buffer, width: number, height: number): void {
+		const T = 240;
+		const F = 10;
+		const low = T - F;
+
+		const yEnd = Math.round(height * 0.12);
+		const xStart = Math.round(width * 0.25);
+		const xEnd = Math.round(width * 0.75);
+
+		for (let y = 0; y < yEnd; y++) {
+			for (let x = xStart; x < xEnd; x++) {
+				const i = (y * width + x) * 4;
+				if (data[i + 3] === 0) continue; // already transparent
+				const m = Math.min(data[i], data[i + 1], data[i + 2]);
+				if (m > T) {
+					data[i + 3] = 0;
+				} else if (m > low) {
+					data[i + 3] = Math.min(data[i + 3], Math.round((255 * (T - m)) / F));
+				}
+			}
 		}
 	}
 }
