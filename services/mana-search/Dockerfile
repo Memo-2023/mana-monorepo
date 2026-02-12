@@ -19,11 +19,13 @@ COPY services/mana-search ./services/mana-search
 WORKDIR /app/services/mana-search
 RUN pnpm build
 
+# Deploy standalone version (resolves pnpm symlinks)
+RUN pnpm deploy --filter @manacore/mana-search --prod /app/deploy
+
 # ================================
 # Production Stage
 # ================================
 FROM node:20-alpine AS runner
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 ENV NODE_ENV=production
 
 # Create non-root user
@@ -33,10 +35,9 @@ USER nestjs
 
 WORKDIR /app
 
-# Copy built application
+# Copy deployed standalone application (no symlinks)
+COPY --from=builder --chown=nestjs:nodejs /app/deploy ./
 COPY --from=builder --chown=nestjs:nodejs /app/services/mana-search/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/services/mana-search/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/services/mana-search/package.json ./
 
 # Expose port
 EXPOSE 3021
