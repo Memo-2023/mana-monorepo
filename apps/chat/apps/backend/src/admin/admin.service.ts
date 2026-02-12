@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, sql, desc } from 'drizzle-orm';
 import * as schema from '../db/schema';
 import {
@@ -15,7 +15,7 @@ export class AdminService {
 
 	constructor(
 		@Inject('DATABASE_CONNECTION')
-		private readonly db: NodePgDatabase<typeof schema>
+		private readonly db: PostgresJsDatabase<typeof schema>
 	) {}
 
 	/**
