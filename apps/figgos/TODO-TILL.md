@@ -77,7 +77,26 @@ Ueberlegen wie ein Karten-Merge im UI aussehen koennte:
 
 ---
 
-## 6. Allgemeiner Screen-Review
+## 6. Mana Core Auth + Credits einbauen (Prio 3)
+
+Aktuell laeuft alles mit `DEV_BYPASS_AUTH=true`. Fuer echten Betrieb brauchen wir:
+
+**Auth (Login/Signup):**
+- Mobile: `@manacore/shared-auth` fuer Login/Signup Screens
+- Web: Supabase SSR Auth oder shared-auth
+- Backend nutzt bereits `@manacore/shared-nestjs-auth` (JwtAuthGuard) — muss nur aktiviert werden (`DEV_BYPASS_AUTH=false`)
+
+**Credit-System:**
+- Jede Figure-Generation kostet Credits
+- `@mana-core/nestjs-integration` mit `CreditClientService` einbinden
+- Credit-Check vor Generation, Abzug nach Erfolg
+- UI: Credit-Anzeige + "Nicht genug Credits" Fehler
+
+**Referenz:** Siehe `CLAUDE.md` Abschnitt "Authentication Architecture" und Chat/ManaDeck Backends als Beispiel.
+
+---
+
+## 7. Allgemeiner Screen-Review
 
 Einmal ueber alle Screens gehen und schauen wo Verbesserungen moeglich sind:
 
