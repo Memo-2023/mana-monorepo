@@ -108,6 +108,14 @@ services:
       CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://todo.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://storage.mana.how,https://presi.mana.how,https://nutriphi.mana.how,https://skilltree.mana.how,https://photos.mana.how,https://matrix.mana.how,https://element.mana.how,https://link.mana.how,https://playground.mana.how
       DUCKDB_PATH: /data/analytics/metrics.duckdb
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET:-}
+      # Backend URLs for user data aggregation (GDPR self-service)
+      CHAT_BACKEND_URL: http://chat-backend:3030
+      TODO_BACKEND_URL: http://todo-backend:3031
+      CALENDAR_BACKEND_URL: http://calendar-backend:3032
+      CONTACTS_BACKEND_URL: http://contacts-backend:3034
+      PICTURE_BACKEND_URL: http://photos-backend:3039
+      PRESI_BACKEND_URL: http://presi-backend:3036
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     volumes:
       - analytics_data:/data/analytics
     ports:
