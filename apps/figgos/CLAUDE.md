@@ -72,7 +72,6 @@ S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin
 S3_BUCKET=figgos-storage
 CORS_ORIGINS=http://localhost:5196,http://localhost:8081
-BG_REMOVAL_METHOD=feathered    # optional, see below
 ```
 
 ### Mobile (.env)
@@ -82,23 +81,9 @@ EXPO_PUBLIC_BACKEND_URL=http://localhost:3025
 EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 ```
 
-### Background Removal (`BG_REMOVAL_METHOD`)
+### Background Removal
 
-Two methods available for removing white backgrounds from generated card images:
-
-| Method | Env Value | Speed | Quality | Dependencies |
-|--------|-----------|-------|---------|--------------|
-| **Feathered Threshold** | `feathered` (default) | ~77ms | Good for white/near-white backgrounds | `sharp` only |
-| **RMBG-1.4 AI** | `rmbg` | ~1s (first run downloads model) | Better for complex backgrounds | `@huggingface/transformers` |
-
-- **Feathered** (default): Removes near-white pixels (threshold=240) with a soft 10px feather edge. Fast, no model download needed. Works well because Gemini generates cards on white backgrounds.
-- **RMBG**: Uses the RMBG-1.4 segmentation model via Hugging Face Transformers. Model is lazy-loaded and cached after first use. Better quality but slower.
-
-Set in `.env`:
-```env
-BG_REMOVAL_METHOD=feathered   # fast, sharp-based (default)
-BG_REMOVAL_METHOD=rmbg        # AI-based, higher quality
-```
+Uses **RMBG-1.4** AI segmentation model (`@huggingface/transformers`) for background removal. The model is lazy-loaded and cached on first use (~1s first run to download). After removal, a white-threshold cleanup pass targets the top 12% of the card to remove peg-hole (hang tab) artifacts that the model sometimes preserves.
 
 ## Game Concept
 
