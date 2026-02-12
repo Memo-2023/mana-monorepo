@@ -12,7 +12,7 @@ import { AdminService } from './admin.service';
 import { ServiceAuthGuard } from './guards/service-auth.guard';
 import { UserDataResponse, DeleteUserDataResponse } from './dto/user-data-response.dto';
 
-@Controller('api/v1/admin')
+@Controller('admin')
 @UseGuards(ServiceAuthGuard)
 export class AdminController {
 	private readonly logger = new Logger(AdminController.name);

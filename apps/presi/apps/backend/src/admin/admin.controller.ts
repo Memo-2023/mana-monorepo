@@ -16,7 +16,7 @@ import { UserDataResponse, DeleteUserDataResponse } from './dto/user-data-respon
  * Admin controller for cross-service user data management
  * All endpoints require service key authentication (X-Service-Key header)
  */
-@Controller('api/v1/admin')
+@Controller('admin')
 @UseGuards(ServiceAuthGuard)
 export class AdminController {
 	private readonly logger = new Logger(AdminController.name);
