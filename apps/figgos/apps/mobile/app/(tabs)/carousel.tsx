@@ -11,9 +11,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import type { FigureResponse, FigureRarity } from '@figgos/shared';
 import { api } from '../../services/api';
 import FlippableCard from '../../components/FlippableCard';
+import { shareFigure } from '../../utils/share-figure';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.8;
@@ -185,6 +187,42 @@ export default function CarouselScreen() {
 									Drag to rotate · Double-tap to flip
 								</Text>
 								<FlippableCard figure={selected} maxWidth={SCREEN_WIDTH - 48} />
+
+								<Pressable
+									onPress={() => shareFigure(selected)}
+									className="active:opacity-90"
+									style={{ marginTop: 24 }}
+								>
+									<View style={{ position: 'relative' }}>
+										<View
+											className="bg-primary-dark rounded-lg"
+											style={{ position: 'absolute', top: 5, left: 4, right: -4, bottom: -5 }}
+										/>
+										<View
+											className="bg-primary rounded-lg flex-row items-center justify-center"
+											style={{
+												paddingHorizontal: 20,
+												paddingVertical: 12,
+												borderWidth: 3,
+												borderColor: 'rgb(255, 224, 102)',
+												gap: 8,
+											}}
+										>
+											<Ionicons name="paper-plane" size={18} color="rgb(15, 15, 30)" />
+											<Text
+												style={{
+													fontSize: 15,
+													fontWeight: '900',
+													letterSpacing: 2,
+													textTransform: 'uppercase',
+													color: 'rgb(15, 15, 30)',
+												}}
+											>
+												Share It
+											</Text>
+										</View>
+									</View>
+								</Pressable>
 							</View>
 						)}
 					</Pressable>
