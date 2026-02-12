@@ -11,6 +11,7 @@ import type {
 	CardStyle,
 	GeneratedProfile,
 } from '@figgos/shared';
+import sharp from 'sharp';
 import { GeminiService } from './gemini.service';
 import { ImageProcessingService } from './image-processing.service';
 import { StorageService } from '../storage/storage.service';
@@ -105,6 +106,112 @@ export class GenerationService {
 				throw error;
 			}
 		}
+	}
+
+	async generateFusion(
+		figureId: string,
+		userId: string,
+		input: {
+			nameA: string;
+			profileA: GeneratedProfile;
+			rarityA: FigureRarity;
+			imageUrlA: string;
+			nameB: string;
+			profileB: GeneratedProfile;
+			rarityB: FigureRarity;
+			imageUrlB: string;
+			rarity: FigureRarity;
+			cardStyle: CardStyle;
+		}
+	): Promise<Figure> {
+		try {
+			// Phase 1: Merge profiles via LLM
+			await this.updateStatus(figureId, 'generating_profile');
+			const fusedProfile = await this.geminiService.mergeProfiles(
+				input.nameA,
+				input.profileA,
+				input.rarityA,
+				input.nameB,
+				input.profileB,
+				input.rarityB,
+				input.rarity
+			);
+
+			// Save profile + fused name
+			const { name: fusedName, ...profile } = fusedProfile;
+			await this.db
+				.update(figures)
+				.set({ name: fusedName, generatedProfile: profile, updatedAt: new Date() })
+				.where(eq(figures.id, figureId));
+
+			// Phase 2: Download parent images + convert webp→jpeg
+			await this.updateStatus(figureId, 'generating_image');
+			this.logger.log('Downloading parent images for fusion...');
+			const [imgA, imgB] = await Promise.all([
+				this.downloadAndConvertImage(input.imageUrlA),
+				this.downloadAndConvertImage(input.imageUrlB),
+			]);
+
+			// Phase 3: Generate fused image
+			const itemLabels = profile.items.map((item) => `${item.name} — ${item.description}`);
+			const pngBuffer = await this.geminiService.generateFusionImage(
+				fusedName,
+				profile.subtitle,
+				profile.visualDescription,
+				itemLabels,
+				input.cardStyle,
+				imgA,
+				imgB
+			);
+
+			// Phase 4: BG removal
+			await this.updateStatus(figureId, 'processing');
+			const webpBuffer = await this.imageProcessingService.removeBackground(pngBuffer);
+
+			// Phase 5: Upload
+			const imageUrl = await this.storageService.uploadFigureImage(userId, figureId, webpBuffer);
+
+			// Phase 6: Finalize
+			const [completed] = await this.db
+				.update(figures)
+				.set({
+					imageUrl,
+					status: 'completed',
+					updatedAt: new Date(),
+				})
+				.where(eq(figures.id, figureId))
+				.returning();
+
+			this.logger.log(`Fusion "${fusedName}" generation completed`);
+			return completed;
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Unknown error';
+			this.logger.error(`Fusion generation failed: ${message}`);
+
+			try {
+				const [failed] = await this.db
+					.update(figures)
+					.set({
+						status: 'failed',
+						errorMessage: message,
+						updatedAt: new Date(),
+					})
+					.where(eq(figures.id, figureId))
+					.returning();
+
+				return failed;
+			} catch (dbError) {
+				this.logger.error(`Failed to update error status for fusion ${figureId}`, dbError);
+				throw error;
+			}
+		}
+	}
+
+	private async downloadAndConvertImage(imageUrl: string): Promise<Buffer> {
+		const res = await fetch(imageUrl);
+		if (!res.ok) throw new Error(`Failed to download image: ${res.status}`);
+		const webpBuffer = Buffer.from(await res.arrayBuffer());
+		return sharp(webpBuffer).jpeg({ quality: 85 }).toBuffer();
 	}
 
 	private async updateStatus(figureId: string, status: FigureStatus): Promise<void> {

@@ -6,8 +6,12 @@ import { ConfigService } from '@nestjs/config';
 import {
 	PROFILE_JSON_SCHEMA,
 	PROFILE_SYSTEM_PROMPT,
+	FUSION_PROFILE_SYSTEM_PROMPT,
+	FUSION_PROFILE_JSON_SCHEMA,
 	buildImagePrompt,
 	buildProfileUserPrompt,
+	buildFusionProfilePrompt,
+	buildFusionImagePrompt,
 } from './prompts';
 
 const TEXT_MODEL = 'gemini-3-flash-preview';
@@ -154,5 +158,107 @@ export class GeminiService {
 		}
 
 		throw new Error('Gemini returned no image data');
+	}
+
+	async mergeProfiles(
+		nameA: string,
+		profileA: GeneratedProfile,
+		rarityA: FigureRarity,
+		nameB: string,
+		profileB: GeneratedProfile,
+		rarityB: FigureRarity,
+		fusedRarity: FigureRarity
+	): Promise<{ name: string } & GeneratedProfile> {
+		const statRange = STAT_RANGES[fusedRarity];
+		const userPrompt = buildFusionProfilePrompt(nameA, profileA, rarityA, nameB, profileB, rarityB, statRange);
+
+		this.logger.log(`Merging profiles: "${nameA}" + "${nameB}" → ${fusedRarity}`);
+
+		const response = await this.client.models.generateContent({
+			model: TEXT_MODEL,
+			contents: userPrompt,
+			config: {
+				systemInstruction: FUSION_PROFILE_SYSTEM_PROMPT,
+				responseMimeType: 'application/json',
+				responseSchema: FUSION_PROFILE_JSON_SCHEMA,
+				temperature: 1.0,
+				thinkingConfig: { thinkingBudget: 0 },
+				safetySettings: this.safetySettings,
+			},
+		});
+
+		const text = response.text;
+		if (!text) {
+			throw new Error('Gemini returned empty text response for fusion profile');
+		}
+
+		const parsed = JSON.parse(text);
+
+		if (!parsed.name || !parsed.subtitle || !parsed.backstory || !parsed.visualDescription) {
+			throw new Error('Fusion profile missing required fields');
+		}
+		if (!Array.isArray(parsed.items) || parsed.items.length !== 3) {
+			throw new Error(`Expected 3 items, got ${parsed.items?.length}`);
+		}
+		if (!parsed.stats || typeof parsed.stats.attack !== 'number') {
+			throw new Error('Fusion profile has invalid stats');
+		}
+		if (!parsed.specialAttack?.name || !parsed.specialAttack?.description) {
+			throw new Error('Fusion profile missing specialAttack');
+		}
+
+		const clamp = (v: number) => Math.max(statRange.min, Math.min(statRange.max, v));
+		parsed.stats.attack = clamp(parsed.stats.attack);
+		parsed.stats.defense = clamp(parsed.stats.defense);
+		parsed.stats.special = clamp(parsed.stats.special);
+
+		this.logger.log(`Fusion profile: "${parsed.name}" — "${parsed.subtitle}"`);
+		return parsed;
+	}
+
+	async generateFusionImage(
+		name: string,
+		subtitle: string,
+		visualDescription: string,
+		items: string[],
+		cardStyle: CardStyle,
+		sourceImageA: Buffer,
+		sourceImageB: Buffer
+	): Promise<Buffer> {
+		const prompt = buildFusionImagePrompt(name, subtitle, visualDescription, items, cardStyle);
+
+		this.logger.log(`Generating fusion image for "${name}"...`);
+
+		const contents: Array<string | { inlineData: { mimeType: string; data: string } }> = [
+			{ inlineData: { mimeType: 'image/jpeg', data: sourceImageA.toString('base64') } },
+			{ inlineData: { mimeType: 'image/jpeg', data: sourceImageB.toString('base64') } },
+			prompt,
+		];
+
+		const response = await this.client.models.generateContent({
+			model: IMAGE_MODEL,
+			contents,
+			config: {
+				responseModalities: ['IMAGE', 'TEXT'],
+				safetySettings: this.safetySettings,
+			},
+		});
+
+		const parts = response.candidates?.[0]?.content?.parts;
+		if (!parts) {
+			throw new Error(
+				'The AI could not generate this fusion — try different figures'
+			);
+		}
+
+		for (const part of parts) {
+			if (part.inlineData?.data) {
+				const buffer = Buffer.from(part.inlineData.data, 'base64');
+				this.logger.log(`Fusion image generated: ${(buffer.length / 1024).toFixed(0)} KB`);
+				return buffer;
+			}
+		}
+
+		throw new Error('Gemini returned no image data for fusion');
 	}
 }

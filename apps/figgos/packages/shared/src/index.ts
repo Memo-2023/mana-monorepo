@@ -25,7 +25,8 @@ export type CardStyle =
 	| 'common_warm'
 	| 'rare'
 	| 'epic'
-	| 'legendary';
+	| 'legendary'
+	| 'fusion';
 
 const COMMON_STYLES: CardStyle[] = ['common_kraft', 'common_white', 'common_mint', 'common_warm'];
 
@@ -35,6 +36,23 @@ export function getCardStyle(rarity: FigureRarity): CardStyle {
 		return COMMON_STYLES[Math.floor(Math.random() * COMMON_STYLES.length)];
 	}
 	return rarity as CardStyle;
+}
+
+// ── Fusion Rarity ──
+
+const RARITY_TIERS: FigureRarity[] = ['common', 'rare', 'epic', 'legendary'];
+
+/** Roll rarity for a fused figure. Base = higher parent, 30% chance +1 tier, 10% chance +2 tiers. */
+export function rollFusionRarity(rarityA: FigureRarity, rarityB: FigureRarity): FigureRarity {
+	const idxA = RARITY_TIERS.indexOf(rarityA);
+	const idxB = RARITY_TIERS.indexOf(rarityB);
+	let base = Math.max(idxA, idxB);
+
+	const roll = Math.random();
+	if (roll < 0.10) base += 2;
+	else if (roll < 0.40) base += 1;
+
+	return RARITY_TIERS[Math.min(base, RARITY_TIERS.length - 1)];
 }
 
 // ── Language ──
@@ -101,6 +119,8 @@ export interface FigureResponse {
 	isPublic: boolean;
 	errorMessage: string | null;
 	isArchived: boolean;
+	isFusion: boolean;
+	parentFigureIds: string[] | null;
 	createdAt: string;
 	updatedAt: string;
 }

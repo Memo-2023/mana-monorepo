@@ -11,6 +11,7 @@ import {
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { FiguresService } from './figures.service';
 import { CreateFigureDto } from './dto/create-figure.dto';
+import { FuseFiguresDto } from './dto/fuse-figures.dto';
 
 @Controller('figures')
 @UseGuards(JwtAuthGuard)
@@ -26,6 +27,12 @@ export class FiguresController {
 			dto.language || 'en',
 			dto.faceImage
 		);
+		return { figure };
+	}
+
+	@Post('fuse')
+	async fuse(@CurrentUser() user: CurrentUserData, @Body() dto: FuseFiguresDto) {
+		const figure = await this.figuresService.fuse(user.userId, dto.figureIdA, dto.figureIdB);
 		return { figure };
 	}
 

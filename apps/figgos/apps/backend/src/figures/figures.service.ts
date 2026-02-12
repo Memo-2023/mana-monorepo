@@ -6,7 +6,9 @@ import { figures } from '../db/schema';
 import type { Figure } from '../db/schema';
 import {
 	RARITY_WEIGHTS,
+	STAT_RANGES,
 	getCardStyle,
+	rollFusionRarity,
 	type FigureRarity,
 	type FigureLanguage,
 } from '@figgos/shared';
@@ -96,5 +98,54 @@ export class FiguresService {
 		}
 
 		await this.db.delete(figures).where(eq(figures.id, id));
+	}
+
+	async fuse(userId: string, figureIdA: string, figureIdB: string): Promise<Figure> {
+		// Fetch both figures — must exist and be completed
+		const [figA] = await this.db
+			.select()
+			.from(figures)
+			.where(and(eq(figures.id, figureIdA), eq(figures.status, 'completed')));
+		if (!figA) throw new NotFoundException(`Figure ${figureIdA} not found or not completed`);
+
+		const [figB] = await this.db
+			.select()
+			.from(figures)
+			.where(and(eq(figures.id, figureIdB), eq(figures.status, 'completed')));
+		if (!figB) throw new NotFoundException(`Figure ${figureIdB} not found or not completed`);
+
+		// TODO: verify ownership (figA.userId === userId && figB.userId === userId)
+
+		const rarity = rollFusionRarity(figA.rarity, figB.rarity);
+
+		// Insert fusion figure row
+		const [figure] = await this.db
+			.insert(figures)
+			.values({
+				userId,
+				name: `${figA.name} + ${figB.name}`, // placeholder, will be overwritten by LLM
+				rarity,
+				language: figA.language,
+				userInput: { description: `Fusion of ${figA.name} and ${figB.name}`, language: figA.language },
+				status: 'pending',
+				isFusion: true,
+				parentFigureIds: [figureIdA, figureIdB],
+			})
+			.returning();
+
+		const completed = await this.generationService.generateFusion(figure.id, userId, {
+			nameA: figA.name,
+			profileA: figA.generatedProfile!,
+			rarityA: figA.rarity,
+			imageUrlA: figA.imageUrl!,
+			nameB: figB.name,
+			profileB: figB.generatedProfile!,
+			rarityB: figB.rarity,
+			imageUrlB: figB.imageUrl!,
+			rarity,
+			cardStyle: 'fusion',
+		});
+
+		return completed;
 	}
 }

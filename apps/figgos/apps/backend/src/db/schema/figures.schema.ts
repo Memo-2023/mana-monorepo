@@ -31,6 +31,8 @@ export const figures = pgTable(
 		errorMessage: text('error_message'),
 		isPublic: boolean('is_public').default(false).notNull(),
 		isArchived: boolean('is_archived').default(false).notNull(),
+		isFusion: boolean('is_fusion').default(false).notNull(),
+		parentFigureIds: text('parent_figure_ids').array(),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 	},

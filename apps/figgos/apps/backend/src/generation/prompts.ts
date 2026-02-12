@@ -1,4 +1,4 @@
-import type { CardStyle, FigureLanguage } from '@figgos/shared';
+import type { CardStyle, FigureLanguage, GeneratedProfile } from '@figgos/shared';
 
 // ══════════════════════════════════════════════════════════════
 // Profile Generation — System Prompt
@@ -176,6 +176,14 @@ export const RARITY_STYLES: Record<CardStyle, RarityStyle> = {
 		vibe: 'This packaging is LOUD and electric. It demands attention. The holographic surface throws rainbow light everywhere. The neon accents make it feel like it belongs in an arcade or a cyberpunk display case. Nothing about this is subtle.',
 	},
 
+	// -- Fusion: Purple & gold hybrid --
+	fusion: {
+		card: 'Dark matte charcoal cardstock backing card with a subtle purple metallic sheen and fine gold filigree border.',
+		textStyle: 'gold metallic uppercase with a purple glow outline',
+		tag: 'A metallic purple tag with gold border in the top-right corner reading "FUSION" in gold text. The tag has a subtle shine.',
+		vibe: 'This packaging signals something unique — a fusion of two characters into one. The purple-and-gold accents distinguish it from standard rarity packaging.',
+	},
+
 	// -- Legendary: Ultra-luxury black & gold, museum piece --
 	legendary: {
 		card: 'Ultra-premium heavyweight matte black cardstock with a wide ornate gold foil border featuring intricate filigree scrollwork patterns embossed into the card. Gold foil decorative corner pieces with Art Deco geometric designs. A subtle gold foil crest or emblem is centered above the figure name. The card itself has a soft-touch velvet-like texture.',
@@ -211,6 +219,103 @@ export function buildImagePrompt(
 		: '';
 
 	return `Product photograph of a premium collectible figure in sealed blister packaging on a pure white background. Package fills 95% of frame.${faceBlock}
+
+${style.card} Hanging hole at top center. Clear plastic blister with molded compartments.
+
+${style.tag}
+
+Name in ${style.textStyle}: "${name.toUpperCase()}" large at the top. "${subtitle.toUpperCase()}" in smaller text below.
+
+In the left compartment stands the figure: ${visualDescription}
+
+${REALISM_BLOCK}
+${style.vibe}
+
+Three accessories in separate molded blister compartments on the right side, stacked vertically:
+${itemsText}
+Each accessory is detailed, clearly visible, and generously sized.
+
+IMPORTANT: The figure and accessories must NOT contain pure white (#FFFFFF) areas. Use off-white, cream, ivory, or light gray instead of white for any clothing, skin highlights, or materials. Pure white is reserved for the background only.
+
+Pure white background, soft even studio lighting, product catalog quality. 85mm lens, sharp focus.`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// Fusion — Profile Merge Prompt
+// ══════════════════════════════════════════════════════════════
+
+export const FUSION_PROFILE_SYSTEM_PROMPT = `You are the creative engine behind FIGGOS — a collectible action figure game. You are performing a FUSION: merging two existing figures into one new hybrid character.
+
+The fused figure should:
+- Combine elements from BOTH characters (appearance, backstory, abilities)
+- Have a new unique name that blends or references both originals
+- Have a new subtitle that reflects the fusion
+- Have a backstory that explains how/why these two merged
+- Have a visualDescription that combines visual elements from both figures
+- Pick or merge items from both sets (exactly 3 items total)
+- Have a new special attack that combines elements of both
+- The visualDescription must describe ONLY the figure (not packaging)
+- Never use pure white for clothing — use off-white, cream, ivory instead`;
+
+export function buildFusionProfilePrompt(
+	nameA: string,
+	profileA: GeneratedProfile,
+	rarityA: string,
+	nameB: string,
+	profileB: GeneratedProfile,
+	rarityB: string,
+	statRange: { min: number; max: number }
+): string {
+	const formatProfile = (name: string, profile: GeneratedProfile, rarity: string) =>
+		`=== "${name}" (${rarity}) ===
+Subtitle: ${profile.subtitle}
+Backstory: ${profile.backstory}
+Visual: ${profile.visualDescription}
+Items: ${profile.items.map((i) => `${i.name} — ${i.description}`).join('; ')}
+Stats: ATK ${profile.stats.attack}, DEF ${profile.stats.defense}, SPL ${profile.stats.special}
+Special: ${profile.specialAttack.name} — ${profile.specialAttack.description}`;
+
+	return `Fuse these two figures into one new character:
+
+${formatProfile(nameA, profileA, rarityA)}
+
+${formatProfile(nameB, profileB, rarityB)}
+
+Generate the fused character. Stats must be between ${statRange.min} and ${statRange.max}.`;
+}
+
+export const FUSION_PROFILE_JSON_SCHEMA = {
+	type: 'object' as const,
+	properties: {
+		name: {
+			type: 'string' as const,
+			description: 'New fused character name that blends or references both originals.',
+		},
+		...PROFILE_JSON_SCHEMA.properties,
+	},
+	required: ['name', ...PROFILE_JSON_SCHEMA.required] as const,
+};
+
+// ══════════════════════════════════════════════════════════════
+// Fusion — Image Generation Prompt
+// ══════════════════════════════════════════════════════════════
+
+export function buildFusionImagePrompt(
+	name: string,
+	subtitle: string,
+	visualDescription: string,
+	items: string[],
+	cardStyle: CardStyle
+): string {
+	const style = RARITY_STYLES[cardStyle];
+	const itemsText = items
+		.slice(0, 3)
+		.map((item) => `  - ${item}`)
+		.join('\n');
+
+	return `Product photograph of a premium collectible figure in sealed blister packaging on a pure white background. Package fills 95% of frame.
+
+FUSION FIGURE: This figure is the result of merging two existing characters. The two attached images show the original parent figures. The fused figure should visually combine elements from BOTH parents into a cohesive new design.
 
 ${style.card} Hanging hole at top center. Clear plastic blister with molded compartments.
 
