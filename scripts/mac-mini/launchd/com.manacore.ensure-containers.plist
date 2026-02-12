@@ -8,7 +8,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/till/projects/manacore-monorepo/scripts/mac-mini/ensure-containers-running.sh</string>
+        <string>/Users/mana/projects/manacore-monorepo/scripts/mac-mini/ensure-containers-running.sh</string>
     </array>
 
     <key>StartInterval</key>
