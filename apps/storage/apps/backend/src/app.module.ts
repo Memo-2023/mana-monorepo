@@ -9,6 +9,7 @@ import { TagModule } from './tag/tag.module';
 import { TrashModule } from './trash/trash.module';
 import { SearchModule } from './search/search.module';
 import { StorageModule } from './storage/storage.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -24,6 +25,7 @@ import { StorageModule } from './storage/storage.module';
 		TagModule,
 		TrashModule,
 		SearchModule,
+		AdminModule,
 	],
 })
 export class AppModule {}

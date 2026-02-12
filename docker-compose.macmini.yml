@@ -115,6 +115,10 @@ services:
       CONTACTS_BACKEND_URL: http://contacts-backend:3034
       PICTURE_BACKEND_URL: http://photos-backend:3039
       PRESI_BACKEND_URL: http://presi-backend:3036
+      ZITARE_BACKEND_URL: http://zitare-backend:3007
+      PHOTOS_BACKEND_URL: http://photos-backend:3039
+      CLOCK_BACKEND_URL: http://clock-backend:3033
+      STORAGE_BACKEND_URL: http://storage-backend:3035
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     volumes:
       - analytics_data:/data/analytics
@@ -287,6 +291,7 @@ services:
       AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
       AZURE_OPENAI_API_VERSION: 2024-12-01-preview
       CORS_ORIGINS: https://chat.mana.how,https://mana.how
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     ports:
       - "3030:3030"
     healthcheck:
@@ -312,6 +317,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/todo
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://todo.mana.how,https://mana.how
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     ports:
       - "3031:3031"
     healthcheck:
@@ -340,6 +346,7 @@ services:
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://calendar.mana.how,https://mana.how
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     ports:
       - "3032:3032"
     healthcheck:
@@ -368,6 +375,7 @@ services:
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://clock.mana.how,https://mana.how
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     ports:
       - "3033:3033"
     healthcheck:
@@ -402,6 +410,7 @@ services:
       S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       S3_BUCKET: contacts-photos
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     ports:
       - "3034:3034"
     healthcheck:
@@ -412,7 +421,10 @@ services:
       start_period: 40s
 
   storage-backend:
-    image: ghcr.io/memo-2023/storage-backend:latest
+    build:
+      context: .
+      dockerfile: apps/storage/apps/backend/Dockerfile
+    image: storage-backend:local
     container_name: mana-app-storage-backend
     restart: always
     depends_on:
@@ -432,6 +444,7 @@ services:
       STORAGE_S3_PUBLIC_URL: https://storage-files.mana.how
       MAX_FILE_SIZE: 104857600
       MAX_FILES_PER_UPLOAD: 10
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     ports:
       - "3035:3035"
     healthcheck:
@@ -454,6 +467,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/presi
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://presi.mana.how,https://mana.how
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     ports:
       - "3036:3036"
     healthcheck:
@@ -536,6 +550,7 @@ services:
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_MEDIA_URL: http://mana-media:3015
       CORS_ORIGINS: https://photos.mana.how,https://mana.how
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
     ports:
       - "3039:3039"
     healthcheck:

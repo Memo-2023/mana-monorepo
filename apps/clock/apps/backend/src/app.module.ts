@@ -8,6 +8,7 @@ import { AlarmModule } from './alarm/alarm.module';
 import { TimerModule } from './timer/timer.module';
 import { WorldClockModule } from './world-clock/world-clock.module';
 import { PresetModule } from './preset/preset.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -26,6 +27,7 @@ import { PresetModule } from './preset/preset.module';
 		TimerModule,
 		WorldClockModule,
 		PresetModule,
+		AdminModule,
 	],
 })
 export class AppModule {}

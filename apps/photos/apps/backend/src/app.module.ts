@@ -6,6 +6,7 @@ import { AlbumModule } from './album/album.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { TagModule } from './tag/tag.module';
 import { PhotoModule } from './photo/photo.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
 	imports: [
@@ -19,6 +20,7 @@ import { PhotoModule } from './photo/photo.module';
 		FavoriteModule,
 		TagModule,
 		PhotoModule,
+		AdminModule,
 	],
 })
 export class AppModule {}

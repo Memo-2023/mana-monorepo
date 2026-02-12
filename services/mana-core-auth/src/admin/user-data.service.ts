@@ -85,6 +85,24 @@ export class UserDataService {
 				icon: '📊',
 				url: this.configService.get('PRESI_BACKEND_URL', 'http://localhost:3008'),
 			},
+			{
+				id: 'photos',
+				name: 'Photos',
+				icon: '📷',
+				url: this.configService.get('PHOTOS_BACKEND_URL', 'http://localhost:3019'),
+			},
+			{
+				id: 'clock',
+				name: 'Clock',
+				icon: '⏰',
+				url: this.configService.get('CLOCK_BACKEND_URL', 'http://localhost:3017'),
+			},
+			{
+				id: 'storage',
+				name: 'Storage',
+				icon: '💾',
+				url: this.configService.get('STORAGE_BACKEND_URL', 'http://localhost:3016'),
+			},
 		];
 	}
 
