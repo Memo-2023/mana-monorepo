@@ -495,8 +495,9 @@ services:
     depends_on:
       mana-auth:
         condition: service_healthy
-      mana-media:
-        condition: service_healthy
+      # mana-media dependency temporarily disabled until mana-media Dockerfile is fixed
+      # mana-media:
+      #   condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3039
