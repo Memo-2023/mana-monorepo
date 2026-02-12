@@ -22,6 +22,8 @@
 	let prevMessageCount = $state(0);
 	let hasInitiallyScrolled = $state(false);
 	let currentRoomId = $state<string | null>(null);
+	// Track if user manually scrolled up (to read history)
+	let userScrolledUp = $state(false);
 
 	// Reset state when room changes
 	$effect(() => {
@@ -32,6 +34,7 @@
 			prevMessageCount = 0;
 			loadingMore = false;
 			showScrollButton = false;
+			userScrolledUp = false;
 		}
 	});
 
@@ -51,15 +54,16 @@
 			return;
 		}
 
-		// Auto-scroll on new messages (if already at bottom)
+		// Auto-scroll on new messages (only if user hasn't manually scrolled up)
 		if (messageCount > prevMessageCount && container && hasInitiallyScrolled) {
-			const isAtBottom =
-				container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-			if (isAtBottom) {
+			if (!userScrolledUp) {
+				// Use double tick to ensure DOM has rendered the new message
 				tick().then(() => {
-					if (container) {
-						container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-					}
+					tick().then(() => {
+						if (container) {
+							container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+						}
+					});
 				});
 			}
 		}
@@ -69,9 +73,19 @@
 	function handleScroll() {
 		if (!container) return;
 
-		// Show scroll button if not at bottom
+		// Calculate distance from bottom
 		const distanceFromBottom =
 			container.scrollHeight - container.scrollTop - container.clientHeight;
+
+		// Track if user manually scrolled up (more than 150px from bottom)
+		// Reset when they scroll back to bottom (within 50px)
+		if (distanceFromBottom > 150) {
+			userScrolledUp = true;
+		} else if (distanceFromBottom < 50) {
+			userScrolledUp = false;
+		}
+
+		// Show scroll button if not at bottom
 		showScrollButton = distanceFromBottom > 200;
 
 		// Load more when scrolled to top (only after initial scroll and with messages present)
@@ -104,6 +118,7 @@
 	}
 
 	function scrollToBottom() {
+		userScrolledUp = false;
 		container?.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 	}
 </script>

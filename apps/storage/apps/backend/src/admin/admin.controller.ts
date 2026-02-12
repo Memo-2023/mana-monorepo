@@ -17,7 +17,7 @@ import { UserDataResponse, DeleteUserDataResponse } from './dto/user-data-respon
  * Used by mana-core-auth aggregation service
  * Protected by X-Service-Key authentication
  */
-@Controller('admin')
+@Controller('api/v1/admin')
 @UseGuards(ServiceAuthGuard)
 export class AdminController {
 	private readonly logger = new Logger(AdminController.name);

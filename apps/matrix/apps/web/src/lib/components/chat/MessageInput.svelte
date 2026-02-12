@@ -53,6 +53,15 @@
 		}
 	});
 
+	// Auto-focus input when room changes or component mounts
+	$effect(() => {
+		const roomId = matrixStore.currentRoomId;
+		if (roomId && textarea) {
+			// Small delay to ensure DOM is ready
+			setTimeout(() => textarea?.focus(), 50);
+		}
+	});
+
 	async function handleSend() {
 		const trimmed = message.trim();
 		if (!trimmed) return;
@@ -416,13 +425,17 @@
 		<div
 			class="mb-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 shadow-xl overflow-hidden"
 		>
-			<div class="px-3 py-1.5 text-xs text-muted-foreground border-b border-black/5 dark:border-white/5">
+			<div
+				class="px-3 py-1.5 text-xs text-muted-foreground border-b border-black/5 dark:border-white/5"
+			>
 				Erwähne jemanden
 			</div>
 			{#each mentionResults as member, i}
 				<button
 					class="flex items-center gap-3 w-full px-3 py-2 transition-colors text-left
-					       {i === selectedMentionIndex ? 'bg-violet-500/10 dark:bg-violet-500/20' : 'hover:bg-black/5 dark:hover:bg-white/5'}"
+					       {i === selectedMentionIndex
+						? 'bg-violet-500/10 dark:bg-violet-500/20'
+						: 'hover:bg-black/5 dark:hover:bg-white/5'}"
 					onclick={() => insertMention(member)}
 				>
 					<!-- Avatar -->
