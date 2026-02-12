@@ -1137,7 +1137,10 @@ services:
       retries: 3
       start_period: 40s
 
+  # NOTE: skilltree-web disabled - Dockerfile needs pnpm deploy fix for shared packages
+  # TODO: Fix Dockerfile similar to mana-search to resolve @manacore/shared-vite-config
   skilltree-web:
+    profiles: ["disabled"]
     build:
       context: .
       dockerfile: apps/skilltree/apps/web/Dockerfile

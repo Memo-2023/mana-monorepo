@@ -39,12 +39,12 @@ WORKDIR /app
 COPY --from=builder --chown=nestjs:nodejs /app/deploy ./
 COPY --from=builder --chown=nestjs:nodejs /app/services/mana-search/dist ./dist
 
-# Expose port
-EXPOSE 3021
+# Expose port (default 3020, configurable via PORT env)
+EXPOSE 3020
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD node -e "fetch('http://localhost:3021/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
+# Health check uses /api/v1/health endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3020/api/v1/health || exit 1
 
 # Start the application
 CMD ["node", "dist/main"]

@@ -81,8 +81,9 @@ password_config:
   pepper: "${SYNAPSE_PASSWORD_PEPPER:-change-me-pepper}"
 
 # Session lifetime (must be >= refresh_token_lifetime)
-session_lifetime: 168h
-refresh_token_lifetime: 168h
+# Set to 10 years for bot tokens to avoid frequent expiration
+session_lifetime: 87600h
+refresh_token_lifetime: 87600h
 
 # ============================================
 # Rate Limiting
@@ -149,6 +150,8 @@ registration_shared_secret: "${SYNAPSE_REGISTRATION_SECRET:-change-me-registrati
 
 # ============================================
 # Application Services (for Bots)
+# Currently disabled - using long-lived user tokens instead
+# TODO: Migrate bots to AS for truly permanent tokens
 # ============================================
 
 app_service_config_files: []

@@ -245,7 +245,7 @@ check_service "NutriPhi Web" "http://localhost:5017/health"
 echo ""
 echo "SkillTree:"
 check_service "SkillTree Backend" "http://localhost:3038/health"
-check_service "SkillTree Web" "http://localhost:5018/health"
+# SkillTree Web disabled - Dockerfile needs fix for shared packages
 
 echo ""
 echo "Photos:"
@@ -254,8 +254,8 @@ check_service "Photos Web" "http://localhost:5019/health"
 
 echo ""
 echo "Core Services:"
-check_service "API Gateway" "http://localhost:3010/health"
-check_service "Search Service" "http://localhost:3020/health"
+# API Gateway disabled - no GHCR image, no Dockerfile
+check_service "Search Service" "http://localhost:3020/api/v1/health"
 check_service "Media Service" "http://localhost:3015/api/v1/health"
 check_service "LLM Service" "http://localhost:3025/health"
 
