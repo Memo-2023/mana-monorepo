@@ -92,16 +92,18 @@ check_health() {
     fi
 }
 
-check_health "Auth API" "http://localhost:3001/api/v1/health"
-check_health "ManaCore Web" "http://localhost:5173/health"
-check_health "Chat Backend" "http://localhost:3002/api/v1/health"
-check_health "Chat Web" "http://localhost:3000/health"
-check_health "Todo Backend" "http://localhost:3018/api/health"
-check_health "Todo Web" "http://localhost:5188/health"
-check_health "Calendar Backend" "http://localhost:3016/api/v1/health"
-check_health "Calendar Web" "http://localhost:5186/health"
-check_health "Clock Backend" "http://localhost:3017/api/v1/health"
-check_health "Clock Web" "http://localhost:5187/health"
+check_health "Auth API" "http://localhost:3001/health"
+check_health "ManaCore Web" "http://localhost:5000/health"
+check_health "Chat Backend" "http://localhost:3030/health"
+check_health "Chat Web" "http://localhost:5010/health"
+check_health "Todo Backend" "http://localhost:3031/health"
+check_health "Todo Web" "http://localhost:5011/health"
+check_health "Calendar Backend" "http://localhost:3032/health"
+check_health "Calendar Web" "http://localhost:5012/health"
+check_health "Clock Backend" "http://localhost:3033/health"
+check_health "Clock Web" "http://localhost:5013/health"
+check_health "Contacts Backend" "http://localhost:3034/health"
+check_health "Contacts Web" "http://localhost:5014/health"
 
 echo ""
 echo "=== Deployment Complete ==="

@@ -174,7 +174,7 @@ echo ""
 
 echo "Infrastructure:"
 # Check postgres via docker
-if docker exec manacore-postgres pg_isready -U postgres >/dev/null 2>&1; then
+if docker exec mana-infra-postgres pg_isready -U postgres >/dev/null 2>&1; then
     echo -e "  ${GREEN}[OK]${NC} PostgreSQL"
 else
     echo -e "  ${RED}[FAIL]${NC} PostgreSQL"
@@ -182,60 +182,98 @@ else
 fi
 
 # Check redis via docker
-if docker exec manacore-redis redis-cli ping >/dev/null 2>&1; then
+if docker exec mana-infra-redis redis-cli ping >/dev/null 2>&1; then
     echo -e "  ${GREEN}[OK]${NC} Redis"
 else
     echo -e "  ${RED}[FAIL]${NC} Redis"
     FAILURES+=("Redis")
 fi
 
+# Check for stuck containers (Created/Exited status)
+STUCK_CONTAINERS=$(docker ps -a --filter "status=created" --filter "status=exited" --format "{{.Names}}" | grep "^mana-" || true)
+if [ -n "$STUCK_CONTAINERS" ]; then
+    echo -e "  ${RED}[FAIL]${NC} Stuck containers detected:"
+    echo "$STUCK_CONTAINERS" | while read c; do echo "         - $c"; done
+    FAILURES+=("Stuck containers: $(echo $STUCK_CONTAINERS | tr '\n' ' ')")
+fi
+
 echo ""
 echo "Auth & Dashboard:"
 check_service "Auth API" "http://localhost:3001/health"
-check_service "Dashboard Web" "http://localhost:5173/health"
+check_service "Dashboard Web" "http://localhost:5000/health"
 
 echo ""
 echo "Chat:"
-check_service "Chat Backend" "http://localhost:3002/health"
-check_service "Chat Web" "http://localhost:3000/health"
+check_service "Chat Backend" "http://localhost:3030/health"
+check_service "Chat Web" "http://localhost:5010/health"
 
 echo ""
 echo "Todo:"
-check_service "Todo Backend" "http://localhost:3018/health"
-check_service "Todo Web" "http://localhost:5188/health"
+check_service "Todo Backend" "http://localhost:3031/health"
+check_service "Todo Web" "http://localhost:5011/health"
 
 echo ""
 echo "Calendar:"
-check_service "Calendar Backend" "http://localhost:3016/health"
-check_service "Calendar Web" "http://localhost:5186/health"
+check_service "Calendar Backend" "http://localhost:3032/health"
+check_service "Calendar Web" "http://localhost:5012/health"
 
 echo ""
 echo "Clock:"
-check_service "Clock Backend" "http://localhost:3017/health"
-check_service "Clock Web" "http://localhost:5187/health"
+check_service "Clock Backend" "http://localhost:3033/health"
+check_service "Clock Web" "http://localhost:5013/health"
 
 echo ""
 echo "Contacts:"
-check_service "Contacts Backend" "http://localhost:3015/health"
-check_service "Contacts Web" "http://localhost:5184/health"
+check_service "Contacts Backend" "http://localhost:3034/health"
+check_service "Contacts Web" "http://localhost:5014/health"
 
 echo ""
 echo "Storage:"
-check_service "Storage Backend" "http://localhost:3019/api/v1/health"
-check_service "Storage Web" "http://localhost:5185/health"
+check_service "Storage Backend" "http://localhost:3035/api/v1/health"
+check_service "Storage Web" "http://localhost:5015/health"
 
 echo ""
 echo "Presi:"
-check_service "Presi Backend" "http://localhost:3008/api/v1/health"
-check_service "Presi Web" "http://localhost:5178/health"
+check_service "Presi Backend" "http://localhost:3036/api/v1/health"
+check_service "Presi Web" "http://localhost:5016/health"
 
 echo ""
-echo "Matrix (DSGVO-konform):"
-check_service "Synapse" "http://localhost:8008/health"
-check_service "Element Web" "http://localhost:8087/"
-check_service "Matrix Ollama Bot" "http://localhost:3311/health"
-check_service "Matrix Stats Bot" "http://localhost:3312/health"
-check_service "Matrix Project Doc Bot" "http://localhost:3313/health"
+echo "NutriPhi:"
+check_service "NutriPhi Backend" "http://localhost:3037/api/v1/health"
+check_service "NutriPhi Web" "http://localhost:5017/health"
+
+echo ""
+echo "SkillTree:"
+check_service "SkillTree Backend" "http://localhost:3038/health"
+check_service "SkillTree Web" "http://localhost:5018/health"
+
+echo ""
+echo "Photos:"
+check_service "Photos Backend" "http://localhost:3039/api/v1/health"
+check_service "Photos Web" "http://localhost:5019/health"
+
+echo ""
+echo "Core Services:"
+check_service "API Gateway" "http://localhost:3010/health"
+check_service "Search Service" "http://localhost:3020/health"
+check_service "Media Service" "http://localhost:3015/api/v1/health"
+check_service "LLM Service" "http://localhost:3025/health"
+
+echo ""
+echo "Matrix:"
+check_service "Synapse" "http://localhost:4000/health"
+check_service "Element Web" "http://localhost:4080/"
+check_service "Matrix Web" "http://localhost:4090/health"
+check_service "Matrix Mana Bot" "http://localhost:4010/health"
+check_service "Matrix Ollama Bot" "http://localhost:4011/health"
+check_service "Matrix Stats Bot" "http://localhost:4012/health"
+check_service "Matrix Project Doc Bot" "http://localhost:4013/health"
+
+echo ""
+echo "Monitoring:"
+check_service "Grafana" "http://localhost:8000/api/health"
+check_service "Umami" "http://localhost:8010/api/heartbeat"
+check_service "VictoriaMetrics" "http://localhost:9090/health"
 
 echo ""
 echo "Cloudflare Tunnel:"
