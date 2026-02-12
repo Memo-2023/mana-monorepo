@@ -1431,6 +1431,11 @@ services:
       - /dev/disk/:/dev/disk:ro
     ports:
       - "9110:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:v0.15.0
@@ -1482,6 +1487,80 @@ services:
       retries: 3
 
   # ============================================
+  # Alerting Stack (Ports 9093-9095)
+  # ============================================
+
+  vmalert:
+    image: victoriametrics/vmalert:v1.99.0
+    container_name: mana-mon-vmalert
+    restart: always
+    depends_on:
+      victoriametrics:
+        condition: service_healthy
+      alertmanager:
+        condition: service_healthy
+    command:
+      - '-datasource.url=http://victoriametrics:9090'
+      - '-notifier.url=http://alertmanager:9093'
+      - '-remoteWrite.url=http://victoriametrics:9090'
+      - '-remoteRead.url=http://victoriametrics:9090'
+      - '-rule=/etc/alerts/*.yml'
+      - '-evaluationInterval=30s'
+      - '-httpListenAddr=:8880'
+    volumes:
+      - ./docker/prometheus/alerts.yml:/etc/alerts/alerts.yml:ro
+    ports:
+      - "8880:8880"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8880/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: mana-mon-alertmanager
+    restart: always
+    depends_on:
+      alert-notifier:
+        condition: service_healthy
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.listen-address=:9093'
+    volumes:
+      - ./docker/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    ports:
+      - "9093:9093"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  alert-notifier:
+    build:
+      context: ./docker/alert-notifier
+      dockerfile: Dockerfile
+    image: alert-notifier:local
+    container_name: mana-mon-alert-notifier
+    restart: always
+    environment:
+      PORT: 8080
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      NTFY_TOPIC: ${NTFY_TOPIC:-}
+    ports:
+      - "9095:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ============================================
   # Auto-Update (Watchtower)
   # ============================================
 
@@ -1508,6 +1587,8 @@ volumes:
     name: mana-redis-data
   victoriametrics_data:
     name: mana-victoria-data
+  alertmanager_data:
+    name: mana-alertmanager-data
   grafana_data:
     name: mana-grafana-data
   analytics_data:

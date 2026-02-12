@@ -276,6 +276,12 @@ check_service "Umami" "http://localhost:8010/api/heartbeat"
 check_service "VictoriaMetrics" "http://localhost:9090/health"
 
 echo ""
+echo "Alerting:"
+check_service "vmalert" "http://localhost:8880/health"
+check_service "Alertmanager" "http://localhost:9093/-/healthy"
+check_service "Alert Notifier" "http://localhost:9095/health"
+
+echo ""
 echo "Cloudflare Tunnel:"
 if pgrep -x "cloudflared" >/dev/null; then
     echo -e "  ${GREEN}[OK]${NC} cloudflared running"

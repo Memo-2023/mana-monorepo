@@ -17,8 +17,11 @@ for f in *.plist; do launchctl load ~/Library/LaunchAgents/$f; done
 | Service | Description | Interval |
 |---------|-------------|----------|
 | `docker-startup` | Starts Docker containers on boot | At login |
-| `ensure-containers` | Detects and restarts stuck containers | Every 5 min |
+| `ensure-containers` | Detects and restarts stuck/crash-looping containers | Every 5 min |
 | `health-check` | Checks all services and sends alerts | Every 5 min |
+| `backup-databases` | PostgreSQL backup with daily/weekly rotation | Daily 3 AM |
+| `disk-check` | Monitors disk space, alerts on thresholds | Hourly |
+| `weekly-report` | Generates system health summary | Sunday 10 AM |
 | `ssd-check` | Monitors SSD health | Periodic |
 | `mana-stt` | Speech-to-text service (Whisper) | At login |
 | `mana-tts` | Text-to-speech service (Kokoro) | At login |

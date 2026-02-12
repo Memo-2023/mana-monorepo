@@ -1,0 +1,62 @@
+# Alertmanager Configuration for ManaCore
+# Sends alerts via webhook to custom notification handler
+
+global:
+  resolve_timeout: 5m
+
+route:
+  # Default receiver for all alerts
+  receiver: 'webhook'
+  # Group alerts by severity and service
+  group_by: ['alertname', 'severity', 'job']
+  # Wait before sending first notification
+  group_wait: 30s
+  # Wait before sending follow-up notifications for same group
+  group_interval: 5m
+  # Wait before re-sending resolved alerts
+  repeat_interval: 4h
+
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'webhook'
+      group_wait: 10s
+      repeat_interval: 1h
+
+    # Warning alerts - less frequent
+    - match:
+        severity: warning
+      receiver: 'webhook'
+      group_wait: 1m
+      repeat_interval: 6h
+
+    # Info alerts - only during business hours, batch together
+    - match:
+        severity: info
+      receiver: 'webhook'
+      group_wait: 5m
+      repeat_interval: 24h
+
+receivers:
+  - name: 'webhook'
+    webhook_configs:
+      - url: 'http://alert-notifier:8080/webhook'
+        send_resolved: true
+        max_alerts: 10
+
+# Inhibition rules - prevent redundant alerts
+inhibit_rules:
+  # Don't alert on warnings if critical is firing for same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'job']
+
+  # Don't alert on service-specific issues if PostgreSQL is down
+  - source_match:
+      alertname: 'PostgreSQLDown'
+    target_match_re:
+      alertname: '.*(Backend|Service).*'
+    equal: []

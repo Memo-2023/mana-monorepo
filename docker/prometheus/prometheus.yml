@@ -9,11 +9,11 @@ global:
 rule_files:
   - /etc/prometheus/alerts.yml
 
-# Alertmanager configuration (optional, for future use)
-# alerting:
-#   alertmanagers:
-#     - static_configs:
-#         - targets: []
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
 
 scrape_configs:
   # Prometheus self-monitoring
@@ -30,10 +30,10 @@ scrape_configs:
         target_label: instance
         replacement: 'mac-mini'
 
-  # Docker container metrics via cAdvisor (disabled - container not deployed)
-  # - job_name: 'cadvisor'
-  #   static_configs:
-  #     - targets: ['cadvisor:8080']
+  # Docker container metrics via cAdvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
 
   # PostgreSQL metrics
   - job_name: 'postgres'
