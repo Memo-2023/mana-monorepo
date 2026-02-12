@@ -17,5 +17,6 @@ import { AuthModule } from '../auth/auth.module';
 	],
 	controllers: [UserDataController],
 	providers: [UserDataService, AdminGuard],
+	exports: [UserDataService],
 })
 export class AdminModule {}

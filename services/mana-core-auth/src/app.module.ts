@@ -13,6 +13,7 @@ import { HealthModule } from './health/health.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { SettingsModule } from './settings/settings.module';
 import { TagsModule } from './tags/tags.module';
+import { MeModule } from './me/me.module';
 import { AnalyticsModule } from './analytics';
 import { MetricsModule } from './metrics';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -43,6 +44,7 @@ import { LoggerModule } from './common/logger';
 		ReferralsModule,
 		SettingsModule,
 		TagsModule,
+		MeModule,
 	],
 	providers: [
 		{

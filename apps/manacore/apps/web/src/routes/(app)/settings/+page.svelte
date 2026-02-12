@@ -265,39 +265,69 @@
 				</div>
 			</Card>
 
-			<!-- Danger Zone -->
+			<!-- My Data & Danger Zone -->
 			<Card>
-				<div class="p-6 border-red-200 dark:border-red-800">
+				<div class="p-6">
 					<div class="flex items-center gap-3 mb-6">
 						<div
-							class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+							class="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"
 						>
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									stroke-width="2"
-									d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 								/>
 							</svg>
 						</div>
 						<div>
-							<h2 class="text-lg font-semibold text-red-600 dark:text-red-400">Gefahrenzone</h2>
-							<p class="text-sm text-muted-foreground">Irreversible Aktionen</p>
+							<h2 class="text-lg font-semibold">Meine Daten (DSGVO)</h2>
+							<p class="text-sm text-muted-foreground">Datenschutz und Datenexport</p>
 						</div>
 					</div>
 
-					<div class="rounded-lg border border-red-200 dark:border-red-800 p-4">
-						<div class="flex items-center justify-between">
+					<div class="space-y-4">
+						<div class="flex items-center justify-between py-3 border-b border-border">
 							<div>
-								<p class="font-medium text-red-600 dark:text-red-400">Konto löschen</p>
+								<p class="font-medium">Daten ansehen & exportieren</p>
 								<p class="text-sm text-muted-foreground">
-									Das Löschen deines Kontos kann nicht rückgängig gemacht werden.
+									Sieh alle deine gespeicherten Daten ein und exportiere sie als JSON
 								</p>
 							</div>
-							<Button variant="destructive" disabled class="bg-red-600 hover:bg-red-700 text-white">
-								Konto löschen
-							</Button>
+							<a
+								href="/settings/my-data"
+								class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+							>
+								Meine Daten
+								<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 5l7 7-7 7"
+									/>
+								</svg>
+							</a>
+						</div>
+
+						<div
+							class="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 p-4"
+						>
+							<div class="flex items-center justify-between">
+								<div>
+									<p class="font-medium text-red-600 dark:text-red-400">Konto loschen</p>
+									<p class="text-sm text-muted-foreground">
+										Das Loschen deines Kontos kann nicht ruckgangig gemacht werden.
+									</p>
+								</div>
+								<a
+									href="/settings/my-data"
+									class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
+								>
+									Verwalten
+								</a>
+							</div>
 						</div>
 					</div>
 				</div>
