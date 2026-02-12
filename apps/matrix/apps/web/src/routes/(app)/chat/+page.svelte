@@ -6,7 +6,7 @@
 	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
 	import ForwardMessageDialog from '$lib/components/chat/ForwardMessageDialog.svelte';
 	import { CallView, IncomingCallDialog } from '$lib/components/call';
-	import { ChatCircle, Plus, Gear } from '@manacore/shared-icons';
+	import { ChatCircle, Plus, Gear, List } from '@manacore/shared-icons';
 	import { browser } from '$app/environment';
 
 	// Call state
@@ -231,6 +231,24 @@
 
 	<!-- Room Settings Panel -->
 	<RoomSettingsPanel open={showRoomSettings} onClose={() => (showRoomSettings = false)} />
+
+	<!-- FAB to open sidebar (mobile/tablet only, when sidebar is closed) -->
+	{#if !sidebarOpen}
+		<button
+			onclick={toggleSidebar}
+			class="fixed bottom-20 left-4 z-30 lg:hidden flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
+			aria-label="Chats anzeigen"
+		>
+			<List class="h-6 w-6" weight="bold" />
+			{#if matrixStore.totalUnreadCount > 0}
+				<span
+					class="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold shadow-md"
+				>
+					{matrixStore.totalUnreadCount > 99 ? '99+' : matrixStore.totalUnreadCount}
+				</span>
+			{/if}
+		</button>
+	{/if}
 </div>
 
 <!-- Create Room Dialog -->
