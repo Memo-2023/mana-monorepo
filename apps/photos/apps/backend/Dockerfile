@@ -18,7 +18,6 @@ COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
 COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
-COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 
 # Copy photos shared package
@@ -44,9 +43,6 @@ WORKDIR /app/packages/shared-nestjs-metrics
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-setup
-RUN pnpm build
-
-WORKDIR /app/packages/mana-core-nestjs-integration
 RUN pnpm build
 
 # Build the backend
