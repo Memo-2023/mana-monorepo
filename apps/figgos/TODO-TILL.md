@@ -65,15 +65,26 @@ Die Web-App (`apps/figgos/apps/web`) hat aktuell nur Grundgeruest. Mobile ist we
 
 ---
 
-## 5. Karten-Merge UI Konzept (Prio 3)
+## 5. Karten-Fusion UI Konzept (Prio 3)
 
-Ueberlegen wie ein Karten-Merge im UI aussehen koennte:
+Ueberlegen wie eine Karten-Fusion im UI aussehen koennte:
 
 - Zwei Karten auswaehlen → verschmelzen zu einer neuen Figur
 - Wie sieht die Auswahl-UI aus? (Drag & Drop, Side-by-Side, Slots?)
-- Merge-Animation — wie verschmelzen die Karten visuell?
-- Was passiert mit Stats/Rarity? (Durchschnitt, Bonus, Upgrade?)
+- Fusion-Animation — wie verschmelzen die Karten visuell?
 - Was passiert mit den Ausgangskarten? (Verbraucht, archiviert?)
+
+**Backend-Endpoint existiert bereits:**
+```
+POST /api/v1/figures/fuse
+Body: { "figureIdA": "<uuid>", "figureIdB": "<uuid>" }
+```
+- Beide Figuren muessen `status: completed` haben
+- Rarity wird anhand der Eltern berechnet (Basis = hoeherer Eltern-Rarity, 30% Chance +1 Stufe, 10% +2 Stufen)
+- Fusionierte Karte hat eigenen Kartenstil (Lila/Gold mit "FUSION" Badge) + behaelt die gewuerfelte Rarity
+- Response: `{ figure }` mit `isFusion: true`, `parentFigureIds: [idA, idB]`
+- Profil (Name, Backstory, Items, Stats) wird vom LLM aus beiden Eltern zusammengefuehrt
+- Bild wird mit beiden Elternkarten als Referenz generiert
 
 ---
 
