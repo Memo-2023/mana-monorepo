@@ -123,7 +123,10 @@ services:
   # Tier 2: Gateway & Search Services (Ports 3010-3029)
   # ============================================
 
+  # NOTE: api-gateway disabled - no GHCR image available, no Dockerfile exists
+  # To re-enable: create Dockerfile in services/api-gateway/ and build locally
   api-gateway:
+    profiles: ["disabled"]
     image: ghcr.io/memo-2023/api-gateway:latest
     container_name: mana-core-gateway
     restart: always
@@ -175,7 +178,10 @@ services:
       start_period: 15s
 
   mana-search:
-    image: ghcr.io/memo-2023/mana-search:latest
+    build:
+      context: .
+      dockerfile: services/mana-search/Dockerfile
+    image: mana-search:local
     container_name: mana-core-search
     restart: always
     depends_on:
@@ -554,6 +560,7 @@ services:
     volumes:
       - ./docker/matrix/homeserver.yaml:/config/homeserver.yaml:ro
       - ./docker/matrix/log.config.yaml:/config/log.config.yaml:ro
+      - ./docker/matrix/appservices:/appservices:ro
       - ./docker/matrix/data:/data
     ports:
       - "4000:8008"
@@ -1131,7 +1138,13 @@ services:
       start_period: 40s
 
   skilltree-web:
-    image: ghcr.io/memo-2023/skilltree-web:latest
+    build:
+      context: .
+      dockerfile: apps/skilltree/apps/web/Dockerfile
+      args:
+        PUBLIC_BACKEND_URL: http://skilltree-backend:3038
+        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+    image: skilltree-web:local
     container_name: mana-app-skilltree-web
     restart: always
     depends_on:
