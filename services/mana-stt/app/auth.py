@@ -1,14 +1,18 @@
 """
 API Key Authentication for ManaCore STT Service
 
-Simple API key authentication with rate limiting.
-Keys are configured via environment variables.
+Supports two authentication modes:
+1. Local API keys: Configured via environment variables
+2. External API keys: Validated via mana-core-auth service (when EXTERNAL_AUTH_ENABLED=true)
 
 Usage:
+    # Local keys
     API_KEYS=sk-key1:name1,sk-key2:name2
-
-    Or for unlimited internal access:
     INTERNAL_API_KEY=sk-internal-xxx
+
+    # External auth (for user-created keys via mana.how)
+    EXTERNAL_AUTH_ENABLED=true
+    MANA_CORE_AUTH_URL=http://localhost:3001
 """
 
 import os
@@ -20,6 +24,12 @@ from dataclasses import dataclass, field
 
 from fastapi import HTTPException, Security, Request
 from fastapi.security import APIKeyHeader
+
+from .external_auth import (
+    is_external_auth_enabled,
+    validate_api_key_external,
+    ExternalValidationResult,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +116,7 @@ class AuthResult:
     key_name: Optional[str] = None
     is_internal: bool = False
     rate_limit_remaining: Optional[int] = None
+    user_id: Optional[str] = None  # Set when using external auth
 
 
 async def verify_api_key(
@@ -114,6 +125,10 @@ async def verify_api_key(
 ) -> AuthResult:
     """
     Verify API key and check rate limits.
+
+    Supports two authentication modes:
+    1. External auth via mana-core-auth (for sk_live_ keys)
+    2. Local auth via environment variables
 
     Returns AuthResult with authentication status.
     Raises HTTPException if auth fails or rate limited.
@@ -136,7 +151,52 @@ async def verify_api_key(
             headers={"WWW-Authenticate": "ApiKey"},
         )
 
-    # Validate key
+    # Try external auth first for sk_live_ keys (user-created keys via mana.how)
+    if api_key.startswith("sk_live_") and is_external_auth_enabled():
+        external_result = await validate_api_key_external(api_key, "stt")
+
+        if external_result is not None:
+            if external_result.valid:
+                # Use rate limits from external auth
+                rate_info = _rate_limits[api_key]
+                limit = external_result.rate_limit_requests
+                window = external_result.rate_limit_window
+
+                if not rate_info.is_allowed(limit, window):
+                    remaining = rate_info.remaining(limit, window)
+                    logger.warning(f"Rate limit exceeded for external key")
+                    raise HTTPException(
+                        status_code=429,
+                        detail=f"Rate limit exceeded. Try again in {window} seconds.",
+                        headers={
+                            "X-RateLimit-Limit": str(limit),
+                            "X-RateLimit-Remaining": str(remaining),
+                            "X-RateLimit-Reset": str(int(time.time()) + window),
+                            "Retry-After": str(window),
+                        },
+                    )
+
+                remaining = rate_info.remaining(limit, window)
+                logger.debug(f"Authenticated external request from user {external_result.user_id} to {path}")
+
+                return AuthResult(
+                    authenticated=True,
+                    key_name="external",
+                    is_internal=False,
+                    rate_limit_remaining=remaining,
+                    user_id=external_result.user_id,
+                )
+            else:
+                # External auth returned invalid
+                logger.warning(f"External auth failed: {external_result.error}")
+                raise HTTPException(
+                    status_code=401,
+                    detail=external_result.error or "Invalid API key.",
+                    headers={"WWW-Authenticate": "ApiKey"},
+                )
+        # If external_result is None, fall through to local auth
+
+    # Local auth: Validate key against environment variables
     if api_key not in _api_keys:
         logger.warning(f"Invalid API key attempt for {path}")
         raise HTTPException(

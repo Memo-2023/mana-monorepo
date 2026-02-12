@@ -20,3 +20,6 @@ tqdm>=4.67.0
 
 # Utilities
 aiofiles>=24.1.0
+
+# External Auth (mana-core-auth integration)
+httpx>=0.27.0
