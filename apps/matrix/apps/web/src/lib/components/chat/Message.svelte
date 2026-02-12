@@ -26,6 +26,8 @@
 		showAvatar?: boolean;
 		showTimestamp?: boolean;
 		showEncryptionBadge?: boolean;
+		isSameSender?: boolean;
+		isLastInGroup?: boolean;
 		onReply?: (message: SimpleMessage) => void;
 		onEdit?: (message: SimpleMessage) => void;
 		onForward?: (message: SimpleMessage) => void;
@@ -36,6 +38,8 @@
 		showAvatar = true,
 		showTimestamp = false,
 		showEncryptionBadge = false,
+		isSameSender = false,
+		isLastInGroup = true,
 		onReply,
 		onEdit,
 		onForward,
