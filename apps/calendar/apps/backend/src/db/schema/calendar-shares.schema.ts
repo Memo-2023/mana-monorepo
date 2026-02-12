@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, varchar, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, varchar, unique, text } from 'drizzle-orm/pg-core';
 import { calendars } from './calendars.schema';
 
 /**
@@ -11,7 +11,7 @@ export const calendarShares = pgTable(
 		calendarId: uuid('calendar_id')
 			.notNull()
 			.references(() => calendars.id, { onDelete: 'cascade' }),
-		sharedWithUserId: uuid('shared_with_user_id'),
+		sharedWithUserId: text('shared_with_user_id'),
 		sharedWithEmail: varchar('shared_with_email', { length: 255 }),
 
 		// Permission level: read, write, admin
@@ -25,7 +25,7 @@ export const calendarShares = pgTable(
 		status: varchar('status', { length: 20 }).default('pending'),
 
 		// Metadata
-		invitedBy: uuid('invited_by').notNull(),
+		invitedBy: text('invited_by').notNull(),
 		acceptedAt: timestamp('accepted_at', { withTimezone: true }),
 		expiresAt: timestamp('expires_at', { withTimezone: true }),
 
