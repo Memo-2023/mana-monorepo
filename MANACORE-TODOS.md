@@ -91,9 +91,9 @@
 - [x] Credits-Seite: Stripe Checkout Integration
 - [x] Loading-States und Toast-Benachrichtigungen
 
-**Noch offen:**
+**Rechnungs-PDFs:**
 
-- [ ] Rechnungs-PDF generieren
+- [x] Stripe Invoice PDFs werden automatisch über Webhooks synchronisiert (`invoicePdfUrl`)
 
 ---
 
@@ -167,9 +167,9 @@ Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 
 | Feature           | Backend | Frontend | Priorität |
 | ----------------- | ------- | -------- | --------- |
-| Profil bearbeiten | ✅      | ❌       | Hoch      |
-| Passwort ändern   | ✅      | ❌       | Hoch      |
-| Konto löschen     | ✅      | ❌       | Mittel    |
+| Profil bearbeiten | ✅      | ✅       | Hoch      |
+| Passwort ändern   | ✅      | ✅       | Hoch      |
+| Konto löschen     | ✅      | ✅       | Mittel    |
 | Avatar hochladen  | ✅      | ❌       | Niedrig   |
 | 2FA aktivieren    | ❌      | ❌       | Niedrig   |
 
@@ -186,7 +186,14 @@ Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 - [x] Profil-Edit Modal erstellt (`EditProfileModal.svelte`)
 - [x] Passwort-Ändern Dialog erstellt (`ChangePasswordModal.svelte`)
 - [x] Konto-Löschung mit Bestätigung (`DeleteAccountModal.svelte`)
-- [ ] Avatar-Upload mit S3/MinIO Integration (noch offen)
+
+**Avatar-Upload (Implementiert 2026-02-13):**
+
+- [x] Storage-Modul für S3/MinIO (`services/mana-core-auth/src/storage/`)
+- [x] Presigned URL Endpoint: `POST /api/v1/storage/avatar/upload-url`
+- [x] Direct Upload Endpoint: `POST /api/v1/storage/avatar`
+- [x] `manacore-storage` Bucket konfiguriert
+- [ ] Frontend-Integration (EditProfileModal) noch offen
 
 ---
 
@@ -257,7 +264,8 @@ GET  /api/v1/subscriptions/invoices       # Rechnungen
 - [x] Stripe Checkout Integration für Subscriptions
 - [x] Billing Portal Integration
 - [x] Rechnungsübersicht
-- [ ] Stripe Price IDs in DB eintragen (nach Stripe-Setup)
+- [x] Subscription-Plans Seed-Script erstellt (`pnpm db:seed:plans`)
+- [ ] Stripe Products/Prices erstellen und ENV-Variablen setzen
 
 ---
 
@@ -406,4 +414,4 @@ Diese Tasks können schnell erledigt werden:
 
 ---
 
-_Zuletzt aktualisiert: 2026-02-13 (Profile + Subscription + Credits Frontend)_
+_Zuletzt aktualisiert: 2026-02-13 (Avatar Storage Backend + Subscription Plans Seed)_

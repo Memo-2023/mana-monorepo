@@ -12,6 +12,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { HealthModule } from './health/health.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { SettingsModule } from './settings/settings.module';
+import { StorageModule } from './storage/storage.module';
 import { TagsModule } from './tags/tags.module';
 import { MeModule } from './me/me.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
@@ -45,6 +46,7 @@ import { LoggerModule } from './common/logger';
 		HealthModule,
 		ReferralsModule,
 		SettingsModule,
+		StorageModule,
 		TagsModule,
 		MeModule,
 		StripeModule,

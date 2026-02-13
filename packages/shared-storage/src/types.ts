@@ -76,6 +76,7 @@ export interface FileInfo {
  * Predefined bucket names for each project
  */
 export const BUCKETS = {
+	MANACORE: 'manacore-storage',
 	PICTURE: 'picture-storage',
 	CHAT: 'chat-storage',
 	MANADECK: 'manadeck-storage',

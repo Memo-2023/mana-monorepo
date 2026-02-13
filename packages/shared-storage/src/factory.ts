@@ -67,6 +67,16 @@ export function createStorageClient(
 }
 
 /**
+ * Create a storage client for the Mana Core Auth project (avatars, etc.)
+ */
+export function createManaCoreStorage(publicUrl?: string): StorageClient {
+	return createStorageClient({
+		name: BUCKETS.MANACORE,
+		publicUrl: publicUrl ?? process.env.MANACORE_STORAGE_PUBLIC_URL,
+	});
+}
+
+/**
  * Create a storage client for the Picture project
  */
 export function createPictureStorage(publicUrl?: string): StorageClient {

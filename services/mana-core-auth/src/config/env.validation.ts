@@ -55,6 +55,9 @@ const envSchema = z.object({
 	// AI
 	GOOGLE_GENAI_API_KEY: z.string().optional(),
 
+	// Storage
+	MANACORE_STORAGE_PUBLIC_URL: z.string().optional(),
+
 	// Base URL for callbacks
 	BASE_URL: z.string().url().optional(),
 

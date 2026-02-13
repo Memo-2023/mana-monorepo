@@ -76,6 +76,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       mc alias set myminio http://minio:9000 $${MINIO_ROOT_USER:-minioadmin} $${MINIO_ROOT_PASSWORD:-minioadmin};
+      mc mb --ignore-existing myminio/manacore-storage;
       mc mb --ignore-existing myminio/picture-storage;
       mc mb --ignore-existing myminio/chat-storage;
       mc mb --ignore-existing myminio/manadeck-storage;
@@ -87,6 +88,7 @@ services:
       mc mb --ignore-existing myminio/inventory-storage;
       mc mb --ignore-existing myminio/planta-storage;
       mc mb --ignore-existing myminio/projectdoc-storage;
+      mc anonymous set download myminio/manacore-storage;
       mc anonymous set download myminio/picture-storage;
       mc anonymous set download myminio/planta-storage;
       mc anonymous set download myminio/inventory-storage;

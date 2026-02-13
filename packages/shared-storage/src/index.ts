@@ -5,6 +5,7 @@ export { StorageClient } from './client';
 export {
 	createStorageClient,
 	getStorageConfig,
+	createManaCoreStorage,
 	createPictureStorage,
 	createChatStorage,
 	createManaDeckStorage,

@@ -72,5 +72,9 @@ export default () => ({
 		geminiApiKey: env.GOOGLE_GENAI_API_KEY || '',
 	},
 
+	storage: {
+		publicUrl: env.MANACORE_STORAGE_PUBLIC_URL || '',
+	},
+
 	baseUrl: env.BASE_URL || (isDevelopment() ? 'http://localhost:3001' : ''),
 });
