@@ -41,6 +41,8 @@ export class CalendarApiService {
 
 	/**
 	 * Get events within a date range
+	 * Note: The calendar backend doesn't support date filtering via query params,
+	 * so we fetch all events and filter client-side.
 	 */
 	async getEvents(
 		token: string,
@@ -48,11 +50,15 @@ export class CalendarApiService {
 	): Promise<CalendarEvent[]> {
 		try {
 			const params = new URLSearchParams();
-			if (filter?.start) params.append('start', filter.start);
-			if (filter?.end) params.append('end', filter.end);
+			// Only calendarId is supported as query param
 			if (filter?.calendarId) params.append('calendarId', filter.calendarId);
 
-			const response = await fetch(`${this.baseUrl}/api/v1/events?${params}`, {
+			const queryString = params.toString();
+			const url = queryString
+				? `${this.baseUrl}/api/v1/events?${queryString}`
+				: `${this.baseUrl}/api/v1/events`;
+
+			const response = await fetch(url, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 
@@ -61,7 +67,24 @@ export class CalendarApiService {
 			}
 
 			const data = (await response.json()) as { events?: unknown[] };
-			return this.mapApiEvents(data.events || []);
+			let events = this.mapApiEvents(data.events || []);
+
+			// Client-side date filtering
+			if (filter?.start || filter?.end) {
+				const startDate = filter.start ? new Date(filter.start + 'T00:00:00') : null;
+				const endDate = filter.end ? new Date(filter.end + 'T23:59:59') : null;
+
+				events = events.filter((event) => {
+					const eventStart = new Date(event.startTime);
+					const eventEnd = new Date(event.endTime);
+
+					if (startDate && eventEnd < startDate) return false;
+					if (endDate && eventStart > endDate) return false;
+					return true;
+				});
+			}
+
+			return events;
 		} catch (error) {
 			this.logger.error('Failed to get events:', error);
 			return [];
