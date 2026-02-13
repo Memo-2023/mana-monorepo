@@ -54,6 +54,8 @@
 		label: string;
 	}
 
+	import type { Snippet } from 'svelte';
+
 	interface Props {
 		onSearch: (query: string) => Promise<QuickInputItem[]>;
 		onSelect: (item: QuickInputItem) => void;
@@ -85,6 +87,8 @@
 		onShowShortcuts?: () => void;
 		/** Callback to show syntax help */
 		onShowSyntaxHelp?: () => void;
+		/** Snippet for left action button (e.g., voice input) - rendered inside the input bar on the left */
+		leftAction?: Snippet;
 	}
 
 	let {
@@ -108,6 +112,7 @@
 		onDefaultChange,
 		onShowShortcuts,
 		onShowSyntaxHelp,
+		leftAction,
 	}: Props = $props();
 
 	// Use settings for autoFocus
@@ -423,6 +428,13 @@
 	<!-- Input Bar (always visible) -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="input-container" oncontextmenu={handleContextMenu}>
+		<!-- Left action slot (e.g., voice input button) -->
+		{#if leftAction}
+			<div class="left-action">
+				{@render leftAction()}
+			</div>
+		{/if}
+
 		<div class="app-icon">
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				{#if appIcon === 'check-square' || appIcon === 'todo'}
@@ -574,6 +586,13 @@
 			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
 			0 2px 4px -1px hsl(var(--color-foreground) / 0.06),
 			0 0 0 2px hsl(var(--color-primary) / 0.25);
+	}
+
+	.left-action {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
 	}
 
 	.app-icon {

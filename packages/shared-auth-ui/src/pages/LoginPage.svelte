@@ -119,11 +119,18 @@
 
 	const t = $derived({ ...defaultTranslations, ...translations });
 
+	// Check if we're in development mode (early for state init)
+	const isDevMode = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
+	// Local dev credentials (run `pnpm db:seed:dev` in mana-core-auth to create this user)
+	const DEV_EMAIL = 'dev@manacore.local';
+	const DEV_PASSWORD = 'devpassword123';
+
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let errorField = $state<'email' | 'password' | 'general' | null>(null);
-	let email = $state(initialEmail);
-	let password = $state(initialPassword);
+	// In dev mode, pre-fill with test credentials
+	let email = $state(initialEmail || (isDevMode ? DEV_EMAIL : ''));
+	let password = $state(initialPassword || (isDevMode ? DEV_PASSWORD : ''));
 	let showPassword = $state(false);
 	let rememberMe = $state(false);
 	let showSuccess = $state(false);
@@ -278,8 +285,8 @@
 	}
 
 	function fillDevCredentials() {
-		email = 't@t.de';
-		password = 'testtesttest';
+		email = DEV_EMAIL;
+		password = DEV_PASSWORD;
 	}
 </script>
 
