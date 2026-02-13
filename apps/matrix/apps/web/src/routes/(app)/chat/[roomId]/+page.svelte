@@ -14,6 +14,14 @@
 	let activeCall = $derived(matrixStore.activeCall);
 	let incomingCall = $derived(matrixStore.incomingCall);
 
+	// Swipe-back gesture state
+	let touchStartX = 0;
+	let touchStartY = 0;
+	let isSwiping = $state(false);
+	let swipeProgress = $state(0);
+	const SWIPE_THRESHOLD = 100; // px to trigger back navigation
+	const EDGE_ZONE = 30; // px from left edge to start swipe
+
 	let showRoomSettings = $state(false);
 	let showSearch = $state(false);
 	let showForward = $state(false);
@@ -69,7 +77,66 @@
 	});
 
 	function handleBack() {
-		goto('/chat');
+		// Use history.back() if we came from the chat list, otherwise goto
+		if (browser && window.history.length > 1) {
+			window.history.back();
+		} else {
+			goto('/chat');
+		}
+	}
+
+	// Touch event handlers for swipe-back gesture
+	function handleTouchStart(e: TouchEvent) {
+		const touch = e.touches[0];
+		// Only start swipe if touch begins in the left edge zone
+		if (touch.clientX <= EDGE_ZONE) {
+			touchStartX = touch.clientX;
+			touchStartY = touch.clientY;
+			isSwiping = true;
+			swipeProgress = 0;
+		}
+	}
+
+	function handleTouchMove(e: TouchEvent) {
+		if (!isSwiping) return;
+
+		const touch = e.touches[0];
+		const deltaX = touch.clientX - touchStartX;
+		const deltaY = Math.abs(touch.clientY - touchStartY);
+
+		// Cancel if vertical movement is greater than horizontal (scrolling)
+		if (deltaY > Math.abs(deltaX)) {
+			isSwiping = false;
+			swipeProgress = 0;
+			return;
+		}
+
+		// Only track right swipe
+		if (deltaX > 0) {
+			swipeProgress = Math.min(deltaX / SWIPE_THRESHOLD, 1);
+			// Prevent default to avoid scroll interference
+			if (deltaX > 10) {
+				e.preventDefault();
+			}
+		}
+	}
+
+	function handleTouchEnd() {
+		if (!isSwiping) return;
+
+		// Navigate back if swipe threshold reached
+		if (swipeProgress >= 1) {
+			handleBack();
+		}
+
+		// Reset state
+		isSwiping = false;
+		swipeProgress = 0;
+	}
+
+	function handleTouchCancel() {
+		isSwiping = false;
+		swipeProgress = 0;
 	}
 
 	function handleReply(message: SimpleMessage) {
@@ -114,7 +181,39 @@
 </script>
 
 <!-- Full-screen chat view for mobile -->
-<div class="flex flex-col h-full bg-background safe-area-top">
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	class="flex flex-col h-full bg-background safe-area-top relative"
+	ontouchstart={handleTouchStart}
+	ontouchmove={handleTouchMove}
+	ontouchend={handleTouchEnd}
+	ontouchcancel={handleTouchCancel}
+>
+	<!-- Swipe-back visual indicator -->
+	{#if isSwiping && swipeProgress > 0}
+		<div
+			class="absolute inset-y-0 left-0 w-1 bg-primary/50 z-50 transition-all"
+			style="transform: scaleX({swipeProgress * 3}); transform-origin: left;"
+		></div>
+		<div
+			class="absolute top-1/2 left-2 -translate-y-1/2 z-50 transition-all"
+			style="opacity: {swipeProgress}; transform: translateY(-50%) translateX({swipeProgress *
+				20}px);"
+		>
+			<div
+				class="w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center"
+			>
+				<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M15 19l-7-7 7-7"
+					/>
+				</svg>
+			</div>
+		</div>
+	{/if}
 	{#if matrixStore.currentRoom}
 		<!-- Room Header with back button -->
 		<RoomHeader
