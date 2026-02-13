@@ -17,18 +17,18 @@
 
 ### Vorhandene Features
 
-| Feature        | Status | Beschreibung                                   |
-| -------------- | ------ | ---------------------------------------------- |
-| Dashboard      | ✅     | Anpassbare Widgets, Drag & Drop                |
-| Credits-System | ✅     | Übersicht, Transaktionen, Pakete (ohne Stripe) |
-| Teams          | ✅     | Team-Verwaltung                                |
-| Organizations  | ✅     | Organisations-Verwaltung                       |
-| Settings       | ✅     | Benutzereinstellungen                          |
-| Themes         | ✅     | Theme-Auswahl                                  |
-| Feedback       | ✅     | Feedback-Formular                              |
-| Profil         | ✅     | Basis-Profil-Ansicht                           |
-| i18n           | ✅     | 5 Sprachen (DE, EN, ES, FR, IT)                |
-| Apps-Übersicht | ✅     | Alle Mana-Apps anzeigen                        |
+| Feature        | Status | Beschreibung                                  |
+| -------------- | ------ | --------------------------------------------- |
+| Dashboard      | ✅     | Anpassbare Widgets, Drag & Drop               |
+| Credits-System | ✅     | Übersicht, Transaktionen, Pakete, Stripe-Kauf |
+| Teams          | ✅     | Team-Verwaltung                               |
+| Organizations  | ✅     | Organisations-Verwaltung                      |
+| Settings       | ✅     | Benutzereinstellungen                         |
+| Themes         | ✅     | Theme-Auswahl                                 |
+| Feedback       | ✅     | Feedback-Formular                             |
+| Profil         | ✅     | Basis-Profil-Ansicht                          |
+| i18n           | ✅     | 5 Sprachen (DE, EN, ES, FR, IT)               |
+| Apps-Übersicht | ✅     | Alle Mana-Apps anzeigen                       |
 
 ### Dashboard-Widgets (6 Typen)
 
@@ -56,29 +56,40 @@
 
 ## Kritische TODOs (Hohe Priorität)
 
-### 1. Stripe-Integration für Credit-Kauf
+### 1. ✅ Stripe-Integration für Credit-Kauf (ERLEDIGT)
 
-**Problem:** Credit-Kauf zeigt nur Alert statt echtem Checkout
+**Status:** Abgeschlossen am 2026-02-13
 
-**Betroffene Datei:** `apps/manacore/apps/web/src/routes/(app)/credits/+page.svelte`
+**Implementiert:**
 
-```typescript
-// Zeile 93-98: TODO im Code
-function handleBuyPackage(pkg: CreditPackage) {
-	// TODO: Integrate with Stripe
-	alert(`...Stripe-Integration kommt bald!`);
-}
-```
+- [x] Stripe SDK integrieren (`@stripe/mcp` v17.5.0)
+- [x] `StripeService` für PaymentIntent-Erstellung
+- [x] `POST /credits/purchase` Endpoint
+- [x] Webhook-Handler für `payment_intent.succeeded`/`payment_intent.payment_failed`
+- [x] Credit-Gutschrift nach erfolgreicher Zahlung (idempotent)
+- [x] Stripe MCP Server eingerichtet (OAuth-basiert)
+- [x] Test-Pakete angelegt (Starter, Basic, Pro, Ultra)
 
-**Aufgaben:**
+**Credit-Pakete:**
 
-- [ ] Stripe SDK integrieren
-- [ ] Checkout Session erstellen (Backend)
-- [ ] Webhook für erfolgreiche Zahlungen
-- [ ] Credit-Gutschrift nach Zahlung
+| Paket   | Credits | Preis  | Hinweis                 |
+| ------- | ------- | ------ | ----------------------- |
+| Starter | 100     | €1,00  | 1 Mana = 1 Cent (immer) |
+| Basic   | 500     | €5,00  | Kein Mengenrabatt       |
+| Pro     | 1.500   | €15,00 | Kein Mengenrabatt       |
+| Ultra   | 5.000   | €50,00 | Kein Mengenrabatt       |
+
+> **Preisregel:** 1 Mana = 1 Cent. Keine Rabatte für größere Pakete.
+
+**Dateien:**
+
+- `services/mana-core-auth/src/stripe/` - Stripe-Module
+- `services/mana-core-auth/src/credits/credits.service.ts` - Purchase-Methoden
+
+**Noch offen:**
+
 - [ ] Rechnungs-PDF generieren
-
-**Geschätzter Aufwand:** 2-3 Tage
+- [ ] Frontend: Stripe Elements einbinden
 
 ---
 
@@ -216,26 +227,45 @@ onDeleteAccount: () => {
 
 ---
 
-### 6. Subscription/Plan-Management
+### 6. ✅ Subscription/Plan-Management (Backend ERLEDIGT)
 
-**Beschreibung:** Verwaltung von Abonnements und Plänen
+**Status:** Backend implementiert am 2026-02-13
 
-**Features:**
+**Implementiert:**
 
-- Aktuelle Plan-Übersicht (Free, Pro, Enterprise)
-- Upgrade/Downgrade Workflow
-- Rechnungshistorie
-- Zahlungsmethoden verwalten
-- Kündigung
+- [x] DB-Schema: `subscriptions.plans`, `subscriptions.subscriptions`, `subscriptions.invoices`
+- [x] `SubscriptionsService` mit Checkout, Portal, Cancel, Reactivate
+- [x] `SubscriptionsController` mit REST-Endpoints
+- [x] Stripe Checkout Session für Subscriptions
+- [x] Stripe Customer Portal Integration (Self-Service Billing)
+- [x] Webhook-Handler für Subscription/Invoice Events
+- [x] Pläne angelegt (Free, Pro, Enterprise)
 
-**Aufgaben:**
+**Subscription-Pläne:**
 
-- [ ] Plan-Übersicht Seite
-- [ ] Stripe Customer Portal Integration
-- [ ] Rechnungs-Download
+| Plan       | Mana/Monat | Monatlich | Jährlich | Features                                |
+| ---------- | ---------- | --------- | -------- | --------------------------------------- |
+| Free       | 150        | €0        | €0       | Basis-Features, Community Support       |
+| Pro        | 1.500      | €9,99     | €99,90   | Alle Features, Priority Support, API    |
+| Enterprise | 10.000     | €49,99    | €499,90  | SSO, Audit Logs, SLA, Dedicated Support |
+
+**API-Endpoints:**
+
+```
+GET  /api/v1/subscriptions/plans          # Alle Pläne
+GET  /api/v1/subscriptions/current        # Aktuelles Abo
+POST /api/v1/subscriptions/checkout       # Stripe Checkout starten
+POST /api/v1/subscriptions/portal         # Billing Portal öffnen
+POST /api/v1/subscriptions/cancel         # Kündigen
+POST /api/v1/subscriptions/reactivate     # Reaktivieren
+GET  /api/v1/subscriptions/invoices       # Rechnungen
+```
+
+**Noch offen (Frontend):**
+
+- [ ] Plan-Übersicht Seite im Frontend
 - [ ] Plan-Vergleichs-UI
-
-**Geschätzter Aufwand:** 2-3 Tage
+- [ ] Stripe Price IDs in DB eintragen (nach Stripe-Setup)
 
 ---
 
@@ -384,4 +414,4 @@ Diese Tasks können schnell erledigt werden:
 
 ---
 
-_Zuletzt aktualisiert: 2024-12-05_
+_Zuletzt aktualisiert: 2026-02-13_

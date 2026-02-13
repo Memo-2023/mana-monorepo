@@ -1,11 +1,15 @@
 import { Controller, Get, Post, Body, UseGuards, Query, ParseIntPipe, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CreditsService } from './credits.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { CurrentUserData } from '../common/decorators/current-user.decorator';
 import { UseCreditsDto } from './dto/use-credits.dto';
 import { AllocateCreditsDto } from './dto/allocate-credits.dto';
+import { PurchaseCreditsDto } from './dto/purchase-credits.dto';
 
+@ApiTags('credits')
+@ApiBearerAuth('JWT-auth')
 @Controller('credits')
 @UseGuards(JwtAuthGuard)
 export class CreditsController {
@@ -16,6 +20,8 @@ export class CreditsController {
 	// ============================================================================
 
 	@Get('balance')
+	@ApiOperation({ summary: 'Get current credit balance' })
+	@ApiResponse({ status: 200, description: 'Returns user credit balance' })
 	async getBalance(@CurrentUser() user: CurrentUserData) {
 		return this.creditsService.getBalance(user.userId);
 	}
@@ -40,8 +46,32 @@ export class CreditsController {
 	}
 
 	@Get('packages')
+	@ApiOperation({ summary: 'Get available credit packages' })
+	@ApiResponse({ status: 200, description: 'Returns list of active credit packages' })
 	async getPackages() {
 		return this.creditsService.getPackages();
+	}
+
+	@Post('purchase')
+	@ApiOperation({ summary: 'Initiate credit purchase' })
+	@ApiResponse({
+		status: 201,
+		description: 'Returns Stripe PaymentIntent client secret for frontend payment',
+	})
+	@ApiResponse({ status: 404, description: 'Package not found' })
+	async initiatePurchase(@CurrentUser() user: CurrentUserData, @Body() dto: PurchaseCreditsDto) {
+		return this.creditsService.initiatePurchase(user.userId, dto.packageId);
+	}
+
+	@Get('purchase/:purchaseId')
+	@ApiOperation({ summary: 'Get purchase status' })
+	@ApiResponse({ status: 200, description: 'Returns purchase details and status' })
+	@ApiResponse({ status: 404, description: 'Purchase not found' })
+	async getPurchaseStatus(
+		@CurrentUser() user: CurrentUserData,
+		@Param('purchaseId') purchaseId: string
+	) {
+		return this.creditsService.getPurchaseStatus(user.userId, purchaseId);
 	}
 
 	// ============================================================================

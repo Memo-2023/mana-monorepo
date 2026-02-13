@@ -14,6 +14,8 @@ import { ReferralsModule } from './referrals/referrals.module';
 import { SettingsModule } from './settings/settings.module';
 import { TagsModule } from './tags/tags.module';
 import { MeModule } from './me/me.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { StripeModule } from './stripe/stripe.module';
 import { AnalyticsModule } from './analytics';
 import { MetricsModule } from './metrics';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -45,6 +47,8 @@ import { LoggerModule } from './common/logger';
 		SettingsModule,
 		TagsModule,
 		MeModule,
+		StripeModule,
+		SubscriptionsModule,
 	],
 	providers: [
 		{

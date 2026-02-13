@@ -32,6 +32,17 @@ export const transactionStatusEnum = pgEnum('transaction_status', [
 	'cancelled',
 ]);
 
+// Stripe customer mapping (for reusing Stripe customers across purchases)
+export const stripeCustomers = creditsSchema.table('stripe_customers', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	stripeCustomerId: text('stripe_customer_id').unique().notNull(),
+	email: text('email'),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 // Credit balances (one per user)
 export const balances = creditsSchema.table('balances', {
 	userId: text('user_id')

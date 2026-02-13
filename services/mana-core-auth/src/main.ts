@@ -20,7 +20,9 @@ function normalizeRoute(path: string): string {
 }
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create(AppModule, {
+		rawBody: true, // Enable raw body for Stripe webhook signature verification
+	});
 
 	const configService = app.get(ConfigService);
 
