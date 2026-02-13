@@ -43,9 +43,10 @@ export class JwtAuthGuard implements CanActivate {
 			}
 
 			// IMPORTANT: Match Better Auth signing config exactly (better-auth.config.ts)
-			// Signing uses: issuer = BASE_URL, audience = JWT_AUDIENCE || 'manacore'
-			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
-			const issuer = baseUrl; // Better Auth uses BASE_URL as issuer for OIDC compatibility
+			// Better Auth uses: issuer = BASE_URL || JWT_ISSUER || 'http://localhost:3001'
+			const baseUrl = this.configService.get<string>('BASE_URL');
+			const jwtIssuer = this.configService.get<string>('jwt.issuer');
+			const issuer = baseUrl || jwtIssuer || 'http://localhost:3001';
 			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
 
 			const { payload } = await jwtVerify(token, this.jwks, {

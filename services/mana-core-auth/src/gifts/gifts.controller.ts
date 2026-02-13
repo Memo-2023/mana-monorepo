@@ -16,7 +16,7 @@ import { CreateGiftDto } from './dto/create-gift.dto';
 import { RedeemGiftDto } from './dto/redeem-gift.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
-@Controller('api/v1/gifts')
+@Controller('gifts')
 export class GiftsController {
 	constructor(private readonly giftCodeService: GiftCodeService) {}
 
@@ -50,11 +50,7 @@ export class GiftsController {
 	@Post(':code/redeem')
 	@UseGuards(JwtAuthGuard)
 	@HttpCode(HttpStatus.OK)
-	async redeemGift(
-		@Request() req: any,
-		@Param('code') code: string,
-		@Body() dto: RedeemGiftDto
-	) {
+	async redeemGift(@Request() req: any, @Param('code') code: string, @Body() dto: RedeemGiftDto) {
 		const userId = req.user.sub;
 		const userEmail = req.user.email;
 		// Matrix ID would be passed in the request if coming from a Matrix bot
