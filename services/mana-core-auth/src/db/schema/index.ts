@@ -2,6 +2,7 @@ export * from './api-keys.schema';
 export * from './auth.schema';
 export * from './credits.schema';
 export * from './feedback.schema';
+export * from './gifts.schema';
 export * from './organizations.schema';
 export * from './referrals.schema';
 export * from './subscriptions.schema';

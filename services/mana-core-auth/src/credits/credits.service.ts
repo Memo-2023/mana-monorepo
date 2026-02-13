@@ -943,4 +943,139 @@ export class CreditsService {
 			completedAt: purchase.completedAt,
 		};
 	}
+
+	/**
+	 * Update purchase with PaymentIntent ID
+	 * Called from webhook when checkout.session.completed fires
+	 */
+	async updatePurchasePaymentIntent(purchaseId: string, paymentIntentId: string): Promise<void> {
+		const db = this.getDb();
+
+		await db
+			.update(purchases)
+			.set({
+				stripePaymentIntentId: paymentIntentId,
+			})
+			.where(eq(purchases.id, purchaseId));
+	}
+
+	// ============================================================================
+	// PAYMENT LINK METHODS (for Matrix Bots)
+	// ============================================================================
+
+	/**
+	 * Create a Stripe Checkout Session URL for credit purchase
+	 * Used by Matrix bots to allow users to buy credits without leaving chat
+	 */
+	async createPaymentLink(
+		userId: string,
+		packageId: string,
+		options?: {
+			successUrl?: string;
+			cancelUrl?: string;
+			roomId?: string;
+		}
+	): Promise<{
+		url: string;
+		purchaseId: string;
+		expiresAt: Date;
+		package: {
+			name: string;
+			credits: number;
+			priceEuroCents: number;
+		};
+	}> {
+		const db = this.getDb();
+
+		// 1. Get package details
+		const [pkg] = await db
+			.select()
+			.from(packages)
+			.where(and(eq(packages.id, packageId), eq(packages.active, true)))
+			.limit(1);
+
+		if (!pkg) {
+			throw new NotFoundException('Package not found or inactive');
+		}
+
+		// 2. Get user email for Stripe customer
+		const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+
+		// 3. Get or create Stripe customer
+		const stripeCustomerId = await this.stripeService.getOrCreateCustomer(userId, user.email);
+
+		// 4. Create pending purchase record
+		const [purchase] = await db
+			.insert(purchases)
+			.values({
+				userId,
+				packageId,
+				credits: pkg.credits,
+				priceEuroCents: pkg.priceEuroCents,
+				stripeCustomerId,
+				status: 'pending',
+				metadata: options?.roomId ? { roomId: options.roomId } : undefined,
+			})
+			.returning();
+
+		// 5. Build URLs
+		const baseUrl = this.configService.get<string>('app.baseUrl') || 'https://mana.how';
+		const successUrl = options?.successUrl || `${baseUrl}/credits/success?purchase_id=${purchase.id}`;
+		const cancelUrl = options?.cancelUrl || `${baseUrl}/credits/cancelled`;
+
+		// 6. Create Checkout Session
+		const session = await this.stripeService.createCheckoutSession({
+			customerId: stripeCustomerId,
+			amountCents: pkg.priceEuroCents,
+			productName: pkg.name,
+			credits: pkg.credits,
+			metadata: {
+				userId,
+				packageId,
+				purchaseId: purchase.id,
+				roomId: options?.roomId,
+			},
+			successUrl,
+			cancelUrl,
+		});
+
+		// 7. Update purchase with session ID
+		await db
+			.update(purchases)
+			.set({
+				stripePaymentIntentId: session.payment_intent as string,
+				metadata: {
+					...((purchase.metadata as Record<string, unknown>) || {}),
+					stripeSessionId: session.id,
+				},
+			})
+			.where(eq(purchases.id, purchase.id));
+
+		// Session expires in 24 hours
+		const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+		this.logger.log('Payment link created', {
+			purchaseId: purchase.id,
+			userId,
+			packageId,
+			packageName: pkg.name,
+			credits: pkg.credits,
+			sessionId: session.id,
+		});
+
+		return {
+			url: session.url!,
+			purchaseId: purchase.id,
+			expiresAt,
+			package: {
+				name: pkg.name,
+				credits: pkg.credits,
+				priceEuroCents: pkg.priceEuroCents,
+			},
+		};
+	}
 }

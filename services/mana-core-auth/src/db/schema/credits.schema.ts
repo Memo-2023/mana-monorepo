@@ -22,6 +22,9 @@ export const transactionTypeEnum = pgEnum('transaction_type', [
 	'bonus',
 	'expiry',
 	'adjustment',
+	'gift_reserve',
+	'gift_release',
+	'gift_receive',
 ]);
 
 // Transaction status enum

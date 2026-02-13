@@ -7,6 +7,7 @@ import type { CurrentUserData } from '../common/decorators/current-user.decorato
 import { UseCreditsDto } from './dto/use-credits.dto';
 import { AllocateCreditsDto } from './dto/allocate-credits.dto';
 import { PurchaseCreditsDto } from './dto/purchase-credits.dto';
+import { CreatePaymentLinkDto } from './dto/create-payment-link.dto';
 
 @ApiTags('credits')
 @ApiBearerAuth('JWT-auth')
@@ -72,6 +73,39 @@ export class CreditsController {
 		@Param('purchaseId') purchaseId: string
 	) {
 		return this.creditsService.getPurchaseStatus(user.userId, purchaseId);
+	}
+
+	@Post('payment-link')
+	@ApiOperation({ summary: 'Create payment link for credit purchase' })
+	@ApiResponse({
+		status: 201,
+		description: 'Returns Stripe Checkout URL for payment',
+		schema: {
+			properties: {
+				url: { type: 'string', description: 'Stripe Checkout URL' },
+				purchaseId: { type: 'string', description: 'Purchase ID for tracking' },
+				expiresAt: { type: 'string', format: 'date-time', description: 'Link expiration time' },
+				package: {
+					type: 'object',
+					properties: {
+						name: { type: 'string' },
+						credits: { type: 'number' },
+						priceEuroCents: { type: 'number' },
+					},
+				},
+			},
+		},
+	})
+	@ApiResponse({ status: 404, description: 'Package not found' })
+	async createPaymentLink(
+		@CurrentUser() user: CurrentUserData,
+		@Body() dto: CreatePaymentLinkDto
+	) {
+		return this.creditsService.createPaymentLink(user.userId, dto.packageId, {
+			successUrl: dto.successUrl,
+			cancelUrl: dto.cancelUrl,
+			roomId: dto.roomId,
+		});
 	}
 
 	// ============================================================================

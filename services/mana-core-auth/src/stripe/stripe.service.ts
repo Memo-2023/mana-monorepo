@@ -11,6 +11,23 @@ export interface PaymentIntentMetadata {
 	purchaseId: string;
 }
 
+export interface CheckoutSessionMetadata {
+	userId: string;
+	packageId: string;
+	purchaseId: string;
+	roomId?: string;
+}
+
+export interface CheckoutSessionOptions {
+	customerId: string;
+	amountCents: number;
+	productName: string;
+	credits: number;
+	metadata: CheckoutSessionMetadata;
+	successUrl: string;
+	cancelUrl: string;
+}
+
 @Injectable()
 export class StripeService {
 	private stripe: Stripe | null = null;
@@ -155,5 +172,71 @@ export class StripeService {
 	async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
 		const stripe = this.ensureStripeConfigured();
 		return stripe.paymentIntents.retrieve(paymentIntentId);
+	}
+
+	/**
+	 * Create a Checkout Session for credit purchase
+	 * Returns a URL where the user can complete payment
+	 */
+	async createCheckoutSession(options: CheckoutSessionOptions): Promise<Stripe.Checkout.Session> {
+		const stripe = this.ensureStripeConfigured();
+
+		try {
+			const session = await stripe.checkout.sessions.create({
+				customer: options.customerId,
+				mode: 'payment',
+				payment_method_types: ['card'],
+				line_items: [
+					{
+						price_data: {
+							currency: 'eur',
+							product_data: {
+								name: options.productName,
+								description: `${options.credits} Credits`,
+							},
+							unit_amount: options.amountCents,
+						},
+						quantity: 1,
+					},
+				],
+				metadata: {
+					userId: options.metadata.userId,
+					packageId: options.metadata.packageId,
+					purchaseId: options.metadata.purchaseId,
+					roomId: options.metadata.roomId || '',
+				},
+				success_url: options.successUrl,
+				cancel_url: options.cancelUrl,
+				expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
+			});
+
+			this.logger.log('Created Checkout Session', {
+				sessionId: session.id,
+				amount: options.amountCents,
+				customerId: options.customerId,
+				purchaseId: options.metadata.purchaseId,
+			});
+
+			return session;
+		} catch (error) {
+			this.logger.error('Failed to create Checkout Session', {
+				customerId: options.customerId,
+				amount: options.amountCents,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			});
+
+			if (error instanceof Stripe.errors.StripeError) {
+				throw new ServiceUnavailableException(`Payment service error: ${error.message}`);
+			}
+			throw new ServiceUnavailableException('Failed to create checkout session');
+		}
+	}
+
+	/**
+	 * Retrieve a Checkout Session by ID
+	 */
+	async retrieveCheckoutSession(sessionId: string): Promise<Stripe.Checkout.Session> {
+		const stripe = this.ensureStripeConfigured();
+		return stripe.checkout.sessions.retrieve(sessionId);
 	}
 }

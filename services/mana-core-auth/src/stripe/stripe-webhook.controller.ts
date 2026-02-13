@@ -70,6 +70,11 @@ export class StripeWebhookController {
 
 		// Handle relevant events
 		switch (event.type) {
+			// Credit purchases via Checkout Session
+			case 'checkout.session.completed':
+				await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+				break;
+
 			// Credit purchases
 			case 'payment_intent.succeeded':
 				await this.handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
@@ -146,6 +151,55 @@ export class StripeWebhookController {
 				paymentIntentId: paymentIntent.id,
 				error: error instanceof Error ? error.message : 'Unknown error',
 			});
+		}
+	}
+
+	private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+		this.logger.log('Processing checkout session completed', {
+			sessionId: session.id,
+			paymentIntentId: session.payment_intent,
+			purchaseId: session.metadata?.purchaseId,
+		});
+
+		// For Checkout Sessions, we need to update the purchase with the PaymentIntent ID
+		// so that the payment_intent.succeeded handler can process it
+		const purchaseId = session.metadata?.purchaseId;
+		const paymentIntentId = session.payment_intent as string;
+
+		if (purchaseId && paymentIntentId) {
+			try {
+				await this.creditsService.updatePurchasePaymentIntent(purchaseId, paymentIntentId);
+				this.logger.log('Updated purchase with PaymentIntent ID', {
+					purchaseId,
+					paymentIntentId,
+				});
+			} catch (error) {
+				this.logger.error('Failed to update purchase with PaymentIntent ID', {
+					purchaseId,
+					paymentIntentId,
+					error: error instanceof Error ? error.message : 'Unknown error',
+				});
+			}
+		}
+
+		// If payment_status is 'paid', complete the purchase immediately
+		if (session.payment_status === 'paid' && paymentIntentId) {
+			try {
+				const result = await this.creditsService.completePurchase(paymentIntentId);
+				if (result.alreadyProcessed) {
+					this.logger.log('Purchase already processed', { sessionId: session.id });
+				} else {
+					this.logger.log('Purchase completed via checkout session', {
+						sessionId: session.id,
+						creditsAdded: result.creditsAdded,
+					});
+				}
+			} catch (error) {
+				this.logger.error('Failed to complete purchase from checkout session', {
+					sessionId: session.id,
+					error: error instanceof Error ? error.message : 'Unknown error',
+				});
+			}
 		}
 	}
 

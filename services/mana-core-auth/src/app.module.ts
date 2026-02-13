@@ -9,6 +9,7 @@ import { ApiKeysModule } from './api-keys/api-keys.module';
 import { AuthModule } from './auth/auth.module';
 import { CreditsModule } from './credits/credits.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { GiftsModule } from './gifts/gifts.module';
 import { HealthModule } from './health/health.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { SettingsModule } from './settings/settings.module';
@@ -43,6 +44,7 @@ import { LoggerModule } from './common/logger';
 		AuthModule,
 		CreditsModule,
 		FeedbackModule,
+		GiftsModule,
 		HealthModule,
 		ReferralsModule,
 		SettingsModule,
