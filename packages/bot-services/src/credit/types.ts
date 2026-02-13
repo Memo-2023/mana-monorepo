@@ -73,3 +73,62 @@ export interface CreditStatusMessage {
 	/** HTML formatted message (for Matrix) */
 	html: string;
 }
+
+/**
+ * Credit package available for purchase
+ */
+export interface CreditPackage {
+	/** Package ID */
+	id: string;
+	/** Package name (e.g., "Starter", "Standard", "Premium") */
+	name: string;
+	/** Number of credits in package */
+	credits: number;
+	/** Price in euro cents */
+	priceEuroCents: number;
+	/** Human-readable price (e.g., "4,99 €") */
+	formattedPrice: string;
+	/** Display order */
+	sortOrder: number;
+}
+
+/**
+ * Result of creating a payment link
+ */
+export interface PaymentLinkResult {
+	/** Stripe Checkout URL */
+	url: string;
+	/** Purchase ID for tracking */
+	purchaseId: string;
+	/** When the link expires */
+	expiresAt: Date;
+	/** Package details */
+	package: {
+		name: string;
+		credits: number;
+		priceEuroCents: number;
+	};
+}
+
+/**
+ * Purchase status
+ */
+export type PurchaseStatus = 'pending' | 'completed' | 'failed';
+
+/**
+ * Purchase status result
+ */
+export interface PurchaseStatusResult {
+	/** Purchase ID */
+	id: string;
+	/** Current status */
+	status: PurchaseStatus;
+	/** Credits in package */
+	credits: number;
+	/** Price in euro cents */
+	priceEuroCents: number;
+	/** When purchase was created */
+	createdAt: Date;
+	/** When purchase was completed (if completed) */
+	completedAt?: Date;
+}

@@ -24,6 +24,19 @@ export interface CommonTranslations {
 	insufficientCredits: string;
 	buyCredits: string;
 
+	// Credit purchasing
+	creditBalance: string;
+	creditPackagesTitle: string;
+	creditPackageLine: string;
+	creditBuyHelp: string;
+	creditPaymentLink: string;
+	creditLinkValid: string;
+	creditPaymentSuccess: string;
+	creditNewBalance: string;
+	creditPackageNotFound: string;
+	creditPurchaseError: string;
+	creditNoPackages: string;
+
 	// Sync
 	synced: string;
 	localStorage: string;
@@ -217,6 +230,57 @@ export interface ClockTranslations extends CommonTranslations {
 }
 
 /**
+ * Gift translations
+ */
+export interface GiftTranslations extends CommonTranslations {
+	// Gift creation
+	giftCreated: string;
+	giftCreatedCode: string;
+	giftCreatedCredits: string;
+	giftCreatedLink: string;
+	giftCreatedSplit: string;
+	giftInvalidCredits: string;
+	giftInvalidSyntax: string;
+	giftInsufficientCredits: string;
+
+	// Gift redemption
+	giftRedeemed: string;
+	giftRedeemedCredits: string;
+	giftRedeemedMessage: string;
+	giftInvalidCode: string;
+	giftExpired: string;
+	giftDepleted: string;
+	giftAlreadyClaimed: string;
+	giftWrongUser: string;
+	giftWrongAnswer: string;
+	giftRiddleRequired: string;
+	giftRiddleQuestion: string;
+
+	// Gift list
+	giftListTitle: string;
+	giftListEmpty: string;
+	giftListItem: string;
+	giftReceivedListTitle: string;
+	giftReceivedListEmpty: string;
+
+	// Gift info
+	giftInfoTitle: string;
+	giftInfoCredits: string;
+	giftInfoAvailable: string;
+	giftInfoFrom: string;
+
+	// Gift help
+	giftHelpTitle: string;
+	giftHelpCommands: string;
+	giftHelpSyntax: string;
+	giftHelpExamples: string;
+
+	// Gift cancellation
+	giftCancelled: string;
+	giftRefunded: string;
+}
+
+/**
  * All bot translations combined
  */
 export interface BotTranslations {
@@ -225,6 +289,7 @@ export interface BotTranslations {
 	calendar: CalendarTranslations;
 	contacts: ContactsTranslations;
 	clock: ClockTranslations;
+	gift: GiftTranslations;
 }
 
 /**

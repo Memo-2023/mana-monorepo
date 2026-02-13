@@ -7,6 +7,7 @@ import {
 	CalendarTranslations,
 	ContactsTranslations,
 	ClockTranslations,
+	GiftTranslations,
 	I18nOptions,
 } from './types';
 import { de } from './locales/de';
@@ -179,6 +180,17 @@ export class I18nService {
 	}
 
 	/**
+	 * Get a translator function for gift commands
+	 */
+	async getGiftTranslator(
+		userId: string
+	): Promise<(key: keyof GiftTranslations, params?: Record<string, string | number>) => string> {
+		const lang = await this.getLanguage(userId);
+		const t = translations[lang].gift;
+		return (key, params) => this.interpolate(t[key], params);
+	}
+
+	/**
 	 * Get translations directly for a bot type
 	 */
 	async getTodoTranslations(userId: string): Promise<TodoTranslations> {
@@ -199,6 +211,11 @@ export class I18nService {
 	async getClockTranslations(userId: string): Promise<ClockTranslations> {
 		const lang = await this.getLanguage(userId);
 		return translations[lang].clock;
+	}
+
+	async getGiftTranslations(userId: string): Promise<GiftTranslations> {
+		const lang = await this.getLanguage(userId);
+		return translations[lang].gift;
 	}
 
 	/**

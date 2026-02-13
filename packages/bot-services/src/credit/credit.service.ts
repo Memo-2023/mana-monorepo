@@ -6,6 +6,9 @@ import {
 	CreditModuleOptions,
 	CreditStatusMessage,
 	CreditErrorCode,
+	CreditPackage,
+	PaymentLinkResult,
+	PurchaseStatusResult,
 	CREDIT_MODULE_OPTIONS,
 } from './types';
 
@@ -311,5 +314,160 @@ export class CreditService {
 		}
 
 		return { text, html };
+	}
+
+	// ============================================================================
+	// PACKAGE & PAYMENT LINK METHODS (for bot credit purchasing)
+	// ============================================================================
+
+	/**
+	 * Get available credit packages
+	 *
+	 * @returns List of available credit packages
+	 */
+	async getPackages(): Promise<CreditPackage[]> {
+		try {
+			const response = await fetch(`${this.authUrl}/api/v1/credits/packages`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+
+			if (!response.ok) {
+				this.logger.warn(`Failed to get packages: ${response.status}`);
+				return [];
+			}
+
+			const packages = (await response.json()) as Array<{
+				id: string;
+				name: string;
+				credits: number;
+				priceEuroCents: number;
+				sortOrder: number;
+			}>;
+
+			return packages.map((pkg) => ({
+				id: pkg.id,
+				name: pkg.name,
+				credits: pkg.credits,
+				priceEuroCents: pkg.priceEuroCents,
+				formattedPrice: this.formatPrice(pkg.priceEuroCents),
+				sortOrder: pkg.sortOrder,
+			}));
+		} catch (error) {
+			this.logger.error('Error getting packages:', error);
+			return [];
+		}
+	}
+
+	/**
+	 * Create a payment link for purchasing credits
+	 *
+	 * @param token - User's JWT token
+	 * @param packageId - ID of the package to purchase
+	 * @param roomId - Optional Matrix room ID for notification after payment
+	 * @returns Payment link result with URL and expiration
+	 */
+	async createPaymentLink(
+		token: string,
+		packageId: string,
+		roomId?: string
+	): Promise<PaymentLinkResult | null> {
+		try {
+			const response = await fetch(`${this.authUrl}/api/v1/credits/payment-link`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					packageId,
+					roomId,
+				}),
+			});
+
+			if (!response.ok) {
+				this.logger.warn(`Failed to create payment link: ${response.status}`);
+				return null;
+			}
+
+			const result = (await response.json()) as {
+				url: string;
+				purchaseId: string;
+				expiresAt: string;
+				package: {
+					name: string;
+					credits: number;
+					priceEuroCents: number;
+				};
+			};
+
+			return {
+				url: result.url,
+				purchaseId: result.purchaseId,
+				expiresAt: new Date(result.expiresAt),
+				package: result.package,
+			};
+		} catch (error) {
+			this.logger.error('Error creating payment link:', error);
+			return null;
+		}
+	}
+
+	/**
+	 * Get purchase status
+	 *
+	 * @param token - User's JWT token
+	 * @param purchaseId - Purchase ID to check
+	 * @returns Purchase status or null if not found
+	 */
+	async getPurchaseStatus(token: string, purchaseId: string): Promise<PurchaseStatusResult | null> {
+		try {
+			const response = await fetch(`${this.authUrl}/api/v1/credits/purchase/${purchaseId}`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+			});
+
+			if (!response.ok) {
+				this.logger.warn(`Failed to get purchase status: ${response.status}`);
+				return null;
+			}
+
+			const result = (await response.json()) as {
+				id: string;
+				status: 'pending' | 'completed' | 'failed';
+				credits: number;
+				priceEuroCents: number;
+				createdAt: string;
+				completedAt?: string;
+			};
+
+			return {
+				id: result.id,
+				status: result.status,
+				credits: result.credits,
+				priceEuroCents: result.priceEuroCents,
+				createdAt: new Date(result.createdAt),
+				completedAt: result.completedAt ? new Date(result.completedAt) : undefined,
+			};
+		} catch (error) {
+			this.logger.error('Error getting purchase status:', error);
+			return null;
+		}
+	}
+
+	/**
+	 * Format price in euro cents to human-readable format
+	 *
+	 * @param priceEuroCents - Price in euro cents
+	 * @returns Formatted price (e.g., "4,99 €")
+	 */
+	private formatPrice(priceEuroCents: number): string {
+		const euros = priceEuroCents / 100;
+		return `${euros.toFixed(2).replace('.', ',')} €`;
 	}
 }

@@ -6,5 +6,9 @@ export type {
 	CreditConsumeResult,
 	CreditModuleOptions,
 	CreditStatusMessage,
+	CreditPackage,
+	PaymentLinkResult,
+	PurchaseStatus,
+	PurchaseStatusResult,
 } from './types';
 export { CREDIT_MODULE_OPTIONS, CreditErrorCode } from './types';

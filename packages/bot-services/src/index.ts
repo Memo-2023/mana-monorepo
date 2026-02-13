@@ -134,7 +134,26 @@ export type {
 	CreditConsumeResult,
 	CreditModuleOptions,
 	CreditStatusMessage,
+	CreditPackage,
+	PaymentLinkResult,
+	PurchaseStatus,
+	PurchaseStatusResult,
 } from './credit/index.js';
+
+// Gift (Gift code management for Matrix bots)
+export { GiftModule, GiftService, GIFT_MODULE_OPTIONS } from './gift/index.js';
+export type {
+	GiftCodeType,
+	GiftCodeStatus,
+	CreateGiftOptions,
+	CreateGiftResult,
+	GiftCodeInfo,
+	RedeemGiftResult,
+	CreatedGiftItem,
+	ReceivedGiftItem,
+	GiftModuleOptions,
+	GiftStatusMessage,
+} from './gift/index.js';
 
 // I18n (Multi-language support for Matrix bots)
 export { I18nModule, I18nService, I18N_OPTIONS, LANGUAGE_NAMES } from './i18n/index.js';
@@ -147,6 +166,7 @@ export type {
 	CalendarTranslations,
 	ContactsTranslations,
 	ClockTranslations,
+	GiftTranslations,
 } from './i18n/index.js';
 export { de as deTranslations, en as enTranslations } from './i18n/index.js';
 
