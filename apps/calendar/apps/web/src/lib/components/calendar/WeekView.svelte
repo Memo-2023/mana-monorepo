@@ -1302,6 +1302,8 @@
 	.time-column {
 		width: var(--time-column-width);
 		flex-shrink: 0;
+		padding-top: 1rem;
+		padding-bottom: 200px; /* Space for bottom UI (PillNav, InputBar, etc.) */
 	}
 
 	.time-label {
@@ -1324,6 +1326,8 @@
 		flex: 1;
 		position: relative;
 		border-left: 1px solid hsl(var(--color-border));
+		padding-top: 1rem;
+		padding-bottom: 200px; /* Space for bottom UI (PillNav, InputBar, etc.) */
 	}
 
 	.day-column.today {

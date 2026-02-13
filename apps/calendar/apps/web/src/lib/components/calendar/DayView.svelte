@@ -1009,6 +1009,8 @@
 	.time-column {
 		width: 50px;
 		flex-shrink: 0;
+		padding-top: 1rem;
+		padding-bottom: 200px; /* Space for bottom UI (PillNav, InputBar, etc.) */
 	}
 
 	.time-label {
@@ -1033,6 +1035,8 @@
 		position: relative;
 		border-left: 1px solid hsl(var(--color-border));
 		max-width: 600px;
+		padding-top: 1rem;
+		padding-bottom: 200px; /* Space for bottom UI (PillNav, InputBar, etc.) */
 	}
 
 	.day-column.today {
