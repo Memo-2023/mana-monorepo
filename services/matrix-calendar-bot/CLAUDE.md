@@ -2,13 +2,16 @@
 
 ## Overview
 
-Matrix Calendar Bot provides a GDPR-compliant calendar/event management interface via Matrix chat. It uses the Matrix protocol for messaging, allowing self-hosting all data on the Mac Mini server.
+Matrix Calendar Bot provides calendar/event management via Matrix chat. It integrates with the Calendar backend for full CRUD operations, syncing events across Matrix, web, and mobile apps.
+
+**Login Required**: Users must login (`!login email password`) to use the bot. All events are synchronized with the calendar-backend.
 
 ## Tech Stack
 
 - **Framework**: NestJS 10
 - **Matrix**: matrix-bot-sdk
-- **Storage**: Local JSON file (per-user events)
+- **Backend**: Calendar API (port 3014)
+- **Auth**: Mana Core Auth (JWT)
 
 ## Commands
 
@@ -34,12 +37,9 @@ services/matrix-calendar-bot/
 │   ├── health.controller.ts  # Health check endpoint
 │   ├── config/
 │   │   └── configuration.ts  # Configuration & help texts
-│   ├── bot/
-│   │   ├── bot.module.ts
-│   │   └── matrix.service.ts # Matrix client & command handlers
-│   └── calendar/
-│       ├── calendar.module.ts
-│       └── calendar.service.ts # Event storage & management
+│   └── bot/
+│       ├── bot.module.ts
+│       └── matrix.service.ts # Matrix client & command handlers
 ├── Dockerfile
 └── package.json
 ```
@@ -49,6 +49,8 @@ services/matrix-calendar-bot/
 | Command | Description |
 |---------|-------------|
 | `!help` | Show help message |
+| `!login email pass` | Login (required before use) |
+| `!logout` | Logout |
 | `!heute` / `!today` | Show today's events |
 | `!morgen` / `!tomorrow` | Show tomorrow's events |
 | `!woche` / `!week` | Show this week's events |
@@ -97,8 +99,17 @@ MATRIX_ACCESS_TOKEN=syt_xxx
 MATRIX_ALLOWED_ROOMS=#calendar-bot:mana.how
 MATRIX_STORAGE_PATH=./data/bot-storage.json
 
-# Calendar API (optional, for future integration)
-CALENDAR_API_URL=http://localhost:3016/api/v1
+# Calendar Backend
+CALENDAR_BACKEND_URL=http://localhost:3014
+
+# Mana Core Auth
+MANA_CORE_AUTH_URL=http://localhost:3001
+
+# Redis (for session storage)
+REDIS_URL=redis://localhost:6379
+
+# Speech-to-Text (optional)
+STT_URL=http://localhost:3020
 ```
 
 ## Docker
@@ -111,6 +122,8 @@ docker build -f services/matrix-calendar-bot/Dockerfile -t matrix-calendar-bot s
 docker run -p 3315:3315 \
   -e MATRIX_HOMESERVER_URL=http://synapse:8008 \
   -e MATRIX_ACCESS_TOKEN=syt_xxx \
+  -e CALENDAR_BACKEND_URL=http://calendar-backend:3014 \
+  -e MANA_CORE_AUTH_URL=http://mana-core-auth:3001 \
   -v matrix-calendar-bot-data:/app/data \
   matrix-calendar-bot
 ```
@@ -136,43 +149,19 @@ curl -X POST "https://matrix.mana.how/_matrix/client/v3/login" \
 # Response contains: {"access_token": "syt_xxx", ...}
 ```
 
-## Data Storage
+## Authentication Flow
 
-Events are stored in a local JSON file (`/app/data/calendar-data.json`) with per-user isolation.
+1. User sends `!login email password`
+2. Bot authenticates via mana-core-auth
+3. JWT token stored in Redis session
+4. Token used for all Calendar API calls
+5. Events sync with calendar-backend (PostgreSQL)
 
-Structure:
-```json
-{
-  "events": [
-    {
-      "id": "unique-id",
-      "title": "Event title",
-      "description": null,
-      "location": null,
-      "startTime": "2024-02-15T14:00:00.000Z",
-      "endTime": "2024-02-15T15:00:00.000Z",
-      "isAllDay": false,
-      "calendarId": "cal-id",
-      "calendarName": "Mein Kalender",
-      "createdAt": "2024-01-27T10:00:00Z",
-      "userId": "@user:mana.how"
-    }
-  ],
-  "calendars": [
-    {
-      "id": "cal-id",
-      "name": "Mein Kalender",
-      "color": "#3B82F6",
-      "userId": "@user:mana.how"
-    }
-  ]
-}
-```
+## Data Synchronization
 
-## GDPR Compliance
+All events are stored in the Calendar backend PostgreSQL database. Changes made via:
+- Matrix bot
+- Calendar web app
+- Calendar mobile app
 
-- All event data stored locally on Mac Mini
-- No third-party data processing
-- Full control over data retention
-- Per-user data isolation via Matrix user IDs
-- Can delete all user data on request
+...are all synchronized automatically.

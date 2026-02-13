@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MatrixService } from './matrix.service';
-import { CalendarModule } from '../calendar/calendar.module';
 import {
 	TranscriptionModule,
 	SessionModule,
@@ -23,7 +22,6 @@ const calendarApiServiceProvider = {
 @Module({
 	imports: [
 		ConfigModule,
-		CalendarModule,
 		TranscriptionModule.register({
 			sttUrl: process.env.STT_URL || 'http://localhost:3020',
 		}),

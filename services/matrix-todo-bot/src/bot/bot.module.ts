@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MatrixService } from './matrix.service';
-import { TodoModule } from '../todo/todo.module';
 import {
 	TranscriptionModule,
 	SessionModule,
@@ -23,7 +22,6 @@ const todoApiServiceProvider = {
 @Module({
 	imports: [
 		ConfigModule,
-		TodoModule,
 		TranscriptionModule.forRoot(),
 		SessionModule.forRoot({ storageMode: 'redis' }),
 		CreditModule.forRoot(),

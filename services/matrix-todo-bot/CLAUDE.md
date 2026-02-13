@@ -2,13 +2,16 @@
 
 ## Overview
 
-Matrix Todo Bot provides a GDPR-compliant task management interface via Matrix chat. It uses the Matrix protocol for messaging, allowing self-hosting all data on the Mac Mini server.
+Matrix Todo Bot provides a task management interface via Matrix chat. It integrates with the Todo backend for full CRUD operations, syncing tasks across Matrix, web, and mobile apps.
+
+**Login Required**: Users must login (`!login email password`) to use the bot. All tasks are synchronized with the todo-backend.
 
 ## Tech Stack
 
 - **Framework**: NestJS 10
 - **Matrix**: matrix-bot-sdk
-- **Storage**: Local JSON file (per-user tasks)
+- **Backend**: Todo API (port 3018)
+- **Auth**: Mana Core Auth (JWT)
 
 ## Commands
 
@@ -34,12 +37,9 @@ services/matrix-todo-bot/
 │   ├── health.controller.ts  # Health check endpoint
 │   ├── config/
 │   │   └── configuration.ts  # Configuration & help texts
-│   ├── bot/
-│   │   ├── bot.module.ts
-│   │   └── matrix.service.ts # Matrix client & command handlers
-│   └── todo/
-│       ├── todo.module.ts
-│       └── todo.service.ts   # Task storage & management
+│   └── bot/
+│       ├── bot.module.ts
+│       └── matrix.service.ts # Matrix client & command handlers
 ├── Dockerfile
 └── package.json
 ```
@@ -49,6 +49,8 @@ services/matrix-todo-bot/
 | Command | Description |
 |---------|-------------|
 | `!help` | Show help message |
+| `!login email pass` | Login (required before use) |
+| `!logout` | Logout |
 | `!add [task]` | Create a new task |
 | `!list` | Show all pending tasks |
 | `!heute` / `!today` | Show today's tasks |
@@ -90,6 +92,15 @@ MATRIX_HOMESERVER_URL=http://localhost:8008
 MATRIX_ACCESS_TOKEN=syt_xxx
 MATRIX_ALLOWED_ROOMS=#todo-bot:mana.how
 MATRIX_STORAGE_PATH=./data/bot-storage.json
+
+# Todo Backend
+TODO_BACKEND_URL=http://localhost:3018
+
+# Mana Core Auth
+MANA_CORE_AUTH_URL=http://localhost:3001
+
+# Redis (for session storage)
+REDIS_URL=redis://localhost:6379
 ```
 
 ## Docker
@@ -102,6 +113,8 @@ docker build -f services/matrix-todo-bot/Dockerfile -t matrix-todo-bot services/
 docker run -p 3314:3314 \
   -e MATRIX_HOMESERVER_URL=http://synapse:8008 \
   -e MATRIX_ACCESS_TOKEN=syt_xxx \
+  -e TODO_BACKEND_URL=http://todo-backend:3018 \
+  -e MANA_CORE_AUTH_URL=http://mana-core-auth:3001 \
   -v matrix-todo-bot-data:/app/data \
   matrix-todo-bot
 ```
@@ -127,35 +140,19 @@ curl -X POST "https://matrix.mana.how/_matrix/client/v3/login" \
 # Response contains: {"access_token": "syt_xxx", ...}
 ```
 
-## Data Storage
+## Authentication Flow
 
-Tasks are stored in a local JSON file (`/app/data/todo-data.json`) with per-user isolation.
+1. User sends `!login email password`
+2. Bot authenticates via mana-core-auth
+3. JWT token stored in Redis session
+4. Token used for all Todo API calls
+5. Tasks sync with todo-backend (PostgreSQL)
 
-Structure:
-```json
-{
-  "tasks": [
-    {
-      "id": "unique-id",
-      "title": "Task title",
-      "completed": false,
-      "priority": 4,
-      "dueDate": "2024-01-28",
-      "project": "Arbeit",
-      "labels": [],
-      "createdAt": "2024-01-27T10:00:00Z",
-      "completedAt": null,
-      "userId": "@user:mana.how"
-    }
-  ],
-  "projects": []
-}
-```
+## Data Synchronization
 
-## GDPR Compliance
+All tasks are stored in the Todo backend PostgreSQL database. Changes made via:
+- Matrix bot
+- Todo web app
+- Todo mobile app
 
-- All task data stored locally on Mac Mini
-- No third-party data processing
-- Full control over data retention
-- Per-user data isolation via Matrix user IDs
-- Can delete all user data on request
+...are all synchronized automatically.
