@@ -114,7 +114,7 @@
 </script>
 
 <!-- Full-screen chat view for mobile -->
-<div class="flex flex-col h-full bg-background">
+<div class="flex flex-col h-full bg-background safe-area-top">
 	{#if matrixStore.currentRoom}
 		<!-- Room Header with back button -->
 		<RoomHeader

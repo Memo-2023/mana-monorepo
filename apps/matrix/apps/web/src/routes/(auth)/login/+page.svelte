@@ -339,8 +339,8 @@
 
 	.theme-toggle {
 		position: absolute;
-		top: 1rem;
-		left: 1rem;
+		top: calc(1rem + env(safe-area-inset-top, 0px));
+		left: calc(1rem + env(safe-area-inset-left, 0px));
 		z-index: 50;
 		display: flex;
 		align-items: center;
@@ -381,7 +381,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 3rem 1rem 1.5rem;
+		padding: calc(3rem + env(safe-area-inset-top, 0px)) 1rem 1.5rem;
 		animation: fadeInScale 0.5s ease-out both;
 	}
 
@@ -428,7 +428,7 @@
 		flex: 1;
 		display: flex;
 		justify-content: center;
-		padding: 1rem 1rem 2rem;
+		padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom, 0px));
 	}
 
 	.form-card {

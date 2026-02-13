@@ -217,7 +217,9 @@
 
 {#if loading}
 	<!-- Loading State -->
-	<div class="flex h-screen flex-col items-center justify-center gap-4 bg-background">
+	<div
+		class="flex h-screen flex-col items-center justify-center gap-4 bg-background safe-area-top safe-area-bottom"
+	>
 		<CircleNotch class="h-12 w-12 animate-spin text-primary" />
 		<div class="text-center">
 			<p class="font-medium text-foreground">Connecting to Matrix...</p>
@@ -236,7 +238,9 @@
 	</div>
 {:else if initError}
 	<!-- Error State -->
-	<div class="flex h-screen flex-col items-center justify-center gap-4 p-4 bg-background">
+	<div
+		class="flex h-screen flex-col items-center justify-center gap-4 p-4 bg-background safe-area-top safe-area-bottom"
+	>
 		<div class="rounded-full bg-red-500/10 p-4">
 			<WarningCircle class="h-12 w-12 text-red-500" />
 		</div>

@@ -349,7 +349,7 @@
 	}
 </script>
 
-<div class="p-3 pb-4 lg:pb-20">
+<div class="p-3 pb-4 lg:pb-20 safe-area-bottom">
 	<!-- Reply/Edit Preview -->
 	{#if replyTo || editMessage}
 		<div

@@ -136,10 +136,10 @@
 
 {#if isMobile}
 	<!-- Mobile: Full-screen room list -->
-	<div class="flex flex-col h-full bg-background">
+	<div class="flex flex-col h-full bg-background safe-area-bottom">
 		<!-- User Info / Status Bar -->
 		<div
-			class="border-b border-black/10 dark:border-white/10 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl"
+			class="border-b border-black/10 dark:border-white/10 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl safe-area-top"
 		>
 			<div class="flex items-center justify-between">
 				<div>
