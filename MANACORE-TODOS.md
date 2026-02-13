@@ -93,111 +93,92 @@
 
 ---
 
-### 2. App-Config aktualisieren
+### 2. ✅ App-Config aktualisieren (ERLEDIGT)
 
-**Problem:** `apps.ts` enthält veraltete Apps und fehlt neue
+**Status:** Bereits vollständig implementiert
 
-**Betroffene Datei:** `apps/manacore/apps/web/src/lib/config/apps.ts`
+**Datei:** `apps/manacore/apps/web/src/lib/config/apps.ts`
 
-**Aktuell konfiguriert:**
+**Alle Apps konfiguriert:**
 
-- memoro (archiviert!)
-- manadeck ✅
-- storyteller (archiviert!)
-- manacore ✅
+| Kategorie    | Apps                                        |
+| ------------ | ------------------------------------------- |
+| Core         | manacore                                    |
+| AI-Powered   | chat, picture, presi, mail                  |
+| Productivity | manadeck, todo, calendar, contacts, finance |
+| Utility      | clock, zitare, storage, moodlit             |
 
-**Fehlende Apps:**
-| App | Typ | Priorität |
-|-----|-----|-----------|
-| chat | AI-Chat | Hoch |
-| picture | AI-Bilder | Hoch |
-| zitare | Zitate | Hoch |
-| calendar | Kalender | Hoch |
-| todo | Aufgaben | Hoch |
-| contacts | Kontakte | Mittel |
-| clock | Uhren | Mittel |
-| presi | Präsentationen | Mittel |
-| finance | Finanzen | Mittel |
-| mail | E-Mail | Niedrig |
-| storage | Cloud-Speicher | Niedrig |
-| moodlit | Ambient Lighting | Niedrig |
-
-**Aufgaben:**
-
-- [ ] Archivierte Apps entfernen (memoro, storyteller)
-- [ ] Alle aktiven Apps hinzufügen
-- [ ] Features pro App definieren
-- [ ] Icons/Emojis festlegen
-- [ ] Farben pro App definieren
-
-**Geschätzter Aufwand:** 2-4 Stunden
+Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 
 ---
 
-### 3. Dashboard-Widgets erweitern
+### 3. ✅ Dashboard-Widgets erweitern (GRÖSSTENTEILS ERLEDIGT)
 
-**Problem:** Nur 6 Widget-Typen, neue Apps fehlen
+**Status:** 10 von 13 Widgets implementiert
 
-**Betroffene Dateien:**
+**Existierende Widgets (13 Typen):**
 
-- `lib/components/dashboard/widgets/`
-- `lib/types/dashboard.ts`
-- `lib/config/default-dashboard.ts`
+| Widget                  | App            | Status |
+| ----------------------- | -------------- | ------ |
+| CreditsWidget           | mana-core-auth | ✅     |
+| TransactionsWidget      | mana-core-auth | ✅     |
+| ReferralWidget          | mana-core-auth | ✅     |
+| QuickActionsWidget      | core           | ✅     |
+| TasksTodayWidget        | todo           | ✅     |
+| TasksUpcomingWidget     | todo           | ✅     |
+| CalendarEventsWidget    | calendar       | ✅     |
+| ChatRecentWidget        | chat           | ✅     |
+| ContactsFavoritesWidget | contacts       | ✅     |
+| ZitareQuoteWidget       | zitare         | ✅     |
+| PictureRecentWidget     | picture        | ✅     |
+| ManadeckProgressWidget  | manadeck       | ✅     |
+| ClockTimersWidget       | clock          | ✅     |
 
-**Neue Widgets erstellen:**
+**Noch offen (Backend fehlt noch):**
 
-| Widget                 | App      | Beschreibung                    |
-| ---------------------- | -------- | ------------------------------- |
-| PictureRecentWidget    | picture  | Letzte AI-Generierungen         |
-| ManadeckProgressWidget | manadeck | Lernfortschritt, fällige Karten |
-| FinanceBalanceWidget   | finance  | Kontostand, Budget-Status       |
-| ZitareQuoteWidget      | zitare   | Tägliches Zitat                 |
-| ClockAlarmsWidget      | clock    | Nächste Wecker/Timer            |
-| MailInboxWidget        | mail     | Ungelesene E-Mails              |
-| StorageUsageWidget     | storage  | Speicherplatz-Übersicht         |
-
-**Aufgaben:**
-
-- [ ] Widget-Komponenten erstellen
-- [ ] API-Services erweitern
-- [ ] Widget-Registry aktualisieren
-- [ ] Default-Dashboard anpassen
-
-**Geschätzter Aufwand:** 1-2 Tage
+- [ ] FinanceBalanceWidget (finance Backend nötig)
+- [ ] MailInboxWidget (mail Backend nötig)
+- [ ] StorageUsageWidget (storage Backend nötig)
 
 ---
 
-### 4. Profil-Features vervollständigen
+### 4. ✅ Profil-Features vervollständigen (Backend ERLEDIGT)
 
-**Problem:** Mehrere Profil-Aktionen sind nicht implementiert
+**Status:** Backend implementiert am 2026-02-13
 
-**Betroffene Datei:** `apps/manacore/apps/web/src/routes/(app)/profile/+page.svelte`
+**Implementierte Backend-Endpoints:**
 
-```typescript
-// Zeile 20-22: Nur Alert
-onDeleteAccount: () => {
-  alert('Konto löschen ist noch nicht implementiert.');
-},
-```
+| Endpoint                | Methode | Beschreibung                                         |
+| ----------------------- | ------- | ---------------------------------------------------- |
+| `/auth/profile`         | GET     | Profil-Daten abrufen                                 |
+| `/auth/profile`         | POST    | Profil aktualisieren (Name, Bild)                    |
+| `/auth/change-password` | POST    | Passwort ändern (mit aktuellem Passwort)             |
+| `/auth/account`         | DELETE  | Konto löschen (Soft-Delete mit Passwort-Bestätigung) |
 
-**Fehlende Features:**
+**Feature-Status:**
 
-| Feature           | Status | Priorität |
-| ----------------- | ------ | --------- |
-| Profil bearbeiten | ❌     | Hoch      |
-| Passwort ändern   | ❌     | Hoch      |
-| Konto löschen     | ❌     | Mittel    |
-| Avatar hochladen  | ❌     | Niedrig   |
-| 2FA aktivieren    | ❌     | Niedrig   |
+| Feature           | Backend | Frontend | Priorität |
+| ----------------- | ------- | -------- | --------- |
+| Profil bearbeiten | ✅      | ❌       | Hoch      |
+| Passwort ändern   | ✅      | ❌       | Hoch      |
+| Konto löschen     | ✅      | ❌       | Mittel    |
+| Avatar hochladen  | ✅      | ❌       | Niedrig   |
+| 2FA aktivieren    | ❌      | ❌       | Niedrig   |
 
-**Aufgaben:**
+**Dateien:**
+
+- `services/mana-core-auth/src/auth/auth.controller.ts` - Endpoints
+- `services/mana-core-auth/src/auth/services/better-auth.service.ts` - Service-Methoden
+- `services/mana-core-auth/src/auth/dto/update-profile.dto.ts` - Profil-Update DTO
+- `services/mana-core-auth/src/auth/dto/change-password.dto.ts` - Passwort-Ändern DTO
+- `services/mana-core-auth/src/auth/dto/delete-account.dto.ts` - Konto-Löschen DTO
+
+**Noch offen (Frontend):**
 
 - [ ] Profil-Edit Modal/Seite erstellen
 - [ ] Passwort-Ändern Dialog
 - [ ] Konto-Löschung mit Bestätigung
-- [ ] Backend-Endpoints prüfen/erstellen
-
-**Geschätzter Aufwand:** 1-2 Tage
+- [ ] Avatar-Upload mit S3/MinIO Integration
 
 ---
 
@@ -414,4 +395,4 @@ Diese Tasks können schnell erledigt werden:
 
 ---
 
-_Zuletzt aktualisiert: 2026-02-13_
+_Zuletzt aktualisiert: 2026-02-13 (Profile-Features Backend)_

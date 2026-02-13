@@ -26,7 +26,12 @@ import { SetActiveOrganizationDto } from './dto/set-active-organization.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { CurrentUserData } from '../common/decorators/current-user.decorator';
 
 /**
  * Auth Controller
@@ -292,6 +297,101 @@ export class AuthController {
 			resendVerificationDto.email,
 			resendVerificationDto.sourceAppUrl
 		);
+	}
+
+	// =========================================================================
+	// Profile Management Endpoints
+	// =========================================================================
+
+	/**
+	 * Get current user profile
+	 *
+	 * Returns the authenticated user's profile data.
+	 */
+	@Get('profile')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'Get current user profile' })
+	@ApiResponse({
+		status: 200,
+		description: 'Returns user profile',
+		schema: {
+			type: 'object',
+			properties: {
+				id: { type: 'string' },
+				name: { type: 'string' },
+				email: { type: 'string' },
+				emailVerified: { type: 'boolean' },
+				image: { type: 'string' },
+				role: { type: 'string' },
+				createdAt: { type: 'string', format: 'date-time' },
+			},
+		},
+	})
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	async getProfile(@CurrentUser() user: CurrentUserData) {
+		return this.betterAuthService.getProfile(user.userId);
+	}
+
+	/**
+	 * Update user profile
+	 *
+	 * Updates the user's name and/or profile image.
+	 */
+	@Post('profile')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'Update user profile' })
+	@ApiBody({ type: UpdateProfileDto })
+	@ApiResponse({ status: 200, description: 'Profile updated successfully' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	async updateProfile(@CurrentUser() user: CurrentUserData, @Body() updateDto: UpdateProfileDto) {
+		return this.betterAuthService.updateProfile(user.userId, {
+			name: updateDto.name,
+			image: updateDto.image,
+		});
+	}
+
+	/**
+	 * Change password
+	 *
+	 * Changes the user's password. Requires current password for verification.
+	 * Rate limited to 5 requests per minute.
+	 */
+	@Post('change-password')
+	@UseGuards(JwtAuthGuard)
+	@Throttle({ default: { ttl: 60000, limit: 5 } })
+	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'Change password' })
+	@ApiBody({ type: ChangePasswordDto })
+	@ApiResponse({ status: 200, description: 'Password changed successfully' })
+	@ApiResponse({ status: 401, description: 'Current password is incorrect' })
+	async changePassword(@CurrentUser() user: CurrentUserData, @Body() changeDto: ChangePasswordDto) {
+		return this.betterAuthService.changePassword(
+			user.userId,
+			changeDto.currentPassword,
+			changeDto.newPassword
+		);
+	}
+
+	/**
+	 * Delete account
+	 *
+	 * Soft-deletes the user's account. Requires password confirmation.
+	 * Rate limited to 3 requests per minute.
+	 */
+	@Delete('account')
+	@UseGuards(JwtAuthGuard)
+	@Throttle({ default: { ttl: 60000, limit: 3 } })
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'Delete user account' })
+	@ApiBody({ type: DeleteAccountDto })
+	@ApiResponse({ status: 200, description: 'Account deleted' })
+	@ApiResponse({ status: 401, description: 'Password is incorrect' })
+	async deleteAccount(@CurrentUser() user: CurrentUserData, @Body() deleteDto: DeleteAccountDto) {
+		return this.betterAuthService.deleteAccount(user.userId, deleteDto.password, deleteDto.reason);
 	}
 
 	// =========================================================================

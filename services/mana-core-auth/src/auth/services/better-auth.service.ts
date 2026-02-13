@@ -1127,6 +1127,250 @@ export class BetterAuthService {
 	}
 
 	// =========================================================================
+	// Profile Management Methods
+	// =========================================================================
+
+	/**
+	 * Update user profile
+	 *
+	 * Updates the user's name and/or image.
+	 *
+	 * @param userId - User ID
+	 * @param updates - Fields to update (name, image)
+	 * @returns Updated user data
+	 */
+	async updateProfile(
+		userId: string,
+		updates: { name?: string; image?: string }
+	): Promise<{
+		success: boolean;
+		user: { id: string; name: string; email: string; image?: string };
+	}> {
+		const db = getDb(this.databaseUrl);
+		const { users } = await import('../../db/schema/auth.schema');
+		const { eq } = await import('drizzle-orm');
+
+		// Get current user
+		const [currentUser] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+
+		if (!currentUser || currentUser.deletedAt) {
+			throw new NotFoundException('User not found');
+		}
+
+		// Build update object
+		const updateData: Partial<{ name: string; image: string; updatedAt: Date }> = {
+			updatedAt: new Date(),
+		};
+
+		if (updates.name !== undefined) {
+			updateData.name = updates.name;
+		}
+
+		if (updates.image !== undefined) {
+			updateData.image = updates.image;
+		}
+
+		// Update user
+		const [updatedUser] = await db
+			.update(users)
+			.set(updateData)
+			.where(eq(users.id, userId))
+			.returning();
+
+		this.logger.log('Profile updated', { userId });
+
+		return {
+			success: true,
+			user: {
+				id: updatedUser.id,
+				name: updatedUser.name,
+				email: updatedUser.email,
+				image: updatedUser.image || undefined,
+			},
+		};
+	}
+
+	/**
+	 * Change user password
+	 *
+	 * Verifies the current password and updates to the new one.
+	 * Requires the user to be authenticated.
+	 *
+	 * @param userId - User ID
+	 * @param currentPassword - Current password for verification
+	 * @param newPassword - New password to set
+	 * @returns Success status
+	 * @throws UnauthorizedException if current password is incorrect
+	 */
+	async changePassword(
+		userId: string,
+		currentPassword: string,
+		newPassword: string
+	): Promise<{ success: boolean; message: string }> {
+		const db = getDb(this.databaseUrl);
+		const { accounts } = await import('../../db/schema/auth.schema');
+		const { eq, and } = await import('drizzle-orm');
+		const bcrypt = await import('bcrypt');
+
+		// Get credential account (where password is stored)
+		const [account] = await db
+			.select()
+			.from(accounts)
+			.where(and(eq(accounts.userId, userId), eq(accounts.providerId, 'credential')))
+			.limit(1);
+
+		if (!account || !account.password) {
+			throw new NotFoundException('No password credential found for this account');
+		}
+
+		// Verify current password
+		const isValid = await bcrypt.compare(currentPassword, account.password);
+
+		if (!isValid) {
+			throw new UnauthorizedException('Current password is incorrect');
+		}
+
+		// Hash new password
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+		// Update password
+		await db
+			.update(accounts)
+			.set({
+				password: hashedPassword,
+				updatedAt: new Date(),
+			})
+			.where(eq(accounts.id, account.id));
+
+		this.logger.log('Password changed', { userId });
+
+		// Log security event
+		try {
+			const { securityEvents } = await import('../../db/schema/auth.schema');
+			await db.insert(securityEvents).values({
+				userId,
+				eventType: 'password_changed',
+				metadata: { changedAt: new Date().toISOString() },
+			});
+		} catch {
+			// Non-critical - just log
+			this.logger.warn('Failed to log security event for password change');
+		}
+
+		return {
+			success: true,
+			message: 'Password changed successfully',
+		};
+	}
+
+	/**
+	 * Delete user account
+	 *
+	 * Soft-deletes the user account after password verification.
+	 * Sets deletedAt timestamp instead of hard delete for data retention.
+	 *
+	 * @param userId - User ID
+	 * @param password - Password for verification
+	 * @param reason - Optional reason for deletion
+	 * @returns Success status
+	 * @throws UnauthorizedException if password is incorrect
+	 */
+	async deleteAccount(
+		userId: string,
+		password: string,
+		reason?: string
+	): Promise<{ success: boolean; message: string }> {
+		const db = getDb(this.databaseUrl);
+		const { accounts, users, sessions } = await import('../../db/schema/auth.schema');
+		const { eq, and } = await import('drizzle-orm');
+		const bcrypt = await import('bcrypt');
+
+		// Get credential account
+		const [account] = await db
+			.select()
+			.from(accounts)
+			.where(and(eq(accounts.userId, userId), eq(accounts.providerId, 'credential')))
+			.limit(1);
+
+		if (!account || !account.password) {
+			throw new NotFoundException('No password credential found for this account');
+		}
+
+		// Verify password
+		const isValid = await bcrypt.compare(password, account.password);
+
+		if (!isValid) {
+			throw new UnauthorizedException('Password is incorrect');
+		}
+
+		const now = new Date();
+
+		// Soft delete user
+		await db.update(users).set({ deletedAt: now, updatedAt: now }).where(eq(users.id, userId));
+
+		// Revoke all sessions
+		await db.update(sessions).set({ revokedAt: now }).where(eq(sessions.userId, userId));
+
+		this.logger.log('Account deleted', { userId, reason });
+
+		// Log security event
+		try {
+			const { securityEvents } = await import('../../db/schema/auth.schema');
+			await db.insert(securityEvents).values({
+				userId,
+				eventType: 'account_deleted',
+				metadata: { reason, deletedAt: now.toISOString() },
+			});
+		} catch {
+			// Non-critical
+			this.logger.warn('Failed to log security event for account deletion');
+		}
+
+		return {
+			success: true,
+			message: 'Account has been deleted',
+		};
+	}
+
+	/**
+	 * Get user profile
+	 *
+	 * Returns the full user profile data.
+	 *
+	 * @param userId - User ID
+	 * @returns User profile data
+	 */
+	async getProfile(userId: string): Promise<{
+		id: string;
+		name: string;
+		email: string;
+		emailVerified: boolean;
+		image?: string;
+		role: string;
+		createdAt: Date;
+	}> {
+		const db = getDb(this.databaseUrl);
+		const { users } = await import('../../db/schema/auth.schema');
+		const { eq } = await import('drizzle-orm');
+
+		const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+
+		if (!user || user.deletedAt) {
+			throw new NotFoundException('User not found');
+		}
+
+		return {
+			id: user.id,
+			name: user.name,
+			email: user.email,
+			emailVerified: user.emailVerified,
+			image: user.image || undefined,
+			role: user.role,
+			createdAt: user.createdAt,
+		};
+	}
+
+	// =========================================================================
 	// Private Helper Methods
 	// =========================================================================
 
