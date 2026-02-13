@@ -82,7 +82,7 @@ contacts-api.mana.how {
 # Skilltree App
 # ============================================
 skilltree.mana.how {
-    reverse_proxy localhost:5018
+    reverse_proxy localhost:5020
 }
 
 skilltree-api.mana.how {

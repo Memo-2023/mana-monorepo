@@ -1256,15 +1256,15 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5018
+      PORT: 5020
       PUBLIC_BACKEND_URL: http://skilltree-backend:3038
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://skilltree-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
-      - "5018:5018"
+      - "5020:5020"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5018/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5020/health"]
       interval: 30s
       timeout: 10s
       retries: 3

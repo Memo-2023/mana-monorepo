@@ -66,16 +66,16 @@ COPY --from=builder /app/apps/skilltree/apps/web/build ./build
 COPY --from=builder /app/apps/skilltree/apps/web/package.json ./
 
 # Expose port
-EXPOSE 5018
+EXPOSE 5020
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=5018
+ENV PORT=5020
 ENV HOST=0.0.0.0
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:5018/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5020/health || exit 1
 
 # Run the app
 CMD ["node", "build"]
