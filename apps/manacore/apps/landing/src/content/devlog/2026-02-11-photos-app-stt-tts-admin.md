@@ -21,6 +21,17 @@ tags:
 featured: true
 commits: 28
 readTime: 14
+stats:
+  filesChanged: 241
+  linesAdded: 14772
+  linesRemoved: 1668
+contributors:
+  - name: 'Till Schneider'
+    handle: 'Till-JS'
+    commits: 28
+workingHours:
+  start: '2026-02-11T11:00'
+  end: '2026-02-12T11:00'
 ---
 
 Nach einer Woche Pause: **28 Commits** mit Fokus auf neue Apps und API-Infrastruktur:

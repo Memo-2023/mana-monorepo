@@ -106,6 +106,25 @@ const formatDate = (date: Date) => {
 			</div>
 
 			<Container class="relative z-10">
+				<!-- Activity Link -->
+				<div class="max-w-4xl mx-auto mb-8">
+					<a
+						href="/devlog/activity"
+						class="group flex items-center justify-between bg-gradient-to-r from-green-500/10 to-emerald-500/10 hover:from-green-500/20 hover:to-emerald-500/20 border border-green-500/30 rounded-xl p-4 transition-all"
+					>
+						<div class="flex items-center gap-3">
+							<div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+								<Icon name="mdi:chart-timeline-variant" class="w-5 h-5 text-green-600 dark:text-green-400" />
+							</div>
+							<div>
+								<Text weight="semibold" class="text-green-700 dark:text-green-300">Aktivitäts-Übersicht</Text>
+								<Text size="sm" class="text-green-600/70 dark:text-green-400/70">Contribution Grid, Stats & Contributors</Text>
+							</div>
+						</div>
+						<Icon name="mdi:arrow-right" class="w-5 h-5 text-green-600 dark:text-green-400 group-hover:translate-x-1 transition-transform" />
+					</a>
+				</div>
+
 				<div class="max-w-4xl mx-auto space-y-8">
 					{
 						sortedPosts.map((post) => {

@@ -21,6 +21,17 @@ tags:
 featured: true
 commits: 74
 readTime: 20
+stats:
+  filesChanged: 747
+  linesAdded: 56325
+  linesRemoved: 11567
+contributors:
+  - name: 'Till Schneider'
+    handle: 'Till-JS'
+    commits: 74
+workingHours:
+  start: '2026-01-28T11:00'
+  end: '2026-01-29T11:00'
 ---
 
 Außergewöhnlich produktiver Tag (und Nacht!) mit **74 Commits** und mehreren großen neuen Features. Die wichtigsten Errungenschaften:

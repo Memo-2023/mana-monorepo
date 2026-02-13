@@ -154,6 +154,30 @@ const devlogCollection = defineCollection({
 		featured: z.boolean().default(false),
 		commits: z.number().optional(),
 		readTime: z.number().optional(),
+		// Extended stats for activity grid
+		stats: z
+			.object({
+				filesChanged: z.number(),
+				linesAdded: z.number(),
+				linesRemoved: z.number(),
+			})
+			.optional(),
+		contributors: z
+			.array(
+				z.object({
+					name: z.string(),
+					handle: z.string().optional(),
+					commits: z.number().optional(),
+				})
+			)
+			.optional(),
+		// Working hours (11:00 to 11:00 next day convention)
+		workingHours: z
+			.object({
+				start: z.string(), // e.g., "2026-01-30T11:00"
+				end: z.string(), // e.g., "2026-01-31T11:00"
+			})
+			.optional(),
 	}),
 });
 

@@ -18,6 +18,17 @@ tags:
 featured: true
 commits: 43
 readTime: 12
+stats:
+  filesChanged: 222
+  linesAdded: 19273
+  linesRemoved: 985
+contributors:
+  - name: 'Till Schneider'
+    handle: 'Till-JS'
+    commits: 43
+workingHours:
+  start: '2026-01-23T11:00'
+  end: '2026-01-24T11:00'
 ---
 
 Heute war ein sehr produktiver Tag mit Fokus auf die **Produktivstellung der ManaCore Apps auf dem Mac Mini Server**. Die wichtigsten Errungenschaften:

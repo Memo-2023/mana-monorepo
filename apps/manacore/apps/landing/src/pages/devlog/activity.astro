@@ -1,0 +1,322 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import Heading from '../../components/typography/Heading.astro';
+import Text from '../../components/typography/Text.astro';
+import HeroSection from '../../components/content/HeroSection.astro';
+import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+
+const posts = await getCollection('devlog');
+const sortedPosts = posts.sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+
+// Generate activity data for the grid (last 365 days)
+const today = new Date();
+const startDate = new Date(today);
+startDate.setDate(startDate.getDate() - 364);
+
+// Create a map of date -> activity level
+const activityMap = new Map<string, { commits: number; linesAdded: number; linesRemoved: number; posts: string[] }>();
+
+for (const post of sortedPosts) {
+	const dateKey = post.data.date.toISOString().split('T')[0];
+	const existing = activityMap.get(dateKey) || { commits: 0, linesAdded: 0, linesRemoved: 0, posts: [] };
+	activityMap.set(dateKey, {
+		commits: existing.commits + (post.data.commits || 0),
+		linesAdded: existing.linesAdded + (post.data.stats?.linesAdded || 0),
+		linesRemoved: existing.linesRemoved + (post.data.stats?.linesRemoved || 0),
+		posts: [...existing.posts, post.data.title],
+	});
+}
+
+// Generate weeks for the grid
+const weeks: { date: Date; dateKey: string; activity: number; commits: number; posts: string[] }[][] = [];
+let currentWeek: { date: Date; dateKey: string; activity: number; commits: number; posts: string[] }[] = [];
+const currentDate = new Date(startDate);
+
+// Pad the first week to start on Sunday
+const firstDayOfWeek = currentDate.getDay();
+for (let i = 0; i < firstDayOfWeek; i++) {
+	currentWeek.push({ date: new Date(0), dateKey: '', activity: -1, commits: 0, posts: [] });
+}
+
+while (currentDate <= today) {
+	const dateKey = currentDate.toISOString().split('T')[0];
+	const data = activityMap.get(dateKey);
+	const commits = data?.commits || 0;
+
+	// Activity level: 0 = none, 1 = low, 2 = medium, 3 = high, 4 = very high
+	let activity = 0;
+	if (commits > 0) activity = 1;
+	if (commits >= 20) activity = 2;
+	if (commits >= 40) activity = 3;
+	if (commits >= 60) activity = 4;
+
+	currentWeek.push({
+		date: new Date(currentDate),
+		dateKey,
+		activity,
+		commits,
+		posts: data?.posts || [],
+	});
+
+	if (currentWeek.length === 7) {
+		weeks.push(currentWeek);
+		currentWeek = [];
+	}
+
+	currentDate.setDate(currentDate.getDate() + 1);
+}
+
+// Push remaining days
+if (currentWeek.length > 0) {
+	weeks.push(currentWeek);
+}
+
+// Calculate totals
+const totalCommits = sortedPosts.reduce((sum, post) => sum + (post.data.commits || 0), 0);
+const totalLinesAdded = sortedPosts.reduce((sum, post) => sum + (post.data.stats?.linesAdded || 0), 0);
+const totalLinesRemoved = sortedPosts.reduce((sum, post) => sum + (post.data.stats?.linesRemoved || 0), 0);
+const totalFilesChanged = sortedPosts.reduce((sum, post) => sum + (post.data.stats?.filesChanged || 0), 0);
+const totalDays = sortedPosts.length;
+
+// Get all contributors
+const contributorMap = new Map<string, { name: string; handle?: string; commits: number }>();
+for (const post of sortedPosts) {
+	for (const contributor of post.data.contributors || []) {
+		const existing = contributorMap.get(contributor.name) || { name: contributor.name, handle: contributor.handle, commits: 0 };
+		contributorMap.set(contributor.name, {
+			...existing,
+			commits: existing.commits + (contributor.commits || 0),
+		});
+	}
+}
+const contributors = Array.from(contributorMap.values()).sort((a, b) => b.commits - a.commits);
+
+const activityColors = [
+	'bg-gray-100 dark:bg-gray-800', // 0 - none
+	'bg-green-200 dark:bg-green-900', // 1 - low
+	'bg-green-400 dark:bg-green-700', // 2 - medium
+	'bg-green-500 dark:bg-green-600', // 3 - high
+	'bg-green-600 dark:bg-green-500', // 4 - very high
+];
+
+const monthLabels = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const dayLabels = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+const formatNumber = (num: number) => {
+	if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+	if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+	return num.toString();
+};
+
+const formatDate = (date: Date) => {
+	return new Intl.DateTimeFormat('de-DE', {
+		day: '2-digit',
+		month: 'long',
+		year: 'numeric',
+	}).format(date);
+};
+---
+
+<Layout title="Aktivität - ManaCore Entwicklung">
+	<div class="bg-gradient-to-b from-blue-50/30 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+		<Navbar />
+
+		<!-- Hero Section -->
+		<div class="relative">
+			<div class="absolute inset-0 -bottom-32">
+				<div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent dark:from-gray-900 dark:to-transparent"></div>
+				<div class="absolute top-0 right-0 w-96 h-96 bg-green-500/10 dark:bg-green-500/5 rounded-full blur-3xl"></div>
+				<div class="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl"></div>
+			</div>
+
+			<HeroSection
+				title="Entwicklungsaktivität"
+				subtitle="Übersicht der Entwicklungsarbeit am ManaCore Projekt. Jeder Tag zählt."
+				background="none"
+				minHeight="small"
+				spacing="small"
+				containerClass="py-16 relative z-10"
+				centered={true}
+				debug={false}
+			/>
+		</div>
+
+		<!-- Stats Cards -->
+		<Section spacing="medium" class="relative">
+			<Container>
+				<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+					<div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+						<div class="flex items-center gap-3 mb-2">
+							<div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+								<Icon name="mdi:source-commit" class="w-5 h-5 text-green-600 dark:text-green-400" />
+							</div>
+							<Text size="sm" class="text-gray-500 dark:text-gray-400">Commits</Text>
+						</div>
+						<Heading as="h3" size="3" class="text-green-600 dark:text-green-400">{totalCommits}</Heading>
+					</div>
+
+					<div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+						<div class="flex items-center gap-3 mb-2">
+							<div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
+								<Icon name="mdi:file-document-outline" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+							</div>
+							<Text size="sm" class="text-gray-500 dark:text-gray-400">Dateien</Text>
+						</div>
+						<Heading as="h3" size="3" class="text-blue-600 dark:text-blue-400">{formatNumber(totalFilesChanged)}</Heading>
+					</div>
+
+					<div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+						<div class="flex items-center gap-3 mb-2">
+							<div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center">
+								<Icon name="mdi:plus" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+							</div>
+							<Text size="sm" class="text-gray-500 dark:text-gray-400">Zeilen +</Text>
+						</div>
+						<Heading as="h3" size="3" class="text-emerald-600 dark:text-emerald-400">+{formatNumber(totalLinesAdded)}</Heading>
+					</div>
+
+					<div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+						<div class="flex items-center gap-3 mb-2">
+							<div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center">
+								<Icon name="mdi:minus" class="w-5 h-5 text-red-600 dark:text-red-400" />
+							</div>
+							<Text size="sm" class="text-gray-500 dark:text-gray-400">Zeilen -</Text>
+						</div>
+						<Heading as="h3" size="3" class="text-red-600 dark:text-red-400">-{formatNumber(totalLinesRemoved)}</Heading>
+					</div>
+				</div>
+
+				<!-- Activity Grid -->
+				<div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700 mb-8">
+					<div class="flex items-center justify-between mb-6">
+						<Heading as="h2" size="4">{totalDays} aktive Entwicklungstage</Heading>
+						<a href="/devlog" class="text-sm text-mana-blue hover:underline flex items-center gap-1">
+							Alle Devlogs
+							<Icon name="mdi:arrow-right" class="w-4 h-4" />
+						</a>
+					</div>
+
+					<!-- Grid -->
+					<div class="overflow-x-auto">
+						<div class="inline-flex gap-1">
+							<!-- Day labels -->
+							<div class="flex flex-col gap-1 mr-2 text-xs text-gray-400">
+								{dayLabels.map((day, i) => (
+									<div class="h-3 flex items-center" style={i % 2 === 0 ? '' : 'visibility: hidden'}>
+										{day}
+									</div>
+								))}
+							</div>
+
+							<!-- Weeks -->
+							{weeks.map((week, weekIndex) => (
+								<div class="flex flex-col gap-1">
+									{week.map((day) => (
+										<div
+											class={`w-3 h-3 rounded-sm ${day.activity === -1 ? 'bg-transparent' : activityColors[day.activity]} ${day.commits > 0 ? 'cursor-pointer hover:ring-2 hover:ring-offset-1 hover:ring-green-500' : ''}`}
+											title={day.activity === -1 ? '' : `${formatDate(day.date)}: ${day.commits} Commits${day.posts.length > 0 ? '\n' + day.posts.join(', ') : ''}`}
+										/>
+									))}
+								</div>
+							))}
+						</div>
+					</div>
+
+					<!-- Legend -->
+					<div class="flex items-center justify-end gap-2 mt-4 text-xs text-gray-500">
+						<span>Weniger</span>
+						{activityColors.map((color) => (
+							<div class={`w-3 h-3 rounded-sm ${color}`} />
+						))}
+						<span>Mehr</span>
+					</div>
+				</div>
+
+				<!-- Contributors -->
+				<div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+					<Heading as="h2" size="4" class="mb-6">Contributors</Heading>
+
+					<div class="space-y-4">
+						{contributors.map((contributor, index) => (
+							<div class="flex items-center gap-4">
+								<div class="w-10 h-10 rounded-full bg-gradient-to-br from-mana-blue to-purple-500 flex items-center justify-center text-white font-semibold">
+									{contributor.name.charAt(0)}
+								</div>
+								<div class="flex-1">
+									<div class="flex items-center gap-2">
+										<Text weight="semibold">{contributor.name}</Text>
+										{contributor.handle && (
+											<Text size="sm" class="text-gray-500">@{contributor.handle}</Text>
+										)}
+									</div>
+									<div class="flex items-center gap-4 mt-1">
+										<Text size="sm" class="text-gray-500">
+											<Icon name="mdi:source-commit" class="w-4 h-4 inline mr-1" />
+											{contributor.commits} Commits
+										</Text>
+										<div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+											<div
+												class="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+												style={`width: ${(contributor.commits / totalCommits) * 100}%`}
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			</Container>
+		</Section>
+
+		<!-- Recent Activity -->
+		<Section spacing="large" class="relative">
+			<Container>
+				<Heading as="h2" size="3" class="mb-8">Letzte Aktivität</Heading>
+
+				<div class="space-y-4">
+					{sortedPosts.slice(-5).reverse().map((post) => (
+						<a
+							href={`/devlog/${post.slug}`}
+							class="block bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-mana-blue/50 transition-colors"
+						>
+							<div class="flex items-center justify-between">
+								<div>
+									<Text weight="semibold" class="mb-1">{post.data.title}</Text>
+									<div class="flex items-center gap-4 text-sm text-gray-500">
+										<span>
+											<Icon name="mdi:calendar" class="w-4 h-4 inline mr-1" />
+											{formatDate(post.data.date)}
+										</span>
+										<span>
+											<Icon name="mdi:source-commit" class="w-4 h-4 inline mr-1" />
+											{post.data.commits} Commits
+										</span>
+										{post.data.stats && (
+											<span class="text-green-600 dark:text-green-400">
+												+{formatNumber(post.data.stats.linesAdded)}
+											</span>
+										)}
+										{post.data.stats && (
+											<span class="text-red-600 dark:text-red-400">
+												-{formatNumber(post.data.stats.linesRemoved)}
+											</span>
+										)}
+									</div>
+								</div>
+								<Icon name="mdi:chevron-right" class="w-5 h-5 text-gray-400" />
+							</div>
+						</a>
+					))}
+				</div>
+			</Container>
+		</Section>
+
+		<Footer />
+	</div>
+</Layout>

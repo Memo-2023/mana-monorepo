@@ -35,6 +35,23 @@ tags:
 featured: true # oder false
 commits: 42 # Anzahl der Commits an diesem Tag
 readTime: 15 # Geschätzte Lesezeit in Minuten
+
+# Extended Stats für Aktivitätsgrid
+stats:
+  filesChanged: 289
+  linesAdded: 17857
+  linesRemoved: 2113
+
+# Contributors (wer hat an diesem Tag gearbeitet)
+contributors:
+  - name: 'Till Schneider'
+    handle: 'Till-JS'
+    commits: 42
+
+# Working Hours (für Aktivitätsgrid)
+workingHours:
+  start: '2026-01-30T11:00'
+  end: '2026-01-31T11:00'
 ---
 ```
 
@@ -56,12 +73,25 @@ readTime: 15 # Geschätzte Lesezeit in Minuten
 4. **Zusammenfassung** - Tabelle mit Bereichen, Commit-Anzahl und Highlights
 5. **Nächste Schritte** - Was als nächstes geplant ist
 
-## Commit-Zählung
+## Git-Stats abrufen
 
 ```bash
 # Commits für einen Arbeitstag zählen (11:00 - 11:00 des Folgetages)
-git log --since="YYYY-MM-DD 11:00" --until="YYYY-MM-DD+1 10:59" --oneline | wc -l
+git log --since="YYYY-MM-DD 11:00" --until="YYYY-MM-DD+1 11:00" --oneline | wc -l
+
+# Detaillierte Stats (files, insertions, deletions)
+git log --since="YYYY-MM-DD 11:00" --until="YYYY-MM-DD+1 11:00" --shortstat --format="" | \
+  awk '{files+=$1; ins+=$4; del+=$6} END {print "files:", files, "insertions:", ins, "deletions:", del}'
 ```
+
+## Aktivitätsgrid
+
+Die Aktivitätsgrid-Seite ist unter `/devlog/activity` erreichbar und zeigt:
+
+- **GitHub-Style Contribution Grid** - Aktivität der letzten 365 Tage
+- **Gesamt-Statistiken** - Commits, Dateien, Lines Added/Removed
+- **Contributors** - Wer hat wie viel beigetragen
+- **Letzte Aktivität** - Die 5 neuesten Devlogs
 
 ## Best Practices
 
