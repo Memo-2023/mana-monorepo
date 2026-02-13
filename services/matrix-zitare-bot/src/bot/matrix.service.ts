@@ -295,7 +295,8 @@ Sag "hilfe" fuer alle Befehle!`;
 		const maxResults = Math.min(results.length, 5);
 		for (let i = 0; i < maxResults; i++) {
 			const quote = results[i];
-			text += `**${i + 1}.** "${quote.text.substring(0, 80)}${quote.text.length > 80 ? '...' : ''}"\n-- *${quote.author}*\n\n`;
+			const quoteText = this.quotesService.getQuoteText(quote);
+			text += `**${i + 1}.** "${quoteText.substring(0, 80)}${quoteText.length > 80 ? '...' : ''}"\n-- *${quote.author}*\n\n`;
 		}
 
 		if (results.length > 5) {
@@ -405,9 +406,10 @@ Sag "hilfe" fuer alle Befehle!`;
 		try {
 			await this.zitareService.addFavorite(lastQuoteId, token);
 			const quote = this.quotesService.getQuoteById(lastQuoteId);
+			const quoteText = quote ? this.quotesService.getQuoteText(quote) : '';
 			await this.sendMessage(
 				roomId,
-				`Zu Favoriten hinzugefuegt!\n\n"${quote?.text.substring(0, 50)}..."`
+				`Zu Favoriten hinzugefuegt!\n\n"${quoteText.substring(0, 50)}..."`
 			);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
@@ -439,7 +441,8 @@ Sag "hilfe" fuer alle Befehle!`;
 				const fav = favorites[i];
 				const quote = this.quotesService.getQuoteById(fav.quoteId);
 				if (quote) {
-					text += `**${i + 1}.** "${quote.text.substring(0, 60)}${quote.text.length > 60 ? '...' : ''}"\n-- *${quote.author}*\n\n`;
+					const quoteText = this.quotesService.getQuoteText(quote);
+					text += `**${i + 1}.** "${quoteText.substring(0, 60)}${quoteText.length > 60 ? '...' : ''}"\n-- *${quote.author}*\n\n`;
 				}
 			}
 
@@ -557,9 +560,10 @@ Sag "hilfe" fuer alle Befehle!`;
 			await this.zitareService.addQuoteToList(list.id, lastQuoteId, token);
 
 			const quote = this.quotesService.getQuoteById(lastQuoteId);
+			const quoteText = quote ? this.quotesService.getQuoteText(quote) : '';
 			await this.sendMessage(
 				roomId,
-				`Zitat zu "${list.name}" hinzugefuegt!\n\n"${quote?.text.substring(0, 50)}..."`
+				`Zitat zu "${list.name}" hinzugefuegt!\n\n"${quoteText.substring(0, 50)}..."`
 			);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';

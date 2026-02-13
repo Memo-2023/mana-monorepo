@@ -1,5 +1,12 @@
 // Types
-export type { Quote } from './types';
+export type {
+	Quote,
+	TranslatedText,
+	AuthorBio,
+	SupportedLanguage,
+	OriginalLanguage,
+} from './types';
+export { SUPPORTED_LANGUAGES, ORIGINAL_LANGUAGES } from './types';
 export type { Category } from './categories';
 
 // Data
@@ -17,9 +24,16 @@ export {
 	getQuoteByIndex,
 	getAllCategories,
 	getCategoryByName,
+	getQuoteText,
 	formatQuote,
 	formatQuoteWithNumber,
 	getTotalCount,
+	getQuotesByTag,
+	getAllTags,
+	getQuotesByAuthor,
+	getVerifiedQuotes,
+	getQuotesByYearRange,
+	getQuotesByOriginalLanguage,
 } from './utils';
 
 export { getCategoryLabel, isValidCategory } from './categories';

@@ -1,6 +1,6 @@
 import { QUOTES } from './quotes';
 import { CATEGORIES, CATEGORY_LABELS, type Category } from './categories';
-import type { Quote } from './types';
+import type { Quote, SupportedLanguage } from './types';
 
 /**
  * Get a random quote
@@ -38,14 +38,14 @@ export function getRandomQuoteByCategory(category: Category): Quote | null {
 }
 
 /**
- * Search quotes by text or author
+ * Search quotes by text or author (searches in specified language, defaults to German)
  */
-export function searchQuotes(searchText: string): Quote[] {
+export function searchQuotes(searchText: string, language: SupportedLanguage = 'de'): Quote[] {
 	const lowerSearch = searchText.toLowerCase();
-	return QUOTES.filter(
-		(q) =>
-			q.text.toLowerCase().includes(lowerSearch) || q.author.toLowerCase().includes(lowerSearch)
-	);
+	return QUOTES.filter((q) => {
+		const text = language === 'original' ? q.text.original : q.text[language];
+		return text.toLowerCase().includes(lowerSearch) || q.author.toLowerCase().includes(lowerSearch);
+	});
 }
 
 /**
@@ -99,19 +99,35 @@ export function getCategoryByName(name: string): Category | null {
 }
 
 /**
+ * Get quote text in a specific language
+ */
+export function getQuoteText(quote: Quote, language: SupportedLanguage = 'de'): string {
+	if (language === 'original') {
+		return quote.text.original;
+	}
+	return quote.text[language];
+}
+
+/**
  * Format a quote for display
  */
-export function formatQuote(quote: Quote): string {
+export function formatQuote(quote: Quote, language: SupportedLanguage = 'de'): string {
+	const text = getQuoteText(quote, language);
 	const categoryLabel = CATEGORY_LABELS[quote.category];
-	return `"${quote.text}"\n\n— *${quote.author}*\n\n[${categoryLabel}]`;
+	return `"${text}"\n\n— *${quote.author}*\n\n[${categoryLabel}]`;
 }
 
 /**
  * Format a quote with number
  */
-export function formatQuoteWithNumber(quote: Quote, number: number): string {
+export function formatQuoteWithNumber(
+	quote: Quote,
+	number: number,
+	language: SupportedLanguage = 'de'
+): string {
+	const text = getQuoteText(quote, language);
 	const categoryLabel = CATEGORY_LABELS[quote.category];
-	return `**#${number}**\n"${quote.text}"\n\n— *${quote.author}* [${categoryLabel}]`;
+	return `**#${number}**\n"${text}"\n\n— *${quote.author}* [${categoryLabel}]`;
 }
 
 /**
@@ -119,6 +135,52 @@ export function formatQuoteWithNumber(quote: Quote, number: number): string {
  */
 export function getTotalCount(): number {
 	return QUOTES.length;
+}
+
+/**
+ * Get quotes by tag
+ */
+export function getQuotesByTag(tag: string): Quote[] {
+	const lowerTag = tag.toLowerCase();
+	return QUOTES.filter((q) => q.tags?.some((t) => t.toLowerCase() === lowerTag));
+}
+
+/**
+ * Get all unique tags
+ */
+export function getAllTags(): string[] {
+	const tags = new Set<string>();
+	QUOTES.forEach((q) => q.tags?.forEach((t) => tags.add(t)));
+	return Array.from(tags).sort();
+}
+
+/**
+ * Get quotes by author
+ */
+export function getQuotesByAuthor(author: string): Quote[] {
+	const lowerAuthor = author.toLowerCase();
+	return QUOTES.filter((q) => q.author.toLowerCase().includes(lowerAuthor));
+}
+
+/**
+ * Get verified quotes only
+ */
+export function getVerifiedQuotes(): Quote[] {
+	return QUOTES.filter((q) => q.verified === true);
+}
+
+/**
+ * Get quotes by year range
+ */
+export function getQuotesByYearRange(startYear: number, endYear: number): Quote[] {
+	return QUOTES.filter((q) => q.year !== undefined && q.year >= startYear && q.year <= endYear);
+}
+
+/**
+ * Get quotes by original language
+ */
+export function getQuotesByOriginalLanguage(language: string): Quote[] {
+	return QUOTES.filter((q) => q.originalLanguage === language);
 }
 
 // Helper function

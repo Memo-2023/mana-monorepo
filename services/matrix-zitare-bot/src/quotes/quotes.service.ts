@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
 	type Quote,
 	type Category,
+	type SupportedLanguage,
 	QUOTES,
 	CATEGORIES,
 	CATEGORY_LABELS,
@@ -14,6 +15,7 @@ import {
 	getQuoteByIndex,
 	getAllCategories,
 	getCategoryByName,
+	getQuoteText,
 	formatQuote,
 	formatQuoteWithNumber,
 	getTotalCount,
@@ -38,7 +40,8 @@ export class QuotesService {
 
 		const quote = getDailyQuote();
 		this.dailyQuoteCache = { date: today, quote };
-		this.logger.log(`Daily quote for ${today}: "${quote.text.substring(0, 30)}..."`);
+		const text = getQuoteText(quote, 'de');
+		this.logger.log(`Daily quote for ${today}: "${text.substring(0, 30)}..."`);
 
 		return quote;
 	}
@@ -75,11 +78,15 @@ export class QuotesService {
 		return getTotalCount();
 	}
 
-	formatQuote(quote: Quote): string {
-		return formatQuote(quote);
+	getQuoteText(quote: Quote, language: SupportedLanguage = 'de'): string {
+		return getQuoteText(quote, language);
 	}
 
-	formatQuoteWithNumber(quote: Quote, number: number): string {
-		return formatQuoteWithNumber(quote, number);
+	formatQuote(quote: Quote, language: SupportedLanguage = 'de'): string {
+		return formatQuote(quote, language);
+	}
+
+	formatQuoteWithNumber(quote: Quote, number: number, language: SupportedLanguage = 'de'): string {
+		return formatQuoteWithNumber(quote, number, language);
 	}
 }
