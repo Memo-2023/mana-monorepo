@@ -1077,15 +1077,15 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5012
+      PORT: 5018
       PUBLIC_ZITARE_API_URL: http://zitare-backend:3007
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_ZITARE_API_URL_CLIENT: https://zitare-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
-      - "5012:5012"
+      - "5018:5018"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5012/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5018/health"]
       interval: 30s
       timeout: 10s
       retries: 3

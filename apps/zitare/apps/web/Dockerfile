@@ -88,16 +88,16 @@ COPY apps/zitare/apps/web/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 # Expose port
-EXPOSE 5012
+EXPOSE 5018
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=5012
+ENV PORT=5018
 ENV HOST=0.0.0.0
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:5012/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5018/health || exit 1
 
 # Run the app
 ENTRYPOINT ["/docker-entrypoint.sh"]
