@@ -829,7 +829,8 @@ services:
       start_period: 40s
 
   matrix-calendar-bot:
-    image: ghcr.io/memo-2023/matrix-calendar-bot:latest
+    image: matrix-calendar-bot:local
+    pull_policy: never
     platform: linux/amd64
     container_name: mana-matrix-bot-calendar
     restart: always
