@@ -262,26 +262,8 @@ class MatrixStore {
 				this._rooms = this._client!.getRooms();
 				console.log(`Matrix sync prepared, ${this._rooms.length} rooms loaded`);
 
-				// Restore last selected room
-				if (browser && !this._currentRoomId) {
-					const lastRoomId = localStorage.getItem(LAST_ROOM_KEY);
-					console.log(
-						`[Matrix] Restore check: lastRoomId=${lastRoomId}, rooms=${this._rooms.length}`
-					);
-					if (lastRoomId) {
-						// Check if room exists in loaded rooms
-						const roomExists = this._rooms.some((r) => r.roomId === lastRoomId);
-						console.log(`[Matrix] Room exists: ${roomExists}`);
-						if (roomExists) {
-							console.log(`[Matrix] Restoring room: ${lastRoomId}`);
-							this.selectRoom(lastRoomId);
-						}
-					}
-				} else {
-					console.log(
-						`[Matrix] Skip restore: browser=${browser}, currentRoomId=${this._currentRoomId}`
-					);
-				}
+				// Note: Last room restore is now handled in the /chat page component
+				// to support different behavior on mobile vs desktop
 			}
 
 			if (state === 'ERROR') {
@@ -482,7 +464,6 @@ class MatrixStore {
 	 * Select a room to view
 	 */
 	selectRoom(roomId: string) {
-		console.log(`[Matrix] selectRoom called: ${roomId}`);
 		this._currentRoomId = roomId;
 		const room = this._client?.getRoom(roomId);
 
@@ -498,10 +479,8 @@ class MatrixStore {
 			// Save last room to localStorage
 			if (browser) {
 				localStorage.setItem(LAST_ROOM_KEY, roomId);
-				console.log(`[Matrix] Saved to localStorage: ${roomId}`);
 			}
 		} else {
-			console.log(`[Matrix] Room not found by getRoom: ${roomId}`);
 			this._timeline = [];
 		}
 	}

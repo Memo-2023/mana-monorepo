@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import {
+		ArrowLeft,
 		List,
 		Phone,
 		VideoCamera,
@@ -18,9 +19,19 @@
 		onSearchClick?: () => void;
 		onVoiceCall?: () => void;
 		onVideoCall?: () => void;
+		showBackButton?: boolean;
+		onBackClick?: () => void;
 	}
 
-	let { onMenuClick, onInfoClick, onSearchClick, onVoiceCall, onVideoCall }: Props = $props();
+	let {
+		onMenuClick,
+		onInfoClick,
+		onSearchClick,
+		onVoiceCall,
+		onVideoCall,
+		showBackButton = false,
+		onBackClick,
+	}: Props = $props();
 
 	// Check if calls are possible (DMs only for now)
 	let canCall = $derived(matrixStore.currentSimpleRoom?.isDirect ?? false);
@@ -68,13 +79,23 @@
 	<header
 		class="flex items-center gap-3 border-b border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm px-4 py-3"
 	>
-		<!-- Mobile menu button -->
-		<button
-			class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors lg:hidden"
-			onclick={onMenuClick}
-		>
-			<List class="h-5 w-5" />
-		</button>
+		<!-- Mobile back button or menu button -->
+		{#if showBackButton}
+			<button
+				class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				onclick={onBackClick}
+				aria-label="Zurück"
+			>
+				<ArrowLeft class="h-5 w-5" />
+			</button>
+		{:else}
+			<button
+				class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors lg:hidden"
+				onclick={onMenuClick}
+			>
+				<List class="h-5 w-5" />
+			</button>
+		{/if}
 
 		<!-- Room avatar with online indicator -->
 		<div class="relative flex-shrink-0">
