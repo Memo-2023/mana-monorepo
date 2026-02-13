@@ -1,6 +1,6 @@
 # Build stage
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
-FROM node:20-slim AS builder
+FROM node:25-slim AS builder
 
 # Install pnpm and build tools for native modules (bcrypt)
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
@@ -32,7 +32,7 @@ RUN pnpm build
 
 # Production stage
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
-FROM node:20-slim AS production
+FROM node:25-slim AS production
 
 # Install pnpm and wget for health checks
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
