@@ -563,6 +563,35 @@ services:
       retries: 3
       start_period: 40s
 
+  zitare-backend:
+    build:
+      context: .
+      dockerfile: apps/zitare/apps/backend/Dockerfile
+    image: zitare-backend:local
+    container_name: mana-app-zitare-backend
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3007
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/zitare
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      CORS_ORIGINS: https://zitare.mana.how,https://mana.how
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+    ports:
+      - "3007:3007"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3007/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # ============================================
   # Tier 4: Matrix Stack (Ports 4000-4099)
   # ============================================
@@ -873,6 +902,8 @@ services:
     restart: always
     depends_on:
       synapse:
+        condition: service_healthy
+      zitare-backend:
         condition: service_healthy
     environment:
       NODE_ENV: production
