@@ -225,6 +225,56 @@ export async function sendVerificationEmail(
 }
 
 /**
+ * Send account deletion confirmation email
+ */
+export async function sendAccountDeletionEmail(email: string, userName?: string): Promise<boolean> {
+	const name = userName || email.split('@')[0];
+
+	return sendEmail({
+		to: email,
+		subject: 'Dein ManaCore-Konto wurde gelöscht',
+		html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #2563eb; margin: 0;">ManaCore</h1>
+  </div>
+
+  <p>Hallo ${name},</p>
+
+  <p>dein ManaCore-Konto und alle damit verbundenen Daten wurden erfolgreich gelöscht.</p>
+
+  <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0;">
+    <p style="margin: 0 0 10px 0; font-weight: 600;">Folgende Daten wurden entfernt:</p>
+    <ul style="margin: 0; padding-left: 20px; color: #666;">
+      <li>Benutzerprofil und Anmeldedaten</li>
+      <li>Alle Sessions und verknüpften Accounts</li>
+      <li>Credits und Transaktionshistorie</li>
+      <li>Daten in allen verbundenen Apps</li>
+    </ul>
+  </div>
+
+  <p style="color: #666;">Diese Aktion ist unwiderruflich. Falls du ManaCore erneut nutzen möchtest, kannst du jederzeit ein neues Konto erstellen.</p>
+
+  <p style="color: #666;">Bei Fragen erreichst du uns unter <a href="mailto:support@mana.how" style="color: #2563eb;">support@mana.how</a>.</p>
+
+  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+  <p style="color: #999; font-size: 12px; text-align: center;">
+    Diese E-Mail wurde automatisch von ManaCore gesendet.
+  </p>
+</body>
+</html>
+`,
+	});
+}
+
+/**
  * Send welcome/verification email
  */
 export async function sendWelcomeEmail(

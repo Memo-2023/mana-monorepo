@@ -339,6 +339,118 @@ export class UserDataService {
 	}
 
 	/**
+	 * Get full export data including sessions, security events, and transactions
+	 */
+	async getFullExportData(userId: string) {
+		const summary = await this.getUserDataSummary(userId);
+
+		// Get additional details for export
+		const [sessions, securityEvents, transactions] = await Promise.all([
+			this.getSessionHistory(userId),
+			this.getSecurityEvents(userId),
+			this.getTransactionHistory(userId),
+		]);
+
+		return {
+			...summary,
+			exportedAt: new Date().toISOString(),
+			exportVersion: '2.0',
+			sessions: {
+				active: sessions.filter((s) => !s.revokedAt && new Date(s.expiresAt) > new Date()),
+				history: sessions,
+			},
+			securityEvents,
+			creditTransactions: transactions,
+		};
+	}
+
+	/**
+	 * Get session history for a user
+	 */
+	private async getSessionHistory(userId: string) {
+		const db = this.getDatabase();
+
+		return db
+			.select({
+				id: schema.sessions.id,
+				createdAt: schema.sessions.createdAt,
+				expiresAt: schema.sessions.expiresAt,
+				lastActivityAt: schema.sessions.lastActivityAt,
+				ipAddress: schema.sessions.ipAddress,
+				userAgent: schema.sessions.userAgent,
+				deviceName: schema.sessions.deviceName,
+				revokedAt: schema.sessions.revokedAt,
+			})
+			.from(schema.sessions)
+			.where(eq(schema.sessions.userId, userId))
+			.orderBy(desc(schema.sessions.createdAt))
+			.limit(100);
+	}
+
+	/**
+	 * Get security events for a user
+	 */
+	private async getSecurityEvents(userId: string) {
+		const db = this.getDatabase();
+
+		return db
+			.select({
+				id: schema.securityEvents.id,
+				eventType: schema.securityEvents.eventType,
+				ipAddress: schema.securityEvents.ipAddress,
+				userAgent: schema.securityEvents.userAgent,
+				metadata: schema.securityEvents.metadata,
+				createdAt: schema.securityEvents.createdAt,
+			})
+			.from(schema.securityEvents)
+			.where(eq(schema.securityEvents.userId, userId))
+			.orderBy(desc(schema.securityEvents.createdAt))
+			.limit(100);
+	}
+
+	/**
+	 * Get transaction history for a user
+	 */
+	private async getTransactionHistory(userId: string) {
+		const db = this.getDatabase();
+
+		return db
+			.select({
+				id: schema.transactions.id,
+				type: schema.transactions.type,
+				status: schema.transactions.status,
+				amount: schema.transactions.amount,
+				balanceBefore: schema.transactions.balanceBefore,
+				balanceAfter: schema.transactions.balanceAfter,
+				appId: schema.transactions.appId,
+				description: schema.transactions.description,
+				createdAt: schema.transactions.createdAt,
+				completedAt: schema.transactions.completedAt,
+			})
+			.from(schema.transactions)
+			.where(eq(schema.transactions.userId, userId))
+			.orderBy(desc(schema.transactions.createdAt));
+	}
+
+	/**
+	 * Get user data for email (before deletion)
+	 */
+	async getUserForEmail(userId: string) {
+		const db = this.getDatabase();
+
+		const user = await db
+			.select({
+				email: schema.users.email,
+				name: schema.users.name,
+			})
+			.from(schema.users)
+			.where(eq(schema.users.id, userId))
+			.limit(1);
+
+		return user[0] || null;
+	}
+
+	/**
 	 * Query a single backend for user data
 	 */
 	private async queryBackend(config: ProjectConfig, userId: string): Promise<ProjectDataSummary> {

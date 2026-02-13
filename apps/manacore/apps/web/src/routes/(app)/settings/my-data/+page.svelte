@@ -149,6 +149,42 @@
 		{/if}
 	</div>
 
+	<!-- DSGVO Info Banner -->
+	<div
+		class="rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 p-4"
+	>
+		<div class="flex items-start gap-3">
+			<svg
+				class="h-5 w-5 text-blue-500 mt-0.5 shrink-0"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+			</svg>
+			<div class="flex-1">
+				<p class="text-sm text-blue-800 dark:text-blue-200">
+					Hier siehst du alle Daten, die wir uber dich speichern. Mehr Informationen findest du in
+					unserer
+					<a
+						href="https://mana.how/datenschutz"
+						target="_blank"
+						rel="noopener"
+						class="underline font-medium hover:text-blue-600"
+					>
+						Datenschutzerklarung
+					</a>. Wir verwenden <strong>keine Tracking-Cookies</strong> – unsere Analyse erfolgt vollstandig
+					anonym via Umami.
+				</p>
+			</div>
+		</div>
+	</div>
+
 	{#if loading}
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 			{#each Array(4) as _}
@@ -332,6 +368,46 @@
 				{/each}
 			</div>
 		</div>
+
+		<!-- Aufbewahrungsfristen -->
+		<Card>
+			<div class="p-6">
+				<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+					<svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
+					</svg>
+					Aufbewahrungsfristen
+				</h3>
+				<p class="text-sm text-muted-foreground mb-4">So lange speichern wir deine Daten:</p>
+				<div class="space-y-2 text-sm">
+					<div class="flex justify-between py-2 border-b">
+						<span>Benutzerkonto & Profil</span>
+						<span class="text-muted-foreground">Bis zur Loschung</span>
+					</div>
+					<div class="flex justify-between py-2 border-b">
+						<span>Sessions & Login-Historie</span>
+						<span class="text-muted-foreground">90 Tage nach Ablauf</span>
+					</div>
+					<div class="flex justify-between py-2 border-b">
+						<span>Credit-Transaktionen</span>
+						<span class="text-muted-foreground">10 Jahre (gesetzlich)</span>
+					</div>
+					<div class="flex justify-between py-2 border-b">
+						<span>Security-Logs</span>
+						<span class="text-muted-foreground">1 Jahr</span>
+					</div>
+					<div class="flex justify-between py-2">
+						<span>Projektdaten (Chat, Todo, etc.)</span>
+						<span class="text-muted-foreground">Bis zur Loschung</span>
+					</div>
+				</div>
+			</div>
+		</Card>
 
 		<!-- Danger Zone -->
 		<Card>
