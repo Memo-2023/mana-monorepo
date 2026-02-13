@@ -93,7 +93,10 @@ export class SessionService {
 		// 1. Try Redis first
 		if (this.useRedis()) {
 			const token = await this.redisProvider!.getToken(matrixUserId);
-			if (token) return token;
+			if (token) {
+				this.logger.debug(`Found token in Redis for ${matrixUserId}`);
+				return token;
+			}
 		}
 
 		// 2. Try in-memory cache
@@ -102,14 +105,19 @@ export class SessionService {
 			if (session.expiresAt < new Date()) {
 				this.sessions.delete(matrixUserId);
 			} else {
+				this.logger.debug(`Found token in memory for ${matrixUserId}`);
 				return session.token;
 			}
 		}
 
 		// 3. Try Matrix-SSO-Link (automatic login)
+		this.logger.debug(
+			`No cached token for ${matrixUserId}, trying SSO-Link (enabled: ${this.enableMatrixSsoLink}, hasServiceKey: ${!!this.serviceKey})`
+		);
 		if (this.enableMatrixSsoLink) {
 			const token = await this.fetchMatrixLinkedToken(matrixUserId);
 			if (token) {
+				this.logger.log(`Matrix-SSO-Link: auto-login successful for ${matrixUserId}`);
 				// Cache the token
 				await this.storeSession(matrixUserId, {
 					token,

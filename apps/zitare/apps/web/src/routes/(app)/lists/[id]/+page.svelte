@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { listsStore } from '$lib/stores/lists';
-	import type { QuoteList } from '$lib/stores/lists';
-	import { quotesDE, authorsDE } from '@zitare/shared';
+	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
+	import { listsStore, type QuoteList } from '$lib/stores/lists.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { quotesStore } from '$lib/stores/quotes.svelte';
+	import { toast } from '$lib/stores/toast.svelte';
+	import { QUOTES, type Quote } from '@zitare/content';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
-	import { toast } from '$lib/stores/toast';
+
+	const allQuotes = QUOTES;
 
 	let list = $state<QuoteList | null>(null);
+	let isLoading = $state(true);
 	let searchTerm = $state('');
 	let isSearchOpen = $state(false);
 	let showEditModal = $state(false);
@@ -14,55 +20,47 @@
 	let editName = $state('');
 	let editDescription = $state('');
 	let selectedQuoteIds = $state<Set<string>>(new Set());
-	let favorites = $state<Set<string>>(new Set());
 
-	// Load favorites from localStorage
-	if (typeof window !== 'undefined') {
-		const savedFavorites = localStorage.getItem('favorites');
-		if (savedFavorites) {
-			favorites = new Set(JSON.parse(savedFavorites));
-		}
-	}
-
-	// Subscribe to lists and find current list
-	listsStore.subscribe((lists) => {
+	// Load list on mount
+	$effect(() => {
 		const listId = $page.params.id;
-		const foundList = lists.find((l) => l.id === listId);
-		if (foundList) {
-			list = foundList;
+		if (listId) {
+			loadList(listId);
 		}
 	});
 
+	async function loadList(listId: string) {
+		if (!authStore.isAuthenticated) {
+			goto('/login');
+			return;
+		}
+
+		isLoading = true;
+		list = await listsStore.getList(listId);
+		isLoading = false;
+
+		if (!list) {
+			toast.error('Liste nicht gefunden');
+		}
+	}
+
 	// Get quotes in this list
-	let listQuotes = $derived(
-		list
-			? quotesDE
-					.filter((quote) => list.quoteIds.includes(quote.id))
-					.map((quote) => ({
-						...quote,
-						author: authorsDE.find((a) => a.id === quote.authorId),
-						isFavorite: favorites.has(quote.id),
-					}))
-			: []
+	let listQuotes = $derived<Quote[]>(
+		list ? allQuotes.filter((quote: Quote) => list!.quoteIds.includes(quote.id)) : []
 	);
 
 	// Filter quotes by search
-	let filteredQuotes = $derived(
+	let filteredQuotes = $derived<Quote[]>(
 		listQuotes.filter(
-			(quote) =>
-				quote.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				quote.author?.name.toLowerCase().includes(searchTerm.toLowerCase())
+			(quote: Quote) =>
+				quotesStore.getText(quote).toLowerCase().includes(searchTerm.toLowerCase()) ||
+				quote.author.toLowerCase().includes(searchTerm.toLowerCase())
 		)
 	);
 
-	// Get all available quotes (not in this list)
-	let availableQuotes = $derived(
-		quotesDE
-			.filter((quote) => !list?.quoteIds.includes(quote.id))
-			.map((quote) => ({
-				...quote,
-				author: authorsDE.find((a) => a.id === quote.authorId),
-			}))
+	// Get available quotes (not in this list)
+	let availableQuotes = $derived<Quote[]>(
+		allQuotes.filter((quote: Quote) => !list?.quoteIds.includes(quote.id))
 	);
 
 	function toggleSearch() {
@@ -84,22 +82,31 @@
 		showEditModal = false;
 	}
 
-	function handleUpdateList() {
+	async function handleUpdateList() {
 		if (list && editName.trim()) {
-			listsStore.updateList(list.id, {
+			const updated = await listsStore.updateList(list.id, {
 				name: editName.trim(),
 				description: editDescription.trim() || undefined,
 			});
-			toast.success('Liste aktualisiert!');
-			closeEditModal();
+			if (updated) {
+				list = updated;
+				toast.success('Liste aktualisiert!');
+				closeEditModal();
+			} else {
+				toast.error('Fehler beim Aktualisieren');
+			}
 		}
 	}
 
-	function handleDeleteList() {
+	async function handleDeleteList() {
 		if (list && confirm('Möchtest du diese Liste wirklich löschen?')) {
-			listsStore.deleteList(list.id);
-			toast.info('Liste gelöscht');
-			window.location.href = '/lists';
+			const success = await listsStore.deleteList(list.id);
+			if (success) {
+				toast.info('Liste gelöscht');
+				goto('/lists');
+			} else {
+				toast.error('Fehler beim Löschen');
+			}
 		}
 	}
 
@@ -122,47 +129,38 @@
 		selectedQuoteIds = new Set(selectedQuoteIds);
 	}
 
-	function handleAddQuotes() {
+	async function handleAddQuotes() {
 		if (list) {
 			const count = selectedQuoteIds.size;
-			selectedQuoteIds.forEach((quoteId) => {
-				listsStore.addQuoteToList(list.id, quoteId);
-			});
-			toast.success(`${count} ${count === 1 ? 'Zitat' : 'Zitate'} hinzugefügt!`);
+			let successCount = 0;
+			for (const quoteId of selectedQuoteIds) {
+				const success = await listsStore.addQuoteToList(list.id, quoteId);
+				if (success) successCount++;
+			}
+			if (successCount > 0) {
+				// Reload list to get updated quote IDs
+				list = await listsStore.getList(list.id);
+				toast.success(`${successCount} ${successCount === 1 ? 'Zitat' : 'Zitate'} hinzugefügt!`);
+			}
 			closeAddQuotesModal();
 		}
 	}
 
-	function handleRemoveQuote(quoteId: string) {
+	async function handleRemoveQuote(quoteId: string) {
 		if (list && confirm('Zitat aus dieser Liste entfernen?')) {
-			listsStore.removeQuoteFromList(list.id, quoteId);
-			toast.info('Zitat entfernt');
+			const success = await listsStore.removeQuoteFromList(list.id, quoteId);
+			if (success) {
+				// Reload list to get updated quote IDs
+				list = await listsStore.getList(list.id);
+				toast.info('Zitat entfernt');
+			} else {
+				toast.error('Fehler beim Entfernen');
+			}
 		}
 	}
 
-	function handleToggleFavorite(event: CustomEvent) {
-		const { quoteId } = event.detail;
-		if (favorites.has(quoteId)) {
-			favorites.delete(quoteId);
-		} else {
-			favorites.add(quoteId);
-		}
-		favorites = new Set(favorites);
-
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('favorites', JSON.stringify([...favorites]));
-		}
-	}
-
-	function handleAuthorClick(event: CustomEvent) {
-		const { authorId } = event.detail;
-		if (authorId) {
-			window.location.href = `/authors/${authorId}`;
-		}
-	}
-
-	function formatDate(timestamp: number): string {
-		return new Date(timestamp).toLocaleDateString('de-DE', {
+	function formatDate(dateStr: string): string {
+		return new Date(dateStr).toLocaleDateString('de-DE', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',
@@ -171,10 +169,15 @@
 </script>
 
 <svelte:head>
-	<title>{list?.name || 'Liste'} - Quotes Web App</title>
+	<title>{list?.name || 'Liste'} - Zitare</title>
 </svelte:head>
 
-{#if !list}
+{#if isLoading}
+	<div class="loading-state">
+		<div class="spinner"></div>
+		<p>{$_('common.loading')}</p>
+	</div>
+{:else if !list}
 	<div class="error-state">
 		<h2>Liste nicht gefunden</h2>
 		<p>Diese Liste existiert nicht oder wurde gelöscht.</p>
@@ -324,11 +327,7 @@
 			<div class="quotes-grid">
 				{#each filteredQuotes as quote (quote.id)}
 					<div class="quote-wrapper">
-						<QuoteCard
-							{quote}
-							on:toggleFavorite={handleToggleFavorite}
-							on:authorClick={handleAuthorClick}
-						/>
+						<QuoteCard {quote} />
 						<button
 							class="remove-btn"
 							onclick={() => handleRemoveQuote(quote.id)}
@@ -359,8 +358,8 @@
 
 <!-- Edit List Modal -->
 {#if showEditModal}
-	<div class="modal-overlay" onclick={closeEditModal}>
-		<div class="modal" onclick={(e) => e.stopPropagation()}>
+	<div class="modal-overlay" onclick={closeEditModal} role="presentation">
+		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
 			<div class="modal-header">
 				<h3>Liste bearbeiten</h3>
 				<button class="close-btn" onclick={closeEditModal} aria-label="Schließen">
@@ -423,8 +422,13 @@
 
 <!-- Add Quotes Modal -->
 {#if showAddQuotesModal}
-	<div class="modal-overlay" onclick={closeAddQuotesModal}>
-		<div class="modal modal-large" onclick={(e) => e.stopPropagation()}>
+	<div class="modal-overlay" onclick={closeAddQuotesModal} role="presentation">
+		<div
+			class="modal modal-large"
+			onclick={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+		>
 			<div class="modal-header">
 				<h3>Zitate hinzufügen</h3>
 				<button class="close-btn" onclick={closeAddQuotesModal} aria-label="Schließen">
@@ -448,8 +452,8 @@
 							onchange={() => toggleQuoteSelection(quote.id)}
 						/>
 						<div class="quote-preview">
-							<p class="quote-text">"{quote.text}"</p>
-							<p class="quote-author">— {quote.author?.name || 'Unknown'}</p>
+							<p class="quote-text">"{quotesStore.getText(quote)}"</p>
+							<p class="quote-author">— {quote.author}</p>
 						</div>
 					</label>
 				{/each}
@@ -479,6 +483,30 @@
 		max-width: 1200px;
 		margin: 0 auto;
 		padding-bottom: var(--spacing-2xl);
+	}
+
+	.loading-state,
+	.error-state {
+		max-width: 500px;
+		margin: var(--spacing-2xl) auto;
+		text-align: center;
+		padding: var(--spacing-2xl);
+	}
+
+	.spinner {
+		width: 40px;
+		height: 40px;
+		border: 3px solid rgb(var(--color-border));
+		border-top-color: rgb(var(--color-primary));
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin: 0 auto var(--spacing-md);
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.header-container {
@@ -633,9 +661,9 @@
 		justify-content: center;
 		gap: var(--spacing-xs);
 		padding: var(--spacing-xs) var(--spacing-sm);
-		background: rgba(var(--color-error), 0.1);
-		color: rgb(var(--color-error));
-		border: 1px solid rgba(var(--color-error), 0.3);
+		background: rgba(239, 68, 68, 0.1);
+		color: rgb(239, 68, 68);
+		border: 1px solid rgba(239, 68, 68, 0.3);
 		border-radius: var(--radius-md);
 		font-size: 0.875rem;
 		font-weight: 500;
@@ -651,8 +679,8 @@
 	}
 
 	.remove-btn:hover {
-		background: rgba(var(--color-error), 0.2);
-		border-color: rgba(var(--color-error), 0.5);
+		background: rgba(239, 68, 68, 0.2);
+		border-color: rgba(239, 68, 68, 0.5);
 	}
 
 	/* Empty State */
@@ -694,29 +722,12 @@
 		cursor: pointer;
 		transition: all var(--transition-base);
 		box-shadow: var(--shadow-md);
+		text-decoration: none;
 	}
 
 	.cta-button:hover {
 		transform: translateY(-2px);
 		box-shadow: var(--shadow-lg);
-	}
-
-	/* Error State */
-	.error-state {
-		max-width: 500px;
-		margin: var(--spacing-2xl) auto;
-		text-align: center;
-		padding: var(--spacing-2xl);
-	}
-
-	.error-state h2 {
-		font-size: 1.5rem;
-		margin-bottom: var(--spacing-sm);
-	}
-
-	.error-state p {
-		color: rgb(var(--color-text-secondary));
-		margin-bottom: var(--spacing-xl);
 	}
 
 	/* Floating Results */
@@ -735,18 +746,6 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		z-index: 20;
-		animation: fadeInUp 0.3s ease;
-	}
-
-	@keyframes fadeInUp {
-		from {
-			opacity: 0;
-			transform: translate(-50%, 10px);
-		}
-		to {
-			opacity: 1;
-			transform: translate(-50%, 0);
-		}
 	}
 
 	/* Modal Styles */
@@ -760,16 +759,6 @@
 		justify-content: center;
 		z-index: 50;
 		padding: var(--spacing-lg);
-		animation: fadeIn 0.2s ease;
-	}
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
 	}
 
 	.modal {
@@ -778,7 +767,6 @@
 		max-width: 500px;
 		width: 100%;
 		box-shadow: var(--shadow-xl);
-		animation: slideUp 0.3s ease;
 		max-height: 90vh;
 		display: flex;
 		flex-direction: column;
@@ -786,17 +774,6 @@
 
 	.modal-large {
 		max-width: 700px;
-	}
-
-	@keyframes slideUp {
-		from {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
 	}
 
 	.modal-header {
@@ -921,9 +898,9 @@
 		align-items: center;
 		gap: var(--spacing-sm);
 		padding: var(--spacing-sm) var(--spacing-md);
-		background: rgba(var(--color-error), 0.1);
-		color: rgb(var(--color-error));
-		border: 1px solid rgba(var(--color-error), 0.3);
+		background: rgba(239, 68, 68, 0.1);
+		color: rgb(239, 68, 68);
+		border: 1px solid rgba(239, 68, 68, 0.3);
 		border-radius: var(--radius-md);
 		font-weight: 500;
 		cursor: pointer;
@@ -934,8 +911,8 @@
 	}
 
 	.danger-btn:hover {
-		background: rgba(var(--color-error), 0.2);
-		border-color: rgba(var(--color-error), 0.5);
+		background: rgba(239, 68, 68, 0.2);
+		border-color: rgba(239, 68, 68, 0.5);
 	}
 
 	.modal-footer {
@@ -1005,15 +982,6 @@
 
 		h2 {
 			font-size: 1.5rem;
-		}
-
-		.header-actions {
-			flex-direction: column;
-		}
-
-		.icon-btn {
-			width: 2.25rem;
-			height: 2.25rem;
 		}
 
 		.quotes-grid {

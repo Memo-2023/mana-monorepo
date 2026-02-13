@@ -1,0 +1,73 @@
+{
+	"app": {
+		"name": "Zitare",
+		"tagline": "Inspirierende Zitate jeden Tag"
+	},
+	"nav": {
+		"home": "Heute",
+		"categories": "Kategorien",
+		"favorites": "Favoriten",
+		"lists": "Listen",
+		"search": "Suche",
+		"settings": "Einstellungen",
+		"feedback": "Feedback"
+	},
+	"home": {
+		"dailyQuote": "Zitat des Tages",
+		"newQuote": "Neues Zitat",
+		"share": "Teilen",
+		"favorite": "Favorit",
+		"unfavorite": "Entfernen",
+		"source": "Quelle",
+		"year": "Jahr"
+	},
+	"categories": {
+		"title": "Kategorien",
+		"wisdom": "Weisheit",
+		"motivation": "Motivation",
+		"love": "Liebe",
+		"life": "Leben",
+		"success": "Erfolg",
+		"happiness": "Glück",
+		"friendship": "Freundschaft",
+		"courage": "Mut",
+		"hope": "Hoffnung",
+		"nature": "Natur",
+		"quotes": "{count} Zitate"
+	},
+	"favorites": {
+		"title": "Favoriten",
+		"empty": "Noch keine Favoriten",
+		"emptyDescription": "Tippe auf das Herz-Symbol, um Zitate zu speichern"
+	},
+	"lists": {
+		"title": "Meine Listen",
+		"create": "Neue Liste",
+		"empty": "Noch keine Listen",
+		"emptyDescription": "Erstelle Listen, um Zitate zu organisieren"
+	},
+	"search": {
+		"title": "Suche",
+		"placeholder": "Zitat oder Autor suchen...",
+		"noResults": "Keine Ergebnisse",
+		"results": "{count} Ergebnisse"
+	},
+	"auth": {
+		"login": "Anmelden",
+		"logout": "Abmelden",
+		"register": "Registrieren"
+	},
+	"feedback": {
+		"title": "Feedback & Vorschläge",
+		"subtitle": "Teile deine Ideen und stimme für Feature-Wünsche ab"
+	},
+	"common": {
+		"loading": "Laden...",
+		"error": "Ein Fehler ist aufgetreten",
+		"retry": "Erneut versuchen",
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"delete": "Löschen",
+		"edit": "Bearbeiten"
+	}
+}

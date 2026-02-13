@@ -1,0 +1,16 @@
+{
+	"name": "Zitare",
+	"short_name": "Zitare",
+	"description": "Inspirierende Zitate jeden Tag",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#1a1a2e",
+	"theme_color": "#8b5cf6",
+	"icons": [
+		{
+			"src": "/favicon.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		}
+	]
+}

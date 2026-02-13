@@ -1,0 +1,73 @@
+{
+	"app": {
+		"name": "Zitare",
+		"tagline": "Inspiring quotes every day"
+	},
+	"nav": {
+		"home": "Today",
+		"categories": "Categories",
+		"favorites": "Favorites",
+		"lists": "Lists",
+		"search": "Search",
+		"settings": "Settings",
+		"feedback": "Feedback"
+	},
+	"home": {
+		"dailyQuote": "Quote of the Day",
+		"newQuote": "New Quote",
+		"share": "Share",
+		"favorite": "Favorite",
+		"unfavorite": "Remove",
+		"source": "Source",
+		"year": "Year"
+	},
+	"categories": {
+		"title": "Categories",
+		"wisdom": "Wisdom",
+		"motivation": "Motivation",
+		"love": "Love",
+		"life": "Life",
+		"success": "Success",
+		"happiness": "Happiness",
+		"friendship": "Friendship",
+		"courage": "Courage",
+		"hope": "Hope",
+		"nature": "Nature",
+		"quotes": "{count} quotes"
+	},
+	"favorites": {
+		"title": "Favorites",
+		"empty": "No favorites yet",
+		"emptyDescription": "Tap the heart icon to save quotes"
+	},
+	"lists": {
+		"title": "My Lists",
+		"create": "New List",
+		"empty": "No lists yet",
+		"emptyDescription": "Create lists to organize quotes"
+	},
+	"search": {
+		"title": "Search",
+		"placeholder": "Search quotes or authors...",
+		"noResults": "No results",
+		"results": "{count} results"
+	},
+	"auth": {
+		"login": "Sign In",
+		"logout": "Sign Out",
+		"register": "Sign Up"
+	},
+	"feedback": {
+		"title": "Feedback & Suggestions",
+		"subtitle": "Share your ideas and vote for feature requests"
+	},
+	"common": {
+		"loading": "Loading...",
+		"error": "An error occurred",
+		"retry": "Try again",
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit"
+	}
+}
