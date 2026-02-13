@@ -137,8 +137,9 @@ export class SessionService {
 		}
 
 		try {
+			// Note: mana-core-auth has double prefix due to global prefix + controller prefix
 			const response = await fetch(
-				`${this.authUrl}/api/v1/auth/matrix-session/${encodeURIComponent(matrixUserId)}`,
+				`${this.authUrl}/api/v1/api/v1/auth/matrix-session/${encodeURIComponent(matrixUserId)}`,
 				{
 					headers: {
 						'X-Service-Key': this.serviceKey,
@@ -247,7 +248,8 @@ export class SessionService {
 		email: string
 	): Promise<void> {
 		try {
-			const response = await fetch(`${this.authUrl}/api/v1/auth/matrix-user-links`, {
+			// Note: mana-core-auth has double prefix due to global prefix + controller prefix
+			const response = await fetch(`${this.authUrl}/api/v1/api/v1/auth/matrix-user-links`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
