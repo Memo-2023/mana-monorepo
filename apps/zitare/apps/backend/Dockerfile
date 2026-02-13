@@ -76,8 +76,8 @@ WORKDIR /app/apps/zitare/apps/backend
 EXPOSE 3007
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3007/api/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3007/health || exit 1
 
 # Run entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]
