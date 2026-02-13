@@ -221,6 +221,9 @@ export class SessionService {
 
 			await this.storeSession(matrixUserId, session);
 
+			// Store persistent link in mana-core-auth for future auto-login
+			await this.createMatrixUserLink(matrixUserId, token, email);
+
 			this.logger.log(`User ${matrixUserId} logged in as ${email}`);
 			return { success: true, email };
 		} catch (error) {
@@ -229,6 +232,41 @@ export class SessionService {
 				success: false,
 				error: 'Verbindung zum Auth-Server fehlgeschlagen',
 			};
+		}
+	}
+
+	/**
+	 * Create a persistent link between Matrix user ID and Mana account
+	 *
+	 * This allows the bot to auto-authenticate the user in the future
+	 * without requiring another !login command.
+	 */
+	private async createMatrixUserLink(
+		matrixUserId: string,
+		token: string,
+		email: string
+	): Promise<void> {
+		try {
+			const response = await fetch(`${this.authUrl}/api/v1/auth/matrix-user-links`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ matrixUserId, email }),
+			});
+
+			if (response.ok) {
+				this.logger.log(`Matrix-SSO-Link: created link for ${matrixUserId}`);
+			} else {
+				// Non-critical - log but don't fail the login
+				this.logger.debug(
+					`Matrix-SSO-Link: failed to create link for ${matrixUserId}: ${response.status}`
+				);
+			}
+		} catch (error) {
+			// Non-critical - log but don't fail the login
+			this.logger.debug(`Matrix-SSO-Link: error creating link for ${matrixUserId}: ${error}`);
 		}
 	}
 
