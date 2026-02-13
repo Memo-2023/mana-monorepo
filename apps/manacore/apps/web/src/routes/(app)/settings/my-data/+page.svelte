@@ -172,7 +172,7 @@
 					Hier siehst du alle Daten, die wir uber dich speichern. Mehr Informationen findest du in
 					unserer
 					<a
-						href="https://mana.how/datenschutz"
+						href="https://manacore-landing.pages.dev/datenschutz"
 						target="_blank"
 						rel="noopener"
 						class="underline font-medium hover:text-blue-600"

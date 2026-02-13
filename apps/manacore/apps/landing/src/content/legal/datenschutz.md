@@ -1,7 +1,7 @@
 ---
 title: Datenschutzerklärung
-description: Informationen zum Datenschutz und zur Verarbeitung personenbezogener Daten bei Mana
-lastUpdated: 2024-01-15
+description: Informationen zum Datenschutz und zur Verarbeitung personenbezogener Daten bei ManaCore
+lastUpdated: 2026-02-13
 order: 1
 ---
 
@@ -42,10 +42,15 @@ Sie haben jederzeit das Recht auf:
 
 ### Hosting
 
-Unsere Website und Services werden auf Servern in Deutschland gehostet. Dies gewährleistet, dass Ihre Daten innerhalb der EU verarbeitet werden und den strengen deutschen Datenschutzbestimmungen unterliegen.
+Unsere Website und Services werden auf eigenen Servern in Deutschland gehostet. Dies gewährleistet, dass Ihre Daten innerhalb der EU verarbeitet werden und den strengen deutschen Datenschutzbestimmungen unterliegen.
 
-**Server-Standort:** Frankfurt am Main, Deutschland
-**Sicherheit:** SSL-Verschlüsselung, regelmäßige Backups, Firewall-Schutz
+**Primärer Server-Standort:** Deutschland (eigene Infrastruktur)
+**CDN:** Cloudflare (für statische Inhalte und DDoS-Schutz)
+**Sicherheit:** SSL/TLS-Verschlüsselung, regelmäßige Backups, Firewall-Schutz
+
+### Cloudflare
+
+Wir nutzen Cloudflare als Content Delivery Network und für DDoS-Schutz. Cloudflare kann dabei technische Daten (IP-Adresse, Browser-Informationen) verarbeiten. Details finden Sie in der Datenschutzerklärung von Cloudflare: https://www.cloudflare.com/de-de/privacypolicy/
 
 ## 3. Allgemeine Hinweise und Pflichtinformationen
 
@@ -63,7 +68,7 @@ Mana Systems GmbH
 Deutschland
 
 Telefon: [Telefonnummer]  
-E-Mail: datenschutz@mana.ai
+E-Mail: datenschutz@mana.how
 
 ### Speicherdauer
 
@@ -104,15 +109,6 @@ Bei der Nutzung von KI-Tools über Mana:
 - Ihre Eingaben werden NICHT für das Training von KI-Modellen verwendet
 - Temporäre Speicherung nur zur Servicebereitstellung
 - Automatische Löschung nach Verarbeitung
-
-### Memoro App
-
-Bei Nutzung der Memoro-App:
-
-- Audio-Aufnahmen werden verschlüsselt übertragen
-- Transkripte werden in Ihrem Account gespeichert
-- Sie haben volle Kontrolle über Ihre Aufnahmen
-- Löschung jederzeit möglich
 
 ## 5. Zahlungsdaten
 
@@ -161,11 +157,14 @@ Wir verwenden nur technisch notwendige Cookies für:
 
 ### Analytics
 
-Wir verwenden datenschutzfreundliche Analytics-Tools:
+Wir verwenden Umami als datenschutzfreundliches Analytics-Tool:
 
-- Anonymisierte IP-Adressen
-- Kein Cross-Site-Tracking
-- Opt-Out möglich
+- **Keine Cookies** - Umami verwendet keine Tracking-Cookies
+- **Anonymisierte Daten** - Keine persönlichen Daten werden erfasst
+- **EU-konform** - Selbst gehostet auf eigenen Servern in Deutschland
+- **Kein Cross-Site-Tracking** - Keine Weitergabe an Dritte
+
+Durch den Verzicht auf Cookies ist keine Cookie-Einwilligung erforderlich.
 
 ## 8. Ihre Rechte
 
@@ -248,7 +247,7 @@ Wir behalten uns vor, diese Datenschutzerklärung anzupassen. Die aktuelle Versi
 
 Bei Fragen zum Datenschutz erreichen Sie uns unter:
 
-**E-Mail:** datenschutz@mana.ai  
+**E-Mail:** datenschutz@mana.how  
 **Telefon:** [Telefonnummer]  
 **Post:** Mana Systems GmbH, Datenschutz, [Adresse]
 
@@ -258,4 +257,4 @@ Unser Datenschutzbeauftragter:
 
 ---
 
-_Stand: Januar 2024_
+_Stand: Februar 2026_
