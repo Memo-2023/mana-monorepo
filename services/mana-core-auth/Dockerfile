@@ -2,8 +2,9 @@
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
 FROM node:20-slim AS builder
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# Install pnpm and build tools for native modules (bcrypt)
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -18,8 +19,8 @@ COPY packages/shared-storage ./packages/shared-storage
 # Copy mana-core-auth
 COPY services/mana-core-auth ./services/mana-core-auth
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# Install dependencies (without ignore-scripts to build native modules like bcrypt)
+RUN pnpm install --frozen-lockfile
 
 # Build shared-storage first
 WORKDIR /app/packages/shared-storage
