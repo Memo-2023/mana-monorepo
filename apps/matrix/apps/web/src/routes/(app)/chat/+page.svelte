@@ -236,7 +236,7 @@
 	{#if !sidebarOpen}
 		<button
 			onclick={toggleSidebar}
-			class="fixed bottom-20 left-4 z-30 lg:hidden flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
+			class="fixed bottom-24 left-4 z-[100] lg:hidden flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
 			aria-label="Chats anzeigen"
 		>
 			<List class="h-6 w-6" weight="bold" />
