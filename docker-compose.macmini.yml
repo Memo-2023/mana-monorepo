@@ -943,7 +943,10 @@ services:
   # ============================================
 
   mana-web:
-    image: ghcr.io/memo-2023/manacore-web:latest
+    build:
+      context: .
+      dockerfile: apps/manacore/apps/web/Dockerfile
+    image: manacore-web:local
     container_name: mana-app-web
     restart: always
     depends_on:
