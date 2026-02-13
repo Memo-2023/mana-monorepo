@@ -155,25 +155,45 @@ Daten von Umami Analytics (self-hosted).`;
 
 	private async sendStats(roomId: string) {
 		await this.sendMessage(roomId, '📊 Lade Statistiken...');
-		const report = await this.analyticsService.generateStatsOverview();
-		await this.sendMessage(roomId, report);
+		try {
+			const report = await this.analyticsService.generateStatsOverview();
+			await this.sendMessage(roomId, report);
+		} catch (error) {
+			this.logger.error('Failed to generate stats overview:', error);
+			await this.sendMessage(roomId, `❌ Fehler beim Laden der Statistiken: ${error instanceof Error ? error.message : String(error)}`);
+		}
 	}
 
 	private async sendToday(roomId: string) {
 		await this.sendMessage(roomId, '📊 Lade heutige Statistiken...');
-		const report = await this.analyticsService.generateDailyReport();
-		await this.sendMessage(roomId, report);
+		try {
+			const report = await this.analyticsService.generateDailyReport();
+			await this.sendMessage(roomId, report);
+		} catch (error) {
+			this.logger.error('Failed to generate daily report:', error);
+			await this.sendMessage(roomId, `❌ Fehler beim Laden: ${error instanceof Error ? error.message : String(error)}`);
+		}
 	}
 
 	private async sendWeek(roomId: string) {
 		await this.sendMessage(roomId, '📊 Lade Wochenstatistiken...');
-		const report = await this.analyticsService.generateWeeklyReport();
-		await this.sendMessage(roomId, report);
+		try {
+			const report = await this.analyticsService.generateWeeklyReport();
+			await this.sendMessage(roomId, report);
+		} catch (error) {
+			this.logger.error('Failed to generate weekly report:', error);
+			await this.sendMessage(roomId, `❌ Fehler beim Laden: ${error instanceof Error ? error.message : String(error)}`);
+		}
 	}
 
 	private async sendRealtime(roomId: string) {
-		const report = await this.analyticsService.generateRealtimeReport();
-		await this.sendMessage(roomId, report);
+		try {
+			const report = await this.analyticsService.generateRealtimeReport();
+			await this.sendMessage(roomId, report);
+		} catch (error) {
+			this.logger.error('Failed to generate realtime report:', error);
+			await this.sendMessage(roomId, `❌ Fehler beim Laden: ${error instanceof Error ? error.message : String(error)}`);
+		}
 	}
 
 	private async sendUsers(roomId: string) {

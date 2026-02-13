@@ -30,11 +30,18 @@ export class UmamiService implements OnModuleInit {
 	}
 
 	async onModuleInit() {
-		await this.authenticate();
+		try {
+			await this.authenticate();
+		} catch (error) {
+			this.logger.warn('Initial Umami auth failed, will retry on first request');
+		}
 	}
 
 	private async authenticate(): Promise<void> {
 		try {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 10000);
+
 			const response = await fetch(`${this.apiUrl}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -42,10 +49,13 @@ export class UmamiService implements OnModuleInit {
 					username: this.username,
 					password: this.password,
 				}),
+				signal: controller.signal,
 			});
 
+			clearTimeout(timeoutId);
+
 			if (!response.ok) {
-				throw new Error(`Auth failed: ${response.status}`);
+				throw new Error(`Umami auth failed: ${response.status}`);
 			}
 
 			const data = await response.json();
@@ -53,34 +63,51 @@ export class UmamiService implements OnModuleInit {
 			this.logger.log('Umami authenticated successfully');
 		} catch (error) {
 			this.logger.error('Failed to authenticate with Umami:', error);
+			this.accessToken = null;
+			throw error instanceof Error ? error : new Error('Umami authentication failed');
 		}
 	}
 
-	private async request<T>(endpoint: string): Promise<T | null> {
+	private async request<T>(endpoint: string, retryCount = 0): Promise<T | null> {
 		if (!this.accessToken) {
 			await this.authenticate();
 		}
 
+		if (!this.accessToken) {
+			throw new Error('Umami nicht authentifiziert - prüfe UMAMI_API_URL und Credentials');
+		}
+
 		try {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
 			const response = await fetch(`${this.apiUrl}${endpoint}`, {
 				headers: {
 					Authorization: `Bearer ${this.accessToken}`,
 				},
+				signal: controller.signal,
 			});
 
-			if (response.status === 401) {
+			clearTimeout(timeoutId);
+
+			if (response.status === 401 && retryCount < 1) {
+				this.accessToken = null;
 				await this.authenticate();
-				return this.request(endpoint);
+				return this.request(endpoint, retryCount + 1);
 			}
 
 			if (!response.ok) {
-				throw new Error(`Request failed: ${response.status}`);
+				throw new Error(`Umami API Fehler: ${response.status}`);
 			}
 
 			return response.json();
 		} catch (error) {
+			if (error instanceof Error && error.name === 'AbortError') {
+				this.logger.error(`Umami request timeout: ${endpoint}`);
+				throw new Error('Umami API Timeout - Server nicht erreichbar?');
+			}
 			this.logger.error(`Umami request failed: ${endpoint}`, error);
-			return null;
+			throw error;
 		}
 	}
 

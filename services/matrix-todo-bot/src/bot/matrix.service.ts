@@ -6,11 +6,16 @@ import {
 	MatrixRoomEvent,
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
+	handleCreditCommand,
+	handleGiftCommand,
+	type CreditCommandsHost,
+	type GiftCommandsHost,
 } from '@manacore/matrix-bot-common';
 import {
 	TranscriptionService,
 	SessionService,
 	CreditService,
+	GiftService,
 	TodoApiService,
 	Task as ApiTask,
 	I18nService,
@@ -26,7 +31,12 @@ const TASK_CREATE_CREDITS = 0.02;
 type Task = ApiTask;
 
 @Injectable()
-export class MatrixService extends BaseMatrixService {
+export class MatrixService extends BaseMatrixService implements CreditCommandsHost, GiftCommandsHost {
+	// Expose services for credit and gift commands mixins
+	public creditService: CreditService;
+	public giftService: GiftService;
+	public i18nService: I18nService;
+	public sessionService: SessionService;
 	private readonly keywordDetector = new KeywordCommandDetector(
 		[
 			...COMMON_KEYWORDS,
@@ -55,6 +65,9 @@ export class MatrixService extends BaseMatrixService {
 			{ keywords: ['login', 'anmelden'], command: 'login' },
 			{ keywords: ['logout', 'abmelden'], command: 'logout' },
 			{ keywords: ['sprache', 'language', 'lang'], command: 'language' },
+			{ keywords: ['credits', 'guthaben', 'kontostand'], command: 'credits' },
+			{ keywords: ['packages', 'pakete', 'preise'], command: 'packages' },
+			{ keywords: ['kaufen', 'buy'], command: 'buy' },
 		],
 		{ partialMatch: true }
 	);
@@ -63,12 +76,58 @@ export class MatrixService extends BaseMatrixService {
 		configService: ConfigService,
 		private todoApiService: TodoApiService,
 		private transcriptionService: TranscriptionService,
-		private sessionService: SessionService,
-		private creditService: CreditService,
-		private i18nService: I18nService
+		sessionService: SessionService,
+		creditService: CreditService,
+		giftService: GiftService,
+		i18nService: I18nService
 	) {
 		super(configService);
+		// Assign to public properties for credit and gift commands mixins
+		this.sessionService = sessionService;
+		this.creditService = creditService;
+		this.giftService = giftService;
+		this.i18nService = i18nService;
 	}
+
+	// ============================================================================
+	// CreditCommandsHost interface implementation
+	// ============================================================================
+
+	/**
+	 * Send a credit message (delegates to protected sendMessage)
+	 */
+	async sendCreditMessage(roomId: string, message: string): Promise<void> {
+		await this.sendMessage(roomId, message);
+	}
+
+	/**
+	 * Send a credit reply (delegates to protected sendReply)
+	 */
+	async sendCreditReply(roomId: string, event: MatrixRoomEvent, message: string): Promise<void> {
+		await this.sendReply(roomId, event, message);
+	}
+
+	// ============================================================================
+	// GiftCommandsHost interface implementation
+	// ============================================================================
+
+	/**
+	 * Send a gift message (delegates to protected sendMessage)
+	 */
+	async sendGiftMessage(roomId: string, message: string): Promise<void> {
+		await this.sendMessage(roomId, message);
+	}
+
+	/**
+	 * Send a gift reply (delegates to protected sendReply)
+	 */
+	async sendGiftReply(roomId: string, event: MatrixRoomEvent, message: string): Promise<void> {
+		await this.sendReply(roomId, event, message);
+	}
+
+	// ============================================================================
+	// Private helpers
+	// ============================================================================
 
 	/**
 	 * Check if user is logged in and has a valid token for API access
@@ -164,6 +223,20 @@ export class MatrixService extends BaseMatrixService {
 		'language',
 		'sprache',
 		'lang',
+		// Credit commands
+		'credits',
+		'guthaben',
+		'packages',
+		'pakete',
+		'buy',
+		'kaufen',
+		// Gift commands
+		'geschenk',
+		'gift',
+		'einloesen',
+		'redeem',
+		'meine-geschenke',
+		'my-gifts',
 	];
 
 	protected async handleTextMessage(
@@ -333,6 +406,16 @@ export class MatrixService extends BaseMatrixService {
 		command: string,
 		args: string
 	) {
+		// Handle credit commands first (credits, packages, buy)
+		if (await handleCreditCommand(this, roomId, event, userId, command, args)) {
+			return;
+		}
+
+		// Handle gift commands (geschenk, einloesen, meine-geschenke)
+		if (await handleGiftCommand(this, roomId, event, userId, command, args)) {
+			return;
+		}
+
 		switch (command) {
 			case 'help':
 			case 'hilfe':

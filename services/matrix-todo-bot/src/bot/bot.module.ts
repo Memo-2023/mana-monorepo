@@ -5,6 +5,7 @@ import {
 	TranscriptionModule,
 	SessionModule,
 	CreditModule,
+	GiftModule,
 	TodoApiService,
 	I18nModule,
 } from '@manacore/bot-services';
@@ -25,6 +26,7 @@ const todoApiServiceProvider = {
 		TranscriptionModule.forRoot(),
 		SessionModule.forRoot({ storageMode: 'redis' }),
 		CreditModule.forRoot(),
+		GiftModule.forRoot(),
 		I18nModule.forRoot(),
 	],
 	providers: [MatrixService, todoApiServiceProvider],
