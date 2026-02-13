@@ -42,6 +42,10 @@ export interface TodoAppSettings extends Record<string, unknown> {
 
 	// Immersive Mode
 	immersiveModeEnabled: boolean;
+
+	// Navigation UI
+	pillNavCollapsed: boolean;
+	filterStripCollapsed: boolean;
 }
 
 const DEFAULT_SETTINGS: TodoAppSettings = {
@@ -76,6 +80,10 @@ const DEFAULT_SETTINGS: TodoAppSettings = {
 
 	// Immersive Mode
 	immersiveModeEnabled: false,
+
+	// Navigation UI
+	pillNavCollapsed: true, // PillNav hidden by default, shown via FAB
+	filterStripCollapsed: false, // FilterStrip shown by default when PillNav is visible
 };
 
 // Create base store using factory
@@ -154,5 +162,25 @@ export const todoSettings = {
 	},
 	get immersiveModeEnabled() {
 		return baseStore.settings.immersiveModeEnabled;
+	},
+	get pillNavCollapsed() {
+		return baseStore.settings.pillNavCollapsed;
+	},
+	get filterStripCollapsed() {
+		return baseStore.settings.filterStripCollapsed;
+	},
+
+	// Toggle methods
+	togglePillNav() {
+		baseStore.update({ pillNavCollapsed: !baseStore.settings.pillNavCollapsed });
+	},
+	toggleFilterStrip() {
+		baseStore.update({ filterStripCollapsed: !baseStore.settings.filterStripCollapsed });
+	},
+	showPillNav() {
+		baseStore.update({ pillNavCollapsed: false });
+	},
+	hidePillNav() {
+		baseStore.update({ pillNavCollapsed: true });
 	},
 };

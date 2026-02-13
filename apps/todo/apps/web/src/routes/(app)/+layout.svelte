@@ -22,8 +22,7 @@
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { theme } from '$lib/stores/theme';
-	import { isToolbarCollapsed as toolbarCollapsedStore } from '$lib/stores/navigation';
-	import TodoToolbar from '$lib/components/TodoToolbar.svelte';
+	import FilterStrip from '$lib/components/FilterStrip.svelte';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -102,7 +101,11 @@
 		});
 	}
 
-	let isToolbarCollapsed = $state(true);
+	// PillNav collapsed state (controlled by FAB)
+	let isPillNavCollapsed = $state(true);
+
+	// FilterStrip visibility (toggle via Filter button in PillNav)
+	let isFilterStripVisible = $derived(!todoSettings.filterStripCollapsed);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -151,14 +154,27 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
+	// Toggle FilterStrip visibility
+	function handleFilterToggle() {
+		todoSettings.toggleFilterStrip();
+	}
+
 	// Base navigation items for Todo
-	const baseNavItems: PillNavItem[] = [
+	// Note: Filter uses onClick to toggle FilterStrip visibility instead of navigating
+	let baseNavItems = $derived<PillNavItem[]>([
 		{ href: '/', label: 'Aufgaben', icon: 'list' },
 		{ href: '/kanban', label: 'Kanban', icon: 'columns' },
+		{
+			href: '/',
+			label: 'Filter',
+			icon: 'filter',
+			onClick: handleFilterToggle,
+			active: isFilterStripVisible,
+		},
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
-	];
+	]);
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)
 	const navItems = $derived(
@@ -166,7 +182,7 @@
 	);
 
 	// Navigation shortcuts (Ctrl+1-6) - use base items for consistent shortcuts
-	const navRoutes = baseNavItems.map((item) => item.href);
+	let navRoutes = $derived(baseNavItems.map((item) => item.href));
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
@@ -199,11 +215,11 @@
 		}
 	}
 
-	function handleToolbarCollapsedChange(collapsed: boolean) {
-		isToolbarCollapsed = collapsed;
-		toolbarCollapsedStore?.set(collapsed);
+	// Toggle PillNav visibility (called by FAB)
+	function handlePillNavToggle() {
+		isPillNavCollapsed = !isPillNavCollapsed;
 		try {
-			localStorage?.setItem('todo-toolbar-collapsed', String(collapsed));
+			localStorage?.setItem('todo-pillnav-collapsed', String(isPillNavCollapsed));
 		} catch {
 			// localStorage not available or quota exceeded
 		}
@@ -248,12 +264,11 @@
 			goto(userSettings.startPage, { replaceState: true });
 		}
 
-		// Initialize toolbar collapsed state from localStorage
+		// Initialize PillNav collapsed state from localStorage
 		try {
-			const savedToolbarCollapsed = localStorage?.getItem('todo-toolbar-collapsed');
-			if (savedToolbarCollapsed === 'false') {
-				isToolbarCollapsed = false;
-				toolbarCollapsedStore?.set(false);
+			const savedPillNavCollapsed = localStorage?.getItem('todo-pillnav-collapsed');
+			if (savedPillNavCollapsed === 'false') {
+				isPillNavCollapsed = false;
 			}
 		} catch {
 			// localStorage not available
@@ -292,36 +307,44 @@
 	<div class="layout-container">
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !todoSettings.immersiveModeEnabled}
-			<PillNavigation
-				items={navItems}
-				currentPath={$page.url.pathname}
-				appName="Todo"
-				homeRoute="/"
-				onToggleTheme={handleToggleTheme}
-				{isDark}
-				desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
-				showThemeToggle={true}
-				showThemeVariants={true}
-				{themeVariantItems}
-				{currentThemeVariantLabel}
-				themeMode={theme.mode}
-				onThemeModeChange={handleThemeModeChange}
-				showLanguageSwitcher={true}
-				{languageItems}
-				{currentLanguageLabel}
-				showLogout={true}
-				onLogout={handleLogout}
-				loginHref="/login"
-				primaryColor="#8b5cf6"
-				showAppSwitcher={true}
-				{appItems}
-				{userEmail}
-				settingsHref="/settings"
-				manaHref="/mana"
-				profileHref="/profile"
-				allAppsHref="/apps"
-				onOpenInPanel={handleOpenInPanel}
-			/>
+			<!-- PillNav (shown/hidden via FAB) -->
+			{#if !isPillNavCollapsed}
+				<PillNavigation
+					items={navItems}
+					currentPath={$page.url.pathname}
+					appName="Todo"
+					homeRoute="/"
+					onToggleTheme={handleToggleTheme}
+					{isDark}
+					desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
+					showThemeToggle={true}
+					showThemeVariants={true}
+					{themeVariantItems}
+					{currentThemeVariantLabel}
+					themeMode={theme.mode}
+					onThemeModeChange={handleThemeModeChange}
+					showLanguageSwitcher={true}
+					{languageItems}
+					{currentLanguageLabel}
+					showLogout={true}
+					onLogout={handleLogout}
+					loginHref="/login"
+					primaryColor="#8b5cf6"
+					showAppSwitcher={true}
+					{appItems}
+					{userEmail}
+					settingsHref="/settings"
+					manaHref="/mana"
+					profileHref="/profile"
+					allAppsHref="/apps"
+					onOpenInPanel={handleOpenInPanel}
+				/>
+
+				<!-- FilterStrip (shown when Filter pill is active in PillNav) -->
+				{#if isFilterStripVisible}
+					<FilterStrip />
+				{/if}
+			{/if}
 
 			<!-- Global Quick Input Bar -->
 			<QuickInputBar
@@ -335,15 +358,37 @@
 				createText="Erstellen"
 				appIcon="todo"
 				hasFabRight={true}
-				bottomOffset={isToolbarCollapsed ? '70px' : '140px'}
+				bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '140px' : '70px'}
 			/>
 
-			<!-- Todo Toolbar (ExpandableToolbar FAB) -->
-			<TodoToolbar
-				isCollapsed={isToolbarCollapsed}
-				onCollapsedChange={handleToolbarCollapsedChange}
-				bottomOffset="70px"
-			/>
+			<!-- FAB to toggle PillNav visibility -->
+			<button
+				class="pillnav-fab"
+				onclick={handlePillNavToggle}
+				title={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
+			>
+				{#if isPillNavCollapsed}
+					<!-- Menu icon -->
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h16"
+						/>
+					</svg>
+				{:else}
+					<!-- Close icon -->
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				{/if}
+			</button>
 		{/if}
 
 		<!-- Immersive Mode Toggle (always visible) -->
@@ -429,5 +474,54 @@
 		.main-content {
 			padding-bottom: calc(150px + env(safe-area-inset-bottom));
 		}
+	}
+
+	/* FAB to toggle PillNav */
+	.pillnav-fab {
+		position: fixed;
+		bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+		right: 1rem;
+		width: 54px;
+		height: 54px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.9);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 4px 12px rgba(0, 0, 0, 0.15),
+			0 2px 4px rgba(0, 0, 0, 0.1);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 50;
+		transition: all 0.2s ease;
+	}
+
+	:global(.dark) .pillnav-fab {
+		background: rgba(30, 30, 30, 0.9);
+		border-color: rgba(255, 255, 255, 0.15);
+	}
+
+	.pillnav-fab:hover {
+		transform: scale(1.05);
+		box-shadow:
+			0 6px 16px rgba(0, 0, 0, 0.2),
+			0 3px 6px rgba(0, 0, 0, 0.15);
+	}
+
+	.pillnav-fab:active {
+		transform: scale(0.95);
+	}
+
+	.fab-icon {
+		width: 24px;
+		height: 24px;
+		color: #374151;
+	}
+
+	:global(.dark) .fab-icon {
+		color: #f3f4f6;
 	}
 </style>
