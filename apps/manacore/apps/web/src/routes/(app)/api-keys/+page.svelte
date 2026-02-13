@@ -13,6 +13,8 @@
 	let showCreateModal = $state(false);
 	let creating = $state(false);
 	let newKeyName = $state('');
+	let newKeyScopes = $state<{ stt: boolean; tts: boolean }>({ stt: true, tts: true });
+	let newKeyRateLimit = $state(60);
 	let createdKey = $state<ApiKeyWithSecret | null>(null);
 	let copied = $state(false);
 
@@ -44,8 +46,23 @@
 	async function handleCreate() {
 		if (!newKeyName.trim()) return;
 
+		// Build scopes array from checkboxes
+		const scopes: string[] = [];
+		if (newKeyScopes.stt) scopes.push('stt');
+		if (newKeyScopes.tts) scopes.push('tts');
+
+		// Validate at least one scope is selected
+		if (scopes.length === 0) {
+			error = 'Please select at least one scope';
+			return;
+		}
+
 		creating = true;
-		const result = await apiKeysService.create({ name: newKeyName.trim() });
+		const result = await apiKeysService.create({
+			name: newKeyName.trim(),
+			scopes,
+			rateLimitRequests: newKeyRateLimit,
+		});
 
 		if (result.error) {
 			error = result.error;
@@ -91,6 +108,8 @@
 		showCreateModal = false;
 		createdKey = null;
 		newKeyName = '';
+		newKeyScopes = { stt: true, tts: true };
+		newKeyRateLimit = 60;
 		copied = false;
 	}
 
@@ -190,11 +209,12 @@
 							{#each activeKeys as key (key.id)}
 								<div class="flex items-center justify-between p-4 rounded-lg bg-surface-hover">
 									<div class="flex-1 min-w-0">
-										<div class="flex items-center gap-2">
+										<div class="flex items-center gap-2 flex-wrap">
 											<span class="font-medium">{key.name}</span>
 											<Badge variant="secondary">{key.scopes.join(', ')}</Badge>
+											<Badge variant="outline">{key.rateLimitRequests}/min</Badge>
 										</div>
-										<div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+										<div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
 											<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"
 												>{key.keyPrefix}</code
 											>
@@ -403,12 +423,55 @@
 					<p class="mt-1 text-xs text-muted-foreground">A friendly name to identify this key</p>
 				</div>
 
+				<!-- Scopes -->
+				<div class="mb-4">
+					<label class="block text-sm font-medium mb-2">Scopes</label>
+					<div class="space-y-2">
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={newKeyScopes.stt}
+								class="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+							/>
+							<span class="text-sm">Speech-to-Text (stt)</span>
+						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="checkbox"
+								bind:checked={newKeyScopes.tts}
+								class="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+							/>
+							<span class="text-sm">Text-to-Speech (tts)</span>
+						</label>
+					</div>
+					<p class="mt-1 text-xs text-muted-foreground">Select which services this key can access</p>
+				</div>
+
+				<!-- Rate Limit -->
+				<div class="mb-6">
+					<label for="rateLimit" class="block text-sm font-medium mb-2">Rate Limit</label>
+					<div class="flex items-center gap-2">
+						<Input
+							type="number"
+							id="rateLimit"
+							bind:value={newKeyRateLimit}
+							min={1}
+							max={1000}
+							class="w-24"
+						/>
+						<span class="text-sm text-muted-foreground">requests per minute</span>
+					</div>
+					<p class="mt-1 text-xs text-muted-foreground">
+						Maximum number of API calls allowed per minute (default: 60)
+					</p>
+				</div>
+
 				<div class="flex gap-3">
 					<Button variant="secondary" onclick={closeCreateModal} class="flex-1">Cancel</Button>
 					<Button
 						onclick={handleCreate}
 						loading={creating}
-						disabled={!newKeyName.trim()}
+						disabled={!newKeyName.trim() || (!newKeyScopes.stt && !newKeyScopes.tts)}
 						class="flex-1"
 					>
 						{creating ? 'Creating...' : 'Create Key'}

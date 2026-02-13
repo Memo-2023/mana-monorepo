@@ -3,10 +3,27 @@
  * Handles API key creation, listing, and revocation
  */
 
+import { browser } from '$app/environment';
 import { createApiClient, type ApiResult } from './base-client';
 
-const MANA_AUTH_URL = 'http://localhost:3001'; // TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env
-const client = createApiClient(MANA_AUTH_URL);
+// Get auth URL dynamically at runtime
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+}
+
+// Lazy initialization to avoid SSR issues
+let _client: ReturnType<typeof createApiClient> | null = null;
+function getClient() {
+	if (!_client) {
+		_client = createApiClient(getAuthUrl());
+	}
+	return _client;
+}
 
 // Types
 export interface ApiKey {
@@ -38,7 +55,7 @@ export const apiKeysService = {
 	 * List all API keys for the current user
 	 */
 	async list(): Promise<ApiResult<ApiKey[]>> {
-		return client.get<ApiKey[]>('/api/v1/api-keys');
+		return getClient().get<ApiKey[]>('/api/v1/api-keys');
 	},
 
 	/**
@@ -46,13 +63,13 @@ export const apiKeysService = {
 	 * Returns the full key only once - it cannot be retrieved later
 	 */
 	async create(dto: CreateApiKeyDto): Promise<ApiResult<ApiKeyWithSecret>> {
-		return client.post<ApiKeyWithSecret>('/api/v1/api-keys', dto);
+		return getClient().post<ApiKeyWithSecret>('/api/v1/api-keys', dto);
 	},
 
 	/**
 	 * Revoke an API key
 	 */
 	async revoke(id: string): Promise<ApiResult<void>> {
-		return client.delete<void>(`/api/v1/api-keys/${id}`);
+		return getClient().delete<void>(`/api/v1/api-keys/${id}`);
 	},
 };
