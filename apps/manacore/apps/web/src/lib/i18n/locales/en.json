@@ -92,6 +92,19 @@
 				"open": "Open Clock",
 				"active_timers": "Active Timers",
 				"alarms": "Alarms"
+			},
+			"storage": {
+				"title": "Storage",
+				"description": "Your cloud storage",
+				"total_size": "Used",
+				"files": "Files",
+				"recent": "Recent",
+				"empty": "No files",
+				"open": "Open Storage"
+			},
+			"referral": {
+				"title": "Referrals",
+				"description": "Share and earn credits"
 			}
 		}
 	},

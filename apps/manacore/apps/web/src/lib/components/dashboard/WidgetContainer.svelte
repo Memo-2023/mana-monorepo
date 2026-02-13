@@ -26,6 +26,7 @@
 	import PictureRecentWidget from './widgets/PictureRecentWidget.svelte';
 	import ManadeckProgressWidget from './widgets/ManadeckProgressWidget.svelte';
 	import ClockTimersWidget from './widgets/ClockTimersWidget.svelte';
+	import StorageUsageWidget from './widgets/StorageUsageWidget.svelte';
 
 	interface Props {
 		widget: WidgetConfig;
@@ -67,6 +68,7 @@
 		'picture-recent': PictureRecentWidget,
 		'manadeck-progress': ManadeckProgressWidget,
 		'clock-timers': ClockTimersWidget,
+		'storage-usage': StorageUsageWidget,
 	} as const;
 
 	const WidgetComponent = $derived(widgetComponents[widget.type]);

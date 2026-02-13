@@ -12,3 +12,4 @@ export { zitareService, type Favorite, type Quote, type QuoteList } from './zita
 export { pictureService, type GeneratedImage, type GenerationStats } from './picture';
 export { manadeckService, type Deck, type Card, type LearningProgress } from './manadeck';
 export { clockService, type Timer, type Alarm, type ClockStats } from './clock';
+export { storageService, type StorageFile, type StorageStats } from './storage';

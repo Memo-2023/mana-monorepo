@@ -114,9 +114,9 @@ Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 
 ### 3. ✅ Dashboard-Widgets erweitern (GRÖSSTENTEILS ERLEDIGT)
 
-**Status:** 10 von 13 Widgets implementiert
+**Status:** 14 von 16 Widgets implementiert (Finance + Mail fehlen)
 
-**Existierende Widgets (13 Typen):**
+**Existierende Widgets (14 Typen):**
 
 | Widget                  | App            | Status |
 | ----------------------- | -------------- | ------ |
@@ -133,12 +133,16 @@ Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 | PictureRecentWidget     | picture        | ✅     |
 | ManadeckProgressWidget  | manadeck       | ✅     |
 | ClockTimersWidget       | clock          | ✅     |
+| StorageUsageWidget      | storage        | ✅     |
+
+**Neue Widgets (2026-02-13):**
+
+- [x] StorageUsageWidget - Speichernutzung und letzte Dateien
 
 **Noch offen (Backend fehlt noch):**
 
 - [ ] FinanceBalanceWidget (finance Backend nötig)
 - [ ] MailInboxWidget (mail Backend nötig)
-- [ ] StorageUsageWidget (storage Backend nötig)
 
 ---
 

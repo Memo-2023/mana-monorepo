@@ -163,4 +163,48 @@ export class FileService {
 		const file = await this.findOne(userId, id);
 		return this.storageService.getDownloadUrl(file.storageKey);
 	}
+
+	async getStats(userId: string): Promise<{
+		totalFiles: number;
+		totalSize: number;
+		favoriteCount: number;
+		recentFiles: File[];
+	}> {
+		const { count, sum } = await import('drizzle-orm');
+
+		// Get total files and size
+		const [stats] = await this.db
+			.select({
+				totalFiles: count(files.id),
+				totalSize: sum(files.size),
+			})
+			.from(files)
+			.where(and(eq(files.userId, userId), eq(files.isDeleted, false)));
+
+		// Get favorite count
+		const [favStats] = await this.db
+			.select({
+				count: count(files.id),
+			})
+			.from(files)
+			.where(
+				and(eq(files.userId, userId), eq(files.isDeleted, false), eq(files.isFavorite, true))
+			);
+
+		// Get recent files (last 5)
+		const { desc } = await import('drizzle-orm');
+		const recentFiles = await this.db
+			.select()
+			.from(files)
+			.where(and(eq(files.userId, userId), eq(files.isDeleted, false)))
+			.orderBy(desc(files.updatedAt))
+			.limit(5);
+
+		return {
+			totalFiles: Number(stats.totalFiles) || 0,
+			totalSize: Number(stats.totalSize) || 0,
+			favoriteCount: Number(favStats.count) || 0,
+			recentFiles,
+		};
+	}
 }

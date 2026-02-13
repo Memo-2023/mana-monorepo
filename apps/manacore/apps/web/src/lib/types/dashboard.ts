@@ -20,7 +20,8 @@ export type WidgetType =
 	| 'zitare-quote' // Zitare API: daily inspiration quote
 	| 'picture-recent' // Picture API: recent generations
 	| 'manadeck-progress' // ManaDeck API: learning progress
-	| 'clock-timers'; // Clock: active timers and alarms
+	| 'clock-timers' // Clock: active timers and alarms
+	| 'storage-usage'; // Storage: file storage stats
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -114,6 +115,7 @@ export interface WidgetMeta {
 		| 'picture'
 		| 'manadeck'
 		| 'clock'
+		| 'storage'
 		| 'mana-core-auth';
 }
 
@@ -236,6 +238,15 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		defaultSize: 'small',
 		allowMultiple: false,
 		requiredBackend: 'clock',
+	},
+	{
+		type: 'storage-usage',
+		nameKey: 'dashboard.widgets.storage.title',
+		descriptionKey: 'dashboard.widgets.storage.description',
+		icon: '💾',
+		defaultSize: 'medium',
+		allowMultiple: false,
+		requiredBackend: 'storage',
 	},
 ];
 

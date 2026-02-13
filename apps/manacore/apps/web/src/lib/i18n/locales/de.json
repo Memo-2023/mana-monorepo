@@ -92,6 +92,19 @@
 				"open": "Clock öffnen",
 				"active_timers": "Aktive Timer",
 				"alarms": "Wecker"
+			},
+			"storage": {
+				"title": "Speicher",
+				"description": "Dein Cloud-Speicher",
+				"total_size": "Genutzt",
+				"files": "Dateien",
+				"recent": "Kürzlich",
+				"empty": "Keine Dateien",
+				"open": "Storage öffnen"
+			},
+			"referral": {
+				"title": "Empfehlungen",
+				"description": "Teile und verdiene Credits"
 			}
 		}
 	},

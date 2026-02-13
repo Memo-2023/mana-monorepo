@@ -37,6 +37,11 @@ export class FileController {
 		return this.fileService.findAll(user.userId, parentFolderId);
 	}
 
+	@Get('stats')
+	async getStats(@CurrentUser() user: CurrentUserData) {
+		return this.fileService.getStats(user.userId);
+	}
+
 	@Get(':id')
 	async findOne(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
 		return this.fileService.findOne(user.userId, id);
