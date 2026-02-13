@@ -119,4 +119,22 @@ export const creditsService = {
 			body: JSON.stringify({ amount, appId, description }),
 		});
 	},
+
+	/**
+	 * Initiate a credit purchase via Stripe Checkout
+	 */
+	async initiatePurchase(packageId: string): Promise<{
+		purchaseId: string;
+		checkoutUrl: string;
+		amount: number;
+		credits: number;
+	}> {
+		const successUrl = `${window.location.origin}/credits?success=true`;
+		const cancelUrl = `${window.location.origin}/credits?canceled=true`;
+
+		return fetchWithAuth('/api/v1/credits/purchase', {
+			method: 'POST',
+			body: JSON.stringify({ packageId, successUrl, cancelUrl }),
+		});
+	},
 };

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { Card, PageHeader } from '@manacore/shared-ui';
 	import {
 		creditsService,
@@ -14,6 +15,31 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let activeTab = $state<'overview' | 'transactions' | 'packages'>('overview');
+	let processingPackageId = $state<string | null>(null);
+
+	// Toast notification
+	let toastMessage = $state<string | null>(null);
+	let toastType = $state<'success' | 'error'>('success');
+
+	// Handle tab from URL params
+	$effect(() => {
+		const tab = $page.url.searchParams.get('tab');
+		if (tab === 'packages') activeTab = 'packages';
+		else if (tab === 'transactions') activeTab = 'transactions';
+
+		// Handle success/canceled from Stripe redirect
+		const success = $page.url.searchParams.get('success');
+		const canceled = $page.url.searchParams.get('canceled');
+
+		if (success === 'true') {
+			showToast('Credits wurden erfolgreich gekauft!', 'success');
+			loadData();
+			window.history.replaceState({}, '', '/credits');
+		} else if (canceled === 'true') {
+			showToast('Kauf wurde abgebrochen', 'error');
+			window.history.replaceState({}, '', '/credits');
+		}
+	});
 
 	onMount(async () => {
 		await loadData();
@@ -90,11 +116,25 @@
 		}
 	}
 
-	function handleBuyPackage(pkg: CreditPackage) {
-		// TODO: Integrate with Stripe
-		alert(
-			`Paket "${pkg.name}" kaufen\n\n${formatCredits(pkg.credits)} Credits für ${formatPrice(pkg.priceEuroCents)}\n\nStripe-Integration kommt bald!`
-		);
+	async function handleBuyPackage(pkg: CreditPackage) {
+		processingPackageId = pkg.id;
+		try {
+			const result = await creditsService.initiatePurchase(pkg.id);
+			// Redirect to Stripe Checkout
+			window.location.href = result.checkoutUrl;
+		} catch (e) {
+			showToast(e instanceof Error ? e.message : 'Fehler beim Erstellen der Checkout-Session', 'error');
+		} finally {
+			processingPackageId = null;
+		}
+	}
+
+	function showToast(message: string, type: 'success' | 'error') {
+		toastMessage = message;
+		toastType = type;
+		setTimeout(() => {
+			toastMessage = null;
+		}, 4000);
 	}
 </script>
 
@@ -230,7 +270,8 @@
 							{#each packages.slice(0, 3) as pkg}
 								<button
 									onclick={() => handleBuyPackage(pkg)}
-									class="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-surface-hover transition-colors"
+									disabled={processingPackageId === pkg.id}
+									class="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-surface-hover transition-colors disabled:opacity-50"
 								>
 									<div class="text-left">
 										<p class="font-medium">{pkg.name}</p>
@@ -238,7 +279,14 @@
 											{formatCredits(pkg.credits)} Credits
 										</p>
 									</div>
-									<span class="font-semibold text-primary">{formatPrice(pkg.priceEuroCents)}</span>
+									{#if processingPackageId === pkg.id}
+										<svg class="animate-spin h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24">
+											<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+											<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+										</svg>
+									{:else}
+										<span class="font-semibold text-primary">{formatPrice(pkg.priceEuroCents)}</span>
+									{/if}
 								</button>
 							{/each}
 						</div>
@@ -309,9 +357,18 @@
 							</p>
 							<button
 								onclick={() => handleBuyPackage(pkg)}
-								class="mt-4 w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+								disabled={processingPackageId === pkg.id}
+								class="mt-4 w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 flex items-center justify-center gap-2"
 							>
-								Kaufen
+								{#if processingPackageId === pkg.id}
+									<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									Wird geladen...
+								{:else}
+									Kaufen
+								{/if}
 							</button>
 						</div>
 					</Card>
@@ -327,3 +384,30 @@
 		{/if}
 	{/if}
 </div>
+
+<!-- Toast Notification -->
+{#if toastMessage}
+	<div
+		class="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg animate-fade-in {toastType === 'success'
+			? 'bg-green-600 text-white'
+			: 'bg-red-600 text-white'}"
+	>
+		{toastMessage}
+	</div>
+{/if}
+
+<style>
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	.animate-fade-in {
+		animation: fade-in 0.2s ease-out;
+	}
+</style>

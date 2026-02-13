@@ -86,10 +86,14 @@
 - `services/mana-core-auth/src/stripe/` - Stripe-Module
 - `services/mana-core-auth/src/credits/credits.service.ts` - Purchase-Methoden
 
+**Frontend (Implementiert 2026-02-13):**
+
+- [x] Credits-Seite: Stripe Checkout Integration
+- [x] Loading-States und Toast-Benachrichtigungen
+
 **Noch offen:**
 
 - [ ] Rechnungs-PDF generieren
-- [ ] Frontend: Stripe Elements einbinden
 
 ---
 
@@ -177,12 +181,12 @@ Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 - `services/mana-core-auth/src/auth/dto/change-password.dto.ts` - Passwort-Ändern DTO
 - `services/mana-core-auth/src/auth/dto/delete-account.dto.ts` - Konto-Löschen DTO
 
-**Noch offen (Frontend):**
+**Frontend (Implementiert 2026-02-13):**
 
-- [ ] Profil-Edit Modal/Seite erstellen
-- [ ] Passwort-Ändern Dialog
-- [ ] Konto-Löschung mit Bestätigung
-- [ ] Avatar-Upload mit S3/MinIO Integration
+- [x] Profil-Edit Modal erstellt (`EditProfileModal.svelte`)
+- [x] Passwort-Ändern Dialog erstellt (`ChangePasswordModal.svelte`)
+- [x] Konto-Löschung mit Bestätigung (`DeleteAccountModal.svelte`)
+- [ ] Avatar-Upload mit S3/MinIO Integration (noch offen)
 
 ---
 
@@ -246,10 +250,13 @@ POST /api/v1/subscriptions/reactivate     # Reaktivieren
 GET  /api/v1/subscriptions/invoices       # Rechnungen
 ```
 
-**Noch offen (Frontend):**
+**Frontend (Implementiert 2026-02-13):**
 
-- [ ] Plan-Übersicht Seite im Frontend
-- [ ] Plan-Vergleichs-UI
+- [x] Plan-Übersicht Seite im Frontend (`/subscription`)
+- [x] Plan-Vergleichs-UI mit monatlich/jährlich Toggle
+- [x] Stripe Checkout Integration für Subscriptions
+- [x] Billing Portal Integration
+- [x] Rechnungsübersicht
 - [ ] Stripe Price IDs in DB eintragen (nach Stripe-Setup)
 
 ---
@@ -399,4 +406,4 @@ Diese Tasks können schnell erledigt werden:
 
 ---
 
-_Zuletzt aktualisiert: 2026-02-13 (Profile-Features Backend)_
+_Zuletzt aktualisiert: 2026-02-13 (Profile + Subscription + Credits Frontend)_
