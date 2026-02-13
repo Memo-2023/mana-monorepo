@@ -3,45 +3,55 @@
 FROM node:20-slim AS builder
 
 # Install pnpm
-RUN npm install -g pnpm@9.15.0
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-# Copy package files for mana-core-auth only (standalone build)
-COPY services/mana-core-auth/package.json ./
+# Copy root workspace files
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
 
-# Install all dependencies (including devDependencies for build)
-RUN pnpm install
+# Copy shared packages (required dependencies)
+COPY packages/shared-storage ./packages/shared-storage
 
-# Copy source code
-COPY services/mana-core-auth/src ./src
-COPY services/mana-core-auth/tsconfig*.json ./
-COPY services/mana-core-auth/nest-cli.json ./
+# Copy mana-core-auth
+COPY services/mana-core-auth ./services/mana-core-auth
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Build shared-storage first
+WORKDIR /app/packages/shared-storage
+RUN pnpm build || true
 
 # Build the application
+WORKDIR /app/services/mana-core-auth
 RUN pnpm build
 
 # Production stage
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
 FROM node:20-slim AS production
 
-# Install pnpm
-RUN npm install -g pnpm@9.15.0
+# Install pnpm and wget for health checks
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+    && apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy package files
+# Copy everything from builder (including node_modules)
+COPY --from=builder /app/pnpm-workspace.yaml ./
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/services/mana-core-auth ./services/mana-core-auth
 
-# Install production dependencies only (no tsx needed - migrations run externally)
-RUN pnpm install --prod
+# Copy entrypoint script
+COPY services/mana-core-auth/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Copy built application only (no source code)
-COPY --from=builder /app/dist ./dist
-COPY services/mana-core-auth/docker-entrypoint.sh ./
-
-# Make entrypoint executable
-RUN chmod +x ./docker-entrypoint.sh
+WORKDIR /app/services/mana-core-auth
 
 # Create non-root user (Debian syntax)
 RUN groupadd -g 1001 nodejs && \
@@ -58,7 +68,8 @@ EXPOSE 3001
 
 # Health check - uses /health/ready to verify database connectivity
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health/ready', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1))"
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health/ready || exit 1
 
 # Start the application
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["node", "dist/main.js"]
