@@ -10,7 +10,8 @@ import {
 import { QuotesService } from '../quotes/quotes.service';
 import { ZitareService } from '../quotes/zitare.service';
 import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
-import { HELP_MESSAGE, Category } from '../config/configuration';
+import { HELP_MESSAGE } from '../config/configuration';
+import type { Category } from '@zitare/content';
 
 @Injectable()
 export class MatrixService extends BaseMatrixService {
