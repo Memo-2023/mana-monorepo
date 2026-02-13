@@ -796,7 +796,10 @@ services:
       start_period: 40s
 
   matrix-todo-bot:
-    image: ghcr.io/memo-2023/matrix-todo-bot:latest
+    image: matrix-todo-bot:local
+    build:
+      context: .
+      dockerfile: services/matrix-todo-bot/Dockerfile
     platform: linux/amd64
     container_name: mana-matrix-bot-todo
     restart: always
