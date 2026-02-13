@@ -774,10 +774,16 @@ services:
     depends_on:
       synapse:
         condition: service_healthy
+      todo-backend:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 4014
       TZ: Europe/Berlin
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      TODO_BACKEND_URL: http://todo-backend:3031
       MATRIX_HOMESERVER_URL: http://synapse:8008
       MATRIX_ACCESS_TOKEN: ${MATRIX_TODO_BOT_TOKEN}
       MATRIX_ALLOWED_ROOMS: ${MATRIX_TODO_BOT_ROOMS:-}
@@ -800,10 +806,16 @@ services:
     depends_on:
       synapse:
         condition: service_healthy
+      calendar-backend:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 4015
       TZ: Europe/Berlin
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      CALENDAR_BACKEND_URL: http://calendar-backend:3032
       MATRIX_HOMESERVER_URL: http://synapse:8008
       MATRIX_ACCESS_TOKEN: ${MATRIX_CALENDAR_BOT_TOKEN}
       MATRIX_ALLOWED_ROOMS: ${MATRIX_CALENDAR_BOT_ROOMS:-}
