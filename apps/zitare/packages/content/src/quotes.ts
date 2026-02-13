@@ -9,43 +9,43 @@ export const QUOTES: Quote[] = [
 	// ============================================
 	{
 		id: 'mot-1',
-		text: 'Der einzige Weg, grossartige Arbeit zu leisten, ist zu lieben, was man tut.',
+		text: 'Der einzige Weg, großartige Arbeit zu leisten, ist zu lieben, was man tut.',
 		author: 'Steve Jobs',
 		category: 'motivation',
 	},
 	{
 		id: 'mot-2',
-		text: 'Erfolg ist nicht endgueltig, Misserfolg ist nicht fatal: Was zaehlt, ist der Mut weiterzumachen.',
+		text: 'Erfolg ist nicht endgültig, Misserfolg ist nicht fatal: Was zählt, ist der Mut weiterzumachen.',
 		author: 'Winston Churchill',
 		category: 'motivation',
 	},
 	{
 		id: 'mot-3',
-		text: 'Die Zukunft gehoert denen, die an die Schoenheit ihrer Traeume glauben.',
+		text: 'Die Zukunft gehört denen, die an die Schönheit ihrer Träume glauben.',
 		author: 'Eleanor Roosevelt',
 		category: 'motivation',
 	},
 	{
 		id: 'mot-4',
-		text: 'Es ist nie zu spaet, das zu werden, was man haette sein koennen.',
+		text: 'Es ist nie zu spät, das zu werden, was man hätte sein können.',
 		author: 'George Eliot',
 		category: 'motivation',
 	},
 	{
 		id: 'mot-5',
-		text: 'Gib jedem Tag die Chance, der schoenste deines Lebens zu werden.',
+		text: 'Gib jedem Tag die Chance, der schönste deines Lebens zu werden.',
 		author: 'Mark Twain',
 		category: 'motivation',
 	},
 	{
 		id: 'mot-6',
-		text: 'Der Anfang ist die Haelfte des Ganzen.',
+		text: 'Der Anfang ist die Hälfte des Ganzen.',
 		author: 'Aristoteles',
 		category: 'motivation',
 	},
 	{
 		id: 'mot-7',
-		text: 'Tue heute etwas, wofuer dein zukuenftiges Ich dir danken wird.',
+		text: 'Tue heute etwas, wofür dein zukünftiges Ich dir danken wird.',
 		author: 'Sean Patrick Flanery',
 		category: 'motivation',
 	},
@@ -67,14 +67,14 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'weis-2',
-		text: 'Wer kaempft, kann verlieren. Wer nicht kaempft, hat schon verloren.',
+		text: 'Wer kämpft, kann verlieren. Wer nicht kämpft, hat schon verloren.',
 		author: 'Bertolt Brecht',
 		category: 'weisheit',
 	},
 	{
 		id: 'weis-3',
-		text: 'Man sieht nur mit dem Herzen gut. Das Wesentliche ist fuer die Augen unsichtbar.',
-		author: 'Antoine de Saint-Exupery',
+		text: 'Man sieht nur mit dem Herzen gut. Das Wesentliche ist für die Augen unsichtbar.',
+		author: 'Antoine de Saint-Exupéry',
 		category: 'weisheit',
 	},
 	{
@@ -91,13 +91,13 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'weis-6',
-		text: 'Ich weiss, dass ich nichts weiss.',
+		text: 'Ich weiß, dass ich nichts weiß.',
 		author: 'Sokrates',
 		category: 'weisheit',
 	},
 	{
 		id: 'weis-7',
-		text: 'Die einzige Konstante im Leben ist die Veraenderung.',
+		text: 'Die einzige Konstante im Leben ist die Veränderung.',
 		author: 'Heraklit',
 		category: 'weisheit',
 	},
@@ -125,19 +125,19 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'liebe-3',
-		text: 'Es gibt nur ein Glueck in diesem Leben: zu lieben und geliebt zu werden.',
+		text: 'Es gibt nur ein Glück in diesem Leben: zu lieben und geliebt zu werden.',
 		author: 'George Sand',
 		category: 'liebe',
 	},
 	{
 		id: 'liebe-4',
-		text: 'Liebe ist das einzige, was waechst, wenn wir es verschwenden.',
+		text: 'Liebe ist das einzige, was wächst, wenn wir es verschwenden.',
 		author: 'Ricarda Huch',
 		category: 'liebe',
 	},
 	{
 		id: 'liebe-5',
-		text: 'Die groesste Sache der Welt ist es, zu wissen, wie man sich selbst gehoert.',
+		text: 'Die größte Sache der Welt ist es, zu wissen, wie man sich selbst gehört.',
 		author: 'Michel de Montaigne',
 		category: 'liebe',
 	},
@@ -153,26 +153,26 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'leben-2',
-		text: 'Leben ist das, was passiert, waehrend du damit beschaeftigt bist, andere Plaene zu machen.',
+		text: 'Leben ist das, was passiert, während du damit beschäftigt bist, andere Pläne zu machen.',
 		author: 'John Lennon',
 		category: 'leben',
 	},
 	{
 		id: 'leben-3',
-		text: 'Das Leben ist zu kurz fuer spaeter.',
+		text: 'Das Leben ist zu kurz für später.',
 		author: 'Alexandra Reinwarth',
 		category: 'leben',
 	},
 	{
 		id: 'leben-4',
-		text: 'Lebe jeden Tag, als waere es dein letzter.',
+		text: 'Lebe jeden Tag, als wäre es dein letzter.',
 		author: 'Marcus Aurelius',
 		category: 'leben',
 	},
 	{
 		id: 'leben-5',
-		text: 'Das Leben ist kein Problem, das geloest werden muss, sondern eine Wirklichkeit, die erfahren werden will.',
-		author: 'Soeren Kierkegaard',
+		text: 'Das Leben ist kein Problem, das gelöst werden muss, sondern eine Wirklichkeit, die erfahren werden will.',
+		author: 'Søren Kierkegaard',
 		category: 'leben',
 	},
 	{
@@ -187,13 +187,13 @@ export const QUOTES: Quote[] = [
 	// ============================================
 	{
 		id: 'erfolg-1',
-		text: 'Erfolg besteht darin, dass man genau die Faehigkeiten hat, die im Moment gefragt sind.',
+		text: 'Erfolg besteht darin, dass man genau die Fähigkeiten hat, die im Moment gefragt sind.',
 		author: 'Henry Ford',
 		category: 'erfolg',
 	},
 	{
 		id: 'erfolg-2',
-		text: 'Der Preis des Erfolges ist Hingabe, harte Arbeit und unablaessiger Einsatz.',
+		text: 'Der Preis des Erfolges ist Hingabe, harte Arbeit und unablässiger Einsatz.',
 		author: 'Frank Lloyd Wright',
 		category: 'erfolg',
 	},
@@ -205,7 +205,7 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'erfolg-4',
-		text: 'Der Erfolg ist nicht das Endergebnis, das Scheitern ist nicht toedlich: Was zaehlt, ist der Mut, weiterzumachen.',
+		text: 'Der Erfolg ist nicht das Endergebnis, das Scheitern ist nicht tödlich: Was zählt, ist der Mut, weiterzumachen.',
 		author: 'Winston Churchill',
 		category: 'erfolg',
 	},
@@ -217,35 +217,35 @@ export const QUOTES: Quote[] = [
 	},
 
 	// ============================================
-	// GLUECK
+	// GLÜCK
 	// ============================================
 	{
 		id: 'glueck-1',
-		text: 'Glueck ist das Einzige, das sich verdoppelt, wenn man es teilt.',
+		text: 'Glück ist das Einzige, das sich verdoppelt, wenn man es teilt.',
 		author: 'Albert Schweitzer',
 		category: 'glueck',
 	},
 	{
 		id: 'glueck-2',
-		text: 'Glueck ist kein Ziel, sondern ein Weg.',
+		text: 'Glück ist kein Ziel, sondern ein Weg.',
 		author: 'Buddha',
 		category: 'glueck',
 	},
 	{
 		id: 'glueck-3',
-		text: 'Nicht die Gluecklichen sind dankbar. Es sind die Dankbaren, die gluecklich sind.',
+		text: 'Nicht die Glücklichen sind dankbar. Es sind die Dankbaren, die glücklich sind.',
 		author: 'Francis Bacon',
 		category: 'glueck',
 	},
 	{
 		id: 'glueck-4',
-		text: 'Das Vergleichen ist das Ende des Gluecks und der Anfang der Unzufriedenheit.',
-		author: 'Soeren Kierkegaard',
+		text: 'Das Vergleichen ist das Ende des Glücks und der Anfang der Unzufriedenheit.',
+		author: 'Søren Kierkegaard',
 		category: 'glueck',
 	},
 	{
 		id: 'glueck-5',
-		text: 'Glueck entsteht oft durch Aufmerksamkeit in kleinen Dingen, Unglueck oft durch Vernachlaessigung kleiner Dinge.',
+		text: 'Glück entsteht oft durch Aufmerksamkeit in kleinen Dingen, Unglück oft durch Vernachlässigung kleiner Dinge.',
 		author: 'Wilhelm Busch',
 		category: 'glueck',
 	},
@@ -261,7 +261,7 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'freund-2',
-		text: 'Freundschaft ist eine Seele in zwei Koerpern.',
+		text: 'Freundschaft ist eine Seele in zwei Körpern.',
 		author: 'Aristoteles',
 		category: 'freundschaft',
 	},
@@ -273,7 +273,7 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'freund-4',
-		text: 'Die Freundschaft gehoert zum Notwendigsten in unserem Leben.',
+		text: 'Die Freundschaft gehört zum Notwendigsten in unserem Leben.',
 		author: 'Aristoteles',
 		category: 'freundschaft',
 	},
@@ -283,7 +283,7 @@ export const QUOTES: Quote[] = [
 	// ============================================
 	{
 		id: 'mut-1',
-		text: 'Mut steht am Anfang des Handelns, Glueck am Ende.',
+		text: 'Mut steht am Anfang des Handelns, Glück am Ende.',
 		author: 'Demokrit',
 		category: 'mut',
 	},
@@ -307,7 +307,7 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'mut-5',
-		text: 'Inmitten der Schwierigkeit liegt die Moeglichkeit.',
+		text: 'Inmitten der Schwierigkeit liegt die Möglichkeit.',
 		author: 'Albert Einstein',
 		category: 'mut',
 	},
@@ -329,7 +329,7 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'hoff-3',
-		text: 'Auch aus Steinen, die einem in den Weg gelegt werden, kann man Schoenes bauen.',
+		text: 'Auch aus Steinen, die einem in den Weg gelegt werden, kann man Schönes bauen.',
 		author: 'Johann Wolfgang von Goethe',
 		category: 'hoffnung',
 	},
@@ -345,7 +345,7 @@ export const QUOTES: Quote[] = [
 	// ============================================
 	{
 		id: 'natur-1',
-		text: 'In der Natur ist nichts isoliert; alles haengt mit allem zusammen.',
+		text: 'In der Natur ist nichts isoliert; alles hängt mit allem zusammen.',
 		author: 'Johann Wolfgang von Goethe',
 		category: 'natur',
 	},
@@ -357,13 +357,13 @@ export const QUOTES: Quote[] = [
 	},
 	{
 		id: 'natur-3',
-		text: 'Die Natur macht keine Spruenge.',
-		author: 'Carl von Linne',
+		text: 'Die Natur macht keine Sprünge.',
+		author: 'Carl von Linné',
 		category: 'natur',
 	},
 	{
 		id: 'natur-4',
-		text: 'Vergiss nicht, dass die Erde sich freut, deine nackten Fuesse zu fuehlen, und die Winde sich danach sehnen, mit deinem Haar zu spielen.',
+		text: 'Vergiss nicht, dass die Erde sich freut, deine nackten Füße zu fühlen, und die Winde sich danach sehnen, mit deinem Haar zu spielen.',
 		author: 'Khalil Gibran',
 		category: 'natur',
 	},
