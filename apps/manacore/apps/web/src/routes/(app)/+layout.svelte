@@ -22,6 +22,8 @@
 		isNavCollapsed as collapsedStore,
 	} from '$lib/stores/navigation';
 	import { getPillAppItems } from '@manacore/shared-branding';
+	import { onboardingStore } from '$lib/stores/onboarding.svelte';
+	import { OnboardingWizard } from '$lib/components/onboarding';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -148,6 +150,17 @@
 
 	// Track initialization state
 	let isInitializing = $state(true);
+	let showOnboarding = $state(false);
+
+	function handleOnboardingComplete() {
+		onboardingStore.complete();
+		showOnboarding = false;
+	}
+
+	function handleOnboardingSkip() {
+		onboardingStore.skip();
+		showOnboarding = false;
+	}
 
 	onMount(async () => {
 		// Initialize auth store first
@@ -182,6 +195,13 @@
 			// Settings API not available - use defaults
 		});
 
+		// Load onboarding state and show wizard if needed
+		onboardingStore.load();
+		if (onboardingStore.shouldShow) {
+			onboardingStore.start();
+			showOnboarding = true;
+		}
+
 		loading = false;
 	});
 </script>
@@ -198,6 +218,15 @@
 		</div>
 	</div>
 {:else if authStore.isAuthenticated}
+	<!-- Onboarding Wizard Modal -->
+	{#if showOnboarding}
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm"
+		>
+			<OnboardingWizard onComplete={handleOnboardingComplete} onSkip={handleOnboardingSkip} />
+		</div>
+	{/if}
+
 	<div class="min-h-screen bg-background">
 		<!-- Pill Navigation -->
 		<PillNavigation

@@ -170,7 +170,7 @@ Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 | Profil bearbeiten | ✅      | ✅       | Hoch      |
 | Passwort ändern   | ✅      | ✅       | Hoch      |
 | Konto löschen     | ✅      | ✅       | Mittel    |
-| Avatar hochladen  | ✅      | ❌       | Niedrig   |
+| Avatar hochladen  | ✅      | ✅       | Niedrig   |
 | 2FA aktivieren    | ❌      | ❌       | Niedrig   |
 
 **Dateien:**
@@ -193,7 +193,7 @@ Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 - [x] Presigned URL Endpoint: `POST /api/v1/storage/avatar/upload-url`
 - [x] Direct Upload Endpoint: `POST /api/v1/storage/avatar`
 - [x] `manacore-storage` Bucket konfiguriert
-- [ ] Frontend-Integration (EditProfileModal) noch offen
+- [x] Frontend-Integration (EditProfileModal mit Avatar-Picker und Presigned-URL-Upload)
 
 ---
 
@@ -291,27 +291,34 @@ GET  /api/v1/subscriptions/invoices       # Rechnungen
 
 ---
 
-### 8. Onboarding-Flow
+### 8. ✅ Onboarding-Flow (ERLEDIGT)
+
+**Status:** Implementiert am 2026-02-13
 
 **Beschreibung:** Welcome-Wizard für neue Benutzer
 
-**Schritte:**
+**Implementierte Schritte:**
 
-1. Willkommen & Kurze Einführung
-2. Profil vervollständigen (Name, Avatar)
-3. Bevorzugte Apps auswählen
-4. Dashboard personalisieren
-5. Credits-System erklären
-6. Tour durch wichtigste Features
+1. Willkommen & Kurze Einführung (WelcomeStep)
+2. Profil vervollständigen - Name, Avatar (ProfileStep)
+3. Apps-Übersicht - alle Mana-Apps zeigen (AppsStep)
+4. Credits-System erklären (CreditsStep)
+5. Fertig - Quick Actions zum Start (CompleteStep)
 
 **Aufgaben:**
 
-- [ ] Onboarding-Wizard Komponente
-- [ ] Progress-Tracking (User hat Onboarding abgeschlossen)
-- [ ] Skip-Option
-- [ ] Feature-Tour (Tooltip-basiert)
+- [x] Onboarding-Store (`lib/stores/onboarding.svelte.ts`)
+- [x] OnboardingWizard Komponente mit Step-Navigation
+- [x] 5 Step-Komponenten (Welcome, Profile, Apps, Credits, Complete)
+- [x] Progress-Tracking (LocalStorage-basiert)
+- [x] Skip-Option
+- [x] Integration in App-Layout (zeigt Wizard für neue User)
 
-**Geschätzter Aufwand:** 2-3 Tage
+**Dateien:**
+
+- `apps/manacore/apps/web/src/lib/stores/onboarding.svelte.ts`
+- `apps/manacore/apps/web/src/lib/components/onboarding/OnboardingWizard.svelte`
+- `apps/manacore/apps/web/src/lib/components/onboarding/steps/*.svelte`
 
 ---
 
@@ -378,16 +385,16 @@ GET  /api/v1/subscriptions/invoices       # Rechnungen
 
 ## Empfohlene Reihenfolge
 
-| #   | Task                        | Aufwand  | Impact   | Abhängigkeiten |
-| --- | --------------------------- | -------- | -------- | -------------- |
-| 1   | App-Config aktualisieren    | 2-4h     | Hoch     | Keine          |
-| 2   | Stripe-Integration          | 2-3 Tage | Kritisch | mana-core-auth |
-| 3   | Dashboard-Widgets erweitern | 1-2 Tage | Hoch     | App-Config     |
-| 4   | Profil-Features             | 1-2 Tage | Mittel   | Keine          |
-| 5   | Notifications               | 3-5 Tage | Hoch     | Backend-Arbeit |
-| 6   | Onboarding                  | 2-3 Tage | Mittel   | Keine          |
-| 7   | Subscription-Management     | 2-3 Tage | Mittel   | Stripe         |
-| 8   | API-Keys                    | 2-3 Tage | Niedrig  | Keine          |
+| #   | Task                        | Aufwand  | Impact   | Status      |
+| --- | --------------------------- | -------- | -------- | ----------- |
+| 1   | App-Config aktualisieren    | 2-4h     | Hoch     | ✅ Erledigt |
+| 2   | Stripe-Integration          | 2-3 Tage | Kritisch | ✅ Erledigt |
+| 3   | Dashboard-Widgets erweitern | 1-2 Tage | Hoch     | ✅ Erledigt |
+| 4   | Profil-Features             | 1-2 Tage | Mittel   | ✅ Erledigt |
+| 5   | Notifications               | 3-5 Tage | Hoch     | ⏳ Offen    |
+| 6   | Onboarding                  | 2-3 Tage | Mittel   | ✅ Erledigt |
+| 7   | Subscription-Management     | 2-3 Tage | Mittel   | ✅ Erledigt |
+| 8   | API-Keys                    | 2-3 Tage | Niedrig  | ⏳ Offen    |
 
 ---
 
@@ -414,4 +421,4 @@ Diese Tasks können schnell erledigt werden:
 
 ---
 
-_Zuletzt aktualisiert: 2026-02-13 (Avatar Storage Backend + Subscription Plans Seed)_
+_Zuletzt aktualisiert: 2026-02-13 (Avatar-Upload Frontend + Onboarding-Flow implementiert)_
