@@ -307,22 +307,18 @@ export class MatrixService extends BaseMatrixService {
 			const task = this.normalizeTask(apiTask);
 			task.project = project;
 
-			let responseText = `Transkription: "${transcription}"\n\nAufgabe erstellt: **${task.title}**`;
+			let responseText = `Aufgabe erstellt: **${task.title}**`;
 
 			const details: string[] = [];
-			if (task.priority < 4) details.push(`Prioritat ${task.priority}`);
-			if (task.dueDate) details.push(`Datum: ${this.formatDate(task.dueDate)}`);
-			if (task.project) details.push(`Projekt: ${task.project}`);
+			if (task.priority < 4) details.push(`Priorität ${task.priority}`);
+			if (task.dueDate) details.push(`${this.formatDate(task.dueDate)}`);
+			if (task.project) details.push(`#${task.project}`);
 
 			if (details.length > 0) {
-				responseText += `\n${details.join(' | ')}`;
+				responseText += ` · ${details.join(' · ')}`;
 			}
 
-			const balance = await this.creditService.getBalance(token);
-			responseText += `\n\n⚡ -${TASK_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)`;
-			responseText += '\n🔄 Synchronisiert';
-
-			await this.sendReply(roomId, event, responseText);
+			await this.sendMessage(roomId, responseText);
 		} catch (error) {
 			this.logger.error('Audio processing failed:', error);
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
@@ -509,19 +505,15 @@ export class MatrixService extends BaseMatrixService {
 		let response = `Aufgabe erstellt: **${task.title}**`;
 
 		const details: string[] = [];
-		if (task.priority < 4) details.push(`Prioritaet ${task.priority}`);
-		if (task.dueDate) details.push(`Datum: ${this.formatDate(task.dueDate)}`);
-		if (task.project) details.push(`Projekt: ${task.project}`);
+		if (task.priority < 4) details.push(`Priorität ${task.priority}`);
+		if (task.dueDate) details.push(`${this.formatDate(task.dueDate)}`);
+		if (task.project) details.push(`#${task.project}`);
 
 		if (details.length > 0) {
-			response += `\n${details.join(' | ')}`;
+			response += ` · ${details.join(' · ')}`;
 		}
 
-		const balance = await this.creditService.getBalance(token);
-		response += `\n\n⚡ -${TASK_CREATE_CREDITS} Credits (${balance.balance.toFixed(2)} verbleibend)`;
-		response += '\n🔄 Synchronisiert';
-
-		await this.sendReply(roomId, event, response);
+		await this.sendMessage(roomId, response);
 	}
 
 	private async handleListTasks(roomId: string, event: MatrixRoomEvent, userId: string) {
@@ -541,9 +533,8 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		let response = this.formatTaskList('**Alle offenen Aufgaben:**', tasks);
-		response += '\n\n🔄 Synchronisiert';
-		await this.sendReply(roomId, event, response);
+		const response = this.formatTaskList('**Alle offenen Aufgaben:**', tasks);
+		await this.sendMessage(roomId, response);
 	}
 
 	private async handleTodayTasks(roomId: string, event: MatrixRoomEvent, userId: string) {
@@ -581,8 +572,7 @@ export class MatrixService extends BaseMatrixService {
 			response += this.formatTaskList('**Inbox (ohne Datum):**', inboxTasks);
 		}
 
-		response += '\n\n🔄 Synchronisiert';
-		await this.sendReply(roomId, event, response);
+		await this.sendMessage(roomId, response);
 	}
 
 	private async handleInboxTasks(roomId: string, event: MatrixRoomEvent, userId: string) {
@@ -598,9 +588,8 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		let response = this.formatTaskList('**Inbox (ohne Datum):**', tasks);
-		response += '\n\n🔄 Synchronisiert';
-		await this.sendReply(roomId, event, response);
+		const response = this.formatTaskList('**Inbox (ohne Datum):**', tasks);
+		await this.sendMessage(roomId, response);
 	}
 
 	private async handleCompleteTask(
@@ -641,8 +630,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const response = `Erledigt: ~~${task.title}~~\n\n🔄 Synchronisiert`;
-		await this.sendReply(roomId, event, response);
+		await this.sendMessage(roomId, `✓ ~~${task.title}~~`);
 	}
 
 	private async handleDeleteTask(
@@ -683,8 +671,7 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		const response = `Geloescht: ${task.title}\n\n🔄 Synchronisiert`;
-		await this.sendReply(roomId, event, response);
+		await this.sendMessage(roomId, `🗑️ ${task.title}`);
 	}
 
 	private async handleProjects(roomId: string, event: MatrixRoomEvent, userId: string) {
@@ -708,9 +695,8 @@ export class MatrixService extends BaseMatrixService {
 			response += `- ${project.name}\n`;
 		}
 		response += '\nZeige Projektaufgaben mit `projekt [Name]`';
-		response += '\n\n🔄 Synchronisiert';
 
-		await this.sendReply(roomId, event, response);
+		await this.sendMessage(roomId, response);
 	}
 
 	private async handleProjectTasks(
@@ -749,9 +735,8 @@ export class MatrixService extends BaseMatrixService {
 			return;
 		}
 
-		let response = this.formatTaskList(`**Projekt: ${projectName}**`, tasks);
-		response += '\n\n🔄 Synchronisiert';
-		await this.sendReply(roomId, event, response);
+		const response = this.formatTaskList(`**Projekt: ${projectName}**`, tasks);
+		await this.sendMessage(roomId, response);
 	}
 
 	private async handleStatus(roomId: string, event: MatrixRoomEvent, userId: string) {
@@ -759,54 +744,26 @@ export class MatrixService extends BaseMatrixService {
 		const isLoggedIn = await this.sessionService.isLoggedIn(userId);
 		const email = this.sessionService.getEmail(userId);
 
-		let statsInfo = '';
-		let creditInfo = '';
-
 		if (token) {
-			// Get stats from API
 			const stats = await this.todoApiService.getStats(token);
-			statsInfo = `
-- Offene Aufgaben: ${stats.pending}
-- Heute faellig: ${stats.today}
-- Erledigt: ${stats.completed}
-- Gesamt: ${stats.total}`;
+			const response = `**Status**
 
-			// Get credit balance
-			const balance = await this.creditService.getBalance(token);
-			const creditIcon = balance.hasCredits ? '⚡' : '⚠️';
-			creditInfo = `\n${creditIcon} Credits: ${balance.balance.toFixed(2)}`;
-			if (balance.balance < 10 && balance.balance > 0) {
-				creditInfo += '\n⚠️ Nur noch wenig Credits!';
-			}
-			if (!balance.hasCredits) {
-				creditInfo += '\n👉 Credits kaufen: https://mana.how/credits';
-			}
-		}
+👤 ${email}
 
-		let response = `**Status**
+- Offen: ${stats.pending}
+- Heute: ${stats.today}
+- Erledigt: ${stats.completed}`;
 
-👤 Angemeldet: ${isLoggedIn ? `Ja (${email})` : 'Nein'}${creditInfo}`;
-
-		if (token) {
-			response += `
-${statsInfo}
-
-🔄 Synchronisiert mit todo-backend
-Bot: Online`;
+			await this.sendMessage(roomId, response);
 		} else {
-			response += `
+			const response = `**Status**
 
-🔐 **Login erforderlich**
+🔐 Nicht angemeldet
 
-Um Aufgaben zu verwalten, melde dich an:
-\`login deine@email.de deinpasswort\`
+\`login email passwort\``;
 
-Deine Aufgaben werden dann mit der Todo-App synchronisiert.
-
-Bot: Online`;
+			await this.sendMessage(roomId, response);
 		}
-
-		await this.sendReply(roomId, event, response);
 	}
 
 	private async handleLogin(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
