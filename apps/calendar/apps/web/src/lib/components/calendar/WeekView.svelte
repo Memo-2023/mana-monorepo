@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
@@ -146,6 +147,32 @@
 
 	// Reference to the days container for position calculations
 	let daysContainerEl: HTMLDivElement;
+
+	// Reference to the time grid (scroll container)
+	let timeGridEl: HTMLDivElement;
+
+	// Scroll to current hour on mount
+	onMount(() => {
+		if (!timeGridEl) return;
+
+		// Use CSS variable for hour height (default 48px)
+		const hourHeight =
+			parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hour-height')) ||
+			48;
+		const currentHour = new Date().getHours();
+		const viewportHeight = timeGridEl.clientHeight;
+
+		// Calculate scroll position to center current hour in viewport
+		// Account for firstVisibleHour (if hour filtering is enabled)
+		const effectiveHour = Math.max(0, currentHour - firstVisibleHour);
+		const scrollPosition = effectiveHour * hourHeight - viewportHeight / 2 + hourHeight / 2;
+
+		// Scroll to position (instant, not smooth, for initial load)
+		timeGridEl.scrollTo({
+			top: Math.max(0, scrollPosition),
+			behavior: 'instant',
+		});
+	});
 
 	// Birthday Popover (using composable)
 	const birthdayPopover = useBirthdayPopover();
@@ -933,7 +960,7 @@
 	</div>
 
 	<!-- Time grid -->
-	<div class="time-grid scrollbar-thin">
+	<div class="time-grid scrollbar-thin" bind:this={timeGridEl}>
 		<!-- Time column -->
 		<div class="time-column">
 			{#each hours as hour}

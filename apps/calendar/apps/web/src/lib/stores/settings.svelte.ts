@@ -100,7 +100,7 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	showBirthdays: true,
 	showBirthdayAge: true,
 	showTasksInCalendar: false,
-	sidebarCollapsed: false,
+	sidebarCollapsed: true,
 	quickViewPillViews: ['week', 'month', 'agenda'],
 	customDayCount: 30,
 	defaultEventDuration: 60,
@@ -130,6 +130,13 @@ const baseStore = createAppSettingsStore<CalendarAppSettings>(
 		onSettingsChange: syncToCloud,
 	}
 );
+
+// Always start with tasks/sidebar hidden when the app loads
+// (don't persist this from previous sessions)
+if (browser) {
+	baseStore.set('showTasksInCalendar', false);
+	baseStore.set('sidebarCollapsed', true);
+}
 
 // Load settings from cloud
 function loadFromCloud(): Partial<CalendarAppSettings> | null {
@@ -266,7 +273,14 @@ export const settingsStore = {
 		if (!initialSyncDone) {
 			const cloudSettings = loadFromCloud();
 			if (cloudSettings && Object.keys(cloudSettings).length > 0) {
-				baseStore.update(cloudSettings);
+				// Exclude showTasksInCalendar and sidebarCollapsed from cloud sync
+				// - always start with tasks hidden and sidebar collapsed
+				const {
+					showTasksInCalendar: _,
+					sidebarCollapsed: __,
+					...settingsWithoutTasks
+				} = cloudSettings;
+				baseStore.update(settingsWithoutTasks);
 			} else {
 				syncToCloud(baseStore.settings);
 			}
