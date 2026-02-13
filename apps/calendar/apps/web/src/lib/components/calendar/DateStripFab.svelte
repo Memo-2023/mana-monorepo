@@ -7,10 +7,9 @@
 	interface Props {
 		isToolbarExpanded?: boolean;
 		isMobile?: boolean;
-		hasTagStrip?: boolean;
 	}
 
-	let { isToolbarExpanded = false, isMobile = false, hasTagStrip = false }: Props = $props();
+	let { isToolbarExpanded = false, isMobile = false }: Props = $props();
 
 	let contextMenu: DateStripContextMenu;
 
@@ -31,7 +30,6 @@
 	class="datestrip-fab-container"
 	class:toolbar-expanded={isToolbarExpanded}
 	class:mobile={isMobile}
-	class:has-tag-strip={hasTagStrip}
 >
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<button
@@ -79,23 +77,6 @@
 
 	.datestrip-fab-container.mobile.toolbar-expanded {
 		bottom: calc(70px + 72px + 70px + 8px + env(safe-area-inset-bottom, 0px));
-	}
-
-	/* When TagStrip is visible, add 70px offset */
-	.datestrip-fab-container.has-tag-strip {
-		bottom: calc(140px + 9px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.datestrip-fab-container.has-tag-strip.toolbar-expanded {
-		bottom: calc(210px + 9px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.datestrip-fab-container.has-tag-strip.mobile {
-		bottom: calc(140px + 72px + 8px + env(safe-area-inset-bottom, 0px));
-	}
-
-	.datestrip-fab-container.has-tag-strip.mobile.toolbar-expanded {
-		bottom: calc(140px + 72px + 70px + 8px + env(safe-area-inset-bottom, 0px));
 	}
 
 	/* Fallback for CSS-only mobile detection */

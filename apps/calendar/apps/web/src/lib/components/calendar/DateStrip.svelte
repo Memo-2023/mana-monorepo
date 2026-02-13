@@ -28,10 +28,9 @@
 
 	interface Props {
 		isToolbarExpanded?: boolean;
-		hasTagStrip?: boolean; // Whether TagStrip is visible below
 	}
 
-	let { isToolbarExpanded = false, hasTagStrip = false }: Props = $props();
+	let { isToolbarExpanded = false }: Props = $props();
 
 	// Get event count for a day (max 5 dots displayed)
 	function getEventCount(date: Date): number {
@@ -246,7 +245,6 @@
 	class="date-strip-wrapper"
 	class:toolbar-expanded={isToolbarExpanded}
 	class:compact={settingsStore.dateStripCompact}
-	class:has-tag-strip={hasTagStrip}
 >
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="date-strip-container" oncontextmenu={handleContextMenu}>
@@ -336,15 +334,6 @@
 	/* When toolbar is expanded, push DateStrip up */
 	.date-strip-wrapper.toolbar-expanded {
 		bottom: calc(210px + env(safe-area-inset-bottom, 0px)); /* Extra space for toolbar */
-	}
-
-	/* When TagStrip is visible below, add extra offset */
-	.date-strip-wrapper.has-tag-strip {
-		bottom: calc(210px + env(safe-area-inset-bottom, 0px)); /* +70px for TagStrip */
-	}
-
-	.date-strip-wrapper.has-tag-strip.toolbar-expanded {
-		bottom: calc(280px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.today-button {

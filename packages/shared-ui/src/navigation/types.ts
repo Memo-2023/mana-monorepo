@@ -105,8 +105,36 @@ export interface PillDivider {
 	type: 'divider';
 }
 
+export interface PillTagItem {
+	/** Unique tag identifier */
+	id: string;
+	/** Tag display name */
+	name: string;
+	/** Tag color (hex) */
+	color: string;
+}
+
+export interface PillTagSelectorConfig {
+	/** Discriminator for type checking */
+	type: 'tag-selector';
+	/** Available tags */
+	tags: PillTagItem[];
+	/** Currently selected tag IDs */
+	selectedIds: string[];
+	/** Called when a tag is toggled */
+	onToggle: (tagId: string) => void;
+	/** Called when selection is cleared */
+	onClear: () => void;
+	/** Called when "New Tag" is clicked (optional) */
+	onCreate?: () => void;
+	/** Loading state */
+	loading?: boolean;
+	/** Label for the selector button */
+	label?: string;
+}
+
 /** Union type for all elements that can appear in PillNavigation */
-export type PillNavElement = PillNavItem | PillTabGroupConfig | PillDivider;
+export type PillNavElement = PillNavItem | PillTabGroupConfig | PillDivider | PillTagSelectorConfig;
 
 export interface PillNavigationProps {
 	/** Navigation items */

@@ -20,6 +20,7 @@
 		QuickInputItem,
 		CreatePreview,
 		PillTabGroupConfig,
+		PillTagSelectorConfig,
 		PillNavElement,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
@@ -56,7 +57,6 @@
 	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
 	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
 	import DateStripFab from '$lib/components/calendar/DateStripFab.svelte';
-	import TagStrip from '$lib/components/calendar/TagStrip.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
@@ -256,27 +256,9 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
-	// Toggle TagStrip visibility
-	function handleTagsToggle() {
-		settingsStore.toggleTagStrip();
-	}
-
-	// Tags button active state (show as active when TagStrip is visible)
-	let isTagStripVisible = $derived(!settingsStore.tagStripCollapsed);
-
-	// Offset for elements above TagStrip (70px when visible)
-	let tagStripOffset = $derived(showCalendarToolbar && !settingsStore.tagStripCollapsed ? 70 : 0);
-
 	// Base navigation items for Calendar (without Kalender/Aufgaben - handled by tab group)
-	// Note: Tags uses onClick to toggle TagStrip visibility instead of navigating
+	// Tags are now in the tag-selector dropdown in prependElements
 	let baseNavItems = $derived<PillNavItem[]>([
-		{
-			href: '/tags',
-			label: 'Tags',
-			icon: 'tag',
-			onClick: handleTagsToggle,
-			active: isTagStripVisible,
-		},
 		{
 			href: '/',
 			label: 'Einstellungen',
@@ -377,9 +359,23 @@
 		onContextMenu: handleViewContextMenu,
 	});
 
+	// Tag selector config for PillNavigation
+	let tagSelectorConfig = $derived<PillTagSelectorConfig>({
+		type: 'tag-selector',
+		tags: eventTagsStore.tags.map((t) => ({ id: t.id, name: t.name, color: t.color || '#3b82f6' })),
+		selectedIds: settingsStore.selectedTagIds,
+		onToggle: settingsStore.toggleTagSelection,
+		onClear: settingsStore.clearTagSelection,
+		onCreate: () => goto('/tags?new=true'),
+		loading: eventTagsStore.loading,
+		label: 'Tags',
+	});
+
 	// Prepended elements (tab groups at the start of navigation)
 	let prependElements = $derived<PillNavElement[]>(
-		showCalendarToolbar ? [calendarTasksTabGroup, viewSwitcherTabGroup] : [calendarTasksTabGroup]
+		showCalendarToolbar
+			? [calendarTasksTabGroup, viewSwitcherTabGroup, { type: 'divider' }, tagSelectorConfig]
+			: [calendarTasksTabGroup]
 	);
 
 	// Handle tab change: toggle sidebar for tasks, close for calendar
@@ -627,22 +623,10 @@
 			<!-- Date strip (only on main calendar page) -->
 			{#if showCalendarToolbar}
 				{#if settingsStore.dateStripCollapsed}
-					<DateStripFab
-						isToolbarExpanded={!isToolbarCollapsed}
-						{isMobile}
-						hasTagStrip={!settingsStore.tagStripCollapsed}
-					/>
+					<DateStripFab isToolbarExpanded={!isToolbarCollapsed} {isMobile} />
 				{:else}
-					<DateStrip
-						isToolbarExpanded={!isToolbarCollapsed}
-						hasTagStrip={!settingsStore.tagStripCollapsed}
-					/>
+					<DateStrip isToolbarExpanded={!isToolbarCollapsed} />
 				{/if}
-			{/if}
-
-			<!-- Tag strip (only on main calendar page, when not collapsed) - directly above PillNav -->
-			{#if showCalendarToolbar && !settingsStore.tagStripCollapsed}
-				<TagStrip />
 			{/if}
 
 			<!-- Calendar toolbar (only on main calendar page) -->
@@ -650,7 +634,7 @@
 				<CalendarToolbar
 					isCollapsed={isToolbarCollapsed}
 					{isMobile}
-					bottomOffset={settingsStore.tagStripCollapsed ? '70px' : '140px'}
+					bottomOffset="70px"
 					onCollapsedChange={handleToolbarCollapsedChange}
 				/>
 			{/if}
@@ -671,10 +655,10 @@
 					createText="Erstellen"
 					appIcon="calendar"
 					bottomOffset={isMobile
-						? `${70 + tagStripOffset}px`
+						? '70px'
 						: showCalendarToolbar && !isToolbarCollapsed
-							? `${140 + tagStripOffset}px`
-							: `${70 + tagStripOffset}px`}
+							? '140px'
+							: '70px'}
 					hasFabRight={showCalendarToolbar}
 					hasFabLeft={!isMobile && showCalendarToolbar && settingsStore.dateStripCollapsed}
 					defaultOptions={calendarOptions}
@@ -683,20 +667,13 @@
 					onDefaultChange={handleDefaultCalendarChange}
 					onShowShortcuts={handleShowShortcuts}
 					onShowSyntaxHelp={handleShowSyntaxHelp}
-				/>
-				<!-- Voice Record Button -->
-				{#if voiceRecordingStore.isSupported}
-					<div
-						class="voice-button-wrapper"
-						style="--bottom-offset: {isMobile
-							? `${70 + tagStripOffset}px`
-							: showCalendarToolbar && !isToolbarCollapsed
-								? `${140 + tagStripOffset}px`
-								: `${70 + tagStripOffset}px`}"
-					>
-						<VoiceRecordButton onResult={handleVoiceResult} size={40} />
-					</div>
-				{/if}
+				>
+					{#snippet leftAction()}
+						{#if voiceRecordingStore.isSupported}
+							<VoiceRecordButton onResult={handleVoiceResult} size={32} />
+						{/if}
+					{/snippet}
+				</QuickInputBar>
 			</div>
 		</div>
 
@@ -909,57 +886,6 @@
 		:global(.quick-input-bar.has-fab-right) {
 			padding-left: 1rem;
 			padding-right: calc(54px + 1rem + 8px); /* FAB width + margin + gap */
-		}
-	}
-
-	/* Voice Button Wrapper */
-	.input-bar-row {
-		position: relative;
-	}
-
-	.voice-button-wrapper {
-		position: fixed;
-		bottom: calc(var(--bottom-offset, 70px) + env(safe-area-inset-bottom, 0px) + 7px);
-		left: 50%;
-		transform: translateX(calc(-50% + 260px)); /* Position to the right of centered InputBar */
-		z-index: 91;
-		background: hsl(var(--color-surface) / 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid hsl(var(--color-border));
-		border-radius: 50%;
-		padding: 0.25rem;
-		box-shadow:
-			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
-			0 2px 4px -1px hsl(var(--color-foreground) / 0.06);
-		transition:
-			bottom 0.3s ease,
-			transform 0.15s ease;
-	}
-
-	.voice-button-wrapper:hover {
-		transform: translateX(calc(-50% + 260px)) scale(1.05);
-	}
-
-	/* Adjust voice button position on smaller screens */
-	@media (max-width: 900px) {
-		.voice-button-wrapper {
-			right: calc(1rem + 54px + 8px); /* FAB width + margin + gap from right FAB */
-			left: auto;
-			transform: none;
-		}
-
-		.voice-button-wrapper:hover {
-			transform: scale(1.05);
-		}
-	}
-
-	/* Mobile: Hide voice button (use modal instead) */
-	@media (max-width: 640px) {
-		.voice-button-wrapper {
-			right: calc(54px + 1rem + 54px + 8px); /* Right FAB + margin + voice btn + gap */
-			left: auto;
-			transform: none;
 		}
 	}
 </style>

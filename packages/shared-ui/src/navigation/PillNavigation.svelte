@@ -5,10 +5,12 @@
 		PillDropdownItem,
 		PillNavElement,
 		PillTabGroupConfig,
+		PillTagSelectorConfig,
 		PillAppItem,
 	} from './types';
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
+	import PillTagSelector from './PillTagSelector.svelte';
 	// Phosphor Icons (via shared-icons)
 	import {
 		House,
@@ -311,6 +313,10 @@
 		return 'type' in element && element.type === 'divider';
 	}
 
+	function isTagSelector(element: PillNavElement): element is PillTagSelectorConfig {
+		return 'type' in element && element.type === 'tag-selector';
+	}
+
 	function isNavItem(element: PillNavElement): element is PillNavItem {
 		return 'href' in element;
 	}
@@ -468,6 +474,8 @@
 			'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
 		'share-2':
 			'M18 8a3 3 0 100-6 3 3 0 000 6zM6 15a3 3 0 100-6 3 3 0 000 6zM18 22a3 3 0 100-6 3 3 0 000 6zM8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98',
+		filter:
+			'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z',
 	};
 
 	function getIconPath(name: string): string {
@@ -502,7 +510,7 @@
 				</a>
 			{/if}
 
-			<!-- Prepended Elements (Tab Groups, Dividers, Nav Items) -->
+			<!-- Prepended Elements (Tab Groups, Dividers, Nav Items, Tag Selectors) -->
 			{#each prependElements as element}
 				{#if isTabGroup(element)}
 					<PillTabGroup
@@ -516,6 +524,17 @@
 					/>
 				{:else if isDivider(element)}
 					<div class="pill-divider" class:sidebar-divider={isSidebarMode}></div>
+				{:else if isTagSelector(element)}
+					<PillTagSelector
+						tags={element.tags}
+						selectedIds={element.selectedIds}
+						onToggle={element.onToggle}
+						onClear={element.onClear}
+						onCreate={element.onCreate}
+						loading={element.loading}
+						label={element.label}
+						direction={dropdownDirection}
+					/>
 				{:else if isNavItem(element)}
 					<a href={element.href} class="pill glass-pill" class:active={isActive(element.href)}>
 						{#if element.icon}
@@ -597,7 +616,7 @@
 				{/if}
 			{/each}
 
-			<!-- Additional Elements (Tab Groups, Dividers) -->
+			<!-- Additional Elements (Tab Groups, Dividers, Tag Selectors) -->
 			{#each elements as element}
 				{#if isTabGroup(element)}
 					<PillTabGroup
@@ -611,6 +630,17 @@
 					/>
 				{:else if isDivider(element)}
 					<div class="pill-divider" class:sidebar-divider={isSidebarMode}></div>
+				{:else if isTagSelector(element)}
+					<PillTagSelector
+						tags={element.tags}
+						selectedIds={element.selectedIds}
+						onToggle={element.onToggle}
+						onClear={element.onClear}
+						onCreate={element.onCreate}
+						loading={element.loading}
+						label={element.label}
+						direction={dropdownDirection}
+					/>
 				{:else if isNavItem(element)}
 					<a href={element.href} class="pill glass-pill" class:active={isActive(element.href)}>
 						{#if element.icon}

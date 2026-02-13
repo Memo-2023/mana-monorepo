@@ -85,6 +85,7 @@ export {
 	PillNavigation,
 	PillDropdown,
 	PillTabGroup,
+	PillTagSelector,
 	PillTimeRangeSelector,
 	PillViewSwitcher,
 	PillToolbar,
@@ -104,6 +105,8 @@ export type {
 	PillNavigationProps,
 	PillTabOption,
 	PillTabGroupConfig,
+	PillTagItem,
+	PillTagSelectorConfig,
 	ExpandableToolbarProps,
 } from './navigation';
 
