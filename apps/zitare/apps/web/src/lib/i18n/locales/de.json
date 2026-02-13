@@ -5,12 +5,17 @@
 	},
 	"nav": {
 		"home": "Heute",
+		"today": "Heute",
 		"categories": "Kategorien",
 		"favorites": "Favoriten",
 		"lists": "Listen",
 		"search": "Suche",
 		"settings": "Einstellungen",
-		"feedback": "Feedback"
+		"feedback": "Feedback",
+		"menu": "Menü",
+		"allThemes": "Alle Themes",
+		"showNav": "Navigation anzeigen",
+		"hideNav": "Navigation ausblenden"
 	},
 	"home": {
 		"dailyQuote": "Zitat des Tages",
@@ -50,7 +55,11 @@
 		"title": "Suche",
 		"placeholder": "Zitat oder Autor suchen...",
 		"noResults": "Keine Ergebnisse",
-		"results": "{count} Ergebnisse"
+		"results": "{count} Ergebnisse",
+		"searching": "Suche...",
+		"create": "Erstellen",
+		"createList": "als Liste erstellen",
+		"createListDescription": "Neue Liste mit diesem Namen erstellen"
 	},
 	"auth": {
 		"login": "Anmelden",

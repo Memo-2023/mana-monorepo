@@ -5,12 +5,17 @@
 	},
 	"nav": {
 		"home": "Today",
+		"today": "Today",
 		"categories": "Categories",
 		"favorites": "Favorites",
 		"lists": "Lists",
 		"search": "Search",
 		"settings": "Settings",
-		"feedback": "Feedback"
+		"feedback": "Feedback",
+		"menu": "Menu",
+		"allThemes": "All Themes",
+		"showNav": "Show navigation",
+		"hideNav": "Hide navigation"
 	},
 	"home": {
 		"dailyQuote": "Quote of the Day",
@@ -50,7 +55,11 @@
 		"title": "Search",
 		"placeholder": "Search quotes or authors...",
 		"noResults": "No results",
-		"results": "{count} results"
+		"results": "{count} results",
+		"searching": "Searching...",
+		"create": "Create",
+		"createList": "create as list",
+		"createListDescription": "Create a new list with this name"
 	},
 	"auth": {
 		"login": "Sign In",

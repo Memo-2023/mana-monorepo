@@ -8,6 +8,7 @@
 @source "../../../../packages/shared-theme-ui/src";
 @source "../../../../packages/shared-theme-ui/src/components";
 @source "../../../../packages/shared-theme-ui/src/pages";
+@source "../../../../packages/shared-stores/src";
 
 /* Quote-specific styles */
 .quote-text {
