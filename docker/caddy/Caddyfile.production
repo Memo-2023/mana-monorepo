@@ -79,6 +79,17 @@ contacts-api.mana.how {
 }
 
 # ============================================
+# Skilltree App
+# ============================================
+skilltree.mana.how {
+    reverse_proxy localhost:5018
+}
+
+skilltree-api.mana.how {
+    reverse_proxy localhost:3038
+}
+
+# ============================================
 # LLM Playground
 # ============================================
 playground.mana.how {
