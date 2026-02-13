@@ -227,25 +227,42 @@
 		position: absolute;
 		left: 0;
 		right: 0;
-		height: 8px;
+		height: 20px;
 		cursor: ns-resize;
 		opacity: 0;
 		transition: opacity 0.15s ease;
 		z-index: 2;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.resize-handle::after {
+		content: '';
+		width: 32px;
+		height: 4px;
+		background: rgba(255, 255, 255, 0.5);
+		border-radius: 2px;
 	}
 
 	.resize-handle.top {
-		top: 0;
+		top: -6px;
 		border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 	}
 
 	.resize-handle.bottom {
-		bottom: 0;
+		bottom: -6px;
 		border-radius: 0 0 var(--radius-sm) var(--radius-sm);
 	}
 
-	.event-card:hover .resize-handle {
+	.event-card:hover .resize-handle,
+	.event-card.resizing .resize-handle {
 		opacity: 1;
-		background: rgba(255, 255, 255, 0.3);
+		background: rgba(255, 255, 255, 0.15);
+	}
+
+	.event-card:hover .resize-handle::after,
+	.event-card.resizing .resize-handle::after {
+		background: rgba(255, 255, 255, 0.7);
 	}
 </style>

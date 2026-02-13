@@ -23,7 +23,7 @@
 	// Generate a unique key for the overlay to force remount
 	let overlayKey = $state(0);
 
-	function handleQuickCreate(date: Date, position: { x: number; y: number }) {
+	function handleQuickCreate(date: Date, position: { x: number; y: number }, endDate?: Date) {
 		// Close any existing overlay first
 		editingEvent = null;
 
@@ -31,7 +31,8 @@
 
 		// Create draft event immediately so it appears in the grid
 		const defaultCalendar = calendarsStore.defaultCalendar;
-		const endTime = addMinutes(date, settingsStore.defaultEventDuration);
+		// Use provided endDate or calculate from default duration
+		const endTime = endDate ?? addMinutes(date, settingsStore.defaultEventDuration);
 
 		eventsStore.createDraftEvent({
 			calendarId: defaultCalendar?.id || '',

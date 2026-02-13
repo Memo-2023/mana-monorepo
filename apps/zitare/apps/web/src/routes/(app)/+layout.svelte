@@ -3,31 +3,51 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale, _ } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+
+	// Extend QuickInputItem for zitare-specific search results with href navigation
+	interface ZitareSearchItem extends QuickInputItem {
+		href?: string;
+	}
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { quotesStore } from '$lib/stores/quotes.svelte';
+	import { listsStore } from '$lib/stores/lists.svelte';
+	import { zitareSettings } from '$lib/stores/settings.svelte';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
-		EXTENDED_THEME_VARIANTS,
+		createUserSettingsStore,
+		filterHiddenNavItems,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { QUOTES, type Quote } from '@zitare/content';
 
 	// App switcher items
 	const appItems = getPillAppItems('zitare');
 
-	let { children } = $props();
+	// User settings for nav visibility
+	const userSettings = createUserSettingsStore({
+		appId: 'zitare',
+		authUrl: import.meta.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001',
+		getAccessToken: () => authStore.getAccessToken(),
+	});
 
-	let isSidebarMode = $state(false);
-	let isCollapsed = $state(false);
+	let { children } = $props();
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
+
+	// Check if on home page for toolbar visibility
+	let isHomePage = $derived($page.url.pathname === '/');
+
+	// Bottom offset for QuickInputBar
+	let inputBarBottomOffset = $derived(zitareSettings.pillNavCollapsed ? '16px' : '70px');
 
 	// Visible themes in PillNav
 	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS]);
@@ -43,7 +63,7 @@
 		})),
 		{
 			id: 'all-themes',
-			label: 'Alle Themes',
+			label: $_('nav.allThemes'),
 			icon: 'palette',
 			onClick: () => goto('/themes'),
 			active: false,
@@ -66,32 +86,25 @@
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email || 'Menü');
+	let userEmail = $derived(authStore.user?.email || $_('nav.menu'));
 
-	// Navigation items for Zitare
-	const navItems: PillNavItem[] = [
-		{ href: '/', label: 'Heute', icon: 'sun' },
-		{ href: '/categories', label: 'Kategorien', icon: 'grid' },
-		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
-		{ href: '/lists', label: 'Listen', icon: 'list' },
-		{ href: '/search', label: 'Suche', icon: 'search' },
-		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
-	];
+	// Base navigation items for Zitare
+	let baseNavItems = $derived<PillNavItem[]>([
+		{ href: '/', label: $_('nav.today'), icon: 'sun' },
+		{ href: '/categories', label: $_('nav.categories'), icon: 'grid' },
+		{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
+		{ href: '/lists', label: $_('nav.lists'), icon: 'list' },
+		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
+		{ href: '/feedback', label: $_('nav.feedback'), icon: 'chat' },
+	]);
 
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('zitare-nav-sidebar', String(isSidebar));
-		}
-	}
+	// Filter hidden nav items
+	let navItems = $derived(
+		filterHiddenNavItems('zitare', baseNavItems, userSettings.nav.hiddenNavItems || {})
+	);
 
-	function handleCollapsedChange(collapsed: boolean) {
-		isCollapsed = collapsed;
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('zitare-nav-collapsed', String(collapsed));
-		}
-	}
+	// Navigation routes for keyboard shortcuts
+	const navRoutes = ['/', '/categories', '/favorites', '/lists', '/settings', '/feedback'];
 
 	function handleToggleTheme() {
 		theme.toggleMode();
@@ -107,67 +120,202 @@
 		goto('/login');
 	}
 
-	onMount(async () => {
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('zitare-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
+	// QuickInputBar search handler
+	async function handleSearch(query: string): Promise<ZitareSearchItem[]> {
+		if (!query.trim()) return [];
+
+		const results = quotesStore.search(query);
+		return results.slice(0, 10).map((quote: Quote) => ({
+			id: quote.id,
+			title: quotesStore.getText(quote).substring(0, 60) + '...',
+			subtitle: quote.author,
+			icon: 'quote' as const,
+			href: `/quote/${quote.id}`,
+		}));
+	}
+
+	// QuickInputBar select handler
+	function handleSelect(item: ZitareSearchItem) {
+		if (item.href) {
+			goto(item.href);
+		}
+	}
+
+	// QuickInputBar create preview
+	function handleParseCreate(query: string) {
+		if (!query.trim()) return null;
+		return {
+			title: `"${query}" ${$_('search.createList')}`,
+			subtitle: $_('search.createListDescription'),
+		};
+	}
+
+	// QuickInputBar create handler
+	async function handleCreate(query: string) {
+		if (!query.trim() || !authStore.isAuthenticated) return;
+
+		// Create a new list with the query as name
+		await listsStore.createList(query, '');
+		goto('/lists');
+	}
+
+	// Keyboard shortcuts
+	function handleKeydown(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+
+		// Don't interfere with text inputs
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+			return;
 		}
 
-		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem('zitare-nav-collapsed');
-		if (savedCollapsed === 'true') {
-			isCollapsed = true;
+		// Ctrl+1, Ctrl+2, etc. for navigation
+		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
+			const num = parseInt(event.key);
+			if (num >= 1 && num <= navRoutes.length) {
+				event.preventDefault();
+				const route = navRoutes[num - 1];
+				goto(route);
+			}
 		}
 
-		// Load favorites if authenticated
+		// F key - Toggle Immersive Mode (no modifiers)
+		if (
+			(event.key === 'f' || event.key === 'F') &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.shiftKey &&
+			!event.altKey
+		) {
+			event.preventDefault();
+			zitareSettings.toggleImmersiveMode();
+		}
+
+		// N key - New random quote (on home page)
+		if (
+			isHomePage &&
+			(event.key === 'n' || event.key === 'N') &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.shiftKey &&
+			!event.altKey
+		) {
+			event.preventDefault();
+			quotesStore.loadRandomQuote();
+		}
+	}
+
+	// Toggle PillNav visibility (called by FAB)
+	function handlePillNavToggle() {
+		zitareSettings.togglePillNav();
+	}
+
+	onMount(() => {
+		// Initialize settings
+		zitareSettings.initialize();
+
+		// Load user settings and favorites if authenticated
 		if (authStore.isAuthenticated) {
-			await favoritesStore.load();
+			userSettings.load();
+			favoritesStore.load();
+			listsStore.loadLists();
 		}
+
+		// Add keyboard listener
+		window.addEventListener('keydown', handleKeydown);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeydown);
+		};
 	});
 </script>
 
 <div class="layout-container">
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Zitare"
-		homeRoute="/"
-		desktopPosition="bottom"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isSidebarMode}
-		onModeChange={handleModeChange}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLanguageSwitcher={true}
-		{languageItems}
-		{currentLanguageLabel}
-		showLogout={authStore.isAuthenticated}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#8b5cf6"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		manaHref="/mana"
-		profileHref="/profile"
-		allAppsHref="/apps"
+	{#if !zitareSettings.immersiveModeEnabled}
+		<!-- PillNav (shown/hidden via FAB) -->
+		{#if !zitareSettings.pillNavCollapsed}
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="Zitare"
+				homeRoute="/"
+				desktopPosition="bottom"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={authStore.isAuthenticated}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#8b5cf6"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
+				allAppsHref="/apps"
+			/>
+		{/if}
+
+		<!-- Global Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			onCreate={handleCreate}
+			onParseCreate={handleParseCreate}
+			placeholder={$_('search.placeholder')}
+			emptyText={$_('search.noResults')}
+			searchingText={$_('search.searching')}
+			createText={$_('search.create')}
+			appIcon="quote"
+			bottomOffset={inputBarBottomOffset}
+			hasFabRight={true}
+		/>
+
+		<!-- FAB to toggle PillNav visibility -->
+		<button
+			class="pillnav-fab"
+			onclick={handlePillNavToggle}
+			title={zitareSettings.pillNavCollapsed ? $_('nav.showNav') : $_('nav.hideNav')}
+		>
+			{#if zitareSettings.pillNavCollapsed}
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 6h16M4 12h16M4 18h16"
+					/>
+				</svg>
+			{:else}
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			{/if}
+		</button>
+	{/if}
+
+	<!-- Immersive Mode Toggle (always visible) -->
+	<ImmersiveModeToggle
+		isImmersive={zitareSettings.immersiveModeEnabled}
+		onToggle={() => zitareSettings.toggleImmersiveMode()}
 	/>
 
-	<main
-		class="main-content bg-background"
-		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode && !isCollapsed}
-	>
-		<div class="content-wrapper">
+	<!-- Main content -->
+	<main class="main-content bg-background" class:immersive={zitareSettings.immersiveModeEnabled}>
+		<div class="content-wrapper" class:immersive={zitareSettings.immersiveModeEnabled}>
 			{@render children()}
 		</div>
 	</main>
@@ -178,40 +326,91 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
+		position: relative;
 	}
 
 	.main-content {
+		flex: 1;
 		transition: all 300ms ease;
-		position: relative;
-		z-index: 0;
+		padding-bottom: calc(150px + env(safe-area-inset-bottom));
 	}
 
-	.main-content.floating-mode {
-		padding-top: 70px;
-	}
-
-	.main-content.sidebar-mode {
-		padding-left: 180px;
+	.main-content.immersive {
+		padding: 0 !important;
 	}
 
 	.content-wrapper {
-		max-width: 100%;
+		max-width: 900px;
 		margin-left: auto;
 		margin-right: auto;
 		padding: 1rem;
-		position: relative;
-		z-index: 0;
+	}
+
+	.content-wrapper.immersive {
+		max-width: 100%;
+		padding: 0;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	@media (min-width: 640px) {
-		.content-wrapper {
+		.content-wrapper:not(.immersive) {
 			padding: 1.5rem;
 		}
 	}
 
 	@media (min-width: 1024px) {
-		.content-wrapper {
+		.content-wrapper:not(.immersive) {
 			padding: 2rem;
 		}
+	}
+
+	@media (max-width: 768px) {
+		.main-content:not(.immersive) {
+			padding-bottom: calc(160px + env(safe-area-inset-bottom));
+		}
+	}
+
+	/* FAB to toggle PillNav */
+	.pillnav-fab {
+		position: fixed;
+		bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+		right: 1rem;
+		width: 54px;
+		height: 54px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.9);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 50;
+		transition: all 0.2s ease;
+	}
+
+	.pillnav-fab:hover {
+		transform: scale(1.05);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+	}
+
+	.pillnav-fab:active {
+		transform: scale(0.95);
+	}
+
+	:global(.dark) .pillnav-fab {
+		background: rgba(30, 30, 30, 0.9);
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	.fab-icon {
+		width: 24px;
+		height: 24px;
+		color: var(--color-foreground);
 	}
 </style>

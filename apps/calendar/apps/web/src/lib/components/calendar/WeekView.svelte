@@ -45,7 +45,7 @@
 	interface Props {
 		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
 		date?: Date;
-		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onQuickCreate?: (date: Date, position: { x: number; y: number }, endDate?: Date) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 		onTaskClick?: (task: Task) => void;
 	}
@@ -130,6 +130,14 @@
 
 	// Track if we actually moved during drag/resize (to prevent click on simple mousedown/up)
 	let hasMoved = $state(false);
+
+	// Drag-to-Create State
+	let isCreating = $state(false);
+	let createTargetDay = $state<Date | null>(null);
+	let createStartMinutes = $state(0);
+	let createEndMinutes = $state(0);
+	let createPreviewTop = $state(0);
+	let createPreviewHeight = $state(0);
 
 	// Task Drag & Drop State
 	let isTaskDragging = $state(false);
@@ -259,6 +267,40 @@
 	}
 
 	/**
+	 * Calculate live time display during resize
+	 */
+	function getResizePreviewTime(): string {
+		if (!resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return '';
+
+		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		// Calculate from preview position
+		const previewStartMinutes =
+			(resizePreviewTop / 100) * totalVisibleHours * 60 + firstVisibleHour * 60;
+		const previewEndMinutes =
+			previewStartMinutes + (resizePreviewHeight / 100) * totalVisibleHours * 60;
+
+		let startMinutes: number;
+		let endMinutes: number;
+
+		if (resizeEdge === 'top') {
+			startMinutes = Math.round(previewStartMinutes);
+			endMinutes = origEndMinutes;
+		} else {
+			startMinutes = origStartMinutes;
+			endMinutes = Math.round(previewEndMinutes);
+		}
+
+		const startHours = Math.floor(startMinutes / 60);
+		const startMins = startMinutes % 60;
+		const endHours = Math.floor(endMinutes / 60);
+		const endMins = endMinutes % 60;
+
+		return `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')} - ${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+	}
+
+	/**
 	 * Get style for a scheduled task (time-blocking)
 	 */
 	function getTaskStyle(task: Task): string {
@@ -311,18 +353,112 @@
 		}
 	}
 
-	function handleSlotClick(day: Date, hour: number, e: MouseEvent) {
-		// Don't create new event if dragging
-		if (isDragging || isResizing) return;
+	// ========== Drag-to-Create Handlers ==========
+	function startCreate(e: PointerEvent) {
+		// Don't create event if dragging or resizing
+		if (isDragging || isResizing || isTaskDragging || isTaskResizing) return;
 
-		const startTime = new Date(day);
-		startTime.setHours(hour, 0, 0, 0);
-
-		if (onQuickCreate) {
-			onQuickCreate(startTime, { x: e.clientX, y: e.clientY });
-		} else {
-			goto(`/event/new?start=${startTime.toISOString()}`);
+		// Don't start creating if clicking on an event, task, or other interactive element
+		const target = e.target as HTMLElement;
+		if (
+			target.closest(
+				'.event-card, .task-block, .all-day-event, .all-day-block-event, .overflow-indicator, .resize-handle'
+			)
+		) {
+			return;
 		}
+
+		e.preventDefault();
+
+		const day = getDayFromX(e.clientX);
+		if (!day) return;
+
+		const minutes = getMinutesFromY(e.clientY);
+		const snappedMinutes = Math.round(minutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
+
+		isCreating = true;
+		hasMoved = false;
+		createTargetDay = day;
+		createStartMinutes = snappedMinutes;
+		createEndMinutes = snappedMinutes + MINUTES_PER_SLOT;
+
+		updateCreatePreview();
+
+		document.addEventListener('pointermove', handleCreateMove);
+		document.addEventListener('pointerup', handleCreateEnd);
+	}
+
+	function handleCreateMove(e: PointerEvent) {
+		if (!isCreating) return;
+
+		hasMoved = true;
+
+		// Update target day
+		const day = getDayFromX(e.clientX);
+		if (day) {
+			createTargetDay = day;
+		}
+
+		const minutes = getMinutesFromY(e.clientY);
+		const snappedMinutes = Math.round(minutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
+
+		// Allow dragging both up and down from start point
+		if (snappedMinutes >= createStartMinutes) {
+			createEndMinutes = Math.max(snappedMinutes, createStartMinutes + MINUTES_PER_SLOT);
+		} else {
+			createEndMinutes = createStartMinutes + MINUTES_PER_SLOT;
+			createStartMinutes = snappedMinutes;
+		}
+
+		// Clamp to visible hours
+		createStartMinutes = Math.max(firstVisibleHour * 60, createStartMinutes);
+		createEndMinutes = Math.min(lastVisibleHour * 60, createEndMinutes);
+
+		updateCreatePreview();
+	}
+
+	function updateCreatePreview() {
+		createPreviewTop = minutesToPercent(createStartMinutes);
+		const duration = createEndMinutes - createStartMinutes;
+		createPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+	}
+
+	function handleCreateEnd(e: PointerEvent) {
+		document.removeEventListener('pointermove', handleCreateMove);
+		document.removeEventListener('pointerup', handleCreateEnd);
+
+		if (!isCreating || !createTargetDay) {
+			isCreating = false;
+			return;
+		}
+
+		// Calculate final times
+		const startTime = new Date(createTargetDay);
+		startTime.setHours(Math.floor(createStartMinutes / 60), createStartMinutes % 60, 0, 0);
+
+		const endTime = new Date(createTargetDay);
+		endTime.setHours(Math.floor(createEndMinutes / 60), createEndMinutes % 60, 0, 0);
+
+		// Reset state
+		isCreating = false;
+		createTargetDay = null;
+
+		// Open quick create with the calculated times
+		if (onQuickCreate) {
+			onQuickCreate(startTime, { x: e.clientX, y: e.clientY }, endTime);
+		} else {
+			goto(`/event/new?start=${startTime.toISOString()}&end=${endTime.toISOString()}`);
+		}
+
+		hasMoved = false;
+	}
+
+	function getCreatePreviewTime(): string {
+		const startHours = Math.floor(createStartMinutes / 60);
+		const startMins = createStartMinutes % 60;
+		const endHours = Math.floor(createEndMinutes / 60);
+		const endMins = createEndMinutes % 60;
+		return `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')} - ${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 	}
 
 	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
@@ -888,6 +1024,15 @@
 				resizeTask = null;
 				hasMoved = false;
 			}
+			// Cancel creating
+			if (isCreating) {
+				e.preventDefault();
+				document.removeEventListener('pointermove', handleCreateMove);
+				document.removeEventListener('pointerup', handleCreateEnd);
+				isCreating = false;
+				createTargetDay = null;
+				hasMoved = false;
+			}
 		}
 	}
 
@@ -978,16 +1123,19 @@
 					class="day-column"
 					class:today={isToday(day)}
 					class:drop-target={sidebarDropTarget && isSameDay(day, sidebarDropTarget.day)}
+					class:creating={isCreating && createTargetDay && isSameDay(day, createTargetDay)}
+					onpointerdown={startCreate}
 					ondragover={(e) => handleSidebarDragOver(e, day)}
 					ondragleave={handleSidebarDragLeave}
 					ondrop={(e) => handleSidebarDrop(e, day)}
 				>
 					{#each hours as hour}
-						<button
+						<div
 							class="hour-slot"
-							onclick={(e) => handleSlotClick(day, hour, e)}
+							role="button"
+							tabindex="-1"
 							aria-label={`${format(day, 'EEEE', { locale: currentDateLocale })} ${settingsStore.formatHour(hour)}`}
-						></button>
+						></div>
 					{/each}
 
 					<!-- Block-style all-day events -->
@@ -1022,7 +1170,7 @@
 							isResizing={isBeingResized}
 							isSearchHighlighted={searchStore.isEventHighlighted(event.id)}
 							isSearchDimmed={searchStore.isEventDimmed(event.id)}
-							formattedTime={formatEventTimeRange(event)}
+							formattedTime={isBeingResized ? getResizePreviewTime() : formatEventTimeRange(event)}
 							onClick={handleEventClick}
 							onPointerDown={startDrag}
 							onContextMenu={handleEventContextMenu}
@@ -1074,6 +1222,19 @@
 							isDragging={true}
 							formattedTime={formatEventTimeRange(draggedEvent)}
 						/>
+					{/if}
+
+					<!-- Create preview (drag-to-create) -->
+					{#if isCreating && createTargetDay && isSameDay(day, createTargetDay)}
+						<div
+							class="create-preview"
+							style="top: {createPreviewTop}%; height: {createPreviewHeight}%; background-color: {calendarsStore.getColor(
+								calendarsStore.defaultCalendar?.id || ''
+							)};"
+						>
+							<span class="event-time">{getCreatePreviewTime()}</span>
+							<span class="event-title">(Neuer Termin)</span>
+						</div>
 					{/if}
 
 					<!-- Overflow indicators for events outside visible time range -->
@@ -1351,6 +1512,39 @@
 
 	.hour-slot:hover {
 		background: hsl(var(--color-muted) / 0.3);
+	}
+
+	/* Create preview (drag-to-create) */
+	.create-preview {
+		position: absolute;
+		left: 2px;
+		right: 2px;
+		padding: 2px 4px;
+		border-radius: var(--radius-sm);
+		text-align: left;
+		z-index: 50;
+		overflow: hidden;
+		color: white;
+		opacity: 0.85;
+		border: 2px dashed rgba(255, 255, 255, 0.5);
+		pointer-events: none;
+	}
+
+	.create-preview .event-time {
+		display: block;
+		font-size: 0.6rem;
+		opacity: 0.9;
+	}
+
+	.create-preview .event-title {
+		display: block;
+		font-size: 0.7rem;
+		font-weight: 500;
+		opacity: 0.8;
+	}
+
+	.day-column.creating {
+		cursor: ns-resize;
 	}
 
 	.time-indicator {

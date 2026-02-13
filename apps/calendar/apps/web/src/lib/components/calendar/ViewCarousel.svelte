@@ -14,7 +14,7 @@
 	import type { CalendarEvent } from '@calendar/shared';
 
 	interface Props {
-		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onQuickCreate?: (date: Date, position: { x: number; y: number }, endDate?: Date) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 		disableSwipe?: boolean;
 	}

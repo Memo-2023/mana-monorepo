@@ -38,7 +38,7 @@
 	interface Props {
 		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
 		date?: Date;
-		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onQuickCreate?: (date: Date, position: { x: number; y: number }, endDate?: Date) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 	}
 

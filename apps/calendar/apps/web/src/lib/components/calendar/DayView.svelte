@@ -30,7 +30,7 @@
 	interface Props {
 		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
 		date?: Date;
-		onQuickCreate?: (date: Date, position: { x: number; y: number }) => void;
+		onQuickCreate?: (date: Date, position: { x: number; y: number }, endDate?: Date) => void;
 		onEventClick?: (event: CalendarEvent) => void;
 		onTaskClick?: (task: Task) => void;
 	}
@@ -163,6 +163,15 @@
 
 	// Track if we actually moved during drag/resize (to prevent click on simple mousedown/up)
 	let hasMoved = $state(false);
+
+	// ============================================================================
+	// Drag-to-Create State
+	// ============================================================================
+	let isCreating = $state(false);
+	let createStartMinutes = $state(0);
+	let createEndMinutes = $state(0);
+	let createPreviewTop = $state(0);
+	let createPreviewHeight = $state(0);
 
 	// ============================================================================
 	// Task Drag & Drop State
@@ -395,10 +404,16 @@
 		resizeOriginalEnd = null;
 		resizeOffsetMinutes = 0;
 		hasMoved = false;
+		// Creating cleanup
+		isCreating = false;
+		createStartMinutes = 0;
+		createEndMinutes = 0;
 		document.removeEventListener('pointermove', handleDragMove);
 		document.removeEventListener('pointerup', handleDragEnd);
 		document.removeEventListener('pointermove', handleResizeMove);
 		document.removeEventListener('pointerup', handleResizeEnd);
+		document.removeEventListener('pointermove', handleCreateMove);
+		document.removeEventListener('pointerup', handleCreateEnd);
 		// Task cleanup
 		isTaskDragging = false;
 		draggedTask = null;
@@ -630,7 +645,10 @@
 	// Keyboard Handling
 	// ============================================================================
 	function handleKeyDown(e: KeyboardEvent) {
-		if (e.key === 'Escape' && (isDragging || isResizing || isTaskDragging || isTaskResizing)) {
+		if (
+			e.key === 'Escape' &&
+			(isDragging || isResizing || isTaskDragging || isTaskResizing || isCreating)
+		) {
 			e.preventDefault();
 			cleanup();
 		}
@@ -661,6 +679,40 @@
 
 	function formatEventTime(event: CalendarEvent): string {
 		return `${format(toDate(event.startTime), 'HH:mm')} - ${format(toDate(event.endTime), 'HH:mm')}`;
+	}
+
+	/**
+	 * Calculate live time display during resize
+	 */
+	function getResizePreviewTime(): string {
+		if (!resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return '';
+
+		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		// Calculate from preview position
+		const previewStartMinutes =
+			(resizePreviewTop / 100) * totalVisibleHours * 60 + firstVisibleHour * 60;
+		const previewEndMinutes =
+			previewStartMinutes + (resizePreviewHeight / 100) * totalVisibleHours * 60;
+
+		let startMinutes: number;
+		let endMinutes: number;
+
+		if (resizeEdge === 'top') {
+			startMinutes = Math.round(previewStartMinutes);
+			endMinutes = origEndMinutes;
+		} else {
+			startMinutes = origStartMinutes;
+			endMinutes = Math.round(previewEndMinutes);
+		}
+
+		const startHours = Math.floor(startMinutes / 60);
+		const startMins = startMinutes % 60;
+		const endHours = Math.floor(endMinutes / 60);
+		const endMins = endMinutes % 60;
+
+		return `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')} - ${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 	}
 
 	/**
@@ -709,18 +761,100 @@
 		}
 	}
 
-	function handleSlotClick(hour: number, e: MouseEvent) {
+	// ============================================================================
+	// Drag-to-Create Handlers
+	// ============================================================================
+	function startCreate(e: PointerEvent) {
 		// Don't create event if dragging or resizing
-		if (isDragging || isResizing) return;
+		if (isDragging || isResizing || isTaskDragging || isTaskResizing) return;
 
-		const startTime = new Date(effectiveDate);
-		startTime.setHours(hour, 0, 0, 0);
-
-		if (onQuickCreate) {
-			onQuickCreate(startTime, { x: e.clientX, y: e.clientY });
-		} else {
-			goto(`/event/new?start=${startTime.toISOString()}`);
+		// Don't start creating if clicking on an event, task, or other interactive element
+		const target = e.target as HTMLElement;
+		if (
+			target.closest(
+				'.event-card, .task-block, .all-day-event, .all-day-block-event, .overflow-indicator, .resize-handle'
+			)
+		) {
+			return;
 		}
+
+		e.preventDefault();
+
+		const minutes = getMinutesFromY(e.clientY);
+		const snappedMinutes = snapToGrid(minutes);
+
+		isCreating = true;
+		hasMoved = false;
+		createStartMinutes = snappedMinutes;
+		createEndMinutes = snappedMinutes + SNAP_MINUTES; // Start with 15 min duration
+
+		updateCreatePreview();
+
+		document.addEventListener('pointermove', handleCreateMove);
+		document.addEventListener('pointerup', handleCreateEnd);
+	}
+
+	function handleCreateMove(e: PointerEvent) {
+		if (!isCreating) return;
+
+		hasMoved = true;
+		const minutes = getMinutesFromY(e.clientY);
+		const snappedMinutes = snapToGrid(minutes);
+
+		// Allow dragging both up and down from start point
+		if (snappedMinutes >= createStartMinutes) {
+			createEndMinutes = Math.max(snappedMinutes, createStartMinutes + SNAP_MINUTES);
+		} else {
+			// Dragging upward - swap start and end
+			createEndMinutes = createStartMinutes + SNAP_MINUTES;
+			createStartMinutes = snappedMinutes;
+		}
+
+		// Clamp to visible hours
+		createStartMinutes = Math.max(firstVisibleHour * 60, createStartMinutes);
+		createEndMinutes = Math.min(lastVisibleHour * 60, createEndMinutes);
+
+		updateCreatePreview();
+	}
+
+	function updateCreatePreview() {
+		createPreviewTop = minutesToPercent(createStartMinutes);
+		const duration = createEndMinutes - createStartMinutes;
+		createPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
+	}
+
+	function handleCreateEnd(e: PointerEvent) {
+		document.removeEventListener('pointermove', handleCreateMove);
+		document.removeEventListener('pointerup', handleCreateEnd);
+
+		if (!isCreating) return;
+
+		// Calculate final times
+		const startTime = new Date(effectiveDate);
+		startTime.setHours(Math.floor(createStartMinutes / 60), createStartMinutes % 60, 0, 0);
+
+		const endTime = new Date(effectiveDate);
+		endTime.setHours(Math.floor(createEndMinutes / 60), createEndMinutes % 60, 0, 0);
+
+		// Reset state
+		isCreating = false;
+
+		// Open quick create with the calculated times
+		if (onQuickCreate) {
+			onQuickCreate(startTime, { x: e.clientX, y: e.clientY }, endTime);
+		} else {
+			goto(`/event/new?start=${startTime.toISOString()}&end=${endTime.toISOString()}`);
+		}
+
+		hasMoved = false;
+	}
+
+	function getCreatePreviewTime(): string {
+		const startHours = Math.floor(createStartMinutes / 60);
+		const startMins = createStartMinutes % 60;
+		const endHours = Math.floor(createEndMinutes / 60);
+		const endMins = createEndMinutes % 60;
+		return `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')} - ${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 	}
 
 	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
@@ -788,17 +922,15 @@
 			class="day-column"
 			class:today={isToday(effectiveDate)}
 			class:drop-target={isSidebarDropTarget}
+			class:creating={isCreating}
 			bind:this={dayColumnRef}
+			onpointerdown={startCreate}
 			ondragover={handleSidebarDragOver}
 			ondragleave={handleSidebarDragLeave}
 			ondrop={handleSidebarDrop}
 		>
 			{#each hours as hour}
-				<button
-					class="hour-slot"
-					onclick={(e) => handleSlotClick(hour, e)}
-					aria-label={`${hour}:00 Uhr`}
-				></button>
+				<div class="hour-slot" role="button" tabindex="-1" aria-label={`${hour}:00 Uhr`}></div>
 			{/each}
 
 			<!-- Block-style all-day events -->
@@ -830,7 +962,7 @@
 					isResizing={isBeingResized}
 					isSearchHighlighted={searchStore.isEventHighlighted(event.id)}
 					isSearchDimmed={searchStore.isEventDimmed(event.id)}
-					formattedTime={formatEventTime(event)}
+					formattedTime={isBeingResized ? getResizePreviewTime() : formatEventTime(event)}
 					onClick={handleEventClick}
 					onPointerDown={startDrag}
 					onContextMenu={handleEventContextMenu}
@@ -857,6 +989,19 @@
 						isResizing={isTaskBeingResized}
 					/>
 				{/each}
+			{/if}
+
+			<!-- Create preview (drag-to-create) -->
+			{#if isCreating}
+				<div
+					class="create-preview"
+					style="top: {createPreviewTop}%; height: {createPreviewHeight}%; background-color: {calendarsStore.getColor(
+						calendarsStore.defaultCalendar?.id || ''
+					)};"
+				>
+					<span class="event-time">{getCreatePreviewTime()}</span>
+					<span class="event-title">(Neuer Termin)</span>
+				</div>
 			{/if}
 
 			<!-- Overflow indicators for events outside visible time range -->
@@ -1082,6 +1227,39 @@
 
 	.hour-slot:hover {
 		background: hsl(var(--color-muted) / 0.2);
+	}
+
+	/* Create preview (drag-to-create) */
+	.create-preview {
+		position: absolute;
+		left: 2px;
+		right: 2px;
+		padding: 2px 4px;
+		border-radius: var(--radius-sm);
+		text-align: left;
+		z-index: 50;
+		overflow: hidden;
+		color: white;
+		opacity: 0.85;
+		border: 2px dashed rgba(255, 255, 255, 0.5);
+		pointer-events: none;
+	}
+
+	.create-preview .event-time {
+		display: block;
+		font-size: 0.6rem;
+		opacity: 0.9;
+	}
+
+	.create-preview .event-title {
+		display: block;
+		font-size: 0.7rem;
+		font-weight: 500;
+		opacity: 0.8;
+	}
+
+	.day-column.creating {
+		cursor: ns-resize;
 	}
 
 	/* Overflow indicators for events outside visible time range */
