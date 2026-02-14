@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { matrixStore, type SimpleMessage, type RoomMember } from '$lib/matrix';
+	import { userSettings } from '$lib/stores/userSettings.svelte';
 	import {
 		PaperPlaneTilt,
 		Paperclip,
@@ -47,59 +48,121 @@
 
 	// Emoji picker state
 	let showEmojiPicker = $state(false);
-	const RECENT_EMOJIS_KEY = 'matrix_recent_emojis';
 	const MAX_RECENT_EMOJIS = 16; // 2 rows of 8
 
-	// Load recent emojis from localStorage
-	function loadRecentEmojis(): string[] {
-		if (typeof localStorage === 'undefined') return [];
-		try {
-			const stored = localStorage.getItem(RECENT_EMOJIS_KEY);
-			return stored ? JSON.parse(stored) : [];
-		} catch {
-			return [];
-		}
-	}
+	// Recent emojis from user settings (synced across apps)
+	let recentEmojis = $derived(userSettings.globalSettings?.recentEmojis ?? []);
 
-	// Save recent emojis to localStorage
-	function saveRecentEmojis(emojis: string[]) {
-		if (typeof localStorage === 'undefined') return;
-		try {
-			localStorage.setItem(RECENT_EMOJIS_KEY, JSON.stringify(emojis));
-		} catch {
-			// Ignore storage errors
-		}
-	}
-
-	// Add emoji to recent list
+	// Add emoji to recent list (saves to mana-core-auth)
 	function addToRecentEmojis(emoji: string) {
-		const recent = loadRecentEmojis();
+		const current = userSettings.globalSettings?.recentEmojis ?? [];
 		// Remove if already exists, then add to front
-		const filtered = recent.filter((e) => e !== emoji);
+		const filtered = current.filter((e) => e !== emoji);
 		const updated = [emoji, ...filtered].slice(0, MAX_RECENT_EMOJIS);
-		saveRecentEmojis(updated);
-		recentEmojis = updated;
+		// Update server (optimistic update handled by store)
+		userSettings.updateGlobal({ recentEmojis: updated });
 	}
-
-	let recentEmojis = $state<string[]>([]);
-
-	// Load recent emojis on mount (browser only)
-	$effect(() => {
-		recentEmojis = loadRecentEmojis();
-	});
 
 	const commonEmojis = [
 		// Smileys
-		'😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉', '😌',
-		'😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤗',
-		'🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬',
-		'😮', '🤯', '😳', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '😈', '👿',
+		'😀',
+		'😃',
+		'😄',
+		'😁',
+		'😅',
+		'😂',
+		'🤣',
+		'😊',
+		'😇',
+		'🙂',
+		'😉',
+		'😌',
+		'😍',
+		'🥰',
+		'😘',
+		'😗',
+		'😙',
+		'😚',
+		'😋',
+		'😛',
+		'😜',
+		'🤪',
+		'😝',
+		'🤗',
+		'🤭',
+		'🤫',
+		'🤔',
+		'🤐',
+		'🤨',
+		'😐',
+		'😑',
+		'😶',
+		'😏',
+		'😒',
+		'🙄',
+		'😬',
+		'😮',
+		'🤯',
+		'😳',
+		'🥺',
+		'😢',
+		'😭',
+		'😤',
+		'😠',
+		'😡',
+		'🤬',
+		'😈',
+		'👿',
 		// Gestures
-		'👍', '👎', '👌', '🤌', '✌️', '🤞', '🤟', '🤘', '🤙', '👋', '🖐️', '✋',
-		'👏', '🙌', '👐', '🤲', '🙏', '💪', '🦾', '❤️', '🧡', '💛', '💚', '💙',
+		'👍',
+		'👎',
+		'👌',
+		'🤌',
+		'✌️',
+		'🤞',
+		'🤟',
+		'🤘',
+		'🤙',
+		'👋',
+		'🖐️',
+		'✋',
+		'👏',
+		'🙌',
+		'👐',
+		'🤲',
+		'🙏',
+		'💪',
+		'🦾',
+		'❤️',
+		'🧡',
+		'💛',
+		'💚',
+		'💙',
 		// Objects & Symbols
-		'🔥', '✨', '💫', '⭐', '🌟', '💯', '💢', '💥', '💦', '💨', '🎉', '🎊',
-		'🎁', '🏆', '🥇', '🎯', '💡', '📌', '📍', '✅', '❌', '⚠️', '❗', '❓',
+		'🔥',
+		'✨',
+		'💫',
+		'⭐',
+		'🌟',
+		'💯',
+		'💢',
+		'💥',
+		'💦',
+		'💨',
+		'🎉',
+		'🎊',
+		'🎁',
+		'🏆',
+		'🥇',
+		'🎯',
+		'💡',
+		'📌',
+		'📍',
+		'✅',
+		'❌',
+		'⚠️',
+		'❗',
+		'❓',
 	];
 
 	function insertEmoji(emoji: string) {
@@ -657,7 +720,9 @@
 					<!-- Recent/Frequently used emojis -->
 					{#if recentEmojis.length > 0}
 						<div class="mb-2">
-							<p class="text-[10px] text-muted-foreground uppercase font-medium px-1 mb-1">Häufig benutzt</p>
+							<p class="text-[10px] text-muted-foreground uppercase font-medium px-1 mb-1">
+								Häufig benutzt
+							</p>
 							<div class="grid grid-cols-8 gap-1">
 								{#each recentEmojis as emoji}
 									<button

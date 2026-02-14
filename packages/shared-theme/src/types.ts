@@ -292,6 +292,8 @@ export interface GlobalSettings {
 	locale: string;
 	/** General preferences (start pages, sounds, etc.) */
 	general: GeneralSettings;
+	/** Recently used emojis (shared across all apps) - max 16 */
+	recentEmojis?: string[];
 }
 
 /**
@@ -363,6 +365,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
 	theme: { mode: 'system', colorScheme: 'ocean', pinnedThemes: [] },
 	locale: 'de',
 	general: DEFAULT_GENERAL_SETTINGS,
+	recentEmojis: [],
 };
 
 /**

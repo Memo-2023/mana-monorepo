@@ -264,6 +264,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 					...settings.general?.startPages,
 				},
 			},
+			recentEmojis: settings.recentEmojis ?? globalSettings.recentEmojis,
 		};
 		saveToStorage();
 

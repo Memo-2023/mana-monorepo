@@ -55,6 +55,11 @@ export class UpdateGlobalSettingsDto {
 	@IsOptional()
 	@IsString()
 	locale?: string;
+
+	@IsOptional()
+	@IsArray()
+	@IsString({ each: true })
+	recentEmojis?: string[];
 }
 
 // App override update
@@ -115,6 +120,7 @@ export interface GlobalSettings {
 	nav: NavSettings;
 	theme: ThemeSettings;
 	locale: string;
+	recentEmojis?: string[];
 }
 
 export interface AppOverride {

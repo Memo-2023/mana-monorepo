@@ -8,6 +8,12 @@
 	import { CircleNotch, WarningCircle, ArrowsClockwise } from '@manacore/shared-icons';
 	import { theme } from '$lib/stores/theme';
 	import {
+		userSettings,
+		setAccessToken,
+		clearAccessToken,
+		loadStoredAccessToken,
+	} from '$lib/stores/userSettings.svelte';
+	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
 		EXTENDED_THEME_VARIANTS,
@@ -22,6 +28,51 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+
+	const AUTH_URL = 'https://auth.mana.how';
+
+	/**
+	 * Exchange session cookie for JWT token from mana-core-auth
+	 * This enables cross-app settings sync after Matrix SSO login
+	 */
+	async function fetchManaCoreToken(): Promise<boolean> {
+		try {
+			const response = await fetch(`${AUTH_URL}/api/v1/auth/session-to-token`, {
+				method: 'POST',
+				credentials: 'include', // Send session cookie
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				if (data.accessToken) {
+					setAccessToken(data.accessToken);
+					return true;
+				}
+			}
+		} catch (e) {
+			console.warn('Could not exchange session for token:', e);
+		}
+		return false;
+	}
+
+	/**
+	 * Initialize user settings (load from mana-core-auth)
+	 */
+	async function initUserSettings(): Promise<void> {
+		// First try to load stored token
+		const storedToken = loadStoredAccessToken();
+
+		// If no stored token, try to exchange session cookie
+		if (!storedToken) {
+			await fetchManaCoreToken();
+		}
+
+		// Load user settings (will use the token we just set)
+		await userSettings.load();
+	}
 
 	// App switcher items
 	const appItems = getPillAppItems('matrix');
@@ -120,6 +171,7 @@
 
 	function handleLogout() {
 		matrixStore.logout();
+		clearAccessToken();
 		goto('/login');
 	}
 
@@ -140,6 +192,8 @@
 
 		// Check if already initialized
 		if (matrixStore.isReady) {
+			// Matrix ready, initialize user settings in background
+			initUserSettings();
 			loading = false;
 			return;
 		}
@@ -166,6 +220,10 @@
 
 				if (!initialized) {
 					initError = matrixStore.error || 'Failed to initialize Matrix client';
+				} else {
+					// Matrix ready after SSO, fetch mana-core-auth token and load settings
+					// This happens after SSO so the session cookie should be available
+					initUserSettings();
 				}
 
 				loading = false;
@@ -193,6 +251,9 @@
 			}
 			// Has credentials but failed to init
 			initError = matrixStore.error || 'Failed to connect to Matrix server';
+		} else {
+			// Matrix ready, initialize user settings in background
+			initUserSettings();
 		}
 
 		loading = false;

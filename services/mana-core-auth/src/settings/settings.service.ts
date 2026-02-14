@@ -91,6 +91,7 @@ export class SettingsService {
 			nav: { ...current.globalSettings.nav, ...dto.nav },
 			theme: { ...current.globalSettings.theme, ...dto.theme },
 			locale: dto.locale ?? current.globalSettings.locale,
+			recentEmojis: dto.recentEmojis ?? current.globalSettings.recentEmojis,
 		};
 
 		// Update in database
