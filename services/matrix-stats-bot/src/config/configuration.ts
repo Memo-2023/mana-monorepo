@@ -15,6 +15,9 @@ export default () => ({
 	database: {
 		url: process.env.DATABASE_URL || '',
 	},
+	prometheus: {
+		url: process.env.PROMETHEUS_URL || 'http://localhost:9090',
+	},
 });
 
 // Website IDs from Umami - update these with actual UUIDs

@@ -8,7 +8,7 @@ Matrix Stats Bot delivers analytics from Umami (self-hosted) via Matrix. GDPR-co
 
 - **Framework**: NestJS 10
 - **Matrix**: matrix-bot-sdk
-- **Analytics**: Umami API
+- **Analytics**: Umami API + Prometheus/VictoriaMetrics
 - **Scheduling**: @nestjs/schedule
 
 ## Commands
@@ -22,13 +22,30 @@ pnpm type-check       # TypeScript check
 
 ## Matrix Commands
 
+### Analytics (Umami)
+
 | Command | Description |
 |---------|-------------|
 | `!stats` | Overview of all apps (30 days) |
 | `!today` | Today's statistics |
 | `!week` | This week's statistics |
 | `!realtime` | Active visitors right now |
-| `!users` | Registered user statistics |
+
+### Infrastructure (Prometheus)
+
+| Command | Description |
+|---------|-------------|
+| `!system` | Mac Mini status (CPU, RAM, Disk, Uptime) |
+| `!services` | Backend service health (UP/DOWN) |
+| `!traffic` | HTTP traffic & latency per service |
+| `!db` | PostgreSQL & Redis status |
+| `!growth` | User growth statistics |
+
+### General
+
+| Command | Description |
+|---------|-------------|
+| `!status` | Account status |
 | `!help` | Show available commands |
 
 ## Scheduled Reports
@@ -53,6 +70,9 @@ MATRIX_REPORT_ROOM_ID=!roomid:mana.how
 UMAMI_API_URL=http://umami:3000
 UMAMI_USERNAME=admin
 UMAMI_PASSWORD=xxx
+
+# Prometheus / VictoriaMetrics
+PROMETHEUS_URL=http://victoriametrics:8428
 
 # Database (for user counts)
 DATABASE_URL=postgresql://...
