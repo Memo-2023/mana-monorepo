@@ -33,6 +33,14 @@ interface TimerMessageTracker {
 	startedAt: Date;
 }
 
+/**
+ * Room topic tracking for timer display
+ */
+interface RoomTopicTracker {
+	originalTopic: string;
+	timerId: string;
+}
+
 @Injectable()
 export class MatrixService extends BaseMatrixService implements OnModuleDestroy {
 	// Demo token for development (TODO: implement proper auth)
@@ -42,6 +50,9 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 	private readonly activeTimerMessages = new Map<string, TimerMessageTracker>();
 	private timerUpdateInterval: NodeJS.Timeout | null = null;
 	private readonly UPDATE_INTERVAL_MS = 10000; // Update every 10 seconds
+
+	// Track original room topics for restoration when timer ends
+	private readonly originalRoomTopics = new Map<string, RoomTopicTracker>();
 
 	// Note: We override COMMON_KEYWORDS' cancel->cancel with stop->stop for this bot
 	private readonly keywordDetector = new KeywordCommandDetector([
@@ -120,8 +131,9 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 			const timer = await this.clockService.getTimer(tracker.timerId, tracker.token);
 
 			if (!timer) {
-				// Timer deleted, remove tracking
+				// Timer deleted, remove tracking and restore topic
 				this.activeTimerMessages.delete(tracker.timerId);
+				await this.restoreRoomTopic(tracker.roomId);
 				return;
 			}
 
@@ -129,15 +141,16 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 			const remainingSeconds = this.calculateRemainingSeconds(timer);
 
 			if (timer.status === 'finished' || remainingSeconds <= 0) {
-				// Timer finished - send final message and stop tracking
+				// Timer finished - send final message, restore topic, and stop tracking
 				const finalMessage = this.formatTimerFinishedMessage(tracker);
 				await this.editMessage(tracker.roomId, tracker.eventId, finalMessage);
+				await this.restoreRoomTopic(tracker.roomId);
 				this.activeTimerMessages.delete(tracker.timerId);
 				return;
 			}
 
 			if (timer.status === 'paused') {
-				// Timer paused - update message but keep tracking
+				// Timer paused - update message and topic but keep tracking
 				const pausedMessage = this.formatTimerMessage(
 					remainingSeconds,
 					tracker.durationSeconds,
@@ -145,10 +158,18 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 					'paused'
 				);
 				await this.editMessage(tracker.roomId, tracker.eventId, pausedMessage);
+				await this.updateRoomTopicWithTimer(
+					tracker.roomId,
+					tracker.timerId,
+					remainingSeconds,
+					tracker.durationSeconds,
+					tracker.label,
+					'paused'
+				);
 				return;
 			}
 
-			// Timer running - update with current progress
+			// Timer running - update message and topic with current progress
 			const runningMessage = this.formatTimerMessage(
 				remainingSeconds,
 				tracker.durationSeconds,
@@ -156,6 +177,14 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 				'running'
 			);
 			await this.editMessage(tracker.roomId, tracker.eventId, runningMessage);
+			await this.updateRoomTopicWithTimer(
+				tracker.roomId,
+				tracker.timerId,
+				remainingSeconds,
+				tracker.durationSeconds,
+				tracker.label,
+				'running'
+			);
 		} catch (error) {
 			// Token might have expired or API error
 			this.logger.warn(`Timer update failed for ${tracker.timerId}: ${error}`);
@@ -245,6 +274,88 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 		const empty = '░'.repeat(emptyCount);
 
 		return `${filled}${empty}`;
+	}
+
+	/**
+	 * Get current room topic
+	 */
+	private async getRoomTopic(roomId: string): Promise<string> {
+		try {
+			const client = this.getClient();
+			const state = await client.getRoomStateEvent(roomId, 'm.room.topic', '');
+			return state?.topic || '';
+		} catch {
+			// Room might not have a topic set
+			return '';
+		}
+	}
+
+	/**
+	 * Set room topic
+	 */
+	private async setRoomTopic(roomId: string, topic: string): Promise<void> {
+		try {
+			const client = this.getClient();
+			await client.sendStateEvent(roomId, 'm.room.topic', '', { topic });
+		} catch (error) {
+			this.logger.warn(`Failed to set room topic for ${roomId}: ${error}`);
+		}
+	}
+
+	/**
+	 * Format timer status for room topic
+	 */
+	private formatTimerTopic(
+		remainingSeconds: number,
+		totalSeconds: number,
+		label: string | null,
+		status: 'running' | 'paused'
+	): string {
+		const remaining = this.clockService.formatDuration(remainingSeconds);
+		const percentage = Math.round((1 - remainingSeconds / totalSeconds) * 100);
+
+		const statusIcon = status === 'running' ? '▶️' : '⏸️';
+		let topic = `${statusIcon} Timer: ${remaining} (${percentage}%)`;
+
+		if (label) {
+			topic += ` - ${label}`;
+		}
+
+		return topic;
+	}
+
+	/**
+	 * Update room topic with timer status
+	 */
+	private async updateRoomTopicWithTimer(
+		roomId: string,
+		timerId: string,
+		remainingSeconds: number,
+		totalSeconds: number,
+		label: string | null,
+		status: 'running' | 'paused'
+	): Promise<void> {
+		// Save original topic if not already saved for this room
+		if (!this.originalRoomTopics.has(roomId)) {
+			const originalTopic = await this.getRoomTopic(roomId);
+			this.originalRoomTopics.set(roomId, { originalTopic, timerId });
+		}
+
+		// Update topic with timer status
+		const timerTopic = this.formatTimerTopic(remainingSeconds, totalSeconds, label, status);
+		await this.setRoomTopic(roomId, timerTopic);
+	}
+
+	/**
+	 * Restore original room topic when timer ends
+	 */
+	private async restoreRoomTopic(roomId: string): Promise<void> {
+		const tracker = this.originalRoomTopics.get(roomId);
+		if (tracker) {
+			await this.setRoomTopic(roomId, tracker.originalTopic);
+			this.originalRoomTopics.delete(roomId);
+			this.logger.log(`Restored original topic for room ${roomId}`);
+		}
 	}
 
 	protected getConfig(): MatrixBotConfig {
@@ -492,6 +603,16 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 				label,
 				startedAt: new Date(),
 			});
+
+			// Set initial room topic with timer status
+			await this.updateRoomTopicWithTimer(
+				roomId,
+				timer.id,
+				durationSeconds,
+				durationSeconds,
+				label,
+				'running'
+			);
 
 			this.logger.log(`Started tracking timer ${timer.id} for live updates`);
 		} catch (error) {
