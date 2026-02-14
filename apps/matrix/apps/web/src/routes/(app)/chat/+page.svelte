@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { matrixStore, type SimpleMessage } from '$lib/matrix';
-	import { RoomList, RoomHeader, Timeline, MessageInput } from '$lib/components/chat';
+	import {
+		RoomList,
+		RoomHeader,
+		Timeline,
+		MessageInput,
+		DropZoneOverlay,
+	} from '$lib/components/chat';
 	import CreateRoomDialog from '$lib/components/chat/CreateRoomDialog.svelte';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
 	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
@@ -19,6 +25,10 @@
 	let showRoomSettings = $state(false);
 	let showSearch = $state(false);
 	let showForward = $state(false);
+
+	// Drag & Drop state
+	let isDragging = $state(false);
+	let dragCounter = $state(0);
 
 	// Reply/Edit/Forward state
 	let replyTo = $state<SimpleMessage | null>(null);
@@ -132,6 +142,41 @@
 	function handleCallReject() {
 		// Call rejected - UI will update automatically
 	}
+
+	// Drag & Drop handlers
+	function handleDragEnter(e: DragEvent) {
+		e.preventDefault();
+		dragCounter++;
+		if (e.dataTransfer?.types.includes('Files')) {
+			isDragging = true;
+		}
+	}
+
+	function handleDragLeave(e: DragEvent) {
+		e.preventDefault();
+		dragCounter--;
+		if (dragCounter === 0) {
+			isDragging = false;
+		}
+	}
+
+	function handleDragOver(e: DragEvent) {
+		e.preventDefault();
+	}
+
+	async function handleDrop(e: DragEvent) {
+		e.preventDefault();
+		isDragging = false;
+		dragCounter = 0;
+
+		const files = e.dataTransfer?.files;
+		if (!files?.length || !matrixStore.currentRoom) return;
+
+		// Upload all dropped files sequentially
+		for (const file of files) {
+			await matrixStore.sendFile(file);
+		}
+	}
 </script>
 
 {#if isMobile}
@@ -228,7 +273,16 @@
 		</aside>
 
 		<!-- Main Chat Area -->
-		<main class="flex flex-1 min-h-0 flex-col overflow-hidden bg-background">
+		<main
+			class="flex flex-1 min-h-0 flex-col overflow-hidden bg-background relative"
+			ondragenter={handleDragEnter}
+			ondragleave={handleDragLeave}
+			ondragover={handleDragOver}
+			ondrop={handleDrop}
+		>
+			<!-- Drop Zone Overlay -->
+			<DropZoneOverlay visible={isDragging && !!matrixStore.currentRoom} />
+
 			{#if matrixStore.currentRoom}
 				<!-- Room Header -->
 				<RoomHeader

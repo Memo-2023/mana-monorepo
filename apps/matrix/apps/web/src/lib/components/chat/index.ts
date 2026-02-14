@@ -7,3 +7,4 @@ export { default as MessageInput } from './MessageInput.svelte';
 export { default as TypingIndicator } from './TypingIndicator.svelte';
 export { default as CreateRoomDialog } from './CreateRoomDialog.svelte';
 export { default as RoomSettingsPanel } from './RoomSettingsPanel.svelte';
+export { default as DropZoneOverlay } from './DropZoneOverlay.svelte';
