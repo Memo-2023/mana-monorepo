@@ -958,7 +958,10 @@ services:
       start_period: 40s
 
   matrix-tts-bot:
-    image: ghcr.io/memo-2023/matrix-tts-bot:latest
+    build:
+      context: .
+      dockerfile: services/matrix-tts-bot/Dockerfile
+    image: matrix-tts-bot:local
     platform: linux/amd64
     container_name: mana-matrix-bot-tts
     restart: always
