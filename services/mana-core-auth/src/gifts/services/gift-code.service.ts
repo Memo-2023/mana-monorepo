@@ -319,7 +319,10 @@ export class GiftCodeService {
 					cancelled: 'This gift code has been cancelled',
 					refunded: 'This gift code has been refunded',
 				};
-				return { success: false, error: statusMessages[giftCode.status] || 'Gift code is not active' };
+				return {
+					success: false,
+					error: statusMessages[giftCode.status] || 'Gift code is not active',
+				};
 			}
 
 			// 3. Check expiration
@@ -345,7 +348,8 @@ export class GiftCodeService {
 
 			// 5. Check personalization
 			if (giftCode.targetEmail || giftCode.targetMatrixId) {
-				const emailMatch = giftCode.targetEmail && userEmail?.toLowerCase() === giftCode.targetEmail.toLowerCase();
+				const emailMatch =
+					giftCode.targetEmail && userEmail?.toLowerCase() === giftCode.targetEmail.toLowerCase();
 				const matrixMatch = giftCode.targetMatrixId && userMatrixId === giftCode.targetMatrixId;
 
 				if (!emailMatch && !matrixMatch) {
@@ -368,7 +372,10 @@ export class GiftCodeService {
 					return { success: false, error: 'Please provide the answer to the riddle' };
 				}
 
-				const isCorrect = await bcrypt.compare(dto.answer.toLowerCase().trim(), giftCode.riddleAnswerHash);
+				const isCorrect = await bcrypt.compare(
+					dto.answer.toLowerCase().trim(),
+					giftCode.riddleAnswerHash
+				);
 				if (!isCorrect) {
 					// Record failed attempt
 					await tx.insert(giftRedemptions).values({
@@ -383,8 +390,13 @@ export class GiftCodeService {
 				}
 			}
 
-			// 7. Check if user already claimed (for simple/personalized types)
-			if (giftCode.type === 'simple' || giftCode.type === 'personalized' || giftCode.type === 'riddle') {
+			// 7. Check if user already claimed (for most types except 'split')
+			if (
+				giftCode.type === 'simple' ||
+				giftCode.type === 'personalized' ||
+				giftCode.type === 'riddle' ||
+				giftCode.type === 'first_come'
+			) {
 				const [existingClaim] = await tx
 					.select({ id: giftRedemptions.id })
 					.from(giftRedemptions)
@@ -644,12 +656,7 @@ export class GiftCodeService {
 			})
 			.from(giftRedemptions)
 			.innerJoin(giftCodes, eq(giftRedemptions.giftCodeId, giftCodes.id))
-			.where(
-				and(
-					eq(giftRedemptions.redeemerUserId, userId),
-					eq(giftRedemptions.status, 'success')
-				)
-			)
+			.where(and(eq(giftRedemptions.redeemerUserId, userId), eq(giftRedemptions.status, 'success')))
 			.orderBy(desc(giftRedemptions.createdAt))
 			.limit(50);
 
