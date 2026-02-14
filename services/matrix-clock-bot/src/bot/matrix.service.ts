@@ -296,7 +296,7 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 	private async setRoomTopic(roomId: string, topic: string): Promise<void> {
 		try {
 			const client = this.getClient();
-			this.logger.debug(`Attempting to set room topic for ${roomId}: ${topic}`);
+			this.logger.log(`Attempting to set room topic for ${roomId}: ${topic}`);
 			await client.sendStateEvent(roomId, 'm.room.topic', '', { topic });
 			this.logger.log(`Room topic updated: ${topic}`);
 		} catch (error: unknown) {
@@ -344,10 +344,13 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 		label: string | null,
 		status: 'running' | 'paused'
 	): Promise<void> {
+		this.logger.log(`updateRoomTopicWithTimer called: room=${roomId}, timer=${timerId}, status=${status}`);
+
 		// Save original topic if not already saved for this room
 		if (!this.originalRoomTopics.has(roomId)) {
 			const originalTopic = await this.getRoomTopic(roomId);
 			this.originalRoomTopics.set(roomId, { originalTopic, timerId });
+			this.logger.log(`Saved original topic: "${originalTopic}"`);
 		}
 
 		// Update topic with timer status
