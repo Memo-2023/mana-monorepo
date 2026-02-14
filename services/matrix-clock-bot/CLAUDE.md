@@ -30,9 +30,8 @@ pnpm type-check       # Check TypeScript types
 ```
 services/matrix-clock-bot/
 ├── src/
-│   ├── main.ts               # Application entry point (port 3318)
+│   ├── main.ts               # Application entry point (port 3317)
 │   ├── app.module.ts         # Root module
-│   ├── health.controller.ts  # Health check endpoint
 │   ├── config/
 │   │   └── configuration.ts  # Configuration & help messages
 │   ├── bot/
@@ -41,9 +40,9 @@ services/matrix-clock-bot/
 │   ├── clock/
 │   │   ├── clock.module.ts
 │   │   └── clock.service.ts  # Clock API client
-│   └── transcription/
-│       ├── transcription.module.ts
-│       └── transcription.service.ts  # STT service client
+│   └── widget/
+│       ├── widget.module.ts
+│       └── widget.controller.ts  # Timer widget for Element sidebar
 ├── Dockerfile
 └── package.json
 ```
@@ -62,6 +61,7 @@ services/matrix-clock-bot/
 | `!reset` | Reset timer to start |
 | `!status` | Show current timer status |
 | `!timers` | List all timers |
+| `!widget` | Add timer widget to room sidebar |
 
 ### Alarm Commands
 
@@ -94,7 +94,7 @@ Voice notes are transcribed and parsed as commands.
 
 ```env
 # Server
-PORT=3318
+PORT=3317
 
 # Matrix
 MATRIX_HOMESERVER_URL=http://localhost:8008
@@ -108,6 +108,9 @@ CLOCK_API_TOKEN=
 
 # Speech-to-Text
 STT_URL=http://localhost:3020
+
+# Widget (public URL for embedding in Matrix clients)
+WIDGET_PUBLIC_URL=http://localhost:3317/widget
 ```
 
 ## Clock API Endpoints Used
@@ -125,6 +128,30 @@ STT_URL=http://localhost:3020
 | `/world-clocks` | GET | List world clocks |
 | `/world-clocks` | POST | Add world clock |
 | `/timezones/search` | GET | Search timezones (public) |
+
+## Widget
+
+The bot provides a timer widget that can be embedded in Matrix/Element rooms.
+
+### Widget Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /widget` | HTML page with timer display |
+| `GET /widget/api/status?userId=X` | Timer status JSON |
+| `GET /widget/api/control?userId=X&action=Y` | Control timer (start/pause/reset) |
+
+### Adding Widget
+
+1. Use `!widget` command - bot adds widget automatically
+2. Or manually: `/addwidget <WIDGET_PUBLIC_URL>`
+
+### Widget Features
+
+- Live timer progress bar with countdown
+- Start/Pause/Reset controls
+- Auto-refresh every 10 seconds with local countdown
+- Dark theme matching Element
 
 ## Docker
 

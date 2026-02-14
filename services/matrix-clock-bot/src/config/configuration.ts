@@ -12,12 +12,17 @@ export default () => ({
 	stt: {
 		url: process.env.STT_URL || 'http://localhost:3020',
 	},
+	widget: {
+		// Public URL where the widget can be accessed (for embedding in Matrix clients)
+		publicUrl: process.env.WIDGET_PUBLIC_URL || 'http://localhost:3317/widget',
+	},
 });
 
 export const HELP_TEXT = `**Clock Bot - Zeiterfassung per Chat**
 
 **Status:**
 - \`!status\` - Account & Timer Status
+- \`!widget\` - Timer-Widget im Raum hinzufügen
 
 **Timer (Stoppuhr):**
 - \`!timer 25m\` oder \`!timer 1h30m\` - Timer erstellen & starten

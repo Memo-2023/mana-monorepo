@@ -968,6 +968,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      WIDGET_PUBLIC_URL: ${CLOCK_BOT_WIDGET_URL:-https://clock-bot.mana.how/widget}
     volumes:
       - matrix_bots_data:/app/data
     ports:
@@ -1008,6 +1009,43 @@ services:
       - "4019:4019"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4019/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  matrix-onboarding-bot:
+    build:
+      context: .
+      dockerfile: services/matrix-onboarding-bot/Dockerfile
+    image: matrix-onboarding-bot:local
+    container_name: mana-matrix-bot-onboarding
+    restart: always
+    depends_on:
+      synapse:
+        condition: service_healthy
+      mana-auth:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4020
+      TZ: Europe/Berlin
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_ONBOARDING_BOT_TOKEN}
+      MATRIX_ALLOWED_ROOMS: ${MATRIX_ONBOARDING_BOT_ROOMS:-}
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+    volumes:
+      - matrix_bots_data:/app/data
+    ports:
+      - "4020:4020"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4020/health"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -428,6 +428,10 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 				await this.handleLanguage(roomId, event, userId, args);
 				break;
 
+			case 'widget':
+				await this.handleWidgetCommand(roomId, event, userId);
+				break;
+
 			default:
 				// Silently ignore unknown commands
 				break;
@@ -922,6 +926,67 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 			await this.sendReply(roomId, event, `Sprache geändert zu: **${langName}**`);
 		} else {
 			await this.sendReply(roomId, event, `Language changed to: **${langName}**`);
+		}
+	}
+
+	/**
+	 * Handle widget command - adds a timer widget to the room
+	 */
+	private async handleWidgetCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
+		try {
+			const widgetBaseUrl =
+				this.configService.get<string>('widget.publicUrl') || 'http://localhost:3317/widget';
+
+			// Widget URL with Matrix variables that Element substitutes
+			const widgetUrl = `${widgetBaseUrl}?userId=$matrix_user_id&roomId=$matrix_room_id`;
+
+			// Generate unique widget ID
+			const widgetId = `clock-timer-widget-${roomId.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+			// Widget state event content
+			const widgetContent = {
+				type: 'm.custom',
+				url: widgetUrl,
+				name: 'Timer Widget',
+				data: {
+					title: 'Clock Bot Timer',
+				},
+				creatorUserId: this.botUserId,
+				id: widgetId,
+			};
+
+			// Send state event to add widget
+			await this.getClient().sendStateEvent(
+				roomId,
+				'im.vector.modular.widgets',
+				widgetId,
+				widgetContent
+			);
+
+			await this.sendReply(
+				roomId,
+				event,
+				'**Timer Widget hinzugefügt!**\n\n' +
+					'Das Widget zeigt deinen Timer-Status in der Seitenleiste an.\n\n' +
+					'Falls es nicht sichtbar ist:\n' +
+					'1. Klicke auf das **Info-Symbol** (i) oben rechts\n' +
+					'2. Wähle **Widgets**\n' +
+					'3. Das Timer Widget sollte sichtbar sein'
+			);
+		} catch (error) {
+			this.logger.error('Widget creation failed:', error);
+
+			// Fallback: Give manual instructions
+			const widgetBaseUrl =
+				this.configService.get<string>('widget.publicUrl') || 'http://localhost:3317/widget';
+			await this.sendReply(
+				roomId,
+				event,
+				'**Widget konnte nicht automatisch hinzugefügt werden.**\n\n' +
+					'Du kannst es manuell hinzufügen:\n' +
+					`1. In Element: \`/addwidget ${widgetBaseUrl}\`\n` +
+					'2. Oder über Raum-Einstellungen → Widgets'
+			);
 		}
 	}
 }

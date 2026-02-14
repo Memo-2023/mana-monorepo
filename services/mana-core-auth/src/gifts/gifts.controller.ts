@@ -21,8 +21,31 @@ export class GiftsController {
 	constructor(private readonly giftCodeService: GiftCodeService) {}
 
 	/**
+	 * List gift codes created by the authenticated user
+	 * NOTE: This route must come BEFORE :code to avoid 'me' being treated as a code
+	 */
+	@Get('me/created')
+	@UseGuards(JwtAuthGuard)
+	async listCreatedGifts(@Request() req: any) {
+		const userId = req.user.sub;
+		return this.giftCodeService.listCreatedGifts(userId);
+	}
+
+	/**
+	 * List gifts received by the authenticated user
+	 * NOTE: This route must come BEFORE :code to avoid 'me' being treated as a code
+	 */
+	@Get('me/received')
+	@UseGuards(JwtAuthGuard)
+	async listReceivedGifts(@Request() req: any) {
+		const userId = req.user.sub;
+		return this.giftCodeService.listReceivedGifts(userId);
+	}
+
+	/**
 	 * Get gift code info (public - no auth required)
 	 * For displaying gift info before redeeming
+	 * NOTE: This dynamic route must come AFTER specific routes like 'me/created'
 	 */
 	@Get(':code')
 	async getGiftInfo(@Param('code') code: string) {
@@ -57,26 +80,6 @@ export class GiftsController {
 		const userMatrixId = req.headers['x-matrix-user-id'];
 
 		return this.giftCodeService.redeemGiftCode(userId, code, dto, userEmail, userMatrixId);
-	}
-
-	/**
-	 * List gift codes created by the authenticated user
-	 */
-	@Get('me/created')
-	@UseGuards(JwtAuthGuard)
-	async listCreatedGifts(@Request() req: any) {
-		const userId = req.user.sub;
-		return this.giftCodeService.listCreatedGifts(userId);
-	}
-
-	/**
-	 * List gifts received by the authenticated user
-	 */
-	@Get('me/received')
-	@UseGuards(JwtAuthGuard)
-	async listReceivedGifts(@Request() req: any) {
-		const userId = req.user.sub;
-		return this.giftCodeService.listReceivedGifts(userId);
 	}
 
 	/**

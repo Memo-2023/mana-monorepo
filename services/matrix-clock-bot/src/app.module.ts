@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HealthController, createHealthProvider } from '@manacore/matrix-bot-common';
 import { BotModule } from './bot/bot.module';
+import { WidgetModule } from './widget/widget.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -11,6 +12,7 @@ import configuration from './config/configuration';
 			load: [configuration],
 		}),
 		BotModule,
+		WidgetModule,
 	],
 	controllers: [HealthController],
 	providers: [createHealthProvider('matrix-clock-bot')],
