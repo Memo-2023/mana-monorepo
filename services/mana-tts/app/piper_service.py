@@ -32,6 +32,15 @@ PIPER_VOICES = {
         "gender": "male",
         "local": True,
     },
+    "de_kerstin": {
+        "type": "piper",
+        "model": "kerstin_low.onnx",
+        "name": "Kerstin",
+        "description": "Deutsche Frauenstimme (lokal, schnell)",
+        "language": "de",
+        "gender": "female",
+        "local": True,
+    },
     # === EDGE TTS VOICES (Fallback - Cloud) ===
     "de_katja": {
         "type": "edge",
@@ -83,8 +92,8 @@ PIPER_VOICES = {
 
 DEFAULT_PIPER_VOICE = "de_thorsten"
 
-# Cached Piper voice instance
-_piper_voice = None
+# Cached Piper voice instances (one per model)
+_piper_voices: dict = {}
 _piper_available = None
 _edge_available = None
 
@@ -138,26 +147,28 @@ def is_piper_loaded() -> bool:
     return check_piper_available() or _check_edge_available()
 
 
-def _get_piper_voice():
-    """Get or create cached Piper voice instance."""
-    global _piper_voice
-    if _piper_voice is not None:
-        return _piper_voice
+def _get_piper_voice(model_name: str = "thorsten_medium.onnx"):
+    """Get or create cached Piper voice instance for a specific model."""
+    global _piper_voices
+
+    if model_name in _piper_voices:
+        return _piper_voices[model_name]
 
     if not check_piper_available():
         return None
 
     try:
         from piper import PiperVoice
-        model_path = _get_piper_model_path("thorsten_medium.onnx")
-        config_path = _get_piper_model_path("thorsten_medium.onnx.json")
+        model_path = _get_piper_model_path(model_name)
+        config_path = _get_piper_model_path(f"{model_name}.json")
 
         logger.info(f"Loading Piper voice from {model_path}")
-        _piper_voice = PiperVoice.load(str(model_path), str(config_path))
-        logger.info("Piper voice loaded successfully")
-        return _piper_voice
+        voice = PiperVoice.load(str(model_path), str(config_path))
+        _piper_voices[model_name] = voice
+        logger.info(f"Piper voice {model_name} loaded successfully")
+        return voice
     except Exception as e:
-        logger.error(f"Failed to load Piper voice: {e}")
+        logger.error(f"Failed to load Piper voice {model_name}: {e}")
         return None
 
 
@@ -172,14 +183,19 @@ class PiperSynthesisResult:
 
 async def _synthesize_with_piper(
     text: str,
+    voice_id: str = "de_thorsten",
     length_scale: float = 1.0,
 ) -> PiperSynthesisResult:
     """Synthesize using local Piper TTS."""
-    voice = _get_piper_voice()
-    if voice is None:
-        raise RuntimeError("Piper voice not available")
+    # Get the model name for this voice
+    voice_config = PIPER_VOICES.get(voice_id, PIPER_VOICES["de_thorsten"])
+    model_name = voice_config.get("model", "thorsten_medium.onnx")
 
-    logger.debug(f"Piper synthesizing: \"{text[:50]}...\"")
+    piper_voice = _get_piper_voice(model_name)
+    if piper_voice is None:
+        raise RuntimeError(f"Piper voice {voice_id} not available")
+
+    logger.debug(f"Piper synthesizing with {voice_id}: \"{text[:50]}...\"")
 
     # Piper uses length_scale directly (1.0 = normal, >1 = slower)
     # Run in thread pool to not block async
@@ -187,7 +203,7 @@ async def _synthesize_with_piper(
 
     def _synth():
         audio_data = []
-        for audio_chunk in voice.synthesize_stream_raw(text, length_scale=length_scale):
+        for audio_chunk in piper_voice.synthesize_stream_raw(text, length_scale=length_scale):
             audio_data.append(audio_chunk)
         return b"".join(audio_data)
 
@@ -195,7 +211,7 @@ async def _synthesize_with_piper(
 
     # Convert to numpy (16-bit PCM)
     audio = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32) / 32768.0
-    sample_rate = voice.config.sample_rate
+    sample_rate = piper_voice.config.sample_rate
 
     duration = len(audio) / sample_rate
     logger.debug(f"Piper synthesis complete: {duration:.2f}s, {sample_rate}Hz")
@@ -204,7 +220,7 @@ async def _synthesize_with_piper(
         audio=audio,
         sample_rate=sample_rate,
         duration=duration,
-        voice="de_thorsten",
+        voice=voice_id,
     )
 
 
@@ -280,7 +296,7 @@ async def synthesize_piper(
     # Try local Piper first for piper-type voices
     if voice_type == "piper" and check_piper_available():
         try:
-            return await _synthesize_with_piper(text, length_scale)
+            return await _synthesize_with_piper(text, voice, length_scale)
         except Exception as e:
             logger.warning(f"Piper synthesis failed, trying Edge fallback: {e}")
 
@@ -288,8 +304,9 @@ async def synthesize_piper(
     if _check_edge_available():
         edge_voice = voice_config.get("edge_voice", "de-DE-ConradNeural")
         if voice_type == "piper":
-            # Fallback: use Conrad for male voices
-            edge_voice = "de-DE-ConradNeural"
+            # Fallback: use appropriate Edge voice based on gender
+            gender = voice_config.get("gender", "male")
+            edge_voice = "de-DE-KatjaNeural" if gender == "female" else "de-DE-ConradNeural"
         return await _synthesize_with_edge(text, edge_voice, length_scale)
 
     raise RuntimeError("No TTS backend available (neither Piper nor Edge TTS)")

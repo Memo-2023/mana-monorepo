@@ -9,7 +9,7 @@ export default () => ({
 	tts: {
 		url: process.env.TTS_URL || 'http://localhost:3022',
 		apiKey: process.env.TTS_API_KEY || '',
-		defaultVoice: process.env.DEFAULT_VOICE || 'de_thorsten',
+		defaultVoice: process.env.DEFAULT_VOICE || 'de_kerstin',
 		defaultSpeed: parseFloat(process.env.DEFAULT_SPEED || '1.0'),
 		maxTextLength: parseInt(process.env.MAX_TEXT_LENGTH || '500', 10),
 	},
@@ -31,10 +31,11 @@ Schreibe einfach eine Nachricht und ich sende dir die Sprachausgabe zurück.
 Die Sprache wird automatisch erkannt (Deutsch/Englisch).
 
 **Deutsche Stimmen:**
+- \`de_kerstin\` - Deutsch weiblich (lokal, Standard)
 - \`de_thorsten\` - Deutsch männlich (lokal)
-- \`de_katja\` - Deutsch weiblich
-- \`de_conrad\` - Deutsch männlich
-- \`de_florian\` - Deutsch männlich jung
+- \`de_katja\` - Deutsch weiblich (Cloud)
+- \`de_conrad\` - Deutsch männlich (Cloud)
+- \`de_florian\` - Deutsch männlich jung (Cloud)
 
 **Englische Stimmen:**
 - \`af_heart\` - Amerikanisch weiblich (warm)

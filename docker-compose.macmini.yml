@@ -991,7 +991,7 @@ services:
       MATRIX_ALLOWED_ROOMS: ${MATRIX_TTS_BOT_ROOMS:-}
       TTS_URL: http://host.docker.internal:3022
       TTS_API_KEY: ${TTS_INTERNAL_API_KEY:-}
-      DEFAULT_VOICE: de_thorsten
+      DEFAULT_VOICE: de_kerstin
       DEFAULT_SPEED: 1.0
       MAX_TEXT_LENGTH: 500
     volumes:

@@ -15,14 +15,15 @@ export interface VoicesResponse {
 
 // German voice mapping
 const GERMAN_VOICES: Record<string, string> = {
-	de_thorsten: 'de_thorsten', // Local Piper
+	de_kerstin: 'de_kerstin', // Local Piper female
+	de_thorsten: 'de_thorsten', // Local Piper male
 	de_katja: 'de_katja', // Edge TTS female
 	de_conrad: 'de_conrad', // Edge TTS male
 	de_amala: 'de_amala', // Edge TTS female young
 	de_florian: 'de_florian', // Edge TTS male young
 };
 
-const DEFAULT_GERMAN_VOICE = 'de_thorsten';
+const DEFAULT_GERMAN_VOICE = 'de_kerstin';
 
 // Common German words for language detection
 const GERMAN_INDICATORS = [
@@ -122,7 +123,11 @@ export class TtsService {
 	/**
 	 * Synthesize text to speech - auto-detects language
 	 */
-	async synthesize(text: string, voice: string = 'de_thorsten', speed: number = 1.0): Promise<Buffer> {
+	async synthesize(
+		text: string,
+		voice: string = 'de_thorsten',
+		speed: number = 1.0
+	): Promise<Buffer> {
 		// Auto-detect language if using English voice but text is German
 		const textIsGerman = this.isGerman(text);
 		const voiceIsGerman = this.isGermanVoice(voice);
