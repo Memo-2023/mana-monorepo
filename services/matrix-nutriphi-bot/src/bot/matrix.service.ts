@@ -13,7 +13,12 @@ import {
 	DailySummary,
 	WeeklyStats,
 } from '../nutriphi/nutriphi.service';
-import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
+import {
+	SessionService,
+	TranscriptionService,
+	CreditService,
+	LOGIN_MESSAGES,
+} from '@manacore/bot-services';
 import { MediaService } from '../media/media.service';
 import { HELP_MESSAGE, MEAL_TYPE_LABELS } from '../config/configuration';
 
@@ -96,21 +101,33 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async autoAnalyzeImage(roomId: string, sender: string, mxcUrl: string, mimeType: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(
-				roomId,
-				`Bild empfangen, aber du bist nicht angemeldet.\n\nNutze \`!login email passwort\` um dich anzumelden, dann sende das Bild erneut.`
-			);
-			return;
-		}
+		let token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		await this.sendMessage(roomId, 'Bild empfangen! Analysiere...');
 		await this.client.setTyping(roomId, true, 60000);
 
 		try {
 			const imageData = await this.downloadMatrixImage(mxcUrl);
-			const result = await this.nutriphiService.analyzePhoto(imageData, mimeType, token);
+
+			let result;
+			try {
+				result = await this.nutriphiService.analyzePhoto(imageData, mimeType, token);
+			} catch (error) {
+				// If token expired, try to refresh and retry once
+				if (this.isTokenExpiredError(error)) {
+					token = await this.refreshToken(sender);
+					if (!token) {
+						await this.client.setTyping(roomId, false);
+						await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+						return;
+					}
+					// Retry with new token
+					result = await this.nutriphiService.analyzePhoto(imageData, mimeType, token);
+				} else {
+					throw error;
+				}
+			}
 
 			await this.client.setTyping(roomId, false);
 
@@ -142,14 +159,8 @@ Sag "hilfe" fur alle Befehle!`;
 		event: MatrixRoomEvent,
 		sender: string
 	): Promise<void> {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(
-				roomId,
-				`Du bist nicht angemeldet. Nutze \`!login email passwort\` um dich anzumelden.`
-			);
-			return;
-		}
+		let token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		await this.sendMessage(roomId, 'Verarbeite Sprachnotiz...');
 		await this.client.setTyping(roomId, true, 60000);
@@ -174,11 +185,20 @@ Sag "hilfe" fur alle Befehle!`;
 			// Analyze the transcribed text as a meal
 			await this.sendMessage(roomId, `Transkription: "${transcription}"\n\nAnalysiere...`);
 
-			const result = await this.nutriphiService.analyzeText(transcription, token);
+			const apiResult = await this.withTokenRefresh(sender, token, (t) =>
+				this.nutriphiService.analyzeText(transcription, t)
+			);
+
+			if ('error' in apiResult) {
+				await this.client.setTyping(roomId, false);
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
+
 			await this.client.setTyping(roomId, false);
 
 			// Format and send result
-			const formattedResult = this.formatAnalysisResult(result);
+			const formattedResult = this.formatAnalysisResult(apiResult.result);
 			await this.sendMessage(roomId, formattedResult);
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
@@ -313,14 +333,8 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleAnalyze(roomId: string, sender: string, description: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(
-				roomId,
-				`Du bist nicht angemeldet. Nutze \`!login email passwort\` um dich anzumelden.`
-			);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		const pendingImage = await this.sessionService.getSessionData<{
 			url: string;
@@ -339,24 +353,33 @@ Sag "hilfe" fur alle Befehle!`;
 		await this.client.setTyping(roomId, true, 60000);
 
 		try {
-			let result: AIAnalysisResult;
+			let apiResult;
 
 			if (pendingImage) {
 				// Analyze image
 				await this.sendMessage(roomId, 'Analysiere Bild...');
 				const imageData = await this.downloadMatrixImage(pendingImage.url);
-				result = await this.nutriphiService.analyzePhoto(imageData, pendingImage.mimeType, token);
+				apiResult = await this.withTokenRefresh(sender, token, (t) =>
+					this.nutriphiService.analyzePhoto(imageData, pendingImage.mimeType, t)
+				);
 				this.sessionService.setSessionData(sender, 'pendingImage', null);
 			} else {
 				// Analyze text
 				await this.sendMessage(roomId, `Analysiere: "${description}"...`);
-				result = await this.nutriphiService.analyzeText(description, token);
+				apiResult = await this.withTokenRefresh(sender, token, (t) =>
+					this.nutriphiService.analyzeText(description, t)
+				);
 			}
 
 			await this.client.setTyping(roomId, false);
 
+			if ('error' in apiResult) {
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
+
 			// Format and send result
-			const response = this.formatAnalysisResult(result);
+			const response = this.formatAnalysisResult(apiResult.result);
 			await this.sendMessage(roomId, response);
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
@@ -403,20 +426,25 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleToday(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		await this.client.setTyping(roomId, true, 10000);
 
 		try {
 			const today = new Date().toISOString().split('T')[0];
-			const summary = await this.nutriphiService.getDailySummary(today, token);
+			const apiResult = await this.withTokenRefresh(sender, token, (t) =>
+				this.nutriphiService.getDailySummary(today, t)
+			);
 
 			await this.client.setTyping(roomId, false);
-			await this.sendMessage(roomId, this.formatDailySummary(summary));
+
+			if ('error' in apiResult) {
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
+
+			await this.sendMessage(roomId, this.formatDailySummary(apiResult.result));
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
@@ -463,20 +491,25 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleWeek(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		await this.client.setTyping(roomId, true, 10000);
 
 		try {
 			const today = new Date().toISOString().split('T')[0];
-			const stats = await this.nutriphiService.getWeeklyStats(today, token);
+			const apiResult = await this.withTokenRefresh(sender, token, (t) =>
+				this.nutriphiService.getWeeklyStats(today, t)
+			);
 
 			await this.client.setTyping(roomId, false);
-			await this.sendMessage(roomId, this.formatWeeklyStats(stats));
+
+			if ('error' in apiResult) {
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
+
+			await this.sendMessage(roomId, this.formatWeeklyStats(apiResult.result));
 		} catch (error) {
 			await this.client.setTyping(roomId, false);
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
@@ -516,14 +549,20 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleGoals(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		try {
-			const goals = await this.nutriphiService.getGoals(token);
+			const apiResult = await this.withTokenRefresh(sender, token, (t) =>
+				this.nutriphiService.getGoals(t)
+			);
+
+			if ('error' in apiResult) {
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
+
+			const goals = apiResult.result;
 
 			if (!goals) {
 				await this.sendMessage(
@@ -547,11 +586,8 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleSetGoals(roomId: string, sender: string, args: string[]) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		if (args.length < 1) {
 			await this.sendMessage(
@@ -575,15 +611,22 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 
 		try {
-			await this.nutriphiService.setGoals(
-				{
-					dailyCalories: calories,
-					dailyProtein: protein,
-					dailyCarbs: carbs,
-					dailyFat: fat,
-				},
-				token
+			const apiResult = await this.withTokenRefresh(sender, token, (t) =>
+				this.nutriphiService.setGoals(
+					{
+						dailyCalories: calories,
+						dailyProtein: protein,
+						dailyCarbs: carbs,
+						dailyFat: fat,
+					},
+					t
+				)
 			);
+
+			if ('error' in apiResult) {
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
 
 			let text = `**Ziele gesetzt:**\n`;
 			text += `- Kalorien: ${calories} kcal\n`;
@@ -599,14 +642,20 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleFavorites(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		try {
-			const favorites = await this.nutriphiService.getFavorites(token);
+			const apiResult = await this.withTokenRefresh(sender, token, (t) =>
+				this.nutriphiService.getFavorites(t)
+			);
+
+			if ('error' in apiResult) {
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
+
+			const favorites = apiResult.result;
 
 			if (favorites.length === 0) {
 				await this.sendMessage(roomId, `Du hast noch keine Favoriten gespeichert.`);
@@ -627,14 +676,20 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleTips(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		try {
-			const recommendations = await this.nutriphiService.getRecommendations(token);
+			const apiResult = await this.withTokenRefresh(sender, token, (t) =>
+				this.nutriphiService.getRecommendations(t)
+			);
+
+			if ('error' in apiResult) {
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
+
+			const recommendations = apiResult.result;
 
 			if (recommendations.length === 0) {
 				await this.sendMessage(
@@ -654,6 +709,73 @@ Sag "hilfe" fur alle Befehle!`;
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
 			await this.sendMessage(roomId, `Fehler: ${errorMsg}`);
+		}
+	}
+
+	/**
+	 * Require login - returns token or sends login prompt and returns null
+	 */
+	private async requireLogin(roomId: string, userId: string): Promise<string | null> {
+		const token = await this.sessionService.getToken(userId);
+		if (!token) {
+			await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+			return null;
+		}
+		return token;
+	}
+
+	/**
+	 * Check if an error is a token expiration error (JWT exp claim failed)
+	 */
+	private isTokenExpiredError(error: unknown): boolean {
+		if (error instanceof Error) {
+			const message = error.message.toLowerCase();
+			return (
+				(message.includes('401') || message.includes('unauthorized')) &&
+				(message.includes('exp') || message.includes('expired') || message.includes('token'))
+			);
+		}
+		return false;
+	}
+
+	/**
+	 * Refresh token by clearing session and fetching new one via Matrix-SSO-Link
+	 */
+	private async refreshToken(userId: string): Promise<string | null> {
+		this.logger.log(`Token expired for ${userId}, attempting refresh via Matrix-SSO-Link...`);
+		// Clear the expired session
+		await this.sessionService.logout(userId);
+		// Try to get a new token via Matrix-SSO-Link
+		const newToken = await this.sessionService.getToken(userId);
+		if (newToken) {
+			this.logger.log(`Token refreshed successfully for ${userId}`);
+		} else {
+			this.logger.warn(`Token refresh failed for ${userId} - user needs to re-login`);
+		}
+		return newToken;
+	}
+
+	/**
+	 * Execute an API operation with automatic token refresh on expiration
+	 */
+	private async withTokenRefresh<T>(
+		userId: string,
+		token: string,
+		operation: (token: string) => Promise<T>
+	): Promise<{ result: T; newToken?: string } | { error: 'token_refresh_failed' }> {
+		try {
+			const result = await operation(token);
+			return { result };
+		} catch (error) {
+			if (this.isTokenExpiredError(error)) {
+				const newToken = await this.refreshToken(userId);
+				if (!newToken) {
+					return { error: 'token_refresh_failed' };
+				}
+				const result = await operation(newToken);
+				return { result, newToken };
+			}
+			throw error;
 		}
 	}
 
