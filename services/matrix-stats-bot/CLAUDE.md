@@ -22,12 +22,14 @@ pnpm type-check       # TypeScript check
 
 ## Matrix Commands
 
-### Personal Stats (requires login)
+### Personal Stats (auto-login via Matrix-SSO-Link)
 
 | Command | Description |
 |---------|-------------|
 | `!stats` | Your personal statistics across all ManaCore apps |
 | `!status` | Account status and credit balance |
+
+**Note:** If you logged in via another Matrix bot or via OIDC, you're automatically authenticated.
 
 ### Global Analytics (Umami)
 
@@ -66,7 +68,7 @@ pnpm type-check       # TypeScript check
 ## Environment Variables
 
 ```env
-PORT=3312
+PORT=4012
 TZ=Europe/Berlin
 
 # Matrix
@@ -74,17 +76,32 @@ MATRIX_HOMESERVER_URL=http://localhost:8008
 MATRIX_ACCESS_TOKEN=syt_xxx
 MATRIX_REPORT_ROOM_ID=!roomid:mana.how
 
+# Redis (for session storage & Matrix-SSO-Link)
+REDIS_HOST=redis
+REDIS_PASSWORD=xxx
+
+# Mana Core Auth (for Matrix-SSO-Link auto-login)
+MANA_CORE_AUTH_URL=http://mana-auth:3001
+MANA_CORE_SERVICE_KEY=xxx
+
 # Umami
 UMAMI_API_URL=http://umami:3000
 UMAMI_USERNAME=admin
 UMAMI_PASSWORD=xxx
 
 # Prometheus / VictoriaMetrics
-PROMETHEUS_URL=http://victoriametrics:8428
+PROMETHEUS_URL=http://victoriametrics:9090
 
 # Database (for user counts)
 DATABASE_URL=postgresql://...
 ```
+
+## Authentication
+
+The bot uses **Matrix-SSO-Link** for automatic authentication:
+- Sessions are stored in Redis (shared across all bots)
+- If a user logged in via another bot or OIDC, they're automatically authenticated
+- Manual login via `!login email password` creates a persistent link
 
 ## Health Check
 
