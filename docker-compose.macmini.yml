@@ -732,8 +732,8 @@ services:
       start_period: 40s
 
   matrix-stats-bot:
-    image: ghcr.io/memo-2023/matrix-stats-bot:latest
-    platform: linux/amd64
+    image: matrix-stats-bot:local
+    #platform: linux/amd64
     container_name: mana-matrix-bot-stats
     restart: always
     depends_on:
@@ -741,10 +741,18 @@ services:
         condition: service_healthy
       victoriametrics:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 4012
       TZ: Europe/Berlin
+      # Redis for session storage (Matrix-SSO-Link)
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      # Mana Core Auth for Matrix-SSO-Link auto-login
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       MATRIX_HOMESERVER_URL: http://synapse:8008
       MATRIX_ACCESS_TOKEN: ${MATRIX_STATS_BOT_TOKEN}
       MATRIX_REPORT_ROOM_ID: ${MATRIX_STATS_REPORT_ROOM:-}
