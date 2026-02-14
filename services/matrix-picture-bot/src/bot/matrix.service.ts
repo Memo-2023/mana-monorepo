@@ -8,7 +8,12 @@ import {
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
 import { PictureService } from '../picture/picture.service';
-import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
+import {
+	SessionService,
+	TranscriptionService,
+	CreditService,
+	LOGIN_MESSAGES,
+} from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 // Credit cost for image generation
@@ -156,15 +161,6 @@ Sag "hilfe" fur alle Befehle!`;
 			case 'credits':
 			case 'guthaben':
 				await this.handleCredits(roomId, sender);
-				break;
-
-			case 'login':
-				await this.handleLogin(roomId, sender, args);
-				break;
-
-			case 'logout':
-				await this.sessionService.logout(sender);
-				await this.sendMessage(roomId, 'Du wurdest abgemeldet.');
 				break;
 
 			case 'status':
@@ -402,11 +398,8 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleHistory(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		try {
 			const images = await this.pictureService.getImages(token, 10);
@@ -434,11 +427,8 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleDelete(roomId: string, sender: string, args: string[]) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		if (args.length < 1) {
 			await this.sendMessage(
@@ -472,11 +462,8 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleCredits(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		try {
 			const balance = await this.creditService.getBalance(token);
@@ -510,29 +497,16 @@ Sag "hilfe" fur alle Befehle!`;
 		await this.sendMessage(roomId, HELP_MESSAGE);
 	}
 
-	private async handleLogin(roomId: string, sender: string, args: string[]) {
-		if (args.length < 2) {
-			await this.sendMessage(
-				roomId,
-				`**Verwendung:** \`!login email passwort\`\n\nBeispiel: \`!login nutzer@example.com meinpasswort\``
-			);
-			return;
+	/**
+	 * Require login - returns token or sends login prompt and returns null
+	 */
+	private async requireLogin(roomId: string, userId: string): Promise<string | null> {
+		const token = await this.sessionService.getToken(userId);
+		if (!token) {
+			await this.sendMessage(roomId, LOGIN_MESSAGES.picture);
+			return null;
 		}
-
-		const [email, password] = args;
-
-		await this.sendMessage(roomId, 'Anmeldung lauft...');
-
-		const result = await this.sessionService.login(sender, email, password);
-
-		if (result.success) {
-			await this.sendMessage(
-				roomId,
-				`Erfolgreich angemeldet!\n\nDu kannst jetzt Bilder generieren mit \`!generate [prompt]\``
-			);
-		} else {
-			await this.sendMessage(roomId, `Anmeldung fehlgeschlagen: ${result.error}`);
-		}
+		return token;
 	}
 
 	private async handleStatus(roomId: string, sender: string) {

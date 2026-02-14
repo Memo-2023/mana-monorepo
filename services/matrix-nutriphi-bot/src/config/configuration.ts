@@ -27,7 +27,6 @@ export const HELP_MESSAGE = `**NutriPhi Bot - KI-Ernahrungsassistent**
 
 **Befehle:**
 - \`!help\` - Diese Hilfe anzeigen
-- \`!login email passwort\` - Bei NutriPhi anmelden
 - \`!analyze beschreibung\` - Text analysieren
 - \`!today\` / \`heute\` - Tages-Zusammenfassung
 - \`!week\` / \`woche\` - Wochen-Statistik

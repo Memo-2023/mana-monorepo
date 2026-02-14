@@ -15,7 +15,12 @@ import {
 	ShareLink,
 	TrashItem,
 } from '../storage/storage.service';
-import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
+import {
+	SessionService,
+	TranscriptionService,
+	CreditService,
+	LOGIN_MESSAGES,
+} from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
@@ -83,15 +88,6 @@ export class MatrixService extends BaseMatrixService {
 				case 'help':
 				case 'hilfe':
 					await this.sendMessage(roomId, HELP_MESSAGE);
-					break;
-
-				case 'login':
-					await this.handleLogin(roomId, sender, args);
-					break;
-
-				case 'logout':
-					await this.sessionService.logout(sender);
-					await this.sendMessage(roomId, '<p>Erfolgreich abgemeldet.</p>');
 					break;
 
 				case 'status':
@@ -240,38 +236,9 @@ export class MatrixService extends BaseMatrixService {
 	private async requireAuth(sender: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			throw new Error('Nicht angemeldet. Nutze <code>!login email passwort</code>');
+			throw new Error(LOGIN_MESSAGES.storage);
 		}
 		return token;
-	}
-
-	// Auth handlers
-	private async handleLogin(roomId: string, sender: string, args: string[]) {
-		if (args.length < 2) {
-			await this.sendMessage(roomId, '<p>Verwendung: <code>!login email passwort</code></p>');
-			return;
-		}
-
-		const [email, password] = args;
-		const result = await this.sessionService.login(sender, email, password);
-
-		if (result.success) {
-			const token = await this.sessionService.getToken(sender);
-			if (token) {
-				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(
-					roomId,
-					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong><br/>⚡ Credits: ${balance.balance.toFixed(2)}</p>`
-				);
-			} else {
-				await this.sendMessage(
-					roomId,
-					`<p>✅ Erfolgreich angemeldet als <strong>${email}</strong></p>`
-				);
-			}
-		} else {
-			await this.sendMessage(roomId, `<p>Login fehlgeschlagen: ${result.error}</p>`);
-		}
 	}
 
 	private async handleStatus(roomId: string, sender: string) {

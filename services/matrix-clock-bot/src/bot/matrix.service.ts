@@ -15,6 +15,7 @@ import {
 	I18nService,
 	Language,
 	LANGUAGE_NAMES,
+	LOGIN_MESSAGES,
 } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
 
@@ -168,14 +169,6 @@ export class MatrixService extends BaseMatrixService {
 				await this.sendReply(roomId, event, HELP_TEXT);
 				break;
 
-			case 'login':
-				await this.handleLogin(roomId, event, userId, args);
-				break;
-
-			case 'logout':
-				await this.handleLogout(roomId, event, userId);
-				break;
-
 			case 'timer':
 				await this.handleTimerCommand(roomId, event, userId, args);
 				break;
@@ -263,11 +256,8 @@ export class MatrixService extends BaseMatrixService {
 		const label = args.replace(/[\d\s]*[hms]+/gi, '').trim() || null;
 
 		try {
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung. Bitte zuerst `!login`.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			// Create and start timer
 			const timer = await this.clockService.createTimer(durationSeconds, label, token);
@@ -287,11 +277,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleStopCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			const runningTimer = await this.clockService.getRunningTimer(token);
 			if (!runningTimer) {
@@ -324,11 +311,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleResumeCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			const pausedTimer = await this.clockService.getRunningTimer(token);
 			if (!pausedTimer || pausedTimer.status !== 'paused') {
@@ -348,11 +332,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleResetCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			const activeTimer = await this.clockService.getRunningTimer(token);
 			if (!activeTimer) {
@@ -368,37 +349,6 @@ export class MatrixService extends BaseMatrixService {
 		}
 	}
 
-	private async handleLogin(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
-		const parts = args.split(' ');
-		if (parts.length < 2 || !parts[0] || !parts[1]) {
-			await this.sendReply(roomId, event, 'Verwendung: `!login email passwort`');
-			return;
-		}
-		const [email, password] = parts;
-		const result = await this.sessionService.login(userId, email, password);
-
-		if (result.success) {
-			const token = await this.sessionService.getToken(userId);
-			if (token) {
-				const balance = await this.creditService.getBalance(token);
-				await this.sendReply(
-					roomId,
-					event,
-					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`
-				);
-			} else {
-				await this.sendReply(roomId, event, `✅ Erfolgreich angemeldet als **${email}**`);
-			}
-		} else {
-			await this.sendReply(roomId, event, `❌ Anmeldung fehlgeschlagen: ${result.error}`);
-		}
-	}
-
-	private async handleLogout(roomId: string, event: MatrixRoomEvent, userId: string) {
-		await this.sessionService.logout(userId);
-		await this.sendReply(roomId, event, '👋 Erfolgreich abgemeldet.');
-	}
-
 	private async handleStatusCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		// Auth-Status zuerst
 		const loggedIn = await this.sessionService.isLoggedIn(userId);
@@ -412,8 +362,7 @@ export class MatrixService extends BaseMatrixService {
 			response += `👤 Angemeldet als: ${session.email}\n`;
 			response += `⚡ Credits: ${balance.balance.toFixed(2)}\n\n`;
 		} else {
-			response += `❌ Nicht angemeldet\n`;
-			response += `Nutze \`!login email passwort\` zum Anmelden.\n\n`;
+			response += `⚠️ Nicht verbunden - bitte in Element neu einloggen via "Mit Mana Core anmelden"\n\n`;
 		}
 
 		// Timer-Status
@@ -445,11 +394,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleTimersCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			const timers = await this.clockService.getTimers(token);
 			if (timers.length === 0) {
@@ -501,11 +447,8 @@ export class MatrixService extends BaseMatrixService {
 		const label = args.replace(/[\d:]+\s*(uhr\s*\d*)?/gi, '').trim() || null;
 
 		try {
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			await this.clockService.createAlarm(time, label, token);
 			let response = `**Alarm gestellt!**\n\nZeit: ${time.substring(0, 5)} Uhr`;
@@ -520,11 +463,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleAlarmsCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			const alarms = await this.clockService.getAlarms(token);
 			if (alarms.length === 0) {
@@ -603,11 +543,8 @@ export class MatrixService extends BaseMatrixService {
 				return;
 			}
 
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			const best = results[0];
 			await this.clockService.addWorldClock(best.timezone, best.city, token);
@@ -620,11 +557,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private async handleWorldClocksCommand(roomId: string, event: MatrixRoomEvent, userId: string) {
 		try {
-			const token = await this.getToken(userId);
-			if (!token) {
-				await this.sendReply(roomId, event, 'Keine Authentifizierung.');
-				return;
-			}
+			const token = await this.requireLogin(roomId, event, userId);
+			if (!token) return;
 
 			const clocks = await this.clockService.getWorldClocks(token);
 			if (clocks.length === 0) {
@@ -709,6 +643,22 @@ export class MatrixService extends BaseMatrixService {
 
 		// Entwicklungs-Fallback
 		return this.demoToken || null;
+	}
+
+	/**
+	 * Require login - returns token or sends login prompt and returns null
+	 */
+	private async requireLogin(
+		roomId: string,
+		event: MatrixRoomEvent,
+		userId: string
+	): Promise<string | null> {
+		const token = await this.getToken(userId);
+		if (!token) {
+			await this.sendReply(roomId, event, LOGIN_MESSAGES.clock);
+			return null;
+		}
+		return token;
 	}
 
 	private async handleLanguage(

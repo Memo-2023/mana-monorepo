@@ -33,9 +33,7 @@ export const HELP_MESSAGE = `**Picture Bot - AI-Bildgenerierung**
 \`!generate A beautiful sunset over mountains --width 1280 --height 720\`
 \`!bild Ein niedlicher Hund im Park --steps 40\`
 
-**Bilder verwalten:** (Login erforderlich)
-- \`!login email passwort\` - Anmelden
-- \`!logout\` - Abmelden
+**Bilder verwalten:**
 - \`!history\` - Letzte Bilder anzeigen
 - \`!delete [nr]\` - Bild loschen
 

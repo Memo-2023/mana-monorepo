@@ -16,9 +16,7 @@ export default () => ({
 
 export const HELP_TEXT = `**Clock Bot - Zeiterfassung per Chat**
 
-**Account:**
-- \`!login email passwort\` - Anmelden
-- \`!logout\` - Abmelden
+**Status:**
 - \`!status\` - Account & Timer Status
 
 **Timer (Stoppuhr):**
@@ -49,16 +47,14 @@ Sende eine Sprachnotiz wie "Timer 25 Minuten" oder "Wecker um 7 Uhr"
 - "stop" - Timer stoppen
 - "status" - Status anzeigen`;
 
-export const WELCOME_TEXT = `**Clock Bot - Zeiterfassung**
+export const WELCOME_TEXT = `🕐 **Clock Bot - Zeiterfassung**
 
-Starte mit:
-- \`!timer 25m\` - 25-Minuten Timer
+**Schnellstart:**
+- \`!timer 25m\` - 25-Minuten Timer starten
 - \`!alarm 07:30\` - Wecker stellen
-- \`!zeit\` - Aktuelle Zeit
+- \`!status\` - Status anzeigen
 
-Oder sende eine Sprachnotiz!
-
-\`!help\` fur alle Befehle.`;
+\`!help\` für alle Befehle.`;
 
 // Natural language patterns for time parsing
 export const TIME_PATTERNS = {

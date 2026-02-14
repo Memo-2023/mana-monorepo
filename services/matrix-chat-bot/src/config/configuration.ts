@@ -17,9 +17,7 @@ export default () => ({
 
 export const HELP_MESSAGE = `**AI Chat Bot - Hilfe**
 
-**Authentifizierung:**
-- \`!login email passwort\` - Anmelden
-- \`!logout\` - Abmelden
+**Status:**
 - \`!status\` - Bot-Status anzeigen
 
 **Schnell-Chat:**
@@ -48,7 +46,6 @@ export const HELP_MESSAGE = `**AI Chat Bot - Hilfe**
 
 **Beispiele:**
 \`\`\`
-!login max@example.com meinpasswort
 !chat Was ist die Hauptstadt von Frankreich?
 !neu Programmierung
 !senden Erklaere mir Python Listen

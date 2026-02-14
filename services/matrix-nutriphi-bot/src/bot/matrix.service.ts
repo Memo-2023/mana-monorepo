@@ -241,15 +241,6 @@ Sag "hilfe" fur alle Befehle!`;
 				await this.sendHelp(roomId);
 				break;
 
-			case 'login':
-				await this.handleLogin(roomId, sender, args);
-				break;
-
-			case 'logout':
-				await this.sessionService.logout(sender);
-				await this.sendMessage(roomId, 'Du wurdest abgemeldet.');
-				break;
-
 			case 'analyze':
 				await this.handleAnalyze(roomId, sender, argString);
 				break;
@@ -296,40 +287,6 @@ Sag "hilfe" fur alle Befehle!`;
 
 	private async sendHelp(roomId: string) {
 		await this.sendMessage(roomId, HELP_MESSAGE);
-	}
-
-	private async handleLogin(roomId: string, sender: string, args: string[]) {
-		if (args.length < 2) {
-			await this.sendMessage(
-				roomId,
-				`**Verwendung:** \`!login email passwort\`\n\nBeispiel: \`!login nutzer@example.com meinpasswort\``
-			);
-			return;
-		}
-
-		const [email, password] = args;
-
-		await this.sendMessage(roomId, 'Anmeldung lauft...');
-
-		const result = await this.sessionService.login(sender, email, password);
-
-		if (result.success) {
-			const token = await this.sessionService.getToken(sender);
-			if (token) {
-				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(
-					roomId,
-					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}\n\nDu kannst jetzt Fotos analysieren und deine Ernahrung tracken.`
-				);
-			} else {
-				await this.sendMessage(
-					roomId,
-					`✅ Erfolgreich angemeldet!\n\nDu kannst jetzt Fotos analysieren und deine Ernahrung tracken.`
-				);
-			}
-		} else {
-			await this.sendMessage(roomId, `Anmeldung fehlgeschlagen: ${result.error}`);
-		}
 	}
 
 	private async handleAnalyze(roomId: string, sender: string, description: string) {

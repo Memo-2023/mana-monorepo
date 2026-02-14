@@ -74,10 +74,10 @@ url_preview_ip_range_blacklist:
 enable_registration: false
 enable_registration_without_verification: false
 
-# Password config
+# Password config (disabled - all users authenticate via OIDC/SSO)
 password_config:
-  enabled: true
-  localdb_enabled: true
+  enabled: false
+  localdb_enabled: false
   pepper: "${SYNAPSE_PASSWORD_PEPPER:-change-me-pepper}"
 
 # Session lifetime (must be >= refresh_token_lifetime)

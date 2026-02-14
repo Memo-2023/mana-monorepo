@@ -37,11 +37,6 @@ export default () => ({
 // Help text for the unified bot
 export const HELP_TEXT = `**🤖 Mana - Dein Assistent**
 
-**👤 Account**
-• \`!login email passwort\` - Anmelden
-• \`!logout\` - Abmelden
-• \`!status\` - Account & Bot Status
-
 **AI & Chat**
 Schreib einfach eine Nachricht - ich antworte!
 • \`!model [name]\` - KI-Modell wechseln

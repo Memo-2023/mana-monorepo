@@ -27,13 +27,11 @@ export const HELP_MESSAGE = `**Zitare Bot - Taegliche Inspiration**
 - \`!kategorie [name]\` - Zitate nach Kategorie
 - \`!kategorien\` - Alle Kategorien
 
-**Favoriten:** (Login erforderlich)
-- \`!login email passwort\` - Anmelden
-- \`!logout\` - Abmelden
+**Favoriten:**
 - \`!favorit\` - Letztes Zitat speichern
 - \`!favoriten\` - Alle Favoriten anzeigen
 
-**Listen:** (Login erforderlich)
+**Listen:**
 - \`!listen\` - Alle Listen anzeigen
 - \`!liste [name]\` - Neue Liste erstellen
 - \`!addliste [nr] [zitat-nr]\` - Zitat zur Liste hinzufuegen

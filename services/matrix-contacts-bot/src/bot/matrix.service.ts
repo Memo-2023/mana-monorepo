@@ -16,6 +16,7 @@ import {
 	I18nService,
 	Language,
 	LANGUAGE_NAMES,
+	LOGIN_MESSAGES,
 } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
@@ -183,15 +184,6 @@ Sag "hilfe" fur alle Befehle!`;
 				await this.handleToggleArchive(roomId, event, sender, args);
 				break;
 
-			case 'login':
-				await this.handleLogin(roomId, event, sender, args);
-				break;
-
-			case 'logout':
-				await this.sessionService.logout(sender);
-				await this.sendReply(roomId, event, 'Du wurdest abgemeldet.');
-				break;
-
 			case 'status':
 				await this.handleStatus(roomId, event, sender);
 				break;
@@ -216,11 +208,8 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleListContacts(roomId: string, event: MatrixRoomEvent, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		try {
 			const result = await this.contactsService.getContacts(token, { limit: 20 });
@@ -267,11 +256,8 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		searchTerm: string
 	) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		if (!searchTerm.trim()) {
 			await this.sendReply(
@@ -314,11 +300,8 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async handleFavorites(roomId: string, event: MatrixRoomEvent, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		try {
 			const result = await this.contactsService.getContacts(token, { isFavorite: true, limit: 20 });
@@ -357,11 +340,8 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		if (args.length < 1) {
 			await this.sendReply(
@@ -429,11 +409,8 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		// Validate credits
 		const validation = await this.creditService.validateCredits(token, CONTACT_CREATE_CREDITS);
@@ -484,11 +461,8 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		if (args.length < 3) {
 			await this.sendReply(
@@ -579,11 +553,8 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		if (args.length < 1) {
 			await this.sendReply(
@@ -623,11 +594,8 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		if (args.length < 1) {
 			await this.sendReply(
@@ -667,11 +635,8 @@ Sag "hilfe" fur alle Befehle!`;
 		sender: string,
 		args: string[]
 	) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendReply(roomId, event, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, event, sender);
+		if (!token) return;
 
 		if (args.length < 1) {
 			await this.sendReply(
@@ -705,46 +670,20 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleLogin(
+	/**
+	 * Require login - returns token or sends login prompt and returns null
+	 */
+	private async requireLogin(
 		roomId: string,
 		event: MatrixRoomEvent,
-		sender: string,
-		args: string[]
-	) {
-		if (args.length < 2) {
-			await this.sendReply(
-				roomId,
-				event,
-				`**Verwendung:** \`!login email passwort\`\n\nBeispiel: \`!login nutzer@example.com meinpasswort\``
-			);
-			return;
+		userId: string
+	): Promise<string | null> {
+		const token = await this.sessionService.getToken(userId);
+		if (!token) {
+			await this.sendReply(roomId, event, LOGIN_MESSAGES.contacts);
+			return null;
 		}
-
-		const [email, password] = args;
-
-		await this.sendReply(roomId, event, 'Anmeldung lauft...');
-
-		const result = await this.sessionService.login(sender, email, password);
-
-		if (result.success) {
-			const token = await this.sessionService.getToken(sender);
-			if (token) {
-				const balance = await this.creditService.getBalance(token);
-				await this.sendReply(
-					roomId,
-					event,
-					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}\n\nNutze \`!kontakte\` um deine Kontakte zu sehen.`
-				);
-			} else {
-				await this.sendReply(
-					roomId,
-					event,
-					`✅ Erfolgreich angemeldet!\n\nNutze \`!kontakte\` um deine Kontakte zu sehen.`
-				);
-			}
-		} else {
-			await this.sendReply(roomId, event, `❌ Anmeldung fehlgeschlagen: ${result.error}`);
-		}
+		return token;
 	}
 
 	private async handleStatus(roomId: string, event: MatrixRoomEvent, sender: string) {

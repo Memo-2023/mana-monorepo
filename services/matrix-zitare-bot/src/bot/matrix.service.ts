@@ -198,15 +198,6 @@ Sag "hilfe" fuer alle Befehle!`;
 				await this.handleCategoryQuote(roomId, sender, 'motivation');
 				break;
 
-			case 'login':
-				await this.handleLogin(roomId, sender, args);
-				break;
-
-			case 'logout':
-				await this.sessionService.logout(sender);
-				await this.sendMessage(roomId, 'Du wurdest abgemeldet.');
-				break;
-
 			case 'favorit':
 			case 'fav':
 				await this.handleAddFavorite(roomId, sender);
@@ -351,40 +342,6 @@ Sag "hilfe" fuer alle Befehle!`;
 		text += `\n**Gesamt:** ${this.quotesService.getTotalCount()} Zitate`;
 
 		await this.sendMessage(roomId, text);
-	}
-
-	private async handleLogin(roomId: string, sender: string, args: string[]) {
-		if (args.length < 2) {
-			await this.sendMessage(
-				roomId,
-				`**Verwendung:** \`!login email passwort\`\n\nBeispiel: \`!login nutzer@example.com meinpasswort\``
-			);
-			return;
-		}
-
-		const [email, password] = args;
-
-		await this.sendMessage(roomId, 'Anmeldung laeuft...');
-
-		const result = await this.sessionService.login(sender, email, password);
-
-		if (result.success) {
-			const token = await this.sessionService.getToken(sender);
-			if (token) {
-				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(
-					roomId,
-					`✅ Erfolgreich angemeldet!\n⚡ Credits: ${balance.balance.toFixed(2)}\n\nDu kannst jetzt Favoriten speichern und Listen verwalten.`
-				);
-			} else {
-				await this.sendMessage(
-					roomId,
-					`Erfolgreich angemeldet!\n\nDu kannst jetzt Favoriten speichern und Listen verwalten.`
-				);
-			}
-		} else {
-			await this.sendMessage(roomId, `Anmeldung fehlgeschlagen: ${result.error}`);
-		}
 	}
 
 	private async handleAddFavorite(roomId: string, sender: string) {

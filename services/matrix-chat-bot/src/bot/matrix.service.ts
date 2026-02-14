@@ -13,6 +13,7 @@ import {
 	TranscriptionService,
 	CreditService,
 	CreditErrorCode,
+	LOGIN_MESSAGES,
 } from '@manacore/bot-services';
 import { HELP_MESSAGE, BRANCH_ICONS } from '../config/configuration';
 
@@ -138,14 +139,6 @@ export class MatrixService extends BaseMatrixService {
 				response = HELP_MESSAGE;
 				break;
 
-			case 'login':
-				response = await this.handleLogin(sender, args);
-				break;
-
-			case 'logout':
-				response = await this.handleLogout(sender);
-				break;
-
 			case 'status':
 				response = await this.handleStatus(sender);
 				break;
@@ -239,26 +232,6 @@ export class MatrixService extends BaseMatrixService {
 		await this.sendReply(roomId, event, response);
 	}
 
-	// Auth handlers
-	private async handleLogin(sender: string, args: string[]): Promise<string> {
-		if (args.length < 2) {
-			return 'Verwendung: `!login email passwort`';
-		}
-
-		const [email, password] = args;
-		const result = await this.sessionService.login(sender, email, password);
-
-		if (result.success) {
-			return `Erfolgreich angemeldet als **${email}**`;
-		}
-		return `Anmeldung fehlgeschlagen: ${result.error}`;
-	}
-
-	private async handleLogout(sender: string): Promise<string> {
-		await this.sessionService.logout(sender);
-		return 'Erfolgreich abgemeldet.';
-	}
-
 	private async handleStatus(sender: string): Promise<string> {
 		const isLoggedIn = await this.sessionService.isLoggedIn(sender);
 		const email = await this.sessionService.getEmail(sender);
@@ -281,7 +254,7 @@ export class MatrixService extends BaseMatrixService {
 		}
 
 		if (!isLoggedIn) {
-			return `🤖 **Bot Status**\n\n❌ Nicht angemeldet.\n\nNutze \`!login email passwort\` zum Anmelden.`;
+			return `🤖 **Bot Status**\n\n❌ Nicht angemeldet.\n\n${LOGIN_MESSAGES.chat}`;
 		}
 
 		const statusMessage = this.creditService.formatStatusMessage(
@@ -301,7 +274,7 @@ export class MatrixService extends BaseMatrixService {
 
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		// Get models to find default
@@ -345,7 +318,7 @@ export class MatrixService extends BaseMatrixService {
 	private async handleNewConversation(sender: string, title: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		// Get models to find default
@@ -376,7 +349,7 @@ export class MatrixService extends BaseMatrixService {
 	private async handleListConversations(sender: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		const result = await this.chatService.getConversations(token);
@@ -417,7 +390,7 @@ export class MatrixService extends BaseMatrixService {
 	private async handleSelectConversation(sender: string, numberStr: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		if (!numberStr) {
@@ -475,7 +448,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		const conversationId = await this.getCurrentConversation(sender);
@@ -540,7 +513,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 	private async handleShowHistory(sender: string, numberStr?: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		let conversationId = await this.getCurrentConversation(sender);
@@ -591,7 +564,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 	): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		if (!numberStr || !title) {
@@ -619,7 +592,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 	private async handleArchive(sender: string, numberStr: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		if (!numberStr) {
@@ -647,7 +620,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 	private async handleListArchived(sender: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		const result = await this.chatService.getArchivedConversations(token);
@@ -678,7 +651,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 	private async handleUnarchive(sender: string, numberStr: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		if (!numberStr) {
@@ -706,7 +679,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 	private async handlePin(sender: string, numberStr: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		if (!numberStr) {
@@ -734,7 +707,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 	private async handleUnpin(sender: string, numberStr: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		if (!numberStr) {
@@ -762,7 +735,7 @@ Nutze \`!senden [nachricht]\` um zu chatten oder \`!verlauf\` fuer den Nachricht
 	private async handleDelete(sender: string, numberStr: string): Promise<string> {
 		const token = await this.sessionService.getToken(sender);
 		if (!token) {
-			return 'Bitte zuerst anmelden mit `!login email passwort`';
+			return LOGIN_MESSAGES.chat;
 		}
 
 		if (!numberStr) {

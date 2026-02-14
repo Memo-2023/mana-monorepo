@@ -23,7 +23,7 @@ export const HELP_MESSAGE = `**Contacts Bot - Kontaktverwaltung**
 - \`!favoriten\` - Favoriten anzeigen
 - \`!kontakt [nr]\` - Kontakt-Details
 
-**Kontakte verwalten:** (Login erforderlich)
+**Kontakte verwalten:**
 - \`!neu Vorname Nachname\` - Neuen Kontakt erstellen
 - \`!edit [nr] [feld] [wert]\` - Kontakt bearbeiten
 - \`!loeschen [nr]\` - Kontakt loschen
@@ -42,7 +42,5 @@ export const HELP_MESSAGE = `**Contacts Bot - Kontaktverwaltung**
 \`!edit 1 phone +49 123 456789\`
 
 **Sonstiges:**
-- \`!login email passwort\` - Anmelden
-- \`!logout\` - Abmelden
 - \`!status\` - Bot-Status
 - \`!help\` - Diese Hilfe`;

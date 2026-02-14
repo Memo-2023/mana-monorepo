@@ -121,12 +121,6 @@ export class MatrixService extends BaseMatrixService {
 			case 'start':
 				await this.sendHelp(roomId);
 				break;
-			case 'login':
-				await this.handleLogin(roomId, sender, argString);
-				break;
-			case 'logout':
-				await this.handleLogout(roomId, sender);
-				break;
 			case 'auth':
 			case 'account':
 				await this.handleAuthStatus(roomId, sender);
@@ -198,36 +192,6 @@ ${styles}
 **Tipp:** Starte mit \`!new Projektname\``;
 
 		await this.sendMessage(roomId, helpText);
-	}
-
-	private async handleLogin(roomId: string, sender: string, args: string) {
-		const parts = args.split(' ');
-		if (parts.length < 2 || !parts[0] || !parts[1]) {
-			await this.sendMessage(roomId, 'Verwendung: `!login email passwort`');
-			return;
-		}
-		const [email, password] = parts;
-		const result = await this.sessionService.login(sender, email, password);
-
-		if (result.success) {
-			const token = await this.sessionService.getToken(sender);
-			if (token) {
-				const balance = await this.creditService.getBalance(token);
-				await this.sendMessage(
-					roomId,
-					`✅ Erfolgreich angemeldet als **${email}**\n⚡ Credits: ${balance.balance.toFixed(2)}`
-				);
-			} else {
-				await this.sendMessage(roomId, `✅ Erfolgreich angemeldet als **${email}**`);
-			}
-		} else {
-			await this.sendMessage(roomId, `❌ Anmeldung fehlgeschlagen: ${result.error}`);
-		}
-	}
-
-	private async handleLogout(roomId: string, sender: string) {
-		await this.sessionService.logout(sender);
-		await this.sendMessage(roomId, '👋 Erfolgreich abgemeldet.');
 	}
 
 	private async handleAuthStatus(roomId: string, sender: string) {

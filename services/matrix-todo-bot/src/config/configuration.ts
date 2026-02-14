@@ -38,8 +38,6 @@ export const HELP_TEXT = `🎯 **Todo Bot - Hilfe**
 **Sonstiges:**
 • \`status\` - Verbindungsstatus prüfen
 • \`hilfe\` - Diese Hilfe anzeigen
-• \`login email passwort\` - Anmelden für Synchronisation
-• \`logout\` - Abmelden
 
 **Tipp:** Alle Befehle funktionieren auch mit \`!\` davor (z.B. \`!neu\`)`;
 

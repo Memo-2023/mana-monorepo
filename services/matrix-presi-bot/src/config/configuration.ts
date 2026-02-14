@@ -17,13 +17,6 @@ export default () => ({
 
 export const HELP_MESSAGE = `<h2>Presi Bot - Befehle</h2>
 
-<h3>Authentifizierung</h3>
-<ul>
-<li><code>!login email passwort</code> - Anmelden</li>
-<li><code>!logout</code> - Abmelden</li>
-<li><code>!status</code> - Bot-Status anzeigen</li>
-</ul>
-
 <h3>Praesentationen</h3>
 <ul>
 <li><code>!presis</code> - Alle Praesentationen auflisten</li>

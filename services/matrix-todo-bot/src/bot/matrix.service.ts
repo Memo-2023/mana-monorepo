@@ -419,14 +419,6 @@ export class MatrixService
 				await this.sendReply(roomId, event, HELP_TEXT);
 				break;
 
-			case 'login':
-				await this.handleLogin(roomId, event, userId, args);
-				break;
-
-			case 'logout':
-				await this.handleLogout(roomId, event, userId);
-				break;
-
 			case 'add':
 			case 'neu':
 			case 'neue':
@@ -844,28 +836,6 @@ export class MatrixService
 
 			await this.sendMessage(roomId, response);
 		}
-	}
-
-	private async handleLogin(roomId: string, event: MatrixRoomEvent, userId: string, args: string) {
-		const parts = args.trim().split(/\s+/);
-		if (parts.length < 2) {
-			await this.sendReply(roomId, event, 'Verwendung: `login email passwort`');
-			return;
-		}
-
-		const [email, password] = parts;
-		const result = await this.sessionService.login(userId, email, password);
-
-		if (result.success) {
-			await this.sendReply(roomId, event, `Erfolgreich angemeldet als **${email}**`);
-		} else {
-			await this.sendReply(roomId, event, `Anmeldung fehlgeschlagen: ${result.error}`);
-		}
-	}
-
-	private async handleLogout(roomId: string, event: MatrixRoomEvent, userId: string) {
-		this.sessionService.logout(userId);
-		await this.sendReply(roomId, event, 'Erfolgreich abgemeldet.');
 	}
 
 	private async handlePinHelp(roomId: string, event: MatrixRoomEvent) {
