@@ -59,6 +59,7 @@
 		Robot,
 		Key,
 		Shield,
+		Gift,
 	} from '@manacore/shared-icons';
 
 	// Map icon names to Phosphor components
@@ -113,6 +114,7 @@
 		robot: Robot,
 		key: Key,
 		shield: Shield,
+		gift: Gift,
 	};
 
 	// Convert app items to dropdown items (will be computed as derived)
