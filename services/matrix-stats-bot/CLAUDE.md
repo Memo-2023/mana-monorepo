@@ -22,7 +22,14 @@ pnpm type-check       # TypeScript check
 
 ## Matrix Commands
 
-### Analytics (Umami)
+### Personal Stats (requires login)
+
+| Command | Description |
+|---------|-------------|
+| `!mystats` | Your personal statistics across all ManaCore apps |
+| `!status` | Account status and credit balance |
+
+### Global Analytics (Umami)
 
 | Command | Description |
 |---------|-------------|
@@ -41,11 +48,12 @@ pnpm type-check       # TypeScript check
 | `!db` | PostgreSQL & Redis status |
 | `!growth` | User growth statistics |
 
-### General
+### Account
 
 | Command | Description |
 |---------|-------------|
-| `!status` | Account status |
+| `!login email password` | Login with ManaCore credentials |
+| `!logout` | Logout from current session |
 | `!help` | Show available commands |
 
 ## Scheduled Reports

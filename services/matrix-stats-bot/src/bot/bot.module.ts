@@ -3,6 +3,7 @@ import { MatrixService } from './matrix.service';
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { UsersModule } from '../users/users.module';
 import { InfrastructureModule } from '../infrastructure/infrastructure.module';
+import { MyDataModule } from '../mydata/mydata.module';
 import { TranscriptionModule, SessionModule, CreditModule } from '@manacore/bot-services';
 
 @Module({
@@ -10,6 +11,7 @@ import { TranscriptionModule, SessionModule, CreditModule } from '@manacore/bot-
 		AnalyticsModule,
 		UsersModule,
 		InfrastructureModule,
+		MyDataModule,
 		TranscriptionModule.register({
 			sttUrl: process.env.STT_URL || 'http://localhost:3020',
 		}),

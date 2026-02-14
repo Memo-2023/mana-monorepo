@@ -35,6 +35,12 @@ export const REDIS_SESSION_PROVIDER = 'REDIS_SESSION_PROVIDER';
  * // Token is available across ALL bots!
  * ```
  */
+/**
+ * Buffer time before JWT expiry to trigger refresh (in seconds)
+ * Refresh tokens 60 seconds before they expire to avoid edge cases
+ */
+const JWT_REFRESH_BUFFER_SECONDS = 60;
+
 @Injectable()
 export class SessionService {
 	private readonly logger = new Logger(SessionService.name);
@@ -79,12 +85,57 @@ export class SessionService {
 	}
 
 	/**
+	 * Decode JWT and check if it's expired or about to expire
+	 *
+	 * @param token - JWT token string
+	 * @returns true if token is valid and not expired, false otherwise
+	 */
+	private isTokenValid(token: string): boolean {
+		try {
+			// JWT format: header.payload.signature
+			const parts = token.split('.');
+			if (parts.length !== 3) {
+				this.logger.debug('Invalid JWT format');
+				return false;
+			}
+
+			// Decode payload (base64url)
+			const payload = JSON.parse(
+				Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')
+			);
+
+			if (!payload.exp) {
+				this.logger.debug('JWT has no exp claim');
+				return true; // No expiry = valid
+			}
+
+			// Check if expired (with buffer)
+			const now = Math.floor(Date.now() / 1000);
+			const expiresAt = payload.exp;
+			const isValid = expiresAt > now + JWT_REFRESH_BUFFER_SECONDS;
+
+			if (!isValid) {
+				this.logger.debug(
+					`JWT expired or expiring soon: exp=${expiresAt}, now=${now}, buffer=${JWT_REFRESH_BUFFER_SECONDS}s`
+				);
+			}
+
+			return isValid;
+		} catch (error) {
+			this.logger.debug(`Failed to decode JWT: ${error}`);
+			return false;
+		}
+	}
+
+	/**
 	 * Get or create a session for a Matrix user
 	 *
 	 * This method tries multiple sources in order:
-	 * 1. Redis cache (if enabled)
-	 * 2. In-memory cache
+	 * 1. Redis cache (if enabled) - validates JWT expiry
+	 * 2. In-memory cache - validates JWT expiry
 	 * 3. Matrix-SSO-Link lookup (automatic login if user logged into Matrix via OIDC)
+	 *
+	 * If a cached token is expired, it automatically fetches a fresh one via SSO-Link.
 	 *
 	 * @param matrixUserId - Matrix user ID (e.g., "@user:matrix.mana.how")
 	 * @returns JWT token or null if not logged in
@@ -94,8 +145,19 @@ export class SessionService {
 		if (this.useRedis()) {
 			const token = await this.redisProvider!.getToken(matrixUserId);
 			if (token) {
-				this.logger.debug(`Found token in Redis for ${matrixUserId}`);
-				return token;
+				// Check if JWT is still valid
+				if (this.isTokenValid(token)) {
+					this.logger.debug(`Found valid token in Redis for ${matrixUserId}`);
+					return token;
+				}
+				// Token expired - try to refresh via SSO-Link
+				this.logger.debug(`Token in Redis expired for ${matrixUserId}, refreshing...`);
+				const freshToken = await this.refreshToken(matrixUserId);
+				if (freshToken) {
+					return freshToken;
+				}
+				// Refresh failed - clear invalid session
+				await this.redisProvider!.deleteSession(matrixUserId);
 			}
 		}
 
@@ -104,9 +166,18 @@ export class SessionService {
 		if (session) {
 			if (session.expiresAt < new Date()) {
 				this.sessions.delete(matrixUserId);
-			} else {
-				this.logger.debug(`Found token in memory for ${matrixUserId}`);
+			} else if (this.isTokenValid(session.token)) {
+				this.logger.debug(`Found valid token in memory for ${matrixUserId}`);
 				return session.token;
+			} else {
+				// Token expired - try to refresh via SSO-Link
+				this.logger.debug(`Token in memory expired for ${matrixUserId}, refreshing...`);
+				const freshToken = await this.refreshToken(matrixUserId);
+				if (freshToken) {
+					return freshToken;
+				}
+				// Refresh failed - clear invalid session
+				this.sessions.delete(matrixUserId);
 			}
 		}
 
@@ -128,6 +199,34 @@ export class SessionService {
 			}
 		}
 
+		return null;
+	}
+
+	/**
+	 * Refresh an expired token via Matrix-SSO-Link
+	 *
+	 * @param matrixUserId - Matrix user ID
+	 * @returns Fresh JWT token or null if refresh failed
+	 */
+	private async refreshToken(matrixUserId: string): Promise<string | null> {
+		if (!this.enableMatrixSsoLink) {
+			this.logger.debug('Cannot refresh token: SSO-Link disabled');
+			return null;
+		}
+
+		const freshToken = await this.fetchMatrixLinkedToken(matrixUserId);
+		if (freshToken) {
+			this.logger.log(`Token refreshed via SSO-Link for ${matrixUserId}`);
+			// Update cached session with fresh token
+			await this.storeSession(matrixUserId, {
+				token: freshToken,
+				email: '', // Unknown from SSO link
+				expiresAt: new Date(Date.now() + this.sessionExpiryMs),
+			});
+			return freshToken;
+		}
+
+		this.logger.warn(`Token refresh failed for ${matrixUserId}`);
 		return null;
 	}
 

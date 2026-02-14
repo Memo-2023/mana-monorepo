@@ -10,6 +10,7 @@ import {
 import { AnalyticsService } from '../analytics/analytics.service';
 import { UsersService } from '../users/users.service';
 import { InfrastructureService } from '../infrastructure/infrastructure.service';
+import { MyDataService } from '../mydata/mydata.service';
 import { TranscriptionService, SessionService, CreditService } from '@manacore/bot-services';
 
 @Injectable()
@@ -28,6 +29,7 @@ export class MatrixService extends BaseMatrixService {
 		{ keywords: ['traffic', 'requests', 'http', 'api'], command: 'traffic' },
 		{ keywords: ['db', 'database', 'datenbank', 'postgres', 'redis'], command: 'db' },
 		{ keywords: ['growth', 'wachstum', 'registrierungen'], command: 'growth' },
+		{ keywords: ['mystats', 'meinestats', 'meinedaten', 'mydata'], command: 'mystats' },
 	]);
 
 	constructor(
@@ -35,6 +37,7 @@ export class MatrixService extends BaseMatrixService {
 		private analyticsService: AnalyticsService,
 		private usersService: UsersService,
 		private infrastructureService: InfrastructureService,
+		private myDataService: MyDataService,
 		private readonly transcriptionService: TranscriptionService,
 		private sessionService: SessionService,
 		private creditService: CreditService
@@ -146,6 +149,10 @@ export class MatrixService extends BaseMatrixService {
 				await this.sendGrowth(roomId);
 				break;
 
+			case 'mystats':
+				await this.sendMyStats(roomId, sender);
+				break;
+
 			default:
 				await this.sendMessage(roomId, `Unbekannter Befehl: !${command}\n\nVerwende !help`);
 		}
@@ -154,7 +161,11 @@ export class MatrixService extends BaseMatrixService {
 	private async sendHelp(roomId: string) {
 		const helpText = `**📊 ManaCore Stats Bot**
 
-**Analytics (Umami):**
+**Persönliche Stats:**
+- \`!mystats\` - Deine persönlichen Statistiken
+- \`!status\` - Account Status
+
+**Globale Analytics (Umami):**
 - \`!stats\` - Übersicht aller Apps (30 Tage)
 - \`!today\` - Heutige Statistiken
 - \`!week\` - Wochenstatistiken
@@ -168,7 +179,8 @@ export class MatrixService extends BaseMatrixService {
 - \`!growth\` - User Wachstum
 
 **Account:**
-- \`!status\` - Account Status
+- \`!login email passwort\` - Anmelden
+- \`!logout\` - Abmelden
 - \`!help\` - Diese Hilfe`;
 
 		await this.sendMessage(roomId, helpText);
@@ -311,6 +323,31 @@ export class MatrixService extends BaseMatrixService {
 				roomId,
 				`❌ Fehler: ${error instanceof Error ? error.message : String(error)}`
 			);
+		}
+	}
+
+	private async sendMyStats(roomId: string, sender: string) {
+		const token = await this.sessionService.getToken(sender);
+
+		if (!token) {
+			await this.sendMessage(roomId, this.myDataService.formatNotLoggedIn());
+			return;
+		}
+
+		try {
+			await this.sendMessage(roomId, '📊 Lade deine persönlichen Stats...');
+			const userData = await this.myDataService.getUserData(token);
+
+			if (!userData) {
+				await this.sendMessage(roomId, this.myDataService.formatError());
+				return;
+			}
+
+			const report = this.myDataService.formatUserStats(userData);
+			await this.sendMessage(roomId, report);
+		} catch (error) {
+			this.logger.error('Failed to fetch user stats:', error);
+			await this.sendMessage(roomId, this.myDataService.formatError());
 		}
 	}
 
