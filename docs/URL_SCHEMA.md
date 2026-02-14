@@ -13,25 +13,68 @@ This document defines the URL schema for all mana.how subdomains.
 
 ## Complete URL Mapping
 
-### Core Apps
+### Core Apps (Production)
 
-| App | Landing Page | Web App | API |
-|-----|--------------|---------|-----|
-| **Calendar** | calendars.mana.how | calendar.mana.how | calendar-api.mana.how |
-| **Clock** | clocks.mana.how | clock.mana.how | clock-api.mana.how |
-| **Todo** | todos.mana.how | todo.mana.how | todo-api.mana.how |
-| **Contacts** | contacts.mana.how | contact.mana.how | contact-api.mana.how |
-| **Chat** | chats.mana.how | chat.mana.how | chat-api.mana.how |
-| **Picture** | pictures.mana.how | picture.mana.how | picture-api.mana.how |
-| **Zitare** | zitares.mana.how | zitare.mana.how | zitare-api.mana.how |
+| App | Web App | API | Status |
+|-----|---------|-----|--------|
+| **Calendar** | calendar.mana.how | api.mana.how/calendar | Active |
+| **Clock** | clock.mana.how | api.mana.how/clock | Active |
+| **Todo** | todo.mana.how | api.mana.how/todo | Active |
+| **Contacts** | contacts.mana.how | api.mana.how/contacts | Active |
+| **Chat** | chat.mana.how | api.mana.how/chat | Active |
+| **Storage** | storage.mana.how | api.mana.how/storage | Active |
+| **Zitare** | zitare.mana.how | api.mana.how/zitare | Active |
+| **NutriPhi** | nutriphi.mana.how | api.mana.how/nutriphi | Active |
+| **Presi** | presi.mana.how | api.mana.how/presi | Active |
+| **SkillTree** | skilltree.mana.how | api.mana.how/skilltree | Active |
+| **Photos** | photos.mana.how | api.mana.how/photos | Active |
 
-### Platform
+### Platform Services
 
-| Service | URL |
-|---------|-----|
-| **Main Dashboard** | mana.how |
-| **Dashboard App** | app.mana.how |
-| **Auth Service** | auth.mana.how |
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Main Dashboard** | mana.how | Main landing/dashboard |
+| **Auth Service** | auth.mana.how | Central authentication (mana-core-auth) |
+| **API Gateway** | api.mana.how | Unified API gateway |
+| **Media Service** | media.mana.how | Image/video processing |
+| **LLM Service** | llm.mana.how | LLM abstraction layer |
+| **LLM Playground** | playground.mana.how | LLM testing interface |
+| **Link Shortener** | link.mana.how | URL shortener (uload) |
+| **File Storage** | files.mana.how | MinIO/S3 file access |
+
+### Matrix/Communication
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Matrix Server** | matrix.mana.how | Synapse homeserver |
+| **Element Web** | element.mana.how | Matrix web client |
+| **N8N** | n.mana.how | Workflow automation |
+
+### Monitoring & Admin
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Grafana** | grafana.mana.how | Metrics dashboards |
+| **Umami** | (internal :8010) | Web analytics |
+
+### Umami Tracking (Analytics)
+
+For web analytics, the following apps are tracked in Umami:
+
+| Umami Website ID | Display Name | Domain |
+|------------------|--------------|--------|
+| `manacore-webapp` | Dashboard | mana.how |
+| `chat-webapp` | Chat | chat.mana.how |
+| `todo-webapp` | Todo | todo.mana.how |
+| `calendar-webapp` | Calendar | calendar.mana.how |
+| `clock-webapp` | Clock | clock.mana.how |
+| `contacts-webapp` | Contacts | contacts.mana.how |
+| `storage-webapp` | Storage | storage.mana.how |
+| `zitare-webapp` | Zitare | zitare.mana.how |
+| `nutriphi-webapp` | NutriPhi | nutriphi.mana.how |
+| `presi-webapp` | Presi | presi.mana.how |
+| `skilltree-webapp` | SkillTree | skilltree.mana.how |
+| `photos-webapp` | Photos | photos.mana.how |
 
 ---
 

@@ -155,17 +155,11 @@ Sag "hilfe" fur alle Befehle!`;
 		await this.client.setTyping(roomId, true, 60000);
 
 		try {
-			// Download audio from Matrix
+			// Download audio from Matrix using authenticated API
 			const mxcUrl = event.content.url!;
-			const httpUrl = this.client.mxcToHttp(mxcUrl);
-			this.logger.log(`Downloading audio from ${httpUrl}`);
+			this.logger.log(`Downloading audio from ${mxcUrl}`);
 
-			const response = await fetch(httpUrl);
-			if (!response.ok) {
-				throw new Error(`Failed to download audio: ${response.status}`);
-			}
-
-			const buffer = Buffer.from(await response.arrayBuffer());
+			const buffer = await this.downloadMedia(mxcUrl);
 
 			// Transcribe audio
 			const transcription = await this.transcriptionService.transcribe(buffer);
@@ -709,17 +703,11 @@ Sag "hilfe" fur alle Befehle!`;
 	}
 
 	private async downloadMatrixImage(mxcUrl: string): Promise<string> {
-		const httpUrl = this.client.mxcToHttp(mxcUrl);
-		this.logger.log(`Downloading image from ${httpUrl}`);
+		this.logger.log(`Downloading image from ${mxcUrl}`);
 
-		const response = await fetch(httpUrl);
-		if (!response.ok) {
-			throw new Error(`Failed to download image: ${response.status}`);
-		}
-
-		const buffer = await response.arrayBuffer();
-		const base64 = Buffer.from(buffer).toString('base64');
-		return base64;
+		// Use the authenticated download method from BaseMatrixService
+		const buffer = await this.downloadMedia(mxcUrl);
+		return buffer.toString('base64');
 	}
 
 	private markdownToHtmlLocal(markdown: string): string {

@@ -9,6 +9,22 @@ interface UmamiStats {
 	totaltime: { value: number; change: number };
 }
 
+// Raw API response format from Umami
+interface UmamiStatsRaw {
+	pageviews: number;
+	visitors: number;
+	visits: number;
+	bounces: number;
+	totaltime: number;
+	comparison: {
+		pageviews: number;
+		visitors: number;
+		visits: number;
+		bounces: number;
+		totaltime: number;
+	};
+}
+
 interface UmamiRealtime {
 	pageviews: number;
 	visitors: number;
@@ -119,9 +135,40 @@ export class UmamiService implements OnModuleInit {
 	}
 
 	async getStats(websiteId: string, startAt: number, endAt: number): Promise<UmamiStats | null> {
-		return this.request<UmamiStats>(
+		const raw = await this.request<UmamiStatsRaw>(
 			`/api/websites/${websiteId}/stats?startAt=${startAt}&endAt=${endAt}`
 		);
+
+		if (!raw) return null;
+
+		// Transform raw API response to expected format
+		const calcChange = (current: number, previous: number): number => {
+			if (previous === 0) return current > 0 ? 100 : 0;
+			return Math.round(((current - previous) / previous) * 100);
+		};
+
+		return {
+			pageviews: {
+				value: raw.pageviews,
+				change: calcChange(raw.pageviews, raw.comparison?.pageviews ?? 0),
+			},
+			visitors: {
+				value: raw.visitors,
+				change: calcChange(raw.visitors, raw.comparison?.visitors ?? 0),
+			},
+			visits: {
+				value: raw.visits,
+				change: calcChange(raw.visits, raw.comparison?.visits ?? 0),
+			},
+			bounces: {
+				value: raw.bounces,
+				change: calcChange(raw.bounces, raw.comparison?.bounces ?? 0),
+			},
+			totaltime: {
+				value: raw.totaltime,
+				change: calcChange(raw.totaltime, raw.comparison?.totaltime ?? 0),
+			},
+		};
 	}
 
 	async getRealtime(websiteId: string): Promise<UmamiRealtime | null> {
@@ -133,7 +180,10 @@ export class UmamiService implements OnModuleInit {
 		startAt: number,
 		endAt: number,
 		unit: 'hour' | 'day' | 'month' = 'day'
-	): Promise<{ pageviews: { x: string; y: number }[]; sessions: { x: string; y: number }[] } | null> {
+	): Promise<{
+		pageviews: { x: string; y: number }[];
+		sessions: { x: string; y: number }[];
+	} | null> {
 		return this.request(
 			`/api/websites/${websiteId}/pageviews?startAt=${startAt}&endAt=${endAt}&unit=${unit}`
 		);
