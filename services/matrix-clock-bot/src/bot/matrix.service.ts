@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
 	BaseMatrixService,
@@ -7,7 +7,7 @@ import {
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
-import { ClockService } from '../clock/clock.service';
+import { ClockService, Timer } from '../clock/clock.service';
 import {
 	TranscriptionService,
 	SessionService,
@@ -19,10 +19,29 @@ import {
 } from '@manacore/bot-services';
 import { HELP_TEXT, WELCOME_TEXT } from '../config/configuration';
 
+/**
+ * Tracking info for live timer updates
+ */
+interface TimerMessageTracker {
+	timerId: string;
+	roomId: string;
+	eventId: string;
+	userId: string;
+	token: string;
+	durationSeconds: number;
+	label: string | null;
+	startedAt: Date;
+}
+
 @Injectable()
-export class MatrixService extends BaseMatrixService {
+export class MatrixService extends BaseMatrixService implements OnModuleDestroy {
 	// Demo token for development (TODO: implement proper auth)
 	private readonly demoToken = process.env.CLOCK_API_TOKEN || '';
+
+	// Track active timer messages for live updates
+	private readonly activeTimerMessages = new Map<string, TimerMessageTracker>();
+	private timerUpdateInterval: NodeJS.Timeout | null = null;
+	private readonly UPDATE_INTERVAL_MS = 10000; // Update every 10 seconds
 
 	// Note: We override COMMON_KEYWORDS' cancel->cancel with stop->stop for this bot
 	private readonly keywordDetector = new KeywordCommandDetector([
@@ -42,6 +61,190 @@ export class MatrixService extends BaseMatrixService {
 		private i18nService: I18nService
 	) {
 		super(configService);
+		this.startTimerUpdateLoop();
+	}
+
+	/**
+	 * Cleanup on module destroy
+	 */
+	async onModuleDestroy(): Promise<void> {
+		this.stopTimerUpdateLoop();
+		await super.onModuleDestroy();
+	}
+
+	/**
+	 * Start the background timer update loop
+	 */
+	private startTimerUpdateLoop() {
+		if (this.timerUpdateInterval) return;
+
+		this.timerUpdateInterval = setInterval(async () => {
+			await this.updateAllActiveTimers();
+		}, this.UPDATE_INTERVAL_MS);
+
+		this.logger.log('Timer update loop started');
+	}
+
+	/**
+	 * Stop the background timer update loop
+	 */
+	private stopTimerUpdateLoop() {
+		if (this.timerUpdateInterval) {
+			clearInterval(this.timerUpdateInterval);
+			this.timerUpdateInterval = null;
+			this.logger.log('Timer update loop stopped');
+		}
+	}
+
+	/**
+	 * Update all active timer messages
+	 */
+	private async updateAllActiveTimers() {
+		for (const [timerId, tracker] of this.activeTimerMessages) {
+			try {
+				await this.updateTimerMessage(tracker);
+			} catch (error) {
+				this.logger.error(`Failed to update timer ${timerId}:`, error);
+				// Remove tracker on persistent errors
+				this.activeTimerMessages.delete(timerId);
+			}
+		}
+	}
+
+	/**
+	 * Update a single timer message
+	 */
+	private async updateTimerMessage(tracker: TimerMessageTracker) {
+		try {
+			// Get current timer state from API
+			const timer = await this.clockService.getTimer(tracker.timerId, tracker.token);
+
+			if (!timer) {
+				// Timer deleted, remove tracking
+				this.activeTimerMessages.delete(tracker.timerId);
+				return;
+			}
+
+			// Calculate remaining time
+			const remainingSeconds = this.calculateRemainingSeconds(timer);
+
+			if (timer.status === 'finished' || remainingSeconds <= 0) {
+				// Timer finished - send final message and stop tracking
+				const finalMessage = this.formatTimerFinishedMessage(tracker);
+				await this.editMessage(tracker.roomId, tracker.eventId, finalMessage);
+				this.activeTimerMessages.delete(tracker.timerId);
+				return;
+			}
+
+			if (timer.status === 'paused') {
+				// Timer paused - update message but keep tracking
+				const pausedMessage = this.formatTimerMessage(
+					remainingSeconds,
+					tracker.durationSeconds,
+					tracker.label,
+					'paused'
+				);
+				await this.editMessage(tracker.roomId, tracker.eventId, pausedMessage);
+				return;
+			}
+
+			// Timer running - update with current progress
+			const runningMessage = this.formatTimerMessage(
+				remainingSeconds,
+				tracker.durationSeconds,
+				tracker.label,
+				'running'
+			);
+			await this.editMessage(tracker.roomId, tracker.eventId, runningMessage);
+		} catch (error) {
+			// Token might have expired or API error
+			this.logger.warn(`Timer update failed for ${tracker.timerId}: ${error}`);
+			throw error;
+		}
+	}
+
+	/**
+	 * Calculate remaining seconds for a timer
+	 */
+	private calculateRemainingSeconds(timer: Timer): number {
+		if (timer.status === 'paused') {
+			return timer.remainingSeconds;
+		}
+
+		if (timer.status === 'running' && timer.startedAt) {
+			const startedAt = new Date(timer.startedAt).getTime();
+			const now = Date.now();
+			const elapsedSeconds = Math.floor((now - startedAt) / 1000);
+			return Math.max(0, timer.durationSeconds - elapsedSeconds);
+		}
+
+		return timer.remainingSeconds || timer.durationSeconds;
+	}
+
+	/**
+	 * Format a timer message with progress bar
+	 */
+	private formatTimerMessage(
+		remainingSeconds: number,
+		totalSeconds: number,
+		label: string | null,
+		status: 'running' | 'paused'
+	): string {
+		const remaining = this.clockService.formatDuration(remainingSeconds);
+		const total = this.clockService.formatDuration(totalSeconds);
+		const progress = this.createProgressBar(remainingSeconds, totalSeconds);
+		const percentage = Math.round((1 - remainingSeconds / totalSeconds) * 100);
+
+		const statusIcon = status === 'running' ? '▶️' : '⏸️';
+		const statusText = status === 'running' ? 'läuft' : 'pausiert';
+
+		let message = `${statusIcon} **Timer ${statusText}**\n\n`;
+		message += `⏱️ **${remaining}** / ${total}\n`;
+		message += `${progress} ${percentage}%`;
+
+		if (label) {
+			message += `\n📝 ${label}`;
+		}
+
+		if (status === 'running') {
+			message += '\n\n`!stop` zum Pausieren';
+		} else {
+			message += '\n\n`!resume` zum Fortsetzen';
+		}
+
+		return message;
+	}
+
+	/**
+	 * Format timer finished message
+	 */
+	private formatTimerFinishedMessage(tracker: TimerMessageTracker): string {
+		const total = this.clockService.formatDuration(tracker.durationSeconds);
+
+		let message = '🎉 **Timer abgelaufen!**\n\n';
+		message += `⏱️ ${total} vergangen`;
+
+		if (tracker.label) {
+			message += `\n📝 ${tracker.label}`;
+		}
+
+		message += '\n\n`!timer` für neuen Timer';
+
+		return message;
+	}
+
+	/**
+	 * Create a progress bar using Unicode block characters
+	 */
+	private createProgressBar(remaining: number, total: number, width: number = 20): string {
+		const elapsed = total - remaining;
+		const filledCount = Math.round((elapsed / total) * width);
+		const emptyCount = width - filledCount;
+
+		const filled = '█'.repeat(filledCount);
+		const empty = '░'.repeat(emptyCount);
+
+		return `${filled}${empty}`;
 	}
 
 	protected getConfig(): MatrixBotConfig {
@@ -263,12 +466,30 @@ export class MatrixService extends BaseMatrixService {
 			const timer = await this.clockService.createTimer(durationSeconds, label, token);
 			await this.clockService.startTimer(timer.id, token);
 
-			const durationStr = this.clockService.formatDuration(durationSeconds);
-			let response = `**Timer gestartet!**\n\nDauer: ${durationStr}`;
-			if (label) response += `\nLabel: ${label}`;
-			response += '\n\n`!stop` zum Pausieren, `!status` fur Status';
+			// Format initial message with progress bar
+			const initialMessage = this.formatTimerMessage(
+				durationSeconds,
+				durationSeconds,
+				label,
+				'running'
+			);
 
-			await this.sendReply(roomId, event, response);
+			// Send message and track it for live updates
+			const eventId = await this.sendReply(roomId, event, initialMessage);
+
+			// Store tracking info for live updates
+			this.activeTimerMessages.set(timer.id, {
+				timerId: timer.id,
+				roomId,
+				eventId,
+				userId,
+				token,
+				durationSeconds,
+				label,
+				startedAt: new Date(),
+			});
+
+			this.logger.log(`Started tracking timer ${timer.id} for live updates`);
 		} catch (error) {
 			this.logger.error('Timer creation failed:', error);
 			await this.sendReply(roomId, event, 'Fehler beim Erstellen des Timers.');

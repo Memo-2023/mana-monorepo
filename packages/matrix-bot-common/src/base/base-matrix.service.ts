@@ -221,6 +221,32 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 	}
 
 	/**
+	 * Edit an existing message
+	 */
+	protected async editMessage(
+		roomId: string,
+		originalEventId: string,
+		newMessage: string
+	): Promise<string> {
+		return this.client.sendMessage(roomId, {
+			msgtype: 'm.text',
+			body: `* ${newMessage}`,
+			format: 'org.matrix.custom.html',
+			formatted_body: `* ${markdownToHtml(newMessage)}`,
+			'm.relates_to': {
+				rel_type: 'm.replace',
+				event_id: originalEventId,
+			},
+			'm.new_content': {
+				msgtype: 'm.text',
+				body: newMessage,
+				format: 'org.matrix.custom.html',
+				formatted_body: markdownToHtml(newMessage),
+			},
+		});
+	}
+
+	/**
 	 * Download media from Matrix using authenticated media API (v1)
 	 * Newer Synapse versions require authenticated downloads via /_matrix/client/v1/media/download/
 	 */
