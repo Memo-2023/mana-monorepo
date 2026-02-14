@@ -8,7 +8,7 @@ Matrix TTS Bot converts text messages to speech and sends them back as audio mes
 
 - **Framework**: NestJS 10
 - **Matrix**: matrix-bot-sdk
-- **TTS Backend**: mana-tts service (Kokoro/F5-TTS)
+- **TTS Backend**: mana-tts service (Piper for German, Kokoro for English)
 
 ## Commands
 
@@ -80,17 +80,26 @@ TTS_URL=http://localhost:3022
 TTS_API_KEY=sk-internal-xxx
 
 # Defaults
-DEFAULT_VOICE=af_heart
+DEFAULT_VOICE=de_kerstin
 DEFAULT_SPEED=1.0
 MAX_TEXT_LENGTH=500
 ```
 
 ## TTS API Integration
 
-The bot uses mana-tts `/synthesize/kokoro` endpoint:
+The bot auto-detects language and uses the appropriate endpoint:
 
 ```typescript
-// Request
+// German voices use /synthesize/auto (routes to Piper)
+POST /synthesize/auto
+{
+  "text": "Hallo Welt",
+  "voice": "de_kerstin",
+  "speed": 1.0,
+  "output_format": "wav"
+}
+
+// English voices use /synthesize/kokoro
 POST /synthesize/kokoro
 {
   "text": "Hello world",
@@ -102,13 +111,32 @@ POST /synthesize/kokoro
 // Response: audio/wav binary
 ```
 
-## Example Voices
+**Language Detection**: The bot automatically detects German text (via German characters like äöüß or common German words) and switches to a German voice if needed.
+
+## Available Voices
+
+### German (Local - Piper)
+
+| Voice ID | Description |
+|----------|-------------|
+| `de_kerstin` | German female (default) |
+| `de_thorsten` | German male |
+
+### German (Cloud - Edge TTS)
+
+| Voice ID | Description |
+|----------|-------------|
+| `de_katja` | German female |
+| `de_conrad` | German male |
+| `de_amala` | German female (young) |
+| `de_florian` | German male (young) |
+
+### English (Kokoro)
 
 | Voice ID | Description |
 |----------|-------------|
 | `af_heart` | American female (warm) |
 | `af_bella` | American female (expressive) |
-| `af_sarah` | American female (neutral) |
 | `am_michael` | American male (trustworthy) |
 | `bm_daniel` | British male (classic) |
 | `bf_emma` | British female (professional) |

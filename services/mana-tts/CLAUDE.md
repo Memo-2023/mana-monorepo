@@ -23,10 +23,18 @@ uvicorn app.main:app --host 0.0.0.0 --port 3022 --reload
 
 # Test
 curl http://localhost:3022/health
+
+# English (Kokoro)
 curl -X POST http://localhost:3022/synthesize/kokoro \
   -H "Content-Type: application/json" \
   -d '{"text": "Hello world", "voice": "af_heart"}' \
-  --output test.wav
+  --output test_en.wav
+
+# German (Piper) - use /synthesize/auto
+curl -X POST http://localhost:3022/synthesize/auto \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hallo Welt", "voice": "de_kerstin"}' \
+  --output test_de.wav
 ```
 
 ## File Structure
@@ -36,12 +44,14 @@ services/mana-tts/
 ├── app/
 │   ├── __init__.py
 │   ├── main.py              # FastAPI endpoints
-│   ├── kokoro_service.py    # Kokoro TTS (preset voices)
+│   ├── kokoro_service.py    # Kokoro TTS (English preset voices)
+│   ├── piper_service.py     # Piper TTS (German voices, local)
 │   ├── f5_service.py        # F5-TTS (voice cloning)
 │   ├── voice_manager.py     # Custom voice registry
 │   └── audio_utils.py       # Audio format conversion
-├── voices/                  # Custom voice storage
-├── mlx_models/             # Model cache
+├── piper_voices/            # Piper voice models (.onnx)
+├── voices/                  # Custom F5 voice storage
+├── mlx_models/             # MLX model cache
 ├── setup.sh                # Setup script
 ├── requirements.txt
 └── README.md
@@ -62,13 +72,26 @@ services/mana-tts/
 
 ## Models
 
-### Kokoro-82M
+### Kokoro-82M (English)
 - ~300 MB download
-- 30+ preset voices
+- 30+ preset English voices
 - Fast inference
 - No reference audio needed
 
-### F5-TTS
+### Piper TTS (German)
+- ~63 MB per voice model
+- 100% local, GDPR-compliant
+- Fast inference on CPU
+- Available voices:
+  - `de_kerstin` - Female (default)
+  - `de_thorsten` - Male
+- Fallback to Edge TTS (cloud) if Piper unavailable:
+  - `de_katja` - Female (cloud)
+  - `de_conrad` - Male (cloud)
+  - `de_amala` - Female young (cloud)
+  - `de_florian` - Male young (cloud)
+
+### F5-TTS (Voice Cloning)
 - ~6 GB download
 - Voice cloning capability
 - Requires reference audio + transcript
@@ -89,6 +112,8 @@ services/mana-tts/
 - `f5-tts-mlx` - Voice cloning model
 - `mlx-audio` - Kokoro implementation
 - `mlx` - Apple Silicon ML framework
+- `piper-tts` - German TTS (local)
+- `edge-tts` - German TTS fallback (cloud)
 - `soundfile` - Audio I/O
 - `pydub` - MP3 conversion
 
