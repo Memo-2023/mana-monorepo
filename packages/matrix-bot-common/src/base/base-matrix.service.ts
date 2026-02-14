@@ -171,6 +171,13 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 	}
 
 	/**
+	 * Check if event is an edit (message replacement)
+	 */
+	protected isEditEvent(event: MatrixRoomEvent): boolean {
+		return event.content?.['m.relates_to']?.rel_type === 'm.replace';
+	}
+
+	/**
 	 * Handle incoming room message
 	 */
 	protected async onRoomMessage(roomId: string, event: MatrixRoomEvent): Promise<void> {
@@ -179,6 +186,9 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 
 		// Ignore messages from other bots to prevent infinite loops
 		if (this.isBot(event.sender)) return;
+
+		// Ignore edit events (message replacements) to prevent duplicate responses
+		if (this.isEditEvent(event)) return;
 
 		// Check room permissions
 		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
