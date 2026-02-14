@@ -150,53 +150,47 @@ export class WidgetController {
 
 		body {
 			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-			background: #1a1a2e;
+			background: transparent;
 			color: #eee;
-			min-height: 100vh;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			padding: 16px;
+			padding: 12px;
 		}
 
 		.container {
 			width: 100%;
-			max-width: 320px;
 			text-align: center;
 		}
 
 		.status-icon {
-			font-size: 48px;
-			margin-bottom: 16px;
-		}
-
-		.time-display {
-			font-size: 48px;
-			font-weight: 300;
-			font-variant-numeric: tabular-nums;
+			font-size: 32px;
 			margin-bottom: 8px;
 		}
 
+		.time-display {
+			font-size: 36px;
+			font-weight: 300;
+			font-variant-numeric: tabular-nums;
+			margin-bottom: 4px;
+		}
+
 		.time-total {
-			font-size: 14px;
+			font-size: 12px;
 			color: #888;
-			margin-bottom: 16px;
+			margin-bottom: 12px;
 		}
 
 		.progress-container {
 			width: 100%;
-			height: 8px;
-			background: #333;
-			border-radius: 4px;
+			height: 6px;
+			background: rgba(255,255,255,0.1);
+			border-radius: 3px;
 			overflow: hidden;
-			margin-bottom: 8px;
+			margin-bottom: 6px;
 		}
 
 		.progress-bar {
 			height: 100%;
 			background: linear-gradient(90deg, #4CAF50, #8BC34A);
-			border-radius: 4px;
+			border-radius: 3px;
 			transition: width 0.3s ease;
 		}
 
@@ -205,37 +199,39 @@ export class WidgetController {
 		}
 
 		.percentage {
-			font-size: 14px;
+			font-size: 11px;
 			color: #888;
-			margin-bottom: 24px;
+			margin-bottom: 12px;
 		}
 
 		.label {
-			font-size: 14px;
+			font-size: 11px;
 			color: #aaa;
-			margin-bottom: 24px;
-			padding: 8px 16px;
-			background: #252540;
-			border-radius: 16px;
+			margin-bottom: 12px;
+			padding: 4px 10px;
+			background: rgba(255,255,255,0.05);
+			border-radius: 12px;
 			display: inline-block;
+			word-break: break-word;
 		}
 
 		.controls {
 			display: flex;
-			gap: 12px;
+			gap: 8px;
 			justify-content: center;
+			flex-wrap: wrap;
 		}
 
 		.btn {
-			padding: 12px 24px;
-			font-size: 16px;
+			padding: 8px 14px;
+			font-size: 13px;
 			border: none;
-			border-radius: 8px;
+			border-radius: 6px;
 			cursor: pointer;
 			transition: all 0.2s ease;
-			display: flex;
+			display: inline-flex;
 			align-items: center;
-			gap: 8px;
+			gap: 4px;
 		}
 
 		.btn-primary {
@@ -248,12 +244,12 @@ export class WidgetController {
 		}
 
 		.btn-secondary {
-			background: #333;
+			background: rgba(255,255,255,0.1);
 			color: #eee;
 		}
 
 		.btn-secondary:hover {
-			background: #444;
+			background: rgba(255,255,255,0.15);
 		}
 
 		.btn:disabled {
@@ -264,34 +260,44 @@ export class WidgetController {
 		.no-timer {
 			text-align: center;
 			color: #888;
+			padding: 8px 0;
 		}
 
 		.no-timer-icon {
-			font-size: 64px;
-			margin-bottom: 16px;
+			font-size: 40px;
+			margin-bottom: 8px;
 			opacity: 0.5;
 		}
 
 		.no-timer h2 {
-			font-size: 18px;
+			font-size: 14px;
 			font-weight: 500;
-			margin-bottom: 8px;
+			margin-bottom: 4px;
 			color: #aaa;
 		}
 
 		.no-timer p {
-			font-size: 14px;
+			font-size: 12px;
+		}
+
+		.no-timer code {
+			background: rgba(255,255,255,0.1);
+			padding: 2px 6px;
+			border-radius: 4px;
+			font-size: 11px;
 		}
 
 		.error {
 			color: #f44336;
-			padding: 16px;
-			background: #2a1a1a;
-			border-radius: 8px;
+			padding: 12px;
+			background: rgba(244, 67, 54, 0.1);
+			border-radius: 6px;
+			font-size: 12px;
 		}
 
 		.loading {
 			color: #888;
+			padding: 20px 0;
 		}
 
 		.finished {
