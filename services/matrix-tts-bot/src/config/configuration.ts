@@ -8,6 +8,7 @@ export default () => ({
 	},
 	tts: {
 		url: process.env.TTS_URL || 'http://localhost:3022',
+		apiKey: process.env.TTS_API_KEY || '',
 		defaultVoice: process.env.DEFAULT_VOICE || 'af_heart',
 		defaultSpeed: parseFloat(process.env.DEFAULT_SPEED || '1.0'),
 		maxTextLength: parseInt(process.env.MAX_TEXT_LENGTH || '500', 10),

@@ -77,6 +77,7 @@ MATRIX_STORAGE_PATH=./data/bot-storage.json
 
 # TTS Service
 TTS_URL=http://localhost:3022
+TTS_API_KEY=sk-internal-xxx
 
 # Defaults
 DEFAULT_VOICE=af_heart

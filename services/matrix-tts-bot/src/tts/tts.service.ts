@@ -17,9 +17,11 @@ export interface VoicesResponse {
 export class TtsService {
 	private readonly logger = new Logger(TtsService.name);
 	private readonly ttsUrl: string;
+	private readonly apiKey: string;
 
 	constructor(private configService: ConfigService) {
 		this.ttsUrl = this.configService.get<string>('tts.url', 'http://localhost:3022');
+		this.apiKey = this.configService.get<string>('tts.apiKey', '');
 	}
 
 	/**
@@ -32,9 +34,14 @@ export class TtsService {
 			`Synthesizing: "${text.substring(0, 50)}..." with voice=${voice}, speed=${speed}`
 		);
 
+		const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+		if (this.apiKey) {
+			headers['X-API-Key'] = this.apiKey;
+		}
+
 		const response = await fetch(url, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers,
 			body: JSON.stringify({
 				text,
 				voice,
@@ -61,7 +68,12 @@ export class TtsService {
 	async getVoices(): Promise<VoicesResponse> {
 		const url = `${this.ttsUrl}/voices`;
 
-		const response = await fetch(url);
+		const headers: Record<string, string> = {};
+		if (this.apiKey) {
+			headers['X-API-Key'] = this.apiKey;
+		}
+
+		const response = await fetch(url, { headers });
 
 		if (!response.ok) {
 			throw new Error(`Failed to get voices: ${response.status}`);
