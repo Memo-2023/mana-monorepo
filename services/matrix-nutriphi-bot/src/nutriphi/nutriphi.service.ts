@@ -152,7 +152,7 @@ export class NutriPhiService {
 	): Promise<AIAnalysisResult> {
 		return this.request<AIAnalysisResult>('/analysis/photo', {
 			method: 'POST',
-			body: JSON.stringify({ image: imageBase64, mimeType }),
+			body: JSON.stringify({ imageBase64, mimeType }),
 			token,
 		});
 	}
