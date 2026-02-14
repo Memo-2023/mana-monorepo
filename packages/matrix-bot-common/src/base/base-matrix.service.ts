@@ -159,11 +159,26 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 	}
 
 	/**
+	 * Check if a sender is a bot (has "-bot" in the localpart)
+	 * Bots should not respond to each other to avoid infinite loops
+	 */
+	protected isBot(sender: string): boolean {
+		// Extract localpart from @user:server format
+		const match = sender.match(/^@([^:]+):/);
+		if (!match) return false;
+		const localpart = match[1].toLowerCase();
+		return localpart.includes('-bot') || localpart.endsWith('bot');
+	}
+
+	/**
 	 * Handle incoming room message
 	 */
 	protected async onRoomMessage(roomId: string, event: MatrixRoomEvent): Promise<void> {
 		// Ignore own messages
 		if (event.sender === this.botUserId) return;
+
+		// Ignore messages from other bots to prevent infinite loops
+		if (this.isBot(event.sender)) return;
 
 		// Check room permissions
 		if (this.allowedRooms.length > 0 && !this.allowedRooms.includes(roomId)) {
