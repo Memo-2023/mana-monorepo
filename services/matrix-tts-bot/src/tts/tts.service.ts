@@ -122,7 +122,7 @@ export class TtsService {
 	/**
 	 * Synthesize text to speech - auto-detects language
 	 */
-	async synthesize(text: string, voice: string = 'af_heart', speed: number = 1.0): Promise<Buffer> {
+	async synthesize(text: string, voice: string = 'de_thorsten', speed: number = 1.0): Promise<Buffer> {
 		// Auto-detect language if using English voice but text is German
 		const textIsGerman = this.isGerman(text);
 		const voiceIsGerman = this.isGermanVoice(voice);
