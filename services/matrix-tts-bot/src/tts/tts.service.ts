@@ -182,23 +182,20 @@ export class TtsService {
 	}
 
 	/**
-	 * Synthesize using Piper (German voices)
+	 * Synthesize using auto endpoint (German voices via Piper/Edge)
 	 */
 	private async synthesizeGerman(
 		text: string,
 		voice: string = DEFAULT_GERMAN_VOICE,
 		speed: number = 1.0
 	): Promise<Buffer> {
-		const url = `${this.ttsUrl}/synthesize/piper`;
+		const url = `${this.ttsUrl}/synthesize/auto`;
 
 		// Map voice to valid German voice
 		const germanVoice = GERMAN_VOICES[voice] || DEFAULT_GERMAN_VOICE;
 
-		// Piper uses length_scale (inverse of speed)
-		const lengthScale = 1.0 / speed;
-
 		this.logger.debug(
-			`Piper synthesizing: "${text.substring(0, 50)}..." with voice=${germanVoice}, lengthScale=${lengthScale}`
+			`German synthesizing: "${text.substring(0, 50)}..." with voice=${germanVoice}, speed=${speed}`
 		);
 
 		const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -212,14 +209,14 @@ export class TtsService {
 			body: JSON.stringify({
 				text,
 				voice: germanVoice,
-				length_scale: lengthScale,
+				speed,
 				output_format: 'wav',
 			}),
 		});
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			this.logger.error(`Piper TTS failed: ${response.status} - ${errorText}`);
+			this.logger.error(`German TTS failed: ${response.status} - ${errorText}`);
 			throw new Error(`TTS synthesis failed: ${response.status}`);
 		}
 
