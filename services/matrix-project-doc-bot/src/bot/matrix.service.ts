@@ -498,9 +498,7 @@ ${styles}
 
 		try {
 			const mxcUrl = content.url;
-			const httpUrl = this.client.mxcToHttp(mxcUrl);
-			const response = await fetch(httpUrl);
-			const buffer = Buffer.from(await response.arrayBuffer());
+			const buffer = await this.downloadMedia(mxcUrl);
 			const contentType = content.info?.mimetype || 'image/jpeg';
 
 			await this.mediaService.processPhoto(projectId, buffer, contentType, mxcUrl, content.body);
@@ -528,9 +526,7 @@ ${styles}
 
 		try {
 			const mxcUrl = content.url;
-			const httpUrl = this.client.mxcToHttp(mxcUrl);
-			const response = await fetch(httpUrl);
-			const buffer = Buffer.from(await response.arrayBuffer());
+			const buffer = await this.downloadMedia(mxcUrl);
 			const contentType = content.info?.mimetype || 'audio/ogg';
 			const duration = Math.round((content.info?.duration || 0) / 1000);
 

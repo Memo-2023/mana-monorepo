@@ -31,7 +31,10 @@ const TASK_CREATE_CREDITS = 0.02;
 type Task = ApiTask;
 
 @Injectable()
-export class MatrixService extends BaseMatrixService implements CreditCommandsHost, GiftCommandsHost {
+export class MatrixService
+	extends BaseMatrixService
+	implements CreditCommandsHost, GiftCommandsHost
+{
 	// Expose services for credit and gift commands mixins
 	public creditService: CreditService;
 	public giftService: GiftService;
@@ -324,17 +327,11 @@ export class MatrixService extends BaseMatrixService implements CreditCommandsHo
 
 			await this.sendReply(roomId, event, 'Verarbeite Sprachnotiz...');
 
-			// Download audio from Matrix
+			// Download audio from Matrix using authenticated API
 			const mxcUrl = content.url;
-			const httpUrl = this.client.mxcToHttp(mxcUrl);
-			this.logger.log(`Downloading audio from ${httpUrl}`);
+			this.logger.log(`Downloading audio from ${mxcUrl}`);
 
-			const response = await fetch(httpUrl);
-			if (!response.ok) {
-				throw new Error(`Failed to download audio: ${response.status}`);
-			}
-
-			const buffer = Buffer.from(await response.arrayBuffer());
+			const buffer = await this.downloadMedia(mxcUrl);
 
 			// Transcribe audio
 			const transcription = await this.transcriptionService.transcribe(buffer);

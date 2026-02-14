@@ -654,18 +654,11 @@ Schreibe einfach eine Nachricht und ich antworte!
 	}
 
 	private async downloadMatrixImage(mxcUrl: string): Promise<string> {
-		// Convert mxc:// URL to HTTP URL and download
-		const httpUrl = this.client.mxcToHttp(mxcUrl);
-		this.logger.log(`Downloading image from ${httpUrl}`);
+		this.logger.log(`Downloading image from ${mxcUrl}`);
 
-		const response = await fetch(httpUrl);
-		if (!response.ok) {
-			throw new Error(`Failed to download image: ${response.status}`);
-		}
-
-		const buffer = await response.arrayBuffer();
-		const base64 = Buffer.from(buffer).toString('base64');
-		return base64;
+		// Use the authenticated download method from BaseMatrixService
+		const buffer = await this.downloadMedia(mxcUrl);
+		return buffer.toString('base64');
 	}
 
 	private async pinHelpMessage(roomId: string) {

@@ -9,7 +9,12 @@ import {
 } from '@manacore/matrix-bot-common';
 import { QuotesService } from '../quotes/quotes.service';
 import { ZitareService } from '../quotes/zitare.service';
-import { SessionService, TranscriptionService, CreditService } from '@manacore/bot-services';
+import {
+	SessionService,
+	TranscriptionService,
+	CreditService,
+	LOGIN_MESSAGES,
+} from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 import type { Category } from '@zitare/content';
 
@@ -103,14 +108,9 @@ Sag "hilfe" fuer alle Befehle!`;
 		this.logger.log(`Processing voice message from ${sender}`);
 
 		try {
-			// Download audio from Matrix
-			const httpUrl = this.client.mxcToHttp(content.url);
-			const response = await fetch(httpUrl);
-			if (!response.ok) {
-				throw new Error(`Failed to download audio: ${response.status}`);
-			}
-
-			const audioBuffer = Buffer.from(await response.arrayBuffer());
+			// Download audio from Matrix using authenticated API
+			this.logger.log(`Downloading audio from ${content.url}`);
+			const audioBuffer = await this.downloadMedia(content.url);
 
 			// Transcribe
 			await this.sendMessage(roomId, 'Transkribiere Sprachnotiz...');
@@ -388,11 +388,8 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleAddFavorite(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		const lastQuoteId = this.lastQuotes.get(sender);
 		if (!lastQuoteId) {
@@ -418,11 +415,8 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleFavorites(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		try {
 			const favorites = await this.zitareService.getFavorites(token);
@@ -458,11 +452,8 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleLists(roomId: string, sender: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		try {
 			const lists = await this.zitareService.getLists(token);
@@ -493,11 +484,8 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleCreateList(roomId: string, sender: string, name: string) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		if (!name.trim()) {
 			await this.sendMessage(
@@ -520,11 +508,8 @@ Sag "hilfe" fuer alle Befehle!`;
 	}
 
 	private async handleAddToList(roomId: string, sender: string, args: string[]) {
-		const token = await this.sessionService.getToken(sender);
-		if (!token) {
-			await this.sendMessage(roomId, `Du bist nicht angemeldet. Nutze \`!login\` zuerst.`);
-			return;
-		}
+		const token = await this.requireLogin(roomId, sender);
+		if (!token) return;
 
 		if (args.length < 1) {
 			await this.sendMessage(
@@ -569,6 +554,18 @@ Sag "hilfe" fuer alle Befehle!`;
 			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
 			await this.sendMessage(roomId, `Fehler: ${errorMsg}`);
 		}
+	}
+
+	/**
+	 * Require login - returns token or sends login prompt and returns null
+	 */
+	private async requireLogin(roomId: string, userId: string): Promise<string | null> {
+		const token = await this.sessionService.getToken(userId);
+		if (!token) {
+			await this.sendMessage(roomId, LOGIN_MESSAGES.zitare);
+			return null;
+		}
+		return token;
 	}
 
 	private async handleStatus(roomId: string, sender: string) {
