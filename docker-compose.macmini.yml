@@ -933,12 +933,18 @@ services:
       start_period: 40s
 
   matrix-clock-bot:
-    image: ghcr.io/memo-2023/matrix-clock-bot:latest
-    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: services/matrix-clock-bot/Dockerfile
+    image: matrix-clock-bot:local
     container_name: mana-matrix-bot-clock
     restart: always
     depends_on:
       synapse:
+        condition: service_healthy
+      mana-auth:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     environment:
       NODE_ENV: production
@@ -949,6 +955,11 @@ services:
       MATRIX_ALLOWED_ROOMS: ${MATRIX_CLOCK_BOT_ROOMS:-}
       CLOCK_API_URL: http://clock-backend:3033/api/v1
       STT_URL: http://host.docker.internal:3021
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
     volumes:
       - matrix_bots_data:/app/data
     ports:
