@@ -20,6 +20,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Copy shared packages needed by nutriphi web
+COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
