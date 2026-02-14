@@ -228,7 +228,146 @@ Sag "hilfe" fur alle Befehle!`;
 			return;
 		}
 
+		// Auto-analyze text that looks like a meal description
+		// (longer than 15 chars and contains food-related content)
+		if (this.looksLikeMealDescription(message)) {
+			await this.autoAnalyzeText(roomId, sender, message);
+			return;
+		}
+
 		// Don't respond to random messages - only commands
+	}
+
+	/**
+	 * Check if a message looks like a meal description
+	 * Simple heuristic: longer than 15 chars, contains numbers or food keywords
+	 */
+	private looksLikeMealDescription(message: string): boolean {
+		if (message.length < 15) return false;
+
+		const lowerMessage = message.toLowerCase();
+
+		// Skip greetings and questions
+		const skipPatterns = [
+			/^(hallo|hi|hey|guten|moin|servus)/,
+			/^(was|wie|wann|wo|wer|warum|kannst|könntest)/,
+			/\?$/,
+		];
+		for (const pattern of skipPatterns) {
+			if (pattern.test(lowerMessage)) return false;
+		}
+
+		// Check for food indicators: numbers (portions), units, or food words
+		const hasNumbers = /\d+/.test(message);
+		const foodKeywords = [
+			'gramm',
+			'g ',
+			'ml',
+			'liter',
+			'stück',
+			'portion',
+			'tasse',
+			'löffel',
+			'mit',
+			'und',
+			'apfel',
+			'banane',
+			'brot',
+			'ei',
+			'milch',
+			'käse',
+			'fleisch',
+			'gemüse',
+			'obst',
+			'salat',
+			'reis',
+			'nudel',
+			'pasta',
+			'pizza',
+			'suppe',
+			'smoothie',
+			'müsli',
+			'joghurt',
+			'haferflocken',
+			'nüsse',
+			'erdnüsse',
+			'mandeln',
+			'karotte',
+			'tomate',
+			'gurke',
+			'zwiebel',
+			'kartoffel',
+			'huhn',
+			'hähnchen',
+			'rind',
+			'schwein',
+			'fisch',
+			'lachs',
+			'thunfisch',
+			'schinken',
+			'wurst',
+			'butter',
+			'öl',
+			'olive',
+			'kokos',
+			'dattel',
+			'zucker',
+			'honig',
+			'kaffee',
+			'tee',
+			'saft',
+			'wasser',
+			'sahne',
+			'quark',
+		];
+
+		const hasFoodKeyword = foodKeywords.some((keyword) => lowerMessage.includes(keyword));
+
+		return hasNumbers || hasFoodKeyword;
+	}
+
+	/**
+	 * Auto-analyze a text message as a meal description
+	 */
+	private async autoAnalyzeText(roomId: string, sender: string, description: string) {
+		let token = await this.sessionService.getToken(sender);
+
+		// If not logged in, prompt for login
+		if (!token) {
+			await this.sendMessage(
+				roomId,
+				`Das sieht nach einer Mahlzeit aus! Melde dich an, um sie zu analysieren:\n\n\`!login email passwort\``
+			);
+			return;
+		}
+
+		this.logger.log(`Auto-analyzing text from ${sender}: "${description.substring(0, 50)}..."`);
+		await this.sendMessage(
+			roomId,
+			`Analysiere: "${description.substring(0, 80)}${description.length > 80 ? '...' : ''}"...`
+		);
+		await this.client.setTyping(roomId, true, 60000);
+
+		try {
+			const apiResult = await this.withTokenRefresh(sender, token, (t) =>
+				this.nutriphiService.analyzeText(description, t)
+			);
+
+			await this.client.setTyping(roomId, false);
+
+			if ('error' in apiResult) {
+				await this.sendMessage(roomId, LOGIN_MESSAGES.nutriphi);
+				return;
+			}
+
+			const response = this.formatAnalysisResult(apiResult.result);
+			await this.sendMessage(roomId, response);
+		} catch (error) {
+			await this.client.setTyping(roomId, false);
+			const errorMsg = error instanceof Error ? error.message : 'Unbekannter Fehler';
+			this.logger.error('Auto-analyze text failed:', error);
+			await this.sendMessage(roomId, `Fehler bei der Analyse: ${errorMsg}`);
+		}
 	}
 
 	private async handleCommand(roomId: string, sender: string, body: string) {
