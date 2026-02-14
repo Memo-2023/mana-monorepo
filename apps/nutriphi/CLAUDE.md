@@ -109,7 +109,7 @@ pnpm build                    # Build for production
 | Layer | Technology |
 |-------|------------|
 | **Backend** | NestJS 10, Drizzle ORM, PostgreSQL |
-| **AI** | Google Gemini 2.0 Flash |
+| **AI** | Google Gemini 2.5 Flash |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Landing** | Astro 5.x, Tailwind CSS |
 | **Auth** | Mana Core Auth (JWT) |
@@ -241,9 +241,11 @@ DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/nutriphi
 MANA_CORE_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5180,http://localhost:4323
 
-# Gemini AI
+# Gemini AI (uses gemini-2.5-flash model)
 GEMINI_API_KEY=your-gemini-api-key
 ```
+
+> **Note:** Get your API key from https://aistudio.google.com/apikey
 
 ### Web (.env)
 
