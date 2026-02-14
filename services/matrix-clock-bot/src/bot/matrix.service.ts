@@ -296,11 +296,18 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 	private async setRoomTopic(roomId: string, topic: string): Promise<void> {
 		try {
 			const client = this.getClient();
+			this.logger.debug(`Attempting to set room topic for ${roomId}: ${topic}`);
 			await client.sendStateEvent(roomId, 'm.room.topic', '', { topic });
 			this.logger.log(`Room topic updated: ${topic}`);
 		} catch (error: unknown) {
-			const errorMessage = error instanceof Error ? error.message : String(error);
-			this.logger.error(`Failed to set room topic for ${roomId}: ${errorMessage}`);
+			// Log full error details including Matrix errcode
+			const errorDetails =
+				error && typeof error === 'object'
+					? JSON.stringify(error, null, 2)
+					: String(error);
+			this.logger.error(
+				`Failed to set room topic for ${roomId}. Topic: "${topic}". Error: ${errorDetails}`
+			);
 		}
 	}
 
