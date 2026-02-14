@@ -668,8 +668,11 @@ services:
 
   # Matrix Bots (Ports 4010-4029)
   matrix-mana-bot:
-    image: ghcr.io/memo-2023/matrix-mana-bot:latest
-    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: services/matrix-mana-bot/Dockerfile
+    image: matrix-mana-bot:local
+    platform: linux/arm64
     container_name: mana-matrix-bot-mana
     restart: always
     depends_on:
