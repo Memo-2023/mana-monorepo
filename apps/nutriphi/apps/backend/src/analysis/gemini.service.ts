@@ -85,8 +85,8 @@ export class GeminiService implements OnModuleInit {
 		const apiKey = this.configService.get<string>('GEMINI_API_KEY');
 		if (apiKey) {
 			const genAI = new GoogleGenerativeAI(apiKey);
-			// Use Gemini 2.0 Flash - fast and cost-effective
-			this.model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+			// Use Gemini 2.5 Flash - fast and cost-effective
+			this.model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 		}
 	}
 
