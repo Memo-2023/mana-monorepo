@@ -359,7 +359,7 @@ export class GiftCodeService {
 						redeemerUserId: userId,
 						status: 'failed_wrong_user',
 						creditsReceived: 0,
-						sourceAppId: dto.sourceAppId,
+						sourceAppId: dto.sourceAppId ?? null,
 					});
 
 					return { success: false, error: 'This gift code is for a specific person' };
@@ -383,7 +383,7 @@ export class GiftCodeService {
 						redeemerUserId: userId,
 						status: 'failed_wrong_answer',
 						creditsReceived: 0,
-						sourceAppId: dto.sourceAppId,
+						sourceAppId: dto.sourceAppId ?? null,
 					});
 
 					return { success: false, error: 'Incorrect answer' };
@@ -489,7 +489,7 @@ export class GiftCodeService {
 				creditsReceived: creditsToAdd,
 				portionNumber,
 				creditTransactionId: creditTx.id,
-				sourceAppId: dto.sourceAppId,
+				sourceAppId: dto.sourceAppId ?? null,
 			});
 
 			this.logger.log('Gift code redeemed', {
