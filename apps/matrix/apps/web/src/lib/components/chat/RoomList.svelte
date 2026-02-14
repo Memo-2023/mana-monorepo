@@ -56,7 +56,8 @@
 	<div class="p-3">
 		<div class="relative">
 			<MagnifyingGlass
-				class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+				size={16}
+				class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
 			/>
 			<input
 				type="text"
@@ -135,18 +136,16 @@
 		{/if}
 
 		<!-- Direct Messages Section -->
-		{#if filteredDirectRooms.length > 0 || !search}
+		{#if matrixStore.directRooms.length > 0}
 			<div class="mb-2">
 				<div
 					class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground"
 				>
 					<ChatCircle class="h-3.5 w-3.5" />
 					Direktnachrichten
-					{#if matrixStore.directRooms.length > 0}
-						<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px]">
-							{matrixStore.directRooms.length}
-						</span>
-					{/if}
+					<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px]">
+						{matrixStore.directRooms.length}
+					</span>
 				</div>
 				{#each filteredDirectRooms as room (room.id)}
 					<RoomItem
@@ -154,27 +153,21 @@
 						selected={room.id === matrixStore.currentRoomId}
 						onclick={() => handleSelectRoom(room.id)}
 					/>
-				{:else}
-					{#if !search}
-						<p class="px-2 py-3 text-sm text-muted-foreground">Keine Direktnachrichten</p>
-					{/if}
 				{/each}
 			</div>
 		{/if}
 
 		<!-- Group Rooms Section -->
-		{#if filteredGroupRooms.length > 0 || !search}
+		{#if matrixStore.groupRooms.length > 0}
 			<div class="mb-2">
 				<div
 					class="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase text-muted-foreground"
 				>
 					<Users class="h-3.5 w-3.5" />
 					Räume
-					{#if matrixStore.groupRooms.length > 0}
-						<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px]">
-							{matrixStore.groupRooms.length}
-						</span>
-					{/if}
+					<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px]">
+						{matrixStore.groupRooms.length}
+					</span>
 				</div>
 				{#each filteredGroupRooms as room (room.id)}
 					<RoomItem
@@ -182,16 +175,12 @@
 						selected={room.id === matrixStore.currentRoomId}
 						onclick={() => handleSelectRoom(room.id)}
 					/>
-				{:else}
-					{#if !search}
-						<p class="px-2 py-3 text-sm text-muted-foreground">Keine Räume</p>
-					{/if}
 				{/each}
 			</div>
 		{/if}
 
 		<!-- No search results -->
-		{#if search && filteredDirectRooms.length === 0 && filteredGroupRooms.length === 0}
+		{#if search && filteredDirectRooms.length === 0 && filteredGroupRooms.length === 0 && filteredInvites.length === 0 && (matrixStore.directRooms.length > 0 || matrixStore.groupRooms.length > 0 || matrixStore.invitedRooms.length > 0)}
 			<div class="flex flex-col items-center justify-center p-8 text-muted-foreground">
 				<MagnifyingGlass class="mb-2 h-8 w-8 opacity-50" />
 				<p class="text-sm">Keine Ergebnisse für "{search}"</p>

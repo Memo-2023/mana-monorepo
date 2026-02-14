@@ -45,6 +45,143 @@
 	let mentionResults = $state<RoomMember[]>([]);
 	let selectedMentionIndex = $state(0);
 
+	// Emoji picker state
+	let showEmojiPicker = $state(false);
+	const commonEmojis = [
+		// Smileys
+		'😀',
+		'😃',
+		'😄',
+		'😁',
+		'😅',
+		'😂',
+		'🤣',
+		'😊',
+		'😇',
+		'🙂',
+		'😉',
+		'😌',
+		'😍',
+		'🥰',
+		'😘',
+		'😗',
+		'😙',
+		'😚',
+		'😋',
+		'😛',
+		'😜',
+		'🤪',
+		'😝',
+		'🤗',
+		'🤭',
+		'🤫',
+		'🤔',
+		'🤐',
+		'🤨',
+		'😐',
+		'😑',
+		'😶',
+		'😏',
+		'😒',
+		'🙄',
+		'😬',
+		'😮',
+		'🤯',
+		'😳',
+		'🥺',
+		'😢',
+		'😭',
+		'😤',
+		'😠',
+		'😡',
+		'🤬',
+		'😈',
+		'👿',
+		// Gestures
+		'👍',
+		'👎',
+		'👌',
+		'🤌',
+		'✌️',
+		'🤞',
+		'🤟',
+		'🤘',
+		'🤙',
+		'👋',
+		'🖐️',
+		'✋',
+		'👏',
+		'🙌',
+		'👐',
+		'🤲',
+		'🙏',
+		'💪',
+		'🦾',
+		'❤️',
+		'🧡',
+		'💛',
+		'💚',
+		'💙',
+		// Objects & Symbols
+		'🔥',
+		'✨',
+		'💫',
+		'⭐',
+		'🌟',
+		'💯',
+		'💢',
+		'💥',
+		'💦',
+		'💨',
+		'🎉',
+		'🎊',
+		'🎁',
+		'🏆',
+		'🥇',
+		'🎯',
+		'💡',
+		'📌',
+		'📍',
+		'✅',
+		'❌',
+		'⚠️',
+		'❗',
+		'❓',
+	];
+
+	function insertEmoji(emoji: string) {
+		const cursorPos = textarea?.selectionStart ?? message.length;
+		const before = message.slice(0, cursorPos);
+		const after = message.slice(cursorPos);
+		message = before + emoji + after;
+
+		// Close picker and focus textarea
+		showEmojiPicker = false;
+		setTimeout(() => {
+			textarea?.focus();
+			const newPos = cursorPos + emoji.length;
+			textarea?.setSelectionRange(newPos, newPos);
+		}, 0);
+	}
+
+	function handleEmojiClick() {
+		// Try to open native emoji picker (works on some browsers/OS)
+		if ('showPicker' in HTMLInputElement.prototype) {
+			// This is for date/color inputs, won't work for emoji but we try
+		}
+
+		// Check if we're on mobile - keyboard usually has emoji button
+		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+		if (isMobile) {
+			// On mobile, just focus the textarea - user can use keyboard emoji button
+			textarea?.focus();
+			return;
+		}
+
+		// Desktop fallback: show our emoji picker
+		showEmojiPicker = !showEmojiPicker;
+	}
+
 	// Set message content when editing
 	$effect(() => {
 		if (editMessage) {
@@ -462,19 +599,17 @@
 		</div>
 	{/if}
 
-	<!-- Input Area -->
-	<div
-		class="flex items-end gap-2 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/5 dark:border-white/10 p-2 shadow-lg"
-	>
-		<!-- Attachment button with custom dropdown -->
-		<div class="relative">
+	<!-- Input Area - WhatsApp style -->
+	<div class="flex items-end gap-2">
+		<!-- Attachment button (left, outside input) -->
+		<div class="relative flex-shrink-0">
 			<button
-				class="p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				class="p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
 				title="Datei anhängen"
 				disabled={uploading}
 				onclick={() => (showAttachMenu = !showAttachMenu)}
 			>
-				<Paperclip class="h-5 w-5 text-muted-foreground" />
+				<Paperclip size={22} class="text-muted-foreground" />
 			</button>
 
 			{#if showAttachMenu}
@@ -521,8 +656,10 @@
 			onchange={handleFileSelect}
 		/>
 
-		<!-- Text input -->
-		<div class="flex-1">
+		<!-- Text input with emoji button inside -->
+		<div
+			class="relative flex-1 flex items-end rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 px-4 py-1"
+		>
 			<textarea
 				bind:this={textarea}
 				bind:value={message}
@@ -535,41 +672,74 @@
 						? 'Antwort schreiben...'
 						: 'Nachricht schreiben...'}
 				rows="1"
-				class="w-full resize-none bg-transparent px-2 py-2.5 text-sm text-foreground
+				class="flex-1 resize-none bg-transparent py-2.5 text-sm text-foreground
 				       focus:outline-none placeholder:text-muted-foreground"
 				style="max-height: 150px; min-height: 40px;"
 				disabled={uploading}
 			></textarea>
+			<!-- Emoji button inside input -->
+			<button
+				class="flex-shrink-0 p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors mb-1"
+				title="Emoji"
+				onclick={handleEmojiClick}
+			>
+				<Smiley size={22} class="text-muted-foreground" />
+			</button>
+
+			<!-- Emoji Picker Popup -->
+			{#if showEmojiPicker}
+				<!-- Backdrop -->
+				<button
+					class="fixed inset-0 z-40"
+					onclick={() => (showEmojiPicker = false)}
+					aria-label="Emoji-Picker schließen"
+				></button>
+				<!-- Picker -->
+				<div
+					class="absolute bottom-full right-0 mb-2 z-50 w-72 max-h-64 overflow-y-auto rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-2 shadow-xl"
+				>
+					<div class="grid grid-cols-8 gap-1">
+						{#each commonEmojis as emoji}
+							<button
+								class="p-1.5 text-xl hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+								onclick={() => insertEmoji(emoji)}
+							>
+								{emoji}
+							</button>
+						{/each}
+					</div>
+				</div>
+			{/if}
 		</div>
 
-		<!-- Voice/Send button -->
+		<!-- Voice/Send button (right, outside input) -->
 		{#if isRecording}
 			<button
-				class="flex-shrink-0 p-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white transition-colors"
+				class="flex-shrink-0 p-2.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors"
 				onclick={stopRecording}
 				title="Aufnahme beenden und senden"
 			>
-				<Stop class="h-5 w-5" weight="fill" />
+				<Stop size={22} weight="fill" />
 			</button>
 		{:else if message.trim()}
 			<button
-				class="flex-shrink-0 p-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white transition-colors
+				class="flex-shrink-0 p-2.5 rounded-full bg-primary hover:bg-primary/90 text-white transition-colors
 				       disabled:opacity-50 disabled:cursor-not-allowed"
 				onclick={handleSend}
 				disabled={uploading}
 				title={editMessage ? 'Speichern' : 'Senden'}
 			>
-				<PaperPlaneTilt class="h-5 w-5" weight="bold" />
+				<PaperPlaneTilt size={22} weight="fill" />
 			</button>
 		{:else}
 			<button
-				class="flex-shrink-0 p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-primary transition-colors
+				class="flex-shrink-0 p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-primary transition-colors
 				       disabled:opacity-50 disabled:cursor-not-allowed"
 				onclick={startRecording}
 				disabled={uploading}
 				title="Sprachnotiz aufnehmen"
 			>
-				<Microphone class="h-5 w-5" weight="bold" />
+				<Microphone size={22} weight="bold" />
 			</button>
 		{/if}
 	</div>
