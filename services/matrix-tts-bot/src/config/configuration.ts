@@ -9,7 +9,7 @@ export default () => ({
 	tts: {
 		url: process.env.TTS_URL || 'http://localhost:3022',
 		apiKey: process.env.TTS_API_KEY || '',
-		defaultVoice: process.env.DEFAULT_VOICE || 'af_heart',
+		defaultVoice: process.env.DEFAULT_VOICE || 'de_thorsten',
 		defaultSpeed: parseFloat(process.env.DEFAULT_SPEED || '1.0'),
 		maxTextLength: parseInt(process.env.MAX_TEXT_LENGTH || '500', 10),
 	},
@@ -20,19 +20,26 @@ export const HELP_TEXT = `**TTS Bot - Hilfe**
 Ich wandle deine Textnachrichten in Sprache um!
 
 **Befehle:**
-- \`!voice [name]\` - Stimme wechseln (z.B. \`!voice bm_daniel\`)
-- \`!voices\` - Alle verfugbaren Stimmen anzeigen
-- \`!speed [0.5-2.0]\` - Geschwindigkeit andern
+- \`!voice [name]\` - Stimme wechseln (z.B. \`!voice de_thorsten\`)
+- \`!voices\` - Alle verfügbaren Stimmen anzeigen
+- \`!speed [0.5-2.0]\` - Geschwindigkeit ändern
 - \`!status\` - Aktuelle Einstellungen
 - \`!help\` - Diese Hilfe
 
 **Verwendung:**
-Schreibe einfach eine Nachricht und ich sende dir die Sprachausgabe zuruck.
+Schreibe einfach eine Nachricht und ich sende dir die Sprachausgabe zurück.
+Die Sprache wird automatisch erkannt (Deutsch/Englisch).
 
-**Beispiel-Stimmen:**
+**Deutsche Stimmen:**
+- \`de_thorsten\` - Deutsch männlich (lokal)
+- \`de_katja\` - Deutsch weiblich
+- \`de_conrad\` - Deutsch männlich
+- \`de_florian\` - Deutsch männlich jung
+
+**Englische Stimmen:**
 - \`af_heart\` - Amerikanisch weiblich (warm)
-- \`bm_daniel\` - Britisch mannlich (klassisch)
-- \`am_michael\` - Amerikanisch mannlich`;
+- \`bm_daniel\` - Britisch männlich
+- \`am_michael\` - Amerikanisch männlich`;
 
 export const WELCOME_TEXT = `**TTS Bot**
 

@@ -78,3 +78,48 @@ export const SESSION_MODULE_OPTIONS = 'SESSION_MODULE_OPTIONS';
  * Default session expiry: 7 days in milliseconds
  */
 export const DEFAULT_SESSION_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Standard auth error message for all bots
+ * Used when SSO-Link fails to authenticate the user automatically.
+ * Since all users authenticate via OIDC, this indicates a technical issue.
+ */
+export function formatAuthErrorMessage(featureDescription: string): string {
+	return (
+		'⚠️ **Authentifizierung fehlgeschlagen**\n\n' +
+		`Um ${featureDescription} zu nutzen, muss dein Account verknüpft sein.\n\n` +
+		'Bitte logge dich in Element neu ein über "Mit Mana Core anmelden".\n\n' +
+		'Falls das Problem weiterhin besteht, kontaktiere den Support.'
+	);
+}
+
+/**
+ * Pre-defined auth error messages for all bot types
+ */
+export const AUTH_ERROR_MESSAGES = {
+	clock: formatAuthErrorMessage('Timer und Alarme'),
+	todo: formatAuthErrorMessage('Aufgaben'),
+	calendar: formatAuthErrorMessage('Termine'),
+	contacts: formatAuthErrorMessage('Kontakte'),
+	picture: formatAuthErrorMessage('Bilder'),
+	zitare: formatAuthErrorMessage('Favoriten'),
+	nutriphi: formatAuthErrorMessage('Mahlzeiten'),
+	chat: formatAuthErrorMessage('Chats'),
+	storage: formatAuthErrorMessage('Dateien'),
+	skilltree: formatAuthErrorMessage('Skills'),
+	presi: formatAuthErrorMessage('Präsentationen'),
+	planta: formatAuthErrorMessage('Pflanzen'),
+	manadeck: formatAuthErrorMessage('Decks'),
+	questions: formatAuthErrorMessage('Fragen'),
+} as const;
+
+/**
+ * @deprecated Use formatAuthErrorMessage instead. Kept for backwards compatibility.
+ */
+export const formatLoginRequiredMessage = (featureDescription: string, _appName: string): string =>
+	formatAuthErrorMessage(featureDescription);
+
+/**
+ * @deprecated Use AUTH_ERROR_MESSAGES instead. Kept for backwards compatibility.
+ */
+export const LOGIN_MESSAGES = AUTH_ERROR_MESSAGES;
