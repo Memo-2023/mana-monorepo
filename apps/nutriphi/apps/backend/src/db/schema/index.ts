@@ -13,7 +13,7 @@ import {
 // User Goals
 export const userGoals = pgTable('user_goals', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	dailyCalories: integer('daily_calories').notNull().default(2000),
 	dailyProtein: integer('daily_protein'), // grams
 	dailyCarbs: integer('daily_carbs'), // grams
@@ -26,7 +26,7 @@ export const userGoals = pgTable('user_goals', {
 // Meals
 export const meals = pgTable('meals', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	date: timestamp('date').notNull(),
 	mealType: varchar('meal_type', { length: 20 }).notNull(), // breakfast, lunch, dinner, snack
 	inputType: varchar('input_type', { length: 20 }).notNull(), // photo, text
@@ -83,7 +83,7 @@ export const mealNutrition = pgTable('meal_nutrition', {
 // Favorite Meals
 export const favoriteMeals = pgTable('favorite_meals', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description').notNull(),
 	mealType: varchar('meal_type', { length: 20 }).notNull(),
@@ -96,7 +96,7 @@ export const favoriteMeals = pgTable('favorite_meals', {
 // Recommendations
 export const recommendations = pgTable('recommendations', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id').notNull(),
+	userId: text('user_id').notNull(),
 	date: timestamp('date').notNull(),
 	type: varchar('type', { length: 20 }).notNull(), // hint, coaching
 	priority: varchar('priority', { length: 20 }).notNull().default('medium'), // low, medium, high
