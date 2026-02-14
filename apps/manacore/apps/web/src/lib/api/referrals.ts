@@ -4,8 +4,7 @@
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-
-const MANA_AUTH_URL = 'http://localhost:3001'; // TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env
+import { getManaAuthUrl } from './config';
 
 // Types
 export interface ReferralStats {
@@ -55,7 +54,7 @@ export interface ReferralValidation {
 async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const token = await authStore.getAccessToken();
 
-	const response = await fetch(`${MANA_AUTH_URL}${endpoint}`, {
+	const response = await fetch(`${getManaAuthUrl()}${endpoint}`, {
 		...options,
 		headers: {
 			'Content-Type': 'application/json',
@@ -109,7 +108,7 @@ export const referralsService = {
 	 */
 	async validateCode(code: string): Promise<ReferralValidation> {
 		try {
-			const response = await fetch(`${MANA_AUTH_URL}/api/v1/referrals/validate/${code}`);
+			const response = await fetch(`${getManaAuthUrl()}/api/v1/referrals/validate/${code}`);
 			if (!response.ok) {
 				return { valid: false, error: 'Invalid code' };
 			}

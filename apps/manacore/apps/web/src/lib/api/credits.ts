@@ -4,8 +4,7 @@
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-
-const MANA_AUTH_URL = 'http://localhost:3001'; // TODO: Use PUBLIC_MANA_CORE_AUTH_URL from env
+import { getManaAuthUrl } from './config';
 
 // Types
 export interface CreditBalance {
@@ -53,7 +52,7 @@ export interface CreditPurchase {
 async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const token = await authStore.getAccessToken();
 
-	const response = await fetch(`${MANA_AUTH_URL}${endpoint}`, {
+	const response = await fetch(`${getManaAuthUrl()}${endpoint}`, {
 		...options,
 		headers: {
 			'Content-Type': 'application/json',
@@ -99,7 +98,7 @@ export const creditsService = {
 	 * Get available credit packages (public endpoint)
 	 */
 	async getPackages(): Promise<CreditPackage[]> {
-		const response = await fetch(`${MANA_AUTH_URL}/api/v1/credits/packages`);
+		const response = await fetch(`${getManaAuthUrl()}/api/v1/credits/packages`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch packages');
 		}

@@ -4,8 +4,7 @@
  */
 
 import { authStore } from '$lib/stores/auth.svelte';
-
-const MANA_AUTH_URL = 'http://localhost:3001';
+import { getManaAuthUrl } from './config';
 
 // Types
 export interface SubscriptionPlan {
@@ -60,7 +59,7 @@ export interface CurrentSubscription {
 async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 	const token = await authStore.getAccessToken();
 
-	const response = await fetch(`${MANA_AUTH_URL}${endpoint}`, {
+	const response = await fetch(`${getManaAuthUrl()}${endpoint}`, {
 		...options,
 		headers: {
 			'Content-Type': 'application/json',
@@ -83,7 +82,7 @@ export const subscriptionsService = {
 	 * Get all available plans (public)
 	 */
 	async getPlans(): Promise<SubscriptionPlan[]> {
-		const response = await fetch(`${MANA_AUTH_URL}/api/v1/subscriptions/plans`);
+		const response = await fetch(`${getManaAuthUrl()}/api/v1/subscriptions/plans`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch plans');
 		}
