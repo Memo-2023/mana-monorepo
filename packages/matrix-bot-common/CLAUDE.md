@@ -67,6 +67,11 @@ export class MyBotService extends BaseMatrixService {
 - `sendNotice(roomId, message)` - Non-highlighted message
 - `downloadMedia(mxcUrl)` - Download from Matrix
 - `uploadMedia(buffer, contentType, filename)` - Upload to Matrix
+- `isBot(sender)` - Check if sender is a bot (prevents bot-to-bot loops)
+
+**Bot-to-Bot Loop Prevention:**
+
+The base class automatically ignores messages from other bots to prevent infinite message loops when multiple bots are in the same room. A sender is considered a bot if their Matrix ID localpart contains `-bot` or ends with `bot` (e.g., `@mana-bot:server`, `@todobot:server`).
 
 ### HealthController
 
