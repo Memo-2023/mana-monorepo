@@ -297,8 +297,10 @@ export class MatrixService extends BaseMatrixService implements OnModuleDestroy 
 		try {
 			const client = this.getClient();
 			await client.sendStateEvent(roomId, 'm.room.topic', '', { topic });
-		} catch (error) {
-			this.logger.warn(`Failed to set room topic for ${roomId}: ${error}`);
+			this.logger.log(`Room topic updated: ${topic}`);
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			this.logger.error(`Failed to set room topic for ${roomId}: ${errorMessage}`);
 		}
 	}
 
