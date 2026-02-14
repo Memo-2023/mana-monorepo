@@ -20,9 +20,9 @@ COPY packages/matrix-bot-common packages/matrix-bot-common
 COPY packages/bot-services packages/bot-services
 COPY services/matrix-stt-bot services/matrix-stt-bot
 
-# Build shared packages
-RUN pnpm --filter @manacore/matrix-bot-common build
+# Build shared packages (bot-services first, then matrix-bot-common which depends on it)
 RUN pnpm --filter @manacore/bot-services build
+RUN pnpm --filter @manacore/matrix-bot-common build
 
 # Build the bot
 RUN pnpm --filter @manacore/matrix-stt-bot build
@@ -49,12 +49,12 @@ RUN mkdir -p /app/data
 
 # Set environment
 ENV NODE_ENV=production
-ENV PORT=3024
+ENV PORT=4021
 
-EXPOSE 3024
+EXPOSE 4021
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3024/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4021/health || exit 1
 
 CMD ["node", "dist/main.js"]
