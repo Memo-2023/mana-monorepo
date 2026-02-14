@@ -37,6 +37,11 @@ from .f5_service import (
     DEFAULT_F5_MODEL,
 )
 from .voice_manager import get_voice_manager, CustomVoice
+from .piper_service import (
+    synthesize_piper,
+    PIPER_VOICES,
+    is_piper_loaded,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -562,6 +567,41 @@ async def synthesize_auto(
             output_format=request.output_format,
         )
         return await synthesize_with_kokoro(kokoro_request)
+
+    # Check if it's a Piper/German voice
+    if voice in PIPER_VOICES:
+        try:
+            # Convert speed to length_scale (inverse relationship)
+            # speed > 1 means faster, so length_scale < 1
+            length_scale = 1.0 / request.speed
+
+            result = await synthesize_piper(
+                text=request.text,
+                voice=voice,
+                length_scale=length_scale,
+            )
+
+            # Convert to requested format
+            output_format = request.output_format.lower()
+            audio_bytes, content_type = convert_audio(
+                result.audio,
+                result.sample_rate,
+                output_format,
+            )
+
+            return Response(
+                content=audio_bytes,
+                media_type=content_type,
+                headers={
+                    "X-Model": "piper",
+                    "X-Voice": voice,
+                    "X-Duration": str(result.duration),
+                    "X-Sample-Rate": str(result.sample_rate),
+                },
+            )
+        except Exception as e:
+            logger.error(f"Piper synthesis error: {e}")
+            raise HTTPException(status_code=500, detail=f"German voice synthesis failed: {e}")
 
     # Check if it's a registered custom voice
     voice_manager = get_voice_manager()
