@@ -60,6 +60,20 @@ export class UpdateGlobalSettingsDto {
 	@IsArray()
 	@IsString({ each: true })
 	recentEmojis?: string[];
+
+	// Profile fields (from onboarding)
+	@IsOptional()
+	@IsString()
+	displayName?: string;
+
+	@IsOptional()
+	@IsArray()
+	@IsString({ each: true })
+	interests?: string[];
+
+	@IsOptional()
+	@IsBoolean()
+	onboardingCompleted?: boolean;
 }
 
 // App override update
@@ -121,6 +135,10 @@ export interface GlobalSettings {
 	theme: ThemeSettings;
 	locale: string;
 	recentEmojis?: string[];
+	// Profile fields (from onboarding)
+	displayName?: string;
+	interests?: string[];
+	onboardingCompleted?: boolean;
 }
 
 export interface AppOverride {

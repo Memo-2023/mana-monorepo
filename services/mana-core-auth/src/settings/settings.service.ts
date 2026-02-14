@@ -92,6 +92,10 @@ export class SettingsService {
 			theme: { ...current.globalSettings.theme, ...dto.theme },
 			locale: dto.locale ?? current.globalSettings.locale,
 			recentEmojis: dto.recentEmojis ?? current.globalSettings.recentEmojis,
+			// Profile fields
+			displayName: dto.displayName ?? current.globalSettings.displayName,
+			interests: dto.interests ?? current.globalSettings.interests,
+			onboardingCompleted: dto.onboardingCompleted ?? current.globalSettings.onboardingCompleted,
 		};
 
 		// Update in database
