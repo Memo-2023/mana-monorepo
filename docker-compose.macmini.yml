@@ -739,6 +739,8 @@ services:
     depends_on:
       synapse:
         condition: service_healthy
+      victoriametrics:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 4012
@@ -749,6 +751,7 @@ services:
       UMAMI_API_URL: http://umami:3000
       UMAMI_USERNAME: ${UMAMI_USERNAME:-admin}
       UMAMI_PASSWORD: ${UMAMI_PASSWORD}
+      PROMETHEUS_URL: http://victoriametrics:9090
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_auth
     volumes:
       - matrix_bots_data:/app/data
