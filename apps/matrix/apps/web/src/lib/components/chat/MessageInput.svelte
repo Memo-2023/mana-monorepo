@@ -47,106 +47,59 @@
 
 	// Emoji picker state
 	let showEmojiPicker = $state(false);
+	const RECENT_EMOJIS_KEY = 'matrix_recent_emojis';
+	const MAX_RECENT_EMOJIS = 16; // 2 rows of 8
+
+	// Load recent emojis from localStorage
+	function loadRecentEmojis(): string[] {
+		if (typeof localStorage === 'undefined') return [];
+		try {
+			const stored = localStorage.getItem(RECENT_EMOJIS_KEY);
+			return stored ? JSON.parse(stored) : [];
+		} catch {
+			return [];
+		}
+	}
+
+	// Save recent emojis to localStorage
+	function saveRecentEmojis(emojis: string[]) {
+		if (typeof localStorage === 'undefined') return;
+		try {
+			localStorage.setItem(RECENT_EMOJIS_KEY, JSON.stringify(emojis));
+		} catch {
+			// Ignore storage errors
+		}
+	}
+
+	// Add emoji to recent list
+	function addToRecentEmojis(emoji: string) {
+		const recent = loadRecentEmojis();
+		// Remove if already exists, then add to front
+		const filtered = recent.filter((e) => e !== emoji);
+		const updated = [emoji, ...filtered].slice(0, MAX_RECENT_EMOJIS);
+		saveRecentEmojis(updated);
+		recentEmojis = updated;
+	}
+
+	let recentEmojis = $state<string[]>([]);
+
+	// Load recent emojis on mount (browser only)
+	$effect(() => {
+		recentEmojis = loadRecentEmojis();
+	});
+
 	const commonEmojis = [
 		// Smileys
-		'😀',
-		'😃',
-		'😄',
-		'😁',
-		'😅',
-		'😂',
-		'🤣',
-		'😊',
-		'😇',
-		'🙂',
-		'😉',
-		'😌',
-		'😍',
-		'🥰',
-		'😘',
-		'😗',
-		'😙',
-		'😚',
-		'😋',
-		'😛',
-		'😜',
-		'🤪',
-		'😝',
-		'🤗',
-		'🤭',
-		'🤫',
-		'🤔',
-		'🤐',
-		'🤨',
-		'😐',
-		'😑',
-		'😶',
-		'😏',
-		'😒',
-		'🙄',
-		'😬',
-		'😮',
-		'🤯',
-		'😳',
-		'🥺',
-		'😢',
-		'😭',
-		'😤',
-		'😠',
-		'😡',
-		'🤬',
-		'😈',
-		'👿',
+		'😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉', '😌',
+		'😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤗',
+		'🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬',
+		'😮', '🤯', '😳', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '😈', '👿',
 		// Gestures
-		'👍',
-		'👎',
-		'👌',
-		'🤌',
-		'✌️',
-		'🤞',
-		'🤟',
-		'🤘',
-		'🤙',
-		'👋',
-		'🖐️',
-		'✋',
-		'👏',
-		'🙌',
-		'👐',
-		'🤲',
-		'🙏',
-		'💪',
-		'🦾',
-		'❤️',
-		'🧡',
-		'💛',
-		'💚',
-		'💙',
+		'👍', '👎', '👌', '🤌', '✌️', '🤞', '🤟', '🤘', '🤙', '👋', '🖐️', '✋',
+		'👏', '🙌', '👐', '🤲', '🙏', '💪', '🦾', '❤️', '🧡', '💛', '💚', '💙',
 		// Objects & Symbols
-		'🔥',
-		'✨',
-		'💫',
-		'⭐',
-		'🌟',
-		'💯',
-		'💢',
-		'💥',
-		'💦',
-		'💨',
-		'🎉',
-		'🎊',
-		'🎁',
-		'🏆',
-		'🥇',
-		'🎯',
-		'💡',
-		'📌',
-		'📍',
-		'✅',
-		'❌',
-		'⚠️',
-		'❗',
-		'❓',
+		'🔥', '✨', '💫', '⭐', '🌟', '💯', '💢', '💥', '💦', '💨', '🎉', '🎊',
+		'🎁', '🏆', '🥇', '🎯', '💡', '📌', '📍', '✅', '❌', '⚠️', '❗', '❓',
 	];
 
 	function insertEmoji(emoji: string) {
@@ -154,6 +107,9 @@
 		const before = message.slice(0, cursorPos);
 		const after = message.slice(cursorPos);
 		message = before + emoji + after;
+
+		// Add to recent emojis
+		addToRecentEmojis(emoji);
 
 		// Close picker and focus textarea
 		showEmojiPicker = false;
@@ -696,8 +652,26 @@
 				></button>
 				<!-- Picker -->
 				<div
-					class="absolute bottom-full right-0 mb-2 z-50 w-72 max-h-64 overflow-y-auto rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-2 shadow-xl"
+					class="absolute bottom-full right-0 mb-2 z-50 w-72 max-h-80 overflow-y-auto rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-2 shadow-xl"
 				>
+					<!-- Recent/Frequently used emojis -->
+					{#if recentEmojis.length > 0}
+						<div class="mb-2">
+							<p class="text-[10px] text-muted-foreground uppercase font-medium px-1 mb-1">Häufig benutzt</p>
+							<div class="grid grid-cols-8 gap-1">
+								{#each recentEmojis as emoji}
+									<button
+										class="p-1.5 text-xl hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+										onclick={() => insertEmoji(emoji)}
+									>
+										{emoji}
+									</button>
+								{/each}
+							</div>
+						</div>
+						<div class="border-t border-black/5 dark:border-white/10 my-2"></div>
+					{/if}
+					<!-- All emojis -->
 					<div class="grid grid-cols-8 gap-1">
 						{#each commonEmojis as emoji}
 							<button
