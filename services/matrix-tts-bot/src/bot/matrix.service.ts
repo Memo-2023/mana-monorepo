@@ -338,8 +338,8 @@ export class MatrixService extends BaseMatrixService {
 			// Stop typing indicator
 			await this.client.setTyping(roomId, false);
 
-			// Upload audio to Matrix (MP3 for better browser compatibility)
-			const mxcUrl = await this.client.uploadContent(audioBuffer, 'audio/mpeg', 'speech.mp3');
+			// Upload audio to Matrix (WAV for better compatibility)
+			const mxcUrl = await this.client.uploadContent(audioBuffer, 'audio/wav', 'speech.wav');
 
 			// Calculate approximate duration (rough estimate based on text length and speed)
 			const estimatedDuration = Math.round(((text.length / 15) * 1000) / settings.speed);
@@ -347,10 +347,10 @@ export class MatrixService extends BaseMatrixService {
 			// Send audio message
 			await this.client.sendMessage(roomId, {
 				msgtype: 'm.audio',
-				body: 'speech.mp3',
+				body: 'speech.wav',
 				url: mxcUrl,
 				info: {
-					mimetype: 'audio/mpeg',
+					mimetype: 'audio/wav',
 					size: audioBuffer.length,
 					duration: estimatedDuration,
 				},

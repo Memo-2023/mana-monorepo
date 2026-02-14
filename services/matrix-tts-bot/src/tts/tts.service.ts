@@ -46,7 +46,7 @@ export class TtsService {
 				text,
 				voice,
 				speed,
-				output_format: 'mp3',
+				output_format: 'wav',
 			}),
 		});
 
