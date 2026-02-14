@@ -19,7 +19,8 @@ export class MatrixService extends BaseMatrixService {
 
 	private readonly keywordDetector = new KeywordCommandDetector([
 		...COMMON_KEYWORDS,
-		{ keywords: ['stats', 'statistik', 'statistiken', 'uebersicht'], command: 'stats' },
+		{ keywords: ['stats', 'statistik', 'statistiken', 'meinestats', 'mydata'], command: 'stats' },
+		{ keywords: ['global', 'alle', 'gesamt', 'uebersicht', 'overview'], command: 'global' },
 		{ keywords: ['heute', 'today', 'tagesstatistik'], command: 'today' },
 		{ keywords: ['woche', 'week', 'wochenstatistik'], command: 'week' },
 		{ keywords: ['realtime', 'live', 'aktive', 'jetzt'], command: 'realtime' },
@@ -29,7 +30,6 @@ export class MatrixService extends BaseMatrixService {
 		{ keywords: ['traffic', 'requests', 'http', 'api'], command: 'traffic' },
 		{ keywords: ['db', 'database', 'datenbank', 'postgres', 'redis'], command: 'db' },
 		{ keywords: ['growth', 'wachstum', 'registrierungen'], command: 'growth' },
-		{ keywords: ['mystats', 'meinestats', 'meinedaten', 'mydata'], command: 'mystats' },
 	]);
 
 	constructor(
@@ -110,7 +110,11 @@ export class MatrixService extends BaseMatrixService {
 				break;
 
 			case 'stats':
-				await this.sendStats(roomId);
+				await this.sendMyStats(roomId, sender);
+				break;
+
+			case 'global':
+				await this.sendGlobalStats(roomId);
 				break;
 
 			case 'today':
@@ -149,10 +153,6 @@ export class MatrixService extends BaseMatrixService {
 				await this.sendGrowth(roomId);
 				break;
 
-			case 'mystats':
-				await this.sendMyStats(roomId, sender);
-				break;
-
 			default:
 				await this.sendMessage(roomId, `Unbekannter Befehl: !${command}\n\nVerwende !help`);
 		}
@@ -161,12 +161,12 @@ export class MatrixService extends BaseMatrixService {
 	private async sendHelp(roomId: string) {
 		const helpText = `**📊 ManaCore Stats Bot**
 
-**Persönliche Stats:**
-- \`!mystats\` - Deine persönlichen Statistiken
-- \`!status\` - Account Status
+**Deine Stats:**
+- \`!stats\` - Deine persönlichen Statistiken
+- \`!status\` - Account Status & Credits
 
 **Globale Analytics (Umami):**
-- \`!stats\` - Übersicht aller Apps (30 Tage)
+- \`!global\` - Übersicht aller Apps (30 Tage)
 - \`!today\` - Heutige Statistiken
 - \`!week\` - Wochenstatistiken
 - \`!realtime\` - Aktive Besucher jetzt
@@ -186,8 +186,8 @@ export class MatrixService extends BaseMatrixService {
 		await this.sendMessage(roomId, helpText);
 	}
 
-	private async sendStats(roomId: string) {
-		await this.sendMessage(roomId, '📊 Lade Statistiken...');
+	private async sendGlobalStats(roomId: string) {
+		await this.sendMessage(roomId, '📊 Lade globale Statistiken...');
 		try {
 			const report = await this.analyticsService.generateStatsOverview();
 			await this.sendMessage(roomId, report);

@@ -26,14 +26,14 @@ pnpm type-check       # TypeScript check
 
 | Command | Description |
 |---------|-------------|
-| `!mystats` | Your personal statistics across all ManaCore apps |
+| `!stats` | Your personal statistics across all ManaCore apps |
 | `!status` | Account status and credit balance |
 
 ### Global Analytics (Umami)
 
 | Command | Description |
 |---------|-------------|
-| `!stats` | Overview of all apps (30 days) |
+| `!global` | Overview of all apps (30 days) |
 | `!today` | Today's statistics |
 | `!week` | This week's statistics |
 | `!realtime` | Active visitors right now |
