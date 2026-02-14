@@ -298,6 +298,13 @@ export class GiftCodeService {
 	): Promise<GiftRedeemResponse> {
 		const db = this.getDb();
 
+		this.logger.log('=== redeemGiftCode DEBUG START ===');
+		this.logger.log(`userId: ${userId}, type: ${typeof userId}`);
+		this.logger.log(`code: ${code}, type: ${typeof code}`);
+		this.logger.log(`dto: ${JSON.stringify(dto)}`);
+		this.logger.log(`dto.sourceAppId: ${dto?.sourceAppId}, type: ${typeof dto?.sourceAppId}`);
+		this.logger.log(`dto.answer: ${dto?.answer}, type: ${typeof dto?.answer}`);
+
 		return await db.transaction(async (tx) => {
 			// 1. Get gift code with row lock
 			const [giftCode] = await tx
@@ -419,6 +426,7 @@ export class GiftCodeService {
 			}
 
 			// 8. Get or create redeemer balance
+			this.logger.log('=== Getting redeemer balance ===');
 			let [redeemerBalance] = await tx
 				.select()
 				.from(balances)
@@ -426,19 +434,25 @@ export class GiftCodeService {
 				.for('update')
 				.limit(1);
 
+			this.logger.log(`redeemerBalance found: ${!!redeemerBalance}`);
+
 			if (!redeemerBalance) {
 				// Initialize balance
-				[redeemerBalance] = await tx
-					.insert(balances)
-					.values({
-						userId,
-						balance: 0,
-						freeCreditsRemaining: 150, // Signup bonus
-						dailyFreeCredits: 5,
-						lastDailyResetAt: new Date(),
-					})
-					.returning();
+				this.logger.log('Creating new balance for user');
+				const balanceValues = {
+					userId,
+					balance: 0,
+					freeCreditsRemaining: 150, // Signup bonus
+					dailyFreeCredits: 5,
+					lastDailyResetAt: new Date(),
+				};
+				this.logger.log(`Balance values: ${JSON.stringify(balanceValues)}`);
+
+				[redeemerBalance] = await tx.insert(balances).values(balanceValues).returning();
 			}
+
+			this.logger.log(`redeemerBalance.balance: ${redeemerBalance.balance}`);
+			this.logger.log(`redeemerBalance.version: ${redeemerBalance.version}`);
 
 			// 9. Add credits to redeemer
 			const creditsToAdd = giftCode.creditsPerPortion;
@@ -456,23 +470,32 @@ export class GiftCodeService {
 				.where(eq(balances.userId, userId));
 
 			// 10. Create credit transaction for receiver
-			const [creditTx] = await tx
-				.insert(transactions)
-				.values({
-					userId,
-					type: 'gift_receive',
-					status: 'completed',
-					amount: creditsToAdd,
-					balanceBefore: redeemerBalance.balance,
-					balanceAfter: newBalance,
-					appId: dto.sourceAppId || 'gift',
-					description: `Gift received: ${giftCode.code}`,
-					organizationId: null,
-					metadata: { giftCodeId: giftCode.id, portionNumber },
-					idempotencyKey: null,
-					completedAt: new Date(),
-				})
-				.returning();
+			const transactionValues = {
+				userId,
+				type: 'gift_receive' as const,
+				status: 'completed' as const,
+				amount: creditsToAdd,
+				balanceBefore: redeemerBalance.balance,
+				balanceAfter: newBalance,
+				appId: dto.sourceAppId || 'gift',
+				description: `Gift received: ${giftCode.code}`,
+				organizationId: null,
+				metadata: { giftCodeId: giftCode.id, portionNumber },
+				idempotencyKey: null,
+				completedAt: new Date(),
+			};
+
+			this.logger.log('=== Transaction insert values ===');
+			this.logger.log(JSON.stringify(transactionValues, null, 2));
+
+			// Check for any undefined values
+			for (const [key, value] of Object.entries(transactionValues)) {
+				if (value === undefined) {
+					this.logger.error(`FOUND UNDEFINED: ${key} is undefined!`);
+				}
+			}
+
+			const [creditTx] = await tx.insert(transactions).values(transactionValues).returning();
 
 			// 11. Update gift code
 			const newClaimedPortions = giftCode.claimedPortions + 1;
@@ -488,15 +511,27 @@ export class GiftCodeService {
 				.where(eq(giftCodes.id, giftCode.id));
 
 			// 12. Record successful redemption
-			await tx.insert(giftRedemptions).values({
+			const redemptionValues = {
 				giftCodeId: giftCode.id,
 				redeemerUserId: userId,
-				status: 'success',
+				status: 'success' as const,
 				creditsReceived: creditsToAdd,
 				portionNumber,
 				creditTransactionId: creditTx.id,
 				sourceAppId: dto.sourceAppId ?? null,
-			});
+			};
+
+			this.logger.log('=== Redemption insert values ===');
+			this.logger.log(JSON.stringify(redemptionValues, null, 2));
+
+			// Check for any undefined values
+			for (const [key, value] of Object.entries(redemptionValues)) {
+				if (value === undefined) {
+					this.logger.error(`FOUND UNDEFINED in redemption: ${key} is undefined!`);
+				}
+			}
+
+			await tx.insert(giftRedemptions).values(redemptionValues);
 
 			this.logger.log('Gift code redeemed', {
 				code: giftCode.code,
