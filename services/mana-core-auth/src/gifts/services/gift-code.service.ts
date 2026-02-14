@@ -359,6 +359,8 @@ export class GiftCodeService {
 						redeemerUserId: userId,
 						status: 'failed_wrong_user',
 						creditsReceived: 0,
+						portionNumber: null,
+						creditTransactionId: null,
 						sourceAppId: dto.sourceAppId ?? null,
 					});
 
@@ -383,6 +385,8 @@ export class GiftCodeService {
 						redeemerUserId: userId,
 						status: 'failed_wrong_answer',
 						creditsReceived: 0,
+						portionNumber: null,
+						creditTransactionId: null,
 						sourceAppId: dto.sourceAppId ?? null,
 					});
 
@@ -463,7 +467,9 @@ export class GiftCodeService {
 					balanceAfter: newBalance,
 					appId: dto.sourceAppId || 'gift',
 					description: `Gift received: ${giftCode.code}`,
+					organizationId: null,
 					metadata: { giftCodeId: giftCode.id, portionNumber },
+					idempotencyKey: null,
 					completedAt: new Date(),
 				})
 				.returning();
