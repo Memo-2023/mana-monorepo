@@ -692,7 +692,8 @@ services:
       CLOCK_API_URL: http://mana-matrix-bot-clock:4018/api/v1
       TODO_STORAGE_PATH: /app/data/todos.json
       CALENDAR_STORAGE_PATH: /app/data/calendar.json
-      STT_URL: http://host.docker.internal:3020
+      STT_URL: http://host.docker.internal:3026
+      STT_API_KEY: ${STT_INTERNAL_API_KEY:-}
       TTS_URL: http://host.docker.internal:3022
     volumes:
       - matrix_bots_data:/app/data
@@ -965,7 +966,8 @@ services:
       MATRIX_ACCESS_TOKEN: ${MATRIX_CLOCK_BOT_TOKEN}
       MATRIX_ALLOWED_ROOMS: ${MATRIX_CLOCK_BOT_ROOMS:-}
       CLOCK_API_URL: http://clock-backend:3033/api/v1
-      STT_URL: http://host.docker.internal:3021
+      STT_URL: http://host.docker.internal:3026
+      STT_API_KEY: ${STT_INTERNAL_API_KEY:-}
       MANA_CORE_AUTH_URL: http://mana-core-auth:3001
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       REDIS_HOST: redis
