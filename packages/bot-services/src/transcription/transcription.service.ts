@@ -27,6 +27,7 @@ export class TranscriptionService {
 	private readonly logger = new Logger(TranscriptionService.name);
 	private readonly sttUrl: string;
 	private readonly defaultLanguage: string;
+	private readonly apiKey: string;
 
 	constructor(
 		@Optional() private configService: ConfigService,
@@ -40,6 +41,12 @@ export class TranscriptionService {
 			'http://localhost:3020';
 
 		this.defaultLanguage = options?.defaultLanguage || 'de';
+
+		this.apiKey =
+			options?.apiKey ||
+			this.configService?.get<string>('stt.apiKey') ||
+			this.configService?.get<string>('STT_API_KEY') ||
+			'';
 
 		this.logger.log(`STT Service URL: ${this.sttUrl}`);
 	}
@@ -64,8 +71,14 @@ export class TranscriptionService {
 		}
 
 		try {
+			const headers: Record<string, string> = {};
+			if (this.apiKey) {
+				headers['X-API-Key'] = this.apiKey;
+			}
+
 			const response = await fetch(`${this.sttUrl}/transcribe`, {
 				method: 'POST',
+				headers,
 				body: formData,
 			});
 
@@ -102,8 +115,14 @@ export class TranscriptionService {
 		}
 
 		try {
+			const headers: Record<string, string> = {};
+			if (this.apiKey) {
+				headers['X-API-Key'] = this.apiKey;
+			}
+
 			const response = await fetch(`${this.sttUrl}/transcribe`, {
 				method: 'POST',
+				headers,
 				body: formData,
 			});
 
@@ -124,7 +143,12 @@ export class TranscriptionService {
 	 */
 	async checkHealth(): Promise<boolean> {
 		try {
-			const response = await fetch(`${this.sttUrl}/health`);
+			const headers: Record<string, string> = {};
+			if (this.apiKey) {
+				headers['X-API-Key'] = this.apiKey;
+			}
+
+			const response = await fetch(`${this.sttUrl}/health`, { headers });
 			return response.ok;
 		} catch {
 			return false;

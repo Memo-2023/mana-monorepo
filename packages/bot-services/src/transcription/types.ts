@@ -17,6 +17,7 @@ export interface TranscriptionOptions {
 export interface TranscriptionModuleOptions {
 	sttUrl?: string;
 	defaultLanguage?: string;
+	apiKey?: string;
 }
 
 export const STT_MODULE_OPTIONS = 'STT_MODULE_OPTIONS';

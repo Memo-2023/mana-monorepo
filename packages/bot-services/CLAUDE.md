@@ -124,7 +124,18 @@ const convId = sessionService.getSessionData<string>('@user:matrix.org', 'curren
 ### Transcription Service (Speech-to-Text)
 
 ```typescript
-import { TranscriptionService } from '@manacore/bot-services';
+import { TranscriptionService, TranscriptionModule } from '@manacore/bot-services';
+
+// Module registration with API key
+TranscriptionModule.register({
+  sttUrl: 'http://mana-stt:3020',
+  apiKey: process.env.STT_API_KEY,  // Optional: for authenticated STT service
+  defaultLanguage: 'de'
+})
+
+// Or use forRoot() which reads from config:
+// - stt.url / STT_URL
+// - stt.apiKey / STT_API_KEY
 
 // Transcribe audio buffer
 const text = await transcriptionService.transcribe(audioBuffer, { language: 'de' });
