@@ -57,14 +57,13 @@
 	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
 	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
 	import DateStripFab from '$lib/components/calendar/DateStripFab.svelte';
+	import ViewsBar from '$lib/components/calendar/ViewsBar.svelte';
 	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
-	import ViewModePillContextMenu from '$lib/components/calendar/ViewModePillContextMenu.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import VoiceRecordButton from '$lib/components/voice/VoiceRecordButton.svelte';
 	import VoiceRecordingModal from '$lib/components/voice/VoiceRecordingModal.svelte';
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
-	import type { CalendarViewType } from '@calendar/shared';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
@@ -287,78 +286,6 @@
 		onChange: handleTabChange,
 	});
 
-	// View switcher context menu
-	let viewContextMenu: ViewModePillContextMenu;
-
-	function handleViewContextMenu(x: number, y: number) {
-		viewContextMenu?.show(x, y);
-	}
-
-	// View labels for tabs (numbers for day views, letters for others)
-	const viewLabels: Record<CalendarViewType, string> = {
-		day: '1',
-		'3day': '3',
-		'5day': '5',
-		week: '7',
-		'10day': '10',
-		'14day': '14',
-		'30day': '30',
-		'60day': '60',
-		'90day': '90',
-		'365day': '365',
-		month: 'M',
-		year: 'Y',
-		agenda: 'L',
-		custom: '', // Will be set dynamically
-	};
-
-	// View titles for tooltips
-	const viewTitles: Record<CalendarViewType, string> = {
-		day: 'Tagesansicht',
-		'3day': '3-Tage-Ansicht',
-		'5day': '5-Tage-Ansicht',
-		week: 'Wochenansicht',
-		'10day': '10-Tage-Ansicht',
-		'14day': '14-Tage-Ansicht',
-		'30day': '30-Tage-Ansicht',
-		'60day': '60-Tage-Ansicht',
-		'90day': '90-Tage-Ansicht',
-		'365day': '365-Tage-Ansicht',
-		month: 'Monatsansicht',
-		year: 'Jahresansicht',
-		agenda: 'Agenda',
-		custom: 'Benutzerdefiniert',
-	};
-
-	// Get enabled views from settings
-	let enabledViews = $derived(settingsStore.quickViewPillViews);
-
-	// Get label for a view (dynamic for custom)
-	function getViewLabel(view: CalendarViewType): string {
-		if (view === 'custom') {
-			return String(settingsStore.customDayCount);
-		}
-		return viewLabels[view];
-	}
-
-	// Handle view change
-	function handleViewChange(id: string) {
-		viewStore.setViewType(id as CalendarViewType);
-	}
-
-	// View switcher tab group (only shown on calendar main page)
-	let viewSwitcherTabGroup = $derived<PillTabGroupConfig>({
-		type: 'tabs',
-		options: enabledViews.map((view) => ({
-			id: view,
-			label: getViewLabel(view),
-			title: view === 'custom' ? `${settingsStore.customDayCount}-Tage-Ansicht` : viewTitles[view],
-		})),
-		value: viewStore.viewType,
-		onChange: handleViewChange,
-		onContextMenu: handleViewContextMenu,
-	});
-
 	// Tag selector config for PillNavigation
 	let tagSelectorConfig = $derived<PillTagSelectorConfig>({
 		type: 'tag-selector',
@@ -372,9 +299,10 @@
 	});
 
 	// Prepended elements (tab groups at the start of navigation)
+	// Note: View switcher moved to ViewsBar component
 	let prependElements = $derived<PillNavElement[]>(
 		showCalendarToolbar
-			? [calendarTasksTabGroup, viewSwitcherTabGroup, { type: 'divider' }, tagSelectorConfig]
+			? [calendarTasksTabGroup, { type: 'divider' }, tagSelectorConfig]
 			: [calendarTasksTabGroup]
 	);
 
@@ -640,6 +568,17 @@
 			{/if}
 		{/if}
 
+		<!-- Views Bar (only on main calendar page, hidden in immersive mode) -->
+		{#if showCalendarToolbar && !settingsStore.immersiveModeEnabled}
+			<ViewsBar
+				bottomOffset={isMobile
+					? '70px'
+					: showCalendarToolbar && !isToolbarCollapsed
+						? '140px'
+						: '70px'}
+			/>
+		{/if}
+
 		<!-- Global Input Bar with Voice Button (hidden via CSS in immersive mode to prevent re-mount focus) -->
 		<div class="input-bar-wrapper" class:hidden={settingsStore.immersiveModeEnabled}>
 			<div class="input-bar-row">
@@ -655,7 +594,9 @@
 					createText="Erstellen"
 					appIcon="calendar"
 					bottomOffset={isMobile
-						? '70px'
+						? showCalendarToolbar
+							? 'calc(70px + 72px)'
+							: '70px'
 						: showCalendarToolbar && !isToolbarCollapsed
 							? '140px'
 							: '70px'}
@@ -705,9 +646,6 @@
 
 <!-- Global Event Context Menu - rendered at top level for proper z-index -->
 <EventContextMenu onEdit={handleContextMenuEdit} />
-
-<!-- View Mode Context Menu -->
-<ViewModePillContextMenu bind:this={viewContextMenu} />
 
 <!-- InputBar Help Modal -->
 <InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />

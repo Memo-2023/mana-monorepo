@@ -67,7 +67,7 @@
 		}
 	}
 
-	/* Mobile: Position in row above InputBar, left of ViewModePill */
+	/* Mobile: Position in row above InputBar, left of ViewsBar */
 	/* InputBar is at bottom: 70px (above PillNav), so controls go above that */
 	.datestrip-fab-container.mobile {
 		/* Above PillNav (70px) + InputBar (72px) + gap (8px), to the left of center */
