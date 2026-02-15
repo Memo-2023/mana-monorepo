@@ -57,7 +57,9 @@ export class JwtAuthGuard implements CanActivate {
 			this.logger.debug('Token verification successful', { userId: payload.sub });
 
 			// Attach user to request
+			// Include both 'sub' and 'userId' for compatibility with different controllers
 			request.user = {
+				sub: payload.sub,
 				userId: payload.sub,
 				email: payload.email as string,
 				role: payload.role as string,
