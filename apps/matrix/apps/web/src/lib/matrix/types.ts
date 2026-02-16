@@ -306,3 +306,19 @@ export interface CallCallbacks {
 	onCallStateChange?: (call: SimpleCall) => void;
 	onCallEnded?: (call: SimpleCall, reason?: string) => void;
 }
+
+// ─────────────────────────────────────────────────────────
+// Widget Types
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Matrix widget info
+ */
+export interface RoomWidget {
+	id: string;
+	type: string;
+	name: string;
+	url: string;
+	creatorUserId: string;
+	data?: Record<string, unknown>;
+}

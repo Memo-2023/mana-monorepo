@@ -26,6 +26,7 @@ import type {
 	CallState as CallStateType,
 	CallType,
 	CallDirection,
+	RoomWidget,
 } from './types';
 
 const STORAGE_KEY = 'matrix_credentials';
@@ -966,6 +967,60 @@ class MatrixStore {
 			membership: member.membership as RoomMember['membership'],
 			powerLevel: powerLevels[member.userId] ?? defaultPowerLevel,
 		}));
+	}
+
+	/**
+	 * Get widgets in a room
+	 */
+	getRoomWidgets(roomId?: string): RoomWidget[] {
+		const id = roomId || this._currentRoomId;
+		if (!this._client || !id) return [];
+
+		const room = this._client.getRoom(id);
+		if (!room) return [];
+
+		const widgets: RoomWidget[] = [];
+
+		// Get all widget state events (im.vector.modular.widgets is the standard type)
+		const widgetEvents = room.currentState.getStateEvents('im.vector.modular.widgets');
+
+		for (const event of widgetEvents) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const content = (event as any).getContent?.();
+			if (!content || !content.url) continue; // Skip removed widgets
+
+			widgets.push({
+				id: content.id || (event as any).getStateKey?.() || '',
+				type: content.type || 'm.custom',
+				name: content.name || 'Widget',
+				url: content.url,
+				creatorUserId: content.creatorUserId || (event as any).getSender?.() || '',
+				data: content.data,
+			});
+		}
+
+		return widgets;
+	}
+
+	/**
+	 * Build widget URL with Matrix variable substitution
+	 */
+	buildWidgetUrl(widget: RoomWidget, roomId?: string): string {
+		const id = roomId || this._currentRoomId;
+		const userId = this._client?.getUserId() || '';
+
+		let url = widget.url;
+
+		// Substitute Matrix variables
+		url = url.replace(/\$matrix_user_id/g, encodeURIComponent(userId));
+		url = url.replace(/\$matrix_room_id/g, encodeURIComponent(id || ''));
+		url = url.replace(
+			/\$matrix_display_name/g,
+			encodeURIComponent(userId.split(':')[0].substring(1))
+		);
+		url = url.replace(/\$matrix_avatar_url/g, '');
+
+		return url;
 	}
 
 	// ─────────────────────────────────────────────────────────

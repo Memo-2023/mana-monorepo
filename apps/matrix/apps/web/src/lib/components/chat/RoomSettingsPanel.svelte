@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
+	import type { RoomWidget } from '$lib/matrix/types';
 	import {
 		X,
 		Users,
@@ -11,6 +12,7 @@
 		Bell,
 		BellSlash,
 		CircleNotch,
+		SquaresFour,
 	} from '@manacore/shared-icons';
 
 	interface Props {
@@ -20,15 +22,25 @@
 
 	let { open, onClose }: Props = $props();
 
-	let activeTab = $state<'members' | 'settings'>('members');
+	let activeTab = $state<'members' | 'widgets' | 'settings'>('members');
 	let inviteQuery = $state('');
 	let searchResults = $state<{ userId: string; displayName?: string; avatarUrl?: string }[]>([]);
 	let searching = $state(false);
 	let inviting = $state(false);
 	let searchTimeout: ReturnType<typeof setTimeout>;
+	let expandedWidget = $state<string | null>(null);
 
 	let room = $derived(matrixStore.currentSimpleRoom);
 	let members = $derived(matrixStore.getRoomMembers());
+	let widgets = $derived(matrixStore.getRoomWidgets());
+
+	function getWidgetUrl(widget: RoomWidget): string {
+		return matrixStore.buildWidgetUrl(widget);
+	}
+
+	function toggleWidget(widgetId: string) {
+		expandedWidget = expandedWidget === widgetId ? null : widgetId;
+	}
 
 	function handleSearchInput() {
 		clearTimeout(searchTimeout);
@@ -131,6 +143,17 @@
 			</button>
 			<button
 				class="tab flex-1"
+				class:tab-active={activeTab === 'widgets'}
+				onclick={() => (activeTab = 'widgets')}
+			>
+				<SquaresFour class="mr-1 h-4 w-4" />
+				Widgets
+				{#if widgets.length > 0}
+					<span class="badge badge-sm badge-primary ml-1">{widgets.length}</span>
+				{/if}
+			</button>
+			<button
+				class="tab flex-1"
 				class:tab-active={activeTab === 'settings'}
 				onclick={() => (activeTab = 'settings')}
 			>
@@ -211,6 +234,43 @@
 						</li>
 					{/each}
 				</ul>
+			{:else if activeTab === 'widgets'}
+				<!-- Widgets -->
+				<div class="p-3">
+					{#if widgets.length === 0}
+						<div class="text-center py-8 text-base-content/50">
+							<SquaresFour class="h-12 w-12 mx-auto mb-2 opacity-50" />
+							<p>Keine Widgets in diesem Raum</p>
+							<p class="text-xs mt-1">Bots können Widgets hinzufügen</p>
+						</div>
+					{:else}
+						<div class="space-y-3">
+							{#each widgets as widget}
+								<div class="card bg-base-200 shadow-sm">
+									<div class="card-body p-3">
+										<div class="flex items-center justify-between">
+											<h3 class="font-medium text-sm">{widget.name}</h3>
+											<button class="btn btn-ghost btn-xs" onclick={() => toggleWidget(widget.id)}>
+												{expandedWidget === widget.id ? 'Schließen' : 'Öffnen'}
+											</button>
+										</div>
+										{#if expandedWidget === widget.id}
+											<div class="mt-2 -mx-3 -mb-3">
+												<iframe
+													src={getWidgetUrl(widget)}
+													title={widget.name}
+													class="w-full border-0 rounded-b-2xl bg-base-300"
+													style="height: 300px;"
+													sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+												></iframe>
+											</div>
+										{/if}
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
 			{:else}
 				<!-- Settings -->
 				<div class="space-y-2 p-3">
