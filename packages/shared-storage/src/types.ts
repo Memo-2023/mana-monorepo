@@ -12,6 +12,13 @@ export interface StorageConfig {
 	secretAccessKey: string;
 	/** Force path-style URLs (required for MinIO) */
 	forcePathStyle?: boolean;
+	/**
+	 * Public endpoint for generating presigned URLs accessible from browsers.
+	 * Use this when the internal endpoint (e.g., http://minio:9000) differs
+	 * from the public URL (e.g., https://minio.mana.how).
+	 * If not set, presigned URLs use the main endpoint.
+	 */
+	publicEndpoint?: string;
 }
 
 /**

@@ -7,6 +7,7 @@ import type { StorageConfig, BucketConfig, BucketName } from './types';
  */
 const ENV_KEYS = {
 	ENDPOINT: 'S3_ENDPOINT',
+	PUBLIC_ENDPOINT: 'S3_PUBLIC_ENDPOINT',
 	REGION: 'S3_REGION',
 	ACCESS_KEY: 'S3_ACCESS_KEY',
 	SECRET_KEY: 'S3_SECRET_KEY',
@@ -29,15 +30,17 @@ const MINIO_DEFAULTS: StorageConfig = {
  */
 export function getStorageConfig(): StorageConfig {
 	const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+	const endpoint = process.env[ENV_KEYS.ENDPOINT] ?? (isDev ? MINIO_DEFAULTS.endpoint : '');
 
 	// Use environment variables if available, otherwise use MinIO defaults
 	return {
-		endpoint: process.env[ENV_KEYS.ENDPOINT] ?? (isDev ? MINIO_DEFAULTS.endpoint : ''),
+		endpoint,
+		publicEndpoint: process.env[ENV_KEYS.PUBLIC_ENDPOINT],
 		region: process.env[ENV_KEYS.REGION] ?? MINIO_DEFAULTS.region,
 		accessKeyId: process.env[ENV_KEYS.ACCESS_KEY] ?? (isDev ? MINIO_DEFAULTS.accessKeyId : ''),
 		secretAccessKey:
 			process.env[ENV_KEYS.SECRET_KEY] ?? (isDev ? MINIO_DEFAULTS.secretAccessKey : ''),
-		forcePathStyle: isDev || process.env[ENV_KEYS.ENDPOINT]?.includes('localhost'),
+		forcePathStyle: isDev || endpoint?.includes('localhost') || endpoint?.includes('minio'),
 	};
 }
 

@@ -22,9 +22,11 @@ import type {
  */
 export class StorageClient {
 	private client: S3Client;
+	private presignClient: S3Client;
 	private bucket: BucketConfig;
 
 	constructor(config: StorageConfig, bucket: BucketConfig) {
+		// Main client for internal operations (upload, download, delete, etc.)
 		this.client = new S3Client({
 			endpoint: config.endpoint,
 			region: config.region,
@@ -34,6 +36,20 @@ export class StorageClient {
 			},
 			forcePathStyle: config.forcePathStyle ?? true,
 		});
+
+		// Separate client for presigned URLs (uses public endpoint if available)
+		// This allows internal operations to use Docker network addresses
+		// while presigned URLs use publicly accessible endpoints
+		this.presignClient = new S3Client({
+			endpoint: config.publicEndpoint ?? config.endpoint,
+			region: config.region,
+			credentials: {
+				accessKeyId: config.accessKeyId,
+				secretAccessKey: config.secretAccessKey,
+			},
+			forcePathStyle: config.forcePathStyle ?? true,
+		});
+
 		this.bucket = bucket;
 	}
 
@@ -142,6 +158,7 @@ export class StorageClient {
 
 	/**
 	 * Generate a presigned URL for uploading (PUT)
+	 * Uses the public endpoint if configured, allowing browser access
 	 */
 	async getUploadUrl(key: string, options: PresignedUrlOptions = {}): Promise<string> {
 		const command = new PutObjectCommand({
@@ -149,13 +166,14 @@ export class StorageClient {
 			Key: key,
 		});
 
-		return getSignedUrl(this.client, command, {
+		return getSignedUrl(this.presignClient, command, {
 			expiresIn: options.expiresIn ?? 3600,
 		});
 	}
 
 	/**
 	 * Generate a presigned URL for downloading (GET)
+	 * Uses the public endpoint if configured, allowing browser access
 	 */
 	async getDownloadUrl(key: string, options: PresignedUrlOptions = {}): Promise<string> {
 		const command = new GetObjectCommand({
@@ -163,7 +181,7 @@ export class StorageClient {
 			Key: key,
 		});
 
-		return getSignedUrl(this.client, command, {
+		return getSignedUrl(this.presignClient, command, {
 			expiresIn: options.expiresIn ?? 3600,
 		});
 	}
