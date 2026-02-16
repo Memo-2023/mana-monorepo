@@ -1,11 +1,13 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { createPWAConfig } from '@manacore/shared-pwa';
 import { MANACORE_SHARED_PACKAGES } from '@manacore/shared-vite-config';
 
 export default defineConfig({
 	plugins: [
+		tailwindcss(),
 		sveltekit(),
 		SvelteKitPWA(
 			createPWAConfig({
