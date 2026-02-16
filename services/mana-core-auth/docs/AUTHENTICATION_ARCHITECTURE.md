@@ -2,7 +2,7 @@
 
 > **Decision Date**: December 2024
 > **Status**: Active
-> **Last Updated**: December 1, 2024
+> **Last Updated**: February 16, 2026
 
 ## Overview
 
@@ -258,8 +258,22 @@ issuer: process.env.JWT_ISSUER || 'manacore',
 | `/api/v1/auth/register/b2b` | POST | Register organization |
 | `/api/v1/auth/organizations` | GET | List user's orgs |
 | `/api/v1/auth/organizations/:id` | GET | Get org details |
+| `/api/v1/auth/organizations/:id` | PUT | Update org (name, logo, metadata) |
+| `/api/v1/auth/organizations/:id` | DELETE | Delete organization (owner only) |
 | `/api/v1/auth/organizations/:id/invite` | POST | Invite employee |
+| `/api/v1/auth/organizations/:id/members` | GET | List org members |
+| `/api/v1/auth/organizations/:id/members/:memberId` | DELETE | Remove member |
+| `/api/v1/auth/organizations/:orgId/members/:memberId/role` | PATCH | Update member role |
+| `/api/v1/auth/organizations/:id/invitations` | GET | List org invitations |
 | `/api/v1/auth/organizations/set-active` | POST | Switch active org |
+| `/api/v1/auth/organizations/accept-invitation` | POST | Accept invitation |
+
+### Invitations
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/auth/invitations` | GET | List user's pending invitations |
+| `/api/v1/auth/invitations/:id` | DELETE | Cancel or reject invitation |
 
 ---
 

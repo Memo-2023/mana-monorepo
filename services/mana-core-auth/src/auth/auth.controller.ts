@@ -49,14 +49,23 @@ import type { CurrentUserData } from '../common/decorators/current-user.decorato
  * - POST /auth/refresh - Refresh access token
  * - GET /auth/session - Get current session
  *
- * B2B Endpoints:
+ * B2B Organization Endpoints:
  * - POST /auth/register/b2b - Register organization with owner
  * - GET /auth/organizations - List user's organizations
  * - GET /auth/organizations/:id - Get organization details
+ * - PUT /auth/organizations/:id - Update organization
+ * - DELETE /auth/organizations/:id - Delete organization (owner only)
  * - POST /auth/organizations/:id/invite - Invite employee
- * - POST /auth/organizations/accept-invitation - Accept invitation
+ * - GET /auth/organizations/:id/members - List organization members
  * - DELETE /auth/organizations/:id/members/:memberId - Remove member
+ * - PATCH /auth/organizations/:orgId/members/:memberId/role - Update member role
+ * - GET /auth/organizations/:id/invitations - List organization invitations
+ * - POST /auth/organizations/accept-invitation - Accept invitation
  * - POST /auth/organizations/set-active - Switch active organization
+ *
+ * Invitation Endpoints:
+ * - GET /auth/invitations - List user's pending invitations
+ * - DELETE /auth/invitations/:id - Cancel or reject invitation
  */
 @ApiTags('auth')
 @Controller('auth')
