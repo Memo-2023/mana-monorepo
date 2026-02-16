@@ -185,7 +185,7 @@ export class StripeService {
 			const session = await stripe.checkout.sessions.create({
 				customer: options.customerId,
 				mode: 'payment',
-				payment_method_types: ['card'],
+				payment_method_types: ['card', 'sepa_debit'],
 				line_items: [
 					{
 						price_data: {

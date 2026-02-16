@@ -69,13 +69,26 @@ export class StripeWebhookController {
 		});
 
 		// Handle relevant events
+		// Note: SEPA Direct Debit payments are not instant - they go through:
+		// 1. checkout.session.completed (payment_status may be 'unpaid' for SEPA)
+		// 2. payment_intent.processing (SEPA is being processed by banks)
+		// 3. payment_intent.succeeded (3-14 days later when bank confirms)
+		// Credits are only added on payment_intent.succeeded for safety.
 		switch (event.type) {
 			// Credit purchases via Checkout Session
 			case 'checkout.session.completed':
 				await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
 				break;
 
-			// Credit purchases
+			// Payment processing (SEPA: bank is processing the debit)
+			case 'payment_intent.processing':
+				this.logger.log('Payment processing (SEPA in progress)', {
+					paymentIntentId: (event.data.object as Stripe.PaymentIntent).id,
+				});
+				// Purchase stays in 'pending' status until succeeded
+				break;
+
+			// Credit purchases - payment confirmed
 			case 'payment_intent.succeeded':
 				await this.handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
 				break;

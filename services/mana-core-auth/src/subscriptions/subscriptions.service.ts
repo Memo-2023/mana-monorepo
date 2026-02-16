@@ -139,7 +139,7 @@ export class SubscriptionsService {
 		const session = await this.stripe.checkout.sessions.create({
 			customer: stripeCustomerId,
 			mode: 'subscription',
-			payment_method_types: ['card'],
+			payment_method_types: ['card', 'sepa_debit'],
 			line_items: [
 				{
 					price: stripePriceId,
