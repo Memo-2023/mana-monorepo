@@ -101,24 +101,18 @@
 	<!-- Slide-in Panel -->
 	<div
 		class="fixed inset-y-0 right-0 z-50 flex w-[90vw] max-w-[320px] lg:w-80 flex-col
-		       bg-white/80 dark:bg-black/80 backdrop-blur-xl
-		       border-l border-black/10 dark:border-white/10 shadow-2xl"
+		       bg-surface-elevated border-l border-border shadow-xl"
 	>
 		<!-- Header -->
-		<header
-			class="flex items-center justify-between border-b border-black/10 dark:border-white/10 px-4 py-3"
-		>
+		<header class="flex items-center justify-between border-b border-border px-4 py-3">
 			<h2 class="font-semibold text-foreground">Raum-Details</h2>
-			<button
-				class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-				onclick={onClose}
-			>
+			<button class="p-2 rounded-lg hover:bg-surface-hover transition-colors" onclick={onClose}>
 				<X class="h-5 w-5 text-foreground" />
 			</button>
 		</header>
 
 		<!-- Room Info -->
-		<div class="border-b border-black/10 dark:border-white/10 p-4 text-center">
+		<div class="border-b border-border p-4 text-center">
 			<div class="mx-auto mb-3 w-20 h-20 rounded-full overflow-hidden">
 				{#if room.avatar}
 					<img src={room.avatar} alt={room.name} class="w-full h-full object-cover" />
@@ -143,7 +137,7 @@
 		</div>
 
 		<!-- Tabs -->
-		<div class="flex border-b border-black/10 dark:border-white/10">
+		<div class="flex border-b border-border">
 			<button
 				class="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors
 				       {activeTab === 'members'
@@ -187,7 +181,7 @@
 		<div class="flex-1 overflow-y-auto chat-scrollbar">
 			{#if activeTab === 'members'}
 				<!-- Invite User -->
-				<div class="border-b border-black/10 dark:border-white/10 p-3">
+				<div class="border-b border-border p-3">
 					<div class="relative">
 						<MagnifyingGlass
 							class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
@@ -196,8 +190,7 @@
 							type="text"
 							bind:value={inviteQuery}
 							oninput={handleSearchInput}
-							class="w-full rounded-xl bg-white/70 dark:bg-white/10 backdrop-blur-xl
-							       border border-black/10 dark:border-white/20 px-4 py-2 pl-10
+							class="w-full rounded-xl bg-surface border border-border px-4 py-2 pl-10
 							       text-sm text-foreground focus:ring-2 focus:ring-primary focus:outline-none
 							       placeholder:text-muted-foreground"
 							placeholder="Benutzer einladen..."
@@ -211,12 +204,10 @@
 
 					<!-- Search Results -->
 					{#if searchResults.length > 0}
-						<div
-							class="mt-2 rounded-xl bg-white/50 dark:bg-white/5 border border-black/10 dark:border-white/10 overflow-hidden"
-						>
+						<div class="mt-2 rounded-xl bg-surface border border-border overflow-hidden">
 							{#each searchResults as user}
 								<button
-									class="w-full flex items-center gap-2 px-3 py-2 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+									class="w-full flex items-center gap-2 px-3 py-2 hover:bg-surface-hover transition-colors"
 									onclick={() => inviteUser(user.userId)}
 									disabled={inviting}
 								>
@@ -240,7 +231,7 @@
 					{#each members as member}
 						{@const PowerIcon = getPowerLevelIcon(member.powerLevel)}
 						<div
-							class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+							class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-surface-hover transition-colors"
 						>
 							<div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
 								{#if member.avatarUrl}
@@ -275,14 +266,12 @@
 					{:else}
 						<div class="space-y-3">
 							{#each widgets as widget}
-								<div
-									class="rounded-xl bg-white/50 dark:bg-white/5 border border-black/10 dark:border-white/10 overflow-hidden"
-								>
+								<div class="rounded-xl bg-surface border border-border overflow-hidden">
 									<div class="flex items-center justify-between p-3">
 										<h3 class="font-medium text-sm text-foreground">{widget.name}</h3>
 										<button
 											class="px-3 py-1 text-xs font-medium rounded-lg
-											       bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20
+											       bg-muted hover:bg-surface-hover
 											       text-foreground transition-colors"
 											onclick={() => toggleWidget(widget.id)}
 										>
@@ -290,7 +279,7 @@
 										</button>
 									</div>
 									{#if expandedWidget === widget.id}
-										<div class="border-t border-black/10 dark:border-white/10">
+										<div class="border-t border-border">
 											<iframe
 												src={getWidgetUrl(widget)}
 												title={widget.name}
@@ -311,13 +300,11 @@
 					<!-- Notifications -->
 					<button
 						class="w-full flex items-center gap-3 px-4 py-3 rounded-xl
-						       hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+						       hover:bg-surface-hover transition-colors"
 					>
 						<Bell class="h-5 w-5 text-foreground" />
 						<span class="flex-1 text-left text-foreground">Benachrichtigungen</span>
-						<span
-							class="px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-medium"
-						>
+						<span class="px-2 py-0.5 rounded-full bg-success/10 text-success text-xs font-medium">
 							An
 						</span>
 					</button>
@@ -325,7 +312,7 @@
 					<!-- Leave Room -->
 					<button
 						class="w-full flex items-center gap-3 px-4 py-3 rounded-xl
-						       text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors"
+						       text-error hover:bg-error/10 transition-colors"
 						onclick={leaveRoom}
 					>
 						<SignOut class="h-5 w-5" />
