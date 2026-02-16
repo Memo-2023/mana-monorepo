@@ -13,6 +13,7 @@
 		BellSlash,
 		CircleNotch,
 		SquaresFour,
+		MagnifyingGlass,
 	} from '@manacore/shared-icons';
 
 	interface Props {
@@ -96,34 +97,44 @@
 		onclick={onClose}
 		aria-label="Schließen"
 	></button>
+
 	<!-- Slide-in Panel -->
 	<div
-		class="fixed inset-y-0 right-0 z-50 flex w-[90vw] max-w-[320px] lg:w-80 flex-col border-l border-base-300 bg-base-100 shadow-xl"
+		class="fixed inset-y-0 right-0 z-50 flex w-[90vw] max-w-[320px] lg:w-80 flex-col
+		       bg-white/80 dark:bg-black/80 backdrop-blur-xl
+		       border-l border-black/10 dark:border-white/10 shadow-2xl"
 	>
 		<!-- Header -->
-		<header class="flex items-center justify-between border-b border-base-300 px-4 py-3">
-			<h2 class="font-semibold">Raum-Details</h2>
-			<button class="btn btn-ghost btn-sm btn-circle" onclick={onClose}>
-				<X class="h-5 w-5" />
+		<header
+			class="flex items-center justify-between border-b border-black/10 dark:border-white/10 px-4 py-3"
+		>
+			<h2 class="font-semibold text-foreground">Raum-Details</h2>
+			<button
+				class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				onclick={onClose}
+			>
+				<X class="h-5 w-5 text-foreground" />
 			</button>
 		</header>
 
 		<!-- Room Info -->
-		<div class="border-b border-base-300 p-4 text-center">
-			<div class="avatar placeholder mx-auto mb-3">
-				<div class="w-20 rounded-full bg-neutral text-neutral-content">
-					{#if room.avatar}
-						<img src={room.avatar} alt={room.name} />
-					{:else}
-						<span class="text-2xl">{room.name.charAt(0).toUpperCase()}</span>
-					{/if}
-				</div>
+		<div class="border-b border-black/10 dark:border-white/10 p-4 text-center">
+			<div class="mx-auto mb-3 w-20 h-20 rounded-full overflow-hidden">
+				{#if room.avatar}
+					<img src={room.avatar} alt={room.name} class="w-full h-full object-cover" />
+				{:else}
+					<div
+						class="w-full h-full flex items-center justify-center bg-gradient-to-br from-violet-500 to-purple-600 text-white"
+					>
+						<span class="text-2xl font-semibold">{room.name.charAt(0).toUpperCase()}</span>
+					</div>
+				{/if}
 			</div>
-			<h3 class="text-lg font-semibold">{room.name}</h3>
+			<h3 class="text-lg font-semibold text-foreground">{room.name}</h3>
 			{#if room.topic}
-				<p class="mt-1 text-sm text-base-content/60">{room.topic}</p>
+				<p class="mt-1 text-sm text-muted-foreground">{room.topic}</p>
 			{/if}
-			<p class="mt-2 text-xs text-base-content/50">
+			<p class="mt-2 text-xs text-muted-foreground">
 				{room.memberCount} Mitglieder
 				{#if room.isEncrypted}
 					• Verschlüsselt
@@ -132,140 +143,163 @@
 		</div>
 
 		<!-- Tabs -->
-		<div class="tabs tabs-bordered">
+		<div class="flex border-b border-black/10 dark:border-white/10">
 			<button
-				class="tab flex-1"
-				class:tab-active={activeTab === 'members'}
+				class="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors
+				       {activeTab === 'members'
+					? 'text-primary border-b-2 border-primary'
+					: 'text-muted-foreground hover:text-foreground'}"
 				onclick={() => (activeTab = 'members')}
 			>
-				<Users class="mr-1 h-4 w-4" />
+				<Users class="h-4 w-4" />
 				Mitglieder
 			</button>
 			<button
-				class="tab flex-1"
-				class:tab-active={activeTab === 'widgets'}
+				class="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors
+				       {activeTab === 'widgets'
+					? 'text-primary border-b-2 border-primary'
+					: 'text-muted-foreground hover:text-foreground'}"
 				onclick={() => (activeTab = 'widgets')}
 			>
-				<SquaresFour class="mr-1 h-4 w-4" />
+				<SquaresFour class="h-4 w-4" />
 				Widgets
 				{#if widgets.length > 0}
-					<span class="badge badge-sm badge-primary ml-1">{widgets.length}</span>
+					<span
+						class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-white text-[10px] font-medium"
+					>
+						{widgets.length}
+					</span>
 				{/if}
 			</button>
 			<button
-				class="tab flex-1"
-				class:tab-active={activeTab === 'settings'}
+				class="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors
+				       {activeTab === 'settings'
+					? 'text-primary border-b-2 border-primary'
+					: 'text-muted-foreground hover:text-foreground'}"
 				onclick={() => (activeTab = 'settings')}
 			>
-				<Gear class="mr-1 h-4 w-4" />
+				<Gear class="h-4 w-4" />
 				Einstellungen
 			</button>
 		</div>
 
 		<!-- Content -->
-		<div class="flex-1 overflow-y-auto">
+		<div class="flex-1 overflow-y-auto chat-scrollbar">
 			{#if activeTab === 'members'}
 				<!-- Invite User -->
-				<div class="border-b border-base-300 p-3">
+				<div class="border-b border-black/10 dark:border-white/10 p-3">
 					<div class="relative">
+						<MagnifyingGlass
+							class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+						/>
 						<input
 							type="text"
 							bind:value={inviteQuery}
 							oninput={handleSearchInput}
-							class="input input-bordered input-sm w-full"
+							class="w-full rounded-xl bg-white/70 dark:bg-white/10 backdrop-blur-xl
+							       border border-black/10 dark:border-white/20 px-4 py-2 pl-10
+							       text-sm text-foreground focus:ring-2 focus:ring-primary focus:outline-none
+							       placeholder:text-muted-foreground"
 							placeholder="Benutzer einladen..."
 						/>
 						{#if searching}
-							<CircleNotch class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />
+							<CircleNotch
+								class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground"
+							/>
 						{/if}
 					</div>
 
 					<!-- Search Results -->
 					{#if searchResults.length > 0}
-						<ul class="menu mt-2 rounded-lg bg-base-200 p-1">
+						<div
+							class="mt-2 rounded-xl bg-white/50 dark:bg-white/5 border border-black/10 dark:border-white/10 overflow-hidden"
+						>
 							{#each searchResults as user}
-								<li>
-									<button
-										class="flex items-center gap-2 py-1"
-										onclick={() => inviteUser(user.userId)}
-										disabled={inviting}
+								<button
+									class="w-full flex items-center gap-2 px-3 py-2 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+									onclick={() => inviteUser(user.userId)}
+									disabled={inviting}
+								>
+									<div
+										class="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-violet-500 to-purple-600 text-white text-xs font-medium"
 									>
-										<div class="avatar placeholder">
-											<div class="w-6 rounded-full bg-neutral text-neutral-content">
-												<span class="text-xs">{user.displayName?.[0] || '?'}</span>
-											</div>
-										</div>
-										<span class="flex-1 truncate text-sm">
-											{user.displayName || user.userId}
-										</span>
-										<UserPlus class="h-4 w-4 text-primary" />
-									</button>
-								</li>
+										{user.displayName?.[0]?.toUpperCase() || '?'}
+									</div>
+									<span class="flex-1 truncate text-sm text-foreground text-left">
+										{user.displayName || user.userId}
+									</span>
+									<UserPlus class="h-4 w-4 text-primary" />
+								</button>
 							{/each}
-						</ul>
+						</div>
 					{/if}
 				</div>
 
 				<!-- Member List -->
-				<ul class="menu p-2">
+				<div class="p-2">
 					{#each members as member}
 						{@const PowerIcon = getPowerLevelIcon(member.powerLevel)}
-						<li>
-							<div class="flex items-center gap-2 py-1">
-								<div class="avatar placeholder">
-									<div class="w-8 rounded-full bg-neutral text-neutral-content">
-										{#if member.avatarUrl}
-											<img src={member.avatarUrl} alt="" />
-										{:else}
-											<span class="text-xs">
-												{member.displayName.charAt(0).toUpperCase()}
-											</span>
-										{/if}
+						<div
+							class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+						>
+							<div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+								{#if member.avatarUrl}
+									<img src={member.avatarUrl} alt="" class="w-full h-full object-cover" />
+								{:else}
+									<div
+										class="w-full h-full flex items-center justify-center bg-gradient-to-br from-violet-500 to-purple-600 text-white text-sm font-medium"
+									>
+										{member.displayName.charAt(0).toUpperCase()}
 									</div>
-								</div>
-								<div class="flex-1 min-w-0">
-									<p class="truncate font-medium">{member.displayName}</p>
-									<p class="truncate text-xs text-base-content/50">{member.userId}</p>
-								</div>
-								{#if PowerIcon}
-									<PowerIcon class="h-4 w-4 text-warning" />
 								{/if}
 							</div>
-						</li>
+							<div class="flex-1 min-w-0">
+								<p class="truncate font-medium text-foreground">{member.displayName}</p>
+								<p class="truncate text-xs text-muted-foreground">{member.userId}</p>
+							</div>
+							{#if PowerIcon}
+								<PowerIcon class="h-4 w-4 text-amber-500" />
+							{/if}
+						</div>
 					{/each}
-				</ul>
+				</div>
 			{:else if activeTab === 'widgets'}
 				<!-- Widgets -->
 				<div class="p-3">
 					{#if widgets.length === 0}
-						<div class="text-center py-8 text-base-content/50">
-							<SquaresFour class="h-12 w-12 mx-auto mb-2 opacity-50" />
-							<p>Keine Widgets in diesem Raum</p>
-							<p class="text-xs mt-1">Bots können Widgets hinzufügen</p>
+						<div class="text-center py-8">
+							<SquaresFour class="h-12 w-12 mx-auto mb-2 text-muted-foreground opacity-50" />
+							<p class="text-muted-foreground">Keine Widgets in diesem Raum</p>
+							<p class="text-xs mt-1 text-muted-foreground">Bots können Widgets hinzufügen</p>
 						</div>
 					{:else}
 						<div class="space-y-3">
 							{#each widgets as widget}
-								<div class="card bg-base-200 shadow-sm">
-									<div class="card-body p-3">
-										<div class="flex items-center justify-between">
-											<h3 class="font-medium text-sm">{widget.name}</h3>
-											<button class="btn btn-ghost btn-xs" onclick={() => toggleWidget(widget.id)}>
-												{expandedWidget === widget.id ? 'Schließen' : 'Öffnen'}
-											</button>
-										</div>
-										{#if expandedWidget === widget.id}
-											<div class="mt-2 -mx-3 -mb-3">
-												<iframe
-													src={getWidgetUrl(widget)}
-													title={widget.name}
-													class="w-full border-0 rounded-b-2xl bg-base-300"
-													style="height: 300px;"
-													sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-												></iframe>
-											</div>
-										{/if}
+								<div
+									class="rounded-xl bg-white/50 dark:bg-white/5 border border-black/10 dark:border-white/10 overflow-hidden"
+								>
+									<div class="flex items-center justify-between p-3">
+										<h3 class="font-medium text-sm text-foreground">{widget.name}</h3>
+										<button
+											class="px-3 py-1 text-xs font-medium rounded-lg
+											       bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20
+											       text-foreground transition-colors"
+											onclick={() => toggleWidget(widget.id)}
+										>
+											{expandedWidget === widget.id ? 'Schließen' : 'Öffnen'}
+										</button>
 									</div>
+									{#if expandedWidget === widget.id}
+										<div class="border-t border-black/10 dark:border-white/10">
+											<iframe
+												src={getWidgetUrl(widget)}
+												title={widget.name}
+												class="w-full border-0 bg-surface"
+												style="height: 300px;"
+												sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+											></iframe>
+										</div>
+									{/if}
 								</div>
 							{/each}
 						</div>
@@ -273,18 +307,29 @@
 				</div>
 			{:else}
 				<!-- Settings -->
-				<div class="space-y-2 p-3">
+				<div class="p-3 space-y-2">
 					<!-- Notifications -->
-					<button class="btn btn-ghost w-full justify-start">
-						<Bell class="h-4 w-4" />
-						Benachrichtigungen
-						<span class="ml-auto badge badge-sm">An</span>
+					<button
+						class="w-full flex items-center gap-3 px-4 py-3 rounded-xl
+						       hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+					>
+						<Bell class="h-5 w-5 text-foreground" />
+						<span class="flex-1 text-left text-foreground">Benachrichtigungen</span>
+						<span
+							class="px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-medium"
+						>
+							An
+						</span>
 					</button>
 
 					<!-- Leave Room -->
-					<button class="btn btn-ghost w-full justify-start text-error" onclick={leaveRoom}>
-						<SignOut class="h-4 w-4" />
-						Raum verlassen
+					<button
+						class="w-full flex items-center gap-3 px-4 py-3 rounded-xl
+						       text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors"
+						onclick={leaveRoom}
+					>
+						<SignOut class="h-5 w-5" />
+						<span class="flex-1 text-left">Raum verlassen</span>
 					</button>
 				</div>
 			{/if}
