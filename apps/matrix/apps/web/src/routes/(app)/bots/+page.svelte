@@ -91,7 +91,7 @@
 					type="text"
 					bind:value={search}
 					placeholder={$t('bots.search')}
-					class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+					class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
 				/>
 			</div>
 		</div>
@@ -104,7 +104,7 @@
 						class="px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap cursor-pointer
 						{selectedCategory === category.id
 							? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
-							: 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground border border-white/10'}"
+							: 'bg-surface text-muted-foreground hover:bg-surface-hover hover:text-foreground border border-border'}"
 						onclick={() => (selectedCategory = category.id as BotCategory)}
 					>
 						{category.label}

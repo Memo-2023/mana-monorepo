@@ -123,7 +123,7 @@
 
 	// Apply markdown formatting (bold, italic, code, strikethrough)
 	function applyMarkdown(text: string, isOwn: boolean): string {
-		const codeColor = isOwn ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10';
+		const codeColor = isOwn ? 'bg-white/20 text-white' : 'bg-muted';
 
 		// Inline code (backticks) - process first to avoid conflicts
 		text = text.replace(
@@ -331,7 +331,7 @@
 			class="relative px-4 py-3 shadow-md
 				   {message.isOwn
 				? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl rounded-tr-md'
-				: 'bg-white dark:bg-white/10 text-foreground border border-black/5 dark:border-white/10 rounded-2xl rounded-tl-md'}"
+				: 'bg-surface text-foreground border border-border rounded-2xl rounded-tl-md'}"
 		>
 			{#if message.redacted}
 				<p class="italic text-white/70">Nachricht wurde gelöscht</p>
@@ -345,12 +345,12 @@
 				<!-- Image message -->
 				<div class="relative">
 					{#if imageLoading}
-						<div class="flex h-48 w-full items-center justify-center rounded-lg bg-black/10">
+						<div class="flex h-48 w-full items-center justify-center rounded-lg bg-muted">
 							<ImageIcon class="h-8 w-8 animate-pulse text-white/50" />
 						</div>
 					{/if}
 					{#if imageError}
-						<div class="flex h-32 w-full items-center justify-center rounded-lg bg-black/10">
+						<div class="flex h-32 w-full items-center justify-center rounded-lg bg-muted">
 							<p class="text-sm text-white/70">Bild konnte nicht geladen werden</p>
 						</div>
 					{:else}
@@ -394,7 +394,7 @@
 				<div
 					class="flex items-center gap-3 rounded-lg {message.isOwn
 						? 'bg-white/20'
-						: 'bg-black/5 dark:bg-white/5'} p-3 min-w-[220px]"
+						: 'bg-muted'} p-3 min-w-[220px]"
 				>
 					<!-- Hidden audio element -->
 					{#if mediaUrl}
@@ -432,7 +432,7 @@
 						<button
 							class="relative h-1.5 w-full rounded-full {message.isOwn
 								? 'bg-white/20'
-								: 'bg-black/10 dark:bg-white/10'} overflow-hidden cursor-pointer"
+								: 'bg-muted dark:bg-white/10'} overflow-hidden cursor-pointer"
 							onclick={seekAudio}
 						>
 							<div
@@ -461,7 +461,7 @@
 					rel="noopener noreferrer"
 					class="flex items-center gap-3 rounded-lg {message.isOwn
 						? 'bg-white/20 hover:bg-white/30'
-						: 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'} p-3 transition-colors"
+						: 'bg-muted hover:bg-muted dark:hover:bg-white/10'} p-3 transition-colors"
 				>
 					<div class="rounded-lg {message.isOwn ? 'bg-white/20' : 'bg-primary/10'} p-2">
 						<FileIcon class="h-5 w-5 {message.isOwn ? 'text-white' : 'text-primary'}" />
@@ -504,7 +504,7 @@
 						rel="noopener noreferrer"
 						class="mt-2 flex items-center gap-2 rounded-lg {message.isOwn
 							? 'bg-white/10 hover:bg-white/20'
-							: 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'} p-2 transition-colors"
+							: 'bg-muted hover:bg-muted dark:hover:bg-white/10'} p-2 transition-colors"
 					>
 						<img
 							src="https://www.google.com/s2/favicons?domain={getDomain(firstUrl() || '')}&sz=32"
@@ -540,7 +540,7 @@
 						class="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors
 							   {reaction.includesMe
 							? 'bg-primary/20 border border-primary/40 text-primary'
-							: 'bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/20'}"
+							: 'bg-muted border border-border hover:bg-surface-hover'}"
 						title={reaction.users.join(', ')}
 						onclick={() => handleReaction(reaction.key)}
 					>
@@ -581,7 +581,7 @@
 				<!-- Emoji reaction button -->
 				<div class="relative">
 					<button
-						class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
 						title="Reaktion"
 						onclick={() => (showEmojiPicker = !showEmojiPicker)}
 					>
@@ -599,7 +599,7 @@
 						></button>
 						<!-- Emoji picker dropdown -->
 						<div
-							class="absolute z-50 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 shadow-xl
+							class="absolute z-50 rounded-xl bg-surface-elevated border border-border shadow-xl
 							       left-0 top-full mt-2 lg:bottom-full lg:top-auto lg:mt-0 lg:mb-2
 							       {message.isOwn ? 'lg:right-0 lg:left-auto' : ''}
 							       {showFullPicker ? 'w-72' : ''}"
@@ -608,15 +608,13 @@
 								<!-- Full emoji picker with categories -->
 								<div class="p-2">
 									<!-- Category tabs -->
-									<div
-										class="flex gap-1 mb-2 border-b border-black/10 dark:border-white/10 pb-2 overflow-x-auto"
-									>
+									<div class="flex gap-1 mb-2 border-b border-border pb-2 overflow-x-auto">
 										{#each emojiCategories as category, i}
 											<button
 												class="px-2 py-1 text-xs rounded-md whitespace-nowrap transition-colors
 												       {selectedCategory === i
 													? 'bg-violet-500 text-white'
-													: 'hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground'}"
+													: 'hover:bg-surface-hover text-muted-foreground'}"
 												onclick={() => (selectedCategory = i)}
 											>
 												{category.name}
@@ -627,7 +625,7 @@
 									<div class="grid grid-cols-8 gap-1 max-h-40 overflow-y-auto">
 										{#each emojiCategories[selectedCategory].emojis as emoji}
 											<button
-												class="text-xl hover:scale-110 hover:bg-black/5 dark:hover:bg-white/10 rounded p-1 transition-all"
+												class="text-xl hover:scale-110 hover:bg-surface-hover rounded p-1 transition-all"
 												onclick={() => handleReaction(emoji)}
 											>
 												{emoji}
@@ -648,7 +646,7 @@
 									{/each}
 									<!-- Expand button -->
 									<button
-										class="ml-1 p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+										class="ml-1 p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
 										onclick={() => (showFullPicker = true)}
 										title="Mehr Emojis"
 									>
@@ -660,14 +658,14 @@
 					{/if}
 				</div>
 				<button
-					class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+					class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
 					title="Antworten"
 					onclick={() => onReply?.(message)}
 				>
 					<ArrowBendUpLeft class="h-4 w-4 text-muted-foreground" />
 				</button>
 				<button
-					class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+					class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
 					title="Weiterleiten"
 					onclick={() => onForward?.(message)}
 				>
@@ -675,7 +673,7 @@
 				</button>
 				{#if message.isOwn && message.type === 'm.text'}
 					<button
-						class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
 						title="Bearbeiten"
 						onclick={() => onEdit?.(message)}
 					>

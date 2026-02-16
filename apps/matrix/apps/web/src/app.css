@@ -65,18 +65,17 @@
 	background: rgba(255, 255, 255, 0.25);
 }
 
-/* Glassmorphic utilities */
+/* Elevation utilities - semantic surface styles */
 .glass {
-	@apply bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20;
+	@apply bg-surface-elevated border border-border;
 }
 
 .glass-card {
-	@apply bg-white/60 dark:bg-white/5 backdrop-blur-sm border border-black/10 dark:border-white/10;
+	@apply bg-surface border border-border;
 }
 
 .glass-button {
-	@apply bg-white/90 dark:bg-white/20 backdrop-blur-sm border border-black/10 dark:border-white/20
-	       hover:bg-white dark:hover:bg-white/30 hover:shadow-lg transition-all duration-200;
+	@apply bg-surface border border-border hover:bg-surface-hover hover:shadow-lg transition-all duration-200;
 }
 
 /* iOS Safe Area Insets for PWA */

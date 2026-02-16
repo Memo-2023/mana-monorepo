@@ -76,13 +76,11 @@
 </script>
 
 {#if room}
-	<header
-		class="flex items-center gap-3 border-b border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm px-4 py-3"
-	>
+	<header class="flex items-center gap-3 border-b border-border bg-surface-elevated px-4 py-3">
 		<!-- Mobile back button or menu button -->
 		{#if showBackButton}
 			<button
-				class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				class="p-2 rounded-lg hover:bg-surface-hover transition-colors"
 				onclick={onBackClick}
 				aria-label="Zurück"
 			>
@@ -90,7 +88,7 @@
 			</button>
 		{:else}
 			<button
-				class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors lg:hidden"
+				class="p-2 rounded-lg hover:bg-surface-hover transition-colors lg:hidden"
 				onclick={onMenuClick}
 			>
 				<List class="h-5 w-5" />
@@ -112,8 +110,8 @@
 			<!-- Online indicator for DMs -->
 			{#if room.isDirect}
 				<div
-					class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900
-					       {isOnline ? 'bg-green-500' : 'bg-zinc-400 dark:bg-zinc-600'}"
+					class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background
+					       {isOnline ? 'bg-green-500' : 'bg-muted-foreground'}"
 					title={presenceText()}
 				></div>
 			{/if}
@@ -151,7 +149,7 @@
 							<span class="w-2 h-2 rounded-full bg-green-500"></span>
 							<span class="text-green-600 dark:text-green-400">Online</span>
 						{:else}
-							<span class="w-2 h-2 rounded-full bg-zinc-400"></span>
+							<span class="w-2 h-2 rounded-full bg-muted-foreground"></span>
 							<span>{presenceText() || 'Offline'}</span>
 						{/if}
 					</span>

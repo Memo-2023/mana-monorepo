@@ -64,10 +64,10 @@
 	let IconComponent = $derived(iconMap[bot.icon] || Robot);
 </script>
 
-<div class="glass-card rounded-xl overflow-hidden border border-white/10">
+<div class="glass-card rounded-xl overflow-hidden border border-border">
 	<!-- Header (always visible) -->
 	<button
-		class="w-full p-4 text-left hover:bg-white/5 transition-colors cursor-pointer"
+		class="w-full p-4 text-left hover:bg-surface-hover transition-colors cursor-pointer"
 		onclick={() => (expanded = !expanded)}
 	>
 		<div class="flex items-start gap-3">
@@ -128,7 +128,7 @@
 				<h4 class="text-sm font-medium text-foreground mb-2">{$t('bots.commands')}</h4>
 				<div class="space-y-1.5 max-h-48 overflow-y-auto">
 					{#each bot.commands as cmd}
-						<div class="text-xs bg-black/20 rounded px-2 py-1.5">
+						<div class="text-xs bg-muted rounded px-2 py-1.5">
 							<code class="text-primary font-mono">{cmd.command}</code>
 							{#if cmd.aliases?.length}
 								<span class="text-muted-foreground"> ({cmd.aliases.join(', ')})</span>

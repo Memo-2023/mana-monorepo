@@ -37,12 +37,12 @@
 					<img
 						src={user.avatarUrl}
 						alt={user.name}
-						class="w-6 h-6 rounded-full border-2 border-white dark:border-zinc-900 object-cover"
+						class="w-6 h-6 rounded-full border-2 border-background object-cover"
 						style="z-index: {3 - i}"
 					/>
 				{:else}
 					<div
-						class="w-6 h-6 rounded-full border-2 border-white dark:border-zinc-900 bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center"
+						class="w-6 h-6 rounded-full border-2 border-background bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center"
 						style="z-index: {3 - i}"
 					>
 						<User class="w-3 h-3 text-white" />
@@ -52,10 +52,16 @@
 		</div>
 
 		<!-- Animated dots -->
-		<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/10">
-			<span class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]"></span>
-			<span class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]"></span>
-			<span class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]"></span>
+		<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted">
+			<span
+				class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]"
+			></span>
+			<span
+				class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]"
+			></span>
+			<span
+				class="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]"
+			></span>
 		</div>
 
 		<!-- Text -->

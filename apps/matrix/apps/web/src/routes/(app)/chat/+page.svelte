@@ -183,9 +183,7 @@
 	<!-- Mobile: Full-screen room list -->
 	<div class="flex flex-col h-full bg-background safe-area-bottom">
 		<!-- User Info / Status Bar -->
-		<div
-			class="border-b border-black/10 dark:border-white/10 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl safe-area-top"
-		>
+		<div class="border-b border-border px-4 py-3 bg-surface-elevated safe-area-top">
 			<div class="flex items-center justify-between">
 				<div>
 					<h1 class="text-xl font-bold text-foreground">Manalink</h1>
@@ -204,13 +202,13 @@
 				<div class="flex items-center gap-1">
 					<a
 						href="/settings"
-						class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						class="p-2 rounded-lg hover:bg-surface-hover transition-colors"
 						title="Einstellungen"
 					>
 						<Gear class="h-5 w-5" />
 					</a>
 					<button
-						class="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+						class="p-2 rounded-lg hover:bg-surface-hover transition-colors"
 						title="Neuer Chat"
 						onclick={() => (showCreateRoom = true)}
 					>
@@ -229,23 +227,21 @@
 	<!-- Desktop: Side-by-side layout -->
 	<div class="chat-layout flex h-full min-h-0 overflow-hidden bg-background">
 		<!-- Sidebar -->
-		<aside
-			class="flex flex-col border-r border-black/10 dark:border-white/10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl w-80"
-		>
+		<aside class="flex flex-col border-r border-border bg-surface-elevated w-80">
 			<!-- User Info / Status Bar -->
-			<div class="border-b border-black/10 dark:border-white/10 px-4 py-3">
+			<div class="border-b border-border px-4 py-3">
 				<div class="flex items-center justify-between">
 					<p class="truncate text-sm font-medium">{matrixStore.userId}</p>
 					<div class="flex items-center gap-1">
 						<a
 							href="/settings"
-							class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+							class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
 							title="Einstellungen"
 						>
 							<Gear class="h-4 w-4" />
 						</a>
 						<button
-							class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+							class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
 							title="Neuer Chat"
 							onclick={() => (showCreateRoom = true)}
 						>

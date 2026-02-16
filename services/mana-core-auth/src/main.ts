@@ -77,7 +77,14 @@ async function bootstrap() {
 	app.use(cookieParser());
 
 	// Explicit body parsers for form-urlencoded (needed for OAuth2 token endpoint)
-	app.use(bodyParser.json());
+	// IMPORTANT: Skip JSON body parsing for Stripe webhooks to preserve rawBody for signature verification
+	app.use((req: Request, res: Response, next: NextFunction) => {
+		if (req.path === '/api/v1/webhooks/stripe') {
+			// Skip body parsing for Stripe webhooks - NestJS rawBody will be used instead
+			return next();
+		}
+		bodyParser.json()(req, res, next);
+	});
 	app.use(bodyParser.urlencoded({ extended: true }));
 
 	// CORS configuration

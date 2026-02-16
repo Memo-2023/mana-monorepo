@@ -508,9 +508,7 @@
 <div class="p-3 pb-4 lg:pb-20 safe-area-bottom">
 	<!-- Reply/Edit Preview -->
 	{#if replyTo || editMessage}
-		<div
-			class="mb-2 flex items-center gap-2 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 px-3 py-2"
-		>
+		<div class="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-border px-3 py-2">
 			<div class="flex-1">
 				{#if editMessage}
 					<p class="text-xs text-muted-foreground">Nachricht bearbeiten</p>
@@ -523,7 +521,7 @@
 				{/if}
 			</div>
 			<button
-				class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
 				onclick={() => {
 					if (editMessage) {
 						onCancelEdit?.();
@@ -540,12 +538,10 @@
 
 	<!-- Upload Progress -->
 	{#if uploading}
-		<div
-			class="mb-2 flex items-center gap-3 rounded-xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 px-3 py-2"
-		>
+		<div class="mb-2 flex items-center gap-3 rounded-xl bg-surface border border-border px-3 py-2">
 			<CircleNotch class="h-4 w-4 animate-spin text-primary" />
 			<div class="flex-1">
-				<div class="h-1.5 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+				<div class="h-1.5 overflow-hidden rounded-full bg-muted">
 					<div
 						class="h-full bg-primary transition-all duration-300"
 						style="width: {uploadProgress}%"
@@ -578,12 +574,8 @@
 
 	<!-- @Mention Picker -->
 	{#if showMentionPicker && mentionResults.length > 0}
-		<div
-			class="mb-2 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 shadow-xl overflow-hidden"
-		>
-			<div
-				class="px-3 py-1.5 text-xs text-muted-foreground border-b border-black/5 dark:border-white/5"
-			>
+		<div class="mb-2 rounded-xl bg-surface-elevated border border-border shadow-xl overflow-hidden">
+			<div class="px-3 py-1.5 text-xs text-muted-foreground border-b border-border">
 				Erwähne jemanden
 			</div>
 			{#each mentionResults as member, i}
@@ -591,7 +583,7 @@
 					class="flex items-center gap-3 w-full px-3 py-2 transition-colors text-left
 					       {i === selectedMentionIndex
 						? 'bg-violet-500/10 dark:bg-violet-500/20'
-						: 'hover:bg-black/5 dark:hover:bg-white/5'}"
+						: 'hover:bg-surface-hover'}"
 					onclick={() => insertMention(member)}
 				>
 					<!-- Avatar -->
@@ -623,7 +615,7 @@
 		<!-- Attachment button (left, outside input) -->
 		<div class="relative flex-shrink-0">
 			<button
-				class="p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+				class="p-2.5 rounded-full hover:bg-surface-hover transition-colors"
 				title="Datei anhängen"
 				disabled={uploading}
 				onclick={() => (showAttachMenu = !showAttachMenu)}
@@ -640,14 +632,14 @@
 				></button>
 				<!-- Dropdown menu -->
 				<div
-					class="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-1.5 shadow-xl"
+					class="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl bg-surface-elevated border border-border p-1.5 shadow-xl"
 				>
 					<button
 						onclick={() => {
 							openFilePicker();
 							showAttachMenu = false;
 						}}
-						class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-sm"
+						class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors text-sm"
 					>
 						<Image class="h-4 w-4" />
 						Bild oder Video
@@ -657,7 +649,7 @@
 							openFilePicker();
 							showAttachMenu = false;
 						}}
-						class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-sm"
+						class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors text-sm"
 					>
 						<FileIcon class="h-4 w-4" />
 						Datei
@@ -677,7 +669,7 @@
 
 		<!-- Text input with emoji button inside -->
 		<div
-			class="relative flex-1 flex items-end rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/20 px-4 py-1"
+			class="relative flex-1 flex items-end rounded-full bg-surface border border-border px-4 py-1"
 		>
 			<textarea
 				bind:this={textarea}
@@ -698,7 +690,7 @@
 			></textarea>
 			<!-- Emoji button inside input -->
 			<button
-				class="flex-shrink-0 p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors mb-1"
+				class="flex-shrink-0 p-1.5 rounded-full hover:bg-surface-hover transition-colors mb-1"
 				title="Emoji"
 				onclick={handleEmojiClick}
 			>
@@ -715,7 +707,7 @@
 				></button>
 				<!-- Picker -->
 				<div
-					class="absolute bottom-full right-0 mb-2 z-50 w-72 max-h-80 overflow-y-auto rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 p-2 shadow-xl"
+					class="absolute bottom-full right-0 mb-2 z-50 w-72 max-h-80 overflow-y-auto rounded-xl bg-surface-elevated border border-border p-2 shadow-xl"
 				>
 					<!-- Recent/Frequently used emojis -->
 					{#if recentEmojis.length > 0}
@@ -726,7 +718,7 @@
 							<div class="grid grid-cols-8 gap-1">
 								{#each recentEmojis as emoji}
 									<button
-										class="p-1.5 text-xl hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+										class="p-1.5 text-xl hover:bg-surface-hover rounded-lg transition-colors"
 										onclick={() => insertEmoji(emoji)}
 									>
 										{emoji}
@@ -734,13 +726,13 @@
 								{/each}
 							</div>
 						</div>
-						<div class="border-t border-black/5 dark:border-white/10 my-2"></div>
+						<div class="border-t border-border my-2"></div>
 					{/if}
 					<!-- All emojis -->
 					<div class="grid grid-cols-8 gap-1">
 						{#each commonEmojis as emoji}
 							<button
-								class="p-1.5 text-xl hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
+								class="p-1.5 text-xl hover:bg-surface-hover rounded-lg transition-colors"
 								onclick={() => insertEmoji(emoji)}
 							>
 								{emoji}
@@ -772,7 +764,7 @@
 			</button>
 		{:else}
 			<button
-				class="flex-shrink-0 p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground hover:text-primary transition-colors
+				class="flex-shrink-0 p-2.5 rounded-full hover:bg-surface-hover text-muted-foreground hover:text-primary transition-colors
 				       disabled:opacity-50 disabled:cursor-not-allowed"
 				onclick={startRecording}
 				disabled={uploading}

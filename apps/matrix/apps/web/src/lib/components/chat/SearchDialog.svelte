@@ -79,7 +79,10 @@
 	function highlightMatch(text: string, searchTerm: string): string {
 		if (!searchTerm.trim()) return text;
 		const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-		return text.replace(regex, '<mark class="bg-yellow-300/50 dark:bg-yellow-500/30 rounded px-0.5">$1</mark>');
+		return text.replace(
+			regex,
+			'<mark class="bg-yellow-300/50 dark:bg-yellow-500/30 rounded px-0.5">$1</mark>'
+		);
 	}
 </script>
 
@@ -95,12 +98,12 @@
 	>
 		<!-- Dialog -->
 		<div
-			class="w-full max-w-2xl rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden"
+			class="w-full max-w-2xl rounded-2xl bg-surface-elevated shadow-2xl overflow-hidden"
 			onclick={(e) => e.stopPropagation()}
 			role="document"
 		>
 			<!-- Search Header -->
-			<div class="flex items-center gap-3 p-4 border-b border-black/10 dark:border-white/10">
+			<div class="flex items-center gap-3 p-4 border-b border-border">
 				<MagnifyingGlass class="h-5 w-5 text-muted-foreground flex-shrink-0" />
 				<input
 					bind:this={inputRef}
@@ -113,26 +116,23 @@
 				{#if searching}
 					<CircleNotch class="h-5 w-5 animate-spin text-muted-foreground" />
 				{/if}
-				<button
-					class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-					onclick={onClose}
-				>
+				<button class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors" onclick={onClose}>
 					<X class="h-5 w-5" />
 				</button>
 			</div>
 
 			<!-- Scope Toggle -->
-			<div class="flex gap-2 px-4 py-2 border-b border-black/5 dark:border-white/5 bg-muted/30">
+			<div class="flex gap-2 px-4 py-2 border-b border-border bg-muted/30">
 				<button
 					class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-					       {searchScope === 'room' ? 'bg-primary text-primary-foreground' : 'hover:bg-black/5 dark:hover:bg-white/10'}"
+					       {searchScope === 'room' ? 'bg-primary text-primary-foreground' : 'hover:bg-surface-hover'}"
 					onclick={() => (searchScope = 'room')}
 				>
 					Aktueller Raum
 				</button>
 				<button
 					class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-					       {searchScope === 'all' ? 'bg-primary text-primary-foreground' : 'hover:bg-black/5 dark:hover:bg-white/10'}"
+					       {searchScope === 'all' ? 'bg-primary text-primary-foreground' : 'hover:bg-surface-hover'}"
 					onclick={() => (searchScope = 'all')}
 				>
 					Alle Räume
@@ -147,10 +147,10 @@
 						<span>Suche läuft...</span>
 					</div>
 				{:else if searchResults.length > 0}
-					<div class="divide-y divide-black/5 dark:divide-white/5">
+					<div class="divide-y divide-border">
 						{#each searchResults as result}
 							<button
-								class="w-full text-left px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+								class="w-full text-left px-4 py-3 hover:bg-surface-hover transition-colors"
 								onclick={() => handleSelectResult(result)}
 							>
 								<div class="flex items-center gap-2 mb-1">
@@ -158,7 +158,9 @@
 									{#if searchScope === 'all'}
 										<span class="text-xs text-muted-foreground">in {result.roomName}</span>
 									{/if}
-									<span class="text-xs text-muted-foreground ml-auto">{formatTime(result.timestamp)}</span>
+									<span class="text-xs text-muted-foreground ml-auto"
+										>{formatTime(result.timestamp)}</span
+									>
 								</div>
 								<p class="text-sm text-muted-foreground line-clamp-2">
 									{@html highlightMatch(result.body, query)}

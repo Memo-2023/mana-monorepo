@@ -63,8 +63,7 @@
 				type="text"
 				bind:value={search}
 				placeholder="Chats durchsuchen..."
-				class="w-full rounded-xl bg-white/70 dark:bg-white/10 backdrop-blur-xl
-				       border border-black/10 dark:border-white/20 px-4 py-2.5 pl-10
+				class="w-full rounded-xl bg-surface border border-border px-4 py-2.5 pl-10
 				       text-sm font-medium text-foreground focus:ring-2 focus:ring-primary focus:outline-none
 				       placeholder:text-muted-foreground shadow-sm"
 			/>
@@ -143,7 +142,7 @@
 				>
 					<ChatCircle class="h-3.5 w-3.5" />
 					Direktnachrichten
-					<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px]">
+					<span class="px-1.5 py-0.5 rounded-full bg-muted text-[10px]">
 						{matrixStore.directRooms.length}
 					</span>
 				</div>
@@ -165,7 +164,7 @@
 				>
 					<Users class="h-3.5 w-3.5" />
 					Räume
-					<span class="px-1.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-[10px]">
+					<span class="px-1.5 py-0.5 rounded-full bg-muted text-[10px]">
 						{matrixStore.groupRooms.length}
 					</span>
 				</div>
@@ -189,7 +188,7 @@
 	</div>
 
 	<!-- New Room Button -->
-	<div class="border-t border-black/10 dark:border-white/10 p-3 pb-4 lg:pb-20">
+	<div class="border-t border-border p-3 pb-4 lg:pb-20">
 		<button
 			class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
 			       bg-gradient-to-r from-violet-500 to-purple-600 text-white font-medium

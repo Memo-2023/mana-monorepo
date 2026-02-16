@@ -48,8 +48,8 @@
 <button
 	class="flex w-full items-center gap-3 px-3 py-2.5 mb-1 rounded-xl transition-all duration-200
 	       {selected
-		? 'bg-white dark:bg-white/15 shadow-md border border-black/5 dark:border-white/10'
-		: 'hover:bg-white/60 dark:hover:bg-white/5 hover:-translate-y-0.5'}"
+		? 'bg-surface-elevated shadow-md border border-border'
+		: 'hover:bg-surface-hover hover:-translate-y-0.5'}"
 	{onclick}
 >
 	<!-- Avatar with online indicator -->
@@ -69,8 +69,8 @@
 		<!-- Online indicator dot -->
 		{#if room.isDirect}
 			<div
-				class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-zinc-900
-				       {isOnline ? 'bg-green-500' : 'bg-zinc-400 dark:bg-zinc-600'}"
+				class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-background
+				       {isOnline ? 'bg-green-500' : 'bg-muted-foreground'}"
 				title={lastActiveText()}
 			></div>
 		{/if}
