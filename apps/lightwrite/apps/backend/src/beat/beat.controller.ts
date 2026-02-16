@@ -51,6 +51,14 @@ export class BeatController {
 		return { beat };
 	}
 
+	// ==================== STT Transcription ====================
+
+	@Get('stt/available')
+	async getSttAvailability() {
+		const available = await this.beatService.isSttAvailable();
+		return { available };
+	}
+
 	// ==================== User Beats (Protected) ====================
 
 	@Get('project/:projectId')
@@ -106,5 +114,15 @@ export class BeatController {
 	async delete(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		await this.beatService.delete(id, user.userId);
 		return { success: true };
+	}
+
+	@Post(':id/transcribe')
+	@UseGuards(JwtAuthGuard)
+	async transcribeBeat(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id', ParseUUIDPipe) id: string
+	) {
+		const result = await this.beatService.transcribeBeat(id, user.userId);
+		return result;
 	}
 }

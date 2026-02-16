@@ -196,6 +196,27 @@ function createProjectStore() {
 			state.currentMarkers = [];
 		},
 
+		async checkSttAvailable(): Promise<boolean> {
+			try {
+				const data = await fetchApi<{ available: boolean }>('/beats/stt/available');
+				return data.available;
+			} catch {
+				return false;
+			}
+		},
+
+		async transcribeBeat(beatId: string): Promise<{ beat: Beat; lyrics: string | null }> {
+			const data = await fetchApi<{ beat: Beat; lyrics: string | null }>(
+				`/beats/${beatId}/transcribe`,
+				{ method: 'POST' }
+			);
+			state.currentBeat = data.beat;
+			if (data.lyrics) {
+				state.currentLyrics = { ...state.currentLyrics!, content: data.lyrics };
+			}
+			return data;
+		},
+
 		async updateLyrics(projectId: string, content: string) {
 			const data = await fetchApi<{ lyrics: Lyrics }>(`/lyrics/project/${projectId}`, {
 				method: 'POST',

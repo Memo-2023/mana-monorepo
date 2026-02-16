@@ -7,21 +7,48 @@
 	interface Props {
 		projectId: string;
 		onUploadComplete?: () => void;
+		onLyricsUpdate?: (lyrics: string) => void;
 	}
 
-	let { projectId, onUploadComplete }: Props = $props();
+	let { projectId, onUploadComplete, onLyricsUpdate }: Props = $props();
 
 	type Tab = 'upload' | 'library';
 	let activeTab = $state<Tab>('upload');
 
 	let isUploading = $state(false);
 	let isDetectingBpm = $state(false);
+	let isTranscribing = $state(false);
 	let uploadProgress = $state(0);
 	let errorMessage = $state<string | null>(null);
+	let transcriptionError = $state<string | null>(null);
+	let currentBeatId = $state<string | null>(null);
 	let fileInputRef: HTMLInputElement;
 
 	const acceptedTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3', 'audio/x-wav'];
 	const acceptedExtensions = '.mp3,.wav,.ogg';
+
+	async function startTranscription(beatId: string) {
+		isTranscribing = true;
+		transcriptionError = null;
+		currentBeatId = beatId;
+
+		try {
+			const result = await projectStore.transcribeBeat(beatId);
+			if (result.lyrics) {
+				onLyricsUpdate?.(result.lyrics);
+			}
+		} catch (err) {
+			transcriptionError = err instanceof Error ? err.message : 'Transcription failed';
+		} finally {
+			isTranscribing = false;
+		}
+	}
+
+	async function retryTranscription() {
+		if (currentBeatId) {
+			await startTranscription(currentBeatId);
+		}
+	}
 
 	async function handleFileSelect(e: Event) {
 		const input = e.target as HTMLInputElement;
@@ -35,6 +62,7 @@
 		}
 
 		errorMessage = null;
+		transcriptionError = null;
 		isUploading = true;
 		uploadProgress = 0;
 
@@ -42,6 +70,7 @@
 			// Upload the file
 			uploadProgress = 30;
 			const beat = await projectStore.uploadBeat(projectId, file);
+			currentBeatId = beat.id;
 			uploadProgress = 60;
 
 			// Detect BPM
@@ -67,6 +96,9 @@
 			uploadProgress = 100;
 
 			onUploadComplete?.();
+
+			// Auto-start transcription
+			startTranscription(beat.id);
 		} catch (err) {
 			errorMessage = err instanceof Error ? err.message : 'Failed to upload beat';
 		} finally {
@@ -217,6 +249,49 @@
 				<p class="text-red-500 mt-4 text-sm">{errorMessage}</p>
 			{/if}
 		</div>
+
+		<!-- Transcription Status -->
+		{#if isTranscribing}
+			<div
+				class="flex items-center gap-3 p-4 bg-surface-hover rounded-lg border border-border animate-pulse"
+			>
+				<div
+					class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"
+				></div>
+				<div class="flex-1">
+					<p class="text-sm font-medium">Transcribing lyrics...</p>
+					<p class="text-xs text-foreground-secondary">
+						Analyzing audio to extract lyrics automatically
+					</p>
+				</div>
+			</div>
+		{:else if transcriptionError}
+			<div class="flex items-center gap-3 p-4 bg-red-500/10 rounded-lg border border-red-500/30">
+				<svg
+					class="w-5 h-5 text-red-500 flex-shrink-0"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+					/>
+				</svg>
+				<div class="flex-1">
+					<p class="text-sm font-medium text-red-500">Transcription failed</p>
+					<p class="text-xs text-foreground-secondary">{transcriptionError}</p>
+				</div>
+				<button
+					onclick={retryTranscription}
+					class="px-3 py-1.5 text-sm font-medium bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+				>
+					Retry
+				</button>
+			</div>
+		{/if}
 	{:else}
 		<BeatLibrary {projectId} onSelectBeat={onUploadComplete} />
 	{/if}

@@ -12,6 +12,10 @@ export const beats = pgTable('beats', {
 	bpm: real('bpm'),
 	bpmConfidence: real('bpm_confidence'),
 	waveformData: jsonb('waveform_data'),
+	// STT Transcription fields
+	transcriptionStatus: varchar('transcription_status', { length: 50 }).default('none'), // 'none' | 'pending' | 'completed' | 'failed'
+	transcriptionError: text('transcription_error'),
+	transcribedAt: timestamp('transcribed_at', { withTimezone: true }),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

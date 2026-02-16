@@ -1,3 +1,5 @@
+export type TranscriptionStatus = 'none' | 'pending' | 'completed' | 'failed';
+
 export interface Beat {
 	id: string;
 	projectId: string;
@@ -7,6 +9,10 @@ export interface Beat {
 	bpm?: number | null;
 	bpmConfidence?: number | null;
 	waveformData?: WaveformData | null;
+	// STT Transcription fields
+	transcriptionStatus?: TranscriptionStatus | null;
+	transcriptionError?: string | null;
+	transcribedAt?: Date | null;
 	createdAt: Date;
 }
 

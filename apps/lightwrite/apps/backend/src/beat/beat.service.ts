@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
@@ -10,12 +10,19 @@ import {
 	getContentType,
 	type StorageClient,
 } from '@manacore/shared-storage';
+import { SttService } from '../stt/stt.service';
+import { LyricsService } from '../lyrics/lyrics.service';
 
 @Injectable()
 export class BeatService {
+	private readonly logger = new Logger(BeatService.name);
 	private storage: StorageClient;
 
-	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {
+	constructor(
+		@Inject(DATABASE_CONNECTION) private db: Database,
+		private sttService: SttService,
+		private lyricsService: LyricsService
+	) {
 		this.storage = createLightWriteStorage();
 	}
 
@@ -178,5 +185,83 @@ export class BeatService {
 			.returning();
 
 		return beat;
+	}
+
+	// ==================== STT Transcription ====================
+
+	/**
+	 * Check if STT service is available
+	 */
+	async isSttAvailable(): Promise<boolean> {
+		return this.sttService.isAvailable();
+	}
+
+	/**
+	 * Transcribe beat audio and save lyrics to the project
+	 */
+	async transcribeBeat(
+		beatId: string,
+		userId: string
+	): Promise<{ beat: Beat; lyrics: string | null }> {
+		const beat = await this.findByIdOrThrow(beatId);
+		await this.verifyProjectOwnership(beat.projectId, userId);
+
+		// Set status to pending
+		await this.db
+			.update(beats)
+			.set({
+				transcriptionStatus: 'pending',
+				transcriptionError: null,
+			})
+			.where(eq(beats.id, beatId));
+
+		try {
+			this.logger.log(`Starting transcription for beat ${beatId}`);
+
+			// Download audio from storage
+			const audioBuffer = await this.storage.download(beat.storagePath);
+
+			// Call STT service
+			const result = await this.sttService.transcribe(audioBuffer, beat.filename || 'audio.mp3');
+
+			// Save transcribed text as lyrics
+			const lyricsRecord = await this.lyricsService.createOrUpdate(
+				beat.projectId,
+				userId,
+				result.text
+			);
+
+			// Update beat status to completed
+			const [updatedBeat] = await this.db
+				.update(beats)
+				.set({
+					transcriptionStatus: 'completed',
+					transcribedAt: new Date(),
+					transcriptionError: null,
+				})
+				.where(eq(beats.id, beatId))
+				.returning();
+
+			this.logger.log(`Transcription completed for beat ${beatId}: ${result.text.length} chars`);
+
+			return {
+				beat: updatedBeat,
+				lyrics: lyricsRecord.content,
+			};
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			this.logger.error(`Transcription failed for beat ${beatId}: ${errorMessage}`);
+
+			// Update beat status to failed
+			await this.db
+				.update(beats)
+				.set({
+					transcriptionStatus: 'failed',
+					transcriptionError: errorMessage,
+				})
+				.where(eq(beats.id, beatId));
+
+			throw error;
+		}
 	}
 }
