@@ -83,8 +83,6 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | - |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret | - |
 | `CORS_ORIGINS` | Allowed CORS origins | - |
-| `CREDITS_SIGNUP_BONUS` | Credits on signup | `150` |
-| `CREDITS_DAILY_FREE` | Daily free credits | `5` |
 | `RATE_LIMIT_TTL` | Rate limit window (seconds) | `60` |
 | `RATE_LIMIT_MAX` | Max requests per window | `100` |
 

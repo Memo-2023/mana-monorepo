@@ -4,19 +4,18 @@ Central authentication and credit management system for the Mana Universe ecosys
 
 ## Features
 
-- **JWT-based Authentication** (RS256 algorithm)
+- **JWT-based Authentication** (EdDSA algorithm via Better Auth)
   - User registration and login
   - Refresh token rotation
   - Multi-session management
-  - Device tracking
+  - JWKS endpoint for token verification
 
 - **Credit System**
   - User balance management
-  - Transaction ledger with double-entry bookkeeping
+  - Transaction ledger (purchase, usage, refund, gift)
   - Optimistic locking for concurrency
-  - Daily free credits
-  - Signup bonus (150 credits)
   - Idempotency for credit operations
+  - Gift code system with auto-redemption on registration
 
 - **Security**
   - Row-Level Security (RLS) on PostgreSQL
@@ -145,7 +144,7 @@ Central authentication and credit management system for the Mana Universe ecosys
 
 - Get current credit balance
 - Requires: Bearer token
-- Returns: `{ balance, freeCreditsRemaining, totalEarned, totalSpent }`
+- Returns: `{ balance, totalEarned, totalSpent }`
 
 **POST** `/api/v1/credits/use`
 
@@ -199,13 +198,10 @@ See `.env.example` for all available configuration options.
 Key variables:
 
 - `DATABASE_URL` - PostgreSQL connection string
-- `JWT_PUBLIC_KEY` - RS256 public key (PEM format)
-- `JWT_PRIVATE_KEY` - RS256 private key (PEM format)
 - `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` - Redis configuration
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe integration
 - `CORS_ORIGINS` - Allowed origins for CORS
-- `CREDITS_SIGNUP_BONUS` - Free credits on signup (default: 150)
-- `CREDITS_DAILY_FREE` - Daily free credits (default: 5)
+- `BASE_URL` - Base URL for JWKS endpoint (e.g., http://localhost:3001)
 
 ## Development
 
@@ -250,16 +246,15 @@ pnpm format
 
 ### Credit System
 
-- **Signup Bonus**: 150 free credits on registration
-- **Daily Free Credits**: 5 credits added every 24 hours
 - **Paid Credits**: Purchased via Stripe (100 mana = €1)
-- **Usage Priority**: Free credits used first, then paid credits
+- **Gift Codes**: Can be created and redeemed, auto-redeem on registration if pending
+- **Transaction Types**: purchase, usage, refund, gift
 - **Idempotency**: Duplicate requests with same key are detected and ignored
 - **Concurrency**: Optimistic locking prevents race conditions
 
 ## Security Considerations
 
-1. **JWT Keys**: Generate strong RS256 keys and keep private key secure
+1. **JWT Keys**: Better Auth auto-generates EdDSA keys stored in `auth.jwks` table
 2. **Database**: Use strong passwords and enable SSL in production
 3. **Redis**: Always set a password for Redis
 4. **CORS**: Only allow trusted origins
