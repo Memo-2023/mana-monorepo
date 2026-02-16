@@ -35,6 +35,7 @@ export {
 	SkillTreeLogo,
 	PlantaLogo,
 	PlaygroundLogo,
+	LightWriteLogo,
 } from './logos';
 
 // Configuration

@@ -4,12 +4,8 @@
 	import { browser } from '$app/environment';
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { getLoginTranslations } from '@manacore/shared-i18n';
+	import { LightWriteLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
-
-	// Simple LightWrite Logo component
-	function LightWriteLogo() {
-		return null; // Will use appName text instead
-	}
 
 	// Get redirect URL from query params or sessionStorage
 	const redirectTo = $derived.by(() => {

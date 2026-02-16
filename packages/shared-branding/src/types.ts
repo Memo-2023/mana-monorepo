@@ -22,7 +22,8 @@ export type AppId =
 	| 'questions'
 	| 'skilltree'
 	| 'planta'
-	| 'playground';
+	| 'playground'
+	| 'lightwrite';
 
 /**
  * App branding configuration
