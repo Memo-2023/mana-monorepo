@@ -1,15 +1,23 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { theme } from '$lib/stores/theme.svelte';
 
 	let { children } = $props();
 
 	let loading = $state(true);
+	let cleanupTheme: (() => void) | undefined;
 
 	onMount(async () => {
+		// Initialize theme first to prevent flash
+		cleanupTheme = theme.initialize();
 		await authStore.initialize();
 		loading = false;
+	});
+
+	onDestroy(() => {
+		cleanupTheme?.();
 	});
 </script>
 

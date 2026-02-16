@@ -5,6 +5,7 @@
 	import { audioStore } from '$lib/stores/audio.svelte';
 	import { projectStore } from '$lib/stores/project.svelte';
 	import { editorStore } from '$lib/stores/editor.svelte';
+	import { theme } from '$lib/stores/theme.svelte';
 	import { MARKER_COLORS, type Marker, type MarkerType } from '@lightwrite/shared';
 
 	let containerRef: HTMLDivElement;
@@ -19,16 +20,26 @@
 
 	let { audioUrl, onTimeUpdate, onSeek }: Props = $props();
 
+	// Get theme-aware colors
+	function getWaveformColors() {
+		return {
+			waveColor: theme.isDark ? '#9CA3AF' : '#6B7280',
+			progressColor: theme.isDark ? '#60A5FA' : '#3B82F6',
+			cursorColor: '#EF4444',
+		};
+	}
+
 	onMount(() => {
 		if (!containerRef) return;
 
 		regionsPlugin = RegionsPlugin.create();
+		const colors = getWaveformColors();
 
 		wavesurfer = WaveSurfer.create({
 			container: containerRef,
-			waveColor: '#6B7280',
-			progressColor: '#3B82F6',
-			cursorColor: '#EF4444',
+			waveColor: colors.waveColor,
+			progressColor: colors.progressColor,
+			cursorColor: colors.cursorColor,
 			cursorWidth: 2,
 			height: 128,
 			normalize: true,
@@ -104,6 +115,19 @@
 		}
 	});
 
+	// Watch for theme changes and update waveform colors
+	$effect(() => {
+		// Reference isDark to track changes
+		const isDark = theme.isDark;
+		if (wavesurfer) {
+			const colors = getWaveformColors();
+			wavesurfer.setOptions({
+				waveColor: colors.waveColor,
+				progressColor: colors.progressColor,
+			});
+		}
+	});
+
 	// Watch for marker changes and sync regions
 	$effect(() => {
 		const markers = projectStore.currentMarkers;
@@ -166,6 +190,38 @@
 			});
 		}
 	}
+
+	export function toggleLoop(markerId: string) {
+		if (!regionsPlugin || !wavesurfer) return;
+
+		const region = regionsPlugin.getRegions().find((r) => r.id === `marker-${markerId}`);
+		if (!region) return;
+
+		if (editorStore.loopRegionId === markerId) {
+			// Disable loop
+			editorStore.setLoopRegion(null);
+		} else {
+			// Enable loop and start playback from region start
+			editorStore.setLoopRegion(markerId);
+			wavesurfer.setTime(region.start);
+			wavesurfer.play();
+		}
+	}
+
+	// Watch for loop region and handle looping
+	$effect(() => {
+		if (!wavesurfer || !regionsPlugin || !editorStore.loopRegionId) return;
+
+		const region = regionsPlugin
+			.getRegions()
+			.find((r) => r.id === `marker-${editorStore.loopRegionId}`);
+		if (!region) return;
+
+		// Check if we've reached the end of the loop region
+		if (audioStore.currentTime >= region.end && editorStore.isLooping) {
+			wavesurfer.setTime(region.start);
+		}
+	});
 </script>
 
 <div class="waveform-container" bind:this={containerRef}>

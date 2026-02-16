@@ -11,14 +11,50 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { BeatService } from './beat.service';
-import { CreateBeatUploadDto, UpdateBeatMetadataDto } from './dto/beat.dto';
+import { CreateBeatUploadDto, UpdateBeatMetadataDto, UseLibraryBeatDto } from './dto/beat.dto';
 
 @Controller('beats')
-@UseGuards(JwtAuthGuard)
 export class BeatController {
 	constructor(private readonly beatService: BeatService) {}
 
+	// ==================== Library Beats (Public) ====================
+
+	@Get('library')
+	async getLibraryBeats() {
+		const beats = await this.beatService.getLibraryBeats();
+		return { beats };
+	}
+
+	@Get('library/:id')
+	async getLibraryBeat(@Param('id', ParseUUIDPipe) id: string) {
+		const beat = await this.beatService.getLibraryBeatById(id);
+		if (!beat) {
+			return { beat: null };
+		}
+		return { beat };
+	}
+
+	@Get('library/:id/download-url')
+	async getLibraryBeatDownloadUrl(@Param('id', ParseUUIDPipe) id: string) {
+		const url = await this.beatService.getLibraryBeatDownloadUrl(id);
+		return { url };
+	}
+
+	@Post('library/:id/use')
+	@UseGuards(JwtAuthGuard)
+	async useLibraryBeat(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id', ParseUUIDPipe) id: string,
+		@Body() dto: UseLibraryBeatDto
+	) {
+		const beat = await this.beatService.useLibraryBeat(id, dto.projectId, user.userId);
+		return { beat };
+	}
+
+	// ==================== User Beats (Protected) ====================
+
 	@Get('project/:projectId')
+	@UseGuards(JwtAuthGuard)
 	async findByProject(
 		@CurrentUser() user: CurrentUserData,
 		@Param('projectId', ParseUUIDPipe) projectId: string
@@ -29,6 +65,7 @@ export class BeatController {
 	}
 
 	@Get(':id')
+	@UseGuards(JwtAuthGuard)
 	async findOne(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		const beat = await this.beatService.findByIdOrThrow(id);
 		await this.beatService.verifyProjectOwnership(beat.projectId, user.userId);
@@ -37,6 +74,7 @@ export class BeatController {
 	}
 
 	@Get(':id/download-url')
+	@UseGuards(JwtAuthGuard)
 	async getDownloadUrl(
 		@CurrentUser() user: CurrentUserData,
 		@Param('id', ParseUUIDPipe) id: string
@@ -46,12 +84,14 @@ export class BeatController {
 	}
 
 	@Post('upload')
+	@UseGuards(JwtAuthGuard)
 	async createUploadUrl(@CurrentUser() user: CurrentUserData, @Body() dto: CreateBeatUploadDto) {
 		const result = await this.beatService.createUploadUrl(dto.projectId, user.userId, dto.filename);
 		return result;
 	}
 
 	@Put(':id/metadata')
+	@UseGuards(JwtAuthGuard)
 	async updateMetadata(
 		@CurrentUser() user: CurrentUserData,
 		@Param('id', ParseUUIDPipe) id: string,
@@ -62,6 +102,7 @@ export class BeatController {
 	}
 
 	@Delete(':id')
+	@UseGuards(JwtAuthGuard)
 	async delete(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
 		await this.beatService.delete(id, user.userId);
 		return { success: true };

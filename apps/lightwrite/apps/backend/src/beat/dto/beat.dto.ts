@@ -10,6 +10,12 @@ export class CreateBeatUploadDto {
 	filename!: string;
 }
 
+export class UseLibraryBeatDto {
+	@IsUUID()
+	@IsNotEmpty()
+	projectId!: string;
+}
+
 export class UpdateBeatMetadataDto {
 	@IsNumber()
 	@IsOptional()

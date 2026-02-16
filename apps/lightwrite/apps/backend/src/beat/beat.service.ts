@@ -2,8 +2,8 @@ import { Injectable, Inject, NotFoundException, BadRequestException } from '@nes
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
-import { beats, projects, markers } from '../db/schema';
-import type { Beat, Marker } from '../db/schema';
+import { beats, projects, markers, libraryBeats } from '../db/schema';
+import type { Beat, Marker, LibraryBeat } from '../db/schema';
 import {
 	createLightWriteStorage,
 	generateUserFileKey,
@@ -126,5 +126,57 @@ export class BeatService {
 
 	async getMarkersForBeat(beatId: string): Promise<Marker[]> {
 		return this.db.select().from(markers).where(eq(markers.beatId, beatId));
+	}
+
+	// ==================== Library Beats ====================
+
+	async getLibraryBeats(): Promise<LibraryBeat[]> {
+		return this.db
+			.select()
+			.from(libraryBeats)
+			.where(eq(libraryBeats.isActive, true))
+			.orderBy(libraryBeats.title);
+	}
+
+	async getLibraryBeatById(id: string): Promise<LibraryBeat | null> {
+		const [beat] = await this.db.select().from(libraryBeats).where(eq(libraryBeats.id, id));
+		return beat || null;
+	}
+
+	async getLibraryBeatDownloadUrl(id: string): Promise<string> {
+		const beat = await this.getLibraryBeatById(id);
+		if (!beat) {
+			throw new NotFoundException('Library beat not found');
+		}
+		return this.storage.getDownloadUrl(beat.storagePath, { expiresIn: 3600 });
+	}
+
+	async useLibraryBeat(libraryBeatId: string, projectId: string, userId: string): Promise<Beat> {
+		await this.verifyProjectOwnership(projectId, userId);
+
+		// Check if beat already exists for this project
+		const existingBeat = await this.findByProjectId(projectId);
+		if (existingBeat) {
+			throw new BadRequestException('Beat already exists for this project. Delete it first.');
+		}
+
+		const libraryBeat = await this.getLibraryBeatById(libraryBeatId);
+		if (!libraryBeat) {
+			throw new NotFoundException('Library beat not found');
+		}
+
+		// Create beat record referencing the same storage path
+		const [beat] = await this.db
+			.insert(beats)
+			.values({
+				projectId,
+				storagePath: libraryBeat.storagePath,
+				filename: `${libraryBeat.title}${libraryBeat.artist ? ` - ${libraryBeat.artist}` : ''}.mp3`,
+				duration: libraryBeat.duration,
+				bpm: libraryBeat.bpm,
+			})
+			.returning();
+
+		return beat;
 	}
 }

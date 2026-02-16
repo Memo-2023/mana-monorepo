@@ -6,16 +6,122 @@
 	import { projectStore } from '$lib/stores/project.svelte';
 	import { audioStore } from '$lib/stores/audio.svelte';
 	import { editorStore } from '$lib/stores/editor.svelte';
+	import { MARKER_COLORS } from '@lightwrite/shared';
 	import WaveformEditor from '$lib/components/WaveformEditor.svelte';
 	import PlaybackControls from '$lib/components/PlaybackControls.svelte';
 	import LyricsEditor from '$lib/components/LyricsEditor.svelte';
 	import MarkerTimeline from '$lib/components/MarkerTimeline.svelte';
 	import KaraokePreview from '$lib/components/KaraokePreview.svelte';
 	import BeatUploader from '$lib/components/BeatUploader.svelte';
+	import { ThemeToggle } from '@manacore/shared-theme-ui';
+	import { theme } from '$lib/stores/theme.svelte';
 
 	let waveformEditor: WaveformEditor;
 	let showExportMenu = $state(false);
 	let isExporting = $state(false);
+
+	// Mobile responsive state
+	let isMobile = $state(false);
+	let mobileTab: 'lyrics' | 'preview' = $state('lyrics');
+
+	// Listen for resize events
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+
+		const checkMobile = () => {
+			isMobile = window.innerWidth < 768;
+		};
+		checkMobile();
+
+		window.addEventListener('resize', checkMobile);
+		return () => window.removeEventListener('resize', checkMobile);
+	});
+
+	// Keyboard shortcuts handler
+	function handleKeydown(e: KeyboardEvent) {
+		// Ignore if typing in input fields
+		if (
+			e.target instanceof HTMLInputElement ||
+			e.target instanceof HTMLTextAreaElement ||
+			(e.target instanceof HTMLElement && e.target.isContentEditable)
+		) {
+			return;
+		}
+
+		// Ignore if no audio loaded
+		if (!audioStore.isLoaded) return;
+
+		switch (e.code) {
+			case 'Space':
+				e.preventDefault();
+				waveformEditor?.playPause();
+				break;
+
+			case 'ArrowLeft':
+				e.preventDefault();
+				const skipBack = e.shiftKey ? 1 : 5;
+				waveformEditor?.seekTo(Math.max(0, audioStore.currentTime - skipBack));
+				break;
+
+			case 'ArrowRight':
+				e.preventDefault();
+				const skipForward = e.shiftKey ? 1 : 5;
+				waveformEditor?.seekTo(Math.min(audioStore.duration, audioStore.currentTime + skipForward));
+				break;
+
+			case 'Home':
+				e.preventDefault();
+				waveformEditor?.seekTo(0);
+				break;
+
+			case 'End':
+				e.preventDefault();
+				waveformEditor?.seekTo(audioStore.duration);
+				break;
+
+			case 'KeyM':
+				e.preventDefault();
+				if (projectStore.currentBeat) {
+					projectStore.createMarker(projectStore.currentBeat.id, {
+						type: editorStore.markerTypeToCreate,
+						startTime: audioStore.currentTime,
+						endTime: audioStore.currentTime + 4,
+						color: MARKER_COLORS[editorStore.markerTypeToCreate],
+					});
+				}
+				break;
+
+			case 'KeyL':
+				e.preventDefault();
+				if (editorStore.selectedMarkerId) {
+					waveformEditor?.toggleLoop(editorStore.selectedMarkerId);
+				}
+				break;
+
+			case 'Escape':
+				e.preventDefault();
+				editorStore.selectMarker(null);
+				editorStore.selectLine(null);
+				editorStore.setLoopRegion(null);
+				break;
+
+			case 'Equal':
+			case 'NumpadAdd':
+				if (e.ctrlKey || e.metaKey) {
+					e.preventDefault();
+					handleZoomIn();
+				}
+				break;
+
+			case 'Minus':
+			case 'NumpadSubtract':
+				if (e.ctrlKey || e.metaKey) {
+					e.preventDefault();
+					handleZoomOut();
+				}
+				break;
+		}
+	}
 
 	$effect(() => {
 		const id = $page.params.id;
@@ -148,13 +254,18 @@
 	<title>{projectStore.currentProject?.title || 'Editor'} - LightWrite</title>
 </svelte:head>
 
+<svelte:window onkeydown={handleKeydown} />
+
 <div class="h-screen flex flex-col">
 	<!-- Header -->
 	<header class="border-b border-border bg-surface shrink-0">
-		<div class="px-4 py-3 flex items-center justify-between">
-			<div class="flex items-center gap-4">
-				<a href="/" class="text-foreground-secondary hover:text-foreground transition-colors">
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<div class="px-3 md:px-4 py-2 md:py-3 flex items-center justify-between">
+			<div class="flex items-center gap-2 md:gap-4 min-w-0">
+				<a
+					href="/"
+					class="text-foreground-secondary hover:text-foreground transition-colors shrink-0"
+				>
+					<svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -163,25 +274,28 @@
 						/>
 					</svg>
 				</a>
-				<div>
-					<h1 class="font-semibold">
+				<div class="min-w-0">
+					<h1 class="font-semibold text-sm md:text-base truncate">
 						{projectStore.currentProject?.title || 'Loading...'}
 					</h1>
-					{#if projectStore.currentProject?.description}
-						<p class="text-sm text-foreground-secondary">
+					{#if projectStore.currentProject?.description && !isMobile}
+						<p class="text-sm text-foreground-secondary truncate">
 							{projectStore.currentProject.description}
 						</p>
 					{/if}
 				</div>
 			</div>
 
-			<div class="flex items-center gap-3">
+			<div class="flex items-center gap-1 md:gap-3 shrink-0">
+				<!-- Theme toggle -->
+				<ThemeToggle {theme} showTooltip size={isMobile ? 16 : 20} />
+
 				<!-- Export dropdown -->
 				<div class="relative">
 					<button
 						onclick={() => (showExportMenu = !showExportMenu)}
 						disabled={isExporting || !projectStore.currentLyrics}
-						class="px-4 py-2 bg-surface-hover hover:bg-surface-active rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+						class="px-2 md:px-4 py-1.5 md:py-2 bg-surface-hover hover:bg-surface-active rounded-lg transition-colors flex items-center gap-1 md:gap-2 disabled:opacity-50 text-sm"
 					>
 						{#if isExporting}
 							<div
@@ -197,7 +311,7 @@
 								/>
 							</svg>
 						{/if}
-						Export
+						<span class="hidden sm:inline">Export</span>
 					</button>
 
 					{#if showExportMenu}
@@ -246,12 +360,14 @@
 		<!-- Main editor layout -->
 		<div class="flex-1 flex flex-col min-h-0">
 			<!-- Waveform section -->
-			<div class="shrink-0 p-4 border-b border-border">
+			<div class="shrink-0 p-2 md:p-4 border-b border-border">
 				{#if projectStore.currentBeat}
-					<div class="space-y-4">
+					<div class="space-y-2 md:space-y-4">
 						<div class="flex items-center justify-between">
-							<div class="flex items-center gap-2 text-sm text-foreground-secondary">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<div
+								class="flex items-center gap-2 text-xs md:text-sm text-foreground-secondary truncate"
+							>
+								<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path
 										stroke-linecap="round"
 										stroke-linejoin="round"
@@ -259,10 +375,13 @@
 										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
 									/>
 								</svg>
-								{projectStore.currentBeat.filename}
+								<span class="truncate">{projectStore.currentBeat.filename}</span>
 							</div>
-							<button onclick={handleDeleteBeat} class="text-sm text-red-500 hover:text-red-600">
-								Remove Beat
+							<button
+								onclick={handleDeleteBeat}
+								class="text-xs md:text-sm text-red-500 hover:text-red-600 shrink-0"
+							>
+								{isMobile ? 'Remove' : 'Remove Beat'}
 							</button>
 						</div>
 
@@ -272,7 +391,13 @@
 							onSeek={handleSeek}
 						/>
 
-						<MarkerTimeline onMarkerClick={handleMarkerClick} onSeek={handleSeek} />
+						{#if !isMobile}
+							<MarkerTimeline
+								onMarkerClick={handleMarkerClick}
+								onSeek={handleSeek}
+								onToggleLoop={(markerId) => waveformEditor?.toggleLoop(markerId)}
+							/>
+						{/if}
 
 						<PlaybackControls
 							onPlay={handlePlay}
@@ -280,6 +405,7 @@
 							onSeek={handleSeek}
 							onZoomIn={handleZoomIn}
 							onZoomOut={handleZoomOut}
+							compact={isMobile}
 						/>
 					</div>
 				{:else}
@@ -291,31 +417,69 @@
 			</div>
 
 			<!-- Lyrics and preview section -->
-			<div class="flex-1 flex min-h-0">
-				<!-- Lyrics editor -->
-				<div class="w-1/2 border-r border-border overflow-hidden">
-					<LyricsEditor onLineClick={handleLineClick} onSyncLine={handleSyncLine} />
-				</div>
+			{#if isMobile}
+				<!-- Mobile: Tab-based layout -->
+				<div class="flex-1 flex flex-col min-h-0">
+					<!-- Tab bar -->
+					<div class="flex border-b border-border bg-surface shrink-0">
+						<button
+							onclick={() => (mobileTab = 'lyrics')}
+							class="flex-1 px-4 py-2 text-sm font-medium transition-colors {mobileTab === 'lyrics'
+								? 'text-primary border-b-2 border-primary'
+								: 'text-foreground-secondary'}"
+						>
+							Lyrics
+						</button>
+						<button
+							onclick={() => {
+								mobileTab = 'preview';
+								editorStore.setMode('preview');
+							}}
+							class="flex-1 px-4 py-2 text-sm font-medium transition-colors {mobileTab === 'preview'
+								? 'text-primary border-b-2 border-primary'
+								: 'text-foreground-secondary'}"
+						>
+							Preview
+						</button>
+					</div>
 
-				<!-- Karaoke preview -->
-				<div class="w-1/2 overflow-hidden">
-					{#if editorStore.mode === 'preview'}
-						<KaraokePreview />
-					{:else}
-						<div class="h-full flex items-center justify-center text-foreground-secondary">
-							<div class="text-center">
-								<p>Switch to Preview mode to see karaoke animation</p>
-								<button
-									onclick={() => editorStore.setMode('preview')}
-									class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover"
-								>
-									Preview Mode
-								</button>
-							</div>
-						</div>
-					{/if}
+					<!-- Tab content -->
+					<div class="flex-1 overflow-hidden">
+						{#if mobileTab === 'lyrics'}
+							<LyricsEditor onLineClick={handleLineClick} onSyncLine={handleSyncLine} />
+						{:else}
+							<KaraokePreview />
+						{/if}
+					</div>
 				</div>
-			</div>
+			{:else}
+				<!-- Desktop: Side-by-side layout -->
+				<div class="flex-1 flex min-h-0">
+					<!-- Lyrics editor -->
+					<div class="w-1/2 border-r border-border overflow-hidden">
+						<LyricsEditor onLineClick={handleLineClick} onSyncLine={handleSyncLine} />
+					</div>
+
+					<!-- Karaoke preview -->
+					<div class="w-1/2 overflow-hidden">
+						{#if editorStore.mode === 'preview'}
+							<KaraokePreview />
+						{:else}
+							<div class="h-full flex items-center justify-center text-foreground-secondary">
+								<div class="text-center">
+									<p>Switch to Preview mode to see karaoke animation</p>
+									<button
+										onclick={() => editorStore.setMode('preview')}
+										class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover"
+									>
+										Preview Mode
+									</button>
+								</div>
+							</div>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>

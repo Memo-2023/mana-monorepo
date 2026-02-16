@@ -16,6 +16,8 @@ interface EditorState {
 	showWaveform: boolean;
 	showMarkers: boolean;
 	showLyrics: boolean;
+	loopRegionId: string | null;
+	isLooping: boolean;
 }
 
 function createEditorStore() {
@@ -32,6 +34,8 @@ function createEditorStore() {
 		showWaveform: true,
 		showMarkers: true,
 		showLyrics: true,
+		loopRegionId: null,
+		isLooping: false,
 	});
 
 	return {
@@ -70,6 +74,12 @@ function createEditorStore() {
 		},
 		get showLyrics() {
 			return state.showLyrics;
+		},
+		get loopRegionId() {
+			return state.loopRegionId;
+		},
+		get isLooping() {
+			return state.isLooping;
 		},
 
 		setMode(mode: EditorMode) {
@@ -128,6 +138,11 @@ function createEditorStore() {
 			state.showLyrics = !state.showLyrics;
 		},
 
+		setLoopRegion(markerId: string | null) {
+			state.loopRegionId = markerId;
+			state.isLooping = markerId !== null;
+		},
+
 		reset() {
 			state.mode = 'edit';
 			state.syncMode = 'line';
@@ -136,6 +151,8 @@ function createEditorStore() {
 			state.isRecordingTimestamps = false;
 			state.zoom = 1;
 			state.scrollPosition = 0;
+			state.loopRegionId = null;
+			state.isLooping = false;
 		},
 	};
 }

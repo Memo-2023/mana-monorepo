@@ -2,6 +2,7 @@
 	import { projectStore } from '$lib/stores/project.svelte';
 	import { audioStore } from '$lib/stores/audio.svelte';
 	import { detectBpmFromFile } from '$lib/utils/bpm-detector';
+	import BeatLibrary from './BeatLibrary.svelte';
 
 	interface Props {
 		projectId: string;
@@ -9,6 +10,9 @@
 	}
 
 	let { projectId, onUploadComplete }: Props = $props();
+
+	type Tab = 'upload' | 'library';
+	let activeTab = $state<Tab>('upload');
 
 	let isUploading = $state(false);
 	let isDetectingBpm = $state(false);
@@ -90,59 +94,17 @@
 	}
 </script>
 
-<div
-	class="border-2 border-dashed border-border rounded-lg p-8 text-center transition-colors hover:border-primary"
-	ondragover={handleDragOver}
-	ondrop={handleDrop}
-	role="button"
-	tabindex="0"
->
-	<input
-		bind:this={fileInputRef}
-		type="file"
-		accept={acceptedExtensions}
-		onchange={handleFileSelect}
-		class="hidden"
-		id="beat-upload"
-	/>
-
-	{#if isUploading}
-		<div class="space-y-4">
-			<div class="w-16 h-16 mx-auto">
-				{#if isDetectingBpm}
-					<svg
-						class="w-full h-full text-primary animate-pulse"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-						/>
-					</svg>
-				{:else}
-					<div
-						class="w-full h-full border-4 border-primary border-t-transparent rounded-full animate-spin"
-					></div>
-				{/if}
-			</div>
-			<p class="text-foreground-secondary">
-				{isDetectingBpm ? 'Detecting BPM...' : 'Uploading...'}
-			</p>
-			<div class="w-full max-w-xs mx-auto h-2 bg-surface-hover rounded-full overflow-hidden">
-				<div
-					class="h-full bg-primary transition-all duration-300"
-					style="width: {uploadProgress}%"
-				></div>
-			</div>
-		</div>
-	{:else}
-		<label for="beat-upload" class="cursor-pointer block">
-			<div class="w-16 h-16 mx-auto mb-4 text-foreground-secondary">
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+<div class="space-y-4">
+	<!-- Tab Switcher -->
+	<div class="flex border-b border-border">
+		<button
+			onclick={() => (activeTab = 'upload')}
+			class="flex-1 py-3 px-4 text-sm font-medium transition-colors relative {activeTab === 'upload'
+				? 'text-primary'
+				: 'text-foreground-secondary hover:text-foreground'}"
+		>
+			<span class="flex items-center justify-center gap-2">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -150,14 +112,112 @@
 						d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
 					/>
 				</svg>
-			</div>
-			<p class="text-lg font-medium mb-2">Upload a Beat</p>
-			<p class="text-foreground-secondary text-sm">Drag & drop or click to select an audio file</p>
-			<p class="text-foreground-secondary text-xs mt-2">Supported formats: MP3, WAV, OGG</p>
-		</label>
-	{/if}
+				Upload
+			</span>
+			{#if activeTab === 'upload'}
+				<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
+			{/if}
+		</button>
+		<button
+			onclick={() => (activeTab = 'library')}
+			class="flex-1 py-3 px-4 text-sm font-medium transition-colors relative {activeTab ===
+			'library'
+				? 'text-primary'
+				: 'text-foreground-secondary hover:text-foreground'}"
+		>
+			<span class="flex items-center justify-center gap-2">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+					/>
+				</svg>
+				Library
+			</span>
+			{#if activeTab === 'library'}
+				<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
+			{/if}
+		</button>
+	</div>
 
-	{#if errorMessage}
-		<p class="text-red-500 mt-4 text-sm">{errorMessage}</p>
+	<!-- Tab Content -->
+	{#if activeTab === 'upload'}
+		<div
+			class="border-2 border-dashed border-border rounded-lg p-8 text-center transition-colors hover:border-primary"
+			ondragover={handleDragOver}
+			ondrop={handleDrop}
+			role="button"
+			tabindex="0"
+		>
+			<input
+				bind:this={fileInputRef}
+				type="file"
+				accept={acceptedExtensions}
+				onchange={handleFileSelect}
+				class="hidden"
+				id="beat-upload"
+			/>
+
+			{#if isUploading}
+				<div class="space-y-4">
+					<div class="w-16 h-16 mx-auto">
+						{#if isDetectingBpm}
+							<svg
+								class="w-full h-full text-primary animate-pulse"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+								/>
+							</svg>
+						{:else}
+							<div
+								class="w-full h-full border-4 border-primary border-t-transparent rounded-full animate-spin"
+							></div>
+						{/if}
+					</div>
+					<p class="text-foreground-secondary">
+						{isDetectingBpm ? 'Detecting BPM...' : 'Uploading...'}
+					</p>
+					<div class="w-full max-w-xs mx-auto h-2 bg-surface-hover rounded-full overflow-hidden">
+						<div
+							class="h-full bg-primary transition-all duration-300"
+							style="width: {uploadProgress}%"
+						></div>
+					</div>
+				</div>
+			{:else}
+				<label for="beat-upload" class="cursor-pointer block">
+					<div class="w-16 h-16 mx-auto mb-4 text-foreground-secondary">
+						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+							/>
+						</svg>
+					</div>
+					<p class="text-lg font-medium mb-2">Upload a Beat</p>
+					<p class="text-foreground-secondary text-sm">
+						Drag & drop or click to select an audio file
+					</p>
+					<p class="text-foreground-secondary text-xs mt-2">Supported formats: MP3, WAV, OGG</p>
+				</label>
+			{/if}
+
+			{#if errorMessage}
+				<p class="text-red-500 mt-4 text-sm">{errorMessage}</p>
+			{/if}
+		</div>
+	{:else}
+		<BeatLibrary {projectId} onSelectBeat={onUploadComplete} />
 	{/if}
 </div>

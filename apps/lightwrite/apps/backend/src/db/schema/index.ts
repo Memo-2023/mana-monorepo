@@ -2,3 +2,4 @@ export * from './projects.schema';
 export * from './beats.schema';
 export * from './markers.schema';
 export * from './lyrics.schema';
+export * from './library-beats.schema';
