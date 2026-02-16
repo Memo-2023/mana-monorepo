@@ -54,10 +54,10 @@
 </script>
 
 <!-- Backdrop -->
-<div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-	<!-- Modal Container -->
+<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+	<!-- Modal Container - uses surface-elevated-2 for proper elevation hierarchy -->
 	<div
-		class="bg-background rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+		class="bg-surface-elevated-2 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-border"
 	>
 		<!-- Header with progress -->
 		<header class="border-b px-5 py-4 flex-shrink-0">

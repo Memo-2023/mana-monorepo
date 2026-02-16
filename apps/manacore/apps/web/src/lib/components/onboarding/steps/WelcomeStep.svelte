@@ -18,9 +18,9 @@
 		- alles an einem Ort.
 	</p>
 
-	<!-- Feature highlights -->
+	<!-- Feature highlights - using surface-elevated-1 (one level below the modal) -->
 	<div class="space-y-2 text-left">
-		<div class="p-3 rounded-lg bg-card border flex items-start gap-3">
+		<div class="p-3 rounded-lg bg-surface-elevated-1 border flex items-start gap-3">
 			<div
 				class="h-8 w-8 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0"
 			>
@@ -44,7 +44,7 @@
 			</div>
 		</div>
 
-		<div class="p-3 rounded-lg bg-card border flex items-start gap-3">
+		<div class="p-3 rounded-lg bg-surface-elevated-1 border flex items-start gap-3">
 			<div
 				class="h-8 w-8 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0"
 			>
@@ -68,7 +68,7 @@
 			</div>
 		</div>
 
-		<div class="p-3 rounded-lg bg-card border flex items-start gap-3">
+		<div class="p-3 rounded-lg bg-surface-elevated-1 border flex items-start gap-3">
 			<div
 				class="h-8 w-8 rounded-md bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0"
 			>
