@@ -37,6 +37,8 @@ ingress:
     service: http://localhost:5013
   - hostname: clock-api.mana.how
     service: http://localhost:3033
+  - hostname: clock-bot.mana.how
+    service: http://localhost:4018
 
   # Contacts App
   - hostname: contacts.mana.how
@@ -67,6 +69,12 @@ ingress:
     service: http://localhost:5019
   - hostname: photos-api.mana.how
     service: http://localhost:3039
+
+  # LightWrite App
+  - hostname: lightwrite.mana.how
+    service: http://localhost:5180
+  - hostname: lightwrite-api.mana.how
+    service: http://localhost:3010
 
   # LLM Services
   - hostname: playground.mana.how
