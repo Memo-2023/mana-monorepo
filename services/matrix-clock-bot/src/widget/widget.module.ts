@@ -10,7 +10,7 @@ import { SessionModule } from '@manacore/bot-services';
  * The widget displays live timer status with controls.
  */
 @Module({
-	imports: [ClockModule, SessionModule.forRoot()],
+	imports: [ClockModule, SessionModule.forRoot({ storageMode: 'redis' })],
 	controllers: [WidgetController],
 })
 export class WidgetModule {}
