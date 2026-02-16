@@ -2,30 +2,30 @@
 	// Welcome step - introduces ManaCore
 </script>
 
-<div class="text-center max-w-xl mx-auto">
+<div class="text-center">
 	<!-- Hero Icon -->
-	<div class="mb-8">
+	<div class="mb-4">
 		<div
-			class="inline-flex h-24 w-24 rounded-2xl bg-gradient-to-br from-primary via-primary/80 to-primary/60 items-center justify-center shadow-lg shadow-primary/25"
+			class="inline-flex h-16 w-16 rounded-xl bg-gradient-to-br from-primary via-primary/80 to-primary/60 items-center justify-center shadow-lg shadow-primary/25"
 		>
-			<span class="text-5xl text-primary-foreground font-bold">M</span>
+			<span class="text-3xl text-primary-foreground font-bold">M</span>
 		</div>
 	</div>
 
-	<h2 class="text-3xl font-bold mb-4">Willkommen bei ManaCore!</h2>
-	<p class="text-lg text-muted-foreground mb-8">
+	<h2 class="text-xl font-bold mb-2">Willkommen bei ManaCore!</h2>
+	<p class="text-sm text-muted-foreground mb-4">
 		Dein zentrales Dashboard für alle Mana-Apps. Verwalte deine Aufgaben, Termine, Kontakte und mehr
 		- alles an einem Ort.
 	</p>
 
 	<!-- Feature highlights -->
-	<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-		<div class="p-4 rounded-xl bg-card border">
+	<div class="space-y-2 text-left">
+		<div class="p-3 rounded-lg bg-card border flex items-start gap-3">
 			<div
-				class="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-3"
+				class="h-8 w-8 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0"
 			>
 				<svg
-					class="h-5 w-5 text-blue-600 dark:text-blue-400"
+					class="h-4 w-4 text-blue-600 dark:text-blue-400"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
@@ -38,18 +38,18 @@
 					/>
 				</svg>
 			</div>
-			<h3 class="font-semibold mb-1">Alle Apps</h3>
-			<p class="text-sm text-muted-foreground">
-				Zugriff auf Todo, Kalender, Chat, Picture und mehr.
-			</p>
+			<div>
+				<h3 class="font-medium text-sm">Alle Apps</h3>
+				<p class="text-xs text-muted-foreground">Todo, Kalender, Chat, Picture und mehr.</p>
+			</div>
 		</div>
 
-		<div class="p-4 rounded-xl bg-card border">
+		<div class="p-3 rounded-lg bg-card border flex items-start gap-3">
 			<div
-				class="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-3"
+				class="h-8 w-8 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0"
 			>
 				<svg
-					class="h-5 w-5 text-green-600 dark:text-green-400"
+					class="h-4 w-4 text-green-600 dark:text-green-400"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
@@ -62,16 +62,18 @@
 					/>
 				</svg>
 			</div>
-			<h3 class="font-semibold mb-1">Credits-System</h3>
-			<p class="text-sm text-muted-foreground">Ein Guthaben für alle AI-Features in allen Apps.</p>
+			<div>
+				<h3 class="font-medium text-sm">Credits-System</h3>
+				<p class="text-xs text-muted-foreground">Ein Guthaben für alle AI-Features.</p>
+			</div>
 		</div>
 
-		<div class="p-4 rounded-xl bg-card border">
+		<div class="p-3 rounded-lg bg-card border flex items-start gap-3">
 			<div
-				class="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-3"
+				class="h-8 w-8 rounded-md bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0"
 			>
 				<svg
-					class="h-5 w-5 text-purple-600 dark:text-purple-400"
+					class="h-4 w-4 text-purple-600 dark:text-purple-400"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
@@ -84,10 +86,10 @@
 					/>
 				</svg>
 			</div>
-			<h3 class="font-semibold mb-1">Personalisierung</h3>
-			<p class="text-sm text-muted-foreground">
-				Themes, Widgets und Einstellungen nach deinem Geschmack.
-			</p>
+			<div>
+				<h3 class="font-medium text-sm">Personalisierung</h3>
+				<p class="text-xs text-muted-foreground">Themes und Einstellungen nach deinem Geschmack.</p>
+			</div>
 		</div>
 	</div>
 </div>

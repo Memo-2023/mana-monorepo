@@ -53,50 +53,54 @@
 	}
 </script>
 
-<div class="fixed inset-0 z-50 bg-background flex flex-col">
-	<!-- Header with progress -->
-	<header class="border-b px-6 py-4">
-		<div class="max-w-3xl mx-auto">
-			<div class="flex items-center justify-between mb-4">
+<!-- Backdrop -->
+<div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+	<!-- Modal Container -->
+	<div
+		class="bg-background rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+	>
+		<!-- Header with progress -->
+		<header class="border-b px-5 py-4 flex-shrink-0">
+			<div class="flex items-center justify-between mb-3">
 				<div class="flex items-center gap-3">
 					<div
-						class="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center"
+						class="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center"
 					>
-						<span class="text-xl">M</span>
+						<span class="text-lg font-semibold text-primary-foreground">M</span>
 					</div>
 					<div>
-						<h1 class="font-semibold text-lg">Willkommen bei ManaCore</h1>
-						<p class="text-sm text-muted-foreground">
+						<h1 class="font-semibold">Willkommen bei ManaCore</h1>
+						<p class="text-xs text-muted-foreground">
 							Schritt {currentStep + 1} von {STEPS.length}
 						</p>
 					</div>
 				</div>
 				<button
 					onclick={handleSkip}
-					class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+					class="text-xs text-muted-foreground hover:text-foreground transition-colors"
 				>
 					Überspringen
 				</button>
 			</div>
 
 			<!-- Progress bar -->
-			<div class="h-1.5 bg-muted rounded-full overflow-hidden">
+			<div class="h-1 bg-muted rounded-full overflow-hidden">
 				<div
 					class="h-full bg-primary transition-all duration-300 ease-out rounded-full"
 					style="width: {progress}%"
 				></div>
 			</div>
 
-			<!-- Step indicators -->
-			<div class="flex justify-between mt-3">
+			<!-- Step indicators (compact) -->
+			<div class="flex justify-between mt-2">
 				{#each STEPS as step, index}
 					<button
 						onclick={() => handleStepClick(index)}
 						disabled={index > currentStep}
-						class="flex flex-col items-center gap-1 group"
+						class="flex flex-col items-center gap-0.5 group"
 					>
 						<div
-							class="h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all
+							class="h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium transition-all
 								{index < currentStep
 								? 'bg-primary text-primary-foreground'
 								: index === currentStep
@@ -104,7 +108,7 @@
 									: 'bg-muted text-muted-foreground'}"
 						>
 							{#if index < currentStep}
-								<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 									<path
 										stroke-linecap="round"
 										stroke-linejoin="round"
@@ -117,7 +121,7 @@
 							{/if}
 						</div>
 						<span
-							class="text-xs {index === currentStep
+							class="text-[10px] {index === currentStep
 								? 'text-foreground font-medium'
 								: 'text-muted-foreground'} hidden sm:block"
 						>
@@ -126,12 +130,10 @@
 					</button>
 				{/each}
 			</div>
-		</div>
-	</header>
+		</header>
 
-	<!-- Step content -->
-	<main class="flex-1 overflow-y-auto">
-		<div class="max-w-3xl mx-auto px-6 py-8">
+		<!-- Step content -->
+		<main class="flex-1 overflow-y-auto px-5 py-4">
 			{#if currentStepData.id === 'welcome'}
 				<WelcomeStep />
 			{:else if currentStepData.id === 'profile'}
@@ -143,25 +145,25 @@
 			{:else if currentStepData.id === 'complete'}
 				<CompleteStep />
 			{/if}
-		</div>
-	</main>
+		</main>
 
-	<!-- Footer with navigation -->
-	<footer class="border-t px-6 py-4">
-		<div class="max-w-3xl mx-auto flex justify-between">
-			<button
-				onclick={handlePrev}
-				disabled={isFirstStep}
-				class="px-6 py-2.5 border rounded-lg hover:bg-muted transition-colors disabled:opacity-0 disabled:pointer-events-none"
-			>
-				Zurück
-			</button>
-			<button
-				onclick={handleNext}
-				class="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-			>
-				{isLastStep ? "Los geht's!" : 'Weiter'}
-			</button>
-		</div>
-	</footer>
+		<!-- Footer with navigation -->
+		<footer class="border-t px-5 py-3 flex-shrink-0">
+			<div class="flex justify-between">
+				<button
+					onclick={handlePrev}
+					disabled={isFirstStep}
+					class="px-4 py-2 text-sm border rounded-lg hover:bg-muted transition-colors disabled:opacity-0 disabled:pointer-events-none"
+				>
+					Zurück
+				</button>
+				<button
+					onclick={handleNext}
+					class="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+				>
+					{isLastStep ? "Los geht's!" : 'Weiter'}
+				</button>
+			</div>
+		</footer>
+	</div>
 </div>
