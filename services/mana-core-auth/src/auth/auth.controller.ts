@@ -2,6 +2,8 @@ import {
 	Controller,
 	Post,
 	Get,
+	Put,
+	Patch,
 	Delete,
 	Body,
 	Param,
@@ -29,6 +31,8 @@ import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { CurrentUserData } from '../common/decorators/current-user.decorator';
@@ -532,6 +536,162 @@ export class AuthController {
 			organizationId: setActiveDto.organizationId,
 			userToken: token,
 		});
+	}
+
+	/**
+	 * Update organization
+	 *
+	 * Updates an organization's name, logo, or metadata.
+	 * Requires owner or admin role.
+	 */
+	@Put('organizations/:id')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({
+		summary: 'Update organization',
+		description: 'Update organization name, logo, or metadata. Requires admin or owner role.',
+	})
+	@ApiBody({ type: UpdateOrganizationDto })
+	@ApiResponse({ status: 200, description: 'Organization updated successfully' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	@ApiResponse({ status: 403, description: 'No permission to update organization' })
+	@ApiResponse({ status: 404, description: 'Organization not found' })
+	async updateOrganization(
+		@Param('id') id: string,
+		@Body() dto: UpdateOrganizationDto,
+		@Headers('authorization') authorization: string
+	) {
+		const token = this.extractToken(authorization);
+		return this.betterAuthService.updateOrganization(id, dto, token);
+	}
+
+	/**
+	 * Delete organization
+	 *
+	 * Permanently deletes an organization and all its data.
+	 * Requires owner role.
+	 */
+	@Delete('organizations/:id')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({
+		summary: 'Delete organization',
+		description: 'Permanently delete an organization. Only the owner can delete.',
+	})
+	@ApiResponse({ status: 204, description: 'Organization deleted successfully' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	@ApiResponse({ status: 403, description: 'Only owner can delete organization' })
+	@ApiResponse({ status: 404, description: 'Organization not found' })
+	async deleteOrganization(
+		@Param('id') id: string,
+		@Headers('authorization') authorization: string
+	) {
+		const token = this.extractToken(authorization);
+		await this.betterAuthService.deleteOrganization(id, token);
+	}
+
+	/**
+	 * Update member role
+	 *
+	 * Changes a member's role within an organization.
+	 * Requires owner or admin role.
+	 */
+	@Patch('organizations/:orgId/members/:memberId/role')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({
+		summary: 'Update member role',
+		description: "Change a member's role. Requires admin or owner role.",
+	})
+	@ApiBody({ type: UpdateMemberRoleDto })
+	@ApiResponse({ status: 200, description: 'Member role updated successfully' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	@ApiResponse({ status: 403, description: 'No permission to change roles' })
+	@ApiResponse({ status: 404, description: 'Member not found' })
+	async updateMemberRole(
+		@Param('orgId') orgId: string,
+		@Param('memberId') memberId: string,
+		@Body() dto: UpdateMemberRoleDto,
+		@Headers('authorization') authorization: string
+	) {
+		const token = this.extractToken(authorization);
+		return this.betterAuthService.updateMemberRole(orgId, memberId, dto.role, token);
+	}
+
+	/**
+	 * List organization invitations
+	 *
+	 * Returns all pending invitations for an organization.
+	 * Requires owner or admin role.
+	 */
+	@Get('organizations/:id/invitations')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({
+		summary: 'List organization invitations',
+		description: 'Get all pending invitations for an organization.',
+	})
+	@ApiResponse({ status: 200, description: 'Returns list of invitations' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	async listOrganizationInvitations(
+		@Param('id') id: string,
+		@Headers('authorization') authorization: string
+	) {
+		const token = this.extractToken(authorization);
+		return this.betterAuthService.listOrganizationInvitations(id, token);
+	}
+
+	/**
+	 * List user's pending invitations
+	 *
+	 * Returns all pending invitations for the authenticated user.
+	 */
+	@Get('invitations')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({
+		summary: 'List user invitations',
+		description: 'Get all pending invitations for the current user.',
+	})
+	@ApiResponse({ status: 200, description: 'Returns list of invitations' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	async listUserInvitations(@Headers('authorization') authorization: string) {
+		const token = this.extractToken(authorization);
+		return this.betterAuthService.listUserInvitations(token);
+	}
+
+	/**
+	 * Cancel or reject invitation
+	 *
+	 * Cancels an invitation (for org admins) or rejects it (for invitees).
+	 * The system automatically determines which action to take based on the user's role.
+	 */
+	@Delete('invitations/:id')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({
+		summary: 'Cancel or reject invitation',
+		description:
+			'Cancel (as org admin/owner) or reject (as invitee) a pending invitation.',
+	})
+	@ApiResponse({ status: 204, description: 'Invitation cancelled/rejected successfully' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	@ApiResponse({ status: 404, description: 'Invitation not found' })
+	async cancelOrRejectInvitation(
+		@Param('id') id: string,
+		@Headers('authorization') authorization: string
+	) {
+		const token = this.extractToken(authorization);
+		// Try cancel first (for org owners/admins), if fails try reject (for invitees)
+		try {
+			await this.betterAuthService.cancelInvitation(id, token);
+		} catch {
+			await this.betterAuthService.rejectInvitation(id, token);
+		}
 	}
 
 	// =========================================================================

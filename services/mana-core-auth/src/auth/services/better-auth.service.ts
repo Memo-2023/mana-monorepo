@@ -58,6 +58,7 @@ import type {
 	ValidateTokenResult,
 	TokenPayload,
 	OrganizationMember,
+	OrganizationInvitation,
 	Organization,
 	BetterAuthAPI,
 	SignUpResponse,
@@ -715,6 +716,252 @@ export class BetterAuthService {
 			if (error instanceof Error) {
 				if (error.message?.includes('not found')) {
 					throw new NotFoundException('Organization not found');
+				}
+			}
+			throw error;
+		}
+	}
+
+	/**
+	 * Update organization
+	 *
+	 * Updates an organization's name, logo, or metadata.
+	 * Requires owner or admin role.
+	 *
+	 * @param organizationId - Organization ID
+	 * @param data - Fields to update (name, logo, metadata)
+	 * @param token - User's authentication token
+	 * @returns Updated organization
+	 * @throws ForbiddenException if user lacks permission
+	 * @throws NotFoundException if organization not found
+	 */
+	async updateOrganization(
+		organizationId: string,
+		data: { name?: string; logo?: string; metadata?: Record<string, unknown> },
+		token: string
+	): Promise<Organization> {
+		try {
+			const result = await (this.orgApi as any).updateOrganization({
+				body: {
+					organizationId,
+					data: {
+						...(data.name !== undefined && { name: data.name }),
+						...(data.logo !== undefined && { logo: data.logo }),
+						...(data.metadata !== undefined && { metadata: data.metadata }),
+					},
+				},
+				headers: {
+					authorization: `Bearer ${token}`,
+				},
+			});
+
+			return result;
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				if (error.message?.includes('not found')) {
+					throw new NotFoundException('Organization not found');
+				}
+				if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+					throw new ForbiddenException('You do not have permission to update this organization');
+				}
+			}
+			throw error;
+		}
+	}
+
+	/**
+	 * Delete organization
+	 *
+	 * Deletes an organization and all its data.
+	 * Requires owner role.
+	 *
+	 * @param organizationId - Organization ID
+	 * @param token - User's authentication token
+	 * @throws ForbiddenException if user is not the owner
+	 * @throws NotFoundException if organization not found
+	 */
+	async deleteOrganization(organizationId: string, token: string): Promise<void> {
+		try {
+			await (this.orgApi as any).deleteOrganization({
+				body: { organizationId },
+				headers: {
+					authorization: `Bearer ${token}`,
+				},
+			});
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				if (error.message?.includes('not found')) {
+					throw new NotFoundException('Organization not found');
+				}
+				if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+					throw new ForbiddenException('Only the owner can delete the organization');
+				}
+			}
+			throw error;
+		}
+	}
+
+	/**
+	 * Update member role
+	 *
+	 * Changes a member's role within an organization.
+	 * Requires owner or admin role.
+	 *
+	 * @param organizationId - Organization ID
+	 * @param memberId - Member ID to update
+	 * @param role - New role ('admin' or 'member')
+	 * @param token - User's authentication token
+	 * @returns Updated member
+	 * @throws ForbiddenException if user lacks permission
+	 * @throws NotFoundException if member not found
+	 */
+	async updateMemberRole(
+		organizationId: string,
+		memberId: string,
+		role: 'admin' | 'member',
+		token: string
+	): Promise<OrganizationMember> {
+		try {
+			const result = await (this.orgApi as any).updateMemberRole({
+				body: {
+					organizationId,
+					memberId,
+					role,
+				},
+				headers: {
+					authorization: `Bearer ${token}`,
+				},
+			});
+
+			return result?.member || result;
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				if (error.message?.includes('not found')) {
+					throw new NotFoundException('Member not found');
+				}
+				if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+					throw new ForbiddenException('You do not have permission to change member roles');
+				}
+				if (error.message?.includes('owner')) {
+					throw new ForbiddenException("Cannot change the owner's role");
+				}
+			}
+			throw error;
+		}
+	}
+
+	/**
+	 * List organization invitations
+	 *
+	 * Returns all pending invitations for an organization.
+	 * Requires owner or admin role.
+	 *
+	 * @param organizationId - Organization ID
+	 * @param token - User's authentication token
+	 * @returns List of invitations
+	 */
+	async listOrganizationInvitations(
+		organizationId: string,
+		token: string
+	): Promise<OrganizationInvitation[]> {
+		try {
+			const result = await (this.orgApi as any).listInvitations({
+				query: { organizationId },
+				headers: {
+					authorization: `Bearer ${token}`,
+				},
+			});
+
+			return result?.invitations || result || [];
+		} catch (error: unknown) {
+			this.logger.error(
+				'Failed to list organization invitations',
+				error instanceof Error ? error.stack : undefined
+			);
+			return [];
+		}
+	}
+
+	/**
+	 * List user's pending invitations
+	 *
+	 * Returns all pending invitations for the authenticated user.
+	 *
+	 * @param token - User's authentication token
+	 * @returns List of invitations
+	 */
+	async listUserInvitations(token: string): Promise<OrganizationInvitation[]> {
+		try {
+			const result = (await (this.orgApi as any).getInvitation)
+				? await (this.orgApi as any).listUserInvitations({
+						headers: {
+							authorization: `Bearer ${token}`,
+						},
+					})
+				: [];
+
+			return result?.invitations || result || [];
+		} catch (error: unknown) {
+			this.logger.error(
+				'Failed to list user invitations',
+				error instanceof Error ? error.stack : undefined
+			);
+			return [];
+		}
+	}
+
+	/**
+	 * Cancel an invitation
+	 *
+	 * Cancels a pending invitation. Used by organization admins/owners.
+	 *
+	 * @param invitationId - Invitation ID
+	 * @param token - User's authentication token
+	 * @throws ForbiddenException if user lacks permission
+	 * @throws NotFoundException if invitation not found
+	 */
+	async cancelInvitation(invitationId: string, token: string): Promise<void> {
+		try {
+			await (this.orgApi as any).cancelInvitation({
+				body: { invitationId },
+				headers: {
+					authorization: `Bearer ${token}`,
+				},
+			});
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				if (error.message?.includes('not found')) {
+					throw new NotFoundException('Invitation not found');
+				}
+				if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+					throw new ForbiddenException('You do not have permission to cancel this invitation');
+				}
+			}
+			throw error;
+		}
+	}
+
+	/**
+	 * Reject an invitation
+	 *
+	 * Rejects a pending invitation. Used by the invited user.
+	 *
+	 * @param invitationId - Invitation ID
+	 * @param token - User's authentication token
+	 * @throws NotFoundException if invitation not found
+	 */
+	async rejectInvitation(invitationId: string, token: string): Promise<void> {
+		try {
+			await (this.orgApi as any).rejectInvitation({
+				body: { invitationId },
+				headers: {
+					authorization: `Bearer ${token}`,
+				},
+			});
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				if (error.message?.includes('not found')) {
+					throw new NotFoundException('Invitation not found');
 				}
 			}
 			throw error;

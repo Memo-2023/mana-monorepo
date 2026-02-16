@@ -14,6 +14,8 @@ export { RegisterB2BDto } from './register-b2b.dto';
 export { InviteEmployeeDto } from './invite-employee.dto';
 export { AcceptInvitationDto } from './accept-invitation.dto';
 export { SetActiveOrganizationDto } from './set-active-organization.dto';
+export { UpdateOrganizationDto } from './update-organization.dto';
+export { UpdateMemberRoleDto } from './update-member-role.dto';
 
 // Password management DTOs
 export { ForgotPasswordDto } from './forgot-password.dto';

@@ -1,0 +1,27 @@
+{
+	"name": "@manacore/shared-pwa",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc",
+		"type-check": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"@vite-pwa/sveltekit": ">=0.6.0"
+	},
+	"devDependencies": {
+		"@vite-pwa/sveltekit": "^0.6.5",
+		"typescript": "^5.0.0",
+		"vite": "^6.0.0",
+		"workbox-build": "^7.0.0"
+	}
+}
