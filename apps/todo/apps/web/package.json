@@ -14,6 +14,7 @@
 		"type-check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
 	},
 	"devDependencies": {
+		"@manacore/shared-pwa": "workspace:*",
 		"@manacore/shared-vite-config": "workspace:*",
 		"@sveltejs/adapter-node": "^5.0.0",
 		"@sveltejs/kit": "^2.47.1",
@@ -21,6 +22,7 @@
 		"@tailwindcss/vite": "^4.1.7",
 		"@types/d3-force": "^3.0.0",
 		"@types/node": "^20.0.0",
+		"@vite-pwa/sveltekit": "^1.1.0",
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
 		"svelte": "^5.41.0",

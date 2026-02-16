@@ -37,9 +37,10 @@
 		"svelte-i18n": "^4.0.1"
 	},
 	"devDependencies": {
-		"@manacore/shared-vite-config": "workspace:*",
 		"@eslint/compat": "^1.4.0",
 		"@eslint/js": "^9.36.0",
+		"@manacore/shared-pwa": "workspace:*",
+		"@manacore/shared-vite-config": "workspace:*",
 		"@sveltejs/adapter-netlify": "^5.2.3",
 		"@sveltejs/kit": "^2.47.1",
 		"@sveltejs/vite-plugin-svelte": "^6.2.0",
@@ -47,6 +48,7 @@
 		"@tailwindcss/typography": "^0.5.18",
 		"@tailwindcss/vite": "^4.1.13",
 		"@types/node": "^20",
+		"@vite-pwa/sveltekit": "^1.1.0",
 		"eslint": "^9.36.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.12.4",

@@ -16,6 +16,7 @@
 		"test:e2e": "playwright test"
 	},
 	"devDependencies": {
+		"@manacore/shared-pwa": "workspace:*",
 		"@manacore/shared-vite-config": "workspace:*",
 		"@playwright/test": "^1.51.0",
 		"@sveltejs/adapter-node": "^5.0.0",
@@ -24,6 +25,7 @@
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.1.7",
 		"@types/node": "^22.10.5",
+		"@vite-pwa/sveltekit": "^1.1.0",
 		"@vitest/coverage-v8": "^4.0.14",
 		"@vitest/ui": "^4.0.14",
 		"autoprefixer": "^10.4.20",
