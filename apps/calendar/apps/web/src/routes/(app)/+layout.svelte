@@ -64,6 +64,8 @@
 	import VoiceRecordingModal from '$lib/components/voice/VoiceRecordingModal.svelte';
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
+	import { calendarOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
@@ -652,6 +654,11 @@
 
 <!-- Settings Modal -->
 <SettingsModal visible={showSettingsModal} onClose={() => (showSettingsModal = false)} />
+
+<!-- App Onboarding Modal (shown once on first visit) -->
+{#if calendarOnboarding.shouldShow}
+	<MiniOnboardingModal store={calendarOnboarding} appName="Kalender" appEmoji="📅" />
+{/if}
 
 <style>
 	.layout-container {
