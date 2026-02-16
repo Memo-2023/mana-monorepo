@@ -81,6 +81,7 @@ ALL_DATABASES=(
     "nutriphi_bot"
     "questions"
     "skilltree"
+    "lightwrite"
 )
 
 # Check if specific service requested
@@ -190,9 +191,13 @@ setup_service() {
             create_db_if_not_exists "skilltree"
             push_schema "@skilltree/backend" "skilltree"
             ;;
+        lightwrite)
+            create_db_if_not_exists "lightwrite"
+            push_schema "@lightwrite/backend" "lightwrite"
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, picture, photos, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, picture, photos, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, lightwrite"
             exit 1
             ;;
     esac
@@ -216,7 +221,7 @@ echo -e "\n${GREEN}Step 2: Pushing schemas${NC}"
 echo "--------------------------------------"
 
 # Push schemas for all known services
-for service in auth chat zitare contacts calendar clock todo manadeck picture photos mail moodlit finance voxel-lava figgos planta nutriphi presi storage questions skilltree; do
+for service in auth chat zitare contacts calendar clock todo manadeck picture photos mail moodlit finance voxel-lava figgos planta nutriphi presi storage questions skilltree lightwrite; do
     setup_service "$service" 2>/dev/null || true
 done
 

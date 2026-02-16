@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#3B82F6" />
+		<meta name="description" content="LightWrite - Beat & Lyrics Editor" />
+		<title>LightWrite</title>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+		<script>
+			window.__PUBLIC_MANA_CORE_AUTH_URL__ = '%env:PUBLIC_MANA_CORE_AUTH_URL_CLIENT%' || '%env:PUBLIC_MANA_CORE_AUTH_URL%';
+			window.__PUBLIC_BACKEND_URL__ = '%env:PUBLIC_BACKEND_URL_CLIENT%' || '%env:PUBLIC_BACKEND_URL%';
+		</script>
+	</body>
+</html>

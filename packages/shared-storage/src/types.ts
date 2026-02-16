@@ -87,6 +87,7 @@ export const BUCKETS = {
 	STORAGE: 'storage-storage',
 	MAIL: 'mail-storage',
 	INVENTORY: 'inventory-storage',
+	LIGHTWRITE: 'lightwrite-storage',
 } as const;
 
 export type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];

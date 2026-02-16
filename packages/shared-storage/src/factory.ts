@@ -157,3 +157,10 @@ export function createInventoryStorage(publicUrl?: string): StorageClient {
 		publicUrl: publicUrl ?? process.env.INVENTORY_S3_PUBLIC_URL,
 	});
 }
+
+/**
+ * Create a storage client for the LightWrite project
+ */
+export function createLightWriteStorage(): StorageClient {
+	return createStorageClient({ name: BUCKETS.LIGHTWRITE });
+}

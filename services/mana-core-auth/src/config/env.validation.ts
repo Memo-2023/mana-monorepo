@@ -5,6 +5,10 @@
  * Fails fast with clear error messages if configuration is invalid.
  */
 
+// Load .env file before validation runs
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { z } from 'zod';
 
 // Schema for environment variables
