@@ -28,10 +28,11 @@ import { ConfigService } from '@nestjs/config';
 import { createBetterAuth } from '../better-auth.config';
 import type { BetterAuthInstance } from '../better-auth.config';
 import { getDb } from '../../db/connection';
-import { balances, organizationBalances } from '../../db/schema/credits.schema';
+import { balances } from '../../db/schema/credits.schema';
 import { ReferralCodeService } from '../../referrals/services/referral-code.service';
 import { ReferralTierService } from '../../referrals/services/referral-tier.service';
 import { ReferralTrackingService } from '../../referrals/services/referral-tracking.service';
+import { GiftCodeService } from '../../gifts/services/gift-code.service';
 import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';
 import { sourceAppStore } from '../stores/source-app.store';
 import { passwordResetRedirectStore } from '../stores/password-reset-redirect.store';
@@ -120,6 +121,9 @@ export class BetterAuthService {
 		@Optional()
 		@Inject(forwardRef(() => ReferralTrackingService))
 		private referralTrackingService: ReferralTrackingService,
+		@Optional()
+		@Inject(forwardRef(() => GiftCodeService))
+		private giftCodeService: GiftCodeService,
 		loggerService: LoggerService
 	) {
 		this.logger = loggerService.setContext('BetterAuthService');
@@ -162,6 +166,24 @@ export class BetterAuthService {
 
 			// Create personal credit balance
 			await this.createPersonalCreditBalance(user.id);
+
+			// Redeem any pending gift codes sent to this email
+			if (this.giftCodeService) {
+				try {
+					const giftResult = await this.giftCodeService.redeemPendingGifts(user.id, dto.email);
+					if (giftResult.redeemedCount > 0) {
+						this.logger.log('Redeemed pending gifts on registration', {
+							userId: user.id,
+							redeemedCount: giftResult.redeemedCount,
+							totalCredits: giftResult.totalCredits,
+						});
+					}
+				} catch (error) {
+					this.logger.warn('Failed to redeem pending gifts (non-critical)', {
+						error: error instanceof Error ? error.message : 'Unknown error',
+					});
+				}
+			}
 
 			// Initialize referral system for new user
 			await this.initializeUserReferrals(user.id, dto.referralCode, dto.sourceAppId);
@@ -229,10 +251,7 @@ export class BetterAuthService {
 
 			const organizationId = orgResult.id;
 
-			// Step 3: Create organization credit balance
-			await this.createOrganizationCreditBalance(organizationId);
-
-			// Step 4: Create owner's personal balance (for when they use credits)
+			// Step 3: Create owner's personal balance (for when they use credits)
 			await this.createPersonalCreditBalance(ownerId);
 
 			return {
@@ -1377,10 +1396,8 @@ export class BetterAuthService {
 	/**
 	 * Create personal credit balance for user
 	 *
-	 * Initializes a user's credit balance with:
-	 * - 0 purchased credits
-	 * - 150 free signup credits
-	 * - 5 daily free credits
+	 * Initializes a user's credit balance with balance: 0
+	 * Users must purchase credits or receive them as gifts.
 	 *
 	 * @param userId - User ID
 	 * @private
@@ -1392,46 +1409,11 @@ export class BetterAuthService {
 			await db.insert(balances).values({
 				userId: userId as any, // Cast to handle UUID type
 				balance: 0,
-				freeCreditsRemaining: 150, // Signup bonus
-				dailyFreeCredits: 5,
 				totalEarned: 0,
 				totalSpent: 0,
 			});
 		} catch (error) {
 			this.logger.warn('Failed to create personal credit balance (non-critical)', {
-				error: error instanceof Error ? error.message : 'Unknown error',
-			});
-			// Don't throw - this is a non-critical operation
-		}
-	}
-
-	/**
-	 * Create organization credit balance
-	 *
-	 * Initializes an organization's credit pool with:
-	 * - 0 purchased credits
-	 * - 0 allocated credits
-	 * - 0 available credits
-	 *
-	 * The organization owner must purchase credits before allocating to employees.
-	 *
-	 * @param organizationId - Organization ID
-	 * @private
-	 */
-	private async createOrganizationCreditBalance(organizationId: string) {
-		const db = getDb(this.databaseUrl);
-
-		try {
-			await db.insert(organizationBalances).values({
-				organizationId,
-				balance: 0,
-				allocatedCredits: 0,
-				availableCredits: 0,
-				totalPurchased: 0,
-				totalAllocated: 0,
-			});
-		} catch (error) {
-			this.logger.warn('Failed to create organization credit balance (non-critical)', {
 				error: error instanceof Error ? error.message : 'Unknown error',
 			});
 			// Don't throw - this is a non-critical operation

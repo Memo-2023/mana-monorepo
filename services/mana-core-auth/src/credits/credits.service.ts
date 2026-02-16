@@ -3,28 +3,15 @@ import {
 	BadRequestException,
 	NotFoundException,
 	ConflictException,
-	ForbiddenException,
 	Inject,
 	forwardRef,
 	Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { eq, and, sql, desc, sum } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { getDb } from '../db/connection';
-import {
-	balances,
-	transactions,
-	purchases,
-	packages,
-	usageStats,
-	organizationBalances,
-	creditAllocations,
-	members,
-	organizations,
-	users,
-} from '../db/schema';
+import { balances, transactions, purchases, packages, usageStats, users } from '../db/schema';
 import { UseCreditsDto } from './dto/use-credits.dto';
-import { AllocateCreditsDto } from './dto/allocate-credits.dto';
 import { StripeService } from '../stripe/stripe.service';
 
 @Injectable()
@@ -44,8 +31,6 @@ export class CreditsService {
 
 	async initializeUserBalance(userId: string) {
 		const db = this.getDb();
-		const signupBonus = this.configService.get<number>('credits.signupBonus') || 150;
-		const dailyFreeCredits = this.configService.get<number>('credits.dailyFreeCredits') || 5;
 
 		// Check if balance already exists
 		const [existingBalance] = await db
@@ -58,39 +43,22 @@ export class CreditsService {
 			return existingBalance;
 		}
 
-		// Create initial balance with signup bonus
+		// Create initial balance (starts at 0 - no signup bonus)
 		const [balance] = await db
 			.insert(balances)
 			.values({
 				userId,
 				balance: 0,
-				freeCreditsRemaining: signupBonus,
-				dailyFreeCredits,
-				lastDailyResetAt: new Date(),
+				totalEarned: 0,
+				totalSpent: 0,
 			})
 			.returning();
-
-		// Create transaction record for signup bonus
-		await db.insert(transactions).values({
-			userId,
-			type: 'bonus',
-			status: 'completed',
-			amount: signupBonus,
-			balanceBefore: 0,
-			balanceAfter: 0,
-			appId: 'system',
-			description: 'Signup bonus',
-			completedAt: new Date(),
-		});
 
 		return balance;
 	}
 
 	async getBalance(userId: string) {
 		const db = this.getDb();
-
-		// Check and apply daily free credits reset
-		await this.checkDailyReset(userId);
 
 		const [balance] = await db.select().from(balances).where(eq(balances.userId, userId)).limit(1);
 
@@ -101,10 +69,8 @@ export class CreditsService {
 
 		return {
 			balance: balance.balance,
-			freeCreditsRemaining: balance.freeCreditsRemaining,
 			totalEarned: balance.totalEarned,
 			totalSpent: balance.totalSpent,
-			dailyFreeCredits: balance.dailyFreeCredits,
 		};
 	}
 
@@ -142,18 +108,11 @@ export class CreditsService {
 				throw new NotFoundException('User balance not found');
 			}
 
-			const totalAvailable = currentBalance.balance + currentBalance.freeCreditsRemaining;
-
-			if (totalAvailable < useCreditsDto.amount) {
+			if (currentBalance.balance < useCreditsDto.amount) {
 				throw new BadRequestException('Insufficient credits');
 			}
 
-			// Calculate deduction from free and paid credits
-			const freeCreditsUsed = Math.min(useCreditsDto.amount, currentBalance.freeCreditsRemaining);
-			const paidCreditsUsed = useCreditsDto.amount - freeCreditsUsed;
-
-			const newFreeCredits = currentBalance.freeCreditsRemaining - freeCreditsUsed;
-			const newBalance = currentBalance.balance - paidCreditsUsed;
+			const newBalance = currentBalance.balance - useCreditsDto.amount;
 			const newTotalSpent = currentBalance.totalSpent + useCreditsDto.amount;
 
 			// Update balance with optimistic locking
@@ -161,7 +120,6 @@ export class CreditsService {
 				.update(balances)
 				.set({
 					balance: newBalance,
-					freeCreditsRemaining: newFreeCredits,
 					totalSpent: newTotalSpent,
 					version: currentBalance.version + 1,
 					updatedAt: new Date(),
@@ -181,8 +139,8 @@ export class CreditsService {
 					type: 'usage',
 					status: 'completed',
 					amount: -useCreditsDto.amount,
-					balanceBefore: currentBalance.balance + currentBalance.freeCreditsRemaining,
-					balanceAfter: newBalance + newFreeCredits,
+					balanceBefore: currentBalance.balance,
+					balanceAfter: newBalance,
 					appId: useCreditsDto.appId,
 					description: useCreditsDto.description,
 					metadata: useCreditsDto.metadata,
@@ -208,7 +166,6 @@ export class CreditsService {
 				transaction,
 				newBalance: {
 					balance: newBalance,
-					freeCreditsRemaining: newFreeCredits,
 					totalSpent: newTotalSpent,
 				},
 			};
@@ -249,429 +206,12 @@ export class CreditsService {
 			.orderBy(packages.sortOrder);
 	}
 
-	private async checkDailyReset(userId: string) {
-		const db = this.getDb();
-
-		const [balance] = await db.select().from(balances).where(eq(balances.userId, userId)).limit(1);
-
-		if (!balance) {
-			return;
-		}
-
-		const now = new Date();
-		const lastReset = balance.lastDailyResetAt;
-
-		// Check if last reset was on a different day
-		if (
-			!lastReset ||
-			lastReset.getDate() !== now.getDate() ||
-			lastReset.getMonth() !== now.getMonth() ||
-			lastReset.getFullYear() !== now.getFullYear()
-		) {
-			// Reset daily free credits
-			await db
-				.update(balances)
-				.set({
-					freeCreditsRemaining: balance.freeCreditsRemaining + balance.dailyFreeCredits,
-					lastDailyResetAt: now,
-					updatedAt: now,
-				})
-				.where(eq(balances.userId, userId));
-
-			// Create transaction record for daily bonus
-			await db.insert(transactions).values({
-				userId,
-				type: 'bonus',
-				status: 'completed',
-				amount: balance.dailyFreeCredits,
-				balanceBefore: balance.balance + balance.freeCreditsRemaining,
-				balanceAfter: balance.balance + balance.freeCreditsRemaining + balance.dailyFreeCredits,
-				appId: 'system',
-				description: 'Daily free credits',
-				completedAt: now,
-			});
-		}
-	}
-
-	// ============================================================================
-	// ORGANIZATION CREDIT METHODS (B2B)
-	// ============================================================================
-
-	/**
-	 * Create organization credit balance
-	 * Called when a new organization is created
-	 */
-	async createOrganizationCreditBalance(organizationId: string) {
-		const db = this.getDb();
-
-		// Check if balance already exists
-		const [existingBalance] = await db
-			.select()
-			.from(organizationBalances)
-			.where(eq(organizationBalances.organizationId, organizationId))
-			.limit(1);
-
-		if (existingBalance) {
-			return existingBalance;
-		}
-
-		// Create initial balance
-		const [balance] = await db
-			.insert(organizationBalances)
-			.values({
-				organizationId,
-				balance: 0,
-				allocatedCredits: 0,
-				availableCredits: 0,
-				totalPurchased: 0,
-				totalAllocated: 0,
-			})
-			.returning();
-
-		return balance;
-	}
-
 	/**
 	 * Create personal credit balance (B2C user)
 	 * Alias for initializeUserBalance for clarity
 	 */
 	async createPersonalCreditBalance(userId: string) {
 		return this.initializeUserBalance(userId);
-	}
-
-	/**
-	 * Allocate credits from organization to employee
-	 * Only organization owners can allocate credits
-	 */
-	async allocateCredits(allocatorUserId: string, allocateDto: AllocateCreditsDto) {
-		const db = this.getDb();
-		const { organizationId, employeeId, amount, reason } = allocateDto;
-
-		return await db.transaction(async (tx) => {
-			// 1. Verify allocator has 'owner' role in the organization
-			const [member] = await tx
-				.select()
-				.from(members)
-				.where(and(eq(members.organizationId, organizationId), eq(members.userId, allocatorUserId)))
-				.limit(1);
-
-			if (!member || member.role !== 'owner') {
-				throw new ForbiddenException('Only organization owners can allocate credits');
-			}
-
-			// 2. Get organization balance with row lock
-			const [orgBalance] = await tx
-				.select()
-				.from(organizationBalances)
-				.where(eq(organizationBalances.organizationId, organizationId))
-				.for('update')
-				.limit(1);
-
-			if (!orgBalance) {
-				throw new NotFoundException('Organization balance not found');
-			}
-
-			// 3. Check if organization has sufficient available credits
-			if (orgBalance.availableCredits < amount) {
-				throw new BadRequestException(
-					`Insufficient organization credits. Available: ${orgBalance.availableCredits}, Requested: ${amount}`
-				);
-			}
-
-			// 4. Get or create employee balance with row lock
-			let employeeBalance = await tx
-				.select()
-				.from(balances)
-				.where(eq(balances.userId, employeeId))
-				.for('update')
-				.limit(1)
-				.then((rows) => rows[0]);
-
-			if (!employeeBalance) {
-				// Initialize employee balance within the transaction
-				const signupBonus = this.configService.get<number>('credits.signupBonus') || 150;
-				const dailyFreeCredits = this.configService.get<number>('credits.dailyFreeCredits') || 5;
-
-				const [newBalance] = await tx
-					.insert(balances)
-					.values({
-						userId: employeeId,
-						balance: 0,
-						freeCreditsRemaining: signupBonus,
-						dailyFreeCredits,
-						lastDailyResetAt: new Date(),
-					})
-					.returning();
-
-				employeeBalance = newBalance;
-			}
-
-			const currentEmployeeBalance = employeeBalance.balance;
-			const newEmployeeBalance = currentEmployeeBalance + amount;
-
-			// 5. Update organization balance
-			const newAllocatedCredits = orgBalance.allocatedCredits + amount;
-			const newAvailableCredits = orgBalance.balance - newAllocatedCredits;
-
-			const updateOrgResult = await tx
-				.update(organizationBalances)
-				.set({
-					allocatedCredits: newAllocatedCredits,
-					availableCredits: newAvailableCredits,
-					totalAllocated: orgBalance.totalAllocated + amount,
-					version: orgBalance.version + 1,
-					updatedAt: new Date(),
-				})
-				.where(
-					and(
-						eq(organizationBalances.organizationId, organizationId),
-						eq(organizationBalances.version, orgBalance.version)
-					)
-				)
-				.returning();
-
-			if (updateOrgResult.length === 0) {
-				throw new ConflictException(
-					'Organization balance was modified by another transaction. Please retry.'
-				);
-			}
-
-			// 6. Update employee balance
-			const updateEmployeeResult = await tx
-				.update(balances)
-				.set({
-					balance: newEmployeeBalance,
-					totalEarned: employeeBalance.totalEarned + amount,
-					version: employeeBalance.version + 1,
-					updatedAt: new Date(),
-				})
-				.where(and(eq(balances.userId, employeeId), eq(balances.version, employeeBalance.version)))
-				.returning();
-
-			if (updateEmployeeResult.length === 0) {
-				throw new ConflictException(
-					'Employee balance was modified by another transaction. Please retry.'
-				);
-			}
-
-			// 7. Create allocation record (audit trail)
-			const [allocation] = await tx
-				.insert(creditAllocations)
-				.values({
-					organizationId,
-					employeeId,
-					amount,
-					allocatedBy: allocatorUserId,
-					reason: reason || 'Credit allocation',
-					balanceBefore: currentEmployeeBalance,
-					balanceAfter: newEmployeeBalance,
-				})
-				.returning();
-
-			// 8. Create transaction record for employee
-			await tx.insert(transactions).values({
-				userId: employeeId,
-				type: 'bonus',
-				status: 'completed',
-				amount,
-				balanceBefore: currentEmployeeBalance,
-				balanceAfter: newEmployeeBalance,
-				appId: 'organization',
-				description: `Credit allocation from organization: ${reason || 'N/A'}`,
-				organizationId,
-				completedAt: new Date(),
-			});
-
-			return {
-				success: true,
-				allocation,
-				organizationBalance: {
-					balance: orgBalance.balance,
-					allocatedCredits: newAllocatedCredits,
-					availableCredits: newAvailableCredits,
-				},
-				employeeBalance: {
-					balance: newEmployeeBalance,
-				},
-			};
-		});
-	}
-
-	/**
-	 * Get employee's credit balance (allocated from organization)
-	 * Returns the employee's personal balance
-	 */
-	async getEmployeeCreditBalance(userId: string, organizationId?: string) {
-		const db = this.getDb();
-
-		// Get employee's personal balance
-		const [balance] = await db.select().from(balances).where(eq(balances.userId, userId)).limit(1);
-
-		if (!balance) {
-			return null;
-		}
-
-		return {
-			balance: balance.balance,
-			freeCreditsRemaining: balance.freeCreditsRemaining,
-			totalEarned: balance.totalEarned,
-			totalSpent: balance.totalSpent,
-		};
-	}
-
-	/**
-	 * Get personal credit balance (B2C user)
-	 * Alias for getBalance for clarity
-	 */
-	async getPersonalCreditBalance(userId: string) {
-		return this.getBalance(userId);
-	}
-
-	/**
-	 * Get organization balance and allocation statistics
-	 */
-	async getOrganizationBalance(organizationId: string) {
-		const db = this.getDb();
-
-		// Get organization balance
-		const [orgBalance] = await db
-			.select()
-			.from(organizationBalances)
-			.where(eq(organizationBalances.organizationId, organizationId))
-			.limit(1);
-
-		if (!orgBalance) {
-			throw new NotFoundException('Organization balance not found');
-		}
-
-		// Get allocation statistics
-		const allocations = await db
-			.select()
-			.from(creditAllocations)
-			.where(eq(creditAllocations.organizationId, organizationId))
-			.orderBy(desc(creditAllocations.createdAt))
-			.limit(10); // Last 10 allocations
-
-		return {
-			balance: orgBalance.balance,
-			allocatedCredits: orgBalance.allocatedCredits,
-			availableCredits: orgBalance.availableCredits,
-			totalPurchased: orgBalance.totalPurchased,
-			totalAllocated: orgBalance.totalAllocated,
-			recentAllocations: allocations,
-		};
-	}
-
-	/**
-	 * Deduct credits with organization tracking
-	 * Enhanced version of useCredits that tracks organization_id for B2B users
-	 */
-	async deductCredits(userId: string, useCreditsDto: UseCreditsDto, organizationId?: string) {
-		const db = this.getDb();
-
-		// Check for idempotency
-		if (useCreditsDto.idempotencyKey) {
-			const [existingTransaction] = await db
-				.select()
-				.from(transactions)
-				.where(eq(transactions.idempotencyKey, useCreditsDto.idempotencyKey))
-				.limit(1);
-
-			if (existingTransaction) {
-				return {
-					success: true,
-					transaction: existingTransaction,
-					message: 'Transaction already processed',
-				};
-			}
-		}
-
-		// Use a transaction for atomicity
-		return await db.transaction(async (tx) => {
-			// Get current balance with row lock
-			const [currentBalance] = await tx
-				.select()
-				.from(balances)
-				.where(eq(balances.userId, userId))
-				.for('update')
-				.limit(1);
-
-			if (!currentBalance) {
-				throw new NotFoundException('User balance not found');
-			}
-
-			const totalAvailable = currentBalance.balance + currentBalance.freeCreditsRemaining;
-
-			if (totalAvailable < useCreditsDto.amount) {
-				throw new BadRequestException('Insufficient credits');
-			}
-
-			// Calculate deduction from free and paid credits
-			const freeCreditsUsed = Math.min(useCreditsDto.amount, currentBalance.freeCreditsRemaining);
-			const paidCreditsUsed = useCreditsDto.amount - freeCreditsUsed;
-
-			const newFreeCredits = currentBalance.freeCreditsRemaining - freeCreditsUsed;
-			const newBalance = currentBalance.balance - paidCreditsUsed;
-			const newTotalSpent = currentBalance.totalSpent + useCreditsDto.amount;
-
-			// Update balance
-			const updateResult = await tx
-				.update(balances)
-				.set({
-					balance: newBalance,
-					freeCreditsRemaining: newFreeCredits,
-					totalSpent: newTotalSpent,
-					version: currentBalance.version + 1,
-					updatedAt: new Date(),
-				})
-				.where(and(eq(balances.userId, userId), eq(balances.version, currentBalance.version)))
-				.returning();
-
-			if (updateResult.length === 0) {
-				throw new ConflictException('Balance was modified by another transaction. Please retry.');
-			}
-
-			// Create transaction record with organization_id
-			const [transaction] = await tx
-				.insert(transactions)
-				.values({
-					userId,
-					type: 'usage',
-					status: 'completed',
-					amount: -useCreditsDto.amount,
-					balanceBefore: currentBalance.balance + currentBalance.freeCreditsRemaining,
-					balanceAfter: newBalance + newFreeCredits,
-					appId: useCreditsDto.appId,
-					description: useCreditsDto.description,
-					organizationId: organizationId || null, // Track organization for B2B
-					metadata: useCreditsDto.metadata,
-					idempotencyKey: useCreditsDto.idempotencyKey,
-					completedAt: new Date(),
-				})
-				.returning();
-
-			// Track usage stats
-			const today = new Date();
-			today.setHours(0, 0, 0, 0);
-
-			await tx.insert(usageStats).values({
-				userId,
-				appId: useCreditsDto.appId,
-				creditsUsed: useCreditsDto.amount,
-				date: today,
-				metadata: useCreditsDto.metadata,
-			});
-
-			return {
-				success: true,
-				transaction,
-				newBalance: {
-					balance: newBalance,
-					freeCreditsRemaining: newFreeCredits,
-					totalSpent: newTotalSpent,
-				},
-			};
-		});
 	}
 
 	// ============================================================================
@@ -797,18 +337,14 @@ export class CreditsService {
 				.limit(1);
 
 			if (!balance) {
-				// Initialize balance if not exists
-				const signupBonus = this.configService.get<number>('credits.signupBonus') || 150;
-				const dailyFreeCredits = this.configService.get<number>('credits.dailyFreeCredits') || 5;
-
+				// Initialize balance if not exists (starts at 0)
 				[balance] = await tx
 					.insert(balances)
 					.values({
 						userId: purchase.userId,
 						balance: 0,
-						freeCreditsRemaining: signupBonus,
-						dailyFreeCredits,
-						lastDailyResetAt: new Date(),
+						totalEarned: 0,
+						totalSpent: 0,
 					})
 					.returning();
 			}
@@ -1024,7 +560,8 @@ export class CreditsService {
 
 		// 5. Build URLs
 		const baseUrl = this.configService.get<string>('app.baseUrl') || 'https://mana.how';
-		const successUrl = options?.successUrl || `${baseUrl}/credits/success?purchase_id=${purchase.id}`;
+		const successUrl =
+			options?.successUrl || `${baseUrl}/credits/success?purchase_id=${purchase.id}`;
 		const cancelUrl = options?.cancelUrl || `${baseUrl}/credits/cancelled`;
 
 		// 6. Create Checkout Session

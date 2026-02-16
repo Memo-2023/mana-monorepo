@@ -53,10 +53,6 @@
 				<span class="text-muted-foreground">{$_('dashboard.widgets.credits.available')}</span>
 				<span class="text-2xl font-bold">{formatCredits(data.balance)}</span>
 			</div>
-			<div class="flex items-center justify-between">
-				<span class="text-muted-foreground">{$_('dashboard.widgets.credits.free_today')}</span>
-				<span class="font-medium">{data.freeCreditsRemaining}/{data.dailyFreeCredits}</span>
-			</div>
 			<a
 				href="/credits"
 				class="mt-4 block w-full rounded-lg bg-primary/10 py-2 text-center text-sm font-medium text-primary hover:bg-primary/20"

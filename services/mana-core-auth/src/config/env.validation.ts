@@ -52,10 +52,6 @@ const envSchema = z.object({
 	RATE_LIMIT_TTL: z.string().regex(/^\d+$/).optional(),
 	RATE_LIMIT_MAX: z.string().regex(/^\d+$/).optional(),
 
-	// Credits
-	CREDITS_SIGNUP_BONUS: z.string().regex(/^\d+$/).optional(),
-	CREDITS_DAILY_FREE: z.string().regex(/^\d+$/).optional(),
-
 	// AI
 	GOOGLE_GENAI_API_KEY: z.string().optional(),
 

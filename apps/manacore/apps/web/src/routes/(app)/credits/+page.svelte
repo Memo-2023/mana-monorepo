@@ -91,12 +91,8 @@
 				return '⚡';
 			case 'refund':
 				return '↩️';
-			case 'bonus':
+			case 'gift':
 				return '🎁';
-			case 'expiry':
-				return '⏰';
-			case 'adjustment':
-				return '🔧';
 			default:
 				return '📝';
 		}
@@ -105,11 +101,10 @@
 	function getTransactionColor(type: string): string {
 		switch (type) {
 			case 'purchase':
-			case 'bonus':
+			case 'gift':
 			case 'refund':
 				return 'text-green-600 dark:text-green-400';
 			case 'usage':
-			case 'expiry':
 				return 'text-red-600 dark:text-red-400';
 			default:
 				return 'text-gray-600 dark:text-gray-400';
@@ -123,7 +118,10 @@
 			// Redirect to Stripe Checkout
 			window.location.href = result.checkoutUrl;
 		} catch (e) {
-			showToast(e instanceof Error ? e.message : 'Fehler beim Erstellen der Checkout-Session', 'error');
+			showToast(
+				e instanceof Error ? e.message : 'Fehler beim Erstellen der Checkout-Session',
+				'error'
+			);
 		} finally {
 			processingPackageId = null;
 		}
@@ -161,20 +159,12 @@
 		</Card>
 	{:else}
 		<!-- Balance Overview Cards -->
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+		<div class="grid gap-4 sm:grid-cols-3 mb-8">
 			<Card>
 				<div class="text-center">
 					<p class="text-sm text-muted-foreground">Verfügbare Credits</p>
 					<p class="text-3xl font-bold text-primary mt-1">
 						{formatCredits(balance?.balance ?? 0)}
-					</p>
-				</div>
-			</Card>
-			<Card>
-				<div class="text-center">
-					<p class="text-sm text-muted-foreground">Gratis-Credits heute</p>
-					<p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">
-						{balance?.freeCreditsRemaining ?? 0} / {balance?.dailyFreeCredits ?? 5}
 					</p>
 				</div>
 			</Card>
@@ -281,11 +271,23 @@
 									</div>
 									{#if processingPackageId === pkg.id}
 										<svg class="animate-spin h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24">
-											<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-											<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+											<circle
+												class="opacity-25"
+												cx="12"
+												cy="12"
+												r="10"
+												stroke="currentColor"
+												stroke-width="4"
+											></circle>
+											<path
+												class="opacity-75"
+												fill="currentColor"
+												d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+											></path>
 										</svg>
 									{:else}
-										<span class="font-semibold text-primary">{formatPrice(pkg.priceEuroCents)}</span>
+										<span class="font-semibold text-primary">{formatPrice(pkg.priceEuroCents)}</span
+										>
 									{/if}
 								</button>
 							{/each}
@@ -362,8 +364,19 @@
 							>
 								{#if processingPackageId === pkg.id}
 									<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+										<circle
+											class="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											stroke-width="4"
+										></circle>
+										<path
+											class="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										></path>
 									</svg>
 									Wird geladen...
 								{:else}
@@ -388,7 +401,8 @@
 <!-- Toast Notification -->
 {#if toastMessage}
 	<div
-		class="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg animate-fade-in {toastType === 'success'
+		class="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg animate-fade-in {toastType ===
+		'success'
 			? 'bg-green-600 text-white'
 			: 'bg-red-600 text-white'}"
 	>

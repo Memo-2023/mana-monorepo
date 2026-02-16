@@ -63,10 +63,7 @@ export default () => ({
 		limit: parseInt(env.RATE_LIMIT_MAX || '100', 10),
 	},
 
-	credits: {
-		signupBonus: parseInt(env.CREDITS_SIGNUP_BONUS || '150', 10),
-		dailyFreeCredits: parseInt(env.CREDITS_DAILY_FREE || '5', 10),
-	},
+	// Credits config removed - no free credits system
 
 	ai: {
 		geminiApiKey: env.GOOGLE_GENAI_API_KEY || '',

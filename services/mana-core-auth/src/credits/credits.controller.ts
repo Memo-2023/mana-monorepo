@@ -5,7 +5,6 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { CurrentUserData } from '../common/decorators/current-user.decorator';
 import { UseCreditsDto } from './dto/use-credits.dto';
-import { AllocateCreditsDto } from './dto/allocate-credits.dto';
 import { PurchaseCreditsDto } from './dto/purchase-credits.dto';
 import { CreatePaymentLinkDto } from './dto/create-payment-link.dto';
 
@@ -97,61 +96,11 @@ export class CreditsController {
 		},
 	})
 	@ApiResponse({ status: 404, description: 'Package not found' })
-	async createPaymentLink(
-		@CurrentUser() user: CurrentUserData,
-		@Body() dto: CreatePaymentLinkDto
-	) {
+	async createPaymentLink(@CurrentUser() user: CurrentUserData, @Body() dto: CreatePaymentLinkDto) {
 		return this.creditsService.createPaymentLink(user.userId, dto.packageId, {
 			successUrl: dto.successUrl,
 			cancelUrl: dto.cancelUrl,
 			roomId: dto.roomId,
 		});
-	}
-
-	// ============================================================================
-	// ORGANIZATION / B2B ENDPOINTS
-	// ============================================================================
-
-	/**
-	 * Allocate credits from organization to employee
-	 * Only organization owners can allocate credits
-	 */
-	@Post('organization/allocate')
-	async allocateCredits(
-		@CurrentUser() user: CurrentUserData,
-		@Body() allocateDto: AllocateCreditsDto
-	) {
-		return this.creditsService.allocateCredits(user.userId, allocateDto);
-	}
-
-	/**
-	 * Get organization credit balance and allocation stats
-	 */
-	@Get('organization/:organizationId/balance')
-	async getOrganizationBalance(@Param('organizationId') organizationId: string) {
-		return this.creditsService.getOrganizationBalance(organizationId);
-	}
-
-	/**
-	 * Get employee's credit balance within an organization context
-	 */
-	@Get('organization/:organizationId/employee/:employeeId/balance')
-	async getEmployeeBalance(
-		@Param('organizationId') organizationId: string,
-		@Param('employeeId') employeeId: string
-	) {
-		return this.creditsService.getEmployeeCreditBalance(employeeId, organizationId);
-	}
-
-	/**
-	 * Deduct credits with organization tracking (for B2B usage)
-	 */
-	@Post('organization/:organizationId/use')
-	async deductCreditsWithOrgTracking(
-		@CurrentUser() user: CurrentUserData,
-		@Param('organizationId') organizationId: string,
-		@Body() useCreditsDto: UseCreditsDto
-	) {
-		return this.creditsService.deductCredits(user.userId, useCreditsDto, organizationId);
 	}
 }

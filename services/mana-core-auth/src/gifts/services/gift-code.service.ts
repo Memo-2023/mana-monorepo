@@ -138,10 +138,9 @@ export class GiftCodeService {
 				throw new NotFoundException('User balance not found');
 			}
 
-			const totalAvailable = userBalance.balance + userBalance.freeCreditsRemaining;
-			if (totalAvailable < totalCredits) {
+			if (userBalance.balance < totalCredits) {
 				throw new BadRequestException(
-					`Insufficient credits. Required: ${totalCredits}, Available: ${totalAvailable}`
+					`Insufficient credits. Required: ${totalCredits}, Available: ${userBalance.balance}`
 				);
 			}
 
@@ -149,17 +148,12 @@ export class GiftCodeService {
 			const code = await this.generateUniqueCode();
 
 			// 3. Deduct credits from user (reserve them)
-			const freeCreditsUsed = Math.min(totalCredits, userBalance.freeCreditsRemaining);
-			const paidCreditsUsed = totalCredits - freeCreditsUsed;
-
-			const newFreeCredits = userBalance.freeCreditsRemaining - freeCreditsUsed;
-			const newBalance = userBalance.balance - paidCreditsUsed;
+			const newBalance = userBalance.balance - totalCredits;
 
 			const updateResult = await tx
 				.update(balances)
 				.set({
 					balance: newBalance,
-					freeCreditsRemaining: newFreeCredits,
 					version: userBalance.version + 1,
 					updatedAt: new Date(),
 				})
@@ -175,11 +169,11 @@ export class GiftCodeService {
 				.insert(transactions)
 				.values({
 					userId,
-					type: 'gift_reserve',
+					type: 'gift',
 					status: 'completed',
 					amount: -totalCredits,
-					balanceBefore: totalAvailable,
-					balanceAfter: newBalance + newFreeCredits,
+					balanceBefore: userBalance.balance,
+					balanceAfter: newBalance,
 					appId: dto.sourceAppId || 'gift',
 					description: `Gift code reservation: ${code}`,
 					completedAt: new Date(),
@@ -427,15 +421,14 @@ export class GiftCodeService {
 				.limit(1);
 
 			if (!redeemerBalance) {
-				// Initialize balance
+				// Initialize balance (starts at 0)
 				[redeemerBalance] = await tx
 					.insert(balances)
 					.values({
 						userId,
 						balance: 0,
-						freeCreditsRemaining: 150, // Signup bonus
-						dailyFreeCredits: 5,
-						lastDailyResetAt: new Date(),
+						totalEarned: 0,
+						totalSpent: 0,
 					})
 					.returning();
 			}
@@ -460,14 +453,13 @@ export class GiftCodeService {
 				.insert(transactions)
 				.values({
 					userId,
-					type: 'gift_receive',
+					type: 'gift',
 					status: 'completed',
 					amount: creditsToAdd,
 					balanceBefore: redeemerBalance.balance,
 					balanceAfter: newBalance,
 					appId: dto.sourceAppId || 'gift',
 					description: `Gift received: ${giftCode.code}`,
-					organizationId: null,
 					metadata: { giftCodeId: giftCode.id, portionNumber },
 					idempotencyKey: null,
 					completedAt: new Date(),
@@ -570,7 +562,7 @@ export class GiftCodeService {
 				// 5. Create refund transaction
 				await tx.insert(transactions).values({
 					userId,
-					type: 'gift_release',
+					type: 'refund',
 					status: 'completed',
 					amount: refundAmount,
 					balanceBefore: creatorBalance.balance,
@@ -686,5 +678,60 @@ export class GiftCodeService {
 			creatorName: creatorMap.get(r.creatorId) || undefined,
 			redeemedAt: r.redeemedAt.toISOString(),
 		}));
+	}
+
+	/**
+	 * Automatically redeem pending gifts for a newly registered user
+	 * Called during registration to give users any gifts sent to their email before signup
+	 */
+	async redeemPendingGifts(
+		userId: string,
+		email: string
+	): Promise<{ redeemedCount: number; totalCredits: number }> {
+		const db = this.getDb();
+
+		// Find active gift codes with targetEmail matching the user's email
+		const pendingGifts = await db
+			.select()
+			.from(giftCodes)
+			.where(and(eq(giftCodes.targetEmail, email.toLowerCase()), eq(giftCodes.status, 'active')));
+
+		if (pendingGifts.length === 0) {
+			return { redeemedCount: 0, totalCredits: 0 };
+		}
+
+		let redeemedCount = 0;
+		let totalCredits = 0;
+
+		// Redeem each pending gift
+		for (const gift of pendingGifts) {
+			try {
+				const result = await this.redeemGiftCode(
+					userId,
+					gift.code,
+					{ sourceAppId: 'registration' },
+					email
+				);
+
+				if (result.success) {
+					redeemedCount++;
+					totalCredits += result.credits || 0;
+					this.logger.log('Auto-redeemed pending gift on registration', {
+						userId,
+						code: gift.code,
+						credits: result.credits,
+					});
+				}
+			} catch (error) {
+				this.logger.warn('Failed to auto-redeem pending gift', {
+					userId,
+					code: gift.code,
+					error: error instanceof Error ? error.message : 'Unknown error',
+				});
+				// Continue with other gifts even if one fails
+			}
+		}
+
+		return { redeemedCount, totalCredits };
 	}
 }

@@ -18,8 +18,6 @@ export const createMockConfigService = (overrides: Record<string, any> = {}): Co
 		'jwt.refreshTokenExpiry': '7d',
 		'jwt.issuer': 'mana-core',
 		'jwt.audience': 'mana-universe',
-		'credits.signupBonus': 150,
-		'credits.dailyFreeCredits': 5,
 		'redis.host': 'localhost',
 		'redis.port': 6379,
 		'redis.password': 'test',

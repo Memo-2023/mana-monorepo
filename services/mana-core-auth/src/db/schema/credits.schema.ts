@@ -10,21 +10,16 @@ import {
 	boolean,
 } from 'drizzle-orm/pg-core';
 import { users } from './auth.schema';
-import { organizations } from './organizations.schema';
 
 export const creditsSchema = pgSchema('credits');
 
 // Transaction types enum
+// Simplified: removed bonus, expiry, adjustment - kept core types
 export const transactionTypeEnum = pgEnum('transaction_type', [
 	'purchase',
 	'usage',
 	'refund',
-	'bonus',
-	'expiry',
-	'adjustment',
-	'gift_reserve',
-	'gift_release',
-	'gift_receive',
+	'gift',
 ]);
 
 // Transaction status enum
@@ -47,14 +42,12 @@ export const stripeCustomers = creditsSchema.table('stripe_customers', {
 });
 
 // Credit balances (one per user)
+// Simplified: removed free credits columns (no signup bonus, no daily credits)
 export const balances = creditsSchema.table('balances', {
 	userId: text('user_id')
 		.primaryKey()
 		.references(() => users.id, { onDelete: 'cascade' }),
 	balance: integer('balance').default(0).notNull(),
-	freeCreditsRemaining: integer('free_credits_remaining').default(150).notNull(),
-	dailyFreeCredits: integer('daily_free_credits').default(5).notNull(),
-	lastDailyResetAt: timestamp('last_daily_reset_at', { withTimezone: true }).defaultNow(),
 	totalEarned: integer('total_earned').default(0).notNull(),
 	totalSpent: integer('total_spent').default(0).notNull(),
 	version: integer('version').default(0).notNull(),
@@ -77,7 +70,6 @@ export const transactions = creditsSchema.table(
 		balanceAfter: integer('balance_after').notNull(),
 		appId: text('app_id').notNull(),
 		description: text('description').notNull(),
-		organizationId: text('organization_id').references(() => organizations.id),
 		metadata: jsonb('metadata'),
 		idempotencyKey: text('idempotency_key').unique(),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -86,7 +78,6 @@ export const transactions = creditsSchema.table(
 	(table) => ({
 		userIdIdx: index('transactions_user_id_idx').on(table.userId),
 		appIdIdx: index('transactions_app_id_idx').on(table.appId),
-		organizationIdIdx: index('transactions_organization_id_idx').on(table.organizationId),
 		createdAtIdx: index('transactions_created_at_idx').on(table.createdAt),
 		idempotencyKeyIdx: index('transactions_idempotency_key_idx').on(table.idempotencyKey),
 	})
@@ -152,46 +143,4 @@ export const usageStats = creditsSchema.table(
 	})
 );
 
-// Organization credit balances (B2B)
-export const organizationBalances = creditsSchema.table('organization_balances', {
-	organizationId: text('organization_id')
-		.primaryKey()
-		.references(() => organizations.id, { onDelete: 'cascade' }),
-	balance: integer('balance').default(0).notNull(),
-	allocatedCredits: integer('allocated_credits').default(0).notNull(),
-	availableCredits: integer('available_credits').default(0).notNull(),
-	totalPurchased: integer('total_purchased').default(0).notNull(),
-	totalAllocated: integer('total_allocated').default(0).notNull(),
-	version: integer('version').default(0).notNull(),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
-
-// Credit allocations (B2B - tracking allocations from org to employees)
-export const creditAllocations = creditsSchema.table(
-	'credit_allocations',
-	{
-		id: uuid('id').primaryKey().defaultRandom(),
-		organizationId: text('organization_id')
-			.references(() => organizations.id, { onDelete: 'cascade' })
-			.notNull(),
-		employeeId: text('employee_id')
-			.references(() => users.id, { onDelete: 'cascade' })
-			.notNull(),
-		amount: integer('amount').notNull(),
-		allocatedBy: text('allocated_by')
-			.references(() => users.id)
-			.notNull(),
-		reason: text('reason'),
-		balanceBefore: integer('balance_before').notNull(),
-		balanceAfter: integer('balance_after').notNull(),
-		metadata: jsonb('metadata'),
-		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	},
-	(table) => ({
-		organizationIdIdx: index('credit_allocations_organization_id_idx').on(table.organizationId),
-		employeeIdIdx: index('credit_allocations_employee_id_idx').on(table.employeeId),
-		allocatedByIdx: index('credit_allocations_allocated_by_idx').on(table.allocatedBy),
-		createdAtIdx: index('credit_allocations_created_at_idx').on(table.createdAt),
-	})
-);
+// B2B organization credit tables removed - simplified to B2C only

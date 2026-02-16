@@ -9,15 +9,13 @@ import { getManaAuthUrl } from './config';
 // Types
 export interface CreditBalance {
 	balance: number;
-	freeCreditsRemaining: number;
 	totalEarned: number;
 	totalSpent: number;
-	dailyFreeCredits: number;
 }
 
 export interface CreditTransaction {
 	id: string;
-	type: 'purchase' | 'usage' | 'refund' | 'bonus' | 'expiry' | 'adjustment';
+	type: 'purchase' | 'usage' | 'refund' | 'gift';
 	status: 'pending' | 'completed' | 'failed' | 'cancelled';
 	amount: number;
 	balanceBefore: number;

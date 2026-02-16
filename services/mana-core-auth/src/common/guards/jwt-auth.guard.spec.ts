@@ -103,6 +103,7 @@ describe('JwtAuthGuard', () => {
 
 			expect(result).toBe(true);
 			expect(mockRequest.user).toEqual({
+				sub: 'user-123',
 				userId: 'user-123',
 				email: 'test@example.com',
 				role: 'user',
@@ -206,11 +207,12 @@ describe('JwtAuthGuard', () => {
 
 			await guard.canActivate(mockContext as any);
 
+			// Note: issuer defaults to http://localhost:3001 when BASE_URL and jwt.issuer are not set
 			expect(mockJwtVerify).toHaveBeenCalledWith(
 				'valid-jwt-token',
 				expect.anything(), // JWKS
 				expect.objectContaining({
-					issuer: 'manacore',
+					issuer: 'http://localhost:3001',
 					audience: 'manacore',
 				})
 			);
@@ -240,6 +242,7 @@ describe('JwtAuthGuard', () => {
 			await guard.canActivate(mockContext as any);
 
 			expect(mockRequest.user).toEqual({
+				sub: 'user-456',
 				userId: 'user-456',
 				email: 'admin@example.com',
 				role: 'admin',
@@ -396,9 +399,9 @@ describe('JwtAuthGuard', () => {
 		});
 
 		it('should use configured issuer and audience', async () => {
+			// Note: issuer = baseUrl || jwtIssuer || default, so we don't set BASE_URL to test jwt.issuer
 			const guardWithCustomConfig = new JwtAuthGuard(
 				createMockConfigService({
-					BASE_URL: 'http://localhost:3001',
 					'jwt.issuer': 'custom-issuer',
 					'jwt.audience': 'custom-audience',
 				}),

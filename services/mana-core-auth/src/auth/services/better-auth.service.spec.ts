@@ -176,14 +176,12 @@ describe('BetterAuthService', () => {
 				},
 			});
 
-			// Verify personal credit balance was created
+			// Verify personal credit balance was created (no free credits)
 			expect(mockDb.insert).toHaveBeenCalled();
 			expect(mockDb.values).toHaveBeenCalledWith(
 				expect.objectContaining({
 					userId: 'user-123',
 					balance: 0,
-					freeCreditsRemaining: 150,
-					dailyFreeCredits: 5,
 					totalEarned: 0,
 					totalSpent: 0,
 				})
@@ -265,12 +263,10 @@ describe('BetterAuthService', () => {
 
 			await service.registerB2C(registerDto);
 
-			// Verify credit balance initialization
+			// Verify credit balance initialization (no free credits)
 			expect(mockDb.values).toHaveBeenCalledWith({
 				userId: 'user-123',
 				balance: 0,
-				freeCreditsRemaining: 150, // Signup bonus
-				dailyFreeCredits: 5,
 				totalEarned: 0,
 				totalSpent: 0,
 			});
@@ -355,8 +351,8 @@ describe('BetterAuthService', () => {
 				},
 			});
 
-			// Verify both credit balances were created
-			expect(mockDb.insert).toHaveBeenCalledTimes(2);
+			// Verify personal credit balance was created (org balance removed)
+			expect(mockDb.insert).toHaveBeenCalledTimes(1);
 
 			// Verify response structure
 			expect(result).toEqual({
@@ -366,7 +362,7 @@ describe('BetterAuthService', () => {
 			});
 		});
 
-		it('should create organization credit balance', async () => {
+		it('should create personal credit balance for org owner', async () => {
 			const registerDto = {
 				ownerEmail: 'owner@company.com',
 				password: 'SecurePassword123!',
@@ -386,15 +382,13 @@ describe('BetterAuthService', () => {
 
 			await service.registerB2B(registerDto);
 
-			// Verify organization credit balance was created
+			// Verify personal credit balance was created (no org balance - B2B simplified)
 			expect(mockDb.values).toHaveBeenCalledWith(
 				expect.objectContaining({
-					organizationId: 'org-123',
+					userId: 'owner-123',
 					balance: 0,
-					allocatedCredits: 0,
-					availableCredits: 0,
-					totalPurchased: 0,
-					totalAllocated: 0,
+					totalEarned: 0,
+					totalSpent: 0,
 				})
 			);
 		});
@@ -488,22 +482,14 @@ describe('BetterAuthService', () => {
 
 			await service.registerB2B(registerDto);
 
-			// Verify two credit balances were created
-			expect(mockDb.insert).toHaveBeenCalledTimes(2);
+			// Verify personal credit balance was created (no org balance)
+			expect(mockDb.insert).toHaveBeenCalledTimes(1);
 
-			// First call: organization balance
-			expect(mockDb.values).toHaveBeenNthCalledWith(
-				1,
-				expect.objectContaining({
-					organizationId: 'org-123',
-				})
-			);
-
-			// Second call: personal balance
-			expect(mockDb.values).toHaveBeenNthCalledWith(
-				2,
+			// Personal balance for the owner
+			expect(mockDb.values).toHaveBeenCalledWith(
 				expect.objectContaining({
 					userId: 'owner-123',
+					balance: 0,
 				})
 			);
 		});
@@ -931,18 +917,16 @@ describe('BetterAuthService', () => {
 
 			await service.registerB2C(registerDto);
 
-			// Verify credit balance was initialized with correct values
+			// Verify credit balance was initialized with correct values (simplified - no free credits)
 			expect(mockDb.values).toHaveBeenCalledWith({
 				userId: 'user-123',
 				balance: 0,
-				freeCreditsRemaining: 150,
-				dailyFreeCredits: 5,
 				totalEarned: 0,
 				totalSpent: 0,
 			});
 		});
 
-		it('should initialize organization balance with zero credits', async () => {
+		it('should initialize personal credit balance for B2B owner', async () => {
 			const registerDto = {
 				ownerEmail: 'owner@company.com',
 				password: 'SecurePassword123!',
@@ -959,15 +943,13 @@ describe('BetterAuthService', () => {
 
 			await service.registerB2B(registerDto);
 
-			// Verify organization balance was initialized
+			// Verify personal balance was initialized (no org balance - simplified system)
 			expect(mockDb.values).toHaveBeenCalledWith(
 				expect.objectContaining({
-					organizationId: 'org-123',
+					userId: 'owner-123',
 					balance: 0,
-					allocatedCredits: 0,
-					availableCredits: 0,
-					totalPurchased: 0,
-					totalAllocated: 0,
+					totalEarned: 0,
+					totalSpent: 0,
 				})
 			);
 		});

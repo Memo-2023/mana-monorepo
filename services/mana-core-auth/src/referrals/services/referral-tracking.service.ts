@@ -691,29 +691,29 @@ export class ReferralTrackingService {
 			throw new NotFoundException('User balance not found');
 		}
 
-		const newFreeCredits = currentBalance.freeCreditsRemaining + amount;
+		const newBalance = currentBalance.balance + amount;
 		const newTotalEarned = currentBalance.totalEarned + amount;
 
-		// Update balance
+		// Update balance (add to main balance, not free credits)
 		await db
 			.update(balances)
 			.set({
-				freeCreditsRemaining: newFreeCredits,
+				balance: newBalance,
 				totalEarned: newTotalEarned,
 				updatedAt: new Date(),
 			})
 			.where(eq(balances.userId, userId));
 
-		// Create transaction record
+		// Create transaction record (using 'gift' type for referral bonuses)
 		const [transaction] = await db
 			.insert(transactions)
 			.values({
 				userId,
-				type: 'bonus',
+				type: 'gift',
 				status: 'completed',
 				amount,
-				balanceBefore: currentBalance.balance + currentBalance.freeCreditsRemaining,
-				balanceAfter: currentBalance.balance + newFreeCredits,
+				balanceBefore: currentBalance.balance,
+				balanceAfter: newBalance,
 				appId: 'referral',
 				description: `Referral bonus: ${reason}`,
 				completedAt: new Date(),

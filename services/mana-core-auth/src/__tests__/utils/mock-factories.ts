@@ -72,14 +72,12 @@ export const mockPasswordFactory = {
 
 /**
  * Mock Balance Factory
+ * Simplified - no free credits or daily reset
  */
 export const mockBalanceFactory = {
 	create: (userId: string, overrides: Partial<any> = {}) => ({
 		userId,
 		balance: 0,
-		freeCreditsRemaining: 150,
-		dailyFreeCredits: 5,
-		lastDailyResetAt: new Date(),
 		totalEarned: 0,
 		totalSpent: 0,
 		version: 0,
@@ -88,10 +86,9 @@ export const mockBalanceFactory = {
 		...overrides,
 	}),
 
-	withBalance: (userId: string, balance: number, freeCredits = 0) => {
+	withBalance: (userId: string, balance: number) => {
 		return mockBalanceFactory.create(userId, {
 			balance,
-			freeCreditsRemaining: freeCredits,
 		});
 	},
 };

@@ -11,7 +11,6 @@ export interface CreditValidationResult {
 
 export interface CreditBalance {
 	balance: number;
-	freeCreditsRemaining: number;
 	totalEarned: number;
 	totalSpent: number;
 }
@@ -58,11 +57,10 @@ export class CreditClientService {
 	): Promise<CreditValidationResult> {
 		try {
 			const balance = await this.getBalance(userId);
-			const totalAvailable = balance.balance + balance.freeCreditsRemaining;
 
 			return {
-				hasCredits: totalAvailable >= requiredAmount,
-				availableCredits: totalAvailable,
+				hasCredits: balance.balance >= requiredAmount,
+				availableCredits: balance.balance,
 				requiredCredits: requiredAmount,
 			};
 		} catch (error) {
@@ -85,7 +83,6 @@ export class CreditClientService {
 			this.logger.warn('Service key not configured, returning default balance');
 			return {
 				balance: 1000,
-				freeCreditsRemaining: 100,
 				totalEarned: 0,
 				totalSpent: 0,
 			};
@@ -108,13 +105,11 @@ export class CreditClientService {
 
 			const {
 				balance = 0,
-				freeCreditsRemaining = 0,
 				totalEarned = 0,
 				totalSpent = 0,
 			} = (await response.json()) as CreditBalance;
 			return {
 				balance,
-				freeCreditsRemaining,
 				totalEarned,
 				totalSpent,
 			};
@@ -227,7 +222,6 @@ export class CreditClientService {
 	private getDefaultBalance(): CreditBalance {
 		return {
 			balance: 1000,
-			freeCreditsRemaining: 100,
 			totalEarned: 0,
 			totalSpent: 0,
 		};
