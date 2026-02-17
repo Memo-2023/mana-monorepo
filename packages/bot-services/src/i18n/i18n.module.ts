@@ -1,4 +1,4 @@
-import { Module, DynamicModule, Global } from '@nestjs/common';
+import { Module, DynamicModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { I18nService, I18N_OPTIONS } from './i18n.service';
 import { I18nOptions } from './types';
@@ -28,7 +28,6 @@ import { I18nOptions } from './types';
  * })
  * ```
  */
-@Global()
 @Module({})
 export class I18nModule {
 	/**
@@ -37,6 +36,7 @@ export class I18nModule {
 	static forRoot(options?: I18nOptions): DynamicModule {
 		return {
 			module: I18nModule,
+			global: true,
 			imports: [ConfigModule],
 			providers: [
 				{
@@ -59,6 +59,7 @@ export class I18nModule {
 	}): DynamicModule {
 		return {
 			module: I18nModule,
+			global: true,
 			imports: [...(options.imports || []), ConfigModule],
 			providers: [
 				{
