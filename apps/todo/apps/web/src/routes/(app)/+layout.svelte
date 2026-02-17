@@ -171,6 +171,7 @@
 			onClick: handleFilterToggle,
 			active: isFilterStripVisible,
 		},
+		{ href: '/spiral', label: 'Spiral', icon: 'sparkles' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
