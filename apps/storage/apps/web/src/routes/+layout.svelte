@@ -9,10 +9,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-	} from '$lib/stores/navigation';
+	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -25,7 +22,6 @@
 	let { children } = $props();
 
 	let loading = $state(true);
-	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Use theme store's isDark directly
@@ -111,14 +107,6 @@
 		}
 	}
 
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('storage-nav-sidebar', String(isSidebar));
-		}
-	}
-
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
@@ -154,13 +142,6 @@
 
 			// Load user settings
 			await userSettings.load();
-
-			// Initialize sidebar mode from localStorage
-			const savedSidebar = localStorage.getItem('storage-nav-sidebar');
-			if (savedSidebar === 'true') {
-				isSidebarMode = true;
-				sidebarModeStore.set(true);
-			}
 
 			// Initialize collapsed state from localStorage
 			const savedCollapsed = localStorage.getItem('storage-nav-collapsed');
@@ -204,11 +185,8 @@
 			homeRoute="/files"
 			onToggleTheme={handleToggleTheme}
 			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav.desktopPosition}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}
@@ -231,11 +209,7 @@
 			allAppsHref="/apps"
 		/>
 
-		<main
-			class="main-content bg-background"
-			class:sidebar-mode={isSidebarMode && !isCollapsed}
-			class:floating-mode={!isSidebarMode && !isCollapsed}
-		>
+		<main class="main-content bg-background">
 			<div class="content-wrapper">
 				{@render children()}
 			</div>
@@ -252,15 +226,7 @@
 
 	.main-content {
 		flex: 1;
-		transition: all 300ms ease;
-	}
-
-	.main-content.floating-mode {
-		padding-top: 100px;
-	}
-
-	.main-content.sidebar-mode {
-		padding-left: 180px;
+		padding-bottom: 100px;
 	}
 
 	.content-wrapper {

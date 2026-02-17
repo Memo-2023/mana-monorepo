@@ -29,23 +29,15 @@
 	let { children } = $props();
 
 	// PillNav state
-	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Load persisted nav state
 	$effect(() => {
 		if (browser) {
-			const savedSidebarMode = localStorage.getItem('picture-nav-sidebar');
 			const savedCollapsed = localStorage.getItem('picture-nav-collapsed');
-			if (savedSidebarMode !== null) isSidebarMode = savedSidebarMode === 'true';
 			if (savedCollapsed !== null) isCollapsed = savedCollapsed === 'true';
 		}
 	});
-
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		if (browser) localStorage.setItem('picture-nav-sidebar', String(isSidebar));
-	}
 
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
@@ -263,11 +255,8 @@
 				onLogout={handleLogout}
 				onToggleTheme={handleToggleTheme}
 				isDark={theme.isDark}
-				{isSidebarMode}
-				onModeChange={handleModeChange}
 				{isCollapsed}
 				onCollapsedChange={handleCollapsedChange}
-				desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 				showThemeToggle={true}
 				showThemeVariants={true}
 				{themeVariantItems}
@@ -290,11 +279,7 @@
 		{/if}
 
 		<!-- Main Content Area -->
-		<main
-			class="main-content transition-all duration-300"
-			class:sidebar-mode={isSidebarMode && !isCollapsed && $isUIVisible}
-			class:floating-mode={!isSidebarMode && !isCollapsed && $isUIVisible}
-		>
+		<main class="main-content pb-24">
 			<div class="min-h-screen">
 				{@render children?.()}
 			</div>
@@ -306,24 +291,7 @@
 {/if}
 
 <style>
-	/* Floating nav mode - add top padding for fixed nav */
-	.main-content.floating-mode {
-		padding-top: 80px;
-	}
-
-	/* Sidebar mode - add left padding for sidebar nav */
-	.main-content.sidebar-mode {
-		padding-left: 180px;
-	}
-
-	/* Mobile adjustments */
-	@media (max-width: 768px) {
-		.main-content.floating-mode {
-			padding-top: 70px;
-		}
-		.main-content.sidebar-mode {
-			padding-left: 0;
-			padding-top: 70px;
-		}
+	.main-content {
+		padding-bottom: 100px;
 	}
 </style>

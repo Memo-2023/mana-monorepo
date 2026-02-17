@@ -10,23 +10,13 @@
 		onChange: (id: string) => void;
 		/** Optional section label */
 		sectionLabel?: string;
-		/** Whether in sidebar mode (affects layout) */
-		isSidebarMode?: boolean;
 		/** Primary color for active state */
 		primaryColor?: string;
 		/** Called on right-click (context menu) - receives click coordinates */
 		onContextMenu?: (x: number, y: number) => void;
 	}
 
-	let {
-		options,
-		value,
-		onChange,
-		sectionLabel,
-		isSidebarMode = false,
-		primaryColor,
-		onContextMenu,
-	}: Props = $props();
+	let { options, value, onChange, sectionLabel, primaryColor, onContextMenu }: Props = $props();
 
 	function handleContextMenu(event: MouseEvent) {
 		if (onContextMenu) {
@@ -66,13 +56,9 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="pill-tab-group" class:sidebar-mode={isSidebarMode} oncontextmenu={handleContextMenu}>
-	{#if sectionLabel && isSidebarMode}
-		<p class="section-label">{sectionLabel}</p>
-	{/if}
+<div class="pill-tab-group" oncontextmenu={handleContextMenu}>
 	<div
 		class="tab-container glass-pill"
-		class:sidebar-tabs={isSidebarMode}
 		style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}
 	>
 		{#each options as option, index}
@@ -116,20 +102,6 @@
 		gap: 0.5rem;
 	}
 
-	.section-label {
-		font-size: 0.75rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: #6b7280;
-		margin: 0;
-		padding: 0 0.25rem;
-	}
-
-	:global(.dark) .section-label {
-		color: #9ca3af;
-	}
-
 	.tab-container {
 		display: flex;
 		align-items: center;
@@ -152,20 +124,6 @@
 	:global(.dark) .glass-pill {
 		background: rgba(255, 255, 255, 0.12);
 		border: 1px solid rgba(255, 255, 255, 0.15);
-	}
-
-	/* Sidebar mode - transparent */
-	.sidebar-tabs {
-		background: transparent;
-		backdrop-filter: none;
-		-webkit-backdrop-filter: none;
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow: none;
-	}
-
-	:global(.dark) .sidebar-tabs {
-		background: transparent;
-		border: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	.tab-btn {
@@ -252,15 +210,5 @@
 		font-size: 0.8125rem;
 		font-weight: 500;
 		white-space: nowrap;
-	}
-
-	/* Sidebar mode adjustments */
-	.sidebar-mode .tab-container {
-		width: 100%;
-	}
-
-	.sidebar-mode .tab-btn {
-		justify-content: flex-start;
-		padding: 0.5rem 0.625rem;
 	}
 </style>

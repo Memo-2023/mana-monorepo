@@ -194,10 +194,6 @@
 		onToggleTheme?: () => void;
 		/** Whether dark mode is active */
 		isDark?: boolean;
-		/** Whether sidebar mode is enabled */
-		isSidebarMode?: boolean;
-		/** Called when sidebar mode changes */
-		onModeChange?: (isSidebar: boolean) => void;
 		/** Whether navigation is collapsed */
 		isCollapsed?: boolean;
 		/** Called when collapsed state changes */
@@ -257,12 +253,8 @@
 		onA11yReduceMotionChange?: (reduce: boolean) => void;
 		/** Show a11y quick toggles in theme dropdown */
 		showA11yQuickToggles?: boolean;
-		/** Desktop navigation position (mobile always at bottom) */
-		desktopPosition?: 'top' | 'bottom';
 		/** Called when an app should be opened in a split panel */
 		onOpenInPanel?: (appId: string, url: string) => void;
-		/** Toolbar content snippet (shown in sidebar mode) */
-		toolbarContent?: Snippet;
 	}
 
 	let {
@@ -274,8 +266,6 @@
 		onLogout,
 		onToggleTheme,
 		isDark = false,
-		isSidebarMode: externalSidebarMode,
-		onModeChange,
 		isCollapsed: externalCollapsed,
 		onCollapsedChange,
 		languageItems = [],
@@ -305,9 +295,7 @@
 		a11yReduceMotion = false,
 		onA11yReduceMotionChange,
 		showA11yQuickToggles = false,
-		desktopPosition = 'top',
 		onOpenInPanel,
-		toolbarContent,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -338,48 +326,15 @@
 	}
 
 	// Local state for uncontrolled mode
-	let internalSidebarMode = $state(false);
 	let internalCollapsed = $state(false);
 
 	// Use external or internal state
-	const isSidebarMode = $derived(
-		onModeChange !== undefined ? (externalSidebarMode ?? false) : internalSidebarMode
-	);
 	const isCollapsed = $derived(
 		onCollapsedChange !== undefined ? (externalCollapsed ?? false) : internalCollapsed
 	);
 
-	// Mobile detection for dropdown direction
-	let isMobile = $state(false);
-	$effect(() => {
-		if (typeof window !== 'undefined') {
-			const checkMobile = () => {
-				isMobile = window.innerWidth <= 768;
-			};
-			checkMobile();
-			window.addEventListener('resize', checkMobile);
-			return () => window.removeEventListener('resize', checkMobile);
-		}
-	});
-
-	// Dropdown direction: up when nav is at bottom (mobile or desktop-bottom), down otherwise
-	const dropdownDirection = $derived<'up' | 'down'>(
-		// Mobile: always up (nav at bottom) unless in sidebar mode
-		(isMobile && !isSidebarMode) ||
-			// Desktop with bottom position: up unless in sidebar mode
-			(!isMobile && desktopPosition === 'bottom' && !isSidebarMode)
-			? 'up'
-			: 'down'
-	);
-
-	function toggleSidebarMode() {
-		const newValue = !isSidebarMode;
-		if (onModeChange) {
-			onModeChange(newValue);
-		} else {
-			internalSidebarMode = newValue;
-		}
-	}
+	// Dropdown direction: always up since nav is always at bottom
+	const dropdownDirection = 'up' as const;
 
 	function collapseNav() {
 		if (onCollapsedChange) {
@@ -463,12 +418,7 @@
 		chevronLeft: 'M15 19l-7-7 7-7',
 		chevronRight: 'M9 5l7 7-7 7',
 		menu: 'M4 6h16M4 12h16M4 18h16',
-		// Layout icons
-		sidebar: 'M3 3h7v18H3V3zm9 0h9v18h-9V3z', // Sidebar layout icon
-		layoutBottom: 'M3 3h18v9H3V3zm0 12h18v6H3v-6z', // Bottom bar layout icon
-		panelRight: 'M9 3h12v18H9V3zM3 3h3v18H3V3z', // Panel right icon
 		minimize: 'M4 12h16', // Minimize (minus) icon
-		maximize: 'M4 8h16M4 16h16', // Two lines for expand
 		fire: 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z',
 		grid: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
 		gridSmall:
@@ -493,13 +443,8 @@
 </script>
 
 {#if !isCollapsed}
-	<nav
-		class="pill-nav"
-		class:sidebar-mode={isSidebarMode}
-		class:desktop-bottom={desktopPosition === 'bottom'}
-		style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}
-	>
-		<div class="pill-nav-container" class:sidebar-container={isSidebarMode}>
+	<nav class="pill-nav" style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}>
+		<div class="pill-nav-container">
 			<!-- Logo pill / App Switcher -->
 			{#if showAppSwitcher && appItems.length > 0}
 				<PillDropdown
@@ -507,7 +452,7 @@
 					direction={dropdownDirection}
 					label={appName}
 					icon="grid"
-					iconOnly={!isSidebarMode}
+					iconOnly={false}
 				/>
 			{:else}
 				<a href={homeRoute} class="pill glass-pill logo-pill">
@@ -528,11 +473,10 @@
 						onChange={element.onChange}
 						sectionLabel={element.sectionLabel}
 						onContextMenu={element.onContextMenu}
-						{isSidebarMode}
 						{primaryColor}
 					/>
 				{:else if isDivider(element)}
-					<div class="pill-divider" class:sidebar-divider={isSidebarMode}></div>
+					<div class="pill-divider"></div>
 				{:else if isTagSelector(element)}
 					<PillTagSelector
 						tags={element.tags}
@@ -634,11 +578,10 @@
 						onChange={element.onChange}
 						sectionLabel={element.sectionLabel}
 						onContextMenu={element.onContextMenu}
-						{isSidebarMode}
 						{primaryColor}
 					/>
 				{:else if isDivider(element)}
-					<div class="pill-divider" class:sidebar-divider={isSidebarMode}></div>
+					<div class="pill-divider"></div>
 				{:else if isTagSelector(element)}
 					<PillTagSelector
 						tags={element.tags}
@@ -916,83 +859,24 @@
 				</button>
 			{/if}
 
-			<!-- Control Button (right position in horizontal mode, bottom in sidebar mode) -->
-			{#if !isSidebarMode}
-				<div class="pill glass-pill segmented-control">
-					<button onclick={collapseNav} class="segment-btn" title="Navigation minimieren">
-						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d={getIconPath('chevronRight')}
-							/>
-						</svg>
-					</button>
-					<div class="segment-divider"></div>
-					<button onclick={toggleSidebarMode} class="segment-btn" title="Zur Sidebar wechseln">
-						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d={getIconPath('sidebar')}
-							/>
-						</svg>
-					</button>
-				</div>
-			{/if}
-
-			<!-- Control Button (bottom position in sidebar mode) -->
-			{#if isSidebarMode}
-				<!-- Toolbar content (if provided) -->
-				{#if toolbarContent}
-					<div class="pill-divider sidebar-divider"></div>
-					<div class="sidebar-toolbar-content">
-						{@render toolbarContent()}
-					</div>
-				{/if}
-				<div class="sidebar-spacer"></div>
-				<div class="pill glass-pill segmented-control sidebar-segmented">
-					<button
-						onclick={toggleSidebarMode}
-						class="segment-btn"
-						title="Zur Bottom-Navigation wechseln"
-					>
-						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d={getIconPath('layoutBottom')}
-							/>
-						</svg>
-					</button>
-					<div class="segment-divider"></div>
-					<button onclick={collapseNav} class="segment-btn" title="Sidebar minimieren">
-						<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d={getIconPath('chevronRight')}
-							/>
-						</svg>
-					</button>
-				</div>
-			{/if}
+			<!-- Collapse Button -->
+			<button onclick={collapseNav} class="pill glass-pill" title="Navigation minimieren">
+				<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d={getIconPath('chevronRight')}
+					/>
+				</svg>
+			</button>
 		</div>
 	</nav>
 {/if}
 
 <!-- FAB for collapsed state -->
 {#if isCollapsed}
-	<button
-		onclick={expandNav}
-		class="nav-fab glass-pill"
-		class:desktop-bottom={desktopPosition === 'bottom'}
-		title="Expand navigation"
-	>
+	<button onclick={expandNav} class="nav-fab glass-pill" title="Expand navigation">
 		<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"
@@ -1007,33 +891,15 @@
 <style>
 	.pill-nav {
 		position: fixed;
-		top: 0;
+		bottom: 0;
 		left: 0;
 		right: 0;
 		z-index: 1000;
-		padding: 0.75rem 0 1.5rem;
+		padding: 1rem 0 calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
 		pointer-events: none;
 		/* Container query context */
 		container-type: inline-size;
 		container-name: pillnav;
-	}
-
-	/* Desktop bottom position */
-	@media (min-width: 769px) {
-		.pill-nav.desktop-bottom:not(.sidebar-mode) {
-			top: auto;
-			bottom: 0;
-			padding: 1rem 0 0.75rem;
-		}
-	}
-
-	/* Mobile: always position at bottom */
-	@media (max-width: 768px) {
-		.pill-nav:not(.sidebar-mode) {
-			top: auto;
-			bottom: 0;
-			padding: 1rem 0 calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
-		}
 	}
 
 	.pill-nav-container {
@@ -1052,15 +918,7 @@
 
 	/* Center when container has enough space (> 600px) */
 	@container pillnav (min-width: 600px) {
-		.pill-nav-container:not(.sidebar-container) {
-			margin-left: auto;
-			margin-right: auto;
-		}
-	}
-
-	/* Larger screens: always centered */
-	@container pillnav (min-width: 900px) {
-		.pill-nav-container:not(.sidebar-container) {
+		.pill-nav-container {
 			margin-left: auto;
 			margin-right: auto;
 		}
@@ -1153,12 +1011,6 @@
 		background: rgba(255, 255, 255, 0.2);
 	}
 
-	.sidebar-divider {
-		width: 100%;
-		height: 1px;
-		margin: 0.5rem 0;
-	}
-
 	/* Logout pill */
 	.logout-pill {
 		color: #dc2626;
@@ -1183,429 +1035,20 @@
 		display: inline;
 	}
 
-	/* Sidebar mode styles */
-	.pill-nav.sidebar-mode {
-		top: 0;
-		left: 0;
-		bottom: 0;
-		right: auto;
-		width: 180px;
-		padding: 0.75rem 0;
-		background: transparent;
-		backdrop-filter: none;
-		-webkit-backdrop-filter: none;
-		border: none;
-	}
-
-	:global(.dark) .pill-nav.sidebar-mode {
-		background: transparent;
-		border: none;
-	}
-
-	/* Mobile: Sidebar as bottom sheet */
-	@media (max-width: 768px) {
-		.pill-nav.sidebar-mode {
-			top: auto;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			width: 100%;
-			max-height: 70vh;
-			padding: 1.5rem 0 calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
-			background: rgba(255, 255, 255, 0.95);
-			backdrop-filter: blur(12px);
-			-webkit-backdrop-filter: blur(12px);
-			border-top: 1px solid rgba(0, 0, 0, 0.1);
-			border-radius: 1.5rem 1.5rem 0 0;
-			box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-		}
-
-		/* Drag handle */
-		.pill-nav.sidebar-mode::before {
-			content: '';
-			position: absolute;
-			top: 0.625rem;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 2.5rem;
-			height: 0.25rem;
-			background: rgba(0, 0, 0, 0.2);
-			border-radius: 9999px;
-		}
-
-		:global(.dark) .pill-nav.sidebar-mode {
-			background: rgba(30, 30, 30, 0.95);
-			border-top: 1px solid rgba(255, 255, 255, 0.1);
-		}
-
-		:global(.dark) .pill-nav.sidebar-mode::before {
-			background: rgba(255, 255, 255, 0.3);
-		}
-	}
-
-	.sidebar-container {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 0.5rem;
-		overflow-y: auto;
-		overflow-x: hidden;
-		padding: 1rem 1rem;
-		height: 100%;
-	}
-
-	/* Toolbar content in sidebar mode */
-	.sidebar-toolbar-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		width: 100%;
-		padding: 0.5rem 0;
-		max-height: 40vh;
-		overflow-y: auto;
-		overflow-x: hidden;
-		scrollbar-width: thin;
-		scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-	}
-
-	.sidebar-toolbar-content::-webkit-scrollbar {
-		width: 4px;
-	}
-
-	.sidebar-toolbar-content::-webkit-scrollbar-track {
-		background: transparent;
-	}
-
-	.sidebar-toolbar-content::-webkit-scrollbar-thumb {
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-	}
-
-	:global(.dark) .sidebar-toolbar-content {
-		scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-	}
-
-	:global(.dark) .sidebar-toolbar-content::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.2);
-	}
-
-	.sidebar-toolbar-content :global(.toolbar-bar) {
-		flex-direction: column;
-		background: transparent;
-		backdrop-filter: none;
-		border: none;
-		box-shadow: none;
-		border-radius: 0;
-		padding: 0;
-		gap: 0.5rem;
-	}
-
-	.sidebar-toolbar-content :global(.toolbar-content) {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 0.5rem;
-		width: 100%;
-	}
-
-	/* All buttons in sidebar toolbar - full width, left aligned */
-	.sidebar-toolbar-content :global(.pill-toolbar-btn),
-	.sidebar-toolbar-content :global(.pill-dropdown .trigger-button),
-	.sidebar-toolbar-content :global(button) {
-		width: 100%;
-		justify-content: flex-start;
-		text-align: left;
-		background: transparent;
-		border: 1px solid transparent;
-		box-shadow: none;
-	}
-
-	.sidebar-toolbar-content :global(.pill-toolbar-btn:hover),
-	.sidebar-toolbar-content :global(.pill-dropdown .trigger-button:hover),
-	.sidebar-toolbar-content :global(button:hover) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .sidebar-toolbar-content :global(.pill-toolbar-btn:hover),
-	:global(.dark) .sidebar-toolbar-content :global(.pill-dropdown .trigger-button:hover),
-	:global(.dark) .sidebar-toolbar-content :global(button:hover) {
-		background: rgba(255, 255, 255, 0.1);
-	}
-
-	/* Style for PillViewSwitcher in sidebar - vertical layout */
-	.sidebar-toolbar-content :global(.pill-view-switcher) {
-		flex-direction: column;
-		gap: 0.25rem;
-		width: 100%;
-		padding: 0;
-		background: transparent;
-		border: none;
-		box-shadow: none;
-	}
-
-	/* Hide the sliding indicator in vertical mode */
-	.sidebar-toolbar-content :global(.pill-view-switcher .sliding-indicator) {
-		display: none;
-	}
-
-	.sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn) {
-		width: 100%;
-		justify-content: flex-start;
-		padding: 0.5rem 0.875rem;
-		border-radius: 9999px;
-		background: transparent;
-		border: 1px solid transparent;
-	}
-
-	.sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn:hover) {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn:hover) {
-		background: rgba(255, 255, 255, 0.1);
-	}
-
-	.sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn.active) {
-		background: color-mix(in srgb, var(--pill-primary-color, #3b82f6) 15%, transparent 85%);
-		border-color: color-mix(in srgb, var(--pill-primary-color, #3b82f6) 25%, transparent 75%);
-	}
-
-	:global(.dark) .sidebar-toolbar-content :global(.pill-view-switcher .switcher-btn.active) {
-		background: color-mix(in srgb, var(--pill-primary-color, #3b82f6) 25%, transparent 75%);
-		border-color: color-mix(in srgb, var(--pill-primary-color, #3b82f6) 35%, transparent 65%);
-	}
-
-	/* PillTimeRangeSelector in sidebar */
-	.sidebar-toolbar-content :global(.pill-time-range-selector),
-	.sidebar-toolbar-content :global(.pill-dropdown) {
-		width: 100%;
-	}
-
-	/* PillCalendarSelector in sidebar */
-	.sidebar-toolbar-content :global(.calendar-selector) {
-		width: 100%;
-	}
-
-	/* Mobile: Sidebar container adjustments */
-	@media (max-width: 768px) {
-		.sidebar-container {
-			padding: 1rem 1.5rem 1rem;
-			gap: 0.5rem;
-			height: auto;
-			max-height: calc(70vh - 2rem);
-		}
-
-		/* Hide spacer on mobile - not needed in bottom sheet */
-		.sidebar-container .sidebar-spacer {
-			display: none;
-		}
-	}
-
-	.sidebar-container .pill {
-		justify-content: flex-start;
-		width: 100%;
-	}
-
-	.sidebar-container :global(.pill-dropdown) {
-		width: 100%;
-	}
-
-	.sidebar-container :global(.pill-dropdown .trigger-button) {
-		width: 100%;
-		justify-content: flex-start;
-	}
-
-	.sidebar-container .segmented-control {
-		width: 100%;
-	}
-
-	.sidebar-container .segmented-control .segment-btn {
-		flex: 1;
-	}
-
-	/* Transparent pills in sidebar mode (desktop) */
-	.sidebar-container .glass-pill,
-	.sidebar-container :global(.pill-dropdown .trigger-button) {
-		background: transparent;
-		backdrop-filter: none;
-		-webkit-backdrop-filter: none;
-		border: 1px solid transparent;
-		box-shadow: none;
-	}
-
-	.sidebar-container .glass-pill:hover,
-	.sidebar-container :global(.pill-dropdown .trigger-button:hover) {
-		background: rgba(0, 0, 0, 0.05);
-		border-color: rgba(0, 0, 0, 0.1);
-		transform: none;
-		box-shadow: none;
-	}
-
-	:global(.dark) .sidebar-container .glass-pill:hover,
-	:global(.dark) .sidebar-container :global(.pill-dropdown .trigger-button:hover) {
-		background: rgba(255, 255, 255, 0.05);
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	/* Mobile: Visible pills in sidebar/bottom-sheet mode */
-	@media (max-width: 768px) {
-		.sidebar-container .glass-pill,
-		.sidebar-container :global(.pill-dropdown .trigger-button) {
-			background: rgba(0, 0, 0, 0.05);
-			border: 1px solid rgba(0, 0, 0, 0.08);
-		}
-
-		.sidebar-container .glass-pill:hover,
-		.sidebar-container :global(.pill-dropdown .trigger-button:hover) {
-			background: rgba(0, 0, 0, 0.1);
-			border-color: rgba(0, 0, 0, 0.15);
-		}
-
-		:global(.dark) .sidebar-container .glass-pill,
-		:global(.dark) .sidebar-container :global(.pill-dropdown .trigger-button) {
-			background: rgba(255, 255, 255, 0.08);
-			border: 1px solid rgba(255, 255, 255, 0.1);
-		}
-
-		:global(.dark) .sidebar-container .glass-pill:hover,
-		:global(.dark) .sidebar-container :global(.pill-dropdown .trigger-button:hover) {
-			background: rgba(255, 255, 255, 0.15);
-			border-color: rgba(255, 255, 255, 0.2);
-		}
-	}
-
-	/* Keep active state visible */
-	.sidebar-container .pill.active {
-		background: color-mix(
-			in srgb,
-			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 20%,
-			transparent 80%
-		);
-		border-color: color-mix(
-			in srgb,
-			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 30%,
-			transparent 70%
-		);
-	}
-
-	:global(.dark) .sidebar-container .pill.active {
-		background: color-mix(
-			in srgb,
-			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 15%,
-			transparent 85%
-		);
-		border-color: color-mix(
-			in srgb,
-			var(--pill-primary-color, var(--color-primary-500, #f8d62b)) 25%,
-			transparent 75%
-		);
-	}
-
-	/* Logo pill in sidebar - same as other pills (transparent) */
-	.sidebar-container .logo-pill {
-		background: transparent;
-		border-color: transparent;
-	}
-
-	.sidebar-container .logo-pill:hover {
-		background: rgba(0, 0, 0, 0.05);
-		border-color: rgba(0, 0, 0, 0.1);
-	}
-
-	:global(.dark) .sidebar-container .logo-pill:hover {
-		background: rgba(255, 255, 255, 0.05);
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	/* Spacer to push toggle button to bottom */
-	.sidebar-spacer {
-		flex: 1;
-		min-height: 1rem;
-	}
-
-	/* Note: .toggle-pill class may be applied dynamically */
-
-	/* Segmented control */
-	.segmented-control {
-		display: flex;
-		align-items: center;
-		padding: 0;
-		gap: 0;
-	}
-
-	.segment-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.5rem 0.625rem;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		color: inherit;
-		transition: background 0.2s;
-	}
-
-	.segment-btn:first-child {
-		border-radius: 9999px 0 0 9999px;
-	}
-
-	.segment-btn:last-child {
-		border-radius: 0 9999px 9999px 0;
-	}
-
-	.segment-btn:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .segment-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-	}
-
-	.segment-divider {
-		width: 1px;
-		height: 1rem;
-		background: rgba(0, 0, 0, 0.15);
-	}
-
-	:global(.dark) .segment-divider {
-		background: rgba(255, 255, 255, 0.2);
-	}
-
-	.sidebar-segmented {
-		margin: 0;
-	}
-
-	/* FAB for collapsed state - positioned at right */
+	/* FAB for collapsed state - positioned at bottom right */
 	.nav-fab {
 		position: fixed;
-		top: 0;
+		bottom: 0;
 		right: 0;
 		z-index: 1001;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding: 0.875rem;
-		border-radius: 0 0 0 1rem;
+		padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.875rem);
+		border-radius: 1rem 0 0 0;
 		cursor: pointer;
 		border: none;
-	}
-
-	/* Desktop: FAB at bottom when desktop-bottom */
-	@media (min-width: 769px) {
-		.nav-fab.desktop-bottom {
-			top: auto;
-			bottom: 0;
-			border-radius: 1rem 0 0 0;
-		}
-	}
-
-	/* Mobile: FAB always at bottom right */
-	@media (max-width: 768px) {
-		.nav-fab {
-			top: auto;
-			bottom: 0;
-			right: 0;
-			border-radius: 1rem 0 0 0;
-			padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.875rem);
-		}
 	}
 
 	/* Transitions */

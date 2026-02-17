@@ -520,7 +520,6 @@
 				homeRoute="/"
 				onToggleTheme={handleToggleTheme}
 				{isDark}
-				desktopPosition="bottom"
 				showThemeToggle={true}
 				showThemeVariants={true}
 				{themeVariantItems}
@@ -542,13 +541,7 @@
 				profileHref="/profile"
 				allAppsHref="/apps"
 				onOpenInPanel={handleOpenInPanel}
-			>
-				{#snippet toolbarContent()}
-					{#if showCalendarToolbar}
-						<CalendarToolbarContent vertical={true} />
-					{/if}
-				{/snippet}
-			</PillNavigation>
+			/>
 
 			<!-- Date strip (only on main calendar page) -->
 			{#if showCalendarToolbar}

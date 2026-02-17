@@ -153,10 +153,6 @@ export interface PillNavigationProps {
 	onToggleTheme?: () => void;
 	/** Whether dark mode is active */
 	isDark?: boolean;
-	/** Whether sidebar mode is enabled (controlled) */
-	isSidebarMode?: boolean;
-	/** Called when sidebar mode changes */
-	onModeChange?: (isSidebar: boolean) => void;
 	/** Whether navigation is collapsed (controlled) */
 	isCollapsed?: boolean;
 	/** Called when collapsed state changes */

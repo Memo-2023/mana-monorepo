@@ -55,6 +55,7 @@
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
 		"@manacore/shared-app-onboarding": "workspace:*",
+		"@sqlite.org/sqlite-wasm": "^3.49.1-build1",
 		"@neodrag/svelte": "^2.3.3",
 		"d3-force": "^3.0.0",
 		"date-fns": "^4.1.0",

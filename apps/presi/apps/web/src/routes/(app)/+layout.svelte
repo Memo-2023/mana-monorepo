@@ -9,10 +9,7 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-	} from '$lib/stores/navigation';
+	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -22,7 +19,6 @@
 
 	let { children } = $props();
 
-	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Theme variant dropdown items
@@ -70,14 +66,6 @@
 
 	function shouldHideNav(pathname: string): boolean {
 		return hideNavRoutes.some((route) => pathname.startsWith(route));
-	}
-
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('presi-nav-sidebar', String(isSidebar));
-		}
 	}
 
 	function handleCollapsedChange(collapsed: boolean) {
@@ -132,13 +120,6 @@
 			goto(userSettings.startPage, { replaceState: true });
 		}
 
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('presi-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
-		}
-
 		// Initialize collapsed state from localStorage
 		const savedCollapsed = localStorage.getItem('presi-nav-collapsed');
 		if (savedCollapsed === 'true') {
@@ -158,7 +139,7 @@
 {:else}
 	<!-- Navigation Layout -->
 	<div class="layout-container">
-		<!-- Floating/Sidebar Pill Navigation -->
+		<!-- Floating Pill Navigation -->
 		<PillNavigation
 			items={navItems}
 			currentPath={$page.url.pathname}
@@ -166,11 +147,8 @@
 			homeRoute="/"
 			onToggleTheme={handleToggleTheme}
 			isDark={theme.isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav.desktopPosition}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}
@@ -192,12 +170,8 @@
 			allAppsHref="/apps"
 		/>
 
-		<!-- Main Content with dynamic padding based on nav mode -->
-		<main
-			class="main-content"
-			class:sidebar-mode={isSidebarMode && !isCollapsed}
-			class:floating-mode={!isSidebarMode && !isCollapsed}
-		>
+		<!-- Main Content -->
+		<main class="main-content">
 			<div class="content-wrapper">
 				{@render children()}
 			</div>
@@ -214,17 +188,7 @@
 
 	.main-content {
 		flex: 1;
-		transition: all 300ms ease;
-	}
-
-	/* Floating nav mode - add top padding for fixed nav */
-	.main-content.floating-mode {
-		padding-top: 100px;
-	}
-
-	/* Sidebar mode - add left padding for sidebar nav */
-	.main-content.sidebar-mode {
-		padding-left: 180px;
+		padding-bottom: 100px;
 	}
 
 	.content-wrapper {

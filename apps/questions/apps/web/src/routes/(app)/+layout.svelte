@@ -31,7 +31,6 @@
 	}
 
 	// Navigation mode state
-	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Theme state
@@ -61,11 +60,6 @@
 
 		// Restore nav mode from localStorage
 		if (browser) {
-			const savedSidebar = localStorage.getItem('questions-nav-sidebar');
-			if (savedSidebar === 'true') {
-				isSidebarMode = true;
-			}
-
 			const savedCollapsed = localStorage.getItem('questions-nav-collapsed');
 			if (savedCollapsed === 'true') {
 				isCollapsed = true;
@@ -81,13 +75,6 @@
 
 	function handleToggleTheme() {
 		theme.toggle();
-	}
-
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('questions-nav-sidebar', String(isSidebar));
-		}
 	}
 
 	function handleCollapsedChange(collapsed: boolean) {
@@ -205,11 +192,8 @@
 		homeRoute="/"
 		onToggleTheme={handleToggleTheme}
 		{isDark}
-		{isSidebarMode}
-		onModeChange={handleModeChange}
 		{isCollapsed}
 		onCollapsedChange={handleCollapsedChange}
-		desktopPosition="bottom"
 		showThemeToggle={true}
 		showLogout={true}
 		onLogout={handleSignOut}
@@ -232,11 +216,11 @@
 		onParseCreate={handleParseCreate}
 		createText="Create"
 		appIcon="help-circle"
-		bottomOffset={isMobile ? '70px' : isSidebarMode ? '0px' : '70px'}
+		bottomOffset={isMobile ? '70px' : '70px'}
 	/>
 
 	<!-- Main Content -->
-	<main class="main-content bg-background" class:sidebar-mode={isSidebarMode && !isCollapsed}>
+	<main class="main-content bg-background">
 		<div class="content-wrapper">
 			{@render children()}
 		</div>
@@ -257,12 +241,6 @@
 		flex-direction: column;
 		min-height: 0;
 		padding-bottom: calc(80px + env(safe-area-inset-bottom));
-		transition: all 300ms ease;
-	}
-
-	.main-content.sidebar-mode {
-		padding-left: 180px;
-		padding-bottom: 0;
 	}
 
 	.content-wrapper {

@@ -1,3 +1,3 @@
 import { createSimpleNavigationStores } from '@manacore/shared-stores';
 
-export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores();
+export const { isNavCollapsed } = createSimpleNavigationStores();

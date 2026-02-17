@@ -19,10 +19,7 @@
 		EXTENDED_THEME_VARIANTS,
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-	} from '$lib/stores/navigation.svelte';
+	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation.svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
@@ -86,7 +83,6 @@
 	let initError = $state<string | null>(null);
 
 	// Navigation state
-	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Theme state
@@ -145,14 +141,6 @@
 		}
 	}
 
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('matrix-nav-sidebar', String(isSidebar));
-		}
-	}
-
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
@@ -176,13 +164,6 @@
 	}
 
 	onMount(async () => {
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('matrix-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
-		}
-
 		// Initialize collapsed state from localStorage
 		const savedCollapsed = localStorage.getItem('matrix-nav-collapsed');
 		if (savedCollapsed === 'true') {
@@ -333,11 +314,8 @@
 			homeRoute="/chat"
 			onToggleTheme={handleToggleTheme}
 			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
-			desktopPosition="bottom"
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}
@@ -358,11 +336,7 @@
 		/>
 
 		<!-- Main Content -->
-		<main
-			class="main-content bg-background"
-			class:sidebar-mode={isSidebarMode && !isCollapsed}
-			class:floating-mode={!isSidebarMode && !isCollapsed}
-		>
+		<main class="main-content bg-background">
 			{@render children()}
 		</main>
 	</div>
@@ -385,11 +359,6 @@
 		flex: 1;
 		min-height: 0;
 		overflow: hidden;
-		transition: all 300ms ease;
-	}
-
-	/* Sidebar mode - add left padding for sidebar nav */
-	.main-content.sidebar-mode {
-		padding-left: 180px;
+		padding-bottom: 80px;
 	}
 </style>

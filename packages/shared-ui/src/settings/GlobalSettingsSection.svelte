@@ -1,10 +1,5 @@
 <script lang="ts">
-	import type {
-		UserSettingsStore,
-		NavPosition,
-		ThemeMode,
-		WeekStartDay,
-	} from '@manacore/shared-theme';
+	import type { UserSettingsStore, ThemeMode, WeekStartDay } from '@manacore/shared-theme';
 	import { getAvailableRoutes, getDefaultRoute } from '@manacore/shared-theme';
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingsCard from './SettingsCard.svelte';
@@ -25,8 +20,6 @@
 		navItems?: NavItem[];
 		/** Items that should always be visible (e.g., home route) */
 		alwaysVisibleHrefs?: string[];
-		/** Whether to show navigation settings */
-		showNavigation?: boolean;
 		/** Whether to show nav visibility settings */
 		showNavVisibility?: boolean;
 		/** Whether to show theme settings */
@@ -48,7 +41,6 @@
 		appId,
 		navItems = [],
 		alwaysVisibleHrefs = [],
-		showNavigation = true,
 		showNavVisibility = true,
 		showTheme = true,
 		showLanguage = true,
@@ -64,20 +56,6 @@
 	const currentStartPage = $derived(
 		appId ? userSettings.general?.startPages?.[appId] || defaultRoute : '/'
 	);
-
-	// Navigation position handler
-	async function handleNavPositionChange(position: NavPosition) {
-		await userSettings.updateGlobal({
-			nav: { ...userSettings.globalSettings.nav, desktopPosition: position },
-		});
-	}
-
-	// Sidebar collapsed handler
-	async function handleSidebarChange(collapsed: boolean) {
-		await userSettings.updateGlobal({
-			nav: { ...userSettings.globalSettings.nav, sidebarCollapsed: collapsed },
-		});
-	}
 
 	// Theme mode handler
 	async function handleThemeModeChange(mode: ThemeMode) {
@@ -155,78 +133,9 @@
 			<p class="text-sm text-[hsl(var(--muted-foreground))] mb-6">{description}</p>
 
 			<div class="space-y-6">
-				{#if showNavigation}
-					<!-- Navigation Settings -->
-					<div class="space-y-4">
-						<h3
-							class="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider"
-						>
-							Navigation
-						</h3>
-
-						<div class="flex items-center justify-between py-2">
-							<div>
-								<p class="font-medium text-[hsl(var(--foreground))]">Position (Desktop)</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">
-									Position der Navigation auf großen Bildschirmen
-								</p>
-							</div>
-							<div class="flex gap-2">
-								<button
-									class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {userSettings
-										.globalSettings.nav.desktopPosition === 'top'
-										? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-										: 'bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))]/80 text-[hsl(var(--foreground))]'}"
-									onclick={() => handleNavPositionChange('top')}
-								>
-									Oben
-								</button>
-								<button
-									class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {userSettings
-										.globalSettings.nav.desktopPosition === 'bottom'
-										? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-										: 'bg-[hsl(var(--muted))] hover:bg-[hsl(var(--muted))]/80 text-[hsl(var(--foreground))]'}"
-									onclick={() => handleNavPositionChange('bottom')}
-								>
-									Unten
-								</button>
-							</div>
-						</div>
-
-						<div
-							class="flex items-center justify-between py-2 border-t border-[hsl(var(--border))]"
-						>
-							<div>
-								<p class="font-medium text-[hsl(var(--foreground))]">Sidebar eingeklappt</p>
-								<p class="text-sm text-[hsl(var(--muted-foreground))]">
-									Standard-Zustand der Sidebar
-								</p>
-							</div>
-							<button
-								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {userSettings
-									.globalSettings.nav.sidebarCollapsed
-									? 'bg-[hsl(var(--primary))]'
-									: 'bg-gray-200 dark:bg-gray-700'}"
-								onclick={() =>
-									handleSidebarChange(!userSettings.globalSettings.nav.sidebarCollapsed)}
-								aria-label="Toggle sidebar collapsed state"
-							>
-								<span
-									class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {userSettings
-										.globalSettings.nav.sidebarCollapsed
-										? 'translate-x-6'
-										: 'translate-x-1'}"
-								></span>
-							</button>
-						</div>
-					</div>
-				{/if}
-
 				{#if showNavVisibility && appId && navItems.length > 0}
 					<!-- Navigation Visibility Settings -->
-					<div
-						class="space-y-4 {showNavigation ? 'pt-4 border-t border-[hsl(var(--border))]' : ''}"
-					>
+					<div class="space-y-4">
 						<NavVisibilitySettings {userSettings} {appId} {navItems} {alwaysVisibleHrefs} />
 					</div>
 				{/if}
@@ -234,7 +143,7 @@
 				{#if showTheme}
 					<!-- Theme Settings -->
 					<div
-						class="space-y-4 {showNavigation || (showNavVisibility && appId)
+						class="space-y-4 {showNavVisibility && appId
 							? 'pt-4 border-t border-[hsl(var(--border))]'
 							: ''}"
 					>
@@ -294,7 +203,7 @@
 				{#if showLanguage}
 					<!-- Language Settings -->
 					<div
-						class="space-y-4 {showTheme || showNavigation || (showNavVisibility && appId)
+						class="space-y-4 {showTheme || (showNavVisibility && appId)
 							? 'pt-4 border-t border-[hsl(var(--border))]'
 							: ''}"
 					>
@@ -331,10 +240,7 @@
 				{#if showGeneral}
 					<!-- General Settings -->
 					<div
-						class="space-y-4 {showLanguage ||
-						showTheme ||
-						showNavigation ||
-						(showNavVisibility && appId)
+						class="space-y-4 {showLanguage || showTheme || (showNavVisibility && appId)
 							? 'pt-4 border-t border-[hsl(var(--border))]'
 							: ''}"
 					>

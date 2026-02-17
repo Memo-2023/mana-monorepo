@@ -238,7 +238,6 @@
 				currentPath={$page.url.pathname}
 				appName="Zitare"
 				homeRoute="/"
-				desktopPosition="bottom"
 				onToggleTheme={handleToggleTheme}
 				{isDark}
 				showThemeToggle={true}

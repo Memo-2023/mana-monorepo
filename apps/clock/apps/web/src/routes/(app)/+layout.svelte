@@ -24,10 +24,7 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-	} from '$lib/stores/navigation';
+	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -114,7 +111,6 @@
 		}
 	}
 
-	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Use theme store's isDark directly
@@ -213,14 +209,6 @@
 		}
 	}
 
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('clock-nav-sidebar', String(isSidebar));
-		}
-	}
-
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
@@ -248,13 +236,6 @@
 		if (!authStore.isAuthenticated) {
 			goto('/login');
 			return;
-		}
-
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('clock-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
 		}
 
 		// Initialize collapsed state from localStorage
@@ -291,11 +272,8 @@
 		currentPath={$page.url.pathname}
 		appName="Clock"
 		homeRoute="/"
-		desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 		onToggleTheme={handleToggleTheme}
 		{isDark}
-		{isSidebarMode}
-		onModeChange={handleModeChange}
 		{isCollapsed}
 		onCollapsedChange={handleCollapsedChange}
 		showThemeToggle={true}
@@ -320,11 +298,7 @@
 		allAppsHref="/apps"
 	/>
 
-	<main
-		class="main-content bg-background"
-		class:sidebar-mode={isSidebarMode && !isCollapsed}
-		class:floating-mode={!isSidebarMode && !isCollapsed}
-	>
+	<main class="main-content bg-background">
 		<div class="content-wrapper">
 			{@render children()}
 		</div>
@@ -351,17 +325,9 @@
 	}
 
 	.main-content {
-		transition: all 300ms ease;
 		position: relative;
 		z-index: 0;
-	}
-
-	.main-content.floating-mode {
-		padding-top: 70px;
-	}
-
-	.main-content.sidebar-mode {
-		padding-left: 180px;
+		padding-bottom: 100px;
 	}
 
 	.content-wrapper {

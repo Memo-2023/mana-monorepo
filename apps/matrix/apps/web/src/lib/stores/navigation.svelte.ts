@@ -3,31 +3,8 @@
 
 import { browser } from '$app/environment';
 
-// Check if on mobile/tablet width
-function checkSidebarMode(): boolean {
-	if (!browser) return false;
-	return window.innerWidth < 1024;
-}
-
 // Create reactive stores using Svelte 5 runes
-let _isSidebarMode = $state(checkSidebarMode());
 let _isNavCollapsed = $state(false);
-
-// Listen for resize events
-if (browser) {
-	window.addEventListener('resize', () => {
-		_isSidebarMode = checkSidebarMode();
-	});
-}
-
-export const isSidebarMode = {
-	get value() {
-		return _isSidebarMode;
-	},
-	set(value: boolean) {
-		_isSidebarMode = value;
-	},
-};
 
 export const isNavCollapsed = {
 	get value() {

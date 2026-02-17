@@ -17,10 +17,7 @@
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-	} from '$lib/stores/navigation';
+	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { onboardingStore } from '$lib/stores/onboarding.svelte';
 	import { OnboardingWizard } from '$lib/components/onboarding';
@@ -31,7 +28,6 @@
 	const appItems = getPillAppItems('manacore');
 
 	let loading = $state(true);
-	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Get theme state
@@ -121,14 +117,6 @@
 		}
 	}
 
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('manacore-nav-sidebar', String(isSidebar));
-		}
-	}
-
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
@@ -175,13 +163,6 @@
 		if (!authStore.isAuthenticated) {
 			goto('/login');
 			return;
-		}
-
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('manacore-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
 		}
 
 		// Initialize collapsed state from localStorage
@@ -239,11 +220,8 @@
 			onLogout={handleSignOut}
 			onToggleTheme={handleToggleTheme}
 			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}
@@ -264,14 +242,8 @@
 			allAppsHref="/apps"
 		/>
 
-		<!-- Main content with dynamic padding -->
-		<main
-			class="transition-all duration-300 {isCollapsed
-				? ''
-				: isSidebarMode
-					? 'pl-[180px]'
-					: 'pt-20'}"
-		>
+		<!-- Main content -->
+		<main class="pb-24">
 			<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 				{@render children()}
 			</div>

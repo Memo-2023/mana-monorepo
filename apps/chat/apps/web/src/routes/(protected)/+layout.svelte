@@ -15,10 +15,7 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
-	import {
-		isSidebarMode as sidebarModeStore,
-		isNavCollapsed as collapsedStore,
-	} from '$lib/stores/navigation';
+	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
@@ -32,7 +29,6 @@
 	let { children, data }: { children: any; data: LayoutData } = $props();
 
 	let isChecking = $state(true);
-	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 
 	// Use theme store's isDark directly
@@ -125,14 +121,6 @@
 		}
 	}
 
-	function handleModeChange(isSidebar: boolean) {
-		isSidebarMode = isSidebar;
-		sidebarModeStore.set(isSidebar);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('chat-nav-sidebar', String(isSidebar));
-		}
-	}
-
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
@@ -165,13 +153,6 @@
 
 		// Initialize theme
 		theme.initialize();
-
-		// Initialize sidebar mode from localStorage
-		const savedSidebar = localStorage.getItem('chat-nav-sidebar');
-		if (savedSidebar === 'true') {
-			isSidebarMode = true;
-			sidebarModeStore.set(true);
-		}
 
 		// Initialize collapsed state from localStorage
 		const savedCollapsed = localStorage.getItem('chat-nav-collapsed');
@@ -213,7 +194,7 @@
 {:else}
 	<!-- Navigation Layout -->
 	<div class="layout-container">
-		<!-- Floating/Sidebar Pill Navigation -->
+		<!-- Floating Pill Navigation -->
 		<PillNavigation
 			items={navItems}
 			currentPath={$page.url.pathname}
@@ -221,11 +202,8 @@
 			homeRoute="/chat"
 			onToggleTheme={handleToggleTheme}
 			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
-			desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 			showThemeToggle={true}
 			showThemeVariants={true}
 			{themeVariantItems}
@@ -247,13 +225,8 @@
 			allAppsHref="/apps"
 		/>
 
-		<!-- Main Content with dynamic padding based on nav mode -->
-		<main
-			class="main-content bg-background"
-			class:sidebar-mode={isSidebarMode && !isCollapsed}
-			class:floating-mode={!isSidebarMode && !isCollapsed}
-			class:chat-page={isChatPage}
-		>
+		<!-- Main Content -->
+		<main class="main-content bg-background" class:chat-page={isChatPage}>
 			{#if isChatPage}
 				<!-- Full-width layout for chat pages -->
 				{@render children()}
@@ -275,17 +248,7 @@
 
 	.main-content {
 		flex: 1;
-		transition: all 300ms ease;
-	}
-
-	/* Floating nav mode - add top padding for fixed nav */
-	.main-content.floating-mode {
-		padding-top: 100px;
-	}
-
-	/* Sidebar mode - add left padding for sidebar nav */
-	.main-content.sidebar-mode {
-		padding-left: 180px;
+		padding-bottom: 100px;
 	}
 
 	/* Chat page - no content wrapper, but keep nav padding */

@@ -317,7 +317,6 @@
 					homeRoute="/"
 					onToggleTheme={handleToggleTheme}
 					{isDark}
-					desktopPosition={userSettings.nav?.desktopPosition || 'bottom'}
 					showThemeToggle={true}
 					showThemeVariants={true}
 					{themeVariantItems}

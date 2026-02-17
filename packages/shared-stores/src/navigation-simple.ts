@@ -6,8 +6,6 @@
 import { writable, type Writable } from 'svelte/store';
 
 export interface SimpleNavigationStores {
-	/** Whether the app is in sidebar mode (desktop) */
-	isSidebarMode: Writable<boolean>;
 	/** Whether the nav is collapsed */
 	isNavCollapsed: Writable<boolean>;
 	/** Whether the toolbar is collapsed (optional) */
@@ -15,7 +13,7 @@ export interface SimpleNavigationStores {
 }
 
 export interface SimpleNavigationOptions {
-	/** App name for localStorage keys (e.g., 'clock' -> 'clock_sidebar_mode') */
+	/** App name for localStorage keys (e.g., 'clock' -> 'clock_nav_collapsed') */
 	storageKey?: string;
 	/** Include isToolbarCollapsed store */
 	withToolbar?: boolean;
@@ -28,17 +26,17 @@ export interface SimpleNavigationOptions {
  *
  * @example
  * // Basic usage (no persistence)
- * export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores();
+ * export const { isNavCollapsed } = createSimpleNavigationStores();
  *
  * @example
  * // With persistence
- * export const { isSidebarMode, isNavCollapsed } = createSimpleNavigationStores({
+ * export const { isNavCollapsed } = createSimpleNavigationStores({
  *   storageKey: 'clock',
  * });
  *
  * @example
  * // With toolbar
- * export const { isSidebarMode, isNavCollapsed, isToolbarCollapsed } = createSimpleNavigationStores({
+ * export const { isNavCollapsed, isToolbarCollapsed } = createSimpleNavigationStores({
  *   withToolbar: true,
  *   toolbarCollapsedDefault: true,
  * });
@@ -71,16 +69,11 @@ export function createSimpleNavigationStores(
 	}
 
 	// Create stores (persisted if storageKey provided, otherwise simple)
-	const isSidebarMode = storageKey
-		? createPersistedWritable('sidebar_mode', false)
-		: writable(false);
-
 	const isNavCollapsed = storageKey
 		? createPersistedWritable('nav_collapsed', false)
 		: writable(false);
 
 	const result: SimpleNavigationStores = {
-		isSidebarMode,
 		isNavCollapsed,
 	};
 
