@@ -42,6 +42,8 @@ COPY packages/shared-tags ./packages/shared-tags
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-stores ./packages/shared-stores
+COPY packages/shared-pwa ./packages/shared-pwa
+COPY packages/spiral-db ./packages/spiral-db
 
 # Copy todo packages and web
 COPY apps/todo/packages ./apps/todo/packages
