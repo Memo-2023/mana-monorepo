@@ -118,15 +118,14 @@ Archivierte Apps (memoro, storyteller) wurden bereits entfernt.
 
 ### 3. ✅ Dashboard-Widgets erweitern (GRÖSSTENTEILS ERLEDIGT)
 
-**Status:** 14 von 16 Widgets implementiert (Finance + Mail fehlen)
+**Status:** 13 von 15 Widgets implementiert (Finance + Mail fehlen)
 
-**Existierende Widgets (14 Typen):**
+**Existierende Widgets (13 Typen):**
 
 | Widget                  | App            | Status |
 | ----------------------- | -------------- | ------ |
 | CreditsWidget           | mana-core-auth | ✅     |
 | TransactionsWidget      | mana-core-auth | ✅     |
-| ReferralWidget          | mana-core-auth | ✅     |
 | QuickActionsWidget      | core           | ✅     |
 | TasksTodayWidget        | todo           | ✅     |
 | TasksUpcomingWidget     | todo           | ✅     |

@@ -16,7 +16,6 @@
 	import CreditsWidget from './widgets/CreditsWidget.svelte';
 	import QuickActionsWidget from './widgets/QuickActionsWidget.svelte';
 	import TransactionsWidget from './widgets/TransactionsWidget.svelte';
-	import ReferralWidget from './widgets/ReferralWidget.svelte';
 	import TasksTodayWidget from './widgets/TasksTodayWidget.svelte';
 	import TasksUpcomingWidget from './widgets/TasksUpcomingWidget.svelte';
 	import CalendarEventsWidget from './widgets/CalendarEventsWidget.svelte';
@@ -58,7 +57,6 @@
 		credits: CreditsWidget,
 		'quick-actions': QuickActionsWidget,
 		transactions: TransactionsWidget,
-		referral: ReferralWidget,
 		'tasks-today': TasksTodayWidget,
 		'tasks-upcoming': TasksUpcomingWidget,
 		'calendar-events': CalendarEventsWidget,

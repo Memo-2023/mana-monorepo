@@ -29,9 +29,6 @@ import { createBetterAuth } from '../better-auth.config';
 import type { BetterAuthInstance } from '../better-auth.config';
 import { getDb } from '../../db/connection';
 import { balances } from '../../db/schema/credits.schema';
-import { ReferralCodeService } from '../../referrals/services/referral-code.service';
-import { ReferralTierService } from '../../referrals/services/referral-tier.service';
-import { ReferralTrackingService } from '../../referrals/services/referral-tracking.service';
 import { GiftCodeService } from '../../gifts/services/gift-code.service';
 import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';
 import { sourceAppStore } from '../stores/source-app.store';
@@ -114,15 +111,6 @@ export class BetterAuthService {
 	constructor(
 		private configService: ConfigService,
 		@Optional()
-		@Inject(forwardRef(() => ReferralCodeService))
-		private referralCodeService: ReferralCodeService,
-		@Optional()
-		@Inject(forwardRef(() => ReferralTierService))
-		private referralTierService: ReferralTierService,
-		@Optional()
-		@Inject(forwardRef(() => ReferralTrackingService))
-		private referralTrackingService: ReferralTrackingService,
-		@Optional()
 		@Inject(forwardRef(() => GiftCodeService))
 		private giftCodeService: GiftCodeService,
 		loggerService: LoggerService
@@ -185,9 +173,6 @@ export class BetterAuthService {
 					});
 				}
 			}
-
-			// Initialize referral system for new user
-			await this.initializeUserReferrals(user.id, dto.referralCode, dto.sourceAppId);
 
 			return {
 				user: {
@@ -1684,58 +1669,6 @@ export class BetterAuthService {
 			.replace(/\s+/g, '-') // Replace spaces with hyphens
 			.replace(/--+/g, '-') // Replace multiple hyphens with single
 			.trim();
-	}
-
-	/**
-	 * Initialize referral system for a new user
-	 *
-	 * This method:
-	 * 1. Creates an automatic referral code for the new user
-	 * 2. Initializes the user's tier (bronze)
-	 * 3. If a referral code was used, applies the referral relationship
-	 *
-	 * @param userId - The new user's ID
-	 * @param referralCode - Optional referral code used during signup
-	 * @param sourceAppId - Optional app ID where the user registered
-	 * @private
-	 */
-	private async initializeUserReferrals(
-		userId: string,
-		referralCode?: string,
-		sourceAppId?: string
-	): Promise<void> {
-		// Skip if referral services are not available
-		if (!this.referralCodeService || !this.referralTierService) {
-			return;
-		}
-
-		try {
-			// 1. Create automatic referral code for the new user
-			await this.referralCodeService.createAutoCode(userId);
-
-			// 2. Initialize user's tier (starts at bronze)
-			await this.referralTierService.initializeUserTier(userId);
-
-			// 3. If a referral code was provided, apply the referral relationship
-			if (referralCode && this.referralTrackingService) {
-				// The applyReferral method handles validation internally
-				const result = await this.referralTrackingService.applyReferral({
-					refereeId: userId,
-					code: referralCode,
-					sourceAppId: sourceAppId || 'manacore',
-				});
-
-				if (!result.success) {
-					this.logger.warn('Failed to apply referral code', { error: result.error, referralCode });
-				}
-			}
-		} catch (error) {
-			// Log but don't fail registration if referral setup fails
-			this.logger.error(
-				'Error setting up referrals',
-				error instanceof Error ? error.stack : undefined
-			);
-		}
 	}
 
 	// =========================================================================

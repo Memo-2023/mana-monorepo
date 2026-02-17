@@ -11,7 +11,6 @@ export type WidgetType =
 	| 'credits' // Credits balance from mana-core-auth
 	| 'quick-actions' // Quick action links
 	| 'transactions' // Recent credit transactions
-	| 'referral' // Referral code and stats
 	| 'tasks-today' // Todo API: today's tasks
 	| 'tasks-upcoming' // Todo API: upcoming 7 days
 	| 'calendar-events' // Calendar API: upcoming events
@@ -145,15 +144,6 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		nameKey: 'dashboard.widgets.transactions.title',
 		descriptionKey: 'dashboard.widgets.transactions.description',
 		icon: '📊',
-		defaultSize: 'medium',
-		allowMultiple: false,
-		requiredBackend: 'mana-core-auth',
-	},
-	{
-		type: 'referral',
-		nameKey: 'dashboard.widgets.referral.title',
-		descriptionKey: 'dashboard.widgets.referral.description',
-		icon: '🤝',
 		defaultSize: 'medium',
 		allowMultiple: false,
 		requiredBackend: 'mana-core-auth',

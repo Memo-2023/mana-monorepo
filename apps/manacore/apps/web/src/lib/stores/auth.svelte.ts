@@ -143,9 +143,8 @@ export const authStore = {
 	 * Sign up with email and password
 	 * @param email User email
 	 * @param password User password
-	 * @param referralCode Optional referral code for bonus credits
 	 */
-	async signUp(email: string, password: string, referralCode?: string) {
+	async signUp(email: string, password: string) {
 		const authService = getAuthService();
 		if (!authService) {
 			return { success: false, error: 'Auth not available on server', needsVerification: false };
@@ -154,7 +153,7 @@ export const authStore = {
 		try {
 			// Pass the current app URL for post-verification redirect
 			const sourceAppUrl = browser ? window.location.origin : undefined;
-			const result = await authService.signUp(email, password, referralCode, sourceAppUrl);
+			const result = await authService.signUp(email, password, undefined, sourceAppUrl);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Signup failed', needsVerification: false };
@@ -171,27 +170,6 @@ export const authStore = {
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			return { success: false, error: errorMessage, needsVerification: false };
-		}
-	},
-
-	/**
-	 * Validate a referral code
-	 */
-	async validateReferralCode(code: string) {
-		try {
-			const response = await fetch(`${getAuthUrl()}/api/v1/referrals/validate/${code}`);
-			if (!response.ok) {
-				return { valid: false, error: 'Invalid code' };
-			}
-			const data = await response.json();
-			return {
-				valid: data.valid,
-				referrerName: data.referrerName,
-				bonusCredits: data.bonusCredits || 25,
-				error: data.error,
-			};
-		} catch {
-			return { valid: false, error: 'Validation failed' };
 		}
 	},
 

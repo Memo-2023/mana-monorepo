@@ -10,14 +10,13 @@ Konzept für fraud-resistente Mechanismen, durch die Nutzer Mana Credits verdien
 
 ## Übersicht
 
-Das Earning-System besteht aus vier Säulen:
+Das Earning-System besteht aus drei Säulen:
 
 | Säule | Beschreibung | Reward-Typ |
 |-------|--------------|------------|
 | **Karma/XP System** | Gamification ohne monetären Wert | XP, Badges, Levels |
 | **Creator Rewards** | Social-Proof-basierte Content-Belohnung | Credits (delayed) |
 | **Community Bounties** | Kuratierte Belohnungen für Contributions | Credits (manual) |
-| **Referral Program** | Bestehendes System | Credits |
 
 ### Design-Prinzipien
 
@@ -497,31 +496,6 @@ CREATE TABLE community.bounty_pool (
 
 ---
 
-## 4. Referral Program (Bestehend)
-
-Das bestehende Referral-System bleibt unverändert. Dokumentation siehe `services/mana-core-auth/src/referrals/`.
-
-### Zusammenfassung
-
-| Event | Referee bekommt | Referrer bekommt |
-|-------|-----------------|------------------|
-| Registration | 25 Credits | 5 × Tier-Multiplier |
-| Activation | - | 10 × Tier-Multiplier |
-| Qualification (1. Kauf) | - | 50 × Tier-Multiplier |
-| Cross-App Usage | - | 5 × Tier-Multiplier (pro App) |
-| Retention (30 Tage) | - | 25 × Tier-Multiplier |
-
-### Tier-Multiplikatoren
-
-| Tier | Qualifizierte Referrals | Multiplier |
-|------|------------------------|------------|
-| Bronze | 0 | 1.0x |
-| Silver | 1-5 | 1.5x |
-| Gold | 6-15 | 2.0x |
-| Platinum | 16+ | 3.0x |
-
----
-
 ## Implementation Roadmap
 
 ### Phase 1: Karma/XP System
@@ -804,5 +778,4 @@ bugs_triage_queue_size          // Gauge: Pending triage
 ## Related Documents
 
 - [Credit System (bestehend)](../services/mana-core-auth/src/credits/)
-- [Referral System (bestehend)](../services/mana-core-auth/src/referrals/)
 - [Credit Operations Registry](../packages/credit-operations/)

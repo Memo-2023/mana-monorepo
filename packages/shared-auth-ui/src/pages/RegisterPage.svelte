@@ -17,12 +17,6 @@
 		backToLogin: string;
 		showPassword: string;
 		hidePassword: string;
-		// Referral
-		referralCodePlaceholder: string;
-		referralCodeValid: string;
-		referralCodeInvalid: string;
-		referralCodeValidating: string;
-		referralBonusCredits: string;
 		// Error messages
 		emailRequired: string;
 		passwordRequired: string;
@@ -40,14 +34,6 @@
 		checkYourEmail?: string;
 	}
 
-	/** Referral code validation result */
-	interface ReferralValidation {
-		valid: boolean;
-		referrerName?: string;
-		bonusCredits?: number;
-		error?: string;
-	}
-
 	/** Default English translations */
 	const defaultTranslations: RegisterTranslations = {
 		title: 'Create Account',
@@ -61,12 +47,6 @@
 		backToLogin: 'Back to Login',
 		showPassword: 'Show password',
 		hidePassword: 'Hide password',
-		// Referral
-		referralCodePlaceholder: 'Referral Code (optional)',
-		referralCodeValid: 'Valid code!',
-		referralCodeInvalid: 'Invalid code',
-		referralCodeValidating: 'Checking...',
-		referralBonusCredits: 'bonus credits',
 		// Error messages
 		emailRequired: 'Email is required',
 		passwordRequired: 'Password is required',
@@ -91,8 +71,8 @@
 		logo: Component<{ size?: number; color?: string }>;
 		/** Primary color (hex) */
 		primaryColor: string;
-		/** Sign up function (with optional referral code) */
-		onSignUp: (email: string, password: string, referralCode?: string) => Promise<AuthResult>;
+		/** Sign up function */
+		onSignUp: (email: string, password: string) => Promise<AuthResult>;
 		/** Navigation function */
 		goto: (path: string) => void;
 		/** Resend verification email function */
@@ -111,12 +91,6 @@
 		headerControls?: Snippet;
 		/** Translations for i18n support */
 		translations?: Partial<RegisterTranslations>;
-		/** Referral code validation function */
-		onValidateReferralCode?: (code: string) => Promise<ReferralValidation>;
-		/** Initial referral code (e.g., from URL) */
-		initialReferralCode?: string;
-		/** Base signup credits (shown to user) */
-		baseSignupCredits?: number;
 	}
 
 	let {
@@ -133,9 +107,6 @@
 		appSlider,
 		headerControls,
 		translations = {},
-		onValidateReferralCode,
-		initialReferralCode = '',
-		baseSignupCredits = 25,
 	}: Props = $props();
 
 	// Merge provided translations with defaults
@@ -152,17 +123,6 @@
 	let showConfirmPassword = $state(false);
 	let resendingVerification = $state(false);
 	let verificationEmailSent = $state(false);
-
-	// Referral state
-	let referralCode = $state(initialReferralCode);
-	let referralValidation = $state<ReferralValidation | null>(null);
-	let validatingReferral = $state(false);
-	let referralDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-	// Calculate total credits (base + bonus)
-	let totalCredits = $derived(
-		baseSignupCredits + (referralValidation?.valid ? referralValidation.bonusCredits || 0 : 0)
-	);
 
 	// Theme state - can be toggled manually, defaults to system preference
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -193,44 +153,6 @@
 		} else {
 			userThemePreference = userThemePreference === 'dark' ? 'light' : 'dark';
 		}
-	}
-
-	// Referral code validation
-	async function validateReferralCode(code: string) {
-		if (!code || code.length < 3 || !onValidateReferralCode) {
-			referralValidation = null;
-			return;
-		}
-
-		validatingReferral = true;
-		try {
-			const result = await onValidateReferralCode(code);
-			referralValidation = result;
-		} catch {
-			referralValidation = { valid: false, error: 'Validation failed' };
-		} finally {
-			validatingReferral = false;
-		}
-	}
-
-	function handleReferralCodeChange(value: string) {
-		referralCode = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-
-		// Clear previous timer
-		if (referralDebounceTimer) {
-			clearTimeout(referralDebounceTimer);
-		}
-
-		// Reset validation if empty
-		if (!referralCode) {
-			referralValidation = null;
-			return;
-		}
-
-		// Debounce validation
-		referralDebounceTimer = setTimeout(() => {
-			validateReferralCode(referralCode);
-		}, 500);
 	}
 
 	// Password validation
@@ -306,9 +228,7 @@
 			return;
 		}
 
-		// Pass referral code if valid
-		const validReferralCode = referralValidation?.valid ? referralCode : undefined;
-		const result = await onSignUp(email, password, validReferralCode);
+		const result = await onSignUp(email, password);
 
 		loading = false;
 
@@ -624,58 +544,6 @@
 				>
 					{t.passwordRequirements}
 				</p>
-
-				<!-- Referral Code Input -->
-				{#if onValidateReferralCode}
-					<div>
-						<div class="relative">
-							<input
-								type="text"
-								value={referralCode}
-								oninput={(e) => handleReferralCodeChange((e.target as HTMLInputElement).value)}
-								placeholder={t.referralCodePlaceholder}
-								maxlength={12}
-								class="h-14 w-full rounded-xl border px-4 pr-24 text-lg transition-colors focus:outline-none focus:ring-2 uppercase tracking-wider"
-								style="background-color: {isDark
-									? 'rgba(0, 0, 0, 0.2)'
-									: 'rgba(255, 255, 255, 0.8)'}; border-color: {referralValidation?.valid
-									? '#22c55e'
-									: referralValidation && !referralValidation.valid
-										? '#ef4444'
-										: isDark
-											? 'rgba(255, 255, 255, 0.2)'
-											: 'rgba(0, 0, 0, 0.1)'}; color: {isDark
-									? '#ffffff'
-									: '#000000'}; --tw-ring-color: {primaryColor};"
-							/>
-							<!-- Validation indicator -->
-							<div class="absolute inset-y-0 right-0 flex items-center pr-4">
-								{#if validatingReferral}
-									<span
-										class="text-sm"
-										style="color: {isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'};"
-									>
-										{t.referralCodeValidating}
-									</span>
-								{:else if referralValidation?.valid}
-									<span class="text-sm text-green-500">✓ {t.referralCodeValid}</span>
-								{:else if referralValidation && !referralValidation.valid}
-									<span class="text-sm text-red-500">✗ {t.referralCodeInvalid}</span>
-								{/if}
-							</div>
-						</div>
-						<!-- Bonus info -->
-						{#if referralValidation?.valid && referralValidation.bonusCredits}
-							<p class="mt-2 text-sm text-green-500">
-								+{referralValidation.bonusCredits}
-								{t.referralBonusCredits}
-								{#if referralValidation.referrerName}
-									(von {referralValidation.referrerName})
-								{/if}
-							</p>
-						{/if}
-					</div>
-				{/if}
 
 				<button
 					type="submit"

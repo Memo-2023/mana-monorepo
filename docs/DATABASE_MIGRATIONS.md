@@ -522,8 +522,8 @@ Drizzle ORM does not support automatic rollbacks. Plan your migrations carefully
 
 ```
 src/db/migrations/
-├── 001_add_referrals.up.sql
-├── 001_add_referrals.down.sql   # Manual rollback script
+├── 001_add_feature.up.sql
+├── 001_add_feature.down.sql   # Manual rollback script
 ```
 
 2. **Execute rollback manually**:
@@ -533,7 +533,7 @@ src/db/migrations/
 docker compose exec -T postgres psql -U postgres -d manacore_auth
 
 # Run down migration
-\i /path/to/001_add_referrals.down.sql
+\i /path/to/001_add_feature.down.sql
 ```
 
 ### Rollback Checklist

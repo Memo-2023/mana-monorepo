@@ -20,9 +20,6 @@ import { silentError } from '../../__tests__/utils/silent-error.decorator';
 
 // Mock services that are not yet implemented
 const SecurityEventsService = jest.fn();
-const ReferralCodeService = jest.fn();
-const ReferralTierService = jest.fn();
-const ReferralTrackingService = jest.fn();
 
 // Mock nanoid before importing factories
 jest.mock('nanoid', () => ({
@@ -55,18 +52,6 @@ jest.mock('../better-auth.config', () => ({
 // Mock services
 const mockSecurityEventsService = {
 	logEvent: jest.fn().mockResolvedValue(undefined),
-};
-
-const mockReferralCodeService = {
-	createAutoCode: jest.fn().mockResolvedValue({ id: 'code-123', code: 'ABC123' }),
-};
-
-const mockReferralTierService = {
-	initializeUserTier: jest.fn().mockResolvedValue({ id: 'tier-123', tier: 'bronze' }),
-};
-
-const mockReferralTrackingService = {
-	applyReferral: jest.fn().mockResolvedValue({ success: true }),
 };
 
 const mockLoggerService = {
@@ -113,18 +98,6 @@ describe('BetterAuthService', () => {
 				{
 					provide: SecurityEventsService,
 					useValue: mockSecurityEventsService,
-				},
-				{
-					provide: ReferralCodeService,
-					useValue: mockReferralCodeService,
-				},
-				{
-					provide: ReferralTierService,
-					useValue: mockReferralTierService,
-				},
-				{
-					provide: ReferralTrackingService,
-					useValue: mockReferralTrackingService,
 				},
 				{
 					provide: LoggerService,

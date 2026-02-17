@@ -40,6 +40,9 @@ COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-vite-config ./packages/shared-vite-config
+COPY packages/shared-pwa ./packages/shared-pwa
+COPY packages/qr-export ./packages/qr-export
+COPY packages/wallpaper-generator ./packages/wallpaper-generator
 
 # Copy manacore web
 COPY apps/manacore/apps/web ./apps/manacore/apps/web

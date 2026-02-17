@@ -11,7 +11,6 @@ import { CreditsModule } from './credits/credits.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { GiftsModule } from './gifts/gifts.module';
 import { HealthModule } from './health/health.module';
-import { ReferralsModule } from './referrals/referrals.module';
 import { SettingsModule } from './settings/settings.module';
 import { StorageModule } from './storage/storage.module';
 import { TagsModule } from './tags/tags.module';
@@ -46,7 +45,6 @@ import { LoggerModule } from './common/logger';
 		FeedbackModule,
 		GiftsModule,
 		HealthModule,
-		ReferralsModule,
 		SettingsModule,
 		StorageModule,
 		TagsModule,
