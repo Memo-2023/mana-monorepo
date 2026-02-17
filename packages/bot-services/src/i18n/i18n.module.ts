@@ -1,4 +1,4 @@
-import { Module, DynamicModule } from '@nestjs/common';
+import { Module, DynamicModule, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { I18nService, I18N_OPTIONS } from './i18n.service';
 import { I18nOptions } from './types';

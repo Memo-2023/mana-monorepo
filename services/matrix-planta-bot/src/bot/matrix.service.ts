@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
 	BaseMatrixService,
@@ -61,7 +61,7 @@ export class MatrixService extends BaseMatrixService implements CreditCommandsHo
 	// Expose services for credit commands mixin (CreditCommandsHost interface)
 	public sessionService: SessionService;
 	public creditService: CreditService;
-	public i18nService: I18nService;
+	public i18nService!: I18nService;
 
 	constructor(
 		configService: ConfigService,
@@ -69,13 +69,15 @@ export class MatrixService extends BaseMatrixService implements CreditCommandsHo
 		private plantaService: PlantaService,
 		sessionService: SessionService,
 		creditService: CreditService,
-		i18nService: I18nService
+		@Optional() i18nService?: I18nService
 	) {
 		super(configService);
 		// Assign to public properties for credit commands mixin
 		this.sessionService = sessionService;
 		this.creditService = creditService;
-		this.i18nService = i18nService;
+		if (i18nService) {
+			this.i18nService = i18nService;
+		}
 	}
 
 	// ============================================================================
