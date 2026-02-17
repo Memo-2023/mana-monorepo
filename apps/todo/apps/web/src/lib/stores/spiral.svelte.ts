@@ -9,6 +9,7 @@ import {
 	type SpiralImage,
 	type SpiralRecord,
 	exportToPngBytes,
+	importFromPngBytes,
 	downloadPng,
 } from '@manacore/spiral-db';
 
@@ -199,6 +200,35 @@ class SpiralStore {
 			compression: true,
 		});
 		this.updateState();
+	}
+
+	/**
+	 * Import from PNG file
+	 */
+	async importFromPng(file: File): Promise<{ success: boolean; error?: string }> {
+		try {
+			this.isLoading = true;
+			this.error = null;
+
+			// Read file as ArrayBuffer
+			const buffer = await file.arrayBuffer();
+			const bytes = new Uint8Array(buffer);
+
+			// Parse PNG and extract image
+			const image = importFromPngBytes(bytes);
+
+			// Reconstruct database from image
+			this.db = SpiralDB.fromImage<TodoData>(image, createTodoSchema());
+			this.updateState();
+
+			return { success: true };
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+			this.error = errorMessage;
+			return { success: false, error: errorMessage };
+		} finally {
+			this.isLoading = false;
+		}
 	}
 }
 

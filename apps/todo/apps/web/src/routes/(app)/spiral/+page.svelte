@@ -65,6 +65,26 @@
 		spiralStore.downloadPng();
 	}
 
+	let fileInput: HTMLInputElement;
+
+	function handleImportClick() {
+		fileInput?.click();
+	}
+
+	async function handleFileSelect(e: Event) {
+		const input = e.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		const result = await spiralStore.importFromPng(file);
+		if (!result.success) {
+			alert(`Import fehlgeschlagen: ${result.error}`);
+		}
+
+		// Reset input
+		input.value = '';
+	}
+
 	function handleClear() {
 		if (confirm('Alle Spiral-Daten löschen?')) {
 			spiralStore.clear();
@@ -269,6 +289,15 @@
 			</div>
 		</section>
 
+		<!-- Hidden file input for PNG import -->
+		<input
+			type="file"
+			accept=".png,image/png"
+			bind:this={fileInput}
+			onchange={handleFileSelect}
+			style="display: none;"
+		/>
+
 		<!-- Actions Section -->
 		<section class="actions-section">
 			<h2>Aktionen</h2>
@@ -276,6 +305,11 @@
 				<button onclick={handleDownload} class="btn-action" disabled={!spiralStore.image}>
 					<span class="btn-icon">📥</span>
 					PNG herunterladen
+				</button>
+
+				<button onclick={handleImportClick} class="btn-action" disabled={spiralStore.isLoading}>
+					<span class="btn-icon">📤</span>
+					PNG importieren
 				</button>
 
 				<button onclick={handleReimport} class="btn-action">
