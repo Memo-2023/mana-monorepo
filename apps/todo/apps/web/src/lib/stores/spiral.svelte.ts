@@ -215,7 +215,7 @@ class SpiralStore {
 			const bytes = new Uint8Array(buffer);
 
 			// Parse PNG and extract image
-			const image = importFromPngBytes(bytes);
+			const image = await importFromPngBytes(bytes);
 
 			// Reconstruct database from image
 			this.db = SpiralDB.fromImage<TodoData>(image, createTodoSchema());
