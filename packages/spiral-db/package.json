@@ -10,11 +10,15 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
+		},
+		"./wallpaper": {
+			"types": "./dist/wallpaper.d.ts",
+			"import": "./dist/wallpaper.js"
 		}
 	},
 	"scripts": {
-		"build": "tsup src/index.ts --format esm --dts --clean",
-		"dev": "tsup src/index.ts --format esm --dts --watch",
+		"build": "tsup src/index.ts src/wallpaper.ts --format esm --dts --clean",
+		"dev": "tsup src/index.ts src/wallpaper.ts --format esm --dts --watch",
 		"test": "vitest",
 		"test:run": "vitest run",
 		"type-check": "tsc --noEmit"
@@ -31,10 +35,14 @@
 		"vitest": "^1.6.1"
 	},
 	"peerDependencies": {
-		"sharp": "^0.33.0"
+		"sharp": "^0.33.0",
+		"@manacore/wallpaper-generator": "workspace:*"
 	},
 	"peerDependenciesMeta": {
 		"sharp": {
+			"optional": true
+		},
+		"@manacore/wallpaper-generator": {
 			"optional": true
 		}
 	},

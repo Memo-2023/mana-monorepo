@@ -3,6 +3,7 @@
 	import { toDataURL, toSVG } from '@manacore/qr-export/generate';
 	import { qrExportService, type QRExportResult } from '$lib/api/services/qr-export';
 	import type { UserDataSummary } from '$lib/api/services/my-data';
+	import { WallpaperModal } from '@manacore/wallpaper-generator/svelte';
 
 	interface Props {
 		show: boolean;
@@ -15,6 +16,8 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let exportResult = $state<QRExportResult | null>(null);
+	let showWallpaperModal = $state(false);
+	let qrDataUrl = $state<string | null>(null);
 
 	// Load export data when modal opens
 	$effect(() => {
@@ -86,6 +89,18 @@
 	function formatBytes(bytes: number): string {
 		if (bytes < 1024) return `${bytes} Bytes`;
 		return `${(bytes / 1024).toFixed(1)} KB`;
+	}
+
+	async function openWallpaperModal() {
+		if (!exportResult) return;
+
+		try {
+			// Generate QR code as data URL for wallpaper generation
+			qrDataUrl = await toDataURL(exportResult.encodeResult, { size: 600 });
+			showWallpaperModal = true;
+		} catch (e) {
+			console.error('Failed to generate QR data URL:', e);
+		}
 	}
 </script>
 
@@ -236,6 +251,22 @@
 								SVG
 							</button>
 						</div>
+
+						<!-- Wallpaper Button -->
+						<button
+							onclick={openWallpaperModal}
+							class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-colors"
+						>
+							<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+								/>
+							</svg>
+							Als Wallpaper
+						</button>
 					</div>
 				{/if}
 
@@ -249,4 +280,13 @@
 			</div>
 		</div>
 	</div>
+{/if}
+
+<!-- Wallpaper Modal -->
+{#if qrDataUrl}
+	<WallpaperModal
+		show={showWallpaperModal}
+		imageDataUrl={qrDataUrl}
+		onClose={() => (showWallpaperModal = false)}
+	/>
 {/if}
