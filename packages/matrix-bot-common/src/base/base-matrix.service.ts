@@ -146,10 +146,11 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 		this.client.on('room.message', async (roomId: string, event: MatrixRoomEvent) => {
 			await this.onRoomMessage(roomId, event);
 		});
+		this.logger.log('Message handler registered');
 
 		// Start the client
 		await this.client.start();
-		this.logger.log('Matrix client started');
+		this.logger.log('Matrix client started and syncing');
 	}
 
 	/**
@@ -198,6 +199,11 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 	 * Handle incoming room message
 	 */
 	protected async onRoomMessage(roomId: string, event: MatrixRoomEvent): Promise<void> {
+		// Debug: Log all incoming messages
+		this.logger.debug(
+			`[MESSAGE] Room: ${roomId}, Sender: ${event.sender}, Type: ${event.type}, MsgType: ${event.content?.msgtype}`
+		);
+
 		// Ignore own messages
 		if (event.sender === this.botUserId) return;
 
