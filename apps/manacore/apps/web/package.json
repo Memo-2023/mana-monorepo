@@ -42,6 +42,7 @@
 		"vitest": "^4.0.14"
 	},
 	"dependencies": {
+		"@manacore/qr-export": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",

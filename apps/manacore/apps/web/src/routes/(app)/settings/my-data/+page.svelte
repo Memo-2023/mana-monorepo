@@ -5,6 +5,7 @@
 	import StatCard from '$lib/components/admin/StatCard.svelte';
 	import ProjectDataCard from '$lib/components/admin/ProjectDataCard.svelte';
 	import DeleteConfirmationModal from '$lib/components/my-data/DeleteConfirmationModal.svelte';
+	import QRExportModal from '$lib/components/my-data/QRExportModal.svelte';
 	import { myDataService, type UserDataSummary } from '$lib/api/services/my-data';
 	import type { DeleteUserDataResponse } from '$lib/api/services/admin';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -19,6 +20,9 @@
 	let deleting = $state(false);
 	let deleteResult = $state<DeleteUserDataResponse | null>(null);
 	let deleteError = $state<string | null>(null);
+
+	// QR Export dialog state
+	let showQRDialog = $state(false);
 
 	async function loadMyData() {
 		loading = true;
@@ -119,33 +123,56 @@
 			</div>
 		</div>
 		{#if userData}
-			<button
-				onclick={handleExport}
-				disabled={exporting}
-				class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
-			>
-				{#if exporting}
-					<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
-						></circle>
-						<path
-							class="opacity-75"
-							fill="currentColor"
-							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-						></path>
-					</svg>
-				{:else}
+			<div class="flex items-center gap-2">
+				<button
+					onclick={() => (showQRDialog = true)}
+					class="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors"
+					title="Als QR-Code exportieren"
+				>
 					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
 							stroke-width="2"
-							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+							d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
 						/>
 					</svg>
-				{/if}
-				<span>{exporting ? 'Exportiere...' : 'Daten exportieren'}</span>
-			</button>
+					<span>QR-Code</span>
+				</button>
+				<button
+					onclick={handleExport}
+					disabled={exporting}
+					class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+				>
+					{#if exporting}
+						<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+					{:else}
+						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+							/>
+						</svg>
+					{/if}
+					<span>{exporting ? 'Exportiere...' : 'Daten exportieren'}</span>
+				</button>
+			</div>
 		{/if}
 	</div>
 
@@ -465,3 +492,6 @@
 	onConfirm={handleDelete}
 	onClose={handleDeleteModalClose}
 />
+
+<!-- QR Export Modal -->
+<QRExportModal show={showQRDialog} {userData} onClose={() => (showQRDialog = false)} />
