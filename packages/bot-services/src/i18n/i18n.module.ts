@@ -2,23 +2,29 @@ import { Module, DynamicModule, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { I18nService, I18N_OPTIONS } from './i18n.service';
 import { I18nOptions } from './types';
-import { SessionModule } from '../session/session.module';
 
 /**
  * I18n Module for Matrix Bots
  *
  * Provides multi-language support with per-user language preferences.
  *
+ * NOTE: SessionService is optional. If you want per-user language preferences,
+ * import SessionModule in your app before I18nModule. Otherwise, the default
+ * language will be used for all users.
+ *
  * @example
  * ```typescript
- * // Basic usage (uses SessionModule and ConfigModule)
+ * // Basic usage (uses default language for all users)
  * @Module({
  *   imports: [I18nModule.forRoot()],
  * })
  *
- * // With custom default language
+ * // With per-user preferences (requires SessionModule)
  * @Module({
- *   imports: [I18nModule.forRoot({ defaultLanguage: 'en' })],
+ *   imports: [
+ *     SessionModule.forRoot({ storageMode: 'redis' }),
+ *     I18nModule.forRoot({ defaultLanguage: 'en' }),
+ *   ],
  * })
  * ```
  */
@@ -31,7 +37,7 @@ export class I18nModule {
 	static forRoot(options?: I18nOptions): DynamicModule {
 		return {
 			module: I18nModule,
-			imports: [ConfigModule, SessionModule.forRoot()],
+			imports: [ConfigModule],
 			providers: [
 				{
 					provide: I18N_OPTIONS,
@@ -53,7 +59,7 @@ export class I18nModule {
 	}): DynamicModule {
 		return {
 			module: I18nModule,
-			imports: [...(options.imports || []), ConfigModule, SessionModule.forRoot()],
+			imports: [...(options.imports || []), ConfigModule],
 			providers: [
 				{
 					provide: I18N_OPTIONS,
