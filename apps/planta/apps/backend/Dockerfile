@@ -74,8 +74,8 @@ WORKDIR /app/apps/planta/apps/backend
 EXPOSE 3022
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3022/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3022/api/v1/health || exit 1
 
 # Run entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]
