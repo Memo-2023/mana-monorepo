@@ -1,0 +1,54 @@
+{
+	"name": "@manacore/spiral-db",
+	"version": "0.1.0",
+	"description": "Pixel-based spiral database - store structured data in images",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsup src/index.ts --format esm --dts --clean",
+		"dev": "tsup src/index.ts --format esm --dts --watch",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"pako": "^2.1.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20.19.25",
+		"@types/pako": "^2.0.4",
+		"tsup": "^8.5.1",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3",
+		"vitest": "^1.6.1"
+	},
+	"peerDependencies": {
+		"sharp": "^0.33.0"
+	},
+	"peerDependenciesMeta": {
+		"sharp": {
+			"optional": true
+		}
+	},
+	"files": [
+		"dist",
+		"src"
+	],
+	"keywords": [
+		"pixel",
+		"database",
+		"spiral",
+		"image",
+		"storage",
+		"encoding"
+	],
+	"license": "MIT"
+}
