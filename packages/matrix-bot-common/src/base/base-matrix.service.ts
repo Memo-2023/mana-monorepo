@@ -7,7 +7,13 @@ import {
 } from 'matrix-bot-sdk';
 import * as path from 'path';
 import * as fs from 'fs';
-import { type MatrixBotConfig, type MatrixRoomEvent, isTextMessage, isAudioMessage } from './types';
+import {
+	type MatrixBotConfig,
+	type MatrixRoomEvent,
+	isTextMessage,
+	isAudioMessage,
+	isImageMessage,
+} from './types';
 import { markdownToHtml } from '../markdown/markdown-formatter';
 
 /**
@@ -82,6 +88,17 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 		_sender: string
 	): Promise<void> {
 		// Default: no-op, override in subclass for voice support
+	}
+
+	/**
+	 * Handle an image message (optional override)
+	 */
+	protected async handleImageMessage(
+		_roomId: string,
+		_event: MatrixRoomEvent,
+		_sender: string
+	): Promise<void> {
+		// Default: no-op, override in subclass for image support
 	}
 
 	/**
@@ -201,6 +218,8 @@ export abstract class BaseMatrixService implements OnModuleInit, OnModuleDestroy
 				await this.handleTextMessage(roomId, event, message, event.sender);
 			} else if (isAudioMessage(event)) {
 				await this.handleAudioMessage(roomId, event, event.sender);
+			} else if (isImageMessage(event)) {
+				await this.handleImageMessage(roomId, event, event.sender);
 			}
 		} catch (error) {
 			this.logger.error(`Error handling message: ${error}`);

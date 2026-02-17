@@ -203,9 +203,9 @@ export class MatrixService extends BaseMatrixService {
 		const field = parts[0].toLowerCase();
 		const value = parts.slice(1).join(' ');
 
-		let fieldKey: 'fullName' | 'interests' | 'locale' | null = null;
+		let fieldKey: 'displayName' | 'interests' | 'locale' | null = null;
 		if (field === 'name' || field === 'namen') {
-			fieldKey = 'fullName';
+			fieldKey = 'displayName';
 		} else if (field === 'interests' || field === 'interessen') {
 			fieldKey = 'interests';
 		} else if (field === 'language' || field === 'sprache' || field === 'lang') {

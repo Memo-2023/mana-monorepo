@@ -42,6 +42,30 @@ export interface UpcomingWatering {
 	isOverdue: boolean;
 }
 
+export interface PlantPhoto {
+	id: string;
+	plantId?: string;
+	storagePath: string;
+	publicUrl?: string;
+	isPrimary: boolean;
+	isAnalyzed: boolean;
+}
+
+export interface PlantAnalysis {
+	id: string;
+	photoId: string;
+	identifiedSpecies?: string;
+	scientificName?: string;
+	commonNames?: string[];
+	confidence?: number;
+	healthAssessment?: string;
+	healthDetails?: string;
+	issues?: string[];
+	wateringAdvice?: string;
+	lightAdvice?: string;
+	generalTips?: string[];
+}
+
 @Injectable()
 export class PlantaService {
 	private readonly logger = new Logger(PlantaService.name);
@@ -49,7 +73,8 @@ export class PlantaService {
 	private apiPrefix: string;
 
 	constructor(private configService: ConfigService) {
-		this.backendUrl = this.configService.get<string>('planta.backendUrl') || 'http://localhost:3022';
+		this.backendUrl =
+			this.configService.get<string>('planta.backendUrl') || 'http://localhost:3022';
 		this.apiPrefix = this.configService.get<string>('planta.apiPrefix') || '/api';
 	}
 
@@ -118,7 +143,9 @@ export class PlantaService {
 	}
 
 	// Watering operations
-	async getUpcomingWaterings(token: string): Promise<{ data?: UpcomingWatering[]; error?: string }> {
+	async getUpcomingWaterings(
+		token: string
+	): Promise<{ data?: UpcomingWatering[]; error?: string }> {
 		return this.request<UpcomingWatering[]>(token, '/watering/upcoming');
 	}
 
@@ -158,5 +185,101 @@ export class PlantaService {
 		} catch {
 			return false;
 		}
+	}
+
+	/**
+	 * Upload a photo for analysis
+	 */
+	async uploadPhoto(
+		token: string,
+		imageBuffer: Buffer,
+		mimeType: string,
+		filename: string,
+		plantId?: string
+	): Promise<{ data?: PlantPhoto; error?: string }> {
+		try {
+			const formData = new FormData();
+			// Convert Buffer to Blob - use type assertion to bypass strict TypeScript check
+			const blob = new Blob([imageBuffer as unknown as BlobPart], { type: mimeType });
+			formData.append('file', blob, filename);
+
+			let url = `${this.backendUrl}${this.apiPrefix}/photos/upload`;
+			if (plantId) {
+				url += `?plantId=${plantId}`;
+			}
+
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+				body: formData,
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				return { error: errorData.message || `Fehler: ${response.status}` };
+			}
+
+			const data = await response.json();
+			return { data };
+		} catch (error) {
+			this.logger.error('Photo upload failed:', error);
+			return { error: 'Foto-Upload fehlgeschlagen' };
+		}
+	}
+
+	/**
+	 * Analyze a photo with AI
+	 */
+	async analyzePhoto(
+		token: string,
+		photoId: string,
+		plantId?: string
+	): Promise<{ data?: PlantAnalysis; error?: string }> {
+		try {
+			const body: Record<string, string> = { photoId };
+			if (plantId) body.plantId = plantId;
+
+			const response = await fetch(`${this.backendUrl}${this.apiPrefix}/analysis/identify`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(body),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				return { error: errorData.message || `Fehler: ${response.status}` };
+			}
+
+			const data = await response.json();
+			return { data };
+		} catch (error) {
+			this.logger.error('Photo analysis failed:', error);
+			return { error: 'Analyse fehlgeschlagen' };
+		}
+	}
+
+	/**
+	 * Upload and analyze a photo in one step
+	 */
+	async uploadAndAnalyze(
+		token: string,
+		imageBuffer: Buffer,
+		mimeType: string,
+		filename: string,
+		plantId?: string
+	): Promise<{ data?: PlantAnalysis; error?: string }> {
+		// Step 1: Upload
+		const uploadResult = await this.uploadPhoto(token, imageBuffer, mimeType, filename, plantId);
+		if (uploadResult.error || !uploadResult.data) {
+			return { error: uploadResult.error || 'Upload fehlgeschlagen' };
+		}
+
+		// Step 2: Analyze
+		return this.analyzePhoto(token, uploadResult.data.id, plantId);
 	}
 }

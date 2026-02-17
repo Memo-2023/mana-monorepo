@@ -2,7 +2,7 @@
 
 ## Overview
 
-Matrix Planta Bot provides plant care management via Matrix chat. It integrates with the Planta backend for plant CRUD operations, watering schedules, watering history, and care settings.
+Matrix Planta Bot provides plant care management via Matrix chat. It integrates with the Planta backend for plant CRUD operations, watering schedules, watering history, care settings, and **AI-powered plant identification** via image analysis.
 
 ## Tech Stack
 
@@ -67,6 +67,18 @@ services/matrix-planta-bot/
 | `!loeschen [nr]` | delete, entfernen | Remove plant |
 | `!edit [nr] [feld] [wert]` | bearbeiten | Edit plant field |
 
+### AI Plant Identification
+
+| Action | Description |
+|--------|-------------|
+| Send image | Automatically analyzes plant with Gemini Vision AI |
+
+When you send an image to the bot, it will:
+1. Upload the image to the Planta backend
+2. Analyze it using Google Gemini Vision
+3. Return identification (scientific name, common names, confidence)
+4. Show health assessment and care tips
+
 ### Watering
 
 | Command | Aliases | Description |
@@ -95,6 +107,18 @@ services/matrix-planta-bot/
 ```
 # Login
 !login max@example.com mypassword
+
+# Send a plant image -> Bot responds with:
+# 🌿 Pflanze erkannt!
+# Monstera deliciosa (Fensterblatt)
+# ✅ Konfidenz: 92%
+#
+# Gesundheit: 💚 Gesund
+#
+# 📋 Pflegetipps:
+# • ☀️ Helles Licht - Heller Standort mit indirektem Sonnenlicht
+# • 💧 Alle 7 Tage giessen
+# • 🌱 Blaetter regelmaessig mit Wasser besprühen
 
 # Add a new plant
 !neu Monstera Deliciosa
@@ -182,6 +206,8 @@ curl http://localhost:3322/health
 | `/api/watering/:plantId/water` | POST | Log watering |
 | `/api/watering/:plantId` | PUT | Update watering schedule |
 | `/api/watering/:plantId/history` | GET | Get watering history |
+| `/api/photos/upload` | POST | Upload plant photo (multipart) |
+| `/api/analysis/identify` | POST | Analyze photo with Gemini Vision AI |
 
 ## Number-Based Reference System
 

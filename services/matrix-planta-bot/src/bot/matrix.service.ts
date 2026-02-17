@@ -8,7 +8,7 @@ import {
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
 } from '@manacore/matrix-bot-common';
-import { PlantaService, Plant } from '../planta/planta.service';
+import { PlantaService, Plant, PlantAnalysis } from '../planta/planta.service';
 import {
 	SessionService,
 	TranscriptionService,
@@ -84,6 +84,130 @@ export class MatrixService extends BaseMatrixService {
 			this.logger.error(`Audio transcription error: ${error}`);
 			await this.sendMessage(roomId, '<p>❌ Fehler bei der Spracherkennung.</p>');
 		}
+	}
+
+	protected override async handleImageMessage(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string
+	): Promise<void> {
+		try {
+			const mxcUrl = event.content.url;
+			if (!mxcUrl) return;
+
+			// Check auth
+			const token = await this.sessionService.getToken(sender);
+			if (!token) {
+				await this.sendMessage(
+					roomId,
+					'<p>🌱 Melde dich an, um Pflanzen zu analysieren: <code>!login email passwort</code></p>'
+				);
+				return;
+			}
+
+			// Send processing message
+			await this.sendMessage(roomId, '<p>🔍 Analysiere Pflanzenbild...</p>');
+
+			// Download image
+			const imageBuffer = await this.downloadMedia(mxcUrl);
+			const mimeType = (event.content.info?.mimetype as string) || 'image/jpeg';
+			const filename = event.content.body || 'plant.jpg';
+
+			// Upload and analyze
+			const result = await this.plantaService.uploadAndAnalyze(
+				token,
+				imageBuffer,
+				mimeType,
+				filename
+			);
+
+			if (result.error || !result.data) {
+				await this.sendMessage(roomId, `<p>❌ ${result.error || 'Analyse fehlgeschlagen'}</p>`);
+				return;
+			}
+
+			// Format and send result
+			const html = this.formatAnalysisResult(result.data);
+			await this.sendMessage(roomId, html);
+		} catch (error) {
+			this.logger.error(`Image analysis error: ${error}`);
+			await this.sendMessage(roomId, '<p>❌ Fehler bei der Bildanalyse.</p>');
+		}
+	}
+
+	private formatAnalysisResult(analysis: PlantAnalysis): string {
+		const confidence = analysis.confidence || 0;
+		const confidenceEmoji = confidence >= 80 ? '✅' : confidence >= 50 ? '🤔' : '❓';
+
+		let html = '<h3>🌿 Pflanze erkannt!</h3>';
+
+		// Identification
+		const scientificName = analysis.scientificName || analysis.identifiedSpecies || 'Unbekannt';
+		const commonNames = analysis.commonNames?.join(', ') || '';
+
+		html += `<p><strong>${scientificName}</strong>`;
+		if (commonNames) {
+			html += ` <em>(${commonNames})</em>`;
+		}
+		html += `<br/>${confidenceEmoji} Konfidenz: ${confidence}%</p>`;
+
+		// Health
+		if (analysis.healthAssessment) {
+			const healthEmoji = this.getHealthStatusEmoji(analysis.healthAssessment);
+			html += `<p><strong>Gesundheit:</strong> ${healthEmoji} ${this.translateHealthStatus(analysis.healthAssessment)}`;
+			if (analysis.healthDetails) {
+				html += `<br/><em>${analysis.healthDetails}</em>`;
+			}
+			html += '</p>';
+
+			if (analysis.issues && analysis.issues.length > 0) {
+				html += '<p><strong>Probleme:</strong></p><ul>';
+				for (const issue of analysis.issues) {
+					html += `<li>⚠️ ${issue}</li>`;
+				}
+				html += '</ul>';
+			}
+		}
+
+		// Care tips
+		html += '<p><strong>📋 Pflegetipps:</strong></p><ul>';
+		if (analysis.lightAdvice) {
+			html += `<li>☀️ ${analysis.lightAdvice}</li>`;
+		}
+		if (analysis.wateringAdvice) {
+			html += `<li>💧 ${analysis.wateringAdvice}</li>`;
+		}
+		if (analysis.generalTips && analysis.generalTips.length > 0) {
+			for (const tip of analysis.generalTips.slice(0, 3)) {
+				html += `<li>🌱 ${tip}</li>`;
+			}
+		}
+		html += '</ul>';
+
+		// Call to action
+		html += '<p><em>Pflanze hinzufuegen mit: <code>!neu Pflanzenname</code></em></p>';
+
+		return html;
+	}
+
+	private getHealthStatusEmoji(status: string): string {
+		const emojiMap: Record<string, string> = {
+			healthy: '💚',
+			minor_issues: '💛',
+			needs_care: '🧡',
+			critical: '❤️',
+		};
+		return emojiMap[status] || '💚';
+	}
+
+	private translateHealthStatus(status: string): string {
+		const statusMap: Record<string, string> = {
+			healthy: 'Gesund',
+			minor_issues: 'Kleinere Probleme',
+			needs_care: 'Braucht Pflege',
+			critical: 'Kritisch',
+		};
+		return statusMap[status] || status;
 	}
 
 	protected getConfig(): MatrixBotConfig {
