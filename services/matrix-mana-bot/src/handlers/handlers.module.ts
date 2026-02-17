@@ -5,13 +5,36 @@ import { CalendarHandler } from './calendar.handler';
 import { ClockHandler } from './clock.handler';
 import { HelpHandler } from './help.handler';
 import { VoiceHandler } from './voice.handler';
+import { MorningHandler } from './morning.handler';
 import { BotModule } from '../bot/bot.module';
 import { VoiceModule } from '../voice/voice.module';
-import { SessionModule, CreditModule } from '@manacore/bot-services';
+import { SessionModule, CreditModule, MorningSummaryModule } from '@manacore/bot-services';
 
 @Module({
-	imports: [forwardRef(() => BotModule), VoiceModule, SessionModule.forRoot(), CreditModule.forRoot()],
-	providers: [AiHandler, TodoHandler, CalendarHandler, ClockHandler, HelpHandler, VoiceHandler],
-	exports: [AiHandler, TodoHandler, CalendarHandler, ClockHandler, HelpHandler, VoiceHandler],
+	imports: [
+		forwardRef(() => BotModule),
+		VoiceModule,
+		SessionModule.forRoot(),
+		CreditModule.forRoot(),
+		MorningSummaryModule.forRoot(),
+	],
+	providers: [
+		AiHandler,
+		TodoHandler,
+		CalendarHandler,
+		ClockHandler,
+		HelpHandler,
+		VoiceHandler,
+		MorningHandler,
+	],
+	exports: [
+		AiHandler,
+		TodoHandler,
+		CalendarHandler,
+		ClockHandler,
+		HelpHandler,
+		VoiceHandler,
+		MorningHandler,
+	],
 })
 export class HandlersModule {}

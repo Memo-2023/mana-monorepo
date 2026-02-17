@@ -5,6 +5,7 @@ import configuration from './config/configuration';
 import { BotModule } from './bot/bot.module';
 import { HandlersModule } from './handlers/handlers.module';
 import { OrchestrationModule } from './orchestration/orchestration.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 // Import shared services from bot-services package
 import { TodoModule, CalendarModule, AiModule, ClockModule } from '@manacore/bot-services';
@@ -67,6 +68,7 @@ import { TodoModule, CalendarModule, AiModule, ClockModule } from '@manacore/bot
 		BotModule,
 		HandlersModule,
 		OrchestrationModule,
+		SchedulerModule,
 	],
 	controllers: [HealthController],
 	providers: [createHealthProvider('matrix-mana-bot')],

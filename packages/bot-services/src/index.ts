@@ -175,6 +175,44 @@ export type {
 } from './i18n/index.js';
 export { de as deTranslations, en as enTranslations } from './i18n/index.js';
 
+// Weather (Open-Meteo API)
+export { WeatherModule, WeatherService } from './weather/index.js';
+export type { WeatherModuleOptions, WeatherData, WeatherCode } from './weather/index.js';
+export {
+	WEATHER_MODULE_OPTIONS,
+	WEATHER_DESCRIPTIONS_DE,
+	WEATHER_DESCRIPTIONS_EN,
+} from './weather/index.js';
+
+// Contacts API (Birthday tracking)
+export { ContactsModule, ContactsApiService } from './contacts/index.js';
+export type { ContactsModuleOptions, Contact, ContactBirthday } from './contacts/index.js';
+export { CONTACTS_MODULE_OPTIONS, DEFAULT_CONTACTS_API_URL } from './contacts/index.js';
+
+// Planta API (Plant watering)
+export { PlantaModule, PlantaApiService } from './planta/index.js';
+export type { PlantaModuleOptions, Plant, PlantWateringStatus } from './planta/index.js';
+export { PLANTA_MODULE_OPTIONS, DEFAULT_PLANTA_API_URL } from './planta/index.js';
+
+// Morning Summary (Daily aggregation)
+export {
+	MorningSummaryModule,
+	MorningSummaryService,
+	MorningPreferencesService,
+} from './morning-summary/index.js';
+export type {
+	MorningSummaryModuleOptions,
+	MorningSummaryData,
+	MorningPreferences,
+} from './morning-summary/index.js';
+export {
+	MORNING_SUMMARY_MODULE_OPTIONS,
+	DEFAULT_MORNING_PREFERENCES,
+	MORNING_PREFS_KEY_PREFIX,
+	DAY_NAMES_DE,
+	MONTH_NAMES_DE,
+} from './morning-summary/index.js';
+
 // ===== Placeholder Services (to be implemented) =====
 
 export { NutritionModule } from './nutrition/index.js';

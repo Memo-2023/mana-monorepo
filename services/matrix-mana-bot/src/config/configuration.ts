@@ -19,10 +19,21 @@ export default () => ({
 		},
 		todo: {
 			storagePath: process.env.TODO_STORAGE_PATH || './data/todos.json',
+			apiUrl: process.env.TODO_API_URL || 'http://localhost:3018',
 		},
 		calendar: {
 			storagePath: process.env.CALENDAR_STORAGE_PATH || './data/calendar.json',
+			apiUrl: process.env.CALENDAR_API_URL || 'http://localhost:3014',
 		},
+		contacts: {
+			apiUrl: process.env.CONTACTS_API_URL || 'http://localhost:3015',
+		},
+		planta: {
+			apiUrl: process.env.PLANTA_API_URL || 'http://localhost:3022',
+		},
+	},
+	weather: {
+		defaultLocation: process.env.WEATHER_DEFAULT_LOCATION || 'Berlin',
 	},
 	voice: {
 		sttUrl: process.env.STT_URL || 'http://localhost:3020',
@@ -64,6 +75,14 @@ Schreib einfach eine Nachricht - ich antworte!
 **🔮 Smart Features**
 • \`!summary\` - Tages-Zusammenfassung (AI)
 • \`!ai-todo [text]\` - AI extrahiert Todos aus Text
+
+**☀️ Morgenzusammenfassung**
+• \`!morning\` - Zusammenfassung jetzt abrufen
+• \`!morning-on\` - Automatisch aktivieren
+• \`!morning-off\` - Automatisch deaktivieren
+• \`!morning-time HH:MM\` - Sendezeit einstellen
+• \`!morning-location [Stadt]\` - Wetter-Ort setzen
+• \`!morning-settings\` - Einstellungen anzeigen
 
 **🎤 Sprache & Voice**
 Sende eine Sprachnachricht - ich verstehe dich!

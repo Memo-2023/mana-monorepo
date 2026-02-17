@@ -54,6 +54,7 @@ Unified Matrix bot that combines all features in one. Users can interact with a 
 | **Timers** | `!timer`, `!timers`, `!stop`, `!alarm`, `!alarms` | Time management |
 | **Smart** | `!summary`, `!ai-todo` | Cross-feature AI features |
 | **Voice** | Send voice note | Speech-to-text via Whisper |
+| **Morning** | `!morning`, `!morning-on/off`, `!morning-time` | Daily morning summary |
 
 ## Commands
 
@@ -168,6 +169,42 @@ Was ist TypeScript?
 !ai-todo Im Meeting besprochen: Website redesign, API Docs aktualisieren
 ```
 
+### Morning Summary
+
+```
+# Get morning summary now
+!morning
+
+# Enable/disable automatic daily delivery
+!morning-on
+!morning-off
+
+# Set delivery time (HH:MM)
+!morning-time 07:30
+
+# Set weather location
+!morning-location Berlin
+
+# Set timezone
+!morning-timezone Europe/Berlin
+
+# Set format (compact/detailed)
+!morning-format detailed
+
+# Show current settings
+!morning-settings
+
+# Show help
+!morning-help
+```
+
+The morning summary includes:
+- Weather forecast (Open-Meteo API)
+- Today's calendar events
+- Today's tasks + overdue tasks
+- Birthdays (from Contacts)
+- Plants needing water (from Planta)
+
 ## Development
 
 ### Prerequisites
@@ -235,7 +272,12 @@ src/
 │   ├── todo.handler.ts        # Todo commands
 │   ├── calendar.handler.ts    # Calendar commands
 │   ├── clock.handler.ts       # Timer/alarm commands
-│   └── help.handler.ts        # Help & status
+│   ├── help.handler.ts        # Help & status
+│   ├── voice.handler.ts       # Voice commands
+│   └── morning.handler.ts     # Morning summary commands
+├── scheduler/
+│   ├── scheduler.module.ts    # @nestjs/schedule integration
+│   └── morning-summary.scheduler.ts  # Cron job for morning delivery
 └── orchestration/
     ├── orchestration.module.ts
     └── orchestration.service.ts  # Cross-feature logic
@@ -321,7 +363,12 @@ All bots share the same `@manacore/bot-services` package, so data is consistent.
 | `OLLAMA_MODEL` | No | gemma3:4b | Default LLM |
 | `CLOCK_API_URL` | No | localhost:3017 | Clock backend |
 | `TODO_STORAGE_PATH` | No | ./data/todos.json | Todo storage |
+| `TODO_API_URL` | No | localhost:3018 | Todo API (morning summary) |
 | `CALENDAR_STORAGE_PATH` | No | ./data/calendar.json | Calendar storage |
+| `CALENDAR_API_URL` | No | localhost:3014 | Calendar API (morning summary) |
+| `CONTACTS_API_URL` | No | localhost:3015 | Contacts API (birthdays) |
+| `PLANTA_API_URL` | No | localhost:3022 | Planta API (plants) |
+| `WEATHER_DEFAULT_LOCATION` | No | Berlin | Default weather location |
 | `STT_URL` | No | localhost:3020 | Speech-to-text (Whisper) |
 | `VOICE_BOT_URL` | No | localhost:3050 | Voice bot (TTS) |
 | `DEFAULT_VOICE` | No | de-DE-ConradNeural | Default TTS voice |

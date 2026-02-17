@@ -6,6 +6,7 @@ import { CalendarHandler } from '../handlers/calendar.handler';
 import { ClockHandler } from '../handlers/clock.handler';
 import { HelpHandler } from '../handlers/help.handler';
 import { VoiceHandler } from '../handlers/voice.handler';
+import { MorningHandler } from '../handlers/morning.handler';
 import { OrchestrationService } from '../orchestration/orchestration.service';
 
 export interface CommandContext {
@@ -27,14 +28,24 @@ export class CommandRouterService {
 	private readonly keywordDetector = new KeywordCommandDetector([
 		...COMMON_KEYWORDS,
 		{ keywords: ['modelle', 'models', 'welche modelle', 'ai models'], command: 'models' },
-		{ keywords: ['meine aufgaben', 'zeige aufgaben', 'todo liste', 'was muss ich', 'aufgaben'], command: 'list' },
+		{
+			keywords: ['meine aufgaben', 'zeige aufgaben', 'todo liste', 'was muss ich', 'aufgaben'],
+			command: 'list',
+		},
 		{ keywords: ['heute', 'was steht heute an', 'today'], command: 'today' },
 		{ keywords: ['termine', 'kalender', 'meine termine', 'calendar'], command: 'cal' },
 		{ keywords: ['timer', 'stoppuhr', 'zeitmesser'], command: 'timers' },
-		{ keywords: ['zusammenfassung', 'wie war mein tag', 'tagesrueckblick', 'summary'], command: 'summary' },
+		{
+			keywords: ['zusammenfassung', 'wie war mein tag', 'tagesrueckblick', 'summary'],
+			command: 'summary',
+		},
 		{ keywords: ['todo', 'aufgabe', 'neue aufgabe', 'task'], command: 'todo' },
 		{ keywords: ['alarm', 'wecker', 'alarme'], command: 'alarms' },
 		{ keywords: ['clear', 'loeschen', 'verlauf loeschen', 'reset'], command: 'clear' },
+		{
+			keywords: ['guten morgen', 'morgen zusammenfassung', 'morgenbericht', 'morning'],
+			command: 'morning',
+		},
 	]);
 	private readonly logger = new Logger(CommandRouterService.name);
 	private routes: CommandRoute[] = [];
@@ -52,6 +63,8 @@ export class CommandRouterService {
 		private helpHandler: HelpHandler,
 		@Inject(forwardRef(() => VoiceHandler))
 		private voiceHandler: VoiceHandler,
+		@Inject(forwardRef(() => MorningHandler))
+		private morningHandler: MorningHandler,
 		@Inject(forwardRef(() => OrchestrationService))
 		private orchestration: OrchestrationService
 	) {
@@ -231,6 +244,53 @@ export class CommandRouterService {
 				patterns: ['!speed', '!tempo', '!geschwindigkeit'],
 				handler: (ctx, args) => this.voiceHandler.setSpeed(ctx, args),
 				description: 'Set speech speed',
+			},
+
+			// Morning Summary Commands
+			{
+				patterns: ['!morning', '!morgen'],
+				handler: (ctx) => this.morningHandler.getSummary(ctx),
+				description: 'Morning summary',
+			},
+			{
+				patterns: ['!morning-on'],
+				handler: (ctx) => this.morningHandler.enable(ctx),
+				description: 'Enable morning summary',
+			},
+			{
+				patterns: ['!morning-off'],
+				handler: (ctx) => this.morningHandler.disable(ctx),
+				description: 'Disable morning summary',
+			},
+			{
+				patterns: ['!morning-time'],
+				handler: (ctx, args) => this.morningHandler.setTime(ctx, args),
+				description: 'Set morning delivery time',
+			},
+			{
+				patterns: ['!morning-location'],
+				handler: (ctx, args) => this.morningHandler.setLocation(ctx, args),
+				description: 'Set weather location',
+			},
+			{
+				patterns: ['!morning-timezone'],
+				handler: (ctx, args) => this.morningHandler.setTimezone(ctx, args),
+				description: 'Set timezone',
+			},
+			{
+				patterns: ['!morning-format'],
+				handler: (ctx, args) => this.morningHandler.setFormat(ctx, args),
+				description: 'Set summary format',
+			},
+			{
+				patterns: ['!morning-settings'],
+				handler: (ctx) => this.morningHandler.showSettings(ctx),
+				description: 'Show morning settings',
+			},
+			{
+				patterns: ['!morning-help'],
+				handler: () => Promise.resolve(this.morningHandler.showHelp()),
+				description: 'Morning help',
 			},
 		];
 	}
