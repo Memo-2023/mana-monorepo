@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
 	BaseMatrixService,
@@ -46,7 +46,7 @@ const keywordDetector = new KeywordCommandDetector([
 export class MatrixService extends BaseMatrixService implements CreditCommandsHost {
 	// Expose services for credit commands mixin
 	public creditService: CreditService;
-	public i18nService: I18nService;
+	public i18nService!: I18nService;
 	public sessionService: SessionService;
 
 	constructor(
@@ -55,14 +55,16 @@ export class MatrixService extends BaseMatrixService implements CreditCommandsHo
 		sessionService: SessionService,
 		private transcriptionService: TranscriptionService,
 		creditService: CreditService,
-		i18nService: I18nService,
-		private mediaService: MediaService
+		private mediaService: MediaService,
+		@Optional() i18nService?: I18nService
 	) {
 		super(configService);
 		// Assign to public properties for credit commands mixin
 		this.sessionService = sessionService;
 		this.creditService = creditService;
-		this.i18nService = i18nService;
+		if (i18nService) {
+			this.i18nService = i18nService;
+		}
 	}
 
 	// ============================================================================
