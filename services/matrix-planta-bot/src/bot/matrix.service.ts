@@ -7,18 +7,21 @@ import {
 	UserListMapper,
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
+	handleCreditCommand,
+	type CreditCommandsHost,
 } from '@manacore/matrix-bot-common';
 import { PlantaService, Plant, PlantAnalysis } from '../planta/planta.service';
 import {
 	SessionService,
 	TranscriptionService,
 	CreditService,
+	I18nService,
 	LOGIN_MESSAGES,
 } from '@manacore/bot-services';
 import { HELP_MESSAGE } from '../config/configuration';
 
 @Injectable()
-export class MatrixService extends BaseMatrixService {
+export class MatrixService extends BaseMatrixService implements CreditCommandsHost {
 	// Store last shown plants per user for reference by number
 	private plantsMapper = new UserListMapper<Plant>();
 
@@ -30,6 +33,9 @@ export class MatrixService extends BaseMatrixService {
 		{ keywords: ['neu', 'new', 'neue pflanze', 'add'], command: 'neu' },
 		{ keywords: ['historie', 'history', 'verlauf', 'giess historie'], command: 'historie' },
 		{ keywords: ['intervall', 'interval', 'frequenz', 'wie oft'], command: 'intervall' },
+		{ keywords: ['credits', 'guthaben', 'kontostand'], command: 'credits' },
+		{ keywords: ['packages', 'pakete', 'preise'], command: 'packages' },
+		{ keywords: ['kaufen', 'buy'], command: 'buy' },
 	]);
 
 	// Field mappings for edit command
@@ -52,14 +58,42 @@ export class MatrixService extends BaseMatrixService {
 		notes: 'careNotes',
 	};
 
+	// Expose services for credit commands mixin (CreditCommandsHost interface)
+	public sessionService: SessionService;
+	public creditService: CreditService;
+	public i18nService: I18nService;
+
 	constructor(
 		configService: ConfigService,
 		private readonly transcriptionService: TranscriptionService,
 		private plantaService: PlantaService,
-		private sessionService: SessionService,
-		private creditService: CreditService
+		sessionService: SessionService,
+		creditService: CreditService,
+		i18nService: I18nService
 	) {
 		super(configService);
+		// Assign to public properties for credit commands mixin
+		this.sessionService = sessionService;
+		this.creditService = creditService;
+		this.i18nService = i18nService;
+	}
+
+	// ============================================================================
+	// CreditCommandsHost interface implementation
+	// ============================================================================
+
+	/**
+	 * Send a credit message (delegates to protected sendMessage)
+	 */
+	async sendCreditMessage(roomId: string, message: string): Promise<void> {
+		await this.sendMessage(roomId, message);
+	}
+
+	/**
+	 * Send a credit reply (delegates to protected sendReply)
+	 */
+	async sendCreditReply(roomId: string, event: MatrixRoomEvent, message: string): Promise<void> {
+		await this.sendReply(roomId, event, message);
 	}
 
 	protected override async handleAudioMessage(
@@ -226,25 +260,38 @@ export class MatrixService extends BaseMatrixService {
 		event: MatrixRoomEvent,
 		body: string
 	): Promise<void> {
+		this.logger.debug(`[PLANTA] handleTextMessage called: body="${body}", sender=${event.sender}`);
+
 		// Check for keyword commands first
 		const keywordCommand = this.keywordDetector.detect(body);
 		if (keywordCommand) {
 			body = `!${keywordCommand}`;
 		}
 
-		if (!body.startsWith('!')) return;
+		if (!body.startsWith('!')) {
+			this.logger.debug(`[PLANTA] Message doesn't start with ! - ignoring`);
+			return;
+		}
 
 		const sender = event.sender;
 		const parts = body.slice(1).split(/\s+/);
 		const command = parts[0].toLowerCase();
 		const args = parts.slice(1);
 		const argString = args.join(' ');
+		this.logger.debug(`[PLANTA] Processing command: ${command}`);
 
 		try {
+			// Handle credit commands first (credits, packages, buy)
+			if (await handleCreditCommand(this, roomId, event, sender, command, argString)) {
+				return;
+			}
+
 			switch (command) {
 				case 'help':
 				case 'hilfe':
+					this.logger.debug(`[PLANTA] Sending help message to room ${roomId}`);
 					await this.sendMessage(roomId, HELP_MESSAGE);
+					this.logger.debug(`[PLANTA] Help message sent successfully`);
 					break;
 
 				case 'status':
