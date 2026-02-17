@@ -6,6 +6,8 @@ import {
 	MatrixRoomEvent,
 	KeywordCommandDetector,
 	COMMON_KEYWORDS,
+	handleCreditCommand,
+	type CreditCommandsHost,
 } from '@manacore/matrix-bot-common';
 import {
 	NutriPhiService,
@@ -17,6 +19,7 @@ import {
 	SessionService,
 	TranscriptionService,
 	CreditService,
+	I18nService,
 	LOGIN_MESSAGES,
 } from '@manacore/bot-services';
 import { MediaService } from '../media/media.service';
@@ -33,19 +36,51 @@ const keywordDetector = new KeywordCommandDetector([
 	{ keywords: ['favoriten', 'favorites', 'lieblings'], command: 'favorites' },
 	{ keywords: ['tipps', 'tips', 'empfehlungen', 'ratschläge'], command: 'tips' },
 	{ keywords: ['verbindung'], command: 'status' },
+	// Credit commands
+	{ keywords: ['credits', 'guthaben', 'kontostand'], command: 'credits' },
+	{ keywords: ['packages', 'pakete', 'preise'], command: 'packages' },
+	{ keywords: ['kaufen', 'buy'], command: 'buy' },
 ]);
 
 @Injectable()
-export class MatrixService extends BaseMatrixService {
+export class MatrixService extends BaseMatrixService implements CreditCommandsHost {
+	// Expose services for credit commands mixin
+	public creditService: CreditService;
+	public i18nService: I18nService;
+	public sessionService: SessionService;
+
 	constructor(
 		configService: ConfigService,
 		private nutriphiService: NutriPhiService,
-		private sessionService: SessionService,
+		sessionService: SessionService,
 		private transcriptionService: TranscriptionService,
-		private creditService: CreditService,
+		creditService: CreditService,
+		i18nService: I18nService,
 		private mediaService: MediaService
 	) {
 		super(configService);
+		// Assign to public properties for credit commands mixin
+		this.sessionService = sessionService;
+		this.creditService = creditService;
+		this.i18nService = i18nService;
+	}
+
+	// ============================================================================
+	// CreditCommandsHost interface implementation
+	// ============================================================================
+
+	/**
+	 * Send a credit message (delegates to protected sendMessage)
+	 */
+	async sendCreditMessage(roomId: string, message: string): Promise<void> {
+		await this.sendMessage(roomId, message);
+	}
+
+	/**
+	 * Send a credit reply (delegates to protected sendReply)
+	 */
+	async sendCreditReply(roomId: string, event: MatrixRoomEvent, message: string): Promise<void> {
+		await this.sendReply(roomId, event, message);
 	}
 
 	protected getConfig(): MatrixBotConfig {
@@ -210,13 +245,13 @@ Sag "hilfe" fur alle Befehle!`;
 
 	protected async handleTextMessage(
 		roomId: string,
-		_event: MatrixRoomEvent,
+		event: MatrixRoomEvent,
 		message: string,
 		sender: string
 	): Promise<void> {
 		// Handle commands with ! prefix
 		if (message.startsWith('!')) {
-			await this.handleCommand(roomId, sender, message);
+			await this.handleCommand(roomId, event, sender, message);
 			return;
 		}
 
@@ -224,7 +259,7 @@ Sag "hilfe" fur alle Befehle!`;
 		const detectedCommand = keywordDetector.detect(message);
 		if (detectedCommand) {
 			this.logger.log(`Detected keyword command: ${detectedCommand}`);
-			await this.handleCommand(roomId, sender, `!${detectedCommand}`);
+			await this.handleCommand(roomId, event, sender, `!${detectedCommand}`);
 			return;
 		}
 
@@ -370,9 +405,19 @@ Sag "hilfe" fur alle Befehle!`;
 		}
 	}
 
-	private async handleCommand(roomId: string, sender: string, body: string) {
+	private async handleCommand(
+		roomId: string,
+		event: MatrixRoomEvent,
+		sender: string,
+		body: string
+	) {
 		const [command, ...args] = body.slice(1).split(' ');
 		const argString = args.join(' ');
+
+		// Handle credit commands first (credits, packages, buy)
+		if (await handleCreditCommand(this, roomId, event, sender, command.toLowerCase(), argString)) {
+			return;
+		}
 
 		switch (command.toLowerCase()) {
 			case 'help':
@@ -497,28 +542,192 @@ Sag "hilfe" fur alle Befehle!`;
 			text += '\n';
 		}
 
-		text += `**Nahrwerte:**\n`;
+		text += `**Nährwerte:**\n`;
 		text += `- Kalorien: ${Math.round(totalNutrition.calories)} kcal\n`;
 		text += `- Protein: ${Math.round(totalNutrition.protein)}g\n`;
 		text += `- Kohlenhydrate: ${Math.round(totalNutrition.carbohydrates)}g\n`;
 		text += `- Fett: ${Math.round(totalNutrition.fat)}g\n`;
 		text += `- Ballaststoffe: ${Math.round(totalNutrition.fiber)}g\n`;
 
+		// Generate smart feedback based on nutrition values
+		const feedback = this.generateMealFeedback(totalNutrition, foods);
+		if (feedback.positives.length > 0 || feedback.improvements.length > 0) {
+			text += '\n---\n';
+
+			if (feedback.positives.length > 0) {
+				text += `\n**👍 Positiv:**\n`;
+				for (const positive of feedback.positives) {
+					text += `- ${positive}\n`;
+				}
+			}
+
+			if (feedback.improvements.length > 0) {
+				text += `\n**💡 Verbesserungsvorschläge:**\n`;
+				for (const improvement of feedback.improvements) {
+					text += `- ${improvement}\n`;
+				}
+			}
+		}
+
+		// Add backend warnings if present
 		if (warnings && warnings.length > 0) {
-			text += `\n**Hinweise:**\n`;
+			text += `\n**⚠️ Hinweise:**\n`;
 			for (const warning of warnings) {
 				text += `- ${warning}\n`;
 			}
 		}
 
+		// Add backend suggestions if present
 		if (suggestions && suggestions.length > 0) {
-			text += `\n**Vorschlage:**\n`;
+			text += `\n**📝 Weitere Tipps:**\n`;
 			for (const suggestion of suggestions) {
 				text += `- ${suggestion}\n`;
 			}
 		}
 
 		return text;
+	}
+
+	/**
+	 * Generate smart feedback based on nutritional values
+	 */
+	private generateMealFeedback(
+		nutrition: AIAnalysisResult['totalNutrition'],
+		foods: AIAnalysisResult['foods']
+	): { positives: string[]; improvements: string[] } {
+		const positives: string[] = [];
+		const improvements: string[] = [];
+
+		const { calories, protein, carbohydrates, fat, fiber } = nutrition;
+
+		// Calculate macros as percentage of calories
+		const proteinCals = protein * 4;
+		const carbCals = carbohydrates * 4;
+		const fatCals = fat * 9;
+		const totalMacroCals = proteinCals + carbCals + fatCals;
+
+		const proteinPct = totalMacroCals > 0 ? (proteinCals / totalMacroCals) * 100 : 0;
+		const carbPct = totalMacroCals > 0 ? (carbCals / totalMacroCals) * 100 : 0;
+		const fatPct = totalMacroCals > 0 ? (fatCals / totalMacroCals) * 100 : 0;
+
+		// Check for food variety
+		const foodNames = foods.map((f) => f.name.toLowerCase());
+		const hasNuts = foodNames.some(
+			(n) =>
+				n.includes('nuss') || n.includes('mandel') || n.includes('cashew') || n.includes('walnuss')
+		);
+		const hasFruit = foodNames.some(
+			(n) =>
+				n.includes('apfel') ||
+				n.includes('banane') ||
+				n.includes('beere') ||
+				n.includes('orange') ||
+				n.includes('mandarine')
+		);
+		const hasVegetables = foodNames.some(
+			(n) =>
+				n.includes('salat') ||
+				n.includes('gemüse') ||
+				n.includes('karotte') ||
+				n.includes('tomate') ||
+				n.includes('gurke') ||
+				n.includes('brokkoli') ||
+				n.includes('spinat') ||
+				n.includes('pastinake')
+		);
+		const hasWholeGrains = foodNames.some(
+			(n) =>
+				n.includes('haferflocken') ||
+				n.includes('vollkorn') ||
+				n.includes('quinoa') ||
+				n.includes('dinkel')
+		);
+		const hasProteinSource = foodNames.some(
+			(n) =>
+				n.includes('ei') ||
+				n.includes('fleisch') ||
+				n.includes('fisch') ||
+				n.includes('huhn') ||
+				n.includes('lachs') ||
+				n.includes('thunfisch') ||
+				n.includes('tofu') ||
+				n.includes('quark') ||
+				n.includes('joghurt')
+		);
+
+		// Positive feedback
+		if (fiber >= 8) {
+			positives.push('Sehr guter Ballaststoffgehalt - fördert die Verdauung und hält länger satt');
+		} else if (fiber >= 5) {
+			positives.push('Guter Ballaststoffgehalt');
+		}
+
+		if (proteinPct >= 20 && proteinPct <= 35) {
+			positives.push('Ausgewogener Proteinanteil für Muskelerhalt und Sättigung');
+		} else if (protein >= 20) {
+			positives.push('Proteinreiche Mahlzeit - gut für Muskelaufbau');
+		}
+
+		if (hasWholeGrains) {
+			positives.push('Vollkornprodukte liefern langanhaltende Energie');
+		}
+
+		if (hasNuts) {
+			positives.push('Nüsse liefern gesunde Fette und wichtige Mineralstoffe');
+		}
+
+		if (hasFruit && hasVegetables) {
+			positives.push('Gute Mischung aus Obst und Gemüse für Vitamine');
+		} else if (hasFruit) {
+			positives.push('Obst liefert natürliche Vitamine und Antioxidantien');
+		} else if (hasVegetables) {
+			positives.push('Gemüse liefert wichtige Vitamine und Mineralstoffe');
+		}
+
+		// Improvement suggestions
+		if (calories > 800 && calories <= 1200) {
+			improvements.push(
+				'Diese Mahlzeit ist recht kalorienreich - ideal als Hauptmahlzeit, weniger als Snack'
+			);
+		} else if (calories > 1200) {
+			improvements.push(
+				'Sehr kalorienreiche Mahlzeit - evtl. Portionsgröße reduzieren oder über den Tag verteilen'
+			);
+		}
+
+		if (fatPct > 45) {
+			improvements.push(
+				'Hoher Fettanteil - evtl. Ölmenge reduzieren oder fettärmere Alternativen wählen'
+			);
+		}
+
+		if (fiber < 3 && calories > 300) {
+			improvements.push('Mehr Ballaststoffe durch Gemüse, Vollkorn oder Hülsenfrüchte ergänzen');
+		}
+
+		if (proteinPct < 15 && calories > 400) {
+			improvements.push(
+				'Proteinquelle ergänzen (z.B. Quark, Joghurt, Nüsse oder Samen) für bessere Sättigung'
+			);
+		}
+
+		if (!hasFruit && !hasVegetables && calories > 300) {
+			improvements.push('Obst oder Gemüse ergänzen für mehr Vitamine und Mineralstoffe');
+		}
+
+		if (carbPct > 60 && protein < 15) {
+			improvements.push(
+				'Sehr kohlenhydratreich - Proteinquelle ergänzen für stabileren Blutzucker'
+			);
+		}
+
+		// Specific food-based suggestions
+		const hasMultipleOils = foodNames.filter((n) => n.includes('öl')).length > 2;
+		if (hasMultipleOils) {
+			improvements.push('Mehrere Ölsorten - ein hochwertiges Öl (z.B. Olivenöl) reicht meist aus');
+		}
+
+		return { positives, improvements };
 	}
 
 	private async handleToday(roomId: string, sender: string) {
