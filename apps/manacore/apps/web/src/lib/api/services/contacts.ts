@@ -68,6 +68,14 @@ export interface ContactActivity {
 }
 
 /**
+ * API response format from Contacts backend
+ */
+interface ContactsApiResponse {
+	contacts: Contact[];
+	total: number;
+}
+
+/**
  * Contacts service for dashboard widgets
  */
 export const contactsService = {
@@ -75,22 +83,29 @@ export const contactsService = {
 	 * Get favorite contacts
 	 */
 	async getFavoriteContacts(limit: number = 5): Promise<ApiResult<Contact[]>> {
-		const result = await getClient().get<Contact[]>(`/contacts?isFavorite=true&limit=${limit}`);
-		return result;
+		const result = await getClient().get<ContactsApiResponse>(
+			`/contacts?isFavorite=true&limit=${limit}`
+		);
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.contacts || [], error: null };
 	},
 
 	/**
 	 * Get recent contacts (by updatedAt)
 	 */
 	async getRecentContacts(limit: number = 5): Promise<ApiResult<Contact[]>> {
-		const result = await getClient().get<Contact[]>(`/contacts?limit=${limit}`);
+		const result = await getClient().get<ContactsApiResponse>(`/contacts?limit=${limit}`);
 
 		if (result.error || !result.data) {
-			return result;
+			return { data: null, error: result.error };
 		}
 
 		// Sort by updatedAt and filter archived
-		const sorted = result.data
+		const sorted = (result.data.contacts || [])
 			.filter((c) => !c.isArchived)
 			.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
 			.slice(0, limit);
@@ -102,16 +117,16 @@ export const contactsService = {
 	 * Get contacts with upcoming birthdays
 	 */
 	async getUpcomingBirthdays(days: number = 30): Promise<ApiResult<Contact[]>> {
-		const result = await getClient().get<Contact[]>('/contacts');
+		const result = await getClient().get<ContactsApiResponse>('/contacts');
 
 		if (result.error || !result.data) {
-			return result;
+			return { data: null, error: result.error };
 		}
 
 		const today = new Date();
 		const futureDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
-		const withBirthdays = result.data.filter((c) => {
+		const withBirthdays = (result.data.contacts || []).filter((c) => {
 			if (!c.birthday || c.isArchived) return false;
 
 			const birthday = new Date(c.birthday);
@@ -133,13 +148,13 @@ export const contactsService = {
 	 * Get contact count
 	 */
 	async getContactCount(): Promise<ApiResult<{ total: number; favorites: number }>> {
-		const result = await getClient().get<Contact[]>('/contacts');
+		const result = await getClient().get<ContactsApiResponse>('/contacts');
 
 		if (result.error || !result.data) {
 			return { data: null, error: result.error };
 		}
 
-		const active = result.data.filter((c) => !c.isArchived);
+		const active = (result.data.contacts || []).filter((c) => !c.isArchived);
 		const favorites = active.filter((c) => c.isFavorite);
 
 		return { data: { total: active.length, favorites: favorites.length }, error: null };
