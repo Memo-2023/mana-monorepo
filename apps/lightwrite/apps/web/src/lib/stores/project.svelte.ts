@@ -13,13 +13,14 @@ interface ProjectState {
 }
 
 function getBackendUrl(): string {
+	let baseUrl = 'http://localhost:3010';
 	if (typeof window !== 'undefined') {
-		return (
+		baseUrl =
 			(window as unknown as { __PUBLIC_BACKEND_URL__: string }).__PUBLIC_BACKEND_URL__ ||
-			'http://localhost:3010'
-		);
+			'http://localhost:3010';
 	}
-	return 'http://localhost:3010';
+	// Ensure API prefix is included
+	return baseUrl.endsWith('/api/v1') ? baseUrl : `${baseUrl}/api/v1`;
 }
 
 function createProjectStore() {
