@@ -14,5 +14,5 @@
 		"noEmit": true
 	},
 	"include": ["src/**/*.ts", "src/**/*.d.ts", "vitest.config.ts"],
-	"exclude": ["node_modules", "src/**/*.svelte"]
+	"exclude": ["node_modules", "src/**/*.svelte", "src/svelte"]
 }

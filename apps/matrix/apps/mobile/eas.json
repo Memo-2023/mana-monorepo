@@ -4,15 +4,33 @@
 		"appVersionSource": "remote"
 	},
 	"build": {
+		"base": {
+			"node": "22.22.1",
+			"pnpm": {
+				"version": "9.15.0"
+			},
+			"env": {
+				"EAS_BUILD_RUNNER": "eas-build-on-success"
+			}
+		},
 		"development": {
+			"extends": "base",
 			"developmentClient": true,
 			"distribution": "internal"
 		},
 		"preview": {
-			"distribution": "internal"
+			"extends": "base",
+			"distribution": "internal",
+			"ios": {
+				"simulator": true
+			}
 		},
 		"production": {
-			"autoIncrement": true
+			"extends": "base",
+			"autoIncrement": true,
+			"ios": {
+				"image": "latest"
+			}
 		}
 	},
 	"submit": {

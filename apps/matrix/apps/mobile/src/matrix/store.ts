@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { MatrixClient, Room, MatrixEvent } from 'matrix-js-sdk';
+import { NotificationCountType } from 'matrix-js-sdk/lib/models/room';
 import type {
 	MatrixCredentials,
 	SimpleRoom,
@@ -42,7 +43,13 @@ interface MatrixState {
 	sendReaction: (eventId: string, key: string) => Promise<void>;
 	redactMessage: (eventId: string) => Promise<void>;
 	sendTyping: (typing: boolean) => Promise<void>;
-	sendImage: (fileUri: string, filename: string, mimetype: string, width?: number, height?: number) => Promise<void>;
+	sendImage: (
+		fileUri: string,
+		filename: string,
+		mimetype: string,
+		width?: number,
+		height?: number
+	) => Promise<void>;
 	sendFile: (fileUri: string, filename: string, mimetype: string) => Promise<void>;
 	editMessage: (eventId: string, newBody: string) => Promise<void>;
 	sendVoice: (fileUri: string, durationMs: number) => Promise<void>;
@@ -64,7 +71,9 @@ function roomToSimple(room: Room, userId: string, baseUrl: string): SimpleRoom {
 	})();
 
 	const rawAvatar = room.getMxcAvatarUrl?.() ?? null;
-	const avatar = rawAvatar ? resolveMxcThumbnail(rawAvatar, baseUrl, 96, 96) ?? undefined : undefined;
+	const avatar = rawAvatar
+		? (resolveMxcThumbnail(rawAvatar, baseUrl, 96, 96) ?? undefined)
+		: undefined;
 
 	return {
 		id: room.roomId,
@@ -74,8 +83,8 @@ function roomToSimple(room: Room, userId: string, baseUrl: string): SimpleRoom {
 		lastMessage: lastMsg?.getContent()?.body,
 		lastMessageSender: lastMsg?.getSender() ?? undefined,
 		lastMessageTime: room.getLastActiveTimestamp?.() ?? undefined,
-		unreadCount: room.getUnreadNotificationCount('total') ?? 0,
-		highlightCount: room.getUnreadNotificationCount('highlight') ?? 0,
+		unreadCount: room.getUnreadNotificationCount(NotificationCountType.Total) ?? 0,
+		highlightCount: room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0,
 		isDirect: !!dmUserId,
 		isEncrypted: room.hasEncryptionStateEvent(),
 		memberCount: room.getJoinedMemberCount(),
@@ -85,7 +94,12 @@ function roomToSimple(room: Room, userId: string, baseUrl: string): SimpleRoom {
 	};
 }
 
-function eventToMessage(event: MatrixEvent, userId: string, baseUrl: string, room?: Room): SimpleMessage | null {
+function eventToMessage(
+	event: MatrixEvent,
+	userId: string,
+	baseUrl: string,
+	room?: Room
+): SimpleMessage | null {
 	if (event.getType() !== 'm.room.message') return null;
 
 	const content = event.getContent();
@@ -103,7 +117,9 @@ function eventToMessage(event: MatrixEvent, userId: string, baseUrl: string, roo
 			width: content.info?.w,
 			height: content.info?.h,
 			filename: content.body,
-			thumbnailUrl: isAudio ? undefined : (resolveMxcThumbnail(mxcUrl, baseUrl, 400, 300) ?? undefined),
+			thumbnailUrl: isAudio
+				? undefined
+				: (resolveMxcThumbnail(mxcUrl, baseUrl, 400, 300) ?? undefined),
 			downloadUrl: resolveMxcUrl(mxcUrl, baseUrl) ?? undefined,
 			duration: content.info?.duration,
 		};
@@ -113,7 +129,7 @@ function eventToMessage(event: MatrixEvent, userId: string, baseUrl: string, roo
 	const senderMember = event.sender;
 	const rawSenderAvatar = senderMember?.getMxcAvatarUrl?.() ?? null;
 	const senderAvatar = rawSenderAvatar
-		? resolveMxcThumbnail(rawSenderAvatar, baseUrl, 64, 64) ?? undefined
+		? (resolveMxcThumbnail(rawSenderAvatar, baseUrl, 64, 64) ?? undefined)
 		: undefined;
 
 	// Reply-to
@@ -133,16 +149,19 @@ function eventToMessage(event: MatrixEvent, userId: string, baseUrl: string, roo
 	let reactions: MessageReaction[] | undefined;
 	if (room) {
 		const eventId = event.getId();
-		const reactionEvents = room.getLiveTimeline().getEvents().filter(
-			(e) =>
-				e.getType() === 'm.reaction' &&
-				e.getContent()?.['m.relates_to']?.event_id === eventId &&
-				e.getContent()?.['m.relates_to']?.rel_type === 'm.annotation',
-		);
+		const reactionEvents = room
+			.getLiveTimeline()
+			.getEvents()
+			.filter(
+				(e) =>
+					e.getType() === 'm.reaction' &&
+					e.getContent()?.['m.relates_to']?.event_id === eventId &&
+					e.getContent()?.['m.relates_to']?.rel_type === 'm.annotation'
+			);
 		if (reactionEvents.length > 0) {
 			const grouped = new Map<string, { users: string[]; includesMe: boolean }>();
 			for (const re of reactionEvents) {
-				const key = re.getContent()['m.relates_to'].key as string;
+				const key = re.getContent()?.['m.relates_to']?.key as string;
 				if (!grouped.has(key)) grouped.set(key, { users: [], includesMe: false });
 				const entry = grouped.get(key)!;
 				const sender = re.getSender() ?? '';
@@ -261,7 +280,9 @@ export const useMatrixStore = create<MatrixState>((set, get) => ({
 		try {
 			const cached = await AsyncStorage.getItem(ROOMS_CACHE_KEY);
 			if (cached) set({ rooms: JSON.parse(cached) });
-		} catch { /* ignore cache errors */ }
+		} catch {
+			/* ignore cache errors */
+		}
 
 		const refresh = () => {
 			const rooms = buildSimpleRooms(client, userId, baseUrl);
@@ -347,7 +368,13 @@ export const useMatrixStore = create<MatrixState>((set, get) => ({
 
 	selectRoom: (roomId: string) => {
 		const { client, credentials } = get();
-		set({ currentRoomId: roomId, typingUsers: [], messages: [], roomMembers: [], firstUnreadEventId: null });
+		set({
+			currentRoomId: roomId,
+			typingUsers: [],
+			messages: [],
+			roomMembers: [],
+			firstUnreadEventId: null,
+		});
 		if (!client || !credentials) return;
 
 		const room = client.getRoom(roomId);
@@ -356,14 +383,16 @@ export const useMatrixStore = create<MatrixState>((set, get) => ({
 		// Capture first unread event before marking as read
 		const { userId, homeserver: baseUrl } = credentials;
 		let firstUnreadEventId: string | null = null;
-		const unreadCount = room.getUnreadNotificationCount('total') ?? 0;
+		const unreadCount = room.getUnreadNotificationCount(NotificationCountType.Total) ?? 0;
 		if (unreadCount > 0) {
 			const lastReadEventId = (room as any).getEventReadUpTo?.(userId) as string | null;
 			if (lastReadEventId) {
 				const timeline = room.getLiveTimeline().getEvents();
 				const lastReadIdx = timeline.findIndex((e) => e.getId() === lastReadEventId);
 				if (lastReadIdx >= 0) {
-					const firstUnread = timeline.slice(lastReadIdx + 1).find((e) => e.getType() === 'm.room.message');
+					const firstUnread = timeline
+						.slice(lastReadIdx + 1)
+						.find((e) => e.getType() === 'm.room.message');
 					firstUnreadEventId = firstUnread?.getId() ?? null;
 				}
 			}
@@ -391,7 +420,7 @@ export const useMatrixStore = create<MatrixState>((set, get) => ({
 					userId: m.userId,
 					displayName: m.name || m.userId,
 					avatarUrl: rawAvatar
-						? resolveMxcThumbnail(rawAvatar, credentials.homeserver, 64, 64) ?? undefined
+						? (resolveMxcThumbnail(rawAvatar, credentials.homeserver, 64, 64) ?? undefined)
 						: undefined,
 					membership: 'join' as const,
 					powerLevel: m.powerLevel ?? 0,

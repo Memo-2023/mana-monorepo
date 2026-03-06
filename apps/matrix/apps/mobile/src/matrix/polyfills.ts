@@ -2,7 +2,7 @@
 import { Buffer } from 'buffer';
 import EventEmitter from 'events';
 
-// @ts-expect-error global polyfill
+// @ts-ignore global polyfill
 global.Buffer = Buffer;
 // @ts-expect-error global polyfill
 global.EventEmitter = EventEmitter;

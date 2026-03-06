@@ -116,8 +116,6 @@
 		"photos:db:push": "pnpm --filter @photos/backend db:push",
 		"photos:db:studio": "pnpm --filter @photos/backend db:studio",
 		"dev:tags-test": "./scripts/setup-databases.sh todo && ./scripts/setup-databases.sh calendar && ./scripts/setup-databases.sh contacts && ./scripts/setup-databases.sh auth && concurrently -n auth,todo-be,todo-web,cal-be,cal-web,con-be,con-web -c blue,green,cyan,yellow,magenta,red,white \"pnpm dev:auth\" \"pnpm dev:todo:backend\" \"pnpm dev:todo:web\" \"pnpm dev:calendar:backend\" \"pnpm dev:calendar:web\" \"pnpm dev:contacts:backend\" \"pnpm dev:contacts:web\"",
-		"matrix:dev": "turbo run dev --filter=matrix...",
-		"dev:matrix:web": "pnpm --filter @matrix/web dev",
 		"moodlit:dev": "turbo run dev --filter=moodlit...",
 		"dev:moodlit:mobile": "pnpm --filter @moodlit/mobile dev",
 		"dev:moodlit:web": "pnpm --filter @moodlit/web dev",
