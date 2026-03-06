@@ -292,7 +292,8 @@
 		},
 		"neverBuiltDependencies": [
 			"cpu-features",
-			"ssh2"
+			"ssh2",
+			"sharp"
 		],
 		"overrides": {
 			"cpu-features": "npm:empty-npm-package@1.0.0",
