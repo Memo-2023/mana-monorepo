@@ -3,6 +3,7 @@ import {
 	View,
 	FlatList,
 	Text,
+	TextInput,
 	Pressable,
 	ActivityIndicator,
 	Modal,
@@ -27,7 +28,7 @@ import UserProfileModal from '~/src/components/UserProfileModal';
 import VoiceRecorder from '~/src/components/VoiceRecorder';
 import UnreadSeparator from '~/src/components/UnreadSeparator';
 import { getMimetypeFromFilename } from '~/src/matrix/upload';
-import type { SimpleMessage, RoomMember } from '~/src/matrix/types';
+import type { SimpleMessage, SimpleRoom, RoomMember } from '~/src/matrix/types';
 
 type ListItem =
 	| { type: 'message'; data: SimpleMessage }
@@ -111,12 +112,14 @@ export default function RoomScreen() {
 	const [showMembers, setShowMembers] = useState(false);
 	const [viewingImage, setViewingImage] = useState<string | null>(null);
 	const [profileUserId, setProfileUserId] = useState<string | null>(null);
+	const [forwardingMessage, setForwardingMessage] = useState<SimpleMessage | null>(null);
+	const [forwardSearch, setForwardSearch] = useState('');
 
 	const {
 		rooms, messages, firstUnreadEventId, typingUsers, roomMembers, client, credentials,
 		selectRoom, loadRoomMembers, sendMessage, editMessage,
 		sendReaction, redactMessage, sendTyping,
-		sendImage, sendFile, sendVoice, leaveRoom,
+		sendImage, sendFile, sendVoice, forwardMessage, leaveRoom,
 	} = useMatrixStore();
 
 	const room = rooms.find((r) => r.id === id);
@@ -234,6 +237,21 @@ export default function RoomScreen() {
 		} finally { setUploading(false); }
 	};
 
+	const handleForward = useCallback((msg: SimpleMessage) => {
+		setForwardingMessage(msg);
+		setForwardSearch('');
+	}, []);
+
+	const handleForwardToRoom = useCallback(async (targetRoom: SimpleRoom) => {
+		if (!forwardingMessage) return;
+		try {
+			await forwardMessage(forwardingMessage.id, targetRoom.id);
+			setForwardingMessage(null);
+		} catch (err) {
+			Alert.alert('Forward failed', err instanceof Error ? err.message : 'Unknown error');
+		}
+	}, [forwardingMessage, forwardMessage]);
+
 	const handleEdit = useCallback((msg: SimpleMessage) => {
 		setReplyTo(null);
 		setEditingMessage(msg);
@@ -259,6 +277,7 @@ export default function RoomScreen() {
 				onEdit={handleEdit}
 				onReact={sendReaction}
 				onDelete={redactMessage}
+				onForward={handleForward}
 				onImagePress={setViewingImage}
 				onAvatarPress={setProfileUserId}
 			/>
@@ -302,7 +321,7 @@ export default function RoomScreen() {
 			<FlatList
 				ref={listRef}
 				data={listItems}
-				keyExtractor={(item) => item.type === 'date' ? item.key : item.data.id}
+				keyExtractor={(item) => item.type === 'message' ? item.data.id : item.key}
 				renderItem={renderItem}
 				contentContainerClassName="px-0 py-2"
 				onEndReached={handleLoadMore}
@@ -369,6 +388,59 @@ export default function RoomScreen() {
 			<ImageViewer uri={viewingImage} onClose={() => setViewingImage(null)} />
 
 			<UserProfileModal userId={profileUserId} onClose={() => setProfileUserId(null)} />
+
+			{/* Forward message modal */}
+			<Modal visible={!!forwardingMessage} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setForwardingMessage(null)}>
+				<SafeAreaView className="flex-1 bg-background" edges={['top']}>
+					<View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
+						<Text className="text-foreground text-lg font-semibold">Forward to...</Text>
+						<Pressable onPress={() => setForwardingMessage(null)} className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}>
+							<X size={22} color="#6b7280" />
+						</Pressable>
+					</View>
+					<View className="px-4 py-2">
+						<TextInput
+							className="bg-surface border border-border rounded-xl px-4 py-2.5 text-foreground text-sm"
+							placeholder="Search rooms..."
+							placeholderTextColor="#6b7280"
+							value={forwardSearch}
+							onChangeText={setForwardSearch}
+							autoFocus
+						/>
+					</View>
+					{forwardingMessage && (
+						<View className="mx-4 mb-2 px-3 py-2 bg-surface border border-border rounded-xl">
+							<Text className="text-muted-foreground text-xs mb-0.5">Message:</Text>
+							<Text className="text-foreground text-sm" numberOfLines={2}>{forwardingMessage.body}</Text>
+						</View>
+					)}
+					<ScrollView contentContainerClassName="py-1">
+						{rooms
+							.filter((r) => r.id !== id && r.name.toLowerCase().includes(forwardSearch.toLowerCase()))
+							.map((r) => (
+								<Pressable
+									key={r.id}
+									onPress={() => handleForwardToRoom(r)}
+									className={({ pressed }) => `flex-row items-center gap-3 px-4 py-3 ${pressed ? 'bg-surface/60' : ''}`}
+								>
+									<View className="w-10 h-10 rounded-full bg-surface border border-border overflow-hidden items-center justify-center">
+										{r.avatar ? (
+											<Image source={{ uri: r.avatar }} style={{ width: 40, height: 40 }} contentFit="cover" />
+										) : (
+											<Text className="text-foreground font-semibold">
+												{r.name[0]?.toUpperCase() ?? '?'}
+											</Text>
+										)}
+									</View>
+									<View className="flex-1">
+										<Text className="text-foreground text-sm font-medium" numberOfLines={1}>{r.name}</Text>
+										{r.isDirect && <Text className="text-muted-foreground text-xs">Direct message</Text>}
+									</View>
+								</Pressable>
+							))}
+					</ScrollView>
+				</SafeAreaView>
+			</Modal>
 		</SafeAreaView>
 	);
 }

@@ -1,9 +1,10 @@
-import { View, Text, Pressable, ActionSheetIOS, Platform, Alert, Clipboard } from 'react-native';
+import { useState } from 'react';
+import { View, Text, Pressable, ActionSheetIOS, Platform, Alert, Clipboard, Modal, ScrollView } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { ArrowBendUpLeft } from 'phosphor-react-native';
-import type { SimpleMessage } from '~/src/matrix/types';
+import type { SimpleMessage, MessageReaction } from '~/src/matrix/types';
 import MessageText from './MessageText';
 import VoiceMessage from './VoiceMessage';
 
@@ -14,6 +15,7 @@ interface Props {
 	onEdit?: (message: SimpleMessage) => void;
 	onReact?: (eventId: string, emoji: string) => void;
 	onDelete?: (eventId: string) => void;
+	onForward?: (message: SimpleMessage) => void;
 	onImagePress?: (uri: string) => void;
 	onAvatarPress?: (userId: string) => void;
 }
@@ -61,7 +63,52 @@ function SwipeReplyAction({ progress }: { progress: Animated.SharedValue<number>
 	);
 }
 
-export default function MessageBubble({ message, prevMessage, onReply, onEdit, onReact, onDelete, onImagePress, onAvatarPress }: Props) {
+function ReactionDetailsModal({ reactions, visible, onClose }: { reactions: MessageReaction[]; visible: boolean; onClose: () => void }) {
+	const [selectedKey, setSelectedKey] = useState<string | null>(null);
+	const selected = selectedKey ? reactions.find((r) => r.key === selectedKey) : reactions[0];
+
+	return (
+		<Modal visible={visible} animationType="slide" presentationStyle="formSheet" onRequestClose={onClose}>
+			<View className="flex-1 bg-background">
+				<View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
+					<Text className="text-foreground text-lg font-semibold">Reactions</Text>
+					<Pressable onPress={onClose} className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}>
+						<Text className="text-primary text-base">Done</Text>
+					</Pressable>
+				</View>
+				<ScrollView horizontal className="border-b border-border" contentContainerClassName="px-3 py-2 gap-2">
+					{reactions.map((r) => (
+						<Pressable
+							key={r.key}
+							onPress={() => setSelectedKey(r.key)}
+							className={`flex-row items-center gap-1 px-3 py-1.5 rounded-full border ${
+								(selected?.key === r.key) ? 'bg-primary/20 border-primary/40' : 'bg-surface border-border'
+							}`}
+						>
+							<Text className="text-sm">{r.key}</Text>
+							<Text className={`text-sm ${(selected?.key === r.key) ? 'text-primary' : 'text-muted-foreground'}`}>{r.count}</Text>
+						</Pressable>
+					))}
+				</ScrollView>
+				<ScrollView contentContainerClassName="py-2">
+					{selected?.users.map((userId) => (
+						<View key={userId} className="flex-row items-center gap-3 px-4 py-2.5">
+							<View className="w-8 h-8 rounded-full bg-surface border border-border items-center justify-center">
+								<Text className="text-foreground font-semibold text-sm">
+									{userId.replace(/^@/, '')[0]?.toUpperCase() ?? '?'}
+								</Text>
+							</View>
+							<Text className="text-foreground text-sm flex-1" numberOfLines={1}>{userId}</Text>
+						</View>
+					))}
+				</ScrollView>
+			</View>
+		</Modal>
+	);
+}
+
+export default function MessageBubble({ message, prevMessage, onReply, onEdit, onReact, onDelete, onForward, onImagePress, onAvatarPress }: Props) {
+	const [showReactionDetails, setShowReactionDetails] = useState(false);
 	const isOwn = message.isOwn;
 	const isGrouped =
 		!message.redacted &&
@@ -73,7 +120,7 @@ export default function MessageBubble({ message, prevMessage, onReply, onEdit, o
 
 	const handleLongPress = () => {
 		const extraOptions = isOwn && !message.redacted ? ['Edit', 'Delete'] : [];
-		const options = ['Cancel', 'Reply', ...QUICK_REACTIONS, 'Copy text', ...extraOptions];
+		const options = ['Cancel', 'Reply', 'Forward', ...QUICK_REACTIONS, 'Copy text', ...extraOptions];
 		const destructiveIndex = isOwn && !message.redacted ? options.length - 1 : undefined;
 
 		if (Platform.OS === 'ios') {
@@ -82,9 +129,10 @@ export default function MessageBubble({ message, prevMessage, onReply, onEdit, o
 				(index) => {
 					if (index === 0) return;
 					if (index === 1) { onReply?.(message); return; }
-					const ri = index - 2;
+					if (index === 2) { onForward?.(message); return; }
+					const ri = index - 3;
 					if (ri < QUICK_REACTIONS.length) { onReact?.(message.id, QUICK_REACTIONS[ri]); return; }
-					const ai = index - 2 - QUICK_REACTIONS.length;
+					const ai = index - 3 - QUICK_REACTIONS.length;
 					if (ai === 0) { Clipboard.setString(message.body); return; }
 					if (ai === 1 && isOwn) { onEdit?.(message); return; }
 					if (ai === 2 && isOwn) { onDelete?.(message.id); }
@@ -93,6 +141,7 @@ export default function MessageBubble({ message, prevMessage, onReply, onEdit, o
 		} else {
 			Alert.alert('Message', undefined, [
 				{ text: 'Reply', onPress: () => onReply?.(message) },
+				{ text: 'Forward', onPress: () => onForward?.(message) },
 				...(isOwn ? [{ text: 'Edit', onPress: () => onEdit?.(message) }] : []),
 				{ text: 'Copy text', onPress: () => Clipboard.setString(message.body) },
 				...(isOwn && !message.redacted
@@ -220,6 +269,7 @@ export default function MessageBubble({ message, prevMessage, onReply, onEdit, o
 								<Pressable
 									key={r.key}
 									onPress={() => onReact?.(message.id, r.key)}
+									onLongPress={() => setShowReactionDetails(true)}
 									className={`flex-row items-center gap-0.5 px-2 py-0.5 rounded-full border ${
 										r.includesMe ? 'bg-primary/20 border-primary/40' : 'bg-surface border-border'
 									}`}
@@ -235,12 +285,42 @@ export default function MessageBubble({ message, prevMessage, onReply, onEdit, o
 						</View>
 					)}
 
-					<Text className="text-muted-foreground text-xs mt-0.5 mx-1">
-						{formatTime(message.timestamp)}
-						{message.edited && ' · edited'}
-					</Text>
+					{/* Timestamp + Read receipts */}
+					<View className="flex-row items-center gap-1 mt-0.5 mx-1">
+						<Text className="text-muted-foreground text-xs">
+							{formatTime(message.timestamp)}
+							{message.edited && ' · edited'}
+						</Text>
+						{message.readBy && message.readBy.length > 0 && (
+							<View className="flex-row items-center ml-1">
+								{message.readBy.slice(0, 3).map((r, i) => (
+									<View
+										key={r.userId}
+										className="w-3.5 h-3.5 rounded-full bg-primary/30 items-center justify-center border border-background"
+										style={i > 0 ? { marginLeft: -3 } : undefined}
+									>
+										<Text style={{ fontSize: 7 }} className="text-primary font-bold">
+											{r.userName[0]?.toUpperCase() ?? '?'}
+										</Text>
+									</View>
+								))}
+								{message.readBy.length > 3 && (
+									<Text className="text-muted-foreground text-xs ml-0.5">+{message.readBy.length - 3}</Text>
+								)}
+							</View>
+						)}
+					</View>
 				</View>
 			</View>
+
+			{/* Reaction details modal */}
+			{message.reactions && message.reactions.length > 0 && (
+				<ReactionDetailsModal
+					reactions={message.reactions}
+					visible={showReactionDetails}
+					onClose={() => setShowReactionDetails(false)}
+				/>
+			)}
 		</Swipeable>
 	);
 }

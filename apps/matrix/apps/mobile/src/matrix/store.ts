@@ -8,6 +8,8 @@ import type {
 	SimpleMessage,
 	SyncState,
 	MessageType,
+	MessageReaction,
+	ReadReceipt,
 	RoomMember,
 } from './types';
 import { resolveMxcThumbnail, resolveMxcUrl } from './media';
@@ -44,6 +46,7 @@ interface MatrixState {
 	sendFile: (fileUri: string, filename: string, mimetype: string) => Promise<void>;
 	editMessage: (eventId: string, newBody: string) => Promise<void>;
 	sendVoice: (fileUri: string, durationMs: number) => Promise<void>;
+	forwardMessage: (eventId: string, targetRoomId: string) => Promise<void>;
 	acceptInvite: (roomId: string) => Promise<void>;
 	declineInvite: (roomId: string) => Promise<void>;
 	leaveRoom: (roomId: string) => Promise<void>;
@@ -126,6 +129,57 @@ function eventToMessage(event: MatrixEvent, userId: string, baseUrl: string, roo
 		}
 	}
 
+	// Reactions
+	let reactions: MessageReaction[] | undefined;
+	if (room) {
+		const eventId = event.getId();
+		const reactionEvents = room.getLiveTimeline().getEvents().filter(
+			(e) =>
+				e.getType() === 'm.reaction' &&
+				e.getContent()?.['m.relates_to']?.event_id === eventId &&
+				e.getContent()?.['m.relates_to']?.rel_type === 'm.annotation',
+		);
+		if (reactionEvents.length > 0) {
+			const grouped = new Map<string, { users: string[]; includesMe: boolean }>();
+			for (const re of reactionEvents) {
+				const key = re.getContent()['m.relates_to'].key as string;
+				if (!grouped.has(key)) grouped.set(key, { users: [], includesMe: false });
+				const entry = grouped.get(key)!;
+				const sender = re.getSender() ?? '';
+				entry.users.push(sender);
+				if (sender === userId) entry.includesMe = true;
+			}
+			reactions = Array.from(grouped.entries()).map(([key, { users, includesMe }]) => ({
+				key,
+				count: users.length,
+				users,
+				includesMe,
+			}));
+		}
+	}
+
+	// Read receipts
+	let readBy: ReadReceipt[] | undefined;
+	if (room) {
+		const eventId = event.getId();
+		if (eventId) {
+			const receipts: ReadReceipt[] = [];
+			const members = room.getMembersWithMembership('join');
+			for (const member of members) {
+				if (member.userId === userId) continue;
+				const readUpTo = (room as any).getEventReadUpTo?.(member.userId) as string | null;
+				if (readUpTo === eventId) {
+					receipts.push({
+						userId: member.userId,
+						userName: member.name || member.userId,
+						timestamp: 0,
+					});
+				}
+			}
+			if (receipts.length > 0) readBy = receipts;
+		}
+	}
+
 	return {
 		id: event.getId() ?? `${event.getTs()}_${event.getSender()}`,
 		sender: event.getSender() ?? '',
@@ -142,6 +196,8 @@ function eventToMessage(event: MatrixEvent, userId: string, baseUrl: string, roo
 		edited: !!event.replacingEvent(),
 		redacted: event.isRedacted(),
 		media,
+		reactions,
+		readBy,
 	};
 }
 
@@ -258,6 +314,9 @@ export const useMatrixStore = create<MatrixState>((set, get) => ({
 		client.on('Room.name' as any, () => refresh());
 		client.on('RoomState.events' as any, () => refresh());
 		client.on('Room.myMembership' as any, () => refresh());
+		client.on('Room.receipt' as any, (_: unknown, room: Room) => {
+			refreshMessages(room);
+		});
 
 		client.on('RoomMember.typing' as any, (_: unknown, member: any) => {
 			const { currentRoomId } = get();
@@ -436,6 +495,25 @@ export const useMatrixStore = create<MatrixState>((set, get) => ({
 			url: uploaded.mxcUrl,
 			info: { mimetype: 'audio/m4a', size: uploaded.size, duration: durationMs },
 		});
+	},
+
+	forwardMessage: async (eventId: string, targetRoomId: string) => {
+		const { client, currentRoomId } = get();
+		if (!client || !currentRoomId) return;
+		const room = client.getRoom(currentRoomId);
+		const event = room?.findEventById(eventId);
+		if (!event) return;
+		const content = event.getContent();
+		const msgtype = content.msgtype ?? 'm.text';
+		// Forward as a fresh message (strip reply relations)
+		const forwarded: Record<string, any> = { msgtype, body: content.body };
+		if (content.url) forwarded.url = content.url;
+		if (content.info) forwarded.info = content.info;
+		if (content.formatted_body) {
+			forwarded.format = content.format;
+			forwarded.formatted_body = content.formatted_body;
+		}
+		await (client as any).sendMessage(targetRoomId, forwarded);
 	},
 
 	leaveRoom: async (roomId: string) => {

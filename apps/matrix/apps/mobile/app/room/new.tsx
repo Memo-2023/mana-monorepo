@@ -52,13 +52,6 @@ export default function NewRoomScreen() {
 					is_direct: true,
 					invite: [userId],
 					preset: 'trusted_private_chat' as any,
-					initial_state: [
-						{
-							type: 'm.room.encryption',
-							state_key: '',
-							content: { algorithm: 'm.megolm' },
-						},
-					],
 				});
 
 				selectRoom(room.room_id);
