@@ -1,0 +1,74 @@
+{
+	"expo": {
+		"name": "Manalink",
+		"slug": "manalink",
+		"version": "1.0.0",
+		"scheme": "manalink",
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"userInterfaceStyle": "automatic",
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#0f0f0f"
+		},
+		"assetBundlePatterns": ["**/*"],
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "how.mana.manalink",
+			"infoPlist": {
+				"ITSAppUsesNonExemptEncryption": false
+			}
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#0f0f0f"
+			},
+			"package": "how.mana.manalink"
+		},
+		"web": {
+			"bundler": "metro",
+			"output": "static",
+			"favicon": "./assets/favicon.png"
+		},
+		"plugins": [
+			"expo-router",
+			"expo-secure-store",
+			[
+				"expo-image-picker",
+				{
+					"photosPermission": "Allow Manalink to select photos for sharing.",
+					"cameraPermission": "Allow Manalink to take photos for sharing."
+				}
+			],
+			[
+				"expo-media-library",
+				{
+					"photosPermission": "Allow Manalink to save images to your library.",
+					"savePhotosPermission": "Allow Manalink to save images."
+				}
+			],
+			[
+				"expo-notifications",
+				{
+					"icon": "./assets/notification-icon.png",
+					"color": "#7c6bff",
+					"sounds": []
+				}
+			]
+		],
+		"experiments": {
+			"typedRoutes": true,
+			"tsconfigPaths": true
+		},
+		"extra": {
+			"router": {
+				"origin": false
+			},
+			"eas": {
+				"projectId": ""
+			}
+		}
+	}
+}
