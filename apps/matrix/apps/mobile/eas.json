@@ -6,9 +6,7 @@
 	"build": {
 		"base": {
 			"node": "22.22.1",
-			"pnpm": {
-				"version": "9.15.0"
-			},
+			"pnpm": "9.15.0",
 			"env": {
 				"EAS_BUILD_RUNNER": "eas-build-on-success"
 			}
