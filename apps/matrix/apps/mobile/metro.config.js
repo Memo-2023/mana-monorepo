@@ -12,6 +12,14 @@ config.resolver.extraNodeModules = {
 	stream: require.resolve('stream-browserify'),
 };
 
+// Block matrix-sdk-crypto-wasm (uses import.meta, not compatible with Hermes)
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+	if (moduleName === '@matrix-org/matrix-sdk-crypto-wasm') {
+		return { type: 'empty' };
+	}
+	return context.resolveRequest(context, moduleName, platform);
+};
+
 // Monorepo workspace support
 const monorepoRoot = path.resolve(__dirname, '../../../..');
 config.watchFolders = [monorepoRoot];
