@@ -11,7 +11,12 @@ import {
 	ScrollView,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
+import Animated, {
+	useAnimatedStyle,
+	interpolate,
+	Extrapolation,
+	type SharedValue,
+} from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { ArrowBendUpLeft } from 'phosphor-react-native';
 import type { SimpleMessage, MessageReaction } from '~/src/matrix/types';
@@ -69,7 +74,7 @@ function AvatarCircle({
 
 const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢'];
 
-function SwipeReplyAction({ progress }: { progress: Animated.SharedValue<number> }) {
+function SwipeReplyAction({ progress }: { progress: SharedValue<number> }) {
 	const style = useAnimatedStyle(() => ({
 		opacity: interpolate(progress.value, [0, 0.5, 1], [0, 0.6, 1], Extrapolation.CLAMP),
 		transform: [{ scale: interpolate(progress.value, [0, 1], [0.5, 1], Extrapolation.CLAMP) }],
@@ -255,10 +260,10 @@ export default function MessageBubble({
 
 	const renderLeftActions = isOwn
 		? undefined
-		: (progress: Animated.SharedValue<number>) => <SwipeReplyAction progress={progress} />;
+		: (progress: SharedValue<number>) => <SwipeReplyAction progress={progress} />;
 
 	const renderRightActions = isOwn
-		? (progress: Animated.SharedValue<number>) => <SwipeReplyAction progress={progress} />
+		? (progress: SharedValue<number>) => <SwipeReplyAction progress={progress} />
 		: undefined;
 
 	// Type assertion needed: react-native-gesture-handler Swipeable types expect old Animated API

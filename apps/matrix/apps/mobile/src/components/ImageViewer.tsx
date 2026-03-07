@@ -1,7 +1,7 @@
 import { Modal, View, Pressable, StatusBar, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { X, DownloadSimple } from 'phosphor-react-native';
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { useState } from 'react';
 
@@ -23,9 +23,8 @@ export default function ImageViewer({ uri, onClose }: Props) {
 			if (status !== 'granted') return;
 
 			const filename = `manalink_${Date.now()}.jpg`;
-			const localUri = FileSystem.cacheDirectory + filename;
-			await FileSystem.downloadAsync(uri, localUri);
-			await MediaLibrary.saveToLibraryAsync(localUri);
+			const downloaded = await File.downloadFileAsync(uri, Paths.cache);
+			await MediaLibrary.saveToLibraryAsync(downloaded.uri);
 		} finally {
 			setSaving(false);
 		}
