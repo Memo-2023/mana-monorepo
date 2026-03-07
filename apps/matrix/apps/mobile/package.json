@@ -43,6 +43,7 @@
 		"react-native-screens": "~4.24.0",
 		"react-native-web": "~0.21.2",
 		"nativewind": "~4.2.2",
+		"react-native-css-interop": "0.2.2",
 		"zustand": "^4.5.1",
 		"@react-native-async-storage/async-storage": "2.1.2",
 		"matrix-js-sdk": "^37.1.0",
