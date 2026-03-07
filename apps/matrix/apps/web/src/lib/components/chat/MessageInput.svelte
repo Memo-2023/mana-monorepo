@@ -505,7 +505,7 @@
 	}
 </script>
 
-<div class="p-3 pb-4 lg:pb-20 safe-area-bottom">
+<div class="p-3 pb-4 safe-area-bottom">
 	<!-- Reply/Edit Preview -->
 	{#if replyTo || editMessage}
 		<div class="mb-2 flex items-center gap-2 rounded-xl bg-surface border border-border px-3 py-2">

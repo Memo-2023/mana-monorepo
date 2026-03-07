@@ -339,6 +339,9 @@
 		<main class="main-content bg-background">
 			{@render children()}
 		</main>
+
+		<!-- Spacer for PillNavigation -->
+		<div class="pill-nav-spacer"></div>
 	</div>
 {:else}
 	<!-- Unknown state - redirect to login -->
@@ -359,6 +362,10 @@
 		flex: 1;
 		min-height: 0;
 		overflow: hidden;
-		padding-bottom: 80px;
+	}
+
+	.pill-nav-spacer {
+		flex-shrink: 0;
+		height: 80px;
 	}
 </style>
