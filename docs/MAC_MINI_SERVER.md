@@ -84,12 +84,18 @@ Cloudflare Tunnel (cloudflared)
 ssh mana-server
 ```
 
-Die SSH-Verbindung läuft über Cloudflare Access (konfiguriert in `~/.ssh/config`):
+SSH-Config (`~/.ssh/config`):
 
 ```
+# Lokales Netzwerk (direkt)
 Host mana-server
+    HostName 192.168.178.131
+    User mana
+
+# Über Cloudflare Tunnel (von extern)
+Host mana-server-remote
     HostName mac-mini.mana.how
-    User till
+    User mana
     ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h
 ```
 
@@ -98,6 +104,16 @@ Host mana-server
 ```bash
 cd ~/projects/manacore-monorepo
 ```
+
+## CI/CD
+
+Ein GitHub Actions Self-Hosted Runner läuft auf dem Mac Mini und deployt automatisch bei Push auf `main`.
+
+- **Workflow:** `.github/workflows/cd-macmini.yml`
+- **Runner:** `mac-mini` (self-hosted, macOS, ARM64)
+- **Setup-Doku:** [MAC_MINI_RUNNER_SETUP.md](MAC_MINI_RUNNER_SETUP.md)
+
+Manuelles Deployment: https://github.com/Memo-2023/manacore-monorepo/actions/workflows/cd-macmini.yml
 
 ## Wichtige Befehle
 

@@ -1,12 +1,23 @@
 # Mac Mini Setup: GitHub Actions Runner & SSH-Zugang
 
-Diese Anleitung auf dem Mac Mini ausführen.
+## Aktueller Status
+
+| Komponente | Status | Details |
+|-----------|--------|---------|
+| SSH-Zugang | Aktiv | User `mana`, lokale IP `192.168.178.131` |
+| GitHub Actions Runner | Aktiv | Name: `mac-mini`, Labels: `self-hosted, macOS, ARM64` |
+| CD-Pipeline | Aktiv | `.github/workflows/cd-macmini.yml` |
+| LaunchAgent | Installiert | `actions.runner.Memo-2023-manacore-monorepo.mac-mini` |
+
+**Runner-Verzeichnis:** `/Users/mana/actions-runner/`
+**Projekt-Verzeichnis:** `/Users/mana/projects/manacore-monorepo/`
+**Runner-Logs:** `/Users/mana/Library/Logs/actions.runner.Memo-2023-manacore-monorepo.mac-mini/`
 
 ---
 
-## Teil A: SSH-Zugang einrichten
+## Teil A: SSH-Zugang
 
-Damit von Entwicklungsrechnern (und Claude Code) direkt per SSH auf den Mac Mini zugegriffen werden kann.
+SSH ist eingerichtet. Verbindung vom Entwicklungsrechner:
 
 ### A1. SSH-Dienst aktivieren (falls noch nicht aktiv)
 
@@ -74,79 +85,42 @@ ssh mana-server "docker logs -f mana-matrix-web --tail 50"
 
 ## Teil B: GitHub Actions Self-Hosted Runner
 
-### 1. Runner-Token holen
+Der Runner ist installiert und läuft als LaunchAgent. Er startet automatisch bei Systemstart.
 
-1. Gehe zu: https://github.com/Memo-2023/manacore-monorepo/settings/actions/runners/new
-2. Wähle **macOS** und **ARM64**
-3. Kopiere den Token aus dem `--token` Parameter (sieht so aus: `AXXXX...`)
+### Manuelles Deployment auslösen
 
-## 2. Runner installieren
+- **Automatisch:** Push auf `main` → erkennt geänderte Services → baut & startet nur diese
+- **Manuell:** https://github.com/Memo-2023/manacore-monorepo/actions/workflows/cd-macmini.yml → "Run workflow" → Service wählen
 
-```bash
-# Verzeichnis erstellen
-mkdir -p ~/actions-runner && cd ~/actions-runner
-
-# Runner herunterladen (ARM64 macOS)
-curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/latest/download/actions-runner-osx-arm64-2.322.0.tar.gz
-
-# Entpacken
-tar xzf actions-runner.tar.gz
-
-# Konfigurieren (Token von Schritt 1 einsetzen)
-./config.sh --url https://github.com/Memo-2023/manacore-monorepo --token DEIN_TOKEN_HIER
-
-# Bei den Prompts:
-#   Runner group: [Enter] (default)
-#   Runner name:  mac-mini
-#   Labels:       [Enter] (default: self-hosted,macOS,ARM64)
-#   Work folder:  [Enter] (default: _work)
-```
-
-## 3. Als LaunchAgent einrichten (Autostart)
+### Runner-Status prüfen
 
 ```bash
-# Installiert den LaunchAgent automatisch
-cd ~/actions-runner
-./svc.sh install
+# Auf dem Mac Mini
+cd ~/actions-runner && ./svc.sh status
 
-# Starten
-./svc.sh start
+# Oder via GitHub API
+gh api repos/Memo-2023/manacore-monorepo/actions/runners --jq '.runners[] | "\(.name): \(.status)"'
 
-# Status prüfen
-./svc.sh status
-```
-
-## 4. Prüfen ob es läuft
-
-```bash
-# Lokal prüfen
-./svc.sh status
-
-# Oder im Browser:
+# Oder im Browser
 # https://github.com/Memo-2023/manacore-monorepo/settings/actions/runners
-# → Runner "mac-mini" sollte als "Idle" angezeigt werden
 ```
 
-## 5. Docker-Zugriff sicherstellen
-
-Der Runner braucht Zugriff auf Docker:
+### Neuinstallation (falls nötig)
 
 ```bash
-# Prüfen ob Docker läuft
-docker info
+# 1. Token holen
+#    https://github.com/Memo-2023/manacore-monorepo/settings/actions/runners/new
+#    Oder: gh api -X POST repos/Memo-2023/manacore-monorepo/actions/runners/registration-token --jq '.token'
 
-# Prüfen ob docker compose funktioniert
-docker compose version
+# 2. Runner installieren
+mkdir -p ~/actions-runner && cd ~/actions-runner
+curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/latest/download/actions-runner-osx-arm64-2.322.0.tar.gz
+tar xzf actions-runner.tar.gz
+./config.sh --url https://github.com/Memo-2023/manacore-monorepo --token DEIN_TOKEN --name mac-mini --unattended --replace
 
-# Prüfen ob das Projekt-Verzeichnis existiert
-ls ~/projects/manacore-monorepo/docker-compose.macmini.yml
+# 3. Als Service starten
+./svc.sh install && ./svc.sh start
 ```
-
-## 6. Test-Deployment auslösen
-
-Entweder:
-- Push auf `main` machen (deployt automatisch geänderte Services)
-- Oder manuell: https://github.com/Memo-2023/manacore-monorepo/actions/workflows/cd-macmini.yml → "Run workflow" → Service wählen
 
 ## Fehlerbehebung
 
