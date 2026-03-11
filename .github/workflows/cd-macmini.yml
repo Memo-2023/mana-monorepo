@@ -46,6 +46,7 @@ env:
   PROJECT_DIR: /Users/mana/projects/manacore-monorepo
   COMPOSE_FILE: docker-compose.macmini.yml
   ENV_FILE: .env.macmini
+  PATH: /usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
 jobs:
   # ===========================================
