@@ -43,7 +43,7 @@ concurrency:
   cancel-in-progress: false  # Don't cancel in-progress deploys
 
 env:
-  PROJECT_DIR: /Users/till/projects/manacore-monorepo
+  PROJECT_DIR: /Users/mana/projects/manacore-monorepo
   COMPOSE_FILE: docker-compose.macmini.yml
   ENV_FILE: .env.macmini
 

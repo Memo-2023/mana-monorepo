@@ -34,7 +34,7 @@ chmod 600 ~/.ssh/authorized_keys
 ### A3. Verbindung testen (vom Entwicklungsrechner)
 
 ```bash
-ssh till@192.168.178.131 "echo 'SSH works!'"
+ssh mana@192.168.178.131 "echo 'SSH works!'"
 ```
 
 ### A4. SSH-Config auf dem Entwicklungsrechner
@@ -45,12 +45,12 @@ Falls noch nicht vorhanden, `~/.ssh/config` erstellen/ergänzen:
 # Lokales Netzwerk (direkt)
 Host mana-server
     HostName 192.168.178.131
-    User till
+    User mana
 
 # Über Cloudflare Tunnel (von extern)
 Host mana-server-remote
     HostName mac-mini.mana.how
-    User till
+    User mana
     ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h
 ```
 
