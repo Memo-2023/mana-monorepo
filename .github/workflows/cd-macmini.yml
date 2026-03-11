@@ -1,0 +1,247 @@
+# CD Pipeline: Auto-deploy to Mac Mini on push to main
+#
+# Requires a self-hosted GitHub Actions runner on the Mac Mini.
+# Setup: see docs/MAC_MINI_RUNNER_SETUP.md
+#
+# Flow:
+#   Push → main : Detects changed services → rebuilds & restarts only those containers
+#
+# The runner executes directly on the Mac Mini, so it has access to
+# Docker, docker-compose, and the local project directory.
+
+name: CD Mac Mini
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy (or "all" for everything)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - matrix-web
+          - mana-core-auth
+          - chat-backend
+          - chat-web
+          - todo-backend
+          - todo-web
+          - calendar-backend
+          - calendar-web
+          - clock-backend
+          - clock-web
+          - contacts-backend
+          - contacts-web
+          - matrix-mana-bot
+
+concurrency:
+  group: cd-macmini
+  cancel-in-progress: false  # Don't cancel in-progress deploys
+
+env:
+  PROJECT_DIR: /Users/till/projects/manacore-monorepo
+  COMPOSE_FILE: docker-compose.macmini.yml
+  ENV_FILE: .env.macmini
+
+jobs:
+  # ===========================================
+  # Detect what changed
+  # ===========================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: self-hosted
+    if: github.event_name == 'push'
+    outputs:
+      matrix-web: ${{ steps.changes.outputs.matrix-web }}
+      mana-core-auth: ${{ steps.changes.outputs.mana-core-auth }}
+      chat-backend: ${{ steps.changes.outputs.chat-backend }}
+      chat-web: ${{ steps.changes.outputs.chat-web }}
+      todo-backend: ${{ steps.changes.outputs.todo-backend }}
+      todo-web: ${{ steps.changes.outputs.todo-web }}
+      calendar-backend: ${{ steps.changes.outputs.calendar-backend }}
+      calendar-web: ${{ steps.changes.outputs.calendar-web }}
+      clock-backend: ${{ steps.changes.outputs.clock-backend }}
+      clock-web: ${{ steps.changes.outputs.clock-web }}
+      contacts-backend: ${{ steps.changes.outputs.contacts-backend }}
+      contacts-web: ${{ steps.changes.outputs.contacts-web }}
+      matrix-mana-bot: ${{ steps.changes.outputs.matrix-mana-bot }}
+      any-changes: ${{ steps.changes.outputs.any-changes }}
+    steps:
+      - name: Check for changes
+        id: changes
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+
+          # Get changed files between previous and current commit
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+
+          # Shared packages trigger rebuilds for all services that use them
+          SHARED_CHANGED="false"
+          if echo "$CHANGED" | grep -qE "^packages/(shared-ui|shared-theme|shared-icons|shared-tailwind|shared-auth|shared-branding|shared-i18n|shared-utils|shared-types)/"; then
+            SHARED_CHANGED="true"
+          fi
+
+          check_changes() {
+            local name=$1
+            shift
+            local result="false"
+            for path in "$@"; do
+              if echo "$CHANGED" | grep -q "^$path"; then
+                result="true"
+                break
+              fi
+            done
+            # Shared package changes trigger rebuild
+            if [ "$SHARED_CHANGED" == "true" ]; then
+              result="true"
+            fi
+            echo "$name=$result" >> $GITHUB_OUTPUT
+            echo "  $name: $result"
+          }
+
+          echo "Changed files:"
+          echo "$CHANGED" | head -20
+          echo ""
+          echo "Shared packages changed: $SHARED_CHANGED"
+          echo ""
+
+          check_changes "matrix-web"       "apps/matrix/apps/web/" "apps/matrix/packages/"
+          check_changes "mana-core-auth"    "services/mana-core-auth/"
+          check_changes "chat-backend"      "apps/chat/apps/backend/" "apps/chat/packages/"
+          check_changes "chat-web"          "apps/chat/apps/web/" "apps/chat/packages/"
+          check_changes "todo-backend"      "apps/todo/apps/backend/" "apps/todo/packages/"
+          check_changes "todo-web"          "apps/todo/apps/web/" "apps/todo/packages/"
+          check_changes "calendar-backend"  "apps/calendar/apps/backend/" "apps/calendar/packages/"
+          check_changes "calendar-web"      "apps/calendar/apps/web/" "apps/calendar/packages/"
+          check_changes "clock-backend"     "apps/clock/apps/backend/" "apps/clock/packages/"
+          check_changes "clock-web"         "apps/clock/apps/web/" "apps/clock/packages/"
+          check_changes "contacts-backend"  "apps/contacts/apps/backend/" "apps/contacts/packages/"
+          check_changes "contacts-web"      "apps/contacts/apps/web/" "apps/contacts/packages/"
+          check_changes "matrix-mana-bot"   "services/matrix-mana-bot/" "packages/matrix-bot-common/"
+
+          # Check if anything needs deploying
+          ANY="false"
+          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web matrix-mana-bot; do
+            val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+            if [ "$val" == "true" ]; then
+              ANY="true"
+              break
+            fi
+          done
+          echo "any-changes=$ANY" >> $GITHUB_OUTPUT
+
+  # ===========================================
+  # Deploy changed services
+  # ===========================================
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    needs: [detect-changes]
+    if: |
+      always() &&
+      (needs.detect-changes.result == 'success' && needs.detect-changes.outputs.any-changes == 'true') ||
+      github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Pull latest code
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          git pull origin main
+
+      - name: Determine services to deploy
+        id: services
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          SERVICES=""
+
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            INPUT="${{ inputs.service }}"
+            if [ "$INPUT" == "all" ]; then
+              echo "Manual deploy: all services"
+              echo "deploy-all=true" >> $GITHUB_OUTPUT
+              exit 0
+            else
+              SERVICES="$INPUT"
+            fi
+          else
+            # Build list from detected changes
+            if [ "${{ needs.detect-changes.outputs.matrix-web }}" == "true" ]; then SERVICES="$SERVICES matrix-web"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-core-auth }}" == "true" ]; then SERVICES="$SERVICES mana-auth"; fi
+            if [ "${{ needs.detect-changes.outputs.chat-backend }}" == "true" ]; then SERVICES="$SERVICES chat-backend"; fi
+            if [ "${{ needs.detect-changes.outputs.chat-web }}" == "true" ]; then SERVICES="$SERVICES chat-web"; fi
+            if [ "${{ needs.detect-changes.outputs.todo-backend }}" == "true" ]; then SERVICES="$SERVICES todo-backend"; fi
+            if [ "${{ needs.detect-changes.outputs.todo-web }}" == "true" ]; then SERVICES="$SERVICES todo-web"; fi
+            if [ "${{ needs.detect-changes.outputs.calendar-backend }}" == "true" ]; then SERVICES="$SERVICES calendar-backend"; fi
+            if [ "${{ needs.detect-changes.outputs.calendar-web }}" == "true" ]; then SERVICES="$SERVICES calendar-web"; fi
+            if [ "${{ needs.detect-changes.outputs.clock-backend }}" == "true" ]; then SERVICES="$SERVICES clock-backend"; fi
+            if [ "${{ needs.detect-changes.outputs.clock-web }}" == "true" ]; then SERVICES="$SERVICES clock-web"; fi
+            if [ "${{ needs.detect-changes.outputs.contacts-backend }}" == "true" ]; then SERVICES="$SERVICES contacts-backend"; fi
+            if [ "${{ needs.detect-changes.outputs.contacts-web }}" == "true" ]; then SERVICES="$SERVICES contacts-web"; fi
+            if [ "${{ needs.detect-changes.outputs.matrix-mana-bot }}" == "true" ]; then SERVICES="$SERVICES matrix-mana-bot"; fi
+          fi
+
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+          echo "deploy-all=false" >> $GITHUB_OUTPUT
+          echo "Services to deploy: $SERVICES"
+
+      - name: Deploy all services
+        if: steps.services.outputs.deploy-all == 'true'
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          echo "=== Rebuilding and restarting ALL services ==="
+          docker compose -f "${{ env.COMPOSE_FILE }}" --env-file "${{ env.ENV_FILE }}" up -d --build
+          echo "=== Waiting for services to start ==="
+          sleep 15
+          docker compose -f "${{ env.COMPOSE_FILE }}" ps
+
+      - name: Deploy changed services
+        if: steps.services.outputs.deploy-all == 'false' && steps.services.outputs.services != ''
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          SERVICES="${{ steps.services.outputs.services }}"
+          echo "=== Rebuilding: $SERVICES ==="
+          docker compose -f "${{ env.COMPOSE_FILE }}" --env-file "${{ env.ENV_FILE }}" up -d --build --no-deps $SERVICES
+          echo "=== Waiting for services to start ==="
+          sleep 10
+
+      - name: Health checks
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+
+          check_health() {
+            local name=$1
+            local url=$2
+            local status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$url" 2>/dev/null || echo "000")
+            if [ "$status" == "200" ]; then
+              echo "  ✓ $name: OK"
+            else
+              echo "  ✗ $name: FAILED (HTTP $status)"
+            fi
+          }
+
+          echo "=== Health Checks ==="
+          check_health "Auth API"          "http://localhost:3001/health"
+          check_health "Matrix Web"        "http://localhost:5180/health"
+          check_health "Chat Backend"      "http://localhost:3030/health"
+          check_health "Chat Web"          "http://localhost:5010/health"
+          check_health "Todo Backend"      "http://localhost:3031/health"
+          check_health "Todo Web"          "http://localhost:5011/health"
+          check_health "Calendar Backend"  "http://localhost:3032/health"
+          check_health "Calendar Web"      "http://localhost:5012/health"
+          check_health "Clock Backend"     "http://localhost:3033/health"
+          check_health "Clock Web"         "http://localhost:5013/health"
+
+      - name: Summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.services.outputs.deploy-all }}" == "true" ]; then
+            echo "**Services:** All" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Services:** ${{ steps.services.outputs.services }}" >> $GITHUB_STEP_SUMMARY
+          fi
