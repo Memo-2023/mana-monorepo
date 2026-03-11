@@ -23,6 +23,7 @@ COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
+COPY packages/shared-pwa ./packages/shared-pwa
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-types ./packages/shared-types
