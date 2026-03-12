@@ -2440,6 +2440,9 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: 2.2.0
         version: 2.2.0(react-native@0.83.2(@babel/core@7.28.5)(@types/react@19.2.14)(react@19.2.0))
+      babel-preset-expo:
+        specifier: ~55.0.8
+        version: 55.0.10(@babel/core@7.28.5)(@babel/runtime@7.28.4)(expo@55.0.5)(react-refresh@0.14.2)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
