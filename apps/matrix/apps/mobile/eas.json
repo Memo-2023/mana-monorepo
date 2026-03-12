@@ -27,7 +27,7 @@
 			"extends": "base",
 			"autoIncrement": true,
 			"ios": {
-				"image": "default"
+				"image": "sdk-55"
 			}
 		}
 	},
