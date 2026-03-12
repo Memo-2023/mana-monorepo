@@ -27,7 +27,7 @@
 			"extends": "base",
 			"autoIncrement": true,
 			"ios": {
-				"image": "latest"
+				"image": "default"
 			}
 		}
 	},

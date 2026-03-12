@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
-import { Audio } from 'expo-av';
+import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio';
 import { Play, Pause } from 'phosphor-react-native';
 
 interface Props {
@@ -17,51 +17,27 @@ function formatDuration(ms: number): string {
 }
 
 export default function VoiceMessage({ uri, duration, isOwn }: Props) {
-	const soundRef = useRef<Audio.Sound | null>(null);
-	const [playing, setPlaying] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const [position, setPosition] = useState(0);
-	const [totalDuration, setTotalDuration] = useState(duration ?? 0);
+	const player = useAudioPlayer(uri);
+	const status = useAudioPlayerStatus(player);
+	const [initialized, setInitialized] = useState(false);
 
-	const progress = totalDuration > 0 ? position / totalDuration : 0;
+	const currentTimeMs = (status.currentTime ?? 0) * 1000;
+	const durationMs = (status.duration ?? 0) * 1000 || duration || 0;
+	const playing = status.playing;
+	const progress = durationMs > 0 ? currentTimeMs / durationMs : 0;
 
-	const handleToggle = async () => {
-		if (loading) return;
+	const handleToggle = useCallback(async () => {
+		if (!initialized) {
+			await setAudioModeAsync({ playsInSilentMode: true });
+			setInitialized(true);
+		}
 
 		if (playing) {
-			await soundRef.current?.pauseAsync();
-			setPlaying(false);
-			return;
+			player.pause();
+		} else {
+			player.play();
 		}
-
-		if (soundRef.current) {
-			await soundRef.current.playAsync();
-			setPlaying(true);
-			return;
-		}
-
-		setLoading(true);
-		try {
-			await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-			const { sound } = await Audio.Sound.createAsync(
-				{ uri },
-				{ shouldPlay: true },
-				(status) => {
-					if (!status.isLoaded) return;
-					setPosition(status.positionMillis);
-					if (status.durationMillis) setTotalDuration(status.durationMillis);
-					if (status.didJustFinish) {
-						setPlaying(false);
-						setPosition(0);
-					}
-				},
-			);
-			soundRef.current = sound;
-			setPlaying(true);
-		} finally {
-			setLoading(false);
-		}
-	};
+	}, [player, playing, initialized]);
 
 	const iconColor = isOwn ? '#fff' : '#7c6bff';
 	const barColor = isOwn ? 'rgba(255,255,255,0.5)' : '#2a2a2a';
@@ -71,9 +47,11 @@ export default function VoiceMessage({ uri, duration, isOwn }: Props) {
 		<View className="flex-row items-center gap-3 px-3 py-2.5 min-w-[160px]">
 			<Pressable
 				onPress={handleToggle}
-				className={({ pressed }) => `w-8 h-8 rounded-full items-center justify-center ${pressed ? 'opacity-60' : ''} ${isOwn ? 'bg-white/20' : 'bg-primary/10'}`}
+				className={({ pressed }) =>
+					`w-8 h-8 rounded-full items-center justify-center ${pressed ? 'opacity-60' : ''} ${isOwn ? 'bg-white/20' : 'bg-primary/10'}`
+				}
 			>
-				{loading ? (
+				{status.isBuffering ? (
 					<ActivityIndicator size={14} color={iconColor} />
 				) : playing ? (
 					<Pause size={14} color={iconColor} weight="fill" />
@@ -83,12 +61,18 @@ export default function VoiceMessage({ uri, duration, isOwn }: Props) {
 			</Pressable>
 
 			{/* Waveform / progress bar */}
-			<View className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: barColor }}>
-				<View style={{ width: `${progress * 100}%`, backgroundColor: fillColor }} className="h-full rounded-full" />
+			<View
+				className="flex-1 h-1 rounded-full overflow-hidden"
+				style={{ backgroundColor: barColor }}
+			>
+				<View
+					style={{ width: `${progress * 100}%`, backgroundColor: fillColor }}
+					className="h-full rounded-full"
+				/>
 			</View>
 
 			<Text className={`text-xs tabular-nums ${isOwn ? 'text-white/70' : 'text-muted-foreground'}`}>
-				{formatDuration(playing || position > 0 ? position : totalDuration)}
+				{formatDuration(playing || currentTimeMs > 0 ? currentTimeMs : durationMs)}
 			</Text>
 		</View>
 	);

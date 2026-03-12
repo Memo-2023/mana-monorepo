@@ -1,7 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { View, Text, Pressable, Animated, Alert } from 'react-native';
-import { Audio } from 'expo-av';
-import { Microphone, Stop, Trash, PaperPlaneRight } from 'phosphor-react-native';
+import {
+	useAudioRecorder,
+	RecordingPresets,
+	requestRecordingPermissionsAsync,
+	setAudioModeAsync,
+} from 'expo-audio';
+import { Trash, PaperPlaneRight } from 'phosphor-react-native';
 
 interface Props {
 	onSend: (uri: string, durationMs: number) => Promise<void>;
@@ -9,7 +14,7 @@ interface Props {
 }
 
 export default function VoiceRecorder({ onSend, onCancel }: Props) {
-	const recordingRef = useRef<Audio.Recording | null>(null);
+	const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 	const [duration, setDuration] = useState(0);
 	const [sending, setSending] = useState(false);
 	const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -17,12 +22,11 @@ export default function VoiceRecorder({ onSend, onCancel }: Props) {
 
 	useEffect(() => {
 		startRecording();
-		// Pulse animation
 		const pulse = Animated.loop(
 			Animated.sequence([
 				Animated.timing(pulseAnim, { toValue: 1.3, duration: 600, useNativeDriver: true }),
 				Animated.timing(pulseAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-			]),
+			])
 		);
 		pulse.start();
 		return () => {
@@ -33,17 +37,15 @@ export default function VoiceRecorder({ onSend, onCancel }: Props) {
 
 	const startRecording = async () => {
 		try {
-			const { status } = await Audio.requestPermissionsAsync();
-			if (status !== 'granted') {
+			const { granted } = await requestRecordingPermissionsAsync();
+			if (!granted) {
 				Alert.alert('Permission required', 'Microphone access is needed to record voice messages.');
 				onCancel();
 				return;
 			}
-			await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-			const { recording } = await Audio.Recording.createAsync(
-				Audio.RecordingOptionsPresets.HIGH_QUALITY,
-			);
-			recordingRef.current = recording;
+			await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+			await recorder.prepareToRecordAsync();
+			recorder.record();
 			timerRef.current = setInterval(() => setDuration((d) => d + 1), 1000);
 		} catch (err) {
 			Alert.alert('Error', 'Could not start recording');
@@ -54,17 +56,19 @@ export default function VoiceRecorder({ onSend, onCancel }: Props) {
 	const stopRecordingCleanup = async () => {
 		if (timerRef.current) clearInterval(timerRef.current);
 		try {
-			await recordingRef.current?.stopAndUnloadAsync();
-		} catch { /* ignore */ }
+			await recorder.stop();
+		} catch {
+			/* ignore */
+		}
 	};
 
 	const handleSend = async () => {
-		if (!recordingRef.current || sending) return;
+		if (sending) return;
 		setSending(true);
 		if (timerRef.current) clearInterval(timerRef.current);
 		try {
-			await recordingRef.current.stopAndUnloadAsync();
-			const uri = recordingRef.current.getURI();
+			await recorder.stop();
+			const uri = recorder.uri;
 			if (!uri) throw new Error('No recording URI');
 			await onSend(uri, duration * 1000);
 		} catch (err) {
@@ -90,7 +94,9 @@ export default function VoiceRecorder({ onSend, onCancel }: Props) {
 			{/* Discard */}
 			<Pressable
 				onPress={handleDiscard}
-				className={({ pressed }) => `w-10 h-10 rounded-full bg-destructive/10 items-center justify-center ${pressed ? 'opacity-60' : ''}`}
+				className={({ pressed }) =>
+					`w-10 h-10 rounded-full bg-destructive/10 items-center justify-center ${pressed ? 'opacity-60' : ''}`
+				}
 			>
 				<Trash size={18} color="#ef4444" />
 			</Pressable>
