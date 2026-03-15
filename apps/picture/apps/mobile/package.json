@@ -14,7 +14,7 @@
 		"lint": "eslint .",
 		"format": "eslint . --fix",
 		"type-check": "echo 'Skipping type-check: @picture/mobile needs theme system migration'",
-		"postinstall": "patch-package && ./scripts/build-workspace-deps.sh"
+		"postinstall": "patch-package || true && ./scripts/build-workspace-deps.sh"
 	},
 	"dependencies": {
 		"@callstack/liquid-glass": "^0.4.2",
