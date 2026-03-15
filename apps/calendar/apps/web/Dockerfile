@@ -78,17 +78,16 @@ COPY --from=builder /app/apps/calendar/apps/web/node_modules ./node_modules
 COPY --from=builder /app/apps/calendar/apps/web/build ./build
 COPY --from=builder /app/apps/calendar/apps/web/package.json ./
 
-# Expose port
-EXPOSE 5186
-
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=5186
+ENV PORT=5012
 ENV HOST=0.0.0.0
 
-# Health check
+EXPOSE ${PORT}
+
+# Health check using PORT env var
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:5186/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
 
 # Run the app
 CMD ["node", "build"]
