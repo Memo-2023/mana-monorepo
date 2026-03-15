@@ -8,6 +8,7 @@ import { ICalService, ParsedEvent } from './ical.service';
 import { CalDavService } from './caldav.service';
 import { GoogleCalendarService } from './google-calendar.service';
 import { ConnectCalendarDto, UpdateExternalCalendarDto, DiscoverCalDavDto } from './dto';
+import { EncryptionService } from '../common/encryption.service';
 
 interface SyncResult {
 	success: boolean;
@@ -24,7 +25,8 @@ export class SyncService {
 		@Inject(DATABASE_CONNECTION) private readonly db: Database,
 		private readonly icalService: ICalService,
 		private readonly caldavService: CalDavService,
-		private readonly googleCalendarService: GoogleCalendarService
+		private readonly googleCalendarService: GoogleCalendarService,
+		private readonly encryptionService: EncryptionService
 	) {}
 
 	/**
@@ -59,7 +61,7 @@ export class SyncService {
 				provider: dto.provider,
 				calendarUrl: dto.calendarUrl,
 				username: dto.username,
-				encryptedPassword: dto.password, // TODO: Encrypt in production
+				encryptedPassword: dto.password ? this.encryptionService.encrypt(dto.password) : null,
 				accessToken: dto.accessToken,
 				refreshToken: dto.refreshToken,
 				tokenExpiresAt: dto.accessToken ? new Date(Date.now() + 3600 * 1000) : null,
@@ -299,7 +301,9 @@ export class SyncService {
 					serverUrl,
 					externalCalendar.calendarUrl,
 					externalCalendar.username || '',
-					externalCalendar.encryptedPassword || '', // TODO: Decrypt
+					externalCalendar.encryptedPassword
+						? this.encryptionService.decrypt(externalCalendar.encryptedPassword)
+						: '',
 					startDate,
 					endDate
 				);
@@ -493,7 +497,9 @@ export class SyncService {
 							serverUrl,
 							externalCalendar.calendarUrl,
 							externalCalendar.username || '',
-							externalCalendar.encryptedPassword || '',
+							externalCalendar.encryptedPassword
+								? this.encryptionService.decrypt(externalCalendar.encryptedPassword)
+								: '',
 							{
 								uid: event.externalId || event.id,
 								title: event.title,

@@ -5,11 +5,19 @@
 import { fetchApi } from './client';
 import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
 
+export interface PaginationMeta {
+	limit?: number;
+	offset: number;
+	count: number;
+}
+
 export interface QueryEventsParams {
 	startDate: string;
 	endDate: string;
 	calendarIds?: string[];
 	search?: string;
+	limit?: number;
+	offset?: number;
 }
 
 export async function getEvents(params: QueryEventsParams) {
@@ -23,11 +31,19 @@ export async function getEvents(params: QueryEventsParams) {
 	if (params.search) {
 		searchParams.set('search', params.search);
 	}
-	const result = await fetchApi<{ events: CalendarEvent[] }>(`/events?${searchParams.toString()}`);
-	if (result.error || !result.data) {
-		return { data: null, error: result.error };
+	if (params.limit !== undefined) {
+		searchParams.set('limit', String(params.limit));
 	}
-	return { data: result.data.events, error: null };
+	if (params.offset !== undefined) {
+		searchParams.set('offset', String(params.offset));
+	}
+	const result = await fetchApi<{ events: CalendarEvent[]; pagination: PaginationMeta }>(
+		`/events?${searchParams.toString()}`
+	);
+	if (result.error || !result.data) {
+		return { data: null, pagination: null, error: result.error };
+	}
+	return { data: result.data.events, pagination: result.data.pagination, error: null };
 }
 
 export async function searchEvents(query: string, limit: number = 10) {

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { DatabaseModule } from './db/database.module';
@@ -24,6 +26,12 @@ import { AdminModule } from './admin/admin.module';
 			envFilePath: '.env',
 		}),
 		ScheduleModule.forRoot(),
+		ThrottlerModule.forRoot([
+			{
+				ttl: 60000, // 60 seconds
+				limit: 100, // 100 requests per minute
+			},
+		]),
 		MetricsModule.register({
 			prefix: 'calendar_',
 			excludePaths: ['/health'],
@@ -50,6 +58,12 @@ import { AdminModule } from './admin/admin.module';
 		SyncModule,
 		NetworkModule,
 		AdminModule,
+	],
+	providers: [
+		{
+			provide: APP_GUARD,
+			useClass: ThrottlerGuard,
+		},
 	],
 })
 export class AppModule {}

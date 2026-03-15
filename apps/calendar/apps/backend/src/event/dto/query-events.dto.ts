@@ -1,5 +1,14 @@
-import { IsOptional, IsDateString, IsArray, IsBoolean, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
+import {
+	IsOptional,
+	IsDateString,
+	IsArray,
+	IsBoolean,
+	IsString,
+	IsInt,
+	Min,
+	Max,
+} from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class QueryEventsDto {
 	@IsOptional()
@@ -24,4 +33,17 @@ export class QueryEventsDto {
 	@IsOptional()
 	@IsString()
 	search?: string;
+
+	@IsOptional()
+	@Type(() => Number)
+	@IsInt()
+	@Min(1)
+	@Max(500)
+	limit?: number;
+
+	@IsOptional()
+	@Type(() => Number)
+	@IsInt()
+	@Min(0)
+	offset?: number;
 }

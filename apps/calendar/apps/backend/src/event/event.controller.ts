@@ -13,7 +13,14 @@ export class EventController {
 	@Get()
 	async queryEvents(@CurrentUser() user: CurrentUserData, @Query() query: QueryEventsDto) {
 		const events = await this.eventService.getEventsWithCalendar(user.userId, query);
-		return { events };
+		return {
+			events,
+			pagination: {
+				limit: query.limit,
+				offset: query.offset ?? 0,
+				count: events.length,
+			},
+		};
 	}
 
 	@Get(':id')

@@ -47,11 +47,20 @@ export class EventService {
 			);
 		}
 
-		return this.db
+		const qb = this.db
 			.select()
 			.from(events)
 			.where(and(...conditions))
 			.orderBy(events.startTime);
+
+		if (query.limit) {
+			qb.limit(query.limit);
+		}
+		if (query.offset) {
+			qb.offset(query.offset);
+		}
+
+		return qb;
 	}
 
 	async findById(id: string, userId: string): Promise<Event | null> {
@@ -194,7 +203,7 @@ export class EventService {
 			);
 		}
 
-		const result = await this.db
+		const qb = this.db
 			.select({
 				event: events,
 				calendar: {
@@ -207,6 +216,15 @@ export class EventService {
 			.leftJoin(calendars, eq(events.calendarId, calendars.id))
 			.where(and(...conditions))
 			.orderBy(events.startTime);
+
+		if (query.limit) {
+			qb.limit(query.limit);
+		}
+		if (query.offset) {
+			qb.offset(query.offset);
+		}
+
+		const result = await qb;
 
 		// Load tags for all events
 		const eventsWithCalendar = await Promise.all(
