@@ -152,6 +152,15 @@ jobs:
           cd "${{ env.PROJECT_DIR }}"
           git pull origin main
 
+      - name: Ensure env vars exist
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          # Add CALENDAR_ENCRYPTION_KEY if not present
+          if ! grep -q "CALENDAR_ENCRYPTION_KEY" "${{ env.ENV_FILE }}" 2>/dev/null; then
+            echo "CALENDAR_ENCRYPTION_KEY=$(openssl rand -base64 32)" >> "${{ env.ENV_FILE }}"
+            echo "Added CALENDAR_ENCRYPTION_KEY to ${{ env.ENV_FILE }}"
+          fi
+
       - name: Determine services to deploy
         id: services
         run: |
