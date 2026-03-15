@@ -111,7 +111,7 @@ export const authStore = {
 	async signUp(email: string, password: string) {
 		// Pass the current app URL for post-verification redirect
 		const sourceAppUrl = browser ? window.location.origin : undefined;
-		const result = await authService.signUp(email, password, undefined, sourceAppUrl);
+		const result = await authService.signUp(email, password, sourceAppUrl);
 		if (result.success && !result.needsVerification) {
 			const userData = await authService.getUserFromToken();
 			user = toManaUser(userData);

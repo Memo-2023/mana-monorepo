@@ -174,7 +174,7 @@ export const authStore = {
 		try {
 			// Pass the current app URL for post-verification redirect
 			const sourceAppUrl = browser ? window.location.origin : undefined;
-			const result = await authService.signUp(email, password, undefined, sourceAppUrl);
+			const result = await authService.signUp(email, password, sourceAppUrl);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Signup failed', needsVerification: false };

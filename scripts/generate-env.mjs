@@ -634,6 +634,34 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Traces Backend (NestJS)
+	{
+		path: 'apps/traces/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.TRACES_BACKEND_PORT || '3026',
+			DATABASE_URL: (env) => env.TRACES_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			MANA_LLM_URL: (env) => env.MANA_LLM_URL || 'http://localhost:3025',
+			MANA_SEARCH_URL: (env) => env.MANA_SEARCH_URL || 'http://localhost:3021',
+			MANA_CORE_SERVICE_KEY: (env) => env.MANA_CORE_SERVICE_KEY || '',
+			APP_ID: () => 'traces',
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Traces Mobile (Expo)
+	{
+		path: 'apps/traces/apps/mobile/.env',
+		vars: {
+			EXPO_PUBLIC_TRACES_BACKEND_URL: (env) =>
+				`http://localhost:${env.TRACES_BACKEND_PORT || '3026'}`,
+			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
 	// LLM Playground (SvelteKit)
 	{
 		path: 'services/llm-playground/.env',

@@ -153,7 +153,7 @@ export const authStore = {
 
 		try {
 			const sourceAppUrl = browser ? window.location.origin : undefined;
-			const result = await authService.signUp(email, password, undefined, sourceAppUrl);
+			const result = await authService.signUp(email, password, sourceAppUrl);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Signup failed', needsVerification: false };

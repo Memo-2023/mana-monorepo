@@ -1,0 +1,90 @@
+{
+	"expo": {
+		"name": "Traces",
+		"slug": "locations",
+		"version": "1.0.0",
+		"scheme": "traces",
+		"web": {
+			"bundler": "metro",
+			"output": "static",
+			"favicon": "./assets/favicon.png"
+		},
+		"plugins": [
+			"expo-router",
+			[
+				"expo-location",
+				{
+					"locationAlwaysAndWhenInUsePermission": "Diese App benötigt Zugriff auf Ihren Standort, auch im Hintergrund, um standortbezogene Funktionen anzubieten.",
+					"locationAlwaysPermission": "Diese App benötigt Zugriff auf Ihren Standort im Hintergrund, um standortbezogene Funktionen anzubieten.",
+					"locationWhenInUsePermission": "Diese App benötigt Zugriff auf Ihren Standort, um standortbezogene Funktionen anzubieten."
+				}
+			],
+			[
+				"expo-media-library",
+				{
+					"photosPermission": "Diese App benötigt Zugriff auf Ihre Fotos, um GPS-Daten aus Bildern zu extrahieren und Ihre Reise-Historie zu importieren.",
+					"savePhotosPermission": "Diese App speichert keine Fotos, sondern liest nur GPS-Metadaten.",
+					"isAccessMediaLocationEnabled": true
+				}
+			]
+		],
+		"experiments": {
+			"typedRoutes": true,
+			"tsconfigPaths": true
+		},
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"userInterfaceStyle": "automatic",
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"assetBundlePatterns": ["**/*"],
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.memoro.locations",
+			"icon": "./assets/traces.icon",
+			"infoPlist": {
+				"NSLocationWhenInUseUsageDescription": "Diese App benötigt Zugriff auf Ihren Standort, um standortbezogene Funktionen anzubieten.",
+				"NSLocationAlwaysAndWhenInUseUsageDescription": "Diese App benötigt Zugriff auf Ihren Standort, auch im Hintergrund, um standortbezogene Funktionen anzubieten.",
+				"NSLocationAlwaysUsageDescription": "Diese App benötigt Zugriff auf Ihren Standort, um standortbezogene Funktionen anzubieten.",
+				"NSPhotoLibraryUsageDescription": "Diese App benötigt Zugriff auf Ihre Fotos, um GPS-Daten aus Bildern zu extrahieren.",
+				"UIBackgroundModes": ["location", "fetch", "processing"],
+				"BGTaskSchedulerPermittedIdentifiers": [
+					"com.memoro.locations.locationupdatetask",
+					"com.memoro.locations.locationprocessingtask"
+				]
+			},
+			"config": {
+				"usesNonExemptEncryption": false
+			}
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#ffffff"
+			},
+			"package": "com.memoro.locations",
+			"permissions": [
+				"ACCESS_COARSE_LOCATION",
+				"ACCESS_FINE_LOCATION",
+				"ACCESS_BACKGROUND_LOCATION",
+				"ACCESS_MEDIA_LOCATION",
+				"READ_EXTERNAL_STORAGE",
+				"READ_MEDIA_IMAGES",
+				"FOREGROUND_SERVICE",
+				"FOREGROUND_SERVICE_LOCATION"
+			]
+		},
+		"owner": "memoro",
+		"extra": {
+			"router": {
+				"origin": false
+			},
+			"eas": {
+				"projectId": "555a9045-475c-4226-a237-3ffe5366e446"
+			}
+		}
+	}
+}

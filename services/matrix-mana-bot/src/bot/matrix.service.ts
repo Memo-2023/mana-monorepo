@@ -191,13 +191,15 @@ export class MatrixService extends BaseMatrixService {
 				let userMessage: string;
 				switch (error.code) {
 					case 'STT_UNAVAILABLE':
-						userMessage = '🎤 Spracherkennung momentan nicht verfügbar. Bitte schreibe deine Nachricht.';
+						userMessage =
+							'🎤 Spracherkennung momentan nicht verfügbar. Bitte schreibe deine Nachricht.';
 						break;
 					case 'TTS_UNAVAILABLE':
 						userMessage = '🔊 Sprachausgabe momentan nicht verfügbar.';
 						break;
 					case 'TIMEOUT':
-						userMessage = '⏱️ Die Verarbeitung dauert zu lange. Bitte versuche eine kürzere Nachricht.';
+						userMessage =
+							'⏱️ Die Verarbeitung dauert zu lange. Bitte versuche eine kürzere Nachricht.';
 						break;
 					case 'INVALID_AUDIO':
 						userMessage = `🎤 ${error.message}`;
@@ -300,6 +302,37 @@ export class MatrixService extends BaseMatrixService {
 			.replace(/\*(.+?)\*/g, '<em>$1</em>')
 			.replace(/~~(.+?)~~/g, '<del>$1</del>')
 			.replace(/\n/g, '<br>');
+	}
+
+	/**
+	 * Send a direct message to a user by finding or creating a DM room
+	 */
+	async sendDirectMessage(userId: string, message: string): Promise<void> {
+		const roomId = await this.getOrCreateDmRoom(userId);
+		await this.sendMessage(roomId, message);
+	}
+
+	private async getOrCreateDmRoom(userId: string): Promise<string> {
+		// Check existing joined rooms for a DM with this user
+		const joinedRooms = await this.client.getJoinedRooms();
+		for (const roomId of joinedRooms) {
+			try {
+				const members = await this.client.getJoinedRoomMembers(roomId);
+				if (members.length === 2 && members.includes(userId)) {
+					return roomId;
+				}
+			} catch {
+				// Skip rooms we can't inspect
+			}
+		}
+
+		// Create a new DM room
+		const roomId = await this.client.createRoom({
+			invite: [userId],
+			is_direct: true,
+			preset: 'trusted_private_chat',
+		});
+		return roomId;
 	}
 
 	getClient() {

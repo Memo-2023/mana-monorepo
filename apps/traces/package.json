@@ -1,0 +1,9 @@
+{
+	"name": "traces",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Traces - GPS tracking with AI city guides",
+	"scripts": {
+		"dev": "pnpm run --filter=@traces/* --parallel dev"
+	}
+}

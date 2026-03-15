@@ -141,7 +141,7 @@ export const authStore = {
 			loading = true;
 			// Pass the current app URL for post-verification redirect
 			const sourceAppUrl = browser ? window.location.origin : undefined;
-			const result = await authService.signUp(email, password, undefined, sourceAppUrl);
+			const result = await authService.signUp(email, password, sourceAppUrl);
 
 			if (result.success) {
 				// Auto-login after signup
