@@ -18,7 +18,6 @@
 		PillNavItem,
 		PillDropdownItem,
 		QuickInputItem,
-		CreatePreview,
 		PillTabGroupConfig,
 		PillTagSelectorConfig,
 		PillNavElement,
@@ -48,22 +47,15 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import {
-		parseEventInput,
-		resolveEventIds,
-		formatParsedEventPreview,
-	} from '$lib/utils/event-parser';
 	import CalendarToolbar from '$lib/components/calendar/CalendarToolbar.svelte';
 	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
 	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
 	import DateStripFab from '$lib/components/calendar/DateStripFab.svelte';
 	import ViewsBar from '$lib/components/calendar/ViewsBar.svelte';
-	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import VoiceRecordButton from '$lib/components/voice/VoiceRecordButton.svelte';
 	import VoiceRecordingModal from '$lib/components/voice/VoiceRecordingModal.svelte';
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
-	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import { calendarOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
@@ -105,55 +97,6 @@
 			searchStore.clear();
 		} else {
 			searchStore.setSearch(query, results);
-		}
-	}
-
-	// QuickInputBar Quick-Create handlers
-	function handleParseCreate(query: string): CreatePreview | null {
-		if (!query.trim()) return null;
-
-		const parsed = parseEventInput(query);
-		if (!parsed.title) return null;
-
-		return {
-			title: `"${parsed.title}" erstellen`,
-			subtitle: formatParsedEventPreview(parsed),
-		};
-	}
-
-	async function handleCreate(query: string): Promise<void> {
-		const parsed = parseEventInput(query);
-		if (!parsed.title) return;
-
-		// Resolve calendar and tag names to IDs
-		const calendars = calendarsStore.calendars.map((c) => ({ id: c.id, name: c.name }));
-		const tags = eventTagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
-		const resolved = resolveEventIds(parsed, calendars, tags);
-
-		// Ensure we have start and end times
-		if (!resolved.startTime) {
-			// Default to now + 1 hour
-			const now = new Date();
-			resolved.startTime = now.toISOString();
-			const end = new Date(now.getTime() + 60 * 60 * 1000);
-			resolved.endTime = end.toISOString();
-		}
-
-		// Create event - calendarId is now optional, backend will use/create default if not provided
-		await eventsStore.createEvent({
-			// Only include calendarId if resolved (from command or default calendar)
-			...(resolved.calendarId ? { calendarId: resolved.calendarId } : {}),
-			title: resolved.title,
-			startTime: resolved.startTime,
-			endTime: resolved.endTime || resolved.startTime,
-			isAllDay: resolved.isAllDay,
-			location: resolved.location,
-			tagIds: resolved.tagIds,
-		});
-
-		// Refresh calendars if none existed (in case default was created)
-		if (calendarsStore.calendars.length === 0) {
-			await calendarsStore.fetchCalendars();
 		}
 	}
 
@@ -424,11 +367,6 @@
 		goto('/login');
 	}
 
-	// Context menu edit handler - navigate to event
-	function handleContextMenuEdit(event: { id: string }) {
-		goto(`/?event=${event.id}`);
-	}
-
 	// Reactive effect: load birthdays when setting is enabled
 	$effect(() => {
 		if (browser && settingsStore.showBirthdays && authStore.isAuthenticated) {
@@ -440,22 +378,12 @@
 	function handleVoiceResult(transcription: string) {
 		if (!browser) return;
 
-		// Parse the transcribed text to extract event data
-		const parsed = parseEventInput(transcription);
-
 		// Dispatch custom event for +page.svelte to handle
-		// The event data includes parsed info plus original transcription as description
 		window.dispatchEvent(
 			new CustomEvent('voice-event-create', {
 				detail: {
-					title: parsed.title || transcription,
-					startTime: parsed.startTime,
-					endTime: parsed.endTime,
-					location: parsed.location,
-					isAllDay: parsed.isAllDay,
-					tagNames: parsed.tagNames,
-					calendarName: parsed.calendarName,
-					description: transcription, // Original transcription as description
+					title: transcription,
+					description: transcription,
 				},
 			})
 		);
@@ -584,8 +512,6 @@
 					placeholder="Neuer Termin oder suchen..."
 					emptyText="Keine Termine gefunden"
 					searchingText="Suche..."
-					onCreate={handleCreate}
-					onParseCreate={handleParseCreate}
 					createText="Erstellen"
 					appIcon="calendar"
 					bottomOffset={isMobile
@@ -627,6 +553,7 @@
 			class="main-content bg-background"
 			class:has-toolbar={showCalendarToolbar}
 			class:immersive={settingsStore.immersiveModeEnabled}
+			aria-label="Kalender"
 		>
 			<div
 				class="content-wrapper"
@@ -638,9 +565,6 @@
 		</main>
 	</div>
 </SplitPaneContainer>
-
-<!-- Global Event Context Menu - rendered at top level for proper z-index -->
-<EventContextMenu onEdit={handleContextMenuEdit} />
 
 <!-- InputBar Help Modal -->
 <InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />

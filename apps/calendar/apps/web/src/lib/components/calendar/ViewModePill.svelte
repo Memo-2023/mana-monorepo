@@ -2,8 +2,6 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
-	import ViewModePillContextMenu from './ViewModePillContextMenu.svelte';
-
 	interface Props {
 		isToolbarExpanded?: boolean;
 		isMobile?: boolean;
@@ -11,51 +9,22 @@
 
 	let { isToolbarExpanded = false, isMobile = false }: Props = $props();
 
-	let contextMenu: ViewModePillContextMenu;
-
-	function handleContextMenu(e: MouseEvent) {
-		e.preventDefault();
-		contextMenu?.show(e.clientX, e.clientY);
-	}
-
 	function handleViewClick(view: CalendarViewType) {
 		viewStore.setViewType(view);
 	}
 
 	// View labels (short versions for pill)
 	const viewLabels: Record<CalendarViewType, string> = {
-		day: '1',
-		'3day': '3',
-		'5day': '5',
 		week: '7',
-		'10day': '10',
-		'14day': '14',
-		'30day': '30',
-		'60day': '60',
-		'90day': '90',
-		'365day': '365',
 		month: 'M',
-		year: 'Y',
 		agenda: 'A',
-		custom: 'C',
 	};
 
 	// View titles for tooltip
 	const viewTitles: Record<CalendarViewType, string> = {
-		day: 'Tagesansicht',
-		'3day': '3-Tage-Ansicht',
-		'5day': '5-Tage-Ansicht',
 		week: 'Wochenansicht',
-		'10day': '10-Tage-Ansicht',
-		'14day': '14-Tage-Ansicht',
-		'30day': '30-Tage-Ansicht',
-		'60day': '60-Tage-Ansicht',
-		'90day': '90-Tage-Ansicht',
-		'365day': '365-Tage-Ansicht',
 		month: 'Monatsansicht',
-		year: 'Jahresansicht',
 		agenda: 'Agenda',
-		custom: 'Benutzerdefiniert',
 	};
 
 	// Get enabled views from settings
@@ -63,12 +32,7 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	class="view-mode-pill"
-	class:toolbar-expanded={isToolbarExpanded}
-	class:mobile={isMobile}
-	oncontextmenu={handleContextMenu}
->
+<div class="view-mode-pill" class:toolbar-expanded={isToolbarExpanded} class:mobile={isMobile}>
 	{#each enabledViews as view}
 		<button
 			type="button"
@@ -77,29 +41,14 @@
 			onclick={() => handleViewClick(view)}
 			title={viewTitles[view]}
 		>
-			{#if view === 'day'}
+			{#if view === 'week'}
 				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<rect x="6" y="4" width="12" height="16" rx="2" stroke-width="2" />
-					<path stroke-linecap="round" stroke-width="2" d="M6 8h12" />
+					<path
+						stroke-linecap="round"
+						stroke-width="2"
+						d="M3 4v16M6.5 4v16M10 4v16M13.5 4v16M17 4v16M20.5 4v16M24 4v16"
+					/>
 				</svg>
-			{:else if view === '5day' || view === 'week'}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					{#if view === '5day'}
-						<path
-							stroke-linecap="round"
-							stroke-width="2"
-							d="M5 4v16M9 4v16M13 4v16M17 4v16M21 4v16"
-						/>
-					{:else}
-						<path
-							stroke-linecap="round"
-							stroke-width="2"
-							d="M3 4v16M6.5 4v16M10 4v16M13.5 4v16M17 4v16M20.5 4v16M24 4v16"
-						/>
-					{/if}
-				</svg>
-			{:else if view === '10day' || view === '14day'}
-				<span class="view-text">{viewLabels[view]}</span>
 			{:else if view === 'month'}
 				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2" />
@@ -110,21 +59,6 @@
 						d="M7 13h2M11 13h2M15 13h2M7 17h2M11 17h2"
 					/>
 				</svg>
-			{:else if view === 'year'}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<rect x="2" y="2" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="7.5" y="2" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="13" y="2" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="18.5" y="2" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="2" y="8" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="7.5" y="8" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="13" y="8" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="18.5" y="8" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="2" y="14" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="7.5" y="14" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="13" y="14" width="4" height="4" rx="0.5" stroke-width="1.5" />
-					<rect x="18.5" y="14" width="4" height="4" rx="0.5" stroke-width="1.5" />
-				</svg>
 			{:else if view === 'agenda'}
 				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h12" />
@@ -133,8 +67,6 @@
 		</button>
 	{/each}
 </div>
-
-<ViewModePillContextMenu bind:this={contextMenu} />
 
 <style>
 	.view-mode-pill {

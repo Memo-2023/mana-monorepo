@@ -3,10 +3,6 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import CalendarHeaderContextMenu from './CalendarHeaderContextMenu.svelte';
-
-	let contextMenu: CalendarHeaderContextMenu;
-
 	// Get weekday format string based on setting
 	function getWeekdayFormat(): string {
 		switch (settingsStore.headerWeekdayFormat) {
@@ -70,40 +66,21 @@
 		};
 
 		switch (viewStore.viewType) {
-			case 'day':
-				return format(date, getDateFormat(true), { locale: de });
-			case '5day':
 			case 'week':
-			case '10day':
-			case '14day':
 				return formatRange();
 			case 'month':
 				return format(date, 'MMMM yyyy', { locale: de });
-			case 'year':
-				return format(date, 'yyyy', { locale: de });
 			case 'agenda':
 				return 'Agenda';
 			default:
 				return format(date, 'MMMM yyyy', { locale: de });
 		}
 	});
-
-	function handleContextMenu(e: MouseEvent) {
-		e.preventDefault();
-		contextMenu.show(e.clientX, e.clientY);
-	}
 </script>
 
-<header
-	class="calendar-header"
-	class:compact={settingsStore.headerCompact}
-	oncontextmenu={handleContextMenu}
-	role="banner"
->
-	<h1 class="header-title">{title}</h1>
+<header class="calendar-header" class:compact={settingsStore.headerCompact} role="banner">
+	<h1 class="header-title" aria-live="polite">{title}</h1>
 </header>
-
-<CalendarHeaderContextMenu bind:this={contextMenu} />
 
 <style>
 	.calendar-header {

@@ -3,9 +3,7 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import { filterByTags } from '$lib/utils/eventFiltering';
-	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
 	import { format, parseISO, isToday, isTomorrow, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';
@@ -87,18 +85,6 @@
 			onEventClick(event);
 		}
 	}
-
-	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
-		e.preventDefault();
-		e.stopPropagation();
-		eventContextMenuStore.show(event, e.clientX, e.clientY);
-	}
-
-	function handleContextMenuEdit(event: CalendarEvent) {
-		if (onEventClick) {
-			onEventClick(event);
-		}
-	}
 </script>
 
 <div class="agenda-view">
@@ -124,11 +110,7 @@
 
 					<div class="events-for-date">
 						{#each group.events as event}
-							<button
-								class="event-item"
-								onclick={() => handleEventClick(event)}
-								oncontextmenu={(e) => handleEventContextMenu(event, e)}
-							>
+							<button class="event-item" onclick={() => handleEventClick(event)}>
 								<div
 									class="color-bar"
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
@@ -186,8 +168,6 @@
 		</div>
 	{/if}
 </div>
-
-<EventContextMenu onEdit={handleContextMenuEdit} />
 
 <style>
 	.agenda-view {

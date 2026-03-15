@@ -1,21 +1,7 @@
 /**
  * Calendar view types
  */
-export type CalendarViewType =
-	| 'day'
-	| '3day'
-	| '5day'
-	| 'week'
-	| '10day'
-	| '14day'
-	| '30day'
-	| '60day'
-	| '90day'
-	| '365day'
-	| 'month'
-	| 'year'
-	| 'agenda'
-	| 'custom';
+export type CalendarViewType = 'week' | 'month' | 'agenda';
 
 /**
  * Calendar settings stored in JSONB

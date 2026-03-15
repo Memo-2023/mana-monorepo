@@ -42,6 +42,12 @@ function getApi(): ApiClient {
 }
 
 /**
+ * Request deduplication for GET requests
+ * Prevents identical concurrent requests from being sent multiple times
+ */
+const pendingRequests = new Map<string, Promise<ApiResult<unknown>>>();
+
+/**
  * Legacy fetchApi interface for backwards compatibility
  */
 export interface FetchOptions {
@@ -55,6 +61,7 @@ export interface FetchOptions {
 /**
  * Fetch API wrapper using shared client
  * Maintains backward compatibility with existing code
+ * GET requests are deduplicated — identical concurrent GETs share one in-flight request
  */
 export async function fetchApi<T>(
 	endpoint: string,
@@ -65,6 +72,19 @@ export async function fetchApi<T>(
 
 	if (isFormData && body instanceof FormData) {
 		return api.upload<T>(endpoint, body);
+	}
+
+	// Deduplicate GET requests
+	if (method === 'GET') {
+		const existing = pendingRequests.get(endpoint);
+		if (existing) {
+			return existing as Promise<ApiResult<T>>;
+		}
+		const promise = api.get<T>(endpoint).finally(() => {
+			pendingRequests.delete(endpoint);
+		});
+		pendingRequests.set(endpoint, promise as Promise<ApiResult<unknown>>);
+		return promise;
 	}
 
 	switch (method) {

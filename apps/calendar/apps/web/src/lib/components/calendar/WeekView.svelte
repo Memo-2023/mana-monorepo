@@ -7,7 +7,6 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
-	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import { useVisibleHours, useCurrentTimeIndicator, useBirthdayPopover } from '$lib/composables';
 	import { toDate } from '$lib/utils/eventDateHelpers';
@@ -20,8 +19,6 @@
 	} from '$lib/utils/eventFiltering';
 	import EventCard from './EventCard.svelte';
 	import TaskBlock from './TaskBlock.svelte';
-	import EventContextMenu from '$lib/components/event/EventContextMenu.svelte';
-	import CalendarHeaderContextMenu from './CalendarHeaderContextMenu.svelte';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -459,19 +456,6 @@
 		const endHours = Math.floor(createEndMinutes / 60);
 		const endMins = createEndMinutes % 60;
 		return `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')} - ${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-	}
-
-	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
-		e.preventDefault();
-		e.stopPropagation();
-		if (eventsStore.isDraftEvent(event.id)) return;
-		eventContextMenuStore.show(event, e.clientX, e.clientY);
-	}
-
-	function handleContextMenuEdit(event: CalendarEvent) {
-		if (onEventClick) {
-			onEventClick(event);
-		}
 	}
 
 	// ========== Drag & Drop Functions ==========
@@ -1055,10 +1039,15 @@
 	<!-- Sticky header container -->
 	<div class="sticky-header">
 		<!-- Day headers -->
-		<div class="day-headers">
+		<div class="day-headers" role="row">
 			<div class="time-gutter"></div>
 			{#each days as day}
-				<div class="day-header" class:today={isToday(day)}>
+				<div
+					class="day-header"
+					class:today={isToday(day)}
+					role="columnheader"
+					aria-label={format(day, 'EEEE, d. MMMM', { locale: currentDateLocale })}
+				>
 					<span class="day-name">{format(day, 'EEE', { locale: currentDateLocale })}</span>
 					<span class="day-number" class:today={isToday(day)}>{format(day, 'd')}</span>
 				</div>
@@ -1082,6 +1071,7 @@
 								class:search-dimmed={searchStore.isEventDimmed(event.id)}
 								style="background-color: {calendarsStore.getColor(event.calendarId)}"
 								onclick={() => goto(`/?event=${event.id}`)}
+								aria-label="{event.title} - {$_('views.allDay')}"
 							>
 								{event.title}
 							</button>
@@ -1091,6 +1081,9 @@
 							<button
 								class="all-day-event birthday-event"
 								onclick={(e) => birthdayPopover.handleBirthdayClick(birthday, e)}
+								aria-label="{birthday.displayName} - {$_(
+									'views.birthday'
+								)}{settingsStore.showBirthdayAge && birthday.age > 0 ? ` (${birthday.age})` : ''}"
 							>
 								🎂 {birthday.displayName}
 								{#if settingsStore.showBirthdayAge && birthday.age > 0}
@@ -1105,7 +1098,12 @@
 	</div>
 
 	<!-- Time grid -->
-	<div class="time-grid scrollbar-thin" bind:this={timeGridEl}>
+	<div
+		class="time-grid scrollbar-thin"
+		bind:this={timeGridEl}
+		role="grid"
+		aria-label={$_('views.weekView')}
+	>
 		<!-- Time column -->
 		<div class="time-column">
 			{#each hours as hour}
@@ -1146,6 +1144,7 @@
 							class:search-dimmed={searchStore.isEventDimmed(event.id)}
 							style="background-color: {calendarsStore.getColor(event.calendarId)}"
 							onclick={() => goto(`/?event=${event.id}`)}
+							aria-label="{event.title} - {$_('views.allDay')}"
 						>
 							<span class="event-title">{event.title}</span>
 						</button>
@@ -1173,7 +1172,6 @@
 							formattedTime={isBeingResized ? getResizePreviewTime() : formatEventTimeRange(event)}
 							onClick={handleEventClick}
 							onPointerDown={startDrag}
-							onContextMenu={handleEventContextMenu}
 							onResizeStart={startResize}
 						/>
 					{/each}
@@ -1276,8 +1274,6 @@
 		</div>
 	</div>
 </div>
-
-<EventContextMenu onEdit={handleContextMenuEdit} />
 
 <!-- Birthday Popover -->
 {#if birthdayPopover.selectedBirthday}

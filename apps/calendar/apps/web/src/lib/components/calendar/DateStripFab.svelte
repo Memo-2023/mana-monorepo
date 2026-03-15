@@ -2,8 +2,6 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import DateStripContextMenu from './DateStripContextMenu.svelte';
-
 	interface Props {
 		isToolbarExpanded?: boolean;
 		isMobile?: boolean;
@@ -11,15 +9,8 @@
 
 	let { isToolbarExpanded = false, isMobile = false }: Props = $props();
 
-	let contextMenu: DateStripContextMenu;
-
 	function handleClick() {
 		settingsStore.set('dateStripCollapsed', false);
-	}
-
-	function handleContextMenu(e: MouseEvent) {
-		e.preventDefault();
-		contextMenu?.show(e.clientX, e.clientY);
 	}
 
 	// Format current date for FAB display: "Dez 14"
@@ -32,17 +23,10 @@
 	class:mobile={isMobile}
 >
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<button
-		onclick={handleClick}
-		oncontextmenu={handleContextMenu}
-		class="datestrip-fab"
-		title="Datumsleiste erweitern (Rechtsklick für Optionen)"
-	>
+	<button onclick={handleClick} class="datestrip-fab" title="Datumsleiste erweitern">
 		<span class="fab-label">{fabLabel}</span>
 	</button>
 </div>
-
-<DateStripContextMenu bind:this={contextMenu} />
 
 <style>
 	.datestrip-fab-container {

@@ -692,6 +692,8 @@
 					oninput={handleTitleChange}
 					bind:this={titleInputRef}
 					placeholder="Titel hinzufügen"
+					aria-label="Terminname"
+					required
 				/>
 			</div>
 
@@ -724,6 +726,8 @@
 								type="button"
 								class="calendar-pill"
 								class:active={calendarId === cal.id}
+								aria-pressed={calendarId === cal.id}
+								aria-label="Kalender: {cal.name}"
 								onclick={() => {
 									calendarId = cal.id;
 									if (!isEditMode) {
@@ -762,7 +766,8 @@
 								<button
 									type="button"
 									class="remove-person"
-									onclick={() => (responsiblePerson = null)}>×</button
+									onclick={() => (responsiblePerson = null)}
+									aria-label="Verantwortliche Person entfernen">×</button
 								>
 							</div>
 						{:else}
@@ -799,6 +804,7 @@
 												class="remove-person"
 												onclick={() =>
 													(attendees = attendees.filter((a) => a.email !== attendee.email))}
+												aria-label="Teilnehmer {attendee.name || attendee.email} entfernen"
 												>×</button
 											>
 										</div>
@@ -832,8 +838,16 @@
 			</div>
 
 			<!-- All day toggle -->
-			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions a11y_no_noninteractive_element_to_interactive_role -->
-			<div class="form-row clickable" onclick={handleAllDayToggle} role="button" tabindex="0">
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="form-row clickable"
+				onclick={handleAllDayToggle}
+				onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleAllDayToggle()}
+				role="switch"
+				tabindex="0"
+				aria-checked={isAllDay}
+				aria-label="Ganztägig"
+			>
 				<div class="row-icon">
 					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -887,22 +901,24 @@
 				</div>
 				<div class="row-content datetime-row">
 					<div class="datetime-field">
-						<span class="field-label">Beginn</span>
+						<span class="field-label" id="start-date-label">Beginn</span>
 						<input
 							type="date"
 							class="field-input"
 							value={startDateStr}
 							onchange={handleStartDateChange}
+							aria-labelledby="start-date-label"
 						/>
 					</div>
 					{#if !isAllDay}
 						<div class="datetime-field time-field">
-							<span class="field-label">Uhrzeit</span>
+							<span class="field-label" id="start-time-label">Uhrzeit</span>
 							<input
 								type="time"
 								class="field-input"
 								value={startTimeStr}
 								onchange={handleStartTimeChange}
+								aria-label="Beginn Uhrzeit"
 							/>
 						</div>
 					{/if}
@@ -912,7 +928,13 @@
 			<!-- End date/time -->
 			<div class="form-row">
 				<div class="row-icon">
-					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="icon"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						aria-hidden="true"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -923,22 +945,24 @@
 				</div>
 				<div class="row-content datetime-row">
 					<div class="datetime-field">
-						<span class="field-label">Ende</span>
+						<span class="field-label" id="end-date-label">Ende</span>
 						<input
 							type="date"
 							class="field-input"
 							value={endDateStr}
 							onchange={handleEndDateChange}
+							aria-labelledby="end-date-label"
 						/>
 					</div>
 					{#if !isAllDay}
 						<div class="datetime-field time-field">
-							<span class="field-label">Uhrzeit</span>
+							<span class="field-label" id="end-time-label">Uhrzeit</span>
 							<input
 								type="time"
 								class="field-input"
 								value={endTimeStr}
 								onchange={handleEndTimeChange}
+								aria-label="Ende Uhrzeit"
 							/>
 						</div>
 					{/if}
@@ -969,12 +993,14 @@
 						class="field-input full"
 						bind:value={location}
 						placeholder="Ort hinzufügen"
+						aria-label="Ort"
 					/>
 					<!-- Toggle for address details -->
 					<button
 						type="button"
 						class="address-toggle"
 						onclick={() => (showLocationDetails = !showLocationDetails)}
+						aria-expanded={showLocationDetails}
 					>
 						<svg
 							class="toggle-chevron"
@@ -1060,6 +1086,7 @@
 						bind:value={description}
 						placeholder="Beschreibung hinzufügen"
 						rows="3"
+						aria-label="Beschreibung"
 					></textarea>
 				</div>
 			</div>

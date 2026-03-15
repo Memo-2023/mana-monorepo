@@ -19,7 +19,11 @@
 		"month": "Mes",
 		"year": "Año",
 		"agenda": "Agenda",
-		"weekdaysOnly": "Solo días laborables"
+		"weekdaysOnly": "Solo días laborables",
+		"allDay": "Todo el día",
+		"birthday": "Cumpleaños",
+		"weekView": "Vista semanal",
+		"monthView": "Vista mensual"
 	},
 	"calendar": {
 		"today": "Hoy",
@@ -27,7 +31,8 @@
 		"noEvents": "Sin eventos",
 		"allDay": "Todo el día",
 		"myCalendars": "Mis calendarios",
-		"sharedCalendars": "Calendarios compartidos"
+		"sharedCalendars": "Calendarios compartidos",
+		"untitled": "Sin título"
 	},
 	"event": {
 		"title": "Título",

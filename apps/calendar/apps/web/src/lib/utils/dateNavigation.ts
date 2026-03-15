@@ -4,17 +4,7 @@
  */
 
 import type { CalendarViewType } from '@calendar/shared';
-import {
-	addDays,
-	addWeeks,
-	addMonths,
-	addYears,
-	subDays,
-	subWeeks,
-	subMonths,
-	subYears,
-} from 'date-fns';
-import { settingsStore } from '$lib/stores/settings.svelte';
+import { addDays, addWeeks, addMonths, subDays, subWeeks, subMonths } from 'date-fns';
 
 /**
  * Calculate a date offset based on the current view type
@@ -33,46 +23,11 @@ import { settingsStore } from '$lib/stores/settings.svelte';
  */
 export function getOffsetDate(date: Date, viewType: CalendarViewType, offset: number): Date {
 	switch (viewType) {
-		case 'day':
-			return offset > 0 ? addDays(date, offset) : subDays(date, Math.abs(offset));
-
-		case '3day':
-			return offset > 0 ? addDays(date, offset * 3) : subDays(date, Math.abs(offset) * 3);
-
-		case '5day':
-			return offset > 0 ? addDays(date, offset * 5) : subDays(date, Math.abs(offset) * 5);
-
 		case 'week':
 			return offset > 0 ? addWeeks(date, offset) : subWeeks(date, Math.abs(offset));
 
-		case '10day':
-			return offset > 0 ? addDays(date, offset * 10) : subDays(date, Math.abs(offset) * 10);
-
-		case '14day':
-			return offset > 0 ? addDays(date, offset * 14) : subDays(date, Math.abs(offset) * 14);
-
-		case '30day':
-			return offset > 0 ? addDays(date, offset * 30) : subDays(date, Math.abs(offset) * 30);
-
-		case '60day':
-			return offset > 0 ? addDays(date, offset * 60) : subDays(date, Math.abs(offset) * 60);
-
-		case '90day':
-			return offset > 0 ? addDays(date, offset * 90) : subDays(date, Math.abs(offset) * 90);
-
-		case '365day':
-			return offset > 0 ? addDays(date, offset * 365) : subDays(date, Math.abs(offset) * 365);
-
-		case 'custom': {
-			const days = settingsStore.customDayCount;
-			return offset > 0 ? addDays(date, offset * days) : subDays(date, Math.abs(offset) * days);
-		}
-
 		case 'month':
 			return offset > 0 ? addMonths(date, offset) : subMonths(date, Math.abs(offset));
-
-		case 'year':
-			return offset > 0 ? addYears(date, offset) : subYears(date, Math.abs(offset));
 
 		case 'agenda':
 			// Agenda moves by 7 days

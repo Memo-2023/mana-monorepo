@@ -6,7 +6,6 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
-	import { eventContextMenuStore } from '$lib/stores/eventContextMenu.svelte';
 	import TodoDayCell from './TodoDayCell.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import { useBirthdayPopover } from '$lib/composables';
@@ -237,9 +236,9 @@
 
 			onQuickCreate(startTime, { x: e.clientX, y: e.clientY });
 		} else {
-			// Fallback: navigate to day view
+			// Fallback: navigate to week view for the selected day
 			viewStore.setDate(day);
-			viewStore.setViewType('day');
+			viewStore.setViewType('week');
 		}
 	}
 
@@ -261,15 +260,7 @@
 	function handleMoreClick(day: Date, e: MouseEvent) {
 		e.stopPropagation();
 		viewStore.setDate(day);
-		viewStore.setViewType('day');
-	}
-
-	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
-		e.preventDefault();
-		e.stopPropagation();
-		// Don't show context menu for draft events
-		if (eventsStore.isDraftEvent(event.id)) return;
-		eventContextMenuStore.show(event, e.clientX, e.clientY);
+		viewStore.setViewType('week');
 	}
 
 	// ============================================================================
@@ -285,16 +276,16 @@
 
 <div class="month-view" style="--column-count: {columnCount}">
 	<!-- Week day headers -->
-	<div class="weekday-headers">
+	<div class="weekday-headers" role="row">
 		{#each weekDays as day}
-			<div class="weekday-header">{day}</div>
+			<div class="weekday-header" role="columnheader">{day}</div>
 		{/each}
 	</div>
 
 	<!-- Calendar grid -->
-	<div class="calendar-grid">
+	<div class="calendar-grid" role="grid" aria-label={$_('views.monthView')}>
 		{#each weeks as week}
-			<div class="week-row">
+			<div class="week-row" role="row">
 				{#each week as day}
 					{@const isDropTarget = isDragging && dragTargetDay && isSameDay(day, dragTargetDay)}
 					<div
@@ -305,8 +296,9 @@
 						use:bindDayCellRef={day}
 						onclick={(e) => handleDayClick(day, e)}
 						onkeydown={(e) => e.key === 'Enter' && handleDayClick(day, e as unknown as MouseEvent)}
-						role="button"
+						role="gridcell"
 						tabindex="0"
+						aria-selected={isToday(day)}
 						aria-label={$_('a11y.createEventOn', {
 							values: { date: format(day, 'EEEE, d. MMMM', { locale: de }) },
 						})}
@@ -339,9 +331,10 @@
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
 									onpointerdown={(e) => startDrag(event, e)}
 									onclick={(e) => !isDraft && handleEventClick(event, e)}
-									oncontextmenu={(e) => handleEventContextMenu(event, e)}
 									role="button"
 									tabindex="0"
+									aria-label={event.title ||
+										(isDraft ? $_('calendar.draftEvent') : $_('calendar.untitled'))}
 								>
 									{#if !event.isAllDay}
 										<span class="event-time"
@@ -370,6 +363,9 @@
 									onclick={(e) => birthdayPopover.handleBirthdayClick(birthday, e)}
 									role="button"
 									tabindex="0"
+									aria-label="{birthday.displayName} - {$_(
+										'views.birthday'
+									)}{settingsStore.showBirthdayAge && birthday.age > 0 ? ` (${birthday.age})` : ''}"
 								>
 									🎂
 									<span class="event-title">{birthday.displayName}</span>

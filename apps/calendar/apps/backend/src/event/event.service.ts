@@ -16,6 +16,10 @@ export class EventService {
 		private eventTagService: EventTagService
 	) {}
 
+	private escapeLikePattern(input: string): string {
+		return input.replace(/[%_\\]/g, '\\$&');
+	}
+
 	async queryEvents(userId: string, query: QueryEventsDto): Promise<Event[]> {
 		const conditions = [eq(events.userId, userId)];
 
@@ -37,13 +41,11 @@ export class EventService {
 			conditions.push(or(eq(events.status, 'confirmed'), eq(events.status, 'tentative')) as any);
 		}
 
-		// Search filter
+		// Search filter (escaped to prevent LIKE pattern injection)
 		if (query.search) {
+			const escaped = this.escapeLikePattern(query.search);
 			conditions.push(
-				or(
-					ilike(events.title, `%${query.search}%`),
-					ilike(events.description, `%${query.search}%`)
-				) as any
+				or(ilike(events.title, `%${escaped}%`), ilike(events.description, `%${escaped}%`)) as any
 			);
 		}
 
@@ -193,13 +195,11 @@ export class EventService {
 			conditions.push(inArray(events.calendarId, query.calendarIds));
 		}
 
-		// Search filter - search in title and description
+		// Search filter (escaped to prevent LIKE pattern injection)
 		if (query.search) {
+			const escaped = this.escapeLikePattern(query.search);
 			conditions.push(
-				or(
-					ilike(events.title, `%${query.search}%`),
-					ilike(events.description, `%${query.search}%`)
-				) as any
+				or(ilike(events.title, `%${escaped}%`), ilike(events.description, `%${escaped}%`)) as any
 			);
 		}
 

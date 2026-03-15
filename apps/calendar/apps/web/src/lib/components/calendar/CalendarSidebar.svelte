@@ -21,7 +21,7 @@
 		</button>
 	</div>
 
-	<div class="calendar-list">
+	<div class="calendar-list" role="group" aria-label="Kalender Sichtbarkeit">
 		{#each calendarsStore.calendars as calendar}
 			<label class="calendar-item">
 				<input
@@ -29,8 +29,10 @@
 					checked={calendar.isVisible}
 					onchange={() => handleToggle(calendar.id)}
 					style="accent-color: {calendar.color}"
+					aria-label="{calendar.name} {calendar.isVisible ? 'sichtbar' : 'ausgeblendet'}"
 				/>
-				<span class="color-dot" style="background-color: {calendar.color}"></span>
+				<span class="color-dot" style="background-color: {calendar.color}" aria-hidden="true"
+				></span>
 				<span class="calendar-name">{calendar.name}</span>
 			</label>
 		{/each}

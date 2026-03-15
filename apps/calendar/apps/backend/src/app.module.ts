@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -18,6 +18,7 @@ import { NetworkModule } from './network/network.module';
 import { EmailModule } from './email/email.module';
 import { NotificationModule } from './notification/notification.module';
 import { AdminModule } from './admin/admin.module';
+import { HttpExceptionFilter } from './common/http-exception.filter';
 
 @Module({
 	imports: [
@@ -60,6 +61,10 @@ import { AdminModule } from './admin/admin.module';
 		AdminModule,
 	],
 	providers: [
+		{
+			provide: APP_FILTER,
+			useClass: HttpExceptionFilter,
+		},
 		{
 			provide: APP_GUARD,
 			useClass: ThrottlerGuard,

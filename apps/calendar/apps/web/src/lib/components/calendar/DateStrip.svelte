@@ -2,7 +2,6 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import DateStripContextMenu from './DateStripContextMenu.svelte';
 	import {
 		format,
 		isToday,
@@ -17,14 +16,6 @@
 	import { de } from 'date-fns/locale';
 	import { onMount, tick } from 'svelte';
 	import SunCalc from 'suncalc';
-
-	// Context menu reference
-	let contextMenu: DateStripContextMenu;
-
-	function handleContextMenu(e: MouseEvent) {
-		e.preventDefault();
-		contextMenu?.show(e.clientX, e.clientY);
-	}
 
 	interface Props {
 		isToolbarExpanded?: boolean;
@@ -247,7 +238,7 @@
 	class:compact={settingsStore.dateStripCompact}
 >
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="date-strip-container" oncontextmenu={handleContextMenu}>
+	<div class="date-strip-container">
 		<!-- Month label -->
 		<div class="month-header">
 			<span class="month-label">
@@ -314,8 +305,6 @@
 		</div>
 	</div>
 </div>
-
-<DateStripContextMenu bind:this={contextMenu} />
 
 <style>
 	.date-strip-wrapper {

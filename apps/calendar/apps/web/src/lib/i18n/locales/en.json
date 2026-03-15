@@ -21,7 +21,11 @@
 		"agenda": "Agenda",
 		"weekdaysOnly": "Weekdays only",
 		"weekNumber": "W",
-		"moreEvents": "+{count} more"
+		"moreEvents": "+{count} more",
+		"allDay": "All day",
+		"birthday": "Birthday",
+		"weekView": "Week view",
+		"monthView": "Month view"
 	},
 	"calendar": {
 		"today": "Today",
@@ -31,6 +35,7 @@
 		"myCalendars": "My Calendars",
 		"sharedCalendars": "Shared Calendars",
 		"draftEvent": "(New Event)",
+		"untitled": "Untitled",
 		"hideSidebar": "Hide sidebar",
 		"showSidebar": "Show sidebar"
 	},

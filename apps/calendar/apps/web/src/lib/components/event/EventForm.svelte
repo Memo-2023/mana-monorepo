@@ -231,7 +231,11 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit} class="flex flex-col gap-4">
+<form
+	onsubmit={handleSubmit}
+	class="flex flex-col gap-4"
+	aria-label={mode === 'create' ? 'Termin erstellen' : 'Termin bearbeiten'}
+>
 	<div class="flex flex-col gap-2">
 		<label for="title" class="text-sm font-medium text-foreground">Titel *</label>
 		<input
@@ -342,6 +346,8 @@
 			type="button"
 			class="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors self-start"
 			onclick={() => (showLocationDetails = !showLocationDetails)}
+			aria-expanded={showLocationDetails}
+			aria-controls="location-details"
 		>
 			<svg
 				class="w-4 h-4 transition-transform"
@@ -349,6 +355,7 @@
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
+				aria-hidden="true"
 			>
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 			</svg>
@@ -357,7 +364,10 @@
 
 		<!-- Address detail fields -->
 		{#if showLocationDetails}
-			<div class="flex flex-col gap-3 p-3 bg-muted/50 rounded-lg border border-border mt-1">
+			<div
+				id="location-details"
+				class="flex flex-col gap-3 p-3 bg-muted/50 rounded-lg border border-border mt-1"
+			>
 				<div class="flex flex-col gap-1">
 					<label for="street" class="text-xs font-medium text-muted-foreground">Straße</label>
 					<input

@@ -2,8 +2,6 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
-	import ViewModePillContextMenu from './ViewModePillContextMenu.svelte';
-
 	interface Props {
 		/** Bottom offset from viewport bottom (default: '70px') */
 		bottomOffset?: string;
@@ -11,75 +9,40 @@
 
 	let { bottomOffset = '70px' }: Props = $props();
 
-	let contextMenu: ViewModePillContextMenu;
-
-	function handleContextMenu(e: MouseEvent) {
-		e.preventDefault();
-		contextMenu?.show(e.clientX, e.clientY);
-	}
-
 	function handleViewClick(view: CalendarViewType) {
 		viewStore.setViewType(view);
 	}
 
-	// View labels (numbers for day views, letters for others)
+	// View labels
 	const viewLabels: Record<CalendarViewType, string> = {
-		day: '1',
-		'3day': '3',
-		'5day': '5',
 		week: '7',
-		'10day': '10',
-		'14day': '14',
-		'30day': '30',
-		'60day': '60',
-		'90day': '90',
-		'365day': '365',
 		month: 'M',
-		year: 'Y',
 		agenda: 'L',
-		custom: '', // Will be set dynamically
 	};
 
 	// View titles for tooltip
 	const viewTitles: Record<CalendarViewType, string> = {
-		day: 'Tagesansicht',
-		'3day': '3-Tage-Ansicht',
-		'5day': '5-Tage-Ansicht',
 		week: 'Wochenansicht',
-		'10day': '10-Tage-Ansicht',
-		'14day': '14-Tage-Ansicht',
-		'30day': '30-Tage-Ansicht',
-		'60day': '60-Tage-Ansicht',
-		'90day': '90-Tage-Ansicht',
-		'365day': '365-Tage-Ansicht',
 		month: 'Monatsansicht',
-		year: 'Jahresansicht',
 		agenda: 'Agenda',
-		custom: 'Benutzerdefiniert',
 	};
 
 	// Get enabled views from settings
 	let enabledViews = $derived(settingsStore.quickViewPillViews);
 
-	// Get label for a view (dynamic for custom)
+	// Get label for a view
 	function getViewLabel(view: CalendarViewType): string {
-		if (view === 'custom') {
-			return String(settingsStore.customDayCount);
-		}
-		return viewLabels[view];
+		return viewLabels[view] || '';
 	}
 
-	// Get title for a view (dynamic for custom)
+	// Get title for a view
 	function getViewTitle(view: CalendarViewType): string {
-		if (view === 'custom') {
-			return `${settingsStore.customDayCount}-Tage-Ansicht`;
-		}
-		return viewTitles[view];
+		return viewTitles[view] || '';
 	}
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="views-bar" style="--bottom-offset: {bottomOffset}" oncontextmenu={handleContextMenu}>
+<div class="views-bar" style="--bottom-offset: {bottomOffset}">
 	<div class="views-container">
 		<div class="views-icon">
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,8 +70,6 @@
 		</div>
 	</div>
 </div>
-
-<ViewModePillContextMenu bind:this={contextMenu} />
 
 <style>
 	.views-bar {

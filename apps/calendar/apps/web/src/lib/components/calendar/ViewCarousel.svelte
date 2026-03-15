@@ -6,10 +6,7 @@
 	import { getOffsetDate } from '$lib/utils/dateNavigation';
 	import { HOUR_HEIGHT_PX } from '$lib/utils/calendarConstants';
 	import WeekView from './WeekView.svelte';
-	import DayView from './DayView.svelte';
 	import MonthView from './MonthView.svelte';
-	import MultiDayView from './MultiDayView.svelte';
-	import YearView from './YearView.svelte';
 	import AgendaView from './AgendaView.svelte';
 	import type { CalendarEvent } from '@calendar/shared';
 
@@ -297,20 +294,8 @@
 		setTimeout(() => {
 			if (!currentPageEl) return;
 
-			// Only scroll for time-grid views (not month, year, agenda)
-			const timeGridViews = [
-				'day',
-				'3day',
-				'5day',
-				'week',
-				'10day',
-				'14day',
-				'30day',
-				'60day',
-				'90day',
-				'365day',
-				'custom',
-			];
+			// Only scroll for time-grid views (not month, agenda)
+			const timeGridViews = ['week'];
 			if (!timeGridViews.includes(viewStore.viewType)) return;
 
 			// Calculate scroll position to center around 12:00 (noon)
@@ -335,32 +320,10 @@
 	<div class="carousel-track" style={trackStyle}>
 		<!-- Previous View -->
 		<div class="carousel-page" class:inactive={!isSwiping && offsetX <= 0}>
-			{#if viewStore.viewType === 'day'}
-				<DayView date={prevDate} />
-			{:else if viewStore.viewType === '3day'}
-				<MultiDayView dayCount={3} date={prevDate} />
-			{:else if viewStore.viewType === '5day'}
-				<MultiDayView dayCount={5} date={prevDate} />
-			{:else if viewStore.viewType === 'week'}
+			{#if viewStore.viewType === 'week'}
 				<WeekView date={prevDate} />
-			{:else if viewStore.viewType === '10day'}
-				<MultiDayView dayCount={10} date={prevDate} />
-			{:else if viewStore.viewType === '14day'}
-				<MultiDayView dayCount={14} date={prevDate} />
-			{:else if viewStore.viewType === '30day'}
-				<MultiDayView dayCount={30} date={prevDate} />
-			{:else if viewStore.viewType === '60day'}
-				<MultiDayView dayCount={60} date={prevDate} />
-			{:else if viewStore.viewType === '90day'}
-				<MultiDayView dayCount={90} date={prevDate} />
-			{:else if viewStore.viewType === '365day'}
-				<MultiDayView dayCount={365} date={prevDate} />
-			{:else if viewStore.viewType === 'custom'}
-				<MultiDayView dayCount={settingsStore.customDayCount} date={prevDate} />
 			{:else if viewStore.viewType === 'month'}
 				<MonthView date={prevDate} />
-			{:else if viewStore.viewType === 'year'}
-				<YearView date={prevDate} />
 			{:else if viewStore.viewType === 'agenda'}
 				<AgendaView date={prevDate} />
 			{/if}
@@ -368,32 +331,10 @@
 
 		<!-- Current View (main interactive view) -->
 		<div class="carousel-page current" bind:this={currentPageEl}>
-			{#if viewStore.viewType === 'day'}
-				<DayView {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === '3day'}
-				<MultiDayView dayCount={3} {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === '5day'}
-				<MultiDayView dayCount={5} {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === 'week'}
+			{#if viewStore.viewType === 'week'}
 				<WeekView {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === '10day'}
-				<MultiDayView dayCount={10} {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === '14day'}
-				<MultiDayView dayCount={14} {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === '30day'}
-				<MultiDayView dayCount={30} {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === '60day'}
-				<MultiDayView dayCount={60} {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === '90day'}
-				<MultiDayView dayCount={90} {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === '365day'}
-				<MultiDayView dayCount={365} {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === 'custom'}
-				<MultiDayView dayCount={settingsStore.customDayCount} {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === 'month'}
 				<MonthView {onQuickCreate} {onEventClick} />
-			{:else if viewStore.viewType === 'year'}
-				<YearView {onQuickCreate} {onEventClick} />
 			{:else if viewStore.viewType === 'agenda'}
 				<AgendaView {onEventClick} />
 			{:else}
@@ -403,32 +344,10 @@
 
 		<!-- Next View -->
 		<div class="carousel-page" class:inactive={!isSwiping && offsetX >= 0}>
-			{#if viewStore.viewType === 'day'}
-				<DayView date={nextDate} />
-			{:else if viewStore.viewType === '3day'}
-				<MultiDayView dayCount={3} date={nextDate} />
-			{:else if viewStore.viewType === '5day'}
-				<MultiDayView dayCount={5} date={nextDate} />
-			{:else if viewStore.viewType === 'week'}
+			{#if viewStore.viewType === 'week'}
 				<WeekView date={nextDate} />
-			{:else if viewStore.viewType === '10day'}
-				<MultiDayView dayCount={10} date={nextDate} />
-			{:else if viewStore.viewType === '14day'}
-				<MultiDayView dayCount={14} date={nextDate} />
-			{:else if viewStore.viewType === '30day'}
-				<MultiDayView dayCount={30} date={nextDate} />
-			{:else if viewStore.viewType === '60day'}
-				<MultiDayView dayCount={60} date={nextDate} />
-			{:else if viewStore.viewType === '90day'}
-				<MultiDayView dayCount={90} date={nextDate} />
-			{:else if viewStore.viewType === '365day'}
-				<MultiDayView dayCount={365} date={nextDate} />
-			{:else if viewStore.viewType === 'custom'}
-				<MultiDayView dayCount={settingsStore.customDayCount} date={nextDate} />
 			{:else if viewStore.viewType === 'month'}
 				<MonthView date={nextDate} />
-			{:else if viewStore.viewType === 'year'}
-				<YearView date={nextDate} />
 			{:else if viewStore.viewType === 'agenda'}
 				<AgendaView date={nextDate} />
 			{/if}

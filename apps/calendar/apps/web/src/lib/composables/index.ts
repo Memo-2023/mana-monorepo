@@ -26,9 +26,6 @@ export { useCalendarKeyboard, type CancellableOperation } from './useCalendarKey
 // Birthday popover management
 export { useBirthdayPopover } from './useBirthdayPopover.svelte';
 
-// Swipe/scroll navigation for view switching
-export { useSwipeNavigation, type SwipeNavigationOptions } from './useSwipeNavigation.svelte';
-
 // Legacy exports (kept for backwards compatibility, may be removed later)
 export { useDragDrop, type DragDropConfig, type DragState } from './useDragDrop.svelte';
 export { useResize, type ResizeConfig, type ResizeState } from './useResize.svelte';
