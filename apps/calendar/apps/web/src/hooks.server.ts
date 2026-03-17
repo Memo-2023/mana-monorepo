@@ -8,10 +8,15 @@
 import type { Handle } from '@sveltejs/kit';
 
 // Get client-side URLs from environment (Docker runtime)
+// In dev mode, Vite exposes .env vars via import.meta.env, not process.env
 const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
-	process.env.PUBLIC_MANA_CORE_AUTH_URL_CLIENT || process.env.PUBLIC_MANA_CORE_AUTH_URL || '';
+	process.env.PUBLIC_MANA_CORE_AUTH_URL_CLIENT ||
+	process.env.PUBLIC_MANA_CORE_AUTH_URL ||
+	'http://localhost:3001';
 const PUBLIC_BACKEND_URL_CLIENT =
-	process.env.PUBLIC_BACKEND_URL_CLIENT || process.env.PUBLIC_BACKEND_URL || '';
+	process.env.PUBLIC_BACKEND_URL_CLIENT ||
+	process.env.PUBLIC_BACKEND_URL ||
+	'http://localhost:3014';
 const PUBLIC_STT_URL = process.env.PUBLIC_STT_URL || 'https://stt-api.mana.how';
 
 // Cross-app integration URLs (for todo and contacts APIs)

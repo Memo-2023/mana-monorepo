@@ -193,6 +193,8 @@
 		"storage:db:push": "pnpm --filter @storage/backend db:push",
 		"storage:db:studio": "pnpm --filter @storage/backend db:studio",
 		"storage:db:seed": "pnpm --filter @storage/backend db:seed",
+		"mukke:dev": "turbo run dev --filter=mukke...",
+		"dev:mukke:mobile": "pnpm --filter @mukke/mobile dev",
 		"traces:dev": "turbo run dev --filter=traces...",
 		"dev:traces:mobile": "pnpm --filter @traces/mobile dev",
 		"dev:traces:backend": "pnpm --filter @traces/backend start:dev",
@@ -265,6 +267,7 @@
 		"prepare": "husky"
 	},
 	"devDependencies": {
+		"@manacore/eslint-config": "workspace:*",
 		"@eslint/js": "^9.39.1",
 		"concurrently": "^9.2.0",
 		"eslint": "^9.39.1",
@@ -301,6 +304,9 @@
 			"ssh2",
 			"sharp"
 		],
+		"patchedDependencies": {
+			"react-native-reanimated@4.1.5": "patches/react-native-reanimated@4.1.5.patch"
+		},
 		"overrides": {
 			"cpu-features": "npm:empty-npm-package@1.0.0",
 			"ssh2": "npm:empty-npm-package@1.0.0",

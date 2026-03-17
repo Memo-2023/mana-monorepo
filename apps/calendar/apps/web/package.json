@@ -12,11 +12,15 @@
 		"lint": "eslint .",
 		"format": "prettier --write .",
 		"type-check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"test": "vitest run"
+		"test": "vitest run",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:headed": "playwright test --headed"
 	},
 	"devDependencies": {
 		"@manacore/shared-pwa": "workspace:*",
 		"@manacore/shared-vite-config": "workspace:*",
+		"@playwright/test": "^1.51.0",
 		"@sveltejs/adapter-node": "^5.0.0",
 		"@sveltejs/kit": "^2.47.1",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",

@@ -9,7 +9,7 @@ import { users } from '../db/schema';
 export class MetricsService implements OnModuleInit, OnModuleDestroy {
 	private readonly logger = new Logger(MetricsService.name);
 	private readonly register: client.Registry;
-	private updateInterval: NodeJS.Timeout | null = null;
+	private updateInterval: ReturnType<typeof setInterval> | null = null;
 
 	// HTTP metrics
 	readonly httpRequestsTotal: client.Counter<string>;
