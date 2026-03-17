@@ -552,6 +552,15 @@ export class BetterAuthService {
 		} catch (error: unknown) {
 			if (error instanceof Error) {
 				if (
+					error.message?.includes('Email not verified') ||
+					error.message?.includes('EMAIL_NOT_VERIFIED')
+				) {
+					throw new ForbiddenException({
+						message: 'Email not verified',
+						code: 'EMAIL_NOT_VERIFIED',
+					});
+				}
+				if (
 					error.message?.includes('invalid') ||
 					error.message?.includes('credentials') ||
 					error.message?.includes('not found')
