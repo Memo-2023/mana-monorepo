@@ -42,3 +42,4 @@ import { typescriptConfig } from './typescript.js';
 import { prettierConfig } from './prettier.js';
 
 export default [...baseConfig, ...typescriptConfig, ...prettierConfig];
+// test
