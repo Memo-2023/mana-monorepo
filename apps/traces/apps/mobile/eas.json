@@ -1,27 +1,36 @@
 {
 	"cli": {
-		"version": ">= 16.0.0",
+		"version": ">= 16.17.4",
 		"appVersionSource": "remote"
 	},
 	"build": {
-		"development": {
-			"developmentClient": true,
-			"distribution": "internal",
-			"ios": {
-				"image": "latest"
+		"base": {
+			"node": "22.15.0",
+			"pnpm": "10.18.1",
+			"env": {
+				"PNPM_WORKSPACE_ROOT": "../..",
+				"EAS_BUILD": "true",
+				"EAS_SKIP_AUTO_FINGERPRINT": "1"
+			},
+			"cache": {
+				"disabled": false,
+				"key": "v1",
+				"cacheDefaultPaths": false,
+				"customPaths": ["node_modules", "../../../../node_modules"]
 			}
+		},
+		"development": {
+			"extends": "base",
+			"developmentClient": true,
+			"distribution": "internal"
 		},
 		"preview": {
-			"distribution": "internal",
-			"ios": {
-				"image": "latest"
-			}
+			"extends": "base",
+			"distribution": "internal"
 		},
 		"production": {
-			"autoIncrement": true,
-			"ios": {
-				"image": "latest"
-			}
+			"extends": "base",
+			"autoIncrement": true
 		}
 	},
 	"submit": {

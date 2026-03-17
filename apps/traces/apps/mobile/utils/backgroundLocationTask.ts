@@ -9,8 +9,8 @@ const SAVE_ADDRESS_KEY = 'save_address_enabled';
 
 // Definiere Task-Namen
 export const BACKGROUND_LOCATION_TASK = 'background-location-task';
-export const LOCATION_UPDATE_TASK = 'com.memoro.locations.locationupdatetask';
-export const LOCATION_PROCESSING_TASK = 'com.memoro.locations.locationprocessingtask';
+export const LOCATION_UPDATE_TASK = 'com.mana.traces.locationupdatetask';
+export const LOCATION_PROCESSING_TASK = 'com.mana.traces.locationprocessingtask';
 
 // Helper function to generate UUID
 const generateUUID = (): string => {
