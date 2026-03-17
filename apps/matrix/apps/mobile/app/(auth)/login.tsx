@@ -92,7 +92,7 @@ export default function LoginScreen() {
 					base,
 					response.access_token,
 					response.user_id,
-					response.device_id,
+					response.device_id
 				);
 				if (loginResult.success && loginResult.credentials) {
 					await initialize(loginResult.credentials);
@@ -112,7 +112,7 @@ export default function LoginScreen() {
 				className="flex-1"
 			>
 				<ScrollView
-					contentContainerClassName="flex-grow justify-center p-6"
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}
 					keyboardShouldPersistTaps="handled"
 				>
 					{/* Logo */}
@@ -134,7 +134,10 @@ export default function LoginScreen() {
 								<TextInput
 									className="flex-1 bg-surface border border-border rounded-xl px-4 py-3 text-foreground"
 									value={homeserver}
-									onChangeText={(v) => { setHomeserver(v); setServerOk(null); }}
+									onChangeText={(v) => {
+										setHomeserver(v);
+										setServerOk(null);
+									}}
 									autoCapitalize="none"
 									autoCorrect={false}
 									keyboardType="url"
@@ -187,9 +190,7 @@ export default function LoginScreen() {
 						<Pressable
 							onPress={handleLogin}
 							disabled={loading || ssoLoading}
-							className={({ pressed }) =>
-								`bg-primary rounded-xl py-4 items-center mt-1 ${pressed || loading ? 'opacity-70' : ''}`
-							}
+							className="bg-primary rounded-xl py-4 items-center mt-1 active:opacity-70"
 						>
 							{loading ? (
 								<ActivityIndicator color="#fff" />
@@ -209,18 +210,12 @@ export default function LoginScreen() {
 						<Pressable
 							onPress={handleSSO}
 							disabled={loading || ssoLoading}
-							className={({ pressed }) =>
-								`bg-surface border border-border rounded-xl py-4 items-center ${
-									pressed || ssoLoading ? 'opacity-70' : ''
-								}`
-							}
+							className="bg-surface border border-border rounded-xl py-4 items-center active:opacity-70"
 						>
 							{ssoLoading ? (
 								<ActivityIndicator color="#7c6bff" />
 							) : (
-								<Text className="text-foreground font-medium text-base">
-									Sign in with SSO
-								</Text>
+								<Text className="text-foreground font-medium text-base">Sign in with SSO</Text>
 							)}
 						</Pressable>
 					</View>

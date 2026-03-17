@@ -76,9 +76,13 @@ export default function MessageInput({
 			{/* Context banner: Reply or Edit */}
 			{(replyTo || isEditing) && (
 				<View className="flex-row items-center gap-2 px-3 pt-2 pb-1">
-					<View className={`w-0.5 self-stretch rounded-full ${isEditing ? 'bg-yellow-500' : 'bg-primary'}`} />
+					<View
+						className={`w-0.5 self-stretch rounded-full ${isEditing ? 'bg-yellow-500' : 'bg-primary'}`}
+					/>
 					<View className="flex-1">
-						<Text className={`text-xs font-medium ${isEditing ? 'text-yellow-500' : 'text-primary'}`}>
+						<Text
+							className={`text-xs font-medium ${isEditing ? 'text-yellow-500' : 'text-primary'}`}
+						>
 							{isEditing ? 'Editing message' : `Reply to ${replyTo!.senderName}`}
 						</Text>
 						<Text className="text-muted-foreground text-xs" numberOfLines={1}>
@@ -87,7 +91,7 @@ export default function MessageInput({
 					</View>
 					<Pressable
 						onPress={isEditing ? onCancelEdit : onCancelReply}
-						className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}
+						className="p-1 active:opacity-50"
 					>
 						<X size={16} color="#6b7280" />
 					</Pressable>
@@ -99,9 +103,7 @@ export default function MessageInput({
 				{onAttach && !isEditing && (
 					<Pressable
 						onPress={onAttach}
-						className={({ pressed }) =>
-							`w-10 h-10 items-center justify-center rounded-full ${pressed ? 'opacity-50' : ''}`
-						}
+						className="w-10 h-10 items-center justify-center rounded-full active:opacity-50"
 					>
 						<Paperclip size={20} color="#6b7280" />
 					</Pressable>
@@ -126,9 +128,7 @@ export default function MessageInput({
 				{showMic ? (
 					<Pressable
 						onPress={onVoiceRecord}
-						className={({ pressed }) =>
-							`w-10 h-10 rounded-full items-center justify-center bg-surface border border-border ${pressed ? 'opacity-60' : ''}`
-						}
+						className="w-10 h-10 rounded-full items-center justify-center bg-surface border border-border active:opacity-60"
 					>
 						<Microphone size={20} color="#7c6bff" />
 					</Pressable>
@@ -136,13 +136,13 @@ export default function MessageInput({
 					<Pressable
 						onPress={handleSubmit}
 						disabled={!canSend}
-						className={({ pressed }) =>
-							`w-10 h-10 rounded-full items-center justify-center ${
-								canSend
-									? isEditing ? 'bg-yellow-500' : 'bg-primary'
-									: 'bg-surface border border-border'
-							} ${pressed ? 'opacity-60' : ''}`
-						}
+						className={`w-10 h-10 rounded-full items-center justify-center ${
+							canSend
+								? isEditing
+									? 'bg-yellow-500'
+									: 'bg-primary'
+								: 'bg-surface border border-border'
+						} active:opacity-60`}
 					>
 						{isEditing ? (
 							<PencilSimple size={16} weight="bold" color={canSend ? '#fff' : '#6b7280'} />

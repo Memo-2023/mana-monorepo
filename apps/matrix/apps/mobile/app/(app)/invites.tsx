@@ -4,14 +4,26 @@ import { Image } from 'expo-image';
 import { useMatrixStore } from '~/src/matrix/store';
 import type { SimpleRoom } from '~/src/matrix/types';
 
-function InviteCard({ room, onAccept, onDecline }: { room: SimpleRoom; onAccept: () => void; onDecline: () => void }) {
+function InviteCard({
+	room,
+	onAccept,
+	onDecline,
+}: {
+	room: SimpleRoom;
+	onAccept: () => void;
+	onDecline: () => void;
+}) {
 	return (
 		<View className="mx-4 mb-3 bg-surface border border-border rounded-2xl overflow-hidden">
 			<View className="flex-row items-center gap-3 p-4">
 				{/* Avatar */}
 				<View className="w-12 h-12 rounded-full bg-background border border-border overflow-hidden items-center justify-center">
 					{room.avatar ? (
-						<Image source={{ uri: room.avatar }} style={{ width: 48, height: 48 }} contentFit="cover" />
+						<Image
+							source={{ uri: room.avatar }}
+							style={{ width: 48, height: 48 }}
+							contentFit="cover"
+						/>
 					) : (
 						<Text className="text-foreground text-lg font-semibold">
 							{(room.name ?? '?')[0].toUpperCase()}
@@ -30,17 +42,15 @@ function InviteCard({ room, onAccept, onDecline }: { room: SimpleRoom; onAccept:
 						</Text>
 					)}
 					{room.inviter && (
-						<Text className="text-muted-foreground text-xs mt-0.5">
-							Invited by {room.inviter}
-						</Text>
+						<Text className="text-muted-foreground text-xs mt-0.5">Invited by {room.inviter}</Text>
 					)}
 					<View className="flex-row items-center gap-1 mt-1">
 						<Text className="text-muted-foreground text-xs">
-							{room.isDirect ? 'Direct message' : `${room.memberCount} member${room.memberCount !== 1 ? 's' : ''}`}
+							{room.isDirect
+								? 'Direct message'
+								: `${room.memberCount} member${room.memberCount !== 1 ? 's' : ''}`}
 						</Text>
-						{room.isEncrypted && (
-							<Text className="text-green-500 text-xs">· 🔒 Encrypted</Text>
-						)}
+						{room.isEncrypted && <Text className="text-green-500 text-xs">· 🔒 Encrypted</Text>}
 					</View>
 				</View>
 			</View>
@@ -49,15 +59,13 @@ function InviteCard({ room, onAccept, onDecline }: { room: SimpleRoom; onAccept:
 			<View className="flex-row border-t border-border">
 				<Pressable
 					onPress={onDecline}
-					className={({ pressed }) =>
-						`flex-1 py-3 items-center border-r border-border ${pressed ? 'bg-surface' : ''}`
-					}
+					className="flex-1 py-3 items-center border-r border-border active:bg-surface"
 				>
 					<Text className="text-destructive font-medium text-sm">Decline</Text>
 				</Pressable>
 				<Pressable
 					onPress={onAccept}
-					className={({ pressed }) => `flex-1 py-3 items-center ${pressed ? 'bg-primary/80' : 'bg-primary'}`}
+					className="flex-1 py-3 items-center bg-primary active:bg-primary/80"
 				>
 					<Text className="text-white font-semibold text-sm">Accept</Text>
 				</Pressable>
@@ -114,7 +122,7 @@ export default function InvitesScreen() {
 							onDecline={() => handleDecline(item.id, item.name)}
 						/>
 					)}
-					contentContainerClassName="pt-2 pb-6"
+					contentContainerStyle={{ paddingTop: 8, paddingBottom: 24 }}
 					ListEmptyComponent={
 						<View className="items-center justify-center py-24">
 							<Text className="text-4xl mb-3">✉️</Text>

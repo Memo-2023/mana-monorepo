@@ -47,9 +47,7 @@ export default function VoiceMessage({ uri, duration, isOwn }: Props) {
 		<View className="flex-row items-center gap-3 px-3 py-2.5 min-w-[160px]">
 			<Pressable
 				onPress={handleToggle}
-				className={({ pressed }) =>
-					`w-8 h-8 rounded-full items-center justify-center ${pressed ? 'opacity-60' : ''} ${isOwn ? 'bg-white/20' : 'bg-primary/10'}`
-				}
+				className={`w-8 h-8 rounded-full items-center justify-center active:opacity-60 ${isOwn ? 'bg-white/20' : 'bg-primary/10'}`}
 			>
 				{status.isBuffering ? (
 					<ActivityIndicator size={14} color={iconColor} />

@@ -29,14 +29,15 @@ export default function UserProfileModal({ userId, onClose }: Props) {
 		setLoading(true);
 		setProfile(null);
 
-		client.getProfileInfo(userId)
+		client
+			.getProfileInfo(userId)
 			.then((info) => {
 				const rawAvatar = info.avatar_url ?? null;
 				setProfile({
 					userId,
 					displayName: info.displayname ?? userId.split(':')[0].slice(1),
 					avatarUrl: rawAvatar
-						? resolveMxcThumbnail(rawAvatar, credentials.homeserver, 160, 160) ?? undefined
+						? (resolveMxcThumbnail(rawAvatar, credentials.homeserver, 160, 160) ?? undefined)
 						: undefined,
 				});
 			})
@@ -50,9 +51,7 @@ export default function UserProfileModal({ userId, onClose }: Props) {
 	}, [userId]);
 
 	// Find an existing DM room with this user
-	const existingDM = userId
-		? rooms.find((r) => r.isDirect && r.dmUserId === userId)
-		: null;
+	const existingDM = userId ? rooms.find((r) => r.isDirect && r.dmUserId === userId) : null;
 
 	const handleStartDM = async () => {
 		if (!client || !userId || !credentials) return;
@@ -81,12 +80,7 @@ export default function UserProfileModal({ userId, onClose }: Props) {
 	const initial = profile?.displayName[0]?.toUpperCase() ?? '?';
 
 	return (
-		<Modal
-			visible={!!userId}
-			transparent
-			animationType="fade"
-			onRequestClose={onClose}
-		>
+		<Modal visible={!!userId} transparent animationType="fade" onRequestClose={onClose}>
 			<Pressable className="flex-1 bg-black/60" onPress={onClose}>
 				<SafeAreaView className="flex-1 justify-end" edges={['bottom']}>
 					<Pressable onPress={(e) => e.stopPropagation()}>
@@ -98,12 +92,20 @@ export default function UserProfileModal({ userId, onClose }: Props) {
 
 							{/* Close */}
 							<View className="absolute top-3 right-4 z-10">
-								<Pressable onPress={onClose} className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}>
+								<Pressable onPress={onClose} className="p-1 active:opacity-50">
 									<X size={20} color="#6b7280" />
 								</Pressable>
 							</View>
 
-							<ScrollView contentContainerClassName="px-6 pt-4 pb-8 items-center gap-4">
+							<ScrollView
+								contentContainerStyle={{
+									paddingHorizontal: 24,
+									paddingTop: 16,
+									paddingBottom: 32,
+									alignItems: 'center',
+									gap: 16,
+								}}
+							>
 								{loading ? (
 									<ActivityIndicator color="#7c6bff" className="py-10" />
 								) : profile ? (
@@ -111,7 +113,11 @@ export default function UserProfileModal({ userId, onClose }: Props) {
 										{/* Avatar */}
 										<View className="w-24 h-24 rounded-full bg-surface border-2 border-border overflow-hidden items-center justify-center">
 											{profile.avatarUrl ? (
-												<Image source={{ uri: profile.avatarUrl }} style={{ width: 96, height: 96 }} contentFit="cover" />
+												<Image
+													source={{ uri: profile.avatarUrl }}
+													style={{ width: 96, height: 96 }}
+													contentFit="cover"
+												/>
 											) : (
 												<Text className="text-foreground text-4xl font-semibold">{initial}</Text>
 											)}
@@ -119,17 +125,19 @@ export default function UserProfileModal({ userId, onClose }: Props) {
 
 										{/* Name */}
 										<View className="items-center gap-1">
-											<Text className="text-foreground text-xl font-bold">{profile.displayName}</Text>
-											<Text className="text-muted-foreground text-sm" selectable>{profile.userId}</Text>
+											<Text className="text-foreground text-xl font-bold">
+												{profile.displayName}
+											</Text>
+											<Text className="text-muted-foreground text-sm" selectable>
+												{profile.userId}
+											</Text>
 										</View>
 
 										{/* Actions */}
 										{profile.userId !== credentials?.userId && (
 											<Pressable
 												onPress={handleStartDM}
-												className={({ pressed }) =>
-													`flex-row items-center gap-2 bg-primary rounded-2xl px-6 py-3 ${pressed ? 'opacity-70' : ''}`
-												}
+												className="flex-row items-center gap-2 bg-primary rounded-2xl px-6 py-3 active:opacity-70"
 											>
 												<ChatCircle size={18} color="#fff" weight="fill" />
 												<Text className="text-white font-semibold">

@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import {
+	View,
+	Text,
+	TextInput,
+	Pressable,
+	ScrollView,
+	Alert,
+	ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Camera } from 'phosphor-react-native';
@@ -46,7 +54,9 @@ export default function RoomSettingsScreen() {
 			const uploaded = await uploadMedia(client, asset.uri, filename, 'image/jpeg');
 			setNewAvatarMxc(uploaded.mxcUrl);
 			setAvatarUri(
-				credentials ? (resolveMxcThumbnail(uploaded.mxcUrl, credentials.homeserver, 128, 128) ?? asset.uri) : asset.uri,
+				credentials
+					? (resolveMxcThumbnail(uploaded.mxcUrl, credentials.homeserver, 128, 128) ?? asset.uri)
+					: asset.uri
 			);
 		} catch (err) {
 			Alert.alert('Upload failed', err instanceof Error ? err.message : 'Unknown error');
@@ -80,36 +90,34 @@ export default function RoomSettingsScreen() {
 	};
 
 	const hasChanges =
-		name.trim() !== room?.name ||
-		topic.trim() !== (room?.topic ?? '') ||
-		newAvatarMxc !== null;
+		name.trim() !== room?.name || topic.trim() !== (room?.topic ?? '') || newAvatarMxc !== null;
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
 			{/* Header */}
 			<View className="flex-row items-center gap-3 px-4 py-3 border-b border-border">
-				<Pressable onPress={() => router.back()} className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}>
+				<Pressable onPress={() => router.back()} className="p-1 active:opacity-50">
 					<ArrowLeft size={22} color="#7c6bff" />
 				</Pressable>
 				<Text className="flex-1 text-foreground font-semibold text-base">Room Settings</Text>
 				<Pressable
 					onPress={handleSave}
 					disabled={!hasChanges || saving}
-					className={({ pressed }) =>
-						`px-4 py-1.5 rounded-full ${hasChanges && !saving ? 'bg-primary' : 'bg-surface border border-border'} ${pressed ? 'opacity-60' : ''}`
-					}
+					className={`px-4 py-1.5 rounded-full ${hasChanges && !saving ? 'bg-primary' : 'bg-surface border border-border'} active:opacity-60`}
 				>
 					{saving ? (
 						<ActivityIndicator size={14} color="#fff" />
 					) : (
-						<Text className={`text-sm font-semibold ${hasChanges ? 'text-white' : 'text-muted-foreground'}`}>
+						<Text
+							className={`text-sm font-semibold ${hasChanges ? 'text-white' : 'text-muted-foreground'}`}
+						>
 							Save
 						</Text>
 					)}
 				</Pressable>
 			</View>
 
-			<ScrollView contentContainerClassName="px-4 py-6 gap-8">
+			<ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 24, gap: 32 }}>
 				{/* Avatar */}
 				<View className="items-center gap-3">
 					<Pressable onPress={handlePickAvatar} disabled={uploadingAvatar}>
@@ -117,7 +125,11 @@ export default function RoomSettingsScreen() {
 							{uploadingAvatar ? (
 								<ActivityIndicator color="#7c6bff" />
 							) : avatarUri ? (
-								<Image source={{ uri: avatarUri }} style={{ width: 96, height: 96 }} contentFit="cover" />
+								<Image
+									source={{ uri: avatarUri }}
+									style={{ width: 96, height: 96 }}
+									contentFit="cover"
+								/>
 							) : (
 								<Text className="text-foreground text-3xl font-bold">
 									{room?.name?.[0]?.toUpperCase() ?? '#'}
@@ -165,7 +177,9 @@ export default function RoomSettingsScreen() {
 				<View className="gap-2">
 					<Text className="text-foreground text-sm font-semibold">Room ID</Text>
 					<View className="bg-surface border border-border rounded-xl px-4 py-3">
-						<Text className="text-muted-foreground text-sm font-mono" selectable>{id}</Text>
+						<Text className="text-muted-foreground text-sm font-mono" selectable>
+							{id}
+						</Text>
 					</View>
 				</View>
 			</ScrollView>

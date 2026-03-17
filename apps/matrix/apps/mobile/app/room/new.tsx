@@ -83,10 +83,7 @@ export default function NewRoomScreen() {
 		<SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
 			{/* Header */}
 			<View className="flex-row items-center gap-3 px-4 py-3 border-b border-border">
-				<Pressable
-					onPress={() => router.back()}
-					className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}
-				>
+				<Pressable onPress={() => router.back()} className="p-1 active:opacity-50">
 					<ArrowLeft size={22} color="#7c6bff" />
 				</Pressable>
 				<Text className="text-foreground text-lg font-semibold">New conversation</Text>
@@ -97,7 +94,7 @@ export default function NewRoomScreen() {
 				className="flex-1"
 			>
 				<ScrollView
-					contentContainerClassName="p-4 gap-5"
+					contentContainerStyle={{ padding: 16, gap: 20 }}
 					keyboardShouldPersistTaps="handled"
 				>
 					{/* Mode toggle */}
@@ -195,9 +192,7 @@ export default function NewRoomScreen() {
 					<Pressable
 						onPress={handleCreate}
 						disabled={loading}
-						className={({ pressed }) =>
-							`bg-primary rounded-xl py-4 items-center ${pressed || loading ? 'opacity-70' : ''}`
-						}
+						className="bg-primary rounded-xl py-4 items-center active:opacity-70"
 					>
 						{loading ? (
 							<ActivityIndicator color="#fff" />

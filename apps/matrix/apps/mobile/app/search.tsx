@@ -1,13 +1,5 @@
 import { useState, useCallback } from 'react';
-import {
-	View,
-	Text,
-	TextInput,
-	FlatList,
-	Pressable,
-	ActivityIndicator,
-	Alert,
-} from 'react-native';
+import { View, Text, TextInput, FlatList, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, MagnifyingGlass, Lock, Users } from 'phosphor-react-native';
@@ -57,7 +49,7 @@ export default function SearchScreen() {
 				setLoading(false);
 			}
 		},
-		[client, credentials],
+		[client, credentials]
 	);
 
 	const handleSearch = (text: string) => {
@@ -98,7 +90,11 @@ export default function SearchScreen() {
 				{/* Avatar */}
 				<View className="w-11 h-11 rounded-xl bg-surface border border-border overflow-hidden items-center justify-center shrink-0">
 					{item.avatar_url ? (
-						<Image source={{ uri: item.avatar_url }} style={{ width: 44, height: 44 }} contentFit="cover" />
+						<Image
+							source={{ uri: item.avatar_url }}
+							style={{ width: 44, height: 44 }}
+							contentFit="cover"
+						/>
 					) : (
 						<Text className="text-foreground text-lg font-semibold">{initial}</Text>
 					)}
@@ -110,9 +106,7 @@ export default function SearchScreen() {
 						<Text className="text-foreground text-sm font-semibold" numberOfLines={1}>
 							{name}
 						</Text>
-						{item.join_rule === 'public' ? null : (
-							<Lock size={11} color="#6b7280" />
-						)}
+						{item.join_rule === 'public' ? null : <Lock size={11} color="#6b7280" />}
 					</View>
 					{item.topic && (
 						<Text className="text-muted-foreground text-xs mt-0.5" numberOfLines={2}>
@@ -129,9 +123,7 @@ export default function SearchScreen() {
 				<Pressable
 					onPress={() => handleJoin(item)}
 					disabled={isJoining}
-					className={({ pressed }) =>
-						`bg-primary rounded-lg px-3 py-1.5 shrink-0 ${pressed || isJoining ? 'opacity-60' : ''}`
-					}
+					className="bg-primary rounded-lg px-3 py-1.5 shrink-0 active:opacity-60"
 				>
 					{isJoining ? (
 						<ActivityIndicator size={14} color="#fff" />
@@ -147,10 +139,7 @@ export default function SearchScreen() {
 		<SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
 			{/* Header */}
 			<View className="flex-row items-center gap-3 px-4 py-3 border-b border-border">
-				<Pressable
-					onPress={() => router.back()}
-					className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}
-				>
+				<Pressable onPress={() => router.back()} className="p-1 active:opacity-50">
 					<ArrowLeft size={22} color="#7c6bff" />
 				</Pressable>
 				<Text className="text-foreground text-lg font-semibold">Explore rooms</Text>

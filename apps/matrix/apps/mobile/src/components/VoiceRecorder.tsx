@@ -94,9 +94,7 @@ export default function VoiceRecorder({ onSend, onCancel }: Props) {
 			{/* Discard */}
 			<Pressable
 				onPress={handleDiscard}
-				className={({ pressed }) =>
-					`w-10 h-10 rounded-full bg-destructive/10 items-center justify-center ${pressed ? 'opacity-60' : ''}`
-				}
+				className="w-10 h-10 rounded-full bg-destructive/10 items-center justify-center active:opacity-60"
 			>
 				<Trash size={18} color="#ef4444" />
 			</Pressable>
@@ -115,9 +113,7 @@ export default function VoiceRecorder({ onSend, onCancel }: Props) {
 			<Pressable
 				onPress={handleSend}
 				disabled={sending || duration < 1}
-				className={({ pressed }) =>
-					`w-10 h-10 rounded-full items-center justify-center ${duration >= 1 ? 'bg-primary' : 'bg-surface border border-border'} ${pressed || sending ? 'opacity-60' : ''}`
-				}
+				className={`w-10 h-10 rounded-full items-center justify-center ${duration >= 1 ? 'bg-primary' : 'bg-surface border border-border'} active:opacity-60`}
 			>
 				<PaperPlaneRight size={18} color={duration >= 1 ? '#fff' : '#6b7280'} weight="fill" />
 			</Pressable>

@@ -38,9 +38,7 @@ export default function RoomListItem({ room, onPress }: Props) {
 	return (
 		<Pressable
 			onPress={onPress}
-			className={({ pressed }) =>
-				`flex-row items-center px-4 py-3 gap-3 ${pressed ? 'bg-surface/60' : ''}`
-			}
+			className="flex-row items-center px-4 py-3 gap-3 active:bg-surface/60"
 		>
 			{/* Avatar */}
 			<View className="relative">
@@ -80,8 +78,8 @@ export default function RoomListItem({ room, onPress }: Props) {
 					>
 						{room.lastMessage
 							? (room.lastMessageSender && !room.isDirect
-								? `${room.lastMessageSender.split(':')[0].slice(1)}: `
-								: '') + room.lastMessage
+									? `${room.lastMessageSender.split(':')[0].slice(1)}: `
+									: '') + room.lastMessage
 							: room.isEncrypted
 								? '🔒 Encrypted'
 								: 'No messages'}
@@ -95,7 +93,11 @@ export default function RoomListItem({ room, onPress }: Props) {
 							}`}
 						>
 							<Text className="text-white text-xs font-bold leading-none">
-								{hasHighlight ? room.highlightCount : room.unreadCount > 99 ? '99+' : room.unreadCount}
+								{hasHighlight
+									? room.highlightCount
+									: room.unreadCount > 99
+										? '99+'
+										: room.unreadCount}
 							</Text>
 						</View>
 					)}

@@ -38,18 +38,14 @@ export default function ImageViewer({ uri, onClose }: Props) {
 				<View className="absolute top-0 left-0 right-0 z-10 flex-row justify-between p-4 pt-12">
 					<Pressable
 						onPress={onClose}
-						className={({ pressed }) =>
-							`w-10 h-10 rounded-full bg-black/50 items-center justify-center ${pressed ? 'opacity-60' : ''}`
-						}
+						className="w-10 h-10 rounded-full bg-black/50 items-center justify-center active:opacity-60"
 					>
 						<X size={20} color="#fff" />
 					</Pressable>
 					<Pressable
 						onPress={handleSave}
 						disabled={saving}
-						className={({ pressed }) =>
-							`w-10 h-10 rounded-full bg-black/50 items-center justify-center ${pressed || saving ? 'opacity-60' : ''}`
-						}
+						className="w-10 h-10 rounded-full bg-black/50 items-center justify-center active:opacity-60"
 					>
 						<DownloadSimple size={20} color="#fff" />
 					</Pressable>

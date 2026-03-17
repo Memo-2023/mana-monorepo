@@ -36,10 +36,13 @@ type ListItem =
 	| { type: 'unread'; key: string };
 
 function isSameDay(a: number, b: number) {
-	const da = new Date(a), db = new Date(b);
-	return da.getFullYear() === db.getFullYear() &&
+	const da = new Date(a),
+		db = new Date(b);
+	return (
+		da.getFullYear() === db.getFullYear() &&
 		da.getMonth() === db.getMonth() &&
-		da.getDate() === db.getDate();
+		da.getDate() === db.getDate()
+	);
 }
 
 function buildListItems(messages: SimpleMessage[], firstUnreadEventId: string | null): ListItem[] {
@@ -65,11 +68,15 @@ function MemberRow({ member, onClose }: { member: RoomMember; onClose: () => voi
 		<>
 			<Pressable
 				onPress={() => setShowProfile(true)}
-				className={({ pressed }) => `flex-row items-center gap-3 px-4 py-3 ${pressed ? 'bg-surface/60' : ''}`}
+				className="flex-row items-center gap-3 px-4 py-3 active:bg-surface/60"
 			>
 				<View className="w-10 h-10 rounded-full bg-surface border border-border overflow-hidden items-center justify-center">
 					{member.avatarUrl ? (
-						<Image source={{ uri: member.avatarUrl }} style={{ width: 40, height: 40 }} contentFit="cover" />
+						<Image
+							source={{ uri: member.avatarUrl }}
+							style={{ width: 40, height: 40 }}
+							contentFit="cover"
+						/>
 					) : (
 						<Text className="text-foreground font-semibold">
 							{member.displayName[0]?.toUpperCase() ?? '?'}
@@ -78,7 +85,9 @@ function MemberRow({ member, onClose }: { member: RoomMember; onClose: () => voi
 				</View>
 				<View className="flex-1">
 					<Text className="text-foreground text-sm font-medium">{member.displayName}</Text>
-					<Text className="text-muted-foreground text-xs" numberOfLines={1}>{member.userId}</Text>
+					<Text className="text-muted-foreground text-xs" numberOfLines={1}>
+						{member.userId}
+					</Text>
 				</View>
 				{member.powerLevel >= 100 && (
 					<View className="bg-primary/20 rounded-full px-2 py-0.5">
@@ -93,7 +102,10 @@ function MemberRow({ member, onClose }: { member: RoomMember; onClose: () => voi
 			</Pressable>
 			<UserProfileModal
 				userId={showProfile ? member.userId : null}
-				onClose={() => { setShowProfile(false); onClose(); }}
+				onClose={() => {
+					setShowProfile(false);
+					onClose();
+				}}
 			/>
 		</>
 	);
@@ -116,10 +128,25 @@ export default function RoomScreen() {
 	const [forwardSearch, setForwardSearch] = useState('');
 
 	const {
-		rooms, messages, firstUnreadEventId, typingUsers, roomMembers, client, credentials,
-		selectRoom, loadRoomMembers, sendMessage, editMessage,
-		sendReaction, redactMessage, sendTyping,
-		sendImage, sendFile, sendVoice, forwardMessage, leaveRoom,
+		rooms,
+		messages,
+		firstUnreadEventId,
+		typingUsers,
+		roomMembers,
+		client,
+		credentials,
+		selectRoom,
+		loadRoomMembers,
+		sendMessage,
+		editMessage,
+		sendReaction,
+		redactMessage,
+		sendTyping,
+		sendImage,
+		sendFile,
+		sendVoice,
+		forwardMessage,
+		leaveRoom,
 	} = useMatrixStore();
 
 	const room = rooms.find((r) => r.id === id);
@@ -130,9 +157,14 @@ export default function RoomScreen() {
 		return (matrixRoom?.getMember(userId)?.powerLevel ?? 0) >= 100;
 	}, [client, id]);
 
-	useEffect(() => { if (id) selectRoom(id); }, [id]);
+	useEffect(() => {
+		if (id) selectRoom(id);
+	}, [id]);
 
-	const listItems = useMemo(() => buildListItems(messages, firstUnreadEventId), [messages, firstUnreadEventId]);
+	const listItems = useMemo(
+		() => buildListItems(messages, firstUnreadEventId),
+		[messages, firstUnreadEventId]
+	);
 
 	// Scroll to first unread message on initial load
 	useEffect(() => {
@@ -150,8 +182,11 @@ export default function RoomScreen() {
 		const matrixRoom = client.getRoom(id);
 		if (!matrixRoom) return;
 		setLoadingMore(true);
-		try { await client.scrollback(matrixRoom, 30); }
-		finally { setLoadingMore(false); }
+		try {
+			await client.scrollback(matrixRoom, 30);
+		} finally {
+			setLoadingMore(false);
+		}
 	};
 
 	const handleRoomOptions = () => {
@@ -162,15 +197,33 @@ export default function RoomScreen() {
 			ActionSheetIOS.showActionSheetWithOptions(
 				{ options, cancelButtonIndex: 0, destructiveButtonIndex: destructiveIndex },
 				(index) => {
-					if (index === 1) { loadRoomMembers(id!); setShowMembers(true); }
-					if (isAdmin && index === 2) { router.push({ pathname: '/room/settings', params: { id } }); }
+					if (index === 1) {
+						loadRoomMembers(id!);
+						setShowMembers(true);
+					}
+					if (isAdmin && index === 2) {
+						router.push({ pathname: '/room/settings', params: { id } });
+					}
 					if (index === options.length - 1) handleLeave();
-				},
+				}
 			);
 		} else {
 			Alert.alert(room?.name ?? 'Room', undefined, [
-				{ text: 'Members', onPress: () => { loadRoomMembers(id!); setShowMembers(true); } },
-				...(isAdmin ? [{ text: 'Room settings', onPress: () => router.push({ pathname: '/room/settings', params: { id } }) }] : []),
+				{
+					text: 'Members',
+					onPress: () => {
+						loadRoomMembers(id!);
+						setShowMembers(true);
+					},
+				},
+				...(isAdmin
+					? [
+							{
+								text: 'Room settings',
+								onPress: () => router.push({ pathname: '/room/settings', params: { id } }),
+							},
+						]
+					: []),
 				{ text: 'Leave room', style: 'destructive' as const, onPress: handleLeave },
 				{ text: 'Cancel', style: 'cancel' as const },
 			]);
@@ -199,7 +252,7 @@ export default function RoomScreen() {
 					if (index === 1) pickImage('library');
 					if (index === 2) pickImage('camera');
 					if (index === 3) pickDocument();
-				},
+				}
 			);
 		} else {
 			Alert.alert('Attach', undefined, [
@@ -212,17 +265,26 @@ export default function RoomScreen() {
 	};
 
 	const pickImage = async (source: 'library' | 'camera') => {
-		const fn = source === 'camera' ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
+		const fn =
+			source === 'camera' ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
 		const result = await fn({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.85 });
 		if (result.canceled || !result.assets[0]) return;
 		const asset = result.assets[0];
 		const filename = asset.fileName ?? `image_${Date.now()}.jpg`;
 		setUploading(true);
 		try {
-			await sendImage(asset.uri, filename, asset.mimeType ?? getMimetypeFromFilename(filename), asset.width, asset.height);
+			await sendImage(
+				asset.uri,
+				filename,
+				asset.mimeType ?? getMimetypeFromFilename(filename),
+				asset.width,
+				asset.height
+			);
 		} catch (err) {
 			Alert.alert('Upload failed', err instanceof Error ? err.message : 'Unknown error');
-		} finally { setUploading(false); }
+		} finally {
+			setUploading(false);
+		}
 	};
 
 	const pickDocument = async () => {
@@ -234,7 +296,9 @@ export default function RoomScreen() {
 			await sendFile(asset.uri, asset.name, asset.mimeType ?? getMimetypeFromFilename(asset.name));
 		} catch (err) {
 			Alert.alert('Upload failed', err instanceof Error ? err.message : 'Unknown error');
-		} finally { setUploading(false); }
+		} finally {
+			setUploading(false);
+		}
 	};
 
 	const handleForward = useCallback((msg: SimpleMessage) => {
@@ -242,28 +306,37 @@ export default function RoomScreen() {
 		setForwardSearch('');
 	}, []);
 
-	const handleForwardToRoom = useCallback(async (targetRoom: SimpleRoom) => {
-		if (!forwardingMessage) return;
-		try {
-			await forwardMessage(forwardingMessage.id, targetRoom.id);
-			setForwardingMessage(null);
-		} catch (err) {
-			Alert.alert('Forward failed', err instanceof Error ? err.message : 'Unknown error');
-		}
-	}, [forwardingMessage, forwardMessage]);
+	const handleForwardToRoom = useCallback(
+		async (targetRoom: SimpleRoom) => {
+			if (!forwardingMessage) return;
+			try {
+				await forwardMessage(forwardingMessage.id, targetRoom.id);
+				setForwardingMessage(null);
+			} catch (err) {
+				Alert.alert('Forward failed', err instanceof Error ? err.message : 'Unknown error');
+			}
+		},
+		[forwardingMessage, forwardMessage]
+	);
 
 	const handleEdit = useCallback((msg: SimpleMessage) => {
 		setReplyTo(null);
 		setEditingMessage(msg);
 	}, []);
 
-	const handleSend = useCallback(async (body: string, replyToEventId?: string) => {
-		await sendMessage(body, replyToEventId);
-	}, [sendMessage]);
+	const handleSend = useCallback(
+		async (body: string, replyToEventId?: string) => {
+			await sendMessage(body, replyToEventId);
+		},
+		[sendMessage]
+	);
 
-	const handleEditSave = useCallback(async (eventId: string, newBody: string) => {
-		await editMessage(eventId, newBody);
-	}, [editMessage]);
+	const handleEditSave = useCallback(
+		async (eventId: string, newBody: string) => {
+			await editMessage(eventId, newBody);
+		},
+		[editMessage]
+	);
 
 	const renderItem = ({ item, index }: { item: ListItem; index: number }) => {
 		if (item.type === 'date') return <DateSeparator timestamp={item.timestamp} />;
@@ -273,7 +346,10 @@ export default function RoomScreen() {
 			<MessageBubble
 				message={item.data}
 				prevMessage={messages[msgIndex - 1] ?? null}
-				onReply={(msg) => { setEditingMessage(null); setReplyTo(msg); }}
+				onReply={(msg) => {
+					setEditingMessage(null);
+					setReplyTo(msg);
+				}}
 				onEdit={handleEdit}
 				onReact={sendReaction}
 				onDelete={redactMessage}
@@ -288,7 +364,7 @@ export default function RoomScreen() {
 		<SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
 			{/* Header */}
 			<View className="flex-row items-center gap-3 px-4 py-3 border-b border-border">
-				<Pressable onPress={() => router.back()} className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}>
+				<Pressable onPress={() => router.back()} className="p-1 active:opacity-50">
 					<ArrowLeft size={22} color="#7c6bff" />
 				</Pressable>
 				<View className="flex-1">
@@ -299,14 +375,16 @@ export default function RoomScreen() {
 						{room?.isEncrypted && <Lock size={12} color="#22c55e" weight="fill" />}
 					</View>
 					{room?.topic ? (
-						<Text className="text-muted-foreground text-xs" numberOfLines={1}>{room.topic}</Text>
+						<Text className="text-muted-foreground text-xs" numberOfLines={1}>
+							{room.topic}
+						</Text>
 					) : room?.memberCount != null ? (
 						<Text className="text-muted-foreground text-xs">
 							{room.memberCount} member{room.memberCount !== 1 ? 's' : ''}
 						</Text>
 					) : null}
 				</View>
-				<Pressable onPress={handleRoomOptions} className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}>
+				<Pressable onPress={handleRoomOptions} className="p-1 active:opacity-50">
 					<DotsThreeVertical size={22} color="#6b7280" />
 				</Pressable>
 			</View>
@@ -321,9 +399,9 @@ export default function RoomScreen() {
 			<FlatList
 				ref={listRef}
 				data={listItems}
-				keyExtractor={(item) => item.type === 'message' ? item.data.id : item.key}
+				keyExtractor={(item) => (item.type === 'message' ? item.data.id : item.key)}
 				renderItem={renderItem}
-				contentContainerClassName="px-0 py-2"
+				contentContainerStyle={{ paddingHorizontal: 0, paddingVertical: 8 }}
 				onEndReached={handleLoadMore}
 				onEndReachedThreshold={0.15}
 				onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
@@ -342,9 +420,14 @@ export default function RoomScreen() {
 				<VoiceRecorder
 					onSend={async (uri, durationMs) => {
 						setUploading(true);
-						try { await sendVoice(uri, durationMs); }
-						catch (err) { Alert.alert('Upload failed', err instanceof Error ? err.message : 'Unknown error'); }
-						finally { setUploading(false); setShowVoiceRecorder(false); }
+						try {
+							await sendVoice(uri, durationMs);
+						} catch (err) {
+							Alert.alert('Upload failed', err instanceof Error ? err.message : 'Unknown error');
+						} finally {
+							setUploading(false);
+							setShowVoiceRecorder(false);
+						}
 					}}
 					onCancel={() => setShowVoiceRecorder(false)}
 				/>
@@ -363,22 +446,33 @@ export default function RoomScreen() {
 			)}
 
 			{/* Members modal */}
-			<Modal visible={showMembers} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowMembers(false)}>
+			<Modal
+				visible={showMembers}
+				animationType="slide"
+				presentationStyle="pageSheet"
+				onRequestClose={() => setShowMembers(false)}
+			>
 				<SafeAreaView className="flex-1 bg-background" edges={['top']}>
 					<View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
 						<Text className="text-foreground text-lg font-semibold">
 							Members{room?.memberCount != null ? ` (${room.memberCount})` : ''}
 						</Text>
-						<Pressable onPress={() => setShowMembers(false)} className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}>
+						<Pressable onPress={() => setShowMembers(false)} className="p-1 active:opacity-50">
 							<X size={22} color="#6b7280" />
 						</Pressable>
 					</View>
-					<ScrollView contentContainerClassName="py-2">
+					<ScrollView contentContainerStyle={{ paddingVertical: 8 }}>
 						{roomMembers.length === 0 ? (
-							<View className="items-center py-10"><ActivityIndicator color="#7c6bff" /></View>
+							<View className="items-center py-10">
+								<ActivityIndicator color="#7c6bff" />
+							</View>
 						) : (
 							roomMembers.map((member) => (
-								<MemberRow key={member.userId} member={member} onClose={() => setShowMembers(false)} />
+								<MemberRow
+									key={member.userId}
+									member={member}
+									onClose={() => setShowMembers(false)}
+								/>
 							))
 						)}
 					</ScrollView>
@@ -390,11 +484,16 @@ export default function RoomScreen() {
 			<UserProfileModal userId={profileUserId} onClose={() => setProfileUserId(null)} />
 
 			{/* Forward message modal */}
-			<Modal visible={!!forwardingMessage} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setForwardingMessage(null)}>
+			<Modal
+				visible={!!forwardingMessage}
+				animationType="slide"
+				presentationStyle="pageSheet"
+				onRequestClose={() => setForwardingMessage(null)}
+			>
 				<SafeAreaView className="flex-1 bg-background" edges={['top']}>
 					<View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
 						<Text className="text-foreground text-lg font-semibold">Forward to...</Text>
-						<Pressable onPress={() => setForwardingMessage(null)} className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}>
+						<Pressable onPress={() => setForwardingMessage(null)} className="p-1 active:opacity-50">
 							<X size={22} color="#6b7280" />
 						</Pressable>
 					</View>
@@ -411,21 +510,29 @@ export default function RoomScreen() {
 					{forwardingMessage && (
 						<View className="mx-4 mb-2 px-3 py-2 bg-surface border border-border rounded-xl">
 							<Text className="text-muted-foreground text-xs mb-0.5">Message:</Text>
-							<Text className="text-foreground text-sm" numberOfLines={2}>{forwardingMessage.body}</Text>
+							<Text className="text-foreground text-sm" numberOfLines={2}>
+								{forwardingMessage.body}
+							</Text>
 						</View>
 					)}
-					<ScrollView contentContainerClassName="py-1">
+					<ScrollView contentContainerStyle={{ paddingVertical: 4 }}>
 						{rooms
-							.filter((r) => r.id !== id && r.name.toLowerCase().includes(forwardSearch.toLowerCase()))
+							.filter(
+								(r) => r.id !== id && r.name.toLowerCase().includes(forwardSearch.toLowerCase())
+							)
 							.map((r) => (
 								<Pressable
 									key={r.id}
 									onPress={() => handleForwardToRoom(r)}
-									className={({ pressed }) => `flex-row items-center gap-3 px-4 py-3 ${pressed ? 'bg-surface/60' : ''}`}
+									className="flex-row items-center gap-3 px-4 py-3 active:bg-surface/60"
 								>
 									<View className="w-10 h-10 rounded-full bg-surface border border-border overflow-hidden items-center justify-center">
 										{r.avatar ? (
-											<Image source={{ uri: r.avatar }} style={{ width: 40, height: 40 }} contentFit="cover" />
+											<Image
+												source={{ uri: r.avatar }}
+												style={{ width: 40, height: 40 }}
+												contentFit="cover"
+											/>
 										) : (
 											<Text className="text-foreground font-semibold">
 												{r.name[0]?.toUpperCase() ?? '?'}
@@ -433,8 +540,12 @@ export default function RoomScreen() {
 										)}
 									</View>
 									<View className="flex-1">
-										<Text className="text-foreground text-sm font-medium" numberOfLines={1}>{r.name}</Text>
-										{r.isDirect && <Text className="text-muted-foreground text-xs">Direct message</Text>}
+										<Text className="text-foreground text-sm font-medium" numberOfLines={1}>
+											{r.name}
+										</Text>
+										{r.isDirect && (
+											<Text className="text-muted-foreground text-xs">Direct message</Text>
+										)}
 									</View>
 								</Pressable>
 							))}

@@ -21,7 +21,7 @@ export default function DMsScreen() {
 
 	const dmInvites = useMemo(
 		() => rooms.filter((r) => r.membership === 'invite' && r.isDirect),
-		[rooms],
+		[rooms]
 	);
 
 	const handleRoomPress = (roomId: string) => {
@@ -37,9 +37,7 @@ export default function DMsScreen() {
 				<Text className="text-foreground text-2xl font-bold">Direct Messages</Text>
 				<Pressable
 					onPress={() => router.push('/room/new')}
-					className={({ pressed }) =>
-						`w-9 h-9 bg-primary rounded-full items-center justify-center ${pressed ? 'opacity-70' : ''}`
-					}
+					className="w-9 h-9 bg-primary rounded-full items-center justify-center active:opacity-70"
 				>
 					<Plus size={18} color="#fff" weight="bold" />
 				</Pressable>
@@ -69,7 +67,7 @@ export default function DMsScreen() {
 					renderItem={({ item }) => (
 						<RoomListItem room={item} onPress={() => handleRoomPress(item.id)} />
 					)}
-					contentContainerClassName="pb-4"
+					contentContainerStyle={{ paddingBottom: 16 }}
 					ListHeaderComponent={
 						dmInvites.length > 0 ? (
 							<View className="px-4 py-2 bg-primary/10 border-b border-border">

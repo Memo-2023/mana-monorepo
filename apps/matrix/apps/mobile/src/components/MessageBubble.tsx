@@ -66,7 +66,7 @@ function AvatarCircle({
 	);
 	if (!onPress) return inner;
 	return (
-		<Pressable onPress={onPress} className={({ pressed }) => `${pressed ? 'opacity-60' : ''}`}>
+		<Pressable onPress={onPress} className="active:opacity-60">
 			{inner}
 		</Pressable>
 	);
@@ -113,17 +113,14 @@ function ReactionDetailsModal({
 			<View className="flex-1 bg-background">
 				<View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
 					<Text className="text-foreground text-lg font-semibold">Reactions</Text>
-					<Pressable
-						onPress={onClose}
-						className={({ pressed }) => `p-1 ${pressed ? 'opacity-50' : ''}`}
-					>
+					<Pressable onPress={onClose} className="p-1 active:opacity-50">
 						<Text className="text-primary text-base">Done</Text>
 					</Pressable>
 				</View>
 				<ScrollView
 					horizontal
 					className="border-b border-border"
-					contentContainerClassName="px-3 py-2 gap-2"
+					contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 8, gap: 8 }}
 				>
 					{reactions.map((r) => (
 						<Pressable
@@ -144,7 +141,7 @@ function ReactionDetailsModal({
 						</Pressable>
 					))}
 				</ScrollView>
-				<ScrollView contentContainerClassName="py-2">
+				<ScrollView contentContainerStyle={{ paddingVertical: 8 }}>
 					{selected?.users.map((userId) => (
 						<View key={userId} className="flex-row items-center gap-3 px-4 py-2.5">
 							<View className="w-8 h-8 rounded-full bg-surface border border-border items-center justify-center">

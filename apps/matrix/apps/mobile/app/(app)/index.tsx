@@ -22,7 +22,7 @@ export default function ChatsScreen() {
 	// Pending invites
 	const invites = useMemo(
 		() => rooms.filter((r) => r.membership === 'invite' && !r.isDirect),
-		[rooms],
+		[rooms]
 	);
 
 	const handleRoomPress = (roomId: string) => {
@@ -40,17 +40,13 @@ export default function ChatsScreen() {
 				<View className="flex-row gap-2">
 					<Pressable
 						onPress={() => router.push('/search')}
-						className={({ pressed }) =>
-							`w-9 h-9 bg-surface border border-border rounded-full items-center justify-center ${pressed ? 'opacity-70' : ''}`
-						}
+						className="w-9 h-9 bg-surface border border-border rounded-full items-center justify-center active:opacity-70"
 					>
 						<Compass size={18} color="#7c6bff" />
 					</Pressable>
 					<Pressable
 						onPress={() => router.push('/room/new')}
-						className={({ pressed }) =>
-							`w-9 h-9 bg-primary rounded-full items-center justify-center ${pressed ? 'opacity-70' : ''}`
-						}
+						className="w-9 h-9 bg-primary rounded-full items-center justify-center active:opacity-70"
 					>
 						<Plus size={18} color="#fff" weight="bold" />
 					</Pressable>
@@ -84,7 +80,7 @@ export default function ChatsScreen() {
 					renderItem={({ item }) => (
 						<RoomListItem room={item} onPress={() => handleRoomPress(item.id)} />
 					)}
-					contentContainerClassName="pb-4"
+					contentContainerStyle={{ paddingBottom: 16 }}
 					ListHeaderComponent={
 						invites.length > 0 ? (
 							<View className="px-4 py-2 bg-primary/10 border-b border-border">

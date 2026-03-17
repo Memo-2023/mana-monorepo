@@ -41,17 +41,19 @@ export default function SettingsScreen() {
 	const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
 	// Get current profile from client
-	const profileInfo = client ? (() => {
-		try {
-			const user = client.getUser(userId);
-			return {
-				displayName: user?.displayName ?? userId.split(':')[0].slice(1),
-				avatarUrl: user?.avatarUrl ?? undefined,
-			};
-		} catch {
-			return { displayName: userId.split(':')[0].slice(1), avatarUrl: undefined };
-		}
-	})() : { displayName: '', avatarUrl: undefined };
+	const profileInfo = client
+		? (() => {
+				try {
+					const user = client.getUser(userId);
+					return {
+						displayName: user?.displayName ?? userId.split(':')[0].slice(1),
+						avatarUrl: user?.avatarUrl ?? undefined,
+					};
+				} catch {
+					return { displayName: userId.split(':')[0].slice(1), avatarUrl: undefined };
+				}
+			})()
+		: { displayName: '', avatarUrl: undefined };
 
 	const handleEditName = () => {
 		setNewDisplayName(profileInfo.displayName);
@@ -107,15 +109,11 @@ export default function SettingsScreen() {
 				<Text className="text-foreground text-2xl font-bold">Settings</Text>
 			</View>
 
-			<ScrollView className="flex-1" contentContainerClassName="p-4 gap-4">
+			<ScrollView className="flex-1" contentContainerStyle={{ padding: 16, gap: 16 }}>
 				{/* Profile card */}
 				<View className="bg-surface rounded-2xl border border-border p-4 items-center gap-3">
 					{/* Avatar */}
-					<Pressable
-						onPress={handleChangeAvatar}
-						disabled={uploadingAvatar}
-						className="relative"
-					>
+					<Pressable onPress={handleChangeAvatar} disabled={uploadingAvatar} className="relative">
 						<ProfileAvatar
 							displayName={profileInfo.displayName}
 							avatarUrl={profileInfo.avatarUrl}
@@ -148,18 +146,26 @@ export default function SettingsScreen() {
 				{/* Connection info */}
 				<View className="bg-surface rounded-2xl overflow-hidden border border-border">
 					<View className="px-4 py-3 border-b border-border">
-						<Text className="text-muted-foreground text-xs uppercase tracking-wider">Connection</Text>
+						<Text className="text-muted-foreground text-xs uppercase tracking-wider">
+							Connection
+						</Text>
 					</View>
 					<View className="p-4 gap-3">
 						<View>
 							<Text className="text-muted-foreground text-xs">Homeserver</Text>
-							<Text className="text-foreground text-sm mt-0.5" numberOfLines={1}>{homeserver || '—'}</Text>
+							<Text className="text-foreground text-sm mt-0.5" numberOfLines={1}>
+								{homeserver || '—'}
+							</Text>
 						</View>
 						<View className="flex-row items-center justify-between">
 							<Text className="text-muted-foreground text-xs">Sync status</Text>
 							<View className="flex-row items-center gap-1.5">
-								<View className={`w-2 h-2 rounded-full ${syncState === 'SYNCING' || syncState === 'PREPARED' ? 'bg-green-500' : syncState === 'ERROR' ? 'bg-destructive' : 'bg-yellow-500'}`} />
-								<Text className="text-foreground text-sm capitalize">{syncState.toLowerCase()}</Text>
+								<View
+									className={`w-2 h-2 rounded-full ${syncState === 'SYNCING' || syncState === 'PREPARED' ? 'bg-green-500' : syncState === 'ERROR' ? 'bg-destructive' : 'bg-yellow-500'}`}
+								/>
+								<Text className="text-foreground text-sm capitalize">
+									{syncState.toLowerCase()}
+								</Text>
 							</View>
 						</View>
 					</View>
@@ -189,16 +195,19 @@ export default function SettingsScreen() {
 				{/* Sign out */}
 				<Pressable
 					onPress={handleLogout}
-					className={({ pressed }) =>
-						`bg-destructive/10 border border-destructive/30 rounded-2xl p-4 items-center ${pressed ? 'opacity-60' : ''}`
-					}
+					className="bg-destructive/10 border border-destructive/30 rounded-2xl p-4 items-center active:opacity-60"
 				>
 					<Text className="text-destructive font-semibold">Sign out</Text>
 				</Pressable>
 			</ScrollView>
 
 			{/* Edit display name modal */}
-			<Modal visible={editingName} transparent animationType="fade" onRequestClose={() => setEditingName(false)}>
+			<Modal
+				visible={editingName}
+				transparent
+				animationType="fade"
+				onRequestClose={() => setEditingName(false)}
+			>
 				<View className="flex-1 bg-black/60 items-center justify-center p-6">
 					<View className="bg-surface border border-border rounded-2xl p-5 w-full gap-4">
 						<View className="flex-row items-center justify-between">
@@ -218,9 +227,7 @@ export default function SettingsScreen() {
 						<Pressable
 							onPress={handleSaveName}
 							disabled={savingName || !newDisplayName.trim()}
-							className={({ pressed }) =>
-								`bg-primary rounded-xl py-3 items-center ${pressed || savingName || !newDisplayName.trim() ? 'opacity-60' : ''}`
-							}
+							className="bg-primary rounded-xl py-3 items-center active:opacity-60"
 						>
 							{savingName ? (
 								<ActivityIndicator color="#fff" />
