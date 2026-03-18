@@ -1378,6 +1378,7 @@ services:
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://contacts-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_TODO_BACKEND_URL: https://todo-api.mana.how
     ports:
       - "5014:5014"
     healthcheck:
