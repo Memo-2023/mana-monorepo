@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
@@ -27,5 +28,10 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		exclude: [...MANACORE_SHARED_PACKAGES, '@todo/shared'],
+	},
+	test: {
+		environment: 'jsdom',
+		include: ['src/**/*.test.ts'],
+		globals: true,
 	},
 });
