@@ -5,6 +5,7 @@ import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { createPWAConfig } from '@manacore/shared-pwa';
 import { MANACORE_SHARED_PACKAGES } from '@manacore/shared-vite-config';
 
+/// <reference types="vitest/config" />
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
@@ -27,5 +28,10 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		exclude: [...MANACORE_SHARED_PACKAGES],
+	},
+	test: {
+		environment: 'jsdom',
+		include: ['src/**/*.test.ts'],
+		globals: true,
 	},
 });
