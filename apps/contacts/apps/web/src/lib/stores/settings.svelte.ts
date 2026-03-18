@@ -8,7 +8,7 @@ import { createAppSettingsStore } from '@manacore/shared-stores';
 // Settings types
 export type ContactSortBy = 'name' | 'company' | 'created' | 'updated';
 export type ContactSortOrder = 'asc' | 'desc';
-export type ContactView = 'grid' | 'alphabet' | 'network';
+export type ContactView = 'grid' | 'alphabet';
 export type DateFormat = 'dd.MM.yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
 
 export interface ContactsAppSettings {

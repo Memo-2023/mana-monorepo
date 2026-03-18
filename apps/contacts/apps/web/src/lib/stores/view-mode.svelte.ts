@@ -11,7 +11,7 @@ export type ViewMode = ContactView;
 const STORAGE_KEY = 'contacts-view-mode';
 
 // Valid view modes
-const VALID_MODES: ViewMode[] = ['grid', 'alphabet', 'network'];
+const VALID_MODES: ViewMode[] = ['grid', 'alphabet'];
 
 function isValidMode(mode: string | null): mode is ViewMode {
 	return mode !== null && VALID_MODES.includes(mode as ViewMode);

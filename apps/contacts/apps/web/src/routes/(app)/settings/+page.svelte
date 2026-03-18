@@ -27,7 +27,6 @@
 	const viewOptions = [
 		{ value: 'grid', label: 'Kacheln' },
 		{ value: 'alphabet', label: 'Alphabetisch' },
-		{ value: 'network', label: 'Netzwerk' },
 	];
 
 	const sortByOptions = [

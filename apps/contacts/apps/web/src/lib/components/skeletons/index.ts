@@ -36,6 +36,3 @@ export { default as ContactDetailSkeleton } from './ContactDetailSkeleton.svelte
 
 // Contact Notes Skeleton
 export { default as ContactNotesSkeleton } from './ContactNotesSkeleton.svelte';
-
-// Network Graph Skeleton
-export { default as NetworkGraphSkeleton } from './NetworkGraphSkeleton.svelte';
