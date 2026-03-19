@@ -8,7 +8,8 @@ Self-hosted, open-source error tracking for all ManaCore apps using [GlitchTip](
 |---|---|
 | **URL** | https://glitchtip.mana.how |
 | **Version** | GlitchTip v6.0 |
-| **Login** | admin@mana.how |
+| **Guest Login** | `guest@mana.how` / `guestguest` |
+| **Admin Login** | `admin@mana.how` / `ManaAdmin2026` |
 | **License** | MIT |
 | **Containers** | `mana-mon-glitchtip` (web) + `mana-mon-glitchtip-worker` (celery) |
 | **Database** | PostgreSQL `glitchtip` (shared infra) |
