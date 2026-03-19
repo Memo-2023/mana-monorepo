@@ -22,6 +22,8 @@ export const songs = pgTable(
 		genre: varchar('genre', { length: 100 }),
 		trackNumber: integer('track_number'),
 		year: integer('year'),
+		month: integer('month'),
+		day: integer('day'),
 		duration: real('duration'),
 		storagePath: text('storage_path').notNull(),
 		coverArtPath: text('cover_art_path'),

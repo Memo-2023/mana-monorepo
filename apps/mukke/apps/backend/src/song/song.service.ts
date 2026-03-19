@@ -23,7 +23,8 @@ export class SongService {
 
 	async createUploadUrl(
 		userId: string,
-		filename: string
+		filename: string,
+		fileLastModified?: number
 	): Promise<{ song: Song; uploadUrl: string }> {
 		const key = generateUserFileKey(userId, filename);
 		const contentType = getContentType(filename);
@@ -32,13 +33,22 @@ export class SongService {
 			throw new BadRequestException('Invalid file type. Only audio files are allowed.');
 		}
 
+		const values: Record<string, unknown> = {
+			userId,
+			title: filename.replace(/\.[^/.]+$/, ''),
+			storagePath: key,
+		};
+
+		if (fileLastModified) {
+			const date = new Date(fileLastModified);
+			values.year = date.getFullYear();
+			values.month = date.getMonth() + 1;
+			values.day = date.getDate();
+		}
+
 		const [song] = await this.db
 			.insert(songs)
-			.values({
-				userId,
-				title: filename.replace(/\.[^/.]+$/, ''),
-				storagePath: key,
-			})
+			.values(values as typeof songs.$inferInsert)
 			.returning();
 
 		const uploadUrl = await this.storage.getUploadUrl(key, {

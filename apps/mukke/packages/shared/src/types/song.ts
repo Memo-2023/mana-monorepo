@@ -8,6 +8,8 @@ export interface Song {
 	genre: string | null;
 	trackNumber: number | null;
 	year: number | null;
+	month: number | null;
+	day: number | null;
 	duration: number | null;
 	storagePath: string;
 	coverArtPath: string | null;
@@ -59,6 +61,8 @@ export interface CreateSongDto {
 	genre?: string;
 	trackNumber?: number;
 	year?: number;
+	month?: number;
+	day?: number;
 	bpm?: number;
 }
 

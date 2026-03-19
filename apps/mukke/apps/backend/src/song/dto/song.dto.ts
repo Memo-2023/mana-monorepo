@@ -39,6 +39,18 @@ export class CreateSongDto {
 	@IsOptional()
 	year?: number;
 
+	@IsInt()
+	@IsOptional()
+	@Min(1)
+	@Max(12)
+	month?: number;
+
+	@IsInt()
+	@IsOptional()
+	@Min(1)
+	@Max(31)
+	day?: number;
+
 	@IsNumber()
 	@IsOptional()
 	@Min(1)
@@ -81,6 +93,18 @@ export class UpdateSongDto {
 	@IsOptional()
 	year?: number;
 
+	@IsInt()
+	@IsOptional()
+	@Min(1)
+	@Max(12)
+	month?: number;
+
+	@IsInt()
+	@IsOptional()
+	@Min(1)
+	@Max(31)
+	day?: number;
+
 	@IsNumber()
 	@IsOptional()
 	@Min(0)
@@ -103,4 +127,8 @@ export class SongUploadDto {
 	@IsNotEmpty()
 	@MaxLength(255)
 	filename!: string;
+
+	@IsNumber()
+	@IsOptional()
+	fileLastModified?: number;
 }

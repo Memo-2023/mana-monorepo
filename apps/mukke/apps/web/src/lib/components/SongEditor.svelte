@@ -17,6 +17,8 @@
 	let genre = $state('');
 	let trackNumber = $state('');
 	let year = $state('');
+	let month = $state('');
+	let day = $state('');
 	let bpm = $state('');
 	let coverUrl = $state<string | null>(null);
 	let saving = $state(false);
@@ -35,6 +37,8 @@
 			genre = song.genre ?? '';
 			trackNumber = song.trackNumber ? String(song.trackNumber) : '';
 			year = song.year ? String(song.year) : '';
+			month = song.month ? String(song.month) : '';
+			day = song.day ? String(song.day) : '';
 			bpm = song.bpm ? String(song.bpm) : '';
 			error = null;
 			success = null;
@@ -66,6 +70,8 @@
 				genre: genre || undefined,
 				trackNumber: trackNumber ? parseInt(trackNumber) : undefined,
 				year: year ? parseInt(year) : undefined,
+				month: month ? parseInt(month) : undefined,
+				day: day ? parseInt(day) : undefined,
 				bpm: bpm ? parseFloat(bpm) : undefined,
 			});
 			success = 'Metadata saved';
@@ -211,15 +217,29 @@
 						<div>
 							<label
 								for="edit-year"
-								class="block text-xs font-medium text-foreground-secondary mb-1">Year</label
+								class="block text-xs font-medium text-foreground-secondary mb-1">Date</label
 							>
-							<input
-								id="edit-year"
-								type="text"
-								bind:value={year}
-								class="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg focus:border-primary focus:outline-none"
-								placeholder="Year"
-							/>
+							<div class="grid grid-cols-3 gap-1">
+								<input
+									id="edit-year"
+									type="text"
+									bind:value={year}
+									class="w-full px-2 py-2 text-sm bg-background border border-border rounded-lg focus:border-primary focus:outline-none"
+									placeholder="Year"
+								/>
+								<input
+									type="text"
+									bind:value={month}
+									class="w-full px-2 py-2 text-sm bg-background border border-border rounded-lg focus:border-primary focus:outline-none"
+									placeholder="Mo"
+								/>
+								<input
+									type="text"
+									bind:value={day}
+									class="w-full px-2 py-2 text-sm bg-background border border-border rounded-lg focus:border-primary focus:outline-none"
+									placeholder="Day"
+								/>
+							</div>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-3">

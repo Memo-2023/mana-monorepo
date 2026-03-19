@@ -19,6 +19,8 @@ export function createMockSong(overrides?: Partial<Song>): Song {
 		genre: 'Rock',
 		trackNumber: 1,
 		year: 2024,
+		month: null,
+		day: null,
 		duration: 240.5,
 		storagePath: 'users/test-user-123/audio.mp3',
 		coverArtPath: null,

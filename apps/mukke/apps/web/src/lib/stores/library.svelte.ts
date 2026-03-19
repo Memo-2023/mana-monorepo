@@ -229,7 +229,10 @@ function createLibraryStore() {
 		async uploadSong(file: File) {
 			const uploadData = await fetchApi<{ song: Song; uploadUrl: string }>('/songs/upload', {
 				method: 'POST',
-				body: JSON.stringify({ filename: file.name }),
+				body: JSON.stringify({
+					filename: file.name,
+					fileLastModified: file.lastModified || undefined,
+				}),
 			});
 
 			await fetch(uploadData.uploadUrl, {

@@ -14,6 +14,8 @@
 			album: string;
 			genre: string;
 			year: string;
+			month: string;
+			day: string;
 		};
 	}
 
@@ -65,6 +67,8 @@
 				album: '',
 				genre: '',
 				year: '',
+				month: '',
+				day: '',
 			},
 		}));
 		files = [...files, ...newFiles];
@@ -95,6 +99,8 @@
 				if (extracted.album) files[index].metadata.album = extracted.album ?? '';
 				if (extracted.genre) files[index].metadata.genre = extracted.genre ?? '';
 				if (extracted.year) files[index].metadata.year = String(extracted.year);
+				if (extracted.month) files[index].metadata.month = String(extracted.month);
+				if (extracted.day) files[index].metadata.day = String(extracted.day);
 			} catch {
 				// Non-fatal: user can still edit metadata manually
 			}
@@ -115,6 +121,8 @@
 				album: uf.metadata.album || undefined,
 				genre: uf.metadata.genre || undefined,
 				year: uf.metadata.year ? parseInt(uf.metadata.year) : undefined,
+				month: uf.metadata.month ? parseInt(uf.metadata.month) : undefined,
+				day: uf.metadata.day ? parseInt(uf.metadata.day) : undefined,
 			};
 			await libraryStore.updateSongMetadata(uf.songId, data);
 		} catch (e) {
@@ -307,15 +315,29 @@
 								<div>
 									<label
 										for="year-{uf.id}"
-										class="block text-xs font-medium text-foreground-secondary mb-1">Year</label
+										class="block text-xs font-medium text-foreground-secondary mb-1">Date</label
 									>
-									<input
-										id="year-{uf.id}"
-										type="text"
-										bind:value={uf.metadata.year}
-										class="w-full px-3 py-1.5 text-sm bg-background border border-border rounded-lg focus:border-primary focus:outline-none"
-										placeholder="Year"
-									/>
+									<div class="grid grid-cols-3 gap-1">
+										<input
+											id="year-{uf.id}"
+											type="text"
+											bind:value={uf.metadata.year}
+											class="w-full px-2 py-1.5 text-sm bg-background border border-border rounded-lg focus:border-primary focus:outline-none"
+											placeholder="Year"
+										/>
+										<input
+											type="text"
+											bind:value={uf.metadata.month}
+											class="w-full px-2 py-1.5 text-sm bg-background border border-border rounded-lg focus:border-primary focus:outline-none"
+											placeholder="Mo"
+										/>
+										<input
+											type="text"
+											bind:value={uf.metadata.day}
+											class="w-full px-2 py-1.5 text-sm bg-background border border-border rounded-lg focus:border-primary focus:outline-none"
+											placeholder="Day"
+										/>
+									</div>
 								</div>
 							</div>
 						</div>

@@ -21,7 +21,11 @@ export class SongController {
 
 	@Post('upload')
 	async createUploadUrl(@CurrentUser() user: CurrentUserData, @Body() dto: SongUploadDto) {
-		const result = await this.songService.createUploadUrl(user.userId, dto.filename);
+		const result = await this.songService.createUploadUrl(
+			user.userId,
+			dto.filename,
+			dto.fileLastModified
+		);
 		return { song: result.song, uploadUrl: result.uploadUrl };
 	}
 
