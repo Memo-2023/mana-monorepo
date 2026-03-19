@@ -4,6 +4,7 @@ import { TemplateService } from './template.service';
 import { Template } from '../db/schema/templates.schema';
 import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
 import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { CreateTemplateDto, UpdateTemplateDto } from './dto/template.dto';
 
 @Controller('templates')
 @UseGuards(JwtAuthGuard)
@@ -48,16 +49,7 @@ export class TemplateController {
 
 	@Post()
 	async createTemplate(
-		@Body()
-		body: {
-			name: string;
-			description?: string;
-			systemPrompt: string;
-			initialQuestion?: string;
-			modelId?: string;
-			color?: string;
-			documentMode?: boolean;
-		},
+		@Body() body: CreateTemplateDto,
 		@CurrentUser() user: CurrentUserData
 	): Promise<Template> {
 		const result = await this.templateService.createTemplate(user.userId, body);
@@ -72,16 +64,7 @@ export class TemplateController {
 	@Patch(':id')
 	async updateTemplate(
 		@Param('id') id: string,
-		@Body()
-		body: Partial<{
-			name: string;
-			description: string;
-			systemPrompt: string;
-			initialQuestion: string;
-			modelId: string;
-			color: string;
-			documentMode: boolean;
-		}>,
+		@Body() body: UpdateTemplateDto,
 		@CurrentUser() user: CurrentUserData
 	): Promise<Template> {
 		const result = await this.templateService.updateTemplate(id, user.userId, body);

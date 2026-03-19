@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, ForbiddenException } from '@nestjs/common';
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import { AsyncResult, ok, err, DatabaseError, NotFoundError } from '@manacore/shared-errors';
 import { DATABASE_CONNECTION } from '../db/database.module';
@@ -177,6 +177,26 @@ export class SpaceService {
 		role: 'admin' | 'member' | 'viewer' = 'member'
 	): AsyncResult<SpaceMember> {
 		try {
+			// Verify the inviting user is the owner or an admin
+			const spaceResult = await this.getSpace(spaceId);
+			if (!spaceResult.ok) {
+				return err(spaceResult.error);
+			}
+
+			const isOwner = spaceResult.value.ownerId === invitedByUserId;
+			if (!isOwner) {
+				const inviterMember = await this.db
+					.select()
+					.from(spaceMembers)
+					.where(and(eq(spaceMembers.spaceId, spaceId), eq(spaceMembers.userId, invitedByUserId)))
+					.limit(1);
+
+				const isAdmin = inviterMember.length > 0 && inviterMember[0].role === 'admin';
+				if (!isAdmin) {
+					throw new ForbiddenException('Only owners and admins can invite users');
+				}
+			}
+
 			// Check if user is already a member
 			const existingMember = await this.db
 				.select()

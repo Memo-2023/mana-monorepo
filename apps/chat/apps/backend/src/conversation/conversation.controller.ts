@@ -15,6 +15,7 @@ import { Conversation } from '../db/schema/conversations.schema';
 import { Message } from '../db/schema/messages.schema';
 import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
 import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
+import { CreateConversationDto, AddMessageDto, UpdateTitleDto } from './dto/conversation.dto';
 
 @Controller('conversations')
 @UseGuards(JwtAuthGuard)
@@ -76,15 +77,7 @@ export class ConversationController {
 
 	@Post()
 	async createConversation(
-		@Body()
-		body: {
-			modelId: string;
-			title?: string;
-			templateId?: string;
-			conversationMode?: 'free' | 'guided' | 'template';
-			documentMode?: boolean;
-			spaceId?: string;
-		},
+		@Body() body: CreateConversationDto,
 		@CurrentUser() user: CurrentUserData
 	): Promise<Conversation> {
 		const result = await this.conversationService.createConversation(user.userId, body.modelId, {
@@ -105,7 +98,7 @@ export class ConversationController {
 	@Post(':id/messages')
 	async addMessage(
 		@Param('id') id: string,
-		@Body() body: { sender: 'user' | 'assistant' | 'system'; messageText: string },
+		@Body() body: AddMessageDto,
 		@CurrentUser() user: CurrentUserData
 	): Promise<Message> {
 		const result = await this.conversationService.addMessage(
@@ -125,7 +118,7 @@ export class ConversationController {
 	@Patch(':id/title')
 	async updateTitle(
 		@Param('id') id: string,
-		@Body() body: { title: string },
+		@Body() body: UpdateTitleDto,
 		@CurrentUser() user: CurrentUserData
 	): Promise<Conversation> {
 		const result = await this.conversationService.updateTitle(id, user.userId, body.title);

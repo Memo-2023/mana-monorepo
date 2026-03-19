@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, boolean, pgEnum, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { messages } from './messages.schema';
 import { documents } from './documents.schema';
@@ -8,20 +8,30 @@ import { templates } from './templates.schema';
 
 export const conversationModeEnum = pgEnum('conversation_mode', ['free', 'guided', 'template']);
 
-export const conversations = pgTable('conversations', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	userId: text('user_id').notNull(), // TEXT to support Better Auth nanoid format
-	modelId: uuid('model_id').references(() => models.id),
-	templateId: uuid('template_id').references(() => templates.id),
-	spaceId: uuid('space_id').references(() => spaces.id, { onDelete: 'set null' }),
-	title: text('title'),
-	conversationMode: conversationModeEnum('conversation_mode').default('free').notNull(),
-	documentMode: boolean('document_mode').default(false).notNull(),
-	isArchived: boolean('is_archived').default(false).notNull(),
-	isPinned: boolean('is_pinned').default(false).notNull(),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+export const conversations = pgTable(
+	'conversations',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: text('user_id').notNull(), // TEXT to support Better Auth nanoid format
+		modelId: uuid('model_id').references(() => models.id),
+		templateId: uuid('template_id').references(() => templates.id),
+		spaceId: uuid('space_id').references(() => spaces.id, { onDelete: 'set null' }),
+		title: text('title'),
+		conversationMode: conversationModeEnum('conversation_mode').default('free').notNull(),
+		documentMode: boolean('document_mode').default(false).notNull(),
+		isArchived: boolean('is_archived').default(false).notNull(),
+		isPinned: boolean('is_pinned').default(false).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		index('conversations_user_id_idx').on(table.userId),
+		index('conversations_space_id_idx').on(table.spaceId),
+		index('conversations_created_at_idx').on(table.createdAt),
+		index('conversations_model_id_idx').on(table.modelId),
+		index('conversations_template_id_idx').on(table.templateId),
+	]
+);
 
 export const conversationsRelations = relations(conversations, ({ one, many }) => ({
 	model: one(models, {

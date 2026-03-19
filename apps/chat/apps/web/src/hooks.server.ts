@@ -17,9 +17,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 		transformPageChunk: ({ html }) => {
 			// Inject runtime environment variables into the HTML
 			// These will be available on window.__PUBLIC_*__ for client-side code
+			// Use JSON.stringify to prevent HTML/script injection
 			const envScript = `<script>
-window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
-window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
+window.__PUBLIC_MANA_CORE_AUTH_URL__ = ${JSON.stringify(PUBLIC_MANA_CORE_AUTH_URL_CLIENT)};
+window.__PUBLIC_BACKEND_URL__ = ${JSON.stringify(PUBLIC_BACKEND_URL_CLIENT)};
 </script>`;
 			return html.replace('<head>', `<head>${envScript}`);
 		},

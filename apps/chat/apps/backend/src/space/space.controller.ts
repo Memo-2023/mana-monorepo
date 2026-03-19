@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	Delete,
+	ForbiddenException,
+	Get,
+	Param,
+	Patch,
+	Post,
+	UseGuards,
+} from '@nestjs/common';
 import { isOk } from '@manacore/shared-errors';
 import { SpaceService } from './space.service';
 import { Space } from '../db/schema/spaces.schema';
@@ -58,7 +68,16 @@ export class SpaceController {
 	}
 
 	@Get(':id/members')
-	async getSpaceMembers(@Param('id') id: string): Promise<SpaceMember[]> {
+	async getSpaceMembers(
+		@Param('id') id: string,
+		@CurrentUser() user: CurrentUserData
+	): Promise<SpaceMember[]> {
+		// Verify the requesting user is a member of the space
+		const roleResult = await this.spaceService.getUserRoleInSpace(id, user.userId);
+		if (!isOk(roleResult) || roleResult.value === null) {
+			throw new ForbiddenException('You are not a member of this space');
+		}
+
 		const result = await this.spaceService.getSpaceMembers(id);
 
 		if (!isOk(result)) {

@@ -4,6 +4,7 @@ import {
 	IsNumber,
 	IsOptional,
 	IsString,
+	MaxLength,
 	ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -15,6 +16,7 @@ export class ChatMessageDto {
 
 	@IsString()
 	@IsNotEmpty()
+	@MaxLength(50000)
 	content: string;
 }
 

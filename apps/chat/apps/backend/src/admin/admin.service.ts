@@ -101,7 +101,19 @@ export class AdminService {
 		const deletedCounts: EntityCount[] = [];
 		let totalDeleted = 0;
 
-		// Delete space memberships first
+		// Delete usage logs first (references messages and conversations)
+		const deletedUsageLogs = await this.db
+			.delete(schema.usageLogs)
+			.where(eq(schema.usageLogs.userId, userId))
+			.returning();
+		deletedCounts.push({
+			entity: 'usage_logs',
+			count: deletedUsageLogs.length,
+			label: 'Usage Logs',
+		});
+		totalDeleted += deletedUsageLogs.length;
+
+		// Delete space memberships
 		const deletedMemberships = await this.db
 			.delete(schema.spaceMembers)
 			.where(eq(schema.spaceMembers.userId, userId))
@@ -124,6 +136,18 @@ export class AdminService {
 			label: 'Spaces (Owned)',
 		});
 		totalDeleted += deletedSpaces.length;
+
+		// Delete templates owned by user
+		const deletedTemplates = await this.db
+			.delete(schema.templates)
+			.where(eq(schema.templates.userId, userId))
+			.returning();
+		deletedCounts.push({
+			entity: 'templates',
+			count: deletedTemplates.length,
+			label: 'Templates',
+		});
+		totalDeleted += deletedTemplates.length;
 
 		// Delete conversations (cascades to messages and documents)
 		const deletedConversations = await this.db

@@ -1,11 +1,31 @@
-import { Controller, Get, Post, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Post,
+	Delete,
+	Param,
+	Body,
+	Headers,
+	UseGuards,
+	UnauthorizedException,
+	Logger,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { GenerateService } from './generate.service';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { GenerateImageDto } from './dto/generate.dto';
 
 @Controller('generate')
 export class GenerateController {
-	constructor(private readonly generateService: GenerateService) {}
+	private readonly logger = new Logger(GenerateController.name);
+	private readonly webhookSecret: string;
+
+	constructor(
+		private readonly generateService: GenerateService,
+		private readonly configService: ConfigService
+	) {
+		this.webhookSecret = this.configService.get<string>('WEBHOOK_SECRET', 'dev-webhook-secret');
+	}
 
 	@Post()
 	@UseGuards(JwtAuthGuard)
@@ -25,9 +45,13 @@ export class GenerateController {
 		return this.generateService.cancelGeneration(id, user.userId);
 	}
 
-	// Webhook endpoint for Replicate - no auth required
 	@Post('webhook')
-	async handleWebhook(@Body() body: any) {
+	async handleWebhook(@Body() body: any, @Headers('x-webhook-secret') webhookSecret?: string) {
+		if (!webhookSecret || webhookSecret !== this.webhookSecret) {
+			this.logger.warn('Webhook request with missing or invalid secret');
+			throw new UnauthorizedException('Invalid webhook secret');
+		}
+
 		return this.generateService.handleWebhook(body);
 	}
 }

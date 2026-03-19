@@ -560,30 +560,31 @@ export class GenerateService {
 				`generated-${generation.id}.${format}`
 			);
 
-			// Create image record
-			await this.db.insert(images).values({
-				userId: generation.userId,
-				generationId: generation.id,
-				prompt: generation.prompt,
-				negativePrompt: generation.negativePrompt,
-				model: generation.model,
-				style: generation.style,
-				storagePath,
-				publicUrl,
-				filename: `generated-${generation.id}.${format}`,
-				width: generation.width,
-				height: generation.height,
-				format,
-			});
+			// Create image record and update generation status atomically
+			await this.db.transaction(async (tx) => {
+				await tx.insert(images).values({
+					userId: generation.userId,
+					generationId: generation.id,
+					prompt: generation.prompt,
+					negativePrompt: generation.negativePrompt,
+					model: generation.model,
+					style: generation.style,
+					storagePath,
+					publicUrl,
+					filename: `generated-${generation.id}.${format}`,
+					width: generation.width,
+					height: generation.height,
+					format,
+				});
 
-			// Update generation as completed
-			await this.db
-				.update(imageGenerations)
-				.set({
-					status: 'completed',
-					completedAt: new Date(),
-				})
-				.where(eq(imageGenerations.id, generation.id));
+				await tx
+					.update(imageGenerations)
+					.set({
+						status: 'completed',
+						completedAt: new Date(),
+					})
+					.where(eq(imageGenerations.id, generation.id));
+			});
 		} catch (error) {
 			this.logger.error(`Error processing completed generation ${generation.id}`, error);
 

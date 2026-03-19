@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, unique, index } from 'drizzle-orm/pg-core';
 import { images } from './images.schema';
 
 export const imageLikes = pgTable(
@@ -13,6 +13,7 @@ export const imageLikes = pgTable(
 	},
 	(table) => ({
 		uniqueImageUser: unique('unique_image_user').on(table.imageId, table.userId),
+		imageIdIdx: index('image_likes_image_id_idx').on(table.imageId),
 	})
 );
 

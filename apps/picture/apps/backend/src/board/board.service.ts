@@ -205,47 +205,51 @@ export class BoardService {
 				throw new ForbiddenException('Access denied');
 			}
 
-			// Create new board
-			const newBoard = await this.db
-				.insert(boards)
-				.values({
-					userId,
-					name: `${board.name} (Copy)`,
-					description: board.description,
-					canvasWidth: board.canvasWidth,
-					canvasHeight: board.canvasHeight,
-					backgroundColor: board.backgroundColor,
-					isPublic: false,
-				})
-				.returning();
+			// Use a transaction to ensure board + items are created atomically
+			const newBoard = await this.db.transaction(async (tx) => {
+				const newBoardResult = await tx
+					.insert(boards)
+					.values({
+						userId,
+						name: `${board.name} (Copy)`,
+						description: board.description,
+						canvasWidth: board.canvasWidth,
+						canvasHeight: board.canvasHeight,
+						backgroundColor: board.backgroundColor,
+						isPublic: false,
+					})
+					.returning();
 
-			// Copy board items
-			const items = await this.db.select().from(boardItems).where(eq(boardItems.boardId, id));
+				// Copy board items
+				const items = await tx.select().from(boardItems).where(eq(boardItems.boardId, id));
 
-			if (items.length > 0) {
-				await this.db.insert(boardItems).values(
-					items.map((item) => ({
-						boardId: newBoard[0].id,
-						imageId: item.imageId,
-						itemType: item.itemType,
-						positionX: item.positionX,
-						positionY: item.positionY,
-						scaleX: item.scaleX,
-						scaleY: item.scaleY,
-						rotation: item.rotation,
-						zIndex: item.zIndex,
-						opacity: item.opacity,
-						width: item.width,
-						height: item.height,
-						textContent: item.textContent,
-						fontSize: item.fontSize,
-						color: item.color,
-						properties: item.properties,
-					}))
-				);
-			}
+				if (items.length > 0) {
+					await tx.insert(boardItems).values(
+						items.map((item) => ({
+							boardId: newBoardResult[0].id,
+							imageId: item.imageId,
+							itemType: item.itemType,
+							positionX: item.positionX,
+							positionY: item.positionY,
+							scaleX: item.scaleX,
+							scaleY: item.scaleY,
+							rotation: item.rotation,
+							zIndex: item.zIndex,
+							opacity: item.opacity,
+							width: item.width,
+							height: item.height,
+							textContent: item.textContent,
+							fontSize: item.fontSize,
+							color: item.color,
+							properties: item.properties,
+						}))
+					);
+				}
 
-			return newBoard[0];
+				return newBoardResult[0];
+			});
+
+			return newBoard;
 		} catch (error) {
 			if (error instanceof NotFoundException || error instanceof ForbiddenException) {
 				throw error;
