@@ -1,0 +1,238 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+	const audits = await getCollection('audits');
+	return audits.map((audit) => ({
+		params: { slug: audit.slug },
+		props: { audit },
+	}));
+}
+
+const { audit } = Astro.props;
+const { Content } = await audit.render();
+
+const statusLabels: Record<string, string> = {
+	prototype: 'Prototyp',
+	alpha: 'Alpha',
+	beta: 'Beta',
+	production: 'Production',
+	mature: 'Ausgereift',
+};
+
+const statusColors: Record<string, string> = {
+	prototype: 'bg-red-500/10 text-red-500',
+	alpha: 'bg-orange-500/10 text-orange-500',
+	beta: 'bg-yellow-500/10 text-yellow-500',
+	production: 'bg-green-500/10 text-green-500',
+	mature: 'bg-emerald-500/10 text-emerald-500',
+};
+
+const categoryLabels: Record<string, string> = {
+	backend: 'Backend',
+	frontend: 'Frontend',
+	database: 'Database',
+	testing: 'Testing',
+	deployment: 'Deployment',
+	documentation: 'Doku',
+	security: 'Security',
+	ux: 'UX',
+};
+
+function getScoreColor(score: number): string {
+	if (score >= 85) return 'text-emerald-500';
+	if (score >= 70) return 'text-green-500';
+	if (score >= 50) return 'text-yellow-500';
+	if (score >= 30) return 'text-orange-500';
+	return 'text-red-500';
+}
+
+function getBarColor(score: number): string {
+	if (score >= 85) return 'bg-emerald-500';
+	if (score >= 70) return 'bg-green-500';
+	if (score >= 50) return 'bg-yellow-500';
+	if (score >= 30) return 'bg-orange-500';
+	return 'bg-red-500';
+}
+---
+
+<Layout title={`${audit.data.title} - ManaCore Audits`} description={audit.data.description}>
+	<Navbar />
+
+	<Section>
+		<Container>
+			<div class="mx-auto max-w-3xl">
+				{/* Back link */}
+				<a
+					href="/audits"
+					class="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center gap-1 text-sm transition-colors"
+				>
+					&larr; Alle Audits
+				</a>
+
+				{/* Header */}
+				<div class="mb-8">
+					<div class="mb-3 flex items-center gap-3">
+						<span
+							class={`rounded-full px-3 py-1 text-xs font-medium ${statusColors[audit.data.status]}`}
+						>
+							{statusLabels[audit.data.status]}
+						</span>
+						<span class="text-muted-foreground text-sm">
+							{
+								audit.data.date.toLocaleDateString('de-DE', {
+									day: '2-digit',
+									month: 'long',
+									year: 'numeric',
+								})
+							}
+						</span>
+						<span class="text-muted-foreground text-sm">
+							von {audit.data.author}
+						</span>
+					</div>
+
+					<h1 class="text-foreground mb-2 text-3xl font-bold">{audit.data.title}</h1>
+					<p class="text-muted-foreground text-lg">{audit.data.description}</p>
+				</div>
+
+				{/* Overall Score */}
+				<div
+					class="border-border/50 mb-8 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-6"
+				>
+					<div class="flex items-center justify-between">
+						<div>
+							<h2 class="text-foreground text-sm font-semibold">Gesamtscore</h2>
+							<p class="text-muted-foreground text-xs">Gewichteter Durchschnitt aus 8 Kategorien</p>
+						</div>
+						<div class="text-center">
+							<span class={`text-5xl font-bold ${getScoreColor(audit.data.score)}`}>
+								{audit.data.score}
+							</span>
+							<span class="text-muted-foreground block text-sm">/100</span>
+						</div>
+					</div>
+				</div>
+
+				{/* Category Scores */}
+				<div
+					class="border-border/50 mb-8 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-6"
+				>
+					<h2 class="text-foreground mb-4 text-sm font-semibold">Kategorie-Scores</h2>
+					<div class="space-y-3">
+						{
+							Object.entries(audit.data.scores).map(([key, value]) => (
+								<div class="flex items-center gap-3">
+									<span class="text-muted-foreground w-24 text-xs">
+										{categoryLabels[key] || key}
+									</span>
+									<div class="bg-muted h-2 flex-1 overflow-hidden rounded-full">
+										<div
+											class={`h-full rounded-full transition-all ${getBarColor(value)}`}
+											style={`width: ${value}%`}
+										/>
+									</div>
+									<span class={`w-8 text-right text-xs font-medium ${getScoreColor(value)}`}>
+										{value}
+									</span>
+								</div>
+							))
+						}
+					</div>
+				</div>
+
+				{/* Stats */}
+				{
+					audit.data.stats && (
+						<div class="border-border/50 mb-8 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-6">
+							<h2 class="text-foreground mb-4 text-sm font-semibold">Metriken</h2>
+							<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+								{audit.data.stats.backendModules !== undefined && (
+									<div>
+										<span class="text-foreground text-2xl font-bold">
+											{audit.data.stats.backendModules}
+										</span>
+										<span class="text-muted-foreground block text-xs">Backend Module</span>
+									</div>
+								)}
+								{audit.data.stats.webRoutes !== undefined && (
+									<div>
+										<span class="text-foreground text-2xl font-bold">
+											{audit.data.stats.webRoutes}
+										</span>
+										<span class="text-muted-foreground block text-xs">Web Routes</span>
+									</div>
+								)}
+								{audit.data.stats.components !== undefined && (
+									<div>
+										<span class="text-foreground text-2xl font-bold">
+											{audit.data.stats.components}
+										</span>
+										<span class="text-muted-foreground block text-xs">Komponenten</span>
+									</div>
+								)}
+								{audit.data.stats.dbTables !== undefined && (
+									<div>
+										<span class="text-foreground text-2xl font-bold">
+											{audit.data.stats.dbTables}
+										</span>
+										<span class="text-muted-foreground block text-xs">DB Tabellen</span>
+									</div>
+								)}
+								{audit.data.stats.testCount !== undefined && (
+									<div>
+										<span class="text-foreground text-2xl font-bold">
+											{audit.data.stats.testCount}
+										</span>
+										<span class="text-muted-foreground block text-xs">Tests</span>
+									</div>
+								)}
+								{audit.data.stats.testFiles !== undefined && (
+									<div>
+										<span class="text-foreground text-2xl font-bold">
+											{audit.data.stats.testFiles}
+										</span>
+										<span class="text-muted-foreground block text-xs">Test Files</span>
+									</div>
+								)}
+								{audit.data.stats.languages !== undefined && (
+									<div>
+										<span class="text-foreground text-2xl font-bold">
+											{audit.data.stats.languages}
+										</span>
+										<span class="text-muted-foreground block text-xs">Sprachen</span>
+									</div>
+								)}
+							</div>
+						</div>
+					)
+				}
+
+				{/* Tags */}
+				{
+					audit.data.tags && audit.data.tags.length > 0 && (
+						<div class="mb-8 flex flex-wrap gap-2">
+							{audit.data.tags.map((tag: string) => (
+								<span class="bg-muted text-muted-foreground rounded-full px-3 py-1 text-xs">
+									{tag}
+								</span>
+							))}
+						</div>
+					)
+				}
+
+				{/* Content */}
+				<div class="prose prose-invert prose-sm max-w-none">
+					<Content />
+				</div>
+			</div>
+		</Container>
+	</Section>
+
+	<Footer />
+</Layout>

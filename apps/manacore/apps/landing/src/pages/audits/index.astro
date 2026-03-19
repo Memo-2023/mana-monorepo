@@ -1,0 +1,286 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import HeroSection from '../../components/content/HeroSection.astro';
+import { getCollection } from 'astro:content';
+
+const audits = await getCollection('audits');
+// Default: sort by score descending
+const sortedAudits = audits.sort((a, b) => b.data.score - a.data.score);
+
+const statusColors: Record<string, { bg: string; text: string }> = {
+	prototype: { bg: 'bg-red-500/10', text: 'text-red-500' },
+	alpha: { bg: 'bg-orange-500/10', text: 'text-orange-500' },
+	beta: { bg: 'bg-yellow-500/10', text: 'text-yellow-500' },
+	production: { bg: 'bg-green-500/10', text: 'text-green-500' },
+	mature: { bg: 'bg-emerald-500/10', text: 'text-emerald-500' },
+};
+
+function getScoreColor(score: number): string {
+	if (score >= 85) return 'text-emerald-500';
+	if (score >= 70) return 'text-green-500';
+	if (score >= 50) return 'text-yellow-500';
+	if (score >= 30) return 'text-orange-500';
+	return 'text-red-500';
+}
+
+function getScoreBarColor(score: number): string {
+	if (score >= 85) return 'bg-emerald-500';
+	if (score >= 70) return 'bg-green-500';
+	if (score >= 50) return 'bg-yellow-500';
+	if (score >= 30) return 'bg-orange-500';
+	return 'bg-red-500';
+}
+
+// Collect unique statuses
+const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
+---
+
+<Layout title="App Audits - ManaCore" description="Production Readiness Audits der ManaCore Apps">
+	<Navbar />
+
+	<HeroSection
+		badge="Quality Assurance"
+		title="App Audits"
+		subtitle="Production Readiness Bewertungen aller ManaCore Apps. Jede App wird in 8 Kategorien bewertet: Backend, Frontend, Database, Testing, Deployment, Documentation, Security und UX."
+	/>
+
+	<Section>
+		<Container>
+			{/* Filter bar */}
+			<div class="mx-auto mb-6 flex max-w-4xl flex-wrap items-center gap-3">
+				{/* Status filter */}
+				<div class="flex flex-wrap gap-2">
+					<button
+						data-filter="all"
+						class="filter-btn border-primary/50 bg-primary/10 text-primary rounded-full border px-3 py-1 text-xs font-medium transition-all"
+					>
+						Alle ({sortedAudits.length})
+					</button>
+					{
+						(['production', 'beta', 'alpha'] as const).map((s) => {
+							const count = sortedAudits.filter((a) => a.data.status === s).length;
+							if (count === 0) return null;
+							const colors = statusColors[s];
+							return (
+								<button
+									data-filter={s}
+									class={`filter-btn rounded-full border border-transparent px-3 py-1 text-xs font-medium transition-all hover:border-current ${colors.text} opacity-60 hover:opacity-100`}
+								>
+									{s.charAt(0).toUpperCase() + s.slice(1)} ({count})
+								</button>
+							);
+						})
+					}
+				</div>
+
+				{/* Spacer */}
+				<div class="flex-1"></div>
+
+				{/* Sort */}
+				<div class="flex items-center gap-2">
+					<span class="text-muted-foreground text-xs">Sortierung:</span>
+					<select
+						id="sort-select"
+						class="bg-muted text-foreground rounded-lg border-none px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-white/20"
+					>
+						<option value="score-desc" selected>Score (hoch → niedrig)</option>
+						<option value="score-asc">Score (niedrig → hoch)</option>
+						<option value="name-asc">Name (A → Z)</option>
+						<option value="date-desc">Datum (neueste zuerst)</option>
+					</select>
+				</div>
+			</div>
+
+			{/* Audit cards */}
+			<div id="audit-list" class="mx-auto max-w-4xl space-y-4">
+				{
+					sortedAudits.map((audit) => {
+						const { data } = audit;
+						const status = statusColors[data.status] || statusColors.alpha;
+						const scoreColor = getScoreColor(data.score);
+
+						return (
+							<a
+								href={`/audits/${audit.slug}`}
+								class="audit-card group border-border/50 hover:border-border block rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-5 transition-all hover:shadow-lg"
+								data-score={data.score}
+								data-status={data.status}
+								data-name={data.app}
+								data-date={data.date.toISOString()}
+							>
+								<div class="flex items-start justify-between gap-4">
+									<div class="min-w-0 flex-1">
+										<div class="mb-2 flex items-center gap-2">
+											<span
+												class={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${status.bg} ${status.text}`}
+											>
+												{data.status}
+											</span>
+											<span class="text-muted-foreground truncate text-xs font-medium">
+												{data.app}
+											</span>
+											<span class="text-muted-foreground/50 text-[10px]">
+												{data.date.toLocaleDateString('de-DE', {
+													day: '2-digit',
+													month: '2-digit',
+													year: 'numeric',
+												})}
+											</span>
+										</div>
+
+										<p class="text-muted-foreground mb-3 line-clamp-1 text-xs">
+											{data.description}
+										</p>
+
+										{/* Score bars */}
+										<div class="grid grid-cols-4 gap-x-3 gap-y-1 sm:grid-cols-8">
+											{Object.entries(data.scores).map(([key, value]) => (
+												<div>
+													<div class="bg-muted mb-0.5 h-1 overflow-hidden rounded-full">
+														<div
+															class={`h-full rounded-full ${getScoreBarColor(value)}`}
+															style={`width: ${value}%`}
+														/>
+													</div>
+													<span class="text-muted-foreground/70 text-[9px] capitalize">{key}</span>
+												</div>
+											))}
+										</div>
+
+										{/* Stats row */}
+										{data.stats && (
+											<div class="text-muted-foreground/60 mt-2 flex flex-wrap gap-3 text-[10px]">
+												{data.stats.backendModules ? (
+													<span>{data.stats.backendModules} Module</span>
+												) : null}
+												{data.stats.webRoutes ? <span>{data.stats.webRoutes} Routes</span> : null}
+												{data.stats.dbTables ? <span>{data.stats.dbTables} Tables</span> : null}
+												{data.stats.testCount !== undefined ? (
+													<span>{data.stats.testCount} Tests</span>
+												) : null}
+												{data.stats.languages ? <span>{data.stats.languages} Lang</span> : null}
+											</div>
+										)}
+									</div>
+
+									{/* Score */}
+									<div class="flex shrink-0 flex-col items-center">
+										<div class={`text-2xl font-bold tabular-nums ${scoreColor}`}>{data.score}</div>
+										<span class="text-muted-foreground/50 text-[10px]">/100</span>
+									</div>
+								</div>
+							</a>
+						);
+					})
+				}
+			</div>
+
+			{/* No results */}
+			<div
+				id="no-results"
+				class="text-muted-foreground mx-auto mt-8 hidden max-w-4xl text-center text-sm"
+			>
+				Keine Apps für diesen Filter gefunden.
+			</div>
+
+			{/* Scoring reference */}
+			<div class="border-border/30 mx-auto mt-10 max-w-4xl rounded-xl border p-5">
+				<h3 class="text-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
+					Scoring-Referenz
+				</h3>
+				<div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
+					{
+						[
+							{ label: 'Prototype', range: '0-25', color: 'bg-red-500' },
+							{ label: 'Alpha', range: '26-50', color: 'bg-orange-500' },
+							{ label: 'Beta', range: '51-70', color: 'bg-yellow-500' },
+							{ label: 'Production', range: '71-85', color: 'bg-green-500' },
+							{ label: 'Mature', range: '86-100', color: 'bg-emerald-500' },
+						].map(({ label, range, color }) => (
+							<div class="flex items-center gap-2">
+								<div class={`h-2 w-2 rounded-full ${color}`} />
+								<span class="text-muted-foreground text-[11px]">
+									{label} ({range})
+								</span>
+							</div>
+						))
+					}
+				</div>
+			</div>
+		</Container>
+	</Section>
+
+	<Footer />
+</Layout>
+
+<script>
+	const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+	const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
+	const auditList = document.getElementById('audit-list')!;
+	const noResults = document.getElementById('no-results')!;
+	let activeFilter = 'all';
+
+	function applyFilter() {
+		const cards = auditList.querySelectorAll<HTMLAnchorElement>('.audit-card');
+		let visibleCount = 0;
+
+		cards.forEach((card) => {
+			const status = card.dataset.status;
+			const show = activeFilter === 'all' || status === activeFilter;
+			card.style.display = show ? '' : 'none';
+			if (show) visibleCount++;
+		});
+
+		noResults.classList.toggle('hidden', visibleCount > 0);
+	}
+
+	function applySort() {
+		const cards = Array.from(auditList.querySelectorAll<HTMLAnchorElement>('.audit-card'));
+		const sortValue = sortSelect.value;
+
+		cards.sort((a, b) => {
+			switch (sortValue) {
+				case 'score-desc':
+					return Number(b.dataset.score) - Number(a.dataset.score);
+				case 'score-asc':
+					return Number(a.dataset.score) - Number(b.dataset.score);
+				case 'name-asc':
+					return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+				case 'date-desc':
+					return (
+						new Date(b.dataset.date || '').getTime() - new Date(a.dataset.date || '').getTime()
+					);
+				default:
+					return 0;
+			}
+		});
+
+		cards.forEach((card) => auditList.appendChild(card));
+	}
+
+	// Filter buttons
+	filterBtns.forEach((btn) => {
+		btn.addEventListener('click', () => {
+			activeFilter = btn.dataset.filter || 'all';
+
+			filterBtns.forEach((b) => {
+				const isActive = b.dataset.filter === activeFilter;
+				b.classList.toggle('border-primary/50', isActive);
+				b.classList.toggle('bg-primary/10', isActive);
+				b.classList.toggle('text-primary', isActive);
+				b.classList.toggle('opacity-60', !isActive);
+				b.classList.toggle('opacity-100', isActive);
+				b.classList.toggle('border-transparent', !isActive);
+			});
+
+			applyFilter();
+		});
+	});
+
+	// Sort select
+	sortSelect.addEventListener('change', applySort);
+</script>

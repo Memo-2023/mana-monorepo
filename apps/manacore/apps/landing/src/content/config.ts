@@ -181,6 +181,46 @@ const devlogCollection = defineCollection({
 	}),
 });
 
+const auditsCollection = defineCollection({
+	type: 'content',
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		date: z.date(),
+		app: z.string(),
+		author: z.string().default('Till Schneider'),
+		tags: z.array(z.string()).optional(),
+		// Overall score (0-100)
+		score: z.number().min(0).max(100),
+		// Category scores (0-100)
+		scores: z.object({
+			backend: z.number().min(0).max(100),
+			frontend: z.number().min(0).max(100),
+			database: z.number().min(0).max(100),
+			testing: z.number().min(0).max(100),
+			deployment: z.number().min(0).max(100),
+			documentation: z.number().min(0).max(100),
+			security: z.number().min(0).max(100),
+			ux: z.number().min(0).max(100),
+		}),
+		// Readiness level
+		status: z.enum(['prototype', 'alpha', 'beta', 'production', 'mature']),
+		// Stats
+		stats: z
+			.object({
+				backendModules: z.number().optional(),
+				webRoutes: z.number().optional(),
+				components: z.number().optional(),
+				dbTables: z.number().optional(),
+				testFiles: z.number().optional(),
+				testCount: z.number().optional(),
+				languages: z.number().optional(),
+				linesOfCode: z.number().optional(),
+			})
+			.optional(),
+	}),
+});
+
 const blueprintsCollection = defineCollection({
 	type: 'content',
 	schema: z.object({
@@ -217,5 +257,6 @@ export const collections = {
 	mission: missionCollection,
 	context: contextCollection,
 	devlog: devlogCollection,
+	audits: auditsCollection,
 	blueprints: blueprintsCollection,
 };
