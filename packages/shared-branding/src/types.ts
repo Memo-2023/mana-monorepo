@@ -23,7 +23,9 @@ export type AppId =
 	| 'skilltree'
 	| 'planta'
 	| 'playground'
-	| 'lightwrite';
+	| 'lightwrite'
+	| 'context'
+	| 'mukke';
 
 /**
  * App branding configuration

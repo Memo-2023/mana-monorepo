@@ -324,6 +324,22 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'context',
+		name: 'Context',
+		description: {
+			de: 'Wissensmanagement',
+			en: 'Knowledge Management',
+		},
+		longDescription: {
+			de: 'AI-gestütztes Dokumenten- und Wissensmanagement mit Spaces, Kontextreferenzen und KI-Generierung.',
+			en: 'AI-powered document and knowledge management with spaces, context references, and AI generation.',
+		},
+		icon: APP_ICONS.context,
+		color: '#0ea5e9',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -413,6 +429,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	questions: { dev: 'http://localhost:5111', prod: 'https://questions.manacore.app' },
 	matrix: { dev: 'http://localhost:5180', prod: 'https://matrix.mana.how' },
 	playground: { dev: 'http://localhost:5190', prod: 'https://playground.mana.how' },
+	context: { dev: 'http://localhost:5192', prod: 'https://context.manacore.app' },
 };
 
 /**
