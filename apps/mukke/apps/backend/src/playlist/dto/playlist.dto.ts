@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional, IsUUID, MaxLength } from 'class-validator';
+import {
+	IsString,
+	IsNotEmpty,
+	IsOptional,
+	IsUUID,
+	MaxLength,
+	ArrayMaxSize,
+	IsArray,
+} from 'class-validator';
 
 export class CreatePlaylistDto {
 	@IsString()
@@ -8,6 +16,7 @@ export class CreatePlaylistDto {
 
 	@IsString()
 	@IsOptional()
+	@MaxLength(2000)
 	description?: string;
 }
 
@@ -19,6 +28,7 @@ export class UpdatePlaylistDto {
 
 	@IsString()
 	@IsOptional()
+	@MaxLength(2000)
 	description?: string;
 }
 
@@ -29,7 +39,9 @@ export class AddSongDto {
 }
 
 export class ReorderSongsDto {
+	@IsArray()
 	@IsUUID('4', { each: true })
 	@IsNotEmpty({ each: true })
+	@ArrayMaxSize(1000)
 	songIds!: string[];
 }

@@ -67,15 +67,20 @@ export class ProjectService {
 		}
 
 		const title = song.artist ? `${song.title} - ${song.artist}` : song.title;
-		const [project] = await this.db.insert(projects).values({ userId, title, songId }).returning();
 
-		// Create a beat record linked to the song's storage
-		await this.db.insert(beats).values({
-			projectId: project.id,
-			storagePath: song.storagePath,
-			filename: `${song.title}.mp3`,
-			duration: song.duration,
-			bpm: song.bpm,
+		const project = await this.db.transaction(async (tx) => {
+			const [newProject] = await tx.insert(projects).values({ userId, title, songId }).returning();
+
+			// Create a beat record linked to the song's storage
+			await tx.insert(beats).values({
+				projectId: newProject.id,
+				storagePath: song.storagePath,
+				filename: `${song.title}.mp3`,
+				duration: song.duration,
+				bpm: song.bpm,
+			});
+
+			return newProject;
 		});
 
 		return project;

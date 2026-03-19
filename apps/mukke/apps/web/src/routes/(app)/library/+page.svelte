@@ -17,11 +17,12 @@
 	}
 
 	async function fetchApi<T>(path: string, options: RequestInit = {}): Promise<T> {
+		const authHeaders = await authStore.getAuthHeaders();
 		const response = await fetch(`${getBackendUrl()}${path}`, {
 			...options,
 			headers: {
 				'Content-Type': 'application/json',
-				...authStore.getAuthHeaders(),
+				...authHeaders,
 				...options.headers,
 			},
 		});

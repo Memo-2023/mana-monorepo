@@ -100,5 +100,9 @@ ingress:
   - hostname: link.mana.how
     service: http://localhost:4090
 
+  # GlitchTip Error Tracking
+  - hostname: glitchtip.mana.how
+    service: http://localhost:8020
+
   # Catch-all
   - service: http_status:404

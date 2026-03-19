@@ -15,10 +15,11 @@
 	}
 
 	async function fetchApi<T>(path: string): Promise<T> {
+		const authHeaders = await authStore.getAuthHeaders();
 		const response = await fetch(`${getBackendUrl()}${path}`, {
 			headers: {
 				'Content-Type': 'application/json',
-				...authStore.getAuthHeaders(),
+				...authHeaders,
 			},
 		});
 		if (!response.ok) throw new Error('Request failed');

@@ -1,4 +1,14 @@
-import { IsString, IsNotEmpty, IsUUID, IsNumber, IsOptional, IsObject } from 'class-validator';
+import {
+	IsString,
+	IsNotEmpty,
+	IsUUID,
+	IsNumber,
+	IsOptional,
+	IsObject,
+	MaxLength,
+	Min,
+	Max,
+} from 'class-validator';
 
 export class CreateBeatUploadDto {
 	@IsUUID()
@@ -7,6 +17,7 @@ export class CreateBeatUploadDto {
 
 	@IsString()
 	@IsNotEmpty()
+	@MaxLength(255)
 	filename!: string;
 }
 
@@ -19,14 +30,19 @@ export class UseLibraryBeatDto {
 export class UpdateBeatMetadataDto {
 	@IsNumber()
 	@IsOptional()
+	@Min(0)
 	duration?: number;
 
 	@IsNumber()
 	@IsOptional()
+	@Min(1)
+	@Max(999)
 	bpm?: number;
 
 	@IsNumber()
 	@IsOptional()
+	@Min(0)
+	@Max(1)
 	bpmConfidence?: number;
 
 	@IsObject()

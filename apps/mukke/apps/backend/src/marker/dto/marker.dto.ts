@@ -9,6 +9,7 @@ import {
 	ValidateNested,
 	MaxLength,
 	Min,
+	ArrayMaxSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -115,6 +116,7 @@ export class BulkCreateMarkersDto {
 
 	@IsArray()
 	@ValidateNested({ each: true })
+	@ArrayMaxSize(500)
 	@Type(() => MarkerItemDto)
 	markers!: MarkerItemDto[];
 }
@@ -132,6 +134,7 @@ class MarkerUpdateItemDto {
 export class BulkUpdateMarkersDto {
 	@IsArray()
 	@ValidateNested({ each: true })
+	@ArrayMaxSize(500)
 	@Type(() => MarkerUpdateItemDto)
 	updates!: MarkerUpdateItemDto[];
 }

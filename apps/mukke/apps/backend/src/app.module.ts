@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { DatabaseModule } from './db/database.module';
 import { ProjectModule } from './project/project.module';
 import { BeatModule } from './beat/beat.module';
@@ -18,6 +19,7 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 			isGlobal: true,
 			envFilePath: '.env',
 		}),
+		ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
 		DatabaseModule,
 		ProjectModule,
 		BeatModule,

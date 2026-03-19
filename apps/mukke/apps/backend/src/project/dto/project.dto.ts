@@ -8,6 +8,7 @@ export class CreateProjectDto {
 
 	@IsString()
 	@IsOptional()
+	@MaxLength(2000)
 	description?: string;
 }
 
@@ -19,5 +20,6 @@ export class UpdateProjectDto {
 
 	@IsString()
 	@IsOptional()
+	@MaxLength(2000)
 	description?: string;
 }

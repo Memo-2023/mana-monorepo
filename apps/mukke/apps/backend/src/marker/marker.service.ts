@@ -100,11 +100,20 @@ export class MarkerService {
 			data: Partial<Pick<Marker, 'startTime' | 'endTime' | 'sortOrder'>>;
 		}>
 	): Promise<Marker[]> {
-		const results: Marker[] = [];
-		for (const update of updates) {
-			const marker = await this.update(update.id, userId, update.data);
-			results.push(marker);
-		}
-		return results;
+		return this.db.transaction(async (tx) => {
+			const results: Marker[] = [];
+			for (const update of updates) {
+				const marker = await this.findByIdOrThrow(update.id);
+				await this.verifyBeatOwnership(marker.beatId, userId);
+
+				const [updatedMarker] = await tx
+					.update(markers)
+					.set(update.data)
+					.where(eq(markers.id, update.id))
+					.returning();
+				results.push(updatedMarker);
+			}
+			return results;
+		});
 	}
 }

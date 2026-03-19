@@ -6,11 +6,14 @@ import {
 	ValidateNested,
 	IsInt,
 	Min,
+	MaxLength,
+	ArrayMaxSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateOrUpdateLyricsDto {
 	@IsString()
+	@MaxLength(50000)
 	content!: string;
 }
 
@@ -20,6 +23,7 @@ class LyricLineDto {
 	lineNumber!: number;
 
 	@IsString()
+	@MaxLength(1000)
 	text!: string;
 
 	@IsNumber()
@@ -36,6 +40,7 @@ class LyricLineDto {
 export class SyncLinesDto {
 	@IsArray()
 	@ValidateNested({ each: true })
+	@ArrayMaxSize(2000)
 	@Type(() => LyricLineDto)
 	lines!: LyricLineDto[];
 }

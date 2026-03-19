@@ -121,11 +121,15 @@ export class PlaylistService {
 	async reorderSongs(playlistId: string, userId: string, songIds: string[]): Promise<void> {
 		await this.findById(playlistId, userId);
 
-		for (let i = 0; i < songIds.length; i++) {
-			await this.db
-				.update(playlistSongs)
-				.set({ sortOrder: i })
-				.where(and(eq(playlistSongs.playlistId, playlistId), eq(playlistSongs.songId, songIds[i])));
-		}
+		await this.db.transaction(async (tx) => {
+			for (let i = 0; i < songIds.length; i++) {
+				await tx
+					.update(playlistSongs)
+					.set({ sortOrder: i })
+					.where(
+						and(eq(playlistSongs.playlistId, playlistId), eq(playlistSongs.songId, songIds[i]))
+					);
+			}
+		});
 	}
 }

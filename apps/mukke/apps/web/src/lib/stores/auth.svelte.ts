@@ -238,13 +238,11 @@ export const authStore = {
 		return await tokenManager.getValidToken();
 	},
 
-	getAuthHeaders(): Record<string, string> {
-		const authService = getAuthService();
-		if (!authService) return {};
+	async getAuthHeaders(): Promise<Record<string, string>> {
+		const tokenManager = getTokenManager();
+		if (!tokenManager) return {};
 
-		// Get token synchronously from storage if available
-		const token =
-			typeof localStorage !== 'undefined' ? localStorage.getItem('manacore_access_token') : null;
+		const token = await tokenManager.getValidToken();
 		if (token) {
 			return { Authorization: `Bearer ${token}` };
 		}

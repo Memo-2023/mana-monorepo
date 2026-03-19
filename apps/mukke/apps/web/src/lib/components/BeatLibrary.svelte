@@ -57,11 +57,12 @@
 		error = null;
 
 		try {
+			const authHeaders = await authStore.getAuthHeaders();
 			const response = await fetch(`${backendUrl}/beats/library/${beatId}/use`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					...authStore.getAuthHeaders(),
+					...authHeaders,
 				},
 				body: JSON.stringify({ projectId }),
 			});

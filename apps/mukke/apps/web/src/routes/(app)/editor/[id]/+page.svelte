@@ -215,10 +215,11 @@
 				(typeof window !== 'undefined' &&
 					(window as unknown as { __PUBLIC_BACKEND_URL__: string }).__PUBLIC_BACKEND_URL__) ||
 				'http://localhost:3010';
+			const authHeaders = await authStore.getAuthHeaders();
 			const response = await fetch(
 				`${backendUrl}/export/${projectStore.currentProject.id}?format=${format}`,
 				{
-					headers: authStore.getAuthHeaders(),
+					headers: authHeaders,
 				}
 			);
 
