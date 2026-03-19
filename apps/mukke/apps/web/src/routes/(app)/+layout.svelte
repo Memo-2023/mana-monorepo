@@ -1,192 +1,206 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import { PillNavigation } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import {
+		SplitPaneContainer,
+		setSplitPanelContext,
+		DEFAULT_APPS,
+	} from '@manacore/shared-splitscreen';
+	import { getPillAppItems } from '@manacore/shared-branding';
+	import {
+		THEME_DEFINITIONS,
+		DEFAULT_THEME_VARIANTS,
+		EXTENDED_THEME_VARIANTS,
+	} from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
 	import FullPlayer from '$lib/components/FullPlayer.svelte';
 	import QueuePanel from '$lib/components/QueuePanel.svelte';
 
 	let { children } = $props();
-	let sidebarOpen = $state(false);
 
-	$effect(() => {
-		if (authStore.initialized && !authStore.isAuthenticated) {
-			goto('/login');
-		}
-	});
+	// App switcher items
+	const appItems = getPillAppItems('mukke' as any);
 
-	const navItems = [
+	// Split-Panel Store
+	const splitPanel = setSplitPanelContext('mukke' as any, DEFAULT_APPS);
+
+	function handleOpenInPanel(appId: string, url: string) {
+		splitPanel.openPanel(appId);
+	}
+
+	// Theme
+	let isDark = $derived(theme.isDark);
+
+	let themeVariantItems = $derived<PillDropdownItem[]>([
+		...DEFAULT_THEME_VARIANTS.map((variant) => ({
+			id: variant,
+			label: THEME_DEFINITIONS[variant].label,
+			icon: THEME_DEFINITIONS[variant].icon,
+			onClick: () => theme.setVariant(variant),
+			active: theme.variant === variant,
+		})),
 		{
-			label: 'Dashboard',
-			href: '/dashboard',
-			icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+			id: 'all-themes',
+			label: 'All Themes',
+			icon: 'palette',
+			onClick: () => goto('/themes'),
+			active: false,
 		},
-		{
-			label: 'Library',
-			href: '/library',
-			icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3',
-		},
-		{
-			label: 'Search',
-			href: '/search',
-			icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
-		},
-		{
-			label: 'Playlists',
-			href: '/playlists',
-			icon: 'M4 6h16M4 10h16M4 14h16M4 18h16',
-		},
-		{
-			label: 'Editor Projects',
-			href: '/projects',
-			icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
-		},
-		{
-			label: 'Upload',
-			href: '/upload',
-			icon: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12',
-		},
+	]);
+
+	let currentThemeVariantLabel = $derived(THEME_DEFINITIONS[theme.variant].label);
+
+	// User
+	let userEmail = $derived(authStore.user?.email || 'Menu');
+
+	// Navigation items
+	const baseNavItems: PillNavItem[] = [
+		{ href: '/library', label: 'Library', icon: 'music-notes' },
+		{ href: '/playlists', label: 'Playlists', icon: 'playlist' },
+		{ href: '/projects', label: 'Editor', icon: 'waveform' },
+		{ href: '/upload', label: 'Upload', icon: 'upload' },
+		{ href: '/settings', label: 'Settings', icon: 'settings' },
 	];
 
-	function isActive(href: string, pathname: string): boolean {
-		if (href === '/') return pathname === '/';
-		return pathname.startsWith(href);
+	const navItems = $derived(baseNavItems);
+
+	// Keyboard shortcuts (Ctrl+1-5)
+	const navRoutes = baseNavItems.map((item) => item.href);
+
+	function handleKeydown(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+			return;
+		}
+		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
+			const num = parseInt(event.key);
+			if (num >= 1 && num <= navRoutes.length) {
+				event.preventDefault();
+				const route = navRoutes[num - 1];
+				if (route) goto(route);
+			}
+		}
 	}
 
-	function closeSidebar() {
-		sidebarOpen = false;
+	function handleToggleTheme() {
+		theme.toggleMode();
 	}
+
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
+		theme.setMode(mode);
+	}
+
+	async function handleLogout() {
+		await authStore.signOut();
+		goto('/login');
+	}
+
+	onMount(async () => {
+		await authStore.initialize();
+		if (!authStore.isAuthenticated) {
+			goto('/login');
+			return;
+		}
+		splitPanel.initialize();
+	});
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 {#if !authStore.isAuthenticated}
-	<div class="min-h-screen flex items-center justify-center">
+	<div class="min-h-screen flex items-center justify-center bg-background">
 		<div
 			class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
 		></div>
 	</div>
 {:else}
-	<div class="flex h-screen overflow-hidden">
-		<!-- Mobile overlay -->
-		{#if sidebarOpen}
-			<div
-				class="fixed inset-0 bg-black/50 z-30 lg:hidden"
-				onclick={closeSidebar}
-				role="presentation"
-			></div>
-		{/if}
+	<SplitPaneContainer>
+		<div class="layout-container">
+			<a
+				href="#main-content"
+				class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+			>
+				Skip to content
+			</a>
 
-		<!-- Sidebar -->
-		<aside
-			class="fixed inset-y-0 left-0 z-40 w-64 bg-surface border-r border-border flex flex-col transition-transform duration-200 lg:static lg:translate-x-0 {sidebarOpen
-				? 'translate-x-0'
-				: '-translate-x-full'}"
-		>
-			<!-- Logo -->
-			<div class="flex items-center justify-between h-16 px-4 border-b border-border">
-				<a href="/" class="text-xl font-bold text-primary">Mukke</a>
-				<button
-					class="p-1 text-foreground-secondary hover:text-foreground lg:hidden"
-					onclick={closeSidebar}
-				>
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				</button>
-			</div>
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="Mukke"
+				homeRoute="/library"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLogout={true}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#f97316"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				onOpenInPanel={handleOpenInPanel}
+				ariaLabel="Main navigation"
+			/>
 
-			<!-- Navigation -->
-			<nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-				{#each navItems as item}
-					<a
-						href={item.href}
-						onclick={closeSidebar}
-						class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {isActive(
-							item.href,
-							$page.url.pathname
-						)
-							? 'bg-primary text-white'
-							: 'text-foreground-secondary hover:text-foreground hover:bg-background'}"
-					>
-						<svg
-							class="w-5 h-5 flex-shrink-0"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />
-						</svg>
-						{item.label}
-					</a>
-				{/each}
-			</nav>
-
-			<!-- User info -->
-			<div class="border-t border-border p-4">
-				<div class="flex items-center gap-3">
-					<div
-						class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-medium"
-					>
-						{authStore.user?.email?.[0]?.toUpperCase() ?? '?'}
-					</div>
-					<div class="flex-1 min-w-0">
-						<p class="text-sm font-medium truncate">{authStore.user?.email ?? ''}</p>
-					</div>
-					<button
-						onclick={() => authStore.signOut()}
-						class="p-1.5 text-foreground-secondary hover:text-foreground transition-colors"
-						title="Logout"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-							/>
-						</svg>
-					</button>
+			<!-- Main Content -->
+			<main id="main-content" class="main-content bg-background">
+				<div class="content-wrapper">
+					{@render children()}
 				</div>
-			</div>
-		</aside>
-
-		<!-- Main content -->
-		<div class="flex-1 flex flex-col min-w-0">
-			<!-- Mobile header -->
-			<header class="h-16 border-b border-border flex items-center px-4 lg:hidden">
-				<button
-					class="p-1.5 text-foreground-secondary hover:text-foreground"
-					onclick={() => (sidebarOpen = true)}
-				>
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 6h16M4 12h16M4 18h16"
-						/>
-					</svg>
-				</button>
-				<span class="ml-3 text-lg font-bold text-primary">Mukke</span>
-			</header>
-
-			<!-- Page content -->
-			<main class="flex-1 overflow-y-auto">
-				{@render children()}
 			</main>
 
-			<!-- MiniPlayer -->
+			<!-- Player components -->
 			<MiniPlayer />
+			<FullPlayer />
+			<QueuePanel />
 		</div>
-	</div>
-
-	<!-- Full Player Overlay -->
-	<FullPlayer />
-
-	<!-- Queue Panel -->
-	<QueuePanel />
+	</SplitPaneContainer>
 {/if}
+
+<style>
+	.layout-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
+
+	.main-content {
+		flex: 1;
+		transition: all 300ms ease;
+		padding-bottom: calc(130px + env(safe-area-inset-bottom));
+	}
+
+	@media (max-width: 768px) {
+		.main-content {
+			padding-bottom: calc(140px + env(safe-area-inset-bottom));
+		}
+	}
+
+	.content-wrapper {
+		padding: 1rem;
+	}
+
+	@media (min-width: 640px) {
+		.content-wrapper {
+			padding: 1.5rem;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.content-wrapper {
+			padding: 2rem;
+		}
+	}
+</style>
