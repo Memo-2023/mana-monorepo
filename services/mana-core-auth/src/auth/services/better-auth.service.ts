@@ -455,6 +455,28 @@ export class BetterAuthService {
 				},
 			});
 
+			// Better Auth returns error objects instead of throwing for some cases
+			if (result && typeof result === 'object' && 'error' in result) {
+				const errorResult = result as {
+					error: { message?: string; code?: string; status?: number };
+				};
+				const errorMsg = errorResult.error?.message || '';
+				const errorCode = errorResult.error?.code || '';
+				this.logger.debug(`SignIn error result: ${JSON.stringify(errorResult.error)}`);
+
+				if (
+					errorMsg.includes('not verified') ||
+					errorMsg.includes('not confirmed') ||
+					errorCode === 'EMAIL_NOT_VERIFIED' ||
+					errorCode === 'EMAIL_NOT_CONFIRMED'
+				) {
+					throw new ForbiddenException({
+						message: 'Email not verified',
+						code: 'EMAIL_NOT_VERIFIED',
+					});
+				}
+			}
+
 			if (!hasUser(result)) {
 				throw new UnauthorizedException('Invalid credentials');
 			}
@@ -550,9 +572,17 @@ export class BetterAuthService {
 				expiresIn: 15 * 60, // 15 minutes in seconds
 			};
 		} catch (error: unknown) {
+			// Re-throw NestJS HTTP exceptions directly
+			if (error instanceof ForbiddenException || error instanceof UnauthorizedException) {
+				throw error;
+			}
+
 			if (error instanceof Error) {
+				this.logger.debug(`SignIn caught error: ${error.message}`);
+
 				if (
-					error.message?.includes('Email not verified') ||
+					error.message?.toLowerCase().includes('not verified') ||
+					error.message?.toLowerCase().includes('not confirmed') ||
 					error.message?.includes('EMAIL_NOT_VERIFIED')
 				) {
 					throw new ForbiddenException({
