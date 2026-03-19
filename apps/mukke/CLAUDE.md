@@ -39,6 +39,9 @@ pnpm --filter @mukke/landing dev      # Landing page
 - `PUT /songs/:id/play` - Increment play count
 - `DELETE /songs/:id` - Delete song
 - `GET /songs/search?q=` - Search songs
+- `POST /songs/:id/extract-metadata` - Extract ID3 tags from file into DB (+ cover art to S3)
+- `POST /songs/:id/write-tags` - Write DB metadata as ID3 tags back into MP3 file
+- `GET /songs/:id/cover-url` - Get presigned URL for cover art
 
 ### Playlists
 - `GET /playlists` - List user's playlists
