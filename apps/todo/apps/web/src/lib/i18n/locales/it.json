@@ -1,0 +1,104 @@
+{
+	"app": {
+		"name": "Todo",
+		"loading": "Caricamento..."
+	},
+	"nav": {
+		"inbox": "In arrivo",
+		"today": "Oggi",
+		"upcoming": "In programma",
+		"projects": "Progetti",
+		"labels": "Etichette",
+		"completed": "Completate",
+		"settings": "Impostazioni",
+		"feedback": "Feedback"
+	},
+	"task": {
+		"title": "Titolo",
+		"description": "Descrizione",
+		"dueDate": "Scadenza",
+		"dueTime": "Orario",
+		"priority": "Priorità",
+		"project": "Progetto",
+		"labels": "Etichette",
+		"subtasks": "Sotto-attività",
+		"reminder": "Promemoria",
+		"repeat": "Ripeti",
+		"addTask": "Aggiungi attività",
+		"editTask": "Modifica attività",
+		"deleteTask": "Elimina attività",
+		"completeTask": "Completa attività",
+		"uncompleteTask": "Segna come non completata",
+		"noTasks": "Nessuna attività",
+		"noTasksToday": "Nessuna attività per oggi",
+		"noTasksUpcoming": "Nessuna attività in programma"
+	},
+	"project": {
+		"create": "Crea progetto",
+		"edit": "Modifica progetto",
+		"delete": "Elimina progetto",
+		"name": "Nome",
+		"color": "Colore",
+		"icon": "Icona",
+		"archive": "Archivia",
+		"noProjects": "Nessun progetto"
+	},
+	"label": {
+		"create": "Crea etichetta",
+		"edit": "Modifica etichetta",
+		"delete": "Elimina etichetta",
+		"name": "Nome",
+		"color": "Colore",
+		"noLabels": "Nessuna etichetta"
+	},
+	"priority": {
+		"urgent": "Urgente",
+		"high": "Alta",
+		"medium": "Normale",
+		"low": "Bassa"
+	},
+	"repeat": {
+		"none": "Non ripetere",
+		"daily": "Giornaliero",
+		"weekly": "Settimanale",
+		"monthly": "Mensile",
+		"yearly": "Annuale"
+	},
+	"auth": {
+		"login": "Accedi",
+		"logout": "Esci",
+		"register": "Registrati",
+		"email": "E-mail",
+		"password": "Password",
+		"forgotPassword": "Password dimenticata?"
+	},
+	"common": {
+		"save": "Salva",
+		"cancel": "Annulla",
+		"delete": "Elimina",
+		"edit": "Modifica",
+		"add": "Aggiungi",
+		"close": "Chiudi",
+		"search": "Cerca",
+		"error": "Errore",
+		"success": "Successo",
+		"loading": "Caricamento...",
+		"noResults": "Nessun risultato"
+	},
+	"errors": {
+		"loadTasks": "Impossibile caricare le attività",
+		"createTask": "Impossibile creare l'attività",
+		"updateTask": "Impossibile aggiornare l'attività",
+		"deleteTask": "Impossibile eliminare l'attività",
+		"loadProjects": "Impossibile caricare i progetti",
+		"loadLabels": "Impossibile caricare le etichette"
+	},
+	"success": {
+		"taskCreated": "Attività creata",
+		"taskUpdated": "Attività aggiornata",
+		"taskDeleted": "Attività eliminata",
+		"taskCompleted": "Attività completata",
+		"projectCreated": "Progetto creato",
+		"labelCreated": "Etichetta creata"
+	}
+}

@@ -11,6 +11,9 @@ const defaultLocale = 'de';
 // Register all available locales
 register('de', () => import('./locales/de.json'));
 register('en', () => import('./locales/en.json'));
+register('fr', () => import('./locales/fr.json'));
+register('it', () => import('./locales/it.json'));
+register('es', () => import('./locales/es.json'));
 
 // Get initial locale from browser or localStorage
 function getInitialLocale(): SupportedLocale {

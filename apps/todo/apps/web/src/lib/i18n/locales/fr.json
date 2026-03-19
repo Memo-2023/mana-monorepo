@@ -1,0 +1,104 @@
+{
+	"app": {
+		"name": "Todo",
+		"loading": "Chargement..."
+	},
+	"nav": {
+		"inbox": "Boîte de réception",
+		"today": "Aujourd'hui",
+		"upcoming": "À venir",
+		"projects": "Projets",
+		"labels": "Labels",
+		"completed": "Terminées",
+		"settings": "Paramètres",
+		"feedback": "Commentaires"
+	},
+	"task": {
+		"title": "Titre",
+		"description": "Description",
+		"dueDate": "Date d'échéance",
+		"dueTime": "Heure",
+		"priority": "Priorité",
+		"project": "Projet",
+		"labels": "Labels",
+		"subtasks": "Sous-tâches",
+		"reminder": "Rappel",
+		"repeat": "Répéter",
+		"addTask": "Ajouter une tâche",
+		"editTask": "Modifier la tâche",
+		"deleteTask": "Supprimer la tâche",
+		"completeTask": "Terminer la tâche",
+		"uncompleteTask": "Marquer comme non terminée",
+		"noTasks": "Aucune tâche",
+		"noTasksToday": "Aucune tâche pour aujourd'hui",
+		"noTasksUpcoming": "Aucune tâche à venir"
+	},
+	"project": {
+		"create": "Créer un projet",
+		"edit": "Modifier le projet",
+		"delete": "Supprimer le projet",
+		"name": "Nom",
+		"color": "Couleur",
+		"icon": "Icône",
+		"archive": "Archiver",
+		"noProjects": "Aucun projet"
+	},
+	"label": {
+		"create": "Créer un label",
+		"edit": "Modifier le label",
+		"delete": "Supprimer le label",
+		"name": "Nom",
+		"color": "Couleur",
+		"noLabels": "Aucun label"
+	},
+	"priority": {
+		"urgent": "Urgent",
+		"high": "Haute",
+		"medium": "Normale",
+		"low": "Basse"
+	},
+	"repeat": {
+		"none": "Ne pas répéter",
+		"daily": "Quotidien",
+		"weekly": "Hebdomadaire",
+		"monthly": "Mensuel",
+		"yearly": "Annuel"
+	},
+	"auth": {
+		"login": "Connexion",
+		"logout": "Déconnexion",
+		"register": "Inscription",
+		"email": "E-mail",
+		"password": "Mot de passe",
+		"forgotPassword": "Mot de passe oublié ?"
+	},
+	"common": {
+		"save": "Enregistrer",
+		"cancel": "Annuler",
+		"delete": "Supprimer",
+		"edit": "Modifier",
+		"add": "Ajouter",
+		"close": "Fermer",
+		"search": "Rechercher",
+		"error": "Erreur",
+		"success": "Succès",
+		"loading": "Chargement...",
+		"noResults": "Aucun résultat"
+	},
+	"errors": {
+		"loadTasks": "Impossible de charger les tâches",
+		"createTask": "Impossible de créer la tâche",
+		"updateTask": "Impossible de mettre à jour la tâche",
+		"deleteTask": "Impossible de supprimer la tâche",
+		"loadProjects": "Impossible de charger les projets",
+		"loadLabels": "Impossible de charger les labels"
+	},
+	"success": {
+		"taskCreated": "Tâche créée",
+		"taskUpdated": "Tâche mise à jour",
+		"taskDeleted": "Tâche supprimée",
+		"taskCompleted": "Tâche terminée",
+		"projectCreated": "Projet créé",
+		"labelCreated": "Label créé"
+	}
+}
