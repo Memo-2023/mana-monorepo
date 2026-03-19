@@ -20,7 +20,7 @@ COPY packages/shared-storage ./packages/shared-storage
 COPY services/mana-core-auth ./services/mana-core-auth
 
 # Install dependencies (without ignore-scripts to build native modules like bcrypt)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # Build shared-storage first
 WORKDIR /app/packages/shared-storage
