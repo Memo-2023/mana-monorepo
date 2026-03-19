@@ -33,9 +33,9 @@ Self-hosted, open-source error tracking for all ManaCore apps using [GlitchTip](
 
 | App | Project ID | DSN |
 |-----|-----------|-----|
-| Calendar | 1 | `https://7dcf6e86-48a0-4b85-b2cb-275921c059d5@glitchtip.mana.how/1` |
-| Contacts | 2 | `https://a0d81e4b-7869-4b57-951a-1a5de6d64ae7@glitchtip.mana.how/2` |
-| Todo | 3 | `https://c774433d-212c-473d-9088-542a84224488@glitchtip.mana.how/3` |
+| Calendar | 1 | `https://7dcf6e8648a04b85b2cb275921c059d5@glitchtip.mana.how/1` |
+| Contacts | 2 | `https://a0d81e4b78694b57951a1a5de6d64ae7@glitchtip.mana.how/2` |
+| Todo | 3 | `https://c774433d212c473d9088542a84224488@glitchtip.mana.how/3` |
 | Chat | 4 | `https://7ffb55d2-3705-4979-89db-abd486a42014@glitchtip.mana.how/4` |
 | Context | 5 | `https://1ac1bac3-6c75-456e-8857-5048eb0c925c@glitchtip.mana.how/5` |
 | Picture | 6 | `https://a04c991e-0702-4b73-a670-babef3e7c5d1@glitchtip.mana.how/6` |

@@ -318,7 +318,7 @@ services:
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://todo.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: https://c774433d-212c-473d-9088-542a84224488@glitchtip.mana.how/3
+      GLITCHTIP_DSN: https://c774433d212c473d9088542a84224488@glitchtip.mana.how/3
     ports:
       - "3031:3031"
     healthcheck:
@@ -349,7 +349,7 @@ services:
       CORS_ORIGINS: https://calendar.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       ENCRYPTION_KEY: ${CALENDAR_ENCRYPTION_KEY:-}
-      GLITCHTIP_DSN: https://7dcf6e86-48a0-4b85-b2cb-275921c059d5@glitchtip.mana.how/1
+      GLITCHTIP_DSN: https://7dcf6e8648a04b85b2cb275921c059d5@glitchtip.mana.how/1
     ports:
       - "3032:3032"
     healthcheck:
@@ -414,7 +414,7 @@ services:
       S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       S3_BUCKET: contacts-photos
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: https://a0d81e4b-7869-4b57-951a-1a5de6d64ae7@glitchtip.mana.how/2
+      GLITCHTIP_DSN: https://a0d81e4b78694b57951a1a5de6d64ae7@glitchtip.mana.how/2
     ports:
       - "3034:3034"
     healthcheck:
