@@ -5,4 +5,5 @@ bootstrapApp(AppModule, {
 	defaultPort: 3014,
 	serviceName: 'Calendar',
 	additionalCorsOrigins: ['http://localhost:5179'],
+	swagger: true,
 });

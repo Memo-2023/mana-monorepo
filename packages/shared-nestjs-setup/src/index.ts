@@ -1,8 +1,8 @@
 /**
  * Shared NestJS Bootstrap Utilities for ManaCore Backends
  *
- * Provides a consistent setup for CORS, validation, and global prefix
- * across all backend applications.
+ * Provides a consistent setup for CORS, validation, global prefix,
+ * and optional Swagger/OpenAPI documentation across all backend applications.
  */
 
 import { type INestApplication, ValidationPipe, type Type } from '@nestjs/common';
@@ -22,6 +22,20 @@ export const DEFAULT_CORS_ORIGINS = [
 ];
 
 /**
+ * Swagger/OpenAPI configuration
+ */
+export interface SwaggerOptions {
+	/** API title (default: serviceName + ' API') */
+	title?: string;
+	/** API description */
+	description?: string;
+	/** API version (default: '1.0') */
+	version?: string;
+	/** Path to serve docs at (default: 'api/docs') */
+	path?: string;
+}
+
+/**
  * Configuration options for the bootstrap utility
  */
 export interface BootstrapOptions {
@@ -39,6 +53,8 @@ export interface BootstrapOptions {
 	corsMethods?: string[];
 	/** Body size limit for JSON/urlencoded payloads (default: '100kb'). Use '50mb' for image uploads. */
 	bodyLimit?: string;
+	/** Enable Swagger/OpenAPI docs. Pass true for defaults or SwaggerOptions for custom config. */
+	swagger?: boolean | SwaggerOptions;
 }
 
 /**
@@ -94,6 +110,38 @@ export function configurePrefix(
 }
 
 /**
+ * Setup Swagger/OpenAPI documentation if enabled and @nestjs/swagger is installed
+ */
+async function setupSwagger(
+	app: INestApplication,
+	serviceName: string,
+	port: string | number,
+	swaggerConfig: boolean | SwaggerOptions
+): Promise<void> {
+	try {
+		const { DocumentBuilder, SwaggerModule } = await import('@nestjs/swagger');
+		const opts: SwaggerOptions = typeof swaggerConfig === 'object' ? swaggerConfig : {};
+
+		const config = new DocumentBuilder()
+			.setTitle(opts.title || `${serviceName} API`)
+			.setDescription(opts.description || `API documentation for ${serviceName}`)
+			.setVersion(opts.version || '1.0')
+			.addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'JWT-auth')
+			.build();
+
+		const document = SwaggerModule.createDocument(app, config);
+		const docsPath = opts.path || 'api/docs';
+		SwaggerModule.setup(docsPath, app, document, {
+			swaggerOptions: { persistAuthorization: true },
+		});
+
+		console.log(`${serviceName} API docs at http://localhost:${port}/${docsPath}`);
+	} catch {
+		// @nestjs/swagger not installed - skip silently
+	}
+}
+
+/**
  * Bootstrap a NestJS application with standard configuration
  *
  * @example
@@ -105,6 +153,7 @@ export function configurePrefix(
  *   defaultPort: 3002,
  *   serviceName: 'Chat',
  *   additionalCorsOrigins: ['http://localhost:5178'],
+ *   swagger: true,
  * });
  * ```
  */
@@ -135,8 +184,13 @@ export async function bootstrapApp(
 		options.excludeFromPrefix ?? ['metrics', 'health']
 	);
 
-	// Start listening
+	// Setup Swagger/OpenAPI docs if enabled
 	const port = process.env.PORT || options.defaultPort;
+	if (options.swagger) {
+		await setupSwagger(app, options.serviceName, port, options.swagger);
+	}
+
+	// Start listening
 	await app.listen(port);
 
 	console.log(`${options.serviceName} backend running on http://localhost:${port}`);

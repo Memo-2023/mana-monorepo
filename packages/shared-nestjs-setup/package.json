@@ -30,6 +30,12 @@
 	},
 	"peerDependencies": {
 		"@nestjs/common": "^10.0.0 || ^11.0.0",
-		"@nestjs/core": "^10.0.0 || ^11.0.0"
+		"@nestjs/core": "^10.0.0 || ^11.0.0",
+		"@nestjs/swagger": "^8.0.0 || ^7.0.0"
+	},
+	"peerDependenciesMeta": {
+		"@nestjs/swagger": {
+			"optional": true
+		}
 	}
 }
