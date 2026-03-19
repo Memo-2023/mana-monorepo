@@ -1,10 +1,23 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Post,
+	Put,
+	Delete,
+	Body,
+	Param,
+	UseGuards,
+	ParseUUIDPipe,
+} from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { DeckService } from './deck.service';
 import { CreateDeckDto } from './deck.dto';
 import type { UpdateDeckDto } from './deck.dto';
 import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
 import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 
+@ApiTags('Decks')
+@ApiBearerAuth()
 @Controller('decks')
 @UseGuards(JwtAuthGuard)
 export class DeckController {
@@ -16,7 +29,7 @@ export class DeckController {
 	}
 
 	@Get(':id')
-	async findOne(@Param('id') id: string, @CurrentUser() user: CurrentUserData) {
+	async findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: CurrentUserData) {
 		return this.deckService.findOneWithSlides(id, user.userId);
 	}
 
@@ -27,7 +40,7 @@ export class DeckController {
 
 	@Put(':id')
 	async update(
-		@Param('id') id: string,
+		@Param('id', ParseUUIDPipe) id: string,
 		@Body() updateDeckDto: UpdateDeckDto,
 		@CurrentUser() user: CurrentUserData
 	) {
@@ -35,7 +48,7 @@ export class DeckController {
 	}
 
 	@Delete(':id')
-	async remove(@Param('id') id: string, @CurrentUser() user: CurrentUserData) {
+	async remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: CurrentUserData) {
 		return this.deckService.remove(id, user.userId);
 	}
 }

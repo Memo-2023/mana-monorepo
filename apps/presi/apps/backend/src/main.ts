@@ -6,5 +6,6 @@ bootstrapApp(AppModule, {
 	defaultPort: 3008,
 	serviceName: 'Presi',
 	additionalCorsOrigins: ['http://localhost:5177', 'http://localhost:5178'],
-	excludeFromPrefix: [], // no exclusions
+	excludeFromPrefix: [],
+	swagger: true,
 });

@@ -1,10 +1,22 @@
-import { Controller, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+	Controller,
+	Post,
+	Put,
+	Delete,
+	Body,
+	Param,
+	UseGuards,
+	ParseUUIDPipe,
+} from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { SlideService } from './slide.service';
 import { CreateSlideDto } from './slide.dto';
 import type { UpdateSlideDto, ReorderSlidesDto } from './slide.dto';
 import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
 import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 
+@ApiTags('Slides')
+@ApiBearerAuth()
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class SlideController {
@@ -12,7 +24,7 @@ export class SlideController {
 
 	@Post('decks/:deckId/slides')
 	async create(
-		@Param('deckId') deckId: string,
+		@Param('deckId', ParseUUIDPipe) deckId: string,
 		@Body() createSlideDto: CreateSlideDto,
 		@CurrentUser() user: CurrentUserData
 	) {
@@ -21,7 +33,7 @@ export class SlideController {
 
 	@Put('slides/:id')
 	async update(
-		@Param('id') id: string,
+		@Param('id', ParseUUIDPipe) id: string,
 		@Body() updateSlideDto: UpdateSlideDto,
 		@CurrentUser() user: CurrentUserData
 	) {
@@ -29,7 +41,7 @@ export class SlideController {
 	}
 
 	@Delete('slides/:id')
-	async remove(@Param('id') id: string, @CurrentUser() user: CurrentUserData) {
+	async remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: CurrentUserData) {
 		return this.slideService.remove(id, user.userId);
 	}
 

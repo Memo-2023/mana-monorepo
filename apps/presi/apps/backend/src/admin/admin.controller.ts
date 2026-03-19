@@ -8,14 +8,12 @@ import {
 	HttpCode,
 	HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { ServiceAuthGuard } from './guards/service-auth.guard';
 import { UserDataResponse, DeleteUserDataResponse } from './dto/user-data-response.dto';
 
-/**
- * Admin controller for cross-service user data management
- * All endpoints require service key authentication (X-Service-Key header)
- */
+@ApiTags('Admin')
 @Controller('admin')
 @UseGuards(ServiceAuthGuard)
 export class AdminController {

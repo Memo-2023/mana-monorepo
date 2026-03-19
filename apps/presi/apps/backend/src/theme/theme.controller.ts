@@ -1,6 +1,8 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { ThemeService } from './theme.service';
 
+@ApiTags('Themes')
 @Controller('themes')
 export class ThemeController {
 	constructor(private readonly themeService: ThemeService) {}
@@ -16,7 +18,7 @@ export class ThemeController {
 	}
 
 	@Get(':id')
-	async findOne(@Param('id') id: string) {
+	async findOne(@Param('id', ParseUUIDPipe) id: string) {
 		return this.themeService.findOne(id);
 	}
 }
