@@ -85,7 +85,6 @@
 		{ href: '/spaces', label: 'Spaces', icon: 'building' },
 		{ href: '/documents', label: 'Dokumente', icon: 'archive' },
 		{ href: '/archive', label: 'Archiv', icon: 'list' },
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)

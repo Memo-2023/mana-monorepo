@@ -56,10 +56,7 @@
 	let userEmail = $derived(auth.user?.email);
 
 	// Navigation items for Presi
-	const navItems: PillNavItem[] = [
-		{ href: '/', label: 'Decks', icon: 'document' },
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
-	];
+	const navItems: PillNavItem[] = [{ href: '/', label: 'Decks', icon: 'document' }];
 
 	// Routes where nav should be hidden (present mode, shared view)
 	const hideNavRoutes = ['/present/', '/shared/'];

@@ -178,7 +178,6 @@
 		{ href: '/spiral', label: 'Spiral', icon: 'sparkles' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	]);
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)

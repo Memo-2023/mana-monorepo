@@ -172,7 +172,6 @@
 		{ href: '/world-clock', label: 'Weltzeituhr', icon: 'globe' },
 		{ href: '/life', label: 'Lebensuhr', icon: 'heart' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
 	// Navigation items filtered by visibility settings

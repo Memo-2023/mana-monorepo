@@ -209,7 +209,6 @@
 			icon: 'settings',
 			onClick: () => (showSettingsModal = true),
 		},
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	]);
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)

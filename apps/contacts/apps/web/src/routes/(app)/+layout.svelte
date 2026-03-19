@@ -129,7 +129,6 @@
 		{ href: '/', label: 'Kontakte', icon: 'users' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
 	];
 

@@ -68,7 +68,6 @@
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
 		{ href: '/trash', label: 'Papierkorb', icon: 'trash' },
 		{ href: '/search', label: 'Suche', icon: 'search' },
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
 	// Navigation shortcuts

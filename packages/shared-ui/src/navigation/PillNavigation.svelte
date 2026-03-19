@@ -257,6 +257,8 @@
 		onOpenInPanel?: (appId: string, url: string) => void;
 		/** Accessible label for the nav element */
 		ariaLabel?: string;
+		/** Feedback page href (shown in user dropdown). Set to empty string to hide. */
+		feedbackHref?: string;
 	}
 
 	let {
@@ -299,6 +301,7 @@
 		showA11yQuickToggles = false,
 		onOpenInPanel,
 		ariaLabel,
+		feedbackHref = '/feedback',
 	}: Props = $props();
 
 	// Type guards for elements
@@ -810,6 +813,19 @@
 							},
 							active: currentPath === settingsHref,
 						},
+						...(feedbackHref
+							? [
+									{
+										id: 'feedback',
+										label: 'Feedback',
+										icon: 'chat',
+										onClick: () => {
+											window.location.href = feedbackHref;
+										},
+										active: currentPath === feedbackHref,
+									},
+								]
+							: []),
 						...(showLanguageSwitcher && languageItems.length > 0
 							? [
 									{ id: 'language-divider', label: '', divider: true },

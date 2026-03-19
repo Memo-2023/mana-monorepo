@@ -142,7 +142,6 @@
 		{ href: '/documents', label: 'Dokumente', icon: 'file-text' },
 		{ href: '/tokens', label: 'Tokens', icon: 'sparkle' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
-		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
 
 	const navItems = $derived(
