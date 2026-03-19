@@ -127,6 +127,22 @@ export const authStore = {
 	},
 
 	/**
+	 * Reset password with token (from reset email link)
+	 */
+	async resetPasswordWithToken(token: string, newPassword: string) {
+		try {
+			const result = await authService.resetPassword(token, newPassword);
+			if (!result.success) {
+				return { success: false, error: result.error || 'Failed to reset password' };
+			}
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	/**
 	 * Resend verification email
 	 */
 	async resendVerificationEmail(email: string) {

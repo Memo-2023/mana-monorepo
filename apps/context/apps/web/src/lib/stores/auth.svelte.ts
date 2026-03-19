@@ -4,9 +4,9 @@
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth } from '@manacore/shared-auth';
-import type { UserData } from '@manacore/shared-auth';
+import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
 
+// Get auth URL dynamically at runtime - fallback for SSR and client
 function getAuthUrl(): string {
 	if (browser && typeof window !== 'undefined') {
 		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
@@ -16,15 +16,7 @@ function getAuthUrl(): string {
 	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
 }
 
-function getBackendUrl(): string {
-	if (browser && typeof window !== 'undefined') {
-		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
-			.__PUBLIC_BACKEND_URL__;
-		return injectedUrl || 'http://localhost:3011';
-	}
-	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3011';
-}
-
+// Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
 let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
 
@@ -33,7 +25,6 @@ function getAuthService() {
 	if (!_authService) {
 		const auth = initializeWebAuth({
 			baseUrl: getAuthUrl(),
-			backendUrl: getBackendUrl(),
 		});
 		_authService = auth.authService;
 		_tokenManager = auth.tokenManager;
@@ -47,6 +38,7 @@ function getTokenManager() {
 	return _tokenManager;
 }
 
+// State
 let user = $state<UserData | null>(null);
 let loading = $state(true);
 let initialized = $state(false);
@@ -65,10 +57,6 @@ export const authStore = {
 		return initialized;
 	},
 
-	/**
-	 * Initialize auth state from stored tokens
-	 * Also tries SSO if no local tokens exist (cross-domain authentication)
-	 */
 	async initialize() {
 		if (initialized) return;
 
@@ -81,15 +69,11 @@ export const authStore = {
 
 		loading = true;
 		try {
-			// First, check if we have valid local tokens
 			let authenticated = await authService.isAuthenticated();
 
-			// If not authenticated locally, try SSO (shared session cookie)
 			if (!authenticated) {
-				console.log('No local tokens, trying SSO...');
 				const ssoResult = await authService.trySSO();
 				if (ssoResult.success) {
-					console.log('SSO successful, user authenticated via shared session');
 					authenticated = true;
 				}
 			}
@@ -213,17 +197,6 @@ export const authStore = {
 		}
 	},
 
-	async getValidToken(): Promise<string | null> {
-		const tokenManager = getTokenManager();
-		if (!tokenManager) {
-			return null;
-		}
-		return await tokenManager.getValidToken();
-	},
-
-	/**
-	 * Resend verification email
-	 */
 	async resendVerificationEmail(email: string) {
 		const authService = getAuthService();
 		if (!authService) {
@@ -243,5 +216,21 @@ export const authStore = {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			return { success: false, error: errorMessage };
 		}
+	},
+
+	async getAccessToken() {
+		const authService = getAuthService();
+		if (!authService) {
+			return null;
+		}
+		return await authService.getAppToken();
+	},
+
+	async getValidToken(): Promise<string | null> {
+		const tokenManager = getTokenManager();
+		if (!tokenManager) {
+			return null;
+		}
+		return await tokenManager.getValidToken();
 	},
 };

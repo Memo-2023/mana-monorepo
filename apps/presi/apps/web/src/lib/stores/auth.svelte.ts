@@ -194,6 +194,27 @@ export const auth = {
 	},
 
 	/**
+	 * Reset password with token (from reset email link)
+	 */
+	async resetPasswordWithToken(token: string, newPassword: string) {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
+
+		try {
+			const result = await authService.resetPassword(token, newPassword);
+			if (!result.success) {
+				return { success: false, error: result.error || 'Failed to reset password' };
+			}
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	/**
 	 * Get access token for API calls
 	 */
 	async getAccessToken() {
