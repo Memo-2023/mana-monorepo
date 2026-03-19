@@ -88,6 +88,7 @@ services:
       mc mb --ignore-existing myminio/inventory-storage;
       mc mb --ignore-existing myminio/planta-storage;
       mc mb --ignore-existing myminio/projectdoc-storage;
+      mc mb --ignore-existing myminio/mukke-storage;
       mc anonymous set download myminio/manacore-storage;
       mc anonymous set download myminio/picture-storage;
       mc anonymous set download myminio/planta-storage;

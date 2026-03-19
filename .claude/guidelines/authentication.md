@@ -782,6 +782,102 @@ await request(app.getHttpServer())
   .expect(200);
 ```
 
+## SvelteKit Auth Routes Checklist
+
+When creating a new SvelteKit web app, **ALL** of the following auth routes MUST be implemented:
+
+### Required Routes (in `src/routes/(auth)/`)
+
+| Route | Page | Component | Store Method |
+|-------|------|-----------|-------------|
+| `/login` | `login/+page.svelte` | `LoginPage` from `@manacore/shared-auth-ui` | `authStore.signIn()` |
+| `/register` | `register/+page.svelte` | `RegisterPage` from `@manacore/shared-auth-ui` | `authStore.signUp()` |
+| `/forgot-password` | `forgot-password/+page.svelte` | `ForgotPasswordPage` from `@manacore/shared-auth-ui` | `authStore.resetPassword()` |
+| `/reset-password` | `reset-password/+page.svelte` | Custom form (token from URL) | `authStore.resetPasswordWithToken()` |
+
+### Required Auth Store Methods
+
+The `auth.svelte.ts` store MUST implement these methods using `@manacore/shared-auth`:
+
+| Method | Shared Auth Method | Purpose |
+|--------|-------------------|---------|
+| `signIn(email, password)` | `authService.signIn()` | Login |
+| `signUp(email, password)` | `authService.signUp()` | Register |
+| `signOut()` | `authService.signOut()` | Logout |
+| `resetPassword(email)` | `authService.forgotPassword()` | Send reset email |
+| `resetPasswordWithToken(token, pw)` | `authService.resetPassword()` | Reset with token |
+| `resendVerificationEmail(email)` | `authService.resendVerificationEmail()` | Resend verification |
+| `getValidToken()` | `tokenManager.getValidToken()` | Get valid JWT |
+| `getAuthHeaders()` | Direct localStorage read | Get `Authorization` header |
+
+### Login Page Template
+
+```svelte
+<script lang="ts">
+  import { goto } from '$app/navigation';
+  import { LoginPage } from '@manacore/shared-auth-ui';
+  import { getLoginTranslations } from '@manacore/shared-i18n';
+  import { YourAppLogo } from '@manacore/shared-branding';
+  import { authStore } from '$lib/stores/auth.svelte';
+
+  const translations = getLoginTranslations('en');
+
+  async function handleSignIn(email: string, password: string) {
+    return authStore.signIn(email, password);
+  }
+</script>
+
+<LoginPage
+  appName="YourApp"
+  logo={YourAppLogo}
+  primaryColor="#your-color"
+  onSignIn={handleSignIn}
+  {goto}
+  forgotPasswordPath="/forgot-password"
+  registerPath="/register"
+  {translations}
+/>
+```
+
+### Forgot Password Page Template
+
+```svelte
+<script lang="ts">
+  import { goto } from '$app/navigation';
+  import { ForgotPasswordPage } from '@manacore/shared-auth-ui';
+  import { getForgotPasswordTranslations } from '@manacore/shared-i18n';
+  import { YourAppLogo } from '@manacore/shared-branding';
+  import { authStore } from '$lib/stores/auth.svelte';
+
+  const translations = getForgotPasswordTranslations('en');
+
+  async function handleForgotPassword(email: string) {
+    return authStore.resetPassword(email);
+  }
+</script>
+
+<ForgotPasswordPage
+  appName="YourApp"
+  logo={YourAppLogo}
+  primaryColor="#your-color"
+  onForgotPassword={handleForgotPassword}
+  {goto}
+  loginPath="/login"
+  {translations}
+/>
+```
+
+### Reset Password Page
+
+The reset password page is a **custom implementation** (not a shared component) because it handles token validation from URL params. See `apps/calendar/apps/web/src/routes/(auth)/reset-password/+page.svelte` as reference.
+
+Key requirements:
+- Read `token` from `$page.url.searchParams`
+- Validate password length (min 8 chars) and match
+- Call `authStore.resetPasswordWithToken(token, password)`
+- Show success state and redirect to `/login` after 3 seconds
+- Show invalid token state with link to `/forgot-password`
+
 ## Security Considerations
 
 1. **Store tokens securely**

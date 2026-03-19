@@ -36,6 +36,8 @@ export {
 	PlantaLogo,
 	PlaygroundLogo,
 	LightWriteLogo,
+	MukkeLogo,
+	ContextLogo,
 } from './logos';
 
 // Configuration

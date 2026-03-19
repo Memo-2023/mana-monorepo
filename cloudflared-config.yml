@@ -70,10 +70,10 @@ ingress:
   - hostname: photos-api.mana.how
     service: http://localhost:3039
 
-  # LightWrite App
-  - hostname: lightwrite.mana.how
+  # Mukke App
+  - hostname: mukke.mana.how
     service: http://localhost:5180
-  - hostname: lightwrite-api.mana.how
+  - hostname: mukke-api.mana.how
     service: http://localhost:3010
 
   # LLM Services

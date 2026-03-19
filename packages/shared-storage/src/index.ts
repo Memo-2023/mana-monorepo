@@ -17,6 +17,7 @@ export {
 	createMailStorage,
 	createInventoryStorage,
 	createLightWriteStorage,
+	createMukkeStorage,
 } from './factory';
 
 // Utilities

@@ -167,3 +167,10 @@ export function createInventoryStorage(publicUrl?: string): StorageClient {
 export function createLightWriteStorage(): StorageClient {
 	return createStorageClient({ name: BUCKETS.LIGHTWRITE });
 }
+
+/**
+ * Create a storage client for the Mukke project
+ */
+export function createMukkeStorage(): StorageClient {
+	return createStorageClient({ name: BUCKETS.MUKKE });
+}
