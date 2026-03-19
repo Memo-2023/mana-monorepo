@@ -41,13 +41,12 @@ WORKDIR /app/packages/shared-nestjs-health
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-metrics
-
-
-WORKDIR /app/packages/shared-error-tracking
-RUN pnpm build
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-setup
+RUN pnpm build
+
+WORKDIR /app/packages/shared-error-tracking
 RUN pnpm build
 
 WORKDIR /app/packages/credit-operations
