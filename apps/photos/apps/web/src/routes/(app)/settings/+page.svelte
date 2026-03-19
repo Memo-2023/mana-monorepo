@@ -3,6 +3,7 @@
 	import { theme } from '$lib/stores/theme';
 	import { setLocale, supportedLocales, type SupportedLocale } from '$lib/i18n';
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
+	import { APP_VERSION } from '$lib/version';
 
 	let selectedLocale = $state<SupportedLocale>('de');
 
@@ -135,6 +136,8 @@
 			</div>
 		</div>
 	</div>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </div>
 
 <style>

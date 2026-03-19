@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { GlobalSettingsSection } from '@manacore/shared-ui';
+	import { APP_VERSION } from '$lib/version';
 
 	onMount(async () => {
 		await userSettings.load();
@@ -102,4 +103,6 @@
 			Töne können für einzelne Wecker und Timer in deren Einstellungen angepasst werden.
 		</p>
 	</div>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </div>

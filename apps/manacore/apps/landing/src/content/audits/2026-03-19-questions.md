@@ -16,6 +16,7 @@ scores:
   security: 55
   ux: 55
 status: 'alpha'
+version: '0.1.0'
 stats:
   backendModules: 8
   webRoutes: 12

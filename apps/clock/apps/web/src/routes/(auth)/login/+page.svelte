@@ -7,6 +7,7 @@
 	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import { ClockLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { APP_VERSION } from '$lib/version';
 	import '$lib/i18n';
 
 	// Read verification status from query params (set after email verification)
@@ -64,4 +65,5 @@
 	{translations}
 	{verified}
 	{initialEmail}
+	version={APP_VERSION}
 />

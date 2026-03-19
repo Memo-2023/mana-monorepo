@@ -15,6 +15,7 @@ interface LibraryState {
 	artists: Artist[];
 	genres: Genre[];
 	stats: LibraryStats | null;
+	coverUrls: Record<string, string>;
 	activeTab: 'songs' | 'albums' | 'artists' | 'genres';
 	sortField: SortField;
 	sortDirection: SortDirection;
@@ -40,6 +41,7 @@ function createLibraryStore() {
 		artists: [],
 		genres: [],
 		stats: null,
+		coverUrls: {},
 		activeTab: 'songs',
 		sortField: 'addedAt' as SortField,
 		sortDirection: 'desc' as SortDirection,
@@ -94,8 +96,25 @@ function createLibraryStore() {
 		get isLoading() {
 			return state.isLoading;
 		},
+		get coverUrls() {
+			return state.coverUrls;
+		},
 		get error() {
 			return state.error;
+		},
+
+		async loadCoverUrls(paths: string[]) {
+			const uncached = paths.filter((p) => p && !state.coverUrls[p]);
+			if (uncached.length === 0) return;
+			try {
+				const data = await fetchApi<{ urls: Record<string, string> }>('/library/cover-urls', {
+					method: 'POST',
+					body: JSON.stringify({ paths: uncached }),
+				});
+				state.coverUrls = { ...state.coverUrls, ...data.urls };
+			} catch {
+				// Cover URLs are non-critical, don't set error
+			}
 		},
 
 		async loadSongs() {
@@ -106,6 +125,8 @@ function createLibraryStore() {
 					`/songs?sort=${state.sortField}&direction=${state.sortDirection}`
 				);
 				state.songs = data.songs;
+				const coverPaths = data.songs.map((s) => s.coverArtPath).filter((p): p is string => !!p);
+				if (coverPaths.length > 0) this.loadCoverUrls(coverPaths);
 			} catch (e) {
 				state.error = e instanceof Error ? e.message : 'Failed to load songs';
 			}
@@ -118,6 +139,8 @@ function createLibraryStore() {
 			try {
 				const data = await fetchApi<{ albums: Album[] }>('/library/albums');
 				state.albums = data.albums;
+				const coverPaths = data.albums.map((a) => a.coverArtPath).filter((p): p is string => !!p);
+				if (coverPaths.length > 0) this.loadCoverUrls(coverPaths);
 			} catch (e) {
 				state.error = e instanceof Error ? e.message : 'Failed to load albums';
 			}

@@ -91,6 +91,8 @@
 		initialEmail?: string;
 		/** Pre-fill password field (for dev mode) */
 		initialPassword?: string;
+		/** App version string to display */
+		version?: string;
 	}
 
 	let {
@@ -115,6 +117,7 @@
 		verified = false,
 		initialEmail = '',
 		initialPassword = '',
+		version = '',
 	}: Props = $props();
 
 	const t = $derived({ ...defaultTranslations, ...translations });
@@ -541,6 +544,10 @@
 		<footer class="app-slider-section">
 			{@render appSlider()}
 		</footer>
+	{/if}
+
+	{#if version}
+		<p class="version-label">v{version}</p>
 	{/if}
 </div>
 
@@ -1010,6 +1017,21 @@
 	.app-slider-section {
 		width: 100%;
 		padding: 0 0 1rem;
+	}
+
+	.version-label {
+		position: fixed;
+		bottom: 0.5rem;
+		right: 0.75rem;
+		font-size: 10px;
+		color: rgba(156, 163, 175, 0.6);
+		user-select: none;
+		pointer-events: none;
+		margin: 0;
+	}
+
+	.light .version-label {
+		color: rgba(156, 163, 175, 0.6);
 	}
 
 	/* Entrance Animations */

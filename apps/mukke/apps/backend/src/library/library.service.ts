@@ -3,10 +3,15 @@ import { eq, and, asc, sql } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { songs } from '../db/schema';
+import { createMukkeStorage, type StorageClient } from '@manacore/shared-storage';
 
 @Injectable()
 export class LibraryService {
-	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
+	private storage: StorageClient;
+
+	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {
+		this.storage = createMukkeStorage();
+	}
 
 	async getAlbums(userId: string) {
 		const result = await this.db.execute<{
@@ -92,5 +97,27 @@ export class LibraryService {
 			.from(songs)
 			.where(and(eq(songs.userId, userId), eq(songs.genre, genreName)))
 			.orderBy(asc(songs.title));
+	}
+
+	async getCoverUrls(paths: string[]): Promise<Record<string, string>> {
+		const uniquePaths = [...new Set(paths.filter(Boolean))];
+		if (uniquePaths.length === 0) return {};
+
+		const entries = await Promise.all(
+			uniquePaths.map(async (path) => {
+				try {
+					const url = await this.storage.getDownloadUrl(path, { expiresIn: 3600 });
+					return [path, url] as const;
+				} catch {
+					return null;
+				}
+			})
+		);
+
+		const result: Record<string, string> = {};
+		for (const entry of entries) {
+			if (entry) result[entry[0]] = entry[1];
+		}
+		return result;
 	}
 }

@@ -6,6 +6,7 @@
 	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import { MukkeLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { APP_VERSION } from '$lib/version';
 
 	// Get redirect URL from query params or sessionStorage
 	const redirectTo = $derived.by(() => {
@@ -60,4 +61,5 @@
 	{translations}
 	{verified}
 	{initialEmail}
+	version={APP_VERSION}
 />

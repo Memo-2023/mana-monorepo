@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { APP_VERSION } from '$lib/version';
 
 	let isDark = $derived(theme.isDark);
 </script>
@@ -54,6 +55,8 @@
 			Planta hilft dir, deine Pflanzen zu dokumentieren und zu pflegen. Mache ein Foto und die KI
 			erstellt automatisch einen Steckbrief mit Pflegehinweisen und Gießvorschlägen.
 		</p>
-		<p class="text-sm text-muted-foreground mt-2">Version 1.0.0</p>
+		<p class="text-sm text-muted-foreground mt-2">Version {APP_VERSION}</p>
 	</div>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </div>

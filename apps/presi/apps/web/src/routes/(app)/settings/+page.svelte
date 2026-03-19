@@ -4,6 +4,7 @@
 	import { auth } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { APP_VERSION } from '$lib/version';
 	import {
 		SettingsPage,
 		SettingsSection,
@@ -191,4 +192,6 @@
 			{/snippet}
 		</SettingsDangerButton>
 	</SettingsDangerZone>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </SettingsPage>

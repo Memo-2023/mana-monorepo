@@ -4,6 +4,7 @@ import { authStore } from './auth.svelte';
 interface PlaylistState {
 	playlists: Playlist[];
 	currentPlaylist: PlaylistWithSongs | null;
+	coverUrls: Record<string, string>;
 	isLoading: boolean;
 	error: string | null;
 }
@@ -23,6 +24,7 @@ function createPlaylistStore() {
 	let state = $state<PlaylistState>({
 		playlists: [],
 		currentPlaylist: null,
+		coverUrls: {},
 		isLoading: false,
 		error: null,
 	});
@@ -56,8 +58,25 @@ function createPlaylistStore() {
 		get isLoading() {
 			return state.isLoading;
 		},
+		get coverUrls() {
+			return state.coverUrls;
+		},
 		get error() {
 			return state.error;
+		},
+
+		async loadCoverUrls(paths: string[]) {
+			const uncached = paths.filter((p) => p && !state.coverUrls[p]);
+			if (uncached.length === 0) return;
+			try {
+				const data = await fetchApi<{ urls: Record<string, string> }>('/library/cover-urls', {
+					method: 'POST',
+					body: JSON.stringify({ paths: uncached }),
+				});
+				state.coverUrls = { ...state.coverUrls, ...data.urls };
+			} catch {
+				// Cover URLs are non-critical
+			}
 		},
 
 		async loadPlaylists() {
@@ -66,6 +85,10 @@ function createPlaylistStore() {
 			try {
 				const data = await fetchApi<{ playlists: Playlist[] }>('/playlists');
 				state.playlists = data.playlists;
+				const coverPaths = data.playlists
+					.map((p) => p.coverArtPath)
+					.filter((p): p is string => !!p);
+				if (coverPaths.length > 0) this.loadCoverUrls(coverPaths);
 			} catch (e) {
 				state.error = e instanceof Error ? e.message : 'Failed to load playlists';
 			}
@@ -78,6 +101,10 @@ function createPlaylistStore() {
 			try {
 				const data = await fetchApi<{ playlist: PlaylistWithSongs }>(`/playlists/${id}`);
 				state.currentPlaylist = data.playlist;
+				const coverPaths = data.playlist.songs
+					.map((s) => s.coverArtPath)
+					.filter((p): p is string => !!p);
+				if (coverPaths.length > 0) this.loadCoverUrls(coverPaths);
 			} catch (e) {
 				state.error = e instanceof Error ? e.message : 'Failed to load playlist';
 			}

@@ -5,6 +5,7 @@
 	import { creditsService } from '$lib/api/credits';
 	import type { CreditBalance } from '$lib/api/credits';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { APP_VERSION } from '$lib/version';
 
 	let loading = $state(true);
 	let savingProfile = $state(false);
@@ -333,5 +334,7 @@
 				</div>
 			</Card>
 		</div>
+
+		<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 	{/if}
 </div>

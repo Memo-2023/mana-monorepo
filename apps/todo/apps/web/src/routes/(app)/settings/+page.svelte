@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { APP_VERSION } from '$lib/version';
 	import { todoSettings, type TodoView, type KanbanCardSize } from '$lib/stores/settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
 	import type { TaskPriority } from '@todo/shared';
@@ -698,4 +699,6 @@
 			{/snippet}
 		</SettingsDangerButton>
 	</SettingsDangerZone>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </SettingsPage>

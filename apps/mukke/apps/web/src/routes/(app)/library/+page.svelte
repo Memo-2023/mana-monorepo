@@ -136,8 +136,9 @@
 				<div class="bg-surface rounded-lg overflow-hidden">
 					<!-- Header -->
 					<div
-						class="grid grid-cols-[1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 text-xs font-medium text-foreground-secondary uppercase tracking-wide border-b border-border"
+						class="grid grid-cols-[40px_1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 text-xs font-medium text-foreground-secondary uppercase tracking-wide border-b border-border"
 					>
+						<span></span>
 						<span>Title</span>
 						<span>Artist</span>
 						<span>Album</span>
@@ -149,8 +150,33 @@
 					<!-- Song rows -->
 					{#each libraryStore.songs as song}
 						<div
-							class="grid grid-cols-[1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center"
+							class="grid grid-cols-[40px_1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center"
 						>
+							<div
+								class="w-10 h-10 rounded bg-background flex items-center justify-center overflow-hidden flex-shrink-0"
+							>
+								{#if song.coverArtPath && libraryStore.coverUrls[song.coverArtPath]}
+									<img
+										src={libraryStore.coverUrls[song.coverArtPath]}
+										alt=""
+										class="w-full h-full object-cover"
+									/>
+								{:else}
+									<svg
+										class="w-5 h-5 text-foreground-secondary"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+										/>
+									</svg>
+								{/if}
+							</div>
 							<span class="truncate font-medium">{song.title}</span>
 							<span class="truncate text-foreground-secondary">{song.artist ?? 'Unknown'}</span>
 							<span class="truncate text-foreground-secondary">{song.album ?? 'Unknown'}</span>
@@ -226,21 +252,29 @@
 							class="bg-surface rounded-lg p-4 hover:bg-surface-hover transition-colors group"
 						>
 							<div
-								class="aspect-square bg-background rounded-lg mb-3 flex items-center justify-center"
+								class="aspect-square bg-background rounded-lg mb-3 flex items-center justify-center overflow-hidden"
 							>
-								<svg
-									class="w-12 h-12 text-foreground-secondary"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+								{#if album.coverArtPath && libraryStore.coverUrls[album.coverArtPath]}
+									<img
+										src={libraryStore.coverUrls[album.coverArtPath]}
+										alt={album.album}
+										class="w-full h-full object-cover"
 									/>
-								</svg>
+								{:else}
+									<svg
+										class="w-12 h-12 text-foreground-secondary"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+										/>
+									</svg>
+								{/if}
 							</div>
 							<h3 class="font-medium truncate group-hover:text-primary transition-colors">
 								{album.album}

@@ -6,6 +6,7 @@
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { APP_VERSION } from '$lib/version';
 	import '$lib/i18n';
 
 	let redirectTo = $state('/');
@@ -53,4 +54,5 @@
 	{translations}
 	{verified}
 	{initialEmail}
+	version={APP_VERSION}
 />

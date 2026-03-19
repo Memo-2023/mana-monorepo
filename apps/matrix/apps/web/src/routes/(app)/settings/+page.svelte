@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { matrixStore } from '$lib/matrix';
 	import { goto } from '$app/navigation';
+	import { APP_VERSION } from '$lib/version';
 	import {
 		ArrowLeft,
 		User,
@@ -228,8 +229,8 @@
 							<button
 								class="flex flex-col items-center gap-2 rounded-xl p-4 transition-all
 								       {theme.mode === 'light'
-									       ? 'bg-primary text-primary-foreground ring-2 ring-primary'
-									       : 'bg-muted hover:bg-muted/80'}"
+									? 'bg-primary text-primary-foreground ring-2 ring-primary'
+									: 'bg-muted hover:bg-muted/80'}"
 								onclick={() => theme.setMode('light')}
 							>
 								<Sun class="h-6 w-6" />
@@ -239,8 +240,8 @@
 							<button
 								class="flex flex-col items-center gap-2 rounded-xl p-4 transition-all
 								       {theme.mode === 'dark'
-									       ? 'bg-primary text-primary-foreground ring-2 ring-primary'
-									       : 'bg-muted hover:bg-muted/80'}"
+									? 'bg-primary text-primary-foreground ring-2 ring-primary'
+									: 'bg-muted hover:bg-muted/80'}"
 								onclick={() => theme.setMode('dark')}
 							>
 								<Moon class="h-6 w-6" />
@@ -250,8 +251,8 @@
 							<button
 								class="flex flex-col items-center gap-2 rounded-xl p-4 transition-all
 								       {theme.mode === 'system'
-									       ? 'bg-primary text-primary-foreground ring-2 ring-primary'
-									       : 'bg-muted hover:bg-muted/80'}"
+									? 'bg-primary text-primary-foreground ring-2 ring-primary'
+									: 'bg-muted hover:bg-muted/80'}"
 								onclick={() => theme.setMode('system')}
 							>
 								<Desktop class="h-6 w-6" />
@@ -309,7 +310,9 @@
 					{:else}
 						<div class="space-y-3">
 							<!-- Enable/Disable Toggle -->
-							<label class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer">
+							<label
+								class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer"
+							>
 								<div class="flex items-center gap-3">
 									<BellRinging class="h-6 w-6" />
 									<div>
@@ -330,7 +333,9 @@
 
 							<!-- Sound Toggle -->
 							<label
-								class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer {!notificationSettings.enabled ? 'opacity-50' : ''}"
+								class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer {!notificationSettings.enabled
+									? 'opacity-50'
+									: ''}"
 							>
 								<div class="flex items-center gap-3">
 									<SpeakerHigh class="h-6 w-6" />
@@ -350,7 +355,9 @@
 
 							<!-- Preview Toggle -->
 							<label
-								class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer {!notificationSettings.enabled ? 'opacity-50' : ''}"
+								class="flex items-center justify-between rounded-lg bg-muted p-4 cursor-pointer {!notificationSettings.enabled
+									? 'opacity-50'
+									: ''}"
 							>
 								<div class="flex items-center gap-3">
 									<Eye class="h-6 w-6" />
@@ -386,6 +393,8 @@
 				</button>
 			</section>
 		</div>
+
+		<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 	</div>
 </div>
 

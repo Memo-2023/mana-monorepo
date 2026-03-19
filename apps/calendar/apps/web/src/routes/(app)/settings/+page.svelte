@@ -14,6 +14,7 @@
 		FilterDropdown,
 		type FilterDropdownOption,
 	} from '@manacore/shared-ui';
+	import { APP_VERSION } from '$lib/version';
 	import type { CalendarViewType, Calendar } from '@calendar/shared';
 
 	// Calendar management state
@@ -651,6 +652,8 @@
 			</div>
 		</SettingsCard>
 	</SettingsSection>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </div>
 
 <style>

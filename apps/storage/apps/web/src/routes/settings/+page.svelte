@@ -3,6 +3,7 @@
 	import { theme } from '$lib/stores/theme.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
+	import { APP_VERSION } from '$lib/version';
 	import {
 		SettingsPage,
 		SettingsSection,
@@ -121,4 +122,6 @@
 			</SettingsRow>
 		</SettingsCard>
 	</SettingsSection>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </SettingsPage>

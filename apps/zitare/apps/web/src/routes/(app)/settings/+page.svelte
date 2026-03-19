@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
 	import type { SupportedLanguage } from '@zitare/content';
+	import { APP_VERSION } from '$lib/version';
 
 	// Language options for quotes
 	const languageOptions: { value: SupportedLanguage; label: string }[] = [
@@ -56,4 +57,6 @@
 			</p>
 		</div>
 	</div>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { APP_VERSION } from '$lib/version';
 	import {
 		SettingsPage,
 		SettingsSection,
@@ -171,4 +172,6 @@
 			<a href="#" class="text-[hsl(var(--primary))] hover:underline">Hilfe & Support</a>
 		</div>
 	</SettingsSection>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </SettingsPage>

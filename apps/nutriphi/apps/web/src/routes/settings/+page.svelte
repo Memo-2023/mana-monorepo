@@ -4,6 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { apiClient } from '$lib/api/client';
 	import { DEFAULT_DAILY_VALUES } from '@nutriphi/shared';
+	import { APP_VERSION } from '$lib/version';
 	import {
 		ArrowLeft,
 		FloppyDisk,
@@ -278,8 +279,10 @@
 
 		<!-- App Info -->
 		<section class="text-center text-sm text-[var(--color-text-muted)] py-4">
-			<p>NutriPhi v1.0.0</p>
+			<p>NutriPhi v{APP_VERSION}</p>
 			<p class="mt-1">KI-gestützte Ernährungsanalyse</p>
 		</section>
+
+		<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 	</main>
 </div>

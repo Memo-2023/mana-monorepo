@@ -29,6 +29,7 @@
 	let songs = $state<Song[]>([]);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
+	let coverUrl = $state<string | null>(null);
 
 	let albumName = $derived(decodeURIComponent($page.params.name ?? ''));
 	let albumArtist = $derived(
@@ -42,10 +43,17 @@
 
 		isLoading = true;
 		error = null;
+		coverUrl = null;
 
 		fetchApi<{ songs: Song[] }>(`/library/albums/${encodeURIComponent(decodeURIComponent(name))}`)
 			.then((data) => {
 				songs = data.songs;
+				const songWithCover = data.songs.find((s) => s.coverArtPath);
+				if (songWithCover) {
+					fetchApi<{ url: string | null }>(`/songs/${songWithCover.id}/cover-url`).then((res) => {
+						coverUrl = res.url;
+					});
+				}
 			})
 			.catch((e) => {
 				error = e instanceof Error ? e.message : 'Failed to load album';
@@ -100,20 +108,26 @@
 	{:else}
 		<!-- Album header -->
 		<div class="flex items-end gap-6 mb-8">
-			<div class="w-48 h-48 bg-surface rounded-lg flex items-center justify-center flex-shrink-0">
-				<svg
-					class="w-16 h-16 text-foreground-secondary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-					/>
-				</svg>
+			<div
+				class="w-48 h-48 bg-surface rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
+			>
+				{#if coverUrl}
+					<img src={coverUrl} alt={albumName} class="w-full h-full object-cover" />
+				{:else}
+					<svg
+						class="w-16 h-16 text-foreground-secondary"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+						/>
+					</svg>
+				{/if}
 			</div>
 			<div>
 				<h1 class="text-3xl font-bold mb-1">{albumName}</h1>

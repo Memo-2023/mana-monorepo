@@ -8,6 +8,7 @@
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { APP_VERSION } from '$lib/version';
 
 	// Get translations based on current locale
 	const translations = $derived(getLoginTranslations($locale || 'de'));
@@ -42,6 +43,7 @@
 	{translations}
 	{verified}
 	{initialEmail}
+	version={APP_VERSION}
 >
 	{#snippet headerControls()}
 		<LanguageSelector />

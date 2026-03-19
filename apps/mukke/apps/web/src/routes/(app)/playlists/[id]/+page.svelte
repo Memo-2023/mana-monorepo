@@ -205,8 +205,9 @@
 			<div class="bg-surface rounded-lg overflow-hidden">
 				<!-- Header -->
 				<div
-					class="grid grid-cols-[1fr_1fr_1fr_80px_40px] gap-4 px-4 py-3 text-xs font-medium text-foreground-secondary uppercase tracking-wide border-b border-border"
+					class="grid grid-cols-[40px_1fr_1fr_1fr_80px_40px] gap-4 px-4 py-3 text-xs font-medium text-foreground-secondary uppercase tracking-wide border-b border-border"
 				>
+					<span></span>
 					<span>Title</span>
 					<span>Artist</span>
 					<span>Album</span>
@@ -216,7 +217,7 @@
 				<!-- Song rows -->
 				{#each playlistStore.currentPlaylist.songs as song, index}
 					<div
-						class="grid grid-cols-[1fr_1fr_1fr_80px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center cursor-pointer"
+						class="grid grid-cols-[40px_1fr_1fr_1fr_80px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center cursor-pointer"
 						onclick={() => handlePlaySong(song, index)}
 						role="button"
 						tabindex="0"
@@ -224,6 +225,31 @@
 							if (e.key === 'Enter') handlePlaySong(song, index);
 						}}
 					>
+						<div
+							class="w-10 h-10 rounded bg-background flex items-center justify-center overflow-hidden flex-shrink-0"
+						>
+							{#if song.coverArtPath && playlistStore.coverUrls[song.coverArtPath]}
+								<img
+									src={playlistStore.coverUrls[song.coverArtPath]}
+									alt=""
+									class="w-full h-full object-cover"
+								/>
+							{:else}
+								<svg
+									class="w-5 h-5 text-foreground-secondary"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+									/>
+								</svg>
+							{/if}
+						</div>
 						<span class="truncate font-medium">{song.title}</span>
 						<span class="truncate text-foreground-secondary">{song.artist ?? 'Unknown'}</span>
 						<span class="truncate text-foreground-secondary">{song.album ?? 'Unknown'}</span>

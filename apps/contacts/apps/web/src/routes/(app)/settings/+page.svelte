@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { APP_VERSION } from '$lib/version';
 	import {
 		contactsSettings,
 		type ContactView,
@@ -638,4 +639,6 @@
 			{/snippet}
 		</SettingsDangerButton>
 	</SettingsDangerZone>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </SettingsPage>

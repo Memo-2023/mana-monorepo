@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme';
+	import { APP_VERSION } from '$lib/version';
 	import { ArrowLeft, User, Moon, Sun, Desktop, Bell, Shield, Trash } from '@manacore/shared-icons';
 
 	let currentTheme = $state(theme.current);
@@ -169,10 +170,12 @@
 	<section class="mb-8">
 		<div class="rounded-xl border border-border bg-card p-6 text-center">
 			<p class="text-sm text-muted-foreground">
-				Questions App v1.0.0
+				Questions App v{APP_VERSION}
 				<br />
 				Powered by mana-search
 			</p>
 		</div>
 	</section>
+
+	<p class="mt-8 pb-4 text-center text-xs text-gray-400 dark:text-gray-600">v{APP_VERSION}</p>
 </div>

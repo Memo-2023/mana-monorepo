@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { LibraryService } from './library.service';
 
@@ -6,6 +6,12 @@ import { LibraryService } from './library.service';
 @UseGuards(JwtAuthGuard)
 export class LibraryController {
 	constructor(private readonly libraryService: LibraryService) {}
+
+	@Post('cover-urls')
+	async getCoverUrls(@Body() body: { paths: string[] }) {
+		const urls = await this.libraryService.getCoverUrls(body.paths ?? []);
+		return { urls };
+	}
 
 	@Get('albums')
 	async getAlbums(@CurrentUser() user: CurrentUserData) {
