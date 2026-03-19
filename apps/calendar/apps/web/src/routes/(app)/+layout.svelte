@@ -438,6 +438,13 @@
 
 <SplitPaneContainer>
 	<div class="layout-container">
+		<a
+			href="#main-content"
+			class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+		>
+			Zum Inhalt springen
+		</a>
+
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !settingsStore.immersiveModeEnabled}
 			<PillNavigation
@@ -469,6 +476,7 @@
 				profileHref="/profile"
 				allAppsHref="/apps"
 				onOpenInPanel={handleOpenInPanel}
+				ariaLabel="Hauptnavigation"
 			/>
 
 			<!-- Date strip (only on main calendar page) -->
@@ -550,6 +558,7 @@
 		/>
 
 		<main
+			id="main-content"
 			class="main-content bg-background"
 			class:has-toolbar={showCalendarToolbar}
 			class:immersive={settingsStore.immersiveModeEnabled}

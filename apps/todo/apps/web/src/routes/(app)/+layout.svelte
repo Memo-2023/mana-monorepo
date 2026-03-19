@@ -310,6 +310,13 @@
 
 <SplitPaneContainer>
 	<div class="layout-container">
+		<a
+			href="#main-content"
+			class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+		>
+			Zum Inhalt springen
+		</a>
+
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !todoSettings.immersiveModeEnabled}
 			<!-- PillNav (shown/hidden via FAB) -->
@@ -342,6 +349,7 @@
 					profileHref="/profile"
 					allAppsHref="/apps"
 					onOpenInPanel={handleOpenInPanel}
+					ariaLabel="Hauptnavigation"
 				/>
 
 				<!-- FilterStrip (shown when Filter pill is active in PillNav) -->
@@ -370,6 +378,7 @@
 				class="pillnav-fab"
 				onclick={handlePillNavToggle}
 				title={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
+				aria-label={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
 			>
 				{#if isPillNavCollapsed}
 					<!-- Menu icon -->
@@ -401,7 +410,11 @@
 			onToggle={() => todoSettings.toggleImmersiveMode()}
 		/>
 
-		<main class="main-content bg-background" class:immersive={todoSettings.immersiveModeEnabled}>
+		<main
+			id="main-content"
+			class="main-content bg-background"
+			class:immersive={todoSettings.immersiveModeEnabled}
+		>
 			<div
 				class="content-wrapper"
 				class:full-width={$page.url.pathname === '/kanban'}

@@ -278,6 +278,13 @@
 <SplitPaneContainer>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
+		<a
+			href="#main-content"
+			class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+		>
+			Zum Inhalt springen
+		</a>
+
 		<!-- UI Elements (hidden in immersive mode) -->
 		{#if !contactsSettings.immersiveModeEnabled}
 			<!-- Floating Pill Navigation (at bottom) -->
@@ -310,6 +317,7 @@
 				profileHref="/profile"
 				allAppsHref="/apps"
 				onOpenInPanel={handleOpenInPanel}
+				ariaLabel="Hauptnavigation"
 			/>
 
 			<!-- Global Quick Input Bar -->
@@ -342,6 +350,7 @@
 
 		<!-- Main Content -->
 		<main
+			id="main-content"
 			class="main-content bg-background"
 			class:immersive={contactsSettings.immersiveModeEnabled}
 		>

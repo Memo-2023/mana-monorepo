@@ -255,6 +255,8 @@
 		showA11yQuickToggles?: boolean;
 		/** Called when an app should be opened in a split panel */
 		onOpenInPanel?: (appId: string, url: string) => void;
+		/** Accessible label for the nav element */
+		ariaLabel?: string;
 	}
 
 	let {
@@ -296,6 +298,7 @@
 		onA11yReduceMotionChange,
 		showA11yQuickToggles = false,
 		onOpenInPanel,
+		ariaLabel,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -443,7 +446,11 @@
 </script>
 
 {#if !isCollapsed}
-	<nav class="pill-nav" style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}>
+	<nav
+		class="pill-nav"
+		style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}
+		aria-label={ariaLabel}
+	>
 		<div class="pill-nav-container">
 			<!-- Logo pill / App Switcher -->
 			{#if showAppSwitcher && appItems.length > 0}
