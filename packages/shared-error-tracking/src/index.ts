@@ -1,0 +1,118 @@
+/**
+ * Shared Error Tracking for ManaCore Apps
+ *
+ * Uses Sentry SDK with GlitchTip as the self-hosted backend.
+ * Compatible with any Sentry-compatible error tracking service.
+ *
+ * @example
+ * ```typescript
+ * // In instrument.ts (must be imported BEFORE app bootstrap)
+ * import { initErrorTracking } from '@manacore/shared-error-tracking';
+ *
+ * initErrorTracking({
+ *   serviceName: 'calendar-backend',
+ *   dsn: process.env.GLITCHTIP_DSN,
+ *   environment: process.env.NODE_ENV,
+ *   release: process.env.APP_VERSION,
+ * });
+ * ```
+ */
+
+import * as Sentry from '@sentry/node';
+
+export interface ErrorTrackingOptions {
+	/** Service/app name (e.g. 'calendar-backend', 'contacts-web') */
+	serviceName: string;
+	/** GlitchTip/Sentry DSN. If not set, error tracking is disabled. */
+	dsn?: string;
+	/** Environment (development, staging, production) */
+	environment?: string;
+	/** Release/version string */
+	release?: string;
+	/** Sample rate for error events (0.0 to 1.0, default: 1.0) */
+	sampleRate?: number;
+	/** Sample rate for performance traces (0.0 to 1.0, default: 0.1) */
+	tracesSampleRate?: number;
+	/** Enable debug mode (default: false) */
+	debug?: boolean;
+}
+
+let initialized = false;
+
+/**
+ * Initialize error tracking. Call this BEFORE bootstrapping your app.
+ * If no DSN is provided, error tracking is silently disabled.
+ */
+export function initErrorTracking(options: ErrorTrackingOptions): void {
+	if (initialized) return;
+
+	const dsn = options.dsn || process.env.GLITCHTIP_DSN || process.env.SENTRY_DSN;
+
+	if (!dsn) {
+		if (options.debug) {
+			console.log(`[ErrorTracking] No DSN configured for ${options.serviceName} - disabled`);
+		}
+		return;
+	}
+
+	Sentry.init({
+		dsn,
+		environment: options.environment || process.env.NODE_ENV || 'development',
+		release: options.release || process.env.APP_VERSION,
+		serverName: options.serviceName,
+		sampleRate: options.sampleRate ?? 1.0,
+		tracesSampleRate: options.tracesSampleRate ?? 0.1,
+		debug: options.debug ?? false,
+	});
+
+	initialized = true;
+
+	console.log(
+		`[ErrorTracking] Initialized for ${options.serviceName} (${options.environment || 'development'})`
+	);
+}
+
+/**
+ * Capture an exception manually
+ */
+export function captureException(error: unknown, context?: Record<string, unknown>): void {
+	if (!initialized) return;
+	Sentry.captureException(error, { extra: context });
+}
+
+/**
+ * Capture a message
+ */
+export function captureMessage(
+	message: string,
+	level: 'fatal' | 'error' | 'warning' | 'info' | 'debug' = 'info'
+): void {
+	if (!initialized) return;
+	Sentry.captureMessage(message, level);
+}
+
+/**
+ * Set user context for error reports
+ */
+export function setUser(user: { id: string; email?: string } | null): void {
+	if (!initialized) return;
+	Sentry.setUser(user);
+}
+
+/**
+ * Set extra context tags
+ */
+export function setTag(key: string, value: string): void {
+	if (!initialized) return;
+	Sentry.setTag(key, value);
+}
+
+/**
+ * Flush pending events (call before process exit)
+ */
+export async function flush(timeout = 2000): Promise<void> {
+	if (!initialized) return;
+	await Sentry.flush(timeout);
+}
+
+export { Sentry };

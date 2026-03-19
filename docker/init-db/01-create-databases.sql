@@ -2,6 +2,7 @@
 -- This script runs on first container initialization
 
 -- Core databases
+CREATE DATABASE IF NOT EXISTS glitchtip;
 CREATE DATABASE IF NOT EXISTS chat;
 CREATE DATABASE IF NOT EXISTS zitare;
 CREATE DATABASE IF NOT EXISTS contacts;
@@ -36,4 +37,5 @@ GRANT ALL PRIVILEGES ON DATABASE techbase TO manacore;
 GRANT ALL PRIVILEGES ON DATABASE voxel_lava TO manacore;
 GRANT ALL PRIVILEGES ON DATABASE figgos TO manacore;
 GRANT ALL PRIVILEGES ON DATABASE context TO manacore;
+GRANT ALL PRIVILEGES ON DATABASE glitchtip TO manacore;
 GRANT ALL PRIVILEGES ON DATABASE manacore TO manacore;

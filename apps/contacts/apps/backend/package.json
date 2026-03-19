@@ -21,6 +21,7 @@
 		"test:cov": "jest --coverage"
 	},
 	"dependencies": {
+		"@manacore/shared-error-tracking": "workspace:^",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",
 		"@manacore/shared-nestjs-metrics": "workspace:*",

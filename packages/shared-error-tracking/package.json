@@ -1,0 +1,45 @@
+{
+	"name": "@manacore/shared-error-tracking",
+	"version": "1.0.0",
+	"description": "Error tracking integration for ManaCore apps (GlitchTip/Sentry-compatible)",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./nestjs": {
+			"types": "./dist/nestjs.d.ts",
+			"default": "./dist/nestjs.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@sentry/node": "^9.0.0"
+	},
+	"peerDependencies": {
+		"@nestjs/common": "^10.0.0 || ^11.0.0",
+		"@nestjs/core": "^10.0.0 || ^11.0.0"
+	},
+	"peerDependenciesMeta": {
+		"@nestjs/common": {
+			"optional": true
+		},
+		"@nestjs/core": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@nestjs/common": "^10.0.0",
+		"@nestjs/core": "^10.0.0",
+		"@types/node": "^22.10.2",
+		"typescript": "^5.0.0"
+	}
+}
