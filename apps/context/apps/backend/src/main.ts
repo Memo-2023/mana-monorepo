@@ -1,3 +1,4 @@
+import './instrument';
 import { bootstrapApp } from '@manacore/shared-nestjs-setup';
 import { AppModule } from './app.module';
 

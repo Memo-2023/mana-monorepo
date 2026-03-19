@@ -292,6 +292,7 @@ services:
       AZURE_OPENAI_API_VERSION: 2024-12-01-preview
       CORS_ORIGINS: https://chat.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      GLITCHTIP_DSN: https://7ffb55d23705497989dbabd486a42014@glitchtip.mana.how/4
     ports:
       - "3030:3030"
     healthcheck:
@@ -379,6 +380,7 @@ services:
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://clock.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      GLITCHTIP_DSN: https://4d5ea890019d4a988e9834bc3e374e0a@glitchtip.mana.how/7
     ports:
       - "3033:3033"
     healthcheck:
@@ -449,6 +451,7 @@ services:
       MAX_FILE_SIZE: 104857600
       MAX_FILES_PER_UPLOAD: 10
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      GLITCHTIP_DSN: https://f38d9b20ba2d416b80d1c559b81fc275@glitchtip.mana.how/17
     ports:
       - "3035:3035"
     healthcheck:
@@ -475,6 +478,7 @@ services:
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://presi.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      GLITCHTIP_DSN: https://24df6aad72b646ba9fb68e54b566ad3e@glitchtip.mana.how/14
     ports:
       - "3036:3036"
     healthcheck:
@@ -501,6 +505,7 @@ services:
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       CORS_ORIGINS: https://nutriphi.mana.how,https://mana.how
+      GLITCHTIP_DSN: https://61b5689b903746b698bd1f77ae9e0be1@glitchtip.mana.how/11
     ports:
       - "3037:3037"
     healthcheck:
@@ -526,6 +531,7 @@ services:
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://skilltree.mana.how,https://mana.how
+      GLITCHTIP_DSN: https://93548ec4e2a14586bfef9f4f98e72fe1@glitchtip.mana.how/16
     ports:
       - "3038:3038"
     healthcheck:
@@ -558,6 +564,7 @@ services:
       MANA_MEDIA_URL: http://mana-media:3015
       CORS_ORIGINS: https://photos.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      GLITCHTIP_DSN: https://032aef0f1da94497b8b8f6accb0c4587@glitchtip.mana.how/12
     ports:
       - "3039:3039"
     healthcheck:
@@ -587,6 +594,7 @@ services:
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://zitare.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      GLITCHTIP_DSN: https://53b871913d864628a8c7cb97b3f69e06@glitchtip.mana.how/8
     ports:
       - "3007:3007"
     healthcheck:
@@ -619,6 +627,7 @@ services:
       S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       S3_BUCKET: mukke-storage
       RUN_DB_PUSH: "true"
+      GLITCHTIP_DSN: https://9f792851d49d4f018625f45855f0a030@glitchtip.mana.how/9
     ports:
       - "3010:3010"
     healthcheck:
@@ -656,6 +665,7 @@ services:
       S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       S3_BUCKET: planta-storage
+      GLITCHTIP_DSN: https://646a927be6c54c989a75c145247d89f9@glitchtip.mana.how/13
     ports:
       - "3022:3022"
     healthcheck:

@@ -1,3 +1,4 @@
+import './instrument';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -30,7 +31,7 @@ async function bootstrap() {
 			whitelist: true,
 			transform: true,
 			forbidNonWhitelisted: true,
-		}),
+		})
 	);
 
 	await app.listen(port);
