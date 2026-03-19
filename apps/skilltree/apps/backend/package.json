@@ -1,6 +1,6 @@
 {
 	"name": "@skilltree/backend",
-	"version": "1.0.0",
+	"version": "0.2.0",
 	"private": true,
 	"description": "SkillTree Backend API",
 	"scripts": {
@@ -17,6 +17,7 @@
 		"db:generate": "drizzle-kit generate"
 	},
 	"dependencies": {
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",
 		"@manacore/shared-nestjs-metrics": "workspace:*",

@@ -1,6 +1,6 @@
 {
 	"name": "@picture/shared",
-	"version": "1.0.0",
+	"version": "0.3.0",
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
 	"exports": {

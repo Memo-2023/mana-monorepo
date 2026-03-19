@@ -1,6 +1,6 @@
 {
 	"name": "@traces/backend",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"private": true,
 	"scripts": {
 		"build": "nest build",
@@ -17,6 +17,7 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/nestjs-integration": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",

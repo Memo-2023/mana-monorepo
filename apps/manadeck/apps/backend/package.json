@@ -1,6 +1,6 @@
 {
 	"name": "@manadeck/backend",
-	"version": "0.0.1",
+	"version": "0.2.0",
 	"description": "",
 	"author": "",
 	"private": true,
@@ -21,6 +21,7 @@
 		"test:e2e": "jest --config ./test/jest-e2e.json"
 	},
 	"dependencies": {
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/nestjs-integration": "workspace:*",
 		"@manacore/shared-errors": "workspace:*",
 		"@google/genai": "^1.14.0",

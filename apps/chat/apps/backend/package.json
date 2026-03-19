@@ -1,6 +1,6 @@
 {
 	"name": "@chat/backend",
-	"version": "1.0.0",
+	"version": "0.3.0",
 	"private": true,
 	"scripts": {
 		"build": "nest build",
@@ -29,6 +29,7 @@
 		"test:cov": "jest --coverage"
 	},
 	"dependencies": {
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/credit-operations": "workspace:*",
 		"@manacore/nestjs-integration": "workspace:*",
 		"@manacore/shared-errors": "workspace:*",

@@ -1,6 +1,6 @@
 {
 	"name": "@nutriphi/backend",
-	"version": "1.0.0",
+	"version": "0.2.0",
 	"type": "commonjs",
 	"private": true,
 	"scripts": {
@@ -23,6 +23,7 @@
 		"db:seed": "tsx src/db/seed.ts"
 	},
 	"dependencies": {
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@nutriphi/shared": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",

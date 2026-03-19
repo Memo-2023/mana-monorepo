@@ -1,6 +1,6 @@
 {
 	"name": "@manacore/mana-notify",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "Central notification microservice for email, push, matrix, and webhook notifications",
 	"private": true,
 	"license": "UNLICENSED",

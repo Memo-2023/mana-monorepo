@@ -1,6 +1,6 @@
 {
 	"name": "mana-core-auth",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"private": true,
 	"description": "Mana Core Authentication and Credit System",
 	"main": "dist/main.js",

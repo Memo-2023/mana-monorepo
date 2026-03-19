@@ -1,6 +1,6 @@
 {
 	"name": "@mukke/backend",
-	"version": "1.0.0",
+	"version": "0.2.0",
 	"private": true,
 	"scripts": {
 		"build": "nest build",
@@ -21,6 +21,7 @@
 		"test:cov": "jest --coverage"
 	},
 	"dependencies": {
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-drizzle-config": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",

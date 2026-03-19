@@ -1,6 +1,6 @@
 {
 	"name": "questions",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"private": true,
 	"description": "Questions app - Collect questions and research answers",
 	"scripts": {

@@ -1,6 +1,6 @@
 {
 	"name": "@manacore/mana-crawler",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"description": "Web crawler microservice for systematic website crawling and content extraction",
 	"private": true,
 	"license": "UNLICENSED",

@@ -1,6 +1,6 @@
 {
 	"name": "@memoro/ui",
-	"version": "0.1.0",
+	"version": "0.3.0",
 	"description": "CLI tool for copying UI components into your app (shadcn-style)",
 	"main": "dist/index.js",
 	"bin": {

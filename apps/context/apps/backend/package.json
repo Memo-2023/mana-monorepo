@@ -1,6 +1,6 @@
 {
 	"name": "@context/backend",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"private": true,
 	"scripts": {
 		"build": "nest build",
@@ -21,6 +21,7 @@
 		"db:seed": "tsx src/db/seed.ts"
 	},
 	"dependencies": {
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-drizzle-config": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",

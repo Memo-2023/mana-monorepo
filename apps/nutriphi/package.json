@@ -1,6 +1,6 @@
 {
 	"name": "nutriphi",
-	"version": "1.0.0",
+	"version": "0.2.0",
 	"private": true,
 	"description": "NutriPhi - AI-powered nutrition tracking with photo analysis",
 	"scripts": {

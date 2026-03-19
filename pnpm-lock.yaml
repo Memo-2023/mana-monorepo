@@ -446,6 +446,9 @@ importers:
       '@manacore/nestjs-integration':
         specifier: workspace:*
         version: link:../../../../packages/mana-core-nestjs-integration
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-errors':
         specifier: workspace:*
         version: link:../../../../packages/shared-errors
@@ -824,6 +827,9 @@ importers:
       '@clock/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -1380,6 +1386,9 @@ importers:
       '@manacore/shared-drizzle-config':
         specifier: workspace:*
         version: link:../../../../packages/shared-drizzle-config
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -2077,6 +2086,9 @@ importers:
       '@manacore/nestjs-integration':
         specifier: workspace:*
         version: link:../../../../packages/mana-core-nestjs-integration
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-errors':
         specifier: workspace:*
         version: link:../../../../packages/shared-errors
@@ -2729,6 +2741,9 @@ importers:
       '@manacore/shared-drizzle-config':
         specifier: workspace:*
         version: link:../../../../packages/shared-drizzle-config
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -2883,6 +2898,12 @@ importers:
       '@manacore/shared-branding':
         specifier: workspace:*
         version: link:../../../../packages/shared-branding
+      '@manacore/shared-feedback-service':
+        specifier: workspace:^
+        version: link:../../../../packages/shared-feedback-service
+      '@manacore/shared-feedback-ui':
+        specifier: workspace:^
+        version: link:../../../../packages/shared-feedback-ui
       '@manacore/shared-i18n':
         specifier: workspace:*
         version: link:../../../../packages/shared-i18n
@@ -2980,6 +3001,9 @@ importers:
       '@google/generative-ai':
         specifier: ^0.21.0
         version: 0.21.0
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -3271,6 +3295,9 @@ importers:
 
   apps/photos/apps/backend:
     dependencies:
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -3502,6 +3529,9 @@ importers:
       '@manacore/nestjs-integration':
         specifier: workspace:*
         version: link:../../../../packages/mana-core-nestjs-integration
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-errors':
         specifier: workspace:*
         version: link:../../../../packages/shared-errors
@@ -4045,6 +4075,9 @@ importers:
       '@google/generative-ai':
         specifier: ^0.21.0
         version: 0.21.0
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -4260,6 +4293,9 @@ importers:
 
   apps/presi/apps/backend:
     dependencies:
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -4572,6 +4608,9 @@ importers:
 
   apps/questions/apps/backend:
     dependencies:
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -4766,6 +4805,9 @@ importers:
 
   apps/skilltree/apps/backend:
     dependencies:
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -4941,6 +4983,9 @@ importers:
 
   apps/storage/apps/backend:
     dependencies:
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -5456,6 +5501,9 @@ importers:
       '@manacore/nestjs-integration':
         specifier: workspace:*
         version: link:../../../../packages/mana-core-nestjs-integration
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth
@@ -5668,6 +5716,9 @@ importers:
 
   apps/zitare/apps/backend:
     dependencies:
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
       '@manacore/shared-nestjs-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-nestjs-auth

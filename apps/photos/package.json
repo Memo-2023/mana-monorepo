@@ -1,6 +1,6 @@
 {
 	"name": "photos",
-	"version": "1.0.0",
+	"version": "0.2.0",
 	"private": true,
 	"description": "Photos App - Unified Photo Gallery for ManaCore Ecosystem",
 	"scripts": {
