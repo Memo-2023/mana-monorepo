@@ -211,6 +211,57 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 					}
 				</div>
 			</div>
+			{/* Monitoring Tools */}
+			<div class="border-border/30 mx-auto mt-6 max-w-4xl rounded-xl border p-5">
+				<h3 class="text-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
+					Monitoring & Error Tracking
+				</h3>
+				<div class="grid gap-3 sm:grid-cols-3">
+					<a
+						href="https://glitchtip.mana.how"
+						target="_blank"
+						class="hover:border-border border-border/30 flex items-center gap-3 rounded-lg border p-3 transition-colors"
+					>
+						<div class="bg-red-500/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+							<span class="text-sm">🐛</span>
+						</div>
+						<div>
+							<div class="text-foreground text-xs font-medium">GlitchTip</div>
+							<div class="text-muted-foreground text-[10px]">guest@mana.how / guest</div>
+						</div>
+					</a>
+					<a
+						href="https://grafana.mana.how"
+						target="_blank"
+						class="hover:border-border border-border/30 flex items-center gap-3 rounded-lg border p-3 transition-colors"
+					>
+						<div
+							class="bg-orange-500/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+						>
+							<span class="text-sm">📊</span>
+						</div>
+						<div>
+							<div class="text-foreground text-xs font-medium">Grafana</div>
+							<div class="text-muted-foreground text-[10px]">Metrics & Dashboards</div>
+						</div>
+					</a>
+					<a
+						href="https://stats.mana.how"
+						target="_blank"
+						class="hover:border-border border-border/30 flex items-center gap-3 rounded-lg border p-3 transition-colors"
+					>
+						<div
+							class="bg-blue-500/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+						>
+							<span class="text-sm">📈</span>
+						</div>
+						<div>
+							<div class="text-foreground text-xs font-medium">Umami</div>
+							<div class="text-muted-foreground text-[10px]">Web Analytics</div>
+						</div>
+					</a>
+				</div>
+			</div>
 		</Container>
 	</Section>
 
