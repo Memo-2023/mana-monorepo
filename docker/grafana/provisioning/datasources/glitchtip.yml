@@ -1,0 +1,23 @@
+# GlitchTip PostgreSQL Datasource
+# Enables error tracking dashboards in Grafana
+
+apiVersion: 1
+
+datasources:
+  - name: GlitchTip
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    user: postgres
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      database: glitchtip
+      sslmode: disable
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1600
+      timescaledb: false
+    isDefault: false
+    editable: true

@@ -1,0 +1,166 @@
+{
+	"annotations": { "list": [] },
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 1,
+	"id": null,
+	"links": [
+		{
+			"title": "GlitchTip",
+			"url": "https://glitchtip.mana.how",
+			"targetBlank": true,
+			"icon": "external link"
+		}
+	],
+	"panels": [
+		{
+			"title": "Total Open Issues",
+			"type": "stat",
+			"gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+			"datasource": { "type": "postgres", "uid": "${DS_GLITCHTIP}" },
+			"targets": [
+				{
+					"rawSql": "SELECT COUNT(*) AS \"Open Issues\" FROM issue_events_issue WHERE status = 0 AND is_deleted = false",
+					"format": "table"
+				}
+			],
+			"fieldConfig": {
+				"defaults": {
+					"thresholds": {
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 10 },
+							{ "color": "red", "value": 50 }
+						]
+					}
+				}
+			}
+		},
+		{
+			"title": "Issues by Project",
+			"type": "piechart",
+			"gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+			"datasource": { "type": "postgres", "uid": "${DS_GLITCHTIP}" },
+			"targets": [
+				{
+					"rawSql": "SELECT p.name AS \"Project\", COUNT(i.id) AS \"Issues\" FROM issue_events_issue i JOIN projects_project p ON i.project_id = p.id WHERE i.is_deleted = false GROUP BY p.name ORDER BY COUNT(i.id) DESC",
+					"format": "table"
+				}
+			]
+		},
+		{
+			"title": "Total Events (all time)",
+			"type": "stat",
+			"gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+			"datasource": { "type": "postgres", "uid": "${DS_GLITCHTIP}" },
+			"targets": [
+				{
+					"rawSql": "SELECT SUM(count) AS \"Total Events\" FROM issue_events_issue WHERE is_deleted = false",
+					"format": "table"
+				}
+			]
+		},
+		{
+			"title": "Projects Tracked",
+			"type": "stat",
+			"gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+			"datasource": { "type": "postgres", "uid": "${DS_GLITCHTIP}" },
+			"targets": [
+				{
+					"rawSql": "SELECT COUNT(*) AS \"Projects\" FROM projects_project WHERE is_deleted = false",
+					"format": "table"
+				}
+			],
+			"fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" } } }
+		},
+		{
+			"title": "Resolved vs Unresolved",
+			"type": "stat",
+			"gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
+			"datasource": { "type": "postgres", "uid": "${DS_GLITCHTIP}" },
+			"targets": [
+				{
+					"rawSql": "SELECT COUNT(*) FILTER (WHERE status = 1) AS \"Resolved\", COUNT(*) FILTER (WHERE status = 0) AS \"Unresolved\" FROM issue_events_issue WHERE is_deleted = false",
+					"format": "table"
+				}
+			]
+		},
+		{
+			"title": "New Issues Over Time",
+			"type": "timeseries",
+			"gridPos": { "h": 8, "w": 18, "x": 6, "y": 8 },
+			"datasource": { "type": "postgres", "uid": "${DS_GLITCHTIP}" },
+			"targets": [
+				{
+					"rawSql": "SELECT date_trunc('day', first_seen) AS time, p.name AS metric, COUNT(*) AS value FROM issue_events_issue i JOIN projects_project p ON i.project_id = p.id WHERE i.is_deleted = false AND i.first_seen > NOW() - INTERVAL '30 days' GROUP BY 1, 2 ORDER BY 1",
+					"format": "time_series"
+				}
+			],
+			"fieldConfig": {
+				"defaults": {
+					"custom": {
+						"drawStyle": "bars",
+						"fillOpacity": 80,
+						"stacking": { "mode": "normal" }
+					}
+				}
+			}
+		},
+		{
+			"title": "Recent Issues",
+			"type": "table",
+			"gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+			"datasource": { "type": "postgres", "uid": "${DS_GLITCHTIP}" },
+			"targets": [
+				{
+					"rawSql": "SELECT p.name AS \"Project\", i.title AS \"Error\", i.culprit AS \"Location\", i.count AS \"Events\", CASE i.level WHEN 40 THEN 'error' WHEN 50 THEN 'fatal' WHEN 30 THEN 'warning' WHEN 20 THEN 'info' ELSE 'debug' END AS \"Level\", CASE i.status WHEN 0 THEN 'unresolved' WHEN 1 THEN 'resolved' WHEN 2 THEN 'ignored' END AS \"Status\", i.first_seen AS \"First Seen\", i.last_seen AS \"Last Seen\" FROM issue_events_issue i JOIN projects_project p ON i.project_id = p.id WHERE i.is_deleted = false ORDER BY i.last_seen DESC LIMIT 50",
+					"format": "table"
+				}
+			],
+			"fieldConfig": {
+				"overrides": [
+					{
+						"matcher": { "id": "byName", "options": "Level" },
+						"properties": [
+							{
+								"id": "custom.cellOptions",
+								"value": {
+									"type": "color-text"
+								}
+							},
+							{
+								"id": "mappings",
+								"value": [
+									{
+										"type": "value",
+										"options": {
+											"error": { "color": "red", "text": "error" },
+											"fatal": { "color": "dark-red", "text": "fatal" },
+											"warning": { "color": "yellow", "text": "warning" }
+										}
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		}
+	],
+	"schemaVersion": 39,
+	"tags": ["error-tracking", "glitchtip"],
+	"templating": {
+		"list": [
+			{
+				"name": "DS_GLITCHTIP",
+				"type": "datasource",
+				"query": "postgres",
+				"current": { "text": "GlitchTip", "value": "GlitchTip" },
+				"hide": 2
+			}
+		]
+	},
+	"time": { "from": "now-7d", "to": "now" },
+	"title": "Error Tracking (GlitchTip)",
+	"uid": "error-tracking-glitchtip"
+}
