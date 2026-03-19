@@ -197,6 +197,11 @@ advanced: {
 - Production: `COOKIE_DOMAIN=.mana.how`
 - Development: Leave empty (cookies domain-specific)
 
+**Adding a new app to SSO** (all 3 steps required):
+1. Add `https://{app}.mana.how` to `trustedOrigins` in `better-auth.config.ts`
+2. Add `https://{app}.mana.how` to `CORS_ORIGINS` for mana-auth in `docker-compose.macmini.yml`
+3. Run `pnpm test -- src/auth/sso-config.spec.ts` to verify alignment (47 contract tests)
+
 ## Test Credentials (Production)
 
 For automated testing against `auth.mana.how`:

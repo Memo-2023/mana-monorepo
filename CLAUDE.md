@@ -370,6 +370,16 @@ curl http://localhost:3007/api/favorites \
 | Presi    | Custom (same pattern)           | 3008 |
 | ManaDeck | `@mana-core/nestjs-integration` | 3009 |
 
+#### Adding a New App to SSO
+
+When adding a new app that should participate in cross-app SSO, update **all three** locations:
+
+1. `trustedOrigins` in `services/mana-core-auth/src/auth/better-auth.config.ts`
+2. `CORS_ORIGINS` for mana-auth in `docker-compose.macmini.yml`
+3. Run `pnpm test -- src/auth/sso-config.spec.ts` (from `services/mana-core-auth/`) to verify
+
+Missing any of these will silently break SSO for that app.
+
 ### Search Architecture
 
 Projects requiring web search and content extraction use **mana-search** as the central search service:
