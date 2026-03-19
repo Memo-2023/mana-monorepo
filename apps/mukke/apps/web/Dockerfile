@@ -29,6 +29,7 @@ COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-pwa ./packages/shared-pwa
+COPY packages/shared-splitscreen ./packages/shared-splitscreen
 COPY packages/shared-stores ./packages/shared-stores
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
