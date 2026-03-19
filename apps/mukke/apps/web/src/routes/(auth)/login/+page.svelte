@@ -35,8 +35,7 @@
 	}
 
 	async function handleResendVerification(email: string) {
-		// Implement if needed
-		return { success: true };
+		return authStore.resendVerificationEmail(email);
 	}
 </script>
 
