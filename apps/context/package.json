@@ -3,6 +3,9 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "pnpm --filter @context/mobile dev"
+		"dev": "turbo run dev",
+		"dev:web": "pnpm --filter @context/web dev",
+		"dev:backend": "pnpm --filter @context/backend dev",
+		"dev:mobile": "pnpm --filter @context/mobile dev"
 	}
 }

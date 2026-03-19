@@ -81,8 +81,9 @@ ALL_DATABASES=(
     "nutriphi_bot"
     "questions"
     "skilltree"
-    "lightwrite"
+    "mukke"
     "traces"
+    "context"
 )
 
 # Check if specific service requested
@@ -192,17 +193,21 @@ setup_service() {
             create_db_if_not_exists "skilltree"
             push_schema "@skilltree/backend" "skilltree"
             ;;
-        lightwrite)
-            create_db_if_not_exists "lightwrite"
-            push_schema "@lightwrite/backend" "lightwrite"
+        mukke)
+            create_db_if_not_exists "mukke"
+            push_schema "@mukke/backend" "mukke"
             ;;
         traces)
             create_db_if_not_exists "traces"
             push_schema "@traces/backend" "traces"
             ;;
+        context)
+            create_db_if_not_exists "context"
+            push_schema "@context/backend" "context"
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, picture, photos, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, lightwrite, traces"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, picture, photos, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, mukke, traces, context"
             exit 1
             ;;
     esac
@@ -226,7 +231,7 @@ echo -e "\n${GREEN}Step 2: Pushing schemas${NC}"
 echo "--------------------------------------"
 
 # Push schemas for all known services
-for service in auth chat zitare contacts calendar clock todo manadeck picture photos mail moodlit finance voxel-lava figgos planta nutriphi presi storage questions skilltree lightwrite traces; do
+for service in auth chat zitare contacts calendar clock todo manadeck picture photos mail moodlit finance voxel-lava figgos planta nutriphi presi storage questions skilltree mukke traces context; do
     setup_service "$service" 2>/dev/null || true
 done
 

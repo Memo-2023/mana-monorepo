@@ -381,6 +381,32 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// Context Backend (NestJS)
+	{
+		path: 'apps/context/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.CONTEXT_BACKEND_PORT || '3020',
+			DATABASE_URL: (env) => env.CONTEXT_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			AZURE_OPENAI_API_KEY: (env) => env.CONTEXT_AZURE_OPENAI_API_KEY || '',
+			AZURE_OPENAI_ENDPOINT: (env) => env.CONTEXT_AZURE_OPENAI_ENDPOINT || '',
+			GOOGLE_API_KEY: (env) => env.CONTEXT_GOOGLE_API_KEY || '',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Context Web (SvelteKit)
+	{
+		path: 'apps/context/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CONTEXT_BACKEND_PORT || '3020'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
 	// Calendar Backend (NestJS)
 	{
 		path: 'apps/calendar/apps/backend/.env',
@@ -659,6 +685,34 @@ const APP_CONFIGS = [
 			EXPO_PUBLIC_TRACES_BACKEND_URL: (env) =>
 				`http://localhost:${env.TRACES_BACKEND_PORT || '3026'}`,
 			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// Mukke Backend (NestJS)
+	{
+		path: 'apps/mukke/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.MUKKE_BACKEND_PORT || '3010',
+			DATABASE_URL: (env) => env.MUKKE_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			S3_ENDPOINT: (env) => env.S3_ENDPOINT || 'http://localhost:9000',
+			S3_REGION: (env) => env.S3_REGION || 'us-east-1',
+			S3_ACCESS_KEY: (env) => env.S3_ACCESS_KEY || 'minioadmin',
+			S3_SECRET_KEY: (env) => env.S3_SECRET_KEY || 'minioadmin',
+			S3_BUCKET: () => 'mukke-storage',
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// Mukke Web (SvelteKit)
+	{
+		path: 'apps/mukke/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MUKKE_BACKEND_PORT || '3010'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 		},
 	},
 
