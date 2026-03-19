@@ -34,6 +34,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthController } from './auth.controller';
 import { BetterAuthService } from './services/better-auth.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { SecurityEventsService, AccountLockoutService } from '../security';
 import { mockDtoFactory } from '../__tests__/utils/mock-factories';
 
 describe('AuthController', () => {
@@ -43,6 +44,7 @@ describe('AuthController', () => {
 	// Common test data
 	const mockAuthHeader = 'Bearer valid-jwt-token';
 	const mockToken = 'valid-jwt-token';
+	const mockReq = { headers: { 'user-agent': 'test' }, ip: '127.0.0.1' } as any;
 
 	beforeEach(async () => {
 		// Create mock BetterAuthService with all methods
@@ -63,6 +65,18 @@ describe('AuthController', () => {
 			validateToken: jest.fn(),
 		};
 
+		const mockSecurityEventsService = {
+			logEvent: jest.fn().mockResolvedValue(undefined),
+			logEventWithRequest: jest.fn().mockResolvedValue(undefined),
+			extractRequestInfo: jest.fn().mockReturnValue({ ipAddress: '127.0.0.1', userAgent: 'test' }),
+		};
+
+		const mockAccountLockoutService = {
+			checkLockout: jest.fn().mockResolvedValue({ locked: false }),
+			recordAttempt: jest.fn().mockResolvedValue(undefined),
+			clearAttempts: jest.fn().mockResolvedValue(undefined),
+		};
+
 		const module: TestingModule = await Test.createTestingModule({
 			imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }])],
 			controllers: [AuthController],
@@ -70,6 +84,14 @@ describe('AuthController', () => {
 				{
 					provide: BetterAuthService,
 					useValue: mockBetterAuthService,
+				},
+				{
+					provide: SecurityEventsService,
+					useValue: mockSecurityEventsService,
+				},
+				{
+					provide: AccountLockoutService,
+					useValue: mockAccountLockoutService,
 				},
 			],
 		})
@@ -110,7 +132,7 @@ describe('AuthController', () => {
 
 			betterAuthService.registerB2C.mockResolvedValue(expectedResult);
 
-			const result = await controller.register(registerDto);
+			const result = await controller.register(registerDto, mockReq);
 
 			expect(result).toEqual(expectedResult);
 			expect(betterAuthService.registerB2C).toHaveBeenCalledWith({
@@ -133,7 +155,7 @@ describe('AuthController', () => {
 
 			betterAuthService.registerB2C.mockResolvedValue(expectedResult);
 
-			const result = await controller.register(registerDto as any);
+			const result = await controller.register(registerDto as any, mockReq);
 
 			expect(result).toEqual(expectedResult);
 			expect(betterAuthService.registerB2C).toHaveBeenCalledWith({
@@ -151,7 +173,7 @@ describe('AuthController', () => {
 				new ConflictException('User with this email already exists')
 			);
 
-			await expect(controller.register(registerDto)).rejects.toThrow(ConflictException);
+			await expect(controller.register(registerDto, mockReq)).rejects.toThrow(ConflictException);
 		});
 	});
 
@@ -180,7 +202,7 @@ describe('AuthController', () => {
 
 			betterAuthService.signIn.mockResolvedValue(expectedResult);
 
-			const result = await controller.login(loginDto);
+			const result = await controller.login(loginDto, mockReq);
 
 			expect(result).toEqual(expectedResult);
 			expect(betterAuthService.signIn).toHaveBeenCalledWith({
@@ -206,7 +228,7 @@ describe('AuthController', () => {
 				expiresIn: 900,
 			});
 
-			await controller.login(loginDto);
+			await controller.login(loginDto, mockReq);
 
 			expect(betterAuthService.signIn).toHaveBeenCalledWith({
 				email: loginDto.email,
@@ -223,7 +245,7 @@ describe('AuthController', () => {
 				new UnauthorizedException('Invalid email or password')
 			);
 
-			await expect(controller.login(loginDto)).rejects.toThrow(UnauthorizedException);
+			await expect(controller.login(loginDto, mockReq)).rejects.toThrow(UnauthorizedException);
 		});
 	});
 
@@ -237,7 +259,7 @@ describe('AuthController', () => {
 
 			betterAuthService.signOut.mockResolvedValue(expectedResult);
 
-			const result = await controller.logout(mockAuthHeader);
+			const result = await controller.logout(mockAuthHeader, mockReq);
 
 			expect(result).toEqual(expectedResult);
 			expect(betterAuthService.signOut).toHaveBeenCalledWith(mockToken);
@@ -246,7 +268,7 @@ describe('AuthController', () => {
 		it('should extract token from Bearer header', async () => {
 			betterAuthService.signOut.mockResolvedValue({ success: true, message: 'Signed out' });
 
-			await controller.logout('Bearer my-secret-token');
+			await controller.logout('Bearer my-secret-token', mockReq);
 
 			expect(betterAuthService.signOut).toHaveBeenCalledWith('my-secret-token');
 		});
@@ -254,7 +276,7 @@ describe('AuthController', () => {
 		it('should handle raw token without Bearer prefix', async () => {
 			betterAuthService.signOut.mockResolvedValue({ success: true, message: 'Signed out' });
 
-			await controller.logout('raw-token');
+			await controller.logout('raw-token', mockReq);
 
 			expect(betterAuthService.signOut).toHaveBeenCalledWith('raw-token');
 		});
@@ -700,7 +722,7 @@ describe('AuthController', () => {
 		it('should extract token from Bearer authorization header', async () => {
 			betterAuthService.signOut.mockResolvedValue({ success: true, message: 'OK' });
 
-			await controller.logout('Bearer my-token-123');
+			await controller.logout('Bearer my-token-123', mockReq);
 
 			expect(betterAuthService.signOut).toHaveBeenCalledWith('my-token-123');
 		});
@@ -708,7 +730,7 @@ describe('AuthController', () => {
 		it('should handle missing authorization header', async () => {
 			betterAuthService.signOut.mockResolvedValue({ success: true, message: 'OK' });
 
-			await controller.logout('');
+			await controller.logout('', mockReq);
 
 			expect(betterAuthService.signOut).toHaveBeenCalledWith('');
 		});

@@ -6,8 +6,10 @@ import { OidcLoginController } from './oidc-login.controller';
 import { MatrixSessionController } from './matrix-session.controller';
 import { BetterAuthService } from './services/better-auth.service';
 import { MatrixSessionService } from './services/matrix-session.service';
+import { SecurityModule } from '../security';
 
 @Module({
+	imports: [SecurityModule],
 	controllers: [
 		AuthController,
 		BetterAuthPassthroughController,

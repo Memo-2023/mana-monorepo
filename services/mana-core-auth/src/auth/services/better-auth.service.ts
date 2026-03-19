@@ -1534,19 +1534,6 @@ export class BetterAuthService {
 
 		this.logger.log('Password changed', { userId });
 
-		// Log security event
-		try {
-			const { securityEvents } = await import('../../db/schema/auth.schema');
-			await db.insert(securityEvents).values({
-				userId,
-				eventType: 'password_changed',
-				metadata: { changedAt: new Date().toISOString() },
-			});
-		} catch {
-			// Non-critical - just log
-			this.logger.warn('Failed to log security event for password change');
-		}
-
 		return {
 			success: true,
 			message: 'Password changed successfully',
@@ -1602,19 +1589,6 @@ export class BetterAuthService {
 		await db.update(sessions).set({ revokedAt: now }).where(eq(sessions.userId, userId));
 
 		this.logger.log('Account deleted', { userId, reason });
-
-		// Log security event
-		try {
-			const { securityEvents } = await import('../../db/schema/auth.schema');
-			await db.insert(securityEvents).values({
-				userId,
-				eventType: 'account_deleted',
-				metadata: { reason, deletedAt: now.toISOString() },
-			});
-		} catch {
-			// Non-critical
-			this.logger.warn('Failed to log security event for account deletion');
-		}
 
 		return {
 			success: true,

@@ -13,6 +13,7 @@ import {
 	HttpStatus,
 	Req,
 	Res,
+	ForbiddenException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
@@ -36,6 +37,7 @@ import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { CurrentUserData } from '../common/decorators/current-user.decorator';
+import { SecurityEventsService, SecurityEventType, AccountLockoutService } from '../security';
 
 /**
  * Auth Controller
@@ -71,7 +73,11 @@ import type { CurrentUserData } from '../common/decorators/current-user.decorato
 @Controller('auth')
 @UseGuards(ThrottlerGuard)
 export class AuthController {
-	constructor(private readonly betterAuthService: BetterAuthService) {}
+	constructor(
+		private readonly betterAuthService: BetterAuthService,
+		private readonly securityEvents: SecurityEventsService,
+		private readonly accountLockout: AccountLockoutService
+	) {}
 
 	// =========================================================================
 	// B2C Authentication Endpoints
@@ -94,13 +100,21 @@ export class AuthController {
 	@ApiResponse({ status: 400, description: 'Invalid input data' })
 	@ApiResponse({ status: 409, description: 'Email already exists' })
 	@ApiResponse({ status: 429, description: 'Rate limit exceeded' })
-	async register(@Body() registerDto: RegisterDto) {
-		return this.betterAuthService.registerB2C({
+	async register(@Body() registerDto: RegisterDto, @Req() req: Request) {
+		const result = await this.betterAuthService.registerB2C({
 			email: registerDto.email,
 			password: registerDto.password,
 			name: registerDto.name || '',
 			sourceAppUrl: registerDto.sourceAppUrl,
 		});
+
+		this.securityEvents.logEventWithRequest(req, {
+			userId: result.user?.id,
+			eventType: SecurityEventType.REGISTER,
+			metadata: { email: registerDto.email },
+		});
+
+		return result;
 	}
 
 	/**
@@ -139,13 +153,59 @@ export class AuthController {
 	})
 	@ApiResponse({ status: 401, description: 'Invalid credentials' })
 	@ApiResponse({ status: 429, description: 'Rate limit exceeded' })
-	async login(@Body() loginDto: LoginDto) {
-		return this.betterAuthService.signIn({
-			email: loginDto.email,
-			password: loginDto.password,
-			deviceId: loginDto.deviceId,
-			deviceName: loginDto.deviceName,
-		});
+	async login(@Body() loginDto: LoginDto, @Req() req: Request) {
+		const { ipAddress, userAgent } = this.securityEvents.extractRequestInfo(req);
+
+		// Check account lockout before attempting login
+		const lockout = await this.accountLockout.checkLockout(loginDto.email);
+		if (lockout.locked) {
+			this.securityEvents.logEventWithRequest(req, {
+				eventType: SecurityEventType.LOGIN_FAILURE,
+				metadata: { email: loginDto.email, reason: 'account_locked' },
+			});
+			throw new ForbiddenException({
+				message: 'Account temporarily locked due to too many failed login attempts',
+				code: 'ACCOUNT_LOCKED',
+				retryAfter: lockout.remainingSeconds,
+			});
+		}
+
+		try {
+			const result = await this.betterAuthService.signIn({
+				email: loginDto.email,
+				password: loginDto.password,
+				deviceId: loginDto.deviceId,
+				deviceName: loginDto.deviceName,
+			});
+
+			// Login successful - clear failed attempts and log
+			this.accountLockout.clearAttempts(loginDto.email);
+			this.securityEvents.logEvent({
+				userId: result.user?.id,
+				eventType: SecurityEventType.LOGIN_SUCCESS,
+				ipAddress,
+				userAgent,
+				metadata: { email: loginDto.email, deviceId: loginDto.deviceId },
+			});
+
+			return result;
+		} catch (error) {
+			// Don't count email-not-verified as a failed login attempt
+			if (error instanceof ForbiddenException) {
+				throw error;
+			}
+
+			// Record failed attempt
+			this.accountLockout.recordAttempt(loginDto.email, false, ipAddress);
+			this.securityEvents.logEvent({
+				eventType: SecurityEventType.LOGIN_FAILURE,
+				ipAddress,
+				userAgent,
+				metadata: { email: loginDto.email, reason: 'invalid_credentials' },
+			});
+
+			throw error;
+		}
 	}
 
 	/**
@@ -163,9 +223,15 @@ export class AuthController {
 	})
 	@ApiResponse({ status: 200, description: 'Logout successful' })
 	@ApiResponse({ status: 401, description: 'Not authenticated' })
-	async logout(@Headers('authorization') authorization: string) {
+	async logout(@Headers('authorization') authorization: string, @Req() req: Request) {
 		const token = this.extractToken(authorization);
-		return this.betterAuthService.signOut(token);
+		const result = await this.betterAuthService.signOut(token);
+
+		this.securityEvents.logEventWithRequest(req, {
+			eventType: SecurityEventType.LOGOUT,
+		});
+
+		return result;
 	}
 
 	/**
@@ -244,7 +310,15 @@ export class AuthController {
 	})
 	@ApiResponse({ status: 401, description: 'No valid session cookie' })
 	async sessionToToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-		return this.betterAuthService.sessionToToken(req, res);
+		const result = await this.betterAuthService.sessionToToken(req, res);
+
+		this.securityEvents.logEventWithRequest(req, {
+			userId: result.user?.id,
+			eventType: SecurityEventType.SSO_TOKEN_EXCHANGE,
+			metadata: { email: result.user?.email },
+		});
+
+		return result;
 	}
 
 	/**
@@ -272,11 +346,18 @@ export class AuthController {
 	@Post('forgot-password')
 	@Throttle({ default: { ttl: 60000, limit: 3 } })
 	@HttpCode(HttpStatus.OK)
-	async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-		return this.betterAuthService.requestPasswordReset(
+	async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto, @Req() req: Request) {
+		const result = await this.betterAuthService.requestPasswordReset(
 			forgotPasswordDto.email,
 			forgotPasswordDto.redirectTo
 		);
+
+		this.securityEvents.logEventWithRequest(req, {
+			eventType: SecurityEventType.PASSWORD_RESET_REQUESTED,
+			metadata: { email: forgotPasswordDto.email },
+		});
+
+		return result;
 	}
 
 	/**
@@ -288,11 +369,17 @@ export class AuthController {
 	@Post('reset-password')
 	@Throttle({ default: { ttl: 60000, limit: 5 } })
 	@HttpCode(HttpStatus.OK)
-	async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-		return this.betterAuthService.resetPassword(
+	async resetPassword(@Body() resetPasswordDto: ResetPasswordDto, @Req() req: Request) {
+		const result = await this.betterAuthService.resetPassword(
 			resetPasswordDto.token,
 			resetPasswordDto.newPassword
 		);
+
+		this.securityEvents.logEventWithRequest(req, {
+			eventType: SecurityEventType.PASSWORD_RESET_COMPLETED,
+		});
+
+		return result;
 	}
 
 	/**
@@ -381,12 +468,23 @@ export class AuthController {
 	@ApiBody({ type: ChangePasswordDto })
 	@ApiResponse({ status: 200, description: 'Password changed successfully' })
 	@ApiResponse({ status: 401, description: 'Current password is incorrect' })
-	async changePassword(@CurrentUser() user: CurrentUserData, @Body() changeDto: ChangePasswordDto) {
-		return this.betterAuthService.changePassword(
+	async changePassword(
+		@CurrentUser() user: CurrentUserData,
+		@Body() changeDto: ChangePasswordDto,
+		@Req() req: Request
+	) {
+		const result = await this.betterAuthService.changePassword(
 			user.userId,
 			changeDto.currentPassword,
 			changeDto.newPassword
 		);
+
+		this.securityEvents.logEventWithRequest(req, {
+			userId: user.userId,
+			eventType: SecurityEventType.PASSWORD_CHANGED,
+		});
+
+		return result;
 	}
 
 	/**
@@ -403,8 +501,24 @@ export class AuthController {
 	@ApiBody({ type: DeleteAccountDto })
 	@ApiResponse({ status: 200, description: 'Account deleted' })
 	@ApiResponse({ status: 401, description: 'Password is incorrect' })
-	async deleteAccount(@CurrentUser() user: CurrentUserData, @Body() deleteDto: DeleteAccountDto) {
-		return this.betterAuthService.deleteAccount(user.userId, deleteDto.password, deleteDto.reason);
+	async deleteAccount(
+		@CurrentUser() user: CurrentUserData,
+		@Body() deleteDto: DeleteAccountDto,
+		@Req() req: Request
+	) {
+		const result = await this.betterAuthService.deleteAccount(
+			user.userId,
+			deleteDto.password,
+			deleteDto.reason
+		);
+
+		this.securityEvents.logEventWithRequest(req, {
+			userId: user.userId,
+			eventType: SecurityEventType.ACCOUNT_DELETED,
+			metadata: { reason: deleteDto.reason },
+		});
+
+		return result;
 	}
 
 	// =========================================================================
@@ -684,8 +798,7 @@ export class AuthController {
 	@ApiBearerAuth('JWT-auth')
 	@ApiOperation({
 		summary: 'Cancel or reject invitation',
-		description:
-			'Cancel (as org admin/owner) or reject (as invitee) a pending invitation.',
+		description: 'Cancel (as org admin/owner) or reject (as invitee) a pending invitation.',
 	})
 	@ApiResponse({ status: 204, description: 'Invitation cancelled/rejected successfully' })
 	@ApiResponse({ status: 401, description: 'Not authenticated' })

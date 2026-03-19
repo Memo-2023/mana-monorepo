@@ -21,6 +21,7 @@ import { AnalyticsModule } from './analytics';
 import { MetricsModule } from './metrics';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggerModule } from './common/logger';
+import { SecurityModule } from './security';
 
 @Module({
 	imports: [
@@ -35,6 +36,7 @@ import { LoggerModule } from './common/logger';
 			},
 		]),
 		LoggerModule,
+		SecurityModule,
 		MetricsModule,
 		AnalyticsModule,
 		AdminModule,
