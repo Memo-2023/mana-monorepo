@@ -1,7 +1,0 @@
-{
-	"name": "lightwrite",
-	"private": true,
-	"scripts": {
-		"dev": "pnpm run --filter=@lightwrite/* --parallel dev"
-	}
-}
