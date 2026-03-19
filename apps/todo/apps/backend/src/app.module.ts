@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { DatabaseModule } from './db/database.module';
@@ -20,6 +21,12 @@ import { AdminModule } from './admin/admin.module';
 			envFilePath: '.env',
 		}),
 		ScheduleModule.forRoot(),
+		ThrottlerModule.forRoot([
+			{
+				ttl: 60000, // 60 seconds
+				limit: 100, // 100 requests per minute
+			},
+		]),
 		MetricsModule.register({
 			prefix: 'todo_',
 			excludePaths: ['/health'],
