@@ -60,6 +60,14 @@
 		Key,
 		Shield,
 		Gift,
+		MusicNotes,
+		Playlist,
+		Waveform,
+		FileText,
+		Sparkle,
+		ShareFat,
+		Trash,
+		Funnel,
 	} from '@manacore/shared-icons';
 
 	// Map icon names to Phosphor components
@@ -115,6 +123,15 @@
 		key: Key,
 		shield: Shield,
 		gift: Gift,
+		'music-notes': MusicNotes,
+		playlist: Playlist,
+		waveform: Waveform,
+		'file-text': FileText,
+		sparkle: Sparkle,
+		sparkles: Sparkle,
+		share: ShareFat,
+		trash: Trash,
+		filter: Funnel,
 	};
 
 	// Convert app items to dropdown items (will be computed as derived)
