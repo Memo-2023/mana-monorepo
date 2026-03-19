@@ -489,7 +489,10 @@ services:
       start_period: 40s
 
   nutriphi-backend:
-    image: ghcr.io/memo-2023/nutriphi-backend:latest
+    build:
+      context: .
+      dockerfile: apps/nutriphi/apps/backend/Dockerfile
+    image: nutriphi-backend:local
     container_name: mana-app-nutriphi-backend
     restart: always
     depends_on:
@@ -516,7 +519,10 @@ services:
       start_period: 40s
 
   skilltree-backend:
-    image: ghcr.io/memo-2023/skilltree-backend:latest
+    build:
+      context: .
+      dockerfile: apps/skilltree/apps/backend/Dockerfile
+    image: skilltree-backend:local
     container_name: mana-app-skilltree-backend
     restart: always
     depends_on:
