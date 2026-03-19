@@ -20,6 +20,8 @@ COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 COPY packages/shared-storage ./packages/shared-storage
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
+COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 
 # Copy mukke packages
 COPY apps/mukke/packages ./apps/mukke/packages
@@ -45,6 +47,13 @@ WORKDIR /app/packages/shared-nestjs-setup
 RUN pnpm build
 
 # Build the backend
+
+WORKDIR /app/packages/shared-nestjs-setup
+RUN pnpm build
+
+WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
+
 WORKDIR /app/apps/mukke/apps/backend
 RUN pnpm build
 

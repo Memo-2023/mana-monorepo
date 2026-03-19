@@ -10,6 +10,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY patches ./patches
 
 # Copy shared packages (all required dependencies)
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
@@ -17,6 +18,7 @@ COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
 
@@ -44,6 +46,9 @@ WORKDIR /app/packages/shared-nestjs-setup
 RUN pnpm build
 
 # Build the backend
+WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
+
 WORKDIR /app/apps/clock/apps/backend
 RUN pnpm build
 
@@ -67,6 +72,9 @@ COPY --from=builder /app/apps/clock ./apps/clock
 # Copy entrypoint script
 COPY apps/clock/apps/backend/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
 
 WORKDIR /app/apps/clock/apps/backend
 

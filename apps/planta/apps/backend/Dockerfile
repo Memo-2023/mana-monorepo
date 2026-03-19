@@ -10,6 +10,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY patches ./patches
 
 # Copy shared packages (all required dependencies)
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
@@ -19,6 +20,8 @@ COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 COPY packages/shared-storage ./packages/shared-storage
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
+COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 
 # Copy planta packages and backend
 COPY apps/planta/packages ./apps/planta/packages
@@ -44,6 +47,13 @@ WORKDIR /app/packages/shared-storage
 RUN pnpm build
 
 # Build the backend
+
+WORKDIR /app/packages/shared-nestjs-setup
+RUN pnpm build
+
+WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
+
 WORKDIR /app/apps/planta/apps/backend
 RUN pnpm build
 

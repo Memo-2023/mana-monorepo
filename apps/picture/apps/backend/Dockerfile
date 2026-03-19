@@ -10,6 +10,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY patches ./patches
 
 # Copy shared packages (all required dependencies)
 COPY packages/credit-operations ./packages/credit-operations
@@ -20,6 +21,8 @@ COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 COPY packages/shared-storage ./packages/shared-storage
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
+COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 
 # Copy picture backend
 COPY apps/picture/apps/backend ./apps/picture/apps/backend
@@ -47,6 +50,13 @@ WORKDIR /app/packages/mana-core-nestjs-integration
 RUN pnpm build
 
 # Build the backend
+
+WORKDIR /app/packages/shared-nestjs-setup
+RUN pnpm build
+
+WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
+
 WORKDIR /app/apps/picture/apps/backend
 RUN pnpm build
 
