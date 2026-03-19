@@ -10,7 +10,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
-
+COPY patches ./patches
 # Copy shared packages (all required dependencies)
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY packages/shared-errors ./packages/shared-errors

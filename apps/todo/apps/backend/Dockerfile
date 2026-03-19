@@ -10,7 +10,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
-
+COPY patches ./patches
 # Copy shared packages (all required dependencies)
 COPY packages/credit-operations ./packages/credit-operations
 COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
