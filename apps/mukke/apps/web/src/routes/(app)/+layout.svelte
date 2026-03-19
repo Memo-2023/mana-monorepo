@@ -66,6 +66,8 @@
 		{ href: '/projects', label: 'Editor', icon: 'waveform' },
 		{ href: '/upload', label: 'Upload', icon: 'upload' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
+		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
+		{ href: '/help', label: 'Help', icon: 'help-circle' },
 	];
 
 	const navItems = $derived(baseNavItems);
