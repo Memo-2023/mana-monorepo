@@ -101,6 +101,31 @@
 				"recent": "Recent",
 				"empty": "No files",
 				"open": "Open Storage"
+			},
+			"mukke": {
+				"title": "Music",
+				"description": "Your music library",
+				"songs": "Songs",
+				"playlists": "Playlists",
+				"favorites": "Favorites",
+				"empty": "No songs",
+				"open": "Open Mukke"
+			},
+			"presi": {
+				"title": "Presentations",
+				"description": "Your slide decks",
+				"decks": "Decks",
+				"empty": "No presentations",
+				"create": "Create deck",
+				"open": "Open Presi"
+			},
+			"context": {
+				"title": "Context",
+				"description": "Your documents & spaces",
+				"spaces": "Spaces",
+				"documents": "Documents",
+				"empty": "No documents",
+				"open": "Open Context"
 			}
 		}
 	},

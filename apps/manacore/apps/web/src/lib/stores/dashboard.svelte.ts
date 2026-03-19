@@ -213,6 +213,9 @@ export const dashboardStore = {
 				'chat-recent',
 				'contacts-favorites',
 				'zitare-quote',
+				'mukke-library',
+				'presi-decks',
+				'context-docs',
 			] as WidgetType[]
 		).filter((type) => {
 			const meta = getWidgetMeta(type);

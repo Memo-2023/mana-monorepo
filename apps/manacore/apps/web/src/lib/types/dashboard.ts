@@ -20,7 +20,10 @@ export type WidgetType =
 	| 'picture-recent' // Picture API: recent generations
 	| 'manadeck-progress' // ManaDeck API: learning progress
 	| 'clock-timers' // Clock: active timers and alarms
-	| 'storage-usage'; // Storage: file storage stats
+	| 'storage-usage' // Storage: file storage stats
+	| 'mukke-library' // Mukke: music library stats
+	| 'presi-decks' // Presi: recent presentations
+	| 'context-docs'; // Context: recent documents & spaces
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -115,6 +118,9 @@ export interface WidgetMeta {
 		| 'manadeck'
 		| 'clock'
 		| 'storage'
+		| 'mukke'
+		| 'presi'
+		| 'context'
 		| 'mana-core-auth';
 }
 
@@ -237,6 +243,33 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		defaultSize: 'medium',
 		allowMultiple: false,
 		requiredBackend: 'storage',
+	},
+	{
+		type: 'mukke-library',
+		nameKey: 'dashboard.widgets.mukke.title',
+		descriptionKey: 'dashboard.widgets.mukke.description',
+		icon: '🎵',
+		defaultSize: 'medium',
+		allowMultiple: false,
+		requiredBackend: 'mukke',
+	},
+	{
+		type: 'presi-decks',
+		nameKey: 'dashboard.widgets.presi.title',
+		descriptionKey: 'dashboard.widgets.presi.description',
+		icon: '📊',
+		defaultSize: 'medium',
+		allowMultiple: false,
+		requiredBackend: 'presi',
+	},
+	{
+		type: 'context-docs',
+		nameKey: 'dashboard.widgets.context.title',
+		descriptionKey: 'dashboard.widgets.context.description',
+		icon: '📝',
+		defaultSize: 'medium',
+		allowMultiple: false,
+		requiredBackend: 'context',
 	},
 ];
 

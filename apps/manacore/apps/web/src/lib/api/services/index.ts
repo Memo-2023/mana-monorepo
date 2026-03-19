@@ -13,3 +13,11 @@ export { pictureService, type GeneratedImage, type GenerationStats } from './pic
 export { manadeckService, type Deck, type Card, type LearningProgress } from './manadeck';
 export { clockService, type Timer, type Alarm, type ClockStats } from './clock';
 export { storageService, type StorageFile, type StorageStats } from './storage';
+export { mukkeService, type Song, type MukkeStats } from './mukke';
+export { presiService, type PresiDeck, type PresiStats } from './presi';
+export {
+	contextService,
+	type ContextSpace,
+	type ContextDocument,
+	type TokenBalance,
+} from './context';

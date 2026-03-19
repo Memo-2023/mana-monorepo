@@ -8,8 +8,8 @@ import {
 } from './dashboard';
 
 describe('WIDGET_REGISTRY', () => {
-	it('should contain 13 widget definitions', () => {
-		expect(WIDGET_REGISTRY).toHaveLength(13);
+	it('should contain 16 widget definitions', () => {
+		expect(WIDGET_REGISTRY).toHaveLength(16);
 	});
 
 	it('should have unique types for all widgets', () => {
@@ -47,6 +47,9 @@ describe('WIDGET_REGISTRY', () => {
 			'manadeck',
 			'clock',
 			'storage',
+			'mukke',
+			'presi',
+			'context',
 			'mana-core-auth',
 			undefined,
 		];
@@ -70,6 +73,9 @@ describe('WIDGET_REGISTRY', () => {
 		expect(types).toContain('manadeck-progress');
 		expect(types).toContain('clock-timers');
 		expect(types).toContain('storage-usage');
+		expect(types).toContain('mukke-library');
+		expect(types).toContain('presi-decks');
+		expect(types).toContain('context-docs');
 	});
 
 	it('should have i18n-style name keys', () => {
