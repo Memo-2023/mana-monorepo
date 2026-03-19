@@ -26,6 +26,9 @@ COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-config ./packages/shared-config
+COPY packages/shared-feedback-service ./packages/shared-feedback-service
+COPY packages/shared-feedback-types ./packages/shared-feedback-types
+COPY packages/shared-feedback-ui ./packages/shared-feedback-ui
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-pwa ./packages/shared-pwa
