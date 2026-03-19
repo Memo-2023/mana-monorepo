@@ -78,6 +78,25 @@ export class EventTagService {
 		return results.map((r) => r.tag);
 	}
 
+	async getTagsForEvents(eventIds: string[]): Promise<Map<string, EventTag[]>> {
+		const tagMap = new Map<string, EventTag[]>();
+		if (eventIds.length === 0) return tagMap;
+
+		const results = await this.db
+			.select({ eventId: eventToTags.eventId, tag: eventTags })
+			.from(eventToTags)
+			.innerJoin(eventTags, eq(eventToTags.tagId, eventTags.id))
+			.where(inArray(eventToTags.eventId, eventIds));
+
+		for (const r of results) {
+			const existing = tagMap.get(r.eventId) || [];
+			existing.push(r.tag);
+			tagMap.set(r.eventId, existing);
+		}
+
+		return tagMap;
+	}
+
 	async getTagIdsForEvent(eventId: string): Promise<string[]> {
 		const results = await this.db
 			.select({ tagId: eventToTags.tagId })

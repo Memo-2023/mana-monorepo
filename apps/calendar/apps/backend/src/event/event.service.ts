@@ -226,17 +226,15 @@ export class EventService {
 
 		const result = await qb;
 
-		// Load tags for all events
-		const eventsWithCalendar = await Promise.all(
-			result.map(async (r) => {
-				const tags = await this.eventTagService.getTagsForEvent(r.event.id);
-				return {
-					...r.event,
-					calendar: r.calendar,
-					tags,
-				};
-			})
-		);
+		// Load tags for all events in a single batch query
+		const eventIds = result.map((r) => r.event.id);
+		const tagMap = await this.eventTagService.getTagsForEvents(eventIds);
+
+		const eventsWithCalendar = result.map((r) => ({
+			...r.event,
+			calendar: r.calendar,
+			tags: tagMap.get(r.event.id) || [],
+		}));
 
 		return eventsWithCalendar;
 	}

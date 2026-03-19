@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq, and, or, ilike, desc, sql, isNotNull } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, sql, isNotNull, inArray } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
-import { contacts } from '../db/schema';
+import { contacts, contactToTags } from '../db/schema';
 import type { Contact, NewContact } from '../db/schema';
 
 export interface ContactBirthdaySummary {
@@ -28,7 +28,20 @@ export class ContactService {
 	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
 
 	async findByUserId(userId: string, filters: ContactFilters = {}): Promise<Contact[]> {
-		const { search, isFavorite, isArchived = false, limit = 50, offset = 0 } = filters;
+		const { search, isFavorite, isArchived = false, tagId, limit = 50, offset = 0 } = filters;
+
+		// If tagId is provided, get the set of contact IDs that have this tag
+		let tagContactIds: string[] | undefined;
+		if (tagId) {
+			const taggedContacts = await this.db
+				.select({ contactId: contactToTags.contactId })
+				.from(contactToTags)
+				.where(eq(contactToTags.tagId, tagId));
+			tagContactIds = taggedContacts.map((tc) => tc.contactId);
+			if (tagContactIds.length === 0) {
+				return [];
+			}
+		}
 
 		// When searching, use relevance-based sorting (name matches first, then company/email)
 		if (search) {
@@ -57,6 +70,7 @@ export class ContactService {
 						eq(contacts.userId, userId),
 						eq(contacts.isArchived, isArchived),
 						isFavorite !== undefined ? eq(contacts.isFavorite, isFavorite) : undefined,
+						tagContactIds ? inArray(contacts.id, tagContactIds) : undefined,
 						or(
 							ilike(contacts.firstName, `%${search}%`),
 							ilike(contacts.lastName, `%${search}%`),
@@ -82,7 +96,8 @@ export class ContactService {
 				and(
 					eq(contacts.userId, userId),
 					eq(contacts.isArchived, isArchived),
-					isFavorite !== undefined ? eq(contacts.isFavorite, isFavorite) : undefined
+					isFavorite !== undefined ? eq(contacts.isFavorite, isFavorite) : undefined,
+					tagContactIds ? inArray(contacts.id, tagContactIds) : undefined
 				)
 			)
 			.orderBy(desc(contacts.updatedAt))
@@ -120,15 +135,12 @@ export class ContactService {
 	}
 
 	async delete(id: string, userId: string): Promise<void> {
-		const result = await this.db
-			.delete(contacts)
-			.where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
-
-		// Drizzle doesn't return affected rows easily, so we check manually
 		const existing = await this.findById(id, userId);
-		if (existing) {
+		if (!existing) {
 			throw new NotFoundException('Contact not found');
 		}
+
+		await this.db.delete(contacts).where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
 	}
 
 	async toggleFavorite(id: string, userId: string): Promise<Contact> {

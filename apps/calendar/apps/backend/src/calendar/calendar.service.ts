@@ -104,17 +104,44 @@ export class CalendarService {
 			.limit(1);
 
 		if (anyCalendar.length > 0) {
-			// Make it the default
-			const [updated] = await this.db
-				.update(calendars)
-				.set({ isDefault: true, updatedAt: new Date() })
-				.where(eq(calendars.id, anyCalendar[0].id))
-				.returning();
-			return updated;
+			// Make it the default — unique partial index prevents duplicates
+			try {
+				const [updated] = await this.db
+					.update(calendars)
+					.set({ isDefault: true, updatedAt: new Date() })
+					.where(eq(calendars.id, anyCalendar[0].id))
+					.returning();
+				return updated;
+			} catch (error: any) {
+				// Unique constraint violation — another request already set a default
+				if (error?.code === '23505') {
+					const [defaultCal] = await this.db
+						.select()
+						.from(calendars)
+						.where(and(eq(calendars.userId, userId), eq(calendars.isDefault, true)));
+					return defaultCal;
+				}
+				throw error;
+			}
 		}
 
-		// Create default calendars for new user
-		await this.createDefaultCalendars(userId);
+		// Create default calendars for new user — unique partial index prevents
+		// concurrent requests from creating duplicate defaults
+		try {
+			await this.createDefaultCalendars(userId);
+		} catch (error: any) {
+			// Unique constraint violation — another request already created defaults
+			if (error?.code === '23505') {
+				const [defaultCal] = await this.db
+					.select()
+					.from(calendars)
+					.where(and(eq(calendars.userId, userId), eq(calendars.isDefault, true)));
+				if (defaultCal) {
+					return defaultCal;
+				}
+			}
+			throw error;
+		}
 
 		// Return the default one
 		const defaultCal = await this.db

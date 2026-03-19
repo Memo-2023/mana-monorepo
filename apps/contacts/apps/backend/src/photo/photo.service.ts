@@ -10,6 +10,8 @@ import {
 	validateFileSize,
 	validateFileExtension,
 	IMAGE_EXTENSIONS,
+	getStorageConfig,
+	BUCKETS,
 } from '@manacore/shared-storage';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -77,8 +79,9 @@ export class PhotoService {
 			public: true,
 		});
 
-		// Generate the URL (for MinIO, construct it manually)
-		const photoUrl = `http://localhost:9000/contacts-storage/${key}`;
+		// Generate the URL from S3 endpoint configuration
+		const { endpoint } = getStorageConfig();
+		const photoUrl = `${endpoint}/${BUCKETS.CONTACTS}/${key}`;
 
 		// Update contact with photo URL
 		await this.db
@@ -125,7 +128,7 @@ export class PhotoService {
 	}
 
 	private extractKeyFromUrl(url: string): string | null {
-		// Extract key from URLs like http://localhost:9000/contacts-storage/users/xxx/file.jpg
+		// Extract key from URLs like {endpoint}/contacts-storage/users/xxx/file.jpg
 		const match = url.match(/contacts-storage\/(.+)$/);
 		return match ? match[1] : null;
 	}

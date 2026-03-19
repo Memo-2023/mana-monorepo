@@ -44,7 +44,7 @@ export const tasks = pgTable(
 	'tasks',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		projectId: uuid('project_id').references(() => projects.id, { onDelete: 'set null' }),
+		projectId: uuid('project_id').references(() => projects.id, { onDelete: 'cascade' }),
 		userId: text('user_id').notNull(),
 		parentTaskId: uuid('parent_task_id'),
 
@@ -101,6 +101,15 @@ export const tasks = pgTable(
 		parentIdx: index('tasks_parent_idx').on(table.parentTaskId),
 		orderIdx: index('tasks_order_idx').on(table.projectId, table.order),
 		columnIdx: index('tasks_column_idx').on(table.columnId, table.columnOrder),
+		// Composite indexes for common query patterns
+		userProjectIdx: index('tasks_user_project_idx').on(table.userId, table.projectId),
+		userStatusIdx: index('tasks_user_status_idx').on(table.userId, table.status),
+		userDueDateIdx: index('tasks_user_due_date_idx').on(table.userId, table.dueDate),
+		userCompletedIdx: index('tasks_user_completed_idx').on(table.userId, table.isCompleted),
+		userScheduledDateIdx: index('tasks_user_scheduled_date_idx').on(
+			table.userId,
+			table.scheduledDate
+		),
 	})
 );
 

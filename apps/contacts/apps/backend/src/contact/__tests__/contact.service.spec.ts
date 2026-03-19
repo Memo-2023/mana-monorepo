@@ -216,12 +216,19 @@ describe('ContactService', () => {
 
 	describe('delete', () => {
 		it('should delete a contact successfully', async () => {
+			// findById check (contact exists)
+			mockDb.where.mockResolvedValueOnce([mockContact]);
 			// delete call
 			mockDb.where.mockResolvedValueOnce(undefined);
-			// findById check (contact no longer exists)
-			mockDb.where.mockResolvedValueOnce([]);
 
 			await expect(service.delete('contact-1', 'user-1')).resolves.toBeUndefined();
+		});
+
+		it('should throw NotFoundException if contact does not exist', async () => {
+			// findById returns nothing
+			mockDb.where.mockResolvedValueOnce([]);
+
+			await expect(service.delete('contact-1', 'user-1')).rejects.toThrow(NotFoundException);
 		});
 	});
 });

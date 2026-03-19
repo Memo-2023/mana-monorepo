@@ -3,7 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { ProjectService } from '../project.service';
 import { DATABASE_CONNECTION } from '../../db/database.module';
 
-const mockDb = {
+const mockDb: any = {
 	query: {
 		projects: {
 			findMany: jest.fn(),
@@ -17,7 +17,11 @@ const mockDb = {
 	set: jest.fn().mockReturnThis(),
 	where: jest.fn().mockReturnThis(),
 	returning: jest.fn(),
+	transaction: jest.fn(),
 };
+
+// Make transaction execute callback with mockDb as tx
+mockDb.transaction.mockImplementation((cb: any) => cb(mockDb));
 
 describe('ProjectService', () => {
 	let service: ProjectService;

@@ -39,11 +39,6 @@ export class ProjectService {
 		// If this is the first project, make it default
 		const isDefault = dto.isDefault ?? existingProjects.length === 0;
 
-		// If this project is default, clear other defaults
-		if (isDefault) {
-			await this.clearDefaultProject(userId);
-		}
-
 		const newProject: NewProject = {
 			userId,
 			name: dto.name,
@@ -55,26 +50,42 @@ export class ProjectService {
 			settings: dto.settings,
 		};
 
-		const [created] = await this.db.insert(projects).values(newProject).returning();
+		// Clear default and insert atomically to prevent multiple defaults
+		const [created] = await this.db.transaction(async (tx) => {
+			if (isDefault) {
+				await tx
+					.update(projects)
+					.set({ isDefault: false, updatedAt: new Date() })
+					.where(and(eq(projects.userId, userId), eq(projects.isDefault, true)));
+			}
+
+			return tx.insert(projects).values(newProject).returning();
+		});
+
 		return created;
 	}
 
 	async update(id: string, userId: string, dto: UpdateProjectDto): Promise<Project> {
 		await this.findByIdOrThrow(id, userId);
 
-		// If setting as default, clear other defaults first
-		if (dto.isDefault) {
-			await this.clearDefaultProject(userId);
-		}
+		// Clear default and update atomically to prevent multiple defaults
+		const [updated] = await this.db.transaction(async (tx) => {
+			if (dto.isDefault) {
+				await tx
+					.update(projects)
+					.set({ isDefault: false, updatedAt: new Date() })
+					.where(and(eq(projects.userId, userId), eq(projects.isDefault, true)));
+			}
 
-		const [updated] = await this.db
-			.update(projects)
-			.set({
-				...dto,
-				updatedAt: new Date(),
-			})
-			.where(and(eq(projects.id, id), eq(projects.userId, userId)))
-			.returning();
+			return tx
+				.update(projects)
+				.set({
+					...dto,
+					updatedAt: new Date(),
+				})
+				.where(and(eq(projects.id, id), eq(projects.userId, userId)))
+				.returning();
+		});
 
 		return updated;
 	}
@@ -99,15 +110,15 @@ export class ProjectService {
 	}
 
 	async reorder(userId: string, projectIds: string[]): Promise<Project[]> {
-		// Update order for each project
-		const updates = projectIds.map((id, index) =>
-			this.db
-				.update(projects)
-				.set({ order: index, updatedAt: new Date() })
-				.where(and(eq(projects.id, id), eq(projects.userId, userId)))
-		);
-
-		await Promise.all(updates);
+		// Update order for each project atomically
+		await this.db.transaction(async (tx) => {
+			for (const [index, id] of projectIds.entries()) {
+				await tx
+					.update(projects)
+					.set({ order: index, updatedAt: new Date() })
+					.where(and(eq(projects.id, id), eq(projects.userId, userId)));
+			}
+		});
 
 		return this.findAll(userId);
 	}
@@ -129,12 +140,5 @@ export class ProjectService {
 			icon: 'inbox',
 			isDefault: true,
 		});
-	}
-
-	private async clearDefaultProject(userId: string): Promise<void> {
-		await this.db
-			.update(projects)
-			.set({ isDefault: false, updatedAt: new Date() })
-			.where(and(eq(projects.userId, userId), eq(projects.isDefault, true)));
 	}
 }

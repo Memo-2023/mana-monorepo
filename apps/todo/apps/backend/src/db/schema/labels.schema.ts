@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, varchar, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, varchar, index, unique } from 'drizzle-orm/pg-core';
 
 export const labels = pgTable(
 	'labels',
@@ -12,6 +12,7 @@ export const labels = pgTable(
 	},
 	(table) => ({
 		userIdx: index('labels_user_idx').on(table.userId),
+		uniqueUserName: unique('labels_user_name_unique').on(table.userId, table.name),
 	})
 );
 

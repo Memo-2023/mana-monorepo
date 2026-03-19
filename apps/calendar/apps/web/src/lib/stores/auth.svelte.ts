@@ -182,16 +182,18 @@ export const authStore = {
 		const authService = getAuthService();
 		if (!authService) {
 			user = null;
+			initialized = false;
 			return;
 		}
 
 		try {
 			await authService.signOut();
-			user = null;
 		} catch (error) {
 			console.error('Sign out error:', error);
-			// Clear user even if sign out fails
+		} finally {
+			// Always clear auth state, even if the remote sign-out fails
 			user = null;
+			initialized = false;
 		}
 	},
 

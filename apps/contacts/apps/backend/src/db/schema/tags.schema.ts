@@ -1,13 +1,19 @@
-import { pgTable, uuid, timestamp, varchar, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, varchar, primaryKey, index } from 'drizzle-orm/pg-core';
 import { contacts } from './contacts.schema';
 
-export const contactTags = pgTable('contact_tags', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	userId: varchar('user_id', { length: 255 }).notNull(),
-	name: varchar('name', { length: 50 }).notNull(),
-	color: varchar('color', { length: 20 }),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
+export const contactTags = pgTable(
+	'contact_tags',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: varchar('user_id', { length: 255 }).notNull(),
+		name: varchar('name', { length: 50 }).notNull(),
+		color: varchar('color', { length: 20 }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => ({
+		userIdx: index('contact_tags_user_idx').on(table.userId),
+	})
+);
 
 export const contactToTags = pgTable(
 	'contact_to_tags',
@@ -21,6 +27,8 @@ export const contactToTags = pgTable(
 	},
 	(table) => ({
 		pk: primaryKey({ columns: [table.contactId, table.tagId] }),
+		contactIdx: index('contact_to_tags_contact_idx').on(table.contactId),
+		tagIdx: index('contact_to_tags_tag_idx').on(table.tagId),
 	})
 );
 

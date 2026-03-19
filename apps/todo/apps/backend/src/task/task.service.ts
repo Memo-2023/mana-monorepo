@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
 import { eq, and, or, gte, lte, ilike, asc, desc, isNull, SQL, sql, inArray } from 'drizzle-orm';
 import { RRule, RRuleSet, rrulestr } from 'rrule';
 import { DATABASE_CONNECTION } from '../db/database.module';
@@ -12,6 +12,8 @@ type TaskWithLabels = Task & { labels: (typeof labels.$inferSelect)[] };
 
 @Injectable()
 export class TaskService {
+	private readonly logger = new Logger(TaskService.name);
+
 	constructor(
 		@Inject(DATABASE_CONNECTION) private db: Database,
 		private projectService: ProjectService
@@ -264,12 +266,15 @@ export class TaskService {
 
 			// Reject if too many occurrences (prevents hourly/minutely abuse)
 			if (occurrences.length >= maxOccurrences) {
-				console.warn(`RRULE rejected: too many occurrences (${occurrences.length})`);
+				this.logger.warn(`RRULE rejected: too many occurrences (${occurrences.length})`);
 				return false;
 			}
 
 			return true;
-		} catch {
+		} catch (error) {
+			this.logger.error(
+				`RRULE validation failed for rule "${rruleString}": ${error instanceof Error ? error.message : error}`
+			);
 			return false;
 		}
 	}
@@ -286,7 +291,9 @@ export class TaskService {
 
 		// Validate RRULE complexity before parsing
 		if (!this.validateRRule(task.recurrenceRule)) {
-			console.warn(`Invalid or too complex RRULE for task ${task.id}`);
+			this.logger.warn(
+				`Invalid or too complex RRULE for task ${task.id}: "${task.recurrenceRule}"`
+			);
 			return null;
 		}
 
@@ -341,22 +348,29 @@ export class TaskService {
 				columnOrder: task.columnOrder,
 			};
 
-			const [created] = await this.db.insert(tasks).values(newTask).returning();
+			// Create task and copy labels atomically
+			const created = await this.db.transaction(async (tx) => {
+				const [newCreated] = await tx.insert(tasks).values(newTask).returning();
 
-			// Copy labels from original task
-			if (task.labels && task.labels.length > 0) {
-				await this.db.insert(taskLabels).values(
-					task.labels.map((label) => ({
-						taskId: created.id,
-						labelId: label.id,
-					}))
-				);
-			}
+				// Copy labels from original task
+				if (task.labels && task.labels.length > 0) {
+					await tx.insert(taskLabels).values(
+						task.labels.map((label) => ({
+							taskId: newCreated.id,
+							labelId: label.id,
+						}))
+					);
+				}
+
+				return newCreated;
+			});
 
 			return this.loadTaskLabels(created);
 		} catch (error) {
 			// If RRULE parsing fails, log and return null
-			console.error('Failed to parse recurrence rule:', error);
+			this.logger.error(
+				`Failed to parse recurrence rule for task ${task.id}: ${error instanceof Error ? error.message : error}`
+			);
 			return null;
 		}
 	}
@@ -412,18 +426,19 @@ export class TaskService {
 	async updateTaskLabels(taskId: string, userId: string, labelIds: string[]): Promise<void> {
 		await this.findByIdOrThrow(taskId, userId);
 
-		// Delete existing labels
-		await this.db.delete(taskLabels).where(eq(taskLabels.taskId, taskId));
+		// Delete existing labels and insert new ones atomically
+		await this.db.transaction(async (tx) => {
+			await tx.delete(taskLabels).where(eq(taskLabels.taskId, taskId));
 
-		// Insert new labels
-		if (labelIds.length > 0) {
-			await this.db.insert(taskLabels).values(
-				labelIds.map((labelId) => ({
-					taskId,
-					labelId,
-				}))
-			);
-		}
+			if (labelIds.length > 0) {
+				await tx.insert(taskLabels).values(
+					labelIds.map((labelId) => ({
+						taskId,
+						labelId,
+					}))
+				);
+			}
+		});
 	}
 
 	async getInboxTasks(userId: string): Promise<TaskWithLabels[]> {
@@ -545,15 +560,15 @@ export class TaskService {
 		taskIds: string[],
 		projectId?: string | null
 	): Promise<TaskWithLabels[]> {
-		// Update order for each task
-		const updates = taskIds.map((id, index) =>
-			this.db
-				.update(tasks)
-				.set({ order: index, updatedAt: new Date() })
-				.where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
-		);
-
-		await Promise.all(updates);
+		// Update order for each task atomically
+		await this.db.transaction(async (tx) => {
+			for (const [index, id] of taskIds.entries()) {
+				await tx
+					.update(tasks)
+					.set({ order: index, updatedAt: new Date() })
+					.where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+			}
+		});
 
 		return this.findAll(userId, { projectId: projectId ?? undefined });
 	}

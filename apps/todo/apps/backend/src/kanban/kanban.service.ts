@@ -84,22 +84,29 @@ export class KanbanService {
 			return existingGlobal;
 		}
 
-		// Create global board
-		const [globalBoard] = await this.db
-			.insert(kanbanBoards)
-			.values({
+		// Create global board and default columns atomically
+		return this.db.transaction(async (tx) => {
+			const [globalBoard] = await tx
+				.insert(kanbanBoards)
+				.values({
+					userId,
+					name: 'Alle Aufgaben',
+					color: '#8b5cf6',
+					order: 0,
+					isGlobal: true,
+				})
+				.returning();
+
+			// Create default columns inline (can't call initializeDefaultColumns since it uses this.db)
+			const columnsToCreate: NewKanbanColumn[] = DEFAULT_COLUMNS.map((col) => ({
+				...col,
 				userId,
-				name: 'Alle Aufgaben',
-				color: '#8b5cf6',
-				order: 0,
-				isGlobal: true,
-			})
-			.returning();
+				boardId: globalBoard.id,
+			}));
+			await tx.insert(kanbanColumns).values(columnsToCreate);
 
-		// Initialize default columns for the global board
-		await this.initializeDefaultColumns(globalBoard.id, userId);
-
-		return globalBoard;
+			return globalBoard;
+		});
 	}
 
 	async createBoard(userId: string, dto: CreateBoardDto): Promise<KanbanBoard> {
@@ -117,12 +124,19 @@ export class KanbanService {
 			isGlobal: false,
 		};
 
-		const [created] = await this.db.insert(kanbanBoards).values(newBoard).returning();
+		// Create board and default columns atomically
+		return this.db.transaction(async (tx) => {
+			const [created] = await tx.insert(kanbanBoards).values(newBoard).returning();
 
-		// Initialize default columns for the new board
-		await this.initializeDefaultColumns(created.id, userId);
+			const columnsToCreate: NewKanbanColumn[] = DEFAULT_COLUMNS.map((col) => ({
+				...col,
+				userId,
+				boardId: created.id,
+			}));
+			await tx.insert(kanbanColumns).values(columnsToCreate);
 
-		return created;
+			return created;
+		});
 	}
 
 	async updateBoard(id: string, userId: string, dto: UpdateBoardDto): Promise<KanbanBoard> {
@@ -152,37 +166,41 @@ export class KanbanService {
 		const globalColumns = await this.findAllColumns(globalBoard.id, userId);
 		const firstGlobalColumn = globalColumns[0];
 
-		if (firstGlobalColumn) {
-			// Get all columns for this board
-			const boardColumns = await this.findAllColumns(id, userId);
+		// Move tasks and delete board atomically
+		await this.db.transaction(async (tx) => {
+			if (firstGlobalColumn) {
+				// Get all columns for this board
+				const boardColumns = await this.findAllColumns(id, userId);
 
-			// Move tasks from board columns to first global column
-			for (const column of boardColumns) {
-				await this.db
-					.update(tasks)
-					.set({
-						columnId: firstGlobalColumn.id,
-						updatedAt: new Date(),
-					})
-					.where(eq(tasks.columnId, column.id));
+				// Move tasks from board columns to first global column
+				for (const column of boardColumns) {
+					await tx
+						.update(tasks)
+						.set({
+							columnId: firstGlobalColumn.id,
+							updatedAt: new Date(),
+						})
+						.where(eq(tasks.columnId, column.id));
+				}
 			}
-		}
 
-		// Delete the board (columns will cascade delete)
-		await this.db
-			.delete(kanbanBoards)
-			.where(and(eq(kanbanBoards.id, id), eq(kanbanBoards.userId, userId)));
+			// Delete the board (columns will cascade delete)
+			await tx
+				.delete(kanbanBoards)
+				.where(and(eq(kanbanBoards.id, id), eq(kanbanBoards.userId, userId)));
+		});
 	}
 
 	async reorderBoards(userId: string, boardIds: string[]): Promise<KanbanBoard[]> {
-		const updates = boardIds.map((id, index) =>
-			this.db
-				.update(kanbanBoards)
-				.set({ order: index, updatedAt: new Date() })
-				.where(and(eq(kanbanBoards.id, id), eq(kanbanBoards.userId, userId)))
-		);
-
-		await Promise.all(updates);
+		// Update order for each board atomically
+		await this.db.transaction(async (tx) => {
+			for (const [index, id] of boardIds.entries()) {
+				await tx
+					.update(kanbanBoards)
+					.set({ order: index, updatedAt: new Date() })
+					.where(and(eq(kanbanBoards.id, id), eq(kanbanBoards.userId, userId)));
+			}
+		});
 
 		return this.findAllBoards(userId);
 	}
@@ -262,30 +280,34 @@ export class KanbanService {
 			throw new BadRequestException('Cannot delete the last column');
 		}
 
-		// Move all tasks from this column to the first column
-		await this.db
-			.update(tasks)
-			.set({
-				columnId: firstColumn.id,
-				updatedAt: new Date(),
-			})
-			.where(eq(tasks.columnId, id));
+		// Move tasks and delete column atomically
+		await this.db.transaction(async (tx) => {
+			// Move all tasks from this column to the first column
+			await tx
+				.update(tasks)
+				.set({
+					columnId: firstColumn.id,
+					updatedAt: new Date(),
+				})
+				.where(eq(tasks.columnId, id));
 
-		// Delete the column
-		await this.db
-			.delete(kanbanColumns)
-			.where(and(eq(kanbanColumns.id, id), eq(kanbanColumns.userId, userId)));
+			// Delete the column
+			await tx
+				.delete(kanbanColumns)
+				.where(and(eq(kanbanColumns.id, id), eq(kanbanColumns.userId, userId)));
+		});
 	}
 
 	async reorderColumns(userId: string, columnIds: string[]): Promise<KanbanColumn[]> {
-		const updates = columnIds.map((id, index) =>
-			this.db
-				.update(kanbanColumns)
-				.set({ order: index, updatedAt: new Date() })
-				.where(and(eq(kanbanColumns.id, id), eq(kanbanColumns.userId, userId)))
-		);
-
-		await Promise.all(updates);
+		// Update order for each column atomically
+		await this.db.transaction(async (tx) => {
+			for (const [index, id] of columnIds.entries()) {
+				await tx
+					.update(kanbanColumns)
+					.set({ order: index, updatedAt: new Date() })
+					.where(and(eq(kanbanColumns.id, id), eq(kanbanColumns.userId, userId)));
+			}
+		});
 
 		// Determine boardId from first column
 		const firstColumn = await this.findColumnById(columnIds[0], userId);
@@ -436,19 +458,19 @@ export class KanbanService {
 		// Verify column exists
 		await this.findColumnByIdOrThrow(columnId, userId);
 
-		// Update order for each task
-		const updates = taskIds.map((id, index) =>
-			this.db
-				.update(tasks)
-				.set({
-					columnId,
-					columnOrder: index,
-					updatedAt: new Date(),
-				})
-				.where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
-		);
-
-		await Promise.all(updates);
+		// Update order for each task atomically
+		await this.db.transaction(async (tx) => {
+			for (const [index, id] of taskIds.entries()) {
+				await tx
+					.update(tasks)
+					.set({
+						columnId,
+						columnOrder: index,
+						updatedAt: new Date(),
+					})
+					.where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+			}
+		});
 
 		// Return updated tasks
 		return this.db.query.tasks.findMany({

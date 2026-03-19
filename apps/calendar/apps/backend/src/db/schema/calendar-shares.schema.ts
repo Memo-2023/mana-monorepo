@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, varchar, unique, text } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, varchar, unique, text, index } from 'drizzle-orm/pg-core';
 import { calendars } from './calendars.schema';
 
 /**
@@ -35,6 +35,9 @@ export const calendarShares = pgTable(
 	(table) => ({
 		uniqueUserShare: unique().on(table.calendarId, table.sharedWithUserId),
 		uniqueEmailShare: unique().on(table.calendarId, table.sharedWithEmail),
+		calendarIdx: index('calendar_shares_calendar_idx').on(table.calendarId),
+		sharedWithUserIdx: index('calendar_shares_shared_with_user_idx').on(table.sharedWithUserId),
+		shareTokenIdx: index('calendar_shares_token_idx').on(table.shareToken),
 	})
 );
 

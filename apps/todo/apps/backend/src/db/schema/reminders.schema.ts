@@ -30,6 +30,12 @@ export const reminders = pgTable(
 		taskIdx: index('reminders_task_idx').on(table.taskId),
 		userIdx: index('reminders_user_idx').on(table.userId),
 		pendingIdx: index('reminders_pending_idx').on(table.status, table.reminderTime),
+		// Composite indexes for user-scoped queries
+		userPendingIdx: index('reminders_user_pending_idx').on(
+			table.userId,
+			table.status,
+			table.reminderTime
+		),
 	})
 );
 

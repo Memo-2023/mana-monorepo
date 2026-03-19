@@ -1,4 +1,15 @@
-import { pgTable, uuid, text, timestamp, varchar, boolean, jsonb } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	text,
+	timestamp,
+	varchar,
+	boolean,
+	jsonb,
+	index,
+	uniqueIndex,
+} from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 /**
  * Calendar settings stored in JSONB
@@ -14,19 +25,28 @@ export interface CalendarSettings {
 /**
  * Calendars table - stores user calendars
  */
-export const calendars = pgTable('calendars', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	userId: text('user_id').notNull(),
-	name: varchar('name', { length: 255 }).notNull(),
-	description: text('description'),
-	color: varchar('color', { length: 7 }).default('#3B82F6'),
-	isDefault: boolean('is_default').default(false),
-	isVisible: boolean('is_visible').default(true),
-	timezone: varchar('timezone', { length: 100 }).default('Europe/Berlin'),
-	settings: jsonb('settings').$type<CalendarSettings>(),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+export const calendars = pgTable(
+	'calendars',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: text('user_id').notNull(),
+		name: varchar('name', { length: 255 }).notNull(),
+		description: text('description'),
+		color: varchar('color', { length: 7 }).default('#3B82F6'),
+		isDefault: boolean('is_default').default(false),
+		isVisible: boolean('is_visible').default(true),
+		timezone: varchar('timezone', { length: 100 }).default('Europe/Berlin'),
+		settings: jsonb('settings').$type<CalendarSettings>(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => ({
+		userIdx: index('calendars_user_idx').on(table.userId),
+		uniqueDefaultPerUser: uniqueIndex('calendars_unique_default_per_user')
+			.on(table.userId)
+			.where(sql`${table.isDefault} = true`),
+	})
+);
 
 export type Calendar = typeof calendars.$inferSelect;
 export type NewCalendar = typeof calendars.$inferInsert;

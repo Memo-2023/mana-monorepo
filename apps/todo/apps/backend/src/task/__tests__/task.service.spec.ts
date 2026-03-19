@@ -50,7 +50,11 @@ const mockDb = {
 	set: jest.fn().mockReturnThis(),
 	where: jest.fn().mockReturnThis(),
 	returning: jest.fn(),
-};
+	transaction: jest.fn(),
+} as any;
+
+// Make transaction execute callback with mockDb as tx
+mockDb.transaction.mockImplementation((cb: any) => cb(mockDb));
 
 // Mock ProjectService
 const mockProjectService = {
