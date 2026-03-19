@@ -18,6 +18,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY patches ./patches
 
 # Copy shared packages needed by mukke web
 COPY packages/shared-api-client ./packages/shared-api-client
