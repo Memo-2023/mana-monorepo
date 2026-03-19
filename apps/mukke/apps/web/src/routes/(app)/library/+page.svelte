@@ -3,8 +3,12 @@
 	import { goto } from '$app/navigation';
 	import { libraryStore } from '$lib/stores/library.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import SongEditor from '$lib/components/SongEditor.svelte';
+	import type { Song } from '@mukke/shared';
 
 	const tabs = ['songs', 'albums', 'artists', 'genres'] as const;
+
+	let editingSong = $state<Song | null>(null);
 
 	function getBackendUrl(): string {
 		let baseUrl = 'http://localhost:3010';
@@ -46,6 +50,12 @@
 		e.preventDefault();
 		e.stopPropagation();
 		await libraryStore.toggleFavorite(id);
+	}
+
+	function handleEditSong(song: Song, e: Event) {
+		e.preventDefault();
+		e.stopPropagation();
+		editingSong = song;
 	}
 
 	async function openInEditor(songId: string, e: Event) {
@@ -126,7 +136,7 @@
 				<div class="bg-surface rounded-lg overflow-hidden">
 					<!-- Header -->
 					<div
-						class="grid grid-cols-[1fr_1fr_1fr_80px_40px_40px] gap-4 px-4 py-3 text-xs font-medium text-foreground-secondary uppercase tracking-wide border-b border-border"
+						class="grid grid-cols-[1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 text-xs font-medium text-foreground-secondary uppercase tracking-wide border-b border-border"
 					>
 						<span>Title</span>
 						<span>Artist</span>
@@ -134,11 +144,12 @@
 						<span class="text-right">Duration</span>
 						<span></span>
 						<span></span>
+						<span></span>
 					</div>
 					<!-- Song rows -->
 					{#each libraryStore.songs as song}
 						<div
-							class="grid grid-cols-[1fr_1fr_1fr_80px_40px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center"
+							class="grid grid-cols-[1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center"
 						>
 							<span class="truncate font-medium">{song.title}</span>
 							<span class="truncate text-foreground-secondary">{song.artist ?? 'Unknown'}</span>
@@ -146,6 +157,20 @@
 							<span class="text-right text-foreground-secondary text-sm">
 								{formatDuration(song.duration)}
 							</span>
+							<button
+								onclick={(e) => handleEditSong(song, e)}
+								class="p-1 text-foreground-secondary hover:text-primary transition-colors"
+								title="Edit metadata"
+							>
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+									/>
+								</svg>
+							</button>
 							<button
 								onclick={(e) => openInEditor(song.id, e)}
 								class="p-1 text-foreground-secondary hover:text-primary transition-colors"
@@ -156,7 +181,7 @@
 										stroke-linecap="round"
 										stroke-linejoin="round"
 										stroke-width="2"
-										d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
 									/>
 								</svg>
 							</button>
@@ -293,3 +318,14 @@
 		{/if}
 	{/if}
 </div>
+
+{#if editingSong}
+	<SongEditor
+		song={editingSong}
+		open={editingSong !== null}
+		onclose={() => {
+			editingSong = null;
+			libraryStore.loadSongs();
+		}}
+	/>
+{/if}

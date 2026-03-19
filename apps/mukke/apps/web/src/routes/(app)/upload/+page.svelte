@@ -86,11 +86,18 @@
 			files[index].status = 'uploaded';
 			files[index].progress = 100;
 			files[index].songId = song.id;
-			if (song.title) files[index].metadata.title = song.title;
-			if (song.artist) files[index].metadata.artist = song.artist;
-			if (song.album) files[index].metadata.album = song.album;
-			if (song.genre) files[index].metadata.genre = song.genre;
-			if (song.year) files[index].metadata.year = String(song.year);
+
+			// Auto-extract ID3 tags from the uploaded file
+			try {
+				const extracted = await libraryStore.extractMetadata(song.id);
+				if (extracted.title) files[index].metadata.title = extracted.title;
+				if (extracted.artist) files[index].metadata.artist = extracted.artist;
+				if (extracted.album) files[index].metadata.album = extracted.album ?? '';
+				if (extracted.genre) files[index].metadata.genre = extracted.genre ?? '';
+				if (extracted.year) files[index].metadata.year = String(extracted.year);
+			} catch {
+				// Non-fatal: user can still edit metadata manually
+			}
 		} catch (e) {
 			files[index].status = 'error';
 			files[index].error = e instanceof Error ? e.message : 'Upload failed';

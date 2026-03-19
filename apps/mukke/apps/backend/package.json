@@ -38,6 +38,7 @@
 		"drizzle-kit": "^0.30.2",
 		"drizzle-orm": "^0.38.3",
 		"music-metadata": "^11.12.3",
+		"node-id3": "^0.2.9",
 		"postgres": "^3.4.5",
 		"reflect-metadata": "^0.2.2",
 		"rxjs": "^7.8.1"

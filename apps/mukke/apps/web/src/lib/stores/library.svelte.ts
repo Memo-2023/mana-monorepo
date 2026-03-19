@@ -250,6 +250,25 @@ function createLibraryStore() {
 			state.songs = state.songs.map((s) => (s.id === id ? result.song : s));
 			return result.song;
 		},
+
+		async extractMetadata(id: string) {
+			const result = await fetchApi<{ song: Song }>(`/songs/${id}/extract-metadata`, {
+				method: 'POST',
+			});
+			state.songs = state.songs.map((s) => (s.id === id ? result.song : s));
+			return result.song;
+		},
+
+		async writeTags(id: string) {
+			await fetchApi<{ success: boolean }>(`/songs/${id}/write-tags`, {
+				method: 'POST',
+			});
+		},
+
+		async getCoverUrl(id: string): Promise<string | null> {
+			const result = await fetchApi<{ url: string | null }>(`/songs/${id}/cover-url`);
+			return result.url;
+		},
 	};
 }
 

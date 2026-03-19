@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { eq, and, desc, asc, ilike, or, sql } from 'drizzle-orm';
+import NodeID3 from 'node-id3';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { songs } from '../db/schema';
@@ -194,6 +195,105 @@ export class SongService {
 	async getDownloadUrl(id: string, userId: string): Promise<string> {
 		const song = await this.findByIdOrThrow(id, userId);
 		return this.storage.getDownloadUrl(song.storagePath, { expiresIn: 3600 });
+	}
+
+	async extractMetadata(id: string, userId: string): Promise<Song> {
+		const song = await this.findByIdOrThrow(id, userId);
+
+		const buffer = await this.storage.download(song.storagePath);
+		const { parseBuffer } = await import('music-metadata');
+		const metadata = await parseBuffer(buffer);
+
+		const updateData: Record<string, unknown> = {};
+		const { common, format } = metadata;
+
+		if (common.title) updateData.title = common.title;
+		if (common.artist) updateData.artist = common.artist;
+		if (common.album) updateData.album = common.album;
+		if (common.albumartist) updateData.albumArtist = common.albumartist;
+		if (common.genre?.[0]) updateData.genre = common.genre[0];
+		if (common.year) updateData.year = common.year;
+		if (common.track?.no) updateData.trackNumber = common.track.no;
+		if (common.bpm) updateData.bpm = common.bpm;
+		if (format.duration) updateData.duration = format.duration;
+		updateData.fileSize = buffer.length;
+
+		// Extract cover art
+		const picture = common.picture?.[0];
+		if (picture) {
+			try {
+				const ext = picture.format.includes('png') ? 'png' : 'jpg';
+				const coverKey = generateUserFileKey(userId, `covers/${id}.${ext}`);
+				await this.storage.upload(coverKey, Buffer.from(picture.data), {
+					contentType: picture.format,
+					public: true,
+				});
+				updateData.coverArtPath = coverKey;
+			} catch (e) {
+				this.logger.warn(`Failed to extract cover art for song ${id}: ${e}`);
+			}
+		}
+
+		updateData.updatedAt = new Date();
+
+		const [updatedSong] = await this.db
+			.update(songs)
+			.set(updateData)
+			.where(and(eq(songs.id, id), eq(songs.userId, userId)))
+			.returning();
+
+		return updatedSong;
+	}
+
+	async writeTags(id: string, userId: string): Promise<void> {
+		const song = await this.findByIdOrThrow(id, userId);
+
+		if (!song.storagePath.toLowerCase().endsWith('.mp3')) {
+			throw new BadRequestException('ID3 tag writing is only supported for MP3 files');
+		}
+
+		const buffer = await this.storage.download(song.storagePath);
+
+		const tags: NodeID3.Tags = {};
+		if (song.title) tags.title = song.title;
+		if (song.artist) tags.artist = song.artist;
+		if (song.album) tags.album = song.album;
+		if (song.albumArtist) tags.performerInfo = song.albumArtist;
+		if (song.genre) tags.genre = song.genre;
+		if (song.year) tags.year = String(song.year);
+		if (song.trackNumber) tags.trackNumber = String(song.trackNumber);
+		if (song.bpm) tags.bpm = String(Math.round(song.bpm));
+
+		// Embed cover art if available
+		if (song.coverArtPath) {
+			try {
+				const coverBuffer = await this.storage.download(song.coverArtPath);
+				const mime = song.coverArtPath.endsWith('.png') ? 'image/png' : 'image/jpeg';
+				tags.image = {
+					mime,
+					type: { id: 3, name: 'front cover' },
+					description: 'Cover',
+					imageBuffer: coverBuffer,
+				};
+			} catch (e) {
+				this.logger.warn(`Failed to load cover art for embedding: ${e}`);
+			}
+		}
+
+		const taggedBuffer = NodeID3.write(tags, buffer);
+		if (!taggedBuffer || taggedBuffer instanceof Error) {
+			throw new BadRequestException('Failed to write ID3 tags');
+		}
+
+		await this.storage.upload(song.storagePath, taggedBuffer as Buffer, {
+			contentType: 'audio/mpeg',
+		});
+	}
+
+	async getCoverDownloadUrl(id: string, userId: string): Promise<string | null> {
+		const song = await this.findByIdOrThrow(id, userId);
+		if (!song.coverArtPath) return null;
+		return this.storage.getDownloadUrl(song.coverArtPath, { expiresIn: 3600 });
 	}
 
 	private getSortColumn(field: string) {

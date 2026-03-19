@@ -66,6 +66,27 @@ export class SongController {
 		return { url };
 	}
 
+	@Post(':id/extract-metadata')
+	async extractMetadata(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id', ParseUUIDPipe) id: string
+	) {
+		const song = await this.songService.extractMetadata(id, user.userId);
+		return { song };
+	}
+
+	@Post(':id/write-tags')
+	async writeTags(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
+		await this.songService.writeTags(id, user.userId);
+		return { success: true };
+	}
+
+	@Get(':id/cover-url')
+	async getCoverUrl(@CurrentUser() user: CurrentUserData, @Param('id', ParseUUIDPipe) id: string) {
+		const url = await this.songService.getCoverDownloadUrl(id, user.userId);
+		return { url };
+	}
+
 	@Put(':id')
 	async update(
 		@CurrentUser() user: CurrentUserData,
