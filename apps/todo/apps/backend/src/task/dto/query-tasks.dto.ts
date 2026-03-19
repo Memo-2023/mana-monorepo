@@ -6,6 +6,9 @@ import {
 	IsString,
 	IsNumber,
 	IsDateString,
+	Min,
+	Max,
+	MaxLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import type { TaskPriority, TaskStatus } from '../../db/schema/tasks.schema';
@@ -46,6 +49,7 @@ export class QueryTasksDto {
 
 	@IsOptional()
 	@IsString()
+	@MaxLength(500)
 	search?: string;
 
 	@IsOptional()
@@ -59,10 +63,13 @@ export class QueryTasksDto {
 	@IsOptional()
 	@Transform(({ value }) => parseInt(value, 10))
 	@IsNumber()
+	@Min(0)
+	@Max(100)
 	limit?: number;
 
 	@IsOptional()
 	@Transform(({ value }) => parseInt(value, 10))
 	@IsNumber()
+	@Min(0)
 	offset?: number;
 }

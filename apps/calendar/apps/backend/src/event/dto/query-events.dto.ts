@@ -7,6 +7,7 @@ import {
 	IsInt,
 	Min,
 	Max,
+	MaxLength,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
@@ -32,6 +33,7 @@ export class QueryEventsDto {
 
 	@IsOptional()
 	@IsString()
+	@MaxLength(500)
 	search?: string;
 
 	@IsOptional()

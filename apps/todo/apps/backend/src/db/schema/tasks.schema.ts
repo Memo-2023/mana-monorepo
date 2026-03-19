@@ -8,6 +8,7 @@ import {
 	integer,
 	jsonb,
 	index,
+	foreignKey,
 } from 'drizzle-orm/pg-core';
 import { projects } from './projects.schema';
 import { kanbanColumns } from './kanban-columns.schema';
@@ -110,6 +111,10 @@ export const tasks = pgTable(
 			table.userId,
 			table.scheduledDate
 		),
+		parentTaskFk: foreignKey({
+			columns: [table.parentTaskId],
+			foreignColumns: [table.id],
+		}).onDelete('cascade'),
 	})
 );
 

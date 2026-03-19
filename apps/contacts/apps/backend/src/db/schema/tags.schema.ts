@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, varchar, primaryKey, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, timestamp, varchar, primaryKey, index, unique } from 'drizzle-orm/pg-core';
 import { contacts } from './contacts.schema';
 
 export const contactTags = pgTable(
@@ -12,6 +12,7 @@ export const contactTags = pgTable(
 	},
 	(table) => ({
 		userIdx: index('contact_tags_user_idx').on(table.userId),
+		userNameUnique: unique('contact_tags_user_name_unique').on(table.userId, table.name),
 	})
 );
 

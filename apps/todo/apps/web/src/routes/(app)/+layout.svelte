@@ -89,16 +89,20 @@
 	async function handleCreate(query: string): Promise<void> {
 		if (!query.trim()) return;
 
-		const parsed = parseTaskInput(query);
-		const resolved = resolveTaskIds(parsed, projectsStore.projects, labelsStore.labels);
+		try {
+			const parsed = parseTaskInput(query);
+			const resolved = resolveTaskIds(parsed, projectsStore.projects, labelsStore.labels);
 
-		const result = await tasksStore.createTask({
-			title: resolved.title,
-			dueDate: resolved.dueDate,
-			priority: resolved.priority,
-			projectId: resolved.projectId,
-			labelIds: resolved.labelIds,
-		});
+			await tasksStore.createTask({
+				title: resolved.title,
+				dueDate: resolved.dueDate,
+				priority: resolved.priority,
+				projectId: resolved.projectId,
+				labelIds: resolved.labelIds,
+			});
+		} catch (error) {
+			console.error('Failed to create task:', error);
+		}
 	}
 
 	// PillNav collapsed state (controlled by FAB)

@@ -57,7 +57,7 @@ export class ShareController {
 
 	@Post('shares/:shareId/accept')
 	async acceptInvitation(@CurrentUser() user: CurrentUserData, @Param('shareId') shareId: string) {
-		const share = await this.shareService.acceptInvitation(shareId, user.userId);
+		const share = await this.shareService.acceptInvitation(shareId, user.userId, user.email);
 		return { share };
 	}
 

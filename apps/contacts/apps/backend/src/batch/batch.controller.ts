@@ -1,12 +1,20 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { BatchService } from './batch.service';
-import { IsArray, IsString, IsBoolean, IsOptional, ArrayMinSize } from 'class-validator';
+import {
+	IsArray,
+	IsString,
+	IsBoolean,
+	IsOptional,
+	ArrayMinSize,
+	ArrayMaxSize,
+} from 'class-validator';
 
 class BatchContactIdsDto {
 	@IsArray()
 	@IsString({ each: true })
 	@ArrayMinSize(1)
+	@ArrayMaxSize(100)
 	contactIds: string[];
 }
 
@@ -26,6 +34,7 @@ class BatchTagsDto extends BatchContactIdsDto {
 	@IsArray()
 	@IsString({ each: true })
 	@ArrayMinSize(1)
+	@ArrayMaxSize(100)
 	tagIds: string[];
 }
 

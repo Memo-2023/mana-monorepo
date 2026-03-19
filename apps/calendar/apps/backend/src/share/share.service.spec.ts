@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ShareService } from './share.service';
 import { CalendarService } from '../calendar/calendar.service';
 import { EmailService } from '../email/email.service';
@@ -52,6 +53,10 @@ describe('ShareService', () => {
 				{
 					provide: EmailService,
 					useValue: mockEmailService,
+				},
+				{
+					provide: ConfigService,
+					useValue: { get: jest.fn().mockReturnValue('http://localhost:5179') },
 				},
 			],
 		}).compile();
@@ -241,7 +246,7 @@ describe('ShareService', () => {
 			mockDb.where.mockResolvedValueOnce([share]);
 			mockDb.returning.mockResolvedValueOnce([acceptedShare]);
 
-			const result = await service.acceptInvitation(share.id, TEST_USER_ID);
+			const result = await service.acceptInvitation(share.id, TEST_USER_ID, 'shared@example.com');
 
 			expect(result.status).toBe('accepted');
 			expect(result.sharedWithUserId).toBe(TEST_USER_ID);
@@ -250,18 +255,18 @@ describe('ShareService', () => {
 		it('should throw NotFoundException when invitation not found', async () => {
 			mockDb.where.mockResolvedValueOnce([]);
 
-			await expect(service.acceptInvitation('non-existent-id', TEST_USER_ID)).rejects.toThrow(
-				NotFoundException
-			);
+			await expect(
+				service.acceptInvitation('non-existent-id', TEST_USER_ID, 'shared@example.com')
+			).rejects.toThrow(NotFoundException);
 		});
 
 		it('should throw ForbiddenException when invitation already processed', async () => {
 			const share = createMockCalendarShare({ status: 'accepted' });
 			mockDb.where.mockResolvedValueOnce([share]);
 
-			await expect(service.acceptInvitation(share.id, TEST_USER_ID)).rejects.toThrow(
-				ForbiddenException
-			);
+			await expect(
+				service.acceptInvitation(share.id, TEST_USER_ID, 'shared@example.com')
+			).rejects.toThrow(ForbiddenException);
 		});
 	});
 

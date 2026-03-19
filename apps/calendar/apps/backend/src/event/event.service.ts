@@ -1,4 +1,10 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+	Injectable,
+	Inject,
+	NotFoundException,
+	ForbiddenException,
+	BadRequestException,
+} from '@nestjs/common';
 import { eq, and, gte, lte, inArray, or, ilike } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
@@ -95,7 +101,15 @@ export class EventService {
 		});
 	}
 
+	private validateTimeRange(startTime: string, endTime: string): void {
+		if (new Date(startTime) >= new Date(endTime)) {
+			throw new BadRequestException('startTime must be before endTime');
+		}
+	}
+
 	async create(userId: string, dto: CreateEventDto): Promise<Event> {
+		this.validateTimeRange(dto.startTime, dto.endTime);
+
 		let calendarId = dto.calendarId;
 		let calendar;
 
@@ -137,6 +151,13 @@ export class EventService {
 
 	async update(id: string, userId: string, dto: UpdateEventDto): Promise<Event> {
 		const existingEvent = await this.findByIdOrThrow(id, userId);
+
+		// Validate time range when either startTime or endTime is provided
+		const effectiveStart = dto.startTime ?? existingEvent.startTime.toISOString();
+		const effectiveEnd = dto.endTime ?? existingEvent.endTime.toISOString();
+		if (dto.startTime || dto.endTime) {
+			this.validateTimeRange(effectiveStart, effectiveEnd);
+		}
 
 		// If changing calendar, verify user owns the new calendar
 		if (dto.calendarId && dto.calendarId !== existingEvent.calendarId) {

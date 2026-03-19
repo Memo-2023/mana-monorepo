@@ -56,23 +56,11 @@ export class PhotoService {
 			throw new BadRequestException('Contact not found');
 		}
 
-		// Delete old photo if exists
-		if (contact.photoUrl) {
-			try {
-				const oldKey = this.extractKeyFromUrl(contact.photoUrl);
-				if (oldKey) {
-					await this.storage.delete(oldKey);
-				}
-			} catch {
-				// Ignore deletion errors
-			}
-		}
-
 		// Generate unique key for the new photo
 		const filename = `${contactId}.${extension}`;
 		const key = generateUserFileKey(userId, filename);
 
-		// Upload to S3
+		// Upload new photo to S3 first (safe: if this fails, nothing is lost)
 		const contentType = getContentType(filename);
 		await this.storage.upload(key, file.buffer, {
 			contentType,
@@ -88,6 +76,18 @@ export class PhotoService {
 			.update(contacts)
 			.set({ photoUrl, updatedAt: new Date() })
 			.where(eq(contacts.id, contactId));
+
+		// Delete old photo if exists (after successful upload + DB update)
+		if (contact.photoUrl) {
+			try {
+				const oldKey = this.extractKeyFromUrl(contact.photoUrl);
+				if (oldKey) {
+					await this.storage.delete(oldKey);
+				}
+			} catch {
+				// Ignore deletion errors - orphaned old file is harmless
+			}
+		}
 
 		return { photoUrl };
 	}

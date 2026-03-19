@@ -106,6 +106,11 @@ export class TaskService {
 			await this.projectService.findByIdOrThrow(dto.projectId, userId);
 		}
 
+		// Verify parent task belongs to user if provided
+		if (dto.parentTaskId) {
+			await this.findByIdOrThrow(dto.parentTaskId, userId);
+		}
+
 		// Get the highest order value for the project
 		const existingTasks = await this.findAll(userId, { projectId: dto.projectId ?? undefined });
 		const maxOrder = existingTasks.reduce((max, t) => Math.max(max, t.order ?? 0), -1);

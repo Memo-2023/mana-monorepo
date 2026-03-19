@@ -1,4 +1,5 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { eq, and, or } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
 import { DATABASE_CONNECTION } from '../db/database.module';
@@ -19,7 +20,8 @@ export class ShareService {
 	constructor(
 		@Inject(DATABASE_CONNECTION) private db: Database,
 		private calendarService: CalendarService,
-		private emailService: EmailService
+		private emailService: EmailService,
+		private configService: ConfigService
 	) {}
 
 	async findByCalendar(calendarId: string, userId: string): Promise<CalendarShare[]> {
@@ -76,7 +78,7 @@ export class ShareService {
 		// Send invitation email if sharing with specific email
 		if (dto.email && !dto.createLink) {
 			const inviterName = inviterEmail.split('@')[0];
-			const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5179';
+			const baseUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5179');
 			const acceptUrl = `${baseUrl}/shares/${created.id}/accept`;
 
 			try {
@@ -131,7 +133,7 @@ export class ShareService {
 		await this.db.delete(calendarShares).where(eq(calendarShares.id, id));
 	}
 
-	async acceptInvitation(shareId: string, userId: string): Promise<CalendarShare> {
+	async acceptInvitation(shareId: string, userId: string, email: string): Promise<CalendarShare> {
 		const share = await this.findById(shareId);
 		if (!share) {
 			throw new NotFoundException(`Invitation not found`);
@@ -139,6 +141,15 @@ export class ShareService {
 
 		if (share.status !== 'pending') {
 			throw new ForbiddenException('Invitation has already been processed');
+		}
+
+		// Validate that the accepting user matches the invitation target
+		const matchesUserId = share.sharedWithUserId && share.sharedWithUserId === userId;
+		const matchesEmail = share.sharedWithEmail && share.sharedWithEmail === email;
+		if (share.sharedWithUserId || share.sharedWithEmail) {
+			if (!matchesUserId && !matchesEmail) {
+				throw new ForbiddenException('You are not the intended recipient of this invitation');
+			}
 		}
 
 		const [updated] = await this.db

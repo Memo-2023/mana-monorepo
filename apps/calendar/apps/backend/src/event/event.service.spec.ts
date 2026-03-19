@@ -152,7 +152,7 @@ describe('EventService', () => {
 				calendarId: calendar.id,
 				title: 'New Event',
 				startTime: new Date().toISOString(),
-				endTime: new Date().toISOString(),
+				endTime: new Date(Date.now() + 3600000).toISOString(),
 			});
 
 			expect(result).toEqual(newEvent);
@@ -169,7 +169,7 @@ describe('EventService', () => {
 			const result = await service.create(TEST_USER_ID, {
 				title: 'New Event',
 				startTime: new Date().toISOString(),
-				endTime: new Date().toISOString(),
+				endTime: new Date(Date.now() + 3600000).toISOString(),
 			});
 
 			expect(result).toEqual(newEvent);
@@ -188,7 +188,7 @@ describe('EventService', () => {
 				calendarId: calendar.id,
 				title: 'New Event',
 				startTime: new Date().toISOString(),
-				endTime: new Date().toISOString(),
+				endTime: new Date(Date.now() + 3600000).toISOString(),
 				tagIds,
 			});
 

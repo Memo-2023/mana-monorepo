@@ -11,10 +11,11 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { NoteService } from './note.service';
-import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, MaxLength } from 'class-validator';
 
 class CreateNoteDto {
 	@IsString()
+	@MaxLength(10000)
 	content!: string;
 
 	@IsBoolean()
@@ -25,6 +26,7 @@ class CreateNoteDto {
 class UpdateNoteDto {
 	@IsString()
 	@IsOptional()
+	@MaxLength(10000)
 	content?: string;
 
 	@IsBoolean()

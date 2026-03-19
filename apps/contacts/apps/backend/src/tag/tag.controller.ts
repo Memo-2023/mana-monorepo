@@ -8,9 +8,11 @@ import {
 	Param,
 	UseGuards,
 	ParseUUIDPipe,
+	NotFoundException,
 } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { TagService } from './tag.service';
+import { ContactService } from '../contact/contact.service';
 import { IsString, IsOptional, MaxLength } from 'class-validator';
 
 class CreateTagDto {
@@ -39,7 +41,10 @@ class UpdateTagDto {
 @Controller('tags')
 @UseGuards(JwtAuthGuard)
 export class TagController {
-	constructor(private readonly tagService: TagService) {}
+	constructor(
+		private readonly tagService: TagService,
+		private readonly contactService: ContactService
+	) {}
 
 	@Get()
 	async findAll(@CurrentUser() user: CurrentUserData) {
@@ -81,7 +86,12 @@ export class TagController {
 		// Verify tag belongs to user
 		const tag = await this.tagService.findById(tagId, user.userId);
 		if (!tag) {
-			throw new Error('Tag not found');
+			throw new NotFoundException('Tag not found');
+		}
+		// Verify contact belongs to user
+		const contact = await this.contactService.findById(contactId, user.userId);
+		if (!contact) {
+			throw new NotFoundException('Contact not found');
 		}
 		await this.tagService.addTagToContact(contactId, tagId);
 		return { success: true };
@@ -96,7 +106,12 @@ export class TagController {
 		// Verify tag belongs to user
 		const tag = await this.tagService.findById(tagId, user.userId);
 		if (!tag) {
-			throw new Error('Tag not found');
+			throw new NotFoundException('Tag not found');
+		}
+		// Verify contact belongs to user
+		const contact = await this.contactService.findById(contactId, user.userId);
+		if (!contact) {
+			throw new NotFoundException('Contact not found');
 		}
 		await this.tagService.removeTagFromContact(contactId, tagId);
 		return { success: true };
