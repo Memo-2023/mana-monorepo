@@ -7,6 +7,7 @@ import {
 	HeadObjectCommand,
 	type PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type {
 	StorageConfig,
@@ -85,7 +86,41 @@ export class StorageClient {
 	}
 
 	/**
-	 * Download a file from the bucket
+	 * Upload a large file using multipart upload.
+	 * Automatically splits the file into parts and uploads them in parallel.
+	 * Use this for files >100MB or when uploading over unstable connections.
+	 */
+	async uploadMultipart(
+		key: string,
+		body: Buffer | Uint8Array | ReadableStream,
+		options: UploadOptions = {}
+	): Promise<UploadResult> {
+		const upload = new Upload({
+			client: this.client,
+			params: {
+				Bucket: this.bucket.name,
+				Key: key,
+				Body: body,
+				ContentType: options.contentType,
+				CacheControl: options.cacheControl,
+				Metadata: options.metadata,
+				...(options.public ? { ACL: 'public-read' as const } : {}),
+			},
+			queueSize: 4,
+			partSize: 10 * 1024 * 1024, // 10MB parts
+		});
+
+		const result = await upload.done();
+
+		return {
+			key,
+			url: this.getPublicUrl(key),
+			etag: result.ETag,
+		};
+	}
+
+	/**
+	 * Download a file from the bucket (loads entire file into memory)
 	 */
 	async download(key: string): Promise<Buffer> {
 		const command = new GetObjectCommand({
@@ -106,6 +141,24 @@ export class StorageClient {
 			chunks.push(chunk);
 		}
 		return Buffer.concat(chunks);
+	}
+
+	/**
+	 * Download a file as a readable stream (memory-efficient for large files)
+	 */
+	async downloadStream(key: string): Promise<ReadableStream> {
+		const command = new GetObjectCommand({
+			Bucket: this.bucket.name,
+			Key: key,
+		});
+
+		const response = await this.client.send(command);
+
+		if (!response.Body) {
+			throw new Error(`File not found: ${key}`);
+		}
+
+		return response.Body.transformToWebStream();
 	}
 
 	/**
@@ -131,29 +184,46 @@ export class StorageClient {
 			});
 			await this.client.send(command);
 			return true;
-		} catch {
-			return false;
+		} catch (err: unknown) {
+			if (err instanceof Error) {
+				if (err.name === 'NotFound') return false;
+				const metadata = (err as Error & { $metadata?: { httpStatusCode?: number } }).$metadata;
+				if (metadata?.httpStatusCode === 404) return false;
+			}
+			throw err;
 		}
 	}
 
 	/**
-	 * List files in the bucket with optional prefix
+	 * List files in the bucket with optional prefix.
+	 * Automatically paginates through all results if the bucket contains more than maxKeys items.
 	 */
 	async list(prefix?: string, maxKeys = 1000): Promise<FileInfo[]> {
-		const command = new ListObjectsV2Command({
-			Bucket: this.bucket.name,
-			Prefix: prefix,
-			MaxKeys: maxKeys,
-		});
+		const allFiles: FileInfo[] = [];
+		let continuationToken: string | undefined;
 
-		const response = await this.client.send(command);
+		do {
+			const command = new ListObjectsV2Command({
+				Bucket: this.bucket.name,
+				Prefix: prefix,
+				MaxKeys: maxKeys,
+				ContinuationToken: continuationToken,
+			});
 
-		return (response.Contents ?? []).map((item) => ({
-			key: item.Key!,
-			size: item.Size ?? 0,
-			lastModified: item.LastModified ?? new Date(),
-			etag: item.ETag,
-		}));
+			const response = await this.client.send(command);
+
+			const files = (response.Contents ?? []).map((item) => ({
+				key: item.Key ?? '',
+				size: item.Size ?? 0,
+				lastModified: item.LastModified ?? new Date(),
+				etag: item.ETag,
+			}));
+
+			allFiles.push(...files);
+			continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined;
+		} while (continuationToken);
+
+		return allFiles;
 	}
 
 	/**
@@ -194,6 +264,16 @@ export class StorageClient {
 			return undefined;
 		}
 		return `${this.bucket.publicUrl}/${key}`;
+	}
+
+	/**
+	 * Get the CDN URL for a file. Falls back to publicUrl if no CDN is configured.
+	 */
+	getCdnUrl(key: string): string | undefined {
+		if (this.bucket.cdnUrl) {
+			return `${this.bucket.cdnUrl}/${key}`;
+		}
+		return this.getPublicUrl(key);
 	}
 
 	/**

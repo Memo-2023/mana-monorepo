@@ -93,7 +93,10 @@ services:
       mc anonymous set download myminio/picture-storage;
       mc anonymous set download myminio/planta-storage;
       mc anonymous set download myminio/inventory-storage;
-      echo 'Buckets created successfully';
+      mc ilm rule add --expire-days 90 myminio/chat-storage --prefix 'tmp/' 2>/dev/null || true;
+      mc ilm rule add --expire-days 30 myminio/calendar-storage --prefix 'tmp/' 2>/dev/null || true;
+      mc ilm rule add --expire-days 7 myminio/picture-storage --prefix 'tmp/' 2>/dev/null || true;
+      echo 'Buckets and lifecycle rules created successfully';
       exit 0;
       "
     networks:

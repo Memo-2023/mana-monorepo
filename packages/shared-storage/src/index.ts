@@ -3,6 +3,7 @@ export { StorageClient } from './client';
 
 // Factory functions
 export {
+	createStorage,
 	createStorageClient,
 	getStorageConfig,
 	createManaCoreStorage,

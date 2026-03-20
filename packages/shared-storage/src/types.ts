@@ -29,6 +29,11 @@ export interface BucketConfig {
 	name: string;
 	/** Public URL for accessing files (optional, for CDN/public buckets) */
 	publicUrl?: string;
+	/**
+	 * CDN URL prefix for serving files (e.g., https://cdn.mana.how/picture).
+	 * When set, getCdnUrl() returns URLs through the CDN instead of direct S3 access.
+	 */
+	cdnUrl?: string;
 }
 
 /**

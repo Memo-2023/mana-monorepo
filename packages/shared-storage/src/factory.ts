@@ -25,6 +25,17 @@ const MINIO_DEFAULTS: StorageConfig = {
 };
 
 /**
+ * Mapping of bucket keys to their public URL environment variable names
+ */
+const PUBLIC_URL_ENV: Partial<Record<keyof typeof BUCKETS, string>> = {
+	MANACORE: 'MANACORE_STORAGE_PUBLIC_URL',
+	PICTURE: 'PICTURE_STORAGE_PUBLIC_URL',
+	NUTRIPHI: 'NUTRIPHI_S3_PUBLIC_URL',
+	STORAGE: 'STORAGE_S3_PUBLIC_URL',
+	INVENTORY: 'INVENTORY_S3_PUBLIC_URL',
+};
+
+/**
  * Get storage configuration from environment variables
  * Falls back to MinIO defaults in development
  */
@@ -70,107 +81,35 @@ export function createStorageClient(
 }
 
 /**
- * Create a storage client for the Mana Core Auth project (avatars, etc.)
+ * Create a storage client for a project by bucket key.
+ * Automatically resolves the public URL and CDN URL from environment variables.
+ *
+ * @example
+ * const storage = createStorage('PICTURE');
+ * const storage = createStorage('CHAT');
  */
-export function createManaCoreStorage(publicUrl?: string): StorageClient {
+export function createStorage(bucketKey: keyof typeof BUCKETS, publicUrl?: string): StorageClient {
+	const envKey = PUBLIC_URL_ENV[bucketKey];
+	const cdnEnvKey = `${bucketKey}_CDN_URL`;
 	return createStorageClient({
-		name: BUCKETS.MANACORE,
-		publicUrl: publicUrl ?? process.env.MANACORE_STORAGE_PUBLIC_URL,
+		name: BUCKETS[bucketKey],
+		publicUrl: publicUrl ?? (envKey ? process.env[envKey] : undefined),
+		cdnUrl: process.env[cdnEnvKey],
 	});
 }
 
-/**
- * Create a storage client for the Picture project
- */
-export function createPictureStorage(publicUrl?: string): StorageClient {
-	return createStorageClient({
-		name: BUCKETS.PICTURE,
-		publicUrl: publicUrl ?? process.env.PICTURE_STORAGE_PUBLIC_URL,
-	});
-}
+// Convenience aliases for backward compatibility
 
-/**
- * Create a storage client for the Chat project
- */
-export function createChatStorage(): StorageClient {
-	return createStorageClient({ name: BUCKETS.CHAT });
-}
-
-/**
- * Create a storage client for the ManaDeck project
- */
-export function createManaDeckStorage(): StorageClient {
-	return createStorageClient({ name: BUCKETS.MANADECK });
-}
-
-/**
- * Create a storage client for the NutriPhi project
- */
-export function createNutriPhiStorage(publicUrl?: string): StorageClient {
-	return createStorageClient({
-		name: BUCKETS.NUTRIPHI,
-		publicUrl: publicUrl ?? process.env.NUTRIPHI_S3_PUBLIC_URL,
-	});
-}
-
-/**
- * Create a storage client for the Presi project
- */
-export function createPresiStorage(): StorageClient {
-	return createStorageClient({ name: BUCKETS.PRESI });
-}
-
-/**
- * Create a storage client for the Calendar project
- */
-export function createCalendarStorage(): StorageClient {
-	return createStorageClient({ name: BUCKETS.CALENDAR });
-}
-
-/**
- * Create a storage client for the Contacts project
- */
-export function createContactsStorage(): StorageClient {
-	return createStorageClient({ name: BUCKETS.CONTACTS });
-}
-
-/**
- * Create a storage client for the Storage project (cloud drive)
- */
-export function createStorageStorage(publicUrl?: string): StorageClient {
-	return createStorageClient({
-		name: BUCKETS.STORAGE,
-		publicUrl: publicUrl ?? process.env.STORAGE_S3_PUBLIC_URL,
-	});
-}
-
-/**
- * Create a storage client for the Mail project
- */
-export function createMailStorage(): StorageClient {
-	return createStorageClient({ name: BUCKETS.MAIL });
-}
-
-/**
- * Create a storage client for the Inventory project
- */
-export function createInventoryStorage(publicUrl?: string): StorageClient {
-	return createStorageClient({
-		name: BUCKETS.INVENTORY,
-		publicUrl: publicUrl ?? process.env.INVENTORY_S3_PUBLIC_URL,
-	});
-}
-
-/**
- * Create a storage client for the LightWrite project
- */
-export function createLightWriteStorage(): StorageClient {
-	return createStorageClient({ name: BUCKETS.LIGHTWRITE });
-}
-
-/**
- * Create a storage client for the Mukke project
- */
-export function createMukkeStorage(): StorageClient {
-	return createStorageClient({ name: BUCKETS.MUKKE });
-}
+export const createManaCoreStorage = (publicUrl?: string) => createStorage('MANACORE', publicUrl);
+export const createPictureStorage = (publicUrl?: string) => createStorage('PICTURE', publicUrl);
+export const createChatStorage = () => createStorage('CHAT');
+export const createManaDeckStorage = () => createStorage('MANADECK');
+export const createNutriPhiStorage = (publicUrl?: string) => createStorage('NUTRIPHI', publicUrl);
+export const createPresiStorage = () => createStorage('PRESI');
+export const createCalendarStorage = () => createStorage('CALENDAR');
+export const createContactsStorage = () => createStorage('CONTACTS');
+export const createStorageStorage = (publicUrl?: string) => createStorage('STORAGE', publicUrl);
+export const createMailStorage = () => createStorage('MAIL');
+export const createInventoryStorage = (publicUrl?: string) => createStorage('INVENTORY', publicUrl);
+export const createLightWriteStorage = () => createStorage('LIGHTWRITE');
+export const createMukkeStorage = () => createStorage('MUKKE');
