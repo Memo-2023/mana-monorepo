@@ -317,7 +317,7 @@ services:
       PORT: 3031
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/todo
       MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://todo.mana.how,https://mana.how
+      CORS_ORIGINS: https://todo.mana.how,https://mana.how,https://calendar.mana.how,https://contacts.mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       GLITCHTIP_DSN: https://c774433d212c473d9088542a84224488@glitchtip.mana.how/3
     ports:
