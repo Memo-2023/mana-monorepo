@@ -5,7 +5,7 @@
  */
 
 import { nanoid } from 'nanoid';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 /**
  * Mock User Factory

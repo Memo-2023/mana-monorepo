@@ -1,6 +1,28 @@
 import type { StorageHooks } from './hooks';
 
 /**
+ * Minimal interface matching MetricsService.createCounter/createHistogram.
+ * This avoids a hard dependency on @manacore/shared-nestjs-metrics or prom-client.
+ */
+export interface MetricsFactory {
+	createCounter(name: string, help: string, labelNames?: string[]): CounterLike;
+	createHistogram(
+		name: string,
+		help: string,
+		labelNames?: string[],
+		buckets?: number[]
+	): HistogramLike;
+}
+
+interface CounterLike {
+	inc(labels?: Record<string, string | number>, value?: number): void;
+}
+
+interface HistogramLike {
+	observe(labels: Record<string, string | number>, value: number): void;
+}
+
+/**
  * Interface for a metrics collector — decoupled from prom-client so shared-storage
  * stays dependency-free. NestJS backends wire this up with their MetricsService.
  */
@@ -79,4 +101,68 @@ export function attachMetrics(hooks: StorageHooks, collector: StorageMetricsColl
 	];
 
 	return () => unsubs.forEach((unsub) => unsub());
+}
+
+/**
+ * Create a StorageMetricsCollector backed by Prometheus counters/histograms.
+ * Pass your NestJS MetricsService (or anything that matches MetricsFactory).
+ *
+ * @example
+ * // In a NestJS service
+ * import { MetricsService } from '@manacore/shared-nestjs-metrics';
+ * import { createPrometheusCollector, attachMetrics } from '@manacore/shared-storage';
+ *
+ * const storage = createPictureStorage();
+ * const collector = createPrometheusCollector(metricsService);
+ * attachMetrics(storage.hooks, collector);
+ */
+export function createPrometheusCollector(factory: MetricsFactory): StorageMetricsCollector {
+	const uploadsCounter = factory.createCounter(
+		'storage_uploads_total',
+		'Total storage upload operations',
+		['bucket', 'content_type']
+	);
+
+	const uploadErrorsCounter = factory.createCounter(
+		'storage_upload_errors_total',
+		'Total storage upload errors',
+		['bucket']
+	);
+
+	const deletesCounter = factory.createCounter(
+		'storage_deletes_total',
+		'Total storage delete operations',
+		['bucket']
+	);
+
+	const downloadsCounter = factory.createCounter(
+		'storage_downloads_total',
+		'Total storage download operations',
+		['bucket']
+	);
+
+	const uploadSizeHistogram = factory.createHistogram(
+		'storage_upload_size_bytes',
+		'Upload file sizes in bytes',
+		['bucket'],
+		[1024, 10240, 102400, 1048576, 10485760, 104857600] // 1KB, 10KB, 100KB, 1MB, 10MB, 100MB
+	);
+
+	return {
+		incrementUploads(bucket: string, contentType?: string): void {
+			uploadsCounter.inc({ bucket, content_type: contentType ?? 'unknown' });
+		},
+		incrementUploadErrors(bucket: string): void {
+			uploadErrorsCounter.inc({ bucket });
+		},
+		incrementDeletes(bucket: string, count: number): void {
+			deletesCounter.inc({ bucket }, count);
+		},
+		incrementDownloads(bucket: string): void {
+			downloadsCounter.inc({ bucket });
+		},
+		observeUploadSize(bucket: string, sizeBytes: number): void {
+			uploadSizeHistogram.observe({ bucket }, sizeBytes);
+		},
+	};
 }

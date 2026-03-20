@@ -1500,7 +1500,7 @@ export class BetterAuthService {
 		const db = getDb(this.databaseUrl);
 		const { accounts } = await import('../../db/schema/auth.schema');
 		const { eq, and } = await import('drizzle-orm');
-		const bcrypt = await import('bcrypt');
+		const bcrypt = await import('bcryptjs');
 
 		// Get credential account (where password is stored)
 		const [account] = await db
@@ -1560,7 +1560,7 @@ export class BetterAuthService {
 		const db = getDb(this.databaseUrl);
 		const { accounts, users, sessions } = await import('../../db/schema/auth.schema');
 		const { eq, and } = await import('drizzle-orm');
-		const bcrypt = await import('bcrypt');
+		const bcrypt = await import('bcryptjs');
 
 		// Get credential account
 		const [account] = await db

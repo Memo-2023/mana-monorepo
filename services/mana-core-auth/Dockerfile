@@ -2,9 +2,8 @@
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
 FROM node:20-slim AS builder
 
-# Install pnpm and build tools for native modules (bcrypt)
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+# Install pnpm (no build tools needed — bcryptjs is pure JS, DuckDB ships prebuilt binaries)
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 

@@ -34,8 +34,8 @@ export type {
 } from './hooks';
 
 // Metrics
-export { InMemoryMetrics, attachMetrics } from './metrics';
-export type { StorageMetricsCollector } from './metrics';
+export { InMemoryMetrics, attachMetrics, createPrometheusCollector } from './metrics';
+export type { StorageMetricsCollector, MetricsFactory } from './metrics';
 
 // Utilities
 export {

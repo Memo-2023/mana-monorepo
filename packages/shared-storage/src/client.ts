@@ -29,6 +29,39 @@ import type {
 } from './types';
 
 /**
+ * Wraps a ReadableStream to enforce a maximum byte size.
+ * Throws if the stream exceeds the limit mid-transfer.
+ */
+function constrainStream(stream: ReadableStream, maxBytes: number): ReadableStream {
+	const reader = stream.getReader();
+	let bytesRead = 0;
+
+	return new ReadableStream({
+		async pull(controller) {
+			const { done, value } = await reader.read();
+			if (done) {
+				controller.close();
+				return;
+			}
+			bytesRead += value.byteLength;
+			if (bytesRead > maxBytes) {
+				controller.error(
+					new Error(
+						`Stream size ${bytesRead} bytes exceeds maximum allowed ${maxBytes} bytes`
+					)
+				);
+				reader.cancel();
+				return;
+			}
+			controller.enqueue(value);
+		},
+		cancel(reason) {
+			reader.cancel(reason);
+		},
+	});
+}
+
+/**
  * S3-compatible storage client for MinIO (local) and Hetzner Object Storage (production)
  */
 export class StorageClient {
@@ -74,12 +107,15 @@ export class StorageClient {
 		body: Buffer | Uint8Array | string | ReadableStream,
 		options: UploadOptions = {}
 	): Promise<UploadResult> {
-		if (options.maxSizeBytes && typeof body !== 'string' && !(body instanceof ReadableStream)) {
-			const size = body.byteLength;
-			if (size > options.maxSizeBytes) {
-				throw new Error(
-					`File size ${size} bytes exceeds maximum allowed ${options.maxSizeBytes} bytes`
-				);
+		if (options.maxSizeBytes) {
+			if (typeof body !== 'string' && !(body instanceof ReadableStream)) {
+				if (body.byteLength > options.maxSizeBytes) {
+					throw new Error(
+						`File size ${body.byteLength} bytes exceeds maximum allowed ${options.maxSizeBytes} bytes`
+					);
+				}
+			} else if (body instanceof ReadableStream) {
+				body = constrainStream(body, options.maxSizeBytes);
 			}
 		}
 
@@ -130,12 +166,15 @@ export class StorageClient {
 		body: Buffer | Uint8Array | ReadableStream,
 		options: UploadOptions = {}
 	): Promise<UploadResult> {
-		if (options.maxSizeBytes && !(body instanceof ReadableStream)) {
-			const size = body.byteLength;
-			if (size > options.maxSizeBytes) {
-				throw new Error(
-					`File size ${size} bytes exceeds maximum allowed ${options.maxSizeBytes} bytes`
-				);
+		if (options.maxSizeBytes) {
+			if (!(body instanceof ReadableStream)) {
+				if (body.byteLength > options.maxSizeBytes) {
+					throw new Error(
+						`File size ${body.byteLength} bytes exceeds maximum allowed ${options.maxSizeBytes} bytes`
+					);
+				}
+			} else {
+				body = constrainStream(body, options.maxSizeBytes);
 			}
 		}
 
@@ -386,8 +425,16 @@ export class StorageClient {
 	}
 
 	/**
+	 * Move a file within the same bucket (copy + delete source).
+	 */
+	async move(sourceKey: string, destKey: string): Promise<UploadResult> {
+		const result = await this.copy(sourceKey, destKey);
+		await this.delete(sourceKey);
+		return result;
+	}
+
+	/**
 	 * Copy a file within the same bucket.
-	 * For move operations, call copy() then delete() the source.
 	 */
 	async copy(sourceKey: string, destKey: string): Promise<UploadResult> {
 		const command = new CopyObjectCommand({
