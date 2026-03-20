@@ -20,7 +20,7 @@ COPY packages/shared-storage ./packages/shared-storage
 # Copy mana-core-auth
 COPY services/mana-core-auth ./services/mana-core-auth
 
-# Install dependencies (without ignore-scripts to build native modules like bcrypt)
+# Install all dependencies (without ignore-scripts to build native modules like bcrypt)
 RUN pnpm install --no-frozen-lockfile --filter mana-core-auth... --filter @manacore/shared-storage
 
 # Build shared-storage first
@@ -31,8 +31,15 @@ RUN pnpm build || true
 WORKDIR /app/services/mana-core-auth
 RUN pnpm build
 
-# Prune to production dependencies only
-RUN pnpm prune --prod
+# Remove devDependencies but keep native modules intact
+WORKDIR /app
+RUN pnpm prune --prod --no-optional 2>/dev/null || true \
+    && find node_modules -name '*.ts' -not -name '*.d.ts' -delete 2>/dev/null || true \
+    && find node_modules -name '*.map' -delete 2>/dev/null || true \
+    && find node_modules -type d -name 'test' -prune -exec rm -rf {} + 2>/dev/null || true \
+    && find node_modules -type d -name 'tests' -prune -exec rm -rf {} + 2>/dev/null || true \
+    && find node_modules -type d -name '__tests__' -prune -exec rm -rf {} + 2>/dev/null || true \
+    && find node_modules -type d -name 'docs' -prune -exec rm -rf {} + 2>/dev/null || true
 
 # Production stage
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
