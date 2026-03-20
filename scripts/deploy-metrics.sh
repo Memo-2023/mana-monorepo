@@ -29,14 +29,19 @@ deploy_timer_elapsed() {
 # Usage: get_image_size_mb <compose-service-name>
 get_image_size_mb() {
   local service="$1"
-  local image_id size_bytes
-  # Get the image ID from the running container
-  image_id=$(docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" images "$service" --format '{{.ID}}' 2>/dev/null | head -1)
-  if [ -z "$image_id" ]; then
-    echo "0"
-    return
+  local size_bytes
+  # Try direct image name (compose services use <service-name>:local)
+  size_bytes=$(docker image inspect "${service}:local" --format='{{.Size}}' 2>/dev/null || echo "")
+  # Fallback: try via running container
+  if [ -z "$size_bytes" ]; then
+    local container_image
+    container_image=$(docker inspect "$(docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps -q "$service" 2>/dev/null)" --format='{{.Config.Image}}' 2>/dev/null || echo "")
+    if [ -n "$container_image" ]; then
+      size_bytes=$(docker image inspect "$container_image" --format='{{.Size}}' 2>/dev/null || echo "0")
+    else
+      size_bytes="0"
+    fi
   fi
-  size_bytes=$(docker image inspect "$image_id" --format='{{.Size}}' 2>/dev/null || echo "0")
   echo "scale=2; $size_bytes / 1048576" | bc 2>/dev/null || echo "0"
 }
 
