@@ -12,6 +12,7 @@
 	import AttendeeSelector from './AttendeeSelector.svelte';
 	import ResponsiblePersonSelector from './ResponsiblePersonSelector.svelte';
 	import RecurrenceSelector from './RecurrenceSelector.svelte';
+	import ReminderSelector from './ReminderSelector.svelte';
 	import type {
 		CalendarEvent,
 		CreateEventInput,
@@ -24,11 +25,17 @@
 	import { format, addMinutes } from 'date-fns';
 	import { toDate } from '$lib/utils/eventDateHelpers';
 
+	interface ReminderDraft {
+		minutesBefore: number;
+		notifyPush: boolean;
+		notifyEmail: boolean;
+	}
+
 	interface Props {
 		mode: 'create' | 'edit';
 		event?: CalendarEvent;
 		initialStartTime?: Date | null;
-		onSave: (data: CreateEventInput | UpdateEventInput) => void;
+		onSave: (data: CreateEventInput | UpdateEventInput, reminderDrafts?: ReminderDraft[]) => void;
 		onCancel: () => void;
 	}
 
@@ -67,6 +74,15 @@
 
 	// Attendees state
 	let attendees = $state<EventAttendee[]>(event?.metadata?.attendees || []);
+
+	// Reminder drafts (for create mode)
+	let reminderDrafts = $state<ReminderDraft[]>([
+		{
+			minutesBefore: settingsStore.defaultReminder,
+			notifyPush: true,
+			notifyEmail: false,
+		},
+	]);
 
 	// Recurrence state
 	let recurrenceRule = $state<string | null>(event?.recurrenceRule || null);
@@ -238,7 +254,7 @@
 		};
 
 		submitting = true;
-		onSave(data);
+		onSave(data, mode === 'create' ? reminderDrafts : undefined);
 	}
 </script>
 
@@ -350,6 +366,12 @@
 			recurrenceRule = rule;
 			recurrenceEndDate = endDt;
 		}}
+	/>
+
+	<!-- Erinnerungen -->
+	<ReminderSelector
+		eventId={mode === 'edit' ? (event?.id ?? null) : null}
+		onDraftsChange={(drafts) => (reminderDrafts = drafts)}
 	/>
 
 	<div class="flex flex-col gap-2">

@@ -4,10 +4,12 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import EventForm from './EventForm.svelte';
 	import RecurrenceEditDialog from './RecurrenceEditDialog.svelte';
+	import ReminderSelector from './ReminderSelector.svelte';
 	import { TagBadge, toastStore as toast } from '@manacore/shared-ui';
-	import type { CalendarEvent, UpdateEventInput } from '@calendar/shared';
+	import type { CalendarEvent, UpdateEventInput, Reminder } from '@calendar/shared';
 	import { describeRecurrence, parseRRule } from '@calendar/shared';
 	import * as api from '$lib/api/events';
+	import * as reminderApi from '$lib/api/reminders';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';
@@ -25,6 +27,7 @@
 	let isEditing = $state(false);
 	let showRecurrenceDialog = $state(false);
 	let recurrenceDialogMode = $state<'edit' | 'delete'>('delete');
+	let reminders = $state<Reminder[]>([]);
 
 	// Load event data
 	$effect(() => {
@@ -43,6 +46,12 @@
 
 		event = result.data;
 		loading = false;
+
+		// Load reminders for this event
+		const reminderResult = await reminderApi.getReminders(eventId);
+		if (reminderResult.data) {
+			reminders = Array.isArray(reminderResult.data) ? reminderResult.data : [];
+		}
 	}
 
 	async function handleSave(data: UpdateEventInput) {
@@ -283,6 +292,32 @@
 								</div>
 							</div>
 						{/if}
+
+						<!-- Erinnerungen -->
+						<div class="detail-row">
+							<span class="detail-icon">
+								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+									/>
+								</svg>
+							</span>
+							<div class="detail-content" style="flex: 1;">
+								<ReminderSelector
+									eventId={event.id}
+									{reminders}
+									onRemindersChange={async () => {
+										const result = await reminderApi.getReminders(eventId);
+										if (result.data) {
+											reminders = Array.isArray(result.data) ? result.data : [];
+										}
+									}}
+								/>
+							</div>
+						</div>
 
 						<!-- Ort -->
 						{#if event.location || event.metadata?.locationDetails}
