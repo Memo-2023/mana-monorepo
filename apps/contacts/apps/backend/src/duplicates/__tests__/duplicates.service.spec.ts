@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { DuplicatesService } from '../duplicates.service';
+import { PhotoService } from '../../photo/photo.service';
 import { DATABASE_CONNECTION } from '../../db/database.module';
 
 describe('DuplicatesService', () => {
@@ -109,6 +110,10 @@ describe('DuplicatesService', () => {
 				{
 					provide: DATABASE_CONNECTION,
 					useValue: mockDb,
+				},
+				{
+					provide: PhotoService,
+					useValue: { deletePhotoByUrl: jest.fn() },
 				},
 			],
 		}).compile();

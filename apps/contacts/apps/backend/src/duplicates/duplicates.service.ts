@@ -4,6 +4,7 @@ import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { contacts } from '../db/schema';
 import type { Contact } from '../db/schema';
+import { PhotoService } from '../photo/photo.service';
 
 export interface DuplicateGroup {
 	id: string;
@@ -19,7 +20,10 @@ export interface MergeResult {
 
 @Injectable()
 export class DuplicatesService {
-	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
+	constructor(
+		@Inject(DATABASE_CONNECTION) private db: Database,
+		private readonly photoService: PhotoService
+	) {}
 
 	/** Maximum number of duplicate groups to return per match type */
 	private static readonly MAX_GROUPS_PER_TYPE = 50;
@@ -321,6 +325,13 @@ export class DuplicatesService {
 			.set({ ...mergedData, updatedAt: new Date() })
 			.where(eq(contacts.id, primaryId))
 			.returning();
+
+		// Clean up photos of merged contacts (skip if photo was adopted by primary)
+		for (const mergedContact of contactsToMerge) {
+			if (mergedContact.photoUrl && mergedContact.photoUrl !== updatedContact.photoUrl) {
+				await this.photoService.deletePhotoByUrl(mergedContact.photoUrl);
+			}
+		}
 
 		// Delete merged contacts
 		await this.db
