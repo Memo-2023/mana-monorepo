@@ -4,6 +4,7 @@ import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { contacts, contactToTags } from '../db/schema';
 import type { Contact, NewContact } from '../db/schema';
+import { PhotoService } from '../photo/photo.service';
 
 export interface ContactBirthdaySummary {
 	id: string;
@@ -25,7 +26,10 @@ export interface ContactFilters {
 
 @Injectable()
 export class ContactService {
-	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
+	constructor(
+		@Inject(DATABASE_CONNECTION) private db: Database,
+		private readonly photoService: PhotoService
+	) {}
 
 	async findByUserId(userId: string, filters: ContactFilters = {}): Promise<Contact[]> {
 		const { search, isFavorite, isArchived = false, tagId, limit = 50, offset = 0 } = filters;
@@ -139,6 +143,9 @@ export class ContactService {
 		if (!existing) {
 			throw new NotFoundException('Contact not found');
 		}
+
+		// Clean up photo from S3 before deleting the DB record
+		await this.photoService.deletePhotoByUrl(existing.photoUrl);
 
 		await this.db.delete(contacts).where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
 	}

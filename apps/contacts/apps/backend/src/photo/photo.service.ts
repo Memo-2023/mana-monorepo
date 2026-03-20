@@ -1,4 +1,4 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, Logger } from '@nestjs/common';
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
@@ -7,20 +7,28 @@ import {
 	createContactsStorage,
 	generateUserFileKey,
 	getContentType,
-	validateFileSize,
 	validateFileExtension,
 	IMAGE_EXTENSIONS,
-	getStorageConfig,
-	BUCKETS,
+	type StorageClient,
 } from '@manacore/shared-storage';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 @Injectable()
 export class PhotoService {
-	private storage = createContactsStorage();
+	private readonly logger = new Logger(PhotoService.name);
+	private storage: StorageClient;
 
-	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {}
+	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {
+		this.storage = createContactsStorage();
+
+		this.storage.hooks.on('upload', ({ key, sizeBytes, contentType }) => {
+			this.logger.debug(`Uploaded photo ${key} (${sizeBytes} bytes, ${contentType})`);
+		});
+		this.storage.hooks.on('upload:error', ({ key, error }) => {
+			this.logger.error(`Failed to upload photo ${key}: ${error.message}`);
+		});
+	}
 
 	/**
 	 * Upload a photo for a contact
@@ -30,21 +38,13 @@ export class PhotoService {
 		userId: string,
 		file: Express.Multer.File
 	): Promise<{ photoUrl: string }> {
-		// Validate file
 		if (!file) {
 			throw new BadRequestException('No file provided');
 		}
 
-		if (!validateFileSize(file.size, MAX_FILE_SIZE)) {
-			throw new BadRequestException(`File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`);
-		}
-
-		// validateFileExtension expects a filename, not just the extension
 		if (!validateFileExtension(file.originalname, IMAGE_EXTENSIONS)) {
 			throw new BadRequestException(`Invalid file type. Allowed: ${IMAGE_EXTENSIONS.join(', ')}`);
 		}
-
-		const extension = file.originalname.split('.').pop()?.toLowerCase() || '';
 
 		// Verify contact belongs to user
 		const [contact] = await this.db
@@ -57,19 +57,17 @@ export class PhotoService {
 		}
 
 		// Generate unique key for the new photo
-		const filename = `${contactId}.${extension}`;
-		const key = generateUserFileKey(userId, filename);
+		const key = generateUserFileKey(userId, file.originalname, 'photos');
 
-		// Upload new photo to S3 first (safe: if this fails, nothing is lost)
-		const contentType = getContentType(filename);
-		await this.storage.upload(key, file.buffer, {
-			contentType,
+		// Upload with size enforcement and cache headers
+		const result = await this.storage.upload(key, file.buffer, {
+			contentType: getContentType(file.originalname),
 			public: true,
+			maxSizeBytes: MAX_FILE_SIZE,
+			cacheControl: 'public, max-age=31536000, immutable',
 		});
 
-		// Generate the URL from S3 endpoint configuration
-		const { endpoint } = getStorageConfig();
-		const photoUrl = `${endpoint}/${BUCKETS.CONTACTS}/${key}`;
+		const photoUrl = result.url ?? this.storage.getPublicUrl(key) ?? '';
 
 		// Update contact with photo URL
 		await this.db
@@ -79,14 +77,7 @@ export class PhotoService {
 
 		// Delete old photo if exists (after successful upload + DB update)
 		if (contact.photoUrl) {
-			try {
-				const oldKey = this.extractKeyFromUrl(contact.photoUrl);
-				if (oldKey) {
-					await this.storage.delete(oldKey);
-				}
-			} catch {
-				// Ignore deletion errors - orphaned old file is harmless
-			}
+			await this.deleteStorageFile(contact.photoUrl);
 		}
 
 		return { photoUrl };
@@ -96,7 +87,6 @@ export class PhotoService {
 	 * Delete photo for a contact
 	 */
 	async deletePhoto(contactId: string, userId: string): Promise<void> {
-		// Get contact
 		const [contact] = await this.db
 			.select()
 			.from(contacts)
@@ -107,28 +97,47 @@ export class PhotoService {
 		}
 
 		if (!contact.photoUrl) {
-			return; // No photo to delete
+			return;
 		}
 
-		// Delete from S3
-		try {
-			const key = this.extractKeyFromUrl(contact.photoUrl);
-			if (key) {
-				await this.storage.delete(key);
-			}
-		} catch {
-			// Ignore deletion errors
-		}
+		await this.deleteStorageFile(contact.photoUrl);
 
-		// Update contact to remove photo URL
 		await this.db
 			.update(contacts)
 			.set({ photoUrl: null, updatedAt: new Date() })
 			.where(eq(contacts.id, contactId));
 	}
 
+	/**
+	 * Delete photo from S3 when a contact is deleted.
+	 * Called by ContactService.delete() to avoid orphaned files.
+	 */
+	async deletePhotoByUrl(photoUrl: string | null): Promise<void> {
+		if (!photoUrl) return;
+		await this.deleteStorageFile(photoUrl);
+	}
+
+	/**
+	 * Delete all photos for a user (account deletion).
+	 */
+	async deleteAllUserPhotos(userId: string): Promise<number> {
+		return this.storage.deleteByPrefix(`users/${userId}/`);
+	}
+
+	private async deleteStorageFile(photoUrl: string): Promise<void> {
+		try {
+			const key = this.extractKeyFromUrl(photoUrl);
+			if (key) {
+				await this.storage.delete(key);
+			}
+		} catch (err) {
+			this.logger.warn(
+				`Failed to delete photo from storage: ${photoUrl} — ${err instanceof Error ? err.message : err}`
+			);
+		}
+	}
+
 	private extractKeyFromUrl(url: string): string | null {
-		// Extract key from URLs like {endpoint}/contacts-storage/users/xxx/file.jpg
 		const match = url.match(/contacts-storage\/(.+)$/);
 		return match ? match[1] : null;
 	}
