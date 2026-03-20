@@ -12,6 +12,9 @@ import {
 	type StorageClient,
 } from '@manacore/shared-storage';
 
+const MAX_AUDIO_SIZE = 500 * 1024 * 1024; // 500MB
+const MAX_COVER_SIZE = 10 * 1024 * 1024; // 10MB
+
 @Injectable()
 export class SongService {
 	private readonly logger = new Logger(SongService.name);
@@ -19,6 +22,13 @@ export class SongService {
 
 	constructor(@Inject(DATABASE_CONNECTION) private db: Database) {
 		this.storage = createMukkeStorage();
+
+		this.storage.hooks.on('upload', ({ key, sizeBytes, contentType }) => {
+			this.logger.debug(`Uploaded ${key} (${sizeBytes} bytes, ${contentType})`);
+		});
+		this.storage.hooks.on('upload:error', ({ key, error }) => {
+			this.logger.error(`Upload failed for ${key}: ${error.message}`);
+		});
 	}
 
 	async createUploadUrl(
@@ -26,7 +36,7 @@ export class SongService {
 		filename: string,
 		fileLastModified?: number
 	): Promise<{ song: Song; uploadUrl: string }> {
-		const key = generateUserFileKey(userId, filename);
+		const key = generateUserFileKey(userId, filename, 'songs');
 		const contentType = getContentType(filename);
 
 		if (!contentType.startsWith('audio/') && !['application/octet-stream'].includes(contentType)) {
@@ -51,9 +61,7 @@ export class SongService {
 			.values(values as typeof songs.$inferInsert)
 			.returning();
 
-		const uploadUrl = await this.storage.getUploadUrl(key, {
-			expiresIn: 3600,
-		});
+		const uploadUrl = await this.storage.getUploadUrl(key, { expiresIn: 3600 });
 
 		return { song, uploadUrl };
 	}
@@ -63,18 +71,16 @@ export class SongService {
 		userId: string,
 		filename: string
 	): Promise<{ uploadUrl: string }> {
-		const song = await this.findByIdOrThrow(songId, userId);
+		await this.findByIdOrThrow(songId, userId);
 
-		const key = generateUserFileKey(userId, `covers/${filename}`);
+		const key = generateUserFileKey(userId, filename, 'covers');
 
 		await this.db
 			.update(songs)
 			.set({ coverArtPath: key, updatedAt: new Date() })
 			.where(eq(songs.id, songId));
 
-		const uploadUrl = await this.storage.getUploadUrl(key, {
-			expiresIn: 3600,
-		});
+		const uploadUrl = await this.storage.getUploadUrl(key, { expiresIn: 3600 });
 
 		return { uploadUrl };
 	}
@@ -183,20 +189,14 @@ export class SongService {
 	async delete(id: string, userId: string): Promise<void> {
 		const song = await this.findByIdOrThrow(id, userId);
 
-		// Delete audio from storage
-		try {
-			await this.storage.delete(song.storagePath);
-		} catch {
-			// Ignore storage errors, continue with DB deletion
-		}
+		// Batch delete audio + cover in one call
+		const keysToDelete = [song.storagePath];
+		if (song.coverArtPath) keysToDelete.push(song.coverArtPath);
 
-		// Delete cover art from storage if exists
-		if (song.coverArtPath) {
-			try {
-				await this.storage.delete(song.coverArtPath);
-			} catch {
-				// Ignore storage errors
-			}
+		try {
+			await this.storage.deleteMany(keysToDelete);
+		} catch (err) {
+			this.logger.warn(`Failed to delete storage files for song ${id}: ${err}`);
 		}
 
 		await this.db.delete(songs).where(and(eq(songs.id, id), eq(songs.userId, userId)));
@@ -233,10 +233,12 @@ export class SongService {
 		if (picture) {
 			try {
 				const ext = picture.format.includes('png') ? 'png' : 'jpg';
-				const coverKey = generateUserFileKey(userId, `covers/${id}.${ext}`);
+				const coverKey = generateUserFileKey(userId, `${id}.${ext}`, 'covers');
 				await this.storage.upload(coverKey, Buffer.from(picture.data), {
 					contentType: picture.format,
 					public: true,
+					maxSizeBytes: MAX_COVER_SIZE,
+					cacheControl: 'public, max-age=31536000, immutable',
 				});
 				updateData.coverArtPath = coverKey;
 			} catch (e) {
@@ -297,6 +299,7 @@ export class SongService {
 
 		await this.storage.upload(song.storagePath, taggedBuffer as Buffer, {
 			contentType: 'audio/mpeg',
+			maxSizeBytes: MAX_AUDIO_SIZE,
 		});
 	}
 
@@ -304,6 +307,13 @@ export class SongService {
 		const song = await this.findByIdOrThrow(id, userId);
 		if (!song.coverArtPath) return null;
 		return this.storage.getDownloadUrl(song.coverArtPath, { expiresIn: 3600 });
+	}
+
+	/**
+	 * Delete all storage files for a user (account deletion).
+	 */
+	async deleteAllUserFiles(userId: string): Promise<number> {
+		return this.storage.deleteByPrefix(`users/${userId}/`);
 	}
 
 	private getSortColumn(field: string) {

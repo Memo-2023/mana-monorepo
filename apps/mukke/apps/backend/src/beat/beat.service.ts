@@ -24,6 +24,10 @@ export class BeatService {
 		private lyricsService: LyricsService
 	) {
 		this.storage = createMukkeStorage();
+
+		this.storage.hooks.on('upload:error', ({ key, error }) => {
+			this.logger.error(`Upload failed for ${key}: ${error.message}`);
+		});
 	}
 
 	async findByProjectId(projectId: string): Promise<Beat | null> {
@@ -67,7 +71,7 @@ export class BeatService {
 			throw new BadRequestException('Beat already exists for this project. Delete it first.');
 		}
 
-		const key = generateUserFileKey(userId, filename);
+		const key = generateUserFileKey(userId, filename, 'beats');
 		const contentType = getContentType(filename);
 
 		if (!contentType.startsWith('audio/') && !['application/octet-stream'].includes(contentType)) {
@@ -85,9 +89,7 @@ export class BeatService {
 			.returning();
 
 		// Generate presigned upload URL
-		const uploadUrl = await this.storage.getUploadUrl(key, {
-			expiresIn: 3600,
-		});
+		const uploadUrl = await this.storage.getUploadUrl(key, { expiresIn: 3600 });
 
 		return { beat, uploadUrl };
 	}
@@ -120,11 +122,10 @@ export class BeatService {
 		const beat = await this.findByIdOrThrow(id);
 		await this.verifyProjectOwnership(beat.projectId, userId);
 
-		// Delete from storage
 		try {
 			await this.storage.delete(beat.storagePath);
-		} catch {
-			// Ignore storage errors, continue with DB deletion
+		} catch (err) {
+			this.logger.warn(`Failed to delete beat file ${beat.storagePath}: ${err}`);
 		}
 
 		// Delete from database (markers will be cascade deleted)
@@ -189,16 +190,10 @@ export class BeatService {
 
 	// ==================== STT Transcription ====================
 
-	/**
-	 * Check if STT service is available
-	 */
 	async isSttAvailable(): Promise<boolean> {
 		return this.sttService.isAvailable();
 	}
 
-	/**
-	 * Transcribe beat audio and save lyrics to the project
-	 */
 	async transcribeBeat(
 		beatId: string,
 		userId: string
@@ -252,7 +247,6 @@ export class BeatService {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			this.logger.error(`Transcription failed for beat ${beatId}: ${errorMessage}`);
 
-			// Update beat status to failed
 			await this.db
 				.update(beats)
 				.set({
