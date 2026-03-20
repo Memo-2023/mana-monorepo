@@ -16,7 +16,7 @@ auth.mana.how {
 # ManaCore Dashboard (Main)
 # ============================================
 mana.how {
-    reverse_proxy localhost:5173
+    reverse_proxy localhost:5000
 }
 
 www.mana.how {
@@ -27,44 +27,44 @@ www.mana.how {
 # Chat App
 # ============================================
 chat.mana.how {
-    reverse_proxy localhost:3000
+    reverse_proxy localhost:5010
 }
 
 chat-api.mana.how {
-    reverse_proxy localhost:3002
+    reverse_proxy localhost:3030
 }
 
 # ============================================
 # Todo App
 # ============================================
 todo.mana.how {
-    reverse_proxy localhost:5188
+    reverse_proxy localhost:5011
 }
 
 todo-api.mana.how {
-    reverse_proxy localhost:3018
+    reverse_proxy localhost:3031
 }
 
 # ============================================
 # Calendar App
 # ============================================
 calendar.mana.how {
-    reverse_proxy localhost:5186
+    reverse_proxy localhost:5012
 }
 
 calendar-api.mana.how {
-    reverse_proxy localhost:3016
+    reverse_proxy localhost:3032
 }
 
 # ============================================
 # Clock App
 # ============================================
 clock.mana.how {
-    reverse_proxy localhost:5187
+    reverse_proxy localhost:5013
 }
 
 clock-api.mana.how {
-    reverse_proxy localhost:3017
+    reverse_proxy localhost:3033
 }
 
 clock-bot.mana.how {
@@ -75,11 +75,11 @@ clock-bot.mana.how {
 # Contacts App
 # ============================================
 contacts.mana.how {
-    reverse_proxy localhost:5184
+    reverse_proxy localhost:5014
 }
 
 contacts-api.mana.how {
-    reverse_proxy localhost:3015
+    reverse_proxy localhost:3034
 }
 
 # ============================================
@@ -115,9 +115,9 @@ playground.mana.how {
 # Monitoring & Analytics
 # ============================================
 grafana.mana.how {
-    reverse_proxy localhost:3100
+    reverse_proxy localhost:8000
 }
 
 stats.mana.how {
-    reverse_proxy localhost:3200
+    reverse_proxy localhost:8010
 }
