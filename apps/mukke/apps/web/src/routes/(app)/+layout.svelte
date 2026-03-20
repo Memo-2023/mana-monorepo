@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { PillNavigation } from '@manacore/shared-ui';
+	import { PillNavigation, DevBuildBadge } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
@@ -166,6 +166,7 @@
 			<MiniPlayer />
 			<FullPlayer />
 			<QueuePanel />
+			<DevBuildBadge commitHash={__BUILD_HASH__} buildTime={__BUILD_TIME__} />
 		</div>
 	</SplitPaneContainer>
 {/if}

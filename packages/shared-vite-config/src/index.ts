@@ -3,6 +3,7 @@
  * Provides consistent SSR and optimization settings.
  */
 
+import { execSync } from 'child_process';
 import type { UserConfig, UserConfigExport } from 'vite';
 
 /**
@@ -33,6 +34,24 @@ export const MANACORE_SHARED_PACKAGES = [
 	'@manacore/shared-help-content',
 	'@manacore/shared-help-ui',
 ] as const;
+
+/**
+ * Get build-time defines for version tracking.
+ * Injects __BUILD_HASH__ and __BUILD_TIME__ as compile-time constants.
+ */
+export function getBuildDefines(): Record<string, string> {
+	let commitHash = 'dev';
+	try {
+		commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+	} catch {
+		// fallback if not in a git repo
+	}
+	const buildTime = new Date().toISOString();
+	return {
+		__BUILD_HASH__: JSON.stringify(commitHash),
+		__BUILD_TIME__: JSON.stringify(buildTime),
+	};
+}
 
 export interface ViteConfigOptions {
 	/** Server port */
