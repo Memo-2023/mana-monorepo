@@ -6,161 +6,255 @@ S3-compatible object storage client for the Manacore monorepo. Uses MinIO for lo
 
 ### Local Development
 
-1. Start MinIO with Docker:
-
 ```bash
-pnpm docker:up
+pnpm docker:up          # Start MinIO + Postgres + Redis
+pnpm docker:up          # MinIO Console: http://localhost:9001 (minioadmin/minioadmin)
 ```
 
-2. Access MinIO Console at http://localhost:9001
-   - Username: `minioadmin`
-   - Password: `minioadmin`
+### Buckets
 
-### Pre-created Buckets
-
-The following buckets are automatically created:
+Each app gets its own isolated bucket, created automatically by `minio-init`:
 
 | Bucket | Project | Purpose |
 |--------|---------|---------|
-| `picture-storage` | Picture | Generated AI images |
+| `manacore-storage` | ManaCore | Avatars, auth assets |
+| `picture-storage` | Picture | AI-generated images |
 | `chat-storage` | Chat | User file uploads |
 | `manadeck-storage` | ManaDeck | Card/deck assets |
-| `nutriphi-storage` | NutriPhi | Meal photos |
 | `presi-storage` | Presi | Presentation slides |
 | `calendar-storage` | Calendar | Calendar attachments |
 | `contacts-storage` | Contacts | Contact avatars/files |
 | `storage-storage` | Storage | Cloud drive files |
+| `mail-storage` | Mail | Email attachments |
+| `inventory-storage` | Inventory | Product photos |
+| `mukke-storage` | Mukke | Music tracks, beats, covers |
+| `planta-storage` | Planta | Plant photos |
+| `projectdoc-storage` | ProjectDoc | Document files |
 
 ## Usage
 
-### Basic Usage
+### Basic Operations
 
 ```typescript
 import { createPictureStorage, generateUserFileKey, getContentType } from '@manacore/shared-storage';
 
-// Create client for Picture project
 const storage = createPictureStorage();
 
-// Upload a file
+// Upload
 const key = generateUserFileKey('user-123', 'avatar.png');
 const result = await storage.upload(key, imageBuffer, {
   contentType: getContentType('avatar.png'),
   public: true,
+  maxSizeBytes: 10 * 1024 * 1024, // 10MB limit (works with buffers AND streams)
 });
 
-console.log(result.url); // http://localhost:9000/picture-storage/users/user-123/uuid.png
-
-// Download a file
+// Download
 const buffer = await storage.download(key);
+const stream = await storage.downloadStream(key); // Memory-efficient for large files
 
-// Delete a file
+// Delete
 await storage.delete(key);
+await storage.deleteMany(['a.png', 'b.png', 'c.png']); // Bulk delete (auto-batches at 1000)
+await storage.deleteByPrefix('users/user-123/');         // Delete all user files
 
-// List files
+// Copy & Move
+const copied = await storage.copy('old/file.png', 'new/file.png');
+const moved = await storage.move('src/file.png', 'dst/file.png'); // copy + delete
+
+// Metadata (without downloading)
+const meta = await storage.getMetadata(key);
+// => { contentType: 'image/png', size: 4096, lastModified: Date, etag: '...', metadata: {} }
+
+// Check existence
+const exists = await storage.exists(key);
+
+// List files (auto-paginates)
 const files = await storage.list('users/user-123/');
 
-// Generate presigned URLs
+// Presigned URLs
 const uploadUrl = await storage.getUploadUrl('temp/upload.png', { expiresIn: 3600 });
-const downloadUrl = await storage.getDownloadUrl(key, { expiresIn: 3600 });
+const downloadUrl = await storage.getDownloadUrl(key);
+
+// Public/CDN URLs
+const publicUrl = storage.getPublicUrl(key);
+const cdnUrl = storage.getCdnUrl(key); // Falls back to publicUrl if no CDN configured
 ```
 
-### Custom Configuration
+### Generic Factory
 
 ```typescript
-import { createStorageClient, BUCKETS } from '@manacore/shared-storage';
+import { createStorage } from '@manacore/shared-storage';
 
-// Override default config
-const storage = createStorageClient(BUCKETS.PICTURE, {
-  endpoint: 'https://fsn1.your-objectstorage.com',
-  region: 'fsn1',
-  accessKeyId: process.env.HETZNER_ACCESS_KEY,
-  secretAccessKey: process.env.HETZNER_SECRET_KEY,
-  forcePathStyle: false,
+// Instead of app-specific factories:
+const storage = createStorage('PICTURE');
+const storage = createStorage('CHAT');
+const storage = createStorage('MUKKE');
+```
+
+App-specific aliases still work: `createPictureStorage()`, `createChatStorage()`, etc.
+
+### Multipart Upload (Server-Side)
+
+For large files uploaded through the backend:
+
+```typescript
+const result = await storage.uploadMultipart('video.mp4', largeBuffer, {
+  contentType: 'video/mp4',
+  maxSizeBytes: 500 * 1024 * 1024, // 500MB limit
 });
 ```
 
-### Available Factory Functions
+### Presigned Multipart Upload (Browser Direct-Upload)
+
+Skip the backend — browser uploads directly to S3:
 
 ```typescript
-import {
-  createPictureStorage,
-  createChatStorage,
-  createManaDeckStorage,
-  createNutriPhiStorage,
-  createPresiStorage,
-  createCalendarStorage,
-  createContactsStorage,
-  createStorageStorage,
-} from '@manacore/shared-storage';
+// 1. Backend: initiate upload
+const { uploadId, key } = await storage.createMultipartUpload(
+  'users/123/video.mp4',
+  'video/mp4'
+);
+
+// 2. Backend: generate presigned URLs for each part
+const urls = await storage.getMultipartUploadUrls(key, uploadId, numberOfParts);
+// => ['https://signed-url-part-1', 'https://signed-url-part-2', ...]
+
+// 3. Browser: PUT each chunk to the corresponding URL
+// (returns ETag in response headers)
+
+// 4. Backend: complete upload with ETags from browser
+const result = await storage.completeMultipartUpload(key, uploadId, [
+  { partNumber: 1, etag: '"etag-from-part-1"' },
+  { partNumber: 2, etag: '"etag-from-part-2"' },
+]);
+
+// If browser abandons upload:
+await storage.abortMultipartUpload(key, uploadId);
 ```
+
+## Hooks (Upload Events)
+
+Fire-and-forget event system for post-upload processing:
+
+```typescript
+const storage = createPictureStorage();
+
+// Thumbnail generation after upload
+storage.hooks.on('upload', async ({ key, contentType, sizeBytes }) => {
+  if (contentType?.startsWith('image/')) {
+    await generateThumbnail(key);
+  }
+});
+
+// Error logging
+storage.hooks.on('upload:error', ({ bucket, key, error }) => {
+  logger.error(`Upload failed: ${bucket}/${key}`, error);
+});
+
+// Track deletions
+storage.hooks.on('delete', ({ bucket, keys }) => {
+  logger.info(`Deleted ${keys.length} files from ${bucket}`);
+});
+
+// Unsubscribe
+const unsub = storage.hooks.on('download', handler);
+unsub(); // Remove listener
+
+// Available events: upload, upload:error, delete, delete:error, download
+```
+
+## Metrics
+
+### In-Memory (Testing / Local Dev)
+
+```typescript
+import { InMemoryMetrics, attachMetrics } from '@manacore/shared-storage';
+
+const storage = createPictureStorage();
+const metrics = new InMemoryMetrics();
+attachMetrics(storage.hooks, metrics);
+
+// After some operations:
+console.log(metrics.counters.uploads);    // 5
+console.log(metrics.counters.deletes);    // 2
+console.log(metrics.sizes);              // [1024, 2048, ...]
+```
+
+### Prometheus (NestJS Backends)
+
+```typescript
+import { MetricsService } from '@manacore/shared-nestjs-metrics';
+import { createPictureStorage, createPrometheusCollector, attachMetrics } from '@manacore/shared-storage';
+
+@Injectable()
+export class StorageService {
+  private storage = createPictureStorage();
+
+  constructor(metricsService: MetricsService) {
+    const collector = createPrometheusCollector(metricsService);
+    attachMetrics(this.storage.hooks, collector);
+  }
+}
+```
+
+This creates the following Prometheus metrics:
+- `storage_uploads_total` (counter, labels: bucket, content_type)
+- `storage_upload_errors_total` (counter, labels: bucket)
+- `storage_deletes_total` (counter, labels: bucket)
+- `storage_downloads_total` (counter, labels: bucket)
+- `storage_upload_size_bytes` (histogram, labels: bucket, buckets: 1KB-100MB)
 
 ## Environment Variables
 
-### Local Development (MinIO)
-
-Already configured in `.env.development`:
-
 ```env
-S3_ENDPOINT=http://localhost:9000
+# Required
+S3_ENDPOINT=http://localhost:9000      # MinIO local / Hetzner production
 S3_REGION=us-east-1
 S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin
+
+# Optional
+S3_PUBLIC_ENDPOINT=https://minio.mana.how  # For presigned URLs (if internal != public)
+PICTURE_STORAGE_PUBLIC_URL=https://...     # Direct public URL per bucket
+PICTURE_CDN_URL=https://cdn.example.com   # CDN URL per bucket (getCdnUrl() uses this)
 ```
 
-### Production (Hetzner Object Storage)
-
-```env
-S3_ENDPOINT=https://fsn1.your-objectstorage.com
-S3_REGION=fsn1
-S3_ACCESS_KEY=your-access-key
-S3_SECRET_KEY=your-secret-key
-
-# Optional: public URLs for CDN access
-PICTURE_STORAGE_PUBLIC_URL=https://picture-storage.fsn1.your-objectstorage.com
-NUTRIPHI_S3_PUBLIC_URL=https://nutriphi-storage.fsn1.your-objectstorage.com
-```
-
-## Utilities
-
-```typescript
-import {
-  generateFileKey,
-  generateUserFileKey,
-  getContentType,
-  validateFileSize,
-  validateFileExtension,
-  IMAGE_EXTENSIONS,
-  DOCUMENT_EXTENSIONS,
-} from '@manacore/shared-storage';
-
-// Generate unique file key
-const key = generateFileKey('photo.jpg', 'uploads', '2024');
-// => 'uploads/2024/uuid.jpg'
-
-// User-scoped key
-const userKey = generateUserFileKey('user-123', 'avatar.png', 'avatars');
-// => 'users/user-123/avatars/uuid.png'
-
-// Get MIME type
-const contentType = getContentType('image.png'); // => 'image/png'
-
-// Validate file
-const isValidSize = validateFileSize(fileSize, 10); // max 10MB
-const isValidType = validateFileExtension('photo.jpg', IMAGE_EXTENSIONS);
-```
-
-## Docker Commands
+## Testing
 
 ```bash
-# Start all infrastructure (Postgres, Redis, MinIO)
-pnpm docker:up
-
-# Start only database services (no MinIO)
-pnpm docker:up:db
-
-# View MinIO logs
-docker logs manacore-minio
-
-# View bucket init logs
-docker logs manacore-minio-init
+cd packages/shared-storage
+pnpm test           # Run 104 tests
+pnpm test:watch     # Watch mode
+pnpm type-check     # TypeScript check
+pnpm build          # Build to dist/
 ```
+
+## API Reference
+
+### StorageClient
+
+| Method | Description |
+|--------|-------------|
+| `upload(key, body, options?)` | Upload a file (supports maxSizeBytes for buffers and streams) |
+| `uploadMultipart(key, body, options?)` | Multipart upload for large files (10MB parts) |
+| `download(key)` | Download file to Buffer |
+| `downloadStream(key)` | Download as ReadableStream (memory-efficient) |
+| `delete(key)` | Delete a file |
+| `deleteMany(keys)` | Bulk delete (auto-batches at 1000) |
+| `deleteByPrefix(prefix)` | Delete all files matching prefix |
+| `copy(src, dest)` | Copy file within bucket |
+| `move(src, dest)` | Move file (copy + delete) |
+| `exists(key)` | Check if file exists |
+| `getMetadata(key)` | Get content-type, size, metadata without download |
+| `list(prefix?, maxKeys?)` | List files (auto-paginates) |
+| `getUploadUrl(key, options?)` | Presigned PUT URL |
+| `getDownloadUrl(key, options?)` | Presigned GET URL |
+| `getPublicUrl(key)` | Direct public URL |
+| `getCdnUrl(key)` | CDN URL (falls back to public) |
+| `createMultipartUpload(key, contentType?)` | Initiate browser direct-upload |
+| `getMultipartUploadUrls(key, uploadId, parts)` | Presigned URLs per part |
+| `completeMultipartUpload(key, uploadId, parts)` | Finalize multipart upload |
+| `abortMultipartUpload(key, uploadId)` | Cancel multipart upload |
+| `hooks` | StorageHooks instance for event listeners |
+| `getBucketName()` | Get bucket name |
+| `getS3Client()` | Get underlying S3Client for advanced use |
