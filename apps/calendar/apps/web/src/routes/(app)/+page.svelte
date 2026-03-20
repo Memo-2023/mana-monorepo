@@ -5,9 +5,12 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { todosStore } from '$lib/stores/todos.svelte';
+	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
 	import ViewCarousel from '$lib/components/calendar/ViewCarousel.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
+	import ServiceStatusBanner from '$lib/components/ServiceStatusBanner.svelte';
 	import { CalendarViewSkeleton } from '$lib/components/skeletons';
 	import type { CalendarEvent } from '@calendar/shared';
 	import { addMinutes } from 'date-fns';
@@ -162,6 +165,23 @@
 <svelte:head>
 	<title>{$_('app.name')}</title>
 </svelte:head>
+
+<div class="service-banners">
+	<ServiceStatusBanner
+		serviceName="Todo-Service"
+		available={todosStore.serviceAvailable}
+		error={todosStore.error}
+		onRetry={() => todosStore.fetchTodos()}
+	/>
+	{#if settingsStore.showBirthdays}
+		<ServiceStatusBanner
+			serviceName="Geburtstage (Kontakte)"
+			available={birthdaysStore.serviceAvailable}
+			error={birthdaysStore.error}
+			onRetry={() => birthdaysStore.fetchBirthdays(true)}
+		/>
+	{/if}
+</div>
 
 <div class="calendar-layout">
 	<!-- Desktop: Left Sidebar -->
@@ -400,5 +420,16 @@
 		.calendar-sidebar {
 			width: 220px;
 		}
+	}
+
+	.service-banners {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		padding: 0 0.5rem;
+	}
+
+	.service-banners:empty {
+		display: none;
 	}
 </style>

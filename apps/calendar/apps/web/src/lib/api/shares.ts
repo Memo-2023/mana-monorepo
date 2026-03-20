@@ -35,8 +35,16 @@ export async function updateShare(shareId: string, data: UpdateShareInput) {
 	});
 }
 
-export async function deleteShare(shareId: string) {
-	return fetchApi<void>(`/shares/${shareId}`, {
+export async function deleteShare(calendarId: string, shareId: string) {
+	return fetchApi<void>(`/calendars/${calendarId}/shares/${shareId}`, {
 		method: 'DELETE',
 	});
+}
+
+export async function getInvitations() {
+	return fetchApi<CalendarShare[]>('/shares/invitations');
+}
+
+export async function getSharedWithMe() {
+	return fetchApi<CalendarShare[]>('/shares/shared-with-me');
 }
