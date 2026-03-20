@@ -40,6 +40,7 @@
 			"targets": [
 				{
 					"expr": "time() - deploy_last_timestamp_seconds{branch=\"main\"}",
+					"instant": true,
 					"legendFormat": ""
 				}
 			],
@@ -78,6 +79,7 @@
 			"targets": [
 				{
 					"expr": "deploy_last_status{branch=\"main\"}",
+					"instant": true,
 					"legendFormat": ""
 				}
 			],
@@ -110,6 +112,7 @@
 			"targets": [
 				{
 					"expr": "deploy_last_duration_seconds{branch=\"main\"}",
+					"instant": true,
 					"legendFormat": ""
 				}
 			],
@@ -332,6 +335,7 @@
 			"targets": [
 				{
 					"expr": "deploy_service_image_size_mb",
+					"instant": true,
 					"legendFormat": "{{service}}"
 				}
 			],
@@ -379,6 +383,7 @@
 			"targets": [
 				{
 					"expr": "deploy_service_healthy",
+					"instant": true,
 					"legendFormat": "{{service}}"
 				}
 			],

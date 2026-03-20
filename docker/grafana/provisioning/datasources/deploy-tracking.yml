@@ -5,6 +5,7 @@ apiVersion: 1
 
 datasources:
   - name: DeployTracking
+    uid: deploy-tracking
     type: postgres
     access: proxy
     url: postgres:5432
