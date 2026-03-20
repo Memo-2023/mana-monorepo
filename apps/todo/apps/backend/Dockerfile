@@ -59,6 +59,13 @@ RUN pnpm build
 WORKDIR /app/apps/todo/apps/backend
 RUN pnpm build
 
+# Remove devDependencies and unnecessary files from node_modules
+WORKDIR /app
+RUN pnpm prune --prod --no-optional 2>/dev/null || true \
+    && find node_modules -name '*.ts' -not -name '*.d.ts' -delete 2>/dev/null || true \
+    && find node_modules -name '*.map' -delete 2>/dev/null || true \
+    && find node_modules -type d \( -name 'test' -o -name 'tests' -o -name '__tests__' -o -name 'docs' \) -prune -exec rm -rf {} + 2>/dev/null || true
+
 # Production stage
 FROM node:20-alpine AS production
 
