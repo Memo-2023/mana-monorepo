@@ -48,6 +48,8 @@ env:
   PROJECT_DIR: /Users/mana/projects/manacore-monorepo
   COMPOSE_FILE: docker-compose.macmini.yml
   ENV_FILE: .env.macmini
+  DEPLOY_NOTIFY_ROOM_ID: ${{ secrets.DEPLOY_NOTIFY_ROOM_ID }}
+  DEPLOY_NOTIFY_BOT_TOKEN: ${{ secrets.DEPLOY_NOTIFY_BOT_TOKEN }}
   PATH: /usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
 jobs:
@@ -410,6 +412,33 @@ jobs:
           # Push overall metrics to Pushgateway
           push_deploy_metrics "$STATUS" "$DURATION" "$BRANCH" 2>/dev/null || true
           echo "Deploy tracking recorded: status=$STATUS duration=${DURATION}s"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          SERVICES="${{ steps.services.outputs.services }}"
+          [ "${{ steps.services.outputs.deploy-all }}" == "true" ] && SERVICES="all"
+          COMMIT_MSG=$(git log -1 --pretty=%s 2>/dev/null | head -c 100)
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          MSG="⚠️ **Deploy failed**\n\n**Services:** ${SERVICES}\n**Commit:** ${COMMIT_MSG}\n**By:** ${{ github.actor }}\n**[View logs](${RUN_URL})**"
+
+          # Send to Matrix deploy-notifications room via Synapse API
+          ROOM_ID="${DEPLOY_NOTIFY_ROOM_ID:-}"
+          BOT_TOKEN="${DEPLOY_NOTIFY_BOT_TOKEN:-}"
+          if [ -n "$ROOM_ID" ] && [ -n "$BOT_TOKEN" ]; then
+            TXN_ID="deploy-$(date +%s)"
+            curl -s -X PUT \
+              "http://localhost:8008/_matrix/client/v3/rooms/${ROOM_ID}/send/m.room.message/${TXN_ID}" \
+              -H "Authorization: Bearer ${BOT_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"msgtype\":\"m.text\",\"body\":\"Deploy failed: ${SERVICES}\",\"format\":\"org.matrix.custom.html\",\"formatted_body\":\"$(echo -e "$MSG" | sed 's/"/\\"/g')\"}" \
+              || true
+            echo "Matrix notification sent"
+          else
+            echo "Matrix notification skipped (DEPLOY_NOTIFY_ROOM_ID or DEPLOY_NOTIFY_BOT_TOKEN not set)"
+          fi
 
       - name: Cleanup old images
         if: always()
