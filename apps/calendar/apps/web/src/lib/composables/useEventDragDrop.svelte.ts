@@ -373,6 +373,36 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 		}
 	}
 
+	/**
+	 * Get formatted time range during resize preview
+	 */
+	function getResizePreviewTime(): string {
+		if (!resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return '';
+
+		const config = getConfig();
+		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
+		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
+
+		const previewStartMinutes =
+			(resizePreviewTop / 100) * config.totalVisibleHours * 60 + config.firstVisibleHour * 60;
+		const previewEndMinutes =
+			previewStartMinutes + (resizePreviewHeight / 100) * config.totalVisibleHours * 60;
+
+		let startMin: number;
+		let endMin: number;
+
+		if (resizeEdge === 'top') {
+			startMin = Math.round(previewStartMinutes);
+			endMin = origEndMinutes;
+		} else {
+			startMin = origStartMinutes;
+			endMin = Math.round(previewEndMinutes);
+		}
+
+		const pad = (n: number) => n.toString().padStart(2, '0');
+		return `${pad(Math.floor(startMin / 60))}:${pad(startMin % 60)} - ${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`;
+	}
+
 	return {
 		// Drag state (reactive getters)
 		get isDragging() {
@@ -423,5 +453,6 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 		startResize,
 		cancel,
 		cleanup,
+		getResizePreviewTime,
 	};
 }

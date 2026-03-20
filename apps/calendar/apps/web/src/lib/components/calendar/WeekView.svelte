@@ -8,7 +8,16 @@
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
-	import { useVisibleHours, useCurrentTimeIndicator, useBirthdayPopover } from '$lib/composables';
+	import {
+		useVisibleHours,
+		useCurrentTimeIndicator,
+		useBirthdayPopover,
+		useEventDragDrop,
+		useTaskDragDrop,
+		useSidebarDrop,
+		useDragToCreate,
+		useCalendarKeyboard,
+	} from '$lib/composables';
 	import { toDate } from '$lib/utils/eventDateHelpers';
 	import { HOUR_HEIGHT_PX, SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
 	import {
@@ -27,9 +36,6 @@
 		isWeekend,
 		isSameDay,
 		differenceInMinutes,
-		addMinutes,
-		setHours,
-		setMinutes,
 		getWeek,
 		startOfWeek,
 		endOfWeek,
@@ -107,54 +113,70 @@
 	// Current time indicator position
 	let currentTimePosition = $derived(minutesToPercent(timeIndicator.currentMinutes));
 
-	// Drag & Drop State
-	let isDragging = $state(false);
-	let draggedEvent = $state<CalendarEvent | null>(null);
-	let dragOffsetMinutes = $state(0);
-	let dragTargetDay = $state<Date | null>(null);
-	let dragPreviewTop = $state(0);
-	let dragPreviewHeight = $state(0);
-
-	// Resize State
-	let isResizing = $state(false);
-	let resizeEvent = $state<CalendarEvent | null>(null);
-	let resizeEdge = $state<'top' | 'bottom'>('bottom');
-	let resizeOriginalStart = $state<Date | null>(null);
-	let resizeOriginalEnd = $state<Date | null>(null);
-	let resizePreviewTop = $state(0);
-	let resizePreviewHeight = $state(0);
-	let resizeOffsetMinutes = $state(0);
-
-	// Track if we actually moved during drag/resize (to prevent click on simple mousedown/up)
-	let hasMoved = $state(false);
-
-	// Drag-to-Create State
-	let isCreating = $state(false);
-	let createTargetDay = $state<Date | null>(null);
-	let createStartMinutes = $state(0);
-	let createEndMinutes = $state(0);
-	let createPreviewTop = $state(0);
-	let createPreviewHeight = $state(0);
-
-	// Task Drag & Drop State
-	let isTaskDragging = $state(false);
-	let draggedTask = $state<Task | null>(null);
-	let taskDragTargetDay = $state<Date | null>(null);
-	let taskDragPreviewTop = $state(0);
-	let taskDragPreviewHeight = $state(0);
-
-	// Task Resize State
-	let isTaskResizing = $state(false);
-	let resizeTask = $state<Task | null>(null);
-	let taskResizeEdge = $state<'top' | 'bottom'>('bottom');
-	let taskResizePreviewTop = $state(0);
-	let taskResizePreviewHeight = $state(0);
-
 	// Reference to the days container for position calculations
 	let daysContainerEl: HTMLDivElement;
 
 	// Reference to the time grid (scroll container)
 	let timeGridEl: HTMLDivElement;
+
+	// ========== Composables for Drag/Drop/Resize/Create ==========
+	const eventDragDrop = useEventDragDrop(() => ({
+		containerEl: daysContainerEl,
+		days,
+		firstVisibleHour,
+		lastVisibleHour,
+		totalVisibleHours,
+		hourHeight: HOUR_HEIGHT,
+		minutesToPercent,
+	}));
+
+	const taskDragDrop = useTaskDragDrop(() => ({
+		containerEl: daysContainerEl,
+		days,
+		firstVisibleHour,
+		totalVisibleHours,
+	}));
+
+	const sidebarDrop = useSidebarDrop(() => ({
+		firstVisibleHour,
+		totalVisibleHours,
+	}));
+
+	const dragToCreate = useDragToCreate(() => ({
+		containerEl: daysContainerEl,
+		days,
+		firstVisibleHour,
+		lastVisibleHour,
+		totalVisibleHours,
+		hourHeight: HOUR_HEIGHT,
+		minutesToPercent,
+		isOtherOperationActive: () =>
+			eventDragDrop.isDragging ||
+			eventDragDrop.isResizing ||
+			taskDragDrop.isTaskDragging ||
+			taskDragDrop.isTaskResizing,
+		onCreateEnd: (startTime, endTime, position) => {
+			if (onQuickCreate) {
+				onQuickCreate(startTime, position, endTime);
+			} else {
+				goto(`/event/new?start=${startTime.toISOString()}&end=${endTime.toISOString()}`);
+			}
+		},
+	}));
+
+	const keyboard = useCalendarKeyboard([
+		{
+			isActive: () => eventDragDrop.isDragging || eventDragDrop.isResizing,
+			cancel: eventDragDrop.cancel,
+		},
+		{
+			isActive: () => taskDragDrop.isTaskDragging || taskDragDrop.isTaskResizing,
+			cancel: taskDragDrop.cancel,
+		},
+		{ isActive: () => dragToCreate.isCreating, cancel: dragToCreate.cancel },
+	]);
+
+	$effect(() => keyboard.setup());
 
 	// Scroll to current hour on mount
 	onMount(() => {
@@ -264,40 +286,6 @@
 	}
 
 	/**
-	 * Calculate live time display during resize
-	 */
-	function getResizePreviewTime(): string {
-		if (!resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return '';
-
-		const origStartMinutes = resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
-		const origEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
-
-		// Calculate from preview position
-		const previewStartMinutes =
-			(resizePreviewTop / 100) * totalVisibleHours * 60 + firstVisibleHour * 60;
-		const previewEndMinutes =
-			previewStartMinutes + (resizePreviewHeight / 100) * totalVisibleHours * 60;
-
-		let startMinutes: number;
-		let endMinutes: number;
-
-		if (resizeEdge === 'top') {
-			startMinutes = Math.round(previewStartMinutes);
-			endMinutes = origEndMinutes;
-		} else {
-			startMinutes = origStartMinutes;
-			endMinutes = Math.round(previewEndMinutes);
-		}
-
-		const startHours = Math.floor(startMinutes / 60);
-		const startMins = startMinutes % 60;
-		const endHours = Math.floor(endMinutes / 60);
-		const endMins = endMinutes % 60;
-
-		return `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')} - ${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-	}
-
-	/**
 	 * Get style for a scheduled task (time-blocking)
 	 */
 	function getTaskStyle(task: Task): string {
@@ -333,14 +321,10 @@
 	}
 
 	function handleEventClick(event: CalendarEvent, e: MouseEvent) {
-		// Don't navigate if we just finished dragging or resizing, or if we moved
-		if (isDragging || isResizing || hasMoved) {
+		if (eventDragDrop.isDragging || eventDragDrop.isResizing || eventDragDrop.hasMoved) {
 			e.preventDefault();
 			e.stopPropagation();
-			// Reset hasMoved after a short delay to allow for the next clean click
-			setTimeout(() => {
-				hasMoved = false;
-			}, 100);
+			setTimeout(() => eventDragDrop.resetHasMoved(), 100);
 			return;
 		}
 		if (onEventClick) {
@@ -350,681 +334,7 @@
 		}
 	}
 
-	// ========== Drag-to-Create Handlers ==========
-	function startCreate(e: PointerEvent) {
-		// Don't create event if dragging or resizing
-		if (isDragging || isResizing || isTaskDragging || isTaskResizing) return;
-
-		// Don't start creating if clicking on an event, task, or other interactive element
-		const target = e.target as HTMLElement;
-		if (
-			target.closest(
-				'.event-card, .task-block, .all-day-event, .all-day-block-event, .overflow-indicator, .resize-handle'
-			)
-		) {
-			return;
-		}
-
-		e.preventDefault();
-
-		const day = getDayFromX(e.clientX);
-		if (!day) return;
-
-		const minutes = getMinutesFromY(e.clientY);
-		const snappedMinutes = Math.round(minutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
-
-		isCreating = true;
-		hasMoved = false;
-		createTargetDay = day;
-		createStartMinutes = snappedMinutes;
-		createEndMinutes = snappedMinutes + MINUTES_PER_SLOT;
-
-		updateCreatePreview();
-
-		document.addEventListener('pointermove', handleCreateMove);
-		document.addEventListener('pointerup', handleCreateEnd);
-	}
-
-	function handleCreateMove(e: PointerEvent) {
-		if (!isCreating) return;
-
-		hasMoved = true;
-
-		// Update target day
-		const day = getDayFromX(e.clientX);
-		if (day) {
-			createTargetDay = day;
-		}
-
-		const minutes = getMinutesFromY(e.clientY);
-		const snappedMinutes = Math.round(minutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
-
-		// Allow dragging both up and down from start point
-		if (snappedMinutes >= createStartMinutes) {
-			createEndMinutes = Math.max(snappedMinutes, createStartMinutes + MINUTES_PER_SLOT);
-		} else {
-			createEndMinutes = createStartMinutes + MINUTES_PER_SLOT;
-			createStartMinutes = snappedMinutes;
-		}
-
-		// Clamp to visible hours
-		createStartMinutes = Math.max(firstVisibleHour * 60, createStartMinutes);
-		createEndMinutes = Math.min(lastVisibleHour * 60, createEndMinutes);
-
-		updateCreatePreview();
-	}
-
-	function updateCreatePreview() {
-		createPreviewTop = minutesToPercent(createStartMinutes);
-		const duration = createEndMinutes - createStartMinutes;
-		createPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
-	}
-
-	function handleCreateEnd(e: PointerEvent) {
-		document.removeEventListener('pointermove', handleCreateMove);
-		document.removeEventListener('pointerup', handleCreateEnd);
-
-		if (!isCreating || !createTargetDay) {
-			isCreating = false;
-			return;
-		}
-
-		// Calculate final times
-		const startTime = new Date(createTargetDay);
-		startTime.setHours(Math.floor(createStartMinutes / 60), createStartMinutes % 60, 0, 0);
-
-		const endTime = new Date(createTargetDay);
-		endTime.setHours(Math.floor(createEndMinutes / 60), createEndMinutes % 60, 0, 0);
-
-		// Reset state
-		isCreating = false;
-		createTargetDay = null;
-
-		// Open quick create with the calculated times
-		if (onQuickCreate) {
-			onQuickCreate(startTime, { x: e.clientX, y: e.clientY }, endTime);
-		} else {
-			goto(`/event/new?start=${startTime.toISOString()}&end=${endTime.toISOString()}`);
-		}
-
-		hasMoved = false;
-	}
-
-	function getCreatePreviewTime(): string {
-		const startHours = Math.floor(createStartMinutes / 60);
-		const startMins = createStartMinutes % 60;
-		const endHours = Math.floor(createEndMinutes / 60);
-		const endMins = createEndMinutes % 60;
-		return `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')} - ${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-	}
-
-	// ========== Drag & Drop Functions ==========
-
-	function getDayFromX(clientX: number): Date | null {
-		if (!daysContainerEl) return null;
-
-		const rect = daysContainerEl.getBoundingClientRect();
-		const relativeX = clientX - rect.left;
-		const dayWidth = rect.width / days.length;
-		const dayIndex = Math.floor(relativeX / dayWidth);
-
-		if (dayIndex >= 0 && dayIndex < days.length) {
-			return days[dayIndex];
-		}
-		return null;
-	}
-
-	function getMinutesFromY(clientY: number): number {
-		if (!daysContainerEl) return 0;
-
-		const rect = daysContainerEl.getBoundingClientRect();
-		const scrollTop = daysContainerEl.parentElement?.scrollTop || 0;
-		const relativeY = clientY - rect.top + scrollTop;
-		// Account for hidden early hours
-		const visibleMinutes = (relativeY / (totalVisibleHours * HOUR_HEIGHT)) * totalVisibleHours * 60;
-		const totalMinutes = visibleMinutes + firstVisibleHour * 60;
-
-		// Snap to 15-minute intervals
-		return Math.round(totalMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
-	}
-
-	function startDrag(event: CalendarEvent, e: PointerEvent) {
-		e.preventDefault();
-		e.stopPropagation();
-
-		isDragging = true;
-		draggedEvent = event;
-		hasMoved = false;
-
-		const start = toDate(event.startTime);
-		const end = toDate(event.endTime);
-		const duration = differenceInMinutes(end, start);
-
-		// Calculate initial preview position
-		const startMinutes = start.getHours() * 60 + start.getMinutes();
-		dragPreviewTop = minutesToPercent(startMinutes);
-		dragPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
-		dragTargetDay = start;
-
-		// Calculate offset from event start to click position
-		const clickMinutes = getMinutesFromY(e.clientY);
-		dragOffsetMinutes = clickMinutes - startMinutes;
-
-		document.addEventListener('pointermove', handleDragMove);
-		document.addEventListener('pointerup', handleDragEnd);
-	}
-
-	function handleDragMove(e: PointerEvent) {
-		if (!isDragging || !draggedEvent) return;
-
-		hasMoved = true;
-
-		// Calculate new position
-		const newDay = getDayFromX(e.clientX);
-		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
-
-		// Clamp to valid range (firstVisibleHour to lastVisibleHour)
-		const clampedMinutes = Math.max(
-			firstVisibleHour * 60,
-			Math.min(lastVisibleHour * 60 - 15, newMinutes)
-		);
-
-		// Update preview
-		dragPreviewTop = minutesToPercent(clampedMinutes);
-		if (newDay) {
-			dragTargetDay = newDay;
-		}
-	}
-
-	async function handleDragEnd(e: PointerEvent) {
-		document.removeEventListener('pointermove', handleDragMove);
-		document.removeEventListener('pointerup', handleDragEnd);
-
-		if (!isDragging || !draggedEvent || !dragTargetDay || !hasMoved) {
-			isDragging = false;
-			draggedEvent = null;
-			hasMoved = false;
-			return;
-		}
-
-		const start = toDate(draggedEvent.startTime);
-		const end = toDate(draggedEvent.endTime);
-		const duration = differenceInMinutes(end, start);
-
-		// Calculate new start time
-		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
-		const clampedMinutes = Math.max(0, Math.min(24 * 60 - 15, newMinutes));
-		const newHours = Math.floor(clampedMinutes / 60);
-		const newMins = clampedMinutes % 60;
-
-		let newStart = new Date(dragTargetDay);
-		newStart = setHours(newStart, newHours);
-		newStart = setMinutes(newStart, newMins);
-
-		const newEnd = addMinutes(newStart, duration);
-
-		// Update event via store (use updateDraftEvent for draft events)
-		if (eventsStore.isDraftEvent(draggedEvent.id)) {
-			eventsStore.updateDraftEvent({
-				startTime: newStart.toISOString(),
-				endTime: newEnd.toISOString(),
-			});
-		} else {
-			await eventsStore.updateEvent(draggedEvent.id, {
-				startTime: newStart.toISOString(),
-				endTime: newEnd.toISOString(),
-			});
-		}
-
-		// Reset state
-		isDragging = false;
-		draggedEvent = null;
-		dragTargetDay = null;
-		hasMoved = false;
-	}
-
-	// ========== Resize Functions ==========
-
-	function startResize(event: CalendarEvent, edge: 'top' | 'bottom', e: PointerEvent) {
-		e.preventDefault();
-		e.stopPropagation();
-
-		isResizing = true;
-		resizeEvent = event;
-		resizeEdge = edge;
-		hasMoved = false;
-
-		const start = toDate(event.startTime);
-		const end = toDate(event.endTime);
-
-		resizeOriginalStart = start;
-		resizeOriginalEnd = end;
-
-		// Set initial preview
-		const startMinutes = start.getHours() * 60 + start.getMinutes();
-		const endMinutes = end.getHours() * 60 + end.getMinutes();
-		const duration = differenceInMinutes(end, start);
-		resizePreviewTop = minutesToPercent(startMinutes);
-		resizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
-
-		// Calculate offset between snapped click position and actual event boundary
-		const clickMinutes = getMinutesFromY(e.clientY);
-		if (edge === 'top') {
-			resizeOffsetMinutes = clickMinutes - startMinutes;
-		} else {
-			resizeOffsetMinutes = clickMinutes - endMinutes;
-		}
-
-		document.addEventListener('pointermove', handleResizeMove);
-		document.addEventListener('pointerup', handleResizeEnd);
-	}
-
-	function handleResizeMove(e: PointerEvent) {
-		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd) return;
-
-		hasMoved = true;
-		const currentMinutes = getMinutesFromY(e.clientY);
-		// Apply offset to prevent jumping when drag starts
-		const adjustedMinutes = currentMinutes - resizeOffsetMinutes;
-		const originalStartMinutes =
-			resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
-		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
-
-		if (resizeEdge === 'bottom') {
-			// Resize from bottom - change end time
-			const newEndMinutes = Math.max(
-				originalStartMinutes + 15,
-				Math.min(lastVisibleHour * 60, adjustedMinutes)
-			);
-			const newDuration = newEndMinutes - originalStartMinutes;
-			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
-		} else {
-			// Resize from top - change start time
-			const newStartMinutes = Math.max(
-				firstVisibleHour * 60,
-				Math.min(originalEndMinutes - 15, adjustedMinutes)
-			);
-			const newDuration = originalEndMinutes - newStartMinutes;
-			resizePreviewTop = minutesToPercent(newStartMinutes);
-			resizePreviewHeight = (newDuration / (totalVisibleHours * 60)) * 100;
-		}
-	}
-
-	async function handleResizeEnd(e: PointerEvent) {
-		document.removeEventListener('pointermove', handleResizeMove);
-		document.removeEventListener('pointerup', handleResizeEnd);
-
-		if (!isResizing || !resizeEvent || !resizeOriginalStart || !resizeOriginalEnd || !hasMoved) {
-			isResizing = false;
-			resizeEvent = null;
-			resizeOriginalStart = null;
-			resizeOriginalEnd = null;
-			resizeOffsetMinutes = 0;
-			hasMoved = false;
-			return;
-		}
-
-		const currentMinutes = getMinutesFromY(e.clientY);
-		// Apply offset to prevent jumping
-		const adjustedMinutes = currentMinutes - resizeOffsetMinutes;
-		const originalStartMinutes =
-			resizeOriginalStart.getHours() * 60 + resizeOriginalStart.getMinutes();
-		const originalEndMinutes = resizeOriginalEnd.getHours() * 60 + resizeOriginalEnd.getMinutes();
-
-		let newStart = resizeOriginalStart;
-		let newEnd = resizeOriginalEnd;
-
-		if (resizeEdge === 'bottom') {
-			const newEndMinutes = Math.max(
-				originalStartMinutes + 15,
-				Math.min(lastVisibleHour * 60, adjustedMinutes)
-			);
-			const newHours = Math.floor(newEndMinutes / 60);
-			const newMins = newEndMinutes % 60;
-			newEnd = setHours(new Date(resizeOriginalEnd), newHours);
-			newEnd = setMinutes(newEnd, newMins);
-		} else {
-			const newStartMinutes = Math.max(
-				firstVisibleHour * 60,
-				Math.min(originalEndMinutes - 15, adjustedMinutes)
-			);
-			const newHours = Math.floor(newStartMinutes / 60);
-			const newMins = newStartMinutes % 60;
-			newStart = setHours(new Date(resizeOriginalStart), newHours);
-			newStart = setMinutes(newStart, newMins);
-		}
-
-		// Update event via store (use updateDraftEvent for draft events)
-		if (eventsStore.isDraftEvent(resizeEvent.id)) {
-			eventsStore.updateDraftEvent({
-				startTime: newStart.toISOString(),
-				endTime: newEnd.toISOString(),
-			});
-		} else {
-			await eventsStore.updateEvent(resizeEvent.id, {
-				startTime: newStart.toISOString(),
-				endTime: newEnd.toISOString(),
-			});
-		}
-
-		// Reset state
-		isResizing = false;
-		resizeEvent = null;
-		resizeOriginalStart = null;
-		resizeOriginalEnd = null;
-		resizeOffsetMinutes = 0;
-		hasMoved = false;
-	}
-
-	// ========== Task Drag & Drop ==========
-
-	function handleTaskDragStart(task: Task, e: PointerEvent) {
-		e.preventDefault();
-		isTaskDragging = true;
-		draggedTask = task;
-		hasMoved = false;
-
-		// Initialize preview position
-		if (task.scheduledStartTime) {
-			const [h, m] = task.scheduledStartTime.split(':').map(Number);
-			const startMinutes = h * 60 + m - firstVisibleHour * 60;
-			taskDragPreviewTop = (startMinutes / (totalVisibleHours * 60)) * 100;
-		}
-
-		const duration = task.estimatedDuration || 30;
-		taskDragPreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
-
-		document.addEventListener('pointermove', handleTaskDragMove);
-		document.addEventListener('pointerup', handleTaskDragEnd);
-	}
-
-	function handleTaskDragMove(e: PointerEvent) {
-		if (!isTaskDragging || !draggedTask) return;
-		hasMoved = true;
-
-		// Find which day column we're over
-		const daysEl = daysContainerEl;
-		if (!daysEl) return;
-
-		const dayColumns = daysEl.querySelectorAll('.day-column');
-		for (let i = 0; i < dayColumns.length; i++) {
-			const col = dayColumns[i];
-			const rect = col.getBoundingClientRect();
-			if (e.clientX >= rect.left && e.clientX <= rect.right) {
-				taskDragTargetDay = days[i];
-				break;
-			}
-		}
-
-		// Calculate vertical position
-		const targetColumn = daysEl.querySelector('.day-column');
-		if (!targetColumn) return;
-		const rect = targetColumn.getBoundingClientRect();
-		const relativeY = e.clientY - rect.top;
-		const percentY = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
-
-		// Snap to 15-minute intervals
-		const minutesPerPercent = (totalVisibleHours * 60) / 100;
-		const rawMinutes = percentY * minutesPerPercent;
-		const snappedMinutes = Math.round(rawMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
-		taskDragPreviewTop = (snappedMinutes / (totalVisibleHours * 60)) * 100;
-	}
-
-	async function handleTaskDragEnd(e: PointerEvent) {
-		document.removeEventListener('pointermove', handleTaskDragMove);
-		document.removeEventListener('pointerup', handleTaskDragEnd);
-
-		if (!isTaskDragging || !draggedTask || !hasMoved) {
-			isTaskDragging = false;
-			draggedTask = null;
-			taskDragTargetDay = null;
-			return;
-		}
-
-		// Calculate new time from position
-		const minutesFromStart = (taskDragPreviewTop / 100) * (totalVisibleHours * 60);
-		const totalMinutes = firstVisibleHour * 60 + minutesFromStart;
-		const hours = Math.floor(totalMinutes / 60);
-		const minutes = Math.round(totalMinutes % 60);
-
-		const newStartTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-
-		// Calculate end time based on duration
-		const duration = draggedTask.estimatedDuration || 30;
-		const endTotalMinutes = totalMinutes + duration;
-		const endHours = Math.floor(endTotalMinutes / 60);
-		const endMins = Math.round(endTotalMinutes % 60);
-		const newEndTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-
-		await todosStore.updateTodo(draggedTask.id, {
-			scheduledDate: taskDragTargetDay ? format(taskDragTargetDay, 'yyyy-MM-dd') : undefined,
-			scheduledStartTime: newStartTime,
-			scheduledEndTime: newEndTime,
-		});
-
-		isTaskDragging = false;
-		draggedTask = null;
-		taskDragTargetDay = null;
-		hasMoved = false;
-	}
-
-	// ========== Task Resize ==========
-
-	function handleTaskResizeStart(task: Task, edge: 'top' | 'bottom', e: PointerEvent) {
-		e.preventDefault();
-		e.stopPropagation();
-		isTaskResizing = true;
-		resizeTask = task;
-		taskResizeEdge = edge;
-		hasMoved = false;
-
-		// Initialize preview position
-		if (task.scheduledStartTime) {
-			const [h, m] = task.scheduledStartTime.split(':').map(Number);
-			const startMinutes = h * 60 + m - firstVisibleHour * 60;
-			taskResizePreviewTop = (startMinutes / (totalVisibleHours * 60)) * 100;
-		}
-
-		const duration = task.estimatedDuration || 30;
-		taskResizePreviewHeight = (duration / (totalVisibleHours * 60)) * 100;
-
-		document.addEventListener('pointermove', handleTaskResizeMove);
-		document.addEventListener('pointerup', handleTaskResizeEnd);
-	}
-
-	function handleTaskResizeMove(e: PointerEvent) {
-		if (!isTaskResizing || !resizeTask) return;
-		hasMoved = true;
-
-		const daysEl = daysContainerEl;
-		if (!daysEl) return;
-
-		const targetColumn = daysEl.querySelector('.day-column');
-		if (!targetColumn) return;
-
-		const rect = targetColumn.getBoundingClientRect();
-		const relativeY = e.clientY - rect.top;
-		const percentY = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
-
-		const minutesPerPercent = (totalVisibleHours * 60) / 100;
-
-		if (taskResizeEdge === 'top') {
-			// Adjust start time, keep end fixed
-			const originalEndPercent = taskResizePreviewTop + taskResizePreviewHeight;
-			const rawMinutes = percentY * minutesPerPercent;
-			const snappedMinutes = Math.round(rawMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
-			taskResizePreviewTop = (snappedMinutes / (totalVisibleHours * 60)) * 100;
-			taskResizePreviewHeight = Math.max(2, originalEndPercent - taskResizePreviewTop);
-		} else {
-			// Adjust end time, keep start fixed
-			const rawMinutes = percentY * minutesPerPercent;
-			const snappedMinutes = Math.round(rawMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
-			const newBottom = (snappedMinutes / (totalVisibleHours * 60)) * 100;
-			taskResizePreviewHeight = Math.max(2, newBottom - taskResizePreviewTop);
-		}
-	}
-
-	async function handleTaskResizeEnd(e: PointerEvent) {
-		document.removeEventListener('pointermove', handleTaskResizeMove);
-		document.removeEventListener('pointerup', handleTaskResizeEnd);
-
-		if (!isTaskResizing || !resizeTask || !hasMoved) {
-			isTaskResizing = false;
-			resizeTask = null;
-			return;
-		}
-
-		// Calculate new times from position
-		const startMinutes =
-			(taskResizePreviewTop / 100) * (totalVisibleHours * 60) + firstVisibleHour * 60;
-		const endMinutes =
-			((taskResizePreviewTop + taskResizePreviewHeight) / 100) * (totalVisibleHours * 60) +
-			firstVisibleHour * 60;
-
-		const startHours = Math.floor(startMinutes / 60);
-		const startMins = Math.round(startMinutes % 60);
-		const endHours = Math.floor(endMinutes / 60);
-		const endMins = Math.round(endMinutes % 60);
-
-		const newStartTime = `${startHours.toString().padStart(2, '0')}:${startMins.toString().padStart(2, '0')}`;
-		const newEndTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-		const newDuration = Math.round(endMinutes - startMinutes);
-
-		await todosStore.updateTodo(resizeTask.id, {
-			scheduledStartTime: newStartTime,
-			scheduledEndTime: newEndTime,
-			estimatedDuration: newDuration,
-		});
-
-		isTaskResizing = false;
-		resizeTask = null;
-		hasMoved = false;
-	}
-
-	// ========== Sidebar Task Drop ==========
-	let sidebarDropTarget = $state<{ day: Date; y: number } | null>(null);
-
-	function handleSidebarDragOver(e: DragEvent, day: Date) {
-		e.preventDefault();
-		if (!e.dataTransfer) return;
-
-		// Check if this is a sidebar task drag
-		const types = e.dataTransfer.types;
-		if (!types.includes('application/json')) return;
-
-		e.dataTransfer.dropEffect = 'move';
-		sidebarDropTarget = { day, y: e.clientY };
-	}
-
-	function handleSidebarDragLeave(e: DragEvent) {
-		// Only clear if leaving the column entirely
-		const relatedTarget = e.relatedTarget as HTMLElement;
-		if (!relatedTarget?.closest('.day-column')) {
-			sidebarDropTarget = null;
-		}
-	}
-
-	async function handleSidebarDrop(e: DragEvent, day: Date) {
-		e.preventDefault();
-		sidebarDropTarget = null;
-
-		if (!e.dataTransfer) return;
-
-		const jsonData = e.dataTransfer.getData('application/json');
-		if (!jsonData) return;
-
-		try {
-			const data = JSON.parse(jsonData);
-			if (data.type !== 'sidebar-task') return;
-
-			// Calculate drop time from Y position
-			const dayColumn = (e.target as HTMLElement).closest('.day-column');
-			if (!dayColumn) return;
-
-			const rect = dayColumn.getBoundingClientRect();
-			const relativeY = e.clientY - rect.top;
-			const percentY = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
-
-			const minutesPerPercent = (totalVisibleHours * 60) / 100;
-			const rawMinutes = percentY * minutesPerPercent;
-			const snappedMinutes = Math.round(rawMinutes / MINUTES_PER_SLOT) * MINUTES_PER_SLOT;
-			const totalMinutes = firstVisibleHour * 60 + snappedMinutes;
-
-			const hours = Math.floor(totalMinutes / 60);
-			const minutes = totalMinutes % 60;
-			const startTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-
-			// Calculate end time
-			const duration = data.estimatedDuration || 30;
-			const endMinutes = totalMinutes + duration;
-			const endHours = Math.floor(endMinutes / 60);
-			const endMins = endMinutes % 60;
-			const endTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
-
-			// Update the task with scheduled time
-			await todosStore.updateTodo(data.taskId, {
-				scheduledDate: format(day, 'yyyy-MM-dd'),
-				scheduledStartTime: startTime,
-				scheduledEndTime: endTime,
-				estimatedDuration: duration,
-			});
-		} catch (err) {
-			console.error('Failed to parse drop data:', err);
-		}
-	}
-
-	// ========== Keyboard Handling ==========
-
-	function handleKeyDown(e: KeyboardEvent) {
-		// Cancel drag/resize on Escape
-		if (e.key === 'Escape') {
-			if (isDragging || isResizing) {
-				e.preventDefault();
-				document.removeEventListener('pointermove', handleDragMove);
-				document.removeEventListener('pointerup', handleDragEnd);
-				document.removeEventListener('pointermove', handleResizeMove);
-				document.removeEventListener('pointerup', handleResizeEnd);
-				isDragging = false;
-				draggedEvent = null;
-				dragTargetDay = null;
-				isResizing = false;
-				resizeEvent = null;
-				resizeOriginalStart = null;
-				resizeOriginalEnd = null;
-				resizeOffsetMinutes = 0;
-				hasMoved = false;
-			}
-			// Cancel task drag/resize
-			if (isTaskDragging || isTaskResizing) {
-				e.preventDefault();
-				document.removeEventListener('pointermove', handleTaskDragMove);
-				document.removeEventListener('pointerup', handleTaskDragEnd);
-				document.removeEventListener('pointermove', handleTaskResizeMove);
-				document.removeEventListener('pointerup', handleTaskResizeEnd);
-				isTaskDragging = false;
-				draggedTask = null;
-				taskDragTargetDay = null;
-				isTaskResizing = false;
-				resizeTask = null;
-				hasMoved = false;
-			}
-			// Cancel creating
-			if (isCreating) {
-				e.preventDefault();
-				document.removeEventListener('pointermove', handleCreateMove);
-				document.removeEventListener('pointerup', handleCreateEnd);
-				isCreating = false;
-				createTargetDay = null;
-				hasMoved = false;
-			}
-		}
-	}
-
-	// Add global keydown listener
-	$effect(() => {
-		document.addEventListener('keydown', handleKeyDown);
-		return () => document.removeEventListener('keydown', handleKeyDown);
-	});
+	// (Drag/drop/resize/create/keyboard handlers are in composables above)
 </script>
 
 <div class="week-view">
@@ -1120,12 +430,14 @@
 				<div
 					class="day-column"
 					class:today={isToday(day)}
-					class:drop-target={sidebarDropTarget && isSameDay(day, sidebarDropTarget.day)}
-					class:creating={isCreating && createTargetDay && isSameDay(day, createTargetDay)}
-					onpointerdown={startCreate}
-					ondragover={(e) => handleSidebarDragOver(e, day)}
-					ondragleave={handleSidebarDragLeave}
-					ondrop={(e) => handleSidebarDrop(e, day)}
+					class:drop-target={sidebarDrop.dropTarget && isSameDay(day, sidebarDrop.dropTarget.day)}
+					class:creating={dragToCreate.isCreating &&
+						dragToCreate.createTargetDay &&
+						isSameDay(day, dragToCreate.createTargetDay)}
+					onpointerdown={dragToCreate.startCreate}
+					ondragover={(e) => sidebarDrop.handleDragOver(e, day)}
+					ondragleave={sidebarDrop.handleDragLeave}
+					ondrop={(e) => sidebarDrop.handleDrop(e, day)}
 				>
 					{#each hours as hour}
 						<div
@@ -1152,16 +464,20 @@
 
 					<!-- Timed events -->
 					{#each getEventsForDay(day) as event (event.id)}
-						{@const isBeingDragged = isDragging && draggedEvent?.id === event.id}
-						{@const isBeingResized = isResizing && resizeEvent?.id === event.id}
+						{@const isBeingDragged =
+							eventDragDrop.isDragging && eventDragDrop.draggedEvent?.id === event.id}
+						{@const isBeingResized =
+							eventDragDrop.isResizing && eventDragDrop.resizeEvent?.id === event.id}
 						{@const isCrossDayDrag =
-							isBeingDragged && dragTargetDay !== null && !isSameDay(day, dragTargetDay)}
+							isBeingDragged &&
+							eventDragDrop.dragTargetDay !== null &&
+							!isSameDay(day, eventDragDrop.dragTargetDay)}
 						<EventCard
 							{event}
 							style={isBeingDragged && !isCrossDayDrag
-								? `top: ${dragPreviewTop}%; height: ${dragPreviewHeight}%;`
+								? `top: ${eventDragDrop.dragPreviewTop}%; height: ${eventDragDrop.dragPreviewHeight}%;`
 								: isBeingResized
-									? `top: ${resizePreviewTop}%; height: ${resizePreviewHeight}%;`
+									? `top: ${eventDragDrop.resizePreviewTop}%; height: ${eventDragDrop.resizePreviewHeight}%;`
 									: getEventStyle(event)}
 							color={calendarsStore.getColor(event.calendarId)}
 							isDragging={isBeingDragged && !isCrossDayDrag}
@@ -1169,68 +485,72 @@
 							isResizing={isBeingResized}
 							isSearchHighlighted={searchStore.isEventHighlighted(event.id)}
 							isSearchDimmed={searchStore.isEventDimmed(event.id)}
-							formattedTime={isBeingResized ? getResizePreviewTime() : formatEventTimeRange(event)}
+							formattedTime={isBeingResized
+								? eventDragDrop.getResizePreviewTime()
+								: formatEventTimeRange(event)}
 							onClick={handleEventClick}
-							onPointerDown={startDrag}
-							onResizeStart={startResize}
+							onPointerDown={eventDragDrop.startDrag}
+							onResizeStart={eventDragDrop.startResize}
 						/>
 					{/each}
 
 					<!-- Scheduled Tasks (Time-Blocking) - only shown if enabled in settings -->
 					{#if settingsStore.showTasksInCalendar}
 						{#each getScheduledTasksForDay(day) as task (task.id)}
-							{@const isTaskBeingDragged = isTaskDragging && draggedTask?.id === task.id}
-							{@const isTaskBeingResized = isTaskResizing && resizeTask?.id === task.id}
+							{@const isTaskBeingDragged =
+								taskDragDrop.isTaskDragging && taskDragDrop.draggedTask?.id === task.id}
+							{@const isTaskBeingResized =
+								taskDragDrop.isTaskResizing && taskDragDrop.resizeTask?.id === task.id}
 							{@const isTaskCrossDayDrag =
 								isTaskBeingDragged &&
-								taskDragTargetDay !== null &&
-								!isSameDay(day, taskDragTargetDay)}
+								taskDragDrop.taskDragTargetDay !== null &&
+								!isSameDay(day, taskDragDrop.taskDragTargetDay)}
 							<TaskBlock
 								{task}
 								style={isTaskBeingDragged && !isTaskCrossDayDrag
-									? `top: ${taskDragPreviewTop}%; height: ${taskDragPreviewHeight}%;`
+									? `top: ${taskDragDrop.taskDragPreviewTop}%; height: ${taskDragDrop.taskDragPreviewHeight}%;`
 									: isTaskBeingResized
-										? `top: ${taskResizePreviewTop}%; height: ${taskResizePreviewHeight}%;`
+										? `top: ${taskDragDrop.taskResizePreviewTop}%; height: ${taskDragDrop.taskResizePreviewHeight}%;`
 										: getTaskStyle(task)}
 								{onTaskClick}
-								onDragStart={handleTaskDragStart}
-								onResizeStart={handleTaskResizeStart}
+								onDragStart={taskDragDrop.startDrag}
+								onResizeStart={taskDragDrop.startResize}
 								isDragging={isTaskBeingDragged && !isTaskCrossDayDrag}
 								isResizing={isTaskBeingResized}
 								isDraggingSource={isTaskCrossDayDrag}
 							/>
 						{/each}
 
-						<!-- Task Drag preview (solid) for cross-day dragging - shows where task will be -->
-						{#if isTaskDragging && draggedTask && taskDragTargetDay && isSameDay(day, taskDragTargetDay) && !getScheduledTasksForDay(day).some((t) => t.id === draggedTask!.id)}
+						<!-- Task Drag preview (solid) for cross-day dragging -->
+						{#if taskDragDrop.isTaskDragging && taskDragDrop.draggedTask && taskDragDrop.taskDragTargetDay && isSameDay(day, taskDragDrop.taskDragTargetDay) && !getScheduledTasksForDay(day).some((t) => t.id === taskDragDrop.draggedTask!.id)}
 							<TaskBlock
-								task={draggedTask}
-								style="top: {taskDragPreviewTop}%; height: {taskDragPreviewHeight}%;"
+								task={taskDragDrop.draggedTask}
+								style="top: {taskDragDrop.taskDragPreviewTop}%; height: {taskDragDrop.taskDragPreviewHeight}%;"
 								isDragging={true}
 							/>
 						{/if}
 					{/if}
 
-					<!-- Drag preview (solid) for cross-day dragging - shows where event will be -->
-					{#if isDragging && draggedEvent && dragTargetDay && isSameDay(day, dragTargetDay) && !getEventsForDay(day).some((e) => e.id === draggedEvent!.id)}
+					<!-- Drag preview (solid) for cross-day dragging -->
+					{#if eventDragDrop.isDragging && eventDragDrop.draggedEvent && eventDragDrop.dragTargetDay && isSameDay(day, eventDragDrop.dragTargetDay) && !getEventsForDay(day).some((e) => e.id === eventDragDrop.draggedEvent!.id)}
 						<EventCard
-							event={draggedEvent}
-							style="top: {dragPreviewTop}%; height: {dragPreviewHeight}%;"
-							color={calendarsStore.getColor(draggedEvent.calendarId)}
+							event={eventDragDrop.draggedEvent}
+							style="top: {eventDragDrop.dragPreviewTop}%; height: {eventDragDrop.dragPreviewHeight}%;"
+							color={calendarsStore.getColor(eventDragDrop.draggedEvent.calendarId)}
 							isDragging={true}
-							formattedTime={formatEventTimeRange(draggedEvent)}
+							formattedTime={formatEventTimeRange(eventDragDrop.draggedEvent)}
 						/>
 					{/if}
 
 					<!-- Create preview (drag-to-create) -->
-					{#if isCreating && createTargetDay && isSameDay(day, createTargetDay)}
+					{#if dragToCreate.isCreating && dragToCreate.createTargetDay && isSameDay(day, dragToCreate.createTargetDay)}
 						<div
 							class="create-preview"
-							style="top: {createPreviewTop}%; height: {createPreviewHeight}%; background-color: {calendarsStore.getColor(
+							style="top: {dragToCreate.createPreviewTop}%; height: {dragToCreate.createPreviewHeight}%; background-color: {calendarsStore.getColor(
 								calendarsStore.defaultCalendar?.id || ''
 							)};"
 						>
-							<span class="event-time">{getCreatePreviewTime()}</span>
+							<span class="event-time">{dragToCreate.getCreatePreviewTime()}</span>
 							<span class="event-title">(Neuer Termin)</span>
 						</div>
 					{/if}

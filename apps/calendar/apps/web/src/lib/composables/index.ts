@@ -20,6 +20,9 @@ export { useTaskDragDrop, type TaskDragDropConfig } from './useTaskDragDrop.svel
 // Sidebar task drop handling
 export { useSidebarDrop, type SidebarDropConfig } from './useSidebarDrop.svelte';
 
+// Drag-to-create
+export { useDragToCreate, type DragToCreateConfig } from './useDragToCreate.svelte';
+
 // Keyboard handling
 export { useCalendarKeyboard, type CancellableOperation } from './useCalendarKeyboard.svelte';
 
