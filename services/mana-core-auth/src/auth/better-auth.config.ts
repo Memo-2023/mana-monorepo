@@ -215,8 +215,10 @@ export function createBetterAuth(databaseUrl: string) {
 			defaultCookieAttributes: {
 				// Secure in production, allow http in development
 				secure: process.env.NODE_ENV === 'production',
-				// Protect against CSRF while allowing cross-site navigation
-				sameSite: 'lax' as const,
+				// SameSite=None is required for cross-subdomain SSO via fetch()
+				// Lax only sends cookies on top-level navigations, not programmatic fetch()
+				// None requires Secure=true (ensured by production check above)
+				sameSite: process.env.COOKIE_DOMAIN ? ('none' as const) : ('lax' as const),
 				// Cookies accessible to all paths
 				path: '/',
 				// Prevent JavaScript access to cookies
