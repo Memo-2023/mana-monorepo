@@ -5,10 +5,14 @@ FROM node:20-alpine AS builder
 # Build arguments for SvelteKit static env vars
 ARG PUBLIC_BACKEND_URL=http://picture-backend:3040
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
+ARG PUBLIC_GOOGLE_CLIENT_ID=
+ARG PUBLIC_APPLE_CLIENT_ID=
 
 # Set as environment variables for build
 ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
 ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+ENV PUBLIC_GOOGLE_CLIENT_ID=$PUBLIC_GOOGLE_CLIENT_ID
+ENV PUBLIC_APPLE_CLIENT_ID=$PUBLIC_APPLE_CLIENT_ID
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
