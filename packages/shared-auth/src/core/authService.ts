@@ -95,6 +95,19 @@ export function createAuthService(config: AuthServiceConfig) {
 					storage.setItem(storageKeys.USER_EMAIL, email),
 				]);
 
+				// Also sign in via Better Auth native endpoint to set session cookie
+				// This enables cross-subdomain SSO (cookie shared across *.mana.how)
+				try {
+					await fetch(`${baseUrl}/api/auth/sign-in/email`, {
+						method: 'POST',
+						credentials: 'include',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ email, password }),
+					});
+				} catch {
+					// SSO cookie is nice-to-have, don't fail login if this fails
+				}
+
 				return { success: true };
 			} catch (error) {
 				console.error('Error signing in:', error);
