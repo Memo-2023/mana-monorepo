@@ -258,31 +258,28 @@ jobs:
           cd "${{ env.PROJECT_DIR }}"
           source scripts/deploy-metrics.sh
 
-          # Map of service -> health URL
-          declare -A HEALTH_URLS=(
-            ["mana-auth"]="http://localhost:3001/health"
-            ["matrix-web"]="http://localhost:5180/health"
-            ["chat-backend"]="http://localhost:3030/health"
-            ["chat-web"]="http://localhost:5010/health"
-            ["todo-backend"]="http://localhost:3031/health"
-            ["todo-web"]="http://localhost:5011/health"
-            ["calendar-backend"]="http://localhost:3032/health"
-            ["calendar-web"]="http://localhost:5012/health"
-            ["clock-backend"]="http://localhost:3033/health"
-            ["clock-web"]="http://localhost:5013/health"
-            ["contacts-backend"]="http://localhost:3034/health"
-            ["contacts-web"]="http://localhost:5014/health"
-          )
-
-          DEPLOY_ALL="${{ steps.services.outputs.deploy-all }}"
-          SERVICES="${{ steps.services.outputs.services }}"
+          # Service health URL pairs (Bash 3.x compatible — no declare -A)
+          HEALTH_ENTRIES="
+            mana-auth|http://localhost:3001/health
+            matrix-web|http://localhost:5180/health
+            chat-backend|http://localhost:3030/health
+            chat-web|http://localhost:5010/health
+            todo-backend|http://localhost:3031/health
+            todo-web|http://localhost:5011/health
+            calendar-backend|http://localhost:3032/health
+            calendar-web|http://localhost:5012/health
+            clock-backend|http://localhost:3033/health
+            clock-web|http://localhost:5013/health
+            contacts-backend|http://localhost:3034/health
+            contacts-web|http://localhost:5014/health
+          "
 
           HEALTH_RESULTS=""
           echo "=== Health Checks ==="
 
-          # Check all known health endpoints
-          for svc in "${!HEALTH_URLS[@]}"; do
-            url="${HEALTH_URLS[$svc]}"
+          for entry in $HEALTH_ENTRIES; do
+            svc="${entry%%|*}"
+            url="${entry#*|}"
             result=$(check_health_timed "$svc" "$url" 2>/dev/null) || true
             status=$(echo "$result" | awk '{print $1}')
             elapsed=$(echo "$result" | awk '{print $2}')
@@ -349,37 +346,35 @@ jobs:
             # Finalise with duration
             finalise_deployment "$DEPLOY_ID" "$STATUS" "$DURATION" 2>/dev/null || true
 
-            # Parse build times: "svc1:42 svc2:31"
+            # Helper: lookup value from "key:val key2:val2" string
+            # Usage: lookup "key" "key:val key2:val2" [field_index] (default: 2nd field)
+            lookup() {
+              local needle="$1" haystack="$2" field="${3:-2}"
+              for item in $haystack; do
+                if [ "${item%%:*}" = "$needle" ]; then
+                  echo "$item" | cut -d: -f"$field"
+                  return
+                fi
+              done
+              echo ""
+            }
+
             BUILD_TIMES="${{ steps.build.outputs.build-times }}"
-            declare -A BUILD_DUR_MAP
-            for entry in $BUILD_TIMES; do
-              svc="${entry%%:*}"
-              dur="${entry#*:}"
-              BUILD_DUR_MAP["$svc"]="$dur"
-            done
-
-            # Parse health results: "svc1:ok:200:5.0 svc2:failed:503:30.0"
             HEALTH_RESULTS="${{ steps.health.outputs.health-results }}"
-            declare -A HEALTH_MAP HTTP_MAP STARTUP_MAP
-            for entry in $HEALTH_RESULTS; do
-              svc=$(echo "$entry" | cut -d: -f1)
-              h_status=$(echo "$entry" | cut -d: -f2)
-              h_code=$(echo "$entry" | cut -d: -f3)
-              h_time=$(echo "$entry" | cut -d: -f4)
-              HEALTH_MAP["$svc"]="$h_status"
-              HTTP_MAP["$svc"]="$h_code"
-              STARTUP_MAP["$svc"]="$h_time"
-            done
 
-            # Combine: for each service that was built or health-checked, insert a row
+            # Collect unique service names from both build and health data
             ALL_SVCS=$(echo "$BUILD_TIMES $HEALTH_RESULTS" | tr ' ' '\n' | cut -d: -f1 | sort -u | tr '\n' ' ')
             for svc in $ALL_SVCS; do
               [ -z "$svc" ] && continue
-              build_dur="${BUILD_DUR_MAP[$svc]:-0}"
+              build_dur=$(lookup "$svc" "$BUILD_TIMES" 2)
+              build_dur="${build_dur:-0}"
               img_mb=$(get_image_size_mb "$svc" 2>/dev/null || echo "0")
-              startup="${STARTUP_MAP[$svc]:-0}"
-              health="${HEALTH_MAP[$svc]:-skipped}"
-              http_code="${HTTP_MAP[$svc]:-0}"
+              startup=$(lookup "$svc" "$HEALTH_RESULTS" 4)
+              startup="${startup:-0}"
+              health=$(lookup "$svc" "$HEALTH_RESULTS" 2)
+              health="${health:-skipped}"
+              http_code=$(lookup "$svc" "$HEALTH_RESULTS" 3)
+              http_code="${http_code:-0}"
 
               insert_deploy_service "$DEPLOY_ID" "$svc" "$build_dur" "$img_mb" "$startup" "$health" "$http_code" 2>/dev/null || true
               push_service_metrics "$svc" "$build_dur" "$img_mb" "$health" 2>/dev/null || true

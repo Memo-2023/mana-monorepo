@@ -4,7 +4,8 @@
 #
 # Provides functions for timing, DB inserts, and Pushgateway pushes.
 
-set -euo pipefail
+# NOTE: No set -euo pipefail here — this file is sourced by CI steps
+# that need to handle errors gracefully. The caller controls error handling.
 
 DEPLOY_START_EPOCH=""
 PUSHGATEWAY_URL="http://localhost:9091"
