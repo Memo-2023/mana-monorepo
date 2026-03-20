@@ -358,6 +358,33 @@
 		</SettingsCard>
 	</SettingsSection>
 
+	<!-- Externe Kalender -->
+	<SettingsSection title="Externe Kalender">
+		{#snippet icon()}
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+				/>
+			</svg>
+		{/snippet}
+		<SettingsCard>
+			<div class="flex flex-col gap-3">
+				<p class="text-sm text-muted-foreground">
+					Verbinde Google Calendar, Apple Calendar, CalDAV oder iCal-URLs.
+				</p>
+				<a
+					href="/settings/sync"
+					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors self-start"
+				>
+					Kalender-Sync verwalten
+				</a>
+			</div>
+		</SettingsCard>
+	</SettingsSection>
+
 	<!-- Global App Settings (synced across all apps) -->
 	<GlobalSettingsSection
 		{userSettings}

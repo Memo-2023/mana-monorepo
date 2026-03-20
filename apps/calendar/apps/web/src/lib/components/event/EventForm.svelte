@@ -11,6 +11,7 @@
 	} from '@manacore/shared-ui';
 	import AttendeeSelector from './AttendeeSelector.svelte';
 	import ResponsiblePersonSelector from './ResponsiblePersonSelector.svelte';
+	import RecurrenceSelector from './RecurrenceSelector.svelte';
 	import type {
 		CalendarEvent,
 		CreateEventInput,
@@ -66,6 +67,12 @@
 
 	// Attendees state
 	let attendees = $state<EventAttendee[]>(event?.metadata?.attendees || []);
+
+	// Recurrence state
+	let recurrenceRule = $state<string | null>(event?.recurrenceRule || null);
+	let recurrenceEndDate = $state<string | null>(
+		event?.recurrenceEndDate ? format(toDate(event.recurrenceEndDate), 'yyyy-MM-dd') : null
+	);
 
 	// Convert EventTag to Tag type for shared-ui components
 	function eventTagToTag(tag: EventTag): Tag {
@@ -222,6 +229,10 @@
 			endTime: endDateTime.toISOString(),
 			// Only include calendarId if set - backend will use default if not provided
 			...(calendarId ? { calendarId } : {}),
+			recurrenceRule: recurrenceRule || undefined,
+			recurrenceEndDate: recurrenceEndDate
+				? new Date(`${recurrenceEndDate}T23:59:59`).toISOString()
+				: undefined,
 			metadata: finalMetadata,
 			tagIds: selectedTags.length > 0 ? selectedTags.map((t) => t.id) : undefined,
 		};
@@ -330,6 +341,16 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Wiederholung -->
+	<RecurrenceSelector
+		{recurrenceRule}
+		{recurrenceEndDate}
+		onRecurrenceChange={(rule, endDt) => {
+			recurrenceRule = rule;
+			recurrenceEndDate = endDt;
+		}}
+	/>
 
 	<div class="flex flex-col gap-2">
 		<label for="location" class="text-sm font-medium text-foreground">Ort</label>

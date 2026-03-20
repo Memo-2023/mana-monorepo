@@ -3,8 +3,9 @@
  */
 
 import type { CalendarEvent, CreateEventInput, UpdateEventInput } from '@calendar/shared';
+import { parseRRule, generateOccurrences } from '@calendar/shared';
 import * as api from '$lib/api/events';
-import { format, isWithinInterval, isSameDay } from 'date-fns';
+import { format, isWithinInterval, isSameDay, differenceInMilliseconds } from 'date-fns';
 import { toDate } from '$lib/utils/eventDateHelpers';
 import { toastStore } from '@manacore/shared-ui';
 
@@ -16,6 +17,53 @@ let loadedRange = $state<{ start: Date; end: Date } | null>(null);
 
 // Draft event for quick create (temporary event shown in grid before saving)
 let draftEvent = $state<CalendarEvent | null>(null);
+
+/**
+ * Expand recurring events into individual occurrences for the current view range.
+ * Each occurrence gets a synthetic ID: `{parentId}__recurrence__{dateISO}`
+ */
+function expandRecurringEvents(
+	rawEvents: CalendarEvent[],
+	rangeStart: Date,
+	rangeEnd: Date
+): CalendarEvent[] {
+	const result: CalendarEvent[] = [];
+
+	for (const event of rawEvents) {
+		if (!event.recurrenceRule) {
+			result.push(event);
+			continue;
+		}
+
+		const pattern = parseRRule(event.recurrenceRule);
+		if (!pattern) {
+			result.push(event);
+			continue;
+		}
+
+		const eventStart = toDate(event.startTime);
+		const eventEnd = toDate(event.endTime);
+		const durationMs = differenceInMilliseconds(eventEnd, eventStart);
+		const exceptions = (event.recurrenceExceptions as string[]) || [];
+
+		const occurrences = generateOccurrences(eventStart, pattern, rangeStart, rangeEnd, exceptions);
+
+		for (const occurrenceDate of occurrences) {
+			const occEnd = new Date(occurrenceDate.getTime() + durationMs);
+			const dateKey = format(occurrenceDate, 'yyyy-MM-dd');
+
+			result.push({
+				...event,
+				id: `${event.id}__recurrence__${dateKey}`,
+				parentEventId: event.id,
+				startTime: occurrenceDate.toISOString(),
+				endTime: occEnd.toISOString(),
+			});
+		}
+	}
+
+	return result;
+}
 
 export const eventsStore = {
 	// Getters - always return safe values
@@ -51,7 +99,8 @@ export const eventsStore = {
 		} else {
 			// API returns events array directly (already extracted in api/events.ts)
 			const eventsData = result.data as CalendarEvent[] | null;
-			events = eventsData || [];
+			// Expand recurring events into individual occurrences for the view range
+			events = expandRecurringEvents(eventsData || [], startDate, endDate);
 			loadedRange = { start: startDate, end: endDate };
 		}
 
@@ -233,5 +282,86 @@ export const eventsStore = {
 	 */
 	isDraftEvent(eventId: string) {
 		return eventId === '__draft__';
+	},
+
+	/**
+	 * Check if an event ID is a recurrence occurrence
+	 */
+	isRecurrenceOccurrence(eventId: string) {
+		return eventId.includes('__recurrence__');
+	},
+
+	/**
+	 * Get the parent event ID from a recurrence occurrence ID
+	 */
+	getParentEventId(eventId: string): string {
+		if (eventId.includes('__recurrence__')) {
+			return eventId.split('__recurrence__')[0];
+		}
+		return eventId;
+	},
+
+	/**
+	 * Delete a single occurrence of a recurring event by adding an exception date
+	 */
+	async deleteRecurrenceOccurrence(eventId: string) {
+		const parentId = this.getParentEventId(eventId);
+		const dateKey = eventId.split('__recurrence__')[1]; // yyyy-MM-dd
+
+		// Find the parent event to get existing exceptions
+		const parent = events.find(
+			(e) => e.id === parentId || this.getParentEventId(e.id) === parentId
+		);
+		if (!parent) return { error: { message: 'Event not found' } };
+
+		const realParentId = this.getParentEventId(parent.id);
+		const existingExceptions = (parent.recurrenceExceptions as string[]) || [];
+		const updatedExceptions = [...existingExceptions, dateKey];
+
+		// Optimistic: remove this occurrence from local state
+		events = events.filter((e) => e.id !== eventId);
+
+		const result = await api.updateEvent(realParentId, {
+			recurrenceExceptions: updatedExceptions as unknown as undefined,
+		});
+
+		if (result.error) {
+			toastStore.error(`Fehler: ${result.error.message}`);
+			// Refetch to restore state
+			if (loadedRange) {
+				this.fetchEvents(loadedRange.start, loadedRange.end);
+			}
+		} else {
+			toastStore.success('Termin gelöscht');
+		}
+
+		return result;
+	},
+
+	/**
+	 * Delete all occurrences of a recurring event (deletes the parent)
+	 */
+	async deleteRecurrenceSeries(eventId: string) {
+		const parentId = this.getParentEventId(eventId);
+		return this.deleteEvent(parentId);
+	},
+
+	/**
+	 * Update all occurrences of a recurring event (updates the parent)
+	 */
+	async updateRecurrenceSeries(eventId: string, data: UpdateEventInput) {
+		const parentId = this.getParentEventId(eventId);
+		const result = await api.updateEvent(parentId, data);
+
+		if (result.error) {
+			toastStore.error(`Fehler: ${result.error.message}`);
+		} else {
+			// Refetch to regenerate occurrences
+			if (loadedRange) {
+				await this.fetchEvents(loadedRange.start, loadedRange.end);
+			}
+		}
+
+		return result;
 	},
 };
