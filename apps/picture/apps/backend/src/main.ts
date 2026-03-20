@@ -47,8 +47,10 @@ async function bootstrap() {
 		prefix: '/uploads/',
 	});
 
-	// Set global prefix for API routes
-	app.setGlobalPrefix('api/v1');
+	// Set global prefix for API routes, exclude health/metrics
+	app.setGlobalPrefix('api/v1', {
+		exclude: ['health', 'metrics'],
+	});
 
 	const port = process.env.PORT || 3006;
 	await app.listen(port);

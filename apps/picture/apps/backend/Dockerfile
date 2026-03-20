@@ -84,12 +84,12 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 WORKDIR /app/apps/picture/apps/backend
 
-# Expose port
-EXPOSE 3006
+# Expose port (overridden by PORT env var in docker-compose)
+EXPOSE 3040
 
-# Health check
+# Health check (overridden by docker-compose healthcheck)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3006/api/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-3040}/health || exit 1
 
 # Run entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]

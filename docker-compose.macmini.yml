@@ -1637,7 +1637,7 @@ services:
     ports:
       - "3040:3040"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3040/api/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3040/health"]
       interval: 30s
       timeout: 10s
       retries: 3
