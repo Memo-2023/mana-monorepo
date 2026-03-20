@@ -26,5 +26,8 @@ export { useDragToCreate, type DragToCreateConfig } from './useDragToCreate.svel
 // Keyboard handling
 export { useCalendarKeyboard, type CancellableOperation } from './useCalendarKeyboard.svelte';
 
+// Swipe navigation (carousel gesture handling)
+export { useSwipeNavigation, type SwipeNavigationConfig } from './useSwipeNavigation.svelte';
+
 // Birthday popover management
 export { useBirthdayPopover } from './useBirthdayPopover.svelte';

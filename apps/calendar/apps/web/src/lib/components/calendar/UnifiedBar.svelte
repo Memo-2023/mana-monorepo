@@ -1,16 +1,13 @@
 <script lang="ts">
 	import { setContext, onMount } from 'svelte';
 	import { unifiedBarStore } from '$lib/stores/unified-bar.svelte';
-	import { createEventDispatcher } from 'svelte';
 	import { quintOut } from 'svelte/easing';
 	import { fly, slide } from 'svelte/transition';
 
-	// Components
-	// import QuickInputBar from '@manacore/shared-ui/components/QuickInputBar.svelte';
-	import DateStrip from './DateStrip.svelte';
-	import TagStrip from './TagStrip.svelte';
-	import CalendarToolbar from './CalendarToolbar.svelte';
-	import DateStripFab from './DateStripFab.svelte';
+	// Components (not yet integrated — using placeholders)
+	// import DateStrip from './DateStrip.svelte';
+	// import TagStrip from './TagStrip.svelte';
+	// import CalendarToolbar from './CalendarToolbar.svelte';
 
 	// Props
 	interface Props {
@@ -68,8 +65,6 @@
 		onToolbarCollapsedChange = () => {},
 	}: Props = $props();
 
-	const dispatch = createEventDispatcher();
-
 	// Local state for transitions
 	let isTransitioning = $state(false);
 	let previousMode = $state(unifiedBarStore.mode);
@@ -115,13 +110,9 @@
 	// Overlay menu handlers
 	function handleOverlayToggle() {
 		unifiedBarStore.toggleOverlay();
-		dispatch('overlayToggle', { isOpen: unifiedBarStore.isOverlayOpen });
 	}
 
 	function handleOverlayAction(action: string) {
-		dispatch('overlayAction', { action });
-
-		// Handle common actions
 		switch (action) {
 			case 'toggle-date-strip':
 				unifiedBarStore.toggleDateStrip();
@@ -218,71 +209,6 @@
 			aria-label="Date strip"
 			onclick={() => handleLayerClick('date')}
 		>
-			<!-- DateStrip placeholder -->
-			<div class="date-strip-placeholder">DateStrip Component</div>
-		</div>
-	{/if}
-
-	<!-- Layer 1: DateStrip -->
-	{#if unifiedBarStore.showDateStrip}
-		<div
-			class="unified-bar-layer date-strip-layer"
-			style="z-index: {layerZIndices.date}; bottom: 70px;"
-			class:active={unifiedBarStore.activeLayer === 'date'}
-			transition:fly={{ ...flyConfig, y: 30 }}
-			role="toolbar"
-			aria-label="Date strip"
-			onclick={() => handleLayerClick('date')}
-		>
-			<!-- DateStrip placeholder -->
-			<div class="date-strip-placeholder">DateStrip Component</div>
-		</div>
-	{/if}
-
-	<!-- Layer 2: TagStrip -->
-	{#if unifiedBarStore.showTagStrip}
-		<div
-			class="unified-bar-layer tag-strip-layer"
-			style="z-index: {layerZIndices.tag}; bottom: {layerBottomOffsets.tag};"
-			class:active={unifiedBarStore.activeLayer === 'tag'}
-			transition:fly={{ ...flyConfig, y: 50 }}
-			role="toolbar"
-			aria-label="Tag filter bar"
-			onclick={() => handleLayerClick('tag')}
-		>
-			<!-- TagStrip placeholder -->
-			<div class="tag-strip-placeholder">TagStrip Component</div>
-		</div>
-	{/if}
-
-	<!-- Layer 1: DateStrip -->
-	{#if unifiedBarStore.showDateStrip}
-		<div
-			class="unified-bar-layer date-strip-layer"
-			style="z-index: {layerZIndices.date}; bottom: {layerBottomOffsets.date};"
-			class:active={unifiedBarStore.activeLayer === 'date'}
-			transition:fly={{ ...flyConfig, y: 30 }}
-			role="toolbar"
-			aria-label="Date strip"
-			onclick={() => handleLayerClick('date')}
-		>
-			<!-- DateStrip placeholder -->
-			<div class="date-strip-placeholder">DateStrip Component</div>
-		</div>
-	{/if}
-
-	<!-- Layer 1: DateStrip -->
-	{#if unifiedBarStore.showDateStrip}
-		<div
-			class="unified-bar-layer date-strip-layer"
-			style="z-index: {layerZIndices.date}; bottom: {layerBottomOffsets.date};"
-			class:active={unifiedBarStore.activeLayer === 'date'}
-			transition:fly={{ ...flyConfig, y: 30 }}
-			role="toolbar"
-			aria-label="Date strip"
-			onclick={() => handleLayerClick('date')}
-		>
-			<!-- DateStrip placeholder -->
 			<div class="date-strip-placeholder">DateStrip Component</div>
 		</div>
 	{/if}
