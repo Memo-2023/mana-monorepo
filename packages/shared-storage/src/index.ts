@@ -21,6 +21,22 @@ export {
 	createProjectDocStorage,
 } from './factory';
 
+// Hooks
+export { StorageHooks } from './hooks';
+export type {
+	StorageEventType,
+	StorageEventMap,
+	StorageHook,
+	UploadEventPayload,
+	DeleteEventPayload,
+	DownloadEventPayload,
+	ErrorEventPayload,
+} from './hooks';
+
+// Metrics
+export { InMemoryMetrics, attachMetrics } from './metrics';
+export type { StorageMetricsCollector } from './metrics';
+
 // Utilities
 export {
 	generateFileKey,
@@ -42,6 +58,8 @@ export {
 	type BucketName,
 	type UploadOptions,
 	type PresignedUrlOptions,
+	type MultipartUploadInit,
+	type MultipartUploadPart,
 	type UploadResult,
 	type FileInfo,
 } from './types';

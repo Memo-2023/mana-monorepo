@@ -87,6 +87,26 @@ export interface FileInfo {
 }
 
 /**
+ * Multipart upload initialization result
+ */
+export interface MultipartUploadInit {
+	/** S3 upload ID for this multipart upload session */
+	uploadId: string;
+	/** Object key */
+	key: string;
+}
+
+/**
+ * A completed part of a multipart upload
+ */
+export interface MultipartUploadPart {
+	/** 1-based part number */
+	partNumber: number;
+	/** ETag returned by S3 after uploading the part */
+	etag: string;
+}
+
+/**
  * Predefined bucket names for each project
  */
 export const BUCKETS = {

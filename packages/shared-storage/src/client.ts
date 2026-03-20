@@ -6,15 +6,22 @@ import {
 	DeleteObjectsCommand,
 	ListObjectsV2Command,
 	HeadObjectCommand,
+	CreateMultipartUploadCommand,
+	UploadPartCommand,
+	CompleteMultipartUploadCommand,
+	AbortMultipartUploadCommand,
 	type PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { StorageHooks } from './hooks';
 import type {
 	StorageConfig,
 	BucketConfig,
 	UploadOptions,
 	PresignedUrlOptions,
+	MultipartUploadInit,
+	MultipartUploadPart,
 	UploadResult,
 	FileInfo,
 } from './types';
@@ -26,8 +33,10 @@ export class StorageClient {
 	private client: S3Client;
 	private presignClient: S3Client;
 	private bucket: BucketConfig;
+	readonly hooks: StorageHooks;
 
 	constructor(config: StorageConfig, bucket: BucketConfig) {
+		this.hooks = new StorageHooks();
 		// Main client for internal operations (upload, download, delete, etc.)
 		this.client = new S3Client({
 			endpoint: config.endpoint,
@@ -86,13 +95,27 @@ export class StorageClient {
 		}
 
 		const command = new PutObjectCommand(input);
-		const result = await this.client.send(command);
-
-		return {
-			key,
-			url: this.getPublicUrl(key),
-			etag: result.ETag,
-		};
+		try {
+			const result = await this.client.send(command);
+			const uploadResult: UploadResult = { key, url: this.getPublicUrl(key), etag: result.ETag };
+			const sizeBytes =
+				typeof body !== 'string' && !(body instanceof ReadableStream) ? body.byteLength : undefined;
+			this.hooks.emit('upload', {
+				bucket: this.bucket.name,
+				key,
+				sizeBytes,
+				contentType: options.contentType,
+				result: uploadResult,
+			});
+			return uploadResult;
+		} catch (err) {
+			this.hooks.emit('upload:error', {
+				bucket: this.bucket.name,
+				key,
+				error: err instanceof Error ? err : new Error(String(err)),
+			});
+			throw err;
+		}
 	}
 
 	/**
@@ -114,28 +137,41 @@ export class StorageClient {
 			}
 		}
 
-		const upload = new Upload({
-			client: this.client,
-			params: {
-				Bucket: this.bucket.name,
-				Key: key,
-				Body: body,
-				ContentType: options.contentType,
-				CacheControl: options.cacheControl,
-				Metadata: options.metadata,
-				...(options.public ? { ACL: 'public-read' as const } : {}),
-			},
-			queueSize: 4,
-			partSize: 10 * 1024 * 1024, // 10MB parts
-		});
+		try {
+			const upload = new Upload({
+				client: this.client,
+				params: {
+					Bucket: this.bucket.name,
+					Key: key,
+					Body: body,
+					ContentType: options.contentType,
+					CacheControl: options.cacheControl,
+					Metadata: options.metadata,
+					...(options.public ? { ACL: 'public-read' as const } : {}),
+				},
+				queueSize: 4,
+				partSize: 10 * 1024 * 1024, // 10MB parts
+			});
 
-		const result = await upload.done();
-
-		return {
-			key,
-			url: this.getPublicUrl(key),
-			etag: result.ETag,
-		};
+			const result = await upload.done();
+			const uploadResult: UploadResult = { key, url: this.getPublicUrl(key), etag: result.ETag };
+			const sizeBytes = !(body instanceof ReadableStream) ? body.byteLength : undefined;
+			this.hooks.emit('upload', {
+				bucket: this.bucket.name,
+				key,
+				sizeBytes,
+				contentType: options.contentType,
+				result: uploadResult,
+			});
+			return uploadResult;
+		} catch (err) {
+			this.hooks.emit('upload:error', {
+				bucket: this.bucket.name,
+				key,
+				error: err instanceof Error ? err : new Error(String(err)),
+			});
+			throw err;
+		}
 	}
 
 	/**
@@ -152,6 +188,8 @@ export class StorageClient {
 		if (!response.Body) {
 			throw new Error(`File not found: ${key}`);
 		}
+
+		this.hooks.emit('download', { bucket: this.bucket.name, key });
 
 		// Convert stream to buffer
 		const chunks: Uint8Array[] = [];
@@ -190,6 +228,7 @@ export class StorageClient {
 		});
 
 		await this.client.send(command);
+		this.hooks.emit('delete', { bucket: this.bucket.name, keys: [key] });
 	}
 
 	/**
@@ -211,6 +250,7 @@ export class StorageClient {
 			});
 			await this.client.send(command);
 		}
+		this.hooks.emit('delete', { bucket: this.bucket.name, keys });
 	}
 
 	/**
@@ -328,5 +368,109 @@ export class StorageClient {
 	 */
 	getBucketName(): string {
 		return this.bucket.name;
+	}
+
+	// ── Presigned Multipart Upload (browser direct-upload) ──────────────
+
+	/**
+	 * Initiate a multipart upload and return the upload ID.
+	 * The browser uses this ID to upload parts directly via presigned URLs.
+	 */
+	async createMultipartUpload(key: string, contentType?: string): Promise<MultipartUploadInit> {
+		const command = new CreateMultipartUploadCommand({
+			Bucket: this.bucket.name,
+			Key: key,
+			ContentType: contentType,
+		});
+
+		const response = await this.client.send(command);
+		if (!response.UploadId) {
+			throw new Error('Failed to create multipart upload — no UploadId returned');
+		}
+
+		return { uploadId: response.UploadId, key };
+	}
+
+	/**
+	 * Generate presigned URLs for each part of a multipart upload.
+	 * The browser PUTs each chunk to the corresponding URL.
+	 *
+	 * @param key - Object key
+	 * @param uploadId - From createMultipartUpload()
+	 * @param parts - Number of parts to generate URLs for
+	 * @param expiresIn - URL expiration in seconds (default: 3600)
+	 */
+	async getMultipartUploadUrls(
+		key: string,
+		uploadId: string,
+		parts: number,
+		expiresIn = 3600
+	): Promise<string[]> {
+		const urls: string[] = [];
+
+		for (let partNumber = 1; partNumber <= parts; partNumber++) {
+			const command = new UploadPartCommand({
+				Bucket: this.bucket.name,
+				Key: key,
+				UploadId: uploadId,
+				PartNumber: partNumber,
+			});
+
+			const url = await getSignedUrl(this.presignClient, command, { expiresIn });
+			urls.push(url);
+		}
+
+		return urls;
+	}
+
+	/**
+	 * Complete a multipart upload after all parts have been uploaded.
+	 * The browser sends the ETag of each part (from the PUT response headers).
+	 */
+	async completeMultipartUpload(
+		key: string,
+		uploadId: string,
+		parts: MultipartUploadPart[]
+	): Promise<UploadResult> {
+		const command = new CompleteMultipartUploadCommand({
+			Bucket: this.bucket.name,
+			Key: key,
+			UploadId: uploadId,
+			MultipartUpload: {
+				Parts: parts.map((p) => ({
+					PartNumber: p.partNumber,
+					ETag: p.etag,
+				})),
+			},
+		});
+
+		const result = await this.client.send(command);
+
+		const uploadResult: UploadResult = {
+			key,
+			url: this.getPublicUrl(key),
+			etag: result.ETag,
+		};
+
+		this.hooks.emit('upload', {
+			bucket: this.bucket.name,
+			key,
+			result: uploadResult,
+		});
+
+		return uploadResult;
+	}
+
+	/**
+	 * Abort a multipart upload (cleanup if the browser abandons the upload).
+	 */
+	async abortMultipartUpload(key: string, uploadId: string): Promise<void> {
+		const command = new AbortMultipartUploadCommand({
+			Bucket: this.bucket.name,
+			Key: key,
+			UploadId: uploadId,
+		});
+
+		await this.client.send(command);
 	}
 }

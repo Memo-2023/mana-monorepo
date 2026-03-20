@@ -31,6 +31,18 @@ vi.mock('@aws-sdk/client-s3', () => ({
 	HeadObjectCommand: vi.fn(function (this: any, input: any) {
 		Object.assign(this, input);
 	}),
+	CreateMultipartUploadCommand: vi.fn(function (this: any, input: any) {
+		Object.assign(this, input);
+	}),
+	UploadPartCommand: vi.fn(function (this: any, input: any) {
+		Object.assign(this, input);
+	}),
+	CompleteMultipartUploadCommand: vi.fn(function (this: any, input: any) {
+		Object.assign(this, input);
+	}),
+	AbortMultipartUploadCommand: vi.fn(function (this: any, input: any) {
+		Object.assign(this, input);
+	}),
 }));
 
 vi.mock('@aws-sdk/lib-storage', () => ({
@@ -343,6 +355,123 @@ describe('StorageClient', () => {
 		it('getDownloadUrl returns a signed URL', async () => {
 			const url = await storage.getDownloadUrl('download.png');
 			expect(url).toBe('https://signed.url/file');
+		});
+	});
+
+	describe('hooks', () => {
+		it('emits upload event on successful upload', async () => {
+			mockSend.mockResolvedValue({ ETag: '"abc"' });
+			const handler = vi.fn();
+			storage.hooks.on('upload', handler);
+
+			await storage.upload('file.png', Buffer.from('data'), { contentType: 'image/png' });
+
+			expect(handler).toHaveBeenCalledWith(
+				expect.objectContaining({
+					bucket: 'test-bucket',
+					key: 'file.png',
+					contentType: 'image/png',
+					sizeBytes: 4,
+				})
+			);
+		});
+
+		it('emits upload:error on failed upload', async () => {
+			mockSend.mockRejectedValue(new Error('S3 down'));
+			const handler = vi.fn();
+			storage.hooks.on('upload:error', handler);
+
+			await expect(storage.upload('file.png', Buffer.from('x'))).rejects.toThrow('S3 down');
+			expect(handler).toHaveBeenCalledWith(
+				expect.objectContaining({
+					bucket: 'test-bucket',
+					key: 'file.png',
+				})
+			);
+		});
+
+		it('emits delete event', async () => {
+			mockSend.mockResolvedValue({});
+			const handler = vi.fn();
+			storage.hooks.on('delete', handler);
+
+			await storage.delete('file.png');
+
+			expect(handler).toHaveBeenCalledWith({
+				bucket: 'test-bucket',
+				keys: ['file.png'],
+			});
+		});
+
+		it('emits download event', async () => {
+			mockSend.mockResolvedValue({
+				Body: (async function* () {
+					yield new Uint8Array([1]);
+				})(),
+			});
+			const handler = vi.fn();
+			storage.hooks.on('download', handler);
+
+			await storage.download('file.bin');
+
+			expect(handler).toHaveBeenCalledWith({ bucket: 'test-bucket', key: 'file.bin' });
+		});
+	});
+
+	describe('presigned multipart upload', () => {
+		it('createMultipartUpload returns upload ID', async () => {
+			mockSend.mockResolvedValue({ UploadId: 'mp-123' });
+
+			const result = await storage.createMultipartUpload('big.zip', 'application/zip');
+
+			expect(result).toEqual({ uploadId: 'mp-123', key: 'big.zip' });
+		});
+
+		it('createMultipartUpload throws when no UploadId', async () => {
+			mockSend.mockResolvedValue({});
+
+			await expect(storage.createMultipartUpload('big.zip')).rejects.toThrow(
+				'no UploadId returned'
+			);
+		});
+
+		it('getMultipartUploadUrls returns URLs for each part', async () => {
+			const urls = await storage.getMultipartUploadUrls('big.zip', 'mp-123', 3);
+
+			expect(urls).toHaveLength(3);
+			expect(urls[0]).toBe('https://signed.url/file');
+		});
+
+		it('completeMultipartUpload finishes upload and emits hook', async () => {
+			mockSend.mockResolvedValue({ ETag: '"final"' });
+			const handler = vi.fn();
+			storage.hooks.on('upload', handler);
+
+			const result = await storage.completeMultipartUpload('big.zip', 'mp-123', [
+				{ partNumber: 1, etag: '"part1"' },
+				{ partNumber: 2, etag: '"part2"' },
+			]);
+
+			expect(result.key).toBe('big.zip');
+			expect(result.etag).toBe('"final"');
+			expect(handler).toHaveBeenCalledWith(
+				expect.objectContaining({ bucket: 'test-bucket', key: 'big.zip' })
+			);
+		});
+
+		it('abortMultipartUpload sends abort command', async () => {
+			mockSend.mockResolvedValue({});
+			const { AbortMultipartUploadCommand } = await import('@aws-sdk/client-s3');
+
+			await storage.abortMultipartUpload('big.zip', 'mp-123');
+
+			expect(AbortMultipartUploadCommand).toHaveBeenCalledWith(
+				expect.objectContaining({
+					Bucket: 'test-bucket',
+					Key: 'big.zip',
+					UploadId: 'mp-123',
+				})
+			);
 		});
 	});
 });
