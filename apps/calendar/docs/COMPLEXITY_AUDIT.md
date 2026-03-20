@@ -62,19 +62,20 @@ Die Legacy-Composables (`useDragDrop`, `useResize`) sind von keiner Komponente i
 
 ---
 
-### 5. UnifiedBar Komplexität (633 LOC) — Offen
+### 5. UnifiedBar Komplexität — ✅ Vereinfacht (633→559 LOC)
 
-**Problem:** 3 Modi mit Layer-System, duplizierte Renderings von DateStrip/TagStrip, eigener Store mit Cloud-Sync für lokalen UI-State.
-
-**Empfehlung:** Vereinfachen, Duplikate entfernen, Cloud-Sync für UI-State überdenken.
+- 3 duplizierte DateStrip-Blöcke entfernt (4→1)
+- 1 duplizierten TagStrip-Block entfernt (2→1)
+- Deprecated Svelte 4 createEventDispatcher entfernt
+- Ungenutzte Komponenten-Imports entfernt
 
 ---
 
-### 6. ViewCarousel Gesture-Handling (~400 LOC) — Offen
+### 6. ViewCarousel Gesture-Handling — ✅ Extrahiert (402→162 LOC)
 
-**Problem:** Touch + Wheel + Keyboard + Button-Navigation mit Velocity-Berechnung und RAF-Animation, eng gekoppelt.
-
-**Empfehlung:** Gesture-Handling als wiederverwendbares Composable extrahieren.
+- Gesamte Gesture-Logik (Touch, Wheel, Velocity, Snap, Animation, Chain-Navigation)
+  in `useSwipeNavigation` Composable extrahiert (260 LOC)
+- ViewCarousel enthält nur noch Layout und View-Rendering
 
 ---
 
@@ -104,13 +105,18 @@ Die Legacy-Composables (`useDragDrop`, `useResize`) sind von keiner Komponente i
 - Status-Anzeige (Ausstehend/Gesendet/Fehlgeschlagen)
 - Backend war bereits vollständig (Cron, Expo Push, Brevo Email)
 
-### 4. Kalender-Sharing kaum implementiert — Priorität: Mittel
+### 4. Kalender-Sharing — ✅ Implementiert
 
-`shares.ts` API-Client existiert als Stub. Kein UI zum Teilen oder für Berechtigungsverwaltung.
+- Shares Store mit vollem Lifecycle (Teilen, Annehmen/Ablehnen, Entfernen, Berechtigungen)
+- /settings/sharing Seite mit Einladungen, geteilten Kalendern, Pro-Kalender-Freigabeverwaltung
+- Fehlende API-Methoden (getInvitations, getSharedWithMe) ergänzt
 
-### 5. Fehlertoleranz bei Cross-App-Integration — Priorität: Mittel
+### 5. Fehlertoleranz bei Cross-App-Integration — ✅ Implementiert
 
-Calendar hängt von Contacts (Birthdays), Todo, und STT ab. Kein Error Boundary oder Offline-Fallback.
+- ServiceStatusBanner-Komponente für graceful degradation
+- In Hauptseite integriert für Todo- und Birthday-Services
+- Warnung bei nicht erreichbarem Service mit Retry-Button
+- Nutzt bestehende serviceAvailable-Flags der Stores
 
 ### 6. Suche sehr basic — Priorität: Niedrig
 
