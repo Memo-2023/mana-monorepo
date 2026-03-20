@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
-	import { settingsStore } from '$lib/stores/settings.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
 	interface Props {
 		/** Bottom offset from viewport bottom (default: '70px') */
@@ -27,15 +26,12 @@
 		agenda: 'Agenda',
 	};
 
-	// Get enabled views from settings
-	let enabledViews = $derived(settingsStore.quickViewPillViews);
+	const enabledViews: CalendarViewType[] = ['week', 'month', 'agenda'];
 
-	// Get label for a view
 	function getViewLabel(view: CalendarViewType): string {
 		return viewLabels[view] || '';
 	}
 
-	// Get title for a view
 	function getViewTitle(view: CalendarViewType): string {
 		return viewTitles[view] || '';
 	}

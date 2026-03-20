@@ -10,7 +10,7 @@
 	let { isToolbarExpanded = false, isMobile = false }: Props = $props();
 
 	function handleClick() {
-		settingsStore.set('dateStripCollapsed', false);
+		settingsStore.setDateStripCollapsed(false);
 	}
 
 	// Format current date for FAB display: "Dez 14"

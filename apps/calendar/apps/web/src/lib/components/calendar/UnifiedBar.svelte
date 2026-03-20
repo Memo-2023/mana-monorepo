@@ -224,7 +224,7 @@
 	{/if}
 
 	<!-- Layer 1: DateStrip -->
-	{#if unifiedBarStore.showDateStrip && !unifiedBarStore.legacyDateStripCollapsed}
+	{#if unifiedBarStore.showDateStrip}
 		<div
 			class="unified-bar-layer date-strip-layer"
 			style="z-index: {layerZIndices.date}; bottom: 70px;"

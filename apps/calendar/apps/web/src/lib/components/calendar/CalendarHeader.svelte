@@ -1,67 +1,26 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
-	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	// Get weekday format string based on setting
-	function getWeekdayFormat(): string {
-		switch (settingsStore.headerWeekdayFormat) {
-			case 'full':
-				return 'EEEE';
-			case 'short':
-				return 'EEE';
-			case 'hidden':
-				return '';
-		}
-	}
 
-	// Get date format string based on settings
-	function getDateFormat(includeYear: boolean = true): string {
-		const parts: string[] = [];
-
-		// Weekday
-		const weekdayFormat = getWeekdayFormat();
-		if (weekdayFormat) {
-			parts.push(weekdayFormat);
-		}
-
-		// Date with optional month
-		if (settingsStore.headerShowDate) {
-			if (settingsStore.headerAlwaysShowMonth) {
-				parts.push(includeYear ? 'd.M. MMMM yyyy' : 'd.M.');
-			} else {
-				parts.push(includeYear ? 'd. MMMM yyyy' : 'd.');
-			}
-		} else if (includeYear) {
-			// Only month and year if date is hidden
-			parts.push('MMMM yyyy');
-		}
-
-		return parts.join(', ');
-	}
-
-	// Format title based on view type and settings
+	// Format title based on view type
 	let title = $derived.by(() => {
 		const date = viewStore.currentDate;
 		const rangeStart = viewStore.viewRange.start;
 		const rangeEnd = viewStore.viewRange.end;
 
-		// Helper to format date range
 		const formatRange = () => {
-			const showMonth = settingsStore.headerAlwaysShowMonth;
-			const startFormat = showMonth ? 'd.M.' : 'd.';
-
 			if (rangeStart.getMonth() === rangeEnd.getMonth()) {
 				return (
-					format(rangeStart, startFormat, { locale: de }) +
+					format(rangeStart, 'd.', { locale: de }) +
 					' - ' +
-					format(rangeEnd, showMonth ? 'd.M. MMMM yyyy' : 'd. MMMM yyyy', { locale: de })
+					format(rangeEnd, 'd. MMMM yyyy', { locale: de })
 				);
 			}
 			return (
-				format(rangeStart, showMonth ? 'd.M. MMM' : 'd. MMM', { locale: de }) +
+				format(rangeStart, 'd. MMM', { locale: de }) +
 				' - ' +
-				format(rangeEnd, showMonth ? 'd.M. MMM yyyy' : 'd. MMM yyyy', { locale: de })
+				format(rangeEnd, 'd. MMM yyyy', { locale: de })
 			);
 		};
 
@@ -78,7 +37,7 @@
 	});
 </script>
 
-<header class="calendar-header" class:compact={settingsStore.headerCompact} role="banner">
+<header class="calendar-header" role="banner">
 	<h1 class="header-title" aria-live="polite">{title}</h1>
 </header>
 
@@ -99,21 +58,6 @@
 	@media (max-width: 640px) {
 		.header-title {
 			font-size: 1rem;
-		}
-	}
-
-	/* Compact variant */
-	.calendar-header.compact {
-		padding: 0.5rem 1rem;
-	}
-
-	.calendar-header.compact .header-title {
-		font-size: 1rem;
-	}
-
-	@media (max-width: 640px) {
-		.calendar-header.compact .header-title {
-			font-size: 0.875rem;
 		}
 	}
 </style>

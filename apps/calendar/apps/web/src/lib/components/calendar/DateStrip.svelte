@@ -10,8 +10,6 @@
 		subDays,
 		startOfDay,
 		isWithinInterval,
-		getWeek,
-		startOfWeek,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { onMount, tick } from 'svelte';
@@ -62,17 +60,6 @@
 		}
 
 		return { significant: false, emoji: '' };
-	}
-
-	// Check if a date is the first day of the week (respects weekStartsOn setting)
-	function isFirstDayOfWeek(date: Date): boolean {
-		const weekStart = startOfWeek(date, { weekStartsOn: settingsStore.weekStartsOn });
-		return isSameDay(date, weekStart);
-	}
-
-	// Get week number for a date
-	function getWeekNumber(date: Date): number {
-		return getWeek(date, { weekStartsOn: settingsStore.weekStartsOn });
 	}
 
 	// Reactive view range - needed to trigger re-renders
@@ -264,12 +251,8 @@
 				{@const isFirstOfMonth = day.getDate() === 1}
 				{@const moonPhase = isSignificantMoonPhase(day)}
 				{@const eventCount = getEventCount(day)}
-				{@const showWeekNumber = settingsStore.dateStripShowWeekNumbers && isFirstDayOfWeek(day)}
 				{#if isFirstOfMonth}
-					<div
-						class="month-divider"
-						class:show-line={settingsStore.dateStripShowMonthDividers}
-					></div>
+					<div class="month-divider show-line"></div>
 				{/if}
 				<button
 					class="day-item"
@@ -283,15 +266,10 @@
 					onclick={() => handleDayClick(day)}
 					class:is-today={dayIsToday}
 				>
-					{#if showWeekNumber}
-						<span class="week-number-label">KW {getWeekNumber(day)}</span>
-					{/if}
 					{#if moonPhase.significant && settingsStore.dateStripShowMoonPhases}
 						<span class="moon-indicator">{moonPhase.emoji}</span>
 					{/if}
-					{#if settingsStore.dateStripShowWeekday}
-						<span class="day-weekday">{format(day, 'EE', { locale: de })}</span>
-					{/if}
+					<span class="day-weekday">{format(day, 'EE', { locale: de })}</span>
 					<span class="day-number">{format(day, 'd')}</span>
 					{#if eventCount > 0 && settingsStore.dateStripShowEventIndicators}
 						<div class="event-dots">
@@ -463,20 +441,6 @@
 		line-height: 1;
 	}
 
-	.week-number-label {
-		position: absolute;
-		top: -14px;
-		left: 50%;
-		transform: translateX(-50%);
-		font-size: 0.5625rem;
-		font-weight: 600;
-		color: hsl(var(--color-muted-foreground));
-		white-space: nowrap;
-		pointer-events: none;
-		text-transform: uppercase;
-		letter-spacing: 0.02em;
-	}
-
 	.event-dots {
 		display: flex;
 		gap: 2px;
@@ -611,11 +575,6 @@
 			top: -14px;
 		}
 
-		.week-number-label {
-			top: -12px;
-			font-size: 0.5rem;
-		}
-
 		.day-number {
 			font-size: 1rem;
 		}
@@ -660,11 +619,6 @@
 	.date-strip-wrapper.compact .moon-indicator {
 		font-size: 0.875rem;
 		top: -12px;
-	}
-
-	.date-strip-wrapper.compact .week-number-label {
-		top: -10px;
-		font-size: 0.5rem;
 	}
 
 	.date-strip-wrapper.compact .month-divider {

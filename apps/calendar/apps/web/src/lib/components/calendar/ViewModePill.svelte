@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
-	import { settingsStore } from '$lib/stores/settings.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
 	interface Props {
 		isToolbarExpanded?: boolean;
@@ -13,13 +12,6 @@
 		viewStore.setViewType(view);
 	}
 
-	// View labels (short versions for pill)
-	const viewLabels: Record<CalendarViewType, string> = {
-		week: '7',
-		month: 'M',
-		agenda: 'A',
-	};
-
 	// View titles for tooltip
 	const viewTitles: Record<CalendarViewType, string> = {
 		week: 'Wochenansicht',
@@ -27,8 +19,7 @@
 		agenda: 'Agenda',
 	};
 
-	// Get enabled views from settings
-	let enabledViews = $derived(settingsStore.quickViewPillViews);
+	const enabledViews: CalendarViewType[] = ['week', 'month', 'agenda'];
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

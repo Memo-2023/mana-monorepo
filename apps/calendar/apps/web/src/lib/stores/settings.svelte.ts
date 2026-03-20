@@ -12,7 +12,6 @@ import { userSettings } from './user-settings.svelte';
 export type WeekStartDay = 0 | 1;
 export type TimeFormat = '24h' | '12h';
 export type AllDayDisplayMode = 'header' | 'block';
-export type WeekdayFormat = 'full' | 'short' | 'hidden';
 export type SttLanguage = 'de' | 'auto';
 
 export interface CalendarAppSettings extends Record<string, unknown> {
@@ -27,42 +26,13 @@ export interface CalendarAppSettings extends Record<string, unknown> {
 	dayEndHour: number;
 	allDayDisplayMode: AllDayDisplayMode;
 
-	// Header settings
-	headerCompact: boolean;
-	headerWeekdayFormat: WeekdayFormat;
-	headerShowDate: boolean;
-	headerAlwaysShowMonth: boolean;
-
-	// DateStrip settings
-	dateStripShowMoonPhases: boolean;
-	dateStripShowEventIndicators: boolean;
-	dateStripShowWeekday: boolean;
-	dateStripHighlightWeekends: boolean;
-	dateStripShowMonthDividers: boolean;
-	dateStripCompact: boolean;
-	dateStripShowWeekNumbers: boolean;
-	dateStripCollapsed: boolean;
-
-	// TagStrip settings
-	tagStripCollapsed: boolean;
-	selectedTagIds: string[];
-
-	// Immersive Mode settings
-	immersiveModeEnabled: boolean;
-
-	// Birthday settings
+	// Display settings
 	showBirthdays: boolean;
 	showBirthdayAge: boolean;
-
-	// Task settings
-	showTasksInCalendar: boolean;
-
-	// UI settings
-	sidebarCollapsed: boolean;
-
-	// Quick View Pill settings
-	quickViewPillViews: CalendarViewType[];
-	customDayCount: number;
+	dateStripShowMoonPhases: boolean;
+	dateStripShowEventIndicators: boolean;
+	dateStripHighlightWeekends: boolean;
+	dateStripCompact: boolean;
 
 	// Event defaults
 	defaultEventDuration: number;
@@ -71,6 +41,14 @@ export interface CalendarAppSettings extends Record<string, unknown> {
 	// Voice input settings
 	sttLanguage: SttLanguage;
 }
+
+// --- UI state (not persisted, resets on page load) ---
+let _dateStripCollapsed = $state(false);
+let _tagStripCollapsed = $state(true);
+let _selectedTagIds = $state<string[]>([]);
+let _immersiveModeEnabled = $state(false);
+let _showTasksInCalendar = $state(false);
+let _sidebarCollapsed = $state(true);
 
 const DEFAULT_SETTINGS: CalendarAppSettings = {
 	defaultView: 'week',
@@ -82,27 +60,12 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	dayStartHour: 6,
 	dayEndHour: 20,
 	allDayDisplayMode: 'header',
-	headerCompact: false,
-	headerWeekdayFormat: 'full',
-	headerShowDate: true,
-	headerAlwaysShowMonth: false,
 	dateStripShowMoonPhases: true,
 	dateStripShowEventIndicators: true,
-	dateStripShowWeekday: true,
 	dateStripHighlightWeekends: true,
-	dateStripShowMonthDividers: true,
 	dateStripCompact: false,
-	dateStripShowWeekNumbers: false,
-	dateStripCollapsed: false,
-	tagStripCollapsed: true,
-	selectedTagIds: [],
-	immersiveModeEnabled: false,
 	showBirthdays: true,
 	showBirthdayAge: true,
-	showTasksInCalendar: false,
-	sidebarCollapsed: true,
-	quickViewPillViews: ['week', 'month', 'agenda'],
-	customDayCount: 30,
 	defaultEventDuration: 60,
 	defaultReminder: 15,
 	sttLanguage: 'de',
@@ -131,11 +94,43 @@ const baseStore = createAppSettingsStore<CalendarAppSettings>(
 	}
 );
 
-// Always start with tasks/sidebar hidden when the app loads
-// (don't persist this from previous sessions)
+// Migrate: strip removed keys from localStorage to keep it clean
 if (browser) {
-	baseStore.set('showTasksInCalendar', false);
-	baseStore.set('sidebarCollapsed', true);
+	try {
+		const raw = localStorage.getItem('calendar-settings');
+		if (raw) {
+			const stored = JSON.parse(raw);
+			const removedKeys = [
+				'headerCompact',
+				'headerWeekdayFormat',
+				'headerShowDate',
+				'headerAlwaysShowMonth',
+				'dateStripShowWeekday',
+				'dateStripShowMonthDividers',
+				'dateStripShowWeekNumbers',
+				'dateStripCollapsed',
+				'tagStripCollapsed',
+				'selectedTagIds',
+				'immersiveModeEnabled',
+				'showTasksInCalendar',
+				'sidebarCollapsed',
+				'quickViewPillViews',
+				'customDayCount',
+			];
+			let changed = false;
+			for (const key of removedKeys) {
+				if (key in stored) {
+					delete stored[key];
+					changed = true;
+				}
+			}
+			if (changed) {
+				localStorage.setItem('calendar-settings', JSON.stringify(stored));
+			}
+		}
+	} catch {
+		// ignore migration errors
+	}
 }
 
 // Load settings from cloud
@@ -158,9 +153,8 @@ export const settingsStore = {
 	update: baseStore.update,
 	reset: baseStore.reset,
 	getDefaults: baseStore.getDefaults,
-	toggleImmersiveMode: baseStore.toggleImmersiveMode,
 
-	// Convenience getters
+	// Persisted preference getters
 	get defaultView() {
 		return baseStore.settings.defaultView;
 	},
@@ -188,53 +182,17 @@ export const settingsStore = {
 	get allDayDisplayMode() {
 		return baseStore.settings.allDayDisplayMode;
 	},
-	get headerCompact() {
-		return baseStore.settings.headerCompact;
-	},
-	get headerWeekdayFormat() {
-		return baseStore.settings.headerWeekdayFormat;
-	},
-	get headerShowDate() {
-		return baseStore.settings.headerShowDate;
-	},
-	get headerAlwaysShowMonth() {
-		return baseStore.settings.headerAlwaysShowMonth;
-	},
 	get dateStripShowMoonPhases() {
 		return baseStore.settings.dateStripShowMoonPhases;
 	},
 	get dateStripShowEventIndicators() {
 		return baseStore.settings.dateStripShowEventIndicators;
 	},
-	get dateStripShowWeekday() {
-		return baseStore.settings.dateStripShowWeekday;
-	},
 	get dateStripHighlightWeekends() {
 		return baseStore.settings.dateStripHighlightWeekends;
 	},
-	get dateStripShowMonthDividers() {
-		return baseStore.settings.dateStripShowMonthDividers;
-	},
 	get dateStripCompact() {
 		return baseStore.settings.dateStripCompact;
-	},
-	get dateStripShowWeekNumbers() {
-		return baseStore.settings.dateStripShowWeekNumbers;
-	},
-	get dateStripCollapsed() {
-		return baseStore.settings.dateStripCollapsed;
-	},
-	get tagStripCollapsed() {
-		return baseStore.settings.tagStripCollapsed;
-	},
-	get selectedTagIds() {
-		return baseStore.settings.selectedTagIds;
-	},
-	get hasSelectedTags() {
-		return baseStore.settings.selectedTagIds.length > 0;
-	},
-	get immersiveModeEnabled() {
-		return baseStore.settings.immersiveModeEnabled;
 	},
 	get showBirthdays() {
 		return baseStore.settings.showBirthdays;
@@ -242,23 +200,11 @@ export const settingsStore = {
 	get showBirthdayAge() {
 		return baseStore.settings.showBirthdayAge;
 	},
-	get showTasksInCalendar() {
-		return baseStore.settings.showTasksInCalendar;
-	},
 	get defaultEventDuration() {
 		return baseStore.settings.defaultEventDuration;
 	},
 	get defaultReminder() {
 		return baseStore.settings.defaultReminder;
-	},
-	get sidebarCollapsed() {
-		return baseStore.settings.sidebarCollapsed;
-	},
-	get quickViewPillViews() {
-		return baseStore.settings.quickViewPillViews;
-	},
-	get customDayCount() {
-		return baseStore.settings.customDayCount;
 	},
 	get sttLanguage() {
 		return baseStore.settings.sttLanguage;
@@ -267,20 +213,36 @@ export const settingsStore = {
 		return cloudSyncEnabled;
 	},
 
+	// --- UI state getters (non-persisted) ---
+	get dateStripCollapsed() {
+		return _dateStripCollapsed;
+	},
+	get tagStripCollapsed() {
+		return _tagStripCollapsed;
+	},
+	get selectedTagIds() {
+		return _selectedTagIds;
+	},
+	get hasSelectedTags() {
+		return _selectedTagIds.length > 0;
+	},
+	get immersiveModeEnabled() {
+		return _immersiveModeEnabled;
+	},
+	get showTasksInCalendar() {
+		return _showTasksInCalendar;
+	},
+	get sidebarCollapsed() {
+		return _sidebarCollapsed;
+	},
+
 	// Cloud sync methods
 	enableCloudSync() {
 		cloudSyncEnabled = true;
 		if (!initialSyncDone) {
 			const cloudSettings = loadFromCloud();
 			if (cloudSettings && Object.keys(cloudSettings).length > 0) {
-				// Exclude showTasksInCalendar and sidebarCollapsed from cloud sync
-				// - always start with tasks hidden and sidebar collapsed
-				const {
-					showTasksInCalendar: _,
-					sidebarCollapsed: __,
-					...settingsWithoutTasks
-				} = cloudSettings;
-				baseStore.update(settingsWithoutTasks);
+				baseStore.update(cloudSettings);
 			} else {
 				syncToCloud(baseStore.settings);
 			}
@@ -292,32 +254,40 @@ export const settingsStore = {
 		cloudSyncEnabled = false;
 	},
 
-	// Calendar-specific toggle methods
+	// UI state toggle methods (non-persisted)
 	toggleSidebar() {
-		baseStore.set('sidebarCollapsed', !baseStore.settings.sidebarCollapsed);
+		_sidebarCollapsed = !_sidebarCollapsed;
 	},
 
 	toggleTagStrip() {
-		baseStore.set('tagStripCollapsed', !baseStore.settings.tagStripCollapsed);
+		_tagStripCollapsed = !_tagStripCollapsed;
 	},
 
 	toggleTagSelection(tagId: string) {
-		const currentIds = baseStore.settings.selectedTagIds;
-		const isSelected = currentIds.includes(tagId);
-		const newIds = isSelected ? currentIds.filter((id) => id !== tagId) : [...currentIds, tagId];
-		baseStore.set('selectedTagIds', newIds);
+		const isSelected = _selectedTagIds.includes(tagId);
+		_selectedTagIds = isSelected
+			? _selectedTagIds.filter((id) => id !== tagId)
+			: [..._selectedTagIds, tagId];
 	},
 
 	isTagSelected(tagId: string): boolean {
-		return baseStore.settings.selectedTagIds.includes(tagId);
+		return _selectedTagIds.includes(tagId);
 	},
 
 	clearTagSelection() {
-		baseStore.set('selectedTagIds', []);
+		_selectedTagIds = [];
 	},
 
 	toggleTasksInCalendar() {
-		baseStore.set('showTasksInCalendar', !baseStore.settings.showTasksInCalendar);
+		_showTasksInCalendar = !_showTasksInCalendar;
+	},
+
+	toggleImmersiveMode() {
+		_immersiveModeEnabled = !_immersiveModeEnabled;
+	},
+
+	setDateStripCollapsed(value: boolean) {
+		_dateStripCollapsed = value;
 	},
 
 	// Time formatting helpers

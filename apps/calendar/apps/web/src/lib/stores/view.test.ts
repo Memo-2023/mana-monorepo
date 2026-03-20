@@ -10,7 +10,6 @@ vi.mock('$app/environment', () => ({
 vi.mock('./settings.svelte', () => ({
 	settingsStore: {
 		weekStartsOn: 1 as 0 | 1,
-		customDayCount: 30,
 		defaultView: 'week',
 		initialize: vi.fn(),
 	},
@@ -19,13 +18,12 @@ vi.mock('./settings.svelte', () => ({
 // Mock @manacore/shared-stores
 vi.mock('@manacore/shared-stores', () => ({
 	createAppSettingsStore: vi.fn(() => ({
-		settings: { weekStartsOn: 1, customDayCount: 30, defaultView: 'week' },
+		settings: { weekStartsOn: 1, defaultView: 'week' },
 		initialize: vi.fn(),
 		set: vi.fn(),
 		update: vi.fn(),
 		reset: vi.fn(),
 		getDefaults: vi.fn(),
-		toggleImmersiveMode: vi.fn(),
 	})),
 }));
 
