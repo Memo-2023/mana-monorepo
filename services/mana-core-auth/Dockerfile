@@ -31,36 +31,35 @@ RUN pnpm build || true
 WORKDIR /app/services/mana-core-auth
 RUN pnpm build
 
+# Prune to production dependencies only
+RUN pnpm prune --prod
+
 # Production stage
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
 FROM node:20-slim AS production
 
-# Install pnpm and wget for health checks
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+# Install wget for health checks
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-# Copy everything from builder (including node_modules)
-COPY --from=builder /app/pnpm-workspace.yaml ./
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/services/mana-core-auth ./services/mana-core-auth
-
-# Copy entrypoint script
-COPY services/mana-core-auth/docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-WORKDIR /app/services/mana-core-auth
-
-# Create non-root user (Debian syntax)
+# Create non-root user before copying files
 RUN groupadd -g 1001 nodejs && \
     useradd -u 1001 -g nodejs nestjs
 
-# Change ownership
-RUN chown -R nestjs:nodejs /app
+WORKDIR /app
+
+# Copy files with correct ownership (avoids expensive chown -R layer)
+COPY --from=builder --chown=nestjs:nodejs /app/pnpm-workspace.yaml ./
+COPY --from=builder --chown=nestjs:nodejs /app/package.json ./
+COPY --from=builder --chown=nestjs:nodejs /app/pnpm-lock.yaml ./
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/packages ./packages
+COPY --from=builder --chown=nestjs:nodejs /app/services/mana-core-auth ./services/mana-core-auth
+
+# Copy entrypoint script
+COPY --chown=nestjs:nodejs services/mana-core-auth/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+WORKDIR /app/services/mana-core-auth
 
 # Switch to non-root user
 USER nestjs
@@ -68,7 +67,7 @@ USER nestjs
 # Expose port
 EXPOSE 3001
 
-# Health check - uses /health/ready to verify database connectivity
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
