@@ -48,6 +48,8 @@ export interface UploadOptions {
 	metadata?: Record<string, string>;
 	/** Make the object publicly readable */
 	public?: boolean;
+	/** Maximum allowed file size in bytes. Throws if body exceeds this limit. */
+	maxSizeBytes?: number;
 }
 
 /**
@@ -92,15 +94,15 @@ export const BUCKETS = {
 	PICTURE: 'picture-storage',
 	CHAT: 'chat-storage',
 	MANADECK: 'manadeck-storage',
-	NUTRIPHI: 'nutriphi-storage',
 	PRESI: 'presi-storage',
 	CALENDAR: 'calendar-storage',
 	CONTACTS: 'contacts-storage',
 	STORAGE: 'storage-storage',
 	MAIL: 'mail-storage',
 	INVENTORY: 'inventory-storage',
-	LIGHTWRITE: 'lightwrite-storage',
 	MUKKE: 'mukke-storage',
+	PLANTA: 'planta-storage',
+	PROJECTDOC: 'projectdoc-storage',
 } as const;
 
 export type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];

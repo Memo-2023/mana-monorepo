@@ -22,6 +22,9 @@ vi.mock('@aws-sdk/client-s3', () => ({
 	DeleteObjectCommand: vi.fn(function (this: any, input: any) {
 		Object.assign(this, input);
 	}),
+	DeleteObjectsCommand: vi.fn(function (this: any, input: any) {
+		Object.assign(this, input);
+	}),
 	ListObjectsV2Command: vi.fn(function (this: any, input: any) {
 		Object.assign(this, input);
 	}),
@@ -79,6 +82,19 @@ describe('StorageClient', () => {
 			expect(result.etag).toBe('"abc123"');
 		});
 
+		it('throws when file exceeds maxSizeBytes', async () => {
+			const bigBuffer = Buffer.alloc(1024);
+			await expect(storage.upload('file.png', bigBuffer, { maxSizeBytes: 512 })).rejects.toThrow(
+				'File size 1024 bytes exceeds maximum allowed 512 bytes'
+			);
+		});
+
+		it('allows file within maxSizeBytes', async () => {
+			mockSend.mockResolvedValue({ ETag: '"ok"' });
+			const result = await storage.upload('file.png', Buffer.alloc(100), { maxSizeBytes: 512 });
+			expect(result.key).toBe('file.png');
+		});
+
 		it('sets ACL to public-read when public option is true', async () => {
 			mockSend.mockResolvedValue({ ETag: '"abc"' });
 			const { PutObjectCommand } = await import('@aws-sdk/client-s3');
@@ -92,6 +108,13 @@ describe('StorageClient', () => {
 	});
 
 	describe('uploadMultipart', () => {
+		it('throws when file exceeds maxSizeBytes', async () => {
+			const bigBuffer = Buffer.alloc(2048);
+			await expect(
+				storage.uploadMultipart('big.zip', bigBuffer, { maxSizeBytes: 1024 })
+			).rejects.toThrow('File size 2048 bytes exceeds maximum allowed 1024 bytes');
+		});
+
 		it('uses Upload from lib-storage', async () => {
 			const { Upload } = await import('@aws-sdk/lib-storage');
 
@@ -160,6 +183,39 @@ describe('StorageClient', () => {
 			expect(DeleteObjectCommand).toHaveBeenCalledWith(
 				expect.objectContaining({ Bucket: 'test-bucket', Key: 'file.png' })
 			);
+		});
+	});
+
+	describe('deleteMany', () => {
+		it('deletes multiple files in one request', async () => {
+			mockSend.mockResolvedValue({});
+			const { DeleteObjectsCommand } = await import('@aws-sdk/client-s3');
+
+			await storage.deleteMany(['a.png', 'b.png', 'c.png']);
+
+			expect(DeleteObjectsCommand).toHaveBeenCalledWith(
+				expect.objectContaining({
+					Bucket: 'test-bucket',
+					Delete: {
+						Objects: [{ Key: 'a.png' }, { Key: 'b.png' }, { Key: 'c.png' }],
+						Quiet: true,
+					},
+				})
+			);
+		});
+
+		it('does nothing for empty array', async () => {
+			await storage.deleteMany([]);
+			expect(mockSend).not.toHaveBeenCalled();
+		});
+
+		it('batches requests for >1000 keys', async () => {
+			mockSend.mockResolvedValue({});
+			const keys = Array.from({ length: 1500 }, (_, i) => `file-${i}.png`);
+
+			await storage.deleteMany(keys);
+
+			expect(mockSend).toHaveBeenCalledTimes(2);
 		});
 	});
 

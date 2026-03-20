@@ -10,15 +10,15 @@ export {
 	createPictureStorage,
 	createChatStorage,
 	createManaDeckStorage,
-	createNutriPhiStorage,
 	createPresiStorage,
 	createCalendarStorage,
 	createContactsStorage,
 	createStorageStorage,
 	createMailStorage,
 	createInventoryStorage,
-	createLightWriteStorage,
 	createMukkeStorage,
+	createPlantaStorage,
+	createProjectDocStorage,
 } from './factory';
 
 // Utilities

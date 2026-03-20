@@ -3,6 +3,7 @@ import {
 	PutObjectCommand,
 	GetObjectCommand,
 	DeleteObjectCommand,
+	DeleteObjectsCommand,
 	ListObjectsV2Command,
 	HeadObjectCommand,
 	type PutObjectCommandInput,
@@ -62,6 +63,15 @@ export class StorageClient {
 		body: Buffer | Uint8Array | string | ReadableStream,
 		options: UploadOptions = {}
 	): Promise<UploadResult> {
+		if (options.maxSizeBytes && typeof body !== 'string' && !(body instanceof ReadableStream)) {
+			const size = body.byteLength;
+			if (size > options.maxSizeBytes) {
+				throw new Error(
+					`File size ${size} bytes exceeds maximum allowed ${options.maxSizeBytes} bytes`
+				);
+			}
+		}
+
 		const input: PutObjectCommandInput = {
 			Bucket: this.bucket.name,
 			Key: key,
@@ -95,6 +105,15 @@ export class StorageClient {
 		body: Buffer | Uint8Array | ReadableStream,
 		options: UploadOptions = {}
 	): Promise<UploadResult> {
+		if (options.maxSizeBytes && !(body instanceof ReadableStream)) {
+			const size = body.byteLength;
+			if (size > options.maxSizeBytes) {
+				throw new Error(
+					`File size ${size} bytes exceeds maximum allowed ${options.maxSizeBytes} bytes`
+				);
+			}
+		}
+
 		const upload = new Upload({
 			client: this.client,
 			params: {
@@ -171,6 +190,27 @@ export class StorageClient {
 		});
 
 		await this.client.send(command);
+	}
+
+	/**
+	 * Delete multiple files from the bucket in a single request.
+	 * S3 supports up to 1000 keys per request; this method batches automatically.
+	 */
+	async deleteMany(keys: string[]): Promise<void> {
+		if (keys.length === 0) return;
+
+		const BATCH_SIZE = 1000;
+		for (let i = 0; i < keys.length; i += BATCH_SIZE) {
+			const batch = keys.slice(i, i + BATCH_SIZE);
+			const command = new DeleteObjectsCommand({
+				Bucket: this.bucket.name,
+				Delete: {
+					Objects: batch.map((key) => ({ Key: key })),
+					Quiet: true,
+				},
+			});
+			await this.client.send(command);
+		}
 	}
 
 	/**
