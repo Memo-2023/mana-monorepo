@@ -31,6 +31,9 @@ vi.mock('@aws-sdk/client-s3', () => ({
 	HeadObjectCommand: vi.fn(function (this: any, input: any) {
 		Object.assign(this, input);
 	}),
+	CopyObjectCommand: vi.fn(function (this: any, input: any) {
+		Object.assign(this, input);
+	}),
 	CreateMultipartUploadCommand: vi.fn(function (this: any, input: any) {
 		Object.assign(this, input);
 	}),
@@ -415,6 +418,88 @@ describe('StorageClient', () => {
 			await storage.download('file.bin');
 
 			expect(handler).toHaveBeenCalledWith({ bucket: 'test-bucket', key: 'file.bin' });
+		});
+	});
+
+	describe('deleteByPrefix', () => {
+		it('lists and deletes all files with prefix', async () => {
+			mockSend
+				.mockResolvedValueOnce({
+					Contents: [
+						{ Key: 'users/123/a.png', Size: 100, LastModified: new Date() },
+						{ Key: 'users/123/b.png', Size: 200, LastModified: new Date() },
+					],
+					IsTruncated: false,
+				})
+				.mockResolvedValue({}); // deleteMany
+
+			const count = await storage.deleteByPrefix('users/123/');
+
+			expect(count).toBe(2);
+		});
+
+		it('returns 0 when prefix has no files', async () => {
+			mockSend.mockResolvedValue({ Contents: undefined, IsTruncated: false });
+
+			const count = await storage.deleteByPrefix('users/nonexistent/');
+
+			expect(count).toBe(0);
+			expect(mockSend).toHaveBeenCalledTimes(1); // only list, no delete
+		});
+	});
+
+	describe('copy', () => {
+		it('copies a file and returns new key', async () => {
+			mockSend.mockResolvedValue({ CopyObjectResult: { ETag: '"copied"' } });
+
+			const result = await storage.copy('old/file.png', 'new/file.png');
+
+			expect(result.key).toBe('new/file.png');
+			expect(result.etag).toBe('"copied"');
+			expect(result.url).toBe('http://localhost:9000/test-bucket/new/file.png');
+		});
+
+		it('sends CopyObjectCommand with correct source', async () => {
+			mockSend.mockResolvedValue({ CopyObjectResult: {} });
+			const { CopyObjectCommand } = await import('@aws-sdk/client-s3');
+
+			await storage.copy('src.png', 'dst.png');
+
+			expect(CopyObjectCommand).toHaveBeenCalledWith(
+				expect.objectContaining({
+					Bucket: 'test-bucket',
+					CopySource: 'test-bucket/src.png',
+					Key: 'dst.png',
+				})
+			);
+		});
+	});
+
+	describe('getMetadata', () => {
+		it('returns file metadata', async () => {
+			mockSend.mockResolvedValue({
+				ContentType: 'image/png',
+				ContentLength: 4096,
+				LastModified: new Date('2024-06-15'),
+				ETag: '"meta-etag"',
+				Metadata: { author: 'test' },
+			});
+
+			const meta = await storage.getMetadata('file.png');
+
+			expect(meta.contentType).toBe('image/png');
+			expect(meta.size).toBe(4096);
+			expect(meta.etag).toBe('"meta-etag"');
+			expect(meta.metadata).toEqual({ author: 'test' });
+		});
+
+		it('handles missing optional fields', async () => {
+			mockSend.mockResolvedValue({});
+
+			const meta = await storage.getMetadata('file.png');
+
+			expect(meta.size).toBe(0);
+			expect(meta.contentType).toBeUndefined();
 		});
 	});
 

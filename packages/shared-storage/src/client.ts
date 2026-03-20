@@ -6,6 +6,7 @@ import {
 	DeleteObjectsCommand,
 	ListObjectsV2Command,
 	HeadObjectCommand,
+	CopyObjectCommand,
 	CreateMultipartUploadCommand,
 	UploadPartCommand,
 	CompleteMultipartUploadCommand,
@@ -24,6 +25,7 @@ import type {
 	MultipartUploadPart,
 	UploadResult,
 	FileInfo,
+	FileMetadata,
 } from './types';
 
 /**
@@ -368,6 +370,59 @@ export class StorageClient {
 	 */
 	getBucketName(): string {
 		return this.bucket.name;
+	}
+
+	/**
+	 * Delete all files matching a prefix.
+	 * Useful for account deletion (e.g., deleteByPrefix('users/user-123/'))
+	 */
+	async deleteByPrefix(prefix: string): Promise<number> {
+		const files = await this.list(prefix);
+		if (files.length === 0) return 0;
+
+		const keys = files.map((f) => f.key);
+		await this.deleteMany(keys);
+		return keys.length;
+	}
+
+	/**
+	 * Copy a file within the same bucket.
+	 * For move operations, call copy() then delete() the source.
+	 */
+	async copy(sourceKey: string, destKey: string): Promise<UploadResult> {
+		const command = new CopyObjectCommand({
+			Bucket: this.bucket.name,
+			CopySource: `${this.bucket.name}/${sourceKey}`,
+			Key: destKey,
+		});
+
+		const result = await this.client.send(command);
+
+		return {
+			key: destKey,
+			url: this.getPublicUrl(destKey),
+			etag: result.CopyObjectResult?.ETag,
+		};
+	}
+
+	/**
+	 * Get file metadata without downloading the file.
+	 */
+	async getMetadata(key: string): Promise<FileMetadata> {
+		const command = new HeadObjectCommand({
+			Bucket: this.bucket.name,
+			Key: key,
+		});
+
+		const response = await this.client.send(command);
+
+		return {
+			contentType: response.ContentType,
+			size: response.ContentLength ?? 0,
+			lastModified: response.LastModified,
+			etag: response.ETag,
+			metadata: response.Metadata,
+		};
 	}
 
 	// ── Presigned Multipart Upload (browser direct-upload) ──────────────

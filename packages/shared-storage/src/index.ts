@@ -62,4 +62,5 @@ export {
 	type MultipartUploadPart,
 	type UploadResult,
 	type FileInfo,
+	type FileMetadata,
 } from './types';

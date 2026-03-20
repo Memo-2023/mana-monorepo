@@ -87,6 +87,22 @@ export interface FileInfo {
 }
 
 /**
+ * Metadata for a stored file (from HeadObject)
+ */
+export interface FileMetadata {
+	/** Content type (MIME type) */
+	contentType?: string;
+	/** File size in bytes */
+	size: number;
+	/** Last modified date */
+	lastModified?: Date;
+	/** ETag */
+	etag?: string;
+	/** Custom metadata */
+	metadata?: Record<string, string>;
+}
+
+/**
  * Multipart upload initialization result
  */
 export interface MultipartUploadInit {
