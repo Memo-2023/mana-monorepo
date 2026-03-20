@@ -95,9 +95,14 @@ Die Legacy-Composables (`useDragDrop`, `useResize`) sind von keiner Komponente i
 - RecurrenceEditDialog für "Diesen/Alle/Zukünftige" beim Löschen
 - In EventDetailModal und QuickEventOverlay integriert
 
-### 3. Erinnerungen / Notifications nur rudimentär — Priorität: Mittel
+### 3. Erinnerungen / Notifications — ✅ Implementiert
 
-API-Client `reminders.ts` existiert, aber nur Basic CRUD. Keine Push-Notifications, keine E-Mail-Erinnerungen, kein UI zur Konfiguration pro Event.
+- ReminderSelector-Komponente mit Draft-Modus (neue Events) und Saved-Modus (bestehende Events)
+- In EventForm integriert: Standard-Erinnerung aus Settings, Push/Email-Toggles
+- In EventDetailModal integriert: Erinnerungen anzeigen/hinzufügen/löschen
+- Preset-Auswahl (Zum Zeitpunkt, 5-30 Min., 1-2 Std., 1-2 Tage, 1 Woche)
+- Status-Anzeige (Ausstehend/Gesendet/Fehlgeschlagen)
+- Backend war bereits vollständig (Cron, Expo Push, Brevo Email)
 
 ### 4. Kalender-Sharing kaum implementiert — Priorität: Mittel
 
