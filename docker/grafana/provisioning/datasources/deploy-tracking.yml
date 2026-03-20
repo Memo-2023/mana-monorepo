@@ -1,0 +1,23 @@
+# Deploy Tracking PostgreSQL Datasource
+# Queries deploy_tracking schema in the mana database
+
+apiVersion: 1
+
+datasources:
+  - name: DeployTracking
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    user: postgres
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      database: mana
+      sslmode: disable
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1600
+      timescaledb: false
+    isDefault: false
+    editable: true

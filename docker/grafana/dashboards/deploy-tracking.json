@@ -1,0 +1,487 @@
+{
+	"annotations": { "list": [] },
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 1,
+	"id": null,
+	"links": [],
+	"panels": [
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+			"id": 100,
+			"panels": [],
+			"title": "Status Overview",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 3600 },
+							{ "color": "red", "value": 86400 }
+						]
+					},
+					"unit": "s"
+				}
+			},
+			"gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+			"id": 1,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"targets": [
+				{
+					"expr": "time() - deploy_last_timestamp_seconds{branch=\"main\"}",
+					"legendFormat": ""
+				}
+			],
+			"title": "Last Deploy",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"mappings": [
+						{
+							"options": {
+								"0": { "color": "red", "text": "FAILED" },
+								"1": { "color": "green", "text": "OK" }
+							},
+							"type": "value"
+						}
+					],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "red", "value": null },
+							{ "color": "green", "value": 1 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+			"id": 2,
+			"options": {
+				"colorMode": "background",
+				"graphMode": "none",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"targets": [
+				{
+					"expr": "deploy_last_status{branch=\"main\"}",
+					"legendFormat": ""
+				}
+			],
+			"title": "Status",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 300 },
+							{ "color": "red", "value": 600 }
+						]
+					},
+					"unit": "s"
+				}
+			},
+			"gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+			"id": 3,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"targets": [
+				{
+					"expr": "deploy_last_duration_seconds{branch=\"main\"}",
+					"legendFormat": ""
+				}
+			],
+			"title": "Duration",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+			"fieldConfig": {
+				"defaults": {
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "blue", "value": null }]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+			"id": 4,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"targets": [
+				{
+					"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+					"format": "table",
+					"rawQuery": true,
+					"rawSql": "SELECT COUNT(*) AS \"Deploys\" FROM deploy_tracking.deployments WHERE started_at > NOW() - INTERVAL '30 days';"
+				}
+			],
+			"title": "Deploys (30d)",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+			"fieldConfig": {
+				"defaults": {
+					"unit": "percentunit",
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "red", "value": null },
+							{ "color": "yellow", "value": 0.8 },
+							{ "color": "green", "value": 0.95 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+			"id": 5,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"targets": [
+				{
+					"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+					"format": "table",
+					"rawQuery": true,
+					"rawSql": "SELECT CASE WHEN COUNT(*) = 0 THEN 0 ELSE COUNT(*) FILTER (WHERE status = 'success')::float / COUNT(*)::float END AS \"Rate\" FROM deploy_tracking.deployments WHERE started_at > NOW() - INTERVAL '30 days';"
+				}
+			],
+			"title": "Success Rate (30d)",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+			"fieldConfig": {
+				"defaults": {
+					"unit": "s",
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 300 },
+							{ "color": "red", "value": 600 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+			"id": 6,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"targets": [
+				{
+					"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+					"format": "table",
+					"rawQuery": true,
+					"rawSql": "SELECT COALESCE(AVG(duration_s), 0) AS \"Avg\" FROM deploy_tracking.deployments WHERE status = 'success' AND started_at > NOW() - INTERVAL '30 days';"
+				}
+			],
+			"title": "Avg Duration (30d)",
+			"type": "stat"
+		},
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+			"id": 101,
+			"panels": [],
+			"title": "Deploy Frequency",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"custom": {
+						"drawStyle": "bars",
+						"fillOpacity": 80,
+						"stacking": { "mode": "normal" }
+					}
+				},
+				"overrides": [
+					{
+						"matcher": { "id": "byName", "options": "success" },
+						"properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+					},
+					{
+						"matcher": { "id": "byName", "options": "failure" },
+						"properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+					}
+				]
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+			"id": 7,
+			"options": { "legend": { "displayMode": "list" }, "tooltip": { "mode": "multi" } },
+			"targets": [
+				{
+					"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+					"format": "time_series",
+					"rawQuery": true,
+					"rawSql": "SELECT date_trunc('day', started_at) AS time, status AS metric, COUNT(*) AS value FROM deploy_tracking.deployments WHERE $__timeFilter(started_at) GROUP BY 1, 2 ORDER BY 1;"
+				}
+			],
+			"title": "Deploys per Day",
+			"type": "timeseries"
+		},
+		{
+			"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [{ "color": "blue", "value": null }]
+					}
+				}
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+			"id": 8,
+			"options": { "orientation": "horizontal" },
+			"targets": [
+				{
+					"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+					"format": "table",
+					"rawQuery": true,
+					"rawSql": "SELECT s AS \"Service\", COUNT(*) AS \"Deploys\" FROM deploy_tracking.deployments, unnest(services) AS s WHERE started_at > NOW() - INTERVAL '30 days' GROUP BY s ORDER BY COUNT(*) DESC;"
+				}
+			],
+			"title": "Deploys per Service (30d)",
+			"type": "barchart"
+		},
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+			"id": 102,
+			"panels": [],
+			"title": "Build Performance",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"unit": "s",
+					"custom": { "drawStyle": "line", "pointSize": 5, "showPoints": "auto" }
+				}
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+			"id": 9,
+			"options": { "legend": { "displayMode": "list" }, "tooltip": { "mode": "multi" } },
+			"targets": [
+				{
+					"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+					"format": "time_series",
+					"rawQuery": true,
+					"rawSql": "SELECT d.started_at AS time, ds.service_name AS metric, ds.build_duration_s AS value FROM deploy_tracking.deploy_services ds JOIN deploy_tracking.deployments d ON d.id = ds.deployment_id WHERE $__timeFilter(d.started_at) ORDER BY d.started_at;"
+				}
+			],
+			"title": "Build Duration Trend",
+			"type": "timeseries"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"unit": "decmbytes",
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 500 },
+							{ "color": "red", "value": 1000 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+			"id": 10,
+			"options": { "orientation": "horizontal" },
+			"targets": [
+				{
+					"expr": "deploy_service_image_size_mb",
+					"legendFormat": "{{service}}"
+				}
+			],
+			"title": "Image Sizes",
+			"type": "barchart"
+		},
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+			"id": 103,
+			"panels": [],
+			"title": "Startup & Health",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"mappings": [
+						{
+							"options": {
+								"0": { "color": "red", "text": "UNHEALTHY" },
+								"1": { "color": "green", "text": "HEALTHY" }
+							},
+							"type": "value"
+						}
+					],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "red", "value": null },
+							{ "color": "green", "value": 1 }
+						]
+					}
+				}
+			},
+			"gridPos": { "h": 4, "w": 12, "x": 0, "y": 24 },
+			"id": 11,
+			"options": {
+				"colorMode": "background",
+				"graphMode": "none",
+				"orientation": "horizontal",
+				"reduceOptions": { "calcs": ["lastNotNull"] }
+			},
+			"targets": [
+				{
+					"expr": "deploy_service_healthy",
+					"legendFormat": "{{service}}"
+				}
+			],
+			"title": "Service Health",
+			"type": "stat"
+		},
+		{
+			"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"unit": "s",
+					"custom": { "drawStyle": "line", "pointSize": 5, "showPoints": "auto" }
+				}
+			},
+			"gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+			"id": 12,
+			"options": { "legend": { "displayMode": "list" }, "tooltip": { "mode": "multi" } },
+			"targets": [
+				{
+					"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+					"format": "time_series",
+					"rawQuery": true,
+					"rawSql": "SELECT d.started_at AS time, ds.service_name AS metric, ds.startup_time_s AS value FROM deploy_tracking.deploy_services ds JOIN deploy_tracking.deployments d ON d.id = ds.deployment_id WHERE ds.startup_time_s IS NOT NULL AND $__timeFilter(d.started_at) ORDER BY d.started_at;"
+				}
+			],
+			"title": "Startup Time Trend",
+			"type": "timeseries"
+		},
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+			"id": 104,
+			"panels": [],
+			"title": "Deploy History",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+			"fieldConfig": {
+				"defaults": {},
+				"overrides": [
+					{
+						"matcher": { "id": "byName", "options": "status" },
+						"properties": [
+							{
+								"id": "mappings",
+								"value": [
+									{
+										"options": {
+											"failure": { "color": "red", "text": "FAILED" },
+											"success": { "color": "green", "text": "OK" },
+											"running": { "color": "yellow", "text": "RUNNING" }
+										},
+										"type": "value"
+									}
+								]
+							}
+						]
+					},
+					{
+						"matcher": { "id": "byName", "options": "duration_s" },
+						"properties": [{ "id": "unit", "value": "s" }]
+					}
+				]
+			},
+			"gridPos": { "h": 10, "w": 24, "x": 0, "y": 33 },
+			"id": 13,
+			"options": { "showHeader": true, "sortBy": [{ "desc": true, "displayName": "started_at" }] },
+			"targets": [
+				{
+					"datasource": { "type": "postgres", "uid": "deploy-tracking" },
+					"format": "table",
+					"rawQuery": true,
+					"rawSql": "SELECT started_at, commit_sha, commit_message, deployer, array_to_string(services, ', ') AS services, status, duration_s FROM deploy_tracking.deployments ORDER BY started_at DESC LIMIT 50;"
+				}
+			],
+			"title": "Recent Deploys",
+			"type": "table"
+		}
+	],
+	"schemaVersion": 39,
+	"tags": ["deploy", "ci-cd"],
+	"templating": {
+		"list": [
+			{
+				"current": { "selected": false, "text": "Prometheus", "value": "Prometheus" },
+				"hide": 0,
+				"includeAll": false,
+				"label": "Datasource",
+				"multi": false,
+				"name": "datasource",
+				"options": [],
+				"query": "prometheus",
+				"refresh": 1,
+				"type": "datasource"
+			}
+		]
+	},
+	"time": { "from": "now-30d", "to": "now" },
+	"timepicker": {},
+	"timezone": "browser",
+	"title": "Deploy Tracking",
+	"uid": "deploy-tracking",
+	"version": 1
+}

@@ -152,6 +152,15 @@ jobs:
           cd "${{ env.PROJECT_DIR }}"
           git pull origin main
 
+      - name: Init deploy tracking
+        id: init
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          source scripts/deploy-metrics.sh
+          deploy_timer_start
+          echo "start_epoch=$DEPLOY_START_EPOCH" >> $GITHUB_OUTPUT
+          ensure_deploy_schema
+
       - name: Ensure env vars exist
         run: |
           cd "${{ env.PROJECT_DIR }}"
@@ -197,61 +206,241 @@ jobs:
           echo "deploy-all=false" >> $GITHUB_OUTPUT
           echo "Services to deploy: $SERVICES"
 
-      - name: Deploy all services
-        if: steps.services.outputs.deploy-all == 'true'
+      - name: Build and deploy services
+        id: build
         run: |
           cd "${{ env.PROJECT_DIR }}"
-          echo "=== Rebuilding and restarting ALL services ==="
-          docker compose -f "${{ env.COMPOSE_FILE }}" --env-file "${{ env.ENV_FILE }}" up -d --build
-          echo "=== Waiting for services to start ==="
-          sleep 15
-          docker compose -f "${{ env.COMPOSE_FILE }}" ps
+          source scripts/deploy-metrics.sh
 
-      - name: Deploy changed services
-        if: steps.services.outputs.deploy-all == 'false' && steps.services.outputs.services != ''
-        run: |
-          cd "${{ env.PROJECT_DIR }}"
+          DEPLOY_ALL="${{ steps.services.outputs.deploy-all }}"
           SERVICES="${{ steps.services.outputs.services }}"
-          echo "=== Rebuilding: $SERVICES ==="
-          docker compose -f "${{ env.COMPOSE_FILE }}" --env-file "${{ env.ENV_FILE }}" up -d --build --no-deps $SERVICES
+
+          # Determine final service list
+          if [ "$DEPLOY_ALL" == "true" ]; then
+            # Get all service names from compose file
+            SERVICES=$(docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" config --services | tr '\n' ' ')
+            echo "=== Rebuilding ALL services ==="
+          elif [ -z "$SERVICES" ]; then
+            echo "No services to deploy"
+            echo "build-times=" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "=== Rebuilding: $SERVICES ==="
+          fi
+
+          # Build each service individually to capture build times
+          BUILD_TIMES=""
+          for svc in $SERVICES; do
+            echo "--- Building $svc ---"
+            build_start=$(date +%s)
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build "$svc" 2>&1 || true
+            build_end=$(date +%s)
+            build_dur=$(( build_end - build_start ))
+            BUILD_TIMES="$BUILD_TIMES $svc:$build_dur"
+            echo "  $svc built in ${build_dur}s"
+          done
+
+          # Start all services at once (no rebuild, images already built)
+          echo "=== Starting services ==="
+          if [ "$DEPLOY_ALL" == "true" ]; then
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
+          else
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --no-deps $SERVICES
+          fi
           echo "=== Waiting for services to start ==="
           sleep 10
 
+          echo "build-times=$BUILD_TIMES" >> $GITHUB_OUTPUT
+
       - name: Health checks
+        id: health
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          source scripts/deploy-metrics.sh
+
+          # Map of service -> health URL
+          declare -A HEALTH_URLS=(
+            ["mana-auth"]="http://localhost:3001/health"
+            ["matrix-web"]="http://localhost:5180/health"
+            ["chat-backend"]="http://localhost:3030/health"
+            ["chat-web"]="http://localhost:5010/health"
+            ["todo-backend"]="http://localhost:3031/health"
+            ["todo-web"]="http://localhost:5011/health"
+            ["calendar-backend"]="http://localhost:3032/health"
+            ["calendar-web"]="http://localhost:5012/health"
+            ["clock-backend"]="http://localhost:3033/health"
+            ["clock-web"]="http://localhost:5013/health"
+            ["contacts-backend"]="http://localhost:3034/health"
+            ["contacts-web"]="http://localhost:5014/health"
+          )
+
+          DEPLOY_ALL="${{ steps.services.outputs.deploy-all }}"
+          SERVICES="${{ steps.services.outputs.services }}"
+
+          HEALTH_RESULTS=""
+          echo "=== Health Checks ==="
+
+          # Check all known health endpoints
+          for svc in "${!HEALTH_URLS[@]}"; do
+            url="${HEALTH_URLS[$svc]}"
+            result=$(check_health_timed "$svc" "$url" 2>/dev/null) || true
+            status=$(echo "$result" | awk '{print $1}')
+            elapsed=$(echo "$result" | awk '{print $2}')
+            http_code=$(echo "$result" | awk '{print $3}')
+
+            if [ -z "$status" ]; then
+              status="skipped"
+              elapsed="0"
+              http_code="0"
+            fi
+
+            if [ "$status" = "ok" ]; then
+              echo "  ✓ $svc: OK (${elapsed}s)"
+            else
+              echo "  ✗ $svc: $status (HTTP $http_code, ${elapsed}s)"
+            fi
+
+            HEALTH_RESULTS="$HEALTH_RESULTS $svc:$status:$http_code:$elapsed"
+          done
+
+          echo "health-results=$HEALTH_RESULTS" >> $GITHUB_OUTPUT
+
+      - name: Record deploy metrics
+        if: always()
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          source scripts/deploy-metrics.sh
+
+          START_EPOCH="${{ steps.init.outputs.start_epoch }}"
+          NOW=$(date +%s)
+          DURATION=$(( NOW - START_EPOCH ))
+
+          # Determine overall status
+          STATUS="success"
+          if [ "${{ job.status }}" != "success" ]; then
+            STATUS="failure"
+          fi
+
+          # Determine services list
+          DEPLOY_ALL="${{ steps.services.outputs.deploy-all }}"
+          SERVICES="${{ steps.services.outputs.services }}"
+          if [ "$DEPLOY_ALL" == "true" ]; then
+            SERVICES_CSV="all"
+          else
+            SERVICES_CSV=$(echo "$SERVICES" | tr ' ' ',')
+          fi
+
+          COMMIT_MSG=$(git log -1 --pretty=%s 2>/dev/null | head -c 200 || echo "unknown")
+          BRANCH="${{ github.ref_name }}"
+
+          # Insert deployment row
+          DEPLOY_ID=$(insert_deployment \
+            "${{ github.run_id }}" \
+            "${{ github.run_attempt }}" \
+            "${{ github.sha }}" \
+            "$COMMIT_MSG" \
+            "$BRANCH" \
+            "${{ github.event_name }}" \
+            "${{ github.actor }}" \
+            "$SERVICES_CSV" \
+            "$STATUS" 2>/dev/null) || DEPLOY_ID=""
+
+          if [ -n "$DEPLOY_ID" ]; then
+            # Finalise with duration
+            finalise_deployment "$DEPLOY_ID" "$STATUS" "$DURATION" 2>/dev/null || true
+
+            # Parse build times: "svc1:42 svc2:31"
+            BUILD_TIMES="${{ steps.build.outputs.build-times }}"
+            declare -A BUILD_DUR_MAP
+            for entry in $BUILD_TIMES; do
+              svc="${entry%%:*}"
+              dur="${entry#*:}"
+              BUILD_DUR_MAP["$svc"]="$dur"
+            done
+
+            # Parse health results: "svc1:ok:200:5.0 svc2:failed:503:30.0"
+            HEALTH_RESULTS="${{ steps.health.outputs.health-results }}"
+            declare -A HEALTH_MAP HTTP_MAP STARTUP_MAP
+            for entry in $HEALTH_RESULTS; do
+              svc=$(echo "$entry" | cut -d: -f1)
+              h_status=$(echo "$entry" | cut -d: -f2)
+              h_code=$(echo "$entry" | cut -d: -f3)
+              h_time=$(echo "$entry" | cut -d: -f4)
+              HEALTH_MAP["$svc"]="$h_status"
+              HTTP_MAP["$svc"]="$h_code"
+              STARTUP_MAP["$svc"]="$h_time"
+            done
+
+            # Combine: for each service that was built or health-checked, insert a row
+            ALL_SVCS=$(echo "$BUILD_TIMES $HEALTH_RESULTS" | tr ' ' '\n' | cut -d: -f1 | sort -u | tr '\n' ' ')
+            for svc in $ALL_SVCS; do
+              [ -z "$svc" ] && continue
+              build_dur="${BUILD_DUR_MAP[$svc]:-0}"
+              img_mb=$(get_image_size_mb "$svc" 2>/dev/null || echo "0")
+              startup="${STARTUP_MAP[$svc]:-0}"
+              health="${HEALTH_MAP[$svc]:-skipped}"
+              http_code="${HTTP_MAP[$svc]:-0}"
+
+              insert_deploy_service "$DEPLOY_ID" "$svc" "$build_dur" "$img_mb" "$startup" "$health" "$http_code" 2>/dev/null || true
+              push_service_metrics "$svc" "$build_dur" "$img_mb" "$health" 2>/dev/null || true
+            done
+          fi
+
+          # Push overall metrics to Pushgateway
+          push_deploy_metrics "$STATUS" "$DURATION" "$BRANCH" 2>/dev/null || true
+          echo "Deploy tracking recorded: status=$STATUS duration=${DURATION}s"
+
+      - name: Summary
+        if: always()
         run: |
           cd "${{ env.PROJECT_DIR }}"
 
-          check_health() {
-            local name=$1
-            local url=$2
-            local status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$url" 2>/dev/null || echo "000")
-            if [ "$status" == "200" ]; then
-              echo "  ✓ $name: OK"
-            else
-              echo "  ✗ $name: FAILED (HTTP $status)"
-            fi
-          }
+          START_EPOCH="${{ steps.init.outputs.start_epoch }}"
+          NOW=$(date +%s)
+          DURATION=$(( NOW - START_EPOCH ))
 
-          echo "=== Health Checks ==="
-          check_health "Auth API"          "http://localhost:3001/health"
-          check_health "Matrix Web"        "http://localhost:5180/health"
-          check_health "Chat Backend"      "http://localhost:3030/health"
-          check_health "Chat Web"          "http://localhost:5010/health"
-          check_health "Todo Backend"      "http://localhost:3031/health"
-          check_health "Todo Web"          "http://localhost:5011/health"
-          check_health "Calendar Backend"  "http://localhost:3032/health"
-          check_health "Calendar Web"      "http://localhost:5012/health"
-          check_health "Clock Backend"     "http://localhost:3033/health"
-          check_health "Clock Web"         "http://localhost:5013/health"
-
-      - name: Summary
-        run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Duration:** ${DURATION}s" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           if [ "${{ steps.services.outputs.deploy-all }}" == "true" ]; then
             echo "**Services:** All" >> $GITHUB_STEP_SUMMARY
           else
             echo "**Services:** ${{ steps.services.outputs.services }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Build times table
+          BUILD_TIMES="${{ steps.build.outputs.build-times }}"
+          if [ -n "$BUILD_TIMES" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Build Times" >> $GITHUB_STEP_SUMMARY
+            echo "| Service | Duration |" >> $GITHUB_STEP_SUMMARY
+            echo "|---------|----------|" >> $GITHUB_STEP_SUMMARY
+            for entry in $BUILD_TIMES; do
+              svc="${entry%%:*}"
+              dur="${entry#*:}"
+              echo "| $svc | ${dur}s |" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          # Health results table
+          HEALTH_RESULTS="${{ steps.health.outputs.health-results }}"
+          if [ -n "$HEALTH_RESULTS" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Health Checks" >> $GITHUB_STEP_SUMMARY
+            echo "| Service | Status | HTTP | Startup |" >> $GITHUB_STEP_SUMMARY
+            echo "|---------|--------|------|---------|" >> $GITHUB_STEP_SUMMARY
+            for entry in $HEALTH_RESULTS; do
+              svc=$(echo "$entry" | cut -d: -f1)
+              h_status=$(echo "$entry" | cut -d: -f2)
+              h_code=$(echo "$entry" | cut -d: -f3)
+              h_time=$(echo "$entry" | cut -d: -f4)
+              icon="✓"
+              [ "$h_status" != "ok" ] && icon="✗"
+              echo "| $svc | $icon $h_status | $h_code | ${h_time}s |" >> $GITHUB_STEP_SUMMARY
+            done
           fi

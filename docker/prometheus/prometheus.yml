@@ -111,3 +111,11 @@ scrape_configs:
   #     - targets: ['nutriphi-backend:3037']
   #   metrics_path: '/metrics'
   #   scrape_interval: 30s
+
+  # ============================================
+  # Pushgateway (deploy metrics, batch jobs)
+  # ============================================
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
