@@ -28,6 +28,7 @@ function getTodoClient() {
 			getAuthToken: () => authStore.getValidToken(),
 			timeout: 30000,
 			debug: import.meta.env.DEV,
+			useRuntimeUrl: false,
 		});
 	}
 	return _todoClient;

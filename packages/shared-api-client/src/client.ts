@@ -61,7 +61,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
 		options: RequestOptions = {},
 		attemptNum = 0
 	): Promise<ApiResult<T>> {
-		const baseUrl = getBaseUrl(config.baseUrl);
+		const baseUrl = config.useRuntimeUrl !== false ? getBaseUrl(config.baseUrl) : config.baseUrl;
 		const queryString = options.params ? buildQueryString(options.params) : '';
 		const url = baseUrl + apiPrefix + endpoint + queryString;
 		const requestTimeout = options.timeout ?? timeout;

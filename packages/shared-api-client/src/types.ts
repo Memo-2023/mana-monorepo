@@ -62,6 +62,10 @@ export interface ApiClientConfig {
 
 	/** Enable debug logging (default: false) */
 	debug?: boolean;
+
+	/** Use window.__PUBLIC_BACKEND_URL__ runtime override (default: true).
+	 * Set to false for cross-app clients that resolve their own base URL. */
+	useRuntimeUrl?: boolean;
 }
 
 /**
