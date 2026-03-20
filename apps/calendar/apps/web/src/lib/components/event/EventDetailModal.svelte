@@ -3,8 +3,10 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import EventForm from './EventForm.svelte';
+	import RecurrenceEditDialog from './RecurrenceEditDialog.svelte';
 	import { TagBadge, toastStore as toast } from '@manacore/shared-ui';
 	import type { CalendarEvent, UpdateEventInput } from '@calendar/shared';
+	import { describeRecurrence, parseRRule } from '@calendar/shared';
 	import * as api from '$lib/api/events';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
@@ -21,6 +23,8 @@
 	let event = $state<CalendarEvent | null>(null);
 	let loading = $state(true);
 	let isEditing = $state(false);
+	let showRecurrenceDialog = $state(false);
+	let recurrenceDialogMode = $state<'edit' | 'delete'>('delete');
 
 	// Load event data
 	$effect(() => {
@@ -60,6 +64,13 @@
 	async function handleDelete() {
 		if (!event) return;
 
+		// For recurring events, show the recurrence dialog
+		if (event.recurrenceRule || eventsStore.isRecurrenceOccurrence(event.id)) {
+			recurrenceDialogMode = 'delete';
+			showRecurrenceDialog = true;
+			return;
+		}
+
 		if (!confirm('Möchten Sie diesen Termin wirklich löschen?')) {
 			return;
 		}
@@ -73,6 +84,21 @@
 
 		toast.success('Termin gelöscht');
 		onClose();
+	}
+
+	async function handleRecurrenceAction(action: 'this' | 'all' | 'this_and_future') {
+		if (!event) return;
+		showRecurrenceDialog = false;
+
+		if (recurrenceDialogMode === 'delete') {
+			let result;
+			if (action === 'this') {
+				result = await eventsStore.deleteRecurrenceOccurrence(event.id);
+			} else {
+				result = await eventsStore.deleteRecurrenceSeries(event.id);
+			}
+			if (!result.error) onClose();
+		}
 	}
 
 	function handleCancel() {
@@ -144,6 +170,13 @@
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
+
+<RecurrenceEditDialog
+	visible={showRecurrenceDialog}
+	mode={recurrenceDialogMode}
+	onSelect={handleRecurrenceAction}
+	onCancel={() => (showRecurrenceDialog = false)}
+/>
 
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 <div class="modal-backdrop" onclick={handleBackdropClick} role="presentation">

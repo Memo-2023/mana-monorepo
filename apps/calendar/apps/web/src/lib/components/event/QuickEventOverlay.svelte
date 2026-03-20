@@ -3,6 +3,7 @@
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import RecurrenceEditDialog from './RecurrenceEditDialog.svelte';
 	import type {
 		LocationDetails,
 		CalendarEvent,
@@ -207,6 +208,7 @@
 	let locationCity = $state('');
 	let locationCountry = $state('');
 	let submitting = $state(false);
+	let showRecurrenceDialog = $state(false);
 
 	// People state
 	let responsiblePerson = $state<ResponsiblePerson | null>(null);
@@ -605,6 +607,12 @@
 	async function handleDelete() {
 		if (!event) return;
 
+		// For recurring events, show recurrence dialog
+		if (event.recurrenceRule || eventsStore.isRecurrenceOccurrence(event.id)) {
+			showRecurrenceDialog = true;
+			return;
+		}
+
 		submitting = true;
 		try {
 			const result = await eventsStore.deleteEvent(event.id);
@@ -623,6 +631,26 @@
 		}
 	}
 
+	async function handleRecurrenceDeleteAction(action: 'this' | 'all' | 'this_and_future') {
+		if (!event) return;
+		showRecurrenceDialog = false;
+		submitting = true;
+		try {
+			let result;
+			if (action === 'this') {
+				result = await eventsStore.deleteRecurrenceOccurrence(event.id);
+			} else {
+				result = await eventsStore.deleteRecurrenceSeries(event.id);
+			}
+			if (!result.error) {
+				onDeleted?.();
+				onClose();
+			}
+		} finally {
+			submitting = false;
+		}
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			onClose();
@@ -631,6 +659,13 @@
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
+
+<RecurrenceEditDialog
+	visible={showRecurrenceDialog}
+	mode="delete"
+	onSelect={handleRecurrenceDeleteAction}
+	onCancel={() => (showRecurrenceDialog = false)}
+/>
 
 <!-- Overlay (no blocking backdrop - allows interaction with calendar) -->
 <!-- Portal to body to escape stacking contexts -->

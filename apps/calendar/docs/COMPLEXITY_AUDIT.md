@@ -80,15 +80,20 @@ Die Legacy-Composables (`useDragDrop`, `useResize`) sind von keiner Komponente i
 
 ## Teil 2: Unterentwickelte Bereiche
 
-### 1. Keine Kalender-Synchronisation (CalDAV/iCal) — Priorität: Hoch
+### 1. Keine Kalender-Synchronisation (CalDAV/iCal) — ✅ Implementiert
 
-Backend hat `external_calendars`-Tabelle und Sync-Endpunkte. Frontend hat null UI dafür.
-Für eine Kalender-App ist das das größte fehlende Feature.
+- API-Client (`lib/api/sync.ts`) für alle Sync-Endpunkte
+- External Calendars Store mit connect/disconnect/sync
+- Settings-Seite `/settings/sync` mit Provider-Auswahl, CalDAV-Discovery, Sync-Status
+- Sidebar zeigt externe Kalender mit Sichtbarkeits-Toggle
 
-### 2. Keine wiederkehrenden Termine (Recurring Events) — Priorität: Hoch
+### 2. Keine wiederkehrenden Termine (Recurring Events) — ✅ Implementiert
 
-Backend-Schema unterstützt RFC 5545 RRULE. Kein UI oder Store-Logik dafür.
-Essentiell für eine nutzbare Kalender-App.
+- RecurrenceSelector-Komponente mit Presets + benutzerdefinierter Konfiguration
+- Im EventForm integriert, sendet `recurrenceRule` + `recurrenceEndDate`
+- Events Store expandiert RRULE zu Einzelterminen per `generateOccurrences()`
+- RecurrenceEditDialog für "Diesen/Alle/Zukünftige" beim Löschen
+- In EventDetailModal und QuickEventOverlay integriert
 
 ### 3. Erinnerungen / Notifications nur rudimentär — Priorität: Mittel
 
