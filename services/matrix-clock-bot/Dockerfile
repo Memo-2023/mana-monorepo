@@ -57,7 +57,7 @@ RUN mkdir -p /app/data
 # Create non-root user
 RUN groupadd --system --gid 1001 nodejs && \
     useradd --system --uid 1001 -g nodejs nestjs && \
-    chown -R nestjs:nodejs /app
+    chown -R nestjs:nodejs /app/data
 
 USER nestjs
 

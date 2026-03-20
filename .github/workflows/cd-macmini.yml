@@ -266,28 +266,46 @@ jobs:
           cd "${{ env.PROJECT_DIR }}"
           source scripts/deploy-metrics.sh
 
-          # Service health URL pairs (Bash 3.x compatible — no declare -A)
-          HEALTH_ENTRIES="
-            mana-auth|http://localhost:3001/health
-            matrix-web|http://localhost:5180/health
-            chat-backend|http://localhost:3030/health
-            chat-web|http://localhost:5010/health
-            todo-backend|http://localhost:3031/health
-            todo-web|http://localhost:5011/health
-            calendar-backend|http://localhost:3032/health
-            calendar-web|http://localhost:5012/health
-            clock-backend|http://localhost:3033/health
-            clock-web|http://localhost:5013/health
-            contacts-backend|http://localhost:3034/health
-            contacts-web|http://localhost:5014/health
-          "
+          # Service -> health URL mapping
+          health_url_for() {
+            case "$1" in
+              mana-auth)         echo "http://localhost:3001/health" ;;
+              matrix-web)        echo "http://localhost:5180/health" ;;
+              chat-backend)      echo "http://localhost:3030/health" ;;
+              chat-web)          echo "http://localhost:5010/health" ;;
+              todo-backend)      echo "http://localhost:3031/health" ;;
+              todo-web)          echo "http://localhost:5011/health" ;;
+              calendar-backend)  echo "http://localhost:3032/health" ;;
+              calendar-web)      echo "http://localhost:5012/health" ;;
+              clock-backend)     echo "http://localhost:3033/health" ;;
+              clock-web)         echo "http://localhost:5013/health" ;;
+              contacts-backend)  echo "http://localhost:3034/health" ;;
+              contacts-web)      echo "http://localhost:5014/health" ;;
+              mukke-backend)     echo "http://localhost:3035/health" ;;
+              mukke-web)         echo "http://localhost:5015/health" ;;
+              *)                 echo "" ;;
+            esac
+          }
+
+          # Only check services that were actually deployed
+          DEPLOY_ALL="${{ steps.services.outputs.deploy-all }}"
+          SERVICES="${{ steps.services.outputs.services }}"
+
+          if [ "$DEPLOY_ALL" == "true" ]; then
+            SERVICES="mana-auth matrix-web chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web"
+          fi
 
           HEALTH_RESULTS=""
           echo "=== Health Checks ==="
 
-          for entry in $HEALTH_ENTRIES; do
-            svc="${entry%%|*}"
-            url="${entry#*|}"
+          for svc in $SERVICES; do
+            url=$(health_url_for "$svc")
+            if [ -z "$url" ]; then
+              echo "  - $svc: no health endpoint configured"
+              HEALTH_RESULTS="$HEALTH_RESULTS $svc:skipped:0:0"
+              continue
+            fi
+
             result=$(check_health_timed "$svc" "$url" 2>/dev/null) || true
             status=$(echo "$result" | awk '{print $1}')
             elapsed=$(echo "$result" | awk '{print $2}')
@@ -392,6 +410,15 @@ jobs:
           # Push overall metrics to Pushgateway
           push_deploy_metrics "$STATUS" "$DURATION" "$BRANCH" 2>/dev/null || true
           echo "Deploy tracking recorded: status=$STATUS duration=${DURATION}s"
+
+      - name: Cleanup old images
+        if: always()
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          echo "=== Pruning dangling images ==="
+          docker image prune -f 2>/dev/null || true
+          echo "=== Pruning unused images older than 7 days ==="
+          docker image prune -a -f --filter "until=168h" 2>/dev/null || true
 
       - name: Summary
         if: always()
