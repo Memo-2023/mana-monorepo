@@ -5,6 +5,7 @@
 #   3000-3099: Core Services & Backends
 #   4000-4099: Matrix Stack
 #   5000-5099: Web Frontends
+#   5100-5199: Games
 #   6000-6099: Automation & Workflows
 #   8000-8099: Monitoring Dashboards
 #   9000-9199: Infrastructure & Exporters
@@ -147,7 +148,7 @@ services:
       TODO_BACKEND_URL: http://todo-backend:3031
       CALENDAR_BACKEND_URL: http://calendar-backend:3032
       CONTACTS_BACKEND_URL: http://contacts-backend:3034
-      PICTURE_BACKEND_URL: http://photos-backend:3039
+      PICTURE_BACKEND_URL: http://picture-backend:3040
       PRESI_BACKEND_URL: http://presi-backend:3036
       ZITARE_BACKEND_URL: http://zitare-backend:3007
       PHOTOS_BACKEND_URL: http://photos-backend:3039
@@ -1603,6 +1604,74 @@ services:
       retries: 3
       start_period: 40s
 
+  picture-backend:
+    build:
+      context: .
+      dockerfile: apps/picture/apps/backend/Dockerfile
+    image: picture-backend:local
+    container_name: mana-app-picture-backend
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3040
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/picture
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
+      APP_ID: picture-app
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_ENDPOINT: https://minio.mana.how
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      S3_BUCKET: picture-storage
+      CORS_ORIGINS: https://picture.mana.how,https://mana.how
+    ports:
+      - "3040:3040"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3040/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  picture-web:
+    build:
+      context: .
+      dockerfile: apps/picture/apps/web/Dockerfile
+      args:
+        PUBLIC_BACKEND_URL: http://picture-backend:3040
+        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+    image: picture-web:local
+    container_name: mana-app-picture-web
+    restart: always
+    depends_on:
+      picture-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5021
+      PUBLIC_BACKEND_URL: http://picture-backend:3040
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://picture-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5021:5021"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5021/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   mana-llm:
     build:
       context: ./services/mana-llm
@@ -2007,6 +2076,30 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  # ============================================
+  # Games
+  # ============================================
+
+  whopixels:
+    build:
+      context: .
+      dockerfile: games/whopixels/Dockerfile
+    container_name: mana-game-whopixels
+    restart: unless-stopped
+    environment:
+      PORT: 5100
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-}
+    ports:
+      - "5100:5100"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5100/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   redis_data:

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -28,7 +29,7 @@ COPY apps/calendar/packages ./apps/calendar/packages
 COPY apps/calendar/apps/backend ./apps/calendar/apps/backend
 
 # Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors

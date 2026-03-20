@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Multi-stage Dockerfile for NestJS backend services
 # This is a template - copy and customize for each backend service
 
@@ -26,7 +27,7 @@ ARG SERVICE_PATH
 COPY ${SERVICE_PATH} ./${SERVICE_PATH}
 
 # Install all dependencies (including devDependencies for build)
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 # Build shared packages first
 RUN pnpm run build:packages
@@ -60,7 +61,7 @@ ARG SERVICE_PATH
 COPY --from=builder /app/${SERVICE_PATH} ./${SERVICE_PATH}
 
 # Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --prod --frozen-lockfile
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \

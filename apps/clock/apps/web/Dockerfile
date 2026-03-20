@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -46,7 +47,7 @@ COPY apps/clock/packages ./apps/clock/packages
 COPY apps/clock/apps/web ./apps/clock/apps/web
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-vite-config

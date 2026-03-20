@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # ================================
 # Build Stage
 # ================================
@@ -11,7 +12,7 @@ COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY services/mana-media ./services/mana-media
 
 # Install all dependencies
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 # Build the API
 WORKDIR /app/services/mana-media/apps/api

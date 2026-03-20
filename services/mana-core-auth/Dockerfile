@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
 FROM node:20-slim AS builder
@@ -20,7 +21,7 @@ COPY packages/shared-storage ./packages/shared-storage
 COPY services/mana-core-auth ./services/mana-core-auth
 
 # Install all dependencies (without ignore-scripts to build native modules like bcrypt)
-RUN pnpm install --no-frozen-lockfile --filter mana-core-auth... --filter @manacore/shared-storage
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile --filter mana-core-auth... --filter @manacore/shared-storage
 
 # Build shared-storage first
 WORKDIR /app/packages/shared-storage

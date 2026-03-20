@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM node:20-alpine AS base
 
 # Install pnpm
@@ -13,7 +14,7 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY services/mana-notify/package.json ./services/mana-notify/
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile --filter @manacore/mana-notify
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --filter @manacore/mana-notify
 
 # Copy source code
 COPY services/mana-notify ./services/mana-notify

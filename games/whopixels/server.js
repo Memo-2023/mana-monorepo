@@ -10,7 +10,7 @@ require('dotenv').config();
 const { parse } = require('querystring');
 
 // Konfiguration
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Azure OpenAI API Konfiguration aus Umgebungsvariablen
 const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY;

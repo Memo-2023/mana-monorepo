@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -17,7 +18,7 @@ COPY services/mana-crawler/package.json ./services/mana-crawler/
 COPY packages/shared-drizzle-config/package.json ./packages/shared-drizzle-config/
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 # Copy source code
 COPY services/mana-crawler ./services/mana-crawler
@@ -42,7 +43,7 @@ COPY --from=builder /app/services/mana-crawler/package.json ./services/mana-craw
 COPY --from=builder /app/packages/shared-drizzle-config/package.json ./packages/shared-drizzle-config/
 
 # Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --prod
 
 # Copy built files
 COPY --from=builder /app/services/mana-crawler/dist ./services/mana-crawler/dist

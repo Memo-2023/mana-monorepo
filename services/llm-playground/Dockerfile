@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -30,7 +31,7 @@ COPY packages/shared-icons ./packages/shared-icons
 COPY services/llm-playground ./services/llm-playground
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-auth

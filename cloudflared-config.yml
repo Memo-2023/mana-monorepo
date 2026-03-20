@@ -76,6 +76,12 @@ ingress:
   - hostname: mukke-api.mana.how
     service: http://localhost:3010
 
+  # Picture App
+  - hostname: picture.mana.how
+    service: http://localhost:5021
+  - hostname: picture-api.mana.how
+    service: http://localhost:3040
+
   # LLM Services
   - hostname: playground.mana.how
     service: http://localhost:5090
@@ -85,6 +91,10 @@ ingress:
     service: http://localhost:3020
   - hostname: tts-api.mana.how
     service: http://localhost:3022
+
+  # Games
+  - hostname: whopxl.mana.how
+    service: http://localhost:5100
 
   # Monitoring & Tools
   - hostname: grafana.mana.how

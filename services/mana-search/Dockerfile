@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # ================================
 # Build Stage (Monorepo-aware)
 # ================================
@@ -9,7 +10,7 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/mana-search/package.json ./services/mana-search/
-RUN pnpm install --frozen-lockfile --filter @manacore/mana-search...
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --filter @manacore/mana-search...
 
 # Build the application
 FROM base AS builder

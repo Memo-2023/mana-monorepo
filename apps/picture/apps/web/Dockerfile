@@ -3,7 +3,7 @@
 FROM node:20-alpine AS builder
 
 # Build arguments for SvelteKit static env vars
-ARG PUBLIC_BACKEND_URL=http://todo-backend:3018
+ARG PUBLIC_BACKEND_URL=http://picture-backend:3040
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
 
 # Set as environment variables for build
@@ -20,9 +20,8 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages needed by todo web
+# Copy shared packages needed by picture web
 COPY packages/shared-types ./packages/shared-types
-COPY packages/shared-splitscreen ./packages/shared-splitscreen
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
@@ -39,16 +38,17 @@ COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
-COPY packages/shared-tags ./packages/shared-tags
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-stores ./packages/shared-stores
 COPY packages/shared-pwa ./packages/shared-pwa
-COPY packages/spiral-db ./packages/spiral-db
 
-# Copy todo packages and web
-COPY apps/todo/packages ./apps/todo/packages
-COPY apps/todo/apps/web ./apps/todo/apps/web
+# Copy picture packages
+COPY apps/picture/packages/shared ./apps/picture/packages/shared
+COPY apps/picture/packages/design-tokens ./apps/picture/packages/design-tokens
+
+# Copy picture web
+COPY apps/picture/apps/web ./apps/picture/apps/web
 
 # Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
@@ -61,7 +61,7 @@ WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
 # Build the web app
-WORKDIR /app/apps/todo/apps/web
+WORKDIR /app/apps/picture/apps/web
 RUN pnpm exec svelte-kit sync
 RUN pnpm build
 
@@ -69,29 +69,29 @@ RUN pnpm build
 FROM node:20-alpine AS production
 
 # Keep same directory structure as builder so pnpm symlinks resolve correctly
-WORKDIR /app/apps/todo/apps/web
+WORKDIR /app/apps/picture/apps/web
 
 # Copy the pnpm store that symlinks point to (at /app/node_modules/.pnpm)
 COPY --from=builder /app/node_modules/.pnpm /app/node_modules/.pnpm
 
 # Copy the app's node_modules (contains symlinks to the pnpm store)
-COPY --from=builder /app/apps/todo/apps/web/node_modules ./node_modules
+COPY --from=builder /app/apps/picture/apps/web/node_modules ./node_modules
 
 # Copy built application
-COPY --from=builder /app/apps/todo/apps/web/build ./build
-COPY --from=builder /app/apps/todo/apps/web/package.json ./
+COPY --from=builder /app/apps/picture/apps/web/build ./build
+COPY --from=builder /app/apps/picture/apps/web/package.json ./
 
 # Expose port
-EXPOSE 5188
+EXPOSE 5021
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=5188
+ENV PORT=5021
 ENV HOST=0.0.0.0
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:5188/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5021/health || exit 1
 
 # Run the app
 CMD ["node", "build"]

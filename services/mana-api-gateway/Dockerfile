@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # ================================
 # Build Stage (Monorepo-aware)
 # ================================
@@ -10,7 +11,7 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/mana-api-gateway/package.json ./services/mana-api-gateway/
 COPY packages/shared-nestjs-auth/package.json ./packages/shared-nestjs-auth/
-RUN pnpm install --frozen-lockfile --filter @manacore/api-gateway...
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --filter @manacore/api-gateway...
 
 # Build the application
 FROM base AS builder

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -36,7 +37,7 @@ COPY packages/shared-api-client ./packages/shared-api-client
 COPY apps/skilltree/apps/web ./apps/skilltree/apps/web
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-vite-config

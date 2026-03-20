@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -28,7 +29,7 @@ COPY apps/mukke/packages ./apps/mukke/packages
 COPY apps/mukke/apps/backend ./apps/mukke/apps/backend
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages
 WORKDIR /app/packages/shared-errors

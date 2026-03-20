@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -26,7 +27,7 @@ COPY apps/nutriphi/packages ./apps/nutriphi/packages
 COPY apps/nutriphi/apps/backend ./apps/nutriphi/apps/backend
 
 # Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first
 WORKDIR /app/packages/shared-nestjs-auth

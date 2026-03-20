@@ -1,11 +1,10 @@
-# Multi-stage Dockerfile for Astro landing pages # This is a template - copy and customize for each
-landing page # ============================================ # Build Stage #
-============================================ FROM node:20-alpine AS builder # Install pnpm RUN
-corepack enable && corepack prepare pnpm@9.15.0 --activate WORKDIR /app # Copy workspace files COPY
-pnpm-workspace.yaml ./ COPY package.json ./ COPY pnpm-lock.yaml ./ # Copy all shared packages COPY
-packages/ ./packages/ # Copy the specific landing page ARG SERVICE_PATH COPY ${SERVICE_PATH} ./${
-	SERVICE_PATH
-}
+# syntax=docker/dockerfile:1 # Multi-stage Dockerfile for Astro landing pages # This is a template -
+copy and customize for each landing page # ============================================ # Build
+Stage # ============================================ FROM node:20-alpine AS builder # Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate WORKDIR /app # Copy workspace files
+COPY pnpm-workspace.yaml ./ COPY package.json ./ COPY pnpm-lock.yaml ./ # Copy all shared packages
+COPY packages/ ./packages/ # Copy the specific landing page ARG SERVICE_PATH COPY ${SERVICE_PATH}
+./${SERVICE_PATH}
 # Install all dependencies RUN pnpm install --frozen-lockfile # Build shared packages first RUN pnpm
 run build:packages # Build the landing page WORKDIR /app/${SERVICE_PATH}
 RUN pnpm build # ============================================ # Production Stage - Nginx # ============================================

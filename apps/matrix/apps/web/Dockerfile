@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -34,7 +35,7 @@ COPY packages/shared-utils ./packages/shared-utils
 COPY apps/matrix/apps/web ./apps/matrix/apps/web
 
 # Install dependencies (--no-frozen-lockfile due to workspace overrides)
-RUN pnpm install --no-frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-auth

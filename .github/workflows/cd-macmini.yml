@@ -50,6 +50,7 @@ env:
   ENV_FILE: .env.macmini
   DEPLOY_NOTIFY_ROOM_ID: ${{ secrets.DEPLOY_NOTIFY_ROOM_ID }}
   DEPLOY_NOTIFY_BOT_TOKEN: ${{ secrets.DEPLOY_NOTIFY_BOT_TOKEN }}
+  DOCKER_BUILDKIT: 1
   PATH: /usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
 jobs:

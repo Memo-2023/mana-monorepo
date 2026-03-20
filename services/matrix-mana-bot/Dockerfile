@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Build stage
 FROM node:20-slim AS builder
 
@@ -17,7 +18,7 @@ COPY packages/matrix-bot-common ./packages/matrix-bot-common
 COPY services/matrix-mana-bot ./services/matrix-mana-bot
 
 # Install all dependencies (--ignore-scripts to skip root postinstall hooks)
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages first (in dependency order)
 RUN pnpm --filter @manacore/bot-services build
@@ -49,7 +50,7 @@ COPY --from=builder /app/services/matrix-mana-bot/dist ./services/matrix-mana-bo
 COPY --from=builder /app/services/matrix-mana-bot/package.json ./services/matrix-mana-bot/
 
 # Install production dependencies only (--ignore-scripts to skip root postinstall hooks)
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Create data directory
 RUN mkdir -p /app/data
