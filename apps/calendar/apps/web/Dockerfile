@@ -43,6 +43,9 @@ COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-stores ./packages/shared-stores
 
+# Copy patches (referenced by pnpm-lock.yaml)
+COPY patches ./patches
+
 # Copy calendar packages and web
 COPY apps/calendar/packages ./apps/calendar/packages
 COPY apps/calendar/apps/web ./apps/calendar/apps/web
