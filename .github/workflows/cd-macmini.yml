@@ -36,6 +36,8 @@ on:
           - clock-web
           - contacts-backend
           - contacts-web
+          - mukke-backend
+          - mukke-web
           - matrix-mana-bot
 
 concurrency:
@@ -69,6 +71,8 @@ jobs:
       clock-web: ${{ steps.changes.outputs.clock-web }}
       contacts-backend: ${{ steps.changes.outputs.contacts-backend }}
       contacts-web: ${{ steps.changes.outputs.contacts-web }}
+      mukke-backend: ${{ steps.changes.outputs.mukke-backend }}
+      mukke-web: ${{ steps.changes.outputs.mukke-web }}
       matrix-mana-bot: ${{ steps.changes.outputs.matrix-mana-bot }}
       any-changes: ${{ steps.changes.outputs.any-changes }}
     steps:
@@ -122,11 +126,13 @@ jobs:
           check_changes "clock-web"         "apps/clock/apps/web/" "apps/clock/packages/"
           check_changes "contacts-backend"  "apps/contacts/apps/backend/" "apps/contacts/packages/"
           check_changes "contacts-web"      "apps/contacts/apps/web/" "apps/contacts/packages/"
+          check_changes "mukke-backend"     "apps/mukke/apps/backend/" "apps/mukke/packages/"
+          check_changes "mukke-web"         "apps/mukke/apps/web/" "apps/mukke/packages/"
           check_changes "matrix-mana-bot"   "services/matrix-mana-bot/" "packages/matrix-bot-common/"
 
           # Check if anything needs deploying
           ANY="false"
-          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web matrix-mana-bot; do
+          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web matrix-mana-bot; do
             val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
             if [ "$val" == "true" ]; then
               ANY="true"
@@ -199,6 +205,8 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.clock-web }}" == "true" ]; then SERVICES="$SERVICES clock-web"; fi
             if [ "${{ needs.detect-changes.outputs.contacts-backend }}" == "true" ]; then SERVICES="$SERVICES contacts-backend"; fi
             if [ "${{ needs.detect-changes.outputs.contacts-web }}" == "true" ]; then SERVICES="$SERVICES contacts-web"; fi
+            if [ "${{ needs.detect-changes.outputs.mukke-backend }}" == "true" ]; then SERVICES="$SERVICES mukke-backend"; fi
+            if [ "${{ needs.detect-changes.outputs.mukke-web }}" == "true" ]; then SERVICES="$SERVICES mukke-web"; fi
             if [ "${{ needs.detect-changes.outputs.matrix-mana-bot }}" == "true" ]; then SERVICES="$SERVICES matrix-mana-bot"; fi
           fi
 
