@@ -1330,7 +1330,10 @@ services:
       start_period: 40s
 
   calendar-web:
-    image: ghcr.io/memo-2023/calendar-web:latest
+    build:
+      context: .
+      dockerfile: apps/calendar/apps/web/Dockerfile
+    image: calendar-web:local
     container_name: mana-app-calendar-web
     restart: always
     depends_on:
