@@ -13,6 +13,37 @@
 
 {#if playerStore.currentSong}
 	<div class="fixed bottom-0 left-0 right-0 z-30 bg-surface border-t border-border">
+		<!-- Error toast -->
+		{#if playerStore.error}
+			<div
+				class="flex items-center gap-2 px-4 py-2 bg-red-500/10 border-b border-red-500/20 text-sm text-red-500"
+			>
+				<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					/>
+				</svg>
+				<span class="truncate">{playerStore.error}</span>
+				<button
+					onclick={() => playerStore.clearError()}
+					class="ml-auto p-0.5 hover:text-red-400 shrink-0"
+					aria-label="Dismiss error"
+				>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
+		{/if}
+
 		<!-- Progress bar at top -->
 		<div class="h-1 w-full bg-border">
 			<div class="h-full bg-primary transition-all duration-200" style="width: {progress}%"></div>

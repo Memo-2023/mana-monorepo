@@ -104,7 +104,9 @@ function createLibraryStore() {
 		},
 
 		async loadCoverUrls(paths: string[]) {
-			const uncached = paths.filter((p) => p && !state.coverUrls[p]);
+			// Filter out non-image paths (e.g. .mp3 storagePaths stored as coverArtPath by mistake)
+			const imageExtensions = /\.(jpg|jpeg|png|gif|webp|avif|svg)$/i;
+			const uncached = paths.filter((p) => p && !state.coverUrls[p] && imageExtensions.test(p));
 			if (uncached.length === 0) return;
 			try {
 				const data = await fetchApi<{ urls: Record<string, string> }>('/library/cover-urls', {

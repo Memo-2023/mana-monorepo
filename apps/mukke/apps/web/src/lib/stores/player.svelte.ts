@@ -16,6 +16,7 @@ interface PlayerState {
 	currentIndex: number;
 	showFullPlayer: boolean;
 	showQueue: boolean;
+	error: string | null;
 }
 
 function getBackendUrl(): string {
@@ -55,6 +56,7 @@ function createPlayerStore() {
 		currentIndex: 0,
 		showFullPlayer: false,
 		showQueue: false,
+		error: null,
 	});
 
 	let audio: HTMLAudioElement | null = null;
@@ -69,6 +71,18 @@ function createPlayerStore() {
 		});
 		audio.addEventListener('ended', () => {
 			handleNext();
+		});
+		audio.addEventListener('error', () => {
+			const mediaError = audio!.error;
+			const msg =
+				mediaError?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
+					? 'Audio format not supported'
+					: mediaError?.code === MediaError.MEDIA_ERR_NETWORK
+						? 'Network error while loading audio'
+						: 'Failed to load audio file';
+			console.warn(`[Mukke Player] ${msg} for song: ${state.currentSong?.title}`);
+			state.error = msg;
+			state.isPlaying = false;
 		});
 	}
 
@@ -152,6 +166,7 @@ function createPlayerStore() {
 		state.currentSong = song;
 		state.currentTime = 0;
 		state.duration = 0;
+		state.error = null;
 
 		try {
 			const url = await getDownloadUrl(song.id);
@@ -160,8 +175,18 @@ function createPlayerStore() {
 			state.isPlaying = true;
 			updateMediaSession(song);
 		} catch (e) {
-			console.error('Failed to play song:', e);
+			console.warn(`[Mukke Player] Failed to play "${song.title}":`, e);
 			state.isPlaying = false;
+			if (!state.error) {
+				state.error = 'Failed to play song. The file may be missing.';
+			}
+			// Auto-skip to next song after a short delay
+			setTimeout(() => {
+				if (state.error && state.queue.length > 1) {
+					state.error = null;
+					handleNext();
+				}
+			}, 2000);
 		}
 	}
 
@@ -214,6 +239,9 @@ function createPlayerStore() {
 		},
 		get showQueue() {
 			return state.showQueue;
+		},
+		get error() {
+			return state.error;
 		},
 
 		async playSong(song: Song, queue?: Song[], startIndex?: number) {
@@ -322,6 +350,10 @@ function createPlayerStore() {
 			state.showQueue = !state.showQueue;
 		},
 
+		clearError() {
+			state.error = null;
+		},
+
 		clearQueue() {
 			if (audio) {
 				audio.pause();
@@ -336,6 +368,7 @@ function createPlayerStore() {
 			state.currentIndex = 0;
 			state.showFullPlayer = false;
 			state.showQueue = false;
+			state.error = null;
 		},
 
 		removeFromQueue(index: number) {

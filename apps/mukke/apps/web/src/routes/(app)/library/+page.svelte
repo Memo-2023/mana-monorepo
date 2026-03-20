@@ -3,12 +3,14 @@
 	import { goto } from '$app/navigation';
 	import { libraryStore } from '$lib/stores/library.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { playerStore } from '$lib/stores/player.svelte';
 	import SongEditor from '$lib/components/SongEditor.svelte';
 	import type { Song } from '@mukke/shared';
 
 	const tabs = ['songs', 'albums', 'artists', 'genres'] as const;
 
 	let editingSong = $state<Song | null>(null);
+	let failedCovers = $state<Set<string>>(new Set());
 
 	function getBackendUrl(): string {
 		let baseUrl = 'http://localhost:3010';
@@ -56,6 +58,10 @@
 		e.preventDefault();
 		e.stopPropagation();
 		editingSong = song;
+	}
+
+	function handlePlaySong(song: Song, index: number) {
+		playerStore.playSong(song, libraryStore.songs, index);
 	}
 
 	async function openInEditor(songId: string, e: Event) {
@@ -148,22 +154,40 @@
 						<span></span>
 					</div>
 					<!-- Song rows -->
-					{#each libraryStore.songs as song}
+					{#each libraryStore.songs as song, index}
 						<div
-							class="grid grid-cols-[40px_1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center"
+							role="button"
+							tabindex="0"
+							onclick={() => handlePlaySong(song, index)}
+							onkeydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									handlePlaySong(song, index);
+								}
+							}}
+							class="grid grid-cols-[40px_1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center cursor-pointer group {playerStore
+								.currentSong?.id === song.id
+								? 'bg-primary/5'
+								: ''}"
 						>
 							<div
-								class="w-10 h-10 rounded bg-background flex items-center justify-center overflow-hidden flex-shrink-0"
+								class="w-10 h-10 rounded bg-background flex items-center justify-center overflow-hidden flex-shrink-0 relative"
 							>
-								{#if song.coverArtPath && libraryStore.coverUrls[song.coverArtPath]}
+								{#if song.coverArtPath && libraryStore.coverUrls[song.coverArtPath] && !failedCovers.has(song.id)}
 									<img
 										src={libraryStore.coverUrls[song.coverArtPath]}
 										alt=""
 										class="w-full h-full object-cover"
+										onerror={() => {
+											failedCovers = new Set([...failedCovers, song.id]);
+										}}
 									/>
 								{:else}
 									<svg
-										class="w-5 h-5 text-foreground-secondary"
+										class="w-5 h-5 text-foreground-secondary transition-opacity {playerStore
+											.currentSong?.id === song.id && playerStore.isPlaying
+											? 'opacity-0'
+											: 'group-hover:opacity-0'}"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -176,8 +200,30 @@
 										/>
 									</svg>
 								{/if}
+								<!-- Playing indicator or play icon on hover -->
+								{#if playerStore.currentSong?.id === song.id && playerStore.isPlaying}
+									<div
+										class="absolute inset-0 flex items-center justify-center bg-black/40 rounded"
+									>
+										<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+											<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+										</svg>
+									</div>
+								{:else}
+									<div
+										class="absolute inset-0 items-center justify-center bg-black/40 rounded hidden group-hover:flex"
+									>
+										<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</div>
+								{/if}
 							</div>
-							<span class="truncate font-medium">{song.title}</span>
+							<span
+								class="truncate font-medium {playerStore.currentSong?.id === song.id
+									? 'text-primary'
+									: ''}">{song.title}</span
+							>
 							<span class="truncate text-foreground-secondary">{song.artist ?? 'Unknown'}</span>
 							<span class="truncate text-foreground-secondary">{song.album ?? 'Unknown'}</span>
 							<span class="text-right text-foreground-secondary text-sm">
@@ -254,11 +300,15 @@
 							<div
 								class="aspect-square bg-background rounded-lg mb-3 flex items-center justify-center overflow-hidden"
 							>
-								{#if album.coverArtPath && libraryStore.coverUrls[album.coverArtPath]}
+								{#if album.coverArtPath && libraryStore.coverUrls[album.coverArtPath] && !failedCovers.has(album.coverArtPath)}
 									<img
 										src={libraryStore.coverUrls[album.coverArtPath]}
 										alt={album.album}
 										class="w-full h-full object-cover"
+										onerror={() => {
+											if (album.coverArtPath)
+												failedCovers = new Set([...failedCovers, album.coverArtPath]);
+										}}
 									/>
 								{:else}
 									<svg
