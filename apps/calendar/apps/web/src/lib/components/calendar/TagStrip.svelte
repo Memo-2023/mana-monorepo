@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
-	import { eventTagGroupsStore } from '$lib/stores/event-tag-groups.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { DotsThree, Plus, X } from '@manacore/shared-icons';
@@ -10,7 +9,6 @@
 	let showModal = $state(false);
 
 	function handleTagClick(tagId: string) {
-		// Toggle tag selection for filtering calendar view
 		settingsStore.toggleTagSelection(tagId);
 	}
 
@@ -28,30 +26,15 @@
 		showModal = false;
 	}
 
-	// Sort tags by group, then by name
 	const sortedTags = $derived.by(() => {
-		const tags = [...eventTagsStore.tags];
-		const groupOrder = new Map(eventTagGroupsStore.groups.map((g, i) => [g.id, i]));
-
-		return tags.sort((a, b) => {
-			// Ungrouped tags go last
-			const aOrder = a.groupId ? (groupOrder.get(a.groupId) ?? 999) : 1000;
-			const bOrder = b.groupId ? (groupOrder.get(b.groupId) ?? 999) : 1000;
-
-			if (aOrder !== bOrder) return aOrder - bOrder;
-			return a.name.localeCompare(b.name, 'de');
-		});
+		return [...eventTagsStore.tags].sort((a, b) => a.name.localeCompare(b.name, 'de'));
 	});
 
 	const hasTags = $derived(eventTagsStore.tags.length > 0);
 
 	onMount(async () => {
-		// Fetch tags and groups if not already loaded
 		if (eventTagsStore.tags.length === 0) {
 			await eventTagsStore.fetchTags();
-		}
-		if (eventTagGroupsStore.groups.length === 0) {
-			await eventTagGroupsStore.fetchGroups();
 		}
 	});
 </script>

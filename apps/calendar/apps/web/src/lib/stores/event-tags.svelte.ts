@@ -1,7 +1,5 @@
 /**
  * Event Tags Store - Manages event tags using Svelte 5 runes
- *
- * Uses the Calendar Backend API which supports tag groups (groupId).
  */
 
 import type { EventTag } from '@calendar/shared';
@@ -109,28 +107,5 @@ export const eventTagsStore = {
 	clear() {
 		tags = [];
 		error = null;
-	},
-
-	/**
-	 * Get tags grouped by groupId
-	 * Returns a Map where keys are groupId (or null for ungrouped)
-	 */
-	getGroupedTags(): Map<string | null, EventTag[]> {
-		const grouped = new Map<string | null, EventTag[]>();
-
-		for (const tag of getTagsArray()) {
-			const groupId = tag.groupId ?? null;
-			const existing = grouped.get(groupId) ?? [];
-			grouped.set(groupId, [...existing, tag]);
-		}
-
-		return grouped;
-	},
-
-	/**
-	 * Get tags by group ID (null for ungrouped)
-	 */
-	getTagsByGroup(groupId: string | null): EventTag[] {
-		return getTagsArray().filter((t) => (t.groupId ?? null) === groupId);
 	},
 };

@@ -1,20 +1,8 @@
 <script lang="ts">
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
-	import { eventTagGroupsStore } from '$lib/stores/event-tag-groups.svelte';
-	import {
-		CaretDown,
-		CaretRight,
-		Plus,
-		X,
-		Check,
-		FolderSimplePlus,
-		Pencil,
-		Trash,
-		MagnifyingGlass,
-		DotsSixVertical,
-	} from '@manacore/shared-icons';
+	import { Plus, X, Check, Pencil, Trash, MagnifyingGlass } from '@manacore/shared-icons';
 	import { TagColorPicker } from '@manacore/shared-ui';
-	import type { EventTag, EventTagGroup } from '@calendar/shared';
+	import type { EventTag } from '@calendar/shared';
 
 	interface Props {
 		visible: boolean;
@@ -26,84 +14,37 @@
 	// Search state
 	let searchQuery = $state('');
 
-	// Track collapsed state
-	let collapsedGroups = $state<Set<string | null>>(new Set());
-
-	// New group form state
-	let showNewGroupForm = $state(false);
-	let newGroupName = $state('');
-	let newGroupColor = $state('#3b82f6');
-	let isCreatingGroup = $state(false);
-
 	// New tag form state
 	let showNewTagForm = $state(false);
 	let newTagName = $state('');
 	let newTagColor = $state('#3b82f6');
-	let newTagGroupId = $state<string | null>(null);
 	let isCreatingTag = $state(false);
 
 	// Edit tag state
 	let editingTag = $state<EventTag | null>(null);
 	let editTagName = $state('');
 	let editTagColor = $state('#3b82f6');
-	let editTagGroupId = $state<string | null>(null);
 	let isSavingTag = $state(false);
 
-	// Edit group state
-	let editingGroup = $state<EventTagGroup | null>(null);
-	let editGroupName = $state('');
-	let editGroupColor = $state('#3b82f6');
-	let isSavingGroup = $state(false);
-
-	// Drag and drop state for tags
-	let draggedTag = $state<EventTag | null>(null);
-	let dragOverGroupId = $state<string | null | 'none'>(null);
-
-	// Drag and drop state for groups
-	let draggedGroup = $state<EventTagGroup | null>(null);
-	let dragOverGroupIndex = $state<number | null>(null);
-
-	// Filtered tags based on search
-	const filteredTags = $derived.by(() => {
-		if (!searchQuery.trim()) return eventTagsStore.tags;
+	// Filtered and sorted tags
+	const sortedTags = $derived.by(() => {
+		const tags = [...eventTagsStore.tags].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+		if (!searchQuery.trim()) return tags;
 		const query = searchQuery.toLowerCase();
-		return eventTagsStore.tags.filter((t) => t.name.toLowerCase().includes(query));
+		return tags.filter((t) => t.name.toLowerCase().includes(query));
 	});
-
-	function toggleGroup(groupId: string | null) {
-		const newSet = new Set(collapsedGroups);
-		if (newSet.has(groupId)) {
-			newSet.delete(groupId);
-		} else {
-			newSet.add(groupId);
-		}
-		collapsedGroups = newSet;
-	}
-
-	function isExpanded(groupId: string | null): boolean {
-		return !collapsedGroups.has(groupId);
-	}
-
-	function getTagsForGroup(groupId: string | null): EventTag[] {
-		return filteredTags.filter((t) => (t.groupId ?? null) === groupId);
-	}
-
-	// Get ungrouped tags
-	const ungroupedTags = $derived(getTagsForGroup(null));
 
 	// ==================== NEW TAG ====================
 	function openNewTagForm() {
 		showNewTagForm = true;
 		newTagName = '';
 		newTagColor = '#3b82f6';
-		newTagGroupId = null;
 	}
 
 	function closeNewTagForm() {
 		showNewTagForm = false;
 		newTagName = '';
 		newTagColor = '#3b82f6';
-		newTagGroupId = null;
 	}
 
 	async function handleCreateTag() {
@@ -113,14 +54,12 @@
 		const result = await eventTagsStore.createTag({
 			name: newTagName.trim(),
 			color: newTagColor,
-			groupId: newTagGroupId,
 		});
 
 		if (result.error) {
 			console.error('Failed to create tag:', result.error);
 		} else {
 			closeNewTagForm();
-			eventTagGroupsStore.fetchGroups();
 		}
 
 		isCreatingTag = false;
@@ -141,14 +80,12 @@
 		editingTag = tag;
 		editTagName = tag.name;
 		editTagColor = tag.color;
-		editTagGroupId = tag.groupId ?? null;
 	}
 
 	function closeEditTag() {
 		editingTag = null;
 		editTagName = '';
 		editTagColor = '#3b82f6';
-		editTagGroupId = null;
 	}
 
 	async function handleSaveTag() {
@@ -158,14 +95,12 @@
 		const result = await eventTagsStore.updateTag(editingTag.id, {
 			name: editTagName.trim(),
 			color: editTagColor,
-			groupId: editTagGroupId,
 		});
 
 		if (result.error) {
 			console.error('Failed to update tag:', result.error);
 		} else {
 			closeEditTag();
-			eventTagGroupsStore.fetchGroups();
 		}
 
 		isSavingTag = false;
@@ -180,7 +115,6 @@
 			console.error('Failed to delete tag:', result.error);
 		} else {
 			closeEditTag();
-			eventTagGroupsStore.fetchGroups();
 		}
 	}
 
@@ -194,176 +128,20 @@
 		}
 	}
 
-	// ==================== NEW GROUP ====================
-	function toggleNewGroupForm() {
-		showNewGroupForm = !showNewGroupForm;
-		if (!showNewGroupForm) {
-			resetNewGroupForm();
-		}
-	}
-
-	function resetNewGroupForm() {
-		newGroupName = '';
-		newGroupColor = '#3b82f6';
-	}
-
-	async function handleCreateGroup() {
-		if (!newGroupName.trim() || isCreatingGroup) return;
-
-		isCreatingGroup = true;
-		const result = await eventTagGroupsStore.createGroup({
-			name: newGroupName.trim(),
-			color: newGroupColor,
-		});
-
-		if (result.error) {
-			console.error('Failed to create group:', result.error);
-		} else {
-			resetNewGroupForm();
-			showNewGroupForm = false;
-		}
-
-		isCreatingGroup = false;
-	}
-
-	function handleNewGroupKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && newGroupName.trim()) {
-			e.preventDefault();
-			handleCreateGroup();
-		} else if (e.key === 'Escape') {
-			e.stopPropagation();
-			showNewGroupForm = false;
-			resetNewGroupForm();
-		}
-	}
-
-	// ==================== EDIT GROUP ====================
-	function openEditGroup(e: MouseEvent, group: EventTagGroup) {
-		e.stopPropagation();
-		editingGroup = group;
-		editGroupName = group.name;
-		editGroupColor = group.color;
-	}
-
-	function closeEditGroup() {
-		editingGroup = null;
-		editGroupName = '';
-		editGroupColor = '#3b82f6';
-	}
-
-	async function handleSaveGroup() {
-		if (!editingGroup || !editGroupName.trim() || isSavingGroup) return;
-
-		isSavingGroup = true;
-		const result = await eventTagGroupsStore.updateGroup(editingGroup.id, {
-			name: editGroupName.trim(),
-			color: editGroupColor,
-		});
-
-		if (result.error) {
-			console.error('Failed to update group:', result.error);
-		} else {
-			closeEditGroup();
-		}
-
-		isSavingGroup = false;
-	}
-
-	async function handleDeleteGroup() {
-		if (!editingGroup) return;
-
-		const result = await eventTagGroupsStore.deleteGroup(editingGroup.id);
-
-		if (result.error) {
-			console.error('Failed to delete group:', result.error);
-		} else {
-			closeEditGroup();
-		}
-	}
-
-	function handleEditGroupKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && editGroupName.trim()) {
-			e.preventDefault();
-			handleSaveGroup();
-		} else if (e.key === 'Escape') {
-			e.stopPropagation();
-			closeEditGroup();
-		}
-	}
-
-	// ==================== DRAG AND DROP ====================
-	function handleDragStart(e: DragEvent, tag: EventTag) {
-		draggedTag = tag;
-		if (e.dataTransfer) {
-			e.dataTransfer.effectAllowed = 'move';
-			e.dataTransfer.setData('text/plain', tag.id);
-		}
-	}
-
-	function handleDragEnd() {
-		draggedTag = null;
-		dragOverGroupId = null;
-	}
-
-	function handleDragOver(e: DragEvent, groupId: string | null) {
-		e.preventDefault();
-		if (e.dataTransfer) {
-			e.dataTransfer.dropEffect = 'move';
-		}
-		dragOverGroupId = groupId ?? 'none';
-	}
-
-	function handleDragLeave() {
-		dragOverGroupId = null;
-	}
-
-	async function handleDrop(e: DragEvent, targetGroupId: string | null) {
-		e.preventDefault();
-		dragOverGroupId = null;
-
-		if (!draggedTag) return;
-
-		const currentGroupId = draggedTag.groupId ?? null;
-		if (currentGroupId === targetGroupId) {
-			draggedTag = null;
-			return;
-		}
-
-		const result = await eventTagsStore.updateTag(draggedTag.id, {
-			groupId: targetGroupId,
-		});
-
-		if (result.error) {
-			console.error('Failed to move tag:', result.error);
-		} else {
-			eventTagGroupsStore.fetchGroups();
-		}
-
-		draggedTag = null;
-	}
-
 	// ==================== KEYBOARD ====================
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			if (editingTag) {
 				closeEditTag();
-			} else if (editingGroup) {
-				closeEditGroup();
 			} else if (showNewTagForm) {
 				closeNewTagForm();
-			} else if (showNewGroupForm) {
-				showNewGroupForm = false;
-				resetNewGroupForm();
 			} else {
 				onClose();
 			}
 		}
 	}
 
-	// Check if any form is open
-	const hasOpenForm = $derived(
-		showNewTagForm || showNewGroupForm || editingTag !== null || editingGroup !== null
-	);
+	const hasOpenForm = $derived(showNewTagForm || editingTag !== null);
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -423,15 +201,6 @@
 									autofocus
 								/>
 							</div>
-							<div class="form-row">
-								<label class="form-label">Gruppe</label>
-								<select bind:value={newTagGroupId} class="group-select">
-									<option value={null}>Keine Gruppe</option>
-									{#each eventTagGroupsStore.groups as group (group.id)}
-										<option value={group.id}>{group.name}</option>
-									{/each}
-								</select>
-							</div>
 							<div class="color-picker-row">
 								<TagColorPicker
 									selectedColor={newTagColor}
@@ -473,15 +242,6 @@
 									autofocus
 								/>
 							</div>
-							<div class="form-row">
-								<label class="form-label">Gruppe</label>
-								<select bind:value={editTagGroupId} class="group-select">
-									<option value={null}>Keine Gruppe</option>
-									{#each eventTagGroupsStore.groups as group (group.id)}
-										<option value={group.id}>{group.name}</option>
-									{/each}
-								</select>
-							</div>
 							<div class="color-picker-row">
 								<TagColorPicker
 									selectedColor={editTagColor}
@@ -505,234 +265,34 @@
 					</div>
 				{/if}
 
-				<!-- Edit Group Form -->
-				{#if editingGroup}
-					<div class="edit-form-section">
-						<div class="edit-form-header">
-							<span class="edit-form-title">Gruppe bearbeiten</span>
-							<button class="icon-btn" onclick={closeEditGroup} title="Abbrechen">
-								<X size={14} weight="bold" />
-							</button>
-						</div>
-						<div class="edit-form">
-							<div class="form-row">
-								<div class="color-preview" style="background-color: {editGroupColor}"></div>
-								<input
-									type="text"
-									bind:value={editGroupName}
-									onkeydown={handleEditGroupKeydown}
-									placeholder="Gruppenname"
-									class="name-input"
-									autofocus
-								/>
-							</div>
-							<div class="color-picker-row">
-								<TagColorPicker
-									selectedColor={editGroupColor}
-									onColorChange={(c) => (editGroupColor = c)}
-								/>
-							</div>
-							<div class="form-actions">
-								<button class="btn btn-danger" onclick={handleDeleteGroup} title="Gruppe löschen">
-									<Trash size={14} weight="bold" />
-								</button>
-								<button
-									class="btn btn-primary"
-									onclick={handleSaveGroup}
-									disabled={!editGroupName.trim() || isSavingGroup}
-								>
-									<Check size={14} weight="bold" />
-									Speichern
-								</button>
-							</div>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Groups with their tags (show all groups) -->
-				{#if !hasOpenForm || (hasOpenForm && filteredTags.length > 0)}
-					{#each eventTagGroupsStore.groups as group (group.id)}
-						{@const groupTags = getTagsForGroup(group.id)}
-						{#if !searchQuery || groupTags.length > 0}
-							<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<!-- Tags list -->
+				{#if !hasOpenForm || sortedTags.length > 0}
+					<div class="tags-grid">
+						{#each sortedTags as tag (tag.id)}
 							<div
-								class="group-section"
-								class:drag-over={dragOverGroupId === group.id}
-								ondragover={(e) => handleDragOver(e, group.id)}
-								ondragleave={handleDragLeave}
-								ondrop={(e) => handleDrop(e, group.id)}
+								class="tag-pill glass-tag"
+								role="button"
+								tabindex="0"
+								style="--tag-color: {tag.color || '#3b82f6'}"
 							>
-								<div class="group-header">
-									<button type="button" onclick={() => toggleGroup(group.id)} class="group-toggle">
-										<div class="group-header-left">
-											{#if isExpanded(group.id)}
-												<CaretDown size={14} weight="bold" />
-											{:else}
-												<CaretRight size={14} weight="bold" />
-											{/if}
-											<div class="group-dot" style="background-color: {group.color}"></div>
-											<span class="group-name">{group.name}</span>
-											<span class="group-count">({groupTags.length})</span>
-										</div>
-									</button>
-									<div class="group-actions">
-										<button
-											class="icon-btn icon-btn-sm"
-											onclick={(e) => openEditGroup(e, group)}
-											title="Gruppe bearbeiten"
-										>
-											<Pencil size={12} weight="bold" />
-										</button>
-									</div>
-								</div>
-
-								{#if isExpanded(group.id)}
-									<div class="tags-grid">
-										{#if groupTags.length === 0}
-											<div class="empty-group-hint">Tags hierher ziehen</div>
-										{:else}
-											{#each groupTags as tag (tag.id)}
-												<div
-													class="tag-pill glass-tag"
-													class:dragging={draggedTag?.id === tag.id}
-													draggable="true"
-													ondragstart={(e) => handleDragStart(e, tag)}
-													ondragend={handleDragEnd}
-													role="button"
-													tabindex="0"
-													style="--tag-color: {tag.color || '#3b82f6'}"
-												>
-													<span class="tag-dot"></span>
-													<span class="tag-name">{tag.name}</span>
-													<button
-														class="tag-edit-btn"
-														onclick={() => openEditTag(tag)}
-														title="Tag bearbeiten"
-													>
-														<Pencil size={10} weight="bold" />
-													</button>
-												</div>
-											{/each}
-										{/if}
-									</div>
-								{/if}
-							</div>
-						{/if}
-					{/each}
-
-					<!-- Ungrouped tags -->
-					{#if !searchQuery || ungroupedTags.length > 0}
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<div
-							class="group-section"
-							class:drag-over={dragOverGroupId === 'none'}
-							ondragover={(e) => handleDragOver(e, null)}
-							ondragleave={handleDragLeave}
-							ondrop={(e) => handleDrop(e, null)}
-						>
-							<div class="group-header">
-								<button type="button" onclick={() => toggleGroup(null)} class="group-toggle">
-									<div class="group-header-left">
-										{#if isExpanded(null)}
-											<CaretDown size={14} weight="bold" />
-										{:else}
-											<CaretRight size={14} weight="bold" />
-										{/if}
-										<span class="group-name muted">Ohne Gruppe</span>
-										<span class="group-count">({ungroupedTags.length})</span>
-									</div>
+								<span class="tag-dot"></span>
+								<span class="tag-name">{tag.name}</span>
+								<button
+									class="tag-edit-btn"
+									onclick={() => openEditTag(tag)}
+									title="Tag bearbeiten"
+								>
+									<Pencil size={10} weight="bold" />
 								</button>
 							</div>
+						{/each}
+					</div>
 
-							{#if isExpanded(null)}
-								<div class="tags-grid">
-									{#if ungroupedTags.length === 0}
-										<div class="empty-group-hint">Tags hierher ziehen</div>
-									{:else}
-										{#each ungroupedTags as tag (tag.id)}
-											<div
-												class="tag-pill glass-tag"
-												class:dragging={draggedTag?.id === tag.id}
-												draggable="true"
-												ondragstart={(e) => handleDragStart(e, tag)}
-												ondragend={handleDragEnd}
-												role="button"
-												tabindex="0"
-												style="--tag-color: {tag.color || '#3b82f6'}"
-											>
-												<span class="tag-dot"></span>
-												<span class="tag-name">{tag.name}</span>
-												<button
-													class="tag-edit-btn"
-													onclick={() => openEditTag(tag)}
-													title="Tag bearbeiten"
-												>
-													<Pencil size={10} weight="bold" />
-												</button>
-											</div>
-										{/each}
-									{/if}
-								</div>
-							{/if}
-						</div>
-					{/if}
-
-					<!-- Search empty state -->
-					{#if searchQuery && filteredTags.length === 0}
+					{#if searchQuery && sortedTags.length === 0}
 						<div class="search-empty">
 							<p>Keine Tags gefunden für "{searchQuery}"</p>
 						</div>
 					{/if}
-
-					<!-- New Group Section -->
-					<div class="group-section new-group-section">
-						<button
-							type="button"
-							onclick={toggleNewGroupForm}
-							class="group-toggle new-group-header"
-						>
-							<div class="group-header-left">
-								{#if showNewGroupForm}
-									<CaretDown size={14} weight="bold" />
-								{:else}
-									<Plus size={14} weight="bold" />
-								{/if}
-								<FolderSimplePlus size={14} />
-								<span class="group-name muted">Neue Gruppe</span>
-							</div>
-						</button>
-
-						{#if showNewGroupForm}
-							<div class="new-group-form">
-								<div class="form-row">
-									<div class="color-preview" style="background-color: {newGroupColor}"></div>
-									<input
-										type="text"
-										bind:value={newGroupName}
-										onkeydown={handleNewGroupKeydown}
-										placeholder="Gruppenname"
-										class="name-input"
-										autofocus
-									/>
-									<button
-										type="button"
-										onclick={handleCreateGroup}
-										disabled={!newGroupName.trim() || isCreatingGroup}
-										class="save-btn"
-										title="Gruppe erstellen"
-									>
-										<Check size={16} weight="bold" />
-									</button>
-								</div>
-								<div class="color-picker-row">
-									<TagColorPicker
-										selectedColor={newGroupColor}
-										onColorChange={(c) => (newGroupColor = c)}
-									/>
-								</div>
-							</div>
-						{/if}
-					</div>
 				{/if}
 			{/if}
 		</div>
@@ -1020,16 +580,6 @@
 		gap: 0.5rem;
 	}
 
-	.form-label {
-		font-size: 0.75rem;
-		color: #6b7280;
-		min-width: 50px;
-	}
-
-	:global(.dark) .form-label {
-		color: #9ca3af;
-	}
-
 	.color-preview {
 		width: 24px;
 		height: 24px;
@@ -1068,23 +618,6 @@
 	:global(.dark) .name-input:focus {
 		border-color: #60a5fa;
 		box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
-	}
-
-	.group-select {
-		flex: 1;
-		padding: 0.375rem 0.5rem;
-		border: 1px solid rgba(0, 0, 0, 0.15);
-		border-radius: 0.375rem;
-		background: white;
-		color: #374151;
-		font-size: 0.8125rem;
-		cursor: pointer;
-	}
-
-	:global(.dark) .group-select {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.2);
-		color: #f3f4f6;
 	}
 
 	.color-picker-row {
@@ -1172,112 +705,12 @@
 		color: #f3f4f6;
 	}
 
-	.icon-btn-sm {
-		width: 1.25rem;
-		height: 1.25rem;
-	}
-
-	/* Group Section */
-	.group-section {
-		margin-bottom: 0.5rem;
-		border-radius: 0.5rem;
-		transition: background 0.15s ease;
-	}
-
-	.group-section.drag-over {
-		background: rgba(59, 130, 246, 0.1);
-	}
-
-	:global(.dark) .group-section.drag-over {
-		background: rgba(96, 165, 250, 0.15);
-	}
-
-	.group-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		width: 100%;
-	}
-
-	.group-toggle {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		padding: 0.5rem 0.75rem;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		border-radius: 0.5rem;
-		transition: background 0.15s ease;
-	}
-
-	.group-toggle:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .group-toggle:hover {
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	.group-actions {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding-right: 0.5rem;
-		opacity: 0;
-		transition: opacity 0.15s ease;
-	}
-
-	.group-header:hover .group-actions {
-		opacity: 1;
-	}
-
-	.group-header-left {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: #6b7280;
-	}
-
-	:global(.dark) .group-header-left {
-		color: #9ca3af;
-	}
-
-	.group-dot {
-		width: 10px;
-		height: 10px;
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
-
-	.group-name {
-		font-size: 0.8125rem;
-		font-weight: 600;
-		color: #374151;
-	}
-
-	.group-name.muted {
-		color: #6b7280;
-	}
-
-	:global(.dark) .group-name {
-		color: #e5e7eb;
-	}
-
-	:global(.dark) .group-name.muted {
-		color: #9ca3af;
-	}
-
-	.group-count {
-		font-size: 0.75rem;
-		color: #9ca3af;
-	}
-
+	/* Tags grid */
 	.tags-grid {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem;
-		padding: 0.25rem 0.75rem 0.75rem;
+		padding: 0.25rem 0;
 	}
 
 	/* Tag Pill */
@@ -1287,7 +720,7 @@
 		gap: 0.375rem;
 		padding: 0.375rem 0.625rem;
 		border-radius: 9999px;
-		cursor: grab;
+		cursor: pointer;
 		flex-shrink: 0;
 		transition: all 0.15s ease;
 		position: relative;
@@ -1316,15 +749,6 @@
 	:global(.dark) .glass-tag:hover {
 		background: rgba(255, 255, 255, 0.2);
 		border-color: rgba(255, 255, 255, 0.25);
-	}
-
-	.glass-tag.dragging {
-		opacity: 0.5;
-		transform: scale(0.95);
-	}
-
-	.glass-tag:active {
-		cursor: grabbing;
 	}
 
 	.tag-dot {
@@ -1379,74 +803,5 @@
 	:global(.dark) .tag-edit-btn:hover {
 		background: rgba(255, 255, 255, 0.25);
 		color: #f3f4f6;
-	}
-
-	.empty-group-hint {
-		font-size: 0.75rem;
-		color: #9ca3af;
-		font-style: italic;
-		padding: 0.25rem 0;
-	}
-
-	:global(.dark) .empty-group-hint {
-		color: #6b7280;
-	}
-
-	/* New Group Section */
-	.new-group-section {
-		border-top: 1px dashed rgba(0, 0, 0, 0.1);
-		margin-top: 0.5rem;
-		padding-top: 0.5rem;
-	}
-
-	:global(.dark) .new-group-section {
-		border-top-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.new-group-header {
-		color: #3b82f6;
-	}
-
-	.new-group-header .group-name {
-		color: #3b82f6;
-	}
-
-	:global(.dark) .new-group-header {
-		color: #60a5fa;
-	}
-
-	:global(.dark) .new-group-header .group-name {
-		color: #60a5fa;
-	}
-
-	.new-group-form {
-		padding: 0.75rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.save-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
-		border-radius: 0.5rem;
-		background: #3b82f6;
-		color: white;
-		border: none;
-		cursor: pointer;
-		transition: all 0.15s ease;
-		flex-shrink: 0;
-	}
-
-	.save-btn:hover:not(:disabled) {
-		background: #2563eb;
-	}
-
-	.save-btn:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
 	}
 </style>

@@ -1,50 +1,37 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Modal, Input, TagColorPicker, TagBadge } from '@manacore/shared-ui';
-	import { MagnifyingGlass, Plus, CaretLeft, FolderSimple } from '@manacore/shared-icons';
+	import { MagnifyingGlass, Plus, CaretLeft } from '@manacore/shared-icons';
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
-	import { eventTagGroupsStore } from '$lib/stores/event-tag-groups.svelte';
-	import { GroupedTagList } from '$lib/components/tags';
 	import type { EventTag } from '@calendar/shared';
 
 	let searchQuery = $state('');
 	let showTagModal = $state(false);
 	let editingTag = $state<EventTag | null>(null);
-	let selectedGroupId = $state<string | null>(null);
 
-	// Filtered tags based on search
+	// Filtered tags based on search, sorted alphabetically
 	const filteredTags = $derived.by(() => {
-		if (!searchQuery.trim()) return eventTagsStore.tags;
+		const sorted = [...eventTagsStore.tags].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+		if (!searchQuery.trim()) return sorted;
 		const query = searchQuery.toLowerCase();
-		return eventTagsStore.tags.filter((t) => t.name.toLowerCase().includes(query));
+		return sorted.filter((t) => t.name.toLowerCase().includes(query));
 	});
 
-	// Filter groups that have matching tags (for search)
-	const filteredGroups = $derived.by(() => {
-		if (!searchQuery.trim()) return eventTagGroupsStore.groups;
-		// Only show groups that have at least one matching tag
-		const tagGroupIds = new Set(filteredTags.map((t) => t.groupId).filter(Boolean));
-		return eventTagGroupsStore.groups.filter((g) => tagGroupIds.has(g.id));
-	});
-
-	// Form state for custom tag edit modal with group selection
+	// Form state
 	let tagName = $state('');
 	let tagColor = $state('#3B82F6');
 
 	const DEFAULT_COLOR = '#3B82F6';
 
-	// Reset form when editing tag changes
 	$effect(() => {
 		if (showTagModal) {
 			tagName = editingTag?.name ?? '';
 			tagColor = editingTag?.color ?? DEFAULT_COLOR;
-			selectedGroupId = editingTag?.groupId ?? null;
 		}
 	});
 
 	function openCreateTagModal() {
 		editingTag = null;
-		selectedGroupId = null;
 		showTagModal = true;
 	}
 
@@ -66,18 +53,14 @@
 				await eventTagsStore.updateTag(editingTag.id, {
 					name: tagName.trim(),
 					color: tagColor,
-					groupId: selectedGroupId,
 				});
 			} else {
 				await eventTagsStore.createTag({
 					name: tagName.trim(),
 					color: tagColor,
-					groupId: selectedGroupId ?? undefined,
 				});
 			}
 			closeTagModal();
-			// Refresh groups to update tag counts
-			eventTagGroupsStore.fetchGroups();
 		} catch (e) {
 			console.error('Failed to save tag:', e);
 		}
@@ -91,8 +74,6 @@
 		try {
 			await eventTagsStore.deleteTag(editingTag.id);
 			closeTagModal();
-			// Refresh groups to update tag counts
-			eventTagGroupsStore.fetchGroups();
 		} catch (e) {
 			console.error('Failed to delete tag:', e);
 		}
@@ -106,16 +87,11 @@
 	}
 
 	const previewTag = $derived({ name: tagName || 'Tag Name', color: tagColor });
-	const isLoading = $derived(eventTagsStore.loading || eventTagGroupsStore.loading);
 
 	onMount(async () => {
-		// Fetch both tags and groups in parallel
-		await Promise.all([
-			eventTagsStore.tags.length === 0 ? eventTagsStore.fetchTags() : Promise.resolve(),
-			eventTagGroupsStore.groups.length === 0
-				? eventTagGroupsStore.fetchGroups()
-				: Promise.resolve(),
-		]);
+		if (eventTagsStore.tags.length === 0) {
+			await eventTagsStore.fetchTags();
+		}
 	});
 </script>
 
@@ -130,9 +106,6 @@
 			<CaretLeft size={20} weight="bold" />
 		</a>
 		<h1 class="title">Tags</h1>
-		<a href="/tags/groups" class="groups-button" aria-label="Gruppen verwalten">
-			<FolderSimple size={20} weight="bold" />
-		</a>
 		<button onclick={openCreateTagModal} class="add-button" aria-label="Neues Tag">
 			<Plus size={20} weight="bold" />
 		</button>
@@ -149,29 +122,42 @@
 		/>
 	</div>
 
-	{#if eventTagsStore.error || eventTagGroupsStore.error}
+	{#if eventTagsStore.error}
 		<div class="error-banner" role="alert">
-			<span>{eventTagsStore.error || eventTagGroupsStore.error}</span>
+			<span>{eventTagsStore.error}</span>
 		</div>
 	{/if}
 
-	<!-- Grouped Tag List -->
-	<GroupedTagList
-		groups={filteredGroups}
-		tags={filteredTags}
-		loading={isLoading}
-		onEditTag={openEditTagModal}
-		emptyMessage={searchQuery ? 'Keine Tags gefunden' : 'Keine Tags vorhanden'}
-	/>
+	<!-- Tag List -->
+	{#if eventTagsStore.loading}
+		<div class="flex justify-center py-8">
+			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+		</div>
+	{:else if filteredTags.length === 0}
+		<div class="text-center py-12">
+			<div class="text-muted-foreground mb-2">
+				{searchQuery ? 'Keine Tags gefunden' : 'Keine Tags vorhanden'}
+			</div>
+		</div>
+	{:else}
+		<div class="tags-list">
+			{#each filteredTags as tag (tag.id)}
+				<button type="button" class="tag-item" onclick={() => openEditTagModal(tag)}>
+					<div class="tag-color" style="background-color: {tag.color}"></div>
+					<span class="tag-label">{tag.name}</span>
+				</button>
+			{/each}
+		</div>
+	{/if}
 
-	{#if !isLoading && eventTagsStore.tags.length > 0}
+	{#if !eventTagsStore.loading && eventTagsStore.tags.length > 0}
 		<p class="tags-count">
 			{eventTagsStore.tags.length}
 			{eventTagsStore.tags.length === 1 ? 'Tag' : 'Tags'}
 		</p>
 	{/if}
 
-	{#if !isLoading && eventTagsStore.tags.length === 0 && !searchQuery}
+	{#if !eventTagsStore.loading && eventTagsStore.tags.length === 0 && !searchQuery}
 		<div class="empty-cta">
 			<button onclick={openCreateTagModal} class="btn btn-primary">
 				<Plus size={16} weight="bold" />
@@ -181,7 +167,7 @@
 	{/if}
 </div>
 
-<!-- Custom Tag Edit Modal with Group Selection -->
+<!-- Tag Edit Modal -->
 <Modal
 	visible={showTagModal}
 	onClose={closeTagModal}
@@ -189,31 +175,15 @@
 	maxWidth="sm"
 >
 	<div class="space-y-6">
-		<!-- Name Input -->
 		<div>
 			<Input bind:value={tagName} placeholder="Tag Name" onkeydown={handleKeyDown} />
 		</div>
 
-		<!-- Group Selection -->
-		<div>
-			<span class="block text-sm font-medium text-muted-foreground mb-3"> Gruppe </span>
-			<select bind:value={selectedGroupId} class="group-select">
-				<option value={null}>Keine Gruppe</option>
-				{#each eventTagGroupsStore.groups as group (group.id)}
-					<option value={group.id}>
-						{group.name}
-					</option>
-				{/each}
-			</select>
-		</div>
-
-		<!-- Color Picker -->
 		<div>
 			<span class="block text-sm font-medium text-muted-foreground mb-3"> Farbe </span>
 			<TagColorPicker selectedColor={tagColor} onColorChange={(c) => (tagColor = c)} />
 		</div>
 
-		<!-- Preview -->
 		<div>
 			<span class="block text-sm font-medium text-muted-foreground mb-3"> Vorschau </span>
 			<div class="flex items-center gap-2">
@@ -263,7 +233,6 @@
 		padding: 0 1rem 2rem;
 	}
 
-	/* Header */
 	.header {
 		display: flex;
 		align-items: center;
@@ -296,22 +265,6 @@
 		color: hsl(var(--foreground));
 	}
 
-	.groups-button {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.5rem;
-		height: 2.5rem;
-		border-radius: 50%;
-		background: hsl(var(--muted));
-		color: hsl(var(--foreground));
-		transition: all 0.2s ease;
-	}
-
-	.groups-button:hover {
-		background: hsl(var(--muted-foreground) / 0.2);
-	}
-
 	.add-button {
 		display: flex;
 		align-items: center;
@@ -331,7 +284,6 @@
 		box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
 	}
 
-	/* Search */
 	.search-wrapper {
 		position: relative;
 		margin-bottom: 1.5rem;
@@ -363,26 +315,6 @@
 		box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
 	}
 
-	/* Group Select */
-	.group-select {
-		width: 100%;
-		padding: 0.75rem 1rem;
-		border: 1.5px solid hsl(var(--border));
-		border-radius: 0.75rem;
-		background: hsl(var(--background));
-		color: hsl(var(--foreground));
-		font-size: 0.9375rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.group-select:focus {
-		outline: none;
-		border-color: hsl(var(--primary));
-		box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
-	}
-
-	/* Error */
 	.error-banner {
 		display: flex;
 		align-items: center;
@@ -395,7 +327,42 @@
 		margin-bottom: 1.5rem;
 	}
 
-	/* Count */
+	.tags-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.tag-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: hsl(var(--card));
+		border: 1px solid hsl(var(--border));
+		border-radius: 9999px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.tag-item:hover {
+		background: hsl(var(--muted) / 0.5);
+		transform: scale(1.02);
+	}
+
+	.tag-color {
+		width: 0.75rem;
+		height: 0.75rem;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	.tag-label {
+		font-weight: 500;
+		color: hsl(var(--foreground));
+		font-size: 0.9375rem;
+	}
+
 	.tags-count {
 		text-align: center;
 		font-size: 0.875rem;
@@ -403,14 +370,12 @@
 		margin-top: 1.5rem;
 	}
 
-	/* Empty CTA */
 	.empty-cta {
 		display: flex;
 		justify-content: center;
 		margin-top: 1rem;
 	}
 
-	/* Buttons */
 	.btn {
 		display: inline-flex;
 		align-items: center;
