@@ -1,55 +1,64 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createStorageClient, StorageClient } from '@manacore/shared-storage';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable, Logger } from '@nestjs/common';
+import {
+	createPlantaStorage,
+	generateUserFileKey,
+	type StorageClient,
+} from '@manacore/shared-storage';
+
+const MAX_PHOTO_SIZE = 20 * 1024 * 1024; // 20MB
 
 @Injectable()
 export class StorageService {
+	private readonly logger = new Logger(StorageService.name);
 	private storage: StorageClient;
 
-	constructor(private configService: ConfigService) {
-		const publicUrl = this.configService.get<string>('PLANTA_S3_PUBLIC_URL');
-		this.storage = createStorageClient(
-			{
-				name: 'planta-storage',
-				publicUrl,
-			},
-			{
-				endpoint: this.configService.get<string>('S3_ENDPOINT'),
-				region: this.configService.get<string>('S3_REGION'),
-				accessKeyId: this.configService.get<string>('S3_ACCESS_KEY'),
-				secretAccessKey: this.configService.get<string>('S3_SECRET_KEY'),
-			}
-		);
+	constructor() {
+		this.storage = createPlantaStorage();
+
+		this.storage.hooks.on('upload', ({ key, sizeBytes }) => {
+			this.logger.debug(`Uploaded photo ${key} (${sizeBytes} bytes)`);
+		});
+		this.storage.hooks.on('upload:error', ({ key, error }) => {
+			this.logger.error(`Photo upload failed for ${key}: ${error.message}`);
+		});
 	}
 
 	async uploadPhoto(
 		userId: string,
 		file: Express.Multer.File
 	): Promise<{ storagePath: string; publicUrl: string }> {
-		const extension = file.originalname.split('.').pop() || 'jpg';
-		const filename = `${uuidv4()}.${extension}`;
-		const storagePath = `users/${userId}/photos/${filename}`;
+		const storagePath = generateUserFileKey(userId, file.originalname, 'photos');
 
-		await this.storage.upload(storagePath, file.buffer, {
+		const result = await this.storage.upload(storagePath, file.buffer, {
 			contentType: file.mimetype,
 			public: true,
+			maxSizeBytes: MAX_PHOTO_SIZE,
+			cacheControl: 'public, max-age=31536000, immutable',
 		});
 
-		const publicUrl = this.storage.getPublicUrl(storagePath) ?? '';
-
-		return { storagePath, publicUrl };
+		return { storagePath, publicUrl: result.url ?? this.storage.getPublicUrl(storagePath) ?? '' };
 	}
 
 	async deletePhoto(storagePath: string): Promise<void> {
-		await this.storage.delete(storagePath);
+		try {
+			await this.storage.delete(storagePath);
+		} catch (err) {
+			this.logger.warn(`Failed to delete photo ${storagePath}: ${err}`);
+		}
 	}
 
-	async getPhotoUrl(storagePath: string): Promise<string> {
+	getPhotoUrl(storagePath: string): string {
 		return this.storage.getPublicUrl(storagePath) ?? '';
 	}
 
 	async downloadPhoto(storagePath: string): Promise<Buffer> {
 		return this.storage.download(storagePath);
+	}
+
+	/**
+	 * Delete all photos for a user (account deletion).
+	 */
+	async deleteAllUserPhotos(userId: string): Promise<number> {
+		return this.storage.deleteByPrefix(`users/${userId}/`);
 	}
 }

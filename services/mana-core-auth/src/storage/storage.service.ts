@@ -1,10 +1,9 @@
-import { Injectable, Logger, BadRequestException, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
 	createManaCoreStorage,
 	generateUserFileKey,
 	getContentType,
-	validateFileSize,
 	validateFileExtension,
 	IMAGE_EXTENSIONS,
 } from '@manacore/shared-storage';
@@ -13,18 +12,22 @@ import type { StorageClient } from '@manacore/shared-storage';
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
 
 @Injectable()
-export class StorageService implements OnModuleInit {
+export class StorageService {
 	private readonly logger = new Logger(StorageService.name);
 	private storage: StorageClient | null = null;
-	private readonly publicUrl: string | undefined;
 
 	constructor(private readonly configService: ConfigService) {
-		this.publicUrl = this.configService.get<string>('storage.publicUrl');
-	}
-
-	async onModuleInit() {
 		try {
-			this.storage = createManaCoreStorage(this.publicUrl);
+			const publicUrl = this.configService.get<string>('storage.publicUrl');
+			this.storage = createManaCoreStorage(publicUrl);
+
+			this.storage.hooks.on('upload', ({ key, sizeBytes }) => {
+				this.logger.debug(`Uploaded avatar ${key} (${sizeBytes} bytes)`);
+			});
+			this.storage.hooks.on('upload:error', ({ key, error }) => {
+				this.logger.error(`Avatar upload failed for ${key}: ${error.message}`);
+			});
+
 			this.logger.log('Storage service initialized');
 		} catch (error) {
 			this.logger.warn(
@@ -43,10 +46,6 @@ export class StorageService implements OnModuleInit {
 
 	/**
 	 * Generate a presigned URL for avatar upload
-	 *
-	 * @param userId - User ID
-	 * @param filename - Original filename
-	 * @returns Presigned upload URL and the final file URL
 	 */
 	async getAvatarUploadUrl(
 		userId: string,
@@ -61,42 +60,20 @@ export class StorageService implements OnModuleInit {
 			throw new BadRequestException('Storage service is not configured');
 		}
 
-		// Validate file extension
-		const ext = filename.split('.').pop()?.toLowerCase();
-		if (!ext || !validateFileExtension(filename, IMAGE_EXTENSIONS)) {
+		if (!validateFileExtension(filename, IMAGE_EXTENSIONS)) {
 			throw new BadRequestException(`Invalid file type. Allowed: ${IMAGE_EXTENSIONS.join(', ')}`);
 		}
 
-		// Generate unique key for avatar
-		const key = `avatars/${userId}/${Date.now()}.${ext}`;
-		const contentType = getContentType(filename);
-
-		// Get presigned upload URL (1 hour expiry)
+		const key = generateUserFileKey(userId, filename, 'avatars');
 		const expiresIn = 3600;
-		const uploadUrl = await this.storage.getUploadUrl(key, {
-			expiresIn,
-		});
+		const uploadUrl = await this.storage.getUploadUrl(key, { expiresIn });
+		const fileUrl = this.storage.getPublicUrl(key) ?? '';
 
-		// Construct the final public URL
-		const fileUrl = await this.getPublicUrl(key);
-
-		this.logger.debug('Generated avatar upload URL', { userId, key });
-
-		return {
-			uploadUrl,
-			fileUrl,
-			key,
-			expiresIn,
-		};
+		return { uploadUrl, fileUrl, key, expiresIn };
 	}
 
 	/**
 	 * Upload avatar directly (for server-side uploads)
-	 *
-	 * @param userId - User ID
-	 * @param buffer - File buffer
-	 * @param filename - Original filename
-	 * @returns Public URL of the uploaded avatar
 	 */
 	async uploadAvatar(
 		userId: string,
@@ -107,40 +84,24 @@ export class StorageService implements OnModuleInit {
 			throw new BadRequestException('Storage service is not configured');
 		}
 
-		// Validate file extension
 		if (!validateFileExtension(filename, IMAGE_EXTENSIONS)) {
 			throw new BadRequestException(`Invalid file type. Allowed: ${IMAGE_EXTENSIONS.join(', ')}`);
 		}
 
-		// Validate file size
-		if (!validateFileSize(buffer.length, MAX_AVATAR_SIZE)) {
-			throw new BadRequestException(
-				`File too large. Maximum size: ${MAX_AVATAR_SIZE / 1024 / 1024}MB`
-			);
-		}
+		const key = generateUserFileKey(userId, filename, 'avatars');
 
-		// Generate unique key for avatar
-		const ext = filename.split('.').pop()?.toLowerCase() || 'jpg';
-		const key = `avatars/${userId}/${Date.now()}.${ext}`;
-
-		// Upload file
 		const result = await this.storage.upload(key, buffer, {
 			contentType: getContentType(filename),
 			public: true,
-			cacheControl: 'public, max-age=31536000', // 1 year cache
+			maxSizeBytes: MAX_AVATAR_SIZE,
+			cacheControl: 'public, max-age=31536000, immutable',
 		});
 
-		const url = result.url || (await this.getPublicUrl(key));
-
-		this.logger.log('Avatar uploaded', { userId, key });
-
-		return { url, key };
+		return { url: result.url ?? this.storage.getPublicUrl(key) ?? '', key };
 	}
 
 	/**
 	 * Delete avatar
-	 *
-	 * @param key - Storage key of the avatar
 	 */
 	async deleteAvatar(key: string): Promise<void> {
 		if (!this.storage) {
@@ -148,29 +109,13 @@ export class StorageService implements OnModuleInit {
 		}
 
 		await this.storage.delete(key);
-		this.logger.log('Avatar deleted', { key });
 	}
 
 	/**
-	 * Get public URL for a key
+	 * Delete all avatars for a user (account deletion).
 	 */
-	private async getPublicUrl(key: string): Promise<string> {
-		if (!this.storage) {
-			throw new BadRequestException('Storage service is not configured');
-		}
-
-		// If we have a configured public URL, use it
-		if (this.publicUrl) {
-			return `${this.publicUrl}/${key}`;
-		}
-
-		// Check if the storage has a public URL configured
-		const publicUrl = this.storage.getPublicUrl(key);
-		if (publicUrl) {
-			return publicUrl;
-		}
-
-		// Otherwise, get a presigned URL for reading
-		return this.storage.getDownloadUrl(key, { expiresIn: 86400 * 365 }); // 1 year
+	async deleteAllUserAvatars(userId: string): Promise<number> {
+		if (!this.storage) return 0;
+		return this.storage.deleteByPrefix(`users/${userId}/`);
 	}
 }
