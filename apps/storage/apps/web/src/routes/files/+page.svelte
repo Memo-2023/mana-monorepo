@@ -10,7 +10,9 @@
 	import Breadcrumb from '$lib/components/files/Breadcrumb.svelte';
 	import UploadZone from '$lib/components/files/UploadZone.svelte';
 	import NewFolderModal from '$lib/components/files/NewFolderModal.svelte';
+	import FilePreviewModal from '$lib/components/files/FilePreviewModal.svelte';
 
+	let previewFile = $state<StorageFile | null>(null);
 	let showUploadZone = $state(false);
 	let showNewFolderModal = $state(false);
 	let uploading = $state(false);
@@ -33,7 +35,7 @@
 	}
 
 	function handleFileClick(file: StorageFile) {
-		// TODO: Open file preview
+		previewFile = file;
 	}
 
 	async function handleFileAction(action: string, file: StorageFile) {
@@ -260,6 +262,16 @@
 	open={showNewFolderModal}
 	onClose={() => (showNewFolderModal = false)}
 	onCreate={handleCreateFolder}
+/>
+
+<FilePreviewModal
+	open={previewFile !== null}
+	file={previewFile}
+	onClose={() => (previewFile = null)}
+	onAction={(action, file) => {
+		handleFileAction(action, file);
+		previewFile = null;
+	}}
 />
 
 <style>

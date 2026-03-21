@@ -3,7 +3,7 @@
 FROM node:20-alpine AS builder
 
 # Build arguments for SvelteKit static env vars
-ARG PUBLIC_BACKEND_URL=http://storage-backend:3019
+ARG PUBLIC_BACKEND_URL=http://storage-backend:3016
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-core-auth:3001
 
 # Set as environment variables for build

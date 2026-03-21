@@ -77,11 +77,11 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 WORKDIR /app/apps/storage/apps/backend
 
 # Expose port
-EXPOSE 3019
+EXPOSE 3016
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3019/api/v1/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3016/api/v1/health || exit 1
 
 # Run entrypoint script
 ENTRYPOINT ["docker-entrypoint.sh"]

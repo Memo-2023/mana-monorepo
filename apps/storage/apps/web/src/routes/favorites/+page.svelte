@@ -8,7 +8,9 @@
 	import { toastStore } from '@manacore/shared-ui';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
 	import FileList from '$lib/components/files/FileList.svelte';
+	import FilePreviewModal from '$lib/components/files/FilePreviewModal.svelte';
 
+	let previewFile = $state<StorageFile | null>(null);
 	let files = $state<StorageFile[]>([]);
 	let folders = $state<StorageFolder[]>([]);
 	let loading = $state(true);
@@ -39,7 +41,7 @@
 	}
 
 	function handleFileClick(file: StorageFile) {
-		// TODO: Open file preview
+		previewFile = file;
 	}
 
 	async function handleFileAction(action: string, file: StorageFile) {
@@ -131,6 +133,16 @@
 		/>
 	{/if}
 </div>
+
+<FilePreviewModal
+	open={previewFile !== null}
+	file={previewFile}
+	onClose={() => (previewFile = null)}
+	onAction={(action, file) => {
+		handleFileAction(action, file);
+		previewFile = null;
+	}}
+/>
 
 <style>
 	.favorites-page {

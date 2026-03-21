@@ -8,7 +8,9 @@
 	import { filesStore } from '$lib/stores/files.svelte';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
 	import FileList from '$lib/components/files/FileList.svelte';
+	import FilePreviewModal from '$lib/components/files/FilePreviewModal.svelte';
 
+	let previewFile = $state<StorageFile | null>(null);
 	let query = $state('');
 	let files = $state<StorageFile[]>([]);
 	let folders = $state<StorageFolder[]>([]);
@@ -57,7 +59,7 @@
 	}
 
 	function handleFileClick(file: StorageFile) {
-		// TODO: Open file preview
+		previewFile = file;
 	}
 </script>
 
@@ -137,6 +139,15 @@
 		</div>
 	{/if}
 </div>
+
+<FilePreviewModal
+	open={previewFile !== null}
+	file={previewFile}
+	onClose={() => (previewFile = null)}
+	onAction={() => {
+		previewFile = null;
+	}}
+/>
 
 <style>
 	.search-page {
