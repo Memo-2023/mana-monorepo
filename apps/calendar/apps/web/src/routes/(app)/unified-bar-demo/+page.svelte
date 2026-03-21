@@ -1,52 +1,21 @@
 <script lang="ts">
 	import UnifiedBar from '$lib/components/calendar/UnifiedBar.svelte';
-	import UnifiedBarControls from '$lib/components/calendar/UnifiedBarControls.svelte';
 	import { unifiedBarStore } from '$lib/stores/unified-bar.svelte';
 	import { onMount } from 'svelte';
+	import type { QuickInputItem } from '@manacore/shared-ui';
 
 	// Demo handlers
-	function handleSearch(query: string) {
+	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		console.log('Search:', query);
+		return [{ id: '1', title: `Ergebnis für "${query}"`, subtitle: 'Demo-Termin' }];
 	}
 
-	function handleSelect(result: any) {
-		console.log('Select:', result);
+	function handleSelect(item: QuickInputItem) {
+		console.log('Select:', item);
 	}
 
-	function handleSearchChange(query: string) {
-		console.log('Search change:', query);
-	}
-
-	function handleCreate(data: any) {
-		console.log('Create:', data);
-	}
-
-	function handleDateSelect(date: Date) {
-		console.log('Date select:', date);
-	}
-
-	function handleOverlayToggle(event: CustomEvent) {
-		console.log('Overlay toggle:', event.detail);
-	}
-
-	function handleOverlayAction(event: CustomEvent) {
-		console.log('Overlay action:', event.detail);
-	}
-
-	function handleModeChange(mode: string) {
-		console.log('Mode change:', mode);
-	}
-
-	function handleLayerChange(layer: string) {
-		console.log('Layer change:', layer);
-	}
-
-	function handleQuickAction(event: CustomEvent) {
-		console.log('Quick action:', event.detail);
-	}
-
-	function handleToolbarCollapsedChange(collapsed: boolean) {
-		console.log('Toolbar collapsed:', collapsed);
+	function handleSearchChange(query: string, results: QuickInputItem[]) {
+		console.log('Search change:', query, results);
 	}
 
 	// Initialize store on mount
@@ -62,14 +31,8 @@
 <main class="demo-container">
 	<header class="demo-header">
 		<h1>UnifiedBar Demo</h1>
-		<p>Demonstration der neuen unified bottom bar Architektur</p>
+		<p>Demonstration der unified bottom bar Architektur</p>
 	</header>
-
-	<!-- Controls for testing -->
-	<section class="controls-section">
-		<h2>UnifiedBar Controls</h2>
-		<UnifiedBarControls onModeChange={handleModeChange} onLayerChange={handleLayerChange} />
-	</section>
 
 	<!-- Main content area -->
 	<section class="content-section">
@@ -79,22 +42,12 @@
 
 			<div class="info-cards">
 				<div class="info-card">
-					<h3>Aktueller Modus</h3>
-					<p><strong>{unifiedBarStore.mode}</strong></p>
-				</div>
-
-				<div class="info-card">
-					<h3>Aktiver Layer</h3>
-					<p><strong>{unifiedBarStore.activeLayer}</strong></p>
-				</div>
-
-				<div class="info-card">
 					<h3>Sichtbare Layers</h3>
 					<ul>
-						{#if unifiedBarStore.showQuickInput}<li>✓ QuickInput</li>{/if}
-						{#if unifiedBarStore.showDateStrip}<li>✓ DateStrip</li>{/if}
-						{#if unifiedBarStore.showTagStrip}<li>✓ TagStrip</li>{/if}
-						{#if unifiedBarStore.showCalendarToolbar}<li>✓ CalendarToolbar</li>{/if}
+						{#if unifiedBarStore.showQuickInput}<li>QuickInput</li>{/if}
+						{#if unifiedBarStore.showDateStrip}<li>DateStrip</li>{/if}
+						{#if unifiedBarStore.showTagStrip}<li>TagStrip</li>{/if}
+						{#if unifiedBarStore.showCalendarToolbar}<li>CalendarToolbar</li>{/if}
 					</ul>
 				</div>
 
@@ -105,10 +58,14 @@
 			</div>
 
 			<div class="demo-actions">
-				<button onmousedown={() => unifiedBarStore.setMode('collapsed')}> Zusammengklappt </button>
-				<button onmousedown={() => unifiedBarStore.setMode('expanded')}> Erweitert </button>
 				<button onmousedown={() => unifiedBarStore.toggleOverlay()}> Overlay Toggle </button>
-				<button onmousedown={() => unifiedBarStore.expandToLayer('date')}> zum Datum-Layer </button>
+				<button onmousedown={() => unifiedBarStore.expandToLayer('date')}>
+					DateStrip zeigen
+				</button>
+				<button onmousedown={() => unifiedBarStore.expandToLayer('tag')}> TagStrip zeigen </button>
+				<button onmousedown={() => unifiedBarStore.expandToLayer('toolbar')}>
+					Toolbar zeigen
+				</button>
 				<button onmousedown={() => unifiedBarStore.collapseAll()}> Alle einklappen </button>
 			</div>
 		</div>
@@ -119,67 +76,45 @@
 		onSearch={handleSearch}
 		onSelect={handleSelect}
 		onSearchChange={handleSearchChange}
-		onCreate={handleCreate}
-		onDateSelect={handleDateSelect}
-		onToolbarCollapsedChange={handleToolbarCollapsedChange}
 		placeholder="Neuer Termin oder suchen..."
 		emptyText="Keine Termine gefunden"
 		searchingText="Suche..."
 		createText="Erstellen"
 		appIcon="calendar"
 		isMobile={false}
-		showCalendarToolbar={true}
+		showCalendarLayers={true}
 	/>
-
-	<!-- Footer with info -->
-	<footer class="demo-footer">
-		<p>UnifiedBar Demo - Calendar App</p>
-		<p>Scrollen Sie, um zu sehen wie die Bars fixiert bleiben</p>
-	</footer>
 </main>
 
 <style>
 	.demo-container {
 		min-height: 100vh;
-		padding-bottom: 400px; /* Space for UnifiedBar */
+		padding-bottom: 300px;
 		background: var(--color-background);
 		color: var(--color-foreground);
 	}
 
 	.demo-header {
-		padding: var(--spacing-xl) var(--spacing-lg);
+		padding: 2rem;
 		text-align: center;
-		border-bottom: 1px solid var(--color-border);
-		background: var(--color-surface);
+		border-bottom: 1px solid var(--color-border, #e5e7eb);
+		background: var(--color-surface, #fff);
 	}
 
 	.demo-header h1 {
-		margin: 0 0 var(--spacing-sm) 0;
+		margin: 0 0 0.5rem 0;
 		font-size: 2rem;
 		font-weight: 700;
-		color: var(--color-primary);
+		color: hsl(var(--color-primary));
 	}
 
 	.demo-header p {
 		margin: 0;
-		color: var(--color-muted-foreground);
-		font-size: 1rem;
-	}
-
-	.controls-section {
-		padding: var(--spacing-lg);
-		border-bottom: 1px solid var(--color-border);
-		background: color-mix(in srgb, var(--color-surface) 50%, transparent);
-	}
-
-	.controls-section h2 {
-		margin: 0 0 var(--spacing-md) 0;
-		font-size: 1.25rem;
-		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.content-section {
-		padding: var(--spacing-lg);
+		padding: 2rem;
 	}
 
 	.content-placeholder {
@@ -188,51 +123,37 @@
 	}
 
 	.content-placeholder h2 {
-		margin: 0 0 var(--spacing-lg) 0;
+		margin: 0 0 1rem 0;
 		font-size: 1.5rem;
 		font-weight: 600;
 	}
 
 	.content-placeholder p {
-		margin: 0 0 var(--spacing-xl) 0;
-		color: var(--color-muted-foreground);
-		line-height: 1.6;
+		margin: 0 0 2rem 0;
+		color: hsl(var(--color-muted-foreground));
 	}
 
 	.info-cards {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: var(--spacing-lg);
-		margin-bottom: var(--spacing-xl);
+		gap: 1rem;
+		margin-bottom: 2rem;
 	}
 
 	.info-card {
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-lg);
-		padding: var(--spacing-lg);
-		transition: all var(--transition-base);
-	}
-
-	.info-card:hover {
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-		transform: translateY(-2px);
+		background: var(--color-surface, #fff);
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 0.75rem;
+		padding: 1.5rem;
 	}
 
 	.info-card h3 {
-		margin: 0 0 var(--spacing-sm) 0;
+		margin: 0 0 0.5rem 0;
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: var(--color-muted-foreground);
+		color: hsl(var(--color-muted-foreground));
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-	}
-
-	.info-card p {
-		margin: 0;
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: var(--color-foreground);
 	}
 
 	.info-card ul {
@@ -242,82 +163,29 @@
 	}
 
 	.info-card li {
-		padding: var(--spacing-xs) 0;
-		color: var(--color-success);
+		padding: 0.25rem 0;
 		font-weight: 500;
 	}
 
 	.demo-actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--spacing-md);
-		margin-top: var(--spacing-xl);
+		gap: 0.75rem;
 	}
 
 	.demo-actions button {
-		padding: var(--spacing-md) var(--spacing-lg);
-		background: var(--color-primary);
-		color: var(--color-primary-foreground);
+		padding: 0.75rem 1.25rem;
+		background: hsl(var(--color-primary));
+		color: hsl(var(--color-primary-foreground, 0 0% 100%));
 		border: none;
-		border-radius: var(--radius-md);
+		border-radius: 0.5rem;
 		cursor: pointer;
 		font-weight: 500;
-		transition: all var(--transition-base);
+		transition: all 0.15s ease;
 	}
 
 	.demo-actions button:hover {
 		filter: brightness(0.9);
 		transform: translateY(-1px);
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-	}
-
-	.demo-footer {
-		position: fixed;
-		bottom: 350px;
-		left: 0;
-		right: 0;
-		text-align: center;
-		padding: var(--spacing-md);
-		background: color-mix(in srgb, var(--color-surface) 80%, transparent);
-		border-top: 1px solid var(--color-border);
-		color: var(--color-muted-foreground);
-		font-size: 0.875rem;
-	}
-
-	.demo-footer p {
-		margin: 0;
-	}
-
-	/* Responsive Design */
-	@media (max-width: 768px) {
-		.demo-container {
-			padding-bottom: 500px;
-		}
-
-		.demo-header {
-			padding: var(--spacing-lg) var(--spacing-md);
-		}
-
-		.demo-header h1 {
-			font-size: 1.5rem;
-		}
-
-		.controls-section,
-		.content-section {
-			padding: var(--spacing-md);
-		}
-
-		.info-cards {
-			grid-template-columns: 1fr;
-			gap: var(--spacing-md);
-		}
-
-		.demo-actions {
-			flex-direction: column;
-		}
-
-		.demo-footer {
-			bottom: 450px;
-		}
 	}
 </style>

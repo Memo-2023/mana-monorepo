@@ -3,12 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import {
-		PillNavigation,
-		QuickInputBar,
-		InputBarHelpModal,
-		ImmersiveModeToggle,
-	} from '@manacore/shared-ui';
+	import { PillNavigation, InputBarHelpModal, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -39,7 +34,6 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
-	import { isToolbarCollapsed as toolbarCollapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -47,11 +41,7 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import CalendarToolbar from '$lib/components/calendar/CalendarToolbar.svelte';
-	import CalendarToolbarContent from '$lib/components/calendar/CalendarToolbarContent.svelte';
-	import DateStrip from '$lib/components/calendar/DateStrip.svelte';
-	import DateStripFab from '$lib/components/calendar/DateStripFab.svelte';
-	import ViewsBar from '$lib/components/calendar/ViewsBar.svelte';
+	import UnifiedBar from '$lib/components/calendar/UnifiedBar.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import VoiceRecordButton from '$lib/components/voice/VoiceRecordButton.svelte';
 	import VoiceRecordingModal from '$lib/components/voice/VoiceRecordingModal.svelte';
@@ -99,8 +89,6 @@
 			searchStore.setSearch(query, results);
 		}
 	}
-
-	let isToolbarCollapsed = $state(true); // Default to collapsed - FAB next to InputBar
 
 	// Mobile detection for responsive layout
 	let isMobile = $state(false);
@@ -345,14 +333,6 @@
 		}
 	}
 
-	function handleToolbarCollapsedChange(collapsed: boolean) {
-		isToolbarCollapsed = collapsed;
-		toolbarCollapsedStore?.set(collapsed);
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('calendar-toolbar-collapsed', String(collapsed));
-		}
-	}
-
 	function handleToggleTheme() {
 		theme.toggleMode();
 	}
@@ -421,13 +401,6 @@
 			}
 		}
 
-		// Initialize toolbar collapsed state from localStorage (default is now collapsed)
-		const savedToolbarCollapsed = localStorage.getItem('calendar-toolbar-collapsed');
-		if (savedToolbarCollapsed === 'false') {
-			isToolbarCollapsed = false;
-			toolbarCollapsedStore?.set(false);
-		}
-
 		// Initialize mobile state
 		updateMobileState();
 	});
@@ -477,74 +450,34 @@
 				onOpenInPanel={handleOpenInPanel}
 				ariaLabel="Hauptnavigation"
 			/>
+		{/if}
 
-			<!-- Date strip (only on main calendar page) -->
-			{#if showCalendarToolbar}
-				{#if settingsStore.dateStripCollapsed}
-					<DateStripFab isToolbarExpanded={!isToolbarCollapsed} {isMobile} />
-				{:else}
-					<DateStrip isToolbarExpanded={!isToolbarCollapsed} />
+		<!-- Unified Bar: QuickInputBar + DateStrip + TagStrip + CalendarToolbar -->
+		<UnifiedBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			onSearchChange={handleSearchChange}
+			placeholder="Neuer Termin oder suchen..."
+			emptyText="Keine Termine gefunden"
+			searchingText="Suche..."
+			createText="Erstellen"
+			appIcon="calendar"
+			defaultOptions={calendarOptions}
+			selectedDefaultId={selectedDefaultCalendarId}
+			defaultOptionLabel="Standard-Kalender"
+			onDefaultChange={handleDefaultCalendarChange}
+			onShowShortcuts={handleShowShortcuts}
+			onShowSyntaxHelp={handleShowSyntaxHelp}
+			showCalendarLayers={showCalendarToolbar}
+			{isMobile}
+			hidden={settingsStore.immersiveModeEnabled}
+		>
+			{#snippet leftAction()}
+				{#if voiceRecordingStore.isSupported}
+					<VoiceRecordButton onResult={handleVoiceResult} size={32} />
 				{/if}
-			{/if}
-
-			<!-- Calendar toolbar (only on main calendar page) -->
-			{#if showCalendarToolbar}
-				<CalendarToolbar
-					isCollapsed={isToolbarCollapsed}
-					{isMobile}
-					bottomOffset="70px"
-					onCollapsedChange={handleToolbarCollapsedChange}
-				/>
-			{/if}
-		{/if}
-
-		<!-- Views Bar (only on main calendar page, hidden in immersive mode) -->
-		{#if showCalendarToolbar && !settingsStore.immersiveModeEnabled}
-			<ViewsBar
-				bottomOffset={isMobile
-					? '70px'
-					: showCalendarToolbar && !isToolbarCollapsed
-						? '140px'
-						: '70px'}
-			/>
-		{/if}
-
-		<!-- Global Input Bar with Voice Button (hidden via CSS in immersive mode to prevent re-mount focus) -->
-		<div class="input-bar-wrapper" class:hidden={settingsStore.immersiveModeEnabled}>
-			<div class="input-bar-row">
-				<QuickInputBar
-					onSearch={handleSearch}
-					onSelect={handleSelect}
-					onSearchChange={handleSearchChange}
-					placeholder="Neuer Termin oder suchen..."
-					emptyText="Keine Termine gefunden"
-					searchingText="Suche..."
-					createText="Erstellen"
-					appIcon="calendar"
-					bottomOffset={isMobile
-						? showCalendarToolbar
-							? 'calc(70px + 72px)'
-							: '70px'
-						: showCalendarToolbar && !isToolbarCollapsed
-							? '140px'
-							: '70px'}
-					hasFabRight={showCalendarToolbar}
-					hasFabLeft={!isMobile && showCalendarToolbar && settingsStore.dateStripCollapsed}
-					defaultOptions={calendarOptions}
-					selectedDefaultId={selectedDefaultCalendarId}
-					defaultOptionLabel="Standard-Kalender"
-					onDefaultChange={handleDefaultCalendarChange}
-					onShowShortcuts={handleShowShortcuts}
-					onShowSyntaxHelp={handleShowSyntaxHelp}
-				>
-					{#snippet leftAction()}
-						{#if voiceRecordingStore.isSupported}
-							<VoiceRecordButton onResult={handleVoiceResult} size={32} />
-						{/if}
-					{/snippet}
-				</QuickInputBar>
-			</div>
-		</div>
+			{/snippet}
+		</UnifiedBar>
 
 		<!-- Voice Recording Modal -->
 		<VoiceRecordingModal onResult={handleVoiceResult} />
@@ -612,11 +545,9 @@
 		min-height: 0;
 	}
 
-	/* Extra padding when DateStrip is at bottom (toolbar is now a FAB) */
+	/* Extra padding for UnifiedBar layers (PillNav + InputBar + DateStrip) */
 	.main-content.has-toolbar {
-		padding-bottom: calc(
-			220px + env(safe-area-inset-bottom)
-		); /* DateStrip + PillNav + QuickInputBar */
+		padding-bottom: calc(220px + env(safe-area-inset-bottom));
 	}
 
 	@media (max-width: 768px) {
@@ -715,47 +646,5 @@
 		height: 100vh;
 		width: 100vw;
 		max-width: 100vw;
-	}
-
-	/* Adjust InputBar when FABs are visible (toolbar FAB on right, DateStripFab on left) */
-	/* For a centered InputBar with max-width 450px, left edge is at 50% - 225px */
-	/* DateStripFab is positioned at: 50% - 225px - 8px gap - 54px fab width */
-	:global(.quick-input-bar.has-fab-right .input-container),
-	:global(.quick-input-bar.has-fab-left .input-container) {
-		max-width: 450px;
-	}
-
-	/* On smaller screens (<900px), FABs move to fixed positions (left: 1rem, right: 1rem) */
-	@media (max-width: 900px) {
-		:global(.quick-input-bar.has-fab-right .input-container) {
-			max-width: calc(100% - 140px); /* 54px FAB + padding */
-			margin-left: auto;
-			margin-right: 0;
-		}
-		:global(.quick-input-bar.has-fab-left .input-container) {
-			max-width: calc(100% - 140px); /* 54px FAB + padding */
-			margin-left: 0;
-			margin-right: auto;
-		}
-		:global(.quick-input-bar.has-fab-right.has-fab-left .input-container) {
-			max-width: calc(100% - 200px); /* Both FABs */
-			margin-left: auto;
-			margin-right: auto;
-		}
-	}
-
-	/* Mobile: InputBar in its own row (above PillNav), Settings FAB stays next to InputBar */
-	@media (max-width: 640px) {
-		/* InputBar takes all available space up to the FAB */
-		:global(.quick-input-bar.has-fab-right .input-container) {
-			max-width: none;
-			width: 100%;
-			margin: 0;
-		}
-
-		:global(.quick-input-bar.has-fab-right) {
-			padding-left: 1rem;
-			padding-right: calc(54px + 1rem + 8px); /* FAB width + margin + gap */
-		}
 	}
 </style>
