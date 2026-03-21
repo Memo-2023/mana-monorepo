@@ -34,6 +34,8 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getTasks } from '$lib/api/tasks';
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
+	import { todoOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
@@ -422,6 +424,10 @@
 				{@render children()}
 			</div>
 		</main>
+		<!-- Onboarding Modal -->
+		{#if todoOnboarding.shouldShow}
+			<MiniOnboardingModal store={todoOnboarding} appName="Todo" appEmoji="✅" />
+		{/if}
 	</div>
 </SplitPaneContainer>
 
