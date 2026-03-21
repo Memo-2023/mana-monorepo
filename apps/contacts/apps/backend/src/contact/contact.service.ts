@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { eq, and, or, ilike, desc, sql, isNotNull, inArray } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
@@ -144,10 +144,47 @@ export class ContactService {
 			throw new NotFoundException('Contact not found');
 		}
 
+		if (existing.isSelf) {
+			throw new BadRequestException('Cannot delete your own contact card');
+		}
+
 		// Clean up photo from S3 before deleting the DB record
 		await this.photoService.deletePhotoByUrl(existing.photoUrl);
 
 		await this.db.delete(contacts).where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
+	}
+
+	async findSelfContact(userId: string): Promise<Contact | null> {
+		const [contact] = await this.db
+			.select()
+			.from(contacts)
+			.where(and(eq(contacts.userId, userId), eq(contacts.isSelf, true)));
+		return contact || null;
+	}
+
+	async ensureSelfContact(userId: string, email: string): Promise<Contact> {
+		const existing = await this.findSelfContact(userId);
+		if (existing) {
+			return existing;
+		}
+
+		// Create self contact with email prefix as display name
+		const emailPrefix = email.split('@')[0] || '';
+		const displayName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+
+		const [contact] = await this.db
+			.insert(contacts)
+			.values({
+				userId,
+				email,
+				displayName,
+				firstName: displayName,
+				isSelf: true,
+				createdBy: userId,
+			})
+			.returning();
+
+		return contact;
 	}
 
 	async toggleFavorite(id: string, userId: string): Promise<Contact> {

@@ -249,9 +249,21 @@ export class ContactController {
 
 	@Get()
 	async findAll(@CurrentUser() user: CurrentUserData, @Query() query: ContactQueryDto) {
+		// Ensure the user's own contact card exists (lazy creation)
+		await this.contactService.ensureSelfContact(user.userId, user.email);
+
 		const contacts = await this.contactService.findByUserId(user.userId, query);
 		const total = await this.contactService.count(user.userId, query.isArchived);
 		return { contacts, total };
+	}
+
+	/**
+	 * Get the user's own contact card
+	 */
+	@Get('self')
+	async findSelf(@CurrentUser() user: CurrentUserData) {
+		const contact = await this.contactService.ensureSelfContact(user.userId, user.email);
+		return { contact };
 	}
 
 	/**

@@ -14,6 +14,7 @@ const DEFAULT_PAGE_SIZE = 50;
 
 // State
 let contacts = $state<Contact[]>([]);
+let selfContact = $state<Contact | null>(null);
 let selectedContact = $state<Contact | null>(null);
 let loading = $state(false);
 let loadingMore = $state(false);
@@ -27,6 +28,9 @@ export const contactsStore = {
 	// Getters
 	get contacts() {
 		return contacts;
+	},
+	get selfContact() {
+		return selfContact;
 	},
 	get selectedContact() {
 		return selectedContact;
@@ -98,7 +102,12 @@ export const contactsStore = {
 				limit: DEFAULT_PAGE_SIZE,
 				offset: 0,
 			});
-			contacts = result.contacts;
+			// Extract self contact from the list
+			const self = result.contacts.find((c) => c.isSelf);
+			if (self) {
+				selfContact = self;
+			}
+			contacts = result.contacts.filter((c) => !c.isSelf);
 			total = result.total;
 			hasMore = contacts.length < total;
 			currentOffset = contacts.length;
@@ -126,7 +135,7 @@ export const contactsStore = {
 				offset: currentOffset,
 			});
 
-			const newContacts = result.contacts;
+			const newContacts = result.contacts.filter((c) => !c.isSelf);
 			contacts = [...contacts, ...newContacts];
 			total = result.total;
 			currentOffset += newContacts.length;
@@ -203,7 +212,11 @@ export const contactsStore = {
 		try {
 			const contact = await contactsApi.update(id, data);
 			// Update in local state
-			contacts = contacts.map((c) => (c.id === id ? contact : c));
+			if (contact.isSelf) {
+				selfContact = contact;
+			} else {
+				contacts = contacts.map((c) => (c.id === id ? contact : c));
+			}
 			if (selectedContact?.id === id) {
 				selectedContact = contact;
 			}
@@ -225,6 +238,11 @@ export const contactsStore = {
 		// Demo contact: require authentication
 		if (isDemoContact(id)) {
 			return { error: 'auth_required' as const };
+		}
+
+		// Prevent deleting self contact
+		if (selfContact?.id === id) {
+			return;
 		}
 
 		loading = true;

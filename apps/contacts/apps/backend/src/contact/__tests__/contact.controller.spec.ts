@@ -34,6 +34,8 @@ describe('ContactController', () => {
 			delete: jest.fn(),
 			toggleFavorite: jest.fn(),
 			toggleArchive: jest.fn(),
+			ensureSelfContact: jest.fn().mockResolvedValue(createMockContact({ isSelf: true })),
+			findSelfContact: jest.fn(),
 		};
 		controller = new ContactController(service);
 	});

@@ -63,6 +63,7 @@ export const contacts = pgTable(
 		// Flags
 		isFavorite: boolean('is_favorite').default(false),
 		isArchived: boolean('is_archived').default(false),
+		isSelf: boolean('is_self').default(false),
 
 		// Manacore Integration
 		organizationId: uuid('organization_id'),

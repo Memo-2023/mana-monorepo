@@ -253,7 +253,7 @@
 
 	onMount(async () => {
 		// Only load if not already loaded
-		if (contactsStore.contacts.length === 0) {
+		if (contactsStore.contacts.length === 0 && !contactsStore.selfContact) {
 			await contactsStore.loadContacts();
 		}
 
@@ -379,7 +379,7 @@
 		{:else}
 			<ContactListSkeleton count={10} />
 		{/if}
-	{:else if contactsStore.contacts.length === 0}
+	{:else if contactsStore.contacts.length === 0 && !contactsStore.selfContact}
 		<!-- Empty state -->
 		<div class="text-center py-12">
 			<div class="text-6xl mb-4">👤</div>
@@ -390,6 +390,45 @@
 			</button>
 		</div>
 	{:else}
+		<!-- Self Contact Card ("My Card") -->
+		{#if contactsStore.selfContact}
+			{@const self = contactsStore.selfContact}
+			<button type="button" class="self-contact-card" onclick={() => goto(`/contacts/${self.id}`)}>
+				<div class="self-contact-avatar">
+					{#if self.photoUrl}
+						<img
+							src={self.photoUrl}
+							alt={self.displayName || ''}
+							class="w-full h-full object-cover rounded-full"
+						/>
+					{:else}
+						<span class="text-lg font-semibold text-primary">
+							{(self.firstName?.[0] || self.email?.[0] || '?').toUpperCase()}
+						</span>
+					{/if}
+				</div>
+				<div class="flex-1 min-w-0 text-left">
+					<div class="flex items-center gap-2">
+						<span class="font-semibold text-foreground truncate">
+							{self.displayName || self.email || $_('contacts.myCard')}
+						</span>
+						<span class="self-badge">{$_('contacts.me')}</span>
+					</div>
+					{#if self.email}
+						<p class="text-sm text-muted-foreground truncate">{self.email}</p>
+					{/if}
+				</div>
+				<svg
+					class="w-5 h-5 text-muted-foreground shrink-0"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
+		{/if}
+
 		<!-- Contacts View -->
 		{#if viewModeStore.mode === 'grid'}
 			<ContactGridView
@@ -433,6 +472,48 @@
 </div>
 
 <style>
+	.self-contact-card {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		width: 100%;
+		padding: 0.75rem 1rem;
+		background: hsl(var(--color-surface));
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.75rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.self-contact-card:hover {
+		background: hsl(var(--color-surface-hover, var(--color-muted)));
+		border-color: hsl(var(--color-primary) / 0.3);
+	}
+
+	.self-contact-avatar {
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 50%;
+		background: hsl(var(--color-primary) / 0.1);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		shrink: 0;
+	}
+
+	.self-badge {
+		font-size: 0.625rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		padding: 0.125rem 0.375rem;
+		border-radius: 0.25rem;
+		background: hsl(var(--color-primary) / 0.1);
+		color: hsl(var(--color-primary));
+		white-space: nowrap;
+	}
+
 	.batch-actions-bar {
 		display: flex;
 		align-items: center;

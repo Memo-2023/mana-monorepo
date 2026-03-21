@@ -57,6 +57,7 @@ export interface Contact {
 	tags?: Array<{ id: string; name: string; color: string | null }>;
 	isFavorite: boolean;
 	isArchived: boolean;
+	isSelf: boolean;
 	organizationId?: string | null;
 	teamId?: string | null;
 	visibility: string;
