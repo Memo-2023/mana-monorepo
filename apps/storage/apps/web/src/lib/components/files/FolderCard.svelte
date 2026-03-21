@@ -13,6 +13,7 @@
 
 	let showMenu = $state(false);
 	let isDragOver = $state(false);
+	let isDragging = $state(false);
 
 	function handleDragOver(e: DragEvent) {
 		e.preventDefault();
@@ -69,6 +70,7 @@
 <div
 	class="folder-card"
 	class:drag-over={isDragOver}
+	class:dragging={isDragging}
 	onclick={onClick}
 	role="button"
 	tabindex="0"
@@ -76,6 +78,10 @@
 	ondragstart={(e) => {
 		e.dataTransfer?.setData('application/json', JSON.stringify({ type: 'folder', id: folder.id }));
 		e.dataTransfer!.effectAllowed = 'move';
+		isDragging = true;
+	}}
+	ondragend={() => {
+		isDragging = false;
 	}}
 	ondragover={handleDragOver}
 	ondragleave={handleDragLeave}
@@ -142,6 +148,13 @@
 		border-style: dashed;
 		background: rgba(var(--color-success), 0.05);
 		box-shadow: var(--shadow-lg);
+		transform: scale(1.02);
+	}
+
+	.folder-card.dragging {
+		opacity: 0.5;
+		transform: scale(0.95);
+		border-style: dashed;
 	}
 
 	.folder-icon {

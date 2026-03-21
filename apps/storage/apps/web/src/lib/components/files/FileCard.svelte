@@ -20,6 +20,7 @@
 	let { file, onClick, onAction }: Props = $props();
 
 	let showMenu = $state(false);
+	let isDragging = $state(false);
 
 	function getFileIcon(mimeType: string) {
 		if (mimeType.startsWith('image/')) return FileImage;
@@ -53,6 +54,7 @@
 
 <div
 	class="file-card"
+	class:dragging={isDragging}
 	onclick={onClick}
 	role="button"
 	tabindex="0"
@@ -60,6 +62,10 @@
 	ondragstart={(e) => {
 		e.dataTransfer?.setData('application/json', JSON.stringify({ type: 'file', id: file.id }));
 		e.dataTransfer!.effectAllowed = 'move';
+		isDragging = true;
+	}}
+	ondragend={() => {
+		isDragging = false;
 	}}
 >
 	<div class="file-icon">
@@ -118,6 +124,12 @@
 	.file-card:hover {
 		border-color: rgb(var(--color-primary));
 		box-shadow: var(--shadow-md);
+	}
+
+	.file-card.dragging {
+		opacity: 0.5;
+		transform: scale(0.95);
+		border-style: dashed;
 	}
 
 	.file-icon {

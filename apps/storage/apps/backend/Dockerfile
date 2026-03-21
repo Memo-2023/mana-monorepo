@@ -1,64 +1,29 @@
 # syntax=docker/dockerfile:1
-# Build stage
-FROM node:20-alpine AS builder
-
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
-
-WORKDIR /app
-
-# Copy root workspace files
-COPY pnpm-workspace.yaml ./
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-COPY patches ./patches
-
-# Copy shared packages (all required dependencies)
-COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
-COPY packages/shared-errors ./packages/shared-errors
-COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
-COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
-COPY packages/shared-storage ./packages/shared-storage
-COPY packages/shared-tsconfig ./packages/shared-tsconfig
-COPY packages/shared-error-tracking ./packages/shared-error-tracking
-COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
+# Build stage — inherits pre-built shared packages from nestjs-base
+FROM nestjs-base:local AS builder
 
 # Copy storage backend
 COPY apps/storage/apps/backend ./apps/storage/apps/backend
 
-# Install dependencies (ignore scripts since generate-env.mjs isn't in Docker context)
+# Reinstall to link app-specific dependencies
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
-# Build shared packages first (in dependency order)
-WORKDIR /app/packages/shared-errors
-RUN pnpm build
-
-WORKDIR /app/packages/shared-nestjs-auth
-RUN pnpm build
-
-WORKDIR /app/packages/shared-nestjs-health
-RUN pnpm build
-
-WORKDIR /app/packages/shared-storage
-RUN pnpm build
-
 # Build the backend
-
-WORKDIR /app/packages/shared-nestjs-setup
-RUN pnpm build
-
-WORKDIR /app/packages/shared-error-tracking
-RUN pnpm build
-
 WORKDIR /app/apps/storage/apps/backend
 RUN pnpm build
+
+# Remove devDependencies and unnecessary files from node_modules
+WORKDIR /app
+RUN pnpm prune --prod --no-optional 2>/dev/null || true \
+    && find node_modules -name '*.ts' -not -name '*.d.ts' -delete 2>/dev/null || true \
+    && find node_modules -name '*.map' -delete 2>/dev/null || true \
+    && find node_modules -type d \( -name 'test' -o -name 'tests' -o -name '__tests__' -o -name 'docs' \) -prune -exec rm -rf {} + 2>/dev/null || true
 
 # Production stage
 FROM node:20-alpine AS production
 
-# Install pnpm and postgresql-client for health checks
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && apk add --no-cache postgresql-client
+# Install postgresql-client for health checks
+RUN apk add --no-cache postgresql-client
 
 WORKDIR /app
 
@@ -68,7 +33,7 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/storage ./apps/storage
+COPY --from=builder /app/apps/storage/apps/backend ./apps/storage/apps/backend
 
 # Copy entrypoint script
 COPY apps/storage/apps/backend/docker-entrypoint.sh /usr/local/bin/
