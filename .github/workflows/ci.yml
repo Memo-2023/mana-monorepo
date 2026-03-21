@@ -567,8 +567,14 @@ jobs:
       - name: Type check
         run: pnpm run type-check
 
+      - name: Format check
+        run: pnpm run format:check
+
       - name: Lint
-        run: pnpm run lint || echo "Lint warnings found"
+        run: pnpm run lint
+
+      - name: Test
+        run: pnpm run test || true
 
       - name: Security Audit
         run: |
