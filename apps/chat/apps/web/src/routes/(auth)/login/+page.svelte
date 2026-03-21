@@ -9,7 +9,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
-	import { APP_VERSION } from '$lib/version';
+	import { APP_VERSION, BUILD_TIME } from '$lib/version';
 	import '$lib/i18n';
 
 	// Dev credentials - pre-filled in development mode
@@ -76,6 +76,7 @@
 	{initialEmail}
 	{initialPassword}
 	version={APP_VERSION}
+	buildTime={BUILD_TIME}
 >
 	{#snippet headerControls()}
 		<LanguageSelector />

@@ -2,7 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
-import { MANACORE_SHARED_PACKAGES } from '@manacore/shared-vite-config';
+import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@manacore/shared-vite-config';
 import { createPWAConfig } from '@manacore/shared-pwa';
 
 export default defineConfig({
@@ -28,5 +28,8 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		exclude: [...MANACORE_SHARED_PACKAGES, 'marked'],
+	},
+	define: {
+		...getBuildDefines(),
 	},
 });

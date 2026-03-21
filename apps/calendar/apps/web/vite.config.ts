@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { createOfflineFirstPWAConfig } from '@manacore/shared-pwa';
-import { MANACORE_SHARED_PACKAGES } from '@manacore/shared-vite-config';
+import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@manacore/shared-vite-config';
 
 export default defineConfig({
 	plugins: [
@@ -33,5 +33,8 @@ export default defineConfig({
 		environment: 'jsdom',
 		include: ['src/**/*.test.ts'],
 		globals: true,
+	},
+	define: {
+		...getBuildDefines(),
 	},
 });

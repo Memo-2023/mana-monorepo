@@ -93,6 +93,8 @@
 		initialPassword?: string;
 		/** App version string to display */
 		version?: string;
+		/** Build timestamp (ISO string) to display next to version */
+		buildTime?: string;
 	}
 
 	let {
@@ -118,6 +120,7 @@
 		initialEmail = '',
 		initialPassword = '',
 		version = '',
+		buildTime = '',
 	}: Props = $props();
 
 	const t = $derived({ ...defaultTranslations, ...translations });
@@ -547,7 +550,18 @@
 	{/if}
 
 	{#if version}
-		<p class="version-label">v{version}</p>
+		<p class="version-label">
+			v{version}{#if buildTime}
+				· {new Date(buildTime).toLocaleDateString('de-DE', {
+					day: '2-digit',
+					month: '2-digit',
+					year: 'numeric',
+				})}
+				{new Date(buildTime).toLocaleTimeString('de-DE', {
+					hour: '2-digit',
+					minute: '2-digit',
+				})}{/if}
+		</p>
 	{/if}
 </div>
 

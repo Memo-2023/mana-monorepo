@@ -9,7 +9,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
-	import { APP_VERSION } from '$lib/version';
+	import { APP_VERSION, BUILD_TIME } from '$lib/version';
 
 	// Get redirect URL from query params or sessionStorage (set by AuthGateModal)
 	const redirectTo = $derived.by(() => {
@@ -67,6 +67,7 @@
 	{verified}
 	{initialEmail}
 	version={APP_VERSION}
+	buildTime={BUILD_TIME}
 >
 	{#snippet headerControls()}
 		<LanguageSelector />

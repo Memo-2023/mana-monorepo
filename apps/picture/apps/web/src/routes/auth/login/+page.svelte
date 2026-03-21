@@ -8,7 +8,7 @@
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { APP_VERSION } from '$lib/version';
+	import { APP_VERSION, BUILD_TIME } from '$lib/version';
 	import { onMount } from 'svelte';
 	import { PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_APPLE_CLIENT_ID } from '$env/static/public';
 
@@ -68,6 +68,7 @@
 	{verified}
 	{initialEmail}
 	version={APP_VERSION}
+	buildTime={BUILD_TIME}
 >
 	{#snippet headerControls()}
 		<LanguageSelector />

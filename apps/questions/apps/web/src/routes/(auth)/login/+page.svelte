@@ -8,7 +8,7 @@
 	import { QuestionsLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { apiClient } from '$lib/api/client';
-	import { APP_VERSION } from '$lib/version';
+	import { APP_VERSION, BUILD_TIME } from '$lib/version';
 	import '$lib/i18n';
 
 	// Get redirect URL from query params or sessionStorage
@@ -70,4 +70,5 @@
 	{verified}
 	{initialEmail}
 	version={APP_VERSION}
+	buildTime={BUILD_TIME}
 />
