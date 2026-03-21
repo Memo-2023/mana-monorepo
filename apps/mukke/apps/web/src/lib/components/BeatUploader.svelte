@@ -24,8 +24,7 @@
 	let currentBeatId = $state<string | null>(null);
 	let fileInputRef: HTMLInputElement;
 
-	const acceptedTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3', 'audio/x-wav'];
-	const acceptedExtensions = '.mp3,.wav,.ogg';
+	const acceptedExtensions = 'audio/*';
 
 	async function startTranscription(beatId: string) {
 		isTranscribing = true;
@@ -56,8 +55,11 @@
 		if (!file) return;
 
 		// Validate file type
-		if (!acceptedTypes.includes(file.type) && !file.name.match(/\.(mp3|wav|ogg)$/i)) {
-			errorMessage = 'Please select an audio file (MP3, WAV, or OGG)';
+		if (
+			!file.type.startsWith('audio/') &&
+			!file.name.match(/\.(mp3|wav|ogg|flac|aac|m4a|wma|aiff|aif|opus|webm|alac|ape|wv|dsf|dff)$/i)
+		) {
+			errorMessage = 'Please select an audio file';
 			return;
 		}
 
@@ -241,7 +243,9 @@
 					<p class="text-foreground-secondary text-sm">
 						Drag & drop or click to select an audio file
 					</p>
-					<p class="text-foreground-secondary text-xs mt-2">Supported formats: MP3, WAV, OGG</p>
+					<p class="text-foreground-secondary text-xs mt-2">
+						Supported formats: MP3, WAV, OGG, FLAC, AAC, M4A, AIFF, OPUS, WebM and more
+					</p>
 				</label>
 			{/if}
 

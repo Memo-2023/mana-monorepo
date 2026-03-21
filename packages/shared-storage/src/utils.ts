@@ -75,6 +75,17 @@ export function getContentType(filename: string): string {
 		'.wav': 'audio/wav',
 		'.ogg': 'audio/ogg',
 		'.m4a': 'audio/mp4',
+		'.aac': 'audio/aac',
+		'.flac': 'audio/flac',
+		'.aiff': 'audio/aiff',
+		'.aif': 'audio/aiff',
+		'.opus': 'audio/opus',
+		'.wma': 'audio/x-ms-wma',
+		'.alac': 'audio/mp4',
+		'.ape': 'audio/x-ape',
+		'.wv': 'audio/x-wavpack',
+		'.dsf': 'audio/dsf',
+		'.dff': 'audio/dff',
 
 		// Video
 		'.mp4': 'video/mp4',
@@ -127,7 +138,24 @@ export const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.
 /**
  * Common allowed extensions for audio
  */
-export const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.ogg', '.m4a'];
+export const AUDIO_EXTENSIONS = [
+	'.mp3',
+	'.wav',
+	'.ogg',
+	'.m4a',
+	'.aac',
+	'.flac',
+	'.aiff',
+	'.aif',
+	'.opus',
+	'.wma',
+	'.webm',
+	'.alac',
+	'.ape',
+	'.wv',
+	'.dsf',
+	'.dff',
+];
 
 /**
  * Common allowed extensions for video
