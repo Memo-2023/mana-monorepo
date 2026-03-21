@@ -5,12 +5,70 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { playerStore } from '$lib/stores/player.svelte';
 	import SongEditor from '$lib/components/SongEditor.svelte';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import type { Song } from '@mukke/shared';
 
 	const tabs = ['songs', 'albums', 'artists', 'genres'] as const;
 
 	let editingSong = $state<Song | null>(null);
 	let failedCovers = $state<Set<string>>(new Set());
+
+	// Context menu state
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+	let contextMenuSong = $state<{ song: Song; index: number } | null>(null);
+
+	function handleContextMenu(e: MouseEvent, song: Song, index: number) {
+		e.preventDefault();
+		e.stopPropagation();
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		contextMenuSong = { song, index };
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(): ContextMenuItem[] {
+		if (!contextMenuSong) return [];
+		const { song } = contextMenuSong;
+		return [
+			{
+				id: 'play',
+				label: playerStore.currentSong?.id === song.id && playerStore.isPlaying ? 'Pause' : 'Play',
+				action: () => handlePlaySong(contextMenuSong!.song, contextMenuSong!.index),
+			},
+			{ id: 'divider-1', label: '', type: 'divider' as const },
+			{
+				id: 'edit',
+				label: 'Edit Metadata',
+				action: () => {
+					editingSong = contextMenuSong!.song;
+				},
+			},
+			{
+				id: 'editor',
+				label: 'Open in Editor',
+				action: () => openInEditor(contextMenuSong!.song.id, new MouseEvent('click')),
+			},
+			{ id: 'divider-2', label: '', type: 'divider' as const },
+			{
+				id: 'favorite',
+				label: song.favorite ? 'Remove from Favorites' : 'Add to Favorites',
+				action: () => libraryStore.toggleFavorite(contextMenuSong!.song.id),
+			},
+			{ id: 'divider-3', label: '', type: 'divider' as const },
+			{
+				id: 'delete',
+				label: 'Delete Song',
+				variant: 'danger' as const,
+				action: () => {
+					if (confirm(`Delete "${contextMenuSong!.song.title}"?`)) {
+						libraryStore.deleteSong(contextMenuSong!.song.id);
+					}
+				},
+			},
+		];
+	}
 
 	function getBackendUrl(): string {
 		let baseUrl = 'http://localhost:3010';
@@ -165,6 +223,7 @@
 									handlePlaySong(song, index);
 								}
 							}}
+							oncontextmenu={(e) => handleContextMenu(e, song, index)}
 							class="grid grid-cols-[40px_1fr_1fr_1fr_80px_40px_40px_40px] gap-4 px-4 py-3 hover:bg-background transition-colors items-center cursor-pointer group {playerStore
 								.currentSong?.id === song.id
 								? 'bg-primary/5'
@@ -413,3 +472,14 @@
 		}}
 	/>
 {/if}
+
+<ContextMenu
+	visible={contextMenuVisible}
+	x={contextMenuX}
+	y={contextMenuY}
+	items={getContextMenuItems()}
+	onClose={() => {
+		contextMenuVisible = false;
+		contextMenuSong = null;
+	}}
+/>
