@@ -6,6 +6,7 @@
 		ShareNetwork,
 		Heart,
 		Trash,
+		ClockCounterClockwise,
 		File,
 		FileImage,
 		FileText,
@@ -14,6 +15,7 @@
 		FileZip,
 	} from '@manacore/shared-icons';
 	import type { StorageFile } from '$lib/api/client';
+	import FileVersionsModal from './FileVersionsModal.svelte';
 
 	interface Props {
 		open: boolean;
@@ -23,6 +25,8 @@
 	}
 
 	let { open, file, onClose, onAction }: Props = $props();
+
+	let showVersions = $state(false);
 
 	let isImage = $derived(file?.mimeType.startsWith('image/') ?? false);
 	let isTextOrCode = $derived(
@@ -157,6 +161,10 @@
 					<ShareNetwork size={18} />
 					<span>Teilen</span>
 				</button>
+				<button class="action-btn" onclick={() => (showVersions = true)} aria-label="Versionen">
+					<ClockCounterClockwise size={18} />
+					<span>Versionen</span>
+				</button>
 				<button
 					class="action-btn"
 					class:favorited={file.isFavorite}
@@ -178,6 +186,8 @@
 		</div>
 	</div>
 {/if}
+
+<FileVersionsModal open={showVersions} {file} onClose={() => (showVersions = false)} />
 
 <style>
 	.modal-overlay {
