@@ -10,10 +10,18 @@
 		onFolderClick?: (folder: StorageFolder) => void;
 		onFileAction?: (action: string, file: StorageFile) => void;
 		onFolderAction?: (action: string, folder: StorageFolder) => void;
+		onMoveToFolder?: (itemType: 'file' | 'folder', itemId: string, targetFolderId: string) => void;
 	}
 
-	let { files, folders, onFileClick, onFolderClick, onFileAction, onFolderAction }: Props =
-		$props();
+	let {
+		files,
+		folders,
+		onFileClick,
+		onFolderClick,
+		onFileAction,
+		onFolderAction,
+		onMoveToFolder,
+	}: Props = $props();
 </script>
 
 <div class="file-grid">
@@ -22,6 +30,7 @@
 			{folder}
 			onClick={() => onFolderClick?.(folder)}
 			onAction={(action) => onFolderAction?.(action, folder)}
+			onDrop={(data) => onMoveToFolder?.(data.type, data.id, folder.id)}
 		/>
 	{/each}
 	{#each files as file (file.id)}

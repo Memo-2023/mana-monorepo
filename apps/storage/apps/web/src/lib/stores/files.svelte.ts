@@ -155,6 +155,22 @@ export const filesStore = {
 		return result;
 	},
 
+	async moveFile(id: string, targetFolderId: string) {
+		const result = await filesApi.move(id, targetFolderId);
+		if (!result.error) {
+			files = files.filter((f) => f.id !== id);
+		}
+		return result;
+	},
+
+	async moveFolder(id: string, targetFolderId: string) {
+		const result = await foldersApi.move(id, targetFolderId);
+		if (!result.error) {
+			folders = folders.filter((f) => f.id !== id);
+		}
+		return result;
+	},
+
 	async downloadFile(id: string, filename: string) {
 		const blob = await filesApi.download(id);
 		if (blob) {

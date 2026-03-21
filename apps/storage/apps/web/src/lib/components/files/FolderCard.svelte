@@ -6,11 +6,40 @@
 		folder: StorageFolder;
 		onClick?: () => void;
 		onAction?: (action: string) => void;
+		onDrop?: (data: { type: 'file' | 'folder'; id: string }) => void;
 	}
 
-	let { folder, onClick, onAction }: Props = $props();
+	let { folder, onClick, onAction, onDrop }: Props = $props();
 
 	let showMenu = $state(false);
+	let isDragOver = $state(false);
+
+	function handleDragOver(e: DragEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+		isDragOver = true;
+	}
+
+	function handleDragLeave(e: DragEvent) {
+		e.preventDefault();
+		isDragOver = false;
+	}
+
+	function handleDrop(e: DragEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		isDragOver = false;
+		const raw = e.dataTransfer?.getData('application/json');
+		if (raw) {
+			try {
+				const data = JSON.parse(raw);
+				if (data.id !== folder.id) {
+					onDrop?.(data);
+				}
+			} catch {}
+		}
+	}
 
 	function handleMenuClick(e: MouseEvent) {
 		e.stopPropagation();
@@ -37,7 +66,21 @@
 	let folderColor = $derived(folder.color ? colorMap[folder.color] || folder.color : undefined);
 </script>
 
-<div class="folder-card" onclick={onClick} role="button" tabindex="0">
+<div
+	class="folder-card"
+	class:drag-over={isDragOver}
+	onclick={onClick}
+	role="button"
+	tabindex="0"
+	draggable="true"
+	ondragstart={(e) => {
+		e.dataTransfer?.setData('application/json', JSON.stringify({ type: 'folder', id: folder.id }));
+		e.dataTransfer!.effectAllowed = 'move';
+	}}
+	ondragover={handleDragOver}
+	ondragleave={handleDragLeave}
+	ondrop={handleDrop}
+>
 	<div class="folder-icon" style:color={folderColor}>
 		<Folder size={40} strokeWidth={1.5} fill="currentColor" />
 		{#if folder.isFavorite}
@@ -92,6 +135,13 @@
 	.folder-card:hover {
 		border-color: rgb(var(--color-primary));
 		box-shadow: var(--shadow-md);
+	}
+
+	.folder-card.drag-over {
+		border-color: rgb(var(--color-success));
+		border-style: dashed;
+		background: rgba(var(--color-success), 0.05);
+		box-shadow: var(--shadow-lg);
 	}
 
 	.folder-icon {

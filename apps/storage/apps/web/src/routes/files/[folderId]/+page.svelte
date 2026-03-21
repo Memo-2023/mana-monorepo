@@ -165,6 +165,28 @@
 		}
 	}
 
+	async function handleMoveToFolder(
+		itemType: 'file' | 'folder',
+		itemId: string,
+		targetFolderId: string
+	) {
+		if (itemType === 'file') {
+			const result = await filesStore.moveFile(itemId, targetFolderId);
+			if (result?.error) {
+				toastStore.error(result.error);
+			} else {
+				toastStore.success('Datei verschoben');
+			}
+		} else {
+			const result = await filesStore.moveFolder(itemId, targetFolderId);
+			if (result?.error) {
+				toastStore.error(result.error);
+			} else {
+				toastStore.success('Ordner verschoben');
+			}
+		}
+	}
+
 	function goBack() {
 		const parentId = filesStore.currentFolder?.parentFolderId;
 		if (parentId) {
@@ -261,6 +283,7 @@
 			onFolderClick={handleFolderClick}
 			onFileAction={handleFileAction}
 			onFolderAction={handleFolderAction}
+			onMoveToFolder={handleMoveToFolder}
 		/>
 	{:else}
 		<FileList

@@ -51,7 +51,17 @@
 	const Icon = getFileIcon(file.mimeType);
 </script>
 
-<div class="file-card" onclick={onClick} role="button" tabindex="0">
+<div
+	class="file-card"
+	onclick={onClick}
+	role="button"
+	tabindex="0"
+	draggable="true"
+	ondragstart={(e) => {
+		e.dataTransfer?.setData('application/json', JSON.stringify({ type: 'file', id: file.id }));
+		e.dataTransfer!.effectAllowed = 'move';
+	}}
+>
 	<div class="file-icon">
 		<Icon size={40} strokeWidth={1.5} />
 		{#if file.isFavorite}
