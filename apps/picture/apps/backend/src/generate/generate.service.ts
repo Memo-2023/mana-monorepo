@@ -8,7 +8,7 @@ import {
 	Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { eq } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { CreditClientService } from '@manacore/nestjs-integration';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
@@ -482,6 +482,96 @@ export class GenerateService {
 			this.logger.error(`Error cancelling generation ${generationId}`, error);
 			throw error;
 		}
+	}
+
+	/**
+	 * Get user's credit balance
+	 */
+	async getCreditBalance(userId: string): Promise<{
+		balance: number;
+		totalEarned: number;
+		totalSpent: number;
+		creditsPerGeneration: number;
+	}> {
+		const creditBalance = await this.creditClient.getBalance(userId);
+
+		return {
+			balance: creditBalance.balance,
+			totalEarned: creditBalance.totalEarned,
+			totalSpent: creditBalance.totalSpent,
+			creditsPerGeneration: CREDITS_PER_GENERATION,
+		};
+	}
+
+	/**
+	 * Get user's generation history with associated images, paginated
+	 */
+	async getGenerationHistory(
+		userId: string,
+		page: number,
+		limit: number
+	): Promise<{
+		data: (ImageGeneration & { image?: Image })[];
+		total: number;
+		page: number;
+		limit: number;
+		totalPages: number;
+	}> {
+		const offset = (page - 1) * limit;
+
+		// Get total count
+		const countResult = await this.db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(imageGenerations)
+			.where(eq(imageGenerations.userId, userId));
+
+		const total = countResult[0]?.count ?? 0;
+
+		// Get paginated generations
+		const generations = await this.db
+			.select()
+			.from(imageGenerations)
+			.where(eq(imageGenerations.userId, userId))
+			.orderBy(desc(imageGenerations.createdAt))
+			.limit(limit)
+			.offset(offset);
+
+		// Fetch associated images for completed generations
+		const generationIds = generations.filter((g) => g.status === 'completed').map((g) => g.id);
+
+		let imageMap = new Map<string, Image>();
+
+		if (generationIds.length > 0) {
+			const generationImages = await this.db
+				.select()
+				.from(images)
+				.where(
+					sql`${images.generationId} IN (${sql.join(
+						generationIds.map((id) => sql`${id}`),
+						sql`, `
+					)})`
+				);
+
+			for (const img of generationImages) {
+				if (img.generationId) {
+					imageMap.set(img.generationId, img);
+				}
+			}
+		}
+
+		// Merge images into generations
+		const data = generations.map((generation) => ({
+			...generation,
+			image: imageMap.get(generation.id),
+		}));
+
+		return {
+			data,
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		};
 	}
 
 	async handleWebhook(body: any): Promise<{ received: boolean }> {

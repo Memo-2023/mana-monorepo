@@ -5,6 +5,7 @@ import { Database } from '../db/connection';
 import {
 	batchGenerations,
 	imageGenerations,
+	images,
 	type BatchGeneration,
 	type NewBatchGeneration,
 } from '../db/schema';
@@ -114,7 +115,7 @@ export class BatchService {
 				throw new ForbiddenException('Access denied');
 			}
 
-			// Get items
+			// Get items with their associated image URLs
 			const items = await this.db
 				.select({
 					id: imageGenerations.id,
@@ -123,8 +124,10 @@ export class BatchService {
 					errorMessage: imageGenerations.errorMessage,
 					retryCount: imageGenerations.retryCount,
 					priority: imageGenerations.priority,
+					imageUrl: images.publicUrl,
 				})
 				.from(imageGenerations)
+				.leftJoin(images, eq(images.generationId, imageGenerations.id))
 				.where(eq(imageGenerations.batchId, batchId))
 				.orderBy(imageGenerations.priority);
 
@@ -137,7 +140,7 @@ export class BatchService {
 					status: item.status,
 					errorMessage: item.errorMessage,
 					retryCount: item.retryCount ?? 0,
-					imageUrl: null, // TODO: Join with images table to get URL
+					imageUrl: item.imageUrl ?? null,
 				})),
 			};
 		} catch (error) {

@@ -5,6 +5,7 @@ import {
 	Delete,
 	Param,
 	Body,
+	Query,
 	Headers,
 	UseGuards,
 	UnauthorizedException,
@@ -31,6 +32,25 @@ export class GenerateController {
 	@UseGuards(JwtAuthGuard)
 	async generateImage(@CurrentUser() user: CurrentUserData, @Body() dto: GenerateImageDto) {
 		return this.generateService.generateImage(user.userId, dto);
+	}
+
+	@Get('credits')
+	@UseGuards(JwtAuthGuard)
+	async getCreditBalance(@CurrentUser() user: CurrentUserData) {
+		return this.generateService.getCreditBalance(user.userId);
+	}
+
+	@Get('history')
+	@UseGuards(JwtAuthGuard)
+	async getGenerationHistory(
+		@CurrentUser() user: CurrentUserData,
+		@Query('page') page?: string,
+		@Query('limit') limit?: string
+	) {
+		const pageNum = Math.max(1, parseInt(page || '1', 10) || 1);
+		const limitNum = Math.min(100, Math.max(1, parseInt(limit || '20', 10) || 20));
+
+		return this.generateService.getGenerationHistory(user.userId, pageNum, limitNum);
 	}
 
 	@Get(':id/status')

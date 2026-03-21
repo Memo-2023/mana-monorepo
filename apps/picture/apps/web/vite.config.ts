@@ -2,7 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
-import { createPWAConfig } from '@manacore/shared-pwa';
+import { createOfflineFirstPWAConfig } from '@manacore/shared-pwa';
 import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@manacore/shared-vite-config';
 
 export default defineConfig({
@@ -10,11 +10,11 @@ export default defineConfig({
 		tailwindcss() as any,
 		sveltekit() as any,
 		SvelteKitPWA(
-			createPWAConfig({
-				name: 'Picture - KI Bildgenerator',
+			createOfflineFirstPWAConfig({
+				name: 'Picture - AI Bildgenerierung',
 				shortName: 'Picture',
-				description: 'KI-gestützte Bildgenerierung',
-				themeColor: '#ec4899',
+				description: 'KI-gestützte Bildgenerierung und -verwaltung',
+				themeColor: '#8b5cf6',
 			})
 		) as any,
 	],

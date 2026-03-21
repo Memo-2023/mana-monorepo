@@ -43,12 +43,52 @@ export class ReplicateService {
 	private replicate: Replicate | null = null;
 	private readonly apiToken: string | undefined;
 
+	/** Timeout for creating predictions (POST) */
+	private readonly CREATE_TIMEOUT_MS = 30_000;
+	/** Timeout for polling prediction status (GET) */
+	private readonly POLL_TIMEOUT_MS = 60_000;
+	/** Timeout for canceling predictions (POST) */
+	private readonly CANCEL_TIMEOUT_MS = 10_000;
+	/** Timeout for fetching source images for img2img */
+	private readonly IMAGE_FETCH_TIMEOUT_MS = 30_000;
+
 	constructor(private configService: ConfigService) {
 		this.apiToken = this.configService.get<string>('REPLICATE_API_TOKEN');
 		if (this.apiToken) {
 			this.replicate = new Replicate({ auth: this.apiToken });
 		} else {
 			this.logger.warn('REPLICATE_API_TOKEN not configured');
+		}
+	}
+
+	/**
+	 * Execute a fetch request with an AbortController timeout.
+	 * Throws a descriptive error on timeout instead of hanging indefinitely.
+	 */
+	private async fetchWithTimeout(
+		url: string,
+		options: RequestInit,
+		timeoutMs: number,
+		operationName: string
+	): Promise<Response> {
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+		try {
+			const response = await fetch(url, {
+				...options,
+				signal: controller.signal,
+			});
+			return response;
+		} catch (error: any) {
+			if (error.name === 'AbortError') {
+				throw new Error(
+					`Replicate API timeout: ${operationName} did not complete within ${timeoutMs / 1000}s`
+				);
+			}
+			throw error;
+		} finally {
+			clearTimeout(timeoutId);
 		}
 	}
 
@@ -75,7 +115,12 @@ export class ReplicateService {
 	private async convertImageToBase64(imageUrl: string): Promise<string> {
 		this.logger.debug(`Converting image to base64: ${imageUrl}`);
 
-		const imageResponse = await fetch(imageUrl);
+		const imageResponse = await this.fetchWithTimeout(
+			imageUrl,
+			{},
+			this.IMAGE_FETCH_TIMEOUT_MS,
+			'fetch source image'
+		);
 		if (!imageResponse.ok) {
 			throw new Error('Failed to fetch source image');
 		}
@@ -447,14 +492,19 @@ export class ReplicateService {
 
 			// Call Replicate API to start prediction
 			this.logger.log('Calling Replicate API...');
-			const replicateResponse = await fetch('https://api.replicate.com/v1/predictions', {
-				method: 'POST',
-				headers: {
-					Authorization: `Token ${this.apiToken}`,
-					'Content-Type': 'application/json',
+			const replicateResponse = await this.fetchWithTimeout(
+				'https://api.replicate.com/v1/predictions',
+				{
+					method: 'POST',
+					headers: {
+						Authorization: `Token ${this.apiToken}`,
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(requestBody),
 				},
-				body: JSON.stringify(requestBody),
-			});
+				this.CREATE_TIMEOUT_MS,
+				'create prediction'
+			);
 
 			if (!replicateResponse.ok) {
 				const errorText = await replicateResponse.text();
@@ -473,14 +523,22 @@ export class ReplicateService {
 				await new Promise((resolve) => setTimeout(resolve, 5000)); // Poll every 5 seconds
 				attempts++;
 
-				const statusResponse = await fetch(
-					`https://api.replicate.com/v1/predictions/${prediction.id}`,
-					{
-						headers: {
-							Authorization: `Token ${this.apiToken}`,
+				let statusResponse: Response;
+				try {
+					statusResponse = await this.fetchWithTimeout(
+						`https://api.replicate.com/v1/predictions/${prediction.id}`,
+						{
+							headers: {
+								Authorization: `Token ${this.apiToken}`,
+							},
 						},
-					}
-				);
+						this.POLL_TIMEOUT_MS,
+						`poll prediction ${prediction.id}`
+					);
+				} catch (pollError: any) {
+					this.logger.warn(`Poll attempt ${attempts} failed: ${pollError.message}`);
+					continue; // Retry on next interval
+				}
 
 				if (!statusResponse.ok) {
 					this.logger.warn('Failed to get prediction status');
@@ -566,14 +624,19 @@ export class ReplicateService {
 				requestBody.model = modelId;
 			}
 
-			const response = await fetch('https://api.replicate.com/v1/predictions', {
-				method: 'POST',
-				headers: {
-					Authorization: `Token ${this.apiToken}`,
-					'Content-Type': 'application/json',
+			const response = await this.fetchWithTimeout(
+				'https://api.replicate.com/v1/predictions',
+				{
+					method: 'POST',
+					headers: {
+						Authorization: `Token ${this.apiToken}`,
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(requestBody),
 				},
-				body: JSON.stringify(requestBody),
-			});
+				this.CREATE_TIMEOUT_MS,
+				'create prediction (webhook mode)'
+			);
 
 			if (!response.ok) {
 				const errorText = await response.text();
@@ -600,11 +663,16 @@ export class ReplicateService {
 		}
 
 		try {
-			const response = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
-				headers: {
-					Authorization: `Token ${this.apiToken}`,
+			const response = await this.fetchWithTimeout(
+				`https://api.replicate.com/v1/predictions/${predictionId}`,
+				{
+					headers: {
+						Authorization: `Token ${this.apiToken}`,
+					},
 				},
-			});
+				this.POLL_TIMEOUT_MS,
+				`get prediction ${predictionId}`
+			);
 
 			if (!response.ok) {
 				throw new Error(`Failed to get prediction: ${response.status}`);
@@ -631,12 +699,17 @@ export class ReplicateService {
 		}
 
 		try {
-			await fetch(`https://api.replicate.com/v1/predictions/${predictionId}/cancel`, {
-				method: 'POST',
-				headers: {
-					Authorization: `Token ${this.apiToken}`,
+			await this.fetchWithTimeout(
+				`https://api.replicate.com/v1/predictions/${predictionId}/cancel`,
+				{
+					method: 'POST',
+					headers: {
+						Authorization: `Token ${this.apiToken}`,
+					},
 				},
-			});
+				this.CANCEL_TIMEOUT_MS,
+				`cancel prediction ${predictionId}`
+			);
 		} catch (error) {
 			this.logger.error(`Error canceling prediction ${predictionId}`, error);
 			throw error;
