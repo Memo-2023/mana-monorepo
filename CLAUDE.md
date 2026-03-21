@@ -815,7 +815,7 @@ packages/eslint-config/    # Shared ESLint configuration
 
 ### Current State
 
-- Testing: ~25 test files total (sparse coverage)
-- Linting: Fragmented configs across projects
-- CI: Only 2 backend deployment workflows exist
-- Pre-commit: Only maerchenzauber has Husky (SSH URL fixer only)
+- Testing: ~128 test files across all projects (unit + e2e + integration)
+- Linting: Husky + lint-staged on pre-commit (format + lint)
+- CI: PR validation (type-check, lint, format, tests) + CD pipeline with deploy tracking
+- Pre-commit: Husky runs lint-staged on every commit
