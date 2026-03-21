@@ -7,8 +7,8 @@ import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@manacore/shared-vite
 
 export default defineConfig({
 	plugins: [
-		tailwindcss(),
-		sveltekit(),
+		tailwindcss() as any,
+		sveltekit() as any,
 		SvelteKitPWA(
 			createPWAConfig({
 				name: 'Picture - KI Bildgenerator',
@@ -16,7 +16,7 @@ export default defineConfig({
 				description: 'KI-gestützte Bildgenerierung',
 				themeColor: '#ec4899',
 			})
-		),
+		) as any,
 	],
 	server: {
 		port: 5175,

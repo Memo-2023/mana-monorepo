@@ -280,7 +280,7 @@
 </div>
 
 <!-- Create Board Modal -->
-<Modal open={$showCreateBoardModal} onClose={() => showCreateBoardModal.set(false)}>
+<Modal visible={$showCreateBoardModal} onClose={() => showCreateBoardModal.set(false)}>
 	<div class="p-6">
 		<h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Neues Board erstellen</h2>
 
@@ -339,7 +339,7 @@
 </Modal>
 
 <!-- Delete Confirmation Modal -->
-<Modal open={showDeleteModal} onClose={() => (showDeleteModal = false)}>
+<Modal visible={showDeleteModal} onClose={() => (showDeleteModal = false)}>
 	<div class="p-6">
 		<h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Board löschen?</h2>
 		<p class="mt-4 text-gray-600 dark:text-gray-400">

@@ -132,7 +132,7 @@
 	);
 </script>
 
-<Modal {open} {onClose} size="large">
+<Modal visible={open} {onClose} maxWidth="3xl">
 	<div class="flex h-[80vh] flex-col p-6">
 		<!-- Header -->
 		<div class="mb-6">
