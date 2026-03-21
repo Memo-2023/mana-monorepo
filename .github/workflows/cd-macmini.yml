@@ -217,6 +217,30 @@ jobs:
           echo "deploy-all=false" >> $GITHUB_OUTPUT
           echo "Services to deploy: $SERVICES"
 
+      - name: Build shared base image
+        run: |
+          cd "${{ env.PROJECT_DIR }}"
+          SERVICES="${{ steps.services.outputs.services }}"
+          DEPLOY_ALL="${{ steps.services.outputs.deploy-all }}"
+
+          # Check if any backend service is being deployed
+          NEEDS_BASE=false
+          if [ "$DEPLOY_ALL" == "true" ]; then
+            NEEDS_BASE=true
+          else
+            for svc in $SERVICES; do
+              case "$svc" in *-backend) NEEDS_BASE=true; break ;; esac
+            done
+          fi
+
+          if [ "$NEEDS_BASE" == "true" ]; then
+            echo "=== Building shared NestJS base image ==="
+            docker build -f docker/Dockerfile.nestjs-base -t nestjs-base:local . 2>&1 | tail -5
+            echo "Base image built"
+          else
+            echo "No backends to deploy, skipping base image"
+          fi
+
       - name: Build and deploy services
         id: build
         run: |

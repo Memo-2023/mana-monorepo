@@ -1,0 +1,56 @@
+# syntax=docker/dockerfile:1
+# Shared builder base for all NestJS backends
+# Contains pre-built shared packages and dependencies
+#
+# Usage in backend Dockerfiles:
+#   FROM nestjs-base:local AS builder
+#   COPY apps/myapp/apps/backend ./apps/myapp/apps/backend
+#   RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
+#   WORKDIR /app/apps/myapp/apps/backend
+#   RUN pnpm build
+
+FROM node:20-alpine
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+WORKDIR /app
+
+# Copy root workspace files
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+COPY patches ./patches
+
+# Copy ALL shared packages used by NestJS backends
+COPY packages/credit-operations ./packages/credit-operations
+COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
+COPY packages/manadeck-database ./packages/manadeck-database
+COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
+COPY packages/shared-errors ./packages/shared-errors
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
+COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
+COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
+COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
+COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
+COPY packages/shared-storage ./packages/shared-storage
+COPY packages/shared-tsconfig ./packages/shared-tsconfig
+
+# Install dependencies
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --ignore-scripts
+
+# Build all shared packages (in dependency order)
+RUN cd packages/shared-errors && pnpm build \
+    && cd /app/packages/shared-nestjs-auth && pnpm build \
+    && cd /app/packages/shared-nestjs-health && pnpm build \
+    && cd /app/packages/shared-nestjs-metrics && pnpm build \
+    && cd /app/packages/shared-nestjs-setup && pnpm build \
+    && cd /app/packages/shared-error-tracking && pnpm build \
+    && cd /app/packages/shared-storage && pnpm build \
+    && cd /app/packages/shared-drizzle-config && pnpm build 2>/dev/null || true \
+    && cd /app/packages/credit-operations && pnpm build \
+    && cd /app/packages/mana-core-nestjs-integration && pnpm build \
+    && cd /app/packages/manadeck-database && pnpm build 2>/dev/null || true
+
+WORKDIR /app

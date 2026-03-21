@@ -1,69 +1,23 @@
 # syntax=docker/dockerfile:1
-# Build stage
-FROM node:20-alpine AS builder
+# Build stage — inherits pre-built shared packages from nestjs-base
+FROM nestjs-base:local AS builder
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
-
-WORKDIR /app
-
-# Copy root workspace files
-COPY pnpm-workspace.yaml ./
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-COPY patches ./patches
-
-# Copy shared packages
-COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
-COPY packages/shared-errors ./packages/shared-errors
-COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
-COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
-COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
-COPY packages/shared-storage ./packages/shared-storage
-COPY packages/shared-tsconfig ./packages/shared-tsconfig
-COPY packages/shared-error-tracking ./packages/shared-error-tracking
-COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
-
-# Copy mukke packages
+# Copy mukke-specific packages and backend
 COPY apps/mukke/packages ./apps/mukke/packages
 COPY apps/mukke/apps/backend ./apps/mukke/apps/backend
 
-# Install dependencies
+# Reinstall to link app-specific dependencies
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
-# Build shared packages
-WORKDIR /app/packages/shared-errors
-RUN pnpm build
-
-WORKDIR /app/packages/shared-nestjs-auth
-RUN pnpm build
-
-WORKDIR /app/packages/shared-nestjs-health
-RUN pnpm build
-
-WORKDIR /app/packages/shared-storage
-RUN pnpm build
-
-WORKDIR /app/packages/shared-nestjs-setup
-RUN pnpm build
-
 # Build the backend
-
-WORKDIR /app/packages/shared-nestjs-setup
-RUN pnpm build
-
-WORKDIR /app/packages/shared-error-tracking
-RUN pnpm build
-
 WORKDIR /app/apps/mukke/apps/backend
 RUN pnpm build
 
 # Production stage
 FROM node:20-alpine AS production
 
-# Install pnpm and postgresql-client
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
-    && apk add --no-cache postgresql-client
+# Install postgresql-client for health checks
+RUN apk add --no-cache postgresql-client
 
 WORKDIR /app
 
