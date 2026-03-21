@@ -4,6 +4,7 @@
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import RecurrenceEditDialog from './RecurrenceEditDialog.svelte';
+	import RecurrenceSelector from './RecurrenceSelector.svelte';
 	import type {
 		LocationDetails,
 		CalendarEvent,
@@ -209,6 +210,8 @@
 	let locationCountry = $state('');
 	let submitting = $state(false);
 	let showRecurrenceDialog = $state(false);
+	let recurrenceRule = $state<string | null>(null);
+	let recurrenceEndDate = $state<string | null>(null);
 
 	// People state
 	let responsiblePerson = $state<ResponsiblePerson | null>(null);
@@ -260,6 +263,14 @@
 			// Initialize people
 			responsiblePerson = event.metadata?.responsiblePerson || null;
 			attendees = event.metadata?.attendees || [];
+
+			// Initialize recurrence
+			recurrenceRule = event.recurrenceRule || null;
+			recurrenceEndDate = event.recurrenceEndDate
+				? typeof event.recurrenceEndDate === 'string'
+					? event.recurrenceEndDate
+					: event.recurrenceEndDate.toISOString()
+				: null;
 
 			// Initialize time fields
 			const eventStart = toDate(event.startTime);
@@ -568,6 +579,8 @@
 				isAllDay,
 				description: description.trim() || undefined,
 				location: location.trim() || undefined,
+				recurrenceRule: recurrenceRule || undefined,
+				recurrenceEndDate: recurrenceEndDate || undefined,
 				metadata,
 			};
 
@@ -921,6 +934,30 @@
 					</div>
 				</div>
 			{/if}
+
+			<!-- Recurrence -->
+			<div class="form-row">
+				<div class="row-icon">
+					<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+						/>
+					</svg>
+				</div>
+				<div class="row-content">
+					<RecurrenceSelector
+						{recurrenceRule}
+						{recurrenceEndDate}
+						onRecurrenceChange={(rule, endDate) => {
+							recurrenceRule = rule;
+							recurrenceEndDate = endDate;
+						}}
+					/>
+				</div>
+			</div>
 
 			<!-- Start date/time -->
 			<div class="form-row">
