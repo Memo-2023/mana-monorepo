@@ -1,5 +1,9 @@
 <script lang="ts">
-	import type { AppOnboardingStore, AppOnboardingSelectStep, AppOnboardingToggleStep } from './types';
+	import type {
+		AppOnboardingStore,
+		AppOnboardingSelectStep,
+		AppOnboardingToggleStep,
+	} from './types';
 
 	interface Props {
 		store: AppOnboardingStore;
@@ -65,12 +69,15 @@
 				</button>
 			</div>
 
-			<!-- Progress bar -->
-			<div class="h-1 bg-muted rounded-full overflow-hidden">
-				<div
-					class="h-full bg-primary transition-all duration-300 ease-out rounded-full"
-					style="width: {store.progress}%"
-				></div>
+			<!-- Step dots -->
+			<div class="flex items-center gap-1.5">
+				{#each Array(store.totalSteps) as _, i}
+					<div
+						class="h-1.5 rounded-full transition-all duration-300 {i <= store.currentStep
+							? 'bg-primary'
+							: 'bg-muted'} {i === store.currentStep ? 'w-6' : 'w-1.5'}"
+					></div>
+				{/each}
 			</div>
 		</header>
 
@@ -80,18 +87,6 @@
 				{@const step = store.currentStepConfig}
 
 				<div class="text-center">
-					<!-- Step icon -->
-					{#if step.emoji}
-						{@const gradient = step.gradient || { from: 'primary', to: 'primary/70' }}
-						<div class="mb-5">
-							<div
-								class="inline-flex h-14 w-14 rounded-xl bg-gradient-to-br from-{gradient.from} to-{gradient.to} items-center justify-center shadow-lg"
-							>
-								<span class="text-2xl">{step.emoji}</span>
-							</div>
-						</div>
-					{/if}
-
 					<!-- Question -->
 					<h2 class="text-lg font-bold mb-2">{step.question}</h2>
 					{#if step.description}
@@ -104,22 +99,34 @@
 							{@const selectStep = step as AppOnboardingSelectStep}
 							<div class="space-y-2">
 								{#each selectStep.options as option}
+									{@const isSelected = store.preferences[step.id] === option.id}
 									<button
 										onclick={() => selectOption(step.id, option.id)}
-										class="w-full p-3 rounded-xl border-2 transition-all text-left {store.preferences[step.id] === option.id
-											? 'border-primary bg-primary/10'
+										class="w-full p-3 rounded-xl border-2 transition-all text-left {isSelected
+											? 'border-primary bg-primary/15 shadow-sm shadow-primary/20'
 											: 'border-border hover:border-primary/50 bg-surface-elevated-1'}"
 									>
 										<div class="flex items-center gap-3">
 											{#if option.emoji}
 												<span class="text-xl">{option.emoji}</span>
 											{/if}
-											<div>
+											<div class="flex-1">
 												<p class="font-medium text-sm">{option.label}</p>
 												{#if option.description}
 													<p class="text-xs text-muted-foreground">{option.description}</p>
 												{/if}
 											</div>
+											{#if isSelected}
+												<svg
+													class="w-5 h-5 text-primary flex-shrink-0"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+													stroke-width="2.5"
+												>
+													<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+												</svg>
+											{/if}
 										</div>
 									</button>
 								{/each}
@@ -135,7 +142,9 @@
 							>
 								<div class="flex items-center justify-between">
 									<span class="font-medium text-sm">
-										{isEnabled ? (toggleStep.enabledLabel || 'Aktiviert') : (toggleStep.disabledLabel || 'Deaktiviert')}
+										{isEnabled
+											? toggleStep.enabledLabel || 'Aktiviert'
+											: toggleStep.disabledLabel || 'Deaktiviert'}
 									</span>
 									<div
 										class="relative w-11 h-6 rounded-full transition-colors {isEnabled
@@ -170,13 +179,16 @@
 		<!-- Footer with navigation -->
 		<footer class="border-t px-5 py-3 flex-shrink-0">
 			<div class="flex justify-between">
-				<button
-					onclick={handlePrev}
-					disabled={store.isFirstStep}
-					class="px-4 py-2 text-sm border rounded-lg hover:bg-muted transition-colors disabled:opacity-0 disabled:pointer-events-none"
-				>
-					Zurück
-				</button>
+				{#if store.isFirstStep}
+					<div></div>
+				{:else}
+					<button
+						onclick={handlePrev}
+						class="px-4 py-2 text-sm border rounded-lg hover:bg-muted transition-colors"
+					>
+						Zurück
+					</button>
+				{/if}
 				<button
 					onclick={handleNext}
 					disabled={store.saving}

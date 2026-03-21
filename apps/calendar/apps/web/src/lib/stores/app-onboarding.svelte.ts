@@ -1,5 +1,7 @@
 import { createAppOnboardingStore, type AppOnboardingStep } from '@manacore/shared-app-onboarding';
 import { userSettings } from './user-settings.svelte';
+import { settingsStore } from './settings.svelte';
+import type { CalendarViewType } from '@calendar/shared';
 
 /**
  * Calendar-specific onboarding steps
@@ -37,12 +39,6 @@ const calendarOnboardingSteps: AppOnboardingStep[] = [
 		gradient: { from: 'indigo-500', to: 'indigo-700' },
 		options: [
 			{
-				id: 'day',
-				label: 'Tagesansicht',
-				description: 'Detaillierte 24-Stunden-Timeline',
-				emoji: '📆',
-			},
-			{
 				id: 'week',
 				label: 'Wochenansicht',
 				description: '7-Tage-Übersicht (Empfohlen)',
@@ -54,43 +50,14 @@ const calendarOnboardingSteps: AppOnboardingStep[] = [
 				description: 'Kompakte Monatsübersicht',
 				emoji: '📅',
 			},
+			{
+				id: 'agenda',
+				label: 'Agenda',
+				description: 'Chronologische Terminliste',
+				emoji: '📋',
+			},
 		],
 		defaultValue: 'week',
-	},
-	{
-		id: 'timezone',
-		type: 'select',
-		question: 'Welche Zeitzone verwendest du?',
-		description: 'Termine werden in dieser Zeitzone angezeigt.',
-		emoji: '🌍',
-		gradient: { from: 'emerald-500', to: 'emerald-700' },
-		options: [
-			{
-				id: 'auto',
-				label: 'Automatisch erkennen',
-				description: 'Basierend auf deinem Standort',
-				emoji: '📍',
-			},
-			{
-				id: 'Europe/Berlin',
-				label: 'Berlin (MEZ/MESZ)',
-				description: 'Deutschland, Österreich, Schweiz',
-				emoji: '🇩🇪',
-			},
-			{
-				id: 'Europe/London',
-				label: 'London (GMT/BST)',
-				description: 'Großbritannien',
-				emoji: '🇬🇧',
-			},
-			{
-				id: 'America/New_York',
-				label: 'New York (EST/EDT)',
-				description: 'US-Ostküste',
-				emoji: '🇺🇸',
-			},
-		],
-		defaultValue: 'auto',
 	},
 	{
 		id: 'welcome',
@@ -132,13 +99,25 @@ export const calendarOnboarding = createAppOnboardingStore({
 	steps: calendarOnboardingSteps,
 	userSettings,
 	onComplete: async (preferences) => {
-		console.log('[Calendar] Onboarding completed with preferences:', preferences);
+		// Apply week start preference
+		if (preferences.weekStart === 'monday') {
+			settingsStore.set('weekStartsOn', 1);
+		} else if (preferences.weekStart === 'sunday') {
+			settingsStore.set('weekStartsOn', 0);
+		}
 
-		// Apply preferences to the app
-		// The preferences are automatically saved to deviceSettings by the store
-		// Additional app-specific logic can go here (e.g., applying timezone, view settings)
+		// Apply default view preference
+		const viewMap: Record<string, CalendarViewType> = {
+			week: 'week',
+			month: 'month',
+			agenda: 'agenda',
+		};
+		const selectedView = preferences.defaultView as string;
+		if (selectedView && viewMap[selectedView]) {
+			settingsStore.set('defaultView', viewMap[selectedView]);
+		}
 	},
 	onSkip: async () => {
-		console.log('[Calendar] Onboarding skipped');
+		// Defaults are already sensible, nothing to do
 	},
 });
