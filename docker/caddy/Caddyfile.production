@@ -83,6 +83,17 @@ contacts-api.mana.how {
 }
 
 # ============================================
+# Storage App
+# ============================================
+storage.mana.how {
+    reverse_proxy localhost:5015
+}
+
+storage-api.mana.how {
+    reverse_proxy localhost:3035
+}
+
+# ============================================
 # Skilltree App
 # ============================================
 skilltree.mana.how {
@@ -102,6 +113,17 @@ lightwrite.mana.how {
 
 lightwrite-api.mana.how {
     reverse_proxy localhost:3010
+}
+
+# ============================================
+# Picture App
+# ============================================
+picture.mana.how {
+    reverse_proxy localhost:5021
+}
+
+picture-api.mana.how {
+    reverse_proxy localhost:3040
 }
 
 # ============================================

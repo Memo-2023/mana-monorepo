@@ -14,8 +14,29 @@ export default defineConfig({
 			createPWAConfig({
 				name: 'Storage - Cloud Speicher',
 				shortName: 'Storage',
-				description: 'Cloud-Dateispeicher',
+				description: 'Cloud-Dateispeicher mit Offline-Unterstützung',
 				themeColor: '#64748b',
+				preset: 'full',
+				shortcuts: [
+					{
+						name: 'Meine Dateien',
+						short_name: 'Dateien',
+						description: 'Dateien und Ordner öffnen',
+						url: '/files',
+					},
+					{
+						name: 'Suche',
+						short_name: 'Suche',
+						description: 'Dateien durchsuchen',
+						url: '/search',
+					},
+					{
+						name: 'Favoriten',
+						short_name: 'Favoriten',
+						description: 'Favorisierte Dateien anzeigen',
+						url: '/favorites',
+					},
+				],
 			})
 		),
 	],
