@@ -84,7 +84,43 @@ class BootScene extends Phaser.Scene {
 		// Create player walk animation frames (4 directions)
 		this.createPlayerWalkAnimations();
 
+		// Lade gespeicherten Custom-Avatar, falls vorhanden
+		this.loadCustomAvatar();
+
 		this.scene.start('MainMenuScene');
+	}
+
+	loadCustomAvatar() {
+		try {
+			const saved = localStorage.getItem('whopixels_avatar');
+			if (!saved) return;
+
+			const avatarData = JSON.parse(saved);
+			const frameSize = 32;
+			const pixelSize = frameSize / avatarData.width;
+
+			const graphics = this.make.graphics({ x: 0, y: 0 });
+
+			for (let y = 0; y < avatarData.height; y++) {
+				for (let x = 0; x < avatarData.width; x++) {
+					const color = avatarData.pixels[y][x];
+					if (color !== 0xffffff) {
+						graphics.fillStyle(color);
+						graphics.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+					}
+				}
+			}
+
+			graphics.generateTexture('custom_avatar_down', frameSize, frameSize);
+			graphics.generateTexture('custom_avatar_up', frameSize, frameSize);
+			graphics.generateTexture('custom_avatar_left', frameSize, frameSize);
+			graphics.generateTexture('custom_avatar_right', frameSize, frameSize);
+			graphics.destroy();
+
+			console.log('Custom-Avatar geladen');
+		} catch (error) {
+			console.error('Fehler beim Laden des Custom-Avatars:', error);
+		}
 	}
 
 	createPlayerWalkAnimations() {

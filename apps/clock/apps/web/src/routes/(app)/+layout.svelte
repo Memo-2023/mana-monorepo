@@ -30,6 +30,8 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { alarmsApi } from '$lib/api/alarms';
 	import { timersApi } from '$lib/api/timers';
+	import { clockOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
 	// App switcher items
 	const appItems = getPillAppItems('clock');
@@ -314,6 +316,11 @@
 		emptyText="Keine Ergebnisse"
 		searchingText="Suche..."
 	/>
+
+	<!-- Onboarding Modal -->
+	{#if clockOnboarding.shouldShow}
+		<MiniOnboardingModal store={clockOnboarding} appName="Uhr" appEmoji="⏰" />
+	{/if}
 </div>
 
 <style>

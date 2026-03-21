@@ -14,6 +14,8 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { ToastContainer } from '@manacore/shared-ui';
+	import { storageOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import '../app.css';
 
 	// App switcher items
@@ -219,6 +221,11 @@
 				{@render children()}
 			</div>
 		</main>
+
+		<!-- Onboarding Modal -->
+		{#if storageOnboarding.shouldShow}
+			<MiniOnboardingModal store={storageOnboarding} appName="Storage" appEmoji="☁️" />
+		{/if}
 	</div>
 {/if}
 

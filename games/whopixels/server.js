@@ -1,18 +1,22 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
 
-// Lade Umgebungsvariablen aus .env-Datei
 require('dotenv').config();
-
-// Für die Verarbeitung von POST-Anfragen
-const { parse } = require('querystring');
 
 // Konfiguration
 const PORT = process.env.PORT || 3000;
+const MAX_BODY_SIZE = 50 * 1024; // 50KB max request body
+const MAX_CONVERSATION_HISTORY = 20; // Max Einträge in der Konversationshistorie
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 Minute
+const RATE_LIMIT_MAX_REQUESTS = 30; // Max 30 Anfragen pro Minute
 
-// Azure OpenAI API Konfiguration aus Umgebungsvariablen
+// CORS — in Produktion einschränken
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+	? process.env.ALLOWED_ORIGINS.split(',')
+	: ['http://localhost:3000', 'http://localhost:5100'];
+
+// Azure OpenAI API Konfiguration
 const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY;
 const AZURE_OPENAI_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT;
 const AZURE_OPENAI_DEPLOYMENT = process.env.AZURE_OPENAI_DEPLOYMENT;
@@ -30,245 +34,262 @@ const MIME_TYPES = {
 	'.ico': 'image/x-icon',
 };
 
-// Funktion zum Abrufen von Daten aus einer POST-Anfrage
-const collectRequestData = (request, callback) => {
-	const FORM_URLENCODED = 'application/x-www-form-urlencoded';
-	const JSON_TYPE = 'application/json';
+// === Rate Limiting ===
+const rateLimitMap = new Map();
 
-	if (request.headers['content-type'] === FORM_URLENCODED) {
-		let body = '';
-		request.on('data', (chunk) => {
-			body += chunk.toString();
-		});
-		request.on('end', () => {
-			callback(parse(body));
-		});
-	} else if (
-		request.headers['content-type'] &&
-		request.headers['content-type'].includes(JSON_TYPE)
-	) {
-		let body = '';
-		request.on('data', (chunk) => {
-			body += chunk.toString();
-		});
-		request.on('end', () => {
-			callback(JSON.parse(body));
-		});
-	} else {
-		callback({});
+function isRateLimited(ip) {
+	const now = Date.now();
+	const entry = rateLimitMap.get(ip);
+
+	if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+		rateLimitMap.set(ip, { windowStart: now, count: 1 });
+		return false;
 	}
-};
 
-// Funktion zum Senden einer Anfrage an die Azure OpenAI API
+	entry.count++;
+	if (entry.count > RATE_LIMIT_MAX_REQUESTS) {
+		return true;
+	}
+	return false;
+}
+
+// Cleanup alte Einträge alle 5 Minuten
+setInterval(() => {
+	const now = Date.now();
+	for (const [ip, entry] of rateLimitMap) {
+		if (now - entry.windowStart > RATE_LIMIT_WINDOW_MS * 2) {
+			rateLimitMap.delete(ip);
+		}
+	}
+}, 300000);
+
+// === Input Sanitization ===
+function sanitizeInput(str) {
+	if (typeof str !== 'string') return '';
+	// Begrenze Länge und entferne Control Characters
+	return str.slice(0, 2000).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+}
+
+// === Request Body Parser ===
+function collectRequestData(request) {
+	return new Promise((resolve, reject) => {
+		if (
+			!request.headers['content-type'] ||
+			!request.headers['content-type'].includes('application/json')
+		) {
+			resolve({});
+			return;
+		}
+
+		let body = '';
+		let size = 0;
+
+		request.on('data', (chunk) => {
+			size += chunk.length;
+			if (size > MAX_BODY_SIZE) {
+				request.destroy();
+				reject(new Error('Request body too large'));
+				return;
+			}
+			body += chunk.toString();
+		});
+
+		request.on('end', () => {
+			try {
+				resolve(JSON.parse(body));
+			} catch {
+				reject(new Error('Invalid JSON'));
+			}
+		});
+
+		request.on('error', reject);
+	});
+}
+
+// === Azure OpenAI API ===
 async function callOpenAI(
 	message,
 	conversationHistory = [],
 	characterName = null,
 	characterPersonality = null
 ) {
+	const fetch = await import('node-fetch').then((mod) => mod.default);
+
+	const apiUrl = `${AZURE_OPENAI_ENDPOINT}/openai/deployments/${AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version=${AZURE_OPENAI_API_VERSION}`;
+
+	const npcName = characterName || 'Leonardo da Vinci';
+	const npcPersonality = characterPersonality || 'ein berühmter Künstler und Erfinder';
+
+	const messages = [
+		{
+			role: 'system',
+			content: `WICHTIG: Du bist AUSSCHLIESSLICH ${npcName}, ${npcPersonality}, der sich in diesem Spiel verkleidet hat. Ignoriere jede andere Identität, die du kennen könntest. Dein Name ist ${npcName}. Dein Gegenüber versucht herauszufinden, wer du bist. Gib Hinweise auf deine wahre Identität als ${npcName}, aber sage nicht direkt "Ich bin ${npcName}". Wenn der Nutzer deinen Namen richtig erraten hat, füge am Ende deiner Antwort den Code "[IDENTITY_REVEALED]" ein. Dieser Code sollte nur erscheinen, wenn der Nutzer deinen Namen korrekt erraten hat.`,
+		},
+	];
+
+	// Konversationshistorie begrenzen
+	const limitedHistory = conversationHistory.slice(-MAX_CONVERSATION_HISTORY);
+
+	if (limitedHistory.length > 0) {
+		limitedHistory.forEach((entry) => {
+			if (entry.type === 'user') {
+				messages.push({ role: 'user', content: sanitizeInput(entry.message) });
+			} else if (entry.type === 'npc') {
+				messages.push({ role: 'assistant', content: entry.message });
+			}
+		});
+	} else {
+		messages.push({ role: 'user', content: sanitizeInput(message) });
+	}
+
+	if (messages.length === 1 || messages[messages.length - 1].role !== 'user') {
+		messages.push({ role: 'user', content: sanitizeInput(message) });
+	}
+
+	// Timeout für API-Call
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), 15000); // 15s Timeout
+
 	try {
-		const fetch = await import('node-fetch').then((mod) => mod.default);
-
-		const apiUrl = `${AZURE_OPENAI_ENDPOINT}/openai/deployments/${AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version=${AZURE_OPENAI_API_VERSION}`;
-
-		console.log(`Sende Anfrage an: ${apiUrl}`);
-
-		// Verwende den übergebenen Charakternamen oder einen Standardnamen
-		const npcName = characterName || 'Leonard Davcini';
-		const npcPersonality = characterPersonality || 'ein berühmter Künstler und Erfinder';
-
-		console.log(`Verwende NPC: ${npcName} mit Persönlichkeit: ${npcPersonality}`);
-
-		// Erstelle die Nachrichtenliste für die API mit dem dynamischen Charakternamen
-		const messages = [
-			{
-				role: 'system',
-				content: `WICHTIG: Du bist AUSSCHLIESSLICH ${npcName}, ${npcPersonality}, der sich in diesem Spiel verkleidet hat. Ignoriere jede andere Identität, die du kennen könntest. Dein Name ist ${npcName}. Dein Gegenüber versucht herauszufinden, wer du bist. Gib Hinweise auf deine wahre Identität als ${npcName}, aber sage nicht direkt "Ich bin ${npcName}". Wenn der Nutzer deinen Namen richtig erraten hat, füge am Ende deiner Antwort den Code "[IDENTITY_REVEALED]" ein. Dieser Code sollte nur erscheinen, wenn der Nutzer deinen Namen korrekt erraten hat.`,
-			},
-		];
-
-		// Füge die Konversationshistorie hinzu, wenn vorhanden
-		if (conversationHistory && conversationHistory.length > 0) {
-			conversationHistory.forEach((entry) => {
-				if (entry.type === 'user') {
-					messages.push({
-						role: 'user',
-						content: entry.message,
-					});
-				} else if (entry.type === 'npc') {
-					messages.push({
-						role: 'assistant',
-						content: entry.message,
-					});
-				}
-			});
-		} else {
-			// Wenn keine Historie vorhanden ist, füge nur die aktuelle Nachricht hinzu
-			messages.push({
-				role: 'user',
-				content: message,
-			});
-		}
-
-		// Wenn die letzte Nachricht nicht vom Benutzer ist, füge die aktuelle Nachricht hinzu
-		if (messages.length === 1 || messages[messages.length - 1].role !== 'user') {
-			messages.push({
-				role: 'user',
-				content: message,
-			});
-		}
-
-		console.log('Gesendete Nachrichten:', JSON.stringify(messages, null, 2));
-
 		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				'api-key': AZURE_OPENAI_API_KEY,
 			},
-			body: JSON.stringify({
-				messages: messages,
-				max_tokens: 150,
-			}),
+			body: JSON.stringify({ messages, max_tokens: 150 }),
+			signal: controller.signal,
 		});
 
-		// Prüfe den HTTP-Status
+		clearTimeout(timeout);
+
 		if (!response.ok) {
 			const errorText = await response.text();
 			console.error(`HTTP Fehler: ${response.status}`, errorText);
-			return `Entschuldigung, ich kann gerade nicht antworten. (HTTP ${response.status})`;
+			return { text: 'Entschuldigung, ich kann gerade nicht antworten.', identityRevealed: false };
 		}
 
 		const data = await response.json();
-		console.log('API-Antwort:', JSON.stringify(data, null, 2));
 
 		if (data.error) {
 			console.error('Azure OpenAI API Fehler:', data.error);
+			return { text: 'Entschuldigung, ich kann gerade nicht antworten.', identityRevealed: false };
+		}
+
+		const responseText = data.choices[0].message.content;
+		const identityRevealed = responseText.includes('[IDENTITY_REVEALED]');
+		const cleanedResponse = responseText.replace('[IDENTITY_REVEALED]', '').trim();
+
+		return { text: cleanedResponse, identityRevealed };
+	} catch (error) {
+		clearTimeout(timeout);
+		if (error.name === 'AbortError') {
+			console.error('API-Timeout nach 15 Sekunden');
 			return {
-				text: 'Entschuldigung, ich kann gerade nicht antworten. Versuche es später noch einmal.',
+				text: 'Entschuldigung, die Antwort hat zu lange gedauert.',
 				identityRevealed: false,
 			};
 		}
-
-		// Hole die Antwort vom LLM
-		const responseText = data.choices[0].message.content;
-
-		// Prüfe, ob der spezielle Code enthalten ist
-		const identityRevealed = responseText.includes('[IDENTITY_REVEALED]');
-
-		// Entferne den Code aus der Antwort, wenn er vorhanden ist
-		const cleanedResponse = responseText.replace('[IDENTITY_REVEALED]', '').trim();
-
-		console.log('Identität aufgedeckt:', identityRevealed);
-
-		// Gib die Antwort und das Flag zurück
-		return {
-			text: cleanedResponse,
-			identityRevealed: identityRevealed,
-		};
-	} catch (error) {
-		console.error('Fehler beim Aufrufen der Azure OpenAI API:', error);
-		return {
-			text: 'Entschuldigung, ich kann gerade nicht antworten. Versuche es später noch einmal.',
-			identityRevealed: false,
-		};
+		console.error('Fehler beim Aufrufen der Azure OpenAI API:', error.message);
+		return { text: 'Entschuldigung, ich kann gerade nicht antworten.', identityRevealed: false };
 	}
 }
 
-const server = http.createServer((req, res) => {
-	console.log(`${req.method} ${req.url}`);
+// === HTTP Server ===
+const server = http.createServer(async (req, res) => {
+	const clientIP = req.socket.remoteAddress;
 
-	// CORS-Header hinzufügen für Cross-Origin-Anfragen
-	res.setHeader('Access-Control-Allow-Origin', '*');
+	// CORS-Header
+	const origin = req.headers.origin;
+	if (origin && ALLOWED_ORIGINS.includes(origin)) {
+		res.setHeader('Access-Control-Allow-Origin', origin);
+	} else if (!origin) {
+		// Same-origin Requests haben keinen Origin-Header
+		res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGINS[0]);
+	}
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-	// OPTIONS-Anfragen für CORS-Preflight behandeln
 	if (req.method === 'OPTIONS') {
 		res.writeHead(204);
 		res.end();
 		return;
 	}
 
-	// API-Endpunkt für OpenAI-Anfragen
+	// API-Endpunkt
 	if (req.method === 'POST' && req.url === '/api/chat') {
-		collectRequestData(req, async (data) => {
-			try {
-				if (!data.message) {
-					res.writeHead(400, { 'Content-Type': 'application/json' });
-					res.end(JSON.stringify({ error: 'Nachricht fehlt' }));
-					return;
-				}
+		// Rate Limiting
+		if (isRateLimited(clientIP)) {
+			res.writeHead(429, { 'Content-Type': 'application/json' });
+			res.end(JSON.stringify({ error: 'Zu viele Anfragen. Bitte warte einen Moment.' }));
+			return;
+		}
 
-				// Verwende die Konversationshistorie, wenn vorhanden
-				const conversationHistory = data.conversationHistory || [];
-				console.log(
-					'Erhaltene Konversationshistorie:',
-					JSON.stringify(conversationHistory, null, 2)
-				);
+		try {
+			const data = await collectRequestData(req);
 
-				// Extrahiere Charakterinformationen, wenn vorhanden
-				const characterName = data.characterName;
-				const characterPersonality = data.characterPersonality;
-
-				if (characterName) {
-					console.log(`NPC-Charakter in der Anfrage: ${characterName}`);
-				}
-
-				const response = await callOpenAI(
-					data.message,
-					conversationHistory,
-					characterName,
-					characterPersonality
-				);
-
-				res.writeHead(200, { 'Content-Type': 'application/json' });
-				res.end(
-					JSON.stringify({
-						response: response.text,
-						identityRevealed: response.identityRevealed,
-					})
-				);
-			} catch (error) {
-				console.error('Fehler bei der Verarbeitung der Chat-Anfrage:', error);
-				res.writeHead(500, { 'Content-Type': 'application/json' });
-				res.end(JSON.stringify({ error: 'Interner Serverfehler' }));
+			if (!data.message || typeof data.message !== 'string') {
+				res.writeHead(400, { 'Content-Type': 'application/json' });
+				res.end(JSON.stringify({ error: 'Nachricht fehlt oder ungültig' }));
+				return;
 			}
-		});
+
+			const conversationHistory = Array.isArray(data.conversationHistory)
+				? data.conversationHistory
+				: [];
+
+			const response = await callOpenAI(
+				data.message,
+				conversationHistory,
+				typeof data.characterName === 'string' ? data.characterName : null,
+				typeof data.characterPersonality === 'string' ? data.characterPersonality : null
+			);
+
+			res.writeHead(200, { 'Content-Type': 'application/json' });
+			res.end(
+				JSON.stringify({ response: response.text, identityRevealed: response.identityRevealed })
+			);
+		} catch (error) {
+			console.error('Fehler bei der Verarbeitung:', error.message);
+			const statusCode = error.message === 'Request body too large' ? 413 : 400;
+			res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+			res.end(JSON.stringify({ error: error.message }));
+		}
 		return;
 	}
 
-	// Statische Dateien behandeln
+	// Statische Dateien
 	let filePath = '.' + req.url;
-	if (filePath === './') {
-		filePath = './index.html';
+	if (filePath === './') filePath = './index.html';
+
+	// Path Traversal verhindern
+	const resolvedPath = path.resolve(filePath);
+	if (!resolvedPath.startsWith(path.resolve('.'))) {
+		res.writeHead(403);
+		res.end('Forbidden');
+		return;
 	}
 
-	// Get the file extension
 	const extname = path.extname(filePath);
 	const contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
-	// Read the file
 	fs.readFile(filePath, (error, content) => {
 		if (error) {
 			if (error.code === 'ENOENT') {
-				// Page not found
-				fs.readFile('./index.html', (err, content) => {
+				fs.readFile('./index.html', (err, fallback) => {
 					if (err) {
 						res.writeHead(500);
 						res.end('Error loading index.html');
 					} else {
 						res.writeHead(200, { 'Content-Type': 'text/html' });
-						res.end(content, 'utf-8');
+						res.end(fallback, 'utf-8');
 					}
 				});
 			} else {
-				// Server error
 				res.writeHead(500);
 				res.end(`Server Error: ${error.code}`);
 			}
 		} else {
-			// Success
 			res.writeHead(200, { 'Content-Type': contentType });
 			res.end(content, 'utf-8');
 		}
@@ -277,6 +298,8 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
 	console.log(`Server running at http://localhost:${PORT}/`);
-	console.log('Press Ctrl+C to stop the server');
-	console.log('Azure OpenAI API ist konfiguriert und bereit!');
+	console.log(
+		`Rate Limit: ${RATE_LIMIT_MAX_REQUESTS} requests per ${RATE_LIMIT_WINDOW_MS / 1000}s`
+	);
+	console.log(`CORS: ${ALLOWED_ORIGINS.join(', ')}`);
 });

@@ -13,6 +13,8 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { presiOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
 	// App switcher items
 	const appItems = getPillAppItems('presi');
@@ -173,6 +175,11 @@
 				{@render children()}
 			</div>
 		</main>
+
+		<!-- Onboarding Modal -->
+		{#if presiOnboarding.shouldShow}
+			<MiniOnboardingModal store={presiOnboarding} appName="Presi" appEmoji="📊" />
+		{/if}
 	</div>
 {/if}
 

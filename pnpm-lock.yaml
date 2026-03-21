@@ -719,6 +719,9 @@ importers:
       '@manacore/shared-api-client':
         specifier: workspace:*
         version: link:../../../../packages/shared-api-client
+      '@manacore/shared-app-onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-app-onboarding
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -988,6 +991,9 @@ importers:
       '@manacore/shared-api-client':
         specifier: workspace:*
         version: link:../../../../packages/shared-api-client
+      '@manacore/shared-app-onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-app-onboarding
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -1652,6 +1658,9 @@ importers:
       '@manacore/shared-api-client':
         specifier: workspace:*
         version: link:../../../../packages/shared-api-client
+      '@manacore/shared-app-onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-app-onboarding
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -2398,6 +2407,9 @@ importers:
 
   apps/manadeck/apps/web:
     dependencies:
+      '@manacore/shared-app-onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-app-onboarding
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -3895,6 +3907,9 @@ importers:
       '@manacore/shared-api-client':
         specifier: workspace:*
         version: link:../../../../packages/shared-api-client
+      '@manacore/shared-app-onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-app-onboarding
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -4530,6 +4545,9 @@ importers:
 
   apps/presi/apps/web:
     dependencies:
+      '@manacore/shared-app-onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-app-onboarding
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
@@ -5128,6 +5146,9 @@ importers:
       '@manacore/shared-api-client':
         specifier: workspace:*
         version: link:../../../../packages/shared-api-client
+      '@manacore/shared-app-onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-app-onboarding
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth

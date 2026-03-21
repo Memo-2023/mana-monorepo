@@ -30,6 +30,7 @@
 		"vite": "^7.1.10"
 	},
 	"dependencies": {
+		"@manacore/shared-app-onboarding": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",

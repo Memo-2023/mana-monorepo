@@ -22,6 +22,8 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import type { LayoutData } from './$types';
+	import { chatOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
 	// App switcher items
 	const appItems = getPillAppItems('chat');
@@ -235,6 +237,11 @@
 				</div>
 			{/if}
 		</main>
+
+		<!-- Onboarding Modal -->
+		{#if chatOnboarding.shouldShow}
+			<MiniOnboardingModal store={chatOnboarding} appName="Chat" appEmoji="💬" />
+		{/if}
 	</div>
 {/if}
 

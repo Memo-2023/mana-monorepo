@@ -19,6 +19,8 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { manadeckOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
 	// App switcher items
 	const appItems = getPillAppItems('manadeck');
@@ -213,5 +215,10 @@
 				{@render children()}
 			</div>
 		</main>
+
+		<!-- Onboarding Modal -->
+		{#if manadeckOnboarding.shouldShow}
+			<MiniOnboardingModal store={manadeckOnboarding} appName="ManaDeck" appEmoji="🃏" />
+		{/if}
 	</div>
 {/if}

@@ -19,6 +19,8 @@
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
+	import { pictureOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { viewMode, setViewMode } from '$lib/stores/view';
 	import type { ViewMode } from '$lib/stores/view';
 	import { browser } from '$app/environment';
@@ -287,6 +289,11 @@
 
 		<!-- Keyboard Shortcuts Modal -->
 		<KeyboardShortcutsModal />
+
+		<!-- Onboarding Modal -->
+		{#if pictureOnboarding.shouldShow}
+			<MiniOnboardingModal store={pictureOnboarding} appName="Picture" appEmoji="🎨" />
+		{/if}
 	</div>
 {/if}
 

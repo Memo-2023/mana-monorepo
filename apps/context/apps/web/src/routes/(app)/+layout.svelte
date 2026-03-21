@@ -26,6 +26,8 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { contextOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
 	const appItems = getPillAppItems('context');
 
@@ -266,6 +268,11 @@
 		emptyText="Keine Ergebnisse"
 		searchingText="Suche..."
 	/>
+
+	<!-- Onboarding Modal -->
+	{#if contextOnboarding.shouldShow}
+		<MiniOnboardingModal store={contextOnboarding} appName="Context" appEmoji="📄" />
+	{/if}
 </div>
 
 <style>
