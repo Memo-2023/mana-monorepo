@@ -120,6 +120,28 @@ pnpm --filter @mukke/landing dev      # Landing page
 { id, lyricsId, lineNumber, text, startTime, endTime }
 ```
 
+## Supported Audio Formats
+
+Playback uses HTML5 Audio (browser-native codec support). Upload accepts any `audio/*` MIME type.
+
+| Format | Extensions | Browser Playback | Notes |
+|--------|-----------|-----------------|-------|
+| MP3 | `.mp3` | All browsers | ID3 tag read/write supported |
+| WAV | `.wav` | All browsers | Uncompressed PCM |
+| OGG Vorbis | `.ogg` | Chrome, Firefox, Edge | No Safari support |
+| FLAC | `.flac` | All modern browsers | Lossless |
+| AAC/M4A | `.aac`, `.m4a` | All browsers | Common iOS format |
+| OPUS | `.opus` | Chrome, Firefox, Edge | Best quality/size ratio |
+| WebM | `.webm` | Chrome, Firefox, Edge | Container format |
+| AIFF | `.aiff`, `.aif` | Safari, Chrome | Common macOS format |
+| WMA | `.wma` | Edge only | Legacy Windows format |
+| ALAC | `.alac` | Safari | Apple Lossless |
+| APE | `.ape` | None natively | Monkey's Audio (upload/metadata only) |
+| WavPack | `.wv` | None natively | Hybrid lossless (upload/metadata only) |
+| DSF/DFF | `.dsf`, `.dff` | None natively | DSD audio (upload/metadata only) |
+
+**Note:** Formats without native browser playback can be uploaded and have metadata extracted (via `music-metadata`), but require server-side transcoding for playback (not yet implemented).
+
 ## Key Technologies
 
 | Component | Technology |
