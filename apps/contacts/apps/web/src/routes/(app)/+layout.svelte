@@ -42,6 +42,8 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
+	import { contactsOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -243,6 +245,22 @@
 		});
 	}
 
+	// Navigate to import page after onboarding if user chose to import
+	let previousOnboardingShow = true;
+	$effect(() => {
+		const showing = contactsOnboarding.shouldShow;
+		if (previousOnboardingShow && !showing) {
+			// Onboarding just closed
+			const importSource = contactsOnboarding.preferences.importSource as string;
+			if (importSource === 'google') {
+				goto('/data?tab=import&source=google');
+			} else if (importSource === 'file') {
+				goto('/data?tab=import&source=file');
+			}
+		}
+		previousOnboardingShow = showing;
+	});
+
 	onMount(async () => {
 		// Initialize auth and redirect if not authenticated
 		await authStore.initialize();
@@ -366,6 +384,11 @@
 		<!-- New Contact Modal -->
 		{#if newContactModalStore.isOpen}
 			<NewContactModal onClose={() => newContactModalStore.close()} />
+		{/if}
+
+		<!-- Onboarding Modal -->
+		{#if contactsOnboarding.shouldShow}
+			<MiniOnboardingModal store={contactsOnboarding} appName="Kontakte" appEmoji="👥" />
 		{/if}
 	</div>
 </SplitPaneContainer>
