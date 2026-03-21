@@ -3,7 +3,7 @@ import { eq, and, isNull } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { files, fileVersions } from '../db/schema';
-import type { File, NewFile, NewFileVersion } from '../db/schema';
+import type { File, FileVersion, NewFile, NewFileVersion } from '../db/schema';
 import { StorageService } from '../storage/storage.service';
 import { CreateFileDto, UpdateFileDto, MoveFileDto } from './dto/create-file.dto';
 
@@ -164,6 +164,67 @@ export class FileService {
 		return this.storageService.getDownloadUrl(file.storageKey);
 	}
 
+	async getVersions(userId: string, fileId: string): Promise<FileVersion[]> {
+		// Verify file belongs to user
+		await this.findOne(userId, fileId);
+
+		const { desc } = await import('drizzle-orm');
+		return this.db
+			.select()
+			.from(fileVersions)
+			.where(eq(fileVersions.fileId, fileId))
+			.orderBy(desc(fileVersions.versionNumber));
+	}
+
+	async uploadVersion(
+		userId: string,
+		fileId: string,
+		file: Express.Multer.File,
+		comment?: string
+	): Promise<FileVersion> {
+		const existingFile = await this.findOne(userId, fileId);
+
+		// Upload new version to S3
+		const uploadResult = await this.storageService.uploadFile(
+			userId,
+			file.buffer,
+			file.originalname,
+			file.mimetype,
+			'versions'
+		);
+
+		const newVersionNumber = existingFile.currentVersion + 1;
+
+		// Create version record
+		const version: NewFileVersion = {
+			fileId,
+			versionNumber: newVersionNumber,
+			storagePath: uploadResult.storagePath,
+			storageKey: uploadResult.storageKey,
+			size: file.size,
+			comment,
+			createdBy: userId,
+		};
+
+		const [createdVersion] = await this.db.insert(fileVersions).values(version).returning();
+
+		// Update file's current version and size
+		await this.db
+			.update(files)
+			.set({
+				currentVersion: newVersionNumber,
+				size: file.size,
+				name: file.originalname,
+				mimeType: file.mimetype,
+				storagePath: uploadResult.storagePath,
+				storageKey: uploadResult.storageKey,
+				updatedAt: new Date(),
+			})
+			.where(eq(files.id, fileId));
+
+		return createdVersion;
+	}
+
 	async getStats(userId: string): Promise<{
 		totalFiles: number;
 		totalSize: number;
@@ -187,9 +248,7 @@ export class FileService {
 				count: count(files.id),
 			})
 			.from(files)
-			.where(
-				and(eq(files.userId, userId), eq(files.isDeleted, false), eq(files.isFavorite, true))
-			);
+			.where(and(eq(files.userId, userId), eq(files.isDeleted, false), eq(files.isFavorite, true)));
 
 		// Get recent files (last 5)
 		const { desc } = await import('drizzle-orm');

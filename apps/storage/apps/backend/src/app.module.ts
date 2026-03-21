@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
 import { FileModule } from './file/file.module';
@@ -16,6 +17,12 @@ import { AdminModule } from './admin/admin.module';
 		ConfigModule.forRoot({
 			isGlobal: true,
 		}),
+		ThrottlerModule.forRoot([
+			{
+				ttl: 60000, // 60 seconds
+				limit: 100, // 100 requests per minute
+			},
+		]),
 		DatabaseModule,
 		HealthModule.forRoot({ serviceName: 'storage-backend', route: 'api/v1/health' }),
 		StorageModule,

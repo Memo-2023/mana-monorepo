@@ -116,6 +116,19 @@ export interface Share {
 	createdAt: string;
 }
 
+export interface FileVersion {
+	id: string;
+	fileId: string;
+	versionNumber: number;
+	storagePath: string;
+	storageKey: string;
+	size: number;
+	checksum: string | null;
+	comment: string | null;
+	createdBy: string;
+	createdAt: string;
+}
+
 export interface Tag {
 	id: string;
 	userId: string;
@@ -172,6 +185,20 @@ export const filesApi = {
 	delete: (id: string) => request<{ success: boolean }>(`/files/${id}`, { method: 'DELETE' }),
 
 	toggleFavorite: (id: string) => request<StorageFile>(`/files/${id}/favorite`, { method: 'POST' }),
+
+	getVersions: (fileId: string) => request<FileVersion[]>(`/files/${fileId}/versions`),
+
+	uploadVersion: async (
+		fileId: string,
+		file: File,
+		comment?: string
+	): Promise<ApiResponse<FileVersion>> => {
+		const formData = new FormData();
+		formData.append('file', file);
+		if (comment) formData.append('comment', comment);
+		const result = await api.upload<FileVersion>(`/files/${fileId}/versions`, formData);
+		return toLegacyResponse(result);
+	},
 };
 
 // Folders API

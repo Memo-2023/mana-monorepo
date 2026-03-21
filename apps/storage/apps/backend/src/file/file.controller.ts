@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard, CurrentUser } from '@manacore/shared-nestjs-auth';
 import type { CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { FileService } from './file.service';
@@ -42,12 +43,32 @@ export class FileController {
 		return this.fileService.getStats(user.userId);
 	}
 
+	@Get(':id/versions')
+	async getVersions(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
+		return this.fileService.getVersions(user.userId, id);
+	}
+
+	@Post(':id/versions')
+	@UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE } }))
+	async uploadVersion(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') id: string,
+		@UploadedFile() file: Express.Multer.File,
+		@Body('comment') comment?: string
+	) {
+		if (!file) {
+			throw new BadRequestException('No file provided');
+		}
+		return this.fileService.uploadVersion(user.userId, id, file, comment);
+	}
+
 	@Get(':id')
 	async findOne(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
 		return this.fileService.findOne(user.userId, id);
 	}
 
 	@Post('upload')
+	@Throttle({ default: { ttl: 60000, limit: 20 } })
 	@UseInterceptors(
 		FileInterceptor('file', {
 			limits: { fileSize: MAX_FILE_SIZE },
@@ -65,6 +86,7 @@ export class FileController {
 	}
 
 	@Post('upload-multiple')
+	@Throttle({ default: { ttl: 60000, limit: 10 } })
 	@UseInterceptors(
 		FilesInterceptor('files', MAX_FILES, {
 			limits: { fileSize: MAX_FILE_SIZE },
