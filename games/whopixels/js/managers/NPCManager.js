@@ -21,9 +21,7 @@ class NPCManager {
 		this.npcDialog = null;
 		this.interactionPrompt = null;
 
-		// Partikel-Pool (wiederverwendbar)
-		/** @type {Phaser.GameObjects.Particles.ParticleEmitterManager|null} */
-		this._particlePool = null;
+		// Partikel-Emitter (wiederverwendbar)
 		/** @type {Phaser.GameObjects.Particles.ParticleEmitter|null} */
 		this._emitter = null;
 	}
@@ -84,18 +82,16 @@ class NPCManager {
 	}
 
 	_initParticlePool() {
-		this._particlePool = this.scene.add.particles('particle');
-		if (this._particlePool.createEmitter) {
-			this._emitter = this._particlePool.createEmitter({
-				speed: { min: 50, max: 100 },
-				angle: { min: 0, max: 360 },
-				scale: { start: 0.5, end: 0 },
-				blendMode: 'ADD',
-				lifespan: GAME_CONFIG.ANIMATIONS.PARTICLE_LIFETIME,
-				gravityY: 0,
-				on: false, // Startet deaktiviert
-			});
-		}
+		// Phaser 3.60+ API: add.particles() gibt direkt einen ParticleEmitter zurück
+		this._emitter = this.scene.add.particles(0, 0, 'particle', {
+			speed: { min: 50, max: 100 },
+			angle: { min: 0, max: 360 },
+			scale: { start: 0.5, end: 0 },
+			blendMode: 'ADD',
+			lifespan: GAME_CONFIG.ANIMATIONS.PARTICLE_LIFETIME,
+			gravityY: 0,
+			emitting: false,
+		});
 	}
 
 	spawnNewNPC() {

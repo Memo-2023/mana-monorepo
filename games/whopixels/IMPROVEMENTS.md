@@ -35,7 +35,7 @@
 ## Performance
 
 - [x] **19. Object Pooling** — Partikel-Pool einmalig erstellt, Emitter wird wiederverwendet statt neu erstellt
-- [ ] **20. Phaser-Version updaten** — Von 3.55.2 auf 3.80+ (Breaking Changes bei Particle-API, benötigt umfassende Tests)
+- [x] **20. Phaser-Version updaten** — Von 3.55.2 auf 3.80.1, Particle-API auf neue `add.particles(x, y, key, config)` Syntax migriert
 
 ## Lokalisierung
 
