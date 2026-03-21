@@ -3,7 +3,10 @@
  * Handles click-and-drag on the calendar grid to create new events
  */
 
-import { SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
+import {
+	SNAP_INTERVAL_MINUTES,
+	DEFAULT_EVENT_DURATION_MINUTES,
+} from '$lib/utils/calendarConstants';
 
 export interface DragToCreateConfig {
 	containerEl: HTMLElement | null;
@@ -95,7 +98,7 @@ export function useDragToCreate(getConfig: () => DragToCreateConfig) {
 		hasMoved = false;
 		createTargetDay = day;
 		createStartMinutes = snappedMinutes;
-		createEndMinutes = snappedMinutes + snap;
+		createEndMinutes = snappedMinutes + DEFAULT_EVENT_DURATION_MINUTES;
 
 		updatePreview();
 
