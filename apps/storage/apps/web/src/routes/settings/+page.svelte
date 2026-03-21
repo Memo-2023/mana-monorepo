@@ -19,13 +19,14 @@
 
 <svelte:head>
 	<title>Einstellungen - Storage</title>
+	<meta name="description" content="Passe Darstellung, Speicher und weitere Einstellungen an." />
 </svelte:head>
 
 <SettingsPage title="Einstellungen" subtitle="Passe die App an deine Vorlieben an.">
 	<!-- Appearance Section -->
 	<SettingsSection title="Darstellung">
 		{#snippet icon()}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 				<path
 					stroke-linecap="round"
 					stroke-linejoin="round"
@@ -78,7 +79,7 @@
 	<!-- Storage Section -->
 	<SettingsSection title="Speicher">
 		{#snippet icon()}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 				<path
 					stroke-linecap="round"
 					stroke-linejoin="round"
@@ -106,7 +107,7 @@
 	<!-- About Section -->
 	<SettingsSection title="Über">
 		{#snippet icon()}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 				<path
 					stroke-linecap="round"
 					stroke-linejoin="round"

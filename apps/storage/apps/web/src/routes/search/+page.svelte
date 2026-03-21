@@ -57,12 +57,13 @@
 	}
 
 	function handleFileClick(file: StorageFile) {
-		console.log('File clicked:', file);
+		// TODO: Open file preview
 	}
 </script>
 
 <svelte:head>
 	<title>Suche - Storage</title>
+	<meta name="description" content="Durchsuche deine Dateien und Ordner in der Cloud." />
 </svelte:head>
 
 <div class="search-page">
@@ -95,10 +96,11 @@
 	<div class="search-bar">
 		<MagnifyingGlass size={20} />
 		<input
-			type="text"
+			type="search"
 			bind:value={query}
 			onkeydown={handleKeydown}
 			placeholder="Dateien und Ordner durchsuchen..."
+			aria-label="Dateien und Ordner durchsuchen"
 			autofocus
 		/>
 		<button onclick={handleSearch} disabled={!query.trim() || loading}>
@@ -107,8 +109,8 @@
 	</div>
 
 	{#if loading}
-		<div class="loading-state">
-			<div class="spinner"></div>
+		<div class="loading-state" role="status" aria-live="polite">
+			<div class="spinner" aria-hidden="true"></div>
 			<p>Suche läuft...</p>
 		</div>
 	{:else if searched && files.length === 0 && folders.length === 0}

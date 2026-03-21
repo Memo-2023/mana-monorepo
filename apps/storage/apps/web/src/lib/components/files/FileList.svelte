@@ -32,14 +32,14 @@
 	}
 </script>
 
-<div class="file-list">
-	<div class="list-header">
-		<span class="col-name">Name</span>
-		<span class="col-size">Größe</span>
-		<span class="col-date">Geändert</span>
-		<span class="col-actions"></span>
+<div class="file-list" role="table" aria-label="Dateien und Ordner">
+	<div class="list-header" role="row">
+		<span class="col-name" role="columnheader">Name</span>
+		<span class="col-size" role="columnheader">Größe</span>
+		<span class="col-date" role="columnheader">Geändert</span>
+		<span class="col-actions" role="columnheader"><span class="sr-only">Aktionen</span></span>
 	</div>
-	<div class="list-body">
+	<div class="list-body" role="rowgroup">
 		{#each folders as folder (folder.id)}
 			<FolderRow
 				{folder}
@@ -82,6 +82,18 @@
 
 	.list-body {
 		background: rgb(var(--color-surface-elevated));
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
 	}
 
 	@media (max-width: 640px) {

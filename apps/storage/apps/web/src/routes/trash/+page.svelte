@@ -84,6 +84,10 @@
 
 <svelte:head>
 	<title>Papierkorb - Storage</title>
+	<meta
+		name="description"
+		content="Gelöschte Dateien und Ordner wiederherstellen oder endgültig löschen."
+	/>
 </svelte:head>
 
 <div class="trash-page">
@@ -102,8 +106,8 @@
 	</div>
 
 	{#if loading}
-		<div class="loading-state">
-			<div class="spinner"></div>
+		<div class="loading-state" role="status" aria-live="polite">
+			<div class="spinner" aria-hidden="true"></div>
 			<p>Laden...</p>
 		</div>
 	{:else if error}
@@ -122,7 +126,7 @@
 			{#each folders as folder (folder.id)}
 				<div class="trash-item">
 					<div class="item-info">
-						<span class="item-icon folder">📁</span>
+						<span class="item-icon folder" role="img" aria-label="Ordner">📁</span>
 						<div class="item-details">
 							<span class="item-name">{folder.name}</span>
 							<span class="item-meta">Gelöscht am {formatDate(folder.deletedAt)}</span>
@@ -142,7 +146,7 @@
 			{#each files as file (file.id)}
 				<div class="trash-item">
 					<div class="item-info">
-						<span class="item-icon file">📄</span>
+						<span class="item-icon file" role="img" aria-label="Datei">📄</span>
 						<div class="item-details">
 							<span class="item-name">{file.name}</span>
 							<span class="item-meta">Gelöscht am {formatDate(file.deletedAt)}</span>

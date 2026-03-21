@@ -41,7 +41,7 @@
 	}
 
 	function handleFileClick(file: StorageFile) {
-		console.log('File clicked:', file);
+		// TODO: Open file preview
 	}
 
 	async function handleFileAction(action: string, file: StorageFile) {
@@ -226,8 +226,8 @@
 	{/if}
 
 	{#if filesStore.loading}
-		<div class="loading-state">
-			<div class="spinner"></div>
+		<div class="loading-state" role="status" aria-live="polite">
+			<div class="spinner" aria-hidden="true"></div>
 			<p>Laden...</p>
 		</div>
 	{:else if filesStore.error}

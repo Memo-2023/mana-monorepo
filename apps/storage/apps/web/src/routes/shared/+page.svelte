@@ -70,6 +70,7 @@
 
 <svelte:head>
 	<title>Geteilt - Storage</title>
+	<meta name="description" content="Verwalte deine geteilten Links für Dateien und Ordner." />
 </svelte:head>
 
 <div class="shared-page">
@@ -81,8 +82,8 @@
 	</div>
 
 	{#if loading}
-		<div class="loading-state">
-			<div class="spinner"></div>
+		<div class="loading-state" role="status" aria-live="polite">
+			<div class="spinner" aria-hidden="true"></div>
 			<p>Laden...</p>
 		</div>
 	{:else if error}
@@ -127,7 +128,11 @@
 							<Copy size={16} />
 							Link kopieren
 						</button>
-						<button class="delete-btn" onclick={() => deleteShare(share.id)}>
+						<button
+							class="delete-btn"
+							onclick={() => deleteShare(share.id)}
+							aria-label="Share-Link löschen"
+						>
 							<Trash size={16} />
 						</button>
 					</div>

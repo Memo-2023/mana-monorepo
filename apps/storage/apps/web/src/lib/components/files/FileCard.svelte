@@ -64,21 +64,28 @@
 		<span class="file-name" title={file.name}>{file.name}</span>
 		<span class="file-size">{formatFileSize(file.size)}</span>
 	</div>
-	<button class="menu-button" onclick={handleMenuClick} type="button">
+	<button
+		class="menu-button"
+		onclick={handleMenuClick}
+		type="button"
+		aria-label="Aktionen für {file.name}"
+		aria-expanded={showMenu}
+		aria-haspopup="menu"
+	>
 		<DotsThreeVertical size={16} />
 	</button>
 
 	{#if showMenu}
-		<div class="menu-dropdown">
-			<button onclick={() => handleAction('download')}>Herunterladen</button>
-			<button onclick={() => handleAction('rename')}>Umbenennen</button>
-			<button onclick={() => handleAction('share')}>Teilen</button>
-			<button onclick={() => handleAction('favorite')}>
+		<div class="menu-dropdown" role="menu" aria-label="Dateiaktionen">
+			<button role="menuitem" onclick={() => handleAction('download')}>Herunterladen</button>
+			<button role="menuitem" onclick={() => handleAction('rename')}>Umbenennen</button>
+			<button role="menuitem" onclick={() => handleAction('share')}>Teilen</button>
+			<button role="menuitem" onclick={() => handleAction('favorite')}>
 				{file.isFavorite ? 'Favorit entfernen' : 'Als Favorit'}
 			</button>
-			<button onclick={() => handleAction('move')}>Verschieben</button>
+			<button role="menuitem" onclick={() => handleAction('move')}>Verschieben</button>
 			<hr />
-			<button class="danger" onclick={() => handleAction('delete')}>Löschen</button>
+			<button role="menuitem" class="danger" onclick={() => handleAction('delete')}>Löschen</button>
 		</div>
 	{/if}
 </div>

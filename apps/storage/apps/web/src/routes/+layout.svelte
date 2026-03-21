@@ -163,10 +163,16 @@
 <ToastContainer />
 
 {#if loading}
-	<div class="flex min-h-screen items-center justify-center bg-background">
+	<div
+		class="flex min-h-screen items-center justify-center bg-background"
+		role="status"
+		aria-live="polite"
+		aria-busy="true"
+	>
 		<div class="text-center">
 			<div
 				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
+				aria-hidden="true"
 			></div>
 			<p class="text-muted-foreground">Laden...</p>
 		</div>

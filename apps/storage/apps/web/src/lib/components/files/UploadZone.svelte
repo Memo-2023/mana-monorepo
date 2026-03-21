@@ -53,6 +53,7 @@
 	ondrop={handleDrop}
 	role="button"
 	tabindex="0"
+	aria-label="Dateien zum Hochladen hierher ziehen oder klicken"
 	onclick={openFileDialog}
 	onkeydown={(e) => e.key === 'Enter' && openFileDialog()}
 >
@@ -66,8 +67,15 @@
 	/>
 
 	{#if uploading}
-		<div class="upload-progress">
-			<div class="progress-bar">
+		<div class="upload-progress" role="status" aria-live="polite">
+			<div
+				class="progress-bar"
+				role="progressbar"
+				aria-valuenow={progress}
+				aria-valuemin={0}
+				aria-valuemax={100}
+				aria-label="Upload-Fortschritt"
+			>
 				<div class="progress-fill" style="width: {progress}%"></div>
 			</div>
 			<span class="progress-text">Hochladen... {progress}%</span>

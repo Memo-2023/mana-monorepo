@@ -51,19 +51,28 @@
 	<span class="col-size">—</span>
 	<span class="col-date">{formatDate(folder.updatedAt)}</span>
 	<span class="col-actions">
-		<button class="menu-button" onclick={handleMenuClick} type="button">
+		<button
+			class="menu-button"
+			onclick={handleMenuClick}
+			type="button"
+			aria-label="Aktionen für {folder.name}"
+			aria-expanded={showMenu}
+			aria-haspopup="menu"
+		>
 			<DotsThreeVertical size={16} />
 		</button>
 		{#if showMenu}
-			<div class="menu-dropdown">
-				<button onclick={() => handleAction('rename')}>Umbenennen</button>
-				<button onclick={() => handleAction('share')}>Teilen</button>
-				<button onclick={() => handleAction('favorite')}>
+			<div class="menu-dropdown" role="menu" aria-label="Ordneraktionen">
+				<button role="menuitem" onclick={() => handleAction('rename')}>Umbenennen</button>
+				<button role="menuitem" onclick={() => handleAction('share')}>Teilen</button>
+				<button role="menuitem" onclick={() => handleAction('favorite')}>
 					{folder.isFavorite ? 'Favorit entfernen' : 'Als Favorit'}
 				</button>
-				<button onclick={() => handleAction('move')}>Verschieben</button>
+				<button role="menuitem" onclick={() => handleAction('move')}>Verschieben</button>
 				<hr />
-				<button class="danger" onclick={() => handleAction('delete')}>Löschen</button>
+				<button role="menuitem" class="danger" onclick={() => handleAction('delete')}
+					>Löschen</button
+				>
 			</div>
 		{/if}
 	</span>

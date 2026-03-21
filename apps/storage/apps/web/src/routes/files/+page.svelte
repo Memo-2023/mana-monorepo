@@ -34,7 +34,6 @@
 
 	function handleFileClick(file: StorageFile) {
 		// TODO: Open file preview
-		console.log('File clicked:', file);
 	}
 
 	async function handleFileAction(action: string, file: StorageFile) {
@@ -161,6 +160,10 @@
 
 <svelte:head>
 	<title>Meine Dateien - Storage</title>
+	<meta
+		name="description"
+		content="Verwalte deine Dateien und Ordner in der Cloud. Hochladen, organisieren und teilen."
+	/>
 </svelte:head>
 
 <div class="files-page">
@@ -207,8 +210,8 @@
 	{/if}
 
 	{#if filesStore.loading}
-		<div class="loading-state">
-			<div class="spinner"></div>
+		<div class="loading-state" role="status" aria-live="polite">
+			<div class="spinner" aria-hidden="true"></div>
 			<p>Laden...</p>
 		</div>
 	{:else if filesStore.error}

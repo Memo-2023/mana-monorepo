@@ -39,7 +39,7 @@
 	}
 
 	function handleFileClick(file: StorageFile) {
-		console.log('File clicked:', file);
+		// TODO: Open file preview
 	}
 
 	async function handleFileAction(action: string, file: StorageFile) {
@@ -65,6 +65,7 @@
 
 <svelte:head>
 	<title>Favoriten - Storage</title>
+	<meta name="description" content="Deine favorisierten Dateien und Ordner auf einen Blick." />
 </svelte:head>
 
 <div class="favorites-page">
@@ -95,8 +96,8 @@
 	</div>
 
 	{#if loading}
-		<div class="loading-state">
-			<div class="spinner"></div>
+		<div class="loading-state" role="status" aria-live="polite">
+			<div class="spinner" aria-hidden="true"></div>
 			<p>Laden...</p>
 		</div>
 	{:else if error}
