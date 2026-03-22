@@ -45,6 +45,7 @@ COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-vite-config ./packages/shared-vite-config
+COPY packages/shared-pwa ./packages/shared-pwa
 
 # Copy storage web
 COPY apps/storage/apps/web ./apps/storage/apps/web
