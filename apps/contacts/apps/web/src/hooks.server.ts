@@ -6,6 +6,7 @@
 
 import type { Handle } from '@sveltejs/kit';
 import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server';
+import { setSecurityHeaders } from '@manacore/shared-utils/security-headers';
 
 // Get client-side URLs from environment (Docker runtime)
 const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
@@ -15,9 +16,10 @@ const PUBLIC_BACKEND_URL_CLIENT =
 
 // Cross-app integration URLs
 const PUBLIC_TODO_BACKEND_URL = process.env.PUBLIC_TODO_BACKEND_URL || 'http://localhost:3031';
+const PUBLIC_GLITCHTIP_DSN = process.env.PUBLIC_GLITCHTIP_DSN || '';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	return resolve(event, {
+	const response = await resolve(event, {
 		transformPageChunk: ({ html }) => {
 			// Inject runtime environment variables into the HTML
 			// These will be available on window.__PUBLIC_*__ for client-side code
@@ -25,8 +27,19 @@ export const handle: Handle = async ({ event, resolve }) => {
 window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
 window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
 window.__PUBLIC_TODO_BACKEND_URL__ = "${PUBLIC_TODO_BACKEND_URL}";
+window.__PUBLIC_GLITCHTIP_DSN__ = "${PUBLIC_GLITCHTIP_DSN}";
 </script>`;
 			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
 		},
 	});
+
+	setSecurityHeaders(response, {
+		connectSrc: [
+			PUBLIC_MANA_CORE_AUTH_URL_CLIENT,
+			PUBLIC_BACKEND_URL_CLIENT,
+			PUBLIC_TODO_BACKEND_URL,
+		],
+	});
+
+	return response;
 };
