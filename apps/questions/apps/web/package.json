@@ -38,6 +38,7 @@
 		"@manacore/shared-utils": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",

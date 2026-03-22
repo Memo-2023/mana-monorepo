@@ -12,6 +12,10 @@
 		"./nestjs": {
 			"types": "./dist/nestjs.d.ts",
 			"default": "./dist/nestjs.js"
+		},
+		"./browser": {
+			"types": "./dist/browser.d.ts",
+			"default": "./dist/browser.js"
 		}
 	},
 	"files": [
@@ -22,6 +26,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@sentry/browser": "^9.0.0",
 		"@sentry/node": "^9.0.0"
 	},
 	"peerDependencies": {

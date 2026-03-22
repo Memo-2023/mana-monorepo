@@ -38,6 +38,7 @@
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
+		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-feedback-service": "workspace:*",
 		"@manacore/shared-feedback-ui": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
