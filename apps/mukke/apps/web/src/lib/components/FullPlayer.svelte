@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { playerStore } from '$lib/stores/player.svelte';
-	import FrequencyBars from '$lib/visualizer/FrequencyBars.svelte';
+	import VisualizerRenderer from '$lib/visualizer/VisualizerRenderer.svelte';
 
 	let progress = $derived(
 		playerStore.duration > 0 ? (playerStore.currentTime / playerStore.duration) * 100 : 0
@@ -63,9 +63,9 @@
 				</svg>
 			</div>
 
-			<!-- Frequency visualizer -->
+			<!-- Visualizer -->
 			<div class="w-full max-w-md">
-				<FrequencyBars barCount={48} height={80} mirror={true} barGap={2} barRadius={2} />
+				<VisualizerRenderer height={200} showSwitcher={true} />
 			</div>
 
 			<!-- Song info -->

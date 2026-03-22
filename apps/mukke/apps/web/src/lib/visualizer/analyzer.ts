@@ -69,6 +69,22 @@ export function getAnalyzer(): AnalyserNode | null {
 }
 
 /**
+ * Get the AudioContext (null if not yet created).
+ * Needed by Butterchurn for its own audio processing.
+ */
+export function getAudioContext(): AudioContext | null {
+	return audioContext;
+}
+
+/**
+ * Get the MediaElementAudioSourceNode (null if not yet connected).
+ * Needed by Butterchurn to connect its own audio analysis.
+ */
+export function getSourceNode(): MediaElementAudioSourceNode | null {
+	return sourceNode;
+}
+
+/**
  * Resume the AudioContext (required after user gesture on some browsers).
  */
 export async function resumeAudioContext(): Promise<void> {
