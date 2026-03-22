@@ -20,6 +20,9 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
+# Copy patches (referenced by pnpm-lock.yaml)
+COPY patches ./patches
+
 # Copy shared packages needed by todo web
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-splitscreen ./packages/shared-splitscreen
