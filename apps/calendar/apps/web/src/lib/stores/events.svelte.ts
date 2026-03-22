@@ -8,6 +8,7 @@ import * as api from '$lib/api/events';
 import { format, isWithinInterval, isSameDay, differenceInMilliseconds } from 'date-fns';
 import { toDate } from '$lib/utils/eventDateHelpers';
 import { toastStore } from '@manacore/shared-ui';
+import { CalendarEvents } from '@manacore/shared-utils/analytics';
 
 // State
 let events = $state<CalendarEvent[]>([]);
@@ -168,6 +169,7 @@ export const eventsStore = {
 
 		if (result.data) {
 			events = [...events, result.data];
+			CalendarEvents.eventCreated(!!data.recurrenceRule);
 		}
 
 		return result;

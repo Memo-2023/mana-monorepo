@@ -4,6 +4,7 @@
 
 import { browser } from '$app/environment';
 import type { CalendarViewType } from '@calendar/shared';
+import { CalendarEvents } from '@manacore/shared-utils/analytics';
 import {
 	startOfDay,
 	startOfWeek,
@@ -109,6 +110,7 @@ export const viewStore = {
 		if (browser) {
 			localStorage.setItem('calendar-view-type', type);
 		}
+		CalendarEvents.viewChanged(type as 'day' | 'week' | 'month' | 'agenda');
 	},
 
 	/**

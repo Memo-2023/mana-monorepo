@@ -9,6 +9,7 @@ import * as tasksApi from '$lib/api/tasks';
 import { isToday, isPast, isFuture, startOfDay, addDays } from 'date-fns';
 import { authStore } from './auth.svelte';
 import { generateDemoTasks, isDemoTask } from '$lib/data/demo-tasks';
+import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 // State
 let tasks = $state<Task[]>([]);
@@ -224,6 +225,7 @@ export const tasksStore = {
 		try {
 			const newTask = await tasksApi.createTask(data);
 			tasks = [...tasks, newTask];
+			TodoEvents.taskCreated(!!data.dueDate);
 			return newTask;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create task';
@@ -339,6 +341,7 @@ export const tasksStore = {
 		try {
 			await tasksApi.deleteTask(id);
 			tasks = tasks.filter((t) => t.id !== id);
+			TodoEvents.taskDeleted();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete task';
 			console.error('Failed to delete task:', e);
@@ -362,6 +365,7 @@ export const tasksStore = {
 		try {
 			const completedTask = await tasksApi.completeTask(id);
 			tasks = tasks.map((t) => (t.id === id ? completedTask : t));
+			TodoEvents.taskCompleted();
 			return completedTask;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to complete task';

@@ -8,6 +8,7 @@ import { contactsApi } from '$lib/api/contacts';
 import type { Contact, ContactFilters } from '$lib/api/contacts';
 import { authStore } from './auth.svelte';
 import { generateDemoContacts, isDemoContact } from '$lib/data/demo-contacts';
+import { ContactsEvents } from '@manacore/shared-utils/analytics';
 
 // Default page size for pagination
 const DEFAULT_PAGE_SIZE = 50;
@@ -186,6 +187,7 @@ export const contactsStore = {
 			// Add to local state
 			contacts = [contact, ...contacts];
 			total += 1;
+			ContactsEvents.contactCreated();
 			return contact;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create contact';

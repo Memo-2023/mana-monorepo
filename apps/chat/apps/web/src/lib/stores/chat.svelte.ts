@@ -5,6 +5,7 @@
 import { chatService } from '$lib/services/chat';
 import type { ChatCompletionRequest } from '$lib/services/chat';
 import type { Message, AIModel, ChatMessage } from '@chat/types';
+import { ChatEvents } from '@manacore/shared-utils/analytics';
 
 // State
 let messages = $state<Message[]>([]);
@@ -103,6 +104,7 @@ export const chatStore = {
 					createdAt: new Date().toISOString(),
 				};
 				messages = [...messages, assistantMessage];
+				ChatEvents.messageSent(selectedModelId);
 			} else {
 				error = 'Failed to get response';
 			}
