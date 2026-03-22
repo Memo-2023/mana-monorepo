@@ -7,6 +7,7 @@ import { api } from '$lib/api/client';
 import { sessionTimersStore } from './session-timers.svelte';
 import { authStore } from './auth.svelte';
 import type { Timer, CreateTimerInput, UpdateTimerInput } from '@clock/shared';
+import { ClockEvents } from '@manacore/shared-utils/analytics';
 
 // State
 let timers = $state<Timer[]>([]);
@@ -134,6 +135,7 @@ export const timersStore = {
 
 		if (response.data) {
 			timers = timers.map((t) => (t.id === id ? response.data! : t));
+			ClockEvents.timerStarted(response.data.type as 'pomodoro' | 'stopwatch' | 'countdown');
 		}
 		return { success: true, data: response.data };
 	},

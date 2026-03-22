@@ -8,6 +8,7 @@ import type {
 	SortDirection,
 } from '@mukke/shared';
 import { authStore } from './auth.svelte';
+import { trackEvent } from '@manacore/shared-utils/analytics';
 
 interface LibraryState {
 	songs: Song[];
@@ -267,6 +268,7 @@ function createLibraryStore() {
 			});
 
 			state.songs = [uploadData.song, ...state.songs];
+			trackEvent('song_uploaded');
 			return uploadData.song;
 		},
 

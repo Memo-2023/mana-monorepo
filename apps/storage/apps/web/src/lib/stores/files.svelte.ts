@@ -4,6 +4,7 @@
 
 import { filesApi, foldersApi } from '$lib/api/client';
 import type { StorageFile, StorageFolder } from '$lib/api/client';
+import { trackEvent } from '@manacore/shared-utils/analytics';
 
 let files = $state<StorageFile[]>([]);
 let folders = $state<StorageFolder[]>([]);
@@ -95,6 +96,7 @@ export const filesStore = {
 		const result = await filesApi.upload(file, currentFolder?.id);
 		if (result.data) {
 			files = [...files, result.data];
+			trackEvent('file_uploaded', { size: Math.round(file.size / 1024) });
 		}
 		return result;
 	},
@@ -103,6 +105,7 @@ export const filesStore = {
 		const result = await foldersApi.create(name, currentFolder?.id, color);
 		if (result.data) {
 			folders = [...folders, result.data];
+			trackEvent('folder_created');
 		}
 		return result;
 	},

@@ -4,6 +4,7 @@
 
 import { fetchApi } from './client';
 import type { Plant, PlantWithDetails, CreatePlantDto, UpdatePlantDto } from '@planta/shared';
+import { trackEvent } from '@manacore/shared-utils/analytics';
 
 export const plantsApi = {
 	async getAll(): Promise<Plant[]> {
@@ -33,6 +34,7 @@ export const plantsApi = {
 			console.error('Failed to create plant:', error);
 			return null;
 		}
+		trackEvent('plant_created');
 		return data;
 	},
 

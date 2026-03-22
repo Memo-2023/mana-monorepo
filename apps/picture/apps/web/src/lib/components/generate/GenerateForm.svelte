@@ -9,6 +9,7 @@
 	import Button from '../ui/Button.svelte';
 	import Card from '../ui/Card.svelte';
 	import { XCircle, Lightning } from '@manacore/shared-icons';
+	import { PictureEvents } from '@manacore/shared-utils/analytics';
 
 	let prompt = $state('');
 	let negativePrompt = $state('');
@@ -86,12 +87,14 @@
 
 			// Success - redirect to gallery
 			generationProgress.set('Complete!');
+			PictureEvents.imageGenerated(selectedModelId);
 			setTimeout(() => {
 				goto('/app/gallery');
 			}, 1000);
 		} catch (error) {
 			console.error('Generation error:', error);
 			generationError.set(error instanceof Error ? error.message : 'Failed to generate image');
+			PictureEvents.generationFailed(error instanceof Error ? error.message : 'unknown');
 		} finally {
 			isGenerating.set(false);
 		}
