@@ -69,10 +69,15 @@ const lang = getLangFromUrl(Astro.url);
 		/>
 
 		<!-- Umami Analytics -->
-		<script
-			defer
-			src="https://stats.mana.how/script.js"
-			data-website-id="cef3798d-85ae-47df-a44a-e9bee09dbcf9"></script>
+		{
+			import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && (
+				<script
+					defer
+					src="https://stats.mana.how/script.js"
+					data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
+				/>
+			)
+		}
 
 		<!-- Alternate language links for SEO -->
 		<AlternateLinks />

@@ -24,6 +24,17 @@ const { title, description = 'NutriPhi - KI-gestützte Ernährungsanalyse per Fo
 
 		<!-- Theme Color -->
 		<meta name="theme-color" content="#22C55E" />
+
+		<!-- Umami Analytics -->
+		{
+			import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && (
+				<script
+					defer
+					src="https://stats.mana.how/script.js"
+					data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
+				/>
+			)
+		}
 	</head>
 	<body class="bg-[#0F1F0F] text-gray-100 antialiased">
 		<slot />

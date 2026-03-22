@@ -17,6 +17,16 @@ const { title } = Astro.props;
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
+		<!-- Umami Analytics -->
+		{
+			import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && (
+				<script
+					defer
+					src="https://stats.mana.how/script.js"
+					data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
+				/>
+			)
+		}
 		<title>{title}</title>
 		<style is:global>
 			* {

@@ -48,6 +48,10 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | Calendar | `84862d98-727e-4e25-8645-639241dd1544` | stats.mana.how/share/calendarlanding |
 | Clock | `0332b471-a022-46af-a726-0f45932bfd58` | stats.mana.how/share/clocklanding |
 | Picture | `d3ac98e6-0d1a-47a3-a218-2a81fff596bd` | stats.mana.how/share/picturelanding |
+| Todo | `538eb4b6-2241-45a3-994d-cdb9bdb0c250` | stats.mana.how/share/todolanding |
+| NutriPhi | `15610d03-b280-4b92-9c71-0ef89c23202b` | stats.mana.how/share/nutriphilanding |
+| Presi | `dd485016-0077-47b9-9f59-ab2c6c1730ee` | stats.mana.how/share/presilanding |
+| Mukke | `b2c9ab34-3c53-4463-9dde-1ecf098886a5` | stats.mana.how/share/mukkelanding |
 
 ### Web Apps
 

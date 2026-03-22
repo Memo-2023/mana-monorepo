@@ -119,6 +119,7 @@ const APP_CONFIGS = [
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.CHAT_SUPABASE_ANON_KEY,
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CHAT_BACKEND_PORT || '3002'}`,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CHAT || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -139,6 +140,7 @@ const APP_CONFIGS = [
 			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANACORE_SUPABASE_ANON_KEY,
 			MIDDLEWARE_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANACORE || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -184,6 +186,7 @@ const APP_CONFIGS = [
 			PUBLIC_API_URL: (env) => `http://localhost:${env.MANADECK_BACKEND_PORT || '3004'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANADECK || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -235,6 +238,7 @@ const APP_CONFIGS = [
 			PUBLIC_GOOGLE_CLIENT_ID: (env) => env.PICTURE_GOOGLE_CLIENT_ID || '',
 			PUBLIC_APPLE_CLIENT_ID: (env) => env.PICTURE_APPLE_CLIENT_ID || '',
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PICTURE || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -264,6 +268,7 @@ const APP_CONFIGS = [
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_MIDDLEWARE_APP_ID: (env) => env.NUTRIPHI_APP_ID || 'nutriphi',
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_NUTRIPHI || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -297,6 +302,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.ZITARE_BACKEND_PORT || '3007'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_ZITARE || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -331,6 +337,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PRESI_BACKEND_PORT || '3008'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PRESI || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -356,6 +363,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.SKILLTREE_BACKEND_PORT || '3024'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_SKILLTREE || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -452,6 +460,7 @@ const APP_CONFIGS = [
 			// Speech-to-Text Service
 			PUBLIC_STT_URL: (env) => env.STT_URL || 'http://localhost:3020',
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CALENDAR || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -494,6 +503,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CONTACTS_BACKEND_PORT || '3015'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CONTACTS || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -525,6 +535,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.STORAGE_BACKEND_PORT || '3016'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_STORAGE || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -549,6 +560,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CLOCK_BACKEND_PORT || '3017'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CLOCK || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -573,6 +585,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TODO_BACKEND_PORT || '3018'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_TODO || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -708,6 +721,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PHOTOS_BACKEND_PORT || '3039'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PHOTOS || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -718,6 +732,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PLANTA_BACKEND_PORT || '3022'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PLANTA || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -728,6 +743,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.QUESTIONS_BACKEND_PORT || '3011'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_QUESTIONS || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -757,6 +773,7 @@ const APP_CONFIGS = [
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MUKKE_BACKEND_PORT || '3010'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MUKKE || '',
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
 
@@ -790,6 +807,90 @@ const APP_CONFIGS = [
 			DATABASE_URL: (env) => env.TODO_BOT_DATABASE_URL,
 			TODO_API_URL: (env) => env.TODO_BOT_API_URL || 'http://localhost:3018',
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+		},
+	},
+
+	// ==========================================================
+	// Landing Pages (Astro) - Umami Website IDs
+	// ==========================================================
+
+	// Chat Landing
+	{
+		path: 'apps/chat/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CHAT_LANDING || '',
+		},
+	},
+
+	// ManaCore Landing
+	{
+		path: 'apps/manacore/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANACORE_LANDING || '',
+		},
+	},
+
+	// ManaDeck Landing
+	{
+		path: 'apps/manadeck/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANADECK_LANDING || '',
+		},
+	},
+
+	// Calendar Landing
+	{
+		path: 'apps/calendar/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CALENDAR_LANDING || '',
+		},
+	},
+
+	// Clock Landing
+	{
+		path: 'apps/clock/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CLOCK_LANDING || '',
+		},
+	},
+
+	// Picture Landing
+	{
+		path: 'apps/picture/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PICTURE_LANDING || '',
+		},
+	},
+
+	// Todo Landing
+	{
+		path: 'apps/todo/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_TODO_LANDING || '',
+		},
+	},
+
+	// NutriPhi Landing
+	{
+		path: 'apps/nutriphi/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_NUTRIPHI_LANDING || '',
+		},
+	},
+
+	// Presi Landing
+	{
+		path: 'apps/presi/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_PRESI_LANDING || '',
+		},
+	},
+
+	// Mukke Landing
+	{
+		path: 'apps/mukke/apps/landing/.env',
+		vars: {
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MUKKE_LANDING || '',
 		},
 	},
 ];

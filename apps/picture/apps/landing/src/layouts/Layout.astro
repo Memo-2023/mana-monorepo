@@ -36,10 +36,15 @@ const {
 		<!-- <HeadHrefLangs /> -->
 
 		<!-- Umami Analytics -->
-		<script
-			defer
-			src="https://stats.mana.how/script.js"
-			data-website-id="d3ac98e6-0d1a-47a3-a218-2a81fff596bd"></script>
+		{
+			import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && (
+				<script
+					defer
+					src="https://stats.mana.how/script.js"
+					data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
+				/>
+			)
+		}
 
 		<title>{title}</title>
 	</head>

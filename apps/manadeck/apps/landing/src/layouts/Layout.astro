@@ -43,10 +43,15 @@ const {
 		/>
 
 		<!-- Umami Analytics -->
-		<script
-			defer
-			src="https://stats.mana.how/script.js"
-			data-website-id="2ac83d50-107f-4d4e-ac23-5540946e96e3"></script>
+		{
+			import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && (
+				<script
+					defer
+					src="https://stats.mana.how/script.js"
+					data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
+				/>
+			)
+		}
 
 		<title>{title}</title>
 	</head>
