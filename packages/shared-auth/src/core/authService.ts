@@ -21,6 +21,20 @@ import {
 } from './jwtUtils';
 
 /**
+ * Inline analytics helper - tracks auth events via Umami if available.
+ * No-ops silently in environments without Umami (mobile, SSR, dev).
+ */
+function trackAuth(event: string, data?: Record<string, string | number | boolean>): void {
+	if (typeof window !== 'undefined' && (window as any).umami?.track) {
+		try {
+			(window as any).umami.track(event, data);
+		} catch {
+			// Silently ignore tracking errors
+		}
+	}
+}
+
+/**
  * Default storage keys
  */
 const DEFAULT_STORAGE_KEYS: StorageKeys = {
@@ -108,9 +122,11 @@ export function createAuthService(config: AuthServiceConfig) {
 					// SSO cookie is nice-to-have, don't fail login if this fails
 				}
 
+				trackAuth('login', { method: 'email' });
 				return { success: true };
 			} catch (error) {
 				console.error('Error signing in:', error);
+				trackAuth('login_failed', { method: 'email' });
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error during sign in',
@@ -154,9 +170,11 @@ export function createAuthService(config: AuthServiceConfig) {
 
 				// Mana Core Auth returns user data immediately on registration
 				// User needs to sign in separately to get tokens
+				trackAuth('signup', { method: 'email' });
 				return { success: true, needsVerification: false };
 			} catch (error) {
 				console.error('Error signing up:', error);
+				trackAuth('signup_failed', { method: 'email' });
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : 'Unknown error during sign up',
@@ -180,6 +198,7 @@ export function createAuthService(config: AuthServiceConfig) {
 					}).catch((err) => console.error('Error logging out on server:', err));
 				}
 
+				trackAuth('logout');
 				await service.clearAuthStorage();
 			} catch (error) {
 				console.error('Error signing out:', error);
@@ -209,6 +228,7 @@ export function createAuthService(config: AuthServiceConfig) {
 					return { success: false, error: errorData.message || 'Password reset failed' };
 				}
 
+				trackAuth('password_reset_requested');
 				return { success: true };
 			} catch (error) {
 				console.error('Error sending password reset email:', error);
@@ -344,14 +364,18 @@ export function createAuthService(config: AuthServiceConfig) {
 		 * Sign in with Google
 		 */
 		async signInWithGoogle(idToken: string): Promise<AuthResult> {
-			return service.signInWithSocial(idToken, endpoints.googleSignIn);
+			const result = await service.signInWithSocial(idToken, endpoints.googleSignIn);
+			trackAuth(result.success ? 'login' : 'login_failed', { method: 'google' });
+			return result;
 		},
 
 		/**
 		 * Sign in with Apple
 		 */
 		async signInWithApple(identityToken: string): Promise<AuthResult> {
-			return service.signInWithSocial(identityToken, endpoints.appleSignIn);
+			const result = await service.signInWithSocial(identityToken, endpoints.appleSignIn);
+			trackAuth(result.success ? 'login' : 'login_failed', { method: 'apple' });
+			return result;
 		},
 
 		/**
@@ -693,6 +717,7 @@ export function createAuthService(config: AuthServiceConfig) {
 				]);
 
 				console.log('SSO: Successfully authenticated via session cookie');
+				trackAuth('login', { method: 'sso' });
 				return { success: true };
 			} catch (error) {
 				// SSO failed - this is expected if user hasn't logged in anywhere

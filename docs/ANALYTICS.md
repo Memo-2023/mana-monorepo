@@ -67,6 +67,23 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 
 ---
 
+## Automatisches Auth-Tracking
+
+Auth-Events werden automatisch in `@manacore/shared-auth` getrackt (alle Web-Apps):
+
+| Event | Wann | Data |
+|-------|------|------|
+| `login` | Erfolgreicher Login | `{ method: 'email' \| 'google' \| 'apple' \| 'sso' }` |
+| `login_failed` | Login fehlgeschlagen | `{ method: 'email' \| 'google' \| 'apple' }` |
+| `signup` | Erfolgreiche Registrierung | `{ method: 'email' }` |
+| `signup_failed` | Registrierung fehlgeschlagen | `{ method: 'email' }` |
+| `logout` | Benutzer hat sich abgemeldet | - |
+| `password_reset_requested` | Passwort-Reset angefragt | - |
+
+Diese Events erfordern **keinen Code in den einzelnen Apps** — sie werden automatisch vom shared Auth-Service ausgelöst.
+
+---
+
 ## Custom Event Tracking
 
 ### Installation
