@@ -6,6 +6,7 @@
  */
 
 import type { Handle } from '@sveltejs/kit';
+import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server';
 
 // Get client-side URLs from environment (Docker runtime)
 // In dev mode, Vite exposes .env vars via import.meta.env, not process.env
@@ -35,7 +36,7 @@ window.__PUBLIC_STT_URL__ = "${PUBLIC_STT_URL}";
 window.__PUBLIC_TODO_BACKEND_URL__ = "${PUBLIC_TODO_BACKEND_URL}";
 window.__PUBLIC_CONTACTS_API_URL__ = "${PUBLIC_CONTACTS_API_URL}";
 </script>`;
-			return html.replace('<head>', `<head>${envScript}`);
+			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
 		},
 	});
 

@@ -1,9 +1,3 @@
-/**
- * Server Hooks for SvelteKit
- * - Injects runtime environment variables for client-side use
- * - Auth is handled client-side via Mana Core Auth
- */
-
 import type { Handle } from '@sveltejs/kit';
 import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server';
 

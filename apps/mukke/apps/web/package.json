@@ -50,6 +50,7 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
+		"@manacore/shared-utils": "workspace:*",
 		"@mukke/shared": "workspace:*",
 		"wavesurfer.js": "^7.8.0"
 	},

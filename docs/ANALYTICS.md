@@ -7,6 +7,35 @@ ManaCore verwendet Umami für Web Analytics. Alle Events werden zu `stats.mana.h
 - **URL**: https://stats.mana.how
 - **Public Stats**: Alle Websites haben Public Sharing aktiviert
 
+## Architektur
+
+Web-App Analytics werden über `hooks.server.ts` injiziert (nicht mehr hardcoded in `app.html`).
+
+```
+.env.development              → UMAMI_WEBSITE_ID_CHAT=xxx
+       ↓ (scripts/generate-env.mjs)
+apps/chat/apps/web/.env       → PUBLIC_UMAMI_WEBSITE_ID=xxx
+       ↓ (process.env in hooks.server.ts)
+injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" data-website-id="xxx">
+```
+
+### Zentrale Konfiguration
+
+- **Website-IDs**: `.env.development` (`UMAMI_WEBSITE_ID_*`)
+- **Env-Verteilung**: `scripts/generate-env.mjs` → `PUBLIC_UMAMI_WEBSITE_ID`
+- **Server-Side Injection**: `@manacore/shared-utils/analytics-server` (`injectUmamiAnalytics()`)
+- **Client-Side Events**: `@manacore/shared-utils/analytics` (`trackEvent()`, etc.)
+
+### Neue App hinzufügen
+
+1. Website in Umami anlegen (https://umami.mana.how)
+2. `UMAMI_WEBSITE_ID_APPNAME=<uuid>` zu `.env.development` hinzufügen
+3. `PUBLIC_UMAMI_WEBSITE_ID` Mapping in `scripts/generate-env.mjs` hinzufügen
+4. `@manacore/shared-utils` als Dependency in der Web-App `package.json`
+5. In `hooks.server.ts`: `import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server'`
+6. `injectUmamiAnalytics(html)` im `transformPageChunk` aufrufen
+7. `pnpm setup:env` ausführen
+
 ## Website IDs
 
 ### Landing Pages
@@ -33,6 +62,8 @@ ManaCore verwendet Umami für Web Analytics. Alle Events werden zu `stats.mana.h
 | Picture | `bc552bd2-667d-44b4-a717-0dce6a8db98f` | stats.mana.how/share/picturewebapp |
 | ManaDeck | `314fc57a-c63d-4008-b19e-5e272c0329d6` | stats.mana.how/share/manadeckwebapp |
 | Planta | `876f30bd-43e3-405a-9697-6157db67ca6b` | stats.mana.how/share/plantawebapp |
+| Mukke | `89015bbb-dc59-45b7-ad51-2a68a1391553` | stats.mana.how/share/mukkewebapp |
+| Questions | `4940b9a8-834a-483a-8696-a3086bd531e6` | stats.mana.how/share/questionswebapp |
 
 ---
 

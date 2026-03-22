@@ -32,6 +32,7 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
+		"@manacore/shared-utils": "workspace:*",
 		"@picture/design-tokens": "workspace:*",
 		"@picture/shared": "workspace:*",
 		"konva": "^10.0.2",

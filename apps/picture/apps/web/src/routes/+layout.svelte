@@ -32,16 +32,6 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-
-	<!-- Umami Analytics -->
-	{#if import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && import.meta.env.PUBLIC_UMAMI_URL}
-		<script
-			defer
-			src={`${import.meta.env.PUBLIC_UMAMI_URL}/script.js`}
-			data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
-			data-do-not-track="true"
-		></script>
-	{/if}
 </svelte:head>
 
 {@render children?.()}

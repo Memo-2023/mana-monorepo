@@ -1036,6 +1036,9 @@ importers:
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
+      '@manacore/shared-utils':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-utils
       d3:
         specifier: ^7.9.0
         version: 7.9.0
@@ -2943,6 +2946,9 @@ importers:
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
+      '@manacore/shared-utils':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-utils
       '@mukke/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -3952,6 +3958,9 @@ importers:
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
+      '@manacore/shared-utils':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-utils
       '@picture/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
@@ -4247,6 +4256,9 @@ importers:
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
+      '@manacore/shared-utils':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-utils
       '@planta/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -4587,6 +4599,9 @@ importers:
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
+      '@manacore/shared-utils':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-utils
       '@presi/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -5197,6 +5212,9 @@ importers:
       '@manacore/shared-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-ui
+      '@manacore/shared-utils':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-utils
       svelte-i18n:
         specifier: ^4.0.1
         version: 4.0.1(svelte@5.44.0)

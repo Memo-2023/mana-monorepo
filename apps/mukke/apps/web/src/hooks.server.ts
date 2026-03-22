@@ -5,6 +5,7 @@
  */
 
 import type { Handle } from '@sveltejs/kit';
+import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server';
 
 // Get client-side URLs from environment (Docker runtime)
 const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
@@ -21,7 +22,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
 window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
 </script>`;
-			return html.replace('<head>', `<head>${envScript}`);
+			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
 		},
 	});
 };

@@ -1,4 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
+import { injectUmamiAnalytics } from '@manacore/shared-utils/analytics-server';
 
 /**
  * Server hooks for ManaCore web app
@@ -32,7 +33,7 @@ window.__PUBLIC_CALENDAR_API_URL__ = "${PUBLIC_CALENDAR_API_URL_CLIENT}";
 window.__PUBLIC_CLOCK_API_URL__ = "${PUBLIC_CLOCK_API_URL_CLIENT}";
 window.__PUBLIC_CONTACTS_API_URL__ = "${PUBLIC_CONTACTS_API_URL_CLIENT}";
 </script>`;
-			return html.replace('<head>', `<head>${envScript}`);
+			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
 		},
 	});
 };

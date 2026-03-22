@@ -52,6 +52,7 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
+		"@manacore/shared-utils": "workspace:*",
 		"d3": "^7.9.0",
 		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.1",
