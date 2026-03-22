@@ -5,6 +5,13 @@
 # Deploy to: ~/Caddyfile on production server
 # Reload with: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
 
+# PWA files must never be cached by the browser/CDN so that
+# service worker updates are picked up immediately after deploys.
+(pwa-no-cache) {
+    @pwa-files path /sw.js /manifest.webmanifest /registerSW.js
+    header @pwa-files Cache-Control "no-cache, no-store, must-revalidate"
+}
+
 # ============================================
 # Auth Service
 # ============================================
@@ -16,6 +23,7 @@ auth.mana.how {
 # ManaCore Dashboard (Main)
 # ============================================
 mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5000
 }
 
@@ -27,6 +35,7 @@ www.mana.how {
 # Chat App
 # ============================================
 chat.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5010
 }
 
@@ -38,6 +47,7 @@ chat-api.mana.how {
 # Todo App
 # ============================================
 todo.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5011
 }
 
@@ -49,6 +59,7 @@ todo-api.mana.how {
 # Calendar App
 # ============================================
 calendar.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5012
 }
 
@@ -60,6 +71,7 @@ calendar-api.mana.how {
 # Clock App
 # ============================================
 clock.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5013
 }
 
@@ -75,6 +87,7 @@ clock-bot.mana.how {
 # Contacts App
 # ============================================
 contacts.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5014
 }
 
@@ -86,6 +99,7 @@ contacts-api.mana.how {
 # Storage App
 # ============================================
 storage.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5015
 }
 
@@ -97,6 +111,7 @@ storage-api.mana.how {
 # Skilltree App
 # ============================================
 skilltree.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5020
 }
 
@@ -108,6 +123,7 @@ skilltree-api.mana.how {
 # LightWrite App
 # ============================================
 lightwrite.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5180
 }
 
@@ -119,6 +135,7 @@ lightwrite-api.mana.how {
 # Picture App
 # ============================================
 picture.mana.how {
+    import pwa-no-cache
     reverse_proxy localhost:5021
 }
 
