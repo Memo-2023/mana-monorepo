@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { playerStore } from '$lib/stores/player.svelte';
+	import FrequencyBars from '$lib/visualizer/FrequencyBars.svelte';
 
 	let progress = $derived(
 		playerStore.duration > 0 ? (playerStore.currentTime / playerStore.duration) * 100 : 0
@@ -44,9 +45,14 @@
 			</div>
 		{/if}
 
-		<!-- Progress bar at top -->
-		<div class="h-1 w-full bg-border">
-			<div class="h-full bg-primary transition-all duration-200" style="width: {progress}%"></div>
+		<!-- Frequency visualizer + progress bar -->
+		<div class="relative">
+			<div class="opacity-40">
+				<FrequencyBars barCount={64} height={20} barGap={1} barRadius={1} />
+			</div>
+			<div class="absolute bottom-0 left-0 right-0 h-1 bg-border">
+				<div class="h-full bg-primary transition-all duration-200" style="width: {progress}%"></div>
+			</div>
 		</div>
 
 		<div class="flex items-center h-16 px-4 gap-3">

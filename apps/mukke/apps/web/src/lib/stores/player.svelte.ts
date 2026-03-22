@@ -371,6 +371,10 @@ function createPlayerStore() {
 			state.error = null;
 		},
 
+		getAudioElement(): HTMLAudioElement | null {
+			return audio;
+		},
+
 		removeFromQueue(index: number) {
 			if (index === state.currentIndex) return;
 
