@@ -38,6 +38,8 @@ on:
           - contacts-web
           - mukke-backend
           - mukke-web
+          - storage-backend
+          - storage-web
           - matrix-mana-bot
 
 concurrency:
@@ -76,6 +78,8 @@ jobs:
       contacts-web: ${{ steps.changes.outputs.contacts-web }}
       mukke-backend: ${{ steps.changes.outputs.mukke-backend }}
       mukke-web: ${{ steps.changes.outputs.mukke-web }}
+      storage-backend: ${{ steps.changes.outputs.storage-backend }}
+      storage-web: ${{ steps.changes.outputs.storage-web }}
       matrix-mana-bot: ${{ steps.changes.outputs.matrix-mana-bot }}
       any-changes: ${{ steps.changes.outputs.any-changes }}
     steps:
@@ -131,11 +135,13 @@ jobs:
           check_changes "contacts-web"      "apps/contacts/apps/web/" "apps/contacts/packages/"
           check_changes "mukke-backend"     "apps/mukke/apps/backend/" "apps/mukke/packages/"
           check_changes "mukke-web"         "apps/mukke/apps/web/" "apps/mukke/packages/"
+          check_changes "storage-backend"   "apps/storage/apps/backend/" "apps/storage/packages/"
+          check_changes "storage-web"       "apps/storage/apps/web/" "apps/storage/packages/"
           check_changes "matrix-mana-bot"   "services/matrix-mana-bot/" "packages/matrix-bot-common/"
 
           # Check if anything needs deploying
           ANY="false"
-          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web matrix-mana-bot; do
+          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web matrix-mana-bot; do
             val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
             if [ "$val" == "true" ]; then
               ANY="true"
@@ -210,6 +216,8 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.contacts-web }}" == "true" ]; then SERVICES="$SERVICES contacts-web"; fi
             if [ "${{ needs.detect-changes.outputs.mukke-backend }}" == "true" ]; then SERVICES="$SERVICES mukke-backend"; fi
             if [ "${{ needs.detect-changes.outputs.mukke-web }}" == "true" ]; then SERVICES="$SERVICES mukke-web"; fi
+            if [ "${{ needs.detect-changes.outputs.storage-backend }}" == "true" ]; then SERVICES="$SERVICES storage-backend"; fi
+            if [ "${{ needs.detect-changes.outputs.storage-web }}" == "true" ]; then SERVICES="$SERVICES storage-web"; fi
             if [ "${{ needs.detect-changes.outputs.matrix-mana-bot }}" == "true" ]; then SERVICES="$SERVICES matrix-mana-bot"; fi
           fi
 
@@ -308,8 +316,10 @@ jobs:
               clock-web)         echo "http://localhost:5013/health" ;;
               contacts-backend)  echo "http://localhost:3034/health" ;;
               contacts-web)      echo "http://localhost:5014/health" ;;
-              mukke-backend)     echo "http://localhost:3035/health" ;;
-              mukke-web)         echo "http://localhost:5015/health" ;;
+              mukke-backend)     echo "http://localhost:3010/health" ;;
+              mukke-web)         echo "http://localhost:5180/health" ;;
+              storage-backend)   echo "http://localhost:3035/api/v1/health" ;;
+              storage-web)       echo "http://localhost:5015/health" ;;
               *)                 echo "" ;;
             esac
           }
@@ -319,7 +329,7 @@ jobs:
           SERVICES="${{ steps.services.outputs.services }}"
 
           if [ "$DEPLOY_ALL" == "true" ]; then
-            SERVICES="mana-auth matrix-web chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web"
+            SERVICES="mana-auth matrix-web chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web"
           fi
 
           HEALTH_RESULTS=""

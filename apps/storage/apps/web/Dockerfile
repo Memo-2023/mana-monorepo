@@ -79,17 +79,9 @@ COPY --from=builder /app/apps/storage/apps/web/node_modules ./node_modules
 COPY --from=builder /app/apps/storage/apps/web/build ./build
 COPY --from=builder /app/apps/storage/apps/web/package.json ./
 
-# Expose port
-EXPOSE 5185
-
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=5185
 ENV HOST=0.0.0.0
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:5185/health || exit 1
 
 # Run the app
 CMD ["node", "build"]

@@ -1446,7 +1446,13 @@ services:
       start_period: 40s
 
   storage-web:
-    image: ghcr.io/memo-2023/storage-web:latest
+    build:
+      context: .
+      dockerfile: apps/storage/apps/web/Dockerfile
+      args:
+        PUBLIC_BACKEND_URL: http://storage-backend:3035
+        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+    image: storage-web:local
     container_name: mana-app-storage-web
     restart: always
     depends_on:
