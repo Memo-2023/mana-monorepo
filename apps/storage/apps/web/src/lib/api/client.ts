@@ -3,10 +3,21 @@
  * Uses @manacore/shared-api-client for consistent error handling
  */
 
+import { browser } from '$app/environment';
 import { createApiClient, type ApiResult } from '@manacore/shared-api-client';
 import { authStore } from '$lib/stores/auth.svelte';
 
-const API_URL = 'http://localhost:3016';
+// Use client URL in browser (injected by hooks.server.ts), SSR URL on server
+function getApiUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
+			.__PUBLIC_BACKEND_URL__;
+		if (injectedUrl) return injectedUrl;
+	}
+	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3016';
+}
+
+const API_URL = getApiUrl();
 
 /**
  * Storage API client instance
