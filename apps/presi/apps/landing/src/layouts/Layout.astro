@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Analytics from '@manacore/shared-landing-ui/atoms/Analytics.astro';
 
 interface Props {
 	title: string;
@@ -57,5 +58,6 @@ const {
 	</head>
 	<body class="min-h-screen bg-background-page text-text-primary antialiased">
 		<slot />
+		<Analytics />
 	</body>
 </html>

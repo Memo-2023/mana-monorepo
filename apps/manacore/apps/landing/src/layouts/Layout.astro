@@ -1,6 +1,7 @@
 ---
 import AlternateLinks from '../components/seo/AlternateLinks.astro';
 import Sidebar from '../components/navigation/Sidebar.astro';
+import Analytics from '@manacore/shared-landing-ui/atoms/Analytics.astro';
 import { getLangFromUrl } from '../lib/i18n/config';
 
 export interface Props {
@@ -138,6 +139,7 @@ const lang = getLangFromUrl(Astro.url);
 
 		<!-- FAB Sidebar Navigation -->
 		<Sidebar />
+		<Analytics />
 	</body>
 </html>
 

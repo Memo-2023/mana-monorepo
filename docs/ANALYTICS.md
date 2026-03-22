@@ -88,6 +88,27 @@ Diese Events erfordern **keinen Code in den einzelnen Apps** — sie werden auto
 
 ---
 
+## Landing Page Event Tracking
+
+Alle Landing Pages binden `<Analytics />` aus `@manacore/shared-landing-ui` ein. Das Script trackt automatisch:
+
+| Event | Wann | Data |
+|-------|------|------|
+| `cta_click` | Klick auf CTA-Button/Link | `{ location: 'hero' \| 'pricing' \| 'footer' \| ... }` |
+| `pricing_viewed` | Pricing-Section wird sichtbar | - |
+| `pricing_plan_selected` | Klick auf Pricing-Plan CTA | `{ plan: 'free' \| 'pro' \| ... }` |
+
+**Auto-Detection:** Das Script erkennt die Section automatisch aus `id`-Attributen oder der Position im DOM (erster/letzter Abschnitt).
+
+**Explizite Attribute (optional):**
+```html
+<a href="/register" data-track-cta="hero">Jetzt starten</a>
+<a href="/pro" data-track-cta="pricing" data-track-pricing="pro">Pro starten</a>
+<section data-track-section="pricing">...</section>
+```
+
+---
+
 ## Custom Event Tracking
 
 ### Installation

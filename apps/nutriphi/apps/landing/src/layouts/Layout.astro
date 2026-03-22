@@ -1,4 +1,6 @@
 ---
+import Analytics from '@manacore/shared-landing-ui/atoms/Analytics.astro';
+
 interface Props {
 	title: string;
 	description?: string;
@@ -38,6 +40,7 @@ const { title, description = 'NutriPhi - KI-gestützte Ernährungsanalyse per Fo
 	</head>
 	<body class="bg-[#0F1F0F] text-gray-100 antialiased">
 		<slot />
+		<Analytics />
 	</body>
 </html>
 
