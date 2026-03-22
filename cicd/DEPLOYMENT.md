@@ -445,8 +445,8 @@ curl -s http://localhost:3002/api/v1/health | jq
 
 ```bash
 # Health check endpoints
-curl -s https://staging-api-chat.manacore.app/api/v1/health | jq
-curl -s https://staging-api-zitare.manacore.app/api/v1/health | jq
+curl -s https://staging-api-chat.mana.how/api/v1/health | jq
+curl -s https://staging-api-zitare.mana.how/api/v1/health | jq
 ```
 
 ---

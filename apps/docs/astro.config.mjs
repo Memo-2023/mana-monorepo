@@ -4,7 +4,7 @@ import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-	site: 'https://docs.manacore.app',
+	site: 'https://docs.mana.how',
 	integrations: [
 		starlight({
 			title: 'Manacore Docs',
@@ -90,7 +90,7 @@ export default defineConfig({
 					tag: 'meta',
 					attrs: {
 						property: 'og:image',
-						content: 'https://docs.manacore.app/og-image.png',
+						content: 'https://docs.mana.how/og-image.png',
 					},
 				},
 				{

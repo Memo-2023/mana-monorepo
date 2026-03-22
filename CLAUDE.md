@@ -666,7 +666,7 @@ pnpm cf:projects:list
 
 ```bash
 # Add custom domain to a project
-npx wrangler pages project add-domain chat-landing chat.manacore.app
+npx wrangler pages project add-domain chat-landing chat.mana.how
 ```
 
 ## Server Access

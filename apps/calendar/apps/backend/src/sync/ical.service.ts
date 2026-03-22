@@ -195,7 +195,7 @@ export class ICalService {
 			const vevent = new ICAL.Component('vevent');
 
 			// Required properties
-			vevent.addPropertyWithValue('uid', `${event.id}@manacore.app`);
+			vevent.addPropertyWithValue('uid', `${event.id}@mana.how`);
 			vevent.addPropertyWithValue('summary', event.title);
 
 			// Timestamps

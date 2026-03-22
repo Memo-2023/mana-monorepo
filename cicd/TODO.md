@@ -231,8 +231,8 @@
 ### 3.3 Configure Reverse Proxy (Traefik/Nginx)
 
 - [ ] Plan domain structure:
-  - `chat.manacore.app` → Chat web app
-  - `api-chat.manacore.app` → Chat backend
+  - `chat.mana.how` → Chat web app
+  - `api-chat.mana.how` → Chat backend
   - `maerchenzauber.com` → Landing page
   - `app.maerchenzauber.com` → Web app
   - etc.

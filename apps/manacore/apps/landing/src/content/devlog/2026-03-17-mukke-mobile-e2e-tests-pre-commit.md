@@ -245,7 +245,7 @@ EAS Build für die Traces App konfiguriert, inkl. TestFlight Distribution.
 	"submit": {
 		"production": {
 			"ios": {
-				"appleId": "till@manacore.app",
+				"appleId": "till@mana.how",
 				"ascAppId": "traces-app-id"
 			}
 		}

@@ -3,7 +3,7 @@ id: contact-support
 title: Contact Support
 language: en
 order: 1
-supportEmail: support@manacore.app
+supportEmail: support@mana.how
 responseTime: Usually within 24 hours
 ---
 
@@ -19,7 +19,7 @@ Our support team is here to help you with any questions or issues.
 
 ### Contact Options
 
-- **Email**: Send us a message at support@manacore.app
+- **Email**: Send us a message at support@mana.how
 - **Response Time**: We typically respond within 24 hours on business days
 
 ### What to Include

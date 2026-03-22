@@ -105,7 +105,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://chat.manacore.app',
+		website: 'https://chat.mana.how',
 	},
 
 	picture: {
@@ -143,7 +143,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://picture.manacore.app',
+		website: 'https://picture.mana.how',
 	},
 
 	presi: {
@@ -181,7 +181,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://presi.manacore.app',
+		website: 'https://presi.mana.how',
 	},
 
 	mail: {
@@ -220,7 +220,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://mail.manacore.app',
+		website: 'https://mail.mana.how',
 	},
 
 	// ============================================
@@ -261,7 +261,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://manadeck.manacore.app',
+		website: 'https://manadeck.mana.how',
 	},
 
 	todo: {
@@ -299,7 +299,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://todo.manacore.app',
+		website: 'https://todo.mana.how',
 	},
 
 	calendar: {
@@ -338,7 +338,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://calendar.manacore.app',
+		website: 'https://calendar.mana.how',
 	},
 
 	contacts: {
@@ -376,7 +376,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://contacts.manacore.app',
+		website: 'https://contacts.mana.how',
 	},
 
 	finance: {
@@ -415,7 +415,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://finance.manacore.app',
+		website: 'https://finance.mana.how',
 	},
 
 	// ============================================
@@ -456,7 +456,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://clock.manacore.app',
+		website: 'https://clock.mana.how',
 	},
 
 	zitare: {
@@ -494,7 +494,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://zitare.manacore.app',
+		website: 'https://zitare.mana.how',
 	},
 
 	storage: {
@@ -532,7 +532,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://storage.manacore.app',
+		website: 'https://storage.mana.how',
 	},
 
 	moodlit: {
@@ -571,7 +571,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://moodlit.manacore.app',
+		website: 'https://moodlit.mana.how',
 	},
 };
 

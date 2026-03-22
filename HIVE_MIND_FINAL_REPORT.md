@@ -71,7 +71,7 @@ The Hive Mind collective has successfully analyzed, designed, and implemented a 
 **Architecture Highlights**:
 
 - **Environment Stages**: Development (local) → Staging (Coolify) → Production (Coolify/K8s)
-- **Domain Strategy**: `{service}.manacore.app` (e.g., `api-chat.manacore.app`)
+- **Domain Strategy**: `{service}.mana.how` (e.g., `api-chat.mana.how`)
 - **Disaster Recovery**: RTO < 1 hour, RPO < 24 hours, automated daily backups
 - **Resource Requirements**: 15 vCPU, 15 GB RAM, 100 GB SSD (~$150-300/month single-server)
 

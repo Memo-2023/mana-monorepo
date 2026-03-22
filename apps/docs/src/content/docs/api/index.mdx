@@ -12,7 +12,7 @@ This section contains API documentation for all Manacore backend services.
 All API endpoints (except public ones) require authentication via JWT bearer token:
 
 ```bash
-curl -X GET https://api.manacore.app/v1/users/me \
+curl -X GET https://api.mana.how/v1/users/me \
   -H "Authorization: Bearer <your-token>"
 ```
 
@@ -20,7 +20,7 @@ curl -X GET https://api.manacore.app/v1/users/me \
 
 ```bash
 # Login
-curl -X POST https://api.manacore.app/v1/auth/login \
+curl -X POST https://api.mana.how/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "password": "password"}'
 
@@ -36,10 +36,10 @@ curl -X POST https://api.manacore.app/v1/auth/login \
 
 | Service | Development | Production |
 |---------|-------------|------------|
-| Auth | `http://localhost:3001` | `https://auth.manacore.app` |
-| Chat | `http://localhost:3002` | `https://chat-api.manacore.app` |
-| Picture | `http://localhost:3006` | `https://picture-api.manacore.app` |
-| Zitare | `http://localhost:3007` | `https://zitare-api.manacore.app` |
+| Auth | `http://localhost:3001` | `https://auth.mana.how` |
+| Chat | `http://localhost:3002` | `https://chat-api.mana.how` |
+| Picture | `http://localhost:3006` | `https://picture-api.mana.how` |
+| Zitare | `http://localhost:3007` | `https://zitare-api.mana.how` |
 
 ## Common Response Format
 

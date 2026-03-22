@@ -3,5 +3,5 @@ import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
 	integrations: [tailwind()],
-	site: 'https://nutriphi.manacore.app',
+	site: 'https://nutriphi.mana.how',
 });

@@ -412,7 +412,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:5179,http://localhost:8081
 # Notifications (optional)
 EXPO_ACCESS_TOKEN=your-expo-access-token
 RESEND_API_KEY=your-resend-api-key
-EMAIL_FROM=calendar@manacore.app
+EMAIL_FROM=calendar@mana.how
 ```
 
 ### Web (.env)

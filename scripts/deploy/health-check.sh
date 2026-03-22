@@ -17,9 +17,9 @@ ENVIRONMENT=${1:-"staging"}
 
 # Environment-specific configuration
 if [ "$ENVIRONMENT" == "production" ]; then
-    BASE_URL=${PRODUCTION_API_URL:-"https://api.manacore.app"}
+    BASE_URL=${PRODUCTION_API_URL:-"https://api.mana.how"}
 else
-    BASE_URL=${STAGING_API_URL:-"https://staging.manacore.app"}
+    BASE_URL=${STAGING_API_URL:-"https://staging.mana.how"}
 fi
 
 log_info() {

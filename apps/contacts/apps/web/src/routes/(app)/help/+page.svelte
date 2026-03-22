@@ -435,7 +435,7 @@
 				<!-- Contact Options -->
 				<div class="grid gap-4 sm:grid-cols-2">
 					<a
-						href="mailto:support@manacore.app"
+						href="mailto:support@mana.how"
 						class="group flex items-center gap-4 rounded-2xl bg-white/80 p-5 shadow-sm ring-1 ring-gray-200 backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:bg-white/5 dark:ring-white/10"
 					>
 						<div
@@ -447,7 +447,7 @@
 							<p class="font-medium text-gray-900 dark:text-gray-100">
 								{t.email}
 							</p>
-							<p class="text-sm text-gray-600 dark:text-gray-400">support@manacore.app</p>
+							<p class="text-sm text-gray-600 dark:text-gray-400">support@mana.how</p>
 						</div>
 						<ArrowRight
 							size={18}
@@ -483,7 +483,7 @@
 					</h3>
 					<div class="space-y-2">
 						<a
-							href="https://manacore.app"
+							href="https://mana.how"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
@@ -492,7 +492,7 @@
 							{$locale === 'de' ? 'Website besuchen' : 'Visit Website'}
 						</a>
 						<a
-							href="https://manacore.app/docs"
+							href="https://mana.how/docs"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"

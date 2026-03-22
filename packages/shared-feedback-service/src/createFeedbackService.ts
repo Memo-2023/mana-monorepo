@@ -10,7 +10,7 @@
  * import { authStore } from '$lib/stores/auth.svelte';
  *
  * export const feedbackService = createFeedbackService({
- *   apiUrl: 'https://auth.manacore.app',
+ *   apiUrl: 'https://auth.mana.how',
  *   appId: 'chat',
  *   getAuthToken: async () => authStore.getToken(),
  * });

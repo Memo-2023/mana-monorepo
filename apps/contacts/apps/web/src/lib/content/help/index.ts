@@ -167,7 +167,7 @@ export const centralHelpContent: HelpContent = {
 			</ul>`,
 		language: 'en',
 		order: 1,
-		supportEmail: 'support@manacore.app',
+		supportEmail: 'support@mana.how',
 		responseTime: 'Usually within 24 hours',
 	},
 };

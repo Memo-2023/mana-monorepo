@@ -3,9 +3,6 @@ import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://chat.manacore.app',
-  integrations: [
-    tailwind(),
-    sitemap()
-  ]
+	site: 'https://chat.mana.how',
+	integrations: [tailwind(), sitemap()],
 });

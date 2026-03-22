@@ -33,6 +33,6 @@ export default () => ({
 		maxLength: parseInt(process.env.EXTRACT_MAX_LENGTH || '50000', 10),
 		userAgent:
 			process.env.EXTRACT_USER_AGENT ||
-			'Mozilla/5.0 (compatible; ManaSearchBot/1.0; +https://manacore.app)',
+			'Mozilla/5.0 (compatible; ManaSearchBot/1.0; +https://mana.how)',
 	},
 });

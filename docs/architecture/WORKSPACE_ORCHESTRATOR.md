@@ -27,12 +27,12 @@ Das ManaCore-Ökosystem besteht aus mehreren unabhängigen SvelteKit-Anwendungen
 
 | App | Port (Dev) | Domain (Prod) |
 |-----|------------|---------------|
-| Calendar | 5179 | calendar.manacore.app |
-| Contacts | 5184 | contacts.manacore.app |
-| Todo | 5188 | todo.manacore.app |
-| Chat | 5174 | chat.manacore.app |
-| Clock | 5187 | clock.manacore.app |
-| Picture | 5185 | picture.manacore.app |
+| Calendar | 5179 | calendar.mana.how |
+| Contacts | 5184 | contacts.mana.how |
+| Todo | 5188 | todo.mana.how |
+| Chat | 5174 | chat.mana.how |
+| Clock | 5187 | clock.mana.how |
+| Picture | 5185 | picture.mana.how |
 
 Jede App ist eine **eigenständige SvelteKit-Instanz** mit:
 - Eigenem Dev-Server und Production-Build

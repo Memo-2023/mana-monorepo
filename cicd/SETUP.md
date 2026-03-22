@@ -505,7 +505,7 @@ cp docker/templates/Dockerfile.astro apps/bauntown/Dockerfile
 
 1. Add a new "Resource" → "Service"
 2. For each web app/landing:
-   - Set domain (e.g., `chat.manacore.app`)
+   - Set domain (e.g., `chat.mana.how`)
    - Enable "Generate SSL"
    - Set Docker image: `ghcr.io/wuesteon/chat-web:latest`
    - Configure environment variables

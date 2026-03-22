@@ -377,7 +377,7 @@ The pipeline handles deployment for:
 
 ```bash
 # SSH to server
-ssh deploy@api.manacore.app
+ssh deploy@api.mana.how
 cd ~/manacore-production
 
 # Find backup

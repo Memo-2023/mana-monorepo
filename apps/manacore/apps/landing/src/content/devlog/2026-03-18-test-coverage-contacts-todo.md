@@ -214,8 +214,8 @@ Die `PUBLIC_TODO_BACKEND_URL` fehlte in der Production-Konfiguration der Contact
 
 ```diff
   # .env.production
-  PUBLIC_CONTACTS_BACKEND_URL=https://contacts-api.manacore.app
-+ PUBLIC_TODO_BACKEND_URL=https://todo-api.manacore.app
+  PUBLIC_CONTACTS_BACKEND_URL=https://contacts-api.mana.how
++ PUBLIC_TODO_BACKEND_URL=https://todo-api.mana.how
 ```
 
 ---
