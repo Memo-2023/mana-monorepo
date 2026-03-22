@@ -48,7 +48,7 @@ window.__PUBLIC_CONTACTS_API_URL__ = "${PUBLIC_CONTACTS_API_URL}";
 		'Content-Security-Policy',
 		[
 			"default-src 'self'",
-			"script-src 'self' 'unsafe-inline'",
+			"script-src 'self' 'unsafe-inline' https://stats.mana.how",
 			"style-src 'self' 'unsafe-inline'",
 			"img-src 'self' data: https:",
 			`connect-src 'self' ${PUBLIC_MANA_CORE_AUTH_URL_CLIENT} ${PUBLIC_BACKEND_URL_CLIENT} ${PUBLIC_STT_URL} ${PUBLIC_TODO_BACKEND_URL} ${PUBLIC_CONTACTS_API_URL}`,

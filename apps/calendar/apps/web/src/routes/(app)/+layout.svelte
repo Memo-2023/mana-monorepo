@@ -62,6 +62,9 @@
 
 	let { children } = $props();
 
+	// Auth gate - prevent children from mounting before auth is confirmed
+	let appReady = $state(false);
+
 	// InputBar search - search events
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		if (!query.trim()) return [];
@@ -378,6 +381,9 @@
 			return;
 		}
 
+		// Auth confirmed - allow children to render
+		appReady = true;
+
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
@@ -408,114 +414,120 @@
 
 <svelte:window onkeydown={handleKeydown} onresize={updateMobileState} />
 
-<SplitPaneContainer>
-	<div class="layout-container">
-		<a
-			href="#main-content"
-			class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-		>
-			Zum Inhalt springen
-		</a>
-
-		<!-- UI Elements (hidden in immersive mode) -->
-		{#if !settingsStore.immersiveModeEnabled}
-			<PillNavigation
-				items={navItems}
-				{prependElements}
-				currentPath={$page.url.pathname}
-				appName="Kalender"
-				homeRoute="/"
-				onToggleTheme={handleToggleTheme}
-				{isDark}
-				showThemeToggle={true}
-				showThemeVariants={true}
-				{themeVariantItems}
-				{currentThemeVariantLabel}
-				themeMode={theme.mode}
-				onThemeModeChange={handleThemeModeChange}
-				showLanguageSwitcher={true}
-				{languageItems}
-				{currentLanguageLabel}
-				showLogout={authStore.isAuthenticated}
-				onLogout={handleLogout}
-				loginHref="/login"
-				primaryColor="#3b82f6"
-				showAppSwitcher={true}
-				{appItems}
-				{userEmail}
-				settingsHref="/settings"
-				manaHref="/mana"
-				profileHref="/profile"
-				allAppsHref="/apps"
-				onOpenInPanel={handleOpenInPanel}
-				ariaLabel="Hauptnavigation"
-			/>
-		{/if}
-
-		<!-- Unified Bar: QuickInputBar + DateStrip + TagStrip + CalendarToolbar -->
-		<UnifiedBar
-			onSearch={handleSearch}
-			onSelect={handleSelect}
-			onSearchChange={handleSearchChange}
-			placeholder="Neuer Termin oder suchen..."
-			emptyText="Keine Termine gefunden"
-			searchingText="Suche..."
-			createText="Erstellen"
-			appIcon="calendar"
-			defaultOptions={calendarOptions}
-			selectedDefaultId={selectedDefaultCalendarId}
-			defaultOptionLabel="Standard-Kalender"
-			onDefaultChange={handleDefaultCalendarChange}
-			onShowShortcuts={handleShowShortcuts}
-			onShowSyntaxHelp={handleShowSyntaxHelp}
-			showCalendarLayers={showCalendarToolbar}
-			{isMobile}
-			hidden={settingsStore.immersiveModeEnabled}
-		>
-			{#snippet leftAction()}
-				{#if voiceRecordingStore.isSupported}
-					<VoiceRecordButton onResult={handleVoiceResult} size={32} />
-				{/if}
-			{/snippet}
-		</UnifiedBar>
-
-		<!-- Voice Recording Modal -->
-		<VoiceRecordingModal onResult={handleVoiceResult} />
-
-		<!-- Immersive Mode Toggle (always visible on main calendar page) -->
-		<ImmersiveModeToggle
-			isImmersive={settingsStore.immersiveModeEnabled}
-			onToggle={() => settingsStore.toggleImmersiveMode()}
-			visible={showCalendarToolbar}
-		/>
-
-		<main
-			id="main-content"
-			class="main-content bg-background"
-			class:has-toolbar={showCalendarToolbar}
-			class:immersive={settingsStore.immersiveModeEnabled}
-			aria-label="Kalender"
-		>
-			<div
-				class="content-wrapper"
-				class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
-				class:immersive={settingsStore.immersiveModeEnabled}
-			>
-				{@render children()}
-			</div>
-		</main>
+{#if !appReady}
+	<div class="flex items-center justify-center h-screen bg-background">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
 	</div>
-</SplitPaneContainer>
+{:else}
+	<SplitPaneContainer>
+		<div class="layout-container">
+			<a
+				href="#main-content"
+				class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+			>
+				Zum Inhalt springen
+			</a>
 
-<!-- InputBar Help Modal -->
-<InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />
+			<!-- UI Elements (hidden in immersive mode) -->
+			{#if !settingsStore.immersiveModeEnabled}
+				<PillNavigation
+					items={navItems}
+					{prependElements}
+					currentPath={$page.url.pathname}
+					appName="Kalender"
+					homeRoute="/"
+					onToggleTheme={handleToggleTheme}
+					{isDark}
+					showThemeToggle={true}
+					showThemeVariants={true}
+					{themeVariantItems}
+					{currentThemeVariantLabel}
+					themeMode={theme.mode}
+					onThemeModeChange={handleThemeModeChange}
+					showLanguageSwitcher={true}
+					{languageItems}
+					{currentLanguageLabel}
+					showLogout={authStore.isAuthenticated}
+					onLogout={handleLogout}
+					loginHref="/login"
+					primaryColor="#3b82f6"
+					showAppSwitcher={true}
+					{appItems}
+					{userEmail}
+					settingsHref="/settings"
+					manaHref="/mana"
+					profileHref="/profile"
+					allAppsHref="/apps"
+					onOpenInPanel={handleOpenInPanel}
+					ariaLabel="Hauptnavigation"
+				/>
+			{/if}
 
-<!-- Settings Modal -->
-<SettingsModal visible={showSettingsModal} onClose={() => (showSettingsModal = false)} />
+			<!-- Unified Bar: QuickInputBar + DateStrip + TagStrip + CalendarToolbar -->
+			<UnifiedBar
+				onSearch={handleSearch}
+				onSelect={handleSelect}
+				onSearchChange={handleSearchChange}
+				placeholder="Neuer Termin oder suchen..."
+				emptyText="Keine Termine gefunden"
+				searchingText="Suche..."
+				createText="Erstellen"
+				appIcon="calendar"
+				defaultOptions={calendarOptions}
+				selectedDefaultId={selectedDefaultCalendarId}
+				defaultOptionLabel="Standard-Kalender"
+				onDefaultChange={handleDefaultCalendarChange}
+				onShowShortcuts={handleShowShortcuts}
+				onShowSyntaxHelp={handleShowSyntaxHelp}
+				showCalendarLayers={showCalendarToolbar}
+				{isMobile}
+				hidden={settingsStore.immersiveModeEnabled}
+			>
+				{#snippet leftAction()}
+					{#if voiceRecordingStore.isSupported}
+						<VoiceRecordButton onResult={handleVoiceResult} size={32} />
+					{/if}
+				{/snippet}
+			</UnifiedBar>
 
-<!-- App Onboarding Modal (shown once on first visit) -->
-{#if calendarOnboarding.shouldShow}
-	<MiniOnboardingModal store={calendarOnboarding} appName="Kalender" appEmoji="📅" />
+			<!-- Voice Recording Modal -->
+			<VoiceRecordingModal onResult={handleVoiceResult} />
+
+			<!-- Immersive Mode Toggle (always visible on main calendar page) -->
+			<ImmersiveModeToggle
+				isImmersive={settingsStore.immersiveModeEnabled}
+				onToggle={() => settingsStore.toggleImmersiveMode()}
+				visible={showCalendarToolbar}
+			/>
+
+			<main
+				id="main-content"
+				class="main-content bg-background"
+				class:has-toolbar={showCalendarToolbar}
+				class:immersive={settingsStore.immersiveModeEnabled}
+				aria-label="Kalender"
+			>
+				<div
+					class="content-wrapper"
+					class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+					class:immersive={settingsStore.immersiveModeEnabled}
+				>
+					{@render children()}
+				</div>
+			</main>
+		</div>
+	</SplitPaneContainer>
+
+	<!-- InputBar Help Modal -->
+	<InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />
+
+	<!-- Settings Modal -->
+	<SettingsModal visible={showSettingsModal} onClose={() => (showSettingsModal = false)} />
+
+	<!-- App Onboarding Modal (shown once on first visit) -->
+	{#if calendarOnboarding.shouldShow}
+		<MiniOnboardingModal store={calendarOnboarding} appName="Kalender" appEmoji="📅" />
+	{/if}
 {/if}
 
 <style>
