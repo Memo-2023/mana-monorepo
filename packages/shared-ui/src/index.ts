@@ -155,6 +155,7 @@ export type { QuickInputItem, QuickAction, CreatePreview, InputBarSettings } fro
 
 // Pages
 export { default as AppsPage } from './pages/AppsPage.svelte';
+export { default as OfflinePage } from './pages/OfflinePage.svelte';
 
 // Charts - Statistics Visualization
 export {

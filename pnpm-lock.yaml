@@ -4959,6 +4959,9 @@ importers:
       '@manacore/shared-theme':
         specifier: workspace:*
         version: link:../../../../packages/shared-theme
+      '@manacore/shared-ui':
+        specifier: workspace:^
+        version: link:../../../../packages/shared-ui
       '@manacore/shared-utils':
         specifier: workspace:*
         version: link:../../../../packages/shared-utils

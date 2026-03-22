@@ -12,10 +12,30 @@ export default defineConfig({
 		sveltekit(),
 		SvelteKitPWA(
 			createPWAConfig({
-				name: 'Todo - Aufgaben',
+				name: 'Todo - Aufgabenverwaltung',
 				shortName: 'Todo',
-				description: 'Aufgaben und Projekte verwalten',
-				themeColor: '#10b981',
+				description: 'Aufgaben und Projekte verwalten mit Kanban-Board, Subtasks und mehr',
+				themeColor: '#8b5cf6',
+				shortcuts: [
+					{
+						name: 'Neue Aufgabe',
+						short_name: 'Neu',
+						description: 'Neue Aufgabe erstellen',
+						url: '/?action=new',
+					},
+					{
+						name: 'Kanban Board',
+						short_name: 'Kanban',
+						description: 'Kanban-Ansicht öffnen',
+						url: '/kanban',
+					},
+					{
+						name: 'Einstellungen',
+						short_name: 'Settings',
+						description: 'App-Einstellungen öffnen',
+						url: '/settings',
+					},
+				],
 			})
 		),
 	],

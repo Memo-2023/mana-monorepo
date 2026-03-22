@@ -42,6 +42,7 @@
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
+		"@manacore/shared-ui": "workspace:^",
 		"@manacore/shared-utils": "workspace:*",
 		"idb": "^8.0.0",
 		"svelte-i18n": "^4.0.1",
