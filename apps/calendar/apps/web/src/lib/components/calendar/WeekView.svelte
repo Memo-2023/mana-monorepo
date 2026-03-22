@@ -178,23 +178,24 @@
 
 	$effect(() => keyboard.setup());
 
-	// Scroll to current hour on mount
+	// Scroll to current time on mount so the red indicator line is visible
 	onMount(() => {
 		if (!timeGridEl) return;
 
-		// Use CSS variable for hour height (default 48px)
 		const hourHeight =
 			parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hour-height')) ||
 			48;
-		const currentHour = new Date().getHours();
+		const now = new Date();
+		const currentMinutesFromMidnight = now.getHours() * 60 + now.getMinutes();
 		const viewportHeight = timeGridEl.clientHeight;
 
-		// Calculate scroll position to center current hour in viewport
-		// Account for firstVisibleHour (if hour filtering is enabled)
-		const effectiveHour = Math.max(0, currentHour - firstVisibleHour);
-		const scrollPosition = effectiveHour * hourHeight - viewportHeight / 2 + hourHeight / 2;
+		// Calculate pixel position of current time
+		const effectiveMinutes = Math.max(0, currentMinutesFromMidnight - firstVisibleHour * 60);
+		const currentTimePixels = (effectiveMinutes / 60) * hourHeight;
 
-		// Scroll to position (instant, not smooth, for initial load)
+		// Scroll so current time is ~1/3 from the top of the viewport
+		const scrollPosition = currentTimePixels - viewportHeight / 3;
+
 		timeGridEl.scrollTo({
 			top: Math.max(0, scrollPosition),
 			behavior: 'instant',
@@ -587,7 +588,10 @@
 
 					<!-- Current time indicator -->
 					{#if isToday(day)}
-						<div class="time-indicator" style="top: {currentTimePosition}%"></div>
+						<div class="time-indicator" style="top: {currentTimePosition}%">
+							<span class="time-indicator-label">{settingsStore.formatTime(timeIndicator.now)}</span
+							>
+						</div>
 					{/if}
 				</div>
 			{/each}
@@ -881,6 +885,17 @@
 		height: 10px;
 		background: hsl(var(--color-error));
 		border-radius: 50%;
+	}
+
+	.time-indicator-label {
+		position: absolute;
+		right: 4px;
+		bottom: 3px;
+		font-size: 0.6rem;
+		font-weight: 600;
+		color: hsl(var(--color-error));
+		line-height: 1;
+		pointer-events: none;
 	}
 
 	/* Overflow indicators for events outside visible time range */
