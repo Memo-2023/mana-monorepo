@@ -80,7 +80,8 @@
 	// Navigation items for ManaCore
 	// Admin link is conditionally added based on user role
 	let baseNavItems: PillNavItem[] = [
-		{ href: '/dashboard', label: 'Dashboard', icon: 'home' },
+		{ href: '/home', label: 'Home', icon: 'home' },
+		{ href: '/dashboard', label: 'Dashboard', icon: 'grid' },
 		{ href: '/credits', label: 'Credits', icon: 'creditCard' },
 		{ href: '/gifts', label: 'Geschenke', icon: 'gift' },
 		{ href: '/api-keys', label: 'API Keys', icon: 'key' },
@@ -215,7 +216,7 @@
 			items={navItems}
 			currentPath={$page.url.pathname}
 			appName="ManaCore"
-			homeRoute="/dashboard"
+			homeRoute="/home"
 			onLogout={handleSignOut}
 			onToggleTheme={handleToggleTheme}
 			{isDark}

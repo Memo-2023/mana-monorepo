@@ -7,7 +7,7 @@
 		if (!data.session) {
 			goto('/login');
 		} else {
-			goto('/dashboard');
+			goto('/home');
 		}
 	});
 </script>
