@@ -38,42 +38,50 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 
 ## Website IDs
 
+> **Hinweis**: Die Website-IDs sind in `.env.development` als `UMAMI_WEBSITE_ID_*` definiert. Das ist die Single Source of Truth. Die IDs hier dienen nur als Schnellreferenz.
+
 ### Landing Pages
 
-| App | Website ID | Public URL |
-|-----|-----------|------------|
-| Chat | `a264b165-80d2-47ab-91f4-2efc01de0b66` | stats.mana.how/share/chatlanding |
-| ManaCore | `cef3798d-85ae-47df-a44a-e9bee09dbcf9` | stats.mana.how/share/manacorelanding |
-| ManaDeck | `2ac83d50-107f-4d4e-ac23-5540946e96e3` | stats.mana.how/share/manadecklanding |
-| Calendar | `84862d98-727e-4e25-8645-639241dd1544` | stats.mana.how/share/calendarlanding |
-| Clock | `0332b471-a022-46af-a726-0f45932bfd58` | stats.mana.how/share/clocklanding |
-| Picture | `d3ac98e6-0d1a-47a3-a218-2a81fff596bd` | stats.mana.how/share/picturelanding |
-| Todo | `538eb4b6-2241-45a3-994d-cdb9bdb0c250` | stats.mana.how/share/todolanding |
-| NutriPhi | `15610d03-b280-4b92-9c71-0ef89c23202b` | stats.mana.how/share/nutriphilanding |
-| Presi | `dd485016-0077-47b9-9f59-ab2c6c1730ee` | stats.mana.how/share/presilanding |
-| Mukke | `b2c9ab34-3c53-4463-9dde-1ecf098886a5` | stats.mana.how/share/mukkelanding |
+| App | Env-Variable |
+|-----|-------------|
+| Chat | `UMAMI_WEBSITE_ID_CHAT_LANDING` |
+| ManaCore | `UMAMI_WEBSITE_ID_MANACORE_LANDING` |
+| ManaDeck | `UMAMI_WEBSITE_ID_MANADECK_LANDING` |
+| Calendar | `UMAMI_WEBSITE_ID_CALENDAR_LANDING` |
+| Clock | `UMAMI_WEBSITE_ID_CLOCK_LANDING` |
+| Picture | `UMAMI_WEBSITE_ID_PICTURE_LANDING` |
+| Todo | `UMAMI_WEBSITE_ID_TODO_LANDING` |
+| NutriPhi | `UMAMI_WEBSITE_ID_NUTRIPHI_LANDING` |
+| Presi | `UMAMI_WEBSITE_ID_PRESI_LANDING` |
+| Mukke | `UMAMI_WEBSITE_ID_MUKKE_LANDING` |
 
 ### Web Apps
 
-| App | Website ID | Public URL |
-|-----|-----------|------------|
-| Chat | `5cf9d569-3266-4a57-80dd-3a652dc32786` | stats.mana.how/share/chatwebapp |
-| ManaCore | `4a14016d-394a-44e0-8ecc-67271f63ffb0` | stats.mana.how/share/manacorewebapp |
-| Todo | `ac021d98-778e-46cf-b6b2-2f650ea78f07` | stats.mana.how/share/todowebapp |
-| Calendar | `884fc0a8-3b67-43bd-903b-2be531c66792` | stats.mana.how/share/calendarwebapp |
-| Clock | `1e7b5006-87a5-4547-8a3d-ab30eac15dd4` | stats.mana.how/share/clockwebapp |
-| Contacts | `ab89a839-be15-4949-99b4-e72492cee4ff` | stats.mana.how/share/contactswebapp |
-| Picture | `bc552bd2-667d-44b4-a717-0dce6a8db98f` | stats.mana.how/share/picturewebapp |
-| ManaDeck | `314fc57a-c63d-4008-b19e-5e272c0329d6` | stats.mana.how/share/manadeckwebapp |
-| Planta | `876f30bd-43e3-405a-9697-6157db67ca6b` | stats.mana.how/share/plantawebapp |
-| Mukke | `89015bbb-dc59-45b7-ad51-2a68a1391553` | stats.mana.how/share/mukkewebapp |
-| Questions | `4940b9a8-834a-483a-8696-a3086bd531e6` | stats.mana.how/share/questionswebapp |
+| App | Env-Variable |
+|-----|-------------|
+| Chat | `UMAMI_WEBSITE_ID_CHAT` |
+| ManaCore | `UMAMI_WEBSITE_ID_MANACORE` |
+| Todo | `UMAMI_WEBSITE_ID_TODO` |
+| Calendar | `UMAMI_WEBSITE_ID_CALENDAR` |
+| Clock | `UMAMI_WEBSITE_ID_CLOCK` |
+| Contacts | `UMAMI_WEBSITE_ID_CONTACTS` |
+| Picture | `UMAMI_WEBSITE_ID_PICTURE` |
+| ManaDeck | `UMAMI_WEBSITE_ID_MANADECK` |
+| Planta | `UMAMI_WEBSITE_ID_PLANTA` |
+| Mukke | `UMAMI_WEBSITE_ID_MUKKE` |
+| Questions | `UMAMI_WEBSITE_ID_QUESTIONS` |
+| Zitare | `UMAMI_WEBSITE_ID_ZITARE` |
+| Presi | `UMAMI_WEBSITE_ID_PRESI` |
+| NutriPhi | `UMAMI_WEBSITE_ID_NUTRIPHI` |
+| Storage | `UMAMI_WEBSITE_ID_STORAGE` |
+| Photos | `UMAMI_WEBSITE_ID_PHOTOS` |
+| SkillTree | `UMAMI_WEBSITE_ID_SKILLTREE` |
 
 ---
 
 ## Automatisches Auth-Tracking
 
-Auth-Events werden automatisch in `@manacore/shared-auth` getrackt (alle Web-Apps):
+Auth-Events werden automatisch in `@manacore/shared-auth` (`src/core/authService.ts`) getrackt (alle Web-Apps):
 
 | Event | Wann | Data |
 |-------|------|------|
@@ -81,7 +89,7 @@ Auth-Events werden automatisch in `@manacore/shared-auth` getrackt (alle Web-App
 | `login_failed` | Login fehlgeschlagen | `{ method: 'email' \| 'google' \| 'apple' }` |
 | `signup` | Erfolgreiche Registrierung | `{ method: 'email' }` |
 | `signup_failed` | Registrierung fehlgeschlagen | `{ method: 'email' }` |
-| `logout` | Benutzer hat sich abgemeldet | - |
+| `logout` | Benutzer abgemeldet | - |
 | `password_reset_requested` | Passwort-Reset angefragt | - |
 
 Diese Events erfordern **keinen Code in den einzelnen Apps** — sie werden automatisch vom shared Auth-Service ausgelöst.
@@ -186,11 +194,14 @@ trackError('api_error', 'Failed to fetch data');
 
 ### AuthEvents
 
+> **Hinweis**: Diese Helpers werden in der Regel nicht direkt verwendet. Das automatische Auth-Tracking in `@manacore/shared-auth` (siehe oben) deckt alle Login/Signup/Logout-Events ab.
+
 ```typescript
 import { AuthEvents } from '@manacore/shared-utils/analytics';
 
 AuthEvents.login('email');           // login { method: 'email' }
 AuthEvents.login('google');          // login { method: 'google' }
+AuthEvents.login('github');          // login { method: 'github' }
 AuthEvents.logout();                 // logout
 AuthEvents.signup('email');          // signup { method: 'email' }
 AuthEvents.signupCompleted();        // signup_completed
@@ -384,11 +395,7 @@ AppEvents.shareClicked('twitter');       // share_clicked { platform: 'twitter' 
 
 ### Development Mode
 
-Im Development-Modus (`import.meta.env?.DEV`) werden Events in die Console geloggt:
-
-```
-[Analytics] cta_click { location: 'hero' }
-```
+Im Development-Modus ist Umami normalerweise nicht geladen (kein Script-Tag), daher werden Events stillschweigend ignoriert (`isUmamiAvailable()` gibt `false` zurück). Fehler beim Tracking werden als `console.warn` ausgegeben.
 
 ---
 
@@ -411,6 +418,7 @@ Im Development-Modus (`import.meta.env?.DEV`) werden Events in die Console gelog
 ## Umami Server
 
 - **Host**: Mac Mini (mana-server)
-- **Container**: `umami`
-- **Datenbank**: PostgreSQL (shared mit anderen Services)
-- **Port**: 3200 (intern), via Caddy erreichbar unter stats.mana.how
+- **Container**: `mana-mon-umami`
+- **Image**: `ghcr.io/umami-software/umami:postgresql-latest`
+- **Datenbank**: PostgreSQL (`umami` DB, shared Postgres-Instanz)
+- **Port**: 3000 (intern) → 8010 (extern), via Caddy erreichbar unter stats.mana.how
