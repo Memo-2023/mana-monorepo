@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     together_api_key: str | None = None
     together_base_url: str = "https://api.together.xyz/v1"
 
+    # Google Gemini (Fallback provider)
+    google_api_key: str | None = None
+    google_default_model: str = "gemini-2.0-flash"
+
+    # Auto-fallback: Ollama → Google when Ollama is overloaded/down
+    auto_fallback_enabled: bool = True
+    ollama_max_concurrent: int = 3
+
     # Caching (Optional)
     redis_url: str | None = None
     cache_ttl: int = 3600

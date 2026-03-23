@@ -1779,6 +1779,10 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       TOGETHER_API_KEY: ${TOGETHER_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GOOGLE_DEFAULT_MODEL: gemini-2.0-flash
+      AUTO_FALLBACK_ENABLED: "true"
+      OLLAMA_MAX_CONCURRENT: 3
       CORS_ORIGINS: https://playground.mana.how,https://mana.how,https://chat.mana.how
     extra_hosts:
       - "host.docker.internal:host-gateway"

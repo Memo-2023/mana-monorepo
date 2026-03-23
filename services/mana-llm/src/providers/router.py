@@ -1,6 +1,8 @@
-"""Provider routing logic for mana-llm."""
+"""Provider routing logic for mana-llm with auto-fallback support."""
 
+import asyncio
 import logging
+import time
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -22,10 +24,19 @@ logger = logging.getLogger(__name__)
 
 
 class ProviderRouter:
-    """Routes requests to appropriate LLM providers based on model prefix."""
+    """Routes requests to appropriate LLM providers with auto-fallback.
+
+    When auto_fallback_enabled is True and a Google API key is configured:
+    - Ollama requests that fail or exceed max_concurrent are automatically
+      retried on Google Gemini with model mapping.
+    - Explicit provider requests (e.g., openrouter/...) are never fallback-routed.
+    """
 
     def __init__(self):
         self.providers: dict[str, LLMProvider] = {}
+        self._ollama_concurrent: int = 0
+        self._ollama_health_cache: tuple[dict[str, Any] | None, float] = (None, 0)
+        self._health_cache_ttl: float = 5.0  # seconds
         self._initialize_providers()
 
     def _initialize_providers(self) -> None:
@@ -33,6 +44,16 @@ class ProviderRouter:
         # Ollama is always available (local)
         self.providers["ollama"] = OllamaProvider()
         logger.info(f"Initialized Ollama provider at {settings.ollama_url}")
+
+        # Google Gemini (fallback provider)
+        if settings.google_api_key:
+            from .google import GoogleProvider
+
+            self.providers["google"] = GoogleProvider(
+                api_key=settings.google_api_key,
+                default_model=settings.google_default_model,
+            )
+            logger.info("Initialized Google Gemini provider (fallback)")
 
         # OpenRouter (if API key configured)
         if settings.openrouter_api_key:
@@ -63,17 +84,12 @@ class ProviderRouter:
             logger.info("Initialized Together provider")
 
     def _parse_model(self, model: str) -> tuple[str, str]:
-        """
-        Parse model string into (provider, model_name).
-
-        Format: "provider/model" or just "model" (defaults to ollama)
-        """
+        """Parse model string into (provider, model_name)."""
         if "/" in model:
             parts = model.split("/", 1)
             provider = parts[0].lower()
             model_name = parts[1]
         else:
-            # Default to Ollama
             provider = "ollama"
             model_name = model
 
@@ -89,39 +105,141 @@ class ProviderRouter:
             )
         return self.providers[provider_name]
 
+    def _can_fallback_to_google(self, provider_name: str) -> bool:
+        """Check if a request can be fallback-routed to Google."""
+        return (
+            settings.auto_fallback_enabled
+            and provider_name == "ollama"
+            and "google" in self.providers
+        )
+
+    def _should_use_ollama(self) -> bool:
+        """Determine if Ollama should handle the request based on load."""
+        return self._ollama_concurrent < settings.ollama_max_concurrent
+
+    async def _get_ollama_health_cached(self) -> dict[str, Any]:
+        """Get Ollama health with caching (5s TTL)."""
+        cached, cached_at = self._ollama_health_cache
+        if cached is not None and (time.time() - cached_at) < self._health_cache_ttl:
+            return cached
+
+        try:
+            provider = self.providers.get("ollama")
+            if provider:
+                result = await provider.health_check()
+            else:
+                result = {"status": "unhealthy", "error": "no ollama provider"}
+        except Exception as e:
+            result = {"status": "unhealthy", "error": str(e)}
+
+        self._ollama_health_cache = (result, time.time())
+        return result
+
+    async def _fallback_to_google(
+        self,
+        request: ChatCompletionRequest,
+        model_name: str,
+        original_error: Exception | None = None,
+    ) -> ChatCompletionResponse:
+        """Route a request to Google Gemini as fallback."""
+        from .google import GoogleProvider
+
+        google = self.providers["google"]
+        assert isinstance(google, GoogleProvider)
+
+        gemini_model = google.map_model(model_name)
+        reason = f"error: {original_error}" if original_error else "overloaded"
+        logger.warning(
+            f"Falling back to Google Gemini ({gemini_model}) for ollama/{model_name} ({reason})"
+        )
+        return await google.chat_completion(request, gemini_model)
+
     async def chat_completion(
         self,
         request: ChatCompletionRequest,
     ) -> ChatCompletionResponse:
-        """Route chat completion request to appropriate provider."""
+        """Route chat completion request with auto-fallback."""
         provider_name, model_name = self._parse_model(request.model)
-        provider = self._get_provider(provider_name)
 
-        logger.info(f"Routing chat completion to {provider_name}/{model_name}")
+        # Non-Ollama providers: direct routing, no fallback
+        if provider_name != "ollama":
+            provider = self._get_provider(provider_name)
+            logger.info(f"Routing chat completion to {provider_name}/{model_name}")
+            return await provider.chat_completion(request, model_name)
+
+        # Ollama with fallback logic
+        can_fallback = self._can_fallback_to_google(provider_name)
+
+        # Check if Ollama is overloaded
+        if can_fallback and not self._should_use_ollama():
+            return await self._fallback_to_google(request, model_name)
+
+        # Try Ollama first
+        provider = self._get_provider("ollama")
+        logger.info(f"Routing chat completion to ollama/{model_name}")
+        self._ollama_concurrent += 1
 
         try:
             return await provider.chat_completion(request, model_name)
         except Exception as e:
-            logger.error(f"Chat completion failed on {provider_name}: {e}")
-            # Could implement fallback logic here
+            logger.error(f"Chat completion failed on ollama: {e}")
+            if can_fallback:
+                return await self._fallback_to_google(request, model_name, e)
             raise
+        finally:
+            self._ollama_concurrent -= 1
 
     async def chat_completion_stream(
         self,
         request: ChatCompletionRequest,
     ) -> AsyncIterator[ChatCompletionStreamResponse]:
-        """Route streaming chat completion request to appropriate provider."""
+        """Route streaming chat completion with auto-fallback."""
         provider_name, model_name = self._parse_model(request.model)
-        provider = self._get_provider(provider_name)
 
-        logger.info(f"Routing streaming chat completion to {provider_name}/{model_name}")
+        # Non-Ollama: direct
+        if provider_name != "ollama":
+            provider = self._get_provider(provider_name)
+            logger.info(f"Routing streaming to {provider_name}/{model_name}")
+            async for chunk in provider.chat_completion_stream(request, model_name):
+                yield chunk
+            return
+
+        # Ollama with fallback
+        can_fallback = self._can_fallback_to_google(provider_name)
+
+        if can_fallback and not self._should_use_ollama():
+            from .google import GoogleProvider
+
+            google = self.providers["google"]
+            assert isinstance(google, GoogleProvider)
+            gemini_model = google.map_model(model_name)
+            logger.warning(f"Streaming fallback to Google Gemini ({gemini_model})")
+            async for chunk in google.chat_completion_stream(request, gemini_model):
+                yield chunk
+            return
+
+        provider = self._get_provider("ollama")
+        logger.info(f"Routing streaming to ollama/{model_name}")
+        self._ollama_concurrent += 1
 
         try:
             async for chunk in provider.chat_completion_stream(request, model_name):
                 yield chunk
         except Exception as e:
-            logger.error(f"Streaming chat completion failed on {provider_name}: {e}")
-            raise
+            logger.error(f"Streaming failed on ollama: {e}")
+            if can_fallback:
+                from .google import GoogleProvider
+
+                google = self.providers["google"]
+                assert isinstance(google, GoogleProvider)
+                gemini_model = google.map_model(model_name)
+                logger.warning(f"Streaming fallback to Google Gemini ({gemini_model})")
+                async for chunk in google.chat_completion_stream(request, gemini_model):
+                    yield chunk
+            else:
+                raise
+        finally:
+            self._ollama_concurrent -= 1
 
     async def embeddings(
         self,
@@ -175,10 +293,20 @@ class ProviderRouter:
         all_healthy = all(r.get("status") == "healthy" for r in results.values())
         any_healthy = any(r.get("status") == "healthy" for r in results.values())
 
-        return {
+        status_info: dict[str, Any] = {
             "status": "healthy" if all_healthy else ("degraded" if any_healthy else "unhealthy"),
             "providers": results,
         }
+
+        # Include fallback info
+        if settings.auto_fallback_enabled and "google" in self.providers:
+            status_info["fallback"] = {
+                "enabled": True,
+                "ollama_concurrent": self._ollama_concurrent,
+                "ollama_max_concurrent": settings.ollama_max_concurrent,
+            }
+
+        return status_info
 
     async def close(self) -> None:
         """Close all providers."""
