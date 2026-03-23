@@ -144,26 +144,6 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Memoro Mobile
-	{
-		path: 'apps/memoro/apps/mobile/.env',
-		vars: {
-			EXPO_PUBLIC_SUPABASE_URL: (env) => env.MEMORO_SUPABASE_URL,
-			EXPO_PUBLIC_SUPABASE_ANON_KEY: (env) => env.MEMORO_SUPABASE_ANON_KEY,
-			EXPO_PUBLIC_MIDDLEWARE_API_URL: (env) => env.MEMORO_MIDDLEWARE_API_URL,
-			EXPO_PUBLIC_APPID: (env) => env.MEMORO_APPID,
-		},
-	},
-
-	// Memoro Web
-	{
-		path: 'apps/memoro/apps/web/.env',
-		vars: {
-			PUBLIC_SUPABASE_URL: (env) => env.MEMORO_SUPABASE_URL,
-			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MEMORO_SUPABASE_ANON_KEY,
-		},
-	},
-
 	// Manadeck Backend
 	{
 		path: 'apps/manadeck/apps/backend/.env',
@@ -181,8 +161,6 @@ const APP_CONFIGS = [
 	{
 		path: 'apps/manadeck/apps/web/.env',
 		vars: {
-			PUBLIC_SUPABASE_URL: (env) => env.MANADECK_SUPABASE_URL,
-			PUBLIC_SUPABASE_ANON_KEY: (env) => env.MANADECK_SUPABASE_ANON_KEY,
 			PUBLIC_API_URL: (env) => `http://localhost:${env.MANADECK_BACKEND_PORT || '3004'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
 			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANADECK || '',
@@ -657,12 +635,7 @@ const APP_CONFIGS = [
 	{
 		path: 'games/worldream/apps/web/.env',
 		vars: {
-			PUBLIC_SUPABASE_URL: (env) => env.WORLDREAM_SUPABASE_URL,
-			PUBLIC_SUPABASE_ANON_KEY: (env) => env.WORLDREAM_SUPABASE_ANON_KEY,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			OPENAI_API_KEY: (env) => env.WORLDREAM_OPENAI_API_KEY,
-			GEMINI_API_KEY: (env) => env.WORLDREAM_GEMINI_API_KEY,
-			REPLICATE_API_TOKEN: (env) => env.WORLDREAM_REPLICATE_API_TOKEN,
 		},
 	},
 
