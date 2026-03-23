@@ -1,0 +1,164 @@
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { api } from '$lib/api';
+
+	let name = $state('');
+	let category = $state<string>('sight');
+	let description = $state('');
+	let address = $state('');
+	let submitting = $state(false);
+	let error = $state('');
+
+	const categories = [
+		{ value: 'sight', labelKey: 'category.sight' },
+		{ value: 'restaurant', labelKey: 'category.restaurant' },
+		{ value: 'shop', labelKey: 'category.shop' },
+		{ value: 'museum', labelKey: 'category.museum' },
+	];
+
+	let isValid = $derived(name.trim().length > 0 && description.trim().length > 10);
+
+	async function handleSubmit() {
+		if (!isValid || submitting) return;
+
+		submitting = true;
+		error = '';
+
+		try {
+			const token = await authStore.getValidToken();
+			if (!token) {
+				error = $_('add.loginRequired');
+				return;
+			}
+
+			const res = await fetch(api('/locations'), {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					name: name.trim(),
+					category,
+					description: description.trim(),
+					address: address.trim() || undefined,
+				}),
+			});
+
+			if (res.ok) {
+				const data = await res.json();
+				goto(`/locations/${data.location.id}`);
+			} else {
+				const data = await res.json().catch(() => ({}));
+				error = data.message || $_('add.error');
+			}
+		} catch {
+			error = $_('add.error');
+		} finally {
+			submitting = false;
+		}
+	}
+</script>
+
+<svelte:head>
+	<title>{$_('add.title')} - CityCorners</title>
+</svelte:head>
+
+<header class="mb-6">
+	<h1 class="text-2xl font-bold text-foreground">{$_('add.title')}</h1>
+	<p class="text-foreground-secondary">{$_('add.subtitle')}</p>
+</header>
+
+{#if !authStore.isAuthenticated}
+	<div class="rounded-xl border border-border bg-background-card p-8 text-center">
+		<span class="mb-2 block text-4xl">📍</span>
+		<p class="mb-4 text-foreground-secondary">{$_('add.loginRequired')}</p>
+		<a
+			href="/login?redirectTo=/add"
+			class="inline-block rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+		>
+			{$_('settings.login')}
+		</a>
+	</div>
+{:else}
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			handleSubmit();
+		}}
+		class="space-y-5"
+	>
+		{#if error}
+			<div class="rounded-lg bg-red-500/10 p-3 text-sm text-red-500">{error}</div>
+		{/if}
+
+		<div>
+			<label for="name" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.name')}</label
+			>
+			<input
+				id="name"
+				type="text"
+				bind:value={name}
+				placeholder={$_('add.namePlaceholder')}
+				class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+			/>
+		</div>
+
+		<div>
+			<label for="category" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.category')}</label
+			>
+			<div class="flex flex-wrap gap-2">
+				{#each categories as cat}
+					<button
+						type="button"
+						class="rounded-full px-4 py-2 text-sm transition-colors {category === cat.value
+							? 'bg-primary text-white'
+							: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover border border-border'}"
+						onclick={() => (category = cat.value)}
+					>
+						{$_(cat.labelKey)}
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		<div>
+			<label for="description" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.description')}</label
+			>
+			<textarea
+				id="description"
+				bind:value={description}
+				placeholder={$_('add.descriptionPlaceholder')}
+				rows="4"
+				class="w-full resize-none rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+			></textarea>
+			<p class="mt-1 text-xs text-foreground-secondary/60">{$_('add.minChars')}</p>
+		</div>
+
+		<div>
+			<label for="address" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.address')}</label
+			>
+			<input
+				id="address"
+				type="text"
+				bind:value={address}
+				placeholder={$_('add.addressPlaceholder')}
+				class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+			/>
+		</div>
+
+		<button
+			type="submit"
+			disabled={!isValid || submitting}
+			class="w-full rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+		>
+			{submitting ? $_('add.submitting') : $_('add.submit')}
+		</button>
+	</form>
+{/if}

@@ -13,6 +13,7 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { api } from '$lib/api';
 
 	const appItems = getPillAppItems('citycorners');
 
@@ -52,6 +53,7 @@
 	let navItems = $derived<PillNavItem[]>([
 		{ href: '/', label: $_('nav.explore'), icon: 'compass' },
 		{ href: '/map', label: $_('nav.map'), icon: 'mappin' },
+		{ href: '/add', label: $_('nav.add'), icon: 'plus' },
 		{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
 		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
 	]);
@@ -70,11 +72,6 @@
 		goto('/login');
 	}
 
-	const backendUrl =
-		typeof window !== 'undefined'
-			? (window as any).__PUBLIC_BACKEND_URL__ || 'http://localhost:3025'
-			: 'http://localhost:3025';
-
 	let inputBarBottomOffset = $derived(showNav ? '70px' : '16px');
 
 	interface SearchItem extends QuickInputItem {
@@ -85,7 +82,7 @@
 		if (!query.trim()) return [];
 
 		try {
-			const res = await fetch(`${backendUrl}/locations/search?q=${encodeURIComponent(query)}`);
+			const res = await fetch(api(`/locations/search?q=${encodeURIComponent(query)}`));
 			if (!res.ok) return [];
 			const data = await res.json();
 			return data.locations.slice(0, 8).map((loc: any) => ({

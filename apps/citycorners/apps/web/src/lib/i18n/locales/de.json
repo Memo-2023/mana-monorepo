@@ -6,6 +6,7 @@
 	"nav": {
 		"explore": "Entdecken",
 		"map": "Karte",
+		"add": "Hinzufügen",
 		"favorites": "Favoriten",
 		"settings": "Einstellungen",
 		"showNav": "Navigation einblenden",
@@ -73,6 +74,22 @@
 	"auth": {
 		"loginTitle": "Login - CityCorners",
 		"registerTitle": "Registrieren - CityCorners"
+	},
+	"add": {
+		"title": "Ort hinzufügen",
+		"subtitle": "Teile deinen Lieblingsort in Konstanz",
+		"name": "Name",
+		"namePlaceholder": "z.B. Café am See",
+		"category": "Kategorie",
+		"description": "Beschreibung",
+		"descriptionPlaceholder": "Was macht diesen Ort besonders?",
+		"minChars": "Mindestens 10 Zeichen",
+		"address": "Adresse (optional)",
+		"addressPlaceholder": "z.B. Seestraße 1, 78462 Konstanz",
+		"submit": "Ort einreichen",
+		"submitting": "Wird eingereicht...",
+		"loginRequired": "Melde dich an, um Orte hinzuzufügen.",
+		"error": "Fehler beim Einreichen. Bitte versuche es erneut."
 	},
 	"offline": {
 		"title": "Keine Verbindung",

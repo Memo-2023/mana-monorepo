@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { _ } from 'svelte-i18n';
+	import { api } from '$lib/api';
 
 	interface Location {
 		id: string;
@@ -17,11 +18,6 @@
 	let locations = $state<Location[]>([]);
 	let mapContainer: HTMLDivElement;
 	let map: any = null;
-
-	const backendUrl =
-		typeof window !== 'undefined'
-			? (window as any).__PUBLIC_BACKEND_URL__ || 'http://localhost:3025'
-			: 'http://localhost:3025';
 
 	const categoryColors: Record<string, string> = {
 		sight: '#2563eb',
@@ -40,7 +36,7 @@
 	onMount(async () => {
 		// Load locations
 		try {
-			const res = await fetch(`${backendUrl}/locations`);
+			const res = await fetch(api('/locations'));
 			const data = await res.json();
 			locations = data.locations;
 		} catch (err) {

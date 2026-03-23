@@ -2,21 +2,14 @@
  * Favorites Store - Manages favorite locations using Svelte 5 runes
  */
 
-import { browser } from '$app/environment';
 import { authStore } from './auth.svelte';
+import { api } from '$lib/api';
 
 interface Favorite {
 	id: string;
 	userId: string;
 	locationId: string;
 	createdAt: string;
-}
-
-function getBackendUrl(): string {
-	if (browser && typeof window !== 'undefined') {
-		return (window as any).__PUBLIC_BACKEND_URL__ || 'http://localhost:3025';
-	}
-	return 'http://localhost:3025';
 }
 
 let favoriteLocationIds = $state<Set<string>>(new Set());
@@ -42,7 +35,7 @@ export const favoritesStore = {
 			const token = await authStore.getValidToken();
 			if (!token) return;
 
-			const res = await fetch(`${getBackendUrl()}/favorites`, {
+			const res = await fetch(`${api('/favorites')}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 
@@ -75,7 +68,7 @@ export const favoritesStore = {
 		favoriteLocationIds = newSet;
 
 		try {
-			const res = await fetch(`${getBackendUrl()}/favorites/${locationId}`, {
+			const res = await fetch(`${api(`/favorites/${locationId}`)}`, {
 				method: isFav ? 'DELETE' : 'POST',
 				headers: { Authorization: `Bearer ${token}` },
 			});

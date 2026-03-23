@@ -5,6 +5,7 @@
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { api } from '$lib/api';
 
 	interface TimelineEntry {
 		year: string;
@@ -27,11 +28,6 @@
 	let loading = $state(true);
 	let mapContainer: HTMLDivElement;
 
-	const backendUrl =
-		typeof window !== 'undefined'
-			? (window as any).__PUBLIC_BACKEND_URL__ || 'http://localhost:3025'
-			: 'http://localhost:3025';
-
 	const categoryLabels: Record<string, string> = {
 		sight: 'Sehenswürdigkeit',
 		restaurant: 'Restaurant',
@@ -48,7 +44,7 @@
 
 	onMount(async () => {
 		try {
-			const res = await fetch(`${backendUrl}/locations/${$page.params.id}`);
+			const res = await fetch(api(`/locations/${$page.params.id}`));
 			const data = await res.json();
 			location = data.location;
 		} catch (err) {

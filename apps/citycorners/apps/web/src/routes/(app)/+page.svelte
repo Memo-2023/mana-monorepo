@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { api } from '$lib/api';
 
 	interface Location {
 		id: string;
@@ -19,11 +20,6 @@
 	let loading = $state(true);
 	let selectedCategory = $state<string | null>(null);
 
-	const backendUrl =
-		typeof window !== 'undefined'
-			? (window as any).__PUBLIC_BACKEND_URL__ || 'http://localhost:3025'
-			: 'http://localhost:3025';
-
 	const categoryKeys = ['sight', 'restaurant', 'shop', 'museum'];
 
 	let filtered = $derived(
@@ -32,7 +28,7 @@
 
 	onMount(async () => {
 		try {
-			const res = await fetch(`${backendUrl}/locations`);
+			const res = await fetch(api('/locations'));
 			const data = await res.json();
 			locations = data.locations;
 		} catch (err) {

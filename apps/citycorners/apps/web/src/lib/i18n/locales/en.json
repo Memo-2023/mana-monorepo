@@ -6,6 +6,7 @@
 	"nav": {
 		"explore": "Explore",
 		"map": "Map",
+		"add": "Add",
 		"favorites": "Favorites",
 		"settings": "Settings",
 		"showNav": "Show navigation",
@@ -73,6 +74,22 @@
 	"auth": {
 		"loginTitle": "Login - CityCorners",
 		"registerTitle": "Sign up - CityCorners"
+	},
+	"add": {
+		"title": "Add a place",
+		"subtitle": "Share your favorite spot in Konstanz",
+		"name": "Name",
+		"namePlaceholder": "e.g. Lakeside Café",
+		"category": "Category",
+		"description": "Description",
+		"descriptionPlaceholder": "What makes this place special?",
+		"minChars": "At least 10 characters",
+		"address": "Address (optional)",
+		"addressPlaceholder": "e.g. Seestraße 1, 78462 Konstanz",
+		"submit": "Submit place",
+		"submitting": "Submitting...",
+		"loginRequired": "Sign in to add places.",
+		"error": "Failed to submit. Please try again."
 	},
 	"offline": {
 		"title": "No connection",
