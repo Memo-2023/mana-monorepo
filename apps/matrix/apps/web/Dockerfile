@@ -17,6 +17,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY patches ./patches
 
 # Copy shared packages needed by matrix web
 COPY packages/shared-auth ./packages/shared-auth
