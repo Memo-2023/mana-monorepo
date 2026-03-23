@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
+	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
 
@@ -106,9 +107,9 @@
 {:else if !location}
 	<div class="py-20 text-center">
 		<span class="mb-4 block text-5xl">🔍</span>
-		<p class="text-foreground-secondary">Location nicht gefunden.</p>
+		<p class="text-foreground-secondary">{$_('detail.notFound')}</p>
 		<a href="/" class="mt-4 inline-block text-sm text-primary hover:underline"
-			>Zurück zur Übersicht</a
+			>{$_('detail.back')}</a
 		>
 	</div>
 {:else}
@@ -142,8 +143,8 @@
 					class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition-all hover:bg-black/50"
 					onclick={() => favoritesStore.toggle(location!.id)}
 					title={favoritesStore.isFavorite(location.id)
-						? 'Aus Favoriten entfernen'
-						: 'Zu Favoriten hinzufügen'}
+						? $_('favorites.remove')
+						: $_('favorites.add')}
 				>
 					{#if favoritesStore.isFavorite(location.id)}
 						<svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
@@ -235,7 +236,7 @@
 							d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
 						/>
 					</svg>
-					In OpenStreetMap öffnen
+					{$_('detail.openInMaps')}
 				</a>
 			</div>
 		{/if}
@@ -243,7 +244,7 @@
 		<!-- Timeline -->
 		{#if location.timeline && location.timeline.length > 0}
 			<div>
-				<h2 class="mb-4 text-xl font-semibold text-foreground">Geschichte</h2>
+				<h2 class="mb-4 text-xl font-semibold text-foreground">{$_('detail.history')}</h2>
 				<div class="relative space-y-0">
 					{#each location.timeline as entry, i}
 						<div class="relative flex gap-4 pb-6 {i < location.timeline!.length - 1 ? '' : ''}">

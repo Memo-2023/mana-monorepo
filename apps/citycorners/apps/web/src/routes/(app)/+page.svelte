@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
 
@@ -23,12 +24,7 @@
 			? (window as any).__PUBLIC_BACKEND_URL__ || 'http://localhost:3025'
 			: 'http://localhost:3025';
 
-	const categories = [
-		{ value: 'sight', label: 'Sehenswürdigkeiten' },
-		{ value: 'restaurant', label: 'Restaurants' },
-		{ value: 'shop', label: 'Läden' },
-		{ value: 'museum', label: 'Museen' },
-	];
+	const categoryKeys = ['sight', 'restaurant', 'shop', 'museum'];
 
 	let filtered = $derived(
 		selectedCategory ? locations.filter((l) => l.category === selectedCategory) : locations
@@ -58,12 +54,12 @@
 </script>
 
 <svelte:head>
-	<title>CityCorners - Entdecke Konstanz</title>
+	<title>{$_('app.name')} - {$_('app.tagline')}</title>
 </svelte:head>
 
 <header class="mb-6">
-	<h1 class="text-2xl font-bold text-foreground">Entdecke Konstanz</h1>
-	<p class="text-foreground-secondary">Sehenswürdigkeiten, Restaurants, Museen und mehr</p>
+	<h1 class="text-2xl font-bold text-foreground">{$_('home.title')}</h1>
+	<p class="text-foreground-secondary">{$_('home.subtitle')}</p>
 </header>
 
 <div class="mb-6 flex flex-wrap gap-2">
@@ -73,24 +69,24 @@
 			: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover'}"
 		onclick={() => (selectedCategory = null)}
 	>
-		Alle
+		{$_('home.all')}
 	</button>
-	{#each categories as cat}
+	{#each categoryKeys as cat}
 		<button
-			class="rounded-full px-4 py-2 text-sm transition-colors {selectedCategory === cat.value
+			class="rounded-full px-4 py-2 text-sm transition-colors {selectedCategory === cat
 				? 'bg-primary text-white'
 				: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover'}"
-			onclick={() => (selectedCategory = cat.value)}
+			onclick={() => (selectedCategory = cat)}
 		>
-			{cat.label}
+			{$_(`categories.${cat}`)}
 		</button>
 	{/each}
 </div>
 
 {#if loading}
-	<p class="text-foreground-secondary">Laden...</p>
+	<p class="text-foreground-secondary">{$_('home.loading')}</p>
 {:else if filtered.length === 0}
-	<p class="text-foreground-secondary">Keine Locations gefunden.</p>
+	<p class="text-foreground-secondary">{$_('home.noResults')}</p>
 {:else}
 	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 		{#each filtered as location}
@@ -112,8 +108,8 @@
 						class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition-all hover:bg-black/50"
 						onclick={(e) => handleFavoriteToggle(e, location.id)}
 						title={favoritesStore.isFavorite(location.id)
-							? 'Aus Favoriten entfernen'
-							: 'Zu Favoriten hinzufügen'}
+							? $_('favorites.remove')
+							: $_('favorites.add')}
 					>
 						{#if favoritesStore.isFavorite(location.id)}
 							<svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
@@ -143,7 +139,7 @@
 					<span
 						class="mb-1 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
 					>
-						{categories.find((c) => c.value === location.category)?.label ?? location.category}
+						{$_(`categories.${location.category}`)}
 					</span>
 					<h2 class="text-lg font-semibold text-foreground group-hover:text-primary">
 						{location.name}

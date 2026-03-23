@@ -1,25 +1,66 @@
 ---
-// This is a placeholder for the filter component.
-// The actual filtering logic will be implemented on the page.
-const categories = ['Sehenswürdigkeit', 'Restaurant', 'Laden'];
+const categories = [
+	{ value: '', label: 'Alle' },
+	{ value: 'sehenswürdigkeit', label: 'Sehenswürdigkeiten' },
+	{ value: 'restaurant', label: 'Restaurants' },
+	{ value: 'laden', label: 'Läden' },
+	{ value: 'museum', label: 'Museen' },
+];
 ---
 
-<div class="filter-container">
-	<label for="category-filter">Filter by Category:</label>
-	<select id="category-filter">
-		<option value="">All</option>
-		{categories.map((category) => <option value={category.toLowerCase()}>{category}</option>)}
-	</select>
+<div class="flex flex-wrap gap-2" id="category-filter">
+	{
+		categories.map((cat) => (
+			<button
+				class="filter-btn rounded-full px-4 py-2 text-sm font-medium transition-colors"
+				data-category={cat.value}
+			>
+				{cat.label}
+			</button>
+		))
+	}
 </div>
 
-<style>
-	.filter-container {
-		margin: 20px;
-		text-align: center;
-	}
-	#category-filter {
-		padding: 10px;
-		border-radius: 5px;
-		border: 1px solid #ccc;
-	}
-</style>
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const buttons = document.querySelectorAll('.filter-btn');
+		const container = document.getElementById('locations-container');
+		if (!container) return;
+		const allCards = Array.from(container.children) as HTMLElement[];
+		let activeCategory = '';
+
+		function updateButtons() {
+			buttons.forEach((btn) => {
+				const cat = (btn as HTMLElement).dataset.category || '';
+				if (cat === activeCategory) {
+					btn.className =
+						'filter-btn rounded-full px-4 py-2 text-sm font-medium transition-colors bg-primary text-white';
+				} else {
+					btn.className =
+						'filter-btn rounded-full px-4 py-2 text-sm font-medium transition-colors bg-white text-gray-600 hover:bg-gray-100 border border-gray-200';
+				}
+			});
+		}
+
+		function filterCards() {
+			allCards.forEach((card) => {
+				const cardCategory = card.dataset.category || '';
+				if (!activeCategory || cardCategory === activeCategory) {
+					card.style.display = '';
+				} else {
+					card.style.display = 'none';
+				}
+			});
+		}
+
+		buttons.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				activeCategory = (btn as HTMLElement).dataset.category || '';
+				updateButtons();
+				filterCards();
+			});
+		});
+
+		updateButtons();
+	});
+</script>

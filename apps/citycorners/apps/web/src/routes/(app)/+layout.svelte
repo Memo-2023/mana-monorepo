@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { _, locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
@@ -10,6 +11,8 @@
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { setLocale, supportedLocales } from '$lib/i18n';
 
 	const appItems = getPillAppItems('citycorners');
 
@@ -34,13 +37,23 @@
 		THEME_DEFINITIONS[theme.variant]?.label || THEME_DEFINITIONS.lume?.label || 'Lume'
 	);
 
-	let userEmail = $derived(authStore.user?.email || 'Menü');
+	// Language
+	let currentLocale = $derived($locale || 'de');
+	function handleLocaleChange(newLocale: string) {
+		setLocale(newLocale as 'de' | 'en');
+	}
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
+
+	let userEmail = $derived(authStore.user?.email || $_('nav.settings'));
 
 	let navItems = $derived<PillNavItem[]>([
-		{ href: '/', label: 'Entdecken', icon: 'compass' },
-		{ href: '/map', label: 'Karte', icon: 'mappin' },
-		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
-		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+		{ href: '/', label: $_('nav.explore'), icon: 'compass' },
+		{ href: '/map', label: $_('nav.map'), icon: 'mappin' },
+		{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
+		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
 	]);
 
 	function handleToggleTheme() {
@@ -56,13 +69,6 @@
 		favoritesStore.clear();
 		goto('/login');
 	}
-
-	const categoryLabels: Record<string, string> = {
-		sight: 'Sehenswürdigkeit',
-		restaurant: 'Restaurant',
-		shop: 'Laden',
-		museum: 'Museum',
-	};
 
 	const backendUrl =
 		typeof window !== 'undefined'
@@ -85,7 +91,7 @@
 			return data.locations.slice(0, 8).map((loc: any) => ({
 				id: loc.id,
 				title: loc.name,
-				subtitle: categoryLabels[loc.category] || loc.category,
+				subtitle: $_(`category.${loc.category}`),
 				icon: 'mappin' as const,
 				href: `/locations/${loc.id}`,
 			}));
@@ -125,6 +131,9 @@
 			{currentThemeVariantLabel}
 			themeMode={theme.mode}
 			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
 			showLogout={authStore.isAuthenticated}
 			onLogout={handleLogout}
 			loginHref="/login"
@@ -140,9 +149,9 @@
 	<QuickInputBar
 		onSearch={handleSearch}
 		onSelect={handleSelect}
-		placeholder="Ort suchen..."
-		emptyText="Keine Ergebnisse"
-		searchingText="Suche..."
+		placeholder={$_('search.placeholder')}
+		emptyText={$_('search.noResults')}
+		searchingText={$_('search.searching')}
 		appIcon="mappin"
 		bottomOffset={inputBarBottomOffset}
 		hasFabRight={true}
@@ -151,7 +160,7 @@
 	<button
 		class="pillnav-fab"
 		onclick={handleNavToggle}
-		title={showNav ? 'Navigation ausblenden' : 'Navigation einblenden'}
+		title={showNav ? $_('nav.hideNav') : $_('nav.showNav')}
 	>
 		{#if !showNav}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">

@@ -1,0 +1,82 @@
+{
+	"app": {
+		"name": "CityCorners",
+		"tagline": "Entdecke Konstanz"
+	},
+	"nav": {
+		"explore": "Entdecken",
+		"map": "Karte",
+		"favorites": "Favoriten",
+		"settings": "Einstellungen",
+		"showNav": "Navigation einblenden",
+		"hideNav": "Navigation ausblenden"
+	},
+	"home": {
+		"title": "Entdecke Konstanz",
+		"subtitle": "Sehenswürdigkeiten, Restaurants, Museen und mehr",
+		"all": "Alle",
+		"loading": "Laden...",
+		"noResults": "Keine Locations gefunden."
+	},
+	"categories": {
+		"sight": "Sehenswürdigkeiten",
+		"restaurant": "Restaurants",
+		"shop": "Läden",
+		"museum": "Museen"
+	},
+	"category": {
+		"sight": "Sehenswürdigkeit",
+		"restaurant": "Restaurant",
+		"shop": "Laden",
+		"museum": "Museum"
+	},
+	"detail": {
+		"history": "Geschichte",
+		"openInMaps": "In OpenStreetMap öffnen",
+		"back": "Zurück zur Übersicht",
+		"notFound": "Location nicht gefunden."
+	},
+	"favorites": {
+		"title": "Favoriten",
+		"subtitle": "Deine gespeicherten Orte",
+		"empty": "Noch keine Favoriten. Tippe auf das Herz bei einer Location, um sie zu speichern.",
+		"loginRequired": "Melde dich an, um Favoriten zu speichern.",
+		"add": "Zu Favoriten hinzufügen",
+		"remove": "Aus Favoriten entfernen"
+	},
+	"map": {
+		"title": "Karte",
+		"subtitle": "Alle Orte in Konstanz"
+	},
+	"search": {
+		"placeholder": "Ort suchen...",
+		"noResults": "Keine Ergebnisse",
+		"searching": "Suche..."
+	},
+	"settings": {
+		"title": "Einstellungen",
+		"appearance": "Erscheinungsbild",
+		"mode": "Modus",
+		"light": "Hell",
+		"dark": "Dunkel",
+		"system": "System",
+		"colorScheme": "Farbschema",
+		"account": "Account",
+		"email": "E-Mail",
+		"logout": "Abmelden",
+		"loginPrompt": "Melde dich an, um Favoriten zu speichern und alle Features zu nutzen.",
+		"login": "Anmelden",
+		"register": "Registrieren",
+		"about": "Über CityCorners",
+		"aboutText": "CityCorners ist ein Stadtführer für Konstanz am Bodensee. Entdecke Sehenswürdigkeiten, Restaurants, Museen und Läden."
+	},
+	"auth": {
+		"loginTitle": "Login - CityCorners",
+		"registerTitle": "Registrieren - CityCorners"
+	},
+	"offline": {
+		"title": "Keine Verbindung",
+		"message": "Du bist gerade offline. Sobald du wieder eine Internetverbindung hast, kannst du CityCorners weiter nutzen.",
+		"retry": "Erneut versuchen"
+	}
+}

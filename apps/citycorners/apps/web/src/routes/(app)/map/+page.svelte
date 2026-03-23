@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { _ } from 'svelte-i18n';
 
 	interface Location {
 		id: string;
@@ -88,14 +89,14 @@
 </script>
 
 <svelte:head>
-	<title>Karte - CityCorners</title>
+	<title>{$_('map.title')} - CityCorners</title>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 </svelte:head>
 
 <div class="map-page">
 	<header class="mb-4">
-		<h1 class="text-2xl font-bold text-foreground">Karte</h1>
-		<p class="text-foreground-secondary">Alle Orte in Konstanz</p>
+		<h1 class="text-2xl font-bold text-foreground">{$_('map.title')}</h1>
+		<p class="text-foreground-secondary">{$_('map.subtitle')}</p>
 	</header>
 
 	<div class="legend mb-4 flex flex-wrap gap-3">

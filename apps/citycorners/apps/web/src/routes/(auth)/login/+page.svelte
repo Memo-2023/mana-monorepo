@@ -2,9 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
+	import { locale } from 'svelte-i18n';
 	import { LoginPage } from '@manacore/shared-auth-ui';
+	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import { CitycornersLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import '$lib/i18n';
 
 	const redirectTo = $derived.by(() => {
 		const queryRedirect = $page.url.searchParams.get('redirectTo');
@@ -21,6 +24,7 @@
 		return '/';
 	});
 
+	const translations = $derived(getLoginTranslations($locale || 'de'));
 	const verified = $derived($page.url.searchParams.get('verified') === 'true');
 	const initialEmail = $derived($page.url.searchParams.get('email') || '');
 
@@ -34,7 +38,7 @@
 </script>
 
 <svelte:head>
-	<title>Login - CityCorners</title>
+	<title>{translations.title} - CityCorners</title>
 </svelte:head>
 
 <LoginPage
@@ -51,6 +55,7 @@
 	forgotPasswordPath="/forgot-password"
 	lightBackground="#eff6ff"
 	darkBackground="#1e1b4b"
+	{translations}
 	{verified}
 	{initialEmail}
 />

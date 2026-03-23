@@ -1,0 +1,82 @@
+{
+	"app": {
+		"name": "CityCorners",
+		"tagline": "Discover Konstanz"
+	},
+	"nav": {
+		"explore": "Explore",
+		"map": "Map",
+		"favorites": "Favorites",
+		"settings": "Settings",
+		"showNav": "Show navigation",
+		"hideNav": "Hide navigation"
+	},
+	"home": {
+		"title": "Discover Konstanz",
+		"subtitle": "Sights, restaurants, museums and more",
+		"all": "All",
+		"loading": "Loading...",
+		"noResults": "No locations found."
+	},
+	"categories": {
+		"sight": "Sights",
+		"restaurant": "Restaurants",
+		"shop": "Shops",
+		"museum": "Museums"
+	},
+	"category": {
+		"sight": "Sight",
+		"restaurant": "Restaurant",
+		"shop": "Shop",
+		"museum": "Museum"
+	},
+	"detail": {
+		"history": "History",
+		"openInMaps": "Open in OpenStreetMap",
+		"back": "Back to overview",
+		"notFound": "Location not found."
+	},
+	"favorites": {
+		"title": "Favorites",
+		"subtitle": "Your saved places",
+		"empty": "No favorites yet. Tap the heart on a location to save it.",
+		"loginRequired": "Sign in to save favorites.",
+		"add": "Add to favorites",
+		"remove": "Remove from favorites"
+	},
+	"map": {
+		"title": "Map",
+		"subtitle": "All places in Konstanz"
+	},
+	"search": {
+		"placeholder": "Search places...",
+		"noResults": "No results",
+		"searching": "Searching..."
+	},
+	"settings": {
+		"title": "Settings",
+		"appearance": "Appearance",
+		"mode": "Mode",
+		"light": "Light",
+		"dark": "Dark",
+		"system": "System",
+		"colorScheme": "Color scheme",
+		"account": "Account",
+		"email": "Email",
+		"logout": "Sign out",
+		"loginPrompt": "Sign in to save favorites and use all features.",
+		"login": "Sign in",
+		"register": "Sign up",
+		"about": "About CityCorners",
+		"aboutText": "CityCorners is a city guide for Konstanz at Lake Constance. Discover sights, restaurants, museums and shops."
+	},
+	"auth": {
+		"loginTitle": "Login - CityCorners",
+		"registerTitle": "Sign up - CityCorners"
+	},
+	"offline": {
+		"title": "No connection",
+		"message": "You are currently offline. You can continue using CityCorners once you have an internet connection again.",
+		"retry": "Try again"
+	}
+}

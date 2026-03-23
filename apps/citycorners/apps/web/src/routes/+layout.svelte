@@ -1,8 +1,10 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import { isLoading as isLocaleLoading } from 'svelte-i18n';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { waitLocale } from '$lib/i18n';
 	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
 
 	let { children } = $props();
@@ -13,6 +15,7 @@
 		const cleanupErrorHandler = setupGlobalErrorHandler();
 
 		const init = async () => {
+			await waitLocale();
 			theme.initialize();
 			await authStore.initialize();
 			loading = false;
@@ -26,7 +29,7 @@
 
 <ToastContainer />
 
-{#if loading}
+{#if $isLocaleLoading || loading}
 	<div class="min-h-screen bg-background flex items-center justify-center">
 		<div class="text-center">
 			<div

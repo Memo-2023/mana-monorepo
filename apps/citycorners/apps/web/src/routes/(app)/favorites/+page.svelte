@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
 
@@ -18,13 +19,6 @@
 		typeof window !== 'undefined'
 			? (window as any).__PUBLIC_BACKEND_URL__ || 'http://localhost:3025'
 			: 'http://localhost:3025';
-
-	const categoryLabels: Record<string, string> = {
-		sight: 'Sehenswürdigkeit',
-		restaurant: 'Restaurant',
-		shop: 'Laden',
-		museum: 'Museum',
-	};
 
 	let favoriteLocations = $derived(allLocations.filter((l) => favoritesStore.isFavorite(l.id)));
 
@@ -52,32 +46,30 @@
 </script>
 
 <svelte:head>
-	<title>Favoriten - CityCorners</title>
+	<title>{$_('favorites.title')} - CityCorners</title>
 </svelte:head>
 
 <header class="mb-6">
-	<h1 class="text-2xl font-bold text-foreground">Favoriten</h1>
-	<p class="text-foreground-secondary">Deine gespeicherten Orte</p>
+	<h1 class="text-2xl font-bold text-foreground">{$_('favorites.title')}</h1>
+	<p class="text-foreground-secondary">{$_('favorites.subtitle')}</p>
 </header>
 
 {#if !authStore.isAuthenticated}
 	<div class="rounded-xl border border-border bg-background-card p-8 text-center">
-		<p class="mb-4 text-foreground-secondary">Melde dich an, um Favoriten zu speichern.</p>
+		<p class="mb-4 text-foreground-secondary">{$_('favorites.loginRequired')}</p>
 		<a
 			href="/login"
 			class="inline-block rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
 		>
-			Anmelden
+			{$_('settings.login')}
 		</a>
 	</div>
 {:else if loading}
-	<p class="text-foreground-secondary">Laden...</p>
+	<p class="text-foreground-secondary">{$_('home.loading')}</p>
 {:else if favoriteLocations.length === 0}
 	<div class="rounded-xl border border-border bg-background-card p-8 text-center">
 		<span class="mb-2 block text-4xl">💙</span>
-		<p class="text-foreground-secondary">
-			Noch keine Favoriten. Tippe auf das Herz bei einer Location, um sie zu speichern.
-		</p>
+		<p class="text-foreground-secondary">{$_('favorites.empty')}</p>
 	</div>
 {:else}
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -100,9 +92,7 @@
 					</div>
 				{/if}
 				<div class="min-w-0 flex-1">
-					<span class="text-xs text-primary"
-						>{categoryLabels[location.category] || location.category}</span
-					>
+					<span class="text-xs text-primary">{$_(`category.${location.category}`)}</span>
 					<h3 class="truncate font-semibold text-foreground group-hover:text-primary">
 						{location.name}
 					</h3>
@@ -110,7 +100,7 @@
 				<button
 					class="flex-shrink-0 p-1 text-red-500 transition-colors hover:text-red-600"
 					onclick={(e) => handleRemove(e, location.id)}
-					title="Aus Favoriten entfernen"
+					title={$_('favorites.remove')}
 				>
 					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
 						<path
