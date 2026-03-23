@@ -41,6 +41,7 @@
 		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
+		"@manacore/shared-app-onboarding": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",

@@ -8,6 +8,20 @@ import type { CalendarViewType } from '@calendar/shared';
  */
 const calendarOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei Kalender!',
+		description: 'Das kann Kalender für dich tun:',
+		emoji: '📅',
+		gradient: { from: 'blue-500', to: 'blue-700' },
+		bullets: [
+			'Termine erstellen & verwalten',
+			'Wochen-, Monats- & Agenda-Ansicht',
+			'Schnelleingabe per Text',
+			'Drag & Drop zum Verschieben',
+		],
+	},
+	{
 		id: 'weekStart',
 		type: 'select',
 		question: 'Wann beginnt deine Woche?',

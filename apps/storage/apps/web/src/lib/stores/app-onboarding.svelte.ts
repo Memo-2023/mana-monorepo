@@ -6,6 +6,20 @@ import { userSettings } from './user-settings.svelte';
  */
 const storageOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei Storage!',
+		description: 'Das kann Storage für dich tun:',
+		emoji: '☁️',
+		gradient: { from: 'blue-500', to: 'blue-700' },
+		bullets: [
+			'Dateien hochladen & verwalten',
+			'Ordnerstruktur & Tags',
+			'Sichere Links mit Passwortschutz',
+			'Drag & Drop Upload',
+		],
+	},
+	{
 		id: 'welcome',
 		type: 'info',
 		question: 'Willkommen bei Storage!',

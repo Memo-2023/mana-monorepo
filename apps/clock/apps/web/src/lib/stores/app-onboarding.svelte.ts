@@ -6,6 +6,20 @@ import { userSettings } from './user-settings.svelte';
  */
 const clockOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei Clock!',
+		description: 'Das kann Clock für dich tun:',
+		emoji: '🕐',
+		gradient: { from: 'blue-500', to: 'blue-700' },
+		bullets: [
+			'Flexible Timer & Stoppuhr',
+			'Pomodoro-Technik für produktives Arbeiten',
+			'Voreingestellte Timer-Dauern',
+			'Minimalistisches Design',
+		],
+	},
+	{
 		id: 'defaultTimer',
 		type: 'select',
 		question: 'Welche Timer-Dauer nutzt du am häufigsten?',

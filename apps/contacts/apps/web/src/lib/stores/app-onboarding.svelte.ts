@@ -7,6 +7,20 @@ import { contactsFilterStore } from './filter.svelte';
  */
 const contactsOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei Kontakte!',
+		description: 'Das kann Kontakte für dich tun:',
+		emoji: '👥',
+		gradient: { from: 'blue-500', to: 'blue-700' },
+		bullets: [
+			'Kontakte verwalten & organisieren',
+			'Import von Google oder vCard/CSV',
+			'Tags & Gruppen für bessere Übersicht',
+			'Schnellsuche & Filter',
+		],
+	},
+	{
 		id: 'sortOrder',
 		type: 'select',
 		question: 'Wie sortierst du Kontakte?',

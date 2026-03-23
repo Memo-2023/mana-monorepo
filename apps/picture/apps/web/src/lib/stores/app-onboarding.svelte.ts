@@ -6,6 +6,20 @@ import { userSettings } from './user-settings.svelte';
  */
 const pictureOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei Picture!',
+		description: 'Das kann Picture für dich tun:',
+		emoji: '🎨',
+		gradient: { from: 'indigo-500', to: 'indigo-700' },
+		bullets: [
+			'KI-Bilder generieren',
+			'Verschiedene Modelle & Stile',
+			'Galerie mit Grid-Ansicht',
+			'Bilder teilen & herunterladen',
+		],
+	},
+	{
 		id: 'viewMode',
 		type: 'select',
 		question: 'Wie möchtest du deine Bilder sehen?',

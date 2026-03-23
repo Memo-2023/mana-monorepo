@@ -7,6 +7,20 @@ import { todoSettings } from './settings.svelte';
  */
 const todoOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei Todo!',
+		description: 'Das kann Todo für dich tun:',
+		emoji: '✅',
+		gradient: { from: 'blue-500', to: 'blue-700' },
+		bullets: [
+			'Aufgaben erstellen & verwalten',
+			'Heute-, Inbox- & Kanban-Ansichten',
+			'Fälligkeiten & Prioritäten',
+			'Schnelleingabe per Text',
+		],
+	},
+	{
 		id: 'defaultView',
 		type: 'select',
 		question: 'Wo möchtest du starten?',

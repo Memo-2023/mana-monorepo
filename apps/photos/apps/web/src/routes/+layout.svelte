@@ -6,6 +6,8 @@
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { photosOnboarding } from '$lib/stores/app-onboarding.svelte';
 
 	let { children } = $props();
 
@@ -32,6 +34,10 @@
 	<div class="min-h-screen bg-background text-foreground">
 		{@render children()}
 	</div>
+
+	{#if photosOnboarding.shouldShow}
+		<MiniOnboardingModal store={photosOnboarding} appName="Photos" appEmoji="📸" />
+	{/if}
 {/if}
 
 <ToastContainer />

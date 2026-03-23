@@ -6,6 +6,20 @@ import { userSettings } from './user-settings.svelte';
  */
 const contextOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei Context!',
+		description: 'Das kann Context für dich tun:',
+		emoji: '📄',
+		gradient: { from: 'blue-500', to: 'blue-700' },
+		bullets: [
+			'Dokumente & Wissen organisieren',
+			'KI-gestützte Zusammenfassungen',
+			'Persönliche Wissensdatenbank',
+			'Schnelle Volltextsuche',
+		],
+	},
+	{
 		id: 'useCase',
 		type: 'select',
 		question: 'Wofür nutzt du Context?',

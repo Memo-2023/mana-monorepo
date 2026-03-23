@@ -42,6 +42,7 @@
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
+		"@manacore/shared-app-onboarding": "workspace:*",
 		"@planta/shared": "workspace:*",
 		"svelte-i18n": "^4.0.1"
 	},

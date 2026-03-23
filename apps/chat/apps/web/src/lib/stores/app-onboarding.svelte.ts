@@ -6,6 +6,20 @@ import { userSettings } from './user-settings.svelte';
  */
 const chatOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei Chat!',
+		description: 'Das kann Chat für dich tun:',
+		emoji: '💬',
+		gradient: { from: 'blue-500', to: 'blue-700' },
+		bullets: [
+			'KI-Chat mit lokalen & Cloud-Modellen',
+			'Konversationen organisieren & durchsuchen',
+			'Dateien & Bilder teilen',
+			'Code-Highlighting & Markdown',
+		],
+	},
+	{
 		id: 'defaultModel',
 		type: 'select',
 		question: 'Welches Modell bevorzugst du?',

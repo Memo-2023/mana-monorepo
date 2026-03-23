@@ -5,6 +5,8 @@
 	import { isLoading as i18nLoading, _ as t } from 'svelte-i18n';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { plantaOnboarding } from '$lib/stores/app-onboarding.svelte';
 
 	let { children } = $props();
 
@@ -35,4 +37,8 @@
 	<div class="min-h-screen bg-background text-foreground">
 		{@render children()}
 	</div>
+
+	{#if plantaOnboarding.shouldShow}
+		<MiniOnboardingModal store={plantaOnboarding} appName="Planta" appEmoji="🌱" />
+	{/if}
 {/if}

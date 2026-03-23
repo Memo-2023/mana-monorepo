@@ -6,6 +6,20 @@ import { userSettings } from './user-settings.svelte';
  */
 const manadeckOnboardingSteps: AppOnboardingStep[] = [
 	{
+		id: 'features',
+		type: 'info',
+		question: 'Willkommen bei ManaDeck!',
+		description: 'Das kann ManaDeck für dich tun:',
+		emoji: '🃏',
+		gradient: { from: 'blue-500', to: 'blue-700' },
+		bullets: [
+			'Kartendecks erstellen & lernen',
+			'Spaced Repetition für optimales Lernen',
+			'Fortschritt tracken',
+			'Verschiedene Kartentypen',
+		],
+	},
+	{
 		id: 'startAction',
 		type: 'select',
 		question: 'Wie möchtest du starten?',

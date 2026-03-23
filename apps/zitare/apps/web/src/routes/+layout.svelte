@@ -7,6 +7,8 @@
 	import { quotesStore } from '$lib/stores/quotes.svelte';
 	import { waitLocale } from '$lib/i18n';
 	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { zitareOnboarding } from '$lib/stores/app-onboarding.svelte';
 
 	let { children } = $props();
 
@@ -54,4 +56,8 @@
 	<div class="min-h-screen bg-background text-foreground">
 		{@render children()}
 	</div>
+
+	{#if zitareOnboarding.shouldShow}
+		<MiniOnboardingModal store={zitareOnboarding} appName="Zitare" appEmoji="✨" />
+	{/if}
 {/if}

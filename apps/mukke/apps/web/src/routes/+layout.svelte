@@ -3,6 +3,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { theme } from '$lib/stores/theme.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { mukkeOnboarding } from '$lib/stores/app-onboarding.svelte';
 
 	let { children } = $props();
 
@@ -34,4 +36,8 @@
 	<div class="min-h-screen bg-background text-foreground">
 		{@render children()}
 	</div>
+
+	{#if mukkeOnboarding.shouldShow}
+		<MiniOnboardingModal store={mukkeOnboarding} appName="Mukke" appEmoji="🎵" />
+	{/if}
 {/if}

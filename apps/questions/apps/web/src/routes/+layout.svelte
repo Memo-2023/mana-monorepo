@@ -7,6 +7,8 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { apiClient } from '$lib/api/client';
 	import { AppLoadingSkeleton } from '$lib/components/skeletons';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { questionsOnboarding } from '$lib/stores/app-onboarding.svelte';
 
 	let { children } = $props();
 
@@ -33,4 +35,8 @@
 	<div class="min-h-screen bg-background text-foreground">
 		{@render children()}
 	</div>
+
+	{#if questionsOnboarding.shouldShow}
+		<MiniOnboardingModal store={questionsOnboarding} appName="Questions" appEmoji="🔬" />
+	{/if}
 {/if}

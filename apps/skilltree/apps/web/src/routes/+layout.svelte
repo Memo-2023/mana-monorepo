@@ -5,6 +5,8 @@
 	import { isLoading as i18nLoading, _ as t } from 'svelte-i18n';
 	import { skillStore } from '$lib/stores/skills.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { skilltreeOnboarding } from '$lib/stores/app-onboarding.svelte';
 
 	let { children } = $props();
 
@@ -33,4 +35,8 @@
 	<div class="min-h-screen bg-gray-900 text-gray-100">
 		{@render children()}
 	</div>
+
+	{#if skilltreeOnboarding.shouldShow}
+		<MiniOnboardingModal store={skilltreeOnboarding} appName="SkillTree" appEmoji="🌳" />
+	{/if}
 {/if}
