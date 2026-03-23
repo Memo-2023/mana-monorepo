@@ -1,0 +1,14 @@
+/* This file is overwritten by the builder service with the org's theme */
+:root {
+  --color-primary: #64748b;
+  --color-primary-hover: #475569;
+  --color-primary-glow: rgba(100, 116, 139, 0.3);
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+  --color-background-page: #0f172a;
+  --color-background-card: #1e293b;
+  --color-background-card-hover: #334155;
+  --color-border: #334155;
+  --color-border-hover: #475569;
+}

@@ -132,7 +132,15 @@ manacore-monorepo/
 │   ├── mana-core-auth/      # Central authentication service
 │   ├── mana-search/         # Central search & content extraction service
 │   ├── mana-crawler/        # Web crawler service
-│   └── mana-llm/            # Central LLM abstraction service
+│   ├── mana-llm/            # Central LLM abstraction service
+│   ├── mana-landing-builder/# Org landing page builder (Astro → Cloudflare Pages)
+│   ├── mana-media/          # Central media platform (CAS, thumbnails)
+│   ├── mana-api-gateway/    # API gateway with rate limiting
+│   ├── mana-notify/         # Notification service (push, email, in-app)
+│   ├── mana-image-gen/      # Local AI image generation (FLUX)
+│   ├── mana-stt/            # Speech-to-text service
+│   ├── mana-tts/            # Text-to-speech service
+│   └── mana-voice-bot/      # Voice interaction bot
 ├── packages/                # Monorepo-wide shared packages
 └── docker/                  # Docker configuration files
 ```
@@ -648,6 +656,26 @@ pnpm cf:projects:list
 npx wrangler pages project add-domain chat-landing chat.mana.how
 ```
 
+### Organization Landing Pages
+
+Organizations can have their own landing pages at `{slug}.mana.how`, built and deployed automatically by the **mana-landing-builder** service.
+
+```bash
+# Start the builder service
+pnpm dev:landing-builder
+```
+
+**How it works:**
+1. Org admin configures landing page at `/organizations/{id}/landing` in the Manacore web dashboard
+2. Config is stored in `organizations.metadata.landingPage` (mana-core-auth)
+3. On publish, the builder service generates a static Astro site from the config
+4. Site is deployed to Cloudflare Pages as `org-{slug}` → `{slug}.mana.how`
+
+**Available themes:** `classic` (dark, professional), `warm` (light, inviting)
+**Available sections:** Hero, About/Features, Team, Contact, Footer
+
+See `services/mana-landing-builder/CLAUDE.md` for full documentation.
+
 ## Server Access
 
 ### Mac Mini Production Server
@@ -767,6 +795,7 @@ Each project has its own `CLAUDE.md` with detailed information:
 - `services/mana-search/CLAUDE.md` - Search & content extraction service
 - `services/mana-crawler/CLAUDE.md` - Web crawler service
 - `services/mana-llm/CLAUDE.md` - Central LLM abstraction service
+- `services/mana-landing-builder/CLAUDE.md` - Org landing page builder service
 
 Navigate to the specific project directory to work on it.
 

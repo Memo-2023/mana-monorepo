@@ -19,6 +19,9 @@ export * from './common';
 // Contact types for cross-app integration
 export * from './contact';
 
+// Landing page configuration types
+export * from './landing-config';
+
 // API types
 export interface User {
 	id: string;

@@ -299,6 +299,32 @@ services:
       retries: 3
       start_period: 40s
 
+  mana-landing-builder:
+    build:
+      context: .
+      dockerfile: services/mana-landing-builder/Dockerfile
+    image: mana-landing-builder:local
+    container_name: mana-core-landing-builder
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3030
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
+      ORG_LANDING_DOMAIN: mana.how
+    ports:
+      - "3030:3030"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # ============================================
   # Tier 3: App Backends (Ports 3030-3049)
   # ============================================

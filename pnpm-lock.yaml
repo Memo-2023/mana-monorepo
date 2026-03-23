@@ -4013,6 +4013,9 @@ importers:
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
+      '@manacore/shared-logger':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-logger
       '@picture/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
@@ -4083,7 +4086,7 @@ importers:
         specifier: ~15.0.8
         version: 15.0.9(expo@54.0.12)(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.1.0))
       nativewind:
-        specifier: latest
+        specifier: ^4.2.1
         version: 4.2.3(react-native-reanimated@4.1.5(patch_hash=ja2p6dcgbdai4kr2slklwsqegq)(@babel/core@7.28.5)(react-native-worklets@0.6.1(@babel/core@7.28.5)(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.1.0))(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.1.0))(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.1.0))(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.5)(@types/react@19.2.7)(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.18(tsx@4.21.0)(yaml@2.8.1))
       react:
         specifier: 19.1.0

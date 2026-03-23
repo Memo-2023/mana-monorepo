@@ -1,0 +1,78 @@
+---
+/**
+ * Shared Team Section component
+ * Displays team/board members in a responsive grid with avatar, name, role, and optional bio.
+ */
+import Container from '../atoms/Container.astro';
+import SectionHeader from '../atoms/SectionHeader.astro';
+import Card from '../atoms/Card.astro';
+
+interface TeamMember {
+	name: string;
+	role: string;
+	image?: string;
+	bio?: string;
+}
+
+interface Props {
+	title: string;
+	subtitle?: string;
+	members: TeamMember[];
+	columns?: 2 | 3 | 4;
+	class?: string;
+	id?: string;
+}
+
+const { title, subtitle, members, columns = 3, class: className = '', id } = Astro.props;
+
+const gridCols = {
+	2: 'md:grid-cols-2',
+	3: 'md:grid-cols-2 lg:grid-cols-3',
+	4: 'md:grid-cols-2 lg:grid-cols-4',
+};
+
+function getInitials(name: string): string {
+	return name
+		.split(' ')
+		.map((part) => part[0])
+		.join('')
+		.toUpperCase()
+		.slice(0, 2);
+}
+---
+
+<section id={id} class:list={['py-16 md:py-24', className]}>
+	<Container>
+		<SectionHeader title={title} subtitle={subtitle} />
+
+		<div class:list={['grid gap-6 md:gap-8', gridCols[columns]]}>
+			{
+				members.map((member) => (
+					<Card variant="hover" padding="lg">
+						<div class="flex flex-col items-center text-center">
+							{member.image ? (
+								<img
+									src={member.image}
+									alt={member.name}
+									class="w-20 h-20 rounded-full object-cover mb-4"
+									loading="lazy"
+								/>
+							) : (
+								<div class="w-20 h-20 rounded-full bg-[var(--color-primary)] flex items-center justify-center mb-4">
+									<span class="text-xl font-bold text-white">{getInitials(member.name)}</span>
+								</div>
+							)}
+							<h3 class="text-lg font-semibold text-[var(--color-text-primary)]">{member.name}</h3>
+							<p class="text-sm text-[var(--color-primary)] font-medium mt-1">{member.role}</p>
+							{member.bio && (
+								<p class="text-sm text-[var(--color-text-secondary)] mt-3 leading-relaxed">
+									{member.bio}
+								</p>
+							)}
+						</div>
+					</Card>
+				))
+			}
+		</div>
+	</Container>
+</section>

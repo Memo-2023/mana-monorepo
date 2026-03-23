@@ -20,7 +20,9 @@
 		"./themes/manadeck": "./src/themes/manadeck.css",
 		"./themes/picture": "./src/themes/picture.css",
 		"./themes/chat": "./src/themes/chat.css",
-		"./themes/zitare": "./src/themes/zitare.css"
+		"./themes/zitare": "./src/themes/zitare.css",
+		"./themes/org-classic": "./src/themes/org-classic.css",
+		"./themes/org-warm": "./src/themes/org-warm.css"
 	},
 	"files": [
 		"src"

@@ -1,0 +1,69 @@
+---
+import config from '../data/config.json';
+import '../styles/theme.css';
+
+import Layout from '../layouts/Layout.astro';
+import HeroSection from '@manacore/shared-landing-ui/sections/HeroSection.astro';
+import FeatureSection from '@manacore/shared-landing-ui/sections/FeatureSection.astro';
+import TeamSection from '@manacore/shared-landing-ui/sections/TeamSection.astro';
+import ContactSection from '@manacore/shared-landing-ui/sections/ContactSection.astro';
+import Footer from '@manacore/shared-landing-ui/layouts/Footer.astro';
+
+const { hero, about, team, contact, footer } = config;
+
+const hasAbout = about?.features && about.features.length > 0;
+const hasTeam = team?.members && team.members.length > 0;
+const hasContact = contact?.email || contact?.phone || contact?.address;
+---
+
+<Layout title={hero.title} description={hero.subtitle}>
+	<main>
+		<HeroSection
+			title={hero.title}
+			subtitle={hero.subtitle}
+			variant={hero.variant || 'centered'}
+			primaryCta={hero.primaryCta}
+			secondaryCta={hero.secondaryCta}
+			image={hero.image}
+		/>
+
+		{
+			hasAbout && (
+				<FeatureSection
+					id="about"
+					title={about.title}
+					subtitle={about.subtitle}
+					features={about.features}
+					columns={about.columns || 3}
+					variant="cards"
+				/>
+			)
+		}
+
+		{
+			hasTeam && (
+				<TeamSection id="team" title={team.title} subtitle={team.subtitle} members={team.members} />
+			)
+		}
+
+		{
+			hasContact && (
+				<ContactSection
+					id="contact"
+					title={contact.title}
+					subtitle={contact.subtitle}
+					email={contact.email}
+					phone={contact.phone}
+					address={contact.address}
+				/>
+			)
+		}
+	</main>
+
+	<Footer
+		brand={{ name: hero.title }}
+		copyright={footer.copyright}
+		socialLinks={footer.socialLinks}
+		sections={footer.links ? [{ title: 'Links', links: footer.links }] : []}
+	/>
+</Layout>

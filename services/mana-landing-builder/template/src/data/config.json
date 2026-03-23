@@ -1,0 +1,18 @@
+{
+	"hero": {
+		"title": "Placeholder",
+		"subtitle": "This file is overwritten by the builder service."
+	},
+	"about": {
+		"title": "About",
+		"features": []
+	},
+	"team": {
+		"title": "Team",
+		"members": []
+	},
+	"contact": {
+		"title": "Contact"
+	},
+	"footer": {}
+}
