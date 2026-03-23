@@ -155,6 +155,31 @@ scrape_configs:
     scrape_interval: 30s
 
   # ============================================
+  # Core Services
+  # ============================================
+
+  # Mana Search Service
+  - job_name: 'mana-search'
+    static_configs:
+      - targets: ['mana-search:3020']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Mana Media Service
+  - job_name: 'mana-media'
+    static_configs:
+      - targets: ['mana-media:3015']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Matrix Synapse
+  - job_name: 'synapse'
+    static_configs:
+      - targets: ['synapse:9002']
+    metrics_path: '/_synapse/metrics'
+    scrape_interval: 30s
+
+  # ============================================
   # Pushgateway (deploy metrics, batch jobs)
   # ============================================
   - job_name: 'pushgateway'

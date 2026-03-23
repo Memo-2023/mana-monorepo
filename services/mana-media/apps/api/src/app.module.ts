@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { DatabaseModule } from './db/database.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { StorageModule } from './modules/storage/storage.module';
@@ -13,6 +14,10 @@ import { HealthController } from './health.controller';
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
+		}),
+		MetricsModule.register({
+			prefix: 'media_',
+			excludePaths: ['/health'],
 		}),
 		BullModule.forRoot({
 			connection: {

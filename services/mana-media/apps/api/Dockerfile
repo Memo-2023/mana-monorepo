@@ -9,6 +9,7 @@ WORKDIR /app
 # Copy all necessary files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
+COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
 COPY services/mana-media ./services/mana-media
 
 # Install all dependencies
@@ -40,6 +41,7 @@ COPY --from=builder --chown=nestjs:nodejs /app/services/mana-media/apps/api/node
 
 # Copy shared packages that are symlinked
 COPY --from=builder --chown=nestjs:nodejs /app/packages/shared-drizzle-config /app/packages/shared-drizzle-config
+COPY --from=builder --chown=nestjs:nodejs /app/packages/shared-nestjs-metrics /app/packages/shared-nestjs-metrics
 
 # Copy built application
 COPY --from=builder --chown=nestjs:nodejs /app/services/mana-media/apps/api/dist ./dist

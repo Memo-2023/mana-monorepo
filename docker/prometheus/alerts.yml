@@ -3,7 +3,7 @@ groups:
     rules:
       # Service Down Alert
       - alert: ServiceDown
-        expr: up{job=~"mana-core-auth|chat-backend|todo-backend|calendar-backend|clock-backend|contacts-backend|storage-backend|presi-backend|nutriphi-backend|skilltree-backend|photos-backend|zitare-backend|mukke-backend|planta-backend|picture-backend"} == 0
+        expr: up{job=~"mana-core-auth|.*-backend|mana-search|mana-media|synapse"} == 0
         for: 1m
         labels:
           severity: critical

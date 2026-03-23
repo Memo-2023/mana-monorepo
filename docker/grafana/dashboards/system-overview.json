@@ -627,6 +627,24 @@
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"mana-search\"}",
+					"legendFormat": "Search",
+					"refId": "S"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"mana-media\"}",
+					"legendFormat": "Media",
+					"refId": "T"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"synapse\"}",
+					"legendFormat": "Synapse",
+					"refId": "U"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
 					"expr": "pg_up",
 					"legendFormat": "PostgreSQL",
 					"refId": "G"
