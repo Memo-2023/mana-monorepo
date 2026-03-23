@@ -63,6 +63,7 @@ function createPlayerStore() {
 
 	if (typeof window !== 'undefined') {
 		audio = new Audio();
+		audio.crossOrigin = 'anonymous';
 		audio.addEventListener('timeupdate', () => {
 			state.currentTime = audio!.currentTime;
 		});

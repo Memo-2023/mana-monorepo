@@ -59,6 +59,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_API_CORS_ALLOW_ORIGIN: https://mukke.mana.how,https://mana.how,https://picture.mana.how,https://storage.mana.how,https://planta.mana.how,https://contacts.mana.how,https://chat.mana.how,https://nutriphi.mana.how,https://photos.mana.how
     volumes:
       - /Volumes/ManaData/minio:/data
     ports:
