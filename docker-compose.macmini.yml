@@ -732,9 +732,9 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_SEARCH_URL: http://mana-search:3020
       CORS_ORIGINS: https://citycorners.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      SEED_ON_START: "true"
     ports:
       - "3041:3041"
     healthcheck:

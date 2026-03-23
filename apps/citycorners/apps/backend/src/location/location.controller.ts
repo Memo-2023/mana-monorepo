@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { LocationService } from './location.service';
+import { LocationLookupService } from './location-lookup.service';
 import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -70,12 +71,24 @@ class UpdateLocationDto {
 
 @Controller('locations')
 export class LocationController {
-	constructor(private readonly locationService: LocationService) {}
+	constructor(
+		private readonly locationService: LocationService,
+		private readonly lookupService: LocationLookupService
+	) {}
 
 	@Get()
 	async findAll(@Query('category') category?: string) {
 		const locations = await this.locationService.findAll(category);
 		return { locations };
+	}
+
+	@Get('lookup')
+	async lookup(@Query('q') query: string) {
+		if (!query || query.trim().length === 0) {
+			return { result: null };
+		}
+		const result = await this.lookupService.lookup(query.trim());
+		return { result };
 	}
 
 	@Get('search')

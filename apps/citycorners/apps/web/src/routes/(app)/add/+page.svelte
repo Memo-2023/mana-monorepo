@@ -4,6 +4,13 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { api } from '$lib/api';
 
+	// Lookup state
+	let searchQuery = $state('');
+	let searching = $state(false);
+	let lookupDone = $state(false);
+	let sources = $state<{ url: string; title: string }[]>([]);
+
+	// Form state
 	let name = $state('');
 	let category = $state<string>('sight');
 	let description = $state('');
@@ -19,6 +26,55 @@
 	];
 
 	let isValid = $derived(name.trim().length > 0 && description.trim().length > 10);
+
+	async function handleLookup() {
+		if (!searchQuery.trim() || searching) return;
+
+		searching = true;
+		error = '';
+		sources = [];
+
+		try {
+			const res = await fetch(api(`/locations/lookup?q=${encodeURIComponent(searchQuery.trim())}`));
+			if (!res.ok) throw new Error('Lookup failed');
+
+			const data = await res.json();
+
+			if (data.result) {
+				name = data.result.name || searchQuery.trim();
+				description = data.result.description || '';
+				address = data.result.address || '';
+				category = data.result.category || 'sight';
+				sources = data.result.sources || [];
+			} else {
+				name = searchQuery.trim();
+			}
+
+			lookupDone = true;
+		} catch {
+			// Fallback: just use the search query as name
+			name = searchQuery.trim();
+			lookupDone = true;
+		} finally {
+			searching = false;
+		}
+	}
+
+	function handleSkipLookup() {
+		name = searchQuery.trim();
+		lookupDone = true;
+	}
+
+	function handleReset() {
+		lookupDone = false;
+		searchQuery = '';
+		name = '';
+		description = '';
+		address = '';
+		category = 'sight';
+		sources = [];
+		error = '';
+	}
 
 	async function handleSubmit() {
 		if (!isValid || submitting) return;
@@ -82,7 +138,64 @@
 			{$_('settings.login')}
 		</a>
 	</div>
+{:else if !lookupDone}
+	<!-- Step 1: Search for the location online -->
+	<div class="space-y-4">
+		<div class="rounded-xl border border-border bg-background-card p-5">
+			<h2 class="mb-1 text-lg font-semibold text-foreground">{$_('add.searchTitle')}</h2>
+			<p class="mb-4 text-sm text-foreground-secondary">{$_('add.searchSubtitle')}</p>
+
+			<div class="flex gap-2">
+				<input
+					type="text"
+					bind:value={searchQuery}
+					placeholder={$_('add.searchPlaceholder')}
+					class="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+					onkeydown={(e) => e.key === 'Enter' && handleLookup()}
+				/>
+				<button
+					onclick={handleLookup}
+					disabled={!searchQuery.trim() || searching}
+					class="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					{#if searching}
+						<div
+							class="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+						></div>
+					{:else}
+						{$_('add.searchButton')}
+					{/if}
+				</button>
+			</div>
+		</div>
+
+		<button
+			onclick={handleSkipLookup}
+			class="w-full text-center text-sm text-foreground-secondary hover:text-primary transition-colors"
+		>
+			{$_('add.skipSearch')}
+		</button>
+	</div>
 {:else}
+	<!-- Step 2: Edit and submit -->
+	{#if sources.length > 0}
+		<div class="mb-5 rounded-lg bg-primary/5 border border-primary/20 p-3">
+			<p class="mb-2 text-xs font-medium text-primary">{$_('add.foundSources')}</p>
+			<div class="space-y-1">
+				{#each sources.slice(0, 3) as source}
+					<a
+						href={source.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="block truncate text-xs text-foreground-secondary hover:text-primary"
+					>
+						{source.title}
+					</a>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
 	<form
 		onsubmit={(e) => {
 			e.preventDefault();
@@ -153,12 +266,21 @@
 			/>
 		</div>
 
-		<button
-			type="submit"
-			disabled={!isValid || submitting}
-			class="w-full rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-		>
-			{submitting ? $_('add.submitting') : $_('add.submit')}
-		</button>
+		<div class="flex gap-3">
+			<button
+				type="button"
+				onclick={handleReset}
+				class="rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium text-foreground-secondary transition-colors hover:bg-background-card-hover"
+			>
+				{$_('add.reset')}
+			</button>
+			<button
+				type="submit"
+				disabled={!isValid || submitting}
+				class="flex-1 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				{submitting ? $_('add.submitting') : $_('add.submit')}
+			</button>
+		</div>
 	</form>
 {/if}
