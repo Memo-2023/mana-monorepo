@@ -9,6 +9,7 @@
 	import { exportApi, type ExportFormat } from '$lib/api/export';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { ImportPreviewSkeleton } from '$lib/components/skeletons';
+	import { ContactsEvents } from '@manacore/shared-utils/analytics';
 	import '$lib/i18n';
 
 	type Tab = 'import' | 'export';
@@ -111,6 +112,8 @@
 		try {
 			importResult = await importApi.execute(preview.contacts, duplicateAction, skipIndices);
 			importStep = 'result';
+			const fileExt = selectedFile?.name?.endsWith('.csv') ? 'csv' : 'vcard';
+			ContactsEvents.contactImported(fileExt as 'csv' | 'vcard', importResult?.imported);
 			await contactsStore.loadContacts();
 		} catch (e) {
 			importError = e instanceof Error ? e.message : 'Fehler beim Importieren';

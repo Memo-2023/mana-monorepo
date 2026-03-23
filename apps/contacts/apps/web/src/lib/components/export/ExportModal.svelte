@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { exportApi, type ExportFormat } from '$lib/api/export';
+	import { ContactsEvents } from '@manacore/shared-utils/analytics';
 
 	interface Props {
 		isOpen: boolean;
@@ -25,6 +26,7 @@
 				contactIds: selectedContactIds.length > 0 ? selectedContactIds : undefined,
 				includeArchived,
 			});
+			ContactsEvents.contactExported(format as 'csv' | 'vcard');
 			onClose();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Export fehlgeschlagen';

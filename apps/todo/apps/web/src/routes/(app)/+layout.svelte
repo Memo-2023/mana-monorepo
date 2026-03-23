@@ -36,6 +36,7 @@
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 	import { todoOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
@@ -102,6 +103,7 @@
 				projectId: resolved.projectId,
 				labelIds: resolved.labelIds,
 			});
+			TodoEvents.quickAddUsed();
 		} catch (error) {
 			console.error('Failed to create task:', error);
 		}

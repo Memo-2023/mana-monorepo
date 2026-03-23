@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { contactsApi, type Contact } from '$lib/api/contacts';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
+	import { ContactsEvents } from '@manacore/shared-utils/analytics';
 
 	interface Props {
 		open: boolean;
@@ -47,6 +48,7 @@
 				});
 				results = response.contacts || [];
 				selectedIndex = 0;
+				ContactsEvents.searchPerformed();
 			} catch (e) {
 				console.error('Search error:', e);
 				results = [];

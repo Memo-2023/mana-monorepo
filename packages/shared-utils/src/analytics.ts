@@ -189,10 +189,14 @@ export const TodoEvents = {
 	taskCreated: (hasDeadline = false) => trackEvent('task_created', { has_deadline: hasDeadline }),
 	taskCompleted: () => trackEvent('task_completed'),
 	taskDeleted: () => trackEvent('task_deleted'),
+	taskUncompleted: () => trackEvent('task_uncompleted'),
+	subtaskCompleted: () => trackEvent('subtask_completed'),
 	projectCreated: () => trackEvent('project_created'),
+	projectDeleted: () => trackEvent('project_deleted'),
 	labelCreated: () => trackEvent('label_created'),
-	viewChanged: (view: 'inbox' | 'today' | 'upcoming' | 'project') =>
-		trackEvent('view_changed', { view }),
+	viewChanged: (view: string) => trackEvent('view_changed', { view }),
+	quickAddUsed: () => trackEvent('quick_add_used'),
+	filterUsed: (filterType: string) => trackEvent('filter_used', { filter: filterType }),
 };
 
 /**
@@ -203,9 +207,11 @@ export const CalendarEvents = {
 	eventUpdated: () => trackEvent('event_updated'),
 	eventDeleted: () => trackEvent('event_deleted'),
 	calendarCreated: () => trackEvent('calendar_created'),
+	calendarDeleted: () => trackEvent('calendar_deleted'),
 	calendarShared: () => trackEvent('calendar_shared'),
-	viewChanged: (view: 'day' | 'week' | 'month' | 'agenda') => trackEvent('view_changed', { view }),
+	viewChanged: (view: string) => trackEvent('view_changed', { view }),
 	reminderSet: (minutesBefore: number) => trackEvent('reminder_set', { minutes: minutesBefore }),
+	eventDragged: () => trackEvent('event_dragged'),
 };
 
 /**
@@ -229,8 +235,10 @@ export const ContactsEvents = {
 	contactCreated: () => trackEvent('contact_created'),
 	contactUpdated: () => trackEvent('contact_updated'),
 	contactDeleted: () => trackEvent('contact_deleted'),
-	contactImported: (source: 'google' | 'csv' | 'vcard') =>
-		trackEvent('contact_imported', { source }),
+	contactFavorited: () => trackEvent('contact_favorited'),
+	contactArchived: () => trackEvent('contact_archived'),
+	contactImported: (source: 'google' | 'csv' | 'vcard', count?: number) =>
+		trackEvent('contact_imported', { source, ...(count !== undefined && { count }) }),
 	contactExported: (format: 'csv' | 'vcard') => trackEvent('contact_exported', { format }),
 	tagCreated: () => trackEvent('tag_created'),
 	searchPerformed: () => trackEvent('search_performed'),

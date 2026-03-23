@@ -6,6 +6,7 @@
 import type { Project } from '@todo/shared';
 import * as projectsApi from '$lib/api/projects';
 import { authStore } from './auth.svelte';
+import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 // Guest inbox project for unauthenticated users
 const GUEST_INBOX: Project = {
@@ -108,6 +109,7 @@ export const projectsStore = {
 		try {
 			const newProject = await projectsApi.createProject(data);
 			projects = [...projects, newProject];
+			TodoEvents.projectCreated();
 			return newProject;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create project';
@@ -145,6 +147,7 @@ export const projectsStore = {
 		try {
 			await projectsApi.deleteProject(id);
 			projects = projects.filter((p) => p.id !== id);
+			TodoEvents.projectDeleted();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete project';
 			console.error('Failed to delete project:', e);

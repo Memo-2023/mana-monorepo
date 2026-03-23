@@ -185,6 +185,7 @@ export const eventsStore = {
 			toastStore.error(`Termin konnte nicht aktualisiert werden: ${result.error.message}`);
 		} else if (result.data) {
 			events = events.map((e) => (e.id === id ? result.data! : e));
+			CalendarEvents.eventUpdated();
 		}
 
 		return result;
@@ -207,6 +208,7 @@ export const eventsStore = {
 			}
 			toastStore.error(`Termin konnte nicht gelöscht werden: ${result.error.message}`);
 		} else {
+			CalendarEvents.eventDeleted();
 			toastStore.success('Termin gelöscht');
 		}
 

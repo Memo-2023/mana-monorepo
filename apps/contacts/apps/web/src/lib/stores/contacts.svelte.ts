@@ -222,6 +222,7 @@ export const contactsStore = {
 			if (selectedContact?.id === id) {
 				selectedContact = contact;
 			}
+			ContactsEvents.contactUpdated();
 			return contact;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update contact';
@@ -258,6 +259,7 @@ export const contactsStore = {
 			if (selectedContact?.id === id) {
 				selectedContact = null;
 			}
+			ContactsEvents.contactDeleted();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete contact';
 			console.error('Failed to delete contact:', e);
@@ -284,6 +286,7 @@ export const contactsStore = {
 			if (selectedContact?.id === id) {
 				selectedContact = contact;
 			}
+			ContactsEvents.contactFavorited();
 			return contact;
 		} catch (e) {
 			console.error('Failed to toggle favorite:', e);
@@ -309,6 +312,7 @@ export const contactsStore = {
 			if (selectedContact?.id === id) {
 				selectedContact = null;
 			}
+			ContactsEvents.contactArchived();
 			return contact;
 		} catch (e) {
 			console.error('Failed to toggle archive:', e);

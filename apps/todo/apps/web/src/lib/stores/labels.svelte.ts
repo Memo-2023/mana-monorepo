@@ -7,6 +7,7 @@
 
 import type { Label } from '$lib/api/labels';
 import * as labelsApi from '$lib/api/labels';
+import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 // State
 let labels = $state<Label[]>([]);
@@ -65,6 +66,7 @@ export const labelsStore = {
 		try {
 			const newLabel = await labelsApi.createLabel(data);
 			labels = [...labels, newLabel];
+			TodoEvents.labelCreated();
 			return newLabel;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create label';

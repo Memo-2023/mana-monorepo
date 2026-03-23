@@ -390,6 +390,7 @@ export const tasksStore = {
 		try {
 			const uncompletedTask = await tasksApi.uncompleteTask(id);
 			tasks = tasks.map((t) => (t.id === id ? uncompletedTask : t));
+			TodoEvents.taskUncompleted();
 			return uncompletedTask;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to uncomplete task';

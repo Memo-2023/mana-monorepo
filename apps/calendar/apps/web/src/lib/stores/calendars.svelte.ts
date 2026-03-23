@@ -8,6 +8,7 @@ import * as api from '$lib/api/calendars';
 import { BIRTHDAY_CALENDAR } from '$lib/api/birthdays';
 import { settingsStore } from './settings.svelte';
 import { authStore } from './auth.svelte';
+import { CalendarEvents } from '@manacore/shared-utils/analytics';
 
 // Guest calendar for unauthenticated users
 const GUEST_CALENDAR: Calendar = {
@@ -128,6 +129,7 @@ export const calendarsStore = {
 
 		if (result.data) {
 			calendars = [...calendars, result.data];
+			CalendarEvents.calendarCreated();
 		}
 
 		return result;
@@ -154,6 +156,7 @@ export const calendarsStore = {
 
 		if (!result.error) {
 			calendars = getCalendarsArray().filter((c) => c.id !== id);
+			CalendarEvents.calendarDeleted();
 		}
 
 		return result;

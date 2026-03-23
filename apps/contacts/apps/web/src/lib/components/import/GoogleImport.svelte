@@ -11,6 +11,7 @@
 	} from '$lib/api/google';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { GoogleImportSkeleton } from '$lib/components/skeletons';
+	import { ContactsEvents } from '@manacore/shared-utils/analytics';
 
 	type Step = 'connect' | 'select' | 'result';
 
@@ -128,6 +129,7 @@
 		try {
 			result = await googleApi.importContacts(Array.from(selectedContacts));
 			step = 'result';
+			ContactsEvents.contactImported('google', result.imported);
 			// Refresh contacts list
 			await contactsStore.loadContacts();
 		} catch (e) {
