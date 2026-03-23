@@ -177,7 +177,7 @@
 			onClick: handleFilterToggle,
 			active: isFilterStripVisible,
 		},
-		{ href: '/spiral', label: 'Spiral', icon: 'sparkles' },
+		{ href: '/spiral', label: 'Spiral', icon: 'spiral' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 	]);
 
