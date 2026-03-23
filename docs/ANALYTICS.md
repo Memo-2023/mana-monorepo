@@ -421,4 +421,4 @@ Im Development-Modus ist Umami normalerweise nicht geladen (kein Script-Tag), da
 - **Container**: `mana-mon-umami`
 - **Image**: `ghcr.io/umami-software/umami:postgresql-latest`
 - **Datenbank**: PostgreSQL (`umami` DB, shared Postgres-Instanz)
-- **Port**: 3000 (intern) → 8010 (extern), via Caddy erreichbar unter stats.mana.how
+- **Port**: 3000 (intern) → 8010 (extern), via Cloudflare Tunnel erreichbar unter stats.mana.how

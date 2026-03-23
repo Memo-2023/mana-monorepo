@@ -128,36 +128,17 @@ pnpm deploy:landing:all
 
 ### Web Apps & APIs
 
-**Platform:** Hetzner Server (46.224.108.214) via Docker + Caddy
-
-See [PRODUCTION_LAUNCH.md](./PRODUCTION_LAUNCH.md) for deployment details.
+**Platform:** Mac Mini (self-hosted) via Docker + Cloudflare Tunnel
 
 ---
 
 ## DNS Configuration
 
-All subdomains point to Hetzner server, except landing pages which use Cloudflare:
+Web apps and APIs are routed via Cloudflare Tunnel to the Mac Mini. Landing pages use Cloudflare Pages.
 
-### A Records (Hetzner - Web Apps & APIs)
+### Cloudflare Tunnel (Web Apps & APIs)
 
-```
-calendar.mana.how    A    46.224.108.214
-calendar-api.mana.how A   46.224.108.214
-clock.mana.how       A    46.224.108.214
-clock-api.mana.how   A    46.224.108.214
-todo.mana.how        A    46.224.108.214
-todo-api.mana.how    A    46.224.108.214
-contact.mana.how     A    46.224.108.214
-contact-api.mana.how A    46.224.108.214
-chat.mana.how        A    46.224.108.214
-chat-api.mana.how    A    46.224.108.214
-picture.mana.how     A    46.224.108.214
-picture-api.mana.how A    46.224.108.214
-zitare.mana.how      A    46.224.108.214
-zitare-api.mana.how  A    46.224.108.214
-app.mana.how         A    46.224.108.214
-auth.mana.how        A    46.224.108.214
-```
+All `*.mana.how` subdomains are routed via Cloudflare Tunnel to the Mac Mini Docker containers. No A records needed — Cloudflare manages the DNS.
 
 ### CNAME Records (Cloudflare - Landing Pages)
 

@@ -39,6 +39,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **chat**     | AI chat application          | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **zitare**   | Daily inspiration quotes     | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **contacts** | Contact management           | NestJS backend, SvelteKit web                             |
+| **citycorners** | City guide for Konstanz   | Astro landing                                             |
 
 ### Archived Projects (`apps-archived/`)
 
@@ -514,7 +515,7 @@ $: doubled = count * 2;
 | `@manacore/shared-nestjs-auth`  | NestJS JWT validation guards via mana-core-auth |
 | `@mana-core/nestjs-integration` | NestJS module with auth guards + credit client  |
 | `@manacore/shared-auth`         | Client-side auth service for web/mobile apps    |
-| `@manacore/shared-storage`      | S3-compatible storage (MinIO local, Hetzner prod) |
+| `@manacore/shared-storage`      | S3-compatible storage (MinIO)                     |
 | `@manacore/shared-supabase`     | Unified Supabase client                         |
 | `@manacore/shared-types`        | Common TypeScript types                         |
 | `@manacore/shared-utils`        | Utility functions                               |
@@ -536,7 +537,7 @@ import { formatDate, truncate } from '@manacore/shared-utils';
 - Each project has its own Supabase project/schema
 - Types typically generated via `supabase gen types`
 
-## Object Storage (MinIO / Hetzner)
+## Object Storage (MinIO)
 
 S3-compatible object storage for file uploads, generated images, etc.
 
@@ -544,8 +545,7 @@ S3-compatible object storage for file uploads, generated images, etc.
 
 | Environment | Service | Purpose |
 |-------------|---------|---------|
-| **Local** | MinIO (Docker) | S3-compatible local storage |
-| **Production** | Hetzner Object Storage | Cost-effective S3-compatible cloud storage |
+| **Local + Production** | MinIO (Docker) | S3-compatible storage |
 
 ### Local Development
 
@@ -597,17 +597,11 @@ const uploadUrl = await storage.getUploadUrl(key, { expiresIn: 3600 });
 ### Environment Variables
 
 ```env
-# Local (in .env.development)
+# MinIO (local + production via Docker)
 S3_ENDPOINT=http://localhost:9000
 S3_REGION=us-east-1
 S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin
-
-# Production (Hetzner)
-S3_ENDPOINT=https://fsn1.your-objectstorage.com
-S3_REGION=fsn1
-S3_ACCESS_KEY=your-access-key
-S3_SECRET_KEY=your-secret-key
 ```
 
 ## Landing Pages (Cloudflare Pages)
