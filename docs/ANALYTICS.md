@@ -246,10 +246,15 @@ import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 TodoEvents.taskCreated(true);            // task_created { has_deadline: true }
 TodoEvents.taskCompleted();              // task_completed
+TodoEvents.taskUncompleted();            // task_uncompleted
 TodoEvents.taskDeleted();                // task_deleted
+TodoEvents.subtaskCompleted();           // subtask_completed
 TodoEvents.projectCreated();             // project_created
+TodoEvents.projectDeleted();             // project_deleted
 TodoEvents.labelCreated();               // label_created
-TodoEvents.viewChanged('today');         // view_changed { view: 'today' }
+TodoEvents.viewChanged('kanban');        // view_changed { view: 'kanban' }
+TodoEvents.quickAddUsed();               // quick_add_used
+TodoEvents.filterUsed('priority');       // filter_used { filter: 'priority' }
 ```
 
 ### CalendarEvents
@@ -261,9 +266,11 @@ CalendarEvents.eventCreated(true);       // event_created { recurring: true }
 CalendarEvents.eventUpdated();           // event_updated
 CalendarEvents.eventDeleted();           // event_deleted
 CalendarEvents.calendarCreated();        // calendar_created
+CalendarEvents.calendarDeleted();        // calendar_deleted
 CalendarEvents.calendarShared();         // calendar_shared
 CalendarEvents.viewChanged('week');      // view_changed { view: 'week' }
 CalendarEvents.reminderSet(30);          // reminder_set { minutes: 30 }
+CalendarEvents.eventDragged();           // event_dragged
 ```
 
 ### ClockEvents
@@ -286,7 +293,9 @@ import { ContactsEvents } from '@manacore/shared-utils/analytics';
 ContactsEvents.contactCreated();             // contact_created
 ContactsEvents.contactUpdated();             // contact_updated
 ContactsEvents.contactDeleted();             // contact_deleted
-ContactsEvents.contactImported('google');    // contact_imported { source: 'google' }
+ContactsEvents.contactFavorited();           // contact_favorited
+ContactsEvents.contactArchived();            // contact_archived
+ContactsEvents.contactImported('google', 5); // contact_imported { source: 'google', count: 5 }
 ContactsEvents.contactExported('vcard');     // contact_exported { format: 'vcard' }
 ContactsEvents.tagCreated();                 // tag_created
 ContactsEvents.searchPerformed();            // search_performed
