@@ -23,8 +23,6 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/services/mana-landing-builder/node_modules ./services/mana-landing-builder/node_modules
-COPY --from=deps /app/packages/shared-types/node_modules ./packages/shared-types/node_modules 2>/dev/null || true
-COPY --from=deps /app/packages/shared-landing-ui/node_modules ./packages/shared-landing-ui/node_modules 2>/dev/null || true
 COPY services/mana-landing-builder ./services/mana-landing-builder
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-landing-ui ./packages/shared-landing-ui
