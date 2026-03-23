@@ -169,9 +169,12 @@
 		min-width: 180px;
 		max-width: 280px;
 		padding: 0.375rem;
-		background: var(--color-surface-elevated-3);
+		background: hsl(var(--color-surface-elevated));
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-lg);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.15),
+			0 1px 4px rgba(0, 0, 0, 0.1);
 		/* Ensure menu can receive events even when parent has pointer-events: none */
 		pointer-events: auto;
 	}
