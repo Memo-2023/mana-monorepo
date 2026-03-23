@@ -1,7 +1,7 @@
 import { createUserSettingsStore } from '@manacore/shared-theme';
 import { browser } from '$app/environment';
 
-const AUTH_URL = 'https://auth.mana.how';
+const AUTH_URL = import.meta.env.VITE_MANA_AUTH_URL || 'https://auth.mana.how';
 const TOKEN_STORAGE_KEY = 'mana_core_access_token';
 
 // Internal access token state

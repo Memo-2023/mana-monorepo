@@ -66,8 +66,9 @@
 	function handleSSOLogin() {
 		if (!browser) return;
 		loadingSSO = true;
+		const hs = homeserver.includes('://') ? homeserver : `https://${homeserver}`;
 		const redirectUrl = encodeURIComponent(window.location.origin + '/chat');
-		window.location.href = `https://matrix.mana.how/_matrix/client/v3/login/sso/redirect/oidc-manacore?redirectUrl=${redirectUrl}`;
+		window.location.href = `${hs}/_matrix/client/v3/login/sso/redirect/oidc-manacore?redirectUrl=${redirectUrl}`;
 	}
 
 	// Auto-discover homeserver when username looks like a full Matrix ID

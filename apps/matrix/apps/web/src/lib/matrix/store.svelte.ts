@@ -223,12 +223,10 @@ class MatrixStore {
 			try {
 				await this._client.initRustCrypto();
 				this._cryptoReady = true;
-				console.log('Rust crypto initialized successfully');
 
 				// Setup crypto event handlers
 				this.setupCryptoEventHandlers(sdk);
-			} catch (cryptoErr) {
-				console.warn('Crypto initialization failed, continuing without E2EE:', cryptoErr);
+			} catch {
 				this._cryptoReady = false;
 			}
 
@@ -261,10 +259,6 @@ class MatrixStore {
 
 			if (state === 'PREPARED') {
 				this._rooms = this._client!.getRooms();
-				console.log(`Matrix sync prepared, ${this._rooms.length} rooms loaded`);
-
-				// Note: Last room restore is now handled in the /chat page component
-				// to support different behavior on mobile vs desktop
 			}
 
 			if (state === 'ERROR') {
@@ -327,7 +321,6 @@ class MatrixStore {
 
 		// Room membership changes (invites, joins, leaves)
 		this._client.on(sdk.RoomEvent.MyMembership, (room, membership, prevMembership) => {
-			console.log(`Membership changed: ${room.roomId} - ${prevMembership} -> ${membership}`);
 			this._rooms = this._client!.getRooms();
 		});
 
@@ -371,7 +364,6 @@ class MatrixStore {
 		// CallEvent is exported from matrix-js-sdk, but CallState needs dynamic import from webrtc module
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		this._client.on('Call.incoming' as any, async (call: any) => {
-			console.log('Incoming call:', call.callId);
 			try {
 				const webrtc = await import('matrix-js-sdk/lib/webrtc/call');
 				this.handleIncomingCall(call, webrtc.CallEvent, webrtc.CallState);
@@ -399,8 +391,6 @@ class MatrixStore {
 			// Verification request received
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			(this._client as any).on(CryptoEvent.VerificationRequestReceived, (request: unknown) => {
-				console.log('Verification request received:', request);
-
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const req = request as any;
 				const verificationRequest: VerificationRequest = {
@@ -419,7 +409,6 @@ class MatrixStore {
 			// Keys changed (e.g., new device added)
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			(this._client as any).on(CryptoEvent.KeysChanged, () => {
-				console.log('Crypto keys changed');
 				this.checkVerificationStatus();
 			});
 
@@ -427,13 +416,12 @@ class MatrixStore {
 			if ('KeyBackupStatus' in CryptoEvent) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				(this._client as any).on((CryptoEvent as any).KeyBackupStatus, (enabled: boolean) => {
-					console.log('Key backup status:', enabled);
 					this._keyBackupEnabled = enabled;
 					this._cryptoCallbacks.onKeyBackupStatus?.(enabled);
 				});
 			}
-		} catch (err) {
-			console.warn('Could not setup crypto event handlers:', err);
+		} catch {
+			// Crypto event handlers not fully supported in this SDK version
 		}
 
 		// Initial status check
@@ -1145,14 +1133,10 @@ class MatrixStore {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const cryptoAny = crypto as any;
 			if (userId === this._client.getUserId() && cryptoAny.requestOwnUserVerification) {
-				const request = await cryptoAny.requestOwnUserVerification();
-				console.log('Self-verification started:', request);
+				await cryptoAny.requestOwnUserVerification();
 			} else if (cryptoAny.requestVerificationDM) {
-				// Try DM-based verification for other users
-				const request = await cryptoAny.requestVerificationDM(userId);
-				console.log('Verification started:', request);
+				await cryptoAny.requestVerificationDM(userId);
 			} else {
-				console.warn('Verification method not available in this SDK version');
 				return false;
 			}
 
@@ -1171,9 +1155,7 @@ class MatrixStore {
 		if (!this._client || !this._cryptoReady) return false;
 
 		try {
-			// Verification request handling is complex and varies by SDK version
-			// For now, log and return success to allow UI to proceed
-			console.log('Accept verification - handled by SDK automatically');
+			// Verification request handling varies by SDK version - handled automatically
 			return true;
 		} catch (err) {
 			console.error('Error accepting verification:', err);
@@ -1189,8 +1171,6 @@ class MatrixStore {
 
 		try {
 			// In newer SDK versions, verification is handled via verifier events
-			// This is a simplified approach
-			console.log('Confirm SAS verification - handled by SDK');
 			return true;
 		} catch (err) {
 			console.error('Error confirming SAS verification:', err);
@@ -1205,11 +1185,9 @@ class MatrixStore {
 		if (!this._client || !this._cryptoReady) return;
 
 		try {
-			// Cancel is handled at the request level
 			this._activeVerification = null;
-			console.log('Verification cancelled');
-		} catch (err) {
-			console.error('Error cancelling verification:', err);
+		} catch {
+			// Cancellation is best-effort
 		}
 	}
 
@@ -1604,8 +1582,6 @@ class MatrixStore {
 	private setupCallEventHandlers(call: any, CallEvent: any, CallState: any) {
 		// State changes
 		call.on(CallEvent.State, (state: string, oldState: string) => {
-			console.log(`Call state: ${oldState} -> ${state}`);
-
 			if (this._activeCall) {
 				this._activeCall = {
 					...this._activeCall,

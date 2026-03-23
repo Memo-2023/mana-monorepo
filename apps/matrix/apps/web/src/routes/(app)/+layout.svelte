@@ -26,7 +26,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 
-	const AUTH_URL = 'https://auth.mana.how';
+	const AUTH_URL = import.meta.env.VITE_MANA_AUTH_URL || 'https://auth.mana.how';
 
 	/**
 	 * Exchange session cookie for JWT token from mana-core-auth
@@ -36,7 +36,7 @@
 		try {
 			const response = await fetch(`${AUTH_URL}/api/v1/auth/session-to-token`, {
 				method: 'POST',
-				credentials: 'include', // Send session cookie
+				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -49,8 +49,8 @@
 					return true;
 				}
 			}
-		} catch (e) {
-			console.warn('Could not exchange session for token:', e);
+		} catch {
+			// Token exchange failed silently - user can still use Matrix without mana-core settings
 		}
 		return false;
 	}
@@ -184,14 +184,10 @@
 		const loginToken = urlParams.get('loginToken');
 
 		if (loginToken) {
-			console.log('Found loginToken in URL, exchanging for credentials...');
-
 			// Exchange loginToken for Matrix credentials
 			const result = await loginWithLoginToken('matrix.mana.how', loginToken);
 
 			if (result.success && result.credentials) {
-				console.log('SSO login successful, initializing Matrix client...');
-
 				// Remove loginToken from URL to prevent re-processing on refresh
 				const cleanUrl = window.location.pathname;
 				window.history.replaceState({}, '', cleanUrl);
