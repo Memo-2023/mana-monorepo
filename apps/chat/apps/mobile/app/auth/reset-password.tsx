@@ -31,10 +31,10 @@ export default function ResetPasswordScreen() {
 
 		try {
 			setLoading(true);
-			const { error } = await resetPassword(email);
+			const result = await resetPassword(email);
 
-			if (error) {
-				Alert.alert('Fehler', error.message);
+			if (!result.success) {
+				Alert.alert('Fehler', result.error || 'Unbekannter Fehler');
 			} else {
 				Alert.alert(
 					'E-Mail gesendet',

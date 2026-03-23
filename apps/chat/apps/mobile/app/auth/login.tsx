@@ -34,10 +34,10 @@ export default function LoginScreen() {
 
 		try {
 			setLoading(true);
-			const { error } = await signIn(email, password);
+			const result = await signIn(email, password);
 
-			if (error) {
-				Alert.alert('Anmeldung fehlgeschlagen', error.message || 'Unbekannter Fehler');
+			if (!result.success) {
+				Alert.alert('Anmeldung fehlgeschlagen', result.error || 'Unbekannter Fehler');
 			} else {
 				// Erfolgreich angemeldet, navigiere zur Hauptseite
 				router.replace('/');

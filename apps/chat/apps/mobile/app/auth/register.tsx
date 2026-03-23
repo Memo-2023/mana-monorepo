@@ -44,11 +44,17 @@ export default function RegisterScreen() {
 
 		try {
 			setLoading(true);
-			const { data, error } = await signUp(email, password);
+			const result = await signUp(email, password);
 
-			if (error) {
-				Alert.alert('Registrierung fehlgeschlagen', error.message);
-			} else if (data?.user) {
+			if (!result.success) {
+				Alert.alert('Registrierung fehlgeschlagen', result.error || 'Unbekannter Fehler');
+			} else if (result.needsVerification) {
+				Alert.alert(
+					'E-Mail bestätigen',
+					'Bitte überprüfe dein Postfach und bestätige deine E-Mail-Adresse.',
+					[{ text: 'OK', onPress: () => router.replace('/auth/login') }]
+				);
+			} else {
 				Alert.alert(
 					'Registrierung erfolgreich',
 					'Dein Konto wurde erfolgreich erstellt. Du wirst jetzt angemeldet.',

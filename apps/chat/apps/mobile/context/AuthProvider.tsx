@@ -81,13 +81,18 @@ const authService = createAuthService({ baseUrl: MANA_AUTH_URL });
 const tokenManager = createTokenManager(authService);
 
 // Auth context type
+type AuthResult = { success: boolean; error?: string };
+
 type AuthContextType = {
 	user: UserData | null;
 	loading: boolean;
-	signIn: (email: string, password: string) => Promise<{ error: any | null }>;
-	signUp: (email: string, password: string) => Promise<{ error: any | null; data: any | null }>;
+	signIn: (email: string, password: string) => Promise<AuthResult>;
+	signUp: (
+		email: string,
+		password: string
+	) => Promise<AuthResult & { needsVerification?: boolean }>;
 	signOut: () => Promise<void>;
-	resetPassword: (email: string) => Promise<{ error: any | null }>;
+	resetPassword: (email: string) => Promise<AuthResult>;
 };
 
 // Create auth context
@@ -132,25 +137,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	// Sign in with email and password
-	const signIn = async (email: string, password: string) => {
+	const signIn = async (email: string, password: string): Promise<AuthResult> => {
 		try {
-			console.log('Versuche Anmeldung mit:', email);
 			const result = await authService.signIn(email, password);
 
 			if (!result.success) {
-				console.error('Auth Fehler:', result.error);
-				return { error: { message: result.error } };
+				return { success: false, error: result.error || 'Login failed' };
 			}
 
-			// Get user data from token
 			const userData = await authService.getUserFromToken();
 			setUser(userData);
 
-			console.log('Anmeldung erfolgreich:', userData?.userId);
-			return { error: null };
+			return { success: true };
 		} catch (error: any) {
-			console.error('Unerwarteter Fehler beim Anmelden:', error.message || error);
-			return { error };
+			console.error('Fehler beim Anmelden:', error.message || error);
+			return { success: false, error: error.message || 'Unknown error' };
 		}
 	};
 
@@ -160,20 +161,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			const result = await authService.signUp(email, password);
 
 			if (!result.success) {
-				return { data: null, error: { message: result.error } };
+				return { success: false, error: result.error || 'Signup failed' };
+			}
+
+			if (result.needsVerification) {
+				return { success: true, needsVerification: true };
 			}
 
 			// Auto sign in after successful signup
-			const signInResult = await signIn(email, password);
-
-			if (signInResult.error) {
-				return { data: null, error: signInResult.error };
-			}
-
-			return { data: user, error: null };
-		} catch (error) {
+			return signIn(email, password);
+		} catch (error: any) {
 			console.error('Fehler beim Registrieren:', error);
-			return { data: null, error };
+			return { success: false, error: error.message || 'Unknown error' };
 		}
 	};
 
@@ -188,18 +187,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	// Reset password
-	const resetPassword = async (email: string) => {
+	const resetPassword = async (email: string): Promise<AuthResult> => {
 		try {
 			const result = await authService.forgotPassword(email);
 
 			if (!result.success) {
-				return { error: { message: result.error } };
+				return { success: false, error: result.error || 'Password reset failed' };
 			}
 
-			return { error: null };
-		} catch (error) {
+			return { success: true };
+		} catch (error: any) {
 			console.error('Fehler beim Zurücksetzen des Passworts:', error);
-			return { error };
+			return { success: false, error: error.message || 'Unknown error' };
 		}
 	};
 

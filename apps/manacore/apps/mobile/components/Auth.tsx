@@ -16,20 +16,25 @@ export default function Auth() {
 
 	async function signInWithEmail() {
 		setLoading(true);
-		const { error } = await signIn(email, password);
+		const result = await signIn(email, password);
 
-		if (error) {
-			Alert.alert('Fehler bei der Anmeldung', error.message || 'Anmeldung fehlgeschlagen');
+		if (!result.success) {
+			Alert.alert('Fehler bei der Anmeldung', result.error || 'Anmeldung fehlgeschlagen');
 		}
 		setLoading(false);
 	}
 
 	async function signUpWithEmail() {
 		setLoading(true);
-		const { error } = await signUp(email, password);
+		const result = await signUp(email, password);
 
-		if (error) {
-			Alert.alert('Fehler bei der Registrierung', error.message || 'Registrierung fehlgeschlagen');
+		if (!result.success) {
+			Alert.alert('Fehler bei der Registrierung', result.error || 'Registrierung fehlgeschlagen');
+		} else if (result.needsVerification) {
+			Alert.alert(
+				'E-Mail bestätigen',
+				'Bitte überprüfen Sie Ihre E-Mail und bestätigen Sie Ihre Adresse.'
+			);
 		} else {
 			Alert.alert(
 				'Registrierung erfolgreich',
@@ -48,10 +53,10 @@ export default function Auth() {
 		setLoading(true);
 
 		try {
-			const { error } = await resetPassword(email);
+			const result = await resetPassword(email);
 
-			if (error) {
-				Alert.alert('Fehler', error.message || 'Fehler beim Zurücksetzen des Passworts');
+			if (!result.success) {
+				Alert.alert('Fehler', result.error || 'Fehler beim Zurücksetzen des Passworts');
 			} else {
 				Alert.alert(
 					'E-Mail gesendet',
