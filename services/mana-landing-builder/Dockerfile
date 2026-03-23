@@ -11,6 +11,7 @@ WORKDIR /app
 # Install dependencies
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
 COPY services/mana-landing-builder/package.json ./services/mana-landing-builder/
 COPY packages/shared-types/package.json ./packages/shared-types/
 # Template needs shared-landing-ui at build time
