@@ -8,6 +8,7 @@ import {
 	decodeSchema,
 	getSchemaPixelCount,
 	createTodoSchema,
+	createQuoteSchema,
 	validateRecord,
 	getFieldNames,
 } from './schema.js';
@@ -190,6 +191,52 @@ describe('validateRecord', () => {
 		const result = validateRecord(schema, record);
 		expect(result.valid).toBe(false);
 		expect(result.errors.length).toBeGreaterThan(3);
+	});
+});
+
+describe('Quote Schema', () => {
+	it('should create quote schema with correct fields', () => {
+		const schema = createQuoteSchema();
+		expect(schema.name).toBe('quote');
+		expect(schema.version).toBe(1);
+		expect(schema.fields).toHaveLength(8);
+		expect(schema.fields.map((f) => f.name)).toEqual([
+			'id',
+			'status',
+			'category',
+			'language',
+			'createdAt',
+			'quoteId',
+			'author',
+			'text',
+		]);
+	});
+
+	it('should round-trip quote schema encode/decode', () => {
+		const schema = createQuoteSchema();
+		const pixels = encodeSchema(schema);
+		const names = getFieldNames(schema);
+		const decoded = decodeSchema(pixels, names);
+		expect(decoded.fields.length).toBe(schema.fields.length);
+		for (let i = 0; i < schema.fields.length; i++) {
+			expect(decoded.fields[i].type).toBe(schema.fields[i].type);
+			expect(decoded.fields[i].maxLength).toBe(schema.fields[i].maxLength);
+		}
+	});
+
+	it('should validate a valid quote record', () => {
+		const schema = createQuoteSchema();
+		const result = validateRecord(schema, {
+			id: 0,
+			status: 0,
+			category: 3,
+			language: 1,
+			createdAt: new Date(),
+			quoteId: 'q-123',
+			author: 'Goethe',
+			text: 'Ein kluges Wort',
+		});
+		expect(result.valid).toBe(true);
 	});
 });
 

@@ -92,6 +92,7 @@ export {
 // Schema utilities
 export {
 	createTodoSchema,
+	createQuoteSchema,
 	encodeSchema,
 	decodeSchema,
 	getSchemaPixelCount,

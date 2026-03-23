@@ -95,6 +95,7 @@
 		{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
 		{ href: '/lists', label: $_('nav.lists'), icon: 'list' },
 		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
+		{ href: '/spiral', label: 'Spiral', icon: 'sparkles' },
 	]);
 
 	// Filter hidden nav items
@@ -103,7 +104,7 @@
 	);
 
 	// Navigation routes for keyboard shortcuts
-	const navRoutes = ['/', '/categories', '/favorites', '/lists', '/settings'];
+	const navRoutes = ['/', '/categories', '/favorites', '/lists', '/settings', '/spiral'];
 
 	function handleToggleTheme() {
 		theme.toggleMode();

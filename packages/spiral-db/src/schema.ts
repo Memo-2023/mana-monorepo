@@ -111,6 +111,26 @@ export function createTodoSchema(): SchemaDefinition {
 }
 
 /**
+ * Create a schema for Quote items (Zitare app)
+ */
+export function createQuoteSchema(): SchemaDefinition {
+	return {
+		version: 1,
+		name: 'quote',
+		fields: [
+			{ name: 'id', type: 'int', maxLength: 12 }, // 0-4095
+			{ name: 'status', type: 'int', maxLength: 3 }, // 0=active, 2=favorited, 4=removed
+			{ name: 'category', type: 'int', maxLength: 4 }, // 10 categories (0-15)
+			{ name: 'language', type: 'int', maxLength: 3 }, // 6 languages (0-7)
+			{ name: 'createdAt', type: 'timestamp', maxLength: 24 },
+			{ name: 'quoteId', type: 'string', maxLength: 100 }, // Reference to content package
+			{ name: 'author', type: 'string', maxLength: 100 },
+			{ name: 'text', type: 'string', maxLength: 255 },
+		],
+	};
+}
+
+/**
  * Validate that a record matches a schema
  */
 export function validateRecord(

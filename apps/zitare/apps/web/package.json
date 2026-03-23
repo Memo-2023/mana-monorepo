@@ -48,6 +48,7 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
+		"@manacore/spiral-db": "workspace:^",
 		"@zitare/content": "workspace:*",
 		"svelte-i18n": "^4.0.1"
 	},
