@@ -5,6 +5,7 @@
 	import { Sparkle, ArrowDown } from '@manacore/shared-icons';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
+	import { applyTaskFilters } from '$lib/utils/task-filters';
 	import TaskList from '$lib/components/TaskList.svelte';
 	import CollapsibleSection from '$lib/components/CollapsibleSection.svelte';
 	import { TaskListSkeleton } from '$lib/components/skeletons';
@@ -12,27 +13,16 @@
 
 	let isLoading = $state(true);
 
-	// Apply viewStore filters to task lists
+	// Build filter criteria from viewStore (reactive)
+	let filterCriteria = $derived({
+		priorities: viewStore.filterPriorities,
+		projectId: viewStore.filterProjectId,
+		labelIds: viewStore.filterLabelIds,
+		searchQuery: viewStore.filterSearchQuery,
+	});
+
 	function applyFilters(tasks: Task[]): Task[] {
-		let filtered = tasks;
-		if (viewStore.filterPriorities.length > 0) {
-			filtered = filtered.filter((t) => viewStore.filterPriorities.includes(t.priority));
-		}
-		if (viewStore.filterProjectId) {
-			filtered = filtered.filter((t) => t.projectId === viewStore.filterProjectId);
-		}
-		if (viewStore.filterLabelIds.length > 0) {
-			filtered = filtered.filter((t) =>
-				t.labels?.some((l) => viewStore.filterLabelIds.includes(l.id))
-			);
-		}
-		if (viewStore.filterSearchQuery.trim()) {
-			const q = viewStore.filterSearchQuery.toLowerCase();
-			filtered = filtered.filter(
-				(t) => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)
-			);
-		}
-		return filtered;
+		return applyTaskFilters(tasks, filterCriteria);
 	}
 
 	onMount(async () => {
