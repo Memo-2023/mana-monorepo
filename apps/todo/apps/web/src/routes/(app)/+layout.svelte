@@ -12,6 +12,7 @@
 	import type {
 		PillNavItem,
 		PillDropdownItem,
+		PillNavElement,
 		QuickInputItem,
 		CreatePreview,
 	} from '@manacore/shared-ui';
@@ -22,7 +23,9 @@
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { theme } from '$lib/stores/theme';
-	import FilterStrip from '$lib/components/FilterStrip.svelte';
+	import TaskFilters from '$lib/components/TaskFilters.svelte';
+	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
+	import type { TaskPriority } from '@todo/shared';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -167,11 +170,35 @@
 		todoSettings.toggleFilterStrip();
 	}
 
-	// Base navigation items for Todo
-	// Note: Filter uses onClick to toggle FilterStrip visibility instead of navigating
+	// View routes for the tab group (pages that navigate)
+	const viewRoutes: Record<string, string> = {
+		liste: '/',
+		kanban: '/kanban',
+		tags: '/tags',
+	};
+
+	// Determine active view tab from current path
+	let activeViewTab = $derived(
+		Object.entries(viewRoutes).find(([_, path]) => $page.url.pathname === path)?.[0] || 'liste'
+	);
+
+	// Tab group for view switching (Liste, Kanban, Tags) - grouped in one pill
+	let viewTabGroup = $derived<PillNavElement>({
+		type: 'tabs' as const,
+		options: [
+			{ id: 'liste', icon: 'list', label: 'Liste', title: 'Listenansicht' },
+			{ id: 'kanban', icon: 'columns', label: 'Kanban', title: 'Kanban-Board' },
+			{ id: 'tags', icon: 'tag', label: 'Tags', title: 'Tags verwalten' },
+		],
+		value: activeViewTab,
+		onChange: (id: string) => {
+			const route = viewRoutes[id];
+			if (route) goto(route);
+		},
+	});
+
+	// Filter stays as a standalone pill (toggle behavior, not navigation)
 	let baseNavItems = $derived<PillNavItem[]>([
-		{ href: '/', label: 'Liste', icon: 'list' },
-		{ href: '/kanban', label: 'Kanban', icon: 'columns' },
 		{
 			href: '/',
 			label: 'Filter',
@@ -179,7 +206,6 @@
 			onClick: handleFilterToggle,
 			active: isFilterStripVisible,
 		},
-		{ href: '/tags', label: 'Tags', icon: 'tag' },
 	]);
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)
@@ -187,8 +213,8 @@
 		filterHiddenNavItems('todo', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
-	// Navigation shortcuts (Ctrl+1-6) - use base items for consistent shortcuts
-	let navRoutes = $derived(baseNavItems.map((item) => item.href));
+	// Navigation shortcuts (Ctrl+1-3) - use view routes for consistent shortcuts
+	let navRoutes = $derived(Object.values(viewRoutes));
 
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
@@ -299,6 +325,7 @@
 			{#if !isPillNavCollapsed}
 				<PillNavigation
 					items={navItems}
+					prependElements={[viewTabGroup]}
 					currentPath={$page.url.pathname}
 					appName="Todo"
 					homeRoute="/"
@@ -330,26 +357,46 @@
 					ariaLabel="Hauptnavigation"
 				/>
 
-				<!-- FilterStrip (shown when Filter pill is active in PillNav) -->
+				<!-- TaskFilters strip (shown when Filter pill is active in PillNav) -->
 				{#if isFilterStripVisible}
-					<FilterStrip />
+					<TaskFilters
+						variant="strip"
+						selectedPriorities={viewStore.filterPriorities}
+						selectedProjectId={viewStore.filterProjectId}
+						selectedLabelIds={viewStore.filterLabelIds}
+						searchQuery={viewStore.filterSearchQuery}
+						onPrioritiesChange={(p: TaskPriority[]) => viewStore.setFilterPriorities(p)}
+						onProjectChange={(id: string | null) => viewStore.setFilterProjectId(id)}
+						onLabelsChange={(ids: string[]) => viewStore.setFilterLabelIds(ids)}
+						onSearchChange={(q: string) => viewStore.setFilterSearchQuery(q)}
+						onClearFilters={() => viewStore.clearFilters()}
+						sortBy={viewStore.sortBy}
+						onSortChange={(s: SortBy) => viewStore.setSort(s, viewStore.sortOrder)}
+						showSort={true}
+						showCompleted={true}
+						showKanbanNav={true}
+						isCompletedVisible={viewStore.showCompleted}
+						onToggleCompleted={() => viewStore.toggleShowCompleted()}
+					/>
 				{/if}
 			{/if}
 
-			<!-- Global Quick Input Bar -->
-			<QuickInputBar
-				onSearch={handleSearch}
-				onSelect={handleSelect}
-				placeholder="Neue Aufgabe oder suchen..."
-				emptyText="Keine Aufgaben gefunden"
-				searchingText="Suche..."
-				onCreate={handleCreate}
-				onParseCreate={handleParseCreate}
-				createText="Erstellen"
-				appIcon="todo"
-				hasFabRight={true}
-				bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '140px' : '70px'}
-			/>
+			<!-- Global Quick Input Bar - only on list and kanban views -->
+			{#if $page.url.pathname === '/' || $page.url.pathname === '/kanban'}
+				<QuickInputBar
+					onSearch={handleSearch}
+					onSelect={handleSelect}
+					placeholder="Neue Aufgabe oder suchen..."
+					emptyText="Keine Aufgaben gefunden"
+					searchingText="Suche..."
+					onCreate={handleCreate}
+					onParseCreate={handleParseCreate}
+					createText="Erstellen"
+					appIcon="todo"
+					hasFabRight={true}
+					bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '140px' : '70px'}
+				/>
+			{/if}
 
 			<!-- FAB to toggle PillNav visibility -->
 			<button
