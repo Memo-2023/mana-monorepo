@@ -6,33 +6,56 @@
 import { browser } from '$app/environment';
 import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
 
+// Default URLs for local development only
+const DEV_AUTH_URL = 'http://localhost:3001';
+const DEV_BACKEND_URL = 'http://localhost:3016';
+
 // Get auth URL dynamically at runtime - fallback for SSR and client
 function getAuthUrl(): string {
 	if (browser && typeof window !== 'undefined') {
-		// Client-side: use injected window variable (set by hooks.server.ts)
 		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
 			.__PUBLIC_MANA_CORE_AUTH_URL__;
-		return injectedUrl || 'http://localhost:3001';
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_AUTH_URL : '';
 	}
-	// Server-side (SSR): use Docker internal URL for container-to-container communication
-	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
 }
 
-const MANA_AUTH_URL = getAuthUrl();
+// Get backend URL dynamically at runtime
+function getBackendUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
+			.__PUBLIC_BACKEND_URL__;
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_BACKEND_URL : '';
+	}
+	return process.env.PUBLIC_BACKEND_URL || DEV_BACKEND_URL;
+}
 
+// Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
 let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
 
 function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
-		const auth = initializeWebAuth({ baseUrl: MANA_AUTH_URL });
+		const auth = initializeWebAuth({
+			baseUrl: getAuthUrl(),
+			backendUrl: getBackendUrl(),
+		});
 		_authService = auth.authService;
 		_tokenManager = auth.tokenManager;
 	}
 	return _authService;
 }
 
+function getTokenManager() {
+	if (!browser) return null;
+	getAuthService();
+	return _tokenManager;
+}
+
+// State
 let user = $state<UserData | null>(null);
 let loading = $state(true);
 let initialized = $state(false);
@@ -67,10 +90,8 @@ export const authStore = {
 
 		loading = true;
 		try {
-			// First, check if we have valid local tokens
 			let authenticated = await authService.isAuthenticated();
 
-			// If not authenticated locally, try SSO (shared session cookie)
 			if (!authenticated) {
 				console.log('No local tokens, trying SSO...');
 				const ssoResult = await authService.trySSO();
@@ -93,6 +114,9 @@ export const authStore = {
 		}
 	},
 
+	/**
+	 * Sign in with email and password
+	 */
 	async signIn(email: string, password: string) {
 		const authService = getAuthService();
 		if (!authService) {
@@ -116,6 +140,9 @@ export const authStore = {
 		}
 	},
 
+	/**
+	 * Sign up with email and password
+	 */
 	async signUp(email: string, password: string) {
 		const authService = getAuthService();
 		if (!authService) {
@@ -123,7 +150,6 @@ export const authStore = {
 		}
 
 		try {
-			// Pass the current app URL for post-verification redirect
 			const sourceAppUrl = browser ? window.location.origin : undefined;
 			const result = await authService.signUp(email, password, sourceAppUrl);
 
@@ -143,6 +169,9 @@ export const authStore = {
 		}
 	},
 
+	/**
+	 * Sign out
+	 */
 	async signOut() {
 		const authService = getAuthService();
 		if (!authService) {
@@ -159,6 +188,9 @@ export const authStore = {
 		}
 	},
 
+	/**
+	 * Send password reset email
+	 */
 	async resetPassword(email: string) {
 		const authService = getAuthService();
 		if (!authService) {
@@ -166,7 +198,8 @@ export const authStore = {
 		}
 
 		try {
-			const result = await authService.forgotPassword(email);
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Password reset failed' };
@@ -179,12 +212,25 @@ export const authStore = {
 		}
 	},
 
-	async getAccessToken() {
+	/**
+	 * Reset password with token (from reset email link)
+	 */
+	async resetPasswordWithToken(token: string, newPassword: string) {
 		const authService = getAuthService();
 		if (!authService) {
-			return null;
+			return { success: false, error: 'Auth not available on server' };
 		}
-		return await authService.getAppToken();
+
+		try {
+			const result = await authService.resetPassword(token, newPassword);
+			if (!result.success) {
+				return { success: false, error: result.error || 'Failed to reset password' };
+			}
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
 	},
 
 	/**
@@ -209,5 +255,29 @@ export const authStore = {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			return { success: false, error: errorMessage };
 		}
+	},
+
+	/**
+	 * Get access token for API calls (raw token, no refresh)
+	 * @deprecated Use getValidToken() instead for automatic refresh
+	 */
+	async getAccessToken() {
+		const authService = getAuthService();
+		if (!authService) {
+			return null;
+		}
+		return await authService.getAppToken();
+	},
+
+	/**
+	 * Get a valid access token for API calls
+	 * Automatically refreshes if the token is expired or about to expire
+	 */
+	async getValidToken(): Promise<string | null> {
+		const tokenManager = getTokenManager();
+		if (!tokenManager) {
+			return null;
+		}
+		return await tokenManager.getValidToken();
 	},
 };

@@ -1,52 +1,57 @@
 /**
  * Auth Store - Manages authentication state using Svelte 5 runes
- * Now using Mana Core Auth instead of Supabase Auth
+ * Uses Mana Core Auth
  */
 
 import { browser } from '$app/environment';
-import { env } from '$env/dynamic/public';
+import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
 
-const MANA_AUTH_URL = env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
-const BACKEND_URL = env.PUBLIC_BACKEND_URL || 'http://localhost:3006';
+// Default URLs for local development only
+const DEV_AUTH_URL = 'http://localhost:3001';
+const DEV_BACKEND_URL = 'http://localhost:3006';
 
-export interface UserData {
-	id: string;
-	email: string;
-	role?: string;
+// Get auth URL dynamically at runtime - fallback for SSR and client
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_AUTH_URL : '';
+	}
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
 }
 
-interface AuthResult {
-	success: boolean;
-	error?: string;
+// Get backend URL dynamically at runtime
+function getBackendUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
+			.__PUBLIC_BACKEND_URL__;
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_BACKEND_URL : '';
+	}
+	return process.env.PUBLIC_BACKEND_URL || DEV_BACKEND_URL;
 }
 
-// Internal auth service reference
-let _authService: any = null;
-let _tokenManager: any = null;
+// Lazy initialization to avoid SSR issues with localStorage
+let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
+let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
 
-async function getAuthService() {
+function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
-		try {
-			const { initializeWebAuth } = await import('@manacore/shared-auth');
-			const auth = initializeWebAuth({
-				baseUrl: MANA_AUTH_URL,
-				backendUrl: BACKEND_URL, // Enables automatic token refresh on 401 responses
-			});
-			_authService = auth.authService;
-			_tokenManager = auth.tokenManager;
-		} catch (error) {
-			console.error('Failed to initialize auth service:', error);
-			return null;
-		}
+		const auth = initializeWebAuth({
+			baseUrl: getAuthUrl(),
+			backendUrl: getBackendUrl(),
+		});
+		_authService = auth.authService;
+		_tokenManager = auth.tokenManager;
 	}
 	return _authService;
 }
 
-async function getTokenManager() {
+function getTokenManager() {
 	if (!browser) return null;
-	// Ensure auth service is initialized first
-	await getAuthService();
+	getAuthService();
 	return _tokenManager;
 }
 
@@ -69,158 +74,174 @@ export const authStore = {
 		return initialized;
 	},
 
+	/**
+	 * Initialize auth state from stored tokens
+	 * Also tries SSO if no local tokens exist (cross-domain authentication)
+	 */
 	async initialize() {
-		if (!browser || initialized) return;
+		if (initialized) return;
+
+		const authService = getAuthService();
+		if (!authService) {
+			initialized = true;
+			loading = false;
+			return;
+		}
 
 		loading = true;
-
 		try {
-			const authService = await getAuthService();
-			if (authService) {
-				// First, check if we have valid local tokens
-				let authenticated = await authService.isAuthenticated();
+			// First, check if we have valid local tokens
+			let authenticated = await authService.isAuthenticated();
 
-				// If not authenticated locally, try SSO (shared session cookie)
-				if (!authenticated) {
-					console.log('No local tokens, trying SSO...');
-					const ssoResult = await authService.trySSO();
-					if (ssoResult.success) {
-						console.log('SSO successful, user authenticated via shared session');
-						authenticated = true;
-					}
-				}
-
-				if (authenticated) {
-					const userData = await authService.getUserFromToken();
-					user = userData;
+			// If not authenticated locally, try SSO (shared session cookie)
+			if (!authenticated) {
+				console.log('No local tokens, trying SSO...');
+				const ssoResult = await authService.trySSO();
+				if (ssoResult.success) {
+					console.log('SSO successful, user authenticated via shared session');
+					authenticated = true;
 				}
 			}
+
+			if (authenticated) {
+				const userData = await authService.getUserFromToken();
+				user = userData;
+			}
+			initialized = true;
 		} catch (error) {
-			console.error('Auth initialization error:', error);
+			console.error('Failed to initialize auth:', error);
 			user = null;
 		} finally {
 			loading = false;
-			initialized = true;
 		}
 	},
 
-	async signIn(email: string, password: string): Promise<AuthResult> {
-		const authService = await getAuthService();
+	/**
+	 * Sign in with email and password
+	 */
+	async signIn(email: string, password: string) {
+		const authService = getAuthService();
 		if (!authService) {
-			return { success: false, error: 'Auth service not available' };
+			return { success: false, error: 'Auth not available on server' };
 		}
 
 		try {
-			loading = true;
 			const result = await authService.signIn(email, password);
 
-			if (result.success) {
-				const userData = await authService.getUserFromToken();
-				user = userData;
-				return { success: true };
+			if (!result.success) {
+				return { success: false, error: result.error || 'Login failed' };
 			}
 
-			return { success: false, error: result.error || 'Login failed' };
+			const userData = await authService.getUserFromToken();
+			user = userData;
+
+			return { success: true };
 		} catch (error) {
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : 'Login failed',
-			};
-		} finally {
-			loading = false;
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
 		}
 	},
 
-	async signUp(email: string, password: string): Promise<AuthResult> {
-		const authService = await getAuthService();
+	/**
+	 * Sign up with email and password
+	 */
+	async signUp(email: string, password: string) {
+		const authService = getAuthService();
 		if (!authService) {
-			return { success: false, error: 'Auth service not available' };
+			return { success: false, error: 'Auth not available on server', needsVerification: false };
 		}
 
 		try {
-			loading = true;
-			// Pass the current app URL for post-verification redirect
 			const sourceAppUrl = browser ? window.location.origin : undefined;
 			const result = await authService.signUp(email, password, sourceAppUrl);
 
-			if (result.success) {
-				// Auto-login after signup
-				const signInResult = await this.signIn(email, password);
-				return signInResult;
+			if (!result.success) {
+				return { success: false, error: result.error || 'Signup failed', needsVerification: false };
 			}
 
-			return { success: false, error: result.error || 'Signup failed' };
+			if (result.needsVerification) {
+				return { success: true, needsVerification: true };
+			}
+
+			const signInResult = await this.signIn(email, password);
+			return { ...signInResult, needsVerification: false };
 		} catch (error) {
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : 'Signup failed',
-			};
-		} finally {
-			loading = false;
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage, needsVerification: false };
 		}
 	},
 
-	async signOut(): Promise<void> {
-		const authService = await getAuthService();
-		if (authService) {
-			try {
-				await authService.signOut();
-			} catch (error) {
-				console.error('Sign out error:', error);
-			}
-		}
-		user = null;
-	},
-
-	async resetPassword(email: string): Promise<AuthResult> {
-		const authService = await getAuthService();
+	/**
+	 * Sign out
+	 */
+	async signOut() {
+		const authService = getAuthService();
 		if (!authService) {
-			return { success: false, error: 'Auth service not available' };
+			user = null;
+			return;
 		}
 
 		try {
-			const result = await authService.forgotPassword(email);
-			return {
-				success: result.success,
-				error: result.error,
-			};
+			await authService.signOut();
+			user = null;
 		} catch (error) {
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : 'Password reset failed',
-			};
+			console.error('Sign out error:', error);
+			user = null;
 		}
 	},
 
 	/**
-	 * Get access token for API calls (raw token, no refresh)
-	 * @deprecated Use getValidToken() instead for automatic refresh
+	 * Send password reset email
 	 */
-	async getAccessToken(): Promise<string | null> {
-		const authService = await getAuthService();
-		if (!authService) return null;
-		return authService.getAppToken();
+	async resetPassword(email: string) {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
+
+		try {
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Password reset failed' };
+			}
+
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
 	},
 
 	/**
-	 * Get a valid access token for API calls
-	 * Automatically refreshes if the token is expired or about to expire
+	 * Reset password with token (from reset email link)
 	 */
-	async getValidToken(): Promise<string | null> {
-		const tokenManager = await getTokenManager();
-		if (!tokenManager) {
-			return null;
+	async resetPasswordWithToken(token: string, newPassword: string) {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
 		}
-		return await tokenManager.getValidToken();
+
+		try {
+			const result = await authService.resetPassword(token, newPassword);
+			if (!result.success) {
+				return { success: false, error: result.error || 'Failed to reset password' };
+			}
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
 	},
 
 	/**
 	 * Resend verification email
 	 */
 	async resendVerificationEmail(email: string) {
-		const authService = await getAuthService();
+		const authService = getAuthService();
 		if (!authService) {
-			return { success: false, error: 'Auth service not available' };
+			return { success: false, error: 'Auth not available on server' };
 		}
 
 		try {
@@ -233,28 +254,32 @@ export const authStore = {
 
 			return { success: true };
 		} catch (error) {
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : 'Failed to resend verification email',
-			};
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
 		}
 	},
 
-	// For compatibility with old code that reads user store directly
-	setUser(userData: UserData | null) {
-		user = userData;
+	/**
+	 * Get access token for API calls (raw token, no refresh)
+	 * @deprecated Use getValidToken() instead for automatic refresh
+	 */
+	async getAccessToken() {
+		const authService = getAuthService();
+		if (!authService) {
+			return null;
+		}
+		return await authService.getAppToken();
+	},
+
+	/**
+	 * Get a valid access token for API calls
+	 * Automatically refreshes if the token is expired or about to expire
+	 */
+	async getValidToken(): Promise<string | null> {
+		const tokenManager = getTokenManager();
+		if (!tokenManager) {
+			return null;
+		}
+		return await tokenManager.getValidToken();
 	},
 };
-
-// Export individual reactive getters for backward compatibility
-export function getUser() {
-	return user;
-}
-
-export function getLoading() {
-	return loading;
-}
-
-export function getIsAuthenticated() {
-	return !!user;
-}

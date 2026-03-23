@@ -123,7 +123,8 @@ export const authStore = {
 	 * Send password reset email
 	 */
 	async forgotPassword(email: string) {
-		return authService.forgotPassword(email);
+		const redirectTo = browser ? window.location.origin : undefined;
+		return authService.forgotPassword(email, redirectTo);
 	},
 
 	/**

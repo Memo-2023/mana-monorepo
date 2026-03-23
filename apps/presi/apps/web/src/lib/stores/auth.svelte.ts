@@ -4,12 +4,33 @@
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth } from '@manacore/shared-auth';
-import type { UserData } from '@manacore/shared-auth';
-import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
+import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
 
-// Initialize Mana Core Auth only on the client side
-const MANA_AUTH_URL = PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+// Default URLs for local development only
+const DEV_AUTH_URL = 'http://localhost:3001';
+const DEV_BACKEND_URL = 'http://localhost:3008';
+
+// Get auth URL dynamically at runtime - fallback for SSR and client
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_AUTH_URL : '';
+	}
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
+}
+
+// Get backend URL dynamically at runtime
+function getBackendUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
+			.__PUBLIC_BACKEND_URL__;
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_BACKEND_URL : '';
+	}
+	return process.env.PUBLIC_BACKEND_URL || DEV_BACKEND_URL;
+}
 
 // Lazy initialization to avoid SSR issues with localStorage
 let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
@@ -18,11 +39,20 @@ let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null =
 function getAuthService() {
 	if (!browser) return null;
 	if (!_authService) {
-		const auth = initializeWebAuth({ baseUrl: MANA_AUTH_URL });
+		const auth = initializeWebAuth({
+			baseUrl: getAuthUrl(),
+			backendUrl: getBackendUrl(),
+		});
 		_authService = auth.authService;
 		_tokenManager = auth.tokenManager;
 	}
 	return _authService;
+}
+
+function getTokenManager() {
+	if (!browser) return null;
+	getAuthService();
+	return _tokenManager;
 }
 
 // State
@@ -61,10 +91,8 @@ export const auth = {
 
 		loading = true;
 		try {
-			// First, check if we have valid local tokens
 			let authenticated = await authService.isAuthenticated();
 
-			// If not authenticated locally, try SSO (shared session cookie)
 			if (!authenticated) {
 				console.log('No local tokens, trying SSO...');
 				const ssoResult = await authService.trySSO();
@@ -89,7 +117,6 @@ export const auth = {
 
 	/**
 	 * Sign in with email and password
-	 * Returns AuthResult compatible format for shared-auth-ui
 	 */
 	async login(email: string, password: string): Promise<{ success: boolean; error?: string }> {
 		const authService = getAuthService();
@@ -104,7 +131,6 @@ export const auth = {
 				return { success: false, error: result.error || 'Login failed' };
 			}
 
-			// Get user data from token
 			const userData = await authService.getUserFromToken();
 			user = userData;
 
@@ -128,7 +154,6 @@ export const auth = {
 		}
 
 		try {
-			// Pass the current app URL for post-verification redirect
 			const sourceAppUrl = browser ? window.location.origin : undefined;
 			const result = await authService.signUp(email, password, sourceAppUrl);
 
@@ -136,12 +161,10 @@ export const auth = {
 				return { success: false, error: result.error || 'Signup failed', needsVerification: false };
 			}
 
-			// Mana Core Auth requires separate login after signup
 			if (result.needsVerification) {
 				return { success: true, needsVerification: true };
 			}
 
-			// Auto sign in after successful signup
 			const signInResult = await this.login(email, password);
 			return { ...signInResult, needsVerification: false };
 		} catch (error) {
@@ -165,7 +188,6 @@ export const auth = {
 			user = null;
 		} catch (error) {
 			console.error('Sign out error:', error);
-			// Clear user even if sign out fails
 			user = null;
 		}
 	},
@@ -180,7 +202,8 @@ export const auth = {
 		}
 
 		try {
-			const result = await authService.forgotPassword(email);
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Password reset failed' };
@@ -216,6 +239,7 @@ export const auth = {
 
 	/**
 	 * Get access token for API calls
+	 * @deprecated Use getValidToken() instead for automatic refresh
 	 */
 	async getAccessToken() {
 		const authService = getAuthService();
@@ -223,6 +247,18 @@ export const auth = {
 			return null;
 		}
 		return await authService.getAppToken();
+	},
+
+	/**
+	 * Get a valid access token for API calls
+	 * Automatically refreshes if the token is expired or about to expire
+	 */
+	async getValidToken(): Promise<string | null> {
+		const tokenManager = getTokenManager();
+		if (!tokenManager) {
+			return null;
+		}
+		return await tokenManager.getValidToken();
 	},
 
 	/**

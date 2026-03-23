@@ -7,27 +7,28 @@ import { browser } from '$app/environment';
 import { initializeWebAuth } from '@manacore/shared-auth';
 import type { UserData } from '@manacore/shared-auth';
 
-// Get auth URL dynamically at runtime - fallback for SSR and client
+// Default URLs for local development only
+const DEV_AUTH_URL = 'http://localhost:3001';
+const DEV_BACKEND_URL = 'http://localhost:3023';
+
 function getAuthUrl(): string {
 	if (browser && typeof window !== 'undefined') {
-		// Client-side: use injected window variable (set by hooks.server.ts)
-		// Falls back to localhost for local development
 		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
 			.__PUBLIC_MANA_CORE_AUTH_URL__;
-		return injectedUrl || 'http://localhost:3001';
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_AUTH_URL : '';
 	}
-	// Server-side (SSR): use Docker internal URL for container-to-container communication
-	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
 }
 
-// Get backend URL dynamically at runtime
 function getBackendUrl(): string {
 	if (browser && typeof window !== 'undefined') {
 		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
 			.__PUBLIC_BACKEND_URL__;
-		return injectedUrl || 'http://localhost:3023';
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_BACKEND_URL : '';
 	}
-	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3023';
+	return process.env.PUBLIC_BACKEND_URL || DEV_BACKEND_URL;
 }
 
 // Lazy initialization to avoid SSR issues with localStorage
@@ -202,7 +203,8 @@ export const authStore = {
 		}
 
 		try {
-			const result = await authService.forgotPassword(email);
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Password reset failed' };

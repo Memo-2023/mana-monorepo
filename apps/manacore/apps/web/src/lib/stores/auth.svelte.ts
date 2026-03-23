@@ -4,20 +4,20 @@
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth } from '@manacore/shared-auth';
-import type { UserData } from '@manacore/shared-auth';
+import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
+
+// Default URL for local development only
+const DEV_AUTH_URL = 'http://localhost:3001';
 
 // Get auth URL dynamically at runtime - fallback for SSR and client
 function getAuthUrl(): string {
 	if (browser && typeof window !== 'undefined') {
-		// Client-side: use injected window variable (set by hooks.server.ts)
-		// Falls back to localhost for local development
 		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
 			.__PUBLIC_MANA_CORE_AUTH_URL__;
-		return injectedUrl || 'http://localhost:3001';
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_AUTH_URL : '';
 	}
-	// Server-side (SSR): use Docker internal URL for container-to-container communication
-	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
 }
 
 // Lazy initialization to avoid SSR issues with localStorage
@@ -203,7 +203,8 @@ export const authStore = {
 		}
 
 		try {
-			const result = await authService.forgotPassword(email);
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Password reset failed' };

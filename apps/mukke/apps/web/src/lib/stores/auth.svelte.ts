@@ -7,24 +7,28 @@ import { browser } from '$app/environment';
 import { initializeWebAuth } from '@manacore/shared-auth';
 import type { UserData } from '@manacore/shared-auth';
 
-// Get auth URL dynamically at runtime - fallback for SSR and client
+// Default URLs for local development only
+const DEV_AUTH_URL = 'http://localhost:3001';
+const DEV_BACKEND_URL = 'http://localhost:3010';
+
 function getAuthUrl(): string {
 	if (browser && typeof window !== 'undefined') {
 		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
 			.__PUBLIC_MANA_CORE_AUTH_URL__;
-		return injectedUrl || 'http://localhost:3001';
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_AUTH_URL : '';
 	}
-	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
 }
 
-// Get backend URL dynamically at runtime
 function getBackendUrl(): string {
 	if (browser && typeof window !== 'undefined') {
 		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
 			.__PUBLIC_BACKEND_URL__;
-		return injectedUrl || 'http://localhost:3010';
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_BACKEND_URL : '';
 	}
-	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3010';
+	return process.env.PUBLIC_BACKEND_URL || DEV_BACKEND_URL;
 }
 
 // Lazy initialization to avoid SSR issues with localStorage
@@ -196,8 +200,8 @@ export const authStore = {
 		}
 
 		try {
-			const sourceAppUrl = browser ? window.location.origin : undefined;
-			const result = await authService.forgotPassword(email, sourceAppUrl);
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Failed to send reset email' };

@@ -4,20 +4,21 @@
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth } from '@manacore/shared-auth';
-import type { UserData } from '@manacore/shared-auth';
+import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
+
+// Default URLs for local development only
+const DEV_AUTH_URL = 'http://localhost:3001';
+const DEV_BACKEND_URL = 'http://localhost:3002';
 
 // Get auth URL dynamically at runtime - fallback for SSR and client
 function getAuthUrl(): string {
 	if (browser && typeof window !== 'undefined') {
-		// Client-side: use injected window variable (set by hooks.server.ts)
-		// Falls back to localhost for local development
 		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
 			.__PUBLIC_MANA_CORE_AUTH_URL__;
-		return injectedUrl || 'http://localhost:3001';
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_AUTH_URL : '';
 	}
-	// Server-side (SSR): use Docker internal URL for container-to-container communication
-	return process.env.PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
 }
 
 // Get backend URL dynamically at runtime
@@ -25,9 +26,10 @@ function getBackendUrl(): string {
 	if (browser && typeof window !== 'undefined') {
 		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
 			.__PUBLIC_BACKEND_URL__;
-		return injectedUrl || 'http://localhost:3002';
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_BACKEND_URL : '';
 	}
-	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3002';
+	return process.env.PUBLIC_BACKEND_URL || DEV_BACKEND_URL;
 }
 
 // Lazy initialization to avoid SSR issues with localStorage
@@ -136,7 +138,7 @@ export const authStore = {
 			const userData = await authService.getUserFromToken();
 			user = userData;
 
-			return { success: true, error: null };
+			return { success: true };
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			return { success: false, error: errorMessage };
@@ -163,7 +165,7 @@ export const authStore = {
 
 			// Mana Core Auth requires separate login after signup
 			if (result.needsVerification) {
-				return { success: true, error: null, needsVerification: true };
+				return { success: true, needsVerification: true };
 			}
 
 			// Auto sign in after successful signup
@@ -205,13 +207,14 @@ export const authStore = {
 		}
 
 		try {
-			const result = await authService.forgotPassword(email);
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
 
 			if (!result.success) {
 				return { success: false, error: result.error || 'Password reset failed' };
 			}
 
-			return { success: true, error: null };
+			return { success: true };
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			return { success: false, error: errorMessage };

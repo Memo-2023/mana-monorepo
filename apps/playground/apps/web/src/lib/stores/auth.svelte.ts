@@ -2,41 +2,54 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { initializeWebAuth, type AuthService, type UserData } from '@manacore/shared-auth';
 
+// Default URLs for local development only
+const DEV_AUTH_URL = 'http://localhost:3001';
+const DEV_BACKEND_URL = 'http://localhost:3025';
+
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_AUTH_URL : '';
+	}
+	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
+}
+
+function getBackendUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_LLM_URL__?: string })
+			.__PUBLIC_MANA_LLM_URL__;
+		if (injectedUrl) return injectedUrl;
+		return import.meta.env.DEV ? DEV_BACKEND_URL : '';
+	}
+	return process.env.PUBLIC_MANA_LLM_URL || DEV_BACKEND_URL;
+}
+
 let user = $state<UserData | null>(null);
 let loading = $state(true);
 let initialized = $state(false);
 
 let _authService: AuthService | null = null;
-
-function getAuthUrl(): string {
-	if (!browser) return '';
-	return (
-		(window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
-			.__PUBLIC_MANA_CORE_AUTH_URL__ ||
-		import.meta.env.PUBLIC_MANA_CORE_AUTH_URL ||
-		'http://localhost:3001'
-	);
-}
-
-function getLlmUrl(): string {
-	if (!browser) return '';
-	return (
-		(window as unknown as { __PUBLIC_MANA_LLM_URL__?: string }).__PUBLIC_MANA_LLM_URL__ ||
-		import.meta.env.PUBLIC_MANA_LLM_URL ||
-		'http://localhost:3025'
-	);
-}
+let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
 
 function getAuthService(): AuthService | null {
 	if (!browser) return null;
 	if (!_authService) {
 		const auth = initializeWebAuth({
 			baseUrl: getAuthUrl(),
-			backendUrl: getLlmUrl(),
+			backendUrl: getBackendUrl(),
 		});
 		_authService = auth.authService;
+		_tokenManager = auth.tokenManager;
 	}
 	return _authService;
+}
+
+function getTokenManager() {
+	if (!browser) return null;
+	getAuthService();
+	return _tokenManager;
 }
 
 export const authStore = {
@@ -118,10 +131,29 @@ export const authStore = {
 		goto('/login');
 	},
 
-	async getValidToken(): Promise<string | null> {
+	async resetPassword(email: string) {
 		const authService = getAuthService();
-		if (!authService) return null;
-		return authService.getAppToken();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
+
+		try {
+			const redirectTo = browser ? window.location.origin : undefined;
+			const result = await authService.forgotPassword(email, redirectTo);
+			if (!result.success) {
+				return { success: false, error: result.error || 'Password reset failed' };
+			}
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
+	async getValidToken(): Promise<string | null> {
+		const tokenManager = getTokenManager();
+		if (!tokenManager) return null;
+		return await tokenManager.getValidToken();
 	},
 
 	async resendVerificationEmail(email: string) {
