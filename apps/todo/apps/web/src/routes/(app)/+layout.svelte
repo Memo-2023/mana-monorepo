@@ -179,7 +179,6 @@
 		},
 		{ href: '/spiral', label: 'Spiral', icon: 'sparkles' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
-		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 	]);
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)
@@ -492,7 +491,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		z-index: 50;
+		z-index: 1002;
 		transition: all 0.2s ease;
 	}
 
