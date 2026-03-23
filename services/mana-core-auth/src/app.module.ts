@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER } from '@nestjs/core';
+import { LlmModule } from '@manacore/shared-llm';
 import configuration from './config/configuration';
 import { AdminModule } from './admin/admin.module';
 import { AiModule } from './ai/ai.module';
@@ -35,6 +36,14 @@ import { SecurityModule } from './security';
 				limit: 100, // 100 requests per minute
 			},
 		]),
+		LlmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (config: ConfigService) => ({
+				manaLlmUrl: config.get('MANA_LLM_URL'),
+				debug: config.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
+		}),
 		LoggerModule,
 		SecurityModule,
 		MetricsModule,

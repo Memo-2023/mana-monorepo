@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { LlmModule } from '@manacore/shared-llm';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { DatabaseModule } from './db/database.module';
@@ -20,6 +21,15 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 			envFilePath: '.env',
 		}),
 		ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+		LlmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (configService: ConfigService) => ({
+				manaLlmUrl: configService.get('MANA_LLM_URL'),
+				timeout: configService.get<number>('LLM_TIMEOUT', 120000),
+				debug: configService.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
+		}),
 		ManaCoreModule.forRootAsync({
 			imports: [ConfigModule],
 			useFactory: (configService: ConfigService) => ({

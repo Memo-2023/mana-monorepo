@@ -21,8 +21,9 @@
 		"db:seed": "tsx src/db/seed.ts"
 	},
 	"dependencies": {
-		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-drizzle-config": "workspace:*",
+		"@manacore/shared-error-tracking": "workspace:*",
+		"@manacore/shared-llm": "workspace:^",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",
 		"@manacore/shared-nestjs-setup": "workspace:*",

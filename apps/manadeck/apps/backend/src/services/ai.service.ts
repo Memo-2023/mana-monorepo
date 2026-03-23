@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { GoogleGenAI, Type } from '@google/genai';
+import { LlmClientService } from '@manacore/shared-llm';
 import { AsyncResult, ok, err, ServiceError } from '@manacore/shared-errors';
 
 export type CardType = 'text' | 'flashcard' | 'quiz' | 'mixed';
@@ -50,31 +49,15 @@ export interface DeckGenerationData {
 @Injectable()
 export class AiService {
 	private readonly logger = new Logger(AiService.name);
-	private readonly ai: GoogleGenAI | null;
-	private readonly model = 'gemini-2.0-flash';
 
-	constructor(private readonly configService: ConfigService) {
-		const apiKey = this.configService.get<string>('GOOGLE_GENAI_API_KEY');
-
-		if (apiKey) {
-			this.ai = new GoogleGenAI({ apiKey });
-			this.logger.log('Google Gemini AI initialized successfully');
-		} else {
-			this.ai = null;
-			this.logger.warn('Google Gemini API key not configured - AI features disabled');
-		}
-	}
+	constructor(private readonly llm: LlmClientService) {}
 
 	isAvailable(): boolean {
-		return this.ai !== null;
+		return true;
 	}
 
 	async generateDeck(request: DeckGenerationRequest): AsyncResult<DeckGenerationData> {
 		const startTime = Date.now();
-
-		if (!this.ai) {
-			return err(ServiceError.unavailable('AI (Google Gemini not configured)'));
-		}
 
 		const {
 			prompt,
@@ -96,28 +79,23 @@ export class AiService {
 				cardTypes
 			);
 
-			const response = await this.ai.models.generateContent({
-				model: this.model,
-				contents: userPrompt,
-				config: {
-					systemInstruction: systemPrompt,
-					responseMimeType: 'application/json',
-					responseSchema: this.buildResponseSchema(cardTypes),
+			const { data, usage } = await this.llm.json<{ cards: GeneratedCard[] }>(userPrompt, {
+				systemPrompt,
+				temperature: 0.7,
+				validate: (raw) => {
+					const obj = raw as { cards: GeneratedCard[] };
+					if (!obj.cards || !Array.isArray(obj.cards)) {
+						throw new Error('Response must contain a "cards" array');
+					}
+					return obj;
 				},
 			});
 
 			const generationTime = Date.now() - startTime;
-			const responseText = response.text?.trim();
-
-			if (!responseText) {
-				return err(ServiceError.generationFailed('Google Gemini', 'Empty response from AI'));
-			}
-
-			const parsed = JSON.parse(responseText);
-			const cards: GeneratedCard[] = parsed.cards || [];
+			const cards = data.cards;
 
 			if (cards.length === 0) {
-				return err(ServiceError.generationFailed('Google Gemini', 'No cards generated'));
+				return err(ServiceError.generationFailed('mana-llm', 'No cards generated'));
 			}
 
 			this.logger.log(`Generated ${cards.length} cards in ${generationTime}ms`);
@@ -125,8 +103,8 @@ export class AiService {
 			return ok({
 				cards,
 				metadata: {
-					model: this.model,
-					tokensUsed: response.usageMetadata?.totalTokenCount,
+					model: 'mana-llm',
+					tokensUsed: usage.total_tokens || undefined,
 					generationTime,
 				},
 			});
@@ -135,7 +113,7 @@ export class AiService {
 
 			return err(
 				ServiceError.generationFailed(
-					'Google Gemini',
+					'mana-llm',
 					error instanceof Error ? error.message : 'Unknown error occurred',
 					error instanceof Error ? error : undefined
 				)
@@ -176,7 +154,33 @@ QUALITY GUIDELINES:
 4. For quiz: all 4 options should be plausible, avoid obviously wrong answers
 5. Include helpful hints for difficult flashcards
 6. Add explanations for quiz questions to reinforce learning
-7. Progress from easier to harder cards when possible`;
+7. Progress from easier to harder cards when possible
+
+RESPONSE FORMAT:
+You MUST respond with a valid JSON object containing a "cards" array. Each card has:
+${this.buildJsonSchemaDescription(cardTypes)}`;
+	}
+
+	private buildJsonSchemaDescription(cardTypes: CardType[]): string {
+		const schemas: string[] = [];
+
+		if (cardTypes.includes('flashcard')) {
+			schemas.push(
+				`- Flashcard: { "cardType": "flashcard", "title": "optional title", "content": { "front": "question/term", "back": "answer/definition", "hint": "optional hint" } }`
+			);
+		}
+		if (cardTypes.includes('quiz')) {
+			schemas.push(
+				`- Quiz: { "cardType": "quiz", "title": "optional title", "content": { "question": "the question", "options": ["A", "B", "C", "D"], "correctAnswer": 0, "explanation": "why this is correct" } }`
+			);
+		}
+		if (cardTypes.includes('text')) {
+			schemas.push(
+				`- Text: { "cardType": "text", "title": "optional title", "content": { "text": "informational content" } }`
+			);
+		}
+
+		return schemas.join('\n');
 	}
 
 	private buildUserPrompt(
@@ -200,7 +204,9 @@ CARD DISTRIBUTION:
 ${typeDistribution}
 
 Generate exactly ${cardCount} cards that cover the topic comprehensively.
-Ensure variety in the questions and good coverage of the subject matter.`;
+Ensure variety in the questions and good coverage of the subject matter.
+
+Respond ONLY with a JSON object: {"cards": [...]}`;
 	}
 
 	private suggestTypeDistribution(cardCount: number, cardTypes: CardType[]): string {
@@ -229,7 +235,7 @@ Ensure variety in the questions and good coverage of the subject matter.`;
 	}
 
 	/**
-	 * Generate cards from an image using Gemini Vision
+	 * Generate cards from an image using vision model
 	 */
 	async generateFromImage(
 		imageBase64: string,
@@ -238,59 +244,41 @@ Ensure variety in the questions and good coverage of the subject matter.`;
 	): AsyncResult<DeckGenerationData> {
 		const startTime = Date.now();
 
-		if (!this.ai) {
-			return err(ServiceError.unavailable('AI (Google Gemini not configured)'));
-		}
-
 		try {
 			const prompt = `Analyze this image and create ${cardCount} educational flashcards based on its content.
 ${context ? `Context: ${context}` : ''}
 
 For each concept, term, or important element you identify in the image, create a flashcard or quiz question.
 
-Return the cards as a JSON object with a "cards" array containing objects with:
+Return ONLY a JSON object: {"cards": [...]} where each card has:
 - cardType: "flashcard" or "quiz"
 - title: short title
 - content: { front, back, hint } for flashcards OR { question, options, correctAnswer, explanation } for quiz`;
 
-			const response = await this.ai.models.generateContent({
-				model: this.model,
-				contents: [
-					{
-						role: 'user',
-						parts: [
-							{ text: prompt },
-							{
-								inlineData: {
-									mimeType: 'image/jpeg',
-									data: imageBase64,
-								},
-							},
-						],
+			const { data, usage } = await this.llm.visionJson<{ cards: GeneratedCard[] }>(
+				prompt,
+				imageBase64,
+				'image/jpeg',
+				{
+					validate: (raw) => {
+						const obj = raw as { cards: GeneratedCard[] };
+						if (!obj.cards || !Array.isArray(obj.cards)) {
+							throw new Error('Response must contain a "cards" array');
+						}
+						return obj;
 					},
-				],
-				config: {
-					responseMimeType: 'application/json',
-				},
-			});
+				}
+			);
 
 			const generationTime = Date.now() - startTime;
-			const responseText = response.text?.trim();
 
-			if (!responseText) {
-				return err(ServiceError.generationFailed('Google Gemini', 'Empty response from AI'));
-			}
-
-			const parsed = JSON.parse(responseText);
-			const cards: GeneratedCard[] = parsed.cards || [];
-
-			this.logger.log(`Generated ${cards.length} cards from image in ${generationTime}ms`);
+			this.logger.log(`Generated ${data.cards.length} cards from image in ${generationTime}ms`);
 
 			return ok({
-				cards,
+				cards: data.cards,
 				metadata: {
-					model: this.model,
-					tokensUsed: response.usageMetadata?.totalTokenCount,
+					model: 'mana-llm',
+					tokensUsed: usage.total_tokens || undefined,
 					generationTime,
 				},
 			});
@@ -298,7 +286,7 @@ Return the cards as a JSON object with a "cards" array containing objects with:
 			this.logger.error('AI image generation failed:', error);
 			return err(
 				ServiceError.generationFailed(
-					'Google Gemini',
+					'mana-llm',
 					error instanceof Error ? error.message : 'Unknown error'
 				)
 			);
@@ -312,109 +300,24 @@ Return the cards as a JSON object with a "cards" array containing objects with:
 		content: string,
 		cardType: string
 	): AsyncResult<{ enhancedContent: string }> {
-		if (!this.ai) {
-			return err(ServiceError.unavailable('AI (Google Gemini not configured)'));
-		}
-
 		try {
-			const prompt = `Improve and enhance this ${cardType} card content. Make it clearer, more educational, and engaging.
+			const result = await this.llm.chat(
+				`Improve and enhance this ${cardType} card content. Make it clearer, more educational, and engaging.
 
 Original content:
 ${content}
 
-Return the enhanced content in the same JSON format as the input, but improved.`;
+Return the enhanced content in the same JSON format as the input, but improved.`
+			);
 
-			const response = await this.ai.models.generateContent({
-				model: this.model,
-				contents: prompt,
-				config: {
-					responseMimeType: 'application/json',
-				},
-			});
-
-			const responseText = response.text?.trim();
-			if (!responseText) {
+			if (!result.content) {
 				return ok({ enhancedContent: content });
 			}
 
-			return ok({ enhancedContent: responseText });
+			return ok({ enhancedContent: result.content });
 		} catch (error) {
 			this.logger.error('AI content enhancement failed:', error);
-			return ok({ enhancedContent: content }); // Return original on failure
+			return ok({ enhancedContent: content });
 		}
-	}
-
-	private buildResponseSchema(cardTypes: CardType[]): any {
-		const cardSchemas: any[] = [];
-
-		if (cardTypes.includes('flashcard')) {
-			cardSchemas.push({
-				type: Type.OBJECT,
-				properties: {
-					cardType: { type: Type.STRING, enum: ['flashcard'] },
-					title: { type: Type.STRING },
-					content: {
-						type: Type.OBJECT,
-						properties: {
-							front: { type: Type.STRING },
-							back: { type: Type.STRING },
-							hint: { type: Type.STRING },
-						},
-						required: ['front', 'back'],
-					},
-				},
-				required: ['cardType', 'content'],
-			});
-		}
-
-		if (cardTypes.includes('quiz')) {
-			cardSchemas.push({
-				type: Type.OBJECT,
-				properties: {
-					cardType: { type: Type.STRING, enum: ['quiz'] },
-					title: { type: Type.STRING },
-					content: {
-						type: Type.OBJECT,
-						properties: {
-							question: { type: Type.STRING },
-							options: { type: Type.ARRAY, items: { type: Type.STRING } },
-							correctAnswer: { type: Type.NUMBER },
-							explanation: { type: Type.STRING },
-						},
-						required: ['question', 'options', 'correctAnswer'],
-					},
-				},
-				required: ['cardType', 'content'],
-			});
-		}
-
-		if (cardTypes.includes('text')) {
-			cardSchemas.push({
-				type: Type.OBJECT,
-				properties: {
-					cardType: { type: Type.STRING, enum: ['text'] },
-					title: { type: Type.STRING },
-					content: {
-						type: Type.OBJECT,
-						properties: {
-							text: { type: Type.STRING },
-						},
-						required: ['text'],
-					},
-				},
-				required: ['cardType', 'content'],
-			});
-		}
-
-		return {
-			type: Type.OBJECT,
-			properties: {
-				cards: {
-					type: Type.ARRAY,
-					items: cardSchemas.length === 1 ? cardSchemas[0] : { anyOf: cardSchemas },
-				},
-			},
-			required: ['cards'],
-		};
 	}
 }

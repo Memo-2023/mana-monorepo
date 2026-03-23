@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LlmModule } from '@manacore/shared-llm';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { HealthModule } from '@manacore/shared-nestjs-health';
@@ -22,6 +23,14 @@ import { GuideModule } from './guide/guide.module';
 				appId: configService.get<string>('APP_ID', 'traces'),
 				serviceKey: configService.get<string>('MANA_CORE_SERVICE_KEY', ''),
 				debug: configService.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
+		}),
+		LlmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (config: ConfigService) => ({
+				manaLlmUrl: config.get('MANA_LLM_URL'),
+				debug: config.get('NODE_ENV') === 'development',
 			}),
 			inject: [ConfigService],
 		}),

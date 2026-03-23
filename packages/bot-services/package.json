@@ -71,6 +71,7 @@
 		"prepublishOnly": "pnpm build"
 	},
 	"dependencies": {
+		"@manacore/shared-llm": "workspace:^",
 		"@nestjs/common": "^11.0.20",
 		"@nestjs/config": "^4.0.2",
 		"date-fns": "^4.1.0",

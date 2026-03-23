@@ -4,6 +4,7 @@ import { ClsModule } from 'nestjs-cls';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { ManaCoreModule } from '@manacore/nestjs-integration';
+import { LlmModule } from '@manacore/shared-llm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ApiController } from './controllers/api.controller';
@@ -49,6 +50,16 @@ import {
 			}),
 			inject: [ConfigService],
 		}) as any,
+
+		// LLM (via mana-llm service)
+		LlmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (config: ConfigService) => ({
+				manaLlmUrl: config.get('MANA_LLM_URL'),
+				debug: config.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
+		}),
 
 		// Health checks
 		TerminusModule,

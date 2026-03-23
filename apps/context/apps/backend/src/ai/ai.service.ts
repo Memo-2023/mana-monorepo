@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { LlmClientService } from '@manacore/shared-llm';
 import { TokenService } from '../token/token.service';
 
 interface GenerateOptions {
@@ -19,14 +19,11 @@ function estimateTokens(text: string): number {
 @Injectable()
 export class AiService {
 	private readonly logger = new Logger(AiService.name);
-	private readonly manaLlmUrl: string;
 
 	constructor(
-		private configService: ConfigService,
+		private readonly llm: LlmClientService,
 		private tokenService: TokenService
-	) {
-		this.manaLlmUrl = this.configService.get<string>('MANA_LLM_URL') || 'http://localhost:3025';
-	}
+	) {}
 
 	async generate(userId: string, options: GenerateOptions) {
 		const model = options.model || 'ollama/gemma3:4b';
@@ -51,11 +48,16 @@ export class AiService {
 		}
 
 		// Generate text via mana-llm
-		const completionText = await this.generateWithManaLlm(fullPrompt, options, model);
+		const result = await this.llm.chat(fullPrompt, {
+			model,
+			systemPrompt: 'You are a helpful assistant.',
+			temperature: options.temperature || 0.7,
+			maxTokens: options.maxTokens || 2000,
+		});
 
-		// Calculate actual cost and log
-		const actualPromptTokens = estimateTokens(fullPrompt);
-		const completionTokens = estimateTokens(completionText);
+		// Use actual token counts from response when available, fall back to estimates
+		const actualPromptTokens = result.usage.prompt_tokens || estimateTokens(fullPrompt);
+		const completionTokens = result.usage.completion_tokens || estimateTokens(result.content);
 		const { tokensUsed, remainingBalance } = await this.tokenService.logUsage(
 			userId,
 			model,
@@ -65,7 +67,7 @@ export class AiService {
 		);
 
 		return {
-			text: completionText,
+			text: result.content,
 			tokenInfo: {
 				promptTokens: actualPromptTokens,
 				completionTokens,
@@ -109,35 +111,5 @@ export class AiService {
 			estimate,
 			balance,
 		};
-	}
-
-	private async generateWithManaLlm(
-		prompt: string,
-		options: GenerateOptions,
-		model: string
-	): Promise<string> {
-		const response = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				model,
-				messages: [
-					{ role: 'system', content: 'You are a helpful assistant.' },
-					{ role: 'user', content: prompt },
-				],
-				temperature: options.temperature || 0.7,
-				max_tokens: options.maxTokens || 2000,
-			}),
-			signal: AbortSignal.timeout(120000),
-		});
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			this.logger.error(`mana-llm error: ${response.status} - ${errorText}`);
-			throw new BadRequestException(`LLM generation failed: ${response.status}`);
-		}
-
-		const data = await response.json();
-		return data.choices?.[0]?.message?.content || '';
 	}
 }

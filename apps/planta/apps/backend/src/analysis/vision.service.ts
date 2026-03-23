@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { LlmClientService } from '@manacore/shared-llm';
 import type { AnalysisResult } from '@planta/shared';
 
 const PLANT_ANALYSIS_PROMPT = `Du bist ein erfahrener Botaniker und Pflanzenexperte. Analysiere dieses Pflanzenfoto und erstelle einen detaillierten Steckbrief.
@@ -43,70 +43,32 @@ Falls du die Pflanze nicht identifizieren kannst, setze confidence auf 0 und sci
 @Injectable()
 export class VisionService {
 	private readonly logger = new Logger(VisionService.name);
-	private readonly manaLlmUrl: string;
-	private readonly visionModel = 'ollama/llava:7b';
 
-	constructor(private configService: ConfigService) {
-		this.manaLlmUrl = this.configService.get<string>('MANA_LLM_URL') || 'http://localhost:3025';
-		this.logger.log(`Planta Vision using mana-llm at ${this.manaLlmUrl}`);
-	}
+	constructor(private readonly llm: LlmClientService) {}
 
 	async analyzePlantImage(imageBuffer: Buffer, mimeType: string): Promise<AnalysisResult | null> {
 		try {
 			const base64 = imageBuffer.toString('base64');
 
-			const result = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					model: this.visionModel,
-					messages: [
-						{
-							role: 'user',
-							content: [
-								{ type: 'text', text: PLANT_ANALYSIS_PROMPT },
-								{
-									type: 'image_url',
-									image_url: { url: `data:${mimeType};base64,${base64}` },
-								},
-							],
-						},
-					],
+			const { data } = await this.llm.visionJson<AnalysisResult>(
+				PLANT_ANALYSIS_PROMPT,
+				base64,
+				mimeType,
+				{
 					temperature: 0.3,
-				}),
-				signal: AbortSignal.timeout(120000),
-			});
-
-			if (!result.ok) {
-				const errorText = await result.text();
-				this.logger.error(`mana-llm vision error: ${result.status} - ${errorText}`);
-				return null;
-			}
-
-			const data = await result.json();
-			const response = (data.choices?.[0]?.message?.content || '').trim();
-
-			this.logger.debug(`Gemini raw response: ${response}`);
-
-			// Parse JSON response - handle potential markdown code blocks
-			let jsonStr = response;
-			if (response.includes('```')) {
-				const match = response.match(/```(?:json)?\s*([\s\S]*?)```/);
-				if (match) {
-					jsonStr = match[1].trim();
+					validate: (raw) => {
+						const result = raw as AnalysisResult;
+						this.validateAnalysisResult(result);
+						return result;
+					},
 				}
-			}
-
-			const parsed = JSON.parse(jsonStr) as AnalysisResult;
-
-			// Validate and sanitize response
-			this.validateAnalysisResult(parsed);
-
-			this.logger.log(
-				`Plant identified: ${parsed.identification.scientificName} (${parsed.identification.confidence}% confidence)`
 			);
 
-			return parsed;
+			this.logger.log(
+				`Plant identified: ${data.identification.scientificName} (${data.identification.confidence}% confidence)`
+			);
+
+			return data;
 		} catch (error) {
 			this.logger.error(`Vision analysis failed: ${error}`);
 			return null;
@@ -114,7 +76,6 @@ export class VisionService {
 	}
 
 	private validateAnalysisResult(result: AnalysisResult): void {
-		// Validate identification
 		if (!result.identification) {
 			result.identification = {
 				scientificName: 'Unbekannt',
@@ -123,13 +84,11 @@ export class VisionService {
 			};
 		}
 
-		// Ensure confidence is within range
 		if (typeof result.identification.confidence !== 'number') {
 			result.identification.confidence = 0;
 		}
 		result.identification.confidence = Math.max(0, Math.min(100, result.identification.confidence));
 
-		// Validate health
 		if (!result.health) {
 			result.health = {
 				status: 'healthy',
@@ -143,7 +102,6 @@ export class VisionService {
 			result.health.status = 'healthy';
 		}
 
-		// Validate care
 		if (!result.care) {
 			result.care = {
 				light: 'medium',

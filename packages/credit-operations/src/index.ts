@@ -44,6 +44,18 @@ export enum CreditOperationType {
 	// Zitare - AI explanations
 	AI_QUOTE_EXPLANATION = 'ai_quote_explanation',
 
+	// Planta - Plant analysis
+	AI_PLANT_ANALYSIS = 'ai_plant_analysis',
+
+	// Traces - City guide generation
+	AI_GUIDE_GENERATION = 'ai_guide_generation',
+
+	// Context - AI text generation
+	AI_CONTEXT_GENERATION = 'ai_context_generation',
+
+	// Matrix Bots - Bot chat
+	AI_BOT_CHAT = 'ai_bot_chat',
+
 	// General AI features
 	AI_SMART_SCHEDULING = 'ai_smart_scheduling',
 	AI_SUGGESTIONS = 'ai_suggestions',
@@ -116,6 +128,11 @@ export const CREDIT_COSTS: Record<CreditOperationType, number> = {
 	[CreditOperationType.AI_CARD_GENERATION]: 2,
 
 	[CreditOperationType.AI_QUOTE_EXPLANATION]: 2,
+
+	[CreditOperationType.AI_PLANT_ANALYSIS]: 2,
+	[CreditOperationType.AI_GUIDE_GENERATION]: 5,
+	[CreditOperationType.AI_CONTEXT_GENERATION]: 2,
+	[CreditOperationType.AI_BOT_CHAT]: 0.1,
 
 	[CreditOperationType.AI_SMART_SCHEDULING]: 2,
 	[CreditOperationType.AI_SUGGESTIONS]: 2,
@@ -269,6 +286,38 @@ export const OPERATION_METADATA: Record<CreditOperationType, OperationMetadata> 
 		description: 'Get an AI explanation of a quote',
 		category: CreditCategory.AI,
 		app: 'zitare',
+	},
+
+	// Planta
+	[CreditOperationType.AI_PLANT_ANALYSIS]: {
+		name: 'Plant Analysis',
+		description: 'Identify and analyze a plant from a photo',
+		category: CreditCategory.AI,
+		app: 'planta',
+	},
+
+	// Traces
+	[CreditOperationType.AI_GUIDE_GENERATION]: {
+		name: 'City Guide Generation',
+		description: 'Generate an AI-powered city walking guide',
+		category: CreditCategory.AI,
+		app: 'traces',
+	},
+
+	// Context
+	[CreditOperationType.AI_CONTEXT_GENERATION]: {
+		name: 'AI Text Generation',
+		description: 'Generate or transform text with AI',
+		category: CreditCategory.AI,
+		app: 'context',
+	},
+
+	// Matrix Bots
+	[CreditOperationType.AI_BOT_CHAT]: {
+		name: 'Bot Chat Message',
+		description: 'Chat with AI via Matrix bot',
+		category: CreditCategory.AI,
+		app: 'matrix',
 	},
 
 	// General AI

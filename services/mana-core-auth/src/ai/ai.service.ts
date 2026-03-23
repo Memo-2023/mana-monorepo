@@ -1,32 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { LlmClientService } from '@manacore/shared-llm';
 
 export interface FeedbackAnalysis {
 	title: string;
 	category: 'bug' | 'feature' | 'improvement' | 'question' | 'other';
 }
 
+const VALID_CATEGORIES = ['bug', 'feature', 'improvement', 'question', 'other'] as const;
+
 @Injectable()
 export class AiService {
 	private readonly logger = new Logger(AiService.name);
-	private readonly manaLlmUrl: string | null = null;
 
-	constructor(private configService: ConfigService) {
-		const url = this.configService.get<string>('MANA_LLM_URL');
-		if (url) {
-			this.manaLlmUrl = url;
-			this.logger.log(`AI service using mana-llm at ${url}`);
-		} else {
-			this.logger.warn('MANA_LLM_URL not configured - AI features disabled');
-		}
-	}
+	constructor(private readonly llm: LlmClientService) {}
 
 	async analyzeFeedback(feedbackText: string): Promise<FeedbackAnalysis> {
-		// Fallback if AI not available
-		if (!this.manaLlmUrl) {
-			return this.fallbackAnalysis(feedbackText);
-		}
-
 		try {
 			const prompt = `Analysiere dieses User-Feedback und generiere:
 1. Einen kurzen, prägnanten deutschen Titel (max 60 Zeichen) der den Kern des Feedbacks zusammenfasst
@@ -37,48 +25,24 @@ Feedback: "${feedbackText}"
 Antworte NUR mit validem JSON in diesem Format (keine Markdown-Codeblocks, kein anderer Text):
 {"title": "...", "category": "..."}`;
 
-			const result = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					model: 'ollama/gemma3:4b',
-					messages: [{ role: 'user', content: prompt }],
-					temperature: 0.3,
-				}),
-				signal: AbortSignal.timeout(30000),
+			const { data } = await this.llm.json<FeedbackAnalysis>(prompt, {
+				temperature: 0.3,
+				timeout: 30_000,
+				validate: (raw) => {
+					const obj = raw as FeedbackAnalysis;
+					if (!obj.title || !obj.category) throw new Error('missing fields');
+					if (!VALID_CATEGORIES.includes(obj.category as any)) {
+						obj.category = 'other';
+					}
+					if (obj.title.length > 60) {
+						obj.title = obj.title.substring(0, 57) + '...';
+					}
+					return obj;
+				},
 			});
 
-			if (!result.ok) {
-				throw new Error(`mana-llm error: ${result.status}`);
-			}
-
-			const data = await result.json();
-			const response = (data.choices?.[0]?.message?.content || '').trim();
-
-			// Parse JSON response - handle potential markdown code blocks
-			let jsonStr = response;
-			if (response.includes('```')) {
-				const match = response.match(/```(?:json)?\s*([\s\S]*?)```/);
-				if (match) {
-					jsonStr = match[1].trim();
-				}
-			}
-
-			const parsed = JSON.parse(jsonStr) as FeedbackAnalysis;
-
-			// Validate category
-			const validCategories = ['bug', 'feature', 'improvement', 'question', 'other'];
-			if (!validCategories.includes(parsed.category)) {
-				parsed.category = 'other';
-			}
-
-			// Ensure title is not too long
-			if (parsed.title.length > 60) {
-				parsed.title = parsed.title.substring(0, 57) + '...';
-			}
-
-			this.logger.debug(`AI analyzed feedback: ${JSON.stringify(parsed)}`);
-			return parsed;
+			this.logger.debug(`AI analyzed feedback: ${JSON.stringify(data)}`);
+			return data;
 		} catch (error) {
 			this.logger.error(`AI analysis failed: ${error}`);
 			return this.fallbackAnalysis(feedbackText);

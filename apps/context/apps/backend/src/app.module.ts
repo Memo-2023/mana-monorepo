@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { LlmModule } from '@manacore/shared-llm';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
 import { SpaceModule } from './space/space.module';
@@ -22,6 +23,14 @@ import { HttpExceptionFilter } from './common/http-exception.filter';
 				limit: 100,
 			},
 		]),
+		LlmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (config: ConfigService) => ({
+				manaLlmUrl: config.get('MANA_LLM_URL'),
+				debug: config.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
+		}),
 		DatabaseModule,
 		HealthModule.forRoot({ serviceName: 'context-backend' }),
 		SpaceModule,

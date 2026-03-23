@@ -1,5 +1,5 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger } from '@nestjs/common';
+import { LlmClientService } from '@manacore/shared-llm';
 import type { AIAnalysisResult } from '../types/nutrition.types';
 
 const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere das Bild dieser Mahlzeit und liefere eine detaillierte Nährwertanalyse.
@@ -75,95 +75,28 @@ Antworte NUR mit einem validen JSON-Objekt im folgenden Format:
 }`;
 
 @Injectable()
-export class GeminiService implements OnModuleInit {
+export class GeminiService {
 	private readonly logger = new Logger(GeminiService.name);
-	private manaLlmUrl: string | null = null;
-	private readonly visionModel = 'ollama/llava:7b';
-	private readonly textModel = 'ollama/gemma3:4b';
 
-	constructor(private configService: ConfigService) {}
-
-	onModuleInit() {
-		this.manaLlmUrl = this.configService.get<string>('MANA_LLM_URL') || 'http://localhost:3025';
-		this.logger.log(`NutriPhi AI using mana-llm at ${this.manaLlmUrl}`);
-	}
+	constructor(private readonly llm: LlmClientService) {}
 
 	async analyzeImage(imageBase64: string, mimeType = 'image/jpeg'): Promise<AIAnalysisResult> {
-		if (!this.manaLlmUrl) {
-			throw new Error('mana-llm not configured');
-		}
-
-		const response = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				model: this.visionModel,
-				messages: [
-					{
-						role: 'user',
-						content: [
-							{ type: 'text', text: ANALYSIS_PROMPT },
-							{
-								type: 'image_url',
-								image_url: { url: `data:${mimeType};base64,${imageBase64}` },
-							},
-						],
-					},
-				],
-				temperature: 0.3,
-			}),
-			signal: AbortSignal.timeout(120000),
-		});
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			this.logger.error(`mana-llm vision error: ${response.status} - ${errorText}`);
-			throw new Error('Failed to analyze image');
-		}
-
-		const data = await response.json();
-		const text = data.choices?.[0]?.message?.content || '';
-
-		// Extract JSON from response
-		const jsonMatch = text.match(/\{[\s\S]*\}/);
-		if (!jsonMatch) {
-			throw new Error('Failed to parse AI response');
-		}
-
-		return JSON.parse(jsonMatch[0]) as AIAnalysisResult;
+		const { data } = await this.llm.visionJson<AIAnalysisResult>(
+			ANALYSIS_PROMPT,
+			imageBase64,
+			mimeType,
+			{ temperature: 0.3 }
+		);
+		return data;
 	}
 
 	async analyzeText(description: string): Promise<AIAnalysisResult> {
-		if (!this.manaLlmUrl) {
-			throw new Error('mana-llm not configured');
-		}
-
 		const prompt = TEXT_ANALYSIS_PROMPT.replace('{INPUT}', description);
 
-		const response = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				model: this.textModel,
-				messages: [{ role: 'user', content: prompt }],
-				temperature: 0.3,
-			}),
-			signal: AbortSignal.timeout(60000),
+		const { data } = await this.llm.json<AIAnalysisResult>(prompt, {
+			temperature: 0.3,
+			timeout: 60_000,
 		});
-
-		if (!response.ok) {
-			throw new Error(`mana-llm error: ${response.status}`);
-		}
-
-		const data = await response.json();
-		const text = data.choices?.[0]?.message?.content || '';
-
-		// Extract JSON from response
-		const jsonMatch = text.match(/\{[\s\S]*\}/);
-		if (!jsonMatch) {
-			throw new Error('Failed to parse AI response');
-		}
-
-		return JSON.parse(jsonMatch[0]) as AIAnalysisResult;
+		return data;
 	}
 }

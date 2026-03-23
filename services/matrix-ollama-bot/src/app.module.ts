@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LlmModule } from '@manacore/shared-llm';
 import { HealthController, createHealthProvider } from '@manacore/matrix-bot-common';
 import { BotModule } from './bot/bot.module';
 import configuration from './config/configuration';
@@ -9,6 +10,15 @@ import configuration from './config/configuration';
 		ConfigModule.forRoot({
 			isGlobal: true,
 			load: [configuration],
+		}),
+		LlmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (config: ConfigService) => ({
+				manaLlmUrl: config.get('llm.url') || 'http://localhost:3025',
+				defaultModel: config.get('llm.model') || 'ollama/gemma3:4b',
+				timeout: config.get<number>('llm.timeout') || 120000,
+			}),
+			inject: [ConfigService],
 		}),
 		BotModule,
 	],

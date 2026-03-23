@@ -2,6 +2,7 @@ import { Injectable, Inject, NotFoundException, ForbiddenException, Logger } fro
 import { ConfigService } from '@nestjs/config';
 import { eq, and, desc } from 'drizzle-orm';
 import { CreditClientService } from '@manacore/nestjs-integration';
+import { LlmClientService } from '@manacore/shared-llm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import type { Database } from '../db/connection';
 import { guides, guidePois, pois, cities } from '../db/schema';
@@ -18,7 +19,8 @@ export class GuideService {
 		private readonly configService: ConfigService,
 		private readonly cityService: CityService,
 		private readonly poiService: PoiService,
-		private readonly creditClient: CreditClientService
+		private readonly creditClient: CreditClientService,
+		private readonly llm: LlmClientService
 	) {}
 
 	async generateGuide(userId: string, request: GenerateGuideRequest) {
@@ -135,35 +137,20 @@ export class GuideService {
 
 		// Step 3: Enrich POIs with AI summaries
 		this.logger.log(`[${guideId}] Step 3: Content enrichment`);
-		if (manaLlmUrl) {
-			for (const poi of nearbyPois) {
-				if (!poi.aiSummary) {
-					try {
-						const prompt =
-							language === 'de'
-								? `Schreibe eine 200-Wort-Zusammenfassung über "${poi.name}" in ${city.name}. Fokus auf Baugeschichte, Architekturstil und interessante Anekdoten.`
-								: `Write a 200-word summary about "${poi.name}" in ${city.name}. Focus on architectural history, style, and interesting anecdotes.`;
+		for (const poi of nearbyPois) {
+			if (!poi.aiSummary) {
+				try {
+					const prompt =
+						language === 'de'
+							? `Schreibe eine 200-Wort-Zusammenfassung über "${poi.name}" in ${city.name}. Fokus auf Baugeschichte, Architekturstil und interessante Anekdoten.`
+							: `Write a 200-word summary about "${poi.name}" in ${city.name}. Focus on architectural history, style, and interesting anecdotes.`;
 
-						const llmResponse = await fetch(`${manaLlmUrl}/api/v1/chat/completions`, {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({
-								messages: [{ role: 'user', content: prompt }],
-								model: 'default',
-								max_tokens: 500,
-							}),
-						});
-
-						if (llmResponse.ok) {
-							const data = await llmResponse.json();
-							const summary = data.choices?.[0]?.message?.content;
-							if (summary) {
-								await this.poiService.updateAiSummary(poi.id, summary, language);
-							}
-						}
-					} catch (err) {
-						this.logger.warn(`AI summary failed for POI ${poi.name}:`, err);
+					const result = await this.llm.chat(prompt, { maxTokens: 500 });
+					if (result.content) {
+						await this.poiService.updateAiSummary(poi.id, result.content, language);
 					}
+				} catch (err) {
+					this.logger.warn(`AI summary failed for POI ${poi.name}:`, err);
 				}
 			}
 		}
@@ -197,43 +184,29 @@ export class GuideService {
 			const poi = sortedPois[i];
 			let narrative: string | null = null;
 
-			if (manaLlmUrl) {
-				try {
-					const prevStation = i > 0 ? sortedPois[i - 1].name : 'Startpunkt';
-					const distanceToPrev =
-						i > 0
-							? Math.round(
-									this.haversineDistance(
-										sortedPois[i - 1].latitude,
-										sortedPois[i - 1].longitude,
-										poi.latitude,
-										poi.longitude
-									)
+			try {
+				const prevStation = i > 0 ? sortedPois[i - 1].name : 'Startpunkt';
+				const distanceToPrev =
+					i > 0
+						? Math.round(
+								this.haversineDistance(
+									sortedPois[i - 1].latitude,
+									sortedPois[i - 1].longitude,
+									poi.latitude,
+									poi.longitude
 								)
-							: 0;
+							)
+						: 0;
 
-					const prompt =
-						language === 'de'
-							? `Du bist ein erfahrener Stadtführer in ${city.name}. Schreibe einen kurzen, lebendigen Stadtführer-Text (80-120 Wörter) über "${poi.name}" als Station ${i + 1} einer Stadtführung. ${i > 0 ? `Die vorherige Station war "${prevStation}" (${distanceToPrev}m entfernt).` : 'Dies ist die erste Station.'} Erwähne architektonische Details und eine interessante Anekdote.`
-							: `You are an experienced city guide in ${city.name}. Write a short, vivid guide text (80-120 words) about "${poi.name}" as station ${i + 1} of a walking tour. ${i > 0 ? `The previous station was "${prevStation}" (${distanceToPrev}m away).` : 'This is the first station.'} Mention architectural details and an interesting anecdote.`;
+				const prompt =
+					language === 'de'
+						? `Du bist ein erfahrener Stadtführer in ${city.name}. Schreibe einen kurzen, lebendigen Stadtführer-Text (80-120 Wörter) über "${poi.name}" als Station ${i + 1} einer Stadtführung. ${i > 0 ? `Die vorherige Station war "${prevStation}" (${distanceToPrev}m entfernt).` : 'Dies ist die erste Station.'} Erwähne architektonische Details und eine interessante Anekdote.`
+						: `You are an experienced city guide in ${city.name}. Write a short, vivid guide text (80-120 words) about "${poi.name}" as station ${i + 1} of a walking tour. ${i > 0 ? `The previous station was "${prevStation}" (${distanceToPrev}m away).` : 'This is the first station.'} Mention architectural details and an interesting anecdote.`;
 
-					const llmResponse = await fetch(`${manaLlmUrl}/api/v1/chat/completions`, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({
-							messages: [{ role: 'user', content: prompt }],
-							model: 'default',
-							max_tokens: 300,
-						}),
-					});
-
-					if (llmResponse.ok) {
-						const data = await llmResponse.json();
-						narrative = data.choices?.[0]?.message?.content || null;
-					}
-				} catch (err) {
-					this.logger.warn(`Narrative generation failed for POI ${poi.name}:`, err);
-				}
+				const result = await this.llm.chat(prompt, { maxTokens: 300 });
+				narrative = result.content || null;
+			} catch (err) {
+				this.logger.warn(`Narrative generation failed for POI ${poi.name}:`, err);
 			}
 
 			guidePoiRecords.push({

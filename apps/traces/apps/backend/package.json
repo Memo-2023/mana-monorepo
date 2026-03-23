@@ -17,8 +17,9 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
-		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/nestjs-integration": "workspace:*",
+		"@manacore/shared-error-tracking": "workspace:*",
+		"@manacore/shared-llm": "workspace:^",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",
 		"@manacore/shared-nestjs-metrics": "workspace:*",

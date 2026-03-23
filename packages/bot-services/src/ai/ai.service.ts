@@ -1,4 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { LlmClient, resolveOptions } from '@manacore/shared-llm';
+import type { ModelInfo } from '@manacore/shared-llm';
 import {
 	OllamaModel,
 	ChatMessage,
@@ -9,23 +11,34 @@ import {
 	SYSTEM_PROMPTS,
 	VISION_MODELS,
 	NON_CHAT_MODELS,
-	OllamaVersionResponse,
-	OllamaTagsResponse,
-	OllamaChatResponse,
 } from './types';
 
 @Injectable()
 export class AiService implements OnModuleInit {
 	private readonly logger = new Logger(AiService.name);
 	private readonly config: AiServiceConfig;
+	private readonly llm: LlmClient;
 	private sessions: Map<string, UserAiSession> = new Map();
 
 	constructor(config?: Partial<AiServiceConfig>) {
 		this.config = {
-			baseUrl: config?.baseUrl ?? process.env.OLLAMA_URL ?? 'http://localhost:11434',
+			baseUrl:
+				config?.baseUrl ??
+				process.env.MANA_LLM_URL ??
+				process.env.OLLAMA_URL ??
+				'http://localhost:3025',
 			defaultModel: config?.defaultModel ?? process.env.OLLAMA_MODEL ?? 'gemma3:4b',
 			timeout: config?.timeout ?? parseInt(process.env.OLLAMA_TIMEOUT ?? '120000'),
 		};
+
+		this.llm = new LlmClient(
+			resolveOptions({
+				manaLlmUrl: this.config.baseUrl,
+				defaultModel: this.normalizeModel(this.config.defaultModel),
+				timeout: this.config.timeout,
+				maxRetries: 1,
+			})
+		);
 	}
 
 	async onModuleInit() {
@@ -36,14 +49,15 @@ export class AiService implements OnModuleInit {
 
 	async checkConnection(): Promise<boolean> {
 		try {
-			const response = await fetch(`${this.config.baseUrl}/api/version`, {
-				signal: AbortSignal.timeout(5000),
-			});
-			const data = (await response.json()) as OllamaVersionResponse;
-			this.logger.log(`Ollama connected: v${data.version}`);
-			return true;
+			const health = await this.llm.health();
+			const isConnected = health.status === 'healthy' || health.status === 'degraded';
+			if (isConnected) {
+				const providers = Object.keys(health.providers || {}).join(', ');
+				this.logger.log(`mana-llm connected: ${health.status}, providers: ${providers}`);
+			}
+			return isConnected;
 		} catch (error) {
-			this.logger.error(`Failed to connect to Ollama at ${this.config.baseUrl}:`, error);
+			this.logger.error(`Failed to connect to mana-llm at ${this.config.baseUrl}:`, error);
 			return false;
 		}
 	}
@@ -52,9 +66,12 @@ export class AiService implements OnModuleInit {
 
 	async listModels(): Promise<OllamaModel[]> {
 		try {
-			const response = await fetch(`${this.config.baseUrl}/api/tags`);
-			const data = (await response.json()) as OllamaTagsResponse;
-			return data.models || [];
+			const models = await this.llm.listModels();
+			return models.map((m: ModelInfo) => ({
+				name: m.id,
+				size: 0,
+				modified_at: new Date(m.created * 1000).toISOString(),
+			}));
 		} catch (error) {
 			this.logger.error('Failed to list models:', error);
 			return [];
@@ -79,55 +96,38 @@ export class AiService implements OnModuleInit {
 
 	async chat(messages: ChatMessage[], options?: ChatOptions): Promise<ChatResult> {
 		const model = options?.model ?? this.config.defaultModel;
+		const normalizedModel = this.normalizeModel(model);
 
-		try {
-			const response = await fetch(`${this.config.baseUrl}/api/chat`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					model,
-					messages,
-					stream: false,
-					options: {
-						temperature: options?.temperature,
-						num_predict: options?.maxTokens,
-					},
-				}),
-				signal: AbortSignal.timeout(this.config.timeout),
-			});
-
-			if (!response.ok) {
-				throw new Error(`Ollama API error: ${response.status}`);
+		const result = await this.llm.chatMessages(
+			messages.map((m) => ({
+				role: m.role,
+				content: m.content,
+			})),
+			{
+				model: normalizedModel,
+				temperature: options?.temperature,
+				maxTokens: options?.maxTokens,
 			}
+		);
 
-			const data = (await response.json()) as OllamaChatResponse;
+		const meta = {
+			model,
+			evalCount: result.usage.completion_tokens,
+			evalDuration: undefined as number | undefined,
+			tokensPerSecond: undefined as number | undefined,
+		};
 
-			const meta = {
-				model,
-				evalCount: data.eval_count,
-				evalDuration: data.eval_duration,
-				tokensPerSecond:
-					data.eval_count && data.eval_duration
-						? (data.eval_count / data.eval_duration) * 1e9
-						: undefined,
-			};
-
-			if (meta.tokensPerSecond) {
-				this.logger.debug(
-					`Generated ${meta.evalCount} tokens at ${meta.tokensPerSecond.toFixed(1)} t/s`
-				);
-			}
-
-			return {
-				content: data.message?.content || '',
-				meta,
-			};
-		} catch (error) {
-			if (error instanceof Error && error.name === 'TimeoutError') {
-				throw new Error('Ollama Timeout - Antwort dauerte zu lange');
-			}
-			throw error;
+		if (meta.evalCount && result.latencyMs > 0) {
+			meta.tokensPerSecond = (meta.evalCount / result.latencyMs) * 1000;
+			this.logger.debug(
+				`Generated ${meta.evalCount} tokens at ${meta.tokensPerSecond.toFixed(1)} t/s`
+			);
 		}
+
+		return {
+			content: result.content,
+			meta,
+		};
 	}
 
 	async chatSimple(userId: string, message: string, options?: ChatOptions): Promise<string> {
@@ -162,51 +162,27 @@ export class AiService implements OnModuleInit {
 
 	async chatWithImage(prompt: string, imageBase64: string, model?: string): Promise<ChatResult> {
 		const selectedModel = model ?? this.config.defaultModel;
+		const normalizedModel = this.normalizeModel(selectedModel);
 
-		try {
-			const response = await fetch(`${this.config.baseUrl}/api/chat`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					model: selectedModel,
-					messages: [
-						{
-							role: 'user',
-							content: prompt,
-							images: [imageBase64],
-						},
-					],
-					stream: false,
-				}),
-				signal: AbortSignal.timeout(this.config.timeout),
-			});
+		const result = await this.llm.vision(prompt, imageBase64, 'image/png', {
+			model: normalizedModel,
+		});
 
-			if (!response.ok) {
-				throw new Error(`Ollama API error: ${response.status}`);
-			}
+		const meta = {
+			model: selectedModel,
+			evalCount: result.usage.completion_tokens,
+			evalDuration: undefined as number | undefined,
+			tokensPerSecond: undefined as number | undefined,
+		};
 
-			const data = (await response.json()) as OllamaChatResponse;
-
-			const meta = {
-				model: selectedModel,
-				evalCount: data.eval_count,
-				evalDuration: data.eval_duration,
-				tokensPerSecond:
-					data.eval_count && data.eval_duration
-						? (data.eval_count / data.eval_duration) * 1e9
-						: undefined,
-			};
-
-			return {
-				content: data.message?.content || '',
-				meta,
-			};
-		} catch (error) {
-			if (error instanceof Error && error.name === 'TimeoutError') {
-				throw new Error('Ollama Timeout - Bildanalyse dauerte zu lange');
-			}
-			throw error;
+		if (meta.evalCount && result.latencyMs > 0) {
+			meta.tokensPerSecond = (meta.evalCount / result.latencyMs) * 1000;
 		}
+
+		return {
+			content: result.content,
+			meta,
+		};
 	}
 
 	// ===== Compare Models =====
@@ -256,7 +232,7 @@ export class AiService implements OnModuleInit {
 	setSessionModel(userId: string, model: string): void {
 		const session = this.getSession(userId);
 		session.model = model;
-		session.history = []; // Clear history when switching models
+		session.history = [];
 	}
 
 	setSessionSystemPrompt(userId: string, prompt: string): void {
@@ -302,5 +278,10 @@ export class AiService implements OnModuleInit {
 		const session = this.getSession(userId);
 		const entry = Object.entries(SYSTEM_PROMPTS).find(([_, v]) => v === session.systemPrompt);
 		return entry ? entry[0] : 'custom';
+	}
+
+	private normalizeModel(model: string): string {
+		if (model.includes('/')) return model;
+		return `ollama/${model}`;
 	}
 }

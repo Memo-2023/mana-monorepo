@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LlmModule } from '@manacore/shared-llm';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
@@ -15,6 +16,14 @@ import { RecommendationsModule } from './recommendations/recommendations.module'
 		ConfigModule.forRoot({
 			isGlobal: true,
 			envFilePath: ['.env', '.env.development'],
+		}),
+		LlmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (config: ConfigService) => ({
+				manaLlmUrl: config.get('MANA_LLM_URL'),
+				debug: config.get('NODE_ENV') === 'development',
+			}),
+			inject: [ConfigService],
 		}),
 		DatabaseModule,
 		HealthModule.forRoot({ serviceName: 'nutriphi-backend' }),
