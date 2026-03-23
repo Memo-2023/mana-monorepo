@@ -273,6 +273,8 @@
 			emptyText={$_('search.noResults')}
 			searchingText={$_('search.searching')}
 			createText={$_('search.create')}
+			deferSearch={true}
+			locale={$locale || 'de'}
 			appIcon="quote"
 			bottomOffset={inputBarBottomOffset}
 			hasFabRight={true}

@@ -32,6 +32,8 @@
 		isMobile?: boolean;
 		/** Hide the entire bar (e.g. immersive mode) */
 		hidden?: boolean;
+		/** Locale for syntax highlighting (e.g., 'de', 'en') */
+		locale?: string;
 	}
 
 	let {
@@ -53,6 +55,7 @@
 		showCalendarLayers = false,
 		isMobile = false,
 		hidden = false,
+		locale = 'de',
 	}: Props = $props();
 
 	const flyConfig = { duration: 250, easing: quintOut, y: 40 };
@@ -141,6 +144,7 @@
 			{searchingText}
 			{createText}
 			{appIcon}
+			{locale}
 			bottomOffset="0px"
 			hasFabRight={showCalendarLayers}
 			{defaultOptions}

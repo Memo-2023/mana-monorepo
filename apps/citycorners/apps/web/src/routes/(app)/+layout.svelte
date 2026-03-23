@@ -149,6 +149,7 @@
 		placeholder={$_('search.placeholder')}
 		emptyText={$_('search.noResults')}
 		searchingText={$_('search.searching')}
+		locale={$locale || 'de'}
 		appIcon="mappin"
 		bottomOffset={inputBarBottomOffset}
 		hasFabRight={true}

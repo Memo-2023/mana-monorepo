@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
+	import { locale } from 'svelte-i18n';
 	import { authStore, collectionsStore, questionsStore } from '$lib/stores';
 	import { apiClient } from '$lib/api/client';
 	import { questionsApi } from '$lib/api/questions';
@@ -212,9 +213,12 @@
 		placeholder="New question or search..."
 		emptyText="No questions found"
 		searchingText="Searching..."
+		searchText="Search"
 		onCreate={handleCreate}
 		onParseCreate={handleParseCreate}
 		createText="Create"
+		deferSearch={true}
+		locale={$locale || 'en'}
 		appIcon="help-circle"
 		bottomOffset={isMobile ? '70px' : '70px'}
 	/>

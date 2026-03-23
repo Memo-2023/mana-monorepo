@@ -347,9 +347,12 @@
 				placeholder="Neuer Kontakt oder suchen..."
 				emptyText="Keine Kontakte gefunden"
 				searchingText="Suche..."
+				searchText="Suchen"
 				onCreate={handleCreate}
 				onParseCreate={handleParseCreate}
 				createText="Erstellen"
+				deferSearch={true}
+				locale={$locale || 'de'}
 				appIcon="contacts"
 				bottomOffset={inputBarBottomOffset}
 				hasFabRight={showContactsToolbar}

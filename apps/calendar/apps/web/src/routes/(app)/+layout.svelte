@@ -473,6 +473,7 @@
 				searchingText="Suche..."
 				createText="Erstellen"
 				appIcon="calendar"
+				locale={$locale || 'de'}
 				defaultOptions={calendarOptions}
 				selectedDefaultId={selectedDefaultCalendarId}
 				defaultOptionLabel="Standard-Kalender"
