@@ -3,6 +3,7 @@
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import type { Conversation } from '@chat/types';
 	import { Plus, PencilSimple, Check, X } from '@manacore/shared-icons';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
 	interface Props {
 		conversations: Conversation[];
@@ -14,6 +15,47 @@
 	// Edit state
 	let editingId = $state<string | null>(null);
 	let editTitle = $state('');
+
+	// Context menu state
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+	let contextMenuConv = $state<Conversation | null>(null);
+
+	function handleContextMenu(event: MouseEvent, conv: Conversation) {
+		event.preventDefault();
+		event.stopPropagation();
+		contextMenuX = event.clientX;
+		contextMenuY = event.clientY;
+		contextMenuConv = conv;
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(conv: Conversation): ContextMenuItem[] {
+		return [
+			{
+				id: 'rename',
+				label: 'Umbenennen',
+				action: () => startEdit(conv, new MouseEvent('click')),
+			},
+			{
+				id: 'divider-1',
+				label: '',
+				type: 'divider',
+			},
+			{
+				id: 'archive',
+				label: 'Archivieren',
+				action: () => conversationsStore.archiveConversation(conv.id),
+			},
+			{
+				id: 'delete',
+				label: 'Löschen',
+				variant: 'danger',
+				action: () => conversationsStore.deleteConversation(conv.id),
+			},
+		];
+	}
 	let isSaving = $state(false);
 
 	function formatDate(dateString: string): string {
@@ -134,7 +176,8 @@
 						</div>
 					{:else}
 						<!-- View Mode -->
-						<div class="group relative">
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<div class="group relative" oncontextmenu={(e) => handleContextMenu(e, conv)}>
 							<a
 								href="/chat/{conv.id}"
 								class="block px-3 py-2 mx-2 rounded-lg transition-colors
@@ -165,4 +208,17 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if contextMenuConv}
+		<ContextMenu
+			visible={contextMenuVisible}
+			x={contextMenuX}
+			y={contextMenuY}
+			items={getContextMenuItems(contextMenuConv)}
+			onClose={() => {
+				contextMenuVisible = false;
+				contextMenuConv = null;
+			}}
+		/>
+	{/if}
 </div>

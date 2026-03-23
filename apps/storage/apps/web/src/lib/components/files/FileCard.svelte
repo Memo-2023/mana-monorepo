@@ -10,6 +10,7 @@
 		Heart,
 		DotsThreeVertical,
 	} from '@manacore/shared-icons';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
 	interface Props {
 		file: StorageFile;
@@ -19,7 +20,9 @@
 
 	let { file, onClick, onAction }: Props = $props();
 
-	let showMenu = $state(false);
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
 	let isDragging = $state(false);
 
 	function getFileIcon(mimeType: string) {
@@ -39,14 +42,36 @@
 		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 	}
 
-	function handleMenuClick(e: MouseEvent) {
+	function handleContextMenu(e: MouseEvent) {
+		e.preventDefault();
 		e.stopPropagation();
-		showMenu = !showMenu;
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		contextMenuVisible = true;
 	}
 
-	function handleAction(action: string) {
-		showMenu = false;
-		onAction?.(action);
+	function handleMenuClick(e: MouseEvent) {
+		e.stopPropagation();
+		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		contextMenuX = rect.right;
+		contextMenuY = rect.bottom;
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(): ContextMenuItem[] {
+		return [
+			{ id: 'download', label: 'Herunterladen' },
+			{ id: 'rename', label: 'Umbenennen' },
+			{ id: 'share', label: 'Teilen' },
+			{ id: 'favorite', label: file.isFavorite ? 'Favorit entfernen' : 'Als Favorit' },
+			{ id: 'move', label: 'Verschieben' },
+			{ id: 'divider', label: '', type: 'divider' },
+			{ id: 'delete', label: 'Löschen', variant: 'danger' },
+		];
+	}
+
+	function handleContextMenuSelect(item: ContextMenuItem) {
+		onAction?.(item.id);
 	}
 
 	const Icon = getFileIcon(file.mimeType);
@@ -56,6 +81,7 @@
 	class="file-card"
 	class:dragging={isDragging}
 	onclick={onClick}
+	oncontextmenu={handleContextMenu}
 	role="button"
 	tabindex="0"
 	draggable="true"
@@ -85,26 +111,20 @@
 		onclick={handleMenuClick}
 		type="button"
 		aria-label="Aktionen für {file.name}"
-		aria-expanded={showMenu}
 		aria-haspopup="menu"
 	>
 		<DotsThreeVertical size={16} />
 	</button>
-
-	{#if showMenu}
-		<div class="menu-dropdown" role="menu" aria-label="Dateiaktionen">
-			<button role="menuitem" onclick={() => handleAction('download')}>Herunterladen</button>
-			<button role="menuitem" onclick={() => handleAction('rename')}>Umbenennen</button>
-			<button role="menuitem" onclick={() => handleAction('share')}>Teilen</button>
-			<button role="menuitem" onclick={() => handleAction('favorite')}>
-				{file.isFavorite ? 'Favorit entfernen' : 'Als Favorit'}
-			</button>
-			<button role="menuitem" onclick={() => handleAction('move')}>Verschieben</button>
-			<hr />
-			<button role="menuitem" class="danger" onclick={() => handleAction('delete')}>Löschen</button>
-		</div>
-	{/if}
 </div>
+
+<ContextMenu
+	visible={contextMenuVisible}
+	x={contextMenuX}
+	y={contextMenuY}
+	items={getContextMenuItems()}
+	onClose={() => (contextMenuVisible = false)}
+	onSelect={handleContextMenuSelect}
+/>
 
 <style>
 	.file-card {
@@ -188,44 +208,5 @@
 	.menu-button:hover {
 		background: rgb(var(--color-surface));
 		color: rgb(var(--color-text-primary));
-	}
-
-	.menu-dropdown {
-		position: absolute;
-		top: 2rem;
-		right: 0.5rem;
-		min-width: 150px;
-		background: rgb(var(--color-surface-elevated));
-		border: 1px solid rgb(var(--color-border));
-		border-radius: var(--radius-md);
-		box-shadow: var(--shadow-lg);
-		z-index: 100;
-		overflow: hidden;
-	}
-
-	.menu-dropdown button {
-		display: block;
-		width: 100%;
-		padding: 0.5rem 0.75rem;
-		text-align: left;
-		background: none;
-		border: none;
-		font-size: 0.875rem;
-		color: rgb(var(--color-text-primary));
-		cursor: pointer;
-	}
-
-	.menu-dropdown button:hover {
-		background: rgb(var(--color-surface));
-	}
-
-	.menu-dropdown button.danger {
-		color: rgb(var(--color-error));
-	}
-
-	.menu-dropdown hr {
-		margin: 0.25rem 0;
-		border: none;
-		border-top: 1px solid rgb(var(--color-border));
 	}
 </style>

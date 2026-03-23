@@ -2,11 +2,13 @@
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
 	interface Props {
 		contacts: Contact[];
 		onContactClick: (id: string) => void;
 		onToggleFavorite: (e: MouseEvent, id: string) => void;
+		onDeleteContact?: (id: string) => void;
 		selectionMode?: boolean;
 		selectedIds?: Set<string>;
 		onToggleSelection?: (id: string) => void;
@@ -17,11 +19,55 @@
 		contacts,
 		onContactClick,
 		onToggleFavorite,
+		onDeleteContact,
 		selectionMode = false,
 		selectedIds = new Set(),
 		onToggleSelection,
 		showNewContactCard = true,
 	}: Props = $props();
+
+	let contextMenu = $state({ visible: false, x: 0, y: 0, target: null as Contact | null });
+
+	function handleContextMenu(e: MouseEvent, contact: Contact) {
+		e.preventDefault();
+		e.stopPropagation();
+		contextMenu = { visible: true, x: e.clientX, y: e.clientY, target: contact };
+	}
+
+	function getContextMenuItems(contact: Contact): ContextMenuItem[] {
+		return [
+			{
+				id: 'open',
+				label: 'Öffnen',
+				action: () => onContactClick(contact.id),
+			},
+			{
+				id: 'favorite',
+				label: contact.isFavorite ? 'Favorit entfernen' : 'Favorit',
+				action: () => onToggleFavorite(new MouseEvent('click'), contact.id),
+			},
+			{ id: 'divider-1', label: '', type: 'divider' },
+			{
+				id: 'call',
+				label: 'Anrufen',
+				disabled: !contact.phone && !contact.mobile,
+				action: () => window.open('tel:' + (contact.mobile || contact.phone)),
+			},
+			{
+				id: 'email',
+				label: 'E-Mail',
+				disabled: !contact.email,
+				action: () => window.open('mailto:' + contact.email),
+			},
+			{ id: 'divider-2', label: '', type: 'divider' },
+			{
+				id: 'delete',
+				label: 'Löschen',
+				variant: 'danger',
+				action: () => onDeleteContact?.(contact.id),
+			},
+		];
+	}
 
 	function handleCheckboxClick(e: MouseEvent, id: string) {
 		e.stopPropagation();
@@ -96,6 +142,7 @@
 			tabindex="0"
 			onclick={() => onContactClick(contact.id)}
 			onkeydown={(e) => e.key === 'Enter' && onContactClick(contact.id)}
+			oncontextmenu={(e) => handleContextMenu(e, contact)}
 			class="grid-card {selectionMode && selectedIds.has(contact.id) ? 'selected' : ''}"
 		>
 			<!-- Selection Checkbox -->
@@ -209,6 +256,16 @@
 		</div>
 	{/each}
 </div>
+
+{#if contextMenu.visible && contextMenu.target}
+	<ContextMenu
+		visible={contextMenu.visible}
+		x={contextMenu.x}
+		y={contextMenu.y}
+		items={getContextMenuItems(contextMenu.target)}
+		onClose={() => (contextMenu = { visible: false, x: 0, y: 0, target: null })}
+	/>
+{/if}
 
 <style>
 	.contact-grid {

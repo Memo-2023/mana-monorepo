@@ -7,7 +7,9 @@
 	import { format, parseISO, isToday, isTomorrow, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';
-	import type { CalendarEvent } from '@calendar/shared';
+	import type { CalendarEvent, CreateEventInput } from '@calendar/shared';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		/** Optional date override for carousel navigation (uses viewStore.currentDate if not provided) */
@@ -85,6 +87,59 @@
 			onEventClick(event);
 		}
 	}
+
+	// Context menu state
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+	let contextMenuEvent = $state<CalendarEvent | null>(null);
+
+	function handleContextMenu(event: CalendarEvent, e: MouseEvent) {
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		contextMenuEvent = event;
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(): ContextMenuItem[] {
+		if (!contextMenuEvent) return [];
+		const event = contextMenuEvent;
+
+		return [
+			{
+				id: 'edit',
+				label: $_('calendar.contextMenu.edit'),
+				action: () => {
+					handleEventClick(event);
+				},
+			},
+			{
+				id: 'duplicate',
+				label: $_('calendar.contextMenu.duplicate'),
+				action: async () => {
+					await eventsStore.createEvent({
+						calendarId: event.calendarId,
+						title: `${event.title} (${$_('calendar.contextMenu.copy')})`,
+						description: event.description ?? undefined,
+						location: event.location ?? undefined,
+						startTime: event.startTime,
+						endTime: event.endTime,
+						isAllDay: event.isAllDay,
+						timezone: event.timezone ?? undefined,
+						color: event.color ?? undefined,
+						status: event.status ?? undefined,
+					});
+				},
+			},
+			{ id: 'divider-1', label: '', type: 'divider' },
+			{
+				id: 'delete',
+				label: $_('calendar.contextMenu.delete'),
+				variant: 'danger',
+				action: () => eventsStore.deleteEvent(event.id),
+			},
+		];
+	}
 </script>
 
 <div class="agenda-view">
@@ -110,7 +165,15 @@
 
 					<div class="events-for-date">
 						{#each group.events as event}
-							<button class="event-item" onclick={() => handleEventClick(event)}>
+							<button
+								class="event-item"
+								onclick={() => handleEventClick(event)}
+								oncontextmenu={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									handleContextMenu(event, e);
+								}}
+							>
 								<div
 									class="color-bar"
 									style="background-color: {calendarsStore.getColor(event.calendarId)}"
@@ -168,6 +231,17 @@
 		</div>
 	{/if}
 </div>
+
+<ContextMenu
+	visible={contextMenuVisible}
+	x={contextMenuX}
+	y={contextMenuY}
+	items={getContextMenuItems()}
+	onClose={() => {
+		contextMenuVisible = false;
+		contextMenuEvent = null;
+	}}
+/>
 
 <style>
 	.agenda-view {
