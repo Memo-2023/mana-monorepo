@@ -34,6 +34,8 @@ window.__PUBLIC_GLITCHTIP_DSN__ = "${PUBLIC_GLITCHTIP_DSN}";
 		connectSrc: [PUBLIC_MANA_CORE_AUTH_URL_CLIENT, PUBLIC_BACKEND_URL_CLIENT, S3_PUBLIC_ENDPOINT],
 		mediaSrc: [S3_PUBLIC_ENDPOINT, 'blob:'],
 		imgSrc: [S3_PUBLIC_ENDPOINT],
+		// Butterchurn (Milkdrop) uses eval() for shader/preset compilation
+		scriptSrc: ["'unsafe-eval'"],
 	});
 
 	return response;
