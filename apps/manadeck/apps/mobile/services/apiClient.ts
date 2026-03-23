@@ -1,11 +1,11 @@
 /**
  * API Client for ManaDeck Backend
- * Replaces direct Supabase access with backend API calls
+ * Uses shared-auth TokenManager for automatic token handling
  */
 
-import { authService } from './authService';
+import { tokenManager } from './tokenManager';
 
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3009';
 
 interface ApiResponse<T> {
 	data: T | null;
@@ -14,30 +14,9 @@ interface ApiResponse<T> {
 
 class ApiClient {
 	private async getAuthHeaders(): Promise<Record<string, string>> {
-		const token = await authService.getAppToken();
+		const token = await tokenManager.getValidToken();
 		if (!token) {
 			throw new Error('Not authenticated');
-		}
-
-		// Check if token is valid, try to refresh if not
-		if (!authService.isTokenValidLocally(token)) {
-			const refreshToken = await authService.getRefreshToken();
-			if (refreshToken) {
-				try {
-					await authService.refreshTokens(refreshToken);
-					const newToken = await authService.getAppToken();
-					if (newToken) {
-						return {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${newToken}`,
-						};
-					}
-				} catch (error) {
-					console.error('Failed to refresh token:', error);
-					throw new Error('Session expired. Please sign in again.');
-				}
-			}
-			throw new Error('Session expired. Please sign in again.');
 		}
 
 		return {
@@ -87,8 +66,7 @@ class ApiClient {
 
 	// ============ Decks ============
 	async getDecks() {
-		const response = await this.request<{ decks: any[]; count: number }>('/api/decks');
-		return response;
+		return this.request<{ decks: any[]; count: number }>('/api/decks');
 	}
 
 	async getDeck(id: string) {
