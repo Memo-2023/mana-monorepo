@@ -297,6 +297,19 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 1.5,
 	},
+	citycorners: {
+		id: 'citycorners',
+		name: 'CityCorners',
+		tagline: 'City Guide',
+		primaryColor: '#2563eb',
+		secondaryColor: '#3b82f6',
+		// Map pin / compass icon
+		logoPath:
+			'M15 10.5a3 3 0 11-6 0 3 3 0 016 0z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z',
+		logoViewBox: '0 0 24 24',
+		logoStroke: true,
+		logoStrokeWidth: 1.5,
+	},
 	context: {
 		id: 'context',
 		name: 'Context',

@@ -717,6 +717,35 @@ services:
       retries: 3
       start_period: 40s
 
+  citycorners-backend:
+    build:
+      context: .
+      dockerfile: apps/citycorners/apps/backend/Dockerfile
+    image: citycorners-backend:local
+    container_name: mana-app-citycorners-backend
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3025
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/citycorners
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      CORS_ORIGINS: https://citycorners.mana.how,https://mana.how
+      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+    ports:
+      - "3025:3025"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3025/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # ============================================
   # Tier 4: Matrix Stack (Ports 4000-4099)
   # ============================================
@@ -1606,6 +1635,35 @@ services:
       - "5180:5180"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5180/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  citycorners-web:
+    build:
+      context: .
+      dockerfile: apps/citycorners/apps/web/Dockerfile
+      args:
+        PUBLIC_BACKEND_URL: http://citycorners-backend:3025
+        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+    image: citycorners-web:local
+    container_name: mana-app-citycorners-web
+    restart: always
+    depends_on:
+      citycorners-backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5022
+      PUBLIC_BACKEND_URL: http://citycorners-backend:3025
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_CITYCORNERS_API_URL_CLIENT: https://citycorners-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5022:5022"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5022/health"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -1,0 +1,113 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import locations from '../../data/locations.json';
+
+export async function getStaticPaths() {
+	return locations.map((location) => ({
+		params: { id: location.id.toString() },
+	}));
+}
+
+const { id } = Astro.params;
+const location = locations.find((loc) => loc.id.toString() === id);
+
+if (!location) {
+	return Astro.redirect('/404');
+}
+---
+
+<Layout>
+	<main class="location-detail">
+		<a href="/" class="back-link">&laquo; Zurück zur Übersicht</a>
+		<article>
+			<img src={location.image} alt={location.name} class="location-image" />
+			<h1>{location.name}</h1>
+			<p class="category">{location.category}</p>
+			<p class="description">{location.description}</p>
+
+			{
+				location.timeline && (
+					<div class="timeline">
+						<h2>Historische Zeitachse</h2>
+						<ul>
+							{location.timeline.map((event) => (
+								<li>
+									<strong>{event.year}:</strong> {event.description}
+								</li>
+							))}
+						</ul>
+					</div>
+				)
+			}
+
+			<p class="address"><strong>Adresse:</strong> {location.address}</p>
+			<!-- In a real application, you would use a map component here -->
+			<div class="map-placeholder">
+				Karte für {location.coordinates.lat}, {location.coordinates.lng}
+			</div>
+		</article>
+	</main>
+</Layout>
+
+<style>
+	.location-detail {
+		padding: 20px;
+		max-width: 800px;
+		margin: 0 auto;
+	}
+	.back-link {
+		display: inline-block;
+		margin-bottom: 20px;
+		text-decoration: none;
+		color: #333;
+	}
+	.location-image {
+		width: 100%;
+		height: auto;
+		border-radius: 8px;
+		margin-bottom: 20px;
+	}
+	.category {
+		font-style: italic;
+		color: #666;
+	}
+	.description {
+		line-height: 1.6;
+	}
+	.address {
+		margin-top: 20px;
+	}
+	.map-placeholder {
+		margin-top: 20px;
+		background-color: #f0f0f0;
+		padding: 50px;
+		text-align: center;
+		border-radius: 8px;
+	}
+	.timeline {
+		margin-top: 30px;
+	}
+	.timeline h2 {
+		margin-bottom: 15px;
+	}
+	.timeline ul {
+		list-style-type: none;
+		padding-left: 0;
+		border-left: 2px solid #ccc;
+		margin-left: 10px;
+	}
+	.timeline li {
+		padding: 10px 20px;
+		position: relative;
+	}
+	.timeline li::before {
+		content: '';
+		width: 10px;
+		height: 10px;
+		background-color: #ccc;
+		border-radius: 50%;
+		position: absolute;
+		left: -6px;
+		top: 18px;
+	}
+</style>

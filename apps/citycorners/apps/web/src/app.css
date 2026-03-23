@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@import '@manacore/shared-tailwind/themes.css';
+
+@source '../../../../packages/shared-ui/src';
+@source '../../../../packages/shared-auth-ui/src';
+@source '../../../../packages/shared-branding/src';
+@source '../../../../packages/shared-theme-ui/src';
+@source '../../../../packages/shared-stores/src';

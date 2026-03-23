@@ -25,3 +25,4 @@ export { default as PlaygroundLogo } from './PlaygroundLogo.svelte';
 export { default as LightWriteLogo } from './LightWriteLogo.svelte';
 export { default as MukkeLogo } from './MukkeLogo.svelte';
 export { default as ContextLogo } from './ContextLogo.svelte';
+export { default as CitycornersLogo } from './CitycornersLogo.svelte';

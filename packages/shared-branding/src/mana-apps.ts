@@ -340,6 +340,22 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'citycorners',
+		name: 'CityCorners',
+		description: {
+			de: 'Stadtführer für Konstanz',
+			en: 'City Guide for Konstanz',
+		},
+		longDescription: {
+			de: 'Entdecke Sehenswürdigkeiten, Restaurants, Museen und Läden in Konstanz am Bodensee.',
+			en: 'Discover sights, restaurants, museums, and shops in Konstanz at Lake Constance.',
+		},
+		icon: APP_ICONS.citycorners,
+		color: '#2563eb',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -430,6 +446,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	matrix: { dev: 'http://localhost:5180', prod: 'https://matrix.mana.how' },
 	playground: { dev: 'http://localhost:5190', prod: 'https://playground.mana.how' },
 	context: { dev: 'http://localhost:5192', prod: 'https://context.mana.how' },
+	citycorners: { dev: 'http://localhost:5196', prod: 'https://citycorners.mana.how' },
 };
 
 /**

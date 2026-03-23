@@ -1,0 +1,33 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="evening" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#evening)"/>
+  <!-- Lake reflection -->
+  <rect x="0" y="350" width="800" height="150" fill="#0f3460" opacity="0.5"/>
+  <!-- Building -->
+  <rect x="200" y="180" width="400" height="190" fill="#2a2a4a" rx="4"/>
+  <!-- Windows with warm glow -->
+  <rect x="240" y="210" width="50" height="40" fill="#FFD700" opacity="0.7" rx="2"/>
+  <rect x="310" y="210" width="50" height="40" fill="#FFD700" opacity="0.5" rx="2"/>
+  <rect x="380" y="210" width="50" height="40" fill="#FFD700" opacity="0.8" rx="2"/>
+  <rect x="450" y="210" width="50" height="40" fill="#FFD700" opacity="0.6" rx="2"/>
+  <rect x="520" y="210" width="50" height="40" fill="#FFD700" opacity="0.4" rx="2"/>
+  <!-- Restaurant windows (ground floor, brighter) -->
+  <rect x="240" y="290" width="110" height="60" fill="#FFE4B5" opacity="0.9" rx="2"/>
+  <rect x="370" y="290" width="110" height="60" fill="#FFE4B5" opacity="0.9" rx="2"/>
+  <rect x="500" y="290" width="70" height="60" fill="#FFE4B5" opacity="0.7" rx="2"/>
+  <!-- Stars -->
+  <circle cx="100" cy="60" r="2" fill="#fff" opacity="0.8"/>
+  <circle cx="250" cy="40" r="1.5" fill="#fff" opacity="0.6"/>
+  <circle cx="500" cy="80" r="2" fill="#fff" opacity="0.7"/>
+  <circle cx="650" cy="50" r="1.5" fill="#fff" opacity="0.5"/>
+  <circle cx="720" cy="100" r="2" fill="#fff" opacity="0.8"/>
+  <!-- Michelin stars indicator -->
+  <text x="400" y="160" text-anchor="middle" font-size="28" fill="#FFD700">★★</text>
+  <!-- Label -->
+  <text x="400" y="460" text-anchor="middle" font-family="system-ui" font-size="22" fill="#fff" font-weight="600">Restaurant Ophelia</text>
+</svg>

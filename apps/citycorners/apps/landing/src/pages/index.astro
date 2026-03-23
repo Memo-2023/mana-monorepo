@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LocationCard from '../components/LocationCard.astro';
+import Filter from '../components/Filter.astro';
+import locations from '../data/locations.json';
+---
+
+<Layout>
+	<main>
+		<h1>CityCorners Konstanz</h1>
+		<Filter />
+		<div id="locations-container" class="locations-grid">
+			{locations.map((location) => <LocationCard location={location} />)}
+		</div>
+	</main>
+</Layout>
+
+<style>
+	.locations-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 20px;
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const filter = document.getElementById('category-filter');
+		const locationsContainer = document.getElementById('locations-container');
+		const allLocations = Array.from(locationsContainer.children);
+
+		filter.addEventListener('change', (event) => {
+			const selectedCategory = event.target.value;
+			locationsContainer.innerHTML = ''; // Clear existing locations
+
+			const filteredLocations = allLocations.filter((locationElement) => {
+				if (!selectedCategory) return true; // Show all if no category is selected
+				return locationElement.dataset.category === selectedCategory;
+			});
+
+			filteredLocations.forEach((locationElement) => {
+				locationsContainer.appendChild(locationElement);
+			});
+		});
+	});
+</script>

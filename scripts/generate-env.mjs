@@ -666,6 +666,30 @@ const APP_CONFIGS = [
 		},
 	},
 
+	// CityCorners Backend (NestJS)
+	{
+		path: 'apps/citycorners/apps/backend/.env',
+		vars: {
+			NODE_ENV: () => 'development',
+			PORT: (env) => env.CITYCORNERS_BACKEND_PORT || '3025',
+			DATABASE_URL: (env) => env.CITYCORNERS_DATABASE_URL,
+			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			DEV_BYPASS_AUTH: () => 'true',
+			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
+			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
+		},
+	},
+
+	// CityCorners Web (SvelteKit)
+	{
+		path: 'apps/citycorners/apps/web/.env',
+		vars: {
+			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.CITYCORNERS_BACKEND_PORT || '3025'}`,
+			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
+			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
+		},
+	},
+
 	// TechBase Backend (NestJS)
 	{
 		path: 'apps/techbase/apps/backend/.env',

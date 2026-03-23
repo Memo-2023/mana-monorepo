@@ -1,0 +1,25 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="500" fill="#87CEEB"/>
+  <rect x="0" y="380" width="800" height="120" fill="#8B9467"/>
+  <!-- Historic building -->
+  <rect x="200" y="150" width="400" height="240" fill="#E8D5B0" rx="4"/>
+  <!-- Roof -->
+  <polygon points="180,150 400,50 620,150" fill="#8B4513"/>
+  <!-- Dormers -->
+  <polygon points="300,120 330,80 360,120" fill="#8B4513"/>
+  <rect x="315" y="95" width="30" height="25" fill="#4A6FA5" opacity="0.6"/>
+  <polygon points="440,120 470,80 500,120" fill="#8B4513"/>
+  <rect x="455" y="95" width="30" height="25" fill="#4A6FA5" opacity="0.6"/>
+  <!-- Windows (historic style) -->
+  <rect x="240" y="190" width="40" height="55" fill="#4A6FA5" opacity="0.5" rx="20"/>
+  <rect x="310" y="190" width="40" height="55" fill="#4A6FA5" opacity="0.5" rx="20"/>
+  <rect x="450" y="190" width="40" height="55" fill="#4A6FA5" opacity="0.5" rx="20"/>
+  <rect x="520" y="190" width="40" height="55" fill="#4A6FA5" opacity="0.5" rx="20"/>
+  <!-- Door -->
+  <rect x="370" y="300" width="60" height="90" fill="#5C4A3A" rx="30"/>
+  <!-- Museum sign -->
+  <rect x="300" y="270" width="200" height="25" fill="#8B4513" rx="3"/>
+  <text x="400" y="289" text-anchor="middle" font-family="serif" font-size="14" fill="#FFE4B5" font-weight="600">ROSGARTENMUSEUM</text>
+  <!-- Label -->
+  <text x="400" y="460" text-anchor="middle" font-family="system-ui" font-size="22" fill="#fff" font-weight="600">Rosgartenmuseum</text>
+</svg>

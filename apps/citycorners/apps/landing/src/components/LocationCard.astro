@@ -1,0 +1,25 @@
+---
+const { location } = Astro.props;
+---
+
+<div class="location-card" data-category="{location.category.toLowerCase()}">
+	<img src={location.image} alt={location.name} />
+	<h3>{location.name}</h3>
+	<p>{location.category}</p>
+	<a href={`/locations/${location.id}`}>Details</a>
+</div>
+
+<style>
+	.location-card {
+		border: 1px solid #ccc;
+		border-radius: 8px;
+		padding: 16px;
+		margin: 16px;
+		text-align: center;
+	}
+	.location-card img {
+		max-width: 100%;
+		height: auto;
+		border-radius: 4px;
+	}
+</style>

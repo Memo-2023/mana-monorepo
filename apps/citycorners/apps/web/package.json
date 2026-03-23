@@ -1,0 +1,42 @@
+{
+	"name": "@citycorners/web",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"type-check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+	},
+	"devDependencies": {
+		"@manacore/shared-vite-config": "workspace:*",
+		"@sveltejs/adapter-node": "^5.0.0",
+		"@sveltejs/kit": "^2.47.1",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"@tailwindcss/vite": "^4.1.7",
+		"@types/leaflet": "^1.9.8",
+		"@types/node": "^20.0.0",
+		"svelte": "^5.41.0",
+		"svelte-check": "^4.3.3",
+		"tailwindcss": "^4.1.7",
+		"tslib": "^2.4.1",
+		"typescript": "^5.9.3",
+		"vite": "^6.0.0"
+	},
+	"dependencies": {
+		"@manacore/shared-auth": "workspace:*",
+		"@manacore/shared-auth-ui": "workspace:*",
+		"@manacore/shared-branding": "workspace:*",
+		"@manacore/shared-error-tracking": "workspace:*",
+		"@manacore/shared-icons": "workspace:*",
+		"@manacore/shared-stores": "workspace:*",
+		"@manacore/shared-tailwind": "workspace:*",
+		"@manacore/shared-theme": "workspace:*",
+		"@manacore/shared-ui": "workspace:*",
+		"leaflet": "^1.9.4"
+	}
+}

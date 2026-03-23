@@ -25,7 +25,8 @@ export type AppId =
 	| 'playground'
 	| 'lightwrite'
 	| 'context'
-	| 'mukke';
+	| 'mukke'
+	| 'citycorners';
 
 /**
  * App branding configuration

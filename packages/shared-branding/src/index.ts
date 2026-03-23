@@ -38,6 +38,7 @@ export {
 	LightWriteLogo,
 	MukkeLogo,
 	ContextLogo,
+	CitycornersLogo,
 } from './logos';
 
 // Configuration

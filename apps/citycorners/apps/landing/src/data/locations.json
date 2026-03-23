@@ -1,0 +1,93 @@
+[
+	{
+		"id": 1,
+		"name": "Konstanzer Münster",
+		"category": "Sehenswürdigkeit",
+		"description": "Das Konstanzer Münster ist eine imposante Basilika, die über Jahrhunderte das Zentrum des Bistums Konstanz war. Besucher können den Turm besteigen und einen atemberaubenden Blick über die Stadt und den Bodensee genießen.",
+		"image": "/images/muenster.svg",
+		"address": "Münsterplatz 1, 78462 Konstanz",
+		"coordinates": {
+			"lat": 47.663,
+			"lng": 9.175
+		},
+		"timeline": [
+			{ "year": "ca. 600", "description": "Gründung einer ersten Bischofskirche." },
+			{ "year": "1054-1089", "description": "Neubau der Basilika nach ottonischem Vorbild." },
+			{
+				"year": "1414-1418",
+				"description": "Das Münster ist Schauplatz des Konzils von Konstanz."
+			},
+			{
+				"year": "1844-1853",
+				"description": "Neugotische Umgestaltung des Turms durch Heinrich Hübsch."
+			}
+		]
+	},
+	{
+		"id": 2,
+		"name": "Imperia",
+		"category": "Sehenswürdigkeit",
+		"description": "Die Imperia ist eine satirische Statue im Hafen von Konstanz, die an das Konzil von Konstanz erinnert. Sie dreht sich langsam um ihre Achse und ist ein beliebtes Fotomotiv.",
+		"image": "/images/imperia.svg",
+		"address": "Hafenstraße, 78462 Konstanz",
+		"coordinates": {
+			"lat": 47.66,
+			"lng": 9.18
+		}
+	},
+	{
+		"id": 3,
+		"name": "Restaurant Ophelia",
+		"category": "Restaurant",
+		"description": "Das mit zwei Michelin-Sternen ausgezeichnete Restaurant Ophelia bietet eine exquisite Küche in einem eleganten Ambiente. Es befindet sich im Hotel Riva am Ufer des Bodensees.",
+		"image": "/images/ophelia.svg",
+		"address": "Seestraße 25, 78464 Konstanz",
+		"coordinates": {
+			"lat": 47.67,
+			"lng": 9.19
+		}
+	},
+	{
+		"id": 4,
+		"name": "LAGO Shopping-Center",
+		"category": "Laden",
+		"description": "Das LAGO ist das größte Einkaufszentrum am Bodensee und bietet eine Vielzahl von Geschäften, Restaurants und Cafés. Es ist ein beliebter Treffpunkt für Einheimische und Touristen.",
+		"image": "/images/lago.svg",
+		"address": "Bodanstraße 1, 78462 Konstanz",
+		"coordinates": {
+			"lat": 47.658,
+			"lng": 9.176
+		}
+	},
+	{
+		"id": 5,
+		"name": "Rosgartenmuseum",
+		"category": "Museum",
+		"description": "Das Rosgartenmuseum ist das städtische Museum für Kunst, Kultur und Geschichte von Konstanz und der Bodenseeregion. Es wurde 1870 gegründet und befindet sich in einem ehemaligen Zunfthaus.",
+		"image": "/images/rosgartenmuseum.svg",
+		"address": "Rosgartenstraße 3-5, 78462 Konstanz",
+		"coordinates": {
+			"lat": 47.661,
+			"lng": 9.174
+		},
+		"timeline": [
+			{ "year": "1454", "description": "Das Gebäude wird als Zunfthaus der Metzger errichtet." },
+			{
+				"year": "1870",
+				"description": "Gründung des Museums durch den Apotheker und Stadtrat Ludwig Leiner."
+			}
+		]
+	},
+	{
+		"id": 6,
+		"name": "Archäologisches Landesmuseum Baden-Württemberg",
+		"category": "Museum",
+		"description": "Das Archäologische Landesmuseum (ALM) in Konstanz ist ein Zweigmuseum des ALM in Stuttgart und zeigt Funde aus der Archäologie, Geschichte und Kultur der Region.",
+		"image": "/images/alm.svg",
+		"address": "Benediktinerplatz 5, 78467 Konstanz",
+		"coordinates": {
+			"lat": 47.665,
+			"lng": 9.171
+		}
+	}
+]
