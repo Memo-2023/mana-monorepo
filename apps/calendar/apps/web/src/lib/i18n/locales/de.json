@@ -37,7 +37,13 @@
 		"draftEvent": "(Neuer Termin)",
 		"untitled": "Ohne Titel",
 		"hideSidebar": "Sidebar ausblenden",
-		"showSidebar": "Sidebar einblenden"
+		"showSidebar": "Sidebar einblenden",
+		"contextMenu": {
+			"edit": "Bearbeiten",
+			"duplicate": "Duplizieren",
+			"copy": "Kopie",
+			"delete": "Löschen"
+		}
 	},
 	"event": {
 		"title": "Titel",

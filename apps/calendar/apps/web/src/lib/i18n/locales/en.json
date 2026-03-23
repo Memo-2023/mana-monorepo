@@ -37,7 +37,13 @@
 		"draftEvent": "(New Event)",
 		"untitled": "Untitled",
 		"hideSidebar": "Hide sidebar",
-		"showSidebar": "Show sidebar"
+		"showSidebar": "Show sidebar",
+		"contextMenu": {
+			"edit": "Edit",
+			"duplicate": "Duplicate",
+			"copy": "Copy",
+			"delete": "Delete"
+		}
 	},
 	"event": {
 		"title": "Title",

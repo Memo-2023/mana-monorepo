@@ -32,7 +32,13 @@
 		"allDay": "Tutto il giorno",
 		"myCalendars": "I miei calendari",
 		"sharedCalendars": "Calendari condivisi",
-		"untitled": "Senza titolo"
+		"untitled": "Senza titolo",
+		"contextMenu": {
+			"edit": "Modifica",
+			"duplicate": "Duplica",
+			"copy": "Copia",
+			"delete": "Elimina"
+		}
 	},
 	"event": {
 		"title": "Titolo",

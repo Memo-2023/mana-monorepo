@@ -28,6 +28,7 @@
 	} from '$lib/utils/eventFiltering';
 	import EventCard from './EventCard.svelte';
 	import TaskBlock from './TaskBlock.svelte';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import { goto } from '$app/navigation';
 	import {
 		format,
@@ -336,6 +337,63 @@
 	}
 
 	// (Drag/drop/resize/create/keyboard handlers are in composables above)
+
+	// Context menu state
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+	let contextMenuEvent = $state<CalendarEvent | null>(null);
+
+	function handleEventContextMenu(event: CalendarEvent, e: MouseEvent) {
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		contextMenuEvent = event;
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(): ContextMenuItem[] {
+		if (!contextMenuEvent) return [];
+		const event = contextMenuEvent;
+
+		return [
+			{
+				id: 'edit',
+				label: $_('calendar.contextMenu.edit'),
+				action: () => {
+					if (onEventClick) {
+						onEventClick(event);
+					} else {
+						goto(`/?event=${event.id}`);
+					}
+				},
+			},
+			{
+				id: 'duplicate',
+				label: $_('calendar.contextMenu.duplicate'),
+				action: async () => {
+					await eventsStore.createEvent({
+						calendarId: event.calendarId,
+						title: `${event.title} (${$_('calendar.contextMenu.copy')})`,
+						description: event.description ?? undefined,
+						location: event.location ?? undefined,
+						startTime: event.startTime,
+						endTime: event.endTime,
+						isAllDay: event.isAllDay,
+						timezone: event.timezone ?? undefined,
+						color: event.color ?? undefined,
+						status: event.status ?? undefined,
+					});
+				},
+			},
+			{ id: 'divider-1', label: '', type: 'divider' },
+			{
+				id: 'delete',
+				label: $_('calendar.contextMenu.delete'),
+				variant: 'danger',
+				action: () => eventsStore.deleteEvent(event.id),
+			},
+		];
+	}
 </script>
 
 <div class="week-view">
@@ -490,6 +548,7 @@
 								? eventDragDrop.getResizePreviewTime()
 								: formatEventTimeRange(event)}
 							onClick={handleEventClick}
+							onContextMenu={handleEventContextMenu}
 							onPointerDown={eventDragDrop.startDrag}
 							onResizeStart={eventDragDrop.startResize}
 						/>
@@ -607,6 +666,17 @@
 		onClose={birthdayPopover.closePopover}
 	/>
 {/if}
+
+<ContextMenu
+	visible={contextMenuVisible}
+	x={contextMenuX}
+	y={contextMenuY}
+	items={getContextMenuItems()}
+	onClose={() => {
+		contextMenuVisible = false;
+		contextMenuEvent = null;
+	}}
+/>
 
 <style>
 	.week-view {
