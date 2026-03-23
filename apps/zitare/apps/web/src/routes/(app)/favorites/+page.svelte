@@ -3,8 +3,9 @@
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
-	import { getQuoteById } from '@zitare/content';
+	import { getQuoteById, getQuoteText, type Quote } from '@zitare/content';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
 	// Get favorite quotes
 	let favoriteQuotes = $derived(
@@ -12,6 +13,60 @@
 			.map((f) => getQuoteById(f.quoteId))
 			.filter((q): q is NonNullable<typeof q> => q !== undefined)
 	);
+
+	// Context menu state
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+	let contextMenuQuote = $state<Quote | null>(null);
+
+	function handleContextMenu(e: MouseEvent, quote: Quote) {
+		e.preventDefault();
+		e.stopPropagation();
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		contextMenuQuote = quote;
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(): ContextMenuItem[] {
+		if (!contextMenuQuote) return [];
+		const quote = contextMenuQuote;
+
+		return [
+			{
+				id: 'remove-favorite',
+				label: $_('favorites.removeFromFavorites', { default: 'Aus Favoriten entfernen' }),
+				variant: 'danger',
+				action: () => favoritesStore.toggle(quote.id),
+			},
+			{ id: 'divider-1', label: '', type: 'divider' },
+			{
+				id: 'copy',
+				label: $_('common.copyQuote', { default: 'Zitat kopieren' }),
+				action: () => {
+					const text = getQuoteText(quote);
+					navigator.clipboard.writeText(`"${text}" — ${quote.author}`);
+				},
+			},
+			{
+				id: 'share',
+				label: $_('common.share', { default: 'Teilen' }),
+				action: async () => {
+					const text = `"${getQuoteText(quote)}" — ${quote.author}`;
+					if (navigator.share) {
+						try {
+							await navigator.share({ text });
+						} catch {
+							// User cancelled or share failed, ignore
+						}
+					} else {
+						await navigator.clipboard.writeText(text);
+					}
+				},
+			},
+		];
+	}
 </script>
 
 <svelte:head>
@@ -75,8 +130,22 @@
 		<!-- Favorites list -->
 		<div class="space-y-6">
 			{#each favoriteQuotes as quote (quote.id)}
-				<QuoteCard {quote} showCategory showSource />
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div oncontextmenu={(e) => handleContextMenu(e, quote)}>
+					<QuoteCard {quote} showCategory showSource />
+				</div>
 			{/each}
 		</div>
 	{/if}
 </div>
+
+<ContextMenu
+	visible={contextMenuVisible}
+	x={contextMenuX}
+	y={contextMenuY}
+	items={getContextMenuItems()}
+	onClose={() => {
+		contextMenuVisible = false;
+		contextMenuQuote = null;
+	}}
+/>

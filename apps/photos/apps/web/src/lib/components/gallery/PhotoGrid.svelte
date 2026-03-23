@@ -2,6 +2,9 @@
 	import { onMount } from 'svelte';
 	import type { Photo } from '@photos/shared';
 	import PhotoCard from './PhotoCard.svelte';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import { photoStore } from '$lib/stores/photos.svelte';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		photos: Photo[];
@@ -12,6 +15,48 @@
 	}
 
 	let { photos, loading, hasMore, onPhotoClick, onLoadMore }: Props = $props();
+
+	// Context menu state
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+	let contextMenuPhoto = $state<Photo | null>(null);
+
+	function handleContextMenu(e: MouseEvent, photo: Photo) {
+		e.preventDefault();
+		e.stopPropagation();
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		contextMenuPhoto = photo;
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(): ContextMenuItem[] {
+		if (!contextMenuPhoto) return [];
+		const photo = contextMenuPhoto;
+
+		return [
+			{
+				id: 'view',
+				label: $_('contextMenu.view'),
+				action: () => onPhotoClick(photo),
+			},
+			{
+				id: 'favorite',
+				label: photo.isFavorited
+					? $_('contextMenu.removeFromFavorites')
+					: $_('contextMenu.addToFavorites'),
+				action: () => photoStore.toggleFavorite(photo.id),
+			},
+			{ id: 'divider-1', label: '', type: 'divider' },
+			{
+				id: 'delete',
+				label: $_('common.delete'),
+				variant: 'danger',
+				action: () => photoStore.deletePhoto(photo.id),
+			},
+		];
+	}
 
 	let loadMoreRef = $state<HTMLDivElement | null>(null);
 	let observer: IntersectionObserver;
@@ -45,9 +90,23 @@
 
 <div class="photo-grid">
 	{#each photos as photo (photo.id)}
-		<PhotoCard {photo} onClick={() => onPhotoClick(photo)} />
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div oncontextmenu={(e) => handleContextMenu(e, photo)}>
+			<PhotoCard {photo} onClick={() => onPhotoClick(photo)} />
+		</div>
 	{/each}
 </div>
+
+<ContextMenu
+	visible={contextMenuVisible}
+	x={contextMenuX}
+	y={contextMenuY}
+	items={getContextMenuItems()}
+	onClose={() => {
+		contextMenuVisible = false;
+		contextMenuPhoto = null;
+	}}
+/>
 
 {#if loading}
 	<div class="loading-indicator">

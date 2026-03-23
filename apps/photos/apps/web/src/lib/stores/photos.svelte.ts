@@ -150,6 +150,27 @@ export const photoStore = {
 	},
 
 	/**
+	 * Delete a photo
+	 */
+	async deletePhoto(mediaId: string) {
+		try {
+			const result = await api.delete(`/photos/${mediaId}`);
+			if (result.error) {
+				error = result.error.message;
+				return false;
+			}
+			photos = photos.filter((p) => p.id !== mediaId);
+			if (selectedPhoto?.id === mediaId) {
+				selectedPhoto = null;
+			}
+			return true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to delete photo';
+			return false;
+		}
+	},
+
+	/**
 	 * Clear all state
 	 */
 	reset() {

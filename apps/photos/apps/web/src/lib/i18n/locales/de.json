@@ -107,6 +107,13 @@
 		"signUp": "Registrieren",
 		"forgotPassword": "Passwort vergessen?"
 	},
+	"contextMenu": {
+		"view": "Anzeigen",
+		"open": "Öffnen",
+		"toggleFavorite": "Favorit umschalten",
+		"addToFavorites": "Zu Favoriten hinzufügen",
+		"removeFromFavorites": "Aus Favoriten entfernen"
+	},
 	"common": {
 		"save": "Speichern",
 		"cancel": "Abbrechen",

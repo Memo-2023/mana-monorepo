@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { decksStore } from '$lib/stores/decks.svelte';
-	import { PageHeader } from '@manacore/shared-ui';
+	import { PageHeader, ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import {
 		Plus,
 		Presentation,
@@ -10,6 +10,7 @@
 		DotsThreeVertical,
 		Clock,
 		Stack,
+		ArrowSquareOut,
 	} from '@manacore/shared-icons';
 
 	let showCreateModal = $state(false);
@@ -18,6 +19,45 @@
 	let newDeckTitle = $state('');
 	let newDeckDescription = $state('');
 	let isCreating = $state(false);
+
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+	let contextMenuDeck = $state<(typeof decksStore.decks)[0] | null>(null);
+
+	function handleContextMenu(e: MouseEvent, deck: (typeof decksStore.decks)[0]) {
+		e.preventDefault();
+		e.stopPropagation();
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		contextMenuDeck = deck;
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(): ContextMenuItem[] {
+		if (!contextMenuDeck) return [];
+		const deck = contextMenuDeck;
+		return [
+			{
+				id: 'open',
+				label: 'Open',
+				icon: ArrowSquareOut,
+				action: () => goto(`/deck/${deck.id}`),
+			},
+			{
+				id: 'divider',
+				label: '',
+				type: 'divider',
+			},
+			{
+				id: 'delete',
+				label: 'Delete',
+				icon: Trash,
+				variant: 'danger',
+				action: () => confirmDelete({ id: deck.id, title: deck.title }),
+			},
+		];
+	}
 
 	onMount(() => {
 		decksStore.loadDecks();
@@ -106,8 +146,10 @@
 	{:else}
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 			{#each decksStore.decks as deck (deck.id)}
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow"
+					oncontextmenu={(e) => handleContextMenu(e, deck)}
 				>
 					<a href="/deck/{deck.id}" class="block">
 						<div
@@ -147,6 +189,17 @@
 		</div>
 	{/if}
 </div>
+
+<ContextMenu
+	visible={contextMenuVisible}
+	x={contextMenuX}
+	y={contextMenuY}
+	items={getContextMenuItems()}
+	onClose={() => {
+		contextMenuVisible = false;
+		contextMenuDeck = null;
+	}}
+/>
 
 <!-- Create Deck Modal -->
 {#if showCreateModal}

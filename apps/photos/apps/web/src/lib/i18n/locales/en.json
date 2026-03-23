@@ -107,6 +107,13 @@
 		"signUp": "Sign Up",
 		"forgotPassword": "Forgot Password?"
 	},
+	"contextMenu": {
+		"view": "View",
+		"open": "Open",
+		"toggleFavorite": "Toggle Favorite",
+		"addToFavorites": "Add to Favorites",
+		"removeFromFavorites": "Remove from Favorites"
+	},
 	"common": {
 		"save": "Save",
 		"cancel": "Cancel",
