@@ -168,7 +168,7 @@
 	// Base navigation items for Todo
 	// Note: Filter uses onClick to toggle FilterStrip visibility instead of navigating
 	let baseNavItems = $derived<PillNavItem[]>([
-		{ href: '/', label: 'Aufgaben', icon: 'list' },
+		{ href: '/', label: 'Liste', icon: 'list' },
 		{ href: '/kanban', label: 'Kanban', icon: 'columns' },
 		{
 			href: '/',
