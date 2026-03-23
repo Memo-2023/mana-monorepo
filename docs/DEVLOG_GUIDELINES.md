@@ -2,12 +2,16 @@
 
 ## Zeitraum-Konvention
 
-**Arbeitstage werden wie folgt definiert:**
+**Devlogs werden pro Arbeitssession geschrieben, nicht pro Tag:**
 
-- Ein "Arbeitstag" beginnt um **11:00 Uhr** und endet um **11:00 Uhr des Folgetages**
-- Beispiel: Der Devlog für "2026-01-30" umfasst alle Commits von 30.01. 11:00 bis 31.01. 10:59
+- Eine "Session" ist ein zusammenhängender Arbeitszeitraum (z.B. Vormittag, Nachmittag, Abend)
+- Pro Tag können mehrere Devlogs entstehen (z.B. `2026-03-23-vormittag-manalink-prod.md` und `2026-03-23-abend-citycorners-features.md`)
+- Der Dateiname enthält die Session-Bezeichnung zur Unterscheidung
+- `workingHours` im Frontmatter bilden den tatsächlichen Session-Zeitraum ab
 
-Diese Konvention ermöglicht es, Nachtarbeit dem richtigen Tag zuzuordnen.
+**Beispiele für Session-Bezeichnungen:** `vormittag`, `nachmittag`, `abend`, `nacht`
+
+Falls nur eine Session an einem Tag stattfindet, kann die Session-Bezeichnung weggelassen werden.
 
 ## Dateistruktur
 
@@ -48,10 +52,10 @@ contributors:
     handle: 'Till-JS'
     commits: 42
 
-# Working Hours (für Aktivitätsgrid)
+# Working Hours (tatsächlicher Session-Zeitraum)
 workingHours:
-  start: '2026-01-30T11:00'
-  end: '2026-01-31T11:00'
+  start: '2026-01-30T09:00'
+  end: '2026-01-30T13:30'
 ---
 ```
 
