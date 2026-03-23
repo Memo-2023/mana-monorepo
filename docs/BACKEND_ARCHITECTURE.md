@@ -712,7 +712,6 @@ export const characters = pgTable('characters', {
 #### Option B: Alles auf Supabase
 
 ```typescript
-// packages/shared-supabase/src/client.ts
 export const createProjectClient = (project: 'maerchenzauber' | 'manadeck' | 'uload') => {
   return createClient(
     process.env[`${project.toUpperCase()}_SUPABASE_URL`],

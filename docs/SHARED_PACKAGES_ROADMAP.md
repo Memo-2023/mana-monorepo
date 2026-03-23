@@ -13,7 +13,6 @@ This document outlines the plan to unify common code across all web apps in the 
 - [x] `@manacore/shared-theme-ui` - Theme UI Components (ThemeToggle, ThemeSelector)
 - [x] `@manacore/shared-utils` - Unified Utilities (formatting, validation, async, date, keyboard)
 - [x] `@manacore/shared-types` - Unified TypeScript Types
-- [x] `@manacore/shared-supabase` - Unified Supabase Client Factory
 - [x] `@manacore/shared-i18n` - Unified i18n (languages, locale detection, translations)
 - [x] `@manacore/shared-config` - Unified Config (env validation)
 - [x] `@manacore/shared-branding` - **NEW** Unified App Branding (logos, colors, app config)
@@ -232,7 +231,6 @@ packages/shared-i18n/
 3. **Phase 3** (Completed)
    - [x] `@manacore/shared-utils`
    - [x] `@manacore/shared-types`
-   - [x] `@manacore/shared-supabase`
 
 4. **Phase 4** (Completed)
    - [x] `@manacore/shared-i18n`

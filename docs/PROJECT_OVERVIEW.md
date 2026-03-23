@@ -454,7 +454,6 @@ Alle Projekte teilen gemeinsame Packages unter `packages/`:
 | --------------------------- | ---------------------------------------- |
 | `@manacore/shared-types`    | Gemeinsame TypeScript Types              |
 | `@manacore/shared-utils`    | Utility-Funktionen (Date, String, Async) |
-| `@manacore/shared-supabase` | Einheitlicher Supabase Client            |
 | `@manacore/shared-config`   | Gemeinsame Konfiguration                 |
 
 ### Auth & Security
@@ -498,7 +497,6 @@ Alle Projekte teilen gemeinsame Packages unter `packages/`:
 ```typescript
 // In einem beliebigen Projekt
 import { User, ApiResponse } from '@manacore/shared-types';
-import { createSupabaseClient } from '@manacore/shared-supabase';
 import { formatDate, truncate, retry } from '@manacore/shared-utils';
 ```
 

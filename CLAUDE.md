@@ -502,7 +502,6 @@ $: doubled = count * 2;
 | `@mana-core/nestjs-integration` | NestJS module with auth guards + credit client  |
 | `@manacore/shared-auth`         | Client-side auth service for web/mobile apps    |
 | `@manacore/shared-storage`      | S3-compatible storage (MinIO)                     |
-| `@manacore/shared-supabase`     | Unified Supabase client                         |
 | `@manacore/shared-types`        | Common TypeScript types                         |
 | `@manacore/shared-utils`        | Utility functions                               |
 | `@manacore/shared-ui`           | React Native UI components                      |
