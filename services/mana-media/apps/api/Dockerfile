@@ -8,6 +8,7 @@ WORKDIR /app
 
 # Copy all necessary files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
 COPY services/mana-media ./services/mana-media
