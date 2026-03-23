@@ -37,7 +37,8 @@ COPY packages/eslint-config ./packages/eslint-config
 # Copy matrix web app
 COPY apps/matrix/apps/web ./apps/matrix/apps/web
 
-# Install dependencies (--no-frozen-lockfile due to workspace overrides)
+# Remove react-native patches (not applicable in web-only context) then install
+RUN node -e "const p=require('./package.json'); delete p.pnpm?.patchedDependencies; require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2))"
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile
 
 # Build shared packages that need building
