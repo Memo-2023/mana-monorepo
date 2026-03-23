@@ -19,7 +19,6 @@ import {
 } from '~/services/aiService';
 import { useTheme } from '~/utils/theme/theme';
 import { getDocumentById } from '~/services/supabaseService';
-import { supabase } from '~/utils/supabase';
 import { eventEmitter, EVENTS } from '~/utils/eventEmitter';
 import { getCurrentTokenBalance } from '~/services/tokenTransactionService';
 import TokenDisplay from '~/components/monetization/TokenDisplay';
@@ -206,32 +205,15 @@ export const BottomLLMToolbar: React.FC<BottomLLMToolbarProps> = ({
 			setTimeout(async () => {
 				console.log('Aktualisiere Token-Guthaben nach erfolgreichem Call...');
 
-				// Direkte Aktualisierung des Token-Guthabens ohne Caching
+				// Direkte Aktualisierung des Token-Guthabens via Backend API
 				try {
-					// Hole den aktuellen Benutzer
-					const { data: sessionData } = await supabase.auth.getSession();
-					const userId = sessionData?.session?.user?.id;
+					const newBalance = await getCurrentTokenBalance();
+					console.log('Neues Token-Guthaben:', newBalance);
+					setTokenBalance(newBalance);
 
-					if (!userId) {
-						throw new Error('Nicht angemeldet');
-					}
-
-					// Hole das aktuelle Token-Guthaben direkt aus der Datenbank mit Cache-Busting
-					const { data: userData } = await supabase
-						.from('users')
-						.select('token_balance')
-						.eq('id', userId)
-						.single();
-
-					if (userData) {
-						console.log('Neues Token-Guthaben:', userData.token_balance);
-						// Aktualisiere den Zustand mit dem neuen Guthaben
-						setTokenBalance(userData.token_balance);
-
-						// Löse ein Event aus, um alle TokenDisplay-Komponenten zu benachrichtigen
-						console.log('Löse TOKEN_BALANCE_UPDATED-Event aus');
-						eventEmitter.emit(EVENTS.TOKEN_BALANCE_UPDATED);
-					}
+					// Löse ein Event aus, um alle TokenDisplay-Komponenten zu benachrichtigen
+					console.log('Löse TOKEN_BALANCE_UPDATED-Event aus');
+					eventEmitter.emit(EVENTS.TOKEN_BALANCE_UPDATED);
 				} catch (error) {
 					console.error('Fehler beim direkten Aktualisieren des Token-Guthabens:', error);
 					// Fallback zur normalen Aktualisierung
@@ -296,16 +278,8 @@ export const BottomLLMToolbar: React.FC<BottomLLMToolbarProps> = ({
 		try {
 			setLoading(true);
 
-			// Hole den aktuellen Benutzer
-			const { data: sessionData } = await supabase.auth.getSession();
-			const userId = sessionData?.session?.user?.id;
-
-			if (!userId) {
-				throw new Error('Nicht angemeldet');
-			}
-
-			// Hole das aktuelle Token-Guthaben
-			const balance = await getCurrentTokenBalance(userId);
+			// Hole das aktuelle Token-Guthaben (backend identifies user from JWT)
+			const balance = await getCurrentTokenBalance();
 			setTokenBalance(balance);
 
 			// Löse ein Event aus, um alle TokenDisplay-Komponenten zu benachrichtigen

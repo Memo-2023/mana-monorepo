@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Text } from '../ui/Text';
 import { Input } from '../ui/Input';
 import { Button } from '../Button';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthProvider';
 
 type LoginFormProps = {
 	onSuccess?: () => void;
@@ -25,10 +25,10 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
 		setLoading(true);
 
 		try {
-			// Verwende die signIn-Funktion aus dem AuthContext
-			const { success, error: authError } = await signIn(email, password);
+			// Verwende die signIn-Funktion aus dem AuthProvider
+			const { error: authError } = await signIn(email, password);
 
-			if (success) {
+			if (!authError) {
 				// Handle successful login
 				if (onSuccess) {
 					onSuccess();
@@ -36,7 +36,9 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
 					router.replace('/');
 				}
 			} else {
-				setError(authError || 'Anmeldung fehlgeschlagen. Bitte überprüfe deine Anmeldedaten.');
+				setError(
+					authError?.message || 'Anmeldung fehlgeschlagen. Bitte überprüfe deine Anmeldedaten.'
+				);
 			}
 		} catch (err: any) {
 			setError('Anmeldung fehlgeschlagen. Bitte überprüfe deine Anmeldedaten.');

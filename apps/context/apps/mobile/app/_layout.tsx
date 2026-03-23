@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Slot, Stack, useRouter, useSegments } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { SplashScreen } from 'expo-router';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+import { AuthProvider, useAuth } from '../context/AuthProvider';
 import { ThemeProvider } from '../components/theme';
 import { DebugProvider } from '../context/DebugContext';
 import { I18nProvider } from '../context/I18nContext';
@@ -51,7 +51,7 @@ function RootLayoutNav() {
 
 		// Initialisiere RevenueCat, wenn der Benutzer angemeldet ist
 		if (user) {
-			initializeRevenueCat(user.id);
+			initializeRevenueCat(user.userId);
 		}
 	}, [user, loading, segments, router]);
 

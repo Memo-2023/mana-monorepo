@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useAuth } from '~/context/AuthContext';
+import { useAuth } from '~/context/AuthProvider';
 import {
 	getDocumentById,
 	getDocumentByShortId,

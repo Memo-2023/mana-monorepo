@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Switch } f
 import { Stack, useRouter } from 'expo-router';
 import { ThemeSelector } from '~/components/theme';
 import { useTheme } from '~/utils/theme/theme';
-import { useAuth } from '~/context/AuthContext';
+import { useAuth } from '~/context/AuthProvider';
 import { useDebug } from '~/context/DebugContext';
 import { useTranslations } from '~/context/I18nContext';
 import { LanguagePicker } from '~/components/settings/LanguagePicker';

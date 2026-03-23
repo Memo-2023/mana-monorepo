@@ -1,4 +1,4 @@
-import { supabase } from '../utils/supabase';
+import { aiApi } from './backendApi';
 
 // Typdefinitionen
 export type AIProvider = 'azure' | 'google';
@@ -39,35 +39,6 @@ export const availableModels: AIModelOption[] = [
 	},
 ];
 
-const BACKEND_URL =
-	process.env.EXPO_PUBLIC_BACKEND_URL ||
-	process.env.EXPO_PUBLIC_CONTEXT_BACKEND_URL ||
-	'http://localhost:3020';
-
-/**
- * Get the current Supabase access token for backend auth
- */
-const getAuthToken = async (): Promise<string> => {
-	const { data } = await supabase.auth.getSession();
-	const token = data?.session?.access_token;
-	if (!token) {
-		throw new Error('Nicht angemeldet');
-	}
-	return token;
-};
-
-/**
- * Get the current user ID from Supabase session
- */
-const getUserId = async (): Promise<string> => {
-	const { data } = await supabase.auth.getSession();
-	const userId = data?.session?.user?.id;
-	if (!userId) {
-		throw new Error('Nicht angemeldet');
-	}
-	return userId;
-};
-
 /**
  * Prüft, ob der Benutzer genügend Tokens für eine Anfrage hat
  */
@@ -77,37 +48,12 @@ export const checkTokenBalance = async (
 	estimatedCompletionLength: number = 500,
 	referencedDocuments?: { title: string; content: string }[]
 ): Promise<{ hasEnough: boolean; estimate: any; balance: number }> => {
-	try {
-		const token = await getAuthToken();
-
-		const response = await fetch(`${BACKEND_URL}/api/v1/ai/estimate/mobile`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`,
-			},
-			body: JSON.stringify({
-				prompt,
-				model,
-				estimatedCompletionLength,
-				referencedDocuments,
-			}),
-		});
-
-		if (!response.ok) {
-			throw new Error(`Backend error: ${response.status}`);
-		}
-
-		const data = await response.json();
-		return {
-			hasEnough: data.hasEnough,
-			estimate: data.estimate,
-			balance: data.balance,
-		};
-	} catch (error) {
-		console.error('Fehler beim Prüfen des Token-Guthabens:', error);
-		return { hasEnough: false, estimate: null, balance: 0 };
-	}
+	return aiApi.estimate({
+		prompt,
+		model,
+		estimatedCompletionLength,
+		referencedDocuments,
+	});
 };
 
 /**
@@ -119,30 +65,14 @@ export const generateText = async (
 	options: AIGenerationOptions = {}
 ): Promise<AIGenerationResult> => {
 	try {
-		const token = await getAuthToken();
-
-		const response = await fetch(`${BACKEND_URL}/api/v1/ai/generate/mobile`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${token}`,
-			},
-			body: JSON.stringify({
-				prompt,
-				model: options.model || 'ollama/gemma3:4b',
-				temperature: options.temperature,
-				maxTokens: options.maxTokens,
-				documentId: options.documentId,
-				referencedDocuments: options.referencedDocuments,
-			}),
+		const result = await aiApi.generate({
+			prompt,
+			model: options.model || 'ollama/gemma3:4b',
+			temperature: options.temperature,
+			maxTokens: options.maxTokens,
+			documentId: options.documentId,
+			referencedDocuments: options.referencedDocuments,
 		});
-
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			throw new Error(errorData.message || `Backend error: ${response.status}`);
-		}
-
-		const result = await response.json();
 
 		return {
 			text: result.text,

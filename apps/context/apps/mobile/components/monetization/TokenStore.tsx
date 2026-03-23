@@ -17,7 +17,6 @@ import {
 	TOKEN_AMOUNTS,
 	ENTITLEMENTS,
 } from '../../services/revenueCatService';
-import { supabase } from '../../utils/supabase';
 import { themeClasses, useColorModeValue } from '../../utils/theme/theme';
 
 type TokenStoreProps = {
@@ -26,7 +25,6 @@ type TokenStoreProps = {
 };
 
 export const TokenStore: React.FC<TokenStoreProps> = ({ onClose, onPurchaseComplete }) => {
-	const [user, setUser] = useState<{ id: string } | null>(null);
 	const [packages, setPackages] = useState<PurchasesPackage[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [purchasing, setPurchasing] = useState(false);
@@ -37,18 +35,6 @@ export const TokenStore: React.FC<TokenStoreProps> = ({ onClose, onPurchaseCompl
 	const textColor = useColorModeValue('gray.800', 'white');
 	const cardBgColor = useColorModeValue('gray.50', 'gray.700');
 	const accentColor = useColorModeValue('blue.500', 'blue.300');
-
-	useEffect(() => {
-		// Aktuellen Benutzer laden
-		const loadUser = async () => {
-			const { data: sessionData } = await supabase.auth.getSession();
-			if (sessionData?.session?.user) {
-				setUser({ id: sessionData.session.user.id });
-			}
-		};
-
-		loadUser();
-	}, []);
 
 	useEffect(() => {
 		const loadData = async () => {
@@ -72,14 +58,10 @@ export const TokenStore: React.FC<TokenStoreProps> = ({ onClose, onPurchaseCompl
 			}
 		};
 
-		if (user) {
-			loadData();
-		}
-	}, [user]);
+		loadData();
+	}, []);
 
 	const handlePurchase = async (pkg: PurchasesPackage) => {
-		if (!user) return;
-
 		try {
 			setPurchasing(true);
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { getCurrentTokenBalance } from '../../services/tokenTransactionService';
-import { supabase } from '../../utils/supabase';
 import { useTheme, themeClasses } from '../../utils/theme/theme';
 import { eventEmitter, EVENTS } from '../../utils/eventEmitter';
 
@@ -34,14 +33,9 @@ export const TokenDisplay: React.FC<TokenDisplayProps> = ({
 	const loadTokenBalance = useCallback(async () => {
 		console.log('TokenDisplay: Lade Token-Guthaben...');
 		try {
-			const { data: sessionData } = await supabase.auth.getSession();
-			const userId = sessionData?.session?.user?.id;
-
-			if (userId) {
-				const balance = await getCurrentTokenBalance(userId);
-				console.log('TokenDisplay: Neues Token-Guthaben geladen:', balance);
-				setTokenBalance(balance);
-			}
+			const balance = await getCurrentTokenBalance();
+			console.log('TokenDisplay: Neues Token-Guthaben geladen:', balance);
+			setTokenBalance(balance);
 		} catch (error) {
 			console.error('Fehler beim Laden des Token-Guthabens:', error);
 		} finally {

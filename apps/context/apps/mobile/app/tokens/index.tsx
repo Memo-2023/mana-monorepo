@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Text } from '~/components/ui/Text';
 import { useTheme } from '~/utils/theme/theme';
-import { supabase } from '~/utils/supabase';
 import {
 	getCurrentTokenBalance,
 	getTokenTransactions,
@@ -33,24 +32,16 @@ export default function TokenManagementScreen() {
 			try {
 				setLoading(true);
 
-				// Hole den aktuellen Benutzer
-				const { data: sessionData } = await supabase.auth.getSession();
-				const userId = sessionData?.session?.user?.id;
-
-				if (!userId) {
-					throw new Error('Nicht angemeldet');
-				}
-
-				// Hole das Token-Guthaben
-				const balance = await getCurrentTokenBalance(userId);
+				// Hole das Token-Guthaben (backend identifies user from JWT)
+				const balance = await getCurrentTokenBalance();
 				setTokenBalance(balance);
 
 				// Hole die Token-Transaktionen
-				const transactionData = await getTokenTransactions(userId, 20);
+				const transactionData = await getTokenTransactions('', 20);
 				setTransactions(transactionData);
 
 				// Hole die Nutzungsstatistiken
-				const stats = await getTokenUsageStats(userId, timeframe);
+				const stats = await getTokenUsageStats('', timeframe);
 				setUsageStats(stats);
 			} catch (error) {
 				console.error('Fehler beim Laden der Token-Daten:', error);
@@ -387,16 +378,11 @@ export default function TokenManagementScreen() {
 						// Aktualisiere die Daten nach dem Kauf
 						const refreshData = async () => {
 							try {
-								const { data: sessionData } = await supabase.auth.getSession();
-								const userId = sessionData?.session?.user?.id;
+								const balance = await getCurrentTokenBalance();
+								setTokenBalance(balance);
 
-								if (userId) {
-									const balance = await getCurrentTokenBalance(userId);
-									setTokenBalance(balance);
-
-									const transactionData = await getTokenTransactions(userId, 20);
-									setTransactions(transactionData);
-								}
+								const transactionData = await getTokenTransactions('', 20);
+								setTransactions(transactionData);
 							} catch (error) {
 								console.error('Fehler beim Aktualisieren der Daten:', error);
 							}

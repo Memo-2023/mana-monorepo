@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Text } from '../ui/Text';
 import { Input } from '../ui/Input';
 import { Button } from '../Button';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthProvider';
 
 type RegisterFormProps = {
 	onSuccess?: () => void;
@@ -46,23 +46,18 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
 		setLoading(true);
 
 		try {
-			// Verwende die signUp-Funktion aus dem AuthContext
-			const { success, error: authError } = await signUp(email, password, name);
+			// Verwende die signUp-Funktion aus dem AuthProvider
+			const { data, error: authError } = await signUp(email, password);
 
-			if (success) {
-				if (authError) {
-					// Wenn die Registrierung erfolgreich war, aber eine E-Mail-Bestätigung erforderlich ist
-					setSuccessMessage(authError);
+			if (!authError) {
+				// Handle successful registration
+				if (onSuccess) {
+					onSuccess();
 				} else {
-					// Handle successful registration
-					if (onSuccess) {
-						onSuccess();
-					} else {
-						router.replace('/');
-					}
+					router.replace('/');
 				}
 			} else {
-				setError(authError || 'Registrierung fehlgeschlagen. Bitte versuche es erneut.');
+				setError(authError?.message || 'Registrierung fehlgeschlagen. Bitte versuche es erneut.');
 			}
 		} catch (err: any) {
 			setError('Registrierung fehlgeschlagen. Bitte versuche es erneut.');

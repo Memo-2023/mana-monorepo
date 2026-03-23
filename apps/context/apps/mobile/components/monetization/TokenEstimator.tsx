@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { estimateCostForPrompt } from '../../services/tokenCountingService';
 import { getCurrentTokenBalance } from '../../services/tokenTransactionService';
-import { supabase } from '../../utils/supabase';
 import { useTheme } from '../../utils/theme/theme';
 
 type TokenEstimatorProps = {
@@ -28,20 +27,8 @@ export const TokenEstimator: React.FC<TokenEstimatorProps> = ({
 			try {
 				setLoading(true);
 
-				// Hole den aktuellen Benutzer
-				const { data: sessionData } = await supabase.auth.getSession();
-				const userId = sessionData?.session?.user?.id;
-
-				if (!userId) {
-					throw new Error('Nicht angemeldet');
-				}
-
-				// WICHTIG: Wir rufen estimateCostForPrompt NICHT mehr direkt auf,
-				// da die Schätzung bereits von der aufrufenden Komponente berechnet wurde
-				// und in der estimate-Prop enthalten ist.
-
-				// Hole das aktuelle Token-Guthaben
-				const tokenBalance = await getCurrentTokenBalance(userId);
+				// Hole das aktuelle Token-Guthaben (backend identifies user from JWT)
+				const tokenBalance = await getCurrentTokenBalance();
 				setBalance(tokenBalance);
 			} catch (error) {
 				console.error('Fehler beim Laden der Token-Schätzung:', error);

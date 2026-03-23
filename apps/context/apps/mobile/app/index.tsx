@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Screen } from '~/components/layout/Screen';
 import { Text } from '~/components/ui/Text';
-import { useAuth } from '~/context/AuthContext';
+import { useAuth } from '~/context/AuthProvider';
 import { getSpaces, getDocuments, Document, Space } from '~/services/supabaseService';
 import { useTheme } from '~/utils/theme/theme';
 import { useTranslations } from '~/context/I18nContext';
