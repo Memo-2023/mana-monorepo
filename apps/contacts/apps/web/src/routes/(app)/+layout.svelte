@@ -42,6 +42,8 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
+	import TagStrip from '$lib/components/TagStrip.svelte';
+	import { tagsStore } from '$lib/stores/tags.svelte';
 	import { contactsOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
@@ -74,8 +76,8 @@
 		showContactsToolbar && !contactsFilterStore.isToolbarCollapsed
 	);
 
-	// Dynamic bottom offset based on toolbar state
-	const inputBarBottomOffset = $derived(isToolbarExpanded ? '140px' : '70px');
+	// Dynamic bottom offset based on toolbar state (TagStrip adds ~40px)
+	const inputBarBottomOffset = $derived(isToolbarExpanded ? '180px' : '110px');
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -281,13 +283,9 @@
 		// Load user settings and tags
 		await userSettings.load();
 
-		// Load tags for Quick-Create
-		try {
-			const tagsResult = await tagsApi.list();
-			availableTags = (tagsResult.tags || []).map((t) => ({ id: t.id, name: t.name }));
-		} catch (e) {
-			console.error('Failed to load tags:', e);
-		}
+		// Load tags (used by TagStrip and Quick-Create)
+		await tagsStore.fetchTags();
+		availableTags = tagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
 	});
 </script>
 
@@ -337,6 +335,9 @@
 				onOpenInPanel={handleOpenInPanel}
 				ariaLabel="Hauptnavigation"
 			/>
+
+			<!-- TagStrip (above PillNav) -->
+			<TagStrip />
 
 			<!-- Global Quick Input Bar -->
 			<QuickInputBar

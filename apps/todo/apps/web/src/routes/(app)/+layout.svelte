@@ -24,6 +24,7 @@
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { theme } from '$lib/stores/theme';
 	import TaskFilters from '$lib/components/TaskFilters.svelte';
+	import TagStrip from '$lib/components/TagStrip.svelte';
 	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
 	import type { TaskPriority } from '@todo/shared';
 	import {
@@ -357,6 +358,9 @@
 					ariaLabel="Hauptnavigation"
 				/>
 
+				<!-- TagStrip (above PillNav, always visible when PillNav is open) -->
+				<TagStrip filterStripVisible={isFilterStripVisible} />
+
 				<!-- TaskFilters strip (shown when Filter pill is active in PillNav) -->
 				{#if isFilterStripVisible}
 					<TaskFilters
@@ -389,12 +393,14 @@
 					placeholder="Neue Aufgabe oder suchen..."
 					emptyText="Keine Aufgaben gefunden"
 					searchingText="Suche..."
+					searchText="Suchen"
 					onCreate={handleCreate}
 					onParseCreate={handleParseCreate}
 					createText="Erstellen"
+					deferSearch={true}
 					appIcon="todo"
 					hasFabRight={true}
-					bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '140px' : '70px'}
+					bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '180px' : '110px'}
 				/>
 			{/if}
 

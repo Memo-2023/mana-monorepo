@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { onMount } from 'svelte';
 	import { PillViewSwitcher, FilterDropdown, type FilterDropdownOption } from '@manacore/shared-ui';
 	import { X } from '@manacore/shared-icons';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
-	import { tagsApi, type ContactTag, type Contact } from '$lib/api/contacts';
+	import type { Contact } from '$lib/api/contacts';
 	import type { ContactFilter, BirthdayFilter } from '$lib/components/FilterBar.svelte';
 
 	interface Props {
@@ -12,14 +11,6 @@
 	}
 
 	let { contacts }: Props = $props();
-
-	// Tags for filter
-	let tags = $state<ContactTag[]>([]);
-
-	// Tag options for FilterDropdown
-	let tagOptions = $derived<FilterDropdownOption[]>(
-		tags.map((tag) => ({ value: tag.id, label: tag.name }))
-	);
 
 	// Contact filter options
 	let contactFilterOptions = $derived<FilterDropdownOption[]>([
@@ -54,27 +45,16 @@
 		companies.map((company) => ({ value: company, label: company }))
 	);
 
-	// Count active filters
+	// Count active filters (tags now handled by TagStrip)
 	let activeFilterCount = $derived.by(() => {
 		let count = 0;
-		if (contactsFilterStore.selectedTagId) count++;
 		if (contactsFilterStore.contactFilter !== 'all') count++;
 		if (contactsFilterStore.birthdayFilter !== 'all') count++;
 		if (contactsFilterStore.selectedCompany) count++;
 		return count;
 	});
 
-	async function loadTags() {
-		try {
-			const response = await tagsApi.list();
-			tags = response.tags || [];
-		} catch (e) {
-			console.error('Failed to load tags:', e);
-		}
-	}
-
 	function clearAllFilters() {
-		contactsFilterStore.setSelectedTagId(null);
 		contactsFilterStore.setContactFilter('all');
 		contactsFilterStore.setBirthdayFilter('all');
 		contactsFilterStore.setSelectedCompany(null);
@@ -89,25 +69,11 @@
 	function handleSortChange(value: string) {
 		contactsFilterStore.setSortField(value as 'firstName' | 'lastName');
 	}
-
-	onMount(() => {
-		loadTags();
-	});
 </script>
 
 <div class="toolbar-content-inner">
-	<!-- Filter Dropdowns -->
+	<!-- Filter Dropdowns (tags moved to TagStrip) -->
 	<div class="filter-group">
-		<!-- Tags Filter -->
-		<FilterDropdown
-			options={tagOptions}
-			value={contactsFilterStore.selectedTagId}
-			onChange={(v) => contactsFilterStore.setSelectedTagId(typeof v === 'string' ? v : null)}
-			placeholder={$_('filters.allTags')}
-			embedded={true}
-			direction="up"
-		/>
-
 		<!-- Contact Info Filter -->
 		<FilterDropdown
 			options={contactFilterOptions}

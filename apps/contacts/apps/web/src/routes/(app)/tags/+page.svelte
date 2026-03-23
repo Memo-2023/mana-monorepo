@@ -1,20 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { tagsApi } from '$lib/api/contacts';
 	import type { ContactTag } from '$lib/api/contacts';
-	import {
-		TagList,
-		TagEditModal,
-		TagColorPicker,
-		DEFAULT_TAG_COLOR,
-		type Tag,
-	} from '@manacore/shared-ui';
+	import { tagsStore } from '$lib/stores/tags.svelte';
+	import { TagList, TagEditModal, type Tag } from '@manacore/shared-ui';
 	import { MagnifyingGlass, Plus, CaretLeft } from '@manacore/shared-icons';
 
-	let loading = $state(true);
-	let tags = $state<ContactTag[]>([]);
-	let error = $state<string | null>(null);
 	let searchQuery = $state('');
 
 	// Modal state
@@ -22,23 +13,10 @@
 	let editingTag = $state<ContactTag | null>(null);
 
 	const filteredTags = $derived.by(() => {
-		if (!searchQuery.trim()) return tags;
+		if (!searchQuery.trim()) return tagsStore.tags;
 		const query = searchQuery.toLowerCase();
-		return tags.filter((t) => t.name.toLowerCase().includes(query));
+		return tagsStore.tags.filter((t) => t.name.toLowerCase().includes(query));
 	});
-
-	async function loadTags() {
-		loading = true;
-		error = null;
-		try {
-			const response = await tagsApi.list();
-			tags = response.tags || [];
-		} catch (e) {
-			error = e instanceof Error ? e.message : $_('messages.error');
-		} finally {
-			loading = false;
-		}
-	}
 
 	function openCreateModal() {
 		editingTag = null;
@@ -56,18 +34,15 @@
 	}
 
 	async function handleSave(name: string, color: string) {
-		error = null;
 		try {
 			if (editingTag) {
-				const response = await tagsApi.update(editingTag.id, { name, color });
-				tags = tags.map((t) => (t.id === editingTag!.id ? response.tag : t));
+				await tagsStore.updateTag(editingTag.id, { name, color });
 			} else {
-				const response = await tagsApi.create({ name, color });
-				tags = [...tags, response.tag];
+				await tagsStore.createTag({ name, color });
 			}
 			closeModal();
 		} catch (e) {
-			error = e instanceof Error ? e.message : $_('messages.error');
+			console.error('Failed to save tag:', e);
 		}
 	}
 
@@ -75,11 +50,10 @@
 		if (!editingTag) return;
 
 		try {
-			await tagsApi.delete(editingTag.id);
-			tags = tags.filter((t) => t.id !== editingTag!.id);
+			await tagsStore.deleteTag(editingTag.id);
 			closeModal();
 		} catch (e) {
-			error = e instanceof Error ? e.message : $_('messages.error');
+			console.error('Failed to delete tag:', e);
 		}
 	}
 
@@ -87,14 +61,17 @@
 		if (!confirm($_('tags.confirmDelete', { values: { name: tag.name } }))) return;
 
 		try {
-			await tagsApi.delete(tag.id);
-			tags = tags.filter((t) => t.id !== tag.id);
+			await tagsStore.deleteTag(tag.id);
 		} catch (e) {
-			error = e instanceof Error ? e.message : $_('messages.error');
+			console.error('Failed to delete tag:', e);
 		}
 	}
 
-	onMount(loadTags);
+	onMount(() => {
+		if (tagsStore.tags.length === 0) {
+			tagsStore.fetchTags();
+		}
+	});
 </script>
 
 <svelte:head>
@@ -124,16 +101,16 @@
 		/>
 	</div>
 
-	{#if error}
+	{#if tagsStore.error}
 		<div class="error-banner" role="alert">
-			<span>{error}</span>
+			<span>{tagsStore.error}</span>
 		</div>
 	{/if}
 
 	<!-- Tag List using shared component -->
 	<TagList
 		tags={filteredTags}
-		{loading}
+		loading={tagsStore.loading}
 		onEdit={(tag) => openEditModal(tag as ContactTag)}
 		onDelete={handleDeleteFromList}
 		emptyMessage={searchQuery ? $_('tags.noResults') : $_('tags.noTags')}
@@ -142,14 +119,14 @@
 			: $_('tags.createFirst')}
 	/>
 
-	{#if !loading && tags.length > 0}
+	{#if !tagsStore.loading && tagsStore.tags.length > 0}
 		<p class="tags-count">
-			{tags.length}
-			{tags.length === 1 ? $_('tags.tagSingular') : $_('tags.tagPlural')}
+			{tagsStore.tags.length}
+			{tagsStore.tags.length === 1 ? $_('tags.tagSingular') : $_('tags.tagPlural')}
 		</p>
 	{/if}
 
-	{#if !loading && tags.length === 0 && !searchQuery}
+	{#if !tagsStore.loading && tagsStore.tags.length === 0 && !searchQuery}
 		<div class="empty-cta">
 			<button onclick={openCreateModal} class="btn btn-primary">
 				<Plus size={16} weight="bold" />
