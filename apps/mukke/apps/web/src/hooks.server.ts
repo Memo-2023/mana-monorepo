@@ -14,6 +14,7 @@ const PUBLIC_MANA_CORE_AUTH_URL_CLIENT =
 const PUBLIC_BACKEND_URL_CLIENT =
 	process.env.PUBLIC_BACKEND_URL_CLIENT || process.env.PUBLIC_BACKEND_URL || '';
 const PUBLIC_GLITCHTIP_DSN = process.env.PUBLIC_GLITCHTIP_DSN || '';
+const S3_PUBLIC_ENDPOINT = process.env.S3_PUBLIC_ENDPOINT || 'https://minio.mana.how';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const response = await resolve(event, {
@@ -30,7 +31,9 @@ window.__PUBLIC_GLITCHTIP_DSN__ = "${PUBLIC_GLITCHTIP_DSN}";
 	});
 
 	setSecurityHeaders(response, {
-		connectSrc: [PUBLIC_MANA_CORE_AUTH_URL_CLIENT, PUBLIC_BACKEND_URL_CLIENT],
+		connectSrc: [PUBLIC_MANA_CORE_AUTH_URL_CLIENT, PUBLIC_BACKEND_URL_CLIENT, S3_PUBLIC_ENDPOINT],
+		mediaSrc: [S3_PUBLIC_ENDPOINT, 'blob:'],
+		imgSrc: [S3_PUBLIC_ENDPOINT],
 	});
 
 	return response;

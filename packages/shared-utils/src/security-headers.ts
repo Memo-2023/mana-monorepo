@@ -25,6 +25,8 @@ interface SecurityHeadersOptions {
 	imgSrc?: string[];
 	/** Additional font-src origins */
 	fontSrc?: string[];
+	/** Additional media-src origins (audio/video sources) */
+	mediaSrc?: string[];
 	/** Override frame-ancestors (default: 'none') */
 	frameAncestors?: string;
 }
@@ -39,6 +41,7 @@ export function setSecurityHeaders(response: Response, options: SecurityHeadersO
 		scriptSrc = [],
 		imgSrc = [],
 		fontSrc = [],
+		mediaSrc = [],
 		frameAncestors = "'none'",
 	} = options;
 
@@ -56,11 +59,12 @@ export function setSecurityHeaders(response: Response, options: SecurityHeadersO
 		`img-src 'self' data: https: ${imgSrc.join(' ')}`.trim(),
 		`connect-src 'self' https://stats.mana.how https://glitchtip.mana.how ${connectSrc.join(' ')}`.trim(),
 		`font-src 'self' ${fontSrc.join(' ')}`.trim(),
+		mediaSrc.length > 0 ? `media-src 'self' ${mediaSrc.join(' ')}`.trim() : '',
 		"object-src 'none'",
 		"base-uri 'self'",
 		"form-action 'self'",
 		`frame-ancestors ${frameAncestors}`,
 	];
 
-	response.headers.set('Content-Security-Policy', cspDirectives.join('; '));
+	response.headers.set('Content-Security-Policy', cspDirectives.filter(Boolean).join('; '));
 }

@@ -389,6 +389,39 @@ curl -s http://localhost:3002/api/v1/health
 curl -s http://localhost:3000/
 ```
 
+The health check monitors:
+- All backend APIs and web frontends
+- Infrastructure (PostgreSQL, Redis)
+- Matrix services (Synapse, Element, all bots)
+- Monitoring stack (Grafana, Umami, GlitchTip, VictoriaMetrics)
+- Alerting stack (vmalert, Alertmanager, Alert Notifier)
+- Disk space for `/` and `/Volumes/ManaData` (warning at 80%, critical at 90%)
+- Cloudflare Tunnel (cloudflared process)
+
+### Docker PATH auf dem Server
+
+Bei SSH-Zugriff ist Docker nicht im Standard-PATH. Für Remote-Befehle:
+
+```bash
+# Docker liegt unter Docker Desktop
+PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
+
+# Beispiel: Remote docker compose
+ssh mana-server "PATH=/Applications/Docker.app/Contents/Resources/bin:\$PATH && docker compose -f ~/projects/manacore-monorepo/docker-compose.macmini.yml restart grafana"
+```
+
+### Container existiert nicht (wurde nie erstellt)
+
+Wenn ein Service im Health-Check als `HTTP 000` erscheint und `docker ps -a` den Container nicht zeigt, wurde er vermutlich beim letzten Deploy übersprungen:
+
+```bash
+# Container erstellen und starten (Beispiel: Project Doc Bot)
+docker compose -f docker-compose.macmini.yml up -d matrix-project-doc-bot
+
+# Nach Restart prüfen
+docker ps --filter name=mana-matrix-bot-projectdoc --format '{{.Names}} {{.Status}}'
+```
+
 ## Wartung
 
 ### Updates einspielen
