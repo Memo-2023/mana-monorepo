@@ -30,6 +30,7 @@ COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
 
@@ -45,6 +46,9 @@ RUN pnpm build
 
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
+
+WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
 
 # Build the web app
 WORKDIR /app/apps/skilltree/apps/web

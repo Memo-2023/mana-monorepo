@@ -39,6 +39,7 @@ COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
 
@@ -52,6 +53,9 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install
 # Build shared packages that need building
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
+
+WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
 
 # Build the web app
 WORKDIR /app/apps/nutriphi/apps/web

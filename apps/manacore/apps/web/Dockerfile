@@ -41,6 +41,7 @@ COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-pwa ./packages/shared-pwa
 COPY packages/qr-export ./packages/qr-export
@@ -58,6 +59,9 @@ RUN pnpm build
 
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
+
+WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
 
 # Build the web app
 WORKDIR /app/apps/manacore/apps/web
