@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Alert, StyleSheet, View, TextInput, TouchableOpacity, Text, Platform } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { supabase } from '../utils/supabase';
+import { useAuth } from '../context/AuthProvider';
 import { useTheme, useThemeColors } from '../utils/themeContext';
 
 export default function Auth() {
 	const { isDarkMode } = useTheme();
 	const themeColors = useThemeColors();
+	const { signIn, signUp, resetPassword } = useAuth();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -15,38 +16,30 @@ export default function Auth() {
 
 	async function signInWithEmail() {
 		setLoading(true);
-		const { error } = await supabase.auth.signInWithPassword({
-			email,
-			password,
-		});
+		const { error } = await signIn(email, password);
 
 		if (error) {
-			Alert.alert('Fehler bei der Anmeldung', error.message);
+			Alert.alert('Fehler bei der Anmeldung', error.message || 'Anmeldung fehlgeschlagen');
 		}
 		setLoading(false);
 	}
 
 	async function signUpWithEmail() {
 		setLoading(true);
-		const { error } = await supabase.auth.signUp({
-			email,
-			password,
-		});
+		const { error } = await signUp(email, password);
 
 		if (error) {
-			Alert.alert('Fehler bei der Registrierung', error.message);
+			Alert.alert('Fehler bei der Registrierung', error.message || 'Registrierung fehlgeschlagen');
 		} else {
 			Alert.alert(
 				'Registrierung erfolgreich',
-				'Bitte überprüfen Sie Ihre E-Mail für den Bestätigungslink.'
+				'Sie wurden erfolgreich registriert und angemeldet.'
 			);
 		}
 		setLoading(false);
 	}
 
-	async function resetPassword() {
-		console.log('Reset password called with email:', email);
-
+	async function handleResetPassword() {
 		if (!email) {
 			Alert.alert('Fehler', 'Bitte geben Sie Ihre E-Mail-Adresse ein');
 			return;
@@ -55,39 +48,18 @@ export default function Auth() {
 		setLoading(true);
 
 		try {
-			const apiUrl =
-				process.env.EXPO_PUBLIC_API_URL ||
-				'https://mana-core-middleware-111768794939.europe-west3.run.app';
-			const endpoint = `${apiUrl}/auth/reset-password`;
+			const { error } = await resetPassword(email);
 
-			console.log('Calling API endpoint:', endpoint);
-			console.log('Request body:', { email });
-
-			// Call your backend endpoint for password reset
-			const response = await fetch(endpoint, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ email }),
-			});
-
-			console.log('Response status:', response.status);
-
-			const data = await response.json();
-			console.log('Response data:', data);
-
-			if (!response.ok) {
-				throw new Error(data.error || 'Fehler beim Zurücksetzen des Passworts');
+			if (error) {
+				Alert.alert('Fehler', error.message || 'Fehler beim Zurücksetzen des Passworts');
+			} else {
+				Alert.alert(
+					'E-Mail gesendet',
+					'Bitte überprüfen Sie Ihre E-Mail für den Link zum Zurücksetzen des Passworts.'
+				);
+				setIsResetPassword(false);
 			}
-
-			Alert.alert(
-				'E-Mail gesendet',
-				'Bitte überprüfen Sie Ihre E-Mail für den Link zum Zurücksetzen des Passworts.'
-			);
-			setIsResetPassword(false);
 		} catch (error: any) {
-			console.error('Reset password error:', error);
 			Alert.alert(
 				'Fehler',
 				error.message || 'Netzwerkfehler. Bitte versuchen Sie es später erneut.'
@@ -189,7 +161,7 @@ export default function Auth() {
 					]}
 					onPress={() => {
 						if (isResetPassword) {
-							resetPassword();
+							handleResetPassword();
 						} else if (isSignUp) {
 							signUpWithEmail();
 						} else {

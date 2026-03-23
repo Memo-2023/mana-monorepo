@@ -1,48 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { useAuth } from '../context/AuthProvider';
+import { api } from '../services/api';
 
-interface Profile {
-	id: string;
-	first_name: string | null;
-	last_name: string | null;
-	avatar_url: string | null;
-	is_individual: boolean;
-	individual_quota: number;
-	individual_usage: number;
-}
-
-export default function Account({ session }: { session: Session }) {
+export default function Account() {
+	const { user, signOut } = useAuth();
 	const [loading, setLoading] = useState(true);
-	const [firstName, setFirstName] = useState('');
-	const [lastName, setLastName] = useState('');
-	const [profile, setProfile] = useState<Profile | null>(null);
+	const [name, setName] = useState('');
+	const [creditBalance, setCreditBalance] = useState<number | null>(null);
 
 	useEffect(() => {
-		if (session) getProfile();
+		if (user) loadProfile();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [session]);
+	}, [user]);
 
-	async function getProfile() {
+	async function loadProfile() {
 		try {
 			setLoading(true);
-			const { user } = session;
-
-			const { data, error } = await supabase
-				.from('profiles')
-				.select('*')
-				.eq('id', user.id)
-				.single();
+			const { data, error } = await api.getProfile();
 
 			if (error) {
-				throw error;
+				throw new Error(error);
 			}
 
 			if (data) {
-				setProfile(data);
-				setFirstName(data.first_name || '');
-				setLastName(data.last_name || '');
+				setName(data.name || '');
+			}
+
+			// Also load credit balance
+			const { data: creditData } = await api.getCreditBalance();
+			if (creditData) {
+				setCreditBalance(creditData.balance);
 			}
 		} catch (error) {
 			if (error instanceof Error) {
@@ -56,35 +44,11 @@ export default function Account({ session }: { session: Session }) {
 	async function updateProfile() {
 		try {
 			setLoading(true);
-			const { user } = session;
 
-			// Prüfen, ob das Profil bereits existiert
-			if (!profile) {
-				// Erstelle ein neues Profil, wenn es noch nicht existiert
-				const { error: insertError } = await supabase.from('profiles').insert([
-					{
-						id: user.id,
-						first_name: firstName,
-						last_name: lastName,
-						is_individual: true, // Standardmäßig als Einzelnutzer
-						individual_quota: 0,
-						individual_usage: 0,
-					},
-				]);
+			const { error } = await api.updateProfile({ name });
 
-				if (insertError) throw insertError;
-			} else {
-				// Aktualisiere das bestehende Profil
-				const { error: updateError } = await supabase
-					.from('profiles')
-					.update({
-						first_name: firstName,
-						last_name: lastName,
-						updated_at: new Date(),
-					})
-					.eq('id', user.id);
-
-				if (updateError) throw updateError;
+			if (error) {
+				throw new Error(error);
 			}
 
 			Alert.alert('Erfolg', 'Profil erfolgreich aktualisiert!');
@@ -97,11 +61,10 @@ export default function Account({ session }: { session: Session }) {
 		}
 	}
 
-	async function signOut() {
+	async function handleSignOut() {
 		try {
 			setLoading(true);
-			const { error } = await supabase.auth.signOut();
-			if (error) throw error;
+			await signOut();
 		} catch (error) {
 			if (error instanceof Error) {
 				Alert.alert('Fehler beim Abmelden', error.message);
@@ -118,35 +81,23 @@ export default function Account({ session }: { session: Session }) {
 
 				<View style={styles.formGroup}>
 					<Text style={styles.label}>E-Mail</Text>
-					<Text style={styles.value}>{session?.user?.email}</Text>
+					<Text style={styles.value}>{user?.email}</Text>
 				</View>
 
 				<View style={styles.formGroup}>
-					<Text style={styles.label}>Vorname</Text>
+					<Text style={styles.label}>Name</Text>
 					<TextInput
 						style={styles.input}
-						value={firstName}
-						onChangeText={setFirstName}
-						placeholder="Vorname eingeben"
+						value={name}
+						onChangeText={setName}
+						placeholder="Name eingeben"
 					/>
 				</View>
 
-				<View style={styles.formGroup}>
-					<Text style={styles.label}>Nachname</Text>
-					<TextInput
-						style={styles.input}
-						value={lastName}
-						onChangeText={setLastName}
-						placeholder="Nachname eingeben"
-					/>
-				</View>
-
-				{profile && profile.is_individual && (
+				{creditBalance !== null && (
 					<View style={styles.quotaContainer}>
 						<Text style={styles.label}>Verfügbare Kredite</Text>
-						<Text style={styles.quota}>
-							{profile.individual_quota - profile.individual_usage} / {profile.individual_quota}
-						</Text>
+						<Text style={styles.quota}>{creditBalance}</Text>
 					</View>
 				)}
 
@@ -158,7 +109,7 @@ export default function Account({ session }: { session: Session }) {
 
 				<TouchableOpacity
 					style={[styles.button, styles.signOutButton]}
-					onPress={signOut}
+					onPress={handleSignOut}
 					disabled={loading}
 				>
 					<Text style={styles.buttonText}>Abmelden</Text>

@@ -2,89 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { useAuth } from '../context/AuthProvider';
+import { api } from '../services/api';
 import { useTheme, lightColors, darkColors } from '../utils/themeContext';
 
 export default function DashboardStats() {
 	const router = useRouter();
 	const { isDarkMode } = useTheme();
-	const [session, setSession] = useState<Session | null>(null);
+	const { user } = useAuth();
 	const [loading, setLoading] = useState(true);
-	const [teamCount, setTeamCount] = useState(0);
 	const [orgCount, setOrgCount] = useState(0);
 	const [availableMana, setAvailableMana] = useState(0);
 	const [totalMana, setTotalMana] = useState(0);
 
 	useEffect(() => {
-		// Prüfe den aktuellen Authentifizierungsstatus
-		supabase.auth.getSession().then(({ data: { session } }) => {
-			setSession(session);
-			if (session) {
-				fetchUserStats(session.user.id);
-			} else {
-				setLoading(false);
-			}
-		});
+		if (user) {
+			fetchUserStats();
+		} else {
+			setLoading(false);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user]);
 
-		// Abonniere Authentifizierungsänderungen
-		const {
-			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_event, session) => {
-			setSession(session);
-			if (session) {
-				fetchUserStats(session.user.id);
-			} else {
-				setLoading(false);
-			}
-		});
-
-		return () => subscription.unsubscribe();
-	}, []);
-
-	async function fetchUserStats(userId: string) {
+	async function fetchUserStats() {
 		try {
 			setLoading(true);
 
-			// Hole alle Teams, in denen der Benutzer Mitglied ist
-			const { data: teamMembers, error: teamMembersError } = await supabase
-				.from('team_members')
-				.select('team_id')
-				.eq('user_id', userId);
+			// Fetch organizations count
+			const { data: orgsData } = await api.getOrganizations();
+			setOrgCount(orgsData?.length || 0);
 
-			if (teamMembersError) throw teamMembersError;
-
-			setTeamCount(teamMembers?.length || 0);
-
-			// Hole alle Organisationen, in denen der Benutzer eine Rolle hat
-			const { data: userRoles, error: userRolesError } = await supabase
-				.from('user_roles')
-				.select('organization_id')
-				.eq('user_id', userId)
-				.not('organization_id', 'is', null);
-
-			if (userRolesError) throw userRolesError;
-
-			// Entferne Duplikate (falls der Benutzer mehrere Rollen in einer Organisation hat)
-			const uniqueOrgIds = [...new Set(userRoles?.map((role) => role.organization_id) || [])];
-			setOrgCount(uniqueOrgIds.length);
-
-			// Hole die Mana-Informationen aus dem Profil des Benutzers
-			const { data: profileData, error: profileError } = await supabase
-				.from('profiles')
-				.select('individual_quota, individual_usage')
-				.eq('id', userId)
-				.single();
-
-			if (profileError) throw profileError;
-
-			if (profileData) {
-				const quota = profileData.individual_quota || 0;
-				const usage = profileData.individual_usage || 0;
-				const available = Math.max(0, quota - usage);
-
-				setTotalMana(quota);
-				setAvailableMana(available);
+			// Fetch credit balance
+			const { data: creditData } = await api.getCreditBalance();
+			if (creditData) {
+				setTotalMana(creditData.totalCredits || 0);
+				setAvailableMana(creditData.balance || 0);
 			}
 		} catch (error) {
 			console.error('Fehler beim Abrufen der Benutzerstatistiken:', error);
@@ -93,7 +45,7 @@ export default function DashboardStats() {
 		}
 	}
 
-	if (!session || loading) {
+	if (!user || loading) {
 		return (
 			<View
 				className={`flex-row justify-between ${isDarkMode ? 'bg-gray-800' : 'bg-white'} mb-5 rounded-lg p-4 shadow`}
@@ -135,40 +87,12 @@ export default function DashboardStats() {
 				</TouchableOpacity>
 			</View>
 
-			{/* Teams und Organisationen */}
+			{/* Organisationen */}
 			<View
 				className={`flex-row justify-between ${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg p-4 shadow`}
 			>
 				<TouchableOpacity
-					className={`flex-1 flex-row items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} mr-2 rounded-lg p-3`}
-					onPress={() => router.push('/teams')}
-				>
-					<View className="items-center">
-						<View className="mb-1 flex-row items-center">
-							<FontAwesome5
-								name="users"
-								size={16}
-								color={isDarkMode ? '#60A5FA' : '#0055FF'}
-								className="mr-2"
-							/>
-							<Text
-								className={`text-base font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}
-							>
-								Teams
-							</Text>
-						</View>
-						<View
-							className={`${isDarkMode ? 'bg-blue-900' : 'bg-blue-100'} rounded-full px-3 py-1`}
-						>
-							<Text className={`${isDarkMode ? 'text-blue-300' : 'text-blue-700'} font-medium`}>
-								{teamCount}
-							</Text>
-						</View>
-					</View>
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					className={`flex-1 flex-row items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} ml-2 rounded-lg p-3`}
+					className={`flex-1 flex-row items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg p-3`}
 					onPress={() => router.push('/organizations')}
 				>
 					<View className="items-center">

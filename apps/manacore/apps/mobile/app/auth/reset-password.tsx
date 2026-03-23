@@ -109,10 +109,8 @@ export default function ResetPasswordScreen() {
 		setLoading(true);
 
 		try {
-			const apiUrl =
-				process.env.EXPO_PUBLIC_API_URL ||
-				'https://mana-core-middleware-111768794939.europe-west3.run.app';
-			const endpoint = `${apiUrl}/auth/update-password`;
+			const apiUrl = process.env.EXPO_PUBLIC_MANA_CORE_AUTH_URL || 'http://localhost:3001';
+			const endpoint = `${apiUrl}/api/v1/auth/reset-password`;
 
 			console.log('Calling update password endpoint:', endpoint);
 
