@@ -1,6 +1,20 @@
 import { describe, it, expect } from 'vitest';
-import type { Task } from '@todo/shared';
+import type { Task, Label } from '@todo/shared';
 import { applyTaskFilters, type TaskFilterCriteria } from './task-filters';
+
+const now = new Date().toISOString();
+
+function makeLabel(overrides: Partial<Label>): Label {
+	return {
+		id: 'l',
+		userId: 'user-1',
+		name: 'Label',
+		color: '#000',
+		createdAt: now,
+		updatedAt: now,
+		...overrides,
+	};
+}
 
 // Helper to create a minimal task for testing
 function makeTask(overrides: Partial<Task> = {}): Task {
@@ -33,7 +47,7 @@ describe('applyTaskFilters', () => {
 			title: 'Urgent meeting',
 			priority: 'urgent',
 			projectId: 'proj-b',
-			labels: [{ id: 'label-1', userId: 'user-1', name: 'Work', color: '#f00' }],
+			labels: [makeLabel({ id: 'label-1', name: 'Work', color: '#f00' })],
 		}),
 		makeTask({
 			id: '3',
@@ -42,8 +56,8 @@ describe('applyTaskFilters', () => {
 			projectId: 'proj-a',
 			description: 'Quarterly financial report',
 			labels: [
-				{ id: 'label-1', userId: 'user-1', name: 'Work', color: '#f00' },
-				{ id: 'label-2', userId: 'user-1', name: 'Important', color: '#0f0' },
+				makeLabel({ id: 'label-1', name: 'Work', color: '#f00' }),
+				makeLabel({ id: 'label-2', name: 'Important', color: '#0f0' }),
 			],
 		}),
 		makeTask({ id: '4', title: 'Relax', priority: 'low', projectId: null }),
