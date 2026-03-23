@@ -65,6 +65,7 @@
 		placeholder?: string;
 		emptyText?: string;
 		searchingText?: string;
+		searchText?: string;
 		createText?: string;
 		appIcon?: string;
 		/** Bottom offset from viewport bottom (default: '70px') */
@@ -75,6 +76,8 @@
 		hasFabLeft?: boolean;
 		/** Enable context menu on right-click (default: true) */
 		enableContextMenu?: boolean;
+		/** Defer search until explicitly triggered (default: false). Shows create + search options instead of auto-searching. */
+		deferSearch?: boolean;
 		/** App-specific default options for context menu (e.g., calendars) */
 		defaultOptions?: DefaultOption[];
 		/** Currently selected default option ID */
@@ -100,12 +103,14 @@
 		placeholder = 'Suchen oder erstellen...',
 		emptyText = 'Keine Ergebnisse gefunden',
 		searchingText = 'Suche...',
+		searchText = 'Suchen',
 		createText = 'Erstellen',
 		appIcon = 'search',
 		bottomOffset = '70px',
 		hasFabRight = false,
 		hasFabLeft = false,
 		enableContextMenu = true,
+		deferSearch = false,
 		defaultOptions = [],
 		selectedDefaultId,
 		defaultOptionLabel = 'Standard-Kalender',
@@ -127,6 +132,8 @@
 	let isFocused = $state(false);
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let inputElement = $state<HTMLInputElement | null>(null);
+	// Whether search has been explicitly triggered in deferred mode
+	let searchTriggered = $state(false);
 
 	// Context menu state
 	let contextMenuVisible = $state(false);
@@ -145,6 +152,12 @@
 
 	// Check if create option is selected (it's always first when available)
 	let isCreateSelected = $derived(selectedIndex === 0 && createPreview !== null);
+
+	// In deferred mode: search option index is right after create (or 0 if no create)
+	let searchOptionIndex = $derived(createPreview !== null ? 1 : 0);
+	let isSearchSelected = $derived(
+		deferSearch && !searchTriggered && selectedIndex === searchOptionIndex
+	);
 
 	// Show panel only when there's actual input
 	$effect(() => {
@@ -184,6 +197,18 @@
 		settingsStore.refresh();
 	}
 
+	function handleInput() {
+		if (deferSearch) {
+			// In deferred mode: reset search state on new input, don't auto-search
+			searchTriggered = false;
+			results = [];
+			loading = false;
+			selectedIndex = 0;
+		} else {
+			handleSearch();
+		}
+	}
+
 	async function handleSearch() {
 		clearTimeout(searchTimeout);
 
@@ -211,6 +236,12 @@
 		}, 150);
 	}
 
+	async function triggerDeferredSearch() {
+		if (!searchQuery.trim()) return;
+		searchTriggered = true;
+		await handleSearch();
+	}
+
 	async function handleCreate() {
 		if (!onCreate || !searchQuery.trim() || creating) return;
 
@@ -220,6 +251,7 @@
 			searchQuery = '';
 			results = [];
 			selectedIndex = 0;
+			searchTriggered = false;
 			onSearchChange?.('', []);
 			// Keep focus for rapid entry
 			inputElement?.focus();
@@ -235,6 +267,7 @@
 			event.preventDefault();
 			searchQuery = '';
 			results = [];
+			searchTriggered = false;
 			onSearchChange?.('', []);
 			inputElement?.blur();
 			return;
@@ -252,8 +285,14 @@
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
 			const hasCreate = createPreview !== null;
-			const maxIndex = (hasCreate ? 1 : 0) + results.length - 1;
-			selectedIndex = Math.min(selectedIndex + 1, Math.max(0, maxIndex));
+			// In deferred mode before search: options are create + search
+			if (deferSearch && !searchTriggered) {
+				const maxIndex = hasCreate ? 1 : 0;
+				selectedIndex = Math.min(selectedIndex + 1, maxIndex);
+			} else {
+				const maxIndex = (hasCreate ? 1 : 0) + results.length - 1;
+				selectedIndex = Math.min(selectedIndex + 1, Math.max(0, maxIndex));
+			}
 			return;
 		}
 
@@ -266,6 +305,11 @@
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			if (searchQuery.trim()) {
+				// If search option is selected in deferred mode
+				if (isSearchSelected) {
+					triggerDeferredSearch();
+					return;
+				}
 				// If create option is selected
 				if (isCreateSelected && onCreate) {
 					handleCreate();
@@ -376,7 +420,31 @@
 					</button>
 				{/if}
 
-				{#if loading}
+				<!-- Deferred search option (shown before search is triggered) -->
+				{#if deferSearch && !searchTriggered}
+					<button
+						type="button"
+						class="result-item search-option"
+						class:selected={selectedIndex === searchOptionIndex}
+						onclick={triggerDeferredSearch}
+						onmouseenter={() => (selectedIndex = searchOptionIndex)}
+					>
+						<div class="result-avatar search-avatar">
+							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+								/>
+							</svg>
+						</div>
+						<div class="result-info">
+							<div class="result-name">"{searchQuery}" {searchText.toLowerCase()}</div>
+						</div>
+						<kbd class="create-shortcut">↵</kbd>
+					</button>
+				{:else if loading}
 					<div class="loading-state">
 						<div class="loading-spinner"></div>
 						<span>{searchingText}</span>
@@ -390,7 +458,7 @@
 						<span>Suchergebnisse</span>
 					</div>
 					{#each results as item, index (item.id)}
-						{@const adjustedIndex = createPreview ? index + 1 : index}
+						{@const adjustedIndex = index + (createPreview ? 1 : 0)}
 						<button
 							type="button"
 							class="result-item"
@@ -481,7 +549,7 @@
 				type="text"
 				{placeholder}
 				bind:value={searchQuery}
-				oninput={handleSearch}
+				oninput={handleInput}
 				onkeydown={handleKeydown}
 				onfocus={handleFocus}
 				onblur={handleBlur}
@@ -795,6 +863,20 @@
 	.result-avatar.create-avatar svg {
 		width: 1.25rem;
 		height: 1.25rem;
+	}
+
+	.result-item.search-option:hover,
+	.result-item.search-option.selected {
+		background: hsl(var(--color-primary) / 0.1);
+	}
+
+	.result-avatar.search-avatar {
+		background: hsl(var(--color-muted-foreground) / 0.3);
+	}
+
+	.result-avatar.search-avatar svg {
+		width: 1.125rem;
+		height: 1.125rem;
 	}
 
 	.result-info {
