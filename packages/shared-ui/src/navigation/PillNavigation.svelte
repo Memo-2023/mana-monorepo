@@ -278,6 +278,10 @@
 		ariaLabel?: string;
 		/** Feedback page href (shown in user dropdown). Set to empty string to hide. */
 		feedbackHref?: string;
+		/** Themes page href (shown in user dropdown). Set to empty string to hide. */
+		themesHref?: string;
+		/** Spiral page href (shown in user dropdown). Set to empty string to hide. */
+		spiralHref?: string;
 	}
 
 	let {
@@ -321,6 +325,8 @@
 		onOpenInPanel,
 		ariaLabel,
 		feedbackHref = '/feedback',
+		themesHref,
+		spiralHref,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -838,6 +844,32 @@
 											window.location.href = feedbackHref;
 										},
 										active: currentPath === feedbackHref,
+									},
+								]
+							: []),
+						...(themesHref
+							? [
+									{
+										id: 'themes',
+										label: 'Themes',
+										icon: 'palette',
+										onClick: () => {
+											window.location.href = themesHref;
+										},
+										active: currentPath === themesHref,
+									},
+								]
+							: []),
+						...(spiralHref
+							? [
+									{
+										id: 'spiral',
+										label: 'Spiral',
+										icon: 'sparkles',
+										onClick: () => {
+											window.location.href = spiralHref;
+										},
+										active: currentPath === spiralHref,
 									},
 								]
 							: []),

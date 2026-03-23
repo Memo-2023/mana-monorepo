@@ -179,7 +179,6 @@
 			onClick: handleFilterToggle,
 			active: isFilterStripVisible,
 		},
-		{ href: '/spiral', label: 'Spiral', icon: 'spiral' },
 		{ href: '/tags', label: 'Tags', icon: 'tag' },
 	]);
 
@@ -325,6 +324,8 @@
 					manaHref="/mana"
 					profileHref="/profile"
 					allAppsHref="/apps"
+					themesHref="/themes"
+					spiralHref="/spiral"
 					onOpenInPanel={handleOpenInPanel}
 					ariaLabel="Hauptnavigation"
 				/>
