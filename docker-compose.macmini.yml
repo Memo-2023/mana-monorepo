@@ -156,6 +156,7 @@ services:
       CLOCK_BACKEND_URL: http://clock-backend:3033
       STORAGE_BACKEND_URL: http://storage-backend:3035
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      MANA_LLM_URL: http://mana-llm:3025
     volumes:
       - analytics_data:/data/analytics
     ports:
@@ -318,14 +319,10 @@ services:
       PORT: 3030
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/chat
       MANA_CORE_AUTH_URL: http://mana-auth:3001
-      OLLAMA_URL: http://host.docker.internal:11434
-      OLLAMA_TIMEOUT: 120000
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      MANA_LLM_URL: http://mana-llm:3025
+      LLM_TIMEOUT: 120000
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
-      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
-      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
-      AZURE_OPENAI_API_VERSION: 2024-12-01-preview
       CORS_ORIGINS: https://chat.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       GLITCHTIP_DSN: https://7ffb55d23705497989dbabd486a42014@glitchtip.mana.how/4
@@ -542,7 +539,7 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      MANA_LLM_URL: http://mana-llm:3025
       CORS_ORIGINS: https://nutriphi.mana.how,https://mana.how
       GLITCHTIP_DSN: https://61b5689b903746b698bd1f77ae9e0be1@glitchtip.mana.how/11
     ports:
@@ -700,7 +697,7 @@ services:
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://planta.mana.how,https://mana.how
-      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY}
+      MANA_LLM_URL: http://mana-llm:3025
       S3_ENDPOINT: http://minio:9000
       S3_PUBLIC_ENDPOINT: https://minio.mana.how
       S3_REGION: us-east-1
@@ -951,8 +948,7 @@ services:
       S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       S3_BUCKET: project-doc-bot
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: gpt-4o-mini
+      MANA_LLM_URL: http://mana-llm:3025
     volumes:
       - matrix_bots_data:/app/data
     ports:

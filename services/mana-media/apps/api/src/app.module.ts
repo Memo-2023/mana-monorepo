@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
-import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { DatabaseModule } from './db/database.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { StorageModule } from './modules/storage/storage.module';
@@ -9,15 +8,12 @@ import { ProcessModule } from './modules/process/process.module';
 import { DeliveryModule } from './modules/delivery/delivery.module';
 import { MatrixModule } from './modules/matrix/matrix.module';
 import { HealthController } from './health.controller';
+import { MetricsController } from './metrics.controller';
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
-		}),
-		MetricsModule.register({
-			prefix: 'media_',
-			excludePaths: ['/health'],
 		}),
 		BullModule.forRoot({
 			connection: {
@@ -33,6 +29,6 @@ import { HealthController } from './health.controller';
 		DeliveryModule,
 		MatrixModule,
 	],
-	controllers: [HealthController],
+	controllers: [HealthController, MetricsController],
 })
 export class AppModule {}

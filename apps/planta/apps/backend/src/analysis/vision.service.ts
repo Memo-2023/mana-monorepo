@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { AnalysisResult } from '@planta/shared';
 
 const PLANT_ANALYSIS_PROMPT = `Du bist ein erfahrener Botaniker und Pflanzenexperte. Analysiere dieses Pflanzenfoto und erstelle einen detaillierten Steckbrief.
@@ -44,36 +43,48 @@ Falls du die Pflanze nicht identifizieren kannst, setze confidence auf 0 und sci
 @Injectable()
 export class VisionService {
 	private readonly logger = new Logger(VisionService.name);
-	private genAI: GoogleGenerativeAI | null = null;
+	private readonly manaLlmUrl: string;
+	private readonly visionModel = 'ollama/llava:7b';
 
 	constructor(private configService: ConfigService) {
-		const apiKey = this.configService.get<string>('GOOGLE_GEMINI_API_KEY');
-		if (apiKey) {
-			this.genAI = new GoogleGenerativeAI(apiKey);
-			this.logger.log('Gemini Vision AI initialized');
-		} else {
-			this.logger.warn('GOOGLE_GEMINI_API_KEY not configured - Vision analysis disabled');
-		}
+		this.manaLlmUrl = this.configService.get<string>('MANA_LLM_URL') || 'http://localhost:3025';
+		this.logger.log(`Planta Vision using mana-llm at ${this.manaLlmUrl}`);
 	}
 
 	async analyzePlantImage(imageBuffer: Buffer, mimeType: string): Promise<AnalysisResult | null> {
-		if (!this.genAI) {
-			this.logger.error('Gemini AI not configured');
-			return null;
-		}
-
 		try {
-			const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+			const base64 = imageBuffer.toString('base64');
 
-			const imagePart = {
-				inlineData: {
-					data: imageBuffer.toString('base64'),
-					mimeType: mimeType,
-				},
-			};
+			const result = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					model: this.visionModel,
+					messages: [
+						{
+							role: 'user',
+							content: [
+								{ type: 'text', text: PLANT_ANALYSIS_PROMPT },
+								{
+									type: 'image_url',
+									image_url: { url: `data:${mimeType};base64,${base64}` },
+								},
+							],
+						},
+					],
+					temperature: 0.3,
+				}),
+				signal: AbortSignal.timeout(120000),
+			});
 
-			const result = await model.generateContent([PLANT_ANALYSIS_PROMPT, imagePart]);
-			const response = result.response.text().trim();
+			if (!result.ok) {
+				const errorText = await result.text();
+				this.logger.error(`mana-llm vision error: ${result.status} - ${errorText}`);
+				return null;
+			}
+
+			const data = await result.json();
+			const response = (data.choices?.[0]?.message?.content || '').trim();
 
 			this.logger.debug(`Gemini raw response: ${response}`);
 

@@ -1,6 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import OpenAI from 'openai';
 import { eq, desc } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import { generations, projectItems, projects } from '../database/schema';
@@ -13,25 +12,18 @@ type Database = PostgresJsDatabase<typeof schema>;
 @Injectable()
 export class GenerationService {
 	private readonly logger = new Logger(GenerationService.name);
-	private readonly openai: OpenAI;
+	private readonly manaLlmUrl: string;
 	private readonly model: string;
 
 	constructor(
 		@Inject(DATABASE_CONNECTION) private db: Database,
 		private configService: ConfigService
 	) {
-		this.openai = new OpenAI({
-			apiKey: this.configService.get<string>('openai.apiKey'),
-		});
-		this.model = this.configService.get<string>('openai.model') || 'gpt-4o-mini';
+		this.manaLlmUrl = this.configService.get<string>('MANA_LLM_URL') || 'http://localhost:3025';
+		this.model = this.configService.get<string>('openai.model') || 'ollama/gemma3:4b';
 	}
 
 	async generateBlogpost(projectId: string, style: keyof typeof BLOG_STYLES): Promise<string> {
-		const apiKey = this.configService.get<string>('openai.apiKey');
-		if (!apiKey) {
-			throw new Error('OpenAI API key not configured');
-		}
-
 		// Get project info
 		const [project] = await this.db.select().from(projects).where(eq(projects.id, projectId));
 		if (!project) {
@@ -46,7 +38,9 @@ export class GenerationService {
 			.orderBy(projectItems.createdAt);
 
 		if (items.length === 0) {
-			throw new Error('Keine Inhalte im Projekt. Füge zuerst Fotos, Sprachnotizen oder Text hinzu.');
+			throw new Error(
+				'Keine Inhalte im Projekt. Füge zuerst Fotos, Sprachnotizen oder Text hinzu.'
+			);
 		}
 
 		// Build content summary
@@ -76,17 +70,29 @@ Erstellt am: ${project.createdAt.toLocaleDateString('de-DE')}
 
 Die folgenden Inhalte wurden während des Projekts gesammelt:`;
 
-		const response = await this.openai.chat.completions.create({
-			model: this.model,
-			messages: [
-				{ role: 'system', content: systemPrompt },
-				{ role: 'user', content: contentSummary },
-			],
-			temperature: 0.7,
-			max_tokens: 2000,
+		const response = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				model: this.model,
+				messages: [
+					{ role: 'system', content: systemPrompt },
+					{ role: 'user', content: contentSummary },
+				],
+				temperature: 0.7,
+				max_tokens: 2000,
+			}),
+			signal: AbortSignal.timeout(120000),
 		});
 
-		const content = response.choices[0]?.message?.content || '';
+		if (!response.ok) {
+			const errorText = await response.text();
+			this.logger.error(`mana-llm error: ${response.status} - ${errorText}`);
+			throw new Error(`LLM generation failed: ${response.status}`);
+		}
+
+		const data = await response.json();
+		const content = data.choices?.[0]?.message?.content || '';
 
 		// Save generation
 		await this.db.insert(generations).values({

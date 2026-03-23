@@ -8,7 +8,6 @@ import {
 	CreditOperationType,
 	CREDIT_COSTS,
 } from '@manacore/nestjs-integration';
-import OpenAI from 'openai';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { models } from '../db/schema/models.schema';
@@ -20,31 +19,13 @@ import { OllamaService } from './ollama.service';
 @Injectable()
 export class ChatService {
 	private readonly logger = new Logger(ChatService.name);
-	// OpenRouter config (cloud provider)
-	private readonly openRouterClient: OpenAI | null = null;
 
 	constructor(
 		private configService: ConfigService,
 		@Inject(DATABASE_CONNECTION) private readonly db: Database,
 		private readonly ollamaService: OllamaService,
 		private readonly creditClient: CreditClientService
-	) {
-		// OpenRouter setup (cloud provider)
-		const openRouterApiKey = this.configService.get<string>('OPENROUTER_API_KEY');
-		if (openRouterApiKey) {
-			this.openRouterClient = new OpenAI({
-				baseURL: 'https://openrouter.ai/api/v1',
-				apiKey: openRouterApiKey,
-				defaultHeaders: {
-					'HTTP-Referer': this.configService.get<string>('APP_URL') || 'http://localhost:3002',
-					'X-Title': 'Mana Chat',
-				},
-			});
-			this.logger.log('OpenRouter client initialized');
-		} else {
-			this.logger.warn('OPENROUTER_API_KEY not set - only local Ollama models will work');
-		}
-	}
+	) {}
 
 	async getAvailableModels(): Promise<Model[]> {
 		try {
@@ -209,57 +190,28 @@ export class ChatService {
 		model: Model,
 		dto: ChatCompletionDto
 	): AsyncResult<ChatCompletionResponseDto> {
-		if (!this.openRouterClient) {
-			return err(ServiceError.externalError('OpenRouter', 'OpenRouter client not configured'));
-		}
-
 		const params = model.parameters as {
 			model?: string;
 			temperature?: number;
 			max_tokens?: number;
 		} | null;
 
+		// Route through mana-llm with openrouter/ prefix
 		const modelName = params?.model || 'meta-llama/llama-3.1-8b-instruct';
+		const prefixedModel = modelName.includes('/') ? `openrouter/${modelName}` : modelName;
 		const temperature = dto.temperature ?? params?.temperature ?? 0.7;
 		const maxTokens = dto.maxTokens ?? params?.max_tokens ?? 4096;
 
-		this.logger.log(`Sending request to OpenRouter model: ${modelName}`);
+		this.logger.log(`Sending request to mana-llm (OpenRouter): ${prefixedModel}`);
 
-		try {
-			const response = await this.openRouterClient.chat.completions.create({
-				model: modelName,
-				messages: dto.messages.map((msg) => ({
-					role: msg.role as 'system' | 'user' | 'assistant',
-					content: msg.content,
-				})),
-				temperature,
-				max_tokens: maxTokens,
-			});
-
-			const messageContent = response.choices?.[0]?.message?.content;
-
-			if (!messageContent) {
-				this.logger.warn('No message content in OpenRouter response');
-				return err(ServiceError.generationFailed('OpenRouter', 'No response generated'));
-			}
-
-			return ok({
-				content: messageContent,
-				usage: {
-					prompt_tokens: response.usage?.prompt_tokens || 0,
-					completion_tokens: response.usage?.completion_tokens || 0,
-					total_tokens: response.usage?.total_tokens || 0,
-				},
-			});
-		} catch (error) {
-			this.logger.error('Error calling OpenRouter API', error);
-			return err(
-				ServiceError.generationFailed(
-					'OpenRouter',
-					error instanceof Error ? error.message : 'Unknown error',
-					error instanceof Error ? error : undefined
-				)
-			);
-		}
+		return this.ollamaService.createChatCompletion(
+			prefixedModel,
+			dto.messages.map((msg) => ({
+				role: msg.role as 'system' | 'user' | 'assistant',
+				content: msg.content,
+			})),
+			temperature,
+			maxTokens
+		);
 	}
 }

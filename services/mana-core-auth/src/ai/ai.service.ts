@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export interface FeedbackAnalysis {
 	title: string;
@@ -10,26 +9,25 @@ export interface FeedbackAnalysis {
 @Injectable()
 export class AiService {
 	private readonly logger = new Logger(AiService.name);
-	private genAI: GoogleGenerativeAI | null = null;
+	private readonly manaLlmUrl: string | null = null;
 
 	constructor(private configService: ConfigService) {
-		const apiKey = this.configService.get<string>('ai.geminiApiKey');
-		if (apiKey) {
-			this.genAI = new GoogleGenerativeAI(apiKey);
+		const url = this.configService.get<string>('MANA_LLM_URL');
+		if (url) {
+			this.manaLlmUrl = url;
+			this.logger.log(`AI service using mana-llm at ${url}`);
 		} else {
-			this.logger.warn('GOOGLE_GENAI_API_KEY not configured - AI features disabled');
+			this.logger.warn('MANA_LLM_URL not configured - AI features disabled');
 		}
 	}
 
 	async analyzeFeedback(feedbackText: string): Promise<FeedbackAnalysis> {
 		// Fallback if AI not available
-		if (!this.genAI) {
+		if (!this.manaLlmUrl) {
 			return this.fallbackAnalysis(feedbackText);
 		}
 
 		try {
-			const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-
 			const prompt = `Analysiere dieses User-Feedback und generiere:
 1. Einen kurzen, prägnanten deutschen Titel (max 60 Zeichen) der den Kern des Feedbacks zusammenfasst
 2. Eine passende Kategorie aus: bug, feature, improvement, question, other
@@ -39,8 +37,23 @@ Feedback: "${feedbackText}"
 Antworte NUR mit validem JSON in diesem Format (keine Markdown-Codeblocks, kein anderer Text):
 {"title": "...", "category": "..."}`;
 
-			const result = await model.generateContent(prompt);
-			const response = result.response.text().trim();
+			const result = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					model: 'ollama/gemma3:4b',
+					messages: [{ role: 'user', content: prompt }],
+					temperature: 0.3,
+				}),
+				signal: AbortSignal.timeout(30000),
+			});
+
+			if (!result.ok) {
+				throw new Error(`mana-llm error: ${result.status}`);
+			}
+
+			const data = await result.json();
+			const response = (data.choices?.[0]?.message?.content || '').trim();
 
 			// Parse JSON response - handle potential markdown code blocks
 			let jsonStr = response;

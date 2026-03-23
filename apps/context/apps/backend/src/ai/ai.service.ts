@@ -1,8 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TokenService } from '../token/token.service';
-
-type AIProvider = 'azure' | 'google';
 
 interface GenerateOptions {
 	prompt: string;
@@ -18,21 +16,20 @@ function estimateTokens(text: string): number {
 	return Math.ceil(text.length / 4);
 }
 
-function getProvider(model: string): AIProvider {
-	if (model.startsWith('gpt')) return 'azure';
-	return 'google';
-}
-
 @Injectable()
 export class AiService {
+	private readonly logger = new Logger(AiService.name);
+	private readonly manaLlmUrl: string;
+
 	constructor(
 		private configService: ConfigService,
 		private tokenService: TokenService
-	) {}
+	) {
+		this.manaLlmUrl = this.configService.get<string>('MANA_LLM_URL') || 'http://localhost:3025';
+	}
 
 	async generate(userId: string, options: GenerateOptions) {
-		const model = options.model || 'gpt-4.1';
-		const provider = getProvider(model);
+		const model = options.model || 'ollama/gemma3:4b';
 
 		// Build full prompt with referenced documents
 		let fullPrompt = options.prompt;
@@ -53,13 +50,8 @@ export class AiService {
 			throw new BadRequestException('Nicht genügend Tokens. Bitte kaufe weitere Tokens.');
 		}
 
-		// Generate text
-		let completionText: string;
-		if (provider === 'azure') {
-			completionText = await this.generateWithAzure(fullPrompt, options);
-		} else {
-			completionText = await this.generateWithGoogle(fullPrompt, { ...options, model });
-		}
+		// Generate text via mana-llm
+		const completionText = await this.generateWithManaLlm(fullPrompt, options, model);
 
 		// Calculate actual cost and log
 		const actualPromptTokens = estimateTokens(fullPrompt);
@@ -93,7 +85,7 @@ export class AiService {
 			referencedDocuments?: { title: string; content: string }[];
 		}
 	) {
-		const model = options.model || 'gpt-4.1';
+		const model = options.model || 'ollama/gemma3:4b';
 
 		let totalInputTokens = estimateTokens(options.prompt);
 
@@ -119,66 +111,33 @@ export class AiService {
 		};
 	}
 
-	private async generateWithAzure(prompt: string, options: GenerateOptions): Promise<string> {
-		const apiKey = this.configService.get<string>('AZURE_OPENAI_API_KEY', '');
-		const endpoint = this.configService.get<string>(
-			'AZURE_OPENAI_ENDPOINT',
-			'https://memoroseopenai.openai.azure.com/'
-		);
-		const deployment = 'gpt-4.1';
-		const apiVersion = '2025-01-01-preview';
-
-		const response = await fetch(
-			`${endpoint}openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'api-key': apiKey,
-				},
-				body: JSON.stringify({
-					messages: [
-						{ role: 'system', content: 'You are a helpful assistant.' },
-						{ role: 'user', content: prompt },
-					],
-					temperature: options.temperature || 0.7,
-					max_tokens: options.maxTokens || 2000,
-				}),
-			}
-		);
+	private async generateWithManaLlm(
+		prompt: string,
+		options: GenerateOptions,
+		model: string
+	): Promise<string> {
+		const response = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				model,
+				messages: [
+					{ role: 'system', content: 'You are a helpful assistant.' },
+					{ role: 'user', content: prompt },
+				],
+				temperature: options.temperature || 0.7,
+				max_tokens: options.maxTokens || 2000,
+			}),
+			signal: AbortSignal.timeout(120000),
+		});
 
 		if (!response.ok) {
-			throw new BadRequestException(`Azure OpenAI error: ${response.statusText}`);
+			const errorText = await response.text();
+			this.logger.error(`mana-llm error: ${response.status} - ${errorText}`);
+			throw new BadRequestException(`LLM generation failed: ${response.status}`);
 		}
 
 		const data = await response.json();
 		return data.choices?.[0]?.message?.content || '';
-	}
-
-	private async generateWithGoogle(prompt: string, options: GenerateOptions): Promise<string> {
-		const apiKey = this.configService.get<string>('GOOGLE_API_KEY', '');
-		const model = options.model || 'gemini-pro';
-
-		const response = await fetch(
-			`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-			{
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					contents: [{ parts: [{ text: prompt }] }],
-					generationConfig: {
-						temperature: options.temperature || 0.7,
-						maxOutputTokens: options.maxTokens || 2000,
-					},
-				}),
-			}
-		);
-
-		if (!response.ok) {
-			throw new BadRequestException(`Google AI error: ${response.statusText}`);
-		}
-
-		const data = await response.json();
-		return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 	}
 }

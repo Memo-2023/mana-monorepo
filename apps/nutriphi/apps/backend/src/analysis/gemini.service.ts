@@ -1,6 +1,5 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai';
 import type { AIAnalysisResult } from '../types/nutrition.types';
 
 const ANALYSIS_PROMPT = `Du bist ein Ernährungsexperte. Analysiere das Bild dieser Mahlzeit und liefere eine detaillierte Nährwertanalyse.
@@ -77,36 +76,53 @@ Antworte NUR mit einem validen JSON-Objekt im folgenden Format:
 
 @Injectable()
 export class GeminiService implements OnModuleInit {
-	private model: GenerativeModel | null = null;
+	private readonly logger = new Logger(GeminiService.name);
+	private manaLlmUrl: string | null = null;
+	private readonly visionModel = 'ollama/llava:7b';
+	private readonly textModel = 'ollama/gemma3:4b';
 
 	constructor(private configService: ConfigService) {}
 
 	onModuleInit() {
-		const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-		if (apiKey) {
-			const genAI = new GoogleGenerativeAI(apiKey);
-			// Use Gemini 2.5 Flash - fast and cost-effective
-			this.model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-		}
+		this.manaLlmUrl = this.configService.get<string>('MANA_LLM_URL') || 'http://localhost:3025';
+		this.logger.log(`NutriPhi AI using mana-llm at ${this.manaLlmUrl}`);
 	}
 
 	async analyzeImage(imageBase64: string, mimeType = 'image/jpeg'): Promise<AIAnalysisResult> {
-		if (!this.model) {
-			throw new Error('Gemini API not configured');
+		if (!this.manaLlmUrl) {
+			throw new Error('mana-llm not configured');
 		}
 
-		const result = await this.model.generateContent([
-			ANALYSIS_PROMPT,
-			{
-				inlineData: {
-					mimeType,
-					data: imageBase64,
-				},
-			},
-		]);
+		const response = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				model: this.visionModel,
+				messages: [
+					{
+						role: 'user',
+						content: [
+							{ type: 'text', text: ANALYSIS_PROMPT },
+							{
+								type: 'image_url',
+								image_url: { url: `data:${mimeType};base64,${imageBase64}` },
+							},
+						],
+					},
+				],
+				temperature: 0.3,
+			}),
+			signal: AbortSignal.timeout(120000),
+		});
 
-		const response = result.response;
-		const text = response.text();
+		if (!response.ok) {
+			const errorText = await response.text();
+			this.logger.error(`mana-llm vision error: ${response.status} - ${errorText}`);
+			throw new Error('Failed to analyze image');
+		}
+
+		const data = await response.json();
+		const text = data.choices?.[0]?.message?.content || '';
 
 		// Extract JSON from response
 		const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -118,15 +134,29 @@ export class GeminiService implements OnModuleInit {
 	}
 
 	async analyzeText(description: string): Promise<AIAnalysisResult> {
-		if (!this.model) {
-			throw new Error('Gemini API not configured');
+		if (!this.manaLlmUrl) {
+			throw new Error('mana-llm not configured');
 		}
 
 		const prompt = TEXT_ANALYSIS_PROMPT.replace('{INPUT}', description);
-		const result = await this.model.generateContent(prompt);
 
-		const response = result.response;
-		const text = response.text();
+		const response = await fetch(`${this.manaLlmUrl}/v1/chat/completions`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				model: this.textModel,
+				messages: [{ role: 'user', content: prompt }],
+				temperature: 0.3,
+			}),
+			signal: AbortSignal.timeout(60000),
+		});
+
+		if (!response.ok) {
+			throw new Error(`mana-llm error: ${response.status}`);
+		}
+
+		const data = await response.json();
+		const text = data.choices?.[0]?.message?.content || '';
 
 		// Extract JSON from response
 		const jsonMatch = text.match(/\{[\s\S]*\}/);
