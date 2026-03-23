@@ -6,9 +6,8 @@
 apps/presi/
 ├── apps/
 │   ├── backend/      # NestJS API server (@presi/backend)
-│   ├── mobile/       # Expo/React Native mobile app (@presi/mobile)
 │   ├── web/          # SvelteKit web application (@presi/web)
-│   └── landing/      # Astro marketing landing page (@presi/landing) - TODO
+│   └── landing/      # Astro marketing landing page (@presi/landing)
 ├── packages/
 │   └── shared/       # Shared types and utils (@presi/shared)
 └── package.json
@@ -20,21 +19,12 @@ apps/presi/
 
 ```bash
 pnpm presi:dev                   # Run all presi apps
-pnpm dev:presi:mobile            # Start mobile app
 pnpm dev:presi:web               # Start web app (port 5178)
 pnpm dev:presi:backend           # Start backend server
 pnpm dev:presi:app               # Start web + backend together
 pnpm presi:db:push               # Push schema to database
 pnpm presi:db:studio             # Open Drizzle Studio
 pnpm presi:db:seed               # Seed database with sample data
-```
-
-### Mobile App (apps/presi/apps/mobile)
-
-```bash
-pnpm dev                         # Start Expo dev server
-pnpm ios                         # Run on iOS simulator
-pnpm android                     # Run on Android emulator
 ```
 
 ### Web App (apps/presi/apps/web)
@@ -59,7 +49,6 @@ pnpm db:seed                     # Seed database
 
 ## Technology Stack
 
-- **Mobile**: React Native 0.76 + Expo SDK 52, Expo Router, Zustand
 - **Web**: SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS
 - **Backend**: NestJS 10, Drizzle ORM, PostgreSQL
 - **Types**: TypeScript 5.x
@@ -143,13 +132,6 @@ MANA_CORE_AUTH_URL=http://localhost:3001
 CORS_ORIGINS=http://localhost:5173,http://localhost:8081
 ```
 
-#### Mobile (.env)
-
-```
-EXPO_PUBLIC_BACKEND_URL=http://localhost:3008
-EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
-```
-
 #### Web (.env)
 
 ```
@@ -178,15 +160,14 @@ Located at `packages/shared/`
 ## Code Style Guidelines
 
 - **TypeScript**: Strict typing with interfaces
-- **Mobile**: Functional components with hooks, Zustand for state
 - **Web**: Svelte 5 runes mode (`$state`, `$derived`, `$effect`)
 - **Backend**: NestJS modules with controllers and services
-- **Styling**: Tailwind CSS (Web), NativeWind (Mobile)
+- **Styling**: Tailwind CSS
 - **Formatting**: Prettier with project config
 
 ## Web App Features
 
-The SvelteKit web app provides feature parity with the mobile app:
+The SvelteKit web app provides the main user interface:
 
 - **Authentication**: Login/Register/Forgot Password with Mana Core Auth
 - **Deck Management**: Create, edit, delete presentation decks
@@ -229,4 +210,4 @@ src/
 1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
 2. **Database**: PostgreSQL with Drizzle ORM
 3. **Ports**: Backend=3008, Web=5178
-4. **Landing**: Not yet implemented (empty folder)
+4. **Landing**: Deployed on Cloudflare Pages

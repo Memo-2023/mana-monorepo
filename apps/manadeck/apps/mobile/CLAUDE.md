@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Manadeck is a React Native/Expo application using Expo Router for navigation, TypeScript for type safety, NativeWind (Tailwind CSS) for styling, and Supabase for backend services. The app uses Zustand for state management and is configured for cross-platform development (iOS, Android, and Web).
+Manadeck is a React Native/Expo application using Expo Router for navigation, TypeScript for type safety, NativeWind (Tailwind CSS) for styling, and Mana Core Auth for authentication. The app uses Zustand for state management and connects to the NestJS backend (port 3009).
 
 ## Essential Commands
 
@@ -43,7 +43,8 @@ npm run format           # Auto-fix ESLint and format with Prettier
   - `modal.tsx`: Modal screens
 - **components/**: Reusable UI components
 - **store/**: Zustand state management stores
-- **utils/**: Utility functions (e.g., Supabase client)
+- **services/**: Auth service, API client
+- **utils/**: Utility functions
 - **assets/**: Static assets (images, icons)
 
 ### Navigation Pattern
@@ -66,11 +67,17 @@ Uses Expo Router v5 with file-based routing:
 - Create typed stores with actions and selectors
 - Access via hooks (e.g., `useStore`)
 
+### Authentication
+
+- Mana Core Auth via `@manacore/shared-auth` in `services/authService.ts`
+- Zustand auth store in `store/authStore.ts`
+- Tokens stored in Expo SecureStore (encrypted)
+- Supports email/password, Google, and Apple sign-in
+
 ### Backend Integration
 
-- Supabase client configured in `utils/supabase.ts`
-- Uses AsyncStorage for session persistence
-- Environment variables: `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+- NestJS backend at port 3009 (`@mana-core/nestjs-integration`)
+- Environment variable: `EXPO_PUBLIC_MANA_CORE_AUTH_URL`
 
 ### TypeScript Configuration
 
@@ -98,15 +105,6 @@ For new screens:
 3. Configure navigation options if needed
 4. Import and use existing UI components
 
-### Supabase Integration
-
-When working with Supabase:
-
-1. Import client from `utils/supabase.ts`
-2. Handle authentication state with AsyncStorage
-3. Use environment variables for configuration
-4. Follow RLS (Row Level Security) best practices
-
 ### Code Style
 
 - ESLint configured with Expo preset
@@ -121,8 +119,8 @@ When working with Supabase:
 Create a `.env` or `.env.local` file:
 
 ```
-EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
+EXPO_PUBLIC_BACKEND_URL=http://localhost:3009
 ```
 
 ### EAS Configuration

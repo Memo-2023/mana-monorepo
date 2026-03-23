@@ -299,15 +299,6 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Presi Mobile (Expo)
-	{
-		path: 'apps/presi/apps/mobile/.env',
-		vars: {
-			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.PRESI_BACKEND_PORT || '3008'}`,
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-		},
-	},
-
 	// Presi Web (SvelteKit)
 	{
 		path: 'apps/presi/apps/web/.env',
