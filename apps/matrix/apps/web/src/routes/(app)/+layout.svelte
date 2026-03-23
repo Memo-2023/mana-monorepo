@@ -27,6 +27,7 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 
 	const AUTH_URL = import.meta.env.VITE_MANA_AUTH_URL || 'https://auth.mana.how';
+	const MATRIX_HOMESERVER = import.meta.env.VITE_MATRIX_HOMESERVER || 'matrix.mana.how';
 
 	/**
 	 * Exchange session cookie for JWT token from mana-core-auth
@@ -185,7 +186,7 @@
 
 		if (loginToken) {
 			// Exchange loginToken for Matrix credentials
-			const result = await loginWithLoginToken('matrix.mana.how', loginToken);
+			const result = await loginWithLoginToken(MATRIX_HOMESERVER, loginToken);
 
 			if (result.success && result.credentials) {
 				// Remove loginToken from URL to prevent re-processing on refresh

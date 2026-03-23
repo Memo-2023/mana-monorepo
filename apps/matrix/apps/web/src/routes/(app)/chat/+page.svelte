@@ -12,7 +12,7 @@
 	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
 	import ForwardMessageDialog from '$lib/components/chat/ForwardMessageDialog.svelte';
 	import { CallView, IncomingCallDialog } from '$lib/components/call';
-	import { ChatCircle, Plus, Gear } from '@manacore/shared-icons';
+	import { ChatCircle, Plus, Gear, ShieldWarning } from '@manacore/shared-icons';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -218,6 +218,15 @@
 			</div>
 		</div>
 
+		{#if !matrixStore.cryptoReady}
+			<div
+				class="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs"
+			>
+				<ShieldWarning class="h-3.5 w-3.5 shrink-0" />
+				<span>Verschlüsselung nicht verfügbar</span>
+			</div>
+		{/if}
+
 		<!-- Room List -->
 		<div class="flex-1 min-h-0 overflow-hidden">
 			<RoomList onCreateRoom={() => (showCreateRoom = true)} onSelectRoom={handleSelectRoom} />
@@ -261,6 +270,15 @@
 					{/if}
 				</p>
 			</div>
+
+			{#if !matrixStore.cryptoReady}
+				<div
+					class="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border-b border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs"
+				>
+					<ShieldWarning class="h-3.5 w-3.5 shrink-0" />
+					<span>Verschlüsselung nicht verfügbar</span>
+				</div>
+			{/if}
 
 			<!-- Room List -->
 			<div class="flex-1 min-h-0 overflow-hidden">
