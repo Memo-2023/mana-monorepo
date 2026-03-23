@@ -32,6 +32,24 @@ function getClient() {
 }
 
 /**
+ * Label entity from Todo backend
+ */
+export interface Label {
+	id: string;
+	name: string;
+	color: string;
+}
+
+/**
+ * Subtask entity from Todo backend
+ */
+export interface Subtask {
+	id: string;
+	title: string;
+	isCompleted: boolean;
+}
+
+/**
  * Task entity from Todo backend
  */
 export interface Task {
@@ -44,7 +62,8 @@ export interface Task {
 	dueTime?: string;
 	isCompleted: boolean;
 	status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-	labelIds: string[];
+	labels?: Label[];
+	subtasks?: Subtask[] | null;
 	createdAt: string;
 	updatedAt: string;
 }
