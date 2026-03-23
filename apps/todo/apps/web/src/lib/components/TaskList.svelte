@@ -3,6 +3,100 @@
 	import type { Task, UpdateTaskInput } from '@todo/shared';
 	import TaskItem from './TaskItem.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
+	import { projectsStore } from '$lib/stores/projects.svelte';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+
+	// Context menu state
+	let contextMenuVisible = $state(false);
+	let contextMenuX = $state(0);
+	let contextMenuY = $state(0);
+	let contextMenuTask = $state<Task | null>(null);
+
+	function handleContextMenu(e: MouseEvent, task: Task) {
+		e.preventDefault();
+		e.stopPropagation();
+		contextMenuX = e.clientX;
+		contextMenuY = e.clientY;
+		contextMenuTask = task;
+		contextMenuVisible = true;
+	}
+
+	function getContextMenuItems(): ContextMenuItem[] {
+		if (!contextMenuTask) return [];
+		const task = contextMenuTask;
+
+		const items: ContextMenuItem[] = [
+			{
+				id: 'edit',
+				label: 'Bearbeiten',
+				action: () => handleExpandTask(task.id),
+			},
+			{
+				id: 'toggle-complete',
+				label: task.isCompleted ? 'Als offen markieren' : 'Als erledigt markieren',
+				action: () => handleToggleComplete(task),
+			},
+			{ id: 'divider-1', label: '', type: 'divider' },
+			{
+				id: 'priority-low',
+				label: 'Niedrig',
+				action: () => handleSetPriority(task.id, 'low'),
+				disabled: task.priority === 'low',
+			},
+			{
+				id: 'priority-medium',
+				label: 'Mittel',
+				action: () => handleSetPriority(task.id, 'medium'),
+				disabled: task.priority === 'medium',
+			},
+			{
+				id: 'priority-high',
+				label: 'Hoch',
+				action: () => handleSetPriority(task.id, 'high'),
+				disabled: task.priority === 'high',
+			},
+			{
+				id: 'priority-urgent',
+				label: 'Dringend',
+				action: () => handleSetPriority(task.id, 'urgent'),
+				disabled: task.priority === 'urgent',
+			},
+		];
+
+		// Add project move options if there are projects
+		const projects = projectsStore.activeProjects;
+		if (projects.length > 0) {
+			items.push({ id: 'divider-2', label: '', type: 'divider' });
+			items.push({
+				id: 'move-inbox',
+				label: 'In Inbox verschieben',
+				action: () => tasksStore.moveTask(task.id, null),
+				disabled: !task.projectId,
+			});
+			for (const project of projects) {
+				items.push({
+					id: `move-${project.id}`,
+					label: project.name,
+					action: () => tasksStore.moveTask(task.id, project.id),
+					disabled: task.projectId === project.id,
+				});
+			}
+		}
+
+		items.push({ id: 'divider-3', label: '', type: 'divider' });
+		items.push({
+			id: 'delete',
+			label: 'Löschen',
+			variant: 'danger',
+			action: () => handleDelete(task.id),
+		});
+
+		return items;
+	}
+
+	async function handleSetPriority(taskId: string, priority: string) {
+		await tasksStore.updateTask(taskId, { priority: priority as Task['priority'] });
+	}
 
 	interface Props {
 		tasks: Task[];
@@ -152,17 +246,20 @@
 		onfinalize={handleDndFinalize}
 	>
 		{#each items.filter((t) => t.id !== SHADOW_PLACEHOLDER_ITEM_ID) as task (task.id)}
-			<TaskItem
-				{task}
-				{showCompleted}
-				animateComplete={animatingTaskId === task.id}
-				isExpanded={expandedTaskId === task.id}
-				onToggleComplete={() => handleToggleComplete(task)}
-				onDelete={() => handleDelete(task.id)}
-				onExpand={() => handleExpandTask(task.id)}
-				onCollapse={handleCollapseTask}
-				onSave={(data) => handleSaveTask(task.id, data)}
-			/>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div oncontextmenu={(e) => handleContextMenu(e, task)}>
+				<TaskItem
+					{task}
+					{showCompleted}
+					animateComplete={animatingTaskId === task.id}
+					isExpanded={expandedTaskId === task.id}
+					onToggleComplete={() => handleToggleComplete(task)}
+					onDelete={() => handleDelete(task.id)}
+					onExpand={() => handleExpandTask(task.id)}
+					onCollapse={handleCollapseTask}
+					onSave={(data) => handleSaveTask(task.id, data)}
+				/>
+			</div>
 		{/each}
 		{#if items.length === 0}
 			<div class="empty-placeholder">
@@ -173,20 +270,34 @@
 {:else}
 	<div class="task-list">
 		{#each tasks as task (task.id)}
-			<TaskItem
-				{task}
-				{showCompleted}
-				animateComplete={animatingTaskId === task.id}
-				isExpanded={expandedTaskId === task.id}
-				onToggleComplete={() => handleToggleComplete(task)}
-				onDelete={() => handleDelete(task.id)}
-				onExpand={() => handleExpandTask(task.id)}
-				onCollapse={handleCollapseTask}
-				onSave={(data) => handleSaveTask(task.id, data)}
-			/>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div oncontextmenu={(e) => handleContextMenu(e, task)}>
+				<TaskItem
+					{task}
+					{showCompleted}
+					animateComplete={animatingTaskId === task.id}
+					isExpanded={expandedTaskId === task.id}
+					onToggleComplete={() => handleToggleComplete(task)}
+					onDelete={() => handleDelete(task.id)}
+					onExpand={() => handleExpandTask(task.id)}
+					onCollapse={handleCollapseTask}
+					onSave={(data) => handleSaveTask(task.id, data)}
+				/>
+			</div>
 		{/each}
 	</div>
 {/if}
+
+<ContextMenu
+	visible={contextMenuVisible}
+	x={contextMenuX}
+	y={contextMenuY}
+	items={getContextMenuItems()}
+	onClose={() => {
+		contextMenuVisible = false;
+		contextMenuTask = null;
+	}}
+/>
 
 <style>
 	.task-list {
