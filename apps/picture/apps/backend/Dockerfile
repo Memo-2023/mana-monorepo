@@ -20,6 +20,7 @@ COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY packages/shared-errors ./packages/shared-errors
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
+COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
 COPY packages/shared-storage ./packages/shared-storage
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
@@ -39,6 +40,9 @@ WORKDIR /app/packages/shared-nestjs-auth
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-health
+RUN pnpm build
+
+WORKDIR /app/packages/shared-nestjs-metrics
 RUN pnpm build
 
 WORKDIR /app/packages/shared-storage
