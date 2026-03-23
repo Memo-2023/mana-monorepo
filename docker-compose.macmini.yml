@@ -726,7 +726,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3025
+      PORT: 3041
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/citycorners
       DB_HOST: postgres
       DB_PORT: 5432
@@ -734,10 +734,11 @@ services:
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://citycorners.mana.how,https://mana.how
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      SEED_ON_START: "true"
     ports:
-      - "3025:3025"
+      - "3041:3041"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3025/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3041/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1641,7 +1642,7 @@ services:
       context: .
       dockerfile: apps/citycorners/apps/web/Dockerfile
       args:
-        PUBLIC_BACKEND_URL: http://citycorners-backend:3025
+        PUBLIC_BACKEND_URL: http://citycorners-backend:3041
         PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
     image: citycorners-web:local
     container_name: mana-app-citycorners-web
@@ -1652,7 +1653,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5022
-      PUBLIC_BACKEND_URL: http://citycorners-backend:3025
+      PUBLIC_BACKEND_URL: http://citycorners-backend:3041
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_CITYCORNERS_API_URL_CLIENT: https://citycorners-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
