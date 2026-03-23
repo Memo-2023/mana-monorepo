@@ -185,116 +185,128 @@
 			</div>
 		</div>
 	{:else}
-		<div class="space-y-2">
-			<!-- Overdue Section - only show if there are overdue tasks -->
-			{#if overdueTasks.length > 0}
-				<CollapsibleSection
-					title="Überfällig"
-					count={overdueTasks.length}
-					icon="warning"
-					variant="warning"
-					defaultOpen={true}
-				>
-					<TaskList
-						tasks={overdueTasks}
-						enableDragDrop
-						dropTargetDate="overdue"
-						onTaskDrop={handleTaskDrop}
-					/>
-				</CollapsibleSection>
-			{/if}
+		<div class="notepad">
+			<div class="notepad-holes" aria-hidden="true">
+				<span class="hole"></span>
+				<span class="hole"></span>
+				<span class="hole"></span>
+				<span class="hole"></span>
+				<span class="hole"></span>
+				<span class="hole"></span>
+			</div>
+			<div class="notepad-content">
+				<div class="space-y-2">
+					<!-- Overdue Section - only show if there are overdue tasks -->
+					{#if overdueTasks.length > 0}
+						<CollapsibleSection
+							title="Überfällig"
+							count={overdueTasks.length}
+							icon="warning"
+							variant="warning"
+							defaultOpen={true}
+						>
+							<TaskList
+								tasks={overdueTasks}
+								enableDragDrop
+								dropTargetDate="overdue"
+								onTaskDrop={handleTaskDrop}
+							/>
+						</CollapsibleSection>
+					{/if}
 
-			<!-- Today Section - always visible when there are any tasks -->
-			{#if showTodaySection}
-				<CollapsibleSection
-					title="Heute"
-					count={todayTasks.length}
-					icon="today"
-					variant="default"
-					defaultOpen={true}
-				>
-					<TaskList
-						tasks={todayTasks}
-						enableDragDrop
-						dropTargetDate={startOfDay(new Date())}
-						onTaskDrop={handleTaskDrop}
-					/>
-				</CollapsibleSection>
-			{/if}
+					<!-- Today Section - always visible when there are any tasks -->
+					{#if showTodaySection}
+						<CollapsibleSection
+							title="Heute"
+							count={todayTasks.length}
+							icon="today"
+							variant="default"
+							defaultOpen={true}
+						>
+							<TaskList
+								tasks={todayTasks}
+								enableDragDrop
+								dropTargetDate={startOfDay(new Date())}
+								onTaskDrop={handleTaskDrop}
+							/>
+						</CollapsibleSection>
+					{/if}
 
-			<!-- Tomorrow Section - only show if there are tasks -->
-			{#if showTomorrowSection}
-				<CollapsibleSection
-					title="Morgen"
-					count={tomorrowTasks.length}
-					icon="upcoming"
-					variant="default"
-					defaultOpen={true}
-				>
-					<TaskList
-						tasks={tomorrowTasks}
-						enableDragDrop
-						dropTargetDate={tomorrowDate}
-						onTaskDrop={handleTaskDrop}
-					/>
-				</CollapsibleSection>
-			{/if}
+					<!-- Tomorrow Section - only show if there are tasks -->
+					{#if showTomorrowSection}
+						<CollapsibleSection
+							title="Morgen"
+							count={tomorrowTasks.length}
+							icon="upcoming"
+							variant="default"
+							defaultOpen={true}
+						>
+							<TaskList
+								tasks={tomorrowTasks}
+								enableDragDrop
+								dropTargetDate={tomorrowDate}
+								onTaskDrop={handleTaskDrop}
+							/>
+						</CollapsibleSection>
+					{/if}
 
-			<!-- Upcoming Section - only show if there are tasks -->
-			{#if showUpcomingSection}
-				<CollapsibleSection
-					title="Demnächst"
-					count={upcomingCount}
-					icon="upcoming"
-					variant="default"
-					defaultOpen={true}
-				>
-					<div class="space-y-4">
-						{#each groupedUpcomingTasks() as group}
-							<div>
-								<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
-									{group.label} ({group.tasks.length})
-								</h3>
-								<TaskList
-									tasks={group.tasks}
-									enableDragDrop
-									dropTargetDate={group.date}
-									onTaskDrop={handleTaskDrop}
-								/>
+					<!-- Upcoming Section - only show if there are tasks -->
+					{#if showUpcomingSection}
+						<CollapsibleSection
+							title="Demnächst"
+							count={upcomingCount}
+							icon="upcoming"
+							variant="default"
+							defaultOpen={true}
+						>
+							<div class="space-y-4">
+								{#each groupedUpcomingTasks() as group}
+									<div>
+										<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
+											{group.label} ({group.tasks.length})
+										</h3>
+										<TaskList
+											tasks={group.tasks}
+											enableDragDrop
+											dropTargetDate={group.date}
+											onTaskDrop={handleTaskDrop}
+										/>
+									</div>
+								{/each}
 							</div>
-						{/each}
-					</div>
-				</CollapsibleSection>
-			{/if}
+						</CollapsibleSection>
+					{/if}
 
-			<!-- Completed Section - only show if there are completed tasks -->
-			{#if showCompletedSection}
-				<CollapsibleSection
-					title="Erledigt"
-					count={completedTasks.length}
-					icon="completed"
-					variant="success"
-					defaultOpen={true}
-				>
-					<TaskList
-						tasks={completedTasks}
-						enableDragDrop
-						dropTargetDate="completed"
-						onTaskDrop={handleTaskDrop}
-						showCompleted
-					/>
-				</CollapsibleSection>
-			{/if}
+					<!-- Completed Section - only show if there are completed tasks -->
+					{#if showCompletedSection}
+						<CollapsibleSection
+							title="Erledigt"
+							count={completedTasks.length}
+							icon="completed"
+							variant="success"
+							defaultOpen={true}
+						>
+							<TaskList
+								tasks={completedTasks}
+								enableDragDrop
+								dropTargetDate="completed"
+								onTaskDrop={handleTaskDrop}
+								showCompleted
+							/>
+						</CollapsibleSection>
+					{/if}
 
-			<!-- Onboarding tip for users with 1-3 tasks -->
-			{#if showOnboardingTip}
-				<div class="onboarding-tip">
-					<span class="onboarding-tip-icon">💡</span>
-					<span class="onboarding-tip-text">
-						Tipp: Nutze <code>#tags</code> und <code>!priorität</code> für bessere Organisation
-					</span>
+					<!-- Onboarding tip for users with 1-3 tasks -->
+					{#if showOnboardingTip}
+						<div class="onboarding-tip">
+							<span class="onboarding-tip-icon">💡</span>
+							<span class="onboarding-tip-text">
+								Tipp: Nutze <code>#tags</code> und <code>!priorität</code> für bessere Organisation
+							</span>
+						</div>
+					{/if}
 				</div>
-			{/if}
+			</div>
 		</div>
 	{/if}
 </div>
@@ -446,5 +458,88 @@
 		background: hsl(var(--color-primary) / 0.15);
 		border-radius: 0.25rem;
 		color: hsl(var(--color-primary));
+	}
+
+	/* Notepad container */
+	.notepad {
+		max-width: 560px;
+		margin: 0 auto;
+		background: #fffef5;
+		border-radius: 0.5rem 0.5rem 0.75rem 0.75rem;
+		box-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.08),
+			0 1px 2px rgba(0, 0, 0, 0.04);
+		position: relative;
+		padding-top: 1.25rem;
+	}
+
+	:global(.dark) .notepad {
+		background: #2a2520;
+		box-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.3),
+			0 1px 2px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Spiral binding holes */
+	.notepad-holes {
+		position: absolute;
+		top: -6px;
+		left: 10%;
+		right: 10%;
+		display: flex;
+		justify-content: space-evenly;
+		pointer-events: none;
+		z-index: 2;
+	}
+
+	.hole {
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: hsl(var(--color-background, 0 0% 100%));
+		border: 2px solid #c4c4c4;
+		box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
+
+	:global(.dark) .hole {
+		background: hsl(var(--color-background, 0 0% 7%));
+		border-color: #555;
+	}
+
+	/* Notepad content with red margin line */
+	.notepad-content {
+		position: relative;
+		padding: 0.75rem 1rem 1.5rem 3.25rem;
+		min-height: 200px;
+	}
+
+	.notepad-content::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 2.5rem;
+		width: 2px;
+		background: #e8b4b8;
+		z-index: 1;
+	}
+
+	:global(.dark) .notepad-content::before {
+		background: rgba(232, 180, 184, 0.4);
+	}
+
+	@media (max-width: 640px) {
+		.notepad {
+			max-width: 100%;
+			border-radius: 0;
+		}
+
+		.notepad-content {
+			padding-left: 2.75rem;
+		}
+
+		.notepad-content::before {
+			left: 2rem;
+		}
 	}
 </style>

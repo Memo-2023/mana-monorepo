@@ -193,10 +193,14 @@
 
 <style>
 	.task-list {
-		min-height: 60px;
+		min-height: 40px;
 		padding: 0;
-		border-radius: 0.5rem;
+		border-radius: 0;
 		transition: background-color 0.15s ease;
+	}
+
+	.task-list :global(.task-item-wrapper:last-child .task-item) {
+		border-bottom: none;
 	}
 
 	.task-list.empty {

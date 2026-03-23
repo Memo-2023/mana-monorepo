@@ -618,12 +618,13 @@
 		align-items: center;
 		gap: 0.625rem;
 		padding: 0.5rem 0.75rem;
-		border-radius: 0.5rem;
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+		border-radius: 0;
+		background: transparent;
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
+		border: none;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		box-shadow: none;
 		transition: all 0.2s;
 	}
 
@@ -641,19 +642,18 @@
 	}
 
 	:global(.dark) .task-item {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+		background: transparent;
+		border: none;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 	}
 
 	.task-item:hover {
-		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.12);
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+		background: rgba(0, 0, 0, 0.02);
+		box-shadow: none;
 	}
 
 	:global(.dark) .task-item:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.25);
+		background: rgba(255, 255, 255, 0.04);
 	}
 
 	.task-item-wrapper.expanded .task-item:hover {
@@ -667,13 +667,13 @@
 
 	/* Completing animation */
 	.task-item.completing {
-		background: rgba(34, 197, 94, 0.15);
-		border-color: rgba(34, 197, 94, 0.3);
+		background: rgba(34, 197, 94, 0.08);
+		border-bottom-color: rgba(34, 197, 94, 0.2);
 	}
 
 	:global(.dark) .task-item.completing {
-		background: rgba(34, 197, 94, 0.2);
-		border-color: rgba(34, 197, 94, 0.4);
+		background: rgba(34, 197, 94, 0.12);
+		border-bottom-color: rgba(34, 197, 94, 0.3);
 	}
 
 	/* Drag handle */
