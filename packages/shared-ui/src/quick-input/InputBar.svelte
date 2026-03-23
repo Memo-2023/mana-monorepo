@@ -1,40 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import type { QuickInputItem, CreatePreview } from './types';
+	import type { QuickInputItem, CreatePreview, HighlightPattern } from './types';
 	import InputBarContextMenu from './InputBarContextMenu.svelte';
 	import { getInputBarSettingsStore } from './inputBarSettings.svelte';
+	import { getHighlightPatterns } from './highlightPatterns';
 
 	// Settings store
 	const settingsStore = getInputBarSettingsStore();
 
-	// Syntax highlighting patterns for command keywords
-	interface HighlightPattern {
-		pattern: RegExp;
-		className: string;
-	}
-
-	const HIGHLIGHT_PATTERNS: HighlightPattern[] = [
-		// Priority keywords (Todo) - with specific colors per level
-		{ pattern: /(!{3,}|!?dringend)\b/gi, className: 'hl-priority-urgent' },
-		{ pattern: /(!{2}|!?wichtig)\b/gi, className: 'hl-priority-high' },
-		{ pattern: /!?normal\b/gi, className: 'hl-priority-medium' },
-		{ pattern: /!?sp[aä]ter\b/gi, className: 'hl-priority-low' },
-		// Tags
-		{ pattern: /#\w+/g, className: 'hl-tag' },
-		// Projects/Calendars/Companies (@reference)
-		{ pattern: /@\w+/g, className: 'hl-reference' },
-		// Date keywords
-		{
-			pattern:
-				/\b(heute|morgen|übermorgen|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|nächsten?\s+\w+|in\s+\d+\s+tagen?)\b/gi,
-			className: 'hl-date',
-		},
-		// Time patterns
-		{ pattern: /\b(\d{1,2}:\d{2}|um\s+\d{1,2}(\s*uhr)?|\d{1,2}\s*uhr)\b/gi, className: 'hl-time' },
-	];
-
-	function highlightText(text: string): string {
+	function highlightText(text: string, patterns: HighlightPattern[]): string {
 		if (!text) return '';
 
 		let result = text;
@@ -42,7 +17,7 @@
 		result = result.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 		// Apply highlights (process in order, avoiding double-highlighting)
-		for (const { pattern, className } of HIGHLIGHT_PATTERNS) {
+		for (const { pattern, className } of patterns) {
 			result = result.replace(pattern, (match) => `<span class="${className}">${match}</span>`);
 		}
 
@@ -92,6 +67,10 @@
 		onShowSyntaxHelp?: () => void;
 		/** Snippet for left action button (e.g., voice input) - rendered inside the input bar on the left */
 		leftAction?: Snippet;
+		/** Custom highlight patterns. If not provided, uses locale-based defaults. */
+		highlightPatterns?: HighlightPattern[];
+		/** Locale for syntax highlighting keywords (e.g., 'de', 'en'). Default: 'de'. */
+		locale?: string;
 	}
 
 	let {
@@ -118,6 +97,8 @@
 		onShowShortcuts,
 		onShowSyntaxHelp,
 		leftAction,
+		highlightPatterns,
+		locale = 'de',
 	}: Props = $props();
 
 	// Use settings for autoFocus
@@ -127,10 +108,12 @@
 	let results = $state<QuickInputItem[]>([]);
 	let loading = $state(false);
 	let creating = $state(false);
+	let createSuccess = $state(false);
 	let selectedIndex = $state(0);
 	let showPanel = $state(false);
 	let isFocused = $state(false);
 	let searchTimeout: ReturnType<typeof setTimeout>;
+	let createSuccessTimeout: ReturnType<typeof setTimeout>;
 	let inputElement = $state<HTMLInputElement | null>(null);
 	// Whether search has been explicitly triggered in deferred mode
 	let searchTriggered = $state(false);
@@ -145,9 +128,12 @@
 		searchQuery.trim() && onParseCreate ? onParseCreate(searchQuery) : null
 	);
 
+	// Resolve highlight patterns: custom prop > locale-based defaults
+	let effectivePatterns = $derived(highlightPatterns ?? getHighlightPatterns(locale));
+
 	// Highlighted text for overlay (respects syntax highlighting setting)
 	let highlightedQuery = $derived(
-		settingsStore.syntaxHighlighting ? highlightText(searchQuery) : searchQuery
+		settingsStore.syntaxHighlighting ? highlightText(searchQuery, effectivePatterns) : searchQuery
 	);
 
 	// Check if create option is selected (it's always first when available)
@@ -253,11 +239,19 @@
 			selectedIndex = 0;
 			searchTriggered = false;
 			onSearchChange?.('', []);
+
+			// Show success feedback
+			creating = false;
+			createSuccess = true;
+			clearTimeout(createSuccessTimeout);
+			createSuccessTimeout = setTimeout(() => {
+				createSuccess = false;
+			}, 1200);
+
 			// Keep focus for rapid entry
 			inputElement?.focus();
 		} catch (error) {
 			console.error('Create error:', error);
-		} finally {
 			creating = false;
 		}
 	}
@@ -495,7 +489,11 @@
 
 	<!-- Input Bar (always visible) -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="input-container" oncontextmenu={handleContextMenu}>
+	<div
+		class="input-container"
+		class:create-success={createSuccess}
+		oncontextmenu={handleContextMenu}
+	>
 		<!-- Left action slot (e.g., voice input button) -->
 		{#if leftAction}
 			<div class="left-action">
@@ -503,39 +501,51 @@
 			</div>
 		{/if}
 
-		<div class="app-icon">
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				{#if appIcon === 'check-square' || appIcon === 'todo'}
+		<div class="app-icon" class:success-icon={createSuccess}>
+			{#if createSuccess}
+				<!-- Checkmark icon -->
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+						stroke-width="2.5"
+						d="M5 13l4 4L19 7"
 					/>
-				{:else if appIcon === 'calendar'}
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-					/>
-				{:else if appIcon === 'users' || appIcon === 'contacts'}
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-					/>
-				{:else}
-					<!-- Default search icon -->
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-					/>
-				{/if}
-			</svg>
+				</svg>
+			{:else}
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					{#if appIcon === 'check-square' || appIcon === 'todo'}
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+						/>
+					{:else if appIcon === 'calendar'}
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+						/>
+					{:else if appIcon === 'users' || appIcon === 'contacts'}
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+						/>
+					{:else}
+						<!-- Default search icon -->
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+						/>
+					{/if}
+				</svg>
+			{/if}
 		</div>
 
 		<div class="input-wrapper">
@@ -654,6 +664,48 @@
 			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
 			0 2px 4px -1px hsl(var(--color-foreground) / 0.06),
 			0 0 0 2px hsl(var(--color-primary) / 0.25);
+	}
+
+	/* Success flash after creating */
+	.input-container.create-success {
+		border-color: hsl(var(--color-success, 142 71% 45%));
+		box-shadow:
+			0 4px 6px -1px hsl(var(--color-foreground) / 0.1),
+			0 2px 4px -1px hsl(var(--color-foreground) / 0.06),
+			0 0 0 2px hsl(var(--color-success, 142 71% 45%) / 0.3);
+		animation: success-flash 1.2s ease-out;
+	}
+
+	@keyframes success-flash {
+		0% {
+			border-color: hsl(var(--color-success, 142 71% 45%));
+			background: hsl(var(--color-success, 142 71% 45%) / 0.15);
+		}
+		40% {
+			background: hsl(var(--color-success, 142 71% 45%) / 0.08);
+		}
+		100% {
+			background: hsl(var(--color-surface) / 0.85);
+		}
+	}
+
+	.app-icon.success-icon {
+		color: hsl(var(--color-success, 142 71% 45%));
+		animation: success-check 0.4s ease-out;
+	}
+
+	@keyframes success-check {
+		0% {
+			transform: scale(0.5);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.2);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
 	}
 
 	.left-action {

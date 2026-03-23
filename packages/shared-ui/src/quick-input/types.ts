@@ -20,3 +20,8 @@ export interface CreatePreview {
 	title: string;
 	subtitle: string;
 }
+
+export interface HighlightPattern {
+	pattern: RegExp;
+	className: string;
+}

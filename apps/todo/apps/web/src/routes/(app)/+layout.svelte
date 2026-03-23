@@ -398,6 +398,7 @@
 					onParseCreate={handleParseCreate}
 					createText="Erstellen"
 					deferSearch={true}
+					locale={$locale || 'de'}
 					appIcon="todo"
 					hasFabRight={true}
 					bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '180px' : '110px'}

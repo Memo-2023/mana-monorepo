@@ -3,7 +3,10 @@ export { default as InputBar } from './InputBar.svelte';
 export { default as QuickInputBar } from './InputBar.svelte';
 export { default as InputBarContextMenu } from './InputBarContextMenu.svelte';
 export { default as InputBarHelpModal } from './InputBarHelpModal.svelte';
-export type { QuickInputItem, QuickAction, CreatePreview } from './types';
+export type { QuickInputItem, QuickAction, CreatePreview, HighlightPattern } from './types';
+
+// Highlight patterns (locale-aware syntax highlighting)
+export { getHighlightPatterns } from './highlightPatterns';
 
 // Recent input history (tags, references)
 export {
