@@ -120,14 +120,14 @@ skilltree-api.mana.how {
 }
 
 # ============================================
-# LightWrite App
+# Mukke App
 # ============================================
-lightwrite.mana.how {
+mukke.mana.how {
     import pwa-no-cache
     reverse_proxy localhost:5180
 }
 
-lightwrite-api.mana.how {
+mukke-api.mana.how {
     reverse_proxy localhost:3010
 }
 
