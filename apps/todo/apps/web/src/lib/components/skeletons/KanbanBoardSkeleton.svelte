@@ -1,6 +1,6 @@
 <script lang="ts">
 	/**
-	 * KanbanBoardSkeleton - Skeleton for kanban board loading
+	 * KanbanBoardSkeleton - Skeleton matching the real kanban board layout
 	 */
 
 	import KanbanColumnSkeleton from './KanbanColumnSkeleton.svelte';
@@ -11,6 +11,7 @@
 		<KanbanColumnSkeleton taskCount={3} />
 		<KanbanColumnSkeleton taskCount={4} />
 		<KanbanColumnSkeleton taskCount={2} />
+		<!-- Add column button placeholder -->
 		<div class="add-column-skeleton">
 			<div class="add-column-btn"></div>
 		</div>
@@ -28,6 +29,7 @@
 		gap: 1rem;
 		padding: 0 1rem;
 		height: 100%;
+		min-height: 100%;
 		align-items: flex-start;
 		overflow-x: auto;
 	}
@@ -40,10 +42,14 @@
 		width: 300px;
 		min-width: 300px;
 		height: 48px;
-		background: hsl(var(--muted) / 0.5);
-		border: 2px dashed hsl(var(--border));
-		border-radius: 1rem;
+		background: transparent;
+		border: 2px dashed rgba(0, 0, 0, 0.12);
+		border-radius: 1.5rem;
 		animation: pulse 2s ease-in-out infinite;
+	}
+
+	:global(.dark) .add-column-btn {
+		border-color: rgba(255, 255, 255, 0.12);
 	}
 
 	@keyframes pulse {

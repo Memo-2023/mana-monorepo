@@ -16,6 +16,7 @@ export default defineConfig({
 				shortName: 'Todo',
 				description: 'Aufgaben und Projekte verwalten mit Kanban-Board, Subtasks und mehr',
 				themeColor: '#8b5cf6',
+				devEnabled: false,
 				shortcuts: [
 					{
 						name: 'Neue Aufgabe',

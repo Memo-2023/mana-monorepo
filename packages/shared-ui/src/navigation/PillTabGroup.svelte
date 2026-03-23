@@ -1,5 +1,42 @@
 <script lang="ts">
 	import type { PillTabOption } from './types';
+	import {
+		List,
+		Columns,
+		Tag,
+		Heart,
+		House,
+		Gear,
+		GridFour,
+		Clock,
+		Timer,
+		Target,
+		CalendarBlank,
+		Fire,
+		MagnifyingGlass,
+		CheckSquare,
+		Funnel,
+	} from '@manacore/shared-icons';
+
+	// Map icon names to Phosphor components
+	const phosphorIcons: Record<string, any> = {
+		list: List,
+		columns: Columns,
+		kanban: Columns,
+		tag: Tag,
+		heart: Heart,
+		home: House,
+		settings: Gear,
+		grid: GridFour,
+		clock: Clock,
+		timer: Timer,
+		target: Target,
+		calendar: CalendarBlank,
+		fire: Fire,
+		search: MagnifyingGlass,
+		'check-square': CheckSquare,
+		filter: Funnel,
+	};
 
 	interface Props {
 		/** Tab options to display */
@@ -76,6 +113,9 @@
 				{#if option.icon}
 					{#if option.iconSvg}
 						{@html option.iconSvg}
+					{:else if phosphorIcons[option.icon]}
+						{@const IconComponent = phosphorIcons[option.icon]}
+						<IconComponent size={18} class="tab-icon" />
 					{:else}
 						<svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
