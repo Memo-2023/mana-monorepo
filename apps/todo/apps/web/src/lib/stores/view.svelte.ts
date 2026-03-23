@@ -2,6 +2,8 @@
  * View Store - Manages current view state using Svelte 5 runes
  */
 
+import type { TaskPriority } from '@todo/shared';
+
 export type ViewType =
 	| 'inbox'
 	| 'today'
@@ -21,6 +23,12 @@ let searchQuery = $state('');
 let sortBy = $state<SortBy>('order');
 let sortOrder = $state<SortOrder>('asc');
 let showCompleted = $state(false);
+
+// Filter state (used by TaskFilters strip in list view)
+let filterPriorities = $state<TaskPriority[]>([]);
+let filterProjectId = $state<string | null>(null);
+let filterLabelIds = $state<string[]>([]);
+let filterSearchQuery = $state('');
 
 export const viewStore = {
 	// Getters
@@ -44,6 +52,18 @@ export const viewStore = {
 	},
 	get showCompleted() {
 		return showCompleted;
+	},
+	get filterPriorities() {
+		return filterPriorities;
+	},
+	get filterProjectId() {
+		return filterProjectId;
+	},
+	get filterLabelIds() {
+		return filterLabelIds;
+	},
+	get filterSearchQuery() {
+		return filterSearchQuery;
 	},
 
 	/**
@@ -146,6 +166,44 @@ export const viewStore = {
 	},
 
 	/**
+	 * Set filter priorities
+	 */
+	setFilterPriorities(priorities: TaskPriority[]) {
+		filterPriorities = priorities;
+	},
+
+	/**
+	 * Set filter project
+	 */
+	setFilterProjectId(id: string | null) {
+		filterProjectId = id;
+	},
+
+	/**
+	 * Set filter label IDs
+	 */
+	setFilterLabelIds(ids: string[]) {
+		filterLabelIds = ids;
+	},
+
+	/**
+	 * Set filter search query
+	 */
+	setFilterSearchQuery(query: string) {
+		filterSearchQuery = query;
+	},
+
+	/**
+	 * Clear all filters
+	 */
+	clearFilters() {
+		filterPriorities = [];
+		filterProjectId = null;
+		filterLabelIds = [];
+		filterSearchQuery = '';
+	},
+
+	/**
 	 * Reset to default state
 	 */
 	reset() {
@@ -156,5 +214,9 @@ export const viewStore = {
 		sortBy = 'order';
 		sortOrder = 'asc';
 		showCompleted = false;
+		filterPriorities = [];
+		filterProjectId = null;
+		filterLabelIds = [];
+		filterSearchQuery = '';
 	},
 };

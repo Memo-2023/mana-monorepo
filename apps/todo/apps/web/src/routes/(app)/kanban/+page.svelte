@@ -2,7 +2,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import type { TaskPriority } from '@todo/shared';
 	import { kanbanStore } from '$lib/stores/kanban.svelte';
-	import { KanbanBoard, KanbanFilters, BoardNavigation } from '$lib/components/kanban';
+	import { KanbanBoard, BoardNavigation } from '$lib/components/kanban';
+	import TaskFilters from '$lib/components/TaskFilters.svelte';
 
 	// Filter state
 	let filterPriorities = $state<TaskPriority[]>([]);
@@ -218,16 +219,19 @@
 	<!-- Collapsible Filters -->
 	{#if showFilters}
 		<div class="mb-6 px-4 sm:px-6 lg:px-8 animate-in slide-in-from-top-2 duration-200">
-			<KanbanFilters
+			<TaskFilters
+				variant="bar"
 				selectedPriorities={filterPriorities}
 				selectedProjectId={filterProjectId}
 				selectedLabelIds={filterLabelIds}
 				searchQuery={filterSearchQuery}
-				onPrioritiesChange={(priorities) => (filterPriorities = priorities)}
-				onProjectChange={(projectId) => (filterProjectId = projectId)}
-				onLabelsChange={(labelIds) => (filterLabelIds = labelIds)}
-				onSearchChange={(query) => (filterSearchQuery = query)}
+				onPrioritiesChange={(priorities: TaskPriority[]) => (filterPriorities = priorities)}
+				onProjectChange={(projectId: string | null) => (filterProjectId = projectId)}
+				onLabelsChange={(labelIds: string[]) => (filterLabelIds = labelIds)}
+				onSearchChange={(query: string) => (filterSearchQuery = query)}
 				onClearFilters={clearFilters}
+				showSearch={true}
+				showLabels={true}
 			/>
 		</div>
 	{/if}

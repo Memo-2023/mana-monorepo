@@ -12,6 +12,29 @@
 
 	let isLoading = $state(true);
 
+	// Apply viewStore filters to task lists
+	function applyFilters(tasks: Task[]): Task[] {
+		let filtered = tasks;
+		if (viewStore.filterPriorities.length > 0) {
+			filtered = filtered.filter((t) => viewStore.filterPriorities.includes(t.priority));
+		}
+		if (viewStore.filterProjectId) {
+			filtered = filtered.filter((t) => t.projectId === viewStore.filterProjectId);
+		}
+		if (viewStore.filterLabelIds.length > 0) {
+			filtered = filtered.filter((t) =>
+				t.labels?.some((l) => viewStore.filterLabelIds.includes(l.id))
+			);
+		}
+		if (viewStore.filterSearchQuery.trim()) {
+			const q = viewStore.filterSearchQuery.toLowerCase();
+			filtered = filtered.filter(
+				(t) => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)
+			);
+		}
+		return filtered;
+	}
+
 	onMount(async () => {
 		viewStore.setToday();
 
@@ -25,20 +48,22 @@
 		isLoading = false;
 	});
 
-	// Derived task lists
-	let overdueTasks = $derived(tasksStore.overdueTasks);
-	let todayTasks = $derived(tasksStore.todayTasks);
-	let completedTasks = $derived(tasksStore.completedTasks);
+	// Derived task lists (with filters applied)
+	let overdueTasks = $derived(applyFilters(tasksStore.overdueTasks));
+	let todayTasks = $derived(applyFilters(tasksStore.todayTasks));
+	let completedTasks = $derived(applyFilters(tasksStore.completedTasks));
 
 	// Tomorrow's tasks
 	let tomorrowDate = $derived(addDays(startOfDay(new Date()), 1));
 	let dayAfterTomorrowDate = $derived(addDays(startOfDay(new Date()), 2));
 	let tomorrowTasks = $derived(
-		tasksStore.tasks.filter((task) => {
-			if (!task.dueDate || task.isCompleted) return false;
-			const taskDate = startOfDay(new Date(task.dueDate));
-			return taskDate.getTime() === tomorrowDate.getTime();
-		})
+		applyFilters(
+			tasksStore.tasks.filter((task) => {
+				if (!task.dueDate || task.isCompleted) return false;
+				const taskDate = startOfDay(new Date(task.dueDate));
+				return taskDate.getTime() === tomorrowDate.getTime();
+			})
+		)
 	);
 
 	// Group upcoming tasks by day (starting from day after tomorrow)
@@ -49,11 +74,13 @@
 		// Start from day after tomorrow (day 2) through day 7
 		for (let i = 2; i <= 7; i++) {
 			const date = addDays(today, i);
-			const dayTasks = tasksStore.tasks.filter((task) => {
-				if (!task.dueDate || task.isCompleted) return false;
-				const taskDate = startOfDay(new Date(task.dueDate));
-				return taskDate.getTime() === date.getTime();
-			});
+			const dayTasks = applyFilters(
+				tasksStore.tasks.filter((task) => {
+					if (!task.dueDate || task.isCompleted) return false;
+					const taskDate = startOfDay(new Date(task.dueDate));
+					return taskDate.getTime() === date.getTime();
+				})
+			);
 
 			if (dayTasks.length > 0) {
 				const label = format(date, 'EEEE, d. MMMM', { locale: de });
