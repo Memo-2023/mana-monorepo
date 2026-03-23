@@ -26,6 +26,9 @@
 	import ManadeckProgressWidget from './widgets/ManadeckProgressWidget.svelte';
 	import ClockTimersWidget from './widgets/ClockTimersWidget.svelte';
 	import StorageUsageWidget from './widgets/StorageUsageWidget.svelte';
+	import MukkeLibraryWidget from './widgets/MukkeLibraryWidget.svelte';
+	import PresiDecksWidget from './widgets/PresiDecksWidget.svelte';
+	import ContextDocsWidget from './widgets/ContextDocsWidget.svelte';
 
 	interface Props {
 		widget: WidgetConfig;
@@ -67,6 +70,9 @@
 		'manadeck-progress': ManadeckProgressWidget,
 		'clock-timers': ClockTimersWidget,
 		'storage-usage': StorageUsageWidget,
+		'mukke-library': MukkeLibraryWidget,
+		'presi-decks': PresiDecksWidget,
+		'context-docs': ContextDocsWidget,
 	} as const;
 
 	const WidgetComponent = $derived(widgetComponents[widget.type]);
