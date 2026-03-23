@@ -69,6 +69,8 @@
 	let isLoading = $state(false);
 	let showDeleteConfirm = $state(false);
 	let titleInputRef = $state<HTMLInputElement | null>(null);
+	let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+	let isInitializing = $state(false);
 
 	// Focus title input when expanded
 	$effect(() => {
@@ -81,6 +83,7 @@
 	// Initialize form when expanded
 	$effect(() => {
 		if (isExpanded && task) {
+			isInitializing = true;
 			title = task.title || '';
 			description = task.description || '';
 			dueDate = task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '';
@@ -103,7 +106,46 @@
 			contactsStore.checkAvailability().then((available) => {
 				contactsAvailable = available;
 			});
+
+			// Allow a tick for all state to settle before enabling auto-save
+			setTimeout(() => {
+				isInitializing = false;
+			}, 0);
 		}
+	});
+
+	// Auto-save: debounce changes and save automatically
+	function scheduleAutoSave() {
+		if (isInitializing || !isExpanded) return;
+		if (autoSaveTimer) clearTimeout(autoSaveTimer);
+		autoSaveTimer = setTimeout(() => {
+			handleSave();
+		}, 500);
+	}
+
+	// Watch all form fields for changes and trigger auto-save
+	$effect(() => {
+		// Read all reactive form fields to create dependencies
+		void [
+			title,
+			description,
+			dueDate,
+			dueTime,
+			startDate,
+			priority,
+			status,
+			projectId,
+			selectedLabelIds,
+			subtasks,
+			recurrenceRule,
+			notes,
+			storyPoints,
+			effectiveDuration,
+			funRating,
+			assignee,
+			involvedContacts,
+		];
+		scheduleAutoSave();
 	});
 
 	// Animation state for completing
@@ -140,9 +182,6 @@
 		if (!isExpanded) return;
 		if (e.key === 'Escape') {
 			onCollapse?.();
-		} else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-			e.preventDefault();
-			handleSave();
 		}
 	}
 
@@ -566,23 +605,6 @@
 				>
 					{showDeleteConfirm ? 'Wirklich löschen?' : 'Löschen'}
 				</button>
-				<div class="actions-right">
-					<button type="button" class="btn btn-secondary" onclick={onCollapse} disabled={isLoading}>
-						Abbrechen
-					</button>
-					<button
-						type="button"
-						class="btn btn-primary"
-						onclick={handleSave}
-						disabled={isLoading || !title.trim()}
-					>
-						{#if isLoading}
-							<div class="spinner"></div>
-						{:else}
-							Speichern
-						{/if}
-					</button>
-				</div>
 			</div>
 		</div>
 	{/if}
@@ -1110,11 +1132,6 @@
 		border-top-color: rgba(255, 255, 255, 0.1);
 	}
 
-	.actions-right {
-		display: flex;
-		gap: 0.5rem;
-	}
-
 	.btn {
 		display: flex;
 		align-items: center;
@@ -1134,33 +1151,6 @@
 		cursor: not-allowed;
 	}
 
-	.btn-primary {
-		background: #8b5cf6;
-		color: white;
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		background: #7c3aed;
-	}
-
-	.btn-secondary {
-		background: rgba(0, 0, 0, 0.05);
-		color: #374151;
-	}
-
-	:global(.dark) .btn-secondary {
-		background: rgba(255, 255, 255, 0.1);
-		color: #e5e7eb;
-	}
-
-	.btn-secondary:hover:not(:disabled) {
-		background: rgba(0, 0, 0, 0.1);
-	}
-
-	:global(.dark) .btn-secondary:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.15);
-	}
-
 	.btn-danger {
 		background: rgba(239, 68, 68, 0.1);
 		color: #ef4444;
@@ -1169,20 +1159,5 @@
 	.btn-danger:hover:not(:disabled) {
 		background: #ef4444;
 		color: white;
-	}
-
-	.spinner {
-		width: 0.875rem;
-		height: 0.875rem;
-		border: 2px solid transparent;
-		border-top-color: white;
-		border-radius: 9999px;
-		animation: spin 0.6s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
 	}
 </style>

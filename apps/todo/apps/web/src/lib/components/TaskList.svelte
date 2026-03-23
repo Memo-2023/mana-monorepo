@@ -51,9 +51,6 @@
 			if (data.labelIds !== undefined) {
 				await tasksStore.updateLabels(taskId, data.labelIds);
 			}
-
-			// Collapse after save
-			expandedTaskId = null;
 		} catch (error) {
 			console.error('Failed to save task:', error);
 		}
