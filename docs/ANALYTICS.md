@@ -28,7 +28,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 
 ### Neue App hinzufügen
 
-1. Website in Umami anlegen (https://umami.mana.how)
+1. Website in Umami anlegen (https://stats.mana.how)
 2. `UMAMI_WEBSITE_ID_APPNAME=<uuid>` zu `.env.development` hinzufügen
 3. `PUBLIC_UMAMI_WEBSITE_ID` Mapping in `scripts/generate-env.mjs` hinzufügen
 4. `@manacore/shared-utils` als Dependency in der Web-App `package.json`
