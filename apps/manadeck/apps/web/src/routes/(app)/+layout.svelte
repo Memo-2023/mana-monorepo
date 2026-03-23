@@ -7,8 +7,8 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -19,6 +19,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { deckStore } from '$lib/stores/deckStore.svelte';
 	import { manadeckOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
@@ -139,6 +140,23 @@
 		goto('/login');
 	}
 
+	// QuickInputBar handlers
+	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
+		const q = query.toLowerCase();
+		return deckStore.decks
+			.filter((d) => d.title.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q))
+			.slice(0, 10)
+			.map((deck) => ({
+				id: deck.id,
+				title: deck.title,
+				subtitle: deck.description || undefined,
+			}));
+	}
+
+	function handleInputSelect(item: QuickInputItem) {
+		goto(`/decks/${item.id}`);
+	}
+
 	onMount(async () => {
 		await authStore.initialize();
 
@@ -207,6 +225,18 @@
 			manaHref="/mana"
 			profileHref="/profile"
 			allAppsHref="/apps"
+		/>
+
+		<!-- Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleInputSearch}
+			onSelect={handleInputSelect}
+			placeholder="Deck suchen..."
+			emptyText="Keine Decks gefunden"
+			searchingText="Suche..."
+			locale={$locale || 'de'}
+			appIcon="search"
+			bottomOffset="70px"
 		/>
 
 		<!-- Main content -->

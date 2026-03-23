@@ -20,8 +20,8 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation.svelte';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -162,6 +162,22 @@
 		matrixStore.logout();
 		clearAccessToken();
 		goto('/login');
+	}
+
+	// QuickInputBar handlers
+	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
+		const q = query.toLowerCase();
+		const rooms = matrixStore.rooms.filter((r) => r.name?.toLowerCase().includes(q));
+		return rooms.slice(0, 10).map((room) => ({
+			id: room.roomId,
+			title: room.name || room.roomId,
+			subtitle: room.isDirect ? 'Direktnachricht' : 'Gruppe',
+		}));
+	}
+
+	function handleInputSelect(item: QuickInputItem) {
+		matrixStore.selectRoom(item.id);
+		goto('/chat');
 	}
 
 	onMount(async () => {
@@ -330,6 +346,18 @@
 			{userEmail}
 			settingsHref="/settings"
 			allAppsHref="https://mana.how"
+		/>
+
+		<!-- Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleInputSearch}
+			onSelect={handleInputSelect}
+			placeholder="Raum oder Kontakt suchen..."
+			emptyText="Keine Räume gefunden"
+			searchingText="Suche..."
+			locale={$locale || 'de'}
+			appIcon="search"
+			bottomOffset="70px"
 		/>
 
 		<!-- Main Content -->

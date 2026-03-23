@@ -2,8 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { PillNavigation, DevBuildBadge } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, DevBuildBadge } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -18,6 +18,7 @@
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { libraryStore } from '$lib/stores/library.svelte';
 	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
 	import FullPlayer from '$lib/components/FullPlayer.svelte';
 	import QueuePanel from '$lib/components/QueuePanel.svelte';
@@ -102,6 +103,21 @@
 		goto('/login');
 	}
 
+	// QuickInputBar handlers
+	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
+		const songs = await libraryStore.searchSongs(query);
+		return songs.slice(0, 10).map((song) => ({
+			id: song.id,
+			title: song.title || 'Untitled',
+			subtitle: [song.artist, song.album].filter(Boolean).join(' — '),
+			isFavorite: song.favorite,
+		}));
+	}
+
+	function handleInputSelect(item: QuickInputItem) {
+		goto(`/library?song=${item.id}`);
+	}
+
 	onMount(async () => {
 		await authStore.initialize();
 		if (!authStore.isAuthenticated) {
@@ -153,6 +169,18 @@
 				settingsHref="/settings"
 				onOpenInPanel={handleOpenInPanel}
 				ariaLabel="Main navigation"
+			/>
+
+			<!-- Quick Input Bar -->
+			<QuickInputBar
+				onSearch={handleInputSearch}
+				onSelect={handleInputSelect}
+				placeholder="Song suchen..."
+				emptyText="Keine Songs gefunden"
+				searchingText="Suche..."
+				locale="de"
+				appIcon="search"
+				bottomOffset="140px"
 			/>
 
 			<!-- Main Content -->

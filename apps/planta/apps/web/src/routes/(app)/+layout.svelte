@@ -2,10 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import type { PillNavItem, QuickInputItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { plantsApi } from '$lib/api/plants';
 
 	let { children } = $props();
 
@@ -25,6 +26,29 @@
 	async function handleLogout() {
 		await authStore.signOut();
 		goto('/login');
+	}
+
+	// QuickInputBar handlers
+	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
+		const plants = await plantsApi.getAll();
+		const q = query.toLowerCase();
+		return plants
+			.filter(
+				(p) =>
+					p.name?.toLowerCase().includes(q) ||
+					p.commonName?.toLowerCase().includes(q) ||
+					p.scientificName?.toLowerCase().includes(q)
+			)
+			.slice(0, 10)
+			.map((plant) => ({
+				id: plant.id,
+				title: plant.name || plant.commonName || 'Unbenannt',
+				subtitle: plant.scientificName || undefined,
+			}));
+	}
+
+	function handleInputSelect(item: QuickInputItem) {
+		goto(`/plant/${item.id}`);
 	}
 
 	onMount(() => {
@@ -47,6 +71,18 @@
 			onLogout={handleLogout}
 			loginHref="/login"
 			primaryColor="#10b981"
+		/>
+
+		<!-- Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleInputSearch}
+			onSelect={handleInputSelect}
+			placeholder="Pflanze suchen..."
+			emptyText="Keine Pflanzen gefunden"
+			searchingText="Suche..."
+			locale="de"
+			appIcon="search"
+			bottomOffset="70px"
 		/>
 
 		<main class="main-content pt-24">

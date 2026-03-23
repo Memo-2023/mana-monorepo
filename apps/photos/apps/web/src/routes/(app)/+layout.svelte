@@ -2,9 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { _ } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { _, locale } from 'svelte-i18n';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { photoStore } from '$lib/stores/photos.svelte';
@@ -56,6 +56,29 @@
 		goto('/login');
 	}
 
+	// QuickInputBar handlers
+	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
+		const q = query.toLowerCase();
+		const albums = albumStore.albums.filter((a) => a.name?.toLowerCase().includes(q));
+		const tags = tagStore.tags.filter((t) => t.name?.toLowerCase().includes(q));
+		const results: QuickInputItem[] = [];
+		for (const album of albums.slice(0, 5)) {
+			results.push({ id: `album-${album.id}`, title: album.name, subtitle: 'Album' });
+		}
+		for (const tag of tags.slice(0, 5)) {
+			results.push({ id: `tag-${tag.id}`, title: tag.name, subtitle: 'Tag' });
+		}
+		return results;
+	}
+
+	function handleInputSelect(item: QuickInputItem) {
+		if (item.id.startsWith('album-')) {
+			goto(`/albums/${item.id.replace('album-', '')}`);
+		} else if (item.id.startsWith('tag-')) {
+			goto(`/tags/${item.id.replace('tag-', '')}`);
+		}
+	}
+
 	onMount(async () => {
 		await authStore.initialize();
 		if (!authStore.isAuthenticated) {
@@ -89,6 +112,18 @@
 		primaryColor="#8b5cf6"
 		{userEmail}
 		settingsHref="/settings"
+	/>
+
+	<!-- Quick Input Bar -->
+	<QuickInputBar
+		onSearch={handleInputSearch}
+		onSelect={handleInputSelect}
+		placeholder="Album oder Tag suchen..."
+		emptyText="Nichts gefunden"
+		searchingText="Suche..."
+		locale={$locale || 'de'}
+		appIcon="search"
+		bottomOffset="70px"
 	/>
 
 	<main class="main-content bg-background">

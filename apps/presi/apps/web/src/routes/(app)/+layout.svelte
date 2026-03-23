@@ -3,8 +3,8 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
@@ -13,6 +13,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { decksStore } from '$lib/stores/decks.svelte';
 	import { presiOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 
@@ -103,6 +104,23 @@
 		}
 	}
 
+	// QuickInputBar handlers
+	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
+		const q = query.toLowerCase();
+		return decksStore.decks
+			.filter((d) => d.title.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q))
+			.slice(0, 10)
+			.map((deck) => ({
+				id: deck.id,
+				title: deck.title,
+				subtitle: deck.description || undefined,
+			}));
+	}
+
+	function handleInputSelect(item: QuickInputItem) {
+		goto(`/deck/${item.id}`);
+	}
+
 	onMount(async () => {
 		// Redirect to login if not authenticated
 		if (!auth.isAuthenticated) {
@@ -167,6 +185,18 @@
 			manaHref="/mana"
 			profileHref="/profile"
 			allAppsHref="/apps"
+		/>
+
+		<!-- Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleInputSearch}
+			onSelect={handleInputSelect}
+			placeholder="Präsentation suchen..."
+			emptyText="Keine Decks gefunden"
+			searchingText="Suche..."
+			locale={$locale || 'de'}
+			appIcon="search"
+			bottomOffset="70px"
 		/>
 
 		<!-- Main Content -->
