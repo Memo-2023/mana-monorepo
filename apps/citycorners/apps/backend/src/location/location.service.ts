@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, or, ilike } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { locations } from '../db/schema';
@@ -17,6 +17,20 @@ export class LocationService {
 				.where(eq(locations.category, category as Location['category']));
 		}
 		return this.db.select().from(locations);
+	}
+
+	async search(query: string): Promise<Location[]> {
+		const pattern = `%${query}%`;
+		return this.db
+			.select()
+			.from(locations)
+			.where(
+				or(
+					ilike(locations.name, pattern),
+					ilike(locations.description, pattern),
+					ilike(locations.address, pattern)
+				)
+			);
 	}
 
 	async findById(id: string): Promise<Location> {

@@ -2,8 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
@@ -57,6 +57,49 @@
 		goto('/login');
 	}
 
+	const categoryLabels: Record<string, string> = {
+		sight: 'Sehenswürdigkeit',
+		restaurant: 'Restaurant',
+		shop: 'Laden',
+		museum: 'Museum',
+	};
+
+	const backendUrl =
+		typeof window !== 'undefined'
+			? (window as any).__PUBLIC_BACKEND_URL__ || 'http://localhost:3025'
+			: 'http://localhost:3025';
+
+	let inputBarBottomOffset = $derived(showNav ? '70px' : '16px');
+
+	interface SearchItem extends QuickInputItem {
+		href?: string;
+	}
+
+	async function handleSearch(query: string): Promise<SearchItem[]> {
+		if (!query.trim()) return [];
+
+		try {
+			const res = await fetch(`${backendUrl}/locations/search?q=${encodeURIComponent(query)}`);
+			if (!res.ok) return [];
+			const data = await res.json();
+			return data.locations.slice(0, 8).map((loc: any) => ({
+				id: loc.id,
+				title: loc.name,
+				subtitle: categoryLabels[loc.category] || loc.category,
+				icon: 'mappin' as const,
+				href: `/locations/${loc.id}`,
+			}));
+		} catch {
+			return [];
+		}
+	}
+
+	function handleSelect(item: SearchItem) {
+		if (item.href) {
+			goto(item.href);
+		}
+	}
+
 	function handleNavToggle() {
 		showNav = !showNav;
 	}
@@ -92,6 +135,18 @@
 			settingsHref="/settings"
 		/>
 	{/if}
+
+	<!-- Quick Search Bar -->
+	<QuickInputBar
+		onSearch={handleSearch}
+		onSelect={handleSelect}
+		placeholder="Ort suchen..."
+		emptyText="Keine Ergebnisse"
+		searchingText="Suche..."
+		appIcon="mappin"
+		bottomOffset={inputBarBottomOffset}
+		hasFabRight={true}
+	/>
 
 	<button
 		class="pillnav-fab"

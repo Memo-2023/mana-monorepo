@@ -78,6 +78,15 @@ export class LocationController {
 		return { locations };
 	}
 
+	@Get('search')
+	async search(@Query('q') query: string) {
+		if (!query || query.trim().length === 0) {
+			return { locations: [] };
+		}
+		const locations = await this.locationService.search(query.trim());
+		return { locations };
+	}
+
 	@Get(':id')
 	async findById(@Param('id') id: string) {
 		const location = await this.locationService.findById(id);
