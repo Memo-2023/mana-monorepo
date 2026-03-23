@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { FileModule } from './file/file.module';
 import { FolderModule } from './folder/folder.module';
 import { ShareModule } from './share/share.module';
@@ -25,6 +26,10 @@ import { AdminModule } from './admin/admin.module';
 		]),
 		DatabaseModule,
 		HealthModule.forRoot({ serviceName: 'storage-backend', route: 'api/v1/health' }),
+		MetricsModule.register({
+			prefix: 'storage_',
+			excludePaths: ['/health'],
+		}),
 		StorageModule,
 		FileModule,
 		FolderModule,

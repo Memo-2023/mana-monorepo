@@ -4,6 +4,7 @@ import { DatabaseModule } from './db/database.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { ListModule } from './list/list.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { AdminModule } from './admin/admin.module';
 
 @Module({
@@ -16,6 +17,10 @@ import { AdminModule } from './admin/admin.module';
 		FavoriteModule,
 		ListModule,
 		HealthModule.forRoot({ serviceName: 'quote-backend' }),
+		MetricsModule.register({
+			prefix: 'zitare_',
+			excludePaths: ['/health'],
+		}),
 		AdminModule,
 	],
 })

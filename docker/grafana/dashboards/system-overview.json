@@ -530,6 +530,60 @@
 				},
 				{
 					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"storage-backend\"}",
+					"legendFormat": "Storage",
+					"refId": "J"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"presi-backend\"}",
+					"legendFormat": "Presi",
+					"refId": "K"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"nutriphi-backend\"}",
+					"legendFormat": "NutriPhi",
+					"refId": "L"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"skilltree-backend\"}",
+					"legendFormat": "SkillTree",
+					"refId": "M"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"photos-backend\"}",
+					"legendFormat": "Photos",
+					"refId": "N"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"zitare-backend\"}",
+					"legendFormat": "Zitare",
+					"refId": "O"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"mukke-backend\"}",
+					"legendFormat": "Mukke",
+					"refId": "P"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"planta-backend\"}",
+					"legendFormat": "Planta",
+					"refId": "Q"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "up{job=\"picture-backend\"}",
+					"legendFormat": "Picture",
+					"refId": "R"
+				},
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
 					"expr": "pg_up",
 					"legendFormat": "PostgreSQL",
 					"refId": "G"

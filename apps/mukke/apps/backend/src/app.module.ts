@@ -12,6 +12,7 @@ import { SongModule } from './song/song.module';
 import { PlaylistModule } from './playlist/playlist.module';
 import { LibraryModule } from './library/library.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 
 @Module({
 	imports: [
@@ -31,6 +32,10 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 		PlaylistModule,
 		LibraryModule,
 		HealthModule.forRoot({ serviceName: 'mukke-backend' }),
+		MetricsModule.register({
+			prefix: 'mukke_',
+			excludePaths: ['/health'],
+		}),
 	],
 })
 export class AppModule {}

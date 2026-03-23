@@ -9,6 +9,7 @@ import { ThemeModule } from './theme/theme.module';
 import { ShareModule } from './share/share.module';
 import { AdminModule } from './admin/admin.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 
 @Module({
 	imports: [
@@ -24,6 +25,10 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 		ShareModule,
 		AdminModule,
 		HealthModule.forRoot({ serviceName: 'presi-backend' }),
+		MetricsModule.register({
+			prefix: 'presi_',
+			excludePaths: ['/health'],
+		}),
 	],
 	providers: [
 		{

@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ManaCoreModule } from '@manacore/nestjs-integration';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
+import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 import { ModelModule } from './model/model.module';
 import { TagModule } from './tag/tag.module';
 import { ImageModule } from './image/image.module';
@@ -35,6 +36,10 @@ import { AdminModule } from './admin/admin.module';
 		}),
 		DatabaseModule,
 		HealthModule.forRoot({ serviceName: 'picture-backend' }),
+		MetricsModule.register({
+			prefix: 'picture_',
+			excludePaths: ['/health'],
+		}),
 		ModelModule,
 		TagModule,
 		ImageModule,

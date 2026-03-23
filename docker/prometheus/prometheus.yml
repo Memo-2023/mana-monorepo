@@ -91,26 +91,68 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Storage Backend (disabled - no /metrics endpoint yet)
-  # - job_name: 'storage-backend'
-  #   static_configs:
-  #     - targets: ['storage-backend:3035']
-  #   metrics_path: '/metrics'
-  #   scrape_interval: 30s
+  # Storage Backend
+  - job_name: 'storage-backend'
+    static_configs:
+      - targets: ['storage-backend:3035']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
 
-  # Presi Backend (disabled - no /metrics endpoint yet)
-  # - job_name: 'presi-backend'
-  #   static_configs:
-  #     - targets: ['presi-backend:3036']
-  #   metrics_path: '/metrics'
-  #   scrape_interval: 30s
+  # Presi Backend
+  - job_name: 'presi-backend'
+    static_configs:
+      - targets: ['presi-backend:3036']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
 
-  # Nutriphi Backend (disabled - no /metrics endpoint yet)
-  # - job_name: 'nutriphi-backend'
-  #   static_configs:
-  #     - targets: ['nutriphi-backend:3037']
-  #   metrics_path: '/metrics'
-  #   scrape_interval: 30s
+  # Nutriphi Backend
+  - job_name: 'nutriphi-backend'
+    static_configs:
+      - targets: ['nutriphi-backend:3037']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # SkillTree Backend
+  - job_name: 'skilltree-backend'
+    static_configs:
+      - targets: ['skilltree-backend:3038']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Photos Backend
+  - job_name: 'photos-backend'
+    static_configs:
+      - targets: ['photos-backend:3039']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Zitare Backend
+  - job_name: 'zitare-backend'
+    static_configs:
+      - targets: ['zitare-backend:3007']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Mukke Backend
+  - job_name: 'mukke-backend'
+    static_configs:
+      - targets: ['mukke-backend:3010']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Planta Backend
+  - job_name: 'planta-backend'
+    static_configs:
+      - targets: ['planta-backend:3022']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Picture Backend
+  - job_name: 'picture-backend'
+    static_configs:
+      - targets: ['picture-backend:3040']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
 
   # ============================================
   # Pushgateway (deploy metrics, batch jobs)

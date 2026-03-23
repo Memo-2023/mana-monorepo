@@ -850,14 +850,14 @@
 				"allValue": ".*",
 				"current": { "selected": true, "text": "All", "value": "$__all" },
 				"datasource": { "type": "prometheus", "uid": "${datasource}" },
-				"definition": "label_values(up{job=~\".*backend|mana-core-auth\"}, job)",
+				"definition": "label_values(up{job=~\".*-backend|mana-core-auth\"}, job)",
 				"hide": 0,
 				"includeAll": true,
 				"multi": true,
 				"name": "service",
 				"options": [],
 				"query": {
-					"query": "label_values(up{job=~\".*backend|mana-core-auth\"}, job)",
+					"query": "label_values(up{job=~\".*-backend|mana-core-auth\"}, job)",
 					"refId": "PrometheusVariableQueryEditor-VariableQuery"
 				},
 				"refresh": 2,

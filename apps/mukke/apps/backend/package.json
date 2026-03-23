@@ -25,6 +25,7 @@
 		"@manacore/shared-drizzle-config": "workspace:*",
 		"@manacore/shared-nestjs-auth": "workspace:*",
 		"@manacore/shared-nestjs-health": "workspace:*",
+		"@manacore/shared-nestjs-metrics": "workspace:*",
 		"@manacore/shared-nestjs-setup": "workspace:*",
 		"@manacore/shared-storage": "workspace:*",
 		"@mukke/shared": "workspace:*",
