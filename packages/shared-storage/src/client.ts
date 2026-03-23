@@ -46,9 +46,7 @@ function constrainStream(stream: ReadableStream, maxBytes: number): ReadableStre
 			bytesRead += value.byteLength;
 			if (bytesRead > maxBytes) {
 				controller.error(
-					new Error(
-						`Stream size ${bytesRead} bytes exceeds maximum allowed ${maxBytes} bytes`
-					)
+					new Error(`Stream size ${bytesRead} bytes exceeds maximum allowed ${maxBytes} bytes`)
 				);
 				reader.cancel();
 				return;
@@ -62,7 +60,7 @@ function constrainStream(stream: ReadableStream, maxBytes: number): ReadableStre
 }
 
 /**
- * S3-compatible storage client for MinIO (local) and Hetzner Object Storage (production)
+ * S3-compatible storage client for MinIO
  */
 export class StorageClient {
 	private client: S3Client;

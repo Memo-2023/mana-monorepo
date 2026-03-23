@@ -47,7 +47,7 @@ pnpm preview                     # Preview production build
 - **Web**: SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS
 - **Backend**: NestJS 10, Drizzle ORM, PostgreSQL
 - **AI**: Google Gemini Vision for plant analysis
-- **Storage**: MinIO (local) / Hetzner S3 (prod)
+- **Storage**: MinIO (S3-compatible)
 - **Auth**: Mana Core Auth (JWT)
 - **Types**: TypeScript 5.x
 
@@ -163,5 +163,5 @@ PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
 2. **Database**: PostgreSQL with Drizzle ORM
 3. **Port**: Backend runs on port 3022 by default
-4. **Storage**: Photos stored in MinIO (local) / Hetzner S3 (prod)
+4. **Storage**: Photos stored in MinIO (S3-compatible)
 5. **AI**: Google Gemini Vision for plant identification

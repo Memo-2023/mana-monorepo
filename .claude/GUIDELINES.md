@@ -49,7 +49,7 @@ This directory contains comprehensive guidelines for working in the Mana Univers
 | **Mobile** | Expo SDK 52-54 | React Native, NativeWind |
 | **Database** | PostgreSQL | Via Drizzle ORM |
 | **Auth** | Mana Core Auth | Better Auth, EdDSA JWT |
-| **Storage** | S3-compatible | MinIO (dev), Hetzner (prod) |
+| **Storage** | S3-compatible | MinIO |
 
 ## Project Structure
 

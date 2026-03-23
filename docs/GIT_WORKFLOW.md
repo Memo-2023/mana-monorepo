@@ -238,10 +238,10 @@ git diff HEAD -- docker-compose.staging.yml  # See what changed
 
 ```yaml
 # WRONG - HTTP IP address
-PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://192.168.1.100:3001
 
-# CORRECT - HTTPS staging domain
-PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.staging.manacore.ai
+# CORRECT - HTTPS domain
+PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
 ```
 
 **CI Check:** The `staging-config-check.yml` workflow validates this on every PR that touches `docker-compose.staging.yml`.

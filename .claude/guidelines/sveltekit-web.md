@@ -784,16 +784,16 @@ services:
       PUBLIC_BACKEND_URL: http://myapp-backend:3000
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
       # Client-side URLs (browser access via public IP)
-      PUBLIC_BACKEND_URL_CLIENT: http://46.224.108.214:3000
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+      PUBLIC_BACKEND_URL_CLIENT: https://myapp.mana.how:3000
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://myapp.mana.how:3001
 ```
 
 ### Why Two URLs?
 
-| Variable                           | Purpose                           | Example                      |
-| ---------------------------------- | --------------------------------- | ---------------------------- |
-| `PUBLIC_MANA_CORE_AUTH_URL`        | Server-to-server (SSR, API calls) | `http://mana-core-auth:3001` |
-| `PUBLIC_MANA_CORE_AUTH_URL_CLIENT` | Browser to server                 | `http://46.224.108.214:3001` |
+| Variable                           | Purpose                           | Example                       |
+| ---------------------------------- | --------------------------------- | ----------------------------- |
+| `PUBLIC_MANA_CORE_AUTH_URL`        | Server-to-server (SSR, API calls) | `http://mana-core-auth:3001`  |
+| `PUBLIC_MANA_CORE_AUTH_URL_CLIENT` | Browser to server                 | `https://myapp.mana.how:3001` |
 
 Docker containers can reach each other by service name (`mana-core-auth`), but browsers need the public IP/domain.
 

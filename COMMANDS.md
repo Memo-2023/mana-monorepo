@@ -255,11 +255,11 @@ pnpm drizzle-kit studio   # Drizzle Studio
 
 Zentraler Such-Microservice mit SearXNG für Web-Suche und Content-Extraktion.
 
-| Service  | Port | Befehl                    |
-| -------- | ---- | ------------------------- |
-| API      | 3021 | `pnpm dev:search`         |
-| SearXNG  | 8080 | (Docker)                  |
-| Redis    | 6380 | (Docker)                  |
+| Service | Port | Befehl            |
+| ------- | ---- | ----------------- |
+| API     | 3021 | `pnpm dev:search` |
+| SearXNG | 8080 | (Docker)          |
+| Redis   | 6380 | (Docker)          |
 
 ```bash
 # SearXNG + Redis in Docker starten
@@ -489,4 +489,4 @@ pnpm --filter @manacore/shared-ui build
 shared-ui - Gemeinsame UI-Komponenten für alle Web-Apps
 shared-auth - Client-seitige Auth-Integration für Web/Mobile
 shared-nestjs-auth - NestJS Guards/Decorators für JWT-Validierung
-shared-storage - S3-kompatible Storage-Abstraktion (MinIO/Hetzner)
+shared-storage - S3-kompatible Storage-Abstraktion (MinIO)

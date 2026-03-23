@@ -159,8 +159,8 @@ myproject-web:
     PUBLIC_BACKEND_URL: http://myproject-backend:30XX
     PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
     # Client-side URLs (browser access via public IP)
-    PUBLIC_BACKEND_URL_CLIENT: http://46.224.108.214:30XX
-    PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+    PUBLIC_BACKEND_URL_CLIENT: http://your-server-ip:30XX
+    PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://your-server-ip:3001
   depends_on:
     myproject-backend:
       condition: service_healthy
@@ -255,7 +255,7 @@ myproject-backend:
     DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/myproject
     MANA_CORE_AUTH_URL: http://mana-core-auth:3001
     # CORS - Include app's web AND manacore-web dashboard
-    CORS_ORIGINS: http://46.224.108.214:51XX,http://46.224.108.214:5173,http://localhost:51XX,http://localhost:5173
+    CORS_ORIGINS: http://your-server-ip:51XX,http://your-server-ip:5173,http://localhost:51XX,http://localhost:5173
   depends_on:
     postgres:
       condition: service_healthy
@@ -287,7 +287,7 @@ myproject-backend:
 ### Create Database on Staging
 
 ```bash
-ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+ssh -i ~/.ssh/deploy_key deploy@your-server-ip
 
 # Create database
 docker exec manacore-postgres-staging psql -U postgres -c 'CREATE DATABASE myproject;'
@@ -314,14 +314,14 @@ docker exec manacore-postgres-staging psql -U postgres -c '\l' | grep myproject
 docker ps --format '{{.Names}}: {{.Image}}' | grep myproject
 
 # Check health endpoint
-curl http://46.224.108.214:30XX/api/v1/health
+curl http://your-server-ip:30XX/api/v1/health
 
 # Check logs for errors
 docker logs myproject-backend-staging --tail 50
 
 # Test CORS (from manacore-web origin)
-curl -I -X OPTIONS http://46.224.108.214:30XX/api/v1/endpoint \
-  -H "Origin: http://46.224.108.214:5173" \
+curl -I -X OPTIONS http://your-server-ip:30XX/api/v1/endpoint \
+  -H "Origin: http://your-server-ip:5173" \
   -H "Access-Control-Request-Method: GET"
 ```
 
@@ -395,7 +395,7 @@ manacore-web:
     # ... existing env vars ...
     # Add new backend URL
     PUBLIC_MYSERVICE_API_URL: http://myservice-backend:30XX
-    PUBLIC_MYSERVICE_API_URL_CLIENT: http://46.224.108.214:30XX
+    PUBLIC_MYSERVICE_API_URL_CLIENT: http://your-server-ip:30XX
 ```
 
 ---

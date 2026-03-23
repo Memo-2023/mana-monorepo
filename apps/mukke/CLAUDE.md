@@ -152,7 +152,7 @@ Playback uses HTML5 Audio (browser-native codec support). Upload accepts any `au
 | Metadata | music-metadata (server-side) |
 | Backend | NestJS 10, Drizzle ORM |
 | Database | PostgreSQL |
-| Storage | MinIO (dev) / Hetzner S3 (prod) |
+| Storage | MinIO (S3-compatible) |
 | Auth | mana-core-auth |
 
 ## Environment Variables

@@ -466,7 +466,7 @@ mv .github/workflows/test.yml.bak .github/workflows/test.yml
 
 ```bash
 # Connect to staging server
-ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+ssh -i ~/.ssh/deploy_key deploy@your-server-ip
 
 # Check container status
 cd ~/manacore-staging
@@ -519,9 +519,9 @@ healthcheck:
 
 ```bash
 # Test from outside the server
-curl http://46.224.108.214:3001/api/v1/health
-curl http://46.224.108.214:3002/api/v1/health
-curl http://46.224.108.214:3000/health
+curl http://your-server-ip:3001/api/v1/health
+curl http://your-server-ip:3002/api/v1/health
+curl http://your-server-ip:3000/health
 ```
 
 ---
@@ -632,8 +632,8 @@ chat-web:
     PUBLIC_BACKEND_URL: http://chat-backend:3002
     PUBLIC_MANA_CORE_AUTH_URL: http://mana-core-auth:3001
     # Client-side URLs (browser access via public IP)
-    PUBLIC_BACKEND_URL_CLIENT: http://46.224.108.214:3002
-    PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://46.224.108.214:3001
+    PUBLIC_BACKEND_URL_CLIENT: http://your-server-ip:3002
+    PUBLIC_MANA_CORE_AUTH_URL_CLIENT: http://your-server-ip:3001
 ```
 
 2. **Inject into HTML via hooks.server.ts:**
@@ -677,7 +677,7 @@ Open browser DevTools (F12) → Console:
 
 ```javascript
 window.__PUBLIC_MANA_CORE_AUTH_URL__;
-// Should show: "http://46.224.108.214:3001"
+// Should show: "http://your-server-ip:3001"
 ```
 
 ---
@@ -686,7 +686,7 @@ window.__PUBLIC_MANA_CORE_AUTH_URL__;
 
 **Symptoms:**
 
-- Browser console shows: `Access to fetch at 'http://46.224.108.214:3001/...' from origin 'http://46.224.108.214:3000' has been blocked by CORS policy`
+- Browser console shows: `Access to fetch at 'http://your-server-ip:3001/...' from origin 'http://your-server-ip:3000' has been blocked by CORS policy`
 - API calls work via curl but fail from browser
 - Preflight OPTIONS requests fail
 
@@ -694,8 +694,8 @@ window.__PUBLIC_MANA_CORE_AUTH_URL__;
 
 Browser security blocks requests between different origins (port counts as different origin):
 
-- chat-web: `http://46.224.108.214:3000`
-- mana-core-auth: `http://46.224.108.214:3001`
+- chat-web: `http://your-server-ip:3000`
+- mana-core-auth: `http://your-server-ip:3001`
 
 Even though they're on the same IP, different ports = different origins = CORS blocked.
 
@@ -708,7 +708,7 @@ mana-core-auth:
   environment:
     # ... other env vars ...
     # CORS - Allow chat-web and other staging origins
-    CORS_ORIGINS: http://46.224.108.214:3000,http://46.224.108.214:3002,http://localhost:3000
+    CORS_ORIGINS: http://your-server-ip:3000,http://your-server-ip:3002,http://localhost:3000
 ```
 
 **CORS Configuration in mana-core-auth:**
@@ -736,13 +736,13 @@ app.enableCors({
 
 ```bash
 # Test CORS preflight
-curl -X OPTIONS http://46.224.108.214:3001/api/v1/auth/register \
-  -H "Origin: http://46.224.108.214:3000" \
+curl -X OPTIONS http://your-server-ip:3001/api/v1/auth/register \
+  -H "Origin: http://your-server-ip:3000" \
   -H "Access-Control-Request-Method: POST" \
   -v
 
 # Should see in response headers:
-# Access-Control-Allow-Origin: http://46.224.108.214:3000
+# Access-Control-Allow-Origin: http://your-server-ip:3000
 ```
 
 ---
@@ -771,7 +771,7 @@ The CD workflow was calling `pnpm run db:migrate` but that script doesn't exist 
 1. **Manual fix (immediate):**
 
 ```bash
-ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+ssh -i ~/.ssh/deploy_key deploy@your-server-ip
 cd ~/manacore-staging
 
 # Push schema to database (--force skips interactive confirmation)
@@ -822,7 +822,7 @@ docker compose exec -T postgres psql -U postgres -d manacore_auth -c '\dt auth.*
 1. **SSH to server:**
 
    ```bash
-   ssh -i ~/.ssh/hetzner_deploy_key deploy@46.224.108.214
+   ssh -i ~/.ssh/deploy_key deploy@your-server-ip
    cd ~/manacore-staging
    ```
 

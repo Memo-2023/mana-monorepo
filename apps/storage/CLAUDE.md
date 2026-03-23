@@ -58,7 +58,7 @@ pnpm build                       # Build for production
 - **Web**: SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS
 - **Landing**: Astro 5.x, Tailwind CSS
 - **Backend**: NestJS 11, Drizzle ORM, PostgreSQL
-- **Storage**: S3-compatible (MinIO local, Hetzner production)
+- **Storage**: S3-compatible (MinIO)
 - **Types**: TypeScript 5.x
 
 ## Architecture

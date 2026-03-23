@@ -4,7 +4,7 @@
 export interface StorageConfig {
 	/** S3 endpoint URL (e.g., http://localhost:9000 for MinIO) */
 	endpoint: string;
-	/** S3 region (e.g., 'us-east-1' or 'fsn1' for Hetzner) */
+	/** S3 region (e.g., 'us-east-1') */
 	region: string;
 	/** Access key ID */
 	accessKeyId: string;

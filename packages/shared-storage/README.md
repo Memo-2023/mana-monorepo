@@ -1,6 +1,6 @@
 # @manacore/shared-storage
 
-S3-compatible object storage client for the Manacore monorepo. Uses MinIO for local development and Hetzner Object Storage in production.
+S3-compatible object storage client for the Manacore monorepo. Uses MinIO for S3-compatible storage.
 
 ## Setup
 
@@ -208,7 +208,7 @@ This creates the following Prometheus metrics:
 
 ```env
 # Required
-S3_ENDPOINT=http://localhost:9000      # MinIO local / Hetzner production
+S3_ENDPOINT=http://localhost:9000      # MinIO
 S3_REGION=us-east-1
 S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin

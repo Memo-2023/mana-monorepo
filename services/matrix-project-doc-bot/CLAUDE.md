@@ -9,7 +9,7 @@ Matrix Project Doc Bot collects photos, voice notes, and text for projects and g
 - **Framework**: NestJS 10
 - **Matrix**: matrix-bot-sdk
 - **Database**: Drizzle ORM + PostgreSQL
-- **Storage**: S3 (MinIO locally, Hetzner in production)
+- **Storage**: S3 (MinIO)
 - **AI**: OpenAI (Whisper for transcription, GPT-4o-mini for generation)
 
 ## Commands
