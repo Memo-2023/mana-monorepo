@@ -13,7 +13,9 @@
 </script>
 
 {#if playerStore.currentSong}
-	<div class="fixed bottom-0 left-0 right-0 z-30 bg-surface border-t border-border">
+	<div
+		class="mini-player fixed left-0 right-0 z-30 bg-surface border-t border-border rounded-t-xl shadow-lg"
+	>
 		<!-- Error toast -->
 		{#if playerStore.error}
 			<div
@@ -113,3 +115,9 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	.mini-player {
+		bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+	}
+</style>

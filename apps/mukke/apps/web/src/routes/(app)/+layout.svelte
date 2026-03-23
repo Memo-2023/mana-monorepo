@@ -181,12 +181,12 @@
 	.main-content {
 		flex: 1;
 		transition: all 300ms ease;
-		padding-bottom: calc(130px + env(safe-area-inset-bottom));
+		padding-bottom: calc(180px + env(safe-area-inset-bottom));
 	}
 
 	@media (max-width: 768px) {
 		.main-content {
-			padding-bottom: calc(140px + env(safe-area-inset-bottom));
+			padding-bottom: calc(190px + env(safe-area-inset-bottom));
 		}
 	}
 
