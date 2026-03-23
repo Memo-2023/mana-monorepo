@@ -16,9 +16,9 @@
 		"test:e2e:ui": "playwright test --ui"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.52.0",
 		"@manacore/shared-pwa": "workspace:*",
 		"@manacore/shared-vite-config": "workspace:*",
+		"@playwright/test": "^1.52.0",
 		"@sveltejs/adapter-node": "^5.0.0",
 		"@sveltejs/kit": "^2.47.1",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
@@ -58,6 +58,7 @@
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
+		"@manacore/spiral-db": "workspace:^",
 		"date-fns": "^4.1.0",
 		"svelte-i18n": "^4.0.1"
 	},

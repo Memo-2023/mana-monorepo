@@ -93,6 +93,7 @@ export {
 export {
 	createTodoSchema,
 	createQuoteSchema,
+	createContactSchema,
 	encodeSchema,
 	decodeSchema,
 	getSchemaPixelCount,

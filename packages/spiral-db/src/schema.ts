@@ -111,6 +111,26 @@ export function createTodoSchema(): SchemaDefinition {
 }
 
 /**
+ * Create a schema for Contact items (Contacts app)
+ */
+export function createContactSchema(): SchemaDefinition {
+	return {
+		version: 1,
+		name: 'contact',
+		fields: [
+			{ name: 'id', type: 'int', maxLength: 12 }, // 0-4095
+			{ name: 'status', type: 'int', maxLength: 3 }, // 0=active, 2=favorite, 4=archived
+			{ name: 'hasEmail', type: 'bool', maxLength: 1 },
+			{ name: 'hasPhone', type: 'bool', maxLength: 1 },
+			{ name: 'createdAt', type: 'timestamp', maxLength: 24 },
+			{ name: 'name', type: 'string', maxLength: 100 },
+			{ name: 'company', type: 'string', maxLength: 100, nullable: true },
+			{ name: 'city', type: 'string', maxLength: 50, nullable: true },
+		],
+	};
+}
+
+/**
  * Create a schema for Quote items (Zitare app)
  */
 export function createQuoteSchema(): SchemaDefinition {

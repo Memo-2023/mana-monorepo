@@ -9,6 +9,7 @@ import {
 	getSchemaPixelCount,
 	createTodoSchema,
 	createQuoteSchema,
+	createContactSchema,
 	validateRecord,
 	getFieldNames,
 } from './schema.js';
@@ -237,6 +238,47 @@ describe('Quote Schema', () => {
 			text: 'Ein kluges Wort',
 		});
 		expect(result.valid).toBe(true);
+	});
+});
+
+describe('Contact Schema', () => {
+	it('should create contact schema with correct fields', () => {
+		const schema = createContactSchema();
+		expect(schema.name).toBe('contact');
+		expect(schema.fields).toHaveLength(8);
+		expect(schema.fields.map((f) => f.name)).toEqual([
+			'id',
+			'status',
+			'hasEmail',
+			'hasPhone',
+			'createdAt',
+			'name',
+			'company',
+			'city',
+		]);
+	});
+
+	it('should validate a valid contact record', () => {
+		const schema = createContactSchema();
+		const result = validateRecord(schema, {
+			id: 0,
+			status: 0,
+			hasEmail: true,
+			hasPhone: false,
+			createdAt: new Date(),
+			name: 'Max Mustermann',
+			company: null,
+			city: null,
+		});
+		expect(result.valid).toBe(true);
+	});
+
+	it('should mark company and city as nullable', () => {
+		const schema = createContactSchema();
+		const companyField = schema.fields.find((f) => f.name === 'company');
+		const cityField = schema.fields.find((f) => f.name === 'city');
+		expect(companyField?.nullable).toBe(true);
+		expect(cityField?.nullable).toBe(true);
 	});
 });
 
