@@ -43,21 +43,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 
 ### Archived Projects (`apps-archived/`)
 
-These projects are temporarily archived and excluded from the workspace. To re-activate, move back to `apps/`.
-
-| Project            | Description                      |
-| ------------------ | -------------------------------- |
-| **bauntown**       | Community website for developers |
-| **memoro**         | Voice memo & AI analysis         |
-| **news**           | News aggregation                 |
-| **nutriphi**       | Nutrition tracking               |
-| **reader**         | Reading app                      |
-| **uload**          | URL shortener                    |
-| **wisekeep**       | AI wisdom extraction from video  |
-| **techbase**       | Software comparison platform     |
-| **inventory**      | Inventory management             |
-| **presi**          | Presentation tool                |
-| **storage**        | Cloud storage                    |
+Currently empty. To archive a project, move it from `apps/` to `apps-archived/` (excluded from workspace).
 
 ## Development Commands
 

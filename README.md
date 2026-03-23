@@ -1,15 +1,29 @@
 # Manacore Monorepo
 
-Monorepo containing all Manacore projects with shared packages and unified tooling.
+Monorepo containing all Manacore projects — a self-hosted multi-app ecosystem with shared packages and unified tooling.
 
 ## Projects
 
-| Project            | Description                     | Tech Stack                     |
-| ------------------ | ------------------------------- | ------------------------------ |
-| **maerchenzauber** | AI-powered story generation app | NestJS, Expo, SvelteKit, Astro |
-| **manacore**       | Multi-app ecosystem platform    | Expo, SvelteKit, Astro         |
-| **manadeck**       | Card/deck management app        | NestJS, Expo, SvelteKit        |
-| **memoro**         | Voice memo & AI analysis app    | Expo, SvelteKit, Astro         |
+| Project | Description | Apps |
+|---------|-------------|------|
+| **manacore** | Multi-app ecosystem platform | Expo mobile, SvelteKit web |
+| **chat** | AI chat application | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
+| **todo** | Task management | NestJS backend, SvelteKit web, Astro landing |
+| **calendar** | Calendar & scheduling | NestJS backend, SvelteKit web, Astro landing |
+| **clock** | Pomodoro & time tracking | NestJS backend, SvelteKit web, Astro landing |
+| **contacts** | Contact management | NestJS backend, SvelteKit web |
+| **picture** | AI image generation | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
+| **manadeck** | Card/deck management | NestJS backend, Expo mobile, SvelteKit web |
+| **zitare** | Daily inspiration quotes | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
+| **mukke** | Music player | NestJS backend, SvelteKit web |
+| **planta** | Plant care tracker | NestJS backend, SvelteKit web |
+| **storage** | Cloud storage | NestJS backend, SvelteKit web |
+| **questions** | Q&A with web search | SvelteKit web |
+| **skilltree** | Skill tree visualization | NestJS backend, SvelteKit web |
+| **nutriphi** | Nutrition tracking | NestJS backend, SvelteKit web |
+| **citycorners** | City guide | NestJS backend, SvelteKit web, Astro landing |
+| **presi** | Presentation tool | NestJS backend, SvelteKit web |
+| **photos** | Photo management | NestJS backend, SvelteKit web |
 
 ## Getting Started
 
@@ -17,107 +31,52 @@ Monorepo containing all Manacore projects with shared packages and unified tooli
 
 - Node.js 20+
 - pnpm 9.15.0+
+- Docker (for PostgreSQL, Redis, MinIO)
 
 ### Installation
 
 ```bash
-# Install pnpm globally (if not installed)
-npm install -g pnpm
-
-# Install all dependencies
 pnpm install
 ```
 
 ### Development
 
 ```bash
-# Start all projects in dev mode
-pnpm run dev
+# Start infrastructure (PostgreSQL, Redis, MinIO)
+pnpm docker:up
 
-# Start a specific project
-pnpm run maerchenzauber:dev
-pnpm run manacore:dev
-pnpm run manadeck:dev
-pnpm run memoro:dev
+# Start any app with auto DB setup
+pnpm dev:chat:full
+pnpm dev:todo:full
+pnpm dev:calendar:full
+pnpm dev:contacts:full
 
-# Build all projects
+# Build & quality
 pnpm run build
-
-# Run tests
-pnpm run test
-
-# Type check
 pnpm run type-check
-
-# Format code
 pnpm run format
 ```
 
-## Shared Packages
+See [CLAUDE.md](./CLAUDE.md) for comprehensive development documentation.
 
-Located in `packages/`:
-
-| Package                     | Description                             |
-| --------------------------- | --------------------------------------- |
-| `@manacore/shared-types`    | Common TypeScript types                 |
-| `@manacore/shared-supabase` | Unified Supabase client                 |
-| `@manacore/shared-utils`    | Utility functions (date, string, async) |
-| `@manacore/shared-ui`       | React Native UI components              |
-
-### Using Shared Packages
-
-```typescript
-// In any project
-import { User, ApiResponse } from '@manacore/shared-types';
-import { createSupabaseClient } from '@manacore/shared-supabase';
-import { formatDate, truncate, retry } from '@manacore/shared-utils';
-```
-
-## Repository Structure
+## Architecture
 
 ```
 manacore-monorepo/
-├── packages/                 # Shared packages
-│   ├── shared-types/         # TypeScript types
-│   ├── shared-supabase/      # Supabase utilities
-│   ├── shared-utils/         # Common utilities
-│   └── shared-ui/            # React Native components
-├── maerchenzauber/           # Storyteller project
-├── manacore/                 # Manacore apps project
-├── manadeck/                 # ManaDeck project
-├── memoro/                   # Memoro project
-├── turbo.json                # Turborepo configuration
-├── pnpm-workspace.yaml       # Workspace configuration
-└── package.json              # Root package
+├── apps/                    # Product applications
+├── services/                # Microservices (auth, search, LLM, bots)
+├── packages/                # Shared packages
+├── docker/                  # Docker configuration
+└── scripts/                 # Development & deployment scripts
 ```
 
 ## Tooling
 
 - **Package Manager:** pnpm 9.15.0
 - **Build System:** Turborepo
-- **Formatting:** Prettier
-- **Node Version:** 20 (see .nvmrc)
-
-## Adding Dependencies
-
-```bash
-# Add to root (dev tools)
-pnpm add -D <package> -w
-
-# Add to specific project
-pnpm add <package> --filter maerchenzauber
-
-# Add to shared package
-pnpm add <package> --filter @manacore/shared-utils
-```
-
-## Contributing
-
-1. Create a feature branch
-2. Make changes
-3. Run `pnpm run format` and `pnpm run type-check`
-4. Commit with conventional commit messages
-5. Create pull request
+- **Formatting:** Prettier (tabs, single quotes, 100 char width)
+- **Hosting:** Mac Mini (self-hosted) via Docker + Cloudflare Tunnel
+- **Analytics:** Umami (stats.mana.how)
 
 ## License
 
