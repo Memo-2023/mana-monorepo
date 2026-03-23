@@ -5,6 +5,7 @@
 
 import type { SpiralImage } from './types.js';
 import { createImage } from './image.js';
+import pako from 'pako';
 
 // =============================================================================
 // PNG ENCODING (Pure JavaScript - works everywhere)
@@ -60,72 +61,10 @@ function createChunk(type: string, data: Uint8Array): Uint8Array {
 }
 
 /**
- * Adler-32 checksum for zlib
- */
-function adler32(data: Uint8Array): number {
-	let a = 1;
-	let b = 0;
-	for (let i = 0; i < data.length; i++) {
-		a = (a + data[i]) % 65521;
-		b = (b + a) % 65521;
-	}
-	return (b << 16) | a;
-}
-
-/**
- * Simple zlib compression (store only, no actual compression)
- * For small images this is fine; for larger ones, use pako
+ * Compress data using pako (zlib deflate)
  */
 function zlibCompress(data: Uint8Array): Uint8Array {
-	// For simplicity, we use uncompressed deflate blocks
-	// This works but doesn't actually compress
-	const maxBlockSize = 65535;
-	const blocks: Uint8Array[] = [];
-
-	for (let i = 0; i < data.length; i += maxBlockSize) {
-		const blockData = data.slice(i, Math.min(i + maxBlockSize, data.length));
-		const isLast = i + maxBlockSize >= data.length;
-
-		// Block header: 1 byte (BFINAL=1 for last, BTYPE=00 for no compression)
-		const header = isLast ? 0x01 : 0x00;
-
-		// Length and complement
-		const len = blockData.length;
-		const nlen = len ^ 0xffff;
-
-		const block = new Uint8Array(5 + blockData.length);
-		block[0] = header;
-		block[1] = len & 0xff;
-		block[2] = (len >> 8) & 0xff;
-		block[3] = nlen & 0xff;
-		block[4] = (nlen >> 8) & 0xff;
-		block.set(blockData, 5);
-
-		blocks.push(block);
-	}
-
-	// Calculate total size
-	const totalBlockSize = blocks.reduce((sum, b) => sum + b.length, 0);
-
-	// zlib header (2 bytes) + blocks + adler32 (4 bytes)
-	const result = new Uint8Array(2 + totalBlockSize + 4);
-	const view = new DataView(result.buffer);
-
-	// zlib header: CMF=0x78 (deflate, 32K window), FLG=0x01 (no dict, check bits)
-	result[0] = 0x78;
-	result[1] = 0x01;
-
-	// Copy blocks
-	let offset = 2;
-	for (const block of blocks) {
-		result.set(block, offset);
-		offset += block.length;
-	}
-
-	// Adler-32 checksum (big-endian)
-	view.setUint32(offset, adler32(data), false);
-
-	return result;
+	return pako.deflate(data);
 }
 
 /**
@@ -190,66 +129,57 @@ export function exportToPngBytes(image: SpiralImage): Uint8Array {
 }
 
 /**
- * Export SpiralImage to PNG with pako compression (smaller files)
+ * Export SpiralImage to PNG with best compression (smaller files)
+ * Uses pako.deflate with maximum compression level.
  */
 export async function exportToPngBytesCompressed(image: SpiralImage): Promise<Uint8Array> {
-	// Try to use pako for better compression
-	try {
-		const pakoModule = await import('pako');
-		const pako = pakoModule.default || pakoModule;
+	const { width, height } = image;
 
-		const { width, height } = image;
+	const signature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 
-		const signature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+	// IHDR
+	const ihdrData = new Uint8Array(13);
+	const ihdrView = new DataView(ihdrData.buffer);
+	ihdrView.setUint32(0, width, false);
+	ihdrView.setUint32(4, height, false);
+	ihdrData[8] = 8;
+	ihdrData[9] = 2;
+	ihdrData[10] = 0;
+	ihdrData[11] = 0;
+	ihdrData[12] = 0;
+	const ihdrChunk = createChunk('IHDR', ihdrData);
 
-		// IHDR
-		const ihdrData = new Uint8Array(13);
-		const ihdrView = new DataView(ihdrData.buffer);
-		ihdrView.setUint32(0, width, false);
-		ihdrView.setUint32(4, height, false);
-		ihdrData[8] = 8;
-		ihdrData[9] = 2;
-		ihdrData[10] = 0;
-		ihdrData[11] = 0;
-		ihdrData[12] = 0;
-		const ihdrChunk = createChunk('IHDR', ihdrData);
-
-		// Raw data with filter bytes
-		const rawData = new Uint8Array(height * (1 + width * 3));
-		let rawOffset = 0;
-		for (let y = 0; y < height; y++) {
-			rawData[rawOffset++] = 0; // Filter byte
-			for (let x = 0; x < width; x++) {
-				const pixelOffset = (y * width + x) * 3;
-				rawData[rawOffset++] = image.pixels[pixelOffset];
-				rawData[rawOffset++] = image.pixels[pixelOffset + 1];
-				rawData[rawOffset++] = image.pixels[pixelOffset + 2];
-			}
+	// Raw data with filter bytes
+	const rawData = new Uint8Array(height * (1 + width * 3));
+	let rawOffset = 0;
+	for (let y = 0; y < height; y++) {
+		rawData[rawOffset++] = 0; // Filter byte
+		for (let x = 0; x < width; x++) {
+			const pixelOffset = (y * width + x) * 3;
+			rawData[rawOffset++] = image.pixels[pixelOffset];
+			rawData[rawOffset++] = image.pixels[pixelOffset + 1];
+			rawData[rawOffset++] = image.pixels[pixelOffset + 2];
 		}
-
-		// Use pako.deflate which returns zlib-wrapped data (header + compressed + adler32)
-		const zlibData = pako.deflate(rawData);
-
-		const idatChunk = createChunk('IDAT', zlibData);
-		const iendChunk = createChunk('IEND', new Uint8Array(0));
-
-		const png = new Uint8Array(
-			signature.length + ihdrChunk.length + idatChunk.length + iendChunk.length
-		);
-		let offset = 0;
-		png.set(signature, offset);
-		offset += signature.length;
-		png.set(ihdrChunk, offset);
-		offset += ihdrChunk.length;
-		png.set(idatChunk, offset);
-		offset += idatChunk.length;
-		png.set(iendChunk, offset);
-
-		return png;
-	} catch {
-		// Fall back to uncompressed
-		return exportToPngBytes(image);
 	}
+
+	const zlibData = pako.deflate(rawData, { level: 9 });
+
+	const idatChunk = createChunk('IDAT', zlibData);
+	const iendChunk = createChunk('IEND', new Uint8Array(0));
+
+	const png = new Uint8Array(
+		signature.length + ihdrChunk.length + idatChunk.length + iendChunk.length
+	);
+	let offset = 0;
+	png.set(signature, offset);
+	offset += signature.length;
+	png.set(ihdrChunk, offset);
+	offset += ihdrChunk.length;
+	png.set(idatChunk, offset);
+	offset += idatChunk.length;
+	png.set(iendChunk, offset);
+
+	return png;
 }
 
 // =============================================================================
@@ -257,9 +187,108 @@ export async function exportToPngBytesCompressed(image: SpiralImage): Promise<Ui
 // =============================================================================
 
 /**
+ * Verify CRC of a PNG chunk.
+ * Returns true if valid, throws on mismatch.
+ */
+function verifyChunkCrc(pngData: Uint8Array, chunkStart: number, dataLength: number): void {
+	// CRC is computed over type (4 bytes) + data
+	const crcDataStart = chunkStart + 4; // skip length field
+	const crcDataLength = 4 + dataLength; // type + data
+	const crcData = pngData.slice(crcDataStart, crcDataStart + crcDataLength);
+	const computed = crc32(crcData) >>> 0;
+
+	const view = new DataView(pngData.buffer, pngData.byteOffset + chunkStart + 8 + dataLength);
+	const stored = view.getUint32(0, false) >>> 0;
+
+	if (computed !== stored) {
+		const type = String.fromCharCode(
+			pngData[chunkStart + 4],
+			pngData[chunkStart + 5],
+			pngData[chunkStart + 6],
+			pngData[chunkStart + 7]
+		);
+		throw new Error(
+			`PNG CRC mismatch in ${type} chunk (expected ${stored.toString(16)}, got ${computed.toString(16)})`
+		);
+	}
+}
+
+/**
+ * Apply PNG row filter to reconstruct original pixel data.
+ * Supports filter types 0 (None), 1 (Sub), 2 (Up), 3 (Average), 4 (Paeth).
+ */
+function unfilterRow(
+	filterType: number,
+	currentRow: Uint8Array,
+	previousRow: Uint8Array | null,
+	bytesPerPixel: number
+): Uint8Array {
+	const result = new Uint8Array(currentRow.length);
+
+	switch (filterType) {
+		case 0: // None
+			result.set(currentRow);
+			break;
+
+		case 1: // Sub
+			for (let i = 0; i < currentRow.length; i++) {
+				const a = i >= bytesPerPixel ? result[i - bytesPerPixel] : 0;
+				result[i] = (currentRow[i] + a) & 0xff;
+			}
+			break;
+
+		case 2: // Up
+			for (let i = 0; i < currentRow.length; i++) {
+				const b = previousRow ? previousRow[i] : 0;
+				result[i] = (currentRow[i] + b) & 0xff;
+			}
+			break;
+
+		case 3: // Average
+			for (let i = 0; i < currentRow.length; i++) {
+				const a = i >= bytesPerPixel ? result[i - bytesPerPixel] : 0;
+				const b = previousRow ? previousRow[i] : 0;
+				result[i] = (currentRow[i] + Math.floor((a + b) / 2)) & 0xff;
+			}
+			break;
+
+		case 4: // Paeth
+			for (let i = 0; i < currentRow.length; i++) {
+				const a = i >= bytesPerPixel ? result[i - bytesPerPixel] : 0;
+				const b = previousRow ? previousRow[i] : 0;
+				const c = i >= bytesPerPixel && previousRow ? previousRow[i - bytesPerPixel] : 0;
+				result[i] = (currentRow[i] + paethPredictor(a, b, c)) & 0xff;
+			}
+			break;
+
+		default:
+			throw new Error(`Unknown PNG filter type: ${filterType}`);
+	}
+
+	return result;
+}
+
+/**
+ * Paeth predictor function used in PNG filter type 4
+ */
+function paethPredictor(a: number, b: number, c: number): number {
+	const p = a + b - c;
+	const pa = Math.abs(p - a);
+	const pb = Math.abs(p - b);
+	const pc = Math.abs(p - c);
+	if (pa <= pb && pa <= pc) return a;
+	if (pb <= pc) return b;
+	return c;
+}
+
+/**
  * Parse PNG bytes to SpiralImage
  */
 export async function importFromPngBytes(pngData: Uint8Array): Promise<SpiralImage> {
+	if (pngData.length < 8) {
+		throw new Error('Invalid PNG: data too short');
+	}
+
 	// Verify PNG signature
 	const signature = [137, 80, 78, 71, 13, 10, 26, 10];
 	for (let i = 0; i < 8; i++) {
@@ -270,15 +299,19 @@ export async function importFromPngBytes(pngData: Uint8Array): Promise<SpiralIma
 
 	let width = 0;
 	let height = 0;
-	let bitDepth = 0;
-	let colorType = 0;
 	const idatChunks: Uint8Array[] = [];
 
-	// Parse chunks
+	// Parse chunks with CRC validation
 	let offset = 8;
-	while (offset < pngData.length) {
+	while (offset + 12 <= pngData.length) {
 		const view = new DataView(pngData.buffer, pngData.byteOffset + offset);
 		const length = view.getUint32(0, false);
+
+		// Validate chunk boundaries
+		if (offset + 12 + length > pngData.length) {
+			throw new Error('PNG chunk extends beyond file boundary');
+		}
+
 		const type = String.fromCharCode(
 			pngData[offset + 4],
 			pngData[offset + 5],
@@ -287,12 +320,17 @@ export async function importFromPngBytes(pngData: Uint8Array): Promise<SpiralIma
 		);
 		const data = pngData.slice(offset + 8, offset + 8 + length);
 
+		// Validate CRC for critical chunks
+		if (type === 'IHDR' || type === 'IDAT' || type === 'IEND') {
+			verifyChunkCrc(pngData, offset, length);
+		}
+
 		if (type === 'IHDR') {
 			const ihdrView = new DataView(data.buffer, data.byteOffset);
 			width = ihdrView.getUint32(0, false);
 			height = ihdrView.getUint32(4, false);
-			bitDepth = data[8];
-			colorType = data[9];
+			const bitDepth = data[8];
+			const colorType = data[9];
 
 			if (bitDepth !== 8 || colorType !== 2) {
 				throw new Error('Only 8-bit RGB PNGs are supported');
@@ -310,6 +348,14 @@ export async function importFromPngBytes(pngData: Uint8Array): Promise<SpiralIma
 		throw new Error('Invalid PNG: no IHDR chunk');
 	}
 
+	if (width !== height || width % 2 === 0) {
+		throw new Error('SpiralDB requires odd square images');
+	}
+
+	if (idatChunks.length === 0) {
+		throw new Error('Invalid PNG: no IDAT chunks');
+	}
+
 	// Combine IDAT chunks
 	const compressedLength = idatChunks.reduce((sum, c) => sum + c.length, 0);
 	const compressed = new Uint8Array(compressedLength);
@@ -322,33 +368,38 @@ export async function importFromPngBytes(pngData: Uint8Array): Promise<SpiralIma
 	// Decompress using pako
 	let rawData: Uint8Array;
 	try {
-		const pakoModule = await import('pako');
-		const pako = pakoModule.default || pakoModule;
-		// Decompress the zlib data (includes header)
 		rawData = pako.inflate(compressed);
 	} catch (e) {
 		throw new Error(`PNG decompression failed: ${e}`);
 	}
 
-	// Parse raw data (with filter bytes)
-	const image = createImage(width);
-	if (width !== height || width % 2 === 0) {
-		throw new Error('SpiralDB requires odd square images');
+	// Validate decompressed data size
+	const expectedSize = height * (1 + width * 3); // filter byte + RGB per row
+	if (rawData.length !== expectedSize) {
+		throw new Error(
+			`PNG data size mismatch: expected ${expectedSize} bytes, got ${rawData.length}`
+		);
 	}
 
+	// Parse raw data with filter support
+	const image = createImage(width);
+	const bytesPerPixel = 3; // RGB
+	const rowBytes = width * 3;
+	let previousRow: Uint8Array | null = null;
 	let rawOffset = 0;
-	for (let y = 0; y < height; y++) {
-		const filterByte = rawData[rawOffset++];
-		if (filterByte !== 0) {
-			throw new Error(`Unsupported PNG filter: ${filterByte}`);
-		}
 
-		for (let x = 0; x < width; x++) {
-			const pixelOffset = (y * width + x) * 3;
-			image.pixels[pixelOffset] = rawData[rawOffset++];
-			image.pixels[pixelOffset + 1] = rawData[rawOffset++];
-			image.pixels[pixelOffset + 2] = rawData[rawOffset++];
-		}
+	for (let y = 0; y < height; y++) {
+		const filterType = rawData[rawOffset++];
+		const filteredRow = rawData.slice(rawOffset, rawOffset + rowBytes);
+		rawOffset += rowBytes;
+
+		const unfilteredRow = unfilterRow(filterType, filteredRow, previousRow, bytesPerPixel);
+
+		// Copy to image
+		const pixelStart = y * width * 3;
+		image.pixels.set(unfilteredRow, pixelStart);
+
+		previousRow = unfilteredRow;
 	}
 
 	return image;

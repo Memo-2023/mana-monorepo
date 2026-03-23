@@ -138,7 +138,7 @@ if (existsSync(pngPath)) {
 	console.log(`  Loaded back: ${loadedImage.width}×${loadedImage.height} pixels`);
 
 	// Verify data integrity
-	const loadedDb = SpiralDB.fromImage(loadedImage, createTodoSchema());
+	const loadedDb = SpiralDB.fromImage<Record<string, unknown>>(loadedImage, createTodoSchema());
 	const loadedTodos = loadedDb.getAll();
 	console.log(`  Verified: ${loadedTodos.length} todos recovered`);
 

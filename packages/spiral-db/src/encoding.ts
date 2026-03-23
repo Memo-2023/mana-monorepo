@@ -185,6 +185,11 @@ export function decodeBool(stream: BitStream): boolean {
 export function encodeString(stream: BitStream, value: string, compress = false): void {
 	const bytes = new TextEncoder().encode(value);
 
+	// 9-bit length field can hold max 511 bytes
+	if (bytes.length > 511) {
+		throw new Error(`String too long: ${bytes.length} bytes (max 511)`);
+	}
+
 	if (compress && bytes.length > 20) {
 		const compressed = pako.deflate(bytes);
 		if (compressed.length < bytes.length) {

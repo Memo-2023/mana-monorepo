@@ -54,12 +54,13 @@ import {
 	expandImage,
 } from './image.js';
 import { getRingInfo, findSpaceForRecord, getTotalPixelsForRing } from './spiral.js';
-import { encodeSchema } from './schema.js';
+import { encodeSchema, validateRecord } from './schema.js';
 
-export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown>> {
+export class SpiralDB<T extends object = Record<string, unknown>> {
 	private image: SpiralImage;
 	private schema: SchemaDefinition;
 	private index: MasterIndex;
+	private dataStartRing: number;
 	private currentRing: number;
 	private currentOffset: number;
 	private compression: boolean;
@@ -69,7 +70,8 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 		this.compression = options.compression ?? false;
 
 		// Initialize with minimum size for header + schema + index
-		const initialRing = Math.max(RING_DATA_START, options.initialSize ?? RING_DATA_START);
+		this.dataStartRing = RING_DATA_START;
+		const initialRing = Math.max(this.dataStartRing, options.initialSize ?? this.dataStartRing);
 		this.image = createImageForRing(initialRing);
 
 		// Initialize empty index
@@ -80,7 +82,7 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 		};
 
 		// Start writing data after index ring
-		this.currentRing = RING_DATA_START;
+		this.currentRing = this.dataStartRing;
 		this.currentOffset = 0;
 
 		// Write initial structure
@@ -134,6 +136,85 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 	}
 
 	/**
+	 * Calculate how many rings the index needs for a given record count.
+	 */
+	private getIndexRingsNeeded(recordCount: number): number {
+		// Header: 12 bits (count) + 12 bits (nextId) = 24 bits
+		// Per entry: 12+8+8+9+3 = 40 bits
+		const totalBits = 24 + recordCount * 40;
+		const totalPixels = Math.ceil(totalBits / 3);
+
+		let ringsNeeded = 0;
+		let pixelsAvailable = 0;
+		let ring = RING_INDEX;
+		while (pixelsAvailable < totalPixels) {
+			pixelsAvailable += getRingInfo(ring).pixelCount;
+			ring++;
+			ringsNeeded++;
+		}
+		return ringsNeeded;
+	}
+
+	/**
+	 * Ensure there's room for additional index entries without overlapping data.
+	 * If the index would overflow into the data region, rebuild the database
+	 * with a higher dataStartRing.
+	 */
+	private ensureIndexCapacity(additionalEntries: number): void {
+		const futureCount = this.index.records.length + additionalEntries;
+		const ringsNeeded = this.getIndexRingsNeeded(futureCount);
+		const requiredDataStart = RING_INDEX + ringsNeeded;
+
+		if (requiredDataStart > this.dataStartRing) {
+			// Need to rebuild: collect all current records, recreate with more index space
+			const activeRecords = this.getAll('active');
+			const completedRecords = this.getAll('completed');
+			const allRecords = [...activeRecords, ...completedRecords];
+
+			// Reset with new data start
+			this.dataStartRing = requiredDataStart;
+			this.image = createImageForRing(this.dataStartRing);
+			this.index = { records: [], deletedIds: new Set(), nextId: 0 };
+			this.currentRing = this.dataStartRing;
+			this.currentOffset = 0;
+			this.initializeDatabase();
+
+			// Re-insert all records
+			for (const record of allRecords) {
+				const id = this.index.nextId++;
+				const pixels = this.serializeRecord(id, record.meta.status, record.data);
+				const space = findSpaceForRecord(this.currentRing, this.currentOffset, pixels.length);
+
+				if (space.ring > Math.floor(this.image.width / 2)) {
+					this.image = expandImage(this.image, space.ring);
+				}
+
+				const ringInfo = getRingInfo(space.ring);
+				const startIndex = ringInfo.startIndex + space.offset;
+				writePixelRange(this.image, startIndex, pixels);
+
+				this.index.records.push({
+					id,
+					ring: space.ring,
+					offset: space.offset,
+					length: pixels.length,
+					status: record.meta.status,
+				});
+
+				this.currentRing = space.ring;
+				this.currentOffset = space.offset + pixels.length;
+				if (this.currentOffset >= ringInfo.pixelCount) {
+					this.currentRing++;
+					this.currentOffset = 0;
+				}
+			}
+
+			this.writeHeader();
+			this.writeIndex();
+		}
+	}
+
+	/**
 	 * Write the master index to Ring 3+
 	 * Index can span multiple rings if needed
 	 */
@@ -158,11 +239,16 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 		const pixels = bitsToPixels(stream.bits);
 
 		// Write index pixels starting at Ring 3
-		// May span multiple rings if needed
 		let pixelIndex = 0;
 		let currentRing = RING_INDEX;
 
 		while (pixelIndex < pixels.length) {
+			// Expand image if this ring doesn't fit
+			const maxRing = Math.floor(this.image.width / 2);
+			if (currentRing > maxRing) {
+				this.image = expandImage(this.image, currentRing);
+			}
+
 			const ringInfo = getRingInfo(currentRing);
 			const pixelsInRing = Math.min(pixels.length - pixelIndex, ringInfo.pixelCount);
 
@@ -177,11 +263,13 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 		}
 
 		// Store how many rings the index spans (for loading)
-		// We use the last pixel of Ring 2 (schema ring) to store this
+		// Encode as 2 pixels (6 bits, max 63 rings) at end of Ring 2
 		const indexRingCount = currentRing - RING_INDEX;
 		const ring2Info = getRingInfo(RING_SCHEMA);
-		const countPixelIndex = ring2Info.startIndex + ring2Info.pixelCount - 1;
-		setPixelByIndex(this.image, countPixelIndex, indexRingCount as ColorIndex);
+		const countPixelIndex = ring2Info.startIndex + ring2Info.pixelCount - 2;
+		// High 3 bits in second-to-last pixel, low 3 bits in last pixel
+		setPixelByIndex(this.image, countPixelIndex, ((indexRingCount >> 3) & 0x7) as ColorIndex);
+		setPixelByIndex(this.image, countPixelIndex + 1, (indexRingCount & 0x7) as ColorIndex);
 	}
 
 	/**
@@ -198,7 +286,7 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 
 		// Encode each field according to schema
 		for (const field of this.schema.fields) {
-			const value = data[field.name];
+			const value = (data as Record<string, unknown>)[field.name];
 
 			// Null flag for nullable fields
 			if (field.nullable) {
@@ -305,6 +393,15 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 	 */
 	insert(data: T): WriteResult {
 		try {
+			// Validate record against schema before writing
+			const validation = validateRecord(this.schema, data as unknown as Record<string, unknown>);
+			if (!validation.valid) {
+				return { success: false, error: `Validation failed: ${validation.errors.join('; ')}` };
+			}
+
+			// Ensure index has room for one more entry without overlapping data
+			this.ensureIndexCapacity(1);
+
 			const id = this.index.nextId++;
 			const pixels = this.serializeRecord(id, 'active', data);
 
@@ -315,8 +412,9 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 			// Find space for the record
 			const space = findSpaceForRecord(this.currentRing, this.currentOffset, pixels.length);
 
-			// Expand image if needed
-			if (space.needsExpansion) {
+			// Expand image if needed (check both ring advancement and image bounds)
+			const maxRing = Math.floor(this.image.width / 2);
+			if (space.ring > maxRing) {
 				this.image = expandImage(this.image, space.ring);
 			}
 
@@ -365,7 +463,15 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 	 * Read a record by ID
 	 */
 	read(id: number): ReadResult<T> {
-		const entry = this.index.records.find((r) => r.id === id);
+		// Find the latest non-deleted entry for this ID
+		// (update creates a new entry with the same ID, so we search from the end)
+		let entry: IndexEntry | undefined;
+		for (let i = this.index.records.length - 1; i >= 0; i--) {
+			if (this.index.records[i].id === id) {
+				entry = this.index.records[i];
+				break;
+			}
+		}
 
 		if (!entry) {
 			return { success: false, error: 'Record not found' };
@@ -421,7 +527,7 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 
 		const space = findSpaceForRecord(this.currentRing, this.currentOffset, pixels.length);
 
-		if (space.needsExpansion) {
+		if (space.ring > Math.floor(this.image.width / 2)) {
 			this.image = expandImage(this.image, space.ring);
 		}
 
@@ -539,7 +645,7 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 		const deletedRecords = this.index.records.filter((r) => r.status === 'deleted').length;
 
 		const usedPixels = this.index.records.reduce((sum, r) => sum + r.length, 0);
-		const headerPixels = getTotalPixelsForRing(RING_INDEX);
+		const headerPixels = getTotalPixelsForRing(this.dataStartRing - 1);
 
 		return {
 			imageSize: this.image.width,
@@ -576,6 +682,7 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 
 		this.image = newDb.image;
 		this.index = newDb.index;
+		this.dataStartRing = newDb.dataStartRing;
 		this.currentRing = newDb.currentRing;
 		this.currentOffset = newDb.currentOffset;
 
@@ -585,10 +692,7 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 	/**
 	 * Load database from an existing image
 	 */
-	static fromImage<T extends Record<string, unknown>>(
-		image: SpiralImage,
-		schema: SchemaDefinition
-	): SpiralDB<T> {
+	static fromImage<T extends object>(image: SpiralImage, schema: SchemaDefinition): SpiralDB<T> {
 		const db = new SpiralDB<T>({ schema });
 		db.image = image;
 
@@ -608,10 +712,15 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 	 * Load index from image
 	 */
 	private loadIndex(): void {
-		// Read index ring count from last pixel of Ring 2
+		// Read index ring count from last 2 pixels of Ring 2 (6 bits, max 63)
 		const ring2Info = getRingInfo(RING_SCHEMA);
-		const countPixelIndex = ring2Info.startIndex + ring2Info.pixelCount - 1;
-		const indexRingCount = getPixelByIndex(this.image, countPixelIndex) || 1;
+		const countPixelIndex = ring2Info.startIndex + ring2Info.pixelCount - 2;
+		const highBits = getPixelByIndex(this.image, countPixelIndex);
+		const lowBits = getPixelByIndex(this.image, countPixelIndex + 1);
+		const indexRingCount = (highBits << 3) | lowBits || 1;
+
+		// Set data start ring based on stored index size
+		this.dataStartRing = RING_INDEX + indexRingCount;
 
 		// Read pixels from all index rings
 		const allPixels: ColorIndex[] = [];
@@ -659,6 +768,9 @@ export class SpiralDB<T extends Record<string, unknown> = Record<string, unknown
 				this.currentRing++;
 				this.currentOffset = 0;
 			}
+		} else {
+			this.currentRing = this.dataStartRing;
+			this.currentOffset = 0;
 		}
 	}
 }
