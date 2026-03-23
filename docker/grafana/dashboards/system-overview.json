@@ -36,7 +36,7 @@
 				},
 				"overrides": []
 			},
-			"gridPos": { "h": 5, "w": 4, "x": 0, "y": 1 },
+			"gridPos": { "h": 5, "w": 3, "x": 0, "y": 1 },
 			"id": 21,
 			"options": {
 				"orientation": "auto",
@@ -79,7 +79,7 @@
 				},
 				"overrides": []
 			},
-			"gridPos": { "h": 5, "w": 4, "x": 4, "y": 1 },
+			"gridPos": { "h": 5, "w": 3, "x": 3, "y": 1 },
 			"id": 22,
 			"options": {
 				"orientation": "auto",
@@ -122,7 +122,7 @@
 				},
 				"overrides": []
 			},
-			"gridPos": { "h": 5, "w": 4, "x": 8, "y": 1 },
+			"gridPos": { "h": 5, "w": 3, "x": 6, "y": 1 },
 			"id": 23,
 			"options": {
 				"orientation": "auto",
@@ -143,6 +143,49 @@
 				}
 			],
 			"title": "Disk Usage (/)",
+			"type": "gauge"
+		},
+		{
+			"datasource": { "type": "prometheus", "uid": "${datasource}" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "thresholds" },
+					"mappings": [],
+					"max": 100,
+					"min": 0,
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{ "color": "green", "value": null },
+							{ "color": "yellow", "value": 70 },
+							{ "color": "red", "value": 85 }
+						]
+					},
+					"unit": "percent"
+				},
+				"overrides": []
+			},
+			"gridPos": { "h": 5, "w": 3, "x": 9, "y": 1 },
+			"id": 30,
+			"options": {
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"showThresholdLabels": false,
+				"showThresholdMarkers": true
+			},
+			"pluginVersion": "10.0.0",
+			"targets": [
+				{
+					"datasource": { "type": "prometheus", "uid": "${datasource}" },
+					"expr": "100 - ((node_filesystem_avail_bytes{mountpoint=~\"/host_mnt/Volumes/ManaData\"} / node_filesystem_size_bytes{mountpoint=~\"/host_mnt/Volumes/ManaData\"}) * 100)",
+					"refId": "A"
+				}
+			],
+			"title": "Disk Usage (ManaData)",
 			"type": "gauge"
 		},
 		{

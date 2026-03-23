@@ -273,6 +273,7 @@ echo ""
 echo "Monitoring:"
 check_service "Grafana" "http://localhost:8000/api/health"
 check_service "Umami" "http://localhost:8010/api/heartbeat"
+check_service "GlitchTip" "http://localhost:8020/_health/"
 check_service "VictoriaMetrics" "http://localhost:9090/health"
 
 echo ""
@@ -280,6 +281,36 @@ echo "Alerting:"
 check_service "vmalert" "http://localhost:8880/health"
 check_service "Alertmanager" "http://localhost:9093/-/healthy"
 check_service "Alert Notifier" "http://localhost:9095/health"
+
+echo ""
+echo "Disk Space:"
+check_disk() {
+    local name=$1
+    local path=$2
+    local warn_pct=${3:-80}
+    local crit_pct=${4:-90}
+
+    if [ ! -d "$path" ]; then
+        echo -e "  ${YELLOW}[SKIP]${NC} $name ($path not found)"
+        return 0
+    fi
+
+    local usage_pct=$(df "$path" | tail -1 | awk '{gsub(/%/,""); print $5}')
+    local avail=$(df -h "$path" | tail -1 | awk '{print $4}')
+
+    if [ "$usage_pct" -ge "$crit_pct" ]; then
+        echo -e "  ${RED}[CRIT]${NC} $name: ${usage_pct}% used ($avail free)"
+        FAILURES+=("Disk $name: ${usage_pct}% (critical)")
+    elif [ "$usage_pct" -ge "$warn_pct" ]; then
+        echo -e "  ${YELLOW}[WARN]${NC} $name: ${usage_pct}% used ($avail free)"
+        FAILURES+=("Disk $name: ${usage_pct}% (warning)")
+    else
+        echo -e "  ${GREEN}[OK]${NC} $name: ${usage_pct}% used ($avail free)"
+    fi
+}
+
+check_disk "System (/)" "/"
+check_disk "ManaData" "/Volumes/ManaData"
 
 echo ""
 echo "Cloudflare Tunnel:"
