@@ -311,15 +311,15 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3030
+      PORT: 3050
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
       CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
       ORG_LANDING_DOMAIN: mana.how
     ports:
-      - "3030:3030"
+      - "3050:3050"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3050/api/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
