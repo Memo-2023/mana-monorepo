@@ -50,7 +50,9 @@
 
 		<div
 			class="mt-2 flex items-center gap-2 text-xs"
-			style="color: {message.role === 'user' ? 'rgba(255,255,255,0.7)' : 'var(--color-text-muted)'};"
+			style="color: {message.role === 'user'
+				? 'rgba(255,255,255,0.7)'
+				: 'var(--color-text-muted)'};"
 		>
 			<span>{formatTime(message.timestamp)}</span>
 			{#if message.model}

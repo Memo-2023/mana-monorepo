@@ -28,7 +28,7 @@ COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 
 # Copy llm-playground service
-COPY services/llm-playground ./services/llm-playground
+COPY apps/playground/apps/web ./apps/playground/apps/web
 
 # Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
@@ -38,7 +38,7 @@ WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
 # Build the web app
-WORKDIR /app/services/llm-playground
+WORKDIR /app/apps/playground/apps/web
 RUN pnpm exec svelte-kit sync
 RUN pnpm build
 
@@ -46,17 +46,17 @@ RUN pnpm build
 FROM node:20-alpine AS production
 
 # Keep same directory structure as builder so pnpm symlinks resolve correctly
-WORKDIR /app/services/llm-playground
+WORKDIR /app/apps/playground/apps/web
 
 # Copy the pnpm store that symlinks point to (at /app/node_modules/.pnpm)
 COPY --from=builder /app/node_modules/.pnpm /app/node_modules/.pnpm
 
 # Copy the app's node_modules (contains symlinks to the pnpm store)
-COPY --from=builder /app/services/llm-playground/node_modules ./node_modules
+COPY --from=builder /app/apps/playground/apps/web/node_modules ./node_modules
 
 # Copy built application
-COPY --from=builder /app/services/llm-playground/build ./build
-COPY --from=builder /app/services/llm-playground/package.json ./
+COPY --from=builder /app/apps/playground/apps/web/build ./build
+COPY --from=builder /app/apps/playground/apps/web/package.json ./
 
 # Expose port
 EXPOSE 5190

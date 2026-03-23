@@ -1767,7 +1767,7 @@ services:
   llm-playground:
     build:
       context: .
-      dockerfile: services/llm-playground/Dockerfile
+      dockerfile: apps/playground/apps/web/Dockerfile
     container_name: mana-app-llm-playground
     restart: unless-stopped
     depends_on:

@@ -22,10 +22,7 @@
 				2) *
 				100}%, var(--color-bg) {(settingsStore.temperature / 2) * 100}%, var(--color-bg) 100%);"
 		/>
-		<div
-			class="mt-1 flex justify-between text-xs"
-			style="color: var(--color-text-muted);"
-		>
+		<div class="mt-1 flex justify-between text-xs" style="color: var(--color-text-muted);">
 			<span>Precise</span>
 			<span>Creative</span>
 		</div>
@@ -47,12 +44,10 @@
 			style="background: linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) {((settingsStore.maxTokens -
 				256) /
 				(8192 - 256)) *
-				100}%, var(--color-bg) {((settingsStore.maxTokens - 256) / (8192 - 256)) * 100}%, var(--color-bg) 100%);"
+				100}%, var(--color-bg) {((settingsStore.maxTokens - 256) / (8192 - 256)) *
+				100}%, var(--color-bg) 100%);"
 		/>
-		<div
-			class="mt-1 flex justify-between text-xs"
-			style="color: var(--color-text-muted);"
-		>
+		<div class="mt-1 flex justify-between text-xs" style="color: var(--color-text-muted);">
 			<span>256</span>
 			<span>8192</span>
 		</div>
@@ -76,10 +71,7 @@
 			style="background: linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) {settingsStore.topP *
 				100}%, var(--color-bg) {settingsStore.topP * 100}%, var(--color-bg) 100%);"
 		/>
-		<div
-			class="mt-1 flex justify-between text-xs"
-			style="color: var(--color-text-muted);"
-		>
+		<div class="mt-1 flex justify-between text-xs" style="color: var(--color-text-muted);">
 			<span>Focused</span>
 			<span>Diverse</span>
 		</div>
