@@ -8,6 +8,10 @@
 	import { pictureService, type GeneratedImage } from '$lib/api/services';
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
+	import { APP_URLS } from '@manacore/shared-branding';
+
+	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+	const pictureUrl = isDev ? APP_URLS.picture.dev : APP_URLS.picture.prod;
 
 	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let data = $state<GeneratedImage[]>([]);
@@ -85,7 +89,7 @@
 				{$_('dashboard.widgets.picture.empty')}
 			</p>
 			<a
-				href="http://localhost:5175"
+				href={pictureUrl}
 				target="_blank"
 				rel="noopener"
 				class="mt-3 inline-block rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
@@ -97,7 +101,7 @@
 		<div class="grid grid-cols-3 gap-2">
 			{#each data as image}
 				<a
-					href="http://localhost:5175/gallery/{image.id}"
+					href="{pictureUrl}/gallery/{image.id}"
 					target="_blank"
 					rel="noopener"
 					class="group relative aspect-square overflow-hidden rounded-lg bg-surface-hover"
@@ -120,7 +124,7 @@
 		</div>
 		<div class="mt-3 text-center">
 			<a
-				href="http://localhost:5175/gallery"
+				href="{pictureUrl}/gallery"
 				target="_blank"
 				rel="noopener"
 				class="text-sm text-primary hover:underline"

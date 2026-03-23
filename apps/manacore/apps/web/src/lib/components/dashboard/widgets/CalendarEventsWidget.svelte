@@ -8,6 +8,10 @@
 	import { calendarService, type CalendarEvent } from '$lib/api/services';
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
+	import { APP_URLS } from '@manacore/shared-branding';
+
+	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+	const calendarUrl = isDev ? APP_URLS.calendar.dev : APP_URLS.calendar.prod;
 
 	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let data = $state<CalendarEvent[]>([]);
@@ -119,7 +123,7 @@
 
 			{#if remainingCount > 0}
 				<a
-					href="http://localhost:5179"
+					href={calendarUrl}
 					target="_blank"
 					rel="noopener"
 					class="block rounded-lg py-2 text-center text-sm text-primary hover:bg-primary/5"

@@ -8,6 +8,10 @@
 	import { clockService, type Timer, type Alarm, type ClockStats } from '$lib/api/services';
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
+	import { APP_URLS } from '@manacore/shared-branding';
+
+	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+	const clockUrl = isDev ? APP_URLS.clock.dev : APP_URLS.clock.prod;
 
 	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let timers = $state<Timer[]>([]);
@@ -90,7 +94,7 @@
 				{$_('dashboard.widgets.clock.empty')}
 			</p>
 			<a
-				href="http://localhost:5177"
+				href={clockUrl}
 				target="_blank"
 				rel="noopener"
 				class="mt-3 inline-block rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
@@ -174,7 +178,7 @@
 
 		<div class="mt-3 text-center">
 			<a
-				href="http://localhost:5177"
+				href={clockUrl}
 				target="_blank"
 				rel="noopener"
 				class="text-sm text-primary hover:underline"

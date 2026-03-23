@@ -8,6 +8,10 @@
 	import { storageService, type StorageStats } from '$lib/api/services/storage';
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
+	import { APP_URLS } from '@manacore/shared-branding';
+
+	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+	const storageUrl = isDev ? APP_URLS.storage.dev : APP_URLS.storage.prod;
 
 	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let data = $state<StorageStats | null>(null);
@@ -99,7 +103,7 @@
 			{/if}
 
 			<a
-				href="https://storage.mana.how"
+				href={storageUrl}
 				target="_blank"
 				rel="noopener"
 				class="mt-2 block w-full rounded-lg bg-primary/10 py-2 text-center text-sm font-medium text-primary hover:bg-primary/20"

@@ -8,6 +8,10 @@
 	import { manadeckService, type LearningProgress, type Deck } from '$lib/api/services';
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
+	import { APP_URLS } from '@manacore/shared-branding';
+
+	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+	const manadeckUrl = isDev ? APP_URLS.manadeck.dev : APP_URLS.manadeck.prod;
 
 	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let progress = $state<LearningProgress | null>(null);
@@ -80,7 +84,7 @@
 				{$_('dashboard.widgets.manadeck.empty')}
 			</p>
 			<a
-				href="http://localhost:5176"
+				href={manadeckUrl}
 				target="_blank"
 				rel="noopener"
 				class="mt-3 inline-block rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
@@ -124,7 +128,7 @@
 			<div class="space-y-2">
 				{#each decksWithDue as deck}
 					<a
-						href="http://localhost:5176/deck/{deck.id}/study"
+						href="{manadeckUrl}/deck/{deck.id}/study"
 						target="_blank"
 						rel="noopener"
 						class="flex items-center justify-between rounded-lg p-2 transition-colors hover:bg-surface-hover"
@@ -144,7 +148,7 @@
 		{#if totalDue > 0}
 			<div class="mt-3 text-center">
 				<a
-					href="http://localhost:5176/study"
+					href="{manadeckUrl}/study"
 					target="_blank"
 					rel="noopener"
 					class="inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
