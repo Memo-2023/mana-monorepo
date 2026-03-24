@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { sharesStore } from '$lib/stores/shares.svelte';
@@ -28,12 +29,6 @@
 	// Active calendar for viewing shares
 	let viewingCalendarId = $state<string | null>(null);
 
-	const PERMISSION_LABELS: Record<SharePermission, string> = {
-		read: 'Lesen',
-		write: 'Lesen & Bearbeiten',
-		admin: 'Administrator',
-	};
-
 	async function handleShare() {
 		if (!shareEmail.trim() || !selectedCalendarId) return;
 
@@ -45,7 +40,7 @@
 	}
 
 	async function handleRemoveShare(calendarId: string, shareId: string) {
-		if (!confirm('Freigabe wirklich entfernen?')) return;
+		if (!confirm($_('sharing.confirmRemoveShare'))) return;
 		await sharesStore.removeShare(calendarId, shareId);
 	}
 
@@ -63,16 +58,20 @@
 </script>
 
 <svelte:head>
-	<title>Kalender-Freigaben - Einstellungen</title>
+	<title>{$_('sharing.pageTitle')}</title>
 </svelte:head>
 
 <div class="page-container">
 	<header class="header">
-		<a href="/settings" class="back-button" aria-label="Zurück">
+		<a href="/settings" class="back-button" aria-label={$_('sharing.back')}>
 			<CaretLeft size={20} weight="bold" />
 		</a>
-		<h1 class="title">Freigaben</h1>
-		<button onclick={() => (showShareForm = true)} class="add-button" aria-label="Kalender teilen">
+		<h1 class="title">{$_('sharing.title')}</h1>
+		<button
+			onclick={() => (showShareForm = true)}
+			class="add-button"
+			aria-label={$_('sharing.shareCalendar')}
+		>
 			<Plus size={20} weight="bold" />
 		</button>
 	</header>
@@ -82,14 +81,15 @@
 		<section class="section">
 			<h2 class="section-title">
 				<EnvelopeSimple size={18} />
-				Einladungen ({sharesStore.invitations.length})
+				{$_('sharing.invitations', { values: { count: sharesStore.invitations.length } })}
 			</h2>
 			{#each sharesStore.invitations as invite (invite.id)}
 				<div class="share-card">
 					<div class="share-info">
-						<span class="share-name">Kalender-Einladung</span>
+						<span class="share-name">{$_('sharing.calendarInvitation')}</span>
 						<span class="share-detail">
-							{PERMISSION_LABELS[invite.permission]} Zugriff
+							{$_('sharing.permission.' + invite.permission)}
+							{$_('sharing.access')}
 						</span>
 					</div>
 					<div class="share-actions">
@@ -98,7 +98,7 @@
 							onclick={() => sharesStore.acceptInvitation(invite.id)}
 						>
 							<CheckCircle size={14} />
-							Annehmen
+							{$_('sharing.accept')}
 						</button>
 						<button
 							class="btn btn-sm btn-ghost"
@@ -117,13 +117,13 @@
 		<section class="section">
 			<h2 class="section-title">
 				<Users size={18} />
-				Mit mir geteilt
+				{$_('sharing.sharedWithMe')}
 			</h2>
 			{#each sharesStore.sharedWithMe as share (share.id)}
 				<div class="share-card">
 					<div class="share-info">
-						<span class="share-name">Geteilter Kalender</span>
-						<span class="share-detail">{PERMISSION_LABELS[share.permission]}</span>
+						<span class="share-name">{$_('sharing.sharedCalendar')}</span>
+						<span class="share-detail">{$_('sharing.permission.' + share.permission)}</span>
 					</div>
 				</div>
 			{/each}
@@ -134,7 +134,7 @@
 	<section class="section">
 		<h2 class="section-title">
 			<UserPlus size={18} />
-			Meine Kalender teilen
+			{$_('sharing.shareMyCalendars')}
 		</h2>
 
 		{#each calendarsStore.calendars as calendar (calendar.id)}
@@ -161,25 +161,25 @@
 					{@const calShares = sharesStore.getSharesForCalendar(calendar.id)}
 					<div class="shares-list">
 						{#if calShares.length === 0}
-							<p class="empty-text">Noch nicht geteilt</p>
+							<p class="empty-text">{$_('sharing.notSharedYet')}</p>
 						{:else}
 							{#each calShares as share (share.id)}
 								<div class="share-item">
 									<div class="share-item-info">
 										<span class="share-email">
-											{share.sharedWithEmail || 'Link-Freigabe'}
+											{share.sharedWithEmail || $_('sharing.linkShare')}
 										</span>
 										<span class="share-permission">
-											{PERMISSION_LABELS[share.permission]}
+											{$_('sharing.permission.' + share.permission)}
 										</span>
 										{#if share.status === 'pending'}
-											<span class="share-status pending">Ausstehend</span>
+											<span class="share-status pending">{$_('sharing.pending')}</span>
 										{/if}
 									</div>
 									<button
 										class="remove-btn"
 										onclick={() => handleRemoveShare(calendar.id, share.id)}
-										title="Freigabe entfernen"
+										title={$_('sharing.removeShare')}
 									>
 										<Trash size={14} />
 									</button>
@@ -195,7 +195,7 @@
 							}}
 						>
 							<Plus size={14} />
-							Person hinzufügen
+							{$_('sharing.addPerson')}
 						</button>
 					</div>
 				{/if}
@@ -208,12 +208,12 @@
 <Modal
 	visible={showShareForm}
 	onClose={() => (showShareForm = false)}
-	title="Kalender teilen"
+	title={$_('sharing.shareCalendar')}
 	maxWidth="sm"
 >
 	<div class="share-form">
 		<div class="form-field">
-			<label>Kalender</label>
+			<label>{$_('sharing.form.calendar')}</label>
 			<select bind:value={selectedCalendarId} class="select-input">
 				{#each calendarsStore.calendars as cal}
 					<option value={cal.id}>{cal.name}</option>
@@ -221,28 +221,30 @@
 			</select>
 		</div>
 		<div class="form-field">
-			<label>E-Mail-Adresse</label>
+			<label>{$_('sharing.form.email')}</label>
 			<Input bind:value={shareEmail} placeholder="name@example.com" />
 		</div>
 		<div class="form-field">
-			<label>Berechtigung</label>
+			<label>{$_('sharing.form.permission')}</label>
 			<select bind:value={sharePermission} class="select-input">
-				<option value="read">{PERMISSION_LABELS.read}</option>
-				<option value="write">{PERMISSION_LABELS.write}</option>
-				<option value="admin">{PERMISSION_LABELS.admin}</option>
+				<option value="read">{$_('sharing.permission.read')}</option>
+				<option value="write">{$_('sharing.permission.write')}</option>
+				<option value="admin">{$_('sharing.permission.admin')}</option>
 			</select>
 		</div>
 	</div>
 
 	{#snippet footer()}
 		<div class="modal-footer">
-			<button class="btn btn-secondary" onclick={() => (showShareForm = false)}>Abbrechen</button>
+			<button class="btn btn-secondary" onclick={() => (showShareForm = false)}
+				>{$_('common.cancel')}</button
+			>
 			<button
 				class="btn btn-primary"
 				onclick={handleShare}
 				disabled={isSharing || !shareEmail.trim() || !selectedCalendarId}
 			>
-				{isSharing ? 'Teile...' : 'Teilen'}
+				{isSharing ? $_('sharing.sharing') : $_('sharing.share')}
 			</button>
 		</div>
 	{/snippet}

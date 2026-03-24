@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { externalCalendarsStore } from '$lib/stores/external-calendars.svelte';
 	import {
@@ -38,11 +39,23 @@
 	let isDiscovering = $state(false);
 
 	// Provider selection
-	const providers: { id: CalendarProvider; label: string; description: string }[] = [
-		{ id: 'ical_url', label: 'iCal URL', description: 'ICS-Link importieren (z.B. Feiertage)' },
-		{ id: 'caldav', label: 'CalDAV', description: 'CalDAV-Server verbinden' },
-		{ id: 'google', label: 'Google Calendar', description: 'Mit Google Kalender synchronisieren' },
-		{ id: 'apple', label: 'Apple Calendar', description: 'iCloud Kalender verbinden' },
+	const providers: { id: CalendarProvider; labelKey: string; descriptionKey: string }[] = [
+		{
+			id: 'ical_url',
+			labelKey: 'sync.providers.icalUrl',
+			descriptionKey: 'sync.providers.icalUrlDesc',
+		},
+		{
+			id: 'caldav',
+			labelKey: 'sync.providers.caldav',
+			descriptionKey: 'sync.providers.caldavDesc',
+		},
+		{
+			id: 'google',
+			labelKey: 'sync.providers.google',
+			descriptionKey: 'sync.providers.googleDesc',
+		},
+		{ id: 'apple', labelKey: 'sync.providers.apple', descriptionKey: 'sync.providers.appleDesc' },
 	];
 
 	function selectProvider(provider: CalendarProvider) {
@@ -131,7 +144,7 @@
 	}
 
 	async function handleDisconnect(id: string, name: string) {
-		if (!confirm(`"${name}" wirklich trennen? Synchronisierte Termine werden gelöscht.`)) return;
+		if (!confirm($_('sync.confirmDisconnect', { values: { name } }))) return;
 		await externalCalendarsStore.disconnect(id);
 	}
 
@@ -144,18 +157,18 @@
 	}
 
 	function formatSyncTime(date: Date | string | null | undefined): string {
-		if (!date) return 'Noch nie';
+		if (!date) return $_('sync.neverSynced');
 		return formatDistanceToNow(new Date(date), { addSuffix: true, locale: de });
 	}
 
 	function getSyncDirectionLabel(direction: SyncDirection): string {
 		switch (direction) {
 			case 'import':
-				return 'Nur Import';
+				return $_('sync.direction.import');
 			case 'export':
-				return 'Nur Export';
+				return $_('sync.direction.export');
 			case 'both':
-				return 'Bidirektional';
+				return $_('sync.direction.both');
 		}
 	}
 
@@ -169,26 +182,26 @@
 </script>
 
 <svelte:head>
-	<title>Kalender-Sync - Einstellungen</title>
+	<title>{$_('sync.pageTitle')}</title>
 </svelte:head>
 
 <div class="page-container">
 	<header class="header">
-		<a href="/settings" class="back-button" aria-label="Zurück">
+		<a href="/settings" class="back-button" aria-label={$_('sync.back')}>
 			<CaretLeft size={20} weight="bold" />
 		</a>
-		<h1 class="title">Kalender-Sync</h1>
+		<h1 class="title">{$_('sync.title')}</h1>
 		<button
 			onclick={() => (showConnectForm = true)}
 			class="add-button"
-			aria-label="Kalender verbinden"
+			aria-label={$_('sync.connectCalendar')}
 		>
 			<Plus size={20} weight="bold" />
 		</button>
 	</header>
 
 	<p class="description">
-		Verbinde externe Kalender, um Termine zu importieren und zu synchronisieren.
+		{$_('sync.description')}
 	</p>
 
 	{#if externalCalendarsStore.error}
@@ -205,10 +218,10 @@
 	{:else if externalCalendarsStore.calendars.length === 0}
 		<div class="empty-state">
 			<Globe size={48} class="text-muted-foreground" />
-			<p>Keine externen Kalender verbunden</p>
+			<p>{$_('sync.emptyState')}</p>
 			<button class="btn btn-primary" onclick={() => (showConnectForm = true)}>
 				<Plus size={16} weight="bold" />
-				Kalender verbinden
+				{$_('sync.connectCalendar')}
 			</button>
 		</div>
 	{:else}
@@ -230,7 +243,7 @@
 								class="icon-btn"
 								onclick={() => handleSync(cal.id)}
 								disabled={externalCalendarsStore.isSyncing(cal.id)}
-								title="Jetzt synchronisieren"
+								title={$_('sync.syncNow')}
 							>
 								<ArrowsClockwise
 									size={16}
@@ -240,7 +253,7 @@
 							<button
 								class="icon-btn icon-btn-danger"
 								onclick={() => handleDisconnect(cal.id, cal.name)}
-								title="Verbindung trennen"
+								title={$_('sync.disconnect')}
 							>
 								<Trash size={16} />
 							</button>
@@ -249,7 +262,7 @@
 
 					<div class="calendar-details">
 						<div class="detail-row">
-							<span class="detail-label">Richtung</span>
+							<span class="detail-label">{$_('sync.directionLabel')}</span>
 							<span class="detail-value">
 								{#if cal.syncDirection === 'import'}
 									<CloudArrowDown size={14} />
@@ -262,26 +275,26 @@
 							</span>
 						</div>
 						<div class="detail-row">
-							<span class="detail-label">Letzte Sync</span>
+							<span class="detail-label">{$_('sync.lastSync')}</span>
 							<span class="detail-value">
 								{formatSyncTime(cal.lastSyncAt)}
 							</span>
 						</div>
 						<div class="detail-row">
-							<span class="detail-label">Status</span>
+							<span class="detail-label">{$_('sync.statusLabel')}</span>
 							<span class="detail-value">
 								{#if cal.lastSyncError}
 									<span class="status-error">
 										<Warning size={14} />
-										Fehler
+										{$_('sync.status.error')}
 									</span>
 								{:else if cal.syncEnabled}
 									<span class="status-ok">
 										<CheckCircle size={14} />
-										Aktiv (alle {cal.syncInterval} Min.)
+										{$_('sync.status.active', { values: { interval: cal.syncInterval } })}
 									</span>
 								{:else}
-									<span class="status-paused">Pausiert</span>
+									<span class="status-paused">{$_('sync.status.paused')}</span>
 								{/if}
 							</span>
 						</div>
@@ -300,7 +313,7 @@
 								onchange={() => handleToggleSync(cal.id, cal.syncEnabled)}
 								class="toggle"
 							/>
-							<span>Auto-Sync</span>
+							<span>{$_('sync.autoSync')}</span>
 						</label>
 					</div>
 				</div>
@@ -314,10 +327,12 @@
 	visible={showConnectForm}
 	onClose={closeConnectForm}
 	title={connectStep === 'provider'
-		? 'Kalender verbinden'
+		? $_('sync.connectCalendar')
 		: connectStep === 'caldav-discover'
-			? 'CalDAV-Server verbinden'
-			: `${PROVIDER_INFO[selectedProvider!]?.label || ''} verbinden`}
+			? $_('sync.connectCaldav')
+			: $_('sync.connectProvider', {
+					values: { provider: PROVIDER_INFO[selectedProvider!]?.label || '' },
+				})}
 	maxWidth="md"
 >
 	{#if connectStep === 'provider'}
@@ -334,8 +349,8 @@
 						{/if}
 					</div>
 					<div>
-						<span class="provider-name">{provider.label}</span>
-						<span class="provider-desc">{provider.description}</span>
+						<span class="provider-name">{$_(provider.labelKey)}</span>
+						<span class="provider-desc">{$_(provider.descriptionKey)}</span>
 					</div>
 				</button>
 			{/each}
@@ -343,26 +358,26 @@
 	{:else if connectStep === 'caldav-discover'}
 		<div class="connect-form">
 			<div class="form-field">
-				<label for="caldav-url">Server-URL</label>
+				<label for="caldav-url">{$_('sync.form.serverUrl')}</label>
 				<Input bind:value={connectUrl} placeholder="https://caldav.example.com" />
 			</div>
 			<div class="form-field">
-				<label for="caldav-user">Benutzername</label>
+				<label for="caldav-user">{$_('sync.form.username')}</label>
 				<Input bind:value={connectUsername} placeholder="user@example.com" />
 			</div>
 			<div class="form-field">
-				<label for="caldav-pass">Passwort</label>
+				<label for="caldav-pass">{$_('sync.form.password')}</label>
 				<input
 					type="password"
 					bind:value={connectPassword}
-					placeholder="Passwort"
+					placeholder={$_('sync.form.password')}
 					class="password-input"
 				/>
 			</div>
 
 			{#if discoveredCalendars.length > 0}
 				<div class="discovered-list">
-					<h4>Gefundene Kalender:</h4>
+					<h4>{$_('sync.discoveredCalendars')}</h4>
 					{#each discoveredCalendars as cal}
 						<button
 							class="discovered-item"
@@ -380,25 +395,25 @@
 		{#snippet footer()}
 			<div class="modal-footer">
 				<button class="btn btn-secondary" onclick={() => (connectStep = 'provider')}>
-					Zurück
+					{$_('sync.back')}
 				</button>
 				<button
 					class="btn btn-primary"
 					onclick={handleCalDavDiscover}
 					disabled={isDiscovering || !connectUrl.trim() || !connectUsername.trim()}
 				>
-					{isDiscovering ? 'Suche...' : 'Kalender suchen'}
+					{isDiscovering ? $_('sync.searching') : $_('sync.searchCalendars')}
 				</button>
 			</div>
 		{/snippet}
 	{:else if connectStep === 'credentials'}
 		<div class="connect-form">
 			<div class="form-field">
-				<label>Name</label>
-				<Input bind:value={connectName} placeholder="Mein externer Kalender" />
+				<label>{$_('sync.form.name')}</label>
+				<Input bind:value={connectName} placeholder={$_('sync.form.namePlaceholder')} />
 			</div>
 			<div class="form-field">
-				<label>URL</label>
+				<label>{$_('sync.form.url')}</label>
 				<Input
 					bind:value={connectUrl}
 					placeholder={selectedProvider === 'ical_url'
@@ -408,26 +423,26 @@
 			</div>
 			{#if selectedProvider !== 'ical_url'}
 				<div class="form-field">
-					<label>Benutzername</label>
+					<label>{$_('sync.form.username')}</label>
 					<Input bind:value={connectUsername} placeholder="user@example.com" />
 				</div>
 				<div class="form-field">
-					<label>Passwort</label>
+					<label>{$_('sync.form.password')}</label>
 					<input
 						type="password"
 						bind:value={connectPassword}
-						placeholder="Passwort"
+						placeholder={$_('sync.form.password')}
 						class="password-input"
 					/>
 				</div>
 			{/if}
 			<div class="form-field">
-				<label>Sync-Richtung</label>
+				<label>{$_('sync.form.syncDirection')}</label>
 				<select bind:value={connectDirection} class="select-input">
-					<option value="import">Nur Import</option>
+					<option value="import">{$_('sync.direction.import')}</option>
 					{#if selectedProvider !== 'ical_url'}
-						<option value="export">Nur Export</option>
-						<option value="both">Bidirektional</option>
+						<option value="export">{$_('sync.direction.export')}</option>
+						<option value="both">{$_('sync.direction.both')}</option>
 					{/if}
 				</select>
 			</div>
@@ -436,14 +451,14 @@
 		{#snippet footer()}
 			<div class="modal-footer">
 				<button class="btn btn-secondary" onclick={() => (connectStep = 'provider')}>
-					Zurück
+					{$_('sync.back')}
 				</button>
 				<button
 					class="btn btn-primary"
 					onclick={handleConnect}
 					disabled={isConnecting || !connectName.trim() || !connectUrl.trim()}
 				>
-					{isConnecting ? 'Verbinde...' : 'Verbinden'}
+					{isConnecting ? $_('sync.connecting') : $_('sync.connect')}
 				</button>
 			</div>
 		{/snippet}

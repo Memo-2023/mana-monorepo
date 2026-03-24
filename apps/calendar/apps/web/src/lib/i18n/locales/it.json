@@ -122,5 +122,88 @@
 	"error": {
 		"notFound": "Pagina non trovata",
 		"backToHome": "Torna alla home"
+	},
+	"sync": {
+		"pageTitle": "Sincronizzazione calendari - Impostazioni",
+		"title": "Sincronizzazione",
+		"back": "Indietro",
+		"connectCalendar": "Collega calendario",
+		"description": "Collega calendari esterni per importare e sincronizzare eventi.",
+		"emptyState": "Nessun calendario esterno collegato",
+		"syncNow": "Sincronizza ora",
+		"disconnect": "Disconnetti",
+		"confirmDisconnect": "Disconnettere davvero \"{name}\"? Gli eventi sincronizzati verranno eliminati.",
+		"neverSynced": "Mai",
+		"directionLabel": "Direzione",
+		"lastSync": "Ultima sincronizzazione",
+		"statusLabel": "Stato",
+		"autoSync": "Sincronizzazione automatica",
+		"connectCaldav": "Collega server CalDAV",
+		"connectProvider": "Collega {provider}",
+		"searching": "Ricerca...",
+		"searchCalendars": "Cerca calendari",
+		"discoveredCalendars": "Calendari trovati:",
+		"connecting": "Collegamento...",
+		"connect": "Collega",
+		"direction": {
+			"import": "Solo importazione",
+			"export": "Solo esportazione",
+			"both": "Bidirezionale"
+		},
+		"status": {
+			"error": "Errore",
+			"active": "Attivo (ogni {interval} min.)",
+			"paused": "In pausa"
+		},
+		"providers": {
+			"icalUrl": "URL iCal",
+			"icalUrlDesc": "Importa link ICS (es. festività)",
+			"caldav": "CalDAV",
+			"caldavDesc": "Collega server CalDAV",
+			"google": "Google Calendar",
+			"googleDesc": "Sincronizza con Google Calendar",
+			"apple": "Apple Calendar",
+			"appleDesc": "Collega calendario iCloud"
+		},
+		"form": {
+			"serverUrl": "URL del server",
+			"username": "Nome utente",
+			"password": "Password",
+			"name": "Nome",
+			"namePlaceholder": "Il mio calendario esterno",
+			"url": "URL",
+			"syncDirection": "Direzione di sincronizzazione"
+		}
+	},
+	"sharing": {
+		"pageTitle": "Condivisione calendari - Impostazioni",
+		"title": "Condivisioni",
+		"back": "Indietro",
+		"shareCalendar": "Condividi calendario",
+		"invitations": "Inviti ({count})",
+		"calendarInvitation": "Invito calendario",
+		"access": "accesso",
+		"accept": "Accetta",
+		"sharedWithMe": "Condivisi con me",
+		"sharedCalendar": "Calendario condiviso",
+		"shareMyCalendars": "Condividi i miei calendari",
+		"notSharedYet": "Non ancora condiviso",
+		"linkShare": "Condivisione tramite link",
+		"pending": "In attesa",
+		"removeShare": "Rimuovi condivisione",
+		"confirmRemoveShare": "Rimuovere davvero questa condivisione?",
+		"addPerson": "Aggiungi persona",
+		"share": "Condividi",
+		"sharing": "Condivisione...",
+		"permission": {
+			"read": "Lettura",
+			"write": "Lettura e modifica",
+			"admin": "Amministratore"
+		},
+		"form": {
+			"calendar": "Calendario",
+			"email": "Indirizzo email",
+			"permission": "Autorizzazione"
+		}
 	}
 }
