@@ -308,6 +308,32 @@
 		return `${completed}/${task.subtasks.length}`;
 	});
 
+	// Long press to expand (mobile)
+	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function handleTouchStart() {
+		longPressTimer = setTimeout(() => {
+			longPressTimer = null;
+			if (!isExpanded && onExpand) {
+				onExpand();
+			}
+		}, 500);
+	}
+
+	function handleTouchEnd() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
+
+	function handleTouchMove() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
+
 	// Only allow drag from the drag handle
 	function handlePointerDown(e: PointerEvent) {
 		const target = e.target as HTMLElement;
@@ -321,7 +347,14 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="task-item-wrapper" class:expanded={isExpanded} onpointerdown={handlePointerDown}>
+<div
+	class="task-item-wrapper"
+	class:expanded={isExpanded}
+	onpointerdown={handlePointerDown}
+	ontouchstart={handleTouchStart}
+	ontouchend={handleTouchEnd}
+	ontouchmove={handleTouchMove}
+>
 	<div
 		class="task-item group"
 		class:completed={task.isCompleted}
