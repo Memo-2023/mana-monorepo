@@ -218,3 +218,6 @@ export type {
 	GlobalErrorHandlerOptions,
 	GlobalErrorHandlerTranslations,
 } from './toast';
+
+// Actions
+export { focusTrap } from './actions';

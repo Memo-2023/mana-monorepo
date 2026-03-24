@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { X } from '@manacore/shared-icons';
 	import Text from '../atoms/Text.svelte';
+	import { focusTrap } from '../actions/focusTrap';
 
 	interface Props {
 		visible: boolean;
@@ -60,6 +61,7 @@
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"
+		use:focusTrap
 	>
 		<!-- Modal Content -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
