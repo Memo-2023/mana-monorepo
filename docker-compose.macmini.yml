@@ -44,7 +44,7 @@ services:
   # Retention: 4 full backups + 14 differential
   # Restore: see docs/POSTGRES_BACKUP.md
   postgres-backup:
-    image: pgbackrest/pgbackrest:latest
+    image: woblerr/pgbackrest:latest
     container_name: mana-infra-pgbackrest
     restart: unless-stopped
     depends_on:
