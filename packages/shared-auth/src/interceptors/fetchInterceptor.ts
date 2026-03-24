@@ -12,8 +12,13 @@ export interface FetchInterceptorConfig {
 	skipPatterns?: string[];
 	/**
 	 * Backend URL to match (only intercept requests to this URL)
+	 * @deprecated Use `urls` instead for multiple URLs
 	 */
 	backendUrl?: string;
+	/**
+	 * URLs to intercept (requests matching any of these origins will be intercepted)
+	 */
+	urls?: string[];
 }
 
 /**
@@ -71,13 +76,22 @@ export function setupFetchInterceptor(
 
 	const originalFetch = globalThis.fetch;
 	const skipPatterns = [...DEFAULT_SKIP_PATTERNS, ...(config?.skipPatterns || [])];
-	const backendUrl = config?.backendUrl || authService.getBaseUrl();
+
+	// Build the list of URLs to intercept:
+	// 1. Explicit `urls` array takes priority
+	// 2. Fall back to `backendUrl` (deprecated) wrapped in an array
+	// 3. Default to the auth service base URL
+	const interceptUrls: string[] = config?.urls
+		? config.urls
+		: config?.backendUrl
+			? [config.backendUrl]
+			: [authService.getBaseUrl()];
 
 	globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
 		const url = extractUrl(input);
 
 		// Skip intercepting if URL doesn't match criteria
-		if (shouldSkipInterception(url, skipPatterns, backendUrl)) {
+		if (shouldSkipInterception(url, skipPatterns, interceptUrls)) {
 			return originalFetch(input, init);
 		}
 
@@ -147,7 +161,11 @@ function extractUrl(input: RequestInfo | URL): string {
 /**
  * Check if request should skip interception
  */
-function shouldSkipInterception(url: string, skipPatterns: string[], backendUrl: string): boolean {
+function shouldSkipInterception(
+	url: string,
+	skipPatterns: string[],
+	interceptUrls: string[]
+): boolean {
 	if (!url) return true;
 
 	const lowerUrl = url.toLowerCase();
@@ -157,14 +175,19 @@ function shouldSkipInterception(url: string, skipPatterns: string[], backendUrl:
 		return true;
 	}
 
-	// Check if URL matches backend (must include full host:port)
-	// Parse backendUrl to get origin (protocol + host + port)
+	// Check if URL matches any of the intercept URLs (must include full host:port)
 	try {
-		const backendOrigin = new URL(backendUrl).origin.toLowerCase();
 		const requestOrigin = new URL(url).origin.toLowerCase();
 
-		// Only intercept if request origin matches backend origin
-		if (requestOrigin !== backendOrigin) {
+		const matchesAny = interceptUrls.some((interceptUrl) => {
+			try {
+				return new URL(interceptUrl).origin.toLowerCase() === requestOrigin;
+			} catch {
+				return false;
+			}
+		});
+
+		if (!matchesAny) {
 			return true;
 		}
 	} catch {

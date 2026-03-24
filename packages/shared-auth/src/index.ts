@@ -107,15 +107,10 @@ export function initializeWebAuth(config: {
 	const authService = _createAuthService(config);
 	const tokenManager = _createTokenManager(authService);
 
-	// Set up interceptor for auth URL
-	_setupFetchInterceptor(authService, tokenManager);
-
-	// Set up interceptor for backend URL if provided (for automatic token refresh on 401)
-	if (config.backendUrl) {
-		_setupFetchInterceptor(authService, tokenManager, {
-			backendUrl: config.backendUrl,
-		});
-	}
+	// Set up a single fetch interceptor for all relevant URLs
+	const urls = [config.baseUrl];
+	if (config.backendUrl) urls.push(config.backendUrl);
+	_setupFetchInterceptor(authService, tokenManager, { urls });
 
 	return { authService, tokenManager };
 }
