@@ -18,6 +18,7 @@ import type {
 	SearchIndexConfig,
 } from '@manacore/shared-help-types';
 import { generateExcerpt, stripHtml } from './parser.js';
+import { sanitizeHtml } from './sanitize.js';
 
 const DEFAULT_CONFIG: SearchIndexConfig = {
 	titleWeight: 2,
@@ -135,8 +136,10 @@ function findOriginalItem(
  */
 function highlightMatch(text: string, query: string): string {
 	if (!query.trim()) return text;
+	// Sanitize text first, then apply highlighting
+	const safeText = sanitizeHtml(text);
 	const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-	return text.replace(regex, '<mark>$1</mark>');
+	return safeText.replace(regex, '<mark>$1</mark>');
 }
 
 /**

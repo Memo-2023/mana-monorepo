@@ -25,9 +25,15 @@
 		<table class="w-full text-left text-sm">
 			<thead>
 				<tr class="border-b border-gray-200 dark:border-gray-700">
-					<th class="pb-3 pr-4 font-semibold text-gray-900 dark:text-gray-100">Shortcut</th>
-					<th class="pb-3 pr-4 font-semibold text-gray-900 dark:text-gray-100">Action</th>
-					<th class="pb-3 font-semibold text-gray-900 dark:text-gray-100">Description</th>
+					<th class="pb-3 pr-4 font-semibold text-gray-900 dark:text-gray-100"
+						>{translations.shortcuts.columns.shortcut}</th
+					>
+					<th class="pb-3 pr-4 font-semibold text-gray-900 dark:text-gray-100"
+						>{translations.shortcuts.columns.action}</th
+					>
+					<th class="pb-3 font-semibold text-gray-900 dark:text-gray-100"
+						>{translations.shortcuts.columns.description}</th
+					>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-100 dark:divide-gray-800">

@@ -27,6 +27,7 @@ export type {
 	FeaturesOverviewProps,
 	KeyboardShortcutsProps,
 	GettingStartedGuideProps,
+	ChangelogEntryProps,
 	ChangelogSectionProps,
 	ContactSectionProps,
 	HelpSearchProps,

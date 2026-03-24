@@ -28,6 +28,9 @@ export {
 // Content merger
 export { mergeContent, createEmptyContent } from './merger.js';
 
+// Sanitization
+export { sanitizeHtml } from './sanitize.js';
+
 // Search functionality
 export { buildSearchIndex, search, createSearcher, flattenContentForSearch } from './search.js';
 

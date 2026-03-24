@@ -12,7 +12,7 @@
 	let {
 		content,
 		appName,
-		appId: _appId,
+		appId,
 		translations,
 		searchEnabled = true,
 		showFAQ = true,
@@ -57,9 +57,13 @@
 
 	const visibleSections = $derived(sections.filter((s) => s.show));
 
+	let contentRef: HTMLDivElement;
+
 	function setActiveSection(section: HelpSection) {
 		activeSection = section;
 		onSectionChange?.(section);
+		// Scroll content area into view on tab change
+		contentRef?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 	}
 
 	function handleSearchResultSelect(result: SearchResult) {
@@ -151,7 +155,7 @@
 	{/if}
 
 	<!-- Content -->
-	<div class="min-h-[400px]">
+	<div class="min-h-[400px]" bind:this={contentRef}>
 		{#if activeSection === 'faq' && showFAQ}
 			<FAQSection items={content.faq} {translations} expandFirst />
 		{:else if activeSection === 'features' && showFeatures}

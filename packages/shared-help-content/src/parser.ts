@@ -5,7 +5,8 @@
 
 import matter from 'gray-matter';
 import { marked } from 'marked';
-import type { ZodSchema } from 'zod';
+import type { ZodType, ZodTypeDef } from 'zod';
+import { sanitizeHtml } from './sanitize.js';
 
 export interface ParsedContent<T> {
 	frontmatter: T;
@@ -23,7 +24,7 @@ export interface ParseOptions {
  */
 export function parseMarkdown<T>(
 	rawContent: string,
-	schema?: ZodSchema<T>,
+	schema?: ZodType<T, ZodTypeDef, unknown>,
 	options: ParseOptions = { renderHtml: true }
 ): ParsedContent<T> {
 	const { data, content } = matter(rawContent);
@@ -40,8 +41,8 @@ export function parseMarkdown<T>(
 		frontmatter = data as T;
 	}
 
-	// Render HTML if requested
-	const html = options.renderHtml ? (marked.parse(content) as string) : '';
+	// Render HTML if requested, then sanitize to prevent XSS
+	const html = options.renderHtml ? sanitizeHtml(marked.parse(content) as string) : '';
 
 	return {
 		frontmatter,
@@ -55,7 +56,7 @@ export function parseMarkdown<T>(
  */
 export function parseMarkdownFiles<T>(
 	files: { filename: string; content: string }[],
-	schema?: ZodSchema<T>,
+	schema?: ZodType<T, ZodTypeDef, unknown>,
 	options?: ParseOptions
 ): Array<ParsedContent<T> & { filename: string }> {
 	return files.map(({ filename, content }) => ({

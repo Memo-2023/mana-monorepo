@@ -27,7 +27,7 @@
 {:else}
 	<div>
 		{#each displayedItems() as item (item.id)}
-			<ChangelogEntry {item} typeLabels={translations.changelog.types} />
+			<ChangelogEntry {item} {translations} />
 		{/each}
 
 		{#if hasMore}
@@ -37,7 +37,7 @@
 					class="text-primary-600 dark:text-primary-400 text-sm font-medium hover:underline"
 					onclick={() => (showAll = true)}
 				>
-					Show all releases ({items.length - maxItems} more)
+					{translations.changelog.showAll} ({items.length - maxItems})
 				</button>
 			</div>
 		{/if}

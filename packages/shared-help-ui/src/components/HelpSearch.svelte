@@ -69,11 +69,11 @@
 		selectedIndex = -1;
 	}
 
-	function handleBlur() {
-		// Delay to allow click on result
-		setTimeout(() => {
-			showResults = false;
-		}, 200);
+	function handleBlur(event: FocusEvent) {
+		// Only close if focus moves outside the search container
+		const relatedTarget = event.relatedTarget as HTMLElement | null;
+		if (relatedTarget?.closest('[data-help-search]')) return;
+		showResults = false;
 	}
 
 	function getTypeIcon(type: string): string {
@@ -107,7 +107,7 @@
 	}
 </script>
 
-<div class="relative">
+<div class="relative" data-help-search>
 	<div class="relative">
 		<input
 			type="text"
@@ -118,10 +118,19 @@
 			onblur={handleBlur}
 			placeholder={placeholder ?? translations.search.noResults}
 			class="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-500 transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
+			aria-label={placeholder ?? translations.search.noResults}
+			role="combobox"
+			aria-expanded={showResults}
+			aria-haspopup="listbox"
 		/>
 		<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 			{#if isSearching}
-				<svg class="h-5 w-5 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
+				<svg
+					class="h-5 w-5 animate-spin text-gray-400"
+					fill="none"
+					viewBox="0 0 24 24"
+					aria-hidden="true"
+				>
 					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 					></circle>
 					<path
@@ -131,7 +140,13 @@
 					></path>
 				</svg>
 			{:else}
-				<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<svg
+					class="h-5 w-5 text-gray-400"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					aria-hidden="true"
+				>
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -146,6 +161,7 @@
 	{#if showResults}
 		<div
 			class="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+			role="listbox"
 		>
 			{#if results.length === 0}
 				<div class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -154,17 +170,21 @@
 			{:else}
 				<ul class="max-h-96 overflow-auto py-2">
 					{#each results as result, index (result.id)}
-						<li>
+						<li role="option" aria-selected={selectedIndex === index}>
 							<button
 								type="button"
 								class="flex w-full items-start gap-3 px-4 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 {selectedIndex ===
 								index
 									? 'bg-primary-50 dark:bg-primary-900/20'
 									: ''}"
-								onclick={() => selectResult(result)}
+								onmousedown={(e) => {
+									e.preventDefault();
+									selectResult(result);
+								}}
 							>
 								<span
 									class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-gray-100 text-xs dark:bg-gray-700"
+									aria-label={getTypeLabel(result.type)}
 								>
 									{getTypeIcon(result.type)}
 								</span>

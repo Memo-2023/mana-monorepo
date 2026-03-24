@@ -1,12 +1,7 @@
 <script lang="ts">
-	import type { ChangelogItem } from '@manacore/shared-help-types';
+	import type { ChangelogEntryProps } from '../types.js';
 
-	interface Props {
-		item: ChangelogItem;
-		typeLabels: Record<string, string>;
-	}
-
-	let { item, typeLabels }: Props = $props();
+	let { item, translations }: ChangelogEntryProps = $props();
 
 	let expanded = $state(false);
 
@@ -32,6 +27,9 @@
 			day: 'numeric',
 		});
 	}
+
+	const typeLabels = translations.changelog.types;
+	const changeLabels = translations.changelog.labels;
 </script>
 
 <div class="border-b border-gray-200 py-4 dark:border-gray-700">
@@ -83,7 +81,7 @@
 				{#if item.changes.features && item.changes.features.length > 0}
 					<div>
 						<h5 class="mb-2 text-sm font-semibold text-green-600 dark:text-green-400">
-							New Features
+							{changeLabels.features}
 						</h5>
 						<ul class="space-y-1">
 							{#each item.changes.features as change}
@@ -104,7 +102,7 @@
 				{#if item.changes.improvements && item.changes.improvements.length > 0}
 					<div>
 						<h5 class="mb-2 text-sm font-semibold text-blue-600 dark:text-blue-400">
-							Improvements
+							{changeLabels.improvements}
 						</h5>
 						<ul class="space-y-1">
 							{#each item.changes.improvements as change}
@@ -124,7 +122,9 @@
 
 				{#if item.changes.bugfixes && item.changes.bugfixes.length > 0}
 					<div>
-						<h5 class="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">Bug Fixes</h5>
+						<h5 class="mb-2 text-sm font-semibold text-red-600 dark:text-red-400">
+							{changeLabels.bugFixes}
+						</h5>
 						<ul class="space-y-1">
 							{#each item.changes.bugfixes as change}
 								<li class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">

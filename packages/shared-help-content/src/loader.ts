@@ -20,6 +20,12 @@ import {
 	gettingStartedFrontmatterSchema,
 	changelogFrontmatterSchema,
 	contactFrontmatterSchema,
+	type FAQFrontmatter,
+	type FeatureFrontmatter,
+	type ShortcutsFrontmatter,
+	type GettingStartedFrontmatter,
+	type ChangelogFrontmatter,
+	type ContactFrontmatter,
 } from '@manacore/shared-help-types';
 import { parseMarkdown } from './parser.js';
 import { createEmptyContent } from './merger.js';
@@ -29,26 +35,28 @@ export interface LoaderOptions {
 	locale: SupportedLanguage;
 	/** Fallback locale if content not found */
 	fallbackLocale?: SupportedLanguage;
+	/** Optional error callback */
+	onError?: (path: string, error: unknown) => void;
 }
 
 /**
  * Parse FAQ content from raw Markdown
  */
 export function parseFAQContent(rawContent: string): FAQItem {
-	const parsed = parseMarkdown(rawContent, faqFrontmatterSchema);
-	const fm = parsed.frontmatter as Record<string, unknown>;
+	const parsed = parseMarkdown<FAQFrontmatter>(rawContent, faqFrontmatterSchema);
+	const fm = parsed.frontmatter;
 	return {
-		id: fm.id as string,
-		language: fm.language as SupportedLanguage,
-		order: fm.order as number | undefined,
-		appSpecific: fm.appSpecific as boolean | undefined,
-		apps: fm.apps as string[] | undefined,
-		lastUpdated: fm.lastUpdated as Date | undefined,
-		question: fm.question as string,
-		category: fm.category as FAQItem['category'],
-		featured: fm.featured as boolean | undefined,
-		tags: fm.tags as string[] | undefined,
-		relatedFaqs: fm.relatedFaqs as string[] | undefined,
+		id: fm.id,
+		language: fm.language,
+		order: fm.order,
+		appSpecific: fm.appSpecific,
+		apps: fm.apps,
+		lastUpdated: fm.lastUpdated,
+		question: fm.question,
+		category: fm.category,
+		featured: fm.featured,
+		tags: fm.tags,
+		relatedFaqs: fm.relatedFaqs,
 		answer: parsed.html,
 	};
 }
@@ -57,23 +65,23 @@ export function parseFAQContent(rawContent: string): FAQItem {
  * Parse Feature content from raw Markdown
  */
 export function parseFeatureContent(rawContent: string): FeatureItem {
-	const parsed = parseMarkdown(rawContent, featureFrontmatterSchema);
-	const fm = parsed.frontmatter as Record<string, unknown>;
+	const parsed = parseMarkdown<FeatureFrontmatter>(rawContent, featureFrontmatterSchema);
+	const fm = parsed.frontmatter;
 	return {
-		id: fm.id as string,
-		language: fm.language as SupportedLanguage,
-		order: fm.order as number | undefined,
-		appSpecific: fm.appSpecific as boolean | undefined,
-		apps: fm.apps as string[] | undefined,
-		lastUpdated: fm.lastUpdated as Date | undefined,
-		title: fm.title as string,
-		description: fm.description as string,
-		icon: fm.icon as string | undefined,
-		category: fm.category as FeatureItem['category'],
-		available: fm.available as boolean | undefined,
-		comingSoon: fm.comingSoon as boolean | undefined,
-		highlights: fm.highlights as string[] | undefined,
-		learnMoreUrl: fm.learnMoreUrl as string | undefined,
+		id: fm.id,
+		language: fm.language,
+		order: fm.order,
+		appSpecific: fm.appSpecific,
+		apps: fm.apps,
+		lastUpdated: fm.lastUpdated,
+		title: fm.title,
+		description: fm.description,
+		icon: fm.icon,
+		category: fm.category,
+		available: fm.available,
+		comingSoon: fm.comingSoon,
+		highlights: fm.highlights,
+		learnMoreUrl: fm.learnMoreUrl,
 		content: parsed.html,
 	};
 }
@@ -82,21 +90,21 @@ export function parseFeatureContent(rawContent: string): FeatureItem {
  * Parse Shortcuts content from raw Markdown
  */
 export function parseShortcutsContent(rawContent: string): ShortcutsItem {
-	const parsed = parseMarkdown(rawContent, shortcutsFrontmatterSchema);
-	const fm = parsed.frontmatter as Record<string, unknown>;
+	const parsed = parseMarkdown<ShortcutsFrontmatter>(rawContent, shortcutsFrontmatterSchema);
+	const fm = parsed.frontmatter;
 
 	// Parse markdown table to extract shortcuts
 	const shortcuts = parseShortcutsTable(parsed.content);
 
 	return {
-		id: fm.id as string,
-		language: fm.language as SupportedLanguage,
-		order: fm.order as number | undefined,
-		appSpecific: fm.appSpecific as boolean | undefined,
-		apps: fm.apps as string[] | undefined,
-		lastUpdated: fm.lastUpdated as Date | undefined,
-		category: fm.category as ShortcutsItem['category'],
-		title: fm.title as string | undefined,
+		id: fm.id,
+		language: fm.language,
+		order: fm.order,
+		appSpecific: fm.appSpecific,
+		apps: fm.apps,
+		lastUpdated: fm.lastUpdated,
+		category: fm.category,
+		title: fm.title,
 		shortcuts,
 	};
 }
@@ -114,8 +122,8 @@ function parseShortcutsTable(
 	for (const line of lines) {
 		const trimmed = line.trim();
 
-		// Skip header separator
-		if (trimmed.match(/^\|[-:\s|]+\|$/)) {
+		// Skip header separator (flexible: allows spaces around dashes)
+		if (trimmed.match(/^\|[\s\-:|]+\|$/)) {
 			inTable = true;
 			continue;
 		}
@@ -147,24 +155,27 @@ function parseShortcutsTable(
  * Parse Getting Started guide content from raw Markdown
  */
 export function parseGettingStartedContent(rawContent: string): GettingStartedItem {
-	const parsed = parseMarkdown(rawContent, gettingStartedFrontmatterSchema);
-	const fm = parsed.frontmatter as Record<string, unknown>;
+	const parsed = parseMarkdown<GettingStartedFrontmatter>(
+		rawContent,
+		gettingStartedFrontmatterSchema
+	);
+	const fm = parsed.frontmatter;
 
 	// Extract steps from content (h2 headers)
 	const steps = parseGuideSteps(parsed.content);
 
 	return {
-		id: fm.id as string,
-		language: fm.language as SupportedLanguage,
-		order: fm.order as number | undefined,
-		appSpecific: fm.appSpecific as boolean | undefined,
-		apps: fm.apps as string[] | undefined,
-		lastUpdated: fm.lastUpdated as Date | undefined,
-		title: fm.title as string,
-		description: fm.description as string,
-		difficulty: fm.difficulty as GettingStartedItem['difficulty'],
-		estimatedTime: fm.estimatedTime as string | undefined,
-		prerequisites: fm.prerequisites as string[] | undefined,
+		id: fm.id,
+		language: fm.language,
+		order: fm.order,
+		appSpecific: fm.appSpecific,
+		apps: fm.apps,
+		lastUpdated: fm.lastUpdated,
+		title: fm.title,
+		description: fm.description,
+		difficulty: fm.difficulty,
+		estimatedTime: fm.estimatedTime,
+		prerequisites: fm.prerequisites,
 		content: parsed.html,
 		steps,
 	};
@@ -180,6 +191,10 @@ function parseGuideSteps(content: string): Array<{ title: string; content: strin
 	for (let i = 1; i < sections.length; i++) {
 		const section = sections[i];
 		const newlineIndex = section.indexOf('\n');
+		if (newlineIndex === -1) {
+			steps.push({ title: section.trim(), content: '' });
+			continue;
+		}
 		const title = section.substring(0, newlineIndex).trim();
 		const stepContent = section.substring(newlineIndex + 1).trim();
 
@@ -193,23 +208,23 @@ function parseGuideSteps(content: string): Array<{ title: string; content: strin
  * Parse Changelog content from raw Markdown
  */
 export function parseChangelogContent(rawContent: string): ChangelogItem {
-	const parsed = parseMarkdown(rawContent, changelogFrontmatterSchema);
-	const fm = parsed.frontmatter as Record<string, unknown>;
+	const parsed = parseMarkdown<ChangelogFrontmatter>(rawContent, changelogFrontmatterSchema);
+	const fm = parsed.frontmatter;
 	return {
-		id: fm.id as string,
-		language: fm.language as SupportedLanguage,
-		order: fm.order as number | undefined,
-		appSpecific: fm.appSpecific as boolean | undefined,
-		apps: fm.apps as string[] | undefined,
-		lastUpdated: fm.lastUpdated as Date | undefined,
-		version: fm.version as string,
-		title: fm.title as string,
-		releaseDate: fm.releaseDate as Date,
-		type: fm.type as ChangelogItem['type'],
-		summary: fm.summary as string | undefined,
-		highlighted: fm.highlighted as boolean | undefined,
-		changes: fm.changes as ChangelogItem['changes'],
-		platforms: fm.platforms as string[] | undefined,
+		id: fm.id,
+		language: fm.language,
+		order: fm.order,
+		appSpecific: fm.appSpecific,
+		apps: fm.apps,
+		lastUpdated: fm.lastUpdated,
+		version: fm.version,
+		title: fm.title,
+		releaseDate: fm.releaseDate,
+		type: fm.type,
+		summary: fm.summary,
+		highlighted: fm.highlighted,
+		changes: fm.changes,
+		platforms: fm.platforms,
 		content: parsed.html,
 	};
 }
@@ -218,22 +233,22 @@ export function parseChangelogContent(rawContent: string): ChangelogItem {
  * Parse Contact content from raw Markdown
  */
 export function parseContactContent(rawContent: string): ContactInfo {
-	const parsed = parseMarkdown(rawContent, contactFrontmatterSchema);
-	const fm = parsed.frontmatter as Record<string, unknown>;
+	const parsed = parseMarkdown<ContactFrontmatter>(rawContent, contactFrontmatterSchema);
+	const fm = parsed.frontmatter;
 	return {
-		id: fm.id as string,
-		language: fm.language as SupportedLanguage,
-		order: fm.order as number | undefined,
-		appSpecific: fm.appSpecific as boolean | undefined,
-		apps: fm.apps as string[] | undefined,
-		lastUpdated: fm.lastUpdated as Date | undefined,
-		title: fm.title as string,
-		supportEmail: fm.supportEmail as string | undefined,
-		supportUrl: fm.supportUrl as string | undefined,
-		discordUrl: fm.discordUrl as string | undefined,
-		twitterUrl: fm.twitterUrl as string | undefined,
-		documentationUrl: fm.documentationUrl as string | undefined,
-		responseTime: fm.responseTime as string | undefined,
+		id: fm.id,
+		language: fm.language,
+		order: fm.order,
+		appSpecific: fm.appSpecific,
+		apps: fm.apps,
+		lastUpdated: fm.lastUpdated,
+		title: fm.title,
+		supportEmail: fm.supportEmail,
+		supportUrl: fm.supportUrl,
+		discordUrl: fm.discordUrl,
+		twitterUrl: fm.twitterUrl,
+		documentationUrl: fm.documentationUrl,
+		responseTime: fm.responseTime,
 		content: parsed.html,
 	};
 }
@@ -247,7 +262,7 @@ export function loadHelpContentFromFiles(
 	options: LoaderOptions
 ): HelpContent {
 	const content = createEmptyContent();
-	const { locale, fallbackLocale = 'en' } = options;
+	const { locale, fallbackLocale = 'en', onError } = options;
 
 	for (const [path, rawContent] of Object.entries(files)) {
 		try {
@@ -283,8 +298,12 @@ export function loadHelpContentFromFiles(
 					content.contact = contact;
 				}
 			}
-		} catch {
-			// Skip files that fail to parse
+		} catch (error) {
+			if (onError) {
+				onError(path, error);
+			} else {
+				console.warn('[shared-help] Failed to parse:', path, error);
+			}
 		}
 	}
 

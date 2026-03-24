@@ -27,6 +27,7 @@ export interface HelpPageTranslations {
 	};
 	faq: {
 		noItems: string;
+		allCategories: string;
 		categories: {
 			general: string;
 			account: string;
@@ -43,6 +44,11 @@ export interface HelpPageTranslations {
 	};
 	shortcuts: {
 		noItems: string;
+		columns: {
+			shortcut: string;
+			action: string;
+			description: string;
+		};
 	};
 	gettingStarted: {
 		noItems: string;
@@ -55,11 +61,17 @@ export interface HelpPageTranslations {
 	};
 	changelog: {
 		noItems: string;
+		showAll: string;
 		types: {
 			major: string;
 			minor: string;
 			patch: string;
 			beta: string;
+		};
+		labels: {
+			features: string;
+			improvements: string;
+			bugFixes: string;
 		};
 	};
 	contact: {
@@ -111,6 +123,11 @@ export interface FAQSectionProps {
 	showCategories?: boolean;
 	maxItems?: number;
 	expandFirst?: boolean;
+}
+
+export interface ChangelogEntryProps {
+	item: HelpContent['changelog'][number];
+	translations: Pick<HelpPageTranslations, 'changelog'>;
 }
 
 export interface FeaturesOverviewProps {

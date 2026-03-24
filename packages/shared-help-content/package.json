@@ -34,9 +34,11 @@
 		"@manacore/shared-help-types": "workspace:*",
 		"fuse.js": "^7.0.0",
 		"gray-matter": "^4.0.3",
+		"isomorphic-dompurify": "^3.7.1",
 		"marked": "^15.0.4"
 	},
 	"devDependencies": {
+		"@types/dompurify": "^3.2.0",
 		"@types/node": "^22.10.2",
 		"typescript": "^5.7.3",
 		"zod": "^3.24.1"

@@ -5,9 +5,7 @@
 
 	let selectedGuideId = $state<string | null>(items.length > 0 ? items[0].id : null);
 
-	const selectedGuide = $derived(() => {
-		return items.find((item) => item.id === selectedGuideId) ?? null;
-	});
+	const guide = $derived(items.find((item) => item.id === selectedGuideId) ?? null);
 
 	function getDifficultyLabel(difficulty: string): string {
 		return (
@@ -67,8 +65,7 @@
 
 		<!-- Guide Content -->
 		<div class="flex-1">
-			{#if selectedGuide()}
-				{@const guide = selectedGuide()}
+			{#if guide}
 				<div>
 					<h3 class="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
 						{guide.title}

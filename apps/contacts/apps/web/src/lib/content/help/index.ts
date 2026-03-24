@@ -1,173 +1,172 @@
 /**
- * Central help content loader for Contacts app
- * This file loads and merges the central help content from @manacore/shared-help-content
+ * Help content for Contacts app
+ * Uses @manacore/shared-help-types for type-safe content definition
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
-import { createEmptyContent } from '@manacore/shared-help-content';
 
-/**
- * Central help content that applies to all Manacore apps
- * In a production setup, this would be loaded from the shared-help-content package's
- * Markdown files. For now, we provide the content inline for simplicity.
- */
-export const centralHelpContent: HelpContent = {
-	faq: [
-		// Account FAQs
-		{
-			id: 'faq-account-001',
-			question: 'How do I create an account?',
-			answer: `<p>Creating an account is simple:</p>
-				<ol>
-					<li>Click the <strong>Sign Up</strong> button on the login page</li>
-					<li>Enter your email address and choose a secure password</li>
-					<li>Verify your email address by clicking the link we send you</li>
-					<li>Complete your profile setup</li>
-				</ol>
-				<p>You can also sign up using your Google or Apple account for faster registration.</p>`,
-			category: 'account',
+export function getContactsHelpContent(locale: string): HelpContent {
+	const isDE = locale === 'de';
+
+	return {
+		faq: [
+			{
+				id: 'faq-import',
+				question: isDE
+					? 'Wie importiere ich Kontakte aus Google?'
+					: 'How do I import contacts from Google?',
+				answer: isDE
+					? '<p>Um Kontakte aus Google zu importieren: Gehe zu <strong>Daten > Import</strong>, wähle Google Kontakte, melde dich bei deinem Google-Konto an, wähle die Kontakte aus und klicke auf <strong>Importieren</strong>.</p>'
+					: '<p>To import contacts from Google: Go to <strong>Data > Import</strong>, select Google Contacts, sign in to your Google account, select the contacts you want to import, and click <strong>Import</strong>.</p>',
+				category: 'features',
+				order: 1,
+				language: isDE ? 'de' : 'en',
+				tags: isDE ? ['import', 'google', 'kontakte'] : ['import', 'google', 'contacts'],
+			},
+			{
+				id: 'faq-export',
+				question: isDE ? 'Wie exportiere ich meine Kontakte?' : 'How do I export my contacts?',
+				answer: isDE
+					? '<p>Du kannst deine Kontakte in verschiedenen Formaten exportieren: Gehe zu <strong>Daten > Export</strong>, wähle das gewünschte Format (vCard, CSV, JSON) und klicke auf <strong>Exportieren</strong>.</p>'
+					: '<p>You can export your contacts in various formats: Go to <strong>Data > Export</strong>, select the desired format (vCard, CSV, JSON), and click <strong>Export</strong>.</p>',
+				category: 'features',
+				order: 2,
+				language: isDE ? 'de' : 'en',
+				tags: isDE ? ['export', 'vcard', 'csv'] : ['export', 'vcard', 'csv'],
+			},
+			{
+				id: 'faq-duplicates',
+				question: isDE ? 'Wie finde ich doppelte Kontakte?' : 'How do I find duplicate contacts?',
+				answer: isDE
+					? '<p>Wir erkennen automatisch potenzielle Duplikate. Gehe zu <strong>Duplikate</strong> in der Seitenleiste, überprüfe die Vorschläge und wähle <strong>Zusammenführen</strong> oder <strong>Ignorieren</strong>.</p>'
+					: '<p>We automatically detect potential duplicates. Go to <strong>Duplicates</strong> in the sidebar, review the suggestions, and choose to <strong>Merge</strong> or <strong>Ignore</strong>.</p>',
+				category: 'features',
+				order: 3,
+				language: isDE ? 'de' : 'en',
+				tags: isDE ? ['duplikate', 'zusammenführen'] : ['duplicates', 'merge'],
+			},
+			{
+				id: 'faq-subscription',
+				question: isDE ? 'Wie kann ich mein Abo kündigen?' : 'How do I cancel my subscription?',
+				answer: isDE
+					? '<p>Du kannst dein Abo jederzeit kündigen: Gehe zu <strong>Einstellungen > Abonnement > Abo verwalten > Abo kündigen</strong>. Dein Abo bleibt bis zum Ende des Abrechnungszeitraums aktiv.</p>'
+					: '<p>You can cancel your subscription at any time: Go to <strong>Settings > Subscription > Manage Subscription > Cancel Subscription</strong>. Your subscription will remain active until the end of the billing period.</p>',
+				category: 'billing',
+				order: 4,
+				language: isDE ? 'de' : 'en',
+				tags: isDE ? ['abo', 'kündigung', 'abrechnung'] : ['subscription', 'cancel', 'billing'],
+			},
+			{
+				id: 'faq-privacy',
+				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
+				answer: isDE
+					? '<p>Wir nehmen deinen Datenschutz ernst:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) und im Ruhezustand verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>Kein Datenverkauf</strong>: Wir verkaufen niemals deine persönlichen Daten</li><li><strong>Datenexport</strong>: Du kannst jederzeit alle deine Daten exportieren</li><li><strong>Kontolöschung</strong>: Du kannst dein Konto und alle Daten dauerhaft löschen</li></ul>'
+					: '<p>We take your privacy seriously:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS) and at rest</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li><li><strong>No Data Selling</strong>: We never sell your personal data</li><li><strong>Data Export</strong>: You can export all your data at any time</li><li><strong>Account Deletion</strong>: You can permanently delete your account and all data</li></ul>',
+				category: 'privacy',
+				order: 5,
+				language: isDE ? 'de' : 'en',
+				featured: true,
+				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
+			},
+		],
+		features: [
+			{
+				id: 'feature-management',
+				title: isDE ? 'Kontaktverwaltung' : 'Contact Management',
+				description: isDE
+					? 'Verwalte alle deine Kontakte an einem Ort'
+					: 'Manage all your contacts in one place',
+				icon: '👥',
+				category: 'core',
+				highlights: isDE
+					? ['Unbegrenzte Kontakte', 'Benutzerdefinierte Felder', 'Tags und Kategorien']
+					: ['Unlimited contacts', 'Custom fields', 'Tags and categories'],
+				content: '',
+				order: 1,
+				language: isDE ? 'de' : 'en',
+			},
+			{
+				id: 'feature-import-export',
+				title: 'Import & Export',
+				description: isDE
+					? 'Importiere und exportiere Kontakte in verschiedenen Formaten'
+					: 'Import and export contacts in various formats',
+				icon: '📤',
+				category: 'core',
+				highlights: isDE
+					? ['Google Kontakte Sync', 'vCard Import/Export', 'CSV Import/Export']
+					: ['Google Contacts sync', 'vCard import/export', 'CSV import/export'],
+				content: '',
+				order: 2,
+				language: isDE ? 'de' : 'en',
+			},
+			{
+				id: 'feature-duplicates',
+				title: isDE ? 'Duplikat-Erkennung' : 'Duplicate Detection',
+				description: isDE
+					? 'Automatische Erkennung und Zusammenführung von Duplikaten'
+					: 'Automatic detection and merging of duplicates',
+				icon: '🔍',
+				category: 'advanced',
+				highlights: isDE
+					? ['Intelligente Erkennung', 'Ein-Klick Zusammenführung', 'Überprüfungsmodus']
+					: ['Smart detection', 'One-click merge', 'Review mode'],
+				content: '',
+				order: 3,
+				language: isDE ? 'de' : 'en',
+			},
+			{
+				id: 'feature-favorites',
+				title: isDE ? 'Favoriten' : 'Favorites',
+				description: isDE
+					? 'Markiere wichtige Kontakte als Favoriten'
+					: 'Mark important contacts as favorites',
+				icon: '⭐',
+				category: 'core',
+				highlights: isDE
+					? ['Schnellzugriff', 'Verschiedene Ansichten', 'Sortierung']
+					: ['Quick access', 'Multiple views', 'Sorting'],
+				content: '',
+				order: 4,
+				language: isDE ? 'de' : 'en',
+			},
+		],
+		shortcuts: [
+			{
+				id: 'shortcuts-general',
+				category: 'general',
+				title: isDE ? 'Allgemein' : 'General',
+				language: isDE ? 'de' : 'en',
+				order: 1,
+				shortcuts: [
+					{
+						shortcut: 'Cmd/Ctrl + K',
+						action: isDE ? 'Suche öffnen' : 'Open search',
+					},
+					{
+						shortcut: 'Cmd/Ctrl + N',
+						action: isDE ? 'Neuer Kontakt' : 'New contact',
+					},
+					{
+						shortcut: 'Cmd/Ctrl + 1-6',
+						action: isDE ? 'Navigation' : 'Navigation',
+					},
+				],
+			},
+		],
+		gettingStarted: [],
+		changelog: [],
+		contact: {
+			id: 'contact-support',
+			title: isDE ? 'Support kontaktieren' : 'Contact Support',
+			content: isDE
+				? '<p>Unser Support-Team hilft dir bei allen Fragen.</p>'
+				: '<p>Our support team is here to help you with any questions or issues.</p>',
+			language: isDE ? 'de' : 'en',
 			order: 1,
-			language: 'en',
-			featured: true,
-			tags: ['account', 'registration', 'signup'],
+			supportEmail: 'support@mana.how',
+			documentationUrl: 'https://mana.how/docs',
+			responseTime: isDE ? 'Normalerweise innerhalb von 24 Stunden' : 'Usually within 24 hours',
 		},
-		{
-			id: 'faq-account-001',
-			question: 'Wie erstelle ich ein Konto?',
-			answer: `<p>Die Kontoerstellung ist einfach:</p>
-				<ol>
-					<li>Klicke auf <strong>Registrieren</strong> auf der Anmeldeseite</li>
-					<li>Gib deine E-Mail-Adresse ein und wähle ein sicheres Passwort</li>
-					<li>Bestätige deine E-Mail-Adresse durch Klick auf den Link, den wir dir senden</li>
-					<li>Vervollständige dein Profil</li>
-				</ol>
-				<p>Du kannst dich auch mit deinem Google- oder Apple-Konto registrieren, um schneller loszulegen.</p>`,
-			category: 'account',
-			order: 1,
-			language: 'de',
-			featured: true,
-			tags: ['konto', 'registrierung', 'anmeldung'],
-		},
-		// Billing FAQs
-		{
-			id: 'faq-billing-001',
-			question: 'How do I cancel my subscription?',
-			answer: `<p>You can cancel your subscription at any time:</p>
-				<ol>
-					<li>Go to <strong>Settings</strong> > <strong>Subscription</strong></li>
-					<li>Click <strong>Manage Subscription</strong></li>
-					<li>Select <strong>Cancel Subscription</strong></li>
-					<li>Confirm your cancellation</li>
-				</ol>
-				<p>Your subscription will remain active until the end of the current billing period. You won't be charged again after cancellation.</p>`,
-			category: 'billing',
-			order: 1,
-			language: 'en',
-			featured: true,
-			tags: ['subscription', 'cancel', 'billing'],
-		},
-		{
-			id: 'faq-billing-001',
-			question: 'Wie kann ich mein Abo kündigen?',
-			answer: `<p>Du kannst dein Abo jederzeit kündigen:</p>
-				<ol>
-					<li>Gehe zu <strong>Einstellungen</strong> > <strong>Abonnement</strong></li>
-					<li>Klicke auf <strong>Abo verwalten</strong></li>
-					<li>Wähle <strong>Abo kündigen</strong></li>
-					<li>Bestätige die Kündigung</li>
-				</ol>
-				<p>Dein Abo bleibt bis zum Ende des aktuellen Abrechnungszeitraums aktiv. Nach der Kündigung erfolgen keine weiteren Abbuchungen.</p>`,
-			category: 'billing',
-			order: 1,
-			language: 'de',
-			featured: true,
-			tags: ['abo', 'kündigung', 'abrechnung'],
-		},
-		// Privacy FAQs
-		{
-			id: 'faq-privacy-001',
-			question: 'How is my data protected?',
-			answer: `<p>We take your privacy seriously:</p>
-				<ul>
-					<li><strong>Encryption</strong>: All data is encrypted in transit (TLS) and at rest</li>
-					<li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li>
-					<li><strong>No Data Selling</strong>: We never sell your personal data to third parties</li>
-					<li><strong>Data Export</strong>: You can export all your data at any time</li>
-					<li><strong>Account Deletion</strong>: You can permanently delete your account and all associated data</li>
-				</ul>`,
-			category: 'privacy',
-			order: 1,
-			language: 'en',
-			featured: true,
-			tags: ['privacy', 'data', 'security', 'gdpr'],
-		},
-		{
-			id: 'faq-privacy-001',
-			question: 'Wie werden meine Daten geschützt?',
-			answer: `<p>Wir nehmen deinen Datenschutz ernst:</p>
-				<ul>
-					<li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) und im Ruhezustand verschlüsselt</li>
-					<li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li>
-					<li><strong>Kein Datenverkauf</strong>: Wir verkaufen niemals deine persönlichen Daten an Dritte</li>
-					<li><strong>Datenexport</strong>: Du kannst jederzeit alle deine Daten exportieren</li>
-					<li><strong>Kontolöschung</strong>: Du kannst dein Konto und alle zugehörigen Daten dauerhaft löschen</li>
-				</ul>`,
-			category: 'privacy',
-			order: 1,
-			language: 'de',
-			featured: true,
-			tags: ['datenschutz', 'daten', 'sicherheit', 'dsgvo'],
-		},
-	],
-	features: [],
-	shortcuts: [],
-	gettingStarted: [
-		{
-			id: 'guide-welcome',
-			title: 'Getting Started',
-			description: 'Learn the basics and get up and running quickly',
-			content: `<h2>Create Your Account</h2>
-				<p>Start by creating your free account. You can sign up with your email address or use Google/Apple sign-in for a faster setup.</p>
-				<h2>Explore the Dashboard</h2>
-				<p>After logging in, you'll see your dashboard. This is your home base where you can access all features and see important information at a glance.</p>
-				<h2>Customize Your Settings</h2>
-				<p>Visit the Settings page to personalize your experience.</p>`,
-			difficulty: 'beginner',
-			estimatedTime: '5 minutes',
-			order: 1,
-			language: 'en',
-		},
-		{
-			id: 'guide-welcome',
-			title: 'Erste Schritte',
-			description: 'Lerne die Grundlagen und starte schnell durch',
-			content: `<h2>Konto erstellen</h2>
-				<p>Beginne mit der Erstellung deines kostenlosen Kontos. Du kannst dich mit deiner E-Mail-Adresse registrieren oder Google/Apple für eine schnellere Anmeldung nutzen.</p>
-				<h2>Dashboard erkunden</h2>
-				<p>Nach dem Einloggen siehst du dein Dashboard. Dies ist deine Zentrale, von der aus du auf alle Funktionen zugreifen kannst.</p>
-				<h2>Einstellungen anpassen</h2>
-				<p>Besuche die Einstellungen, um dein Erlebnis zu personalisieren.</p>`,
-			difficulty: 'beginner',
-			estimatedTime: '5 Minuten',
-			order: 1,
-			language: 'de',
-		},
-	],
-	changelog: [],
-	contact: {
-		id: 'contact-support',
-		title: 'Contact Support',
-		content: `<h2>Need Help?</h2>
-			<p>Our support team is here to help you with any questions or issues.</p>
-			<h3>Before Contacting Us</h3>
-			<ul>
-				<li>Check the <strong>FAQ</strong> section for quick answers</li>
-				<li>Browse our <strong>Getting Started</strong> guides</li>
-				<li>Search the help center using the search bar</li>
-			</ul>`,
-		language: 'en',
-		order: 1,
-		supportEmail: 'support@mana.how',
-		responseTime: 'Usually within 24 hours',
-	},
-};
+	};
+}

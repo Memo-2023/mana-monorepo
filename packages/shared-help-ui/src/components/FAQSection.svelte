@@ -15,14 +15,8 @@
 	let selectedCategory = $state<FAQCategory | 'all'>('all');
 	let showAll = $state(false);
 
-	const categories: FAQCategory[] = [
-		'general',
-		'account',
-		'billing',
-		'features',
-		'technical',
-		'privacy',
-	];
+	// Derive categories from actual items instead of hardcoding
+	const categories = $derived([...new Set(items.map((item) => item.category))] as FAQCategory[]);
 
 	const filteredItems = $derived(() => {
 		let result = items;
@@ -62,27 +56,24 @@
 				class:dark:text-gray-400={selectedCategory !== 'all'}
 				onclick={() => (selectedCategory = 'all')}
 			>
-				All
+				{translations.faq.allCategories}
 			</button>
 			{#each categories as category}
-				{@const hasItems = items.some((item) => item.category === category)}
-				{#if hasItems}
-					<button
-						type="button"
-						class="rounded-full px-3 py-1.5 text-sm font-medium transition-colors"
-						class:bg-primary-100={selectedCategory === category}
-						class:text-primary-700={selectedCategory === category}
-						class:dark:bg-primary-900={selectedCategory === category}
-						class:dark:text-primary-300={selectedCategory === category}
-						class:bg-gray-100={selectedCategory !== category}
-						class:text-gray-600={selectedCategory !== category}
-						class:dark:bg-gray-800={selectedCategory !== category}
-						class:dark:text-gray-400={selectedCategory !== category}
-						onclick={() => (selectedCategory = category)}
-					>
-						{getCategoryLabel(category)}
-					</button>
-				{/if}
+				<button
+					type="button"
+					class="rounded-full px-3 py-1.5 text-sm font-medium transition-colors"
+					class:bg-primary-100={selectedCategory === category}
+					class:text-primary-700={selectedCategory === category}
+					class:dark:bg-primary-900={selectedCategory === category}
+					class:dark:text-primary-300={selectedCategory === category}
+					class:bg-gray-100={selectedCategory !== category}
+					class:text-gray-600={selectedCategory !== category}
+					class:dark:bg-gray-800={selectedCategory !== category}
+					class:dark:text-gray-400={selectedCategory !== category}
+					onclick={() => (selectedCategory = category)}
+				>
+					{getCategoryLabel(category)}
+				</button>
 			{/each}
 		</div>
 	{/if}
