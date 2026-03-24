@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
@@ -59,28 +60,28 @@
 		});
 
 		if (result.error) {
-			toast.error(`Fehler: ${result.error.message}`);
+			toast.error(`${$_('common.error')}: ${result.error.message}`);
 			return;
 		}
 
-		toast.success('Kalender erstellt');
+		toast.success($_('settings.calendarCreated'));
 		newCalendarName = '';
 		showNewCalendarForm = false;
 	}
 
 	async function handleDeleteCalendar(calendar: Calendar) {
-		if (!confirm(`Möchten Sie "${calendar.name}" wirklich löschen?`)) {
+		if (!confirm($_('settings.confirmDeleteCalendar', { values: { name: calendar.name } }))) {
 			return;
 		}
 
 		const result = await calendarsStore.deleteCalendar(calendar.id);
 
 		if (result.error) {
-			toast.error(`Fehler: ${result.error.message}`);
+			toast.error(`${$_('common.error')}: ${result.error.message}`);
 			return;
 		}
 
-		toast.success('Kalender gelöscht');
+		toast.success($_('settings.calendarDeleted'));
 	}
 
 	async function handleUpdateCalendar() {
@@ -90,7 +91,7 @@
 		if (editIsDefault && !editingCalendar.isDefault) {
 			const defaultResult = await calendarsStore.setAsDefault(editingCalendar.id);
 			if (defaultResult?.error) {
-				toast.error(`Fehler: ${defaultResult.error.message}`);
+				toast.error(`${$_('common.error')}: ${defaultResult.error.message}`);
 				return;
 			}
 		}
@@ -102,11 +103,11 @@
 		});
 
 		if (result.error) {
-			toast.error(`Fehler: ${result.error.message}`);
+			toast.error(`${$_('common.error')}: ${result.error.message}`);
 			return;
 		}
 
-		toast.success('Kalender aktualisiert');
+		toast.success($_('settings.calendarUpdated'));
 		cancelEditing();
 	}
 
@@ -127,25 +128,25 @@
 	}
 
 	// View labels
-	const viewLabels: Record<CalendarViewType, string> = {
-		week: 'Woche',
-		month: 'Monat',
-		agenda: 'Agenda',
-	};
+	let viewLabels = $derived<Record<CalendarViewType, string>>({
+		week: $_('settings.viewWeek'),
+		month: $_('settings.viewMonth'),
+		agenda: $_('settings.viewAgenda'),
+	});
 
 	// Duration options in minutes
 	const durationOptions = [15, 30, 45, 60, 90, 120];
 
 	// Reminder options in minutes
-	const reminderOptions = [
-		{ value: 0, label: 'Keine' },
-		{ value: 5, label: '5 Minuten' },
-		{ value: 10, label: '10 Minuten' },
-		{ value: 15, label: '15 Minuten' },
-		{ value: 30, label: '30 Minuten' },
-		{ value: 60, label: '1 Stunde' },
-		{ value: 1440, label: '1 Tag' },
-	];
+	let reminderOptions = $derived([
+		{ value: 0, label: $_('settings.reminderNone') },
+		{ value: 5, label: $_('settings.reminderMinutes', { values: { count: 5 } }) },
+		{ value: 10, label: $_('settings.reminderMinutes', { values: { count: 10 } }) },
+		{ value: 15, label: $_('settings.reminderMinutes', { values: { count: 15 } }) },
+		{ value: 30, label: $_('settings.reminderMinutes', { values: { count: 30 } }) },
+		{ value: 60, label: $_('settings.reminderHour') },
+		{ value: 1440, label: $_('settings.reminderDay') },
+	]);
 
 	// FilterDropdown options
 	let viewOptions = $derived<FilterDropdownOption[]>(
@@ -157,8 +158,8 @@
 			value: String(duration),
 			label:
 				duration >= 60
-					? `${duration / 60} Stunde${duration > 60 ? 'n' : ''}`
-					: `${duration} Minuten`,
+					? $_('settings.durationHours', { values: { count: duration / 60 } })
+					: $_('settings.durationMinutes', { values: { count: duration } }),
 		}))
 	);
 
@@ -190,16 +191,16 @@
 </script>
 
 <svelte:head>
-	<title>Einstellungen | Kalender</title>
+	<title>{$_('nav.settings')} | {$_('app.name')}</title>
 </svelte:head>
 
 <div class="settings-page">
 	<header class="page-header">
-		<h1>Einstellungen</h1>
+		<h1>{$_('nav.settings')}</h1>
 	</header>
 
 	<!-- Meine Kalender -->
-	<SettingsSection title="Meine Kalender">
+	<SettingsSection title={$_('settings.myCalendars')}>
 		{#snippet icon()}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -225,7 +226,7 @@
 								d="M12 4v16m8-8H4"
 							/>
 						</svg>
-						Neuer Kalender
+						{$_('settings.newCalendar')}
 					</button>
 				</div>
 
@@ -241,7 +242,7 @@
 								<input
 									type="text"
 									class="input"
-									placeholder="Kalender Name"
+									placeholder={$_('settings.calendarName')}
 									bind:value={newCalendarName}
 								/>
 								<input type="color" class="color-input" bind:value={newCalendarColor} />
@@ -252,10 +253,10 @@
 									class="btn btn-ghost"
 									onclick={() => (showNewCalendarForm = false)}
 								>
-									Abbrechen
+									{$_('common.cancel')}
 								</button>
 								<button type="submit" class="btn btn-primary" disabled={!newCalendarName.trim()}>
-									Erstellen
+									{$_('common.create')}
 								</button>
 							</div>
 						</form>
@@ -274,18 +275,18 @@
 								>
 									<div class="edit-form-row">
 										<div class="edit-form-group edit-form-group--name">
-											<label for="edit-name" class="edit-label">Name</label>
+											<label for="edit-name" class="edit-label">{$_('settings.name')}</label>
 											<input
 												type="text"
 												id="edit-name"
 												class="edit-input"
-												placeholder="Kalender Name"
+												placeholder={$_('settings.calendarName')}
 												bind:value={editName}
 											/>
 										</div>
 
 										<div class="edit-form-group edit-form-group--color">
-											<label for="edit-color" class="edit-label">Farbe</label>
+											<label for="edit-color" class="edit-label">{$_('settings.color')}</label>
 											<div class="edit-color-wrapper">
 												<input
 													type="color"
@@ -305,19 +306,19 @@
 											disabled={editingCalendar.isDefault}
 										/>
 										<span class="edit-checkbox-text">
-											Als Standardkalender verwenden
+											{$_('settings.setAsDefault')}
 											{#if editingCalendar.isDefault}
-												<span class="edit-checkbox-hint">(aktueller Standard)</span>
+												<span class="edit-checkbox-hint">({$_('settings.currentDefault')})</span>
 											{/if}
 										</span>
 									</label>
 
 									<div class="edit-form-actions">
 										<button type="button" class="btn btn-ghost" onclick={cancelEditing}>
-											Abbrechen
+											{$_('common.cancel')}
 										</button>
 										<button type="submit" class="btn btn-primary" disabled={!editName.trim()}>
-											Speichern
+											{$_('common.save')}
 										</button>
 									</div>
 								</form>
@@ -328,19 +329,19 @@
 									<span class="color-dot" style="background-color: {calendar.color}"></span>
 									<span class="calendar-name">{calendar.name}</span>
 									{#if calendar.isDefault}
-										<span class="badge badge-primary">Standard</span>
+										<span class="badge badge-primary">{$_('settings.default')}</span>
 									{/if}
 								</div>
 								<div class="calendar-actions">
 									<button class="btn btn-ghost btn-sm" onclick={() => startEditing(calendar)}>
-										Bearbeiten
+										{$_('common.edit')}
 									</button>
 									{#if !calendar.isDefault}
 										<button
 											class="btn btn-ghost btn-sm text-destructive"
 											onclick={() => handleDeleteCalendar(calendar)}
 										>
-											Löschen
+											{$_('common.delete')}
 										</button>
 									{/if}
 								</div>
@@ -350,7 +351,7 @@
 
 					{#if calendarsStore.calendars.length === 0}
 						<div class="empty-state">
-							<p>Keine Kalender vorhanden</p>
+							<p>{$_('settings.noCalendars')}</p>
 						</div>
 					{/if}
 				</div>
@@ -359,7 +360,7 @@
 	</SettingsSection>
 
 	<!-- Externe Kalender -->
-	<SettingsSection title="Externe Kalender">
+	<SettingsSection title={$_('settings.externalCalendars')}>
 		{#snippet icon()}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -373,20 +374,20 @@
 		<SettingsCard>
 			<div class="flex flex-col gap-3">
 				<p class="text-sm text-muted-foreground">
-					Verbinde Google Calendar, Apple Calendar, CalDAV oder iCal-URLs.
+					{$_('settings.externalCalendarsDesc')}
 				</p>
 				<a
 					href="/settings/sync"
 					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors self-start"
 				>
-					Kalender-Sync verwalten
+					{$_('settings.manageSync')}
 				</a>
 			</div>
 		</SettingsCard>
 	</SettingsSection>
 
 	<!-- Kalender-Freigaben -->
-	<SettingsSection title="Kalender-Freigaben">
+	<SettingsSection title={$_('settings.shares')}>
 		{#snippet icon()}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -400,13 +401,13 @@
 		<SettingsCard>
 			<div class="flex flex-col gap-3">
 				<p class="text-sm text-muted-foreground">
-					Teile Kalender mit anderen Nutzern oder verwalte Einladungen.
+					{$_('settings.sharesDesc')}
 				</p>
 				<a
 					href="/settings/sharing"
 					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors self-start"
 				>
-					Freigaben verwalten
+					{$_('settings.manageShares')}
 				</a>
 			</div>
 		</SettingsCard>
@@ -416,12 +417,12 @@
 	<GlobalSettingsSection
 		{userSettings}
 		appId="calendar"
-		title="App-Einstellungen"
-		description="Diese Einstellungen werden mit allen Mana Apps synchronisiert"
+		title={$_('settings.appSettings')}
+		description={$_('settings.appSettingsDesc')}
 	/>
 
 	<!-- Kalender-Ansicht -->
-	<SettingsSection title="Kalender-Ansicht">
+	<SettingsSection title={$_('settings.calendarView')}>
 		{#snippet icon()}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -442,21 +443,21 @@
 			<div class="p-5 space-y-4">
 				<div class="setting-item">
 					<div class="setting-info">
-						<span class="setting-label">Standard-Ansicht</span>
-						<span class="setting-description">Ansicht beim Öffnen des Kalenders</span>
+						<span class="setting-label">{$_('settings.defaultView')}</span>
+						<span class="setting-description">{$_('settings.defaultViewDesc')}</span>
 					</div>
 					<FilterDropdown
 						options={viewOptions}
 						value={settingsStore.defaultView}
 						onChange={(v) => handleViewChange(v as CalendarViewType)}
-						placeholder="Ansicht wählen"
+						placeholder={$_('settings.selectView')}
 					/>
 				</div>
 
 				<div class="setting-item">
 					<div class="setting-info">
-						<span class="setting-label">Zeitformat</span>
-						<span class="setting-description">Anzeige der Uhrzeiten</span>
+						<span class="setting-label">{$_('settings.timeFormat')}</span>
+						<span class="setting-description">{$_('settings.timeFormatDesc')}</span>
 					</div>
 					<div class="button-group">
 						<button
@@ -485,8 +486,8 @@
 								settingsStore.set('showOnlyWeekdays', !settingsStore.showOnlyWeekdays)}
 						/>
 						<div class="toggle-info">
-							<span class="setting-label">Nur Werktage anzeigen</span>
-							<span class="setting-description">Wochenenden in der Kalenderansicht ausblenden</span>
+							<span class="setting-label">{$_('settings.weekdaysOnly')}</span>
+							<span class="setting-description">{$_('settings.weekdaysOnlyDesc')}</span>
 						</div>
 					</label>
 				</div>
@@ -499,8 +500,8 @@
 							onchange={() => settingsStore.set('showWeekNumbers', !settingsStore.showWeekNumbers)}
 						/>
 						<div class="toggle-info">
-							<span class="setting-label">Wochennummern anzeigen</span>
-							<span class="setting-description">Kalenderwoche (KW) in der Ansicht anzeigen</span>
+							<span class="setting-label">{$_('settings.showWeekNumbers')}</span>
+							<span class="setting-description">{$_('settings.showWeekNumbersDesc')}</span>
 						</div>
 					</label>
 				</div>
@@ -514,10 +515,8 @@
 								settingsStore.set('filterHoursEnabled', !settingsStore.filterHoursEnabled)}
 						/>
 						<div class="toggle-info">
-							<span class="setting-label">Stunden filtern</span>
-							<span class="setting-description"
-								>Nur bestimmte Stunden in der Tages-/Wochenansicht anzeigen</span
-							>
+							<span class="setting-label">{$_('settings.filterHours')}</span>
+							<span class="setting-description">{$_('settings.filterHoursDesc')}</span>
 						</div>
 					</label>
 				</div>
@@ -525,29 +524,27 @@
 				{#if settingsStore.filterHoursEnabled}
 					<div class="setting-item hour-range-setting">
 						<div class="setting-info">
-							<span class="setting-label">Sichtbare Stunden</span>
-							<span class="setting-description"
-								>Zeitbereich der in der Kalenderansicht angezeigt wird</span
-							>
+							<span class="setting-label">{$_('settings.visibleHours')}</span>
+							<span class="setting-description">{$_('settings.visibleHoursDesc')}</span>
 						</div>
 						<div class="hour-range-inputs">
 							<div class="hour-input-group">
-								<span class="hour-label">Von</span>
+								<span class="hour-label">{$_('settings.hoursFrom')}</span>
 								<FilterDropdown
 									options={hourStartOptions}
 									value={String(settingsStore.dayStartHour)}
 									onChange={(v) => settingsStore.set('dayStartHour', Number(v))}
-									placeholder="Start"
+									placeholder={$_('event.start')}
 								/>
 							</div>
 							<span class="hour-separator">–</span>
 							<div class="hour-input-group">
-								<span class="hour-label">Bis</span>
+								<span class="hour-label">{$_('settings.hoursTo')}</span>
 								<FilterDropdown
 									options={hourEndOptions}
 									value={String(settingsStore.dayEndHour)}
 									onChange={(v) => settingsStore.set('dayEndHour', Number(v))}
-									placeholder="Ende"
+									placeholder={$_('event.end')}
 								/>
 							</div>
 						</div>
@@ -556,8 +553,8 @@
 
 				<div class="setting-item">
 					<div class="setting-info">
-						<span class="setting-label">Ganztägige Termine</span>
-						<span class="setting-description">Wie sollen ganztägige Termine angezeigt werden?</span>
+						<span class="setting-label">{$_('settings.allDayEvents')}</span>
+						<span class="setting-description">{$_('settings.allDayEventsDesc')}</span>
 					</div>
 					<div class="button-group">
 						<button
@@ -565,14 +562,14 @@
 							class:active={settingsStore.allDayDisplayMode === 'header'}
 							onclick={() => settingsStore.set('allDayDisplayMode', 'header' as AllDayDisplayMode)}
 						>
-							In Kopfzeile
+							{$_('settings.allDayInHeader')}
 						</button>
 						<button
 							class="group-button"
 							class:active={settingsStore.allDayDisplayMode === 'block'}
 							onclick={() => settingsStore.set('allDayDisplayMode', 'block' as AllDayDisplayMode)}
 						>
-							Als Tagesblock
+							{$_('settings.allDayAsBlock')}
 						</button>
 					</div>
 				</div>
@@ -581,7 +578,7 @@
 	</SettingsSection>
 
 	<!-- Termin-Einstellungen -->
-	<SettingsSection title="Termine">
+	<SettingsSection title={$_('settings.events')}>
 		{#snippet icon()}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -596,27 +593,27 @@
 			<div class="p-5 space-y-4">
 				<div class="setting-item">
 					<div class="setting-info">
-						<span class="setting-label">Standard-Dauer</span>
-						<span class="setting-description">Voreingestellte Dauer für neue Termine</span>
+						<span class="setting-label">{$_('settings.defaultDuration')}</span>
+						<span class="setting-description">{$_('settings.defaultDurationDesc')}</span>
 					</div>
 					<FilterDropdown
 						options={durationDropdownOptions}
 						value={String(settingsStore.defaultEventDuration)}
 						onChange={(v) => handleEventDurationChange(Number(v))}
-						placeholder="Dauer wählen"
+						placeholder={$_('settings.selectDuration')}
 					/>
 				</div>
 
 				<div class="setting-item">
 					<div class="setting-info">
-						<span class="setting-label">Standard-Erinnerung</span>
-						<span class="setting-description">Voreingestellte Erinnerung für neue Termine</span>
+						<span class="setting-label">{$_('settings.defaultReminder')}</span>
+						<span class="setting-description">{$_('settings.defaultReminderDesc')}</span>
 					</div>
 					<FilterDropdown
 						options={reminderDropdownOptions}
 						value={String(settingsStore.defaultReminder)}
 						onChange={(v) => handleReminderChange(Number(v))}
-						placeholder="Erinnerung wählen"
+						placeholder={$_('settings.selectReminder')}
 					/>
 				</div>
 			</div>
@@ -624,7 +621,7 @@
 	</SettingsSection>
 
 	<!-- Geburtstage -->
-	<SettingsSection title="Geburtstage">
+	<SettingsSection title={$_('settings.birthdays')}>
 		{#snippet icon()}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -645,9 +642,8 @@
 							onchange={() => settingsStore.set('showBirthdays', !settingsStore.showBirthdays)}
 						/>
 						<div class="toggle-info">
-							<span class="setting-label">Geburtstage anzeigen</span>
-							<span class="setting-description">Geburtstage aus Kontakten im Kalender anzeigen</span
-							>
+							<span class="setting-label">{$_('settings.showBirthdays')}</span>
+							<span class="setting-description">{$_('settings.showBirthdaysDesc')}</span>
 						</div>
 					</label>
 				</div>
@@ -662,10 +658,8 @@
 									settingsStore.set('showBirthdayAge', !settingsStore.showBirthdayAge)}
 							/>
 							<div class="toggle-info">
-								<span class="setting-label">Alter anzeigen</span>
-								<span class="setting-description"
-									>Das Alter der Person bei Geburtstagen anzeigen</span
-								>
+								<span class="setting-label">{$_('settings.showAge')}</span>
+								<span class="setting-description">{$_('settings.showAgeDesc')}</span>
 							</div>
 						</label>
 					</div>
@@ -675,7 +669,7 @@
 	</SettingsSection>
 
 	<!-- Konto -->
-	<SettingsSection title="Konto">
+	<SettingsSection title={$_('settings.account')}>
 		{#snippet icon()}
 			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -690,7 +684,7 @@
 			<div class="p-5 space-y-4">
 				<div class="setting-item">
 					<div class="setting-info">
-						<span class="setting-label">E-Mail</span>
+						<span class="setting-label">{$_('auth.email')}</span>
 						<span class="setting-value">{authStore.user?.email || '-'}</span>
 					</div>
 				</div>
@@ -700,7 +694,7 @@
 						class="btn btn-ghost text-destructive"
 						onclick={() => authStore.signOut().then(() => goto('/login'))}
 					>
-						Abmelden
+						{$_('auth.logout')}
 					</button>
 				</div>
 			</div>
