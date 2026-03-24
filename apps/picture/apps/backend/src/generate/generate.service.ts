@@ -15,6 +15,7 @@ import { Database } from '../db/connection';
 import { imageGenerations, images, models } from '../db/schema';
 import type { ImageGeneration, Image } from '../db/schema';
 import { ReplicateService, GenerationParams } from './replicate.service';
+import { LocalImageGenService } from './local-image-gen.service';
 import { StorageService } from '../upload/storage.service';
 import { GenerateImageDto } from './dto/generate.dto';
 
@@ -37,6 +38,7 @@ export class GenerateService {
 	constructor(
 		@Inject(DATABASE_CONNECTION) private readonly db: Database,
 		private readonly replicateService: ReplicateService,
+		private readonly localImageGenService: LocalImageGenService,
 		private readonly storageService: StorageService,
 		private readonly creditClient: CreditClientService,
 		private configService: ConfigService
@@ -161,7 +163,9 @@ export class GenerateService {
 			// Use sync mode if:
 			// 1. Client explicitly requested waitForResult
 			// 2. Webhooks are not available (no HTTPS URL)
-			const useSyncMode = dto.waitForResult || !this.canUseWebhooks;
+			// 3. Local model (mana-image-gen is always synchronous)
+			const isLocalModel = model.replicateId.startsWith('local/');
+			const useSyncMode = isLocalModel || dto.waitForResult || !this.canUseWebhooks;
 
 			if (useSyncMode) {
 				if (!this.canUseWebhooks && !dto.waitForResult) {
@@ -222,8 +226,11 @@ export class GenerateService {
 				.set({ status: 'processing' })
 				.where(eq(imageGenerations.id, generation.id));
 
-			// Process generation with polling
-			const result = await this.replicateService.processGeneration(params);
+			// Route to local or Replicate provider
+			const isLocal = params.modelId.startsWith('local/');
+			const result = isLocal
+				? await this.localImageGenService.processGeneration(params)
+				: await this.replicateService.processGeneration(params);
 
 			if (!result.success || !result.outputUrl) {
 				await this.db

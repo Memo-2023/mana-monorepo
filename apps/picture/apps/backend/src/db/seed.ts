@@ -81,6 +81,31 @@ const defaultModels = [
 		costPerGeneration: 0.039,
 		estimatedTimeSeconds: 3,
 	},
+	{
+		name: 'flux2-klein-local',
+		displayName: 'FLUX.2 Klein (Lokal)',
+		description:
+			'Lokales Bildgenerierungsmodell auf eigenem Server in Deutschland. Keine Cloud-API, keine Kosten, volle Datenkontrolle. ~0.8s pro Bild.',
+		replicateId: 'local/flux2-klein',
+		version: null,
+		defaultWidth: 1024,
+		defaultHeight: 1024,
+		defaultSteps: 4,
+		defaultGuidanceScale: 0,
+		minWidth: 256,
+		minHeight: 256,
+		maxWidth: 2048,
+		maxHeight: 2048,
+		maxSteps: 8,
+		supportsNegativePrompt: false,
+		supportsImg2Img: false,
+		supportsSeed: true,
+		isActive: true,
+		isDefault: false,
+		sortOrder: -1, // Show first (local = preferred)
+		costPerGeneration: 0,
+		estimatedTimeSeconds: 1,
+	},
 ];
 
 async function seed() {
