@@ -1,75 +1,78 @@
-# PostgreSQL Backup mit pgBackRest
+# PostgreSQL Backup
 
-> Point-in-Time Recovery (PITR) für alle Mana-Datenbanken
+> Stündliche Dumps + tägliche Base-Backups für alle Mana-Datenbanken
 
 ## Übersicht
 
-| Aspekt | Vorher (pg_dumpall) | Jetzt (pgBackRest) |
-|--------|--------------------|--------------------|
-| **Recovery Point** | Letzter Dump (24h Verlust möglich) | Bis auf die letzte Sekunde |
-| **Backup-Typ** | Nur Full Dump | Full + Differential + Incremental |
-| **Kompression** | Keine | Zstandard (zst) |
-| **Parallelisierung** | Nein | Ja (2 Threads) |
-| **Validierung** | Keine | Automatisch |
+| Aspekt | Vorher | Jetzt |
+|--------|--------|-------|
+| **Frequenz** | 1x täglich (03:00) | Stündlich + täglich |
+| **Max. Datenverlust** | 24 Stunden | 1 Stunde |
+| **Backup-Typ** | Nur pg_dumpall | pg_dumpall (stündlich) + pg_basebackup (täglich) |
+| **Kompression** | Keine | gzip |
+| **Retention** | 30 Tage | 48h Dumps + 30 Tage Base-Backups |
+| **Automatisch** | LaunchAgent Cron | Docker Container (always running) |
 
 ## Architektur
 
 ```
 PostgreSQL (mana-infra-postgres)
     │
-    ├── WAL-Archivierung → pgBackRest empfängt WAL-Segmente
-    │
-    └── Scheduled Backups:
-        ├── 03:00 → Full Backup (alle Daten)
-        ├── 09:00, 15:00, 21:00 → Differential (nur Änderungen seit Full)
-        └── Jede Stunde → Incremental (nur Änderungen seit letztem Backup)
+    └── postgres-backup Container (mana-infra-postgres-backup)
+        ├── Jede Stunde → pg_dumpall | gzip  (alle DBs als SQL)
+        └── Täglich 03:00 → pg_basebackup -Ft -z  (physisches Backup)
 ```
 
 ## Backup-Speicherort
 
 ```
-/Volumes/ManaData/backups/pgbackrest/
-├── archive/          # WAL-Archive (kontinuierlich)
-└── backup/           # Full + Diff + Incr Backups
+/Volumes/ManaData/backups/postgres/
+├── hourly_20260324_140000.sql.gz    # SQL Dump (stündlich)
+├── hourly_20260324_150000.sql.gz
+├── ...
+├── base_20260324_030000/            # Base Backup (täglich)
+│   ├── base.tar.gz
+│   └── pg_wal.tar.gz
+└── base_20260323_030000/
 ```
 
-**Retention:** 4 Full Backups + 14 Differentials (~4 Wochen Rückblick)
+**Retention:**
+- Stündliche Dumps: 48 Stück (~2 Tage)
+- Tägliche Base-Backups: 30 Stück (~1 Monat)
 
-## Befehle
-
-### Status prüfen
+## Container-Status prüfen
 
 ```bash
-# Backup-Info anzeigen
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana info
+# Container Status
+docker ps --filter name=mana-infra-postgres-backup
 
-# Letzte Backups auflisten
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana info --output=json | jq '.[] | .backup[] | {label, type, timestamp_start, database_size}'
+# Logs (letzte Backups)
+docker logs mana-infra-postgres-backup --tail 20
+
+# Backup-Größe
+du -sh /Volumes/ManaData/backups/postgres/
+ls -lah /Volumes/ManaData/backups/postgres/hourly_*.sql.gz | tail -5
 ```
 
-### Manuelles Backup
+## Wiederherstellung
+
+### Szenario 1: Aus stündlichem Dump (SQL)
 
 ```bash
-# Full Backup (manuell)
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana --type=full backup
+# 1. Gewünschten Dump finden
+ls -la /Volumes/ManaData/backups/postgres/hourly_*.sql.gz
 
-# Differential Backup
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana --type=diff backup
+# 2. Alle Datenbanken wiederherstellen
+gunzip -c /Volumes/ManaData/backups/postgres/hourly_20260324_140000.sql.gz \
+  | docker exec -i mana-infra-postgres psql -U postgres
 
-# Incremental Backup
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana --type=incr backup
+# 3. Oder einzelne Datenbank:
+gunzip -c /Volumes/ManaData/backups/postgres/hourly_20260324_140000.sql.gz \
+  | grep -A 99999 'connect chat_db' | grep -B 99999 'connect ' \
+  | docker exec -i mana-infra-postgres psql -U postgres -d chat_db
 ```
 
-### Backup validieren
-
-```bash
-# Verify prüft Integrität aller Backups
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana verify
-```
-
-## Wiederherstellung (Restore)
-
-### Szenario 1: Komplette Wiederherstellung (letzter Stand)
+### Szenario 2: Aus Base-Backup (physisch)
 
 ```bash
 # 1. PostgreSQL stoppen
@@ -78,103 +81,52 @@ docker compose -f docker-compose.macmini.yml stop postgres
 # 2. Altes Datenverzeichnis sichern
 sudo mv /Volumes/ManaData/postgres /Volumes/ManaData/postgres.broken
 
-# 3. Neues Verzeichnis erstellen
+# 3. Neues Verzeichnis aus Backup erstellen
 sudo mkdir -p /Volumes/ManaData/postgres
-sudo chown 70:70 /Volumes/ManaData/postgres
+cd /Volumes/ManaData/postgres
+sudo tar xzf /Volumes/ManaData/backups/postgres/base_20260324_030000/base.tar.gz
+sudo tar xzf /Volumes/ManaData/backups/postgres/base_20260324_030000/pg_wal.tar.gz -C pg_wal/
+sudo chown -R 70:70 /Volumes/ManaData/postgres
 
-# 4. Restore ausführen
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana restore
-
-# 5. PostgreSQL starten
+# 4. PostgreSQL starten
 docker compose -f docker-compose.macmini.yml start postgres
 
-# 6. Prüfen
+# 5. Prüfen
 docker exec mana-infra-postgres psql -U postgres -c "\l"
 ```
 
-### Szenario 2: Point-in-Time Recovery (z.B. auf 14:59 Uhr)
+### Szenario 3: Einzelne Datenbank aus Dump
 
 ```bash
-# 1. PostgreSQL stoppen
-docker compose -f docker-compose.macmini.yml stop postgres
+# Chat-DB wiederherstellen (Drop + Recreate)
+docker exec mana-infra-postgres psql -U postgres -c "DROP DATABASE IF EXISTS chat_db;"
+docker exec mana-infra-postgres psql -U postgres -c "CREATE DATABASE chat_db;"
 
-# 2. Altes Datenverzeichnis sichern
-sudo mv /Volumes/ManaData/postgres /Volumes/ManaData/postgres.broken
-
-# 3. Neues Verzeichnis erstellen
-sudo mkdir -p /Volumes/ManaData/postgres
-sudo chown 70:70 /Volumes/ManaData/postgres
-
-# 4. PITR Restore auf bestimmten Zeitpunkt
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana \
-  --type=time \
-  --target="2026-03-24 14:59:00+01" \
-  restore
-
-# 5. PostgreSQL starten
-docker compose -f docker-compose.macmini.yml start postgres
+gunzip -c /Volumes/ManaData/backups/postgres/hourly_20260324_140000.sql.gz \
+  | docker exec -i mana-infra-postgres psql -U postgres -d chat_db
 ```
 
-### Szenario 3: Einzelne Datenbank wiederherstellen
-
-pgBackRest stellt immer den gesamten PostgreSQL-Cluster wieder her. Für einzelne Datenbanken:
+## Manuelles Backup
 
 ```bash
-# 1. Restore in temporäres Verzeichnis
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana \
-  --pg1-path=/tmp/pg-restore \
-  restore
+# Sofortiger Dump
+docker exec mana-infra-postgres pg_dumpall -U postgres | gzip > /Volumes/ManaData/backups/postgres/manual_$(date +%Y%m%d_%H%M%S).sql.gz
 
-# 2. Temporären PostgreSQL starten und pg_dump auf einzelne DB
-docker run --rm -v /tmp/pg-restore:/var/lib/postgresql/data \
-  postgres:16-alpine pg_dump -U postgres chat_db > /tmp/chat_db.sql
-
-# 3. In laufende DB importieren
-cat /tmp/chat_db.sql | docker exec -i mana-infra-postgres psql -U postgres chat_db
+# Sofortiges Base-Backup
+mkdir -p /Volumes/ManaData/backups/postgres/manual_base_$(date +%Y%m%d)
+docker exec mana-infra-postgres pg_basebackup -U postgres -D /tmp/backup -Ft -z -P
+docker cp mana-infra-postgres:/tmp/backup /Volumes/ManaData/backups/postgres/manual_base_$(date +%Y%m%d)
 ```
-
-## Monitoring
-
-### In Grafana (geplant)
-
-pgBackRest exportiert keine nativen Prometheus-Metriken. Monitoring via:
-
-```bash
-# Health-Check in health-check.sh hinzufügen:
-LAST_BACKUP=$(docker exec mana-infra-pgbackrest pgbackrest --stanza=mana info --output=json 2>/dev/null | jq -r '.[0].backup[-1].timestamp_stop // "never"')
-echo "Last backup: $LAST_BACKUP"
-```
-
-### Alerting
-
-Der Health-Check (`scripts/mac-mini/health-check.sh`) kann prüfen ob das letzte Backup älter als 24h ist und einen Telegram-Alert senden.
 
 ## Erste Einrichtung
 
-Beim ersten Start auf dem Server:
-
 ```bash
-# 1. Backup-Verzeichnis erstellen
-sudo mkdir -p /Volumes/ManaData/backups/pgbackrest
-sudo chown 999:999 /Volumes/ManaData/backups/pgbackrest
+# Backup-Verzeichnis erstellen
+sudo mkdir -p /Volumes/ManaData/backups/postgres
 
-# 2. Container starten
-docker compose -f docker-compose.macmini.yml up -d postgres postgres-backup
+# Container starten
+docker compose -f docker-compose.macmini.yml up -d postgres-backup
 
-# 3. Stanza erstellen (einmalig)
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana stanza-create
-
-# 4. Erstes Full Backup
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana --type=full backup
-
-# 5. Prüfen
-docker exec mana-infra-pgbackrest pgbackrest --stanza=mana info
+# Prüfen ob Backup läuft
+docker logs mana-infra-postgres-backup --tail 5
 ```
-
-## Konfigurationsdateien
-
-| Datei | Zweck |
-|-------|-------|
-| `docker/postgres/postgresql.conf` | WAL-Archivierung + Performance-Tuning |
-| `docker/postgres/pgbackrest.conf` | pgBackRest Stanza + Retention |
-| `docker-compose.macmini.yml` | Container-Definition (postgres-backup) |

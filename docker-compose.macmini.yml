@@ -39,27 +39,46 @@ services:
       postgres
       -c 'config_file=/etc/postgresql/conf.d/custom.conf'
 
-  # PostgreSQL Backup with Point-in-Time Recovery
-  # Full backup daily at 03:00, differential every 6h, incremental every hour
-  # Retention: 4 full backups + 14 differential
+  # PostgreSQL Backup — hourly pg_dumpall + daily pg_basebackup
+  # Retention: 48 hourly dumps + 30 daily base backups
   # Restore: see docs/POSTGRES_BACKUP.md
   postgres-backup:
-    image: woblerr/pgbackrest:latest
-    container_name: mana-infra-pgbackrest
+    image: postgres:16-alpine
+    container_name: mana-infra-postgres-backup
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      PGBACKREST_STANZA: mana
-      PGBACKREST_REPO1_PATH: /var/lib/pgbackrest
-      PGBACKREST_REPO1_RETENTION_FULL: "4"
-      PGBACKREST_PG1_HOST: postgres
-      PGBACKREST_PG1_PORT: "5432"
-      PGBACKREST_PG1_USER: postgres
-      PGBACKREST_PG1_PATH: /var/lib/postgresql/data
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD:-mana123}
+      BACKUP_DIR: /backups
+      RETENTION_HOURLY: 48
+      RETENTION_DAILY: 30
     volumes:
-      - /Volumes/ManaData/backups/pgbackrest:/var/lib/pgbackrest
+      - /Volumes/ManaData/backups/postgres:/backups
+    entrypoint: >
+      /bin/sh -c "
+      echo 'PostgreSQL Backup Service started';
+      echo 'Hourly: pg_dumpall (retention: 48)';
+      echo 'Daily 03:00: pg_basebackup (retention: 30)';
+      while true; do
+        HOUR=$$(date +%H);
+        TIMESTAMP=$$(date +%Y%m%d_%H%M%S);
+        echo \"[$$TIMESTAMP] Running hourly backup...\";
+        pg_dumpall -h postgres -U postgres | gzip > /backups/hourly_$$TIMESTAMP.sql.gz;
+        if [ \"$$HOUR\" = '03' ]; then
+          echo \"[$$TIMESTAMP] Running daily base backup...\";
+          mkdir -p /backups/base_$$TIMESTAMP;
+          pg_basebackup -h postgres -U postgres -D /backups/base_$$TIMESTAMP -Ft -z -P;
+        fi;
+        find /backups -name 'hourly_*.sql.gz' -mmin +$$((48*60)) -delete 2>/dev/null;
+        find /backups -name 'base_*' -maxdepth 1 -type d -mtime +30 -exec rm -rf {} + 2>/dev/null;
+        echo \"[$$TIMESTAMP] Backup complete. Sleeping 1h...\";
+        sleep 3600;
+      done
+      "
 
   redis:
     image: redis:7-alpine
