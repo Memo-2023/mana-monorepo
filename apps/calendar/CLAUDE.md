@@ -548,6 +548,48 @@ curl -X POST http://localhost:3014/api/v1/events \
   }'
 ```
 
+## Production Readiness
+
+**Status: Production-Ready (2026-03-24)**
+
+### Checklist
+
+| Category | Status | Details |
+|----------|--------|---------|
+| **Error Handling** | ✅ | Global `+error.svelte` with i18n (5 languages), error tracking via GlitchTip |
+| **Offline Support** | ✅ | Offline page with shared `OfflinePage` component |
+| **PWA** | ✅ | Service worker, manifest, icons, apple-touch-icon, shortcuts |
+| **Security Headers** | ✅ | CSP, X-Frame-Options, HSTS via `setSecurityHeaders()` |
+| **Loading States** | ✅ | Skeleton loaders: CalendarView, EventDetail, Agenda, AppLoading |
+| **i18n** | ✅ | 5 languages (DE/EN/FR/ES/IT), all pages including settings fully localized |
+| **Meta/SEO** | ✅ | OG tags, meta description in root layout |
+| **Accessibility** | ✅ | Focus trapping in all modals, ARIA roles, keyboard navigation |
+| **Rate Limiting** | ✅ | ThrottlerGuard global (100 req/min) |
+| **API Validation** | ✅ | DTOs with class-validator, whitelist + forbidNonWhitelisted |
+| **Auth** | ✅ | JWT via mana-core-auth, guards on all controllers |
+| **Toast System** | ✅ | All toast messages localized via svelte-i18n |
+| **Docker** | ✅ | Multi-stage build, health checks, entrypoint script |
+| **Tests** | ✅ | 13 unit tests, 7 E2E test suites (Playwright) |
+| **Error Tracking** | ✅ | GlitchTip integration (client + server) |
+| **Metrics** | ✅ | Prometheus via MetricsModule |
+| **Context Menu** | ✅ | Shared ContextMenu on WeekView + AgendaView events |
+
+### E2E Test Suites
+
+```bash
+pnpm --filter @calendar/web test:e2e
+```
+
+| Suite | Coverage |
+|-------|----------|
+| `auth.spec.ts` | Login, redirect, invalid credentials |
+| `calendar-views.spec.ts` | Week/month/agenda views, navigation |
+| `events.spec.ts` | Event CRUD |
+| `calendars.spec.ts` | Calendar management |
+| `settings.spec.ts` | Settings page |
+| `week-view-interactions.spec.ts` | Drag-to-create, time indicator |
+| `error-page.spec.ts` | 404 error page |
+
 ## Roadmap / TODO
 
 - [ ] Mobile App (Expo)
@@ -555,10 +597,8 @@ curl -X POST http://localhost:3014/api/v1/events \
 - [ ] CalDAV Sync Implementation
 - [ ] Push Notifications
 - [ ] E-Mail Reminders
-- [ ] Drag & Drop Events
 - [ ] Event Attendees
 - [ ] Calendar Import/Export
-- [ ] Offline Support
 - [ ] Dark/Light Theme in Landing
 
 ## Important Notes

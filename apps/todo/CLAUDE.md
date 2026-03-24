@@ -243,6 +243,59 @@ Recognized patterns:
 - **Formatting**: Prettier with project config
 - **i18n**: All UI text in locale files
 
+## Production Readiness
+
+**Status: Production-Ready (2026-03-24)**
+
+### Checklist
+
+| Category | Status | Details |
+|----------|--------|---------|
+| **Error Handling** | ✅ | Global `+error.svelte` with i18n (5 languages), error tracking via GlitchTip |
+| **Offline Support** | ✅ | Offline page with shared `OfflinePage` component |
+| **PWA** | ✅ | Service worker, manifest, icons, shortcuts (New task, Kanban, Settings) |
+| **Security Headers** | ✅ | CSP, X-Frame-Options via `setSecurityHeaders()` |
+| **Loading States** | ✅ | Skeleton loaders: TaskList, TaskItem, KanbanBoard, KanbanColumn, Statistics |
+| **i18n** | ✅ | 5 languages (DE/EN/FR/ES/IT) via svelte-i18n |
+| **Meta/SEO** | ✅ | OG tags, meta description in root layout |
+| **Accessibility** | ✅ | Focus trapping in all modals, ARIA roles, keyboard shortcuts |
+| **Rate Limiting** | ✅ | ThrottlerGuard global (100 req/min) |
+| **API Validation** | ✅ | DTOs with class-validator, RRULE DoS protection (max 5000 occurrences) |
+| **Auth** | ✅ | JWT via mana-core-auth, client-side redirect in `onMount` |
+| **Toast System** | ✅ | Toast notifications via shared `toastStore` |
+| **Docker** | ✅ | Multi-stage build (web + backend), health checks, Traefik labels |
+| **Tests** | ✅ | Unit tests (7 backend, 3 web), E2E tests (3 suites: auth, projects, tasks) |
+| **Error Tracking** | ✅ | GlitchTip integration (client + server) |
+| **Metrics** | ✅ | Prometheus via MetricsModule |
+| **Context Menu** | ✅ | Shared ContextMenu on TaskList (priority, project, complete, delete) |
+| **Auto-Save** | ✅ | 500ms debounce, no save/cancel buttons needed |
+| **Drag & Drop** | ✅ | Task reordering in list + kanban views |
+
+### Test Suites
+
+```bash
+# Unit tests
+pnpm --filter @todo/backend test
+pnpm --filter @todo/web test
+
+# E2E tests
+pnpm --filter @todo/web test:e2e
+```
+
+| Type | Suite | Coverage |
+|------|-------|----------|
+| Unit (Backend) | `task.service.spec.ts` | Task CRUD, recurrence |
+| Unit (Backend) | `project.service.spec.ts` | Project management |
+| Unit (Backend) | `kanban.service.spec.ts` | Kanban operations |
+| Unit (Backend) | `reminder.service.spec.ts` | Reminders |
+| Unit (Backend) | `label.service.spec.ts` | Labels |
+| Unit (Web) | `task-parser.test.ts` | Natural language parsing |
+| Unit (Web) | `task-filters.test.ts` | Filter logic |
+| Unit (Web) | `view.test.ts` | View store state |
+| E2E | `auth.spec.ts` | Login, redirect |
+| E2E | `projects.spec.ts` | Project CRUD |
+| E2E | `tasks.spec.ts` | Task CRUD |
+
 ## Important Notes
 
 1. **Authentication**: Uses Mana Core Auth (JWT in Authorization header)
