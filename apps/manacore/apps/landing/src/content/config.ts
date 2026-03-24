@@ -228,6 +228,31 @@ const manascoreCollection = defineCollection({
 				lastChecked: z.string().optional(), // ISO date
 			})
 			.optional(),
+		// API conformity checks
+		apiConformity: z
+			.object({
+				consistentResponses: z.boolean(), // Uses ApiResult<T> format
+				errorCodes: z.boolean(), // Consistent HTTP error codes
+				pagination: z.boolean(), // Supports pagination where needed
+				versioning: z.boolean(), // API versioning (/api/v1/)
+				documentation: z.boolean(), // Swagger/OpenAPI docs
+				healthEndpoint: z.boolean(), // /health endpoint
+				validation: z.boolean(), // DTO validation on all inputs
+			})
+			.optional(),
+		// Cross-app consistency (shared package usage)
+		consistency: z
+			.object({
+				sharedAuth: z.boolean(), // Uses @manacore/shared-nestjs-auth or nestjs-integration
+				sharedUi: z.boolean(), // Uses @manacore/shared-ui components
+				sharedTheme: z.boolean(), // Uses @manacore/shared-theme
+				sharedBranding: z.boolean(), // Uses @manacore/shared-branding
+				sharedI18n: z.boolean(), // Uses @manacore/shared-i18n
+				sharedErrorTracking: z.boolean(), // Uses @manacore/shared-error-tracking
+				sharedStorage: z.boolean().optional(), // Uses @manacore/shared-storage (if applicable)
+				sharedLlm: z.boolean().optional(), // Uses @manacore/shared-llm (if applicable)
+			})
+			.optional(),
 		// Score history for trend visualization
 		history: z
 			.array(

@@ -172,6 +172,51 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 											))}
 										</div>
 
+										{/* API & Consistency badges */}
+										{(data.apiConformity || data.consistency) && (
+											<div class="mt-1.5 flex items-center gap-3">
+												{data.apiConformity &&
+													(() => {
+														const api = data.apiConformity;
+														const passed = [
+															api.consistentResponses,
+															api.errorCodes,
+															api.pagination,
+															api.versioning,
+															api.documentation,
+															api.healthEndpoint,
+															api.validation,
+														].filter(Boolean).length;
+														return (
+															<span
+																class={`text-[10px] font-medium ${passed === 7 ? 'text-emerald-500' : 'text-yellow-500'}`}
+															>
+																API: {passed}/7
+															</span>
+														);
+													})()}
+												{data.consistency &&
+													(() => {
+														const c = data.consistency;
+														const core = [
+															c.sharedAuth,
+															c.sharedUi,
+															c.sharedTheme,
+															c.sharedBranding,
+															c.sharedI18n,
+															c.sharedErrorTracking,
+														].filter(Boolean).length;
+														return (
+															<span
+																class={`text-[10px] font-medium ${core === 6 ? 'text-emerald-500' : 'text-yellow-500'}`}
+															>
+																Shared: {core}/6
+															</span>
+														);
+													})()}
+											</div>
+										)}
+
 										{/* Dependency health */}
 										{data.dependencies &&
 											(() => {
