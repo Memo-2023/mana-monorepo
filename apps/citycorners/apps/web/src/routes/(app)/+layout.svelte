@@ -76,16 +76,61 @@
 
 	interface SearchItem extends QuickInputItem {
 		href?: string;
+		isHistory?: boolean;
+	}
+
+	const SEARCH_HISTORY_KEY = 'citycorners-search-history';
+	const MAX_HISTORY = 8;
+
+	function getSearchHistory(): { query: string; name: string; category: string; id: string }[] {
+		try {
+			return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY) || '[]');
+		} catch {
+			return [];
+		}
+	}
+
+	function saveToHistory(loc: { id: string; name: string; category: string }) {
+		const history = getSearchHistory().filter((h) => h.id !== loc.id);
+		history.unshift({ query: loc.name, name: loc.name, category: loc.category, id: loc.id });
+		localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
 	}
 
 	async function handleSearch(query: string): Promise<SearchItem[]> {
-		if (!query.trim()) return [];
+		if (!query.trim()) {
+			// Show search history when empty
+			const history = getSearchHistory();
+			if (history.length === 0) return [];
+			return history.map((h) => ({
+				id: h.id,
+				title: h.name,
+				subtitle: $_(`category.${h.category}`),
+				icon: 'clock' as const,
+				href: `/locations/${h.id}`,
+				isHistory: true,
+			}));
+		}
 
 		try {
-			const res = await fetch(api(`/locations/search?q=${encodeURIComponent(query)}`));
+			// Use suggestions endpoint for prefix matching (faster)
+			const res = await fetch(api(`/locations/suggestions?q=${encodeURIComponent(query)}`));
 			if (!res.ok) return [];
 			const data = await res.json();
-			return data.locations.slice(0, 8).map((loc: any) => ({
+			if (data.suggestions?.length > 0) {
+				return data.suggestions.map((s: any) => ({
+					id: s.id,
+					title: s.name,
+					subtitle: $_(`category.${s.category}`),
+					icon: 'mappin' as const,
+					href: `/locations/${s.id}`,
+				}));
+			}
+
+			// Fallback to full search
+			const fullRes = await fetch(api(`/locations/search?q=${encodeURIComponent(query)}`));
+			if (!fullRes.ok) return [];
+			const fullData = await fullRes.json();
+			return fullData.locations.slice(0, 8).map((loc: any) => ({
 				id: loc.id,
 				title: loc.name,
 				subtitle: $_(`category.${loc.category}`),
@@ -99,6 +144,12 @@
 
 	function handleSelect(item: SearchItem) {
 		if (item.href) {
+			// Save to search history
+			saveToHistory({
+				id: item.id as string,
+				name: item.title,
+				category: item.subtitle || '',
+			});
 			goto(item.href);
 		}
 	}

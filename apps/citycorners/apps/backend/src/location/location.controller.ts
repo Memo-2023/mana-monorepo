@@ -115,9 +115,36 @@ export class LocationController {
 		return { locations };
 	}
 
+	@Get('suggestions')
+	async suggestions(@Query('q') query: string) {
+		if (!query || query.trim().length === 0) {
+			return { suggestions: [] };
+		}
+		const suggestions = await this.locationService.searchSuggestions(query.trim());
+		return { suggestions };
+	}
+
 	@Get(':id')
 	async findById(@Param('id') id: string) {
 		const location = await this.locationService.findById(id);
+		return { location };
+	}
+
+	@Get(':id/nearby')
+	async findNearby(@Param('id') id: string, @Query('radius') radius?: string) {
+		const radiusKm = radius ? Math.min(10, Math.max(0.5, parseFloat(radius))) : 2;
+		const nearby = await this.locationService.findNearby(id, radiusKm);
+		return { locations: nearby };
+	}
+
+	@Post(':id/images')
+	@UseGuards(JwtAuthGuard)
+	async addImage(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') id: string,
+		@Body() body: { imageUrl: string }
+	) {
+		const location = await this.locationService.addImage(id, body.imageUrl, user.userId);
 		return { location };
 	}
 

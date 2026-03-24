@@ -49,7 +49,13 @@
 		"deleteConfirm": "Bist du sicher, dass du diesen Ort löschen möchtest? Das kann nicht rückgängig gemacht werden.",
 		"confirmDelete": "Endgültig löschen",
 		"deleting": "Wird gelöscht...",
-		"cancel": "Abbrechen"
+		"cancel": "Abbrechen",
+		"nearby": "In der Nähe"
+	},
+	"gallery": {
+		"addPhoto": "Foto hinzufügen",
+		"add": "Hinzufügen",
+		"addError": "Foto konnte nicht hinzugefügt werden."
 	},
 	"favorites": {
 		"title": "Favoriten",

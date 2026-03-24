@@ -14,6 +14,7 @@ export function createMockLocation(overrides: Partial<Location> = {}): Location 
 		latitude: 47.6603,
 		longitude: 9.1757,
 		imageUrl: '/images/muenster.svg',
+		images: [],
 		timeline: [{ year: '615', event: 'Founded' }],
 		createdBy: null,
 		createdAt: new Date('2026-01-01'),

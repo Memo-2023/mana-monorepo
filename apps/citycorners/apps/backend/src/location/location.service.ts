@@ -1,9 +1,9 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { eq, or, ilike, sql, desc } from 'drizzle-orm';
+import { eq, or, ilike, sql, desc, ne, and, isNotNull } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { Database } from '../db/connection';
 import { locations } from '../db/schema';
-import type { Location, NewLocation } from '../db/schema';
+import type { Location, NewLocation, LocationImage } from '../db/schema';
 
 export interface PaginatedResult<T> {
 	items: T[];
@@ -101,6 +101,74 @@ export class LocationService {
 			.where(eq(locations.id, id))
 			.returning();
 		return location;
+	}
+
+	async findNearby(
+		id: string,
+		radiusKm = 2,
+		limit = 5
+	): Promise<(Location & { distance: number })[]> {
+		const location = await this.findById(id);
+		if (!location.latitude || !location.longitude) return [];
+
+		const haversine = sql<number>`
+			6371 * acos(
+				LEAST(1.0, cos(radians(${location.latitude})) * cos(radians(${locations.latitude}))
+				* cos(radians(${locations.longitude}) - radians(${location.longitude}))
+				+ sin(radians(${location.latitude})) * sin(radians(${locations.latitude})))
+			)
+		`;
+
+		const results = await this.db
+			.select({
+				location: locations,
+				distance: haversine,
+			})
+			.from(locations)
+			.where(
+				and(ne(locations.id, id), isNotNull(locations.latitude), isNotNull(locations.longitude))
+			)
+			.orderBy(haversine)
+			.limit(limit);
+
+		return results
+			.filter((r) => r.distance <= radiusKm)
+			.map((r) => ({
+				...r.location,
+				distance: Math.round(r.distance * 1000), // meters
+			}));
+	}
+
+	async addImage(id: string, imageUrl: string, userId: string): Promise<Location> {
+		const location = await this.findById(id);
+		const currentImages: LocationImage[] = (location.images as LocationImage[]) || [];
+
+		const newImage: LocationImage = {
+			url: imageUrl,
+			addedBy: userId,
+			addedAt: new Date().toISOString(),
+		};
+
+		const [updated] = await this.db
+			.update(locations)
+			.set({ images: [...currentImages, newImage] })
+			.where(eq(locations.id, id))
+			.returning();
+		return updated;
+	}
+
+	async searchSuggestions(
+		query: string,
+		limit = 5
+	): Promise<{ id: string; name: string; category: string }[]> {
+		if (!query.trim()) return [];
+		const pattern = `${query}%`;
+		const results = await this.db
+			.select({ id: locations.id, name: locations.name, category: locations.category })
+			.from(locations)
+			.where(ilike(locations.name, pattern))
+			.limit(limit);
+		return results;
 	}
 
 	async delete(id: string, userId?: string): Promise<void> {

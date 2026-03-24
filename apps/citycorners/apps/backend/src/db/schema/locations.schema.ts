@@ -19,6 +19,7 @@ export const locations = pgTable('locations', {
 	latitude: doublePrecision('latitude'),
 	longitude: doublePrecision('longitude'),
 	imageUrl: text('image_url'),
+	images: jsonb('images').$type<LocationImage[]>().default([]),
 	timeline: jsonb('timeline').$type<TimelineEntry[]>().default([]),
 	createdBy: text('created_by'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -27,6 +28,12 @@ export const locations = pgTable('locations', {
 		.$onUpdate(() => new Date())
 		.notNull(),
 });
+
+export interface LocationImage {
+	url: string;
+	addedBy?: string;
+	addedAt?: string;
+}
 
 export interface TimelineEntry {
 	year: string;

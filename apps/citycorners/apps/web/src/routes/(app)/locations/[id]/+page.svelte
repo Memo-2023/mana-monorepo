@@ -13,6 +13,20 @@
 		event: string;
 	}
 
+	interface LocationImage {
+		url: string;
+		addedBy?: string;
+		addedAt?: string;
+	}
+
+	interface NearbyLocation {
+		id: string;
+		name: string;
+		category: string;
+		imageUrl?: string;
+		distance: number;
+	}
+
 	interface Location {
 		id: string;
 		name: string;
@@ -22,16 +36,25 @@
 		latitude?: number;
 		longitude?: number;
 		imageUrl?: string;
+		images?: LocationImage[];
 		timeline?: TimelineEntry[];
 		createdBy?: string;
 	}
 
 	let location = $state<Location | null>(null);
+	let nearbyLocations = $state<NearbyLocation[]>([]);
 	let loading = $state(true);
 	let mapContainer: HTMLDivElement;
 	let shareSuccess = $state(false);
 	let showDeleteConfirm = $state(false);
 	let deleting = $state(false);
+
+	// Gallery state
+	let selectedImageIndex = $state(0);
+	let showAddPhoto = $state(false);
+	let newPhotoUrl = $state('');
+	let addingPhoto = $state(false);
+	let photoError = $state('');
 
 	const categoryColors: Record<string, string> = {
 		sight: '#2563eb',
@@ -46,11 +69,32 @@
 			authStore.user?.id === location.createdBy
 	);
 
+	// All images: primary imageUrl + gallery images
+	let allImages = $derived(() => {
+		if (!location) return [];
+		const imgs: string[] = [];
+		if (location.imageUrl) imgs.push(location.imageUrl);
+		if (location.images) {
+			for (const img of location.images) {
+				if (img.url && !imgs.includes(img.url)) imgs.push(img.url);
+			}
+		}
+		return imgs;
+	});
+
 	onMount(async () => {
 		try {
-			const res = await fetch(api(`/locations/${$page.params.id}`));
-			const data = await res.json();
-			location = data.location;
+			const [locRes, nearbyRes] = await Promise.all([
+				fetch(api(`/locations/${$page.params.id}`)),
+				fetch(api(`/locations/${$page.params.id}/nearby`)),
+			]);
+			const locData = await locRes.json();
+			location = locData.location;
+
+			if (nearbyRes.ok) {
+				const nearbyData = await nearbyRes.json();
+				nearbyLocations = nearbyData.locations || [];
+			}
 		} catch (err) {
 			console.error('Failed to load location:', err);
 		} finally {
@@ -100,7 +144,7 @@
 			try {
 				await navigator.share({ title, url });
 			} catch {
-				// User cancelled share
+				// User cancelled
 			}
 		} else {
 			await navigator.clipboard.writeText(url);
@@ -112,22 +156,53 @@
 	async function handleDelete() {
 		if (!location || deleting) return;
 		deleting = true;
-
 		try {
 			const token = await authStore.getValidToken();
 			const res = await fetch(api(`/locations/${location.id}`), {
 				method: 'DELETE',
 				headers: { Authorization: `Bearer ${token}` },
 			});
-			if (res.ok) {
-				goto('/');
-			}
+			if (res.ok) goto('/');
 		} catch {
 			// ignore
 		} finally {
 			deleting = false;
 			showDeleteConfirm = false;
 		}
+	}
+
+	async function handleAddPhoto() {
+		if (!newPhotoUrl.trim() || !location || addingPhoto) return;
+		addingPhoto = true;
+		photoError = '';
+		try {
+			const token = await authStore.getValidToken();
+			const res = await fetch(api(`/locations/${location.id}/images`), {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ imageUrl: newPhotoUrl.trim() }),
+			});
+			if (res.ok) {
+				const data = await res.json();
+				location = data.location;
+				newPhotoUrl = '';
+				showAddPhoto = false;
+			} else {
+				photoError = $_('gallery.addError');
+			}
+		} catch {
+			photoError = $_('gallery.addError');
+		} finally {
+			addingPhoto = false;
+		}
+	}
+
+	function formatDistance(meters: number): string {
+		if (meters < 1000) return `${meters} m`;
+		return `${(meters / 1000).toFixed(1)} km`;
 	}
 </script>
 
@@ -151,10 +226,16 @@
 		>
 	</div>
 {:else}
-	<!-- Hero image with overlay -->
+	{@const images = allImages()}
+
+	<!-- Hero image / Gallery -->
 	<div class="relative -mx-4 -mt-4 mb-6 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8">
-		{#if location.imageUrl}
-			<img src={location.imageUrl} alt={location.name} class="h-72 w-full object-cover sm:h-80" />
+		{#if images.length > 0}
+			<img
+				src={images[selectedImageIndex]}
+				alt={location.name}
+				class="h-72 w-full object-cover sm:h-80"
+			/>
 		{:else}
 			<div
 				class="flex h-72 items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 sm:h-80"
@@ -242,7 +323,16 @@
 			{/if}
 		</div>
 
-		<!-- Category badge on image -->
+		<!-- Image counter badge -->
+		{#if images.length > 1}
+			<div
+				class="absolute bottom-4 right-4 rounded-full bg-black/50 px-2.5 py-1 text-xs text-white backdrop-blur-sm"
+			>
+				{selectedImageIndex + 1} / {images.length}
+			</div>
+		{/if}
+
+		<!-- Category badge -->
 		<div class="absolute bottom-4 left-4">
 			<span
 				class="rounded-full px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
@@ -252,6 +342,75 @@
 			</span>
 		</div>
 	</div>
+
+	<!-- Gallery thumbnails -->
+	{#if images.length > 1}
+		<div class="mb-6 flex gap-2 overflow-x-auto pb-1">
+			{#each images as img, i}
+				<button
+					onclick={() => (selectedImageIndex = i)}
+					class="h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all {selectedImageIndex ===
+					i
+						? 'border-primary shadow-md'
+						: 'border-transparent opacity-60 hover:opacity-100'}"
+				>
+					<img src={img} alt="" class="h-full w-full object-cover" loading="lazy" />
+				</button>
+			{/each}
+			{#if authStore.isAuthenticated}
+				<button
+					onclick={() => (showAddPhoto = !showAddPhoto)}
+					class="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-border text-foreground-secondary transition-colors hover:border-primary hover:text-primary"
+					title={$_('gallery.addPhoto')}
+				>
+					<svg
+						class="h-5 w-5"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						viewBox="0 0 24 24"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+					</svg>
+				</button>
+			{/if}
+		</div>
+	{:else if authStore.isAuthenticated}
+		<div class="mb-4">
+			<button
+				onclick={() => (showAddPhoto = !showAddPhoto)}
+				class="text-sm text-foreground-secondary hover:text-primary transition-colors"
+			>
+				+ {$_('gallery.addPhoto')}
+			</button>
+		</div>
+	{/if}
+
+	<!-- Add photo form -->
+	{#if showAddPhoto}
+		<div class="mb-6 rounded-xl border border-border bg-background-card p-4">
+			<p class="mb-3 text-sm font-medium text-foreground">{$_('gallery.addPhoto')}</p>
+			{#if photoError}
+				<div class="mb-3 rounded-lg bg-red-500/10 p-2 text-xs text-red-500">{photoError}</div>
+			{/if}
+			<div class="flex gap-2">
+				<input
+					type="url"
+					bind:value={newPhotoUrl}
+					placeholder={$_('add.imageUrlPlaceholder')}
+					class="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+					onkeydown={(e) => e.key === 'Enter' && handleAddPhoto()}
+				/>
+				<button
+					onclick={handleAddPhoto}
+					disabled={!newPhotoUrl.trim() || addingPhoto}
+					class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+				>
+					{addingPhoto ? '...' : $_('gallery.add')}
+				</button>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Content -->
 	<div class="space-y-6">
@@ -284,7 +443,7 @@
 
 		<p class="text-base leading-relaxed text-foreground">{location.description}</p>
 
-		<!-- Owner actions: Edit + Delete -->
+		<!-- Owner actions -->
 		{#if isOwner}
 			<div class="flex gap-3">
 				<a
@@ -429,22 +588,53 @@
 				<div class="relative space-y-0">
 					{#each location.timeline as entry, i}
 						<div class="relative flex gap-4 pb-6">
-							<!-- Timeline line -->
 							{#if i < location.timeline!.length - 1}
 								<div class="absolute left-[11px] top-6 h-full w-0.5 bg-border"></div>
 							{/if}
-							<!-- Dot -->
 							<div
 								class="relative z-10 mt-1.5 h-6 w-6 flex-shrink-0 rounded-full border-2 border-primary bg-background flex items-center justify-center"
 							>
 								<div class="h-2 w-2 rounded-full bg-primary"></div>
 							</div>
-							<!-- Content -->
 							<div>
 								<span class="font-mono text-sm font-bold text-primary">{entry.year}</span>
 								<p class="mt-0.5 text-sm text-foreground-secondary">{entry.event}</p>
 							</div>
 						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Nearby locations -->
+		{#if nearbyLocations.length > 0}
+			<div>
+				<h2 class="mb-4 text-xl font-semibold text-foreground">{$_('detail.nearby')}</h2>
+				<div class="flex gap-3 overflow-x-auto pb-1">
+					{#each nearbyLocations as nearby}
+						<a
+							href="/locations/{nearby.id}"
+							class="flex-shrink-0 w-40 overflow-hidden rounded-xl border border-border bg-background-card transition-shadow hover:shadow-md"
+						>
+							{#if nearby.imageUrl}
+								<img
+									src={nearby.imageUrl}
+									alt={nearby.name}
+									loading="lazy"
+									class="h-24 w-full object-cover"
+								/>
+							{:else}
+								<div class="flex h-24 items-center justify-center bg-background-card-hover">
+									<span class="text-2xl">📍</span>
+								</div>
+							{/if}
+							<div class="p-2.5">
+								<p class="text-sm font-medium text-foreground line-clamp-1">{nearby.name}</p>
+								<p class="mt-0.5 text-xs text-foreground-secondary">
+									{$_(`category.${nearby.category}`)} · {formatDistance(nearby.distance)}
+								</p>
+							</div>
+						</a>
 					{/each}
 				</div>
 			</div>
