@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { sky, mountains } from '../data/colors';
+	import { mountains } from '../data/colors';
 	import { SCENE, MOUNTAIN_PATHS } from '../data/layout';
+	import Sky from '../atmosphere/Sky.svelte';
+
+	let { hour = new Date().getHours() + new Date().getMinutes() / 60 }: { hour?: number } = $props();
 </script>
 
-<!-- Sky gradient -->
 <defs>
-	<linearGradient id="sky-gradient" x1="0" y1="0" x2="0" y2="1">
-		<stop offset="0%" stop-color={sky.dayTop} />
-		<stop offset="100%" stop-color={sky.dayBottom} />
-	</linearGradient>
-
 	<!-- Subtle haze filter -->
 	<filter id="mountain-haze">
 		<feGaussianBlur stdDeviation="1.5" />
@@ -19,8 +16,8 @@
 	</filter>
 </defs>
 
-<!-- Sky fill -->
-<rect x="0" y="0" width={SCENE.width} height={SCENE.height} fill="url(#sky-gradient)" />
+<!-- Dynamic sky -->
+<Sky {hour} />
 
 <!-- Clouds (subtle, decorative) -->
 <g opacity="0.35">

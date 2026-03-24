@@ -1,21 +1,36 @@
 <script lang="ts">
 	import { SCENE, LAKES, RIVERS } from './data/layout';
 	import { createMockEcosystem } from './data/mockData';
+	import type { AppData } from './data/types';
 	import Background from './terrain/Background.svelte';
 	import Terrain from './terrain/Terrain.svelte';
 	import WaterBody from './terrain/WaterBody.svelte';
 	import RiverFlow from './water/RiverFlow.svelte';
 	import PlantFactory from './plants/PlantFactory.svelte';
-
-	let { onSelectApp }: { onSelectApp?: (appId: string) => void } = $props();
+	import Ambient from './atmosphere/Ambient.svelte';
+	import PlantTooltip from './ui/PlantTooltip.svelte';
+	import DetailPanel from './ui/DetailPanel.svelte';
+	import { onMount } from 'svelte';
 
 	let apps = $state(createMockEcosystem());
-	let selectedApp = $state<string | null>(null);
+	let hour = $state(new Date().getHours() + new Date().getMinutes() / 60);
+
+	onMount(() => {
+		// Update time every minute
+		const interval = setInterval(() => {
+			hour = new Date().getHours() + new Date().getMinutes() / 60;
+		}, 60000);
+		return () => clearInterval(interval);
+	});
+	let selectedApp = $state<AppData | null>(null);
+	let hoveredApp = $state<AppData | null>(null);
+	let tooltipPos = $state({ x: 0, y: 0 });
 
 	// Pan & zoom state
 	let svgEl: SVGSVGElement | undefined = $state();
 	let viewBox = $state({ x: 0, y: 0, w: SCENE.width as number, h: SCENE.height as number });
 	let isPanning = $state(false);
+	let hasPanned = $state(false);
 	let panStart = $state({ x: 0, y: 0 });
 	let panViewBoxStart = $state({ x: 0, y: 0 });
 
@@ -25,30 +40,20 @@
 		const rect = svgEl?.getBoundingClientRect();
 		if (!rect) return;
 
-		// Mouse position as fraction of SVG
 		const mx = (e.clientX - rect.left) / rect.width;
 		const my = (e.clientY - rect.top) / rect.height;
-
-		// Point in viewBox coordinates under mouse
 		const px = viewBox.x + mx * viewBox.w;
 		const py = viewBox.y + my * viewBox.h;
-
-		// Scale viewBox dimensions
 		const nw = Math.max(400, Math.min(SCENE.width * 2, viewBox.w * scaleFactor));
 		const nh = Math.max(225, Math.min(SCENE.height * 2, viewBox.h * scaleFactor));
 
-		// Adjust position to keep point under mouse
-		viewBox = {
-			x: px - mx * nw,
-			y: py - my * nh,
-			w: nw,
-			h: nh,
-		};
+		viewBox = { x: px - mx * nw, y: py - my * nh, w: nw, h: nh };
 	}
 
 	function handlePointerDown(e: PointerEvent) {
 		if (e.button !== 0) return;
 		isPanning = true;
+		hasPanned = false;
 		panStart = { x: e.clientX, y: e.clientY };
 		panViewBoxStart = { x: viewBox.x, y: viewBox.y };
 		(e.currentTarget as SVGSVGElement).setPointerCapture(e.pointerId);
@@ -59,20 +64,34 @@
 		const rect = svgEl.getBoundingClientRect();
 		const dx = ((e.clientX - panStart.x) / rect.width) * viewBox.w;
 		const dy = ((e.clientY - panStart.y) / rect.height) * viewBox.h;
-		viewBox = {
-			...viewBox,
-			x: panViewBoxStart.x - dx,
-			y: panViewBoxStart.y - dy,
-		};
+		if (Math.abs(dx) > 2 || Math.abs(dy) > 2) hasPanned = true;
+		viewBox = { ...viewBox, x: panViewBoxStart.x - dx, y: panViewBoxStart.y - dy };
 	}
 
 	function handlePointerUp() {
 		isPanning = false;
 	}
 
-	function handleAppClick(appId: string) {
-		selectedApp = appId;
-		onSelectApp?.(appId);
+	function handleAppClick(app: AppData) {
+		if (hasPanned) return;
+		selectedApp = app;
+	}
+
+	function handleAppHover(app: AppData, e: MouseEvent) {
+		hoveredApp = app;
+		tooltipPos = { x: e.clientX, y: e.clientY };
+	}
+
+	function handleAppHoverMove(e: MouseEvent) {
+		tooltipPos = { x: e.clientX, y: e.clientY };
+	}
+
+	function handleAppLeave() {
+		hoveredApp = null;
+	}
+
+	function closePanel() {
+		selectedApp = null;
 	}
 
 	function resetView() {
@@ -138,7 +157,7 @@
 		onpointerleave={handlePointerUp}
 	>
 		<!-- Layer 1: Sky + Mountains -->
-		<Background />
+		<Background {hour} />
 
 		<!-- Layer 2: Terrain (meadows, shores) -->
 		<Terrain />
@@ -153,9 +172,26 @@
 			<WaterBody {lake} />
 		{/each}
 
-		<!-- Layer 5: Plants (apps) sorted by y-position for depth -->
+		<!-- Layer 5: Ambient creatures -->
+		<Ambient {hour} />
+
+		<!-- Layer 6: Plants (apps) sorted by y-position for depth -->
 		{#each apps.toSorted((a, b) => a.position.y - b.position.y) as app (app.id)}
-			<PlantFactory {app} onclick={() => handleAppClick(app.id)} />
+			<g
+				onmouseenter={(e) => handleAppHover(app, e)}
+				onmousemove={handleAppHoverMove}
+				onmouseleave={handleAppLeave}
+			>
+				<PlantFactory {app} onclick={() => handleAppClick(app)} />
+			</g>
 		{/each}
 	</svg>
+
+	<!-- Tooltip (HTML overlay, positioned via mouse coordinates) -->
+	{#if hoveredApp && !selectedApp}
+		<PlantTooltip app={hoveredApp} x={tooltipPos.x} y={tooltipPos.y} />
+	{/if}
 </div>
+
+<!-- Detail Panel (outside the SVG container for proper positioning) -->
+<DetailPanel app={selectedApp} onclose={closePanel} />
