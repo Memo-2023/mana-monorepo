@@ -223,6 +223,57 @@ function getBarColor(score: number): string {
 					</div>
 				</div>
 
+				{/* Lighthouse Scores */}
+				{
+					audit.data.lighthouse &&
+						(() => {
+							const lh = audit.data.lighthouse;
+							const lighthouseItems = [
+								{ key: 'Performance', value: lh.performance, icon: '⚡' },
+								{ key: 'Accessibility', value: lh.accessibility, icon: '♿' },
+								{ key: 'Best Practices', value: lh.bestPractices, icon: '✅' },
+								{ key: 'SEO', value: lh.seo, icon: '🔍' },
+							];
+							const avg = Math.round(
+								(lh.performance + lh.accessibility + lh.bestPractices + lh.seo) / 4
+							);
+
+							return (
+								<div class="border-border/50 mb-8 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-6">
+									<div class="flex items-center justify-between mb-4">
+										<div>
+											<h2 class="text-foreground text-sm font-semibold">Lighthouse Scores</h2>
+											<p class="text-muted-foreground text-xs">
+												Google Lighthouse Performance Audit
+											</p>
+										</div>
+										<span class={`text-lg font-bold ${getScoreColor(avg)}`}>Ø {avg}</span>
+									</div>
+									<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+										{lighthouseItems.map(({ key, value, icon }) => (
+											<div class="text-center">
+												<div
+													class={`relative mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full border-4 ${
+														value >= 90
+															? 'border-emerald-500'
+															: value >= 50
+																? 'border-yellow-500'
+																: 'border-red-500'
+													}`}
+												>
+													<span class={`text-lg font-bold ${getScoreColor(value)}`}>{value}</span>
+												</div>
+												<span class="text-muted-foreground text-[11px]">
+													{icon} {key}
+												</span>
+											</div>
+										))}
+									</div>
+								</div>
+							);
+						})()
+				}
+
 				{/* Stats */}
 				{
 					audit.data.stats && (

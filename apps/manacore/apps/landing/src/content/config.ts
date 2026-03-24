@@ -203,6 +203,15 @@ const manascoreCollection = defineCollection({
 			security: z.number().min(0).max(100),
 			ux: z.number().min(0).max(100),
 		}),
+		// Lighthouse scores (0-100, from Google Lighthouse audit)
+		lighthouse: z
+			.object({
+				performance: z.number().min(0).max(100),
+				accessibility: z.number().min(0).max(100),
+				bestPractices: z.number().min(0).max(100),
+				seo: z.number().min(0).max(100),
+			})
+			.optional(),
 		// Score history for trend visualization
 		history: z
 			.array(
