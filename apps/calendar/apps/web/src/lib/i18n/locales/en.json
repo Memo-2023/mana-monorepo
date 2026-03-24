@@ -129,5 +129,9 @@
 	"a11y": {
 		"createEventOn": "Create event on {date}",
 		"slotTime": "{day} {time}"
+	},
+	"error": {
+		"notFound": "Page not found",
+		"backToHome": "Back to home"
 	}
 }

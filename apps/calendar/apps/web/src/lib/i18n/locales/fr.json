@@ -97,5 +97,9 @@
 		"search": "Rechercher",
 		"error": "Erreur",
 		"success": "Succès"
+	},
+	"error": {
+		"notFound": "Page non trouvée",
+		"backToHome": "Retour à l'accueil"
 	}
 }

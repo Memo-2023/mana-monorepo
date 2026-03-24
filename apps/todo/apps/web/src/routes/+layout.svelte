@@ -10,6 +10,7 @@
 	let { children } = $props();
 
 	let loading = $state(true);
+
 	let appReady = $derived(!loading && !$i18nLoading);
 
 	onMount(async () => {
@@ -22,6 +23,19 @@
 		loading = false;
 	});
 </script>
+
+<svelte:head>
+	<meta
+		name="description"
+		content="Aufgaben verwalten, Projekte organisieren und Produktivität steigern mit Todo von ManaCore."
+	/>
+	<meta property="og:title" content="Todo - Aufgabenverwaltung" />
+	<meta
+		property="og:description"
+		content="Aufgaben verwalten, Projekte organisieren und Produktivität steigern."
+	/>
+	<meta property="og:type" content="website" />
+</svelte:head>
 
 {#if !appReady}
 	<AppLoadingSkeleton layout="tasks" listItemCount={4} />

@@ -26,6 +26,19 @@
 	});
 </script>
 
+<svelte:head>
+	<meta
+		name="description"
+		content="Termine verwalten, Kalender teilen und den Überblick behalten mit Calendar von ManaCore."
+	/>
+	<meta property="og:title" content="Calendar - Kalender" />
+	<meta
+		property="og:description"
+		content="Termine verwalten, Kalender teilen und den Überblick behalten."
+	/>
+	<meta property="og:type" content="website" />
+</svelte:head>
+
 {#if !appReady}
 	<AppLoadingSkeleton />
 {:else}

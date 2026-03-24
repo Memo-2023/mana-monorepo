@@ -93,6 +93,10 @@
 		"loadProjects": "Projekte konnten nicht geladen werden",
 		"loadLabels": "Labels konnten nicht geladen werden"
 	},
+	"error": {
+		"notFound": "Seite nicht gefunden",
+		"backToHome": "Zurück zur Startseite"
+	},
 	"success": {
 		"taskCreated": "Aufgabe erstellt",
 		"taskUpdated": "Aufgabe aktualisiert",

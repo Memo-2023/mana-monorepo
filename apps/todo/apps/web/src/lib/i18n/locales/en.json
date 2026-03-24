@@ -93,6 +93,10 @@
 		"loadProjects": "Failed to load projects",
 		"loadLabels": "Failed to load labels"
 	},
+	"error": {
+		"notFound": "Page not found",
+		"backToHome": "Back to home"
+	},
 	"success": {
 		"taskCreated": "Task created",
 		"taskUpdated": "Task updated",

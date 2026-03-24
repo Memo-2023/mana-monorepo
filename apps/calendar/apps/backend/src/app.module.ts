@@ -65,7 +65,10 @@ import { HttpExceptionFilter } from './common/http-exception.filter';
 			provide: APP_FILTER,
 			useClass: HttpExceptionFilter,
 		},
-		// ThrottlerGuard registered via ThrottlerModule — use @UseGuards(ThrottlerGuard) on controllers
+		{
+			provide: APP_GUARD,
+			useClass: ThrottlerGuard,
+		},
 	],
 })
 export class AppModule {}

@@ -93,6 +93,10 @@
 		"loadProjects": "No se pudieron cargar los proyectos",
 		"loadLabels": "No se pudieron cargar las etiquetas"
 	},
+	"error": {
+		"notFound": "Página no encontrada",
+		"backToHome": "Volver al inicio"
+	},
 	"success": {
 		"taskCreated": "Tarea creada",
 		"taskUpdated": "Tarea actualizada",

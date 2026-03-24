@@ -129,5 +129,9 @@
 	"a11y": {
 		"createEventOn": "Termin erstellen am {date}",
 		"slotTime": "{day} {time}"
+	},
+	"error": {
+		"notFound": "Seite nicht gefunden",
+		"backToHome": "Zurück zur Startseite"
 	}
 }

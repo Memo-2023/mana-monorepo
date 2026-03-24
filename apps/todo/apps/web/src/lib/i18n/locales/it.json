@@ -93,6 +93,10 @@
 		"loadProjects": "Impossibile caricare i progetti",
 		"loadLabels": "Impossibile caricare le etichette"
 	},
+	"error": {
+		"notFound": "Pagina non trovata",
+		"backToHome": "Torna alla home"
+	},
 	"success": {
 		"taskCreated": "Attività creata",
 		"taskUpdated": "Attività aggiornata",

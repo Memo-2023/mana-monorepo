@@ -93,6 +93,10 @@
 		"loadProjects": "Impossible de charger les projets",
 		"loadLabels": "Impossible de charger les labels"
 	},
+	"error": {
+		"notFound": "Page non trouvée",
+		"backToHome": "Retour à l'accueil"
+	},
 	"success": {
 		"taskCreated": "Tâche créée",
 		"taskUpdated": "Tâche mise à jour",
