@@ -2,7 +2,7 @@
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import type { Task, UpdateTaskInput, TaskPriority } from '$lib/api/todos';
 	import { PRIORITY_LABELS, PRIORITY_COLORS } from '$lib/api/todos';
-	import { toastStore as toast } from '@manacore/shared-ui';
+	import { toastStore as toast, focusTrap } from '@manacore/shared-ui';
 	import TodoCheckbox from './TodoCheckbox.svelte';
 	import PriorityBadge from './PriorityBadge.svelte';
 	import {
@@ -177,7 +177,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div class="modal-backdrop" onclick={handleBackdropClick} role="presentation">
-	<div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+	<div class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true" use:focusTrap>
 		<!-- Header -->
 		<div class="modal-header">
 			<div class="header-left">

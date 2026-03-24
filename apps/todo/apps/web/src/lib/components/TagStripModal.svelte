@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { labelsStore } from '$lib/stores/labels.svelte';
 	import { Plus, X, Check, Pencil, Trash, MagnifyingGlass } from '@manacore/shared-icons';
-	import { TagColorPicker } from '@manacore/shared-ui';
+	import { TagColorPicker, focusTrap } from '@manacore/shared-ui';
 	import type { Label } from '$lib/api/labels';
 
 	interface Props {
@@ -148,7 +148,7 @@
 	<div class="modal-backdrop" onclick={onClose}></div>
 
 	<!-- Modal -->
-	<div class="tag-modal" role="dialog" aria-modal="true" aria-label="Tags">
+	<div class="tag-modal" role="dialog" aria-modal="true" aria-label="Tags" use:focusTrap>
 		<!-- Header -->
 		<div class="modal-header">
 			<h2 class="modal-title">Tags</h2>

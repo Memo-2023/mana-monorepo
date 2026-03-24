@@ -15,6 +15,7 @@
 		type FilterDropdownOption,
 	} from '@manacore/shared-ui';
 	import { X } from '@manacore/shared-icons';
+	import { focusTrap } from '@manacore/shared-ui';
 	import type { CalendarViewType, Calendar } from '@calendar/shared';
 
 	interface Props {
@@ -208,7 +209,13 @@
 	<div class="modal-backdrop" onclick={onClose}></div>
 
 	<!-- Modal -->
-	<div class="settings-modal" role="dialog" aria-modal="true" aria-label="Einstellungen">
+	<div
+		class="settings-modal"
+		role="dialog"
+		aria-modal="true"
+		aria-label="Einstellungen"
+		use:focusTrap
+	>
 		<!-- Header -->
 		<div class="modal-header">
 			<h2 class="modal-title">Einstellungen</h2>

@@ -5,7 +5,7 @@
 	import EventForm from './EventForm.svelte';
 	import RecurrenceEditDialog from './RecurrenceEditDialog.svelte';
 	import ReminderSelector from './ReminderSelector.svelte';
-	import { TagBadge, toastStore as toast } from '@manacore/shared-ui';
+	import { TagBadge, toastStore as toast, focusTrap } from '@manacore/shared-ui';
 	import type { CalendarEvent, UpdateEventInput, Reminder } from '@calendar/shared';
 	import { describeRecurrence, parseRRule } from '@calendar/shared';
 	import * as api from '$lib/api/events';
@@ -189,7 +189,13 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 <div class="modal-backdrop" onclick={handleBackdropClick} role="presentation">
-	<div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+	<div
+		class="modal-container"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="modal-title"
+		use:focusTrap
+	>
 		{#if loading}
 			<div aria-live="polite" aria-label="Laden...">
 				<EventDetailSkeleton />

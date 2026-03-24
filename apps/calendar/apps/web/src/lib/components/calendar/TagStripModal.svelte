@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
 	import { Plus, X, Check, Pencil, Trash, MagnifyingGlass } from '@manacore/shared-icons';
-	import { TagColorPicker } from '@manacore/shared-ui';
+	import { TagColorPicker, focusTrap } from '@manacore/shared-ui';
 	import type { EventTag } from '@calendar/shared';
 
 	interface Props {
@@ -153,7 +153,7 @@
 	<div class="modal-backdrop" onclick={onClose}></div>
 
 	<!-- Modal -->
-	<div class="tag-modal" role="dialog" aria-modal="true" aria-label="Tags">
+	<div class="tag-modal" role="dialog" aria-modal="true" aria-label="Tags" use:focusTrap>
 		<!-- Header -->
 		<div class="modal-header">
 			<h2 class="modal-title">Tags</h2>

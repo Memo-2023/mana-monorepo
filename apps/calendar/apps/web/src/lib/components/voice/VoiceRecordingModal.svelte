@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { fade, scale } from 'svelte/transition';
+	import { focusTrap } from '@manacore/shared-ui';
 
 	interface Props {
 		/** Called when recording completes with transcription */
@@ -68,6 +69,7 @@
 		role="dialog"
 		aria-modal="true"
 		aria-label="Sprachaufnahme"
+		use:focusTrap
 	>
 		{#if isRequesting}
 			<!-- Requesting permission state -->

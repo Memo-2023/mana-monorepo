@@ -20,7 +20,7 @@
 		FunRatingPicker,
 		TagSelector,
 	} from './form';
-	import { ContactSelector } from '@manacore/shared-ui';
+	import { ContactSelector, focusTrap } from '@manacore/shared-ui';
 
 	interface Props {
 		task: Task;
@@ -168,7 +168,13 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if open}
-	<div class="modal-backdrop" onclick={handleBackdropClick} role="dialog" aria-modal="true">
+	<div
+		class="modal-backdrop"
+		onclick={handleBackdropClick}
+		role="dialog"
+		aria-modal="true"
+		use:focusTrap
+	>
 		<div class="modal-container">
 			<!-- Header -->
 			<div class="modal-header">
