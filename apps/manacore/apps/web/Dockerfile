@@ -64,6 +64,9 @@ RUN pnpm build || true
 WORKDIR /app/packages/shared-error-tracking
 RUN pnpm build
 
+WORKDIR /app/packages/credit-operations
+RUN pnpm build
+
 # Build the web app
 WORKDIR /app/apps/manacore/apps/web
 RUN pnpm exec svelte-kit sync
