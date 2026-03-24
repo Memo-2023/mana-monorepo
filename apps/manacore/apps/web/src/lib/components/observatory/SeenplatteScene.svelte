@@ -82,7 +82,10 @@
 	let viewBoxStr = $derived(`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
 </script>
 
-<div class="relative h-full w-full overflow-hidden rounded-xl bg-sky-100">
+<div
+	class="relative overflow-hidden rounded-xl"
+	style="width: 100%; height: 100%; min-height: 500px; background-color: #e0f2fe;"
+>
 	<!-- Reset zoom button -->
 	<button
 		type="button"
@@ -125,8 +128,9 @@
 	<svg
 		bind:this={svgEl}
 		viewBox={viewBoxStr}
-		class="h-full w-full"
-		style="cursor: {isPanning ? 'grabbing' : 'grab'};"
+		preserveAspectRatio="xMidYMid meet"
+		xmlns="http://www.w3.org/2000/svg"
+		style="width: 100%; height: 100%; display: block; cursor: {isPanning ? 'grabbing' : 'grab'};"
 		onwheel={handleWheel}
 		onpointerdown={handlePointerDown}
 		onpointermove={handlePointerMove}

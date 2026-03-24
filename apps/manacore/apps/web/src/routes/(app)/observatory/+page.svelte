@@ -8,8 +8,8 @@
 	}
 </script>
 
-<div class="flex flex-col gap-4">
-	<div class="h-[calc(100vh-12rem)] min-h-[500px] w-full">
+<div style="display: flex; flex-direction: column; gap: 1rem;">
+	<div style="height: calc(100vh - 12rem); min-height: 500px; width: 100%;">
 		<SeenplatteScene onSelectApp={handleSelectApp} />
 	</div>
 
