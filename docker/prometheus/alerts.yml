@@ -3,7 +3,7 @@ groups:
     rules:
       # Service Down Alert
       - alert: ServiceDown
-        expr: up{job=~"mana-core-auth|.*-backend|mana-search|mana-media|synapse"} == 0
+        expr: up{job=~"mana-core-auth|.*-backend|mana-search|mana-media|mana-llm|synapse"} == 0
         for: 1m
         labels:
           severity: critical
@@ -356,3 +356,50 @@ groups:
         annotations:
           summary: "OIDC token endpoint errors"
           description: "OIDC token endpoint is returning 5xx errors. SSO may be affected."
+
+  - name: llm_alerts
+    rules:
+      # mana-llm Down
+      - alert: LLMServiceDown
+        expr: up{job="mana-llm"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "mana-llm service is down"
+          description: "mana-llm has been down for more than 1 minute. All AI features will fail."
+
+      # High LLM Error Rate (> 10%)
+      - alert: LLMHighErrorRate
+        expr: |
+          sum(rate(mana_llm_llm_errors_total[5m]))
+          / (sum(rate(mana_llm_llm_requests_total[5m])) + 0.001) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High LLM error rate"
+          description: "{{ $value | humanizePercentage }} of LLM requests are failing."
+
+      # Ollama Provider Down (all requests going to fallback)
+      - alert: OllamaProviderDown
+        expr: |
+          sum(rate(mana_llm_llm_requests_total{provider="google"}[5m]))
+          / (sum(rate(mana_llm_llm_requests_total[5m])) + 0.001) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ollama appears down — most requests going to Google fallback"
+          description: "{{ $value | humanizePercentage }} of LLM requests are using Google Gemini fallback."
+
+      # LLM Slow Responses (p95 > 30s)
+      - alert: LLMSlowResponses
+        expr: |
+          histogram_quantile(0.95, sum(rate(mana_llm_llm_latency_seconds_bucket[5m])) by (le)) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM responses are slow"
+          description: "LLM p95 latency is {{ $value | humanizeDuration }}."

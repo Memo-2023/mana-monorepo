@@ -158,6 +158,13 @@ scrape_configs:
   # Core Services
   # ============================================
 
+  # Mana LLM Gateway (Ollama + Google Fallback)
+  - job_name: 'mana-llm'
+    static_configs:
+      - targets: ['mana-llm:3025']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
   # Mana Search Service
   - job_name: 'mana-search'
     static_configs:
