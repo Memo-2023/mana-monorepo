@@ -8,6 +8,7 @@
 	import { dndzone, type DndEvent } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
 	import type { WidgetConfig } from '$lib/types/dashboard';
+	import { WIDGET_SIZE_CLASSES } from '$lib/types/dashboard';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import WidgetContainer from './WidgetContainer.svelte';
 
@@ -44,7 +45,7 @@
 	onfinalize={handleFinalize}
 >
 	{#each items as widget (widget.id)}
-		<div animate:flip={{ duration: flipDurationMs }}>
+		<div class={WIDGET_SIZE_CLASSES[widget.size]} animate:flip={{ duration: flipDurationMs }}>
 			<WidgetContainer {widget} />
 		</div>
 	{/each}

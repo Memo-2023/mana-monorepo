@@ -9,7 +9,7 @@
 	import { _ } from 'svelte-i18n';
 	import { Card } from '@manacore/shared-ui';
 	import type { WidgetConfig, WidgetSize } from '$lib/types/dashboard';
-	import { WIDGET_SIZE_CLASSES, getWidgetMeta } from '$lib/types/dashboard';
+	import { getWidgetMeta } from '$lib/types/dashboard';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 
 	// Widget components
@@ -37,7 +37,6 @@
 	let { widget }: Props = $props();
 
 	const meta = $derived(getWidgetMeta(widget.type));
-	const sizeClasses = $derived(WIDGET_SIZE_CLASSES[widget.size]);
 
 	const sizes: WidgetSize[] = ['small', 'medium', 'large', 'full'];
 	const sizeLabels: Record<WidgetSize, string> = {
@@ -78,7 +77,7 @@
 	const WidgetComponent = $derived(widgetComponents[widget.type]);
 </script>
 
-<div class={sizeClasses}>
+<div>
 	<Card class="relative h-full">
 		<!-- Edit Mode Overlay -->
 		{#if dashboardStore.isEditing}
