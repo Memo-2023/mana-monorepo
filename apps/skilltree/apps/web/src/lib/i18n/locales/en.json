@@ -49,7 +49,36 @@
 		"totalXp": "Total XP",
 		"totalSkills": "Skills",
 		"highestLevel": "Highest Level",
-		"streak": "Streak"
+		"streak": "Streak",
+		"achievements": "Achievements"
+	},
+	"achievement": {
+		"title": "Achievements",
+		"unlocked": "Unlocked",
+		"locked": "Locked",
+		"progress": "Progress",
+		"celebration": "Achievement unlocked!",
+		"clickToClose": "Click to close",
+		"noAchievements": "No achievements found",
+		"showAll": "Show all",
+		"showUnlocked": "Unlocked only",
+		"all": "All",
+		"rarity": {
+			"common": "Common",
+			"uncommon": "Uncommon",
+			"rare": "Rare",
+			"epic": "Epic",
+			"legendary": "Legendary"
+		},
+		"category": {
+			"xp": "Experience",
+			"skills": "Skills",
+			"levels": "Level",
+			"activities": "Activities",
+			"streak": "Streak",
+			"branches": "Branches",
+			"special": "Special"
+		}
 	},
 	"auth": {
 		"login": "Login",

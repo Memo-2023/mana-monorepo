@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { isLoading as i18nLoading, _ as t } from 'svelte-i18n';
 	import { skillStore } from '$lib/stores/skills.svelte';
+	import { achievementStore } from '$lib/stores/achievements.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { skilltreeOnboarding } from '$lib/stores/app-onboarding.svelte';
@@ -15,6 +16,7 @@
 
 	onMount(async () => {
 		await Promise.all([authStore.initialize(), skillStore.initialize()]);
+		await achievementStore.initialize();
 		loading = false;
 	});
 </script>

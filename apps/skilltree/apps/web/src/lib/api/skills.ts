@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { Skill, Activity, UserStats, SkillBranch } from '$lib/types';
+import type { Skill, Activity, UserStats, SkillBranch, AchievementUnlockResult } from '$lib/types';
 
 interface CreateSkillDto {
 	name: string;
@@ -31,6 +31,12 @@ interface AddXpResponse {
 	leveledUp: boolean;
 	previousLevel: number;
 	newLevel: number;
+	newAchievements: AchievementUnlockResult[];
+}
+
+interface CreateSkillResponse {
+	skill: Skill;
+	newAchievements: AchievementUnlockResult[];
 }
 
 interface SkillsResponse {
@@ -56,9 +62,8 @@ export async function getSkill(id: string): Promise<Skill> {
 	return response.skill;
 }
 
-export async function createSkill(data: CreateSkillDto): Promise<Skill> {
-	const response = await apiClient.post<SkillResponse>('/api/v1/skills', data);
-	return response.skill;
+export async function createSkill(data: CreateSkillDto): Promise<CreateSkillResponse> {
+	return await apiClient.post<CreateSkillResponse>('/api/v1/skills', data);
 }
 
 export async function updateSkill(id: string, data: UpdateSkillDto): Promise<Skill> {

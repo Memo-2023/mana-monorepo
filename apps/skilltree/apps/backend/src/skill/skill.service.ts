@@ -4,6 +4,7 @@ import { DATABASE_TOKEN } from '../db/database.module';
 import { Database } from '../db/connection';
 import { skills, activities, userStats, Skill, NewSkill } from '../db/schema';
 import { CreateSkillDto, UpdateSkillDto, AddXpDto } from './dto';
+import { AchievementService, AchievementUnlockResult } from '../achievement/achievement.service';
 
 // Level thresholds
 const LEVEL_THRESHOLDS = [0, 100, 500, 1500, 4000, 10000];
@@ -19,7 +20,10 @@ function calculateLevel(xp: number): number {
 
 @Injectable()
 export class SkillService {
-	constructor(@Inject(DATABASE_TOKEN) private db: Database) {}
+	constructor(
+		@Inject(DATABASE_TOKEN) private db: Database,
+		private readonly achievementService: AchievementService,
+	) {}
 
 	async findAll(userId: string): Promise<Skill[]> {
 		return this.db.select().from(skills).where(eq(skills.userId, userId)).orderBy(desc(skills.totalXp));
@@ -49,7 +53,10 @@ export class SkillService {
 		return skill;
 	}
 
-	async create(userId: string, dto: CreateSkillDto): Promise<Skill> {
+	async create(
+		userId: string,
+		dto: CreateSkillDto
+	): Promise<{ skill: Skill; newAchievements: AchievementUnlockResult[] }> {
 		const newSkill: NewSkill = {
 			userId,
 			name: dto.name,
@@ -68,7 +75,10 @@ export class SkillService {
 		// Update user stats
 		await this.updateUserStats(userId);
 
-		return skill;
+		// Check achievements
+		const newAchievements = await this.achievementService.checkAndUnlock(userId);
+
+		return { skill, newAchievements };
 	}
 
 	async update(id: string, userId: string, dto: UpdateSkillDto): Promise<Skill> {
@@ -99,7 +109,7 @@ export class SkillService {
 		id: string,
 		userId: string,
 		dto: AddXpDto
-	): Promise<{ skill: Skill; leveledUp: boolean; newLevel: number }> {
+	): Promise<{ skill: Skill; leveledUp: boolean; newLevel: number; newAchievements: AchievementUnlockResult[] }> {
 		const skill = await this.findByIdOrThrow(id, userId);
 
 		const newTotalXp = skill.totalXp + dto.xp;
@@ -131,7 +141,12 @@ export class SkillService {
 		// Update user stats
 		await this.updateUserStats(userId);
 
-		return { skill: updated, leveledUp, newLevel };
+		// Check achievements
+		const newAchievements = await this.achievementService.checkAndUnlock(userId, {
+			activityXp: dto.xp,
+		});
+
+		return { skill: updated, leveledUp, newLevel, newAchievements };
 	}
 
 	private async updateUserStats(userId: string): Promise<void> {

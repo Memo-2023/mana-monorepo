@@ -11,12 +11,12 @@ import type { DashboardConfig } from '$lib/types/dashboard';
  */
 export const DEFAULT_DASHBOARD_CONFIG: DashboardConfig = {
 	widgets: [
-		// Row 0: Clock and Tasks Today
+		// Row 0: Clock, Tasks Today, Calendar
 		{
 			id: 'clock-timers-1',
 			type: 'clock-timers',
 			title: 'dashboard.widgets.clock.title',
-			size: 'medium',
+			size: 'small',
 			position: { x: 0, y: 0 },
 			visible: true,
 		},
@@ -24,17 +24,16 @@ export const DEFAULT_DASHBOARD_CONFIG: DashboardConfig = {
 			id: 'tasks-today-1',
 			type: 'tasks-today',
 			title: 'dashboard.widgets.tasks_today.title',
-			size: 'medium',
-			position: { x: 6, y: 0 },
+			size: 'small',
+			position: { x: 4, y: 0 },
 			visible: true,
 		},
-		// Row 1: Calendar (full width)
 		{
 			id: 'calendar-events-1',
 			type: 'calendar-events',
 			title: 'dashboard.widgets.calendar.title',
-			size: 'large',
-			position: { x: 0, y: 1 },
+			size: 'small',
+			position: { x: 8, y: 0 },
 			visible: true,
 		},
 	],

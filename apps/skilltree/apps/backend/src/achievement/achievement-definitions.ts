@@ -1,264 +1,11 @@
-// Skill Tree Types
-
-export type SkillBranch =
-	| 'intellect'
-	| 'body'
-	| 'creativity'
-	| 'social'
-	| 'practical'
-	| 'mindset'
-	| 'custom';
-
-export interface Skill {
-	id: string;
-	name: string;
-	description: string;
-	branch: SkillBranch;
-	parentId: string | null;
-	icon: string;
-	color: string | null;
-	currentXp: number;
-	totalXp: number;
-	level: number;
-	createdAt: string;
-	updatedAt: string;
-}
-
-export interface Activity {
-	id: string;
-	skillId: string;
-	xpEarned: number;
-	description: string;
-	duration: number | null; // minutes
-	timestamp: string;
-}
-
-export interface UserStats {
-	totalXp: number;
-	totalSkills: number;
-	highestLevel: number;
-	streakDays: number;
-	lastActivityDate: string | null;
-}
-
-// Level thresholds (XP needed for each level)
-export const LEVEL_THRESHOLDS = [0, 100, 500, 1500, 4000, 10000] as const;
-
-export const LEVEL_NAMES = [
-	'Unbekannt',
-	'Anfänger',
-	'Fortgeschritten',
-	'Kompetent',
-	'Experte',
-	'Meister',
-] as const;
-
-export const BRANCH_INFO: Record<
-	SkillBranch,
-	{ name: string; icon: string; color: string; description: string }
-> = {
-	intellect: {
-		name: 'Intellekt',
-		icon: 'brain',
-		color: 'var(--color-branch-intellect)',
-		description: 'Wissen, Sprachen, Wissenschaft',
-	},
-	body: {
-		name: 'Körper',
-		icon: 'dumbbell',
-		color: 'var(--color-branch-body)',
-		description: 'Fitness, Sport, Gesundheit',
-	},
-	creativity: {
-		name: 'Kreativität',
-		icon: 'palette',
-		color: 'var(--color-branch-creativity)',
-		description: 'Kunst, Musik, Schreiben',
-	},
-	social: {
-		name: 'Sozial',
-		icon: 'users',
-		color: 'var(--color-branch-social)',
-		description: 'Kommunikation, Leadership, Empathie',
-	},
-	practical: {
-		name: 'Praktisch',
-		icon: 'wrench',
-		color: 'var(--color-branch-practical)',
-		description: 'Handwerk, Kochen, Technologie',
-	},
-	mindset: {
-		name: 'Mindset',
-		icon: 'heart',
-		color: 'var(--color-branch-mindset)',
-		description: 'Meditation, Fokus, Resilienz',
-	},
-	custom: {
-		name: 'Eigene',
-		icon: 'star',
-		color: 'var(--color-primary)',
-		description: 'Eigene Kategorien',
-	},
-};
-
-// Helper functions
-export function calculateLevel(xp: number): number {
-	for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
-		if (xp >= LEVEL_THRESHOLDS[i]) {
-			return i;
-		}
-	}
-	return 0;
-}
-
-export function xpForNextLevel(currentLevel: number): number {
-	if (currentLevel >= LEVEL_THRESHOLDS.length - 1) {
-		return Infinity;
-	}
-	return LEVEL_THRESHOLDS[currentLevel + 1];
-}
-
-export function xpProgress(xp: number, level: number): number {
-	if (level >= LEVEL_THRESHOLDS.length - 1) {
-		return 100;
-	}
-	const currentThreshold = LEVEL_THRESHOLDS[level];
-	const nextThreshold = LEVEL_THRESHOLDS[level + 1];
-	const progress = ((xp - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
-	return Math.min(100, Math.max(0, progress));
-}
-
-export function createDefaultSkill(partial: Partial<Skill> = {}): Skill {
-	const now = new Date().toISOString();
-	return {
-		id: crypto.randomUUID(),
-		name: '',
-		description: '',
-		branch: 'custom',
-		parentId: null,
-		icon: 'star',
-		color: null,
-		currentXp: 0,
-		totalXp: 0,
-		level: 0,
-		createdAt: now,
-		updatedAt: now,
-		...partial,
-	};
-}
-
-export function createActivity(
-	skillId: string,
-	xpEarned: number,
-	description: string,
-	duration?: number
-): Activity {
-	return {
-		id: crypto.randomUUID(),
-		skillId,
-		xpEarned,
-		description,
-		duration: duration ?? null,
-		timestamp: new Date().toISOString(),
-	};
-}
-
-// Achievement Types
-
-export type AchievementCategory =
-	| 'xp'
-	| 'skills'
-	| 'levels'
-	| 'activities'
-	| 'streak'
-	| 'branches'
-	| 'special';
-
-export type AchievementRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-
-export interface AchievementCondition {
-	type: string;
-	threshold: number;
-}
-
-export interface Achievement {
-	id: string;
-	name: string;
-	description: string;
-	icon: string;
-	category: AchievementCategory;
-	rarity: AchievementRarity;
-	xpReward: number;
-	sortOrder: number;
-	condition: AchievementCondition;
-}
-
-export interface AchievementWithStatus extends Achievement {
-	unlocked: boolean;
-	unlockedAt: string | null;
-	progress: number;
-}
-
-export interface AchievementUnlockResult {
-	achievement: Achievement;
-	xpReward: number;
-}
-
-export const RARITY_INFO: Record<
-	AchievementRarity,
-	{ name: string; color: string; bgColor: string; borderColor: string }
-> = {
-	common: {
-		name: 'Gewöhnlich',
-		color: 'text-gray-300',
-		bgColor: 'bg-gray-700/50',
-		borderColor: 'border-gray-600',
-	},
-	uncommon: {
-		name: 'Ungewöhnlich',
-		color: 'text-green-400',
-		bgColor: 'bg-green-900/30',
-		borderColor: 'border-green-700',
-	},
-	rare: {
-		name: 'Selten',
-		color: 'text-blue-400',
-		bgColor: 'bg-blue-900/30',
-		borderColor: 'border-blue-700',
-	},
-	epic: {
-		name: 'Episch',
-		color: 'text-purple-400',
-		bgColor: 'bg-purple-900/30',
-		borderColor: 'border-purple-700',
-	},
-	legendary: {
-		name: 'Legendär',
-		color: 'text-yellow-400',
-		bgColor: 'bg-yellow-900/30',
-		borderColor: 'border-yellow-600',
-	},
-};
-
-export const ACHIEVEMENT_CATEGORY_INFO: Record<
-	AchievementCategory,
-	{ name: string; icon: string }
-> = {
-	xp: { name: 'Erfahrung', icon: 'star' },
-	skills: { name: 'Skills', icon: 'grid' },
-	levels: { name: 'Level', icon: 'arrow-up' },
-	activities: { name: 'Aktivitäten', icon: 'lightning' },
-	streak: { name: 'Streak', icon: 'flame' },
-	branches: { name: 'Branches', icon: 'compass' },
-	special: { name: 'Speziell', icon: 'trophy' },
-};
+import type { NewAchievement } from '../db/schema';
 
 /**
- * All achievement definitions for offline/local evaluation.
- * Mirrors the backend ACHIEVEMENT_DEFINITIONS.
+ * All achievement definitions. These are seeded into the DB on startup.
+ * Conditions are evaluated by the AchievementService after relevant events.
  */
-export const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
-	// XP
+export const ACHIEVEMENT_DEFINITIONS: NewAchievement[] = [
+	// === XP Achievements ===
 	{
 		id: 'xp_100',
 		name: 'Erste Schritte',
@@ -314,7 +61,8 @@ export const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
 		sortOrder: 5,
 		condition: { type: 'total_xp', threshold: 50000 },
 	},
-	// Skills
+
+	// === Skill Achievements ===
 	{
 		id: 'skills_1',
 		name: 'Der Anfang',
@@ -359,7 +107,8 @@ export const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
 		sortOrder: 13,
 		condition: { type: 'total_skills', threshold: 20 },
 	},
-	// Levels
+
+	// === Level Achievements ===
 	{
 		id: 'level_1',
 		name: 'Anfänger',
@@ -393,7 +142,8 @@ export const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
 		sortOrder: 22,
 		condition: { type: 'highest_level', threshold: 5 },
 	},
-	// Activities
+
+	// === Activity Achievements ===
 	{
 		id: 'activities_1',
 		name: 'Erste Aktion',
@@ -449,7 +199,8 @@ export const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
 		sortOrder: 34,
 		condition: { type: 'total_activities', threshold: 500 },
 	},
-	// Streak
+
+	// === Streak Achievements ===
 	{
 		id: 'streak_3',
 		name: '3-Tage-Streak',
@@ -505,7 +256,8 @@ export const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
 		sortOrder: 44,
 		condition: { type: 'streak_days', threshold: 100 },
 	},
-	// Branches
+
+	// === Branch Achievements ===
 	{
 		id: 'branches_3',
 		name: 'Entdecker',
@@ -528,7 +280,8 @@ export const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
 		sortOrder: 51,
 		condition: { type: 'unique_branches', threshold: 6 },
 	},
-	// Special
+
+	// === Special Achievements ===
 	{
 		id: 'single_xp_100',
 		name: 'Mammut-Session',

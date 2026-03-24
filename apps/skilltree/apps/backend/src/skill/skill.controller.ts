@@ -32,8 +32,8 @@ export class SkillController {
 
 	@Post()
 	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateSkillDto) {
-		const skill = await this.skillService.create(user.userId, dto);
-		return { skill };
+		const result = await this.skillService.create(user.userId, dto);
+		return { skill: result.skill, newAchievements: result.newAchievements };
 	}
 
 	@Put(':id')

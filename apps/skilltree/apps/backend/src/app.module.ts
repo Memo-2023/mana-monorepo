@@ -5,6 +5,7 @@ import { DatabaseModule } from './db/database.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
 import { SkillModule } from './skill/skill.module';
 import { ActivityModule } from './activity/activity.module';
+import { AchievementModule } from './achievement/achievement.module';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { ActivityModule } from './activity/activity.module';
 		HealthModule.forRoot({ serviceName: 'skilltree-backend' }),
 		SkillModule,
 		ActivityModule,
+		AchievementModule,
 	],
 })
 export class AppModule {}

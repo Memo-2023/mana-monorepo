@@ -77,8 +77,7 @@
 	const WidgetComponent = $derived(widgetComponents[widget.type]);
 </script>
 
-<div>
-	<Card class="relative h-full">
+<Card class="relative h-full">
 		<!-- Edit Mode Overlay -->
 		{#if dashboardStore.isEditing}
 			<div
@@ -140,7 +139,7 @@
 		{/if}
 
 		<!-- Widget Content -->
-		<div class="p-4" class:opacity-0={dashboardStore.isEditing}>
+		<div class="min-h-[10rem] p-4" class:opacity-0={dashboardStore.isEditing}>
 			{#if WidgetComponent}
 				<WidgetComponent />
 			{:else}
@@ -148,4 +147,3 @@
 			{/if}
 		</div>
 	</Card>
-</div>

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { skillStore } from '$lib/stores/skills.svelte';
+	import { achievementStore } from '$lib/stores/achievements.svelte';
 	import { BRANCH_INFO } from '$lib/types';
-	import type { Skill, SkillBranch } from '$lib/types';
+	import type { Skill, SkillBranch, AchievementUnlockResult } from '$lib/types';
 	import SkillCard from '$lib/components/SkillCard.svelte';
 	import AddSkillModal from '$lib/components/AddSkillModal.svelte';
 	import AddXpModal from '$lib/components/AddXpModal.svelte';
 	import EditSkillModal from '$lib/components/EditSkillModal.svelte';
 	import LevelUpCelebration from '$lib/components/LevelUpCelebration.svelte';
+	import AchievementCelebration from '$lib/components/AchievementCelebration.svelte';
 	import StatsOverview from '$lib/components/StatsOverview.svelte';
 	import SkillTemplates from '$lib/components/SkillTemplates.svelte';
 	import {
@@ -17,6 +19,7 @@
 		UploadSimple,
 		Sparkle,
 		Graph,
+		Trophy,
 	} from '@manacore/shared-icons';
 
 	// Modal states
@@ -31,6 +34,10 @@
 	let showLevelUp = $state(false);
 	let levelUpSkillName = $state('');
 	let levelUpNewLevel = $state(0);
+
+	// Achievement celebration
+	let showAchievementCelebration = $state(false);
+	let currentAchievementUnlock = $state<AchievementUnlockResult | null>(null);
 
 	const filteredSkills = $derived(() => {
 		if (selectedBranch === 'all') return skillStore.skills;
@@ -59,6 +66,29 @@
 		showLevelUp = true;
 	}
 
+	function showNextAchievement() {
+		const next = achievementStore.popUnlockQueue();
+		if (next) {
+			currentAchievementUnlock = next;
+			showAchievementCelebration = true;
+		} else {
+			showAchievementCelebration = false;
+			currentAchievementUnlock = null;
+		}
+	}
+
+	async function checkAchievementsLocal(lastActivityXp?: number) {
+		if (!achievementStore.useApi) {
+			await achievementStore.checkLocal({
+				skills: skillStore.skills,
+				activities: skillStore.activities,
+				userStats: skillStore.userStats,
+				lastActivityXp,
+			});
+			showNextAchievement();
+		}
+	}
+
 	async function handleAddXp(xp: number, description: string, duration?: number) {
 		if (!selectedSkill) return;
 
@@ -70,6 +100,9 @@
 		if (result.leveledUp) {
 			triggerLevelUp(skillName, result.newLevel);
 		}
+
+		// Check achievements (offline mode triggers local check)
+		await checkAchievementsLocal(xp);
 	}
 
 	async function handleExport() {
@@ -118,6 +151,19 @@
 					<h1 class="text-2xl font-bold text-white">SkillTree</h1>
 				</div>
 				<div class="flex items-center gap-2">
+					<!-- Achievements -->
+					<a
+						href="/achievements"
+						class="relative rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-yellow-400"
+						title="Achievements"
+					>
+						<Trophy class="h-5 w-5" />
+						{#if achievementStore.stats().unlocked > 0}
+							<span class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-gray-900">
+								{achievementStore.stats().unlocked}
+							</span>
+						{/if}
+					</a>
 					<!-- Tree View -->
 					<a
 						href="/tree"
@@ -268,6 +314,7 @@
 		onSave={async (skill) => {
 			await skillStore.addSkill(skill);
 			showAddSkillModal = false;
+			await checkAchievementsLocal();
 		}}
 	/>
 {/if}
@@ -306,6 +353,14 @@
 		onClose={() => (showTemplatesModal = false)}
 		onAddSkill={async (skill) => {
 			await skillStore.addSkill(skill);
+			await checkAchievementsLocal();
 		}}
+	/>
+{/if}
+
+{#if showAchievementCelebration && currentAchievementUnlock}
+	<AchievementCelebration
+		result={currentAchievementUnlock}
+		onClose={showNextAchievement}
 	/>
 {/if}

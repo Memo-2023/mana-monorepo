@@ -34,7 +34,7 @@
 </script>
 
 <div
-	class="grid grid-cols-12 gap-4"
+	class="grid auto-rows-fr grid-cols-12 gap-5"
 	use:dndzone={{
 		items,
 		flipDurationMs,

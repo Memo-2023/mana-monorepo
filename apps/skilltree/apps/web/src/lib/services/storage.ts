@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Skill, Activity, UserStats } from '$lib/types';
+import type { Skill, Activity, UserStats, AchievementWithStatus } from '$lib/types';
 
 interface SkillTreeDB {
 	skills: {
@@ -23,10 +23,18 @@ interface SkillTreeDB {
 		key: 'user-stats';
 		value: UserStats;
 	};
+	achievements: {
+		key: string;
+		value: AchievementWithStatus;
+		indexes: {
+			'by-category': string;
+			'by-unlocked': number;
+		};
+	};
 }
 
 const DB_NAME = 'skilltree-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<SkillTreeDB>> | null = null;
 
@@ -52,6 +60,13 @@ function getDB(): Promise<IDBPDatabase<SkillTreeDB>> {
 				// Stats store
 				if (!db.objectStoreNames.contains('stats')) {
 					db.createObjectStore('stats');
+				}
+
+				// Achievements store (added in v2)
+				if (!db.objectStoreNames.contains('achievements')) {
+					const achievementStore = db.createObjectStore('achievements', { keyPath: 'id' });
+					achievementStore.createIndex('by-category', 'category');
+					achievementStore.createIndex('by-unlocked', 'unlocked');
 				}
 			},
 		});
@@ -229,4 +244,36 @@ export async function importData(data: {
 	await tx.objectStore('stats').put(data.stats, 'user-stats');
 
 	await tx.done;
+}
+
+// Achievements CRUD
+export async function getAllAchievements(): Promise<AchievementWithStatus[]> {
+	const db = await getDB();
+	return db.getAll('achievements');
+}
+
+export async function saveAchievement(achievement: AchievementWithStatus): Promise<void> {
+	const db = await getDB();
+	await db.put('achievements', achievement);
+}
+
+export async function saveAllAchievements(achievementsList: AchievementWithStatus[]): Promise<void> {
+	const db = await getDB();
+	const tx = db.transaction('achievements', 'readwrite');
+	await tx.objectStore('achievements').clear();
+	for (const a of achievementsList) {
+		await tx.objectStore('achievements').put(a);
+	}
+	await tx.done;
+}
+
+export async function unlockAchievement(id: string): Promise<void> {
+	const db = await getDB();
+	const achievement = await db.get('achievements', id);
+	if (achievement && !achievement.unlocked) {
+		achievement.unlocked = true;
+		achievement.unlockedAt = new Date().toISOString();
+		achievement.progress = achievement.condition.threshold;
+		await db.put('achievements', achievement);
+	}
 }

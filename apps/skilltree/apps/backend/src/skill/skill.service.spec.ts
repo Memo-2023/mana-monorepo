@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { SkillService } from './skill.service';
 import { DATABASE_TOKEN } from '../db/database.module';
+import { AchievementService } from '../achievement/achievement.service';
 
 // Mock database operations
 // Uses a query builder pattern where each query chain is thenable
@@ -60,6 +61,10 @@ const createMockDb = () => {
 	return mockDb;
 };
 
+const mockAchievementService = {
+	checkAndUnlock: jest.fn().mockResolvedValue([]),
+};
+
 describe('SkillService', () => {
 	let service: SkillService;
 	let mockDb: ReturnType<typeof createMockDb>;
@@ -85,6 +90,7 @@ describe('SkillService', () => {
 
 	beforeEach(async () => {
 		mockDb = createMockDb();
+		mockAchievementService.checkAndUnlock.mockClear();
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -92,6 +98,10 @@ describe('SkillService', () => {
 				{
 					provide: DATABASE_TOKEN,
 					useValue: mockDb,
+				},
+				{
+					provide: AchievementService,
+					useValue: mockAchievementService,
 				},
 			],
 		}).compile();
@@ -215,9 +225,10 @@ describe('SkillService', () => {
 
 			const result = await service.create(testUserId, createDto);
 
-			expect(result.name).toBe('React');
-			expect(result.currentXp).toBe(0);
-			expect(result.level).toBe(0);
+			expect(result.skill.name).toBe('React');
+			expect(result.skill.currentXp).toBe(0);
+			expect(result.skill.level).toBe(0);
+			expect(result.newAchievements).toEqual([]);
 		});
 
 		it('should use default icon when not provided', async () => {
@@ -243,7 +254,7 @@ describe('SkillService', () => {
 
 			const result = await service.create(testUserId, dtoWithoutIcon);
 
-			expect(result.icon).toBe('star');
+			expect(result.skill.icon).toBe('star');
 		});
 	});
 

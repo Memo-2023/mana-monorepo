@@ -1,9 +1,10 @@
-import type { Skill, Activity, UserStats, SkillBranch } from '$lib/types';
+import type { Skill, Activity, UserStats, SkillBranch, AchievementUnlockResult } from '$lib/types';
 import { calculateLevel, createDefaultSkill, createActivity, BRANCH_INFO } from '$lib/types';
 import * as storage from '$lib/services/storage';
 import * as skillsApi from '$lib/api/skills';
 import * as activitiesApi from '$lib/api/activities';
 import { authStore } from './auth.svelte';
+import { achievementStore } from './achievements.svelte';
 
 // Reactive state using Svelte 5 runes
 let skills = $state<Skill[]>([]);
@@ -118,7 +119,7 @@ async function initialize() {
 
 async function addSkill(data: Partial<Skill>): Promise<Skill> {
 	if (useApi && authStore.isAuthenticated) {
-		const skill = await skillsApi.createSkill({
+		const result = await skillsApi.createSkill({
 			name: data.name || '',
 			description: data.description,
 			branch: data.branch || 'custom',
@@ -126,9 +127,12 @@ async function addSkill(data: Partial<Skill>): Promise<Skill> {
 			icon: data.icon,
 			color: data.color ?? undefined,
 		});
-		skills = [...skills, skill];
+		skills = [...skills, result.skill];
 		await updateStats();
-		return skill;
+		if (result.newAchievements?.length > 0) {
+			achievementStore.handleApiUnlocks(result.newAchievements);
+		}
+		return result.skill;
 	} else {
 		const skill = createDefaultSkill(data);
 		await storage.saveSkill(skill);
@@ -185,6 +189,9 @@ async function addXp(
 		skills = [...skills.slice(0, index), result.skill, ...skills.slice(index + 1)];
 		activities = [...activities, result.activity];
 		await updateStats();
+		if (result.newAchievements?.length > 0) {
+			achievementStore.handleApiUnlocks(result.newAchievements);
+		}
 		return { leveledUp: result.leveledUp, newLevel: result.newLevel };
 	} else {
 		const skill = skills[index];
