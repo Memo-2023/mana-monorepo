@@ -9,6 +9,8 @@ import { format, isWithinInterval, isSameDay, differenceInMilliseconds } from 'd
 import { toDate } from '$lib/utils/eventDateHelpers';
 import { toastStore } from '@manacore/shared-ui';
 import { CalendarEvents } from '@manacore/shared-utils/analytics';
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 // State
 let events = $state<CalendarEvent[]>([]);
@@ -96,7 +98,7 @@ export const eventsStore = {
 
 		if (result.error) {
 			error = result.error.message;
-			toastStore.error(`Termine konnten nicht geladen werden: ${result.error.message}`);
+			toastStore.error(get(_)('toast.eventLoadError') + ': ' + result.error.message);
 		} else {
 			// API returns events array directly (already extracted in api/events.ts)
 			const eventsData = result.data as CalendarEvent[] | null;
@@ -182,7 +184,7 @@ export const eventsStore = {
 		const result = await api.updateEvent(id, data);
 
 		if (result.error) {
-			toastStore.error(`Termin konnte nicht aktualisiert werden: ${result.error.message}`);
+			toastStore.error(get(_)('toast.eventUpdateError') + ': ' + result.error.message);
 		} else if (result.data) {
 			events = events.map((e) => (e.id === id ? result.data! : e));
 			CalendarEvents.eventUpdated();
@@ -206,10 +208,10 @@ export const eventsStore = {
 			if (eventToDelete) {
 				events = [...events, eventToDelete];
 			}
-			toastStore.error(`Termin konnte nicht gelöscht werden: ${result.error.message}`);
+			toastStore.error(get(_)('toast.eventDeleteError') + ': ' + result.error.message);
 		} else {
 			CalendarEvents.eventDeleted();
-			toastStore.success('Termin gelöscht');
+			toastStore.success(get(_)('toast.eventDeleted'));
 		}
 
 		return result;
@@ -330,13 +332,13 @@ export const eventsStore = {
 		});
 
 		if (result.error) {
-			toastStore.error(`Fehler: ${result.error.message}`);
+			toastStore.error(get(_)('toast.error') + ': ' + result.error.message);
 			// Refetch to restore state
 			if (loadedRange) {
 				this.fetchEvents(loadedRange.start, loadedRange.end);
 			}
 		} else {
-			toastStore.success('Termin gelöscht');
+			toastStore.success(get(_)('toast.eventDeleted'));
 		}
 
 		return result;
@@ -358,7 +360,7 @@ export const eventsStore = {
 		const result = await api.updateEvent(parentId, data);
 
 		if (result.error) {
-			toastStore.error(`Fehler: ${result.error.message}`);
+			toastStore.error(get(_)('toast.error') + ': ' + result.error.message);
 		} else {
 			// Refetch to regenerate occurrences
 			if (loadedRange) {

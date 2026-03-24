@@ -94,6 +94,26 @@
 		"password": "Password",
 		"forgotPassword": "Forgot password?"
 	},
+	"toast": {
+		"eventLoadError": "Failed to load events",
+		"eventUpdateError": "Failed to update event",
+		"eventDeleteError": "Failed to delete event",
+		"eventDeleted": "Event deleted",
+		"error": "Error",
+		"calendarShared": "Calendar shared with {email}",
+		"shareLinkCreated": "Share link created",
+		"inviteAccepted": "Invitation accepted",
+		"shareRemoved": "Share removed",
+		"shareError": "Sharing failed",
+		"updateError": "Update failed",
+		"removeError": "Remove failed",
+		"declineError": "Decline failed",
+		"calendarConnected": "{name} connected",
+		"calendarDisconnected": "{name} disconnected",
+		"syncCompleted": "Sync completed",
+		"connectionError": "Connection failed",
+		"syncError": "Sync failed"
+	},
 	"common": {
 		"save": "Save",
 		"cancel": "Cancel",
@@ -103,7 +123,8 @@
 		"close": "Close",
 		"search": "Search",
 		"error": "Error",
-		"success": "Success"
+		"success": "Success",
+		"calendar": "Calendar"
 	},
 	"errors": {
 		"loadEvents": "Failed to load events",

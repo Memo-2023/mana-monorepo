@@ -5,6 +5,8 @@
 import type { ExternalCalendar, ConnectExternalCalendarInput } from '@calendar/shared';
 import * as api from '$lib/api/sync';
 import { toastStore } from '@manacore/shared-ui';
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 // State
 let externalCalendars = $state<ExternalCalendar[]>([]);
@@ -53,10 +55,10 @@ export const externalCalendarsStore = {
 		const result = await api.connectExternalCalendar(data);
 
 		if (result.error) {
-			toastStore.error(`Verbindung fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.connectionError') + ': ' + result.error.message);
 		} else if (result.data) {
 			externalCalendars = [...externalCalendars, result.data];
-			toastStore.success(`${data.name} verbunden`);
+			toastStore.success(get(_)('toast.calendarConnected', { values: { name: data.name } }));
 		}
 
 		return result;
@@ -66,7 +68,7 @@ export const externalCalendarsStore = {
 		const result = await api.updateExternalCalendar(id, data);
 
 		if (result.error) {
-			toastStore.error(`Aktualisierung fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.updateError') + ': ' + result.error.message);
 		} else if (result.data) {
 			externalCalendars = getArray().map((c) => (c.id === id ? result.data! : c));
 		}
@@ -79,10 +81,14 @@ export const externalCalendarsStore = {
 		const result = await api.disconnectExternalCalendar(id);
 
 		if (result.error) {
-			toastStore.error(`Trennung fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.connectionError') + ': ' + result.error.message);
 		} else {
 			externalCalendars = getArray().filter((c) => c.id !== id);
-			toastStore.success(`${cal?.name || 'Kalender'} getrennt`);
+			toastStore.success(
+				get(_)('toast.calendarDisconnected', {
+					values: { name: cal?.name || get(_)('common.calendar') },
+				})
+			);
 		}
 
 		return result;
@@ -94,13 +100,13 @@ export const externalCalendarsStore = {
 		const result = await api.triggerSync(id);
 
 		if (result.error) {
-			toastStore.error(`Sync fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.syncError') + ': ' + result.error.message);
 			// Update last sync error in local state
 			externalCalendars = getArray().map((c) =>
 				c.id === id ? { ...c, lastSyncError: result.error!.message } : c
 			);
 		} else {
-			toastStore.success('Synchronisation abgeschlossen');
+			toastStore.success(get(_)('toast.syncCompleted'));
 			// Update local state with new sync time
 			externalCalendars = getArray().map((c) =>
 				c.id === id ? { ...c, lastSyncAt: new Date().toISOString(), lastSyncError: null } : c

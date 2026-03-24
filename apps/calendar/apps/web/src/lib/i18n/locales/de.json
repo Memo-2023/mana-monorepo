@@ -94,6 +94,26 @@
 		"password": "Passwort",
 		"forgotPassword": "Passwort vergessen?"
 	},
+	"toast": {
+		"eventLoadError": "Termine konnten nicht geladen werden",
+		"eventUpdateError": "Termin konnte nicht aktualisiert werden",
+		"eventDeleteError": "Termin konnte nicht gelöscht werden",
+		"eventDeleted": "Termin gelöscht",
+		"error": "Fehler",
+		"calendarShared": "Kalender mit {email} geteilt",
+		"shareLinkCreated": "Freigabe-Link erstellt",
+		"inviteAccepted": "Einladung angenommen",
+		"shareRemoved": "Freigabe entfernt",
+		"shareError": "Freigabe fehlgeschlagen",
+		"updateError": "Aktualisierung fehlgeschlagen",
+		"removeError": "Entfernen fehlgeschlagen",
+		"declineError": "Ablehnung fehlgeschlagen",
+		"calendarConnected": "{name} verbunden",
+		"calendarDisconnected": "{name} getrennt",
+		"syncCompleted": "Synchronisation abgeschlossen",
+		"connectionError": "Verbindung fehlgeschlagen",
+		"syncError": "Sync fehlgeschlagen"
+	},
 	"common": {
 		"save": "Speichern",
 		"cancel": "Abbrechen",
@@ -103,7 +123,8 @@
 		"close": "Schließen",
 		"search": "Suchen",
 		"error": "Fehler",
-		"success": "Erfolgreich"
+		"success": "Erfolgreich",
+		"calendar": "Kalender"
 	},
 	"errors": {
 		"loadEvents": "Termine konnten nicht geladen werden",

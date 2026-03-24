@@ -5,6 +5,8 @@
 import type { CalendarShare, CalendarShareWithDetails } from '@calendar/shared';
 import * as api from '$lib/api/shares';
 import { toastStore } from '@manacore/shared-ui';
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
 // State
 let shares = $state<Map<string, CalendarShare[]>>(new Map());
@@ -56,9 +58,9 @@ export const sharesStore = {
 		const result = await api.createShare(calendarId, { calendarId, email, permission });
 
 		if (result.error) {
-			toastStore.error(`Freigabe fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.shareError') + ': ' + result.error.message);
 		} else {
-			toastStore.success(`Kalender mit ${email} geteilt`);
+			toastStore.success(get(_)('toast.calendarShared', { values: { email } }));
 			await this.fetchSharesForCalendar(calendarId);
 		}
 
@@ -73,9 +75,9 @@ export const sharesStore = {
 		});
 
 		if (result.error) {
-			toastStore.error(`Link-Erstellung fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.shareError') + ': ' + result.error.message);
 		} else {
-			toastStore.success('Freigabe-Link erstellt');
+			toastStore.success(get(_)('toast.shareLinkCreated'));
 			await this.fetchSharesForCalendar(calendarId);
 		}
 
@@ -86,9 +88,9 @@ export const sharesStore = {
 		const result = await api.acceptShare(shareId);
 
 		if (result.error) {
-			toastStore.error(`Annahme fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.shareError') + ': ' + result.error.message);
 		} else {
-			toastStore.success('Einladung angenommen');
+			toastStore.success(get(_)('toast.inviteAccepted'));
 			invitations = invitations.filter((i) => i.id !== shareId);
 			await this.fetchSharedWithMe();
 		}
@@ -100,7 +102,7 @@ export const sharesStore = {
 		const result = await api.declineShare(shareId);
 
 		if (result.error) {
-			toastStore.error(`Ablehnung fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.declineError') + ': ' + result.error.message);
 		} else {
 			invitations = invitations.filter((i) => i.id !== shareId);
 		}
@@ -112,9 +114,9 @@ export const sharesStore = {
 		const result = await api.deleteShare(calendarId, shareId);
 
 		if (result.error) {
-			toastStore.error(`Entfernen fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.removeError') + ': ' + result.error.message);
 		} else {
-			toastStore.success('Freigabe entfernt');
+			toastStore.success(get(_)('toast.shareRemoved'));
 			const current = shares.get(calendarId) || [];
 			shares = new Map(shares).set(
 				calendarId,
@@ -129,7 +131,7 @@ export const sharesStore = {
 		const result = await api.updateShare(shareId, { permission });
 
 		if (result.error) {
-			toastStore.error(`Aktualisierung fehlgeschlagen: ${result.error.message}`);
+			toastStore.error(get(_)('toast.updateError') + ': ' + result.error.message);
 		}
 
 		return result;

@@ -87,6 +87,26 @@
 		"password": "Mot de passe",
 		"forgotPassword": "Mot de passe oublié?"
 	},
+	"toast": {
+		"eventLoadError": "Impossible de charger les événements",
+		"eventUpdateError": "Impossible de mettre à jour l'événement",
+		"eventDeleteError": "Impossible de supprimer l'événement",
+		"eventDeleted": "Événement supprimé",
+		"error": "Erreur",
+		"calendarShared": "Calendrier partagé avec {email}",
+		"shareLinkCreated": "Lien de partage créé",
+		"inviteAccepted": "Invitation acceptée",
+		"shareRemoved": "Partage supprimé",
+		"shareError": "Échec du partage",
+		"updateError": "Échec de la mise à jour",
+		"removeError": "Échec de la suppression",
+		"declineError": "Échec du refus",
+		"calendarConnected": "{name} connecté",
+		"calendarDisconnected": "{name} déconnecté",
+		"syncCompleted": "Synchronisation terminée",
+		"connectionError": "Échec de la connexion",
+		"syncError": "Échec de la synchronisation"
+	},
 	"common": {
 		"save": "Enregistrer",
 		"cancel": "Annuler",
@@ -96,7 +116,8 @@
 		"close": "Fermer",
 		"search": "Rechercher",
 		"error": "Erreur",
-		"success": "Succès"
+		"success": "Succès",
+		"calendar": "Calendrier"
 	},
 	"error": {
 		"notFound": "Page non trouvée",

@@ -87,6 +87,26 @@
 		"password": "Contraseña",
 		"forgotPassword": "¿Olvidaste tu contraseña?"
 	},
+	"toast": {
+		"eventLoadError": "No se pudieron cargar los eventos",
+		"eventUpdateError": "No se pudo actualizar el evento",
+		"eventDeleteError": "No se pudo eliminar el evento",
+		"eventDeleted": "Evento eliminado",
+		"error": "Error",
+		"calendarShared": "Calendario compartido con {email}",
+		"shareLinkCreated": "Enlace de compartir creado",
+		"inviteAccepted": "Invitación aceptada",
+		"shareRemoved": "Compartir eliminado",
+		"shareError": "Error al compartir",
+		"updateError": "Error al actualizar",
+		"removeError": "Error al eliminar",
+		"declineError": "Error al rechazar",
+		"calendarConnected": "{name} conectado",
+		"calendarDisconnected": "{name} desconectado",
+		"syncCompleted": "Sincronización completada",
+		"connectionError": "Error de conexión",
+		"syncError": "Error de sincronización"
+	},
 	"common": {
 		"save": "Guardar",
 		"cancel": "Cancelar",
@@ -96,7 +116,8 @@
 		"close": "Cerrar",
 		"search": "Buscar",
 		"error": "Error",
-		"success": "Éxito"
+		"success": "Éxito",
+		"calendar": "Calendario"
 	},
 	"error": {
 		"notFound": "Página no encontrada",
