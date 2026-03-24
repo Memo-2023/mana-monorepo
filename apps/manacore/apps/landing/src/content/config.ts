@@ -203,6 +203,15 @@ const manascoreCollection = defineCollection({
 			security: z.number().min(0).max(100),
 			ux: z.number().min(0).max(100),
 		}),
+		// Score history for trend visualization
+		history: z
+			.array(
+				z.object({
+					date: z.string(), // ISO date string e.g. "2026-03-19"
+					score: z.number().min(0).max(100),
+				})
+			)
+			.optional(),
 		// Readiness level
 		status: z.enum(['prototype', 'alpha', 'beta', 'production', 'mature']),
 		// Stats

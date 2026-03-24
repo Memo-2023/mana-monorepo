@@ -106,6 +106,24 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 						const status = statusColors[data.status] || statusColors.alpha;
 						const scoreColor = getScoreColor(data.score);
 
+						// Build sparkline SVG path from history
+						const history = data.history || [{ date: data.date.toISOString(), score: data.score }];
+						const sparkWidth = 48;
+						const sparkHeight = 20;
+						const minScore = Math.min(...history.map((h: { score: number }) => h.score));
+						const maxScore = Math.max(...history.map((h: { score: number }) => h.score));
+						const range = maxScore - minScore || 1;
+						const sparkPoints = history
+							.map((h: { score: number }, i: number) => {
+								const x =
+									history.length > 1 ? (i / (history.length - 1)) * sparkWidth : sparkWidth / 2;
+								const y = sparkHeight - ((h.score - minScore) / range) * (sparkHeight - 2) - 1;
+								return `${x},${y}`;
+							})
+							.join(' ');
+						const hasTrend = history.length > 1;
+						const trendDelta = hasTrend ? history[history.length - 1].score - history[0].score : 0;
+
 						return (
 							<a
 								href={`/manascore/${audit.slug}`}
@@ -170,10 +188,47 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 										)}
 									</div>
 
-									{/* Score */}
-									<div class="flex shrink-0 flex-col items-center">
+									{/* Score + Trend */}
+									<div class="flex shrink-0 flex-col items-center gap-1">
 										<div class={`text-2xl font-bold tabular-nums ${scoreColor}`}>{data.score}</div>
-										<span class="text-muted-foreground/50 text-[10px]">/100</span>
+										{hasTrend ? (
+											<div class="flex items-center gap-1">
+												<svg width={sparkWidth} height={sparkHeight} class="overflow-visible">
+													<polyline
+														points={sparkPoints}
+														fill="none"
+														stroke={trendDelta >= 0 ? '#22c55e' : '#ef4444'}
+														stroke-width="1.5"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+													/>
+													{history.map((h: { score: number }, i: number) => {
+														const x =
+															history.length > 1
+																? (i / (history.length - 1)) * sparkWidth
+																: sparkWidth / 2;
+														const y =
+															sparkHeight - ((h.score - minScore) / range) * (sparkHeight - 2) - 1;
+														return (
+															<circle
+																cx={x}
+																cy={y}
+																r={i === history.length - 1 ? 2.5 : 1.5}
+																fill={trendDelta >= 0 ? '#22c55e' : '#ef4444'}
+															/>
+														);
+													})}
+												</svg>
+												<span
+													class={`text-[10px] font-medium ${trendDelta >= 0 ? 'text-green-500' : 'text-red-500'}`}
+												>
+													{trendDelta > 0 ? '+' : ''}
+													{trendDelta}
+												</span>
+											</div>
+										) : (
+											<span class="text-muted-foreground/50 text-[10px]">/100</span>
+										)}
 									</div>
 								</div>
 							</a>
