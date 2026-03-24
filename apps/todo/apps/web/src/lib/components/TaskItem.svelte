@@ -172,6 +172,34 @@
 		}
 	}
 
+	// Inline title editing
+	let isEditingTitle = $state(false);
+	let editingTitle = $state('');
+	let titleEditRef = $state<HTMLInputElement | null>(null);
+
+	function handleTitleClick(e: MouseEvent) {
+		e.stopPropagation();
+		isEditingTitle = true;
+		editingTitle = task.title;
+		setTimeout(() => titleEditRef?.focus(), 0);
+	}
+
+	function handleTitleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			commitTitleEdit();
+		} else if (e.key === 'Escape') {
+			isEditingTitle = false;
+		}
+	}
+
+	function commitTitleEdit() {
+		isEditingTitle = false;
+		const trimmed = editingTitle.trim();
+		if (trimmed && trimmed !== task.title) {
+			onSave?.({ title: trimmed });
+		}
+	}
+
 	function handleContentClick() {
 		if (onExpand) {
 			onExpand();
@@ -342,11 +370,24 @@
 			style="background-color: {priorityColors[task.priority] || priorityColors.medium}"
 		></div>
 
-		<!-- Content (clickable to expand) -->
-		<button type="button" class="task-content" onclick={handleContentClick}>
-			<span class="task-title" class:line-through={task.isCompleted}>
-				{task.title}
-			</span>
+		<!-- Content -->
+		<div class="task-content">
+			{#if isEditingTitle}
+				<input
+					bind:this={titleEditRef}
+					class="task-title-input"
+					type="text"
+					bind:value={editingTitle}
+					onkeydown={handleTitleKeydown}
+					onblur={commitTitleEdit}
+				/>
+			{:else}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<span class="task-title" class:line-through={task.isCompleted} onclick={handleTitleClick}>
+					{task.title}
+				</span>
+			{/if}
 
 			<!-- Labels and subtasks below title -->
 			{#if subtaskProgress() || (task.labels && task.labels.length > 0)}
@@ -377,7 +418,7 @@
 					{/if}
 				</div>
 			{/if}
-		</button>
+		</div>
 
 		<!-- Assignee and involved contacts -->
 		{#if task.metadata?.assignee || (task.metadata?.involvedContacts && task.metadata.involvedContacts.length > 0)}
@@ -820,12 +861,6 @@
 		flex-direction: column;
 		justify-content: center;
 		gap: 0.25rem;
-		background: none;
-		border: none;
-		padding: 0;
-		text-align: left;
-		cursor: pointer;
-		align-self: stretch;
 	}
 
 	.task-title {
@@ -835,6 +870,37 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		cursor: text;
+		border-radius: 0.25rem;
+		padding: 0.125rem 0.25rem;
+		margin: -0.125rem -0.25rem;
+	}
+
+	.task-title:hover {
+		background: rgba(0, 0, 0, 0.04);
+	}
+
+	:global(.dark) .task-title:hover {
+		background: rgba(255, 255, 255, 0.06);
+	}
+
+	.task-title-input {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		background: rgba(0, 0, 0, 0.04);
+		border: 1px solid #8b5cf6;
+		border-radius: 0.25rem;
+		padding: 0.125rem 0.25rem;
+		margin: -0.125rem -0.25rem;
+		outline: none;
+		width: 100%;
+	}
+
+	:global(.dark) .task-title-input {
+		color: #f3f4f6;
+		background: rgba(255, 255, 255, 0.08);
+		border-color: #8b5cf6;
 	}
 
 	:global(.dark) .task-title {
