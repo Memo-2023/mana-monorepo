@@ -22,6 +22,7 @@ import type {
 	ChatCompletionResponse,
 	EmbeddingResponse,
 } from './types/openai-compat.types';
+import type { LlmRequestMetrics } from './utils/metrics';
 import { extractJson } from './utils/json-extractor';
 import { retryFetch } from './utils/retry';
 
@@ -52,17 +53,48 @@ export class LlmClient {
 
 	/** Chat with full message history. */
 	async chatMessages(messages: ChatMessage[], opts?: ChatOptions): Promise<ChatResult> {
+		const requestedModel = opts?.model ?? this.options.defaultModel;
 		const body = this.buildRequest(messages, opts, false);
 		const start = Date.now();
-		const response = await this.fetchCompletion(body, opts?.timeout);
-		const latencyMs = Date.now() - start;
 
-		return {
-			content: response.choices[0]?.message?.content ?? '',
-			model: response.model,
-			usage: response.usage ?? { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-			latencyMs,
-		};
+		try {
+			const response = await this.fetchCompletion(body, opts?.timeout);
+			const latencyMs = Date.now() - start;
+			const usage = response.usage ?? { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+
+			this.emitMetrics({
+				model: requestedModel,
+				actualModel: response.model,
+				type: 'chat',
+				latencyMs,
+				promptTokens: usage.prompt_tokens,
+				completionTokens: usage.completion_tokens,
+				totalTokens: usage.total_tokens,
+				wasFallback: response.model !== requestedModel && !response.model.endsWith(requestedModel),
+				success: true,
+			});
+
+			return {
+				content: response.choices[0]?.message?.content ?? '',
+				model: response.model,
+				usage,
+				latencyMs,
+			};
+		} catch (error) {
+			this.emitMetrics({
+				model: requestedModel,
+				actualModel: requestedModel,
+				type: 'chat',
+				latencyMs: Date.now() - start,
+				promptTokens: 0,
+				completionTokens: 0,
+				totalTokens: 0,
+				wasFallback: false,
+				success: false,
+				error: error instanceof Error ? error.message : String(error),
+			});
+			throw error;
+		}
 	}
 
 	// ---------------------------------------------------------------------------
@@ -346,5 +378,15 @@ export class LlmClient {
 		}
 
 		return (await response.json()) as ChatCompletionResponse;
+	}
+
+	private emitMetrics(metrics: LlmRequestMetrics): void {
+		if (this.options.onMetrics) {
+			try {
+				this.options.onMetrics(metrics);
+			} catch {
+				// Never let metrics callback break the request
+			}
+		}
 	}
 }

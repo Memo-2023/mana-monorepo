@@ -33,3 +33,7 @@ export type {
 
 // Utilities
 export { extractJson } from './utils';
+
+// Metrics
+export { LlmMetricsCollector } from './utils';
+export type { LlmRequestMetrics, MetricsCallback } from './utils';

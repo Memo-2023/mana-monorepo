@@ -80,36 +80,53 @@ export const chatStore = {
 		};
 		messages = [...messages, userMessage];
 
+		// Add placeholder assistant message for streaming
+		const assistantId = `temp-${++messageCounter}`;
+		const assistantMessage: Message = {
+			id: assistantId,
+			conversationId: '',
+			sender: 'assistant',
+			messageText: '',
+			createdAt: new Date().toISOString(),
+		};
+		messages = [...messages, assistantMessage];
+
 		try {
-			// Build chat messages for API
-			const chatMessages: ChatMessage[] = messages.map((m) => ({
-				role: m.sender === 'user' ? 'user' : 'assistant',
-				content: m.messageText,
-			}));
+			const chatMessages: ChatMessage[] = messages
+				.filter((m) => m.id !== assistantId)
+				.map((m) => ({
+					role: m.sender === 'user' ? 'user' : 'assistant',
+					content: m.messageText,
+				}));
 
 			const request: ChatCompletionRequest = {
 				messages: chatMessages,
 				modelId: selectedModelId,
 			};
 
-			const response = await chatService.createCompletion(request);
+			// Stream tokens into the assistant message
+			let fullContent = '';
+			for await (const token of chatService.createStreamingCompletion(request)) {
+				fullContent += token;
+				// Update the assistant message reactively
+				messages = messages.map((m) =>
+					m.id === assistantId ? { ...m, messageText: fullContent } : m
+				);
+			}
 
-			if (response) {
-				// Add assistant message
-				const assistantMessage: Message = {
-					id: `temp-${++messageCounter}`,
-					conversationId: '',
-					sender: 'assistant',
-					messageText: response.content,
-					createdAt: new Date().toISOString(),
-				};
-				messages = [...messages, assistantMessage];
-				ChatEvents.messageSent(selectedModelId);
-			} else {
+			if (!fullContent) {
 				error = 'Failed to get response';
+				messages = messages.filter((m) => m.id !== assistantId);
+			} else {
+				ChatEvents.messageSent(selectedModelId);
 			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to send message';
+			// Remove empty assistant message on error
+			const msg = messages.find((m) => m.id === assistantId);
+			if (msg && !msg.messageText) {
+				messages = messages.filter((m) => m.id !== assistantId);
+			}
 		} finally {
 			isSending = false;
 		}

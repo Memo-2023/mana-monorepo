@@ -89,6 +89,22 @@ export class OllamaService {
 		}
 	}
 
+	async *createStreamingCompletion(
+		modelName: string,
+		messages: ChatMessage[],
+		temperature?: number,
+		maxTokens?: number
+	): AsyncIterable<string> {
+		const normalizedModel = modelName.includes('/') ? modelName : `ollama/${modelName}`;
+		this.logger.log(`Streaming request to mana-llm model: ${normalizedModel}`);
+
+		yield* this.llm.chatStreamMessages(messages, {
+			model: normalizedModel,
+			temperature,
+			maxTokens,
+		});
+	}
+
 	async listModels(): Promise<string[]> {
 		try {
 			const models = await this.llm.listModels();

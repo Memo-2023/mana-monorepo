@@ -28,10 +28,23 @@ export const chatService = {
 	},
 
 	/**
-	 * Send chat completion request
+	 * Send chat completion request (non-streaming)
 	 */
 	async createCompletion(request: ChatCompletionRequest): Promise<ChatCompletionResponse | null> {
 		return chatApi.createCompletion({
+			messages: request.messages,
+			modelId: request.modelId,
+			temperature: request.temperature ?? 0.7,
+			maxTokens: request.maxTokens ?? 1000,
+		});
+	},
+
+	/**
+	 * Send streaming chat completion request.
+	 * Returns an async generator that yields text tokens as they arrive.
+	 */
+	async *createStreamingCompletion(request: ChatCompletionRequest): AsyncGenerator<string> {
+		yield* chatApi.createStreamingCompletion({
 			messages: request.messages,
 			modelId: request.modelId,
 			temperature: request.temperature ?? 0.7,

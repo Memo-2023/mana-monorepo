@@ -595,4 +595,68 @@ export const chatApi = {
 		}
 		return data;
 	},
+
+	/**
+	 * Create a streaming completion. Returns an async generator of text tokens.
+	 * Uses Server-Sent Events (SSE) for real-time token delivery.
+	 */
+	async *createStreamingCompletion(options: {
+		messages: ChatMessage[];
+		modelId: string;
+		temperature?: number;
+		maxTokens?: number;
+	}): AsyncGenerator<string> {
+		const authToken = await authStore.getValidToken();
+		if (!authToken) throw new Error('No authentication token');
+
+		const response = await fetch(`${API_BASE}/api/v1/chat/completions/stream`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${authToken}`,
+			},
+			body: JSON.stringify(options),
+		});
+
+		if (!response.ok) {
+			throw new Error(`Stream error: ${response.status}`);
+		}
+
+		if (!response.body) {
+			throw new Error('No response body for stream');
+		}
+
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder();
+		let buffer = '';
+
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+
+				buffer += decoder.decode(value, { stream: true });
+				const lines = buffer.split('\n');
+				buffer = lines.pop() ?? '';
+
+				for (const line of lines) {
+					const trimmed = line.trim();
+					if (!trimmed || !trimmed.startsWith('data: ')) continue;
+
+					const data = trimmed.slice(6);
+					if (data === '[DONE]') return;
+
+					try {
+						const parsed = JSON.parse(data);
+						if (parsed.error) throw new Error(parsed.error);
+						if (parsed.token) yield parsed.token;
+					} catch (e) {
+						if (e instanceof Error && e.message !== data) throw e;
+					}
+				}
+			}
+		} finally {
+			reader.releaseLock();
+		}
+	},
 };

@@ -159,6 +159,68 @@ export class ChatService {
 		return params?.model || model.provider;
 	}
 
+	/**
+	 * Create a streaming completion. Yields text tokens as they arrive.
+	 * Credits are consumed upfront (estimated cost) since we don't know final token count.
+	 */
+	async *createStreamingCompletion(dto: ChatCompletionDto, userId?: string): AsyncIterable<string> {
+		const model = await this.getModelById(dto.modelId);
+		if (!model) {
+			throw new Error(`Model ${dto.modelId} not found`);
+		}
+
+		// Consume credits upfront for streaming
+		if (userId) {
+			const creditOperation = this.getCreditOperationForModel(model);
+			const creditCost = CREDIT_COSTS[creditOperation];
+
+			const validation = await this.creditClient.validateCredits(
+				userId,
+				creditOperation,
+				creditCost
+			);
+			if (!validation.hasCredits) {
+				throw new Error(
+					`Insufficient credits: need ${creditCost}, have ${validation.availableCredits}`
+				);
+			}
+
+			await this.creditClient.consumeCredits(
+				userId,
+				creditOperation,
+				creditCost,
+				`Chat stream with ${this.getModelDisplayName(model)}`,
+				{ modelId: dto.modelId, provider: model.provider, streaming: true }
+			);
+		}
+
+		const params = model.parameters as {
+			model?: string;
+			temperature?: number;
+			max_tokens?: number;
+		} | null;
+		const modelName = params?.model || 'gemma3:4b';
+		const prefixedModel =
+			model.provider === 'openrouter'
+				? modelName.includes('/')
+					? `openrouter/${modelName}`
+					: modelName
+				: modelName;
+
+		const temperature = dto.temperature ?? params?.temperature ?? 0.7;
+		const maxTokens = dto.maxTokens ?? params?.max_tokens ?? 4096;
+
+		yield* this.ollamaService.createStreamingCompletion(
+			prefixedModel,
+			dto.messages.map((msg) => ({
+				role: msg.role as 'system' | 'user' | 'assistant',
+				content: msg.content,
+			})),
+			temperature,
+			maxTokens
+		);
+	}
+
 	private async createOllamaCompletion(
 		model: Model,
 		dto: ChatCompletionDto

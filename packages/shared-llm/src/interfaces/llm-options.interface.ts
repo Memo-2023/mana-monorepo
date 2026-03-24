@@ -1,4 +1,5 @@
 import type { ModuleMetadata, Type } from '@nestjs/common';
+import type { MetricsCallback } from '../utils/metrics';
 
 export interface LlmModuleOptions {
 	/** mana-llm service URL (default: http://localhost:3025) */
@@ -13,6 +14,8 @@ export interface LlmModuleOptions {
 	maxRetries?: number;
 	/** Enable debug logging (default: false) */
 	debug?: boolean;
+	/** Optional callback invoked after every LLM request with metrics */
+	onMetrics?: MetricsCallback;
 }
 
 export interface LlmModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
@@ -33,6 +36,7 @@ export interface ResolvedLlmOptions {
 	timeout: number;
 	maxRetries: number;
 	debug: boolean;
+	onMetrics?: MetricsCallback;
 }
 
 export function resolveOptions(options: LlmModuleOptions): ResolvedLlmOptions {
@@ -43,5 +47,6 @@ export function resolveOptions(options: LlmModuleOptions): ResolvedLlmOptions {
 		timeout: options.timeout ?? 120_000,
 		maxRetries: options.maxRetries ?? 2,
 		debug: options.debug ?? false,
+		onMetrics: options.onMetrics,
 	};
 }

@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import { isOk } from '@manacore/shared-errors';
 import { ChatService } from './chat.service';
 import { ChatCompletionDto } from './dto/chat-completion.dto';
@@ -24,9 +25,33 @@ export class ChatController {
 		const result = await this.chatService.createCompletion(dto, user.userId);
 
 		if (!isOk(result)) {
-			throw result.error; // Caught by AppExceptionFilter
+			throw result.error;
 		}
 
 		return result.value;
+	}
+
+	@Post('completions/stream')
+	async createStreamingCompletion(
+		@Body() dto: ChatCompletionDto,
+		@CurrentUser() user: CurrentUserData,
+		@Res() res: Response
+	): Promise<void> {
+		res.setHeader('Content-Type', 'text/event-stream');
+		res.setHeader('Cache-Control', 'no-cache');
+		res.setHeader('Connection', 'keep-alive');
+		res.setHeader('X-Accel-Buffering', 'no');
+
+		try {
+			for await (const token of this.chatService.createStreamingCompletion(dto, user.userId)) {
+				res.write(`data: ${JSON.stringify({ token })}\n\n`);
+			}
+			res.write('data: [DONE]\n\n');
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Stream failed';
+			res.write(`data: ${JSON.stringify({ error: message })}\n\n`);
+		} finally {
+			res.end();
+		}
 	}
 }

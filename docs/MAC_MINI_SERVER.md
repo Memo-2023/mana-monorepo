@@ -594,8 +594,13 @@ Systemeinstellungen → Datenschutz & Sicherheit → Voller Festplattenzugriff �
 **LaunchAgent:** `~/Library/LaunchAgents/homebrew.mxcl.ollama.plist`
 
 Optimierungen bereits aktiviert:
+- `OLLAMA_KEEP_ALIVE=5m` - Modelle nach 5min Inaktivität aus RAM entladen (spart 3-16 GB)
 - `OLLAMA_FLASH_ATTENTION=1` - Schnellere Attention-Berechnung
 - `OLLAMA_KV_CACHE_TYPE=q8_0` - Effizienterer KV-Cache
+- `OLLAMA_NUM_PARALLEL=1` - Max 1 paralleler Request (vorhersagbarer RAM)
+- `OLLAMA_MAX_LOADED_MODELS=1` - Max 1 Modell gleichzeitig im RAM
+
+Setup-Script: `./scripts/mac-mini/configure-ollama.sh`
 
 ### Speicherort
 
