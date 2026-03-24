@@ -676,6 +676,38 @@ pnpm dev:landing-builder
 
 See `services/mana-landing-builder/CLAUDE.md` for full documentation.
 
+## ManaScore (Production Readiness)
+
+ManaScore is the internal quality assessment system for all ManaCore apps. Each app is rated on a 0-100 scale across 8 categories plus extended metrics.
+
+**Location:** `apps/manacore/apps/landing/src/content/manascore/`
+**Live:** https://manacore-landing.pages.dev/manascore
+**Methodology:** https://manacore-landing.pages.dev/manascore/about
+
+### Core Categories (8)
+
+Backend, Frontend, Database, Testing, Deployment, Documentation, Security, UX
+
+### Extended Metrics
+
+| Metric | Description |
+|--------|-------------|
+| **Score Trend** | Historical score changes with sparkline visualization |
+| **Lighthouse** | Performance, Accessibility, Best Practices, SEO |
+| **Dependency Health** | Outdated packages, vulnerabilities by severity |
+| **API Conformity** | 7 checks (responses, errors, pagination, versioning, docs, health, validation) |
+| **Cross-App Consistency** | Shared package usage (auth, ui, theme, branding, i18n, error-tracking) |
+
+### Maturity Levels
+
+| Level | Score | Meaning |
+|-------|-------|---------|
+| Prototype | 0-25 | Proof of concept |
+| Alpha | 26-50 | Basic functionality |
+| Beta | 51-70 | Functional with gaps |
+| Production | 71-85 | Stable, deployable |
+| Mature | 86-100 | Fully production-ready |
+
 ## Server Access
 
 ### Mac Mini Production Server

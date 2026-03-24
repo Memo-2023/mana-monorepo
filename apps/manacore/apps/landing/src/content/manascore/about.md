@@ -159,6 +159,67 @@ Bewertet die User Experience und Accessibility.
 
 ---
 
+## Erweiterte Metriken
+
+Zusätzlich zu den 8 Kern-Kategorien erfasst der ManaScore weitere Metriken, die auf der Detail-Seite jeder App angezeigt werden.
+
+### Score-Trend
+
+Zeigt die Entwicklung des Gesamtscores über Zeit als Sparkline-Chart (Übersicht) oder Area-Chart (Detail). Jede Score-Änderung wird in der `history` gespeichert.
+
+### Lighthouse Scores
+
+Direkt von Google Lighthouse übernommene Werte in 4 Kategorien:
+
+| Kategorie          | Beschreibung                                          |
+| ------------------ | ----------------------------------------------------- |
+| **Performance**    | Ladezeit, First Contentful Paint, Time to Interactive |
+| **Accessibility**  | ARIA, Kontraste, Keyboard-Navigation, Screenreader    |
+| **Best Practices** | HTTPS, keine Deprecated APIs, Error Logging           |
+| **SEO**            | Meta Tags, Crawlbarkeit, Mobile-Friendly              |
+
+### Dependency Health
+
+Automatisierbar per `pnpm outdated` und `pnpm audit`:
+
+| Metrik              | Beschreibung                                                     |
+| ------------------- | ---------------------------------------------------------------- |
+| **Total**           | Gesamtanzahl der Abhängigkeiten                                  |
+| **Outdated**        | Pakete mit verfügbaren Updates                                   |
+| **Vulnerabilities** | Aufgeschlüsselt nach Schweregrad (Critical, High, Moderate, Low) |
+| **Health %**        | Anteil aktueller Pakete: `(total - outdated) / total * 100`      |
+
+### API Conformity
+
+Prüft 7 Konsistenz-Kriterien der Backend-API:
+
+| Check                     | Beschreibung                                            |
+| ------------------------- | ------------------------------------------------------- |
+| **Konsistente Responses** | Alle Endpoints nutzen `ApiResult<T>` Format             |
+| **Error Codes**           | Konsistente HTTP Status Codes (400, 401, 403, 404, 500) |
+| **Pagination**            | Offset/Cursor-basierte Pagination wo nötig              |
+| **Versioning**            | API-Versionierung via `/api/v1/`                        |
+| **Dokumentation**         | Swagger/OpenAPI automatisch generiert                   |
+| **Health Endpoint**       | `/health` Endpoint vorhanden                            |
+| **Validation**            | DTO-Validation mit class-validator auf allen Inputs     |
+
+### Cross-App Consistency
+
+Misst wie konsequent eine App die shared Packages des Monorepos nutzt:
+
+| Package                 | Typ      | Beschreibung                                                |
+| ----------------------- | -------- | ----------------------------------------------------------- |
+| `shared-auth`           | Core     | JWT-Authentifizierung via mana-core-auth                    |
+| `shared-ui`             | Core     | Gemeinsame UI-Komponenten (Modal, ContextMenu, Toast, etc.) |
+| `shared-theme`          | Core     | Theme-System (Dark/Light, Varianten)                        |
+| `shared-branding`       | Core     | App-Icons, Farben, URLs                                     |
+| `shared-i18n`           | Core     | Internationalisierung (Sprach-Utilities)                    |
+| `shared-error-tracking` | Core     | GlitchTip Error Tracking                                    |
+| `shared-storage`        | Optional | S3/MinIO Datei-Upload (nur wenn relevant)                   |
+| `shared-llm`            | Optional | LLM-Integration (nur wenn AI-Features)                      |
+
+---
+
 ## Reifegradstufen
 
 | Stufe          | Score  | Bedeutung                                            |
