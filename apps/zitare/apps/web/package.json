@@ -48,6 +48,7 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
+		"@manacore/shared-utils": "workspace:*",
 		"@manacore/spiral-db": "workspace:^",
 		"@manacore/shared-app-onboarding": "workspace:*",
 		"@zitare/content": "workspace:*",
