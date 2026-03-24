@@ -13,6 +13,7 @@ import {
 	formatDatePreview,
 	formatTimePreview,
 } from '@manacore/shared-utils';
+import type { ParserLocale } from '@manacore/shared-utils';
 import type { TaskPriority } from '@todo/shared';
 
 export interface ParsedTask {
@@ -41,20 +42,42 @@ export interface ParsedTaskWithIds {
 	labelIds: string[];
 }
 
-// Priority patterns (task-specific)
-// Supports: später, normal, wichtig, dringend (with or without !) and shortcuts !, !!, !!!
-const PRIORITY_PATTERNS: { pattern: RegExp; priority: TaskPriority }[] = [
-	{ pattern: /!{3,}|!?dringend\b/i, priority: 'urgent' },
-	{ pattern: /!{2}|!?wichtig\b/i, priority: 'high' },
-	{ pattern: /!?normal\b/i, priority: 'medium' },
-	{ pattern: /!?sp[aä]ter\b/i, priority: 'low' },
-];
+// Priority keyword translations per locale
+const PRIORITY_KEYWORDS: Record<
+	ParserLocale,
+	{ urgent: string; high: string; medium: string; low: string }
+> = {
+	de: { urgent: 'dringend', high: 'wichtig', medium: 'normal', low: 'sp[aä]ter' },
+	en: { urgent: 'urgent', high: 'important', medium: 'normal', low: 'later' },
+	fr: { urgent: 'urgent', high: 'important', medium: 'normal', low: 'plus\\s+tard' },
+	es: { urgent: 'urgente', high: 'importante', medium: 'normal', low: 'despu[eé]s' },
+	it: { urgent: 'urgente', high: 'importante', medium: 'normale', low: 'dopo' },
+};
+
+/**
+ * Build locale-aware priority patterns
+ */
+function buildPriorityPatterns(
+	locale: ParserLocale
+): { pattern: RegExp; priority: TaskPriority }[] {
+	const kw = PRIORITY_KEYWORDS[locale];
+	return [
+		{ pattern: new RegExp(`!{3,}|!?${kw.urgent}\\b`, 'i'), priority: 'urgent' },
+		{ pattern: new RegExp(`!{2}|!?${kw.high}\\b`, 'i'), priority: 'high' },
+		{ pattern: new RegExp(`!?${kw.medium}\\b`, 'i'), priority: 'medium' },
+		{ pattern: new RegExp(`!?${kw.low}\\b`, 'i'), priority: 'low' },
+	];
+}
 
 /**
  * Extract priority from text
  */
-function extractPriority(text: string): { priority?: TaskPriority; remaining: string } {
-	for (const { pattern, priority } of PRIORITY_PATTERNS) {
+function extractPriority(
+	text: string,
+	locale: ParserLocale = 'de'
+): { priority?: TaskPriority; remaining: string } {
+	const patterns = buildPriorityPatterns(locale);
+	for (const { pattern, priority } of patterns) {
 		if (pattern.test(text)) {
 			return {
 				priority,
@@ -73,11 +96,11 @@ function extractPriority(text: string): { priority?: TaskPriority; remaining: st
  * - "Einkaufen heute #privat"
  * - "Report in 3 Tagen !!"
  */
-export function parseTaskInput(input: string): ParsedTask {
+export function parseTaskInput(input: string, locale: ParserLocale = 'de'): ParsedTask {
 	let text = input.trim();
 
 	// Extract priority first (task-specific)
-	const priorityResult = extractPriority(text);
+	const priorityResult = extractPriority(text, locale);
 	text = priorityResult.remaining;
 	const priority = priorityResult.priority;
 
@@ -87,7 +110,7 @@ export function parseTaskInput(input: string): ParsedTask {
 	const projectName = projectResult.value;
 
 	// Use base parser for common patterns (date, time, tags)
-	const base = parseBaseInput(text);
+	const base = parseBaseInput(text, locale);
 
 	// Combine date and time
 	const dueDate = combineDateAndTime(base.date, base.time);
@@ -139,10 +162,19 @@ export function resolveTaskIds(
 	};
 }
 
+// Priority display labels per locale
+const PRIORITY_LABELS: Record<ParserLocale, Record<TaskPriority, string>> = {
+	de: { low: '🟢 Später', medium: '🟡 Normal', high: '🟠 Wichtig', urgent: '🔴 Dringend' },
+	en: { low: '🟢 Later', medium: '🟡 Normal', high: '🟠 Important', urgent: '🔴 Urgent' },
+	fr: { low: '🟢 Plus tard', medium: '🟡 Normal', high: '🟠 Important', urgent: '🔴 Urgent' },
+	es: { low: '🟢 Después', medium: '🟡 Normal', high: '🟠 Importante', urgent: '🔴 Urgente' },
+	it: { low: '🟢 Dopo', medium: '🟡 Normale', high: '🟠 Importante', urgent: '🔴 Urgente' },
+};
+
 /**
  * Format parsed task for preview display
  */
-export function formatParsedTaskPreview(parsed: ParsedTask): string {
+export function formatParsedTaskPreview(parsed: ParsedTask, locale: ParserLocale = 'de'): string {
 	const parts: string[] = [];
 
 	if (parsed.dueDate) {
@@ -160,13 +192,7 @@ export function formatParsedTaskPreview(parsed: ParsedTask): string {
 	}
 
 	if (parsed.priority) {
-		const priorityLabels: Record<TaskPriority, string> = {
-			low: '🟢 Später',
-			medium: '🟡 Normal',
-			high: '🟠 Wichtig',
-			urgent: '🔴 Dringend',
-		};
-		parts.push(priorityLabels[parsed.priority]);
+		parts.push(PRIORITY_LABELS[locale][parsed.priority]);
 	}
 
 	if (parsed.projectName) {

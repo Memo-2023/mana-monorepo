@@ -3,7 +3,12 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { PillNavigation, QuickInputBar, DevBuildBadge } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		QuickInputItem,
+		CreatePreview,
+	} from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -19,6 +24,10 @@
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { libraryStore } from '$lib/stores/library.svelte';
+	import { playlistStore } from '$lib/stores/playlist.svelte';
+	import { projectStore } from '$lib/stores/project.svelte';
+	import { parseSongInput, formatParsedSongPreview } from '$lib/utils/song-parser';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
 	import FullPlayer from '$lib/components/FullPlayer.svelte';
 	import QueuePanel from '$lib/components/QueuePanel.svelte';
@@ -118,6 +127,46 @@
 		goto(`/library?song=${item.id}`);
 	}
 
+	// Quick-Create handlers
+	function handleParseCreate(query: string): CreatePreview | null {
+		if (!query.trim()) return null;
+		const parsed = parseSongInput(query);
+		if (!parsed.title) return null;
+		const preview = formatParsedSongPreview(parsed);
+		if (parsed.isPlaylist) {
+			return {
+				title: `Playlist "${parsed.title}" erstellen`,
+				subtitle: preview || 'Neue Playlist',
+			};
+		}
+		if (parsed.isProject) {
+			return {
+				title: `Projekt "${parsed.title}" erstellen`,
+				subtitle: preview || 'Neues Projekt',
+			};
+		}
+		return {
+			title: `Projekt "${parsed.title}" erstellen`,
+			subtitle: preview || 'Neues Projekt',
+		};
+	}
+
+	async function handleCreate(query: string): Promise<void> {
+		if (!query.trim()) return;
+		const parsed = parseSongInput(query);
+		if (!parsed.title) return;
+
+		if (parsed.isPlaylist) {
+			await playlistStore.createPlaylist(parsed.title);
+			goto('/playlists');
+			return;
+		}
+
+		// Default: create project
+		await projectStore.createProject(parsed.title);
+		goto('/projects');
+	}
+
 	onMount(async () => {
 		await authStore.initialize();
 		if (!authStore.isAuthenticated) {
@@ -175,9 +224,13 @@
 			<QuickInputBar
 				onSearch={handleInputSearch}
 				onSelect={handleInputSelect}
-				placeholder="Song suchen..."
+				onParseCreate={handleParseCreate}
+				onCreate={handleCreate}
+				placeholder="Song suchen oder Projekt erstellen..."
 				emptyText="Keine Songs gefunden"
 				searchingText="Suche..."
+				createText="Erstellen"
+				deferSearch={true}
 				locale="de"
 				appIcon="search"
 				bottomOffset="140px"
@@ -197,6 +250,7 @@
 			<DevBuildBadge commitHash={__BUILD_HASH__} buildTime={__BUILD_TIME__} />
 		</div>
 	</SplitPaneContainer>
+	<SessionExpiredBanner locale="de" loginHref="/login" />
 {/if}
 
 <style>

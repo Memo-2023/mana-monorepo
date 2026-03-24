@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { QuickInputBar } from '@manacore/shared-ui';
-	import type { QuickInputItem } from '@manacore/shared-ui';
+	import type { QuickInputItem, CreatePreview } from '@manacore/shared-ui';
 	import { unifiedBarStore } from '$lib/stores/unified-bar.svelte';
 	import DateStrip from './DateStrip.svelte';
 	import TagStrip from './TagStrip.svelte';
@@ -14,6 +14,8 @@
 	interface Props {
 		onSearch: (query: string) => Promise<QuickInputItem[]>;
 		onSelect: (item: QuickInputItem) => void;
+		onParseCreate?: (query: string) => CreatePreview | null;
+		onCreate?: (query: string) => Promise<void>;
 		onSearchChange?: (query: string, results: QuickInputItem[]) => void;
 		placeholder?: string;
 		emptyText?: string;
@@ -39,6 +41,8 @@
 	let {
 		onSearch,
 		onSelect,
+		onParseCreate,
+		onCreate,
 		onSearchChange,
 		placeholder = 'Neuer Termin oder suchen...',
 		emptyText = 'Keine Termine gefunden',
@@ -138,6 +142,8 @@
 		<QuickInputBar
 			{onSearch}
 			{onSelect}
+			{onParseCreate}
+			{onCreate}
 			{onSearchChange}
 			{placeholder}
 			{emptyText}
@@ -145,6 +151,7 @@
 			{createText}
 			{appIcon}
 			{locale}
+			deferSearch={true}
 			bottomOffset="0px"
 			hasFabRight={showCalendarLayers}
 			{defaultOptions}

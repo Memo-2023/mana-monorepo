@@ -3,10 +3,16 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
-	import type { PillNavItem, QuickInputItem } from '@manacore/shared-ui';
+	import type { PillNavItem, QuickInputItem, CreatePreview } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { plantsApi } from '$lib/api/plants';
+	import {
+		parsePlantInput,
+		resolvePlantData,
+		formatParsedPlantPreview,
+	} from '$lib/utils/plant-parser';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 
 	let { children } = $props();
 
@@ -54,6 +60,32 @@
 		goto(`/plant/${item.id}`);
 	}
 
+	// Quick-Create handlers
+	function handleParseCreate(query: string): CreatePreview | null {
+		if (!query.trim()) return null;
+		const parsed = parsePlantInput(query);
+		if (!parsed.name) return null;
+		const preview = formatParsedPlantPreview(parsed);
+		return {
+			title: `"${parsed.name}" erstellen`,
+			subtitle: preview || 'Neue Pflanze',
+		};
+	}
+
+	async function handleCreate(query: string): Promise<void> {
+		if (!query.trim()) return;
+		const parsed = parsePlantInput(query);
+		if (!parsed.name) return;
+		const resolved = resolvePlantData(parsed);
+		const plant = await plantsApi.create({
+			name: resolved.name,
+			acquiredAt: resolved.acquiredAt,
+		});
+		if (plant?.id) {
+			goto(`/plant/${plant.id}`);
+		}
+	}
+
 	onMount(async () => {
 		// Initialize auth state from stored tokens
 		await authStore.initialize();
@@ -86,9 +118,13 @@
 		<QuickInputBar
 			onSearch={handleInputSearch}
 			onSelect={handleInputSelect}
-			placeholder="Pflanze suchen..."
+			onParseCreate={handleParseCreate}
+			onCreate={handleCreate}
+			placeholder="Neue Pflanze oder suchen..."
 			emptyText="Keine Pflanzen gefunden"
 			searchingText="Suche..."
+			createText="Erstellen"
+			deferSearch={true}
 			locale="de"
 			appIcon="search"
 			bottomOffset="70px"
@@ -100,6 +136,7 @@
 			</div>
 		</main>
 	</div>
+	<SessionExpiredBanner locale="de" loginHref="/login" />
 {:else}
 	<div class="flex min-h-screen items-center justify-center">
 		<div
