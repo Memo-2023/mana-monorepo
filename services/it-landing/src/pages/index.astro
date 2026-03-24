@@ -1,0 +1,170 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Shared sections
+import HeroSection from '@manacore/shared-landing-ui/sections/HeroSection.astro';
+import FeatureSection from '@manacore/shared-landing-ui/sections/FeatureSection.astro';
+import PrinciplesSection from '@manacore/shared-landing-ui/sections/PrinciplesSection.astro';
+import TimelineSection from '@manacore/shared-landing-ui/sections/TimelineSection.astro';
+import FAQSection from '@manacore/shared-landing-ui/sections/FAQSection.astro';
+import CTASection from '@manacore/shared-landing-ui/sections/CTASection.astro';
+import Container from '@manacore/shared-landing-ui/atoms/Container.astro';
+import SectionHeader from '@manacore/shared-landing-ui/atoms/SectionHeader.astro';
+
+// Custom components
+import IndependenceBar from '../components/IndependenceBar.astro';
+import InfrastructureGrid from '../components/InfrastructureGrid.astro';
+
+// Data
+import { problemFeatures, gdprFeatures, stackFeatures, principles } from '../data/features';
+import { infrastructure, stats } from '../data/infrastructure';
+import { faqs } from '../data/faq';
+import { roadmapItems } from '../data/roadmap';
+import { audiences } from '../data/audiences';
+---
+
+<Layout
+	title="Mana IT — Europäische Technologie-Souveränität"
+	description="75% self-hosted Infrastruktur in Deutschland. Kein US Cloud Act. DSGVO-konform. Open Source Stack."
+>
+	<!-- Navigation -->
+	<nav
+		class="fixed top-0 z-50 w-full border-b border-border bg-background-page/95 backdrop-blur-sm"
+	>
+		<Container>
+			<div class="flex h-16 items-center justify-between">
+				<a href="/" class="text-xl font-bold text-primary">Mana IT</a>
+				<div class="hidden items-center gap-6 md:flex">
+					<a href="#problem" class="text-sm text-text-secondary hover:text-primary">Warum?</a>
+					<a href="#infrastructure" class="text-sm text-text-secondary hover:text-primary"
+						>Infrastruktur</a
+					>
+					<a href="#gdpr" class="text-sm text-text-secondary hover:text-primary">DSGVO</a>
+					<a href="#audiences" class="text-sm text-text-secondary hover:text-primary">Für wen?</a>
+					<a href="#roadmap" class="text-sm text-text-secondary hover:text-primary">Roadmap</a>
+					<a href="#faq" class="text-sm text-text-secondary hover:text-primary">FAQ</a>
+					<a href="/en/" class="text-sm text-text-muted hover:text-primary">EN</a>
+					<a
+						href="#contact"
+						class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+					>
+						Kontakt
+					</a>
+				</div>
+			</div>
+		</Container>
+	</nav>
+
+	<main class="pt-16">
+		<!-- 1. Hero -->
+		<HeroSection
+			title="Technologische Souveränität für Europa"
+			subtitle="75% unserer Infrastruktur läuft auf eigenen Servern in Deutschland. Kein US Cloud Act. Keine Drittanbieter-Abhängigkeit. Volle DSGVO-Konformität."
+			variant="centered"
+			primaryCta={{ text: 'Infrastruktur entdecken', href: '#infrastructure' }}
+			secondaryCta={{ text: 'Kontakt aufnehmen', href: '#contact' }}
+			trustBadges={[
+				{ icon: '🛡️', text: 'DSGVO-konform' },
+				{ icon: '🇩🇪', text: 'Server in Deutschland' },
+				{ icon: '🔓', text: 'Open Source Stack' },
+			]}
+		/>
+
+		<!-- 2. Problem -->
+		<FeatureSection
+			id="problem"
+			title="Warum Europa unabhängige Technologie braucht"
+			subtitle="Die Abhängigkeit von US-amerikanischen Cloud-Anbietern ist ein strategisches Risiko für europäische Organisationen."
+			features={problemFeatures}
+			columns={2}
+		/>
+
+		<!-- 3. Lösung: Independence Bar + Prinzipien -->
+		<section id="solution" class="py-16">
+			<Container>
+				<SectionHeader
+					title="Unsere Antwort: Self-Hosted Infrastruktur"
+					subtitle="Die Mana-Plattform beweist, dass ein vollwertiges SaaS-Ökosystem ohne US-Cloud-Abhängigkeit funktioniert."
+				/>
+				<IndependenceBar percent={stats.percentSelfHosted} target={stats.targetPercent} />
+			</Container>
+		</section>
+
+		<PrinciplesSection principles={principles} />
+
+		<!-- 4. Infrastructure Grid -->
+		<section id="infrastructure" class="py-16">
+			<Container>
+				<SectionHeader
+					title="Unsere Infrastruktur im Detail"
+					subtitle="14 von 21 Kernkomponenten laufen vollständig auf eigener Hardware in Deutschland."
+				/>
+				<InfrastructureGrid items={infrastructure} />
+			</Container>
+		</section>
+
+		<!-- 5. DSGVO -->
+		<FeatureSection
+			id="gdpr"
+			title="DSGVO-Konformität auf allen Ebenen"
+			subtitle="Nicht nur auf dem Papier — technisch und organisatorisch umgesetzt."
+			features={gdprFeatures}
+			columns={3}
+		/>
+
+		<!-- 6. Open Source Stack -->
+		<FeatureSection
+			id="stack"
+			title="Offene Technologien statt proprietärer Silos"
+			subtitle="Bewährte Open-Source-Software ersetzt teure Cloud-Dienste — ohne Qualitätsverlust."
+			features={stackFeatures}
+			columns={4}
+		/>
+
+		<!-- 7. Zielgruppen -->
+		<FeatureSection
+			id="audiences"
+			title="Für wen ist das relevant?"
+			subtitle="Europäische Organisationen mit hohen Anforderungen an Datenschutz und Unabhängigkeit."
+			features={audiences}
+			columns={2}
+		/>
+
+		<!-- 8. Roadmap -->
+		<section id="roadmap">
+			<TimelineSection
+				title="Unser Weg zu 90%+ Unabhängigkeit"
+				subtitle="Transparente Roadmap — von heute bis zur vollständigen Souveränität."
+				items={roadmapItems}
+			/>
+		</section>
+
+		<!-- 9. FAQ -->
+		<FAQSection id="faq" title="Häufig gestellte Fragen" faqs={faqs} />
+
+		<!-- 10. CTA -->
+		<CTASection
+			id="contact"
+			title="Bereit für digitale Souveränität?"
+			subtitle="Lassen Sie uns gemeinsam Ihre IT-Infrastruktur unabhängig machen. Wir beraten Sie gerne — unverbindlich und transparent."
+			primaryCta={{ text: 'Beratungsgespräch vereinbaren', href: 'mailto:info@mana.how' }}
+			secondaryCta={{ text: 'Technische Dokumentation', href: 'https://mana.how' }}
+		/>
+	</main>
+
+	<!-- Footer -->
+	<footer class="border-t border-border py-8">
+		<Container>
+			<div
+				class="flex flex-col items-center justify-between gap-4 text-sm text-text-muted md:flex-row"
+			>
+				<p>&copy; 2026 Mana. Alle Rechte vorbehalten.</p>
+				<div class="flex gap-6">
+					<a href="/impressum" class="hover:text-primary">Impressum</a>
+					<a href="/datenschutz" class="hover:text-primary">Datenschutz</a>
+					<a href="https://mana.how" class="hover:text-primary">mana.how</a>
+				</div>
+			</div>
+		</Container>
+	</footer>
+</Layout>
