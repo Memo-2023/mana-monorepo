@@ -301,8 +301,13 @@
 	>
 		<!-- Drag handle -->
 		<div class="drag-handle">
-			<svg class="drag-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+			<svg class="drag-icon" viewBox="0 0 24 24" fill="currentColor">
+				<circle cx="9" cy="6" r="1.5" />
+				<circle cx="15" cy="6" r="1.5" />
+				<circle cx="9" cy="12" r="1.5" />
+				<circle cx="15" cy="12" r="1.5" />
+				<circle cx="9" cy="18" r="1.5" />
+				<circle cx="15" cy="18" r="1.5" />
 			</svg>
 		</div>
 
@@ -706,9 +711,11 @@
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
-		padding: 0.25rem;
-		margin-left: -0.125rem;
+		justify-content: center;
+		padding: 0.5rem 0.375rem;
+		margin-left: -0.25rem;
 		border-radius: 0.25rem;
+		min-height: 2rem;
 	}
 
 	.task-item:hover .drag-handle {
@@ -730,8 +737,8 @@
 	}
 
 	.drag-icon {
-		width: 1rem;
-		height: 1rem;
+		width: 1.25rem;
+		height: 1.25rem;
 		color: currentColor;
 	}
 

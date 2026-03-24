@@ -197,6 +197,10 @@
 				// Task moved FROM another section TO this section
 				onTaskDrop(movedTaskId, dropTargetDate);
 			}
+		} else if (wasInThisList) {
+			// Task reordered within this list - persist the new order
+			const taskIds = newItems.map((t) => t.id);
+			tasksStore.reorderTasks(taskIds);
 		}
 
 		// Update local state and sync lastTaskKey to prevent $effect from reverting

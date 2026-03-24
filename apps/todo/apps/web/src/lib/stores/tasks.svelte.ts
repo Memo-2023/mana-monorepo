@@ -452,17 +452,19 @@ export const tasksStore = {
 	 */
 	async reorderTasks(taskIds: string[]) {
 		error = null;
+		const previousTasks = [...tasks];
 		try {
-			await tasksApi.reorderTasks(taskIds);
-			// Update local order
+			// Optimistic update - set new order values
 			tasks = tasks.map((t) => {
 				const newOrder = taskIds.indexOf(t.id);
 				return newOrder !== -1 ? { ...t, order: newOrder } : t;
 			});
+			await tasksApi.reorderTasks(taskIds);
 		} catch (e) {
+			// Rollback on error
+			tasks = previousTasks;
 			error = e instanceof Error ? e.message : 'Failed to reorder tasks';
 			console.error('Failed to reorder tasks:', e);
-			throw e;
 		}
 	},
 
