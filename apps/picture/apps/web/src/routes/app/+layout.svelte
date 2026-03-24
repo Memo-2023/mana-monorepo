@@ -21,6 +21,7 @@
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
 	import { pictureOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 	import { viewMode, setViewMode } from '$lib/stores/view';
 	import type { ViewMode } from '$lib/stores/view';
 	import { browser } from '$app/environment';
@@ -295,6 +296,7 @@
 			<MiniOnboardingModal store={pictureOnboarding} appName="Picture" appEmoji="🎨" />
 		{/if}
 	</div>
+	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/auth/login" />
 {/if}
 
 <style>

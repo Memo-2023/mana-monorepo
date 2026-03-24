@@ -24,6 +24,7 @@
 	import type { LayoutData } from './$types';
 	import { chatOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('chat');
@@ -243,6 +244,7 @@
 			<MiniOnboardingModal store={chatOnboarding} appName="Chat" appEmoji="💬" />
 		{/if}
 	</div>
+	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 {/if}
 
 <style>

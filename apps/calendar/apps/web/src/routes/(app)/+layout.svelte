@@ -47,6 +47,7 @@
 		resolveEventIds,
 		formatParsedEventPreview,
 	} from '$lib/utils/event-parser';
+	import { CALENDAR_SYNTAX, CALENDAR_LIVE_EXAMPLE } from '$lib/utils/syntax-help';
 	import UnifiedBar from '$lib/components/calendar/UnifiedBar.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import VoiceRecordButton from '$lib/components/voice/VoiceRecordButton.svelte';
@@ -581,7 +582,13 @@
 	</SplitPaneContainer>
 
 	<!-- InputBar Help Modal -->
-	<InputBarHelpModal open={helpModalOpen} onClose={handleCloseHelpModal} mode={helpModalMode} />
+	<InputBarHelpModal
+		open={helpModalOpen}
+		onClose={handleCloseHelpModal}
+		mode={helpModalMode}
+		appSyntax={CALENDAR_SYNTAX}
+		liveExample={CALENDAR_LIVE_EXAMPLE}
+	/>
 
 	<!-- Settings Modal -->
 	<SettingsModal visible={showSettingsModal} onClose={() => (showSettingsModal = false)} />

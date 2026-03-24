@@ -65,7 +65,27 @@ describe('parseEventInput', () => {
 	it('should parse @calendar reference', () => {
 		const result = parseEventInput('Meeting @Arbeit');
 		expect(result.calendarName).toBe('Arbeit');
+		expect(result.attendees).toEqual([]);
 		expect(result.title).not.toContain('@Arbeit');
+	});
+
+	it('should parse calendar and attendees from multiple @references', () => {
+		const result = parseEventInput('Meeting @Arbeit @Max @Anna');
+		expect(result.calendarName).toBe('Arbeit');
+		expect(result.attendees).toEqual(['Max', 'Anna']);
+		expect(result.title).not.toContain('@');
+	});
+
+	it('should parse only attendees when no calendar match (first @ref treated as calendarName)', () => {
+		const result = parseEventInput('Meeting @Max @Anna');
+		expect(result.calendarName).toBe('Max');
+		expect(result.attendees).toEqual(['Anna']);
+	});
+
+	it('should parse single @reference as calendarName with no attendees', () => {
+		const result = parseEventInput('Meeting @Arbeit');
+		expect(result.calendarName).toBe('Arbeit');
+		expect(result.attendees).toEqual([]);
 	});
 
 	it('should parse #tags', () => {
@@ -109,10 +129,32 @@ describe('parseEventInput', () => {
 		expect(result.endDate!.getHours()).toBe(17);
 	});
 
+	it('should parse recurrence "jeden Montag"', () => {
+		const result = parseEventInput('Standup jeden Montag 9 Uhr');
+		expect(result.recurrenceRule).toBe('FREQ=WEEKLY;BYDAY=MO');
+		expect(result.title).toBe('Standup');
+	});
+
+	it('should parse recurrence "wöchentlich"', () => {
+		const result = parseEventInput('Team-Meeting wöchentlich 14 Uhr');
+		expect(result.recurrenceRule).toBe('FREQ=WEEKLY');
+	});
+
+	it('should parse recurrence "täglich"', () => {
+		const result = parseEventInput('Standup täglich');
+		expect(result.recurrenceRule).toBe('FREQ=DAILY');
+	});
+
+	it('should have no recurrence for normal input', () => {
+		const result = parseEventInput('Meeting morgen');
+		expect(result.recurrenceRule).toBeUndefined();
+	});
+
 	it('should handle empty input', () => {
 		const result = parseEventInput('');
 		expect(result.title).toBe('');
 		expect(result.tagNames).toEqual([]);
+		expect(result.attendees).toEqual([]);
 	});
 
 	it('should parse time-only input (defaults to today)', () => {
@@ -151,10 +193,32 @@ describe('resolveEventIds', () => {
 		expect(resolved.calendarId).toBe('cal-1');
 	});
 
-	it('should skip unknown calendar', () => {
+	it('should skip unknown calendar and treat it as attendee', () => {
 		const parsed = parseEventInput('Meeting @Unbekannt');
 		const resolved = resolveEventIds(parsed, calendars, tags);
 		expect(resolved.calendarId).toBeUndefined();
+		expect(resolved.attendees).toEqual(['Unbekannt']);
+	});
+
+	it('should resolve calendar and keep attendees separate', () => {
+		const parsed = parseEventInput('Meeting @Arbeit @Max @Anna');
+		const resolved = resolveEventIds(parsed, calendars, tags);
+		expect(resolved.calendarId).toBe('cal-1');
+		expect(resolved.attendees).toEqual(['Max', 'Anna']);
+	});
+
+	it('should treat all @refs as attendees when no calendar matches', () => {
+		const parsed = parseEventInput('Meeting @Max @Anna');
+		const resolved = resolveEventIds(parsed, calendars, tags);
+		expect(resolved.calendarId).toBeUndefined();
+		expect(resolved.attendees).toEqual(['Max', 'Anna']);
+	});
+
+	it('should resolve calendar with no attendees', () => {
+		const parsed = parseEventInput('Meeting @Arbeit');
+		const resolved = resolveEventIds(parsed, calendars, tags);
+		expect(resolved.calendarId).toBe('cal-1');
+		expect(resolved.attendees).toEqual([]);
 	});
 
 	it('should produce ISO date strings', () => {
@@ -178,6 +242,12 @@ describe('formatParsedEventPreview', () => {
 		const parsed = parseEventInput('Meeting @Arbeit');
 		const preview = formatParsedEventPreview(parsed);
 		expect(preview).toContain('Arbeit');
+	});
+
+	it('should format attendees', () => {
+		const parsed = parseEventInput('Meeting @Arbeit @Max @Anna');
+		const preview = formatParsedEventPreview(parsed);
+		expect(preview).toContain('👥 Max, Anna');
 	});
 
 	it('should format tags', () => {

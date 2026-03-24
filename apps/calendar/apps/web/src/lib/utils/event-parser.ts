@@ -15,7 +15,8 @@
 
 import {
 	parseBaseInput,
-	extractAtReference,
+	extractAtReferences,
+	extractRecurrence,
 	combineDateAndTime,
 	formatDatePreview,
 	formatTimePreview,
@@ -30,7 +31,9 @@ export interface ParsedEvent {
 	duration?: number; // in minutes
 	isAllDay?: boolean;
 	calendarName?: string;
+	attendees: string[];
 	location?: string;
+	recurrenceRule?: string;
 	tagNames: string[];
 }
 
@@ -50,7 +53,9 @@ export interface ParsedEventWithIds {
 	endTime?: string;
 	isAllDay?: boolean;
 	calendarId?: string;
+	attendees: string[];
 	location?: string;
+	recurrenceRule?: string;
 	tagIds: string[];
 }
 
@@ -232,6 +237,11 @@ function extractAllDay(
 export function parseEventInput(input: string, locale: ParserLocale = 'de'): ParsedEvent {
 	let text = input.trim();
 
+	// Extract recurrence (before other extractions since "jeden Montag" could conflict with weekday)
+	const recurrenceResult = extractRecurrence(text, locale);
+	text = recurrenceResult.remaining;
+	const recurrenceRule = recurrenceResult.value;
+
 	// Extract all-day flag
 	const allDayResult = extractAllDay(text, locale);
 	text = allDayResult.remaining;
@@ -246,10 +256,12 @@ export function parseEventInput(input: string, locale: ParserLocale = 'de'): Par
 	text = durationResult.remaining;
 	const duration = durationResult.duration;
 
-	// Extract calendar (@CalendarName)
-	const calendarResult = extractAtReference(text);
-	text = calendarResult.remaining;
-	const calendarName = calendarResult.value;
+	// Extract @references (first may be calendar, rest are attendees)
+	const atRefsResult = extractAtReferences(text);
+	text = atRefsResult.remaining;
+	const atRefs = atRefsResult.value ?? [];
+	const calendarName = atRefs.length > 0 ? atRefs[0] : undefined;
+	const attendees = atRefs.length > 1 ? atRefs.slice(1) : [];
 
 	// Use base parser for common patterns (date, time, tags)
 	const base = parseBaseInput(text, locale);
@@ -292,7 +304,9 @@ export function parseEventInput(input: string, locale: ParserLocale = 'de'): Par
 		duration,
 		isAllDay: isAllDay || undefined,
 		calendarName,
+		attendees,
 		location,
+		recurrenceRule,
 		tagNames: base.tagNames,
 	};
 }
@@ -311,15 +325,19 @@ export function resolveEventIds(
 	defaultCalendarId?: string
 ): ParsedEventWithIds {
 	let calendarId: string | undefined;
+	const attendees: string[] = [...parsed.attendees];
 	const tagIds: string[] = [];
 
-	// Find calendar by name (case-insensitive)
+	// Try to match first @ref as calendar (case-insensitive)
 	if (parsed.calendarName) {
 		const calendar = calendars.find(
 			(c) => c.name.toLowerCase() === parsed.calendarName!.toLowerCase()
 		);
 		if (calendar) {
 			calendarId = calendar.id;
+		} else {
+			// First @ref didn't match a calendar, treat it as an attendee
+			attendees.unshift(parsed.calendarName);
 		}
 	}
 
@@ -342,7 +360,9 @@ export function resolveEventIds(
 		endTime: parsed.endDate?.toISOString(),
 		isAllDay: parsed.isAllDay,
 		calendarId,
+		attendees,
 		location: parsed.location,
+		recurrenceRule: parsed.recurrenceRule,
 		tagIds,
 	};
 }
@@ -392,8 +412,16 @@ export function formatParsedEventPreview(parsed: ParsedEvent, locale: ParserLoca
 		parts.push(`📍 ${parsed.location}`);
 	}
 
+	if (parsed.recurrenceRule) {
+		parts.push(`🔄 ${parsed.recurrenceRule}`);
+	}
+
 	if (parsed.calendarName) {
 		parts.push(`📆 ${parsed.calendarName}`);
+	}
+
+	if (parsed.attendees.length > 0) {
+		parts.push(`👥 ${parsed.attendees.join(', ')}`);
 	}
 
 	if (parsed.tagNames.length > 0) {

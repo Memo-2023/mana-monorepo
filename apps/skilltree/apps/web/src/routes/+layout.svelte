@@ -8,6 +8,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { skilltreeOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 
 	let { children } = $props();
 
@@ -41,4 +42,5 @@
 	{#if skilltreeOnboarding.shouldShow}
 		<MiniOnboardingModal store={skilltreeOnboarding} appName="SkillTree" appEmoji="🌳" />
 	{/if}
+	<SessionExpiredBanner locale="de" loginHref="/login" />
 {/if}

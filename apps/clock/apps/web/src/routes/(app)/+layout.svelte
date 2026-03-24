@@ -32,6 +32,7 @@
 	import { timersApi } from '$lib/api/timers';
 	import { clockOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('clock');
@@ -333,6 +334,7 @@
 			<MiniOnboardingModal store={clockOnboarding} appName="Uhr" appEmoji="⏰" />
 		{/if}
 	</div>
+	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 {/if}
 
 <style>

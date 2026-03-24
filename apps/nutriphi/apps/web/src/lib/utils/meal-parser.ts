@@ -15,10 +15,17 @@ import type { MealType } from '@nutriphi/shared';
 import { suggestMealType } from '@nutriphi/shared';
 import type { ParserLocale } from '@manacore/shared-utils';
 
+export interface FoodItem {
+	amount?: number;
+	unit?: string;
+	name: string;
+}
+
 export interface ParsedMeal {
 	description: string;
 	mealType: MealType;
 	mealTypeExplicit: boolean; // Was meal type explicitly mentioned?
+	foodItems: FoodItem[];
 }
 
 // Meal type patterns per locale
@@ -109,6 +116,62 @@ const AUTO_HINT_BY_LOCALE: Record<ParserLocale, string> = {
 	it: 'automatico',
 };
 
+// Units recognized by the parser
+const UNITS_PATTERN =
+	/^(g|kg|mg|ml|l|dl|cl|Stück|Scheibe|Scheiben|Tasse|Tassen|EL|TL|pieces?|cups?|slices?|oz|lb)\b/i;
+
+// Amount pattern: integers, decimals, or fractions like 1/2
+const AMOUNT_PATTERN = /^(\d+\/\d+|\d+(?:[.,]\d+)?)/;
+
+/**
+ * Parse a single food item string into structured FoodItem
+ */
+function parseSingleFoodItem(text: string): FoodItem {
+	let remaining = text.trim();
+
+	// Try to extract amount
+	let amount: number | undefined;
+	const amountMatch = remaining.match(AMOUNT_PATTERN);
+	if (amountMatch) {
+		const raw = amountMatch[1];
+		if (raw.includes('/')) {
+			const [num, den] = raw.split('/');
+			amount = parseInt(num, 10) / parseInt(den, 10);
+		} else {
+			amount = parseFloat(raw.replace(',', '.'));
+		}
+		remaining = remaining.slice(amountMatch[0].length).trim();
+	}
+
+	// Try to extract unit (only if we found an amount, or unit is at the start)
+	let unit: string | undefined;
+	const unitMatch = remaining.match(UNITS_PATTERN);
+	if (unitMatch) {
+		unit = unitMatch[1];
+		remaining = remaining.slice(unitMatch[0].length).trim();
+	}
+
+	return {
+		...(amount !== undefined && { amount }),
+		...(unit !== undefined && { unit }),
+		name: remaining,
+	};
+}
+
+/**
+ * Parse a description string into individual food items.
+ * Splits on commas and parses each segment for amount, unit, and name.
+ */
+export function parseFoodItems(text: string): FoodItem[] {
+	if (!text.trim()) return [];
+
+	const segments = text
+		.split(',')
+		.map((s) => s.trim())
+		.filter(Boolean);
+	return segments.map(parseSingleFoodItem);
+}
+
 function extractMealType(
 	text: string,
 	locale: ParserLocale = 'de'
@@ -138,6 +201,9 @@ export function parseMealInput(input: string, locale: ParserLocale = 'de'): Pars
 	// Clean up description
 	const description = text.replace(/\s+/g, ' ').trim();
 
+	// Parse food items from description
+	const foodItems = parseFoodItems(description);
+
 	// Use explicit meal type or auto-detect based on time of day
 	const mealType = mealTypeResult.mealType || suggestMealType();
 
@@ -145,6 +211,7 @@ export function parseMealInput(input: string, locale: ParserLocale = 'de'): Pars
 		description,
 		mealType,
 		mealTypeExplicit: !!mealTypeResult.mealType,
+		foodItems,
 	};
 }
 
@@ -159,6 +226,10 @@ export function formatParsedMealPreview(parsed: ParsedMeal, locale: ParserLocale
 
 	if (!parsed.mealTypeExplicit) {
 		parts.push(`(${AUTO_HINT_BY_LOCALE[locale]})`);
+	}
+
+	if (parsed.foodItems.length > 0) {
+		parts.push(`🥚 ${parsed.foodItems.length} items`);
 	}
 
 	return parts.join(' ');

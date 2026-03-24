@@ -73,6 +73,53 @@ describe('parseTaskInput', () => {
 		const result = parseTaskInput('#arbeit #privat');
 		expect(result.labelNames).toEqual(['arbeit', 'privat']);
 	});
+
+	it('should parse recurrence "täglich"', () => {
+		const result = parseTaskInput('Standup täglich 9 Uhr');
+		expect(result.recurrenceRule).toBe('FREQ=DAILY');
+		expect(result.title).toBe('Standup');
+	});
+
+	it('should parse recurrence "jeden Montag"', () => {
+		const result = parseTaskInput('Wochenbericht jeden Montag');
+		expect(result.recurrenceRule).toBe('FREQ=WEEKLY;BYDAY=MO');
+	});
+
+	it('should parse recurrence "wöchentlich"', () => {
+		const result = parseTaskInput('Review wöchentlich @Arbeit');
+		expect(result.recurrenceRule).toBe('FREQ=WEEKLY');
+		expect(result.projectName).toBe('Arbeit');
+	});
+
+	it('should have no recurrence for normal input', () => {
+		const result = parseTaskInput('Einfache Aufgabe');
+		expect(result.recurrenceRule).toBeUndefined();
+	});
+
+	it('should parse subtasks "Einkaufen: Milch, Brot, Eier"', () => {
+		const result = parseTaskInput('Einkaufen: Milch, Brot, Eier');
+		expect(result.title).toBe('Einkaufen');
+		expect(result.subtasks).toEqual(['Milch', 'Brot', 'Eier']);
+	});
+
+	it('should parse subtasks with semicolons', () => {
+		const result = parseTaskInput('Aufräumen: Küche; Bad; Wohnzimmer');
+		expect(result.title).toBe('Aufräumen');
+		expect(result.subtasks).toEqual(['Küche', 'Bad', 'Wohnzimmer']);
+	});
+
+	it('should not parse subtasks with single item', () => {
+		const result = parseTaskInput('Note: important thing');
+		expect(result.subtasks).toBeUndefined();
+	});
+
+	it('should parse subtasks with other fields', () => {
+		const result = parseTaskInput('Einkaufen: Milch, Brot morgen !! @Privat');
+		expect(result.title).toBe('Einkaufen');
+		expect(result.subtasks).toEqual(['Milch', 'Brot']);
+		expect(result.priority).toBe('high');
+		expect(result.projectName).toBe('Privat');
+	});
 });
 
 describe('resolveTaskIds', () => {

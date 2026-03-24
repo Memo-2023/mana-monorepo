@@ -9,6 +9,7 @@
 import {
 	parseBaseInput,
 	extractAtReference,
+	extractRecurrence,
 	combineDateAndTime,
 	formatDatePreview,
 	formatTimePreview,
@@ -22,6 +23,8 @@ export interface ParsedTask {
 	priority?: TaskPriority;
 	projectName?: string;
 	labelNames: string[];
+	recurrenceRule?: string;
+	subtasks?: string[];
 }
 
 interface Project {
@@ -40,6 +43,8 @@ export interface ParsedTaskWithIds {
 	priority?: TaskPriority;
 	projectId?: string;
 	labelIds: string[];
+	recurrenceRule?: string;
+	subtasks?: string[];
 }
 
 // Priority keyword translations per locale
@@ -53,6 +58,31 @@ const PRIORITY_KEYWORDS: Record<
 	es: { urgent: 'urgente', high: 'importante', medium: 'normal', low: 'despu[eé]s' },
 	it: { urgent: 'urgente', high: 'importante', medium: 'normale', low: 'dopo' },
 };
+
+/**
+ * Extract subtasks from "Title: item1, item2, item3" pattern
+ */
+function extractSubtasks(text: string): { title: string; subtasks?: string[] } {
+	// Match "Title: list" where list has commas or semicolons
+	const colonIndex = text.indexOf(':');
+	if (colonIndex === -1 || colonIndex < 2) return { title: text };
+
+	const beforeColon = text.substring(0, colonIndex).trim();
+	const afterColon = text.substring(colonIndex + 1).trim();
+
+	if (!afterColon) return { title: text };
+
+	// Split by comma or semicolon
+	const items = afterColon
+		.split(/[,;]/)
+		.map((s) => s.trim())
+		.filter((s) => s.length > 0);
+
+	// Only treat as subtasks if there are at least 2 items
+	if (items.length < 2) return { title: text };
+
+	return { title: beforeColon, subtasks: items };
+}
 
 /**
  * Build locale-aware priority patterns
@@ -99,7 +129,12 @@ function extractPriority(
 export function parseTaskInput(input: string, locale: ParserLocale = 'de'): ParsedTask {
 	let text = input.trim();
 
-	// Extract priority first (task-specific)
+	// Extract recurrence (before priority, since "jeden Tag" shouldn't be confused)
+	const recurrenceResult = extractRecurrence(text, locale);
+	text = recurrenceResult.remaining;
+	const recurrenceRule = recurrenceResult.value;
+
+	// Extract priority (task-specific)
 	const priorityResult = extractPriority(text, locale);
 	text = priorityResult.remaining;
 	const priority = priorityResult.priority;
@@ -115,12 +150,17 @@ export function parseTaskInput(input: string, locale: ParserLocale = 'de'): Pars
 	// Combine date and time
 	const dueDate = combineDateAndTime(base.date, base.time);
 
+	// Check for subtask pattern "Title: item1, item2, item3"
+	const subtaskResult = extractSubtasks(base.title);
+
 	return {
-		title: base.title,
+		title: subtaskResult.title,
 		dueDate,
 		priority,
 		projectName,
 		labelNames: base.tagNames,
+		recurrenceRule,
+		subtasks: subtaskResult.subtasks,
 	};
 }
 
@@ -159,6 +199,8 @@ export function resolveTaskIds(
 		priority: parsed.priority,
 		projectId,
 		labelIds,
+		recurrenceRule: parsed.recurrenceRule,
+		subtasks: parsed.subtasks,
 	};
 }
 
@@ -197,6 +239,14 @@ export function formatParsedTaskPreview(parsed: ParsedTask, locale: ParserLocale
 
 	if (parsed.projectName) {
 		parts.push(`📁 ${parsed.projectName}`);
+	}
+
+	if (parsed.recurrenceRule) {
+		parts.push(`🔄 ${parsed.recurrenceRule}`);
+	}
+
+	if (parsed.subtasks && parsed.subtasks.length > 0) {
+		parts.push(`📋 ${parsed.subtasks.length} Subtasks`);
 	}
 
 	if (parsed.labelNames.length > 0) {

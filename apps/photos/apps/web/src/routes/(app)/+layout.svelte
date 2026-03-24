@@ -12,6 +12,7 @@
 	import { tagStore } from '$lib/stores/tags.svelte';
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 
 	let { children } = $props();
 
@@ -143,6 +144,7 @@
 			</div>
 		</main>
 	</div>
+	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 {/if}
 
 <style>

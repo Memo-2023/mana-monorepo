@@ -53,6 +53,51 @@ describe('parsePlantInput', () => {
 	});
 });
 
+describe('parsePlantInput - care actions', () => {
+	it('should parse "Monstera gegossen" as watered', () => {
+		const result = parsePlantInput('Monstera gegossen');
+		expect(result.name).toBe('Monstera');
+		expect(result.action).toBe('watered');
+	});
+
+	it('should parse "Ficus umgetopft heute" as repotted with date', () => {
+		const result = parsePlantInput('Ficus umgetopft heute');
+		expect(result.name).toBe('Ficus');
+		expect(result.action).toBe('repotted');
+		expect(result.acquiredAt).toBeDefined();
+	});
+
+	it('should parse "Rose pruned" in English as pruned', () => {
+		const result = parsePlantInput('Rose pruned', 'en');
+		expect(result.name).toBe('Rose');
+		expect(result.action).toBe('pruned');
+	});
+
+	it('should have no action for plain "Monstera"', () => {
+		const result = parsePlantInput('Monstera');
+		expect(result.name).toBe('Monstera');
+		expect(result.action).toBeUndefined();
+	});
+
+	it('should parse "Orchidee gedüngt" as fertilized', () => {
+		const result = parsePlantInput('Orchidee gedüngt');
+		expect(result.name).toBe('Orchidee');
+		expect(result.action).toBe('fertilized');
+	});
+
+	it('should parse "Ficus geschnitten" as pruned', () => {
+		const result = parsePlantInput('Ficus geschnitten');
+		expect(result.name).toBe('Ficus');
+		expect(result.action).toBe('pruned');
+	});
+
+	it('should parse "gewässert" as watered (alternative DE word)', () => {
+		const result = parsePlantInput('Monstera gewässert');
+		expect(result.name).toBe('Monstera');
+		expect(result.action).toBe('watered');
+	});
+});
+
 describe('resolvePlantData', () => {
 	it('should produce ISO date string', () => {
 		const parsed = parsePlantInput('Ficus heute gekauft');
@@ -85,5 +130,19 @@ describe('formatParsedPlantPreview', () => {
 	it('should return empty for name-only', () => {
 		const parsed = parsePlantInput('Monstera');
 		expect(formatParsedPlantPreview(parsed)).toBe('');
+	});
+
+	it('should format care action in preview', () => {
+		const parsed = parsePlantInput('Monstera gegossen');
+		const preview = formatParsedPlantPreview(parsed);
+		expect(preview).toContain('💧');
+		expect(preview).toContain('Gegossen');
+	});
+
+	it('should format care action with English locale', () => {
+		const parsed = parsePlantInput('Rose watered', 'en');
+		const preview = formatParsedPlantPreview(parsed, 'en');
+		expect(preview).toContain('💧');
+		expect(preview).toContain('Watered');
 	});
 });

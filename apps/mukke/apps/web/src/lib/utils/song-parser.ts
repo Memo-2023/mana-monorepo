@@ -20,6 +20,7 @@ import { extractTags, type ParserLocale } from '@manacore/shared-utils';
 export interface ParsedSong {
 	title: string;
 	artist?: string;
+	artists?: string[];
 	album?: string;
 	genre?: string;
 	bpm?: number;
@@ -53,6 +54,12 @@ const PROJECT_PATTERNS_BY_LOCALE: Record<ParserLocale, RegExp[]> = {
 	it: [/\bnuovo\s+progetto\b/i, /\bprogetto\b/i],
 };
 
+// Album pattern: trailing parenthesized text e.g. "Title (Album Name)"
+const ALBUM_PATTERN = /\(([^)]+)\)\s*$/;
+
+// Multi-artist separator patterns
+const MULTI_ARTIST_PATTERN = /\s+(?:ft\.?|feat\.?|featuring|&|x|vs\.?)\s+/i;
+
 // "Artist - Title" separator
 const ARTIST_TITLE_SEPARATOR = /\s+[-–—]\s+/;
 
@@ -65,6 +72,21 @@ function extractBpm(text: string): { bpm?: number; remaining: string } {
 		}
 	}
 	return { bpm: undefined, remaining: text };
+}
+
+function extractAlbum(text: string): { album?: string; remaining: string } {
+	const match = text.match(ALBUM_PATTERN);
+	if (match) {
+		return { album: match[1].trim(), remaining: text.replace(ALBUM_PATTERN, '').trim() };
+	}
+	return { album: undefined, remaining: text };
+}
+
+function extractArtists(artist: string): string[] {
+	return artist
+		.split(MULTI_ARTIST_PATTERN)
+		.map((a) => a.trim())
+		.filter((a) => a.length > 0);
 }
 
 function extractYear(text: string): { year?: number; remaining: string } {
@@ -124,6 +146,10 @@ export function parseSongInput(input: string, locale: ParserLocale = 'de'): Pars
 	const typeResult = extractTypeKeyword(text, locale);
 	text = typeResult.remaining;
 
+	// Extract album from parentheses (before other extractions to avoid confusion)
+	const albumResult = extractAlbum(text);
+	text = albumResult.remaining;
+
 	// Extract BPM
 	const bpmResult = extractBpm(text);
 	text = bpmResult.remaining;
@@ -134,12 +160,22 @@ export function parseSongInput(input: string, locale: ParserLocale = 'de'): Pars
 
 	// Try "Artist - Title" format
 	let artist: string | undefined;
+	let artists: string[] | undefined;
 	let title: string;
 
 	if (ARTIST_TITLE_SEPARATOR.test(text)) {
 		const parts = text.split(ARTIST_TITLE_SEPARATOR, 2);
-		artist = parts[0].trim();
+		const rawArtist = parts[0].trim();
 		title = parts[1].trim();
+
+		// Detect multi-artist patterns
+		const artistList = extractArtists(rawArtist);
+		if (artistList.length > 1) {
+			artist = artistList[0];
+			artists = artistList;
+		} else {
+			artist = rawArtist;
+		}
 	} else {
 		title = text.replace(/\s+/g, ' ').trim();
 	}
@@ -147,6 +183,8 @@ export function parseSongInput(input: string, locale: ParserLocale = 'de'): Pars
 	return {
 		title,
 		artist,
+		artists,
+		album: albumResult.album,
 		genre,
 		bpm: bpmResult.bpm,
 		year: yearResult.year,
@@ -171,6 +209,10 @@ export function formatParsedSongPreview(parsed: ParsedSong, locale: ParserLocale
 
 	if (parsed.artist) {
 		parts.push(`🎤 ${parsed.artist}`);
+	}
+
+	if (parsed.album) {
+		parts.push(`💿 ${parsed.album}`);
 	}
 
 	if (parsed.genre) {

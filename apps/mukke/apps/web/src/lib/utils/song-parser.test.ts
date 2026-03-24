@@ -70,6 +70,59 @@ describe('parseSongInput', () => {
 		const result = parseSongInput('Track 5bpm'); // too low
 		expect(result.bpm).toBeUndefined();
 	});
+
+	it('should extract album from parentheses', () => {
+		const result = parseSongInput('Queen - Bohemian Rhapsody (A Night at the Opera)');
+		expect(result.artist).toBe('Queen');
+		expect(result.title).toBe('Bohemian Rhapsody');
+		expect(result.album).toBe('A Night at the Opera');
+	});
+
+	it('should extract album from title without artist', () => {
+		const result = parseSongInput('Song (Album)');
+		expect(result.title).toBe('Song');
+		expect(result.album).toBe('Album');
+	});
+
+	it('should detect multi-artist with ft.', () => {
+		const result = parseSongInput('Daft Punk ft. Pharrell - Get Lucky');
+		expect(result.artist).toBe('Daft Punk');
+		expect(result.artists).toEqual(['Daft Punk', 'Pharrell']);
+		expect(result.title).toBe('Get Lucky');
+	});
+
+	it('should detect multi-artist with &', () => {
+		const result = parseSongInput('ACDC & Brian Johnson - Thunderstruck');
+		expect(result.artist).toBe('ACDC');
+		expect(result.artists).toEqual(['ACDC', 'Brian Johnson']);
+		expect(result.title).toBe('Thunderstruck');
+	});
+
+	it('should detect multi-artist with feat.', () => {
+		const result = parseSongInput('Jay-Z feat. Kanye West - Niggas in Paris');
+		expect(result.artist).toBe('Jay-Z');
+		expect(result.artists).toEqual(['Jay-Z', 'Kanye West']);
+	});
+
+	it('should detect multi-artist with featuring', () => {
+		const result = parseSongInput('Eminem featuring Rihanna - Love the Way You Lie');
+		expect(result.artist).toBe('Eminem');
+		expect(result.artists).toEqual(['Eminem', 'Rihanna']);
+	});
+
+	it('should not set artists for single artist', () => {
+		const result = parseSongInput('Queen - Bohemian Rhapsody');
+		expect(result.artist).toBe('Queen');
+		expect(result.artists).toBeUndefined();
+	});
+
+	it('should combine album and multi-artist', () => {
+		const result = parseSongInput('Daft Punk ft. Pharrell - Get Lucky (Random Access Memories)');
+		expect(result.artist).toBe('Daft Punk');
+		expect(result.artists).toEqual(['Daft Punk', 'Pharrell']);
+		expect(result.title).toBe('Get Lucky');
+		expect(result.album).toBe('Random Access Memories');
+	});
 });
 
 describe('formatParsedSongPreview', () => {
@@ -95,6 +148,12 @@ describe('formatParsedSongPreview', () => {
 		const parsed = parseSongInput('Neue Playlist Workout');
 		const preview = formatParsedSongPreview(parsed);
 		expect(preview).toContain('Neue Playlist');
+	});
+
+	it('should format album', () => {
+		const parsed = parseSongInput('Queen - Bohemian Rhapsody (A Night at the Opera)');
+		const preview = formatParsedSongPreview(parsed);
+		expect(preview).toContain('💿 A Night at the Opera');
 	});
 
 	it('should return empty for simple title', () => {
