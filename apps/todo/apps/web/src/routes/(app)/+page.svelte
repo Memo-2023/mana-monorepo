@@ -4,7 +4,6 @@
 	import { de } from 'date-fns/locale';
 	import { Sparkle, ArrowDown } from '@manacore/shared-icons';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { applyTaskFilters } from '$lib/utils/task-filters';
 	import TaskList from '$lib/components/TaskList.svelte';
@@ -29,11 +28,6 @@
 
 	onMount(async () => {
 		viewStore.setToday();
-
-		// Wait for auth to be initialized (layout onMount runs after page onMount in Svelte)
-		while (!authStore.initialized) {
-			await new Promise((r) => setTimeout(r, 50));
-		}
 
 		try {
 			// Fetch tasks (works in both guest and authenticated mode)

@@ -68,6 +68,9 @@
 
 	let { children } = $props();
 
+	// Auth gate - prevent children from mounting before auth is confirmed
+	let appReady = $state(false);
+
 	// Show toolbar only on main contacts page
 	const showContactsToolbar = $derived($page.url.pathname === '/');
 
@@ -286,117 +289,126 @@
 		// Load tags (used by TagStrip and Quick-Create)
 		await tagsStore.fetchTags();
 		availableTags = tagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
+
+		// Auth confirmed - allow children to render
+		appReady = true;
 	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<SplitPaneContainer>
-	<!-- Navigation Layout -->
-	<div class="layout-container">
-		<a
-			href="#main-content"
-			class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-		>
-			Zum Inhalt springen
-		</a>
-
-		<!-- UI Elements (hidden in immersive mode) -->
-		{#if !contactsSettings.immersiveModeEnabled}
-			<!-- Floating Pill Navigation (at bottom) -->
-			<PillNavigation
-				items={navItems}
-				currentPath={$page.url.pathname}
-				appName="Contacts"
-				homeRoute="/"
-				onToggleTheme={handleToggleTheme}
-				{isDark}
-				desktopPosition="bottom"
-				showThemeToggle={true}
-				showThemeVariants={true}
-				{themeVariantItems}
-				{currentThemeVariantLabel}
-				themeMode={theme.mode}
-				onThemeModeChange={handleThemeModeChange}
-				showLanguageSwitcher={true}
-				{languageItems}
-				{currentLanguageLabel}
-				showLogout={true}
-				onLogout={handleLogout}
-				loginHref="/login"
-				primaryColor="#3b82f6"
-				showAppSwitcher={true}
-				{appItems}
-				{userEmail}
-				settingsHref="/settings"
-				manaHref="/mana"
-				profileHref="/profile"
-				allAppsHref="/apps"
-				onOpenInPanel={handleOpenInPanel}
-				ariaLabel="Hauptnavigation"
-			/>
-
-			<!-- TagStrip (above PillNav) -->
-			<TagStrip />
-
-			<!-- Global Quick Input Bar -->
-			<QuickInputBar
-				onSearch={handleSearch}
-				onSelect={handleSelect}
-				onSearchChange={(query) => contactsFilterStore.setSearchQuery(query)}
-				placeholder="Neuer Kontakt oder suchen..."
-				emptyText="Keine Kontakte gefunden"
-				searchingText="Suche..."
-				searchText="Suchen"
-				onCreate={handleCreate}
-				onParseCreate={handleParseCreate}
-				createText="Erstellen"
-				deferSearch={true}
-				locale={$locale || 'de'}
-				appIcon="contacts"
-				bottomOffset={inputBarBottomOffset}
-				hasFabRight={showContactsToolbar}
-			/>
-
-			<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
-			{#if showContactsToolbar}
-				<ContactsToolbar contacts={contactsStore.contacts} />
-			{/if}
-		{/if}
-
-		<!-- Immersive Mode Toggle (always visible) -->
-		<ImmersiveModeToggle
-			isImmersive={contactsSettings.immersiveModeEnabled}
-			onToggle={() => contactsSettings.toggleImmersiveMode()}
-		/>
-
-		<!-- Main Content -->
-		<main
-			id="main-content"
-			class="main-content bg-background"
-			class:immersive={contactsSettings.immersiveModeEnabled}
-		>
-			<div class="content-wrapper" class:immersive={contactsSettings.immersiveModeEnabled}>
-				{@render children()}
-			</div>
-		</main>
-
-		<!-- Contact Detail Modal -->
-		{#if showContactModal && modalContactId}
-			<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
-		{/if}
-
-		<!-- New Contact Modal -->
-		{#if newContactModalStore.isOpen}
-			<NewContactModal onClose={() => newContactModalStore.close()} />
-		{/if}
-
-		<!-- Onboarding Modal -->
-		{#if contactsOnboarding.shouldShow}
-			<MiniOnboardingModal store={contactsOnboarding} appName="Kontakte" appEmoji="👥" />
-		{/if}
+{#if !appReady}
+	<div class="flex items-center justify-center h-screen bg-background">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
 	</div>
-</SplitPaneContainer>
+{:else}
+	<SplitPaneContainer>
+		<!-- Navigation Layout -->
+		<div class="layout-container">
+			<a
+				href="#main-content"
+				class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+			>
+				Zum Inhalt springen
+			</a>
+
+			<!-- UI Elements (hidden in immersive mode) -->
+			{#if !contactsSettings.immersiveModeEnabled}
+				<!-- Floating Pill Navigation (at bottom) -->
+				<PillNavigation
+					items={navItems}
+					currentPath={$page.url.pathname}
+					appName="Contacts"
+					homeRoute="/"
+					onToggleTheme={handleToggleTheme}
+					{isDark}
+					desktopPosition="bottom"
+					showThemeToggle={true}
+					showThemeVariants={true}
+					{themeVariantItems}
+					{currentThemeVariantLabel}
+					themeMode={theme.mode}
+					onThemeModeChange={handleThemeModeChange}
+					showLanguageSwitcher={true}
+					{languageItems}
+					{currentLanguageLabel}
+					showLogout={true}
+					onLogout={handleLogout}
+					loginHref="/login"
+					primaryColor="#3b82f6"
+					showAppSwitcher={true}
+					{appItems}
+					{userEmail}
+					settingsHref="/settings"
+					manaHref="/mana"
+					profileHref="/profile"
+					allAppsHref="/apps"
+					onOpenInPanel={handleOpenInPanel}
+					ariaLabel="Hauptnavigation"
+				/>
+
+				<!-- TagStrip (above PillNav) -->
+				<TagStrip />
+
+				<!-- Global Quick Input Bar -->
+				<QuickInputBar
+					onSearch={handleSearch}
+					onSelect={handleSelect}
+					onSearchChange={(query) => contactsFilterStore.setSearchQuery(query)}
+					placeholder="Neuer Kontakt oder suchen..."
+					emptyText="Keine Kontakte gefunden"
+					searchingText="Suche..."
+					searchText="Suchen"
+					onCreate={handleCreate}
+					onParseCreate={handleParseCreate}
+					createText="Erstellen"
+					deferSearch={true}
+					locale={$locale || 'de'}
+					appIcon="contacts"
+					bottomOffset={inputBarBottomOffset}
+					hasFabRight={showContactsToolbar}
+				/>
+
+				<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
+				{#if showContactsToolbar}
+					<ContactsToolbar contacts={contactsStore.contacts} />
+				{/if}
+			{/if}
+
+			<!-- Immersive Mode Toggle (always visible) -->
+			<ImmersiveModeToggle
+				isImmersive={contactsSettings.immersiveModeEnabled}
+				onToggle={() => contactsSettings.toggleImmersiveMode()}
+			/>
+
+			<!-- Main Content -->
+			<main
+				id="main-content"
+				class="main-content bg-background"
+				class:immersive={contactsSettings.immersiveModeEnabled}
+			>
+				<div class="content-wrapper" class:immersive={contactsSettings.immersiveModeEnabled}>
+					{@render children()}
+				</div>
+			</main>
+
+			<!-- Contact Detail Modal -->
+			{#if showContactModal && modalContactId}
+				<ContactDetailModal contactId={modalContactId} onClose={handleCloseContactModal} />
+			{/if}
+
+			<!-- New Contact Modal -->
+			{#if newContactModalStore.isOpen}
+				<NewContactModal onClose={() => newContactModalStore.close()} />
+			{/if}
+
+			<!-- Onboarding Modal -->
+			{#if contactsOnboarding.shouldShow}
+				<MiniOnboardingModal store={contactsOnboarding} appName="Kontakte" appEmoji="👥" />
+			{/if}
+		</div>
+	</SplitPaneContainer>
+{/if}
 
 <style>
 	.layout-container {

@@ -15,6 +15,9 @@
 
 	let { children } = $props();
 
+	// Auth gate - prevent children from mounting before auth is confirmed
+	let appReady = $state(false);
+
 	let isDark = $derived(theme.isDark);
 	let userEmail = $derived(authStore.user?.email || 'Menu');
 
@@ -88,50 +91,59 @@
 
 		// Load initial data
 		await Promise.all([photoStore.loadStats(), albumStore.loadAlbums(), tagStore.loadTags()]);
+
+		// Auth confirmed - allow children to render
+		appReady = true;
 	});
 </script>
 
-<div class="layout-container">
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Photos"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		desktopPosition="bottom"
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLogout={true}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#8b5cf6"
-		{userEmail}
-		settingsHref="/settings"
-	/>
+{#if !appReady}
+	<div class="flex items-center justify-center h-screen bg-background">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+	</div>
+{:else}
+	<div class="layout-container">
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Photos"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			desktopPosition="bottom"
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLogout={true}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#8b5cf6"
+			{userEmail}
+			settingsHref="/settings"
+		/>
 
-	<!-- Quick Input Bar -->
-	<QuickInputBar
-		onSearch={handleInputSearch}
-		onSelect={handleInputSelect}
-		placeholder="Album oder Tag suchen..."
-		emptyText="Nichts gefunden"
-		searchingText="Suche..."
-		locale={$locale || 'de'}
-		appIcon="search"
-		bottomOffset="70px"
-	/>
+		<!-- Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleInputSearch}
+			onSelect={handleInputSelect}
+			placeholder="Album oder Tag suchen..."
+			emptyText="Nichts gefunden"
+			searchingText="Suche..."
+			locale={$locale || 'de'}
+			appIcon="search"
+			bottomOffset="70px"
+		/>
 
-	<main class="main-content bg-background">
-		<div class="content-wrapper">
-			{@render children()}
-		</div>
-	</main>
-</div>
+		<main class="main-content bg-background">
+			<div class="content-wrapper">
+				{@render children()}
+			</div>
+		</main>
+	</div>
+{/if}
 
 <style>
 	.layout-container {

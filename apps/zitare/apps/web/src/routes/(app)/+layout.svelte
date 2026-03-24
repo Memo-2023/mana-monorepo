@@ -40,6 +40,9 @@
 
 	let { children } = $props();
 
+	// Auth gate - prevent children from mounting before auth is confirmed
+	let appReady = $state(false);
+
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
 
@@ -209,7 +212,10 @@
 		zitareSettings.togglePillNav();
 	}
 
-	onMount(() => {
+	onMount(async () => {
+		// Initialize auth state from stored tokens
+		await authStore.initialize();
+
 		// Initialize settings
 		zitareSettings.initialize();
 
@@ -220,6 +226,9 @@
 			listsStore.loadLists();
 		}
 
+		// Auth confirmed - allow children to render
+		appReady = true;
+
 		// Add keyboard listener
 		window.addEventListener('keydown', handleKeydown);
 
@@ -229,98 +238,104 @@
 	});
 </script>
 
-<div class="layout-container">
-	{#if !zitareSettings.immersiveModeEnabled}
-		<!-- PillNav (shown/hidden via FAB) -->
-		{#if !zitareSettings.pillNavCollapsed}
-			<PillNavigation
-				items={navItems}
-				currentPath={$page.url.pathname}
-				appName="Zitare"
-				homeRoute="/"
-				onToggleTheme={handleToggleTheme}
-				{isDark}
-				showThemeToggle={true}
-				showThemeVariants={true}
-				{themeVariantItems}
-				{currentThemeVariantLabel}
-				themeMode={theme.mode}
-				onThemeModeChange={handleThemeModeChange}
-				showLanguageSwitcher={true}
-				{languageItems}
-				{currentLanguageLabel}
-				showLogout={authStore.isAuthenticated}
-				onLogout={handleLogout}
-				loginHref="/login"
-				primaryColor="#8b5cf6"
-				showAppSwitcher={true}
-				{appItems}
-				{userEmail}
-				settingsHref="/settings"
-				manaHref="/mana"
-				profileHref="/profile"
-				allAppsHref="/apps"
+{#if !appReady}
+	<div class="flex items-center justify-center h-screen bg-background">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+	</div>
+{:else}
+	<div class="layout-container">
+		{#if !zitareSettings.immersiveModeEnabled}
+			<!-- PillNav (shown/hidden via FAB) -->
+			{#if !zitareSettings.pillNavCollapsed}
+				<PillNavigation
+					items={navItems}
+					currentPath={$page.url.pathname}
+					appName="Zitare"
+					homeRoute="/"
+					onToggleTheme={handleToggleTheme}
+					{isDark}
+					showThemeToggle={true}
+					showThemeVariants={true}
+					{themeVariantItems}
+					{currentThemeVariantLabel}
+					themeMode={theme.mode}
+					onThemeModeChange={handleThemeModeChange}
+					showLanguageSwitcher={true}
+					{languageItems}
+					{currentLanguageLabel}
+					showLogout={authStore.isAuthenticated}
+					onLogout={handleLogout}
+					loginHref="/login"
+					primaryColor="#8b5cf6"
+					showAppSwitcher={true}
+					{appItems}
+					{userEmail}
+					settingsHref="/settings"
+					manaHref="/mana"
+					profileHref="/profile"
+					allAppsHref="/apps"
+				/>
+			{/if}
+
+			<!-- Global Quick Input Bar -->
+			<QuickInputBar
+				onSearch={handleSearch}
+				onSelect={handleSelect}
+				onCreate={handleCreate}
+				onParseCreate={handleParseCreate}
+				placeholder={$_('search.placeholder')}
+				emptyText={$_('search.noResults')}
+				searchingText={$_('search.searching')}
+				createText={$_('search.create')}
+				deferSearch={true}
+				locale={$locale || 'de'}
+				appIcon="quote"
+				bottomOffset={inputBarBottomOffset}
+				hasFabRight={true}
 			/>
+
+			<!-- FAB to toggle PillNav visibility -->
+			<button
+				class="pillnav-fab"
+				onclick={handlePillNavToggle}
+				title={zitareSettings.pillNavCollapsed ? $_('nav.showNav') : $_('nav.hideNav')}
+			>
+				{#if zitareSettings.pillNavCollapsed}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h16"
+						/>
+					</svg>
+				{:else}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				{/if}
+			</button>
 		{/if}
 
-		<!-- Global Quick Input Bar -->
-		<QuickInputBar
-			onSearch={handleSearch}
-			onSelect={handleSelect}
-			onCreate={handleCreate}
-			onParseCreate={handleParseCreate}
-			placeholder={$_('search.placeholder')}
-			emptyText={$_('search.noResults')}
-			searchingText={$_('search.searching')}
-			createText={$_('search.create')}
-			deferSearch={true}
-			locale={$locale || 'de'}
-			appIcon="quote"
-			bottomOffset={inputBarBottomOffset}
-			hasFabRight={true}
+		<!-- Immersive Mode Toggle (always visible) -->
+		<ImmersiveModeToggle
+			isImmersive={zitareSettings.immersiveModeEnabled}
+			onToggle={() => zitareSettings.toggleImmersiveMode()}
 		/>
 
-		<!-- FAB to toggle PillNav visibility -->
-		<button
-			class="pillnav-fab"
-			onclick={handlePillNavToggle}
-			title={zitareSettings.pillNavCollapsed ? $_('nav.showNav') : $_('nav.hideNav')}
-		>
-			{#if zitareSettings.pillNavCollapsed}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h16"
-					/>
-				</svg>
-			{:else}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
-			{/if}
-		</button>
-	{/if}
-
-	<!-- Immersive Mode Toggle (always visible) -->
-	<ImmersiveModeToggle
-		isImmersive={zitareSettings.immersiveModeEnabled}
-		onToggle={() => zitareSettings.toggleImmersiveMode()}
-	/>
-
-	<!-- Main content -->
-	<main class="main-content bg-background" class:immersive={zitareSettings.immersiveModeEnabled}>
-		<div class="content-wrapper" class:immersive={zitareSettings.immersiveModeEnabled}>
-			{@render children()}
-		</div>
-	</main>
-</div>
+		<!-- Main content -->
+		<main class="main-content bg-background" class:immersive={zitareSettings.immersiveModeEnabled}>
+			<div class="content-wrapper" class:immersive={zitareSettings.immersiveModeEnabled}>
+				{@render children()}
+			</div>
+		</main>
+	</div>
+{/if}
 
 <style>
 	.layout-container {

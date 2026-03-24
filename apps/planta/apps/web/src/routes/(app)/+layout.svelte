@@ -10,6 +10,9 @@
 
 	let { children } = $props();
 
+	// Auth gate - prevent children from mounting before auth is confirmed
+	let appReady = $state(false);
+
 	// Navigation items for Planta
 	const navItems: PillNavItem[] = [
 		{ href: '/dashboard', label: 'Meine Pflanzen', icon: 'document' },
@@ -51,14 +54,20 @@
 		goto(`/plant/${item.id}`);
 	}
 
-	onMount(() => {
+	onMount(async () => {
+		// Initialize auth state from stored tokens
+		await authStore.initialize();
 		if (!authStore.isAuthenticated) {
 			goto('/login');
+			return;
 		}
+
+		// Auth confirmed - allow children to render
+		appReady = true;
 	});
 </script>
 
-{#if authStore.isAuthenticated}
+{#if appReady}
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}

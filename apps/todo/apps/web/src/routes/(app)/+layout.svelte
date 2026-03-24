@@ -55,6 +55,9 @@
 
 	let { children } = $props();
 
+	// Auth gate - prevent children from mounting before auth is confirmed
+	let appReady = $state(false);
+
 	// QuickInputBar search - search tasks
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		if (!query.trim()) return [];
@@ -306,161 +309,170 @@
 		} catch {
 			// localStorage not available
 		}
+
+		// Auth confirmed - allow children to render
+		appReady = true;
 	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<SplitPaneContainer>
-	<div class="layout-container">
-		<a
-			href="#main-content"
-			class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
-		>
-			Zum Inhalt springen
-		</a>
+{#if !appReady}
+	<div class="flex items-center justify-center h-screen bg-background">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+	</div>
+{:else}
+	<SplitPaneContainer>
+		<div class="layout-container">
+			<a
+				href="#main-content"
+				class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+			>
+				Zum Inhalt springen
+			</a>
 
-		<!-- UI Elements (hidden in immersive mode) -->
-		{#if !todoSettings.immersiveModeEnabled}
-			<!-- PillNav (shown/hidden via FAB) -->
-			{#if !isPillNavCollapsed}
-				<PillNavigation
-					items={navItems}
-					prependElements={[viewTabGroup]}
-					currentPath={$page.url.pathname}
-					appName="Todo"
-					homeRoute="/"
-					onToggleTheme={handleToggleTheme}
-					{isDark}
-					showThemeToggle={true}
-					showThemeVariants={true}
-					{themeVariantItems}
-					{currentThemeVariantLabel}
-					themeMode={theme.mode}
-					onThemeModeChange={handleThemeModeChange}
-					showLanguageSwitcher={true}
-					{languageItems}
-					{currentLanguageLabel}
-					showLogout={true}
-					onLogout={handleLogout}
-					loginHref="/login"
-					primaryColor="#8b5cf6"
-					showAppSwitcher={true}
-					{appItems}
-					{userEmail}
-					settingsHref="/settings"
-					manaHref="/mana"
-					profileHref="/profile"
-					allAppsHref="/apps"
-					themesHref="/themes"
-					spiralHref="/spiral"
-					onOpenInPanel={handleOpenInPanel}
-					ariaLabel="Hauptnavigation"
-				/>
+			<!-- UI Elements (hidden in immersive mode) -->
+			{#if !todoSettings.immersiveModeEnabled}
+				<!-- PillNav (shown/hidden via FAB) -->
+				{#if !isPillNavCollapsed}
+					<PillNavigation
+						items={navItems}
+						prependElements={[viewTabGroup]}
+						currentPath={$page.url.pathname}
+						appName="Todo"
+						homeRoute="/"
+						onToggleTheme={handleToggleTheme}
+						{isDark}
+						showThemeToggle={true}
+						showThemeVariants={true}
+						{themeVariantItems}
+						{currentThemeVariantLabel}
+						themeMode={theme.mode}
+						onThemeModeChange={handleThemeModeChange}
+						showLanguageSwitcher={true}
+						{languageItems}
+						{currentLanguageLabel}
+						showLogout={true}
+						onLogout={handleLogout}
+						loginHref="/login"
+						primaryColor="#8b5cf6"
+						showAppSwitcher={true}
+						{appItems}
+						{userEmail}
+						settingsHref="/settings"
+						manaHref="/mana"
+						profileHref="/profile"
+						allAppsHref="/apps"
+						themesHref="/themes"
+						spiralHref="/spiral"
+						onOpenInPanel={handleOpenInPanel}
+						ariaLabel="Hauptnavigation"
+					/>
 
-				<!-- TagStrip (above PillNav, always visible when PillNav is open) -->
-				<TagStrip filterStripVisible={isFilterStripVisible} />
+					<!-- TagStrip (above PillNav, always visible when PillNav is open) -->
+					<TagStrip filterStripVisible={isFilterStripVisible} />
 
-				<!-- TaskFilters strip (shown when Filter pill is active in PillNav) -->
-				{#if isFilterStripVisible}
-					<TaskFilters
-						variant="strip"
-						selectedPriorities={viewStore.filterPriorities}
-						selectedProjectId={viewStore.filterProjectId}
-						selectedLabelIds={viewStore.filterLabelIds}
-						searchQuery={viewStore.filterSearchQuery}
-						onPrioritiesChange={(p: TaskPriority[]) => viewStore.setFilterPriorities(p)}
-						onProjectChange={(id: string | null) => viewStore.setFilterProjectId(id)}
-						onLabelsChange={(ids: string[]) => viewStore.setFilterLabelIds(ids)}
-						onSearchChange={(q: string) => viewStore.setFilterSearchQuery(q)}
-						onClearFilters={() => viewStore.clearFilters()}
-						sortBy={viewStore.sortBy}
-						onSortChange={(s: SortBy) => viewStore.setSort(s, viewStore.sortOrder)}
-						showSort={true}
-						showCompleted={true}
-						showKanbanNav={true}
-						isCompletedVisible={viewStore.showCompleted}
-						onToggleCompleted={() => viewStore.toggleShowCompleted()}
+					<!-- TaskFilters strip (shown when Filter pill is active in PillNav) -->
+					{#if isFilterStripVisible}
+						<TaskFilters
+							variant="strip"
+							selectedPriorities={viewStore.filterPriorities}
+							selectedProjectId={viewStore.filterProjectId}
+							selectedLabelIds={viewStore.filterLabelIds}
+							searchQuery={viewStore.filterSearchQuery}
+							onPrioritiesChange={(p: TaskPriority[]) => viewStore.setFilterPriorities(p)}
+							onProjectChange={(id: string | null) => viewStore.setFilterProjectId(id)}
+							onLabelsChange={(ids: string[]) => viewStore.setFilterLabelIds(ids)}
+							onSearchChange={(q: string) => viewStore.setFilterSearchQuery(q)}
+							onClearFilters={() => viewStore.clearFilters()}
+							sortBy={viewStore.sortBy}
+							onSortChange={(s: SortBy) => viewStore.setSort(s, viewStore.sortOrder)}
+							showSort={true}
+							showCompleted={true}
+							showKanbanNav={true}
+							isCompletedVisible={viewStore.showCompleted}
+							onToggleCompleted={() => viewStore.toggleShowCompleted()}
+						/>
+					{/if}
+				{/if}
+
+				<!-- Global Quick Input Bar - only on list and kanban views -->
+				{#if $page.url.pathname === '/' || $page.url.pathname === '/kanban'}
+					<QuickInputBar
+						onSearch={handleSearch}
+						onSelect={handleSelect}
+						placeholder="Neue Aufgabe oder suchen..."
+						emptyText="Keine Aufgaben gefunden"
+						searchingText="Suche..."
+						searchText="Suchen"
+						onCreate={handleCreate}
+						onParseCreate={handleParseCreate}
+						createText="Erstellen"
+						deferSearch={true}
+						locale={$locale || 'de'}
+						appIcon="todo"
+						hasFabRight={true}
+						bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '180px' : '110px'}
 					/>
 				{/if}
+
+				<!-- FAB to toggle PillNav visibility -->
+				<button
+					class="pillnav-fab"
+					onclick={handlePillNavToggle}
+					title={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
+					aria-label={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
+				>
+					{#if isPillNavCollapsed}
+						<!-- Menu icon -->
+						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M4 6h16M4 12h16M4 18h16"
+							/>
+						</svg>
+					{:else}
+						<!-- Close icon -->
+						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
+						</svg>
+					{/if}
+				</button>
 			{/if}
 
-			<!-- Global Quick Input Bar - only on list and kanban views -->
-			{#if $page.url.pathname === '/' || $page.url.pathname === '/kanban'}
-				<QuickInputBar
-					onSearch={handleSearch}
-					onSelect={handleSelect}
-					placeholder="Neue Aufgabe oder suchen..."
-					emptyText="Keine Aufgaben gefunden"
-					searchingText="Suche..."
-					searchText="Suchen"
-					onCreate={handleCreate}
-					onParseCreate={handleParseCreate}
-					createText="Erstellen"
-					deferSearch={true}
-					locale={$locale || 'de'}
-					appIcon="todo"
-					hasFabRight={true}
-					bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '180px' : '110px'}
-				/>
-			{/if}
+			<!-- Immersive Mode Toggle (always visible) -->
+			<ImmersiveModeToggle
+				isImmersive={todoSettings.immersiveModeEnabled}
+				onToggle={() => todoSettings.toggleImmersiveMode()}
+			/>
 
-			<!-- FAB to toggle PillNav visibility -->
-			<button
-				class="pillnav-fab"
-				onclick={handlePillNavToggle}
-				title={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
-				aria-label={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
-			>
-				{#if isPillNavCollapsed}
-					<!-- Menu icon -->
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 6h16M4 12h16M4 18h16"
-						/>
-					</svg>
-				{:else}
-					<!-- Close icon -->
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				{/if}
-			</button>
-		{/if}
-
-		<!-- Immersive Mode Toggle (always visible) -->
-		<ImmersiveModeToggle
-			isImmersive={todoSettings.immersiveModeEnabled}
-			onToggle={() => todoSettings.toggleImmersiveMode()}
-		/>
-
-		<main
-			id="main-content"
-			class="main-content bg-background"
-			class:immersive={todoSettings.immersiveModeEnabled}
-		>
-			<div
-				class="content-wrapper"
-				class:full-width={$page.url.pathname === '/kanban'}
+			<main
+				id="main-content"
+				class="main-content bg-background"
 				class:immersive={todoSettings.immersiveModeEnabled}
 			>
-				{@render children()}
-			</div>
-		</main>
-		<!-- Onboarding Modal -->
-		{#if todoOnboarding.shouldShow}
-			<MiniOnboardingModal store={todoOnboarding} appName="Todo" appEmoji="✅" />
-		{/if}
-	</div>
-</SplitPaneContainer>
+				<div
+					class="content-wrapper"
+					class:full-width={$page.url.pathname === '/kanban'}
+					class:immersive={todoSettings.immersiveModeEnabled}
+				>
+					{@render children()}
+				</div>
+			</main>
+			<!-- Onboarding Modal -->
+			{#if todoOnboarding.shouldShow}
+				<MiniOnboardingModal store={todoOnboarding} appName="Todo" appEmoji="✅" />
+			{/if}
+		</div>
+	</SplitPaneContainer>
+{/if}
 
 <style>
 	.layout-container {

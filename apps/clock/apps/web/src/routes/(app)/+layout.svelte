@@ -38,6 +38,9 @@
 
 	let { children } = $props();
 
+	// Auth gate - prevent children from mounting before auth is confirmed
+	let appReady = $state(false);
+
 	// CommandBar state
 	let commandBarOpen = $state(false);
 
@@ -262,66 +265,75 @@
 		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
 			goto(userSettings.startPage, { replaceState: true });
 		}
+
+		// Auth confirmed - allow children to render
+		appReady = true;
 	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="layout-container">
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Clock"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLanguageSwitcher={true}
-		{languageItems}
-		{currentLanguageLabel}
-		showLogout={true}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#f59e0b"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		manaHref="/mana"
-		profileHref="/profile"
-		allAppsHref="/apps"
-	/>
+{#if !appReady}
+	<div class="flex items-center justify-center h-screen bg-background">
+		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+	</div>
+{:else}
+	<div class="layout-container">
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Clock"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
+			showLogout={true}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#f59e0b"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
+			allAppsHref="/apps"
+		/>
 
-	<main class="main-content bg-background">
-		<div class="content-wrapper">
-			{@render children()}
-		</div>
-	</main>
+		<main class="main-content bg-background">
+			<div class="content-wrapper">
+				{@render children()}
+			</div>
+		</main>
 
-	<!-- Global Command Bar (Cmd/K) -->
-	<CommandBar
-		bind:open={commandBarOpen}
-		onClose={() => (commandBarOpen = false)}
-		onSearch={handleCommandBarSearch}
-		onSelect={handleCommandBarSelect}
-		quickActions={commandBarQuickActions}
-		placeholder="Schnellzugriff..."
-		emptyText="Keine Ergebnisse"
-		searchingText="Suche..."
-	/>
+		<!-- Global Command Bar (Cmd/K) -->
+		<CommandBar
+			bind:open={commandBarOpen}
+			onClose={() => (commandBarOpen = false)}
+			onSearch={handleCommandBarSearch}
+			onSelect={handleCommandBarSelect}
+			quickActions={commandBarQuickActions}
+			placeholder="Schnellzugriff..."
+			emptyText="Keine Ergebnisse"
+			searchingText="Suche..."
+		/>
 
-	<!-- Onboarding Modal -->
-	{#if clockOnboarding.shouldShow}
-		<MiniOnboardingModal store={clockOnboarding} appName="Uhr" appEmoji="⏰" />
-	{/if}
-</div>
+		<!-- Onboarding Modal -->
+		{#if clockOnboarding.shouldShow}
+			<MiniOnboardingModal store={clockOnboarding} appName="Uhr" appEmoji="⏰" />
+		{/if}
+	</div>
+{/if}
 
 <style>
 	.layout-container {
