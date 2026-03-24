@@ -96,7 +96,13 @@
 		"submit": "Submit place",
 		"submitting": "Submitting...",
 		"loginRequired": "Sign in to add places.",
-		"error": "Failed to submit. Please try again."
+		"error": "Failed to submit. Please try again.",
+		"imageUrl": "Image URL (optional)",
+		"imageUrlPlaceholder": "https://example.com/image.jpg",
+		"imagePreview": "Image preview",
+		"imageLoadError": "Image could not be loaded.",
+		"geocoding": "Finding coordinates...",
+		"coordinatesFound": "Coordinates found"
 	},
 	"offline": {
 		"title": "No connection",

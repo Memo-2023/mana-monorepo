@@ -15,8 +15,13 @@
 	let category = $state<string>('sight');
 	let description = $state('');
 	let address = $state('');
+	let imageUrl = $state('');
+	let latitude = $state<number | undefined>(undefined);
+	let longitude = $state<number | undefined>(undefined);
 	let submitting = $state(false);
 	let error = $state('');
+	let geocoding = $state(false);
+	let imageError = $state(false);
 
 	const categories = [
 		{ value: 'sight', labelKey: 'category.sight' },
@@ -46,13 +51,25 @@
 				address = data.result.address || '';
 				category = data.result.category || 'sight';
 				sources = data.result.sources || [];
+				if (data.result.imageUrl) {
+					imageUrl = data.result.imageUrl;
+					imageError = false;
+				}
+				if (data.result.latitude && data.result.longitude) {
+					latitude = data.result.latitude;
+					longitude = data.result.longitude;
+				}
 			} else {
 				name = searchQuery.trim();
 			}
 
 			lookupDone = true;
+
+			// Auto-geocode if we got an address but no coordinates
+			if (address && !latitude) {
+				geocodeAddress();
+			}
 		} catch {
-			// Fallback: just use the search query as name
 			name = searchQuery.trim();
 			lookupDone = true;
 		} finally {
@@ -71,9 +88,46 @@
 		name = '';
 		description = '';
 		address = '';
+		imageUrl = '';
 		category = 'sight';
+		latitude = undefined;
+		longitude = undefined;
 		sources = [];
 		error = '';
+		imageError = false;
+	}
+
+	async function geocodeAddress() {
+		const addr = address.trim();
+		if (!addr) return;
+
+		geocoding = true;
+		try {
+			const q = addr.includes('Konstanz') ? addr : `${addr}, Konstanz`;
+			const res = await fetch(
+				`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`,
+				{ headers: { 'User-Agent': 'CityCorners/1.0' } }
+			);
+			const results = await res.json();
+			if (results.length > 0) {
+				latitude = parseFloat(results[0].lat);
+				longitude = parseFloat(results[0].lon);
+			}
+		} catch {
+			// Geocoding is best-effort
+		} finally {
+			geocoding = false;
+		}
+	}
+
+	let geocodeTimeout: ReturnType<typeof setTimeout> | undefined;
+	function handleAddressInput() {
+		clearTimeout(geocodeTimeout);
+		geocodeTimeout = setTimeout(() => {
+			if (address.trim().length > 5) {
+				geocodeAddress();
+			}
+		}, 1000);
 	}
 
 	async function handleSubmit() {
@@ -89,18 +143,25 @@
 				return;
 			}
 
+			const body: Record<string, unknown> = {
+				name: name.trim(),
+				category,
+				description: description.trim(),
+			};
+			if (address.trim()) body.address = address.trim();
+			if (imageUrl.trim() && !imageError) body.imageUrl = imageUrl.trim();
+			if (latitude !== undefined && longitude !== undefined) {
+				body.latitude = latitude;
+				body.longitude = longitude;
+			}
+
 			const res = await fetch(api('/locations'), {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${token}`,
 				},
-				body: JSON.stringify({
-					name: name.trim(),
-					category,
-					description: description.trim(),
-					address: address.trim() || undefined,
-				}),
+				body: JSON.stringify(body),
 			});
 
 			if (res.ok) {
@@ -261,9 +322,42 @@
 				id="address"
 				type="text"
 				bind:value={address}
+				oninput={handleAddressInput}
 				placeholder={$_('add.addressPlaceholder')}
 				class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
 			/>
+			{#if geocoding}
+				<p class="mt-1 text-xs text-foreground-secondary/60">{$_('add.geocoding')}</p>
+			{:else if latitude !== undefined && longitude !== undefined}
+				<p class="mt-1 text-xs text-green-600 dark:text-green-400">{$_('add.coordinatesFound')}</p>
+			{/if}
+		</div>
+
+		<!-- Image URL -->
+		<div>
+			<label for="imageUrl" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.imageUrl')}</label
+			>
+			<input
+				id="imageUrl"
+				type="url"
+				bind:value={imageUrl}
+				oninput={() => (imageError = false)}
+				placeholder={$_('add.imageUrlPlaceholder')}
+				class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+			/>
+			{#if imageUrl.trim() && !imageError}
+				<div class="mt-2 overflow-hidden rounded-lg border border-border">
+					<img
+						src={imageUrl}
+						alt={$_('add.imagePreview')}
+						class="h-40 w-full object-cover"
+						onerror={() => (imageError = true)}
+					/>
+				</div>
+			{:else if imageError}
+				<p class="mt-1 text-xs text-red-500">{$_('add.imageLoadError')}</p>
+			{/if}
 		</div>
 
 		<div class="flex gap-3">

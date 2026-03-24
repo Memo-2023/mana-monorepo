@@ -6,7 +6,6 @@
 #   4000-4099: Matrix Stack
 #   5000-5099: Web Frontends
 #   5100-5199: Games
-#   6000-6099: Automation & Workflows
 #   8000-8099: Monitoring Dashboards
 #   9000-9199: Infrastructure & Exporters
 #
@@ -32,7 +31,7 @@ services:
       - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 5
 
@@ -47,7 +46,7 @@ services:
       - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 5
 
@@ -67,7 +66,7 @@ services:
       - "9001:9001"
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
-      interval: 30s
+      interval: 120s
       timeout: 20s
       retries: 3
 
@@ -163,7 +162,7 @@ services:
       - "3001:3001"
     healthcheck:
       test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://127.0.0.1:3001/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -203,7 +202,7 @@ services:
       - "3010:3010"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3010/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -221,7 +220,7 @@ services:
     # Internal only - no external port mapping
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 15s
@@ -254,7 +253,7 @@ services:
       - "3020:3020"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3020/api/v1/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -294,7 +293,7 @@ services:
       - "3015:3015"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3015/api/v1/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -320,7 +319,7 @@ services:
       - "3050:3050"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3050/api/v1/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -356,7 +355,7 @@ services:
       - "3030:3030"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -383,7 +382,7 @@ services:
       - "3031:3031"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3031/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -414,7 +413,7 @@ services:
       - "3032:3032"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3032/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -444,7 +443,7 @@ services:
       - "3033:3033"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3033/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -480,7 +479,7 @@ services:
       - "3034:3034"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3034/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -515,7 +514,7 @@ services:
       - "3035:3035"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3035/api/v1/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -542,7 +541,7 @@ services:
       - "3036:3036"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3036/api/v1/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -572,7 +571,7 @@ services:
       - "3037:3037"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3037/api/v1/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -601,7 +600,7 @@ services:
       - "3038:3038"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3038/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -634,7 +633,7 @@ services:
       - "3039:3039"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3039/api/v1/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -664,7 +663,7 @@ services:
       - "3007:3007"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3007/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -697,7 +696,7 @@ services:
       - "3010:3010"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3010/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -735,7 +734,7 @@ services:
       - "3022:3022"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3022/api/v1/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -765,7 +764,7 @@ services:
       - "3041:3041"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3041/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -800,7 +799,7 @@ services:
       - "9002:9002"  # Metrics
     healthcheck:
       test: ["CMD", "curl", "-fSs", "http://localhost:8008/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 60s
@@ -818,7 +817,7 @@ services:
       - "4080:80"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -840,7 +839,7 @@ services:
       - "4090:5180"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5180/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -879,7 +878,7 @@ services:
       - "4010:4010"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4010/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -908,7 +907,7 @@ services:
       - "4011:4011"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4011/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -949,7 +948,7 @@ services:
       - "4012:4012"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4012/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -982,7 +981,7 @@ services:
       - "4013:4013"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4013/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1018,7 +1017,7 @@ services:
       - "4014:4014"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4014/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1052,7 +1051,7 @@ services:
       - "4015:4015"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4015/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1086,7 +1085,7 @@ services:
       - "4016:4016"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4016/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1116,7 +1115,7 @@ services:
       - "4017:4017"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4017/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1157,7 +1156,7 @@ services:
       - "4018:4018"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4018/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1191,7 +1190,7 @@ services:
       - "4019:4019"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4019/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1224,7 +1223,7 @@ services:
       - "4021:4021"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4021/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1261,7 +1260,7 @@ services:
       - "4020:4020"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4020/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1301,7 +1300,7 @@ services:
       - "4022:4022"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4022/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1337,7 +1336,7 @@ services:
       - "5000:5000"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5000/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1360,7 +1359,7 @@ services:
       - "5010:5010"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5010/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1386,7 +1385,7 @@ services:
       - "5011:5011"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5011/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1412,7 +1411,7 @@ services:
       - "5018:5018"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5018/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1440,7 +1439,7 @@ services:
       - "5012:5012"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5012/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1463,7 +1462,7 @@ services:
       - "5013:5013"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5013/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1493,7 +1492,7 @@ services:
       - "5014:5014"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5014/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1522,7 +1521,7 @@ services:
       - "5015:5015"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5015/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1545,7 +1544,7 @@ services:
       - "5016:5016"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5016/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1568,7 +1567,7 @@ services:
       - "5017:5017"
     healthcheck:
       test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://127.0.0.1:5017/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1597,7 +1596,7 @@ services:
       - "5020:5020"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5020/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1629,7 +1628,7 @@ services:
       - "5019:5019"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5019/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1658,7 +1657,7 @@ services:
       - "5180:5180"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5180/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1687,7 +1686,7 @@ services:
       - "5022:5022"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5022/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1726,7 +1725,7 @@ services:
       - "3040:3040"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3040/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1755,7 +1754,7 @@ services:
       - "5021:5021"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5021/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1790,7 +1789,7 @@ services:
       - "3025:3025"
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:3025/health').raise_for_status()"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 30s
@@ -1817,52 +1816,12 @@ services:
       - "5090:5090"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5090/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 10s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-
-  # ============================================
-  # Tier 6: Automation & Workflows (Ports 6000-6099)
-  # ============================================
-
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: mana-auto-n8n
-    restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: postgres
-      DB_POSTGRESDB_PORT: 5432
-      DB_POSTGRESDB_DATABASE: n8n
-      DB_POSTGRESDB_USER: postgres
-      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-mana123}
-      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-change-me-n8n-encryption-key}
-      N8N_USER_MANAGEMENT_JWT_SECRET: ${N8N_JWT_SECRET:-change-me-n8n-jwt-secret}
-      N8N_HOST: n8n.mana.how
-      N8N_PROTOCOL: https
-      WEBHOOK_URL: https://n8n.mana.how/
-      N8N_BASIC_AUTH_ACTIVE: "false"
-      N8N_PORT: 6000
-      GENERIC_TIMEZONE: Europe/Berlin
-      TZ: Europe/Berlin
-      N8N_DIAGNOSTICS_ENABLED: "false"
-      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
-    volumes:
-      - n8n_data:/home/node/.n8n
-    ports:
-      - "6000:6000"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:6000/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   # ============================================
   # Tier 7: Monitoring Dashboards (Ports 8000-8099)
@@ -1893,7 +1852,7 @@ services:
       - "8000:8000"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8000/api/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -1913,7 +1872,7 @@ services:
       - "8010:3000"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/heartbeat"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -1942,7 +1901,7 @@ services:
       - "9090:9090"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9090/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -1954,7 +1913,7 @@ services:
       - "9091:9091"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9091/-/healthy"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -1973,7 +1932,7 @@ services:
       - "9110:8080"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/healthz"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -2022,7 +1981,7 @@ services:
       - "9100:9100"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9100/metrics"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -2053,7 +2012,7 @@ services:
       - "8880:8880"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8880/health"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -2075,7 +2034,7 @@ services:
       - "9093:9093"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9093/-/healthy"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -2095,7 +2054,7 @@ services:
       - "9095:8080"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/health"]
-      interval: 30s
+      interval: 120s
       timeout: 5s
       retries: 3
       start_period: 5s
@@ -2148,7 +2107,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8020/_health/')"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -2189,7 +2148,7 @@ services:
       - "5100:5100"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:5100/"]
-      interval: 30s
+      interval: 120s
       timeout: 10s
       retries: 3
 
@@ -2204,7 +2163,5 @@ volumes:
     name: mana-grafana-data
   analytics_data:
     name: mana-analytics-data
-  n8n_data:
-    name: mana-n8n-data
   matrix_bots_data:
     name: mana-matrix-bots-data

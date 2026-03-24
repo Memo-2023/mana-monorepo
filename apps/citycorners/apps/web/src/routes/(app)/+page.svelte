@@ -53,9 +53,20 @@
 	<title>{$_('app.name')} - {$_('app.tagline')}</title>
 </svelte:head>
 
-<header class="mb-6">
-	<h1 class="text-2xl font-bold text-foreground">{$_('home.title')}</h1>
-	<p class="text-foreground-secondary">{$_('home.subtitle')}</p>
+<header class="mb-6 flex items-start justify-between">
+	<div>
+		<h1 class="text-2xl font-bold text-foreground">{$_('home.title')}</h1>
+		<p class="text-foreground-secondary">{$_('home.subtitle')}</p>
+	</div>
+	<a
+		href="/add"
+		class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-all hover:bg-primary/90 hover:shadow-lg"
+		title={$_('add.title')}
+	>
+		<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+		</svg>
+	</a>
 </header>
 
 <div class="mb-6 flex flex-wrap gap-2">

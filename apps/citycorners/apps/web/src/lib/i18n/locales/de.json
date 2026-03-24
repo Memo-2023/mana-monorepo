@@ -96,7 +96,13 @@
 		"submit": "Ort einreichen",
 		"submitting": "Wird eingereicht...",
 		"loginRequired": "Melde dich an, um Orte hinzuzufügen.",
-		"error": "Fehler beim Einreichen. Bitte versuche es erneut."
+		"error": "Fehler beim Einreichen. Bitte versuche es erneut.",
+		"imageUrl": "Bild-URL (optional)",
+		"imageUrlPlaceholder": "https://example.com/bild.jpg",
+		"imagePreview": "Bildvorschau",
+		"imageLoadError": "Bild konnte nicht geladen werden.",
+		"geocoding": "Koordinaten werden ermittelt...",
+		"coordinatesFound": "Koordinaten gefunden"
 	},
 	"offline": {
 		"title": "Keine Verbindung",

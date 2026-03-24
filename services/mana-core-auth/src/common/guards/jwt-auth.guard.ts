@@ -35,10 +35,10 @@ export class JwtAuthGuard implements CanActivate {
 		}
 
 		try {
-			// Lazy initialize JWKS
+			// Lazy initialize JWKS via localhost (self-referencing avoids external URL issues in Docker)
 			if (!this.jwks) {
-				const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
-				const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
+				const port = this.configService.get<number>('PORT') || 3001;
+				const jwksUrl = new URL(`http://localhost:${port}/api/v1/auth/jwks`);
 				this.jwks = createRemoteJWKSet(jwksUrl);
 			}
 

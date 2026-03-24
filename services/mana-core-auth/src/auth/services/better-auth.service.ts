@@ -1139,15 +1139,16 @@ export class BetterAuthService {
 			// Decode to check the algorithm
 			const decoded = jwt.decode(token, { complete: true });
 
-			// Use our JWKS endpoint (NestJS prefix: /api/v1)
-			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
-			const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
+			// Use our JWKS endpoint via localhost (self-referencing avoids external URL issues in Docker)
+			const port = this.configService.get<number>('PORT') || 3001;
+			const jwksUrl = new URL(`http://localhost:${port}/api/v1/auth/jwks`);
 
 			// Create JWKS fetcher
 			const JWKS = createRemoteJWKSet(jwksUrl);
 
 			// IMPORTANT: Match Better Auth signing config exactly (better-auth.config.ts)
 			// Signing uses: issuer = BASE_URL, audience = JWT_AUDIENCE || 'manacore'
+			const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
 			const issuer = baseUrl; // Better Auth uses BASE_URL as issuer for OIDC compatibility
 			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
 

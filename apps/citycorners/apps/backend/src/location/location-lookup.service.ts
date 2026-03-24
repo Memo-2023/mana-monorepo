@@ -6,6 +6,7 @@ export interface LookupResult {
 	description: string;
 	address?: string;
 	category?: string;
+	imageUrl?: string;
 	sources: { url: string; title: string }[];
 }
 
@@ -82,11 +83,15 @@ export class LocationLookupService {
 			// Build a description from the best snippet or extracted text
 			const description = this.buildDescription(snippets, extractedTexts);
 
+			// Try to find an image URL from search results
+			const imageUrl = this.extractImageUrl(results);
+
 			return {
 				name: query,
 				description,
 				address,
 				category,
+				imageUrl,
 				sources: results.slice(0, 5).map((r: any) => ({
 					url: r.url,
 					title: r.title,
@@ -138,6 +143,28 @@ export class LocationLookupService {
 			return 'shop';
 		}
 		return 'sight';
+	}
+
+	private extractImageUrl(results: any[]): string | undefined {
+		for (const result of results) {
+			// SearXNG results may include img_src or thumbnail
+			if (result.img_src && this.isValidImageUrl(result.img_src)) {
+				return result.img_src;
+			}
+			if (result.thumbnail && this.isValidImageUrl(result.thumbnail)) {
+				return result.thumbnail;
+			}
+		}
+		return undefined;
+	}
+
+	private isValidImageUrl(url: string): boolean {
+		try {
+			const parsed = new URL(url);
+			return parsed.protocol === 'https:' && /\.(jpg|jpeg|png|webp)/i.test(parsed.pathname);
+		} catch {
+			return false;
+		}
 	}
 
 	private buildDescription(snippets: string[], extractedTexts: string[]): string {
