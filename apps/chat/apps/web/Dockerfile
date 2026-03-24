@@ -20,36 +20,31 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages needed by chat web
-COPY packages/shared-types ./packages/shared-types
+# --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
+COPY patches/ ./patches/
+COPY packages/shared-api-client ./packages/shared-api-client
+COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
+COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-feedback-service ./packages/shared-feedback-service
-COPY packages/shared-feedback-types ./packages/shared-feedback-types
 COPY packages/shared-feedback-ui ./packages/shared-feedback-ui
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
+COPY packages/shared-profile-ui ./packages/shared-profile-ui
+COPY packages/shared-pwa ./packages/shared-pwa
+COPY packages/shared-stores ./packages/shared-stores
+COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-theme-ui ./packages/shared-theme-ui
-COPY packages/shared-subscription-types ./packages/shared-subscription-types
-COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
-COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
-COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
-COPY packages/shared-api-client ./packages/shared-api-client
-COPY packages/shared-stores ./packages/shared-stores
-COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
-COPY packages/shared-pwa ./packages/shared-pwa
+COPY apps/chat/packages/chat-types ./apps/chat/packages/chat-types
+# --- END AUTO-GENERATED ---
 
-# Copy patches (referenced by pnpm-lock.yaml)
-COPY patches/ ./patches/
-
-# Copy chat packages
-COPY apps/chat/packages ./apps/chat/packages
 COPY apps/chat/apps/web ./apps/chat/apps/web
 
 # Install dependencies

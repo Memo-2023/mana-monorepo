@@ -20,15 +20,14 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
-# Copy shared packages needed by llm-playground
+# --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
+COPY patches/ ./patches/
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
-
-# Copy patches (referenced by pnpm-lock.yaml)
-COPY patches/ ./patches/
+# --- END AUTO-GENERATED ---
 
 # Copy llm-playground service
 COPY apps/playground/apps/web ./apps/playground/apps/web
