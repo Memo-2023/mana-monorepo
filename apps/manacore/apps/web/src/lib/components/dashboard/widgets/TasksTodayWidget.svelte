@@ -7,8 +7,24 @@
 	import { _ } from 'svelte-i18n';
 	import { todoService, type Task } from '$lib/api/services';
 	import { APP_URLS } from '@manacore/shared-branding';
+	import { format, isToday, isTomorrow, isPast } from 'date-fns';
+	import { de } from 'date-fns/locale';
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
+
+	function formatDueDate(dueDate?: string): string | null {
+		if (!dueDate) return null;
+		const date = new Date(dueDate);
+		if (isToday(date)) return 'Heute';
+		if (isTomorrow(date)) return 'Morgen';
+		return format(date, 'dd. MMM', { locale: de });
+	}
+
+	function isOverdue(dueDate?: string): boolean {
+		if (!dueDate) return false;
+		const date = new Date(dueDate);
+		return isPast(date) && !isToday(date);
+	}
 
 	let state = $state<'loading' | 'success' | 'error'>('loading');
 	let data = $state<Task[]>([]);
@@ -32,7 +48,7 @@
 		state = 'loading';
 		retrying = true;
 
-		const result = await todoService.getTodayTasks();
+		const result = await todoService.getAllOpenTasks();
 
 		if (result.data) {
 			data = result.data;
@@ -124,13 +140,24 @@
 
 					<!-- Content -->
 					<div class="min-w-0 flex-1">
-						<p
-							class="truncate text-sm font-medium {task.isCompleted
-								? 'text-muted-foreground line-through'
-								: ''}"
-						>
-							{task.title}
-						</p>
+						<div class="flex items-center gap-2">
+							<p
+								class="truncate text-sm font-medium {task.isCompleted
+									? 'text-muted-foreground line-through'
+									: ''}"
+							>
+								{task.title}
+							</p>
+							{#if formatDueDate(task.dueDate)}
+								<span
+									class="flex-shrink-0 text-xs {isOverdue(task.dueDate)
+										? 'text-red-500'
+										: 'text-muted-foreground'}"
+								>
+									{formatDueDate(task.dueDate)}
+								</span>
+							{/if}
+						</div>
 						<!-- Meta row: time, subtasks, labels -->
 						{#if task.dueTime || getSubtaskProgress(task) || (task.labels && task.labels.length > 0)}
 							<div class="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">

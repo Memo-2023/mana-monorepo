@@ -33,9 +33,9 @@
 				"empty": "No transactions"
 			},
 			"tasks_today": {
-				"title": "Tasks Today",
-				"description": "Your tasks for today",
-				"empty": "No tasks for today"
+				"title": "Tasks",
+				"description": "Your open tasks",
+				"empty": "No open tasks"
 			},
 			"tasks_upcoming": {
 				"title": "Upcoming Tasks",

@@ -98,6 +98,30 @@ export const todoService = {
 	},
 
 	/**
+	 * Get all open tasks sorted by due date (today first, then future, then no date)
+	 */
+	async getAllOpenTasks(): Promise<ApiResult<Task[]>> {
+		const result = await getClient().get<{ tasks: Task[] }>('/tasks');
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		const openTasks = (result.data.tasks || []).filter((t) => !t.isCompleted);
+
+		// Sort: today/overdue first, then by date ascending, tasks without date last
+		const now = new Date();
+		now.setHours(0, 0, 0, 0);
+		openTasks.sort((a, b) => {
+			const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+			const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+			return dateA - dateB;
+		});
+
+		return { data: openTasks, error: null };
+	},
+
+	/**
 	 * Get upcoming tasks for the next N days
 	 */
 	async getUpcomingTasks(days: number = 7): Promise<ApiResult<Task[]>> {

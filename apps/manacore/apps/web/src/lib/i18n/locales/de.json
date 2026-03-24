@@ -33,9 +33,9 @@
 				"empty": "Keine Transaktionen"
 			},
 			"tasks_today": {
-				"title": "Aufgaben heute",
-				"description": "Deine heutigen Aufgaben",
-				"empty": "Keine Aufgaben für heute"
+				"title": "Aufgaben",
+				"description": "Deine offenen Aufgaben",
+				"empty": "Keine offenen Aufgaben"
 			},
 			"tasks_upcoming": {
 				"title": "Kommende Aufgaben",
