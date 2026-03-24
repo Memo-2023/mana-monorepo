@@ -172,6 +172,46 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 											))}
 										</div>
 
+										{/* Dependency health */}
+										{data.dependencies &&
+											(() => {
+												const deps = data.dependencies;
+												const vulnCount = deps.vulnerabilities
+													? deps.vulnerabilities.critical +
+														deps.vulnerabilities.high +
+														deps.vulnerabilities.moderate +
+														deps.vulnerabilities.low
+													: 0;
+												const healthPct = Math.round(
+													((deps.total - deps.outdated) / deps.total) * 100
+												);
+												const healthColor =
+													vulnCount > 0
+														? deps.vulnerabilities?.critical || deps.vulnerabilities?.high
+															? 'text-red-500'
+															: 'text-yellow-500'
+														: healthPct >= 80
+															? 'text-emerald-500'
+															: 'text-yellow-500';
+												return (
+													<div class="mt-2 flex items-center gap-3">
+														<span class="text-muted-foreground/50 text-[9px]">Deps:</span>
+														<span class={`text-[10px] font-medium ${healthColor}`}>
+															{deps.total} total, {deps.outdated} outdated
+														</span>
+														{vulnCount > 0 ? (
+															<span class="text-[10px] font-medium text-red-500">
+																⚠ {vulnCount} vulnerabilities
+															</span>
+														) : (
+															<span class="text-[10px] font-medium text-emerald-500">
+																✓ no vulnerabilities
+															</span>
+														)}
+													</div>
+												);
+											})()}
+
 										{/* Lighthouse scores */}
 										{data.lighthouse && (
 											<div class="mt-2 flex items-center gap-3">

@@ -274,6 +274,113 @@ function getBarColor(score: number): string {
 						})()
 				}
 
+				{/* Dependency Health */}
+				{
+					audit.data.dependencies &&
+						(() => {
+							const deps = audit.data.dependencies;
+							const vulnCount = deps.vulnerabilities
+								? deps.vulnerabilities.critical +
+									deps.vulnerabilities.high +
+									deps.vulnerabilities.moderate +
+									deps.vulnerabilities.low
+								: 0;
+							const healthPct = Math.round(((deps.total - deps.outdated) / deps.total) * 100);
+
+							return (
+								<div class="border-border/50 mb-8 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-6">
+									<div class="flex items-center justify-between mb-4">
+										<div>
+											<h2 class="text-foreground text-sm font-semibold">Dependency Health</h2>
+											<p class="text-muted-foreground text-xs">
+												Paketstand und Sicherheit
+												{deps.lastChecked ? ` (geprüft ${deps.lastChecked})` : ''}
+											</p>
+										</div>
+										<span
+											class={`text-lg font-bold ${healthPct >= 80 ? 'text-emerald-500' : healthPct >= 60 ? 'text-yellow-500' : 'text-red-500'}`}
+										>
+											{healthPct}% aktuell
+										</span>
+									</div>
+									<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+										<div>
+											<span class="text-foreground text-2xl font-bold">{deps.total}</span>
+											<span class="text-muted-foreground block text-xs">Pakete gesamt</span>
+										</div>
+										<div>
+											<span
+												class={`text-2xl font-bold ${deps.outdated > 10 ? 'text-yellow-500' : 'text-foreground'}`}
+											>
+												{deps.outdated}
+											</span>
+											<span class="text-muted-foreground block text-xs">Veraltet</span>
+										</div>
+										<div>
+											<span
+												class={`text-2xl font-bold ${vulnCount > 0 ? 'text-red-500' : 'text-emerald-500'}`}
+											>
+												{vulnCount}
+											</span>
+											<span class="text-muted-foreground block text-xs">Vulnerabilities</span>
+										</div>
+										<div>
+											{deps.vulnerabilities ? (
+												<div class="flex gap-1.5 mt-1">
+													{deps.vulnerabilities.critical > 0 && (
+														<span class="bg-red-500/10 text-red-500 rounded px-1.5 py-0.5 text-[10px] font-medium">
+															{deps.vulnerabilities.critical} Critical
+														</span>
+													)}
+													{deps.vulnerabilities.high > 0 && (
+														<span class="bg-orange-500/10 text-orange-500 rounded px-1.5 py-0.5 text-[10px] font-medium">
+															{deps.vulnerabilities.high} High
+														</span>
+													)}
+													{deps.vulnerabilities.moderate > 0 && (
+														<span class="bg-yellow-500/10 text-yellow-500 rounded px-1.5 py-0.5 text-[10px] font-medium">
+															{deps.vulnerabilities.moderate} Mod
+														</span>
+													)}
+													{deps.vulnerabilities.low > 0 && (
+														<span class="bg-blue-500/10 text-blue-500 rounded px-1.5 py-0.5 text-[10px] font-medium">
+															{deps.vulnerabilities.low} Low
+														</span>
+													)}
+													{vulnCount === 0 && (
+														<span class="bg-emerald-500/10 text-emerald-500 rounded px-1.5 py-0.5 text-[10px] font-medium">
+															✓ Sicher
+														</span>
+													)}
+												</div>
+											) : (
+												<span class="text-muted-foreground text-xs">Keine Daten</span>
+											)}
+											<span class="text-muted-foreground block text-xs mt-1">Schweregrad</span>
+										</div>
+									</div>
+									{/* Health bar */}
+									<div class="mt-4">
+										<div class="bg-muted h-2 overflow-hidden rounded-full">
+											<div
+												class={`h-full rounded-full transition-all ${healthPct >= 80 ? 'bg-emerald-500' : healthPct >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`}
+												style={`width: ${healthPct}%`}
+											/>
+										</div>
+										<div class="flex justify-between mt-1">
+											<span class="text-muted-foreground/50 text-[10px]">
+												{deps.outdated} veraltet
+											</span>
+											<span class="text-muted-foreground/50 text-[10px]">
+												{deps.total - deps.outdated} aktuell
+											</span>
+										</div>
+									</div>
+								</div>
+							);
+						})()
+				}
+
 				{/* Stats */}
 				{
 					audit.data.stats && (

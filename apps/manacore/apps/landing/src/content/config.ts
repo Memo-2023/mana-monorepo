@@ -212,6 +212,22 @@ const manascoreCollection = defineCollection({
 				seo: z.number().min(0).max(100),
 			})
 			.optional(),
+		// Dependency health metrics
+		dependencies: z
+			.object({
+				total: z.number(), // Total dependency count
+				outdated: z.number(), // Packages with available updates
+				vulnerabilities: z
+					.object({
+						critical: z.number().default(0),
+						high: z.number().default(0),
+						moderate: z.number().default(0),
+						low: z.number().default(0),
+					})
+					.optional(),
+				lastChecked: z.string().optional(), // ISO date
+			})
+			.optional(),
 		// Score history for trend visualization
 		history: z
 			.array(

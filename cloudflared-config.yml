@@ -114,5 +114,27 @@ ingress:
   - hostname: glitchtip.mana.how
     service: http://localhost:8020
 
+  # Self-Hosted Landing Pages (via Nginx on port 4400)
+  - hostname: it.mana.how
+    service: http://localhost:4400
+  - hostname: chats.mana.how
+    service: http://localhost:4400
+  - hostname: pics.mana.how
+    service: http://localhost:4400
+  - hostname: zitares.mana.how
+    service: http://localhost:4400
+  - hostname: presis.mana.how
+    service: http://localhost:4400
+  - hostname: clocks.mana.how
+    service: http://localhost:4400
+  - hostname: manadeck.mana.how
+    service: http://localhost:4400
+  - hostname: nutriphi.mana.how
+    service: http://localhost:4400
+  - hostname: citycorners.mana.how
+    service: http://localhost:4400
+  - hostname: docs.mana.how
+    service: http://localhost:4400
+
   # Catch-all
   - service: http_status:404
