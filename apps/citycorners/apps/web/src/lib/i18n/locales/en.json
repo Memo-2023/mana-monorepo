@@ -50,7 +50,20 @@
 		"confirmDelete": "Delete permanently",
 		"deleting": "Deleting...",
 		"cancel": "Cancel",
-		"nearby": "Nearby"
+		"nearby": "Nearby",
+		"website": "Website",
+		"phone": "Phone",
+		"openingHours": "Opening hours",
+		"closed": "Closed"
+	},
+	"days": {
+		"mo": "Monday",
+		"tu": "Tuesday",
+		"we": "Wednesday",
+		"th": "Thursday",
+		"fr": "Friday",
+		"sa": "Saturday",
+		"su": "Sunday"
 	},
 	"gallery": {
 		"addPhoto": "Add photo",
@@ -63,7 +76,25 @@
 		"empty": "No favorites yet. Tap the heart on a location to save it.",
 		"loginRequired": "Sign in to save favorites.",
 		"add": "Add to favorites",
-		"remove": "Remove from favorites"
+		"remove": "Remove from favorites",
+		"tabFavorites": "Favorites",
+		"tabCollections": "Collections"
+	},
+	"collections": {
+		"title": "Collections",
+		"empty": "No collections created yet.",
+		"create": "Create collection",
+		"name": "Name",
+		"namePlaceholder": "e.g. My favorite restaurants",
+		"description": "Description (optional)",
+		"descriptionPlaceholder": "What is this collection about?",
+		"save": "Save",
+		"cancel": "Cancel",
+		"locations": "{count} places",
+		"noLocations": "No places in this collection.",
+		"delete": "Delete collection",
+		"deleteConfirm": "Are you sure you want to delete this collection?",
+		"back": "Back to collections"
 	},
 	"map": {
 		"title": "Map",
@@ -103,16 +134,16 @@
 		"title": "Add a place",
 		"subtitle": "Share your favorite spot in Konstanz",
 		"name": "Name",
-		"namePlaceholder": "e.g. Lakeside Café",
+		"namePlaceholder": "e.g. Lakeside Cafe",
 		"category": "Category",
 		"description": "Description",
 		"descriptionPlaceholder": "What makes this place special?",
 		"minChars": "At least 10 characters",
 		"address": "Address (optional)",
-		"addressPlaceholder": "e.g. Seestraße 1, 78462 Konstanz",
+		"addressPlaceholder": "e.g. Seestrasse 1, 78462 Konstanz",
 		"searchTitle": "Search for a place online",
 		"searchSubtitle": "We'll automatically find info and pre-fill the form for you.",
-		"searchPlaceholder": "e.g. Café Zeitlos Konstanz",
+		"searchPlaceholder": "e.g. Cafe Zeitlos Konstanz",
 		"searchButton": "Search",
 		"skipSearch": "Skip and enter manually",
 		"foundSources": "Sources found:",
@@ -127,7 +158,11 @@
 		"imageLoadError": "Image could not be loaded.",
 		"imageRetry": "Retry",
 		"geocoding": "Finding coordinates...",
-		"coordinatesFound": "Coordinates found"
+		"coordinatesFound": "Coordinates found",
+		"website": "Website (optional)",
+		"websitePlaceholder": "https://example.com",
+		"phone": "Phone (optional)",
+		"phonePlaceholder": "+49 7531 12345"
 	},
 	"edit": {
 		"title": "Edit place",

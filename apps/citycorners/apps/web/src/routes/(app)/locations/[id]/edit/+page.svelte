@@ -12,6 +12,8 @@
 	let description = $state('');
 	let address = $state('');
 	let imageUrl = $state('');
+	let website = $state('');
+	let phone = $state('');
 	let imageError = $state(false);
 	let submitting = $state(false);
 	let error = $state('');
@@ -42,6 +44,8 @@
 			description = loc.description || '';
 			address = loc.address || '';
 			imageUrl = loc.imageUrl || '';
+			website = loc.website || '';
+			phone = loc.phone || '';
 		} catch {
 			error = $_('edit.loadError');
 		} finally {
@@ -68,6 +72,8 @@
 				description: description.trim(),
 				address: address.trim() || undefined,
 				imageUrl: imageUrl.trim() || undefined,
+				website: website.trim() || undefined,
+				phone: phone.trim() || undefined,
 			};
 
 			const res = await fetch(api(`/locations/${$page.params.id}`), {
@@ -223,6 +229,34 @@
 					</button>
 				</div>
 			{/if}
+		</div>
+
+		<!-- Website -->
+		<div>
+			<label for="website" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.website')}</label
+			>
+			<input
+				id="website"
+				type="url"
+				bind:value={website}
+				placeholder={$_('add.websitePlaceholder')}
+				class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+			/>
+		</div>
+
+		<!-- Phone -->
+		<div>
+			<label for="phone" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.phone')}</label
+			>
+			<input
+				id="phone"
+				type="tel"
+				bind:value={phone}
+				placeholder={$_('add.phonePlaceholder')}
+				class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+			/>
 		</div>
 
 		<div class="flex gap-3">

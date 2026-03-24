@@ -18,6 +18,8 @@
 	let imageUrl = $state('');
 	let latitude = $state<number | undefined>(undefined);
 	let longitude = $state<number | undefined>(undefined);
+	let website = $state('');
+	let phone = $state('');
 	let submitting = $state(false);
 	let error = $state('');
 	let geocoding = $state(false);
@@ -89,6 +91,8 @@
 		description = '';
 		address = '';
 		imageUrl = '';
+		website = '';
+		phone = '';
 		category = 'sight';
 		latitude = undefined;
 		longitude = undefined;
@@ -150,6 +154,8 @@
 			};
 			if (address.trim()) body.address = address.trim();
 			if (imageUrl.trim() && !imageError) body.imageUrl = imageUrl.trim();
+			if (website.trim()) body.website = website.trim();
+			if (phone.trim()) body.phone = phone.trim();
 			if (latitude !== undefined && longitude !== undefined) {
 				body.latitude = latitude;
 				body.longitude = longitude;
@@ -369,6 +375,34 @@
 					</button>
 				</div>
 			{/if}
+		</div>
+
+		<!-- Website -->
+		<div>
+			<label for="website" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.website')}</label
+			>
+			<input
+				id="website"
+				type="url"
+				bind:value={website}
+				placeholder={$_('add.websitePlaceholder')}
+				class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+			/>
+		</div>
+
+		<!-- Phone -->
+		<div>
+			<label for="phone" class="mb-1 block text-sm font-medium text-foreground"
+				>{$_('add.phone')}</label
+			>
+			<input
+				id="phone"
+				type="tel"
+				bind:value={phone}
+				placeholder={$_('add.phonePlaceholder')}
+				class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+			/>
 		</div>
 
 		<div class="flex gap-3">

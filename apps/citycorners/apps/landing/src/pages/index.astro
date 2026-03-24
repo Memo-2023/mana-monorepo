@@ -2,7 +2,39 @@
 import Layout from '../layouts/Layout.astro';
 import LocationCard from '../components/LocationCard.astro';
 import Filter from '../components/Filter.astro';
-import locations from '../data/locations.json';
+import fallbackLocations from '../data/locations.json';
+
+const BACKEND_URL = import.meta.env.BACKEND_URL || 'http://localhost:3025';
+
+let locations = fallbackLocations;
+
+try {
+	const res = await fetch(`${BACKEND_URL}/api/v1/locations?limit=100`);
+	if (res.ok) {
+		const data = await res.json();
+		// Map API response to the shape expected by LocationCard
+		const categoryMap: Record<string, string> = {
+			sight: 'Sehenswürdigkeit',
+			restaurant: 'Restaurant',
+			shop: 'Laden',
+			museum: 'Museum',
+		};
+		locations = data.locations.map((loc: any, index: number) => ({
+			id: loc.slug || loc.id,
+			name: loc.name,
+			category: categoryMap[loc.category] || loc.category,
+			description: loc.description,
+			image: loc.imageUrl || '/images/placeholder.jpg',
+			address: loc.address,
+			coordinates:
+				loc.latitude && loc.longitude ? { lat: loc.latitude, lng: loc.longitude } : undefined,
+			timeline: loc.timeline?.map((t: any) => ({ year: t.year, description: t.event })),
+		}));
+	}
+} catch (e) {
+	// Fallback to hardcoded JSON if API is unreachable
+	console.warn('Could not fetch from API, using fallback data:', e);
+}
 ---
 
 <Layout>

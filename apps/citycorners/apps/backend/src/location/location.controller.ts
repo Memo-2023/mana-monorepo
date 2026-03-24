@@ -2,8 +2,10 @@ import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } fro
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { LocationService } from './location.service';
 import { LocationLookupService } from './location-lookup.service';
-import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import { RateLimitGuard } from '../guards/rate-limit.guard';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
+import type { OpeningHours } from '../db/schema/locations.schema';
 
 class CreateLocationDto {
 	@IsString()
@@ -35,6 +37,18 @@ class CreateLocationDto {
 	@IsString()
 	@IsOptional()
 	imageUrl?: string;
+
+	@IsString()
+	@IsOptional()
+	website?: string;
+
+	@IsString()
+	@IsOptional()
+	phone?: string;
+
+	@IsObject()
+	@IsOptional()
+	openingHours?: OpeningHours;
 }
 
 class UpdateLocationDto {
@@ -67,6 +81,18 @@ class UpdateLocationDto {
 	@IsString()
 	@IsOptional()
 	imageUrl?: string;
+
+	@IsString()
+	@IsOptional()
+	website?: string;
+
+	@IsString()
+	@IsOptional()
+	phone?: string;
+
+	@IsObject()
+	@IsOptional()
+	openingHours?: OpeningHours;
 }
 
 @Controller('locations')
@@ -126,7 +152,7 @@ export class LocationController {
 
 	@Get(':id')
 	async findById(@Param('id') id: string) {
-		const location = await this.locationService.findById(id);
+		const location = await this.locationService.findByIdOrSlug(id);
 		return { location };
 	}
 
@@ -149,7 +175,7 @@ export class LocationController {
 	}
 
 	@Post()
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, RateLimitGuard)
 	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateLocationDto) {
 		const location = await this.locationService.create({
 			...dto,
@@ -159,7 +185,7 @@ export class LocationController {
 	}
 
 	@Put(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, RateLimitGuard)
 	async update(
 		@CurrentUser() user: CurrentUserData,
 		@Param('id') id: string,
@@ -170,9 +196,16 @@ export class LocationController {
 	}
 
 	@Delete(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, RateLimitGuard)
 	async delete(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
 		await this.locationService.delete(id, user.userId);
 		return { success: true };
+	}
+
+	@Post(':id/restore')
+	@UseGuards(JwtAuthGuard)
+	async restore(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
+		const location = await this.locationService.restore(id, user.userId);
+		return { location };
 	}
 }

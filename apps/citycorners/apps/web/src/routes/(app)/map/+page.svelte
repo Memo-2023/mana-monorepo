@@ -6,6 +6,7 @@
 
 	interface Location {
 		id: string;
+		slug?: string;
 		name: string;
 		category: string;
 		description: string;
@@ -49,6 +50,14 @@
 			maxZoom: 19,
 		}).addTo(map);
 
+		const useCluster = locations.length >= 10;
+		let markerLayer: any;
+
+		if (useCluster) {
+			const { default: MCG } = await import('leaflet.markercluster');
+			markerLayer = (L as any).markerClusterGroup();
+		}
+
 		for (const loc of locations) {
 			if (loc.latitude && loc.longitude) {
 				const color = categoryColors[loc.category] || '#6b7280';
@@ -60,17 +69,27 @@
 					iconAnchor: [14, 14],
 				});
 
-				const marker = L.marker([loc.latitude, loc.longitude], { icon }).addTo(map);
+				const marker = L.marker([loc.latitude, loc.longitude], { icon });
 
 				marker.bindPopup(`
 					<div style="min-width:180px">
 						<strong style="font-size:14px">${loc.name}</strong>
 						<div style="color:${color};font-size:12px;margin:4px 0">${$_(`category.${loc.category}`)}</div>
 						<p style="font-size:12px;color:#666;margin:4px 0">${loc.description.substring(0, 100)}...</p>
-						<a href="/locations/${loc.id}" style="color:${color};font-size:12px;font-weight:600">${$_('detail.showDetails')} &rarr;</a>
+						<a href="/locations/${loc.slug || loc.id}" style="color:${color};font-size:12px;font-weight:600">${$_('detail.showDetails')} &rarr;</a>
 					</div>
 				`);
+
+				if (useCluster && markerLayer) {
+					markerLayer.addLayer(marker);
+				} else {
+					marker.addTo(map);
+				}
 			}
+		}
+
+		if (useCluster && markerLayer) {
+			map.addLayer(markerLayer);
 		}
 	});
 
@@ -117,6 +136,16 @@
 <svelte:head>
 	<title>{$_('map.title')} - CityCorners</title>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+	<link
+		rel="stylesheet"
+		href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+		crossorigin=""
+	/>
+	<link
+		rel="stylesheet"
+		href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+		crossorigin=""
+	/>
 </svelte:head>
 
 <div class="map-page">

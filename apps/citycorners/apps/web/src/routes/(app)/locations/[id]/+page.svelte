@@ -21,6 +21,7 @@
 
 	interface NearbyLocation {
 		id: string;
+		slug?: string;
 		name: string;
 		category: string;
 		imageUrl?: string;
@@ -29,6 +30,7 @@
 
 	interface Location {
 		id: string;
+		slug?: string;
 		name: string;
 		category: string;
 		description: string;
@@ -38,6 +40,9 @@
 		imageUrl?: string;
 		images?: LocationImage[];
 		timeline?: TimelineEntry[];
+		website?: string;
+		phone?: string;
+		openingHours?: Record<string, string>;
 		createdBy?: string;
 	}
 
@@ -443,6 +448,58 @@
 
 		<p class="text-base leading-relaxed text-foreground">{location.description}</p>
 
+		<!-- Contact info -->
+		{#if location.website || location.phone}
+			<div class="space-y-2">
+				{#if location.website}
+					<div class="flex items-center gap-2 text-sm">
+						<span class="font-medium text-foreground-secondary">{$_('detail.website')}:</span>
+						<a
+							href={location.website}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-primary hover:underline truncate"
+						>
+							{location.website.replace(/^https?:\/\//, '')}
+						</a>
+					</div>
+				{/if}
+				{#if location.phone}
+					<div class="flex items-center gap-2 text-sm">
+						<span class="font-medium text-foreground-secondary">{$_('detail.phone')}:</span>
+						<a href="tel:{location.phone}" class="text-primary hover:underline">
+							{location.phone}
+						</a>
+					</div>
+				{/if}
+			</div>
+		{/if}
+
+		<!-- Opening hours -->
+		{#if location.openingHours && Object.keys(location.openingHours).length > 0}
+			<div>
+				<h2 class="mb-3 text-lg font-semibold text-foreground">{$_('detail.openingHours')}</h2>
+				<div class="rounded-xl border border-border bg-background-card overflow-hidden">
+					<table class="w-full text-sm">
+						<tbody>
+							{#each ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'] as day}
+								{#if location.openingHours[day]}
+									<tr class="border-b border-border last:border-b-0">
+										<td class="px-4 py-2 font-medium text-foreground">{$_(`days.${day}`)}</td>
+										<td class="px-4 py-2 text-right text-foreground-secondary">
+											{location.openingHours[day] === 'closed'
+												? $_('detail.closed')
+												: location.openingHours[day]}
+										</td>
+									</tr>
+								{/if}
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		{/if}
+
 		<!-- Owner actions -->
 		{#if isOwner}
 			<div class="flex gap-3">
@@ -613,7 +670,7 @@
 				<div class="flex gap-3 overflow-x-auto pb-1">
 					{#each nearbyLocations as nearby}
 						<a
-							href="/locations/{nearby.id}"
+							href="/locations/{nearby.slug || nearby.id}"
 							class="flex-shrink-0 w-40 overflow-hidden rounded-xl border border-border bg-background-card transition-shadow hover:shadow-md"
 						>
 							{#if nearby.imageUrl}

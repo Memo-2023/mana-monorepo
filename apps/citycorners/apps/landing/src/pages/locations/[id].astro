@@ -1,19 +1,15 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import locations from '../../data/locations.json';
+import fallbackLocations from '../../data/locations.json';
 
-export async function getStaticPaths() {
-	return locations.map((location) => ({
-		params: { id: location.id.toString() },
-	}));
-}
+const BACKEND_URL = import.meta.env.BACKEND_URL || 'http://localhost:3025';
 
-const { id } = Astro.params;
-const location = locations.find((loc) => loc.id.toString() === id);
-
-if (!location) {
-	return Astro.redirect('/');
-}
+const categoryMap: Record<string, string> = {
+	sight: 'Sehenswürdigkeit',
+	restaurant: 'Restaurant',
+	shop: 'Laden',
+	museum: 'Museum',
+};
 
 const categoryColors: Record<string, string> = {
 	Sehenswürdigkeit: 'bg-blue-100 text-blue-700',
@@ -21,6 +17,68 @@ const categoryColors: Record<string, string> = {
 	Laden: 'bg-green-100 text-green-700',
 	Museum: 'bg-purple-100 text-purple-700',
 };
+
+function mapApiLocation(loc: any) {
+	return {
+		id: loc.slug || loc.id,
+		name: loc.name,
+		category: categoryMap[loc.category] || loc.category,
+		description: loc.description,
+		image: loc.imageUrl || '/images/placeholder.jpg',
+		address: loc.address,
+		coordinates:
+			loc.latitude && loc.longitude ? { lat: loc.latitude, lng: loc.longitude } : undefined,
+		timeline: loc.timeline?.map((t: any) => ({ year: t.year, description: t.event })),
+	};
+}
+
+let allLocations: any[] = [];
+
+try {
+	const res = await fetch(`${BACKEND_URL}/api/v1/locations?limit=100`);
+	if (res.ok) {
+		const data = await res.json();
+		allLocations = data.locations.map(mapApiLocation);
+	} else {
+		allLocations = fallbackLocations;
+	}
+} catch (e) {
+	console.warn('Could not fetch from API, using fallback data:', e);
+	allLocations = fallbackLocations;
+}
+
+export async function getStaticPaths() {
+	let locations: any[] = [];
+
+	try {
+		const backendUrl = import.meta.env.BACKEND_URL || 'http://localhost:3025';
+		const res = await fetch(`${backendUrl}/api/v1/locations?limit=100`);
+		if (res.ok) {
+			const data = await res.json();
+			locations = data.locations.map((loc: any) => ({
+				id: loc.slug || loc.id,
+			}));
+		}
+	} catch (e) {
+		// Fallback
+	}
+
+	if (locations.length === 0) {
+		const fallback = await import('../../data/locations.json');
+		locations = fallback.default.map((loc) => ({ id: loc.id.toString() }));
+	}
+
+	return locations.map((loc) => ({
+		params: { id: loc.id.toString() },
+	}));
+}
+
+const { id } = Astro.params;
+const location = allLocations.find((loc) => loc.id.toString() === id);
+
+if (!location) {
+	return Astro.redirect('/');
+}
 ---
 
 <Layout title={`${location.name} – CityCorners`}>

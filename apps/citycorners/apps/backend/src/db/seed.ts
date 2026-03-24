@@ -17,6 +17,7 @@ async function seed() {
 	await db.insert(locations).values([
 		{
 			name: 'Konstanzer Münster',
+			slug: 'konstanzer-muenster',
 			category: 'sight',
 			description:
 				'Das Konstanzer Münster ist eine römisch-katholische Basilika in der Altstadt von Konstanz. Der Bau begann im Jahr 615 und wurde im Laufe der Jahrhunderte mehrmals erweitert.',
@@ -32,6 +33,7 @@ async function seed() {
 		},
 		{
 			name: 'Imperia',
+			slug: 'imperia',
 			category: 'sight',
 			description:
 				'Die Imperia ist eine satirische Skulptur des Bildhauers Peter Lenk im Hafen von Konstanz. Sie dreht sich langsam um die eigene Achse.',
@@ -43,6 +45,7 @@ async function seed() {
 		},
 		{
 			name: 'Restaurant Ophelia',
+			slug: 'restaurant-ophelia',
 			category: 'restaurant',
 			description:
 				'Fine-Dining-Restaurant im Riva-Gebäude am Konstanzer Hafen mit Blick auf den Bodensee.',
@@ -53,6 +56,7 @@ async function seed() {
 		},
 		{
 			name: 'LAGO Shopping Center',
+			slug: 'lago-shopping-center',
 			category: 'shop',
 			description: 'Großes Einkaufszentrum in der Konstanzer Innenstadt mit über 80 Geschäften.',
 			address: 'Bodanstraße 1, 78462 Konstanz',
@@ -62,6 +66,7 @@ async function seed() {
 		},
 		{
 			name: 'Rosgartenmuseum',
+			slug: 'rosgartenmuseum',
 			category: 'museum',
 			description:
 				'Das Rosgartenmuseum zeigt die Geschichte der Stadt Konstanz und der Bodenseeregion.',
@@ -71,6 +76,7 @@ async function seed() {
 		},
 		{
 			name: 'Archäologisches Landesmuseum',
+			slug: 'archaeologisches-landesmuseum',
 			category: 'museum',
 			description: 'Landesmuseum für Archäologie in Baden-Württemberg mit Funden aus der Region.',
 			address: 'Benediktinerplatz 5, 78467 Konstanz',

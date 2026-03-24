@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { LocationService } from './location.service';
+import { LocationService, generateSlug } from './location.service';
 import { DATABASE_CONNECTION } from '../db/database.module';
 import { createMockDb, createMockLocation } from '../__tests__/mock-factories';
 
@@ -20,16 +20,36 @@ describe('LocationService', () => {
 
 	afterEach(() => jest.clearAllMocks());
 
+	describe('generateSlug', () => {
+		it('should convert name to slug', () => {
+			expect(generateSlug('Konstanzer Münster')).toBe('konstanzer-muenster');
+		});
+
+		it('should replace umlauts', () => {
+			expect(generateSlug('Über den Flüssen')).toBe('ueber-den-fluessen');
+		});
+
+		it('should replace ß with ss', () => {
+			expect(generateSlug('Große Straße')).toBe('grosse-strasse');
+		});
+
+		it('should deduplicate hyphens', () => {
+			expect(generateSlug('Name -- with --- hyphens')).toBe('name-with-hyphens');
+		});
+
+		it('should trim leading/trailing hyphens', () => {
+			expect(generateSlug('  Hello World  ')).toBe('hello-world');
+		});
+	});
+
 	describe('findAll', () => {
 		it('should return paginated locations', async () => {
 			const locations = [
 				createMockLocation(),
 				createMockLocation({ id: 'loc-2', name: 'Imperia' }),
 			];
-			// Without category: count calls from() which resolves, data calls offset()
-			mockDb.from
-				.mockResolvedValueOnce([{ count: 2 }]) // count query
-				.mockReturnThis(); // data query chain continues
+			// Without category: count query calls where() (for notDeleted filter), data calls offset()
+			mockDb.where.mockResolvedValueOnce([{ count: 2 }]); // count query
 			mockDb.offset.mockResolvedValue(locations);
 
 			const result = await service.findAll();
@@ -56,7 +76,7 @@ describe('LocationService', () => {
 		});
 
 		it('should respect page and limit', async () => {
-			mockDb.from.mockResolvedValueOnce([{ count: 50 }]).mockReturnThis();
+			mockDb.where.mockResolvedValueOnce([{ count: 50 }]);
 			mockDb.offset.mockResolvedValue([]);
 
 			const result = await service.findAll(undefined, 3, 10);
@@ -84,6 +104,43 @@ describe('LocationService', () => {
 		});
 	});
 
+	describe('findBySlug', () => {
+		it('should return a location by slug', async () => {
+			const location = createMockLocation();
+			mockDb.where.mockResolvedValue([location]);
+
+			const result = await service.findBySlug('konstanzer-muenster');
+
+			expect(result).toEqual(location);
+		});
+
+		it('should throw NotFoundException if slug not found', async () => {
+			mockDb.where.mockResolvedValue([]);
+
+			await expect(service.findBySlug('nonexistent-slug')).rejects.toThrow(NotFoundException);
+		});
+	});
+
+	describe('findByIdOrSlug', () => {
+		it('should call findById for UUID', async () => {
+			const location = createMockLocation();
+			mockDb.where.mockResolvedValue([location]);
+
+			const result = await service.findByIdOrSlug('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+
+			expect(result).toEqual(location);
+		});
+
+		it('should call findBySlug for non-UUID', async () => {
+			const location = createMockLocation();
+			mockDb.where.mockResolvedValue([location]);
+
+			const result = await service.findByIdOrSlug('konstanzer-muenster');
+
+			expect(result).toEqual(location);
+		});
+	});
+
 	describe('search', () => {
 		it('should search locations by query', async () => {
 			const locations = [createMockLocation()];
@@ -104,8 +161,10 @@ describe('LocationService', () => {
 	});
 
 	describe('create', () => {
-		it('should create a new location', async () => {
+		it('should create a new location with auto-generated slug', async () => {
 			const newLocation = createMockLocation({ id: 'loc-new' });
+			// generateUniqueSlug: check existing slug
+			mockDb.where.mockResolvedValueOnce([]); // no existing slug
 			mockDb.returning.mockResolvedValue([newLocation]);
 
 			const result = await service.create({
@@ -161,11 +220,15 @@ describe('LocationService', () => {
 	});
 
 	describe('delete', () => {
-		it('should delete a location owned by user', async () => {
+		it('should soft delete a location owned by user', async () => {
 			const existing = createMockLocation({ createdBy: 'user-1' });
-			mockDb.where.mockResolvedValueOnce([existing]); // findById
+			mockDb.where
+				.mockResolvedValueOnce([existing]) // findById
+				.mockReturnThis(); // update where
 
 			await expect(service.delete('loc-1', 'user-1')).resolves.not.toThrow();
+			expect(mockDb.update).toHaveBeenCalled();
+			expect(mockDb.set).toHaveBeenCalled();
 		});
 
 		it('should throw ForbiddenException if not owner', async () => {
@@ -179,6 +242,38 @@ describe('LocationService', () => {
 			mockDb.where.mockResolvedValue([]);
 
 			await expect(service.delete('nonexistent')).rejects.toThrow(NotFoundException);
+		});
+	});
+
+	describe('restore', () => {
+		it('should restore a soft-deleted location', async () => {
+			const deleted = createMockLocation({
+				createdBy: 'user-1',
+				deletedAt: new Date(),
+			});
+			mockDb.where.mockResolvedValueOnce([deleted]); // find
+			const restored = createMockLocation({ createdBy: 'user-1', deletedAt: null });
+			mockDb.returning.mockResolvedValue([restored]);
+
+			const result = await service.restore('loc-1', 'user-1');
+
+			expect(result.deletedAt).toBeNull();
+		});
+
+		it('should throw ForbiddenException if not owner', async () => {
+			const deleted = createMockLocation({
+				createdBy: 'other-user',
+				deletedAt: new Date(),
+			});
+			mockDb.where.mockResolvedValueOnce([deleted]);
+
+			await expect(service.restore('loc-1', 'attacker-user')).rejects.toThrow(ForbiddenException);
+		});
+
+		it('should throw NotFoundException if not found', async () => {
+			mockDb.where.mockResolvedValue([]);
+
+			await expect(service.restore('nonexistent')).rejects.toThrow(NotFoundException);
 		});
 	});
 });

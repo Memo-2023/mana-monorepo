@@ -12,10 +12,13 @@ describe('LocationController', () => {
 		locationService = {
 			findAll: jest.fn(),
 			findById: jest.fn(),
+			findBySlug: jest.fn(),
+			findByIdOrSlug: jest.fn(),
 			search: jest.fn(),
 			create: jest.fn(),
 			update: jest.fn(),
 			delete: jest.fn(),
+			restore: jest.fn(),
 		};
 		lookupService = {
 			lookup: jest.fn(),
@@ -54,6 +57,18 @@ describe('LocationController', () => {
 			await controller.findAll('museum', '2', '10');
 
 			expect(locationService.findAll).toHaveBeenCalledWith('museum', 2, 10);
+		});
+	});
+
+	describe('findById', () => {
+		it('should use findByIdOrSlug', async () => {
+			const location = createMockLocation();
+			locationService.findByIdOrSlug.mockResolvedValue(location);
+
+			const result = await controller.findById('konstanzer-muenster');
+
+			expect(locationService.findByIdOrSlug).toHaveBeenCalledWith('konstanzer-muenster');
+			expect(result).toEqual({ location });
 		});
 	});
 
@@ -140,6 +155,18 @@ describe('LocationController', () => {
 
 			expect(result).toEqual({ success: true });
 			expect(locationService.delete).toHaveBeenCalledWith('loc-1', TEST_USER_ID);
+		});
+	});
+
+	describe('restore', () => {
+		it('should restore a soft-deleted location', async () => {
+			const location = createMockLocation();
+			locationService.restore.mockResolvedValue(location);
+
+			const result = await controller.restore(mockUser, 'loc-1');
+
+			expect(result).toEqual({ location });
+			expect(locationService.restore).toHaveBeenCalledWith('loc-1', TEST_USER_ID);
 		});
 	});
 });

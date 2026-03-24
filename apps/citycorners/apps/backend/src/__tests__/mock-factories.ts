@@ -1,5 +1,6 @@
 import type { Location } from '../db/schema/locations.schema';
 import type { Favorite } from '../db/schema/favorites.schema';
+import type { Collection } from '../db/schema/collections.schema';
 
 export const TEST_USER_ID = 'test-user-123';
 export const TEST_USER_EMAIL = 'test@example.com';
@@ -8,6 +9,7 @@ export function createMockLocation(overrides: Partial<Location> = {}): Location 
 	return {
 		id: 'loc-1',
 		name: 'Konstanzer Münster',
+		slug: 'konstanzer-muenster',
 		category: 'sight',
 		description: 'Historic cathedral in Konstanz.',
 		address: 'Münsterplatz 1, 78462 Konstanz',
@@ -16,9 +18,13 @@ export function createMockLocation(overrides: Partial<Location> = {}): Location 
 		imageUrl: '/images/muenster.svg',
 		images: [],
 		timeline: [{ year: '615', event: 'Founded' }],
+		website: null,
+		phone: null,
+		openingHours: null,
 		createdBy: null,
 		createdAt: new Date('2026-01-01'),
 		updatedAt: new Date('2026-01-01'),
+		deletedAt: null,
 		...overrides,
 	};
 }
@@ -29,6 +35,19 @@ export function createMockFavorite(overrides: Partial<Favorite> = {}): Favorite 
 		userId: TEST_USER_ID,
 		locationId: 'loc-1',
 		createdAt: new Date('2026-01-01'),
+		...overrides,
+	};
+}
+
+export function createMockCollection(overrides: Partial<Collection> = {}): Collection {
+	return {
+		id: 'col-1',
+		userId: TEST_USER_ID,
+		name: 'My Favorites',
+		description: null,
+		locationIds: [],
+		createdAt: new Date('2026-01-01'),
+		updatedAt: new Date('2026-01-01'),
 		...overrides,
 	};
 }

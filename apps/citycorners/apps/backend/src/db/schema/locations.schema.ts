@@ -10,9 +10,12 @@ import {
 
 export const categoryEnum = pgEnum('location_category', ['sight', 'restaurant', 'shop', 'museum']);
 
+export type OpeningHours = Record<string, string>;
+
 export const locations = pgTable('locations', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
+	slug: text('slug').unique(),
 	category: categoryEnum('category').notNull(),
 	description: text('description').notNull(),
 	address: text('address'),
@@ -21,12 +24,16 @@ export const locations = pgTable('locations', {
 	imageUrl: text('image_url'),
 	images: jsonb('images').$type<LocationImage[]>().default([]),
 	timeline: jsonb('timeline').$type<TimelineEntry[]>().default([]),
+	website: text('website'),
+	phone: text('phone'),
+	openingHours: jsonb('opening_hours').$type<OpeningHours>(),
 	createdBy: text('created_by'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()
 		.$onUpdate(() => new Date())
 		.notNull(),
+	deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
 export interface LocationImage {

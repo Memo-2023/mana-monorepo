@@ -50,7 +50,20 @@
 		"confirmDelete": "Endgültig löschen",
 		"deleting": "Wird gelöscht...",
 		"cancel": "Abbrechen",
-		"nearby": "In der Nähe"
+		"nearby": "In der Nähe",
+		"website": "Webseite",
+		"phone": "Telefon",
+		"openingHours": "Öffnungszeiten",
+		"closed": "Geschlossen"
+	},
+	"days": {
+		"mo": "Montag",
+		"tu": "Dienstag",
+		"we": "Mittwoch",
+		"th": "Donnerstag",
+		"fr": "Freitag",
+		"sa": "Samstag",
+		"su": "Sonntag"
 	},
 	"gallery": {
 		"addPhoto": "Foto hinzufügen",
@@ -63,7 +76,25 @@
 		"empty": "Noch keine Favoriten. Tippe auf das Herz bei einer Location, um sie zu speichern.",
 		"loginRequired": "Melde dich an, um Favoriten zu speichern.",
 		"add": "Zu Favoriten hinzufügen",
-		"remove": "Aus Favoriten entfernen"
+		"remove": "Aus Favoriten entfernen",
+		"tabFavorites": "Favoriten",
+		"tabCollections": "Sammlungen"
+	},
+	"collections": {
+		"title": "Sammlungen",
+		"empty": "Noch keine Sammlungen erstellt.",
+		"create": "Sammlung erstellen",
+		"name": "Name",
+		"namePlaceholder": "z.B. Meine Lieblingsrestaurants",
+		"description": "Beschreibung (optional)",
+		"descriptionPlaceholder": "Worum geht es in dieser Sammlung?",
+		"save": "Speichern",
+		"cancel": "Abbrechen",
+		"locations": "{count} Orte",
+		"noLocations": "Keine Orte in dieser Sammlung.",
+		"delete": "Sammlung löschen",
+		"deleteConfirm": "Bist du sicher, dass du diese Sammlung löschen möchtest?",
+		"back": "Zurück zu Sammlungen"
 	},
 	"map": {
 		"title": "Karte",
@@ -127,7 +158,11 @@
 		"imageLoadError": "Bild konnte nicht geladen werden.",
 		"imageRetry": "Erneut versuchen",
 		"geocoding": "Koordinaten werden ermittelt...",
-		"coordinatesFound": "Koordinaten gefunden"
+		"coordinatesFound": "Koordinaten gefunden",
+		"website": "Webseite (optional)",
+		"websitePlaceholder": "https://example.com",
+		"phone": "Telefon (optional)",
+		"phonePlaceholder": "+49 7531 12345"
 	},
 	"edit": {
 		"title": "Ort bearbeiten",
