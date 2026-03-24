@@ -98,10 +98,10 @@ function extractImports(filePath) {
 	// Match import ... from '@scope/package' and import '@scope/package'
 	// Also match dynamic imports and require
 	const patterns = [
-		/from\s+['"](@[^'"/]+\/[^'"/]+)/g,
-		/import\s*\(\s*['"](@[^'"/]+\/[^'"/]+)/g,
-		/import\s+['"](@[^'"/]+\/[^'"/]+)/g,
-		/require\s*\(\s*['"](@[^'"/]+\/[^'"/]+)/g,
+		new RegExp('from\\s+[\'"](@[^\'"/]+/[^\'"/]+)', 'g'),
+		new RegExp('import\\s*\\(\\s*[\'"](@[^\'"/]+/[^\'"/]+)', 'g'),
+		new RegExp('import\\s+[\'"](@[^\'"/]+/[^\'"/]+)', 'g'),
+		new RegExp('require\\s*\\(\\s*[\'"](@[^\'"/]+/[^\'"/]+)', 'g'),
 	];
 	for (const pattern of patterns) {
 		let match;
