@@ -16,15 +16,19 @@ COPY patches/ ./patches/
 
 # Copy shared packages (required dependencies)
 COPY packages/shared-storage ./packages/shared-storage
+COPY packages/shared-llm ./packages/shared-llm
 
 # Copy mana-core-auth
 COPY services/mana-core-auth ./services/mana-core-auth
 
 # Install all dependencies (without ignore-scripts to build native modules like bcrypt)
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile --filter mana-core-auth... --filter @manacore/shared-storage
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile --filter mana-core-auth... --filter @manacore/shared-storage --filter @manacore/shared-llm
 
-# Build shared-storage first
+# Build shared packages first
 WORKDIR /app/packages/shared-storage
+RUN pnpm build || true
+
+WORKDIR /app/packages/shared-llm
 RUN pnpm build || true
 
 # Build the application
