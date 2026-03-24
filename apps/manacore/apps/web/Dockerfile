@@ -51,8 +51,8 @@ COPY packages/credit-operations ./packages/credit-operations
 # Copy manacore web
 COPY apps/manacore/apps/web ./apps/manacore/apps/web
 
-# Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts to prevent premature builds)
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-vite-config
