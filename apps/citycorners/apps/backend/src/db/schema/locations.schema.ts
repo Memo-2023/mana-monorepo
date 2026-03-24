@@ -20,6 +20,7 @@ export const locations = pgTable('locations', {
 	longitude: doublePrecision('longitude'),
 	imageUrl: text('image_url'),
 	timeline: jsonb('timeline').$type<TimelineEntry[]>().default([]),
+	createdBy: text('created_by'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()

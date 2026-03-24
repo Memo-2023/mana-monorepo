@@ -14,10 +14,20 @@
 		latitude?: number;
 		longitude?: number;
 		imageUrl?: string;
+		createdBy?: string;
+	}
+
+	interface Pagination {
+		total: number;
+		page: number;
+		limit: number;
+		totalPages: number;
 	}
 
 	let locations = $state<Location[]>([]);
+	let pagination = $state<Pagination | null>(null);
 	let loading = $state(true);
+	let loadingMore = $state(false);
 	let selectedCategory = $state<string | null>(null);
 
 	const categoryKeys = ['sight', 'restaurant', 'shop', 'museum'];
@@ -36,19 +46,51 @@
 		selectedCategory ? locations.filter((l) => l.category === selectedCategory) : locations
 	);
 
-	onMount(async () => {
+	let hasMore = $derived(pagination ? pagination.page < pagination.totalPages : false);
+
+	async function loadLocations(page = 1, append = false) {
+		if (page === 1) loading = true;
+		else loadingMore = true;
+
 		try {
-			const res = await fetch(api('/locations'));
+			const params = new URLSearchParams({ page: String(page), limit: '20' });
+			if (selectedCategory) params.set('category', selectedCategory);
+			const res = await fetch(api(`/locations?${params}`));
 			const data = await res.json();
-			locations = data.locations;
+			if (append) {
+				locations = [...locations, ...data.locations];
+			} else {
+				locations = data.locations;
+			}
+			pagination = data.pagination;
 		} catch (err) {
 			console.error('Failed to load locations:', err);
 		} finally {
 			loading = false;
+			loadingMore = false;
 		}
+	}
 
+	function loadMore() {
+		if (pagination && hasMore && !loadingMore) {
+			loadLocations(pagination.page + 1, true);
+		}
+	}
+
+	onMount(() => {
+		loadLocations();
 		if (authStore.isAuthenticated) {
 			favoritesStore.load();
+		}
+	});
+
+	// Reload when category changes
+	$effect(() => {
+		// Track selectedCategory to re-run
+		const _ = selectedCategory;
+		// Don't run on initial mount (loading is still true)
+		if (!loading || locations.length > 0) {
+			loadLocations(1);
 		}
 	});
 
@@ -86,7 +128,8 @@
 			: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover'}"
 		onclick={() => (selectedCategory = null)}
 	>
-		{$_('home.all')} ({locations.length})
+		{$_('home.all')}
+		{pagination ? `(${pagination.total})` : ''}
 	</button>
 	{#each categoryKeys as cat}
 		<button
@@ -101,7 +144,11 @@
 </div>
 
 {#if loading}
-	<p class="text-foreground-secondary">{$_('home.loading')}</p>
+	<div class="flex items-center justify-center py-12">
+		<div
+			class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
+		></div>
+	</div>
 {:else if filtered.length === 0}
 	<div class="py-12 text-center">
 		<span class="mb-2 block text-4xl"
@@ -197,4 +244,22 @@
 			</a>
 		{/each}
 	</div>
+
+	<!-- Load more -->
+	{#if hasMore}
+		<div class="mt-8 text-center">
+			<button
+				onclick={loadMore}
+				disabled={loadingMore}
+				class="rounded-lg border border-border bg-background-card px-6 py-2.5 text-sm font-medium text-foreground-secondary transition-colors hover:bg-background-card-hover hover:text-foreground disabled:opacity-50"
+			>
+				{#if loadingMore}
+					<div
+						class="inline-block h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2 align-middle"
+					></div>
+				{/if}
+				{$_('home.loadMore')}
+			</button>
+		</div>
+	{/if}
 {/if}

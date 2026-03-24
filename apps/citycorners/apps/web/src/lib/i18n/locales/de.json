@@ -19,7 +19,8 @@
 		"loading": "Laden...",
 		"noResults": "Keine Locations gefunden.",
 		"noResultsCategory": "Keine {category} gefunden.",
-		"addFirst": "Ersten Ort hinzufügen"
+		"addFirst": "Ersten Ort hinzufügen",
+		"loadMore": "Mehr laden"
 	},
 	"categories": {
 		"sight": "Sehenswürdigkeiten",
@@ -42,7 +43,13 @@
 		"linkCopied": "Link kopiert!",
 		"showDetails": "Details",
 		"back": "Zurück zur Übersicht",
-		"notFound": "Location nicht gefunden."
+		"notFound": "Location nicht gefunden.",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"deleteConfirm": "Bist du sicher, dass du diesen Ort löschen möchtest? Das kann nicht rückgängig gemacht werden.",
+		"confirmDelete": "Endgültig löschen",
+		"deleting": "Wird gelöscht...",
+		"cancel": "Abbrechen"
 	},
 	"favorites": {
 		"title": "Favoriten",
@@ -115,6 +122,16 @@
 		"imageRetry": "Erneut versuchen",
 		"geocoding": "Koordinaten werden ermittelt...",
 		"coordinatesFound": "Koordinaten gefunden"
+	},
+	"edit": {
+		"title": "Ort bearbeiten",
+		"subtitle": "Ändere die Details dieses Ortes",
+		"save": "Änderungen speichern",
+		"saving": "Wird gespeichert...",
+		"cancel": "Abbrechen",
+		"error": "Fehler beim Speichern. Bitte versuche es erneut.",
+		"loadError": "Ort konnte nicht geladen werden.",
+		"forbidden": "Du kannst nur deine eigenen Orte bearbeiten."
 	},
 	"offline": {
 		"title": "Keine Verbindung",

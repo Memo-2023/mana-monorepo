@@ -19,7 +19,8 @@
 		"loading": "Loading...",
 		"noResults": "No locations found.",
 		"noResultsCategory": "No {category} found.",
-		"addFirst": "Add the first place"
+		"addFirst": "Add the first place",
+		"loadMore": "Load more"
 	},
 	"categories": {
 		"sight": "Sights",
@@ -42,7 +43,13 @@
 		"linkCopied": "Link copied!",
 		"showDetails": "Details",
 		"back": "Back to overview",
-		"notFound": "Location not found."
+		"notFound": "Location not found.",
+		"edit": "Edit",
+		"delete": "Delete",
+		"deleteConfirm": "Are you sure you want to delete this place? This cannot be undone.",
+		"confirmDelete": "Delete permanently",
+		"deleting": "Deleting...",
+		"cancel": "Cancel"
 	},
 	"favorites": {
 		"title": "Favorites",
@@ -115,6 +122,16 @@
 		"imageRetry": "Retry",
 		"geocoding": "Finding coordinates...",
 		"coordinatesFound": "Coordinates found"
+	},
+	"edit": {
+		"title": "Edit place",
+		"subtitle": "Update the details of this place",
+		"save": "Save changes",
+		"saving": "Saving...",
+		"cancel": "Cancel",
+		"error": "Failed to save. Please try again.",
+		"loadError": "Could not load place.",
+		"forbidden": "You can only edit your own places."
 	},
 	"offline": {
 		"title": "No connection",

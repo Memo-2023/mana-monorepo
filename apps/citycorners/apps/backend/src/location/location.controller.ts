@@ -77,9 +77,24 @@ export class LocationController {
 	) {}
 
 	@Get()
-	async findAll(@Query('category') category?: string) {
-		const locations = await this.locationService.findAll(category);
-		return { locations };
+	async findAll(
+		@Query('category') category?: string,
+		@Query('page') page?: string,
+		@Query('limit') limit?: string
+	) {
+		const pageNum = page ? Math.max(1, parseInt(page, 10)) : 1;
+		const limitNum = limit ? Math.min(100, Math.max(1, parseInt(limit, 10))) : 20;
+
+		const result = await this.locationService.findAll(category, pageNum, limitNum);
+		return {
+			locations: result.items,
+			pagination: {
+				total: result.total,
+				page: result.page,
+				limit: result.limit,
+				totalPages: result.totalPages,
+			},
+		};
 	}
 
 	@Get('lookup')
@@ -109,7 +124,10 @@ export class LocationController {
 	@Post()
 	@UseGuards(JwtAuthGuard)
 	async create(@CurrentUser() user: CurrentUserData, @Body() dto: CreateLocationDto) {
-		const location = await this.locationService.create(dto);
+		const location = await this.locationService.create({
+			...dto,
+			createdBy: user.userId,
+		});
 		return { location };
 	}
 
@@ -120,14 +138,14 @@ export class LocationController {
 		@Param('id') id: string,
 		@Body() dto: UpdateLocationDto
 	) {
-		const location = await this.locationService.update(id, dto);
+		const location = await this.locationService.update(id, dto, user.userId);
 		return { location };
 	}
 
 	@Delete(':id')
 	@UseGuards(JwtAuthGuard)
 	async delete(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
-		await this.locationService.delete(id);
+		await this.locationService.delete(id, user.userId);
 		return { success: true };
 	}
 }

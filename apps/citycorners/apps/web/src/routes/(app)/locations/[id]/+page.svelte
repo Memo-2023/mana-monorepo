@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { _ } from 'svelte-i18n';
@@ -22,12 +23,15 @@
 		longitude?: number;
 		imageUrl?: string;
 		timeline?: TimelineEntry[];
+		createdBy?: string;
 	}
 
 	let location = $state<Location | null>(null);
 	let loading = $state(true);
 	let mapContainer: HTMLDivElement;
 	let shareSuccess = $state(false);
+	let showDeleteConfirm = $state(false);
+	let deleting = $state(false);
 
 	const categoryColors: Record<string, string> = {
 		sight: '#2563eb',
@@ -35,6 +39,12 @@
 		shop: '#16a34a',
 		museum: '#9333ea',
 	};
+
+	let isOwner = $derived(
+		location?.createdBy != null &&
+			authStore.isAuthenticated &&
+			authStore.user?.id === location.createdBy
+	);
 
 	onMount(async () => {
 		try {
@@ -96,6 +106,27 @@
 			await navigator.clipboard.writeText(url);
 			shareSuccess = true;
 			setTimeout(() => (shareSuccess = false), 2000);
+		}
+	}
+
+	async function handleDelete() {
+		if (!location || deleting) return;
+		deleting = true;
+
+		try {
+			const token = await authStore.getValidToken();
+			const res = await fetch(api(`/locations/${location.id}`), {
+				method: 'DELETE',
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			if (res.ok) {
+				goto('/');
+			}
+		} catch {
+			// ignore
+		} finally {
+			deleting = false;
+			showDeleteConfirm = false;
 		}
 	}
 </script>
@@ -252,6 +283,74 @@
 		</div>
 
 		<p class="text-base leading-relaxed text-foreground">{location.description}</p>
+
+		<!-- Owner actions: Edit + Delete -->
+		{#if isOwner}
+			<div class="flex gap-3">
+				<a
+					href="/locations/{location.id}/edit"
+					class="flex items-center gap-2 rounded-lg border border-border bg-background-card px-4 py-2.5 text-sm font-medium text-foreground-secondary transition-colors hover:bg-background-card-hover hover:text-foreground"
+				>
+					<svg
+						class="h-4 w-4"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+						/>
+					</svg>
+					{$_('detail.edit')}
+				</a>
+				<button
+					onclick={() => (showDeleteConfirm = true)}
+					class="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+				>
+					<svg
+						class="h-4 w-4"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+						/>
+					</svg>
+					{$_('detail.delete')}
+				</button>
+			</div>
+		{/if}
+
+		<!-- Delete confirmation -->
+		{#if showDeleteConfirm}
+			<div
+				class="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/30"
+			>
+				<p class="mb-3 text-sm text-red-700 dark:text-red-300">{$_('detail.deleteConfirm')}</p>
+				<div class="flex gap-2">
+					<button
+						onclick={() => (showDeleteConfirm = false)}
+						class="rounded-lg border border-border bg-background px-4 py-2 text-sm text-foreground-secondary hover:bg-background-card-hover"
+					>
+						{$_('detail.cancel')}
+					</button>
+					<button
+						onclick={handleDelete}
+						disabled={deleting}
+						class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+					>
+						{deleting ? $_('detail.deleting') : $_('detail.confirmDelete')}
+					</button>
+				</div>
+			</div>
+		{/if}
 
 		<!-- Map + Directions -->
 		{#if location.latitude && location.longitude}

@@ -26,23 +26,34 @@ describe('LocationController', () => {
 	afterEach(() => jest.clearAllMocks());
 
 	describe('findAll', () => {
-		it('should return all locations', async () => {
+		it('should return paginated locations', async () => {
 			const locations = [createMockLocation(), createMockLocation({ id: 'loc-2' })];
-			locationService.findAll.mockResolvedValue(locations);
+			locationService.findAll.mockResolvedValue({
+				items: locations,
+				total: 2,
+				page: 1,
+				limit: 20,
+				totalPages: 1,
+			});
 
 			const result = await controller.findAll();
 
-			expect(result).toEqual({ locations });
+			expect(result.locations).toEqual(locations);
+			expect(result.pagination).toEqual({ total: 2, page: 1, limit: 20, totalPages: 1 });
 		});
 
-		it('should filter by category', async () => {
-			const museums = [createMockLocation({ category: 'museum' })];
-			locationService.findAll.mockResolvedValue(museums);
+		it('should pass category and pagination params', async () => {
+			locationService.findAll.mockResolvedValue({
+				items: [],
+				total: 0,
+				page: 2,
+				limit: 10,
+				totalPages: 0,
+			});
 
-			const result = await controller.findAll('museum');
+			await controller.findAll('museum', '2', '10');
 
-			expect(result).toEqual({ locations: museums });
-			expect(locationService.findAll).toHaveBeenCalledWith('museum');
+			expect(locationService.findAll).toHaveBeenCalledWith('museum', 2, 10);
 		});
 	});
 
@@ -86,8 +97,8 @@ describe('LocationController', () => {
 	});
 
 	describe('create', () => {
-		it('should create a location', async () => {
-			const location = createMockLocation({ id: 'new-loc' });
+		it('should create a location with createdBy', async () => {
+			const location = createMockLocation({ id: 'new-loc', createdBy: TEST_USER_ID });
 			locationService.create.mockResolvedValue(location);
 
 			const result = await controller.create(mockUser, {
@@ -97,16 +108,38 @@ describe('LocationController', () => {
 			});
 
 			expect(result).toEqual({ location });
+			expect(locationService.create).toHaveBeenCalledWith({
+				name: 'Test',
+				category: 'sight',
+				description: 'A test location',
+				createdBy: TEST_USER_ID,
+			});
+		});
+	});
+
+	describe('update', () => {
+		it('should pass userId to service', async () => {
+			const location = createMockLocation({ name: 'Updated' });
+			locationService.update.mockResolvedValue(location);
+
+			await controller.update(mockUser, 'loc-1', { name: 'Updated' });
+
+			expect(locationService.update).toHaveBeenCalledWith(
+				'loc-1',
+				{ name: 'Updated' },
+				TEST_USER_ID
+			);
 		});
 	});
 
 	describe('delete', () => {
-		it('should delete a location', async () => {
+		it('should pass userId to service', async () => {
 			locationService.delete.mockResolvedValue(undefined);
 
 			const result = await controller.delete(mockUser, 'loc-1');
 
 			expect(result).toEqual({ success: true });
+			expect(locationService.delete).toHaveBeenCalledWith('loc-1', TEST_USER_ID);
 		});
 	});
 });
