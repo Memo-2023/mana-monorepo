@@ -43,6 +43,14 @@ COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
+COPY packages/shared-pwa ./packages/shared-pwa
+COPY packages/shared-vite-config ./packages/shared-vite-config
+
+# Copy patches (referenced by pnpm-lock.yaml)
+COPY patches/ ./patches/
+
+# Copy presi shared package
+COPY apps/presi/packages/shared ./apps/presi/packages/shared
 
 # Copy presi web
 COPY apps/presi/apps/web ./apps/presi/apps/web

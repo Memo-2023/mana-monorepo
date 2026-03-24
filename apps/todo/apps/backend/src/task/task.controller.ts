@@ -3,7 +3,7 @@ import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nes
 import { UseCredits } from '@manacore/nestjs-integration';
 import { CreditOperationType } from '@manacore/credit-operations';
 import { TaskService } from './task.service';
-import { CreateTaskDto, UpdateTaskDto, QueryTasksDto } from './dto';
+import { CreateTaskDto, UpdateTaskDto, QueryTasksDto, ReorderTasksDto } from './dto';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
@@ -121,12 +121,8 @@ export class TaskController {
 	}
 
 	@Put('reorder')
-	async reorder(
-		@CurrentUser() user: CurrentUserData,
-		@Body('taskIds') taskIds: string[],
-		@Body('projectId') projectId?: string | null
-	) {
-		const tasks = await this.taskService.reorder(user.userId, taskIds, projectId);
+	async reorder(@CurrentUser() user: CurrentUserData, @Body() dto: ReorderTasksDto) {
+		const tasks = await this.taskService.reorder(user.userId, dto.taskIds, dto.projectId);
 		return { tasks };
 	}
 }

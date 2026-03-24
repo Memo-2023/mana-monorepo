@@ -34,6 +34,11 @@ COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
+COPY packages/shared-ui ./packages/shared-ui
+COPY packages/shared-pwa ./packages/shared-pwa
+
+# Copy patches (referenced by pnpm-lock.yaml)
+COPY patches/ ./patches/
 
 # Copy skilltree web
 COPY apps/skilltree/apps/web ./apps/skilltree/apps/web

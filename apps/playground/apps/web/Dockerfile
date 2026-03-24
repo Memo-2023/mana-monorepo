@@ -27,6 +27,9 @@ COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 
+# Copy patches (referenced by pnpm-lock.yaml)
+COPY patches/ ./patches/
+
 # Copy llm-playground service
 COPY apps/playground/apps/web ./apps/playground/apps/web
 

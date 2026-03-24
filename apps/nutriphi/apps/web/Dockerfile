@@ -42,6 +42,10 @@ COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
+COPY packages/shared-pwa ./packages/shared-pwa
+
+# Copy patches (referenced by pnpm-lock.yaml)
+COPY patches/ ./patches/
 
 # Copy nutriphi packages and web
 COPY apps/nutriphi/packages ./apps/nutriphi/packages
