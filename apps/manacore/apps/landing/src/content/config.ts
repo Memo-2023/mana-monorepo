@@ -181,7 +181,7 @@ const devlogCollection = defineCollection({
 	}),
 });
 
-const auditsCollection = defineCollection({
+const manascoreCollection = defineCollection({
 	type: 'content',
 	schema: z.object({
 		title: z.string(),
@@ -257,6 +257,6 @@ export const collections = {
 	mission: missionCollection,
 	context: contextCollection,
 	devlog: devlogCollection,
-	audits: auditsCollection,
+	manascore: manascoreCollection,
 	blueprints: blueprintsCollection,
 };

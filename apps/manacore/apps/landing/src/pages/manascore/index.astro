@@ -7,9 +7,9 @@ import Container from '../../components/layout/Container.astro';
 import HeroSection from '../../components/content/HeroSection.astro';
 import { getCollection } from 'astro:content';
 
-const audits = await getCollection('audits');
+const scores = await getCollection('manascore');
 // Default: sort by score descending
-const sortedAudits = audits.sort((a, b) => b.data.score - a.data.score);
+const sortedAudits = scores.sort((a, b) => b.data.score - a.data.score);
 
 const statusColors: Record<string, { bg: string; text: string }> = {
 	prototype: { bg: 'bg-red-500/10', text: 'text-red-500' },
@@ -39,12 +39,15 @@ function getScoreBarColor(score: number): string {
 const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 ---
 
-<Layout title="App Audits - ManaCore" description="Production Readiness Audits der ManaCore Apps">
+<Layout
+	title="ManaScore - ManaCore"
+	description="ManaScore: Production Readiness Bewertungen aller ManaCore Apps"
+>
 	<Navbar />
 
 	<HeroSection
-		badge="Quality Assurance"
-		title="App Audits"
+		badge="ManaScore"
+		title="ManaScore"
 		subtitle="Production Readiness Bewertungen aller ManaCore Apps. Jede App wird in 8 Kategorien bewertet: Backend, Frontend, Database, Testing, Deployment, Documentation, Security und UX."
 	/>
 
@@ -105,7 +108,7 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 
 						return (
 							<a
-								href={`/audits/${audit.slug}`}
+								href={`/manascore/${audit.slug}`}
 								class="audit-card group border-border/50 hover:border-border block rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-5 transition-all hover:shadow-lg"
 								data-score={data.score}
 								data-status={data.status}

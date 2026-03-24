@@ -1,0 +1,189 @@
+---
+title: 'Was ist der ManaScore?'
+description: 'Der ManaScore ist das interne Qualitätsbewertungssystem für alle ManaCore Apps. Er bewertet jede App in 8 Kategorien auf einer Skala von 0-100.'
+date: 2026-03-24
+app: 'manacore'
+author: 'Till Schneider'
+tags: ['manascore', 'quality', 'methodology']
+score: 100
+scores:
+  backend: 100
+  frontend: 100
+  database: 100
+  testing: 100
+  deployment: 100
+  documentation: 100
+  security: 100
+  ux: 100
+status: 'mature'
+version: '1.0.0'
+stats:
+  backendModules: 0
+  webRoutes: 0
+  components: 0
+  dbTables: 0
+  testFiles: 0
+  testCount: 0
+  languages: 0
+---
+
+## Was ist der ManaScore?
+
+Der **ManaScore** ist das interne Qualitätsbewertungssystem für alle Apps im ManaCore-Ecosystem. Er gibt einen schnellen Überblick über den Reifegrad jeder App und identifiziert Bereiche, die vor einem Production-Deployment verbessert werden müssen.
+
+Der ManaScore ist **kein Lighthouse-Score** und **kein Performance-Benchmark**. Er bewertet die **ganzheitliche Production-Readiness** einer App — von der Code-Qualität über Security bis hin zur User Experience.
+
+---
+
+## Die 8 Kategorien
+
+Jede App wird in 8 Kategorien bewertet. Der Gesamtscore ist der gewichtete Durchschnitt aller Kategorien.
+
+### 1. Backend (Gewicht: 15%)
+
+Bewertet die Qualität und Vollständigkeit des NestJS Backends.
+
+| Kriterium                                              | Punkte |
+| ------------------------------------------------------ | ------ |
+| Module-Architektur (Trennung, Services)                | 0-15   |
+| DTO-Validation (class-validator)                       | 0-15   |
+| Error Handling (Exception Filter, konsistentes Format) | 0-10   |
+| API-Dokumentation (Swagger/OpenAPI)                    | 0-10   |
+| Health Endpoint                                        | 0-10   |
+| Rate Limiting (ThrottlerGuard)                         | 0-10   |
+| Auth Guards (JwtAuthGuard)                             | 0-15   |
+| Credit Operations Integration                          | 0-5    |
+| Metrics/Monitoring (Prometheus)                        | 0-10   |
+
+### 2. Frontend (Gewicht: 15%)
+
+Bewertet die Web-App (SvelteKit/Svelte 5).
+
+| Kriterium                                       | Punkte |
+| ----------------------------------------------- | ------ |
+| Komponentenstruktur (Atoms/Molecules/Organisms) | 0-10   |
+| State Management (Svelte 5 Runes)               | 0-10   |
+| Error Handling (Error Page, Error Boundaries)   | 0-10   |
+| Loading States (Skeleton Loader)                | 0-10   |
+| Empty States                                    | 0-5    |
+| PWA (Service Worker, Manifest, Icons)           | 0-15   |
+| Offline-Support (Offline Page)                  | 0-10   |
+| Context Menus (Shared ContextMenu)              | 0-5    |
+| API Client (Error Handling, Retry, Timeout)     | 0-10   |
+| Security Headers (CSP, X-Frame-Options)         | 0-10   |
+| Meta/OG Tags (SEO)                              | 0-5    |
+
+### 3. Database (Gewicht: 10%)
+
+Bewertet das Datenbankschema und die ORM-Integration.
+
+| Kriterium                                   | Punkte |
+| ------------------------------------------- | ------ |
+| Schema-Design (Normalisierung, Beziehungen) | 0-25   |
+| Drizzle ORM Type Safety                     | 0-15   |
+| Migrations (Advisory Locks, Rollback)       | 0-20   |
+| Indexes (Performance)                       | 0-15   |
+| JSONB für flexible Daten                    | 0-10   |
+| Seed-Skripte                                | 0-15   |
+
+### 4. Testing (Gewicht: 15%)
+
+Bewertet die Test-Coverage und -Qualität.
+
+| Kriterium                       | Punkte |
+| ------------------------------- | ------ |
+| Unit Tests (Services)           | 0-25   |
+| Unit Tests (Frontend/Stores)    | 0-15   |
+| E2E Tests (Playwright)          | 0-25   |
+| Integration Tests (API)         | 0-15   |
+| Mock Factories                  | 0-10   |
+| Coverage Threshold konfiguriert | 0-10   |
+
+### 5. Deployment (Gewicht: 10%)
+
+Bewertet die Deployment-Infrastruktur.
+
+| Kriterium                            | Punkte |
+| ------------------------------------ | ------ |
+| Multi-Stage Dockerfile (Web)         | 0-20   |
+| Multi-Stage Dockerfile (Backend)     | 0-20   |
+| Health Checks (Docker)               | 0-15   |
+| docker-compose (Production)          | 0-15   |
+| Entrypoint Scripts (DB-Wait)         | 0-10   |
+| Environment Variables (.env.example) | 0-10   |
+| CI/CD Pipeline                       | 0-10   |
+
+### 6. Documentation (Gewicht: 10%)
+
+Bewertet die Projektdokumentation.
+
+| Kriterium                               | Punkte |
+| --------------------------------------- | ------ |
+| CLAUDE.md (vollständig, aktuell)        | 0-30   |
+| API-Endpunkte dokumentiert              | 0-20   |
+| Datenbankschema dokumentiert            | 0-15   |
+| Befehle dokumentiert (dev, build, test) | 0-15   |
+| Environment Variables dokumentiert      | 0-10   |
+| Architecture/Patterns erklärt           | 0-10   |
+
+### 7. Security (Gewicht: 15%)
+
+Bewertet die Sicherheitsmaßnahmen.
+
+| Kriterium                                     | Punkte |
+| --------------------------------------------- | ------ |
+| Auth Guards auf allen Endpoints               | 0-20   |
+| Rate Limiting                                 | 0-15   |
+| CORS konfiguriert                             | 0-10   |
+| Security Headers (CSP, HSTS, X-Frame-Options) | 0-15   |
+| Input Validation (DTOs, Sanitization)         | 0-15   |
+| Error Tracking (GlitchTip)                    | 0-10   |
+| Encryption (sensible Daten)                   | 0-10   |
+| Audit Logging                                 | 0-5    |
+
+### 8. UX (Gewicht: 10%)
+
+Bewertet die User Experience und Accessibility.
+
+| Kriterium                    | Punkte |
+| ---------------------------- | ------ |
+| i18n (mindestens 5 Sprachen) | 0-20   |
+| Responsive Design            | 0-15   |
+| Keyboard Navigation          | 0-10   |
+| Focus Trapping (Modals)      | 0-10   |
+| ARIA Labels/Roles            | 0-10   |
+| Toast/Feedback System        | 0-10   |
+| Loading/Skeleton States      | 0-10   |
+| Dark/Light Mode              | 0-10   |
+| Immersive Mode               | 0-5    |
+
+---
+
+## Reifegradstufen
+
+| Stufe          | Score  | Bedeutung                                            |
+| -------------- | ------ | ---------------------------------------------------- |
+| **Prototype**  | 0-25   | Proof of Concept, nicht für Nutzer gedacht           |
+| **Alpha**      | 26-50  | Grundfunktionen vorhanden, aber instabil             |
+| **Beta**       | 51-70  | Funktionsfähig, aber noch Lücken                     |
+| **Production** | 71-85  | Stabil und deploybar, kleinere Lücken                |
+| **Mature**     | 86-100 | Vollständig production-ready, best practices überall |
+
+---
+
+## Wie wird der ManaScore aktualisiert?
+
+1. **Initiales Assessment** — Beim ersten Audit wird jede Kategorie einzeln bewertet
+2. **Fortlaufende Updates** — Nach größeren Änderungen (z.B. i18n-Migration, Security-Fixes) wird der Score aktualisiert
+3. **Änderungslog** — Jeder ManaScore enthält eine "Änderungen seit letztem Audit"-Tabelle
+4. **Top-3 Empfehlungen** — Jeder Report endet mit den 3 wichtigsten nächsten Schritten
+
+---
+
+## Scoring-Philosophie
+
+- **Pragmatisch, nicht perfektionistisch** — Ein Score von 85+ bedeutet "production-ready", nicht "perfekt"
+- **Gewichtet nach Impact** — Security und Testing wiegen schwerer als Documentation
+- **Relativ zum Ecosystem** — Scores werden im Kontext des ManaCore-Monorepos vergeben
+- **Kein Benchmarking gegen externe Apps** — Der ManaScore vergleicht Apps nur untereinander
+- **Action-orientiert** — Jeder Report enthält konkrete Empfehlungen, nicht nur Bewertungen
