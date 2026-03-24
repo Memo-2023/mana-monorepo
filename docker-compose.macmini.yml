@@ -27,7 +27,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mana123}
     volumes:
       - /Volumes/ManaData/postgres:/var/lib/postgresql/data
-      - ./docker/postgres/postgresql.conf:/etc/postgresql/conf.d/custom.conf:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -37,7 +36,14 @@ services:
       retries: 5
     command: >
       postgres
-      -c 'config_file=/etc/postgresql/conf.d/custom.conf'
+      -c shared_buffers=512MB
+      -c effective_cache_size=2GB
+      -c work_mem=16MB
+      -c maintenance_work_mem=128MB
+      -c max_wal_size=1GB
+      -c max_wal_senders=3
+      -c log_min_duration_statement=1000
+      -c log_checkpoints=on
 
   # PostgreSQL Backup — hourly pg_dumpall + daily pg_basebackup
   # Retention: 48 hourly dumps + 30 daily base backups
