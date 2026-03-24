@@ -64,6 +64,7 @@
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
 		"@manacore/wallpaper-generator": "workspace:*",
+		"date-fns": "^4.1.0",
 		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.0"
 	},
