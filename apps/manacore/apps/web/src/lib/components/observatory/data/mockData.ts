@@ -1,0 +1,362 @@
+import type { AppData, AppStatus, PlantType, CategoryScores } from './types';
+import { APP_POSITIONS } from './layout';
+
+interface AppDefinition {
+	id: string;
+	displayName: string;
+	score: number;
+	status: AppStatus;
+	categories: CategoryScores;
+}
+
+function getPlantType(status: AppStatus, score: number): PlantType {
+	if (score >= 85) return 'oak';
+	if (score >= 70) return 'birch';
+	if (status === 'beta' && score >= 55) return 'youngTree';
+	if (status === 'beta') return 'reed';
+	if (status === 'alpha') return 'sprout';
+	if (status === 'prototype') return 'sprout';
+	return 'youngTree';
+}
+
+const APP_DEFINITIONS: AppDefinition[] = [
+	{
+		id: 'calendar',
+		displayName: 'Calendar',
+		score: 97,
+		status: 'mature',
+		categories: {
+			backend: 95,
+			frontend: 96,
+			database: 95,
+			testing: 98,
+			deployment: 100,
+			documentation: 98,
+			security: 95,
+			ux: 98,
+		},
+	},
+	{
+		id: 'todo',
+		displayName: 'Todo',
+		score: 96,
+		status: 'mature',
+		categories: {
+			backend: 94,
+			frontend: 95,
+			database: 95,
+			testing: 97,
+			deployment: 98,
+			documentation: 95,
+			security: 95,
+			ux: 96,
+		},
+	},
+	{
+		id: 'contacts',
+		displayName: 'Contacts',
+		score: 94,
+		status: 'production',
+		categories: {
+			backend: 92,
+			frontend: 90,
+			database: 95,
+			testing: 92,
+			deployment: 95,
+			documentation: 95,
+			security: 95,
+			ux: 94,
+		},
+	},
+	{
+		id: 'manacore',
+		displayName: 'ManaCore',
+		score: 88,
+		status: 'production',
+		categories: {
+			backend: 55,
+			frontend: 90,
+			database: 70,
+			testing: 72,
+			deployment: 90,
+			documentation: 88,
+			security: 80,
+			ux: 92,
+		},
+	},
+	{
+		id: 'presi',
+		displayName: 'Presi',
+		score: 86,
+		status: 'mature',
+		categories: {
+			backend: 90,
+			frontend: 82,
+			database: 85,
+			testing: 80,
+			deployment: 90,
+			documentation: 85,
+			security: 85,
+			ux: 88,
+		},
+	},
+	{
+		id: 'storage',
+		displayName: 'Storage',
+		score: 84,
+		status: 'production',
+		categories: {
+			backend: 88,
+			frontend: 84,
+			database: 82,
+			testing: 78,
+			deployment: 88,
+			documentation: 82,
+			security: 85,
+			ux: 82,
+		},
+	},
+	{
+		id: 'chat',
+		displayName: 'Chat',
+		score: 82,
+		status: 'production',
+		categories: {
+			backend: 90,
+			frontend: 82,
+			database: 80,
+			testing: 68,
+			deployment: 88,
+			documentation: 85,
+			security: 80,
+			ux: 78,
+		},
+	},
+	{
+		id: 'picture',
+		displayName: 'Picture',
+		score: 81,
+		status: 'production',
+		categories: {
+			backend: 90,
+			frontend: 80,
+			database: 75,
+			testing: 65,
+			deployment: 85,
+			documentation: 82,
+			security: 82,
+			ux: 80,
+		},
+	},
+	{
+		id: 'mukke',
+		displayName: 'Mukke',
+		score: 80,
+		status: 'beta',
+		categories: {
+			backend: 90,
+			frontend: 78,
+			database: 80,
+			testing: 60,
+			deployment: 85,
+			documentation: 78,
+			security: 80,
+			ux: 80,
+		},
+	},
+	{
+		id: 'matrix',
+		displayName: 'Matrix',
+		score: 68,
+		status: 'production',
+		categories: {
+			backend: 10,
+			frontend: 78,
+			database: 60,
+			testing: 50,
+			deployment: 85,
+			documentation: 70,
+			security: 75,
+			ux: 72,
+		},
+	},
+	{
+		id: 'nutriphi',
+		displayName: 'NutriPhi',
+		score: 63,
+		status: 'beta',
+		categories: {
+			backend: 78,
+			frontend: 62,
+			database: 65,
+			testing: 42,
+			deployment: 70,
+			documentation: 58,
+			security: 62,
+			ux: 65,
+		},
+	},
+	{
+		id: 'photos',
+		displayName: 'Photos',
+		score: 62,
+		status: 'beta',
+		categories: {
+			backend: 82,
+			frontend: 65,
+			database: 60,
+			testing: 38,
+			deployment: 68,
+			documentation: 55,
+			security: 60,
+			ux: 62,
+		},
+	},
+	{
+		id: 'zitare',
+		displayName: 'Zitare',
+		score: 62,
+		status: 'beta',
+		categories: {
+			backend: 72,
+			frontend: 78,
+			database: 60,
+			testing: 38,
+			deployment: 68,
+			documentation: 55,
+			security: 58,
+			ux: 65,
+		},
+	},
+	{
+		id: 'context',
+		displayName: 'Context',
+		score: 60,
+		status: 'beta',
+		categories: {
+			backend: 75,
+			frontend: 75,
+			database: 55,
+			testing: 32,
+			deployment: 65,
+			documentation: 52,
+			security: 58,
+			ux: 60,
+		},
+	},
+	{
+		id: 'clock',
+		displayName: 'Clock',
+		score: 58,
+		status: 'beta',
+		categories: {
+			backend: 75,
+			frontend: 70,
+			database: 55,
+			testing: 30,
+			deployment: 62,
+			documentation: 48,
+			security: 55,
+			ux: 58,
+		},
+	},
+	{
+		id: 'skilltree',
+		displayName: 'SkillTree',
+		score: 58,
+		status: 'beta',
+		categories: {
+			backend: 65,
+			frontend: 68,
+			database: 55,
+			testing: 35,
+			deployment: 60,
+			documentation: 50,
+			security: 55,
+			ux: 60,
+		},
+	},
+	{
+		id: 'planta',
+		displayName: 'Planta',
+		score: 50,
+		status: 'alpha',
+		categories: {
+			backend: 68,
+			frontend: 58,
+			database: 45,
+			testing: 25,
+			deployment: 55,
+			documentation: 42,
+			security: 48,
+			ux: 50,
+		},
+	},
+	{
+		id: 'manadeck',
+		displayName: 'ManaDeck',
+		score: 48,
+		status: 'alpha',
+		categories: {
+			backend: 50,
+			frontend: 65,
+			database: 42,
+			testing: 28,
+			deployment: 52,
+			documentation: 45,
+			security: 42,
+			ux: 55,
+		},
+	},
+	{
+		id: 'questions',
+		displayName: 'Questions',
+		score: 48,
+		status: 'alpha',
+		categories: {
+			backend: 88,
+			frontend: 62,
+			database: 40,
+			testing: 20,
+			deployment: 45,
+			documentation: 38,
+			security: 40,
+			ux: 42,
+		},
+	},
+	{
+		id: 'traces',
+		displayName: 'Traces',
+		score: 35,
+		status: 'alpha',
+		categories: {
+			backend: 72,
+			frontend: 10,
+			database: 35,
+			testing: 15,
+			deployment: 40,
+			documentation: 30,
+			security: 35,
+			ux: 25,
+		},
+	},
+];
+
+export function createMockEcosystem(): AppData[] {
+	return APP_DEFINITIONS.map((def) => {
+		const pos = APP_POSITIONS[def.id] || { x: 800, y: 500, lakeId: 'auth' };
+		return {
+			id: def.id,
+			name: def.id,
+			displayName: def.displayName,
+			score: def.score,
+			status: def.status,
+			health: 'up' as const,
+			plantType: getPlantType(def.status, def.score),
+			categories: def.categories,
+			trend: 0,
+			lakeId: pos.lakeId,
+			position: { x: pos.x, y: pos.y },
+		};
+	});
+}

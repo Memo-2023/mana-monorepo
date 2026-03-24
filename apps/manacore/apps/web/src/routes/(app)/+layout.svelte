@@ -82,6 +82,7 @@
 	let baseNavItems: PillNavItem[] = [
 		{ href: '/home', label: 'Home', icon: 'home' },
 		{ href: '/dashboard', label: 'Dashboard', icon: 'grid' },
+		{ href: '/observatory', label: 'Observatory', icon: 'eye' },
 		{ href: '/credits', label: 'Credits', icon: 'creditCard' },
 		{ href: '/gifts', label: 'Geschenke', icon: 'gift' },
 		{ href: '/api-keys', label: 'API Keys', icon: 'key' },
