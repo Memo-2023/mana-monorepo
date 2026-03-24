@@ -1,24 +1,17 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import {
-		Warning,
-		CalendarBlank,
-		CalendarDots,
-		CheckCircle,
-		CaretDown,
-	} from '@manacore/shared-icons';
+	import { Warning, CalendarBlank, CalendarDots, CheckCircle } from '@manacore/shared-icons';
 
 	interface Props {
 		title: string;
-		count: number;
+		count?: number;
 		icon?: 'warning' | 'today' | 'upcoming' | 'completed';
 		variant?: 'default' | 'warning' | 'success';
 		defaultOpen?: boolean;
 		children: Snippet;
 	}
 
-	let { title, count, icon, variant = 'default', defaultOpen = true, children }: Props = $props();
-	let isOpen = $state(defaultOpen);
+	let { title, icon, variant = 'default', children }: Props = $props();
 
 	// Icon colors based on variant
 	const iconColors = {
@@ -36,70 +29,34 @@
 </script>
 
 <div class="section mb-3">
-	<button
-		type="button"
-		onclick={() => (isOpen = !isOpen)}
-		class="section-header w-full flex items-center gap-2 py-2 cursor-pointer transition-all duration-200"
-	>
+	<div class="section-header flex items-center gap-2 py-2">
 		<!-- Icon -->
 		<span class="icon-wrapper {iconColors[variant]}">
 			{#if icon === 'warning'}
-				<Warning size={20} weight="bold" />
+				<Warning size={18} weight="bold" />
 			{:else if icon === 'today'}
-				<CalendarBlank size={20} weight="bold" />
+				<CalendarBlank size={18} weight="bold" />
 			{:else if icon === 'upcoming'}
-				<CalendarDots size={20} weight="bold" />
+				<CalendarDots size={18} weight="bold" />
 			{:else if icon === 'completed'}
-				<CheckCircle size={20} weight="bold" />
+				<CheckCircle size={18} weight="bold" />
 			{/if}
 		</span>
 
 		<!-- Title -->
-		<span class="title font-semibold {headerColors[variant]}">{title}</span>
+		<span class="title text-sm font-semibold {headerColors[variant]}">{title}</span>
+	</div>
 
-		<!-- Count -->
-		<span class="count text-sm text-muted-foreground">({count})</span>
-
-		<!-- Chevron -->
-		<span
-			class="chevron ml-auto text-muted-foreground transition-transform duration-200"
-			class:rotate-180={isOpen}
-		>
-			<CaretDown size={18} weight="bold" />
-		</span>
-	</button>
-
-	{#if isOpen}
-		<div class="section-content mt-3 pl-1">
-			{@render children()}
-		</div>
-	{/if}
+	<div class="section-content pl-1">
+		{@render children()}
+	</div>
 </div>
 
 <style>
-	.section-header:hover {
-		opacity: 0.7;
-	}
-
 	.icon-wrapper {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-	}
-
-	.section-content {
-		animation: slideDown 0.2s ease-out;
-	}
-
-	@keyframes slideDown {
-		from {
-			opacity: 0;
-			transform: translateY(-8px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
 	}
 </style>

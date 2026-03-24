@@ -273,7 +273,7 @@
 								{#each groupedUpcomingTasks() as group}
 									<div>
 										<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
-											{group.label} ({group.tasks.length})
+											{group.label}
 										</h3>
 										<TaskList
 											tasks={group.tasks}
