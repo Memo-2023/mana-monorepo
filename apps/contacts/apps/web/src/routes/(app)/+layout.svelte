@@ -46,6 +46,7 @@
 	import { tagsStore } from '$lib/stores/tags.svelte';
 	import { contactsOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -408,6 +409,7 @@
 			{/if}
 		</div>
 	</SplitPaneContainer>
+	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 {/if}
 
 <style>

@@ -26,6 +26,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 	import { QUOTES, type Quote } from '@zitare/content';
 
 	// App switcher items
@@ -335,6 +336,7 @@
 			</div>
 		</main>
 	</div>
+	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 {/if}
 
 <style>

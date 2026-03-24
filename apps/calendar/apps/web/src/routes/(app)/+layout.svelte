@@ -41,6 +41,12 @@
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import type { CreatePreview } from '@manacore/shared-ui';
+	import {
+		parseEventInput,
+		resolveEventIds,
+		formatParsedEventPreview,
+	} from '$lib/utils/event-parser';
 	import UnifiedBar from '$lib/components/calendar/UnifiedBar.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import VoiceRecordButton from '$lib/components/voice/VoiceRecordButton.svelte';
@@ -48,6 +54,7 @@
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { calendarOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
@@ -91,6 +98,58 @@
 		} else {
 			searchStore.setSearch(query, results);
 		}
+	}
+
+	// Quick-Create: parse input for preview
+	function handleParseCreate(query: string): CreatePreview | null {
+		if (!query.trim()) return null;
+
+		const parsed = parseEventInput(query);
+		if (!parsed.title && !parsed.startDate) return null;
+
+		const preview = formatParsedEventPreview(parsed);
+		return {
+			title: `"${parsed.title || query.trim()}" erstellen`,
+			subtitle: preview || 'Neuer Termin',
+		};
+	}
+
+	// Quick-Create: create event from parsed input
+	async function handleCreate(query: string): Promise<void> {
+		if (!query.trim()) return;
+
+		const parsed = parseEventInput(query);
+		if (!parsed.title) return;
+
+		const defaultCalendarId =
+			calendarsStore.calendars.find((c) => c.isDefault)?.id || calendarsStore.calendars[0]?.id;
+
+		const resolved = resolveEventIds(
+			parsed,
+			calendarsStore.calendars.map((c) => ({ id: c.id, name: c.name })),
+			eventTagsStore.tags.map((t) => ({ id: t.id, name: t.name })),
+			defaultCalendarId
+		);
+
+		if (!resolved.startTime) {
+			// No date/time parsed - default to now + 1h
+			const now = new Date();
+			now.setMinutes(0, 0, 0);
+			now.setHours(now.getHours() + 1);
+			resolved.startTime = now.toISOString();
+			const end = new Date(now.getTime() + 60 * 60_000);
+			resolved.endTime = end.toISOString();
+		}
+
+		await eventsStore.createEvent({
+			title: resolved.title,
+			startTime: resolved.startTime,
+			endTime: resolved.endTime!,
+			isAllDay: resolved.isAllDay,
+			calendarId: resolved.calendarId,
+			location: resolved.location,
+			tagIds: resolved.tagIds,
+		});
 	}
 
 	// Mobile detection for responsive layout
@@ -467,6 +526,8 @@
 			<UnifiedBar
 				onSearch={handleSearch}
 				onSelect={handleSelect}
+				onParseCreate={handleParseCreate}
+				onCreate={handleCreate}
 				onSearchChange={handleSearchChange}
 				placeholder="Neuer Termin oder suchen..."
 				emptyText="Keine Termine gefunden"
@@ -529,6 +590,7 @@
 	{#if calendarOnboarding.shouldShow}
 		<MiniOnboardingModal store={calendarOnboarding} appName="Kalender" appEmoji="📅" />
 	{/if}
+	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 {/if}
 
 <style>

@@ -8,6 +8,7 @@ export { default as GoogleSignInButton } from './components/GoogleSignInButton.s
 export { default as AppleSignInButton } from './components/AppleSignInButton.svelte';
 export { default as GuestWelcomeModal } from './components/GuestWelcomeModal.svelte';
 export { default as AuthGateModal } from './components/AuthGateModal.svelte';
+export { default as SessionExpiredBanner } from './components/SessionExpiredBanner.svelte';
 
 // Utilities
 export {

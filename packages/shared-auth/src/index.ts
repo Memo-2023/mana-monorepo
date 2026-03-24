@@ -74,6 +74,16 @@ export type { FetchInterceptorConfig } from './interceptors/fetchInterceptor';
 export { ContactsClient, createContactsClient } from './clients/contactsClient';
 export type { ContactsClientConfig, ContactSearchOptions } from './clients/contactsClient';
 
+// Session expired events
+import { resetSessionExpired as _resetSessionExpired } from './events/sessionExpired';
+import { TokenState as _TokenStateEnum } from './types';
+export {
+	onSessionExpired,
+	emitSessionExpired,
+	resetSessionExpired,
+	isSessionExpired,
+} from './events/sessionExpired';
+
 /**
  * Initialize auth service with all adapters for web
  *
@@ -111,6 +121,13 @@ export function initializeWebAuth(config: {
 	const urls = [config.baseUrl];
 	if (config.backendUrl) urls.push(config.backendUrl);
 	_setupFetchInterceptor(authService, tokenManager, { urls });
+
+	// Reset session expired state when token becomes valid again (e.g., after re-login)
+	tokenManager.subscribe((state) => {
+		if (state === _TokenStateEnum.VALID) {
+			_resetSessionExpired();
+		}
+	});
 
 	return { authService, tokenManager };
 }

@@ -7,6 +7,7 @@ import type {
 import { TokenState as TokenStateEnum } from '../types';
 import { isDeviceConnected, hasStableConnection } from '../adapters/network';
 import type { AuthService } from './authService';
+import { emitSessionExpired } from '../events/sessionExpired';
 
 /**
  * Configuration for the token manager
@@ -110,6 +111,7 @@ export function createTokenManager(authService: AuthService, config?: TokenManag
 		try {
 			await authService.clearAuthStorage();
 			setState(TokenStateEnum.EXPIRED);
+			emitSessionExpired();
 		} catch (error) {
 			console.debug('Error in handleRefreshFailure:', error);
 		}

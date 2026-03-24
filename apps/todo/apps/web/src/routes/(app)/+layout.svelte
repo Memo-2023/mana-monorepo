@@ -40,6 +40,7 @@
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 	import { todoOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
 	import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 	// App switcher items
@@ -472,6 +473,7 @@
 			{/if}
 		</div>
 	</SplitPaneContainer>
+	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 {/if}
 
 <style>
