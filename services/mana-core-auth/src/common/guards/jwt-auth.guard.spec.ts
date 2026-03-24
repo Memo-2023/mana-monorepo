@@ -3,7 +3,7 @@
  *
  * Tests JWT authentication guard functionality:
  * - Token extraction from Authorization header
- * - JWT verification using JWKS (EdDSA keys)
+ * - JWT verification using locally cached JWKS (EdDSA keys)
  * - Error handling for invalid/expired tokens
  * - User attachment to request object
  */
@@ -17,15 +17,21 @@ import { LoggerService } from '../logger';
 import { createMockConfigService, httpMockHelpers } from '../../__tests__/utils/test-helpers';
 import { mockTokenFactory } from '../../__tests__/utils/mock-factories';
 import { silentError } from '../../__tests__/utils/silent-error.decorator';
-import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { jwtVerify } from 'jose';
+import { createCachedLocalJWKSet } from './local-jwks-cache';
 
 // Mock jose (auto-mocked via jest.config.js moduleNameMapper)
 jest.mock('jose');
 
-// Setup mock for createRemoteJWKSet to return a defined JWKS function
+// Mock the local JWKS cache
+jest.mock('./local-jwks-cache');
+
+// Setup mock for createCachedLocalJWKSet to return a defined JWKS function
 const mockJWKS = jest.fn();
-const mockCreateRemoteJWKSet = createRemoteJWKSet as jest.MockedFunction<typeof createRemoteJWKSet>;
-mockCreateRemoteJWKSet.mockReturnValue(mockJWKS as any);
+const mockCreateLocalJWKSet = createCachedLocalJWKSet as jest.MockedFunction<
+	typeof createCachedLocalJWKSet
+>;
+mockCreateLocalJWKSet.mockReturnValue(mockJWKS as any);
 
 // Mock LoggerService
 const createMockLoggerService = (): LoggerService =>
@@ -48,8 +54,8 @@ describe('JwtAuthGuard', () => {
 		// Reset mocks
 		jest.clearAllMocks();
 
-		// Ensure createRemoteJWKSet returns a defined value after clearing
-		mockCreateRemoteJWKSet.mockReturnValue(mockJWKS as any);
+		// Ensure createCachedLocalJWKSet returns a defined value after clearing
+		mockCreateLocalJWKSet.mockReturnValue(mockJWKS as any);
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -60,6 +66,7 @@ describe('JwtAuthGuard', () => {
 						BASE_URL: 'http://localhost:3001',
 						'jwt.issuer': 'manacore',
 						'jwt.audience': 'manacore',
+						'database.url': 'postgresql://localhost:5432/test',
 					}),
 				},
 				{
@@ -343,7 +350,7 @@ describe('JwtAuthGuard', () => {
 	});
 
 	describe('Configuration', () => {
-		it('should use BASE_URL from config for JWKS endpoint', async () => {
+		it('should use local JWKS cache for key resolution', async () => {
 			const mockRequest = httpMockHelpers.createMockRequest({
 				headers: {
 					authorization: 'Bearer valid-jwt-token',
@@ -362,7 +369,10 @@ describe('JwtAuthGuard', () => {
 
 			await guard.canActivate(mockContext as any);
 
-			// JWKS should be created with correct URL (verified via createRemoteJWKSet call)
+			// Should use createCachedLocalJWKSet instead of createRemoteJWKSet
+			expect(mockCreateLocalJWKSet).toHaveBeenCalledWith(
+				expect.any(String) // database URL
+			);
 			expect(mockJwtVerify).toHaveBeenCalled();
 		});
 
@@ -372,6 +382,7 @@ describe('JwtAuthGuard', () => {
 				createMockConfigService({
 					'jwt.issuer': 'manacore',
 					'jwt.audience': 'manacore',
+					'database.url': 'postgresql://localhost:5432/test',
 				}),
 				createMockLoggerService()
 			);
@@ -404,6 +415,7 @@ describe('JwtAuthGuard', () => {
 				createMockConfigService({
 					'jwt.issuer': 'custom-issuer',
 					'jwt.audience': 'custom-audience',
+					'database.url': 'postgresql://localhost:5432/test',
 				}),
 				createMockLoggerService()
 			);

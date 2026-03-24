@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { jwtVerify } from 'jose';
+import { createCachedLocalJWKSet } from './local-jwks-cache';
 
 /**
- * Optional authentication guard using JWKS (Better Auth compatible)
+ * Optional authentication guard using locally cached JWKS (Better Auth compatible)
  *
  * Attaches user to request if valid token is present, but doesn't require it.
- * Uses jose library with JWKS endpoint for EdDSA token verification.
+ * Uses jose library with locally cached JWKS keys for EdDSA token verification.
  */
 @Injectable()
 export class OptionalAuthGuard implements CanActivate {
-	private jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+	private jwks: ReturnType<typeof createCachedLocalJWKSet> | null = null;
 
 	constructor(private configService: ConfigService) {}
 
@@ -26,11 +27,10 @@ export class OptionalAuthGuard implements CanActivate {
 		}
 
 		try {
-			// Lazy initialize JWKS
+			// Lazy initialize local JWKS (reads from DB, cached in memory)
 			if (!this.jwks) {
-				const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
-				const jwksUrl = new URL('/api/v1/auth/jwks', baseUrl);
-				this.jwks = createRemoteJWKSet(jwksUrl);
+				const databaseUrl = this.configService.get<string>('database.url') || '';
+				this.jwks = createCachedLocalJWKSet(databaseUrl);
 			}
 
 			// IMPORTANT: Match Better Auth signing config exactly (better-auth.config.ts)

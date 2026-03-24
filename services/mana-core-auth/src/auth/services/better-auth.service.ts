@@ -64,8 +64,9 @@ import type {
 	BetterAuthUser,
 	BetterAuthSession,
 } from '../types/better-auth.types';
-import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { jwtVerify } from 'jose';
 import * as jwt from 'jsonwebtoken';
+import { createCachedLocalJWKSet } from '../../common/guards/local-jwks-cache';
 
 // Re-export DTOs and result types for external use
 export type {
@@ -1136,15 +1137,8 @@ export class BetterAuthService {
 	 */
 	async validateToken(token: string): Promise<ValidateTokenResult> {
 		try {
-			// Decode to check the algorithm
-			const decoded = jwt.decode(token, { complete: true });
-
-			// Use our JWKS endpoint via localhost (self-referencing avoids external URL issues in Docker)
-			const port = this.configService.get<number>('PORT') || 3001;
-			const jwksUrl = new URL(`http://localhost:${port}/api/v1/auth/jwks`);
-
-			// Create JWKS fetcher
-			const JWKS = createRemoteJWKSet(jwksUrl);
+			// Use local JWKS cache (reads from DB, no self-referential HTTP requests)
+			const localJWKS = createCachedLocalJWKSet(this.databaseUrl);
 
 			// IMPORTANT: Match Better Auth signing config exactly (better-auth.config.ts)
 			// Signing uses: issuer = BASE_URL, audience = JWT_AUDIENCE || 'manacore'
@@ -1152,8 +1146,8 @@ export class BetterAuthService {
 			const issuer = baseUrl; // Better Auth uses BASE_URL as issuer for OIDC compatibility
 			const audience = this.configService.get<string>('jwt.audience') || 'manacore';
 
-			// Verify using jose library with Better Auth's JWKS
-			const { payload } = await jwtVerify(token, JWKS, {
+			// Verify using jose library with locally cached JWKS keys
+			const { payload } = await jwtVerify(token, localJWKS, {
 				issuer,
 				audience,
 			});

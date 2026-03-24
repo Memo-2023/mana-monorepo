@@ -5,18 +5,20 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { jwtVerify } from 'jose';
 import { LoggerService } from '../logger';
+import { createCachedLocalJWKSet } from './local-jwks-cache';
 
 /**
- * JWT Auth Guard using JWKS (Better Auth compatible)
+ * JWT Auth Guard using local JWKS cache (Better Auth compatible)
  *
- * Uses jose library with JWKS endpoint for EdDSA token verification.
- * This is the correct approach for Better Auth which uses EdDSA keys.
+ * Uses jose library with locally cached JWKS keys for EdDSA token verification.
+ * Keys are read directly from the database instead of making HTTP requests
+ * to the service's own JWKS endpoint.
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-	private jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+	private jwks: ReturnType<typeof createCachedLocalJWKSet> | null = null;
 	private readonly logger: LoggerService;
 
 	constructor(
@@ -35,11 +37,10 @@ export class JwtAuthGuard implements CanActivate {
 		}
 
 		try {
-			// Lazy initialize JWKS via localhost (self-referencing avoids external URL issues in Docker)
+			// Lazy initialize local JWKS (reads from DB, cached in memory)
 			if (!this.jwks) {
-				const port = this.configService.get<number>('PORT') || 3001;
-				const jwksUrl = new URL(`http://localhost:${port}/api/v1/auth/jwks`);
-				this.jwks = createRemoteJWKSet(jwksUrl);
+				const databaseUrl = this.configService.get<string>('database.url') || '';
+				this.jwks = createCachedLocalJWKSet(databaseUrl);
 			}
 
 			// IMPORTANT: Match Better Auth signing config exactly (better-auth.config.ts)
