@@ -46,6 +46,7 @@ COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-pwa ./packages/shared-pwa
 COPY packages/qr-export ./packages/qr-export
 COPY packages/wallpaper-generator ./packages/wallpaper-generator
+COPY packages/credit-operations ./packages/credit-operations
 
 # Copy manacore web
 COPY apps/manacore/apps/web ./apps/manacore/apps/web
