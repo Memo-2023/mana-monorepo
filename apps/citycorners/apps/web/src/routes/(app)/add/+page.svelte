@@ -356,7 +356,18 @@
 					/>
 				</div>
 			{:else if imageError}
-				<p class="mt-1 text-xs text-red-500">{$_('add.imageLoadError')}</p>
+				<div class="mt-2 flex items-center gap-2 rounded-lg bg-red-500/10 p-3">
+					<p class="flex-1 text-xs text-red-500">{$_('add.imageLoadError')}</p>
+					<button
+						type="button"
+						onclick={() => {
+							imageError = false;
+						}}
+						class="text-xs font-medium text-red-500 hover:text-red-400"
+					>
+						{$_('add.imageRetry')}
+					</button>
+				</div>
 			{/if}
 		</div>
 

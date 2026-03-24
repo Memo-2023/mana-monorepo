@@ -17,7 +17,9 @@
 		"subtitle": "Sights, restaurants, museums and more",
 		"all": "All",
 		"loading": "Loading...",
-		"noResults": "No locations found."
+		"noResults": "No locations found.",
+		"noResultsCategory": "No {category} found.",
+		"addFirst": "Add the first place"
 	},
 	"categories": {
 		"sight": "Sights",
@@ -33,7 +35,12 @@
 	},
 	"detail": {
 		"history": "History",
-		"openInMaps": "Open in OpenStreetMap",
+		"openInMaps": "OSM",
+		"showOnMap": "On map",
+		"directions": "Directions",
+		"share": "Share",
+		"linkCopied": "Link copied!",
+		"showDetails": "Details",
 		"back": "Back to overview",
 		"notFound": "Location not found."
 	},
@@ -47,7 +54,11 @@
 	},
 	"map": {
 		"title": "Map",
-		"subtitle": "All places in Konstanz"
+		"subtitle": "All places in Konstanz",
+		"locateMe": "My location",
+		"yourLocation": "You are here",
+		"geolocationNotSupported": "Geolocation is not supported.",
+		"geolocationError": "Could not determine location."
 	},
 	"search": {
 		"placeholder": "Search places...",
@@ -101,6 +112,7 @@
 		"imageUrlPlaceholder": "https://example.com/image.jpg",
 		"imagePreview": "Image preview",
 		"imageLoadError": "Image could not be loaded.",
+		"imageRetry": "Retry",
 		"geocoding": "Finding coordinates...",
 		"coordinatesFound": "Coordinates found"
 	},

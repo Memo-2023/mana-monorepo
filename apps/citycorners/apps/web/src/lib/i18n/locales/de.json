@@ -17,7 +17,9 @@
 		"subtitle": "Sehenswürdigkeiten, Restaurants, Museen und mehr",
 		"all": "Alle",
 		"loading": "Laden...",
-		"noResults": "Keine Locations gefunden."
+		"noResults": "Keine Locations gefunden.",
+		"noResultsCategory": "Keine {category} gefunden.",
+		"addFirst": "Ersten Ort hinzufügen"
 	},
 	"categories": {
 		"sight": "Sehenswürdigkeiten",
@@ -33,7 +35,12 @@
 	},
 	"detail": {
 		"history": "Geschichte",
-		"openInMaps": "In OpenStreetMap öffnen",
+		"openInMaps": "OSM",
+		"showOnMap": "Auf Karte",
+		"directions": "Route",
+		"share": "Teilen",
+		"linkCopied": "Link kopiert!",
+		"showDetails": "Details",
 		"back": "Zurück zur Übersicht",
 		"notFound": "Location nicht gefunden."
 	},
@@ -47,7 +54,11 @@
 	},
 	"map": {
 		"title": "Karte",
-		"subtitle": "Alle Orte in Konstanz"
+		"subtitle": "Alle Orte in Konstanz",
+		"locateMe": "Mein Standort",
+		"yourLocation": "Du bist hier",
+		"geolocationNotSupported": "Standortbestimmung wird nicht unterstützt.",
+		"geolocationError": "Standort konnte nicht ermittelt werden."
 	},
 	"search": {
 		"placeholder": "Ort suchen...",
@@ -101,6 +112,7 @@
 		"imageUrlPlaceholder": "https://example.com/bild.jpg",
 		"imagePreview": "Bildvorschau",
 		"imageLoadError": "Bild konnte nicht geladen werden.",
+		"imageRetry": "Erneut versuchen",
 		"geocoding": "Koordinaten werden ermittelt...",
 		"coordinatesFound": "Koordinaten gefunden"
 	},

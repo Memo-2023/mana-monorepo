@@ -18,6 +18,8 @@
 	let locations = $state<Location[]>([]);
 	let mapContainer: HTMLDivElement;
 	let map: any = null;
+	let locating = $state(false);
+	let locationError = $state('');
 
 	const categoryColors: Record<string, string> = {
 		sight: '#2563eb',
@@ -26,15 +28,7 @@
 		museum: '#9333ea',
 	};
 
-	const categoryLabels: Record<string, string> = {
-		sight: 'Sehenswürdigkeit',
-		restaurant: 'Restaurant',
-		shop: 'Laden',
-		museum: 'Museum',
-	};
-
 	onMount(async () => {
-		// Load locations
 		try {
 			const res = await fetch(api('/locations'));
 			const data = await res.json();
@@ -45,11 +39,9 @@
 
 		if (!browser) return;
 
-		// Dynamically import Leaflet (client-side only)
 		const L = await import('leaflet');
 		await import('leaflet/dist/leaflet.css');
 
-		// Center on Konstanz
 		map = L.map(mapContainer).setView([47.6603, 9.1757], 14);
 
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -57,7 +49,6 @@
 			maxZoom: 19,
 		}).addTo(map);
 
-		// Add markers for locations with coordinates
 		for (const loc of locations) {
 			if (loc.latitude && loc.longitude) {
 				const color = categoryColors[loc.category] || '#6b7280';
@@ -74,14 +65,53 @@
 				marker.bindPopup(`
 					<div style="min-width:180px">
 						<strong style="font-size:14px">${loc.name}</strong>
-						<div style="color:${color};font-size:12px;margin:4px 0">${categoryLabels[loc.category] || loc.category}</div>
+						<div style="color:${color};font-size:12px;margin:4px 0">${$_(`category.${loc.category}`)}</div>
 						<p style="font-size:12px;color:#666;margin:4px 0">${loc.description.substring(0, 100)}...</p>
-						<a href="/locations/${loc.id}" style="color:${color};font-size:12px;font-weight:600">Details &rarr;</a>
+						<a href="/locations/${loc.id}" style="color:${color};font-size:12px;font-weight:600">${$_('detail.showDetails')} &rarr;</a>
 					</div>
 				`);
 			}
 		}
 	});
+
+	function handleLocateMe() {
+		if (!browser || !map || !navigator.geolocation) {
+			locationError = $_('map.geolocationNotSupported');
+			return;
+		}
+
+		locating = true;
+		locationError = '';
+
+		navigator.geolocation.getCurrentPosition(
+			async (pos) => {
+				const { latitude, longitude } = pos.coords;
+				const L = await import('leaflet');
+
+				map.setView([latitude, longitude], 16);
+
+				// Add user marker
+				const userIcon = L.divIcon({
+					className: 'custom-marker',
+					html: `<div style="background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.3),0 2px 6px rgba(0,0,0,0.3);"></div>`,
+					iconSize: [16, 16],
+					iconAnchor: [8, 8],
+				});
+
+				L.marker([latitude, longitude], { icon: userIcon })
+					.addTo(map)
+					.bindPopup($_('map.yourLocation'))
+					.openPopup();
+
+				locating = false;
+			},
+			() => {
+				locationError = $_('map.geolocationError');
+				locating = false;
+			},
+			{ enableHighAccuracy: true, timeout: 10000 }
+		);
+	}
 </script>
 
 <svelte:head>
@@ -90,16 +120,42 @@
 </svelte:head>
 
 <div class="map-page">
-	<header class="mb-4">
-		<h1 class="text-2xl font-bold text-foreground">{$_('map.title')}</h1>
-		<p class="text-foreground-secondary">{$_('map.subtitle')}</p>
+	<header class="mb-4 flex items-start justify-between">
+		<div>
+			<h1 class="text-2xl font-bold text-foreground">{$_('map.title')}</h1>
+			<p class="text-foreground-secondary">{$_('map.subtitle')}</p>
+		</div>
+		<button
+			onclick={handleLocateMe}
+			disabled={locating}
+			class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background-card border border-border text-foreground-secondary shadow-sm transition-all hover:text-primary hover:border-primary disabled:opacity-50"
+			title={$_('map.locateMe')}
+		>
+			{#if locating}
+				<div
+					class="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin"
+				></div>
+			{:else}
+				<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
+					/>
+				</svg>
+			{/if}
+		</button>
 	</header>
+
+	{#if locationError}
+		<div class="mb-3 rounded-lg bg-red-500/10 p-2 text-xs text-red-500">{locationError}</div>
+	{/if}
 
 	<div class="legend mb-4 flex flex-wrap gap-3">
 		{#each Object.entries(categoryColors) as [key, color]}
 			<div class="flex items-center gap-1.5 text-sm text-foreground-secondary">
 				<div class="w-3 h-3 rounded-full" style="background:{color}"></div>
-				{categoryLabels[key]}
+				{$_(`category.${key}`)}
 			</div>
 		{/each}
 	</div>

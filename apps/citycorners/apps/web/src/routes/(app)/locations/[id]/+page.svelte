@@ -27,13 +27,7 @@
 	let location = $state<Location | null>(null);
 	let loading = $state(true);
 	let mapContainer: HTMLDivElement;
-
-	const categoryLabels: Record<string, string> = {
-		sight: 'Sehenswürdigkeit',
-		restaurant: 'Restaurant',
-		shop: 'Laden',
-		museum: 'Museum',
-	};
+	let shareSuccess = $state(false);
 
 	const categoryColors: Record<string, string> = {
 		sight: '#2563eb',
@@ -87,6 +81,23 @@
 
 		initMap();
 	});
+
+	async function handleShare() {
+		const url = window.location.href;
+		const title = location?.name || 'CityCorners';
+
+		if (navigator.share) {
+			try {
+				await navigator.share({ title, url });
+			} catch {
+				// User cancelled share
+			}
+		} else {
+			await navigator.clipboard.writeText(url);
+			shareSuccess = true;
+			setTimeout(() => (shareSuccess = false), 2000);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -121,7 +132,7 @@
 			</div>
 		{/if}
 
-		<!-- Back button + Favorite button overlay -->
+		<!-- Back button overlay -->
 		<div class="absolute left-4 top-4">
 			<a
 				href="/"
@@ -133,8 +144,41 @@
 			</a>
 		</div>
 
-		{#if authStore.isAuthenticated}
-			<div class="absolute right-4 top-4">
+		<!-- Share + Favorite buttons overlay -->
+		<div class="absolute right-4 top-4 flex gap-2">
+			<button
+				class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50"
+				onclick={handleShare}
+				title={$_('detail.share')}
+			>
+				{#if shareSuccess}
+					<svg
+						class="h-5 w-5 text-green-400"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						viewBox="0 0 24 24"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+					</svg>
+				{:else}
+					<svg
+						class="h-5 w-5"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
+						/>
+					</svg>
+				{/if}
+			</button>
+
+			{#if authStore.isAuthenticated}
 				<button
 					class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition-all hover:bg-black/50"
 					onclick={() => favoritesStore.toggle(location!.id)}
@@ -164,8 +208,8 @@
 						</svg>
 					{/if}
 				</button>
-			</div>
-		{/if}
+			{/if}
+		</div>
 
 		<!-- Category badge on image -->
 		<div class="absolute bottom-4 left-4">
@@ -173,7 +217,7 @@
 				class="rounded-full px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
 				style="background: {categoryColors[location.category] || '#6b7280'}cc"
 			>
-				{categoryLabels[location.category] || location.category}
+				{$_(`category.${location.category}`)}
 			</span>
 		</div>
 	</div>
@@ -209,31 +253,73 @@
 
 		<p class="text-base leading-relaxed text-foreground">{location.description}</p>
 
-		<!-- Mini Map -->
+		<!-- Map + Directions -->
 		{#if location.latitude && location.longitude}
 			<div class="overflow-hidden rounded-xl border border-border">
 				<div bind:this={mapContainer} class="h-52 w-full"></div>
-				<a
-					href="https://www.openstreetmap.org/?mlat={location.latitude}&mlon={location.longitude}#map=17/{location.latitude}/{location.longitude}"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="flex items-center justify-center gap-2 border-t border-border bg-background-card px-4 py-2.5 text-sm text-foreground-secondary transition-colors hover:text-primary"
-				>
-					<svg
-						class="h-4 w-4"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						viewBox="0 0 24 24"
+				<div class="flex divide-x divide-border border-t border-border">
+					<a
+						href="/map"
+						class="flex flex-1 items-center justify-center gap-2 bg-background-card px-4 py-2.5 text-sm text-foreground-secondary transition-colors hover:text-primary"
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-						/>
-					</svg>
-					{$_('detail.openInMaps')}
-				</a>
+						<svg
+							class="h-4 w-4"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"
+							/>
+						</svg>
+						{$_('detail.showOnMap')}
+					</a>
+					<a
+						href="https://www.google.com/maps/dir/?api=1&destination={location.latitude},{location.longitude}"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="flex flex-1 items-center justify-center gap-2 bg-background-card px-4 py-2.5 text-sm text-foreground-secondary transition-colors hover:text-primary"
+					>
+						<svg
+							class="h-4 w-4"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+							/>
+						</svg>
+						{$_('detail.directions')}
+					</a>
+					<a
+						href="https://www.openstreetmap.org/?mlat={location.latitude}&mlon={location.longitude}#map=17/{location.latitude}/{location.longitude}"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="flex flex-1 items-center justify-center gap-2 bg-background-card px-4 py-2.5 text-sm text-foreground-secondary transition-colors hover:text-primary"
+					>
+						<svg
+							class="h-4 w-4"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+							/>
+						</svg>
+						{$_('detail.openInMaps')}
+					</a>
+				</div>
 			</div>
 		{/if}
 
@@ -243,7 +329,7 @@
 				<h2 class="mb-4 text-xl font-semibold text-foreground">{$_('detail.history')}</h2>
 				<div class="relative space-y-0">
 					{#each location.timeline as entry, i}
-						<div class="relative flex gap-4 pb-6 {i < location.timeline!.length - 1 ? '' : ''}">
+						<div class="relative flex gap-4 pb-6">
 							<!-- Timeline line -->
 							{#if i < location.timeline!.length - 1}
 								<div class="absolute left-[11px] top-6 h-full w-0.5 bg-border"></div>

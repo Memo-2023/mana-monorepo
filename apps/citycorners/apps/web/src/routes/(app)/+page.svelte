@@ -22,6 +22,16 @@
 
 	const categoryKeys = ['sight', 'restaurant', 'shop', 'museum'];
 
+	let categoryCounts = $derived(
+		categoryKeys.reduce(
+			(acc, cat) => {
+				acc[cat] = locations.filter((l) => l.category === cat).length;
+				return acc;
+			},
+			{} as Record<string, number>
+		)
+	);
+
 	let filtered = $derived(
 		selectedCategory ? locations.filter((l) => l.category === selectedCategory) : locations
 	);
@@ -76,7 +86,7 @@
 			: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover'}"
 		onclick={() => (selectedCategory = null)}
 	>
-		{$_('home.all')}
+		{$_('home.all')} ({locations.length})
 	</button>
 	{#each categoryKeys as cat}
 		<button
@@ -85,7 +95,7 @@
 				: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover'}"
 			onclick={() => (selectedCategory = cat)}
 		>
-			{$_(`categories.${cat}`)}
+			{$_(`categories.${cat}`)} ({categoryCounts[cat] || 0})
 		</button>
 	{/each}
 </div>
@@ -93,7 +103,31 @@
 {#if loading}
 	<p class="text-foreground-secondary">{$_('home.loading')}</p>
 {:else if filtered.length === 0}
-	<p class="text-foreground-secondary">{$_('home.noResults')}</p>
+	<div class="py-12 text-center">
+		<span class="mb-2 block text-4xl"
+			>{selectedCategory === 'restaurant'
+				? '🍽️'
+				: selectedCategory === 'museum'
+					? '🏛️'
+					: selectedCategory === 'shop'
+						? '🛍️'
+						: selectedCategory === 'sight'
+							? '🏰'
+							: '📍'}</span
+		>
+		<p class="text-foreground-secondary">
+			{#if selectedCategory}
+				{$_('home.noResultsCategory', {
+					values: { category: $_(`categories.${selectedCategory}`) },
+				})}
+			{:else}
+				{$_('home.noResults')}
+			{/if}
+		</p>
+		<a href="/add" class="mt-3 inline-block text-sm text-primary hover:underline">
+			{$_('home.addFirst')}
+		</a>
+	</div>
 {:else}
 	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 		{#each filtered as location}
@@ -102,7 +136,12 @@
 				class="group relative overflow-hidden rounded-xl border border-border bg-background-card transition-shadow hover:shadow-lg"
 			>
 				{#if location.imageUrl}
-					<img src={location.imageUrl} alt={location.name} class="h-48 w-full object-cover" />
+					<img
+						src={location.imageUrl}
+						alt={location.name}
+						loading="lazy"
+						class="h-48 w-full object-cover"
+					/>
 				{:else}
 					<div class="flex h-48 items-center justify-center bg-background-card-hover">
 						<span class="text-4xl">📍</span>
