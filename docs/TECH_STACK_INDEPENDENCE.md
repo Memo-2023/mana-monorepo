@@ -199,11 +199,11 @@ NutriPhi und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
 | ~~**1**~~ | ~~Picture App → mana-image-gen~~ | ✅ Erledigt | Lokales FLUX.2 klein als Default, Replicate für Premium |
 | ~~**2**~~ | ~~Project Doc Bot → Ollama + mana-stt~~ | ✅ Erledigt | OpenAI SDK entfernt, nutzt mana-llm + mana-stt |
 | ~~**3**~~ | ~~Alle LLM-Calls über mana-llm routen~~ | ✅ Erledigt | @manacore/shared-llm + Google Fallback |
-| **4** | PostgreSQL Backup mit pgBackRest | 1-2 Tage | Disaster Recovery |
+| ~~**4**~~ | ~~PostgreSQL Backup~~ | ✅ Erledigt | Stündliche pg_dumpall + tägliche pg_basebackup, Docker Container |
 | **5** | Brevo → Postal/Stalwart | 2-3 Tage | Email-Unabhängigkeit |
-| **6** | Landing Pages self-hosted | 0.5 Tage | Cloudflare Pages weg |
+| ~~**6**~~ | ~~Landing Pages self-hosted~~ | ✅ Erledigt | Nginx Container auf Port 4400, 10 Domains via Tunnel |
 | **7** | Vision-Models lokal benchmarken | 1 Woche | Gemini-Abhängigkeit reduzieren |
-| **8** | Cloudflare-Fallback dokumentieren | 0.5 Tage | Risikominimierung |
+| ~~**8**~~ | ~~Cloudflare-Fallback dokumentieren~~ | ✅ Erledigt | WireGuard + Caddy auf Hetzner VPS, docs/CLOUDFLARE_FALLBACK.md |
 | **9** | Zweiter Server / Redundanz | 1-2 Wochen | Kein Single Point of Failure |
 | **10** | NestJS 11 + Vitest Migration | 1-2 Wochen | Modernerer Stack |
 
@@ -211,15 +211,19 @@ NutriPhi und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
 
 ## Zusammenfassung
 
-**Aktuell self-hosted:** ~80% der Infrastruktur (Stand: 2026-03-24)
-**Nach Roadmap (Prio 4-6):** ~90%
+**Aktuell self-hosted:** ~85% der Infrastruktur (Stand: 2026-03-24)
+**Nach Roadmap (Prio 5):** ~90%
 **Unvermeidbare Cloud-Abhängigkeiten:** Stripe (Payment Gateway), Google OAuth (Contacts API)
 
 **Erledigte Meilensteine (2026-03-24):**
-- ✅ Alle LLM-Calls über `mana-llm` geroutet (9 Backends, `@manacore/shared-llm`)
-- ✅ Google Gemini Fallback in mana-llm (automatisch bei Ollama-Überlastung)
-- ✅ Picture App nutzt lokales `mana-image-gen` (FLUX.2 klein) als Default
-- ✅ Project Doc Bot: OpenAI SDK komplett entfernt
-- ✅ ManaDeck: Google Gemini SDK entfernt
+- ✅ Prio 1: Picture App nutzt lokales `mana-image-gen` (FLUX.2 klein) als Default
+- ✅ Prio 2: Project Doc Bot: OpenAI SDK komplett entfernt, nutzt mana-llm + mana-stt
+- ✅ Prio 3: Alle LLM-Calls über `mana-llm` geroutet (10 Backends, `@manacore/shared-llm`)
+- ✅ Prio 3: Google Gemini Fallback in mana-llm + ManaDeck Gemini SDK entfernt
+- ✅ Prio 4: PostgreSQL Backup mit stündlichen Dumps + täglichen Base-Backups
+- ✅ Prio 6: Landing Pages self-hosted via Nginx (10 Domains, kein Cloudflare Pages mehr)
+- ✅ Prio 8: Cloudflare-Fallback Plan dokumentiert (WireGuard + Caddy)
+
+**Nächste Schritte:** E-Mail-Unabhängigkeit (Prio 5), Vision-Models benchmarken (Prio 7), Server-Redundanz (Prio 9).
 
 **Nächste Schritte:** PostgreSQL Backup (Prio 4), E-Mail-Unabhängigkeit (Prio 5), Landing Pages self-hosted (Prio 6).

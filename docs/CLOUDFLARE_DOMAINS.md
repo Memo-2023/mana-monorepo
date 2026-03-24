@@ -1,109 +1,149 @@
-# Cloudflare Pages — Domains & Projekte
+# Cloudflare DNS — Domains & Konfiguration
 
 > Stand: 2026-03-24
 
-## Ausstehende Aktionen
+## Ausstehende Aktionen im Cloudflare Dashboard
 
-### 1. `it.mana.how` — Custom Domain hinzufügen (NEU)
+### Landing Pages auf Tunnel umstellen
 
-**Cloudflare Dashboard:**
-1. Gehe zu **Pages → it-landing → Custom domains**
-2. Klicke **Set up a custom domain**
-3. Gib ein: `it.mana.how`
-4. Cloudflare setzt automatisch den CNAME (da `mana.how` bereits bei Cloudflare liegt)
+Landing Pages laufen jetzt **self-hosted** via Nginx auf dem Mac Mini (Port 4400). Die DNS-Records müssen von Cloudflare Pages auf den Cloudflare Tunnel umgestellt werden.
 
-**Status:** Deployed unter `it-landing-9hg.pages.dev`, Custom Domain fehlt noch.
+**Tunnel-ID:** `bb0ea86d-8253-4a54-838b-107bb7945be9`
+
+**Im Cloudflare Dashboard → DNS → mana.how:**
+
+Für jede Domain: **CNAME Record hinzufügen** (oder bestehenden ändern), Proxied (orange Wolke):
+
+| Domain | Typ | Wert | Status |
+|--------|-----|------|--------|
+| `it` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
+| `citycorners` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
+| `nutriphi` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
+| `manadeck` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
+| `docs` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
+
+**Für bestehende Landing-Domains (aktuell auf CF Pages):**
+
+Diese Domains zeigen noch auf Cloudflare Pages. Um sie auf Self-Hosted umzustellen:
+
+1. **Pages → [Projekt] → Custom domains → Remove** (Domain vom Pages-Projekt entfernen)
+2. **DNS → CNAME auf Tunnel-ID ändern** (wie oben)
+
+| Domain | Aktuell | Umstellen auf |
+|--------|---------|---------------|
+| `chats.mana.how` | CF Pages (`chat-landing`) | Tunnel → `localhost:4400` |
+| `pics.mana.how` | CF Pages (`picture-landing`) | Tunnel → `localhost:4400` |
+| `zitares.mana.how` | CF Pages (`zitare-landing`) | Tunnel → `localhost:4400` |
+| `presis.mana.how` | CF Pages (`presi-landing`) | Tunnel → `localhost:4400` |
+| `clocks.mana.how` | CF Pages (`clocks-landing`) | Tunnel → `localhost:4400` |
+
+**Hinweis:** Die Umstellung kann schrittweise erfolgen — erst neue Domains, dann bestehende migrieren.
+
+### Reihenfolge
+
+1. **Zuerst:** Neue Domains erstellen (`it`, `citycorners`, `nutriphi`, `manadeck`, `docs`)
+2. **Danach:** Bestehende Landing-Domains von Pages auf Tunnel migrieren (eine nach der anderen, testen)
+3. **Zuletzt:** Alte CF Pages Projekte löschen (optional, kosten nichts)
 
 ---
 
-### 2. Landing Pages ohne Custom Domain
+## Architektur
 
-Diese Projekte sind deployed aber nur unter `*.pages.dev` erreichbar — keine `*.mana.how` Domain konfiguriert:
+```
+Internet
+    │
+    ▼
+Cloudflare DNS (*.mana.how)
+    │
+    ▼
+Cloudflare Tunnel (bb0ea86d...)
+    │
+    ├── Apps (Web + API):  chat.mana.how → localhost:5010
+    ├── Services:          auth.mana.how → localhost:3001
+    ├── Landing Pages:     it.mana.how   → localhost:4400 (Nginx)
+    ├── Monitoring:        grafana.mana.how → localhost:8000
+    └── Matrix:            matrix.mana.how → localhost:4000
+```
 
-| CF Projekt | Aktuelle URL | Gewünschte Domain | Aktion |
-|------------|-------------|-------------------|--------|
-| `it-landing` | `it-landing-9hg.pages.dev` | **it.mana.how** | Custom Domain hinzufügen |
-| `citycorners-landing` | `citycorners-landing.pages.dev` | **citycorners.mana.how** | Custom Domain hinzufügen |
-| `nutriphi-landing` | `nutriphi-landing.pages.dev` | **nutriphi.mana.how** | Custom Domain hinzufügen |
-| `todo-landing` | `todo-landing.pages.dev` | **todo.mana.how** (Landing, nicht App!) | Prüfen: Konflikt mit App-URL? |
-| `manadeck-landing` | `manadeck-landing.pages.dev` | **manadeck.mana.how** | Custom Domain hinzufügen |
-| `manacore-docs` | `manacore-docs.pages.dev` | **docs.mana.how** | Custom Domain hinzufügen |
+**Nginx Landing Container** (`mana-infra-landings`, Port 4400):
+- Routet nach `Host`-Header zu verschiedenen `dist/`-Ordnern
+- Config: `docker/nginx/landings.conf`
+- Daten: `/Volumes/ManaData/landings/{name}/`
+- Build: `./scripts/mac-mini/build-landings.sh`
 
-**Hinweis `todo.mana.how`:** Die App läuft bereits unter `todo.mana.how` via Cloudflare Tunnel. Die Landing Page muss eine andere Domain bekommen, z.B. `todo-info.mana.how` oder die Landing wird auf einer Unterseite der App eingebunden.
+---
 
-### 3. Landing Pages die noch nicht deployed sind
+## Alle Domains
 
-Diese haben ein `deploy:landing:*` Script aber kein CF-Projekt:
+### Apps (via Tunnel → Docker Container)
 
-| Script | CF Projekt | Status |
-|--------|-----------|--------|
-| `deploy:landing:calendar` | `calendars-landing` | Kein CF-Projekt gefunden — evtl. anderer Name? |
-| `deploy:landing:mail` | `mail-landing` | Kein CF-Projekt — muss erstellt werden |
-| `deploy:landing:moodlit` | `moodlit-landing` | Kein CF-Projekt — muss erstellt werden |
+| Domain | Service | Port |
+|--------|---------|------|
+| `mana.how` | Dashboard Web | 5000 |
+| `auth.mana.how` | Auth API | 3001 |
+| `chat.mana.how` | Chat Web | 5010 |
+| `chat-api.mana.how` | Chat API | 3030 |
+| `todo.mana.how` | Todo Web | 5011 |
+| `todo-api.mana.how` | Todo API | 3031 |
+| `calendar.mana.how` | Calendar Web | 5012 |
+| `calendar-api.mana.how` | Calendar API | 3032 |
+| `clock.mana.how` | Clock Web | 5013 |
+| `clock-api.mana.how` | Clock API | 3033 |
+| `contacts.mana.how` | Contacts Web | 5014 |
+| `contacts-api.mana.how` | Contacts API | 3034 |
+| `storage.mana.how` | Storage Web | 5015 |
+| `storage-api.mana.how` | Storage API | 3035 |
+| `presi.mana.how` | Presi Web | 5016 |
+| `nutriphi.mana.how` | NutriPhi Web | 5017 |
+| `photos.mana.how` | Photos Web | 5019 |
+| `mukke.mana.how` | Mukke Web | 5180 |
+| `picture.mana.how` | Picture Web | 5021 |
+| `playground.mana.how` | LLM Playground | 5090 |
 
-**Erstellen mit:**
+### Landing Pages (via Tunnel → Nginx 4400)
+
+| Domain | Landing | Nginx Root |
+|--------|---------|------------|
+| `it.mana.how` | IT Souveränität | `/srv/landings/it` |
+| `chats.mana.how` | Chat Landing | `/srv/landings/chat` |
+| `pics.mana.how` | Picture Landing | `/srv/landings/picture` |
+| `zitares.mana.how` | Zitare Landing | `/srv/landings/zitare` |
+| `presis.mana.how` | Presi Landing | `/srv/landings/presi` |
+| `clocks.mana.how` | Clock Landing | `/srv/landings/clock` |
+| `manadeck.mana.how` | ManaDeck Landing | `/srv/landings/manadeck` |
+| `nutriphi.mana.how` | NutriPhi Landing | `/srv/landings/nutriphi` |
+| `citycorners.mana.how` | CityCorners Landing | `/srv/landings/citycorners` |
+| `docs.mana.how` | Dokumentation | `/srv/landings/docs` |
+
+### Services & Monitoring (via Tunnel)
+
+| Domain | Service | Port |
+|--------|---------|------|
+| `matrix.mana.how` | Matrix Synapse | 4000 |
+| `element.mana.how` | Element Web | 4080 |
+| `link.mana.how` | Matrix Link | 4090 |
+| `grafana.mana.how` | Grafana | 8000 |
+| `stats.mana.how` | Umami Analytics | 8010 |
+| `glitchtip.mana.how` | GlitchTip Errors | 8020 |
+| `ssh.mana.how` | SSH Access | 22 |
+
+---
+
+## Landing Pages deployen
+
 ```bash
-npx wrangler pages project create mail-landing --production-branch=main
-npx wrangler pages project create moodlit-landing --production-branch=main
+# Alle Landings bauen und nach /Volumes/ManaData/landings/ kopieren
+./scripts/mac-mini/build-landings.sh
+
+# Nginx neuladen
+docker restart mana-infra-landings
 ```
 
----
+## Neue Landing Page hinzufügen
 
-## Bestehende Projekte (korrekt konfiguriert)
-
-| CF Projekt | pages.dev URL | Custom Domain | Status |
-|-----------|---------------|---------------|--------|
-| `chat-landing` | `chat-landing-90m.pages.dev` | **chats.mana.how** | OK |
-| `clocks-landing` | `clocks-landing.pages.dev` | **clocks.mana.how** | OK |
-| `picture-landing` | `picture-landing.pages.dev` | **pics.mana.how** | OK |
-| `presi-landing` | `presi-landing.pages.dev` | **presis.mana.how** | OK |
-| `zitare-landing` | `zitare-landing.pages.dev` | **zitares.mana.how** | OK |
-| `manacore-landing` | `manacore-landing.pages.dev` | **devlog.mana.how**, **woh.mana.how** | OK |
-
----
-
-## Alle Custom Domains — Schritt-für-Schritt
-
-Für jede ausstehende Domain im Cloudflare Dashboard:
-
-1. **Pages → [Projektname] → Custom domains → Set up a custom domain**
-2. Domain eingeben (z.B. `it.mana.how`)
-3. Cloudflare prüft automatisch die DNS-Zone
-4. Da `mana.how` bereits bei Cloudflare ist → CNAME wird automatisch angelegt
-5. SSL-Zertifikat wird automatisch erstellt (~1-2 Minuten)
-
-### Batch: Alle fehlenden Domains auf einmal
-
-```
-it-landing          → it.mana.how
-citycorners-landing → citycorners.mana.how
-nutriphi-landing    → nutriphi.mana.how
-manadeck-landing    → manadeck.mana.how
-manacore-docs       → docs.mana.how
-```
-
----
-
-## Domain-Namenskonvention
-
-| Typ | Pattern | Beispiel |
-|-----|---------|----------|
-| **App (Backend + Web)** | `{app}.mana.how` | `chat.mana.how`, `todo.mana.how` |
-| **Landing Page** | `{app}.mana.how` oder `{plural}.mana.how` | `pics.mana.how`, `chats.mana.how` |
-| **Service** | `{service}.mana.how` | `auth.mana.how`, `matrix.mana.how` |
-| **Informational** | `{topic}.mana.how` | `it.mana.how`, `docs.mana.how` |
-
-**Problem:** Einige Apps und ihre Landing Pages konkurrieren um die gleiche Subdomain (z.B. `todo.mana.how` ist die App, aber die Landing Page braucht auch eine URL). Aktuell gelöst durch Plural-Formen (`chats`, `pics`, `clocks`, etc.).
-
----
-
-## Cloudflare Tunnel vs. Pages
-
-Wichtig: Es gibt zwei verschiedene Routing-Mechanismen:
-
-| Typ | Routing | Beispiel |
-|-----|---------|---------|
-| **Cloudflare Tunnel** | `cloudflared-config.yml` → localhost-Port | `chat.mana.how` → `localhost:3000` (App) |
-| **Cloudflare Pages** | Pages Custom Domain → statische Dateien | `chats.mana.how` → `chat-landing` (Landing) |
-
-Diese dürfen **nicht** die gleiche Domain verwenden! Eine Domain kann entweder Tunnel ODER Pages zugeordnet sein, nicht beiden.
+1. Landing erstellen (Astro in `apps/{app}/apps/landing/` oder `services/{name}/`)
+2. Build-Script (`scripts/mac-mini/build-landings.sh`) erweitern
+3. Nginx Server-Block in `docker/nginx/landings.conf` hinzufügen
+4. Cloudflare Tunnel Ingress in `cloudflared-config.yml` hinzufügen
+5. DNS CNAME im Cloudflare Dashboard erstellen
+6. Bauen, deployen, cloudflared neustarten
