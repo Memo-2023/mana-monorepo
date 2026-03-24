@@ -48,6 +48,7 @@ COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-stores ./packages/shared-stores
 COPY packages/shared-pwa ./packages/shared-pwa
+COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
 
 # Copy picture packages
 COPY apps/picture/packages/shared ./apps/picture/packages/shared

@@ -78,72 +78,72 @@
 </script>
 
 <Card class="relative h-full">
-		<!-- Edit Mode Overlay -->
-		{#if dashboardStore.isEditing}
+	<!-- Edit Mode Overlay -->
+	{#if dashboardStore.isEditing}
+		<div
+			class="absolute inset-0 z-10 flex flex-col rounded-xl border-2 border-dashed border-primary/50 bg-background/80"
+		>
+			<!-- Drag Handle -->
 			<div
-				class="absolute inset-0 z-10 flex flex-col rounded-xl border-2 border-dashed border-primary/50 bg-background/80"
+				class="flex cursor-grab items-center justify-center gap-2 border-b border-border py-2 active:cursor-grabbing"
 			>
-				<!-- Drag Handle -->
-				<div
-					class="flex cursor-grab items-center justify-center gap-2 border-b border-border py-2 active:cursor-grabbing"
-				>
-					<svg class="h-5 w-5 text-muted-foreground" viewBox="0 0 24 24" fill="currentColor">
-						<circle cx="9" cy="5" r="1.5" />
-						<circle cx="15" cy="5" r="1.5" />
-						<circle cx="9" cy="12" r="1.5" />
-						<circle cx="15" cy="12" r="1.5" />
-						<circle cx="9" cy="19" r="1.5" />
-						<circle cx="15" cy="19" r="1.5" />
-					</svg>
-					<span class="text-sm font-medium">{meta?.icon} {$_(widget.title)}</span>
-				</div>
+				<svg class="h-5 w-5 text-muted-foreground" viewBox="0 0 24 24" fill="currentColor">
+					<circle cx="9" cy="5" r="1.5" />
+					<circle cx="15" cy="5" r="1.5" />
+					<circle cx="9" cy="12" r="1.5" />
+					<circle cx="15" cy="12" r="1.5" />
+					<circle cx="9" cy="19" r="1.5" />
+					<circle cx="15" cy="19" r="1.5" />
+				</svg>
+				<span class="text-sm font-medium">{meta?.icon} {$_(widget.title)}</span>
+			</div>
 
-				<!-- Size Buttons -->
-				<div class="flex flex-1 items-center justify-center gap-2 p-4">
-					{#each sizes as size}
-						<button
-							type="button"
-							onclick={() => handleSizeChange(size)}
-							class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors {widget.size ===
-							size
-								? 'bg-primary text-primary-foreground'
-								: 'bg-muted text-muted-foreground hover:bg-muted/80'}"
-						>
-							{sizeLabels[size]}
-						</button>
-					{/each}
-				</div>
-
-				<!-- Remove Button -->
-				<div class="flex justify-center border-t border-border py-2">
+			<!-- Size Buttons -->
+			<div class="flex flex-1 items-center justify-center gap-2 p-4">
+				{#each sizes as size}
 					<button
 						type="button"
-						onclick={handleRemove}
-						class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/10"
+						onclick={() => handleSizeChange(size)}
+						class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors {widget.size ===
+						size
+							? 'bg-primary text-primary-foreground'
+							: 'bg-muted text-muted-foreground hover:bg-muted/80'}"
 					>
-						<svg
-							class="h-4 w-4"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path d="M3 6h18" />
-							<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-							<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-						</svg>
-						{$_('dashboard.remove_widget')}
+						{sizeLabels[size]}
 					</button>
-				</div>
+				{/each}
 			</div>
-		{/if}
 
-		<!-- Widget Content -->
-		<div class="min-h-[10rem] p-4" class:opacity-0={dashboardStore.isEditing}>
-			{#if WidgetComponent}
-				<WidgetComponent />
-			{:else}
-				<p class="text-muted-foreground">Unknown widget type: {widget.type}</p>
-			{/if}
+			<!-- Remove Button -->
+			<div class="flex justify-center border-t border-border py-2">
+				<button
+					type="button"
+					onclick={handleRemove}
+					class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/10"
+				>
+					<svg
+						class="h-4 w-4"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path d="M3 6h18" />
+						<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+						<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+					</svg>
+					{$_('dashboard.remove_widget')}
+				</button>
+			</div>
 		</div>
-	</Card>
+	{/if}
+
+	<!-- Widget Content -->
+	<div class="min-h-[10rem] p-4" class:opacity-0={dashboardStore.isEditing}>
+		{#if WidgetComponent}
+			<WidgetComponent />
+		{:else}
+			<p class="text-muted-foreground">Unknown widget type: {widget.type}</p>
+		{/if}
+	</div>
+</Card>

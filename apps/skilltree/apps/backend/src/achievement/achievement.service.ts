@@ -94,9 +94,7 @@ export class AchievementService implements OnModuleInit {
 	}
 
 	async getStats(userId: string): Promise<{ total: number; unlocked: number }> {
-		const [totalResult] = await this.db
-			.select({ count: sql<number>`count(*)` })
-			.from(achievements);
+		const [totalResult] = await this.db.select({ count: sql<number>`count(*)` }).from(achievements);
 
 		const [unlockedResult] = await this.db
 			.select({ count: sql<number>`count(*)` })
@@ -113,7 +111,10 @@ export class AchievementService implements OnModuleInit {
 	 * Check all achievements for a user and unlock any newly earned ones.
 	 * Called after XP gain, skill creation, activity logging, etc.
 	 */
-	async checkAndUnlock(userId: string, context?: { activityXp?: number }): Promise<AchievementUnlockResult[]> {
+	async checkAndUnlock(
+		userId: string,
+		context?: { activityXp?: number }
+	): Promise<AchievementUnlockResult[]> {
 		const allAchievements = await this.db.select().from(achievements);
 		const unlocked = await this.db
 			.select()

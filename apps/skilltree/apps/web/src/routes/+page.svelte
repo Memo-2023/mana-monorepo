@@ -159,7 +159,9 @@
 					>
 						<Trophy class="h-5 w-5" />
 						{#if achievementStore.stats().unlocked > 0}
-							<span class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-gray-900">
+							<span
+								class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-gray-900"
+							>
 								{achievementStore.stats().unlocked}
 							</span>
 						{/if}
@@ -359,8 +361,5 @@
 {/if}
 
 {#if showAchievementCelebration && currentAchievementUnlock}
-	<AchievementCelebration
-		result={currentAchievementUnlock}
-		onClose={showNextAchievement}
-	/>
+	<AchievementCelebration result={currentAchievementUnlock} onClose={showNextAchievement} />
 {/if}

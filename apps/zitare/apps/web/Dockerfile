@@ -43,6 +43,7 @@ COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
+COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
 
 # Copy zitare content package
 COPY apps/zitare/packages/content ./apps/zitare/packages/content

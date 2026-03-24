@@ -3,11 +3,7 @@
 	import { ACHIEVEMENT_CATEGORY_INFO, RARITY_INFO } from '$lib/types';
 	import type { AchievementCategory } from '$lib/types';
 	import AchievementCard from '$lib/components/AchievementCard.svelte';
-	import {
-		ArrowLeft,
-		Trophy,
-		Star,
-	} from '@manacore/shared-icons';
+	import { ArrowLeft, Trophy, Star } from '@manacore/shared-icons';
 
 	let selectedCategory = $state<AchievementCategory | 'all'>('all');
 	let showOnlyUnlocked = $state(false);
@@ -23,7 +19,10 @@
 		return list.sort((a, b) => a.sortOrder - b.sortOrder);
 	});
 
-	const categoryEntries = Object.entries(ACHIEVEMENT_CATEGORY_INFO) as [AchievementCategory, { name: string; icon: string }][];
+	const categoryEntries = Object.entries(ACHIEVEMENT_CATEGORY_INFO) as [
+		AchievementCategory,
+		{ name: string; icon: string },
+	][];
 </script>
 
 <div class="min-h-screen">
@@ -60,7 +59,9 @@
 		<div class="mb-8 rounded-xl border border-gray-700 bg-gray-800/50 p-6">
 			<div class="flex items-center justify-between mb-3">
 				<h2 class="text-lg font-semibold text-white">Fortschritt</h2>
-				<span class="text-2xl font-bold text-yellow-400">{achievementStore.completionPercentage()}%</span>
+				<span class="text-2xl font-bold text-yellow-400"
+					>{achievementStore.completionPercentage()}%</span
+				>
 			</div>
 			<div class="h-3 overflow-hidden rounded-full bg-gray-700">
 				<div
@@ -70,7 +71,9 @@
 			</div>
 			<div class="mt-3 flex flex-wrap gap-4 text-sm">
 				{#each Object.entries(RARITY_INFO) as [rarity, info]}
-					{@const count = achievementStore.achievements.filter((a) => a.rarity === rarity && a.unlocked).length}
+					{@const count = achievementStore.achievements.filter(
+						(a) => a.rarity === rarity && a.unlocked
+					).length}
 					{@const total = achievementStore.achievements.filter((a) => a.rarity === rarity).length}
 					<span class="flex items-center gap-1.5 {info.color}">
 						<Star class="h-3 w-3" />

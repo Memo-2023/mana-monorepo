@@ -22,11 +22,15 @@ function calculateLevel(xp: number): number {
 export class SkillService {
 	constructor(
 		@Inject(DATABASE_TOKEN) private db: Database,
-		private readonly achievementService: AchievementService,
+		private readonly achievementService: AchievementService
 	) {}
 
 	async findAll(userId: string): Promise<Skill[]> {
-		return this.db.select().from(skills).where(eq(skills.userId, userId)).orderBy(desc(skills.totalXp));
+		return this.db
+			.select()
+			.from(skills)
+			.where(eq(skills.userId, userId))
+			.orderBy(desc(skills.totalXp));
 	}
 
 	async findByBranch(userId: string, branch: string): Promise<Skill[]> {
@@ -109,7 +113,12 @@ export class SkillService {
 		id: string,
 		userId: string,
 		dto: AddXpDto
-	): Promise<{ skill: Skill; leveledUp: boolean; newLevel: number; newAchievements: AchievementUnlockResult[] }> {
+	): Promise<{
+		skill: Skill;
+		leveledUp: boolean;
+		newLevel: number;
+		newAchievements: AchievementUnlockResult[];
+	}> {
 		const skill = await this.findByIdOrThrow(id, userId);
 
 		const newTotalXp = skill.totalXp + dto.xp;

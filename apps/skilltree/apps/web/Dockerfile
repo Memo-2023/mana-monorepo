@@ -33,6 +33,7 @@ COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
+COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
 
 # Copy skilltree web
 COPY apps/skilltree/apps/web ./apps/skilltree/apps/web

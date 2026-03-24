@@ -199,22 +199,14 @@ async function checkLocal(context: {
 				unlockedAt: new Date().toISOString(),
 				progress: condition.threshold,
 			};
-			achievements = [
-				...achievements.slice(0, i),
-				unlocked,
-				...achievements.slice(i + 1),
-			];
+			achievements = [...achievements.slice(0, i), unlocked, ...achievements.slice(i + 1)];
 			await storage.saveAchievement(unlocked);
 			newlyUnlocked.push({ achievement: a, xpReward: a.xpReward });
 		} else {
 			// Update progress
 			const updated = { ...a, progress: Math.min(current, condition.threshold) };
 			if (updated.progress !== a.progress) {
-				achievements = [
-					...achievements.slice(0, i),
-					updated,
-					...achievements.slice(i + 1),
-				];
+				achievements = [...achievements.slice(0, i), updated, ...achievements.slice(i + 1)];
 				await storage.saveAchievement(updated);
 			}
 		}

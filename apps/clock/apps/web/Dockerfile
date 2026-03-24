@@ -42,6 +42,7 @@ COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-stores ./packages/shared-stores
+COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
 
 # Copy clock packages and web
 COPY apps/clock/packages ./apps/clock/packages

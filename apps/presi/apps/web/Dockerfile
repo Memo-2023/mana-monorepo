@@ -42,6 +42,7 @@ COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
 
 # Copy presi web
 COPY apps/presi/apps/web ./apps/presi/apps/web

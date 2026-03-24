@@ -74,7 +74,11 @@
 
 			<!-- XP reward + unlock date -->
 			<div class="mt-2 flex items-center gap-3 text-xs">
-				<span class="flex items-center gap-1 {achievement.unlocked ? 'text-yellow-400' : 'text-gray-500'}">
+				<span
+					class="flex items-center gap-1 {achievement.unlocked
+						? 'text-yellow-400'
+						: 'text-gray-500'}"
+				>
 					<Star class="h-3 w-3" />
 					+{achievement.xpReward} XP
 				</span>

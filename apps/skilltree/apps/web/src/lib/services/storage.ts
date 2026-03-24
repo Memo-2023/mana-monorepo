@@ -257,7 +257,9 @@ export async function saveAchievement(achievement: AchievementWithStatus): Promi
 	await db.put('achievements', achievement);
 }
 
-export async function saveAllAchievements(achievementsList: AchievementWithStatus[]): Promise<void> {
+export async function saveAllAchievements(
+	achievementsList: AchievementWithStatus[]
+): Promise<void> {
 	const db = await getDB();
 	const tx = db.transaction('achievements', 'readwrite');
 	await tx.objectStore('achievements').clear();

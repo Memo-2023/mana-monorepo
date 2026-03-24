@@ -59,7 +59,9 @@
 			</div>
 
 			<!-- Achievement unlocked text -->
-			<h2 class="mb-1 text-2xl font-bold text-yellow-400 achievement-text">Achievement freigeschaltet!</h2>
+			<h2 class="mb-1 text-2xl font-bold text-yellow-400 achievement-text">
+				Achievement freigeschaltet!
+			</h2>
 
 			<!-- Achievement name -->
 			<p class="mb-2 text-xl font-semibold text-white">{result.achievement.name}</p>
