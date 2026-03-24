@@ -31,7 +31,6 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
-		"@presi/shared": "workspace:*",
 		"@manacore/shared-app-onboarding": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
@@ -42,12 +41,14 @@
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
+		"@manacore/shared-stores": "workspace:*",
 		"@manacore/shared-subscription-ui": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
+		"@presi/shared": "workspace:*",
 		"svelte-i18n": "^4.0.1"
 	},
 	"type": "module"
