@@ -311,12 +311,6 @@
 			</svg>
 		</div>
 
-		<!-- Priority indicator -->
-		<div
-			class="priority-dot"
-			style="background-color: {priorityColors[task.priority] || priorityColors.medium}"
-		></div>
-
 		<!-- Checkbox -->
 		<button
 			class="task-checkbox"
@@ -341,6 +335,12 @@
 				</svg>
 			{/if}
 		</button>
+
+		<!-- Priority indicator -->
+		<div
+			class="priority-dot"
+			style="background-color: {priorityColors[task.priority] || priorityColors.medium}"
+		></div>
 
 		<!-- Content (clickable to expand) -->
 		<button type="button" class="task-content" onclick={handleContentClick}>
@@ -421,23 +421,6 @@
 		{#if projectColor()}
 			<div class="project-dot" style="background-color: {projectColor()}"></div>
 		{/if}
-
-		<!-- Expand/Collapse indicator -->
-		<button
-			class="expand-btn"
-			onclick={handleContentClick}
-			title={isExpanded ? 'Einklappen' : 'Bearbeiten'}
-		>
-			<svg
-				class="expand-icon"
-				class:rotated={isExpanded}
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-			</svg>
-		</button>
 	</div>
 
 	<!-- Expanded inline edit form -->
@@ -751,8 +734,8 @@
 
 	/* Priority dot */
 	.priority-dot {
-		width: 0.5rem;
-		height: 0.5rem;
+		width: 0.625rem;
+		height: 0.625rem;
 		border-radius: 9999px;
 		flex-shrink: 0;
 	}
