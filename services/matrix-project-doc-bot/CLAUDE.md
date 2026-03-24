@@ -10,7 +10,7 @@ Matrix Project Doc Bot collects photos, voice notes, and text for projects and g
 - **Matrix**: matrix-bot-sdk
 - **Database**: Drizzle ORM + PostgreSQL
 - **Storage**: S3 (MinIO)
-- **AI**: OpenAI (Whisper for transcription, GPT-4o-mini for generation)
+- **AI**: mana-llm (Ollama/Gemma 3 for generation), mana-stt (Whisper for transcription) — fully self-hosted
 
 ## Commands
 

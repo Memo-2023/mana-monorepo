@@ -27,14 +27,15 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.721.0",
+		"@aws-sdk/s3-request-presigner": "^3.721.0",
 		"@manacore/bot-services": "workspace:*",
 		"@manacore/matrix-bot-common": "workspace:*",
+		"@manacore/shared-llm": "workspace:^",
 		"@nestjs/common": "^10.4.15",
 		"@nestjs/config": "^3.3.0",
 		"@nestjs/core": "^10.4.15",
 		"@nestjs/platform-express": "^10.4.15",
-		"@aws-sdk/client-s3": "^3.721.0",
-		"@aws-sdk/s3-request-presigner": "^3.721.0",
 		"drizzle-orm": "^0.38.3",
 		"matrix-bot-sdk": "^0.7.1",
 		"openai": "^4.77.0",

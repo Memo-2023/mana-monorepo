@@ -94,18 +94,13 @@ Brevo ist SPOF für alle Transaktions-Emails (Verifizierung, Passwort-Reset).
 
 #### 2.1 Alle LLM-Requests über mana-llm routen
 
-**Aufwand:** 1 Woche | **Impact:** Hoch
+**Status: ✅ ERLEDIGT** (2026-03-24)
 
-Aktuell nutzen einige Apps direkt Cloud-SDKs (OpenAI, Gemini, Azure). Wenn alles über `mana-llm` läuft:
-- Ein Switch reicht um Provider zu wechseln
-- Zentrales Logging, Rate-Limiting, Cost-Tracking
-- Einfacherer Wechsel zu lokalen Modellen
-
-**Betroffene Apps:**
-- Context App → `apps/context/apps/backend/src/ai/ai.service.ts`
-- NutriPhi → Google Gemini SDK direkt
-- Planta → Google Gemini SDK direkt
-- Matrix Project Doc Bot → OpenAI SDK direkt
+Alle 9 Backends nutzen jetzt `@manacore/shared-llm` → `mana-llm` Gateway:
+- Auth, Chat, Context, NutriPhi, Planta, Traces, ManaDeck, Bot Services, Matrix Bots
+- Google Gemini als automatischer Fallback wenn Ollama überlastet
+- OpenAI SDK komplett entfernt (Project Doc Bot)
+- Google Gemini SDK entfernt (ManaDeck)
 
 #### 2.2 PostgreSQL Backup stärken
 
@@ -201,9 +196,9 @@ NutriPhi und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
 
 | Prio | Maßnahme | Aufwand | Gewinn |
 |------|----------|---------|--------|
-| **1** | Picture App → mana-image-gen | 1-2 Tage | Replicate-Kosten = 0, volle Kontrolle |
-| **2** | Project Doc Bot → Ollama + mana-stt | 1 Tag | OpenAI-Abhängigkeit weg |
-| **3** | Alle LLM-Calls über mana-llm routen | 1 Woche | Zentrale Provider-Kontrolle |
+| ~~**1**~~ | ~~Picture App → mana-image-gen~~ | ✅ Erledigt | Lokales FLUX.2 klein als Default, Replicate für Premium |
+| ~~**2**~~ | ~~Project Doc Bot → Ollama + mana-stt~~ | ✅ Erledigt | OpenAI SDK entfernt, nutzt mana-llm + mana-stt |
+| ~~**3**~~ | ~~Alle LLM-Calls über mana-llm routen~~ | ✅ Erledigt | @manacore/shared-llm + Google Fallback |
 | **4** | PostgreSQL Backup mit pgBackRest | 1-2 Tage | Disaster Recovery |
 | **5** | Brevo → Postal/Stalwart | 2-3 Tage | Email-Unabhängigkeit |
 | **6** | Landing Pages self-hosted | 0.5 Tage | Cloudflare Pages weg |
@@ -216,8 +211,15 @@ NutriPhi und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
 
 ## Zusammenfassung
 
-**Aktuell self-hosted:** ~75% der Infrastruktur
-**Nach Roadmap (Prio 1-6):** ~90%
+**Aktuell self-hosted:** ~80% der Infrastruktur (Stand: 2026-03-24)
+**Nach Roadmap (Prio 4-6):** ~90%
 **Unvermeidbare Cloud-Abhängigkeiten:** Stripe (Payment Gateway), Google OAuth (Contacts API)
 
-Der Stack ist bereits sehr gut aufgestellt. Die größten Quick Wins sind die Integration von `mana-image-gen` in die Picture App und das Routing aller LLM-Calls über `mana-llm`. Die kritischste Verbesserung ist die Backup-Strategie und Server-Redundanz.
+**Erledigte Meilensteine (2026-03-24):**
+- ✅ Alle LLM-Calls über `mana-llm` geroutet (9 Backends, `@manacore/shared-llm`)
+- ✅ Google Gemini Fallback in mana-llm (automatisch bei Ollama-Überlastung)
+- ✅ Picture App nutzt lokales `mana-image-gen` (FLUX.2 klein) als Default
+- ✅ Project Doc Bot: OpenAI SDK komplett entfernt
+- ✅ ManaDeck: Google Gemini SDK entfernt
+
+**Nächste Schritte:** PostgreSQL Backup (Prio 4), E-Mail-Unabhängigkeit (Prio 5), Landing Pages self-hosted (Prio 6).
