@@ -3,35 +3,236 @@ import Container from '../layout/Container.astro';
 
 const currentYear = new Date().getFullYear();
 
-const footerLinks = [
-	{ label: 'Apps', href: '/apps' },
+// --- Data ---
+
+const ecosystemApps = [
+	{ label: 'Calendar', href: 'https://calendar.mana.how', status: 'mature' },
+	{ label: 'Todo', href: 'https://todo.mana.how', status: 'mature' },
+	{ label: 'Contacts', href: 'https://contacts.mana.how', status: 'production' },
+	{ label: 'Presi', href: 'https://presi.mana.how', status: 'mature' },
+	{ label: 'Storage', href: 'https://storage.mana.how', status: 'production' },
+	{ label: 'Chat', href: 'https://chat.mana.how', status: 'production' },
+	{ label: 'Picture', href: 'https://picture.mana.how', status: 'production' },
+	{ label: 'Mukke', href: 'https://mukke.mana.how', status: 'beta' },
+	{ label: 'Clock', href: 'https://clock.mana.how', status: 'beta' },
+	{ label: 'NutriPhi', href: 'https://nutriphi.mana.how', status: 'beta' },
+	{ label: 'Photos', href: 'https://photos.mana.how', status: 'beta' },
+	{ label: 'Zitare', href: 'https://zitare.mana.how', status: 'beta' },
+	{ label: 'Playground', href: 'https://playground.mana.how', status: 'beta' },
+	{ label: 'ManaDeck', href: 'https://manadeck.mana.how', status: 'alpha' },
+	{ label: 'Planta', href: 'https://planta.mana.how', status: 'alpha' },
+];
+
+const platformLinks = [
+	{ label: 'Dashboard', href: 'https://mana.how' },
+	{ label: 'Observatory', href: 'https://mana.how/observatory' },
+	{ label: 'Alle Apps', href: '/apps' },
 	{ label: 'Preise', href: '/pricing' },
+	{ label: 'Matrix Chat', href: 'https://element.mana.how' },
+];
+
+const monitoringLinks = [
+	{ label: 'Grafana', href: 'https://grafana.mana.how' },
+	{ label: 'Analytics', href: 'https://stats.mana.how' },
+	{ label: 'Error Tracking', href: 'https://glitchtip.mana.how' },
+];
+
+const communityLinks = [
 	{ label: 'Mission', href: '/mission' },
+	{ label: 'Kunden', href: '/clients' },
+	{ label: 'Use Cases', href: '/fuer' },
+];
+
+const insightsLinks = [
+	{ label: 'Devlog', href: '/devlog' },
+	{ label: 'ManaScore', href: '/manascore' },
+	{ label: 'Release Plan', href: '/release-plan' },
+	{ label: 'Blueprints', href: '/blueprints' },
+	{ label: 'Design System', href: '/design-system' },
+	{ label: 'Dokumentation', href: 'https://docs.mana.how' },
+];
+
+const landingPages = [
+	{ label: 'Chat Landing', href: 'https://chats.mana.how' },
+	{ label: 'Picture Landing', href: 'https://pics.mana.how' },
+	{ label: 'Zitare Landing', href: 'https://zitares.mana.how' },
+	{ label: 'Presi Landing', href: 'https://presis.mana.how' },
+	{ label: 'Clock Landing', href: 'https://clocks.mana.how' },
+	{ label: 'IT Souveranitat', href: 'https://it.mana.how' },
+];
+
+const legalLinks = [
 	{ label: 'Datenschutz', href: '/privacy' },
+	{ label: 'DSGVO', href: '/privacy/dsgvo-konformitaet' },
+	{ label: 'KI-Modelle', href: '/privacy/ki-modelle-umgang' },
 	{ label: 'Impressum', href: '/impressum' },
 ];
+
+function statusColor(status: string) {
+	switch (status) {
+		case 'mature':
+			return '#34d399';
+		case 'production':
+			return '#60a5fa';
+		case 'beta':
+			return '#fbbf24';
+		case 'alpha':
+			return '#f97316';
+		default:
+			return '#94a3b8';
+	}
+}
 ---
 
 <footer class="footer">
 	<div class="footer-overlay"></div>
 
 	<Container class="relative z-10">
-		<div class="footer-content">
-			<!-- Links -->
-			<nav class="footer-nav">
-				{
-					footerLinks.map((link) => (
-						<a href={link.href} class="footer-link">
-							{link.label}
-						</a>
-					))
-				}
-			</nav>
+		<div class="footer-grid">
+			<!-- Column 1: Ecosystem Apps -->
+			<div class="footer-col">
+				<h3 class="footer-heading">Okosystem</h3>
+				<ul class="footer-list">
+					{
+						ecosystemApps.slice(0, 8).map((app) => (
+							<li>
+								<a href={app.href} class="footer-link" target="_blank" rel="noopener">
+									<span class="status-dot" style={`background: ${statusColor(app.status)}`} />
+									{app.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
 
-			<!-- Copyright -->
-			<div class="footer-copyright">
-				© {currentYear} Manacore Verein
+				<details class="more-apps">
+					<summary class="more-toggle">Alle Apps anzeigen</summary>
+					<ul class="footer-list">
+						{
+							ecosystemApps.slice(8).map((app) => (
+								<li>
+									<a href={app.href} class="footer-link" target="_blank" rel="noopener">
+										<span class="status-dot" style={`background: ${statusColor(app.status)}`} />
+										{app.label}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</details>
+
+				<!-- Status legend -->
+				<div class="status-legend">
+					<span><span class="status-dot" style="background: #34d399"></span> Mature</span>
+					<span><span class="status-dot" style="background: #60a5fa"></span> Production</span>
+					<span><span class="status-dot" style="background: #fbbf24"></span> Beta</span>
+					<span><span class="status-dot" style="background: #f97316"></span> Alpha</span>
+				</div>
 			</div>
+
+			<!-- Column 2: Platform -->
+			<div class="footer-col">
+				<h3 class="footer-heading">Plattform</h3>
+				<ul class="footer-list">
+					{
+						platformLinks.map((link) => (
+							<li>
+								<a
+									href={link.href}
+									class="footer-link"
+									{...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}
+								>
+									{link.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+
+				<h4 class="footer-subheading">Monitoring</h4>
+				<ul class="footer-list">
+					{
+						monitoringLinks.map((link) => (
+							<li>
+								<a href={link.href} class="footer-link" target="_blank" rel="noopener">
+									{link.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+
+				<h4 class="footer-subheading">Community</h4>
+				<ul class="footer-list">
+					{
+						communityLinks.map((link) => (
+							<li>
+								<a href={link.href} class="footer-link">
+									{link.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<!-- Column 3: Insights -->
+			<div class="footer-col">
+				<h3 class="footer-heading">Einblicke</h3>
+				<ul class="footer-list">
+					{
+						insightsLinks.map((link) => (
+							<li>
+								<a
+									href={link.href}
+									class="footer-link"
+									{...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}
+								>
+									{link.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+
+				<h4 class="footer-subheading">Landing Pages</h4>
+				<ul class="footer-list">
+					{
+						landingPages.map((link) => (
+							<li>
+								<a href={link.href} class="footer-link" target="_blank" rel="noopener">
+									{link.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<!-- Column 4: Legal -->
+			<div class="footer-col">
+				<h3 class="footer-heading">Rechtliches</h3>
+				<ul class="footer-list">
+					{
+						legalLinks.map((link) => (
+							<li>
+								<a href={link.href} class="footer-link">
+									{link.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</div>
+
+		<!-- Bottom bar -->
+		<div class="footer-bottom">
+			<span class="footer-copyright">&copy; {currentYear} Manacore Verein</span>
+			<span class="footer-domain">mana.how</span>
+			<a href="https://github.com/Memo-2023" class="footer-link" target="_blank" rel="noopener">
+				GitHub
+			</a>
 		</div>
 	</Container>
 </footer>
@@ -53,56 +254,187 @@ const footerLinks = [
 		pointer-events: none;
 	}
 
-	.footer-content {
-		padding: 2rem 0 1.5rem;
+	/* Grid */
+	.footer-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 2.5rem;
+		padding: 3rem 0 2rem;
 	}
 
-	.footer-nav {
-		margin-bottom: 1.5rem;
+	.footer-col {
+		min-width: 0;
+	}
+
+	/* Headings */
+	.footer-heading {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: #e2e8f0;
+		margin-bottom: 1rem;
+		letter-spacing: 0.02em;
+	}
+
+	.footer-subheading {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		color: #64748b;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		margin-top: 1.25rem;
+		margin-bottom: 0.625rem;
+	}
+
+	/* Links */
+	.footer-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
 		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem 2rem;
-		justify-content: center;
+		flex-direction: column;
+		gap: 0.375rem;
 	}
 
 	.footer-link {
 		font-size: 0.8125rem;
 		color: #94a3b8;
 		text-decoration: none;
-		transition: color 0.3s ease;
+		transition: color 0.2s ease;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
 		white-space: nowrap;
 	}
 
 	.footer-link:hover {
-		color: #3b82f6;
+		color: #60a5fa;
+	}
+
+	/* Status dots */
+	.status-dot {
+		display: inline-block;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	.status-legend {
+		margin-top: 1rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 0.75rem;
+		font-size: 0.625rem;
+		color: #64748b;
+	}
+
+	.status-legend span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.status-legend .status-dot {
+		width: 5px;
+		height: 5px;
+	}
+
+	/* Expandable apps */
+	.more-apps {
+		margin-top: 0.375rem;
+	}
+
+	.more-toggle {
+		font-size: 0.75rem;
+		color: #64748b;
+		cursor: pointer;
+		padding: 0.25rem 0;
+		transition: color 0.2s ease;
+		list-style: none;
+	}
+
+	.more-toggle::-webkit-details-marker {
+		display: none;
+	}
+
+	.more-toggle::before {
+		content: '+ ';
+	}
+
+	details[open] .more-toggle::before {
+		content: '- ';
+	}
+
+	.more-toggle:hover {
+		color: #94a3b8;
+	}
+
+	.more-apps .footer-list {
+		margin-top: 0.375rem;
+	}
+
+	/* Bottom bar */
+	.footer-bottom {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1.25rem 0;
+		border-top: 1px solid rgba(248, 250, 252, 0.06);
+		font-size: 0.75rem;
+		color: #475569;
+	}
+
+	.footer-domain {
+		color: #64748b;
+		font-weight: 500;
+		letter-spacing: 0.03em;
 	}
 
 	.footer-copyright {
-		text-align: center;
-		font-size: 0.75rem;
 		color: #475569;
-		padding-top: 1.5rem;
-		border-top: 1px solid rgba(248, 250, 252, 0.05);
+	}
+
+	/* Tablet */
+	@media (max-width: 1024px) {
+		.footer-grid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 2rem;
+		}
 	}
 
 	/* Mobile */
 	@media (max-width: 640px) {
-		.footer-content {
-			padding: 1.5rem 0 1rem;
+		.footer-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+			padding: 2rem 0 1.5rem;
 		}
 
-		.footer-nav {
-			gap: 0.375rem 1.25rem;
-			margin-bottom: 1rem;
+		.footer-col {
+			padding-bottom: 1.5rem;
+			border-bottom: 1px solid rgba(248, 250, 252, 0.04);
+		}
+
+		.footer-col:last-child {
+			padding-bottom: 0;
+			border-bottom: none;
+		}
+
+		.footer-heading {
+			font-size: 0.875rem;
+			margin-bottom: 0.75rem;
 		}
 
 		.footer-link {
-			font-size: 0.75rem;
+			font-size: 0.8125rem;
+			padding: 0.125rem 0;
 		}
 
-		.footer-copyright {
-			padding-top: 1rem;
-			font-size: 0.6875rem;
+		.footer-bottom {
+			flex-direction: column;
+			gap: 0.5rem;
+			text-align: center;
+			padding: 1rem 0;
 		}
 	}
 </style>
