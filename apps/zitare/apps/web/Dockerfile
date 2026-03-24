@@ -46,6 +46,7 @@ COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-vite-config ./packages/shared-vite-config
 COPY packages/shared-pwa ./packages/shared-pwa
 COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
+COPY packages/spiral-db ./packages/spiral-db
 
 # Copy zitare content package
 COPY apps/zitare/packages/content ./apps/zitare/packages/content
