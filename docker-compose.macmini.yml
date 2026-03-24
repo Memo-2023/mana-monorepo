@@ -27,6 +27,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mana123}
     volumes:
       - /Volumes/ManaData/postgres:/var/lib/postgresql/data
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/conf.d/custom.conf:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -34,6 +35,31 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
+    command: >
+      postgres
+      -c 'config_file=/etc/postgresql/conf.d/custom.conf'
+
+  # PostgreSQL Backup with Point-in-Time Recovery
+  # Full backup daily at 03:00, differential every 6h, incremental every hour
+  # Retention: 4 full backups + 14 differential
+  # Restore: see docs/POSTGRES_BACKUP.md
+  postgres-backup:
+    image: pgbackrest/pgbackrest:latest
+    container_name: mana-infra-pgbackrest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGBACKREST_STANZA: mana
+      PGBACKREST_REPO1_PATH: /var/lib/pgbackrest
+      PGBACKREST_REPO1_RETENTION_FULL: "4"
+      PGBACKREST_PG1_HOST: postgres
+      PGBACKREST_PG1_PORT: "5432"
+      PGBACKREST_PG1_USER: postgres
+      PGBACKREST_PG1_PATH: /var/lib/postgresql/data
+    volumes:
+      - /Volumes/ManaData/backups/pgbackrest:/var/lib/pgbackrest
 
   redis:
     image: redis:7-alpine
