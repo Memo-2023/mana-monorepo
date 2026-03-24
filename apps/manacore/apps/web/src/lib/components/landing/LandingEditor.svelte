@@ -447,13 +447,13 @@
 					<div class="grid gap-2 md:grid-cols-2 pr-6">
 						<input
 							type="text"
-							bind:value={config.sections.footer.links || [])[index].label}
+							bind:value={link.label}
 							placeholder="Label"
 							class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
 						/>
 						<input
 							type="text"
-							bind:value={config.sections.footer.links || [])[index].href}
+							bind:value={link.href}
 							placeholder="URL"
 							class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
 						/>
