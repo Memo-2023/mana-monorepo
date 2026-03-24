@@ -2174,6 +2174,9 @@ importers:
 
   apps/manacore/apps/web:
     dependencies:
+      '@manacore/credit-operations':
+        specifier: workspace:^
+        version: link:../../../../packages/credit-operations
       '@manacore/qr-export':
         specifier: workspace:*
         version: link:../../../../packages/qr-export
@@ -7288,6 +7291,34 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.10.1)(@vitest/browser@3.2.4)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)
+
+  services/it-landing:
+    dependencies:
+      '@astrojs/check':
+        specifier: ^0.9.0
+        version: 0.9.5(prettier-plugin-astro@0.14.1)(prettier@3.6.2)(typescript@5.9.3)
+      '@astrojs/sitemap':
+        specifier: ^3.2.1
+        version: 3.6.0
+      '@manacore/shared-landing-ui':
+        specifier: workspace:*
+        version: link:../../packages/shared-landing-ui
+      astro:
+        specifier: ^5.16.0
+        version: 5.18.1(@netlify/blobs@10.4.1)(@types/node@24.10.1)(ioredis@5.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.3)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+    devDependencies:
+      '@astrojs/tailwind':
+        specifier: ^6.0.0
+        version: 6.0.2(astro@5.18.1(@netlify/blobs@10.4.1)(@types/node@24.10.1)(ioredis@5.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.3)(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1))(tailwindcss@3.4.18(tsx@4.21.0)(yaml@2.8.1))(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3))
+      '@tailwindcss/typography':
+        specifier: ^0.5.16
+        version: 0.5.19(tailwindcss@3.4.18(tsx@4.21.0)(yaml@2.8.1))
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.18(tsx@4.21.0)(yaml@2.8.1)
 
   services/mana-api-gateway:
     dependencies:

@@ -4,7 +4,7 @@
 		"name": "Konstanzer Münster",
 		"category": "Sehenswürdigkeit",
 		"description": "Das Konstanzer Münster ist eine imposante Basilika, die über Jahrhunderte das Zentrum des Bistums Konstanz war. Besucher können den Turm besteigen und einen atemberaubenden Blick über die Stadt und den Bodensee genießen.",
-		"image": "/images/muenster.svg",
+		"image": "/images/muenster.jpg",
 		"address": "Münsterplatz 1, 78462 Konstanz",
 		"coordinates": {
 			"lat": 47.663,
@@ -28,7 +28,7 @@
 		"name": "Imperia",
 		"category": "Sehenswürdigkeit",
 		"description": "Die Imperia ist eine satirische Statue im Hafen von Konstanz, die an das Konzil von Konstanz erinnert. Sie dreht sich langsam um ihre Achse und ist ein beliebtes Fotomotiv.",
-		"image": "/images/imperia.svg",
+		"image": "/images/imperia.jpg",
 		"address": "Hafenstraße, 78462 Konstanz",
 		"coordinates": {
 			"lat": 47.66,
@@ -40,7 +40,7 @@
 		"name": "Restaurant Ophelia",
 		"category": "Restaurant",
 		"description": "Das mit zwei Michelin-Sternen ausgezeichnete Restaurant Ophelia bietet eine exquisite Küche in einem eleganten Ambiente. Es befindet sich im Hotel Riva am Ufer des Bodensees.",
-		"image": "/images/ophelia.svg",
+		"image": "/images/ophelia.jpg",
 		"address": "Seestraße 25, 78464 Konstanz",
 		"coordinates": {
 			"lat": 47.67,
@@ -52,7 +52,7 @@
 		"name": "LAGO Shopping-Center",
 		"category": "Laden",
 		"description": "Das LAGO ist das größte Einkaufszentrum am Bodensee und bietet eine Vielzahl von Geschäften, Restaurants und Cafés. Es ist ein beliebter Treffpunkt für Einheimische und Touristen.",
-		"image": "/images/lago.svg",
+		"image": "/images/lago.jpg",
 		"address": "Bodanstraße 1, 78462 Konstanz",
 		"coordinates": {
 			"lat": 47.658,
@@ -64,7 +64,7 @@
 		"name": "Rosgartenmuseum",
 		"category": "Museum",
 		"description": "Das Rosgartenmuseum ist das städtische Museum für Kunst, Kultur und Geschichte von Konstanz und der Bodenseeregion. Es wurde 1870 gegründet und befindet sich in einem ehemaligen Zunfthaus.",
-		"image": "/images/rosgartenmuseum.svg",
+		"image": "/images/rosgartenmuseum.jpg",
 		"address": "Rosgartenstraße 3-5, 78462 Konstanz",
 		"coordinates": {
 			"lat": 47.661,
@@ -83,7 +83,7 @@
 		"name": "Archäologisches Landesmuseum Baden-Württemberg",
 		"category": "Museum",
 		"description": "Das Archäologische Landesmuseum (ALM) in Konstanz ist ein Zweigmuseum des ALM in Stuttgart und zeigt Funde aus der Archäologie, Geschichte und Kultur der Region.",
-		"image": "/images/alm.svg",
+		"image": "/images/alm.jpg",
 		"address": "Benediktinerplatz 5, 78467 Konstanz",
 		"coordinates": {
 			"lat": 47.665,

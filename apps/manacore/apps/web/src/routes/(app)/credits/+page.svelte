@@ -8,13 +8,91 @@
 		type CreditTransaction,
 		type CreditPackage,
 	} from '$lib/api/credits';
+	import {
+		OPERATION_METADATA,
+		CREDIT_COSTS,
+		CreditCategory,
+		formatCreditCost,
+		type CreditOperationType,
+	} from '@manacore/credit-operations';
 
 	let balance = $state<CreditBalance | null>(null);
 	let transactions = $state<CreditTransaction[]>([]);
 	let packages = $state<CreditPackage[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
-	let activeTab = $state<'overview' | 'transactions' | 'packages'>('overview');
+	let activeTab = $state<'overview' | 'transactions' | 'packages' | 'costs'>('overview');
+	let costFilter = $state<'all' | 'ai' | 'productivity' | 'premium'>('all');
+
+	// Build pricing data grouped by app
+	const allOperations = $derived(
+		Object.entries(OPERATION_METADATA).map(([op, meta]) => ({
+			operation: op as CreditOperationType,
+			name: meta.name,
+			description: meta.description,
+			category: meta.category,
+			app: meta.app,
+			cost: CREDIT_COSTS[op as CreditOperationType],
+			formattedCost: formatCreditCost(CREDIT_COSTS[op as CreditOperationType]),
+		}))
+	);
+
+	const filteredOperations = $derived(
+		costFilter === 'all'
+			? allOperations
+			: allOperations.filter((op) => {
+					if (costFilter === 'ai') return op.category === CreditCategory.AI;
+					if (costFilter === 'productivity') return op.category === CreditCategory.PRODUCTIVITY;
+					if (costFilter === 'premium') return op.category === CreditCategory.PREMIUM;
+					return true;
+				})
+	);
+
+	const operationsByApp = $derived(() => {
+		const groups: Record<string, typeof filteredOperations> = {};
+		for (const op of filteredOperations) {
+			if (!groups[op.app]) groups[op.app] = [];
+			groups[op.app].push(op);
+		}
+		// Sort apps alphabetically
+		return Object.fromEntries(Object.entries(groups).sort(([a], [b]) => a.localeCompare(b)));
+	});
+
+	const APP_LABELS: Record<string, string> = {
+		calendar: 'Kalender',
+		chat: 'Chat',
+		contacts: 'Kontakte',
+		context: 'Context',
+		general: 'Allgemein',
+		manadeck: 'ManaDeck',
+		matrix: 'Matrix Bots',
+		nutriphi: 'NutriPhi',
+		picture: 'Picture',
+		planta: 'Planta',
+		presi: 'Presi',
+		questions: 'Questions',
+		skilltree: 'SkillTree',
+		todo: 'Todo',
+		traces: 'Traces',
+		zitare: 'Zitare',
+	};
+
+	function getAppLabel(app: string): string {
+		return APP_LABELS[app] ?? app.charAt(0).toUpperCase() + app.slice(1);
+	}
+
+	function getCategoryLabel(category: CreditCategory): string {
+		switch (category) {
+			case CreditCategory.AI:
+				return 'KI-Features';
+			case CreditCategory.PRODUCTIVITY:
+				return 'Erstellen';
+			case CreditCategory.PREMIUM:
+				return 'Premium';
+			default:
+				return category;
+		}
+	}
 	let processingPackageId = $state<string | null>(null);
 
 	// Toast notification
@@ -26,6 +104,7 @@
 		const tab = $page.url.searchParams.get('tab');
 		if (tab === 'packages') activeTab = 'packages';
 		else if (tab === 'transactions') activeTab = 'transactions';
+		else if (tab === 'costs') activeTab = 'costs';
 
 		// Handle success/canceled from Stripe redirect
 		const success = $page.url.searchParams.get('success');
@@ -212,6 +291,14 @@
 			>
 				Credits kaufen
 			</button>
+			<button
+				onclick={() => (activeTab = 'costs')}
+				class="px-4 py-2 -mb-px transition-colors {activeTab === 'costs'
+					? 'border-b-2 border-primary text-primary font-medium'
+					: 'text-muted-foreground hover:text-foreground'}"
+			>
+				Kosten
+			</button>
 		</div>
 
 		<!-- Tab Content -->
@@ -394,6 +481,75 @@
 					</p>
 				</Card>
 			{/if}
+		{:else if activeTab === 'costs'}
+			<!-- Category Filter -->
+			<div class="flex flex-wrap gap-2 mb-6">
+				{#each [{ key: 'all', label: 'Alle' }, { key: 'ai', label: 'KI-Features' }, { key: 'productivity', label: 'Erstellen' }, { key: 'premium', label: 'Premium' }] as filter}
+					<button
+						onclick={() => (costFilter = filter.key as typeof costFilter)}
+						class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors {costFilter ===
+						filter.key
+							? 'bg-primary text-primary-foreground'
+							: 'bg-surface-hover text-muted-foreground hover:text-foreground'}"
+					>
+						{filter.label}
+					</button>
+				{/each}
+			</div>
+
+			<!-- Info -->
+			<div
+				class="mb-6 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800"
+			>
+				<p class="text-sm text-blue-800 dark:text-blue-200">
+					Lesen, Bearbeiten, Löschen und Organisieren von Einträgen ist immer <strong
+						>kostenlos</strong
+					>. Credits werden nur für die unten aufgeführten Aktionen verbraucht.
+				</p>
+			</div>
+
+			<!-- Operations grouped by app -->
+			{@const groups = operationsByApp()}
+			<div class="space-y-4">
+				{#each Object.entries(groups) as [app, operations]}
+					<Card>
+						<h3 class="text-lg font-semibold mb-4">{getAppLabel(app)}</h3>
+						<div class="divide-y divide-border">
+							{#each operations as op}
+								<div class="flex items-center justify-between py-3">
+									<div class="flex-1 min-w-0 pr-4">
+										<p class="font-medium text-sm">{op.name}</p>
+										<p class="text-xs text-muted-foreground mt-0.5">{op.description}</p>
+									</div>
+									<div class="flex items-center gap-3 flex-shrink-0">
+										<span class="text-xs text-muted-foreground"
+											>{getCategoryLabel(op.category)}</span
+										>
+										<span
+											class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tabular-nums {op.cost ===
+											0
+												? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+												: op.cost < 1
+													? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+													: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}"
+										>
+											{op.cost === 0 ? 'Kostenlos' : op.formattedCost}
+										</span>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</Card>
+				{/each}
+
+				{#if Object.keys(groups).length === 0}
+					<Card>
+						<p class="text-center text-muted-foreground py-8">
+							Keine Operationen in dieser Kategorie.
+						</p>
+					</Card>
+				{/if}
+			</div>
 		{/if}
 	{/if}
 </div>

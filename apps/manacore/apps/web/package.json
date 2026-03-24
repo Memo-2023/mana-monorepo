@@ -42,8 +42,8 @@
 		"vitest": "^4.0.14"
 	},
 	"dependencies": {
+		"@manacore/credit-operations": "workspace:^",
 		"@manacore/qr-export": "workspace:*",
-		"@manacore/wallpaper-generator": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
@@ -63,6 +63,7 @@
 		"@manacore/shared-types": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
+		"@manacore/wallpaper-generator": "workspace:*",
 		"svelte-dnd-action": "^0.9.68",
 		"svelte-i18n": "^4.0.0"
 	},

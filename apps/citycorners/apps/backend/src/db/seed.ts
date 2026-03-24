@@ -23,7 +23,7 @@ async function seed() {
 			address: 'Münsterplatz 1, 78462 Konstanz',
 			latitude: 47.6603,
 			longitude: 9.1757,
-			imageUrl: '/images/muenster.svg',
+			imageUrl: '/images/muenster.jpg',
 			timeline: [
 				{ year: '615', event: 'Grundsteinlegung' },
 				{ year: '1089', event: 'Romanischer Neubau' },
@@ -38,7 +38,7 @@ async function seed() {
 			address: 'Hafenstraße, 78462 Konstanz',
 			latitude: 47.6596,
 			longitude: 9.1784,
-			imageUrl: '/images/imperia.svg',
+			imageUrl: '/images/imperia.jpg',
 			timeline: [{ year: '1993', event: 'Aufstellung im Hafen' }],
 		},
 		{
@@ -49,7 +49,7 @@ async function seed() {
 			address: 'Seestraße 25, 78464 Konstanz',
 			latitude: 47.6589,
 			longitude: 9.1795,
-			imageUrl: '/images/ophelia.svg',
+			imageUrl: '/images/ophelia.jpg',
 		},
 		{
 			name: 'LAGO Shopping Center',
@@ -58,7 +58,7 @@ async function seed() {
 			address: 'Bodanstraße 1, 78462 Konstanz',
 			latitude: 47.6615,
 			longitude: 9.1742,
-			imageUrl: '/images/lago.svg',
+			imageUrl: '/images/lago.jpg',
 		},
 		{
 			name: 'Rosgartenmuseum',
