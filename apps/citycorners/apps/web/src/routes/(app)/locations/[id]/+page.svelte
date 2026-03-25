@@ -29,6 +29,19 @@
 		distance: number;
 	}
 
+	interface ReviewStats {
+		averageRating: number;
+		totalReviews: number;
+	}
+
+	interface Review {
+		id: string;
+		userId: string;
+		rating: number;
+		comment?: string;
+		createdAt: string;
+	}
+
 	interface Location {
 		id: string;
 		slug?: string;
@@ -44,6 +57,7 @@
 		website?: string;
 		phone?: string;
 		openingHours?: Record<string, string>;
+		reviewStats?: ReviewStats;
 		createdBy?: string;
 	}
 
@@ -54,6 +68,18 @@
 	let shareSuccess = $state(false);
 	let showDeleteConfirm = $state(false);
 	let deleting = $state(false);
+
+	// Review state
+	let reviews = $state<Review[]>([]);
+	let reviewRating = $state(0);
+	let reviewComment = $state('');
+	let submittingReview = $state(false);
+	let reviewError = $state('');
+	let showReviewForm = $state(false);
+
+	let userHasReviewed = $derived(
+		authStore.isAuthenticated && reviews.some((r) => r.userId === authStore.user?.id)
+	);
 
 	// Gallery state
 	let selectedImageIndex = $state(0);
@@ -117,6 +143,9 @@
 		if (authStore.isAuthenticated) {
 			favoritesStore.load();
 		}
+
+		// Load reviews
+		loadReviews();
 	});
 
 	// Initialize mini map after location loads
@@ -210,6 +239,76 @@
 			photoError = $_('gallery.addError');
 		} finally {
 			addingPhoto = false;
+		}
+	}
+
+	async function loadReviews() {
+		if (!location) return;
+		try {
+			const res = await fetch(api(`/reviews/${location.id}`));
+			if (res.ok) {
+				const data = await res.json();
+				reviews = data.reviews || [];
+			}
+		} catch {
+			// ignore
+		}
+	}
+
+	async function handleSubmitReview() {
+		if (!location || submittingReview || reviewRating === 0) return;
+		submittingReview = true;
+		reviewError = '';
+		try {
+			const token = await authStore.getValidToken();
+			const res = await fetch(api(`/reviews/${location.id}`), {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					rating: reviewRating,
+					comment: reviewComment.trim() || undefined,
+				}),
+			});
+			if (res.ok) {
+				reviewRating = 0;
+				reviewComment = '';
+				showReviewForm = false;
+				await loadReviews();
+				// Update review stats on the location
+				const statsRes = await fetch(api(`/reviews/${location.id}/stats`));
+				if (statsRes.ok) {
+					const statsData = await statsRes.json();
+					location = { ...location, reviewStats: statsData.stats };
+				}
+			} else {
+				reviewError = $_('reviews.error');
+			}
+		} catch {
+			reviewError = $_('reviews.error');
+		} finally {
+			submittingReview = false;
+		}
+	}
+
+	async function handleDeleteReview() {
+		if (!location) return;
+		try {
+			const token = await authStore.getValidToken();
+			await fetch(api(`/reviews/${location.id}`), {
+				method: 'DELETE',
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			await loadReviews();
+			const statsRes = await fetch(api(`/reviews/${location.id}/stats`));
+			if (statsRes.ok) {
+				const statsData = await statsRes.json();
+				location = { ...location, reviewStats: statsData.stats };
+			}
+		} catch {
+			// ignore
 		}
 	}
 
@@ -520,6 +619,138 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Reviews -->
+		<div>
+			<div class="mb-4 flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<h2 class="text-xl font-semibold text-foreground">{$_('reviews.title')}</h2>
+					{#if location.reviewStats && location.reviewStats.totalReviews > 0}
+						<div class="flex items-center gap-1.5">
+							<div class="flex items-center gap-0.5">
+								{#each Array(5) as _, i}
+									<svg
+										class="h-4 w-4 {i < Math.round(location.reviewStats.averageRating)
+											? 'text-amber-400'
+											: 'text-gray-300 dark:text-gray-600'}"
+										fill="currentColor"
+										viewBox="0 0 20 20"
+									>
+										<path
+											d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+										/>
+									</svg>
+								{/each}
+							</div>
+							<span class="text-sm font-medium text-foreground">
+								{location.reviewStats.averageRating.toFixed(1)}
+							</span>
+							<span class="text-sm text-foreground-secondary">
+								({location.reviewStats.totalReviews})
+							</span>
+						</div>
+					{/if}
+				</div>
+				{#if authStore.isAuthenticated && !userHasReviewed}
+					<button
+						onclick={() => (showReviewForm = !showReviewForm)}
+						class="text-sm font-medium text-primary hover:underline"
+					>
+						{$_('reviews.write')}
+					</button>
+				{/if}
+			</div>
+
+			<!-- Review form -->
+			{#if showReviewForm}
+				<div class="mb-4 rounded-xl border border-border bg-background-card p-4">
+					<p class="mb-3 text-sm font-medium text-foreground">{$_('reviews.yourRating')}</p>
+					{#if reviewError}
+						<div class="mb-3 rounded-lg bg-red-500/10 p-2 text-xs text-red-500">
+							{reviewError}
+						</div>
+					{/if}
+					<div class="mb-3 flex gap-1">
+						{#each [1, 2, 3, 4, 5] as star}
+							<button
+								onclick={() => (reviewRating = star)}
+								class="transition-transform hover:scale-110"
+							>
+								<svg
+									class="h-8 w-8 {star <= reviewRating
+										? 'text-amber-400'
+										: 'text-gray-300 dark:text-gray-600'}"
+									fill="currentColor"
+									viewBox="0 0 20 20"
+								>
+									<path
+										d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+									/>
+								</svg>
+							</button>
+						{/each}
+					</div>
+					<textarea
+						bind:value={reviewComment}
+						placeholder={$_('reviews.commentPlaceholder')}
+						rows="2"
+						class="mb-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground-secondary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+					></textarea>
+					<button
+						onclick={handleSubmitReview}
+						disabled={reviewRating === 0 || submittingReview}
+						class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+					>
+						{submittingReview ? $_('reviews.submitting') : $_('reviews.submit')}
+					</button>
+				</div>
+			{/if}
+
+			<!-- Review list -->
+			{#if reviews.length > 0}
+				<div class="space-y-3">
+					{#each reviews as review}
+						<div class="rounded-xl border border-border bg-background-card p-4">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center gap-1">
+									{#each Array(5) as _, i}
+										<svg
+											class="h-4 w-4 {i < review.rating
+												? 'text-amber-400'
+												: 'text-gray-300 dark:text-gray-600'}"
+											fill="currentColor"
+											viewBox="0 0 20 20"
+										>
+											<path
+												d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+											/>
+										</svg>
+									{/each}
+								</div>
+								<div class="flex items-center gap-2">
+									<span class="text-xs text-foreground-secondary">
+										{new Date(review.createdAt).toLocaleDateString()}
+									</span>
+									{#if authStore.isAuthenticated && review.userId === authStore.user?.id}
+										<button
+											onclick={handleDeleteReview}
+											class="text-xs text-red-500 hover:underline"
+										>
+											{$_('reviews.delete')}
+										</button>
+									{/if}
+								</div>
+							</div>
+							{#if review.comment}
+								<p class="mt-2 text-sm text-foreground-secondary">{review.comment}</p>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{:else if !showReviewForm}
+				<p class="text-sm text-foreground-secondary">{$_('reviews.noReviews')}</p>
+			{/if}
+		</div>
 
 		<!-- Owner actions -->
 		{#if isOwner}

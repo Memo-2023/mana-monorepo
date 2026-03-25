@@ -4,6 +4,7 @@ import { DatabaseModule } from './db/database.module';
 import { LocationModule } from './location/location.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { CollectionModule } from './collection/collection.module';
+import { ReviewModule } from './review/review.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 
@@ -17,6 +18,7 @@ import { MetricsModule } from '@manacore/shared-nestjs-metrics';
 		LocationModule,
 		FavoriteModule,
 		CollectionModule,
+		ReviewModule,
 		HealthModule.forRoot({ serviceName: 'citycorners-backend' }),
 		MetricsModule.register({
 			prefix: 'citycorners_',

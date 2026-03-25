@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } fro
 import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
 import { LocationService } from './location.service';
 import { LocationLookupService } from './location-lookup.service';
+import { ReviewService } from '../review/review.service';
 import { RateLimitGuard } from '../guards/rate-limit.guard';
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -121,7 +122,8 @@ class UpdateLocationDto {
 export class LocationController {
 	constructor(
 		private readonly locationService: LocationService,
-		private readonly lookupService: LocationLookupService
+		private readonly lookupService: LocationLookupService,
+		private readonly reviewService: ReviewService
 	) {}
 
 	@Get()
@@ -134,8 +136,14 @@ export class LocationController {
 		const limitNum = limit ? Math.min(100, Math.max(1, parseInt(limit, 10))) : 20;
 
 		const result = await this.locationService.findAll(category, pageNum, limitNum);
+		const locationIds = result.items.map((l) => l.id);
+		const reviewStats = await this.reviewService.getStatsForLocations(locationIds);
+
 		return {
-			locations: result.items,
+			locations: result.items.map((l) => ({
+				...l,
+				reviewStats: reviewStats[l.id] || { averageRating: 0, totalReviews: 0 },
+			})),
 			pagination: {
 				total: result.total,
 				page: result.page,
@@ -175,7 +183,8 @@ export class LocationController {
 	@Get(':id')
 	async findById(@Param('id') id: string) {
 		const location = await this.locationService.findByIdOrSlug(id);
-		return { location };
+		const reviewStats = await this.reviewService.getStats(location.id);
+		return { location: { ...location, reviewStats } };
 	}
 
 	@Get(':id/nearby')

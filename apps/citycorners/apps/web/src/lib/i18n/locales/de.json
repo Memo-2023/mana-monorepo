@@ -191,6 +191,22 @@
 		"loadError": "Ort konnte nicht geladen werden.",
 		"forbidden": "Du kannst nur deine eigenen Orte bearbeiten."
 	},
+	"reviews": {
+		"title": "Bewertungen",
+		"write": "Bewertung schreiben",
+		"yourRating": "Deine Bewertung",
+		"commentPlaceholder": "Was hat dir gefallen? (optional)",
+		"submit": "Absenden",
+		"submitting": "Wird gesendet...",
+		"loginRequired": "Melde dich an, um eine Bewertung zu schreiben.",
+		"alreadyReviewed": "Du hast diesen Ort bereits bewertet.",
+		"deleteConfirm": "Bewertung löschen?",
+		"delete": "Löschen",
+		"noReviews": "Noch keine Bewertungen. Sei der Erste!",
+		"error": "Bewertung konnte nicht gespeichert werden.",
+		"count": "{count} Bewertungen",
+		"countOne": "1 Bewertung"
+	},
 	"offline": {
 		"title": "Keine Verbindung",
 		"message": "Du bist gerade offline. Sobald du wieder eine Internetverbindung hast, kannst du CityCorners weiter nutzen.",
