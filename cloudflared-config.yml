@@ -46,6 +46,24 @@ ingress:
   - hostname: contacts-api.mana.how
     service: http://localhost:3034
 
+  # Zitare App
+  - hostname: zitare.mana.how
+    service: http://localhost:5018
+  - hostname: zitare-api.mana.how
+    service: http://localhost:3007
+
+  # SkillTree App
+  - hostname: skilltree.mana.how
+    service: http://localhost:5020
+  - hostname: skilltree-api.mana.how
+    service: http://localhost:3038
+
+  # Planta App
+  - hostname: planta.mana.how
+    service: http://localhost:5022
+  - hostname: planta-api.mana.how
+    service: http://localhost:3022
+
   # Storage App
   - hostname: storage.mana.how
     service: http://localhost:5015
