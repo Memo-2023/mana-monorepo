@@ -2,17 +2,22 @@
 	import SeenplatteScene from '$lib/components/observatory/SeenplatteScene.svelte';
 	import PlantCard from '$lib/components/observatory/ui/PlantCard.svelte';
 	import LakeCard from '$lib/components/observatory/ui/LakeCard.svelte';
+	import RiverCard from '$lib/components/observatory/ui/RiverCard.svelte';
+	import Leaderboard from '$lib/components/observatory/ui/Leaderboard.svelte';
+	import CompareView from '$lib/components/observatory/ui/CompareView.svelte';
+	import TrendsChart from '$lib/components/observatory/ui/TrendsChart.svelte';
 	import DetailPanel from '$lib/components/observatory/ui/DetailPanel.svelte';
 	import { createMockEcosystem } from '$lib/components/observatory/data/mockData';
-	import { LAKES } from '$lib/components/observatory/data/layout';
+	import { LAKES, RIVERS } from '$lib/components/observatory/data/layout';
 	import type { AppData } from '$lib/components/observatory/data/types';
 
-	type Tab = 'scene' | 'plants' | 'lakes';
+	type Tab = 'scene' | 'plants' | 'lakes' | 'rivers' | 'leaderboard' | 'compare' | 'trends';
 	let activeTab = $state<Tab>('scene');
 	let selectedApp = $state<AppData | null>(null);
 
 	const apps = createMockEcosystem();
 	const lakes = LAKES;
+	const rivers = RIVERS;
 
 	// Sort apps by score descending for gallery
 	const sortedApps = apps.toSorted((a, b) => b.score - a.score);
@@ -27,6 +32,10 @@
 		{ id: 'scene', label: 'Seenplatte' },
 		{ id: 'plants', label: 'Pflanzen', count: apps.length },
 		{ id: 'lakes', label: 'Seen', count: lakes.length },
+		{ id: 'rivers', label: 'Flusse', count: rivers.length },
+		{ id: 'leaderboard', label: 'Rangliste' },
+		{ id: 'compare', label: 'Vergleich' },
+		{ id: 'trends', label: 'Trends' },
 	];
 </script>
 
@@ -132,6 +141,54 @@
 					<LakeCard {lake} />
 				{/each}
 			</div>
+		</div>
+	{:else if activeTab === 'rivers'}
+		<div class="gallery-section">
+			<div class="gallery-header">
+				<h2 class="gallery-title">Alle Flusse</h2>
+				<p class="gallery-subtitle">
+					Datenstrome zwischen den Seen — Geschwindigkeit und Breite zeigen den Durchsatz
+				</p>
+			</div>
+
+			<div class="gallery-scroll">
+				{#each rivers as river (river.id)}
+					<RiverCard {river} />
+				{/each}
+			</div>
+		</div>
+	{:else if activeTab === 'leaderboard'}
+		<div class="gallery-section">
+			<div class="gallery-header">
+				<h2 class="gallery-title">Rangliste</h2>
+				<p class="gallery-subtitle">
+					Alle Apps sortiert nach Score — klicke auf Spalten zum Sortieren, auf Zeilen fur Details
+				</p>
+			</div>
+
+			<Leaderboard apps={sortedApps} onselect={(app) => (selectedApp = app)} />
+		</div>
+	{:else if activeTab === 'compare'}
+		<div class="gallery-section">
+			<div class="gallery-header">
+				<h2 class="gallery-title">Vergleich</h2>
+				<p class="gallery-subtitle">
+					Wahle bis zu 4 Apps und vergleiche ihre Starken und Schwachen direkt
+				</p>
+			</div>
+
+			<CompareView {apps} />
+		</div>
+	{:else if activeTab === 'trends'}
+		<div class="gallery-section">
+			<div class="gallery-header">
+				<h2 class="gallery-title">Trends</h2>
+				<p class="gallery-subtitle">
+					Score-Entwicklung aller Apps uber die Zeit — hover uber eine Linie fur Details
+				</p>
+			</div>
+
+			<TrendsChart {apps} />
 		</div>
 	{/if}
 </div>
