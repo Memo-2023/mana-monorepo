@@ -33,6 +33,7 @@ COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
 COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
+COPY packages/shared-llm ./packages/shared-llm
 COPY packages/shared-storage ./packages/shared-storage
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
 
@@ -48,6 +49,7 @@ RUN cd packages/shared-errors && pnpm build \
     && cd /app/packages/shared-nestjs-setup && pnpm build \
     && cd /app/packages/shared-error-tracking && pnpm build \
     && cd /app/packages/shared-storage && pnpm build \
+    && cd /app/packages/shared-llm && pnpm build \
     && cd /app/packages/shared-drizzle-config && pnpm build 2>/dev/null || true \
     && cd /app/packages/credit-operations && pnpm build \
     && cd /app/packages/mana-core-nestjs-integration && pnpm build \

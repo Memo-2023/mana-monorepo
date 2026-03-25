@@ -13,6 +13,7 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 # Copy shared packages that this bot depends on
 COPY packages/bot-services ./packages/bot-services
 COPY packages/matrix-bot-common ./packages/matrix-bot-common
+COPY packages/shared-llm ./packages/shared-llm
 
 # Copy this bot
 COPY services/matrix-project-doc-bot ./services/matrix-project-doc-bot

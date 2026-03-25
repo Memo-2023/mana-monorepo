@@ -15,6 +15,7 @@ COPY patches ./patches
 
 # Copy shared packages
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
+COPY packages/shared-llm ./packages/shared-llm
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-setup ./packages/shared-nestjs-setup
 COPY packages/shared-nestjs-health ./packages/shared-nestjs-health

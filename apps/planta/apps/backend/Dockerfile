@@ -16,6 +16,7 @@ COPY patches ./patches
 # Copy shared packages (all required dependencies)
 COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY packages/shared-errors ./packages/shared-errors
+COPY packages/shared-llm ./packages/shared-llm
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-nestjs-health ./packages/shared-nestjs-health
 COPY packages/shared-nestjs-metrics ./packages/shared-nestjs-metrics
@@ -34,6 +35,9 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors
+RUN pnpm build
+
+WORKDIR /app/packages/shared-llm
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-auth

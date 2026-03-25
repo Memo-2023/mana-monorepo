@@ -13,6 +13,7 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 # Copy shared packages that this bot depends on
 COPY packages/bot-services ./packages/bot-services
 COPY packages/matrix-bot-common ./packages/matrix-bot-common
+COPY services/mana-media/packages/client ./services/mana-media/packages/client
 
 # Copy this bot
 COPY services/matrix-nutriphi-bot ./services/matrix-nutriphi-bot

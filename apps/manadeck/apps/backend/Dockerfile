@@ -18,6 +18,7 @@ COPY packages/credit-operations ./packages/credit-operations
 COPY packages/mana-core-nestjs-integration ./packages/mana-core-nestjs-integration
 COPY packages/manadeck-database ./packages/manadeck-database
 COPY packages/shared-errors ./packages/shared-errors
+COPY packages/shared-llm ./packages/shared-llm
 COPY packages/shared-nestjs-auth ./packages/shared-nestjs-auth
 COPY packages/shared-tsconfig ./packages/shared-tsconfig
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
@@ -31,6 +32,9 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install
 
 # Build shared packages first (in dependency order)
 WORKDIR /app/packages/shared-errors
+RUN pnpm build
+
+WORKDIR /app/packages/shared-llm
 RUN pnpm build
 
 WORKDIR /app/packages/shared-nestjs-auth

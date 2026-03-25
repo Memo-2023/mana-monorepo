@@ -12,11 +12,13 @@ FROM base AS builder
 # Copy workspace files
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY services/mana-notify/package.json ./services/mana-notify/
+COPY packages/shared-drizzle-config/package.json ./packages/shared-drizzle-config/
 
 # Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile --filter @manacore/mana-notify
 
 # Copy source code
+COPY packages/shared-drizzle-config ./packages/shared-drizzle-config
 COPY services/mana-notify ./services/mana-notify
 
 # Build

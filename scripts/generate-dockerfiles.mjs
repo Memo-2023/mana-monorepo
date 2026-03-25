@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 
-// Generate COPY statements in web app Dockerfiles from package.json workspace dependencies.
+// Generate COPY statements in Dockerfiles from package.json workspace dependencies.
 //
-// For each apps/{name}/apps/web/Dockerfile, reads the corresponding package.json,
+// Processes:
+//   - apps/{name}/apps/web/Dockerfile      (web apps)
+//   - apps/{name}/apps/backend/Dockerfile   (app backends, only if markers exist)
+//   - services/{name}/Dockerfile            (services, only if markers exist)
+//
+// For each Dockerfile, reads the corresponding package.json,
 // resolves workspace dependencies to their directory paths, and updates the
 // COPY block between marker comments.
 //
@@ -21,7 +26,6 @@ const isCheck = process.argv.includes('--check');
 
 // ---------------------------------------------------------------------------
 // Package map: package name -> directory path relative to repo root
-// Reuses the same logic from validate-dockerfiles.mjs
 // ---------------------------------------------------------------------------
 function buildPackageMap() {
 	const map = new Map();
@@ -52,6 +56,25 @@ function buildPackageMap() {
 				try {
 					const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
 					map.set(pkg.name, `apps/${appEntry.name}/packages/${pkgEntry.name}`);
+				} catch {}
+			}
+		}
+	}
+
+	// services/*/packages/*
+	const servicesDir = join(ROOT, 'services');
+	if (existsSync(servicesDir)) {
+		for (const svcEntry of readdirSync(servicesDir, { withFileTypes: true })) {
+			if (!svcEntry.isDirectory()) continue;
+			const svcPkgsDir = join(servicesDir, svcEntry.name, 'packages');
+			if (!existsSync(svcPkgsDir)) continue;
+			for (const pkgEntry of readdirSync(svcPkgsDir, { withFileTypes: true })) {
+				if (!pkgEntry.isDirectory()) continue;
+				const pkgJsonPath = join(svcPkgsDir, pkgEntry.name, 'package.json');
+				if (!existsSync(pkgJsonPath)) continue;
+				try {
+					const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+					map.set(pkg.name, `services/${svcEntry.name}/packages/${pkgEntry.name}`);
 				} catch {}
 			}
 		}
@@ -100,14 +123,18 @@ function generateCopyBlock(workspaceDeps, packageMap) {
 
 	depPaths.sort();
 
-	// Root packages first, then app-specific packages
+	// Root packages first, then app-specific packages, then service packages
 	const rootPackages = depPaths.filter((p) => p.startsWith('packages/'));
 	const appPackages = depPaths.filter((p) => p.startsWith('apps/'));
+	const servicePackages = depPaths.filter((p) => p.startsWith('services/'));
 
 	for (const p of rootPackages) {
 		copyLines.push(`COPY ${p} ./${p}`);
 	}
 	for (const p of appPackages) {
+		copyLines.push(`COPY ${p} ./${p}`);
+	}
+	for (const p of servicePackages) {
 		copyLines.push(`COPY ${p} ./${p}`);
 	}
 
@@ -308,7 +335,7 @@ function insertMarkersAndBlock(lines, copyLines, generatedPaths, appName) {
 		}
 
 		// COPY for apps/{appName}/packages (app-specific workspace packages)
-		if (trimmed.match(new RegExp(`^COPY\\s+apps/${appName}/packages`))) {
+		if (appName && trimmed.match(new RegExp(`^COPY\\s+apps/${appName}/packages`))) {
 			i++;
 			continue;
 		}
@@ -373,63 +400,111 @@ function cleanBlankLines(lines) {
 }
 
 // ---------------------------------------------------------------------------
+// Process a single Dockerfile entry (shared logic for all types)
+// ---------------------------------------------------------------------------
+function processEntry(dockerfilePath, pkgJsonPath, relPath, appName, packageMap, stats) {
+	if (!existsSync(pkgJsonPath)) {
+		console.error(`  ERROR: ${relPath} - package.json not found`);
+		stats.errors++;
+		return;
+	}
+
+	const original = readFileSync(dockerfilePath, 'utf8');
+	const workspaceDeps = getWorkspaceDeps(pkgJsonPath);
+	const copyLines = generateCopyBlock(workspaceDeps, packageMap);
+	const updated = processDockerfile(original, appName, copyLines);
+
+	if (updated !== original) {
+		if (isCheck) {
+			console.log(`  NEEDS UPDATE: ${relPath}`);
+			stats.changed++;
+		} else {
+			writeFileSync(dockerfilePath, updated, 'utf8');
+			console.log(`  UPDATED: ${relPath} (${workspaceDeps.length} deps)`);
+			stats.changed++;
+		}
+	} else {
+		console.log(`  OK: ${relPath} (${workspaceDeps.length} deps)`);
+		stats.unchanged++;
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 function main() {
 	const packageMap = buildPackageMap();
 	const appsDir = join(ROOT, 'apps');
-	let changed = 0;
-	let unchanged = 0;
-	let errors = 0;
+	const servicesDir = join(ROOT, 'services');
+	const stats = { changed: 0, unchanged: 0, errors: 0 };
 
 	const appDirs = readdirSync(appsDir, { withFileTypes: true })
 		.filter((e) => e.isDirectory())
 		.map((e) => e.name)
 		.sort();
 
+	// --- Web app Dockerfiles (always process, insert markers if missing) ---
+	console.log('=== Web App Dockerfiles ===');
 	for (const appName of appDirs) {
 		const dockerfilePath = join(appsDir, appName, 'apps', 'web', 'Dockerfile');
 		if (!existsSync(dockerfilePath)) continue;
 
 		const pkgJsonPath = join(appsDir, appName, 'apps', 'web', 'package.json');
-		if (!existsSync(pkgJsonPath)) {
-			console.error(`  ERROR: ${appName} - package.json not found`);
-			errors++;
+		const relPath = `apps/${appName}/apps/web/Dockerfile`;
+		processEntry(dockerfilePath, pkgJsonPath, relPath, appName, packageMap, stats);
+	}
+
+	// --- Backend app Dockerfiles (only if markers already exist) ---
+	console.log('\n=== Backend App Dockerfiles ===');
+	for (const appName of appDirs) {
+		const dockerfilePath = join(appsDir, appName, 'apps', 'backend', 'Dockerfile');
+		if (!existsSync(dockerfilePath)) continue;
+
+		const content = readFileSync(dockerfilePath, 'utf8');
+		if (!content.includes(START_MARKER)) {
+			console.log(`  SKIP: apps/${appName}/apps/backend/Dockerfile (no markers)`);
 			continue;
 		}
 
-		const relPath = `apps/${appName}/apps/web/Dockerfile`;
-		const original = readFileSync(dockerfilePath, 'utf8');
+		const pkgJsonPath = join(appsDir, appName, 'apps', 'backend', 'package.json');
+		const relPath = `apps/${appName}/apps/backend/Dockerfile`;
+		processEntry(dockerfilePath, pkgJsonPath, relPath, appName, packageMap, stats);
+	}
 
-		const workspaceDeps = getWorkspaceDeps(pkgJsonPath);
-		const copyLines = generateCopyBlock(workspaceDeps, packageMap);
-		const updated = processDockerfile(original, appName, copyLines);
+	// --- Service Dockerfiles (only if markers already exist) ---
+	console.log('\n=== Service Dockerfiles ===');
+	if (existsSync(servicesDir)) {
+		const svcDirs = readdirSync(servicesDir, { withFileTypes: true })
+			.filter((e) => e.isDirectory())
+			.map((e) => e.name)
+			.sort();
 
-		if (updated !== original) {
-			if (isCheck) {
-				console.log(`  NEEDS UPDATE: ${relPath}`);
-				changed++;
-			} else {
-				writeFileSync(dockerfilePath, updated, 'utf8');
-				console.log(`  UPDATED: ${relPath} (${workspaceDeps.length} deps)`);
-				changed++;
+		for (const svcName of svcDirs) {
+			const dockerfilePath = join(servicesDir, svcName, 'Dockerfile');
+			if (!existsSync(dockerfilePath)) continue;
+
+			const content = readFileSync(dockerfilePath, 'utf8');
+			if (!content.includes(START_MARKER)) {
+				console.log(`  SKIP: services/${svcName}/Dockerfile (no markers)`);
+				continue;
 			}
-		} else {
-			console.log(`  OK: ${relPath} (${workspaceDeps.length} deps)`);
-			unchanged++;
+
+			const pkgJsonPath = join(servicesDir, svcName, 'package.json');
+			const relPath = `services/${svcName}/Dockerfile`;
+			processEntry(dockerfilePath, pkgJsonPath, relPath, svcName, packageMap, stats);
 		}
 	}
 
 	console.log('');
 	console.log(
-		`Processed ${changed + unchanged + errors} Dockerfiles: ${changed} ${isCheck ? 'need updates' : 'updated'}, ${unchanged} unchanged, ${errors} errors`
+		`Processed ${stats.changed + stats.unchanged + stats.errors} Dockerfiles: ${stats.changed} ${isCheck ? 'need updates' : 'updated'}, ${stats.unchanged} unchanged, ${stats.errors} errors`
 	);
 
-	if (isCheck && changed > 0) {
+	if (isCheck && stats.changed > 0) {
 		console.log('\nRun `pnpm generate:dockerfiles` to fix.');
 		process.exit(1);
 	}
-	if (errors > 0) {
+	if (stats.errors > 0) {
 		process.exit(1);
 	}
 }
