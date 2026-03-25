@@ -198,12 +198,13 @@
 					{@render children()}
 				</div>
 			</main>
-
-			<!-- Onboarding Modal -->
-			{#if storageOnboarding.shouldShow}
-				<MiniOnboardingModal store={storageOnboarding} appName="Storage" appEmoji="☁️" />
-			{/if}
 		</div>
+
+		<!-- Onboarding Modal -->
+		{#if storageOnboarding.shouldShow}
+			<MiniOnboardingModal store={storageOnboarding} appName="Storage" appEmoji="☁️" />
+		{/if}
+
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 	{/if}
 </AuthGate>
