@@ -270,12 +270,13 @@
 
 		<!-- Keyboard Shortcuts Modal -->
 		<KeyboardShortcutsModal />
-
-		<!-- Onboarding Modal -->
-		{#if pictureOnboarding.shouldShow}
-			<MiniOnboardingModal store={pictureOnboarding} appName="Picture" appEmoji="🎨" />
-		{/if}
 	</div>
+
+	<!-- Onboarding Modal -->
+	{#if pictureOnboarding.shouldShow}
+		<MiniOnboardingModal store={pictureOnboarding} appName="Picture" appEmoji="🎨" />
+	{/if}
+
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/auth/login" />
 </AuthGate>
 

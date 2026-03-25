@@ -268,12 +268,12 @@
 		emptyText="Keine Ergebnisse"
 		searchingText="Suche..."
 	/>
-
-	<!-- Onboarding Modal -->
-	{#if contextOnboarding.shouldShow}
-		<MiniOnboardingModal store={contextOnboarding} appName="Context" appEmoji="📄" />
-	{/if}
 </div>
+
+<!-- Onboarding Modal -->
+{#if contextOnboarding.shouldShow}
+	<MiniOnboardingModal store={contextOnboarding} appName="Context" appEmoji="📄" />
+{/if}
 
 <style>
 	.layout-container {

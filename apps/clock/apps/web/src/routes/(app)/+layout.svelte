@@ -310,12 +310,13 @@
 			emptyText="Keine Ergebnisse"
 			searchingText="Suche..."
 		/>
-
-		<!-- Onboarding Modal -->
-		{#if clockOnboarding.shouldShow}
-			<MiniOnboardingModal store={clockOnboarding} appName="Uhr" appEmoji="⏰" />
-		{/if}
 	</div>
+
+	<!-- Onboarding Modal -->
+	{#if clockOnboarding.shouldShow}
+		<MiniOnboardingModal store={clockOnboarding} appName="Uhr" appEmoji="⏰" />
+	{/if}
+
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 </AuthGate>
 

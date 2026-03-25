@@ -384,13 +384,14 @@
 			{#if newContactModalStore.isOpen}
 				<NewContactModal onClose={() => newContactModalStore.close()} />
 			{/if}
-
-			<!-- Onboarding Modal -->
-			{#if contactsOnboarding.shouldShow}
-				<MiniOnboardingModal store={contactsOnboarding} appName="Kontakte" appEmoji="👥" />
-			{/if}
 		</div>
 	</SplitPaneContainer>
+
+	<!-- Onboarding Modal -->
+	{#if contactsOnboarding.shouldShow}
+		<MiniOnboardingModal store={contactsOnboarding} appName="Kontakte" appEmoji="👥" />
+	{/if}
+
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 </AuthGate>
 

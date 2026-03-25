@@ -449,12 +449,14 @@
 					{@render children()}
 				</div>
 			</main>
-			<!-- Onboarding Modal -->
-			{#if todoOnboarding.shouldShow}
-				<MiniOnboardingModal store={todoOnboarding} appName="Todo" appEmoji="✅" />
-			{/if}
 		</div>
 	</SplitPaneContainer>
+
+	<!-- Onboarding Modal -->
+	{#if todoOnboarding.shouldShow}
+		<MiniOnboardingModal store={todoOnboarding} appName="Todo" appEmoji="✅" />
+	{/if}
+
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 </AuthGate>
 

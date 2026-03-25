@@ -245,10 +245,10 @@
 				{@render children()}
 			</div>
 		</main>
-
-		<!-- Onboarding Modal -->
-		{#if manadeckOnboarding.shouldShow}
-			<MiniOnboardingModal store={manadeckOnboarding} appName="ManaDeck" appEmoji="🃏" />
-		{/if}
 	</div>
+
+	<!-- Onboarding Modal -->
+	{#if manadeckOnboarding.shouldShow}
+		<MiniOnboardingModal store={manadeckOnboarding} appName="ManaDeck" appEmoji="🃏" />
+	{/if}
 {/if}

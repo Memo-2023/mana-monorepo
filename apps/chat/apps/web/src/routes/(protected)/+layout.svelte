@@ -216,12 +216,13 @@
 				</div>
 			{/if}
 		</main>
-
-		<!-- Onboarding Modal -->
-		{#if chatOnboarding.shouldShow}
-			<MiniOnboardingModal store={chatOnboarding} appName="Chat" appEmoji="💬" />
-		{/if}
 	</div>
+
+	<!-- Onboarding Modal -->
+	{#if chatOnboarding.shouldShow}
+		<MiniOnboardingModal store={chatOnboarding} appName="Chat" appEmoji="💬" />
+	{/if}
+
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 </AuthGate>
 

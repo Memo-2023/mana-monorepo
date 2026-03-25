@@ -205,12 +205,12 @@
 				{@render children()}
 			</div>
 		</main>
-
-		<!-- Onboarding Modal -->
-		{#if presiOnboarding.shouldShow}
-			<MiniOnboardingModal store={presiOnboarding} appName="Presi" appEmoji="📊" />
-		{/if}
 	</div>
+
+	<!-- Onboarding Modal -->
+	{#if presiOnboarding.shouldShow}
+		<MiniOnboardingModal store={presiOnboarding} appName="Presi" appEmoji="📊" />
+	{/if}
 {/if}
 
 <style>
