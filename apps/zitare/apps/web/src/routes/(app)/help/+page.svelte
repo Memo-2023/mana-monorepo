@@ -2,30 +2,31 @@
 	import { goto } from '$app/navigation';
 	import { locale } from 'svelte-i18n';
 	import { HelpPage, getHelpTranslations } from '@manacore/shared-help-ui';
-	import { getTodoHelpContent } from '$lib/content/help/index.js';
+	import { getZitareHelpContent } from '$lib/content/help/index.js';
 
-	const content = $derived(getTodoHelpContent($locale ?? 'de'));
+	const content = $derived(getZitareHelpContent($locale ?? 'de'));
 	const translations = $derived(
 		getHelpTranslations($locale ?? 'de', {
 			subtitle:
 				$locale === 'de'
-					? 'Finde Antworten und lerne Todo kennen'
-					: 'Find answers and learn how to use Todo',
+					? 'Finde Antworten und lerne Zitare kennen'
+					: 'Find answers and learn how to use Zitare',
 		})
 	);
 </script>
 
 <svelte:head>
-	<title>{translations.title} | Todo</title>
+	<title>{translations.title} | Zitare</title>
 </svelte:head>
 
 <HelpPage
 	{content}
-	appName="Todo"
-	appId="todo"
+	appName="Zitare"
+	appId="zitare"
 	{translations}
 	showBackButton
 	onBack={() => goto('/')}
+	showShortcuts={false}
 	showGettingStarted={false}
 	showChangelog={false}
 	defaultSection="faq"

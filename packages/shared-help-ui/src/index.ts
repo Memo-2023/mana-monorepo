@@ -18,6 +18,13 @@ export { default as ChangelogEntry } from './components/ChangelogEntry.svelte';
 export { default as ContactSection } from './components/ContactSection.svelte';
 export { default as HelpSearch } from './components/HelpSearch.svelte';
 
+// Default translations
+export {
+	defaultTranslationsDE,
+	defaultTranslationsEN,
+	getHelpTranslations,
+} from './translations.js';
+
 // Types
 export type {
 	HelpPageProps,

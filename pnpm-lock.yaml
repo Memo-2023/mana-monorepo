@@ -3197,6 +3197,12 @@ importers:
       '@manacore/shared-feedback-ui':
         specifier: workspace:^
         version: link:../../../../packages/shared-feedback-ui
+      '@manacore/shared-help-types':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-help-types
+      '@manacore/shared-help-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-help-ui
       '@manacore/shared-i18n':
         specifier: workspace:*
         version: link:../../../../packages/shared-i18n
@@ -6261,6 +6267,12 @@ importers:
       '@manacore/shared-feedback-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-feedback-ui
+      '@manacore/shared-help-types':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-help-types
+      '@manacore/shared-help-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-help-ui
       '@manacore/shared-i18n':
         specifier: workspace:*
         version: link:../../../../packages/shared-i18n
