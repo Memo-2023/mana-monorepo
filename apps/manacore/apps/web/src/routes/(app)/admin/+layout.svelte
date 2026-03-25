@@ -1,8 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	let { children }: { children: Snippet } = $props();
+
+	// Guard: redirect non-admin users
+	let isAdmin = $derived(authStore.user?.role === 'admin');
+	$effect(() => {
+		if (authStore.initialized && !authStore.loading && !isAdmin) {
+			goto('/home');
+		}
+	});
 
 	const tabs = [
 		{ href: '/admin', label: 'Overview', icon: 'home' },
@@ -26,49 +36,57 @@
 	}
 </script>
 
-<div class="space-y-6">
-	<div class="flex items-center justify-between">
-		<div>
-			<h1 class="text-2xl font-bold">Admin Dashboard</h1>
-			<p class="text-muted-foreground">System monitoring and management</p>
-		</div>
-		<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-900/30">
-			<svg
-				class="h-4 w-4 text-red-600 dark:text-red-400"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-				/>
-			</svg>
-			<span class="text-sm font-medium text-red-600 dark:text-red-400">Admin</span>
-		</div>
+{#if !isAdmin}
+	<div class="flex flex-col items-center justify-center py-16 text-center">
+		<div class="mb-4 text-5xl">🔒</div>
+		<h3 class="mb-2 text-lg font-medium">Zugriff verweigert</h3>
+		<p class="text-muted-foreground">Du hast keine Admin-Berechtigung.</p>
 	</div>
-
-	<nav class="flex gap-1 border-b pb-px">
-		{#each tabs as tab}
-			{@const active = isActive(tab.href, $page.url.pathname)}
-			<a
-				href={tab.href}
-				class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors
-					{active
-					? 'text-primary border-b-2 border-primary -mb-px bg-primary/5'
-					: 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}"
-			>
-				<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					{@html icons[tab.icon]}
+{:else}
+	<div class="space-y-6">
+		<div class="flex items-center justify-between">
+			<div>
+				<h1 class="text-2xl font-bold">Admin Dashboard</h1>
+				<p class="text-muted-foreground">System monitoring and management</p>
+			</div>
+			<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-900/30">
+				<svg
+					class="h-4 w-4 text-red-600 dark:text-red-400"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+					/>
 				</svg>
-				{tab.label}
-			</a>
-		{/each}
-	</nav>
+				<span class="text-sm font-medium text-red-600 dark:text-red-400">Admin</span>
+			</div>
+		</div>
 
-	<div>
-		{@render children()}
+		<nav class="flex gap-1 border-b pb-px">
+			{#each tabs as tab}
+				{@const active = isActive(tab.href, $page.url.pathname)}
+				<a
+					href={tab.href}
+					class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors
+					{active
+						? 'text-primary border-b-2 border-primary -mb-px bg-primary/5'
+						: 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}"
+				>
+					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						{@html icons[tab.icon]}
+					</svg>
+					{tab.label}
+				</a>
+			{/each}
+		</nav>
+
+		<div>
+			{@render children()}
+		</div>
 	</div>
-</div>
+{/if}

@@ -4,6 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { creditsService } from '$lib/api/credits';
 	import type { CreditBalance } from '$lib/api/credits';
+	import { profileService } from '$lib/api/profile';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { APP_VERSION } from '$lib/version';
 	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
@@ -38,13 +39,18 @@
 	}
 
 	async function handleUpdateProfile() {
+		const name = `${firstName} ${lastName}`.trim();
+		if (!name) {
+			profileError = 'Bitte gib einen Namen ein';
+			return;
+		}
+
 		savingProfile = true;
 		profileSuccess = false;
 		profileError = null;
 
 		try {
-			// TODO: Implement profile update API when available
-			await new Promise((resolve) => setTimeout(resolve, 500));
+			await profileService.updateProfile({ name });
 			profileSuccess = true;
 			ManaCoreEvents.profileUpdated();
 		} catch (e) {

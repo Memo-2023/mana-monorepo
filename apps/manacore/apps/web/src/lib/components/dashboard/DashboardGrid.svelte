@@ -46,7 +46,29 @@
 >
 	{#each items as widget (widget.id)}
 		<div class={WIDGET_SIZE_CLASSES[widget.size]} animate:flip={{ duration: flipDurationMs }}>
-			<WidgetContainer {widget} />
+			<svelte:boundary>
+				<WidgetContainer {widget} />
+				{#snippet failed(error, reset)}
+					<div
+						class="flex flex-col items-center justify-center rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-900/30 dark:bg-red-950/20"
+					>
+						<div class="mb-2 text-2xl">⚠️</div>
+						<p class="mb-1 text-sm font-medium text-red-700 dark:text-red-400">
+							{widget.id} fehlgeschlagen
+						</p>
+						<p class="mb-3 text-xs text-red-500 dark:text-red-500/70">
+							{error?.message || 'Unbekannter Fehler'}
+						</p>
+						<button
+							type="button"
+							onclick={reset}
+							class="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+						>
+							Erneut versuchen
+						</button>
+					</div>
+				{/snippet}
+			</svelte:boundary>
 		</div>
 	{/each}
 </div>

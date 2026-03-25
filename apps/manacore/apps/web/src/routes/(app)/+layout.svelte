@@ -80,8 +80,7 @@
 	let userEmail = $derived(authStore.user?.email);
 
 	// Navigation items for ManaCore
-	// Admin link is conditionally added based on user role
-	let baseNavItems: PillNavItem[] = [
+	const baseNavItems: PillNavItem[] = [
 		{ href: '/home', label: 'Home', icon: 'home' },
 		{ href: '/dashboard', label: 'Dashboard', icon: 'grid' },
 		{ href: '/observatory', label: 'Observatory', icon: 'eye' },
@@ -92,12 +91,11 @@
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
 	];
 
-	// TODO: Check user role from authStore and add admin link if admin
-	// For now, always show admin link for testing
-	const navItems: PillNavItem[] = [
-		...baseNavItems,
-		{ href: '/admin', label: 'Admin', icon: 'shield' },
-	];
+	// Only show admin link if user has admin role
+	let isAdmin = $derived(authStore.user?.role === 'admin');
+	let navItems = $derived<PillNavItem[]>(
+		isAdmin ? [...baseNavItems, { href: '/admin', label: 'Admin', icon: 'shield' }] : baseNavItems
+	);
 
 	// Navigation shortcuts (Ctrl+1-5)
 	const navRoutes = navItems.map((item) => item.href);

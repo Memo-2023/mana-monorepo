@@ -1,20 +1,31 @@
 <script lang="ts">
 	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
 
+	let toastMessage = $state<string | null>(null);
+
 	function handleSubscribe(planId: string) {
-		console.log('Subscribe to plan:', planId);
-		alert(`Abo "${planId}" ausgewählt. Bezahlsystem wird noch integriert.`);
+		toastMessage = `Abo "${planId}" ausgewahlt. Bezahlsystem wird in Kurze integriert.`;
+		setTimeout(() => (toastMessage = null), 4000);
 	}
 
 	function handleBuyPackage(packageId: string) {
-		console.log('Buy package:', packageId);
-		alert(`Paket "${packageId}" ausgewählt. Bezahlsystem wird noch integriert.`);
+		toastMessage = `Paket "${packageId}" ausgewahlt. Bezahlsystem wird in Kurze integriert.`;
+		setTimeout(() => (toastMessage = null), 4000);
 	}
 </script>
 
 <svelte:head>
 	<title>Mana - ManaCore</title>
 </svelte:head>
+
+<!-- Toast notification -->
+{#if toastMessage}
+	<div
+		class="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-amber-600 px-5 py-3 text-sm font-medium text-white shadow-lg"
+	>
+		{toastMessage}
+	</div>
+{/if}
 
 <div class="mana-page">
 	<SubscriptionPage
