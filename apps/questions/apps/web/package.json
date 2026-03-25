@@ -40,6 +40,8 @@
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
+		"@manacore/shared-help-types": "workspace:*",
+		"@manacore/shared-help-ui": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-app-onboarding": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",

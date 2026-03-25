@@ -41,6 +41,8 @@
 		"@manacore/shared-feedback-service": "workspace:*",
 		"@manacore/shared-feedback-ui": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
+		"@manacore/shared-help-types": "workspace:*",
+		"@manacore/shared-help-ui": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-stores": "workspace:*",
