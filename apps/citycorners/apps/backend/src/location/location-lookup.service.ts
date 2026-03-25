@@ -122,24 +122,36 @@ export class LocationLookupService {
 	private guessCategory(query: string, text: string): string {
 		const lowerQuery = query.toLowerCase();
 		const lowerText = text.toLowerCase();
+		const combined = lowerQuery + ' ' + lowerText.substring(0, 500);
 
-		if (
-			/restaurant|essen|küche|dining|speise|bistro|gasth/i.test(
-				lowerQuery + ' ' + lowerText.substring(0, 500)
-			)
-		) {
+		if (/café|cafe|kaffee|coffee|konditorei|bäckerei|bakery/i.test(combined)) {
+			return 'cafe';
+		}
+		if (/\bbar\b|kneipe|pub|cocktail|lounge|nachtleben|nightlife/i.test(combined)) {
+			return 'bar';
+		}
+		if (/restaurant|essen|küche|dining|speise|bistro|gasth/i.test(combined)) {
 			return 'restaurant';
 		}
-		if (
-			/museum|ausstellung|galerie|sammlung/i.test(lowerQuery + ' ' + lowerText.substring(0, 500))
-		) {
+		if (/\bhotel\b|pension|gasthof|unterkunft|übernacht|hostel/i.test(combined)) {
+			return 'hotel';
+		}
+		if (/strandbad|strand|freibad|beach|badestelle|schwimmbad/i.test(combined)) {
+			return 'beach';
+		}
+		if (/\bpark\b|grünanlage|garten|wald|naturschutz/i.test(combined)) {
+			return 'park';
+		}
+		if (/aussichtspunkt|viewpoint|panorama|aussicht|turm.*blick/i.test(combined)) {
+			return 'viewpoint';
+		}
+		if (/konzert|theater|bühne|veranstaltung|event|halle|forum|kulturzentrum/i.test(combined)) {
+			return 'event_venue';
+		}
+		if (/museum|ausstellung|galerie|sammlung/i.test(combined)) {
 			return 'museum';
 		}
-		if (
-			/laden|shop|geschäft|boutique|markt|einkauf|shopping/i.test(
-				lowerQuery + ' ' + lowerText.substring(0, 500)
-			)
-		) {
+		if (/laden|shop|geschäft|boutique|markt|einkauf|shopping/i.test(combined)) {
 			return 'shop';
 		}
 		return 'sight';

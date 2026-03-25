@@ -14,7 +14,18 @@ class CreateLocationDto {
 
 	@IsString()
 	@IsNotEmpty()
-	category!: 'sight' | 'restaurant' | 'shop' | 'museum';
+	category!:
+		| 'sight'
+		| 'restaurant'
+		| 'shop'
+		| 'museum'
+		| 'cafe'
+		| 'bar'
+		| 'park'
+		| 'beach'
+		| 'hotel'
+		| 'event_venue'
+		| 'viewpoint';
 
 	@IsString()
 	@IsNotEmpty()
@@ -58,7 +69,18 @@ class UpdateLocationDto {
 
 	@IsString()
 	@IsOptional()
-	category?: 'sight' | 'restaurant' | 'shop' | 'museum';
+	category?:
+		| 'sight'
+		| 'restaurant'
+		| 'shop'
+		| 'museum'
+		| 'cafe'
+		| 'bar'
+		| 'park'
+		| 'beach'
+		| 'hotel'
+		| 'event_venue'
+		| 'viewpoint';
 
 	@IsString()
 	@IsOptional()

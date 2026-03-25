@@ -26,13 +26,27 @@
 		"sight": "Sights",
 		"restaurant": "Restaurants",
 		"shop": "Shops",
-		"museum": "Museums"
+		"museum": "Museums",
+		"cafe": "Cafés",
+		"bar": "Bars",
+		"park": "Parks",
+		"beach": "Beaches",
+		"hotel": "Hotels",
+		"event_venue": "Event Venues",
+		"viewpoint": "Viewpoints"
 	},
 	"category": {
 		"sight": "Sight",
 		"restaurant": "Restaurant",
 		"shop": "Shop",
-		"museum": "Museum"
+		"museum": "Museum",
+		"cafe": "Café",
+		"bar": "Bar",
+		"park": "Park",
+		"beach": "Beach",
+		"hotel": "Hotel",
+		"event_venue": "Event Venue",
+		"viewpoint": "Viewpoint"
 	},
 	"detail": {
 		"history": "History",

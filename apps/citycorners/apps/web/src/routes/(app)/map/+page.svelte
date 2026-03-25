@@ -27,6 +27,13 @@
 		restaurant: '#dc2626',
 		shop: '#16a34a',
 		museum: '#9333ea',
+		cafe: '#b45309',
+		bar: '#ea580c',
+		park: '#15803d',
+		beach: '#0891b2',
+		hotel: '#4f46e5',
+		event_venue: '#db2777',
+		viewpoint: '#0ea5e9',
 	};
 
 	onMount(async () => {

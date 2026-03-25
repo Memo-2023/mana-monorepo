@@ -41,7 +41,7 @@ pnpm dev:citycorners:web
 # Database
 pnpm citycorners:db:push      # Push schema
 pnpm citycorners:db:studio    # Drizzle Studio
-pnpm citycorners:db:seed      # Seed 6 sample locations
+pnpm citycorners:db:seed      # Seed 41 sample locations
 
 # Tests
 pnpm --filter @citycorners/backend test        # Run all tests (31 tests)
@@ -58,7 +58,7 @@ PostgreSQL database `citycorners` with Drizzle ORM.
 
 ### Schema
 
-- **locations** – name, category (enum: sight/restaurant/shop/museum), description, address, lat/lng, imageUrl, timeline (JSONB array of {year, event})
+- **locations** – name, category (enum: sight/restaurant/shop/museum/cafe/bar/park/beach/hotel/event_venue/viewpoint), description, address, lat/lng, imageUrl, timeline (JSONB array of {year, event})
 - **favorites** – userId, locationId (FK → locations, cascade delete), unique constraint on (userId, locationId)
 
 ## API Endpoints
@@ -115,6 +115,13 @@ All endpoints are prefixed with `/api/v1/` in production (via shared-nestjs-setu
 | `restaurant` | Restaurant | Restaurant | Red |
 | `shop` | Laden | Shop | Green |
 | `museum` | Museum | Museum | Purple |
+| `cafe` | Café | Café | Amber |
+| `bar` | Bar | Bar | Orange |
+| `park` | Park | Park | Emerald |
+| `beach` | Strandbad | Beach | Cyan |
+| `hotel` | Hotel | Hotel | Indigo |
+| `event_venue` | Veranstaltungsort | Event Venue | Pink |
+| `viewpoint` | Aussichtspunkt | Viewpoint | Sky |
 
 ## Tests
 

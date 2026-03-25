@@ -8,7 +8,19 @@ import {
 	pgEnum,
 } from 'drizzle-orm/pg-core';
 
-export const categoryEnum = pgEnum('location_category', ['sight', 'restaurant', 'shop', 'museum']);
+export const categoryEnum = pgEnum('location_category', [
+	'sight',
+	'restaurant',
+	'shop',
+	'museum',
+	'cafe',
+	'bar',
+	'park',
+	'beach',
+	'hotel',
+	'event_venue',
+	'viewpoint',
+]);
 
 export type OpeningHours = Record<string, string>;
 

@@ -31,7 +31,19 @@
 	let loadingMore = $state(false);
 	let selectedCategory = $state<string | null>(null);
 
-	const categoryKeys = ['sight', 'restaurant', 'shop', 'museum'];
+	const categoryKeys = [
+		'sight',
+		'restaurant',
+		'shop',
+		'museum',
+		'cafe',
+		'bar',
+		'park',
+		'beach',
+		'hotel',
+		'event_venue',
+		'viewpoint',
+	];
 
 	let categoryCounts = $derived(
 		categoryKeys.reduce(
@@ -161,7 +173,21 @@
 						? '🛍️'
 						: selectedCategory === 'sight'
 							? '🏰'
-							: '📍'}</span
+							: selectedCategory === 'cafe'
+								? '☕'
+								: selectedCategory === 'bar'
+									? '🍸'
+									: selectedCategory === 'park'
+										? '🌳'
+										: selectedCategory === 'beach'
+											? '🏖️'
+											: selectedCategory === 'hotel'
+												? '🏨'
+												: selectedCategory === 'event_venue'
+													? '🎭'
+													: selectedCategory === 'viewpoint'
+														? '🔭'
+														: '📍'}</span
 		>
 		<p class="text-foreground-secondary">
 			{#if selectedCategory}

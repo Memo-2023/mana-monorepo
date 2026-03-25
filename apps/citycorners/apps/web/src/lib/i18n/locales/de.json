@@ -26,13 +26,27 @@
 		"sight": "Sehenswürdigkeiten",
 		"restaurant": "Restaurants",
 		"shop": "Läden",
-		"museum": "Museen"
+		"museum": "Museen",
+		"cafe": "Cafés",
+		"bar": "Bars",
+		"park": "Parks",
+		"beach": "Strandbäder",
+		"hotel": "Hotels",
+		"event_venue": "Veranstaltungsorte",
+		"viewpoint": "Aussichtspunkte"
 	},
 	"category": {
 		"sight": "Sehenswürdigkeit",
 		"restaurant": "Restaurant",
 		"shop": "Laden",
-		"museum": "Museum"
+		"museum": "Museum",
+		"cafe": "Café",
+		"bar": "Bar",
+		"park": "Park",
+		"beach": "Strandbad",
+		"hotel": "Hotel",
+		"event_venue": "Veranstaltungsort",
+		"viewpoint": "Aussichtspunkt"
 	},
 	"detail": {
 		"history": "Geschichte",
