@@ -4,7 +4,7 @@
 
 import { filesApi, foldersApi } from '$lib/api/client';
 import type { StorageFile, StorageFolder } from '$lib/api/client';
-import { trackEvent } from '@manacore/shared-utils/analytics';
+import { trackEvent, StorageEvents } from '@manacore/shared-utils/analytics';
 
 let files = $state<StorageFile[]>([]);
 let folders = $state<StorageFolder[]>([]);
@@ -35,6 +35,7 @@ export const filesStore = {
 
 	setViewMode(mode: 'grid' | 'list') {
 		viewMode = mode;
+		StorageEvents.viewModeChanged(mode);
 		if (typeof localStorage !== 'undefined') {
 			localStorage.setItem('storage-view-mode', mode);
 		}
@@ -114,6 +115,7 @@ export const filesStore = {
 		const result = await filesApi.delete(id);
 		if (!result.error) {
 			files = files.filter((f) => f.id !== id);
+			StorageEvents.fileDeleted();
 		}
 		return result;
 	},
@@ -122,6 +124,7 @@ export const filesStore = {
 		const result = await foldersApi.delete(id);
 		if (!result.error) {
 			folders = folders.filter((f) => f.id !== id);
+			StorageEvents.folderDeleted();
 		}
 		return result;
 	},
@@ -130,6 +133,7 @@ export const filesStore = {
 		const result = await filesApi.toggleFavorite(id);
 		if (result.data) {
 			files = files.map((f) => (f.id === id ? result.data! : f));
+			StorageEvents.fileFavorited(result.data.isFavorite);
 		}
 		return result;
 	},
@@ -138,6 +142,7 @@ export const filesStore = {
 		const result = await foldersApi.toggleFavorite(id);
 		if (result.data) {
 			folders = folders.map((f) => (f.id === id ? result.data! : f));
+			StorageEvents.folderFavorited(result.data.isFavorite);
 		}
 		return result;
 	},
@@ -185,6 +190,7 @@ export const filesStore = {
 			a.click();
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
+			StorageEvents.fileDownloaded();
 			return true;
 		}
 		return false;

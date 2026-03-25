@@ -276,6 +276,24 @@ export const ManaCoreEvents = {
 };
 
 /**
+ * Storage App Events
+ */
+export const StorageEvents = {
+	fileDownloaded: () => trackEvent('file_downloaded'),
+	fileDeleted: () => trackEvent('file_deleted'),
+	fileFavorited: (favorited: boolean) => trackEvent('file_favorited', { favorited }),
+	folderDeleted: () => trackEvent('folder_deleted'),
+	folderFavorited: (favorited: boolean) => trackEvent('folder_favorited', { favorited }),
+	shareLinkCopied: () => trackEvent('share_link_copied'),
+	shareLinkDeleted: () => trackEvent('share_link_deleted'),
+	trashRestored: (type: string) => trackEvent('trash_restored', { type }),
+	trashEmptied: () => trackEvent('trash_emptied'),
+	searchPerformed: (resultsCount: number) =>
+		trackEvent('search_performed', { results: resultsCount }),
+	viewModeChanged: (mode: string) => trackEvent('view_mode_changed', { mode }),
+};
+
+/**
  * Mukke App Events
  */
 export const MukkeEvents = {

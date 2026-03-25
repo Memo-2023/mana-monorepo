@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { ShareNetwork, Link, Copy, Trash } from '@manacore/shared-icons';
 	import { sharesApi } from '$lib/api/client';
+	import { StorageEvents } from '@manacore/shared-utils/analytics';
 	import type { Share } from '$lib/api/client';
 	import { toastStore } from '@manacore/shared-ui';
 
@@ -30,6 +31,7 @@
 	async function copyShareLink(token: string) {
 		const url = `${window.location.origin}/s/${token}`;
 		await navigator.clipboard.writeText(url);
+		StorageEvents.shareLinkCopied();
 		toastStore.success('Link kopiert!');
 	}
 
@@ -41,6 +43,7 @@
 			toastStore.error(result.error);
 		} else {
 			shares = shares.filter((s) => s.id !== id);
+			StorageEvents.shareLinkDeleted();
 			toastStore.success('Share-Link gelöscht');
 		}
 	}

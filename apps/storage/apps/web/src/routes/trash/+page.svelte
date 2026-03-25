@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Trash, ArrowCounterClockwise, Warning } from '@manacore/shared-icons';
 	import { trashApi } from '$lib/api/client';
+	import { StorageEvents } from '@manacore/shared-utils/analytics';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { toastStore } from '@manacore/shared-ui';
 
@@ -39,6 +40,7 @@
 			} else {
 				folders = folders.filter((f) => f.id !== id);
 			}
+			StorageEvents.trashRestored(type);
 			toastStore.success('Wiederhergestellt');
 		}
 	}
@@ -68,6 +70,7 @@
 		} else {
 			files = [];
 			folders = [];
+			StorageEvents.trashEmptied();
 			toastStore.success('Papierkorb geleert');
 		}
 	}

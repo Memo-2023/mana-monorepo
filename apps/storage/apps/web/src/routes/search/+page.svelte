@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { MagnifyingGlass, GridFour, List } from '@manacore/shared-icons';
 	import { searchApi } from '$lib/api/client';
+	import { StorageEvents } from '@manacore/shared-utils/analytics';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { filesStore } from '$lib/stores/files.svelte';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
@@ -38,6 +39,7 @@
 		if (result.data) {
 			files = result.data.files;
 			folders = result.data.folders;
+			StorageEvents.searchPerformed(files.length + folders.length);
 		}
 
 		loading = false;
