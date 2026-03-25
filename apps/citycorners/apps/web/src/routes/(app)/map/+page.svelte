@@ -21,6 +21,21 @@
 	let map: any = null;
 	let locating = $state(false);
 	let locationError = $state('');
+	let selectedCategory = $state<string | null>(null);
+
+	const categoryKeys = [
+		'sight',
+		'restaurant',
+		'shop',
+		'museum',
+		'cafe',
+		'bar',
+		'park',
+		'beach',
+		'hotel',
+		'event_venue',
+		'viewpoint',
+	];
 
 	const categoryColors: Record<string, string> = {
 		sight: '#2563eb',
@@ -36,36 +51,36 @@
 		viewpoint: '#0ea5e9',
 	};
 
-	onMount(async () => {
-		try {
-			const res = await fetch(api('/locations'));
-			const data = await res.json();
-			locations = data.locations;
-		} catch (err) {
-			console.error('Failed to load locations:', err);
+	let allMarkers: any[] = [];
+	let markerLayer: any = null;
+	let leafletLib: any = null;
+
+	function updateMarkers() {
+		if (!map || !leafletLib) return;
+		const L = leafletLib;
+
+		// Remove existing markers
+		if (markerLayer) {
+			map.removeLayer(markerLayer);
 		}
+		for (const m of allMarkers) {
+			map.removeLayer(m);
+		}
+		allMarkers = [];
 
-		if (!browser) return;
+		const filtered = selectedCategory
+			? locations.filter((l) => l.category === selectedCategory)
+			: locations;
 
-		const L = await import('leaflet');
-		await import('leaflet/dist/leaflet.css');
+		const useCluster = filtered.length >= 10;
 
-		map = L.map(mapContainer).setView([47.6603, 9.1757], 14);
-
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-			maxZoom: 19,
-		}).addTo(map);
-
-		const useCluster = locations.length >= 10;
-		let markerLayer: any;
-
-		if (useCluster) {
-			const { default: MCG } = await import('leaflet.markercluster');
+		if (useCluster && (L as any).markerClusterGroup) {
 			markerLayer = (L as any).markerClusterGroup();
+		} else {
+			markerLayer = null;
 		}
 
-		for (const loc of locations) {
+		for (const loc of filtered) {
 			if (loc.latitude && loc.longitude) {
 				const color = categoryColors[loc.category] || '#6b7280';
 
@@ -91,12 +106,52 @@
 					markerLayer.addLayer(marker);
 				} else {
 					marker.addTo(map);
+					allMarkers.push(marker);
 				}
 			}
 		}
 
 		if (useCluster && markerLayer) {
 			map.addLayer(markerLayer);
+		}
+	}
+
+	onMount(async () => {
+		try {
+			const res = await fetch(api('/locations?limit=100'));
+			const data = await res.json();
+			locations = data.locations;
+		} catch (err) {
+			console.error('Failed to load locations:', err);
+		}
+
+		if (!browser) return;
+
+		leafletLib = await import('leaflet');
+		const L = leafletLib;
+		await import('leaflet/dist/leaflet.css');
+
+		map = L.map(mapContainer).setView([47.6603, 9.1757], 14);
+
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+			maxZoom: 19,
+		}).addTo(map);
+
+		try {
+			await import('leaflet.markercluster');
+		} catch {
+			// clustering not available
+		}
+
+		updateMarkers();
+	});
+
+	// Re-render markers when category filter changes
+	$effect(() => {
+		const _ = selectedCategory;
+		if (map && leafletLib) {
+			updateMarkers();
 		}
 	});
 
@@ -187,12 +242,27 @@
 		<div class="mb-3 rounded-lg bg-red-500/10 p-2 text-xs text-red-500">{locationError}</div>
 	{/if}
 
-	<div class="legend mb-4 flex flex-wrap gap-3">
-		{#each Object.entries(categoryColors) as [key, color]}
-			<div class="flex items-center gap-1.5 text-sm text-foreground-secondary">
-				<div class="w-3 h-3 rounded-full" style="background:{color}"></div>
-				{$_(`category.${key}`)}
-			</div>
+	<div class="mb-4 flex flex-wrap gap-2">
+		<button
+			class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors {selectedCategory ===
+			null
+				? 'bg-primary text-white'
+				: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover border border-border'}"
+			onclick={() => (selectedCategory = null)}
+		>
+			{$_('map.filterAll')}
+		</button>
+		{#each categoryKeys as cat}
+			<button
+				class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors {selectedCategory ===
+				cat
+					? 'bg-primary text-white'
+					: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover border border-border'}"
+				onclick={() => (selectedCategory = selectedCategory === cat ? null : cat)}
+			>
+				<div class="w-2.5 h-2.5 rounded-full" style="background:{categoryColors[cat]}"></div>
+				{$_(`category.${cat}`)}
+			</button>
 		{/each}
 	</div>
 

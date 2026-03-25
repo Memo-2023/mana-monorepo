@@ -7,6 +7,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
 	import { api } from '$lib/api';
+	import { isOpenNow } from '$lib/opening-hours';
 
 	interface TimelineEntry {
 		year: string;
@@ -66,6 +67,13 @@
 		restaurant: '#dc2626',
 		shop: '#16a34a',
 		museum: '#9333ea',
+		cafe: '#b45309',
+		bar: '#ea580c',
+		park: '#15803d',
+		beach: '#0891b2',
+		hotel: '#4f46e5',
+		event_venue: '#db2777',
+		viewpoint: '#0ea5e9',
 	};
 
 	let isOwner = $derived(
@@ -337,14 +345,28 @@
 			</div>
 		{/if}
 
-		<!-- Category badge -->
-		<div class="absolute bottom-4 left-4">
+		<!-- Category badge + open status -->
+		<div class="absolute bottom-4 left-4 flex items-center gap-2">
 			<span
 				class="rounded-full px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
 				style="background: {categoryColors[location.category] || '#6b7280'}cc"
 			>
 				{$_(`category.${location.category}`)}
 			</span>
+			{@const openStatus = isOpenNow(location.openingHours)}
+			{#if openStatus === true}
+				<span
+					class="rounded-full bg-green-500/90 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
+				>
+					{$_('detail.openNow')}
+				</span>
+			{:else if openStatus === false}
+				<span
+					class="rounded-full bg-red-500/80 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
+				>
+					{$_('detail.closedNow')}
+				</span>
+			{/if}
 		</div>
 	</div>
 

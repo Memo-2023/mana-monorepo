@@ -4,6 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
 	import { api } from '$lib/api';
+	import { isOpenNow } from '$lib/opening-hours';
 
 	interface Location {
 		id: string;
@@ -15,6 +16,7 @@
 		latitude?: number;
 		longitude?: number;
 		imageUrl?: string;
+		openingHours?: Record<string, string>;
 		createdBy?: string;
 	}
 
@@ -256,11 +258,25 @@
 				{/if}
 
 				<div class="p-4">
-					<span
-						class="mb-1 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
-					>
-						{$_(`categories.${location.category}`)}
-					</span>
+					<div class="mb-1 flex flex-wrap items-center gap-1.5">
+						<span class="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+							{$_(`categories.${location.category}`)}
+						</span>
+						{@const openStatus = isOpenNow(location.openingHours)}
+						{#if openStatus === true}
+							<span
+								class="inline-block rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400"
+							>
+								{$_('detail.openNow')}
+							</span>
+						{:else if openStatus === false}
+							<span
+								class="inline-block rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-red-500 dark:text-red-400"
+							>
+								{$_('detail.closedNow')}
+							</span>
+						{/if}
+					</div>
 					<h2 class="text-lg font-semibold text-foreground group-hover:text-primary">
 						{location.name}
 					</h2>

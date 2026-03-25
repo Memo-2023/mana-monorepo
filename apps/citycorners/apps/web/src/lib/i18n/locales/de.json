@@ -68,7 +68,9 @@
 		"website": "Webseite",
 		"phone": "Telefon",
 		"openingHours": "Öffnungszeiten",
-		"closed": "Geschlossen"
+		"closed": "Geschlossen",
+		"openNow": "Jetzt geöffnet",
+		"closedNow": "Geschlossen"
 	},
 	"days": {
 		"mo": "Montag",
@@ -116,7 +118,8 @@
 		"locateMe": "Mein Standort",
 		"yourLocation": "Du bist hier",
 		"geolocationNotSupported": "Standortbestimmung wird nicht unterstützt.",
-		"geolocationError": "Standort konnte nicht ermittelt werden."
+		"geolocationError": "Standort konnte nicht ermittelt werden.",
+		"filterAll": "Alle"
 	},
 	"search": {
 		"placeholder": "Ort suchen...",

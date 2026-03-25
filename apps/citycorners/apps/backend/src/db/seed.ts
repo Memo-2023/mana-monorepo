@@ -56,6 +56,15 @@ async function seed() {
 			latitude: 47.6589,
 			longitude: 9.1795,
 			imageUrl: '/images/ophelia.jpg',
+			openingHours: {
+				mo: 'closed',
+				tu: 'closed',
+				we: '18:30 - 22:00',
+				th: '18:30 - 22:00',
+				fr: '18:30 - 22:00',
+				sa: '18:30 - 22:00',
+				su: 'closed',
+			},
 		},
 
 		// === SHOPS ===
@@ -68,6 +77,15 @@ async function seed() {
 			latitude: 47.6615,
 			longitude: 9.1742,
 			imageUrl: '/images/lago.jpg',
+			openingHours: {
+				mo: '09:30 - 20:00',
+				tu: '09:30 - 20:00',
+				we: '09:30 - 20:00',
+				th: '09:30 - 20:00',
+				fr: '09:30 - 20:00',
+				sa: '09:30 - 20:00',
+				su: 'closed',
+			},
 		},
 
 		// === MUSEUMS ===
@@ -80,6 +98,15 @@ async function seed() {
 			address: 'Rosgartenstraße 3-5, 78462 Konstanz',
 			latitude: 47.6612,
 			longitude: 9.1753,
+			openingHours: {
+				mo: 'closed',
+				tu: '10:00 - 18:00',
+				we: '10:00 - 18:00',
+				th: '10:00 - 18:00',
+				fr: '10:00 - 18:00',
+				sa: '10:00 - 17:00',
+				su: '10:00 - 17:00',
+			},
 		},
 		{
 			name: 'Archäologisches Landesmuseum',
@@ -89,6 +116,15 @@ async function seed() {
 			address: 'Benediktinerplatz 5, 78467 Konstanz',
 			latitude: 47.6637,
 			longitude: 9.1801,
+			openingHours: {
+				mo: 'closed',
+				tu: '10:00 - 18:00',
+				we: '10:00 - 18:00',
+				th: '10:00 - 18:00',
+				fr: '10:00 - 18:00',
+				sa: '10:00 - 18:00',
+				su: '10:00 - 18:00',
+			},
 		},
 
 		// === CAFÉS ===
@@ -101,6 +137,15 @@ async function seed() {
 			address: 'Hussenstraße 13, 78462 Konstanz',
 			latitude: 47.6609,
 			longitude: 9.1749,
+			openingHours: {
+				mo: '08:00 - 18:00',
+				tu: '08:00 - 18:00',
+				we: '08:00 - 18:00',
+				th: '08:00 - 18:00',
+				fr: '08:00 - 18:00',
+				sa: '09:00 - 18:00',
+				su: '10:00 - 17:00',
+			},
 		},
 		{
 			name: 'Café Wessenberg',
@@ -111,6 +156,15 @@ async function seed() {
 			address: 'Wessenbergstraße 41, 78462 Konstanz',
 			latitude: 47.6614,
 			longitude: 9.1739,
+			openingHours: {
+				mo: '07:30 - 18:30',
+				tu: '07:30 - 18:30',
+				we: '07:30 - 18:30',
+				th: '07:30 - 18:30',
+				fr: '07:30 - 18:30',
+				sa: '08:00 - 18:00',
+				su: '09:00 - 17:00',
+			},
 		},
 		{
 			name: 'Café Gessler 1159',
@@ -121,6 +175,15 @@ async function seed() {
 			address: 'Bodanstraße 9, 78462 Konstanz',
 			latitude: 47.6608,
 			longitude: 9.173,
+			openingHours: {
+				mo: '06:30 - 19:00',
+				tu: '06:30 - 19:00',
+				we: '06:30 - 19:00',
+				th: '06:30 - 19:00',
+				fr: '06:30 - 19:00',
+				sa: '07:00 - 18:00',
+				su: '08:00 - 17:00',
+			},
 		},
 		{
 			name: 'Voglhaus Café',
@@ -131,6 +194,15 @@ async function seed() {
 			address: 'Wessenbergstraße 8, 78462 Konstanz',
 			latitude: 47.6619,
 			longitude: 9.1744,
+			openingHours: {
+				mo: '09:00 - 18:00',
+				tu: '09:00 - 18:00',
+				we: '09:00 - 18:00',
+				th: '09:00 - 18:00',
+				fr: '09:00 - 18:00',
+				sa: '09:00 - 18:00',
+				su: '10:00 - 17:00',
+			},
 		},
 		{
 			name: 'Café Herr Hase',
@@ -141,6 +213,15 @@ async function seed() {
 			address: 'Niederburggasse 2, 78462 Konstanz',
 			latitude: 47.6623,
 			longitude: 9.1762,
+			openingHours: {
+				mo: '08:30 - 17:00',
+				tu: '08:30 - 17:00',
+				we: '08:30 - 17:00',
+				th: '08:30 - 17:00',
+				fr: '08:30 - 17:00',
+				sa: '09:00 - 17:00',
+				su: 'closed',
+			},
 		},
 
 		// === BARS ===
@@ -153,6 +234,15 @@ async function seed() {
 			address: 'Bodanstraße 18, 78462 Konstanz',
 			latitude: 47.6611,
 			longitude: 9.1736,
+			openingHours: {
+				mo: '18:00 - 01:00',
+				tu: '18:00 - 01:00',
+				we: '18:00 - 01:00',
+				th: '18:00 - 02:00',
+				fr: '18:00 - 03:00',
+				sa: '18:00 - 03:00',
+				su: 'closed',
+			},
 		},
 		{
 			name: 'Shamrock Irish Pub',
@@ -163,6 +253,15 @@ async function seed() {
 			address: 'Bodanstraße 28, 78462 Konstanz',
 			latitude: 47.6607,
 			longitude: 9.1728,
+			openingHours: {
+				mo: '17:00 - 01:00',
+				tu: '17:00 - 01:00',
+				we: '17:00 - 01:00',
+				th: '17:00 - 01:00',
+				fr: '17:00 - 02:00',
+				sa: '15:00 - 02:00',
+				su: '15:00 - 00:00',
+			},
 		},
 		{
 			name: 'Seekuh',
@@ -173,6 +272,15 @@ async function seed() {
 			address: 'Konradigasse 1, 78462 Konstanz',
 			latitude: 47.6632,
 			longitude: 9.1773,
+			openingHours: {
+				mo: '17:00 - 01:00',
+				tu: '17:00 - 01:00',
+				we: '17:00 - 01:00',
+				th: '17:00 - 02:00',
+				fr: '17:00 - 03:00',
+				sa: '15:00 - 03:00',
+				su: '15:00 - 00:00',
+			},
 		},
 		{
 			name: 'Brauhaus Johann Albrecht',
@@ -183,6 +291,15 @@ async function seed() {
 			address: 'Konradigasse 2, 78462 Konstanz',
 			latitude: 47.663,
 			longitude: 9.177,
+			openingHours: {
+				mo: '11:00 - 23:00',
+				tu: '11:00 - 23:00',
+				we: '11:00 - 23:00',
+				th: '11:00 - 23:00',
+				fr: '11:00 - 00:00',
+				sa: '11:00 - 00:00',
+				su: '11:00 - 22:00',
+			},
 		},
 		{
 			name: 'Schwarze Katz',
@@ -193,6 +310,15 @@ async function seed() {
 			address: 'Katzgasse 7, 78462 Konstanz',
 			latitude: 47.6617,
 			longitude: 9.1752,
+			openingHours: {
+				mo: 'closed',
+				tu: '19:00 - 01:00',
+				we: '19:00 - 01:00',
+				th: '19:00 - 02:00',
+				fr: '19:00 - 03:00',
+				sa: '19:00 - 03:00',
+				su: 'closed',
+			},
 		},
 
 		// === PARKS ===
