@@ -3,6 +3,8 @@
 	import { page } from '$app/stores';
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
+	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
+	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
@@ -30,6 +32,7 @@
 
 	let loading = $state(true);
 	let isCollapsed = $state(false);
+	let showShortcuts = $state(false);
 
 	// Get theme state
 	let isDark = $derived(theme.isDark);
@@ -103,6 +106,13 @@
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+			return;
+		}
+
+		// ? key opens keyboard shortcuts
+		if (event.key === '?' && !event.ctrlKey && !event.metaKey) {
+			event.preventDefault();
+			showShortcuts = !showShortcuts;
 			return;
 		}
 
@@ -254,5 +264,11 @@
 				{@render children()}
 			</div>
 		</main>
+
+		<!-- Session expiry warning -->
+		<SessionWarning />
+
+		<!-- Keyboard shortcuts modal -->
+		<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />
 	</div>
 {/if}

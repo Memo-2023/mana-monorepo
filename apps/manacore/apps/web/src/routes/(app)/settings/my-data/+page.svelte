@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Card, PageHeader } from '@manacore/shared-ui';
+	import Breadcrumbs from '$lib/components/Breadcrumbs.svelte';
 	import StatCard from '$lib/components/admin/StatCard.svelte';
 	import ProjectDataCard from '$lib/components/admin/ProjectDataCard.svelte';
 	import DeleteConfirmationModal from '$lib/components/my-data/DeleteConfirmationModal.svelte';
@@ -100,27 +101,14 @@
 <div class="space-y-6">
 	<!-- Header -->
 	<div class="flex items-center justify-between gap-4">
-		<div class="flex items-center gap-4">
-			<a
-				href="/settings"
-				class="p-2 rounded-lg hover:bg-muted transition-colors"
-				aria-label="Zuruck zu Einstellungen"
-			>
-				<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 19l-7-7 7-7"
-					/>
-				</svg>
-			</a>
-			<div>
-				<h1 class="text-2xl font-bold">Meine Daten</h1>
-				<p class="text-muted-foreground">
-					Ubersicht uber alle deine gespeicherten Daten (GDPR/DSGVO)
-				</p>
-			</div>
+		<div>
+			<Breadcrumbs
+				items={[{ label: 'Einstellungen', href: '/settings' }, { label: 'Meine Daten' }]}
+			/>
+			<h1 class="text-2xl font-bold">Meine Daten</h1>
+			<p class="text-muted-foreground">
+				Ubersicht uber alle deine gespeicherten Daten (GDPR/DSGVO)
+			</p>
 		</div>
 		{#if userData}
 			<div class="flex items-center gap-2">

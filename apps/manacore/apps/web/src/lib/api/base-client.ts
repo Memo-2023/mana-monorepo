@@ -55,6 +55,23 @@ function isNetworkError(error: Error): boolean {
 }
 
 /**
+ * Human-readable HTTP status messages
+ */
+function httpStatusMessage(status: number): string {
+	const messages: Record<number, string> = {
+		400: 'Ungultige Anfrage — bitte Eingaben prufen',
+		404: 'Nicht gefunden',
+		409: 'Konflikt — Daten wurden zwischenzeitlich geandert',
+		422: 'Eingaben konnten nicht verarbeitet werden',
+		429: 'Zu viele Anfragen — bitte kurz warten',
+		500: 'Interner Server-Fehler',
+		502: 'Service vorubergehend nicht erreichbar',
+		503: 'Service wird gewartet',
+	};
+	return messages[status] || `Fehler (HTTP ${status})`;
+}
+
+/**
  * Fetch with authentication and retry logic
  *
  * @param url - Full URL to fetch
@@ -86,23 +103,27 @@ export async function fetchWithRetry<T>(
 
 			if (!response.ok) {
 				// Don't retry on auth errors
-				if (response.status === 401 || response.status === 403) {
+				if (response.status === 401) {
 					return {
 						data: null,
-						error: `Authentication failed (${response.status})`,
+						error: 'Sitzung abgelaufen — bitte neu anmelden',
+					};
+				}
+				if (response.status === 403) {
+					return {
+						data: null,
+						error: 'Keine Berechtigung fur diese Aktion',
 					};
 				}
 
 				// Don't retry on client errors (except rate limiting)
 				if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-					const errorBody = await response.json().catch(() => ({ message: 'Request failed' }));
-					return {
-						data: null,
-						error: errorBody.message || `HTTP ${response.status}`,
-					};
+					const errorBody = await response.json().catch(() => ({ message: '' }));
+					const msg = errorBody.message || httpStatusMessage(response.status);
+					return { data: null, error: msg };
 				}
 
-				throw new Error(`HTTP ${response.status}`);
+				throw new Error(`Server-Fehler (${response.status})`);
 			}
 
 			const data = await response.json();

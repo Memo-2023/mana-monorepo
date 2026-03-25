@@ -15,6 +15,8 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let searchQuery = $state('');
+	let currentPage = $state(1);
+	const pageSize = 20;
 
 	let filteredUsers = $derived(
 		searchQuery
@@ -25,6 +27,17 @@
 				)
 			: users
 	);
+
+	let totalPages = $derived(Math.max(1, Math.ceil(filteredUsers.length / pageSize)));
+	let paginatedUsers = $derived(
+		filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+	);
+
+	// Reset to page 1 when search changes
+	$effect(() => {
+		searchQuery;
+		currentPage = 1;
+	});
 
 	onMount(async () => {
 		try {
@@ -112,7 +125,34 @@
 	</div>
 
 	<!-- User Table -->
-	<UserTable users={filteredUsers} {loading} />
+	<UserTable users={paginatedUsers} {loading} />
+
+	<!-- Pagination -->
+	{#if totalPages > 1}
+		<div class="flex items-center justify-between pt-4">
+			<span class="text-sm text-muted-foreground">
+				Seite {currentPage} von {totalPages}
+			</span>
+			<div class="flex gap-2">
+				<button
+					type="button"
+					onclick={() => (currentPage = Math.max(1, currentPage - 1))}
+					disabled={currentPage === 1}
+					class="rounded-md border px-3 py-1.5 text-sm transition-colors disabled:opacity-40 hover:bg-muted"
+				>
+					Zuruck
+				</button>
+				<button
+					type="button"
+					onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))}
+					disabled={currentPage === totalPages}
+					class="rounded-md border px-3 py-1.5 text-sm transition-colors disabled:opacity-40 hover:bg-muted"
+				>
+					Weiter
+				</button>
+			</div>
+		</div>
+	{/if}
 
 	{#if error}
 		<div
