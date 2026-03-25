@@ -7,6 +7,7 @@ describe('LocationController', () => {
 	let controller: LocationController;
 	let locationService: any;
 	let lookupService: any;
+	let reviewService: any;
 
 	beforeEach(() => {
 		locationService = {
@@ -23,7 +24,11 @@ describe('LocationController', () => {
 		lookupService = {
 			lookup: jest.fn(),
 		};
-		controller = new LocationController(locationService, lookupService);
+		reviewService = {
+			getStats: jest.fn().mockResolvedValue({ averageRating: 0, totalReviews: 0 }),
+			getStatsForLocations: jest.fn().mockResolvedValue({}),
+		};
+		controller = new LocationController(locationService, lookupService, reviewService);
 	});
 
 	afterEach(() => jest.clearAllMocks());
