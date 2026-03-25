@@ -20,8 +20,9 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation.svelte';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import { MagnifyingGlass, X } from '@manacore/shared-icons';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -126,6 +127,17 @@
 	const navRoutes = navItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
+		// Cmd/Ctrl+K opens command palette from anywhere
+		if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+			event.preventDefault();
+			if (showCommandPalette) {
+				closeCommandPalette();
+			} else {
+				openCommandPalette();
+			}
+			return;
+		}
+
 		const target = event.target as HTMLElement;
 		if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
 			return;
@@ -164,20 +176,71 @@
 		goto('/login');
 	}
 
-	// QuickInputBar handlers
-	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
-		const q = query.toLowerCase();
-		const rooms = matrixStore.rooms.filter((r) => r.name?.toLowerCase().includes(q));
-		return rooms.slice(0, 10).map((room) => ({
-			id: room.roomId,
-			title: room.name || room.roomId,
-			subtitle: room.isDirect ? 'Direktnachricht' : 'Gruppe',
-		}));
+	// Command Palette state
+	let showCommandPalette = $state(false);
+	let commandQuery = $state('');
+	let commandResults = $state<QuickInputItem[]>([]);
+	let commandSelectedIndex = $state(0);
+	let commandInputEl = $state<HTMLInputElement | null>(null);
+
+	function openCommandPalette() {
+		showCommandPalette = true;
+		commandQuery = '';
+		commandResults = [];
+		commandSelectedIndex = 0;
+		// Focus after render
+		setTimeout(() => commandInputEl?.focus(), 50);
 	}
 
-	function handleInputSelect(item: QuickInputItem) {
+	function closeCommandPalette() {
+		showCommandPalette = false;
+		commandQuery = '';
+		commandResults = [];
+	}
+
+	function handleCommandSearch() {
+		const q = commandQuery.toLowerCase().trim();
+		if (!q) {
+			commandResults = [];
+			return;
+		}
+		commandResults = matrixStore.rooms
+			.filter((r) => r.name?.toLowerCase().includes(q))
+			.slice(0, 10)
+			.map((room) => ({
+				id: room.roomId,
+				title: room.name || room.roomId,
+				subtitle: room.isDirect ? 'Direktnachricht' : 'Gruppe',
+			}));
+		commandSelectedIndex = 0;
+	}
+
+	function handleCommandSelect(item: QuickInputItem) {
 		matrixStore.selectRoom(item.id);
 		goto('/chat');
+		closeCommandPalette();
+	}
+
+	function handleCommandKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			closeCommandPalette();
+			return;
+		}
+		if (event.key === 'ArrowDown') {
+			event.preventDefault();
+			commandSelectedIndex = Math.min(commandSelectedIndex + 1, commandResults.length - 1);
+			return;
+		}
+		if (event.key === 'ArrowUp') {
+			event.preventDefault();
+			commandSelectedIndex = Math.max(commandSelectedIndex - 1, 0);
+			return;
+		}
+		if (event.key === 'Enter' && commandResults.length > 0) {
+			event.preventDefault();
+			handleCommandSelect(commandResults[commandSelectedIndex]);
+		}
 	}
 
 	onMount(async () => {
@@ -348,22 +411,87 @@
 			allAppsHref="https://mana.how"
 		/>
 
-		<!-- Quick Input Bar -->
-		<QuickInputBar
-			onSearch={handleInputSearch}
-			onSelect={handleInputSelect}
-			placeholder="Raum oder Kontakt suchen..."
-			emptyText="Keine Räume gefunden"
-			searchingText="Suche..."
-			locale={$locale || 'de'}
-			appIcon="search"
-			bottomOffset="70px"
-		/>
-
 		<!-- Main Content -->
 		<main class="main-content bg-background">
 			{@render children()}
 		</main>
+
+		<!-- Command Palette (Cmd+K) -->
+		{#if showCommandPalette}
+			<!-- Backdrop -->
+			<button
+				class="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm"
+				onclick={closeCommandPalette}
+				aria-label="Schließen"
+			></button>
+			<!-- Dialog -->
+			<div class="fixed inset-0 z-[201] flex items-start justify-center pt-[20vh] px-4">
+				<div
+					class="w-full max-w-lg rounded-2xl bg-surface-elevated border border-border shadow-2xl overflow-hidden animate-fade-in"
+				>
+					<!-- Search Input -->
+					<div class="flex items-center gap-3 px-4 py-3 border-b border-border">
+						<MagnifyingGlass class="h-5 w-5 text-muted-foreground flex-shrink-0" />
+						<input
+							bind:this={commandInputEl}
+							type="text"
+							bind:value={commandQuery}
+							oninput={handleCommandSearch}
+							onkeydown={handleCommandKeydown}
+							placeholder="Raum oder Kontakt suchen..."
+							class="flex-1 bg-transparent text-foreground text-sm placeholder:text-muted-foreground outline-none"
+						/>
+						<kbd
+							class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-mono"
+						>
+							ESC
+						</kbd>
+					</div>
+					<!-- Results -->
+					{#if commandQuery.trim()}
+						<div class="max-h-80 overflow-y-auto p-2">
+							{#if commandResults.length === 0}
+								<p class="px-3 py-6 text-center text-sm text-muted-foreground">
+									Keine Räume gefunden
+								</p>
+							{:else}
+								{#each commandResults as item, index (item.id)}
+									<button
+										class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors
+											   {index === commandSelectedIndex
+											? 'bg-primary/10 text-foreground'
+											: 'text-foreground hover:bg-surface-hover'}"
+										onclick={() => handleCommandSelect(item)}
+										onmouseenter={() => (commandSelectedIndex = index)}
+									>
+										<div
+											class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-violet-500 to-purple-600 text-white text-xs font-semibold"
+										>
+											{item.title
+												.split(' ')
+												.map((w) => w[0])
+												.join('')
+												.substring(0, 2)
+												.toUpperCase()}
+										</div>
+										<div class="min-w-0 flex-1">
+											<p class="text-sm font-medium truncate">{item.title}</p>
+											{#if item.subtitle}
+												<p class="text-xs text-muted-foreground">{item.subtitle}</p>
+											{/if}
+										</div>
+									</button>
+								{/each}
+							{/if}
+						</div>
+					{:else}
+						<div class="px-4 py-6 text-center text-sm text-muted-foreground">
+							Tippe um Räume und Kontakte zu finden
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
 
 		<!-- Spacer for PillNavigation -->
 		<div class="pill-nav-spacer"></div>

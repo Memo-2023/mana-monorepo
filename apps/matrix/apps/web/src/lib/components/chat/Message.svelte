@@ -50,6 +50,15 @@
 		message.body.startsWith('Unable to decrypt:') || message.body.includes('** Unable to decrypt')
 	);
 
+	// Check if message contains an error/failure
+	let isErrorMessage = $derived(
+		!isDecryptionError &&
+			(message.body.toLowerCase().includes('fehler') ||
+				message.body.toLowerCase().includes('error') ||
+				message.body.toLowerCase().includes('failed') ||
+				message.body.toLowerCase().includes('fehlgeschlagen'))
+	);
+
 	let showActions = $state(false);
 	let showEmojiPicker = $state(false);
 	let imageLoading = $state(true);
@@ -245,6 +254,25 @@
 			.toUpperCase()
 	);
 
+	// Dynamic bubble rounding based on grouping position
+	let bubbleRounding = $derived(() => {
+		if (message.isOwn) {
+			// Own messages: flat on right side for grouping
+			if (isSameSender && !showTimestamp && !isLastInGroup)
+				return 'rounded-2xl rounded-tr-md rounded-br-md';
+			if (isSameSender && !showTimestamp) return 'rounded-2xl rounded-tr-md';
+			if (!isLastInGroup) return 'rounded-2xl rounded-br-md';
+			return 'rounded-2xl rounded-tr-md';
+		} else {
+			// Other messages: flat on left side for grouping
+			if (isSameSender && !showTimestamp && !isLastInGroup)
+				return 'rounded-2xl rounded-tl-md rounded-bl-md';
+			if (isSameSender && !showTimestamp) return 'rounded-2xl rounded-tl-md';
+			if (!isLastInGroup) return 'rounded-2xl rounded-bl-md';
+			return 'rounded-2xl rounded-tl-md';
+		}
+	});
+
 	// Get media URL for display
 	let mediaUrl = $derived(
 		message.media?.mxcUrl ? matrixStore.getMediaUrl(message.media.mxcUrl) : null
@@ -285,7 +313,9 @@
 
 <!-- Message -->
 <div
-	class="group flex gap-3 mb-4 animate-fade-in {message.isOwn ? 'flex-row-reverse' : 'flex-row'}"
+	class="group flex gap-3 animate-fade-in {message.isOwn ? 'flex-row-reverse' : 'flex-row'}
+		   {isSameSender && !showTimestamp ? 'mt-0.5' : 'mt-4'}
+		   {isLastInGroup ? 'mb-1' : 'mb-0'}"
 	class:opacity-50={message.redacted}
 	role="article"
 	onmouseenter={() => (showActions = true)}
@@ -328,10 +358,12 @@
 
 		<!-- Message Bubble -->
 		<div
-			class="relative px-4 py-3 shadow-md
-				   {message.isOwn
-				? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl rounded-tr-md'
-				: 'bg-surface text-foreground border border-border rounded-2xl rounded-tl-md'}"
+			class="relative px-4 py-3 shadow-md {bubbleRounding()}
+				   {isErrorMessage && !message.isOwn
+				? 'bg-red-500/10 text-foreground border border-red-500/30'
+				: message.isOwn
+					? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+					: 'bg-surface text-foreground border border-border'}"
 		>
 			{#if message.redacted}
 				<p class="italic text-white/70">Nachricht wurde gelöscht</p>
@@ -574,9 +606,9 @@
 		<!-- Message actions (hover/tap) -->
 		{#if showActions && !message.redacted}
 			<div
-				class="absolute flex items-center gap-1 rounded-xl glass p-1.5 shadow-lg z-20
-				       {message.isOwn ? 'right-0 lg:-left-28 lg:right-auto' : 'left-0 lg:-right-28 lg:left-auto'}
-				       top-full mt-1 lg:top-0 lg:mt-0"
+				class="absolute flex items-center gap-0.5 rounded-lg glass px-1 py-0.5 shadow-lg z-20
+				       {message.isOwn ? 'right-0' : 'left-0'}
+				       bottom-full mb-1"
 			>
 				<!-- Emoji reaction button -->
 				<div class="relative">

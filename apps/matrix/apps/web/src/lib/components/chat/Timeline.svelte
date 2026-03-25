@@ -137,7 +137,7 @@
 		{/if}
 
 		<!-- Messages -->
-		<div class="space-y-0">
+		<div>
 			{#each matrixStore.messages as message, index (message.id)}
 				{@const prevMessage = matrixStore.messages[index - 1]}
 				{@const nextMessage = matrixStore.messages[index + 1]}
