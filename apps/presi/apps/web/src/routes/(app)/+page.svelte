@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { PresiEvents } from '@manacore/shared-utils/analytics';
 	import { PageHeader, ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import {
 		Plus,
@@ -74,6 +75,7 @@
 		});
 
 		if (deck) {
+			PresiEvents.deckCreated();
 			showCreateModal = false;
 			newDeckTitle = '';
 			newDeckDescription = '';
@@ -90,6 +92,7 @@
 	async function handleDelete() {
 		if (!deckToDelete) return;
 		await decksStore.deleteDeck(deckToDelete.id);
+		PresiEvents.deckDeleted();
 		showDeleteModal = false;
 		deckToDelete = null;
 	}

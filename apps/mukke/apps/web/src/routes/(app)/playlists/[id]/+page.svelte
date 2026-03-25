@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { playlistStore } from '$lib/stores/playlist.svelte';
 	import { playerStore } from '$lib/stores/player.svelte';
+	import { MukkeEvents } from '@manacore/shared-utils/analytics';
 	import type { Song } from '@mukke/shared';
 
 	let isEditingName = $state(false);
@@ -32,6 +33,7 @@
 		const playlist = playlistStore.currentPlaylist;
 		if (!playlist || playlist.songs.length === 0) return;
 		playerStore.playQueue(playlist.songs, 0);
+		MukkeEvents.playlistPlayAll();
 	}
 
 	function handleShufflePlay() {
@@ -39,6 +41,7 @@
 		if (!playlist || playlist.songs.length === 0) return;
 		const shuffled = shuffleArray(playlist.songs);
 		playerStore.playQueue(shuffled, 0);
+		MukkeEvents.playlistShufflePlay();
 	}
 
 	function handlePlaySong(song: Song, index: number) {

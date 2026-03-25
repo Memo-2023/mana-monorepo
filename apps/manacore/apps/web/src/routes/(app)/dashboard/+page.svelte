@@ -6,11 +6,17 @@
 	import type { CreditBalance, CreditTransaction } from '$lib/api/credits';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
+	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 	import DashboardGrid from '$lib/components/dashboard/DashboardGrid.svelte';
 
 	onMount(() => {
 		dashboardStore.initialize();
 	});
+
+	function handleToggleEditing() {
+		dashboardStore.toggleEditing();
+		ManaCoreEvents.dashboardEditToggled(dashboardStore.isEditing);
+	}
 </script>
 
 <div>
@@ -22,7 +28,7 @@
 		/>
 		<button
 			type="button"
-			onclick={() => dashboardStore.toggleEditing()}
+			onclick={handleToggleEditing}
 			class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {dashboardStore.isEditing
 				? 'bg-primary text-primary-foreground'
 				: 'bg-muted text-muted-foreground hover:bg-muted/80'}"

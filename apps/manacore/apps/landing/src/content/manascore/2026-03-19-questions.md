@@ -15,6 +15,12 @@ scores:
   documentation: 72
   security: 55
   ux: 55
+analytics:
+  pageViewTracking: true
+  customEvents: false
+  authTracking: true
+  landingTracking: false
+  publicDashboard: true
 status: 'alpha'
 version: '0.1.0'
 stats:

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { projectStore } from '$lib/stores/project.svelte';
+	import { MukkeEvents } from '@manacore/shared-utils/analytics';
 
 	let showCreateModal = $state(false);
 	let newProjectTitle = $state('');
@@ -18,6 +19,7 @@
 		isCreating = true;
 		try {
 			const project = await projectStore.createProject(newProjectTitle, newProjectDescription);
+			MukkeEvents.projectCreated();
 			showCreateModal = false;
 			newProjectTitle = '';
 			newProjectDescription = '';
@@ -32,6 +34,7 @@
 		e.preventDefault();
 		if (confirm('Are you sure you want to delete this project?')) {
 			await projectStore.deleteProject(id);
+			MukkeEvents.projectDeleted();
 		}
 	}
 

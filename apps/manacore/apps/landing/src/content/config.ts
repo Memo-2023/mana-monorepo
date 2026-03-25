@@ -253,6 +253,16 @@ const manascoreCollection = defineCollection({
 				sharedLlm: z.boolean().optional(), // Uses @manacore/shared-llm (if applicable)
 			})
 			.optional(),
+		// Analytics maturity (Umami tracking depth)
+		analytics: z
+			.object({
+				pageViewTracking: z.boolean(), // Umami script injected (automatic page views)
+				customEvents: z.boolean(), // App-specific custom events implemented
+				authTracking: z.boolean(), // Login/signup/logout tracked via shared-auth
+				landingTracking: z.boolean(), // Landing page CTA/pricing events
+				publicDashboard: z.boolean(), // Public Umami dashboard configured
+			})
+			.optional(),
 		// Score history for trend visualization
 		history: z
 			.array(

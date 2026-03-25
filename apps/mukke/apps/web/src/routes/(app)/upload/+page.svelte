@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { libraryStore } from '$lib/stores/library.svelte';
+	import { MukkeEvents } from '@manacore/shared-utils/analytics';
 
 	interface UploadFile {
 		file: File;
@@ -90,6 +91,7 @@
 			files[index].status = 'uploaded';
 			files[index].progress = 100;
 			files[index].songId = song.id;
+			MukkeEvents.songUploaded();
 
 			// Auto-extract ID3 tags from the uploaded file
 			try {
@@ -107,6 +109,7 @@
 		} catch (e) {
 			files[index].status = 'error';
 			files[index].error = e instanceof Error ? e.message : 'Upload failed';
+			MukkeEvents.songUploadFailed();
 		}
 	}
 

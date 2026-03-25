@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
+	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 
 	let isRefreshing = $state(false);
@@ -8,6 +9,7 @@
 	async function loadNewQuote() {
 		isRefreshing = true;
 		quotesStore.loadRandomQuote();
+		ZitareEvents.randomQuoteLoaded();
 		// Small delay for visual feedback
 		await new Promise((r) => setTimeout(r, 300));
 		isRefreshing = false;

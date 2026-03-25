@@ -256,6 +256,80 @@ export const ManaDeckEvents = {
 };
 
 /**
+ * ManaCore Platform Events
+ */
+export const ManaCoreEvents = {
+	appOpened: (appId: string) => trackEvent('app_opened', { app: appId }),
+	navClicked: (destination: string) => trackEvent('nav_clicked', { destination }),
+	onboardingStarted: () => trackEvent('onboarding_started'),
+	onboardingStepCompleted: (step: string, stepNumber: number) =>
+		trackEvent('onboarding_step_completed', { step, step_number: stepNumber }),
+	onboardingCompleted: () => trackEvent('onboarding_completed'),
+	onboardingSkipped: (atStep: number) => trackEvent('onboarding_skipped', { at_step: atStep }),
+	dashboardEditToggled: (editing: boolean) => trackEvent('dashboard_edit_toggled', { editing }),
+	widgetAdded: (widgetType: string) => trackEvent('widget_added', { widget_type: widgetType }),
+	widgetRemoved: (widgetType: string) => trackEvent('widget_removed', { widget_type: widgetType }),
+	widgetResized: (widgetType: string, size: string) =>
+		trackEvent('widget_resized', { widget_type: widgetType, size }),
+	creditsTabViewed: (tab: string) => trackEvent('credits_tab_viewed', { tab }),
+	profileUpdated: () => trackEvent('profile_updated'),
+};
+
+/**
+ * Mukke App Events
+ */
+export const MukkeEvents = {
+	songUploaded: () => trackEvent('song_uploaded'),
+	songUploadFailed: () => trackEvent('song_upload_failed'),
+	songPlayed: () => trackEvent('song_played'),
+	songFavorited: (favorited: boolean) => trackEvent('song_favorited', { favorited }),
+	songDeleted: () => trackEvent('song_deleted'),
+	playlistCreated: () => trackEvent('playlist_created'),
+	playlistDeleted: () => trackEvent('playlist_deleted'),
+	playlistPlayAll: () => trackEvent('playlist_play_all'),
+	playlistShufflePlay: () => trackEvent('playlist_shuffle_play'),
+	projectCreated: () => trackEvent('project_created'),
+	projectDeleted: () => trackEvent('project_deleted'),
+	projectExported: (format: string) => trackEvent('project_exported', { format }),
+};
+
+/**
+ * Zitare App Events
+ */
+export const ZitareEvents = {
+	randomQuoteLoaded: () => trackEvent('random_quote_loaded'),
+	quoteShared: (category: string) => trackEvent('quote_shared', { category }),
+	quoteFavorited: (category: string) => trackEvent('quote_favorited', { category }),
+	quoteUnfavorited: () => trackEvent('quote_unfavorited'),
+	categoryViewed: (category: string) => trackEvent('category_viewed', { category }),
+	searchPerformed: (resultsCount: number) =>
+		trackEvent('search_performed', { results: resultsCount }),
+	listCreated: () => trackEvent('list_created'),
+	listDeleted: () => trackEvent('list_deleted'),
+	quoteLanguageChanged: (language: string) => trackEvent('quote_language_changed', { language }),
+};
+
+/**
+ * Presi App Events
+ */
+export const PresiEvents = {
+	deckCreated: () => trackEvent('deck_created'),
+	deckDeleted: () => trackEvent('deck_deleted'),
+	slideCreated: () => trackEvent('slide_created'),
+	slideEdited: () => trackEvent('slide_edited'),
+	slideDeleted: () => trackEvent('slide_deleted'),
+	slideReordered: (direction: 'up' | 'down') => trackEvent('slide_reordered', { direction }),
+	presentationStarted: (slideCount: number) =>
+		trackEvent('presentation_started', { slide_count: slideCount }),
+	presentationExited: (duration: number, slidesViewed: number) =>
+		trackEvent('presentation_exited', { duration_seconds: duration, slides_viewed: slidesViewed }),
+	shareLinkCreated: () => trackEvent('share_link_created'),
+	shareLinkCopied: () => trackEvent('share_link_copied'),
+	shareLinkDeleted: () => trackEvent('share_link_deleted'),
+	sharedDeckViewed: () => trackEvent('shared_deck_viewed'),
+};
+
+/**
  * Subscription/Payment Events
  */
 export const SubscriptionEvents = {

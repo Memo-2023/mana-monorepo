@@ -4,6 +4,7 @@
 	import { libraryStore } from '$lib/stores/library.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { playerStore } from '$lib/stores/player.svelte';
+	import { MukkeEvents } from '@manacore/shared-utils/analytics';
 	import SongEditor from '$lib/components/SongEditor.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import type { Song } from '@mukke/shared';
@@ -109,7 +110,9 @@
 	async function handleToggleFavorite(id: string, e: Event) {
 		e.preventDefault();
 		e.stopPropagation();
+		const song = libraryStore.songs.find((s) => s.id === id);
 		await libraryStore.toggleFavorite(id);
+		MukkeEvents.songFavorited(!song?.favorite);
 	}
 
 	function handleEditSong(song: Song, e: Event) {
@@ -120,6 +123,7 @@
 
 	function handlePlaySong(song: Song, index: number) {
 		playerStore.playSong(song, libraryStore.songs, index);
+		MukkeEvents.songPlayed();
 	}
 
 	async function openInEditor(songId: string, e: Event) {

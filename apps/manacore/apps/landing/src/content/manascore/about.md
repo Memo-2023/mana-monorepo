@@ -203,6 +203,20 @@ Prüft 7 Konsistenz-Kriterien der Backend-API:
 | **Health Endpoint**       | `/health` Endpoint vorhanden                            |
 | **Validation**            | DTO-Validation mit class-validator auf allen Inputs     |
 
+### Analytics Maturity
+
+Bewertet die Tiefe der Umami-Analytics-Integration pro App:
+
+| Check                  | Beschreibung                                                           |
+| ---------------------- | ---------------------------------------------------------------------- |
+| **Page View Tracking** | Umami-Script via `hooks.server.ts` injiziert (automatische Page Views) |
+| **Custom Events**      | App-spezifische Events implementiert (z.B. `TodoEvents`, `ChatEvents`) |
+| **Auth Tracking**      | Login/Signup/Logout automatisch via `@manacore/shared-auth` getrackt   |
+| **Landing Tracking**   | Landing Page Events (CTA-Clicks, Pricing Views) via `Analytics.astro`  |
+| **Public Dashboard**   | Öffentliches Dashboard auf `stats.mana.how` konfiguriert               |
+
+Apps mit allen 5 Checks sind **analytics-mature** — sie erfassen nicht nur Page Views, sondern auch Feature-spezifische Nutzerinteraktionen, Auth-Flows und Landing-Conversions.
+
 ### Cross-App Consistency
 
 Misst wie konsequent eine App die shared Packages des Monorepos nutzt:

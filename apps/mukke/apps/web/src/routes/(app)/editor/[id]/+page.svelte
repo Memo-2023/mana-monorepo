@@ -4,6 +4,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { projectStore } from '$lib/stores/project.svelte';
+	import { MukkeEvents } from '@manacore/shared-utils/analytics';
 	import { audioStore } from '$lib/stores/audio.svelte';
 	import { editorStore } from '$lib/stores/editor.svelte';
 	import { MARKER_COLORS } from '@mukke/shared';
@@ -226,6 +227,7 @@
 			if (!response.ok) throw new Error('Export failed');
 
 			const blob = await response.blob();
+			MukkeEvents.projectExported(format);
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;

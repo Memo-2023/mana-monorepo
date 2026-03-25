@@ -11,6 +11,7 @@
 	import type { WidgetConfig, WidgetSize } from '$lib/types/dashboard';
 	import { getWidgetMeta } from '$lib/types/dashboard';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
+	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 
 	// Widget components
 	import CreditsWidget from './widgets/CreditsWidget.svelte';
@@ -48,9 +49,11 @@
 
 	function handleSizeChange(size: WidgetSize) {
 		dashboardStore.updateWidgetSize(widget.id, size);
+		ManaCoreEvents.widgetResized(widget.type, size);
 	}
 
 	function handleRemove() {
+		ManaCoreEvents.widgetRemoved(widget.type);
 		dashboardStore.removeWidget(widget.id);
 	}
 

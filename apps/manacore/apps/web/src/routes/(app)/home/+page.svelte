@@ -9,6 +9,7 @@
 		type AppIconId,
 	} from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 
 	// Detect dev mode
 	const isDev =
@@ -100,6 +101,7 @@
 	}
 
 	function handleAppClick(app: ManaApp) {
+		ManaCoreEvents.appOpened(app.id);
 		const url = getAppUrl(app.id);
 		if (url) {
 			window.open(url, '_blank', 'noopener,noreferrer');

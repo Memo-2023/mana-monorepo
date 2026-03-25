@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
+	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 	import { CATEGORIES, getQuotesByCategory, type Category } from '@zitare/content';
 
 	// Category data with icons and gradients
@@ -82,7 +83,10 @@
 		{#each CATEGORIES as category}
 			{@const data = categoryData[category]}
 			<button
-				onclick={() => goto(`/category/${category}`)}
+				onclick={() => {
+					ZitareEvents.categoryViewed(category);
+					goto(`/category/${category}`);
+				}}
 				class="group p-6 rounded-2xl bg-gradient-to-br {data.gradient} text-white text-left transition-transform hover:scale-105 hover:shadow-xl"
 			>
 				<div class="text-4xl mb-3">{data.icon}</div>

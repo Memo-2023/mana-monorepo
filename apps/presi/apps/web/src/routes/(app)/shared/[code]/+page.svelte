@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import { shareApi } from '$lib/api/client';
+	import { PresiEvents } from '@manacore/shared-utils/analytics';
 	import type { Slide } from '@presi/shared';
 	import {
 		CaretLeft,
@@ -34,6 +35,7 @@
 			const data = await shareApi.getByCode(shareCode);
 			deck = data;
 			slides = data.slides || [];
+			PresiEvents.sharedDeckViewed();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load shared deck';
 		} finally {

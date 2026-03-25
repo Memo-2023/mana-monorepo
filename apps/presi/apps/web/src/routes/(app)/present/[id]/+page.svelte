@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { PresiEvents } from '@manacore/shared-utils/analytics';
 	import type { Slide } from '@presi/shared';
 	import {
 		X,
@@ -28,8 +29,12 @@
 
 	const deckId = $page.params.id as string;
 
+	let maxSlideReached = $state(0);
+
 	onMount(() => {
-		decksStore.loadDeck(deckId);
+		decksStore.loadDeck(deckId).then(() => {
+			PresiEvents.presentationStarted(decksStore.currentSlides.length);
+		});
 
 		// Keyboard navigation
 		window.addEventListener('keydown', handleKeydown);
@@ -92,6 +97,7 @@
 	function nextSlide() {
 		if (currentSlideIndex < decksStore.currentSlides.length - 1) {
 			currentSlideIndex++;
+			if (currentSlideIndex > maxSlideReached) maxSlideReached = currentSlideIndex;
 		}
 	}
 
@@ -126,6 +132,7 @@
 	}
 
 	function exitPresentation() {
+		PresiEvents.presentationExited(elapsedSeconds, maxSlideReached + 1);
 		if (document.fullscreenElement) {
 			document.exitFullscreen();
 		}

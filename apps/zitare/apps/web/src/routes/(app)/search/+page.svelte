@@ -1,15 +1,25 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { searchQuotes, type Quote } from '@zitare/content';
+	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 
 	let searchTerm = $state('');
+	let lastTrackedTerm = $state('');
 
 	// Search results
 	let results = $derived<Quote[]>(
 		searchTerm.length >= 2 ? searchQuotes(searchTerm, quotesStore.language) : []
 	);
+
+	// Track search when results change (debounced by derived reactivity)
+	$effect(() => {
+		if (searchTerm.length >= 2 && searchTerm !== lastTrackedTerm) {
+			lastTrackedTerm = searchTerm;
+			ZitareEvents.searchPerformed(results.length);
+		}
+	});
 </script>
 
 <svelte:head>

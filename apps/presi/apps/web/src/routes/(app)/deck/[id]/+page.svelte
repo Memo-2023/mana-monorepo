@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { PresiEvents } from '@manacore/shared-utils/analytics';
 	import { shareApi } from '$lib/api/client';
 	import type { ShareLink } from '$lib/api/client';
 	import type { Slide, SlideContent } from '@presi/shared';
@@ -93,8 +94,10 @@
 
 		if (editingSlide) {
 			await decksStore.updateSlide(editingSlide.id, { content });
+			PresiEvents.slideEdited();
 		} else {
 			await decksStore.createSlide(deckId, { content });
+			PresiEvents.slideCreated();
 		}
 
 		isSaving = false;
@@ -109,6 +112,7 @@
 	async function handleDeleteSlide() {
 		if (!slideToDelete) return;
 		await decksStore.deleteSlide(slideToDelete.id);
+		PresiEvents.slideDeleted();
 		showDeleteModal = false;
 		slideToDelete = null;
 	}
@@ -135,6 +139,7 @@
 		// Update order values
 		newSlides.forEach((s, i) => (s.order = i + 1));
 		await decksStore.reorderSlides(newSlides);
+		PresiEvents.slideReordered(direction);
 	}
 
 	function addBulletPoint() {
@@ -170,6 +175,7 @@
 		try {
 			const newShare = await shareApi.createShare(deckId);
 			shareLinks = [newShare, ...shareLinks];
+			PresiEvents.shareLinkCreated();
 		} catch (e) {
 			console.error('Failed to create share link:', e);
 		} finally {
@@ -181,6 +187,7 @@
 		try {
 			await shareApi.deleteShare(shareId);
 			shareLinks = shareLinks.filter((s) => s.id !== shareId);
+			PresiEvents.shareLinkDeleted();
 		} catch (e) {
 			console.error('Failed to delete share link:', e);
 		}
@@ -195,6 +202,7 @@
 		const url = getShareUrl(share.shareCode);
 		try {
 			await navigator.clipboard.writeText(url);
+			PresiEvents.shareLinkCopied();
 			copiedLinkId = share.id;
 			setTimeout(() => {
 				copiedLinkId = null;

@@ -3,6 +3,7 @@
 	import { quotesStore } from '$lib/stores/quotes.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 	import { _ } from 'svelte-i18n';
 
 	interface Props {
@@ -47,7 +48,13 @@
 
 	async function toggleFavorite() {
 		if (!authStore.isAuthenticated) return;
+		const wasFavorite = isFavorite;
 		await favoritesStore.toggle(quote.id);
+		if (wasFavorite) {
+			ZitareEvents.quoteUnfavorited();
+		} else {
+			ZitareEvents.quoteFavorited(quote.category);
+		}
 	}
 
 	async function shareQuote() {
@@ -60,6 +67,7 @@
 		} else {
 			await navigator.clipboard.writeText(text);
 		}
+		ZitareEvents.quoteShared(quote.category);
 	}
 
 	const sizeClasses = {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
+	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 	import type { SupportedLanguage } from '@zitare/content';
 	import { APP_VERSION } from '$lib/version';
 
@@ -16,7 +17,9 @@
 
 	function handleLanguageChange(event: Event) {
 		const select = event.target as HTMLSelectElement;
-		quotesStore.setLanguage(select.value as SupportedLanguage);
+		const lang = select.value as SupportedLanguage;
+		quotesStore.setLanguage(lang);
+		ZitareEvents.quoteLanguageChanged(lang);
 	}
 </script>
 

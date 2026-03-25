@@ -6,6 +6,7 @@
 	import type { CreditBalance } from '$lib/api/credits';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { APP_VERSION } from '$lib/version';
+	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 
 	let loading = $state(true);
 	let savingProfile = $state(false);
@@ -45,6 +46,7 @@
 			// TODO: Implement profile update API when available
 			await new Promise((resolve) => setTimeout(resolve, 500));
 			profileSuccess = true;
+			ManaCoreEvents.profileUpdated();
 		} catch (e) {
 			profileError = e instanceof Error ? e.message : 'Fehler beim Speichern';
 		} finally {

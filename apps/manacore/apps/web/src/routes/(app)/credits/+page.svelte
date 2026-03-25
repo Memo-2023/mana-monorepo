@@ -15,6 +15,7 @@
 		formatCreditCost,
 		type CreditOperationType,
 	} from '@manacore/credit-operations';
+	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 
 	let balance = $state<CreditBalance | null>(null);
 	let transactions = $state<CreditTransaction[]>([]);
@@ -105,6 +106,7 @@
 		if (tab === 'packages') activeTab = 'packages';
 		else if (tab === 'transactions') activeTab = 'transactions';
 		else if (tab === 'costs') activeTab = 'costs';
+		if (activeTab !== 'overview') ManaCoreEvents.creditsTabViewed(activeTab);
 
 		// Handle success/canceled from Stripe redirect
 		const success = $page.url.searchParams.get('success');

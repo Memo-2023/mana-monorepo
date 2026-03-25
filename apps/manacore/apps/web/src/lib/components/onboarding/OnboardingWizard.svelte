@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onboardingStore } from '$lib/stores/onboarding.svelte';
+	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 	import WelcomeStep from './steps/WelcomeStep.svelte';
 	import ProfileStep from './steps/ProfileStep.svelte';
 	import AppsStep from './steps/AppsStep.svelte';
@@ -31,6 +32,7 @@
 			onboardingStore.complete();
 			onComplete();
 		} else {
+			ManaCoreEvents.onboardingStepCompleted(currentStepData.id, currentStep + 1);
 			onboardingStore.completeStep(currentStepData.id);
 			onboardingStore.nextStep();
 		}

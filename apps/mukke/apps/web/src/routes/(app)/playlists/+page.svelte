@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { playlistStore } from '$lib/stores/playlist.svelte';
+	import { MukkeEvents } from '@manacore/shared-utils/analytics';
 
 	let showCreateModal = $state(false);
 	let newName = $state('');
@@ -16,6 +17,7 @@
 		isCreating = true;
 		try {
 			await playlistStore.createPlaylist(newName.trim(), newDescription.trim() || undefined);
+			MukkeEvents.playlistCreated();
 			newName = '';
 			newDescription = '';
 			showCreateModal = false;
@@ -30,6 +32,7 @@
 		e.stopPropagation();
 		if (!confirm('Delete this playlist?')) return;
 		await playlistStore.deletePlaylist(id);
+		MukkeEvents.playlistDeleted();
 	}
 
 	function truncate(text: string, max: number): string {

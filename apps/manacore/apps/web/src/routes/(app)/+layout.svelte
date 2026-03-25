@@ -14,6 +14,7 @@
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { ManaCoreEvents, AppEvents } from '@manacore/shared-utils/analytics';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -68,6 +69,7 @@
 	let currentLocale = $derived($locale || 'de');
 	function handleLocaleChange(newLocale: string) {
 		setLocale(newLocale as any);
+		AppEvents.languageChanged(newLocale);
 	}
 	let languageItems = $derived(
 		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
@@ -128,10 +130,12 @@
 
 	function handleToggleTheme() {
 		theme.toggleMode();
+		AppEvents.themeChanged(theme.isDark ? 'dark' : 'light');
 	}
 
 	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
 		theme.setMode(mode);
+		AppEvents.themeChanged(mode);
 	}
 
 	async function handleSignOut() {
@@ -145,10 +149,12 @@
 
 	function handleOnboardingComplete() {
 		onboardingStore.complete();
+		ManaCoreEvents.onboardingCompleted();
 		showOnboarding = false;
 	}
 
 	function handleOnboardingSkip() {
+		ManaCoreEvents.onboardingSkipped(onboardingStore.currentStep);
 		onboardingStore.skip();
 		showOnboarding = false;
 	}
@@ -183,6 +189,7 @@
 		onboardingStore.load();
 		if (onboardingStore.shouldShow) {
 			onboardingStore.start();
+			ManaCoreEvents.onboardingStarted();
 			showOnboarding = true;
 		}
 
