@@ -103,7 +103,9 @@ function detectDeviceName(): string {
  * ```
  */
 export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSettingsStore {
-	const { appId, authUrl, getAccessToken, deviceName, deviceType } = config;
+	const { appId, authUrl: authUrlConfig, getAccessToken, deviceName, deviceType } = config;
+	const resolveAuthUrl = () =>
+		typeof authUrlConfig === 'function' ? authUrlConfig() : authUrlConfig;
 	const storageKey = `${STORAGE_KEY_PREFIX}-${appId}`;
 
 	// Device info (initialized once)
@@ -202,7 +204,7 @@ export function createUserSettingsStore(config: UserSettingsStoreConfig): UserSe
 		}
 
 		try {
-			const response = await fetch(`${authUrl}/api/v1/settings${path}`, {
+			const response = await fetch(`${resolveAuthUrl()}/api/v1/settings${path}`, {
 				method,
 				headers: {
 					'Content-Type': 'application/json',

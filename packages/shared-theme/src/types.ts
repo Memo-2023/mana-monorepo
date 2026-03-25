@@ -431,8 +431,8 @@ export interface UserSettingsStore {
 export interface UserSettingsStoreConfig {
 	/** App identifier (e.g., 'calendar', 'chat') */
 	appId: string;
-	/** Auth service base URL */
-	authUrl: string;
+	/** Auth service base URL (string or getter function for lazy resolution) */
+	authUrl: string | (() => string);
 	/** Function to get current access token */
 	getAccessToken: () => Promise<string | null>;
 	/** Optional device name (auto-detected if not provided) */
