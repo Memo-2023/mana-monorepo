@@ -42,6 +42,7 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"leaflet": "^1.9.4",
+		"leaflet.markercluster": "^1.5.3",
 		"svelte-i18n": "^4.0.1"
 	}
 }
