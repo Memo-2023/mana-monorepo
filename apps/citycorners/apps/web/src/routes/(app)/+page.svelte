@@ -262,14 +262,13 @@
 						<span class="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
 							{$_(`categories.${location.category}`)}
 						</span>
-						{@const openStatus = isOpenNow(location.openingHours)}
-						{#if openStatus === true}
+						{#if isOpenNow(location.openingHours) === true}
 							<span
 								class="inline-block rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400"
 							>
 								{$_('detail.openNow')}
 							</span>
-						{:else if openStatus === false}
+						{:else if isOpenNow(location.openingHours) === false}
 							<span
 								class="inline-block rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-red-500 dark:text-red-400"
 							>

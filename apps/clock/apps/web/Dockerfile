@@ -60,6 +60,9 @@ RUN pnpm build || true
 WORKDIR /app/packages/shared-error-tracking
 RUN pnpm build
 
+WORKDIR /app/packages/shared-pwa
+RUN pnpm build
+
 # Build the web app
 WORKDIR /app/apps/clock/apps/web
 RUN pnpm exec svelte-kit sync

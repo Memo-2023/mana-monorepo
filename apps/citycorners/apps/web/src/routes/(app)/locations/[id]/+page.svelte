@@ -353,14 +353,13 @@
 			>
 				{$_(`category.${location.category}`)}
 			</span>
-			{@const openStatus = isOpenNow(location.openingHours)}
-			{#if openStatus === true}
+			{#if isOpenNow(location.openingHours) === true}
 				<span
 					class="rounded-full bg-green-500/90 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
 				>
 					{$_('detail.openNow')}
 				</span>
-			{:else if openStatus === false}
+			{:else if isOpenNow(location.openingHours) === false}
 				<span
 					class="rounded-full bg-red-500/80 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
 				>
