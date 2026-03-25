@@ -108,7 +108,9 @@
 		<div class="space-y-1">
 			{#each displayedTasks as task}
 				<a
-					href="{todoUrl}/task/{task.id}"
+					href={todoUrl}
+					target="_blank"
+					rel="noopener"
 					class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
 				>
 					<!-- Priority dot -->

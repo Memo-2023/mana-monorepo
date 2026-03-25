@@ -161,6 +161,32 @@ export const todoService = {
 	},
 
 	/**
+	 * Mark a task as complete
+	 */
+	async completeTask(id: string): Promise<ApiResult<Task>> {
+		const result = await getClient().post<{ task: Task }>(`/tasks/${id}/complete`);
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.task, error: null };
+	},
+
+	/**
+	 * Mark a task as incomplete
+	 */
+	async uncompleteTask(id: string): Promise<ApiResult<Task>> {
+		const result = await getClient().post<{ task: Task }>(`/tasks/${id}/uncomplete`);
+
+		if (result.error || !result.data) {
+			return { data: null, error: result.error };
+		}
+
+		return { data: result.data.task, error: null };
+	},
+
+	/**
 	 * Get task count summary
 	 */
 	async getTaskCounts(): Promise<ApiResult<{ today: number; upcoming: number; overdue: number }>> {

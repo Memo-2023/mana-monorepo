@@ -78,7 +78,7 @@
 	const totalCount = $derived((data || []).length);
 
 	// Track tasks being toggled (for optimistic UI)
-	let togglingIds = $state<Set<string>>(new Set());
+	let togglingIds: Set<string> = $state(new Set());
 
 	async function handleToggleComplete(e: MouseEvent, task: Task) {
 		e.preventDefault();
