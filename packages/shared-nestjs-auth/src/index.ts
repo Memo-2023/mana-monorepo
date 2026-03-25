@@ -2,7 +2,7 @@
  * @manacore/shared-nestjs-auth
  *
  * Shared authentication utilities for NestJS backends.
- * Validates JWT tokens via the central Mana Core Auth service.
+ * Verifies JWT tokens locally using JWKS from the Mana Core Auth service.
  *
  * @example
  * ```typescript

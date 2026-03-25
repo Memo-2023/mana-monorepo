@@ -1,15 +1,24 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TokenValidationResponse, CurrentUserData } from '../types';
+import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
+import { CurrentUserData } from '../types';
 
 // Default development test user ID
 const DEFAULT_DEV_USER_ID = '00000000-0000-0000-0000-000000000000';
 
+/** Cached JWKS instance - shared across all guard instances within the same process */
+let cachedJWKS: ReturnType<typeof createRemoteJWKSet> | null = null;
+let cachedJWKSUrl: string | null = null;
+
 /**
  * JWT Authentication Guard for NestJS backends.
  *
- * Validates JWT tokens by calling the Mana Core Auth service.
- * Supports development mode bypass via DEV_BYPASS_AUTH=true.
+ * Verifies JWT tokens locally using JWKS (JSON Web Key Set) fetched from
+ * the Mana Core Auth service. The JWKS is cached automatically by the
+ * jose library (~10 min cooldown between refetches).
+ *
+ * This eliminates the need for an HTTP call per request - tokens are
+ * verified locally using the public keys from the JWKS endpoint.
  *
  * @example
  * ```typescript
@@ -30,6 +39,8 @@ const DEFAULT_DEV_USER_ID = '00000000-0000-0000-0000-000000000000';
  * MANA_CORE_AUTH_URL=http://localhost:3001
  * DEV_BYPASS_AUTH=true  // Optional: for development
  * DEV_USER_ID=your-test-user-id  // Optional: custom dev user
+ * JWT_ISSUER=http://localhost:3001  // Optional: defaults to MANA_CORE_AUTH_URL
+ * JWT_AUDIENCE=manacore  // Optional: defaults to 'manacore'
  * ```
  */
 @Injectable()
@@ -52,14 +63,17 @@ export class JwtAuthGuard implements CanActivate {
 		}
 
 		try {
-			const userData = await this.validateToken(token);
+			const userData = await this.verifyToken(token);
 			request.user = userData;
 			return true;
 		} catch (error) {
 			if (error instanceof UnauthorizedException) {
 				throw error;
 			}
-			console.error('[JwtAuthGuard] Error validating token:', error);
+			console.error(
+				'[JwtAuthGuard] Token verification failed:',
+				error instanceof Error ? error.message : error
+			);
 			throw new UnauthorizedException('Token validation failed');
 		}
 	}
@@ -86,34 +100,55 @@ export class JwtAuthGuard implements CanActivate {
 	}
 
 	/**
-	 * Validate token with Mana Core Auth service
+	 * Get or create the cached JWKS key set.
+	 * The jose library's createRemoteJWKSet handles caching internally
+	 * with a ~10 minute cooldown between refetches.
 	 */
-	private async validateToken(token: string): Promise<CurrentUserData> {
+	private getJWKS(): ReturnType<typeof createRemoteJWKSet> {
 		const authUrl = this.configService.get<string>('MANA_CORE_AUTH_URL') || 'http://localhost:3001';
+		const jwksUrl = `${authUrl}/api/v1/auth/jwks`;
 
-		const response = await fetch(`${authUrl}/api/v1/auth/validate`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ token }),
-		});
-
-		if (!response.ok) {
-			const errorText = await response.text().catch(() => 'Unknown error');
-			console.error('[JwtAuthGuard] Token validation failed:', response.status, errorText);
-			throw new UnauthorizedException('Invalid token');
+		// Reuse cached JWKS if the URL hasn't changed
+		if (cachedJWKS && cachedJWKSUrl === jwksUrl) {
+			return cachedJWKS;
 		}
 
-		const result: TokenValidationResponse = await response.json();
+		cachedJWKS = createRemoteJWKSet(new URL(jwksUrl));
+		cachedJWKSUrl = jwksUrl;
+		return cachedJWKS;
+	}
 
-		if (!result.valid || !result.payload) {
-			throw new UnauthorizedException(result.error || 'Invalid token');
+	/**
+	 * Verify JWT token locally using JWKS
+	 */
+	private async verifyToken(token: string): Promise<CurrentUserData> {
+		const authUrl = this.configService.get<string>('MANA_CORE_AUTH_URL') || 'http://localhost:3001';
+		const issuer = this.configService.get<string>('JWT_ISSUER') || authUrl;
+		const audience = this.configService.get<string>('JWT_AUDIENCE') || 'manacore';
+
+		const jwks = this.getJWKS();
+
+		const { payload } = await jwtVerify(token, jwks, {
+			issuer,
+			audience,
+		});
+
+		return this.extractUserData(payload);
+	}
+
+	/**
+	 * Extract user data from verified JWT payload
+	 */
+	private extractUserData(payload: JWTPayload): CurrentUserData {
+		if (!payload.sub) {
+			throw new UnauthorizedException('Token missing subject claim');
 		}
 
 		return {
-			userId: result.payload.sub,
-			email: result.payload.email,
-			role: result.payload.role,
-			sessionId: result.payload.sessionId || result.payload.sid,
+			userId: payload.sub,
+			email: (payload as any).email || '',
+			role: (payload as any).role || 'user',
+			sessionId: (payload as any).sid || (payload as any).sessionId,
 		};
 	}
 
