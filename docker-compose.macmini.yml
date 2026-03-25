@@ -34,7 +34,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
     command: >
       postgres
       -c shared_buffers=512MB
@@ -120,7 +120,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 10s
 
   minio:
     image: minio/minio:latest
@@ -141,7 +141,7 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-      start_period: 30s
+      start_period: 15s
 
   # MinIO bucket initialization and lifecycle rules (runs once)
   minio-init:
@@ -519,7 +519,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 50s
 
   contacts-backend:
     build:
@@ -555,7 +555,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 50s
 
   storage-backend:
     build:
@@ -590,7 +590,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 50s
 
   presi-backend:
     build:
@@ -617,7 +617,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 55s
 
   nutriphi-backend:
     build:
@@ -647,7 +647,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   skilltree-backend:
     build:
@@ -676,7 +676,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   photos-backend:
     build:
@@ -709,7 +709,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   zitare-backend:
     build:
@@ -739,7 +739,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 55s
 
   mukke-backend:
     build:
@@ -772,7 +772,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   planta-backend:
     build:
@@ -810,7 +810,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   citycorners-backend:
     build:
@@ -840,7 +840,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   # ============================================
   # Tier 4: Matrix Stack (Ports 4000-4099)
@@ -893,7 +893,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 45s
 
   matrix-web:
     build:
@@ -916,7 +916,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 45s
 
   # Matrix Bots (Ports 4010-4029)
   matrix-mana-bot:
@@ -956,7 +956,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 15s
 
   matrix-ollama-bot:
     image: ghcr.io/memo-2023/matrix-ollama-bot:latest
@@ -985,7 +985,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 15s
 
   matrix-stats-bot:
     image: matrix-stats-bot:local
@@ -1026,7 +1026,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 15s
 
   matrix-project-doc-bot:
     image: ghcr.io/memo-2023/matrix-project-doc-bot:latest
@@ -1059,7 +1059,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 25s
 
   matrix-todo-bot:
     image: matrix-todo-bot:local
@@ -1095,7 +1095,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 25s
 
   matrix-calendar-bot:
     image: matrix-calendar-bot:local
@@ -1129,7 +1129,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 25s
 
   matrix-nutriphi-bot:
     image: ghcr.io/memo-2023/matrix-nutriphi-bot:latest
@@ -1163,7 +1163,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 35s
 
   matrix-zitare-bot:
     image: ghcr.io/memo-2023/matrix-zitare-bot:latest
@@ -1193,7 +1193,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 35s
 
   matrix-clock-bot:
     build:
@@ -1234,7 +1234,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 35s
 
   matrix-tts-bot:
     build:
@@ -1268,7 +1268,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 35s
 
   matrix-stt-bot:
     build:
@@ -1301,7 +1301,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 35s
 
   matrix-onboarding-bot:
     build:
@@ -1338,7 +1338,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 35s
 
   matrix-planta-bot:
     build:
@@ -1378,7 +1378,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 35s
 
   # ============================================
   # Tier 5: Web Frontends (Ports 5000-5099)
@@ -1414,7 +1414,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 20s
 
   chat-web:
     image: ghcr.io/memo-2023/chat-web:latest
@@ -1437,7 +1437,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 20s
 
   todo-web:
     build:
@@ -1463,7 +1463,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 20s
 
   zitare-web:
     build:
@@ -1489,7 +1489,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 35s
 
   calendar-web:
     build:
@@ -1599,7 +1599,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 35s
 
   presi-web:
     image: ghcr.io/memo-2023/presi-web:latest
@@ -1622,7 +1622,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 45s
 
   nutriphi-web:
     image: ghcr.io/memo-2023/nutriphi-web:latest
@@ -1645,7 +1645,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 45s
 
   skilltree-web:
     build:
@@ -1674,7 +1674,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 45s
 
   photos-web:
     build:
@@ -1706,7 +1706,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 45s
 
   mukke-web:
     build:
@@ -1735,7 +1735,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 45s
 
   citycorners-web:
     build:
@@ -1764,7 +1764,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 45s
 
   picture-backend:
     build:
@@ -1804,7 +1804,7 @@ services:
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 55s
 
   picture-web:
     build:
@@ -1833,7 +1833,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 35s
 
   mana-llm:
     build:
@@ -1895,7 +1895,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 45s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
@@ -1931,7 +1931,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 10s
 
   umami:
     image: ghcr.io/umami-software/umami:postgresql-latest
@@ -1952,7 +1952,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 30s
 
   # ============================================
   # Tier 8: Metrics & Exporters (Ports 9000-9199)
@@ -1981,7 +1981,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 10s
 
   pushgateway:
     image: prom/pushgateway:v1.7.0
@@ -1994,7 +1994,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 20s
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
@@ -2064,7 +2064,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 20s
 
   # ============================================
   # Alerting Stack (Ports 9093-9095)
@@ -2096,7 +2096,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 25s
 
   alertmanager:
     image: prom/alertmanager:v0.27.0
@@ -2119,7 +2119,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 25s
 
   alert-notifier:
     build:
@@ -2140,7 +2140,7 @@ services:
       interval: 300s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 25s
 
   # ============================================
   # Auto-Update (Watchtower)
@@ -2193,7 +2193,7 @@ services:
       interval: 300s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 30s
 
   glitchtip-worker:
     image: glitchtip/glitchtip:latest
@@ -2235,7 +2235,7 @@ services:
       interval: 180s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 45s
 
 volumes:
   redis_data:
