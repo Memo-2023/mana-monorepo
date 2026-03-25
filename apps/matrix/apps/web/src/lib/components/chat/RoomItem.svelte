@@ -16,6 +16,17 @@
 		if (!room.lastMessageTime) return '';
 		const date = new Date(room.lastMessageTime);
 		if (!isValid(date) || date.getTime() === 0) return '';
+		// Compact time format
+		const diffMs = Date.now() - date.getTime();
+		const diffMin = Math.floor(diffMs / 60000);
+		if (diffMin < 1) return 'jetzt';
+		if (diffMin < 60) return `${diffMin} Min.`;
+		const diffH = Math.floor(diffMin / 60);
+		if (diffH < 24) return `${diffH} Std.`;
+		const diffD = Math.floor(diffH / 24);
+		if (diffD < 7) return `${diffD} T.`;
+		const diffW = Math.floor(diffD / 7);
+		if (diffW < 5) return `${diffW} Wo.`;
 		return formatDistanceToNow(date, { addSuffix: false, locale: de });
 	});
 
@@ -49,7 +60,7 @@
 	class="flex w-full items-center gap-3 px-3 py-2.5 mb-1 rounded-xl transition-all duration-200
 	       {selected
 		? 'bg-surface-elevated shadow-md border border-border'
-		: 'hover:bg-surface-hover hover:-translate-y-0.5'}"
+		: 'hover:bg-surface-hover lg:hover:-translate-y-0.5 active:scale-[0.98]'}"
 	{onclick}
 >
 	<!-- Avatar with online indicator -->

@@ -60,9 +60,46 @@
 	);
 
 	let showActions = $state(false);
+	let showMobileActions = $state(false);
 	let showEmojiPicker = $state(false);
 	let imageLoading = $state(true);
 	let imageError = $state(false);
+
+	// Long-press for mobile
+	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+	let touchMoved = false;
+
+	function handleTouchStart() {
+		touchMoved = false;
+		longPressTimer = setTimeout(() => {
+			if (!touchMoved && !message.redacted) {
+				showMobileActions = true;
+				// Vibrate if available
+				if (navigator.vibrate) navigator.vibrate(20);
+			}
+		}, 500);
+	}
+
+	function handleTouchMove() {
+		touchMoved = true;
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
+
+	function handleTouchEnd() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
+
+	function closeMobileActions() {
+		showMobileActions = false;
+		showEmojiPicker = false;
+		showFullPicker = false;
+	}
 
 	// Quick reaction emojis (always visible)
 	const quickEmojis = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
@@ -320,6 +357,10 @@
 	role="article"
 	onmouseenter={() => (showActions = true)}
 	onmouseleave={() => (showActions = false)}
+	ontouchstart={handleTouchStart}
+	ontouchmove={handleTouchMove}
+	ontouchend={handleTouchEnd}
+	ontouchcancel={handleTouchEnd}
 >
 	<!-- Avatar -->
 	{#if showAvatar}
@@ -339,7 +380,7 @@
 	<div
 		class="flex flex-col {message.isOwn
 			? 'items-end'
-			: 'items-start'} max-w-[85%] sm:max-w-[75%] relative"
+			: 'items-start'} max-w-[80%] sm:max-w-[75%] relative"
 	>
 		<!-- Sender name (for others only) -->
 		{#if showAvatar && !message.isOwn}
@@ -725,3 +766,80 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Mobile Action Bottom Sheet -->
+{#if showMobileActions}
+	<button
+		class="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
+		onclick={closeMobileActions}
+		aria-label="Schließen"
+	></button>
+	<div
+		class="fixed bottom-0 left-0 right-0 z-[101] bg-surface-elevated border-t border-border rounded-t-2xl safe-area-bottom animate-slide-up"
+	>
+		<!-- Quick reactions row -->
+		<div class="flex items-center justify-center gap-3 px-4 pt-4 pb-2">
+			{#each quickEmojis as emoji}
+				<button
+					class="text-2xl p-2 rounded-full hover:bg-surface-hover active:scale-90 transition-all"
+					onclick={() => {
+						handleReaction(emoji);
+						closeMobileActions();
+					}}
+				>
+					{emoji}
+				</button>
+			{/each}
+		</div>
+
+		<div class="h-px bg-border mx-4"></div>
+
+		<!-- Action buttons -->
+		<div class="p-2">
+			<button
+				class="flex items-center gap-3 w-full px-4 py-3 rounded-xl active:bg-surface-hover transition-colors"
+				onclick={() => {
+					onReply?.(message);
+					closeMobileActions();
+				}}
+			>
+				<ArrowBendUpLeft class="h-5 w-5 text-muted-foreground" />
+				<span class="text-sm font-medium">Antworten</span>
+			</button>
+			<button
+				class="flex items-center gap-3 w-full px-4 py-3 rounded-xl active:bg-surface-hover transition-colors"
+				onclick={() => {
+					onForward?.(message);
+					closeMobileActions();
+				}}
+			>
+				<ArrowBendUpRight class="h-5 w-5 text-muted-foreground" />
+				<span class="text-sm font-medium">Weiterleiten</span>
+			</button>
+			{#if message.isOwn && message.type === 'm.text'}
+				<button
+					class="flex items-center gap-3 w-full px-4 py-3 rounded-xl active:bg-surface-hover transition-colors"
+					onclick={() => {
+						onEdit?.(message);
+						closeMobileActions();
+					}}
+				>
+					<PencilSimple class="h-5 w-5 text-muted-foreground" />
+					<span class="text-sm font-medium">Bearbeiten</span>
+				</button>
+			{/if}
+			{#if message.isOwn}
+				<button
+					class="flex items-center gap-3 w-full px-4 py-3 rounded-xl active:bg-surface-hover transition-colors"
+					onclick={() => {
+						handleDelete();
+						closeMobileActions();
+					}}
+				>
+					<Trash class="h-5 w-5 text-red-500" />
+					<span class="text-sm font-medium text-red-500">Löschen</span>
+				</button>
+			{/if}
+		</div>
+	</div>
+{/if}

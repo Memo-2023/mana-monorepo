@@ -19,8 +19,8 @@
 	let touchStartY = 0;
 	let isSwiping = $state(false);
 	let swipeProgress = $state(0);
-	const SWIPE_THRESHOLD = 100; // px to trigger back navigation
-	const EDGE_ZONE = 30; // px from left edge to start swipe
+	const SWIPE_THRESHOLD = 80; // px to trigger back navigation
+	const EDGE_ZONE = 50; // px from left edge to start swipe
 
 	let showRoomSettings = $state(false);
 	let showSearch = $state(false);

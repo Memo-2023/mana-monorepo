@@ -45,7 +45,7 @@
 <div class="flex h-full flex-col">
 	<!-- Room List with Sections -->
 	<div class="chat-scrollbar flex-1 overflow-y-auto px-3">
-		<!-- New Chat action row -->
+		<!-- Header row with room count + new chat (desktop only, mobile has it in page header) -->
 		<div class="flex items-center justify-between px-2 py-2 mb-1">
 			<span
 				class="text-xs font-semibold uppercase text-muted-foreground tracking-wide flex items-center gap-2"
@@ -57,7 +57,7 @@
 				</span>
 			</span>
 			<button
-				class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium
+				class="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium
 				       bg-gradient-to-r from-violet-500 to-purple-600 text-white
 				       shadow-sm hover:shadow-md hover:-translate-y-px transition-all duration-200"
 				onclick={onCreateRoom}

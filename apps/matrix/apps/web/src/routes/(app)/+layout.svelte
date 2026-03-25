@@ -87,6 +87,14 @@
 	// Navigation state
 	let isCollapsed = $state(false);
 
+	// Hide PillNavigation on mobile when inside a room view
+	let isMobileRoomView = $derived(
+		typeof window !== 'undefined' &&
+			window.innerWidth < 1024 &&
+			$page.url.pathname.startsWith('/chat/') &&
+			$page.url.pathname !== '/chat'
+	);
+
 	// Theme state
 	let isDark = $derived(theme.isDark);
 
@@ -382,34 +390,36 @@
 {:else if matrixStore.isReady}
 	<!-- Ready - Show navigation and content -->
 	<div class="layout-container">
-		<!-- PillNavigation -->
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="Manalink"
-			homeRoute="/chat"
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={true}
-			onLogout={handleLogout}
-			primaryColor="#8b5cf6"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			allAppsHref="https://mana.how"
-		/>
+		<!-- PillNavigation (hidden on mobile when in a room) -->
+		{#if !isMobileRoomView}
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="Manalink"
+				homeRoute="/chat"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={true}
+				onLogout={handleLogout}
+				primaryColor="#8b5cf6"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				allAppsHref="https://mana.how"
+			/>
+		{/if}
 
 		<!-- Main Content -->
 		<main class="main-content bg-background">
@@ -493,8 +503,10 @@
 			</div>
 		{/if}
 
-		<!-- Spacer for PillNavigation -->
-		<div class="pill-nav-spacer"></div>
+		<!-- Spacer for PillNavigation (hidden when nav is hidden) -->
+		{#if !isMobileRoomView}
+			<div class="pill-nav-spacer"></div>
+		{/if}
 	</div>
 {:else}
 	<!-- Unknown state - redirect to login -->

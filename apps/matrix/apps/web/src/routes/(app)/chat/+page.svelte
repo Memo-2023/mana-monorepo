@@ -177,24 +177,24 @@
 {#if isMobile}
 	<!-- Mobile: Full-screen room list -->
 	<div class="flex flex-col h-full bg-background safe-area-bottom">
-		<!-- User Info / Status Bar -->
-		<div class="border-b border-border px-4 py-3 bg-surface-elevated safe-area-top">
+		<!-- Compact Mobile Header -->
+		<div class="border-b border-border px-4 py-2.5 bg-surface-elevated safe-area-top">
 			<div class="flex items-center justify-between">
-				<div>
-					<h1 class="text-xl font-bold text-foreground">Manalink</h1>
-					<p class="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-						<span class="h-2 w-2 rounded-full bg-green-500"></span>
+				<div class="flex items-center gap-2">
+					<h1 class="text-lg font-bold text-foreground">Manalink</h1>
+					<span class="flex items-center gap-1 text-xs text-muted-foreground">
+						<span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
 						{matrixStore.syncState === 'SYNCING' ? 'Verbunden' : matrixStore.syncState}
-						{#if matrixStore.totalUnreadCount > 0}
-							<span
-								class="ml-2 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-medium"
-							>
-								{matrixStore.totalUnreadCount} ungelesen
-							</span>
-						{/if}
-					</p>
+					</span>
+					{#if matrixStore.totalUnreadCount > 0}
+						<span
+							class="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[10px] font-medium"
+						>
+							{matrixStore.totalUnreadCount}
+						</span>
+					{/if}
 				</div>
-				<div class="flex items-center gap-1">
+				<div class="flex items-center gap-0.5">
 					<a
 						href="/settings"
 						class="p-2 rounded-lg hover:bg-surface-hover transition-colors"

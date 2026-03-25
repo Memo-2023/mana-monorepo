@@ -98,13 +98,17 @@
 		<!-- Room avatar with online indicator -->
 		<div class="relative flex-shrink-0">
 			<div
-				class="flex h-10 w-10 items-center justify-center rounded-full shadow-md
+				class="flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full shadow-md
 				       bg-gradient-to-br from-violet-500 to-purple-600 text-white"
 			>
 				{#if room.avatar}
-					<img src={room.avatar} alt={room.name} class="h-10 w-10 rounded-full object-cover" />
+					<img
+						src={room.avatar}
+						alt={room.name}
+						class="h-8 w-8 lg:h-10 lg:w-10 rounded-full object-cover"
+					/>
 				{:else}
-					<span class="text-sm font-semibold">{room.name.charAt(0).toUpperCase()}</span>
+					<span class="text-xs lg:text-sm font-semibold">{room.name.charAt(0).toUpperCase()}</span>
 				{/if}
 			</div>
 			<!-- Online indicator for DMs -->
@@ -161,16 +165,16 @@
 		</div>
 
 		<!-- Actions -->
-		<div class="flex items-center gap-1">
+		<div class="flex items-center gap-0.5 lg:gap-1">
 			<button
-				class="p-2.5 rounded-xl glass-button shadow-sm"
+				class="p-2 lg:p-2.5 rounded-lg lg:rounded-xl lg:glass-button lg:shadow-sm hover:bg-surface-hover transition-colors"
 				title="Suchen"
 				onclick={onSearchClick}
 			>
 				<MagnifyingGlass class="h-5 w-5 text-muted-foreground" />
 			</button>
 			<button
-				class="hidden sm:flex p-2.5 rounded-xl glass-button shadow-sm transition-colors
+				class="hidden sm:flex p-2 lg:p-2.5 rounded-lg lg:rounded-xl lg:glass-button lg:shadow-sm transition-colors
 				       {canCall ? 'hover:bg-green-500/10 hover:text-green-500' : 'opacity-40 cursor-not-allowed'}"
 				title={canCall ? 'Sprachanruf' : 'Anrufe nur in Direktnachrichten verfügbar'}
 				disabled={!canCall}
@@ -179,7 +183,7 @@
 				<Phone class="h-5 w-5" />
 			</button>
 			<button
-				class="hidden sm:flex p-2.5 rounded-xl glass-button shadow-sm transition-colors
+				class="hidden sm:flex p-2 lg:p-2.5 rounded-lg lg:rounded-xl lg:glass-button lg:shadow-sm transition-colors
 				       {canCall ? 'hover:bg-violet-500/10 hover:text-violet-500' : 'opacity-40 cursor-not-allowed'}"
 				title={canCall ? 'Videoanruf' : 'Anrufe nur in Direktnachrichten verfügbar'}
 				disabled={!canCall}
@@ -188,7 +192,7 @@
 				<VideoCamera class="h-5 w-5" />
 			</button>
 			<button
-				class="p-2.5 rounded-xl glass-button shadow-sm"
+				class="p-2 lg:p-2.5 rounded-lg lg:rounded-xl lg:glass-button lg:shadow-sm hover:bg-surface-hover transition-colors"
 				title="Rauminfo"
 				onclick={onInfoClick}
 			>

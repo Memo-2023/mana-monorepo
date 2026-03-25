@@ -626,13 +626,13 @@
 			{#if showAttachMenu}
 				<!-- Backdrop -->
 				<button
-					class="fixed inset-0 z-40"
+					class="fixed inset-0 z-40 lg:bg-transparent bg-black/40"
 					onclick={() => (showAttachMenu = false)}
 					aria-label="Menü schließen"
 				></button>
-				<!-- Dropdown menu -->
+				<!-- Desktop: Dropdown above button -->
 				<div
-					class="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl bg-surface-elevated border border-border p-1.5 shadow-xl"
+					class="hidden lg:block absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl bg-surface-elevated border border-border p-1.5 shadow-xl"
 				>
 					<button
 						onclick={() => {
@@ -654,6 +654,33 @@
 						<FileIcon class="h-4 w-4" />
 						Datei
 					</button>
+				</div>
+				<!-- Mobile: Bottom sheet -->
+				<div
+					class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-elevated border-t border-border rounded-t-2xl safe-area-bottom animate-slide-up"
+				>
+					<div class="p-2">
+						<button
+							onclick={() => {
+								openFilePicker();
+								showAttachMenu = false;
+							}}
+							class="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl active:bg-surface-hover transition-colors"
+						>
+							<Image class="h-5 w-5 text-muted-foreground" />
+							<span class="text-sm font-medium">Bild oder Video</span>
+						</button>
+						<button
+							onclick={() => {
+								openFilePicker();
+								showAttachMenu = false;
+							}}
+							class="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl active:bg-surface-hover transition-colors"
+						>
+							<FileIcon class="h-5 w-5 text-muted-foreground" />
+							<span class="text-sm font-medium">Datei</span>
+						</button>
+					</div>
 				</div>
 			{/if}
 		</div>
@@ -697,19 +724,18 @@
 				<Smiley size={22} class="text-muted-foreground" />
 			</button>
 
-			<!-- Emoji Picker Popup -->
+			<!-- Emoji Picker -->
 			{#if showEmojiPicker}
 				<!-- Backdrop -->
 				<button
-					class="fixed inset-0 z-40"
+					class="fixed inset-0 z-40 lg:bg-transparent bg-black/40"
 					onclick={() => (showEmojiPicker = false)}
 					aria-label="Emoji-Picker schließen"
 				></button>
-				<!-- Picker -->
+				<!-- Desktop: Popup above input -->
 				<div
-					class="absolute bottom-full right-0 mb-2 z-50 w-72 max-h-80 overflow-y-auto rounded-xl bg-surface-elevated border border-border p-2 shadow-xl"
+					class="hidden lg:block absolute bottom-full right-0 mb-2 z-50 w-72 max-h-80 overflow-y-auto rounded-xl bg-surface-elevated border border-border p-2 shadow-xl"
 				>
-					<!-- Recent/Frequently used emojis -->
 					{#if recentEmojis.length > 0}
 						<div class="mb-2">
 							<p class="text-[10px] text-muted-foreground uppercase font-medium px-1 mb-1">
@@ -728,7 +754,6 @@
 						</div>
 						<div class="border-t border-border my-2"></div>
 					{/if}
-					<!-- All emojis -->
 					<div class="grid grid-cols-8 gap-1">
 						{#each commonEmojis as emoji}
 							<button
@@ -738,6 +763,41 @@
 								{emoji}
 							</button>
 						{/each}
+					</div>
+				</div>
+				<!-- Mobile: Bottom sheet -->
+				<div
+					class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-elevated border-t border-border rounded-t-2xl safe-area-bottom animate-slide-up"
+				>
+					<div class="p-3 max-h-[50vh] overflow-y-auto">
+						{#if recentEmojis.length > 0}
+							<div class="mb-3">
+								<p class="text-[10px] text-muted-foreground uppercase font-medium px-1 mb-1">
+									Häufig benutzt
+								</p>
+								<div class="grid grid-cols-8 gap-1">
+									{#each recentEmojis as emoji}
+										<button
+											class="p-2 text-2xl active:scale-90 rounded-lg transition-transform"
+											onclick={() => insertEmoji(emoji)}
+										>
+											{emoji}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div class="border-t border-border my-2"></div>
+						{/if}
+						<div class="grid grid-cols-8 gap-1">
+							{#each commonEmojis as emoji}
+								<button
+									class="p-2 text-2xl active:scale-90 rounded-lg transition-transform"
+									onclick={() => insertEmoji(emoji)}
+								>
+									{emoji}
+								</button>
+							{/each}
+						</div>
 					</div>
 				</div>
 			{/if}
@@ -775,8 +835,8 @@
 		{/if}
 	</div>
 
-	<!-- Hint -->
-	<p class="text-[10px] text-muted-foreground/60 text-center mt-1.5">
+	<!-- Hint (desktop only) -->
+	<p class="hidden lg:block text-[10px] text-muted-foreground/60 text-center mt-1.5">
 		{#if editMessage}
 			Enter = Speichern · Escape = Abbrechen
 		{:else}
