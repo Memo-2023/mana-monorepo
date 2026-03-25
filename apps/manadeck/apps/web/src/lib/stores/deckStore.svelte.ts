@@ -1,6 +1,7 @@
 import type { Deck, CreateDeckInput, UpdateDeckInput } from '$lib/types/deck';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { authService } from '$lib/auth';
+import { ManaDeckEvents } from '@manacore/shared-utils/analytics';
 
 // Svelte 5 runes-based deck store
 let decks = $state<Deck[]>([]);
@@ -109,6 +110,7 @@ export const deckStore = {
 			if (response.deck) {
 				const deck = { ...response.deck, card_count: 0 };
 				decks = [deck, ...decks];
+				ManaDeckEvents.deckCreated();
 				return deck;
 			}
 			return null;
@@ -165,6 +167,7 @@ export const deckStore = {
 
 			// Remove from list
 			decks = decks.filter((d) => d.id !== id);
+			ManaDeckEvents.deckDeleted();
 
 			// Clear current if it's the same
 			if (currentDeck?.id === id) {

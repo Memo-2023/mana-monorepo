@@ -1,5 +1,6 @@
 import { apiClient } from '$lib/api/client';
 import type { Meal, MealNutrition, DailySummary } from '@nutriphi/shared';
+import { NutriPhiEvents } from '@manacore/shared-utils/analytics';
 
 interface MealWithNutrition extends Meal {
 	nutrition: MealNutrition | null;
@@ -59,6 +60,7 @@ class MealsStore {
 			const meal = await apiClient.post<MealWithNutrition>('/meals', mealData);
 			this.meals = [...this.meals, meal];
 			await this.fetchDailySummary();
+			NutriPhiEvents.mealAdded(mealData.mealType, mealData.inputType);
 			return meal;
 		} catch (err) {
 			const message =
@@ -74,6 +76,7 @@ class MealsStore {
 			await apiClient.delete(`/meals/${mealId}`);
 			this.meals = this.meals.filter((m) => m.id !== mealId);
 			await this.fetchDailySummary();
+			NutriPhiEvents.mealDeleted();
 		} catch (err) {
 			this.deleteError =
 				err instanceof Error ? err.message : 'Mahlzeit konnte nicht gelöscht werden';

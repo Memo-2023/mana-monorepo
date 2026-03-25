@@ -249,8 +249,10 @@ export const ContactsEvents = {
  */
 export const ManaDeckEvents = {
 	deckCreated: () => trackEvent('deck_created'),
+	deckDeleted: () => trackEvent('deck_deleted'),
 	deckStudied: (cardsCount: number) => trackEvent('deck_studied', { cards: cardsCount }),
 	cardCreated: () => trackEvent('card_created'),
+	cardDeleted: () => trackEvent('card_deleted'),
 	cardReviewed: (rating: 1 | 2 | 3 | 4 | 5) => trackEvent('card_reviewed', { rating }),
 	aiCardsGenerated: (count: number) => trackEvent('ai_cards_generated', { count }),
 };
@@ -295,6 +297,20 @@ export const SkillTreeEvents = {
 	skillDeleted: () => trackEvent('skill_deleted'),
 	xpAdded: (xp: number, leveledUp: boolean) =>
 		trackEvent('xp_added', { xp, leveled_up: leveledUp }),
+};
+
+/**
+ * NutriPhi App Events
+ */
+export const NutriPhiEvents = {
+	mealAdded: (mealType: string, inputType: string) =>
+		trackEvent('meal_added', { meal_type: mealType, input_type: inputType }),
+	mealDeleted: () => trackEvent('meal_deleted'),
+	photoAnalyzed: () => trackEvent('photo_analyzed'),
+	textAnalyzed: () => trackEvent('text_analyzed'),
+	goalsUpdated: () => trackEvent('goals_updated'),
+	favoriteSaved: () => trackEvent('favorite_saved'),
+	favoriteUsed: () => trackEvent('favorite_used'),
 };
 
 /**
