@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { init, register, locale, waitLocale } from 'svelte-i18n';
+import { STORAGE_KEYS } from '$lib/config/storage-keys';
 
 // Register all available locales
 register('de', () => import('./locales/de.json'));
@@ -19,7 +20,7 @@ const defaultLocale = 'de';
 function getInitialLocale(): SupportedLocale {
 	if (browser) {
 		// Check localStorage first
-		const stored = localStorage.getItem('locale');
+		const stored = localStorage.getItem(STORAGE_KEYS.LOCALE);
 		if (stored && supportedLocales.includes(stored as SupportedLocale)) {
 			return stored as SupportedLocale;
 		}
@@ -52,7 +53,7 @@ export function initI18n() {
 export function setLocale(newLocale: SupportedLocale) {
 	locale.set(newLocale);
 	if (browser) {
-		localStorage.setItem('locale', newLocale);
+		localStorage.setItem(STORAGE_KEYS.LOCALE, newLocale);
 	}
 }
 
