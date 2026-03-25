@@ -32,6 +32,7 @@ COPY packages/shared-pwa ./packages/shared-pwa
 COPY packages/shared-stores ./packages/shared-stores
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
+COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-vite-config ./packages/shared-vite-config
 # --- END AUTO-GENERATED ---
