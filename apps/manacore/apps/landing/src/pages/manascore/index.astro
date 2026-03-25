@@ -288,11 +288,25 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 										{/* Stats row */}
 										{data.stats && (
 											<div class="text-muted-foreground/60 mt-2 flex flex-wrap gap-3 text-[10px]">
-												{data.stats.backendModules ? (
-													<span>{data.stats.backendModules} Module</span>
+												{data.stats.linesOfCode ? (
+													<span class="text-foreground/70 font-medium">
+														{data.stats.linesOfCode.toLocaleString('de-DE')} LOC
+													</span>
 												) : null}
-												{data.stats.webRoutes ? <span>{data.stats.webRoutes} Routes</span> : null}
-												{data.stats.dbTables ? <span>{data.stats.dbTables} Tables</span> : null}
+												{data.stats.sourceFiles ? (
+													<span>{data.stats.sourceFiles} Files</span>
+												) : null}
+												{data.stats.sizeInMb ? <span>{data.stats.sizeInMb} MB</span> : null}
+												{data.stats.commits ? <span>{data.stats.commits} Commits</span> : null}
+												{data.stats.apiEndpoints ? (
+													<span>{data.stats.apiEndpoints} Endpoints</span>
+												) : null}
+												{data.stats.stores ? <span>{data.stats.stores} Stores</span> : null}
+												{data.stats.todoCount ? (
+													<span class={data.stats.todoCount > 200 ? 'text-yellow-500' : ''}>
+														{data.stats.todoCount} TODOs
+													</span>
+												) : null}
 												{data.stats.testCount !== undefined ? (
 													<span>{data.stats.testCount} Tests</span>
 												) : null}

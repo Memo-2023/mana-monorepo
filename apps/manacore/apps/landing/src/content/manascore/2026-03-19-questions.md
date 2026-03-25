@@ -31,6 +31,16 @@ stats:
   testFiles: 0
   testCount: 0
   languages: 3
+  linesOfCode: 6009
+  sourceFiles: 89
+  sizeInMb: 0.5
+  commits: 48
+  contributors: 3
+  firstCommitDate: '2026-01-28'
+  todoCount: 46
+  apiEndpoints: 32
+  stores: 14
+  maxFileLines: 320
 ---
 
 ## Zusammenfassung

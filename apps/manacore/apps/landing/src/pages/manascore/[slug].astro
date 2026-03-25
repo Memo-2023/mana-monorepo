@@ -488,7 +488,78 @@ function getBarColor(score: number): string {
 					audit.data.stats && (
 						<div class="border-border/50 mb-8 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-6">
 							<h2 class="text-foreground mb-4 text-sm font-semibold">Metriken</h2>
+							{/* Codebase size highlight */}
+							{(audit.data.stats.linesOfCode ||
+								audit.data.stats.sourceFiles ||
+								audit.data.stats.sizeInMb) && (
+								<div class="mb-4 grid grid-cols-3 gap-4 rounded-lg bg-white/5 p-4">
+									{audit.data.stats.linesOfCode !== undefined && (
+										<div class="text-center">
+											<span class="text-primary text-2xl font-bold">
+												{audit.data.stats.linesOfCode.toLocaleString('de-DE')}
+											</span>
+											<span class="text-muted-foreground block text-xs">Lines of Code</span>
+										</div>
+									)}
+									{audit.data.stats.sourceFiles !== undefined && (
+										<div class="text-center">
+											<span class="text-primary text-2xl font-bold">
+												{audit.data.stats.sourceFiles}
+											</span>
+											<span class="text-muted-foreground block text-xs">Source Files</span>
+										</div>
+									)}
+									{audit.data.stats.sizeInMb !== undefined && (
+										<div class="text-center">
+											<span class="text-primary text-2xl font-bold">
+												{audit.data.stats.sizeInMb}
+											</span>
+											<span class="text-muted-foreground block text-xs">MB (Source)</span>
+										</div>
+									)}
+								</div>
+							)}
+							{/* Activity & History */}
+							{(audit.data.stats.commits ||
+								audit.data.stats.contributors ||
+								audit.data.stats.firstCommitDate) && (
+								<div class="mb-4 grid grid-cols-3 gap-4 rounded-lg bg-white/5 p-4">
+									{audit.data.stats.commits !== undefined && (
+										<div class="text-center">
+											<span class="text-foreground text-2xl font-bold">
+												{audit.data.stats.commits}
+											</span>
+											<span class="text-muted-foreground block text-xs">Commits</span>
+										</div>
+									)}
+									{audit.data.stats.contributors !== undefined && (
+										<div class="text-center">
+											<span class="text-foreground text-2xl font-bold">
+												{audit.data.stats.contributors}
+											</span>
+											<span class="text-muted-foreground block text-xs">Contributors</span>
+										</div>
+									)}
+									{audit.data.stats.firstCommitDate && (
+										<div class="text-center">
+											<span class="text-foreground text-lg font-bold">
+												{audit.data.stats.firstCommitDate}
+											</span>
+											<span class="text-muted-foreground block text-xs">Erster Commit</span>
+										</div>
+									)}
+								</div>
+							)}
 							<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+								{audit.data.stats.apiEndpoints !== undefined &&
+									audit.data.stats.apiEndpoints > 0 && (
+										<div>
+											<span class="text-foreground text-2xl font-bold">
+												{audit.data.stats.apiEndpoints}
+											</span>
+											<span class="text-muted-foreground block text-xs">API Endpoints</span>
+										</div>
+									)}
 								{audit.data.stats.backendModules !== undefined && (
 									<div>
 										<span class="text-foreground text-2xl font-bold">
@@ -503,6 +574,14 @@ function getBarColor(score: number): string {
 											{audit.data.stats.webRoutes}
 										</span>
 										<span class="text-muted-foreground block text-xs">Web Routes</span>
+									</div>
+								)}
+								{audit.data.stats.stores !== undefined && audit.data.stats.stores > 0 && (
+									<div>
+										<span class="text-foreground text-2xl font-bold">
+											{audit.data.stats.stores}
+										</span>
+										<span class="text-muted-foreground block text-xs">Stores</span>
 									</div>
 								)}
 								{audit.data.stats.components !== undefined && (
@@ -543,6 +622,26 @@ function getBarColor(score: number): string {
 											{audit.data.stats.languages}
 										</span>
 										<span class="text-muted-foreground block text-xs">Sprachen</span>
+									</div>
+								)}
+								{audit.data.stats.todoCount !== undefined && audit.data.stats.todoCount > 0 && (
+									<div>
+										<span
+											class={`text-2xl font-bold ${audit.data.stats.todoCount > 200 ? 'text-yellow-500' : audit.data.stats.todoCount > 400 ? 'text-red-500' : 'text-foreground'}`}
+										>
+											{audit.data.stats.todoCount}
+										</span>
+										<span class="text-muted-foreground block text-xs">TODOs/FIXMEs</span>
+									</div>
+								)}
+								{audit.data.stats.maxFileLines !== undefined && (
+									<div>
+										<span
+											class={`text-2xl font-bold ${audit.data.stats.maxFileLines > 1000 ? 'text-yellow-500' : 'text-foreground'}`}
+										>
+											{audit.data.stats.maxFileLines}
+										</span>
+										<span class="text-muted-foreground block text-xs">Max File (LOC)</span>
 									</div>
 								)}
 							</div>
