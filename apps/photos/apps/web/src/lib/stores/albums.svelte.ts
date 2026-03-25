@@ -3,6 +3,7 @@
  */
 
 import { api } from '$lib/api/client';
+import { PhotosEvents } from '@manacore/shared-utils/analytics';
 import type { Album, Photo } from '@photos/shared';
 
 // State
@@ -92,6 +93,7 @@ export const albumStore = {
 			}
 			if (result.data) {
 				albums = [...albums, result.data];
+				PhotosEvents.albumCreated();
 				return result.data;
 			}
 			return null;
@@ -138,6 +140,7 @@ export const albumStore = {
 				return false;
 			}
 			albums = albums.filter((a) => a.id !== id);
+			PhotosEvents.albumDeleted();
 			if (currentAlbum?.id === id) {
 				currentAlbum = null;
 				albumPhotos = [];
@@ -159,6 +162,7 @@ export const albumStore = {
 				error = result.error.message;
 				return false;
 			}
+			PhotosEvents.photosAddedToAlbum(mediaIds.length);
 			// Reload album to get updated items
 			if (currentAlbum?.id === albumId) {
 				await this.loadAlbum(albumId);
@@ -181,6 +185,7 @@ export const albumStore = {
 				return false;
 			}
 			albumPhotos = albumPhotos.filter((p) => p.id !== mediaId);
+			PhotosEvents.photoRemovedFromAlbum();
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to remove photo from album';

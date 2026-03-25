@@ -3,6 +3,7 @@
  */
 
 import { api } from '$lib/api/client';
+import { PhotosEvents } from '@manacore/shared-utils/analytics';
 import type { Photo, PhotoFilters, PhotoStats } from '@photos/shared';
 
 // State
@@ -104,6 +105,7 @@ export const photoStore = {
 	 */
 	async setFilters(newFilters: Partial<PhotoFilters>) {
 		filters = { ...filters, ...newFilters, offset: 0 };
+		PhotosEvents.filtersApplied();
 		await this.loadPhotos(true);
 	},
 
@@ -135,6 +137,7 @@ export const photoStore = {
 		try {
 			const result = await api.post<{ isFavorited: boolean }>(`/favorites/${mediaId}/toggle`);
 			if (result.data) {
+				PhotosEvents.photoFavorited(result.data.isFavorited);
 				// Update photo in list
 				photos = photos.map((p) =>
 					p.id === mediaId ? { ...p, isFavorited: result.data!.isFavorited } : p
@@ -160,6 +163,7 @@ export const photoStore = {
 				return false;
 			}
 			photos = photos.filter((p) => p.id !== mediaId);
+			PhotosEvents.photoDeleted();
 			if (selectedPhoto?.id === mediaId) {
 				selectedPhoto = null;
 			}

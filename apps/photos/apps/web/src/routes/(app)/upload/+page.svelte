@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { uploadWithAuth } from '$lib/api/client';
+	import { PhotosEvents } from '@manacore/shared-utils/analytics';
 	import UploadDropzone from '$lib/components/upload/UploadDropzone.svelte';
 
 	interface UploadFile {
@@ -52,6 +53,7 @@
 
 				files[i].status = 'success';
 				files[i].progress = 100;
+				PhotosEvents.photoUploaded();
 			} catch (e) {
 				files[i].status = 'error';
 				files[i].error = e instanceof Error ? e.message : 'Upload failed';

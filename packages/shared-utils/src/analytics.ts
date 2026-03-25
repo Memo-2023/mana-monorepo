@@ -276,6 +276,20 @@ export const ManaCoreEvents = {
 };
 
 /**
+ * Photos App Events
+ */
+export const PhotosEvents = {
+	photoUploaded: () => trackEvent('photo_uploaded'),
+	photoFavorited: (favorited: boolean) => trackEvent('photo_favorited', { favorited }),
+	photoDeleted: () => trackEvent('photo_deleted'),
+	albumCreated: () => trackEvent('album_created'),
+	albumDeleted: () => trackEvent('album_deleted'),
+	photosAddedToAlbum: (count: number) => trackEvent('photos_added_to_album', { count }),
+	photoRemovedFromAlbum: () => trackEvent('photo_removed_from_album'),
+	filtersApplied: () => trackEvent('filters_applied'),
+};
+
+/**
  * Storage App Events
  */
 export const StorageEvents = {
