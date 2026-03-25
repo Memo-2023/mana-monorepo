@@ -30,6 +30,9 @@ COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-feedback-service ./packages/shared-feedback-service
 COPY packages/shared-feedback-ui ./packages/shared-feedback-ui
+COPY packages/shared-help-content ./packages/shared-help-content
+COPY packages/shared-help-types ./packages/shared-help-types
+COPY packages/shared-help-ui ./packages/shared-help-ui
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
@@ -58,6 +61,9 @@ WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
 WORKDIR /app/packages/shared-error-tracking
+RUN pnpm build
+
+WORKDIR /app/packages/shared-pwa
 RUN pnpm build
 
 # Build the web app
