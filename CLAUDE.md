@@ -739,6 +739,33 @@ docker compose -f docker-compose.macmini.yml logs -f  # View logs
 
 For detailed server documentation, see **[docs/MAC_MINI_SERVER.md](docs/MAC_MINI_SERVER.md)**.
 
+### Windows GPU Server
+
+A Windows PC with an NVIDIA RTX 3090 (24 GB VRAM) handles GPU-intensive AI workloads.
+
+**Hostname:** mana-server-gpu
+**IP:** 192.168.178.11 (LAN only, no Cloudflare Tunnel yet)
+**SSH:** `ssh mana-gpu`
+
+```bash
+# SSH config (~/.ssh/config)
+Host mana-gpu
+    HostName 192.168.178.11
+    User tills
+```
+
+**Hardware:** NVIDIA GeForce RTX 3090, 24 GB VRAM, CUDA 12.9
+**Software:** Python 3.11, Git, Windows 11
+**Working directory:** `C:\mana\` (services, venvs, models)
+
+**Planned services:**
+- Ollama (LLM inference with GPU acceleration)
+- Mana STT (Speech-to-Text, Port 3020)
+- Mana TTS (Text-to-Speech, Port 3022)
+- Mana Image Gen (FLUX image generation, Port 3023)
+
+For setup documentation, see **[docs/WINDOWS_GPU_SERVER_SETUP.md](docs/WINDOWS_GPU_SERVER_SETUP.md)**.
+
 ## Adding Dependencies
 
 ```bash

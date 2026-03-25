@@ -46,15 +46,14 @@ New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Wi
 3. Auf **Manuell** umstellen, **IPv4** aktivieren:
 
 ```
-IP-Adresse:      192.168.178.11    (oder passend zu eurem Netz)
+IP-Adresse:      192.168.178.11
 Subnetzmaske:    255.255.255.0
-Gateway:         192.168.178.1     (euer Router)
-Bevorzugter DNS: 1.1.1.1
-Alternativer DNS: 8.8.8.8
+Gateway:         192.168.178.1
+Bevorzugter DNS: 192.168.178.1
+Alternativer DNS: 1.1.1.1
 ```
 
-> **Wichtig:** Die ersten drei Zahlenblöcke (z.B. `192.168.178`) müssen zu eurem Netzwerk passen.
-> Prüfe mit `ipconfig` auf dem Mac Mini, welches Subnetz dort genutzt wird.
+> Mac Mini ist auf `192.168.178.131`, Gateway ist `192.168.178.1`.
 
 ---
 
@@ -143,13 +142,36 @@ Restart-Computer
 
 ---
 
-## Schritt 10: SSH testen
+## Schritt 10: SSH-Key einrichten (passwortloser Zugriff)
 
-Nach dem Neustart **vom Mac (dev-Rechner)** aus testen:
+Auf dem **Windows-PC** in PowerShell **als Administrator** ausführen:
+
+```powershell
+# Für Admin-User muss der Key in die systemweite Datei:
+"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAmtp92RmE6lPhHRg24VSYIvq9ne4+qe61SiR4c+lPWu claude-code@manacore" | Out-File -Encoding utf8 -FilePath C:\ProgramData\ssh\administrators_authorized_keys
+
+# Berechtigungen setzen (Windows erfordert das für SSH)
+# Vererbung entfernen
+icacls C:\ProgramData\ssh\administrators_authorized_keys /inheritance:r
+
+# Berechtigungen setzen (NT AUTHORITY\SYSTEM funktioniert auf allen Sprachen)
+icacls C:\ProgramData\ssh\administrators_authorized_keys /grant "NT AUTHORITY\SYSTEM:(R)"
+
+# Admin-Gruppe: Name hängt von der Systemsprache ab, SID ist immer gleich
+$adminGroup = (New-Object System.Security.Principal.SecurityIdentifier("S-1-5-32-544")).Translate([System.Security.Principal.NTAccount]).Value
+icacls C:\ProgramData\ssh\administrators_authorized_keys /grant "${adminGroup}:(R)"
+```
+
+> **Warum nicht `~/.ssh/authorized_keys`?** Windows OpenSSH ignoriert diese Datei für Benutzer in der Administratoren-Gruppe. Stattdessen wird `C:\ProgramData\ssh\administrators_authorized_keys` gelesen.
+
+---
+
+## Schritt 11: SSH testen
+
+**Vom Mac (dev-Rechner)** aus testen:
 
 ```bash
-# IP ggf. anpassen
-ssh <windows-username>@192.168.178.11
+ssh tills@192.168.178.11
 ```
 
 Beim ersten Mal Fingerprint bestätigen mit `yes`.
@@ -160,10 +182,10 @@ Falls erfolgreich, sollte eine PowerShell-Sitzung starten.
 
 ```bash
 # GPU erreichbar?
-ssh <windows-username>@192.168.178.11 "nvidia-smi"
+ssh tills@192.168.178.11 "nvidia-smi"
 
 # Python da?
-ssh <windows-username>@192.168.178.11 "python --version"
+ssh tills@192.168.178.11 "python --version"
 ```
 
 ---
