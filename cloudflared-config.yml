@@ -64,6 +64,12 @@ ingress:
   - hostname: planta-api.mana.how
     service: http://localhost:3022
 
+  # ManaDeck App
+  - hostname: manadeck.mana.how
+    service: http://localhost:5023
+  - hostname: manadeck-api.mana.how
+    service: http://localhost:3009
+
   # Storage App
   - hostname: storage.mana.how
     service: http://localhost:5015
@@ -144,8 +150,6 @@ ingress:
   - hostname: presis.mana.how
     service: http://localhost:4400
   - hostname: clocks.mana.how
-    service: http://localhost:4400
-  - hostname: manadeck.mana.how
     service: http://localhost:4400
   - hostname: nutriphi.mana.how
     service: http://localhost:4400
