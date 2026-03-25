@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
@@ -40,7 +39,7 @@
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 	import { todoOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 	import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 	// App switcher items
@@ -55,9 +54,6 @@
 	}
 
 	let { children } = $props();
-
-	// Auth gate - prevent children from mounting before auth is confirmed
-	let appReady = $state(false);
 
 	// QuickInputBar search - search tasks
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
@@ -277,14 +273,7 @@
 		goto('/login');
 	}
 
-	onMount(async () => {
-		// Initialize auth and redirect if not authenticated
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
+	async function handleAuthReady() {
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
@@ -310,19 +299,12 @@
 		} catch {
 			// localStorage not available
 		}
-
-		// Auth confirmed - allow children to render
-		appReady = true;
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if !appReady}
-	<div class="flex items-center justify-center h-screen bg-background">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} onReady={handleAuthReady}>
 	<SplitPaneContainer>
 		<div class="layout-container">
 			<a
@@ -474,7 +456,7 @@
 		</div>
 	</SplitPaneContainer>
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

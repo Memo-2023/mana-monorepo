@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
 	import type { PillNavItem, QuickInputItem, CreatePreview } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
@@ -12,12 +11,9 @@
 		resolvePlantData,
 		formatParsedPlantPreview,
 	} from '$lib/utils/plant-parser';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 
 	let { children } = $props();
-
-	// Auth gate - prevent children from mounting before auth is confirmed
-	let appReady = $state(false);
 
 	// Navigation items for Planta
 	const navItems: PillNavItem[] = [
@@ -85,21 +81,9 @@
 			goto(`/plant/${plant.id}`);
 		}
 	}
-
-	onMount(async () => {
-		// Initialize auth state from stored tokens
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
-		// Auth confirmed - allow children to render
-		appReady = true;
-	});
 </script>
 
-{#if appReady}
+<AuthGate {authStore} {goto}>
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}
@@ -137,13 +121,7 @@
 		</main>
 	</div>
 	<SessionExpiredBanner locale="de" loginHref="/login" />
-{:else}
-	<div class="flex min-h-screen items-center justify-center">
-		<div
-			class="h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
-		></div>
-	</div>
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

@@ -21,7 +21,7 @@
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
 	import { pictureOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 	import { viewMode, setViewMode } from '$lib/stores/view';
 	import type { ViewMode } from '$lib/stores/view';
 	import { browser } from '$app/environment';
@@ -60,34 +60,23 @@
 		theme.setMode(mode);
 	}
 
-	// Client-side auth check
-	$effect(() => {
-		if (authStore.initialized && !authStore.loading && !authStore.user) {
-			goto('/auth/login');
-		}
-	});
+	async function handleAuthReady() {
+		await userSettings.load();
 
-	// Load user settings when authenticated
-	$effect(() => {
-		if (authStore.initialized && authStore.user) {
-			userSettings.load().then(() => {
-				// Redirect to start page if on /app and a custom start page is set
-				const currentPath = window.location.pathname;
-				if (
-					currentPath === '/app' &&
-					userSettings.startPage &&
-					userSettings.startPage !== '/' &&
-					userSettings.startPage !== '/app'
-				) {
-					// Prepend /app if the start page doesn't include it
-					const targetPath = userSettings.startPage.startsWith('/app')
-						? userSettings.startPage
-						: `/app${userSettings.startPage}`;
-					goto(targetPath, { replaceState: true });
-				}
-			});
+		// Redirect to start page if on /app and a custom start page is set
+		const currentPath = window.location.pathname;
+		if (
+			currentPath === '/app' &&
+			userSettings.startPage &&
+			userSettings.startPage !== '/' &&
+			userSettings.startPage !== '/app'
+		) {
+			const targetPath = userSettings.startPage.startsWith('/app')
+				? userSettings.startPage
+				: `/app${userSettings.startPage}`;
+			goto(targetPath, { replaceState: true });
 		}
-	});
+	}
 
 	// Base navigation items (Mana is in user dropdown via manaHref)
 	const baseNavItems: PillNavItem[] = [
@@ -236,16 +225,7 @@
 
 <svelte:window on:keydown={handleKeyDown} />
 
-{#if authStore.loading}
-	<div class="flex min-h-screen items-center justify-center">
-		<div class="text-center">
-			<div
-				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
-			></div>
-			<p class="text-gray-600">Loading...</p>
-		</div>
-	</div>
-{:else if authStore.user}
+<AuthGate {authStore} {goto} loginHref="/auth/login" onReady={handleAuthReady}>
 	<div class="min-h-screen" style="background-color: hsl(var(--color-background));">
 		<!-- PillNavigation (conditionally visible) -->
 		{#if $isUIVisible}
@@ -297,7 +277,7 @@
 		{/if}
 	</div>
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/auth/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.main-content {

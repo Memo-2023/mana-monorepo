@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
@@ -24,14 +23,13 @@
 	import type { LayoutData } from './$types';
 	import { chatOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('chat');
 
 	let { children, data }: { children: any; data: LayoutData } = $props();
 
-	let isChecking = $state(true);
 	let isCollapsed = $state(false);
 
 	// Use theme store's isDark directly
@@ -144,15 +142,7 @@
 		goto('/login');
 	}
 
-	// Initialize on mount - enforce login
-	onMount(async () => {
-		// Initialize auth and redirect if not authenticated
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
+	async function handleAuthReady() {
 		// Initialize theme
 		theme.initialize();
 
@@ -176,24 +166,12 @@
 		if (currentPath === '/chat' && userSettings.startPage && userSettings.startPage !== '/chat') {
 			goto(userSettings.startPage, { replaceState: true });
 		}
-
-		isChecking = false;
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if isChecking}
-	<!-- Loading state while checking auth -->
-	<div class="flex min-h-screen items-center justify-center bg-background">
-		<div class="text-center">
-			<div
-				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
-			></div>
-			<p class="text-muted-foreground">Laden...</p>
-		</div>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} onReady={handleAuthReady}>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
 		<!-- Floating Pill Navigation -->
@@ -245,7 +223,7 @@
 		{/if}
 	</div>
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { locale, _ } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
@@ -26,7 +25,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 	import { QUOTES, type Quote } from '@zitare/content';
 
 	// App switcher items
@@ -40,9 +39,6 @@
 	});
 
 	let { children } = $props();
-
-	// Auth gate - prevent children from mounting before auth is confirmed
-	let appReady = $state(false);
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -213,10 +209,7 @@
 		zitareSettings.togglePillNav();
 	}
 
-	onMount(async () => {
-		// Initialize auth state from stored tokens
-		await authStore.initialize();
-
+	async function handleAuthReady() {
 		// Initialize settings
 		zitareSettings.initialize();
 
@@ -226,24 +219,12 @@
 			favoritesStore.load();
 			listsStore.loadLists();
 		}
-
-		// Auth confirmed - allow children to render
-		appReady = true;
-
-		// Add keyboard listener
-		window.addEventListener('keydown', handleKeydown);
-
-		return () => {
-			window.removeEventListener('keydown', handleKeydown);
-		};
-	});
+	}
 </script>
 
-{#if !appReady}
-	<div class="flex items-center justify-center h-screen bg-background">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-	</div>
-{:else}
+<svelte:window onkeydown={handleKeydown} />
+
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<div class="layout-container">
 		{#if !zitareSettings.immersiveModeEnabled}
 			<!-- PillNav (shown/hidden via FAB) -->
@@ -337,7 +318,7 @@
 		</main>
 	</div>
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

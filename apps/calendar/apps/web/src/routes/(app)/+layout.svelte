@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, InputBarHelpModal, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
@@ -55,7 +54,7 @@
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { calendarOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
@@ -69,9 +68,6 @@
 	}
 
 	let { children } = $props();
-
-	// Auth gate - prevent children from mounting before auth is confirmed
-	let appReady = $state(false);
 
 	// InputBar search - search events
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
@@ -431,19 +427,7 @@
 		);
 	}
 
-	onMount(async () => {
-		// Initialize auth state from stored tokens
-		await authStore.initialize();
-
-		// Redirect to login if not authenticated
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
-		// Auth confirmed - allow children to render
-		appReady = true;
-
+	async function handleAuthReady() {
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
@@ -459,26 +443,20 @@
 
 		// Note: Birthdays are loaded via reactive $effect when showBirthdays is enabled
 
-		// Redirect to start page if on root and a custom start page is set (only if authenticated)
-		if (authStore.isAuthenticated) {
-			const currentPath = window.location.pathname;
-			if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
-				goto(userSettings.startPage, { replaceState: true });
-			}
+		// Redirect to start page if on root and a custom start page is set
+		const currentPath = window.location.pathname;
+		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+			goto(userSettings.startPage, { replaceState: true });
 		}
 
 		// Initialize mobile state
 		updateMobileState();
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} onresize={updateMobileState} />
 
-{#if !appReady}
-	<div class="flex items-center justify-center h-screen bg-background">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} onReady={handleAuthReady}>
 	<SplitPaneContainer>
 		<div class="layout-container">
 			<a
@@ -598,7 +576,7 @@
 		<MiniOnboardingModal store={calendarOnboarding} appName="Kalender" appEmoji="📅" />
 	{/if}
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

@@ -1,25 +1,20 @@
 <script lang="ts">
 	import '../app.css';
 	import '$lib/i18n';
-	import { onMount } from 'svelte';
 	import { isLoading as i18nLoading, _ as t } from 'svelte-i18n';
 	import { skillStore } from '$lib/stores/skills.svelte';
 	import { achievementStore } from '$lib/stores/achievements.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { skilltreeOnboarding } from '$lib/stores/app-onboarding.svelte';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 
 	let { children } = $props();
 
-	let loading = $state(true);
-	let appReady = $derived(!loading && !$i18nLoading);
-
-	onMount(async () => {
-		await Promise.all([authStore.initialize(), skillStore.initialize()]);
+	async function handleAuthReady() {
+		await skillStore.initialize();
 		await achievementStore.initialize();
-		loading = false;
-	});
+	}
 </script>
 
 <svelte:head>
@@ -27,20 +22,22 @@
 	<meta name="description" content="Track your skills like a game. Level up in real life." />
 </svelte:head>
 
-{#if !appReady}
-	<div class="flex min-h-screen items-center justify-center bg-gray-900">
-		<div class="text-center">
-			<div class="mb-4 text-6xl">🌳</div>
-			<div class="text-xl text-gray-300">{$t('app.loading')}</div>
+<AuthGate {authStore} allowGuest={true} onReady={handleAuthReady}>
+	{#if $i18nLoading}
+		<div class="flex min-h-screen items-center justify-center bg-gray-900">
+			<div class="text-center">
+				<div class="mb-4 text-6xl">🌳</div>
+				<div class="text-xl text-gray-300">Loading...</div>
+			</div>
 		</div>
-	</div>
-{:else}
-	<div class="min-h-screen bg-gray-900 text-gray-100">
-		{@render children()}
-	</div>
+	{:else}
+		<div class="min-h-screen bg-gray-900 text-gray-100">
+			{@render children()}
+		</div>
 
-	{#if skilltreeOnboarding.shouldShow}
-		<MiniOnboardingModal store={skilltreeOnboarding} appName="SkillTree" appEmoji="🌳" />
+		{#if skilltreeOnboarding.shouldShow}
+			<MiniOnboardingModal store={skilltreeOnboarding} appName="SkillTree" appEmoji="🌳" />
+		{/if}
+		<SessionExpiredBanner locale="de" loginHref="/login" />
 	{/if}
-	<SessionExpiredBanner locale="de" loginHref="/login" />
-{/if}
+</AuthGate>

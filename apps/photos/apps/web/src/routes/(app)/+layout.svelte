@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { _, locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
@@ -12,12 +11,9 @@
 	import { tagStore } from '$lib/stores/tags.svelte';
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 
 	let { children } = $props();
-
-	// Auth gate - prevent children from mounting before auth is confirmed
-	let appReady = $state(false);
 
 	let isDark = $derived(theme.isDark);
 	let userEmail = $derived(authStore.user?.email || 'Menu');
@@ -83,26 +79,12 @@
 		}
 	}
 
-	onMount(async () => {
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
-		// Load initial data
+	async function handleAuthReady() {
 		await Promise.all([photoStore.loadStats(), albumStore.loadAlbums(), tagStore.loadTags()]);
-
-		// Auth confirmed - allow children to render
-		appReady = true;
-	});
+	}
 </script>
 
-{#if !appReady}
-	<div class="flex items-center justify-center h-screen bg-background">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} onReady={handleAuthReady}>
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}
@@ -145,7 +127,7 @@
 		</main>
 	</div>
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

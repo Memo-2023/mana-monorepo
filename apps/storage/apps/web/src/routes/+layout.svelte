@@ -16,7 +16,7 @@
 	import { ToastContainer } from '@manacore/shared-ui';
 	import { storageOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 	import '../app.css';
 
 	// App switcher items
@@ -24,7 +24,6 @@
 
 	let { children } = $props();
 
-	let loading = $state(true);
 	let isCollapsed = $state(false);
 
 	// Use theme store's isDark directly
@@ -130,33 +129,24 @@
 		goto('/login');
 	}
 
+	async function handleAuthReady() {
+		// Initialize theme
+		theme.initialize();
+
+		// Load user settings
+		await userSettings.load();
+
+		// Initialize collapsed state from localStorage
+		const savedCollapsed = localStorage.getItem('storage-nav-collapsed');
+		if (savedCollapsed === 'true') {
+			isCollapsed = true;
+			collapsedStore.set(true);
+		}
+	}
+
 	onMount(() => {
 		// Setup global error handling
 		const cleanupErrorHandler = setupGlobalErrorHandler();
-
-		// Initialize async operations
-		const init = async () => {
-			// Initialize theme
-			theme.initialize();
-
-			// Initialize auth
-			await authStore.initialize();
-
-			// Load user settings
-			await userSettings.load();
-
-			// Initialize collapsed state from localStorage
-			const savedCollapsed = localStorage.getItem('storage-nav-collapsed');
-			if (savedCollapsed === 'true') {
-				isCollapsed = true;
-				collapsedStore.set(true);
-			}
-
-			loading = false;
-		};
-
-		init();
-
 		return cleanupErrorHandler;
 	});
 </script>
@@ -165,71 +155,58 @@
 
 <ToastContainer />
 
-{#if loading}
-	<div
-		class="flex min-h-screen items-center justify-center bg-background"
-		role="status"
-		aria-live="polite"
-		aria-busy="true"
-	>
-		<div class="text-center">
-			<div
-				class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"
-				aria-hidden="true"
-			></div>
-			<p class="text-muted-foreground">Laden...</p>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+	{#if isAuthPage}
+		<!-- Auth pages without navigation -->
+		{@render children()}
+	{:else}
+		<!-- Navigation Layout -->
+		<div class="layout-container">
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="Storage"
+				homeRoute="/files"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={authStore.isAuthenticated}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#3b82f6"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
+				allAppsHref="/apps"
+			/>
+
+			<main class="main-content bg-background">
+				<div class="content-wrapper">
+					{@render children()}
+				</div>
+			</main>
+
+			<!-- Onboarding Modal -->
+			{#if storageOnboarding.shouldShow}
+				<MiniOnboardingModal store={storageOnboarding} appName="Storage" appEmoji="☁️" />
+			{/if}
 		</div>
-	</div>
-{:else if isAuthPage}
-	<!-- Auth pages without navigation -->
-	{@render children()}
-{:else}
-	<!-- Navigation Layout -->
-	<div class="layout-container">
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="Storage"
-			homeRoute="/files"
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={authStore.isAuthenticated}
-			onLogout={handleLogout}
-			loginHref="/login"
-			primaryColor="#3b82f6"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			manaHref="/mana"
-			profileHref="/profile"
-			allAppsHref="/apps"
-		/>
-
-		<main class="main-content bg-background">
-			<div class="content-wrapper">
-				{@render children()}
-			</div>
-		</main>
-
-		<!-- Onboarding Modal -->
-		{#if storageOnboarding.shouldShow}
-			<MiniOnboardingModal store={storageOnboarding} appName="Storage" appEmoji="☁️" />
-		{/if}
-	</div>
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-{/if}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

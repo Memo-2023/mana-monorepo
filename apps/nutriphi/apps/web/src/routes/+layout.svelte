@@ -8,13 +8,8 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { mealsStore } from '$lib/stores/meals.svelte';
 	import { parseMealInput, formatParsedMealPreview } from '$lib/utils/meal-parser';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
-	import { onMount } from 'svelte';
-
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 	let { children } = $props();
-
-	let loading = $state(true);
-	let appReady = $derived(!loading && !$i18nLoading);
 
 	// QuickInputBar handlers - search recent meals
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
@@ -55,46 +50,42 @@
 		});
 		goto(`/add?${params.toString()}`);
 	}
-
-	onMount(() => {
-		authStore.initialize().then(() => {
-			loading = false;
-		});
-	});
 </script>
 
 <svelte:head>
-	{#if appReady}
+	{#if !$i18nLoading}
 		<title>{$t('app.name')} - {$t('app.tagline')}</title>
 	{:else}
 		<title>NutriPhi</title>
 	{/if}
 </svelte:head>
 
-{#if !appReady}
-	<div class="flex min-h-screen items-center justify-center bg-background">
-		<div
-			class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
-		></div>
-	</div>
-{:else}
-	{@render children()}
+<AuthGate {authStore} {goto} allowGuest={true}>
+	{#if $i18nLoading}
+		<div class="flex min-h-screen items-center justify-center bg-background">
+			<div
+				class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+			></div>
+		</div>
+	{:else}
+		{@render children()}
 
-	{#if authStore.isAuthenticated}
-		<QuickInputBar
-			onSearch={handleSearch}
-			onSelect={handleSelect}
-			onParseCreate={handleParseCreate}
-			onCreate={handleCreate}
-			placeholder="Mahlzeit eingeben..."
-			emptyText="Keine Mahlzeiten gefunden"
-			searchingText="Suche..."
-			createText="Analysieren"
-			deferSearch={true}
-			locale="de"
-			appIcon="search"
-			bottomOffset="70px"
-		/>
+		{#if authStore.isAuthenticated}
+			<QuickInputBar
+				onSearch={handleSearch}
+				onSelect={handleSelect}
+				onParseCreate={handleParseCreate}
+				onCreate={handleCreate}
+				placeholder="Mahlzeit eingeben..."
+				emptyText="Keine Mahlzeiten gefunden"
+				searchingText="Suche..."
+				createText="Analysieren"
+				deferSearch={true}
+				locale="de"
+				appIcon="search"
+				bottomOffset="70px"
+			/>
+		{/if}
+		<SessionExpiredBanner locale="de" loginHref="/login" />
 	{/if}
-	<SessionExpiredBanner locale="de" loginHref="/login" />
-{/if}
+</AuthGate>

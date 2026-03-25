@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
@@ -46,7 +45,7 @@
 	import { tagsStore } from '$lib/stores/tags.svelte';
 	import { contactsOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -68,9 +67,6 @@
 	}
 
 	let { children } = $props();
-
-	// Auth gate - prevent children from mounting before auth is confirmed
-	let appReady = $state(false);
 
 	// Show toolbar only on main contacts page
 	const showContactsToolbar = $derived($page.url.pathname === '/');
@@ -268,14 +264,7 @@
 		previousOnboardingShow = showing;
 	});
 
-	onMount(async () => {
-		// Initialize auth and redirect if not authenticated
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
+	async function handleAuthReady() {
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
@@ -290,19 +279,12 @@
 		// Load tags (used by TagStrip and Quick-Create)
 		await tagsStore.fetchTags();
 		availableTags = tagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
-
-		// Auth confirmed - allow children to render
-		appReady = true;
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if !appReady}
-	<div class="flex items-center justify-center h-screen bg-background">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} onReady={handleAuthReady}>
 	<SplitPaneContainer>
 		<!-- Navigation Layout -->
 		<div class="layout-container">
@@ -410,7 +392,7 @@
 		</div>
 	</SplitPaneContainer>
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

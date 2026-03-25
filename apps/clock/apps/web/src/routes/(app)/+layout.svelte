@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
 	import type {
@@ -32,15 +31,12 @@
 	import { timersApi } from '$lib/api/timers';
 	import { clockOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 
 	// App switcher items
 	const appItems = getPillAppItems('clock');
 
 	let { children } = $props();
-
-	// Auth gate - prevent children from mounting before auth is confirmed
-	let appReady = $state(false);
 
 	// CommandBar state
 	let commandBarOpen = $state(false);
@@ -235,14 +231,7 @@
 		goto('/login');
 	}
 
-	onMount(async () => {
-		// Initialize auth and redirect if not authenticated
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
+	async function handleAuthReady() {
 		// Initialize collapsed state from localStorage
 		const savedCollapsed = localStorage.getItem('clock-nav-collapsed');
 		if (savedCollapsed === 'true') {
@@ -266,19 +255,12 @@
 		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
 			goto(userSettings.startPage, { replaceState: true });
 		}
-
-		// Auth confirmed - allow children to render
-		appReady = true;
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if !appReady}
-	<div class="flex items-center justify-center h-screen bg-background">
-		<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} onReady={handleAuthReady}>
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}
@@ -335,7 +317,7 @@
 		{/if}
 	</div>
 	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

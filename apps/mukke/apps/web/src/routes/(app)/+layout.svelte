@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { PillNavigation, QuickInputBar, DevBuildBadge } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
@@ -27,7 +26,7 @@
 	import { playlistStore } from '$lib/stores/playlist.svelte';
 	import { projectStore } from '$lib/stores/project.svelte';
 	import { parseSongInput, formatParsedSongPreview } from '$lib/utils/song-parser';
-	import { SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
 	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
 	import FullPlayer from '$lib/components/FullPlayer.svelte';
 	import QueuePanel from '$lib/components/QueuePanel.svelte';
@@ -167,25 +166,14 @@
 		goto('/projects');
 	}
 
-	onMount(async () => {
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
+	async function handleAuthReady() {
 		splitPanel.initialize();
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if !authStore.isAuthenticated}
-	<div class="min-h-screen flex items-center justify-center bg-background">
-		<div
-			class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
-		></div>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} onReady={handleAuthReady}>
 	<SplitPaneContainer>
 		<div class="layout-container">
 			<a
@@ -251,7 +239,7 @@
 		</div>
 	</SplitPaneContainer>
 	<SessionExpiredBanner locale="de" loginHref="/login" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {
