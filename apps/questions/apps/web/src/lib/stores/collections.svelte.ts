@@ -5,6 +5,7 @@
  */
 
 import { collectionsApi } from '$lib/api/collections';
+import { QuestionsEvents } from '@manacore/shared-utils/analytics';
 import type { Collection, CreateCollectionDto, UpdateCollectionDto } from '$lib/types';
 import { authStore } from './auth.svelte';
 import { DEMO_COLLECTION, isDemoCollection } from '$lib/data/demo-questions';
@@ -76,6 +77,7 @@ export const collectionsStore = {
 		try {
 			const collection = await collectionsApi.create(data);
 			collections = [...collections, collection];
+			QuestionsEvents.collectionCreated();
 			return collection;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create collection';
@@ -126,6 +128,7 @@ export const collectionsStore = {
 		try {
 			await collectionsApi.delete(id);
 			collections = collections.filter((c) => c.id !== id);
+			QuestionsEvents.collectionDeleted();
 			if (selectedId === id) {
 				selectedId = null;
 			}

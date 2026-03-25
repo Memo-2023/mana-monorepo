@@ -276,6 +276,49 @@ export const ManaCoreEvents = {
 };
 
 /**
+ * Context App Events
+ */
+export const ContextEvents = {
+	documentCreated: (type: string) => trackEvent('document_created', { type }),
+	documentDeleted: () => trackEvent('document_deleted'),
+	documentPinned: (pinned: boolean) => trackEvent('document_pinned', { pinned }),
+	spaceCreated: () => trackEvent('space_created'),
+	spaceDeleted: () => trackEvent('space_deleted'),
+	aiGenerated: () => trackEvent('ai_generated'),
+};
+
+/**
+ * SkillTree App Events
+ */
+export const SkillTreeEvents = {
+	skillCreated: (branch: string) => trackEvent('skill_created', { branch }),
+	skillDeleted: () => trackEvent('skill_deleted'),
+	xpAdded: (xp: number, leveledUp: boolean) =>
+		trackEvent('xp_added', { xp, leveled_up: leveledUp }),
+};
+
+/**
+ * Planta App Events
+ */
+export const PlantaEvents = {
+	plantAnalyzed: () => trackEvent('plant_analyzed'),
+	plantCreated: () => trackEvent('plant_created'),
+	plantDeleted: () => trackEvent('plant_deleted'),
+	plantWatered: () => trackEvent('plant_watered'),
+};
+
+/**
+ * Questions App Events
+ */
+export const QuestionsEvents = {
+	questionCreated: (depth: string) => trackEvent('question_created', { depth }),
+	questionDeleted: () => trackEvent('question_deleted'),
+	researchStarted: (depth: string) => trackEvent('research_started', { depth }),
+	collectionCreated: () => trackEvent('collection_created'),
+	collectionDeleted: () => trackEvent('collection_deleted'),
+};
+
+/**
  * Photos App Events
  */
 export const PhotosEvents = {

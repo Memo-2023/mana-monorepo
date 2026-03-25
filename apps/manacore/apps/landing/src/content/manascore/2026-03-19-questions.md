@@ -17,7 +17,7 @@ scores:
   ux: 55
 analytics:
   pageViewTracking: true
-  customEvents: false
+  customEvents: true
   authTracking: true
   landingTracking: false
   publicDashboard: true

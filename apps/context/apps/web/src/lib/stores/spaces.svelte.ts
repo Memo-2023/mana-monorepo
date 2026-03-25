@@ -1,4 +1,5 @@
 import type { Space } from '$lib/types';
+import { ContextEvents } from '@manacore/shared-utils/analytics';
 import * as spacesService from '$lib/services/spaces';
 
 let spaces = $state<Space[]>([]);
@@ -39,6 +40,7 @@ export const spacesStore = {
 		const result = await spacesService.createSpace(userId, name, description);
 		if (result.data) {
 			spaces = [result.data, ...spaces];
+			ContextEvents.spaceCreated();
 		}
 		return result;
 	},
@@ -66,6 +68,7 @@ export const spacesStore = {
 		const result = await spacesService.deleteSpace(id);
 		if (result.success) {
 			spaces = spaces.filter((s) => s.id !== id);
+			ContextEvents.spaceDeleted();
 		}
 		return result;
 	},

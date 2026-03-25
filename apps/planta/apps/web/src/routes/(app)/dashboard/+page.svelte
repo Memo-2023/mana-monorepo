@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { plantsApi } from '$lib/api/plants';
 	import { wateringApi } from '$lib/api/watering';
+	import { PlantaEvents } from '@manacore/shared-utils/analytics';
 	import type { Plant, WateringStatus } from '@planta/shared';
 
 	let plants = $state<Plant[]>([]);
@@ -42,6 +43,7 @@
 		e.stopPropagation();
 		const success = await wateringApi.logWatering(plantId);
 		if (success) {
+			PlantaEvents.plantWatered();
 			// Refresh watering status
 			wateringStatus = await wateringApi.getUpcoming();
 		}

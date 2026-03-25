@@ -3,6 +3,7 @@
 	import { photosApi } from '$lib/api/photos';
 	import { analysisApi } from '$lib/api/analysis';
 	import { plantsApi } from '$lib/api/plants';
+	import { PlantaEvents } from '@manacore/shared-utils/analytics';
 	import type { PlantPhoto, PlantAnalysis } from '@planta/shared';
 
 	let step = $state<'upload' | 'analyzing' | 'result'>('upload');
@@ -67,6 +68,7 @@
 		}
 
 		analysis = analysisResult;
+		PlantaEvents.plantAnalyzed();
 
 		// Set default plant name from analysis
 		if (analysisResult.commonNames && analysisResult.commonNames.length > 0) {
@@ -105,6 +107,7 @@
 			return;
 		}
 
+		PlantaEvents.plantCreated();
 		// Navigate to plant detail
 		goto(`/plants/${plant.id}`);
 	}

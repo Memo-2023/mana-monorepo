@@ -1,4 +1,5 @@
 import type { Document, DocumentType } from '$lib/types';
+import { ContextEvents } from '@manacore/shared-utils/analytics';
 import * as docsService from '$lib/services/documents';
 
 let documents = $state<Document[]>([]);
@@ -133,6 +134,7 @@ export const documentsStore = {
 			if (result.data) {
 				documents = [result.data, ...documents];
 				currentDocument = result.data;
+				ContextEvents.documentCreated(type);
 			}
 			return result;
 		} finally {
@@ -159,6 +161,7 @@ export const documentsStore = {
 	async delete(id: string) {
 		const result = await docsService.deleteDocument(id);
 		if (result.success) {
+			ContextEvents.documentDeleted();
 			documents = documents.filter((d) => d.id !== id);
 			if (currentDocument?.id === id) {
 				currentDocument = null;
@@ -173,6 +176,7 @@ export const documentsStore = {
 		const newPinned = !doc.pinned;
 		const result = await docsService.toggleDocumentPinned(id, newPinned);
 		if (result.success) {
+			ContextEvents.documentPinned(newPinned);
 			documents = documents.map((d) => (d.id === id ? { ...d, pinned: newPinned } : d));
 			if (currentDocument?.id === id) {
 				currentDocument = { ...currentDocument, pinned: newPinned };

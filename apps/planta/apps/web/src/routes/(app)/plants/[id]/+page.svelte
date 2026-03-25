@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { plantsApi } from '$lib/api/plants';
 	import { wateringApi } from '$lib/api/watering';
+	import { PlantaEvents } from '@manacore/shared-utils/analytics';
 	import type { PlantWithDetails, WateringLog } from '@planta/shared';
 
 	let plant = $state<PlantWithDetails | null>(null);
@@ -34,6 +35,7 @@
 		watering = true;
 		const success = await wateringApi.logWatering(plant.id);
 		if (success) {
+			PlantaEvents.plantWatered();
 			// Reload plant data
 			await loadPlant(plant.id);
 		}
@@ -46,6 +48,7 @@
 
 		const success = await plantsApi.delete(plant.id);
 		if (success) {
+			PlantaEvents.plantDeleted();
 			goto('/dashboard');
 		}
 	}

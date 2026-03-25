@@ -1,5 +1,6 @@
 import type { Skill, Activity, UserStats, SkillBranch, AchievementUnlockResult } from '$lib/types';
 import { calculateLevel, createDefaultSkill, createActivity, BRANCH_INFO } from '$lib/types';
+import { SkillTreeEvents } from '@manacore/shared-utils/analytics';
 import * as storage from '$lib/services/storage';
 import * as skillsApi from '$lib/api/skills';
 import * as activitiesApi from '$lib/api/activities';
@@ -128,6 +129,7 @@ async function addSkill(data: Partial<Skill>): Promise<Skill> {
 			color: data.color ?? undefined,
 		});
 		skills = [...skills, result.skill];
+		SkillTreeEvents.skillCreated(data.branch || 'custom');
 		await updateStats();
 		if (result.newAchievements?.length > 0) {
 			achievementStore.handleApiUnlocks(result.newAchievements);
@@ -137,6 +139,7 @@ async function addSkill(data: Partial<Skill>): Promise<Skill> {
 		const skill = createDefaultSkill(data);
 		await storage.saveSkill(skill);
 		skills = [...skills, skill];
+		SkillTreeEvents.skillCreated(data.branch || 'custom');
 		await updateStats();
 		return skill;
 	}
@@ -171,6 +174,7 @@ async function deleteSkill(id: string): Promise<void> {
 		await storage.deleteSkill(id);
 	}
 	skills = skills.filter((s) => s.id !== id);
+	SkillTreeEvents.skillDeleted();
 	activities = activities.filter((a) => a.skillId !== id);
 	await updateStats();
 }
@@ -188,6 +192,7 @@ async function addXp(
 		const result = await skillsApi.addXp(skillId, { xp, description, duration });
 		skills = [...skills.slice(0, index), result.skill, ...skills.slice(index + 1)];
 		activities = [...activities, result.activity];
+		SkillTreeEvents.xpAdded(xp, result.leveledUp);
 		await updateStats();
 		if (result.newAchievements?.length > 0) {
 			achievementStore.handleApiUnlocks(result.newAchievements);

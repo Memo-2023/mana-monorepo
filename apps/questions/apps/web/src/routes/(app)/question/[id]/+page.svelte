@@ -4,6 +4,7 @@
 	import { questionsApi } from '$lib/api/questions';
 	import { researchApi } from '$lib/api/research';
 	import { sourcesApi } from '$lib/api/sources';
+	import { QuestionsEvents } from '@manacore/shared-utils/analytics';
 	import { QuestionDetailSkeleton, ErrorAlert } from '$lib/components';
 	import {
 		ArrowLeft,
@@ -67,6 +68,7 @@
 				questionId: question.id,
 				depth: question.researchDepth,
 			});
+			QuestionsEvents.researchStarted(question.researchDepth);
 			researchResults = [result, ...researchResults];
 			sources = await sourcesApi.getByQuestion(question.id);
 			// Reload question to get updated status

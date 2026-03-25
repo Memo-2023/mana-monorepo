@@ -5,6 +5,7 @@
  */
 
 import { questionsApi, type QuestionFilters } from '$lib/api/questions';
+import { QuestionsEvents } from '@manacore/shared-utils/analytics';
 import type { Question, CreateQuestionDto, UpdateQuestionDto } from '$lib/types';
 import { authStore } from './auth.svelte';
 import { generateDemoQuestions, isDemoQuestion } from '$lib/data/demo-questions';
@@ -104,6 +105,7 @@ export const questionsStore = {
 			const question = await questionsApi.create(data);
 			questions = [question, ...questions];
 			total++;
+			QuestionsEvents.questionCreated(data.researchDepth || 'standard');
 			return question;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create question';
@@ -155,6 +157,7 @@ export const questionsStore = {
 			await questionsApi.delete(id);
 			questions = questions.filter((q) => q.id !== id);
 			total--;
+			QuestionsEvents.questionDeleted();
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete question';
