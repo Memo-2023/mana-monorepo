@@ -3,9 +3,9 @@
 	 * CreditsWidget - Displays credit balance and stats
 	 */
 
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { creditsService, type CreditBalance } from '$lib/api/credits';
+	import { useAutoRefresh } from '$lib/utils/autoRefresh';
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 
@@ -15,7 +15,7 @@
 	let retrying = $state(false);
 
 	async function load() {
-		state = 'loading';
+		if (!data) state = 'loading';
 		retrying = true;
 
 		try {
@@ -23,14 +23,16 @@
 			data = balance;
 			state = 'success';
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load credits';
-			state = 'error';
+			if (!data) {
+				error = e instanceof Error ? e.message : 'Failed to load credits';
+				state = 'error';
+			}
 		} finally {
 			retrying = false;
 		}
 	}
 
-	onMount(load);
+	useAutoRefresh(load, 60000);
 
 	function formatCredits(amount: number): string {
 		return amount.toLocaleString('de-DE');

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onboardingStore } from '$lib/stores/onboarding.svelte';
 	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
+	import { profileService } from '$lib/api/profile';
 	import WelcomeStep from './steps/WelcomeStep.svelte';
 	import ProfileStep from './steps/ProfileStep.svelte';
 	import AppsStep from './steps/AppsStep.svelte';
@@ -12,6 +13,9 @@
 	}
 
 	let { onComplete }: Props = $props();
+
+	// Reference to profile name for auto-save on step transition
+	let profileNameRef = $state('');
 
 	const STEPS = [
 		{ id: 'welcome', label: 'Willkommen', component: WelcomeStep },
@@ -27,7 +31,16 @@
 	let isLastStep = $derived(currentStep === STEPS.length - 1);
 	let progress = $derived(((currentStep + 1) / STEPS.length) * 100);
 
-	function handleNext() {
+	async function handleNext() {
+		// Auto-save profile name when leaving the profile step
+		if (currentStepData.id === 'profile' && profileNameRef.trim()) {
+			try {
+				await profileService.updateProfile({ name: profileNameRef.trim() });
+			} catch {
+				// Non-blocking: profile save failure shouldn't block onboarding
+			}
+		}
+
 		if (isLastStep) {
 			onboardingStore.complete();
 			onComplete();
@@ -139,7 +152,7 @@
 			{#if currentStepData.id === 'welcome'}
 				<WelcomeStep />
 			{:else if currentStepData.id === 'profile'}
-				<ProfileStep />
+				<ProfileStep bind:nameValue={profileNameRef} />
 			{:else if currentStepData.id === 'apps'}
 				<AppsStep />
 			{:else if currentStepData.id === 'credits'}

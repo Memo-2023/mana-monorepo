@@ -82,10 +82,8 @@ export const authStore = {
 
 			// If not authenticated locally, try SSO (shared session cookie)
 			if (!authenticated) {
-				console.log('No local tokens, trying SSO...');
 				const ssoResult = await authService.trySSO();
 				if (ssoResult.success) {
-					console.log('SSO successful, user authenticated via shared session');
 					authenticated = true;
 				}
 			}

@@ -3,9 +3,9 @@
 	 * TasksTodayWidget - Today's tasks from Todo app
 	 */
 
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { todoService, type Task } from '$lib/api/services';
+	import { useAutoRefresh } from '$lib/utils/autoRefresh';
 	import { APP_URLS } from '@manacore/shared-branding';
 	import { format, isToday, isTomorrow, isPast } from 'date-fns';
 	import { de } from 'date-fns/locale';
@@ -45,7 +45,7 @@
 	};
 
 	async function load() {
-		state = 'loading';
+		if (data.length === 0) state = 'loading';
 		retrying = true;
 
 		const result = await todoService.getAllOpenTasks();
@@ -55,8 +55,10 @@
 			state = 'success';
 			retryCount = 0;
 		} else {
-			error = result.error;
-			state = 'error';
+			if (data.length === 0) {
+				error = result.error;
+				state = 'error';
+			}
 
 			const isServiceUnavailable = error?.includes('nicht erreichbar');
 			if (!isServiceUnavailable && retryCount < 3) {
@@ -68,12 +70,43 @@
 		retrying = false;
 	}
 
-	onMount(load);
+	useAutoRefresh(load, 30000);
 
 	const displayedTasks = $derived((data || []).slice(0, MAX_DISPLAY));
 	const remainingCount = $derived(Math.max(0, (data || []).length - MAX_DISPLAY));
 	const completedCount = $derived((data || []).filter((t) => t.isCompleted).length);
 	const totalCount = $derived((data || []).length);
+
+	// Track tasks being toggled (for optimistic UI)
+	let togglingIds = $state<Set<string>>(new Set());
+
+	async function handleToggleComplete(e: MouseEvent, task: Task) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (togglingIds.has(task.id)) return;
+
+		// Optimistic update
+		togglingIds = new Set([...togglingIds, task.id]);
+		const wasCompleted = task.isCompleted;
+		task.isCompleted = !wasCompleted;
+
+		const result = wasCompleted
+			? await todoService.uncompleteTask(task.id)
+			: await todoService.completeTask(task.id);
+
+		if (result.error) {
+			// Revert on error
+			task.isCompleted = wasCompleted;
+		} else if (!wasCompleted) {
+			// Task completed: remove from list after brief delay
+			setTimeout(() => {
+				data = data.filter((t) => t.id !== task.id);
+			}, 600);
+		}
+
+		togglingIds = new Set([...togglingIds].filter((id) => id !== task.id));
+	}
 
 	function getSubtaskProgress(task: Task): string | null {
 		if (!task.subtasks || task.subtasks.length === 0) return null;
@@ -110,7 +143,9 @@
 		<div class="space-y-1">
 			{#each displayedTasks as task}
 				<a
-					href="{todoUrl}/task/{task.id}"
+					href={todoUrl}
+					target="_blank"
+					rel="noopener"
 					class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
 				>
 					<!-- Priority dot -->
@@ -120,10 +155,15 @@
 					></div>
 
 					<!-- Checkbox -->
-					<div
-						class="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border-2 {task.isCompleted
+					<button
+						onclick={(e) => handleToggleComplete(e, task)}
+						class="flex h-4 w-4 flex-shrink-0 cursor-pointer items-center justify-center rounded border-2 transition-colors {task.isCompleted
 							? 'border-primary bg-primary'
-							: 'border-muted-foreground/40'}"
+							: 'border-muted-foreground/40 hover:border-primary/60'} {togglingIds.has(task.id)
+							? 'opacity-50'
+							: ''}"
+						aria-label={task.isCompleted ? 'Als unerledigt markieren' : 'Als erledigt markieren'}
+						disabled={togglingIds.has(task.id)}
 					>
 						{#if task.isCompleted}
 							<svg
@@ -136,7 +176,7 @@
 								<path d="M20 6L9 17l-5-5" />
 							</svg>
 						{/if}
-					</div>
+					</button>
 
 					<!-- Content -->
 					<div class="min-w-0 flex-1">

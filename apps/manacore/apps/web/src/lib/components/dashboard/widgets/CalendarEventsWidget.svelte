@@ -3,9 +3,9 @@
 	 * CalendarEventsWidget - Upcoming calendar events
 	 */
 
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { calendarService, type CalendarEvent } from '$lib/api/services';
+	import { useAutoRefresh } from '$lib/utils/autoRefresh';
 	import WidgetSkeleton from '../WidgetSkeleton.svelte';
 	import WidgetError from '../WidgetError.svelte';
 	import { APP_URLS } from '@manacore/shared-branding';
@@ -22,7 +22,7 @@
 	const MAX_DISPLAY = 5;
 
 	async function load() {
-		state = 'loading';
+		if (data.length === 0) state = 'loading';
 		retrying = true;
 
 		const result = await calendarService.getUpcomingEvents(7);
@@ -32,10 +32,11 @@
 			state = 'success';
 			retryCount = 0;
 		} else {
-			error = result.error;
-			state = 'error';
+			if (data.length === 0) {
+				error = result.error;
+				state = 'error';
+			}
 
-			// Don't retry if service is unavailable (network error)
 			const isServiceUnavailable = error?.includes('nicht erreichbar');
 			if (!isServiceUnavailable && retryCount < 3) {
 				retryCount++;
@@ -46,7 +47,7 @@
 		retrying = false;
 	}
 
-	onMount(load);
+	useAutoRefresh(load, 60000);
 
 	function formatEventTime(event: CalendarEvent): string {
 		const start = new Date(event.startTime);

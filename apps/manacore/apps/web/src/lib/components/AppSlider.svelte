@@ -21,8 +21,8 @@
 	const statusLabels = APP_STATUS_LABELS.de;
 	const labels = APP_SLIDER_LABELS.de;
 
-	function handleAppClick(app: AppItem, index: number) {
-		console.log('Opening app:', app.name);
+	function handleAppClick(_app: AppItem, _index: number) {
+		// Navigation handled by AppSlider component
 	}
 </script>
 

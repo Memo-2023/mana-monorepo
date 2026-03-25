@@ -2,7 +2,14 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { profileService } from '$lib/api/profile';
 
+	let { nameValue = $bindable('') }: { nameValue?: string } = $props();
+
 	let name = $state(authStore.user?.name || '');
+
+	// Sync name to parent via bindable
+	$effect(() => {
+		nameValue = name;
+	});
 	let avatarPreview = $state<string | null>(authStore.user?.image || null);
 	let selectedFile = $state<File | null>(null);
 	let saving = $state(false);
