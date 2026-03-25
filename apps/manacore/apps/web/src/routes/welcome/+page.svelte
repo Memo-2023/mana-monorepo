@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { getAppConfig } from '$lib/config/apps';
 	import type { AppConfig } from '$lib/config/apps';
+	import { STORAGE_KEYS } from '$lib/config/storage-keys';
 
 	let appConfig = $state<AppConfig>();
 	let isFirstTime = $state(true);
@@ -15,20 +16,20 @@
 
 		// Check if this is actually a first-time user
 		// You could store this in localStorage or check user profile
-		const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+		const hasSeenWelcome = localStorage.getItem(STORAGE_KEYS.HAS_SEEN_WELCOME);
 		isFirstTime = !hasSeenWelcome;
 	});
 
 	function handleContinue() {
 		// Mark that user has seen welcome screen
-		localStorage.setItem('hasSeenWelcome', 'true');
+		localStorage.setItem(STORAGE_KEYS.HAS_SEEN_WELCOME, 'true');
 
 		// Redirect to app's dashboard
 		goto(appConfig?.dashboardRoute || '/dashboard');
 	}
 
 	function handleSkip() {
-		localStorage.setItem('hasSeenWelcome', 'true');
+		localStorage.setItem(STORAGE_KEYS.HAS_SEEN_WELCOME, 'true');
 		goto(appConfig?.dashboardRoute || '/dashboard');
 	}
 </script>

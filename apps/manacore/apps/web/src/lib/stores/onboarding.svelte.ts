@@ -3,7 +3,9 @@
  * Tracks user onboarding progress and completion status
  */
 
-const STORAGE_KEY = 'manacore-onboarding';
+import { STORAGE_KEYS } from '$lib/config/storage-keys';
+
+const STORAGE_KEY = STORAGE_KEYS.ONBOARDING;
 
 interface OnboardingState {
 	completed: boolean;

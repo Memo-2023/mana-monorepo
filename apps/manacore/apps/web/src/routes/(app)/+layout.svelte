@@ -24,6 +24,7 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { onboardingStore } from '$lib/stores/onboarding.svelte';
 	import { OnboardingWizard } from '$lib/components/onboarding';
+	import { STORAGE_KEYS } from '$lib/config/storage-keys';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -132,7 +133,7 @@
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
 		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('manacore-nav-collapsed', String(collapsed));
+			localStorage.setItem(STORAGE_KEYS.NAV_COLLAPSED, String(collapsed));
 		}
 	}
 
@@ -181,7 +182,7 @@
 		}
 
 		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem('manacore-nav-collapsed');
+		const savedCollapsed = localStorage.getItem(STORAGE_KEYS.NAV_COLLAPSED);
 		if (savedCollapsed === 'true') {
 			isCollapsed = true;
 			collapsedStore.set(true);
