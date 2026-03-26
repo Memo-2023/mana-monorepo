@@ -5,6 +5,7 @@
 	import { StorageEvents } from '@manacore/shared-utils/analytics';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { toastStore } from '@manacore/shared-ui';
+	import FileSkeletonList from '$lib/components/files/FileSkeletonList.svelte';
 
 	let files = $state<StorageFile[]>([]);
 	let folders = $state<StorageFolder[]>([]);
@@ -109,10 +110,7 @@
 	</div>
 
 	{#if loading}
-		<div class="loading-state" role="status" aria-live="polite">
-			<div class="spinner" aria-hidden="true"></div>
-			<p>Laden...</p>
-		</div>
+		<FileSkeletonList />
 	{:else if error}
 		<div class="error-state">
 			<p>Fehler: {error}</p>

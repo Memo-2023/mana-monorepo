@@ -9,6 +9,8 @@
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
 	import FileList from '$lib/components/files/FileList.svelte';
 	import FilePreviewModal from '$lib/components/files/FilePreviewModal.svelte';
+	import FileSkeletonGrid from '$lib/components/files/FileSkeletonGrid.svelte';
+	import FileSkeletonList from '$lib/components/files/FileSkeletonList.svelte';
 
 	let previewFile = $state<StorageFile | null>(null);
 	let files = $state<StorageFile[]>([]);
@@ -98,10 +100,11 @@
 	</div>
 
 	{#if loading}
-		<div class="loading-state" role="status" aria-live="polite">
-			<div class="spinner" aria-hidden="true"></div>
-			<p>Laden...</p>
-		</div>
+		{#if filesStore.viewMode === 'grid'}
+			<FileSkeletonGrid />
+		{:else}
+			<FileSkeletonList />
+		{/if}
 	{:else if error}
 		<div class="error-state">
 			<p>Fehler: {error}</p>
