@@ -74,7 +74,7 @@ RUN pnpm build
 # Build the web app
 WORKDIR /app/apps/todo/apps/web
 RUN pnpm exec svelte-kit sync
-RUN pnpm build
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 # Production stage
 FROM node:20-alpine AS production
