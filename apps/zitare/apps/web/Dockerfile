@@ -29,6 +29,7 @@ COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-feedback-service ./packages/shared-feedback-service
+COPY packages/shared-feedback-types ./packages/shared-feedback-types
 COPY packages/shared-feedback-ui ./packages/shared-feedback-ui
 COPY packages/shared-help-content ./packages/shared-help-content
 COPY packages/shared-help-types ./packages/shared-help-types
@@ -38,10 +39,12 @@ COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-pwa ./packages/shared-pwa
 COPY packages/shared-stores ./packages/shared-stores
+COPY packages/shared-subscription-types ./packages/shared-subscription-types
 COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-theme-ui ./packages/shared-theme-ui
+COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-vite-config ./packages/shared-vite-config
