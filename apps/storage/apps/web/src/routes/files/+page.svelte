@@ -290,6 +290,7 @@
 <FilePreviewModal
 	open={previewFile !== null}
 	file={previewFile}
+	allFiles={filesStore.files}
 	onClose={() => (previewFile = null)}
 	onAction={(action, file) => {
 		handleFileAction(action, file);

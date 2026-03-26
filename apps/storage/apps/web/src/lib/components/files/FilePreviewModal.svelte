@@ -13,22 +13,28 @@
 		FileVideo,
 		FileAudio,
 		FileZip,
+		Play,
+		Pause,
 	} from '@manacore/shared-icons';
 	import type { StorageFile } from '$lib/api/client';
 	import FileVersionsModal from './FileVersionsModal.svelte';
+	import { audioPlayerStore, getAudioFiles } from '$lib/stores/audio-player.svelte';
 
 	interface Props {
 		open: boolean;
 		file: StorageFile | null;
+		/** All files in the current folder (for building audio queue) */
+		allFiles?: StorageFile[];
 		onClose: () => void;
 		onAction: (action: string, file: StorageFile) => void;
 	}
 
-	let { open, file, onClose, onAction }: Props = $props();
+	let { open, file, allFiles = [], onClose, onAction }: Props = $props();
 
 	let showVersions = $state(false);
 
 	let isImage = $derived(file?.mimeType.startsWith('image/') ?? false);
+	let isAudio = $derived(file?.mimeType.startsWith('audio/') ?? false);
 	let isTextOrCode = $derived(
 		file?.mimeType.startsWith('text/') ||
 			file?.mimeType.includes('javascript') ||
@@ -40,6 +46,32 @@
 	let imageUrl = $derived(
 		isImage && file ? `http://localhost:3016/api/v1/files/${file.id}/download` : null
 	);
+
+	/** Check if this file is currently playing in the global player */
+	let isCurrentlyPlaying = $derived(
+		audioPlayerStore.currentFile?.id === file?.id && audioPlayerStore.isPlaying
+	);
+
+	function handlePlayAudio() {
+		if (!file) return;
+
+		// If this file is already playing, toggle play/pause
+		if (audioPlayerStore.currentFile?.id === file.id) {
+			audioPlayerStore.togglePlay();
+			return;
+		}
+
+		// Build queue from all audio files in the folder
+		const audioFiles = getAudioFiles(allFiles);
+		const currentIndex = audioFiles.findIndex((f) => f.id === file!.id);
+		const audioFile = { id: file.id, name: file.name, mimeType: file.mimeType, size: file.size };
+
+		if (audioFiles.length > 0 && currentIndex >= 0) {
+			audioPlayerStore.playFile(audioFile, audioFiles, currentIndex);
+		} else {
+			audioPlayerStore.playFile(audioFile);
+		}
+	}
 
 	function getFileIcon(mimeType: string) {
 		if (mimeType.startsWith('image/')) return FileImage;
@@ -104,6 +136,23 @@
 				<div class="preview-area">
 					{#if isImage && imageUrl}
 						<img src={imageUrl} alt={file.name} class="image-preview" />
+					{:else if isAudio}
+						<div class="audio-preview">
+							<button
+								class="audio-play-btn"
+								onclick={handlePlayAudio}
+								aria-label={isCurrentlyPlaying ? 'Pause' : 'Abspielen'}
+							>
+								<div class="audio-play-icon">
+									{#if isCurrentlyPlaying}
+										<Pause size={32} weight="fill" />
+									{:else}
+										<Play size={32} weight="fill" />
+									{/if}
+								</div>
+							</button>
+							<p class="audio-label">{isCurrentlyPlaying ? 'Wird abgespielt' : 'Abspielen'}</p>
+						</div>
 					{:else if isTextOrCode}
 						<div class="no-preview">
 							<Icon size={64} strokeWidth={1} />
@@ -272,6 +321,47 @@
 		max-width: 100%;
 		max-height: 400px;
 		object-fit: contain;
+	}
+
+	.audio-preview {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		padding: 2rem;
+	}
+
+	.audio-play-btn {
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		padding: 0;
+	}
+
+	.audio-play-icon {
+		width: 4.5rem;
+		height: 4.5rem;
+		border-radius: 50%;
+		background: rgb(var(--color-primary));
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 200ms ease;
+		box-shadow: 0 4px 20px rgb(var(--color-primary) / 0.3);
+	}
+
+	.audio-play-btn:hover .audio-play-icon {
+		transform: scale(1.08);
+		box-shadow: 0 6px 28px rgb(var(--color-primary) / 0.4);
+	}
+
+	.audio-label {
+		margin: 0;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: rgb(var(--color-text-secondary));
 	}
 
 	.no-preview {

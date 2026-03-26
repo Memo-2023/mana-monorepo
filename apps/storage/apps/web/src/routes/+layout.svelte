@@ -17,6 +17,8 @@
 	import { storageOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import MiniPlayer from '$lib/components/audio/MiniPlayer.svelte';
+	import FullPlayer from '$lib/components/audio/FullPlayer.svelte';
 	import '../app.css';
 
 	// App switcher items
@@ -190,6 +192,7 @@
 				settingsHref="/settings"
 				manaHref="/mana"
 				profileHref="/profile"
+				helpHref="/help"
 				allAppsHref="/apps"
 			/>
 
@@ -206,6 +209,10 @@
 		{/if}
 
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+
+		<!-- Audio Player -->
+		<MiniPlayer />
+		<FullPlayer />
 	{/if}
 </AuthGate>
 
