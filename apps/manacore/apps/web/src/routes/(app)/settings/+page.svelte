@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, GlobalSettingsSection } from '@manacore/shared-ui';
+	import { PasskeyManager } from '@manacore/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { creditsService } from '$lib/api/credits';
 	import type { CreditBalance } from '$lib/api/credits';
@@ -10,6 +11,7 @@
 	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 
 	let loading = $state(true);
+	let passkeys = $state<any[]>([]);
 	let savingProfile = $state(false);
 	let profileSuccess = $state(false);
 	let profileError = $state<string | null>(null);
@@ -25,6 +27,7 @@
 		if (authStore.isAuthenticated) {
 			try {
 				creditBalance = await creditsService.getBalance();
+				passkeys = await authStore.listPasskeys();
 				// Load user settings from server
 				await userSettings.load();
 			} catch (e) {
@@ -271,6 +274,23 @@
 							</code>
 						</div>
 					</div>
+				</div>
+			</Card>
+
+			<!-- Passkeys Section -->
+			<Card>
+				<div class="p-6">
+					<PasskeyManager
+						{passkeys}
+						passkeyAvailable={authStore.isPasskeyAvailable()}
+						onRegister={(name) => authStore.registerPasskey(name)}
+						onDelete={(id) => authStore.deletePasskey(id)}
+						onRename={(id, name) => authStore.renamePasskey(id, name)}
+						onRefresh={async () => {
+							passkeys = await authStore.listPasskeys();
+						}}
+						primaryColor="#6366f1"
+					/>
 				</div>
 			</Card>
 

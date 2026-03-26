@@ -138,6 +138,30 @@ export const authStore = {
 		}
 	},
 
+	async registerPasskey(friendlyName?: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		return authService.registerPasskey(friendlyName);
+	},
+
+	async listPasskeys() {
+		const authService = getAuthService();
+		if (!authService) return [];
+		return authService.listPasskeys();
+	},
+
+	async deletePasskey(passkeyId: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		return authService.deletePasskey(passkeyId);
+	},
+
+	async renamePasskey(passkeyId: string, friendlyName: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		return authService.renamePasskey(passkeyId, friendlyName);
+	},
+
 	/**
 	 * Sign in with email and password
 	 */
