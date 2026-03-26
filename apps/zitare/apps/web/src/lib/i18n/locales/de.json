@@ -43,13 +43,62 @@
 	"favorites": {
 		"title": "Favoriten",
 		"empty": "Noch keine Favoriten",
-		"emptyDescription": "Tippe auf das Herz-Symbol, um Zitate zu speichern"
+		"emptyDescription": "Tippe auf das Herz-Symbol, um Zitate zu speichern",
+		"loginPrompt": "Melde dich an, um Favoriten zu speichern",
+		"removeFromFavorites": "Aus Favoriten entfernen",
+		"copyQuote": "Zitat kopieren",
+		"share": "Teilen"
 	},
 	"lists": {
 		"title": "Meine Listen",
 		"create": "Neue Liste",
 		"empty": "Noch keine Listen",
-		"emptyDescription": "Erstelle Listen, um Zitate zu organisieren"
+		"emptyDescription": "Erstelle Listen, um Zitate zu organisieren",
+		"loginPrompt": "Melde dich an, um Listen zu erstellen",
+		"quoteCount": "{count} Zitate",
+		"createModal": {
+			"title": "Neue Liste erstellen",
+			"namePlaceholder": "z.B. Motivierende Zitate",
+			"descriptionPlaceholder": "Was macht diese Liste besonders?",
+			"submit": "Erstellen"
+		},
+		"nameLabel": "Name",
+		"descriptionLabel": "Beschreibung (optional)",
+		"confirmDelete": "Möchtest du diese Liste wirklich löschen?",
+		"detail": {
+			"notFound": "Liste nicht gefunden",
+			"notFoundDescription": "Diese Liste existiert nicht oder wurde gelöscht.",
+			"backToLists": "Zurück zu Listen",
+			"breadcrumb": "Listen",
+			"lastEdited": "Zuletzt bearbeitet: {date}",
+			"searchPlaceholder": "Zitate durchsuchen...",
+			"emptyTitle": "Keine Zitate in dieser Liste",
+			"emptyDescription": "Füge Zitate hinzu, um deine Sammlung zu starten",
+			"addQuotes": "Zitate hinzufügen",
+			"remove": "Entfernen",
+			"removeConfirm": "Zitat aus dieser Liste entfernen?",
+			"noSearchResults": "Keine Ergebnisse",
+			"noSearchResultsDescription": "Versuche es mit anderen Suchbegriffen",
+			"floatingResults": "{filtered} von {total} Zitaten",
+			"editModal": {
+				"title": "Liste bearbeiten",
+				"deleteList": "Liste löschen"
+			},
+			"addModal": {
+				"title": "Zitate hinzufügen",
+				"selected": "{count} ausgewählt",
+				"submit": "Hinzufügen ({count})"
+			},
+			"toast": {
+				"updated": "Liste aktualisiert!",
+				"updateError": "Fehler beim Aktualisieren",
+				"deleted": "Liste gelöscht",
+				"deleteError": "Fehler beim Löschen",
+				"quotesAdded": "{count} {count, plural, one {Zitat} other {Zitate}} hinzugefügt!",
+				"quoteRemoved": "Zitat entfernt",
+				"removeError": "Fehler beim Entfernen"
+			}
+		}
 	},
 	"search": {
 		"title": "Suche",
@@ -59,7 +108,16 @@
 		"searching": "Suche...",
 		"create": "Erstellen",
 		"createList": "als Liste erstellen",
-		"createListDescription": "Neue Liste mit diesem Namen erstellen"
+		"createListDescription": "Neue Liste mit diesem Namen erstellen",
+		"minChars": "Bitte gib mindestens 2 Zeichen ein",
+		"hint": "Suche nach Zitaten, Autoren oder Themen"
+	},
+	"settings": {
+		"quoteLanguage": "Zitat-Sprache",
+		"quoteLanguageDescription": "Wähle die Sprache, in der die Zitate angezeigt werden sollen.",
+		"about": "Über Zitare",
+		"aboutDescription": "Zitare bietet dir täglich inspirierende Zitate von den größten Denkern der Geschichte. Speichere deine Favoriten und erstelle eigene Listen.",
+		"stats": "{quotes} Zitate · {categories} Kategorien · {languages} Sprachen"
 	},
 	"auth": {
 		"login": "Anmelden",
@@ -77,6 +135,9 @@
 		"save": "Speichern",
 		"cancel": "Abbrechen",
 		"delete": "Löschen",
-		"edit": "Bearbeiten"
+		"edit": "Bearbeiten",
+		"close": "Schließen",
+		"search": "Suchen",
+		"list": "Liste"
 	}
 }

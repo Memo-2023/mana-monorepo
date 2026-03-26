@@ -43,13 +43,62 @@
 	"favorites": {
 		"title": "Favorites",
 		"empty": "No favorites yet",
-		"emptyDescription": "Tap the heart icon to save quotes"
+		"emptyDescription": "Tap the heart icon to save quotes",
+		"loginPrompt": "Sign in to save favorites",
+		"removeFromFavorites": "Remove from favorites",
+		"copyQuote": "Copy quote",
+		"share": "Share"
 	},
 	"lists": {
 		"title": "My Lists",
 		"create": "New List",
 		"empty": "No lists yet",
-		"emptyDescription": "Create lists to organize quotes"
+		"emptyDescription": "Create lists to organize quotes",
+		"loginPrompt": "Sign in to create lists",
+		"quoteCount": "{count} quotes",
+		"createModal": {
+			"title": "Create new list",
+			"namePlaceholder": "e.g. Motivational Quotes",
+			"descriptionPlaceholder": "What makes this list special?",
+			"submit": "Create"
+		},
+		"nameLabel": "Name",
+		"descriptionLabel": "Description (optional)",
+		"confirmDelete": "Do you really want to delete this list?",
+		"detail": {
+			"notFound": "List not found",
+			"notFoundDescription": "This list does not exist or has been deleted.",
+			"backToLists": "Back to lists",
+			"breadcrumb": "Lists",
+			"lastEdited": "Last edited: {date}",
+			"searchPlaceholder": "Search quotes...",
+			"emptyTitle": "No quotes in this list",
+			"emptyDescription": "Add quotes to start your collection",
+			"addQuotes": "Add quotes",
+			"remove": "Remove",
+			"removeConfirm": "Remove quote from this list?",
+			"noSearchResults": "No results",
+			"noSearchResultsDescription": "Try different search terms",
+			"floatingResults": "{filtered} of {total} quotes",
+			"editModal": {
+				"title": "Edit list",
+				"deleteList": "Delete list"
+			},
+			"addModal": {
+				"title": "Add quotes",
+				"selected": "{count} selected",
+				"submit": "Add ({count})"
+			},
+			"toast": {
+				"updated": "List updated!",
+				"updateError": "Error updating list",
+				"deleted": "List deleted",
+				"deleteError": "Error deleting list",
+				"quotesAdded": "{count} {count, plural, one {quote} other {quotes}} added!",
+				"quoteRemoved": "Quote removed",
+				"removeError": "Error removing quote"
+			}
+		}
 	},
 	"search": {
 		"title": "Search",
@@ -59,7 +108,16 @@
 		"searching": "Searching...",
 		"create": "Create",
 		"createList": "create as list",
-		"createListDescription": "Create a new list with this name"
+		"createListDescription": "Create a new list with this name",
+		"minChars": "Please enter at least 2 characters",
+		"hint": "Search for quotes, authors, or topics"
+	},
+	"settings": {
+		"quoteLanguage": "Quote language",
+		"quoteLanguageDescription": "Choose the language in which quotes are displayed.",
+		"about": "About Zitare",
+		"aboutDescription": "Zitare offers you daily inspiring quotes from the greatest thinkers in history. Save your favorites and create your own lists.",
+		"stats": "{quotes} quotes · {categories} categories · {languages} languages"
 	},
 	"auth": {
 		"login": "Sign In",
@@ -77,6 +135,9 @@
 		"save": "Save",
 		"cancel": "Cancel",
 		"delete": "Delete",
-		"edit": "Edit"
+		"edit": "Edit",
+		"close": "Close",
+		"search": "Search",
+		"list": "List"
 	}
 }

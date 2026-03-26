@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
 	import { listsStore, type QuoteList } from '$lib/stores/lists.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
@@ -40,7 +40,7 @@
 		isLoading = false;
 
 		if (!list) {
-			toast.error('Liste nicht gefunden');
+			toast.error($_('lists.detail.notFound'));
 		}
 	}
 
@@ -90,22 +90,22 @@
 			});
 			if (updated) {
 				list = updated;
-				toast.success('Liste aktualisiert!');
+				toast.success($_('lists.detail.toast.updated'));
 				closeEditModal();
 			} else {
-				toast.error('Fehler beim Aktualisieren');
+				toast.error($_('lists.detail.toast.updateError'));
 			}
 		}
 	}
 
 	async function handleDeleteList() {
-		if (list && confirm('Möchtest du diese Liste wirklich löschen?')) {
+		if (list && confirm($_('lists.confirmDelete'))) {
 			const success = await listsStore.deleteList(list.id);
 			if (success) {
-				toast.info('Liste gelöscht');
+				toast.info($_('lists.detail.toast.deleted'));
 				goto('/lists');
 			} else {
-				toast.error('Fehler beim Löschen');
+				toast.error($_('lists.detail.toast.deleteError'));
 			}
 		}
 	}
@@ -140,27 +140,27 @@
 			if (successCount > 0) {
 				// Reload list to get updated quote IDs
 				list = await listsStore.getList(list.id);
-				toast.success(`${successCount} ${successCount === 1 ? 'Zitat' : 'Zitate'} hinzugefügt!`);
+				toast.success($_('lists.detail.toast.quotesAdded', { values: { count: successCount } }));
 			}
 			closeAddQuotesModal();
 		}
 	}
 
 	async function handleRemoveQuote(quoteId: string) {
-		if (list && confirm('Zitat aus dieser Liste entfernen?')) {
+		if (list && confirm($_('lists.detail.removeConfirm'))) {
 			const success = await listsStore.removeQuoteFromList(list.id, quoteId);
 			if (success) {
 				// Reload list to get updated quote IDs
 				list = await listsStore.getList(list.id);
-				toast.info('Zitat entfernt');
+				toast.info($_('lists.detail.toast.quoteRemoved'));
 			} else {
-				toast.error('Fehler beim Entfernen');
+				toast.error($_('lists.detail.toast.removeError'));
 			}
 		}
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('de-DE', {
+		return new Date(dateStr).toLocaleDateString($locale || 'de', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',
@@ -169,7 +169,7 @@
 </script>
 
 <svelte:head>
-	<title>{list?.name || 'Liste'} - Zitare</title>
+	<title>{list?.name || $_('common.list')} - Zitare</title>
 </svelte:head>
 
 {#if isLoading}
@@ -179,16 +179,16 @@
 	</div>
 {:else if !list}
 	<div class="error-state">
-		<h2>Liste nicht gefunden</h2>
-		<p>Diese Liste existiert nicht oder wurde gelöscht.</p>
-		<a href="/lists" class="cta-button">Zurück zu Listen</a>
+		<h2>{$_('lists.detail.notFound')}</h2>
+		<p>{$_('lists.detail.notFoundDescription')}</p>
+		<a href="/lists" class="cta-button">{$_('lists.detail.backToLists')}</a>
 	</div>
 {:else}
 	<div class="list-detail-page">
 		<!-- Header -->
 		<div class="header-container">
 			<div class="breadcrumb">
-				<a href="/lists">Listen</a>
+				<a href="/lists">{$_('lists.detail.breadcrumb')}</a>
 				<span class="separator">/</span>
 				<span>{list.name}</span>
 			</div>
@@ -200,15 +200,19 @@
 						<p class="description">{list.description}</p>
 					{/if}
 					<div class="meta">
-						<span>{listQuotes.length} Zitate</span>
+						<span>{$_('lists.quoteCount', { values: { count: listQuotes.length } })}</span>
 						<span class="separator">•</span>
-						<span>Zuletzt bearbeitet: {formatDate(list.updatedAt)}</span>
+						<span
+							>{$_('lists.detail.lastEdited', {
+								values: { date: formatDate(list.updatedAt) },
+							})}</span
+						>
 					</div>
 				</div>
 
 				<div class="header-actions">
 					{#if listQuotes.length > 0}
-						<button class="icon-btn" onclick={toggleSearch} aria-label="Suchen">
+						<button class="icon-btn" onclick={toggleSearch} aria-label={$_('common.search')}>
 							<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								{#if isSearchOpen}
 									<path
@@ -229,7 +233,11 @@
 						</button>
 					{/if}
 
-					<button class="icon-btn" onclick={openEditModal} aria-label="Liste bearbeiten">
+					<button
+						class="icon-btn"
+						onclick={openEditModal}
+						aria-label={$_('lists.detail.editModal.title')}
+					>
 						<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path
 								stroke-linecap="round"
@@ -243,7 +251,7 @@
 					<button
 						class="icon-btn add-btn"
 						onclick={openAddQuotesModal}
-						aria-label="Zitate hinzufügen"
+						aria-label={$_('lists.detail.addQuotes')}
 					>
 						<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path
@@ -261,7 +269,7 @@
 				<div class="search-bar">
 					<input
 						type="text"
-						placeholder="Zitate durchsuchen..."
+						placeholder={$_('lists.detail.searchPlaceholder')}
 						bind:value={searchTerm}
 						class="search"
 					/>
@@ -290,8 +298,8 @@
 						<line x1="3" y1="18" x2="3.01" y2="18"></line>
 					</svg>
 				</div>
-				<h3>Keine Zitate in dieser Liste</h3>
-				<p>Füge Zitate hinzu, um deine Sammlung zu starten</p>
+				<h3>{$_('lists.detail.emptyTitle')}</h3>
+				<p>{$_('lists.detail.emptyDescription')}</p>
 				<button class="cta-button" onclick={openAddQuotesModal}>
 					<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
@@ -301,7 +309,7 @@
 							d="M12 4v16m8-8H4"
 						/>
 					</svg>
-					Zitate hinzufügen
+					{$_('lists.detail.addQuotes')}
 				</button>
 			</div>
 		{:else if filteredQuotes.length === 0}
@@ -320,8 +328,8 @@
 						<path d="m21 21-4.35-4.35"></path>
 					</svg>
 				</div>
-				<h3>Keine Ergebnisse</h3>
-				<p>Versuche es mit anderen Suchbegriffen</p>
+				<h3>{$_('lists.detail.noSearchResults')}</h3>
+				<p>{$_('lists.detail.noSearchResultsDescription')}</p>
 			</div>
 		{:else}
 			<div class="quotes-grid">
@@ -331,7 +339,7 @@
 						<button
 							class="remove-btn"
 							onclick={() => handleRemoveQuote(quote.id)}
-							aria-label="Aus Liste entfernen"
+							aria-label={$_('lists.detail.remove')}
 						>
 							<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path
@@ -341,7 +349,7 @@
 									d="M6 18L18 6M6 6l12 12"
 								/>
 							</svg>
-							Entfernen
+							{$_('lists.detail.remove')}
 						</button>
 					</div>
 				{/each}
@@ -350,7 +358,9 @@
 
 		{#if isSearchOpen && filteredQuotes.length > 0}
 			<div class="floating-results">
-				{filteredQuotes.length} von {listQuotes.length} Zitaten
+				{$_('lists.detail.floatingResults', {
+					values: { filtered: filteredQuotes.length, total: listQuotes.length },
+				})}
 			</div>
 		{/if}
 	</div>
@@ -361,8 +371,8 @@
 	<div class="modal-overlay" onclick={closeEditModal} role="presentation">
 		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
 			<div class="modal-header">
-				<h3>Liste bearbeiten</h3>
-				<button class="close-btn" onclick={closeEditModal} aria-label="Schließen">
+				<h3>{$_('lists.detail.editModal.title')}</h3>
+				<button class="close-btn" onclick={closeEditModal} aria-label={$_('common.close')}>
 					<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
 							stroke-linecap="round"
@@ -376,7 +386,7 @@
 
 			<div class="modal-body">
 				<div class="form-group">
-					<label for="edit-name">Name *</label>
+					<label for="edit-name">{$_('lists.nameLabel')} *</label>
 					<input
 						id="edit-name"
 						type="text"
@@ -387,7 +397,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for="edit-description">Beschreibung (optional)</label>
+					<label for="edit-description">{$_('lists.descriptionLabel')}</label>
 					<textarea
 						id="edit-description"
 						bind:value={editDescription}
@@ -406,14 +416,14 @@
 							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
 						/>
 					</svg>
-					Liste löschen
+					{$_('lists.detail.editModal.deleteList')}
 				</button>
 			</div>
 
 			<div class="modal-footer">
-				<button class="btn btn-secondary" onclick={closeEditModal}> Abbrechen </button>
+				<button class="btn btn-secondary" onclick={closeEditModal}>{$_('common.cancel')}</button>
 				<button class="btn btn-primary" onclick={handleUpdateList} disabled={!editName.trim()}>
-					Speichern
+					{$_('common.save')}
 				</button>
 			</div>
 		</div>
@@ -430,8 +440,8 @@
 			aria-modal="true"
 		>
 			<div class="modal-header">
-				<h3>Zitate hinzufügen</h3>
-				<button class="close-btn" onclick={closeAddQuotesModal} aria-label="Schließen">
+				<h3>{$_('lists.detail.addModal.title')}</h3>
+				<button class="close-btn" onclick={closeAddQuotesModal} aria-label={$_('common.close')}>
 					<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
 							stroke-linecap="round"
@@ -461,16 +471,18 @@
 
 			<div class="modal-footer">
 				<div class="selected-count">
-					{selectedQuoteIds.size} ausgewählt
+					{$_('lists.detail.addModal.selected', { values: { count: selectedQuoteIds.size } })}
 				</div>
 				<div class="footer-actions">
-					<button class="btn btn-secondary" onclick={closeAddQuotesModal}> Abbrechen </button>
+					<button class="btn btn-secondary" onclick={closeAddQuotesModal}
+						>{$_('common.cancel')}</button
+					>
 					<button
 						class="btn btn-primary"
 						onclick={handleAddQuotes}
 						disabled={selectedQuoteIds.size === 0}
 					>
-						Hinzufügen ({selectedQuoteIds.size})
+						{$_('lists.detail.addModal.submit', { values: { count: selectedQuoteIds.size } })}
 					</button>
 				</div>
 			</div>

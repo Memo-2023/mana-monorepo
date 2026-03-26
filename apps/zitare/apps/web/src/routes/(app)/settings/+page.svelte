@@ -33,9 +33,9 @@
 	<div class="space-y-6">
 		<!-- Quote Language -->
 		<div class="bg-surface-elevated rounded-2xl p-6">
-			<h2 class="text-lg font-semibold text-foreground mb-4">Zitat-Sprache</h2>
+			<h2 class="text-lg font-semibold text-foreground mb-4">{$_('settings.quoteLanguage')}</h2>
 			<p class="text-foreground-secondary text-sm mb-4">
-				Wähle die Sprache, in der die Zitate angezeigt werden sollen.
+				{$_('settings.quoteLanguageDescription')}
 			</p>
 			<select
 				value={quotesStore.language}
@@ -50,13 +50,14 @@
 
 		<!-- About -->
 		<div class="bg-surface-elevated rounded-2xl p-6">
-			<h2 class="text-lg font-semibold text-foreground mb-4">Über Zitare</h2>
+			<h2 class="text-lg font-semibold text-foreground mb-4">{$_('settings.about')}</h2>
 			<p class="text-foreground-secondary text-sm">
-				Zitare bietet dir täglich inspirierende Zitate von den größten Denkern der Geschichte.
-				Speichere deine Favoriten und erstelle eigene Listen.
+				{$_('settings.aboutDescription')}
 			</p>
 			<p class="text-foreground-muted text-sm mt-4">
-				{quotesStore.totalCount} Zitate · 10 Kategorien · 6 Sprachen
+				{$_('settings.stats', {
+					values: { quotes: quotesStore.totalCount, categories: 10, languages: 6 },
+				})}
 			</p>
 		</div>
 	</div>

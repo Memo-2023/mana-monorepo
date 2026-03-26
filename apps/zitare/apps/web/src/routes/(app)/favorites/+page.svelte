@@ -36,14 +36,14 @@
 		return [
 			{
 				id: 'remove-favorite',
-				label: $_('favorites.removeFromFavorites', { default: 'Aus Favoriten entfernen' }),
+				label: $_('favorites.removeFromFavorites'),
 				variant: 'danger',
 				action: () => favoritesStore.toggle(quote.id),
 			},
 			{ id: 'divider-1', label: '', type: 'divider' },
 			{
 				id: 'copy',
-				label: $_('common.copyQuote', { default: 'Zitat kopieren' }),
+				label: $_('favorites.copyQuote'),
 				action: () => {
 					const text = getQuoteText(quote);
 					navigator.clipboard.writeText(`"${text}" — ${quote.author}`);
@@ -51,7 +51,7 @@
 			},
 			{
 				id: 'share',
-				label: $_('common.share', { default: 'Teilen' }),
+				label: $_('favorites.share'),
 				action: async () => {
 					const text = `"${getQuoteText(quote)}" — ${quote.author}`;
 					if (navigator.share) {
@@ -92,7 +92,7 @@
 					d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
 				/>
 			</svg>
-			<p class="text-foreground-secondary mb-4">Melde dich an, um Favoriten zu speichern</p>
+			<p class="text-foreground-secondary mb-4">{$_('favorites.loginPrompt')}</p>
 			<button
 				onclick={() => goto('/login')}
 				class="px-6 py-2 bg-primary text-white rounded-full font-medium hover:bg-primary-hover transition-colors"

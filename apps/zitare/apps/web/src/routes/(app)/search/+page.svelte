@@ -98,7 +98,7 @@
 			</div>
 		{/if}
 	{:else if searchTerm.length > 0}
-		<p class="text-center text-foreground-muted py-8">Bitte gib mindestens 2 Zeichen ein</p>
+		<p class="text-center text-foreground-muted py-8">{$_('search.minChars')}</p>
 	{:else}
 		<div class="text-center py-12">
 			<svg
@@ -111,7 +111,7 @@
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m21 21-4.35-4.35"
 				></path>
 			</svg>
-			<p class="text-foreground-secondary">Suche nach Zitaten, Autoren oder Themen</p>
+			<p class="text-foreground-secondary">{$_('search.hint')}</p>
 		</div>
 	{/if}
 </div>

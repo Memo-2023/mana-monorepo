@@ -90,7 +90,7 @@
 	}
 
 	async function deleteList(listId: string) {
-		if (!confirm('Möchtest du diese Liste wirklich löschen?')) return;
+		if (!confirm($_('lists.confirmDelete'))) return;
 
 		const token = await authStore.getValidToken();
 		if (!token) return;
@@ -155,7 +155,7 @@
 					d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
 				/>
 			</svg>
-			<p class="text-foreground-secondary mb-4">Melde dich an, um Listen zu erstellen</p>
+			<p class="text-foreground-secondary mb-4">{$_('lists.loginPrompt')}</p>
 			<button
 				onclick={() => goto('/login')}
 				class="px-6 py-2 bg-primary text-white rounded-full font-medium hover:bg-primary-hover transition-colors"
@@ -205,7 +205,7 @@
 								<p class="text-foreground-secondary mt-1">{list.description}</p>
 							{/if}
 							<p class="text-sm text-foreground-muted mt-2">
-								{list.quoteIds.length} Zitate
+								{$_('lists.quoteCount', { values: { count: list.quoteIds.length } })}
 							</p>
 						</div>
 						<button
@@ -237,7 +237,7 @@
 	<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
 		<div class="bg-surface-elevated rounded-2xl w-full max-w-md shadow-xl">
 			<div class="flex items-center justify-between p-6 border-b border-border">
-				<h3 class="text-xl font-semibold text-foreground">Neue Liste erstellen</h3>
+				<h3 class="text-xl font-semibold text-foreground">{$_('lists.createModal.title')}</h3>
 				<button
 					onclick={() => (showCreateModal = false)}
 					class="p-2 text-foreground-secondary hover:text-foreground transition-colors"
@@ -254,21 +254,23 @@
 			</div>
 			<div class="p-6 space-y-4">
 				<div>
-					<label class="block text-sm font-medium text-foreground mb-2">Name *</label>
+					<label class="block text-sm font-medium text-foreground mb-2"
+						>{$_('lists.nameLabel')} *</label
+					>
 					<input
 						type="text"
 						bind:value={newListName}
-						placeholder="z.B. Motivierende Zitate"
+						placeholder={$_('lists.createModal.namePlaceholder')}
 						class="w-full p-3 rounded-lg bg-surface border border-border text-foreground focus:outline-none focus:border-primary"
 					/>
 				</div>
 				<div>
 					<label class="block text-sm font-medium text-foreground mb-2"
-						>Beschreibung (optional)</label
+						>{$_('lists.descriptionLabel')}</label
 					>
 					<textarea
 						bind:value={newListDescription}
-						placeholder="Was macht diese Liste besonders?"
+						placeholder={$_('lists.createModal.descriptionPlaceholder')}
 						rows="3"
 						class="w-full p-3 rounded-lg bg-surface border border-border text-foreground focus:outline-none focus:border-primary resize-none"
 					></textarea>
@@ -286,7 +288,7 @@
 					disabled={!newListName.trim()}
 					class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					Erstellen
+					{$_('lists.createModal.submit')}
 				</button>
 			</div>
 		</div>
