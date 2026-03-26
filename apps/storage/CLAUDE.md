@@ -237,6 +237,44 @@ PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 - Types: `File`, `Folder`, `FileVersion`, `Share`, `Tag`
 - Utils: File type detection, size formatting, path utilities
 
+## File Preview System
+
+The FilePreviewModal supports rich inline previews for various file types:
+
+| File Type | MIME / Extension | Preview |
+|-----------|-----------------|---------|
+| **Images** | `image/*` | Native `<img>` via download URL |
+| **Audio** | `audio/*` | Play button → global MiniPlayer/FullPlayer with frequency visualizer, queue from folder |
+| **Video** | `video/*` | Native `<video>` player with controls via presigned S3 URL |
+| **PDF** | `application/pdf` | Embedded browser PDF viewer via `<iframe>` |
+| **Text/Code** | `text/*`, `.json`, `.js`, `.ts`, `.xml`, `.yaml` | Fetched content in monospace code view (max 50KB) |
+| **Markdown** | `.md` | Rendered HTML with headings, lists, code blocks, links |
+| **Other** | everything else | File type icon only |
+
+### Audio Player Architecture
+
+```
+audioPlayerStore (Svelte 5 runes)
+    ↓
+HTMLAudioElement → Presigned S3 URL
+    ↓
+Web Audio API (AnalyserNode)
+    ↓
+FrequencyBars (Canvas visualizer)
+```
+
+**Key files:**
+
+| File | Purpose |
+|------|---------|
+| `src/lib/stores/audio-player.svelte.ts` | Player state, queue, play/pause/seek/volume |
+| `src/lib/audio/analyzer.ts` | Web Audio API singleton for frequency data |
+| `src/lib/components/audio/FrequencyBars.svelte` | Canvas frequency bar visualizer |
+| `src/lib/components/audio/MiniPlayer.svelte` | Fixed bottom player bar with visualizer |
+| `src/lib/components/audio/FullPlayer.svelte` | Fullscreen player with mirrored visualizer background |
+
+**Features:** Queue from audio files in folder, Media Session API (OS controls), presigned S3 URLs, keyboard shortcuts (Space, Escape, Arrow keys in FullPlayer).
+
 ## Code Style Guidelines
 
 - **TypeScript**: Strict typing with interfaces
