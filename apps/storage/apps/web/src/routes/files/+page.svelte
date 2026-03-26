@@ -14,8 +14,10 @@
 	import FileSkeletonGrid from '$lib/components/files/FileSkeletonGrid.svelte';
 	import FileSkeletonList from '$lib/components/files/FileSkeletonList.svelte';
 	import EmptyState from '$lib/components/files/EmptyState.svelte';
+	import ShareModal from '$lib/components/files/ShareModal.svelte';
 
 	let previewFile = $state<StorageFile | null>(null);
+	let shareTarget = $state<{ fileId?: string; folderId?: string; name: string } | null>(null);
 	let showUploadZone = $state(false);
 	let showNewFolderModal = $state(false);
 	let uploading = $state(false);
@@ -75,11 +77,9 @@
 				}
 				break;
 			case 'share':
-				// TODO: Open share modal
-				toastStore.info('Teilen-Funktion kommt bald');
+				shareTarget = { fileId: file.id, name: file.name };
 				break;
 			case 'move':
-				// TODO: Open move modal
 				toastStore.info('Verschieben-Funktion kommt bald');
 				break;
 		}
@@ -115,7 +115,7 @@
 				}
 				break;
 			case 'share':
-				toastStore.info('Teilen-Funktion kommt bald');
+				shareTarget = { folderId: folder.id, name: folder.name };
 				break;
 			case 'move':
 				toastStore.info('Verschieben-Funktion kommt bald');
@@ -301,6 +301,14 @@
 		handleFileAction(action, file);
 		previewFile = null;
 	}}
+/>
+
+<ShareModal
+	open={shareTarget !== null}
+	fileId={shareTarget?.fileId}
+	folderId={shareTarget?.folderId}
+	fileName={shareTarget?.name || ''}
+	onClose={() => (shareTarget = null)}
 />
 
 <style>
