@@ -38,7 +38,12 @@
 		"courage": "Mut",
 		"hope": "Hoffnung",
 		"nature": "Natur",
-		"quotes": "{count} Zitate"
+		"quotes": "{count} Zitate",
+		"notFound": "Kategorie nicht gefunden",
+		"backToCategories": "Zurück zu Kategorien",
+		"searchInCategory": "In dieser Kategorie suchen...",
+		"sortByAuthor": "Nach Autor",
+		"sortByDefault": "Standard"
 	},
 	"favorites": {
 		"title": "Favoriten",

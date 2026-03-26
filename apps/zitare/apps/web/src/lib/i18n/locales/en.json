@@ -38,7 +38,12 @@
 		"courage": "Courage",
 		"hope": "Hope",
 		"nature": "Nature",
-		"quotes": "{count} quotes"
+		"quotes": "{count} quotes",
+		"notFound": "Category not found",
+		"backToCategories": "Back to categories",
+		"searchInCategory": "Search in this category...",
+		"sortByAuthor": "By author",
+		"sortByDefault": "Default"
 	},
 	"favorites": {
 		"title": "Favorites",
