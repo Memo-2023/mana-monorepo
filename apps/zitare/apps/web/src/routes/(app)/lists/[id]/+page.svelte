@@ -13,6 +13,9 @@
 
 	let list = $state<QuoteList | null>(null);
 	let isLoading = $state(true);
+	let isSaving = $state(false);
+	let isAdding = $state(false);
+	let removingQuoteId = $state<string | null>(null);
 	let searchTerm = $state('');
 	let isSearchOpen = $state(false);
 	let showEditModal = $state(false);
@@ -83,7 +86,9 @@
 	}
 
 	async function handleUpdateList() {
-		if (list && editName.trim()) {
+		if (!list || !editName.trim() || isSaving) return;
+		isSaving = true;
+		try {
 			const updated = await listsStore.updateList(list.id, {
 				name: editName.trim(),
 				description: editDescription.trim() || undefined,
@@ -95,6 +100,8 @@
 			} else {
 				toast.error($_('lists.detail.toast.updateError'));
 			}
+		} finally {
+			isSaving = false;
 		}
 	}
 
@@ -130,32 +137,37 @@
 	}
 
 	async function handleAddQuotes() {
-		if (list) {
-			const count = selectedQuoteIds.size;
+		if (!list || isAdding) return;
+		isAdding = true;
+		try {
 			let successCount = 0;
 			for (const quoteId of selectedQuoteIds) {
 				const success = await listsStore.addQuoteToList(list.id, quoteId);
 				if (success) successCount++;
 			}
 			if (successCount > 0) {
-				// Reload list to get updated quote IDs
 				list = await listsStore.getList(list.id);
 				toast.success($_('lists.detail.toast.quotesAdded', { values: { count: successCount } }));
 			}
 			closeAddQuotesModal();
+		} finally {
+			isAdding = false;
 		}
 	}
 
 	async function handleRemoveQuote(quoteId: string) {
-		if (list && confirm($_('lists.detail.removeConfirm'))) {
+		if (!list || removingQuoteId || !confirm($_('lists.detail.removeConfirm'))) return;
+		removingQuoteId = quoteId;
+		try {
 			const success = await listsStore.removeQuoteFromList(list.id, quoteId);
 			if (success) {
-				// Reload list to get updated quote IDs
 				list = await listsStore.getList(list.id);
 				toast.info($_('lists.detail.toast.quoteRemoved'));
 			} else {
 				toast.error($_('lists.detail.toast.removeError'));
 			}
+		} finally {
+			removingQuoteId = null;
 		}
 	}
 
@@ -339,16 +351,23 @@
 						<button
 							class="remove-btn"
 							onclick={() => handleRemoveQuote(quote.id)}
+							disabled={removingQuoteId === quote.id}
 							aria-label={$_('lists.detail.remove')}
 						>
-							<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
+							{#if removingQuoteId === quote.id}
+								<div
+									class="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin"
+								></div>
+							{:else}
+								<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M6 18L18 6M6 6l12 12"
+									/>
+								</svg>
+							{/if}
 							{$_('lists.detail.remove')}
 						</button>
 					</div>
@@ -422,7 +441,16 @@
 
 			<div class="modal-footer">
 				<button class="btn btn-secondary" onclick={closeEditModal}>{$_('common.cancel')}</button>
-				<button class="btn btn-primary" onclick={handleUpdateList} disabled={!editName.trim()}>
+				<button
+					class="btn btn-primary"
+					onclick={handleUpdateList}
+					disabled={!editName.trim() || isSaving}
+				>
+					{#if isSaving}
+						<div
+							class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-1"
+						></div>
+					{/if}
 					{$_('common.save')}
 				</button>
 			</div>
@@ -480,8 +508,13 @@
 					<button
 						class="btn btn-primary"
 						onclick={handleAddQuotes}
-						disabled={selectedQuoteIds.size === 0}
+						disabled={selectedQuoteIds.size === 0 || isAdding}
 					>
+						{#if isAdding}
+							<div
+								class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-1"
+							></div>
+						{/if}
 						{$_('lists.detail.addModal.submit', { values: { count: selectedQuoteIds.size } })}
 					</button>
 				</div>

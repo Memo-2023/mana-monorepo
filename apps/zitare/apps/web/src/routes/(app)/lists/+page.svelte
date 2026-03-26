@@ -16,6 +16,8 @@
 
 	let lists = $state<QuoteList[]>([]);
 	let loading = $state(true);
+	let saving = $state(false);
+	let deletingId = $state<string | null>(null);
 	let showCreateModal = $state(false);
 	let newListName = $state('');
 	let newListDescription = $state('');
@@ -58,11 +60,12 @@
 	}
 
 	async function createList() {
-		if (!newListName.trim()) return;
+		if (!newListName.trim() || saving) return;
 
 		const token = await authStore.getValidToken();
 		if (!token) return;
 
+		saving = true;
 		try {
 			const response = await fetch(`${getBackendUrl()}/api/lists`, {
 				method: 'POST',
@@ -86,15 +89,18 @@
 			}
 		} catch (error) {
 			console.error('Failed to create list:', error);
+		} finally {
+			saving = false;
 		}
 	}
 
 	async function deleteList(listId: string) {
-		if (!confirm($_('lists.confirmDelete'))) return;
+		if (deletingId || !confirm($_('lists.confirmDelete'))) return;
 
 		const token = await authStore.getValidToken();
 		if (!token) return;
 
+		deletingId = listId;
 		try {
 			const response = await fetch(`${getBackendUrl()}/api/lists/${listId}`, {
 				method: 'DELETE',
@@ -107,6 +113,8 @@
 			}
 		} catch (error) {
 			console.error('Failed to delete list:', error);
+		} finally {
+			deletingId = null;
 		}
 	}
 
@@ -214,16 +222,23 @@
 								e.stopPropagation();
 								deleteList(list.id);
 							}}
-							class="p-2 text-foreground-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+							disabled={deletingId === list.id}
+							class="p-2 text-foreground-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
 						>
-							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-								/>
-							</svg>
+							{#if deletingId === list.id}
+								<div
+									class="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin"
+								></div>
+							{:else}
+								<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+									/>
+								</svg>
+							{/if}
 						</button>
 					</div>
 				</a>
@@ -285,9 +300,14 @@
 				</button>
 				<button
 					onclick={createList}
-					disabled={!newListName.trim()}
-					class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+					disabled={!newListName.trim() || saving}
+					class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
 				>
+					{#if saving}
+						<div
+							class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+						></div>
+					{/if}
 					{$_('lists.createModal.submit')}
 				</button>
 			</div>
