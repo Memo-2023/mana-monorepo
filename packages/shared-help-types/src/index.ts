@@ -11,3 +11,9 @@ export * from './schemas.js';
 
 // Search types
 export * from './search.js';
+
+// Shared Mana FAQ content
+export { getManaFAQs, getManaFeature } from './mana-faq.js';
+
+// Shared Privacy FAQ content
+export { getPrivacyFAQs, type PrivacyFAQOptions } from './privacy-faq.js';

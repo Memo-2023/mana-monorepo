@@ -145,17 +145,18 @@ Bewertet die Sicherheitsmaßnahmen.
 
 Bewertet die User Experience und Accessibility.
 
-| Kriterium                    | Punkte |
-| ---------------------------- | ------ |
-| i18n (mindestens 5 Sprachen) | 0-20   |
-| Responsive Design            | 0-15   |
-| Keyboard Navigation          | 0-10   |
-| Focus Trapping (Modals)      | 0-10   |
-| ARIA Labels/Roles            | 0-10   |
-| Toast/Feedback System        | 0-10   |
-| Loading/Skeleton States      | 0-10   |
-| Dark/Light Mode              | 0-10   |
-| Immersive Mode               | 0-5    |
+| Kriterium                        | Punkte |
+| -------------------------------- | ------ |
+| i18n (mindestens 5 Sprachen)     | 0-15   |
+| Responsive Design                | 0-15   |
+| Keyboard Navigation              | 0-10   |
+| Focus Trapping (Modals)          | 0-10   |
+| ARIA Labels/Roles                | 0-10   |
+| Toast/Feedback System            | 0-10   |
+| Loading/Skeleton States          | 0-10   |
+| Dark/Light Mode                  | 0-10   |
+| Help-Seite (shared-help-ui)      | 0-5    |
+| Feedback-Seite (shared-feedback) | 0-5    |
 
 ---
 
@@ -229,6 +230,8 @@ Misst wie konsequent eine App die shared Packages des Monorepos nutzt:
 | `shared-branding`       | Core     | App-Icons, Farben, URLs                                     |
 | `shared-i18n`           | Core     | Internationalisierung (Sprach-Utilities)                    |
 | `shared-error-tracking` | Core     | GlitchTip Error Tracking                                    |
+| `shared-help-ui`        | Core     | Hilfe-Seite mit FAQ, Features, Shortcuts                    |
+| `shared-feedback-ui`    | Core     | Feedback-Seite für Nutzer-Rückmeldungen                     |
 | `shared-storage`        | Optional | S3/MinIO Datei-Upload (nur wenn relevant)                   |
 | `shared-llm`            | Optional | LLM-Integration (nur wenn AI-Features)                      |
 

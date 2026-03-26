@@ -282,6 +282,8 @@
 		themesHref?: string;
 		/** Spiral page href (shown in user dropdown). Set to empty string to hide. */
 		spiralHref?: string;
+		/** Help page href (shown in user dropdown). Set to empty string to hide. */
+		helpHref?: string;
 	}
 
 	let {
@@ -327,6 +329,7 @@
 		feedbackHref = '/feedback',
 		themesHref,
 		spiralHref,
+		helpHref,
 	}: Props = $props();
 
 	// Type guards for elements
@@ -870,6 +873,19 @@
 											window.location.href = spiralHref;
 										},
 										active: currentPath === spiralHref,
+									},
+								]
+							: []),
+						...(helpHref
+							? [
+									{
+										id: 'help',
+										label: 'Hilfe',
+										icon: 'help',
+										onClick: () => {
+											window.location.href = helpHref;
+										},
+										active: currentPath === helpHref,
 									},
 								]
 							: []),
