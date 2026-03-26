@@ -32,6 +32,8 @@
 	primaryColor="#8b5cf6"
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}
+	passkeyAvailable={authStore.isPasskeyAvailable()}
+	onSignInWithPasskey={() => authStore.signInWithPasskey()}
 	{goto}
 	successRedirect="/decks"
 	registerPath="/register"

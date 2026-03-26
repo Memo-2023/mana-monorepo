@@ -7,6 +7,7 @@ import {
 	jsonb,
 	pgEnum,
 	index,
+	integer,
 } from 'drizzle-orm/pg-core';
 
 export const authSchema = pgSchema('auth');
@@ -204,6 +205,29 @@ export const matrixUserLinks = authSchema.table(
 	},
 	(table) => ({
 		userIdIdx: index('matrix_user_links_user_id_idx').on(table.userId),
+	})
+);
+
+// Passkeys table (WebAuthn credentials)
+export const passkeys = authSchema.table(
+	'passkeys',
+	{
+		id: text('id').primaryKey(), // nanoid
+		userId: text('user_id')
+			.references(() => users.id, { onDelete: 'cascade' })
+			.notNull(),
+		credentialId: text('credential_id').unique().notNull(), // base64url-encoded
+		publicKey: text('public_key').notNull(), // base64url-encoded COSE public key
+		counter: integer('counter').default(0).notNull(), // signature counter
+		deviceType: text('device_type').notNull(), // 'singleDevice' | 'multiDevice'
+		backedUp: boolean('backed_up').default(false).notNull(),
+		transports: jsonb('transports').$type<string[]>(), // ['internal', 'hybrid', etc.]
+		friendlyName: text('friendly_name'),
+		lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => ({
+		userIdIdx: index('passkeys_user_id_idx').on(table.userId),
 	})
 );
 

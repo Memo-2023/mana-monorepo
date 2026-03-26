@@ -84,6 +84,8 @@
 		version?: string;
 		/** Build timestamp (ISO string) to display next to version */
 		buildTime?: string;
+		onSignInWithPasskey?: () => Promise<AuthResult>;
+		passkeyAvailable?: boolean;
 	}
 
 	let {
@@ -106,6 +108,8 @@
 		initialPassword = '',
 		version = '',
 		buildTime = '',
+		onSignInWithPasskey,
+		passkeyAvailable = false,
 	}: Props = $props();
 
 	const t = $derived({ ...defaultTranslations, ...translations });
@@ -254,6 +258,25 @@
 		}
 	}
 
+	async function handlePasskeySignIn() {
+		if (!onSignInWithPasskey) return;
+		loading = true;
+		clearError();
+
+		const result = await onSignInWithPasskey();
+		loading = false;
+
+		if (result.success) {
+			showSuccess = true;
+			successAnnouncement = t.signInSuccess;
+			setTimeout(() => goto(successRedirect), 600);
+		} else if (result.error === 'Passkey authentication was cancelled') {
+			// User cancelled - don't show error
+		} else {
+			setError(result.error || t.signInFailed, 'general');
+		}
+	}
+
 	function skipToForm() {
 		if (emailInput) emailInput.focus();
 	}
@@ -348,6 +371,34 @@
 					<h2 class="form-title">{t.title}</h2>
 					<p class="form-subtitle">{t.subtitle}</p>
 				</div>
+
+				{#if passkeyAvailable && onSignInWithPasskey}
+					<button
+						type="button"
+						onclick={handlePasskeySignIn}
+						disabled={loading || showSuccess}
+						class="passkey-button"
+						style:border-color={primaryColor}
+					>
+						<svg
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
+							<circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
+						</svg>
+						<span>Passkey</span>
+					</button>
+					<div class="divider">
+						<span>{t.orDivider}</span>
+					</div>
+				{/if}
 
 				{#if verificationEmailSent}
 					<div class="verified-banner" role="status" aria-live="polite">
@@ -925,6 +976,61 @@
 	.submit-button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	.passkey-button {
+		width: 100%;
+		height: 3.5rem;
+		border: 2px solid;
+		border-radius: 0.75rem;
+		font-weight: 500;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		transition: opacity 0.2s;
+		color: rgba(255, 255, 255, 0.9);
+		background: transparent;
+		margin-bottom: 0;
+	}
+
+	.light .passkey-button {
+		color: rgba(0, 0, 0, 0.9);
+	}
+
+	.passkey-button:hover:not(:disabled) {
+		opacity: 0.85;
+	}
+
+	.passkey-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.divider {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin: 1.25rem 0;
+	}
+
+	.divider::before,
+	.divider::after {
+		content: '';
+		flex: 1;
+		height: 1px;
+		background: currentColor;
+		opacity: 0.2;
+	}
+
+	.divider span {
+		font-size: 0.75rem;
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	.light .divider span {
+		color: rgba(0, 0, 0, 0.5);
 	}
 
 	.register-link {

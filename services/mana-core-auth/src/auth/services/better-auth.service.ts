@@ -604,6 +604,73 @@ export class BetterAuthService {
 	}
 
 	/**
+	 * Create a session and generate JWT tokens for a user
+	 * Used by passkey authentication and other non-password flows
+	 */
+	async createSessionAndTokens(
+		user: { id: string; email: string; name: string; role?: string },
+		meta?: { ipAddress?: string; userAgent?: string; deviceId?: string; deviceName?: string }
+	) {
+		const db = getDb(this.databaseUrl);
+		const { sessions } = await import('../../db/schema');
+		const { nanoid } = await import('nanoid');
+
+		const sessionId = nanoid();
+		const sessionToken = nanoid(64);
+		const refreshToken = nanoid(64);
+		const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+		const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+		// Create session in DB
+		await db.insert(sessions).values({
+			id: sessionId,
+			token: sessionToken,
+			userId: user.id,
+			expiresAt,
+			refreshToken,
+			refreshTokenExpiresAt,
+			ipAddress: meta?.ipAddress || null,
+			userAgent: meta?.userAgent || null,
+			deviceId: meta?.deviceId || null,
+			deviceName: meta?.deviceName || null,
+			lastActivityAt: new Date(),
+		});
+
+		// Generate JWT access token
+		let accessToken = '';
+		try {
+			const api = this.auth.api as any;
+			const jwtResult = await api.signJWT({
+				body: {
+					payload: {
+						sub: user.id,
+						email: user.email,
+						role: user.role || 'user',
+						sid: sessionId,
+					},
+				},
+			});
+			accessToken = jwtResult?.token || '';
+			if (!accessToken) throw new Error('signJWT returned empty token');
+		} catch (jwtError) {
+			this.logger.warn('signJWT failed for passkey auth, using session token as fallback');
+			accessToken = sessionToken;
+		}
+
+		return {
+			user: {
+				id: user.id,
+				email: user.email,
+				name: user.name,
+				role: user.role || 'user',
+			},
+			accessToken,
+			refreshToken,
+			expiresIn: 15 * 60, // 15 minutes
+		};
+	}
+
+	/**
 	 * Sign out user
 	 *
 	 * Invalidates the user's session.

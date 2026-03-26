@@ -19,6 +19,7 @@ import type { Request, Response } from 'express';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { BetterAuthService } from './services/better-auth.service';
+import { PasskeyService } from './services/passkey.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -76,7 +77,8 @@ export class AuthController {
 	constructor(
 		private readonly betterAuthService: BetterAuthService,
 		private readonly securityEvents: SecurityEventsService,
-		private readonly accountLockout: AccountLockoutService
+		private readonly accountLockout: AccountLockoutService,
+		private readonly passkeyService: PasskeyService
 	) {}
 
 	// =========================================================================
@@ -814,6 +816,159 @@ export class AuthController {
 		} catch {
 			await this.betterAuthService.rejectInvitation(id, token);
 		}
+	}
+
+	// =========================================================================
+	// Passkey (WebAuthn) Endpoints
+	// =========================================================================
+
+	/**
+	 * Generate passkey registration options
+	 *
+	 * Returns WebAuthn registration options for the authenticated user.
+	 * The user must be logged in to register a passkey.
+	 */
+	@Post('passkeys/register/options')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'Generate passkey registration options' })
+	async passkeyRegisterOptions(@CurrentUser() user: CurrentUserData) {
+		return this.passkeyService.generateRegistrationOptions(user.userId);
+	}
+
+	/**
+	 * Verify and store passkey registration
+	 *
+	 * Verifies the WebAuthn registration response and stores the passkey.
+	 */
+	@Post('passkeys/register/verify')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'Verify and store passkey registration' })
+	async passkeyRegisterVerify(
+		@CurrentUser() user: CurrentUserData,
+		@Body() body: { challengeId: string; credential: any; friendlyName?: string },
+		@Req() req: Request
+	) {
+		const result = await this.passkeyService.verifyRegistration(
+			body.challengeId,
+			body.credential,
+			body.friendlyName
+		);
+		await this.securityEvents.logEvent({
+			userId: user.userId,
+			eventType: SecurityEventType.PASSKEY_REGISTERED,
+			ipAddress: req.ip,
+			userAgent: req.headers['user-agent'] as string,
+			metadata: { passkeyId: result.id },
+		});
+		return result;
+	}
+
+	/**
+	 * Generate passkey authentication options
+	 *
+	 * Returns WebAuthn authentication options. No auth required.
+	 */
+	@Post('passkeys/authenticate/options')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Generate passkey authentication options' })
+	async passkeyAuthOptions() {
+		return this.passkeyService.generateAuthenticationOptions();
+	}
+
+	/**
+	 * Verify passkey authentication and return JWT tokens
+	 *
+	 * Verifies the WebAuthn authentication response and returns
+	 * JWT access and refresh tokens (same format as login).
+	 */
+	@Post('passkeys/authenticate/verify')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Verify passkey authentication and return JWT tokens' })
+	async passkeyAuthVerify(
+		@Body() body: { challengeId: string; credential: any },
+		@Req() req: Request
+	) {
+		const { user, passkeyId } = await this.passkeyService.verifyAuthentication(
+			body.challengeId,
+			body.credential
+		);
+
+		// Generate session + JWT tokens (same pattern as signIn)
+		const tokenResult = await this.betterAuthService.createSessionAndTokens(user, {
+			ipAddress: req.ip,
+			userAgent: req.headers['user-agent'] as string,
+		});
+
+		await this.securityEvents.logEvent({
+			userId: user.id,
+			eventType: SecurityEventType.PASSKEY_LOGIN_SUCCESS,
+			ipAddress: req.ip,
+			userAgent: req.headers['user-agent'] as string,
+			metadata: { passkeyId },
+		});
+
+		return tokenResult;
+	}
+
+	/**
+	 * List user's passkeys
+	 *
+	 * Returns all passkeys registered by the authenticated user.
+	 */
+	@Get('passkeys')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'List user passkeys' })
+	async listPasskeys(@CurrentUser() user: CurrentUserData) {
+		return this.passkeyService.listPasskeys(user.userId);
+	}
+
+	/**
+	 * Delete a passkey
+	 *
+	 * Removes a passkey from the user's account.
+	 */
+	@Delete('passkeys/:id')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'Delete a passkey' })
+	async deletePasskey(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') passkeyId: string,
+		@Req() req: Request
+	) {
+		await this.passkeyService.deletePasskey(user.userId, passkeyId);
+		await this.securityEvents.logEvent({
+			userId: user.userId,
+			eventType: SecurityEventType.PASSKEY_DELETED,
+			ipAddress: req.ip,
+			userAgent: req.headers['user-agent'] as string,
+			metadata: { passkeyId },
+		});
+	}
+
+	/**
+	 * Rename a passkey
+	 *
+	 * Updates the friendly name of a passkey.
+	 */
+	@Patch('passkeys/:id')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.OK)
+	@ApiBearerAuth('JWT-auth')
+	@ApiOperation({ summary: 'Rename a passkey' })
+	async renamePasskey(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') passkeyId: string,
+		@Body() body: { friendlyName: string }
+	) {
+		await this.passkeyService.renamePasskey(user.userId, passkeyId, body.friendlyName);
+		return { success: true };
 	}
 
 	// =========================================================================

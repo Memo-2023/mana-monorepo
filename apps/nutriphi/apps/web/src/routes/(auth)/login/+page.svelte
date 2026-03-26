@@ -52,6 +52,8 @@
 	primaryColor="#22C55E"
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}
+	passkeyAvailable={authStore.isPasskeyAvailable()}
+	onSignInWithPasskey={() => authStore.signInWithPasskey()}
 	{goto}
 	successRedirect={redirectTo}
 	registerPath="/register"

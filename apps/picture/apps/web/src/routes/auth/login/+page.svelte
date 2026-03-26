@@ -36,6 +36,8 @@
 	primaryColor="#3b82f6"
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}
+	passkeyAvailable={authStore.isPasskeyAvailable()}
+	onSignInWithPasskey={() => authStore.signInWithPasskey()}
 	{goto}
 	successRedirect="/app/gallery"
 	registerPath="/auth/signup"

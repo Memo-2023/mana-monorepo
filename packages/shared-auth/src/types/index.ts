@@ -133,6 +133,11 @@ export interface AuthEndpoints {
 	credits: string;
 	/** Better Auth native endpoint for SSO session check */
 	getSession: string;
+	passkeyRegisterOptions: string;
+	passkeyRegisterVerify: string;
+	passkeyAuthOptions: string;
+	passkeyAuthVerify: string;
+	passkeyList: string;
 }
 
 /**

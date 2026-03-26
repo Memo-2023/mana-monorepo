@@ -93,6 +93,20 @@ export const authStore = {
 		return true;
 	},
 
+	isPasskeyAvailable(): boolean {
+		return authService.isPasskeyAvailable();
+	},
+
+	async signInWithPasskey() {
+		const result = await authService.signInWithPasskey();
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			user = toManaUser(userData);
+		}
+		return result;
+	},
+
+	/**
 	/**
 	 * Sign in with email and password
 	 */

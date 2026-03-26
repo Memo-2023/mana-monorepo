@@ -58,6 +58,11 @@ const DEFAULT_ENDPOINTS: AuthEndpoints = {
 	credits: '/api/v1/credits/balance',
 	// Better Auth native endpoints for SSO
 	getSession: '/api/auth/get-session',
+	passkeyRegisterOptions: '/api/v1/auth/passkeys/register/options',
+	passkeyRegisterVerify: '/api/v1/auth/passkeys/register/verify',
+	passkeyAuthOptions: '/api/v1/auth/passkeys/authenticate/options',
+	passkeyAuthVerify: '/api/v1/auth/passkeys/authenticate/verify',
+	passkeyList: '/api/v1/auth/passkeys',
 };
 
 /**
@@ -356,6 +361,210 @@ export function createAuthService(config: AuthServiceConfig) {
 			}
 
 			return { appToken, refreshToken, userData };
+		},
+
+		/**
+		 * Check if WebAuthn/Passkeys are supported in this browser
+		 */
+		isPasskeyAvailable(): boolean {
+			if (typeof window === 'undefined') return false;
+			return !!window.PublicKeyCredential;
+		},
+
+		/**
+		 * Register a new passkey for the current user
+		 */
+		async registerPasskey(friendlyName?: string): Promise<AuthResult> {
+			try {
+				const { startRegistration } = await import('@simplewebauthn/browser');
+				const appToken = await service.getAppToken();
+				if (!appToken) return { success: false, error: 'Not authenticated' };
+
+				// Step 1: Get registration options from server
+				const optionsRes = await fetch(`${baseUrl}${endpoints.passkeyRegisterOptions}`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${appToken}`,
+					},
+				});
+
+				if (!optionsRes.ok) {
+					const err = await optionsRes.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to get registration options' };
+				}
+
+				const { options, challengeId } = await optionsRes.json();
+
+				// Step 2: Create credential via browser WebAuthn API
+				const credential = await startRegistration({ optionsJSON: options });
+
+				// Step 3: Send credential to server for verification
+				const verifyRes = await fetch(`${baseUrl}${endpoints.passkeyRegisterVerify}`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${appToken}`,
+					},
+					body: JSON.stringify({ challengeId, credential, friendlyName }),
+				});
+
+				if (!verifyRes.ok) {
+					const err = await verifyRes.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Passkey registration failed' };
+				}
+
+				trackAuth('passkey_registered');
+				return { success: true };
+			} catch (error) {
+				// User cancelled or WebAuthn error
+				if (error instanceof Error && error.name === 'NotAllowedError') {
+					return { success: false, error: 'Passkey registration was cancelled' };
+				}
+				console.error('Passkey registration error:', error);
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Passkey registration failed',
+				};
+			}
+		},
+
+		/**
+		 * Sign in with a passkey
+		 */
+		async signInWithPasskey(): Promise<AuthResult> {
+			try {
+				const { startAuthentication } = await import('@simplewebauthn/browser');
+				const storage = getStorageAdapter();
+
+				// Step 1: Get authentication options from server
+				const optionsRes = await fetch(`${baseUrl}${endpoints.passkeyAuthOptions}`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+				});
+
+				if (!optionsRes.ok) {
+					const err = await optionsRes.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to get authentication options' };
+				}
+
+				const { options, challengeId } = await optionsRes.json();
+
+				// Step 2: Authenticate via browser WebAuthn API
+				const credential = await startAuthentication({ optionsJSON: options });
+
+				// Step 3: Send credential to server for verification
+				const verifyRes = await fetch(`${baseUrl}${endpoints.passkeyAuthVerify}`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ challengeId, credential }),
+				});
+
+				if (!verifyRes.ok) {
+					const err = await verifyRes.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Passkey authentication failed' };
+				}
+
+				const data = await verifyRes.json();
+				const appToken = data.accessToken;
+				const refreshToken = data.refreshToken;
+
+				await Promise.all([
+					storage.setItem(storageKeys.APP_TOKEN, appToken),
+					storage.setItem(storageKeys.REFRESH_TOKEN, refreshToken),
+					storage.setItem(storageKeys.USER_EMAIL, data.user?.email || ''),
+				]);
+
+				trackAuth('login', { method: 'passkey' });
+				return { success: true };
+			} catch (error) {
+				if (error instanceof Error && error.name === 'NotAllowedError') {
+					return { success: false, error: 'Passkey authentication was cancelled' };
+				}
+				console.error('Passkey authentication error:', error);
+				trackAuth('login_failed', { method: 'passkey' });
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Passkey authentication failed',
+				};
+			}
+		},
+
+		/**
+		 * List user's registered passkeys
+		 */
+		async listPasskeys(): Promise<any[]> {
+			try {
+				const appToken = await service.getAppToken();
+				if (!appToken) return [];
+
+				const res = await fetch(`${baseUrl}${endpoints.passkeyList}`, {
+					headers: { Authorization: `Bearer ${appToken}` },
+				});
+
+				if (!res.ok) return [];
+				return await res.json();
+			} catch {
+				return [];
+			}
+		},
+
+		/**
+		 * Delete a passkey
+		 */
+		async deletePasskey(passkeyId: string): Promise<AuthResult> {
+			try {
+				const appToken = await service.getAppToken();
+				if (!appToken) return { success: false, error: 'Not authenticated' };
+
+				const res = await fetch(`${baseUrl}${endpoints.passkeyList}/${passkeyId}`, {
+					method: 'DELETE',
+					headers: { Authorization: `Bearer ${appToken}` },
+				});
+
+				if (!res.ok) {
+					const err = await res.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to delete passkey' };
+				}
+
+				return { success: true };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to delete passkey',
+				};
+			}
+		},
+
+		/**
+		 * Rename a passkey
+		 */
+		async renamePasskey(passkeyId: string, friendlyName: string): Promise<AuthResult> {
+			try {
+				const appToken = await service.getAppToken();
+				if (!appToken) return { success: false, error: 'Not authenticated' };
+
+				const res = await fetch(`${baseUrl}${endpoints.passkeyList}/${passkeyId}`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${appToken}`,
+					},
+					body: JSON.stringify({ friendlyName }),
+				});
+
+				if (!res.ok) {
+					const err = await res.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to rename passkey' };
+				}
+
+				return { success: true };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to rename passkey',
+				};
+			}
 		},
 
 		/**

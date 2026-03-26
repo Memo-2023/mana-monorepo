@@ -43,6 +43,12 @@ export const SecurityEventType = {
 	API_KEY_VALIDATED: 'api_key_validated',
 	API_KEY_VALIDATION_FAILED: 'api_key_validation_failed',
 
+	// Passkeys
+	PASSKEY_REGISTERED: 'passkey_registered',
+	PASSKEY_LOGIN_SUCCESS: 'passkey_login_success',
+	PASSKEY_LOGIN_FAILURE: 'passkey_login_failure',
+	PASSKEY_DELETED: 'passkey_deleted',
+
 	// Organizations
 	ORG_CREATED: 'org_created',
 	ORG_DELETED: 'org_deleted',

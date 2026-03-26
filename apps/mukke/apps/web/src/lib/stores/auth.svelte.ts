@@ -107,6 +107,35 @@ export const authStore = {
 		}
 	},
 
+	isPasskeyAvailable(): boolean {
+		const authService = getAuthService();
+		if (!authService) return false;
+		return authService.isPasskeyAvailable();
+	},
+
+	async signInWithPasskey() {
+		const authService = getAuthService();
+		if (!authService) {
+			return { success: false, error: 'Auth not available on server' };
+		}
+
+		try {
+			const result = await authService.signInWithPasskey();
+
+			if (!result.success) {
+				return { success: false, error: result.error || 'Passkey authentication failed' };
+			}
+
+			const userData = await authService.getUserFromToken();
+			user = userData;
+
+			return { success: true };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			return { success: false, error: errorMessage };
+		}
+	},
+
 	async signIn(email: string, password: string) {
 		const authService = getAuthService();
 		if (!authService) {
