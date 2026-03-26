@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 
 	interface QuoteList {
@@ -51,9 +52,12 @@
 			if (response.ok) {
 				const data = await response.json();
 				lists = data.lists || [];
+			} else {
+				toast.error($_('common.error'));
 			}
 		} catch (error) {
 			console.error('Failed to fetch lists:', error);
+			toast.error($_('common.error'));
 		} finally {
 			loading = false;
 		}
@@ -86,9 +90,12 @@
 				showCreateModal = false;
 				newListName = '';
 				newListDescription = '';
+			} else {
+				toast.error($_('common.error'));
 			}
 		} catch (error) {
 			console.error('Failed to create list:', error);
+			toast.error($_('common.error'));
 		} finally {
 			saving = false;
 		}
@@ -110,9 +117,12 @@
 			if (response.ok) {
 				lists = lists.filter((l) => l.id !== listId);
 				ZitareEvents.listDeleted();
+			} else {
+				toast.error($_('lists.detail.toast.deleteError'));
 			}
 		} catch (error) {
 			console.error('Failed to delete list:', error);
+			toast.error($_('lists.detail.toast.deleteError'));
 		} finally {
 			deletingId = null;
 		}
