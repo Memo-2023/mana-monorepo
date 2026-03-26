@@ -11,8 +11,6 @@ interface AuthState {
 	initialize: () => Promise<void>;
 	signIn: (email: string, password: string) => Promise<void>;
 	signUp: (email: string, password: string, username: string) => Promise<void>;
-	signInWithGoogle: (idToken: string) => Promise<void>;
-	signInWithApple: (identityToken: string) => Promise<void>;
 	signOut: () => Promise<void>;
 	resetPassword: (email: string) => Promise<void>;
 	updateProfile: (updates: {
@@ -104,44 +102,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 			set({ user: result.user || null });
 		} catch (error: any) {
 			set({ error: error.message || 'Failed to sign up' });
-			throw error;
-		} finally {
-			set({ isLoading: false });
-		}
-	},
-
-	signInWithGoogle: async (idToken: string) => {
-		try {
-			set({ isLoading: true, error: null });
-
-			const result = await authService.signInWithGoogle(idToken);
-
-			if (!result.success) {
-				throw new Error(result.error || 'Google sign-in failed');
-			}
-
-			set({ user: result.user || null });
-		} catch (error: any) {
-			set({ error: error.message || 'Google sign-in failed' });
-			throw error;
-		} finally {
-			set({ isLoading: false });
-		}
-	},
-
-	signInWithApple: async (identityToken: string) => {
-		try {
-			set({ isLoading: true, error: null });
-
-			const result = await authService.signInWithApple(identityToken);
-
-			if (!result.success) {
-				throw new Error(result.error || 'Apple sign-in failed');
-			}
-
-			set({ user: result.user || null });
-		} catch (error: any) {
-			set({ error: error.message || 'Apple sign-in failed' });
 			throw error;
 		} finally {
 			set({ isLoading: false });

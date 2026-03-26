@@ -56,8 +56,6 @@
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}
 	{goto}
-	enableGoogle={false}
-	enableApple={false}
 	successRedirect={redirectTo}
 	registerPath="/register"
 	forgotPasswordPath="/forgot-password"

@@ -140,8 +140,6 @@ export const authService = createAuthService({
 		refresh: '/api/v1/auth/refresh',
 		validate: '/api/v1/auth/validate',
 		forgotPassword: '/api/v1/auth/forgot-password',
-		googleSignIn: '/api/v1/auth/google-signin',
-		appleSignIn: '/api/v1/auth/apple-signin',
 		credits: '/api/v1/credits/balance',
 	},
 });

@@ -223,42 +223,6 @@ export const authService = {
 		}
 	},
 
-	signInWithGoogle: async (
-		idToken: string
-	): Promise<{ success: boolean; user?: ManaUser; error?: string }> => {
-		try {
-			const result = await _sharedAuth.signInWithGoogle(idToken);
-			if (!result.success) {
-				return { success: false, error: result.error || 'Google sign-in failed' };
-			}
-			const userData = await _sharedAuth.getUserFromToken();
-			return { success: true, user: toManaUser(userData) || undefined };
-		} catch (error) {
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error',
-			};
-		}
-	},
-
-	signInWithApple: async (
-		identityToken: string
-	): Promise<{ success: boolean; user?: ManaUser; error?: string }> => {
-		try {
-			const result = await _sharedAuth.signInWithApple(identityToken);
-			if (!result.success) {
-				return { success: false, error: result.error || 'Apple sign-in failed' };
-			}
-			const userData = await _sharedAuth.getUserFromToken();
-			return { success: true, user: toManaUser(userData) || undefined };
-		} catch (error) {
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error',
-			};
-		}
-	},
-
 	onTokenRefresh: null as ((userData: { id: string; email: string; role: string }) => void) | null,
 };
 

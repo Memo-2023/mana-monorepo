@@ -2,9 +2,6 @@
 	import type { Component, Snippet } from 'svelte';
 	import type { AuthResult } from '../types';
 	import { Check, Warning, Eye, EyeSlash, SignIn, Sun, Moon } from '@manacore/shared-icons';
-	import GoogleSignInButton from '../components/GoogleSignInButton.svelte';
-	import AppleSignInButton from '../components/AppleSignInButton.svelte';
-
 	/** Translation strings for the login page */
 	export interface LoginTranslations {
 		title: string;
@@ -26,9 +23,7 @@
 		emailInvalid: string;
 		passwordRequired: string;
 		signInFailed: string;
-		googleSignInFailed: string;
 		signInSuccess: string;
-		googleSignInSuccess: string;
 		emailVerified?: string;
 		emailNotVerified?: string;
 		resendVerification?: string;
@@ -56,9 +51,7 @@
 		emailInvalid: 'Please enter a valid email address',
 		passwordRequired: 'Password is required',
 		signInFailed: 'Sign in failed',
-		googleSignInFailed: 'Google sign in failed',
 		signInSuccess: 'Successfully signed in. Redirecting...',
-		googleSignInSuccess: 'Successfully signed in with Google. Redirecting...',
 		emailVerified: 'Email successfully verified! Please sign in.',
 		emailNotVerified: 'Email not verified.',
 		resendVerification: 'Resend verification email',
@@ -71,12 +64,8 @@
 		logo: Component<{ size?: number; color?: string }>;
 		primaryColor: string;
 		onSignIn: (email: string, password: string) => Promise<AuthResult>;
-		onSignInWithGoogle?: (idToken: string) => Promise<AuthResult>;
-		onSignInWithApple?: (identityToken: string) => Promise<AuthResult>;
 		onResendVerification?: (email: string) => Promise<AuthResult>;
 		goto: (path: string) => void;
-		enableGoogle?: boolean;
-		enableApple?: boolean;
 		successRedirect?: string;
 		registerPath?: string;
 		forgotPasswordPath?: string;
@@ -102,12 +91,8 @@
 		logo: Logo,
 		primaryColor,
 		onSignIn,
-		onSignInWithGoogle,
-		onSignInWithApple,
 		onResendVerification,
 		goto,
-		enableGoogle = false,
-		enableApple = false,
 		successRedirect = '/dashboard',
 		registerPath = '/register',
 		forgotPasswordPath = '/forgot-password',
@@ -266,23 +251,6 @@
 			showEmailNotVerified = false;
 		} else {
 			setError(result.error || t.signInFailed, 'general');
-		}
-	}
-
-	async function handleGoogleSuccess(idToken: string) {
-		if (!onSignInWithGoogle) return;
-		loading = true;
-		clearError();
-
-		const result = await onSignInWithGoogle(idToken);
-		loading = false;
-
-		if (result.success) {
-			showSuccess = true;
-			successAnnouncement = t.googleSignInSuccess;
-			setTimeout(() => goto(successRedirect), 600);
-		} else {
-			setError(result.error || t.googleSignInFailed, 'general');
 		}
 	}
 
@@ -518,20 +486,6 @@
 						{/if}
 					</button>
 				</form>
-
-				{#if enableGoogle || enableApple}
-					<div class="divider">
-						<span>{t.orDivider}</span>
-					</div>
-					<div class="social-buttons">
-						{#if enableGoogle && onSignInWithGoogle}
-							<GoogleSignInButton onSuccess={handleGoogleSuccess} />
-						{/if}
-						{#if enableApple}
-							<AppleSignInButton />
-						{/if}
-					</div>
-				{/if}
 
 				<p class="register-link">
 					{t.noAccount}
@@ -971,38 +925,6 @@
 	.submit-button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
-	}
-
-	.divider {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin: 1.25rem 0;
-	}
-
-	.divider::before,
-	.divider::after {
-		content: '';
-		flex: 1;
-		height: 1px;
-		background: currentColor;
-		opacity: 0.2;
-	}
-
-	.divider span {
-		font-size: 0.75rem;
-		color: rgba(255, 255, 255, 0.5);
-	}
-
-	.light .divider span {
-		color: rgba(0, 0, 0, 0.5);
-	}
-
-	.social-buttons {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
 	}
 
 	.register-link {

@@ -55,8 +55,6 @@ const DEFAULT_ENDPOINTS: AuthEndpoints = {
 	forgotPassword: '/api/v1/auth/forgot-password',
 	resetPassword: '/api/v1/auth/reset-password',
 	resendVerification: '/api/v1/auth/resend-verification',
-	googleSignIn: '/api/v1/auth/google-signin',
-	appleSignIn: '/api/v1/auth/apple-signin',
 	credits: '/api/v1/credits/balance',
 	// Better Auth native endpoints for SSO
 	getSession: '/api/auth/get-session',
@@ -358,76 +356,6 @@ export function createAuthService(config: AuthServiceConfig) {
 			}
 
 			return { appToken, refreshToken, userData };
-		},
-
-		/**
-		 * Sign in with Google
-		 */
-		async signInWithGoogle(idToken: string): Promise<AuthResult> {
-			const result = await service.signInWithSocial(idToken, endpoints.googleSignIn);
-			trackAuth(result.success ? 'login' : 'login_failed', { method: 'google' });
-			return result;
-		},
-
-		/**
-		 * Sign in with Apple
-		 */
-		async signInWithApple(identityToken: string): Promise<AuthResult> {
-			const result = await service.signInWithSocial(identityToken, endpoints.appleSignIn);
-			trackAuth(result.success ? 'login' : 'login_failed', { method: 'apple' });
-			return result;
-		},
-
-		/**
-		 * Internal: Sign in with social provider
-		 */
-		async signInWithSocial(token: string, endpoint: string): Promise<AuthResult> {
-			try {
-				const storage = getStorageAdapter();
-				const deviceAdapter = getDeviceAdapter();
-				const deviceInfo = await deviceAdapter.getDeviceInfo();
-
-				const response = await fetch(`${baseUrl}${endpoint}`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ token, deviceInfo }),
-				});
-
-				if (!response.ok) {
-					const errorData = await response.json();
-					return { success: false, error: errorData.message || 'Social sign in failed' };
-				}
-
-				const responseData = await response.json();
-				const { appToken, refreshToken } = responseData;
-
-				// Extract email from response or token
-				let email = responseData.email;
-				if (!email && appToken) {
-					const userData = getUserFromToken(appToken);
-					email = userData?.email;
-				}
-
-				// Store tokens
-				const storagePromises = [
-					storage.setItem(storageKeys.APP_TOKEN, appToken),
-					storage.setItem(storageKeys.REFRESH_TOKEN, refreshToken),
-				];
-
-				if (email) {
-					storagePromises.push(storage.setItem(storageKeys.USER_EMAIL, email));
-				}
-
-				await Promise.all(storagePromises);
-
-				return { success: true };
-			} catch (error) {
-				console.error('Error with social sign in:', error);
-				return {
-					success: false,
-					error: error instanceof Error ? error.message : 'Unknown error during social sign in',
-				};
-			}
 		},
 
 		/**

@@ -34,9 +34,7 @@ export interface AuthTranslations {
 		emailInvalid: string;
 		passwordRequired: string;
 		signInFailed: string;
-		googleSignInFailed: string;
 		signInSuccess: string;
-		googleSignInSuccess: string;
 		emailVerified?: string;
 		emailNotVerified?: string;
 		resendVerification?: string;

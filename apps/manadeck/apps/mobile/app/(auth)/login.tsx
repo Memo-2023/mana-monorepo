@@ -8,8 +8,6 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
 import { useThemeColors } from '~/utils/themeUtils';
-import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton';
-import { AppleSignInButton } from '../../components/auth/AppleSignInButton';
 import { spacing } from '~/utils/spacing';
 
 export default function LoginScreen() {
@@ -18,8 +16,7 @@ export default function LoginScreen() {
 	const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 	const colors = useThemeColors();
 
-	const { signIn, signInWithGoogle, signInWithApple, isLoading, error, clearError } =
-		useAuthStore();
+	const { signIn, isLoading, error, clearError } = useAuthStore();
 
 	const validateForm = () => {
 		const newErrors: { email?: string; password?: string } = {};
@@ -49,28 +46,6 @@ export default function LoginScreen() {
 			router.replace('/(tabs)');
 		} catch (err: any) {
 			Alert.alert('Login fehlgeschlagen', err.message || 'Ein Fehler ist aufgetreten');
-		}
-	};
-
-	const handleGoogleSignIn = async (idToken: string) => {
-		try {
-			clearError();
-			await signInWithGoogle(idToken);
-			router.replace('/(tabs)');
-		} catch (err: any) {
-			// Error is already handled in GoogleSignInButton
-			throw err;
-		}
-	};
-
-	const handleAppleSignIn = async (identityToken: string) => {
-		try {
-			clearError();
-			await signInWithApple(identityToken);
-			router.replace('/(tabs)');
-		} catch (err: any) {
-			// Error is already handled in AppleSignInButton
-			throw err;
 		}
 	};
 
@@ -139,37 +114,6 @@ export default function LoginScreen() {
 							<Button onPress={handleLogin} loading={isLoading} fullWidth size="lg">
 								Anmelden
 							</Button>
-
-							{/* Social Sign-In Divider */}
-							<View
-								style={{ marginVertical: spacing.xl, flexDirection: 'row', alignItems: 'center' }}
-							>
-								<View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-								<Text
-									style={{
-										marginHorizontal: spacing.lg,
-										color: colors.mutedForeground,
-										fontSize: 14,
-									}}
-								>
-									oder
-								</Text>
-								<View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-							</View>
-
-							{/* Social Sign-In Buttons */}
-							<View style={{ gap: spacing.content.small }}>
-								<GoogleSignInButton
-									onSignIn={handleGoogleSignIn}
-									onSignInSuccess={() => console.log('Google sign-in successful')}
-									onSignInError={(error) => console.error('Google sign-in error:', error)}
-								/>
-								<AppleSignInButton
-									onSignIn={handleAppleSignIn}
-									onSignInSuccess={() => console.log('Apple sign-in successful')}
-									onSignInError={(error) => console.error('Apple sign-in error:', error)}
-								/>
-							</View>
 
 							<View
 								style={{

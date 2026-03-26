@@ -24,21 +24,6 @@ export interface AuthUIConfig {
 
 	/** Redirect path after successful login (default: '/dashboard') */
 	successRedirect?: string;
-
-	/** Enable Google Sign-In */
-	enableGoogle?: boolean;
-
-	/** Enable Apple Sign-In */
-	enableApple?: boolean;
-
-	/** Google OAuth Client ID (required if enableGoogle is true) */
-	googleClientId?: string;
-
-	/** Apple OAuth Service ID (required if enableApple is true) */
-	appleClientId?: string;
-
-	/** Apple OAuth Redirect URI */
-	appleRedirectUri?: string;
 }
 
 /**
@@ -47,8 +32,6 @@ export interface AuthUIConfig {
 export interface AuthServiceInterface {
 	signIn(email: string, password: string): Promise<AuthResult>;
 	signUp(email: string, password: string): Promise<AuthResult>;
-	signInWithGoogle?(idToken: string): Promise<AuthResult>;
-	signInWithApple?(identityToken: string): Promise<AuthResult>;
 	forgotPassword(email: string): Promise<AuthResult>;
 }
 

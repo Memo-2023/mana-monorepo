@@ -33,8 +33,6 @@
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}
 	{goto}
-	enableGoogle={false}
-	enableApple={false}
 	successRedirect="/decks"
 	registerPath="/register"
 	forgotPasswordPath="/forgot-password"
