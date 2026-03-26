@@ -29,12 +29,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const response = await resolve(event, {
 		transformPageChunk: ({ html }) => {
 			const envScript = `<script>
-window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
-window.__PUBLIC_TODO_API_URL__ = "${PUBLIC_TODO_API_URL_CLIENT}";
-window.__PUBLIC_CALENDAR_API_URL__ = "${PUBLIC_CALENDAR_API_URL_CLIENT}";
-window.__PUBLIC_CLOCK_API_URL__ = "${PUBLIC_CLOCK_API_URL_CLIENT}";
-window.__PUBLIC_CONTACTS_API_URL__ = "${PUBLIC_CONTACTS_API_URL_CLIENT}";
-window.__PUBLIC_GLITCHTIP_DSN__ = "${PUBLIC_GLITCHTIP_DSN}";
+window.__PUBLIC_MANA_CORE_AUTH_URL__ = ${JSON.stringify(PUBLIC_MANA_CORE_AUTH_URL_CLIENT)};
+window.__PUBLIC_TODO_API_URL__ = ${JSON.stringify(PUBLIC_TODO_API_URL_CLIENT)};
+window.__PUBLIC_CALENDAR_API_URL__ = ${JSON.stringify(PUBLIC_CALENDAR_API_URL_CLIENT)};
+window.__PUBLIC_CLOCK_API_URL__ = ${JSON.stringify(PUBLIC_CLOCK_API_URL_CLIENT)};
+window.__PUBLIC_CONTACTS_API_URL__ = ${JSON.stringify(PUBLIC_CONTACTS_API_URL_CLIENT)};
+window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 </script>`;
 			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
 		},

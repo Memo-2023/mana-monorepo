@@ -32,12 +32,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 			// Inject runtime environment variables into the HTML
 			// These will be available on window.__PUBLIC_*__ for client-side code
 			const envScript = `<script>
-window.__PUBLIC_MANA_CORE_AUTH_URL__ = "${PUBLIC_MANA_CORE_AUTH_URL_CLIENT}";
-window.__PUBLIC_BACKEND_URL__ = "${PUBLIC_BACKEND_URL_CLIENT}";
-window.__PUBLIC_STT_URL__ = "${PUBLIC_STT_URL}";
-window.__PUBLIC_TODO_BACKEND_URL__ = "${PUBLIC_TODO_BACKEND_URL}";
-window.__PUBLIC_CONTACTS_API_URL__ = "${PUBLIC_CONTACTS_API_URL}";
-window.__PUBLIC_GLITCHTIP_DSN__ = "${PUBLIC_GLITCHTIP_DSN}";
+window.__PUBLIC_MANA_CORE_AUTH_URL__ = ${JSON.stringify(PUBLIC_MANA_CORE_AUTH_URL_CLIENT)};
+window.__PUBLIC_BACKEND_URL__ = ${JSON.stringify(PUBLIC_BACKEND_URL_CLIENT)};
+window.__PUBLIC_STT_URL__ = ${JSON.stringify(PUBLIC_STT_URL)};
+window.__PUBLIC_TODO_BACKEND_URL__ = ${JSON.stringify(PUBLIC_TODO_BACKEND_URL)};
+window.__PUBLIC_CONTACTS_API_URL__ = ${JSON.stringify(PUBLIC_CONTACTS_API_URL)};
+window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 </script>`;
 			return injectUmamiAnalytics(html.replace('<head>', `<head>${envScript}`));
 		},
