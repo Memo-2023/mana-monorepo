@@ -11,6 +11,7 @@
 		DotsThreeVertical,
 	} from '@manacore/shared-icons';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import { filesStore } from '$lib/stores/files.svelte';
 
 	interface Props {
 		file: StorageFile;
@@ -19,6 +20,9 @@
 	}
 
 	let { file, onClick, onAction }: Props = $props();
+
+	let isSelected = $derived(filesStore.selectedFileIds.has(file.id));
+	let hasSelection = $derived(filesStore.selectionCount > 0);
 
 	let contextMenuVisible = $state(false);
 	let contextMenuX = $state(0);
@@ -80,7 +84,15 @@
 <div
 	class="file-card"
 	class:dragging={isDragging}
-	onclick={onClick}
+	class:selected={isSelected}
+	onclick={(e) => {
+		if (hasSelection) {
+			e.stopPropagation();
+			filesStore.toggleFileSelection(file.id);
+		} else {
+			onClick?.();
+		}
+	}}
 	oncontextmenu={handleContextMenu}
 	role="button"
 	tabindex="0"
@@ -94,6 +106,18 @@
 		isDragging = false;
 	}}
 >
+	{#if hasSelection}
+		<input
+			type="checkbox"
+			class="select-checkbox"
+			checked={isSelected}
+			onclick={(e) => {
+				e.stopPropagation();
+				filesStore.toggleFileSelection(file.id);
+			}}
+			aria-label="Datei auswählen"
+		/>
+	{/if}
 	<div class="file-icon">
 		<Icon size={40} strokeWidth={1.5} />
 		{#if file.isFavorite}
@@ -144,6 +168,21 @@
 	.file-card:hover {
 		border-color: rgb(var(--color-primary));
 		box-shadow: var(--shadow-md);
+	}
+
+	.file-card.selected {
+		border-color: rgb(var(--color-primary));
+		background: rgb(var(--color-primary) / 0.06);
+	}
+
+	.select-checkbox {
+		position: absolute;
+		top: 0.5rem;
+		left: 0.5rem;
+		width: 16px;
+		height: 16px;
+		accent-color: rgb(var(--color-primary));
+		cursor: pointer;
 	}
 
 	.file-card.dragging {

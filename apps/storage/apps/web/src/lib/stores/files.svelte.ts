@@ -12,6 +12,8 @@ let currentFolder = $state<StorageFolder | null>(null);
 let loading = $state(false);
 let error = $state<string | null>(null);
 let viewMode = $state<'grid' | 'list'>('grid');
+let selectedFileIds = $state<Set<string>>(new Set());
+let selectedFolderIds = $state<Set<string>>(new Set());
 
 export const filesStore = {
 	get files() {
@@ -31,6 +33,59 @@ export const filesStore = {
 	},
 	get viewMode() {
 		return viewMode;
+	},
+	get selectedFileIds() {
+		return selectedFileIds;
+	},
+	get selectedFolderIds() {
+		return selectedFolderIds;
+	},
+	get selectionCount() {
+		return selectedFileIds.size + selectedFolderIds.size;
+	},
+
+	toggleFileSelection(id: string) {
+		const next = new Set(selectedFileIds);
+		if (next.has(id)) next.delete(id);
+		else next.add(id);
+		selectedFileIds = next;
+	},
+
+	toggleFolderSelection(id: string) {
+		const next = new Set(selectedFolderIds);
+		if (next.has(id)) next.delete(id);
+		else next.add(id);
+		selectedFolderIds = next;
+	},
+
+	selectAll() {
+		selectedFileIds = new Set(files.map((f) => f.id));
+		selectedFolderIds = new Set(folders.map((f) => f.id));
+	},
+
+	clearSelection() {
+		selectedFileIds = new Set();
+		selectedFolderIds = new Set();
+	},
+
+	async deleteSelected() {
+		const fileIds = [...selectedFileIds];
+		const folderIds = [...selectedFolderIds];
+
+		const results = await Promise.all([
+			...fileIds.map((id) => filesApi.delete(id)),
+			...folderIds.map((id) => foldersApi.delete(id)),
+		]);
+
+		const hasErrors = results.some((r) => r.error);
+		if (!hasErrors) {
+			files = files.filter((f) => !selectedFileIds.has(f.id));
+			folders = folders.filter((f) => !selectedFolderIds.has(f.id));
+		}
+
+		selectedFileIds = new Set();
+		selectedFolderIds = new Set();
+		return { deleted: fileIds.length + folderIds.length, hasErrors };
 	},
 
 	setViewMode(mode: 'grid' | 'list') {
@@ -53,6 +108,8 @@ export const filesStore = {
 	async loadFolder(folderId?: string) {
 		loading = true;
 		error = null;
+		selectedFileIds = new Set();
+		selectedFolderIds = new Set();
 
 		try {
 			if (folderId) {

@@ -16,6 +16,7 @@
 	import FileSkeletonList from '$lib/components/files/FileSkeletonList.svelte';
 	import EmptyState from '$lib/components/files/EmptyState.svelte';
 	import ShareModal from '$lib/components/files/ShareModal.svelte';
+	import BulkActionBar from '$lib/components/files/BulkActionBar.svelte';
 
 	let previewFile = $state<StorageFile | null>(null);
 	let shareTarget = $state<{ fileId?: string; folderId?: string; name: string } | null>(null);
@@ -253,6 +254,8 @@
 	{#if showUploadZone}
 		<UploadZone onUpload={handleUpload} {uploading} progress={uploadProgress} />
 	{/if}
+
+	<BulkActionBar />
 
 	{#if filesStore.loading}
 		{#if filesStore.viewMode === 'grid'}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { StorageFolder } from '$lib/api/client';
 	import { Folder, Heart, DotsThreeVertical } from '@manacore/shared-icons';
+	import { filesStore } from '$lib/stores/files.svelte';
 
 	interface Props {
 		folder: StorageFolder;
@@ -10,6 +11,9 @@
 	}
 
 	let { folder, onClick, onAction, onDrop }: Props = $props();
+
+	let isSelected = $derived(filesStore.selectedFolderIds.has(folder.id));
+	let hasSelection = $derived(filesStore.selectionCount > 0);
 
 	let showMenu = $state(false);
 	let isDragOver = $state(false);
@@ -71,7 +75,15 @@
 	class="folder-card"
 	class:drag-over={isDragOver}
 	class:dragging={isDragging}
-	onclick={onClick}
+	class:selected={isSelected}
+	onclick={(e) => {
+		if (hasSelection) {
+			e.stopPropagation();
+			filesStore.toggleFolderSelection(folder.id);
+		} else {
+			onClick?.();
+		}
+	}}
 	role="button"
 	tabindex="0"
 	draggable="true"
@@ -87,6 +99,18 @@
 	ondragleave={handleDragLeave}
 	ondrop={handleDrop}
 >
+	{#if hasSelection}
+		<input
+			type="checkbox"
+			class="select-checkbox"
+			checked={isSelected}
+			onclick={(e) => {
+				e.stopPropagation();
+				filesStore.toggleFolderSelection(folder.id);
+			}}
+			aria-label="Ordner auswählen"
+		/>
+	{/if}
 	<div class="folder-icon" style:color={folderColor}>
 		<Folder size={40} strokeWidth={1.5} fill="currentColor" />
 		{#if folder.isFavorite}
@@ -141,6 +165,22 @@
 	.folder-card:hover {
 		border-color: rgb(var(--color-primary));
 		box-shadow: var(--shadow-md);
+	}
+
+	.folder-card.selected {
+		border-color: rgb(var(--color-primary));
+		background: rgb(var(--color-primary) / 0.06);
+	}
+
+	.select-checkbox {
+		position: absolute;
+		top: 0.5rem;
+		left: 0.5rem;
+		width: 16px;
+		height: 16px;
+		accent-color: rgb(var(--color-primary));
+		cursor: pointer;
+		z-index: 2;
 	}
 
 	.folder-card.drag-over {
