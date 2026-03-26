@@ -19,6 +19,14 @@
 
 	let isFavorite = $derived(favoritesStore.isFavorite(quote.id));
 	let quoteText = $derived(quotesStore.getText(quote));
+	let showBio = $state(false);
+
+	// Get author bio in current language
+	let authorBioText = $derived(() => {
+		if (!quote.authorBio) return '';
+		const lang = quotesStore.language === 'original' ? 'de' : quotesStore.language;
+		return quote.authorBio[lang] || quote.authorBio.de || '';
+	});
 
 	// Category gradient classes
 	const categoryGradients: Record<Category, string> = {
@@ -107,7 +115,28 @@
 
 	<div class="flex items-center justify-between">
 		<div>
-			<p class="quote-author text-foreground-secondary">— {quote.author}</p>
+			<p class="quote-author text-foreground-secondary">
+				— {quote.author}
+				{#if authorBioText}
+					<button
+						onclick={() => (showBio = !showBio)}
+						class="inline-flex ml-1 text-foreground-muted hover:text-primary transition-colors align-middle"
+						aria-label="Info"
+					>
+						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					</button>
+				{/if}
+			</p>
+			{#if showBio && authorBioText}
+				<p class="text-sm text-foreground-muted mt-1 italic">{authorBioText}</p>
+			{/if}
 			{#if showSource && (quote.source || quote.year)}
 				<p class="text-sm text-foreground-muted mt-1">
 					{#if quote.source}
