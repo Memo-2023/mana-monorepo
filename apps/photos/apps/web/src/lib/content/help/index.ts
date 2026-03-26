@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getPhotosHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -53,17 +54,7 @@ export function getPhotosHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: ['favorites', 'heart', 'bookmarks'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Fotos geschützt?' : 'How are my photos protected?',
-				answer: isDE
-					? '<p>Deine Fotos sind sicher bei ManaCore:</p><ul><li>Alle Fotos werden verschlüsselt übertragen und gespeichert</li><li>Nur du hast Zugriff auf deine Galerie</li><li>Fotos werden nicht für KI-Training oder andere Zwecke verwendet</li><li>Du kannst jederzeit Fotos löschen — sie werden dann dauerhaft entfernt</li></ul>'
-					: '<p>Your photos are safe with ManaCore:</p><ul><li>All photos are encrypted in transit and at rest</li><li>Only you have access to your gallery</li><li>Photos are not used for AI training or other purposes</li><li>You can delete photos at any time — they are permanently removed</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				tags: ['privacy', 'security', 'data'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Fotos', dataTypeEN: 'photos' }),
 		],
 		features: [
 			{

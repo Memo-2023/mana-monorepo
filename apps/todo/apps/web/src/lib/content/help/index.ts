@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getTodoHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -60,18 +61,7 @@ export function getTodoHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: isDE ? ['wiederkehrend', 'wiederholung', 'serie'] : ['recurring', 'repeat', 'series'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Daten sind sicher:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>Kein Datenverkauf</strong>: Deine Aufgaben werden nie an Dritte verkauft</li><li><strong>Datenexport</strong>: Du kannst jederzeit alle Daten exportieren</li></ul>'
-					: '<p>Your data is secure:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS)</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li><li><strong>No Data Selling</strong>: Your tasks are never sold to third parties</li><li><strong>Data Export</strong>: You can export all your data anytime</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Aufgaben', dataTypeEN: 'tasks' }),
 		],
 		features: [
 			{

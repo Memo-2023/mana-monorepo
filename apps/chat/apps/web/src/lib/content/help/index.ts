@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getChatHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -56,18 +57,16 @@ export function getChatHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: isDE ? ['vergleich', 'modelle', 'test'] : ['compare', 'models', 'test'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Chats geschützt?' : 'How are my chats protected?',
-				answer: isDE
-					? '<p>Deine Unterhaltungen sind sicher:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) verschlüsselt</li><li><strong>Privat</strong>: Nur du hast Zugriff auf deine Chats</li><li><strong>Lokale Modelle</strong>: Bei lokalen Modellen verlassen deine Daten nie unseren Server</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li></ul>'
-					: '<p>Your conversations are secure:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS)</li><li><strong>Private</strong>: Only you have access to your chats</li><li><strong>Local models</strong>: With local models, your data never leaves our server</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'sicherheit', 'dsgvo'] : ['privacy', 'security', 'gdpr'],
-			},
+			...getPrivacyFAQs(locale, {
+				dataTypeDE: 'Chats',
+				dataTypeEN: 'chats',
+				extraBulletsDE: [
+					'<strong>Lokale Modelle</strong>: Bei lokalen Modellen verlassen deine Daten nie unseren Server',
+				],
+				extraBulletsEN: [
+					'<strong>Local models</strong>: With local models, your data never leaves our server',
+				],
+			}),
 		],
 		features: [
 			{

@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getZitareHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -42,18 +43,7 @@ export function getZitareHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: isDE ? ['listen', 'sammlung', 'organisieren'] : ['lists', 'collection', 'organize'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Daten sind sicher:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) verschlüsselt</li><li><strong>Privat</strong>: Deine Favoriten und Listen sind nur für dich sichtbar</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li></ul>'
-					: '<p>Your data is secure:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS)</li><li><strong>Private</strong>: Your favorites and lists are only visible to you</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li></ul>',
-				category: 'privacy',
-				order: 4,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Zitate', dataTypeEN: 'quotes' }),
 		],
 		features: [
 			{

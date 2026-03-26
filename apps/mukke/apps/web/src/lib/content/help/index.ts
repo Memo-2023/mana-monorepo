@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getMukkeHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -47,18 +48,7 @@ export function getMukkeHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: isDE ? ['playlist', 'erstellen', 'sortieren'] : ['playlist', 'create', 'sort'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Musik ist sicher:</p><ul><li><strong>Privat</strong>: Nur du hast Zugriff auf deine Bibliothek</li><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li></ul>'
-					: '<p>Your music is secure:</p><ul><li><strong>Private</strong>: Only you have access to your library</li><li><strong>Encryption</strong>: All data is encrypted in transit (TLS)</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li></ul>',
-				category: 'privacy',
-				order: 4,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Musik', dataTypeEN: 'music' }),
 		],
 		features: [
 			{

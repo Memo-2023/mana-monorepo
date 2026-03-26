@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getContextHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -59,18 +60,7 @@ export function getContextHelpContent(locale: string): HelpContent {
 					? ['versionierung', 'historie', 'wiederherstellen']
 					: ['versioning', 'history', 'restore'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Daten sind sicher:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) und im Ruhezustand verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>KI-Datenschutz</strong>: Deine Dokumente werden nicht zum Trainieren von KI-Modellen verwendet</li><li><strong>Datenexport</strong>: Du kannst jederzeit alle Dokumente exportieren</li></ul>'
-					: '<p>Your data is secure:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS) and at rest</li><li><strong>GDPR compliant</strong>: We follow EU data protection regulations</li><li><strong>AI privacy</strong>: Your documents are not used to train AI models</li><li><strong>Data export</strong>: You can export all documents at any time</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Dokumente', dataTypeEN: 'documents' }),
 		],
 		features: [
 			{

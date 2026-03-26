@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getPictureHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -60,18 +61,7 @@ export function getPictureHelpContent(locale: string): HelpContent {
 					? ['explore', 'entdecken', 'inspiration']
 					: ['explore', 'discover', 'inspiration'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Bilder geschützt?' : 'How are my images protected?',
-				answer: isDE
-					? '<p>Deine Bilder sind sicher:</p><ul><li><strong>Privat</strong>: Generierte Bilder sind standardmäßig nur für dich sichtbar</li><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>Löschung</strong>: Du kannst Bilder jederzeit dauerhaft löschen</li></ul>'
-					: '<p>Your images are secure:</p><ul><li><strong>Private</strong>: Generated images are only visible to you by default</li><li><strong>Encryption</strong>: All data is encrypted in transit (TLS)</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li><li><strong>Deletion</strong>: You can permanently delete images at any time</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'sicherheit', 'dsgvo'] : ['privacy', 'security', 'gdpr'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Bilder', dataTypeEN: 'images' }),
 		],
 		features: [
 			{

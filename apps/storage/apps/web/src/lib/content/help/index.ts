@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getStorageHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -53,18 +54,16 @@ export function getStorageHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: isDE ? ['papierkorb', 'löschen', 'wiederherstellen'] : ['trash', 'delete', 'restore'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Dateien geschützt?' : 'How are my files protected?',
-				answer: isDE
-					? '<p>Deine Dateien sind sicher:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) verschlüsselt</li><li><strong>Privat</strong>: Nur du hast Zugriff auf deine Dateien</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>Share-Kontrolle</strong>: Du bestimmst, wer Zugriff hat (Passwort, Ablauf, Limit)</li></ul>'
-					: '<p>Your files are secure:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS)</li><li><strong>Private</strong>: Only you have access to your files</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li><li><strong>Share control</strong>: You decide who has access (password, expiry, limits)</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'sicherheit', 'dsgvo'] : ['privacy', 'security', 'gdpr'],
-			},
+			...getPrivacyFAQs(locale, {
+				dataTypeDE: 'Dateien',
+				dataTypeEN: 'files',
+				extraBulletsDE: [
+					'<strong>S3-Storage</strong>: Dateien werden sicher in S3-kompatiblem Speicher (MinIO) abgelegt',
+				],
+				extraBulletsEN: [
+					'<strong>S3 storage</strong>: Files are securely stored in S3-compatible storage (MinIO)',
+				],
+			}),
 		],
 		features: [
 			{

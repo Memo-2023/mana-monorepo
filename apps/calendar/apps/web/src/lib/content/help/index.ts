@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getCalendarHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -82,19 +83,7 @@ export function getCalendarHelpContent(locale: string): HelpContent {
 					? ['sync', 'caldav', 'google', 'apple', 'extern']
 					: ['sync', 'caldav', 'google', 'apple', 'external'],
 			},
-			{
-				id: 'faq-privacy',
-				question: t('Wie werden meine Daten geschützt?', 'How is my data protected?'),
-				answer: t(
-					'<p>Deine Daten sind sicher:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>Kein Datenverkauf</strong>: Deine Kalender-Daten werden nie an Dritte verkauft</li><li><strong>Export</strong>: Du kannst jederzeit alle Kalender als iCal exportieren</li></ul>',
-					'<p>Your data is secure:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS)</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li><li><strong>No Data Selling</strong>: Your calendar data is never sold to third parties</li><li><strong>Export</strong>: You can export all calendars as iCal anytime</li></ul>'
-				),
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Kalenderdaten', dataTypeEN: 'calendar data' }),
 		],
 		features: [
 			{

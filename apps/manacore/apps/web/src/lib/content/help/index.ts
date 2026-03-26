@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getManaCoreHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -59,18 +60,7 @@ export function getManaCoreHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: isDE ? ['wechseln', 'apps', 'navigation'] : ['switch', 'apps', 'navigation'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Daten sind sicher:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) und im Ruhezustand verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>Datenhoheit</strong>: Deine Daten gehören dir — exportiere oder lösche sie jederzeit</li><li><strong>Kein Datenverkauf</strong>: Deine Daten werden nie an Dritte verkauft</li><li><strong>Self-Hosted</strong>: ManaCore läuft auf unserer eigenen Infrastruktur</li></ul>'
-					: '<p>Your data is secure:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS) and at rest</li><li><strong>GDPR compliant</strong>: We follow EU data protection regulations</li><li><strong>Data sovereignty</strong>: Your data belongs to you — export or delete it anytime</li><li><strong>No data selling</strong>: Your data is never sold to third parties</li><li><strong>Self-hosted</strong>: ManaCore runs on our own infrastructure</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Daten', dataTypeEN: 'data' }),
 		],
 		features: [
 			{

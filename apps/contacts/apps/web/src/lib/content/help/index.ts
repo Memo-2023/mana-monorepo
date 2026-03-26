@@ -4,6 +4,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getContactsHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -56,18 +57,7 @@ export function getContactsHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: isDE ? ['abo', 'kündigung', 'abrechnung'] : ['subscription', 'cancel', 'billing'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Wir nehmen deinen Datenschutz ernst:</p><ul><li><strong>Verschlüsselung</strong>: Alle Daten werden bei der Übertragung (TLS) und im Ruhezustand verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>Kein Datenverkauf</strong>: Wir verkaufen niemals deine persönlichen Daten</li><li><strong>Datenexport</strong>: Du kannst jederzeit alle deine Daten exportieren</li><li><strong>Kontolöschung</strong>: Du kannst dein Konto und alle Daten dauerhaft löschen</li></ul>'
-					: '<p>We take your privacy seriously:</p><ul><li><strong>Encryption</strong>: All data is encrypted in transit (TLS) and at rest</li><li><strong>GDPR Compliant</strong>: We follow EU data protection regulations</li><li><strong>No Data Selling</strong>: We never sell your personal data</li><li><strong>Data Export</strong>: You can export all your data at any time</li><li><strong>Account Deletion</strong>: You can permanently delete your account and all data</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Kontakte', dataTypeEN: 'contacts' }),
 		],
 		features: [
 			{

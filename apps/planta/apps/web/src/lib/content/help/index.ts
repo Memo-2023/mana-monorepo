@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getPlantaHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -57,17 +58,7 @@ export function getPlantaHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: ['health', 'diseases', 'pests', 'monitoring'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Pflanzendaten sind sicher bei Planta:</p><ul><li>Fotos werden nur zur Pflanzenidentifizierung verwendet und nicht an Dritte weitergegeben</li><li>Deine Pflanzensammlung ist nur für dich sichtbar</li><li>Standortdaten werden nur lokal für Wetteranpassungen genutzt</li><li>Du kannst jederzeit alle Daten exportieren oder löschen</li></ul>'
-					: '<p>Your plant data is safe with Planta:</p><ul><li>Photos are only used for plant identification and are not shared with third parties</li><li>Your plant collection is visible only to you</li><li>Location data is only used locally for weather adjustments</li><li>You can export or delete all data at any time</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				tags: ['privacy', 'security', 'data', 'photos'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Pflanzendaten', dataTypeEN: 'plant data' }),
 		],
 		features: [
 			{

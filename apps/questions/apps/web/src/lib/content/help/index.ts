@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getQuestionsHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -53,17 +54,7 @@ export function getQuestionsHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: ['collections', 'organize', 'save', 'share'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Recherchen sind privat und sicher:</p><ul><li>Suchanfragen werden nicht mit Dritten geteilt</li><li>Dein Rechercheverlauf ist nur für dich sichtbar</li><li>Die Websuche erfolgt über unseren eigenen Suchdienst, nicht über Google</li><li>Du kannst deinen Verlauf jederzeit löschen</li></ul>'
-					: '<p>Your research is private and secure:</p><ul><li>Search queries are not shared with third parties</li><li>Your research history is visible only to you</li><li>Web search is performed through our own search service, not through Google</li><li>You can delete your history at any time</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				tags: ['privacy', 'security', 'data', 'history'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Fragen', dataTypeEN: 'questions' }),
 		],
 		features: [
 			{

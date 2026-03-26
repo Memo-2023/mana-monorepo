@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getPresiHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -53,17 +54,7 @@ export function getPresiHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 				tags: ['themes', 'design', 'customization', 'styles'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Präsentationen sind sicher bei Presi:</p><ul><li>Alle Daten werden verschlüsselt übertragen und gespeichert</li><li>Geteilte Links können jederzeit widerrufen werden</li><li>Du bestimmst, wer Zugriff auf deine Präsentationen hat</li><li>Gelöschte Präsentationen werden dauerhaft entfernt</li></ul>'
-					: '<p>Your presentations are safe with Presi:</p><ul><li>All data is encrypted in transit and at rest</li><li>Shared links can be revoked at any time</li><li>You control who has access to your presentations</li><li>Deleted presentations are permanently removed</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				tags: ['privacy', 'security', 'data', 'sharing'],
-			},
+			...getPrivacyFAQs(locale, { dataTypeDE: 'Präsentationen', dataTypeEN: 'presentations' }),
 		],
 		features: [
 			{

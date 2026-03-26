@@ -3,6 +3,7 @@
  */
 
 import type { HelpContent } from '@manacore/shared-help-types';
+import { getPrivacyFAQs } from '@manacore/shared-help-types';
 
 export function getClockHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
@@ -59,18 +60,16 @@ export function getClockHelpContent(locale: string): HelpContent {
 					? ['life-clock', 'lebenszeit', 'visualisierung']
 					: ['life-clock', 'lifetime', 'visualization'],
 			},
-			{
-				id: 'faq-privacy',
-				question: isDE ? 'Wie werden meine Daten geschützt?' : 'How is my data protected?',
-				answer: isDE
-					? '<p>Deine Daten sind sicher:</p><ul><li><strong>Lokale Speicherung</strong>: Wecker und Timer werden lokal auf deinem Gerät gespeichert</li><li><strong>Verschlüsselung</strong>: Alle synchronisierten Daten werden bei der Übertragung (TLS) verschlüsselt</li><li><strong>DSGVO-konform</strong>: Wir halten uns an die EU-Datenschutzverordnung</li><li><strong>Kein Tracking</strong>: Deine Nutzungsdaten werden nicht an Dritte weitergegeben</li></ul>'
-					: '<p>Your data is secure:</p><ul><li><strong>Local storage</strong>: Alarms and timers are stored locally on your device</li><li><strong>Encryption</strong>: All synced data is encrypted in transit (TLS)</li><li><strong>GDPR compliant</strong>: We follow EU data protection regulations</li><li><strong>No tracking</strong>: Your usage data is never shared with third parties</li></ul>',
-				category: 'privacy',
-				order: 5,
-				language: isDE ? 'de' : 'en',
-				featured: true,
-				tags: isDE ? ['datenschutz', 'dsgvo', 'sicherheit'] : ['privacy', 'gdpr', 'security'],
-			},
+			...getPrivacyFAQs(locale, {
+				dataTypeDE: 'Daten',
+				dataTypeEN: 'data',
+				extraBulletsDE: [
+					'<strong>Lokale Speicherung</strong>: Wecker und Timer werden lokal auf deinem Gerät gespeichert',
+				],
+				extraBulletsEN: [
+					'<strong>Local storage</strong>: Alarms and timers are stored locally on your device',
+				],
+			}),
 		],
 		features: [
 			{
