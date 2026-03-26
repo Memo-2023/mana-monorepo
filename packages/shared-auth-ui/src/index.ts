@@ -8,6 +8,7 @@ export { default as GuestWelcomeModal } from './components/GuestWelcomeModal.sve
 export { default as AuthGateModal } from './components/AuthGateModal.svelte';
 export { default as SessionExpiredBanner } from './components/SessionExpiredBanner.svelte';
 export { default as AuthGate } from './components/AuthGate.svelte';
+export { default as PasskeyManager } from './components/PasskeyManager.svelte';
 
 // Utilities
 export {
@@ -26,3 +27,4 @@ export type {
 	AuthGateAction,
 	AuthGateTranslations,
 } from './types';
+export type { PasskeyManagerTranslations } from './components/PasskeyManager.svelte';
