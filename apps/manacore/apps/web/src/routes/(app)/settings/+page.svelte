@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, GlobalSettingsSection } from '@manacore/shared-ui';
-	import { PasskeyManager, TwoFactorSetup } from '@manacore/shared-auth-ui';
+	import { PasskeyManager, TwoFactorSetup, AuditLog } from '@manacore/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { creditsService } from '$lib/api/credits';
 	import type { CreditBalance } from '$lib/api/credits';
@@ -23,6 +23,10 @@
 	// Credits data
 	let creditBalance = $state<CreditBalance | null>(null);
 
+	// Security events
+	let securityEvents = $state<any[]>([]);
+	let securityEventsLoading = $state(false);
+
 	onMount(async () => {
 		if (authStore.isAuthenticated) {
 			try {
@@ -30,6 +34,10 @@
 				passkeys = await authStore.listPasskeys();
 				// Load user settings from server
 				await userSettings.load();
+				// Load security events
+				securityEventsLoading = true;
+				securityEvents = await authStore.getSecurityEvents();
+				securityEventsLoading = false;
 			} catch (e) {
 				console.error('Failed to load data:', e);
 			}
@@ -302,6 +310,22 @@
 						onEnable={(password) => authStore.enableTwoFactor(password)}
 						onDisable={(password) => authStore.disableTwoFactor(password)}
 						onGenerateBackupCodes={(password) => authStore.generateBackupCodes(password)}
+						primaryColor="#6366f1"
+					/>
+				</div>
+			</Card>
+
+			<!-- Security Log Section -->
+			<Card>
+				<div class="p-6">
+					<AuditLog
+						events={securityEvents}
+						loading={securityEventsLoading}
+						onRefresh={async () => {
+							securityEventsLoading = true;
+							securityEvents = await authStore.getSecurityEvents();
+							securityEventsLoading = false;
+						}}
 						primaryColor="#6366f1"
 					/>
 				</div>

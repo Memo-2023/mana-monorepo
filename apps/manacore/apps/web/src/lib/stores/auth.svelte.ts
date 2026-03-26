@@ -202,6 +202,12 @@ export const authStore = {
 		return authService.renamePasskey(passkeyId, friendlyName);
 	},
 
+	async getSecurityEvents() {
+		const authService = getAuthService();
+		if (!authService) return [];
+		return authService.getSecurityEvents();
+	},
+
 	/**
 	 * Sign in with email and password
 	 */

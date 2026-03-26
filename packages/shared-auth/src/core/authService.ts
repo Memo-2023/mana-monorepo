@@ -779,6 +779,25 @@ export function createAuthService(config: AuthServiceConfig) {
 		},
 
 		/**
+		 * Get security events (audit log)
+		 */
+		async getSecurityEvents(limit = 50): Promise<any[]> {
+			try {
+				const appToken = await service.getAppToken();
+				if (!appToken) return [];
+
+				const res = await fetch(`${baseUrl}/api/v1/auth/security-events?limit=${limit}`, {
+					headers: { Authorization: `Bearer ${appToken}` },
+				});
+
+				if (!res.ok) return [];
+				return await res.json();
+			} catch {
+				return [];
+			}
+		},
+
+		/**
 		 * Get the current app token
 		 */
 		async getAppToken(): Promise<string | null> {

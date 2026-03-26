@@ -145,6 +145,16 @@
 	let twoFactorCode = $state('');
 	let useBackupCode = $state(false);
 	let trustDevice = $state(false);
+	let rateLimitCountdown = $state(0);
+
+	$effect(() => {
+		if (rateLimitCountdown > 0) {
+			const timer = setTimeout(() => {
+				rateLimitCountdown--;
+			}, 1000);
+			return () => clearTimeout(timer);
+		}
+	});
 
 	// Theme state - can be toggled manually, defaults to system preference
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -252,6 +262,16 @@
 			setError(t.emailNotVerified || 'Email not verified.', 'general');
 		} else {
 			setError(result.error || t.signInFailed, 'general');
+
+			// Detect rate limiting
+			if (result.error?.includes('Too Many') || result.error?.includes('rate limit')) {
+				rateLimitCountdown = 60; // 1 minute cooldown
+			} else if (
+				result.error?.includes('temporarily locked') ||
+				result.error === 'ACCOUNT_LOCKED'
+			) {
+				rateLimitCountdown = (result as any).retryAfter || 300; // 5 min default
+			}
 		}
 	}
 
@@ -568,6 +588,9 @@
 										{resendingVerification ? t.resendingVerification : t.resendVerification}
 									</button>
 								{/if}
+								{#if rateLimitCountdown > 0}
+									<p class="retry-countdown">Erneut versuchen in {rateLimitCountdown}s</p>
+								{/if}
 							</div>
 						</div>
 					{/if}
@@ -652,7 +675,7 @@
 						<!-- Submit -->
 						<button
 							type="submit"
-							disabled={loading || showSuccess}
+							disabled={loading || showSuccess || rateLimitCountdown > 0}
 							class="submit-button"
 							style:background-color={showSuccess ? '#22c55e' : primaryColor + '60'}
 							style:border-color={showSuccess ? '#22c55e' : primaryColor}
@@ -932,6 +955,11 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
+	}
+
+	.retry-countdown {
+		font-weight: 600;
+		margin-top: 0.25rem;
 	}
 
 	.resend-link {

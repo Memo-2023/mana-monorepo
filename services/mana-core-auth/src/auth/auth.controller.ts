@@ -819,6 +819,25 @@ export class AuthController {
 	}
 
 	// =========================================================================
+	// Security Events
+	// =========================================================================
+
+	/**
+	 * Get user security events (audit log)
+	 *
+	 * Returns the authenticated user's security events ordered by most recent first.
+	 */
+	@Get('security-events')
+	@UseGuards(JwtAuthGuard)
+	@ApiOperation({ summary: 'Get user security events (audit log)' })
+	@ApiBearerAuth('JWT-auth')
+	@ApiResponse({ status: 200, description: 'Returns security events' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	async getSecurityEvents(@CurrentUser() user: CurrentUserData, @Req() req: Request) {
+		return this.betterAuthService.getSecurityEvents(user.userId);
+	}
+
+	// =========================================================================
 	// Passkey (WebAuthn) Endpoints
 	// =========================================================================
 

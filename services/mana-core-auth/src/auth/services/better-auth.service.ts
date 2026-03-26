@@ -2117,4 +2117,29 @@ export class BetterAuthService {
 			throw new UnauthorizedException('Failed to exchange session for tokens');
 		}
 	}
+
+	/**
+	 * Get security events for a user (audit log)
+	 */
+	async getSecurityEvents(userId: string, limit = 50) {
+		const db = getDb(this.databaseUrl);
+		const { securityEvents } = await import('../../db/schema');
+		const { eq, desc } = await import('drizzle-orm');
+
+		const events = await db
+			.select({
+				id: securityEvents.id,
+				eventType: securityEvents.eventType,
+				ipAddress: securityEvents.ipAddress,
+				userAgent: securityEvents.userAgent,
+				metadata: securityEvents.metadata,
+				createdAt: securityEvents.createdAt,
+			})
+			.from(securityEvents)
+			.where(eq(securityEvents.userId, userId))
+			.orderBy(desc(securityEvents.createdAt))
+			.limit(limit);
+
+		return events;
+	}
 }
