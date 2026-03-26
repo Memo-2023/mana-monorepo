@@ -15,21 +15,21 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
 DOCKER="${DOCKER_CMD:-/usr/local/bin/docker}"
 
-# Monitoring services (compose service names)
-MONITORING_SERVICES=(
-  grafana
-  umami
-  victoriametrics
-  pushgateway
-  cadvisor
-  postgres-exporter
-  redis-exporter
-  node-exporter
-  vmalert
-  alertmanager
-  alert-notifier
-  glitchtip
-  glitchtip-worker
+# Monitoring containers (by container name — more reliable than compose service names)
+MONITORING_CONTAINERS=(
+  mana-mon-grafana
+  mana-mon-umami
+  mana-mon-victoria
+  mana-mon-pushgateway
+  mana-mon-cadvisor
+  mana-mon-postgres-exporter
+  mana-mon-redis-exporter
+  mana-mon-node-exporter
+  mana-mon-vmalert
+  mana-mon-alertmanager
+  mana-mon-alert-notifier
+  mana-mon-glitchtip
+  mana-mon-glitchtip-worker
 )
 
 # Track if we stopped monitoring
@@ -39,7 +39,7 @@ cleanup() {
   if [ "$MONITORING_STOPPED" = true ]; then
     echo ""
     echo "=== Restarting monitoring stack ==="
-    $DOCKER compose -f "$COMPOSE_FILE" start "${MONITORING_SERVICES[@]}" 2>/dev/null || true
+    $DOCKER start "${MONITORING_CONTAINERS[@]}" 2>/dev/null || true
     echo "Monitoring restored."
   fi
 }
@@ -49,7 +49,7 @@ trap cleanup EXIT
 
 stop_monitoring() {
   echo "=== Stopping monitoring to free RAM ==="
-  $DOCKER compose -f "$COMPOSE_FILE" stop "${MONITORING_SERVICES[@]}" 2>/dev/null || true
+  $DOCKER stop "${MONITORING_CONTAINERS[@]}" 2>/dev/null || true
   MONITORING_STOPPED=true
 
   # Also prune dangling build cache
@@ -60,23 +60,37 @@ stop_monitoring() {
 
 build_base_images() {
   echo "=== Building sveltekit-base image ==="
-  $DOCKER build -f "$PROJECT_ROOT/docker/Dockerfile.sveltekit-base" -t sveltekit-base:local "$PROJECT_ROOT" 2>&1 | tail -5
+  $DOCKER build -f "$PROJECT_ROOT/docker/Dockerfile.sveltekit-base" -t sveltekit-base:local "$PROJECT_ROOT"
   echo "sveltekit-base:local built."
   echo ""
 
   echo "=== Building nestjs-base image ==="
-  $DOCKER build -f "$PROJECT_ROOT/docker/Dockerfile.nestjs-base" -t nestjs-base:local "$PROJECT_ROOT" 2>&1 | tail -5
+  $DOCKER build -f "$PROJECT_ROOT/docker/Dockerfile.nestjs-base" -t nestjs-base:local "$PROJECT_ROOT"
   echo "nestjs-base:local built."
   echo ""
 }
 
 build_services() {
   local services=("$@")
+
+  # Check if any service needs a base image rebuild
+  for svc in "${services[@]}"; do
+    case "$svc" in
+      *-web)
+        if ! $DOCKER image inspect sveltekit-base:local >/dev/null 2>&1; then
+          echo "=== Building sveltekit-base (first time) ==="
+          $DOCKER build -f "$PROJECT_ROOT/docker/Dockerfile.sveltekit-base" -t sveltekit-base:local "$PROJECT_ROOT"
+        fi
+        break
+        ;;
+    esac
+  done
+
   echo "=== Building: ${services[*]} ==="
-  $DOCKER compose -f "$COMPOSE_FILE" build --no-cache "${services[@]}"
+  $DOCKER compose -f "$COMPOSE_FILE" build --no-cache "${services[@]}" 2>&1
   echo ""
   echo "=== Restarting: ${services[*]} ==="
-  $DOCKER compose -f "$COMPOSE_FILE" up -d --no-deps "${services[@]}"
+  $DOCKER compose -f "$COMPOSE_FILE" up -d --no-deps "${services[@]}" 2>&1
 }
 
 # --- Main ---
