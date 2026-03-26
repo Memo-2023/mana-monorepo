@@ -1,111 +1,93 @@
 /**
- * Event Tags Store - Manages event tags using Svelte 5 runes
+ * Event Tags Store - Uses shared Tag Store backed by central mana-core-auth
+ *
+ * Wraps createTagStore to provide a backward-compatible eventTagsStore interface
+ * that existing Calendar components (TagStripModal, EventForm, /tags page) rely on.
  */
 
+import { browser } from '$app/environment';
+import { createTagStore, type TagStore } from '@manacore/shared-stores';
+import { authStore } from '$lib/stores/auth.svelte';
+import type { Tag } from '@manacore/shared-tags';
 import type { EventTag } from '@calendar/shared';
-import * as api from '$lib/api/event-tags';
 
-// State
-let tags = $state<EventTag[]>([]);
-let loading = $state(false);
-let error = $state<string | null>(null);
+// Re-export EventTag for backward compatibility
+export type { EventTag };
 
-// Helper to safely get tags array (Svelte 5 runes safety)
-function getTagsArray(): EventTag[] {
-	const arr = tags ?? [];
-	return Array.isArray(arr) ? arr : [];
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return 'http://localhost:3001';
 }
 
+// Create the shared tag store
+const tagStore: TagStore = createTagStore({
+	authUrl: getAuthUrl(),
+	getToken: () => authStore.getValidToken(),
+});
+
+/**
+ * Backward-compatible wrapper that returns { data, error } results
+ * to match the old Calendar API client pattern used by TagStripModal.
+ */
+async function wrapResult<T>(
+	fn: () => Promise<T>
+): Promise<{ data: T | null; error: { message: string } | null }> {
+	try {
+		const data = await fn();
+		return { data, error: null };
+	} catch (e) {
+		const message = e instanceof Error ? e.message : 'Unknown error';
+		return { data: null, error: { message } };
+	}
+}
+
+// Backward-compatible eventTagsStore wrapper
 export const eventTagsStore = {
-	// Getters
 	get tags() {
-		return tags;
+		return tagStore.tags as unknown as EventTag[];
 	},
 	get loading() {
-		return loading;
+		return tagStore.loading;
 	},
 	get error() {
-		return error;
+		return tagStore.error;
 	},
 
-	/**
-	 * Fetch all tags
-	 */
 	async fetchTags() {
-		loading = true;
-		error = null;
-
-		const result = await api.getEventTags();
-
-		if (result.error) {
-			error = result.error.message;
-			tags = [];
-		} else {
-			tags = result.data || [];
-		}
-
-		loading = false;
-		return result;
+		return tagStore.fetchTags();
 	},
 
-	/**
-	 * Create a new tag
-	 */
-	async createTag(data: api.CreateEventTagInput) {
-		const result = await api.createEventTag(data);
-
-		if (result.data) {
-			tags = [...tags, result.data];
-		}
-
-		return result;
-	},
-
-	/**
-	 * Update a tag
-	 */
-	async updateTag(id: string, data: api.UpdateEventTagInput) {
-		const result = await api.updateEventTag(id, data);
-
-		if (result.data) {
-			tags = getTagsArray().map((t) => (t.id === id ? result.data! : t));
-		}
-
-		return result;
-	},
-
-	/**
-	 * Delete a tag
-	 */
-	async deleteTag(id: string) {
-		const result = await api.deleteEventTag(id);
-
-		if (!result.error) {
-			tags = getTagsArray().filter((t) => t.id !== id);
-		}
-
-		return result;
-	},
-
-	/**
-	 * Get tag by ID
-	 */
 	getById(id: string) {
-		return getTagsArray().find((t) => t.id === id);
+		return tagStore.getById(id) as unknown as EventTag | undefined;
 	},
 
-	/**
-	 * Get tags by IDs
-	 */
 	getByIds(ids: string[]) {
-		return getTagsArray().filter((t) => ids.includes(t.id));
+		return tagStore.getByIds(ids) as unknown as EventTag[];
 	},
 
-	/**
-	 * Clear store
-	 */
+	async createTag(data: { name: string; color?: string; groupId?: string | null }) {
+		return wrapResult(() => tagStore.createTag(data)) as Promise<{
+			data: EventTag | null;
+			error: { message: string } | null;
+		}>;
+	},
+
+	async updateTag(id: string, data: { name?: string; color?: string; groupId?: string | null }) {
+		return wrapResult(() => tagStore.updateTag(id, data)) as Promise<{
+			data: EventTag | null;
+			error: { message: string } | null;
+		}>;
+	},
+
+	async deleteTag(id: string) {
+		return wrapResult(() => tagStore.deleteTag(id));
+	},
+
 	clear() {
-		tags = [];
-		error = null;
+		tagStore.clear();
 	},
 };

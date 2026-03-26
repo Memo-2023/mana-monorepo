@@ -2,7 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
+	import {
+		PillNavigation,
+		QuickInputBar,
+		ImmersiveModeToggle,
+		TagStrip,
+	} from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -41,7 +46,6 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
-	import TagStrip from '$lib/components/TagStrip.svelte';
 	import { tagsStore } from '$lib/stores/tags.svelte';
 	import { contactsOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
@@ -128,10 +132,23 @@
 	// User email for user dropdown (fallback to 'Menü' when not logged in)
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
+	// TagStrip visibility (toggle via Tags button in PillNav)
+	let isTagStripVisible = $state(true);
+
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Base navigation items for Contacts
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Kontakte', icon: 'users' },
-		{ href: '/tags', label: 'Tags', icon: 'tag' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{ href: '/help', label: 'Hilfe', icon: 'help-circle' },
 		{ href: '/spiral', label: 'Spiral', icon: 'sparkles' },
@@ -332,8 +349,28 @@
 					ariaLabel="Hauptnavigation"
 				/>
 
-				<!-- TagStrip (above PillNav) -->
-				<TagStrip />
+				<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+				{#if isTagStripVisible}
+					<TagStrip
+						tags={tagsStore.tags.map((t) => ({
+							id: t.id,
+							name: t.name,
+							color: t.color || '#3b82f6',
+						}))}
+						selectedIds={contactsFilterStore.selectedTagId
+							? [contactsFilterStore.selectedTagId]
+							: []}
+						onToggle={(tagId) => {
+							if (contactsFilterStore.selectedTagId === tagId) {
+								contactsFilterStore.setSelectedTagId(null);
+							} else {
+								contactsFilterStore.setSelectedTagId(tagId);
+							}
+						}}
+						onClear={() => contactsFilterStore.setSelectedTagId(null)}
+						managementHref="/tags"
+					/>
+				{/if}
 
 				<!-- Global Quick Input Bar -->
 				<QuickInputBar
