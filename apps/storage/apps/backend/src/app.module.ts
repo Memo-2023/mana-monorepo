@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { LoggerModule } from 'nestjs-pino';
 import { DatabaseModule } from './db/database.module';
 import { HealthModule } from '@manacore/shared-nestjs-health';
 import { MetricsModule } from '@manacore/shared-nestjs-metrics';
@@ -17,6 +18,16 @@ import { AdminModule } from './admin/admin.module';
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
+		}),
+		LoggerModule.forRoot({
+			pinoHttp: {
+				transport:
+					process.env.NODE_ENV !== 'production'
+						? { target: 'pino-pretty', options: { colorize: true, singleLine: true } }
+						: undefined,
+				level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
+				autoLogging: { ignore: (req) => ['/health', '/metrics'].includes((req as any).url) },
+			},
 		}),
 		ThrottlerModule.forRoot([
 			{
