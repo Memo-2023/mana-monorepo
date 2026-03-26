@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength, Matches } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsInt, MaxLength, Matches } from 'class-validator';
 
 export class UpdateTagDto {
 	@IsOptional()
@@ -16,4 +16,12 @@ export class UpdateTagDto {
 	@IsString()
 	@MaxLength(50)
 	icon?: string;
+
+	@IsOptional()
+	@IsUUID()
+	groupId?: string | null;
+
+	@IsOptional()
+	@IsInt()
+	sortOrder?: number;
 }

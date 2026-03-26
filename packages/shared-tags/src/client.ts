@@ -1,4 +1,17 @@
-import type { Tag, TagResponse, CreateTagInput, UpdateTagInput } from './types';
+import type {
+	Tag,
+	TagResponse,
+	CreateTagInput,
+	UpdateTagInput,
+	TagGroup,
+	TagGroupResponse,
+	CreateTagGroupInput,
+	UpdateTagGroupInput,
+	TagLink,
+	TagLinkResponse,
+	CreateTagLinkInput,
+	SyncTagLinksInput,
+} from './types';
 
 /**
  * Configuration for TagsClient
@@ -125,6 +138,139 @@ export class TagsClient {
 		return tags.map(this.normalizeTag);
 	}
 
+	// ── Tag Groups ──────────────────────────────────────────
+
+	/**
+	 * Get all tag groups for the current user
+	 */
+	async getGroups(): Promise<TagGroup[]> {
+		const groups = await this.request<TagGroupResponse[]>('/tag-groups');
+		return groups.map(this.normalizeTagGroup);
+	}
+
+	/**
+	 * Create a new tag group
+	 */
+	async createGroup(data: CreateTagGroupInput): Promise<TagGroup> {
+		const group = await this.request<TagGroupResponse>('/tag-groups', {
+			method: 'POST',
+			body: JSON.stringify(data),
+		});
+		return this.normalizeTagGroup(group);
+	}
+
+	/**
+	 * Update an existing tag group
+	 */
+	async updateGroup(id: string, data: UpdateTagGroupInput): Promise<TagGroup> {
+		const group = await this.request<TagGroupResponse>(`/tag-groups/${id}`, {
+			method: 'PUT',
+			body: JSON.stringify(data),
+		});
+		return this.normalizeTagGroup(group);
+	}
+
+	/**
+	 * Delete a tag group
+	 */
+	async deleteGroup(id: string): Promise<void> {
+		await this.request(`/tag-groups/${id}`, {
+			method: 'DELETE',
+		});
+	}
+
+	/**
+	 * Reorder tag groups by providing an ordered array of IDs
+	 */
+	async reorderGroups(ids: string[]): Promise<void> {
+		await this.request('/tag-groups/reorder', {
+			method: 'PUT',
+			body: JSON.stringify({ ids }),
+		});
+	}
+
+	// ── Tag Links ───────────────────────────────────────────
+
+	/**
+	 * Link a tag to an entity
+	 */
+	async linkTag(data: CreateTagLinkInput): Promise<TagLink> {
+		const link = await this.request<TagLinkResponse>('/tag-links', {
+			method: 'POST',
+			body: JSON.stringify(data),
+		});
+		return this.normalizeTagLink(link);
+	}
+
+	/**
+	 * Bulk link multiple tags to entities
+	 */
+	async bulkLinkTags(links: CreateTagLinkInput[]): Promise<TagLink[]> {
+		const result = await this.request<TagLinkResponse[]>('/tag-links/bulk', {
+			method: 'POST',
+			body: JSON.stringify({ links }),
+		});
+		return result.map(this.normalizeTagLink);
+	}
+
+	/**
+	 * Remove a tag link
+	 */
+	async unlinkTag(linkId: string): Promise<void> {
+		await this.request(`/tag-links/${linkId}`, {
+			method: 'DELETE',
+		});
+	}
+
+	/**
+	 * Get all tag links for a specific entity
+	 */
+	async getLinksForEntity(appId: string, entityId: string): Promise<TagLink[]> {
+		const links = await this.request<TagLinkResponse[]>(
+			`/tag-links?appId=${encodeURIComponent(appId)}&entityId=${encodeURIComponent(entityId)}`
+		);
+		return links.map(this.normalizeTagLink);
+	}
+
+	/**
+	 * Get all tags for a specific entity (resolved Tag objects)
+	 */
+	async getTagsForEntity(appId: string, entityId: string): Promise<Tag[]> {
+		const tags = await this.request<TagResponse[]>(
+			`/tag-links/tags-for-entity?appId=${encodeURIComponent(appId)}&entityId=${encodeURIComponent(entityId)}`
+		);
+		return tags.map(this.normalizeTag);
+	}
+
+	/**
+	 * Get all links for a specific tag
+	 */
+	async getLinksForTag(tagId: string): Promise<TagLink[]> {
+		const links = await this.request<TagLinkResponse[]>(
+			`/tag-links?tagId=${encodeURIComponent(tagId)}`
+		);
+		return links.map(this.normalizeTagLink);
+	}
+
+	/**
+	 * Sync tags for an entity (add missing, remove extra)
+	 */
+	async syncEntityTags(data: SyncTagLinksInput): Promise<{ added: TagLink[]; removed: string[] }> {
+		const result = await this.request<{ added: TagLinkResponse[]; removed: string[] }>(
+			'/tag-links/sync',
+			{
+				method: 'POST',
+				body: JSON.stringify(data),
+			}
+		);
+		return {
+			added: result.added.map(this.normalizeTagLink),
+			removed: result.removed,
+		};
+	}
+
+	// ── Normalizers ─────────────────────────────────────────
+
 	/**
 	 * Normalize API response to Tag type
 	 */
@@ -133,6 +279,27 @@ export class TagsClient {
 			...tag,
 			createdAt: new Date(tag.createdAt),
 			updatedAt: new Date(tag.updatedAt),
+		};
+	}
+
+	/**
+	 * Normalize API response to TagGroup type
+	 */
+	private normalizeTagGroup(group: TagGroupResponse): TagGroup {
+		return {
+			...group,
+			createdAt: new Date(group.createdAt),
+			updatedAt: new Date(group.updatedAt),
+		};
+	}
+
+	/**
+	 * Normalize API response to TagLink type
+	 */
+	private normalizeTagLink(link: TagLinkResponse): TagLink {
+		return {
+			...link,
+			createdAt: new Date(link.createdAt),
 		};
 	}
 }

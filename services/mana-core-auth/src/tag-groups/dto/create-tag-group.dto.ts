@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsUUID, IsInt, MaxLength, Matches } from 'class-validator';
+import { IsString, IsOptional, IsInt, MaxLength, Matches } from 'class-validator';
 
-export class CreateTagDto {
+export class CreateTagGroupDto {
 	@IsString()
 	@MaxLength(100)
 	name: string;
@@ -15,10 +15,6 @@ export class CreateTagDto {
 	@IsString()
 	@MaxLength(50)
 	icon?: string;
-
-	@IsOptional()
-	@IsUUID()
-	groupId?: string;
 
 	@IsOptional()
 	@IsInt()

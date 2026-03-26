@@ -6,4 +6,6 @@ export * from './gifts.schema';
 export * from './login-attempts.schema';
 export * from './organizations.schema';
 export * from './subscriptions.schema';
+export * from './tag-groups.schema';
+export * from './tag-links.schema';
 export * from './tags.schema';

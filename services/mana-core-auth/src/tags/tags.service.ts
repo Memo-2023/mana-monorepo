@@ -83,6 +83,8 @@ export class TagsService {
 				name: dto.name,
 				color: dto.color || '#3B82F6',
 				icon: dto.icon || null,
+				groupId: dto.groupId || null,
+				sortOrder: dto.sortOrder ?? 0,
 			})
 			.returning();
 
@@ -149,6 +151,17 @@ export class TagsService {
 		}
 
 		await db.delete(tags).where(and(eq(tags.id, id), eq(tags.userId, userId)));
+	}
+
+	/**
+	 * Get all tags in a specific group (only those owned by user)
+	 */
+	async findByGroupId(groupId: string, userId: string) {
+		const db = this.getDb();
+		return db
+			.select()
+			.from(tags)
+			.where(and(eq(tags.groupId, groupId), eq(tags.userId, userId)));
 	}
 
 	/**

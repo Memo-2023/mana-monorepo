@@ -14,6 +14,8 @@ import { GiftsModule } from './gifts/gifts.module';
 import { HealthModule } from './health/health.module';
 import { SettingsModule } from './settings/settings.module';
 import { StorageModule } from './storage/storage.module';
+import { TagGroupsModule } from './tag-groups/tag-groups.module';
+import { TagLinksModule } from './tag-links/tag-links.module';
 import { TagsModule } from './tags/tags.module';
 import { MeModule } from './me/me.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
@@ -59,6 +61,8 @@ import { SecurityModule } from './security';
 		SettingsModule,
 		StorageModule,
 		TagsModule,
+		TagGroupsModule,
+		TagLinksModule,
 		MeModule,
 		StripeModule,
 		SubscriptionsModule,

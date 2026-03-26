@@ -91,6 +91,7 @@ export {
 	PillToolbar,
 	PillToolbarButton,
 	PillToolbarDivider,
+	TagStrip,
 	ExpandableToolbar,
 } from './navigation';
 export type {
