@@ -243,12 +243,29 @@ jobs:
             done
           fi
 
+          NEEDS_WEB_BASE=false
+          if [ "$DEPLOY_ALL" == "true" ]; then
+            NEEDS_WEB_BASE=true
+          else
+            for svc in $SERVICES; do
+              case "$svc" in *-web) NEEDS_WEB_BASE=true; break ;; esac
+            done
+          fi
+
           if [ "$NEEDS_BASE" == "true" ]; then
             echo "=== Building shared NestJS base image ==="
             docker build -f docker/Dockerfile.nestjs-base -t nestjs-base:local . 2>&1 | tail -5
-            echo "Base image built"
+            echo "NestJS base image built"
           else
-            echo "No backends to deploy, skipping base image"
+            echo "No backends to deploy, skipping NestJS base image"
+          fi
+
+          if [ "$NEEDS_WEB_BASE" == "true" ]; then
+            echo "=== Building shared SvelteKit base image ==="
+            docker build -f docker/Dockerfile.sveltekit-base -t sveltekit-base:local . 2>&1 | tail -5
+            echo "SvelteKit base image built"
+          else
+            echo "No web apps to deploy, skipping SvelteKit base image"
           fi
 
       - name: Build and deploy services
