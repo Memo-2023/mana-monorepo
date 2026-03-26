@@ -74,6 +74,7 @@ RUN pnpm build
 # Build the web app
 WORKDIR /app/apps/manacore/apps/web
 RUN pnpm exec svelte-kit sync
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm build
 
 # Production stage
