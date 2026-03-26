@@ -257,6 +257,9 @@
 				settingsHref="/app/settings"
 				manaHref="/app/mana"
 				profileHref="/app/profile"
+				themesHref="/app/themes"
+				helpHref="/app/help"
+				feedbackHref="/app/feedback"
 				allAppsHref="/app/apps"
 			/>
 		{/if}

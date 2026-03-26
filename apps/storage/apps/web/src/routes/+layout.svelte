@@ -192,6 +192,7 @@
 				settingsHref="/settings"
 				manaHref="/mana"
 				profileHref="/profile"
+				themesHref="/themes"
 				helpHref="/help"
 				allAppsHref="/apps"
 			/>

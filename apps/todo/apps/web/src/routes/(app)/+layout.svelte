@@ -348,6 +348,7 @@
 						allAppsHref="/apps"
 						themesHref="/themes"
 						spiralHref="/spiral"
+						helpHref="/help"
 						onOpenInPanel={handleOpenInPanel}
 						ariaLabel="Hauptnavigation"
 					/>

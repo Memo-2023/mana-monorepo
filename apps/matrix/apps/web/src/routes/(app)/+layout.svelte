@@ -417,6 +417,7 @@
 				{appItems}
 				{userEmail}
 				settingsHref="/settings"
+				helpHref="/help"
 				allAppsHref="https://mana.how"
 			/>
 		{/if}

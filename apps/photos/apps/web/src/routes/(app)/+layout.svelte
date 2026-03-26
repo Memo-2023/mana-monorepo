@@ -106,6 +106,9 @@
 			primaryColor="#8b5cf6"
 			{userEmail}
 			settingsHref="/settings"
+			themesHref="/themes"
+			helpHref="/help"
+			profileHref="/profile"
 		/>
 
 		<!-- Quick Input Bar -->

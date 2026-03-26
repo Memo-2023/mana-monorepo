@@ -204,6 +204,9 @@
 				{appItems}
 				{userEmail}
 				settingsHref="/settings"
+				themesHref="/themes"
+				helpHref="/help"
+				profileHref="/profile"
 				onOpenInPanel={handleOpenInPanel}
 				ariaLabel="Main navigation"
 			/>

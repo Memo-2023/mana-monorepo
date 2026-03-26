@@ -96,6 +96,10 @@
 			onLogout={handleLogout}
 			loginHref="/login"
 			primaryColor="#10b981"
+			settingsHref="/settings"
+			themesHref="/themes"
+			helpHref="/help"
+			profileHref="/profile"
 		/>
 
 		<!-- Quick Input Bar -->

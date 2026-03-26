@@ -495,6 +495,8 @@
 					settingsHref="/settings"
 					manaHref="/mana"
 					profileHref="/profile"
+					themesHref="/themes"
+					helpHref="/help"
 					allAppsHref="/apps"
 					onOpenInPanel={handleOpenInPanel}
 					ariaLabel="Hauptnavigation"
