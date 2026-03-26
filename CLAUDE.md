@@ -733,9 +733,20 @@ cd ~/projects/manacore-monorepo
 
 ./scripts/mac-mini/status.sh                 # Check all services
 ./scripts/mac-mini/deploy.sh                 # Pull & restart containers
+./scripts/mac-mini/build-app.sh todo-web     # Build & deploy single app
+./scripts/mac-mini/build-app.sh --base       # Rebuild base images
 ./scripts/mac-mini/health-check.sh           # Run health checks
 docker compose -f docker-compose.macmini.yml logs -f  # View logs
 ```
+
+#### Docker Base Images
+
+All apps build on shared base images to reduce build time and memory usage:
+
+- **`sveltekit-base:local`** (`docker/Dockerfile.sveltekit-base`) — All shared packages for SvelteKit web apps
+- **`nestjs-base:local`** (`docker/Dockerfile.nestjs-base`) — All shared packages for NestJS backends
+
+Rebuild base images after shared package changes: `./scripts/mac-mini/build-app.sh --base`
 
 For detailed server documentation, see **[docs/MAC_MINI_SERVER.md](docs/MAC_MINI_SERVER.md)**.
 

@@ -432,6 +432,50 @@ git pull
 
 # Neue Images pullen und deployen
 ./scripts/mac-mini/deploy.sh
+
+# Einzelne App bauen und deployen (empfohlen)
+./scripts/mac-mini/build-app.sh todo-web
+./scripts/mac-mini/build-app.sh todo-web todo-backend
+
+# Base Images neu bauen (nach Änderungen an shared packages)
+./scripts/mac-mini/build-app.sh --base
+```
+
+### Docker Base Images
+
+Alle Apps werden auf vorgebauten Base Images aufgebaut, um Build-Zeit und Memory-Verbrauch zu reduzieren:
+
+| Base Image | Dockerfile | Verwendet von |
+|------------|-----------|---------------|
+| `sveltekit-base:local` | `docker/Dockerfile.sveltekit-base` | Alle SvelteKit Web-Apps |
+| `nestjs-base:local` | `docker/Dockerfile.nestjs-base` | Alle NestJS Backends |
+
+Die Base Images enthalten alle Shared Packages (`packages/`) vorinstalliert und vorgebaut. App-Dockerfiles müssen nur noch ihren app-spezifischen Code kopieren.
+
+**Base Images neu bauen** wenn sich Shared Packages ändern:
+
+```bash
+./scripts/mac-mini/build-app.sh --base
+```
+
+### Build-Script (`build-app.sh`)
+
+Das Script löst das RAM-Problem beim Bauen: Der Mac Mini hat 16 GB, davon sind ~10 GB durch laufende Container belegt. Docker Builds (besonders Vite/SvelteKit) brauchen 4+ GB.
+
+**Was es tut:**
+1. Stoppt automatisch 13 Monitoring-Container (~2 GB RAM frei)
+2. Baut die angegebenen Services
+3. Startet Monitoring bei Exit automatisch wieder (auch bei Fehler/Ctrl+C via `trap`)
+
+```bash
+# Einzelne App
+./scripts/mac-mini/build-app.sh todo-web
+
+# Mehrere Apps
+./scripts/mac-mini/build-app.sh todo-web todo-backend
+
+# Alle Web-Apps
+./scripts/mac-mini/build-app.sh --all-web
 ```
 
 ### Backup
@@ -468,6 +512,7 @@ docker image prune -a
 | `restart.sh` | Startet alle Container neu |
 | `stop.sh` | Stoppt alle Container |
 | `deploy.sh` | Pullt neue Images und startet neu |
+| `build-app.sh` | Baut einzelne Apps (stoppt Monitoring für RAM) |
 
 ## Ollama (Lokale KI)
 
