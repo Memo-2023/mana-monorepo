@@ -169,7 +169,8 @@ export class TagLinksService {
 	}
 
 	/**
-	 * Sync tags for an entity: adds missing links, removes extra ones
+	 * Sync tags for an entity: adds missing links, removes extra ones.
+	 * Wrapped in a transaction to prevent race conditions.
 	 */
 	async sync(
 		userId: string,
@@ -180,7 +181,7 @@ export class TagLinksService {
 	) {
 		const db = this.getDb();
 
-		// Verify all tags belong to user
+		// Verify all tags belong to user (before transaction)
 		if (tagIds.length > 0) {
 			const userTags = await db
 				.select()
@@ -192,43 +193,49 @@ export class TagLinksService {
 			}
 		}
 
-		// Get current links for this entity
-		const currentLinks = await db
-			.select()
-			.from(tagLinks)
-			.where(
-				and(eq(tagLinks.userId, userId), eq(tagLinks.appId, appId), eq(tagLinks.entityId, entityId))
-			);
+		await db.transaction(async (tx) => {
+			// Get current links for this entity
+			const currentLinks = await tx
+				.select()
+				.from(tagLinks)
+				.where(
+					and(
+						eq(tagLinks.userId, userId),
+						eq(tagLinks.appId, appId),
+						eq(tagLinks.entityId, entityId)
+					)
+				);
 
-		const currentTagIds = currentLinks.map((l) => l.tagId);
-		const toAdd = tagIds.filter((id) => !currentTagIds.includes(id));
-		const toRemove = currentLinks.filter((l) => !tagIds.includes(l.tagId));
+			const currentTagIds = currentLinks.map((l) => l.tagId);
+			const toAdd = tagIds.filter((id) => !currentTagIds.includes(id));
+			const toRemove = currentLinks.filter((l) => !tagIds.includes(l.tagId));
 
-		// Add missing links
-		if (toAdd.length > 0) {
-			await db
-				.insert(tagLinks)
-				.values(
-					toAdd.map((tagId) => ({
-						tagId,
-						appId,
-						entityId,
-						entityType,
-						userId,
-					}))
-				)
-				.onConflictDoNothing();
-		}
+			// Add missing links
+			if (toAdd.length > 0) {
+				await tx
+					.insert(tagLinks)
+					.values(
+						toAdd.map((tagId) => ({
+							tagId,
+							appId,
+							entityId,
+							entityType,
+							userId,
+						}))
+					)
+					.onConflictDoNothing();
+			}
 
-		// Remove extra links
-		if (toRemove.length > 0) {
-			const removeIds = toRemove.map((l) => l.id);
-			await db
-				.delete(tagLinks)
-				.where(and(inArray(tagLinks.id, removeIds), eq(tagLinks.userId, userId)));
-		}
+			// Remove extra links
+			if (toRemove.length > 0) {
+				const removeIds = toRemove.map((l) => l.id);
+				await tx
+					.delete(tagLinks)
+					.where(and(inArray(tagLinks.id, removeIds), eq(tagLinks.userId, userId)));
+			}
+		});
 
-		// Return updated tags for entity
+		// Return updated tags for entity (after transaction commits)
 		return this.getTagsForEntity(userId, appId, entityId);
 	}
 }

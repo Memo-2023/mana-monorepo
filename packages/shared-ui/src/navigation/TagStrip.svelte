@@ -147,6 +147,21 @@
 		overflow-x: auto;
 		scrollbar-width: none;
 		-ms-overflow-style: none;
+		/* Fade edges to indicate scrollable content */
+		mask-image: linear-gradient(
+			to right,
+			transparent 0%,
+			black 2rem,
+			black calc(100% - 2rem),
+			transparent 100%
+		);
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent 0%,
+			black 2rem,
+			black calc(100% - 2rem),
+			transparent 100%
+		);
 	}
 
 	.tag-strip-container::-webkit-scrollbar {
