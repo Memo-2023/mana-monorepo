@@ -49,6 +49,11 @@ export const SecurityEventType = {
 	PASSKEY_LOGIN_FAILURE: 'passkey_login_failure',
 	PASSKEY_DELETED: 'passkey_deleted',
 
+	// Two-Factor Authentication
+	TWO_FACTOR_ENABLED: 'two_factor_enabled',
+	TWO_FACTOR_DISABLED: 'two_factor_disabled',
+	TWO_FACTOR_VERIFIED: 'two_factor_verified',
+
 	// Organizations
 	ORG_CREATED: 'org_created',
 	ORG_DELETED: 'org_deleted',

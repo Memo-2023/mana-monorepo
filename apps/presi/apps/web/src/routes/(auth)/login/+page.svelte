@@ -42,6 +42,8 @@
 	onResendVerification={handleResendVerification}
 	passkeyAvailable={auth.isPasskeyAvailable()}
 	onSignInWithPasskey={() => auth.signInWithPasskey()}
+	onVerifyTwoFactor={(code, trust) => auth.verifyTwoFactor(code, trust)}
+	onVerifyBackupCode={(code) => auth.verifyBackupCode(code)}
 	{goto}
 	successRedirect={redirectTo}
 	registerPath="/register"

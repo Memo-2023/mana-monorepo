@@ -93,6 +93,24 @@ export const authStore = {
 		return true;
 	},
 
+	async verifyTwoFactor(code: string, trustDevice?: boolean) {
+		const result = await authService.verifyTwoFactor(code, trustDevice);
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			user = toManaUser(userData);
+		}
+		return result;
+	},
+
+	async verifyBackupCode(code: string) {
+		const result = await authService.verifyBackupCode(code);
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			user = toManaUser(userData);
+		}
+		return result;
+	},
+
 	isPasskeyAvailable(): boolean {
 		return authService.isPasskeyAvailable();
 	},

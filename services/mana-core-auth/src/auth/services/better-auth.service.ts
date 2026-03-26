@@ -478,6 +478,23 @@ export class BetterAuthService {
 				}
 			}
 
+			// Check if 2FA is required
+			if (
+				result &&
+				typeof result === 'object' &&
+				'twoFactorRedirect' in result &&
+				(result as any).twoFactorRedirect
+			) {
+				this.logger.debug('SignIn: 2FA required, returning redirect');
+				return {
+					twoFactorRedirect: true,
+					user: null,
+					accessToken: '',
+					refreshToken: '',
+					expiresIn: 0,
+				} as any;
+			}
+
 			if (!hasUser(result)) {
 				throw new UnauthorizedException('Invalid credentials');
 			}

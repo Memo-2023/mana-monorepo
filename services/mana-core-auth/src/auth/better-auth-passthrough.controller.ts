@@ -13,7 +13,7 @@
  * but our NestJS API uses `/api/v1/*` as the global prefix.
  */
 
-import { Controller, Get, Param, Query, Req, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, All, Param, Query, Req, Res, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { BetterAuthService } from './services/better-auth.service';
@@ -30,6 +30,77 @@ export class BetterAuthPassthroughController {
 		loggerService: LoggerService
 	) {
 		this.logger = loggerService.setContext('BetterAuthPassthrough');
+	}
+
+	/**
+	 * Forward requests to Better Auth's handler
+	 *
+	 * Converts Express request to Fetch Request and passes it to Better Auth.
+	 * Copies response status, headers (including Set-Cookie), and body back.
+	 */
+	private async forwardToBetterAuth(req: Request, res: Response) {
+		const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3001';
+		const url = new URL(req.originalUrl, baseUrl);
+
+		const headers = new Headers();
+		for (const [key, value] of Object.entries(req.headers)) {
+			if (value && typeof value === 'string') {
+				headers.set(key, value);
+			} else if (Array.isArray(value)) {
+				headers.set(key, value[0]);
+			}
+		}
+
+		const fetchRequest = new Request(url.toString(), {
+			method: req.method,
+			headers,
+			body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+		});
+
+		const handler = this.betterAuthService.getHandler();
+		const response = await handler(fetchRequest);
+
+		res.status(response.status);
+
+		response.headers.forEach((value: string, key: string) => {
+			if (key.toLowerCase() === 'set-cookie') {
+				res.append(key, value);
+			} else {
+				res.setHeader(key, value);
+			}
+		});
+
+		const body = await response.text();
+		try {
+			return res.json(JSON.parse(body));
+		} catch {
+			return res.send(body);
+		}
+	}
+
+	/**
+	 * Two-Factor Authentication passthrough
+	 *
+	 * Forwards all /api/auth/two-factor/* requests to Better Auth's handler.
+	 * The twoFactor plugin registers these routes:
+	 * - POST /two-factor/enable
+	 * - POST /two-factor/disable
+	 * - POST /two-factor/verify-totp
+	 * - POST /two-factor/verify-backup-code
+	 * - POST /two-factor/get-totp-uri
+	 * - POST /two-factor/generate-backup-codes
+	 */
+	@All('two-factor/*')
+	async twoFactorPassthrough(@Req() req: Request, @Res() res: Response) {
+		try {
+			return await this.forwardToBetterAuth(req, res);
+		} catch (error) {
+			this.logger.error(
+				'Two-factor passthrough failed',
+				error instanceof Error ? error.stack : undefined
+			);
+			return res.status(500).json({ error: 'Two-factor request failed' });
+		}
 	}
 
 	/**

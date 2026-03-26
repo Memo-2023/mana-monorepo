@@ -26,6 +26,7 @@ export const users = authSchema.table('users', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 	// Custom fields (not required by Better Auth)
 	role: userRoleEnum('role').default('user').notNull(),
+	twoFactorEnabled: boolean('two_factor_enabled').default(false),
 	deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
@@ -103,7 +104,7 @@ export const twoFactorAuth = authSchema.table('two_factor_auth', {
 		.references(() => users.id, { onDelete: 'cascade' }),
 	secret: text('secret').notNull(),
 	enabled: boolean('enabled').default(false).notNull(),
-	backupCodes: jsonb('backup_codes'),
+	backupCodes: text('backup_codes').notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	enabledAt: timestamp('enabled_at', { withTimezone: true }),
 });

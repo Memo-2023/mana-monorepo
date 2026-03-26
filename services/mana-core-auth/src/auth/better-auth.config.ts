@@ -19,6 +19,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins/jwt';
 import { organization } from 'better-auth/plugins/organization';
 import { oidcProvider } from 'better-auth/plugins/oidc-provider';
+import { twoFactor } from 'better-auth/plugins/two-factor';
 import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations.schema';
 import {
@@ -31,6 +32,7 @@ import {
 	oauthAccessTokens,
 	oauthAuthorizationCodes,
 	oauthConsents,
+	twoFactorAuth,
 } from '../db/schema/auth.schema';
 import type { JWTPayloadContext } from './types/better-auth.types';
 import {
@@ -95,6 +97,9 @@ export function createBetterAuth(databaseUrl: string) {
 
 				// JWT plugin table
 				jwks: jwks,
+
+				// Two-Factor Authentication table
+				twoFactor: twoFactorAuth,
 
 				// OIDC Provider tables
 				oauthApplication: oauthApplications,
@@ -402,6 +407,21 @@ export function createBetterAuth(databaseUrl: string) {
 						skipConsent: true,
 					},
 				],
+			}),
+			/**
+			 * Two-Factor Authentication Plugin (TOTP)
+			 *
+			 * Provides TOTP-based 2FA with backup codes.
+			 * Endpoints provided automatically by Better Auth passthrough:
+			 * - POST /two-factor/enable (requires password)
+			 * - POST /two-factor/disable (requires password)
+			 * - POST /two-factor/verify-totp (during login)
+			 * - POST /two-factor/verify-backup-code (during login)
+			 * - POST /two-factor/get-totp-uri
+			 * - POST /two-factor/generate-backup-codes
+			 */
+			twoFactor({
+				issuer: 'ManaCore',
 			}),
 		],
 	});

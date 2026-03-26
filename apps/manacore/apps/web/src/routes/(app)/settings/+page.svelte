@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, GlobalSettingsSection } from '@manacore/shared-ui';
-	import { PasskeyManager } from '@manacore/shared-auth-ui';
+	import { PasskeyManager, TwoFactorSetup } from '@manacore/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { creditsService } from '$lib/api/credits';
 	import type { CreditBalance } from '$lib/api/credits';
@@ -289,6 +289,19 @@
 						onRefresh={async () => {
 							passkeys = await authStore.listPasskeys();
 						}}
+						primaryColor="#6366f1"
+					/>
+				</div>
+			</Card>
+
+			<!-- Two-Factor Authentication Section -->
+			<Card>
+				<div class="p-6">
+					<TwoFactorSetup
+						enabled={!!authStore.user?.twoFactorEnabled}
+						onEnable={(password) => authStore.enableTwoFactor(password)}
+						onDisable={(password) => authStore.disableTwoFactor(password)}
+						onGenerateBackupCodes={(password) => authStore.generateBackupCodes(password)}
 						primaryColor="#6366f1"
 					/>
 				</div>

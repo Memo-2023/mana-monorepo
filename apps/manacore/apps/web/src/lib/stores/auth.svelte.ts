@@ -138,6 +138,46 @@ export const authStore = {
 		}
 	},
 
+	async enableTwoFactor(password: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		return authService.enableTwoFactor(password);
+	},
+
+	async disableTwoFactor(password: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		return authService.disableTwoFactor(password);
+	},
+
+	async verifyTwoFactor(code: string, trustDevice?: boolean) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		const result = await authService.verifyTwoFactor(code, trustDevice);
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			user = userData;
+		}
+		return result;
+	},
+
+	async verifyBackupCode(code: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		const result = await authService.verifyBackupCode(code);
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			user = userData;
+		}
+		return result;
+	},
+
+	async generateBackupCodes(password: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		return authService.generateBackupCodes(password);
+	},
+
 	async registerPasskey(friendlyName?: string) {
 		const authService = getAuthService();
 		if (!authService) return { success: false, error: 'Auth not available' };

@@ -568,6 +568,186 @@ export function createAuthService(config: AuthServiceConfig) {
 		},
 
 		/**
+		 * Enable 2FA - returns TOTP URI for QR code and backup codes
+		 */
+		async enableTwoFactor(
+			password: string
+		): Promise<{ success: boolean; totpURI?: string; backupCodes?: string[]; error?: string }> {
+			try {
+				const response = await fetch(`${baseUrl}/api/auth/two-factor/enable`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ password }),
+				});
+
+				if (!response.ok) {
+					const err = await response.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to enable 2FA' };
+				}
+
+				const data = await response.json();
+				return { success: true, totpURI: data.totpURI, backupCodes: data.backupCodes };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to enable 2FA',
+				};
+			}
+		},
+
+		/**
+		 * Disable 2FA
+		 */
+		async disableTwoFactor(password: string): Promise<AuthResult> {
+			try {
+				const response = await fetch(`${baseUrl}/api/auth/two-factor/disable`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ password }),
+				});
+
+				if (!response.ok) {
+					const err = await response.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to disable 2FA' };
+				}
+
+				return { success: true };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to disable 2FA',
+				};
+			}
+		},
+
+		/**
+		 * Verify TOTP code during login (when 2FA is required)
+		 */
+		async verifyTwoFactor(code: string, trustDevice?: boolean): Promise<AuthResult> {
+			try {
+				const storage = getStorageAdapter();
+
+				const response = await fetch(`${baseUrl}/api/auth/two-factor/verify-totp`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ code, trustDevice }),
+				});
+
+				if (!response.ok) {
+					const err = await response.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Invalid code' };
+				}
+
+				// After 2FA verification, we need to get tokens
+				// The session cookie is now set by Better Auth
+				// Exchange session for JWT tokens via session-to-token
+				const tokenResponse = await fetch(`${baseUrl}/api/v1/auth/session-to-token`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+				});
+
+				if (tokenResponse.ok) {
+					const tokenData = await tokenResponse.json();
+					if (tokenData.accessToken && tokenData.refreshToken) {
+						await Promise.all([
+							storage.setItem(storageKeys.APP_TOKEN, tokenData.accessToken),
+							storage.setItem(storageKeys.REFRESH_TOKEN, tokenData.refreshToken),
+							storage.setItem(storageKeys.USER_EMAIL, tokenData.user?.email || ''),
+						]);
+					}
+				}
+
+				trackAuth('login', { method: '2fa' });
+				return { success: true };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Verification failed',
+				};
+			}
+		},
+
+		/**
+		 * Verify backup code during login
+		 */
+		async verifyBackupCode(code: string): Promise<AuthResult> {
+			try {
+				const storage = getStorageAdapter();
+
+				const response = await fetch(`${baseUrl}/api/auth/two-factor/verify-backup-code`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ code }),
+				});
+
+				if (!response.ok) {
+					const err = await response.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Invalid backup code' };
+				}
+
+				// Exchange session for JWT tokens
+				const tokenResponse = await fetch(`${baseUrl}/api/v1/auth/session-to-token`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+				});
+
+				if (tokenResponse.ok) {
+					const tokenData = await tokenResponse.json();
+					if (tokenData.accessToken && tokenData.refreshToken) {
+						await Promise.all([
+							storage.setItem(storageKeys.APP_TOKEN, tokenData.accessToken),
+							storage.setItem(storageKeys.REFRESH_TOKEN, tokenData.refreshToken),
+							storage.setItem(storageKeys.USER_EMAIL, tokenData.user?.email || ''),
+						]);
+					}
+				}
+
+				trackAuth('login', { method: 'backup_code' });
+				return { success: true };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Verification failed',
+				};
+			}
+		},
+
+		/**
+		 * Generate new backup codes (replaces existing ones)
+		 */
+		async generateBackupCodes(
+			password: string
+		): Promise<{ success: boolean; backupCodes?: string[]; error?: string }> {
+			try {
+				const response = await fetch(`${baseUrl}/api/auth/two-factor/generate-backup-codes`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ password }),
+				});
+
+				if (!response.ok) {
+					const err = await response.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to generate backup codes' };
+				}
+
+				const data = await response.json();
+				return { success: true, backupCodes: data.backupCodes };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to generate backup codes',
+				};
+			}
+		},
+
+		/**
 		 * Get the current app token
 		 */
 		async getAppToken(): Promise<string | null> {

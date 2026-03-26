@@ -120,6 +120,29 @@ export const authStore = {
 	/**
 	 * Check if passkeys are available in this browser
 	 */
+
+	async verifyTwoFactor(code: string, trustDevice?: boolean) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available on server' };
+		const result = await authService.verifyTwoFactor(code, trustDevice);
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			user = userData;
+		}
+		return result;
+	},
+
+	async verifyBackupCode(code: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available on server' };
+		const result = await authService.verifyBackupCode(code);
+		if (result.success) {
+			const userData = await authService.getUserFromToken();
+			user = userData;
+		}
+		return result;
+	},
+
 	isPasskeyAvailable(): boolean {
 		const authService = getAuthService();
 		if (!authService) return false;

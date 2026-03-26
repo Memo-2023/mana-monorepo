@@ -86,6 +86,8 @@
 		buildTime?: string;
 		onSignInWithPasskey?: () => Promise<AuthResult>;
 		passkeyAvailable?: boolean;
+		onVerifyTwoFactor?: (code: string, trustDevice?: boolean) => Promise<AuthResult>;
+		onVerifyBackupCode?: (code: string) => Promise<AuthResult>;
 	}
 
 	let {
@@ -110,6 +112,8 @@
 		buildTime = '',
 		onSignInWithPasskey,
 		passkeyAvailable = false,
+		onVerifyTwoFactor,
+		onVerifyBackupCode,
 	}: Props = $props();
 
 	const t = $derived({ ...defaultTranslations, ...translations });
@@ -137,6 +141,9 @@
 	let showEmailNotVerified = $state(false);
 	let resendingVerification = $state(false);
 	let verificationEmailSent = $state(false);
+	let showTwoFactor = $state(false);
+	let twoFactorCode = $state('');
+	let useBackupCode = $state(false);
 
 	// Theme state - can be toggled manually, defaults to system preference
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -229,6 +236,12 @@
 		const result = await onSignIn(email, password);
 		loading = false;
 
+		// Check if 2FA is required
+		if ((result as any).twoFactorRedirect) {
+			showTwoFactor = true;
+			return;
+		}
+
 		if (result.success) {
 			showSuccess = true;
 			successAnnouncement = t.signInSuccess;
@@ -255,6 +268,30 @@
 			showEmailNotVerified = false;
 		} else {
 			setError(result.error || t.signInFailed, 'general');
+		}
+	}
+
+	async function handleTwoFactorVerify() {
+		if (!twoFactorCode) return;
+		loading = true;
+		clearError();
+
+		const handler = useBackupCode ? onVerifyBackupCode : onVerifyTwoFactor;
+		if (!handler) {
+			loading = false;
+			return;
+		}
+
+		const result = await handler(twoFactorCode);
+		loading = false;
+
+		if (result.success) {
+			showSuccess = true;
+			successAnnouncement = t.signInSuccess;
+			setTimeout(() => goto(successRedirect), 600);
+		} else {
+			setError(result.error || t.signInFailed, 'general');
+			twoFactorCode = '';
 		}
 	}
 
@@ -352,198 +389,290 @@
 		<!-- Form Section -->
 		<div class="form-section">
 			<div class="form-card" class:shake={shakeError}>
-				{#if showVerifiedBanner}
-					<div class="verified-banner" role="status" aria-live="polite">
-						<Check size={18} class="text-green-500 shrink-0" />
-						<p>{t.emailVerified}</p>
-						<button
-							type="button"
-							class="verified-banner-close"
-							onclick={() => (showVerifiedBanner = false)}
-							aria-label="Close"
-						>
-							&times;
-						</button>
+				{#if showTwoFactor}
+					<!-- 2FA Verification -->
+					<div class="form-header">
+						<h2 class="form-title">Zwei-Faktor-Authentifizierung</h2>
+						<p class="form-subtitle">
+							{useBackupCode
+								? 'Gib einen Backup-Code ein'
+								: 'Gib den Code aus deiner Authenticator-App ein'}
+						</p>
 					</div>
-				{/if}
 
-				<div class="form-header">
-					<h2 class="form-title">{t.title}</h2>
-					<p class="form-subtitle">{t.subtitle}</p>
-				</div>
+					{#if error}
+						<div class="error-message" role="alert">
+							<Warning size={18} class="text-red-500 shrink-0" />
+							<p>{error}</p>
+						</div>
+					{/if}
 
-				{#if passkeyAvailable && onSignInWithPasskey}
+					<form
+						onsubmit={(e) => {
+							e.preventDefault();
+							handleTwoFactorVerify();
+						}}
+					>
+						<div class="input-group">
+							<input
+								type="text"
+								bind:value={twoFactorCode}
+								placeholder={useBackupCode ? 'Backup-Code' : '000000'}
+								required
+								autocomplete="one-time-code"
+								inputmode={useBackupCode ? 'text' : 'numeric'}
+								maxlength={useBackupCode ? 20 : 6}
+								class="input-field"
+								style:--ring-color={primaryColor}
+								style:text-align="center"
+								style:font-size="1.5rem"
+								style:letter-spacing="0.5rem"
+							/>
+						</div>
+
+						<button
+							type="submit"
+							disabled={loading || !twoFactorCode}
+							class="submit-button"
+							style:background-color={primaryColor + '60'}
+							style:border-color={primaryColor}
+						>
+							{loading ? 'Prüfe...' : 'Bestätigen'}
+						</button>
+					</form>
+
 					<button
 						type="button"
-						onclick={handlePasskeySignIn}
-						disabled={loading || showSuccess}
-						class="passkey-button"
-						style:border-color={primaryColor}
+						class="forgot-link"
+						style:color={primaryColor}
+						style:display="block"
+						style:width="100%"
+						style:text-align="center"
+						style:margin-top="1rem"
+						onclick={() => {
+							useBackupCode = !useBackupCode;
+							twoFactorCode = '';
+							clearError();
+						}}
 					>
-						<svg
-							width="20"
-							height="20"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
-							<circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
-						</svg>
-						<span>Passkey</span>
+						{useBackupCode ? 'Authenticator-App verwenden' : 'Backup-Code verwenden'}
 					</button>
-					<div class="divider">
-						<span>{t.orDivider}</span>
-					</div>
-				{/if}
 
-				{#if verificationEmailSent}
-					<div class="verified-banner" role="status" aria-live="polite">
-						<Check size={18} class="text-green-500 shrink-0" />
-						<p>{t.verificationEmailSent}</p>
-						<button
-							type="button"
-							class="verified-banner-close"
-							onclick={() => (verificationEmailSent = false)}
-							aria-label="Close"
-						>
-							&times;
-						</button>
-					</div>
-				{/if}
-
-				{#if error}
-					<div class="error-message" id="form-error" role="alert" aria-live="assertive">
-						<Warning size={18} class="text-red-500 shrink-0" />
-						<div class="error-content">
-							<p>{error}</p>
-							{#if showEmailNotVerified && onResendVerification}
-								<button
-									type="button"
-									class="resend-link"
-									onclick={handleResendVerification}
-									disabled={resendingVerification}
-									style:color={primaryColor}
-								>
-									{resendingVerification ? t.resendingVerification : t.resendVerification}
-								</button>
-							{/if}
-						</div>
-					</div>
-				{/if}
-
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						handleLogin();
-					}}
-					aria-busy={loading}
-				>
-					<!-- Email -->
-					<div class="input-group">
-						<label for="email" class="sr-only">{t.emailPlaceholder}</label>
-						<input
-							id="email"
-							type="email"
-							bind:this={emailInput}
-							bind:value={email}
-							placeholder={t.emailPlaceholder}
-							required
-							autocomplete="email"
-							aria-invalid={errorField === 'email'}
-							class="input-field"
-							class:input-error={errorField === 'email'}
-							style:--ring-color={errorField === 'email' ? '#ef4444' : primaryColor}
-						/>
-					</div>
-
-					<!-- Password -->
-					<div class="input-group">
-						<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
-						<div class="input-wrapper">
-							<input
-								id="password"
-								type={showPassword ? 'text' : 'password'}
-								bind:this={passwordInput}
-								bind:value={password}
-								placeholder={t.passwordPlaceholder}
-								required
-								autocomplete="current-password"
-								aria-invalid={errorField === 'password'}
-								class="input-field has-icon"
-								class:input-error={errorField === 'password'}
-								style:--ring-color={errorField === 'password' ? '#ef4444' : primaryColor}
-							/>
+					<button
+						type="button"
+						class="forgot-link"
+						style:color={primaryColor}
+						style:display="block"
+						style:width="100%"
+						style:text-align="center"
+						style:margin-top="0.5rem"
+						onclick={() => {
+							showTwoFactor = false;
+							twoFactorCode = '';
+							useBackupCode = false;
+							clearError();
+						}}
+					>
+						Zurück zum Login
+					</button>
+				{:else}
+					{#if showVerifiedBanner}
+						<div class="verified-banner" role="status" aria-live="polite">
+							<Check size={18} class="text-green-500 shrink-0" />
+							<p>{t.emailVerified}</p>
 							<button
 								type="button"
-								onclick={() => (showPassword = !showPassword)}
-								class="password-toggle"
-								aria-label={showPassword ? t.hidePassword : t.showPassword}
+								class="verified-banner-close"
+								onclick={() => (showVerifiedBanner = false)}
+								aria-label="Close"
 							>
-								{#if showPassword}
-									<EyeSlash size={20} />
-								{:else}
-									<Eye size={20} />
-								{/if}
+								&times;
 							</button>
 						</div>
+					{/if}
+
+					<div class="form-header">
+						<h2 class="form-title">{t.title}</h2>
+						<p class="form-subtitle">{t.subtitle}</p>
 					</div>
 
-					<!-- Remember & Forgot -->
-					<div class="options-row">
-						<label class="remember-label">
-							<input type="checkbox" bind:checked={rememberMe} style:accent-color={primaryColor} />
-							<span>{t.rememberMe}</span>
-						</label>
+					{#if passkeyAvailable && onSignInWithPasskey}
 						<button
 							type="button"
-							onclick={() => goto(forgotPasswordPath)}
-							class="forgot-link"
-							style:color={primaryColor}
+							onclick={handlePasskeySignIn}
+							disabled={loading || showSuccess}
+							class="passkey-button"
+							style:border-color={primaryColor}
 						>
-							{t.forgotPassword}
-						</button>
-					</div>
-
-					<!-- Submit -->
-					<button
-						type="submit"
-						disabled={loading || showSuccess}
-						class="submit-button"
-						style:background-color={showSuccess ? '#22c55e' : primaryColor + '60'}
-						style:border-color={showSuccess ? '#22c55e' : primaryColor}
-					>
-						{#if loading}
 							<svg
-								class="spinner"
+								width="20"
+								height="20"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
 								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
 							>
-								<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
-								<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+								<path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
+								<circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
 							</svg>
-							<span>{t.signingIn}</span>
-						{:else if showSuccess}
-							<Check size={20} />
-							<span>{t.success}</span>
-						{:else}
-							<SignIn size={20} />
-							<span>{t.signInButton}</span>
-						{/if}
-					</button>
-				</form>
+							<span>Passkey</span>
+						</button>
+						<div class="divider">
+							<span>{t.orDivider}</span>
+						</div>
+					{/if}
 
-				<p class="register-link">
-					{t.noAccount}
-					<button type="button" onclick={() => goto(registerPath)} style:color={primaryColor}>
-						{t.createAccount}
-					</button>
-				</p>
+					{#if verificationEmailSent}
+						<div class="verified-banner" role="status" aria-live="polite">
+							<Check size={18} class="text-green-500 shrink-0" />
+							<p>{t.verificationEmailSent}</p>
+							<button
+								type="button"
+								class="verified-banner-close"
+								onclick={() => (verificationEmailSent = false)}
+								aria-label="Close"
+							>
+								&times;
+							</button>
+						</div>
+					{/if}
+
+					{#if error}
+						<div class="error-message" id="form-error" role="alert" aria-live="assertive">
+							<Warning size={18} class="text-red-500 shrink-0" />
+							<div class="error-content">
+								<p>{error}</p>
+								{#if showEmailNotVerified && onResendVerification}
+									<button
+										type="button"
+										class="resend-link"
+										onclick={handleResendVerification}
+										disabled={resendingVerification}
+										style:color={primaryColor}
+									>
+										{resendingVerification ? t.resendingVerification : t.resendVerification}
+									</button>
+								{/if}
+							</div>
+						</div>
+					{/if}
+
+					<form
+						onsubmit={(e) => {
+							e.preventDefault();
+							handleLogin();
+						}}
+						aria-busy={loading}
+					>
+						<!-- Email -->
+						<div class="input-group">
+							<label for="email" class="sr-only">{t.emailPlaceholder}</label>
+							<input
+								id="email"
+								type="email"
+								bind:this={emailInput}
+								bind:value={email}
+								placeholder={t.emailPlaceholder}
+								required
+								autocomplete="email"
+								aria-invalid={errorField === 'email'}
+								class="input-field"
+								class:input-error={errorField === 'email'}
+								style:--ring-color={errorField === 'email' ? '#ef4444' : primaryColor}
+							/>
+						</div>
+
+						<!-- Password -->
+						<div class="input-group">
+							<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
+							<div class="input-wrapper">
+								<input
+									id="password"
+									type={showPassword ? 'text' : 'password'}
+									bind:this={passwordInput}
+									bind:value={password}
+									placeholder={t.passwordPlaceholder}
+									required
+									autocomplete="current-password"
+									aria-invalid={errorField === 'password'}
+									class="input-field has-icon"
+									class:input-error={errorField === 'password'}
+									style:--ring-color={errorField === 'password' ? '#ef4444' : primaryColor}
+								/>
+								<button
+									type="button"
+									onclick={() => (showPassword = !showPassword)}
+									class="password-toggle"
+									aria-label={showPassword ? t.hidePassword : t.showPassword}
+								>
+									{#if showPassword}
+										<EyeSlash size={20} />
+									{:else}
+										<Eye size={20} />
+									{/if}
+								</button>
+							</div>
+						</div>
+
+						<!-- Remember & Forgot -->
+						<div class="options-row">
+							<label class="remember-label">
+								<input
+									type="checkbox"
+									bind:checked={rememberMe}
+									style:accent-color={primaryColor}
+								/>
+								<span>{t.rememberMe}</span>
+							</label>
+							<button
+								type="button"
+								onclick={() => goto(forgotPasswordPath)}
+								class="forgot-link"
+								style:color={primaryColor}
+							>
+								{t.forgotPassword}
+							</button>
+						</div>
+
+						<!-- Submit -->
+						<button
+							type="submit"
+							disabled={loading || showSuccess}
+							class="submit-button"
+							style:background-color={showSuccess ? '#22c55e' : primaryColor + '60'}
+							style:border-color={showSuccess ? '#22c55e' : primaryColor}
+						>
+							{#if loading}
+								<svg
+									class="spinner"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+									<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+								</svg>
+								<span>{t.signingIn}</span>
+							{:else if showSuccess}
+								<Check size={20} />
+								<span>{t.success}</span>
+							{:else}
+								<SignIn size={20} />
+								<span>{t.signInButton}</span>
+							{/if}
+						</button>
+					</form>
+
+					<p class="register-link">
+						{t.noAccount}
+						<button type="button" onclick={() => goto(registerPath)} style:color={primaryColor}>
+							{t.createAccount}
+						</button>
+					</p>
+				{/if}
 			</div>
 		</div>
 	</main>
