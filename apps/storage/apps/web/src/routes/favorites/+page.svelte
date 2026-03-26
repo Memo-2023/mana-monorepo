@@ -11,6 +11,7 @@
 	import FilePreviewModal from '$lib/components/files/FilePreviewModal.svelte';
 	import FileSkeletonGrid from '$lib/components/files/FileSkeletonGrid.svelte';
 	import FileSkeletonList from '$lib/components/files/FileSkeletonList.svelte';
+	import EmptyState from '$lib/components/files/EmptyState.svelte';
 
 	let previewFile = $state<StorageFile | null>(null);
 	let files = $state<StorageFile[]>([]);
@@ -111,11 +112,11 @@
 			<button onclick={loadFavorites}>Erneut versuchen</button>
 		</div>
 	{:else if files.length === 0 && folders.length === 0}
-		<div class="empty-state">
-			<Heart size={48} />
-			<h2>Keine Favoriten</h2>
-			<p>Markiere Dateien und Ordner als Favoriten, um sie hier schnell zu finden.</p>
-		</div>
+		<EmptyState
+			type="favorites"
+			title="Keine Favoriten"
+			description="Markiere Dateien und Ordner als Favoriten, um sie hier schnell zu finden."
+		/>
 	{:else if filesStore.viewMode === 'grid'}
 		<FileGrid
 			{files}

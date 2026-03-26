@@ -14,6 +14,7 @@
 	import FilePreviewModal from '$lib/components/files/FilePreviewModal.svelte';
 	import FileSkeletonGrid from '$lib/components/files/FileSkeletonGrid.svelte';
 	import FileSkeletonList from '$lib/components/files/FileSkeletonList.svelte';
+	import EmptyState from '$lib/components/files/EmptyState.svelte';
 
 	let previewFile = $state<StorageFile | null>(null);
 	let showUploadZone = $state(false);
@@ -263,11 +264,12 @@
 			<button onclick={() => filesStore.loadFolder(folderId)}>Erneut versuchen</button>
 		</div>
 	{:else if filesStore.files.length === 0 && filesStore.folders.length === 0}
-		<div class="empty-state">
-			<UploadSimple size={48} />
-			<h2>Leerer Ordner</h2>
-			<p>Dieser Ordner ist leer. Lade Dateien hoch oder erstelle Unterordner.</p>
-			<div class="empty-actions">
+		<EmptyState
+			type="folder"
+			title="Leerer Ordner"
+			description="Dieser Ordner ist leer. Lade Dateien hoch oder erstelle Unterordner."
+		>
+			{#snippet actions()}
 				<button class="action-btn" onclick={() => (showNewFolderModal = true)}>
 					<FolderPlus size={18} />
 					<span>Neuer Ordner</span>
@@ -276,8 +278,8 @@
 					<UploadSimple size={18} />
 					<span>Hochladen</span>
 				</button>
-			</div>
-		</div>
+			{/snippet}
+		</EmptyState>
 	{:else if filesStore.viewMode === 'grid'}
 		<FileGrid
 			files={filesStore.files}

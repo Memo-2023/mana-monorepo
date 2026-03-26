@@ -7,6 +7,7 @@
 	import { StorageEvents } from '@manacore/shared-utils/analytics';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { filesStore } from '$lib/stores/files.svelte';
+	import EmptyState from '$lib/components/files/EmptyState.svelte';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
 	import FileList from '$lib/components/files/FileList.svelte';
 	import FilePreviewModal from '$lib/components/files/FilePreviewModal.svelte';
@@ -118,11 +119,11 @@
 			<p>Suche läuft...</p>
 		</div>
 	{:else if searched && files.length === 0 && folders.length === 0}
-		<div class="empty-state">
-			<MagnifyingGlass size={48} />
-			<h2>Keine Ergebnisse</h2>
-			<p>Keine Dateien oder Ordner für "{query}" gefunden.</p>
-		</div>
+		<EmptyState
+			type="search"
+			title="Keine Ergebnisse"
+			description={'Keine Dateien oder Ordner für "' + query + '" gefunden.'}
+		/>
 	{:else if searched}
 		<div class="results-header">
 			<span>{files.length + folders.length} Ergebnis(se) für "{query}"</span>
@@ -134,11 +135,11 @@
 			<FileList {files} {folders} onFileClick={handleFileClick} onFolderClick={handleFolderClick} />
 		{/if}
 	{:else}
-		<div class="empty-state">
-			<MagnifyingGlass size={48} />
-			<h2>Dateien durchsuchen</h2>
-			<p>Gib einen Suchbegriff ein, um Dateien und Ordner zu finden.</p>
-		</div>
+		<EmptyState
+			type="search"
+			title="Dateien durchsuchen"
+			description="Gib einen Suchbegriff ein, um Dateien und Ordner zu finden."
+		/>
 	{/if}
 </div>
 

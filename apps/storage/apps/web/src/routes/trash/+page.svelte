@@ -6,6 +6,7 @@
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import { toastStore } from '@manacore/shared-ui';
 	import FileSkeletonList from '$lib/components/files/FileSkeletonList.svelte';
+	import EmptyState from '$lib/components/files/EmptyState.svelte';
 
 	let files = $state<StorageFile[]>([]);
 	let folders = $state<StorageFolder[]>([]);
@@ -117,11 +118,11 @@
 			<button onclick={loadTrash}>Erneut versuchen</button>
 		</div>
 	{:else if files.length === 0 && folders.length === 0}
-		<div class="empty-state">
-			<Trash size={48} />
-			<h2>Papierkorb ist leer</h2>
-			<p>Gelöschte Dateien und Ordner erscheinen hier.</p>
-		</div>
+		<EmptyState
+			type="trash"
+			title="Papierkorb ist leer"
+			description="Gelöschte Dateien und Ordner erscheinen hier."
+		/>
 	{:else}
 		<div class="trash-list">
 			{#each folders as folder (folder.id)}

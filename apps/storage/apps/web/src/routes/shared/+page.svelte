@@ -5,6 +5,7 @@
 	import { StorageEvents } from '@manacore/shared-utils/analytics';
 	import type { Share } from '$lib/api/client';
 	import { toastStore } from '@manacore/shared-ui';
+	import EmptyState from '$lib/components/files/EmptyState.svelte';
 
 	let shares = $state<Share[]>([]);
 	let loading = $state(true);
@@ -95,11 +96,11 @@
 			<button onclick={loadShares}>Erneut versuchen</button>
 		</div>
 	{:else if shares.length === 0}
-		<div class="empty-state">
-			<ShareNetwork size={48} />
-			<h2>Keine geteilten Links</h2>
-			<p>Teile Dateien oder Ordner, um Links hier zu verwalten.</p>
-		</div>
+		<EmptyState
+			type="shared"
+			title="Keine geteilten Links"
+			description="Teile Dateien oder Ordner, um Links hier zu verwalten."
+		/>
 	{:else}
 		<div class="shares-list">
 			{#each shares as share (share.id)}
