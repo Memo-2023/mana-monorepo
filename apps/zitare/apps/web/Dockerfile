@@ -81,6 +81,7 @@ RUN pnpm build || true
 # Build the web app
 WORKDIR /app/apps/zitare/apps/web
 RUN pnpm exec svelte-kit sync
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm build
 
 # Production stage
