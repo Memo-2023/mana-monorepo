@@ -69,6 +69,7 @@ RUN pnpm build
 
 # Build the web app
 WORKDIR /app/apps/storage/apps/web
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm exec svelte-kit sync
 RUN pnpm build
 
