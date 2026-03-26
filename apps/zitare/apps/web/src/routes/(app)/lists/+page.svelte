@@ -286,6 +286,7 @@
 						type="text"
 						bind:value={newListName}
 						placeholder={$_('lists.createModal.namePlaceholder')}
+						maxlength="50"
 						class="w-full p-3 rounded-lg bg-surface border border-border text-foreground focus:outline-none focus:border-primary"
 					/>
 				</div>
@@ -296,6 +297,7 @@
 					<textarea
 						bind:value={newListDescription}
 						placeholder={$_('lists.createModal.descriptionPlaceholder')}
+						maxlength="200"
 						rows="3"
 						class="w-full p-3 rounded-lg bg-surface border border-border text-foreground focus:outline-none focus:border-primary resize-none"
 					></textarea>
