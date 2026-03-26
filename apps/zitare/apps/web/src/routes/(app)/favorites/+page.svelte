@@ -4,6 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
 	import { getQuoteById, getQuoteText, type Quote } from '@zitare/content';
+	import { zitareSettings } from '$lib/stores/settings.svelte';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
@@ -74,7 +75,14 @@
 </svelte:head>
 
 <div class="max-w-3xl mx-auto">
-	<h1 class="text-3xl font-bold text-foreground mb-8">{$_('favorites.title')}</h1>
+	<div class="flex items-center gap-3 mb-8">
+		<h1 class="text-3xl font-bold text-foreground">{$_('favorites.title')}</h1>
+		{#if authStore.isAuthenticated && favoriteQuotes.length > 0}
+			<span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-primary/10 text-primary">
+				{favoriteQuotes.length}
+			</span>
+		{/if}
+	</div>
 
 	{#if !authStore.isAuthenticated}
 		<!-- Not logged in -->
@@ -132,7 +140,11 @@
 			{#each favoriteQuotes as quote (quote.id)}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div oncontextmenu={(e) => handleContextMenu(e, quote)}>
-					<QuoteCard {quote} showCategory showSource />
+					<QuoteCard
+						{quote}
+						showCategory={zitareSettings.showCategory}
+						showSource={zitareSettings.showSource}
+					/>
 				</div>
 			{/each}
 		</div>
