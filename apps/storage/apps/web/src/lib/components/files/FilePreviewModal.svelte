@@ -17,8 +17,10 @@
 		Pause,
 	} from '@manacore/shared-icons';
 	import type { StorageFile } from '$lib/api/client';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import FileVersionsModal from './FileVersionsModal.svelte';
 	import { audioPlayerStore, getAudioFiles } from '$lib/stores/audio-player.svelte';
+	import { browser } from '$app/environment';
 
 	interface Props {
 		open: boolean;
@@ -35,17 +37,77 @@
 
 	let isImage = $derived(file?.mimeType.startsWith('image/') ?? false);
 	let isAudio = $derived(file?.mimeType.startsWith('audio/') ?? false);
+	let isVideo = $derived(file?.mimeType.startsWith('video/') ?? false);
+	let isPdf = $derived(file?.mimeType === 'application/pdf');
 	let isTextOrCode = $derived(
 		file?.mimeType.startsWith('text/') ||
 			file?.mimeType.includes('javascript') ||
 			file?.mimeType.includes('json') ||
 			file?.mimeType.includes('xml') ||
+			file?.mimeType.includes('yaml') ||
+			file?.mimeType.includes('markdown') ||
 			false
+	);
+	let isMarkdown = $derived(
+		file?.name.endsWith('.md') || file?.mimeType.includes('markdown') || false
 	);
 
 	let imageUrl = $derived(
 		isImage && file ? `http://localhost:3016/api/v1/files/${file.id}/download` : null
 	);
+
+	/** Presigned URL for video/PDF preview */
+	let presignedUrl = $state<string | null>(null);
+	let textContent = $state<string | null>(null);
+	let textLoading = $state(false);
+
+	// Fetch presigned URL for video/PDF when file changes
+	$effect(() => {
+		presignedUrl = null;
+		textContent = null;
+
+		if (!file || !browser) return;
+
+		if (isVideo || isPdf) {
+			fetchPresignedUrl(file.id);
+		} else if (isTextOrCode) {
+			fetchTextContent(file.id);
+		}
+	});
+
+	async function fetchPresignedUrl(fileId: string) {
+		try {
+			const token = await authStore.getAccessToken();
+			const res = await fetch(`http://localhost:3016/api/v1/files/${fileId}/download?url=true`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			if (res.ok) {
+				const data = await res.json();
+				presignedUrl = data.url;
+			}
+		} catch (e) {
+			console.warn('Failed to get presigned URL:', e);
+		}
+	}
+
+	async function fetchTextContent(fileId: string) {
+		textLoading = true;
+		try {
+			const token = await authStore.getAccessToken();
+			const res = await fetch(`http://localhost:3016/api/v1/files/${fileId}/download`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			if (res.ok) {
+				const text = await res.text();
+				// Limit preview to ~50KB to avoid performance issues
+				textContent = text.length > 50000 ? text.slice(0, 50000) + '\n\n… (gekürzt)' : text;
+			}
+		} catch (e) {
+			console.warn('Failed to fetch text content:', e);
+		} finally {
+			textLoading = false;
+		}
+	}
 
 	/** Check if this file is currently playing in the global player */
 	let isCurrentlyPlaying = $derived(
@@ -106,6 +168,40 @@
 		}
 	}
 
+	/** Simple markdown to HTML renderer (no external dependency) */
+	function renderMarkdown(md: string): string {
+		let html = md
+			// Escape HTML
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			// Code blocks (``` ... ```)
+			.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+			// Inline code
+			.replace(/`([^`]+)`/g, '<code>$1</code>')
+			// Headers
+			.replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+			.replace(/^### (.+)$/gm, '<h3>$1</h3>')
+			.replace(/^## (.+)$/gm, '<h2>$1</h2>')
+			.replace(/^# (.+)$/gm, '<h1>$1</h1>')
+			// Bold & italic
+			.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+			.replace(/\*(.+?)\*/g, '<em>$1</em>')
+			// Links
+			.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+			// Unordered lists
+			.replace(/^[*-] (.+)$/gm, '<li>$1</li>')
+			// Horizontal rules
+			.replace(/^---$/gm, '<hr>')
+			// Paragraphs (double newlines)
+			.replace(/\n\n/g, '</p><p>');
+
+		// Wrap loose <li> in <ul>
+		html = html.replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
+
+		return `<p>${html}</p>`;
+	}
+
 	function handleAction(action: string) {
 		if (file) {
 			onAction(action, file);
@@ -136,6 +232,18 @@
 				<div class="preview-area">
 					{#if isImage && imageUrl}
 						<img src={imageUrl} alt={file.name} class="image-preview" />
+					{:else if isVideo}
+						{#if presignedUrl}
+							<!-- svelte-ignore a11y_media_has_caption -->
+							<video src={presignedUrl} controls class="video-preview" preload="metadata">
+								Dein Browser unterstützt kein Video.
+							</video>
+						{:else}
+							<div class="no-preview">
+								<FileVideo size={48} />
+								<p>Video wird geladen…</p>
+							</div>
+						{/if}
 					{:else if isAudio}
 						<div class="audio-preview">
 							<button
@@ -153,14 +261,39 @@
 							</button>
 							<p class="audio-label">{isCurrentlyPlaying ? 'Wird abgespielt' : 'Abspielen'}</p>
 						</div>
+					{:else if isPdf}
+						{#if presignedUrl}
+							<iframe src={presignedUrl} class="pdf-preview" title="PDF Vorschau: {file.name}"
+							></iframe>
+						{:else}
+							<div class="no-preview">
+								<Icon size={48} />
+								<p>PDF wird geladen…</p>
+							</div>
+						{/if}
 					{:else if isTextOrCode}
-						<div class="no-preview">
-							<Icon size={64} strokeWidth={1} />
-							<p>Vorschau nicht verfügbar</p>
-						</div>
+						{#if textLoading}
+							<div class="no-preview">
+								<Icon size={48} />
+								<p>Inhalt wird geladen…</p>
+							</div>
+						{:else if textContent !== null}
+							{#if isMarkdown}
+								<div class="text-preview markdown-preview">
+									{@html renderMarkdown(textContent)}
+								</div>
+							{:else}
+								<pre class="text-preview"><code>{textContent}</code></pre>
+							{/if}
+						{:else}
+							<div class="no-preview">
+								<Icon size={64} />
+								<p>Vorschau nicht verfügbar</p>
+							</div>
+						{/if}
 					{:else}
 						<div class="no-preview">
-							<Icon size={64} strokeWidth={1} />
+							<Icon size={64} />
 						</div>
 					{/if}
 				</div>
@@ -255,7 +388,7 @@
 		border-radius: var(--radius-xl);
 		box-shadow: var(--shadow-xl);
 		width: 100%;
-		max-width: 600px;
+		max-width: 700px;
 		max-height: 90vh;
 		margin: 1rem;
 		display: flex;
@@ -321,6 +454,111 @@
 		max-width: 100%;
 		max-height: 400px;
 		object-fit: contain;
+	}
+
+	.video-preview {
+		width: 100%;
+		max-height: 400px;
+		border-radius: var(--radius-md);
+		background: #000;
+	}
+
+	.pdf-preview {
+		width: 100%;
+		height: 500px;
+		border: none;
+		border-radius: var(--radius-md);
+	}
+
+	.text-preview {
+		width: 100%;
+		max-height: 400px;
+		overflow: auto;
+		padding: 1rem;
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.6;
+		color: rgb(var(--color-text-primary));
+		background: rgb(var(--color-surface));
+		border-radius: var(--radius-md);
+		text-align: left;
+		white-space: pre-wrap;
+		word-break: break-word;
+		font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+		tab-size: 4;
+	}
+
+	.text-preview code {
+		font-family: inherit;
+		font-size: inherit;
+	}
+
+	.markdown-preview {
+		font-family: inherit;
+		white-space: normal;
+	}
+
+	.markdown-preview :global(h1) {
+		font-size: 1.375rem;
+		font-weight: 700;
+		margin: 0 0 0.5rem;
+	}
+
+	.markdown-preview :global(h2) {
+		font-size: 1.125rem;
+		font-weight: 600;
+		margin: 1rem 0 0.375rem;
+	}
+
+	.markdown-preview :global(h3) {
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0.75rem 0 0.25rem;
+	}
+
+	.markdown-preview :global(code) {
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 0.8em;
+		padding: 0.125rem 0.375rem;
+		background: rgb(var(--color-border) / 0.5);
+		border-radius: var(--radius-sm);
+	}
+
+	.markdown-preview :global(pre) {
+		background: rgb(var(--color-surface-elevated));
+		padding: 0.75rem;
+		border-radius: var(--radius-md);
+		overflow-x: auto;
+		margin: 0.5rem 0;
+	}
+
+	.markdown-preview :global(pre code) {
+		padding: 0;
+		background: none;
+	}
+
+	.markdown-preview :global(ul) {
+		padding-left: 1.25rem;
+		margin: 0.375rem 0;
+	}
+
+	.markdown-preview :global(li) {
+		margin: 0.125rem 0;
+	}
+
+	.markdown-preview :global(hr) {
+		border: none;
+		border-top: 1px solid rgb(var(--color-border));
+		margin: 0.75rem 0;
+	}
+
+	.markdown-preview :global(a) {
+		color: rgb(var(--color-primary));
+		text-decoration: underline;
+	}
+
+	.markdown-preview :global(strong) {
+		font-weight: 600;
 	}
 
 	.audio-preview {
