@@ -1,0 +1,77 @@
+{
+	"app": {
+		"name": "Storage",
+		"description": "Almacenamiento seguro en la nube para tus archivos"
+	},
+	"nav": {
+		"files": "Archivos",
+		"shared": "Compartido",
+		"favorites": "Favoritos",
+		"trash": "Papelera",
+		"search": "Buscar",
+		"settings": "Ajustes",
+		"profile": "Perfil",
+		"feedback": "Feedback"
+	},
+	"files": {
+		"title": "Mis archivos",
+		"upload": "Subir",
+		"newFolder": "Nueva carpeta",
+		"empty": "Aún no hay archivos",
+		"dropHere": "Arrastra archivos aquí",
+		"viewGrid": "Vista de cuadrícula",
+		"viewList": "Vista de lista"
+	},
+	"folder": {
+		"create": "Crear carpeta",
+		"name": "Nombre de la carpeta",
+		"color": "Color de la carpeta"
+	},
+	"actions": {
+		"download": "Descargar",
+		"rename": "Renombrar",
+		"move": "Mover",
+		"share": "Compartir",
+		"favorite": "Añadir a favoritos",
+		"unfavorite": "Quitar de favoritos",
+		"delete": "Eliminar",
+		"restore": "Restaurar",
+		"permanentDelete": "Eliminar permanentemente"
+	},
+	"trash": {
+		"title": "Papelera",
+		"empty": "La papelera está vacía",
+		"emptyTrash": "Vaciar papelera",
+		"restoreAll": "Restaurar todo"
+	},
+	"share": {
+		"title": "Compartir",
+		"createLink": "Crear enlace",
+		"copyLink": "Copiar enlace",
+		"linkCopied": "¡Enlace copiado!",
+		"accessLevel": "Nivel de acceso",
+		"view": "Ver",
+		"download": "Descargar",
+		"edit": "Editar",
+		"password": "Protección con contraseña",
+		"expiration": "Fecha de expiración",
+		"maxDownloads": "Descargas máx."
+	},
+	"search": {
+		"title": "Buscar",
+		"placeholder": "Buscar archivos y carpetas...",
+		"noResults": "Sin resultados"
+	},
+	"favorites": {
+		"title": "Favoritos",
+		"empty": "Aún no hay favoritos"
+	},
+	"common": {
+		"loading": "Cargando...",
+		"save": "Guardar",
+		"cancel": "Cancelar",
+		"confirm": "Confirmar",
+		"error": "Error",
+		"success": "Éxito"
+	}
+}
