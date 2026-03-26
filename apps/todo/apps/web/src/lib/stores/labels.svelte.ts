@@ -1,119 +1,62 @@
 /**
- * Labels Store - Manages label state using Svelte 5 runes
- *
- * Uses the central Tags API from mana-core-auth. Labels and Tags are now
- * unified across all Manacore apps (Todo, Calendar, Contacts).
+ * Labels Store - Uses shared Tag Store backed by central mana-core-auth
  */
 
-import type { Label } from '$lib/api/labels';
-import * as labelsApi from '$lib/api/labels';
-import { TodoEvents } from '@manacore/shared-utils/analytics';
+import { browser } from '$app/environment';
+import { createTagStore, type TagStore } from '@manacore/shared-stores';
+import { authStore } from '$lib/stores/auth.svelte';
+import type { Tag } from '@manacore/shared-tags';
 
-// State
-let labels = $state<Label[]>([]);
-let loading = $state(false);
-let error = $state<string | null>(null);
+// Re-export Tag as Label for backward compatibility
+export type Label = Tag;
 
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return 'http://localhost:3001';
+}
+
+// Create the shared tag store
+const tagStore: TagStore = createTagStore({
+	authUrl: getAuthUrl(),
+	getToken: () => authStore.getValidToken(),
+});
+
+// Backward-compatible labelsStore wrapper
 export const labelsStore = {
-	// Getters
 	get labels() {
-		return labels;
+		return tagStore.tags;
 	},
 	get loading() {
-		return loading;
+		return tagStore.loading;
 	},
 	get error() {
-		return error;
+		return tagStore.error;
 	},
 
-	/**
-	 * Fetch all labels from API
-	 */
 	async fetchLabels() {
-		loading = true;
-		error = null;
-		try {
-			labels = await labelsApi.getLabels();
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to fetch labels';
-			console.error('Failed to fetch labels:', e);
-		} finally {
-			loading = false;
-		}
+		return tagStore.fetchTags();
+	},
+	getById(id: string) {
+		return tagStore.getById(id);
+	},
+	getColor(labelId: string) {
+		return tagStore.getColor(labelId);
 	},
 
-	/**
-	 * Get label by ID
-	 */
-	getById(id: string): Label | undefined {
-		return labels.find((l) => l.id === id);
-	},
-
-	/**
-	 * Get label color by ID
-	 */
-	getColor(labelId: string): string {
-		const label = labels.find((l) => l.id === labelId);
-		return label?.color || '#6b7280';
-	},
-
-	/**
-	 * Create a new label
-	 */
 	async createLabel(data: { name: string; color?: string }) {
-		loading = true;
-		error = null;
-		try {
-			const newLabel = await labelsApi.createLabel(data);
-			labels = [...labels, newLabel];
-			TodoEvents.labelCreated();
-			return newLabel;
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to create label';
-			console.error('Failed to create label:', e);
-			throw e;
-		} finally {
-			loading = false;
-		}
+		return tagStore.createTag(data);
 	},
-
-	/**
-	 * Update an existing label
-	 */
 	async updateLabel(id: string, data: { name?: string; color?: string }) {
-		error = null;
-		try {
-			const updatedLabel = await labelsApi.updateLabel(id, data);
-			labels = labels.map((l) => (l.id === id ? updatedLabel : l));
-			return updatedLabel;
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update label';
-			console.error('Failed to update label:', e);
-			throw e;
-		}
+		return tagStore.updateTag(id, data);
 	},
-
-	/**
-	 * Delete a label
-	 */
 	async deleteLabel(id: string) {
-		error = null;
-		try {
-			await labelsApi.deleteLabel(id);
-			labels = labels.filter((l) => l.id !== id);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to delete label';
-			console.error('Failed to delete label:', e);
-			throw e;
-		}
+		return tagStore.deleteTag(id);
 	},
-
-	/**
-	 * Clear all state (for logout)
-	 */
 	clear() {
-		labels = [];
-		loading = false;
-		error = null;
+		tagStore.clear();
 	},
 };

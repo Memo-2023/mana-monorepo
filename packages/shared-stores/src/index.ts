@@ -20,3 +20,4 @@ export {
 	type SimpleNavigationStores,
 	type SimpleNavigationOptions,
 } from './navigation-simple';
+export { createTagStore, type TagStore, type TagStoreConfig } from './tags.svelte';

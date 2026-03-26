@@ -2,7 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
+	import {
+		PillNavigation,
+		QuickInputBar,
+		ImmersiveModeToggle,
+		TagStrip,
+	} from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -23,7 +28,6 @@
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { theme } from '$lib/stores/theme';
 	import TaskFilters from '$lib/components/TaskFilters.svelte';
-	import TagStrip from '$lib/components/TagStrip.svelte';
 	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
 	import type { TaskPriority } from '@todo/shared';
 	import {
@@ -171,11 +175,17 @@
 		todoSettings.toggleFilterStrip();
 	}
 
+	// TagStrip visibility (toggle via Tags button in PillNav)
+	let isTagStripVisible = $state(true);
+
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// View routes for the tab group (pages that navigate)
 	const viewRoutes: Record<string, string> = {
 		liste: '/',
 		kanban: '/kanban',
-		tags: '/tags',
 	};
 
 	// Determine active view tab from current path
@@ -183,13 +193,12 @@
 		Object.entries(viewRoutes).find(([_, path]) => $page.url.pathname === path)?.[0] || 'liste'
 	);
 
-	// Tab group for view switching (Liste, Kanban, Tags) - grouped in one pill
+	// Tab group for view switching (Liste, Kanban) - grouped in one pill
 	let viewTabGroup = $derived<PillNavElement>({
 		type: 'tabs' as const,
 		options: [
 			{ id: 'liste', icon: 'list', label: 'Liste', title: 'Listenansicht' },
 			{ id: 'kanban', icon: 'columns', label: 'Kanban', title: 'Kanban-Board' },
-			{ id: 'tags', icon: 'tag', label: 'Tags', title: 'Tags verwalten' },
 		],
 		value: activeViewTab,
 		onChange: (id: string) => {
@@ -198,7 +207,7 @@
 		},
 	});
 
-	// Filter stays as a standalone pill (toggle behavior, not navigation)
+	// Filter and Tags stay as standalone pills (toggle behavior, not navigation)
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/',
@@ -206,6 +215,13 @@
 			icon: 'filter',
 			onClick: handleFilterToggle,
 			active: isFilterStripVisible,
+		},
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
 		},
 	]);
 
@@ -353,8 +369,28 @@
 						ariaLabel="Hauptnavigation"
 					/>
 
-					<!-- TagStrip (above PillNav, always visible when PillNav is open) -->
-					<TagStrip filterStripVisible={isFilterStripVisible} />
+					<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+					{#if isTagStripVisible}
+						<TagStrip
+							tags={labelsStore.labels.map((l) => ({
+								id: l.id,
+								name: l.name,
+								color: l.color || '#6b7280',
+							}))}
+							selectedIds={viewStore.filterLabelIds}
+							onToggle={(tagId) => {
+								const current = viewStore.filterLabelIds;
+								if (current.includes(tagId)) {
+									viewStore.setFilterLabelIds(current.filter((id) => id !== tagId));
+								} else {
+									viewStore.setFilterLabelIds([...current, tagId]);
+								}
+							}}
+							onClear={() => viewStore.setFilterLabelIds([])}
+							managementHref="/tags"
+							aboveFilterStrip={isFilterStripVisible}
+						/>
+					{/if}
 
 					<!-- TaskFilters strip (shown when Filter pill is active in PillNav) -->
 					{#if isFilterStripVisible}
