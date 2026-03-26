@@ -122,14 +122,23 @@ export class JwtAuthGuard implements CanActivate {
 	 * Verify JWT token locally using JWKS
 	 */
 	private async verifyToken(token: string): Promise<CurrentUserData> {
-		const authUrl = this.configService.get<string>('MANA_CORE_AUTH_URL') || 'http://localhost:3001';
-		const issuer = this.configService.get<string>('JWT_ISSUER') || authUrl;
 		const audience = this.configService.get<string>('JWT_AUDIENCE') || 'manacore';
+
+		// Build issuer allowlist: explicit JWT_ISSUER, MANA_CORE_AUTH_URL, and BASE_URL may all differ
+		// (e.g. internal Docker URL vs public URL). Accept any of them.
+		const issuerCandidates = new Set<string>();
+		const jwtIssuer = this.configService.get<string>('JWT_ISSUER');
+		const authUrl = this.configService.get<string>('MANA_CORE_AUTH_URL');
+		if (jwtIssuer) issuerCandidates.add(jwtIssuer);
+		if (authUrl) issuerCandidates.add(authUrl);
+		// Always accept the well-known production issuer
+		issuerCandidates.add('https://auth.mana.how');
+		issuerCandidates.add('http://localhost:3001');
 
 		const jwks = this.getJWKS();
 
 		const { payload } = await jwtVerify(token, jwks, {
-			issuer,
+			issuer: [...issuerCandidates],
 			audience,
 		});
 
