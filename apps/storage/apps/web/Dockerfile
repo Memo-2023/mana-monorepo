@@ -42,6 +42,7 @@ COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-theme-ui ./packages/shared-theme-ui
+COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-vite-config ./packages/shared-vite-config
