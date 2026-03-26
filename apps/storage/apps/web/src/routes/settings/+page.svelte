@@ -4,6 +4,8 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { APP_VERSION } from '$lib/version';
+	import { filesApi } from '$lib/api/client';
+	import type { StorageStats } from '$lib/api/client';
 	import {
 		SettingsPage,
 		SettingsSection,
@@ -12,8 +14,23 @@
 		GlobalSettingsSection,
 	} from '@manacore/shared-ui';
 
+	let stats = $state<StorageStats | null>(null);
+	let maxStorage = 10 * 1024 * 1024 * 1024; // 10 GB
+
+	let usagePercent = $derived(stats ? Math.min(100, (stats.totalSize / maxStorage) * 100) : 0);
+
+	function formatSize(bytes: number): string {
+		if (bytes === 0) return '0 B';
+		const k = 1024;
+		const sizes = ['B', 'KB', 'MB', 'GB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+	}
+
 	onMount(async () => {
 		await userSettings.load();
+		const result = await filesApi.stats();
+		if (result.data) stats = result.data;
 	});
 </script>
 
@@ -92,11 +109,20 @@
 		<SettingsCard>
 			<div class="px-5 py-4">
 				<p class="font-medium text-[hsl(var(--foreground))] mb-2">Speicherplatz</p>
-				<p class="text-sm text-[hsl(var(--muted-foreground))] mb-4">Dein genutzter Speicherplatz</p>
+				<p class="text-sm text-[hsl(var(--muted-foreground))] mb-4">
+					{stats
+						? `${stats.totalFiles} Dateien, ${stats.favoriteCount} Favoriten`
+						: 'Wird geladen...'}
+				</p>
 				<div class="w-full h-2 bg-[hsl(var(--muted))] rounded-full overflow-hidden mb-2">
-					<div class="h-full bg-[hsl(var(--primary))] rounded-full" style="width: 25%"></div>
+					<div
+						class="h-full bg-[hsl(var(--primary))] rounded-full transition-all duration-500"
+						style="width: {usagePercent}%"
+					></div>
 				</div>
-				<p class="text-sm text-[hsl(var(--muted-foreground))]">2.5 GB von 10 GB verwendet</p>
+				<p class="text-sm text-[hsl(var(--muted-foreground))]">
+					{stats ? formatSize(stats.totalSize) : '...'} von {formatSize(maxStorage)} verwendet
+				</p>
 			</div>
 		</SettingsCard>
 	</SettingsSection>

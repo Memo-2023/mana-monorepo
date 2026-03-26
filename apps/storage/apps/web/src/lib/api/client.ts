@@ -148,12 +148,21 @@ export interface Tag {
 	createdAt: string;
 }
 
+export interface StorageStats {
+	totalFiles: number;
+	totalSize: number;
+	favoriteCount: number;
+	recentFiles: StorageFile[];
+}
+
 // Files API
 export const filesApi = {
 	list: (folderId?: string) =>
 		request<StorageFile[]>(`/files${folderId ? `?folderId=${folderId}` : ''}`),
 
 	get: (id: string) => request<StorageFile>(`/files/${id}`),
+
+	stats: () => request<StorageStats>('/files/stats'),
 
 	upload: async (file: File, folderId?: string): Promise<ApiResponse<StorageFile>> => {
 		const formData = new FormData();
