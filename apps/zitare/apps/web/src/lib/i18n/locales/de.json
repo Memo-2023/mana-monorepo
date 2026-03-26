@@ -110,7 +110,9 @@
 		"createList": "als Liste erstellen",
 		"createListDescription": "Neue Liste mit diesem Namen erstellen",
 		"minChars": "Bitte gib mindestens 2 Zeichen ein",
-		"hint": "Suche nach Zitaten, Autoren oder Themen"
+		"hint": "Suche nach Zitaten, Autoren oder Themen",
+		"allCategories": "Alle",
+		"filterByCategory": "Nach Kategorie filtern"
 	},
 	"settings": {
 		"quoteLanguage": "Zitat-Sprache",

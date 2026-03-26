@@ -110,7 +110,9 @@
 		"createList": "create as list",
 		"createListDescription": "Create a new list with this name",
 		"minChars": "Please enter at least 2 characters",
-		"hint": "Search for quotes, authors, or topics"
+		"hint": "Search for quotes, authors, or topics",
+		"allCategories": "All",
+		"filterByCategory": "Filter by category"
 	},
 	"settings": {
 		"quoteLanguage": "Quote language",
