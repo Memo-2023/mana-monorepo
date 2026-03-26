@@ -295,6 +295,14 @@ export const tagsApi = {
 		}),
 
 	delete: (id: string) => request<{ success: boolean }>(`/tags/${id}`, { method: 'DELETE' }),
+
+	getFileTags: (fileId: string) => request<Tag[]>(`/tags/file/${fileId}`),
+
+	addToFile: (fileId: string, tagId: string) =>
+		request<{ success: boolean }>(`/tags/file/${fileId}/${tagId}`, { method: 'POST' }),
+
+	removeFromFile: (fileId: string, tagId: string) =>
+		request<{ success: boolean }>(`/tags/file/${fileId}/${tagId}`, { method: 'DELETE' }),
 };
 
 // Trash API

@@ -20,6 +20,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import FileVersionsModal from './FileVersionsModal.svelte';
 	import { audioPlayerStore, getAudioFiles } from '$lib/stores/audio-player.svelte';
+	import TagPicker from './TagPicker.svelte';
 	import { browser } from '$app/environment';
 
 	interface Props {
@@ -324,6 +325,8 @@
 						<span class="detail-value">{file.isFavorite ? 'Ja' : 'Nein'}</span>
 					</div>
 				</div>
+
+				<TagPicker fileId={file.id} />
 			</div>
 
 			<div class="modal-actions">

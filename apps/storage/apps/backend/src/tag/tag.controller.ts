@@ -35,4 +35,21 @@ export class TagController {
 		await this.tagService.delete(user.userId, id);
 		return { success: true };
 	}
+
+	@Get('file/:fileId')
+	async getFileTags(@Param('fileId') fileId: string) {
+		return this.tagService.getFileTags(fileId);
+	}
+
+	@Post('file/:fileId/:tagId')
+	async addTagToFile(@Param('fileId') fileId: string, @Param('tagId') tagId: string) {
+		await this.tagService.addTagToFile(fileId, tagId);
+		return { success: true };
+	}
+
+	@Delete('file/:fileId/:tagId')
+	async removeTagFromFile(@Param('fileId') fileId: string, @Param('tagId') tagId: string) {
+		await this.tagService.removeTagFromFile(fileId, tagId);
+		return { success: true };
+	}
 }
