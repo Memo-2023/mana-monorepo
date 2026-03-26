@@ -1,4 +1,5 @@
 <script lang="ts">
+	import QRCode from 'qrcode';
 	import type { AuthResult } from '../types';
 
 	export interface TwoFactorSetupTranslations {
@@ -94,6 +95,15 @@
 	let backupCodes = $state<string[]>([]);
 	let copied = $state(false);
 	let codesCopied = $state(false);
+	let qrCodeDataUrl = $state('');
+
+	$effect(() => {
+		if (totpURI) {
+			QRCode.toDataURL(totpURI, { width: 200, margin: 2 }).then((url: string) => {
+				qrCodeDataUrl = url;
+			});
+		}
+	});
 
 	/** Extract the secret from an otpauth:// URI */
 	function extractSecret(uri: string): string {
@@ -299,15 +309,17 @@
 
 			{#if totpURI}
 				<div class="qr-section">
-					<img
-						src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={encodeURIComponent(
-							totpURI
-						)}"
-						alt="QR Code for TOTP setup"
-						width="200"
-						height="200"
-						class="qr-image"
-					/>
+					{#if qrCodeDataUrl}
+						<img
+							src={qrCodeDataUrl}
+							alt="QR Code for TOTP setup"
+							width="200"
+							height="200"
+							class="qr-image"
+						/>
+					{:else}
+						<div class="qr-placeholder" style:width="200px" style:height="200px"></div>
+					{/if}
 				</div>
 
 				<div class="manual-entry">
@@ -603,6 +615,14 @@
 		border-radius: 0.5rem;
 		background: #fff;
 		padding: 0.5rem;
+	}
+
+	.qr-placeholder {
+		border-radius: 0.5rem;
+		background: rgba(255, 255, 255, 0.1);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.manual-entry {

@@ -10,6 +10,8 @@ export { default as SessionExpiredBanner } from './components/SessionExpiredBann
 export { default as AuthGate } from './components/AuthGate.svelte';
 export { default as PasskeyManager } from './components/PasskeyManager.svelte';
 export { default as TwoFactorSetup } from './components/TwoFactorSetup.svelte';
+export { default as SecurityOnboarding } from './components/SecurityOnboarding.svelte';
+export { default as ChangePassword } from './components/ChangePassword.svelte';
 
 // Utilities
 export {

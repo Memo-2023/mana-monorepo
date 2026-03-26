@@ -144,6 +144,7 @@
 	let showTwoFactor = $state(false);
 	let twoFactorCode = $state('');
 	let useBackupCode = $state(false);
+	let trustDevice = $state(false);
 
 	// Theme state - can be toggled manually, defaults to system preference
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -276,13 +277,14 @@
 		loading = true;
 		clearError();
 
-		const handler = useBackupCode ? onVerifyBackupCode : onVerifyTwoFactor;
-		if (!handler) {
+		if ((useBackupCode && !onVerifyBackupCode) || (!useBackupCode && !onVerifyTwoFactor)) {
 			loading = false;
 			return;
 		}
 
-		const result = await handler(twoFactorCode);
+		const result = useBackupCode
+			? await onVerifyBackupCode!(twoFactorCode)
+			: await onVerifyTwoFactor!(twoFactorCode, trustDevice);
 		loading = false;
 
 		if (result.success) {
@@ -430,6 +432,17 @@
 							/>
 						</div>
 
+						{#if !useBackupCode}
+							<label class="remember-label" style:margin-bottom="1rem">
+								<input
+									type="checkbox"
+									bind:checked={trustDevice}
+									style:accent-color={primaryColor}
+								/>
+								<span>Diesem Gerät 30 Tage vertrauen</span>
+							</label>
+						{/if}
+
 						<button
 							type="submit"
 							disabled={loading || !twoFactorCode}
@@ -576,7 +589,7 @@
 								bind:value={email}
 								placeholder={t.emailPlaceholder}
 								required
-								autocomplete="email"
+								autocomplete={passkeyAvailable ? 'username webauthn' : 'email'}
 								aria-invalid={errorField === 'email'}
 								class="input-field"
 								class:input-error={errorField === 'email'}

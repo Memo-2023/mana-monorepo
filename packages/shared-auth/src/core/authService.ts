@@ -748,6 +748,37 @@ export function createAuthService(config: AuthServiceConfig) {
 		},
 
 		/**
+		 * Change password
+		 */
+		async changePassword(currentPassword: string, newPassword: string): Promise<AuthResult> {
+			try {
+				const appToken = await service.getAppToken();
+				if (!appToken) return { success: false, error: 'Not authenticated' };
+
+				const response = await fetch(`${baseUrl}/api/v1/auth/change-password`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${appToken}`,
+					},
+					body: JSON.stringify({ currentPassword, newPassword }),
+				});
+
+				if (!response.ok) {
+					const err = await response.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to change password' };
+				}
+
+				return { success: true };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to change password',
+				};
+			}
+		},
+
+		/**
 		 * Get the current app token
 		 */
 		async getAppToken(): Promise<string | null> {
