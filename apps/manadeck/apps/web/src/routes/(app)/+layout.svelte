@@ -7,8 +7,9 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -33,11 +34,24 @@
 	// Get theme state
 	let isDark = $derived(theme.isDark);
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Base navigation items for ManaDeck (Mana and Profile are in user dropdown)
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/decks', label: 'Decks', icon: 'archive' },
 		{ href: '/explore', label: 'Explore', icon: 'search' },
 		{ href: '/progress', label: 'Progress', icon: 'chart' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	];
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)
@@ -165,8 +179,9 @@
 			return;
 		}
 
-		// Load user settings
+		// Load user settings and tags
 		await userSettings.load();
+		await tagStore.fetchTags();
 
 		// Redirect to start page if on root and a custom start page is set
 		const currentPath = window.location.pathname;
@@ -228,6 +243,22 @@
 			helpHref="/help"
 			allAppsHref="/apps"
 		/>
+
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
 
 		<!-- Quick Input Bar -->
 		<QuickInputBar

@@ -8,7 +8,7 @@
 	import { apiClient } from '$lib/api/client';
 	import { questionsApi } from '$lib/api/questions';
 	import { theme } from '$lib/stores/theme';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -16,6 +16,7 @@
 		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
+	import { tagStore } from '$lib/stores/tags.svelte';
 
 	let { children } = $props();
 
@@ -55,6 +56,7 @@
 		// Load initial data
 		await collectionsStore.load();
 		await questionsStore.load();
+		await tagStore.fetchTags();
 
 		// Initialize mobile state
 		updateMobileState();
@@ -174,17 +176,46 @@
 		}
 	}
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Navigation items
 	let navItems = $derived<PillNavItem[]>([
 		{ href: '/', label: 'Questions', icon: 'help-circle' },
 		{ href: '/collections', label: 'Collections', icon: 'folder' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	]);
 </script>
 
 <svelte:window onresize={updateMobileState} />
 
 <div class="layout-container">
+	<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+	{#if isTagStripVisible}
+		<TagStrip
+			tags={tagStore.tags.map((t) => ({
+				id: t.id,
+				name: t.name,
+				color: t.color || '#3b82f6',
+			}))}
+			selectedIds={[]}
+			onToggle={() => {}}
+			onClear={() => {}}
+			managementHref="/tags"
+			loading={tagStore.loading}
+		/>
+	{/if}
+
 	<!-- Navigation -->
 	<PillNavigation
 		items={navItems}

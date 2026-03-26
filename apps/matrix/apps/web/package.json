@@ -49,6 +49,8 @@
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
+		"@manacore/shared-stores": "workspace:*",
+		"@manacore/shared-tags": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"@matrix-org/matrix-sdk-crypto-wasm": "^13.0.0",
 		"buffer": "^6.0.3",

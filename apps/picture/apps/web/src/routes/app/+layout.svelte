@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
+	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillNavElement, PillDropdownItem } from '@manacore/shared-ui';
 	import {
 		THEME_DEFINITIONS,
@@ -19,6 +19,7 @@
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
+	import { tagStore } from '$lib/stores/tags';
 	import { pictureOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
@@ -42,6 +43,26 @@
 		}
 	});
 
+	// TagStrip state
+	let isTagStripVisible = $state(true);
+	let selectedTagIds = $state<string[]>([]);
+
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
+	function handleTagToggle(tagId: string) {
+		if (selectedTagIds.includes(tagId)) {
+			selectedTagIds = selectedTagIds.filter((id) => id !== tagId);
+		} else {
+			selectedTagIds = [...selectedTagIds, tagId];
+		}
+	}
+
+	function handleTagClear() {
+		selectedTagIds = [];
+	}
+
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 		if (browser) localStorage.setItem('picture-nav-collapsed', String(collapsed));
@@ -61,7 +82,7 @@
 	}
 
 	async function handleAuthReady() {
-		await userSettings.load();
+		await Promise.all([userSettings.load(), tagStore.fetchTags()]);
 
 		// Redirect to start page if on /app and a custom start page is set
 		const currentPath = window.location.pathname;
@@ -85,7 +106,13 @@
 		{ href: '/app/explore', label: 'Entdecken', icon: 'search' },
 		{ href: '/app/generate', label: 'Generieren', icon: 'fire' },
 		{ href: '/app/upload', label: 'Upload', icon: 'upload' },
-		{ href: '/app/tags', label: 'Tags', icon: 'tag' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 		{ href: '/app/archive', label: 'Archiv', icon: 'archive' },
 	];
 
@@ -262,6 +289,20 @@
 				feedbackHref="/app/feedback"
 				allAppsHref="/app/apps"
 			/>
+			<!-- TagStrip (toggled via Tags pill) -->
+			{#if isTagStripVisible}
+				<TagStrip
+					tags={tagStore.tags.map((t) => ({
+						id: t.id,
+						name: t.name,
+						color: t.color || '#6b7280',
+					}))}
+					selectedIds={selectedTagIds}
+					onToggle={handleTagToggle}
+					onClear={handleTagClear}
+					managementHref="/app/tags"
+				/>
+			{/if}
 		{/if}
 
 		<!-- Main Content Area -->

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { PillNavigation, QuickInputBar, DevBuildBadge } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, DevBuildBadge, TagStrip } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -27,6 +27,7 @@
 	import { projectStore } from '$lib/stores/project.svelte';
 	import { parseSongInput, formatParsedSongPreview } from '$lib/utils/song-parser';
 	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
 	import FullPlayer from '$lib/components/FullPlayer.svelte';
 	import QueuePanel from '$lib/components/QueuePanel.svelte';
@@ -68,6 +69,12 @@
 	// User
 	let userEmail = $derived(authStore.user?.email || 'Menu');
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Navigation items
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/library', label: 'Library', icon: 'music-notes' },
@@ -76,6 +83,13 @@
 		{ href: '/upload', label: 'Upload', icon: 'upload' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
 		{ href: '/help', label: 'Help', icon: 'help-circle' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	];
 
 	const navItems = $derived(baseNavItems);
@@ -168,6 +182,7 @@
 
 	async function handleAuthReady() {
 		splitPanel.initialize();
+		await tagStore.fetchTags();
 	}
 </script>
 
@@ -210,6 +225,22 @@
 				onOpenInPanel={handleOpenInPanel}
 				ariaLabel="Main navigation"
 			/>
+
+			<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+			{#if isTagStripVisible}
+				<TagStrip
+					tags={tagStore.tags.map((t) => ({
+						id: t.id,
+						name: t.name,
+						color: t.color || '#3b82f6',
+					}))}
+					selectedIds={[]}
+					onToggle={() => {}}
+					onClear={() => {}}
+					managementHref="/tags"
+					loading={tagStore.loading}
+				/>
+			{/if}
 
 			<!-- Quick Input Bar -->
 			<QuickInputBar

@@ -3,8 +3,9 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
@@ -58,8 +59,23 @@
 	// User email for user dropdown
 	let userEmail = $derived(auth.user?.email);
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Navigation items for Presi
-	const navItems: PillNavItem[] = [{ href: '/', label: 'Decks', icon: 'document' }];
+	const navItems: PillNavItem[] = [
+		{ href: '/', label: 'Decks', icon: 'document' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
+	];
 
 	// Routes where nav should be hidden (present mode, shared view)
 	const hideNavRoutes = ['/present/', '/shared/'];
@@ -128,8 +144,9 @@
 			return;
 		}
 
-		// Load user settings
+		// Load user settings and tags
 		await userSettings.load();
+		await tagStore.fetchTags();
 
 		// Redirect to start page if on root and a custom start page is set
 		const currentPath = window.location.pathname;
@@ -188,6 +205,22 @@
 			helpHref="/help"
 			allAppsHref="/apps"
 		/>
+
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
 
 		<!-- Quick Input Bar -->
 		<QuickInputBar

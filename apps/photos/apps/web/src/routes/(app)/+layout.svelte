@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { _, locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -18,12 +18,39 @@
 	let isDark = $derived(theme.isDark);
 	let userEmail = $derived(authStore.user?.email || 'Menu');
 
+	// TagStrip state
+	let isTagStripVisible = $state(true);
+	let selectedTagIds = $state<string[]>([]);
+
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
+	function handleTagToggle(tagId: string) {
+		if (selectedTagIds.includes(tagId)) {
+			selectedTagIds = selectedTagIds.filter((id) => id !== tagId);
+		} else {
+			selectedTagIds = [...selectedTagIds, tagId];
+		}
+	}
+
+	function handleTagClear() {
+		selectedTagIds = [];
+	}
+
 	// Navigation items
 	const navItems: PillNavItem[] = [
 		{ href: '/', label: $_('nav.gallery'), icon: 'image' },
 		{ href: '/albums', label: $_('nav.albums'), icon: 'folder' },
 		{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
 		{ href: '/upload', label: $_('nav.upload'), icon: 'upload' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
 	];
 
@@ -110,6 +137,21 @@
 			helpHref="/help"
 			profileHref="/profile"
 		/>
+
+		<!-- TagStrip (toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#6b7280',
+				}))}
+				selectedIds={selectedTagIds}
+				onToggle={handleTagToggle}
+				onClear={handleTagClear}
+				managementHref="/tags"
+			/>
+		{/if}
 
 		<!-- Quick Input Bar -->
 		<QuickInputBar

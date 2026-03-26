@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import { PillNavigation, CommandBar, TagStrip } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -32,6 +32,7 @@
 	import { clockOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 
 	// App switcher items
 	const appItems = getPillAppItems('clock');
@@ -164,6 +165,12 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Base navigation items for Clock
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Übersicht', icon: 'home' },
@@ -174,6 +181,13 @@
 		{ href: '/world-clock', label: 'Weltzeituhr', icon: 'globe' },
 		{ href: '/life', label: 'Lebensuhr', icon: 'heart' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	];
 
 	// Navigation items filtered by visibility settings
@@ -239,8 +253,9 @@
 			collapsedStore.set(true);
 		}
 
-		// Load user settings
+		// Load user settings and tags
 		await userSettings.load();
+		await tagStore.fetchTags();
 
 		// Check for session data to migrate
 		if (alarmsStore.hasSessionAlarms) {
@@ -294,6 +309,22 @@
 			helpHref="/help"
 			allAppsHref="/apps"
 		/>
+
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
 
 		<main class="main-content bg-background">
 			<div class="content-wrapper">

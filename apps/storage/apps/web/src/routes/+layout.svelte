@@ -3,11 +3,12 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, setupGlobalErrorHandler } from '@manacore/shared-ui';
+	import { PillNavigation, setupGlobalErrorHandler, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
+	import { tagsStore } from '$lib/stores/tags.svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
@@ -65,12 +66,39 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
+	// TagStrip state
+	let isTagStripVisible = $state(true);
+	let selectedTagIds = $state<string[]>([]);
+
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
+	function handleTagToggle(tagId: string) {
+		if (selectedTagIds.includes(tagId)) {
+			selectedTagIds = selectedTagIds.filter((id) => id !== tagId);
+		} else {
+			selectedTagIds = [...selectedTagIds, tagId];
+		}
+	}
+
+	function handleTagClear() {
+		selectedTagIds = [];
+	}
+
 	// Navigation items for Storage
 	const navItems: PillNavItem[] = [
 		{ href: '/files', label: 'Dateien', icon: 'folder' },
 		{ href: '/shared', label: 'Geteilt', icon: 'share' },
 		{ href: '/favorites', label: 'Favoriten', icon: 'heart' },
 		{ href: '/trash', label: 'Papierkorb', icon: 'trash' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 		{ href: '/search', label: 'Suche', icon: 'search' },
 	];
 
@@ -135,8 +163,8 @@
 		// Initialize theme
 		theme.initialize();
 
-		// Load user settings
-		await userSettings.load();
+		// Load user settings and tags
+		await Promise.all([userSettings.load(), tagsStore.fetchTags()]);
 
 		// Initialize collapsed state from localStorage
 		const savedCollapsed = localStorage.getItem('storage-nav-collapsed');
@@ -196,6 +224,21 @@
 				helpHref="/help"
 				allAppsHref="/apps"
 			/>
+
+			<!-- TagStrip (toggled via Tags pill) -->
+			{#if isTagStripVisible}
+				<TagStrip
+					tags={tagsStore.tags.map((t) => ({
+						id: t.id,
+						name: t.name,
+						color: t.color || '#6b7280',
+					}))}
+					selectedIds={selectedTagIds}
+					onToggle={handleTagToggle}
+					onClear={handleTagClear}
+					managementHref="/tags"
+				/>
+			{/if}
 
 			<main class="main-content bg-background">
 				<div class="content-wrapper">

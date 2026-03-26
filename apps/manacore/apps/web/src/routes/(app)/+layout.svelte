@@ -6,8 +6,9 @@
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation } from '@manacore/shared-ui';
+	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -83,6 +84,12 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email);
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Navigation items for ManaCore
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/home', label: 'Home', icon: 'home' },
@@ -93,6 +100,13 @@
 		{ href: '/api-keys', label: 'API Keys', icon: 'key' },
 		{ href: '/profile', label: 'Profil', icon: 'user' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	];
 
 	// Only show admin link if user has admin role
@@ -194,6 +208,9 @@
 			// Settings API not available - use defaults
 		});
 
+		// Load tags
+		tagStore.fetchTags();
+
 		// Load onboarding state and show wizard if needed
 		onboardingStore.load();
 		if (onboardingStore.shouldShow) {
@@ -260,6 +277,22 @@
 			helpHref="/help"
 			allAppsHref="/apps"
 		/>
+
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
 
 		<!-- Main content -->
 		<main class="pb-24">

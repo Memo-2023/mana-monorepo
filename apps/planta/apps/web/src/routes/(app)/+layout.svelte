@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, QuickInputItem, CreatePreview } from '@manacore/shared-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { plantsApi } from '$lib/api/plants';
@@ -15,11 +16,24 @@
 
 	let { children } = $props();
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Navigation items for Planta
 	const navItems: PillNavItem[] = [
 		{ href: '/dashboard', label: 'Meine Pflanzen', icon: 'document' },
 		{ href: '/add', label: 'Hinzufügen', icon: 'plus' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	];
 
 	let isDark = $derived(theme.isDark);
@@ -83,7 +97,7 @@
 	}
 </script>
 
-<AuthGate {authStore} {goto}>
+<AuthGate {authStore} {goto} onReady={() => tagStore.fetchTags()}>
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}
@@ -101,6 +115,22 @@
 			helpHref="/help"
 			profileHref="/profile"
 		/>
+
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
 
 		<!-- Quick Input Bar -->
 		<QuickInputBar

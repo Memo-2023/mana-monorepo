@@ -3,8 +3,9 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { _, locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar } from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
@@ -50,12 +51,25 @@
 
 	let userEmail = $derived(authStore.user?.email || $_('nav.settings'));
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	let navItems = $derived<PillNavItem[]>([
 		{ href: '/', label: $_('nav.explore'), icon: 'compass' },
 		{ href: '/map', label: $_('nav.map'), icon: 'mappin' },
 		{ href: '/add', label: $_('nav.add'), icon: 'plus' },
 		{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
 		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	]);
 
 	function handleToggleTheme() {
@@ -158,9 +172,13 @@
 		showNav = !showNav;
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		const savedNav = localStorage.getItem('citycorners-nav-visible');
 		if (savedNav !== null) showNav = savedNav !== 'false';
+
+		if (authStore.isAuthenticated) {
+			await tagStore.fetchTags();
+		}
 	});
 </script>
 
@@ -193,6 +211,22 @@
 			themesHref="/themes"
 			helpHref="/help"
 			profileHref="/profile"
+		/>
+	{/if}
+
+	<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+	{#if isTagStripVisible}
+		<TagStrip
+			tags={tagStore.tags.map((t) => ({
+				id: t.id,
+				name: t.name,
+				color: t.color || '#3b82f6',
+			}))}
+			selectedIds={[]}
+			onToggle={() => {}}
+			onClear={() => {}}
+			managementHref="/tags"
+			loading={tagStore.loading}
 		/>
 	{/if}
 

@@ -2,8 +2,14 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale, _ } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
+	import {
+		PillNavigation,
+		QuickInputBar,
+		ImmersiveModeToggle,
+		TagStrip,
+	} from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 
 	// Extend QuickInputItem for zitare-specific search results with href navigation
 	interface ZitareSearchItem extends QuickInputItem {
@@ -88,12 +94,25 @@
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email || $_('nav.menu'));
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Base navigation items for Zitare
 	let baseNavItems = $derived<PillNavItem[]>([
 		{ href: '/', label: $_('nav.today'), icon: 'sun' },
 		{ href: '/categories', label: $_('nav.categories'), icon: 'grid' },
 		{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
 		{ href: '/lists', label: $_('nav.lists'), icon: 'list' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	]);
 
 	// Filter hidden nav items
@@ -216,6 +235,7 @@
 			userSettings.load();
 			favoritesStore.load();
 			listsStore.loadLists();
+			tagStore.fetchTags();
 		}
 	}
 </script>
@@ -257,6 +277,22 @@
 					profileHref="/profile"
 					helpHref="/help"
 					allAppsHref="/apps"
+				/>
+			{/if}
+
+			<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+			{#if isTagStripVisible}
+				<TagStrip
+					tags={tagStore.tags.map((t) => ({
+						id: t.id,
+						name: t.name,
+						color: t.color || '#3b82f6',
+					}))}
+					selectedIds={[]}
+					onToggle={() => {}}
+					onClear={() => {}}
+					managementHref="/tags"
+					loading={tagStore.loading}
 				/>
 			{/if}
 

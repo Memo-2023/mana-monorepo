@@ -20,8 +20,9 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation.svelte';
-	import { PillNavigation } from '@manacore/shared-ui';
+	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 	import { MagnifyingGlass, X } from '@manacore/shared-icons';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
@@ -71,6 +72,9 @@
 
 		// Load user settings (will use the token we just set)
 		await userSettings.load();
+
+		// Load tags (uses mana-core-auth token)
+		await tagStore.fetchTags();
 	}
 
 	// App switcher items
@@ -121,11 +125,24 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Navigation items for Matrix
 	const navItems: PillNavItem[] = [
 		{ href: '/chat', label: 'Chat', icon: 'home' },
 		{ href: '/bots', label: 'Bots', icon: 'robot' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	];
 
 	// User info from Matrix
@@ -419,6 +436,22 @@
 				settingsHref="/settings"
 				helpHref="/help"
 				allAppsHref="https://mana.how"
+			/>
+		{/if}
+
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible && !isMobileRoomView}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
 			/>
 		{/if}
 

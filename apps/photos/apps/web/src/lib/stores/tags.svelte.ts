@@ -1,48 +1,50 @@
 /**
- * Tags Store - Manages tag state using Svelte 5 runes
+ * Tags Store - Uses shared Tag Store backed by central mana-core-auth
+ *
+ * Wraps createTagStore for backward compatibility with existing tagStore interface.
+ * Also preserves photo-specific tag operations (getPhotoTags, addTagToPhoto, etc.)
+ * which go through the Photos backend, not mana-core-auth.
  */
 
+import { browser } from '$app/environment';
+import { createTagStore, type TagStore } from '@manacore/shared-stores';
+import { authStore } from '$lib/stores/auth.svelte';
 import { api } from '$lib/api/client';
 import type { Tag } from '@photos/shared';
 
-// State
-let tags = $state<Tag[]>([]);
-let loading = $state(false);
-let error = $state<string | null>(null);
+function getAuthUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injectedUrl = (window as unknown as { __PUBLIC_MANA_CORE_AUTH_URL__?: string })
+			.__PUBLIC_MANA_CORE_AUTH_URL__;
+		return injectedUrl || 'http://localhost:3001';
+	}
+	return 'http://localhost:3001';
+}
 
+// Create the shared tag store
+const sharedTagStore: TagStore = createTagStore({
+	authUrl: getAuthUrl(),
+	getToken: () => authStore.getValidToken(),
+});
+
+// Backward-compatible tagStore wrapper
 export const tagStore = {
-	// Getters
+	// Getters (delegate to shared store)
 	get tags() {
-		return tags;
+		return sharedTagStore.tags;
 	},
 	get loading() {
-		return loading;
+		return sharedTagStore.loading;
 	},
 	get error() {
-		return error;
+		return sharedTagStore.error;
 	},
 
 	/**
 	 * Load all tags
 	 */
 	async loadTags() {
-		loading = true;
-		error = null;
-
-		try {
-			const result = await api.get<Tag[]>('/tags');
-			if (result.error) {
-				error = result.error.message;
-				return;
-			}
-			if (result.data) {
-				tags = result.data;
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load tags';
-		} finally {
-			loading = false;
-		}
+		return sharedTagStore.fetchTags();
 	},
 
 	/**
@@ -50,18 +52,9 @@ export const tagStore = {
 	 */
 	async createTag(data: { name: string; color?: string }) {
 		try {
-			const result = await api.post<Tag>('/tags', data);
-			if (result.error) {
-				error = result.error.message;
-				return null;
-			}
-			if (result.data) {
-				tags = [...tags, result.data];
-				return result.data;
-			}
-			return null;
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to create tag';
+			const tag = await sharedTagStore.createTag(data);
+			return tag;
+		} catch {
 			return null;
 		}
 	},
@@ -71,18 +64,9 @@ export const tagStore = {
 	 */
 	async updateTag(id: string, data: { name?: string; color?: string }) {
 		try {
-			const result = await api.patch<Tag>(`/tags/${id}`, data);
-			if (result.error) {
-				error = result.error.message;
-				return null;
-			}
-			if (result.data) {
-				tags = tags.map((t) => (t.id === id ? result.data! : t));
-				return result.data;
-			}
-			return null;
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update tag';
+			const tag = await sharedTagStore.updateTag(id, data);
+			return tag;
+		} catch {
 			return null;
 		}
 	},
@@ -92,21 +76,15 @@ export const tagStore = {
 	 */
 	async deleteTag(id: string) {
 		try {
-			const result = await api.delete(`/tags/${id}`);
-			if (result.error) {
-				error = result.error.message;
-				return false;
-			}
-			tags = tags.filter((t) => t.id !== id);
+			await sharedTagStore.deleteTag(id);
 			return true;
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to delete tag';
+		} catch {
 			return false;
 		}
 	},
 
 	/**
-	 * Get tags for a photo
+	 * Get tags for a photo (from Photos backend)
 	 */
 	async getPhotoTags(mediaId: string): Promise<Tag[]> {
 		try {
@@ -122,7 +100,7 @@ export const tagStore = {
 	},
 
 	/**
-	 * Add tag to photo
+	 * Add tag to photo (from Photos backend)
 	 */
 	async addTagToPhoto(mediaId: string, tagId: string) {
 		try {
@@ -135,7 +113,7 @@ export const tagStore = {
 	},
 
 	/**
-	 * Remove tag from photo
+	 * Remove tag from photo (from Photos backend)
 	 */
 	async removeTagFromPhoto(mediaId: string, tagId: string) {
 		try {
@@ -148,7 +126,7 @@ export const tagStore = {
 	},
 
 	/**
-	 * Set all tags for a photo
+	 * Set all tags for a photo (from Photos backend)
 	 */
 	async setPhotoTags(mediaId: string, tagIds: string[]) {
 		try {
@@ -164,8 +142,6 @@ export const tagStore = {
 	 * Reset store
 	 */
 	reset() {
-		tags = [];
-		loading = false;
-		error = null;
+		sharedTagStore.clear();
 	},
 };

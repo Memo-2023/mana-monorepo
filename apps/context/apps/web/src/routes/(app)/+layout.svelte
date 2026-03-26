@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, CommandBar } from '@manacore/shared-ui';
+	import { PillNavigation, CommandBar, TagStrip } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -28,6 +28,7 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { contextOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { tagStore } from '$lib/stores/tags.svelte';
 
 	const appItems = getPillAppItems('context');
 
@@ -138,12 +139,25 @@
 
 	let userEmail = $derived(authStore.user?.email || 'Menü');
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/', label: 'Übersicht', icon: 'home' },
 		{ href: '/spaces', label: 'Spaces', icon: 'folder' },
 		{ href: '/documents', label: 'Dokumente', icon: 'file-text' },
 		{ href: '/tokens', label: 'Tokens', icon: 'sparkle' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	];
 
 	const navItems = $derived(
@@ -213,6 +227,9 @@
 
 		await userSettings.load();
 
+		// Load tags
+		await tagStore.fetchTags();
+
 		// Pre-load data for CommandBar search
 		await Promise.all([spacesStore.load(), documentsStore.load()]);
 	});
@@ -253,6 +270,22 @@
 		helpHref="/help"
 		allAppsHref="/apps"
 	/>
+
+	<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+	{#if isTagStripVisible}
+		<TagStrip
+			tags={tagStore.tags.map((t) => ({
+				id: t.id,
+				name: t.name,
+				color: t.color || '#3b82f6',
+			}))}
+			selectedIds={[]}
+			onToggle={() => {}}
+			onClear={() => {}}
+			managementHref="/tags"
+			loading={tagStore.loading}
+		/>
+	{/if}
 
 	<main class="main-content bg-background">
 		<div class="content-wrapper">

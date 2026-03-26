@@ -15,8 +15,9 @@
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
-	import { PillNavigation } from '@manacore/shared-ui';
+	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { tagStore } from '$lib/stores/tags.svelte';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -78,6 +79,12 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
+	// TagStrip visibility
+	let isTagStripVisible = $state(false);
+	function handleTagStripToggle() {
+		isTagStripVisible = !isTagStripVisible;
+	}
+
 	// Base navigation items for Chat (settings moved to user dropdown)
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/chat', label: 'Chat', icon: 'home' },
@@ -86,6 +93,13 @@
 		{ href: '/spaces', label: 'Spaces', icon: 'building' },
 		{ href: '/documents', label: 'Dokumente', icon: 'archive' },
 		{ href: '/archive', label: 'Archiv', icon: 'list' },
+		{
+			href: '/',
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
+			active: isTagStripVisible,
+		},
 	];
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)
@@ -153,8 +167,9 @@
 			collapsedStore.set(true);
 		}
 
-		// Load user settings
+		// Load user settings and tags
 		await userSettings.load();
+		await tagStore.fetchTags();
 
 		// Check for session conversations to migrate
 		if (conversationsStore.hasSessionConversations) {
@@ -206,6 +221,22 @@
 			helpHref="/help"
 			allAppsHref="/apps"
 		/>
+
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
 
 		<!-- Main Content -->
 		<main class="main-content bg-background" class:chat-page={isChatPage}>

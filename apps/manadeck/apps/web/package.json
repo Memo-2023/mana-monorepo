@@ -44,6 +44,7 @@
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-stores": "workspace:*",
+		"@manacore/shared-tags": "workspace:*",
 		"@manacore/shared-subscription-types": "workspace:*",
 		"@manacore/shared-subscription-ui": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
