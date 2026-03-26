@@ -68,6 +68,9 @@ RUN pnpm build
 WORKDIR /app/packages/shared-pwa
 RUN pnpm build
 
+WORKDIR /app/packages/spiral-db
+RUN pnpm build || true
+
 # Build zitare content package
 WORKDIR /app/apps/zitare/packages/content
 RUN pnpm build || true
