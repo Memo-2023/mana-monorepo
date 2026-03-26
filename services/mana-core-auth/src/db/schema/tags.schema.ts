@@ -8,6 +8,7 @@ import {
 	unique,
 	integer,
 } from 'drizzle-orm/pg-core';
+import { tagGroups } from './tag-groups.schema';
 
 /**
  * Central tags table for all Manacore applications.
@@ -21,7 +22,7 @@ export const tags = pgTable(
 		name: varchar('name', { length: 100 }).notNull(),
 		color: varchar('color', { length: 7 }).default('#3B82F6'),
 		icon: varchar('icon', { length: 50 }), // Optional: Phosphor Icon name
-		groupId: uuid('group_id'), // Reference to tag_groups (validated in service layer)
+		groupId: uuid('group_id').references(() => tagGroups.id, { onDelete: 'set null' }),
 		sortOrder: integer('sort_order').default(0).notNull(),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull(),

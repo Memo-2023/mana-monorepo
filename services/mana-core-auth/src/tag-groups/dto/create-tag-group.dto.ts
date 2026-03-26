@@ -1,7 +1,17 @@
-import { IsString, IsOptional, IsInt, MaxLength, Matches } from 'class-validator';
+import {
+	IsString,
+	IsOptional,
+	IsNotEmpty,
+	IsInt,
+	MinLength,
+	MaxLength,
+	Matches,
+} from 'class-validator';
 
 export class CreateTagGroupDto {
 	@IsString()
+	@IsNotEmpty({ message: 'Group name must not be empty' })
+	@MinLength(1)
 	@MaxLength(100)
 	name: string;
 

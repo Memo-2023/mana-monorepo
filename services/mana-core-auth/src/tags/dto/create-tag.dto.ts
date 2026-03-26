@@ -1,7 +1,18 @@
-import { IsString, IsOptional, IsUUID, IsInt, MaxLength, Matches } from 'class-validator';
+import {
+	IsString,
+	IsOptional,
+	IsNotEmpty,
+	IsUUID,
+	IsInt,
+	MinLength,
+	MaxLength,
+	Matches,
+} from 'class-validator';
 
 export class CreateTagDto {
 	@IsString()
+	@IsNotEmpty({ message: 'Tag name must not be empty' })
+	@MinLength(1)
 	@MaxLength(100)
 	name: string;
 

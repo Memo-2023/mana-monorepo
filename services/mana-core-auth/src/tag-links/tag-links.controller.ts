@@ -20,7 +20,7 @@ import {
 	BulkCreateTagLinksDto,
 	SyncTagLinksDto,
 } from './dto/create-tag-link.dto';
-import { QueryTagLinksDto } from './dto/query-tag-links.dto';
+import { QueryTagLinksDto, GetTagsForEntityDto } from './dto/query-tag-links.dto';
 
 @Controller('tag-links')
 @UseGuards(JwtAuthGuard)
@@ -63,10 +63,9 @@ export class TagLinksController {
 	@Get('tags-for-entity')
 	async getTagsForEntity(
 		@CurrentUser() user: CurrentUserData,
-		@Query('appId') appId: string,
-		@Query('entityId') entityId: string
+		@Query() query: GetTagsForEntityDto
 	) {
-		return this.tagLinksService.getTagsForEntity(user.userId, appId, entityId);
+		return this.tagLinksService.getTagsForEntity(user.userId, query.appId, query.entityId);
 	}
 
 	/**

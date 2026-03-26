@@ -44,6 +44,10 @@ export class TagsClient {
 	private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
 		const token = await this.getToken();
 
+		if (!token) {
+			throw new Error('No authentication token available');
+		}
+
 		const response = await fetch(`${this.authUrl}/api/v1${path}`, {
 			...options,
 			headers: {
