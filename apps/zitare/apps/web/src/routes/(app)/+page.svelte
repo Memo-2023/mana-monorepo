@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
+	import { zitareSettings } from '$lib/stores/settings.svelte';
 	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 
@@ -30,7 +31,12 @@
 	<!-- Daily Quote Card -->
 	{#if quotesStore.currentQuote}
 		<div class="mb-8 transition-all duration-300 {isRefreshing ? 'opacity-50 scale-95' : ''}">
-			<QuoteCard quote={quotesStore.currentQuote} size="large" showCategory showSource />
+			<QuoteCard
+				quote={quotesStore.currentQuote}
+				size="large"
+				showCategory={zitareSettings.showCategory}
+				showSource={zitareSettings.showSource}
+			/>
 		</div>
 	{/if}
 

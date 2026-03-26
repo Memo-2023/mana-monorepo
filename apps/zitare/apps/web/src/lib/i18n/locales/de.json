@@ -115,6 +115,16 @@
 	"settings": {
 		"quoteLanguage": "Zitat-Sprache",
 		"quoteLanguageDescription": "Wähle die Sprache, in der die Zitate angezeigt werden sollen.",
+		"display": "Anzeige",
+		"showCategory": "Kategorie anzeigen",
+		"showCategoryDescription": "Zeigt die Kategorie-Badge auf Zitat-Karten",
+		"showSource": "Quelle anzeigen",
+		"showSourceDescription": "Zeigt Quelle und Jahr unter dem Zitat",
+		"fontSize": "Schriftgröße",
+		"fontSizeSmall": "Klein",
+		"fontSizeNormal": "Normal",
+		"fontSizeLarge": "Groß",
+		"fontSizeXLarge": "Sehr groß",
 		"about": "Über Zitare",
 		"aboutDescription": "Zitare bietet dir täglich inspirierende Zitate von den größten Denkern der Geschichte. Speichere deine Favoriten und erstelle eigene Listen.",
 		"stats": "{quotes} Zitate · {categories} Kategorien · {languages} Sprachen"

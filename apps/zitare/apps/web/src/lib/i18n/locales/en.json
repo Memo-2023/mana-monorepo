@@ -115,6 +115,16 @@
 	"settings": {
 		"quoteLanguage": "Quote language",
 		"quoteLanguageDescription": "Choose the language in which quotes are displayed.",
+		"display": "Display",
+		"showCategory": "Show category",
+		"showCategoryDescription": "Shows the category badge on quote cards",
+		"showSource": "Show source",
+		"showSourceDescription": "Shows source and year below the quote",
+		"fontSize": "Font size",
+		"fontSizeSmall": "Small",
+		"fontSizeNormal": "Normal",
+		"fontSizeLarge": "Large",
+		"fontSizeXLarge": "Extra large",
 		"about": "About Zitare",
 		"aboutDescription": "Zitare offers you daily inspiring quotes from the greatest thinkers in history. Save your favorites and create your own lists.",
 		"stats": "{quotes} quotes · {categories} categories · {languages} languages"

@@ -5,6 +5,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 	import { toast } from '$lib/stores/toast.svelte';
+	import { zitareSettings } from '$lib/stores/settings.svelte';
 	import { _ } from 'svelte-i18n';
 
 	interface Props {
@@ -84,6 +85,9 @@
 
 <div
 	class="quote-card rounded-2xl bg-surface-elevated shadow-lg overflow-hidden {sizeClasses[size]}"
+	style="font-size: {zitareSettings.fontSizeMultiplier !== 1
+		? `${zitareSettings.fontSizeMultiplier}em`
+		: ''}"
 >
 	{#if showCategory}
 		<div class="mb-4">
