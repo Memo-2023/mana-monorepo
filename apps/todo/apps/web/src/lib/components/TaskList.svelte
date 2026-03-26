@@ -243,7 +243,7 @@
 			items,
 			flipDurationMs,
 			dropTargetStyle: {},
-			dropTargetClasses: ['task-drop-target'],
+			dropTargetClasses: [],
 			type: 'homepage-tasks',
 		}}
 		onconsider={handleDndConsider}
@@ -334,17 +334,31 @@
 		opacity: 0.5;
 	}
 
-	:global(.task-drop-target) {
-		outline: 2px dashed #8b5cf6 !important;
-		outline-offset: -2px;
-		background: rgba(139, 92, 246, 0.08) !important;
+	/* Dragged item styling */
+	:global([aria-grabbed='true']) {
+		opacity: 0.9;
+		transform: scale(1.02);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+		border-radius: 0.5rem;
+		background: rgba(255, 255, 255, 0.95);
+		z-index: 100;
 	}
 
-	:global(.task-drop-target) .empty-placeholder {
-		opacity: 0;
+	:global(.dark [aria-grabbed='true']) {
+		background: rgba(40, 40, 40, 0.95);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 	}
 
-	:global(.dark .task-drop-target) {
-		background: rgba(139, 92, 246, 0.15) !important;
+	/* Shadow placeholder (where dragged item will land) */
+	:global(.task-list [data-is-dnd-shadow-item-hint]) {
+		background: rgba(139, 92, 246, 0.06);
+		border-radius: 0.375rem;
+		border: 1px dashed rgba(139, 92, 246, 0.3);
+		visibility: visible !important;
+	}
+
+	:global(.dark .task-list [data-is-dnd-shadow-item-hint]) {
+		background: rgba(139, 92, 246, 0.1);
+		border-color: rgba(139, 92, 246, 0.4);
 	}
 </style>

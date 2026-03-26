@@ -507,7 +507,7 @@
 		max-width: 560px;
 		margin: 0 auto;
 		background: #fffef5;
-		border-radius: 0.75rem;
+		border-radius: 0.5rem;
 		box-shadow:
 			0 2px 8px rgba(0, 0, 0, 0.08),
 			0 1px 2px rgba(0, 0, 0, 0.04);
@@ -529,7 +529,7 @@
 	@media (max-width: 640px) {
 		.notepad {
 			max-width: 100%;
-			border-radius: 0;
+			border-radius: 0.5rem;
 		}
 	}
 </style>

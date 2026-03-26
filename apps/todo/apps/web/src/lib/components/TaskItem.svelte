@@ -372,11 +372,12 @@
 			</svg>
 		</div>
 
-		<!-- Checkbox -->
+		<!-- Checkbox with priority fill -->
 		<button
-			class="task-checkbox"
+			class="task-checkbox priority-{task.priority || 'medium'}"
 			class:checked={task.isCompleted}
 			class:animating={isAnimatingComplete}
+			style="--priority-color: {priorityColors[task.priority] || priorityColors.medium}"
 			onclick={handleToggleClick}
 		>
 			{#if task.isCompleted || isAnimatingComplete}
@@ -394,14 +395,10 @@
 						d="M5 13l4 4L19 7"
 					/>
 				</svg>
+			{:else if task.priority === 'urgent'}
+				<span class="priority-bang">!</span>
 			{/if}
 		</button>
-
-		<!-- Priority indicator -->
-		<div
-			class="priority-dot"
-			style="background-color: {priorityColors[task.priority] || priorityColors.medium}"
-		></div>
 
 		<!-- Content -->
 		<div class="task-content">
@@ -806,21 +803,13 @@
 		pointer-events: none;
 	}
 
-	/* Priority dot */
-	.priority-dot {
-		width: 0.625rem;
-		height: 0.625rem;
-		border-radius: 9999px;
-		flex-shrink: 0;
-	}
-
-	/* Checkbox */
+	/* Checkbox with priority color fill */
 	.task-checkbox {
 		width: 1.25rem;
 		height: 1.25rem;
 		border-radius: 9999px;
-		border: 2px solid rgba(0, 0, 0, 0.2);
-		background: transparent;
+		border: 2px solid var(--priority-color, rgba(0, 0, 0, 0.2));
+		background: color-mix(in srgb, var(--priority-color) 15%, transparent);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -831,22 +820,57 @@
 	}
 
 	:global(.dark) .task-checkbox {
-		border-color: rgba(255, 255, 255, 0.3);
+		border-color: var(--priority-color, rgba(255, 255, 255, 0.3));
+		background: color-mix(in srgb, var(--priority-color) 20%, transparent);
 	}
 
 	.task-checkbox:hover {
-		border-color: #8b5cf6;
-		background: rgba(139, 92, 246, 0.1);
+		background: color-mix(in srgb, var(--priority-color) 35%, transparent);
+	}
+
+	/* Priority: low — dashed thin border */
+	.task-checkbox.priority-low {
+		border-style: dashed;
+		border-width: 1.5px;
+	}
+
+	/* Priority: medium — normal solid border */
+	.task-checkbox.priority-medium {
+		border-width: 2px;
+	}
+
+	/* Priority: high — thick border */
+	.task-checkbox.priority-high {
+		border-width: 3px;
+	}
+
+	/* Priority: urgent — thick border + exclamation mark */
+	.task-checkbox.priority-urgent {
+		border-width: 3px;
+	}
+
+	.priority-bang {
+		font-size: 0.6875rem;
+		font-weight: 800;
+		line-height: 1;
+		color: var(--priority-color);
+		pointer-events: none;
 	}
 
 	.task-checkbox.checked {
 		background: #8b5cf6;
 		border-color: #8b5cf6;
+		border-style: solid;
+	}
+
+	.task-checkbox.checked .priority-bang {
+		display: none;
 	}
 
 	.task-checkbox.animating {
 		background: #22c55e;
 		border-color: #22c55e;
+		border-style: solid;
 		transform: scale(1.2);
 	}
 

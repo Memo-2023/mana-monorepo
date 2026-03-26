@@ -58,6 +58,12 @@ export class TaskController {
 		return { tasks };
 	}
 
+	@Put('reorder')
+	async reorder(@CurrentUser() user: CurrentUserData, @Body() dto: ReorderTasksDto) {
+		const tasks = await this.taskService.reorder(user.userId, dto.taskIds, dto.projectId);
+		return { tasks };
+	}
+
 	@Get(':id')
 	async findOne(@CurrentUser() user: CurrentUserData, @Param('id') id: string) {
 		const task = await this.taskService.findByIdOrThrow(id, user.userId);
@@ -118,11 +124,5 @@ export class TaskController {
 		await this.taskService.updateTaskLabels(id, user.userId, labelIds);
 		const task = await this.taskService.findByIdOrThrow(id, user.userId);
 		return { task };
-	}
-
-	@Put('reorder')
-	async reorder(@CurrentUser() user: CurrentUserData, @Body() dto: ReorderTasksDto) {
-		const tasks = await this.taskService.reorder(user.userId, dto.taskIds, dto.projectId);
-		return { tasks };
 	}
 }
