@@ -121,7 +121,7 @@ func (e *Extractor) Extract(ctx context.Context, req *ExtractRequest) *ExtractRe
 	})
 	if err != nil {
 		slog.Warn("extraction failed", "url", req.URL, "error", err)
-		return errorResponse(req.URL, fmt.Sprintf("extraction failed: %v", err), start)
+		return errorResponse(req.URL, fmt.Sprintf("extraction failed: %s", err), start)
 	}
 
 	text := cleanText(article.TextContent)
@@ -196,6 +196,12 @@ func (e *Extractor) BulkExtract(ctx context.Context, req *BulkExtractRequest) *B
 		ch := make(chan indexedResult, end-i)
 		for j := i; j < end; j++ {
 			go func(idx int, u string) {
+				defer func() {
+					if p := recover(); p != nil {
+						slog.Error("extract panic", "url", u, "panic", p)
+						ch <- indexedResult{index: idx, result: errorResponse(u, "extraction panicked", start)}
+					}
+				}()
 				r := e.Extract(ctx, &ExtractRequest{URL: u, Options: req.Options})
 				ch <- indexedResult{index: idx, result: r}
 			}(j, req.URLs[j])

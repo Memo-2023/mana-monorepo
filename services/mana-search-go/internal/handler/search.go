@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/manacore/mana-search/internal/cache"
@@ -35,7 +36,7 @@ func (h *SearchHandler) Search(w http.ResponseWriter, r *http.Request) {
 	defer h.metrics.ActiveSearches.Dec()
 
 	var req search.SearchRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
@@ -84,15 +85,16 @@ func (h *SearchHandler) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Collect unique engines
+	// Collect unique engines (sorted for deterministic cache keys)
 	engineSet := make(map[string]bool)
-	for _, r := range results {
-		engineSet[r.Engine] = true
+	for _, res := range results {
+		engineSet[res.Engine] = true
 	}
 	engines := make([]string, 0, len(engineSet))
 	for e := range engineSet {
 		engines = append(engines, e)
 	}
+	sort.Strings(engines)
 
 	resp := search.SearchResponse{
 		Results: results,

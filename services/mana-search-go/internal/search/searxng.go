@@ -160,14 +160,20 @@ func (p *SearxngProvider) HealthCheck(ctx context.Context) (string, int64) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, p.baseURL+"/healthz", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, p.baseURL+"/healthz", nil)
+	if err != nil {
+		return "error", time.Since(start).Milliseconds()
+	}
 	resp, err := p.client.Do(req)
 	latency := time.Since(start).Milliseconds()
-
-	if err != nil || resp.StatusCode != http.StatusOK {
+	if err != nil {
 		return "error", latency
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "error", latency
+	}
 	return "ok", latency
 }
 
@@ -176,7 +182,10 @@ func (p *SearxngProvider) GetEngines(ctx context.Context) []string {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, p.baseURL+"/config", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, p.baseURL+"/config", nil)
+	if err != nil {
+		return nil
+	}
 	resp, err := p.client.Do(req)
 	if err != nil {
 		slog.Warn("failed to fetch searxng engines", "error", err)

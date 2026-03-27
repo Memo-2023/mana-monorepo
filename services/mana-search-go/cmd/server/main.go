@@ -55,7 +55,7 @@ func main() {
 	mux.HandleFunc("POST /api/v1/extract", extractHandler.Extract)
 	mux.HandleFunc("POST /api/v1/extract/bulk", extractHandler.BulkExtract)
 
-	c_handler := cors.New(cors.Options{
+	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   cfg.CORSOrigins,
 		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
@@ -63,11 +63,12 @@ func main() {
 	}).Handler(mux)
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		Handler:      c_handler,
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 60 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		Addr:           fmt.Sprintf(":%d", cfg.Port),
+		Handler:        corsHandler,
+		ReadTimeout:    30 * time.Second,
+		WriteTimeout:   60 * time.Second,
+		IdleTimeout:    120 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1 MB
 	}
 
 	// Graceful shutdown
@@ -87,7 +88,9 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	server.Shutdown(ctx)
+	if err := server.Shutdown(ctx); err != nil {
+		slog.Error("shutdown error", "error", err)
+	}
 
 	slog.Info("server stopped")
 }

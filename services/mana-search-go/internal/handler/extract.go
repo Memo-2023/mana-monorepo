@@ -33,7 +33,7 @@ func (h *ExtractHandler) Extract(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	var req extract.ExtractRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
@@ -97,7 +97,7 @@ func (h *ExtractHandler) BulkExtract(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	var req extract.BulkExtractRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
