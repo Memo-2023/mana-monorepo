@@ -1,9 +1,9 @@
 /**
- * Favorites Store - Manages user's favorite quotes
+ * Favorites Store — Local-First with Dexie.js
+ * All reads/writes go to IndexedDB. Sync happens in background when authenticated.
  */
 
-import { browser } from '$app/environment';
-import { authStore } from './auth.svelte';
+import { favoriteCollection, type LocalFavorite } from '$lib/data/local-store';
 
 interface Favorite {
 	id: string;
@@ -16,37 +16,12 @@ let favorites = $state<Favorite[]>([]);
 let loading = $state(false);
 let initialized = $state(false);
 
-// Get backend URL
-function getBackendUrl(): string {
-	if (browser && typeof window !== 'undefined') {
-		const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
-			.__PUBLIC_BACKEND_URL__;
-		return injectedUrl || 'http://localhost:3007';
-	}
-	return process.env.PUBLIC_BACKEND_URL || 'http://localhost:3007';
-}
-
-async function fetchWithAuth(path: string, options: RequestInit = {}) {
-	const token = await authStore.getValidToken();
-	if (!token) {
-		throw new Error('Not authenticated');
-	}
-
-	const response = await fetch(`${getBackendUrl()}/api${path}`, {
-		...options,
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${token}`,
-			...options.headers,
-		},
-	});
-
-	if (!response.ok) {
-		const error = await response.json().catch(() => ({ message: 'Request failed' }));
-		throw new Error(error.message || 'Request failed');
-	}
-
-	return response.json();
+function toFavorite(local: LocalFavorite): Favorite {
+	return {
+		id: local.id,
+		quoteId: local.quoteId,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
 }
 
 export const favoritesStore = {
@@ -60,27 +35,15 @@ export const favoritesStore = {
 		return initialized;
 	},
 
-	/**
-	 * Check if a quote is favorited
-	 */
 	isFavorite(quoteId: string): boolean {
 		return favorites.some((f) => f.quoteId === quoteId);
 	},
 
-	/**
-	 * Load favorites from backend
-	 */
 	async load() {
-		if (!authStore.isAuthenticated) {
-			favorites = [];
-			initialized = true;
-			return;
-		}
-
 		loading = true;
 		try {
-			const data = await fetchWithAuth('/favorites');
-			favorites = data.favorites || [];
+			const localFavs = await favoriteCollection.getAll();
+			favorites = localFavs.map(toFavorite);
 			initialized = true;
 		} catch (error) {
 			console.error('Failed to load favorites:', error);
@@ -90,44 +53,33 @@ export const favoritesStore = {
 		}
 	},
 
-	/**
-	 * Add a quote to favorites
-	 */
 	async add(quoteId: string) {
-		if (!authStore.isAuthenticated) return;
-
 		try {
-			const data = await fetchWithAuth('/favorites', {
-				method: 'POST',
-				body: JSON.stringify({ quoteId }),
-			});
-			favorites = [...favorites, data.favorite];
+			const newFav: LocalFavorite = {
+				id: crypto.randomUUID(),
+				quoteId,
+			};
+			const inserted = await favoriteCollection.insert(newFav);
+			favorites = [...favorites, toFavorite(inserted)];
 		} catch (error) {
 			console.error('Failed to add favorite:', error);
 			throw error;
 		}
 	},
 
-	/**
-	 * Remove a quote from favorites
-	 */
 	async remove(quoteId: string) {
-		if (!authStore.isAuthenticated) return;
-
 		try {
-			await fetchWithAuth(`/favorites/${quoteId}`, {
-				method: 'DELETE',
-			});
-			favorites = favorites.filter((f) => f.quoteId !== quoteId);
+			const fav = favorites.find((f) => f.quoteId === quoteId);
+			if (fav) {
+				await favoriteCollection.delete(fav.id);
+				favorites = favorites.filter((f) => f.quoteId !== quoteId);
+			}
 		} catch (error) {
 			console.error('Failed to remove favorite:', error);
 			throw error;
 		}
 	},
 
-	/**
-	 * Toggle favorite status
-	 */
 	async toggle(quoteId: string) {
 		if (this.isFavorite(quoteId)) {
 			await this.remove(quoteId);
@@ -136,9 +88,6 @@ export const favoritesStore = {
 		}
 	},
 
-	/**
-	 * Clear all favorites (client-side only)
-	 */
 	clear() {
 		favorites = [];
 		initialized = false;

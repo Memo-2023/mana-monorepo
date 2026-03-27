@@ -1,10 +1,8 @@
-// Lists store - integrates with Zitare backend API
-import { browser } from '$app/environment';
-import { authStore } from './auth.svelte';
+/**
+ * Lists Store — Local-First with Dexie.js
+ */
 
-const API_URL = browser
-	? import.meta.env.PUBLIC_ZITARE_API_URL || 'http://localhost:3007'
-	: 'http://localhost:3007';
+import { listCollection, type LocalQuoteList } from '$lib/data/local-store';
 
 export interface QuoteList {
 	id: string;
@@ -19,38 +17,23 @@ let lists = $state<QuoteList[]>([]);
 let isLoading = $state(false);
 let error = $state<string | null>(null);
 
-async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
-	const token = await authStore.getValidToken();
-	if (!token) {
-		throw new Error('Not authenticated');
-	}
-
-	return fetch(url, {
-		...options,
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${token}`,
-			...options.headers,
-		},
-	});
+function toQuoteList(local: LocalQuoteList): QuoteList {
+	return {
+		id: local.id,
+		name: local.name,
+		description: local.description ?? undefined,
+		quoteIds: local.quoteIds,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
 }
 
 async function loadLists() {
-	if (!authStore.isAuthenticated) {
-		lists = [];
-		return;
-	}
-
 	isLoading = true;
 	error = null;
-
 	try {
-		const response = await fetchWithAuth(`${API_URL}/lists`);
-		if (!response.ok) {
-			throw new Error('Failed to load lists');
-		}
-		const data = await response.json();
-		lists = data.lists || [];
+		const localLists = await listCollection.getAll();
+		lists = localLists.map(toQuoteList);
 	} catch (e) {
 		error = e instanceof Error ? e.message : 'Failed to load lists';
 		lists = [];
@@ -60,37 +43,20 @@ async function loadLists() {
 }
 
 async function getList(id: string): Promise<QuoteList | null> {
-	if (!authStore.isAuthenticated) {
-		return null;
-	}
-
-	try {
-		const response = await fetchWithAuth(`${API_URL}/lists/${id}`);
-		if (!response.ok) {
-			return null;
-		}
-		const data = await response.json();
-		return data.list || null;
-	} catch {
-		return null;
-	}
+	const local = await listCollection.get(id);
+	return local ? toQuoteList(local) : null;
 }
 
 async function createList(name: string, description?: string): Promise<QuoteList | null> {
-	if (!authStore.isAuthenticated) {
-		return null;
-	}
-
 	try {
-		const response = await fetchWithAuth(`${API_URL}/lists`, {
-			method: 'POST',
-			body: JSON.stringify({ name, description }),
-		});
-		if (!response.ok) {
-			throw new Error('Failed to create list');
-		}
-		const data = await response.json();
-		const newList = data.list;
+		const newLocal: LocalQuoteList = {
+			id: crypto.randomUUID(),
+			name,
+			description: description ?? null,
+			quoteIds: [],
+		};
+		const inserted = await listCollection.insert(newLocal);
+		const newList = toQuoteList(inserted);
 		lists = [...lists, newList];
 		return newList;
 	} catch {
@@ -102,39 +68,22 @@ async function updateList(
 	id: string,
 	updates: { name?: string; description?: string }
 ): Promise<QuoteList | null> {
-	if (!authStore.isAuthenticated) {
-		return null;
-	}
-
 	try {
-		const response = await fetchWithAuth(`${API_URL}/lists/${id}`, {
-			method: 'PUT',
-			body: JSON.stringify(updates),
-		});
-		if (!response.ok) {
-			throw new Error('Failed to update list');
+		const updated = await listCollection.update(id, updates as Partial<LocalQuoteList>);
+		if (updated) {
+			const updatedList = toQuoteList(updated);
+			lists = lists.map((l) => (l.id === id ? updatedList : l));
+			return updatedList;
 		}
-		const data = await response.json();
-		const updatedList = data.list;
-		lists = lists.map((l) => (l.id === id ? updatedList : l));
-		return updatedList;
+		return null;
 	} catch {
 		return null;
 	}
 }
 
 async function deleteList(id: string): Promise<boolean> {
-	if (!authStore.isAuthenticated) {
-		return false;
-	}
-
 	try {
-		const response = await fetchWithAuth(`${API_URL}/lists/${id}`, {
-			method: 'DELETE',
-		});
-		if (!response.ok) {
-			throw new Error('Failed to delete list');
-		}
+		await listCollection.delete(id);
 		lists = lists.filter((l) => l.id !== id);
 		return true;
 	} catch {
@@ -143,20 +92,19 @@ async function deleteList(id: string): Promise<boolean> {
 }
 
 async function addQuoteToList(listId: string, quoteId: string): Promise<boolean> {
-	if (!authStore.isAuthenticated) {
-		return false;
-	}
-
 	try {
-		const response = await fetchWithAuth(`${API_URL}/lists/${listId}/quotes`, {
-			method: 'POST',
-			body: JSON.stringify({ quoteId }),
-		});
-		if (!response.ok) {
-			throw new Error('Failed to add quote to list');
+		const existing = await listCollection.get(listId);
+		if (!existing) return false;
+
+		const quoteIds = [...(existing.quoteIds || [])];
+		if (!quoteIds.includes(quoteId)) {
+			quoteIds.push(quoteId);
 		}
-		const data = await response.json();
-		lists = lists.map((l) => (l.id === listId ? data.list : l));
+
+		const updated = await listCollection.update(listId, { quoteIds } as Partial<LocalQuoteList>);
+		if (updated) {
+			lists = lists.map((l) => (l.id === listId ? toQuoteList(updated) : l));
+		}
 		return true;
 	} catch {
 		return false;
@@ -164,19 +112,16 @@ async function addQuoteToList(listId: string, quoteId: string): Promise<boolean>
 }
 
 async function removeQuoteFromList(listId: string, quoteId: string): Promise<boolean> {
-	if (!authStore.isAuthenticated) {
-		return false;
-	}
-
 	try {
-		const response = await fetchWithAuth(`${API_URL}/lists/${listId}/quotes/${quoteId}`, {
-			method: 'DELETE',
-		});
-		if (!response.ok) {
-			throw new Error('Failed to remove quote from list');
+		const existing = await listCollection.get(listId);
+		if (!existing) return false;
+
+		const quoteIds = (existing.quoteIds || []).filter((qid) => qid !== quoteId);
+
+		const updated = await listCollection.update(listId, { quoteIds } as Partial<LocalQuoteList>);
+		if (updated) {
+			lists = lists.map((l) => (l.id === listId ? toQuoteList(updated) : l));
 		}
-		const data = await response.json();
-		lists = lists.map((l) => (l.id === listId ? data.list : l));
 		return true;
 	} catch {
 		return false;

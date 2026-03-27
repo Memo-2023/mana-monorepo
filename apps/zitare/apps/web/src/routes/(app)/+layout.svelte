@@ -31,8 +31,12 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { QUOTES, type Quote } from '@zitare/content';
+	import { zitareStore } from '$lib/data/local-store';
+
+	let showGuestWelcome = $state(false);
 
 	// App switcher items
 	const appItems = getPillAppItems('zitare');
@@ -92,7 +96,9 @@
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email || $_('nav.menu'));
+	let userEmail = $derived(
+		authStore.isAuthenticated ? authStore.user?.email || $_('nav.menu') : ''
+	);
 
 	// TagStrip visibility
 	let isTagStripVisible = $state(false);
@@ -227,15 +233,22 @@
 	}
 
 	async function handleAuthReady() {
+		// Initialize local-first database
+		await zitareStore.initialize();
+
 		// Initialize settings
 		zitareSettings.initialize();
 
-		// Load user settings and favorites if authenticated
+		// Load favorites and lists from IndexedDB (works for guests and auth)
+		await favoritesStore.load();
+		await listsStore.loadLists();
+
 		if (authStore.isAuthenticated) {
+			zitareStore.startSync(() => authStore.getValidToken());
 			userSettings.load();
-			favoritesStore.load();
-			listsStore.loadLists();
 			tagStore.fetchTags();
+		} else if (shouldShowGuestWelcome('zitare')) {
+			showGuestWelcome = true;
 		}
 	}
 </script>
@@ -354,7 +367,18 @@
 			</div>
 		</main>
 	</div>
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	<GuestWelcomeModal
+		appId="zitare"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
 </AuthGate>
 
 <style>
