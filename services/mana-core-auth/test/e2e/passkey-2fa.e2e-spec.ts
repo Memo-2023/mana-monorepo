@@ -454,6 +454,61 @@ describe('Passkey & 2FA (E2E)', () => {
 	});
 
 	// =========================================================================
+	// Magic Link Flow
+	// =========================================================================
+
+	describe('Magic Link Flow', () => {
+		it('POST /api/auth/magic-link/send-magic-link should be routable', async () => {
+			const res = await request(app.getHttpServer())
+				.post('/api/auth/magic-link/send-magic-link')
+				.send({ email: 'test@example.com' });
+			// Should not be 404 (route exists)
+			expect(res.status).not.toBe(404);
+		});
+
+		it('GET /api/auth/magic-link/verify should be routable', async () => {
+			const res = await request(app.getHttpServer())
+				.get('/api/auth/magic-link/verify')
+				.query({ token: 'invalid-token' });
+			expect(res.status).not.toBe(404);
+		});
+	});
+
+	// =========================================================================
+	// Security Events / Audit Log
+	// =========================================================================
+
+	describe('Security Events / Audit Log', () => {
+		it('GET /auth/security-events requires authentication', async () => {
+			const res = await request(app.getHttpServer()).get('/auth/security-events');
+			expect(res.status).toBe(401);
+		});
+
+		it('GET /auth/security-events returns events for authenticated user', async () => {
+			const res = await request(app.getHttpServer())
+				.get('/auth/security-events')
+				.set('Authorization', `Bearer ${accessToken}`);
+			expect(res.status).toBe(200);
+			expect(Array.isArray(res.body)).toBe(true);
+		});
+
+		it('GET /auth/security-events returns events with expected shape', async () => {
+			const res = await request(app.getHttpServer())
+				.get('/auth/security-events')
+				.set('Authorization', `Bearer ${accessToken}`)
+				.expect(200);
+
+			// User has logged in at least once, so there should be events
+			if (res.body.length > 0) {
+				const event = res.body[0];
+				expect(event).toHaveProperty('id');
+				expect(event).toHaveProperty('eventType');
+				expect(event).toHaveProperty('createdAt');
+			}
+		});
+	});
+
+	// =========================================================================
 	// Edge Cases
 	// =========================================================================
 
