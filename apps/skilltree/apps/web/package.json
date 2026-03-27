@@ -49,7 +49,6 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-ui": "workspace:^",
 		"@manacore/shared-utils": "workspace:*",
-		"idb": "^8.0.0",
 		"svelte-i18n": "^4.0.1",
 		"uuid": "^11.0.0"
 	},

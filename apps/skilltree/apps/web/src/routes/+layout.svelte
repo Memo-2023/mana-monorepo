@@ -13,12 +13,12 @@
 	let { children } = $props();
 
 	async function handleAuthReady() {
-		// Initialize unified local-store (IndexedDB + sync)
+		// Initialize local-first database (IndexedDB via Dexie.js)
 		await skilltreeStore.initialize();
 		if (authStore.isAuthenticated) {
 			skilltreeStore.startSync(() => authStore.getValidToken());
 		}
-		// Initialize existing idb-based stores
+		// Load data from IndexedDB into reactive stores
 		await skillStore.initialize();
 		await achievementStore.initialize();
 	}
