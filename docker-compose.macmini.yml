@@ -224,9 +224,9 @@ services:
       CONTACTS_BACKEND_URL: http://contacts-backend:3034
       PICTURE_BACKEND_URL: http://picture-backend:3040
       PRESI_BACKEND_URL: http://presi-backend:3036
-      ZITARE_BACKEND_URL: http://zitare-backend:3007
+      # ZITARE_BACKEND_URL: removed — migrated to local-first
       PHOTOS_BACKEND_URL: http://photos-backend:3039
-      CLOCK_BACKEND_URL: http://clock-backend:3033
+      # CLOCK_BACKEND_URL: removed — migrated to local-first
       STORAGE_BACKEND_URL: http://storage-backend:3035
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       MANA_LLM_URL: http://mana-llm:3025
@@ -366,6 +366,62 @@ services:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3020/health"]
       interval: 120s
       timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  mana-sync:
+    build:
+      context: services/mana-sync
+      dockerfile: Dockerfile
+    image: mana-sync:local
+    container_name: mana-core-sync
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 3051
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
+      JWKS_URL: http://mana-core-auth:3001/api/v1/auth/jwks
+      CORS_ORIGINS: "https://mana.how,https://*.mana.how"
+    ports:
+      - "3051:3051"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3051/health"]
+      interval: 120s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  mana-notify:
+    build:
+      context: .
+      dockerfile: services/mana-notify-go/Dockerfile
+    image: mana-notify:local
+    container_name: mana-core-notify
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 3040
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
+      SERVICE_KEY: ${NOTIFY_SERVICE_KEY:-dev-service-key}
+      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      SMTP_HOST: ${SMTP_HOST:-smtp-relay.brevo.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: "ManaCore <noreply@mana.how>"
+      EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
+      MATRIX_HOMESERVER_URL: http://mana-matrix-synapse:8008
+      MATRIX_ACCESS_TOKEN: ${MATRIX_NOTIFY_BOT_TOKEN:-}
+    ports:
+      - "3040:3040"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3040/health"]
+      interval: 120s
+      timeout: 5s
       retries: 3
       start_period: 5s
 
@@ -559,35 +615,7 @@ services:
       retries: 3
       start_period: 40s
 
-  clock-backend:
-    build:
-      context: .
-      dockerfile: apps/clock/apps/backend/Dockerfile
-    image: clock-backend:local
-    container_name: mana-app-clock-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3033
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/clock
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://clock.mana.how,https://mana.how
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: http://4d5ea890019d4a988e9834bc3e374e0a@glitchtip:8020/7
-    ports:
-      - "3033:3033"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3033/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 50s
+  # clock-backend: REMOVED — migrated to local-first (mana-sync handles CRUD)
 
   contacts-backend:
     build:
@@ -810,35 +838,7 @@ services:
       retries: 3
       start_period: 60s
 
-  zitare-backend:
-    build:
-      context: .
-      dockerfile: apps/zitare/apps/backend/Dockerfile
-    image: zitare-backend:local
-    container_name: mana-app-zitare-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3007
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/zitare
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://zitare.mana.how,https://mana.how
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: http://53b871913d864628a8c7cb97b3f69e06@glitchtip:8020/8
-    ports:
-      - "3007:3007"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3007/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 55s
+  # zitare-backend: REMOVED — migrated to local-first (mana-sync handles CRUD)
 
   mukke-backend:
     build:
@@ -1090,9 +1090,9 @@ services:
       # Backend URLs
       TODO_BACKEND_URL: http://todo-backend:3031
       CALENDAR_BACKEND_URL: http://calendar-backend:3032
-      CLOCK_BACKEND_URL: http://clock-backend:3033
+      # CLOCK_BACKEND_URL: removed — migrated to local-first
       CONTACTS_BACKEND_URL: http://contacts-backend:3034
-      ZITARE_BACKEND_URL: http://zitare-backend:3007
+      # ZITARE_BACKEND_URL: removed — migrated to local-first
       PLANTA_BACKEND_URL: http://planta-backend:3022
       NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3037
       STORAGE_BACKEND_URL: http://storage-backend:3035
@@ -1199,15 +1199,14 @@ services:
     container_name: mana-app-zitare-web
     restart: always
     depends_on:
-      zitare-backend:
+      mana-auth:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 5018
-      PUBLIC_ZITARE_API_URL: http://zitare-backend:3007
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_ZITARE_API_URL_CLIENT: https://zitare-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3050
     ports:
       - "5018:5018"
     healthcheck:
