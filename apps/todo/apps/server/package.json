@@ -1,0 +1,22 @@
+{
+	"name": "@todo/server",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Todo server-side compute (Hono + Bun) — RRULE, reminders, admin",
+	"type": "module",
+	"scripts": {
+		"dev": "bun run --watch src/index.ts",
+		"start": "bun run src/index.ts",
+		"type-check": "bun x tsc --noEmit"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.45.1",
+		"hono": "^4.7.0",
+		"postgres": "^3.4.5",
+		"rrule": "^2.8.1"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.0",
+		"typescript": "^5.9.3"
+	}
+}
