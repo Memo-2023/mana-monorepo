@@ -130,7 +130,8 @@ manacore-monorepo/
 │   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
 │   ├── mana-core-auth/      # Central authentication service
-│   ├── mana-search/         # Central search & content extraction service
+│   ├── mana-search/         # Central search & content extraction (NestJS, legacy)
+│   ├── mana-search-go/      # Central search & content extraction (Go, active)
 │   ├── mana-crawler/        # Web crawler service
 │   ├── mana-llm/            # Central LLM abstraction service
 │   ├── mana-landing-builder/# Org landing page builder (Astro → Cloudflare Pages)
@@ -932,7 +933,8 @@ Each project has its own `CLAUDE.md` with detailed information:
 - `apps/chat/CLAUDE.md` - Chat API endpoints, AI models
 - `apps/picture/CLAUDE.md` - AI image generation
 - `services/mana-core-auth/` - Central authentication service
-- `services/mana-search/CLAUDE.md` - Search & content extraction service
+- `services/mana-search/CLAUDE.md` - Search & content extraction service (NestJS, legacy)
+- `services/mana-search-go/CLAUDE.md` - Search & content extraction service (Go, active)
 - `services/mana-crawler/CLAUDE.md` - Web crawler service
 - `services/mana-llm/CLAUDE.md` - Central LLM abstraction service
 - `services/mana-landing-builder/CLAUDE.md` - Org landing page builder service

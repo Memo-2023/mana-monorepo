@@ -51,7 +51,6 @@ jobs:
     outputs:
       mana-core-auth: ${{ steps.changes.outputs.mana-core-auth }}
       mana-search: ${{ steps.changes.outputs.mana-search }}
-      api-gateway: ${{ steps.changes.outputs.api-gateway }}
       manacore-web: ${{ steps.changes.outputs.manacore-web }}
       chat-backend: ${{ steps.changes.outputs.chat-backend }}
       chat-web: ${{ steps.changes.outputs.chat-web }}
@@ -89,7 +88,6 @@ jobs:
             echo "Force rebuild all services requested"
             echo "mana-core-auth=true" >> $GITHUB_OUTPUT
             echo "mana-search=true" >> $GITHUB_OUTPUT
-            echo "api-gateway=true" >> $GITHUB_OUTPUT
             echo "manacore-web=true" >> $GITHUB_OUTPUT
             echo "chat-backend=true" >> $GITHUB_OUTPUT
             echo "chat-web=true" >> $GITHUB_OUTPUT
@@ -131,7 +129,6 @@ jobs:
             echo "Workflow dispatch without force_build_all - building all"
             echo "mana-core-auth=true" >> $GITHUB_OUTPUT
             echo "mana-search=true" >> $GITHUB_OUTPUT
-            echo "api-gateway=true" >> $GITHUB_OUTPUT
             echo "manacore-web=true" >> $GITHUB_OUTPUT
             echo "chat-backend=true" >> $GITHUB_OUTPUT
             echo "chat-web=true" >> $GITHUB_OUTPUT
@@ -200,14 +197,6 @@ jobs:
             echo "mana-search=true" >> $GITHUB_OUTPUT
           else
             echo "mana-search=false" >> $GITHUB_OUTPUT
-          fi
-
-          # api-gateway: services/mana-api-gateway + packages/shared-nestjs-auth
-          GATEWAY_CHANGED=$(check_pattern "services/mana-api-gateway/|packages/shared-nestjs-auth/")
-          if [ "$COMMON_CHANGED" == "true" ] || [ "$GATEWAY_CHANGED" == "true" ]; then
-            echo "api-gateway=true" >> $GITHUB_OUTPUT
-          else
-            echo "api-gateway=false" >> $GITHUB_OUTPUT
           fi
 
           # manacore-web: apps/manacore/apps/web + shared packages
@@ -401,7 +390,6 @@ jobs:
           echo "|---------|------------|" >> $GITHUB_STEP_SUMMARY
           echo "| mana-core-auth | ${{ steps.changes.outputs.mana-core-auth }} |" >> $GITHUB_STEP_SUMMARY
           echo "| mana-search | ${{ steps.changes.outputs.mana-search }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| api-gateway | ${{ steps.changes.outputs.api-gateway }} |" >> $GITHUB_STEP_SUMMARY
           echo "| manacore-web | ${{ steps.changes.outputs.manacore-web }} |" >> $GITHUB_STEP_SUMMARY
           echo "| chat-backend | ${{ steps.changes.outputs.chat-backend }} |" >> $GITHUB_STEP_SUMMARY
           echo "| chat-web | ${{ steps.changes.outputs.chat-web }} |" >> $GITHUB_STEP_SUMMARY
@@ -540,35 +528,6 @@ jobs:
         with:
           context: .
           file: services/mana-search/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  build-api-gateway:
-    name: Build api-gateway
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.api-gateway == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/metadata-action@v5
-        id: meta
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/api-gateway
-          tags: type=raw,value=latest
-      - uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: services/mana-api-gateway/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
