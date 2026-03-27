@@ -20,7 +20,7 @@ func Load() *Config {
 	return &Config{
 		Port:        port,
 		DatabaseURL: getEnv("DATABASE_URL", "postgresql://manacore:devpassword@localhost:5432/mana_sync"),
-		JWKSUrl:     getEnv("JWKS_URL", "http://localhost:3001/.well-known/jwks.json"),
+		JWKSUrl:     getEnv("JWKS_URL", "http://localhost:3001/api/auth/jwks"),
 		CORSOrigins: getEnv("CORS_ORIGINS", "http://localhost:5173,http://localhost:5188"),
 	}
 }
