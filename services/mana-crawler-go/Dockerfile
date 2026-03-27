@@ -15,6 +15,9 @@ RUN apk --no-cache add ca-certificates tzdata
 
 COPY --from=builder /mana-crawler /usr/local/bin/mana-crawler
 
+# Ensure Go finds CA certificates for HTTPS requests
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 EXPOSE 3023
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
