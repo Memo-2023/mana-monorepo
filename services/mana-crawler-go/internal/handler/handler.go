@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -89,8 +90,8 @@ func (h *Handler) StartCrawl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Start crawl
-	if err := h.crawler.StartJob(r.Context(), jobID, body.StartURL, cfg); err != nil {
+	// Start crawl (use background context so it outlives the HTTP request)
+	if err := h.crawler.StartJob(context.Background(), jobID, body.StartURL, cfg); err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to start crawl"})
 		return
 	}
