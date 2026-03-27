@@ -16,6 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreditsService } from './credits.service';
 import { StripeService } from '../stripe/stripe.service';
+import { GuildPoolService } from './guild-pool.service';
 import { createMockConfigService } from '../__tests__/utils/test-helpers';
 import {
 	mockUserFactory,
@@ -74,6 +75,17 @@ describe('CreditsService', () => {
 			handleWebhook: jest.fn(),
 		};
 
+		const mockGuildPoolService = {
+			initializeGuildPool: jest.fn(),
+			getGuildPoolBalance: jest.fn(),
+			fundGuildPool: jest.fn(),
+			useGuildCredits: jest.fn(),
+			getGuildTransactions: jest.fn(),
+			setSpendingLimit: jest.fn(),
+			getSpendingLimits: jest.fn(),
+			getMemberSpendingSummary: jest.fn(),
+		};
+
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				CreditsService,
@@ -84,6 +96,10 @@ describe('CreditsService', () => {
 				{
 					provide: StripeService,
 					useValue: mockStripeService,
+				},
+				{
+					provide: GuildPoolService,
+					useValue: mockGuildPoolService,
 				},
 			],
 		}).compile();

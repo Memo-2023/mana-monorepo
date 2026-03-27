@@ -56,13 +56,10 @@ describe('CreditsController', () => {
 		const mockCreditsService = {
 			getBalance: jest.fn(),
 			useCredits: jest.fn(),
+			useCreditsWithSource: jest.fn(),
 			getTransactionHistory: jest.fn(),
 			getPurchaseHistory: jest.fn(),
 			getPackages: jest.fn(),
-			allocateCredits: jest.fn(),
-			getOrganizationBalance: jest.fn(),
-			getEmployeeCreditBalance: jest.fn(),
-			deductCredits: jest.fn(),
 		};
 
 		const module: TestingModule = await Test.createTestingModule({
@@ -142,12 +139,15 @@ describe('CreditsController', () => {
 					newBalance: 90,
 				};
 
-				creditsService.useCredits.mockResolvedValue(expectedResult as any);
+				creditsService.useCreditsWithSource.mockResolvedValue(expectedResult as any);
 
 				const result = await controller.useCredits(mockUser, useCreditsDto);
 
 				expect(result).toEqual(expectedResult);
-				expect(creditsService.useCredits).toHaveBeenCalledWith(mockUser.userId, useCreditsDto);
+				expect(creditsService.useCreditsWithSource).toHaveBeenCalledWith(
+					mockUser.userId,
+					useCreditsDto
+				);
 			});
 
 			it('should pass idempotency key for duplicate prevention', async () => {
@@ -159,11 +159,11 @@ describe('CreditsController', () => {
 					idempotencyKey,
 				});
 
-				creditsService.useCredits.mockResolvedValue({ success: true } as any);
+				creditsService.useCreditsWithSource.mockResolvedValue({ success: true } as any);
 
 				await controller.useCredits(mockUser, useCreditsDto);
 
-				expect(creditsService.useCredits).toHaveBeenCalledWith(
+				expect(creditsService.useCreditsWithSource).toHaveBeenCalledWith(
 					mockUser.userId,
 					expect.objectContaining({ idempotencyKey })
 				);
@@ -176,7 +176,7 @@ describe('CreditsController', () => {
 					description: 'Image generation',
 				});
 
-				creditsService.useCredits.mockRejectedValue(
+				creditsService.useCreditsWithSource.mockRejectedValue(
 					new BadRequestException('Insufficient credits')
 				);
 
@@ -197,11 +197,11 @@ describe('CreditsController', () => {
 					},
 				});
 
-				creditsService.useCredits.mockResolvedValue({ success: true } as any);
+				creditsService.useCreditsWithSource.mockResolvedValue({ success: true } as any);
 
 				await controller.useCredits(mockUser, useCreditsDto);
 
-				expect(creditsService.useCredits).toHaveBeenCalledWith(
+				expect(creditsService.useCreditsWithSource).toHaveBeenCalledWith(
 					mockUser.userId,
 					expect.objectContaining({
 						metadata: {

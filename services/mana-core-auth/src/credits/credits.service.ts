@@ -23,7 +23,6 @@ export class CreditsService {
 		private configService: ConfigService,
 		@Inject(forwardRef(() => StripeService))
 		private stripeService: StripeService,
-		@Inject(forwardRef(() => GuildPoolService))
 		private guildPoolService: GuildPoolService
 	) {}
 
