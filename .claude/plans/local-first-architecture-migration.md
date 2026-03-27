@@ -1,7 +1,8 @@
 # Local-First Architektur & Stack-Migration
 
-> **Status**: 🔵 In Planung
+> **Status**: 🟢 In Umsetzung (Phase 1-3 abgeschlossen)
 > **Erstellt**: 2026-03-26
+> **Zuletzt aktualisiert**: 2026-03-27
 > **Autor**: Claude Code + Till Schneider
 > **Ziel**: Alle ManaCore-Apps auf Local-First umstellen, Backend-Stack modernisieren
 
@@ -72,7 +73,7 @@ Dieser Plan beschreibt den Umbau der gesamten ManaCore-Architektur von einem kla
 
 ---
 
-## Phase 1: Foundation (2-3 Wochen)
+## Phase 1: Foundation (2-3 Wochen) — DONE 2026-03-27
 
 ### 1.1 `@manacore/local-store` Package
 
@@ -264,7 +265,7 @@ Die Todo-App wird als erste auf Local-First umgebaut:
 
 ---
 
-## Phase 2: Todo komplett auf Hono/Bun (2-3 Wochen)
+## Phase 2: Todo komplett auf Hono/Bun (2-3 Wochen) — DONE 2026-03-27
 
 ### 2.1 Todo Backend: NestJS → Hono/Bun
 
@@ -312,7 +313,7 @@ apps/todo/apps/backend/     # Oder: services/todo/ (umstrukturieren?)
 
 ---
 
-## Phase 3: Rollout auf alle Apps (4-6 Wochen)
+## Phase 3: Rollout auf alle Apps (4-6 Wochen) — 6/8 DONE 2026-03-27
 
 Reihenfolge nach Komplexität:
 

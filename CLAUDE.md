@@ -502,10 +502,67 @@ let count = 0;
 $: doubled = count * 2;
 ```
 
+## Local-First Architecture
+
+All web apps use a **local-first** data layer: reads/writes go to IndexedDB (Dexie.js) first, sync to server in the background. This enables guest mode, offline CRUD, and instant UI.
+
+### Key Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `@manacore/local-store` | `packages/local-store/` | Dexie.js collections, sync engine, Svelte 5 reactive queries |
+| `mana-sync` | `services/mana-sync/` | Go sync server (WebSocket push, field-level LWW conflict resolution) |
+| Todo Hono Server | `apps/todo/apps/server/` | Lightweight compute server (RRULE, reminders, admin) on Bun |
+
+### Data Flow
+
+```
+Guest:      App → IndexedDB (Dexie.js) → UI            (no sync)
+Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → PostgreSQL
+                                  ← WebSocket push ←
+```
+
+### Migrated Apps
+
+| App | Collections | Status |
+|-----|------------|--------|
+| Todo | tasks, projects, labels, taskLabels, reminders | Done |
+| Zitare | favorites, lists | Done |
+| Calendar | calendars, events | Done |
+| Clock | alarms, timers, worldClocks | Done |
+| Contacts | contacts | Done |
+| ManaDeck | decks, cards | Done |
+| Picture | — | Not yet |
+| Presi | — | Not yet |
+
+### Dev Commands (Local-First Stack)
+
+```bash
+pnpm dev:sync              # Go sync server (port 3050)
+pnpm dev:sync:build        # Compile Go binary
+pnpm dev:todo:server       # Hono/Bun compute server (port 3019)
+pnpm dev:todo:local        # Web + sync + Hono (no auth/NestJS needed)
+pnpm dev:todo:full         # Everything incl. auth + NestJS legacy
+```
+
+### Adding Local-First to a New App
+
+1. Create `apps/{app}/apps/web/src/lib/data/local-store.ts` — define collections with `createLocalStore()`
+2. Create `apps/{app}/apps/web/src/lib/data/guest-seed.ts` — onboarding data
+3. Rewrite stores to use `collection.getAll()` / `collection.insert()` instead of API calls
+4. In layout: `await store.initialize()`, `store.startSync()` on login, `allowGuest={true}` on AuthGate
+5. Set `userEmail = ''` for guests so PillNav shows login button
+6. Add `GuestWelcomeModal` for first-visit experience
+
+### Architecture Plan
+
+Full migration plan: `.claude/plans/local-first-architecture-migration.md`
+
 ## Shared Packages (`packages/`)
 
 | Package                         | Purpose                                         |
 | ------------------------------- | ----------------------------------------------- |
+| `@manacore/local-store`         | Local-first data layer (Dexie.js + sync engine) |
 | `@manacore/shared-nestjs-auth`  | NestJS JWT validation guards via mana-core-auth |
 | `@mana-core/nestjs-integration` | NestJS module with auth guards + credit client  |
 | `@manacore/shared-auth`         | Client-side auth service for web/mobile apps    |
