@@ -55,7 +55,8 @@ import {
 		LlmModule.forRootAsync({
 			imports: [ConfigModule],
 			useFactory: (config: ConfigService) => ({
-				manaLlmUrl: config.get('MANA_LLM_URL'),
+				manaLlmUrl: config.get('MANA_LLM_URL') || 'https://gpu-llm.mana.how',
+				defaultVisionModel: config.get('VISION_MODEL') || 'ollama/gemma3:12b',
 				debug: config.get('NODE_ENV') === 'development',
 			}),
 			inject: [ConfigService],

@@ -25,7 +25,7 @@ import { HealthModule } from '@manacore/shared-nestjs-health';
 		LlmModule.forRootAsync({
 			imports: [ConfigModule],
 			useFactory: (configService: ConfigService) => ({
-				manaLlmUrl: configService.get('MANA_LLM_URL'),
+				manaLlmUrl: configService.get('MANA_LLM_URL') || 'https://gpu-llm.mana.how',
 				timeout: configService.get<number>('LLM_TIMEOUT', 120000),
 				debug: configService.get('NODE_ENV') === 'development',
 			}),

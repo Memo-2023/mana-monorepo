@@ -29,7 +29,7 @@ import { GuideModule } from './guide/guide.module';
 		LlmModule.forRootAsync({
 			imports: [ConfigModule],
 			useFactory: (config: ConfigService) => ({
-				manaLlmUrl: config.get('MANA_LLM_URL'),
+				manaLlmUrl: config.get('MANA_LLM_URL') || 'https://gpu-llm.mana.how',
 				debug: config.get('NODE_ENV') === 'development',
 			}),
 			inject: [ConfigService],
