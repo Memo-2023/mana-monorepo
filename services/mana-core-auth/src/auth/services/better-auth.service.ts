@@ -158,22 +158,29 @@ export class BetterAuthService {
 			// Create personal credit balance
 			await this.createPersonalCreditBalance(user.id);
 
-			// Redeem any pending gift codes sent to this email
-			if (this.giftCodeService) {
-				try {
-					const giftResult = await this.giftCodeService.redeemPendingGifts(user.id, dto.email);
-					if (giftResult.redeemedCount > 0) {
+			// Redeem any pending gift codes via mana-credits service
+			try {
+				const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3060';
+				const serviceKey = process.env.MANA_CORE_SERVICE_KEY || '';
+				const giftRes = await fetch(`${creditsUrl}/api/v1/internal/gifts/redeem-pending`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', 'X-Service-Key': serviceKey },
+					body: JSON.stringify({ userId: user.id, email: dto.email }),
+				});
+				if (giftRes.ok) {
+					const giftResult = await giftRes.json();
+					if (giftResult.redeemed > 0) {
 						this.logger.log('Redeemed pending gifts on registration', {
 							userId: user.id,
-							redeemedCount: giftResult.redeemedCount,
+							redeemedCount: giftResult.redeemed,
 							totalCredits: giftResult.totalCredits,
 						});
 					}
-				} catch (error) {
-					this.logger.warn('Failed to redeem pending gifts (non-critical)', {
-						error: error instanceof Error ? error.message : 'Unknown error',
-					});
 				}
+			} catch (error) {
+				this.logger.warn('Failed to redeem pending gifts via mana-credits (non-critical)', {
+					error: error instanceof Error ? error.message : 'Unknown error',
+				});
 			}
 
 			return {
@@ -1754,37 +1761,41 @@ export class BetterAuthService {
 	 * @param userId - User ID
 	 * @private
 	 */
+	/**
+	 * Initialize credit balance via mana-credits service.
+	 * Non-critical — lazy init on first access if this fails.
+	 */
 	private async createPersonalCreditBalance(userId: string) {
-		const db = getDb(this.databaseUrl);
-
 		try {
-			await db.insert(balances).values({
-				userId: userId as any, // Cast to handle UUID type
-				balance: 0,
-				totalEarned: 0,
-				totalSpent: 0,
+			const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3060';
+			const serviceKey = process.env.MANA_CORE_SERVICE_KEY || '';
+			await fetch(`${creditsUrl}/api/v1/internal/credits/init`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-Service-Key': serviceKey },
+				body: JSON.stringify({ userId }),
 			});
 		} catch (error) {
-			this.logger.warn('Failed to create personal credit balance (non-critical)', {
+			this.logger.warn('Failed to init credit balance via mana-credits (non-critical)', {
 				error: error instanceof Error ? error.message : 'Unknown error',
 			});
-			// Don't throw - this is a non-critical operation
 		}
 	}
 
 	/**
-	 * Initialize a guild pool for an organization.
-	 * Non-critical — if it fails, the pool can be created later.
+	 * Initialize guild pool via mana-credits service.
+	 * Non-critical — lazy init on first access if this fails.
 	 */
 	private async initializeGuildPool(organizationId: string) {
-		const db = getDb(this.databaseUrl);
-
 		try {
-			await db.insert(guildPools).values({
-				organizationId,
+			const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3060';
+			const serviceKey = process.env.MANA_CORE_SERVICE_KEY || '';
+			await fetch(`${creditsUrl}/api/v1/internal/guild-pool/init`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-Service-Key': serviceKey },
+				body: JSON.stringify({ organizationId }),
 			});
 		} catch (error) {
-			this.logger.warn('Failed to initialize guild pool (non-critical)', {
+			this.logger.warn('Failed to init guild pool via mana-credits (non-critical)', {
 				organizationId,
 				error: error instanceof Error ? error.message : 'Unknown error',
 			});

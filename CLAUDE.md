@@ -130,6 +130,7 @@ manacore-monorepo/
 │   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
 │   ├── mana-core-auth/      # Central authentication service
+│   ├── mana-credits/        # Credit system (Hono + Bun, extracted from auth)
 │   ├── mana-search/         # Central search & content extraction (NestJS, legacy)
 │   ├── mana-search-go/      # Central search & content extraction (Go, active)
 │   ├── mana-crawler/        # Web crawler service

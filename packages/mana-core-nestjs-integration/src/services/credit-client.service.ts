@@ -35,6 +35,18 @@ export class CreditClientService {
 		);
 	}
 
+	/**
+	 * Get the credits service URL. Uses MANA_CREDITS_URL if available,
+	 * falls back to MANA_CORE_AUTH_URL for backward compatibility.
+	 */
+	private getCreditsUrl(): string {
+		return (
+			this.configService?.get<string>('MANA_CREDITS_URL') ||
+			process.env.MANA_CREDITS_URL ||
+			this.getAuthUrl()
+		);
+	}
+
 	private getServiceKey(): string {
 		return (
 			this.options?.serviceKey ||
@@ -76,7 +88,7 @@ export class CreditClientService {
 	}
 
 	async getBalance(userId: string): Promise<CreditBalance> {
-		const authUrl = this.getAuthUrl();
+		const creditsUrl = this.getCreditsUrl();
 		const serviceKey = this.getServiceKey();
 
 		if (!serviceKey) {
@@ -89,7 +101,7 @@ export class CreditClientService {
 		}
 
 		try {
-			const response = await fetch(`${authUrl}/api/v1/credits/balance/${userId}`, {
+			const response = await fetch(`${creditsUrl}/api/v1/internal/credits/balance/${userId}`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -127,7 +139,7 @@ export class CreditClientService {
 		metadata?: Record<string, any>,
 		creditSource?: { type: 'personal' } | { type: 'guild'; guildId: string }
 	): Promise<boolean> {
-		const authUrl = this.getAuthUrl();
+		const creditsUrl = this.getCreditsUrl();
 		const serviceKey = this.getServiceKey();
 
 		if (!serviceKey) {
@@ -136,7 +148,7 @@ export class CreditClientService {
 		}
 
 		try {
-			const response = await fetch(`${authUrl}/api/v1/credits/use`, {
+			const response = await fetch(`${creditsUrl}/api/v1/internal/credits/use`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -179,7 +191,7 @@ export class CreditClientService {
 		description: string,
 		metadata?: Record<string, any>
 	): Promise<boolean> {
-		const authUrl = this.getAuthUrl();
+		const creditsUrl = this.getCreditsUrl();
 		const serviceKey = this.getServiceKey();
 
 		if (!serviceKey) {
@@ -188,7 +200,7 @@ export class CreditClientService {
 		}
 
 		try {
-			const response = await fetch(`${authUrl}/api/v1/credits/refund`, {
+			const response = await fetch(`${creditsUrl}/api/v1/internal/credits/refund`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
