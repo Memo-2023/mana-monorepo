@@ -140,23 +140,23 @@ Vereine leben vom Engagement ihrer Mitglieder – nicht von teuren Software-Abos
 - Zugänge für verschiedene Funktionsträger
 - Nutzung je nach Bedarf und Anlass
 
-## Beliebte Mana-Pakete für Vereine
+## Beliebte Mana-Optionen für Vereine
 
-### 🌱 Starter-Paket
+### 🌱 Mana Quelle S (Abo)
 
-- **500 Mana** für 2,99€ (statt 4,99€)
+- **500 Mana/Monat** für 4,99€/Monat
 - Perfekt für kleine Vereine
-- Reicht für: 2-3 Protokolle oder 1 Förderantrag
+- Reicht für: 2-3 Protokolle oder 1 Förderantrag pro Monat
 
-### 🌟 Vereins-Paket
+### 🌟 Mana Quelle M (Abo)
 
-- **2.500 Mana** für 14,99€ (statt 24,99€)
-- Ideal für regelmäßige Nutzung
-- Reicht für: Ein Vereinsjahr mit allen Sitzungen
+- **1.000 Mana/Monat** für 9,99€/Monat
+- Ideal für regelmäßige Vereinsarbeit
+- Reicht für: Alle monatlichen Sitzungen
 
-### 🏆 Aktiv-Paket
+### 🏆 Mana Quelle L (Abo)
 
-- **5.000 Mana** für 29,99€ (statt 49,99€)
+- **2.000 Mana/Monat** für 19,99€/Monat
 - Für aktive Vereine mit vielen Projekten
 - Reicht für: Ganzjährige intensive Nutzung
 

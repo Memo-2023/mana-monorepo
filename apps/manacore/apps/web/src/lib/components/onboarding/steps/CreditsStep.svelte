@@ -161,7 +161,7 @@
 					/>
 				</svg>
 				<p class="text-sm text-blue-800 dark:text-blue-200">
-					<strong>Tipp:</strong> Mit einem Pro-Abo erhältst du monatlich 2.000 Credits und weitere Vorteile.
+					<strong>Tipp:</strong> Mit einer Mana Quelle M erhältst du monatlich 1.000 Mana ab 9,99€/Monat.
 				</p>
 			</div>
 		</div>

@@ -97,31 +97,27 @@ Warum monatlich für Tools zahlen, die Sie nur gelegentlich brauchen? Mit Mana n
 - **Durchschnitt: ~120€/Jahr**
 - **Ersparnis: 75%!**
 
-## Beliebte Pakete für Privatnutzer
+## Beliebte Optionen für Privatnutzer
 
-### 🌟 Einsteiger-Paket
+### 🌟 Mana Quelle S (Abo)
 
-- **500 Mana** für 4,99€
-- Perfekt zum Ausprobieren
-- Reicht für: 50+ ChatGPT-Anfragen oder 10 Bilder
+- **500 Mana/Monat** für 4,99€/Monat
+- Perfekt zum Einstieg
+- Reicht für: 50+ ChatGPT-Anfragen oder 10 Bilder pro Monat
 
-### 💡 Alltags-Paket
+### 💡 Mana Quelle M (Abo)
 
-- **2.000 Mana** für 18,99€ (5% Rabatt)
+- **1.000 Mana/Monat** für 9,99€/Monat
 - Ideal für regelmäßige Nutzung
-- Reicht für: 2-3 Monate normale Nutzung
+- 20% Rabatt bei jährlicher Zahlung (95,90€/Jahr)
 
-### 🚀 Power-Paket
+### 🧪 Mana Tränke (Einmalkauf)
 
-- **5.000 Mana** für 44,99€ (10% Rabatt)
-- Für intensive Projekte
-- Reicht für: 6+ Monate oder große Projekte
-
-### 💎 Jahres-Vorrat
-
-- **10.000 Mana** für 84,99€ (15% Rabatt)
-- Sorgenfrei für ein ganzes Jahr
-- Reicht für: 12+ Monate regelmäßige Nutzung
+- **Kleiner Mana Trank**: 350 Mana für 4,90€
+- **Mittlerer Mana Trank**: 700 Mana für 9,80€
+- **Großer Mana Trank**: 1.400 Mana für 19,60€
+- **Riesiger Mana Trank**: 2.800 Mana für 39,20€
+- Perfekt für Projekte oder als Geschenk
 
 ## Praktische Tipps für Privatnutzer
 

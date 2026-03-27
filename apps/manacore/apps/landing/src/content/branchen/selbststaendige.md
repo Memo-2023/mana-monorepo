@@ -138,25 +138,25 @@ Kalkulieren Sie Mana direkt in Ihre Angebote ein:
 3. **Nachmittags**: Content erstellen (20-30 Mana)
 4. **Tagesbudget**: ~60-90 Mana (0,60-0,90€)
 
-## Beliebte Pakete für Selbstständige
+## Beliebte Optionen für Selbstständige
 
-### Starter-Paket
+### Mana Quelle M (Abo)
 
-- **2.500 Mana** für 24,99€
-- Perfekt für Einzelprojekte
-- Reicht für: ~2 Wochen normale Nutzung
+- **1.000 Mana/Monat** für 9,99€/Monat
+- Perfekt als Basis für den Arbeitsalltag
+- 20% Rabatt bei jährlicher Zahlung (95,90€/Jahr)
 
-### Profi-Paket
+### Mana Quelle L (Abo)
 
-- **10.000 Mana** für 95€ (5% Rabatt)
-- Ideal für regelmäßige Nutzung
-- Reicht für: 1-2 Monate Vollauslastung
+- **2.000 Mana/Monat** für 19,99€/Monat
+- Ideal für regelmäßige intensive Nutzung
+- 20% Rabatt bei jährlicher Zahlung (191,90€/Jahr)
 
-### Business-Paket
+### Mana Quelle XL (Abo)
 
-- **25.000 Mana** für 225€ (10% Rabatt)
-- Für intensive Projektphasen
-- Reicht für: 3-4 Monate oder Großprojekte
+- **4.000 Mana/Monat** für 39,99€/Monat
+- Für intensive Projektphasen und Teams
+- 20% Rabatt bei jährlicher Zahlung (383,90€/Jahr)
 
 ## Sofort durchstarten
 

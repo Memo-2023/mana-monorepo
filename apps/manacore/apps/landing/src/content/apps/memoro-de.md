@@ -76,10 +76,10 @@ Der Mana-Verbrauch bei Memoro ist transparent und fix: **1 Mana = 1 Cent**
 
 **Einmalig (Trank):**
 
-- **Klein**: 4,99€ - 350 Mana
-- **Mittel**: 9,99€ - 700 Mana
-- **Groß**: 19,99€ - 1.400 Mana
-- **Riesig**: 39,99€ - 2.800 Mana
+- **Kleiner Mana Trank**: 4,90€ - 350 Mana
+- **Mittlerer Mana Trank**: 9,80€ - 700 Mana
+- **Großer Mana Trank**: 19,60€ - 1.400 Mana
+- **Riesiger Mana Trank**: 39,20€ - 2.800 Mana
 
 ### Flexibilität von Mana
 
