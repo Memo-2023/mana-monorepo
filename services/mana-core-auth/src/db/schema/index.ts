@@ -3,6 +3,7 @@ export * from './auth.schema';
 export * from './credits.schema';
 export * from './feedback.schema';
 export * from './gifts.schema';
+export * from './guilds.schema';
 export * from './login-attempts.schema';
 export * from './organizations.schema';
 export * from './subscriptions.schema';

@@ -1,4 +1,23 @@
-import { IsString, IsInt, IsPositive, IsOptional, IsObject } from 'class-validator';
+import {
+	IsString,
+	IsInt,
+	IsPositive,
+	IsOptional,
+	IsObject,
+	IsIn,
+	ValidateNested,
+	ValidateIf,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreditSourceDto {
+	@IsIn(['personal', 'guild'])
+	type: 'personal' | 'guild';
+
+	@ValidateIf((o) => o.type === 'guild')
+	@IsString()
+	guildId?: string;
+}
 
 export class UseCreditsDto {
 	@IsInt()
@@ -18,4 +37,9 @@ export class UseCreditsDto {
 	@IsObject()
 	@IsOptional()
 	metadata?: Record<string, any>;
+
+	@IsOptional()
+	@ValidateNested()
+	@Type(() => CreditSourceDto)
+	creditSource?: CreditSourceDto;
 }

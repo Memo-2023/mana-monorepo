@@ -29,6 +29,7 @@ import { createBetterAuth } from '../better-auth.config';
 import type { BetterAuthInstance } from '../better-auth.config';
 import { getDb } from '../../db/connection';
 import { balances } from '../../db/schema/credits.schema';
+import { guildPools } from '../../db/schema/guilds.schema';
 import { GiftCodeService } from '../../gifts/services/gift-code.service';
 import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';
 import { sourceAppStore } from '../stores/source-app.store';
@@ -241,6 +242,9 @@ export class BetterAuthService {
 			// Step 3: Create owner's personal balance (for when they use credits)
 			await this.createPersonalCreditBalance(ownerId);
 
+			// Step 4: Initialize guild pool for the organization
+			await this.initializeGuildPool(organizationId);
+
 			return {
 				user,
 				organization: orgResult,
@@ -252,6 +256,30 @@ export class BetterAuthService {
 			}
 			throw error;
 		}
+	}
+
+	/**
+	 * Create an organization directly (for guild creation).
+	 * The authenticated user becomes the owner.
+	 */
+	async createOrganizationDirect(
+		token: string,
+		data: { name: string; slug?: string; logo?: string }
+	): Promise<CreateOrganizationResponse> {
+		const slug = data.slug || this.slugify(data.name);
+
+		const orgResult = (await this.auth.api.createOrganization({
+			body: {
+				name: data.name,
+				slug,
+				...(data.logo && { logo: data.logo }),
+			},
+			headers: {
+				authorization: `Bearer ${token}`,
+			},
+		})) as CreateOrganizationResponse;
+
+		return orgResult;
 	}
 
 	/**
@@ -1741,6 +1769,25 @@ export class BetterAuthService {
 				error: error instanceof Error ? error.message : 'Unknown error',
 			});
 			// Don't throw - this is a non-critical operation
+		}
+	}
+
+	/**
+	 * Initialize a guild pool for an organization.
+	 * Non-critical — if it fails, the pool can be created later.
+	 */
+	private async initializeGuildPool(organizationId: string) {
+		const db = getDb(this.databaseUrl);
+
+		try {
+			await db.insert(guildPools).values({
+				organizationId,
+			});
+		} catch (error) {
+			this.logger.warn('Failed to initialize guild pool (non-critical)', {
+				organizationId,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			});
 		}
 	}
 

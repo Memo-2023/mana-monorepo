@@ -13,6 +13,7 @@ import { getDb } from '../db/connection';
 import { balances, transactions, purchases, packages, usageStats, users } from '../db/schema';
 import { UseCreditsDto } from './dto/use-credits.dto';
 import { StripeService } from '../stripe/stripe.service';
+import { GuildPoolService } from './guild-pool.service';
 
 @Injectable()
 export class CreditsService {
@@ -21,7 +22,9 @@ export class CreditsService {
 	constructor(
 		private configService: ConfigService,
 		@Inject(forwardRef(() => StripeService))
-		private stripeService: StripeService
+		private stripeService: StripeService,
+		@Inject(forwardRef(() => GuildPoolService))
+		private guildPoolService: GuildPoolService
 	) {}
 
 	private getDb() {
@@ -170,6 +173,17 @@ export class CreditsService {
 				},
 			};
 		});
+	}
+
+	/**
+	 * Use credits with source routing. If creditSource is 'guild', routes to guild pool.
+	 * Otherwise uses personal balance. Backward compatible — no creditSource = personal.
+	 */
+	async useCreditsWithSource(userId: string, dto: UseCreditsDto) {
+		if (dto.creditSource?.type === 'guild' && dto.creditSource.guildId) {
+			return this.guildPoolService.useGuildCredits(dto.creditSource.guildId, userId, dto);
+		}
+		return this.useCredits(userId, dto);
 	}
 
 	async getTransactionHistory(userId: string, limit = 50, offset = 0) {

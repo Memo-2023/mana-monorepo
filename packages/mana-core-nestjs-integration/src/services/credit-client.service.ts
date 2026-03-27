@@ -124,7 +124,8 @@ export class CreditClientService {
 		operation: string,
 		amount: number,
 		description: string,
-		metadata?: Record<string, any>
+		metadata?: Record<string, any>,
+		creditSource?: { type: 'personal' } | { type: 'guild'; guildId: string }
 	): Promise<boolean> {
 		const authUrl = this.getAuthUrl();
 		const serviceKey = this.getServiceKey();
@@ -151,6 +152,7 @@ export class CreditClientService {
 						operation,
 						...metadata,
 					},
+					...(creditSource && { creditSource }),
 				}),
 			});
 

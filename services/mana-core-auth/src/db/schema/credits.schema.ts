@@ -20,6 +20,7 @@ export const transactionTypeEnum = pgEnum('transaction_type', [
 	'usage',
 	'refund',
 	'gift',
+	'guild_funding',
 ]);
 
 // Transaction status enum
@@ -72,6 +73,7 @@ export const transactions = creditsSchema.table(
 		description: text('description').notNull(),
 		metadata: jsonb('metadata'),
 		idempotencyKey: text('idempotency_key').unique(),
+		guildId: text('guild_id'), // Set when transaction is guild-related (e.g. funding a guild pool)
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		completedAt: timestamp('completed_at', { withTimezone: true }),
 	},
@@ -80,6 +82,7 @@ export const transactions = creditsSchema.table(
 		appIdIdx: index('transactions_app_id_idx').on(table.appId),
 		createdAtIdx: index('transactions_created_at_idx').on(table.createdAt),
 		idempotencyKeyIdx: index('transactions_idempotency_key_idx').on(table.idempotencyKey),
+		guildIdIdx: index('transactions_guild_id_idx').on(table.guildId),
 	})
 );
 
@@ -143,4 +146,4 @@ export const usageStats = creditsSchema.table(
 	})
 );
 
-// B2B organization credit tables removed - simplified to B2C only
+// Guild pool tables are in guilds.schema.ts

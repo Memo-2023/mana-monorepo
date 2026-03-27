@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { CreditsModule } from './credits/credits.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { GiftsModule } from './gifts/gifts.module';
+import { GuildsModule } from './guilds/guilds.module';
 import { HealthModule } from './health/health.module';
 import { SettingsModule } from './settings/settings.module';
 import { StorageModule } from './storage/storage.module';
@@ -57,6 +58,7 @@ import { SecurityModule } from './security';
 		CreditsModule,
 		FeedbackModule,
 		GiftsModule,
+		GuildsModule,
 		HealthModule,
 		SettingsModule,
 		StorageModule,

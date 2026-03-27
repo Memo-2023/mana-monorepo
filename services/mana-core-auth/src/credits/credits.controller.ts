@@ -27,8 +27,10 @@ export class CreditsController {
 	}
 
 	@Post('use')
+	@ApiOperation({ summary: 'Use credits (personal or guild pool)' })
+	@ApiResponse({ status: 200, description: 'Credits used successfully' })
 	async useCredits(@CurrentUser() user: CurrentUserData, @Body() useCreditsDto: UseCreditsDto) {
-		return this.creditsService.useCredits(user.userId, useCreditsDto);
+		return this.creditsService.useCreditsWithSource(user.userId, useCreditsDto);
 	}
 
 	@Get('transactions')
