@@ -16,10 +16,13 @@ export class LocalImageGenService {
 	private readonly timeout: number;
 	private isAvailable = false;
 
+	private readonly apiKey?: string;
+
 	constructor(private configService: ConfigService) {
 		this.baseUrl =
-			this.configService.get<string>('IMAGE_GEN_SERVICE_URL') || 'http://localhost:3025';
-		this.timeout = 60_000; // 60s (FLUX.2 klein is fast, but allow margin)
+			this.configService.get<string>('IMAGE_GEN_SERVICE_URL') || 'https://gpu-img.mana.how';
+		this.apiKey = this.configService.get<string>('GPU_API_KEY');
+		this.timeout = 120_000; // 120s (first request may need to load model into VRAM)
 		this.checkHealth();
 	}
 
@@ -63,9 +66,12 @@ export class LocalImageGenService {
 			const controller = new AbortController();
 			setTimeout(() => controller.abort(), this.timeout);
 
+			const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+			if (this.apiKey) headers['X-API-Key'] = this.apiKey;
+
 			const response = await fetch(`${this.baseUrl}/generate`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers,
 				body: JSON.stringify({
 					prompt: params.prompt,
 					width: params.width || 1024,
