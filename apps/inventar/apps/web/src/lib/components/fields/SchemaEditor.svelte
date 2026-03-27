@@ -1,0 +1,225 @@
+<script lang="ts">
+	import type { FieldDefinition, FieldType } from '@inventar/shared';
+	import { _ } from 'svelte-i18n';
+
+	interface Props {
+		fields: FieldDefinition[];
+		onchange: (fields: FieldDefinition[]) => void;
+	}
+
+	let { fields, onchange }: Props = $props();
+
+	const fieldTypes: { value: FieldType; label: string }[] = [
+		{ value: 'text', label: 'Text' },
+		{ value: 'number', label: 'Zahl' },
+		{ value: 'date', label: 'Datum' },
+		{ value: 'select', label: 'Auswahl' },
+		{ value: 'tags', label: 'Tags' },
+		{ value: 'checkbox', label: 'Checkbox' },
+		{ value: 'url', label: 'URL' },
+		{ value: 'currency', label: 'Wahrung' },
+	];
+
+	function addField() {
+		const newField: FieldDefinition = {
+			id: crypto.randomUUID(),
+			name: '',
+			type: 'text',
+			order: fields.length,
+		};
+		onchange([...fields, newField]);
+	}
+
+	function updateField(id: string, updates: Partial<FieldDefinition>) {
+		onchange(fields.map((f) => (f.id === id ? { ...f, ...updates } : f)));
+	}
+
+	function removeField(id: string) {
+		onchange(fields.filter((f) => f.id !== id).map((f, i) => ({ ...f, order: i })));
+	}
+
+	function moveField(id: string, direction: 'up' | 'down') {
+		const index = fields.findIndex((f) => f.id === id);
+		if (index === -1) return;
+		const newIndex = direction === 'up' ? index - 1 : index + 1;
+		if (newIndex < 0 || newIndex >= fields.length) return;
+		const newFields = [...fields];
+		[newFields[index], newFields[newIndex]] = [newFields[newIndex], newFields[index]];
+		onchange(newFields.map((f, i) => ({ ...f, order: i })));
+	}
+
+	let editingOptions = $state<string | null>(null);
+	let newOption = $state('');
+
+	function addOption(fieldId: string) {
+		if (!newOption.trim()) return;
+		const field = fields.find((f) => f.id === fieldId);
+		if (!field) return;
+		updateField(fieldId, { options: [...(field.options || []), newOption.trim()] });
+		newOption = '';
+	}
+
+	function removeOption(fieldId: string, index: number) {
+		const field = fields.find((f) => f.id === fieldId);
+		if (!field) return;
+		updateField(fieldId, { options: field.options?.filter((_, i) => i !== index) });
+	}
+
+	const inputClass =
+		'w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]';
+</script>
+
+<div class="space-y-3">
+	{#each fields.sort((a, b) => a.order - b.order) as field, index (field.id)}
+		<div
+			class="field-enter rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3"
+		>
+			<div class="flex items-start gap-2">
+				<!-- Reorder buttons -->
+				<div class="flex flex-col gap-0.5 pt-1">
+					<button
+						type="button"
+						onclick={() => moveField(field.id, 'up')}
+						disabled={index === 0}
+						class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] disabled:opacity-30"
+						>&#9650;</button
+					>
+					<button
+						type="button"
+						onclick={() => moveField(field.id, 'down')}
+						disabled={index === fields.length - 1}
+						class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] disabled:opacity-30"
+						>&#9660;</button
+					>
+				</div>
+
+				<!-- Field config -->
+				<div class="flex-1 space-y-2">
+					<div class="flex gap-2">
+						<input
+							type="text"
+							value={field.name}
+							placeholder="Feldname"
+							class="{inputClass} flex-1"
+							oninput={(e) => updateField(field.id, { name: (e.target as HTMLInputElement).value })}
+						/>
+						<select
+							value={field.type}
+							class="{inputClass} w-32"
+							onchange={(e) =>
+								updateField(field.id, { type: (e.target as HTMLSelectElement).value as FieldType })}
+						>
+							{#each fieldTypes as ft}
+								<option value={ft.value}>{ft.label}</option>
+							{/each}
+						</select>
+					</div>
+
+					<div class="flex items-center gap-4">
+						<label class="flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))]">
+							<input
+								type="checkbox"
+								checked={field.required || false}
+								onchange={(e) =>
+									updateField(field.id, { required: (e.target as HTMLInputElement).checked })}
+								class="h-3 w-3"
+							/>
+							Pflichtfeld
+						</label>
+
+						<input
+							type="text"
+							value={field.placeholder || ''}
+							placeholder="Platzhalter (optional)"
+							class="{inputClass} flex-1 text-xs"
+							oninput={(e) =>
+								updateField(field.id, {
+									placeholder: (e.target as HTMLInputElement).value || undefined,
+								})}
+						/>
+					</div>
+
+					<!-- Currency code for currency fields -->
+					{#if field.type === 'currency'}
+						<input
+							type="text"
+							value={field.currencyCode || 'EUR'}
+							placeholder="Wahrungscode (z.B. EUR)"
+							class="{inputClass} text-xs"
+							oninput={(e) =>
+								updateField(field.id, { currencyCode: (e.target as HTMLInputElement).value })}
+						/>
+					{/if}
+
+					<!-- Options for select fields -->
+					{#if field.type === 'select'}
+						<div class="space-y-1">
+							<div class="flex flex-wrap gap-1">
+								{#each field.options || [] as option, i}
+									<span
+										class="inline-flex items-center gap-1 rounded bg-[hsl(var(--muted))] px-2 py-0.5 text-xs"
+									>
+										{option}
+										<button
+											type="button"
+											onclick={() => removeOption(field.id, i)}
+											class="text-[hsl(var(--muted-foreground))] hover:text-red-500">x</button
+										>
+									</span>
+								{/each}
+							</div>
+							<div class="flex gap-1">
+								<input
+									type="text"
+									bind:value={newOption}
+									placeholder="Neue Option"
+									class="{inputClass} flex-1 text-xs"
+									onkeydown={(e) => {
+										if (e.key === 'Enter') {
+											e.preventDefault();
+											addOption(field.id);
+										}
+									}}
+								/>
+								<button
+									type="button"
+									onclick={() => addOption(field.id)}
+									class="rounded bg-[hsl(var(--primary))] px-2 py-1 text-xs text-[hsl(var(--primary-foreground))]"
+									>+</button
+								>
+							</div>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Delete button -->
+				<button
+					type="button"
+					onclick={() => removeField(field.id)}
+					class="mt-1 text-[hsl(var(--muted-foreground))] hover:text-red-500"
+					title={$_('field.removeField')}
+				>
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+						/>
+					</svg>
+				</button>
+			</div>
+		</div>
+	{/each}
+
+	<button
+		type="button"
+		onclick={addField}
+		class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[hsl(var(--border))] py-3 text-sm text-[hsl(var(--muted-foreground))] transition-colors hover:border-[hsl(var(--primary))] hover:text-[hsl(var(--primary))]"
+	>
+		<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+		</svg>
+		{$_('collection.addField')}
+	</button>
+</div>
