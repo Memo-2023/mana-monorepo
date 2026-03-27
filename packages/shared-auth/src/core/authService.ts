@@ -825,6 +825,52 @@ export function createAuthService(config: AuthServiceConfig) {
 		},
 
 		/**
+		 * List active sessions
+		 */
+		async listSessions(): Promise<any[]> {
+			try {
+				const appToken = await service.getAppToken();
+				if (!appToken) return [];
+
+				const res = await fetch(`${baseUrl}/api/v1/auth/sessions`, {
+					headers: { Authorization: `Bearer ${appToken}` },
+				});
+
+				if (!res.ok) return [];
+				return await res.json();
+			} catch {
+				return [];
+			}
+		},
+
+		/**
+		 * Revoke a session
+		 */
+		async revokeSession(sessionId: string): Promise<AuthResult> {
+			try {
+				const appToken = await service.getAppToken();
+				if (!appToken) return { success: false, error: 'Not authenticated' };
+
+				const res = await fetch(`${baseUrl}/api/v1/auth/sessions/${sessionId}`, {
+					method: 'DELETE',
+					headers: { Authorization: `Bearer ${appToken}` },
+				});
+
+				if (!res.ok) {
+					const err = await res.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to revoke session' };
+				}
+
+				return { success: true };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to revoke session',
+				};
+			}
+		},
+
+		/**
 		 * Get the current app token
 		 */
 		async getAppToken(): Promise<string | null> {

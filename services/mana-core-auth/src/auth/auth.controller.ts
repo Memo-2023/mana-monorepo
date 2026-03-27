@@ -838,6 +838,47 @@ export class AuthController {
 	}
 
 	// =========================================================================
+	// Session Management
+	// =========================================================================
+
+	/**
+	 * List active sessions for the current user
+	 */
+	@Get('sessions')
+	@UseGuards(JwtAuthGuard)
+	@ApiOperation({ summary: 'List active sessions' })
+	@ApiBearerAuth('JWT-auth')
+	@ApiResponse({ status: 200, description: 'Returns list of active sessions' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	async listSessions(@CurrentUser() user: CurrentUserData) {
+		return this.betterAuthService.listSessions(user.userId);
+	}
+
+	/**
+	 * Revoke a specific session
+	 */
+	@Delete('sessions/:id')
+	@UseGuards(JwtAuthGuard)
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@ApiOperation({ summary: 'Revoke a session' })
+	@ApiBearerAuth('JWT-auth')
+	@ApiResponse({ status: 204, description: 'Session revoked successfully' })
+	@ApiResponse({ status: 401, description: 'Not authenticated' })
+	@ApiResponse({ status: 404, description: 'Session not found' })
+	async revokeSession(
+		@CurrentUser() user: CurrentUserData,
+		@Param('id') sessionId: string,
+		@Req() req: Request
+	) {
+		await this.betterAuthService.revokeSession(user.userId, sessionId);
+		this.securityEvents.logEventWithRequest(req, {
+			userId: user.userId,
+			eventType: SecurityEventType.LOGOUT,
+			metadata: { revokedSessionId: sessionId },
+		});
+	}
+
+	// =========================================================================
 	// Passkey (WebAuthn) Endpoints
 	// =========================================================================
 

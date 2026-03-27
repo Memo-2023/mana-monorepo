@@ -2189,4 +2189,55 @@ export class BetterAuthService {
 
 		return events;
 	}
+
+	/**
+	 * List active sessions for a user
+	 */
+	async listSessions(userId: string) {
+		const db = getDb(this.databaseUrl);
+		const { sessions } = await import('../../db/schema');
+		const { eq, and, isNull, gt } = await import('drizzle-orm');
+
+		const activeSessions = await db
+			.select({
+				id: sessions.id,
+				ipAddress: sessions.ipAddress,
+				userAgent: sessions.userAgent,
+				deviceId: sessions.deviceId,
+				deviceName: sessions.deviceName,
+				lastActivityAt: sessions.lastActivityAt,
+				createdAt: sessions.createdAt,
+				expiresAt: sessions.expiresAt,
+			})
+			.from(sessions)
+			.where(
+				and(
+					eq(sessions.userId, userId),
+					isNull(sessions.revokedAt),
+					gt(sessions.expiresAt, new Date())
+				)
+			)
+			.orderBy(sessions.lastActivityAt);
+
+		return activeSessions;
+	}
+
+	/**
+	 * Revoke a specific session
+	 */
+	async revokeSession(userId: string, sessionId: string) {
+		const db = getDb(this.databaseUrl);
+		const { sessions } = await import('../../db/schema');
+		const { eq, and } = await import('drizzle-orm');
+
+		const result = await db
+			.update(sessions)
+			.set({ revokedAt: new Date() })
+			.where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId)))
+			.returning({ id: sessions.id });
+
+		if (result.length === 0) {
+			throw new NotFoundException('Session not found');
+		}
+	}
 }

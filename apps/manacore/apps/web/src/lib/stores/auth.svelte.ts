@@ -213,6 +213,18 @@ export const authStore = {
 		return authService.getSecurityEvents();
 	},
 
+	async listSessions() {
+		const authService = getAuthService();
+		if (!authService) return [];
+		return authService.listSessions();
+	},
+
+	async revokeSession(sessionId: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available' };
+		return authService.revokeSession(sessionId);
+	},
+
 	/**
 	 * Sign in with email and password
 	 */

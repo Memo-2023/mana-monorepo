@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, GlobalSettingsSection } from '@manacore/shared-ui';
-	import { PasskeyManager, TwoFactorSetup, AuditLog } from '@manacore/shared-auth-ui';
+	import {
+		PasskeyManager,
+		TwoFactorSetup,
+		AuditLog,
+		SessionManager,
+	} from '@manacore/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { creditsService } from '$lib/api/credits';
 	import type { CreditBalance } from '$lib/api/credits';
@@ -27,6 +32,10 @@
 	let securityEvents = $state<any[]>([]);
 	let securityEventsLoading = $state(false);
 
+	// Sessions
+	let sessions = $state<any[]>([]);
+	let sessionsLoading = $state(false);
+
 	onMount(async () => {
 		if (authStore.isAuthenticated) {
 			try {
@@ -38,6 +47,10 @@
 				securityEventsLoading = true;
 				securityEvents = await authStore.getSecurityEvents();
 				securityEventsLoading = false;
+				// Load sessions
+				sessionsLoading = true;
+				sessions = await authStore.listSessions();
+				sessionsLoading = false;
 			} catch (e) {
 				console.error('Failed to load data:', e);
 			}
@@ -296,6 +309,23 @@
 						onRename={(id, name) => authStore.renamePasskey(id, name)}
 						onRefresh={async () => {
 							passkeys = await authStore.listPasskeys();
+						}}
+						primaryColor="#6366f1"
+					/>
+				</div>
+			</Card>
+
+			<!-- Sessions Section -->
+			<Card>
+				<div class="p-6">
+					<SessionManager
+						{sessions}
+						loading={sessionsLoading}
+						onRevoke={(id) => authStore.revokeSession(id)}
+						onRefresh={async () => {
+							sessionsLoading = true;
+							sessions = await authStore.listSessions();
+							sessionsLoading = false;
 						}}
 						primaryColor="#6366f1"
 					/>

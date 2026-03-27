@@ -14,6 +14,7 @@ export { default as SecurityOnboarding } from './components/SecurityOnboarding.s
 export { default as ChangePassword } from './components/ChangePassword.svelte';
 export { default as PasswordStrength } from './components/PasswordStrength.svelte';
 export { default as AuditLog } from './components/AuditLog.svelte';
+export { default as SessionManager } from './components/SessionManager.svelte';
 
 // Utilities
 export {
@@ -34,3 +35,4 @@ export type {
 } from './types';
 export type { PasskeyManagerTranslations } from './components/PasskeyManager.svelte';
 export type { TwoFactorSetupTranslations } from './components/TwoFactorSetup.svelte';
+export type { SessionManagerTranslations } from './components/SessionManager.svelte';

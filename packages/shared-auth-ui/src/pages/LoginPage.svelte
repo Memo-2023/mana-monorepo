@@ -148,6 +148,7 @@
 	let useBackupCode = $state(false);
 	let trustDevice = $state(false);
 	let rateLimitCountdown = $state(0);
+	let isLockedOut = $state(false);
 	let magicLinkSent = $state(false);
 	let sendingMagicLink = $state(false);
 
@@ -157,8 +158,16 @@
 				rateLimitCountdown--;
 			}, 1000);
 			return () => clearTimeout(timer);
+		} else if (isLockedOut) {
+			isLockedOut = false;
 		}
 	});
+
+	function formatCountdown(seconds: number): string {
+		const m = Math.floor(seconds / 60);
+		const s = seconds % 60;
+		return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
+	}
 
 	// Theme state - can be toggled manually, defaults to system preference
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -267,13 +276,14 @@
 		} else {
 			setError(result.error || t.signInFailed, 'general');
 
-			// Detect rate limiting
+			// Detect rate limiting vs account lockout
 			if (result.error?.includes('Too Many') || result.error?.includes('rate limit')) {
 				rateLimitCountdown = 60; // 1 minute cooldown
 			} else if (
 				result.error?.includes('temporarily locked') ||
 				result.error === 'ACCOUNT_LOCKED'
 			) {
+				isLockedOut = true;
 				rateLimitCountdown = (result as any).retryAfter || 300; // 5 min default
 			}
 		}
@@ -596,7 +606,32 @@
 						</div>
 					{/if}
 
-					{#if error}
+					{#if isLockedOut}
+						<div class="lockout-banner" role="alert" aria-live="assertive">
+							<div class="lockout-icon">
+								<Warning size={24} />
+							</div>
+							<div class="lockout-content">
+								<p class="lockout-title">Konto vorübergehend gesperrt</p>
+								<p class="lockout-text">
+									Zu viele fehlgeschlagene Anmeldeversuche.
+									{#if rateLimitCountdown > 0}
+										Erneut versuchen in <strong>{formatCountdown(rateLimitCountdown)}</strong>
+									{:else}
+										Du kannst es jetzt erneut versuchen.
+									{/if}
+								</p>
+								<button
+									type="button"
+									class="lockout-reset-link"
+									onclick={() => goto(forgotPasswordPath)}
+									style:color={primaryColor}
+								>
+									Passwort zurücksetzen
+								</button>
+							</div>
+						</div>
+					{:else if error}
 						<div class="error-message" id="form-error" role="alert" aria-live="assertive">
 							<Warning size={18} class="text-red-500 shrink-0" />
 							<div class="error-content">
@@ -613,7 +648,9 @@
 									</button>
 								{/if}
 								{#if rateLimitCountdown > 0}
-									<p class="retry-countdown">Erneut versuchen in {rateLimitCountdown}s</p>
+									<p class="retry-countdown">
+										Erneut versuchen in {formatCountdown(rateLimitCountdown)}
+									</p>
 								{/if}
 							</div>
 						</div>
@@ -1010,6 +1047,50 @@
 
 	.retry-countdown {
 		font-weight: 600;
+		margin-top: 0.25rem;
+	}
+
+	.lockout-banner {
+		display: flex;
+		gap: 0.75rem;
+		padding: 1rem;
+		margin-bottom: 1rem;
+		border-radius: 0.75rem;
+		background: rgba(245, 158, 11, 0.15);
+		border: 1px solid rgba(245, 158, 11, 0.3);
+		color: #f59e0b;
+	}
+
+	.lockout-icon {
+		flex-shrink: 0;
+		margin-top: 0.125rem;
+	}
+
+	.lockout-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.lockout-title {
+		font-weight: 600;
+		font-size: 0.9rem;
+	}
+
+	.lockout-text {
+		font-size: 0.8rem;
+		opacity: 0.9;
+	}
+
+	.lockout-reset-link {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		font-size: 0.8rem;
+		padding: 0;
+		text-align: left;
+		text-decoration: underline;
 		margin-top: 0.25rem;
 	}
 
