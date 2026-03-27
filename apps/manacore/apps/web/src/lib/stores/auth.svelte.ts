@@ -101,7 +101,12 @@ export const authStore = {
 		}
 	},
 
-	/**
+	async sendMagicLink(email: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available on server' };
+		return authService.sendMagicLink(email);
+	},
+
 	/**
 	 * Check if passkeys are available in this browser
 	 */

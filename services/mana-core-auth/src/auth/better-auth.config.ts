@@ -20,6 +20,7 @@ import { jwt } from 'better-auth/plugins/jwt';
 import { organization } from 'better-auth/plugins/organization';
 import { oidcProvider } from 'better-auth/plugins/oidc-provider';
 import { twoFactor } from 'better-auth/plugins/two-factor';
+import { magicLink } from 'better-auth/plugins/magic-link';
 import { getDb } from '../db/connection';
 import { organizations, members, invitations } from '../db/schema/organizations.schema';
 import {
@@ -39,6 +40,7 @@ import {
 	sendPasswordResetEmail,
 	sendInvitationEmail,
 	sendVerificationEmail,
+	sendMagicLinkEmail,
 } from '../email/email.service';
 import { sourceAppStore } from './stores/source-app.store';
 import { passwordResetRedirectStore } from './stores/password-reset-redirect.store';
@@ -248,6 +250,7 @@ export function createBetterAuth(databaseUrl: string) {
 			'https://context.mana.how',
 			'https://docs.mana.how',
 			'https://element.mana.how',
+			'https://inventar.mana.how',
 			'https://link.mana.how',
 			'https://manadeck.mana.how',
 			'https://matrix.mana.how',
@@ -269,6 +272,7 @@ export function createBetterAuth(databaseUrl: string) {
 			'http://localhost:3001',
 			'http://localhost:5173',
 			'http://localhost:5174',
+			'http://localhost:5190',
 		],
 
 		// Plugins
@@ -422,6 +426,20 @@ export function createBetterAuth(databaseUrl: string) {
 			 */
 			twoFactor({
 				issuer: 'ManaCore',
+			}),
+			/**
+			 * Magic Link Plugin (Passwordless Email Login)
+			 *
+			 * Sends a one-time login link via email.
+			 * Endpoints via Better Auth passthrough:
+			 * - POST /magic-link/send-magic-link
+			 * - GET /magic-link/verify (callback from email)
+			 */
+			magicLink({
+				sendMagicLink: async ({ email, url }: { email: string; url: string }) => {
+					await sendMagicLinkEmail(email, url);
+				},
+				expiresIn: 600, // 10 minutes
 			}),
 		],
 	});

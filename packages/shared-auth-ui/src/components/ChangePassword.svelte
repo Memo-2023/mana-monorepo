@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Eye, EyeSlash } from '@manacore/shared-icons';
+	import PasswordStrength from './PasswordStrength.svelte';
 
 	interface Props {
 		onChangePassword: (
@@ -137,6 +138,8 @@
 				<p class="field-hint">Mindestens 8 Zeichen</p>
 			{/if}
 		</div>
+
+		<PasswordStrength password={newPassword} {primaryColor} />
 
 		<div class="input-group">
 			<label for="confirm-password" class="input-label">Neues Passwort bestätigen</label>

@@ -12,6 +12,7 @@ export { default as PasskeyManager } from './components/PasskeyManager.svelte';
 export { default as TwoFactorSetup } from './components/TwoFactorSetup.svelte';
 export { default as SecurityOnboarding } from './components/SecurityOnboarding.svelte';
 export { default as ChangePassword } from './components/ChangePassword.svelte';
+export { default as PasswordStrength } from './components/PasswordStrength.svelte';
 export { default as AuditLog } from './components/AuditLog.svelte';
 
 // Utilities

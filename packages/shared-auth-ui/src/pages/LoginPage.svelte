@@ -88,6 +88,7 @@
 		passkeyAvailable?: boolean;
 		onVerifyTwoFactor?: (code: string, trustDevice?: boolean) => Promise<AuthResult>;
 		onVerifyBackupCode?: (code: string) => Promise<AuthResult>;
+		onSendMagicLink?: (email: string) => Promise<AuthResult>;
 	}
 
 	let {
@@ -114,6 +115,7 @@
 		passkeyAvailable = false,
 		onVerifyTwoFactor,
 		onVerifyBackupCode,
+		onSendMagicLink,
 	}: Props = $props();
 
 	const t = $derived({ ...defaultTranslations, ...translations });
@@ -146,6 +148,8 @@
 	let useBackupCode = $state(false);
 	let trustDevice = $state(false);
 	let rateLimitCountdown = $state(0);
+	let magicLinkSent = $state(false);
+	let sendingMagicLink = $state(false);
 
 	$effect(() => {
 		if (rateLimitCountdown > 0) {
@@ -331,6 +335,26 @@
 			setTimeout(() => goto(successRedirect), 600);
 		} else if (result.error === 'Passkey authentication was cancelled') {
 			// User cancelled - don't show error
+		} else {
+			setError(result.error || t.signInFailed, 'general');
+		}
+	}
+
+	async function handleSendMagicLink() {
+		if (!onSendMagicLink || !email) return;
+		if (!isValidEmail(email)) {
+			setError(t.emailInvalid, 'email');
+			return;
+		}
+		sendingMagicLink = true;
+		clearError();
+		magicLinkSent = false;
+
+		const result = await onSendMagicLink(email);
+		sendingMagicLink = false;
+
+		if (result.success) {
+			magicLinkSent = true;
 		} else {
 			setError(result.error || t.signInFailed, 'general');
 		}
@@ -701,6 +725,33 @@
 							{/if}
 						</button>
 					</form>
+
+					{#if onSendMagicLink}
+						{#if magicLinkSent}
+							<div class="verified-banner" role="status" aria-live="polite">
+								<Check size={18} class="text-green-500 shrink-0" />
+								<p>Login-Link an {email} gesendet!</p>
+								<button
+									type="button"
+									class="verified-banner-close"
+									onclick={() => (magicLinkSent = false)}
+									aria-label="Close"
+								>
+									&times;
+								</button>
+							</div>
+						{:else}
+							<button
+								type="button"
+								onclick={handleSendMagicLink}
+								disabled={sendingMagicLink || !email}
+								class="magic-link-button"
+								style:color={primaryColor}
+							>
+								{sendingMagicLink ? 'Wird gesendet...' : 'Login-Link per E-Mail senden'}
+							</button>
+						{/if}
+					{/if}
 
 					<p class="register-link">
 						{t.noAccount}
@@ -1201,6 +1252,27 @@
 
 	.light .divider span {
 		color: rgba(0, 0, 0, 0.5);
+	}
+
+	.magic-link-button {
+		width: 100%;
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		font-size: 0.875rem;
+		padding: 0.75rem;
+		text-align: center;
+		transition: opacity 0.2s;
+	}
+
+	.magic-link-button:hover:not(:disabled) {
+		opacity: 0.7;
+	}
+
+	.magic-link-button:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
 	}
 
 	.register-link {

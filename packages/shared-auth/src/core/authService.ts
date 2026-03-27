@@ -779,6 +779,33 @@ export function createAuthService(config: AuthServiceConfig) {
 		},
 
 		/**
+		 * Send magic link for passwordless login
+		 */
+		async sendMagicLink(email: string): Promise<AuthResult> {
+			try {
+				const response = await fetch(`${baseUrl}/api/auth/magic-link/send-magic-link`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ email }),
+				});
+
+				if (!response.ok) {
+					const err = await response.json().catch(() => ({}));
+					return { success: false, error: err.message || 'Failed to send magic link' };
+				}
+
+				trackAuth('magic_link_sent');
+				return { success: true };
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Failed to send magic link',
+				};
+			}
+		},
+
+		/**
 		 * Get security events (audit log)
 		 */
 		async getSecurityEvents(limit = 50): Promise<any[]> {

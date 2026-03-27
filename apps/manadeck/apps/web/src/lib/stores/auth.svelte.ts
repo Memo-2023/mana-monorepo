@@ -111,6 +111,10 @@ export const authStore = {
 		return result;
 	},
 
+	async sendMagicLink(email: string) {
+		return authService.sendMagicLink(email);
+	},
+
 	isPasskeyAvailable(): boolean {
 		return authService.isPasskeyAvailable();
 	},

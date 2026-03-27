@@ -32,6 +32,9 @@
 		"typescript": "^5.7.3"
 	},
 	"dependencies": {
+		"@zxcvbn-ts/core": "^3.0.4",
+		"@zxcvbn-ts/language-common": "^3.0.4",
+		"@zxcvbn-ts/language-de": "^3.0.2",
 		"qrcode": "^1.5.4"
 	}
 }

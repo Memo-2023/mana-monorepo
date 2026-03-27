@@ -104,6 +104,27 @@ export class BetterAuthPassthroughController {
 	}
 
 	/**
+	 * Magic Link passthrough
+	 *
+	 * Forwards all /api/auth/magic-link/* requests to Better Auth's handler.
+	 * The magicLink plugin registers these routes:
+	 * - POST /magic-link/send-magic-link
+	 * - GET /magic-link/verify (callback from email)
+	 */
+	@All('magic-link/*')
+	async handleMagicLink(@Req() req: Request, @Res() res: Response) {
+		try {
+			return await this.forwardToBetterAuth(req, res);
+		} catch (error) {
+			this.logger.error(
+				'Magic link passthrough failed',
+				error instanceof Error ? error.stack : undefined
+			);
+			return res.status(500).json({ error: 'Magic link request failed' });
+		}
+	}
+
+	/**
 	 * Handle SSO get-session request
 	 *
 	 * This endpoint is called by client apps to check if the user has a valid

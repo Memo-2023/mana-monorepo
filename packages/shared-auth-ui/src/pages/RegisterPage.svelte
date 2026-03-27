@@ -2,6 +2,7 @@
 	import type { Component } from 'svelte';
 	import type { AuthResult } from '../types';
 	import { Eye, EyeSlash, UserPlus, ArrowLeft, Sun, Moon } from '@manacore/shared-icons';
+	import PasswordStrength from '../components/PasswordStrength.svelte';
 
 	import type { Snippet } from 'svelte';
 
@@ -504,6 +505,8 @@
 						</button>
 					</div>
 				</div>
+
+				<PasswordStrength {password} {primaryColor} />
 
 				<div>
 					<div class="relative">

@@ -156,6 +156,12 @@ export const authStore = {
 		return result;
 	},
 
+	async sendMagicLink(email: string) {
+		const authService = getAuthService();
+		if (!authService) return { success: false, error: 'Auth not available on server' };
+		return authService.sendMagicLink(email);
+	},
+
 	isPasskeyAvailable(): boolean {
 		const authService = getAuthService();
 		if (!authService) return false;

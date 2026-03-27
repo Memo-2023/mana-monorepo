@@ -67,6 +67,7 @@
 	onSignInWithPasskey={() => authStore.signInWithPasskey()}
 	onVerifyTwoFactor={(code, trust) => authStore.verifyTwoFactor(code, trust)}
 	onVerifyBackupCode={(code) => authStore.verifyBackupCode(code)}
+	onSendMagicLink={(email) => authStore.sendMagicLink(email)}
 	{goto}
 	successRedirect={redirectTo}
 	registerPath="/register"
