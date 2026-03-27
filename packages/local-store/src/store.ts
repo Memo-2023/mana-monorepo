@@ -147,7 +147,10 @@ export class LocalStore {
 			this._syncEngine.registerCollection(col);
 		}
 
-		this._syncEngine.start();
+		// Queue existing local data for initial sync (guest → authenticated transition)
+		this._queueInitialSync().then(() => {
+			this._syncEngine?.start();
+		});
 	}
 
 	/**
@@ -201,6 +204,33 @@ export class LocalStore {
 	async reset(): Promise<void> {
 		this.stopSync();
 		await this.db.reset();
+	}
+
+	/**
+	 * Queue all existing local records for sync if this is the first sync.
+	 * Handles the guest→authenticated transition: local data gets pushed to server.
+	 */
+	private async _queueInitialSync(): Promise<void> {
+		// Check if we've synced before — if any collection has a cursor, skip
+		for (const [name] of this._collections) {
+			const cursor = await this.db.getSyncCursor(name);
+			if (cursor !== '1970-01-01T00:00:00.000Z') {
+				// Already synced before — pending changes from writes will handle it
+				return;
+			}
+		}
+
+		// First sync: queue all local records as pending inserts
+		let total = 0;
+		for (const col of this._collections.values()) {
+			const count = await col.queueAllForSync();
+			total += count;
+		}
+
+		if (total > 0) {
+			// eslint-disable-next-line no-console
+			console.log(`[LocalStore] Queued ${total} local records for initial sync`);
+		}
 	}
 
 	/**

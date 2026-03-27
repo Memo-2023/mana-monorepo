@@ -6,6 +6,7 @@
 import { browser } from '$app/environment';
 import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
 import { apiClient } from '$lib/api/client';
+import { todoStore } from '$lib/data/local-store';
 
 // Default URLs for local development only
 const DEV_AUTH_URL = 'http://localhost:3001';
@@ -221,6 +222,9 @@ export const authStore = {
 				apiClient.setAccessToken(token);
 			}
 
+			// Start syncing local data to server
+			todoStore.startSync(() => authStore.getValidToken());
+
 			return { success: true };
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -264,6 +268,9 @@ export const authStore = {
 	 * Sign out
 	 */
 	async signOut() {
+		// Stop syncing before clearing auth
+		todoStore.stopSync();
+
 		const authService = getAuthService();
 		if (!authService) {
 			user = null;

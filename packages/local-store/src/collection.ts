@@ -281,6 +281,30 @@ export class LocalCollection<T extends BaseRecord> {
 		return this._table.where('updatedAt').above(since).toArray();
 	}
 
+	/**
+	 * Queue all existing local records as pending inserts.
+	 * Used for initial sync after login — ensures guest data gets pushed to server.
+	 */
+	async queueAllForSync(): Promise<number> {
+		const allRecords = await this._table.filter((r) => !r.deletedAt).toArray();
+		let count = 0;
+
+		await this._db.transaction('rw', [this._db._pendingChanges], async () => {
+			for (const record of allRecords) {
+				await this._db._pendingChanges.add({
+					collection: this.name,
+					recordId: record.id,
+					op: 'insert',
+					data: record as unknown as Record<string, unknown>,
+					createdAt: new Date().toISOString(),
+				});
+				count++;
+			}
+		});
+
+		return count;
+	}
+
 	// ─── Internal ───────────────────────────────────────────────
 
 	private async _trackChange(
