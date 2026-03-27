@@ -89,17 +89,88 @@ services/mana-core-auth/
 │   │   ├── auth.controller.ts      # Auth endpoints
 │   │   └── dto/                    # Request DTOs
 │   ├── credits/                    # Credit system
+│   │   ├── credits.service.ts      # Personal credit operations
+│   │   ├── guild-pool.service.ts   # Guild shared Mana pool
+│   │   ├── guild.controller.ts     # /credits/guild/* endpoints
+│   │   └── dto/                    # Credit DTOs (incl. creditSource)
+│   ├── guilds/                     # Gilden (guild management)
+│   │   ├── guilds.controller.ts    # /gilden/* endpoints (RPG-branded)
+│   │   ├── guilds.service.ts       # Wraps Better Auth orgs + sub limits
+│   │   └── guilds.module.ts
 │   ├── db/
 │   │   ├── schema/                 # Drizzle schemas
+│   │   │   ├── guilds.schema.ts    # guild_pools, spending_limits, transactions
+│   │   │   └── ...
 │   │   ├── migrations/             # Generated migration files
 │   │   ├── connection.ts           # DB connection
 │   │   └── migrate.ts              # Migration script with advisory locks
 │   └── config/
 │       └── configuration.ts        # App config
+├── postgres/init/
+│   ├── 03-organization-rls.sql     # Org RLS policies
+│   └── 04-guild-rls.sql           # Guild pool RLS policies
 ├── docs/
 │   └── AUTHENTICATION_ARCHITECTURE.md  # READ THIS FIRST
 └── test/
+    └── e2e/
+        └── guild-journey.e2e-spec.ts  # Full guild E2E tests
 ```
+
+## Gilden (Guilds) - Shared Mana Pools
+
+Guilds allow users to share a Mana pool (family, friends, teams). Uses Better Auth's organization plugin under the hood.
+
+### Key Concepts
+
+- **Gilde** = Organization with a shared credit pool
+- **Gildenmeister** = Owner who manages the pool and members
+- **Mana-Pool** = Shared credit balance members spend from directly
+- **Spending Limits** = Optional per-member daily/monthly limits
+
+### Endpoints
+
+**Guild Management** (`/gilden/*`):
+
+| Method | Endpoint | Who | Description |
+|--------|----------|-----|-------------|
+| POST | `/gilden` | Auth user | Create guild + pool |
+| GET | `/gilden` | Auth user | List user's guilds |
+| GET | `/gilden/:id` | Member | Guild details + pool + members |
+| PUT | `/gilden/:id` | Owner/Admin | Update guild |
+| DELETE | `/gilden/:id` | Owner | Delete guild (cascades pool) |
+| POST | `/gilden/:id/invite` | Owner/Admin | Invite member |
+| POST | `/gilden/accept-invitation` | Invitee | Accept invitation |
+| DELETE | `/gilden/:id/members/:mid` | Owner/Admin | Remove member |
+| PUT | `/gilden/:id/members/:mid/role` | Owner/Admin | Change role |
+
+**Guild Credits** (`/credits/guild/*`):
+
+| Method | Endpoint | Who | Description |
+|--------|----------|-----|-------------|
+| GET | `/credits/guild/:id/balance` | Member | Pool balance |
+| POST | `/credits/guild/:id/fund` | Owner/Admin | Fund from personal balance |
+| POST | `/credits/guild/:id/use` | Member | Use credits from pool |
+| GET | `/credits/guild/:id/transactions` | Member | Transaction history |
+| GET | `/credits/guild/:id/members/:uid/spending` | Member/Owner | Spending summary |
+| GET | `/credits/guild/:id/members/:uid/limits` | Member/Owner | Get limits |
+| PUT | `/credits/guild/:id/members/:uid/limits` | Owner/Admin | Set limits |
+
+**Credit Source Routing**: `POST /credits/use` accepts optional `creditSource`:
+```json
+{
+  "amount": 10,
+  "appId": "chat",
+  "description": "AI chat",
+  "creditSource": { "type": "guild", "guildId": "..." }
+}
+```
+
+### Subscription Limits
+
+Guild creation and invites respect the user's subscription plan:
+- `maxOrganizations` = max guilds a user can own
+- `maxTeamMembers` = max members per guild
+- Free tier: 1 guild, 1 member (just themselves)
 
 ## Database Migrations
 
