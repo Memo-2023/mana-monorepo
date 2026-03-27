@@ -404,7 +404,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      PORT: 3040
+      PORT: 3041
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
       SERVICE_KEY: ${NOTIFY_SERVICE_KEY:-dev-service-key}
       MANA_CORE_AUTH_URL: http://mana-core-auth:3001
@@ -417,9 +417,9 @@ services:
       MATRIX_HOMESERVER_URL: http://mana-matrix-synapse:8008
       MATRIX_ACCESS_TOKEN: ${MATRIX_NOTIFY_BOT_TOKEN:-}
     ports:
-      - "3040:3040"
+      - "3041:3041"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3040/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3041/health"]
       interval: 120s
       timeout: 5s
       retries: 3
