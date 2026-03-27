@@ -30,7 +30,11 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 	});
 
 	setSecurityHeaders(response, {
-		connectSrc: [PUBLIC_MANA_CORE_AUTH_URL_CLIENT, PUBLIC_BACKEND_URL_CLIENT],
+		connectSrc: [
+			PUBLIC_MANA_CORE_AUTH_URL_CLIENT || 'http://localhost:3001',
+			PUBLIC_BACKEND_URL_CLIENT || 'http://localhost:3018',
+			'http://localhost:3050', // mana-sync server
+		],
 	});
 
 	return response;

@@ -43,8 +43,20 @@
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 	import { todoOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { TodoEvents } from '@manacore/shared-utils/analytics';
+	import { todoStore } from '$lib/data/local-store';
+	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
+
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
+	function initGuestWelcome() {
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('todo')) {
+			showGuestWelcome = true;
+		}
+	}
 
 	// App switcher items
 	const appItems = getPillAppItems('todo');
@@ -167,8 +179,8 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
-	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email || 'Menü');
+	// User email for user dropdown — empty string for guests so PillNav shows login button
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
 	// Toggle FilterStrip visibility
 	function handleFilterToggle() {
@@ -290,15 +302,30 @@
 	}
 
 	async function handleAuthReady() {
+		// Initialize local-first database (opens IndexedDB, seeds guest data)
+		await todoStore.initialize();
+
+		// If authenticated, start syncing to server
+		if (authStore.isAuthenticated) {
+			todoStore.startSync(() => authStore.getValidToken());
+		}
+
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
 		// Initialize todo settings
 		todoSettings.initialize();
 
-		// Load projects, labels, and user settings
+		// Show guest welcome modal on first visit
+		initGuestWelcome();
+
+		// Load projects from IndexedDB (guest seed or synced data)
 		await projectsStore.fetchProjects();
-		await Promise.all([labelsStore.fetchLabels(), userSettings.load()]);
+
+		// Labels and user settings need auth (central mana-core-auth service)
+		if (authStore.isAuthenticated) {
+			await Promise.all([labelsStore.fetchLabels(), userSettings.load()]);
+		}
 
 		// Redirect to start page if on root and a custom start page is set
 		const currentPath = window.location.pathname;
@@ -320,7 +347,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} onReady={handleAuthReady}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<SplitPaneContainer>
 		<div class="layout-container">
 			<a
@@ -351,7 +378,7 @@
 						showLanguageSwitcher={true}
 						{languageItems}
 						{currentLanguageLabel}
-						showLogout={true}
+						showLogout={authStore.isAuthenticated}
 						onLogout={handleLogout}
 						loginHref="/login"
 						primaryColor="#8b5cf6"
@@ -478,6 +505,10 @@
 				class="main-content bg-background"
 				class:immersive={todoSettings.immersiveModeEnabled}
 			>
+				<!-- Sync status indicator (top right) -->
+				<div class="sync-indicator-wrapper">
+					<SyncIndicator />
+				</div>
 				<div
 					class="content-wrapper"
 					class:full-width={$page.url.pathname === '/kanban'}
@@ -494,7 +525,19 @@
 		<MiniOnboardingModal store={todoOnboarding} appName="Todo" appEmoji="✅" />
 	{/if}
 
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="todo"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
 </AuthGate>
 
 <style>
@@ -522,6 +565,13 @@
 		padding: 0;
 		max-width: none;
 		height: 100%;
+	}
+
+	.sync-indicator-wrapper {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.75rem;
+		z-index: 10;
 	}
 
 	.content-wrapper {

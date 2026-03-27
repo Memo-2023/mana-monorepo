@@ -943,6 +943,19 @@
 					</svg>
 					<span class="pill-label">Logout</span>
 				</button>
+			{:else if loginHref && !userEmail}
+				<!-- Guest mode: prominent login button -->
+				<a href={loginHref} class="pill glass-pill login-pill" title="Anmelden">
+					<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d={getIconPath('user')}
+						/>
+					</svg>
+					<span class="pill-label">Anmelden</span>
+				</a>
 			{/if}
 
 			<!-- Collapse Button -->
@@ -1109,6 +1122,20 @@
 	.logout-pill:hover {
 		background: rgba(220, 38, 38, 0.15);
 		border-color: rgba(220, 38, 38, 0.3);
+	}
+
+	/* Guest login pill — prominent with primary color */
+	.login-pill {
+		background: var(--pill-primary-color, var(--color-primary-500, #3b82f6));
+		color: #fff;
+		border-color: transparent;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.login-pill:hover {
+		filter: brightness(1.1);
+		transform: scale(1.03);
 	}
 
 	.pill-icon {

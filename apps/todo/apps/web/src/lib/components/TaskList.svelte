@@ -212,26 +212,15 @@
 	}
 
 	async function handleToggleComplete(task: Task) {
-		let result;
 		if (task.isCompleted) {
-			result = await tasksStore.uncompleteTask(task.id);
+			await tasksStore.uncompleteTask(task.id);
 		} else {
-			result = await tasksStore.completeTask(task.id);
-		}
-
-		// Show auth gate if authentication required (demo mode)
-		if (result && 'error' in result && result.error === 'auth_required') {
-			window.dispatchEvent(new CustomEvent('show-auth-gate'));
+			await tasksStore.completeTask(task.id);
 		}
 	}
 
 	async function handleDelete(taskId: string) {
-		const result = await tasksStore.deleteTask(taskId);
-
-		// Show auth gate if authentication required (demo mode)
-		if (result && 'error' in result && result.error === 'auth_required') {
-			window.dispatchEvent(new CustomEvent('show-auth-gate'));
-		}
+		await tasksStore.deleteTask(taskId);
 	}
 </script>
 

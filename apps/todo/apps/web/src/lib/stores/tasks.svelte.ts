@@ -1,20 +1,51 @@
 /**
- * Tasks Store - Manages task state using Svelte 5 runes
- * Authenticated users: tasks from API
- * Demo mode: static sample tasks to showcase the app
+ * Tasks Store — Local-First with Dexie.js
+ *
+ * All reads and writes go to IndexedDB first.
+ * When authenticated, changes sync to the server in the background.
+ * Same public API as before so components don't need changes.
  */
 
 import type { Task, TaskPriority, TaskStatus, Subtask } from '@todo/shared';
-import * as tasksApi from '$lib/api/tasks';
+import { taskCollection, type LocalTask } from '$lib/data/local-store';
 import { isToday, isPast, isFuture, startOfDay, addDays } from 'date-fns';
-import { authStore } from './auth.svelte';
-import { generateDemoTasks, isDemoTask } from '$lib/data/demo-tasks';
 import { TodoEvents } from '@manacore/shared-utils/analytics';
 
-// State
+// State — populated from IndexedDB
 let tasks = $state<Task[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
+
+/** Convert a LocalTask (IndexedDB record) to the shared Task type. */
+function toTask(local: LocalTask): Task {
+	return {
+		id: local.id,
+		projectId: local.projectId,
+		userId: local.userId ?? 'guest',
+		title: local.title,
+		description: local.description,
+		dueDate: local.dueDate,
+		scheduledDate: local.scheduledDate,
+		scheduledStartTime: local.scheduledStartTime,
+		estimatedDuration: local.estimatedDuration,
+		priority: local.priority,
+		status: local.isCompleted ? 'completed' : 'pending',
+		isCompleted: local.isCompleted,
+		completedAt: local.completedAt,
+		order: local.order,
+		recurrenceRule: local.recurrenceRule,
+		subtasks: local.subtasks ?? null,
+		metadata: local.metadata as Task['metadata'],
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+/** Load tasks from IndexedDB into the reactive state. */
+async function refreshTasks(filter?: Partial<LocalTask>) {
+	const localTasks = await taskCollection.getAll(filter, { sortBy: 'order', sortDirection: 'asc' });
+	tasks = localTasks.map(toTask);
+}
 
 export const tasksStore = {
 	// Getters
@@ -28,22 +59,16 @@ export const tasksStore = {
 		return error;
 	},
 
-	/**
-	 * Get incomplete tasks
-	 */
 	get incompleteTasks() {
 		return tasks.filter((t) => !t.isCompleted);
 	},
 
-	/**
-	 * Get completed tasks
-	 */
 	get completedTasks() {
 		return tasks.filter((t) => t.isCompleted);
 	},
 
 	/**
-	 * Fetch tasks with optional filters
+	 * Fetch tasks with optional filters — reads from IndexedDB.
 	 */
 	async fetchTasks(
 		query: {
@@ -60,7 +85,26 @@ export const tasksStore = {
 		loading = true;
 		error = null;
 		try {
-			tasks = await tasksApi.getTasks(query);
+			const filter: Partial<LocalTask> = {};
+			if (query.projectId) filter.projectId = query.projectId;
+			if (query.priority) filter.priority = query.priority;
+			if (query.isCompleted !== undefined) filter.isCompleted = query.isCompleted;
+
+			let localTasks = await taskCollection.getAll(
+				Object.keys(filter).length > 0 ? filter : undefined,
+				{ sortBy: 'order', sortDirection: 'asc' }
+			);
+
+			// Client-side search filter
+			if (query.search) {
+				const search = query.search.toLowerCase();
+				localTasks = localTasks.filter(
+					(t) =>
+						t.title.toLowerCase().includes(search) || t.description?.toLowerCase().includes(search)
+				);
+			}
+
+			tasks = localTasks.map(toTask);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch tasks';
 			console.error('Failed to fetch tasks:', e);
@@ -69,85 +113,82 @@ export const tasksStore = {
 		}
 	},
 
-	/**
-	 * Fetch inbox tasks (tasks without project)
-	 */
 	async fetchInboxTasks() {
 		loading = true;
 		error = null;
 		try {
-			tasks = await tasksApi.getInboxTasks();
+			const localTasks = await taskCollection.getAll(undefined, {
+				sortBy: 'order',
+				sortDirection: 'asc',
+			});
+			// Inbox = tasks without projectId or with null projectId
+			tasks = localTasks.filter((t) => !t.projectId).map(toTask);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch inbox tasks';
-			console.error('Failed to fetch inbox tasks:', e);
 		} finally {
 			loading = false;
 		}
 	},
 
-	/**
-	 * Fetch today's tasks
-	 */
 	async fetchTodayTasks() {
 		loading = true;
 		error = null;
 		try {
-			tasks = await tasksApi.getTodayTasks();
+			const localTasks = await taskCollection.getAll(
+				{ isCompleted: false },
+				{ sortBy: 'order', sortDirection: 'asc' }
+			);
+			const today = startOfDay(new Date());
+			tasks = localTasks
+				.filter((t) => {
+					if (!t.dueDate) return false;
+					const d = new Date(t.dueDate);
+					return isToday(d) || (isPast(startOfDay(d)) && !isToday(d));
+				})
+				.map(toTask);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch today tasks';
-			console.error('Failed to fetch today tasks:', e);
 		} finally {
 			loading = false;
 		}
 	},
 
-	/**
-	 * Fetch upcoming tasks
-	 */
 	async fetchUpcomingTasks() {
 		loading = true;
 		error = null;
 		try {
-			tasks = await tasksApi.getUpcomingTasks();
+			const localTasks = await taskCollection.getAll(
+				{ isCompleted: false },
+				{ sortBy: 'dueDate', sortDirection: 'asc' }
+			);
+			const today = startOfDay(new Date());
+			const weekFromNow = addDays(today, 7);
+			tasks = localTasks
+				.filter((t) => {
+					if (!t.dueDate) return false;
+					const d = new Date(t.dueDate);
+					return isFuture(d) && d <= weekFromNow;
+				})
+				.map(toTask);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch upcoming tasks';
-			console.error('Failed to fetch upcoming tasks:', e);
 		} finally {
 			loading = false;
 		}
 	},
 
-	/**
-	 * Fetch all tasks (incomplete + completed) for unified view
-	 * In demo mode, shows static sample tasks
-	 */
 	async fetchAllTasks() {
 		loading = true;
 		error = null;
-
-		// Demo mode: load static demo tasks
-		if (!authStore.isAuthenticated) {
-			tasks = generateDemoTasks();
-			loading = false;
-			return;
-		}
-
-		// Authenticated: fetch from API
 		try {
-			// Fetch all tasks without filter - let frontend handle filtering
-			const allTasks = await tasksApi.getTasks({});
-			tasks = allTasks;
+			await refreshTasks();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch all tasks';
-			console.error('Failed to fetch all tasks:', e);
 		} finally {
 			loading = false;
 		}
 	},
 
-	/**
-	 * Get tasks for a specific project
-	 */
 	getTasksByProject(projectId: string | null): Task[] {
 		if (projectId === null) {
 			return tasks.filter((t) => !t.projectId);
@@ -155,16 +196,10 @@ export const tasksStore = {
 		return tasks.filter((t) => t.projectId === projectId);
 	},
 
-	/**
-	 * Get tasks with a specific label
-	 */
 	getTasksByLabel(labelId: string): Task[] {
 		return tasks.filter((t) => t.labels?.some((l) => l.id === labelId));
 	},
 
-	/**
-	 * Get overdue tasks
-	 */
 	get overdueTasks(): Task[] {
 		return tasks.filter((t) => {
 			if (!t.dueDate || t.isCompleted) return false;
@@ -173,23 +208,16 @@ export const tasksStore = {
 		});
 	},
 
-	/**
-	 * Get tasks due today
-	 */
 	get todayTasks(): Task[] {
 		const today = startOfDay(new Date());
 		return tasks.filter((t) => {
 			if (t.isCompleted) return false;
-			// Include tasks without dueDate as "today" tasks (inbox behavior)
 			if (!t.dueDate) return true;
 			const taskDate = startOfDay(new Date(t.dueDate));
 			return taskDate.getTime() === today.getTime();
 		});
 	},
 
-	/**
-	 * Get tasks for next 7 days
-	 */
 	get upcomingTasks(): Task[] {
 		const today = startOfDay(new Date());
 		const weekFromNow = addDays(today, 7);
@@ -201,8 +229,7 @@ export const tasksStore = {
 	},
 
 	/**
-	 * Create a new task
-	 * Requires authentication - demo mode shows auth gate
+	 * Create a new task — writes to IndexedDB instantly.
 	 */
 	async createTask(data: {
 		title: string;
@@ -215,15 +242,22 @@ export const tasksStore = {
 		recurrenceRule?: string;
 	}) {
 		error = null;
-
-		// Demo mode: require authentication
-		if (!authStore.isAuthenticated) {
-			return { error: 'auth_required' as const };
-		}
-
-		// Authenticated: create via API
 		try {
-			const newTask = await tasksApi.createTask(data);
+			const newLocal: LocalTask = {
+				id: crypto.randomUUID(),
+				title: data.title,
+				description: data.description,
+				projectId: data.projectId ?? null,
+				priority: data.priority ?? 'medium',
+				isCompleted: false,
+				dueDate: data.dueDate ?? null,
+				order: tasks.length,
+				recurrenceRule: data.recurrenceRule ?? null,
+				subtasks: data.subtasks,
+			};
+
+			const inserted = await taskCollection.insert(newLocal);
+			const newTask = toTask(inserted);
 			tasks = [...tasks, newTask];
 			TodoEvents.taskCreated(!!data.dueDate);
 			return newTask;
@@ -235,8 +269,7 @@ export const tasksStore = {
 	},
 
 	/**
-	 * Update an existing task
-	 * Demo tasks require authentication
+	 * Update a task — writes to IndexedDB instantly.
 	 */
 	async updateTask(
 		id: string,
@@ -260,17 +293,13 @@ export const tasksStore = {
 		}
 	) {
 		error = null;
-
-		// Demo task: require authentication
-		if (isDemoTask(id)) {
-			return { error: 'auth_required' as const };
-		}
-
-		// Cloud task: update via API
 		try {
-			const updatedTask = await tasksApi.updateTask(id, data);
-			tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
-			return updatedTask;
+			const updated = await taskCollection.update(id, data as Partial<LocalTask>);
+			if (updated) {
+				const updatedTask = toTask(updated);
+				tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
+				return updatedTask;
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update task';
 			console.error('Failed to update task:', e);
@@ -279,9 +308,7 @@ export const tasksStore = {
 	},
 
 	/**
-	 * Update task optimistically (for drag and drop)
-	 * Updates local state immediately, then syncs with server
-	 * Demo tasks require authentication
+	 * Optimistic update — for drag-and-drop. Instant local write.
 	 */
 	async updateTaskOptimistic(
 		id: string,
@@ -290,56 +317,24 @@ export const tasksStore = {
 			isCompleted?: boolean;
 		}
 	) {
-		// Demo task: require authentication
-		if (isDemoTask(id)) {
-			return { error: 'auth_required' as const };
-		}
-
-		// Optimistic update - immediately update local state
-		const originalTask = tasks.find((t) => t.id === id);
-		if (!originalTask) return;
-
+		// Immediate local state update
 		tasks = tasks.map((t) => (t.id === id ? { ...t, ...data } : t));
 
-		try {
-			// Handle completion state change first
-			if (data.isCompleted !== undefined && data.isCompleted !== originalTask.isCompleted) {
-				if (data.isCompleted) {
-					const updatedTask = await tasksApi.completeTask(id);
-					tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
-				} else {
-					const updatedTask = await tasksApi.uncompleteTask(id);
-					tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
-				}
-			}
-
-			// Handle due date change
-			if (data.dueDate !== undefined) {
-				const updatedTask = await tasksApi.updateTask(id, { dueDate: data.dueDate });
-				tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
-			}
-		} catch (e) {
-			// Rollback on error
-			console.error('Failed to update task:', e);
-			tasks = tasks.map((t) => (t.id === id ? originalTask : t));
+		// Persist to IndexedDB
+		const updateData: Partial<LocalTask> = {};
+		if (data.dueDate !== undefined) updateData.dueDate = data.dueDate;
+		if (data.isCompleted !== undefined) {
+			updateData.isCompleted = data.isCompleted;
+			updateData.completedAt = data.isCompleted ? new Date().toISOString() : null;
 		}
+
+		await taskCollection.update(id, updateData);
 	},
 
-	/**
-	 * Delete a task
-	 * Demo tasks require authentication
-	 */
 	async deleteTask(id: string) {
 		error = null;
-
-		// Demo task: require authentication
-		if (isDemoTask(id)) {
-			return { error: 'auth_required' as const };
-		}
-
-		// Cloud task: delete via API
 		try {
-			await tasksApi.deleteTask(id);
+			await taskCollection.delete(id);
 			tasks = tasks.filter((t) => t.id !== id);
 			TodoEvents.taskDeleted();
 		} catch (e) {
@@ -349,24 +344,19 @@ export const tasksStore = {
 		}
 	},
 
-	/**
-	 * Mark task as complete
-	 * Demo tasks require authentication
-	 */
 	async completeTask(id: string) {
 		error = null;
-
-		// Demo task: require authentication
-		if (isDemoTask(id)) {
-			return { error: 'auth_required' as const };
-		}
-
-		// Cloud task: complete via API
 		try {
-			const completedTask = await tasksApi.completeTask(id);
-			tasks = tasks.map((t) => (t.id === id ? completedTask : t));
-			TodoEvents.taskCompleted();
-			return completedTask;
+			const updated = await taskCollection.update(id, {
+				isCompleted: true,
+				completedAt: new Date().toISOString(),
+			} as Partial<LocalTask>);
+			if (updated) {
+				const completedTask = toTask(updated);
+				tasks = tasks.map((t) => (t.id === id ? completedTask : t));
+				TodoEvents.taskCompleted();
+				return completedTask;
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to complete task';
 			console.error('Failed to complete task:', e);
@@ -374,24 +364,19 @@ export const tasksStore = {
 		}
 	},
 
-	/**
-	 * Mark task as incomplete
-	 * Demo tasks require authentication
-	 */
 	async uncompleteTask(id: string) {
 		error = null;
-
-		// Demo task: require authentication
-		if (isDemoTask(id)) {
-			return { error: 'auth_required' as const };
-		}
-
-		// Cloud task: uncomplete via API
 		try {
-			const uncompletedTask = await tasksApi.uncompleteTask(id);
-			tasks = tasks.map((t) => (t.id === id ? uncompletedTask : t));
-			TodoEvents.taskUncompleted();
-			return uncompletedTask;
+			const updated = await taskCollection.update(id, {
+				isCompleted: false,
+				completedAt: null,
+			} as Partial<LocalTask>);
+			if (updated) {
+				const uncompletedTask = toTask(updated);
+				tasks = tasks.map((t) => (t.id === id ? uncompletedTask : t));
+				TodoEvents.taskUncompleted();
+				return uncompletedTask;
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to uncomplete task';
 			console.error('Failed to uncomplete task:', e);
@@ -399,15 +384,15 @@ export const tasksStore = {
 		}
 	},
 
-	/**
-	 * Move task to a different project
-	 */
 	async moveTask(id: string, projectId: string | null) {
 		error = null;
 		try {
-			const movedTask = await tasksApi.moveTask(id, projectId);
-			tasks = tasks.map((t) => (t.id === id ? movedTask : t));
-			return movedTask;
+			const updated = await taskCollection.update(id, { projectId } as Partial<LocalTask>);
+			if (updated) {
+				const movedTask = toTask(updated);
+				tasks = tasks.map((t) => (t.id === id ? movedTask : t));
+				return movedTask;
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to move task';
 			console.error('Failed to move task:', e);
@@ -415,15 +400,19 @@ export const tasksStore = {
 		}
 	},
 
-	/**
-	 * Update task labels
-	 */
 	async updateLabels(id: string, labelIds: string[]) {
+		// Labels are stored via the central tag system, not locally.
+		// For now, update the task metadata to track label associations.
 		error = null;
 		try {
-			const updatedTask = await tasksApi.updateTaskLabels(id, labelIds);
-			tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
-			return updatedTask;
+			const updated = await taskCollection.update(id, {
+				metadata: { labelIds },
+			} as Partial<LocalTask>);
+			if (updated) {
+				const updatedTask = toTask(updated);
+				tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
+				return updatedTask;
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update labels';
 			console.error('Failed to update labels:', e);
@@ -431,15 +420,15 @@ export const tasksStore = {
 		}
 	},
 
-	/**
-	 * Update subtasks
-	 */
 	async updateSubtasks(id: string, subtasks: Subtask[]) {
 		error = null;
 		try {
-			const updatedTask = await tasksApi.updateSubtasks(id, subtasks);
-			tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
-			return updatedTask;
+			const updated = await taskCollection.update(id, { subtasks } as Partial<LocalTask>);
+			if (updated) {
+				const updatedTask = toTask(updated);
+				tasks = tasks.map((t) => (t.id === id ? updatedTask : t));
+				return updatedTask;
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update subtasks';
 			console.error('Failed to update subtasks:', e);
@@ -447,30 +436,25 @@ export const tasksStore = {
 		}
 	},
 
-	/**
-	 * Reorder tasks
-	 */
 	async reorderTasks(taskIds: string[]) {
 		error = null;
-		const previousTasks = [...tasks];
 		try {
-			// Optimistic update - set new order values
+			// Update order in local state immediately
 			tasks = tasks.map((t) => {
 				const newOrder = taskIds.indexOf(t.id);
 				return newOrder !== -1 ? { ...t, order: newOrder } : t;
 			});
-			await tasksApi.reorderTasks(taskIds);
+
+			// Persist each order change to IndexedDB
+			for (let i = 0; i < taskIds.length; i++) {
+				await taskCollection.update(taskIds[i], { order: i } as Partial<LocalTask>);
+			}
 		} catch (e) {
-			// Rollback on error
-			tasks = previousTasks;
 			error = e instanceof Error ? e.message : 'Failed to reorder tasks';
 			console.error('Failed to reorder tasks:', e);
 		}
 	},
 
-	/**
-	 * Clear all state (for logout)
-	 */
 	clear() {
 		tasks = [];
 		loading = false;
@@ -478,9 +462,9 @@ export const tasksStore = {
 	},
 
 	/**
-	 * Check if a task is a demo task (static sample data)
+	 * No longer relevant — all tasks are local and editable.
 	 */
-	isDemoTask(taskId: string) {
-		return isDemoTask(taskId);
+	isDemoTask(_taskId: string) {
+		return false;
 	},
 };

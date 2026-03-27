@@ -125,30 +125,24 @@
 		const task = tasksStore.tasks.find((t) => t.id === taskId);
 		if (!task) return;
 
-		let result;
 		if (targetDate === 'completed') {
 			// Mark task as completed (optimistic)
 			if (!task.isCompleted) {
-				result = await tasksStore.updateTaskOptimistic(taskId, { isCompleted: true });
+				await tasksStore.updateTaskOptimistic(taskId, { isCompleted: true });
 			}
 		} else if (targetDate === 'overdue') {
 			// Set to yesterday (optimistic)
 			const yesterday = subDays(startOfDay(new Date()), 1);
-			result = await tasksStore.updateTaskOptimistic(taskId, {
+			await tasksStore.updateTaskOptimistic(taskId, {
 				dueDate: yesterday.toISOString(),
 				isCompleted: task.isCompleted ? false : undefined,
 			});
 		} else {
 			// Set to specific date (optimistic)
-			result = await tasksStore.updateTaskOptimistic(taskId, {
+			await tasksStore.updateTaskOptimistic(taskId, {
 				dueDate: targetDate.toISOString(),
 				isCompleted: task.isCompleted ? false : undefined,
 			});
-		}
-
-		// Show auth gate if authentication required (demo mode)
-		if (result && 'error' in result && result.error === 'auth_required') {
-			window.dispatchEvent(new CustomEvent('show-auth-gate'));
 		}
 	}
 </script>

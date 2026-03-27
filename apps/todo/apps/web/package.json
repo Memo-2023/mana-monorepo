@@ -39,6 +39,7 @@
 		"vitest": "^4.1.0"
 	},
 	"dependencies": {
+		"@manacore/local-store": "workspace:*",
 		"@manacore/shared-api-client": "workspace:*",
 		"@manacore/shared-app-onboarding": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",

@@ -1,33 +1,36 @@
 /**
- * Projects Store - Manages project state using Svelte 5 runes
- * Supports both authenticated (cloud) and guest (session) modes
+ * Projects Store — Local-First with Dexie.js
+ *
+ * All reads and writes go to IndexedDB first.
+ * Same public API as before so components don't need changes.
  */
 
 import type { Project } from '@todo/shared';
-import * as projectsApi from '$lib/api/projects';
-import { authStore } from './auth.svelte';
+import { projectCollection, type LocalProject } from '$lib/data/local-store';
 import { TodoEvents } from '@manacore/shared-utils/analytics';
-
-// Guest inbox project for unauthenticated users
-const GUEST_INBOX: Project = {
-	id: 'session-inbox',
-	userId: 'guest',
-	name: 'Inbox',
-	color: '#6b7280',
-	order: 0,
-	isArchived: false,
-	isDefault: true,
-	createdAt: new Date().toISOString(),
-	updatedAt: new Date().toISOString(),
-};
 
 // State
 let projects = $state<Project[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
 
+/** Convert a LocalProject (IndexedDB) to the shared Project type. */
+function toProject(local: LocalProject): Project {
+	return {
+		id: local.id,
+		userId: local.userId ?? 'guest',
+		name: local.name,
+		color: local.color,
+		icon: local.icon,
+		order: local.order,
+		isArchived: local.isArchived,
+		isDefault: local.isDefault,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
 export const projectsStore = {
-	// Getters
 	get projects() {
 		return projects;
 	},
@@ -38,45 +41,30 @@ export const projectsStore = {
 		return error;
 	},
 
-	/**
-	 * Get inbox project (default project)
-	 */
 	get inboxProject() {
 		return projects.find((p) => p.isDefault);
 	},
 
-	/**
-	 * Get non-archived projects sorted by order
-	 */
 	get activeProjects() {
 		return projects.filter((p) => !p.isArchived).sort((a, b) => a.order - b.order);
 	},
 
-	/**
-	 * Get archived projects
-	 */
 	get archivedProjects() {
 		return projects.filter((p) => p.isArchived);
 	},
 
 	/**
-	 * Fetch all projects from API
-	 * In guest mode, returns a default inbox project
+	 * Load projects from IndexedDB.
 	 */
 	async fetchProjects() {
 		loading = true;
 		error = null;
-
-		// Guest mode: return local inbox only
-		if (!authStore.isAuthenticated) {
-			projects = [GUEST_INBOX];
-			loading = false;
-			return;
-		}
-
-		// Authenticated: fetch from API
 		try {
-			projects = await projectsApi.getProjects();
+			const localProjects = await projectCollection.getAll(undefined, {
+				sortBy: 'order',
+				sortDirection: 'asc',
+			});
+			projects = localProjects.map(toProject);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to fetch projects';
 			console.error('Failed to fetch projects:', e);
@@ -85,29 +73,31 @@ export const projectsStore = {
 		}
 	},
 
-	/**
-	 * Get project by ID
-	 */
 	getById(id: string): Project | undefined {
 		return projects.find((p) => p.id === id);
 	},
 
-	/**
-	 * Get project color by ID
-	 */
 	getColor(projectId: string): string {
 		const project = projects.find((p) => p.id === projectId);
 		return project?.color || '#6b7280';
 	},
 
-	/**
-	 * Create a new project
-	 */
 	async createProject(data: { name: string; description?: string; color?: string; icon?: string }) {
 		loading = true;
 		error = null;
 		try {
-			const newProject = await projectsApi.createProject(data);
+			const newLocal: LocalProject = {
+				id: crypto.randomUUID(),
+				name: data.name,
+				color: data.color ?? '#6b7280',
+				icon: data.icon ?? null,
+				order: projects.length,
+				isArchived: false,
+				isDefault: false,
+			};
+
+			const inserted = await projectCollection.insert(newLocal);
+			const newProject = toProject(inserted);
 			projects = [...projects, newProject];
 			TodoEvents.projectCreated();
 			return newProject;
@@ -120,18 +110,18 @@ export const projectsStore = {
 		}
 	},
 
-	/**
-	 * Update an existing project
-	 */
 	async updateProject(
 		id: string,
 		data: { name?: string; description?: string; color?: string; icon?: string }
 	) {
 		error = null;
 		try {
-			const updatedProject = await projectsApi.updateProject(id, data);
-			projects = projects.map((p) => (p.id === id ? updatedProject : p));
-			return updatedProject;
+			const updated = await projectCollection.update(id, data as Partial<LocalProject>);
+			if (updated) {
+				const updatedProject = toProject(updated);
+				projects = projects.map((p) => (p.id === id ? updatedProject : p));
+				return updatedProject;
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update project';
 			console.error('Failed to update project:', e);
@@ -139,13 +129,10 @@ export const projectsStore = {
 		}
 	},
 
-	/**
-	 * Delete a project
-	 */
 	async deleteProject(id: string) {
 		error = null;
 		try {
-			await projectsApi.deleteProject(id);
+			await projectCollection.delete(id);
 			projects = projects.filter((p) => p.id !== id);
 			TodoEvents.projectDeleted();
 		} catch (e) {
@@ -155,15 +142,17 @@ export const projectsStore = {
 		}
 	},
 
-	/**
-	 * Archive a project
-	 */
 	async archiveProject(id: string) {
 		error = null;
 		try {
-			const archivedProject = await projectsApi.archiveProject(id);
-			projects = projects.map((p) => (p.id === id ? archivedProject : p));
-			return archivedProject;
+			const updated = await projectCollection.update(id, {
+				isArchived: true,
+			} as Partial<LocalProject>);
+			if (updated) {
+				const archivedProject = toProject(updated);
+				projects = projects.map((p) => (p.id === id ? archivedProject : p));
+				return archivedProject;
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to archive project';
 			console.error('Failed to archive project:', e);
@@ -171,18 +160,17 @@ export const projectsStore = {
 		}
 	},
 
-	/**
-	 * Reorder projects
-	 */
 	async reorderProjects(projectIds: string[]) {
 		error = null;
 		try {
-			await projectsApi.reorderProjects(projectIds);
-			// Update local order
 			projects = projects.map((p) => {
 				const newOrder = projectIds.indexOf(p.id);
 				return newOrder !== -1 ? { ...p, order: newOrder } : p;
 			});
+
+			for (let i = 0; i < projectIds.length; i++) {
+				await projectCollection.update(projectIds[i], { order: i } as Partial<LocalProject>);
+			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to reorder projects';
 			console.error('Failed to reorder projects:', e);
@@ -190,26 +178,17 @@ export const projectsStore = {
 		}
 	},
 
-	/**
-	 * Clear all state (for logout)
-	 */
 	clear() {
 		projects = [];
 		loading = false;
 		error = null;
 	},
 
-	/**
-	 * Check if a project ID is the guest inbox
-	 */
-	isGuestInbox(id: string) {
-		return id === GUEST_INBOX.id;
+	isGuestInbox(_id: string) {
+		return false;
 	},
 
-	/**
-	 * Get the guest inbox ID
-	 */
 	get guestInboxId() {
-		return GUEST_INBOX.id;
+		return 'personal-project';
 	},
 };
