@@ -1,18 +1,42 @@
 /**
- * Timers Store - Manages timer state using Svelte 5 runes
- * Supports both authenticated (cloud) and guest (session) modes
+ * Timers Store — Local-First with Dexie.js
+ *
+ * All reads and writes go to IndexedDB first.
+ * When authenticated, changes sync to the server in the background.
+ * Same public API as before so components don't need changes.
  */
 
-import { api } from '$lib/api/client';
-import { sessionTimersStore } from './session-timers.svelte';
-import { authStore } from './auth.svelte';
+import { timerCollection, type LocalTimer } from '$lib/data/local-store';
 import type { Timer, CreateTimerInput, UpdateTimerInput } from '@clock/shared';
 import { ClockEvents } from '@manacore/shared-utils/analytics';
 
-// State
+// State — populated from IndexedDB
 let timers = $state<Timer[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
+
+/** Convert a LocalTimer (IndexedDB record) to the shared Timer type. */
+function toTimer(local: LocalTimer): Timer {
+	return {
+		id: local.id,
+		userId: 'local',
+		label: local.label,
+		durationSeconds: local.durationSeconds,
+		remainingSeconds: local.remainingSeconds,
+		status: local.status,
+		startedAt: local.startedAt,
+		pausedAt: local.pausedAt,
+		sound: local.sound,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+/** Load timers from IndexedDB into the reactive state. */
+async function refreshTimers() {
+	const localTimers = await timerCollection.getAll();
+	timers = localTimers.map(toTimer);
+}
 
 export const timersStore = {
 	// Getters
@@ -30,204 +54,201 @@ export const timersStore = {
 	},
 
 	/**
-	 * Fetch all timers from the backend
-	 * In guest mode, loads from session storage
+	 * Fetch all timers — reads from IndexedDB.
 	 */
 	async fetchTimers() {
 		loading = true;
 		error = null;
-
-		// Guest mode: load from session storage
-		if (!authStore.isAuthenticated) {
-			timers = sessionTimersStore.timers;
+		try {
+			await refreshTimers();
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to fetch timers';
+			console.error('Failed to fetch timers:', e);
+		} finally {
 			loading = false;
-			return { success: true };
 		}
-
-		// Authenticated: fetch from API
-		const response = await api.get<Timer[]>('/timers');
-
-		if (response.error) {
-			error = response.error.message;
-			loading = false;
-			return { success: false, error: response.error.message };
-		}
-
-		timers = response.data || [];
-		loading = false;
 		return { success: true };
 	},
 
 	/**
-	 * Create a new timer
-	 * In guest mode, creates in session storage
+	 * Create a new timer — writes to IndexedDB instantly.
 	 */
 	async createTimer(input: CreateTimerInput) {
-		// Guest mode: create in session storage
-		if (!authStore.isAuthenticated) {
-			const timer = sessionTimersStore.createTimer(input);
-			timers = [...timers, timer];
-			return { success: true, data: timer };
-		}
+		error = null;
+		try {
+			const newLocal: LocalTimer = {
+				id: crypto.randomUUID(),
+				label: input.label ?? null,
+				durationSeconds: input.durationSeconds,
+				remainingSeconds: null,
+				status: 'idle',
+				startedAt: null,
+				pausedAt: null,
+				sound: input.sound ?? null,
+			};
 
-		// Authenticated: create via API
-		const response = await api.post<Timer>('/timers', input);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
+			const inserted = await timerCollection.insert(newLocal);
+			const newTimer = toTimer(inserted);
+			timers = [...timers, newTimer];
+			return { success: true, data: newTimer };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to create timer';
+			console.error('Failed to create timer:', e);
+			return { success: false, error: error };
 		}
-
-		if (response.data) {
-			timers = [...timers, response.data];
-		}
-		return { success: true, data: response.data };
 	},
 
 	/**
-	 * Update a timer
-	 * In guest mode, updates in session storage
+	 * Update a timer — writes to IndexedDB instantly.
 	 */
 	async updateTimer(id: string, input: UpdateTimerInput) {
-		// Guest mode: update in session storage
-		if (!authStore.isAuthenticated || sessionTimersStore.isSessionTimer(id)) {
-			const timer = sessionTimersStore.updateTimer(id, input);
-			if (timer) {
-				timers = timers.map((t) => (t.id === id ? timer : t));
-				return { success: true, data: timer };
+		error = null;
+		try {
+			const updateData: Partial<LocalTimer> = {};
+			if (input.label !== undefined) updateData.label = input.label ?? null;
+			if (input.durationSeconds !== undefined) updateData.durationSeconds = input.durationSeconds;
+			if (input.sound !== undefined) updateData.sound = input.sound ?? null;
+
+			const updated = await timerCollection.update(id, updateData);
+			if (updated) {
+				const updatedTimer = toTimer(updated);
+				timers = timers.map((t) => (t.id === id ? updatedTimer : t));
+				return { success: true, data: updatedTimer };
 			}
 			return { success: false, error: 'Timer not found' };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to update timer';
+			console.error('Failed to update timer:', e);
+			return { success: false, error: error };
 		}
-
-		// Authenticated: update via API
-		const response = await api.patch<Timer>(`/timers/${id}`, input);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
-		}
-
-		if (response.data) {
-			timers = timers.map((t) => (t.id === id ? response.data! : t));
-		}
-		return { success: true, data: response.data };
 	},
 
 	/**
-	 * Start a timer
-	 * In guest mode, starts in session storage
+	 * Start a timer — sets status to running with current timestamp.
 	 */
 	async startTimer(id: string) {
-		// Guest mode: start in session storage
-		if (!authStore.isAuthenticated || sessionTimersStore.isSessionTimer(id)) {
-			const timer = sessionTimersStore.startTimer(id);
-			if (timer) {
-				timers = timers.map((t) => (t.id === id ? timer : t));
-				return { success: true, data: timer };
+		error = null;
+		try {
+			const existing = await timerCollection.get(id);
+			if (!existing) return { success: false, error: 'Timer not found' };
+
+			const updateData: Partial<LocalTimer> = {
+				status: 'running',
+				startedAt: new Date().toISOString(),
+				pausedAt: null,
+			};
+
+			// If resuming from pause, keep remaining seconds
+			if (existing.status !== 'paused') {
+				updateData.remainingSeconds = existing.durationSeconds;
+			}
+
+			const updated = await timerCollection.update(id, updateData);
+			if (updated) {
+				const updatedTimer = toTimer(updated);
+				timers = timers.map((t) => (t.id === id ? updatedTimer : t));
+				ClockEvents.timerStarted(
+					(updatedTimer as Timer & { type?: string }).type as 'pomodoro' | 'stopwatch' | 'countdown'
+				);
+				return { success: true, data: updatedTimer };
 			}
 			return { success: false, error: 'Timer not found' };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to start timer';
+			console.error('Failed to start timer:', e);
+			return { success: false, error: error };
 		}
-
-		// Authenticated: start via API
-		const response = await api.post<Timer>(`/timers/${id}/start`);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
-		}
-
-		if (response.data) {
-			timers = timers.map((t) => (t.id === id ? response.data! : t));
-			ClockEvents.timerStarted(response.data.type as 'pomodoro' | 'stopwatch' | 'countdown');
-		}
-		return { success: true, data: response.data };
 	},
 
 	/**
-	 * Pause a timer
-	 * In guest mode, pauses in session storage
+	 * Pause a timer — calculates remaining seconds and saves.
 	 */
 	async pauseTimer(id: string) {
-		// Guest mode: pause in session storage
-		if (!authStore.isAuthenticated || sessionTimersStore.isSessionTimer(id)) {
-			const timer = sessionTimersStore.pauseTimer(id);
-			if (timer) {
-				timers = timers.map((t) => (t.id === id ? timer : t));
-				return { success: true, data: timer };
+		error = null;
+		try {
+			const existing = await timerCollection.get(id);
+			if (!existing) return { success: false, error: 'Timer not found' };
+
+			// Calculate remaining seconds
+			let remaining = existing.remainingSeconds ?? existing.durationSeconds;
+			if (existing.startedAt) {
+				const elapsed = (Date.now() - new Date(existing.startedAt).getTime()) / 1000;
+				remaining = Math.max(0, remaining - elapsed);
+			}
+
+			const updateData: Partial<LocalTimer> = {
+				status: 'paused',
+				pausedAt: new Date().toISOString(),
+				remainingSeconds: Math.round(remaining),
+				startedAt: null,
+			};
+
+			const updated = await timerCollection.update(id, updateData);
+			if (updated) {
+				const updatedTimer = toTimer(updated);
+				timers = timers.map((t) => (t.id === id ? updatedTimer : t));
+				return { success: true, data: updatedTimer };
 			}
 			return { success: false, error: 'Timer not found' };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to pause timer';
+			console.error('Failed to pause timer:', e);
+			return { success: false, error: error };
 		}
-
-		// Authenticated: pause via API
-		const response = await api.post<Timer>(`/timers/${id}/pause`);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
-		}
-
-		if (response.data) {
-			timers = timers.map((t) => (t.id === id ? response.data! : t));
-		}
-		return { success: true, data: response.data };
 	},
 
 	/**
-	 * Reset a timer
-	 * In guest mode, resets in session storage
+	 * Reset a timer — back to idle with full duration.
 	 */
 	async resetTimer(id: string) {
-		// Guest mode: reset in session storage
-		if (!authStore.isAuthenticated || sessionTimersStore.isSessionTimer(id)) {
-			const timer = sessionTimersStore.resetTimer(id);
-			if (timer) {
-				timers = timers.map((t) => (t.id === id ? timer : t));
-				return { success: true, data: timer };
+		error = null;
+		try {
+			const updateData: Partial<LocalTimer> = {
+				status: 'idle',
+				remainingSeconds: null,
+				startedAt: null,
+				pausedAt: null,
+			};
+
+			const updated = await timerCollection.update(id, updateData);
+			if (updated) {
+				const updatedTimer = toTimer(updated);
+				timers = timers.map((t) => (t.id === id ? updatedTimer : t));
+				return { success: true, data: updatedTimer };
 			}
 			return { success: false, error: 'Timer not found' };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to reset timer';
+			console.error('Failed to reset timer:', e);
+			return { success: false, error: error };
 		}
-
-		// Authenticated: reset via API
-		const response = await api.post<Timer>(`/timers/${id}/reset`);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
-		}
-
-		if (response.data) {
-			timers = timers.map((t) => (t.id === id ? response.data! : t));
-		}
-		return { success: true, data: response.data };
 	},
 
 	/**
-	 * Delete a timer
-	 * In guest mode, deletes from session storage
+	 * Delete a timer — removes from IndexedDB instantly.
 	 */
 	async deleteTimer(id: string) {
-		// Guest mode: delete from session storage
-		if (!authStore.isAuthenticated || sessionTimersStore.isSessionTimer(id)) {
-			sessionTimersStore.deleteTimer(id);
+		error = null;
+		try {
+			await timerCollection.delete(id);
 			timers = timers.filter((t) => t.id !== id);
 			return { success: true };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to delete timer';
+			console.error('Failed to delete timer:', e);
+			return { success: false, error: error };
 		}
-
-		// Authenticated: delete via API
-		const response = await api.delete(`/timers/${id}`);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
-		}
-
-		timers = timers.filter((t) => t.id !== id);
-		return { success: true };
 	},
 
 	/**
-	 * Update local timer state (for countdown display)
+	 * Update local timer state (for countdown display).
 	 */
 	updateLocalState(id: string, updates: Partial<Timer>) {
 		timers = timers.map((t) => (t.id === id ? { ...t, ...updates } : t));
 	},
 
 	/**
-	 * Clear all timers (local state only)
+	 * Clear all timers (local state only).
 	 */
 	clear() {
 		timers = [];
@@ -235,52 +256,21 @@ export const timersStore = {
 	},
 
 	/**
-	 * Get session timer count (for guest mode banner)
+	 * No longer relevant — all timers are local and editable.
 	 */
 	get sessionTimerCount(): number {
-		return sessionTimersStore.count;
+		return 0;
 	},
 
-	/**
-	 * Check if there are session timers
-	 */
 	get hasSessionTimers(): boolean {
-		return sessionTimersStore.count > 0;
+		return false;
 	},
 
-	/**
-	 * Migrate session timers to cloud after login
-	 */
 	async migrateSessionTimers(): Promise<void> {
-		if (!authStore.isAuthenticated) return;
-
-		const sessionTimers = sessionTimersStore.getAllTimers();
-		if (sessionTimers.length === 0) return;
-
-		// Create each timer via API
-		for (const timer of sessionTimers) {
-			try {
-				await api.post<Timer>('/timers', {
-					label: timer.label,
-					durationSeconds: timer.durationSeconds,
-					sound: timer.sound,
-				});
-			} catch (e) {
-				console.error('Failed to migrate timer:', e);
-			}
-		}
-
-		// Clear session data after migration
-		sessionTimersStore.clear();
-
-		// Reload timers from server
-		await this.fetchTimers();
+		// No-op: local-first mode handles data persistence automatically.
 	},
 
-	/**
-	 * Check if a timer ID is a session timer
-	 */
-	isSessionTimer(id: string): boolean {
-		return sessionTimersStore.isSessionTimer(id);
+	isSessionTimer(_id: string): boolean {
+		return false;
 	},
 };

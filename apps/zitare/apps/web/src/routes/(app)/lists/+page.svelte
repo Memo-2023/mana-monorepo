@@ -4,18 +4,9 @@
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
+	import { listsStore } from '$lib/stores/lists.svelte';
 	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 
-	interface QuoteList {
-		id: string;
-		name: string;
-		description?: string;
-		quoteIds: string[];
-		createdAt: string;
-		updatedAt: string;
-	}
-
-	let lists = $state<QuoteList[]>([]);
 	let loading = $state(true);
 	let saving = $state(false);
 	let deletingId = $state<string | null>(null);
@@ -23,69 +14,16 @@
 	let newListName = $state('');
 	let newListDescription = $state('');
 
-	// Get backend URL
-	function getBackendUrl(): string {
-		if (typeof window !== 'undefined') {
-			const injectedUrl = (window as unknown as { __PUBLIC_BACKEND_URL__?: string })
-				.__PUBLIC_BACKEND_URL__;
-			return injectedUrl || 'http://localhost:3007';
-		}
-		return 'http://localhost:3007';
-	}
-
-	async function fetchLists() {
-		if (!authStore.isAuthenticated) {
-			loading = false;
-			return;
-		}
-
-		const token = await authStore.getValidToken();
-		if (!token) {
-			loading = false;
-			return;
-		}
-
-		try {
-			const response = await fetch(`${getBackendUrl()}/api/lists`, {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			if (response.ok) {
-				const data = await response.json();
-				lists = data.lists || [];
-			} else {
-				toast.error($_('common.error'));
-			}
-		} catch (error) {
-			console.error('Failed to fetch lists:', error);
-			toast.error($_('common.error'));
-		} finally {
-			loading = false;
-		}
-	}
-
 	async function createList() {
 		if (!newListName.trim() || saving) return;
 
-		const token = await authStore.getValidToken();
-		if (!token) return;
-
 		saving = true;
 		try {
-			const response = await fetch(`${getBackendUrl()}/api/lists`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({
-					name: newListName.trim(),
-					description: newListDescription.trim() || undefined,
-				}),
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				lists = [...lists, data.list];
+			const created = await listsStore.createList(
+				newListName.trim(),
+				newListDescription.trim() || undefined
+			);
+			if (created) {
 				ZitareEvents.listCreated();
 				showCreateModal = false;
 				newListName = '';
@@ -104,18 +42,10 @@
 	async function deleteList(listId: string) {
 		if (deletingId || !confirm($_('lists.confirmDelete'))) return;
 
-		const token = await authStore.getValidToken();
-		if (!token) return;
-
 		deletingId = listId;
 		try {
-			const response = await fetch(`${getBackendUrl()}/api/lists/${listId}`, {
-				method: 'DELETE',
-				headers: { Authorization: `Bearer ${token}` },
-			});
-
-			if (response.ok) {
-				lists = lists.filter((l) => l.id !== listId);
+			const success = await listsStore.deleteList(listId);
+			if (success) {
 				ZitareEvents.listDeleted();
 			} else {
 				toast.error($_('lists.detail.toast.deleteError'));
@@ -128,8 +58,9 @@
 		}
 	}
 
-	onMount(() => {
-		fetchLists();
+	onMount(async () => {
+		await listsStore.loadLists();
+		loading = false;
 	});
 </script>
 
@@ -187,7 +118,7 @@
 				class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"
 			></div>
 		</div>
-	{:else if lists.length === 0}
+	{:else if listsStore.lists.length === 0}
 		<div class="text-center py-12 bg-surface-elevated rounded-2xl">
 			<svg
 				class="w-16 h-16 mx-auto text-foreground-muted mb-4"
@@ -207,7 +138,7 @@
 		</div>
 	{:else}
 		<div class="grid gap-4">
-			{#each lists as list (list.id)}
+			{#each listsStore.lists as list (list.id)}
 				<a
 					href="/lists/{list.id}"
 					class="block p-6 bg-surface-elevated rounded-2xl hover:shadow-lg transition-all group"

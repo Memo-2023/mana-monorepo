@@ -77,12 +77,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Clock Backend
-  - job_name: 'clock-backend'
-    static_configs:
-      - targets: ['clock-backend:3033']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+  # Clock Backend: REMOVED — migrated to local-first
 
   # Contacts Backend
   - job_name: 'contacts-backend'
@@ -126,12 +121,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Zitare Backend
-  - job_name: 'zitare-backend'
-    static_configs:
-      - targets: ['zitare-backend:3007']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+  # Zitare Backend: REMOVED — migrated to local-first
 
   # Mukke Backend
   - job_name: 'mukke-backend'

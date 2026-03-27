@@ -32,7 +32,6 @@ on:
           - todo-web
           - calendar-backend
           - calendar-web
-          - clock-backend
           - clock-web
           - contacts-backend
           - contacts-web
@@ -72,7 +71,6 @@ jobs:
       todo-web: ${{ steps.changes.outputs.todo-web }}
       calendar-backend: ${{ steps.changes.outputs.calendar-backend }}
       calendar-web: ${{ steps.changes.outputs.calendar-web }}
-      clock-backend: ${{ steps.changes.outputs.clock-backend }}
       clock-web: ${{ steps.changes.outputs.clock-web }}
       contacts-backend: ${{ steps.changes.outputs.contacts-backend }}
       contacts-web: ${{ steps.changes.outputs.contacts-web }}
@@ -129,7 +127,7 @@ jobs:
           check_changes "todo-web"          "apps/todo/apps/web/" "apps/todo/packages/"
           check_changes "calendar-backend"  "apps/calendar/apps/backend/" "apps/calendar/packages/"
           check_changes "calendar-web"      "apps/calendar/apps/web/" "apps/calendar/packages/"
-          check_changes "clock-backend"     "apps/clock/apps/backend/" "apps/clock/packages/"
+          # clock-backend: REMOVED — migrated to local-first
           check_changes "clock-web"         "apps/clock/apps/web/" "apps/clock/packages/"
           check_changes "contacts-backend"  "apps/contacts/apps/backend/" "apps/contacts/packages/"
           check_changes "contacts-web"      "apps/contacts/apps/web/" "apps/contacts/packages/"
@@ -142,7 +140,7 @@ jobs:
 
           # Check if anything needs deploying
           ANY="false"
-          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web mana-matrix-bot mana-landing-builder; do
+          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web mana-matrix-bot mana-landing-builder; do
             val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
             if [ "$val" == "true" ]; then
               ANY="true"
@@ -211,7 +209,7 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.todo-web }}" == "true" ]; then SERVICES="$SERVICES todo-web"; fi
             if [ "${{ needs.detect-changes.outputs.calendar-backend }}" == "true" ]; then SERVICES="$SERVICES calendar-backend"; fi
             if [ "${{ needs.detect-changes.outputs.calendar-web }}" == "true" ]; then SERVICES="$SERVICES calendar-web"; fi
-            if [ "${{ needs.detect-changes.outputs.clock-backend }}" == "true" ]; then SERVICES="$SERVICES clock-backend"; fi
+            # clock-backend: REMOVED
             if [ "${{ needs.detect-changes.outputs.clock-web }}" == "true" ]; then SERVICES="$SERVICES clock-web"; fi
             if [ "${{ needs.detect-changes.outputs.contacts-backend }}" == "true" ]; then SERVICES="$SERVICES contacts-backend"; fi
             if [ "${{ needs.detect-changes.outputs.contacts-web }}" == "true" ]; then SERVICES="$SERVICES contacts-web"; fi
@@ -331,7 +329,7 @@ jobs:
               todo-web)          echo "http://localhost:5011/health" ;;
               calendar-backend)  echo "http://localhost:3032/health" ;;
               calendar-web)      echo "http://localhost:5012/health" ;;
-              clock-backend)     echo "http://localhost:3033/health" ;;
+              # clock-backend: REMOVED
               clock-web)         echo "http://localhost:5013/health" ;;
               contacts-backend)  echo "http://localhost:3034/health" ;;
               contacts-web)      echo "http://localhost:5014/health" ;;
@@ -348,7 +346,7 @@ jobs:
           SERVICES="${{ steps.services.outputs.services }}"
 
           if [ "$DEPLOY_ALL" == "true" ]; then
-            SERVICES="mana-auth matrix-web chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web"
+            SERVICES="mana-auth matrix-web chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web"
           fi
 
           HEALTH_RESULTS=""

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
@@ -25,14 +26,21 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import { alarmsApi } from '$lib/api/alarms';
-	import { timersApi } from '$lib/api/timers';
+	import { alarmCollection, timerCollection } from '$lib/data/local-store';
 	import { clockOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { clockStore } from '$lib/data/local-store';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
+
+	// Shared tag store (local-first)
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	// Guest welcome modal state
 	let showGuestWelcome = $state(false);
@@ -81,8 +89,8 @@
 		const results: CommandBarItem[] = [];
 
 		try {
-			// Search alarms
-			const alarms = await alarmsApi.getAll();
+			// Search alarms (local-first — reads from IndexedDB)
+			const alarms = await alarmCollection.getAll();
 			const matchingAlarms = alarms
 				.filter((alarm) => alarm.label?.toLowerCase().includes(queryLower))
 				.slice(0, 5)
@@ -93,8 +101,8 @@
 				}));
 			results.push(...matchingAlarms);
 
-			// Search timers
-			const timers = await timersApi.getAll();
+			// Search timers (local-first — reads from IndexedDB)
+			const timers = await timerCollection.getAll();
 			const matchingTimers = timers
 				.filter((timer) => timer.label?.toLowerCase().includes(queryLower))
 				.slice(0, 5)
@@ -256,12 +264,14 @@
 	}
 
 	async function handleAuthReady() {
-		// Initialize local-first database (opens IndexedDB, seeds guest data)
-		await clockStore.initialize();
+		// Initialize local-first databases (opens IndexedDB, seeds guest data)
+		await Promise.all([clockStore.initialize(), tagLocalStore.initialize()]);
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
-			clockStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			clockStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 
 		// Initialize collapsed state from localStorage
@@ -274,9 +284,9 @@
 		// Show guest welcome modal on first visit
 		initGuestWelcome();
 
-		// Load user settings and tags (these need auth / central service)
+		// Load user settings (requires auth)
 		if (authStore.isAuthenticated) {
-			await Promise.all([userSettings.load(), tagStore.fetchTags()]);
+			await userSettings.load();
 		}
 
 		// Redirect to start page if on root and a custom start page is set
@@ -327,7 +337,7 @@
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={allTags.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -336,7 +346,6 @@
 				onToggle={() => {}}
 				onClear={() => {}}
 				managementHref="/tags"
-				loading={tagStore.loading}
 			/>
 		{/if}
 

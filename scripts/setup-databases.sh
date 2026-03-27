@@ -104,7 +104,7 @@ setup_service() {
             ;;
         zitare)
             create_db_if_not_exists "zitare"
-            push_schema "@zitare/backend" "zitare"
+            # Schema managed by mana-sync (backend removed)
             ;;
         contacts)
             create_db_if_not_exists "contacts"
@@ -116,7 +116,7 @@ setup_service() {
             ;;
         clock)
             create_db_if_not_exists "clock"
-            push_schema "@clock/backend" "clock"
+            # Schema managed by mana-sync (backend removed)
             ;;
         todo)
             create_db_if_not_exists "todo"

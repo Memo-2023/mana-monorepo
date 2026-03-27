@@ -154,7 +154,6 @@ for container in $ALL_PROBLEM_CONTAINERS; do
         mana-app-calendar-web) SERVICE_NAME="calendar-web" ;;
         mana-app-calendar-backend) SERVICE_NAME="calendar-backend" ;;
         mana-app-clock-web) SERVICE_NAME="clock-web" ;;
-        mana-app-clock-backend) SERVICE_NAME="clock-backend" ;;
         mana-app-contacts-web) SERVICE_NAME="contacts-web" ;;
         mana-app-contacts-backend) SERVICE_NAME="contacts-backend" ;;
         mana-app-storage-web) SERVICE_NAME="storage-web" ;;

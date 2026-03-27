@@ -248,19 +248,7 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Zitare Backend (NestJS)
-	{
-		path: 'apps/zitare/apps/backend/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.ZITARE_BACKEND_PORT || '3007',
-			DATABASE_URL: (env) => env.ZITARE_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			DEV_BYPASS_AUTH: () => 'true',
-			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-		},
-	},
+	// Zitare Backend: REMOVED — migrated to local-first
 
 	// Zitare Mobile (Expo)
 	{
@@ -506,19 +494,7 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Clock Backend (NestJS)
-	{
-		path: 'apps/clock/apps/backend/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.CLOCK_BACKEND_PORT || '3017',
-			DATABASE_URL: (env) => env.CLOCK_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			DEV_BYPASS_AUTH: () => 'true',
-			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-		},
-	},
+	// Clock Backend: REMOVED — migrated to local-first
 
 	// Clock Web (SvelteKit)
 	{
