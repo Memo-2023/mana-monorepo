@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -23,6 +22,9 @@
 	import { deckStore } from '$lib/stores/deckStore.svelte';
 	import { manadeckOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { manadeckStore } from '$lib/data/local-store';
 
 	// App switcher items
 	const appItems = getPillAppItems('manadeck');
@@ -100,8 +102,11 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
-	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email);
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
+	// User email for user dropdown — empty string for guests so PillNav shows login button
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
 	// Navigation shortcuts (Ctrl+1-5)
 	const navRoutes = navItems.map((item) => item.href);
@@ -171,17 +176,28 @@
 		goto(`/decks/${item.id}`);
 	}
 
-	onMount(async () => {
-		await authStore.initialize();
+	async function handleAuthReady() {
+		// Initialize local-first database (opens IndexedDB, seeds guest data)
+		await manadeckStore.initialize();
 
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
+		// If authenticated, start syncing to server
+		if (authStore.isAuthenticated) {
+			manadeckStore.startSync(() => authStore.getValidToken());
 		}
 
-		// Load user settings and tags
-		await userSettings.load();
-		await tagStore.fetchTags();
+		// Load decks from IndexedDB (guest seed or synced data)
+		await deckStore.fetchDecks();
+
+		// Show guest welcome modal on first visit
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('manadeck')) {
+			showGuestWelcome = true;
+		}
+
+		if (authStore.isAuthenticated) {
+			// Load user settings and tags (require auth)
+			await userSettings.load();
+			await tagStore.fetchTags();
+		}
 
 		// Redirect to start page if on root and a custom start page is set
 		const currentPath = window.location.pathname;
@@ -195,21 +211,12 @@
 			isCollapsed = true;
 			collapsedStore.set(true);
 		}
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if authStore.loading}
-	<div class="min-h-screen flex items-center justify-center bg-background">
-		<div class="text-center">
-			<div
-				class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
-			></div>
-			<p class="mt-4 text-muted-foreground">Loading...</p>
-		</div>
-	</div>
-{:else if authStore.isAuthenticated}
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<div class="min-h-screen bg-background">
 		<!-- Pill Navigation -->
 		<PillNavigation
@@ -231,7 +238,8 @@
 			showLanguageSwitcher={true}
 			{languageItems}
 			{currentLanguageLabel}
-			showLogout={true}
+			showLogout={authStore.isAuthenticated}
+			loginHref="/login"
 			primaryColor="#6366f1"
 			showAppSwitcher={true}
 			{appItems}
@@ -284,4 +292,18 @@
 	{#if manadeckOnboarding.shouldShow}
 		<MiniOnboardingModal store={manadeckOnboarding} appName="ManaDeck" appEmoji="🃏" />
 	{/if}
-{/if}
+
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="manadeck"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
+</AuthGate>

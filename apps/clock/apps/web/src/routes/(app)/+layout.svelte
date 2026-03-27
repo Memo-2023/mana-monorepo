@@ -14,8 +14,6 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { alarmsStore } from '$lib/stores/alarms.svelte';
 	import { timersStore } from '$lib/stores/timers.svelte';
-	import { sessionAlarmsStore } from '$lib/stores/session-alarms.svelte';
-	import { sessionTimersStore } from '$lib/stores/session-timers.svelte';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -31,8 +29,19 @@
 	import { timersApi } from '$lib/api/timers';
 	import { clockOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { clockStore } from '$lib/data/local-store';
 	import { tagStore } from '$lib/stores/tags.svelte';
+
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
+	function initGuestWelcome() {
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('clock')) {
+			showGuestWelcome = true;
+		}
+	}
 
 	// App switcher items
 	const appItems = getPillAppItems('clock');
@@ -163,7 +172,8 @@
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email || 'Menü');
+	// User email for user dropdown — empty string for guests so PillNav shows login button
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
 	// TagStrip visibility
 	let isTagStripVisible = $state(false);
@@ -246,6 +256,14 @@
 	}
 
 	async function handleAuthReady() {
+		// Initialize local-first database (opens IndexedDB, seeds guest data)
+		await clockStore.initialize();
+
+		// If authenticated, start syncing to server
+		if (authStore.isAuthenticated) {
+			clockStore.startSync(() => authStore.getValidToken());
+		}
+
 		// Initialize collapsed state from localStorage
 		const savedCollapsed = localStorage.getItem('clock-nav-collapsed');
 		if (savedCollapsed === 'true') {
@@ -253,16 +271,12 @@
 			collapsedStore.set(true);
 		}
 
-		// Load user settings and tags
-		await userSettings.load();
-		await tagStore.fetchTags();
+		// Show guest welcome modal on first visit
+		initGuestWelcome();
 
-		// Check for session data to migrate
-		if (alarmsStore.hasSessionAlarms) {
-			await alarmsStore.migrateSessionAlarms();
-		}
-		if (timersStore.hasSessionTimers) {
-			await timersStore.migrateSessionTimers();
+		// Load user settings and tags (these need auth / central service)
+		if (authStore.isAuthenticated) {
+			await Promise.all([userSettings.load(), tagStore.fetchTags()]);
 		}
 
 		// Redirect to start page if on root and a custom start page is set
@@ -275,7 +289,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} onReady={handleAuthReady}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}
@@ -295,7 +309,7 @@
 			showLanguageSwitcher={true}
 			{languageItems}
 			{currentLanguageLabel}
-			showLogout={true}
+			showLogout={authStore.isAuthenticated}
 			onLogout={handleLogout}
 			loginHref="/login"
 			primaryColor="#f59e0b"
@@ -350,7 +364,19 @@
 		<MiniOnboardingModal store={clockOnboarding} appName="Uhr" appEmoji="⏰" />
 	{/if}
 
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="clock"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
 </AuthGate>
 
 <style>

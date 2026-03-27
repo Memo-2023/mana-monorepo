@@ -1,19 +1,16 @@
 /**
- * Contacts Store - Manages contacts state using Svelte 5 runes
- * Authenticated users: contacts from API
- * Demo mode: static sample contacts to showcase the app
+ * Contacts Store — Local-First with IndexedDB
+ *
+ * All reads and writes go to IndexedDB first.
+ * When authenticated, changes sync to the server in the background.
+ * Same public API as before so components don't need changes.
  */
 
-import { contactsApi } from '$lib/api/contacts';
+import { contactCollection, type LocalContact } from '$lib/data/local-store';
 import type { Contact, ContactFilters } from '$lib/api/contacts';
-import { authStore } from './auth.svelte';
-import { generateDemoContacts, isDemoContact } from '$lib/data/demo-contacts';
 import { ContactsEvents } from '@manacore/shared-utils/analytics';
 
-// Default page size for pagination
-const DEFAULT_PAGE_SIZE = 50;
-
-// State
+// State — populated from IndexedDB
 let contacts = $state<Contact[]>([]);
 let selfContact = $state<Contact | null>(null);
 let selectedContact = $state<Contact | null>(null);
@@ -22,8 +19,64 @@ let loadingMore = $state(false);
 let error = $state<string | null>(null);
 let total = $state(0);
 let filters = $state<ContactFilters>({});
-let hasMore = $state(true);
-let currentOffset = $state(0);
+let hasMore = $state(false);
+
+/** Convert a LocalContact (IndexedDB record) to the shared Contact type. */
+function toContact(local: LocalContact): Contact {
+	const firstName = local.firstName || null;
+	const lastName = local.lastName || null;
+	const displayName = [firstName, lastName].filter(Boolean).join(' ') || null;
+
+	return {
+		id: local.id,
+		userId: 'local',
+		firstName,
+		lastName,
+		displayName,
+		email: local.email || null,
+		phone: local.phone || null,
+		company: local.company || null,
+		jobTitle: local.jobTitle || null,
+		notes: local.notes || null,
+		photoUrl: local.photoUrl || null,
+		birthday: local.birthday || null,
+		tags: (local.tags || []).map((name, i) => ({ id: `tag-${i}`, name, color: null })),
+		isFavorite: local.isFavorite ?? false,
+		isArchived: local.isArchived ?? false,
+		isSelf: false,
+		visibility: 'private',
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+/** Load contacts from IndexedDB into reactive state. */
+async function refreshContacts(appliedFilters?: ContactFilters) {
+	const filter: Partial<LocalContact> = {};
+	if (appliedFilters?.isFavorite !== undefined) filter.isFavorite = appliedFilters.isFavorite;
+	if (appliedFilters?.isArchived !== undefined) filter.isArchived = appliedFilters.isArchived;
+
+	let localContacts = await contactCollection.getAll(
+		Object.keys(filter).length > 0 ? filter : undefined,
+		{ sortBy: 'firstName', sortDirection: 'asc' }
+	);
+
+	// Client-side search filter
+	if (appliedFilters?.search) {
+		const search = appliedFilters.search.toLowerCase();
+		localContacts = localContacts.filter(
+			(c) =>
+				c.firstName?.toLowerCase().includes(search) ||
+				c.lastName?.toLowerCase().includes(search) ||
+				c.email?.toLowerCase().includes(search) ||
+				c.company?.toLowerCase().includes(search)
+		);
+	}
+
+	contacts = localContacts.map(toContact);
+	total = contacts.length;
+	hasMore = false;
+}
 
 export const contactsStore = {
 	// Getters
@@ -56,8 +109,7 @@ export const contactsStore = {
 	},
 
 	/**
-	 * Load contacts with optional filters (resets to first page)
-	 * In demo mode, loads static sample contacts
+	 * Load contacts with optional filters — reads from IndexedDB.
 	 */
 	async loadContacts(newFilters?: ContactFilters) {
 		if (newFilters) {
@@ -66,52 +118,9 @@ export const contactsStore = {
 
 		loading = true;
 		error = null;
-		currentOffset = 0;
 
-		// Demo mode: load static demo contacts
-		if (!authStore.isAuthenticated) {
-			let demoContacts = generateDemoContacts();
-
-			// Apply filters to demo contacts
-			if (filters.search) {
-				const search = filters.search.toLowerCase();
-				demoContacts = demoContacts.filter(
-					(c) =>
-						c.displayName?.toLowerCase().includes(search) ||
-						c.email?.toLowerCase().includes(search) ||
-						c.company?.toLowerCase().includes(search)
-				);
-			}
-			if (filters.isFavorite !== undefined) {
-				demoContacts = demoContacts.filter((c) => c.isFavorite === filters.isFavorite);
-			}
-			if (filters.isArchived !== undefined) {
-				demoContacts = demoContacts.filter((c) => c.isArchived === filters.isArchived);
-			}
-
-			contacts = demoContacts;
-			total = demoContacts.length;
-			hasMore = false;
-			loading = false;
-			return;
-		}
-
-		// Authenticated: fetch from API
 		try {
-			const result = await contactsApi.list({
-				...filters,
-				limit: DEFAULT_PAGE_SIZE,
-				offset: 0,
-			});
-			// Extract self contact from the list
-			const self = result.contacts.find((c) => c.isSelf);
-			if (self) {
-				selfContact = self;
-			}
-			contacts = result.contacts.filter((c) => !c.isSelf);
-			total = result.total;
-			hasMore = contacts.length < total;
-			currentOffset = contacts.length;
+			await refreshContacts(filters);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load contacts';
 			console.error('Failed to load contacts:', e);
@@ -121,45 +130,26 @@ export const contactsStore = {
 	},
 
 	/**
-	 * Load more contacts (infinite scroll)
+	 * Load more contacts (infinite scroll) — no-op in local-first mode since all data is local.
 	 */
 	async loadMore() {
-		if (loadingMore || !hasMore) return;
-
-		loadingMore = true;
-		error = null;
-
-		try {
-			const result = await contactsApi.list({
-				...filters,
-				limit: DEFAULT_PAGE_SIZE,
-				offset: currentOffset,
-			});
-
-			const newContacts = result.contacts.filter((c) => !c.isSelf);
-			contacts = [...contacts, ...newContacts];
-			total = result.total;
-			currentOffset += newContacts.length;
-			hasMore = contacts.length < total;
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load more contacts';
-			console.error('Failed to load more contacts:', e);
-		} finally {
-			loadingMore = false;
-		}
+		// All contacts are already loaded from IndexedDB
 	},
 
 	/**
-	 * Load a single contact by ID
+	 * Load a single contact by ID — reads from IndexedDB.
 	 */
 	async loadContact(id: string) {
 		loading = true;
 		error = null;
 
 		try {
-			const contact = await contactsApi.get(id);
-			selectedContact = contact;
-			return contact;
+			const local = await contactCollection.get(id);
+			if (local) {
+				selectedContact = toContact(local);
+				return selectedContact;
+			}
+			return null;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load contact';
 			console.error('Failed to load contact:', e);
@@ -170,90 +160,87 @@ export const contactsStore = {
 	},
 
 	/**
-	 * Create a new contact
-	 * Requires authentication - demo mode shows auth gate
+	 * Create a new contact — writes to IndexedDB instantly.
 	 */
 	async createContact(data: Partial<Contact>) {
-		// Demo mode: require authentication
-		if (!authStore.isAuthenticated) {
-			return { error: 'auth_required' as const };
-		}
-
-		loading = true;
 		error = null;
 
 		try {
-			const contact = await contactsApi.create(data);
-			// Add to local state
-			contacts = [contact, ...contacts];
+			const newLocal: LocalContact = {
+				id: crypto.randomUUID(),
+				firstName: data.firstName ?? undefined,
+				lastName: data.lastName ?? undefined,
+				email: data.email ?? undefined,
+				phone: data.phone ?? undefined,
+				company: data.company ?? undefined,
+				jobTitle: data.jobTitle ?? undefined,
+				notes: data.notes ?? undefined,
+				photoUrl: data.photoUrl ?? undefined,
+				birthday: data.birthday ?? undefined,
+				tags: data.tags?.map((t) => t.name) ?? [],
+				isFavorite: false,
+				isArchived: false,
+			};
+
+			const inserted = await contactCollection.insert(newLocal);
+			const newContact = toContact(inserted);
+			contacts = [newContact, ...contacts];
 			total += 1;
 			ContactsEvents.contactCreated();
-			return contact;
+			return newContact;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create contact';
 			console.error('Failed to create contact:', e);
 			throw e;
-		} finally {
-			loading = false;
 		}
 	},
 
 	/**
-	 * Update a contact
-	 * Demo contacts require authentication
+	 * Update a contact — writes to IndexedDB instantly.
 	 */
 	async updateContact(id: string, data: Partial<Contact>) {
-		// Demo contact: require authentication
-		if (isDemoContact(id)) {
-			return { error: 'auth_required' as const };
-		}
-
-		loading = true;
 		error = null;
 
 		try {
-			const contact = await contactsApi.update(id, data);
-			// Update in local state
-			if (contact.isSelf) {
-				selfContact = contact;
-			} else {
-				contacts = contacts.map((c) => (c.id === id ? contact : c));
+			const updateData: Partial<LocalContact> = {};
+			if (data.firstName !== undefined) updateData.firstName = data.firstName ?? undefined;
+			if (data.lastName !== undefined) updateData.lastName = data.lastName ?? undefined;
+			if (data.email !== undefined) updateData.email = data.email ?? undefined;
+			if (data.phone !== undefined) updateData.phone = data.phone ?? undefined;
+			if (data.company !== undefined) updateData.company = data.company ?? undefined;
+			if (data.jobTitle !== undefined) updateData.jobTitle = data.jobTitle ?? undefined;
+			if (data.notes !== undefined) updateData.notes = data.notes ?? undefined;
+			if (data.photoUrl !== undefined) updateData.photoUrl = data.photoUrl ?? undefined;
+			if (data.birthday !== undefined) updateData.birthday = data.birthday ?? undefined;
+			if (data.tags !== undefined) updateData.tags = data.tags?.map((t) => t.name) ?? [];
+			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+			if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
+
+			const updated = await contactCollection.update(id, updateData);
+			if (updated) {
+				const updatedContact = toContact(updated);
+				contacts = contacts.map((c) => (c.id === id ? updatedContact : c));
+				if (selectedContact?.id === id) {
+					selectedContact = updatedContact;
+				}
+				ContactsEvents.contactUpdated();
+				return updatedContact;
 			}
-			if (selectedContact?.id === id) {
-				selectedContact = contact;
-			}
-			ContactsEvents.contactUpdated();
-			return contact;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update contact';
 			console.error('Failed to update contact:', e);
 			throw e;
-		} finally {
-			loading = false;
 		}
 	},
 
 	/**
-	 * Delete a contact
-	 * Demo contacts require authentication
+	 * Delete a contact — removes from IndexedDB instantly.
 	 */
 	async deleteContact(id: string) {
-		// Demo contact: require authentication
-		if (isDemoContact(id)) {
-			return { error: 'auth_required' as const };
-		}
-
-		// Prevent deleting self contact
-		if (selfContact?.id === id) {
-			return;
-		}
-
-		loading = true;
 		error = null;
 
 		try {
-			await contactsApi.delete(id);
-			// Remove from local state
+			await contactCollection.delete(id);
 			contacts = contacts.filter((c) => c.id !== id);
 			total -= 1;
 			if (selectedContact?.id === id) {
@@ -264,30 +251,29 @@ export const contactsStore = {
 			error = e instanceof Error ? e.message : 'Failed to delete contact';
 			console.error('Failed to delete contact:', e);
 			throw e;
-		} finally {
-			loading = false;
 		}
 	},
 
 	/**
-	 * Toggle favorite status
-	 * Demo contacts require authentication
+	 * Toggle favorite status — writes to IndexedDB instantly.
 	 */
 	async toggleFavorite(id: string) {
-		// Demo contact: require authentication
-		if (isDemoContact(id)) {
-			return { error: 'auth_required' as const };
-		}
-
 		try {
-			const contact = await contactsApi.toggleFavorite(id);
-			// Update in local state
-			contacts = contacts.map((c) => (c.id === id ? contact : c));
-			if (selectedContact?.id === id) {
-				selectedContact = contact;
+			const local = await contactCollection.get(id);
+			if (!local) return;
+
+			const updated = await contactCollection.update(id, {
+				isFavorite: !local.isFavorite,
+			} as Partial<LocalContact>);
+			if (updated) {
+				const updatedContact = toContact(updated);
+				contacts = contacts.map((c) => (c.id === id ? updatedContact : c));
+				if (selectedContact?.id === id) {
+					selectedContact = updatedContact;
+				}
+				ContactsEvents.contactFavorited();
+				return updatedContact;
 			}
-			ContactsEvents.contactFavorited();
-			return contact;
 		} catch (e) {
 			console.error('Failed to toggle favorite:', e);
 			throw e;
@@ -295,25 +281,26 @@ export const contactsStore = {
 	},
 
 	/**
-	 * Toggle archive status
-	 * Demo contacts require authentication
+	 * Toggle archive status — writes to IndexedDB instantly.
 	 */
 	async toggleArchive(id: string) {
-		// Demo contact: require authentication
-		if (isDemoContact(id)) {
-			return { error: 'auth_required' as const };
-		}
-
 		try {
-			const contact = await contactsApi.toggleArchive(id);
-			// Remove from current view if archived/unarchived
-			contacts = contacts.filter((c) => c.id !== id);
-			total -= 1;
-			if (selectedContact?.id === id) {
-				selectedContact = null;
+			const local = await contactCollection.get(id);
+			if (!local) return;
+
+			const updated = await contactCollection.update(id, {
+				isArchived: !local.isArchived,
+			} as Partial<LocalContact>);
+			if (updated) {
+				// Remove from current view (archived/unarchived toggle)
+				contacts = contacts.filter((c) => c.id !== id);
+				total -= 1;
+				if (selectedContact?.id === id) {
+					selectedContact = null;
+				}
+				ContactsEvents.contactArchived();
+				return toContact(updated);
 			}
-			ContactsEvents.contactArchived();
-			return contact;
 		} catch (e) {
 			console.error('Failed to toggle archive:', e);
 			throw e;
@@ -321,7 +308,7 @@ export const contactsStore = {
 	},
 
 	/**
-	 * Clear filters and reload
+	 * Clear filters and reload.
 	 */
 	async clearFilters() {
 		filters = {};
@@ -329,30 +316,30 @@ export const contactsStore = {
 	},
 
 	/**
-	 * Set search query
+	 * Set search query.
 	 */
 	setSearch(search: string) {
 		filters = { ...filters, search };
 	},
 
 	/**
-	 * Set tag filter
+	 * Set tag filter.
 	 */
 	setTagId(tagId: string | undefined) {
 		filters = { ...filters, tagId };
 	},
 
 	/**
-	 * Clear selected contact
+	 * Clear selected contact.
 	 */
 	clearSelected() {
 		selectedContact = null;
 	},
 
 	/**
-	 * Check if a contact is a demo contact (static sample data)
+	 * No longer relevant — all contacts are local and editable.
 	 */
-	isDemoContact(contactId: string) {
-		return isDemoContact(contactId);
+	isDemoContact(_contactId: string) {
+		return false;
 	},
 };

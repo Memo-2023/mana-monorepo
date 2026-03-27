@@ -54,7 +54,12 @@
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { calendarOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { calendarStore } from '$lib/data/local-store';
+
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
 
 	// App switcher items
 	const appItems = getPillAppItems('calendar');
@@ -244,8 +249,8 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
-	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email || 'Menü');
+	// User email for user dropdown — empty string for guests so PillNav shows login button
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
 	// Base navigation items for Calendar (without Kalender/Aufgaben - handled by tab group)
 	// Tags are now in the tag-selector dropdown in prependElements
@@ -428,18 +433,28 @@
 	}
 
 	async function handleAuthReady() {
+		// Initialize local-first database (opens IndexedDB, seeds guest data)
+		await calendarStore.initialize();
+
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
 		// Initialize view state
 		viewStore.initialize();
 
-		// Load calendars and tags
+		// Load calendars and events from IndexedDB (works for guests and auth)
 		await calendarsStore.fetchCalendars();
 
-		// Fetch tags and user settings
-		await eventTagsStore.fetchTags();
-		await userSettings.load();
+		// If authenticated, start syncing to server
+		if (authStore.isAuthenticated) {
+			calendarStore.startSync(() => authStore.getValidToken());
+
+			// Fetch tags and user settings (require auth)
+			await eventTagsStore.fetchTags();
+			await userSettings.load();
+		} else if (shouldShowGuestWelcome('calendar')) {
+			showGuestWelcome = true;
+		}
 
 		// Note: Birthdays are loaded via reactive $effect when showBirthdays is enabled
 
@@ -456,7 +471,7 @@
 
 <svelte:window onkeydown={handleKeydown} onresize={updateMobileState} />
 
-<AuthGate {authStore} {goto} onReady={handleAuthReady}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<SplitPaneContainer>
 		<div class="layout-container">
 			<a
@@ -577,7 +592,20 @@
 	{#if calendarOnboarding.shouldShow}
 		<MiniOnboardingModal store={calendarOnboarding} appName="Kalender" appEmoji="📅" />
 	{/if}
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="calendar"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
 </AuthGate>
 
 <style>

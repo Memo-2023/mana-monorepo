@@ -46,6 +46,7 @@
 		"@manacore/shared-help-content": "workspace:*",
 		"@manacore/shared-help-types": "workspace:*",
 		"@manacore/shared-help-ui": "workspace:*",
+		"@manacore/local-store": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",

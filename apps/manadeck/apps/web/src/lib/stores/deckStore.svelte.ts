@@ -1,6 +1,13 @@
+/**
+ * Deck Store — Local-First with Dexie.js
+ *
+ * All reads and writes go to IndexedDB first.
+ * When authenticated, changes sync to the server in the background.
+ * Same public API as before so components don't need changes.
+ */
+
 import type { Deck, CreateDeckInput, UpdateDeckInput } from '$lib/types/deck';
-import { PUBLIC_API_URL } from '$env/static/public';
-import { authService } from '$lib/auth';
+import { deckCollection, cardCollection, type LocalDeck } from '$lib/data/local-store';
 import { ManaDeckEvents } from '@manacore/shared-utils/analytics';
 
 // Svelte 5 runes-based deck store
@@ -9,30 +16,21 @@ let currentDeck = $state<Deck | null>(null);
 let loading = $state(false);
 let error = $state<string | null>(null);
 
-/**
- * Helper to make authenticated API requests
- */
-async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-	const appToken = await authService.getAppToken();
-	if (!appToken) {
-		throw new Error('Not authenticated');
-	}
-
-	const response = await fetch(`${PUBLIC_API_URL}${endpoint}`, {
-		...options,
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${appToken}`,
-			...options.headers,
-		},
-	});
-
-	if (!response.ok) {
-		const errorData = await response.json().catch(() => ({}));
-		throw new Error(errorData.message || `API error: ${response.status}`);
-	}
-
-	return response.json();
+/** Convert a LocalDeck (IndexedDB record) to the shared Deck type. */
+function toDeck(local: LocalDeck): Deck {
+	return {
+		id: local.id,
+		user_id: 'guest',
+		title: local.name,
+		description: local.description ?? undefined,
+		is_public: local.isPublic,
+		settings: {},
+		tags: [],
+		metadata: {},
+		created_at: local.createdAt ?? new Date().toISOString(),
+		updated_at: local.updatedAt ?? new Date().toISOString(),
+		card_count: local.cardCount,
+	};
 }
 
 export const deckStore = {
@@ -50,15 +48,15 @@ export const deckStore = {
 	},
 
 	/**
-	 * Fetch all decks for current user
+	 * Fetch all decks for current user — reads from IndexedDB.
 	 */
 	async fetchDecks() {
 		loading = true;
 		error = null;
 
 		try {
-			const response = await apiRequest<{ decks: Deck[]; count: number }>('/v1/api/decks');
-			decks = response.decks || [];
+			const localDecks = await deckCollection.getAll();
+			decks = localDecks.map(toDeck);
 		} catch (err: any) {
 			error = err.message || 'Failed to fetch decks';
 			console.error('Fetch decks error:', err);
@@ -68,16 +66,18 @@ export const deckStore = {
 	},
 
 	/**
-	 * Fetch single deck by ID
+	 * Fetch single deck by ID — reads from IndexedDB.
 	 */
 	async fetchDeck(id: string) {
 		loading = true;
 		error = null;
 
 		try {
-			const response = await apiRequest<{ deck: Deck }>(`/v1/api/decks/${id}`);
-			currentDeck = response.deck || null;
-			if (!currentDeck) {
+			const localDeck = await deckCollection.get(id);
+			if (localDeck) {
+				currentDeck = toDeck(localDeck);
+			} else {
+				currentDeck = null;
 				throw new Error('Deck not found');
 			}
 		} catch (err: any) {
@@ -89,31 +89,27 @@ export const deckStore = {
 	},
 
 	/**
-	 * Create new deck
+	 * Create new deck — writes to IndexedDB instantly.
 	 */
 	async createDeck(input: CreateDeckInput): Promise<Deck | null> {
 		loading = true;
 		error = null;
 
 		try {
-			const response = await apiRequest<{ success: boolean; deck: Deck }>('/v1/api/decks', {
-				method: 'POST',
-				body: JSON.stringify({
-					title: input.title,
-					description: input.description || '',
-					isPublic: input.is_public ?? false,
-					tags: input.tags || [],
-					settings: input.settings || {},
-				}),
-			});
+			const newLocal: LocalDeck = {
+				id: crypto.randomUUID(),
+				name: input.title,
+				description: input.description || null,
+				color: '#6366f1',
+				cardCount: 0,
+				isPublic: input.is_public ?? false,
+			};
 
-			if (response.deck) {
-				const deck = { ...response.deck, card_count: 0 };
-				decks = [deck, ...decks];
-				ManaDeckEvents.deckCreated();
-				return deck;
-			}
-			return null;
+			const inserted = await deckCollection.insert(newLocal);
+			const deck = toDeck(inserted);
+			decks = [deck, ...decks];
+			ManaDeckEvents.deckCreated();
+			return deck;
 		} catch (err: any) {
 			error = err.message || 'Failed to create deck';
 			console.error('Create deck error:', err);
@@ -124,25 +120,25 @@ export const deckStore = {
 	},
 
 	/**
-	 * Update deck
+	 * Update deck — writes to IndexedDB instantly.
 	 */
 	async updateDeck(id: string, updates: UpdateDeckInput) {
 		loading = true;
 		error = null;
 
 		try {
-			const response = await apiRequest<{ success: boolean; deck: Deck }>(`/v1/api/decks/${id}`, {
-				method: 'PUT',
-				body: JSON.stringify(updates),
-			});
+			const localUpdates: Partial<LocalDeck> = {};
+			if (updates.title !== undefined) localUpdates.name = updates.title;
+			if (updates.description !== undefined) localUpdates.description = updates.description;
+			if (updates.is_public !== undefined) localUpdates.isPublic = updates.is_public;
 
-			if (response.deck) {
-				// Update in list
-				decks = decks.map((d) => (d.id === id ? { ...d, ...response.deck } : d));
+			const updated = await deckCollection.update(id, localUpdates);
+			if (updated) {
+				const updatedDeck = toDeck(updated);
+				decks = decks.map((d) => (d.id === id ? updatedDeck : d));
 
-				// Update current if it's the same
 				if (currentDeck?.id === id) {
-					currentDeck = { ...currentDeck, ...response.deck };
+					currentDeck = updatedDeck;
 				}
 			}
 		} catch (err: any) {
@@ -154,22 +150,23 @@ export const deckStore = {
 	},
 
 	/**
-	 * Delete deck
+	 * Delete deck — writes to IndexedDB instantly.
 	 */
 	async deleteDeck(id: string) {
 		loading = true;
 		error = null;
 
 		try {
-			await apiRequest<{ success: boolean }>(`/v1/api/decks/${id}`, {
-				method: 'DELETE',
-			});
+			// Delete all cards belonging to this deck
+			const cards = await cardCollection.getAll({ deckId: id });
+			for (const card of cards) {
+				await cardCollection.delete(card.id);
+			}
 
-			// Remove from list
+			await deckCollection.delete(id);
 			decks = decks.filter((d) => d.id !== id);
 			ManaDeckEvents.deckDeleted();
 
-			// Clear current if it's the same
 			if (currentDeck?.id === id) {
 				currentDeck = null;
 			}
@@ -185,6 +182,16 @@ export const deckStore = {
 	 * Clear error
 	 */
 	clearError() {
+		error = null;
+	},
+
+	/**
+	 * Clear all state
+	 */
+	clear() {
+		decks = [];
+		currentDeck = null;
+		loading = false;
 		error = null;
 	},
 };

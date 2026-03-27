@@ -1,27 +1,15 @@
 /**
- * Calendars Store - Manages user calendars using Svelte 5 runes
- * Supports both authenticated (cloud) and guest (session) modes
+ * Calendars Store — Local-First with IndexedDB
+ *
+ * All reads and writes go to IndexedDB first.
+ * Same public API as before so components don't break.
  */
 
 import type { Calendar, CreateCalendarInput, UpdateCalendarInput } from '@calendar/shared';
-import * as api from '$lib/api/calendars';
+import { calendarCollection, type LocalCalendar } from '$lib/data/local-store';
 import { BIRTHDAY_CALENDAR } from '$lib/api/birthdays';
 import { settingsStore } from './settings.svelte';
-import { authStore } from './auth.svelte';
 import { CalendarEvents } from '@manacore/shared-utils/analytics';
-
-// Guest calendar for unauthenticated users
-const GUEST_CALENDAR: Calendar = {
-	id: 'session-calendar',
-	userId: 'guest',
-	name: 'Mein Kalender',
-	color: '#3b82f6',
-	isDefault: true,
-	isVisible: true,
-	timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-	createdAt: new Date().toISOString(),
-	updatedAt: new Date().toISOString(),
-};
 
 // State
 let calendars = $state<Calendar[]>([]);
@@ -35,11 +23,26 @@ const birthdayCalendar: Calendar = {
 	name: BIRTHDAY_CALENDAR.name,
 	color: BIRTHDAY_CALENDAR.color,
 	isDefault: false,
-	isVisible: true, // Visibility controlled by settingsStore.showBirthdays
+	isVisible: true,
 	timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 	createdAt: new Date().toISOString(),
 	updatedAt: new Date().toISOString(),
 };
+
+/** Convert a LocalCalendar (IndexedDB) to the shared Calendar type. */
+function toCalendar(local: LocalCalendar): Calendar {
+	return {
+		id: local.id,
+		userId: 'guest',
+		name: local.name,
+		color: local.color,
+		isDefault: local.isDefault,
+		isVisible: local.isVisible,
+		timezone: local.timezone,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
 
 // Helper to safely get calendars array (Svelte 5 runes safety)
 function getCalendarsArray(): Calendar[] {
@@ -50,7 +53,6 @@ function getCalendarsArray(): Calendar[] {
 // Derived: all calendars including virtual birthday calendar
 const allCalendars = $derived.by(() => {
 	const userCalendars = getCalendarsArray();
-	// Add virtual birthday calendar if birthdays are enabled in settings
 	if (settingsStore.showBirthdays) {
 		return [...userCalendars, { ...birthdayCalendar, isVisible: true }];
 	}
@@ -91,75 +93,86 @@ export const calendarsStore = {
 	},
 
 	/**
-	 * Fetch all calendars
-	 * In guest mode, returns a default local calendar
+	 * Load calendars from IndexedDB.
 	 */
 	async fetchCalendars() {
 		loading = true;
 		error = null;
-
-		// Guest mode: return local calendar only
-		if (!authStore.isAuthenticated) {
-			calendars = [GUEST_CALENDAR];
-			loading = false;
-			return { data: { calendars: [GUEST_CALENDAR] }, error: null };
-		}
-
-		// Authenticated: fetch from API
-		const result = await api.getCalendars();
-
-		if (result.error) {
-			error = result.error.message;
+		try {
+			const localCalendars = await calendarCollection.getAll();
+			calendars = localCalendars.map(toCalendar);
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to fetch calendars';
+			console.error('Failed to fetch calendars:', e);
 			calendars = [];
-		} else {
-			// API returns { calendars: [...] }
-			const data = result.data as { calendars: Calendar[] } | null;
-			calendars = data?.calendars || [];
+		} finally {
+			loading = false;
 		}
-
-		loading = false;
-		return result;
+		return { data: { calendars }, error: null };
 	},
 
 	/**
-	 * Create a new calendar
+	 * Create a new calendar — writes to IndexedDB instantly.
 	 */
 	async createCalendar(data: CreateCalendarInput) {
-		const result = await api.createCalendar(data);
+		error = null;
+		try {
+			const newLocal: LocalCalendar = {
+				id: crypto.randomUUID(),
+				name: data.name,
+				color: data.color ?? '#3B82F6',
+				isDefault: data.isDefault ?? false,
+				isVisible: data.isVisible ?? true,
+				timezone: data.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+			};
 
-		if (result.data) {
-			calendars = [...calendars, result.data];
+			const inserted = await calendarCollection.insert(newLocal);
+			const newCalendar = toCalendar(inserted);
+			calendars = [...calendars, newCalendar];
 			CalendarEvents.calendarCreated();
+			return { data: newCalendar, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Failed to create calendar';
+			error = msg;
+			return { data: null, error: { message: msg } };
 		}
-
-		return result;
 	},
 
 	/**
-	 * Update a calendar
+	 * Update a calendar — writes to IndexedDB instantly.
 	 */
 	async updateCalendar(id: string, data: UpdateCalendarInput) {
-		const result = await api.updateCalendar(id, data);
-
-		if (result.data) {
-			calendars = getCalendarsArray().map((c) => (c.id === id ? result.data! : c));
+		error = null;
+		try {
+			const updated = await calendarCollection.update(id, data as Partial<LocalCalendar>);
+			if (updated) {
+				const updatedCalendar = toCalendar(updated);
+				calendars = getCalendarsArray().map((c) => (c.id === id ? updatedCalendar : c));
+				return { data: updatedCalendar, error: null };
+			}
+			return { data: null, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Failed to update calendar';
+			error = msg;
+			return { data: null, error: { message: msg } };
 		}
-
-		return result;
 	},
 
 	/**
-	 * Delete a calendar
+	 * Delete a calendar — removes from IndexedDB instantly.
 	 */
 	async deleteCalendar(id: string) {
-		const result = await api.deleteCalendar(id);
-
-		if (!result.error) {
+		error = null;
+		try {
+			await calendarCollection.delete(id);
 			calendars = getCalendarsArray().filter((c) => c.id !== id);
 			CalendarEvents.calendarDeleted();
+			return { error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Failed to delete calendar';
+			error = msg;
+			return { error: { message: msg } };
 		}
-
-		return result;
 	},
 
 	/**
@@ -177,17 +190,30 @@ export const calendarsStore = {
 	 * Set a calendar as the default
 	 */
 	async setAsDefault(id: string) {
-		const result = await api.updateCalendar(id, { isDefault: true });
-
-		if (result.data) {
-			// Update local state: set this one as default, remove default from others
-			calendars = getCalendarsArray().map((c) => ({
-				...c,
-				isDefault: c.id === id,
-			}));
+		error = null;
+		try {
+			// Remove default from all others first
+			for (const cal of getCalendarsArray()) {
+				if (cal.isDefault && cal.id !== id) {
+					await calendarCollection.update(cal.id, { isDefault: false } as Partial<LocalCalendar>);
+				}
+			}
+			// Set the new default
+			const updated = await calendarCollection.update(id, {
+				isDefault: true,
+			} as Partial<LocalCalendar>);
+			if (updated) {
+				calendars = getCalendarsArray().map((c) => ({
+					...c,
+					isDefault: c.id === id,
+				}));
+			}
+			return { data: updated ? toCalendar(updated) : null, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Failed to set default';
+			error = msg;
+			return { data: null, error: { message: msg } };
 		}
-
-		return result;
 	},
 
 	/**
@@ -201,7 +227,6 @@ export const calendarsStore = {
 	 * Get calendar color by ID (with fallback)
 	 */
 	getColor(id: string) {
-		// Handle virtual birthday calendar
 		if (id === BIRTHDAY_CALENDAR.id) {
 			return BIRTHDAY_CALENDAR.color;
 		}
@@ -211,7 +236,6 @@ export const calendarsStore = {
 
 	/**
 	 * Toggle birthday calendar visibility
-	 * (This updates the settings store, not the calendar itself)
 	 */
 	toggleBirthdaysVisibility() {
 		settingsStore.set('showBirthdays', !settingsStore.showBirthdays);
@@ -228,13 +252,19 @@ export const calendarsStore = {
 	 * Check if a calendar ID is the guest calendar
 	 */
 	isGuestCalendar(id: string) {
-		return id === GUEST_CALENDAR.id;
+		return id === 'personal-calendar';
 	},
 
 	/**
 	 * Get the guest calendar ID
 	 */
 	get guestCalendarId() {
-		return GUEST_CALENDAR.id;
+		return 'personal-calendar';
+	},
+
+	clear() {
+		calendars = [];
+		loading = false;
+		error = null;
 	},
 };

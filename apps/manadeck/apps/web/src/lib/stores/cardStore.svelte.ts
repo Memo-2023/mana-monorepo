@@ -1,6 +1,13 @@
+/**
+ * Card Store — Local-First with Dexie.js
+ *
+ * All reads and writes go to IndexedDB first.
+ * When authenticated, changes sync to the server in the background.
+ * Same public API as before so components don't need changes.
+ */
+
 import type { Card, CreateCardInput, UpdateCardInput } from '$lib/types/card';
-import { PUBLIC_API_URL } from '$env/static/public';
-import { authService } from '$lib/auth';
+import { cardCollection, deckCollection, type LocalCard } from '$lib/data/local-store';
 import { ManaDeckEvents } from '@manacore/shared-utils/analytics';
 
 // Svelte 5 runes-based card store
@@ -9,49 +16,22 @@ let currentCard = $state<Card | null>(null);
 let loading = $state(false);
 let error = $state<string | null>(null);
 
-/**
- * Helper to make authenticated API requests
- */
-async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-	const appToken = await authService.getAppToken();
-	if (!appToken) {
-		throw new Error('Not authenticated');
-	}
-
-	const response = await fetch(`${PUBLIC_API_URL}${endpoint}`, {
-		...options,
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${appToken}`,
-			...options.headers,
-		},
-	});
-
-	if (!response.ok) {
-		const errorData = await response.json().catch(() => ({}));
-		throw new Error(errorData.message || `API error: ${response.status}`);
-	}
-
-	return response.json();
-}
-
-/**
- * Map backend camelCase to frontend snake_case
- */
-function mapCardFromApi(apiCard: any): Card {
+/** Convert a LocalCard (IndexedDB record) to the shared Card type. */
+function toCard(local: LocalCard): Card {
 	return {
-		id: apiCard.id,
-		deck_id: apiCard.deckId,
-		position: apiCard.position,
-		title: apiCard.title,
-		content: apiCard.content,
-		card_type: apiCard.cardType,
-		ai_model: apiCard.aiModel,
-		ai_prompt: apiCard.aiPrompt,
-		version: apiCard.version || 1,
-		is_favorite: apiCard.isFavorite || false,
-		created_at: apiCard.createdAt,
-		updated_at: apiCard.updatedAt,
+		id: local.id,
+		deck_id: local.deckId,
+		position: local.order,
+		title: local.front,
+		content: {
+			front: local.front,
+			back: local.back,
+		},
+		card_type: 'flashcard',
+		version: 1,
+		is_favorite: false,
+		created_at: local.createdAt ?? new Date().toISOString(),
+		updated_at: local.updatedAt ?? new Date().toISOString(),
 	};
 }
 
@@ -70,17 +50,18 @@ export const cardStore = {
 	},
 
 	/**
-	 * Fetch all cards for a deck
+	 * Fetch all cards for a deck — reads from IndexedDB.
 	 */
 	async fetchCards(deckId: string) {
 		loading = true;
 		error = null;
 
 		try {
-			const response = await apiRequest<{ cards: any[]; count: number }>(
-				`/v1/api/decks/${deckId}/cards`
+			const localCards = await cardCollection.getAll(
+				{ deckId },
+				{ sortBy: 'order', sortDirection: 'asc' }
 			);
-			cards = (response.cards || []).map(mapCardFromApi);
+			cards = localCards.map(toCard);
 		} catch (err: any) {
 			error = err.message || 'Failed to fetch cards';
 			console.error('Fetch cards error:', err);
@@ -90,15 +71,15 @@ export const cardStore = {
 	},
 
 	/**
-	 * Fetch single card by ID
+	 * Fetch single card by ID — reads from IndexedDB.
 	 */
 	async fetchCard(id: string) {
 		loading = true;
 		error = null;
 
 		try {
-			const response = await apiRequest<{ card: any }>(`/v1/api/cards/${id}`);
-			currentCard = response.card ? mapCardFromApi(response.card) : null;
+			const localCard = await cardCollection.get(id);
+			currentCard = localCard ? toCard(localCard) : null;
 		} catch (err: any) {
 			error = err.message || 'Failed to fetch card';
 			console.error('Fetch card error:', err);
@@ -108,31 +89,38 @@ export const cardStore = {
 	},
 
 	/**
-	 * Create new card
+	 * Create new card — writes to IndexedDB instantly.
 	 */
 	async createCard(input: CreateCardInput): Promise<Card | null> {
 		loading = true;
 		error = null;
 
 		try {
-			const response = await apiRequest<{ success: boolean; card: any }>('/v1/api/cards', {
-				method: 'POST',
-				body: JSON.stringify({
-					deckId: input.deck_id,
-					title: input.title,
-					content: input.content,
-					cardType: input.card_type,
-					position: input.position,
-				}),
-			});
+			const content = input.content as { front?: string; back?: string; text?: string };
+			const newLocal: LocalCard = {
+				id: crypto.randomUUID(),
+				deckId: input.deck_id,
+				front: content.front || content.text || input.title || '',
+				back: content.back || '',
+				difficulty: 1,
+				reviewCount: 0,
+				order: input.position ?? cards.length,
+			};
 
-			if (response.card) {
-				const card = mapCardFromApi(response.card);
-				cards = [...cards, card];
-				ManaDeckEvents.cardCreated();
-				return card;
+			const inserted = await cardCollection.insert(newLocal);
+			const card = toCard(inserted);
+			cards = [...cards, card];
+
+			// Update deck card count
+			const deck = await deckCollection.get(input.deck_id);
+			if (deck) {
+				await deckCollection.update(input.deck_id, {
+					cardCount: (deck.cardCount || 0) + 1,
+				});
 			}
-			return null;
+
+			ManaDeckEvents.cardCreated();
+			return card;
 		} catch (err: any) {
 			error = err.message || 'Failed to create card';
 			console.error('Create card error:', err);
@@ -143,30 +131,27 @@ export const cardStore = {
 	},
 
 	/**
-	 * Update card
+	 * Update card — writes to IndexedDB instantly.
 	 */
 	async updateCard(id: string, updates: UpdateCardInput) {
 		loading = true;
 		error = null;
 
 		try {
-			const response = await apiRequest<{ success: boolean; card: any }>(`/v1/api/cards/${id}`, {
-				method: 'PUT',
-				body: JSON.stringify({
-					title: updates.title,
-					content: updates.content,
-					cardType: updates.card_type,
-					position: updates.position,
-					isFavorite: updates.is_favorite,
-				}),
-			});
+			const localUpdates: Partial<LocalCard> = {};
+			if (updates.content) {
+				const content = updates.content as { front?: string; back?: string; text?: string };
+				if (content.front !== undefined) localUpdates.front = content.front;
+				if (content.back !== undefined) localUpdates.back = content.back;
+			}
+			if (updates.title !== undefined) localUpdates.front = updates.title;
+			if (updates.position !== undefined) localUpdates.order = updates.position;
 
-			if (response.card) {
-				const updatedCard = mapCardFromApi(response.card);
-				// Update in list
+			const updated = await cardCollection.update(id, localUpdates);
+			if (updated) {
+				const updatedCard = toCard(updated);
 				cards = cards.map((c) => (c.id === id ? updatedCard : c));
 
-				// Update current if it's the same
 				if (currentCard?.id === id) {
 					currentCard = updatedCard;
 				}
@@ -180,22 +165,30 @@ export const cardStore = {
 	},
 
 	/**
-	 * Delete card
+	 * Delete card — writes to IndexedDB instantly.
 	 */
 	async deleteCard(id: string) {
 		loading = true;
 		error = null;
 
 		try {
-			await apiRequest<{ success: boolean }>(`/v1/api/cards/${id}`, {
-				method: 'DELETE',
-			});
-
-			// Remove from list
+			// Find the card to get its deckId before deleting
+			const card = cards.find((c) => c.id === id);
+			await cardCollection.delete(id);
 			cards = cards.filter((c) => c.id !== id);
+
+			// Update deck card count
+			if (card) {
+				const deck = await deckCollection.get(card.deck_id);
+				if (deck) {
+					await deckCollection.update(card.deck_id, {
+						cardCount: Math.max(0, (deck.cardCount || 0) - 1),
+					});
+				}
+			}
+
 			ManaDeckEvents.cardDeleted();
 
-			// Clear current if it's the same
 			if (currentCard?.id === id) {
 				currentCard = null;
 			}
@@ -208,18 +201,13 @@ export const cardStore = {
 	},
 
 	/**
-	 * Reorder cards
+	 * Reorder cards — writes to IndexedDB instantly.
 	 */
 	async reorderCards(deckId: string, cardIds: string[]) {
 		loading = true;
 		error = null;
 
 		try {
-			await apiRequest<{ success: boolean }>('/v1/api/cards/reorder', {
-				method: 'POST',
-				body: JSON.stringify({ deckId, cardIds }),
-			});
-
 			// Update local positions
 			cards = cardIds
 				.map((id, index) => {
@@ -227,6 +215,11 @@ export const cardStore = {
 					return card ? { ...card, position: index } : card!;
 				})
 				.filter(Boolean);
+
+			// Persist each order change to IndexedDB
+			for (let i = 0; i < cardIds.length; i++) {
+				await cardCollection.update(cardIds[i], { order: i } as Partial<LocalCard>);
+			}
 		} catch (err: any) {
 			error = err.message || 'Failed to reorder cards';
 			console.error('Reorder cards error:', err);

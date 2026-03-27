@@ -1,17 +1,41 @@
 /**
- * Alarms Store - Manages alarm state using Svelte 5 runes
- * Supports both authenticated (cloud) and guest (session) modes
+ * Alarms Store — Local-First with Dexie.js
+ *
+ * All reads and writes go to IndexedDB first.
+ * When authenticated, changes sync to the server in the background.
+ * Same public API as before so components don't need changes.
  */
 
-import { api } from '$lib/api/client';
-import { sessionAlarmsStore } from './session-alarms.svelte';
-import { authStore } from './auth.svelte';
+import { alarmCollection, type LocalAlarm } from '$lib/data/local-store';
 import type { Alarm, CreateAlarmInput, UpdateAlarmInput } from '@clock/shared';
 
-// State
+// State — populated from IndexedDB
 let alarms = $state<Alarm[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
+
+/** Convert a LocalAlarm (IndexedDB record) to the shared Alarm type. */
+function toAlarm(local: LocalAlarm): Alarm {
+	return {
+		id: local.id,
+		userId: 'local',
+		label: local.label,
+		time: local.time,
+		enabled: local.enabled,
+		repeatDays: local.repeatDays,
+		snoozeMinutes: local.snoozeMinutes,
+		sound: local.sound,
+		vibrate: local.vibrate ?? null,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+/** Load alarms from IndexedDB into the reactive state. */
+async function refreshAlarms() {
+	const localAlarms = await alarmCollection.getAll();
+	alarms = localAlarms.map(toAlarm);
+}
 
 export const alarmsStore = {
 	// Getters
@@ -29,89 +53,81 @@ export const alarmsStore = {
 	},
 
 	/**
-	 * Fetch all alarms from the backend
-	 * In guest mode, loads from session storage
+	 * Fetch all alarms — reads from IndexedDB.
 	 */
 	async fetchAlarms() {
 		loading = true;
 		error = null;
-
-		// Guest mode: load from session storage
-		if (!authStore.isAuthenticated) {
-			alarms = sessionAlarmsStore.alarms;
+		try {
+			await refreshAlarms();
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to fetch alarms';
+			console.error('Failed to fetch alarms:', e);
+		} finally {
 			loading = false;
-			return { success: true };
 		}
-
-		// Authenticated: fetch from API
-		const response = await api.get<Alarm[]>('/alarms');
-
-		if (response.error) {
-			error = response.error.message;
-			loading = false;
-			return { success: false, error: response.error.message };
-		}
-
-		alarms = response.data || [];
-		loading = false;
 		return { success: true };
 	},
 
 	/**
-	 * Create a new alarm
-	 * In guest mode, creates in session storage
+	 * Create a new alarm — writes to IndexedDB instantly.
 	 */
 	async createAlarm(input: CreateAlarmInput) {
-		// Guest mode: create in session storage
-		if (!authStore.isAuthenticated) {
-			const alarm = sessionAlarmsStore.createAlarm(input);
-			alarms = [...alarms, alarm];
-			return { success: true, data: alarm };
-		}
+		error = null;
+		try {
+			const newLocal: LocalAlarm = {
+				id: crypto.randomUUID(),
+				label: input.label ?? null,
+				time: input.time,
+				enabled: input.enabled ?? true,
+				repeatDays: input.repeatDays ?? null,
+				snoozeMinutes: input.snoozeMinutes ?? null,
+				sound: input.sound ?? null,
+				vibrate: input.vibrate ?? null,
+			};
 
-		// Authenticated: create via API
-		const response = await api.post<Alarm>('/alarms', input);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
+			const inserted = await alarmCollection.insert(newLocal);
+			const newAlarm = toAlarm(inserted);
+			alarms = [...alarms, newAlarm];
+			return { success: true, data: newAlarm };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to create alarm';
+			console.error('Failed to create alarm:', e);
+			return { success: false, error: error };
 		}
-
-		if (response.data) {
-			alarms = [...alarms, response.data];
-		}
-		return { success: true, data: response.data };
 	},
 
 	/**
-	 * Update an alarm
-	 * In guest mode, updates in session storage
+	 * Update an alarm — writes to IndexedDB instantly.
 	 */
 	async updateAlarm(id: string, input: UpdateAlarmInput) {
-		// Guest mode: update in session storage
-		if (!authStore.isAuthenticated || sessionAlarmsStore.isSessionAlarm(id)) {
-			const alarm = sessionAlarmsStore.updateAlarm(id, input);
-			if (alarm) {
-				alarms = alarms.map((a) => (a.id === id ? alarm : a));
-				return { success: true, data: alarm };
+		error = null;
+		try {
+			const updateData: Partial<LocalAlarm> = {};
+			if (input.label !== undefined) updateData.label = input.label ?? null;
+			if (input.time !== undefined) updateData.time = input.time;
+			if (input.enabled !== undefined) updateData.enabled = input.enabled;
+			if (input.repeatDays !== undefined) updateData.repeatDays = input.repeatDays ?? null;
+			if (input.snoozeMinutes !== undefined) updateData.snoozeMinutes = input.snoozeMinutes ?? null;
+			if (input.sound !== undefined) updateData.sound = input.sound ?? null;
+			if (input.vibrate !== undefined) updateData.vibrate = input.vibrate ?? null;
+
+			const updated = await alarmCollection.update(id, updateData);
+			if (updated) {
+				const updatedAlarm = toAlarm(updated);
+				alarms = alarms.map((a) => (a.id === id ? updatedAlarm : a));
+				return { success: true, data: updatedAlarm };
 			}
 			return { success: false, error: 'Alarm not found' };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to update alarm';
+			console.error('Failed to update alarm:', e);
+			return { success: false, error: error };
 		}
-
-		// Authenticated: update via API
-		const response = await api.patch<Alarm>(`/alarms/${id}`, input);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
-		}
-
-		if (response.data) {
-			alarms = alarms.map((a) => (a.id === id ? response.data! : a));
-		}
-		return { success: true, data: response.data };
 	},
 
 	/**
-	 * Toggle alarm enabled state
+	 * Toggle alarm enabled state.
 	 */
 	async toggleAlarm(id: string) {
 		const alarm = alarms.find((a) => a.id === id);
@@ -121,30 +137,23 @@ export const alarmsStore = {
 	},
 
 	/**
-	 * Delete an alarm
-	 * In guest mode, deletes from session storage
+	 * Delete an alarm — removes from IndexedDB instantly.
 	 */
 	async deleteAlarm(id: string) {
-		// Guest mode: delete from session storage
-		if (!authStore.isAuthenticated || sessionAlarmsStore.isSessionAlarm(id)) {
-			sessionAlarmsStore.deleteAlarm(id);
+		error = null;
+		try {
+			await alarmCollection.delete(id);
 			alarms = alarms.filter((a) => a.id !== id);
 			return { success: true };
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to delete alarm';
+			console.error('Failed to delete alarm:', e);
+			return { success: false, error: error };
 		}
-
-		// Authenticated: delete via API
-		const response = await api.delete(`/alarms/${id}`);
-
-		if (response.error) {
-			return { success: false, error: response.error.message };
-		}
-
-		alarms = alarms.filter((a) => a.id !== id);
-		return { success: true };
 	},
 
 	/**
-	 * Clear all alarms (local state only)
+	 * Clear all alarms (local state only).
 	 */
 	clear() {
 		alarms = [];
@@ -152,56 +161,21 @@ export const alarmsStore = {
 	},
 
 	/**
-	 * Get session alarm count (for guest mode banner)
+	 * No longer relevant — all alarms are local and editable.
 	 */
 	get sessionAlarmCount(): number {
-		return sessionAlarmsStore.count;
+		return 0;
 	},
 
-	/**
-	 * Check if there are session alarms
-	 */
 	get hasSessionAlarms(): boolean {
-		return sessionAlarmsStore.count > 0;
+		return false;
 	},
 
-	/**
-	 * Migrate session alarms to cloud after login
-	 */
 	async migrateSessionAlarms(): Promise<void> {
-		if (!authStore.isAuthenticated) return;
-
-		const sessionAlarms = sessionAlarmsStore.getAllAlarms();
-		if (sessionAlarms.length === 0) return;
-
-		// Create each alarm via API
-		for (const alarm of sessionAlarms) {
-			try {
-				await api.post<Alarm>('/alarms', {
-					label: alarm.label,
-					time: alarm.time,
-					enabled: alarm.enabled,
-					repeatDays: alarm.repeatDays,
-					snoozeMinutes: alarm.snoozeMinutes,
-					sound: alarm.sound,
-					vibrate: alarm.vibrate,
-				});
-			} catch (e) {
-				console.error('Failed to migrate alarm:', e);
-			}
-		}
-
-		// Clear session data after migration
-		sessionAlarmsStore.clear();
-
-		// Reload alarms from server
-		await this.fetchAlarms();
+		// No-op: local-first mode handles data persistence automatically.
 	},
 
-	/**
-	 * Check if an alarm ID is a session alarm
-	 */
-	isSessionAlarm(id: string): boolean {
-		return sessionAlarmsStore.isSessionAlarm(id);
+	isSessionAlarm(_id: string): boolean {
+		return false;
 	},
 };

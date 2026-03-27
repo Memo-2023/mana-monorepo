@@ -49,7 +49,18 @@
 	import { tagsStore } from '$lib/stores/tags.svelte';
 	import { contactsOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { contactsLocalStore } from '$lib/data/local-store';
+
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
+	function initGuestWelcome() {
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('contacts')) {
+			showGuestWelcome = true;
+		}
+	}
 
 	// Tags state for Quick-Create
 	let availableTags = $state<{ id: string; name: string }[]>([]);
@@ -130,7 +141,8 @@
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
 	// User email for user dropdown (fallback to 'Menü' when not logged in)
-	let userEmail = $derived(authStore.user?.email || 'Menü');
+	// User email for user dropdown — empty string for guests so PillNav shows login button
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
 	// TagStrip visibility (toggle via Tags button in PillNav)
 	let isTagStripVisible = $state(true);
@@ -282,6 +294,14 @@
 	});
 
 	async function handleAuthReady() {
+		// Initialize local-first database (opens IndexedDB, seeds guest data)
+		await contactsLocalStore.initialize();
+
+		// If authenticated, start syncing to server
+		if (authStore.isAuthenticated) {
+			contactsLocalStore.startSync(() => authStore.getValidToken());
+		}
+
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
 
@@ -290,18 +310,24 @@
 		viewModeStore.initialize();
 		contactsFilterStore.initialize();
 
-		// Load user settings and tags
-		await userSettings.load();
+		// Show guest welcome modal on first visit
+		initGuestWelcome();
 
-		// Load tags (used by TagStrip and Quick-Create)
-		await tagsStore.fetchTags();
-		availableTags = tagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
+		// Load contacts from IndexedDB (guest seed or synced data)
+		await contactsStore.loadContacts();
+
+		// Load user settings and tags only when authenticated
+		if (authStore.isAuthenticated) {
+			await userSettings.load();
+			await tagsStore.fetchTags();
+			availableTags = tagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
+		}
 	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} onReady={handleAuthReady}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<SplitPaneContainer>
 		<!-- Navigation Layout -->
 		<div class="layout-container">
@@ -332,7 +358,7 @@
 					showLanguageSwitcher={true}
 					{languageItems}
 					{currentLanguageLabel}
-					showLogout={true}
+					showLogout={authStore.isAuthenticated}
 					onLogout={handleLogout}
 					loginHref="/login"
 					primaryColor="#3b82f6"
@@ -431,7 +457,19 @@
 		<MiniOnboardingModal store={contactsOnboarding} appName="Kontakte" appEmoji="👥" />
 	{/if}
 
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="contacts"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
 </AuthGate>
 
 <style>
