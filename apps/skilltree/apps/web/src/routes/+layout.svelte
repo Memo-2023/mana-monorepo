@@ -8,10 +8,17 @@
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { skilltreeOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { skilltreeStore } from '$lib/data/local-store';
 
 	let { children } = $props();
 
 	async function handleAuthReady() {
+		// Initialize unified local-store (IndexedDB + sync)
+		await skilltreeStore.initialize();
+		if (authStore.isAuthenticated) {
+			skilltreeStore.startSync(() => authStore.getValidToken());
+		}
+		// Initialize existing idb-based stores
 		await skillStore.initialize();
 		await achievementStore.initialize();
 	}

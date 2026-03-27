@@ -14,6 +14,10 @@ ingress:
   - hostname: auth.mana.how
     service: http://localhost:3001
 
+  # API Gateway (Go)
+  - hostname: api.mana.how
+    service: http://localhost:3060
+
   # Chat App
   - hostname: chat.mana.how
     service: http://localhost:5010
@@ -157,6 +161,18 @@ ingress:
     service: http://localhost:4400
   - hostname: docs.mana.how
     service: http://localhost:4400
+
+  # GPU Server (Windows PC, LAN: 192.168.178.11)
+  - hostname: gpu-llm.mana.how
+    service: http://192.168.178.11:3025
+  - hostname: gpu-stt.mana.how
+    service: http://192.168.178.11:3020
+  - hostname: gpu-tts.mana.how
+    service: http://192.168.178.11:3022
+  - hostname: gpu-img.mana.how
+    service: http://192.168.178.11:3023
+  - hostname: gpu-ollama.mana.how
+    service: http://192.168.178.11:11434
 
   # Catch-all
   - service: http_status:404

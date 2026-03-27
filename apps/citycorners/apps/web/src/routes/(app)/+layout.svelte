@@ -9,6 +9,9 @@
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { citycornersStore } from '$lib/data/local-store';
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { getPillAppItems } from '@manacore/shared-branding';
@@ -172,109 +175,126 @@
 		showNav = !showNav;
 	}
 
-	onMount(async () => {
-		const savedNav = localStorage.getItem('citycorners-nav-visible');
-		if (savedNav !== null) showNav = savedNav !== 'false';
+	let showGuestWelcome = $state(false);
 
+	async function handleAuthReady() {
+		await citycornersStore.initialize();
 		if (authStore.isAuthenticated) {
+			citycornersStore.startSync(() => authStore.getValidToken());
 			await tagStore.fetchTags();
 		}
-	});
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('citycorners')) {
+			showGuestWelcome = true;
+		}
+		const savedNav = localStorage.getItem('citycorners-nav-visible');
+		if (savedNav !== null) showNav = savedNav !== 'false';
+	}
 </script>
 
-<div class="layout-container">
-	{#if showNav}
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="CityCorners"
-			homeRoute="/"
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={authStore.isAuthenticated}
-			onLogout={handleLogout}
-			loginHref="/login"
-			primaryColor="#2563eb"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			themesHref="/themes"
-			helpHref="/help"
-			profileHref="/profile"
-		/>
-	{/if}
-
-	<!-- TagStrip (above PillNav, toggled via Tags pill) -->
-	{#if isTagStripVisible}
-		<TagStrip
-			tags={tagStore.tags.map((t) => ({
-				id: t.id,
-				name: t.name,
-				color: t.color || '#3b82f6',
-			}))}
-			selectedIds={[]}
-			onToggle={() => {}}
-			onClear={() => {}}
-			managementHref="/tags"
-			loading={tagStore.loading}
-		/>
-	{/if}
-
-	<!-- Quick Search Bar -->
-	<QuickInputBar
-		onSearch={handleSearch}
-		onSelect={handleSelect}
-		placeholder={$_('search.placeholder')}
-		emptyText={$_('search.noResults')}
-		searchingText={$_('search.searching')}
-		locale={$locale || 'de'}
-		appIcon="mappin"
-		bottomOffset={inputBarBottomOffset}
-		hasFabRight={true}
-	/>
-
-	<button
-		class="pillnav-fab"
-		onclick={handleNavToggle}
-		title={showNav ? $_('nav.hideNav') : $_('nav.showNav')}
-	>
-		{#if !showNav}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 6h16M4 12h16M4 18h16"
-				/>
-			</svg>
-		{:else}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M6 18L18 6M6 6l12 12"
-				/>
-			</svg>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+	<div class="layout-container">
+		{#if showNav}
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="CityCorners"
+				homeRoute="/"
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={authStore.isAuthenticated}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#2563eb"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				themesHref="/themes"
+				helpHref="/help"
+				profileHref="/profile"
+			/>
 		{/if}
-	</button>
 
-	<main class="main-content bg-background">
-		<div class="content-wrapper">
-			{@render children()}
-		</div>
-	</main>
-</div>
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
+
+		<!-- Quick Search Bar -->
+		<QuickInputBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			placeholder={$_('search.placeholder')}
+			emptyText={$_('search.noResults')}
+			searchingText={$_('search.searching')}
+			locale={$locale || 'de'}
+			appIcon="mappin"
+			bottomOffset={inputBarBottomOffset}
+			hasFabRight={true}
+		/>
+
+		<button
+			class="pillnav-fab"
+			onclick={handleNavToggle}
+			title={showNav ? $_('nav.hideNav') : $_('nav.showNav')}
+		>
+			{#if !showNav}
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 6h16M4 12h16M4 18h16"
+					/>
+				</svg>
+			{:else}
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			{/if}
+		</button>
+
+		<main class="main-content bg-background">
+			<div class="content-wrapper">
+				{@render children()}
+			</div>
+		</main>
+	</div>
+
+	<GuestWelcomeModal
+		appId="citycorners"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
+</AuthGate>
 
 <style>
 	.layout-container {

@@ -543,6 +543,8 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | Mukke | songs, playlists, playlistSongs, projects, markers | Done |
 | Context | spaces, documents | Done |
 | Photos | albums, albumItems, favorites, tags, photoTags | Done |
+| SkilltTree | skills, activities, achievements | Done |
+| CityCorners | locations, favorites | Done |
 
 ### Dev Commands (Local-First Stack)
 

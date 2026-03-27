@@ -187,6 +187,64 @@ scrape_configs:
     scrape_interval: 30s
 
   # ============================================
+  # GPU Server (Windows PC, LAN: 192.168.178.11)
+  # ============================================
+
+  # GPU: LLM Gateway
+  - job_name: 'gpu-llm'
+    static_configs:
+      - targets: ['192.168.178.11:3025']
+        labels:
+          instance: 'gpu-server'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # GPU: Speech-to-Text (WhisperX)
+  - job_name: 'gpu-stt'
+    static_configs:
+      - targets: ['192.168.178.11:3020']
+        labels:
+          instance: 'gpu-server'
+    metrics_path: '/health'
+    scrape_interval: 30s
+
+  # GPU: Text-to-Speech
+  - job_name: 'gpu-tts'
+    static_configs:
+      - targets: ['192.168.178.11:3022']
+        labels:
+          instance: 'gpu-server'
+    metrics_path: '/health'
+    scrape_interval: 30s
+
+  # GPU: Image Generation (FLUX.2)
+  - job_name: 'gpu-image-gen'
+    static_configs:
+      - targets: ['192.168.178.11:3023']
+        labels:
+          instance: 'gpu-server'
+    metrics_path: '/health'
+    scrape_interval: 30s
+
+  # ============================================
+  # Go Infrastructure Services
+  # ============================================
+
+  # API Gateway (Go)
+  - job_name: 'mana-api-gateway'
+    static_configs:
+      - targets: ['mana-api-gateway:3060']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # Matrix Bot (Go) — consolidated 21 bots
+  - job_name: 'mana-matrix-bot'
+    static_configs:
+      - targets: ['mana-matrix-bot:4000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # ============================================
   # Pushgateway (deploy metrics, batch jobs)
   # ============================================
   - job_name: 'pushgateway'
