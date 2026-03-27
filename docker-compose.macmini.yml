@@ -1129,8 +1129,7 @@ services:
       PUBLIC_TODO_API_URL_CLIENT: https://todo-api.mana.how
       PUBLIC_CALENDAR_API_URL: http://calendar-backend:3032
       PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.mana.how
-      PUBLIC_CLOCK_API_URL: http://clock-backend:3033
-      PUBLIC_CLOCK_API_URL_CLIENT: https://clock-api.mana.how
+      # PUBLIC_CLOCK_API_URL: removed — migrated to local-first
       PUBLIC_CONTACTS_API_URL: http://contacts-backend:3034
       PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.mana.how
     ports:
@@ -1249,15 +1248,14 @@ services:
     container_name: mana-app-clock-web
     restart: always
     depends_on:
-      clock-backend:
+      mana-auth:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 5013
-      PUBLIC_BACKEND_URL: http://clock-backend:3033
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://clock-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3050
     ports:
       - "5013:5013"
     healthcheck:
