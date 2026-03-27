@@ -9,10 +9,12 @@ import { resolveServiceUrl } from './resolve-url';
 export class ImageClient {
 	private baseUrl: string;
 	private timeout: number;
+	private apiKey?: string;
 
 	constructor(config: GpuServiceConfig) {
 		this.baseUrl = resolveServiceUrl(config, 'image');
 		this.timeout = config.timeout ?? 120_000;
+		this.apiKey = config.apiKey;
 	}
 
 	/** Generate an image from a text prompt. */
@@ -23,7 +25,10 @@ export class ImageClient {
 		try {
 			const response = await fetch(`${this.baseUrl}/generate`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					...(this.apiKey ? { 'X-API-Key': this.apiKey } : {}),
+				},
 				body: JSON.stringify({
 					prompt: options.prompt,
 					width: options.width ?? 1024,

@@ -28,8 +28,10 @@ export class GpuClient {
 	public readonly stt: SttClient;
 	public readonly tts: TtsClient;
 	public readonly image: ImageClient;
+	public readonly apiKey?: string;
 
 	constructor(config: GpuServiceConfig) {
+		this.apiKey = config.apiKey;
 		this.stt = new SttClient(config);
 		this.tts = new TtsClient(config);
 		this.image = new ImageClient(config);

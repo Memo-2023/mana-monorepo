@@ -614,13 +614,19 @@ GPU Server (healthcheck.py → log-shipper.py)
 Shared Package im Monorepo (`packages/shared-gpu/`) für alle GPU-Services:
 
 ```typescript
-import { GpuClient, GPU_PUBLIC_URLS } from '@manacore/shared-gpu';
+import { GpuClient } from '@manacore/shared-gpu';
 
-// Öffentlich (von überall)
-const gpu = new GpuClient({ baseUrl: 'https://gpu.mana.how' });
+// Öffentlich (von überall, mit API-Key)
+const gpu = new GpuClient({
+  baseUrl: 'https://gpu.mana.how',
+  apiKey: process.env.GPU_API_KEY,
+});
 
 // Oder LAN (direkt, schneller)
-const gpuLan = new GpuClient({ baseUrl: 'http://192.168.178.11' });
+const gpuLan = new GpuClient({
+  baseUrl: 'http://192.168.178.11',
+  apiKey: process.env.GPU_API_KEY,
+});
 
 // Speech-to-Text (mit Word-Timestamps + Speaker Diarization)
 const transcript = await gpu.stt.transcribe(audioBuffer, 'recording.wav', {
@@ -641,6 +647,37 @@ const imageUrl = gpu.image.imageUrl(image.image_url);
 const health = await gpu.healthCheck();
 // → { stt: true, tts: true, image: true }
 ```
+
+---
+
+## API-Authentifizierung
+
+Alle GPU-Services erfordern einen API-Key für Zugriff auf geschützte Endpoints.
+`/health` und `/docs` sind öffentlich (kein Key nötig).
+
+**API-Key:** In `.env.development` unter `GPU_API_KEY`
+
+**Verwendung:**
+
+```bash
+# Mit Header
+curl -H "X-API-Key: $GPU_API_KEY" https://gpu-llm.mana.how/v1/models
+
+# Oder als Query-Parameter
+curl "https://gpu-stt.mana.how/models?api_key=$GPU_API_KEY"
+
+# Health (kein Key nötig)
+curl https://gpu-llm.mana.how/health
+```
+
+**Konfiguration auf dem GPU-Server:**
+
+| Service | Env-Variable | Datei |
+|---|---|---|
+| mana-llm | `GPU_API_KEY` | `C:\mana\services\mana-llm\.env` |
+| mana-stt | `API_KEYS`, `INTERNAL_API_KEY` | `C:\mana\services\mana-stt\.env` |
+| mana-tts | `API_KEYS`, `INTERNAL_API_KEY` | `C:\mana\services\mana-tts\.env` |
+| mana-image-gen | `GPU_API_KEY` | `C:\mana\services\mana-image-gen\.env` |
 
 ---
 

@@ -4,10 +4,12 @@ import { resolveServiceUrl } from './resolve-url';
 export class SttClient {
 	private baseUrl: string;
 	private timeout: number;
+	private apiKey?: string;
 
 	constructor(config: GpuServiceConfig) {
 		this.baseUrl = resolveServiceUrl(config, 'stt');
 		this.timeout = config.timeout ?? 60_000;
+		this.apiKey = config.apiKey;
 	}
 
 	/** Transcribe audio with optional word timestamps and speaker diarization. */
@@ -34,6 +36,7 @@ export class SttClient {
 		try {
 			const response = await fetch(`${this.baseUrl}/transcribe`, {
 				method: 'POST',
+				headers: this.apiKey ? { 'X-API-Key': this.apiKey } : {},
 				body: formData,
 				signal: controller.signal,
 			});

@@ -119,6 +119,8 @@ export interface GpuServiceConfig {
 		image?: string;
 		ollama?: string;
 	};
+	/** API key for authenticated access (X-API-Key header) */
+	apiKey?: string;
 	/** Request timeout in ms (default: 30000) */
 	timeout?: number;
 }

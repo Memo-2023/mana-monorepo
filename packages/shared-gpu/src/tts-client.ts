@@ -4,10 +4,12 @@ import { resolveServiceUrl } from './resolve-url';
 export class TtsClient {
 	private baseUrl: string;
 	private timeout: number;
+	private apiKey?: string;
 
 	constructor(config: GpuServiceConfig) {
 		this.baseUrl = resolveServiceUrl(config, 'tts');
 		this.timeout = config.timeout ?? 30_000;
+		this.apiKey = config.apiKey;
 	}
 
 	/** Synthesize speech. Returns audio as ArrayBuffer. */
@@ -23,7 +25,10 @@ export class TtsClient {
 		try {
 			const response = await fetch(`${this.baseUrl}/synthesize/auto`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					...(this.apiKey ? { 'X-API-Key': this.apiKey } : {}),
+				},
 				body: JSON.stringify({
 					text: options.text,
 					voice: options.voice,
