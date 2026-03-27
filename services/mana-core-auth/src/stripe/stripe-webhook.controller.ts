@@ -9,17 +9,22 @@ import {
 	Inject,
 	forwardRef,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiExcludeEndpoint } from '@nestjs/swagger';
+import { ApiTags, ApiExcludeEndpoint } from '@nestjs/swagger';
 import type { Request } from 'express';
 import type Stripe from 'stripe';
 import { StripeService } from './stripe.service';
-import { CreditsService } from '../credits/credits.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 interface RawBodyRequest extends Request {
 	rawBody?: Buffer;
 }
 
+/**
+ * Stripe Webhook Controller — Subscription events only.
+ *
+ * Credit-related events (payment_intent.*, checkout.session.*) are handled
+ * by the standalone mana-credits service.
+ */
 @ApiTags('webhooks')
 @Controller('webhooks/stripe')
 export class StripeWebhookController {
@@ -27,32 +32,18 @@ export class StripeWebhookController {
 
 	constructor(
 		private stripeService: StripeService,
-		@Inject(forwardRef(() => CreditsService))
-		private creditsService: CreditsService,
 		@Inject(forwardRef(() => SubscriptionsService))
 		private subscriptionsService: SubscriptionsService
 	) {}
 
 	@Post()
 	@HttpCode(200)
-	@ApiExcludeEndpoint() // Hide from Swagger - internal webhook
-	@ApiOperation({ summary: 'Handle Stripe webhooks' })
-	@ApiResponse({ status: 200, description: 'Webhook processed' })
-	@ApiResponse({ status: 400, description: 'Invalid webhook signature' })
+	@ApiExcludeEndpoint()
 	async handleWebhook(@Req() req: RawBodyRequest, @Headers('stripe-signature') signature: string) {
 		const rawBody = req.rawBody;
+		if (!rawBody) throw new BadRequestException('Missing raw body');
+		if (!signature) throw new BadRequestException('Missing stripe-signature header');
 
-		if (!rawBody) {
-			this.logger.warn('Webhook received without raw body');
-			throw new BadRequestException('Missing raw body');
-		}
-
-		if (!signature) {
-			this.logger.warn('Webhook received without signature');
-			throw new BadRequestException('Missing stripe-signature header');
-		}
-
-		// Verify signature and parse event
 		let event: Stripe.Event;
 		try {
 			event = this.stripeService.verifyWebhookSignature(rawBody, signature);
@@ -63,40 +54,9 @@ export class StripeWebhookController {
 			throw new BadRequestException('Invalid webhook signature');
 		}
 
-		this.logger.log('Webhook received', {
-			type: event.type,
-			id: event.id,
-		});
+		this.logger.log('Webhook received', { type: event.type, id: event.id });
 
-		// Handle relevant events
-		// Note: SEPA Direct Debit payments are not instant - they go through:
-		// 1. checkout.session.completed (payment_status may be 'unpaid' for SEPA)
-		// 2. payment_intent.processing (SEPA is being processed by banks)
-		// 3. payment_intent.succeeded (3-14 days later when bank confirms)
-		// Credits are only added on payment_intent.succeeded for safety.
 		switch (event.type) {
-			// Credit purchases via Checkout Session
-			case 'checkout.session.completed':
-				await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
-				break;
-
-			// Payment processing (SEPA: bank is processing the debit)
-			case 'payment_intent.processing':
-				this.logger.log('Payment processing (SEPA in progress)', {
-					paymentIntentId: (event.data.object as Stripe.PaymentIntent).id,
-				});
-				// Purchase stays in 'pending' status until succeeded
-				break;
-
-			// Credit purchases - payment confirmed
-			case 'payment_intent.succeeded':
-				await this.handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
-				break;
-
-			case 'payment_intent.payment_failed':
-				await this.handlePaymentFailed(event.data.object as Stripe.PaymentIntent);
-				break;
-
 			// Subscriptions
 			case 'customer.subscription.created':
 			case 'customer.subscription.updated':
@@ -117,103 +77,6 @@ export class StripeWebhookController {
 		}
 
 		return { received: true };
-	}
-
-	private async handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-		this.logger.log('Processing payment success', {
-			paymentIntentId: paymentIntent.id,
-			amount: paymentIntent.amount,
-			customer: paymentIntent.customer,
-		});
-
-		try {
-			const result = await this.creditsService.completePurchase(paymentIntent.id);
-
-			if (result.alreadyProcessed) {
-				this.logger.log('Purchase already processed (idempotent)', {
-					paymentIntentId: paymentIntent.id,
-				});
-			} else {
-				this.logger.log('Purchase completed successfully', {
-					paymentIntentId: paymentIntent.id,
-					creditsAdded: result.creditsAdded,
-				});
-			}
-		} catch (error) {
-			this.logger.error('Failed to complete purchase', {
-				paymentIntentId: paymentIntent.id,
-				error: error instanceof Error ? error.message : 'Unknown error',
-			});
-			// Rethrow to return 500 to Stripe for retry
-			throw error;
-		}
-	}
-
-	private async handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-		const failureMessage = paymentIntent.last_payment_error?.message || 'Payment failed';
-
-		this.logger.log('Processing payment failure', {
-			paymentIntentId: paymentIntent.id,
-			failureMessage,
-		});
-
-		try {
-			await this.creditsService.failPurchase(paymentIntent.id, failureMessage);
-		} catch (error) {
-			this.logger.error('Failed to mark purchase as failed', {
-				paymentIntentId: paymentIntent.id,
-				error: error instanceof Error ? error.message : 'Unknown error',
-			});
-		}
-	}
-
-	private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-		this.logger.log('Processing checkout session completed', {
-			sessionId: session.id,
-			paymentIntentId: session.payment_intent,
-			purchaseId: session.metadata?.purchaseId,
-		});
-
-		// For Checkout Sessions, we need to update the purchase with the PaymentIntent ID
-		// so that the payment_intent.succeeded handler can process it
-		const purchaseId = session.metadata?.purchaseId;
-		const paymentIntentId = session.payment_intent as string;
-
-		if (purchaseId && paymentIntentId) {
-			try {
-				await this.creditsService.updatePurchasePaymentIntent(purchaseId, paymentIntentId);
-				this.logger.log('Updated purchase with PaymentIntent ID', {
-					purchaseId,
-					paymentIntentId,
-				});
-			} catch (error) {
-				this.logger.error('Failed to update purchase with PaymentIntent ID', {
-					purchaseId,
-					paymentIntentId,
-					error: error instanceof Error ? error.message : 'Unknown error',
-				});
-			}
-		}
-
-		// If payment_status is 'paid', complete the purchase immediately
-		if (session.payment_status === 'paid' && paymentIntentId) {
-			try {
-				const result = await this.creditsService.completePurchase(paymentIntentId);
-				if (result.alreadyProcessed) {
-					this.logger.log('Purchase already processed', { sessionId: session.id });
-				} else {
-					this.logger.log('Purchase completed via checkout session', {
-						sessionId: session.id,
-						creditsAdded: result.creditsAdded,
-					});
-				}
-			} catch (error) {
-				this.logger.error('Failed to complete purchase from checkout session', {
-					sessionId: session.id,
-					error: error instanceof Error ? error.message : 'Unknown error',
-				});
-			}
-		}
 	}
 
 	private async handleSubscriptionUpdated(subscription: Stripe.Subscription) {

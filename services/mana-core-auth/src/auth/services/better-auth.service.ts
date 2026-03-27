@@ -19,18 +19,12 @@ import {
 	NotFoundException,
 	ForbiddenException,
 	UnauthorizedException,
-	Inject,
-	forwardRef,
-	Optional,
 } from '@nestjs/common';
 import { LoggerService } from '../../common/logger';
 import { ConfigService } from '@nestjs/config';
 import { createBetterAuth } from '../better-auth.config';
 import type { BetterAuthInstance } from '../better-auth.config';
 import { getDb } from '../../db/connection';
-import { balances } from '../../db/schema/credits.schema';
-import { guildPools } from '../../db/schema/guilds.schema';
-import { GiftCodeService } from '../../gifts/services/gift-code.service';
 import { hasUser, hasToken, hasMember, hasMembers, hasSession } from '../types/better-auth.types';
 import { sourceAppStore } from '../stores/source-app.store';
 import { passwordResetRedirectStore } from '../stores/password-reset-redirect.store';
@@ -112,9 +106,6 @@ export class BetterAuthService {
 
 	constructor(
 		private configService: ConfigService,
-		@Optional()
-		@Inject(forwardRef(() => GiftCodeService))
-		private giftCodeService: GiftCodeService,
 		loggerService: LoggerService
 	) {
 		this.logger = loggerService.setContext('BetterAuthService');

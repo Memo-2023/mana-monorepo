@@ -5,7 +5,6 @@ import { getDb } from '../db/connection';
 import { members, organizations } from '../db/schema';
 import { subscriptions, plans } from '../db/schema/subscriptions.schema';
 import { BetterAuthService } from '../auth/services/better-auth.service';
-import { GuildPoolService } from '../credits/guild-pool.service';
 import { UpdateOrganizationDto } from '../auth/dto/update-organization.dto';
 
 export class CreateGuildDto {
@@ -26,9 +25,35 @@ export class GuildsService {
 
 	constructor(
 		private configService: ConfigService,
-		private betterAuthService: BetterAuthService,
-		private guildPoolService: GuildPoolService
+		private betterAuthService: BetterAuthService
 	) {}
+
+	/** Get mana-credits service URL */
+	private getCreditsUrl(): string {
+		return process.env.MANA_CREDITS_URL || 'http://localhost:3060';
+	}
+
+	private getServiceKey(): string {
+		return process.env.MANA_CORE_SERVICE_KEY || '';
+	}
+
+	/** Call mana-credits to get guild pool balance */
+	private async getGuildPoolBalance(guildId: string, userId: string) {
+		try {
+			const creditsUrl = this.getCreditsUrl();
+			// Use internal API with service key to get pool balance on behalf of user
+			const res = await fetch(
+				`${creditsUrl}/api/v1/internal/guild-pool/balance?guildId=${guildId}&userId=${userId}`,
+				{
+					headers: { 'X-Service-Key': this.getServiceKey() },
+				}
+			);
+			if (res.ok) return await res.json();
+		} catch (error) {
+			this.logger.warn('Failed to get guild pool balance from mana-credits', { guildId });
+		}
+		return { balance: 0, totalFunded: 0, totalSpent: 0 };
+	}
 
 	private getDb() {
 		const databaseUrl = this.configService.get<string>('database.url');
@@ -109,7 +134,19 @@ export class GuildsService {
 		});
 
 		// Initialize the guild pool
-		const pool = await this.guildPoolService.initializeGuildPool(result.id);
+		// Initialize guild pool via mana-credits
+		let pool = { balance: 0, totalFunded: 0, totalSpent: 0 };
+		try {
+			const creditsUrl = this.getCreditsUrl();
+			const res = await fetch(`${creditsUrl}/api/v1/internal/guild-pool/init`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-Service-Key': this.getServiceKey() },
+				body: JSON.stringify({ organizationId: result.id }),
+			});
+			if (res.ok) pool = await res.json();
+		} catch {
+			this.logger.warn('Failed to init guild pool (non-critical)', { guildId: result.id });
+		}
 
 		this.logger.log('Guild created', { guildId: result.id, name: dto.name });
 
@@ -139,7 +176,7 @@ export class GuildsService {
 
 		for (const org of result.organizations || []) {
 			try {
-				const pool = await this.guildPoolService.getGuildPoolBalance(org.id, userId);
+				const pool = await this.getGuildPoolBalance(org.id, userId);
 				guilds.push({
 					gilde: {
 						id: org.id,
@@ -177,7 +214,7 @@ export class GuildsService {
 		let pool = null;
 
 		try {
-			pool = await this.guildPoolService.getGuildPoolBalance(guildId, userId);
+			pool = await this.getGuildPoolBalance(guildId, userId);
 		} catch {
 			// Pool might not exist
 		}
@@ -214,7 +251,13 @@ export class GuildsService {
 	 * Invite a member to the guild.
 	 * Enforces subscription limit for maxTeamMembers.
 	 */
-	async inviteMember(guildId: string, email: string, role: string, inviterUserId: string, token: string) {
+	async inviteMember(
+		guildId: string,
+		email: string,
+		role: string,
+		inviterUserId: string,
+		token: string
+	) {
 		// Find guild owner to check their subscription limits
 		const db = this.getDb();
 		const [owner] = await db

@@ -8,9 +8,7 @@ import { AdminModule } from './admin/admin.module';
 import { AiModule } from './ai/ai.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { AuthModule } from './auth/auth.module';
-import { CreditsModule } from './credits/credits.module';
 import { FeedbackModule } from './feedback/feedback.module';
-import { GiftsModule } from './gifts/gifts.module';
 import { GuildsModule } from './guilds/guilds.module';
 import { HealthModule } from './health/health.module';
 import { SettingsModule } from './settings/settings.module';
@@ -55,9 +53,7 @@ import { SecurityModule } from './security';
 		AiModule,
 		ApiKeysModule,
 		AuthModule,
-		CreditsModule,
 		FeedbackModule,
-		GiftsModule,
 		GuildsModule,
 		HealthModule,
 		SettingsModule,
