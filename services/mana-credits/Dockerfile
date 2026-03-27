@@ -10,9 +10,9 @@ RUN bun install --frozen-lockfile 2>/dev/null || bun install
 COPY src ./src
 COPY tsconfig.json drizzle.config.ts ./
 
-EXPOSE 3060
+EXPOSE 3061
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD bun -e "fetch('http://localhost:3060/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+  CMD bun -e "fetch('http://localhost:3061/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 CMD ["bun", "run", "src/index.ts"]

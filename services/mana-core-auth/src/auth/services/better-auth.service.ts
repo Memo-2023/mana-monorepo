@@ -151,7 +151,7 @@ export class BetterAuthService {
 
 			// Redeem any pending gift codes via mana-credits service
 			try {
-				const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3060';
+				const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3061';
 				const serviceKey = process.env.MANA_CORE_SERVICE_KEY || '';
 				const giftRes = await fetch(`${creditsUrl}/api/v1/internal/gifts/redeem-pending`, {
 					method: 'POST',
@@ -1758,7 +1758,7 @@ export class BetterAuthService {
 	 */
 	private async createPersonalCreditBalance(userId: string) {
 		try {
-			const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3060';
+			const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3061';
 			const serviceKey = process.env.MANA_CORE_SERVICE_KEY || '';
 			await fetch(`${creditsUrl}/api/v1/internal/credits/init`, {
 				method: 'POST',
@@ -1778,7 +1778,7 @@ export class BetterAuthService {
 	 */
 	private async initializeGuildPool(organizationId: string) {
 		try {
-			const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3060';
+			const creditsUrl = process.env.MANA_CREDITS_URL || 'http://localhost:3061';
 			const serviceKey = process.env.MANA_CORE_SERVICE_KEY || '';
 			await fetch(`${creditsUrl}/api/v1/internal/guild-pool/init`, {
 				method: 'POST',

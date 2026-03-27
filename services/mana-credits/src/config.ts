@@ -25,7 +25,7 @@ export function loadConfig(): Config {
 	};
 
 	return {
-		port: parseInt(process.env.PORT || '3060', 10),
+		port: parseInt(process.env.PORT || '3061', 10),
 		databaseUrl: requiredEnv(
 			'DATABASE_URL',
 			'postgresql://manacore:devpassword@localhost:5432/mana_credits'

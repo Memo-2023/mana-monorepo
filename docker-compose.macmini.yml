@@ -208,6 +208,7 @@ services:
       # Cross-domain SSO: share session cookies across all *.mana.how subdomains
       COOKIE_DOMAIN: .mana.how
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      MANA_CREDITS_URL: http://mana-credits:3061
       SMTP_HOST: smtp-relay.brevo.com
       SMTP_PORT: 587
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
@@ -242,6 +243,44 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # ============================================
+  # Tier 1b: Credits Service (Hono + Bun)
+  # ============================================
+
+  mana-credits:
+    build:
+      context: services/mana-credits
+      dockerfile: Dockerfile
+    image: mana-credits:local
+    container_name: mana-credits
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      TZ: Europe/Berlin
+      PORT: 3061
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_credits
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_CREDITS_WEBHOOK_SECRET:-}
+      BASE_URL: https://credits.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://picture.mana.how,https://todo.mana.how,https://zitare.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://manadeck.mana.how,https://presi.mana.how,https://storage.mana.how,https://nutriphi.mana.how,https://planta.mana.how,https://mukke.mana.how,https://context.mana.how,https://photos.mana.how,https://questions.mana.how
+    ports:
+      - "3061:3061"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3061/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mana-credits.rule=Host(`credits.mana.how`)"
+      - "traefik.http.routers.mana-credits.tls=true"
+      - "traefik.http.services.mana-credits.loadbalancer.server.port=3061"
 
   # ============================================
   # Tier 2: Gateway & Search Services (Ports 3010-3029)

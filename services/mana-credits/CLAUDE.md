@@ -23,7 +23,7 @@ bun run db:push    # Push schema
 bun run db:studio  # Open Drizzle Studio
 ```
 
-## Port: 3060
+## Port: 3061
 
 ## API Endpoints
 
@@ -81,11 +81,11 @@ bun run db:studio  # Open Drizzle Studio
 ## Environment Variables
 
 ```env
-PORT=3060
+PORT=3061
 DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/mana_credits
 MANA_CORE_AUTH_URL=http://localhost:3001
 MANA_CORE_SERVICE_KEY=dev-service-key
-BASE_URL=http://localhost:3060
+BASE_URL=http://localhost:3061
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 CORS_ORIGINS=http://localhost:5173,http://localhost:5180
