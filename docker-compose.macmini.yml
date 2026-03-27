@@ -1031,8 +1031,7 @@ services:
       STORAGE_BACKEND_URL: http://storage-backend:3035
     volumes:
       - matrix_bots_data:/app/data
-    ports:
-      - "4000:4000"
+    # No host port mapping needed — only communicates with synapse internally
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4000/health"]
       interval: 60s
@@ -1693,6 +1692,23 @@ services:
       retries: 3
       start_period: 10s
 
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: mana-mon-loki
+    restart: always
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./docker/loki/local-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3100/ready"]
+      interval: 300s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
   pushgateway:
     image: prom/pushgateway:v1.7.0
     container_name: mana-mon-pushgateway
@@ -1958,5 +1974,7 @@ volumes:
     name: mana-grafana-data
   analytics_data:
     name: mana-analytics-data
+  loki_data:
+    name: mana-loki-data
   matrix_bots_data:
     name: mana-matrix-bots-data
