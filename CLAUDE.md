@@ -138,7 +138,8 @@ manacore-monorepo/
 │   ├── mana-landing-builder/# Org landing page builder (Astro → Cloudflare Pages)
 │   ├── mana-media/          # Central media platform (CAS, thumbnails)
 │   ├── mana-api-gateway/    # API gateway with rate limiting
-│   ├── mana-notify/         # Notification service (push, email, in-app)
+│   ├── mana-notify/         # Notification service (NestJS, legacy)
+│   ├── mana-notify-go/      # Notification service (Go, active)
 │   ├── mana-image-gen/      # Local AI image generation (FLUX)
 │   ├── mana-stt/            # Speech-to-text service
 │   ├── mana-tts/            # Text-to-speech service
