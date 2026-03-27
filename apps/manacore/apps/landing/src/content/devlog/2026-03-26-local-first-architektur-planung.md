@@ -1,297 +1,242 @@
 ---
-title: 'Local-First Architektur: Von Login-Wall zu Instant-App mit neuem Tech-Stack'
-description: 'Architekturplanung für den Umbau aller ManaCore-Apps auf Local-First mit Dexie.js, Go Sync-Server und Hono/Bun statt NestJS. Guest-Mode, Offline-CRUD und Instant UI als Kernziele.'
+title: 'Storage-Sprint, Passkeys & 2FA, Cross-App Tags, Zitare-Polish & Local-First Planung'
+description: 'Massiver Tag mit 61 Commits: Storage auf ManaScore 87, WebAuthn/Passkeys und TOTP-2FA, Cross-App Tag-System, Zitare-Komplett-Polish, SvelteKit Base-Image, und Local-First Architekturplanung.'
 date: 2026-03-26
 author: 'Till Schneider'
-category: 'infrastructure'
+category: 'feature'
 tags:
   [
-    'architecture',
+    'storage',
+    'auth',
+    'passkeys',
+    '2fa',
+    'tags',
+    'zitare',
+    'infrastructure',
+    'docker',
     'local-first',
-    'offline',
-    'dexie',
-    'indexeddb',
-    'go',
-    'hono',
-    'bun',
-    'sync',
-    'guest-mode',
-    'pwa',
-    'nestjs-migration',
-    'tech-stack',
+    'architecture',
+    'i18n',
+    'testing',
   ]
 featured: true
-readTime: 15
+commits: 61
+readTime: 18
+stats:
+  filesChanged: 329
+  linesAdded: 19553
+  linesRemoved: 2838
 contributors:
   - name: 'Till Schneider'
     handle: 'Till-JS'
+    commits: 61
 workingHours:
-  start: '2026-03-26T10:00'
-  end: '2026-03-26T16:00'
+  start: '2026-03-26T08:00'
+  end: '2026-03-26T22:00'
 ---
 
-Umfassende Architekturplanung mit dem Ziel, die gesamte ManaCore-Plattform fundamental zu modernisieren:
+Massiver Tag mit **61 Commits** über **329 Dateien** und netto **+16.715 Zeilen** — Storage-Sprint, Auth-Features, Tag-System, Zitare-Polish, Infra und Architekturplanung:
 
-- **Local-First statt API-First** — Alle Daten leben primär in IndexedDB (Dexie.js), Server synchronisiert im Hintergrund
-- **Guest-Mode als Nebeneffekt** — Kein Login-Screen mehr beim ersten Besuch, Nutzer landen direkt in der App
-- **Backend-Modernisierung** — NestJS wird durch Hono auf Bun ersetzt, neuer Go Sync-Server
-- **Instant UI** — Reads < 1ms aus IndexedDB statt 200-500ms API-Roundtrip
-- **Echtes Offline** — Voller CRUD ohne Netz, nicht nur gecachte Reads
-
----
-
-## Ausgangslage: Das Login-Wall-Problem
-
-Wenn ein neuer Nutzer `todo.mana.how` besucht, passiert aktuell Folgendes:
-
-1. SvelteKit App lädt
-2. `AuthGate` Komponente prüft Auth-Status
-3. Kein Token vorhanden → Redirect zu `/login`
-4. Nutzer sieht Login-Screen, ohne die App je gesehen zu haben
-
-Das ist ein klassisches Conversion-Problem: Nutzer müssen sich committen (Account erstellen), bevor sie den Wert der App erleben. Die Lösung scheint einfach — `allowGuest=true` setzen und fertig. Aber die Frage "wo kommen dann die Daten her?" führt zu einer viel grundlegenderen Architekturentscheidung.
+- **Storage-App komplett** — Von Score 72 auf 87: Previews, Audio-Player, Skeleton Screens, Sharing, Tagging, i18n, E2E-Tests
+- **Auth: Passkeys & 2FA** — WebAuthn/Passkeys und TOTP-2FA in allen Apps, Google/Apple Login entfernt
+- **Cross-App Tag-System** — Neues Tag-System mit Gruppen und Entity-Links in 18 Apps integriert
+- **Zitare Komplett-Polish** — i18n, Display-Settings, Suche, Filter, Author-Bios, Loading States
+- **Local-First Architektur** — Umfassende Planung für Dexie.js + Go Sync-Server + Hono/Bun
+- **Infra** — SvelteKit Base-Image, build-app.sh Script, Dockerfile-Fixes
 
 ---
 
-## Analyse: Was ist eigentlich "Offline"?
+## 1. Storage-App: Von 72 auf 87 ManaScore
 
-Aktuell haben alle 20 Web-Apps PWA-Support via `@manacore/shared-pwa` mit Workbox-Caching:
+Massiver Sprint der die Storage-App von einem funktionalen MVP zu einer production-ready Anwendung transformiert hat.
 
-| Schicht | Status | Was es kann |
-|---------|--------|------------|
-| Service Worker + Precaching | Alle 20 Apps | App-Shell (HTML/CSS/JS) offline laden |
-| API Caching (NetworkFirst) | Alle Apps | Zuletzt geladene API-Responses aus Cache lesen |
-| Offline-Seite | Alle Apps | Fallback-UI wenn komplett offline |
-| Offline-Writes | Nur SkillTree | Daten in IndexedDB erstellen/bearbeiten |
+### Datei-Previews
 
-Das bedeutet: **Read-Only Offline** ist bereits da. Aber kein einziger Write funktioniert offline (ausser SkillTree mit dediziertem IndexedDB-Store).
+Vollständiges Preview-System für alle gängigen Dateitypen direkt im Browser:
 
-### Das Spektrum der Offline-Architekturen
+| Dateityp | Preview |
+|----------|---------|
+| **Audio** | Player mit Frequency-Visualizer (Canvas-basierte Wellenform-Animation) |
+| **Video** | Native HTML5 Video Player |
+| **PDF** | Eingebetteter Viewer |
+| **Text/Code** | Syntax-Highlighting |
+| **Markdown** | Gerenderte Ansicht |
 
-```
-Level 0          Level 1          Level 2          Level 3          Level 4
-Online-Only  →  Cache-Read   →  Offline-Capable → Offline-First → Local-First
-                (AKTUELL)                         (ZIEL)
-```
+### UX-Verbesserungen
 
-- **Level 1 (aktuell):** Gecachte API-Responses lesbar, kein Write
-- **Level 2:** Writes werden gequeued, sync bei Reconnect
-- **Level 3:** App arbeitet immer gegen lokale DB, Server synced im Hintergrund
-- **Level 4:** Volle CRDT-basierte Sync, Real-time Collab
+- **Skeleton Shimmer Screens** — Loading-Spinner durch animierte Skeleton-Layouts ersetzt
+- **SVG Empty State Illustrations** — Eigene SVGs für leere Ordner, Suche, Papierkorb, Favoriten
+- **Share Modal** — Dialog zum Erstellen von Share-Links mit Ablaufdatum und Passwort
+- **File Tagging** — TagPicker-Komponente für Tags direkt an Dateien
+- **Bulk Operations** — Multi-Select mit Shift/Cmd-Klick, Bulk-Delete, Bulk-Move, Bulk-Tag
+- **Storage Stats** — Echte Speicher-Nutzung in den Einstellungen
 
-**Entscheidung: Level 3 (Offline-First)** — Guest-Mode wird Nebeneffekt, Instant UI, voller Offline-CRUD. Level 4 (CRDT) ist Overengineering ohne Real-time-Collab-Requirement.
+### Backend-Qualität
 
----
+- **Swagger/OpenAPI Docs** — Vollständige API-Dokumentation
+- **Structured Logging** — Pino Logger mit JSON-Output und Request-Tracing
+- **i18n** — Französisch, Spanisch und Italienisch hinzugefügt
+- **E2E-Tests** — Integration-Tests mit echtem Backend
 
-## Die neue Architektur
+### Commits
 
-### Client: Dexie.js als lokale Datenbank
-
-Jede App bekommt eine lokale IndexedDB-Datenbank via Dexie.js. Statt API-Calls liest und schreibt die App gegen lokale Daten:
-
-```
-VORHER:  Component → API Call → 200ms warten → State Update → Render
-NACHHER: Component → IndexedDB Read (< 1ms) → Render → Sync im Hintergrund
-```
-
-**Warum Dexie.js:**
-- `liveQuery()` — reaktive Queries, die automatisch UI updaten (perfekt für Svelte 5 runes)
-- 15KB Bundle (vs. 500KB für SQLite WASM)
-- Kein OPFS nötig, breite Browser-Unterstützung
-- Bewährte Library mit grosser Community
-
-**Neues Shared Package: `@manacore/local-store`** kapselt die gesamte Local-First-Logik:
-- `createLocalCollection<T>()` — Factory für typisierte, reaktive Collections
-- Sync Engine mit Field-Level Last-Write-Wins Conflict Resolution
-- WebSocket-Client für Push-Updates von anderen Geraeten
-- Offline-Queue für pending Writes
-
-### Sync-Server: Go
-
-Ein zentraler Sync-Server (`mana-sync`) in Go, der das Sync-Protokoll fuer alle Apps implementiert:
-
-**Warum Go:**
-- 100.000+ gleichzeitige WebSocket-Verbindungen (Goroutines, ~4KB/Connection)
-- P99 Latency < 1ms fuer Sync-Operationen
-- Single Binary Deployment (~15MB)
-- Perfekt fuer genau diese Art von I/O-bound Service
-
-**Was der Sync-Server macht:**
-1. Empfaengt Changesets von Clients (Batch von Aenderungen)
-2. Wendet Field-Level LWW an bei Konflikten
-3. Persistiert in PostgreSQL
-4. Gibt Server-Delta zurueck (was der Client noch nicht hat)
-5. Pushed via WebSocket an andere Geraete des Users
-
-**Was er NICHT macht:** Business-Logik, Auth, File-Uploads, AI-Calls. Das bleibt in den App-Backends.
-
-### App-Backends: Von NestJS zu Hono auf Bun
-
-Die groesste Aenderung: NestJS wird durch Hono ersetzt, laeuft auf Bun statt Node.
-
-**Warum weg von NestJS:**
-- Enterprise-Java-Philosophie (Angular-Style DI, Decorators, Module, Guards, DTOs...)
-- ~50MB node_modules pro Backend
-- 2-5 Sekunden Cold Start
-- Viel Boilerplate fuer einfache Aufgaben
-
-**Warum Hono:**
-- 14KB Bundle
-- < 50ms Cold Start auf Bun (< 6ms fuer Bun selbst)
-- Web-Standard API (fetch, Request/Response)
-- RPC Type Safety: Client importiert Server-Typen ohne Codegen
-- Laeuft ueberall: Bun, Node, Deno, Cloudflare Workers
-
-**Warum Bun:**
-- Nativer TypeScript-Support (kein Compiler noetig)
-- ~150K req/s (3x Node)
-- Built-in SQLite, Test Runner, Package Manager
-- Startup ~6ms statt ~300ms (Node)
-
-### Was sich am Backend aendert
-
-Durch Local-First fallen ~220 von ~260 Endpoints weg (alle CRUD). Was bleibt:
-
-| Kategorie | Beispiele | Bleibt weil |
-|-----------|-----------|-------------|
-| **External APIs** | Replicate (Bild-Gen), OpenRouter (LLM), Google OAuth | API Keys duerfen nicht zum Client |
-| **Webhooks** | Stripe Payment, Replicate Completion | Server muss Callbacks empfangen |
-| **Server-Compute** | RRULE Expansion (DoS-Schutz), Spaced Repetition | Zu teuer/riskant fuer Client |
-| **File Uploads** | Bilder, vCards, CSVs → MinIO/S3 | Braucht Server-seitigen Storage-Zugang |
-| **Credits** | Balance pruefen, Consumption tracken | Authoritative Quelle, Betrugsschutz |
-| **Admin** | User-Uebersicht, Metriken | Zugriff auf alle Daten |
-
-### Auth: Better Auth bleibt, NestJS geht
-
-Better Auth hat einen nativen Hono-Adapter. Die Migration ist hauptsaechlich ein HTTP-Layer-Wechsel, die Auth-Logik (EdDSA JWT, SSO, Organizations, Credits) bleibt identisch.
-
-### AI Services: Bleiben Python
-
-`mana-llm`, `mana-stt`, `mana-tts`, `mana-image-gen` — Python ist das richtige Oekosystem fuer ML/AI. Keine Aenderung.
+- `2150452a` — Audio Player mit Frequency Visualizer
+- `59896521` — Video, PDF, Text/Code, Markdown Preview
+- `9f668009` — Skeleton Shimmer Screens
+- `56307a3d` — SVG Empty State Illustrations
+- `56683876` — ShareModal
+- `5c69dc7d` — File Tagging UI
+- `a85682d8` — Bulk File Operations
+- `9611544f` — Storage Usage Stats
+- `8692b082` — Structured Logging (Pino)
+- `8b5889e1` — Swagger/OpenAPI
+- `a439d5d8` — FR/ES/IT Translations
+- `8a1cb2dc` — Integration E2E Tests
+- `c681a5d6` — ManaScore auf 87 aktualisiert
 
 ---
 
-## Conflict Resolution: Field-Level Last-Write-Wins
+## 2. Auth: WebAuthn/Passkeys & TOTP-2FA
 
-Das Herzstück des Sync-Protokolls. Statt "ganzes Objekt gewinnt" wird pro Feld entschieden:
+### Passkeys (WebAuthn)
 
-```
-Gerät A (offline): Task "Einkaufen" → priority: "high"     (14:01:03)
-Gerät B (offline): Task "Einkaufen" → title: "Einkaufen Rewe" (14:01:05)
+Komplette WebAuthn/Passkey-Integration für passwortloses Login über alle Apps:
 
-Sync-Ergebnis:
-  title: "Einkaufen Rewe"  (B war neuer für dieses Feld)
-  priority: "high"          (A war einziger Editor für dieses Feld)
-  → Kein Datenverlust
-```
+- **PasskeyManager-Komponente** — UI zum Registrieren, Benennen und Löschen von Passkeys
+- **Production Config** — Korrektes `rpId` und `origin` für `mana.how`-Domain
+- **ManaCore Integration** — PasskeyManager in Settings-Page eingebaut
+- **35 Tests** — Controller-Tests für Passkey und 2FA Flows
 
-Jede Tabelle bekommt ein `field_timestamps` JSONB-Feld das den letzten Aenderungszeitpunkt pro Feld speichert.
+### TOTP Two-Factor Authentication
 
----
+- Authenticator-App Setup mit QR-Code und manuellem Secret
+- Recovery Codes für Account-Zugang ohne 2FA-Gerät
+- Alle Apps zeigen 2FA-Setup in den Security-Settings
 
-## Guest-Mode: Kein Sonderfall mehr
+### Auth UX & Cleanup
 
-Mit Local-First ist Guest-Mode kein Feature sondern der Default-Zustand:
+- UX-Verbesserungen für Passkey- und 2FA-Management (`70737561`)
+- Rate-Limit-Feedback, Audit-Log UI und E2E-Tests (`0dfd6038`)
+- Google/Apple Social Login Code komplett entfernt — Self-Sovereign Auth (`2d11ba62`)
 
-```
-Guest:      IndexedDB ←→ UI                (Sync Engine aus)
-Eingeloggt: IndexedDB ←→ UI ←→ Sync ←→ Server  (Sync Engine an)
-```
+### Commits
 
-Bei Login passiert:
-1. User meldet sich an
-2. Sync Engine startet
-3. Lokale Daten bekommen `userId`
-4. Alles wird zum Server gepusht
-5. Server-Daten (von anderen Geraeten) werden gepullt
-
-Kein separater Migrations-Endpoint, kein Sonderfall im Store-Code.
-
-### Onboarding-Seed pro App
-
-Jede App definiert Seed-Daten die bei erstem Besuch in IndexedDB geladen werden:
-
-- **Todo:** Beispiel-Projekt "Erste Schritte" mit erklaerenden Tasks
-- **Contacts:** Beispiel-Kontakt mit allen Feldern ausgefuellt
-- **Calendar:** Beispiel-Termine fuer diese Woche
-- **Chat:** Willkommensnachricht mit Erklaerung der Features
+- `3091da91` — WebAuthn/Passkey Support
+- `c4d55209` — PasskeyManager Komponente + Production Config
+- `ac4bacad` — ManaCore Settings Integration
+- `f5a9edcf` — TOTP 2FA in allen Apps
+- `e0e9ede8` — 35 Controller-Tests
+- `70737561` — UX-Improvements
+- `0dfd6038` — Rate-Limit, Audit-Log, E2E-Tests
+- `2d11ba62` — Social Login entfernt
 
 ---
 
-## Performance-Vergleich
+## 3. Cross-App Tag-System
 
-| Metrik | Aktuell (NestJS/Node) | Ziel (Go + Hono/Bun) |
-|--------|----------------------|----------------------|
-| Task erstellen | 200-500ms (API) | < 5ms (lokal) |
-| Seitenwechsel | Loading-Spinner + API | Instant (IndexedDB) |
-| Backend Memory/Service | ~150MB | ~15MB (Go) / ~40MB (Bun) |
-| Cold Start | 2-5s | ~6ms (Bun) / ~50ms (Go) |
-| Concurrent WebSockets | ~5.000 | ~100.000 (Go) |
-| Total Docker Image Size | ~3GB (6 NestJS) | ~250MB (1 Go + 3-4 Hono) |
-| CRUD Endpoints | ~260 | ~40 + 1 Sync-Protokoll |
+### Architektur
 
----
+Neues, app-übergreifendes Tag-System mit:
 
-## Migrationsplan (5 Phasen)
+- **Tag-Gruppen** — Kategorisierung von Tags (z.B. "Priorität", "Status", "Thema")
+- **Entity-Links** — Tags können an beliebige Entities gehängt werden
+- **Farbige Tags** — Jeder Tag hat eine zuweisbare Farbe
+- **Backend-Validierung** — FK-Constraints, Token-Validation, Input-Validation, 37 Tests
 
-### Phase 1: Foundation (2-3 Wochen)
-- `@manacore/local-store` Package bauen
-- `mana-sync` Go Service bauen
-- Todo als Pilot umbauen
+### Shared Components
 
-### Phase 2: Todo komplett (2-3 Wochen)
-- Todo NestJS → Hono/Bun
-- Guest-Mode + Onboarding-Seed
-- PillNav Login-Button
+- `TagStrip` — Horizontale Tag-Leiste für jede App
+- `createTagStore` — Svelte-Store-Factory für Tag-Operationen
 
-### Phase 3: Alle Apps (4-6 Wochen)
-- Reihenfolge: Zitare → Calendar → Clock → ManaDeck → Contacts → Chat → Picture → Presi
-- Pro App: Collections definieren, Stores umbauen, NestJS → Hono
+### Integration
 
-### Phase 4: Auth-Migration (2 Wochen)
-- mana-core-auth: NestJS → Hono/Bun mit Better Auth Hono-Adapter
+1. `ce900d5f` — Todo: TagStrip + createTagStore
+2. `69aa8378` — Contacts & Calendar: TagStrip + createTagStore
+3. `91116bf0` — Alle 15 übrigen Apps: Shared TagStrip
 
-### Phase 5: Cleanup (1-2 Wochen)
-- NestJS Dependencies entfernen
-- Shared Packages migrieren (shared-nestjs-auth → shared-hono-auth)
-- Docker-Images auf Bun Base umstellen
-- CI/CD anpassen
+### Backend
+
+- `0c479b3e` — Tag-System mit Gruppen und Entity-Links
+- `11ab265d` — FK-Constraints, Token-Validation, Input-Validation
+- `4ddff848` — Transaction on Sync, Scroll-Indicator, 37 Backend-Tests
 
 ---
 
-## Technologie-Entscheidungen
+## 4. Zitare: Komplett-Polish
 
-| Entscheidung | Gewählt | Alternativen betrachtet | Begründung |
-|---|---|---|---|
-| Lokale DB | Dexie.js | SQLite WASM, cr-sqlite | 15KB vs 500KB, liveQuery Reaktivität, breiter Support |
-| Sync-Server | Go | Rust, Elixir, Node | Performance + Einfachheit, perfekt für I/O-bound WebSocket Service |
-| App-Backend | Hono + Bun | Fastify, ElysiaJS, Express | RPC Type Safety, Web-Standard API, Multi-Runtime |
-| Conflict Strategy | Field-Level LWW | Volles CRDT (Automerge/Y.js) | Löst 99% der Konflikte, CRDT nur nötig bei Real-time Collab |
-| Runtime | Bun | Node, Deno | Nativer TS, 3x Performance, schnellster Startup |
-| Auth | Better Auth (bleibt) | Lucia, Auth.js | Bereits integriert, Hono-Adapter vorhanden |
+Umfassende Qualitätsverbesserungen für die Zitate-App:
+
+| Feature | Commit |
+|---------|--------|
+| Komplette i18n-Abdeckung aller Seiten | `90e61356` |
+| Display-Settings (Schriftgrösse, Layout) | `6107d572` |
+| Suche & Sortierung auf Kategorie-Detailseite | `40b55eb6` |
+| Category Filter-Chips in Suchergebnissen | `b7d1d2ec` |
+| Favorites-Count-Badge + Display-Settings | `7c7e5eb0` |
+| Author-Bio auf Zitat-Karten | `1316ef57` |
+| Loading States für Listen-Operationen | `96ff16b7` |
+| Error-Feedback für stille API-Fehler | `326acf0e` |
+| Maxlength-Validation im Listen-Formular | `5bb96dbf` |
+| Settings/Spiral/Themes in Account-Dropdown | `08629b80` |
+| Tailwind CSS v4 Vite-Plugin Fix | `30a0a651` |
+
+---
+
+## 5. Local-First Architekturplanung
+
+Umfassende Planung für den fundamentalen Umbau der gesamten ManaCore-Plattform:
+
+### Kernentscheidungen
+
+| Aspekt | Aktuell | Ziel |
+|--------|---------|------|
+| **Datenmodell** | API-First | Local-First (IndexedDB + Sync) |
+| **Client-DB** | Keine | Dexie.js (15KB, liveQuery) |
+| **Sync** | Kein | Go Sync-Server (100K+ WebSockets) |
+| **Backend** | NestJS | Hono auf Bun (14KB, < 50ms Cold Start) |
+| **Guest-Mode** | Separater Code | Nebeneffekt der Architektur |
+| **Offline** | Read-Only Cache | Voller CRUD |
+| **Performance** | 200-500ms API | < 5ms IndexedDB |
+
+### Conflict Resolution
+
+Field-Level Last-Write-Wins statt "ganzes Objekt gewinnt" — zwei Geräte können verschiedene Felder desselben Objekts offline bearbeiten ohne Datenverlust.
+
+### Migrationsplan
+
+5 Phasen über ~12 Wochen: Foundation → Todo-Pilot → Alle Apps → Auth-Migration → Cleanup
+
+Detaillierter Plan: `.claude/plans/local-first-architecture-migration.md`
+
+---
+
+## 6. Infrastructure
+
+### SvelteKit Base Image
+
+Neues `sveltekit-base:local` Docker-Image mit allen Shared Packages vorinstalliert — einzelne App-Builds deutlich schneller.
+
+- `cdfbfcd1` — SvelteKit Base Image + build-app.sh Script
+- `ba6b9537` — Container-Namen statt IDs in build-app.sh
+
+### Weitere Fixes
+
+- `e676ba68` — `JSON.stringify` für Env-Var-Injection in allen `hooks.server.ts`
+- `9c8bae3d` — NestJS Auth: Multiple JWT-Issuers für Docker/Public URL Mismatch
+- `2b0b902b` — Credit-Operations Package Exports auf compiled `dist/` zeigend
+- `5a3ee5c7` — Todo Task UI: Priority-Checkboxes, Drag-Styling, Route-Fix
+- Diverse Dockerfile-Fixes für Zitare, Storage, Todo (fehlende Dependencies, Node Heap Size)
 
 ---
 
 ## Zusammenfassung
 
-| Aspekt | Änderung |
-|--------|----------|
-| **Datenmodell** | API-First → Local-First (IndexedDB + Sync) |
-| **Backend-Framework** | NestJS → Hono auf Bun |
-| **Sync-Server** | Neu: Go Service (mana-sync) |
-| **Runtime** | Node.js → Bun |
-| **Guest-Mode** | Separater Code → Nebeneffekt der Architektur |
-| **Offline** | Read-Only Cache → Voller CRUD |
-| **UI-Geschwindigkeit** | API-abhängig → Instant (lokal) |
-| **AI Services** | Python → Python (keine Änderung) |
-| **Auth** | Better Auth bleibt, HTTP-Layer wechselt |
-
-## Nächste Schritte
-
-1. `@manacore/local-store` Package initialisieren
-2. Go-Projekt `mana-sync` aufsetzen
-3. Todo-App als Pilot: Stores auf Dexie.js umbauen
-4. Sync-Protokoll zwischen Client und Go-Server implementieren
-5. Guest-Seed und PillNav Login-Button für Todo
-
-Detaillierter Plan: `.claude/plans/local-first-architecture-migration.md`
+| Bereich | Änderung |
+|---------|----------|
+| **Storage** | Score 72 → 87: Previews, Audio-Player, Sharing, Tagging, E2E-Tests, i18n |
+| **Auth** | Passkeys + TOTP-2FA in allen Apps, Social Login entfernt, 35+ Tests |
+| **Tags** | Cross-App Tag-System in 18 Apps integriert, 37 Backend-Tests |
+| **Zitare** | Komplett i18n, Display-Settings, Suche, Filter, Author-Bios |
+| **Architektur** | Local-First Planung: Dexie.js + Go Sync + Hono/Bun |
+| **Infra** | SvelteKit Base-Image, build-app.sh, Dockerfile-Fixes |
+| **Gesamt** | 61 Commits, 329 Dateien, +19.553 / -2.838 Zeilen |
