@@ -17,7 +17,9 @@
 	import { ToastContainer } from '@manacore/shared-ui';
 	import { storageOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { storageStore } from '$lib/data/local-store';
 	import MiniPlayer from '$lib/components/audio/MiniPlayer.svelte';
 	import FullPlayer from '$lib/components/audio/FullPlayer.svelte';
 	import '../app.css';
@@ -63,8 +65,11 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
-	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email || 'Menü');
+	// User email for user dropdown — empty string for guests so PillNav shows login button
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
+
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
 
 	// TagStrip state
 	let isTagStripVisible = $state(true);
@@ -160,11 +165,26 @@
 	}
 
 	async function handleAuthReady() {
+		// Initialize local-first database
+		await storageStore.initialize();
+
+		// If authenticated, start syncing
+		if (authStore.isAuthenticated) {
+			storageStore.startSync(() => authStore.getValidToken());
+		}
+
 		// Initialize theme
 		theme.initialize();
 
-		// Load user settings and tags
-		await Promise.all([userSettings.load(), tagsStore.fetchTags()]);
+		// Show guest welcome on first visit
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('storage')) {
+			showGuestWelcome = true;
+		}
+
+		if (authStore.isAuthenticated) {
+			// Load user settings and tags (require auth)
+			await Promise.all([userSettings.load(), tagsStore.fetchTags()]);
+		}
 
 		// Initialize collapsed state from localStorage
 		const savedCollapsed = localStorage.getItem('storage-nav-collapsed');
@@ -252,12 +272,24 @@
 			<MiniOnboardingModal store={storageOnboarding} appName="Storage" appEmoji="☁️" />
 		{/if}
 
-		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+		{#if authStore.isAuthenticated}
+			<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+		{/if}
 
 		<!-- Audio Player -->
 		<MiniPlayer />
 		<FullPlayer />
 	{/if}
+
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="storage"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
 </AuthGate>
 
 <style>

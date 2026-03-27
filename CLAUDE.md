@@ -532,8 +532,12 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | Clock | alarms, timers, worldClocks | Done |
 | Contacts | contacts | Done |
 | ManaDeck | decks, cards | Done |
-| Picture | — | Not yet |
-| Presi | — | Not yet |
+| Picture | images, boards, boardItems, tags, imageTags | Done |
+| Presi | decks, slides | Done |
+| Inventar | collections, items, locations, categories | Done |
+| NutriPhi | meals, goals, favorites | Done |
+| Planta | plants, plantPhotos, wateringSchedules, wateringLogs | Done |
+| Storage | files, folders, tags, fileTags | Done |
 
 ### Dev Commands (Local-First Stack)
 

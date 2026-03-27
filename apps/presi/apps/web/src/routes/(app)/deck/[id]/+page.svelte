@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { auth } from '$lib/stores/auth.svelte';
 	import { PresiEvents } from '@manacore/shared-utils/analytics';
 	import { shareApi } from '$lib/api/client';
 	import type { ShareLink } from '$lib/api/client';
@@ -254,13 +255,15 @@
 					<Plus class="w-5 h-5" />
 					Add Slide
 				</button>
-				<button
-					onclick={openShareModal}
-					class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-colors"
-				>
-					<ShareNetwork class="w-5 h-5" />
-					Share
-				</button>
+				{#if auth.isAuthenticated}
+					<button
+						onclick={openShareModal}
+						class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-colors"
+					>
+						<ShareNetwork class="w-5 h-5" />
+						Share
+					</button>
+				{/if}
 				{#if decksStore.currentSlides.length > 0}
 					<a
 						href="/present/{deckId}"

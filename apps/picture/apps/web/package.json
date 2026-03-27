@@ -28,6 +28,7 @@
 		"@manacore/shared-help-types": "workspace:*",
 		"@manacore/shared-help-ui": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
+		"@manacore/local-store": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-stores": "workspace:*",
 		"@manacore/shared-tags": "workspace:*",

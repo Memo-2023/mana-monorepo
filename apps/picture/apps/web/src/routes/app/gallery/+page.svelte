@@ -10,8 +10,9 @@
 	} from '$lib/stores/images';
 	import { isUIVisible } from '$lib/stores/ui';
 	import { tags, selectedTags } from '$lib/stores/tags';
-	import { getImages } from '$lib/api/images';
-	import { getAllTags } from '$lib/api/tags';
+	import { imageCollection, imageTagCollection, tagCollection } from '$lib/data/local-store';
+	import type { Image } from '$lib/api/images';
+	import type { LocalImage } from '$lib/data/local-store';
 	import GalleryGrid from '$lib/components/gallery/GalleryGrid.svelte';
 	import ImageDetailModal from '$lib/components/gallery/ImageDetailModal.svelte';
 	import QuickGenerateBar from '$lib/components/gallery/QuickGenerateBar.svelte';
@@ -22,9 +23,40 @@
 	import { Heart } from '@manacore/shared-icons';
 	import { onMount } from 'svelte';
 
+	const PAGE_SIZE = 20;
+
 	let loadingMore = $state(false);
 	let observer: IntersectionObserver | null = null;
 	let loadMoreTrigger = $state<HTMLElement | null>(null);
+
+	/** Convert LocalImage (IndexedDB) to the Image type used by components. */
+	function toImage(local: LocalImage): Image {
+		return {
+			id: local.id,
+			userId: 'local',
+			prompt: local.prompt,
+			negativePrompt: local.negativePrompt ?? undefined,
+			model: local.model ?? undefined,
+			style: local.style ?? undefined,
+			publicUrl: local.publicUrl ?? undefined,
+			storagePath: local.storagePath,
+			filename: local.filename,
+			format: local.format ?? undefined,
+			width: local.width ?? undefined,
+			height: local.height ?? undefined,
+			fileSize: local.fileSize ?? undefined,
+			blurhash: local.blurhash ?? undefined,
+			isPublic: local.isPublic,
+			isFavorite: local.isFavorite,
+			downloadCount: local.downloadCount,
+			rating: local.rating ?? undefined,
+			archivedAt: local.archivedAt ?? undefined,
+			generationId: local.generationId ?? undefined,
+			sourceImageId: local.sourceImageId ?? undefined,
+			createdAt: local.createdAt ?? new Date().toISOString(),
+			updatedAt: local.updatedAt ?? new Date().toISOString(),
+		};
+	}
 
 	onMount(() => {
 		loadTags().then(() => {
@@ -40,7 +72,7 @@
 			},
 			{
 				threshold: 0.1,
-				rootMargin: '100px', // Load before reaching the trigger
+				rootMargin: '100px',
 			}
 		);
 
@@ -55,8 +87,15 @@
 
 	async function loadTags() {
 		try {
-			const data = await getAllTags();
-			tags.set(data);
+			const localTags = await tagCollection.getAll();
+			tags.set(
+				localTags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color ?? undefined,
+					createdAt: t.createdAt ?? new Date().toISOString(),
+				}))
+			);
 		} catch (error) {
 			console.error('Error loading tags:', error);
 		}
@@ -70,18 +109,37 @@
 	});
 
 	async function loadInitialImages() {
-		if (!authStore.user) return;
-
 		isLoading.set(true);
 		try {
-			const data = await getImages({
-				page: 1,
-				tagIds: $selectedTags.length > 0 ? $selectedTags : undefined,
-				favoritesOnly: $showFavoritesOnly,
-			});
-			images.set(data);
+			let allImages = await imageCollection.getAll();
+
+			// Filter out archived images
+			allImages = allImages.filter((img) => !img.archivedAt);
+
+			// Filter favorites
+			if ($showFavoritesOnly) {
+				allImages = allImages.filter((img) => img.isFavorite);
+			}
+
+			// Filter by tags
+			if ($selectedTags.length > 0) {
+				const allImageTags = await imageTagCollection.getAll();
+				const imageIdsWithTags = new Set(
+					allImageTags.filter((it) => $selectedTags.includes(it.tagId)).map((it) => it.imageId)
+				);
+				allImages = allImages.filter((img) => imageIdsWithTags.has(img.id));
+			}
+
+			// Sort by createdAt descending
+			allImages.sort(
+				(a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+			);
+
+			// Paginate
+			const page1 = allImages.slice(0, PAGE_SIZE);
+			images.set(page1.map(toImage));
 			currentPage.set(1);
-			hasMore.set(data.length === 20);
+			hasMore.set(allImages.length > PAGE_SIZE);
 		} catch (error) {
 			console.error('Error loading images:', error);
 		} finally {
@@ -90,21 +148,38 @@
 	}
 
 	async function loadMoreImages() {
-		if (!authStore.user || !$hasMore || $isLoading || loadingMore) return;
+		if (!$hasMore || $isLoading || loadingMore) return;
 
 		loadingMore = true;
 		const nextPage = $currentPage + 1;
 
 		try {
-			const newImages = await getImages({
-				page: nextPage,
-				tagIds: $selectedTags.length > 0 ? $selectedTags : undefined,
-				favoritesOnly: $showFavoritesOnly,
-			});
-			if (newImages.length > 0) {
-				images.update((current) => [...current, ...newImages]);
+			let allImages = await imageCollection.getAll();
+			allImages = allImages.filter((img) => !img.archivedAt);
+
+			if ($showFavoritesOnly) {
+				allImages = allImages.filter((img) => img.isFavorite);
+			}
+
+			if ($selectedTags.length > 0) {
+				const allImageTags = await imageTagCollection.getAll();
+				const imageIdsWithTags = new Set(
+					allImageTags.filter((it) => $selectedTags.includes(it.tagId)).map((it) => it.imageId)
+				);
+				allImages = allImages.filter((img) => imageIdsWithTags.has(img.id));
+			}
+
+			allImages.sort(
+				(a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+			);
+
+			const start = (nextPage - 1) * PAGE_SIZE;
+			const pageImages = allImages.slice(start, start + PAGE_SIZE);
+
+			if (pageImages.length > 0) {
+				images.update((current) => [...current, ...pageImages.map(toImage)]);
 				currentPage.set(nextPage);
-				hasMore.set(newImages.length === 20);
+				hasMore.set(start + PAGE_SIZE < allImages.length);
 			} else {
 				hasMore.set(false);
 			}

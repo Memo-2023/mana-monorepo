@@ -22,7 +22,9 @@
 	import { tagStore } from '$lib/stores/tags';
 	import { pictureOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { pictureStore } from '$lib/data/local-store';
 	import { viewMode, setViewMode } from '$lib/stores/view';
 	import type { ViewMode } from '$lib/stores/view';
 	import { browser } from '$app/environment';
@@ -34,6 +36,9 @@
 
 	// PillNav state
 	let isCollapsed = $state(false);
+
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
 
 	// Load persisted nav state
 	$effect(() => {
@@ -82,7 +87,22 @@
 	}
 
 	async function handleAuthReady() {
-		await Promise.all([userSettings.load(), tagStore.fetchTags()]);
+		// Initialize local-first database (opens IndexedDB, seeds guest data)
+		await pictureStore.initialize();
+
+		// If authenticated, start syncing to server
+		if (authStore.isAuthenticated) {
+			pictureStore.startSync(() => authStore.getValidToken());
+		}
+
+		// Show guest welcome modal on first visit
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('picture')) {
+			showGuestWelcome = true;
+		}
+
+		if (authStore.isAuthenticated) {
+			await Promise.all([userSettings.load(), tagStore.fetchTags()]);
+		}
 
 		// Redirect to start page if on /app and a custom start page is set
 		const currentPath = window.location.pathname;
@@ -169,8 +189,8 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
-	// User email for user dropdown
-	let userEmail = $derived(authStore.user?.email);
+	// User email for user dropdown — empty string for guests so PillNav shows login button
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
 	// Elements (divider + view mode tabs)
 	let elements: PillNavElement[] = $derived([
@@ -252,7 +272,7 @@
 
 <svelte:window on:keydown={handleKeyDown} />
 
-<AuthGate {authStore} {goto} loginHref="/auth/login" onReady={handleAuthReady}>
+<AuthGate {authStore} {goto} loginHref="/auth/login" allowGuest={true} onReady={handleAuthReady}>
 	<div class="min-h-screen" style="background-color: hsl(var(--color-background));">
 		<!-- PillNavigation (conditionally visible) -->
 		{#if $isUIVisible}
@@ -276,7 +296,8 @@
 				showLanguageSwitcher={true}
 				{languageItems}
 				{currentLanguageLabel}
-				showLogout={true}
+				showLogout={authStore.isAuthenticated}
+				loginHref="/auth/login"
 				primaryColor="#3b82f6"
 				showAppSwitcher={true}
 				{appItems}
@@ -321,7 +342,19 @@
 		<MiniOnboardingModal store={pictureOnboarding} appName="Picture" appEmoji="🎨" />
 	{/if}
 
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/auth/login" />
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="picture"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/auth/login')}
+		onRegister={() => goto('/auth/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/auth/login" />
+	{/if}
 </AuthGate>
 
 <style>

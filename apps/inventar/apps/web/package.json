@@ -33,6 +33,8 @@
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",
+		"@manacore/local-store": "workspace:*",
+		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-landing-ui": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-feedback-service": "workspace:*",

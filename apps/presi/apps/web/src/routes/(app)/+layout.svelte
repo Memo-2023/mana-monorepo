@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
@@ -17,6 +16,9 @@
 	import { decksStore } from '$lib/stores/decks.svelte';
 	import { presiOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { presiStore } from '$lib/data/local-store';
 
 	// App switcher items
 	const appItems = getPillAppItems('presi');
@@ -24,6 +26,12 @@
 	let { children } = $props();
 
 	let isCollapsed = $state(false);
+
+	// Guest welcome modal state
+	let showGuestWelcome = $state(false);
+
+	// User email for user dropdown — empty string for guests so PillNav shows login button
+	let userEmail = $derived(auth.isAuthenticated ? auth.user?.email || 'Menü' : '');
 
 	// Theme variant dropdown items
 	let themeVariantItems = $derived<PillDropdownItem[]>([
@@ -55,9 +63,6 @@
 		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
-
-	// User email for user dropdown
-	let userEmail = $derived(auth.user?.email);
 
 	// TagStrip visibility
 	let isTagStripVisible = $state(false);
@@ -137,16 +142,28 @@
 		goto(`/deck/${item.id}`);
 	}
 
-	onMount(async () => {
-		// Redirect to login if not authenticated
-		if (!auth.isAuthenticated) {
-			goto('/login');
-			return;
+	async function handleAuthReady() {
+		// Initialize local-first database (opens IndexedDB, seeds guest data)
+		await presiStore.initialize();
+
+		// If authenticated, start syncing to server
+		if (auth.isAuthenticated) {
+			presiStore.startSync(() => auth.getValidToken());
 		}
 
-		// Load user settings and tags
-		await userSettings.load();
-		await tagStore.fetchTags();
+		// Load decks from IndexedDB (guest seed or synced data)
+		await decksStore.loadDecks();
+
+		// Show guest welcome modal on first visit
+		if (!auth.isAuthenticated && shouldShowGuestWelcome('presi')) {
+			showGuestWelcome = true;
+		}
+
+		if (auth.isAuthenticated) {
+			// Load user settings and tags (require auth)
+			await userSettings.load();
+			await tagStore.fetchTags();
+		}
 
 		// Redirect to start page if on root and a custom start page is set
 		const currentPath = window.location.pathname;
@@ -160,7 +177,7 @@
 			isCollapsed = true;
 			collapsedStore.set(true);
 		}
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -171,81 +188,98 @@
 		{@render children()}
 	</main>
 {:else}
-	<!-- Navigation Layout -->
-	<div class="layout-container">
-		<!-- Floating Pill Navigation -->
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="Presi"
-			homeRoute="/"
-			onToggleTheme={handleToggleTheme}
-			isDark={theme.isDark}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={true}
-			onLogout={handleLogout}
-			primaryColor="#64748b"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			manaHref="/mana"
-			profileHref="/profile"
-			themesHref="/themes"
-			helpHref="/help"
-			allAppsHref="/apps"
-		/>
-
-		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
-		{#if isTagStripVisible}
-			<TagStrip
-				tags={tagStore.tags.map((t) => ({
-					id: t.id,
-					name: t.name,
-					color: t.color || '#3b82f6',
-				}))}
-				selectedIds={[]}
-				onToggle={() => {}}
-				onClear={() => {}}
-				managementHref="/tags"
-				loading={tagStore.loading}
+	<AuthGate authStore={auth} {goto} allowGuest={true} onReady={handleAuthReady}>
+		<!-- Navigation Layout -->
+		<div class="layout-container">
+			<!-- Floating Pill Navigation -->
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="Presi"
+				homeRoute="/"
+				onToggleTheme={handleToggleTheme}
+				isDark={theme.isDark}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={auth.isAuthenticated}
+				onLogout={handleLogout}
+				loginHref="/login"
+				primaryColor="#64748b"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
+				themesHref="/themes"
+				helpHref="/help"
+				allAppsHref="/apps"
 			/>
+
+			<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+			{#if isTagStripVisible}
+				<TagStrip
+					tags={tagStore.tags.map((t) => ({
+						id: t.id,
+						name: t.name,
+						color: t.color || '#3b82f6',
+					}))}
+					selectedIds={[]}
+					onToggle={() => {}}
+					onClear={() => {}}
+					managementHref="/tags"
+					loading={tagStore.loading}
+				/>
+			{/if}
+
+			<!-- Quick Input Bar -->
+			<QuickInputBar
+				onSearch={handleInputSearch}
+				onSelect={handleInputSelect}
+				placeholder="Präsentation suchen..."
+				emptyText="Keine Decks gefunden"
+				searchingText="Suche..."
+				locale={$locale || 'de'}
+				appIcon="search"
+				bottomOffset="70px"
+			/>
+
+			<!-- Main Content -->
+			<main class="main-content">
+				<div class="content-wrapper">
+					{@render children()}
+				</div>
+			</main>
+		</div>
+
+		<!-- Onboarding Modal -->
+		{#if presiOnboarding.shouldShow}
+			<MiniOnboardingModal store={presiOnboarding} appName="Presi" appEmoji="📊" />
 		{/if}
 
-		<!-- Quick Input Bar -->
-		<QuickInputBar
-			onSearch={handleInputSearch}
-			onSelect={handleInputSelect}
-			placeholder="Präsentation suchen..."
-			emptyText="Keine Decks gefunden"
-			searchingText="Suche..."
-			locale={$locale || 'de'}
-			appIcon="search"
-			bottomOffset="70px"
+		<!-- Guest Welcome Modal -->
+		<GuestWelcomeModal
+			appId="presi"
+			visible={showGuestWelcome}
+			onClose={() => (showGuestWelcome = false)}
+			onLogin={() => goto('/login')}
+			onRegister={() => goto('/register')}
+			locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 		/>
 
-		<!-- Main Content -->
-		<main class="main-content">
-			<div class="content-wrapper">
-				{@render children()}
-			</div>
-		</main>
-	</div>
-
-	<!-- Onboarding Modal -->
-	{#if presiOnboarding.shouldShow}
-		<MiniOnboardingModal store={presiOnboarding} appName="Presi" appEmoji="📊" />
-	{/if}
+		{#if auth.isAuthenticated}
+			<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+		{/if}
+	</AuthGate>
 {/if}
 
 <style>

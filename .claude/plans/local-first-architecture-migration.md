@@ -313,7 +313,7 @@ apps/todo/apps/backend/     # Oder: services/todo/ (umstrukturieren?)
 
 ---
 
-## Phase 3: Rollout auf alle Apps (4-6 Wochen) — 6/8 DONE 2026-03-27
+## Phase 3: Rollout auf alle Apps (4-6 Wochen) — 8/8 DONE 2026-03-27
 
 Reihenfolge nach Komplexität:
 

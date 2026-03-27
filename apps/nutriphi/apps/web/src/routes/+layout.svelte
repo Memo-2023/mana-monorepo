@@ -8,8 +8,12 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { mealsStore } from '$lib/stores/meals.svelte';
 	import { parseMealInput, formatParsedMealPreview } from '$lib/utils/meal-parser';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { nutriphiStore } from '$lib/data/local-store';
 	let { children } = $props();
+
+	let showGuestWelcome = $state(false);
 
 	// QuickInputBar handlers - search recent meals
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
@@ -38,6 +42,16 @@
 		};
 	}
 
+	async function handleAuthReady() {
+		await nutriphiStore.initialize();
+		if (authStore.isAuthenticated) {
+			nutriphiStore.startSync(() => authStore.getValidToken());
+		}
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('nutriphi')) {
+			showGuestWelcome = true;
+		}
+	}
+
 	async function handleCreate(query: string): Promise<void> {
 		if (!query.trim()) return;
 		const parsed = parseMealInput(query);
@@ -60,7 +74,7 @@
 	{/if}
 </svelte:head>
 
-<AuthGate {authStore} {goto} allowGuest={true}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	{#if $i18nLoading}
 		<div class="flex min-h-screen items-center justify-center bg-background">
 			<div
@@ -88,4 +102,13 @@
 		{/if}
 		<SessionExpiredBanner locale="de" loginHref="/login" />
 	{/if}
+
+	<GuestWelcomeModal
+		appId="nutriphi"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale="de"
+	/>
 </AuthGate>

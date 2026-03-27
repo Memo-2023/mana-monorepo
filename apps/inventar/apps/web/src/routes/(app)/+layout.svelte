@@ -12,30 +12,38 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
+	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { inventarStore } from '$lib/data/local-store';
 
 	let { children } = $props();
 
 	let showNav = $state(true);
 	let initialized = $state(false);
+	let showGuestWelcome = $state(false);
 
-	// Initialize stores
-	$effect(() => {
-		if (authStore.initialized && !initialized) {
-			collectionsStore.initialize();
-			itemsStore.initialize();
-			locationsStore.initialize();
-			categoriesStore.initialize();
-			viewStore.initialize();
-			initialized = true;
-		}
-	});
+	async function handleAuthReady() {
+		// Initialize local-first database
+		await inventarStore.initialize();
 
-	// Auth gate
-	$effect(() => {
-		if (authStore.initialized && !authStore.isAuthenticated) {
-			goto('/login');
+		// If authenticated, start syncing
+		if (authStore.isAuthenticated) {
+			inventarStore.startSync(() => authStore.getValidToken());
 		}
-	});
+
+		// Initialize legacy localStorage stores (will be migrated to IndexedDB later)
+		collectionsStore.initialize();
+		itemsStore.initialize();
+		locationsStore.initialize();
+		categoriesStore.initialize();
+		viewStore.initialize();
+		initialized = true;
+
+		// Show guest welcome on first visit
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('inventar')) {
+			showGuestWelcome = true;
+		}
+	}
 
 	const navItems = [
 		{ href: '/', label: 'Sammlungen', icon: 'archive' },
@@ -54,17 +62,7 @@
 	}
 </script>
 
-{#if !authStore.initialized}
-	<div class="flex min-h-screen items-center justify-center">
-		<div
-			class="h-8 w-8 animate-spin rounded-full border-2 border-[hsl(var(--primary))] border-t-transparent"
-		></div>
-	</div>
-{:else if !authStore.isAuthenticated}
-	<div class="flex min-h-screen items-center justify-center">
-		<p class="text-[hsl(var(--muted-foreground))]">Weiterleitung...</p>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<div class="flex min-h-screen flex-col">
 		<!-- Top Navigation -->
 		{#if showNav}
@@ -170,4 +168,14 @@
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 		</svg>
 	</button>
-{/if}
+
+	<!-- Guest Welcome Modal -->
+	<GuestWelcomeModal
+		appId="inventar"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale="de"
+	/>
+</AuthGate>

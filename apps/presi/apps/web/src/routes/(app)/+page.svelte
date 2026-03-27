@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { decksStore } from '$lib/stores/decks.svelte';
 	import { PresiEvents } from '@manacore/shared-utils/analytics';
@@ -59,10 +58,6 @@
 			},
 		];
 	}
-
-	onMount(() => {
-		decksStore.loadDecks();
-	});
 
 	async function handleCreateDeck(e: SubmitEvent) {
 		e.preventDefault();

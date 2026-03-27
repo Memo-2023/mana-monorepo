@@ -12,9 +12,13 @@
 		resolvePlantData,
 		formatParsedPlantPreview,
 	} from '$lib/utils/plant-parser';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { plantaStore } from '$lib/data/local-store';
 
 	let { children } = $props();
+
+	let showGuestWelcome = $state(false);
 
 	// TagStrip visibility
 	let isTagStripVisible = $state(false);
@@ -95,9 +99,20 @@
 			goto(`/plant/${plant.id}`);
 		}
 	}
+
+	async function handleAuthReady() {
+		await plantaStore.initialize();
+		if (authStore.isAuthenticated) {
+			plantaStore.startSync(() => authStore.getValidToken());
+			await tagStore.fetchTags();
+		}
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('planta')) {
+			showGuestWelcome = true;
+		}
+	}
 </script>
 
-<AuthGate {authStore} {goto} onReady={() => tagStore.fetchTags()}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}
@@ -154,7 +169,18 @@
 			</div>
 		</main>
 	</div>
-	<SessionExpiredBanner locale="de" loginHref="/login" />
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale="de" loginHref="/login" />
+	{/if}
+
+	<GuestWelcomeModal
+		appId="planta"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale="de"
+	/>
 </AuthGate>
 
 <style>

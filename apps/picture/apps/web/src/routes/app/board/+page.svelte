@@ -13,9 +13,12 @@
 		addBoard,
 		removeBoardFromList,
 	} from '$lib/stores/boards';
-	import { getBoards, deleteBoard, duplicateBoard } from '$lib/api/boards';
+	import type { BoardWithCount } from '$lib/api/boards';
+	import { boardCollection, boardItemCollection, type LocalBoard } from '$lib/data/local-store';
 	import { PageHeader, Button, Modal, toastStore } from '@manacore/shared-ui';
 	import { Plus, SquaresFour, Image, Trash } from '@manacore/shared-icons';
+
+	const PAGE_SIZE = 20;
 
 	let loadingMore = $state(false);
 	let observer: IntersectionObserver | null = null;
@@ -29,6 +32,25 @@
 	// Delete confirmation modal
 	let showDeleteModal = $state(false);
 	let deletingBoard = $state<string | null>(null);
+
+	/** Convert LocalBoard to BoardWithCount for existing components. */
+	async function toBoardWithCount(local: LocalBoard): Promise<BoardWithCount> {
+		const items = await boardItemCollection.getAll({ boardId: local.id });
+		return {
+			id: local.id,
+			userId: 'local',
+			name: local.name,
+			description: local.description ?? undefined,
+			thumbnailUrl: local.thumbnailUrl ?? undefined,
+			canvasWidth: local.canvasWidth,
+			canvasHeight: local.canvasHeight,
+			backgroundColor: local.backgroundColor,
+			isPublic: local.isPublic,
+			createdAt: local.createdAt ?? new Date().toISOString(),
+			updatedAt: local.updatedAt ?? new Date().toISOString(),
+			itemCount: items.length,
+		};
+	}
 
 	onMount(() => {
 		resetBoardsState();
@@ -57,14 +79,18 @@
 	});
 
 	async function loadInitialBoards() {
-		if (!authStore.user) return;
-
 		isLoadingBoards.set(true);
 		try {
-			const data = await getBoards({ page: 1 });
+			const localBoards = await boardCollection.getAll();
+			// Sort by updatedAt descending
+			localBoards.sort(
+				(a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime()
+			);
+			const page1 = localBoards.slice(0, PAGE_SIZE);
+			const data = await Promise.all(page1.map(toBoardWithCount));
 			boards.set(data);
 			currentBoardsPage.set(1);
-			hasBoardsMore.set(data.length === 20);
+			hasBoardsMore.set(localBoards.length > PAGE_SIZE);
 		} catch (error) {
 			console.error('Error loading boards:', error);
 			toastStore.show('Fehler beim Laden der Boards', 'error');
@@ -74,17 +100,24 @@
 	}
 
 	async function loadMoreBoards() {
-		if (!authStore.user || !$hasBoardsMore || $isLoadingBoards || loadingMore) return;
+		if (!$hasBoardsMore || $isLoadingBoards || loadingMore) return;
 
 		loadingMore = true;
 		const nextPage = $currentBoardsPage + 1;
 
 		try {
-			const newBoards = await getBoards({ page: nextPage });
-			if (newBoards.length > 0) {
-				boards.update((current) => [...current, ...newBoards]);
+			const localBoards = await boardCollection.getAll();
+			localBoards.sort(
+				(a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime()
+			);
+			const start = (nextPage - 1) * PAGE_SIZE;
+			const pageBoards = localBoards.slice(start, start + PAGE_SIZE);
+
+			if (pageBoards.length > 0) {
+				const data = await Promise.all(pageBoards.map(toBoardWithCount));
+				boards.update((current) => [...current, ...data]);
 				currentBoardsPage.set(nextPage);
-				hasBoardsMore.set(newBoards.length === 20);
+				hasBoardsMore.set(start + PAGE_SIZE < localBoards.length);
 			} else {
 				hasBoardsMore.set(false);
 			}
@@ -96,16 +129,22 @@
 	}
 
 	async function handleCreateBoard() {
-		if (!authStore.user || !boardName.trim()) return;
+		if (!boardName.trim()) return;
 
 		isCreating = true;
 		try {
-			const { createBoard } = await import('$lib/api/boards');
-			const newBoard = await createBoard({
+			const newLocal: LocalBoard = {
+				id: crypto.randomUUID(),
 				name: boardName,
-				description: boardDescription || undefined,
-			});
-			addBoard({ ...newBoard, itemCount: 0 });
+				description: boardDescription || null,
+				canvasWidth: 2000,
+				canvasHeight: 1500,
+				backgroundColor: '#ffffff',
+				isPublic: false,
+			};
+			const inserted = await boardCollection.insert(newLocal);
+			const boardWithCount = await toBoardWithCount(inserted);
+			addBoard(boardWithCount);
 			showCreateBoardModal.set(false);
 			boardName = '';
 			boardDescription = '';
@@ -122,7 +161,12 @@
 		if (!deletingBoard) return;
 
 		try {
-			await deleteBoard(deletingBoard);
+			// Delete all board items first
+			const items = await boardItemCollection.getAll({ boardId: deletingBoard });
+			for (const item of items) {
+				await boardItemCollection.delete(item.id);
+			}
+			await boardCollection.delete(deletingBoard);
 			removeBoardFromList(deletingBoard);
 			showDeleteModal = false;
 			deletingBoard = null;
@@ -134,11 +178,34 @@
 	}
 
 	async function handleDuplicateBoard(boardId: string) {
-		if (!authStore.user) return;
-
 		try {
-			const newBoard = await duplicateBoard(boardId);
-			addBoard({ ...newBoard, itemCount: 0 });
+			const original = await boardCollection.get(boardId);
+			if (!original) throw new Error('Board not found');
+
+			const newId = crypto.randomUUID();
+			const duplicated: LocalBoard = {
+				id: newId,
+				name: `${original.name} (Kopie)`,
+				description: original.description,
+				canvasWidth: original.canvasWidth,
+				canvasHeight: original.canvasHeight,
+				backgroundColor: original.backgroundColor,
+				isPublic: false,
+			};
+			const inserted = await boardCollection.insert(duplicated);
+
+			// Duplicate board items
+			const originalItems = await boardItemCollection.getAll({ boardId });
+			for (const item of originalItems) {
+				await boardItemCollection.insert({
+					...item,
+					id: crypto.randomUUID(),
+					boardId: newId,
+				});
+			}
+
+			const boardWithCount = await toBoardWithCount(inserted);
+			addBoard(boardWithCount);
 			toastStore.show('Board dupliziert', 'success');
 		} catch (error) {
 			console.error('Error duplicating board:', error);
