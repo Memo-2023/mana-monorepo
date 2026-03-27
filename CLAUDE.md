@@ -538,6 +538,11 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | NutriPhi | meals, goals, favorites | Done |
 | Planta | plants, plantPhotos, wateringSchedules, wateringLogs | Done |
 | Storage | files, folders, tags, fileTags | Done |
+| Chat | conversations, messages, templates | Done |
+| Questions | collections, questions, answers | Done |
+| Mukke | songs, playlists, playlistSongs, projects, markers | Done |
+| Context | spaces, documents | Done |
+| Photos | albums, albumItems, favorites, tags, photoTags | Done |
 
 ### Dev Commands (Local-First Stack)
 

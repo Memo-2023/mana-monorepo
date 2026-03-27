@@ -8,6 +8,9 @@
 	import { apiClient } from '$lib/api/client';
 	import { questionsApi } from '$lib/api/questions';
 	import { theme } from '$lib/stores/theme';
+	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { questionsAppStore } from '$lib/data/local-store';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
@@ -41,34 +44,29 @@
 	// User email for nav
 	let userEmail = $derived(authStore.user?.email || 'Menu');
 
-	onMount(async () => {
-		// Initialize auth and redirect if not authenticated
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
+	let showGuestWelcome = $state(false);
+
+	async function handleAuthReady() {
+		await questionsAppStore.initialize();
+		if (authStore.isAuthenticated) {
+			questionsAppStore.startSync(() => authStore.getValidToken());
+			const token = await authStore.getValidToken();
+			apiClient.setAccessToken(token);
+			await collectionsStore.load();
+			await questionsStore.load();
+			await tagStore.fetchTags();
 		}
-
-		// Set API token
-		const token = await authStore.getValidToken();
-		apiClient.setAccessToken(token);
-
-		// Load initial data
-		await collectionsStore.load();
-		await questionsStore.load();
-		await tagStore.fetchTags();
-
-		// Initialize mobile state
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('questions')) {
+			showGuestWelcome = true;
+		}
 		updateMobileState();
-
-		// Restore nav mode from localStorage
 		if (browser) {
 			const savedCollapsed = localStorage.getItem('questions-nav-collapsed');
 			if (savedCollapsed === 'true') {
 				isCollapsed = true;
 			}
 		}
-	});
+	}
 
 	async function handleSignOut() {
 		await authStore.signOut();
@@ -199,71 +197,82 @@
 
 <svelte:window onresize={updateMobileState} />
 
-<div class="layout-container">
-	<!-- TagStrip (above PillNav, toggled via Tags pill) -->
-	{#if isTagStripVisible}
-		<TagStrip
-			tags={tagStore.tags.map((t) => ({
-				id: t.id,
-				name: t.name,
-				color: t.color || '#3b82f6',
-			}))}
-			selectedIds={[]}
-			onToggle={() => {}}
-			onClear={() => {}}
-			managementHref="/tags"
-			loading={tagStore.loading}
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+	<div class="layout-container">
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
+
+		<!-- Navigation -->
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Questions"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			showThemeToggle={true}
+			showLogout={true}
+			onLogout={handleSignOut}
+			loginHref="/login"
+			primaryColor="#8b5cf6"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			themesHref="/themes"
+			helpHref="/help"
+			profileHref="/profile"
 		/>
-	{/if}
 
-	<!-- Navigation -->
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Questions"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		showThemeToggle={true}
-		showLogout={true}
-		onLogout={handleSignOut}
-		loginHref="/login"
-		primaryColor="#8b5cf6"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		themesHref="/themes"
-		helpHref="/help"
-		profileHref="/profile"
+		<!-- Quick Input Bar -->
+		<QuickInputBar
+			onSearch={handleSearch}
+			onSelect={handleSelect}
+			placeholder="New question or search..."
+			emptyText="No questions found"
+			searchingText="Searching..."
+			searchText="Search"
+			onCreate={handleCreate}
+			onParseCreate={handleParseCreate}
+			createText="Create"
+			deferSearch={true}
+			locale={$locale || 'en'}
+			appIcon="help-circle"
+			bottomOffset={isMobile ? '70px' : '70px'}
+		/>
+
+		<!-- Main Content -->
+		<main class="main-content bg-background">
+			<div class="content-wrapper">
+				{@render children()}
+			</div>
+		</main>
+	</div>
+
+	<GuestWelcomeModal
+		appId="questions"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale="de"
 	/>
-
-	<!-- Quick Input Bar -->
-	<QuickInputBar
-		onSearch={handleSearch}
-		onSelect={handleSelect}
-		placeholder="New question or search..."
-		emptyText="No questions found"
-		searchingText="Searching..."
-		searchText="Search"
-		onCreate={handleCreate}
-		onParseCreate={handleParseCreate}
-		createText="Create"
-		deferSearch={true}
-		locale={$locale || 'en'}
-		appIcon="help-circle"
-		bottomOffset={isMobile ? '70px' : '70px'}
-	/>
-
-	<!-- Main Content -->
-	<main class="main-content bg-background">
-		<div class="content-wrapper">
-			{@render children()}
-		</div>
-	</main>
-</div>
+</AuthGate>
 
 <style>
 	.layout-container {

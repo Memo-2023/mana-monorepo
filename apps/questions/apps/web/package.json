@@ -37,6 +37,7 @@
 		"@manacore/shared-types": "workspace:*",
 		"@manacore/shared-utils": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
+		"@manacore/local-store": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-i18n": "workspace:*",

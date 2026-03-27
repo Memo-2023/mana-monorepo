@@ -11,7 +11,9 @@
 	import { tagStore } from '$lib/stores/tags.svelte';
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { photosStore } from '$lib/data/local-store';
 
 	let { children } = $props();
 
@@ -106,12 +108,21 @@
 		}
 	}
 
+	let showGuestWelcome = $state(false);
+
 	async function handleAuthReady() {
-		await Promise.all([photoStore.loadStats(), albumStore.loadAlbums(), tagStore.loadTags()]);
+		await photosStore.initialize();
+		if (authStore.isAuthenticated) {
+			photosStore.startSync(() => authStore.getValidToken());
+			await Promise.all([photoStore.loadStats(), albumStore.loadAlbums(), tagStore.loadTags()]);
+		}
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('photos')) {
+			showGuestWelcome = true;
+		}
 	}
 </script>
 
-<AuthGate {authStore} {goto} onReady={handleAuthReady}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<div class="layout-container">
 		<PillNavigation
 			items={navItems}
@@ -171,7 +182,18 @@
 			</div>
 		</main>
 	</div>
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
+
+	<GuestWelcomeModal
+		appId="photos"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
 </AuthGate>
 
 <style>

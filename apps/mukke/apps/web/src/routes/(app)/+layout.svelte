@@ -26,7 +26,9 @@
 	import { playlistStore } from '$lib/stores/playlist.svelte';
 	import { projectStore } from '$lib/stores/project.svelte';
 	import { parseSongInput, formatParsedSongPreview } from '$lib/utils/song-parser';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { mukkeStore } from '$lib/data/local-store';
 	import { tagStore } from '$lib/stores/tags.svelte';
 	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
 	import FullPlayer from '$lib/components/FullPlayer.svelte';
@@ -180,15 +182,26 @@
 		goto('/projects');
 	}
 
+	let showGuestWelcome = $state(false);
+
 	async function handleAuthReady() {
+		await mukkeStore.initialize();
+		if (authStore.isAuthenticated) {
+			mukkeStore.startSync(() => authStore.getValidToken());
+		}
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('mukke')) {
+			showGuestWelcome = true;
+		}
 		splitPanel.initialize();
-		await tagStore.fetchTags();
+		if (authStore.isAuthenticated) {
+			await tagStore.fetchTags();
+		}
 	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} onReady={handleAuthReady}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<SplitPaneContainer>
 		<div class="layout-container">
 			<a
@@ -272,7 +285,18 @@
 			<DevBuildBadge commitHash={__BUILD_HASH__} buildTime={__BUILD_TIME__} />
 		</div>
 	</SplitPaneContainer>
-	<SessionExpiredBanner locale="de" loginHref="/login" />
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale="de" loginHref="/login" />
+	{/if}
+
+	<GuestWelcomeModal
+		appId="mukke"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale="de"
+	/>
 </AuthGate>
 
 <style>

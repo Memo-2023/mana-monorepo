@@ -28,6 +28,9 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { contextOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
+	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { contextStore } from '$lib/data/local-store';
 	import { tagStore } from '$lib/stores/tags.svelte';
 
 	const appItems = getPillAppItems('context');
@@ -212,11 +215,15 @@
 		goto('/login');
 	}
 
-	onMount(async () => {
-		await authStore.initialize();
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
+	let showGuestWelcome = $state(false);
+
+	async function handleAuthReady() {
+		await contextStore.initialize();
+		if (authStore.isAuthenticated) {
+			contextStore.startSync(() => authStore.getValidToken());
+		}
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('context')) {
+			showGuestWelcome = true;
 		}
 
 		const savedCollapsed = localStorage.getItem('context-nav-collapsed');
@@ -225,90 +232,99 @@
 			collapsedStore.set(true);
 		}
 
-		await userSettings.load();
-
-		// Load tags
-		await tagStore.fetchTags();
-
-		// Pre-load data for CommandBar search
-		await Promise.all([spacesStore.load(), documentsStore.load()]);
-	});
+		if (authStore.isAuthenticated) {
+			await userSettings.load();
+			await tagStore.fetchTags();
+			await Promise.all([spacesStore.load(), documentsStore.load()]);
+		}
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="layout-container">
-	<PillNavigation
-		items={navItems}
-		currentPath={$page.url.pathname}
-		appName="Context"
-		homeRoute="/"
-		onToggleTheme={handleToggleTheme}
-		{isDark}
-		{isCollapsed}
-		onCollapsedChange={handleCollapsedChange}
-		showThemeToggle={true}
-		showThemeVariants={true}
-		{themeVariantItems}
-		{currentThemeVariantLabel}
-		themeMode={theme.mode}
-		onThemeModeChange={handleThemeModeChange}
-		showLanguageSwitcher={true}
-		{languageItems}
-		{currentLanguageLabel}
-		showLogout={true}
-		onLogout={handleLogout}
-		loginHref="/login"
-		primaryColor="#0ea5e9"
-		showAppSwitcher={true}
-		{appItems}
-		{userEmail}
-		settingsHref="/settings"
-		manaHref="/mana"
-		profileHref="/profile"
-		themesHref="/themes"
-		helpHref="/help"
-		allAppsHref="/apps"
-	/>
-
-	<!-- TagStrip (above PillNav, toggled via Tags pill) -->
-	{#if isTagStripVisible}
-		<TagStrip
-			tags={tagStore.tags.map((t) => ({
-				id: t.id,
-				name: t.name,
-				color: t.color || '#3b82f6',
-			}))}
-			selectedIds={[]}
-			onToggle={() => {}}
-			onClear={() => {}}
-			managementHref="/tags"
-			loading={tagStore.loading}
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+	<div class="layout-container">
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Context"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
+			showLogout={true}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#0ea5e9"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			settingsHref="/settings"
+			manaHref="/mana"
+			profileHref="/profile"
+			themesHref="/themes"
+			helpHref="/help"
+			allAppsHref="/apps"
 		/>
+
+		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
+		{#if isTagStripVisible}
+			<TagStrip
+				tags={tagStore.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color || '#3b82f6',
+				}))}
+				selectedIds={[]}
+				onToggle={() => {}}
+				onClear={() => {}}
+				managementHref="/tags"
+				loading={tagStore.loading}
+			/>
+		{/if}
+
+		<main class="main-content bg-background">
+			<div class="content-wrapper">
+				{@render children()}
+			</div>
+		</main>
+
+		<CommandBar
+			bind:open={commandBarOpen}
+			onClose={() => (commandBarOpen = false)}
+			onSearch={handleCommandBarSearch}
+			onSelect={handleCommandBarSelect}
+			quickActions={commandBarQuickActions}
+			placeholder="Schnellzugriff..."
+			emptyText="Keine Ergebnisse"
+			searchingText="Suche..."
+		/>
+	</div>
+
+	<!-- Onboarding Modal -->
+	{#if contextOnboarding.shouldShow}
+		<MiniOnboardingModal store={contextOnboarding} appName="Context" appEmoji="📄" />
 	{/if}
 
-	<main class="main-content bg-background">
-		<div class="content-wrapper">
-			{@render children()}
-		</div>
-	</main>
-
-	<CommandBar
-		bind:open={commandBarOpen}
-		onClose={() => (commandBarOpen = false)}
-		onSearch={handleCommandBarSearch}
-		onSelect={handleCommandBarSelect}
-		quickActions={commandBarQuickActions}
-		placeholder="Schnellzugriff..."
-		emptyText="Keine Ergebnisse"
-		searchingText="Suche..."
+	<GuestWelcomeModal
+		appId="context"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 	/>
-</div>
-
-<!-- Onboarding Modal -->
-{#if contextOnboarding.shouldShow}
-	<MiniOnboardingModal store={contextOnboarding} appName="Context" appEmoji="📄" />
-{/if}
+</AuthGate>
 
 <style>
 	.layout-container {

@@ -24,7 +24,9 @@
 	import type { LayoutData } from './$types';
 	import { chatOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
+	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { chatStore } from '$lib/data/local-store';
 
 	// App switcher items
 	const appItems = getPillAppItems('chat');
@@ -156,7 +158,18 @@
 		goto('/login');
 	}
 
+	let showGuestWelcome = $state(false);
+
 	async function handleAuthReady() {
+		// Initialize local-first database
+		await chatStore.initialize();
+		if (authStore.isAuthenticated) {
+			chatStore.startSync(() => authStore.getValidToken());
+		}
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('chat')) {
+			showGuestWelcome = true;
+		}
+
 		// Initialize theme
 		theme.initialize();
 
@@ -166,6 +179,8 @@
 			isCollapsed = true;
 			collapsedStore.set(true);
 		}
+
+		if (!authStore.isAuthenticated) return;
 
 		// Load user settings and tags
 		await userSettings.load();
@@ -186,7 +201,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} onReady={handleAuthReady}>
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
 		<!-- Floating Pill Navigation -->
@@ -256,7 +271,18 @@
 		<MiniOnboardingModal store={chatOnboarding} appName="Chat" appEmoji="💬" />
 	{/if}
 
-	<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
+
+	<GuestWelcomeModal
+		appId="chat"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+	/>
 </AuthGate>
 
 <style>

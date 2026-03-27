@@ -36,6 +36,7 @@
 		"@manacore/shared-app-onboarding": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
+		"@manacore/local-store": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-feedback-service": "workspace:*",
