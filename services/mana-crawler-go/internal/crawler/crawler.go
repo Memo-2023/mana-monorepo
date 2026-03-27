@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -65,11 +66,22 @@ type Crawler struct {
 
 // New creates a new Crawler.
 func New(pool *pgxpool.Pool, robotsChecker *robots.Checker, userAgent string, concurrency int, timeout time.Duration) *Crawler {
+	// Skip TLS verification for outgoing crawl requests.
+	// Required in Docker Desktop for Mac (TLS proxy) and for crawling
+	// sites with self-signed or expired certificates.
+	transport := &http.Transport{
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+	}
+
 	return &Crawler{
 		pool:   pool,
 		robots: robotsChecker,
 		httpClient: &http.Client{
-			Timeout: timeout,
+			Timeout:   timeout,
+			Transport: transport,
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				if len(via) >= 10 {
 					return fmt.Errorf("too many redirects")
