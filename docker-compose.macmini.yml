@@ -213,7 +213,7 @@ services:
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       SMTP_FROM: Mana <noreply@mana.how>
-      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://link.mana.how,https://manadeck.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
+      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://inventar.mana.how,https://link.mana.how,https://manadeck.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
       DUCKDB_PATH: /data/analytics/metrics.duckdb
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET:-}
       # Backend URLs for user data aggregation (GDPR self-service)
@@ -247,41 +247,39 @@ services:
   # Tier 2: Gateway & Search Services (Ports 3010-3029)
   # ============================================
 
-  # NOTE: api-gateway disabled - no GHCR image available, no Dockerfile exists
-  # To re-enable: create Dockerfile in services/api-gateway/ and build locally
   api-gateway:
-    profiles: ["disabled"]
-    image: ghcr.io/memo-2023/api-gateway:latest
-    container_name: mana-core-gateway
+    build:
+      context: .
+      dockerfile: services/mana-api-gateway-go/Dockerfile
+    image: mana-api-gateway-go:local
+    container_name: mana-api-gateway
     restart: always
     depends_on:
-      mana-auth:
+      postgres:
         condition: service_healthy
-      # Removed: postgres, redis, mana-search - lazy connect with retry
+      redis:
+        condition: service_healthy
     environment:
-      NODE_ENV: production
+      TZ: Europe/Berlin
       PORT: 3010
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/manacore
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       SEARCH_SERVICE_URL: http://mana-search:3020
-      STT_SERVICE_URL: http://host.docker.internal:3021
+      STT_SERVICE_URL: http://host.docker.internal:3026
       TTS_SERVICE_URL: http://host.docker.internal:3022
-      IMAGE_GEN_SERVICE_URL: http://host.docker.internal:3025
       CORS_ORIGINS: https://api.mana.how,https://mana.how
-      # Retry config for lazy dependencies
-      DB_RETRY_ATTEMPTS: 5
-      DB_RETRY_DELAY: 3000
+      ADMIN_USER_IDS: ${ADMIN_USER_IDS:-}
     ports:
       - "3010:3010"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3010/health"]
-      interval: 120s
-      timeout: 10s
+      interval: 60s
+      timeout: 5s
       retries: 3
-      start_period: 40s
+      start_period: 5s
 
   searxng:
     image: searxng/searxng:latest
@@ -952,467 +950,95 @@ services:
       retries: 3
       start_period: 45s
 
-  # Matrix Bots (Ports 4010-4029)
-  matrix-mana-bot:
+  # ============================================
+  # Matrix Bots — Consolidated Go Service
+  # Replaces 21 separate NestJS bot containers
+  # ============================================
+
+  mana-matrix-bot:
     build:
       context: .
-      dockerfile: services/matrix-mana-bot/Dockerfile
-    image: matrix-mana-bot:local
-    platform: linux/arm64
-    container_name: mana-matrix-bot-mana
+      dockerfile: services/mana-matrix-bot/Dockerfile
+    image: mana-matrix-bot:local
+    container_name: mana-matrix-bot
     restart: always
     depends_on:
       synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4010
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_MANA_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_MANA_BOT_ROOMS:-}
-      MATRIX_STORAGE_PATH: /app/data/mana-bot-storage.json
-      OLLAMA_URL: http://host.docker.internal:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
-      OLLAMA_TIMEOUT: 120000
-      CLOCK_API_URL: http://mana-matrix-bot-clock:4018/api/v1
-      TODO_STORAGE_PATH: /app/data/todos.json
-      CALENDAR_STORAGE_PATH: /app/data/calendar.json
-      STT_URL: http://host.docker.internal:3026
-      STT_API_KEY: ${STT_INTERNAL_API_KEY:-}
-      TTS_URL: http://host.docker.internal:3022
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4010:4010"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4010/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-
-  matrix-ollama-bot:
-    image: ghcr.io/memo-2023/matrix-ollama-bot:latest
-    platform: linux/amd64
-    container_name: mana-matrix-bot-ollama
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4011
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_OLLAMA_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_OLLAMA_BOT_ROOMS:-}
-      OLLAMA_URL: http://host.docker.internal:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
-      OLLAMA_TIMEOUT: 120000
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4011:4011"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4011/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-
-  matrix-stats-bot:
-    image: matrix-stats-bot:local
-    #platform: linux/amd64
-    container_name: mana-matrix-bot-stats
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      victoriametrics:
         condition: service_healthy
       redis:
         condition: service_healthy
     environment:
-      NODE_ENV: production
-      PORT: 4012
       TZ: Europe/Berlin
-      # Redis for session storage (Matrix-SSO-Link)
-      REDIS_HOST: redis
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      # Mana Core Auth for Matrix-SSO-Link auto-login
+      PORT: 4000
+      # Matrix
+      MATRIX_HOMESERVER_URL: http://synapse:8008
+      MATRIX_STORAGE_PATH: /app/data
+      # Auth & Redis
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_STATS_BOT_TOKEN}
-      MATRIX_REPORT_ROOM_ID: ${MATRIX_STATS_REPORT_ROOM:-}
-      UMAMI_API_URL: http://umami:3000
-      UMAMI_USERNAME: ${UMAMI_USERNAME:-admin}
-      UMAMI_PASSWORD: ${UMAMI_PASSWORD}
-      PROMETHEUS_URL: http://victoriametrics:9090
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_auth
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4012:4012"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4012/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-
-  matrix-project-doc-bot:
-    image: ghcr.io/memo-2023/matrix-project-doc-bot:latest
-    platform: linux/amd64
-    container_name: mana-matrix-bot-projectdoc
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4013
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_PROJECT_DOC_BOT_TOKEN}
-      MATRIX_ALLOWED_USERS: ${MATRIX_PROJECT_DOC_ALLOWED_USERS:-}
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/project_doc_bot
-      S3_ENDPOINT: http://minio:9000
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      S3_BUCKET: project-doc-bot
-      MANA_LLM_URL: http://mana-llm:3025
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4013:4013"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4013/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 25s
-
-  matrix-todo-bot:
-    image: matrix-todo-bot:local
-    build:
-      context: .
-      dockerfile: services/matrix-todo-bot/Dockerfile
-    platform: linux/amd64
-    container_name: mana-matrix-bot-todo
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      todo-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4014
-      TZ: Europe/Berlin
       REDIS_HOST: redis
+      REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      # Voice services
+      STT_URL: http://host.docker.internal:3026
+      TTS_URL: http://host.docker.internal:3022
+      # AI
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
+      # Plugin tokens (all 21 bot identities)
+      MATRIX_MANA_BOT_TOKEN: ${MATRIX_MANA_BOT_TOKEN}
+      MATRIX_MANA_BOT_ROOMS: ${MATRIX_MANA_BOT_ROOMS:-}
+      MATRIX_TODO_BOT_TOKEN: ${MATRIX_TODO_BOT_TOKEN}
+      MATRIX_TODO_BOT_ROOMS: ${MATRIX_TODO_BOT_ROOMS:-}
+      MATRIX_CALENDAR_BOT_TOKEN: ${MATRIX_CALENDAR_BOT_TOKEN}
+      MATRIX_CALENDAR_BOT_ROOMS: ${MATRIX_CALENDAR_BOT_ROOMS:-}
+      MATRIX_CLOCK_BOT_TOKEN: ${MATRIX_CLOCK_BOT_TOKEN}
+      MATRIX_CLOCK_BOT_ROOMS: ${MATRIX_CLOCK_BOT_ROOMS:-}
+      MATRIX_OLLAMA_BOT_TOKEN: ${MATRIX_OLLAMA_BOT_TOKEN}
+      MATRIX_OLLAMA_BOT_ROOMS: ${MATRIX_OLLAMA_BOT_ROOMS:-}
+      MATRIX_STATS_BOT_TOKEN: ${MATRIX_STATS_BOT_TOKEN}
+      MATRIX_STATS_BOT_ROOMS: ${MATRIX_STATS_BOT_ROOMS:-}
+      MATRIX_CONTACTS_BOT_TOKEN: ${MATRIX_CONTACTS_BOT_TOKEN:-}
+      MATRIX_CONTACTS_BOT_ROOMS: ${MATRIX_CONTACTS_BOT_ROOMS:-}
+      MATRIX_CHAT_BOT_TOKEN: ${MATRIX_CHAT_BOT_TOKEN:-}
+      MATRIX_MANADECK_BOT_TOKEN: ${MATRIX_MANADECK_BOT_TOKEN:-}
+      MATRIX_NUTRIPHI_BOT_TOKEN: ${MATRIX_NUTRIPHI_BOT_TOKEN}
+      MATRIX_NUTRIPHI_BOT_ROOMS: ${MATRIX_NUTRIPHI_BOT_ROOMS:-}
+      MATRIX_PICTURE_BOT_TOKEN: ${MATRIX_PICTURE_BOT_TOKEN:-}
+      MATRIX_PLANTA_BOT_TOKEN: ${MATRIX_PLANTA_BOT_TOKEN}
+      MATRIX_PLANTA_BOT_ROOMS: ${MATRIX_PLANTA_BOT_ROOMS:-}
+      MATRIX_PRESI_BOT_TOKEN: ${MATRIX_PRESI_BOT_TOKEN:-}
+      MATRIX_QUESTIONS_BOT_TOKEN: ${MATRIX_QUESTIONS_BOT_TOKEN:-}
+      MATRIX_SKILLTREE_BOT_TOKEN: ${MATRIX_SKILLTREE_BOT_TOKEN:-}
+      MATRIX_STORAGE_BOT_TOKEN: ${MATRIX_STORAGE_BOT_TOKEN:-}
+      MATRIX_PROJECT_DOC_BOT_TOKEN: ${MATRIX_PROJECT_DOC_BOT_TOKEN}
+      MATRIX_STT_BOT_TOKEN: ${MATRIX_STT_BOT_TOKEN}
+      MATRIX_STT_BOT_ROOMS: ${MATRIX_STT_BOT_ROOMS:-}
+      MATRIX_TTS_BOT_TOKEN: ${MATRIX_TTS_BOT_TOKEN}
+      MATRIX_TTS_BOT_ROOMS: ${MATRIX_TTS_BOT_ROOMS:-}
+      MATRIX_ZITARE_BOT_TOKEN: ${MATRIX_ZITARE_BOT_TOKEN}
+      MATRIX_ZITARE_BOT_ROOMS: ${MATRIX_ZITARE_BOT_ROOMS:-}
+      MATRIX_ONBOARDING_BOT_TOKEN: ${MATRIX_ONBOARDING_BOT_TOKEN}
+      MATRIX_ONBOARDING_BOT_ROOMS: ${MATRIX_ONBOARDING_BOT_ROOMS:-}
+      # Backend URLs
       TODO_BACKEND_URL: http://todo-backend:3031
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_TODO_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_TODO_BOT_ROOMS:-}
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4014:4014"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4014/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 25s
-
-  matrix-calendar-bot:
-    image: matrix-calendar-bot:local
-    pull_policy: never
-    platform: linux/amd64
-    container_name: mana-matrix-bot-calendar
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      calendar-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4015
-      TZ: Europe/Berlin
-      REDIS_HOST: redis
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       CALENDAR_BACKEND_URL: http://calendar-backend:3032
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_CALENDAR_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_CALENDAR_BOT_ROOMS:-}
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4015:4015"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4015/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 25s
-
-  matrix-nutriphi-bot:
-    image: ghcr.io/memo-2023/matrix-nutriphi-bot:latest
-    platform: linux/amd64
-    container_name: mana-matrix-bot-nutriphi
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      mana-media:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4016
-      TZ: Europe/Berlin
-      REDIS_HOST: redis
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_NUTRIPHI_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_NUTRIPHI_BOT_ROOMS:-}
-      NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3037
-      MANA_MEDIA_URL: http://mana-media:3015
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4016:4016"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4016/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  matrix-zitare-bot:
-    image: ghcr.io/memo-2023/matrix-zitare-bot:latest
-    platform: linux/amd64
-    container_name: mana-matrix-bot-zitare
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      zitare-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4017
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_ZITARE_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_ZITARE_BOT_ROOMS:-}
+      CLOCK_BACKEND_URL: http://clock-backend:3033
+      CONTACTS_BACKEND_URL: http://contacts-backend:3034
       ZITARE_BACKEND_URL: http://zitare-backend:3007
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4017:4017"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4017/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  matrix-clock-bot:
-    build:
-      context: .
-      dockerfile: services/matrix-clock-bot/Dockerfile
-    image: matrix-clock-bot:local
-    container_name: mana-matrix-bot-clock
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      mana-auth:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4018
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_CLOCK_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_CLOCK_BOT_ROOMS:-}
-      CLOCK_API_URL: http://clock-backend:3033/api/v1
-      STT_URL: http://host.docker.internal:3026
-      STT_API_KEY: ${STT_INTERNAL_API_KEY:-}
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      WIDGET_PUBLIC_URL: ${CLOCK_BOT_WIDGET_URL:-https://clock-bot.mana.how/widget}
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4018:4018"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4018/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  matrix-tts-bot:
-    build:
-      context: .
-      dockerfile: services/matrix-tts-bot/Dockerfile
-    image: matrix-tts-bot:local
-    platform: linux/amd64
-    container_name: mana-matrix-bot-tts
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4019
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_TTS_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_TTS_BOT_ROOMS:-}
-      TTS_URL: http://host.docker.internal:3022
-      TTS_API_KEY: ${TTS_INTERNAL_API_KEY:-}
-      DEFAULT_VOICE: de_kerstin
-      DEFAULT_SPEED: 1.0
-      MAX_TEXT_LENGTH: 500
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4019:4019"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4019/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  matrix-stt-bot:
-    build:
-      context: .
-      dockerfile: services/matrix-stt-bot/Dockerfile
-    image: matrix-stt-bot:local
-    platform: linux/amd64
-    container_name: mana-matrix-bot-stt
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4021
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_STT_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_STT_BOT_ROOMS:-}
-      STT_URL: http://host.docker.internal:3026
-      STT_API_KEY: ${STT_INTERNAL_API_KEY:-}
-      DEFAULT_LANGUAGE: de
-      DEFAULT_MODEL: whisper
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4021:4021"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4021/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  matrix-onboarding-bot:
-    build:
-      context: .
-      dockerfile: services/matrix-onboarding-bot/Dockerfile
-    image: matrix-onboarding-bot:local
-    container_name: mana-matrix-bot-onboarding
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      mana-auth:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4020
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_ONBOARDING_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_ONBOARDING_BOT_ROOMS:-}
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-    volumes:
-      - matrix_bots_data:/app/data
-    ports:
-      - "4020:4020"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4020/health"]
-      interval: 300s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  matrix-planta-bot:
-    build:
-      context: .
-      dockerfile: services/matrix-planta-bot/Dockerfile
-    image: matrix-planta-bot:local
-    container_name: mana-matrix-bot-planta
-    restart: always
-    depends_on:
-      synapse:
-        condition: service_healthy
-      mana-auth:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      planta-backend:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4022
-      TZ: Europe/Berlin
-      MATRIX_HOMESERVER_URL: http://synapse:8008
-      MATRIX_ACCESS_TOKEN: ${MATRIX_PLANTA_BOT_TOKEN}
-      MATRIX_ALLOWED_ROOMS: ${MATRIX_PLANTA_BOT_ROOMS:-}
       PLANTA_BACKEND_URL: http://planta-backend:3022
-      PLANTA_API_PREFIX: /api
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3037
+      STORAGE_BACKEND_URL: http://storage-backend:3035
     volumes:
       - matrix_bots_data:/app/data
     ports:
-      - "4022:4022"
+      - "4000:4000"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4022/health"]
-      interval: 300s
-      timeout: 10s
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4000/health"]
+      interval: 60s
+      timeout: 5s
       retries: 3
-      start_period: 35s
+      start_period: 10s
 
   # ============================================
   # Tier 5: Web Frontends (Ports 5000-5099)
@@ -1894,6 +1520,30 @@ services:
       timeout: 10s
       retries: 3
       start_period: 35s
+
+  inventar-web:
+    build:
+      context: .
+      dockerfile: apps/inventar/apps/web/Dockerfile
+    image: inventar-web:local
+    container_name: mana-app-inventar-web
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5190
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+    ports:
+      - "5190:5190"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5190/health"]
+      interval: 180s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   mana-llm:
     build:

@@ -40,7 +40,7 @@ on:
           - mukke-web
           - storage-backend
           - storage-web
-          - matrix-mana-bot
+          - mana-matrix-bot
 
 concurrency:
   group: cd-macmini
@@ -80,7 +80,7 @@ jobs:
       mukke-web: ${{ steps.changes.outputs.mukke-web }}
       storage-backend: ${{ steps.changes.outputs.storage-backend }}
       storage-web: ${{ steps.changes.outputs.storage-web }}
-      matrix-mana-bot: ${{ steps.changes.outputs.matrix-mana-bot }}
+      mana-matrix-bot: ${{ steps.changes.outputs.mana-matrix-bot }}
       any-changes: ${{ steps.changes.outputs.any-changes }}
     steps:
       - name: Check for changes
@@ -137,12 +137,12 @@ jobs:
           check_changes "mukke-web"         "apps/mukke/apps/web/" "apps/mukke/packages/"
           check_changes "storage-backend"   "apps/storage/apps/backend/" "apps/storage/packages/"
           check_changes "storage-web"       "apps/storage/apps/web/" "apps/storage/packages/"
-          check_changes "matrix-mana-bot"   "services/matrix-mana-bot/" "packages/matrix-bot-common/"
+          check_changes "mana-matrix-bot"   "services/mana-matrix-bot/"
           check_changes "mana-landing-builder" "services/mana-landing-builder/" "packages/shared-types/" "packages/shared-landing-ui/"
 
           # Check if anything needs deploying
           ANY="false"
-          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web matrix-mana-bot mana-landing-builder; do
+          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-backend clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web mana-matrix-bot mana-landing-builder; do
             val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
             if [ "$val" == "true" ]; then
               ANY="true"
@@ -219,7 +219,7 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.mukke-web }}" == "true" ]; then SERVICES="$SERVICES mukke-web"; fi
             if [ "${{ needs.detect-changes.outputs.storage-backend }}" == "true" ]; then SERVICES="$SERVICES storage-backend"; fi
             if [ "${{ needs.detect-changes.outputs.storage-web }}" == "true" ]; then SERVICES="$SERVICES storage-web"; fi
-            if [ "${{ needs.detect-changes.outputs.matrix-mana-bot }}" == "true" ]; then SERVICES="$SERVICES matrix-mana-bot"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-matrix-bot }}" == "true" ]; then SERVICES="$SERVICES mana-matrix-bot"; fi
             if [ "${{ needs.detect-changes.outputs.mana-landing-builder }}" == "true" ]; then SERVICES="$SERVICES mana-landing-builder"; fi
           fi
 
