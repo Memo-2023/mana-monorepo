@@ -183,33 +183,34 @@ Im Gegensatz dazu bietet das Mana-System:
 Das Regenerationssystem ist das Herzstück des Mana-Modells:
 
 - **Tägliche Gutschrift**: Jeden Tag um 0:00 Uhr werden neue Mana-Credits automatisch gutgeschrieben
-- **Abo-abhängig**: Die Menge hängt von der gewählten Abo-Stufe ab (5 bis 200 Mana täglich)
+- **Abo-abhängig**: Die Menge hängt von der gewählten Abo-Stufe ab (2 bis 333 Mana täglich)
 - **Automatisch**: Keine manuelle Aktivierung erforderlich
 - **Zuverlässig**: Regeneration erfolgt auch bei Nicht-Nutzung
 
-**Beispiel**: Mit einem Mana See Abo erhalten Sie täglich 100 neue Mana. Das entspricht etwa 50 Minuten Transkription pro Tag - oder Sie sparen für größere Projekte.
+**Beispiel**: Mit einer Mana Quelle L erhalten Sie täglich 67 neue Mana. Das entspricht etwa 33 Minuten Transkription pro Tag - oder Sie sparen für größere Projekte.
 
 ### Der Mana-Speicher erklärt
 
 Jede Abo-Stufe hat ein Speicherlimit, das verhindert, dass Credits ins Unendliche anwachsen:
 
-- **Mana Tropfen**: 150 Mana Speicher (ca. 1,25 Stunden)
-- **Mana Fluss**: 1.200 Mana Speicher (ca. 10 Stunden)
-- **Mana Strom**: 3.000 Mana Speicher (ca. 25 Stunden)
-- **Mana See**: 6.000 Mana Speicher (ca. 50 Stunden)
-- **Mana Meer**: 10.000 Mana Speicher (ca. 83 Stunden)
+- **Mana Quelle Free**: 50 Mana Speicher (ca. 25 Minuten)
+- **Mana Quelle S**: 500 Mana Speicher (ca. 4 Stunden)
+- **Mana Quelle M**: 1.000 Mana Speicher (ca. 8 Stunden)
+- **Mana Quelle L**: 2.000 Mana Speicher (ca. 17 Stunden)
+- **Mana Quelle XL**: 4.000 Mana Speicher (ca. 33 Stunden)
+- **Mana Quelle XXL**: 10.000 Mana Speicher (ca. 83 Stunden)
 
 **Wichtig**: Erreicht Ihr Speicher das Limit, verfallen neue Regenerations-Credits. Nutzen Sie daher regelmäßig Ihre Mana, verschenken es, spenden es oder wählen Sie eine höhere Abo-Stufe.
 
 ### Praktisches Beispiel
 
-Ein Forscher mit **Mana Strom** Abo:
+Ein Forscher mit **Mana Quelle L** Abo:
 
-- Tag 1: 1.500 Start-Mana
-- Tag 2-10: +50 Mana täglich = 1.950 Mana
+- Tag 1: 2.000 Start-Mana
+- Tag 2-10: +67 Mana täglich = 2.603 Mana (max. 2.000 Speicher)
 - Führt 5 Interviews à 2 Stunden = -1.200 Mana
-- Verbleibend: 750 Mana
-- Nach 30 Tagen ohne Nutzung: Speicher voll bei 3.000 Mana
+- Verbleibend: 800 Mana
+- Nach 30 Tagen ohne Nutzung: Speicher voll bei 2.000 Mana
 
 ### Kombination mit Mana-Tränken
 
@@ -277,34 +278,37 @@ Besonders geeignet für:
 
 Memoro bietet verschiedene Abo-Modelle mit täglicher Mana-Regeneration:
 
-- **Mana Tropfen**: Kostenlos
-  - 150 Start-Mana, 5 Mana/Tag Regeneration, 150 Mana Speicher
-- **Mana Fluss**: 5,99€/Monat
-  - 600 Start-Mana, 20 Mana/Tag Regeneration, 1.200 Mana Speicher
-- **Mana Strom**: 14,99€/Monat
-  - 1.500 Start-Mana, 50 Mana/Tag Regeneration, 3.000 Mana Speicher
-- **Mana See**: 29,99€/Monat
-  - 3.000 Start-Mana, 100 Mana/Tag Regeneration, 6.000 Mana Speicher
-- **Mana Meer**: 49,99€/Monat
-  - 5.000 Start-Mana, 200 Mana/Tag Regeneration, 10.000 Mana Speicher
+- **Mana Quelle Free**: Kostenlos
+  - 50 Mana/Monat, 2 Mana/Tag Regeneration
+- **Mana Quelle S**: 4,99€/Monat
+  - 500 Mana/Monat, 17 Mana/Tag Regeneration
+- **Mana Quelle M**: 9,99€/Monat
+  - 1.000 Mana/Monat, 33 Mana/Tag Regeneration
+- **Mana Quelle L**: 19,99€/Monat
+  - 2.000 Mana/Monat, 67 Mana/Tag Regeneration
+- **Mana Quelle XL**: 39,99€/Monat
+  - 4.000 Mana/Monat, 133 Mana/Tag Regeneration
+- **Mana Quelle XXL**: 99,99€/Monat
+  - 10.000 Mana/Monat, 333 Mana/Tag Regeneration
 
-### Jährliche Abonnements (mit Ersparnis)
+### Jährliche Abonnements (20% Ersparnis)
 
-Bei jährlicher Zahlung sparen Nutzer bis zu 33%:
+Bei jährlicher Zahlung sparen Nutzer 20%:
 
-- **Mana Fluss**: 47,99€/Jahr (3,99€/Monat)
-- **Mana Strom**: 119,99€/Jahr (9,99€/Monat)
-- **Mana See**: 239,99€/Jahr (19,99€/Monat)
-- **Mana Meer**: 399,99€/Jahr (33,33€/Monat)
+- **Mana Quelle S**: 47,90€/Jahr (3,99€/Monat)
+- **Mana Quelle M**: 95,90€/Jahr (7,99€/Monat)
+- **Mana Quelle L**: 191,90€/Jahr (15,99€/Monat)
+- **Mana Quelle XL**: 383,90€/Jahr (31,99€/Monat)
+- **Mana Quelle XXL**: 959,90€/Jahr (79,99€/Monat)
 
 ### Einmalkäufe (Mana-Tränke)
 
 Für zusätzlichen Bedarf ohne Abo:
 
-- **Kleiner Mana Trank**: 4,99€ für 350 Mana (1,43 Cent/Mana)
-- **Mittlerer Mana Trank**: 9,99€ für 700 Mana (1,43 Cent/Mana)
-- **Großer Mana Trank**: 19,99€ für 1.400 Mana (1,43 Cent/Mana)
-- **Riesiger Mana Trank**: 39,99€ für 2.800 Mana (1,43 Cent/Mana)
+- **Kleiner Mana Trank**: 4,90€ für 350 Mana (1,4 Cent/Mana)
+- **Mittlerer Mana Trank**: 9,80€ für 700 Mana (1,4 Cent/Mana)
+- **Großer Mana Trank**: 19,60€ für 1.400 Mana (1,4 Cent/Mana)
+- **Riesiger Mana Trank**: 39,20€ für 2.800 Mana (1,4 Cent/Mana)
 
 ## Technische Integration
 
@@ -337,8 +341,8 @@ Spätere Features:
 
 **Mana-Modell (50 Mitarbeiter)**:
 
-1. 2x Mana Meer Abonnements (99,98€/Monat)
-2. 10.000 Start-Mana + 400 Mana tägliche Regeneration
+1. 1x Mana Quelle XXL (99,99€/Monat)
+2. 10.000 Mana/Monat + 333 Mana tägliche Regeneration
 3. Credits werden auf alle 50 Mitarbeiter verteilt
 4. Bei intensiven Phasen: Zusätzliche Mana-Tränke
 
@@ -352,14 +356,14 @@ Spätere Features:
 
 **Mana-Modell (15 Forscher, 1 Jahr)**:
 
-1. 1x Mana See Jahresabo (239,99€)
-2. 3.000 Start-Mana + 100 Mana täglich
+1. 1x Mana Quelle L Jahresabo (191,90€)
+2. 2.000 Mana/Monat + 67 Mana täglich
 3. Alle 15 Forscher teilen sich die Credits
 4. Perfekt für unregelmäßige Interview-Phasen
 
 **Klassisches Lizenzmodell zum Vergleich**:
 
-- 15 Lizenzen à 9,99€/Monat = 1’798,20€ für 1 Jahr
+- 15 Lizenzen à 9,99€/Monat = 1.798,20€ für 1 Jahr
 - Viele Lizenzen bleiben ungenutzt (nicht alle forschen gleichzeitig)
 - Keine Übertragbarkeit zwischen Teammitgliedern
 
@@ -367,8 +371,8 @@ Spätere Features:
 
 **Mana-Modell (20 Berater)**:
 
-1. 1x Mana Meer + 1x Mana See (79,98€/Monat)
-2. 8.000 Start-Mana + 300 Mana täglich
+1. 1x Mana Quelle XL + 1x Mana Quelle M (49,98€/Monat)
+2. 5.000 Mana/Monat + 166 Mana täglich
 3. Flexibel auf alle Berater verteilbar
 4. Anpassbar an Projektphasen
 
@@ -380,9 +384,9 @@ Spätere Features:
 
 ## Zusammenfassung
 
-Das Mana-Creditsystem in Memoro bietet erhebliche Vorteile gegenüber klassischen Lizenzmodellen:
+Das Mana-Creditsystem bietet erhebliche Vorteile gegenüber klassischen Lizenzmodellen:
 
-**Kostenersparnis**: Die Beispiele zeigen Einsparungen von 70-90% gegenüber traditionellen Seat-Lizenzen. Ein Unternehmen mit 50 Mitarbeitern zahlt nur 99,98€ statt 999,50€ monatlich.
+**Kostenersparnis**: Die Beispiele zeigen Einsparungen von 70-90% gegenüber traditionellen Seat-Lizenzen. Ein Unternehmen mit 50 Mitarbeitern zahlt nur 99,99€ statt 999,50€ monatlich.
 
 **Flexibilität**: Credits können beliebig zwischen Nutzern verteilt werden - ideal für Teams mit wechselnder Zusammensetzung oder unterschiedlichen Nutzungsintensitäten.
 

@@ -1,20 +1,24 @@
-import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { getDb } from '../db/connection';
 import { members, organizations } from '../db/schema';
+import { subscriptions, plans } from '../db/schema/subscriptions.schema';
 import { BetterAuthService } from '../auth/services/better-auth.service';
 import { GuildPoolService } from '../credits/guild-pool.service';
-import { InviteEmployeeDto } from '../auth/dto/invite-employee.dto';
-import { AcceptInvitationDto } from '../auth/dto/accept-invitation.dto';
 import { UpdateOrganizationDto } from '../auth/dto/update-organization.dto';
-import { UpdateMemberRoleDto } from '../auth/dto/update-member-role.dto';
 
 export class CreateGuildDto {
 	name: string;
 	slug?: string;
 	logo?: string;
 }
+
+// Default limits for users without a subscription (free tier)
+const FREE_TIER_LIMITS = {
+	maxOrganizations: 1,
+	maxTeamMembers: 1, // Just themselves
+};
 
 @Injectable()
 export class GuildsService {
@@ -32,10 +36,71 @@ export class GuildsService {
 	}
 
 	/**
-	 * Create a new guild (organization + pool).
-	 * Checks subscription limits for maxOrganizations.
+	 * Get the user's subscription plan limits.
+	 * Falls back to free tier defaults if no active subscription.
 	 */
-	async createGuild(token: string, dto: CreateGuildDto) {
+	private async getUserPlanLimits(userId: string) {
+		const db = this.getDb();
+
+		const [sub] = await db
+			.select({
+				maxTeamMembers: plans.maxTeamMembers,
+				maxOrganizations: plans.maxOrganizations,
+			})
+			.from(subscriptions)
+			.innerJoin(plans, eq(subscriptions.planId, plans.id))
+			.where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')))
+			.limit(1);
+
+		return {
+			maxOrganizations: sub?.maxOrganizations ?? FREE_TIER_LIMITS.maxOrganizations,
+			maxTeamMembers: sub?.maxTeamMembers ?? FREE_TIER_LIMITS.maxTeamMembers,
+		};
+	}
+
+	/**
+	 * Count how many guilds/organizations the user owns.
+	 */
+	private async countUserOwnedGuilds(userId: string): Promise<number> {
+		const db = this.getDb();
+
+		const [result] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(members)
+			.where(and(eq(members.userId, userId), eq(members.role, 'owner')));
+
+		return Number(result.count);
+	}
+
+	/**
+	 * Count current members of a guild.
+	 */
+	private async countGuildMembers(guildId: string): Promise<number> {
+		const db = this.getDb();
+
+		const [result] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(members)
+			.where(eq(members.organizationId, guildId));
+
+		return Number(result.count);
+	}
+
+	/**
+	 * Create a new guild (organization + pool).
+	 * Enforces subscription limit for maxOrganizations.
+	 */
+	async createGuild(token: string, userId: string, dto: CreateGuildDto) {
+		// Check subscription limit
+		const limits = await this.getUserPlanLimits(userId);
+		const ownedGuilds = await this.countUserOwnedGuilds(userId);
+
+		if (limits.maxOrganizations !== null && ownedGuilds >= limits.maxOrganizations) {
+			throw new BadRequestException(
+				`Guild limit reached. Your plan allows ${limits.maxOrganizations} guild(s). Upgrade to create more.`
+			);
+		}
+
 		// Create organization via Better Auth
 		const result = await this.betterAuthService.createOrganizationDirect(token, {
 			name: dto.name,
@@ -70,11 +135,9 @@ export class GuildsService {
 	async listGuilds(token: string, userId: string) {
 		const result = await this.betterAuthService.listOrganizations(token);
 
-		const db = this.getDb();
 		const guilds = [];
 
 		for (const org of result.organizations || []) {
-			// Get pool balance for each guild
 			try {
 				const pool = await this.guildPoolService.getGuildPoolBalance(org.id, userId);
 				guilds.push({
@@ -89,7 +152,6 @@ export class GuildsService {
 					role: (org as any).role,
 				});
 			} catch {
-				// Pool might not exist for legacy orgs
 				guilds.push({
 					gilde: {
 						id: org.id,
@@ -150,8 +212,28 @@ export class GuildsService {
 
 	/**
 	 * Invite a member to the guild.
+	 * Enforces subscription limit for maxTeamMembers.
 	 */
-	async inviteMember(guildId: string, email: string, role: string, token: string) {
+	async inviteMember(guildId: string, email: string, role: string, inviterUserId: string, token: string) {
+		// Find guild owner to check their subscription limits
+		const db = this.getDb();
+		const [owner] = await db
+			.select()
+			.from(members)
+			.where(and(eq(members.organizationId, guildId), eq(members.role, 'owner')))
+			.limit(1);
+
+		if (owner) {
+			const limits = await this.getUserPlanLimits(owner.userId);
+			const memberCount = await this.countGuildMembers(guildId);
+
+			if (limits.maxTeamMembers !== null && memberCount >= limits.maxTeamMembers) {
+				throw new BadRequestException(
+					`Member limit reached. The guild owner's plan allows ${limits.maxTeamMembers} member(s). Upgrade to invite more.`
+				);
+			}
+		}
+
 		return this.betterAuthService.inviteEmployee({
 			organizationId: guildId,
 			employeeEmail: email,

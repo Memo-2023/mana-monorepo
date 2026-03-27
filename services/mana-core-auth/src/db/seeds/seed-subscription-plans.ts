@@ -11,10 +11,12 @@
  *   1. Stripe products and prices are already created via MCP
  *   2. Set STRIPE_* environment variables with the price IDs
  *
- * Stripe Products (Live):
- *   - ManaCore Plus: prod_TzNUGcq9qx9rRT (4.99€/month, 49.99€/year, 100 credits)
- *   - ManaCore Pro: prod_TzNUgWeBjT35qn (11.99€/month, 119.99€/year, 500 credits)
- *   - ManaCore Ultra: prod_TzNUE5pTbTDdbp (24.99€/month, 249.99€/year, 2000 credits)
+ * Stripe Products (Live) - "Mana Quelle" subscriptions:
+ *   - Mana Quelle S:   prod_UDzZl1uKIHplam (4.99€/month, 47.90€/year, 500 credits)
+ *   - Mana Quelle M:   prod_UDzZXZxEVoyQMF (9.99€/month, 95.90€/year, 1000 credits)
+ *   - Mana Quelle L:   prod_UDzZcDxsDS3q1T (19.99€/month, 191.90€/year, 2000 credits)
+ *   - Mana Quelle XL:  prod_UDzZum6MMQkc0b (39.99€/month, 383.90€/year, 4000 credits)
+ *   - Mana Quelle XXL: prod_UDzZreFcbGxdJj (99.99€/month, 959.90€/year, 10000 credits)
  */
 
 import 'dotenv/config';
@@ -32,20 +34,30 @@ const STRIPE_CONFIG = {
 	// Free plan (no Stripe price needed)
 	FREE_PRODUCT_ID: process.env.STRIPE_FREE_PRODUCT_ID || '',
 
-	// ManaCore Plus plan
-	PLUS_PRODUCT_ID: process.env.STRIPE_PLUS_PRODUCT_ID || 'prod_TzNUGcq9qx9rRT',
-	PLUS_PRICE_MONTHLY: process.env.STRIPE_PLUS_PRICE_MONTHLY || 'price_1T1OkKAZjQCYS0ZJ88m0shoN',
-	PLUS_PRICE_YEARLY: process.env.STRIPE_PLUS_PRICE_YEARLY || 'price_1T1OkLAZjQCYS0ZJ4IdMzVyJ',
+	// Mana Quelle S
+	S_PRODUCT_ID: process.env.STRIPE_S_PRODUCT_ID || 'prod_UDzZl1uKIHplam',
+	S_PRICE_MONTHLY: process.env.STRIPE_S_PRICE_MONTHLY || 'price_1TFXaKAZjQCYS0ZJGQFSxm8v',
+	S_PRICE_YEARLY: process.env.STRIPE_S_PRICE_YEARLY || 'price_1TFXaLAZjQCYS0ZJwFnGP29S',
 
-	// ManaCore Pro plan
-	PRO_PRODUCT_ID: process.env.STRIPE_PRO_PRODUCT_ID || 'prod_TzNUgWeBjT35qn',
-	PRO_PRICE_MONTHLY: process.env.STRIPE_PRO_PRICE_MONTHLY || 'price_1T1OkLAZjQCYS0ZJvyPM7Wop',
-	PRO_PRICE_YEARLY: process.env.STRIPE_PRO_PRICE_YEARLY || 'price_1T1OkLAZjQCYS0ZJDbZeuOOu',
+	// Mana Quelle M
+	M_PRODUCT_ID: process.env.STRIPE_M_PRODUCT_ID || 'prod_UDzZXZxEVoyQMF',
+	M_PRICE_MONTHLY: process.env.STRIPE_M_PRICE_MONTHLY || 'price_1TFXaMAZjQCYS0ZJMRmTgQvb',
+	M_PRICE_YEARLY: process.env.STRIPE_M_PRICE_YEARLY || 'price_1TFXaNAZjQCYS0ZJ6AS1vRkx',
 
-	// ManaCore Ultra plan
-	ULTRA_PRODUCT_ID: process.env.STRIPE_ULTRA_PRODUCT_ID || 'prod_TzNUE5pTbTDdbp',
-	ULTRA_PRICE_MONTHLY: process.env.STRIPE_ULTRA_PRICE_MONTHLY || 'price_1T1OkMAZjQCYS0ZJYCJNZtg8',
-	ULTRA_PRICE_YEARLY: process.env.STRIPE_ULTRA_PRICE_YEARLY || 'price_1T1OkMAZjQCYS0ZJvCvR6Ve6',
+	// Mana Quelle L
+	L_PRODUCT_ID: process.env.STRIPE_L_PRODUCT_ID || 'prod_UDzZcDxsDS3q1T',
+	L_PRICE_MONTHLY: process.env.STRIPE_L_PRICE_MONTHLY || 'price_1TFXaNAZjQCYS0ZJaqXjJ0HC',
+	L_PRICE_YEARLY: process.env.STRIPE_L_PRICE_YEARLY || 'price_1TFXaOAZjQCYS0ZJVndo98Pf',
+
+	// Mana Quelle XL
+	XL_PRODUCT_ID: process.env.STRIPE_XL_PRODUCT_ID || 'prod_UDzZum6MMQkc0b',
+	XL_PRICE_MONTHLY: process.env.STRIPE_XL_PRICE_MONTHLY || 'price_1TFXaPAZjQCYS0ZJ0q7OysMg',
+	XL_PRICE_YEARLY: process.env.STRIPE_XL_PRICE_YEARLY || 'price_1TFXaQAZjQCYS0ZJ6rDqh2FU',
+
+	// Mana Quelle XXL
+	XXL_PRODUCT_ID: process.env.STRIPE_XXL_PRODUCT_ID || 'prod_UDzZreFcbGxdJj',
+	XXL_PRICE_MONTHLY: process.env.STRIPE_XXL_PRICE_MONTHLY || 'price_1TFXaQAZjQCYS0ZJ3A6QB2sv',
+	XXL_PRICE_YEARLY: process.env.STRIPE_XXL_PRICE_YEARLY || 'price_1TFXaRAZjQCYS0ZJCuYSesCA',
 };
 
 // Plan definitions
@@ -72,16 +84,16 @@ const PLANS = [
 		sortOrder: 0,
 	},
 	{
-		name: 'Plus',
-		description: 'Basis-Zugang zu allen ManaCore Apps mit AI-Credits',
-		monthlyCredits: 100,
+		name: 'Mana Quelle S',
+		description: '500 Mana pro Monat – Basis-Zugang zu allen ManaCore Apps',
+		monthlyCredits: 500,
 		priceMonthlyEuroCents: 499, // 4.99 EUR
-		priceYearlyEuroCents: 4999, // 49.99 EUR (~2 months free)
-		stripePriceIdMonthly: STRIPE_CONFIG.PLUS_PRICE_MONTHLY || null,
-		stripePriceIdYearly: STRIPE_CONFIG.PLUS_PRICE_YEARLY || null,
-		stripeProductId: STRIPE_CONFIG.PLUS_PRODUCT_ID || null,
+		priceYearlyEuroCents: 4790, // 47.90 EUR (20% Rabatt)
+		stripePriceIdMonthly: STRIPE_CONFIG.S_PRICE_MONTHLY || null,
+		stripePriceIdYearly: STRIPE_CONFIG.S_PRICE_YEARLY || null,
+		stripeProductId: STRIPE_CONFIG.S_PRODUCT_ID || null,
 		features: [
-			'100 AI-Credits pro Monat',
+			'500 Mana pro Monat',
 			'Zugang zu allen Apps',
 			'Chat & Bildgenerierung',
 			'E-Mail Support',
@@ -93,38 +105,76 @@ const PLANS = [
 		sortOrder: 1,
 	},
 	{
-		name: 'Pro',
-		description: 'Erweiterter Zugang mit Premium-Modellen und Priority-Support',
-		monthlyCredits: 500,
-		priceMonthlyEuroCents: 1199, // 11.99 EUR
-		priceYearlyEuroCents: 11999, // 119.99 EUR (~2 months free)
-		stripePriceIdMonthly: STRIPE_CONFIG.PRO_PRICE_MONTHLY || null,
-		stripePriceIdYearly: STRIPE_CONFIG.PRO_PRICE_YEARLY || null,
-		stripeProductId: STRIPE_CONFIG.PRO_PRODUCT_ID || null,
-		features: [
-			'500 AI-Credits pro Monat',
-			'Premium AI-Modelle (GPT-4, Claude)',
-			'Priority-Support',
-			'API-Zugang',
-			'Erweiterte Exportoptionen',
-		],
-		maxTeamMembers: 5,
-		maxOrganizations: 3,
+		name: 'Mana Quelle M',
+		description: '1.000 Mana pro Monat – Erweiterter Zugang mit mehr AI-Power',
+		monthlyCredits: 1000,
+		priceMonthlyEuroCents: 999, // 9.99 EUR
+		priceYearlyEuroCents: 9590, // 95.90 EUR (20% Rabatt)
+		stripePriceIdMonthly: STRIPE_CONFIG.M_PRICE_MONTHLY || null,
+		stripePriceIdYearly: STRIPE_CONFIG.M_PRICE_YEARLY || null,
+		stripeProductId: STRIPE_CONFIG.M_PRODUCT_ID || null,
+		features: ['1.000 Mana pro Monat', 'Alle AI-Modelle', 'Priority-Support', 'API-Zugang'],
+		maxTeamMembers: 3,
+		maxOrganizations: 2,
 		isDefault: false,
 		isEnterprise: false,
 		sortOrder: 2,
 	},
 	{
-		name: 'Ultra',
-		description: 'Maximale Power für Power-User und Teams',
+		name: 'Mana Quelle L',
+		description: '2.000 Mana pro Monat – Premium-Zugang für Power-User',
 		monthlyCredits: 2000,
-		priceMonthlyEuroCents: 2499, // 24.99 EUR
-		priceYearlyEuroCents: 24999, // 249.99 EUR (~2 months free)
-		stripePriceIdMonthly: STRIPE_CONFIG.ULTRA_PRICE_MONTHLY || null,
-		stripePriceIdYearly: STRIPE_CONFIG.ULTRA_PRICE_YEARLY || null,
-		stripeProductId: STRIPE_CONFIG.ULTRA_PRODUCT_ID || null,
+		priceMonthlyEuroCents: 1999, // 19.99 EUR
+		priceYearlyEuroCents: 19190, // 191.90 EUR (20% Rabatt)
+		stripePriceIdMonthly: STRIPE_CONFIG.L_PRICE_MONTHLY || null,
+		stripePriceIdYearly: STRIPE_CONFIG.L_PRICE_YEARLY || null,
+		stripeProductId: STRIPE_CONFIG.L_PRODUCT_ID || null,
 		features: [
-			'2.000 AI-Credits pro Monat',
+			'2.000 Mana pro Monat',
+			'Alle Premium AI-Modelle',
+			'Priority-Support',
+			'Erweiterte Exportoptionen',
+			'API-Zugang',
+		],
+		maxTeamMembers: 5,
+		maxOrganizations: 3,
+		isDefault: false,
+		isEnterprise: false,
+		sortOrder: 3,
+	},
+	{
+		name: 'Mana Quelle XL',
+		description: '4.000 Mana pro Monat – Maximale Power für Teams und Profis',
+		monthlyCredits: 4000,
+		priceMonthlyEuroCents: 3999, // 39.99 EUR
+		priceYearlyEuroCents: 38390, // 383.90 EUR (20% Rabatt)
+		stripePriceIdMonthly: STRIPE_CONFIG.XL_PRICE_MONTHLY || null,
+		stripePriceIdYearly: STRIPE_CONFIG.XL_PRICE_YEARLY || null,
+		stripeProductId: STRIPE_CONFIG.XL_PRODUCT_ID || null,
+		features: [
+			'4.000 Mana pro Monat',
+			'Alle Premium AI-Modelle',
+			'Dedizierter Support',
+			'Team-Features',
+			'Unlimitierte API-Calls',
+		],
+		maxTeamMembers: 10,
+		maxOrganizations: 5,
+		isDefault: false,
+		isEnterprise: false,
+		sortOrder: 4,
+	},
+	{
+		name: 'Mana Quelle XXL',
+		description: '10.000 Mana pro Monat – Enterprise-Power ohne Limits',
+		monthlyCredits: 10000,
+		priceMonthlyEuroCents: 9999, // 99.99 EUR
+		priceYearlyEuroCents: 95990, // 959.90 EUR (20% Rabatt)
+		stripePriceIdMonthly: STRIPE_CONFIG.XXL_PRICE_MONTHLY || null,
+		stripePriceIdYearly: STRIPE_CONFIG.XXL_PRICE_YEARLY || null,
+		stripeProductId: STRIPE_CONFIG.XXL_PRODUCT_ID || null,
+		features: [
+			'10.000 Mana pro Monat',
 			'Alle Premium AI-Modelle',
 			'Dedizierter Support',
 			'Unlimitierte API-Calls',
@@ -135,7 +185,7 @@ const PLANS = [
 		maxOrganizations: null, // Unlimited
 		isDefault: false,
 		isEnterprise: true,
-		sortOrder: 3,
+		sortOrder: 5,
 	},
 ];
 
@@ -189,9 +239,11 @@ async function seedPlans() {
 
 		// Info about configured Stripe products
 		console.log('\n📦 Stripe Products configured:');
-		console.log('   Plus:  ', STRIPE_CONFIG.PLUS_PRODUCT_ID || '(not set)');
-		console.log('   Pro:   ', STRIPE_CONFIG.PRO_PRODUCT_ID || '(not set)');
-		console.log('   Ultra: ', STRIPE_CONFIG.ULTRA_PRODUCT_ID || '(not set)');
+		console.log('   S:   ', STRIPE_CONFIG.S_PRODUCT_ID || '(not set)');
+		console.log('   M:   ', STRIPE_CONFIG.M_PRODUCT_ID || '(not set)');
+		console.log('   L:   ', STRIPE_CONFIG.L_PRODUCT_ID || '(not set)');
+		console.log('   XL:  ', STRIPE_CONFIG.XL_PRODUCT_ID || '(not set)');
+		console.log('   XXL: ', STRIPE_CONFIG.XXL_PRODUCT_ID || '(not set)');
 	} catch (error) {
 		console.error('Error seeding plans:', error);
 		process.exit(1);

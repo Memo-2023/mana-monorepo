@@ -46,8 +46,8 @@ export function getManaFAQs(locale: string): FAQItem[] {
 			id: 'faq-mana-get',
 			question: isDE ? 'Wie bekomme ich Mana?' : 'How do I get Mana?',
 			answer: isDE
-				? '<p>Es gibt drei Wege, Mana zu erhalten:</p><ul><li><strong>Free-Tier</strong>: Jeder Nutzer erhält <strong>150 Mana/Monat</strong> kostenlos</li><li><strong>Mana Stream</strong> (Abo): Monatliche Mana-Pakete von 600 bis 5.000 Mana (ab 6€/Monat, 20% Jahresrabatt)</li><li><strong>Mana Trank</strong> (Einmalkauf): Sofort-Pakete von 350 bis 2.800 Mana (ab 4,90€)</li></ul><p>Abonnenten können außerdem Mana an andere Nutzer <strong>verschenken</strong>.</p>'
-				: '<p>There are three ways to get Mana:</p><ul><li><strong>Free tier</strong>: Every user receives <strong>150 Mana/month</strong> for free</li><li><strong>Mana Stream</strong> (subscription): Monthly Mana packages from 600 to 5,000 Mana (from €6/month, 20% yearly discount)</li><li><strong>Mana Potion</strong> (one-time purchase): Instant packages from 350 to 2,800 Mana (from €4.90)</li></ul><p>Subscribers can also <strong>gift</strong> Mana to other users.</p>',
+				? '<p>Es gibt drei Wege, Mana zu erhalten:</p><ul><li><strong>Free-Tier</strong>: Jeder Nutzer erhält <strong>50 Mana/Monat</strong> kostenlos</li><li><strong>Mana Quelle</strong> (Abo): Monatliche Mana-Pakete von 500 bis 10.000 Mana (ab 4,99€/Monat, 20% Jahresrabatt)</li><li><strong>Mana Trank</strong> (Einmalkauf): Sofort-Pakete von 350 bis 2.800 Mana (ab 4,90€)</li></ul><p>Abonnenten können außerdem Mana an andere Nutzer <strong>verschenken</strong>.</p>'
+				: '<p>There are three ways to get Mana:</p><ul><li><strong>Free tier</strong>: Every user receives <strong>50 Mana/month</strong> for free</li><li><strong>Mana Source</strong> (subscription): Monthly Mana packages from 500 to 10,000 Mana (from €4.99/month, 20% yearly discount)</li><li><strong>Mana Potion</strong> (one-time purchase): Instant packages from 350 to 2,800 Mana (from €4.90)</li></ul><p>Subscribers can also <strong>gift</strong> Mana to other users.</p>',
 			category: 'billing',
 			order: 91,
 			language: isDE ? 'de' : 'en',

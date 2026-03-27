@@ -67,11 +67,12 @@ Der Mana-Verbrauch bei Memoro ist transparent und fix: **1 Mana = 1 Cent**
 
 **Monatlich (Abo):**
 
-- **Mana Tropfen**: 0€ - 150 Mana/Monat (kostenlos)
-- **Kleiner Stream**: 5,99€ - 600 Mana/Monat
-- **Mittlerer Stream**: 14,99€ - 1.500 Mana/Monat
-- **Großer Stream**: 29,99€ - 3.000 Mana/Monat
-- **Riesiger Stream**: 49,99€ - 5.000 Mana/Monat
+- **Mana Quelle Free**: 0€ - 50 Mana/Monat (kostenlos)
+- **Mana Quelle S**: 4,99€ - 500 Mana/Monat
+- **Mana Quelle M**: 9,99€ - 1.000 Mana/Monat
+- **Mana Quelle L**: 19,99€ - 2.000 Mana/Monat
+- **Mana Quelle XL**: 39,99€ - 4.000 Mana/Monat
+- **Mana Quelle XXL**: 99,99€ - 10.000 Mana/Monat
 
 **Einmalig (Trank):**
 
@@ -82,7 +83,7 @@ Der Mana-Verbrauch bei Memoro ist transparent und fix: **1 Mana = 1 Cent**
 
 ### Flexibilität von Mana
 
-Mit Mana zahlst du nur für die tatsächliche Nutzung. Brauchst du einen Monat mehr? Buche ein größeres Paket oder einen einmaligen Trank. Brauchst du weniger? Nutze einfach den kostenlosen Mana Tropfen. Perfekt für schwankenden Bedarf!
+Mit Mana zahlst du nur für die tatsächliche Nutzung. Brauchst du einen Monat mehr? Buche ein größeres Paket oder einen einmaligen Trank. Brauchst du weniger? Nutze einfach die kostenlose Mana Quelle Free. Perfekt für schwankenden Bedarf!
 
 ## Anwendungsfälle
 

@@ -41,9 +41,13 @@ export class GuildsController {
 	@Post()
 	@ApiOperation({ summary: 'Create a new guild' })
 	@ApiResponse({ status: 201, description: 'Guild created with pool initialized' })
-	async createGuild(@Headers('authorization') authorization: string, @Body() dto: CreateGuildDto) {
+	async createGuild(
+		@Headers('authorization') authorization: string,
+		@CurrentUser() user: CurrentUserData,
+		@Body() dto: CreateGuildDto
+	) {
 		const token = this.extractToken(authorization);
-		return this.guildsService.createGuild(token, dto);
+		return this.guildsService.createGuild(token, user.userId, dto);
 	}
 
 	@Get()
@@ -101,10 +105,11 @@ export class GuildsController {
 	async inviteMember(
 		@Param('id') guildId: string,
 		@Headers('authorization') authorization: string,
+		@CurrentUser() user: CurrentUserData,
 		@Body() dto: InviteMemberDto
 	) {
 		const token = this.extractToken(authorization);
-		return this.guildsService.inviteMember(guildId, dto.email, dto.role, token);
+		return this.guildsService.inviteMember(guildId, dto.email, dto.role, user.userId, token);
 	}
 
 	@Post('accept-invitation')

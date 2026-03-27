@@ -51,27 +51,29 @@ Das Mana-System kombiniert die Vorteile von Abonnements mit der Fairness verbrau
 
 ### Monatliche Abonnements mit Mana-Regeneration
 
-| Abo-Stufe        | Preis/Monat | Start-Mana | Tägliche Regeneration | Speicherlimit | Entspricht ca. |
-| ---------------- | ----------- | ---------- | --------------------- | ------------- | -------------- |
-| **Mana Tropfen** | Kostenlos   | 150        | 5                     | 150           | 1,25 Stunden   |
-| **Mana Fluss**   | 5,99€       | 600        | 20                    | 1.200         | 10 Stunden     |
-| **Mana Strom**   | 14,99€      | 1.500      | 50                    | 3.000         | 25 Stunden     |
-| **Mana See**     | 29,99€      | 3.000      | 100                   | 6.000         | 50 Stunden     |
-| **Mana Meer**    | 49,99€      | 5.000      | 200                   | 10.000        | 83 Stunden     |
+| Abo-Stufe            | Preis/Monat | Mana/Monat | Tägliche Regeneration | Entspricht ca. |
+| -------------------- | ----------- | ---------- | --------------------- | -------------- |
+| **Mana Quelle Free** | Kostenlos   | 50         | 2                     | 25 Minuten     |
+| **Mana Quelle S**    | 4,99€       | 500        | 17                    | 4 Stunden      |
+| **Mana Quelle M**    | 9,99€       | 1.000      | 33                    | 8 Stunden      |
+| **Mana Quelle L**    | 19,99€      | 2.000      | 67                    | 17 Stunden     |
+| **Mana Quelle XL**   | 39,99€      | 4.000      | 133                   | 33 Stunden     |
+| **Mana Quelle XXL**  | 99,99€      | 10.000     | 333                   | 83 Stunden     |
 
-### Jährliche Abonnements (bis zu 33% Ersparnis)
+### Jährliche Abonnements (20% Ersparnis)
 
-- **Mana Fluss**: 47,99€/Jahr (3,99€/Monat)
-- **Mana Strom**: 119,99€/Jahr (9,99€/Monat)
-- **Mana See**: 239,99€/Jahr (19,99€/Monat)
-- **Mana Meer**: 399,99€/Jahr (33,33€/Monat)
+- **Mana Quelle S**: 47,90€/Jahr (3,99€/Monat)
+- **Mana Quelle M**: 95,90€/Jahr (7,99€/Monat)
+- **Mana Quelle L**: 191,90€/Jahr (15,99€/Monat)
+- **Mana Quelle XL**: 383,90€/Jahr (31,99€/Monat)
+- **Mana Quelle XXL**: 959,90€/Jahr (79,99€/Monat)
 
 ### Einmalkäufe (Mana-Tränke)
 
-- **Kleiner Trank**: 4,99€ für 350 Mana
-- **Mittlerer Trank**: 9,99€ für 700 Mana
-- **Großer Trank**: 19,99€ für 1.400 Mana
-- **Riesiger Trank**: 39,99€ für 2.800 Mana
+- **Kleiner Mana Trank**: 4,90€ für 350 Mana
+- **Mittlerer Mana Trank**: 9,80€ für 700 Mana
+- **Großer Mana Trank**: 19,60€ für 1.400 Mana
+- **Riesiger Mana Trank**: 39,20€ für 2.800 Mana
 
 ## Vorteile gegenüber klassischen Lizenzmodellen
 
@@ -79,15 +81,15 @@ Das Mana-System kombiniert die Vorteile von Abonnements mit der Fairness verbrau
 
 **Unternehmen mit 50 Mitarbeitern:**
 
-- **Manacore**: 2x Mana Meer = 99,98€/Monat
+- **Manacore**: 1x Mana Quelle XXL = 99,99€/Monat
 - **Klassische Lizenzen**: 50 × 19,99€ = 999,50€/Monat
 - **Ersparnis**: 90%
 
 **Universitäres Forschungsprojekt (15 Forscher, 1 Jahr):**
 
-- **Manacore**: 1x Mana See Jahresabo = 239,99€
+- **Manacore**: 1x Mana Quelle L Jahresabo = 191,90€
 - **Klassische Lizenzen**: 15 × 9,99€ × 12 Monate = 1.798,20€
-- **Ersparnis**: 87%
+- **Ersparnis**: 89%
 
 ### Weitere Vorteile
 
