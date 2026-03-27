@@ -1,6 +1,6 @@
 # Local-First Architektur & Stack-Migration
 
-> **Status**: 🟢 In Umsetzung (Phase 1-3 abgeschlossen)
+> **Status**: 🟢 Phase 3 vollständig abgeschlossen (19/19 Apps migriert)
 > **Erstellt**: 2026-03-26
 > **Zuletzt aktualisiert**: 2026-03-27
 > **Autor**: Claude Code + Till Schneider
@@ -313,28 +313,43 @@ apps/todo/apps/backend/     # Oder: services/todo/ (umstrukturieren?)
 
 ---
 
-## Phase 3: Rollout auf alle Apps (4-6 Wochen) — 8/8 DONE 2026-03-27
+## Phase 3: Rollout auf alle Apps — 19/19 DONE 2026-03-27
 
-Reihenfolge nach Komplexität:
+Alle Web-Apps mit CRUD-Datenmodell wurden auf Local-First migriert:
 
-| App | Komplexität | Verbleibende Server-Logik |
+| App | Collections | Server-Logik verbleibt |
 |---|---|---|
-| **Zitare** | Niedrig | Nur Sync |
-| **Calendar** | Mittel | RRULE, Google Calendar OAuth |
-| **Clock** | Niedrig | Nur Sync (Timer-State) |
-| **ManaDeck** | Mittel | Spaced Repetition Algorithmus, LLM-Integration |
-| **Contacts** | Hoch | Google OAuth Import, vCard/CSV Parser, Foto-Upload |
-| **Chat** | Hoch | LLM Streaming, Document Processing |
-| **Picture** | Hoch | Replicate API, Webhooks, Bild-Upload |
-| **Presi** | Mittel | Nur Sync + Export |
+| **Todo** | tasks, projects, labels, taskLabels, reminders | RRULE, Reminders (Hono/Bun) |
+| **Zitare** | favorites, lists | Nur Sync |
+| **Calendar** | calendars, events | RRULE, Google Calendar OAuth |
+| **Clock** | alarms, timers, worldClocks | Nur Sync |
+| **ManaDeck** | decks, cards | Spaced Repetition, LLM |
+| **Contacts** | contacts | Google Import, vCard/CSV, Foto-Upload |
+| **Picture** | images, boards, boardItems, tags, imageTags | Replicate API, Upload, Explore |
+| **Presi** | decks, slides | Share-Links |
+| **Inventar** | collections, items, locations, categories | Nur Sync |
+| **NutriPhi** | meals, goals, favorites | AI-Analyse (Gemini), Recommendations |
+| **Planta** | plants, plantPhotos, wateringSchedules, wateringLogs | Foto-Upload, AI-Analyse (Gemini) |
+| **Storage** | files, folders, tags, fileTags | Datei-Upload/Download, Shares, Versionen |
+| **Chat** | conversations, messages, templates | LLM Streaming |
+| **Questions** | collections, questions, answers | Research (mana-search) |
+| **Mukke** | songs, playlists, playlistSongs, projects, markers | Audio-Upload/Streaming |
+| **Context** | spaces, documents | AI-Generierung (Azure/Gemini), Tokens |
+| **Photos** | albums, albumItems, favorites, tags, photoTags | Fotos via mana-media |
+| **SkilltTree** | skills, activities, achievements | Nur Sync |
+| **CityCorners** | locations, favorites | Web-Lookup (mana-search) |
 
-Pro App:
-1. `createLocalCollection()` für jede Tabelle definieren
-2. Stores von API-Calls auf lokale Queries umbauen
-3. Guest-Seed-Daten erstellen
-4. NestJS-Endpoints identifizieren die Server-seitig bleiben
-5. Diese nach Hono/Bun migrieren
-6. Alten NestJS-Backend entfernen
+**Nicht migriert (kein CRUD-Datenmodell):**
+- **ManaCore** — Hub/Settings-App, aggregiert andere Apps
+- **Matrix** — Protocol-Client, kein eigenes Datenmodell
+- **Playground** — Stateless LLM-Chat
+
+Pro App wurde implementiert:
+1. `local-store.ts` mit `createLocalStore()` und typisierten Collections
+2. `guest-seed.ts` mit Onboarding-Daten für Guest-Mode
+3. Layout mit `AuthGate allowGuest={true}` + `handleAuthReady()` (initialize + startSync)
+4. `GuestWelcomeModal` für Erst-Besuch-Erfahrung
+5. `@manacore/local-store` als Dependency
 
 ---
 

@@ -522,7 +522,7 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
                                   ← WebSocket push ←
 ```
 
-### Migrated Apps
+### Migrated Apps (19/22)
 
 | App | Collections | Status |
 |-----|------------|--------|
@@ -545,6 +545,8 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | Photos | albums, albumItems, favorites, tags, photoTags | Done |
 | SkilltTree | skills, activities, achievements | Done |
 | CityCorners | locations, favorites | Done |
+
+**Not migrated (no CRUD data model):** ManaCore (hub), Matrix (protocol client), Playground (stateless)
 
 ### Dev Commands (Local-First Stack)
 
