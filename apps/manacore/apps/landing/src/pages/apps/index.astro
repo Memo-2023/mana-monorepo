@@ -2,54 +2,55 @@
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/navigation/Navbar.astro';
 import Footer from '../../components/navigation/Footer.astro';
+import { Icon } from 'astro-icon/components';
 
 type Item =
   | { type: 'heading'; label: string }
-  | { type: 'app'; name: string; emoji: string; tagline: string; url: string };
+  | { type: 'app'; name: string; icon: string; tagline: string; url: string };
 
 const items: Item[] = [
   // --- KI & Kreativ ---
   { type: 'heading', label: 'KI & Kreativ' },
-  { type: 'app', name: 'ManaChat', emoji: '💬', tagline: 'KI Chat Assistent', url: 'https://chat.mana.how' },
-  { type: 'app', name: 'ManaPicture', emoji: '🎨', tagline: 'KI Bildgenerierung', url: 'https://picture.mana.how' },
-  { type: 'app', name: 'Presi', emoji: '📊', tagline: 'KI Präsentationen', url: 'https://presi.mana.how' },
-  { type: 'app', name: 'Questions', emoji: '🔍', tagline: 'KI Research', url: 'https://questions.mana.how' },
-  { type: 'app', name: 'Context', emoji: '📄', tagline: 'Dokument-Workspace', url: 'https://context.mana.how' },
-  { type: 'app', name: 'Playground', emoji: '🧪', tagline: 'LLM Playground', url: 'https://playground.mana.how' },
+  { type: 'app', name: 'ManaChat', icon: 'ph:chat-circle-dots-bold', tagline: 'KI Chat Assistent', url: 'https://chat.mana.how' },
+  { type: 'app', name: 'ManaPicture', icon: 'ph:paint-brush-bold', tagline: 'KI Bildgenerierung', url: 'https://picture.mana.how' },
+  { type: 'app', name: 'Presi', icon: 'ph:presentation-chart-bold', tagline: 'KI Präsentationen', url: 'https://presi.mana.how' },
+  { type: 'app', name: 'Questions', icon: 'ph:magnifying-glass-bold', tagline: 'KI Research', url: 'https://questions.mana.how' },
+  { type: 'app', name: 'Context', icon: 'ph:file-text-bold', tagline: 'Dokument-Workspace', url: 'https://context.mana.how' },
+  { type: 'app', name: 'Playground', icon: 'ph:flask-bold', tagline: 'LLM Playground', url: 'https://playground.mana.how' },
 
   // --- Organisieren ---
   { type: 'heading', label: 'Organisieren' },
-  { type: 'app', name: 'ManaTodo', emoji: '✅', tagline: 'Aufgaben', url: 'https://todo.mana.how' },
-  { type: 'app', name: 'ManaCalendar', emoji: '📅', tagline: 'Kalender', url: 'https://calendar.mana.how' },
-  { type: 'app', name: 'ManaContacts', emoji: '👥', tagline: 'Kontakte', url: 'https://contacts.mana.how' },
-  { type: 'app', name: 'ManaStorage', emoji: '☁️', tagline: 'Cloud-Speicher', url: 'https://storage.mana.how' },
-  { type: 'app', name: 'Inventar', emoji: '📦', tagline: 'Inventar', url: 'https://inventar.mana.how' },
+  { type: 'app', name: 'ManaTodo', icon: 'ph:check-square-bold', tagline: 'Aufgaben', url: 'https://todo.mana.how' },
+  { type: 'app', name: 'ManaCalendar', icon: 'ph:calendar-bold', tagline: 'Kalender', url: 'https://calendar.mana.how' },
+  { type: 'app', name: 'ManaContacts', icon: 'ph:address-book-bold', tagline: 'Kontakte', url: 'https://contacts.mana.how' },
+  { type: 'app', name: 'ManaStorage', icon: 'ph:cloud-bold', tagline: 'Cloud-Speicher', url: 'https://storage.mana.how' },
+  { type: 'app', name: 'Inventar', icon: 'ph:package-bold', tagline: 'Inventar', url: 'https://inventar.mana.how' },
 
   // --- Lernen ---
   { type: 'heading', label: 'Lernen' },
-  { type: 'app', name: 'ManaDeck', emoji: '🎴', tagline: 'KI Karteikarten', url: 'https://manadeck.mana.how' },
-  { type: 'app', name: 'SkilltTree', emoji: '🌳', tagline: 'Skill-Tracking', url: 'https://skilltree.mana.how' },
-  { type: 'app', name: 'Zitare', emoji: '💡', tagline: 'Zitate & Inspiration', url: 'https://zitare.mana.how' },
+  { type: 'app', name: 'ManaDeck', icon: 'ph:cards-bold', tagline: 'KI Karteikarten', url: 'https://manadeck.mana.how' },
+  { type: 'app', name: 'SkilltTree', icon: 'ph:tree-structure-bold', tagline: 'Skill-Tracking', url: 'https://skilltree.mana.how' },
+  { type: 'app', name: 'Zitare', icon: 'ph:quotes-bold', tagline: 'Zitate & Inspiration', url: 'https://zitare.mana.how' },
 
   // --- Medien ---
   { type: 'heading', label: 'Medien' },
-  { type: 'app', name: 'Mukke', emoji: '🎵', tagline: 'Musikproduktion', url: 'https://mukke.mana.how' },
-  { type: 'app', name: 'Photos', emoji: '📸', tagline: 'Fotoverwaltung', url: 'https://photos.mana.how' },
+  { type: 'app', name: 'Mukke', icon: 'ph:music-notes-bold', tagline: 'Musikproduktion', url: 'https://mukke.mana.how' },
+  { type: 'app', name: 'Photos', icon: 'ph:camera-bold', tagline: 'Fotoverwaltung', url: 'https://photos.mana.how' },
 
   // --- Alltag & Gesundheit ---
   { type: 'heading', label: 'Alltag & Gesundheit' },
-  { type: 'app', name: 'ManaClock', emoji: '⏰', tagline: 'Uhren & Timer', url: 'https://clock.mana.how' },
-  { type: 'app', name: 'NutriPhi', emoji: '🥗', tagline: 'Ernährung', url: 'https://nutriphi.mana.how' },
-  { type: 'app', name: 'Planta', emoji: '🌱', tagline: 'Pflanzenpflege', url: 'https://planta.mana.how' },
+  { type: 'app', name: 'ManaClock', icon: 'ph:clock-bold', tagline: 'Uhren & Timer', url: 'https://clock.mana.how' },
+  { type: 'app', name: 'NutriPhi', icon: 'ph:bowl-food-bold', tagline: 'Ernährung', url: 'https://nutriphi.mana.how' },
+  { type: 'app', name: 'Planta', icon: 'ph:plant-bold', tagline: 'Pflanzenpflege', url: 'https://planta.mana.how' },
 
   // --- Unterwegs ---
   { type: 'heading', label: 'Unterwegs' },
-  { type: 'app', name: 'CityCorners', emoji: '🏙️', tagline: 'Stadtführer Konstanz', url: 'https://citycorners.mana.how' },
-  { type: 'app', name: 'Traces', emoji: '🗺️', tagline: 'Stadt-Erkundung', url: 'https://traces.mana.how' },
+  { type: 'app', name: 'CityCorners', icon: 'ph:buildings-bold', tagline: 'Stadtführer Konstanz', url: 'https://citycorners.mana.how' },
+  { type: 'app', name: 'Traces', icon: 'ph:map-trifold-bold', tagline: 'Stadt-Erkundung', url: 'https://traces.mana.how' },
 
   // --- Kommunikation ---
   { type: 'heading', label: 'Kommunikation' },
-  { type: 'app', name: 'Matrix', emoji: '💬', tagline: 'Matrix Chat', url: 'https://matrix.mana.how' },
+  { type: 'app', name: 'Matrix', icon: 'ph:chats-bold', tagline: 'Matrix Chat', url: 'https://matrix.mana.how' },
 ];
 ---
 
@@ -70,7 +71,7 @@ const items: Item[] = [
             rel="noopener noreferrer"
             class="group flex flex-col items-center justify-center text-center border border-gray-200 dark:border-gray-700 p-5 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800"
           >
-            <div class="text-4xl mb-2">{item.emoji}</div>
+            <Icon name={item.icon} class="w-10 h-10 mb-2 text-gray-700 dark:text-gray-300" />
             <span class="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1">{item.name}</span>
             <span class="text-xs text-gray-500 dark:text-gray-400">{item.tagline}</span>
           </a>
