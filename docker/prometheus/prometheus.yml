@@ -217,14 +217,14 @@ scrape_configs:
   # Matrix Bot (Go) — consolidated 21 bots
   - job_name: 'mana-matrix-bot'
     static_configs:
-      - targets: ['mana-matrix-bot:4001']
+      - targets: ['mana-matrix-bot:4000']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Sync Server (Go) — local-first data sync
   - job_name: 'mana-sync'
     static_configs:
-      - targets: ['mana-core-sync:3010']
+      - targets: ['mana-core-sync:3051']
     metrics_path: '/metrics'
     scrape_interval: 30s
 

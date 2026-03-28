@@ -16,7 +16,7 @@ ingress:
 
   # API Gateway (Go)
   - hostname: api.mana.how
-    service: http://localhost:3060
+    service: http://localhost:3016
 
   # Forgejo (Git + CI/CD)
   - hostname: git.mana.how
