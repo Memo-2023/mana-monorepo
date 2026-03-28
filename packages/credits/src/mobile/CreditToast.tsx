@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
-import { formatCreditCost } from '@manacore/credit-operations';
+import { formatCreditCost } from './operations';
 
 interface CreditToastProps {
 	/** The operation name or description */

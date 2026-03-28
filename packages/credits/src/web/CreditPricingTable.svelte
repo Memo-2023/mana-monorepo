@@ -3,7 +3,7 @@
 		getPricingTable,
 		CreditCategory,
 		type CreditOperationType,
-	} from '@manacore/credit-operations';
+	} from './operations';
 
 	interface Props {
 		/** The app to show pricing for (e.g., 'todo', 'chat', 'calendar') */

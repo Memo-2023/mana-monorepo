@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { createCreditService } from '@manacore/shared-credit-service';
+ * import { createCreditService } from './createCreditService';
  * import { auth } from '$lib/stores/auth';
  *
  * export const creditService = createCreditService({
@@ -29,8 +29,8 @@ import type {
 	PricingResponse,
 	CreditUpdateCallback,
 	StandardOperationType,
-} from './types';
-import { DEFAULT_OPERATION_PRICING } from './types';
+} from './service-types';
+import { DEFAULT_OPERATION_PRICING } from './service-types';
 
 /**
  * Create a credit service instance

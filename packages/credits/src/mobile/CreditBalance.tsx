@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { formatCreditCost } from '@manacore/credit-operations';
+import { formatCreditCost } from './operations';
 
 interface CreditBalanceProps {
 	/** Current credit balance */

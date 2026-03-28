@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatCreditCost } from '@manacore/credit-operations';
+	import { formatCreditCost } from './operations';
 
 	interface Props {
 		/** The operation name or description */
