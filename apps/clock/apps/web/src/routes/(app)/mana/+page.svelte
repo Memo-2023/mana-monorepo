@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
+	import { SubscriptionPage } from '@manacore/subscriptions';
 	import { authStore } from '$lib/stores/auth.svelte';
 </script>
 

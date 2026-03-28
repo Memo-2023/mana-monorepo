@@ -90,18 +90,51 @@
 		editingView = null;
 	}
 
-	// Filter state
+	// ─── View Reorder ──────────────────────────────────────
+	async function handleReorderViews(viewIds: string[]) {
+		await boardViewsStore.reorderViews(viewIds);
+	}
+
+	// ─── Filter state ──────────────────────────────────────
 	let filterPriorities = $state<TaskPriority[]>([]);
 	let filterProjectId = $state<string | null>(null);
 	let filterLabelIds = $state<string[]>([]);
 	let filterSearchQuery = $state('');
 	let showFilters = $state(false);
 
+	// Load filter from active view when it changes
+	let previousViewId = $state<string | null>(null);
+	$effect(() => {
+		if (activeView && activeView.id !== previousViewId) {
+			previousViewId = activeView.id;
+			if (activeView.filter) {
+				filterPriorities = (activeView.filter.priorities ?? []) as TaskPriority[];
+				filterProjectId = activeView.filter.projectId ?? null;
+				filterLabelIds = activeView.filter.tagIds ?? [];
+			} else {
+				filterPriorities = [];
+				filterProjectId = null;
+				filterLabelIds = [];
+			}
+			filterSearchQuery = '';
+		}
+	});
+
 	function clearFilters() {
 		filterPriorities = [];
 		filterProjectId = null;
 		filterLabelIds = [];
 		filterSearchQuery = '';
+	}
+
+	async function saveFiltersToView() {
+		if (!activeViewId) return;
+		const filter: { projectId?: string; tagIds?: string[]; priorities?: string[] } = {};
+		if (filterProjectId) filter.projectId = filterProjectId;
+		if (filterLabelIds.length > 0) filter.tagIds = filterLabelIds;
+		if (filterPriorities.length > 0) filter.priorities = filterPriorities;
+		const hasFilter = Object.keys(filter).length > 0;
+		await boardViewsStore.updateView(activeViewId, { filter: hasFilter ? filter : undefined });
 	}
 
 	let hasActiveFilters = $derived(
@@ -143,6 +176,7 @@
 			onSelect={handleSelectView}
 			onCreate={handleCreateView}
 			onEdit={handleEditView}
+			onReorder={handleReorderViews}
 		/>
 	{/if}
 
@@ -191,13 +225,50 @@
 				showSearch={true}
 				showLabels={true}
 			/>
+			{#if hasActiveFilters}
+				<div class="mt-2 flex items-center gap-2">
+					<button
+						type="button"
+						class="save-filter-btn"
+						onclick={saveFiltersToView}
+					>
+						<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+							<polyline points="17 21 17 13 7 13 7 21" />
+							<polyline points="7 3 7 8 15 8" />
+						</svg>
+						Filter speichern
+					</button>
+					{#if activeView?.filter}
+						<button
+							type="button"
+							class="clear-saved-filter-btn"
+							onclick={async () => {
+								clearFilters();
+								if (activeViewId) {
+									await boardViewsStore.updateView(activeViewId, { filter: undefined });
+								}
+							}}
+						>
+							Gespeicherten Filter entfernen
+						</button>
+					{/if}
+				</div>
+			{/if}
 		</div>
 	{/if}
 
 	<!-- Board Content -->
 	<div class="board-container" class:mobile-bottom-padding={isMobile}>
 		{#if activeView}
-			<BoardViewRenderer view={activeView} />
+			<BoardViewRenderer view={{
+				...activeView,
+				filter: hasActiveFilters ? {
+					projectId: filterProjectId ?? undefined,
+					tagIds: filterLabelIds.length > 0 ? filterLabelIds : undefined,
+					priorities: filterPriorities.length > 0 ? filterPriorities : undefined,
+				} : activeView.filter,
+			}} />
 		{:else if boardViews.value.length === 0}
 			<div class="empty-state">
 				<p class="text-muted-foreground">Board Views werden geladen...</p>
@@ -321,6 +392,69 @@
 		background: #7c3aed;
 		border-color: #7c3aed;
 		color: white;
+	}
+
+	/* ─── Save Filter Button ───────────────────────────────── */
+	.save-filter-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #8b5cf6;
+		background: rgba(139, 92, 246, 0.1);
+		border: 1px solid rgba(139, 92, 246, 0.2);
+		border-radius: 9999px;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.save-filter-btn:hover {
+		background: rgba(139, 92, 246, 0.2);
+		border-color: rgba(139, 92, 246, 0.3);
+	}
+
+	:global(.dark) .save-filter-btn {
+		color: #a78bfa;
+		background: rgba(139, 92, 246, 0.15);
+		border-color: rgba(139, 92, 246, 0.25);
+	}
+
+	:global(.dark) .save-filter-btn:hover {
+		background: rgba(139, 92, 246, 0.25);
+		border-color: rgba(139, 92, 246, 0.35);
+	}
+
+	.clear-saved-filter-btn {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.375rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #6b7280;
+		background: transparent;
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		border-radius: 9999px;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.clear-saved-filter-btn:hover {
+		background: rgba(0, 0, 0, 0.04);
+		color: #ef4444;
+		border-color: rgba(239, 68, 68, 0.2);
+	}
+
+	:global(.dark) .clear-saved-filter-btn {
+		color: #9ca3af;
+		border-color: rgba(255, 255, 255, 0.12);
+	}
+
+	:global(.dark) .clear-saved-filter-btn:hover {
+		background: rgba(239, 68, 68, 0.1);
+		color: #ef4444;
+		border-color: rgba(239, 68, 68, 0.3);
 	}
 
 	/* Animations */

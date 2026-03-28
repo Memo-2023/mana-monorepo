@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
+	import { SubscriptionPage } from '@manacore/subscriptions';
 
 	let toastMessage = $state<string | null>(null);
 

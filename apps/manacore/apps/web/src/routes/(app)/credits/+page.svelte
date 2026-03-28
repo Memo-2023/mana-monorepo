@@ -14,7 +14,7 @@
 		CreditCategory,
 		formatCreditCost,
 		type CreditOperationType,
-	} from '@manacore/credit-operations';
+	} from '@manacore/credits';
 	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 
 	let balance = $state<CreditBalance | null>(null);

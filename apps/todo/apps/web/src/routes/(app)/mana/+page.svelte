@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
+	import { SubscriptionPage } from '@manacore/subscriptions';
 
 	function handleSubscribe(planId: string) {
 		console.log('Subscribe to plan:', planId);

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID, type DndEvent } from 'svelte-dnd-action';
 	import type { LocalBoardView, ViewColumn } from '$lib/data/local-store';
 
 	interface Props {
@@ -265,6 +266,17 @@
 		colorPickerColumnId = colorPickerColumnId === columnId ? null : columnId;
 	}
 
+	// ─── Column DnD ────────────────────────────────────────
+	const columnFlipDurationMs = 150;
+
+	function handleColumnDndConsider(e: CustomEvent<DndEvent<ViewColumn>>) {
+		columns = e.detail.items;
+	}
+
+	function handleColumnDndFinalize(e: CustomEvent<DndEvent<ViewColumn>>) {
+		columns = e.detail.items.filter((c) => c.id !== SHADOW_PLACEHOLDER_ITEM_ID);
+	}
+
 	function handleSave() {
 		if (!name.trim()) return;
 		onSave({
@@ -452,9 +464,37 @@
 							{/if}
 						</p>
 					{:else}
-						<div class="columns-list">
-							{#each columns as col (col.id)}
+						<div
+							class="columns-list"
+							use:dndzone={{
+								items: columns,
+								flipDurationMs: columnFlipDurationMs,
+								dropTargetStyle: {},
+								dropTargetClasses: ['columns-drop-target'],
+								type: 'editor-columns',
+								dragDisabled: !columnsEditable,
+							}}
+							onconsider={handleColumnDndConsider}
+							onfinalize={handleColumnDndFinalize}
+						>
+							{#each columns.filter((c) => c.id !== SHADOW_PLACEHOLDER_ITEM_ID) as col (col.id)}
 								<div class="column-item">
+									<!-- Drag handle -->
+									{#if columnsEditable}
+										<span class="drag-handle" aria-label="Spalte verschieben">
+											<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+												<circle cx="9" cy="5" r="1.5" />
+												<circle cx="15" cy="5" r="1.5" />
+												<circle cx="9" cy="10" r="1.5" />
+												<circle cx="15" cy="10" r="1.5" />
+												<circle cx="9" cy="15" r="1.5" />
+												<circle cx="15" cy="15" r="1.5" />
+												<circle cx="9" cy="20" r="1.5" />
+												<circle cx="15" cy="20" r="1.5" />
+											</svg>
+										</span>
+									{/if}
+
 									<!-- Color dot -->
 									<div class="color-dot-wrapper">
 										<button
@@ -889,6 +929,36 @@
 		border: 1px solid rgba(0, 0, 0, 0.06);
 		border-radius: 0.625rem;
 		transition: all 0.15s;
+	}
+
+	.drag-handle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		color: #d1d5db;
+		cursor: grab;
+		opacity: 0;
+		transition: opacity 0.15s;
+	}
+
+	.drag-handle:active {
+		cursor: grabbing;
+	}
+
+	.column-item:hover .drag-handle {
+		opacity: 1;
+	}
+
+	:global(.dark) .drag-handle {
+		color: #4b5563;
+	}
+
+	:global(.columns-drop-target) {
+		outline: 2px dashed #8b5cf6;
+		outline-offset: -2px;
+		border-radius: 0.625rem;
+		background: rgba(139, 92, 246, 0.05);
 	}
 
 	:global(.dark) .column-item {

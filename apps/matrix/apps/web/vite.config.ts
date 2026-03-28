@@ -16,7 +16,7 @@ const MANACORE_SHARED_PACKAGES = [
 	'@manacore/shared-auth',
 	'@manacore/shared-auth-ui',
 	'@manacore/shared-branding',
-	'@manacore/shared-subscription-ui',
+	'@manacore/subscriptions',
 	'@manacore/shared-profile-ui',
 	'@manacore/shared-i18n',
 	'@manacore/shared-api-client',

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID, type DndEvent } from 'svelte-dnd-action';
 	import type { LocalBoardView } from '$lib/data/local-store';
 
 	interface Props {
@@ -7,9 +8,30 @@
 		onSelect: (viewId: string) => void;
 		onCreate?: () => void;
 		onEdit?: (view: LocalBoardView) => void;
+		onReorder?: (viewIds: string[]) => void;
 	}
 
-	let { views, activeViewId, onSelect, onCreate, onEdit }: Props = $props();
+	let { views, activeViewId, onSelect, onCreate, onEdit, onReorder }: Props = $props();
+
+	// Local state for DnD
+	let localViews = $state<LocalBoardView[]>([]);
+
+	$effect(() => {
+		localViews = [...views];
+	});
+
+	const flipDurationMs = 150;
+
+	function handleDndConsider(e: CustomEvent<DndEvent<LocalBoardView>>) {
+		localViews = e.detail.items;
+	}
+
+	function handleDndFinalize(e: CustomEvent<DndEvent<LocalBoardView>>) {
+		localViews = e.detail.items.filter((v) => v.id !== SHADOW_PLACEHOLDER_ITEM_ID);
+		if (onReorder) {
+			onReorder(localViews.map((v) => v.id));
+		}
+	}
 
 	// Context menu state
 	let contextMenuViewId = $state<string | null>(null);
@@ -65,8 +87,19 @@
 
 <div class="view-selector-container">
 	<div class="view-selector">
-		<div class="view-pills-scroll">
-			{#each views as view (view.id)}
+		<div
+			class="view-pills-scroll"
+			use:dndzone={{
+				items: localViews,
+				flipDurationMs,
+				dropTargetStyle: {},
+				type: 'view-pills',
+				morphDisabled: true,
+			}}
+			onconsider={handleDndConsider}
+			onfinalize={handleDndFinalize}
+		>
+			{#each localViews.filter((v) => v.id !== SHADOW_PLACEHOLDER_ITEM_ID) as view (view.id)}
 				<button
 					type="button"
 					class="view-pill"
@@ -107,23 +140,23 @@
 					{/if}
 				</button>
 			{/each}
-
-			{#if onCreate}
-				<button type="button" class="view-pill add-pill" onclick={onCreate}>
-					<svg
-						class="h-4 w-4"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<path d="M12 5v14M5 12h14" />
-					</svg>
-				</button>
-			{/if}
 		</div>
+
+		{#if onCreate}
+			<button type="button" class="view-pill add-pill" onclick={onCreate}>
+				<svg
+					class="h-4 w-4"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M12 5v14M5 12h14" />
+				</svg>
+			</button>
+		{/if}
 	</div>
 </div>
 

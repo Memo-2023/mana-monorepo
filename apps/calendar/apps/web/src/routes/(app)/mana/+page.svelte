@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SubscriptionPage } from '@manacore/shared-subscription-ui';
+	import { SubscriptionPage } from '@manacore/subscriptions';
 	import { toastStore as toast } from '@manacore/shared-ui';
 
 	function handleSubscribe(planId: string) {
