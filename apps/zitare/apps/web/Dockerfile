@@ -12,6 +12,8 @@ COPY apps/zitare/apps/web ./apps/zitare/apps/web
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --no-frozen-lockfile --ignore-scripts
 
+# Build app-specific packages (e.g. content with dist/ output)
+RUN cd /app/apps/zitare/packages/content && pnpm build || true
 WORKDIR /app/apps/zitare/apps/web
 RUN pnpm exec svelte-kit sync
 RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
