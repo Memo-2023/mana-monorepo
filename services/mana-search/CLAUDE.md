@@ -69,5 +69,5 @@ Uses the same `docker-compose.dev.yml` from `services/mana-search/` for SearXNG 
 cd services/mana-search && docker-compose -f docker-compose.dev.yml up -d
 
 # Run Go service
-cd services/mana-search-go && go run ./cmd/server
+cd services/mana-search && go run ./cmd/server
 ```

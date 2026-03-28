@@ -321,8 +321,8 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: services/mana-api-gateway-go/Dockerfile
-    image: mana-api-gateway-go:local
+      dockerfile: services/mana-api-gateway/Dockerfile
+    image: mana-api-gateway:local
     container_name: mana-api-gateway
     restart: always
     depends_on:
@@ -357,8 +357,8 @@ services:
     container_name: mana-core-searxng
     restart: always
     volumes:
-      - ./services/mana-search-go/searxng/settings.yml:/etc/searxng/settings.yml:ro
-      - ./services/mana-search-go/searxng/limiter.toml:/etc/searxng/limiter.toml:ro
+      - ./services/mana-search/searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - ./services/mana-search/searxng/limiter.toml:/etc/searxng/limiter.toml:ro
     environment:
       SEARXNG_BASE_URL: http://searxng:8080
       SEARXNG_SECRET: ${SEARXNG_SECRET:-change-me-searxng-secret}
@@ -373,7 +373,7 @@ services:
   mana-search:
     build:
       context: .
-      dockerfile: services/mana-search-go/Dockerfile
+      dockerfile: services/mana-search/Dockerfile
     image: mana-search:local
     container_name: mana-core-search
     restart: always
@@ -428,7 +428,7 @@ services:
   mana-notify:
     build:
       context: .
-      dockerfile: services/mana-notify-go/Dockerfile
+      dockerfile: services/mana-notify/Dockerfile
     image: mana-notify:local
     container_name: mana-core-notify
     restart: always
@@ -460,8 +460,8 @@ services:
   mana-crawler:
     build:
       context: .
-      dockerfile: services/mana-crawler-go/Dockerfile
-    image: mana-crawler-go:local
+      dockerfile: services/mana-crawler/Dockerfile
+    image: mana-crawler:local
     container_name: mana-crawler
     restart: always
     depends_on:

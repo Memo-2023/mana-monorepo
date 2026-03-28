@@ -134,13 +134,13 @@ manacore-monorepo/
 │   ├── mana-user/           # User settings, tags, storage (Hono + Bun, extracted from auth)
 │   ├── mana-subscriptions/  # Subscription billing (Hono + Bun, extracted from auth)
 │   ├── mana-analytics/      # Feedback & analytics (Hono + Bun, extracted from auth)
-│   ├── mana-search-go/      # Central search & content extraction (Go)
-│   ├── mana-crawler-go/     # Web crawler service (Go)
+│   ├── mana-search/      # Central search & content extraction (Go)
+│   ├── mana-crawler/     # Web crawler service (Go)
 │   ├── mana-llm/            # Central LLM abstraction service
 │   ├── mana-landing-builder/# Org landing page builder (Astro → Cloudflare Pages)
 │   ├── mana-media/          # Central media platform (CAS, thumbnails)
-│   ├── mana-api-gateway-go/ # API gateway with rate limiting (Go)
-│   ├── mana-notify-go/      # Notification service (Go)
+│   ├── mana-api-gateway/ # API gateway with rate limiting (Go)
+│   ├── mana-notify/      # Notification service (Go)
 │   ├── mana-image-gen/      # Local AI image generation (FLUX)
 │   ├── mana-stt/            # Speech-to-text service
 │   ├── mana-tts/            # Text-to-speech service
@@ -450,10 +450,10 @@ GET /metrics
 
 ```bash
 # Start SearXNG + Redis for local development
-cd services/mana-search-go && docker-compose -f docker-compose.dev.yml up -d
+cd services/mana-search && docker-compose -f docker-compose.dev.yml up -d
 
 # Start Go search service
-cd services/mana-search-go && go run ./cmd/server
+cd services/mana-search && go run ./cmd/server
 ```
 
 #### Environment Variables
@@ -933,9 +933,9 @@ Each project has its own `CLAUDE.md` with detailed information:
 - `apps/chat/CLAUDE.md` - Chat API endpoints, AI models
 - `apps/picture/CLAUDE.md` - AI image generation
 - `services/mana-core-auth/` - Central authentication service
-- `services/mana-search-go/CLAUDE.md` - Search & content extraction service (Go)
-- `services/mana-crawler-go/CLAUDE.md` - Web crawler service (Go)
-- `services/mana-notify-go/CLAUDE.md` - Notification service (Go)
+- `services/mana-search/CLAUDE.md` - Search & content extraction service (Go)
+- `services/mana-crawler/CLAUDE.md` - Web crawler service (Go)
+- `services/mana-notify/CLAUDE.md` - Notification service (Go)
 - `services/mana-llm/CLAUDE.md` - Central LLM abstraction service
 - `services/mana-landing-builder/CLAUDE.md` - Org landing page builder service
 

@@ -1,5 +1,5 @@
 {
-	"name": "@manacore/mana-search-go",
+	"name": "@manacore/mana-search",
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {

@@ -8,15 +8,18 @@ on:
   push:
     branches: [main]
     paths:
-      - 'services/mana-search-go/**'
-      - 'services/mana-notify-go/**'
-      - 'services/mana-crawler-go/**'
-      - 'services/mana-api-gateway-go/**'
+      - 'services/mana-search/**'
+      - 'services/mana-notify/**'
+      - 'services/mana-crawler/**'
+      - 'services/mana-api-gateway/**'
       - 'services/mana-sync/**'
       - 'services/mana-matrix-bot/**'
   pull_request:
     paths:
-      - 'services/mana-*-go/**'
+      - 'services/mana-search/**'
+      - 'services/mana-notify/**'
+      - 'services/mana-crawler/**'
+      - 'services/mana-api-gateway/**'
       - 'services/mana-sync/**'
       - 'services/mana-matrix-bot/**'
 
@@ -26,10 +29,10 @@ jobs:
     strategy:
       matrix:
         service:
-          - mana-search-go
-          - mana-notify-go
-          - mana-crawler-go
-          - mana-api-gateway-go
+          - mana-search
+          - mana-notify
+          - mana-crawler
+          - mana-api-gateway
           - mana-sync
     steps:
       - uses: actions/checkout@v4
@@ -56,13 +59,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - service: mana-search-go
+          - service: mana-search
             image: mana-search
-          - service: mana-notify-go
+          - service: mana-notify
             image: mana-notify
-          - service: mana-crawler-go
+          - service: mana-crawler
             image: mana-crawler
-          - service: mana-api-gateway-go
+          - service: mana-api-gateway
             image: mana-api-gateway
     steps:
       - uses: actions/checkout@v4

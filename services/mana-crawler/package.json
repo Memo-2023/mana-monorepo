@@ -1,5 +1,5 @@
 {
-	"name": "mana-crawler-go",
+	"name": "mana-crawler",
 	"version": "1.0.0",
 	"private": true,
 	"description": "Go web crawler replacing NestJS mana-crawler",
