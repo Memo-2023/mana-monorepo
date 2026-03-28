@@ -3,7 +3,6 @@
 	import { format } from 'date-fns';
 	import type { Photo } from '@photos/shared';
 	import { photoStore } from '$lib/stores/photos.svelte';
-	import { tagStore } from '$lib/stores/tags.svelte';
 
 	interface Props {
 		photo: Photo;

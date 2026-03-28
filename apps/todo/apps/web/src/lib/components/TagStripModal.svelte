@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { labelsStore } from '$lib/stores/labels.svelte';
+	import { getContext } from 'svelte';
+	import type { Tag } from '@manacore/shared-tags';
+	import { tagMutations } from '@manacore/shared-stores';
 	import { Plus, X, Check, Pencil, Trash, MagnifyingGlass } from '@manacore/shared-icons';
 	import { TagColorPicker, focusTrap } from '@manacore/shared-ui';
-	import type { Label } from '$lib/api/labels';
+
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
 	interface Props {
 		visible: boolean;
@@ -21,14 +24,14 @@
 	let isCreatingTag = $state(false);
 
 	// Edit tag state
-	let editingTag = $state<Label | null>(null);
+	let editingTag = $state<Tag | null>(null);
 	let editTagName = $state('');
 	let editTagColor = $state('#8b5cf6');
 	let isSavingTag = $state(false);
 
 	// Filtered and sorted tags
 	const sortedTags = $derived.by(() => {
-		const tags = [...labelsStore.labels].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+		const tags = [...tagsCtx.value].sort((a, b) => a.name.localeCompare(b.name, 'de'));
 		if (!searchQuery.trim()) return tags;
 		const query = searchQuery.toLowerCase();
 		return tags.filter((t) => t.name.toLowerCase().includes(query));
@@ -52,7 +55,7 @@
 
 		isCreatingTag = true;
 		try {
-			await labelsStore.createLabel({
+			await tagMutations.createTag({
 				name: newTagName.trim(),
 				color: newTagColor,
 			});
@@ -74,7 +77,7 @@
 	}
 
 	// ==================== EDIT TAG ====================
-	function openEditTag(tag: Label) {
+	function openEditTag(tag: Tag) {
 		editingTag = tag;
 		editTagName = tag.name;
 		editTagColor = tag.color;
@@ -91,7 +94,7 @@
 
 		isSavingTag = true;
 		try {
-			await labelsStore.updateLabel(editingTag.id, {
+			await tagMutations.updateTag(editingTag.id, {
 				name: editTagName.trim(),
 				color: editTagColor,
 			});
@@ -106,7 +109,7 @@
 		if (!editingTag) return;
 
 		try {
-			await labelsStore.deleteLabel(editingTag.id);
+			await tagMutations.deleteTag(editingTag.id);
 			closeEditTag();
 		} catch (e) {
 			console.error('Failed to delete tag:', e);
@@ -164,9 +167,7 @@
 
 		<!-- Content -->
 		<div class="modal-content">
-			{#if labelsStore.loading}
-				<div class="loading-state">Lädt...</div>
-			{:else if labelsStore.labels.length === 0 && !showNewTagForm}
+			{#if tagsCtx.value.length === 0 && !showNewTagForm}
 				<div class="empty-state">
 					<p>Keine Tags vorhanden</p>
 					<button class="create-btn" onclick={openNewTagForm}>

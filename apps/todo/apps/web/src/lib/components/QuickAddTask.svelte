@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
-	import { projectsStore } from '$lib/stores/projects.svelte';
+	import type { Project } from '@todo/shared';
+	import { getActiveProjects, getProjectById } from '$lib/data/task-queries';
+
+	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import type { TaskPriority } from '@todo/shared';
 	import { PRIORITY_OPTIONS } from '@todo/shared';
 	import { format, addDays } from 'date-fns';
@@ -33,7 +37,7 @@
 	// Derived values
 	let currentPriority = $derived(PRIORITY_OPTIONS.find((p) => p.value === selectedPriority)!);
 	let selectedProject = $derived(
-		selectedProjectId ? projectsStore.getById(selectedProjectId) : undefined
+		selectedProjectId ? getProjectById(projectsCtx.value, selectedProjectId) : undefined
 	);
 	let dateLabel = $derived(() => {
 		const today = new Date();
@@ -282,7 +286,7 @@
 							<span class="project-dot" style="background-color: #6b7280"></span>
 							Kein Projekt
 						</button>
-						{#each projectsStore.activeProjects as project}
+						{#each getActiveProjects(projectsCtx.value) as project}
 							<button
 								type="button"
 								class="dropdown-item"

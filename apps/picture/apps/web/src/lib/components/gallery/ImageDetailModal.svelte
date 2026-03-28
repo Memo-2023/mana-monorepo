@@ -11,7 +11,9 @@
 	import { images, selectedImage } from '$lib/stores/images';
 	import { toastStore } from '@manacore/shared-ui';
 	import { fade, fly } from 'svelte/transition';
-	import { getImageTags, getAllTags, addTagToImage, removeTagFromImage } from '$lib/api/tags';
+	import { getImageTags, addTagToImage, removeTagFromImage } from '$lib/api/tags';
+	import { getContext } from 'svelte';
+	import type { Tag as SharedTag } from '@manacore/shared-tags';
 	import {
 		X,
 		Info,
@@ -32,15 +34,27 @@
 
 	let { image, onClose }: Props = $props();
 
+	const sharedTags: { value: SharedTag[] } = getContext('tags');
+
 	let isArchiving = $state(false);
 	let isDeleting = $state(false);
 	let imageTags = $state<Tag[]>([]);
 	let showInfo = $state(false);
 	let showTagModal = $state(false);
 	let showPublishModal = $state(false);
-	let allTags = $state<Tag[]>([]);
-	let isLoadingTags = $state(false);
 	let isPublishing = $state(false);
+
+	// Derive allTags from the shared context
+	let allTags = $derived(
+		sharedTags.value.map(
+			(t): Tag => ({
+				id: t.id,
+				name: t.name,
+				color: t.color,
+				createdAt: t.createdAt,
+			})
+		)
+	);
 
 	// Get current image index
 	const currentIndex = $derived(image ? $images.findIndex((img) => img.id === image?.id) : -1);
@@ -157,17 +171,8 @@
 		}).format(date);
 	}
 
-	async function openTagModal() {
+	function openTagModal() {
 		showTagModal = true;
-		isLoadingTags = true;
-		try {
-			allTags = await getAllTags();
-		} catch (error) {
-			console.error('Error loading tags:', error);
-			toastStore.show('Fehler beim Laden der Tags', 'error');
-		} finally {
-			isLoadingTags = false;
-		}
 	}
 
 	function closeTagModal() {
@@ -481,13 +486,7 @@
 					</button>
 				</div>
 
-				{#if isLoadingTags}
-					<div class="flex items-center justify-center py-8">
-						<div
-							class="h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"
-						></div>
-					</div>
-				{:else if allTags.length === 0}
+				{#if allTags.length === 0}
 					<p class="py-8 text-center text-gray-500 dark:text-gray-400">Keine Tags verfügbar</p>
 				{:else}
 					<div class="max-h-96 space-y-2 overflow-y-auto">

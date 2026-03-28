@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { tags, selectedTags } from '$lib/stores/tags';
-	import type { Database } from '@picture/shared/types';
+	import { selectedTags } from '$lib/stores/tags';
+	import { getContext } from 'svelte';
+	import type { Tag } from '@manacore/shared-tags';
 	import { Check } from '@manacore/shared-icons';
 
-	type Tag = Database['public']['Tables']['tags']['Row'];
+	const allTags: { value: Tag[] } = getContext('tags');
 
 	function toggleTag(tagId: string) {
 		selectedTags.update((current) => {
@@ -26,7 +27,7 @@
 </script>
 
 <div class="flex flex-wrap gap-2">
-	{#each $tags as tag (tag.id)}
+	{#each allTags.value as tag (tag.id)}
 		{@const selected = isSelected(tag.id)}
 		<button
 			onclick={() => toggleTag(tag.id)}
@@ -44,7 +45,7 @@
 		</button>
 	{/each}
 
-	{#if $tags.length === 0}
+	{#if allTags.value.length === 0}
 		<p class="text-sm text-gray-500 dark:text-gray-400">
 			Keine Tags vorhanden. Erstelle Tags in der Tag-Verwaltung.
 		</p>

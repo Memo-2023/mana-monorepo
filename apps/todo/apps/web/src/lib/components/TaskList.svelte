@@ -2,8 +2,12 @@
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
 	import type { Task, UpdateTaskInput } from '@todo/shared';
 	import TaskItem from './TaskItem.svelte';
+	import { getContext } from 'svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
-	import { projectsStore } from '$lib/stores/projects.svelte';
+	import type { Project } from '@todo/shared';
+	import { getActiveProjects } from '$lib/data/task-queries';
+
+	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
 	// Context menu state
@@ -64,7 +68,7 @@
 		];
 
 		// Add project move options if there are projects
-		const projects = projectsStore.activeProjects;
+		const projects = getActiveProjects(projectsCtx.value);
 		if (projects.length > 0) {
 			items.push({ id: 'divider-2', label: '', type: 'divider' });
 			items.push({

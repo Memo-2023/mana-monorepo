@@ -9,7 +9,11 @@
 		TagStrip,
 	} from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 
 	// Extend QuickInputItem for zitare-specific search results with href navigation
 	interface ZitareSearchItem extends QuickInputItem {
@@ -31,10 +35,14 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { setContext } from 'svelte';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { QUOTES, type Quote } from '@zitare/content';
 	import { zitareStore } from '$lib/data/local-store';
+
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let showGuestWelcome = $state(false);
 
@@ -233,8 +241,8 @@
 	}
 
 	async function handleAuthReady() {
-		// Initialize local-first database
-		await zitareStore.initialize();
+		// Initialize local-first databases (app + shared tags)
+		await Promise.all([zitareStore.initialize(), tagLocalStore.initialize()]);
 
 		// Initialize settings
 		zitareSettings.initialize();
@@ -244,9 +252,10 @@
 		await listsStore.loadLists();
 
 		if (authStore.isAuthenticated) {
-			zitareStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			zitareStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 			userSettings.load();
-			tagStore.fetchTags();
 		} else if (shouldShowGuestWelcome('zitare')) {
 			showGuestWelcome = true;
 		}
@@ -296,7 +305,7 @@
 			<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 			{#if isTagStripVisible}
 				<TagStrip
-					tags={tagStore.tags.map((t) => ({
+					tags={allTags.value.map((t) => ({
 						id: t.id,
 						name: t.name,
 						color: t.color || '#3b82f6',
@@ -305,7 +314,6 @@
 					onToggle={() => {}}
 					onClear={() => {}}
 					managementHref="/tags"
-					loading={tagStore.loading}
 				/>
 			{/if}
 

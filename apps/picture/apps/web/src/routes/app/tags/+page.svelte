@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { tags, isLoadingTags } from '$lib/stores/tags';
-	import { getAllTags, createTag, updateTag, deleteTag } from '$lib/api/tags';
-	import type { Tag } from '$lib/api/tags';
+	import { getContext } from 'svelte';
+	import { tagMutations } from '@manacore/shared-stores';
+	import type { Tag } from '@manacore/shared-tags';
 	import { toastStore } from '@manacore/shared-ui';
 	import { PageHeader } from '@manacore/shared-ui';
 	import { Plus, Tag as TagIcon, PencilSimple, Trash } from '@manacore/shared-icons';
+
+	const allTags: { value: Tag[] } = getContext('tags');
 
 	let showCreateModal = $state(false);
 	let showEditModal = $state(false);
@@ -26,32 +27,14 @@
 		'#14B8A6', // teal
 	];
 
-	onMount(async () => {
-		await loadTags();
-	});
-
-	async function loadTags() {
-		isLoadingTags.set(true);
-		try {
-			const data = await getAllTags();
-			tags.set(data);
-		} catch (error) {
-			console.error('Error loading tags:', error);
-			toastStore.show('Fehler beim Laden der Tags', 'error');
-		} finally {
-			isLoadingTags.set(false);
-		}
-	}
-
 	async function handleCreateTag() {
 		if (!newTagName.trim()) return;
 
 		try {
-			await createTag({
+			await tagMutations.createTag({
 				name: newTagName.trim(),
 				color: newTagColor,
 			});
-			await loadTags();
 			toastStore.show('Tag erfolgreich erstellt', 'success');
 			newTagName = '';
 			newTagColor = '#3B82F6';
@@ -73,11 +56,10 @@
 		if (!editingTag || !editTagName.trim()) return;
 
 		try {
-			await updateTag(editingTag.id, {
+			await tagMutations.updateTag(editingTag.id, {
 				name: editTagName.trim(),
 				color: editTagColor,
 			});
-			await loadTags();
 			toastStore.show('Tag erfolgreich aktualisiert', 'success');
 			showEditModal = false;
 			editingTag = null;
@@ -91,8 +73,7 @@
 		if (!confirm('Möchten Sie diesen Tag wirklich löschen?')) return;
 
 		try {
-			await deleteTag(tagId);
-			await loadTags();
+			await tagMutations.deleteTag(tagId);
 			toastStore.show('Tag erfolgreich gelöscht', 'success');
 		} catch (error) {
 			console.error('Error deleting tag:', error);
@@ -124,13 +105,7 @@
 		</PageHeader>
 
 		<!-- Tags Grid -->
-		{#if $isLoadingTags}
-			<div class="flex items-center justify-center py-12">
-				<div
-					class="h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent dark:border-blue-400"
-				></div>
-			</div>
-		{:else if $tags.length === 0}
+		{#if allTags.value.length === 0}
 			<div
 				class="rounded-3xl border border-gray-200/50 bg-white/80 p-12 text-center backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/80"
 			>
@@ -144,7 +119,7 @@
 			</div>
 		{:else}
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each $tags as tag (tag.id)}
+				{#each allTags.value as tag (tag.id)}
 					<div
 						class="group relative rounded-2xl border border-gray-200/50 bg-white/80 p-6 backdrop-blur-xl transition-all hover:shadow-lg dark:border-gray-700/50 dark:bg-gray-900/80"
 					>

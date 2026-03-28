@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { setContext } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, InputBarHelpModal, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
@@ -22,7 +23,11 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
-	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
 	import { browser } from '$app/environment';
@@ -71,6 +76,10 @@
 	function handleOpenInPanel(appId: string, url: string) {
 		splitPanel.openPanel(appId);
 	}
+
+	// Live tag query + context
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let { children } = $props();
 
@@ -129,7 +138,7 @@
 		const resolved = resolveEventIds(
 			parsed,
 			calendarsStore.calendars.map((c) => ({ id: c.id, name: c.name })),
-			eventTagsStore.tags.map((t) => ({ id: t.id, name: t.name })),
+			allTags.value.map((t) => ({ id: t.id, name: t.name })),
 			defaultCalendarId
 		);
 
@@ -285,12 +294,11 @@
 	// Tag selector config for PillNavigation
 	let tagSelectorConfig = $derived<PillTagSelectorConfig>({
 		type: 'tag-selector',
-		tags: eventTagsStore.tags.map((t) => ({ id: t.id, name: t.name, color: t.color || '#3b82f6' })),
+		tags: allTags.value.map((t) => ({ id: t.id, name: t.name, color: t.color || '#3b82f6' })),
 		selectedIds: settingsStore.selectedTagIds,
 		onToggle: settingsStore.toggleTagSelection,
 		onClear: settingsStore.clearTagSelection,
 		onCreate: () => goto('/tags?new=true'),
-		loading: eventTagsStore.loading,
 		label: 'Tags',
 	});
 
@@ -407,6 +415,7 @@
 
 	async function handleLogout() {
 		await authStore.signOut();
+		tagMutations.stopSync();
 		goto('/login');
 	}
 
@@ -433,8 +442,8 @@
 	}
 
 	async function handleAuthReady() {
-		// Initialize local-first database (opens IndexedDB, seeds guest data)
-		await calendarStore.initialize();
+		// Initialize local-first databases (opens IndexedDB, seeds guest data)
+		await Promise.all([calendarStore.initialize(), tagLocalStore.initialize()]);
 
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
@@ -447,10 +456,11 @@
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
-			calendarStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			calendarStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 
-			// Fetch tags and user settings (require auth)
-			await eventTagsStore.fetchTags();
+			// Load user settings (requires auth)
 			await userSettings.load();
 		} else if (shouldShowGuestWelcome('calendar')) {
 			showGuestWelcome = true;

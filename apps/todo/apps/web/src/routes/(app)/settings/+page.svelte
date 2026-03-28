@@ -5,7 +5,10 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { APP_VERSION } from '$lib/version';
 	import { todoSettings, type TodoView, type KanbanCardSize } from '$lib/stores/settings.svelte';
-	import { projectsStore } from '$lib/stores/projects.svelte';
+	import { getContext } from 'svelte';
+	import type { Project } from '@todo/shared';
+
+	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import type { TaskPriority } from '@todo/shared';
 	import { PRIORITY_OPTIONS } from '@todo/shared';
 	import {
@@ -51,13 +54,13 @@
 	// Project options for quick add (computed)
 	let projectOptions = $derived([
 		{ value: null, label: 'Inbox' },
-		...projectsStore.projects.map((p) => ({ value: p.id, label: p.name })),
+		...projectsCtx.value.map((p) => ({ value: p.id, label: p.name })),
 	]);
 
 	onMount(async () => {
 		// Load user settings and projects from server (only if authenticated)
 		if (authStore.isAuthenticated) {
-			await Promise.all([userSettings.load(), projectsStore.fetchProjects()]);
+			await userSettings.load();
 		}
 
 		// Initialize todo settings from localStorage

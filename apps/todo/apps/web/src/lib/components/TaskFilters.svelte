@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { TaskPriority } from '@todo/shared';
-	import { projectsStore } from '$lib/stores/projects.svelte';
-	import { labelsStore } from '$lib/stores/labels.svelte';
+	import { getContext } from 'svelte';
+	import type { Project } from '@todo/shared';
+	import { getActiveProjects } from '$lib/data/task-queries';
+
+	const projectsCtx: { readonly value: Project[] } = getContext('projects');
+	import type { Tag } from '@manacore/shared-tags';
+
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 	import type { SortBy, SortOrder } from '$lib/stores/view.svelte';
 	import { X, DotsThree } from '@manacore/shared-icons';
 
@@ -215,7 +221,7 @@
 								onchange={(e) => onProjectChange(e.currentTarget.value || null)}
 							>
 								<option value="">Alle Projekte</option>
-								{#each projectsStore.activeProjects as project}
+								{#each getActiveProjects(projectsCtx.value) as project}
 									<option value={project.id}>{project.name}</option>
 								{/each}
 							</select>
@@ -325,7 +331,7 @@
 						onchange={(e) => onProjectChange(e.currentTarget.value || null)}
 					>
 						<option value="">Alle Projekte</option>
-						{#each projectsStore.activeProjects as project}
+						{#each getActiveProjects(projectsCtx.value) as project}
 							<option value={project.id}>{project.name}</option>
 						{/each}
 					</select>
@@ -346,7 +352,7 @@
 							{#if selectedLabelIds.length > 0}
 								<div class="flex items-center gap-1">
 									{#each selectedLabelIds.slice(0, 3) as labelId}
-										{@const label = labelsStore.labels.find((l) => l.id === labelId)}
+										{@const label = tagsCtx.value.find((l) => l.id === labelId)}
 										{#if label}
 											<div
 												class="w-3 h-3 rounded-full ring-2 ring-background"
@@ -385,11 +391,11 @@
 							<div
 								class="absolute top-full left-0 mt-2 z-50 min-w-[220px] bg-popover border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2 duration-150"
 							>
-								{#if labelsStore.labels.length === 0}
+								{#if tagsCtx.value.length === 0}
 									<p class="text-sm text-muted-foreground p-3 text-center">Keine Tags vorhanden</p>
 								{:else}
 									<div class="max-h-[200px] overflow-y-auto">
-										{#each labelsStore.labels as label}
+										{#each tagsCtx.value as label}
 											<button
 												class="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-muted/50 transition-colors"
 												onclick={() => toggleLabel(label.id)}

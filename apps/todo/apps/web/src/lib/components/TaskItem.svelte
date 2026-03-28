@@ -11,7 +11,11 @@
 	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
 	import { format, isToday, isPast, isTomorrow } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import { projectsStore } from '$lib/stores/projects.svelte';
+	import { getContext } from 'svelte';
+	import type { Project } from '@todo/shared';
+	import { getActiveProjects, getProjectColor } from '$lib/data/task-queries';
+
+	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { ContactAvatar, ContactSelector } from '@manacore/shared-ui';
 	import SubtaskList from './SubtaskList.svelte';
@@ -298,7 +302,7 @@
 	// Get project color
 	let projectColor = $derived(() => {
 		if (!task.projectId) return null;
-		return projectsStore.getColor(task.projectId);
+		return getProjectColor(projectsCtx.value, task.projectId);
 	});
 
 	// Subtasks progress
@@ -566,7 +570,7 @@
 					<label class="form-label" for="task-project-{task.id}">Projekt</label>
 					<select id="task-project-{task.id}" class="form-select" bind:value={projectId}>
 						<option value={null}>Kein Projekt</option>
-						{#each projectsStore.activeProjects as project}
+						{#each getActiveProjects(projectsCtx.value) as project}
 							<option value={project.id}>{project.name}</option>
 						{/each}
 					</select>

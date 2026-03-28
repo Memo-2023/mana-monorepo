@@ -1,8 +1,12 @@
 <script lang="ts">
-	import { tagsStore } from '$lib/stores/tags.svelte';
+	import { getContext } from 'svelte';
+	import { tagMutations } from '@manacore/shared-stores';
+	import type { Tag } from '@manacore/shared-tags';
 	import { Plus, X, Check, Pencil, Trash, MagnifyingGlass } from '@manacore/shared-icons';
 	import { TagColorPicker } from '@manacore/shared-ui';
-	import type { ContactTag } from '$lib/api/contacts';
+
+	// Live tags from layout context
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
 	interface Props {
 		visible: boolean;
@@ -21,14 +25,14 @@
 	let isCreatingTag = $state(false);
 
 	// Edit tag state
-	let editingTag = $state<ContactTag | null>(null);
+	let editingTag = $state<Tag | null>(null);
 	let editTagName = $state('');
 	let editTagColor = $state('#3b82f6');
 	let isSavingTag = $state(false);
 
 	// Filtered and sorted tags
 	const sortedTags = $derived.by(() => {
-		const tags = [...tagsStore.tags].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+		const tags = [...tagsCtx.value].sort((a, b) => a.name.localeCompare(b.name, 'de'));
 		if (!searchQuery.trim()) return tags;
 		const query = searchQuery.toLowerCase();
 		return tags.filter((t) => t.name.toLowerCase().includes(query));
@@ -52,7 +56,7 @@
 
 		isCreatingTag = true;
 		try {
-			await tagsStore.createTag({
+			await tagMutations.createTag({
 				name: newTagName.trim(),
 				color: newTagColor,
 			});
@@ -74,7 +78,7 @@
 	}
 
 	// ==================== EDIT TAG ====================
-	function openEditTag(tag: ContactTag) {
+	function openEditTag(tag: Tag) {
 		editingTag = tag;
 		editTagName = tag.name;
 		editTagColor = tag.color;
@@ -91,7 +95,7 @@
 
 		isSavingTag = true;
 		try {
-			await tagsStore.updateTag(editingTag.id, {
+			await tagMutations.updateTag(editingTag.id, {
 				name: editTagName.trim(),
 				color: editTagColor,
 			});
@@ -106,7 +110,7 @@
 		if (!editingTag) return;
 
 		try {
-			await tagsStore.deleteTag(editingTag.id);
+			await tagMutations.deleteTag(editingTag.id);
 			closeEditTag();
 		} catch (e) {
 			console.error('Failed to delete tag:', e);
@@ -164,9 +168,7 @@
 
 		<!-- Content -->
 		<div class="modal-content">
-			{#if tagsStore.loading}
-				<div class="loading-state">Lädt...</div>
-			{:else if tagsStore.tags.length === 0 && !showNewTagForm}
+			{#if tagsCtx.value.length === 0 && !showNewTagForm}
 				<div class="empty-state">
 					<p>Keine Tags vorhanden</p>
 					<button class="create-btn" onclick={openNewTagForm}>

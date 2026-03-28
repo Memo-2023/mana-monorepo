@@ -19,7 +19,12 @@
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isUIVisible, toggleUI, showKeyboardShortcuts } from '$lib/stores/ui';
-	import { tagStore } from '$lib/stores/tags';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
+	import { setContext } from 'svelte';
 	import { pictureOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -31,6 +36,10 @@
 
 	// App switcher items
 	const appItems = getPillAppItems('picture');
+
+	// Live query for shared tags (local-first)
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let { children } = $props();
 
@@ -87,12 +96,13 @@
 	}
 
 	async function handleAuthReady() {
-		// Initialize local-first database (opens IndexedDB, seeds guest data)
-		await pictureStore.initialize();
+		// Initialize local-first databases (opens IndexedDB, seeds guest data)
+		await Promise.all([pictureStore.initialize(), tagLocalStore.initialize()]);
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
 			pictureStore.startSync(() => authStore.getValidToken());
+			tagMutations.startSync(() => authStore.getValidToken());
 		}
 
 		// Show guest welcome modal on first visit
@@ -101,7 +111,7 @@
 		}
 
 		if (authStore.isAuthenticated) {
-			await Promise.all([userSettings.load(), tagStore.fetchTags()]);
+			await userSettings.load();
 		}
 
 		// Redirect to start page if on /app and a custom start page is set
@@ -313,7 +323,7 @@
 			<!-- TagStrip (toggled via Tags pill) -->
 			{#if isTagStripVisible}
 				<TagStrip
-					tags={tagStore.tags.map((t) => ({
+					tags={allTags.value.map((t) => ({
 						id: t.id,
 						name: t.name,
 						color: t.color || '#6b7280',

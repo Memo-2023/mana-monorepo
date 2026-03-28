@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { setContext } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import {
 		PillNavigation,
@@ -24,8 +25,12 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
 	import { projectsStore } from '$lib/stores/projects.svelte';
-	import { labelsStore } from '$lib/stores/labels.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import { theme } from '$lib/stores/theme';
 	import TaskFilters from '$lib/components/TaskFilters.svelte';
 	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
@@ -39,15 +44,28 @@
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
-	import { getTasks } from '$lib/api/tasks';
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 	import { todoOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { TodoEvents } from '@manacore/shared-utils/analytics';
-	import { todoStore } from '$lib/data/local-store';
+	import { todoStore, taskCollection } from '$lib/data/local-store';
+	import { useAllTasks, useAllProjects, getActiveProjects } from '$lib/data/task-queries';
 	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
+
+	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
+	const allTasks = useAllTasks();
+	const allProjects = useAllProjects();
+	const allTags = useAllSharedTags();
+
+	// Provide data to child components via Svelte context
+	setContext('projects', allProjects);
+	setContext('tasks', allTasks);
+	setContext('tags', allTags);
+
+	// Derived active projects for UI
+	let activeProjects = $derived(getActiveProjects(allProjects.value));
 
 	// Guest welcome modal state
 	let showGuestWelcome = $state(false);
@@ -71,13 +89,18 @@
 
 	let { children } = $props();
 
-	// QuickInputBar search - search tasks
+	// QuickInputBar search - search tasks locally
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		if (!query.trim()) return [];
 
-		try {
-			const tasks = await getTasks({ search: query });
-			return tasks.slice(0, 10).map((task) => ({
+		const q = query.toLowerCase();
+		return allTasks.value
+			.filter(
+				(task) =>
+					task.title.toLowerCase().includes(q) || task.description?.toLowerCase().includes(q)
+			)
+			.slice(0, 10)
+			.map((task) => ({
 				id: task.id,
 				title: task.title,
 				subtitle: task.isCompleted
@@ -86,9 +109,6 @@
 						? new Date(task.dueDate).toLocaleDateString('de-DE')
 						: 'Kein Datum',
 			}));
-		} catch {
-			return [];
-		}
 	}
 
 	function handleSelect(item: QuickInputItem) {
@@ -114,7 +134,7 @@
 
 		try {
 			const parsed = parseTaskInput(query);
-			const resolved = resolveTaskIds(parsed, projectsStore.projects, labelsStore.labels);
+			const resolved = resolveTaskIds(parsed, allProjects.value, allTags.value);
 
 			await tasksStore.createTask({
 				title: resolved.title,
@@ -296,18 +316,19 @@
 
 	async function handleLogout() {
 		await authStore.signOut();
-		projectsStore.clear();
-		labelsStore.clear();
+		tagMutations.stopSync();
 		goto('/login');
 	}
 
 	async function handleAuthReady() {
-		// Initialize local-first database (opens IndexedDB, seeds guest data)
-		await todoStore.initialize();
+		// Initialize local-first databases (opens IndexedDB, seeds guest data)
+		await Promise.all([todoStore.initialize(), tagLocalStore.initialize()]);
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
-			todoStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			todoStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 
 		// Initialize split-panel from URL/localStorage
@@ -319,12 +340,11 @@
 		// Show guest welcome modal on first visit
 		initGuestWelcome();
 
-		// Load projects from IndexedDB (guest seed or synced data)
-		await projectsStore.fetchProjects();
+		// Tags and projects are now loaded reactively via useLiveQuery — no fetch needed
 
-		// Labels and user settings need auth (central mana-core-auth service)
+		// User settings need auth
 		if (authStore.isAuthenticated) {
-			await Promise.all([labelsStore.fetchLabels(), userSettings.load()]);
+			await userSettings.load();
 		}
 
 		// Redirect to start page if on root and a custom start page is set
@@ -399,10 +419,10 @@
 					<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 					{#if isTagStripVisible}
 						<TagStrip
-							tags={labelsStore.labels.map((l) => ({
-								id: l.id,
-								name: l.name,
-								color: l.color || '#6b7280',
+							tags={allTags.value.map((t) => ({
+								id: t.id,
+								name: t.name,
+								color: t.color || '#6b7280',
 							}))}
 							selectedIds={viewStore.filterLabelIds}
 							onToggle={(tagId) => {

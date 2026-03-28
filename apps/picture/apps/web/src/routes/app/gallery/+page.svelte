@@ -9,8 +9,10 @@
 		showFavoritesOnly,
 	} from '$lib/stores/images';
 	import { isUIVisible } from '$lib/stores/ui';
-	import { tags, selectedTags } from '$lib/stores/tags';
-	import { imageCollection, imageTagCollection, tagCollection } from '$lib/data/local-store';
+	import { selectedTags } from '$lib/stores/tags';
+	import { getContext } from 'svelte';
+	import type { Tag } from '@manacore/shared-tags';
+	import { imageCollection, imageTagCollection } from '$lib/data/local-store';
 	import type { Image } from '$lib/api/images';
 	import type { LocalImage } from '$lib/data/local-store';
 	import GalleryGrid from '$lib/components/gallery/GalleryGrid.svelte';
@@ -22,6 +24,8 @@
 	import TagPills from '$lib/components/tags/TagPills.svelte';
 	import { Heart } from '@manacore/shared-icons';
 	import { onMount } from 'svelte';
+
+	const allTags: { value: Tag[] } = getContext('tags');
 
 	const PAGE_SIZE = 20;
 
@@ -59,9 +63,7 @@
 	}
 
 	onMount(() => {
-		loadTags().then(() => {
-			loadInitialImages();
-		});
+		loadInitialImages();
 
 		// Setup Intersection Observer for infinite scroll
 		observer = new IntersectionObserver(
@@ -84,22 +86,6 @@
 			if (observer) observer.disconnect();
 		};
 	});
-
-	async function loadTags() {
-		try {
-			const localTags = await tagCollection.getAll();
-			tags.set(
-				localTags.map((t) => ({
-					id: t.id,
-					name: t.name,
-					color: t.color ?? undefined,
-					createdAt: t.createdAt ?? new Date().toISOString(),
-				}))
-			);
-		} catch (error) {
-			console.error('Error loading tags:', error);
-		}
-	}
 
 	// React to tag and favorites filter changes
 	$effect(() => {
@@ -210,7 +196,7 @@
 		</button>
 
 		<!-- Tags -->
-		{#if $tags.length > 0}
+		{#if allTags.value.length > 0}
 			<div class="flex flex-wrap items-center gap-2">
 				<span class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
 					>Tags:</span

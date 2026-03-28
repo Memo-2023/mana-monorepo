@@ -3,7 +3,11 @@
 	import { page } from '$app/stores';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, QuickInputItem, CreatePreview } from '@manacore/shared-ui';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { plantsApi } from '$lib/api/plants';
@@ -14,9 +18,13 @@
 	} from '$lib/utils/plant-parser';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { setContext } from 'svelte';
 	import { plantaStore } from '$lib/data/local-store';
 
 	let { children } = $props();
+
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let showGuestWelcome = $state(false);
 
@@ -101,10 +109,11 @@
 	}
 
 	async function handleAuthReady() {
-		await plantaStore.initialize();
+		await Promise.all([plantaStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
-			plantaStore.startSync(() => authStore.getValidToken());
-			await tagStore.fetchTags();
+			const getToken = () => authStore.getValidToken();
+			plantaStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('planta')) {
 			showGuestWelcome = true;
@@ -134,7 +143,7 @@
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={allTags.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -143,7 +152,6 @@
 				onToggle={() => {}}
 				onClear={() => {}}
 				managementHref="/tags"
-				loading={tagStore.loading}
 			/>
 		{/if}
 

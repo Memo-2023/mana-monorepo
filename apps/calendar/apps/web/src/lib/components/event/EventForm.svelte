@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
+	import type { Tag as SharedTag } from '@manacore/shared-tags';
+
+	// Live tags from layout context
+	const tagsCtx: { readonly value: SharedTag[] } = getContext('tags');
 	import {
 		TagSelector,
 		FilterDropdown,
@@ -91,7 +94,7 @@
 	);
 
 	// Convert EventTag to Tag type for shared-ui components
-	function eventTagToTag(tag: EventTag): Tag {
+	function eventTagToTag(tag: SharedTag): Tag {
 		return {
 			id: tag.id,
 			name: tag.name,
@@ -105,7 +108,7 @@
 	}
 
 	// Derived available tags for TagSelector
-	let availableTags = $derived(eventTagsStore.tags.map(eventTagToTag));
+	let availableTags = $derived(tagsCtx.value.map(eventTagToTag));
 
 	// Calendar options for FilterDropdown
 	let calendarOptions = $derived<FilterDropdownOption[]>(
@@ -171,13 +174,6 @@
 	});
 
 	let submitting = $state(false);
-
-	// Load tags on mount
-	onMount(() => {
-		if (eventTagsStore.tags.length === 0) {
-			eventTagsStore.fetchTags();
-		}
-	});
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -471,7 +467,7 @@
 	</div>
 
 	<!-- Tags -->
-	{#if availableTags.length > 0 || eventTagsStore.loading}
+	{#if availableTags.length > 0}
 		<div class="flex flex-col gap-2">
 			<span class="text-sm font-medium text-foreground">Tags</span>
 			<TagSelector

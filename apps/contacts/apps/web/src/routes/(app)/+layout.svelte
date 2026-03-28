@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
+	import { setContext } from 'svelte';
 	import {
 		PillNavigation,
 		QuickInputBar,
@@ -46,7 +47,11 @@
 		formatParsedContactPreview,
 	} from '$lib/utils/contact-parser';
 	import ContactsToolbar from '$lib/components/ContactsToolbar.svelte';
-	import { tagsStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import { contactsOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -62,8 +67,9 @@
 		}
 	}
 
-	// Tags state for Quick-Create
-	let availableTags = $state<{ id: string; name: string }[]>([]);
+	// Live tag query + context
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	// Check if we're on a contact detail route
 	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([0-9a-f-]{36})$/i));
@@ -215,6 +221,7 @@
 
 	async function handleLogout() {
 		await authStore.signOut();
+		tagMutations.stopSync();
 		goto('/login');
 	}
 
@@ -294,12 +301,14 @@
 	});
 
 	async function handleAuthReady() {
-		// Initialize local-first database (opens IndexedDB, seeds guest data)
-		await contactsLocalStore.initialize();
+		// Initialize local-first databases (opens IndexedDB, seeds guest data)
+		await Promise.all([contactsLocalStore.initialize(), tagLocalStore.initialize()]);
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
-			contactsLocalStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			contactsLocalStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 
 		// Initialize split-panel from URL/localStorage
@@ -316,11 +325,9 @@
 		// Load contacts from IndexedDB (guest seed or synced data)
 		await contactsStore.loadContacts();
 
-		// Load user settings and tags only when authenticated
+		// Load user settings only when authenticated
 		if (authStore.isAuthenticated) {
 			await userSettings.load();
-			await tagsStore.fetchTags();
-			availableTags = tagsStore.tags.map((t) => ({ id: t.id, name: t.name }));
 		}
 	}
 </script>
@@ -378,7 +385,7 @@
 				<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 				{#if isTagStripVisible}
 					<TagStrip
-						tags={tagsStore.tags.map((t) => ({
+						tags={allTags.value.map((t) => ({
 							id: t.id,
 							name: t.name,
 							color: t.color || '#3b82f6',

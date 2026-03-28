@@ -6,14 +6,16 @@
 		showTagSubmenu,
 		hideTagSubmenu,
 	} from '$lib/stores/contextMenu';
-	import { tags } from '$lib/stores/tags';
+	import { getContext } from 'svelte';
+	import type { Tag } from '@manacore/shared-tags';
 	import { authStore } from '$lib/stores/auth.svelte';
+
+	const allTags: { value: Tag[] } = getContext('tags');
 	import { addTagToImage, removeTagFromImage, getImageTags } from '$lib/api/tags';
 	import { archiveImage, unarchiveImage, deleteImage, toggleFavorite } from '$lib/api/images';
 	import { images } from '$lib/stores/images';
 	import { archivedImages } from '$lib/stores/archive';
 	import { toastStore } from '@manacore/shared-ui';
-	import type { Tag } from '$lib/api/tags';
 	import {
 		DownloadSimple,
 		Link,
@@ -322,7 +324,7 @@
 			onmouseleave={hideTagSubmenu}
 			role="menu"
 		>
-			{#if $tags.length === 0}
+			{#if allTags.value.length === 0}
 				<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Keine Tags vorhanden</div>
 			{:else}
 				<div class="px-3 pb-2 pt-1">
@@ -330,7 +332,7 @@
 						Tags hinzufügen/entfernen
 					</p>
 				</div>
-				{#each $tags as tag}
+				{#each allTags.value as tag}
 					{@const hasTag = imageTags.some((t) => t.id === tag.id)}
 					<button
 						onclick={() => {

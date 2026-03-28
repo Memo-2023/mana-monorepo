@@ -21,3 +21,19 @@ export {
 	type SimpleNavigationOptions,
 } from './navigation-simple';
 export { createTagStore, type TagStore, type TagStoreConfig } from './tags.svelte';
+export {
+	tagLocalStore,
+	tagCollection,
+	tagGroupCollection,
+	tagMutations,
+	useAllTags,
+	useAllTagGroups,
+	getTagById,
+	getTagsByIds,
+	getTagColor,
+	getTagsByGroup,
+	toTag,
+	toTagGroup,
+	type LocalTag,
+	type LocalTagGroup,
+} from './tags-local.svelte';

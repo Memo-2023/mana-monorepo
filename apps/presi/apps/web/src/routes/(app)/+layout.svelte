@@ -1,10 +1,15 @@
 <script lang="ts">
+	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
@@ -22,6 +27,10 @@
 
 	// App switcher items
 	const appItems = getPillAppItems('presi');
+
+	// Shared tag store (local-first)
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let { children } = $props();
 
@@ -143,12 +152,14 @@
 	}
 
 	async function handleAuthReady() {
-		// Initialize local-first database (opens IndexedDB, seeds guest data)
-		await presiStore.initialize();
+		// Initialize local-first databases (opens IndexedDB, seeds guest data)
+		await Promise.all([presiStore.initialize(), tagLocalStore.initialize()]);
 
 		// If authenticated, start syncing to server
 		if (auth.isAuthenticated) {
-			presiStore.startSync(() => auth.getValidToken());
+			const getToken = () => auth.getValidToken();
+			presiStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 
 		// Load decks from IndexedDB (guest seed or synced data)
@@ -160,9 +171,8 @@
 		}
 
 		if (auth.isAuthenticated) {
-			// Load user settings and tags (require auth)
+			// Load user settings (requires auth)
 			await userSettings.load();
-			await tagStore.fetchTags();
 		}
 
 		// Redirect to start page if on root and a custom start page is set
@@ -228,7 +238,7 @@
 			<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 			{#if isTagStripVisible}
 				<TagStrip
-					tags={tagStore.tags.map((t) => ({
+					tags={allTags.value.map((t) => ({
 						id: t.id,
 						name: t.name,
 						color: t.color || '#3b82f6',
@@ -237,7 +247,6 @@
 					onToggle={() => {}}
 					onClear={() => {}}
 					managementHref="/tags"
-					loading={tagStore.loading}
 				/>
 			{/if}
 

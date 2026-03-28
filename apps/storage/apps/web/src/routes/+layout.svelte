@@ -8,7 +8,12 @@
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { tagsStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
+	import { setContext } from 'svelte';
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
@@ -26,6 +31,10 @@
 
 	// App switcher items
 	const appItems = getPillAppItems('storage');
+
+	// Live query for shared tags (local-first)
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let { children } = $props();
 
@@ -165,12 +174,13 @@
 	}
 
 	async function handleAuthReady() {
-		// Initialize local-first database
-		await storageStore.initialize();
+		// Initialize local-first databases
+		await Promise.all([storageStore.initialize(), tagLocalStore.initialize()]);
 
 		// If authenticated, start syncing
 		if (authStore.isAuthenticated) {
 			storageStore.startSync(() => authStore.getValidToken());
+			tagMutations.startSync(() => authStore.getValidToken());
 		}
 
 		// Initialize theme
@@ -182,8 +192,8 @@
 		}
 
 		if (authStore.isAuthenticated) {
-			// Load user settings and tags (require auth)
-			await Promise.all([userSettings.load(), tagsStore.fetchTags()]);
+			// Load user settings (require auth)
+			await userSettings.load();
 		}
 
 		// Initialize collapsed state from localStorage
@@ -248,7 +258,7 @@
 			<!-- TagStrip (toggled via Tags pill) -->
 			{#if isTagStripVisible}
 				<TagStrip
-					tags={tagsStore.tags.map((t) => ({
+					tags={allTags.value.map((t) => ({
 						id: t.id,
 						name: t.name,
 						color: t.color || '#6b7280',

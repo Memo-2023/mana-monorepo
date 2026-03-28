@@ -1,8 +1,12 @@
 <script lang="ts">
-	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
+	import { getContext } from 'svelte';
+	import { tagMutations } from '@manacore/shared-stores';
+	import type { Tag } from '@manacore/shared-tags';
 	import { Plus, X, Check, Pencil, Trash, MagnifyingGlass } from '@manacore/shared-icons';
 	import { TagColorPicker, focusTrap } from '@manacore/shared-ui';
-	import type { EventTag } from '@calendar/shared';
+
+	// Live tags from layout context
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
 	interface Props {
 		visible: boolean;
@@ -21,14 +25,14 @@
 	let isCreatingTag = $state(false);
 
 	// Edit tag state
-	let editingTag = $state<EventTag | null>(null);
+	let editingTag = $state<Tag | null>(null);
 	let editTagName = $state('');
 	let editTagColor = $state('#3b82f6');
 	let isSavingTag = $state(false);
 
 	// Filtered and sorted tags
 	const sortedTags = $derived.by(() => {
-		const tags = [...eventTagsStore.tags].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+		const tags = [...tagsCtx.value].sort((a, b) => a.name.localeCompare(b.name, 'de'));
 		if (!searchQuery.trim()) return tags;
 		const query = searchQuery.toLowerCase();
 		return tags.filter((t) => t.name.toLowerCase().includes(query));
@@ -51,17 +55,15 @@
 		if (!newTagName.trim() || isCreatingTag) return;
 
 		isCreatingTag = true;
-		const result = await eventTagsStore.createTag({
-			name: newTagName.trim(),
-			color: newTagColor,
-		});
-
-		if (result.error) {
-			console.error('Failed to create tag:', result.error);
-		} else {
+		try {
+			await tagMutations.createTag({
+				name: newTagName.trim(),
+				color: newTagColor,
+			});
 			closeNewTagForm();
+		} catch (e) {
+			console.error('Failed to create tag:', e);
 		}
-
 		isCreatingTag = false;
 	}
 
@@ -76,7 +78,7 @@
 	}
 
 	// ==================== EDIT TAG ====================
-	function openEditTag(tag: EventTag) {
+	function openEditTag(tag: Tag) {
 		editingTag = tag;
 		editTagName = tag.name;
 		editTagColor = tag.color;
@@ -92,29 +94,26 @@
 		if (!editingTag || !editTagName.trim() || isSavingTag) return;
 
 		isSavingTag = true;
-		const result = await eventTagsStore.updateTag(editingTag.id, {
-			name: editTagName.trim(),
-			color: editTagColor,
-		});
-
-		if (result.error) {
-			console.error('Failed to update tag:', result.error);
-		} else {
+		try {
+			await tagMutations.updateTag(editingTag.id, {
+				name: editTagName.trim(),
+				color: editTagColor,
+			});
 			closeEditTag();
+		} catch (e) {
+			console.error('Failed to update tag:', e);
 		}
-
 		isSavingTag = false;
 	}
 
 	async function handleDeleteTag() {
 		if (!editingTag) return;
 
-		const result = await eventTagsStore.deleteTag(editingTag.id);
-
-		if (result.error) {
-			console.error('Failed to delete tag:', result.error);
-		} else {
+		try {
+			await tagMutations.deleteTag(editingTag.id);
 			closeEditTag();
+		} catch (e) {
+			console.error('Failed to delete tag:', e);
 		}
 	}
 
@@ -169,9 +168,7 @@
 
 		<!-- Content -->
 		<div class="modal-content">
-			{#if eventTagsStore.loading}
-				<div class="loading-state">Lädt...</div>
-			{:else if eventTagsStore.tags.length === 0 && !showNewTagForm}
+			{#if tagsCtx.value.length === 0 && !showNewTagForm}
 				<div class="empty-state">
 					<p>Keine Tags vorhanden</p>
 					<button class="create-btn" onclick={openNewTagForm}>

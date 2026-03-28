@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, CommandBar, TagStrip } from '@manacore/shared-ui';
 	import type {
@@ -31,9 +31,16 @@
 	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { contextStore } from '$lib/data/local-store';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 
 	const appItems = getPillAppItems('context');
+
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let { children } = $props();
 
@@ -218,9 +225,11 @@
 	let showGuestWelcome = $state(false);
 
 	async function handleAuthReady() {
-		await contextStore.initialize();
+		await Promise.all([contextStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
-			contextStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			contextStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('context')) {
 			showGuestWelcome = true;
@@ -234,7 +243,6 @@
 
 		if (authStore.isAuthenticated) {
 			await userSettings.load();
-			await tagStore.fetchTags();
 			await Promise.all([spacesStore.load(), documentsStore.load()]);
 		}
 	}
@@ -280,7 +288,7 @@
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={allTags.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -289,7 +297,6 @@
 				onToggle={() => {}}
 				onClear={() => {}}
 				managementHref="/tags"
-				loading={tagStore.loading}
 			/>
 		{/if}
 

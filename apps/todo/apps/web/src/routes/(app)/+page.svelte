@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, getContext } from 'svelte';
 	import { format, addDays, subDays, startOfDay } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { Sparkle, ArrowDown } from '@manacore/shared-icons';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { applyTaskFilters } from '$lib/utils/task-filters';
+	import { filterOverdue, filterToday, filterCompleted } from '$lib/data/task-queries';
 	import TaskList from '$lib/components/TaskList.svelte';
 	import CollapsibleSection from '$lib/components/CollapsibleSection.svelte';
 	import { TaskListSkeleton } from '$lib/components/skeletons';
 	import type { Task } from '@todo/shared';
 
-	let isLoading = $state(true);
+	// Live tasks from layout context — auto-updates on IndexedDB changes
+	const allTasks: { readonly value: Task[] } = getContext('tasks');
+
 	let tipDismissed = $state(false);
 
 	// Build filter criteria from viewStore (reactive)
@@ -26,30 +29,20 @@
 		return applyTaskFilters(tasks, filterCriteria);
 	}
 
-	onMount(async () => {
+	onMount(() => {
 		viewStore.setToday();
-
-		try {
-			// Fetch tasks (works in both guest and authenticated mode)
-			await tasksStore.fetchAllTasks();
-		} catch (error) {
-			console.error('Failed to load tasks:', error);
-		}
-
-		isLoading = false;
 	});
 
-	// Derived task lists (with filters applied)
-	let overdueTasks = $derived(applyFilters(tasksStore.overdueTasks));
-	let todayTasks = $derived(applyFilters(tasksStore.todayTasks));
-	let completedTasks = $derived(applyFilters(tasksStore.completedTasks));
+	// Derived task lists (with filters applied) — automatically reactive via liveQuery
+	let overdueTasks = $derived(applyFilters(filterOverdue(allTasks.value)));
+	let todayTasks = $derived(applyFilters(filterToday(allTasks.value)));
+	let completedTasks = $derived(applyFilters(filterCompleted(allTasks.value)));
 
 	// Tomorrow's tasks
 	let tomorrowDate = $derived(addDays(startOfDay(new Date()), 1));
-	let dayAfterTomorrowDate = $derived(addDays(startOfDay(new Date()), 2));
 	let tomorrowTasks = $derived(
 		applyFilters(
-			tasksStore.tasks.filter((task) => {
+			allTasks.value.filter((task) => {
 				if (!task.dueDate || task.isCompleted) return false;
 				const taskDate = startOfDay(new Date(task.dueDate));
 				return taskDate.getTime() === tomorrowDate.getTime();
@@ -66,7 +59,7 @@
 		for (let i = 2; i <= 7; i++) {
 			const date = addDays(today, i);
 			const dayTasks = applyFilters(
-				tasksStore.tasks.filter((task) => {
+				allTasks.value.filter((task) => {
 					if (!task.dueDate || task.isCompleted) return false;
 					const taskDate = startOfDay(new Date(task.dueDate));
 					return taskDate.getTime() === date.getTime();
@@ -122,23 +115,20 @@
 
 	// Drag and drop handler - uses optimistic updates for smooth UX
 	async function handleTaskDrop(taskId: string, targetDate: Date | 'completed' | 'overdue') {
-		const task = tasksStore.tasks.find((t) => t.id === taskId);
+		const task = allTasks.value.find((t) => t.id === taskId);
 		if (!task) return;
 
 		if (targetDate === 'completed') {
-			// Mark task as completed (optimistic)
 			if (!task.isCompleted) {
 				await tasksStore.updateTaskOptimistic(taskId, { isCompleted: true });
 			}
 		} else if (targetDate === 'overdue') {
-			// Set to yesterday (optimistic)
 			const yesterday = subDays(startOfDay(new Date()), 1);
 			await tasksStore.updateTaskOptimistic(taskId, {
 				dueDate: yesterday.toISOString(),
 				isCompleted: task.isCompleted ? false : undefined,
 			});
 		} else {
-			// Set to specific date (optimistic)
 			await tasksStore.updateTaskOptimistic(taskId, {
 				dueDate: targetDate.toISOString(),
 				isCompleted: task.isCompleted ? false : undefined,
@@ -152,8 +142,10 @@
 </svelte:head>
 
 <div class="unified-view">
-	{#if isLoading || tasksStore.loading}
-		<TaskListSkeleton sections={3} tasksPerSection={3} />
+	{#if allTasks.error}
+		<div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
+			{allTasks.error}
+		</div>
 	{:else if tasksStore.error}
 		<div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
 			{tasksStore.error}

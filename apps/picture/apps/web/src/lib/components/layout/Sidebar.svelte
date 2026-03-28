@@ -14,8 +14,12 @@
 		hasMoreExplore,
 		showExploreFavoritesOnly,
 	} from '$lib/stores/explore';
-	import { tags, selectedTags } from '$lib/stores/tags';
+	import { selectedTags } from '$lib/stores/tags';
+	import { getContext } from 'svelte';
+	import type { Tag } from '@manacore/shared-tags';
 	import { showFavoritesOnly } from '$lib/stores/images';
+
+	const allTags: { value: Tag[] } = getContext('tags');
 	import { searchPublicImages, getPublicImages } from '$lib/api/explore';
 	import { showKeyboardShortcuts } from '$lib/stores/ui';
 	import TagPills from '$lib/components/tags/TagPills.svelte';
@@ -373,7 +377,7 @@
 						<span>Favoriten</span>
 					</button>
 
-					{#if $tags.length > 0}
+					{#if allTags.value.length > 0}
 						<TagPills />
 					{:else}
 						<p class="text-xs text-gray-500 dark:text-gray-400">Keine Tags vorhanden</p>

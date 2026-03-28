@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
+	import type { Tag } from '@manacore/shared-tags';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { DotsThree, Plus, X } from '@manacore/shared-icons';
 	import TagStripModal from './TagStripModal.svelte';
+
+	// Live tags from layout context
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
 	let showModal = $state(false);
 
@@ -27,16 +30,10 @@
 	}
 
 	const sortedTags = $derived.by(() => {
-		return [...eventTagsStore.tags].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+		return [...tagsCtx.value].sort((a, b) => a.name.localeCompare(b.name, 'de'));
 	});
 
-	const hasTags = $derived(eventTagsStore.tags.length > 0);
-
-	onMount(async () => {
-		if (eventTagsStore.tags.length === 0) {
-			await eventTagsStore.fetchTags();
-		}
-	});
+	const hasTags = $derived(tagsCtx.value.length > 0);
 </script>
 
 <div class="tag-strip-wrapper">
@@ -59,9 +56,7 @@
 			<span class="tag-name">Alle Tags</span>
 		</button>
 
-		{#if eventTagsStore.loading}
-			<div class="loading-state">Lädt...</div>
-		{:else if !hasTags}
+		{#if !hasTags}
 			<button class="empty-state glass-tag" onclick={() => goto('/tags')}>
 				<span>Keine Tags vorhanden</span>
 				<span class="add-hint">+ Erstellen</span>

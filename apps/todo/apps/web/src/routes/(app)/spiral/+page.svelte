@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, getContext } from 'svelte';
 	import { spiralStore } from '$lib/stores/spiral.svelte';
-	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import SpiralCanvas from '$lib/components/SpiralCanvas.svelte';
 	import { visualizeImageEmoji, COLORS, type ColorDefinition } from '@manacore/spiral-db';
+	import type { Task } from '@todo/shared';
+
+	// Live tasks from layout context
+	const allTasks: { readonly value: Task[] } = getContext('tasks');
 
 	// Get colors as array for iteration
 	const colorsArray: ColorDefinition[] = Object.values(COLORS);
@@ -19,16 +22,10 @@
 	let emojiView = $derived(spiralStore.image ? visualizeImageEmoji(spiralStore.image) : '');
 
 	// Import todos from main store on mount
-	onMount(async () => {
-		// Fetch tasks if not already loaded
-		if (tasksStore.tasks.length === 0) {
-			await tasksStore.fetchTasks({});
-		}
-
-		// Import existing todos into spiral DB
-		if (tasksStore.tasks.length > 0) {
+	onMount(() => {
+		if (allTasks.value.length > 0) {
 			spiralStore.importTodos(
-				tasksStore.tasks.map((t) => ({
+				allTasks.value.map((t) => ({
 					title: t.title,
 					description: t.description,
 					priority: t.priority,
@@ -93,7 +90,7 @@
 
 	function handleReimport() {
 		spiralStore.importTodos(
-			tasksStore.tasks.map((t) => ({
+			allTasks.value.map((t) => ({
 				title: t.title,
 				description: t.description,
 				priority: t.priority,

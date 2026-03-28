@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { setContext } from 'svelte';
 	import { _, locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
@@ -20,6 +24,9 @@
 	import { api } from '$lib/api';
 
 	const appItems = getPillAppItems('citycorners');
+
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let { children } = $props();
 
@@ -178,10 +185,11 @@
 	let showGuestWelcome = $state(false);
 
 	async function handleAuthReady() {
-		await citycornersStore.initialize();
+		await Promise.all([citycornersStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
-			citycornersStore.startSync(() => authStore.getValidToken());
-			await tagStore.fetchTags();
+			const getToken = () => authStore.getValidToken();
+			citycornersStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('citycorners')) {
 			showGuestWelcome = true;
@@ -227,7 +235,7 @@
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={allTags.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -236,7 +244,6 @@
 				onToggle={() => {}}
 				onClear={() => {}}
 				managementHref="/tags"
-				loading={tagStore.loading}
 			/>
 		{/if}
 

@@ -15,9 +15,14 @@
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
+	import { setContext } from 'svelte';
 	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -27,6 +32,10 @@
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { chatStore } from '$lib/data/local-store';
+
+	// Live tag query + context
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	// App switcher items
 	const appItems = getPillAppItems('chat');
@@ -155,16 +164,19 @@
 
 	async function handleLogout() {
 		await authStore.signOut();
+		tagMutations.stopSync();
 		goto('/login');
 	}
 
 	let showGuestWelcome = $state(false);
 
 	async function handleAuthReady() {
-		// Initialize local-first database
-		await chatStore.initialize();
+		// Initialize local-first databases
+		await Promise.all([chatStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
-			chatStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			chatStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('chat')) {
 			showGuestWelcome = true;
@@ -182,9 +194,8 @@
 
 		if (!authStore.isAuthenticated) return;
 
-		// Load user settings and tags
+		// Load user settings
 		await userSettings.load();
-		await tagStore.fetchTags();
 
 		// Check for session conversations to migrate
 		if (conversationsStore.hasSessionConversations) {
@@ -240,7 +251,7 @@
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={allTags.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -249,7 +260,6 @@
 				onToggle={() => {}}
 				onClear={() => {}}
 				managementHref="/tags"
-				loading={tagStore.loading}
 			/>
 		{/if}
 

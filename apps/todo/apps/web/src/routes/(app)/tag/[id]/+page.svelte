@@ -1,47 +1,27 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { CaretLeft, Tag } from '@manacore/shared-icons';
-	import { authStore } from '$lib/stores/auth.svelte';
-	import { tasksStore } from '$lib/stores/tasks.svelte';
-	import { labelsStore } from '$lib/stores/labels.svelte';
+	import { CaretLeft, Tag as TagIcon } from '@manacore/shared-icons';
+	import { getContext } from 'svelte';
+	import type { Tag } from '@manacore/shared-tags';
+	import { filterByLabel } from '$lib/data/task-queries';
 	import TaskList from '$lib/components/TaskList.svelte';
-	import { TaskListSkeleton } from '$lib/components/skeletons';
+	import type { Task } from '@todo/shared';
 
-	let isLoading = $state(true);
+	// Live data from layout context
+	const allTasks: { readonly value: Task[] } = getContext('tasks');
+	const allTags: { readonly value: Tag[] } = getContext('tags');
 
 	// Get tag ID from URL
 	const tagId = $derived($page.params.id ?? '');
 
-	// Get tag from store
-	const tag = $derived(labelsStore.getById(tagId));
+	// Get tag — reactively via liveQuery
+	const tag = $derived(allTags.value.find((t) => t.id === tagId));
 
-	// Get tasks with this tag
-	const tagTasks = $derived(tagId ? tasksStore.getTasksByLabel(tagId) : []);
+	// Get tasks with this tag — reactively via liveQuery
+	const tagTasks = $derived(tagId ? filterByLabel(allTasks.value, tagId) : []);
 	const incompleteTasks = $derived(tagTasks.filter((t) => !t.isCompleted));
 	const completedTasks = $derived(tagTasks.filter((t) => t.isCompleted));
-
-	onMount(async () => {
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
-		try {
-			// Ensure tags are loaded
-			if (labelsStore.labels.length === 0) {
-				await labelsStore.fetchLabels();
-			}
-
-			// Fetch all tasks to filter by tag
-			await tasksStore.fetchAllTasks();
-		} catch (error) {
-			console.error('Failed to load data:', error);
-		}
-
-		isLoading = false;
-	});
 </script>
 
 <svelte:head>
@@ -65,16 +45,14 @@
 			{/if}
 		</div>
 		<a href="/tags" class="manage-button" aria-label="Tags verwalten">
-			<Tag size={20} weight="bold" />
+			<TagIcon size={20} weight="bold" />
 		</a>
 	</header>
 
-	{#if isLoading}
-		<TaskListSkeleton />
-	{:else if !tag}
+	{#if !tag}
 		<div class="empty-state">
 			<div class="empty-icon">
-				<Tag size={40} weight="light" />
+				<TagIcon size={40} weight="light" />
 			</div>
 			<h2 class="empty-title">Tag nicht gefunden</h2>
 			<p class="empty-description">Dieser Tag existiert nicht mehr.</p>
@@ -83,7 +61,7 @@
 	{:else if tagTasks.length === 0}
 		<div class="empty-state">
 			<div class="empty-icon" style="background-color: {tag.color}20">
-				<Tag size={40} weight="light" style="color: {tag.color}" />
+				<TagIcon size={40} weight="light" style="color: {tag.color}" />
 			</div>
 			<h2 class="empty-title">Keine Aufgaben</h2>
 			<p class="empty-description">

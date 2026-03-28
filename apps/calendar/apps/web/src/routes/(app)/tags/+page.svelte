@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { Modal, Input, TagColorPicker, TagBadge } from '@manacore/shared-ui';
 	import { MagnifyingGlass, Plus, CaretLeft } from '@manacore/shared-icons';
-	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
-	import type { EventTag } from '@calendar/shared';
+	import { tagMutations } from '@manacore/shared-stores';
+	import type { Tag } from '@manacore/shared-tags';
+
+	// Live tags from layout context
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
 	let searchQuery = $state('');
 	let showTagModal = $state(false);
-	let editingTag = $state<EventTag | null>(null);
+	let editingTag = $state<Tag | null>(null);
 
 	// Filtered tags based on search, sorted alphabetically
 	const filteredTags = $derived.by(() => {
-		const sorted = [...eventTagsStore.tags].sort((a, b) => a.name.localeCompare(b.name, 'de'));
+		const sorted = [...tagsCtx.value].sort((a, b) => a.name.localeCompare(b.name, 'de'));
 		if (!searchQuery.trim()) return sorted;
 		const query = searchQuery.toLowerCase();
 		return sorted.filter((t) => t.name.toLowerCase().includes(query));
@@ -35,7 +38,7 @@
 		showTagModal = true;
 	}
 
-	function openEditTagModal(tag: EventTag) {
+	function openEditTagModal(tag: Tag) {
 		editingTag = tag;
 		showTagModal = true;
 	}
@@ -50,12 +53,12 @@
 
 		try {
 			if (editingTag) {
-				await eventTagsStore.updateTag(editingTag.id, {
+				await tagMutations.updateTag(editingTag.id, {
 					name: tagName.trim(),
 					color: tagColor,
 				});
 			} else {
-				await eventTagsStore.createTag({
+				await tagMutations.createTag({
 					name: tagName.trim(),
 					color: tagColor,
 				});
@@ -72,7 +75,7 @@
 		if (!confirm(`Tag "${editingTag.name}" wirklich löschen?`)) return;
 
 		try {
-			await eventTagsStore.deleteTag(editingTag.id);
+			await tagMutations.deleteTag(editingTag.id);
 			closeTagModal();
 		} catch (e) {
 			console.error('Failed to delete tag:', e);
@@ -87,12 +90,6 @@
 	}
 
 	const previewTag = $derived({ name: tagName || 'Tag Name', color: tagColor });
-
-	onMount(async () => {
-		if (eventTagsStore.tags.length === 0) {
-			await eventTagsStore.fetchTags();
-		}
-	});
 </script>
 
 <svelte:head>
@@ -122,14 +119,14 @@
 		/>
 	</div>
 
-	{#if eventTagsStore.error}
+	{#if false}
 		<div class="error-banner" role="alert">
-			<span>{eventTagsStore.error}</span>
+			<span>{false}</span>
 		</div>
 	{/if}
 
 	<!-- Tag List -->
-	{#if eventTagsStore.loading}
+	{#if false}
 		<div class="flex justify-center py-8">
 			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
 		</div>
@@ -150,14 +147,14 @@
 		</div>
 	{/if}
 
-	{#if !eventTagsStore.loading && eventTagsStore.tags.length > 0}
+	{#if !false && tagsCtx.value.length > 0}
 		<p class="tags-count">
-			{eventTagsStore.tags.length}
-			{eventTagsStore.tags.length === 1 ? 'Tag' : 'Tags'}
+			{tagsCtx.value.length}
+			{tagsCtx.value.length === 1 ? 'Tag' : 'Tags'}
 		</p>
 	{/if}
 
-	{#if !eventTagsStore.loading && eventTagsStore.tags.length === 0 && !searchQuery}
+	{#if !false && tagsCtx.value.length === 0 && !searchQuery}
 		<div class="empty-cta">
 			<button onclick={openCreateTagModal} class="btn btn-primary">
 				<Plus size={16} weight="bold" />

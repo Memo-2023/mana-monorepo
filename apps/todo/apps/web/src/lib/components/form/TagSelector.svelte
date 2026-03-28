@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { labelsStore } from '$lib/stores/labels.svelte';
+	import { getContext } from 'svelte';
+	import type { Tag } from '@manacore/shared-tags';
+
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
 	interface Props {
 		selectedIds: string[];
@@ -37,7 +40,7 @@
 		{:else}
 			<div class="selected-tags">
 				{#each selectedIds.slice(0, 3) as tagId}
-					{@const tag = labelsStore.getById(tagId)}
+					{@const tag = tagsCtx.value.find((t) => t.id === tagId)}
 					{#if tag}
 						<span class="tag-chip" style="--tag-color: {tag.color}">
 							{tag.name}
@@ -56,7 +59,7 @@
 
 	{#if showDropdown}
 		<div class="tag-dropdown" onclick={(e) => e.stopPropagation()} role="listbox">
-			{#each labelsStore.labels as tag}
+			{#each tagsCtx.value as tag}
 				<button
 					type="button"
 					class="tag-option"
@@ -79,7 +82,7 @@
 					{/if}
 				</button>
 			{/each}
-			{#if labelsStore.labels.length === 0}
+			{#if tagsCtx.value.length === 0}
 				<div class="no-tags">Keine Tags vorhanden</div>
 			{/if}
 		</div>

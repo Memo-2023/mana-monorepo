@@ -1,9 +1,12 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { QuickInputItem, CreatePreview } from '@manacore/shared-ui';
 	import { unifiedBarStore } from '$lib/stores/unified-bar.svelte';
-	import { eventTagsStore } from '$lib/stores/event-tags.svelte';
+	import type { Tag } from '@manacore/shared-tags';
+
+	// Live tags from layout context
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import DateStrip from './DateStrip.svelte';
 	import CalendarToolbarContent from './CalendarToolbarContent.svelte';
@@ -128,7 +131,7 @@
 	{#if showCalendarLayers && unifiedBarStore.showTagStrip}
 		<div class="unified-bar-layer tag-layer" transition:fly={flyConfig}>
 			<TagStrip
-				tags={eventTagsStore.tags.map((t) => ({
+				tags={tagsCtx.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -137,7 +140,6 @@
 				onToggle={(tagId) => settingsStore.toggleTagSelection(tagId)}
 				onClear={() => settingsStore.clearTagSelection()}
 				managementHref="/tags"
-				loading={eventTagsStore.loading}
 			/>
 		</div>
 	{/if}

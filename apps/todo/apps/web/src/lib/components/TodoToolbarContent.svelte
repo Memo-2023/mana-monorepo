@@ -2,8 +2,11 @@
 	import { goto } from '$app/navigation';
 	import type { TaskPriority } from '@todo/shared';
 	import { PRIORITY_OPTIONS } from '@todo/shared';
-	import { projectsStore } from '$lib/stores/projects.svelte';
-	import { labelsStore } from '$lib/stores/labels.svelte';
+	import { getContext } from 'svelte';
+	import type { Project } from '@todo/shared';
+	import { getActiveProjects } from '$lib/data/task-queries';
+
+	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
 	import { PillToolbarButton, PillToolbarDivider, PillViewSwitcher } from '@manacore/shared-ui';
 
@@ -144,7 +147,7 @@
 						onchange={(e) => (selectedProjectFilter = e.currentTarget.value || null)}
 					>
 						<option value="">Alle Projekte</option>
-						{#each projectsStore.activeProjects as project}
+						{#each getActiveProjects(projectsCtx.value) as project}
 							<option value={project.id}>{project.name}</option>
 						{/each}
 					</select>

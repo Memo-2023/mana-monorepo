@@ -1,16 +1,19 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { TagList, TagEditModal, ConfirmationModal, type Tag } from '@manacore/shared-ui';
+	import { TagList, TagEditModal, ConfirmationModal, type Tag as UITag } from '@manacore/shared-ui';
 	import { MagnifyingGlass, Plus, CaretLeft, Check } from '@manacore/shared-icons';
-	import { labelsStore } from '$lib/stores/labels.svelte';
-	import type { Label } from '@todo/shared';
+	import { tagMutations } from '@manacore/shared-stores';
+	import type { Tag } from '@manacore/shared-tags';
+
+	// Live tags from layout context
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
 	let searchQuery = $state('');
 	let showModal = $state(false);
-	let editingLabel = $state<Label | null>(null);
+	let editingTag = $state<Tag | null>(null);
 	let showDeleteConfirm = $state(false);
-	let labelToDelete = $state<Tag | null>(null);
+	let tagToDelete = $state<UITag | null>(null);
 
 	// Inline create state
 	let newTagName = $state('');
@@ -31,18 +34,18 @@
 		'#6b7280', // gray
 	];
 
-	const filteredLabels = $derived.by(() => {
-		if (!searchQuery.trim()) return labelsStore.labels;
+	const filteredTags = $derived.by(() => {
+		if (!searchQuery.trim()) return tagsCtx.value;
 		const query = searchQuery.toLowerCase();
-		return labelsStore.labels.filter((l) => l.name.toLowerCase().includes(query));
+		return tagsCtx.value.filter((t) => t.name.toLowerCase().includes(query));
 	});
 
-	// Convert Label to Tag type for shared-ui components
-	function labelToTag(label: Label): Tag {
+	// Convert Tag to UITag type for shared-ui components
+	function tagToUITag(tag: Tag): UITag {
 		return {
-			id: label.id,
-			name: label.name,
-			color: label.color,
+			id: tag.id,
+			name: tag.name,
+			color: tag.color,
 		};
 	}
 
@@ -52,7 +55,7 @@
 
 		isCreating = true;
 		try {
-			await labelsStore.createLabel({ name: newTagName.trim(), color: newTagColor });
+			await tagMutations.createTag({ name: newTagName.trim(), color: newTagColor });
 			newTagName = '';
 			newTagColor = '#8b5cf6';
 		} catch (e) {
@@ -69,68 +72,62 @@
 		}
 	}
 
-	function openEditModal(tag: Tag) {
-		const label = labelsStore.labels.find((l) => l.id === tag.id);
-		if (label) {
-			editingLabel = label;
+	function openEditModal(uiTag: UITag) {
+		const tag = tagsCtx.value.find((t) => t.id === uiTag.id);
+		if (tag) {
+			editingTag = tag;
 			showModal = true;
 		}
 	}
 
 	function closeModal() {
 		showModal = false;
-		editingLabel = null;
+		editingTag = null;
 	}
 
 	async function handleSave(name: string, color: string) {
 		try {
-			if (editingLabel) {
-				await labelsStore.updateLabel(editingLabel.id, { name, color });
+			if (editingTag) {
+				await tagMutations.updateTag(editingTag.id, { name, color });
 			}
 			closeModal();
 		} catch (e) {
-			console.error('Failed to save label:', e);
+			console.error('Failed to save tag:', e);
 		}
 	}
 
 	async function handleDelete() {
-		if (!editingLabel) return;
+		if (!editingTag) return;
 
 		try {
-			await labelsStore.deleteLabel(editingLabel.id);
+			await tagMutations.deleteTag(editingTag.id);
 			closeModal();
 		} catch (e) {
-			console.error('Failed to delete label:', e);
+			console.error('Failed to delete tag:', e);
 		}
 	}
 
-	function handleDeleteFromList(tag: Tag) {
-		labelToDelete = tag;
+	function handleDeleteFromList(uiTag: UITag) {
+		tagToDelete = uiTag;
 		showDeleteConfirm = true;
 	}
 
-	async function confirmDeleteLabel() {
-		if (!labelToDelete) return;
+	async function confirmDeleteTag() {
+		if (!tagToDelete) return;
 
 		try {
-			await labelsStore.deleteLabel(labelToDelete.id);
+			await tagMutations.deleteTag(tagToDelete.id);
 		} catch (e) {
-			console.error('Failed to delete label:', e);
+			console.error('Failed to delete tag:', e);
 		} finally {
 			showDeleteConfirm = false;
-			labelToDelete = null;
+			tagToDelete = null;
 		}
 	}
 
-	function handleTagClick(tag: Tag) {
-		goto(`/tag/${tag.id}`);
+	function handleTagClick(uiTag: UITag) {
+		goto(`/tag/${uiTag.id}`);
 	}
-
-	onMount(() => {
-		if (labelsStore.labels.length === 0) {
-			labelsStore.fetchLabels();
-		}
-	});
 </script>
 
 <svelte:head>
@@ -213,16 +210,16 @@
 		/>
 	</div>
 
-	{#if labelsStore.error}
+	{#if tagMutations.error}
 		<div class="error-banner" role="alert">
-			<span>{labelsStore.error}</span>
+			<span>{tagMutations.error}</span>
 		</div>
 	{/if}
 
 	<!-- Tag List using shared component -->
 	<TagList
-		tags={filteredLabels.map(labelToTag)}
-		loading={labelsStore.loading}
+		tags={filteredTags.map(tagToUITag)}
+		loading={false}
 		onEdit={openEditModal}
 		onDelete={handleDeleteFromList}
 		onClick={handleTagClick}
@@ -232,29 +229,29 @@
 			: 'Erstelle deinen ersten Tag'}
 	/>
 
-	{#if !labelsStore.loading && labelsStore.labels.length > 0}
+	{#if tagsCtx.value.length > 0}
 		<p class="tags-count">
-			{labelsStore.labels.length}
-			{labelsStore.labels.length === 1 ? 'Tag' : 'Tags'}
+			{tagsCtx.value.length}
+			{tagsCtx.value.length === 1 ? 'Tag' : 'Tags'}
 		</p>
 	{/if}
 </div>
 
 <!-- Create/Edit Modal using shared component -->
 <TagEditModal
-	tag={editingLabel ? labelToTag(editingLabel) : null}
+	tag={editingTag ? tagToUITag(editingTag) : null}
 	isOpen={showModal}
 	onClose={closeModal}
 	onSave={handleSave}
-	onDelete={editingLabel ? handleDelete : undefined}
-	title={editingLabel ? 'Tag bearbeiten' : 'Neuer Tag'}
-	saveLabel={editingLabel ? 'Speichern' : 'Erstellen'}
+	onDelete={editingTag ? handleDelete : undefined}
+	title={editingTag ? 'Tag bearbeiten' : 'Neuer Tag'}
+	saveLabel={editingTag ? 'Speichern' : 'Erstellen'}
 	deleteLabel="Löschen"
 	cancelLabel="Abbrechen"
 	namePlaceholder="Tag Name"
 	colorLabel="Farbe"
 	previewLabel="Vorschau"
-	deleteConfirmMessage={`Tag "${editingLabel?.name || ''}" wirklich löschen?`}
+	deleteConfirmMessage={`Tag "${editingTag?.name || ''}" wirklich löschen?`}
 />
 
 <!-- Delete confirmation modal -->
@@ -262,12 +259,12 @@
 	visible={showDeleteConfirm}
 	onClose={() => {
 		showDeleteConfirm = false;
-		labelToDelete = null;
+		tagToDelete = null;
 	}}
-	onConfirm={confirmDeleteLabel}
+	onConfirm={confirmDeleteTag}
 	variant="danger"
 	title="Tag löschen?"
-	message={`Der Tag "${labelToDelete?.name ?? ''}" wird unwiderruflich gelöscht.`}
+	message={`Der Tag "${tagToDelete?.name ?? ''}" wird unwiderruflich gelöscht.`}
 	confirmLabel="Löschen"
 	cancelLabel="Abbrechen"
 />

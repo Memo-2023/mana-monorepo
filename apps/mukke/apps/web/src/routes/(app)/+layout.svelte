@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { PillNavigation, QuickInputBar, DevBuildBadge, TagStrip } from '@manacore/shared-ui';
@@ -29,12 +30,20 @@
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { mukkeStore } from '$lib/data/local-store';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
 	import FullPlayer from '$lib/components/FullPlayer.svelte';
 	import QueuePanel from '$lib/components/QueuePanel.svelte';
 
 	let { children } = $props();
+
+	// Shared tag store (local-first)
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	// App switcher items
 	const appItems = getPillAppItems('mukke' as any);
@@ -185,17 +194,16 @@
 	let showGuestWelcome = $state(false);
 
 	async function handleAuthReady() {
-		await mukkeStore.initialize();
+		await Promise.all([mukkeStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
-			mukkeStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			mukkeStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('mukke')) {
 			showGuestWelcome = true;
 		}
 		splitPanel.initialize();
-		if (authStore.isAuthenticated) {
-			await tagStore.fetchTags();
-		}
 	}
 </script>
 
@@ -242,7 +250,7 @@
 			<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 			{#if isTagStripVisible}
 				<TagStrip
-					tags={tagStore.tags.map((t) => ({
+					tags={allTags.value.map((t) => ({
 						id: t.id,
 						name: t.name,
 						color: t.color || '#3b82f6',
@@ -251,7 +259,6 @@
 					onToggle={() => {}}
 					onClear={() => {}}
 					managementHref="/tags"
-					loading={tagStore.loading}
 				/>
 			{/if}
 

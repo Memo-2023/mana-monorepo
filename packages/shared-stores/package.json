@@ -16,6 +16,7 @@
 		"typescript": "^5.0.0"
 	},
 	"dependencies": {
+		"@manacore/local-store": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-tags": "workspace:*"
 	}

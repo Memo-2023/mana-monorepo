@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
@@ -19,9 +19,16 @@
 		CreatePreview,
 	} from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 
 	let { children } = $props();
+
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	// App switcher items
 	const appItems = getPillAppItems('questions');
@@ -47,14 +54,15 @@
 	let showGuestWelcome = $state(false);
 
 	async function handleAuthReady() {
-		await questionsAppStore.initialize();
+		await Promise.all([questionsAppStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
-			questionsAppStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			questionsAppStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 			const token = await authStore.getValidToken();
 			apiClient.setAccessToken(token);
 			await collectionsStore.load();
 			await questionsStore.load();
-			await tagStore.fetchTags();
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('questions')) {
 			showGuestWelcome = true;
@@ -202,7 +210,7 @@
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={allTags.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -211,7 +219,6 @@
 				onToggle={() => {}}
 				onClear={() => {}}
 				managementHref="/tags"
-				loading={tagStore.loading}
 			/>
 		{/if}
 

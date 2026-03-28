@@ -8,12 +8,21 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { photoStore } from '$lib/stores/photos.svelte';
 	import { albumStore } from '$lib/stores/albums.svelte';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
+	import { setContext } from 'svelte';
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { photosStore } from '$lib/data/local-store';
+
+	// Live query for shared tags (local-first)
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let { children } = $props();
 
@@ -81,7 +90,6 @@
 		await authStore.signOut();
 		photoStore.reset();
 		albumStore.reset();
-		tagStore.reset();
 		goto('/login');
 	}
 
@@ -89,7 +97,7 @@
 	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
 		const q = query.toLowerCase();
 		const albums = albumStore.albums.filter((a) => a.name?.toLowerCase().includes(q));
-		const tags = tagStore.tags.filter((t) => t.name?.toLowerCase().includes(q));
+		const tags = allTags.value.filter((t) => t.name?.toLowerCase().includes(q));
 		const results: QuickInputItem[] = [];
 		for (const album of albums.slice(0, 5)) {
 			results.push({ id: `album-${album.id}`, title: album.name, subtitle: 'Album' });
@@ -111,10 +119,11 @@
 	let showGuestWelcome = $state(false);
 
 	async function handleAuthReady() {
-		await photosStore.initialize();
+		await Promise.all([photosStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
 			photosStore.startSync(() => authStore.getValidToken());
-			await Promise.all([photoStore.loadStats(), albumStore.loadAlbums(), tagStore.loadTags()]);
+			tagMutations.startSync(() => authStore.getValidToken());
+			await Promise.all([photoStore.loadStats(), albumStore.loadAlbums()]);
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('photos')) {
 			showGuestWelcome = true;
@@ -152,7 +161,7 @@
 		<!-- TagStrip (toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={allTags.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#6b7280',

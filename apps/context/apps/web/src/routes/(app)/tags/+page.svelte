@@ -1,12 +1,9 @@
 <script lang="ts">
-	import { tagStore } from '$lib/stores/tags.svelte';
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
+	import { tagMutations } from '@manacore/shared-stores';
+	import type { Tag } from '@manacore/shared-tags';
 
-	onMount(() => {
-		if (tagStore.tags.length === 0) {
-			tagStore.fetchTags();
-		}
-	});
+	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 </script>
 
 <svelte:head>
@@ -19,13 +16,11 @@
 		Tags sind app-übergreifend — Änderungen gelten in allen ManaCore-Apps.
 	</p>
 
-	{#if tagStore.loading}
-		<p>Lädt...</p>
-	{:else if tagStore.tags.length === 0}
+	{#if tagsCtx.value.length === 0}
 		<p>Keine Tags vorhanden.</p>
 	{:else}
 		<div class="grid gap-2">
-			{#each tagStore.tags as tag}
+			{#each tagsCtx.value as tag}
 				<div class="flex items-center gap-2 p-2 rounded-lg bg-card">
 					<span class="w-3 h-3 rounded-full" style="background-color: {tag.color}"></span>
 					<span>{tag.name}</span>

@@ -1,21 +1,24 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import type { ContactTag } from '$lib/api/contacts';
-	import { tagsStore } from '$lib/stores/tags.svelte';
+	import { tagMutations } from '@manacore/shared-stores';
+	import type { Tag as SharedTag } from '@manacore/shared-tags';
 	import { TagList, TagEditModal, type Tag } from '@manacore/shared-ui';
 	import { MagnifyingGlass, Plus, CaretLeft } from '@manacore/shared-icons';
+
+	// Live tags from layout context
+	const tagsCtx: { readonly value: SharedTag[] } = getContext('tags');
 
 	let searchQuery = $state('');
 
 	// Modal state
 	let showModal = $state(false);
-	let editingTag = $state<ContactTag | null>(null);
+	let editingTag = $state<SharedTag | null>(null);
 
 	const filteredTags = $derived.by(() => {
-		if (!searchQuery.trim()) return tagsStore.tags;
+		if (!searchQuery.trim()) return tagsCtx.value;
 		const query = searchQuery.toLowerCase();
-		return tagsStore.tags.filter((t) => t.name.toLowerCase().includes(query));
+		return tagsCtx.value.filter((t) => t.name.toLowerCase().includes(query));
 	});
 
 	function openCreateModal() {
@@ -23,7 +26,7 @@
 		showModal = true;
 	}
 
-	function openEditModal(tag: ContactTag) {
+	function openEditModal(tag: SharedTag) {
 		editingTag = tag;
 		showModal = true;
 	}
@@ -36,9 +39,9 @@
 	async function handleSave(name: string, color: string) {
 		try {
 			if (editingTag) {
-				await tagsStore.updateTag(editingTag.id, { name, color });
+				await tagMutations.updateTag(editingTag.id, { name, color });
 			} else {
-				await tagsStore.createTag({ name, color });
+				await tagMutations.createTag({ name, color });
 			}
 			closeModal();
 		} catch (e) {
@@ -50,7 +53,7 @@
 		if (!editingTag) return;
 
 		try {
-			await tagsStore.deleteTag(editingTag.id);
+			await tagMutations.deleteTag(editingTag.id);
 			closeModal();
 		} catch (e) {
 			console.error('Failed to delete tag:', e);
@@ -61,17 +64,11 @@
 		if (!confirm($_('tags.confirmDelete', { values: { name: tag.name } }))) return;
 
 		try {
-			await tagsStore.deleteTag(tag.id);
+			await tagMutations.deleteTag(tag.id);
 		} catch (e) {
 			console.error('Failed to delete tag:', e);
 		}
 	}
-
-	onMount(() => {
-		if (tagsStore.tags.length === 0) {
-			tagsStore.fetchTags();
-		}
-	});
 </script>
 
 <svelte:head>
@@ -101,17 +98,10 @@
 		/>
 	</div>
 
-	{#if tagsStore.error}
-		<div class="error-banner" role="alert">
-			<span>{tagsStore.error}</span>
-		</div>
-	{/if}
-
 	<!-- Tag List using shared component -->
 	<TagList
 		tags={filteredTags}
-		loading={tagsStore.loading}
-		onEdit={(tag) => openEditModal(tag as ContactTag)}
+		onEdit={(tag) => openEditModal(tag as SharedTag)}
 		onDelete={handleDeleteFromList}
 		emptyMessage={searchQuery ? $_('tags.noResults') : $_('tags.noTags')}
 		emptyDescription={searchQuery
@@ -119,14 +109,14 @@
 			: $_('tags.createFirst')}
 	/>
 
-	{#if !tagsStore.loading && tagsStore.tags.length > 0}
+	{#if tagsCtx.value.length > 0}
 		<p class="tags-count">
-			{tagsStore.tags.length}
-			{tagsStore.tags.length === 1 ? $_('tags.tagSingular') : $_('tags.tagPlural')}
+			{tagsCtx.value.length}
+			{tagsCtx.value.length === 1 ? $_('tags.tagSingular') : $_('tags.tagPlural')}
 		</p>
 	{/if}
 
-	{#if !tagsStore.loading && tagsStore.tags.length === 0 && !searchQuery}
+	{#if tagsCtx.value.length === 0 && !searchQuery}
 		<div class="empty-cta">
 			<button onclick={openCreateModal} class="btn btn-primary">
 				<Plus size={16} weight="bold" />

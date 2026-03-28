@@ -2,13 +2,18 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
+	import { setContext } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import {
+		tagLocalStore,
+		tagMutations,
+		useAllTags as useAllSharedTags,
+	} from '@manacore/shared-stores';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -28,6 +33,9 @@
 
 	// App switcher items
 	const appItems = getPillAppItems('manadeck');
+
+	const allTags = useAllSharedTags();
+	setContext('tags', allTags);
 
 	let { children } = $props();
 
@@ -177,12 +185,14 @@
 	}
 
 	async function handleAuthReady() {
-		// Initialize local-first database (opens IndexedDB, seeds guest data)
-		await manadeckStore.initialize();
+		// Initialize local-first database and shared tag store
+		await Promise.all([manadeckStore.initialize(), tagLocalStore.initialize()]);
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
-			manadeckStore.startSync(() => authStore.getValidToken());
+			const getToken = () => authStore.getValidToken();
+			manadeckStore.startSync(getToken);
+			tagMutations.startSync(getToken);
 		}
 
 		// Load decks from IndexedDB (guest seed or synced data)
@@ -194,9 +204,8 @@
 		}
 
 		if (authStore.isAuthenticated) {
-			// Load user settings and tags (require auth)
+			// Load user settings (require auth)
 			await userSettings.load();
-			await tagStore.fetchTags();
 		}
 
 		// Redirect to start page if on root and a custom start page is set
@@ -255,7 +264,7 @@
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={allTags.value.map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -264,7 +273,6 @@
 				onToggle={() => {}}
 				onClear={() => {}}
 				managementHref="/tags"
-				loading={tagStore.loading}
 			/>
 		{/if}
 
