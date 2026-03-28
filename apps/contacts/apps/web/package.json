@@ -49,7 +49,7 @@
 		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-splitscreen": "workspace:*",
 		"@manacore/shared-stores": "workspace:*",
-		"@manacore/shared-subscription-ui": "workspace:*",
+		"@manacore/subscriptions": "workspace:*",
 		"@manacore/shared-tags": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",

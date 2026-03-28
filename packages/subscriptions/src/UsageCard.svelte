@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UsageData } from '@manacore/shared-subscription-types';
+	import type { UsageData } from './plans';
 
 	interface Props {
 		title?: string;

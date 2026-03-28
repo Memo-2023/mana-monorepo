@@ -50,7 +50,7 @@
 		"@manacore/shared-icons": "workspace:*",
 		"@manacore/local-store": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
-		"@manacore/shared-subscription-ui": "workspace:*",
+		"@manacore/subscriptions": "workspace:*",
 		"@manacore/shared-tailwind": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",

@@ -38,7 +38,7 @@
 		"@manacore/shared-landing-ui": "workspace:*",
 		"@manacore/shared-profile-ui": "workspace:*",
 		"@manacore/shared-stores": "workspace:*",
-		"@manacore/shared-subscription-ui": "workspace:*",
+		"@manacore/subscriptions": "workspace:*",
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-types": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",

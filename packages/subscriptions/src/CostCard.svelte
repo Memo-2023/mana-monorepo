@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CostItem } from '@manacore/shared-subscription-types';
+	import type { CostItem } from './plans';
 
 	interface Props {
 		costs: CostItem[];

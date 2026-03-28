@@ -5,7 +5,7 @@
 		UsageData,
 		CostItem,
 		BillingCycle,
-	} from '@manacore/shared-subscription-types';
+	} from './plans';
 	import BillingToggle from '../BillingToggle.svelte';
 	import SubscriptionCard from '../SubscriptionCard.svelte';
 	import PackageCard from '../PackageCard.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ManaPackage } from '@manacore/shared-subscription-types';
+	import type { ManaPackage } from './plans';
 	import SubscriptionButton from './SubscriptionButton.svelte';
 	import ManaIcon from './ManaIcon.svelte';
 

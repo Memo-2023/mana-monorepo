@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BillingCycle } from '@manacore/shared-subscription-types';
+	import type { BillingCycle } from './plans';
 
 	interface Props {
 		billingCycle: BillingCycle;
