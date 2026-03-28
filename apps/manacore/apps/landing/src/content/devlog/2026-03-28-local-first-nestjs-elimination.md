@@ -22,9 +22,9 @@ tags:
 featured: true
 readTime: 24
 stats:
-  filesChanged: 1400
-  linesAdded: 12800
-  linesRemoved: 101400
+  filesChanged: 1581
+  linesAdded: 19172
+  linesRemoved: 110087
 contributors:
   - name: 'Till Schneider'
     handle: 'Till-JS'
@@ -373,13 +373,131 @@ Der Go Sync-Server — Rueckgrat aller 19 Local-First Apps — hatte kritische L
 
 ### Gesamtbilanz
 
-| Metrik | Wert |
-|--------|------|
-| Netto Code-Reduktion | **~88.600 LOC** |
-| NestJS-Services | 18 → **0** |
-| Packages | 58 → **43** |
-| Auth Store LOC | 6.800 → **182** |
-| RAM-Verbrauch | ~3.5GB → **~700MB** |
-| Expo SDK Versionen | 3 → **1** |
+| Metrik               | Wert                |
+| -------------------- | ------------------- |
+| Netto Code-Reduktion | **~88.600 LOC**     |
+| NestJS-Services      | 18 → **0**          |
+| Packages             | 58 → **43**         |
+| Auth Store LOC       | 6.800 → **182**     |
+| RAM-Verbrauch        | ~3.5GB → **~700MB** |
+| Expo SDK Versionen   | 3 → **1**           |
 
 Das ManaCore-Monorepo ist bereit fuer Production.
+
+---
+
+## Phase 3: Letzte NestJS-Bastion + Infra-Finalisierung
+
+Am Abend des 28. Maerz wurden die letzten offenen Punkte aus dem Migrationsplan abgearbeitet.
+
+### mana-core-auth: Endgueltig geloescht
+
+Der Legacy-Auth-Service war bereits durch `mana-auth` (Hono + Bun) ersetzt, existierte aber noch als Zombie-Directory auf Disk und wurde in **15+ Dateien** referenziert:
+
+| Datei-Typ         | Anzahl | Aenderungen                                                  |
+| ----------------- | ------ | ------------------------------------------------------------ |
+| Docker Compose    | 2      | Service-Definition entfernt, URLs auf mana-auth              |
+| CI/CD Workflows   | 4      | ci.yml, cd-macmini.yml, daily-tests.yml, docker-validate.yml |
+| Root package.json | 3      | dev:auth, seed:dev-user, docker:logs:auth                    |
+| Scripts           | 4      | generate-env, setup-databases, deploy, ensure-containers     |
+| Config            | 3      | Prometheus, dependabot, CODEOWNERS                           |
+
+**Ergebnis:** Null Referenzen auf `mana-core-auth` in aktiven Config-Dateien. Historische Referenzen in Docs/Devlogs bleiben als Dokumentation.
+
+### mana-media: Letzter NestJS-Service → Hono/Bun
+
+Der Media-Service war der **letzte verbleibende NestJS-Service** im gesamten Monorepo. Migration:
+
+| Aspekt       | NestJS (vorher)      | Hono/Bun (nachher)  |
+| ------------ | -------------------- | ------------------- |
+| Source Files | 23                   | 12                  |
+| LOC          | ~1.945               | ~980                |
+| Dependencies | 15 (6 × @nestjs/\*)  | 9                   |
+| Dockerfile   | Node 20, multi-stage | Bun 1, single-stage |
+| Runtime      | ~150 MB RAM          | ~40 MB RAM          |
+
+**Was erhalten blieb** (Business Logic identisch):
+
+- Content-Addressable Storage (SHA-256 Dedup)
+- BullMQ Image Processing (Sharp: Thumbnails 200×200, Medium 800×800, Large 1920×1920)
+- Matrix MXC URL Import
+- EXIF Extraction (Kamera, GPS, Datum)
+- On-the-fly Image Transforms
+- Prometheus Metrics
+
+**Was verschwand** (NestJS-Boilerplate):
+
+- 6 Module-Dateien (`*.module.ts`)
+- `database.module.ts` + DI Container
+- `@Injectable()`, `@Controller()`, `@UseInterceptors()` Decoratoren
+- `FileInterceptor` → Hono `parseBody()`
+- `ValidationPipe` → direkte Validierung
+- `nest-cli.json`, Express Dependencies
+
+### k6 Load Testing fuer mana-sync
+
+Der Sync-Server ist das Rueckgrat aller 19 Local-First Apps. Erstmals gibt es eine Load-Test-Suite:
+
+```bash
+# Smoke Test
+k6 run --vus 10 --duration 30s test/load/sync-load.js
+
+# WebSocket Stress (bis 1000 Connections)
+k6 run --env SCENARIO=websocket test/load/sync-load.js
+
+# Sync Throughput (200 req/s konstant)
+k6 run --env SCENARIO=sync test/load/sync-load.js
+```
+
+**3 Szenarien:**
+
+| Szenario            | Was es testet                            | Ziel                           |
+| ------------------- | ---------------------------------------- | ------------------------------ |
+| **mixed** (default) | 60% Sync + 25% Pull + 15% Health         | Realistischer Workload         |
+| **websocket**       | Bis 1000 parallele WebSocket-Connections | Auth, Ping/Pong, Broadcast     |
+| **sync**            | 200 req/s konstant auf POST /sync        | Throughput + Latenz unter Last |
+
+**Custom Metrics:** Push/Pull-Latenz, WS-Connect-Zeit, LWW-Konflikte, Error-Rate.
+
+**Thresholds:** HTTP p95 < 500ms, Push p95 < 300ms, Pull p95 < 200ms, Errors < 1%.
+
+### CI/CD Pipeline: Alle Services abgedeckt
+
+Vorher fehlten **8 Services** in den CI/CD-Workflows. Jetzt:
+
+| Workflow                         | Vorher        | Nachher                                                                |
+| -------------------------------- | ------------- | ---------------------------------------------------------------------- |
+| `ci.yml` (Build)                 | 2 Services    | 8 Services (+mana-sync, -notify, -gateway, -crawler, -media, -credits) |
+| `cd-macmini.yml` (Deploy)        | 2 Services    | 10 Services                                                            |
+| `docker-validate.yml` (PR-Check) | 1 Architektur | 3 Architekturen (Hono, Go, Hono+Sharp)                                 |
+
+**Go Services** triggern auch bei Aenderungen an `packages/shared-go/`.
+
+### Gesamtbilanz Phase 3
+
+| Metrik                      | Wert         |
+| --------------------------- | ------------ |
+| Dateien geaendert           | 181          |
+| Zeilen hinzugefuegt         | +6.372       |
+| Zeilen entfernt             | −8.687       |
+| NestJS-Services noch uebrig | **0**        |
+| Services in CI/CD           | 8 → **alle** |
+| Load Test Szenarien         | 0 → **3**    |
+
+---
+
+## Gesamtbilanz aller 3 Phasen (27.-28. Maerz)
+
+| Metrik                   | Wert                             |
+| ------------------------ | -------------------------------- |
+| **Netto Code-Reduktion** | ~90.900 LOC                      |
+| **NestJS-Services**      | 18 → 0                           |
+| **Packages**             | 58 → 43                          |
+| **Auth Store LOC**       | 6.800 → 182                      |
+| **RAM-Verbrauch**        | ~3.5 GB → ~700 MB                |
+| **Services in CI/CD**    | lueckenhaft → vollstaendig       |
+| **Load Tests**           | keine → k6 Suite mit 3 Szenarien |
+| **Offline-Faehigkeit**   | 0 Apps → 19 Apps                 |
+| **Cold Start**           | 2-5s → ~50ms                     |
+
+Die Local-First + NestJS-Elimination Migration ist **vollstaendig abgeschlossen**. Alle 5 Phasen des Migrationsplans sind done. Das ManaCore-Monorepo laeuft komplett auf Hono/Bun + Go — kein einziges NestJS-Package oder -Service mehr vorhanden.
