@@ -88,16 +88,9 @@ const items: Item[] = [
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .heading-tile {
-    grid-column: span 2;
-  }
-
   @media (min-width: 640px) {
     .app-grid {
       grid-template-columns: repeat(3, 1fr);
-    }
-    .heading-tile {
-      grid-column: span 3;
     }
   }
 
@@ -105,26 +98,17 @@ const items: Item[] = [
     .app-grid {
       grid-template-columns: repeat(4, 1fr);
     }
-    .heading-tile {
-      grid-column: span 3;
-    }
   }
 
   @media (min-width: 1024px) {
     .app-grid {
       grid-template-columns: repeat(5, 1fr);
     }
-    .heading-tile {
-      grid-column: span 3;
-    }
   }
 
   @media (min-width: 1280px) {
     .app-grid {
       grid-template-columns: repeat(6, 1fr);
-    }
-    .heading-tile {
-      grid-column: span 3;
     }
   }
 </style>
