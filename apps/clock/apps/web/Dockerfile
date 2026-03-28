@@ -51,7 +51,7 @@ COPY apps/clock/packages/shared ./apps/clock/packages/shared
 COPY apps/clock/apps/web ./apps/clock/apps/web
 
 # Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-vite-config

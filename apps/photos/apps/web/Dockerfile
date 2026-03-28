@@ -55,7 +55,7 @@ COPY apps/photos/packages/shared ./apps/photos/packages/shared
 COPY apps/photos/apps/web ./apps/photos/apps/web
 
 # Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-vite-config

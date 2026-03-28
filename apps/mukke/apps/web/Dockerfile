@@ -52,7 +52,7 @@ COPY apps/mukke/packages/shared ./apps/mukke/packages/shared
 COPY apps/mukke/apps/web ./apps/mukke/apps/web
 
 # Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-vite-config

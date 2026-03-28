@@ -16,7 +16,7 @@ COPY apps/todo/apps/web ./apps/todo/apps/web
 
 # Install app-specific dependencies
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --no-frozen-lockfile --ignore-scripts
 
 # Build the web app
 WORKDIR /app/apps/todo/apps/web

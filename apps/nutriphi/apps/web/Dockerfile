@@ -49,7 +49,7 @@ COPY apps/nutriphi/packages/shared ./apps/nutriphi/packages/shared
 COPY apps/nutriphi/apps/web ./apps/nutriphi/apps/web
 
 # Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-auth

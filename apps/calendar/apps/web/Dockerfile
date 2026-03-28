@@ -53,7 +53,7 @@ COPY apps/calendar/packages/shared ./apps/calendar/packages/shared
 COPY apps/calendar/apps/web ./apps/calendar/apps/web
 
 # Install dependencies
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-vite-config

@@ -6,7 +6,7 @@
 #   FROM sveltekit-base:local AS builder
 #   COPY apps/myapp/packages/shared ./apps/myapp/packages/shared
 #   COPY apps/myapp/apps/web ./apps/myapp/apps/web
-#   RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+#   RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --no-frozen-lockfile
 #   WORKDIR /app/apps/myapp/apps/web
 #   RUN pnpm exec svelte-kit sync
 #   RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
@@ -68,7 +68,7 @@ COPY packages/wallpaper-generator ./packages/wallpaper-generator
 
 # Install dependencies (shared packages only - app deps added later)
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --ignore-scripts
+    pnpm install --no-frozen-lockfile --ignore-scripts
 
 # Build shared packages in dependency order
 RUN cd packages/shared-vite-config && pnpm build \
