@@ -1,5 +1,5 @@
 import { pgSchema, text, timestamp, jsonb, index } from 'drizzle-orm/pg-core';
-import { authSchema, users } from './auth.schema';
+import { authSchema, users } from './auth';
 
 /**
  * Better Auth Organization Tables

@@ -1,5 +1,5 @@
 import { text, timestamp, jsonb, integer, index } from 'drizzle-orm/pg-core';
-import { authSchema, users } from './auth.schema';
+import { authSchema, users } from './auth';
 
 /**
  * API Keys table for programmatic access to services.
