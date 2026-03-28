@@ -224,6 +224,27 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
+  # Sync Server (Go) — local-first data sync
+  - job_name: 'mana-sync'
+    static_configs:
+      - targets: ['mana-core-sync:3051']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Notification Service (Go) — email, push, matrix, webhook
+  - job_name: 'mana-notify'
+    static_configs:
+      - targets: ['mana-core-notify:3042']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Crawler Service (Go)
+  - job_name: 'mana-crawler'
+    static_configs:
+      - targets: ['mana-crawler:3023']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
   # ============================================
   # Pushgateway (deploy metrics, batch jobs)
   # ============================================
