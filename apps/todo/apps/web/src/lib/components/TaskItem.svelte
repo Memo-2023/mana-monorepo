@@ -51,6 +51,9 @@
 		onSave,
 	}: Props = $props();
 
+	// Toggle for showing created date on completed tasks
+	let showCreatedDate = $state(false);
+
 	// Form state for expanded mode
 	let title = $state('');
 	let description = $state('');
@@ -481,8 +484,29 @@
 			</div>
 		{/if}
 
-		<!-- Due date (always on the right) -->
-		{#if dueDateText()}
+		<!-- Due date / Completed date (right side) -->
+		{#if task.isCompleted && task.completedAt}
+			<button
+				type="button"
+				class="completed-date-toggle"
+				onclick={(e) => {
+					e.stopPropagation();
+					showCreatedDate = !showCreatedDate;
+				}}
+				title="Klicken für Erstellungsdatum"
+			>
+				{#if showCreatedDate}
+					<span class="date-label">Erstellt</span>
+					<span class="date-value"
+						>{format(new Date(task.createdAt), 'd. MMM yyyy', { locale: de })}</span
+					>
+				{/if}
+				<span class="date-label">Erledigt</span>
+				<span class="date-value"
+					>{format(new Date(task.completedAt), 'd. MMM yyyy', { locale: de })}</span
+				>
+			</button>
+		{:else if dueDateText()}
 			<span
 				class="due-date"
 				class:overdue={isOverdue()}
@@ -1077,6 +1101,44 @@
 
 	.due-date.today {
 		color: #f97316;
+	}
+
+	/* Completed date toggle */
+	.completed-date-toggle {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.125rem;
+		flex-shrink: 0;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.125rem 0;
+		opacity: 0.5;
+		transition: opacity 0.15s;
+	}
+
+	.completed-date-toggle:hover {
+		opacity: 0.8;
+	}
+
+	.completed-date-toggle .date-label {
+		font-size: 0.625rem;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		color: #9ca3af;
+		line-height: 1;
+	}
+
+	.completed-date-toggle .date-value {
+		font-size: 0.6875rem;
+		color: #6b7280;
+		white-space: nowrap;
+		line-height: 1.2;
+	}
+
+	:global(.dark) .completed-date-toggle .date-value {
+		color: #9ca3af;
 	}
 
 	/* Project dot */

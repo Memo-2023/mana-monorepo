@@ -13,9 +13,14 @@
 	import type { Task } from '@todo/shared';
 
 	// Live tasks from layout context — auto-updates on IndexedDB changes
-	const allTasks: { readonly value: Task[] } = getContext('tasks');
+	const allTasks: { readonly value: Task[]; readonly loading: boolean; readonly error: unknown } =
+		getContext('tasks');
 
 	let tipDismissed = $state(false);
+
+	// Stable date references (computed once, not on every re-render)
+	const today = startOfDay(new Date());
+	const tomorrow = addDays(today, 1);
 
 	// Build filter criteria from viewStore (reactive)
 	let filterCriteria = $derived({
@@ -39,23 +44,20 @@
 	let completedTasks = $derived(applyFilters(filterCompleted(allTasks.value)));
 
 	// Tomorrow's tasks
-	let tomorrowDate = $derived(addDays(startOfDay(new Date()), 1));
 	let tomorrowTasks = $derived(
 		applyFilters(
 			allTasks.value.filter((task) => {
 				if (!task.dueDate || task.isCompleted) return false;
 				const taskDate = startOfDay(new Date(task.dueDate));
-				return taskDate.getTime() === tomorrowDate.getTime();
+				return taskDate.getTime() === tomorrow.getTime();
 			})
 		)
 	);
 
 	// Group upcoming tasks by day (starting from day after tomorrow)
-	let groupedUpcomingTasks = $derived(() => {
+	let groupedUpcomingTasks = $derived.by(() => {
 		const groups: { date: Date; label: string; tasks: Task[] }[] = [];
-		const today = startOfDay(new Date());
 
-		// Start from day after tomorrow (day 2) through day 7
 		for (let i = 2; i <= 7; i++) {
 			const date = addDays(today, i);
 			const dayTasks = applyFilters(
@@ -77,7 +79,7 @@
 
 	// Total upcoming count (excluding tomorrow)
 	let upcomingCount = $derived(
-		groupedUpcomingTasks().reduce((sum, group) => sum + group.tasks.length, 0)
+		groupedUpcomingTasks.reduce((sum, group) => sum + group.tasks.length, 0)
 	);
 
 	// Check if all sections are empty
@@ -89,7 +91,7 @@
 			completedTasks.length === 0
 	);
 
-	// Section visibility logic - show only sections with tasks (except "Today" which is always shown when not all empty)
+	// Section visibility logic
 	let showTodaySection = $derived(todayTasks.length > 0 || !allEmpty);
 	let showTomorrowSection = $derived(tomorrowTasks.length > 0);
 	let showUpcomingSection = $derived(upcomingCount > 0);
@@ -108,12 +110,11 @@
 		{ text: 'Wichtig erledigen !hoch', description: 'Mit Priorität' },
 	];
 
-	// Handle clicking a syntax example
 	function handleExampleClick(text: string) {
 		window.dispatchEvent(new CustomEvent('quick-input-set', { detail: { text } }));
 	}
 
-	// Drag and drop handler - uses optimistic updates for smooth UX
+	// Drag and drop handler
 	async function handleTaskDrop(taskId: string, targetDate: Date | 'completed' | 'overdue') {
 		const task = allTasks.value.find((t) => t.id === taskId);
 		if (!task) return;
@@ -123,7 +124,7 @@
 				await tasksStore.updateTaskOptimistic(taskId, { isCompleted: true });
 			}
 		} else if (targetDate === 'overdue') {
-			const yesterday = subDays(startOfDay(new Date()), 1);
+			const yesterday = subDays(today, 1);
 			await tasksStore.updateTaskOptimistic(taskId, {
 				dueDate: yesterday.toISOString(),
 				isCompleted: task.isCompleted ? false : undefined,
@@ -142,27 +143,22 @@
 </svelte:head>
 
 <div class="unified-view">
-	{#if allTasks.error}
+	{#if allTasks.loading}
+		<TaskListSkeleton sections={3} tasksPerSection={3} />
+	{:else if allTasks.error}
 		<div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
 			{allTasks.error}
-		</div>
-	{:else if tasksStore.error}
-		<div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
-			{tasksStore.error}
 		</div>
 	{:else if allEmpty}
 		<!-- Enhanced empty state -->
 		<div class="empty-state-container">
 			<div class="empty-state-content">
-				<!-- Animated icon -->
 				<div class="empty-state-icon">
 					<Sparkle size={56} weight="duotone" />
 				</div>
 
-				<!-- Motivational message -->
 				<h2 class="empty-state-title">Bereit für einen produktiven Tag</h2>
 
-				<!-- Call to action with arrow -->
 				<div class="empty-state-cta">
 					<p class="empty-state-cta-text">Tippe unten um loszulegen...</p>
 					<div class="empty-state-arrow">
@@ -170,7 +166,6 @@
 					</div>
 				</div>
 
-				<!-- Syntax examples -->
 				<div class="empty-state-examples">
 					<p class="examples-label">Schnellstart-Tipps</p>
 					<div class="examples-grid">
@@ -192,7 +187,6 @@
 		<div class="notepad">
 			<div class="notepad-content">
 				<div class="space-y-2">
-					<!-- Overdue Section - only show if there are overdue tasks -->
 					{#if overdueTasks.length > 0}
 						<CollapsibleSection
 							title="Überfällig"
@@ -210,7 +204,6 @@
 						</CollapsibleSection>
 					{/if}
 
-					<!-- Today Section - always visible when there are any tasks -->
 					{#if showTodaySection}
 						<CollapsibleSection
 							title="Heute"
@@ -222,13 +215,12 @@
 							<TaskList
 								tasks={todayTasks}
 								enableDragDrop
-								dropTargetDate={startOfDay(new Date())}
+								dropTargetDate={today}
 								onTaskDrop={handleTaskDrop}
 							/>
 						</CollapsibleSection>
 					{/if}
 
-					<!-- Tomorrow Section - only show if there are tasks -->
 					{#if showTomorrowSection}
 						<CollapsibleSection
 							title="Morgen"
@@ -240,13 +232,12 @@
 							<TaskList
 								tasks={tomorrowTasks}
 								enableDragDrop
-								dropTargetDate={tomorrowDate}
+								dropTargetDate={tomorrow}
 								onTaskDrop={handleTaskDrop}
 							/>
 						</CollapsibleSection>
 					{/if}
 
-					<!-- Upcoming Section - only show if there are tasks -->
 					{#if showUpcomingSection}
 						<CollapsibleSection
 							title="Demnächst"
@@ -256,7 +247,7 @@
 							defaultOpen={true}
 						>
 							<div class="space-y-4">
-								{#each groupedUpcomingTasks() as group}
+								{#each groupedUpcomingTasks as group}
 									<div>
 										<h3 class="text-sm font-medium text-muted-foreground mb-2 pl-2">
 											{group.label}
@@ -273,7 +264,6 @@
 						</CollapsibleSection>
 					{/if}
 
-					<!-- Completed Section - only show if there are completed tasks -->
 					{#if showCompletedSection}
 						<CollapsibleSection
 							title="Erledigt"
@@ -292,7 +282,6 @@
 						</CollapsibleSection>
 					{/if}
 
-					<!-- Onboarding tip for users with 1-3 tasks -->
 					{#if showOnboardingTip && !tipDismissed}
 						<div class="onboarding-tip">
 							<span class="onboarding-tip-icon">💡</span>
@@ -327,7 +316,6 @@
 		padding-bottom: 100px;
 	}
 
-	/* Empty state container */
 	.empty-state-container {
 		display: flex;
 		justify-content: center;
@@ -441,7 +429,6 @@
 		transform: translateY(0);
 	}
 
-	/* Onboarding tip */
 	.onboarding-tip {
 		display: flex;
 		align-items: center;
@@ -488,7 +475,6 @@
 		color: hsl(var(--color-primary));
 	}
 
-	/* Notepad container */
 	.notepad {
 		max-width: 560px;
 		margin: 0 auto;

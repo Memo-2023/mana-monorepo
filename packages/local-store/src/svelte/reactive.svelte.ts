@@ -82,8 +82,9 @@ export function useLiveQuery<T>(querier: () => T | Promise<T>): LiveQueryResult<
 export function useLiveQueryWithDefault<T>(
 	querier: () => T | Promise<T>,
 	defaultValue: T
-): { readonly value: T; readonly error: unknown } {
+): { readonly value: T; readonly loading: boolean; readonly error: unknown } {
 	let value = $state<T>(defaultValue);
+	let loading = $state(true);
 	let error = $state<unknown>(undefined);
 
 	const observable: Observable<T> = liveQuery(querier);
@@ -91,10 +92,12 @@ export function useLiveQueryWithDefault<T>(
 	const subscription = observable.subscribe({
 		next: (result) => {
 			value = result;
+			loading = false;
 			error = undefined;
 		},
 		error: (err) => {
 			error = err;
+			loading = false;
 		},
 	});
 
@@ -105,6 +108,9 @@ export function useLiveQueryWithDefault<T>(
 	return {
 		get value() {
 			return value;
+		},
+		get loading() {
+			return loading;
 		},
 		get error() {
 			return error;
