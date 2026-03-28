@@ -23,7 +23,8 @@ COPY pnpm-lock.yaml ./
 # --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
 COPY packages/credits ./packages/credits
 COPY packages/feedback ./packages/feedback
-COPY packages/eslint-config ./packages/eslint-configCOPY packages/help ./packages/help
+COPY packages/eslint-config ./packages/eslint-config
+COPY packages/help ./packages/help
 COPY packages/qr-export ./packages/qr-export
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-auth-stores ./packages/shared-auth-stores

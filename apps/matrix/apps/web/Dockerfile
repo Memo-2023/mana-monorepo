@@ -20,7 +20,8 @@ COPY pnpm-lock.yaml ./
 
 # --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
 COPY packages/feedback ./packages/feedback
-COPY packages/eslint-config ./packages/eslint-configCOPY packages/help ./packages/help
+COPY packages/eslint-config ./packages/eslint-config
+COPY packages/help ./packages/help
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
