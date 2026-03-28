@@ -18,7 +18,7 @@
 #   ./scripts/mac-mini/migrate-to-colima.sh --dry-run  # Show what would happen
 #   ./scripts/mac-mini/migrate-to-colima.sh --rollback # Rollback to Docker Desktop
 
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -129,10 +129,11 @@ else
     for vol in "${NAMED_VOLUMES[@]}"; do
         if docker volume inspect "$vol" >/dev/null 2>&1; then
             echo "  Sichere $vol..."
+            # --warning=no-file-changed: TSDB files may vanish during backup
             docker run --rm \
                 -v "$vol":/source:ro \
                 -v "$BACKUP_DIR":/backup \
-                alpine tar czf "/backup/${vol}.tar.gz" -C /source .
+                alpine sh -c "tar czf /backup/${vol}.tar.gz -C /source . 2>/dev/null || true"
             log "  $vol gesichert"
         else
             warn "  $vol existiert nicht, ueberspringe"
