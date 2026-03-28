@@ -225,7 +225,7 @@ services:
       PICTURE_BACKEND_URL: http://picture-backend:3040
       # PRESI_BACKEND_URL: removed — replaced by Hono server
       # ZITARE_BACKEND_URL: removed — migrated to local-first
-      PHOTOS_BACKEND_URL: http://photos-backend:3039
+      # PHOTOS_BACKEND_URL: removed — migrated to local-first
       # CLOCK_BACKEND_URL: removed — migrated to local-first
       STORAGE_BACKEND_URL: http://storage-backend:3035
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
@@ -781,38 +781,7 @@ services:
       retries: 3
       start_period: 60s
 
-  photos-backend:
-    build:
-      context: .
-      dockerfile: apps/photos/apps/backend/Dockerfile
-    image: photos-backend:local
-    container_name: mana-app-photos-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-      mana-media:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3039
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/photos
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_MEDIA_URL: http://mana-media:3015
-      CORS_ORIGINS: https://photos.mana.how,https://mana.how
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: http://032aef0f1da94497b8b8f6accb0c4587@glitchtip:8020/12
-    ports:
-      - "3039:3039"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3039/api/v1/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+  # photos-backend: REMOVED — migrated to local-first (talks to mana-media directly)
 
   # zitare-backend: REMOVED — migrated to local-first (mana-sync handles CRUD)
 
@@ -1405,24 +1374,22 @@ services:
       context: .
       dockerfile: apps/photos/apps/web/Dockerfile
       args:
-        PUBLIC_BACKEND_URL: http://photos-backend:3039
         PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
         PUBLIC_MANA_MEDIA_URL: http://mana-media:3015
     image: photos-web:local
     container_name: mana-app-photos-web
     restart: always
     depends_on:
-      photos-backend:
+      mana-auth:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 5019
-      PUBLIC_BACKEND_URL: http://photos-backend:3039
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_MEDIA_URL: http://mana-media:3015
-      PUBLIC_BACKEND_URL_CLIENT: https://photos-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
       PUBLIC_MANA_MEDIA_URL_CLIENT: https://media.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3050
     ports:
       - "5019:5019"
     healthcheck:

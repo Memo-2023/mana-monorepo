@@ -164,7 +164,7 @@ for container in $ALL_PROBLEM_CONTAINERS; do
         mana-app-skilltree-web) SERVICE_NAME="skilltree-web" ;;
         mana-app-skilltree-backend) SERVICE_NAME="skilltree-backend" ;;
         mana-app-photos-web) SERVICE_NAME="photos-web" ;;
-        mana-app-photos-backend) SERVICE_NAME="photos-backend" ;;
+        # mana-app-photos-backend: REMOVED
         mana-app-web) SERVICE_NAME="mana-web" ;;
         mana-core-auth) SERVICE_NAME="mana-auth" ;;
         mana-core-gateway) SERVICE_NAME="api-gateway" ;;

@@ -140,7 +140,7 @@ setup_service() {
             ;;
         photos)
             create_db_if_not_exists "photos"
-            push_schema "@photos/backend" "photos"
+            # Schema managed by mana-sync (backend removed)
             ;;
         finance)
             create_db_if_not_exists "finance"

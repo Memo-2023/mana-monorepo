@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { api } from '$lib/api/client';
 	import { photoStore } from '$lib/stores/photos.svelte';
+	import { favoriteCollection } from '$lib/data/local-store';
 	import PhotoGrid from '$lib/components/gallery/PhotoGrid.svelte';
 	import PhotoDetailModal from '$lib/components/gallery/PhotoDetailModal.svelte';
 	import type { Photo } from '@photos/shared';
@@ -20,14 +20,9 @@
 		error = null;
 
 		try {
-			const result = await api.get<{ items: Photo[] }>('/favorites');
-			if (result.error) {
-				error = result.error.message;
-				return;
-			}
-			if (result.data) {
-				favorites = result.data.items;
-			}
+			const localFavs = await favoriteCollection.getAll();
+			// Favorited media IDs — full photo data would come from mana-media
+			favorites = localFavs.map((f) => ({ id: f.mediaId, isFavorited: true }) as Photo);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load favorites';
 		} finally {

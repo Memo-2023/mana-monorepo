@@ -109,12 +109,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Photos Backend
-  - job_name: 'photos-backend'
-    static_configs:
-      - targets: ['photos-backend:3039']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+  # Photos Backend: REMOVED — migrated to local-first + direct mana-media
 
   # Zitare Backend: REMOVED — migrated to local-first
 

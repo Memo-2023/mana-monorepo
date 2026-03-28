@@ -1,10 +1,36 @@
 /**
- * Photos Store - Manages photo gallery state using Svelte 5 runes
+ * Photos Store — Fetches from mana-media directly, favorites local-first.
+ *
+ * Photo files live on mana-media. Albums/favorites/tags are local (Dexie).
+ * This store calls mana-media for photo listing and enriches with local data.
  */
 
-import { api } from '$lib/api/client';
+import { favoriteCollection, type LocalFavorite } from '$lib/data/local-store';
+import { authStore } from '$lib/stores/auth.svelte';
 import { PhotosEvents } from '@manacore/shared-utils/analytics';
 import type { Photo, PhotoFilters, PhotoStats } from '@photos/shared';
+
+const MEDIA_URL = () =>
+	(typeof window !== 'undefined'
+		? (window as unknown as { __PUBLIC_MANA_MEDIA_URL__?: string }).__PUBLIC_MANA_MEDIA_URL__
+		: null) ||
+	import.meta.env.PUBLIC_MANA_MEDIA_URL ||
+	'http://localhost:3015';
+
+async function mediaFetch<T>(path: string, options: RequestInit = {}): Promise<T | null> {
+	const token = await authStore.getValidToken();
+	const headers: HeadersInit = {
+		'Content-Type': 'application/json',
+		...options.headers,
+	};
+	if (token) {
+		(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+	}
+
+	const response = await fetch(`${MEDIA_URL()}/api/v1${path}`, { ...options, headers });
+	if (!response.ok) return null;
+	return response.json();
+}
 
 // State
 let photos = $state<Photo[]>([]);
@@ -20,8 +46,14 @@ let filters = $state<PhotoFilters>({
 let stats = $state<PhotoStats | null>(null);
 let selectedPhoto = $state<Photo | null>(null);
 
+/** Enrich photos with local favorite status. */
+async function enrichWithFavorites(items: Photo[]): Promise<Photo[]> {
+	const favs = await favoriteCollection.getAll();
+	const favMediaIds = new Set(favs.map((f) => f.mediaId));
+	return items.map((p) => ({ ...p, isFavorited: favMediaIds.has(p.id) }));
+}
+
 export const photoStore = {
-	// Getters
 	get photos() {
 		return photos;
 	},
@@ -44,9 +76,6 @@ export const photoStore = {
 		return selectedPhoto;
 	},
 
-	/**
-	 * Load photos with current filters
-	 */
 	async loadPhotos(reset = false) {
 		if (loading) return;
 
@@ -71,19 +100,15 @@ export const photoStore = {
 			params.set('sortBy', filters.sortBy || 'dateTaken');
 			params.set('sortOrder', filters.sortOrder || 'desc');
 
-			const result = await api.get<{ items: Photo[]; total: number; hasMore: boolean }>(
-				`/photos?${params.toString()}`
+			const result = await mediaFetch<{ items: Photo[]; total: number; hasMore: boolean }>(
+				`/media/list/all?${params.toString()}`
 			);
 
-			if (result.error) {
-				error = result.error.message;
-				return;
-			}
-
-			if (result.data) {
-				photos = reset ? result.data.items : [...photos, ...result.data.items];
-				hasMore = result.data.hasMore;
-				filters = { ...filters, offset: (filters.offset || 0) + result.data.items.length };
+			if (result) {
+				const enriched = await enrichWithFavorites(result.items);
+				photos = reset ? enriched : [...photos, ...enriched];
+				hasMore = result.hasMore;
+				filters = { ...filters, offset: (filters.offset || 0) + result.items.length };
 			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load photos';
@@ -92,81 +117,74 @@ export const photoStore = {
 		}
 	},
 
-	/**
-	 * Load more photos (pagination)
-	 */
 	async loadMore() {
 		if (!hasMore || loading) return;
 		await this.loadPhotos(false);
 	},
 
-	/**
-	 * Update filters and reload
-	 */
 	async setFilters(newFilters: Partial<PhotoFilters>) {
 		filters = { ...filters, ...newFilters, offset: 0 };
 		PhotosEvents.filtersApplied();
 		await this.loadPhotos(true);
 	},
 
-	/**
-	 * Load photo statistics
-	 */
 	async loadStats() {
 		try {
-			const result = await api.get<PhotoStats>('/photos/stats');
-			if (result.data) {
-				stats = result.data;
-			}
+			const result = await mediaFetch<PhotoStats>('/media/stats');
+			if (result) stats = result;
 		} catch (e) {
 			console.error('Failed to load stats:', e);
 		}
 	},
 
-	/**
-	 * Select a photo for detail view
-	 */
 	selectPhoto(photo: Photo | null) {
 		selectedPhoto = photo;
 	},
 
-	/**
-	 * Toggle favorite status
-	 */
+	/** Toggle favorite — local-first via Dexie. */
 	async toggleFavorite(mediaId: string) {
 		try {
-			const result = await api.post<{ isFavorited: boolean }>(`/favorites/${mediaId}/toggle`);
-			if (result.data) {
-				PhotosEvents.photoFavorited(result.data.isFavorited);
-				// Update photo in list
-				photos = photos.map((p) =>
-					p.id === mediaId ? { ...p, isFavorited: result.data!.isFavorited } : p
-				);
-				// Update selected photo if it's the same
-				if (selectedPhoto?.id === mediaId) {
-					selectedPhoto = { ...selectedPhoto, isFavorited: result.data.isFavorited };
-				}
+			const existing = await favoriteCollection.getAll();
+			const fav = existing.find((f) => f.mediaId === mediaId);
+			let isFavorited: boolean;
+
+			if (fav) {
+				await favoriteCollection.delete(fav.id);
+				isFavorited = false;
+			} else {
+				await favoriteCollection.insert({
+					id: crypto.randomUUID(),
+					mediaId,
+				} as LocalFavorite);
+				isFavorited = true;
+			}
+
+			PhotosEvents.photoFavorited(isFavorited);
+			photos = photos.map((p) => (p.id === mediaId ? { ...p, isFavorited } : p));
+			if (selectedPhoto?.id === mediaId) {
+				selectedPhoto = { ...selectedPhoto, isFavorited };
 			}
 		} catch (e) {
 			console.error('Failed to toggle favorite:', e);
 		}
 	},
 
-	/**
-	 * Delete a photo
-	 */
 	async deletePhoto(mediaId: string) {
 		try {
-			const result = await api.delete(`/photos/${mediaId}`);
-			if (result.error) {
-				error = result.error.message;
+			const token = await authStore.getValidToken();
+			const response = await fetch(`${MEDIA_URL()}/api/v1/media/${mediaId}`, {
+				method: 'DELETE',
+				headers: token ? { Authorization: `Bearer ${token}` } : {},
+			});
+
+			if (!response.ok) {
+				error = 'Failed to delete photo';
 				return false;
 			}
+
 			photos = photos.filter((p) => p.id !== mediaId);
 			PhotosEvents.photoDeleted();
-			if (selectedPhoto?.id === mediaId) {
-				selectedPhoto = null;
-			}
+			if (selectedPhoto?.id === mediaId) selectedPhoto = null;
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete photo';
@@ -174,20 +192,12 @@ export const photoStore = {
 		}
 	},
 
-	/**
-	 * Clear all state
-	 */
 	reset() {
 		photos = [];
 		loading = false;
 		error = null;
 		hasMore = true;
-		filters = {
-			limit: 50,
-			offset: 0,
-			sortBy: 'dateTaken',
-			sortOrder: 'desc',
-		};
+		filters = { limit: 50, offset: 0, sortBy: 'dateTaken', sortOrder: 'desc' };
 		stats = null;
 		selectedPhoto = null;
 	},

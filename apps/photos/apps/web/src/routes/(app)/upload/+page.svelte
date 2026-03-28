@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
-	import { uploadWithAuth } from '$lib/api/client';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { PhotosEvents } from '@manacore/shared-utils/analytics';
+
+	const MEDIA_URL = import.meta.env.PUBLIC_MANA_MEDIA_URL || 'http://localhost:3015';
 	import UploadDropzone from '$lib/components/upload/UploadDropzone.svelte';
 
 	interface UploadFile {
@@ -49,7 +51,13 @@
 				formData.append('file', files[i].file);
 				formData.append('app', 'photos');
 
-				await uploadWithAuth('/photos/upload', formData);
+				const token = await authStore.getValidToken();
+				const response = await fetch(`${MEDIA_URL}/api/v1/media/upload`, {
+					method: 'POST',
+					headers: token ? { Authorization: `Bearer ${token}` } : {},
+					body: formData,
+				});
+				if (!response.ok) throw new Error('Upload failed');
 
 				files[i].status = 'success';
 				files[i].progress = 100;
