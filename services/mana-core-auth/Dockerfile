@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Build stage
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
-FROM node:20-slim AS builder
+FROM node:25-slim AS builder
 
 # Install pnpm (no build tools needed — bcryptjs is pure JS, DuckDB ships prebuilt binaries)
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
@@ -47,7 +47,7 @@ RUN pnpm prune --prod --no-optional 2>/dev/null || true \
 
 # Production stage
 # Using node:20-slim instead of alpine for DuckDB glibc compatibility
-FROM node:20-slim AS production
+FROM node:25-slim AS production
 
 # Install wget for health checks
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
