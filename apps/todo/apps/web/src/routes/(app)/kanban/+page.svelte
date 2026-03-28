@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { TaskPriority } from '@todo/shared';
+	import type { LocalBoardView } from '$lib/data/local-store';
 	import { useAllBoardViews } from '$lib/data/task-queries';
-	import { ViewSelector, BoardViewRenderer } from '$lib/components/board-views';
+	import { ViewSelector, BoardViewRenderer, ViewEditorModal } from '$lib/components/board-views';
+	import { boardViewsStore } from '$lib/stores/board-views.svelte';
 	import TaskFilters from '$lib/components/TaskFilters.svelte';
 
 	// Live query for board views
@@ -26,7 +28,11 @@
 			activeViewId = boardViews.value[0].id;
 		}
 		// If stored view no longer exists, fall back to first
-		if (activeViewId && boardViews.value.length > 0 && !boardViews.value.find((v) => v.id === activeViewId)) {
+		if (
+			activeViewId &&
+			boardViews.value.length > 0 &&
+			!boardViews.value.find((v) => v.id === activeViewId)
+		) {
 			activeViewId = boardViews.value[0].id;
 		}
 	});
@@ -38,6 +44,50 @@
 	function handleSelectView(viewId: string) {
 		activeViewId = viewId;
 		localStorage.setItem(STORAGE_KEY, viewId);
+	}
+
+	// ─── Editor Modal ──────────────────────────────────────
+	let showEditor = $state(false);
+	let editingView = $state<LocalBoardView | null>(null);
+
+	function handleCreateView() {
+		editingView = null;
+		showEditor = true;
+	}
+
+	function handleEditView(view: LocalBoardView) {
+		editingView = view;
+		showEditor = true;
+	}
+
+	async function handleSaveView(data: Partial<LocalBoardView>) {
+		if (editingView) {
+			// Update existing view
+			await boardViewsStore.updateView(editingView.id, data);
+		} else {
+			// Create new view
+			const newView = await boardViewsStore.createView({
+				name: data.name ?? 'Neue View',
+				icon: data.icon ?? 'columns',
+				groupBy: data.groupBy ?? 'status',
+				layout: data.layout ?? 'kanban',
+				columns: data.columns ?? [],
+				order: boardViews.value.length,
+			});
+			// Auto-select the new view
+			if (newView?.id) {
+				handleSelectView(newView.id);
+			}
+		}
+		showEditor = false;
+		editingView = null;
+	}
+
+	async function handleDeleteView() {
+		if (!editingView) return;
+		await boardViewsStore.deleteView(editingView.id);
+		showEditor = false;
+		editingView = null;
 	}
 
 	// Filter state
@@ -91,6 +141,8 @@
 			views={boardViews.value}
 			{activeViewId}
 			onSelect={handleSelectView}
+			onCreate={handleCreateView}
+			onEdit={handleEditView}
 		/>
 	{/if}
 
@@ -100,7 +152,10 @@
 		<button
 			type="button"
 			onclick={() => (showFilters = !showFilters)}
-			class="filter-button px-4 py-2 text-sm font-medium transition-all flex items-center gap-2 {showFilters || hasActiveFilters ? 'active' : ''}"
+			class="filter-button px-4 py-2 text-sm font-medium transition-all flex items-center gap-2 {showFilters ||
+			hasActiveFilters
+				? 'active'
+				: ''}"
 		>
 			<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 				<path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
@@ -157,10 +212,24 @@
 				views={boardViews.value}
 				{activeViewId}
 				onSelect={handleSelectView}
+				onCreate={handleCreateView}
+				onEdit={handleEditView}
 			/>
 		</div>
 	{/if}
 </div>
+
+<!-- View Editor Modal -->
+<ViewEditorModal
+	open={showEditor}
+	view={editingView}
+	onSave={handleSaveView}
+	onDelete={handleDeleteView}
+	onClose={() => {
+		showEditor = false;
+		editingView = null;
+	}}
+/>
 
 <style>
 	.board-page {
