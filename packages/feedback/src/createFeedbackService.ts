@@ -23,7 +23,7 @@ import type {
 	FeedbackResponse,
 	FeedbackListResponse,
 	VoteResponse,
-} from './feedback';
+} from './api';
 import type { FeedbackServiceConfig } from './types';
 
 /**
