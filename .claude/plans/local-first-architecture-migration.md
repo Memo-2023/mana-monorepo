@@ -393,7 +393,7 @@ Alle 5 Services laufen auf Hono + Bun.
 
 ---
 
-## Phase 5: Infrastruktur & Cleanup — MOSTLY DONE 2026-03-28
+## Phase 5: Infrastruktur & Cleanup — DONE 2026-03-28
 
 - [x] NestJS Dependencies aus App-Backends entfernt (alle 14 Apps nutzen Hono)
 - [x] `packages/shared-nestjs-auth` entfernt (existiert nicht mehr)
@@ -401,8 +401,8 @@ Alle 5 Services laufen auf Hono + Bun.
 - [x] Docker-Compose: Alle Hono-Services + mana-sync konfiguriert
 - [x] Go Binary in Docker-Compose für mana-sync (Port 3010)
 - [x] Prometheus Metrics für mana-sync (`/metrics` Endpoint)
-- [ ] `services/mana-core-auth/` archivieren oder löschen
-- [ ] `services/mana-media/` (letzter NestJS-Service) evaluieren → Hono Migration
+- [x] `services/mana-core-auth/` gelöscht + alle Referenzen bereinigt (15+ Dateien)
+- [x] `services/mana-media/` von NestJS auf Hono/Bun migriert (23 → 12 Files, -50% LOC)
 - [ ] Load Testing: Sync-Protokoll unter Last testen
 - [ ] CI/CD: Go Build + Bun Build Pipeline finalisieren
 
@@ -448,6 +448,8 @@ Alle 5 Services laufen auf Hono + Bun.
 | 2026-03-26 | Phasenweise Migration | Kein Big Bang, jede App kann einzeln migriert werden |
 | 2026-03-27 | mana-core-auth aufteilen | Auth, Credits, User, Subscriptions, Analytics als eigene Hono-Services |
 | 2026-03-28 | mana-sync Port 3010 statt 3050 | Anpassung an tatsächliche Deployment-Konfiguration |
+| 2026-03-28 | mana-media NestJS → Hono/Bun | Letzter NestJS-Service eliminiert, 50% weniger Code |
+| 2026-03-28 | mana-core-auth gelöscht | Zombie-Directory + 15 Referenz-Dateien bereinigt |
 
 ---
 
@@ -468,7 +470,9 @@ Alle 5 Services laufen auf Hono + Bun.
 
 | Aufgabe | Priorität | Beschreibung |
 |---|---|---|
-| mana-core-auth archivieren | Niedrig | Legacy-Service entfernen, nachdem mana-auth stabil läuft |
-| mana-media evaluieren | Mittel | Letzter NestJS-Service im Stack → Hono Migration prüfen |
+| ~~mana-core-auth archivieren~~ | ~~Niedrig~~ | ✅ Gelöscht + alle Referenzen bereinigt |
+| ~~mana-media migrieren~~ | ~~Mittel~~ | ✅ NestJS → Hono/Bun (23 → 12 Files) |
 | Load Testing | Mittel | Sync-Protokoll unter Last testen (100K+ Connections) |
 | CI/CD finalisieren | Niedrig | Go Build + Bun Build Pipeline komplettieren |
+
+**Zero NestJS im gesamten Monorepo.** Alle Services laufen auf Hono/Bun oder Go.

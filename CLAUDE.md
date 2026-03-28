@@ -144,7 +144,7 @@ manacore-monorepo/
 ├── games/                   # Game projects
 │   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
-│   ├── mana-core-auth/      # Central auth (NestJS + Better Auth, being replaced by mana-auth)
+│   ├── mana-auth/           # Central auth (Hono + Bun + Better Auth)
 │   ├── mana-auth/           # Central auth rewrite (Hono + Bun + Better Auth)
 │   ├── mana-credits/        # Credit system (Hono + Bun)
 │   ├── mana-user/           # User settings & tags (Hono + Bun)
@@ -156,7 +156,7 @@ manacore-monorepo/
 │   ├── mana-api-gateway/    # API gateway + rate limiting (Go)
 │   ├── mana-notify/         # Notifications: email, push, Matrix, webhook (Go)
 │   ├── mana-matrix-bot/     # 21 Matrix bot plugins (Go)
-│   ├── mana-media/          # Media platform: CAS, thumbnails (NestJS)
+│   ├── mana-media/          # Media platform: CAS, thumbnails (Hono + Bun)
 │   ├── mana-llm/            # LLM abstraction (Python/FastAPI)
 │   ├── mana-image-gen/      # AI image generation with FLUX (Python/FastAPI)
 │   ├── mana-stt/            # Speech-to-text (Python/FastAPI)
