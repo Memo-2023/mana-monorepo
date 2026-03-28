@@ -6,7 +6,6 @@
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
-	import { SyncIndicator } from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,

@@ -4,7 +4,6 @@
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
 	import type { PillNavItem, QuickInputItem, CreatePreview } from '@manacore/shared-ui';
-	import { SyncIndicator } from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,

@@ -6,7 +6,6 @@
 	import { QuickInputBar } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
 	import type { QuickInputItem, CreatePreview } from '@manacore/shared-ui';
-	import { SyncIndicator } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { useAllMeals, searchMeals } from '$lib/data/queries';
 	import { parseMealInput, formatParsedMealPreview } from '$lib/utils/meal-parser';

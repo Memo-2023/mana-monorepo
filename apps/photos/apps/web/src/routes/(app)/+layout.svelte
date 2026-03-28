@@ -5,7 +5,6 @@
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
-	import { SyncIndicator } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { photoStore } from '$lib/stores/photos.svelte';
