@@ -4,53 +4,76 @@ import Navbar from '../../components/navigation/Navbar.astro';
 import Footer from '../../components/navigation/Footer.astro';
 import { Icon } from 'astro-icon/components';
 
-type Item =
-  | { type: 'heading'; label: string }
-  | { type: 'app'; name: string; icon: string; tagline: string; url: string };
+interface App {
+  name: string;
+  icon: string;
+  tagline: string;
+  url: string;
+}
 
-const items: Item[] = [
-  // --- KI & Kreativ ---
-  { type: 'heading', label: 'KI & Kreativ' },
-  { type: 'app', name: 'ManaChat', icon: 'ph:chat-circle-dots-bold', tagline: 'KI Chat Assistent', url: 'https://chat.mana.how' },
-  { type: 'app', name: 'ManaPicture', icon: 'ph:paint-brush-bold', tagline: 'KI Bildgenerierung', url: 'https://picture.mana.how' },
-  { type: 'app', name: 'Presi', icon: 'ph:presentation-chart-bold', tagline: 'KI Präsentationen', url: 'https://presi.mana.how' },
-  { type: 'app', name: 'Questions', icon: 'ph:magnifying-glass-bold', tagline: 'KI Research', url: 'https://questions.mana.how' },
-  { type: 'app', name: 'Context', icon: 'ph:file-text-bold', tagline: 'Dokument-Workspace', url: 'https://context.mana.how' },
-  { type: 'app', name: 'Playground', icon: 'ph:flask-bold', tagline: 'LLM Playground', url: 'https://playground.mana.how' },
+interface Section {
+  label: string;
+  apps: App[];
+}
 
-  // --- Organisieren ---
-  { type: 'heading', label: 'Organisieren' },
-  { type: 'app', name: 'ManaTodo', icon: 'ph:check-square-bold', tagline: 'Aufgaben', url: 'https://todo.mana.how' },
-  { type: 'app', name: 'ManaCalendar', icon: 'ph:calendar-bold', tagline: 'Kalender', url: 'https://calendar.mana.how' },
-  { type: 'app', name: 'ManaContacts', icon: 'ph:address-book-bold', tagline: 'Kontakte', url: 'https://contacts.mana.how' },
-  { type: 'app', name: 'ManaStorage', icon: 'ph:cloud-bold', tagline: 'Cloud-Speicher', url: 'https://storage.mana.how' },
-  { type: 'app', name: 'Inventar', icon: 'ph:package-bold', tagline: 'Inventar', url: 'https://inventar.mana.how' },
-
-  // --- Lernen ---
-  { type: 'heading', label: 'Lernen' },
-  { type: 'app', name: 'ManaDeck', icon: 'ph:cards-bold', tagline: 'KI Karteikarten', url: 'https://manadeck.mana.how' },
-  { type: 'app', name: 'SkilltTree', icon: 'ph:tree-structure-bold', tagline: 'Skill-Tracking', url: 'https://skilltree.mana.how' },
-  { type: 'app', name: 'Zitare', icon: 'ph:quotes-bold', tagline: 'Zitate & Inspiration', url: 'https://zitare.mana.how' },
-
-  // --- Medien ---
-  { type: 'heading', label: 'Medien' },
-  { type: 'app', name: 'Mukke', icon: 'ph:music-notes-bold', tagline: 'Musikproduktion', url: 'https://mukke.mana.how' },
-  { type: 'app', name: 'Photos', icon: 'ph:camera-bold', tagline: 'Fotoverwaltung', url: 'https://photos.mana.how' },
-
-  // --- Alltag & Gesundheit ---
-  { type: 'heading', label: 'Alltag & Gesundheit' },
-  { type: 'app', name: 'ManaClock', icon: 'ph:clock-bold', tagline: 'Uhren & Timer', url: 'https://clock.mana.how' },
-  { type: 'app', name: 'NutriPhi', icon: 'ph:bowl-food-bold', tagline: 'Ernährung', url: 'https://nutriphi.mana.how' },
-  { type: 'app', name: 'Planta', icon: 'ph:plant-bold', tagline: 'Pflanzenpflege', url: 'https://planta.mana.how' },
-
-  // --- Unterwegs ---
-  { type: 'heading', label: 'Unterwegs' },
-  { type: 'app', name: 'CityCorners', icon: 'ph:buildings-bold', tagline: 'Stadtführer Konstanz', url: 'https://citycorners.mana.how' },
-  { type: 'app', name: 'Traces', icon: 'ph:map-trifold-bold', tagline: 'Stadt-Erkundung', url: 'https://traces.mana.how' },
-
-  // --- Kommunikation ---
-  { type: 'heading', label: 'Kommunikation' },
-  { type: 'app', name: 'Matrix', icon: 'ph:chats-bold', tagline: 'Matrix Chat', url: 'https://matrix.mana.how' },
+const sections: Section[] = [
+  {
+    label: 'KI & Kreativ',
+    apps: [
+      { name: 'ManaChat', icon: 'ph:chat-circle-dots-bold', tagline: 'KI Chat Assistent', url: 'https://chat.mana.how' },
+      { name: 'ManaPicture', icon: 'ph:paint-brush-bold', tagline: 'KI Bildgenerierung', url: 'https://picture.mana.how' },
+      { name: 'Presi', icon: 'ph:presentation-chart-bold', tagline: 'KI Präsentationen', url: 'https://presi.mana.how' },
+      { name: 'Questions', icon: 'ph:magnifying-glass-bold', tagline: 'KI Research', url: 'https://questions.mana.how' },
+      { name: 'Context', icon: 'ph:file-text-bold', tagline: 'Dokument-Workspace', url: 'https://context.mana.how' },
+      { name: 'Playground', icon: 'ph:flask-bold', tagline: 'LLM Playground', url: 'https://playground.mana.how' },
+    ],
+  },
+  {
+    label: 'Organisieren',
+    apps: [
+      { name: 'ManaTodo', icon: 'ph:check-square-bold', tagline: 'Aufgaben', url: 'https://todo.mana.how' },
+      { name: 'ManaCalendar', icon: 'ph:calendar-bold', tagline: 'Kalender', url: 'https://calendar.mana.how' },
+      { name: 'ManaContacts', icon: 'ph:address-book-bold', tagline: 'Kontakte', url: 'https://contacts.mana.how' },
+      { name: 'ManaStorage', icon: 'ph:cloud-bold', tagline: 'Cloud-Speicher', url: 'https://storage.mana.how' },
+      { name: 'Inventar', icon: 'ph:package-bold', tagline: 'Inventar', url: 'https://inventar.mana.how' },
+    ],
+  },
+  {
+    label: 'Lernen',
+    apps: [
+      { name: 'ManaDeck', icon: 'ph:cards-bold', tagline: 'KI Karteikarten', url: 'https://manadeck.mana.how' },
+      { name: 'SkilltTree', icon: 'ph:tree-structure-bold', tagline: 'Skill-Tracking', url: 'https://skilltree.mana.how' },
+      { name: 'Zitare', icon: 'ph:quotes-bold', tagline: 'Zitate & Inspiration', url: 'https://zitare.mana.how' },
+    ],
+  },
+  {
+    label: 'Medien',
+    apps: [
+      { name: 'Mukke', icon: 'ph:music-notes-bold', tagline: 'Musikproduktion', url: 'https://mukke.mana.how' },
+      { name: 'Photos', icon: 'ph:camera-bold', tagline: 'Fotoverwaltung', url: 'https://photos.mana.how' },
+    ],
+  },
+  {
+    label: 'Alltag & Gesundheit',
+    apps: [
+      { name: 'ManaClock', icon: 'ph:clock-bold', tagline: 'Uhren & Timer', url: 'https://clock.mana.how' },
+      { name: 'NutriPhi', icon: 'ph:bowl-food-bold', tagline: 'Ernährung', url: 'https://nutriphi.mana.how' },
+      { name: 'Planta', icon: 'ph:plant-bold', tagline: 'Pflanzenpflege', url: 'https://planta.mana.how' },
+    ],
+  },
+  {
+    label: 'Unterwegs',
+    apps: [
+      { name: 'CityCorners', icon: 'ph:buildings-bold', tagline: 'Stadtführer Konstanz', url: 'https://citycorners.mana.how' },
+      { name: 'Traces', icon: 'ph:map-trifold-bold', tagline: 'Stadt-Erkundung', url: 'https://traces.mana.how' },
+    ],
+  },
+  {
+    label: 'Kommunikation',
+    apps: [
+      { name: 'Matrix', icon: 'ph:chats-bold', tagline: 'Matrix Chat', url: 'https://matrix.mana.how' },
+    ],
+  },
 ];
 ---
 
@@ -58,26 +81,27 @@ const items: Item[] = [
   <div class="min-h-screen bg-white dark:bg-gray-900">
     <Navbar />
 
-    <div class="app-grid">
-      {items.map((item) =>
-        item.type === 'heading' ? (
-          <div class="heading-tile flex items-center border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-6 py-5">
-            <span class="font-bold text-base text-gray-900 dark:text-gray-100 tracking-tight">{item.label}</span>
-          </div>
-        ) : (
-          <a
-            href={item.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group flex flex-col items-center justify-center text-center border border-gray-200 dark:border-gray-700 p-5 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            <Icon name={item.icon} class="w-10 h-10 mb-2 text-gray-700 dark:text-gray-300" />
-            <span class="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1">{item.name}</span>
-            <span class="text-xs text-gray-500 dark:text-gray-400">{item.tagline}</span>
-          </a>
-        )
-      )}
-    </div>
+    {sections.map((section) => (
+      <div>
+        <div class="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-6 py-3">
+          <span class="font-bold text-sm text-gray-900 dark:text-gray-100 tracking-tight">{section.label}</span>
+        </div>
+        <div class="app-grid">
+          {section.apps.map((app) => (
+            <a
+              href={app.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group flex flex-col items-center justify-center text-center border border-gray-200 dark:border-gray-700 p-5 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <Icon name={app.icon} class="w-10 h-10 mb-2 text-gray-700 dark:text-gray-300" />
+              <span class="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1">{app.name}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">{app.tagline}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    ))}
 
     <Footer />
   </div>
