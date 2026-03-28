@@ -150,3 +150,19 @@ export interface MergeContentOptions {
 	/** If true, app-specific content replaces central content with same ID */
 	overrideById?: boolean;
 }
+
+// Re-export schemas for backward compatibility
+export {
+	faqFrontmatterSchema,
+	featureFrontmatterSchema,
+	shortcutsFrontmatterSchema,
+	gettingStartedFrontmatterSchema,
+	changelogFrontmatterSchema,
+	contactFrontmatterSchema,
+	type FAQFrontmatter,
+	type FeatureFrontmatter,
+	type ShortcutsFrontmatter,
+	type GettingStartedFrontmatter,
+	type ChangelogFrontmatter,
+	type ContactFrontmatter,
+} from './schemas';
