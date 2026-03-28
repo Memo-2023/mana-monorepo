@@ -82,14 +82,14 @@ scrape_configs:
   # Contacts Backend
   - job_name: 'contacts-backend'
     static_configs:
-      - targets: ['contacts-backend:3034']
+      - targets: ['contacts-backend:3033']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Storage Backend
   - job_name: 'storage-backend'
     static_configs:
-      - targets: ['storage-backend:3035']
+      - targets: ['storage-backend:3034']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
@@ -98,7 +98,7 @@ scrape_configs:
   # Nutriphi Backend
   - job_name: 'nutriphi-backend'
     static_configs:
-      - targets: ['nutriphi-backend:3037']
+      - targets: ['nutriphi-backend:3038']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
@@ -113,21 +113,21 @@ scrape_configs:
   # Mukke Backend
   - job_name: 'mukke-backend'
     static_configs:
-      - targets: ['mukke-backend:3010']
+      - targets: ['mukke-backend:3037']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Planta Backend
   - job_name: 'planta-backend'
     static_configs:
-      - targets: ['planta-backend:3022']
+      - targets: ['planta-backend:3039']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Picture Backend
   - job_name: 'picture-backend'
     static_configs:
-      - targets: ['picture-backend:3040']
+      - targets: ['picture-backend:3035']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
@@ -138,21 +138,21 @@ scrape_configs:
   # Mana LLM Gateway (Ollama + Google Fallback)
   - job_name: 'mana-llm'
     static_configs:
-      - targets: ['mana-llm:3025']
+      - targets: ['mana-llm:3020']
     metrics_path: '/metrics'
     scrape_interval: 15s
 
   # Mana Search Service
   - job_name: 'mana-search'
     static_configs:
-      - targets: ['mana-search:3020']
+      - targets: ['mana-search:3012']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Mana Media Service
   - job_name: 'mana-media'
     static_configs:
-      - targets: ['mana-media:3015']
+      - targets: ['mana-media:3011']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
@@ -210,35 +210,35 @@ scrape_configs:
   # API Gateway (Go)
   - job_name: 'mana-api-gateway'
     static_configs:
-      - targets: ['mana-api-gateway:3060']
+      - targets: ['mana-api-gateway:3016']
     metrics_path: '/metrics'
     scrape_interval: 15s
 
   # Matrix Bot (Go) — consolidated 21 bots
   - job_name: 'mana-matrix-bot'
     static_configs:
-      - targets: ['mana-matrix-bot:4000']
+      - targets: ['mana-matrix-bot:4001']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Sync Server (Go) — local-first data sync
   - job_name: 'mana-sync'
     static_configs:
-      - targets: ['mana-core-sync:3051']
+      - targets: ['mana-core-sync:3010']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Notification Service (Go) — email, push, matrix, webhook
   - job_name: 'mana-notify'
     static_configs:
-      - targets: ['mana-core-notify:3042']
+      - targets: ['mana-core-notify:3013']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
   # Crawler Service (Go)
   - job_name: 'mana-crawler'
     static_configs:
-      - targets: ['mana-crawler:3023']
+      - targets: ['mana-crawler:3014']
     metrics_path: '/metrics'
     scrape_interval: 30s
 
