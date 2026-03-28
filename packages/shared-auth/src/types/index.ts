@@ -183,3 +183,77 @@ export interface B2BInfo {
 	plan?: string;
 	role?: string;
 }
+
+/**
+ * Explicit interface for the auth service.
+ *
+ * TypeScript's ReturnType<> inference truncates large object literals (~27 methods shown).
+ * This explicit interface ensures all 37 methods are visible to consumers.
+ */
+export interface AuthServiceInterface {
+	// Core auth
+	signIn(email: string, password: string): Promise<AuthResult>;
+	signUp(email: string, password: string, sourceAppUrl?: string): Promise<AuthResult>;
+	signOut(): Promise<void>;
+	forgotPassword(email: string, redirectTo?: string): Promise<AuthResult>;
+	resetPassword(token: string, newPassword: string): Promise<AuthResult>;
+	resendVerificationEmail(email: string, sourceAppUrl?: string): Promise<AuthResult>;
+	refreshTokens(currentRefreshToken: string): Promise<TokenRefreshResult>;
+	changePassword(currentPassword: string, newPassword: string): Promise<AuthResult>;
+
+	// Magic link
+	sendMagicLink(email: string): Promise<AuthResult>;
+
+	// Passkeys
+	isPasskeyAvailable(): boolean;
+	registerPasskey(friendlyName?: string): Promise<AuthResult>;
+	signInWithPasskey(): Promise<AuthResult>;
+	listPasskeys(): Promise<any[]>;
+	deletePasskey(passkeyId: string): Promise<AuthResult>;
+	renamePasskey(passkeyId: string, friendlyName: string): Promise<AuthResult>;
+
+	// Two-factor auth
+	enableTwoFactor(
+		password: string
+	): Promise<{ success: boolean; uri?: string; backupCodes?: string[]; error?: string }>;
+	disableTwoFactor(password: string): Promise<AuthResult>;
+	verifyTwoFactor(code: string, trustDevice?: boolean): Promise<AuthResult>;
+	verifyBackupCode(code: string): Promise<AuthResult>;
+	generateBackupCodes(
+		password: string
+	): Promise<{ success: boolean; backupCodes?: string[]; error?: string }>;
+
+	// Security
+	getSecurityEvents(limit?: number): Promise<any[]>;
+	listSessions(): Promise<any[]>;
+	revokeSession(sessionId: string): Promise<AuthResult>;
+
+	// Token management
+	getAppToken(): Promise<string | null>;
+	getRefreshToken(): Promise<string | null>;
+	updateTokens(appToken: string, refreshToken: string): Promise<void>;
+	getUserFromToken(): Promise<UserData | null>;
+	clearAuthStorage(): Promise<void>;
+	isAuthenticated(): Promise<boolean>;
+
+	// Credits & B2B
+	getUserCredits(): Promise<CreditBalance | null>;
+	isB2BUser(): Promise<boolean>;
+	getB2BInfo(): Promise<B2BInfo | null>;
+	shouldDisableRevenueCat(): Promise<boolean>;
+	getAppSettings(): Promise<Record<string, unknown> | null>;
+
+	// SSO
+	trySSO(): Promise<AuthResult>;
+
+	// Utilities
+	getBaseUrl(): string;
+	getStorageKeys(): StorageKeys;
+	onTokenRefresh: ((userData: UserData) => void) | null;
+
+	// Token utilities
+	isTokenValidLocally(token: string): boolean;
+
+	// Internal
+	handleAuthError(status: number, errorData: any): AuthResult;
+}

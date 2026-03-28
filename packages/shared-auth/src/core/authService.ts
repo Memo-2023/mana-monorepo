@@ -1,5 +1,6 @@
 import type {
 	AuthServiceConfig,
+	AuthServiceInterface,
 	AuthEndpoints,
 	AuthResult,
 	TokenRefreshResult,
@@ -68,7 +69,7 @@ const DEFAULT_ENDPOINTS: AuthEndpoints = {
 /**
  * Create an authentication service with the given configuration
  */
-export function createAuthService(config: AuthServiceConfig) {
+export function createAuthService(config: AuthServiceConfig): AuthServiceInterface {
 	const baseUrl = config.baseUrl.replace(/\/$/, ''); // Remove trailing slash
 	const storageKeys: StorageKeys = { ...DEFAULT_STORAGE_KEYS, ...config.storageKeys };
 	const endpoints: AuthEndpoints = { ...DEFAULT_ENDPOINTS, ...config.endpoints };
@@ -1174,6 +1175,7 @@ export function createAuthService(config: AuthServiceConfig) {
 }
 
 /**
- * Type for the auth service instance
+ * Type for the auth service instance.
+ * Uses the explicit interface instead of ReturnType<> to avoid TS inference truncation.
  */
-export type AuthService = ReturnType<typeof createAuthService>;
+export type AuthService = AuthServiceInterface;
