@@ -308,9 +308,7 @@
 			"ssh2",
 			"sharp"
 		],
-		"patchedDependencies": {
-			"react-native-reanimated@4.1.5": "patches/react-native-reanimated@4.1.5.patch"
-		},
+		"patchedDependencies": {},
 		"overrides": {
 			"cpu-features": "npm:empty-npm-package@1.0.0",
 			"ssh2": "npm:empty-npm-package@1.0.0",
