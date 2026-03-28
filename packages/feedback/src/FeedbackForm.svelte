@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CreateFeedbackInput } from '@manacore/shared-feedback-types';
+	import type { CreateFeedbackInput } from './feedback';
 
 	interface Props {
 		onSubmit: (input: CreateFeedbackInput) => Promise<void>;

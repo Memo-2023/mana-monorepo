@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { createFeedbackService } from '@manacore/shared-feedback-service';
+ * import { createFeedbackService } from '@manacore/feedback';
  * import { authStore } from '$lib/stores/auth.svelte';
  *
  * export const feedbackService = createFeedbackService({
@@ -23,7 +23,7 @@ import type {
 	FeedbackResponse,
 	FeedbackListResponse,
 	VoteResponse,
-} from '@manacore/shared-feedback-types';
+} from './feedback';
 import type { FeedbackServiceConfig } from './types';
 
 /**

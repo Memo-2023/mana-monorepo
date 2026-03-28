@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { FeedbackPage } from '@manacore/shared-feedback-ui';
-	import { createFeedbackService } from '@manacore/shared-feedback-service';
+	import { FeedbackPage } from '@manacore/feedback';
+	import { createFeedbackService } from '@manacore/feedback';
 	import { authStore } from '$lib/stores/auth.svelte';
 
 	const feedbackService = createFeedbackService({

@@ -2,7 +2,7 @@
  * Feedback Service Instance for Chat Web App
  */
 
-import { createFeedbackService } from '@manacore/shared-feedback-service';
+import { createFeedbackService } from '@manacore/feedback';
 import { authStore } from '$lib/stores/auth.svelte';
 
 // Use environment variable at runtime

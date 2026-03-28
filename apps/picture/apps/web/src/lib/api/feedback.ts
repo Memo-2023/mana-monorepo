@@ -2,7 +2,7 @@
  * Feedback Service Instance for Picture Web App
  */
 
-import { createFeedbackService } from '@manacore/shared-feedback-service';
+import { createFeedbackService } from '@manacore/feedback';
 import { authStore } from '$lib/stores/auth.svelte';
 import { env } from '$env/dynamic/public';
 

@@ -2,7 +2,7 @@
  * Feedback Service Instance for ManaDeck Web App
  */
 
-import { createFeedbackService } from '@manacore/shared-feedback-service';
+import { createFeedbackService } from '@manacore/feedback';
 import { authService } from '$lib/auth';
 import { PUBLIC_MANA_CORE_AUTH_URL } from '$env/static/public';
 

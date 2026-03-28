@@ -3,7 +3,7 @@
 		FeedbackService,
 		Feedback,
 		CreateFeedbackInput,
-	} from '@manacore/shared-feedback-service';
+	} from './createFeedbackService';
 	import FeedbackForm from './FeedbackForm.svelte';
 	import FeedbackList from './FeedbackList.svelte';
 

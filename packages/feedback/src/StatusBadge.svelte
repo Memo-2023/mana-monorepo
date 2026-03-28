@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { FeedbackStatus } from '@manacore/shared-feedback-types';
-	import { FEEDBACK_STATUS_CONFIG } from '@manacore/shared-feedback-types';
+	import type { FeedbackStatus } from './feedback';
+	import { FEEDBACK_STATUS_CONFIG } from './feedback';
 
 	interface Props {
 		status: FeedbackStatus;

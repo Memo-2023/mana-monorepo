@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Feedback } from '@manacore/shared-feedback-types';
+	import type { Feedback } from './feedback';
 	import FeedbackCard from './FeedbackCard.svelte';
 
 	interface Props {

@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { createFeedbackService } from '@manacore/shared-feedback-service';
+import { createFeedbackService } from '@manacore/feedback';
 import { authStore } from '$lib/stores/auth.svelte';
 
 function getAuthUrl(): string {
