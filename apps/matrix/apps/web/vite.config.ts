@@ -10,9 +10,9 @@ const MANACORE_SHARED_PACKAGES = [
 	'@manacore/shared-tailwind',
 	'@manacore/shared-theme',
 	'@manacore/shared-theme-ui',
-	'@manacore/shared-feedback-ui',
-	'@manacore/shared-feedback-service',
-	'@manacore/shared-feedback-types',
+	'@manacore/feedback',
+	'@manacore/feedback',
+	'@manacore/feedback',
 	'@manacore/shared-auth',
 	'@manacore/shared-auth-ui',
 	'@manacore/shared-branding',
@@ -23,9 +23,9 @@ const MANACORE_SHARED_PACKAGES = [
 	'@manacore/shared-splitscreen',
 	'@manacore/shared-utils',
 	'@manacore/shared-tags',
-	'@manacore/shared-help-types',
-	'@manacore/shared-help-content',
-	'@manacore/shared-help-ui',
+	'@manacore/help',
+	'@manacore/help',
+	'@manacore/help',
 ];
 
 const noExternal = [...MANACORE_SHARED_PACKAGES, '@matrix/shared'];

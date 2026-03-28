@@ -2,8 +2,8 @@
  * Help content for Chat app
  */
 
-import type { HelpContent } from '@manacore/shared-help-types';
-import { getPrivacyFAQs } from '@manacore/shared-help-types';
+import type { HelpContent } from '@manacore/help';
+import { getPrivacyFAQs } from '@manacore/help';
 
 export function getChatHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';

@@ -2,7 +2,7 @@
  * Help content for SkillTree app
  */
 
-import type { HelpContent } from '@manacore/shared-help-types';
+import type { HelpContent } from '@manacore/help';
 
 export function getSkillTreeHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';

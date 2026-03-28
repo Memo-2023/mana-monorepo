@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { locale } from 'svelte-i18n';
-	import { HelpPage, getHelpTranslations } from '@manacore/shared-help-ui';
+	import { HelpPage, getHelpTranslations } from '@manacore/help';
 	import { getClockHelpContent } from '$lib/content/help/index.js';
 
 	const content = $derived(getClockHelpContent($locale ?? 'de'));

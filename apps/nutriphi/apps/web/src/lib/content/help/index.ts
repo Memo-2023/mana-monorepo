@@ -2,7 +2,7 @@
  * Help content for NutriPhi app
  */
 
-import type { HelpContent } from '@manacore/shared-help-types';
+import type { HelpContent } from '@manacore/help';
 
 export function getNutriPhiHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';

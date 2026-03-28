@@ -1,10 +1,10 @@
 /**
  * Help content for Contacts app
- * Uses @manacore/shared-help-types for type-safe content definition
+ * Uses @manacore/help for type-safe content definition
  */
 
-import type { HelpContent } from '@manacore/shared-help-types';
-import { getPrivacyFAQs } from '@manacore/shared-help-types';
+import type { HelpContent } from '@manacore/help';
+import { getPrivacyFAQs } from '@manacore/help';
 
 export function getContactsHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
