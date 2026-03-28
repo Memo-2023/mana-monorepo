@@ -96,11 +96,10 @@
 						{#if plant.commonName}
 							<p class="text-xs text-white/70 truncate">{plant.commonName}</p>
 						{/if}
-						{@const waterText = getWateringText(plant.id)}
-						{#if waterText}
+						{#if getWateringText(plant.id)}
 							<div class="water-status {getWateringClass(plant.id)} mt-1">
 								<span>💧</span>
-								<span>{waterText}</span>
+								<span>{getWateringText(plant.id)}</span>
 							</div>
 						{/if}
 					</div>

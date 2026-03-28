@@ -211,10 +211,10 @@
 	</div>
 
 	<!-- Custom Alarms (Grid) -->
-	{@const customAlarms = allAlarms.value.filter(
-		(a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))
-	)}
-	{#if customAlarms.length > 0}
+	{#if allAlarms.value.filter((a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))).length > 0}
+		{@const customAlarms = allAlarms.value.filter(
+			(a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))
+		)}
 		<div class="mt-4">
 			<h2 class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
 				{$_('alarm.custom')}

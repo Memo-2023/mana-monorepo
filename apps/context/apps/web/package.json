@@ -53,6 +53,7 @@
 		"@manacore/shared-theme": "workspace:*",
 		"@manacore/shared-theme-ui": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
+		"@manacore/shared-utils": "workspace:*",
 		"svelte-i18n": "^4.0.1"
 	},
 	"type": "module"

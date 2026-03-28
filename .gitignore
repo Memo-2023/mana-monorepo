@@ -18,6 +18,9 @@ ios/
 # Turbo
 .turbo/
 
+# MCP config (contains API keys)
+.mcp.json
+
 # Environment files
 .env
 .env.local
@@ -127,3 +130,4 @@ pip-delete-this-directory.txt
 # ML Models (large files, downloaded on demand)
 mlx_models/
 services/matrix-stt-bot/data/
+services/mana-sync/server

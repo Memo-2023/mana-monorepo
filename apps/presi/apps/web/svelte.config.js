@@ -11,6 +11,13 @@ const config = {
 		alias: {
 			$lib: './src/lib',
 		},
+		prerender: {
+			handleHttpError: ({ path, referrer, message }) => {
+				// Ignore missing favicon during prerender
+				if (path === '/favicon.png') return;
+				throw new Error(message);
+			},
+		},
 	},
 };
 
