@@ -3,7 +3,7 @@ title: 'Matrix Bot Konsolidierung: 21 NestJS-Bots → 1 Go Binary'
 description: 'Komplette Neuentwicklung des Matrix-Bot-Systems in Go mit Plugin-Architektur. 21 separate NestJS-Prozesse (~2.1 GB RAM, ~4.2 GB Docker Images) ersetzt durch ein einziges Go-Binary (8.6 MB, ~30 MB RAM). Inklusive Redis Sessions, CI/CD, Docker-Migration und Legacy-Cleanup.'
 date: 2026-03-27
 author: 'Till Schneider'
-category: 'architecture'
+category: 'infrastructure'
 tags:
   [
     'go',

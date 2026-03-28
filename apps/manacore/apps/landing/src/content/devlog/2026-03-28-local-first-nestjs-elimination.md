@@ -3,7 +3,7 @@ title: 'Local-First + NestJS-Elimination + Konsolidierung: ~89.000 LOC weniger'
 description: 'Komplette Architektur-Transformation: 19 Apps auf Local-First (IndexedDB + Sync), NestJS-Monolith aufgelöst in 5 Hono-Services, 12 App-Backends durch ~120-LOC Compute-Server ersetzt, 5 NestJS-Packages gelöscht. Netto: ~80.000 LOC weniger, 80% weniger RAM, 98% schnellere Cold Starts.'
 date: 2026-03-28
 author: 'Till Schneider'
-category: 'architecture'
+category: 'infrastructure'
 tags:
   [
     'local-first',

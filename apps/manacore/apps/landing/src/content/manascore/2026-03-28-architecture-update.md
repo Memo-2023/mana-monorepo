@@ -5,6 +5,17 @@ date: 2026-03-28
 app: 'all'
 author: 'Till Schneider'
 tags: ['audit', 'architecture', 'local-first', 'hono', 'manascore-update']
+score: 85
+scores:
+  backend: 88
+  frontend: 90
+  database: 85
+  testing: 65
+  deployment: 90
+  documentation: 80
+  security: 82
+  ux: 92
+status: 'production'
 ---
 
 ## Globale Verbesserungen (alle 19 Apps)
