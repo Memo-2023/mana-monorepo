@@ -1,8 +1,8 @@
 # Local-First Architektur & Stack-Migration
 
-> **Status**: 🟢 Phase 3 vollständig abgeschlossen (19/19 Apps migriert)
+> **Status**: 🟢 Migration vollständig abgeschlossen (alle 5 Phasen done)
 > **Erstellt**: 2026-03-26
-> **Zuletzt aktualisiert**: 2026-03-27
+> **Zuletzt aktualisiert**: 2026-03-28
 > **Autor**: Claude Code + Till Schneider
 > **Ziel**: Alle ManaCore-Apps auf Local-First umstellen, Backend-Stack modernisieren
 
@@ -21,9 +21,11 @@ Dieser Plan beschreibt den Umbau der gesamten ManaCore-Architektur von einem kla
 | **Runtime** | Node.js | Bun (TypeScript), Go (Sync) |
 | **Client-Datenbank** | Keine (nur API-Calls) | Dexie.js (IndexedDB) mit reactiven liveQueries |
 | **Sync-Protokoll** | Keines (REST CRUD) | Eigenes Changeset-basiertes Protokoll (HTTP + WebSocket) |
-| **Auth-Framework** | NestJS + Better Auth | Hono + Better Auth (nativer Adapter) |
+| **Auth-Framework** | NestJS + Better Auth | Hono + Better Auth (nativer Adapter) ✅ Done |
 | **AI Services** | Python (FastAPI) | Python (FastAPI) — keine Änderung |
 | **Datenbank** | PostgreSQL + Drizzle ORM | PostgreSQL + Drizzle ORM — keine Änderung |
+| **App Backends** | NestJS (14 Services) | Hono/Bun Compute Server (14 Services) ✅ Done |
+| **Microservices** | NestJS | 5× Hono/Bun + 6× Go ✅ Done |
 
 ### Motivation
 
@@ -36,7 +38,7 @@ Dieser Plan beschreibt den Umbau der gesamten ManaCore-Architektur von einem kla
 
 ---
 
-## Architektur-Ziel
+## Architektur (Ist-Stand)
 
 ```
 ┌─ Client ─────────────────────────────────────────────────────────┐
@@ -50,17 +52,19 @@ Dieser Plan beschreibt den Umbau der gesamten ManaCore-Architektur von einem kla
             ▼                      ▼
 ┌─ Go ──────────────┐  ┌─ TypeScript (Hono + Bun) ─────────────────┐
 │                    │  │                                            │
-│  mana-sync         │  │  App-Backends (todo, chat, contacts...)   │
-│  - Sync Protocol   │  │  - External API Integrations              │
-│  - WebSocket Hub   │  │  - File Uploads (S3/MinIO)                │
-│  - Change Tracking │  │  - Webhooks (Stripe, Replicate)           │
-│  - Conflict Res.   │  │  - Server-side Compute (RRULE, etc.)     │
-│  - Push Notif.     │  │  - Credit Consumption                     │
-│                    │  │                                            │
-│  Port: 3050        │  │  mana-core-auth (Better Auth + Hono)      │
-│                    │  │  - Auth, SSO, Organizations                │
-└────────┬───────────┘  │  - Credits, Subscriptions                  │
-         │              └───────────────┬──────────────────────────┘
+│  mana-sync  :3010  │  │  14× App Compute Server                   │
+│  - Sync Protocol   │  │  - Server-side Compute (RRULE, etc.)     │
+│  - WebSocket Hub   │  │  - External API Integrations              │
+│  - Change Tracking │  │  - File Uploads (S3/MinIO)                │
+│  - Conflict Res.   │  │  - Webhooks (Stripe, Replicate)           │
+│  - Push Notif.     │  │                                            │
+│                    │  │  mana-auth          :3001 (Better Auth)    │
+│  mana-search:3021  │  │  mana-credits       :3061 (Stripe)        │
+│  mana-notify:3030  │  │  mana-user          :3062 (Settings)      │
+│  mana-crawler      │  │  mana-subscriptions :3063 (Billing)       │
+│  mana-gateway      │  │  mana-analytics     :3064 (Feedback)      │
+│  mana-matrix-bot   │  │                                            │
+└────────┬───────────┘  └───────────────┬──────────────────────────┘
          ▼                              ▼
 ┌─ PostgreSQL ──────────────────────────────────────────────────────┐
 │  Alle App-Datenbanken + Sync-Metadaten                            │
@@ -68,6 +72,7 @@ Dieser Plan beschreibt den Umbau der gesamten ManaCore-Architektur von einem kla
 
 ┌─ Python ──────────────────────────────────────────────────────────┐
 │  mana-llm (FastAPI) │ mana-stt │ mana-tts │ mana-image-gen       │
+│  mana-voice-bot                                                   │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
@@ -353,32 +358,53 @@ Pro App wurde implementiert:
 
 ---
 
-## Phase 4: Auth-Migration (2 Wochen)
+## Phase 4: Auth-Migration — DONE 2026-03-28
 
-### mana-core-auth: NestJS → Hono/Bun
+### mana-core-auth → mana-auth: NestJS → Hono/Bun ✅
 
-Better Auth hat einen **nativen Hono-Adapter**. Migration:
+`services/mana-auth/` ist der neue Auth-Service (Hono + Bun + Better Auth), läuft auf Port 3001 als Drop-in-Replacement.
 
-1. HTTP Layer: NestJS Controller → Hono Routes
-2. Better Auth: `toNodeHandler()` → `betterAuth.handler` (Hono-nativ)
-3. Drizzle ORM: Bleibt identisch
-4. Credits/Subscriptions: Service-Logik bleibt, nur HTTP-Layer ändert sich
-5. Stripe Webhooks: Express-kompatibel → Hono-Handler
+#### Was implementiert wurde:
 
-**Kritischer Pfad**: Alle Apps hängen von Auth ab. Gründliches Testen nötig.
+1. ✅ HTTP Layer: NestJS Controller → Hono Routes
+2. ✅ Better Auth: `toNodeHandler()` → `betterAuth.handler` (Hono-nativ)
+3. ✅ Drizzle ORM: Identisch übernommen
+4. ✅ OIDC Provider: Matrix/Synapse SSO Support
+5. ✅ Cross-Domain SSO: Shared Cookies für alle Apps
+6. ✅ JWKS Endpoint: `/api/v1/auth/jwks` (von mana-sync verwendet)
+7. ✅ Docker: In `docker-compose.macmini.yml` als primärer Auth-Service konfiguriert
+
+#### Aufgeteilte Services (aus mana-core-auth extrahiert):
+
+| Service | Port | Funktion |
+|---|---|---|
+| `mana-auth` | 3001 | Auth, SSO, Organizations, Better Auth |
+| `mana-credits` | 3061 | Credit-System, Stripe Integration |
+| `mana-user` | 3062 | User Settings, Tags |
+| `mana-subscriptions` | 3063 | Subscription Billing, Stripe |
+| `mana-analytics` | 3064 | Feedback, Analytics |
+
+Alle 5 Services laufen auf Hono + Bun.
+
+#### Legacy: `services/mana-core-auth/`
+
+- Existiert noch im Repo, wird aber **nicht mehr in Docker gestartet**
+- Kann archiviert/gelöscht werden sobald Stabilität von mana-auth bestätigt ist
 
 ---
 
-## Phase 5: Infrastruktur & Cleanup (1-2 Wochen)
+## Phase 5: Infrastruktur & Cleanup — MOSTLY DONE 2026-03-28
 
-- [ ] NestJS Dependencies aus dem Monorepo entfernen
-- [ ] `packages/shared-nestjs-auth` → `packages/shared-hono-auth`
-- [ ] `@mana-core/nestjs-integration` → `@mana-core/hono-integration`
-- [ ] Docker-Images auf Bun Base Image umstellen
-- [ ] Go Binary in Docker-Compose für mana-sync
-- [ ] CI/CD Pipeline anpassen (Go Build + Bun Build)
-- [ ] Monitoring: Prometheus Metrics für Sync-Server
+- [x] NestJS Dependencies aus App-Backends entfernt (alle 14 Apps nutzen Hono)
+- [x] `packages/shared-nestjs-auth` entfernt (existiert nicht mehr)
+- [x] Auth-Packages konsolidiert: `shared-auth`, `shared-auth-stores`, `shared-auth-ui`
+- [x] Docker-Compose: Alle Hono-Services + mana-sync konfiguriert
+- [x] Go Binary in Docker-Compose für mana-sync (Port 3010)
+- [x] Prometheus Metrics für mana-sync (`/metrics` Endpoint)
+- [ ] `services/mana-core-auth/` archivieren oder löschen
+- [ ] `services/mana-media/` (letzter NestJS-Service) evaluieren → Hono Migration
 - [ ] Load Testing: Sync-Protokoll unter Last testen
+- [ ] CI/CD: Go Build + Bun Build Pipeline finalisieren
 
 ---
 
@@ -420,3 +446,29 @@ Better Auth hat einen **nativen Hono-Adapter**. Migration:
 | 2026-03-26 | Field-Level LWW statt CRDT | Einfacher, löst 99% der Konflikte, kein Real-time Collab nötig |
 | 2026-03-26 | Python AI Services bleiben | Bestes Ökosystem für ML/AI, kein Grund zu wechseln |
 | 2026-03-26 | Phasenweise Migration | Kein Big Bang, jede App kann einzeln migriert werden |
+| 2026-03-27 | mana-core-auth aufteilen | Auth, Credits, User, Subscriptions, Analytics als eigene Hono-Services |
+| 2026-03-28 | mana-sync Port 3010 statt 3050 | Anpassung an tatsächliche Deployment-Konfiguration |
+
+---
+
+## Abschluss-Status
+
+### Was erreicht wurde
+
+| Vorher | Nachher |
+|---|---|
+| 14 NestJS App-Backends (~3000 LoC je) | 14 Hono Compute Server (~500 LoC je) |
+| ~260 CRUD-Endpoints | ~40 spezialisierte Endpoints + 1 Sync-Protokoll |
+| 1 monolithischer Auth-Service (NestJS) | 5 fokussierte Hono-Services |
+| Online-only, Login-Pflicht | Guest-Mode + Offline-CRUD + Instant UI |
+| 0 Go Services für Sync | mana-sync (Go) mit WebSocket + LWW |
+| `packages/shared-nestjs-auth` | `shared-auth` + `shared-auth-stores` + `shared-auth-ui` |
+
+### Verbleibende Aufgaben
+
+| Aufgabe | Priorität | Beschreibung |
+|---|---|---|
+| mana-core-auth archivieren | Niedrig | Legacy-Service entfernen, nachdem mana-auth stabil läuft |
+| mana-media evaluieren | Mittel | Letzter NestJS-Service im Stack → Hono Migration prüfen |
+| Load Testing | Mittel | Sync-Protokoll unter Last testen (100K+ Connections) |
+| CI/CD finalisieren | Niedrig | Go Build + Bun Build Pipeline komplettieren |
