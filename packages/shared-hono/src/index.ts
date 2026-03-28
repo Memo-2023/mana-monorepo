@@ -38,4 +38,6 @@ export type { DbOptions } from './db';
 export { healthRoute } from './health';
 export { adminRoutes } from './admin';
 export { errorHandler, notFoundHandler } from './error';
+export { getBalance, validateCredits, consumeCredits, refundCredits } from './credits';
+export type { CreditBalance, CreditValidationResult } from './credits';
 export type { CurrentUserData, AuthVariables } from './types';

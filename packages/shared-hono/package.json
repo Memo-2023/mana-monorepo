@@ -12,7 +12,8 @@
 		"./db": "./src/db.ts",
 		"./health": "./src/health.ts",
 		"./admin": "./src/admin.ts",
-		"./error": "./src/error.ts"
+		"./error": "./src/error.ts",
+		"./credits": "./src/credits.ts"
 	},
 	"scripts": {
 		"type-check": "tsc --noEmit"
