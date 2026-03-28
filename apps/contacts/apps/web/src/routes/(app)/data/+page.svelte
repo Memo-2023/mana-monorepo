@@ -7,7 +7,7 @@
 	import GoogleImport from '$lib/components/import/GoogleImport.svelte';
 	import { importApi, type ImportPreviewResponse, type DuplicateAction } from '$lib/api/import';
 	import { exportApi, type ExportFormat } from '$lib/api/export';
-	import { contactsStore } from '$lib/stores/contacts.svelte';
+	// contactsStore removed — live queries auto-update
 	import { ImportPreviewSkeleton } from '$lib/components/skeletons';
 	import { ContactsEvents } from '@manacore/shared-utils/analytics';
 	import '$lib/i18n';
@@ -114,7 +114,7 @@
 			importStep = 'result';
 			const fileExt = selectedFile?.name?.endsWith('.csv') ? 'csv' : 'vcard';
 			ContactsEvents.contactImported(fileExt as 'csv' | 'vcard', importResult?.imported);
-			await contactsStore.loadContacts();
+			// Live query auto-updates — no manual reload needed
 		} catch (e) {
 			importError = e instanceof Error ? e.message : 'Fehler beim Importieren';
 		} finally {

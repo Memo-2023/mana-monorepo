@@ -1,18 +1,17 @@
 /**
- * Decks Store — Local-First with Dexie.js
+ * Decks Store — Mutation-Only
  *
- * All reads and writes go to IndexedDB first.
- * When authenticated, changes sync to the server in the background.
- * Same public API as before so components don't need changes.
+ * Reads are handled by useLiveQuery hooks in queries.ts.
+ * This store only handles writes (create, update, delete).
  */
 
 import type {
-	Deck,
-	Slide,
 	CreateDeckDto,
 	UpdateDeckDto,
 	CreateSlideDto,
 	UpdateSlideDto,
+	Deck,
+	Slide,
 } from '@presi/shared';
 import {
 	deckCollection,
@@ -20,74 +19,12 @@ import {
 	type LocalDeck,
 	type LocalSlide,
 } from '$lib/data/local-store';
+import { toDeck, toSlide } from '$lib/data/queries';
 
-let decks = $state<Deck[]>([]);
-let currentDeck = $state<Deck | null>(null);
-let currentSlides = $state<Slide[]>([]);
 let isLoading = $state(false);
 let error = $state<string | null>(null);
 
-/** Convert LocalDeck (IndexedDB) to shared Deck type. */
-function toDeck(local: LocalDeck): Deck {
-	return {
-		id: local.id,
-		userId: 'local',
-		title: local.title,
-		description: local.description ?? undefined,
-		themeId: local.themeId ?? undefined,
-		isPublic: local.isPublic,
-		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
-	};
-}
-
-/** Convert LocalSlide (IndexedDB) to shared Slide type. */
-function toSlide(local: LocalSlide): Slide {
-	return {
-		id: local.id,
-		deckId: local.deckId,
-		order: local.order,
-		content: local.content,
-		createdAt: local.createdAt ?? new Date().toISOString(),
-	};
-}
-
 function createDecksStore() {
-	async function loadDecks() {
-		isLoading = true;
-		error = null;
-		try {
-			const localDecks = await deckCollection.getAll();
-			decks = localDecks.map(toDeck);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load decks';
-			console.error('Failed to load decks:', e);
-		} finally {
-			isLoading = false;
-		}
-	}
-
-	async function loadDeck(id: string) {
-		isLoading = true;
-		error = null;
-		try {
-			const localDeck = await deckCollection.get(id);
-			if (localDeck) {
-				currentDeck = toDeck(localDeck);
-			} else {
-				currentDeck = null;
-				throw new Error('Deck not found');
-			}
-			const localSlides = await slideCollection.getAll({ deckId: id });
-			currentSlides = localSlides.map(toSlide).sort((a, b) => a.order - b.order);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load deck';
-			console.error('Failed to load deck:', e);
-		} finally {
-			isLoading = false;
-		}
-	}
-
 	async function createDeck(dto: CreateDeckDto): Promise<Deck | null> {
 		isLoading = true;
 		error = null;
@@ -100,9 +37,7 @@ function createDecksStore() {
 				isPublic: false,
 			};
 			const inserted = await deckCollection.insert(newLocal);
-			const deck = toDeck(inserted);
-			decks = [deck, ...decks];
-			return deck;
+			return toDeck(inserted);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create deck';
 			console.error('Failed to create deck:', e);
@@ -121,14 +56,7 @@ function createDecksStore() {
 			if (dto.themeId !== undefined) localUpdates.themeId = dto.themeId;
 			if (dto.isPublic !== undefined) localUpdates.isPublic = dto.isPublic;
 
-			const updated = await deckCollection.update(id, localUpdates);
-			if (updated) {
-				const updatedDeck = toDeck(updated);
-				decks = decks.map((d) => (d.id === id ? updatedDeck : d));
-				if (currentDeck?.id === id) {
-					currentDeck = updatedDeck;
-				}
-			}
+			await deckCollection.update(id, localUpdates);
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update deck';
@@ -147,11 +75,6 @@ function createDecksStore() {
 			}
 
 			await deckCollection.delete(id);
-			decks = decks.filter((d) => d.id !== id);
-			if (currentDeck?.id === id) {
-				currentDeck = null;
-				currentSlides = [];
-			}
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete deck';
@@ -163,7 +86,8 @@ function createDecksStore() {
 	async function createSlide(deckId: string, dto: CreateSlideDto): Promise<Slide | null> {
 		error = null;
 		try {
-			const order = dto.order ?? currentSlides.length + 1;
+			const existingSlides = await slideCollection.getAll({ deckId });
+			const order = dto.order ?? existingSlides.length + 1;
 			const newLocal: LocalSlide = {
 				id: crypto.randomUUID(),
 				deckId,
@@ -171,9 +95,7 @@ function createDecksStore() {
 				content: dto.content,
 			};
 			const inserted = await slideCollection.insert(newLocal);
-			const slide = toSlide(inserted);
-			currentSlides = [...currentSlides, slide].sort((a, b) => a.order - b.order);
-			return slide;
+			return toSlide(inserted);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create slide';
 			console.error('Failed to create slide:', e);
@@ -188,12 +110,7 @@ function createDecksStore() {
 			if (dto.content !== undefined) localUpdates.content = dto.content;
 			if (dto.order !== undefined) localUpdates.order = dto.order;
 
-			const updated = await slideCollection.update(id, localUpdates);
-			if (updated) {
-				currentSlides = currentSlides
-					.map((s) => (s.id === id ? toSlide(updated) : s))
-					.sort((a, b) => a.order - b.order);
-			}
+			await slideCollection.update(id, localUpdates);
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update slide';
@@ -206,7 +123,6 @@ function createDecksStore() {
 		error = null;
 		try {
 			await slideCollection.delete(id);
-			currentSlides = currentSlides.filter((s) => s.id !== id);
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete slide';
@@ -218,13 +134,9 @@ function createDecksStore() {
 	async function reorderSlides(slides: { id: string; order: number }[]): Promise<boolean> {
 		error = null;
 		try {
-			const orderMap = new Map(slides.map((s) => [s.id, s.order]));
 			for (const { id, order } of slides) {
 				await slideCollection.update(id, { order });
 			}
-			currentSlides = currentSlides
-				.map((s) => ({ ...s, order: orderMap.get(s.id) ?? s.order }))
-				.sort((a, b) => a.order - b.order);
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to reorder slides';
@@ -233,29 +145,13 @@ function createDecksStore() {
 		}
 	}
 
-	function clearCurrent() {
-		currentDeck = null;
-		currentSlides = [];
-	}
-
 	return {
-		get decks() {
-			return decks;
-		},
-		get currentDeck() {
-			return currentDeck;
-		},
-		get currentSlides() {
-			return currentSlides;
-		},
 		get isLoading() {
 			return isLoading;
 		},
 		get error() {
 			return error;
 		},
-		loadDecks,
-		loadDeck,
 		createDeck,
 		updateDeck,
 		deleteDeck,
@@ -263,7 +159,6 @@ function createDecksStore() {
 		updateSlide,
 		deleteSlide,
 		reorderSlides,
-		clearCurrent,
 	};
 }
 

@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { COLORS } from '@manacore/spiral-db';
 	import { spiralStore } from '$lib/stores/spiral.svelte';
-	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import SpiralCanvas from '$lib/components/SpiralCanvas.svelte';
+	import type { Contact } from '$lib/api/contacts';
+
+	// Get reactive contacts from context (live query)
+	const allContacts: { readonly value: Contact[] } = getContext('contacts');
 
 	let zoom = $state(10);
 	let showGrid = $state(false);
@@ -11,7 +14,7 @@
 	let fileInput: HTMLInputElement;
 
 	function handleImportContacts() {
-		spiralStore.importContacts(contactsStore.contacts);
+		spiralStore.importContacts(allContacts.value);
 	}
 
 	function handlePixelClick(index: number) {
@@ -30,12 +33,10 @@
 		input.value = '';
 	}
 
-	onMount(async () => {
-		if (contactsStore.contacts.length === 0) {
-			await contactsStore.loadContacts({});
-		}
-		if (contactsStore.contacts.length > 0) {
-			handleImportContacts();
+	// Auto-import when contacts become available
+	$effect(() => {
+		if (allContacts.value.length > 0) {
+			spiralStore.importContacts(allContacts.value);
 		}
 	});
 </script>
@@ -183,9 +184,9 @@
 				<button
 					class="btn"
 					onclick={handleImportContacts}
-					disabled={contactsStore.contacts.length === 0}
+					disabled={allContacts.value.length === 0}
 				>
-					Kontakte neu importieren ({contactsStore.contacts.length})
+					Kontakte neu importieren ({allContacts.value.length})
 				</button>
 				<button
 					class="btn btn-danger"

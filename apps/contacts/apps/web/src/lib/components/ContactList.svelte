@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
@@ -7,24 +7,24 @@
 	import { goto } from '$app/navigation';
 	import ContactGridView from '$lib/components/views/ContactGridView.svelte';
 	import ContactAlphabetView from '$lib/components/views/ContactAlphabetView.svelte';
-	import { ContactListSkeleton, ContactGridSkeleton } from '$lib/components/skeletons';
 	import { batchApi } from '$lib/api/batch';
 	import { toastStore } from '@manacore/shared-ui';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
+	import type { Contact } from '$lib/api/contacts';
 
-	// Infinite scroll
-	let intersectionObserver: IntersectionObserver | null = null;
-	let loadMoreTrigger: HTMLDivElement;
+	// Get reactive contacts from context (live query)
+	const allContacts: { readonly value: Contact[] } = getContext('contacts');
 
 	// Batch selection state
 	let selectionMode = $state(false);
 	let selectedIds = $state<Set<string>>(new Set());
 	let batchLoading = $state(false);
 
+	// Derived: non-archived contacts (the main working set)
+	let contacts = $derived(allContacts.value.filter((c) => !c.isArchived));
+
 	// Derived state for selection
-	let allSelected = $derived(
-		contactsStore.contacts.length > 0 && contactsStore.contacts.every((c) => selectedIds.has(c.id))
-	);
+	let allSelected = $derived(contacts.length > 0 && contacts.every((c) => selectedIds.has(c.id)));
 
 	// Helper functions for birthday filtering
 	function isBirthdayToday(birthday: string | null | undefined): boolean {
@@ -57,13 +57,13 @@
 		return bday.getMonth() === today.getMonth();
 	}
 
-	function isContactIncomplete(contact: (typeof contactsStore.contacts)[0]): boolean {
+	function isContactIncomplete(contact: Contact): boolean {
 		return !contact.phone && !contact.mobile && !contact.email;
 	}
 
 	// Filtered and sorted contacts (using filter store)
 	let filteredContacts = $derived.by(() => {
-		let result = [...contactsStore.contacts];
+		let result = [...contacts];
 
 		// Apply search filter from InputBar
 		const searchQuery = contactsFilterStore.searchQuery?.toLowerCase().trim();
@@ -172,7 +172,7 @@
 		if (allSelected) {
 			selectedIds = new Set();
 		} else {
-			selectedIds = new Set(contactsStore.contacts.map((c) => c.id));
+			selectedIds = new Set(contacts.map((c) => c.id));
 		}
 	}
 
@@ -186,7 +186,6 @@
 			toastStore.success(`${result.success} Kontakte gelöscht`);
 			selectedIds = new Set();
 			selectionMode = false;
-			await contactsStore.loadContacts();
 		} catch (e) {
 			toastStore.error(e instanceof Error ? e.message : 'Fehler beim Löschen');
 		} finally {
@@ -203,7 +202,6 @@
 			toastStore.success(`${result.success} Kontakte archiviert`);
 			selectedIds = new Set();
 			selectionMode = false;
-			await contactsStore.loadContacts();
 		} catch (e) {
 			toastStore.error(e instanceof Error ? e.message : 'Fehler beim Archivieren');
 		} finally {
@@ -220,7 +218,6 @@
 			toastStore.success(`${result.success} Kontakte zu Favoriten hinzugefügt`);
 			selectedIds = new Set();
 			selectionMode = false;
-			await contactsStore.loadContacts();
 		} catch (e) {
 			toastStore.error(e instanceof Error ? e.message : 'Fehler');
 		} finally {
@@ -228,67 +225,7 @@
 		}
 	}
 
-	function setupInfiniteScroll() {
-		if (intersectionObserver) {
-			intersectionObserver.disconnect();
-		}
-
-		intersectionObserver = new IntersectionObserver(
-			(entries) => {
-				const entry = entries[0];
-				if (entry?.isIntersecting && contactsStore.hasMore && !contactsStore.loadingMore) {
-					contactsStore.loadMore();
-				}
-			},
-			{
-				rootMargin: '200px',
-				threshold: 0.1,
-			}
-		);
-
-		if (loadMoreTrigger) {
-			intersectionObserver.observe(loadMoreTrigger);
-		}
-	}
-
-	onMount(async () => {
-		// Only load if not already loaded
-		if (contactsStore.contacts.length === 0 && !contactsStore.selfContact) {
-			await contactsStore.loadContacts();
-		}
-
-		// Setup infinite scroll after DOM is ready
-		setupInfiniteScroll();
-	});
-
-	onDestroy(() => {
-		if (intersectionObserver) {
-			intersectionObserver.disconnect();
-		}
-	});
-
-	// Re-setup observer when trigger element changes
-	$effect(() => {
-		if (loadMoreTrigger && intersectionObserver) {
-			intersectionObserver.disconnect();
-			intersectionObserver.observe(loadMoreTrigger);
-		}
-	});
-
-	// Reload contacts when tag filter changes (tag filtering is server-side)
-	let lastTagId: string | null = null;
-	$effect(() => {
-		const currentTagId = contactsFilterStore.selectedTagId;
-		if (currentTagId !== lastTagId) {
-			lastTagId = currentTagId;
-			if (currentTagId) {
-				contactsStore.setTagId(currentTagId);
-			} else {
-				contactsStore.setTagId(undefined);
-			}
-			contactsStore.loadContacts();
-		}
-	});
+	// Tag filtering is now client-side via the filteredContacts $derived
 </script>
 
 <div class="space-y-6">
@@ -372,14 +309,8 @@
 		</div>
 	{/if}
 
-	<!-- Loading state with skeleton -->
-	{#if contactsStore.loading}
-		{#if viewModeStore.mode === 'grid'}
-			<ContactGridSkeleton count={8} />
-		{:else}
-			<ContactListSkeleton count={10} />
-		{/if}
-	{:else if contactsStore.contacts.length === 0 && !contactsStore.selfContact}
+	<!-- Empty state -->
+	{#if contacts.length === 0}
 		<!-- Empty state -->
 		<div class="text-center py-12">
 			<div class="text-6xl mb-4">👤</div>
@@ -390,45 +321,6 @@
 			</button>
 		</div>
 	{:else}
-		<!-- Self Contact Card ("My Card") -->
-		{#if contactsStore.selfContact}
-			{@const self = contactsStore.selfContact}
-			<button type="button" class="self-contact-card" onclick={() => goto(`/contacts/${self.id}`)}>
-				<div class="self-contact-avatar">
-					{#if self.photoUrl}
-						<img
-							src={self.photoUrl}
-							alt={self.displayName || ''}
-							class="w-full h-full object-cover rounded-full"
-						/>
-					{:else}
-						<span class="text-lg font-semibold text-primary">
-							{(self.firstName?.[0] || self.email?.[0] || '?').toUpperCase()}
-						</span>
-					{/if}
-				</div>
-				<div class="flex-1 min-w-0 text-left">
-					<div class="flex items-center gap-2">
-						<span class="font-semibold text-foreground truncate">
-							{self.displayName || self.email || $_('contacts.myCard')}
-						</span>
-						<span class="self-badge">{$_('contacts.me')}</span>
-					</div>
-					{#if self.email}
-						<p class="text-sm text-muted-foreground truncate">{self.email}</p>
-					{/if}
-				</div>
-				<svg
-					class="w-5 h-5 text-muted-foreground shrink-0"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-				</svg>
-			</button>
-		{/if}
-
 		<!-- Contacts View -->
 		{#if viewModeStore.mode === 'grid'}
 			<ContactGridView
@@ -451,69 +343,15 @@
 			/>
 		{/if}
 
-		<!-- Infinite scroll trigger & loading more indicator -->
-		{#if contactsStore.hasMore}
-			<div bind:this={loadMoreTrigger} class="load-more-trigger">
-				{#if contactsStore.loadingMore}
-					<div class="loading-more">
-						<div class="loading-spinner"></div>
-						<span>{$_('common.loadingMore')}</span>
-					</div>
-				{/if}
-			</div>
-		{/if}
-
 		<!-- Total count -->
 		<p class="text-sm text-muted-foreground text-center">
-			{contactsStore.contacts.length} / {contactsStore.total}
-			{contactsStore.total === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
+			{contacts.length}
+			{contacts.length === 1 ? $_('contacts.contact') : $_('contacts.contactsPlural')}
 		</p>
 	{/if}
 </div>
 
 <style>
-	.self-contact-card {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		width: 100%;
-		padding: 0.75rem 1rem;
-		background: hsl(var(--color-surface));
-		border: 1px solid hsl(var(--color-border));
-		border-radius: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.self-contact-card:hover {
-		background: hsl(var(--color-surface-hover, var(--color-muted)));
-		border-color: hsl(var(--color-primary) / 0.3);
-	}
-
-	.self-contact-avatar {
-		width: 2.75rem;
-		height: 2.75rem;
-		border-radius: 50%;
-		background: hsl(var(--color-primary) / 0.1);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		overflow: hidden;
-		shrink: 0;
-	}
-
-	.self-badge {
-		font-size: 0.625rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		padding: 0.125rem 0.375rem;
-		border-radius: 0.25rem;
-		background: hsl(var(--color-primary) / 0.1);
-		color: hsl(var(--color-primary));
-		white-space: nowrap;
-	}
-
 	.batch-actions-bar {
 		display: flex;
 		align-items: center;
@@ -553,36 +391,5 @@
 	.batch-btn-danger:hover:not(:disabled) {
 		background: hsl(var(--color-error) / 0.15);
 		color: hsl(var(--color-error));
-	}
-
-	/* Infinite scroll */
-	.load-more-trigger {
-		height: 1px;
-		margin-top: 1rem;
-	}
-
-	.loading-more {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		padding: 1.5rem;
-		color: hsl(var(--muted-foreground));
-		font-size: 0.875rem;
-	}
-
-	.loading-spinner {
-		width: 1.25rem;
-		height: 1.25rem;
-		border: 2px solid hsl(var(--muted));
-		border-top-color: hsl(var(--primary));
-		border-radius: 50%;
-		animation: spin 0.8s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
 	}
 </style>

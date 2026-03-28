@@ -13,8 +13,7 @@
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { alarmsStore } from '$lib/stores/alarms.svelte';
-	import { timersStore } from '$lib/stores/timers.svelte';
+	import { useAllAlarms, useAllTimers, useAllWorldClocks } from '$lib/data/queries';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -26,7 +25,6 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import { alarmCollection, timerCollection } from '$lib/data/local-store';
 	import { clockOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -38,8 +36,16 @@
 		useAllTags as useAllSharedTags,
 	} from '@manacore/shared-stores';
 
-	// Shared tag store (local-first)
+	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
+	const allAlarms = useAllAlarms();
+	const allTimers = useAllTimers();
+	const allWorldClocks = useAllWorldClocks();
 	const allTags = useAllSharedTags();
+
+	// Provide data to child components via Svelte context
+	setContext('alarms', allAlarms);
+	setContext('timers', allTimers);
+	setContext('worldClocks', allWorldClocks);
 	setContext('tags', allTags);
 
 	// Guest welcome modal state
@@ -81,44 +87,38 @@
 		{ id: 'settings', label: 'Einstellungen', icon: 'settings', href: '/settings' },
 	];
 
-	// CommandBar search - search alarms and timers
+	// CommandBar search - search alarms and timers using live query data
 	async function handleCommandBarSearch(query: string): Promise<CommandBarItem[]> {
 		if (!query.trim()) return [];
 
 		const queryLower = query.toLowerCase();
 		const results: CommandBarItem[] = [];
 
-		try {
-			// Search alarms (local-first — reads from IndexedDB)
-			const alarms = await alarmCollection.getAll();
-			const matchingAlarms = alarms
-				.filter((alarm) => alarm.label?.toLowerCase().includes(queryLower))
-				.slice(0, 5)
-				.map((alarm) => ({
-					id: `alarm-${alarm.id}`,
-					title: alarm.label || 'Wecker',
-					subtitle: `⏰ ${alarm.time} ${alarm.enabled ? '(aktiv)' : '(inaktiv)'}`,
-				}));
-			results.push(...matchingAlarms);
+		// Search alarms (from live query)
+		const matchingAlarms = allAlarms.value
+			.filter((alarm) => alarm.label?.toLowerCase().includes(queryLower))
+			.slice(0, 5)
+			.map((alarm) => ({
+				id: `alarm-${alarm.id}`,
+				title: alarm.label || 'Wecker',
+				subtitle: `${alarm.time.slice(0, 5)} ${alarm.enabled ? '(aktiv)' : '(inaktiv)'}`,
+			}));
+		results.push(...matchingAlarms);
 
-			// Search timers (local-first — reads from IndexedDB)
-			const timers = await timerCollection.getAll();
-			const matchingTimers = timers
-				.filter((timer) => timer.label?.toLowerCase().includes(queryLower))
-				.slice(0, 5)
-				.map((timer) => {
-					const mins = Math.floor(timer.durationSeconds / 60);
-					const secs = timer.durationSeconds % 60;
-					return {
-						id: `timer-${timer.id}`,
-						title: timer.label || 'Timer',
-						subtitle: `⏱️ ${mins}:${secs.toString().padStart(2, '0')} ${timer.status === 'running' ? '(läuft)' : ''}`,
-					};
-				});
-			results.push(...matchingTimers);
-		} catch {
-			// Ignore errors
-		}
+		// Search timers (from live query)
+		const matchingTimers = allTimers.value
+			.filter((timer) => timer.label?.toLowerCase().includes(queryLower))
+			.slice(0, 5)
+			.map((timer) => {
+				const mins = Math.floor(timer.durationSeconds / 60);
+				const secs = timer.durationSeconds % 60;
+				return {
+					id: `timer-${timer.id}`,
+					title: timer.label || 'Timer',
+					subtitle: `${mins}:${secs.toString().padStart(2, '0')} ${timer.status === 'running' ? '(läuft)' : ''}`,
+				};
+			});
+		results.push(...matchingTimers);
 
 		return results.slice(0, 10);
 	}

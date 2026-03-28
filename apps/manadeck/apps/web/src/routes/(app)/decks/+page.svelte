@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { deckStore } from '$lib/stores/deckStore.svelte';
 	import { Button, ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
@@ -7,12 +7,11 @@
 	import CreateDeckModal from '$lib/components/deck/CreateDeckModal.svelte';
 	import type { Deck } from '$lib/types/deck';
 
+	// Get live query data from layout context
+	const allDecks: { readonly value: Deck[] } = getContext('decks');
+
 	let showCreateModal = $state(false);
 	let contextMenu = $state({ visible: false, x: 0, y: 0, target: null as Deck | null });
-
-	onMount(() => {
-		deckStore.fetchDecks();
-	});
 
 	function handleDeckClick(deckId: string) {
 		goto(`/decks/${deckId}`);
@@ -62,26 +61,13 @@
 		</Button>
 	</div>
 
-	<!-- Loading State -->
-	{#if deckStore.loading && deckStore.decks.length === 0}
-		<div class="flex justify-center py-12">
-			<div class="text-center">
-				<div
-					class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
-				></div>
-				<p class="mt-4 text-muted-foreground">Loading decks...</p>
-			</div>
-		</div>
-	{:else if deckStore.error}
-		<!-- Error State -->
+	<!-- Error State -->
+	{#if deckStore.error}
 		<div class="p-4 rounded-lg bg-destructive/10 text-destructive">
 			<p class="font-medium">Error loading decks</p>
 			<p class="text-sm mt-1">{deckStore.error}</p>
-			<Button variant="outline" class="mt-3" onclick={() => deckStore.fetchDecks()}>
-				Try Again
-			</Button>
 		</div>
-	{:else if deckStore.decks.length === 0}
+	{:else if allDecks.value.length === 0}
 		<!-- Empty State -->
 		<div class="text-center py-12">
 			<div class="text-6xl mb-4">📚</div>
@@ -94,7 +80,7 @@
 	{:else}
 		<!-- Decks Grid -->
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-			{#each deckStore.decks as deck (deck.id)}
+			{#each allDecks.value as deck (deck.id)}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div oncontextmenu={(e) => handleContextMenu(e, deck)}>
 					<DeckCard {deck} onclick={() => handleDeckClick(deck.id)} />

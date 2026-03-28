@@ -1,30 +1,30 @@
 /**
- * Files Store - Manages files and folders state
+ * Files Store — Mutation-Only (Local-First reads via queries.ts)
+ *
+ * Reads are handled by useLiveQuery hooks in queries.ts.
+ * This store handles writes, selection state, view mode, and
+ * server-side operations (upload, download, share) that remain API-based.
  */
 
 import { filesApi, foldersApi } from '$lib/api/client';
 import type { StorageFile, StorageFolder } from '$lib/api/client';
 import { trackEvent, StorageEvents } from '@manacore/shared-utils/analytics';
+import {
+	fileCollection,
+	folderCollection,
+	type LocalFile,
+	type LocalFolder,
+} from '$lib/data/local-store';
+import { toFile, toFolder } from '$lib/data/queries';
 
-let files = $state<StorageFile[]>([]);
-let folders = $state<StorageFolder[]>([]);
-let currentFolder = $state<StorageFolder | null>(null);
 let loading = $state(false);
 let error = $state<string | null>(null);
 let viewMode = $state<'grid' | 'list'>('grid');
 let selectedFileIds = $state<Set<string>>(new Set());
 let selectedFolderIds = $state<Set<string>>(new Set());
+let currentFolderId = $state<string | null>(null);
 
 export const filesStore = {
-	get files() {
-		return files;
-	},
-	get folders() {
-		return folders;
-	},
-	get currentFolder() {
-		return currentFolder;
-	},
 	get loading() {
 		return loading;
 	},
@@ -43,6 +43,9 @@ export const filesStore = {
 	get selectionCount() {
 		return selectedFileIds.size + selectedFolderIds.size;
 	},
+	get currentFolderId() {
+		return currentFolderId;
+	},
 
 	toggleFileSelection(id: string) {
 		const next = new Set(selectedFileIds);
@@ -58,7 +61,7 @@ export const filesStore = {
 		selectedFolderIds = next;
 	},
 
-	selectAll() {
+	selectAllFromLists(files: StorageFile[], folders: StorageFolder[]) {
 		selectedFileIds = new Set(files.map((f) => f.id));
 		selectedFolderIds = new Set(folders.map((f) => f.id));
 	},
@@ -66,26 +69,6 @@ export const filesStore = {
 	clearSelection() {
 		selectedFileIds = new Set();
 		selectedFolderIds = new Set();
-	},
-
-	async deleteSelected() {
-		const fileIds = [...selectedFileIds];
-		const folderIds = [...selectedFolderIds];
-
-		const results = await Promise.all([
-			...fileIds.map((id) => filesApi.delete(id)),
-			...folderIds.map((id) => foldersApi.delete(id)),
-		]);
-
-		const hasErrors = results.some((r) => r.error);
-		if (!hasErrors) {
-			files = files.filter((f) => !selectedFileIds.has(f.id));
-			folders = folders.filter((f) => !selectedFolderIds.has(f.id));
-		}
-
-		selectedFileIds = new Set();
-		selectedFolderIds = new Set();
-		return { deleted: fileIds.length + folderIds.length, hasErrors };
 	},
 
 	setViewMode(mode: 'grid' | 'list') {
@@ -105,64 +88,53 @@ export const filesStore = {
 		}
 	},
 
-	async loadFolder(folderId?: string) {
-		loading = true;
-		error = null;
+	setCurrentFolder(folderId: string | null) {
+		currentFolderId = folderId;
 		selectedFileIds = new Set();
 		selectedFolderIds = new Set();
-
-		try {
-			if (folderId) {
-				const result = await foldersApi.get(folderId);
-				if (result.error) {
-					error = result.error;
-					return;
-				}
-				if (result.data) {
-					currentFolder = result.data.folder;
-					files = result.data.files;
-					folders = result.data.subfolders;
-				}
-			} else {
-				// Load root
-				currentFolder = null;
-				const [filesResult, foldersResult] = await Promise.all([
-					filesApi.list(),
-					foldersApi.list(),
-				]);
-
-				if (filesResult.error) {
-					error = filesResult.error;
-					return;
-				}
-				if (foldersResult.error) {
-					error = foldersResult.error;
-					return;
-				}
-
-				files = filesResult.data || [];
-				folders = foldersResult.data || [];
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Unknown error';
-		} finally {
-			loading = false;
-		}
 	},
 
-	async uploadFile(file: File) {
-		const result = await filesApi.upload(file, currentFolder?.id);
+	// ─── Server-side operations (remain API-based) ────────
+
+	async uploadFile(file: File, parentFolderId?: string | null) {
+		const result = await filesApi.upload(file, parentFolderId ?? currentFolderId ?? undefined);
 		if (result.data) {
-			files = [...files, result.data];
+			// Also insert into local store for liveQuery reactivity
+			const localFile: LocalFile = {
+				id: result.data.id,
+				name: result.data.name,
+				originalName: result.data.originalName,
+				mimeType: result.data.mimeType,
+				size: result.data.size,
+				storagePath: result.data.storagePath,
+				storageKey: result.data.storageKey,
+				parentFolderId: result.data.parentFolderId,
+				currentVersion: result.data.currentVersion,
+				isFavorite: result.data.isFavorite,
+				isDeleted: result.data.isDeleted,
+			};
+			await fileCollection.insert(localFile);
 			trackEvent('file_uploaded', { size: Math.round(file.size / 1024) });
 		}
 		return result;
 	},
 
 	async createFolder(name: string, color?: string) {
-		const result = await foldersApi.create(name, currentFolder?.id, color);
+		const result = await foldersApi.create(name, currentFolderId ?? undefined, color);
 		if (result.data) {
-			folders = [...folders, result.data];
+			// Also insert into local store for liveQuery reactivity
+			const localFolder: LocalFolder = {
+				id: result.data.id,
+				name: result.data.name,
+				description: result.data.description,
+				color: result.data.color,
+				parentFolderId: result.data.parentFolderId,
+				path: result.data.path,
+				depth: result.data.depth,
+				isFavorite: result.data.isFavorite,
+				isDeleted: result.data.isDeleted,
+			};
+			await folderCollection.insert(localFolder);
 			trackEvent('folder_created');
 		}
 		return result;
@@ -171,7 +143,7 @@ export const filesStore = {
 	async deleteFile(id: string) {
 		const result = await filesApi.delete(id);
 		if (!result.error) {
-			files = files.filter((f) => f.id !== id);
+			await fileCollection.update(id, { isDeleted: true });
 			StorageEvents.fileDeleted();
 		}
 		return result;
@@ -180,16 +152,40 @@ export const filesStore = {
 	async deleteFolder(id: string) {
 		const result = await foldersApi.delete(id);
 		if (!result.error) {
-			folders = folders.filter((f) => f.id !== id);
+			await folderCollection.update(id, { isDeleted: true });
 			StorageEvents.folderDeleted();
 		}
 		return result;
 	},
 
+	async deleteSelected(files: StorageFile[], folders: StorageFolder[]) {
+		const fileIds = [...selectedFileIds];
+		const folderIds = [...selectedFolderIds];
+
+		const results = await Promise.all([
+			...fileIds.map((id) => filesApi.delete(id)),
+			...folderIds.map((id) => foldersApi.delete(id)),
+		]);
+
+		const hasErrors = results.some((r) => r.error);
+		if (!hasErrors) {
+			for (const id of fileIds) {
+				await fileCollection.update(id, { isDeleted: true });
+			}
+			for (const id of folderIds) {
+				await folderCollection.update(id, { isDeleted: true });
+			}
+		}
+
+		selectedFileIds = new Set();
+		selectedFolderIds = new Set();
+		return { deleted: fileIds.length + folderIds.length, hasErrors };
+	},
+
 	async toggleFileFavorite(id: string) {
 		const result = await filesApi.toggleFavorite(id);
 		if (result.data) {
-			files = files.map((f) => (f.id === id ? result.data! : f));
+			await fileCollection.update(id, { isFavorite: result.data.isFavorite });
 			StorageEvents.fileFavorited(result.data.isFavorite);
 		}
 		return result;
@@ -198,7 +194,7 @@ export const filesStore = {
 	async toggleFolderFavorite(id: string) {
 		const result = await foldersApi.toggleFavorite(id);
 		if (result.data) {
-			folders = folders.map((f) => (f.id === id ? result.data! : f));
+			await folderCollection.update(id, { isFavorite: result.data.isFavorite });
 			StorageEvents.folderFavorited(result.data.isFavorite);
 		}
 		return result;
@@ -207,7 +203,7 @@ export const filesStore = {
 	async renameFile(id: string, name: string) {
 		const result = await filesApi.rename(id, name);
 		if (result.data) {
-			files = files.map((f) => (f.id === id ? result.data! : f));
+			await fileCollection.update(id, { name: result.data.name });
 		}
 		return result;
 	},
@@ -215,7 +211,7 @@ export const filesStore = {
 	async renameFolder(id: string, name: string) {
 		const result = await foldersApi.rename(id, name);
 		if (result.data) {
-			folders = folders.map((f) => (f.id === id ? result.data! : f));
+			await folderCollection.update(id, { name: result.data.name });
 		}
 		return result;
 	},
@@ -223,7 +219,7 @@ export const filesStore = {
 	async moveFile(id: string, targetFolderId: string) {
 		const result = await filesApi.move(id, targetFolderId);
 		if (!result.error) {
-			files = files.filter((f) => f.id !== id);
+			await fileCollection.update(id, { parentFolderId: targetFolderId });
 		}
 		return result;
 	},
@@ -231,7 +227,7 @@ export const filesStore = {
 	async moveFolder(id: string, targetFolderId: string) {
 		const result = await foldersApi.move(id, targetFolderId);
 		if (!result.error) {
-			folders = folders.filter((f) => f.id !== id);
+			await folderCollection.update(id, { parentFolderId: targetFolderId });
 		}
 		return result;
 	},

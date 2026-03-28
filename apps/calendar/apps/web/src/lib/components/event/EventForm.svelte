@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { getDefaultCalendar } from '$lib/data/queries';
+	import type { Calendar } from '@calendar/shared';
 	import type { Tag as SharedTag } from '@manacore/shared-tags';
 
-	// Live tags from layout context
+	// Live data from layout context
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 	const tagsCtx: { readonly value: SharedTag[] } = getContext('tags');
 	import {
 		TagSelector,
@@ -112,7 +114,7 @@
 
 	// Calendar options for FilterDropdown
 	let calendarOptions = $derived<FilterDropdownOption[]>(
-		calendarsStore.calendars.map((cal) => ({ value: cal.id, label: cal.name }))
+		calendarsCtx.value.map((cal) => ({ value: cal.id, label: cal.name }))
 	);
 
 	// All-day display mode options
@@ -134,8 +136,9 @@
 
 	// Set default calendar when calendars are loaded
 	$effect(() => {
-		if (!calendarId && calendarsStore.defaultCalendar?.id) {
-			calendarId = calendarsStore.defaultCalendar.id;
+		const defaultCal = getDefaultCalendar(calendarsCtx.value);
+		if (!calendarId && defaultCal?.id) {
+			calendarId = defaultCal.id;
 		}
 	});
 
@@ -273,7 +276,7 @@
 
 	<div class="flex flex-col gap-2">
 		<span class="text-sm font-medium text-foreground">Kalender</span>
-		{#if calendarsStore.calendars.length > 0}
+		{#if calendarsCtx.value.length > 0}
 			<FilterDropdown
 				options={calendarOptions}
 				value={calendarId}

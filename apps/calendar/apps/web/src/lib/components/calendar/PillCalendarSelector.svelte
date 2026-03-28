@@ -1,6 +1,11 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import type { Calendar } from '@calendar/shared';
 	import { goto } from '$app/navigation';
+
+	// Get calendars from layout context (live query)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
 	// Portal action - moves element to body to escape stacking contexts
 	function portal(node: HTMLElement) {
@@ -46,7 +51,7 @@
 	}
 
 	function handleToggle(calendarId: string) {
-		calendarsStore.toggleVisibility(calendarId);
+		calendarsStore.toggleVisibility(calendarId, calendarsCtx.value);
 	}
 
 	function handleAddCalendar() {
@@ -55,8 +60,8 @@
 	}
 
 	// Count visible calendars
-	let visibleCount = $derived(calendarsStore.calendars.filter((c) => c.isVisible).length);
-	let totalCount = $derived(calendarsStore.calendars.length);
+	let visibleCount = $derived(calendarsCtx.value.filter((c) => c.isVisible).length);
+	let totalCount = $derived(calendarsCtx.value.length);
 </script>
 
 <div class="pill-calendar-selector">
@@ -123,7 +128,7 @@
 			</div>
 
 			<div class="calendar-list">
-				{#each calendarsStore.calendars as calendar}
+				{#each calendarsCtx.value as calendar}
 					<label class="calendar-item">
 						<input
 							type="checkbox"
@@ -136,7 +141,7 @@
 					</label>
 				{/each}
 
-				{#if calendarsStore.calendars.length === 0}
+				{#if calendarsCtx.value.length === 0}
 					<p class="empty-message">Keine Kalender</p>
 				{/if}
 			</div>

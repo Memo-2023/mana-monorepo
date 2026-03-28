@@ -1,269 +1,132 @@
 /**
- * Conversations Store - Manages conversation list using Svelte 5 runes
- * Supports both authenticated (cloud) and guest (session) modes
+ * Conversations Store — Mutation-Only Service
+ *
+ * All reads are handled by useLiveQuery() hooks in data/queries.ts.
+ * This store only provides write operations (archive, pin, delete, etc.).
+ * IndexedDB writes automatically trigger UI updates via Dexie liveQuery.
  */
 
-import { conversationService } from '$lib/services/conversation';
+import { conversationCollection, type LocalConversation } from '$lib/data/local-store';
+import { toConversation } from '$lib/data/queries';
 import { toastStore } from '@manacore/shared-ui';
-import { sessionConversationsStore } from './session-conversations.svelte';
-import { authStore } from './auth.svelte';
 import type { Conversation } from '@chat/types';
 
-// State
-let conversations = $state<Conversation[]>([]);
-let archivedConversations = $state<Conversation[]>([]);
-let isLoading = $state(false);
 let error = $state<string | null>(null);
 
-/**
- * Sort conversations: pinned first, then by updatedAt descending
- */
-function sortConversations(list: Conversation[]): Conversation[] {
-	return [...list].sort((a, b) => {
-		if (a.isPinned && !b.isPinned) return -1;
-		if (!a.isPinned && b.isPinned) return 1;
-		return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-	});
-}
-
 export const conversationsStore = {
-	// Getters
-	get conversations() {
-		return conversations;
-	},
-	get archivedConversations() {
-		return archivedConversations;
-	},
-	get isLoading() {
-		return isLoading;
-	},
 	get error() {
 		return error;
 	},
 
 	/**
-	 * Load conversations (userId is derived from JWT on backend)
-	 * In guest mode, loads from session storage
+	 * Update a conversation's fields in local-store
 	 */
-	async loadConversations(spaceId?: string) {
-		isLoading = true;
+	async updateConversation(conversationId: string, updates: Partial<LocalConversation>) {
 		error = null;
-
-		// Guest mode: load from session storage
-		if (!authStore.isAuthenticated) {
-			conversations = sessionConversationsStore.conversations;
-			isLoading = false;
-			return;
-		}
-
-		// Authenticated: fetch from API
 		try {
-			conversations = await conversationService.getConversations(spaceId);
+			await conversationCollection.update(conversationId, updates);
 		} catch (e) {
-			const message =
-				e instanceof Error ? e.message : 'Konversationen konnten nicht geladen werden';
-			error = message;
-			toastStore.error(message);
-			conversations = [];
-		} finally {
-			isLoading = false;
+			error = e instanceof Error ? e.message : 'Konversation konnte nicht aktualisiert werden';
+			console.error('Failed to update conversation:', e);
 		}
 	},
 
 	/**
-	 * Load archived conversations
-	 */
-	async loadArchivedConversations() {
-		isLoading = true;
-		error = null;
-
-		try {
-			archivedConversations = await conversationService.getArchivedConversations();
-		} catch (e) {
-			const message =
-				e instanceof Error ? e.message : 'Archivierte Konversationen konnten nicht geladen werden';
-			error = message;
-			toastStore.error(message);
-			archivedConversations = [];
-		} finally {
-			isLoading = false;
-		}
-	},
-
-	/**
-	 * Add a new conversation to the list
-	 */
-	addConversation(conversation: Conversation) {
-		conversations = [conversation, ...conversations];
-	},
-
-	/**
-	 * Update a conversation in the list
-	 */
-	updateConversation(conversationId: string, updates: Partial<Conversation>) {
-		conversations = conversations.map((c) => (c.id === conversationId ? { ...c, ...updates } : c));
-	},
-
-	/**
-	 * Update conversation title via API and update local state
+	 * Update conversation title
 	 */
 	async updateConversationTitle(conversationId: string, title: string): Promise<boolean> {
-		const success = await conversationService.updateTitle(conversationId, title);
-		if (success) {
-			this.updateConversation(conversationId, { title });
+		error = null;
+		try {
+			await conversationCollection.update(conversationId, { title });
+			return true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Titel konnte nicht aktualisiert werden';
+			return false;
 		}
-		return success;
 	},
 
 	/**
 	 * Archive a conversation
 	 */
-	async archiveConversation(conversationId: string) {
-		const success = await conversationService.archiveConversation(conversationId);
-
-		if (success) {
-			const conversation = conversations.find((c) => c.id === conversationId);
-			if (conversation) {
-				conversations = conversations.filter((c) => c.id !== conversationId);
-				archivedConversations = [{ ...conversation, isArchived: true }, ...archivedConversations];
-			}
+	async archiveConversation(conversationId: string): Promise<boolean> {
+		error = null;
+		try {
+			await conversationCollection.update(conversationId, { isArchived: true });
 			toastStore.success('Konversation archiviert');
-		} else {
+			return true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Konversation konnte nicht archiviert werden';
 			toastStore.error('Konversation konnte nicht archiviert werden');
+			return false;
 		}
-
-		return success;
 	},
 
 	/**
 	 * Unarchive a conversation
 	 */
-	async unarchiveConversation(conversationId: string) {
-		const success = await conversationService.unarchiveConversation(conversationId);
-
-		if (success) {
-			const conversation = archivedConversations.find((c) => c.id === conversationId);
-			if (conversation) {
-				archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
-				conversations = sortConversations([
-					{ ...conversation, isArchived: false },
-					...conversations,
-				]);
-			}
+	async unarchiveConversation(conversationId: string): Promise<boolean> {
+		error = null;
+		try {
+			await conversationCollection.update(conversationId, { isArchived: false });
 			toastStore.success('Konversation wiederhergestellt');
-		} else {
+			return true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Konversation konnte nicht wiederhergestellt werden';
 			toastStore.error('Konversation konnte nicht wiederhergestellt werden');
+			return false;
 		}
-
-		return success;
 	},
 
 	/**
 	 * Delete a conversation
 	 */
-	async deleteConversation(conversationId: string) {
-		const success = await conversationService.deleteConversation(conversationId);
-
-		if (success) {
-			conversations = conversations.filter((c) => c.id !== conversationId);
-			archivedConversations = archivedConversations.filter((c) => c.id !== conversationId);
+	async deleteConversation(conversationId: string): Promise<boolean> {
+		error = null;
+		try {
+			await conversationCollection.delete(conversationId);
 			toastStore.success('Konversation gelöscht');
-		} else {
+			return true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Konversation konnte nicht gelöscht werden';
 			toastStore.error('Konversation konnte nicht gelöscht werden');
+			return false;
 		}
-
-		return success;
 	},
 
 	/**
-	 * Pin a conversation (moves it to top of list)
+	 * Pin a conversation
 	 */
-	async pinConversation(conversationId: string) {
-		const success = await conversationService.pinConversation(conversationId);
-
-		if (success) {
-			conversations = sortConversations(
-				conversations.map((c) => (c.id === conversationId ? { ...c, isPinned: true } : c))
-			);
-		} else {
+	async pinConversation(conversationId: string): Promise<boolean> {
+		error = null;
+		try {
+			await conversationCollection.update(conversationId, { isPinned: true });
+			return true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Konversation konnte nicht angepinnt werden';
 			toastStore.error('Konversation konnte nicht angepinnt werden');
+			return false;
 		}
-
-		return success;
 	},
 
 	/**
 	 * Unpin a conversation
 	 */
-	async unpinConversation(conversationId: string) {
-		const success = await conversationService.unpinConversation(conversationId);
-
-		if (success) {
-			conversations = sortConversations(
-				conversations.map((c) => (c.id === conversationId ? { ...c, isPinned: false } : c))
-			);
-		} else {
+	async unpinConversation(conversationId: string): Promise<boolean> {
+		error = null;
+		try {
+			await conversationCollection.update(conversationId, { isPinned: false });
+			return true;
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Konversation konnte nicht losgelöst werden';
 			toastStore.error('Konversation konnte nicht losgelöst werden');
+			return false;
 		}
-
-		return success;
 	},
 
 	/**
-	 * Clear all data
+	 * Reset error state
 	 */
 	reset() {
-		conversations = [];
-		archivedConversations = [];
 		error = null;
-	},
-
-	/**
-	 * Get session conversation count (for guest mode banner)
-	 */
-	get sessionConversationCount(): number {
-		return sessionConversationsStore.count;
-	},
-
-	/**
-	 * Check if there are session conversations
-	 */
-	get hasSessionConversations(): boolean {
-		return sessionConversationsStore.count > 0;
-	},
-
-	/**
-	 * Migrate session conversations to cloud after login
-	 * Note: This is a placeholder - actual implementation would need backend support
-	 */
-	async migrateSessionConversations(): Promise<void> {
-		if (!authStore.isAuthenticated) return;
-
-		const sessionData = sessionConversationsStore.getAllConversations();
-		if (sessionData.conversations.length === 0) return;
-
-		// For now, we just clear the session data
-		// In a full implementation, you would create each conversation via API
-		// and transfer the messages
-		console.log(
-			'Session conversations would be migrated:',
-			sessionData.conversations.length,
-			'conversations'
-		);
-
-		// Clear session data after migration
-		sessionConversationsStore.clear();
-
-		// Reload conversations from server
-		await this.loadConversations();
-
-		toastStore.success('Unterhaltungen wurden in deinen Account übertragen');
-	},
-
-	/**
-	 * Check if a conversation ID is a session conversation
-	 */
-	isSessionConversation(id: string): boolean {
-		return sessionConversationsStore.isSessionConversation(id);
 	},
 };

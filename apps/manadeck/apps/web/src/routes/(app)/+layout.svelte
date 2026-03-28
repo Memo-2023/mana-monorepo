@@ -24,7 +24,7 @@
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
-	import { deckStore } from '$lib/stores/deckStore.svelte';
+	import { useAllDecks } from '$lib/data/queries';
 	import { manadeckOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -34,7 +34,12 @@
 	// App switcher items
 	const appItems = getPillAppItems('manadeck');
 
+	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
+	const allDecks = useAllDecks();
 	const allTags = useAllSharedTags();
+
+	// Provide data to child components via Svelte context
+	setContext('decks', allDecks);
 	setContext('tags', allTags);
 
 	let { children } = $props();
@@ -170,7 +175,7 @@
 	// QuickInputBar handlers
 	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
 		const q = query.toLowerCase();
-		return deckStore.decks
+		return allDecks.value
 			.filter((d) => d.title.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q))
 			.slice(0, 10)
 			.map((deck) => ({
@@ -194,9 +199,6 @@
 			manadeckStore.startSync(getToken);
 			tagMutations.startSync(getToken);
 		}
-
-		// Load decks from IndexedDB (guest seed or synced data)
-		await deckStore.fetchDecks();
 
 		// Show guest welcome modal on first visit
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('manadeck')) {

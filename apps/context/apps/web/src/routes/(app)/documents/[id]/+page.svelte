@@ -5,6 +5,7 @@
 	import { ArrowLeft, Trash, Sparkle } from '@manacore/shared-icons';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { documentsStore } from '$lib/stores/documents.svelte';
+	import { useAllDocuments, findDocumentById } from '$lib/data/queries';
 	import { tokensStore } from '$lib/stores/tokens.svelte';
 	import DocumentEditor from '$lib/components/DocumentEditor.svelte';
 	import AIToolbar from '$lib/components/AIToolbar.svelte';
@@ -12,32 +13,19 @@
 	import type { Document, DocumentType } from '$lib/types';
 	import type { InsertionMode } from '$lib/services/ai';
 
-	let loading = $state(true);
 	let showDeleteConfirm = $state(false);
 	let showAI = $state(false);
 
 	let docId = $derived($page.params.id || '');
-	let doc = $derived(documentsStore.currentDocument);
+
+	const allDocuments = useAllDocuments();
+	let doc = $derived(findDocumentById(allDocuments.value ?? [], docId) ?? null);
 
 	onMount(() => {
-		const init = async () => {
-			await documentsStore.loadDocument(docId);
-			if (!documentsStore.currentDocument) {
-				goto('/documents');
-				return;
-			}
-			loading = false;
-
-			// Load token balance
-			if (authStore.user?.id) {
-				tokensStore.loadBalance(authStore.user.id);
-			}
-		};
-		init();
-
-		return () => {
-			documentsStore.clearCurrent();
-		};
+		// Load token balance
+		if (authStore.user?.id) {
+			tokensStore.loadBalance(authStore.user.id);
+		}
 	});
 
 	function handleSave(updates: Partial<Document>) {
@@ -64,9 +52,7 @@
 		} else if (mode === 'replace') {
 			documentsStore.update(docId, { content: text });
 		}
-
-		// Reload document to get updated content
-		documentsStore.loadDocument(docId);
+		// liveQuery will automatically update the doc
 	}
 
 	async function handleDelete() {
@@ -84,7 +70,7 @@
 </svelte:head>
 
 <div class="mx-auto max-w-4xl pb-48">
-	{#if loading}
+	{#if !doc && !allDocuments.error}
 		<div class="text-center py-12 text-muted-foreground">Lade Dokument...</div>
 	{:else if doc}
 		<!-- Breadcrumb -->

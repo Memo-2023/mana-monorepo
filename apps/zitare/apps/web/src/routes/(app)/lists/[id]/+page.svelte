@@ -2,7 +2,9 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { _, locale } from 'svelte-i18n';
-	import { listsStore, type QuoteList } from '$lib/stores/lists.svelte';
+	import { getContext } from 'svelte';
+	import { listsStore } from '$lib/stores/lists.svelte';
+	import { findListById, type QuoteList } from '$lib/data/queries';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
@@ -10,9 +12,8 @@
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 
 	const allQuotes = QUOTES;
+	const allLists: { readonly value: QuoteList[] } = getContext('lists');
 
-	let list = $state<QuoteList | null>(null);
-	let isLoading = $state(true);
 	let isSaving = $state(false);
 	let isAdding = $state(false);
 	let removingQuoteId = $state<string | null>(null);
@@ -24,28 +25,8 @@
 	let editDescription = $state('');
 	let selectedQuoteIds = $state<Set<string>>(new Set());
 
-	// Load list on mount
-	$effect(() => {
-		const listId = $page.params.id;
-		if (listId) {
-			loadList(listId);
-		}
-	});
-
-	async function loadList(listId: string) {
-		if (!authStore.isAuthenticated) {
-			goto('/login');
-			return;
-		}
-
-		isLoading = true;
-		list = await listsStore.getList(listId);
-		isLoading = false;
-
-		if (!list) {
-			toast.error($_('lists.detail.notFound'));
-		}
-	}
+	// Reactive list from liveQuery context
+	let list = $derived<QuoteList | undefined>(findListById(allLists.value, $page.params.id));
 
 	// Get quotes in this list
 	let listQuotes = $derived<Quote[]>(
@@ -94,7 +75,6 @@
 				description: editDescription.trim() || undefined,
 			});
 			if (updated) {
-				list = updated;
 				toast.success($_('lists.detail.toast.updated'));
 				closeEditModal();
 			} else {
@@ -146,7 +126,6 @@
 				if (success) successCount++;
 			}
 			if (successCount > 0) {
-				list = await listsStore.getList(list.id);
 				toast.success($_('lists.detail.toast.quotesAdded', { values: { count: successCount } }));
 			}
 			closeAddQuotesModal();
@@ -161,7 +140,6 @@
 		try {
 			const success = await listsStore.removeQuoteFromList(list.id, quoteId);
 			if (success) {
-				list = await listsStore.getList(list.id);
 				toast.info($_('lists.detail.toast.quoteRemoved'));
 			} else {
 				toast.error($_('lists.detail.toast.removeError'));
@@ -184,12 +162,7 @@
 	<title>{list?.name || $_('common.list')} - Zitare</title>
 </svelte:head>
 
-{#if isLoading}
-	<div class="loading-state">
-		<div class="spinner"></div>
-		<p>{$_('common.loading')}</p>
-	</div>
-{:else if !list}
+{#if !list}
 	<div class="error-state">
 		<h2>{$_('lists.detail.notFound')}</h2>
 		<p>{$_('lists.detail.notFoundDescription')}</p>

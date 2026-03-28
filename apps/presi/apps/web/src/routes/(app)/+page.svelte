@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { useAllDecks } from '$lib/data/queries';
 	import { PresiEvents } from '@manacore/shared-utils/analytics';
 	import { PageHeader, ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import {
@@ -20,12 +21,15 @@
 	let newDeckDescription = $state('');
 	let isCreating = $state(false);
 
+	const allDecks = useAllDecks();
+	let decks = $derived(allDecks.value ?? []);
+
 	let contextMenuVisible = $state(false);
 	let contextMenuX = $state(0);
 	let contextMenuY = $state(0);
-	let contextMenuDeck = $state<(typeof decksStore.decks)[0] | null>(null);
+	let contextMenuDeck = $state<(typeof decks)[0] | null>(null);
 
-	function handleContextMenu(e: MouseEvent, deck: (typeof decksStore.decks)[0]) {
+	function handleContextMenu(e: MouseEvent, deck: (typeof decks)[0]) {
 		e.preventDefault();
 		e.stopPropagation();
 		contextMenuX = e.clientX;
@@ -118,13 +122,7 @@
 		{/snippet}
 	</PageHeader>
 
-	{#if decksStore.isLoading}
-		<div class="flex items-center justify-center py-16">
-			<div
-				class="animate-spin rounded-full h-10 w-10 border-4 border-primary-500 border-t-transparent"
-			></div>
-		</div>
-	{:else if decksStore.decks.length === 0}
+	{#if decks.length === 0}
 		<div class="text-center py-16">
 			<div
 				class="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4"
@@ -143,7 +141,7 @@
 		</div>
 	{:else}
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-			{#each decksStore.decks as deck (deck.id)}
+			{#each decks as deck (deck.id)}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow"

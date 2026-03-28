@@ -3,7 +3,6 @@
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { spacesStore } from '$lib/stores/spaces.svelte';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { PageHeader } from '@manacore/shared-ui';
 	import SpaceCard from '$lib/components/spaces/SpaceCard.svelte';
 	import SpaceForm from '$lib/components/spaces/SpaceForm.svelte';

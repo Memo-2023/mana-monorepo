@@ -4,8 +4,7 @@
 	import { locale } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
-	import { sessionConversationsStore } from '$lib/stores/session-conversations.svelte';
+	import { useAllConversations, useAllTemplates } from '$lib/data/queries';
 	import { theme } from '$lib/stores/theme';
 	import {
 		THEME_DEFINITIONS,
@@ -33,8 +32,14 @@
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { chatStore } from '$lib/data/local-store';
 
-	// Live tag query + context
+	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
+	const allConversations = useAllConversations();
+	const allTemplates = useAllTemplates();
 	const allTags = useAllSharedTags();
+
+	// Provide data to child components via Svelte context
+	setContext('conversations', allConversations);
+	setContext('templates', allTemplates);
 	setContext('tags', allTags);
 
 	// App switcher items
@@ -196,11 +201,6 @@
 
 		// Load user settings
 		await userSettings.load();
-
-		// Check for session conversations to migrate
-		if (conversationsStore.hasSessionConversations) {
-			await conversationsStore.migrateSessionConversations();
-		}
 
 		// Redirect to start page if on /chat and a custom start page is set
 		const currentPath = window.location.pathname;

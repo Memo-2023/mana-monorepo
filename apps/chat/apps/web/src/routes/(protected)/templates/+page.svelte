@@ -1,23 +1,19 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { templatesStore } from '$lib/stores/templates.svelte';
 	import { conversationService } from '$lib/services/conversation';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { PageHeader } from '@manacore/shared-ui';
 	import TemplateCard from '$lib/components/templates/TemplateCard.svelte';
 	import TemplateForm from '$lib/components/templates/TemplateForm.svelte';
 	import type { Template } from '@chat/types';
 
+	const templatesCtx: { readonly value: Template[] } = getContext('templates');
+	let templates = $derived(templatesCtx.value);
+
 	let showForm = $state(false);
 	let editingTemplate = $state<Template | undefined>(undefined);
-
-	onMount(async () => {
-		if (authStore.user) {
-			await templatesStore.loadTemplates(authStore.user.id);
-		}
-	});
 
 	function handleCreateNew() {
 		editingTemplate = undefined;
@@ -25,7 +21,7 @@
 	}
 
 	function handleEdit(id: string) {
-		const template = templatesStore.templates.find((t) => t.id === id);
+		const template = templates.find((t) => t.id === id);
 		if (template) {
 			editingTemplate = template;
 			showForm = true;
@@ -39,13 +35,11 @@
 	}
 
 	async function handleSetDefault(id: string) {
-		if (authStore.user) {
-			await templatesStore.setDefaultTemplate(id, authStore.user.id);
-		}
+		await templatesStore.setDefaultTemplate(id);
 	}
 
 	async function handleUse(id: string) {
-		const template = templatesStore.templates.find((t) => t.id === id);
+		const template = templates.find((t) => t.id === id);
 		if (!template || !authStore.user) return;
 
 		// Create a new conversation with this template
@@ -57,7 +51,6 @@
 		});
 
 		if (conversationId) {
-			await conversationsStore.loadConversations();
 			goto(`/chat/${conversationId}`);
 		}
 	}
@@ -132,13 +125,7 @@
 		</PageHeader>
 
 		<!-- Loading State -->
-		{#if templatesStore.isLoading}
-			<div class="flex items-center justify-center py-16">
-				<div
-					class="animate-spin w-8 h-8 border-4 border-primary border-r-transparent rounded-full"
-				></div>
-			</div>
-		{:else if templatesStore.templates.length === 0}
+		{#if templates.length === 0}
 			<!-- Empty State -->
 			<div class="text-center py-16">
 				<svg
@@ -175,7 +162,7 @@
 		{:else}
 			<!-- Templates Grid -->
 			<div class="grid gap-4 sm:grid-cols-2">
-				{#each templatesStore.templates as template (template.id)}
+				{#each templates as template (template.id)}
 					<TemplateCard
 						{template}
 						onUse={handleUse}

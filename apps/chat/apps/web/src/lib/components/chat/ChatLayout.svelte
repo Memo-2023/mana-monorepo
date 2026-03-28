@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, getContext } from 'svelte';
 	import { page } from '$app/stores';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
+	import { filterBySearch, splitPinned } from '$lib/data/queries';
+	import type { Conversation } from '@chat/types';
 	import { isSidebarMode, isNavCollapsed } from '$lib/stores/navigation';
 	import {
 		MagnifyingGlass,
@@ -55,22 +56,17 @@
 		};
 	});
 
-	// Get conversations from store
-	let conversations = $derived(conversationsStore.conversations);
-	let isLoading = $derived(conversationsStore.isLoading);
+	// Get conversations from context (live query)
+	const conversationsCtx: { readonly value: Conversation[] } = getContext('conversations');
+	let conversations = $derived(conversationsCtx.value);
 
 	// Filtered conversations based on debounced search
-	let filteredConversations = $derived(
-		debouncedSearchQuery.trim()
-			? conversations.filter((conv) =>
-					conv.title?.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
-				)
-			: conversations
-	);
+	let filteredConversations = $derived(filterBySearch(conversations, debouncedSearchQuery));
 
 	// Split into pinned and unpinned
-	let pinnedConversations = $derived(filteredConversations.filter((conv) => conv.isPinned));
-	let unpinnedConversations = $derived(filteredConversations.filter((conv) => !conv.isPinned));
+	let { pinned: pinnedConversations, unpinned: unpinnedConversations } = $derived(
+		splitPinned(filteredConversations)
+	);
 
 	// Date section types
 	type DateSection = 'today' | 'yesterday' | 'thisWeek' | 'thisMonth' | 'older';
@@ -156,14 +152,9 @@
 		isResizing = false;
 	}
 
-	// Load conversations on mount
 	onMount(() => {
 		window.addEventListener('mousemove', handleMouseMove);
 		window.addEventListener('mouseup', stopResize);
-
-		if (authStore.user) {
-			conversationsStore.loadConversations();
-		}
 	});
 
 	onDestroy(() => {
@@ -309,13 +300,7 @@
 					Neuer Chat
 				</a>
 
-				{#if isLoading}
-					<div class="flex items-center justify-center py-8">
-						<div
-							class="animate-spin w-6 h-6 border-2 border-primary border-r-transparent rounded-full"
-						></div>
-					</div>
-				{:else if filteredConversations.length === 0}
+				{#if filteredConversations.length === 0}
 					<div class="flex flex-col items-center justify-center py-8 text-center">
 						{#if searchQuery}
 							<div class="text-4xl mb-3">🔍</div>

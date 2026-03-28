@@ -35,6 +35,7 @@
 	primaryColor="#3b82f6"
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}
+	onSendMagicLink={(email) => authStore.sendMagicLink(email)}
 	{goto}
 	successRedirect="/files"
 	registerPath="/register"

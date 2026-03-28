@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, getContext } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { filterBySpace } from '$lib/data/queries';
 	import { spaceService } from '$lib/services/space';
 	import { conversationService } from '$lib/services/conversation';
 	import { chatService } from '$lib/services/chat';
@@ -12,8 +12,11 @@
 
 	const spaceId = $derived($page.params.id ?? '');
 
+	// Conversations from live query context, filtered by space
+	const conversationsCtx: { readonly value: Conversation[] } = getContext('conversations');
+	let conversations = $derived(filterBySpace(conversationsCtx.value, spaceId));
+
 	let space = $state<Space | null>(null);
-	let conversations = $state<Conversation[]>([]);
 	let models = $state<AIModel[]>([]);
 	let selectedModelId = $state('');
 	let isLoading = $state(true);
@@ -33,11 +36,6 @@
 			if (!space) {
 				error = 'Space nicht gefunden';
 				return;
-			}
-
-			// Load conversations in this space
-			if (authStore.user) {
-				conversations = await conversationService.getConversations(spaceId);
 			}
 
 			// Load models

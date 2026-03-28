@@ -1,22 +1,21 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
+	import { getDefaultCalendar } from '$lib/data/queries';
 	import ViewCarousel from '$lib/components/calendar/ViewCarousel.svelte';
 	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import ServiceStatusBanner from '$lib/components/ServiceStatusBanner.svelte';
-	import { CalendarViewSkeleton } from '$lib/components/skeletons';
-	import type { CalendarEvent } from '@calendar/shared';
+	import type { CalendarEvent, Calendar } from '@calendar/shared';
 	import { addMinutes } from 'date-fns';
 	import { browser } from '$app/environment';
 
-	let initialized = $state(false);
+	// Get calendars from layout context (live query)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
 	// Quick event overlay state - for both create and edit
 	let showQuickOverlay = $state(false);
@@ -33,7 +32,7 @@
 		quickCreateDate = date;
 
 		// Create draft event immediately so it appears in the grid
-		const defaultCalendar = calendarsStore.defaultCalendar;
+		const defaultCalendar = getDefaultCalendar(calendarsCtx.value);
 		// Use provided endDate or calculate from default duration
 		const endTime = endDate ?? addMinutes(date, settingsStore.defaultEventDuration);
 
@@ -112,7 +111,7 @@
 		}
 
 		// Get default calendar
-		const defaultCalendar = calendarsStore.defaultCalendar;
+		const defaultCalendar = getDefaultCalendar(calendarsCtx.value);
 
 		// Create draft event with voice transcription data
 		eventsStore.createDraftEvent({
@@ -135,29 +134,6 @@
 			const handler = (e: Event) => handleVoiceEventCreate(e as CustomEvent<VoiceEventData>);
 			window.addEventListener('voice-event-create', handler);
 			return () => window.removeEventListener('voice-event-create', handler);
-		}
-	});
-
-	// Track view changes to refetch events
-	let lastViewType = $state(viewStore.viewType);
-	let lastDateKey = $state(viewStore.currentDate.toDateString());
-
-	onMount(async () => {
-		// Fetch events for current view range (works in both guest and authenticated mode)
-		await eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
-		initialized = true;
-	});
-
-	// Refetch events when view type or date changes
-	$effect(() => {
-		const currentViewType = viewStore.viewType;
-		const currentDateKey = viewStore.currentDate.toDateString();
-
-		// Only refetch if view actually changed
-		if (initialized && (currentViewType !== lastViewType || currentDateKey !== lastDateKey)) {
-			lastViewType = currentViewType;
-			lastDateKey = currentDateKey;
-			eventsStore.fetchEvents(viewStore.viewRange.start, viewStore.viewRange.end);
 		}
 	});
 </script>
@@ -208,11 +184,7 @@
 	<!-- Main Calendar Area -->
 	<div class="calendar-main" class:expanded={settingsStore.sidebarCollapsed}>
 		<div class="calendar-content">
-			{#if !initialized}
-				<CalendarViewSkeleton />
-			{:else}
-				<ViewCarousel onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
-			{/if}
+			<ViewCarousel onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 		</div>
 	</div>
 

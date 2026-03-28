@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import {
@@ -14,13 +13,18 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { spacesStore } from '$lib/stores/spaces.svelte';
 	import { documentsStore } from '$lib/stores/documents.svelte';
+	import {
+		useAllSpaces,
+		useSpaceDocuments,
+		filterDocuments,
+		getDocumentStats,
+		findSpaceById,
+	} from '$lib/data/queries';
 	import DocumentCard from '$lib/components/DocumentCard.svelte';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import BatchCreateModal from '$lib/components/BatchCreateModal.svelte';
 	import type { Space, DocumentType } from '$lib/types';
 
-	let space = $state<Space | null>(null);
-	let loading = $state(true);
 	let editingName = $state(false);
 	let editName = $state('');
 	let editDescription = $state('');
@@ -30,16 +34,24 @@
 
 	let spaceId = $derived($page.params.id || '');
 
-	onMount(async () => {
-		space = await spacesStore.getById(spaceId);
-		if (!space) {
-			goto('/spaces');
-			return;
+	const allSpaces = useAllSpaces();
+	const spaceDocs = useSpaceDocuments(spaceId);
+	let space = $derived(findSpaceById(allSpaces.value ?? [], spaceId) ?? null);
+	let documents = $derived(spaceDocs.value ?? []);
+	let stats = $derived(getDocumentStats(documents));
+	let filteredDocuments = $derived(
+		filterDocuments(documents, {
+			typeFilter: documentsStore.typeFilter,
+			searchQuery: documentsStore.searchQuery,
+		})
+	);
+
+	// Keep editName/editDescription in sync with space
+	$effect(() => {
+		if (space && !editingName) {
+			editName = space.name;
+			editDescription = space.description || '';
 		}
-		editName = space.name;
-		editDescription = space.description || '';
-		await documentsStore.load(spaceId);
-		loading = false;
 	});
 
 	async function handleCreateDocument() {
@@ -90,7 +102,8 @@
 	}
 
 	function handleTogglePinDoc(id: string) {
-		documentsStore.togglePinned(id);
+		const doc = documents.find((d) => d.id === id);
+		documentsStore.togglePinned(id, doc?.pinned ?? false);
 	}
 
 	async function handleBatchCreate(items: { title: string; type: DocumentType }[]) {
@@ -107,7 +120,6 @@
 		}
 		batchCreating = false;
 		showBatchCreate = false;
-		await documentsStore.load(spaceId);
 	}
 
 	const typeFilters: { value: DocumentType | 'all'; label: string }[] = [
@@ -133,7 +145,7 @@
 		<span class="text-foreground font-medium">{space?.name || '...'}</span>
 	</div>
 
-	{#if loading}
+	{#if !space && !allSpaces.error}
 		<div class="text-center py-12 text-muted-foreground">Lade...</div>
 	{:else if space}
 		<!-- Space Header -->
@@ -168,8 +180,8 @@
 							<p class="text-sm text-muted-foreground mt-1">{space.description}</p>
 						{/if}
 						<div class="flex gap-4 mt-3 text-xs text-muted-foreground">
-							<span>{documentsStore.stats.total} Dokumente</span>
-							<span>{documentsStore.stats.totalWords.toLocaleString()} Wörter</span>
+							<span>{stats.total} Dokumente</span>
+							<span>{stats.totalWords.toLocaleString()} Wörter</span>
 						</div>
 					</div>
 					<button
@@ -233,9 +245,9 @@
 		</div>
 
 		<!-- Documents -->
-		{#if documentsStore.filteredDocuments.length > 0}
+		{#if filteredDocuments.length > 0}
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-				{#each documentsStore.filteredDocuments as doc}
+				{#each filteredDocuments as doc}
 					<DocumentCard
 						document={doc}
 						onTogglePin={handleTogglePinDoc}

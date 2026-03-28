@@ -2,6 +2,14 @@
 	import { X, Trash, CheckSquare } from '@manacore/shared-icons';
 	import { filesStore } from '$lib/stores/files.svelte';
 	import { toastStore } from '@manacore/shared-ui';
+	import type { StorageFile, StorageFolder } from '$lib/api/client';
+
+	interface Props {
+		files?: StorageFile[];
+		folders?: StorageFolder[];
+	}
+
+	let { files = [], folders = [] }: Props = $props();
 
 	let deleting = $state(false);
 
@@ -10,7 +18,7 @@
 		if (!confirm(`${count} Element(e) in den Papierkorb verschieben?`)) return;
 
 		deleting = true;
-		const result = await filesStore.deleteSelected();
+		const result = await filesStore.deleteSelected(files, folders);
 		deleting = false;
 
 		if (result.hasErrors) {
@@ -34,7 +42,9 @@
 				<span>{deleting ? 'Lösche...' : 'Löschen'}</span>
 			</button>
 
-			<button class="bulk-btn" onclick={() => filesStore.selectAll()}> Alle auswählen </button>
+			<button class="bulk-btn" onclick={() => filesStore.selectAllFromLists(files, folders)}>
+				Alle auswählen
+			</button>
 
 			<button
 				class="bulk-btn close"

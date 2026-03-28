@@ -35,7 +35,7 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import NewContactModal from '$lib/components/NewContactModal.svelte';
-	import { contactsStore } from '$lib/stores/contacts.svelte';
+	import { useAllContacts } from '$lib/data/queries';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import { contactsApi, tagsApi } from '$lib/api/contacts';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
@@ -70,6 +70,10 @@
 	// Live tag query + context
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);
+
+	// Live contacts query + context
+	const allContacts = useAllContacts();
+	setContext('contacts', allContacts);
 
 	// Check if we're on a contact detail route
 	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([0-9a-f-]{36})$/i));
@@ -225,9 +229,8 @@
 		goto('/login');
 	}
 
-	async function handleCloseContactModal() {
-		// Refresh contacts list in case something was changed
-		await contactsStore.loadContacts();
+	function handleCloseContactModal() {
+		// No need to refresh — live query auto-updates
 		goto('/', { replaceState: false });
 	}
 
@@ -321,9 +324,6 @@
 
 		// Show guest welcome modal on first visit
 		initGuestWelcome();
-
-		// Load contacts from IndexedDB (guest seed or synced data)
-		await contactsStore.loadContacts();
 
 		// Load user settings only when authenticated
 		if (authStore.isAuthenticated) {
@@ -426,7 +426,7 @@
 
 				<!-- Contacts Toolbar (FAB + expandable bar) - only on main page -->
 				{#if showContactsToolbar}
-					<ContactsToolbar contacts={contactsStore.contacts} />
+					<ContactsToolbar contacts={allContacts.value} />
 				{/if}
 			{/if}
 

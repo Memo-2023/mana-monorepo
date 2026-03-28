@@ -3,6 +3,12 @@
 	import { onMount } from 'svelte';
 	import { GridFour, List, Plus, FolderPlus, UploadSimple } from '@manacore/shared-icons';
 	import { filesStore } from '$lib/stores/files.svelte';
+	import {
+		useAllFiles,
+		useAllFolders,
+		getFilesInFolder,
+		getFoldersInFolder,
+	} from '$lib/data/queries';
 	import { toastStore } from '@manacore/shared-ui';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
@@ -24,16 +30,20 @@
 	let uploading = $state(false);
 	let uploadProgress = $state(0);
 
-	// Breadcrumb items from current folder path
-	let breadcrumbItems = $derived(
-		filesStore.currentFolder
-			? [{ id: filesStore.currentFolder.id, name: filesStore.currentFolder.name }]
-			: []
-	);
+	// Live queries for reactive reads
+	const allFilesQuery = useAllFiles();
+	const allFoldersQuery = useAllFolders();
+
+	// Root-level files and folders (no parent)
+	let files = $derived(getFilesInFolder(allFilesQuery.value ?? [], null));
+	let folders = $derived(getFoldersInFolder(allFoldersQuery.value ?? [], null));
+
+	// Breadcrumb items (root has none)
+	let breadcrumbItems: { id: string; name: string }[] = [];
 
 	onMount(() => {
 		filesStore.initViewMode();
-		filesStore.loadFolder();
+		filesStore.setCurrentFolder(null);
 	});
 
 	function handleFolderClick(folder: StorageFolder) {
@@ -237,20 +247,13 @@
 		<UploadZone onUpload={handleUpload} {uploading} progress={uploadProgress} />
 	{/if}
 
-	<BulkActionBar />
+	<BulkActionBar {files} {folders} />
 
-	{#if filesStore.loading}
-		{#if filesStore.viewMode === 'grid'}
-			<FileSkeletonGrid />
-		{:else}
-			<FileSkeletonList />
-		{/if}
-	{:else if filesStore.error}
+	{#if allFilesQuery.error}
 		<div class="error-state">
-			<p>Fehler: {filesStore.error}</p>
-			<button onclick={() => filesStore.loadFolder()}>Erneut versuchen</button>
+			<p>Fehler: {allFilesQuery.error}</p>
 		</div>
-	{:else if filesStore.files.length === 0 && filesStore.folders.length === 0}
+	{:else if files.length === 0 && folders.length === 0}
 		<EmptyState
 			type="files"
 			title="Noch keine Dateien"
@@ -269,8 +272,8 @@
 		</EmptyState>
 	{:else if filesStore.viewMode === 'grid'}
 		<FileGrid
-			files={filesStore.files}
-			folders={filesStore.folders}
+			{files}
+			{folders}
 			onFileClick={handleFileClick}
 			onFolderClick={handleFolderClick}
 			onFileAction={handleFileAction}
@@ -279,8 +282,8 @@
 		/>
 	{:else}
 		<FileList
-			files={filesStore.files}
-			folders={filesStore.folders}
+			{files}
+			{folders}
 			onFileClick={handleFileClick}
 			onFolderClick={handleFolderClick}
 			onFileAction={handleFileAction}
@@ -298,7 +301,7 @@
 <FilePreviewModal
 	open={previewFile !== null}
 	file={previewFile}
-	allFiles={filesStore.files}
+	allFiles={files}
 	onClose={() => (previewFile = null)}
 	onAction={(action, file) => {
 		handleFileAction(action, file);

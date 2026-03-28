@@ -1,13 +1,18 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import {
+		getVisibleCalendars,
+		getCalendarColorWithBirthdays,
+		getEventsForRange,
+	} from '$lib/data/queries';
 	import { filterByTags } from '$lib/utils/eventFiltering';
-	import { format, parseISO, isToday, isTomorrow, startOfDay } from 'date-fns';
+	import { format, parseISO, isToday, isTomorrow, startOfDay, addMonths } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';
-	import type { CalendarEvent, CreateEventInput } from '@calendar/shared';
+	import type { CalendarEvent, Calendar, CreateEventInput } from '@calendar/shared';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import { _ } from 'svelte-i18n';
 
@@ -19,16 +24,26 @@
 
 	let { date, onEventClick }: Props = $props();
 
+	// Get calendars and events from layout context (live queries)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
+	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('events');
+	let visibleCalendars = $derived(getVisibleCalendars(calendarsCtx.value));
+
 	// Use provided date or fall back to viewStore
 	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
+	// Expand recurring events for agenda range (3 months ahead)
+	let rangeEvents = $derived(
+		getEventsForRange(eventsCtx.value, effectiveDate, addMonths(effectiveDate, 3))
+	);
+
 	// Group events by date
 	let groupedEvents = $derived.by(() => {
-		const currentEvents = eventsStore.events ?? [];
+		const currentEvents = rangeEvents ?? [];
 		if (!Array.isArray(currentEvents)) return [];
 
 		// Filter by visible calendars
-		const visibleCalendarIds = new Set(calendarsStore.visibleCalendars.map((c) => c.id));
+		const visibleCalendarIds = new Set(visibleCalendars.map((c) => c.id));
 
 		// Filter events that start from current date onwards
 		const startDate = startOfDay(effectiveDate);
@@ -176,7 +191,10 @@
 							>
 								<div
 									class="color-bar"
-									style="background-color: {calendarsStore.getColor(event.calendarId)}"
+									style="background-color: {getCalendarColorWithBirthdays(
+										calendarsCtx.value,
+										event.calendarId
+									)}"
 								></div>
 								<div class="event-content">
 									<div class="event-time">

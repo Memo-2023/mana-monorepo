@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { useDeck, useDeckSlides } from '$lib/data/queries';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { PresiEvents } from '@manacore/shared-utils/analytics';
 	import { shareApi } from '$lib/api/client';
@@ -52,10 +53,11 @@
 
 	const deckId = $page.params.id as string;
 
-	onMount(() => {
-		decksStore.loadDeck(deckId);
-		return () => decksStore.clearCurrent();
-	});
+	// Reactive live queries — auto-update on IndexedDB changes
+	const deckQuery = useDeck(deckId);
+	const slidesQuery = useDeckSlides(deckId);
+	let currentDeck = $derived(deckQuery.value);
+	let currentSlides = $derived(slidesQuery.value ?? []);
 
 	function openCreateSlide() {
 		editingSlide = null;
@@ -119,7 +121,7 @@
 	}
 
 	async function moveSlide(slide: Slide, direction: 'up' | 'down') {
-		const slides = decksStore.currentSlides;
+		const slides = currentSlides;
 		const currentIndex = slides.findIndex((s) => s.id === slide.id);
 		if (currentIndex === -1) return;
 
@@ -215,17 +217,17 @@
 </script>
 
 <svelte:head>
-	<title>{decksStore.currentDeck?.title || 'Loading...'} - Presi</title>
+	<title>{currentDeck?.title || 'Loading...'} - Presi</title>
 </svelte:head>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-	{#if decksStore.isLoading}
+	{#if deckQuery.loading}
 		<div class="flex items-center justify-center py-16">
 			<div
 				class="animate-spin rounded-full h-10 w-10 border-4 border-primary-500 border-t-transparent"
 			></div>
 		</div>
-	{:else if decksStore.currentDeck}
+	{:else if currentDeck}
 		<!-- Header -->
 		<div class="flex items-center justify-between mb-8">
 			<div class="flex items-center gap-4">
@@ -237,11 +239,11 @@
 				</a>
 				<div>
 					<h1 class="text-2xl font-bold text-slate-900 dark:text-white">
-						{decksStore.currentDeck.title}
+						{currentDeck.title}
 					</h1>
-					{#if decksStore.currentDeck.description}
+					{#if currentDeck.description}
 						<p class="text-slate-600 dark:text-slate-400 mt-1">
-							{decksStore.currentDeck.description}
+							{currentDeck.description}
 						</p>
 					{/if}
 				</div>
@@ -264,7 +266,7 @@
 						Share
 					</button>
 				{/if}
-				{#if decksStore.currentSlides.length > 0}
+				{#if currentSlides.length > 0}
 					<a
 						href="/present/{deckId}"
 						class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
@@ -277,7 +279,7 @@
 		</div>
 
 		<!-- Slides Grid -->
-		{#if decksStore.currentSlides.length === 0}
+		{#if currentSlides.length === 0}
 			<div class="text-center py-16">
 				<div
 					class="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4"
@@ -296,7 +298,7 @@
 			</div>
 		{:else}
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-				{#each decksStore.currentSlides as slide, index (slide.id)}
+				{#each currentSlides as slide, index (slide.id)}
 					<div
 						class="group bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
 					>
@@ -354,7 +356,7 @@
 								</button>
 								<button
 									onclick={() => moveSlide(slide, 'down')}
-									disabled={index === decksStore.currentSlides.length - 1}
+									disabled={index === currentSlides.length - 1}
 									class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded disabled:opacity-30"
 									aria-label="Move down"
 								>

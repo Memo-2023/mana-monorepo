@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 	import { listsStore } from '$lib/stores/lists.svelte';
+	import { type QuoteList } from '$lib/data/queries';
 	import { ZitareEvents } from '@manacore/shared-utils/analytics';
 
-	let loading = $state(true);
+	const allLists: { readonly value: QuoteList[] } = getContext('lists');
+
 	let saving = $state(false);
 	let deletingId = $state<string | null>(null);
 	let showCreateModal = $state(false);
@@ -57,11 +59,6 @@
 			deletingId = null;
 		}
 	}
-
-	onMount(async () => {
-		await listsStore.loadLists();
-		loading = false;
-	});
 </script>
 
 <svelte:head>
@@ -112,13 +109,7 @@
 				{$_('auth.login')}
 			</button>
 		</div>
-	{:else if loading}
-		<div class="text-center py-12">
-			<div
-				class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"
-			></div>
-		</div>
-	{:else if listsStore.lists.length === 0}
+	{:else if allLists.value.length === 0}
 		<div class="text-center py-12 bg-surface-elevated rounded-2xl">
 			<svg
 				class="w-16 h-16 mx-auto text-foreground-muted mb-4"
@@ -138,7 +129,7 @@
 		</div>
 	{:else}
 		<div class="grid gap-4">
-			{#each listsStore.lists as list (list.id)}
+			{#each allLists.value as list (list.id)}
 				<a
 					href="/lists/{list.id}"
 					class="block p-6 bg-surface-elevated rounded-2xl hover:shadow-lg transition-all group"

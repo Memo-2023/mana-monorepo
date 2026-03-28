@@ -1,26 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import { conversationsStore } from '$lib/stores/conversations.svelte';
+	import { useArchivedConversations } from '$lib/data/queries';
 	import { PageHeader } from '@manacore/shared-ui';
 	import type { Conversation } from '@chat/types';
 
-	let conversations = $state<Conversation[]>([]);
-	let isLoading = $state(true);
-
-	onMount(async () => {
-		if (authStore.user) {
-			await conversationsStore.loadArchivedConversations();
-			conversations = conversationsStore.archivedConversations;
-		}
-		isLoading = false;
-	});
-
-	// Keep conversations in sync with store
-	$effect(() => {
-		conversations = conversationsStore.archivedConversations;
-	});
+	const archivedConvs = useArchivedConversations();
+	let conversations = $derived(archivedConvs.value);
 
 	function formatDate(dateString: string): string {
 		return new Date(dateString).toLocaleDateString('de-DE', {
@@ -58,14 +44,7 @@
 	<div class="max-w-4xl mx-auto px-4">
 		<PageHeader title="Archiv" description="Deine archivierten Konversationen." size="lg" />
 
-		<!-- Loading State -->
-		{#if isLoading}
-			<div class="flex items-center justify-center py-16">
-				<div
-					class="animate-spin w-8 h-8 border-4 border-primary border-r-transparent rounded-full"
-				></div>
-			</div>
-		{:else if conversations.length === 0}
+		{#if conversations.length === 0}
 			<!-- Empty State -->
 			<div class="text-center py-16">
 				<svg

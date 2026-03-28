@@ -1,12 +1,17 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { externalCalendarsStore } from '$lib/stores/external-calendars.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import type { Calendar } from '@calendar/shared';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
+	// Get calendars from layout context (live query)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
+
 	function handleToggle(calendarId: string) {
-		calendarsStore.toggleVisibility(calendarId);
+		calendarsStore.toggleVisibility(calendarId, calendarsCtx.value);
 	}
 
 	function handleExternalToggle(id: string, currentVisible: boolean) {
@@ -35,7 +40,7 @@
 	</div>
 
 	<div class="calendar-list" role="group" aria-label="Kalender Sichtbarkeit">
-		{#each calendarsStore.calendars as calendar}
+		{#each calendarsCtx.value as calendar}
 			<label class="calendar-item">
 				<input
 					type="checkbox"
@@ -50,7 +55,7 @@
 			</label>
 		{/each}
 
-		{#if calendarsStore.calendars.length === 0}
+		{#if calendarsCtx.value.length === 0}
 			<p class="empty-message">Keine Kalender vorhanden</p>
 		{/if}
 	</div>

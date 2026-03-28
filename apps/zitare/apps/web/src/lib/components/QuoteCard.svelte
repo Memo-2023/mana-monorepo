@@ -7,6 +7,8 @@
 	import { toast } from '$lib/stores/toast.svelte';
 	import { zitareSettings } from '$lib/stores/settings.svelte';
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
+	import { isFavorite as checkIsFavorite, type Favorite } from '$lib/data/queries';
 
 	interface Props {
 		quote: Quote;
@@ -17,7 +19,8 @@
 
 	let { quote, showCategory = false, showSource = true, size = 'medium' }: Props = $props();
 
-	let isFavorite = $derived(favoritesStore.isFavorite(quote.id));
+	const allFavorites: { readonly value: Favorite[] } = getContext('favorites');
+	let isFavorite = $derived(checkIsFavorite(allFavorites.value, quote.id));
 	let quoteText = $derived(quotesStore.getText(quote));
 	let showBio = $state(false);
 
@@ -60,7 +63,7 @@
 		if (!authStore.isAuthenticated) return;
 		const wasFavorite = isFavorite;
 		try {
-			await favoritesStore.toggle(quote.id);
+			await favoritesStore.toggle(quote.id, allFavorites.value);
 			if (wasFavorite) {
 				ZitareEvents.quoteUnfavorited();
 			} else {

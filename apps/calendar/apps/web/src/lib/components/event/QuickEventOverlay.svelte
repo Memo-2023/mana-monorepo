@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { getContext } from 'svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { getDefaultCalendar, getCalendarColorWithBirthdays } from '$lib/data/queries';
+	import type { Calendar } from '@calendar/shared';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import RecurrenceEditDialog from './RecurrenceEditDialog.svelte';
 	import RecurrenceSelector from './RecurrenceSelector.svelte';
@@ -46,6 +48,9 @@
 	}
 
 	let { startTime, event, onClose, onCreated, onUpdated, onDeleted }: Props = $props();
+
+	// Get calendars from layout context (live query)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
 	// Mode: create or edit
 	let isEditMode = $derived(!!event);
@@ -323,8 +328,9 @@
 
 	// Set default calendar - only in create mode
 	$effect(() => {
-		if (!isEditMode && !calendarId && calendarsStore.defaultCalendar?.id) {
-			calendarId = calendarsStore.defaultCalendar.id;
+		const defaultCal = getDefaultCalendar(calendarsCtx.value);
+		if (!isEditMode && !calendarId && defaultCal?.id) {
+			calendarId = defaultCal.id;
 			// Update draft event with calendar
 			eventsStore.updateDraftEvent({ calendarId });
 		}
@@ -600,10 +606,7 @@
 					toast.error(`Fehler beim Erstellen: ${result.error.message}`);
 					return;
 				}
-				// Refresh calendars if none existed (in case default was created)
-				if (calendarsStore.calendars.length === 0) {
-					await calendarsStore.fetchCalendars();
-				}
+				// Calendars auto-refresh via live query — no manual fetch needed
 				toast.success('Termin erstellt');
 				onCreated?.();
 			}
@@ -767,9 +770,9 @@
 
 			<!-- Calendar pills -->
 			<div class="calendar-pills-container">
-				{#if calendarsStore.calendars.length > 0}
+				{#if calendarsCtx.value.length > 0}
 					<div class="calendar-pills-scroll">
-						{#each calendarsStore.calendars as cal}
+						{#each calendarsCtx.value as cal}
 							<button
 								type="button"
 								class="calendar-pill"

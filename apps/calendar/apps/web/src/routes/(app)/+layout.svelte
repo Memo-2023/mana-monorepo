@@ -28,6 +28,7 @@
 		tagMutations,
 		useAllTags as useAllSharedTags,
 	} from '@manacore/shared-stores';
+	import { useAllCalendars, useAllEvents, getDefaultCalendar } from '$lib/data/queries';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
 	import { browser } from '$app/environment';
@@ -77,8 +78,14 @@
 		splitPanel.openPanel(appId);
 	}
 
-	// Live tag query + context
+	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
+	const allCalendars = useAllCalendars();
+	const allEvents = useAllEvents();
 	const allTags = useAllSharedTags();
+
+	// Provide data to child components via Svelte context
+	setContext('calendars', allCalendars);
+	setContext('events', allEvents);
 	setContext('tags', allTags);
 
 	let { children } = $props();
@@ -132,12 +139,12 @@
 		const parsed = parseEventInput(query);
 		if (!parsed.title) return;
 
-		const defaultCalendarId =
-			calendarsStore.calendars.find((c) => c.isDefault)?.id || calendarsStore.calendars[0]?.id;
+		const cals = allCalendars.value;
+		const defaultCalendarId = cals.find((c) => c.isDefault)?.id || cals[0]?.id;
 
 		const resolved = resolveEventIds(
 			parsed,
-			calendarsStore.calendars.map((c) => ({ id: c.id, name: c.name })),
+			cals.map((c) => ({ id: c.id, name: c.name })),
 			allTags.value.map((t) => ({ id: t.id, name: t.name })),
 			defaultCalendarId
 		);
@@ -194,18 +201,16 @@
 	}
 
 	// Default calendar for InputBar quick create
-	let selectedDefaultCalendarId = $derived(
-		calendarsStore.calendars.find((c) => c.isDefault)?.id || calendarsStore.calendars[0]?.id
-	);
+	let selectedDefaultCalendarId = $derived(getDefaultCalendar(allCalendars.value)?.id);
 
 	function handleDefaultCalendarChange(id: string) {
 		// Update the default calendar via API
-		calendarsStore.setAsDefault(id);
+		calendarsStore.setAsDefault(id, allCalendars.value);
 	}
 
 	// Calendar options for InputBar context menu
 	let calendarOptions = $derived(
-		calendarsStore.calendars.map((c) => ({
+		allCalendars.value.map((c) => ({
 			id: c.id,
 			label: c.name,
 		}))
@@ -451,8 +456,7 @@
 		// Initialize view state
 		viewStore.initialize();
 
-		// Load calendars and events from IndexedDB (works for guests and auth)
-		await calendarsStore.fetchCalendars();
+		// Calendars and events are loaded reactively via useLiveQuery (no fetch needed)
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {

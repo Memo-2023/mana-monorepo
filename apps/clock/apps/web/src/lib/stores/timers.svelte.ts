@@ -1,77 +1,25 @@
 /**
- * Timers Store — Local-First with Dexie.js
+ * Timers Store — Mutation-Only Service
  *
- * All reads and writes go to IndexedDB first.
- * When authenticated, changes sync to the server in the background.
- * Same public API as before so components don't need changes.
+ * All reads are handled by useLiveQuery() hooks in queries.ts.
+ * This store only provides write operations (create, update, delete, start, pause, reset).
+ * IndexedDB writes automatically trigger UI updates via Dexie liveQuery.
  */
 
 import { timerCollection, type LocalTimer } from '$lib/data/local-store';
-import type { Timer, CreateTimerInput, UpdateTimerInput } from '@clock/shared';
+import { toTimer } from '$lib/data/queries';
+import type { CreateTimerInput, UpdateTimerInput } from '@clock/shared';
 import { ClockEvents } from '@manacore/shared-utils/analytics';
 
-// State — populated from IndexedDB
-let timers = $state<Timer[]>([]);
-let loading = $state(false);
 let error = $state<string | null>(null);
 
-/** Convert a LocalTimer (IndexedDB record) to the shared Timer type. */
-function toTimer(local: LocalTimer): Timer {
-	return {
-		id: local.id,
-		userId: 'local',
-		label: local.label,
-		durationSeconds: local.durationSeconds,
-		remainingSeconds: local.remainingSeconds,
-		status: local.status,
-		startedAt: local.startedAt,
-		pausedAt: local.pausedAt,
-		sound: local.sound,
-		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
-	};
-}
-
-/** Load timers from IndexedDB into the reactive state. */
-async function refreshTimers() {
-	const localTimers = await timerCollection.getAll();
-	timers = localTimers.map(toTimer);
-}
-
 export const timersStore = {
-	// Getters
-	get timers() {
-		return timers;
-	},
-	get loading() {
-		return loading;
-	},
 	get error() {
 		return error;
 	},
-	get activeTimers() {
-		return timers.filter((t) => t.status === 'running' || t.status === 'paused');
-	},
 
 	/**
-	 * Fetch all timers — reads from IndexedDB.
-	 */
-	async fetchTimers() {
-		loading = true;
-		error = null;
-		try {
-			await refreshTimers();
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to fetch timers';
-			console.error('Failed to fetch timers:', e);
-		} finally {
-			loading = false;
-		}
-		return { success: true };
-	},
-
-	/**
-	 * Create a new timer — writes to IndexedDB instantly.
+	 * Create a new timer -- writes to IndexedDB instantly.
 	 */
 	async createTimer(input: CreateTimerInput) {
 		error = null;
@@ -88,9 +36,7 @@ export const timersStore = {
 			};
 
 			const inserted = await timerCollection.insert(newLocal);
-			const newTimer = toTimer(inserted);
-			timers = [...timers, newTimer];
-			return { success: true, data: newTimer };
+			return { success: true, data: toTimer(inserted) };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create timer';
 			console.error('Failed to create timer:', e);
@@ -99,7 +45,7 @@ export const timersStore = {
 	},
 
 	/**
-	 * Update a timer — writes to IndexedDB instantly.
+	 * Update a timer -- writes to IndexedDB instantly.
 	 */
 	async updateTimer(id: string, input: UpdateTimerInput) {
 		error = null;
@@ -111,9 +57,7 @@ export const timersStore = {
 
 			const updated = await timerCollection.update(id, updateData);
 			if (updated) {
-				const updatedTimer = toTimer(updated);
-				timers = timers.map((t) => (t.id === id ? updatedTimer : t));
-				return { success: true, data: updatedTimer };
+				return { success: true, data: toTimer(updated) };
 			}
 			return { success: false, error: 'Timer not found' };
 		} catch (e) {
@@ -124,7 +68,7 @@ export const timersStore = {
 	},
 
 	/**
-	 * Start a timer — sets status to running with current timestamp.
+	 * Start a timer -- sets status to running with current timestamp.
 	 */
 	async startTimer(id: string) {
 		error = null;
@@ -146,9 +90,8 @@ export const timersStore = {
 			const updated = await timerCollection.update(id, updateData);
 			if (updated) {
 				const updatedTimer = toTimer(updated);
-				timers = timers.map((t) => (t.id === id ? updatedTimer : t));
 				ClockEvents.timerStarted(
-					(updatedTimer as Timer & { type?: string }).type as 'pomodoro' | 'stopwatch' | 'countdown'
+					(updatedTimer as any).type as 'pomodoro' | 'stopwatch' | 'countdown'
 				);
 				return { success: true, data: updatedTimer };
 			}
@@ -161,7 +104,7 @@ export const timersStore = {
 	},
 
 	/**
-	 * Pause a timer — calculates remaining seconds and saves.
+	 * Pause a timer -- calculates remaining seconds and saves.
 	 */
 	async pauseTimer(id: string) {
 		error = null;
@@ -185,9 +128,7 @@ export const timersStore = {
 
 			const updated = await timerCollection.update(id, updateData);
 			if (updated) {
-				const updatedTimer = toTimer(updated);
-				timers = timers.map((t) => (t.id === id ? updatedTimer : t));
-				return { success: true, data: updatedTimer };
+				return { success: true, data: toTimer(updated) };
 			}
 			return { success: false, error: 'Timer not found' };
 		} catch (e) {
@@ -198,7 +139,7 @@ export const timersStore = {
 	},
 
 	/**
-	 * Reset a timer — back to idle with full duration.
+	 * Reset a timer -- back to idle with full duration.
 	 */
 	async resetTimer(id: string) {
 		error = null;
@@ -212,9 +153,7 @@ export const timersStore = {
 
 			const updated = await timerCollection.update(id, updateData);
 			if (updated) {
-				const updatedTimer = toTimer(updated);
-				timers = timers.map((t) => (t.id === id ? updatedTimer : t));
-				return { success: true, data: updatedTimer };
+				return { success: true, data: toTimer(updated) };
 			}
 			return { success: false, error: 'Timer not found' };
 		} catch (e) {
@@ -225,13 +164,12 @@ export const timersStore = {
 	},
 
 	/**
-	 * Delete a timer — removes from IndexedDB instantly.
+	 * Delete a timer -- removes from IndexedDB instantly.
 	 */
 	async deleteTimer(id: string) {
 		error = null;
 		try {
 			await timerCollection.delete(id);
-			timers = timers.filter((t) => t.id !== id);
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete timer';
@@ -241,36 +179,13 @@ export const timersStore = {
 	},
 
 	/**
-	 * Update local timer state (for countdown display).
+	 * Update remaining seconds in IndexedDB (for countdown display).
 	 */
-	updateLocalState(id: string, updates: Partial<Timer>) {
-		timers = timers.map((t) => (t.id === id ? { ...t, ...updates } : t));
-	},
-
-	/**
-	 * Clear all timers (local state only).
-	 */
-	clear() {
-		timers = [];
-		error = null;
-	},
-
-	/**
-	 * No longer relevant — all timers are local and editable.
-	 */
-	get sessionTimerCount(): number {
-		return 0;
-	},
-
-	get hasSessionTimers(): boolean {
-		return false;
-	},
-
-	async migrateSessionTimers(): Promise<void> {
-		// No-op: local-first mode handles data persistence automatically.
-	},
-
-	isSessionTimer(_id: string): boolean {
-		return false;
+	async updateLocalTimer(id: string, remainingSeconds: number) {
+		try {
+			await timerCollection.update(id, { remainingSeconds });
+		} catch (e) {
+			console.error('Failed to update local timer:', e);
+		}
 	},
 };

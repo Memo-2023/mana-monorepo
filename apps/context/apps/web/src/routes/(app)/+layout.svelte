@@ -15,6 +15,7 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { spacesStore } from '$lib/stores/spaces.svelte';
 	import { documentsStore } from '$lib/stores/documents.svelte';
+	import { useAllSpaces, useAllDocuments } from '$lib/data/queries';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -41,6 +42,10 @@
 
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);
+
+	// Live queries: all spaces and documents (reactive, auto-updates on IndexedDB changes)
+	const allSpaces = useAllSpaces();
+	const allDocuments = useAllDocuments();
 
 	let { children } = $props();
 
@@ -70,7 +75,7 @@
 		const results: CommandBarItem[] = [];
 
 		// Search spaces
-		spacesStore.spaces
+		(allSpaces.value ?? [])
 			.filter((s) => s.name.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q))
 			.slice(0, 5)
 			.forEach((s) => {
@@ -82,7 +87,7 @@
 			});
 
 		// Search documents
-		documentsStore.documents
+		(allDocuments.value ?? [])
 			.filter((d) => d.title.toLowerCase().includes(q) || d.content?.toLowerCase().includes(q))
 			.slice(0, 5)
 			.forEach((d) => {
@@ -243,7 +248,6 @@
 
 		if (authStore.isAuthenticated) {
 			await userSettings.load();
-			await Promise.all([spacesStore.load(), documentsStore.load()]);
 		}
 	}
 </script>

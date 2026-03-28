@@ -25,7 +25,7 @@
 		pageTitle="Wähle dein Abo"
 		subscriptionsTitle="Abonnements"
 		packagesTitle="Einmal-Pakete"
-		yearlyDiscount="2 Monate gratis"
+		yearlyDiscount="20% Rabatt"
 	/>
 </div>
 

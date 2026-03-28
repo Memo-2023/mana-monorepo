@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { browser } from '$app/environment';
 	import { PageHeader, toast } from '@manacore/shared-ui';
 	import { timersStore } from '$lib/stores/timers.svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import { QUICK_TIMER_PRESETS, formatDuration } from '@clock/shared';
-	import { TimersSkeleton } from '$lib/components/skeletons';
+	import type { Timer } from '@clock/shared';
+
+	// Get live query data from layout context
+	const allTimersQuery: { readonly value: Timer[] } = getContext('timers');
 
 	// Form state (inline on page)
 	let formMinutes = $state(5);
@@ -24,12 +26,7 @@
 	}
 	let localTimers = $state<LocalTimer[]>([]);
 	let intervals: Map<string, ReturnType<typeof setInterval>> = new Map();
-	let allTimers = $derived([...timersStore.timers, ...localTimers]);
-
-	onMount(async () => {
-		// Load timers - works for both authenticated and guest mode
-		await timersStore.fetchTimers();
-	});
+	let allTimers = $derived([...allTimersQuery.value, ...localTimers]);
 
 	onDestroy(() => {
 		intervals.forEach((interval) => clearInterval(interval));
@@ -69,7 +66,7 @@
 					}
 				}
 			} else {
-				const timer = timersStore.timers.find((t) => t.id === timerId);
+				const timer = allTimersQuery.value.find((t) => t.id === timerId);
 				if (!timer || timer.status !== 'running') {
 					clearInterval(interval);
 					intervals.delete(timerId);
@@ -216,10 +213,7 @@
 		{/each}
 	</div>
 
-	<!-- Loading State -->
-	{#if timersStore.loading}
-		<TimersSkeleton />
-	{:else if allTimers.length > 0}
+	{#if allTimers.length > 0}
 		<!-- Active Timers -->
 		<div>
 			<h2 class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">

@@ -1,15 +1,32 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { Plus, MagnifyingGlass, FileText } from '@manacore/shared-icons';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { documentsStore } from '$lib/stores/documents.svelte';
+	import {
+		useAllDocuments,
+		filterDocuments,
+		getDocumentStats,
+		getAllDocumentTags,
+	} from '$lib/data/queries';
 	import DocumentCard from '$lib/components/DocumentCard.svelte';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import type { DocumentType } from '$lib/types';
 
 	let deleteTarget = $state<string | null>(null);
+
+	const allDocuments = useAllDocuments();
+	let documents = $derived(allDocuments.value ?? []);
+	let stats = $derived(getDocumentStats(documents));
+	let allTags = $derived(getAllDocumentTags(documents));
+	let filteredDocuments = $derived(
+		filterDocuments(documents, {
+			typeFilter: documentsStore.typeFilter,
+			searchQuery: documentsStore.searchQuery,
+			tagFilter: documentsStore.tagFilter,
+		})
+	);
 
 	const typeFilters: { value: DocumentType | 'all'; label: string }[] = [
 		{ value: 'all', label: 'Alle' },
@@ -17,10 +34,6 @@
 		{ value: 'context', label: 'Kontext' },
 		{ value: 'prompt', label: 'Prompt' },
 	];
-
-	onMount(async () => {
-		await documentsStore.load();
-	});
 
 	async function handleCreateDocument() {
 		if (!authStore.user?.id) return;
@@ -48,7 +61,8 @@
 	}
 
 	function handleTogglePin(id: string) {
-		documentsStore.togglePinned(id);
+		const doc = documents.find((d) => d.id === id);
+		documentsStore.togglePinned(id, doc?.pinned ?? false);
 	}
 </script>
 
@@ -61,7 +75,7 @@
 		<div>
 			<h1 class="text-2xl font-bold text-foreground">{$_('documents.title')}</h1>
 			<p class="text-sm text-muted-foreground mt-1">
-				{documentsStore.stats.total} Dokumente, {documentsStore.stats.totalWords.toLocaleString()} Wörter
+				{stats.total} Dokumente, {stats.totalWords.toLocaleString()} Wörter
 			</p>
 		</div>
 		<button class="btn btn-primary flex items-center gap-2" onclick={handleCreateDocument}>
@@ -84,13 +98,13 @@
 				>
 					{filter.label}
 					{#if filter.value === 'all'}
-						<span class="ml-1 opacity-60">{documentsStore.stats.total}</span>
+						<span class="ml-1 opacity-60">{stats.total}</span>
 					{:else if filter.value === 'text'}
-						<span class="ml-1 opacity-60">{documentsStore.stats.text}</span>
+						<span class="ml-1 opacity-60">{stats.text}</span>
 					{:else if filter.value === 'context'}
-						<span class="ml-1 opacity-60">{documentsStore.stats.context}</span>
+						<span class="ml-1 opacity-60">{stats.context}</span>
 					{:else if filter.value === 'prompt'}
-						<span class="ml-1 opacity-60">{documentsStore.stats.prompt}</span>
+						<span class="ml-1 opacity-60">{stats.prompt}</span>
 					{/if}
 				</button>
 			{/each}
@@ -112,9 +126,9 @@
 	</div>
 
 	<!-- Tags filter -->
-	{#if documentsStore.allTags.length > 0}
+	{#if allTags.length > 0}
 		<div class="flex flex-wrap gap-2 mb-4">
-			{#each documentsStore.allTags as tag}
+			{#each allTags as tag}
 				<button
 					class="text-xs px-2 py-1 rounded-full transition-colors"
 					class:bg-primary={documentsStore.tagFilter.includes(tag)}
@@ -139,9 +153,9 @@
 	<!-- Document list -->
 	{#if documentsStore.loading}
 		<div class="text-center py-12 text-muted-foreground">Lade Dokumente...</div>
-	{:else if documentsStore.filteredDocuments.length > 0}
+	{:else if filteredDocuments.length > 0}
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-			{#each documentsStore.filteredDocuments as doc}
+			{#each filteredDocuments as doc}
 				<DocumentCard document={doc} onTogglePin={handleTogglePin} onDelete={handleDeleteClick} />
 			{/each}
 		</div>

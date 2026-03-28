@@ -1,8 +1,15 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import {
+		getVisibleCalendars,
+		getCalendarColorWithBirthdays,
+		getEventsForDay as getEventsForDayPure,
+		getEventsForRange,
+	} from '$lib/data/queries';
+	import type { Calendar } from '@calendar/shared';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
@@ -43,6 +50,11 @@
 
 	let { date, onQuickCreate, onEventClick }: Props = $props();
 
+	// Get calendars and events from layout context (live queries)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
+	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('events');
+	let visibleCalendars = $derived(getVisibleCalendars(calendarsCtx.value));
+
 	// Use provided date or fall back to viewStore
 	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
@@ -54,6 +66,16 @@
 		const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: settingsStore.weekStartsOn });
 
 		return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+	});
+
+	// Expand recurring events for the month grid range
+	let rangeEvents = $derived.by(() => {
+		if (allCalendarDays.length === 0) return [];
+		return getEventsForRange(
+			eventsCtx.value,
+			allCalendarDays[0],
+			allCalendarDays[allCalendarDays.length - 1]
+		);
 	});
 
 	// Filter weekends if option is active
@@ -200,19 +222,15 @@
 	// Event Handlers
 	// ============================================================================
 	function getEventsForDay(day: Date): CalendarEvent[] {
-		let events = filterByVisibleCalendars(
-			eventsStore.getEventsForDay(day),
-			calendarsStore.visibleCalendars
-		);
+		const dayEvents = getEventsForDayPure(rangeEvents, day);
+		let events = filterByVisibleCalendars(dayEvents, visibleCalendars);
 		events = filterByTags(events, settingsStore.selectedTagIds);
 		return events.slice(0, 3); // Max 3 events shown
 	}
 
 	function getAllEventsForDay(day: Date): CalendarEvent[] {
-		let events = filterByVisibleCalendars(
-			eventsStore.getEventsForDay(day),
-			calendarsStore.visibleCalendars
-		);
+		const dayEvents = getEventsForDayPure(rangeEvents, day);
+		let events = filterByVisibleCalendars(dayEvents, visibleCalendars);
 		return filterByTags(events, settingsStore.selectedTagIds);
 	}
 
@@ -328,7 +346,10 @@
 									class:search-highlighted={isSearchHighlighted}
 									class:search-dimmed={isSearchDimmed}
 									data-event-id={event.id}
-									style="background-color: {calendarsStore.getColor(event.calendarId)}"
+									style="background-color: {getCalendarColorWithBirthdays(
+										calendarsCtx.value,
+										event.calendarId
+									)}"
 									onpointerdown={(e) => startDrag(event, e)}
 									onclick={(e) => !isDraft && handleEventClick(event, e)}
 									role="button"

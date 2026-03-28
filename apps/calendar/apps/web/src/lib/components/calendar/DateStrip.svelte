@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
-	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { getEventsForDay as getEventsForDayPure } from '$lib/data/queries';
+	import type { CalendarEvent } from '@calendar/shared';
 	import {
 		format,
 		isToday,
@@ -21,9 +23,12 @@
 
 	let { isToolbarExpanded = false }: Props = $props();
 
+	// Get events from layout context (live query)
+	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('events');
+
 	// Get event count for a day (max 5 dots displayed)
 	function getEventCount(date: Date): number {
-		const events = eventsStore.getEventsForDay(date, false);
+		const events = getEventsForDayPure(eventsCtx.value, date);
 		return Math.min(events.length, 5); // Cap at 5 dots
 	}
 

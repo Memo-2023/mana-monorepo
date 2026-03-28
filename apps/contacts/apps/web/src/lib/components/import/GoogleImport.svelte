@@ -9,7 +9,7 @@
 		type GoogleStatus,
 		type GoogleImportResult,
 	} from '$lib/api/google';
-	import { contactsStore } from '$lib/stores/contacts.svelte';
+	// contactsStore removed — live queries auto-update
 	import { GoogleImportSkeleton } from '$lib/components/skeletons';
 	import { ContactsEvents } from '@manacore/shared-utils/analytics';
 
@@ -130,8 +130,7 @@
 			result = await googleApi.importContacts(Array.from(selectedContacts));
 			step = 'result';
 			ContactsEvents.contactImported('google', result.imported);
-			// Refresh contacts list
-			await contactsStore.loadContacts();
+			// Live query auto-updates — no manual reload needed
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to import';
 		} finally {

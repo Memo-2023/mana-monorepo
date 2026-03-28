@@ -1,76 +1,24 @@
 /**
- * Alarms Store — Local-First with Dexie.js
+ * Alarms Store — Mutation-Only Service
  *
- * All reads and writes go to IndexedDB first.
- * When authenticated, changes sync to the server in the background.
- * Same public API as before so components don't need changes.
+ * All reads are handled by useLiveQuery() hooks in queries.ts.
+ * This store only provides write operations (create, update, delete, toggle).
+ * IndexedDB writes automatically trigger UI updates via Dexie liveQuery.
  */
 
 import { alarmCollection, type LocalAlarm } from '$lib/data/local-store';
-import type { Alarm, CreateAlarmInput, UpdateAlarmInput } from '@clock/shared';
+import { toAlarm } from '$lib/data/queries';
+import type { CreateAlarmInput, UpdateAlarmInput, Alarm } from '@clock/shared';
 
-// State — populated from IndexedDB
-let alarms = $state<Alarm[]>([]);
-let loading = $state(false);
 let error = $state<string | null>(null);
 
-/** Convert a LocalAlarm (IndexedDB record) to the shared Alarm type. */
-function toAlarm(local: LocalAlarm): Alarm {
-	return {
-		id: local.id,
-		userId: 'local',
-		label: local.label,
-		time: local.time,
-		enabled: local.enabled,
-		repeatDays: local.repeatDays,
-		snoozeMinutes: local.snoozeMinutes,
-		sound: local.sound,
-		vibrate: local.vibrate ?? null,
-		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
-	};
-}
-
-/** Load alarms from IndexedDB into the reactive state. */
-async function refreshAlarms() {
-	const localAlarms = await alarmCollection.getAll();
-	alarms = localAlarms.map(toAlarm);
-}
-
 export const alarmsStore = {
-	// Getters
-	get alarms() {
-		return alarms;
-	},
-	get loading() {
-		return loading;
-	},
 	get error() {
 		return error;
 	},
-	get enabledAlarms() {
-		return alarms.filter((a) => a.enabled);
-	},
 
 	/**
-	 * Fetch all alarms — reads from IndexedDB.
-	 */
-	async fetchAlarms() {
-		loading = true;
-		error = null;
-		try {
-			await refreshAlarms();
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to fetch alarms';
-			console.error('Failed to fetch alarms:', e);
-		} finally {
-			loading = false;
-		}
-		return { success: true };
-	},
-
-	/**
-	 * Create a new alarm — writes to IndexedDB instantly.
+	 * Create a new alarm -- writes to IndexedDB instantly.
 	 */
 	async createAlarm(input: CreateAlarmInput) {
 		error = null;
@@ -87,9 +35,7 @@ export const alarmsStore = {
 			};
 
 			const inserted = await alarmCollection.insert(newLocal);
-			const newAlarm = toAlarm(inserted);
-			alarms = [...alarms, newAlarm];
-			return { success: true, data: newAlarm };
+			return { success: true, data: toAlarm(inserted) };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create alarm';
 			console.error('Failed to create alarm:', e);
@@ -98,7 +44,7 @@ export const alarmsStore = {
 	},
 
 	/**
-	 * Update an alarm — writes to IndexedDB instantly.
+	 * Update an alarm -- writes to IndexedDB instantly.
 	 */
 	async updateAlarm(id: string, input: UpdateAlarmInput) {
 		error = null;
@@ -114,9 +60,7 @@ export const alarmsStore = {
 
 			const updated = await alarmCollection.update(id, updateData);
 			if (updated) {
-				const updatedAlarm = toAlarm(updated);
-				alarms = alarms.map((a) => (a.id === id ? updatedAlarm : a));
-				return { success: true, data: updatedAlarm };
+				return { success: true, data: toAlarm(updated) };
 			}
 			return { success: false, error: 'Alarm not found' };
 		} catch (e) {
@@ -129,53 +73,25 @@ export const alarmsStore = {
 	/**
 	 * Toggle alarm enabled state.
 	 */
-	async toggleAlarm(id: string) {
-		const alarm = alarms.find((a) => a.id === id);
+	async toggleAlarm(id: string, currentAlarms: Alarm[]) {
+		const alarm = currentAlarms.find((a) => a.id === id);
 		if (!alarm) return { success: false, error: 'Alarm not found' };
 
 		return this.updateAlarm(id, { enabled: !alarm.enabled });
 	},
 
 	/**
-	 * Delete an alarm — removes from IndexedDB instantly.
+	 * Delete an alarm -- removes from IndexedDB instantly.
 	 */
 	async deleteAlarm(id: string) {
 		error = null;
 		try {
 			await alarmCollection.delete(id);
-			alarms = alarms.filter((a) => a.id !== id);
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete alarm';
 			console.error('Failed to delete alarm:', e);
 			return { success: false, error: error };
 		}
-	},
-
-	/**
-	 * Clear all alarms (local state only).
-	 */
-	clear() {
-		alarms = [];
-		error = null;
-	},
-
-	/**
-	 * No longer relevant — all alarms are local and editable.
-	 */
-	get sessionAlarmCount(): number {
-		return 0;
-	},
-
-	get hasSessionAlarms(): boolean {
-		return false;
-	},
-
-	async migrateSessionAlarms(): Promise<void> {
-		// No-op: local-first mode handles data persistence automatically.
-	},
-
-	isSessionAlarm(_id: string): boolean {
-		return false;
 	},
 };

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { FileText } from '@manacore/shared-icons';
-	import { documentsStore } from '$lib/stores/documents.svelte';
+	import { useAllDocuments } from '$lib/data/queries';
 	import type { Document } from '$lib/types';
+
+	const allDocs = useAllDocuments();
 
 	interface Props {
 		value: string;
@@ -20,7 +22,7 @@
 
 	let filteredDocs = $derived(
 		mentionQuery.trim()
-			? documentsStore.documents
+			? (allDocs.value ?? [])
 					.filter((d) => d.title.toLowerCase().includes(mentionQuery.toLowerCase()))
 					.slice(0, 6)
 			: []

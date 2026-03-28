@@ -6,7 +6,9 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import type { TimeFormat, AllDayDisplayMode } from '$lib/stores/settings.svelte';
+	import { getContext } from 'svelte';
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { getDefaultCalendar } from '$lib/data/queries';
 	import {
 		toastStore as toast,
 		GlobalSettingsSection,
@@ -17,6 +19,9 @@
 	} from '@manacore/shared-ui';
 	import { APP_VERSION } from '$lib/version';
 	import type { CalendarViewType, Calendar } from '@calendar/shared';
+
+	// Get calendars from layout context (live query)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
 	// Calendar management state
 	let editingCalendar = $state<Calendar | null>(null);
@@ -89,7 +94,10 @@
 
 		// If setting as default and it wasn't before, use setAsDefault
 		if (editIsDefault && !editingCalendar.isDefault) {
-			const defaultResult = await calendarsStore.setAsDefault(editingCalendar.id);
+			const defaultResult = await calendarsStore.setAsDefault(
+				editingCalendar.id,
+				calendarsCtx.value
+			);
 			if (defaultResult?.error) {
 				toast.error(`${$_('common.error')}: ${defaultResult.error.message}`);
 				return;
@@ -264,7 +272,7 @@
 				{/if}
 
 				<div class="calendar-list">
-					{#each calendarsStore.calendars as calendar}
+					{#each calendarsCtx.value as calendar}
 						{#if editingCalendar?.id === calendar.id}
 							<div class="calendar-edit-form">
 								<form
@@ -349,7 +357,7 @@
 						{/if}
 					{/each}
 
-					{#if calendarsStore.calendars.length === 0}
+					{#if calendarsCtx.value.length === 0}
 						<div class="empty-state">
 							<p>{$_('settings.noCalendars')}</p>
 						</div>

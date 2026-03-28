@@ -1,25 +1,25 @@
+/**
+ * Documents Store — Mutation-Only (Local-First)
+ *
+ * Reads are handled by useLiveQuery hooks in queries.ts.
+ * This store only handles writes and local filter state.
+ */
+
 import type { Document, DocumentType } from '$lib/types';
 import { ContextEvents } from '@manacore/shared-utils/analytics';
-import * as docsService from '$lib/services/documents';
+import { documentCollection, type LocalDocument } from '$lib/data/local-store';
+import { toDocument } from '$lib/data/queries';
 
-let documents = $state<Document[]>([]);
-let currentDocument = $state<Document | null>(null);
 let loading = $state(false);
 let saving = $state(false);
 let error = $state<string | null>(null);
 
-// Filter state
+// Filter state (UI-only, not persisted)
 let searchQuery = $state('');
 let typeFilter = $state<DocumentType | 'all'>('all');
 let tagFilter = $state<string[]>([]);
 
 export const documentsStore = {
-	get documents() {
-		return documents;
-	},
-	get currentDocument() {
-		return currentDocument;
-	},
 	get loading() {
 		return loading;
 	},
@@ -39,45 +39,6 @@ export const documentsStore = {
 		return tagFilter;
 	},
 
-	get filteredDocuments() {
-		let filtered = documents;
-
-		if (typeFilter !== 'all') {
-			filtered = filtered.filter((d) => d.type === typeFilter);
-		}
-
-		if (searchQuery.trim()) {
-			const q = searchQuery.toLowerCase();
-			filtered = filtered.filter(
-				(d) => d.title.toLowerCase().includes(q) || d.content?.toLowerCase().includes(q)
-			);
-		}
-
-		if (tagFilter.length > 0) {
-			filtered = filtered.filter((d) => tagFilter.some((tag) => d.metadata?.tags?.includes(tag)));
-		}
-
-		return filtered;
-	},
-
-	get allTags() {
-		const tags = new Set<string>();
-		documents.forEach((d) => {
-			d.metadata?.tags?.forEach((t) => tags.add(t));
-		});
-		return Array.from(tags).sort();
-	},
-
-	get stats() {
-		return {
-			total: documents.length,
-			text: documents.filter((d) => d.type === 'text').length,
-			context: documents.filter((d) => d.type === 'context').length,
-			prompt: documents.filter((d) => d.type === 'prompt').length,
-			totalWords: documents.reduce((sum, d) => sum + (d.metadata?.word_count || 0), 0),
-		};
-	},
-
 	setSearchQuery(query: string) {
 		searchQuery = query;
 	},
@@ -90,30 +51,6 @@ export const documentsStore = {
 		tagFilter = tags;
 	},
 
-	async load(spaceId?: string) {
-		loading = true;
-		error = null;
-		try {
-			documents = await docsService.getDocumentsWithPreview(spaceId);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Laden der Dokumente';
-		} finally {
-			loading = false;
-		}
-	},
-
-	async loadDocument(id: string) {
-		loading = true;
-		error = null;
-		try {
-			currentDocument = await docsService.getDocumentById(id);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Laden des Dokuments';
-		} finally {
-			loading = false;
-		}
-	},
-
 	async create(
 		userId: string,
 		content: string,
@@ -122,21 +59,24 @@ export const documentsStore = {
 		title?: string
 	) {
 		saving = true;
+		error = null;
 		try {
-			const result = await docsService.createDocument(
-				userId,
+			const newLocal: LocalDocument = {
+				id: crypto.randomUUID(),
+				title: title || 'Neues Dokument',
 				content,
 				type,
-				spaceId,
-				undefined,
-				title
-			);
-			if (result.data) {
-				documents = [result.data, ...documents];
-				currentDocument = result.data;
-				ContextEvents.documentCreated(type);
-			}
-			return result;
+				spaceId: spaceId || null,
+				pinned: false,
+				metadata: null,
+			};
+			const inserted = await documentCollection.insert(newLocal);
+			ContextEvents.documentCreated(type);
+			return { data: toDocument(inserted), error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Fehler beim Erstellen';
+			error = msg;
+			return { data: null, error: msg };
 		} finally {
 			saving = false;
 		}
@@ -144,64 +84,67 @@ export const documentsStore = {
 
 	async update(id: string, updates: Partial<Document>) {
 		saving = true;
+		error = null;
 		try {
-			const result = await docsService.updateDocument(id, updates);
-			if (result.success) {
-				documents = documents.map((d) => (d.id === id ? { ...d, ...updates } : d));
-				if (currentDocument?.id === id) {
-					currentDocument = { ...currentDocument, ...updates };
-				}
-			}
-			return result;
+			const localUpdates: Partial<LocalDocument> = {};
+			if (updates.title !== undefined) localUpdates.title = updates.title;
+			if (updates.content !== undefined) localUpdates.content = updates.content!;
+			if (updates.type !== undefined) localUpdates.type = updates.type;
+			if (updates.pinned !== undefined) localUpdates.pinned = updates.pinned!;
+			if (updates.metadata !== undefined) localUpdates.metadata = updates.metadata;
+
+			await documentCollection.update(id, localUpdates);
+			return { success: true, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Fehler beim Aktualisieren';
+			error = msg;
+			return { success: false, error: msg };
 		} finally {
 			saving = false;
 		}
 	},
 
 	async delete(id: string) {
-		const result = await docsService.deleteDocument(id);
-		if (result.success) {
+		error = null;
+		try {
+			await documentCollection.delete(id);
 			ContextEvents.documentDeleted();
-			documents = documents.filter((d) => d.id !== id);
-			if (currentDocument?.id === id) {
-				currentDocument = null;
-			}
+			return { success: true, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Fehler beim Löschen';
+			error = msg;
+			return { success: false, error: msg };
 		}
-		return result;
 	},
 
-	async togglePinned(id: string) {
-		const doc = documents.find((d) => d.id === id);
-		if (!doc) return;
-		const newPinned = !doc.pinned;
-		const result = await docsService.toggleDocumentPinned(id, newPinned);
-		if (result.success) {
+	async togglePinned(id: string, currentPinned: boolean) {
+		error = null;
+		try {
+			const newPinned = !currentPinned;
+			await documentCollection.update(id, { pinned: newPinned });
 			ContextEvents.documentPinned(newPinned);
-			documents = documents.map((d) => (d.id === id ? { ...d, pinned: newPinned } : d));
-			if (currentDocument?.id === id) {
-				currentDocument = { ...currentDocument, pinned: newPinned };
-			}
+			return { success: true, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Fehler beim Pin-Toggle';
+			error = msg;
+			return { success: false, error: msg };
 		}
-		return result;
 	},
 
 	async saveTags(id: string, tags: string[]) {
-		const result = await docsService.saveDocumentTags(id, tags);
-		if (result.success) {
-			documents = documents.map((d) =>
-				d.id === id ? { ...d, metadata: { ...d.metadata, tags } } : d
-			);
-			if (currentDocument?.id === id) {
-				currentDocument = {
-					...currentDocument,
-					metadata: { ...currentDocument.metadata, tags },
-				};
+		error = null;
+		try {
+			const existing = await documentCollection.get(id);
+			if (existing) {
+				await documentCollection.update(id, {
+					metadata: { ...existing.metadata, tags },
+				});
 			}
+			return { success: true, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Fehler beim Speichern der Tags';
+			error = msg;
+			return { success: false, error: msg };
 		}
-		return result;
-	},
-
-	clearCurrent() {
-		currentDocument = null;
 	},
 };

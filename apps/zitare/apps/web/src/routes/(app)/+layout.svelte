@@ -21,10 +21,10 @@
 	}
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { favoritesStore } from '$lib/stores/favorites.svelte';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
 	import { listsStore } from '$lib/stores/lists.svelte';
 	import { zitareSettings } from '$lib/stores/settings.svelte';
+	import { useAllFavorites, useAllLists } from '$lib/data/queries';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -43,6 +43,12 @@
 
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);
+
+	const allFavorites = useAllFavorites();
+	setContext('favorites', allFavorites);
+
+	const allLists = useAllLists();
+	setContext('lists', allLists);
 
 	let showGuestWelcome = $state(false);
 
@@ -147,7 +153,6 @@
 
 	async function handleLogout() {
 		await authStore.signOut();
-		favoritesStore.clear();
 		goto('/login');
 	}
 
@@ -246,10 +251,6 @@
 
 		// Initialize settings
 		zitareSettings.initialize();
-
-		// Load favorites and lists from IndexedDB (works for guests and auth)
-		await favoritesStore.load();
-		await listsStore.loadLists();
 
 		if (authStore.isAuthenticated) {
 			const getToken = () => authStore.getValidToken();

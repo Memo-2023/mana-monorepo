@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { PageHeader, toast } from '@manacore/shared-ui';
 	import { alarmsStore } from '$lib/stores/alarms.svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
-	import type { CreateAlarmInput, Alarm } from '@clock/shared';
+	import type { Alarm } from '@clock/shared';
 	import { ALARM_SOUNDS, DEFAULT_ALARM_PRESETS } from '@clock/shared';
-	import { AlarmsSkeleton } from '$lib/components/skeletons';
+
+	// Get live query data from layout context
+	const allAlarms: { readonly value: Alarm[] } = getContext('alarms');
 
 	// Quick create form (inline)
 	let newTime = $state('07:00');
@@ -27,7 +28,7 @@
 
 	// Find existing alarm for a preset time
 	function findAlarmForPreset(presetTime: string): Alarm | undefined {
-		return alarmsStore.alarms.find((a) => a.time.slice(0, 5) === presetTime);
+		return allAlarms.value.find((a) => a.time.slice(0, 5) === presetTime);
 	}
 
 	// Toggle a preset alarm
@@ -35,7 +36,7 @@
 		const existingAlarm = findAlarmForPreset(presetTime);
 
 		if (existingAlarm) {
-			await alarmsStore.toggleAlarm(existingAlarm.id);
+			await alarmsStore.toggleAlarm(existingAlarm.id, allAlarms.value);
 		} else {
 			const result = await alarmsStore.createAlarm({
 				time: presetTime + ':00',
@@ -78,11 +79,6 @@
 			newRepeatDays = [...newRepeatDays, day];
 		}
 	}
-
-	onMount(async () => {
-		// Load alarms - works for both authenticated and guest mode
-		await alarmsStore.fetchAlarms();
-	});
 
 	function openEditModal(alarm: Alarm) {
 		editingId = alarm.id;
@@ -136,7 +132,7 @@
 	}
 
 	async function handleToggle(id: string) {
-		await alarmsStore.toggleAlarm(id);
+		await alarmsStore.toggleAlarm(id, allAlarms.value);
 	}
 
 	function getRepeatText(days: number[] | null) {
@@ -191,63 +187,58 @@
 		</div>
 	{/if}
 
-	<!-- Loading State -->
-	{#if alarmsStore.loading}
-		<AlarmsSkeleton />
-	{:else}
-		<!-- Default Alarm Presets (Grid) -->
-		<div class="alarm-grid">
-			{#each DEFAULT_ALARM_PRESETS as preset}
-				{@const existingAlarm = findAlarmForPreset(preset.time)}
-				{@const isActive = existingAlarm?.enabled ?? false}
-				<div
-					class="alarm-tile"
-					class:active={isActive}
-					role="button"
-					tabindex="0"
-					onclick={() => togglePreset(preset.time, preset.label)}
-					onkeydown={(e) => e.key === 'Enter' && togglePreset(preset.time, preset.label)}
-				>
-					<div class="text-xl font-light text-foreground tabular-nums text-center">
-						{preset.time}
-					</div>
-					<div class="text-[10px] text-muted-foreground text-center truncate mt-0.5">
-						{existingAlarm?.label || preset.label}
-					</div>
+	<!-- Default Alarm Presets (Grid) -->
+	<div class="alarm-grid">
+		{#each DEFAULT_ALARM_PRESETS as preset}
+			{@const existingAlarm = findAlarmForPreset(preset.time)}
+			{@const isActive = existingAlarm?.enabled ?? false}
+			<div
+				class="alarm-tile"
+				class:active={isActive}
+				role="button"
+				tabindex="0"
+				onclick={() => togglePreset(preset.time, preset.label)}
+				onkeydown={(e) => e.key === 'Enter' && togglePreset(preset.time, preset.label)}
+			>
+				<div class="text-xl font-light text-foreground tabular-nums text-center">
+					{preset.time}
 				</div>
-			{/each}
-		</div>
-
-		<!-- Custom Alarms (Grid) -->
-		{@const customAlarms = alarmsStore.alarms.filter(
-			(a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))
-		)}
-		{#if customAlarms.length > 0}
-			<div class="mt-4">
-				<h2 class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
-					{$_('alarm.custom')}
-				</h2>
-				<div class="alarm-grid">
-					{#each customAlarms as alarm (alarm.id)}
-						<div
-							class="alarm-tile"
-							class:active={alarm.enabled}
-							role="button"
-							tabindex="0"
-							onclick={() => handleToggle(alarm.id)}
-							onkeydown={(e) => e.key === 'Enter' && handleToggle(alarm.id)}
-						>
-							<div class="text-xl font-light text-foreground tabular-nums text-center">
-								{alarm.time.slice(0, 5)}
-							</div>
-							<div class="text-[10px] text-muted-foreground text-center truncate mt-0.5">
-								{alarm.label || getRepeatText(alarm.repeatDays)}
-							</div>
-						</div>
-					{/each}
+				<div class="text-[10px] text-muted-foreground text-center truncate mt-0.5">
+					{existingAlarm?.label || preset.label}
 				</div>
 			</div>
-		{/if}
+		{/each}
+	</div>
+
+	<!-- Custom Alarms (Grid) -->
+	{@const customAlarms = allAlarms.value.filter(
+		(a) => !DEFAULT_ALARM_PRESETS.some((p) => p.time === a.time.slice(0, 5))
+	)}
+	{#if customAlarms.length > 0}
+		<div class="mt-4">
+			<h2 class="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
+				{$_('alarm.custom')}
+			</h2>
+			<div class="alarm-grid">
+				{#each customAlarms as alarm (alarm.id)}
+					<div
+						class="alarm-tile"
+						class:active={alarm.enabled}
+						role="button"
+						tabindex="0"
+						onclick={() => handleToggle(alarm.id)}
+						onkeydown={(e) => e.key === 'Enter' && handleToggle(alarm.id)}
+					>
+						<div class="text-xl font-light text-foreground tabular-nums text-center">
+							{alarm.time.slice(0, 5)}
+						</div>
+						<div class="text-[10px] text-muted-foreground text-center truncate mt-0.5">
+							{alarm.label || getRepeatText(alarm.repeatDays)}
+						</div>
+					</div>
+				{/each}
+			</div>
+		</div>
 	{/if}
 
 	<!-- Edit Modal -->

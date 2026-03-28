@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { PageHeader, toast } from '@manacore/shared-ui';
 	import { worldClocksStore } from '$lib/stores/world-clocks.svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
 	import { POPULAR_TIMEZONES } from '@clock/shared';
+	import type { WorldClock } from '@clock/shared';
 	import WorldMap from '$lib/components/WorldMap.svelte';
-	import { WorldClockSkeleton } from '$lib/components/skeletons';
+
+	// Get live query data from layout context
+	const allWorldClocks: { readonly value: WorldClock[] } = getContext('worldClocks');
 
 	// State
 	let showAddModal = $state(false);
@@ -16,11 +18,11 @@
 	let showMap = $state(true);
 
 	// Selected city timezones for map highlighting
-	let selectedTimezones = $derived(worldClocksStore.worldClocks.map((wc) => wc.timezone));
+	let selectedTimezones = $derived(allWorldClocks.value.map((wc) => wc.timezone));
 
 	// Handle map city click
 	function handleMapCityClick(timezone: string, cityName: string) {
-		const alreadyAdded = worldClocksStore.worldClocks.some((wc) => wc.timezone === timezone);
+		const alreadyAdded = allWorldClocks.value.some((wc) => wc.timezone === timezone);
 		if (alreadyAdded) {
 			toast.info(`${cityName} ist bereits hinzugefügt`);
 		} else {
@@ -39,16 +41,10 @@
 			: POPULAR_TIMEZONES
 	);
 
-	onMount(async () => {
-		if (authStore.isAuthenticated) {
-			await worldClocksStore.fetchWorldClocks();
-		}
-
-		// Update time every second
-		interval = setInterval(() => {
-			currentTime = new Date();
-		}, 1000);
-	});
+	// Update time every second
+	interval = setInterval(() => {
+		currentTime = new Date();
+	}, 1000);
 
 	onDestroy(() => {
 		if (interval) {
@@ -66,10 +62,10 @@
 	}
 
 	async function addCity(timezone: string, cityName: string) {
-		const result = await worldClocksStore.addWorldClock({
-			timezone,
-			cityName,
-		});
+		const result = await worldClocksStore.addWorldClock(
+			{ timezone, cityName },
+			allWorldClocks.value.length
+		);
 
 		if (result.success) {
 			toast.success(`${cityName} hinzugefügt`);
@@ -204,9 +200,7 @@
 	{/if}
 
 	<!-- World Clock List -->
-	{#if worldClocksStore.loading}
-		<WorldClockSkeleton />
-	{:else if worldClocksStore.sortedWorldClocks.length === 0}
+	{#if allWorldClocks.value.length === 0}
 		<div class="card py-12 text-center">
 			<p class="text-lg text-muted-foreground">{$_('worldClock.noClocks')}</p>
 			<button class="btn btn-primary mt-4" onclick={openAddModal}>
@@ -215,7 +209,7 @@
 		</div>
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{#each worldClocksStore.sortedWorldClocks as clock (clock.id)}
+			{#each allWorldClocks.value as clock (clock.id)}
 				{@const isDay = isDaytime(clock.timezone)}
 				<div class="world-clock-card relative">
 					<!-- Delete button -->
@@ -295,9 +289,7 @@
 				<!-- Timezone list -->
 				<div class="flex-1 overflow-y-auto -mx-4 px-4">
 					{#each filteredTimezones as tz}
-						{@const alreadyAdded = worldClocksStore.worldClocks.some(
-							(wc) => wc.timezone === tz.timezone
-						)}
+						{@const alreadyAdded = allWorldClocks.value.some((wc) => wc.timezone === tz.timezone)}
 						<button
 							class="flex w-full items-center justify-between rounded-lg p-3 text-left hover:bg-muted transition-colors"
 							class:opacity-50={alreadyAdded}

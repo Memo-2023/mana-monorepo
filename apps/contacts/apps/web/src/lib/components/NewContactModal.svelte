@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { contactsApi, photoApi } from '$lib/api/contacts';
-	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import SocialMediaFields from './forms/SocialMediaFields.svelte';
@@ -177,8 +176,7 @@
 				}
 			}
 
-			// Reload contacts list
-			await contactsStore.loadContacts();
+			// Live query auto-updates — no manual reload needed
 			onSuccess?.();
 			onClose();
 		} catch (e) {

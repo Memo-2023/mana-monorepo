@@ -1,75 +1,90 @@
+/**
+ * Spaces Store — Mutation-Only (Local-First)
+ *
+ * Reads are handled by useLiveQuery hooks in queries.ts.
+ * This store only handles writes (create, update, delete, toggle).
+ */
+
 import type { Space } from '$lib/types';
 import { ContextEvents } from '@manacore/shared-utils/analytics';
-import * as spacesService from '$lib/services/spaces';
+import { spaceCollection, type LocalSpace } from '$lib/data/local-store';
+import { toSpace } from '$lib/data/queries';
 
-let spaces = $state<Space[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
 
 export const spacesStore = {
-	get spaces() {
-		return spaces;
-	},
 	get loading() {
 		return loading;
 	},
 	get error() {
 		return error;
 	},
-	get pinnedSpaces() {
-		return spaces.filter((s) => s.pinned);
-	},
 
-	async load() {
+	async create(userId: string, name: string, description?: string) {
 		loading = true;
 		error = null;
 		try {
-			spaces = await spacesService.getSpaces();
+			const newLocal: LocalSpace = {
+				id: crypto.randomUUID(),
+				name,
+				description: description || null,
+				settings: null,
+				pinned: true,
+				prefix: name.charAt(0).toUpperCase(),
+			};
+			const inserted = await spaceCollection.insert(newLocal);
+			ContextEvents.spaceCreated();
+			return { data: toSpace(inserted), error: null };
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Laden der Spaces';
+			const msg = e instanceof Error ? e.message : 'Fehler beim Erstellen';
+			error = msg;
+			return { data: null, error: msg };
 		} finally {
 			loading = false;
 		}
 	},
 
-	async getById(id: string): Promise<Space | null> {
-		return spacesService.getSpaceById(id);
-	},
-
-	async create(userId: string, name: string, description?: string) {
-		const result = await spacesService.createSpace(userId, name, description);
-		if (result.data) {
-			spaces = [result.data, ...spaces];
-			ContextEvents.spaceCreated();
-		}
-		return result;
-	},
-
 	async update(id: string, updates: Partial<Space>) {
-		const result = await spacesService.updateSpace(id, updates);
-		if (result.success) {
-			spaces = spaces.map((s) => (s.id === id ? { ...s, ...updates } : s));
+		error = null;
+		try {
+			const localUpdates: Partial<LocalSpace> = {};
+			if (updates.name !== undefined) localUpdates.name = updates.name;
+			if (updates.description !== undefined) localUpdates.description = updates.description;
+			if (updates.pinned !== undefined) localUpdates.pinned = updates.pinned;
+			if (updates.settings !== undefined) localUpdates.settings = updates.settings;
+
+			await spaceCollection.update(id, localUpdates);
+			return { success: true, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Fehler beim Aktualisieren';
+			error = msg;
+			return { success: false, error: msg };
 		}
-		return result;
 	},
 
-	async togglePinned(id: string) {
-		const space = spaces.find((s) => s.id === id);
-		if (!space) return;
-		const newPinned = !space.pinned;
-		const result = await spacesService.toggleSpacePinned(id, newPinned);
-		if (result.success) {
-			spaces = spaces.map((s) => (s.id === id ? { ...s, pinned: newPinned } : s));
+	async togglePinned(id: string, currentPinned: boolean) {
+		error = null;
+		try {
+			await spaceCollection.update(id, { pinned: !currentPinned });
+			return { success: true, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Fehler beim Pin-Toggle';
+			error = msg;
+			return { success: false, error: msg };
 		}
-		return result;
 	},
 
 	async delete(id: string) {
-		const result = await spacesService.deleteSpace(id);
-		if (result.success) {
-			spaces = spaces.filter((s) => s.id !== id);
+		error = null;
+		try {
+			await spaceCollection.delete(id);
 			ContextEvents.spaceDeleted();
+			return { success: true, error: null };
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Fehler beim Löschen';
+			error = msg;
+			return { success: false, error: msg };
 		}
-		return result;
 	},
 };

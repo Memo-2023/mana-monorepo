@@ -19,6 +19,7 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { useAllDecks } from '$lib/data/queries';
 	import { presiOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -31,6 +32,9 @@
 	// Shared tag store (local-first)
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);
+
+	// Live query: all decks (reactive, auto-updates on IndexedDB changes)
+	const allDecks = useAllDecks();
 
 	let { children } = $props();
 
@@ -137,7 +141,7 @@
 	// QuickInputBar handlers
 	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
 		const q = query.toLowerCase();
-		return decksStore.decks
+		return (allDecks.value ?? [])
 			.filter((d) => d.title.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q))
 			.slice(0, 10)
 			.map((deck) => ({
@@ -161,9 +165,6 @@
 			presiStore.startSync(getToken);
 			tagMutations.startSync(getToken);
 		}
-
-		// Load decks from IndexedDB (guest seed or synced data)
-		await decksStore.loadDecks();
 
 		// Show guest welcome modal on first visit
 		if (!auth.isAuthenticated && shouldShowGuestWelcome('presi')) {

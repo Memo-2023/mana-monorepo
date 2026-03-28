@@ -1,9 +1,8 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { chatService } from '$lib/services/chat';
 	import { conversationService } from '$lib/services/conversation';
-	import { templateService } from '$lib/services/template';
-	import { conversationsStore } from '$lib/stores/conversations.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import MessageList from '$lib/components/chat/MessageList.svelte';
 	import ChatInput from '$lib/components/chat/ChatInput.svelte';
@@ -11,8 +10,11 @@
 	import type { AIModel, Message, Template } from '@chat/types';
 	import { Sparkle } from '@manacore/shared-icons';
 
+	// Templates from live query context
+	const templatesCtx: { readonly value: Template[] } = getContext('templates');
+	let templates = $derived(templatesCtx.value);
+
 	let models = $state<AIModel[]>([]);
-	let templates = $state<Template[]>([]);
 	let selectedModelId = $state('');
 	let selectedTemplateId = $state('');
 	let documentMode = $state(false);
@@ -39,11 +41,6 @@
 			// Find default model, or fall back to first model
 			const defaultModel = models.find((m) => m.isDefault);
 			selectedModelId = defaultModel?.id || models[0].id;
-		}
-
-		// Load user templates
-		if (authStore.user) {
-			templates = await templateService.getTemplates(authStore.user.id);
 		}
 
 		isLoading = false;
@@ -90,10 +87,7 @@
 				modelToUse
 			);
 
-			// Reload conversations list
-			await conversationsStore.loadConversations();
-
-			// Navigate to the new conversation
+			// Navigate to the new conversation (live query auto-updates sidebar)
 			goto(`/chat/${conversationId}`);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Fehler beim Erstellen der Konversation';

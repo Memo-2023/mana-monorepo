@@ -1,8 +1,9 @@
 <script lang="ts">
-	import type { CalendarEvent } from '@calendar/shared';
+	import { getContext } from 'svelte';
+	import type { CalendarEvent, Calendar as CalendarType } from '@calendar/shared';
 	import type { Task } from '$lib/api/todos';
 	import { PRIORITY_COLORS, PRIORITY_LABELS } from '$lib/api/todos';
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { getCalendarColorWithBirthdays } from '$lib/data/queries';
 	import { todosStore } from '$lib/stores/todos.svelte';
 	import TodoCheckbox from '$lib/components/todo/TodoCheckbox.svelte';
 	import PriorityBadge from '$lib/components/todo/PriorityBadge.svelte';
@@ -22,10 +23,15 @@
 
 	let { type, event, todo, onclick }: Props = $props();
 
+	// Get calendars from layout context (live query)
+	const calendarsCtx: { readonly value: CalendarType[] } = getContext('calendars');
+
 	let isToggling = $state(false);
 
 	// Event helpers
-	const eventColor = $derived(event ? calendarsStore.getColor(event.calendarId) : undefined);
+	const eventColor = $derived(
+		event ? getCalendarColorWithBirthdays(calendarsCtx.value, event.calendarId) : undefined
+	);
 	const eventTimeLabel = $derived.by(() => {
 		if (!event) return '';
 		if (event.isAllDay) return 'Ganztägig';

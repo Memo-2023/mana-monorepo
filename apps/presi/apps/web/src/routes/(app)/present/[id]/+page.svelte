@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { decksStore } from '$lib/stores/decks.svelte';
+	import { useDeck, useDeckSlides } from '$lib/data/queries';
 	import { PresiEvents } from '@manacore/shared-utils/analytics';
 	import type { Slide } from '@presi/shared';
 	import {
@@ -29,13 +30,24 @@
 
 	const deckId = $page.params.id as string;
 
+	// Reactive live queries
+	const deckQuery = useDeck(deckId);
+	const slidesQuery = useDeckSlides(deckId);
+	let currentDeck = $derived(deckQuery.value);
+	let currentSlides = $derived(slidesQuery.value ?? []);
+
 	let maxSlideReached = $state(0);
+	let hasTrackedStart = $state(false);
+
+	// Track presentation start once slides are loaded
+	$effect(() => {
+		if (currentSlides.length > 0 && !hasTrackedStart) {
+			PresiEvents.presentationStarted(currentSlides.length);
+			hasTrackedStart = true;
+		}
+	});
 
 	onMount(() => {
-		decksStore.loadDeck(deckId).then(() => {
-			PresiEvents.presentationStarted(decksStore.currentSlides.length);
-		});
-
 		// Keyboard navigation
 		window.addEventListener('keydown', handleKeydown);
 		window.addEventListener('mousemove', handleMouseMove);
@@ -47,7 +59,6 @@
 			document.removeEventListener('fullscreenchange', handleFullscreenChange);
 			if (timerInterval) clearInterval(timerInterval);
 			if (hideControlsTimeout) clearTimeout(hideControlsTimeout);
-			decksStore.clearCurrent();
 		};
 	});
 
@@ -95,7 +106,7 @@
 	}
 
 	function nextSlide() {
-		if (currentSlideIndex < decksStore.currentSlides.length - 1) {
+		if (currentSlideIndex < currentSlides.length - 1) {
 			currentSlideIndex++;
 			if (currentSlideIndex > maxSlideReached) maxSlideReached = currentSlideIndex;
 		}
@@ -139,15 +150,15 @@
 		goto(`/deck/${deckId}`);
 	}
 
-	const currentSlide = $derived(decksStore.currentSlides[currentSlideIndex]);
+	const currentSlide = $derived(currentSlides[currentSlideIndex]);
 </script>
 
 <svelte:head>
-	<title>Presenting: {decksStore.currentDeck?.title || 'Loading...'}</title>
+	<title>Presenting: {currentDeck?.title || 'Loading...'}</title>
 </svelte:head>
 
 <div class="fixed inset-0 bg-slate-900 text-white flex flex-col">
-	{#if decksStore.isLoading}
+	{#if deckQuery.loading}
 		<div class="flex-1 flex items-center justify-center">
 			<div
 				class="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"
@@ -161,9 +172,9 @@
 			class:pointer-events-none={!showControls}
 		>
 			<div class="flex items-center gap-4">
-				<h1 class="text-lg font-medium truncate max-w-xs">{decksStore.currentDeck?.title}</h1>
+				<h1 class="text-lg font-medium truncate max-w-xs">{currentDeck?.title}</h1>
 				<span class="text-sm text-slate-400">
-					Slide {currentSlideIndex + 1} of {decksStore.currentSlides.length}
+					Slide {currentSlideIndex + 1} of {currentSlides.length}
 				</span>
 			</div>
 			<button
@@ -260,7 +271,7 @@
 
 					<!-- Slide Dots -->
 					<div class="flex items-center gap-2 px-4">
-						{#each decksStore.currentSlides as _, index}
+						{#each currentSlides as _, index}
 							<button
 								onclick={() => goToSlide(index)}
 								class="w-2 h-2 rounded-full transition-all"
@@ -274,7 +285,7 @@
 
 					<button
 						onclick={nextSlide}
-						disabled={currentSlideIndex === decksStore.currentSlides.length - 1}
+						disabled={currentSlideIndex === currentSlides.length - 1}
 						class="p-3 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30"
 						aria-label="Next slide"
 					>

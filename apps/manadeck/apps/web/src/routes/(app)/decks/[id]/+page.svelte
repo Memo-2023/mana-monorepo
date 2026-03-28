@@ -4,12 +4,16 @@
 	import { goto } from '$app/navigation';
 	import { deckStore } from '$lib/stores/deckStore.svelte';
 	import { progressStore } from '$lib/stores/progressStore.svelte';
-	import { cardStore } from '$lib/stores/cardStore.svelte';
+	import { useDeck, useCardsByDeck } from '$lib/data/queries';
 	import { Button, Badge, Card } from '@manacore/shared-ui';
 
 	let deckId = $derived($page.params.id);
 	let showDeleteConfirm = $state(false);
 	let deleting = $state(false);
+
+	// Live queries for this deck's data
+	const currentDeck = useDeck(deckId);
+	const deckCards = useCardsByDeck(deckId);
 
 	// Calculate deck-specific progress
 	let dueCount = $state(0);
@@ -17,11 +21,7 @@
 
 	onMount(async () => {
 		if (deckId) {
-			await Promise.all([
-				deckStore.fetchDeck(deckId),
-				progressStore.fetchDeckProgress(deckId),
-				cardStore.fetchCards(deckId),
-			]);
+			await progressStore.fetchDeckProgress(deckId);
 
 			// Calculate progress
 			const progress = progressStore.cardProgress;
@@ -40,9 +40,7 @@
 		await deckStore.deleteDeck(deckId);
 		deleting = false;
 
-		if (!deckStore.error) {
-			goto('/decks');
-		}
+		goto('/decks');
 	}
 
 	function handleStudy() {
@@ -51,20 +49,11 @@
 </script>
 
 <svelte:head>
-	<title>{deckStore.currentDeck?.title || 'Deck'} - Manadeck</title>
+	<title>{currentDeck.value?.title || 'Deck'} - Manadeck</title>
 </svelte:head>
 
-{#if deckStore.loading && !deckStore.currentDeck}
-	<div class="flex justify-center py-12">
-		<div class="text-center">
-			<div
-				class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
-			></div>
-			<p class="mt-4 text-muted-foreground">Loading deck...</p>
-		</div>
-	</div>
-{:else if deckStore.currentDeck}
-	{@const deck = deckStore.currentDeck}
+{#if currentDeck.value}
+	{@const deck = currentDeck.value}
 	<div class="space-y-6">
 		<!-- Back Button -->
 		<button
@@ -106,7 +95,7 @@
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 			<Card>
 				<div class="text-center">
-					<div class="text-3xl font-bold">{cardStore.cards.length || deck.card_count || 0}</div>
+					<div class="text-3xl font-bold">{deckCards.value.length || deck.card_count || 0}</div>
 					<div class="text-sm text-muted-foreground">Total Cards</div>
 				</div>
 			</Card>

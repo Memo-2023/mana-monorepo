@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { COLORS } from '@manacore/spiral-db';
 	import type { ColorIndex } from '@manacore/spiral-db';
 	import { spiralStore } from '$lib/stores/spiral.svelte';
-	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { type Favorite } from '$lib/data/queries';
 	import { quotesStore } from '$lib/stores/quotes.svelte';
 	import SpiralCanvas from '$lib/components/SpiralCanvas.svelte';
 	import { QUOTES, type Quote } from '@zitare/content';
+
+	const allFavorites: { readonly value: Favorite[] } = getContext('favorites');
 
 	let zoom = $state(10);
 	let showGrid = $state(false);
@@ -33,7 +36,7 @@
 
 	function handleImportFavorites() {
 		spiralStore.importFavorites(
-			favoritesStore.favorites.map((f) => ({
+			allFavorites.value.map((f) => ({
 				quoteId: f.quoteId,
 				createdAt: f.createdAt,
 			})),
@@ -72,7 +75,7 @@
 	};
 
 	onMount(() => {
-		if (favoritesStore.favorites.length > 0) {
+		if (allFavorites.value.length > 0) {
 			handleImportFavorites();
 		}
 	});
@@ -207,9 +210,9 @@
 				<button
 					class="btn"
 					onclick={handleImportFavorites}
-					disabled={favoritesStore.favorites.length === 0}
+					disabled={allFavorites.value.length === 0}
 				>
-					Favoriten neu importieren ({favoritesStore.favorites.length})
+					Favoriten neu importieren ({allFavorites.value.length})
 				</button>
 				<button
 					class="btn btn-danger"

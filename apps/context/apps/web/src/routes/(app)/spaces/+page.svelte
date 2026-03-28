@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { Plus, MagnifyingGlass } from '@manacore/shared-icons';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { spacesStore } from '$lib/stores/spaces.svelte';
+	import { useAllSpaces } from '$lib/data/queries';
 	import SpaceCard from '$lib/components/SpaceCard.svelte';
 	import CreateSpaceModal from '$lib/components/CreateSpaceModal.svelte';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
@@ -15,19 +15,18 @@
 	let deleteTarget = $state<string | null>(null);
 	let editTarget = $state<Space | null>(null);
 
+	const allSpaces = useAllSpaces();
+	let spaces = $derived(allSpaces.value ?? []);
+
 	let filteredSpaces = $derived(
 		searchQuery.trim()
-			? spacesStore.spaces.filter(
+			? spaces.filter(
 					(s) =>
 						s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
 						s.description?.toLowerCase().includes(searchQuery.toLowerCase())
 				)
-			: spacesStore.spaces
+			: spaces
 	);
-
-	onMount(async () => {
-		await spacesStore.load();
-	});
 
 	async function handleCreate(name: string, description: string) {
 		if (!authStore.user?.id) return;
@@ -38,7 +37,8 @@
 	}
 
 	function handleTogglePin(id: string) {
-		spacesStore.togglePinned(id);
+		const space = spaces.find((s) => s.id === id);
+		spacesStore.togglePinned(id, space?.pinned ?? false);
 	}
 
 	function handleDeleteClick(id: string) {

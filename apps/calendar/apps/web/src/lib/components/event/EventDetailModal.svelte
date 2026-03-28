@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { getContext } from 'svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { getCalendarById, getCalendarColorWithBirthdays } from '$lib/data/queries';
+	import type { Calendar } from '@calendar/shared';
 	import EventForm from './EventForm.svelte';
 	import RecurrenceEditDialog from './RecurrenceEditDialog.svelte';
 	import ReminderSelector from './ReminderSelector.svelte';
@@ -21,6 +23,9 @@
 	}
 
 	let { eventId, onClose }: Props = $props();
+
+	// Get calendars from layout context (live query)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
 	let event = $state<CalendarEvent | null>(null);
 	let loading = $state(true);
@@ -141,9 +146,11 @@
 
 	// Get calendar info for the event
 	let calendarName = $derived(
-		event ? calendarsStore.calendars.find((c) => c.id === event!.calendarId)?.name : undefined
+		event ? getCalendarById(calendarsCtx.value, event!.calendarId)?.name : undefined
 	);
-	let calendarColor = $derived(event ? calendarsStore.getColor(event.calendarId) : '#3b82f6');
+	let calendarColor = $derived(
+		event ? getCalendarColorWithBirthdays(calendarsCtx.value, event.calendarId) : '#3b82f6'
+	);
 
 	// Format recurrence rule to human readable text
 	function formatRecurrence(rule: string): string {

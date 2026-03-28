@@ -1,9 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, getContext } from 'svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
+	import {
+		getVisibleCalendars,
+		getDefaultCalendar,
+		getCalendarColorWithBirthdays,
+		getEventsForDay as getEventsForDayPure,
+		getEventsForRange,
+	} from '$lib/data/queries';
+	import type { Calendar } from '@calendar/shared';
 	import { searchStore } from '$lib/stores/search.svelte';
 	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
@@ -56,6 +63,13 @@
 
 	let { date, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
 
+	// Get calendars and events from layout context (live queries)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
+	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('events');
+
+	// Derived: visible calendars and events for current range
+	let visibleCalendars = $derived(getVisibleCalendars(calendarsCtx.value));
+
 	// Use provided date or fall back to viewStore
 	let effectiveDate = $derived(date ?? viewStore.currentDate);
 
@@ -72,6 +86,11 @@
 		// Use viewStore range when no date override
 		return viewStore.viewRange;
 	});
+
+	// Expand recurring events for the current view range
+	let rangeEvents = $derived(
+		getEventsForRange(eventsCtx.value, effectiveViewRange.start, effectiveViewRange.end)
+	);
 
 	// Use shared constants
 	const HOUR_HEIGHT = HOUR_HEIGHT_PX;
@@ -218,34 +237,37 @@
 	);
 
 	function getEventsForDay(day: Date): CalendarEvent[] {
-		return getVisibleTimedEvents(
-			eventsStore.getEventsForDay(day),
-			calendarsStore.visibleCalendars,
-			{
-				filterHoursEnabled: settingsStore.filterHoursEnabled,
-				dayStartHour: settingsStore.dayStartHour,
-				dayEndHour: settingsStore.dayEndHour,
+		const dayEvents = getEventsForDayPure(rangeEvents, day);
+		// Include draft event
+		if (eventsStore.draftEvent) {
+			const draftStart = new Date(eventsStore.draftEvent.startTime);
+			if (isSameDay(day, draftStart)) {
+				dayEvents.push(eventsStore.draftEvent);
 			}
-		);
+		}
+		return getVisibleTimedEvents(dayEvents, visibleCalendars, {
+			filterHoursEnabled: settingsStore.filterHoursEnabled,
+			dayStartHour: settingsStore.dayStartHour,
+			dayEndHour: settingsStore.dayEndHour,
+		});
 	}
 
 	function getOverflowEventsForDay(day: Date): OverflowEvents {
 		if (!settingsStore.filterHoursEnabled) {
 			return { before: [], after: [] };
 		}
+		const dayEvents = getEventsForDayPure(rangeEvents, day);
 		return getVisibleOverflowEvents(
-			eventsStore.getEventsForDay(day),
-			calendarsStore.visibleCalendars,
+			dayEvents,
+			visibleCalendars,
 			settingsStore.dayStartHour,
 			settingsStore.dayEndHour
 		);
 	}
 
 	function getAllDayEventsForDay(day: Date): CalendarEvent[] {
-		return getVisibleAllDayEvents(
-			eventsStore.getEventsForDay(day),
-			calendarsStore.visibleCalendars
-		);
+		const dayEvents = getEventsForDayPure(rangeEvents, day);
+		return getVisibleAllDayEvents(dayEvents, visibleCalendars);
 	}
 
 	// Get display mode for an event (per-event override takes precedence over global setting)
@@ -438,7 +460,10 @@
 								class="all-day-event"
 								class:search-highlighted={searchStore.isEventHighlighted(event.id)}
 								class:search-dimmed={searchStore.isEventDimmed(event.id)}
-								style="background-color: {calendarsStore.getColor(event.calendarId)}"
+								style="background-color: {getCalendarColorWithBirthdays(
+									calendarsCtx.value,
+									event.calendarId
+								)}"
 								onclick={() => goto(`/?event=${event.id}`)}
 								aria-label="{event.title} - {$_('views.allDay')}"
 							>
@@ -513,7 +538,10 @@
 							class="all-day-block-event"
 							class:search-highlighted={searchStore.isEventHighlighted(event.id)}
 							class:search-dimmed={searchStore.isEventDimmed(event.id)}
-							style="background-color: {calendarsStore.getColor(event.calendarId)}"
+							style="background-color: {getCalendarColorWithBirthdays(
+								calendarsCtx.value,
+								event.calendarId
+							)}"
 							onclick={() => goto(`/?event=${event.id}`)}
 							aria-label="{event.title} - {$_('views.allDay')}"
 						>
@@ -538,7 +566,7 @@
 								: isBeingResized
 									? `top: ${eventDragDrop.resizePreviewTop}%; height: ${eventDragDrop.resizePreviewHeight}%;`
 									: getEventStyle(event)}
-							color={calendarsStore.getColor(event.calendarId)}
+							color={getCalendarColorWithBirthdays(calendarsCtx.value, event.calendarId)}
 							isDragging={isBeingDragged && !isCrossDayDrag}
 							isDraggingSource={isCrossDayDrag}
 							isResizing={isBeingResized}
@@ -596,7 +624,10 @@
 						<EventCard
 							event={eventDragDrop.draggedEvent}
 							style="top: {eventDragDrop.dragPreviewTop}%; height: {eventDragDrop.dragPreviewHeight}%;"
-							color={calendarsStore.getColor(eventDragDrop.draggedEvent.calendarId)}
+							color={getCalendarColorWithBirthdays(
+								calendarsCtx.value,
+								eventDragDrop.draggedEvent.calendarId
+							)}
 							isDragging={true}
 							formattedTime={formatEventTimeRange(eventDragDrop.draggedEvent)}
 						/>
@@ -606,8 +637,9 @@
 					{#if dragToCreate.isCreating && dragToCreate.createTargetDay && isSameDay(day, dragToCreate.createTargetDay)}
 						<div
 							class="create-preview"
-							style="top: {dragToCreate.createPreviewTop}%; height: {dragToCreate.createPreviewHeight}%; background-color: {calendarsStore.getColor(
-								calendarsStore.defaultCalendar?.id || ''
+							style="top: {dragToCreate.createPreviewTop}%; height: {dragToCreate.createPreviewHeight}%; background-color: {getCalendarColorWithBirthdays(
+								calendarsCtx.value,
+								getDefaultCalendar(calendarsCtx.value)?.id || ''
 							)};"
 						>
 							<span class="event-time">{dragToCreate.getCreatePreviewTime()}</span>
@@ -623,7 +655,10 @@
 								{#each overflow.before as event}
 									<div
 										class="overflow-line"
-										style="background-color: {calendarsStore.getColor(event.calendarId)}"
+										style="background-color: {getCalendarColorWithBirthdays(
+											calendarsCtx.value,
+											event.calendarId
+										)}"
 										title="{formatEventTime(event.startTime)} {event.title}"
 									></div>
 								{/each}
@@ -637,7 +672,10 @@
 								{#each overflow.after as event}
 									<div
 										class="overflow-line"
-										style="background-color: {calendarsStore.getColor(event.calendarId)}"
+										style="background-color: {getCalendarColorWithBirthdays(
+											calendarsCtx.value,
+											event.calendarId
+										)}"
 										title="{formatEventTime(event.startTime)} {event.title}"
 									></div>
 								{/each}

@@ -4,6 +4,13 @@
 	import { onMount } from 'svelte';
 	import { GridFour, List, FolderPlus, UploadSimple, ArrowLeft } from '@manacore/shared-icons';
 	import { filesStore } from '$lib/stores/files.svelte';
+	import {
+		useAllFiles,
+		useAllFolders,
+		getFilesInFolder,
+		getFoldersInFolder,
+		findFolderById,
+	} from '$lib/data/queries';
 	import { toastStore } from '@manacore/shared-ui';
 	import type { StorageFile, StorageFolder } from '$lib/api/client';
 	import FileGrid from '$lib/components/files/FileGrid.svelte';
@@ -27,16 +34,23 @@
 
 	let folderId = $derived($page.params.folderId);
 
-	// Breadcrumb items from current folder path
+	// Live queries for reactive reads
+	const allFilesQuery = useAllFiles();
+	const allFoldersQuery = useAllFolders();
+
+	// Current folder and its contents
+	let currentFolder = $derived(findFolderById(allFoldersQuery.value ?? [], folderId));
+	let files = $derived(getFilesInFolder(allFilesQuery.value ?? [], folderId));
+	let folders = $derived(getFoldersInFolder(allFoldersQuery.value ?? [], folderId));
+
+	// Breadcrumb items from current folder
 	let breadcrumbItems = $derived(
-		filesStore.currentFolder
-			? [{ id: filesStore.currentFolder.id, name: filesStore.currentFolder.name }]
-			: []
+		currentFolder ? [{ id: currentFolder.id, name: currentFolder.name }] : []
 	);
 
 	$effect(() => {
 		if (folderId) {
-			filesStore.loadFolder(folderId);
+			filesStore.setCurrentFolder(folderId);
 		}
 	});
 
@@ -194,7 +208,7 @@
 	}
 
 	function goBack() {
-		const parentId = filesStore.currentFolder?.parentFolderId;
+		const parentId = currentFolder?.parentFolderId ?? null;
 		if (parentId) {
 			goto(`/files/${parentId}`);
 		} else {
@@ -204,7 +218,7 @@
 </script>
 
 <svelte:head>
-	<title>{filesStore.currentFolder?.name || 'Ordner'} - Storage</title>
+	<title>{currentFolder?.name || 'Ordner'} - Storage</title>
 </svelte:head>
 
 <div class="files-page">
@@ -214,7 +228,7 @@
 				<ArrowLeft size={20} />
 			</button>
 			<div>
-				<h1>{filesStore.currentFolder?.name || 'Ordner'}</h1>
+				<h1>{currentFolder?.name || 'Ordner'}</h1>
 				<Breadcrumb items={breadcrumbItems} onNavigate={handleBreadcrumbNavigate} />
 			</div>
 		</div>
@@ -255,20 +269,13 @@
 		<UploadZone onUpload={handleUpload} {uploading} progress={uploadProgress} />
 	{/if}
 
-	<BulkActionBar />
+	<BulkActionBar {files} {folders} />
 
-	{#if filesStore.loading}
-		{#if filesStore.viewMode === 'grid'}
-			<FileSkeletonGrid />
-		{:else}
-			<FileSkeletonList />
-		{/if}
-	{:else if filesStore.error}
+	{#if allFilesQuery.error}
 		<div class="error-state">
-			<p>Fehler: {filesStore.error}</p>
-			<button onclick={() => filesStore.loadFolder(folderId)}>Erneut versuchen</button>
+			<p>Fehler: {allFilesQuery.error}</p>
 		</div>
-	{:else if filesStore.files.length === 0 && filesStore.folders.length === 0}
+	{:else if files.length === 0 && folders.length === 0}
 		<EmptyState
 			type="folder"
 			title="Leerer Ordner"
@@ -287,8 +294,8 @@
 		</EmptyState>
 	{:else if filesStore.viewMode === 'grid'}
 		<FileGrid
-			files={filesStore.files}
-			folders={filesStore.folders}
+			{files}
+			{folders}
 			onFileClick={handleFileClick}
 			onFolderClick={handleFolderClick}
 			onFileAction={handleFileAction}
@@ -297,8 +304,8 @@
 		/>
 	{:else}
 		<FileList
-			files={filesStore.files}
-			folders={filesStore.folders}
+			{files}
+			{folders}
 			onFileClick={handleFileClick}
 			onFolderClick={handleFolderClick}
 			onFileAction={handleFileAction}
@@ -316,7 +323,7 @@
 <FilePreviewModal
 	open={previewFile !== null}
 	file={previewFile}
-	allFiles={filesStore.files}
+	allFiles={files}
 	onClose={() => (previewFile = null)}
 	onAction={(action, file) => {
 		handleFileAction(action, file);

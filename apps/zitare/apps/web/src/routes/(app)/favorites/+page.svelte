@@ -1,16 +1,20 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { type Favorite } from '$lib/data/queries';
 	import { getQuoteById, getQuoteText, type Quote } from '@zitare/content';
 	import { zitareSettings } from '$lib/stores/settings.svelte';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
+	const allFavorites: { readonly value: Favorite[] } = getContext('favorites');
+
 	// Get favorite quotes
 	let favoriteQuotes = $derived(
-		favoritesStore.favorites
+		allFavorites.value
 			.map((f) => getQuoteById(f.quoteId))
 			.filter((q): q is NonNullable<typeof q> => q !== undefined)
 	);
@@ -39,7 +43,7 @@
 				id: 'remove-favorite',
 				label: $_('favorites.removeFromFavorites'),
 				variant: 'danger',
-				action: () => favoritesStore.toggle(quote.id),
+				action: () => favoritesStore.toggle(quote.id, allFavorites.value),
 			},
 			{ id: 'divider-1', label: '', type: 'divider' },
 			{
@@ -107,13 +111,6 @@
 			>
 				{$_('auth.login')}
 			</button>
-		</div>
-	{:else if favoritesStore.loading}
-		<!-- Loading -->
-		<div class="text-center py-12">
-			<div
-				class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"
-			></div>
 		</div>
 	{:else if favoriteQuotes.length === 0}
 		<!-- Empty state -->

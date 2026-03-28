@@ -3,7 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { calendarsStore } from '$lib/stores/calendars.svelte';
+	import { getContext } from 'svelte';
+	import type { Calendar } from '@calendar/shared';
 	import { sharesStore } from '$lib/stores/shares.svelte';
 	import {
 		CaretLeft,
@@ -18,6 +19,9 @@
 	} from '@manacore/shared-icons';
 	import { Modal, Input } from '@manacore/shared-ui';
 	import { PERMISSION_DESCRIPTIONS, type SharePermission } from '@calendar/shared';
+
+	// Get calendars from layout context (live query)
+	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
 	// Share form state
 	let showShareForm = $state(false);
@@ -50,7 +54,7 @@
 			return;
 		}
 		await Promise.all([
-			calendarsStore.calendars.length === 0 ? calendarsStore.fetchCalendars() : Promise.resolve(),
+			Promise.resolve(), // Calendars loaded via live query
 			sharesStore.fetchInvitations(),
 			sharesStore.fetchSharedWithMe(),
 		]);
@@ -137,7 +141,7 @@
 			{$_('sharing.shareMyCalendars')}
 		</h2>
 
-		{#each calendarsStore.calendars as calendar (calendar.id)}
+		{#each calendarsCtx.value as calendar (calendar.id)}
 			<div class="calendar-card">
 				<button
 					class="calendar-header"
@@ -215,7 +219,7 @@
 		<div class="form-field">
 			<label>{$_('sharing.form.calendar')}</label>
 			<select bind:value={selectedCalendarId} class="select-input">
-				{#each calendarsStore.calendars as cal}
+				{#each calendarsCtx.value as cal}
 					<option value={cal.id}>{cal.name}</option>
 				{/each}
 			</select>
