@@ -7,7 +7,7 @@
 
 import { createLocalStore, type BaseRecord } from '@manacore/local-store';
 import type { Subtask as SharedSubtask } from '@todo/shared';
-import { guestProjects, guestTasks, guestLabels } from './guest-seed.js';
+import { guestProjects, guestTasks, guestLabels, guestBoardViews } from './guest-seed.js';
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -60,6 +60,45 @@ export interface LocalReminder extends BaseRecord {
 	status: 'pending' | 'sent' | 'failed';
 }
 
+// ─── Board Views ────────────────────────────────────────────
+
+export interface TaskMatcher {
+	type: 'status' | 'priority' | 'project' | 'tag' | 'dueDate' | 'custom';
+	value?: string | null;
+	/** For 'custom' groupBy: manually assigned task IDs */
+	taskIds?: string[];
+}
+
+export interface DropAction {
+	setCompleted?: boolean;
+	setPriority?: 'low' | 'medium' | 'high' | 'urgent';
+	setProjectId?: string | null;
+}
+
+export interface ViewColumn {
+	id: string;
+	name: string;
+	color: string;
+	match: TaskMatcher;
+	onDrop?: DropAction;
+}
+
+export interface ViewFilter {
+	projectId?: string;
+	tagIds?: string[];
+	priorities?: string[];
+}
+
+export interface LocalBoardView extends BaseRecord {
+	name: string;
+	icon: string;
+	groupBy: 'status' | 'priority' | 'project' | 'dueDate' | 'tag' | 'custom';
+	columns: ViewColumn[];
+	filter?: ViewFilter;
+	layout: 'kanban' | 'grid';
+	order: number;
+}
+
 // ─── Store ──────────────────────────────────────────────────
 
 const SYNC_SERVER_URL = import.meta.env.PUBLIC_SYNC_SERVER_URL || 'http://localhost:3050';
@@ -98,6 +137,11 @@ export const todoStore = createLocalStore({
 			name: 'reminders',
 			indexes: ['taskId'],
 		},
+		{
+			name: 'boardViews',
+			indexes: ['order', 'groupBy'],
+			guestSeed: guestBoardViews,
+		},
 	],
 	sync: {
 		serverUrl: SYNC_SERVER_URL,
@@ -110,3 +154,4 @@ export const projectCollection = todoStore.collection<LocalProject>('projects');
 export const labelCollection = todoStore.collection<LocalLabel>('labels');
 export const taskLabelCollection = todoStore.collection<LocalTaskLabel>('taskLabels');
 export const reminderCollection = todoStore.collection<LocalReminder>('reminders');
+export const boardViewCollection = todoStore.collection<LocalBoardView>('boardViews');

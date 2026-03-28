@@ -1,37 +1,28 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID, type DndEvent } from 'svelte-dnd-action';
-	import type { KanbanColumn, Task } from '@todo/shared';
-	import KanbanTaskCard from './KanbanTaskCard.svelte';
-	import KanbanColumnHeader from './KanbanColumnHeader.svelte';
-	import QuickAddTaskInline from './QuickAddTaskInline.svelte';
+	import type { Task } from '@todo/shared';
+	import type { GroupedColumn } from '$lib/data/view-grouping';
+	import KanbanTaskCard from '../kanban/KanbanTaskCard.svelte';
+	import QuickAddTaskInline from '../kanban/QuickAddTaskInline.svelte';
+	import ViewColumnHeader from './ViewColumnHeader.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 
 	interface Props {
-		column: KanbanColumn;
-		tasks: Task[];
-		onUpdateColumn?: (data: { name?: string; color?: string }) => void;
-		onDeleteColumn?: () => void;
-		onTasksReorder?: (taskIds: string[]) => void;
-		onTaskMove?: (taskId: string, toColumnId: string, order: number) => void;
-		onAddTask?: (title: string) => void;
+		column: GroupedColumn;
+		onTaskDrop: (taskId: string, columnId: string) => void;
+		onTaskToggle: (task: Task) => void;
+		onTaskDelete: (taskId: string) => void;
+		onTaskUpdate: (taskId: string, data: Partial<Task>) => void;
 	}
 
-	let {
-		column,
-		tasks,
-		onUpdateColumn,
-		onDeleteColumn,
-		onTasksReorder,
-		onTaskMove,
-		onAddTask,
-	}: Props = $props();
+	let { column, onTaskDrop, onTaskToggle, onTaskDelete, onTaskUpdate }: Props = $props();
 
 	// Local tasks state for drag and drop
 	let localTasks = $state<Task[]>([]);
 
-	// Sync with parent
+	// Sync with parent when column tasks change
 	$effect(() => {
-		localTasks = [...tasks];
+		localTasks = [...column.tasks];
 	});
 
 	const flipDurationMs = 200;
@@ -45,32 +36,25 @@
 		const movedTaskId = e.detail.info.id;
 
 		// Check if this task came from another column
-		const movedTask = newItems.find((t) => t.id === movedTaskId);
-		const wasInThisColumn = tasks.some((t) => t.id === movedTaskId);
+		const wasInThisColumn = column.tasks.some((t) => t.id === movedTaskId);
 
-		if (movedTask && !wasInThisColumn) {
+		if (!wasInThisColumn) {
 			// Task moved FROM another column TO this column
-			const newIndex = newItems.findIndex((t) => t.id === movedTaskId);
-			onTaskMove?.(movedTaskId, column.id, newIndex);
+			onTaskDrop(movedTaskId, column.id);
 		} else {
-			// Task reordered within this column
+			// Task reordered within this column — update order
 			const taskIds = newItems.map((t) => t.id);
-			onTasksReorder?.(taskIds);
+			tasksStore.reorderTasks(taskIds);
 		}
 
 		localTasks = newItems;
 	}
 
-	async function handleToggleComplete(task: Task) {
-		if (task.isCompleted) {
-			await tasksStore.uncompleteTask(task.id);
-		} else {
-			await tasksStore.completeTask(task.id);
-		}
+	function handleToggleComplete(task: Task) {
+		onTaskToggle(task);
 	}
 
-	async function handleSaveTask(task: Task, data: Partial<Task>) {
-		// Transform Partial<Task> to updateTask format
+	function handleSaveTask(task: Task, data: Partial<Task>) {
 		const updateData: Record<string, unknown> = {};
 		if (data.title !== undefined) updateData.title = data.title;
 		if (data.description !== undefined) updateData.description = data.description;
@@ -85,22 +69,34 @@
 		if (data.metadata !== undefined) updateData.metadata = data.metadata;
 		if (data.labels !== undefined) updateData.labelIds = data.labels?.map((l) => l.id);
 
-		await tasksStore.updateTask(task.id, updateData);
+		onTaskUpdate(task.id, data);
 	}
 
-	async function handleDeleteTask(task: Task) {
-		await tasksStore.deleteTask(task.id);
+	function handleDeleteTask(task: Task) {
+		onTaskDelete(task.id);
+	}
+
+	async function handleAddTask(title: string) {
+		// Create task with properties that match this column's onDrop action
+		const createData: Record<string, unknown> = { title };
+		if (column.onDrop) {
+			if (column.onDrop.setCompleted !== undefined) {
+				// Don't create completed tasks — create as pending
+			}
+			if (column.onDrop.setPriority) {
+				createData.priority = column.onDrop.setPriority;
+			}
+			if (column.onDrop.setProjectId !== undefined) {
+				createData.projectId = column.onDrop.setProjectId;
+			}
+		}
+		await tasksStore.createTask(createData as { title: string; projectId?: string; priority?: 'low' | 'medium' | 'high' | 'urgent' });
 	}
 </script>
 
-<div class="kanban-column flex flex-col min-w-[300px] max-w-[340px] h-full">
+<div class="view-column flex flex-col">
 	<!-- Header -->
-	<KanbanColumnHeader
-		{column}
-		taskCount={localTasks.length}
-		onUpdate={onUpdateColumn}
-		onDelete={onDeleteColumn}
-	/>
+	<ViewColumnHeader name={column.name} color={column.color} taskCount={localTasks.length} />
 
 	<!-- Tasks list with drag and drop -->
 	<div
@@ -110,7 +106,7 @@
 			flipDurationMs,
 			dropTargetStyle: {},
 			dropTargetClasses: ['drop-target'],
-			type: 'tasks',
+			type: 'board-view-tasks',
 		}}
 		onconsider={handleDndConsider}
 		onfinalize={handleDndFinalize}
@@ -128,15 +124,13 @@
 	</div>
 
 	<!-- Quick Add Task -->
-	{#if onAddTask}
-		<div class="px-3 pb-3 pt-2">
-			<QuickAddTaskInline onAdd={onAddTask} />
-		</div>
-	{/if}
+	<div class="px-3 pb-3 pt-2">
+		<QuickAddTaskInline onAdd={handleAddTask} />
+	</div>
 </div>
 
 <style>
-	.kanban-column {
+	.view-column {
 		min-height: 250px;
 		max-height: calc(100vh - 280px);
 		background: rgba(255, 255, 255, 0.5);
@@ -147,7 +141,7 @@
 		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 	}
 
-	:global(.dark) .kanban-column {
+	:global(.dark) .view-column {
 		background: rgba(255, 255, 255, 0.08);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 	}

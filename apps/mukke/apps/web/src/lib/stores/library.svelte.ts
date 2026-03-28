@@ -128,14 +128,29 @@ function createLibraryStore() {
 			}
 		},
 
-		/** Load albums from backend (aggregated view). */
+		/** Load albums from IndexedDB (aggregated locally). */
 		async loadAlbums() {
 			state.isLoading = true;
 			state.error = null;
 			try {
-				const data = await fetchApi<{ albums: Album[] }>('/library/albums');
-				state.albums = data.albums;
-				const coverPaths = data.albums.map((a) => a.coverArtPath).filter((p): p is string => !!p);
+				const songs = await songCollection.getAll();
+				const albumMap = new Map<string, Album>();
+				for (const s of songs) {
+					const key = s.album || 'Unknown Album';
+					if (!albumMap.has(key)) {
+						albumMap.set(key, {
+							album: key,
+							albumArtist: s.albumArtist || s.artist || 'Unknown',
+							year: s.year ?? null,
+							coverArtPath: s.coverArtPath ?? null,
+							songCount: 0,
+						} as Album);
+					}
+					const a = albumMap.get(key)!;
+					(a as any).songCount = ((a as any).songCount || 0) + 1;
+				}
+				state.albums = Array.from(albumMap.values());
+				const coverPaths = state.albums.map((a) => a.coverArtPath).filter((p): p is string => !!p);
 				if (coverPaths.length > 0) this.loadCoverUrls(coverPaths);
 			} catch (e) {
 				state.error = e instanceof Error ? e.message : 'Failed to load albums';
@@ -143,37 +158,72 @@ function createLibraryStore() {
 			state.isLoading = false;
 		},
 
-		/** Load artists from backend (aggregated view). */
+		/** Load artists from IndexedDB (aggregated locally). */
 		async loadArtists() {
 			state.isLoading = true;
 			state.error = null;
 			try {
-				const data = await fetchApi<{ artists: Artist[] }>('/library/artists');
-				state.artists = data.artists;
+				const songs = await songCollection.getAll();
+				const artistMap = new Map<
+					string,
+					{ artist: string; songCount: number; albumCount: number }
+				>();
+				const artistAlbums = new Map<string, Set<string>>();
+				for (const s of songs) {
+					const key = s.artist || 'Unknown';
+					if (!artistMap.has(key)) {
+						artistMap.set(key, { artist: key, songCount: 0, albumCount: 0 });
+						artistAlbums.set(key, new Set());
+					}
+					artistMap.get(key)!.songCount++;
+					if (s.album) artistAlbums.get(key)!.add(s.album);
+				}
+				state.artists = Array.from(artistMap.values()).map((a) => ({
+					...a,
+					albumCount: artistAlbums.get(a.artist)?.size || 0,
+				})) as Artist[];
 			} catch (e) {
 				state.error = e instanceof Error ? e.message : 'Failed to load artists';
 			}
 			state.isLoading = false;
 		},
 
-		/** Load genres from backend (aggregated view). */
+		/** Load genres from IndexedDB (aggregated locally). */
 		async loadGenres() {
 			state.isLoading = true;
 			state.error = null;
 			try {
-				const data = await fetchApi<{ genres: Genre[] }>('/library/genres');
-				state.genres = data.genres;
+				const songs = await songCollection.getAll();
+				const genreMap = new Map<string, number>();
+				for (const s of songs) {
+					const key = s.genre || 'Unknown';
+					genreMap.set(key, (genreMap.get(key) || 0) + 1);
+				}
+				state.genres = Array.from(genreMap.entries()).map(([genre, songCount]) => ({
+					genre,
+					songCount,
+				})) as Genre[];
 			} catch (e) {
 				state.error = e instanceof Error ? e.message : 'Failed to load genres';
 			}
 			state.isLoading = false;
 		},
 
-		/** Load stats from backend. */
+		/** Load stats from IndexedDB (computed locally). */
 		async loadStats() {
 			try {
-				const data = await fetchApi<{ stats: LibraryStats }>('/library/stats');
-				state.stats = data.stats;
+				const songs = await songCollection.getAll();
+				const artists = new Set(songs.map((s) => s.artist).filter(Boolean));
+				const albums = new Set(songs.map((s) => s.album).filter(Boolean));
+				const genres = new Set(songs.map((s) => s.genre).filter(Boolean));
+				state.stats = {
+					totalSongs: songs.length,
+					totalArtists: artists.size,
+					totalAlbums: albums.size,
+					totalGenres: genres.size,
+					totalDuration: songs.reduce((sum, s) => sum + (s.duration || 0), 0),
+					totalPlays: songs.reduce((sum, s) => sum + (s.playCount || 0), 0),
+				} as LibraryStats;
 			} catch (e) {
 				state.error = e instanceof Error ? e.message : 'Failed to load stats';
 			}

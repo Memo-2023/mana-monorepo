@@ -5,7 +5,7 @@
  * They serve as onboarding content that teaches the user how the app works.
  */
 
-import type { LocalTask, LocalProject, LocalLabel } from './local-store';
+import type { LocalTask, LocalProject, LocalLabel, LocalBoardView } from './local-store';
 
 const ONBOARDING_PROJECT_ID = 'onboarding-project';
 const PERSONAL_PROJECT_ID = 'personal-project';
@@ -43,6 +43,168 @@ export const guestLabels: LocalLabel[] = [
 		color: '#f59e0b',
 	},
 ];
+
+// ─── Board Views ────────────────────────────────────────────
+
+export const guestBoardViews: LocalBoardView[] = [
+	{
+		id: 'view-kanban',
+		name: 'Kanban',
+		icon: 'columns',
+		groupBy: 'status',
+		layout: 'kanban',
+		order: 0,
+		columns: [
+			{
+				id: 'col-todo',
+				name: 'To Do',
+				color: '#6B7280',
+				match: { type: 'status', value: 'pending' },
+				onDrop: { setCompleted: false },
+			},
+			{
+				id: 'col-done',
+				name: 'Erledigt',
+				color: '#22C55E',
+				match: { type: 'status', value: 'completed' },
+				onDrop: { setCompleted: true },
+			},
+		],
+	},
+	{
+		id: 'view-eisenhower',
+		name: 'Eisenhower',
+		icon: 'grid-four',
+		groupBy: 'custom',
+		layout: 'grid',
+		order: 1,
+		columns: [
+			{
+				id: 'col-eis-ui',
+				name: 'Wichtig & Dringend',
+				color: '#EF4444',
+				match: { type: 'custom', value: 'urgent-important' },
+				onDrop: { setPriority: 'urgent' },
+			},
+			{
+				id: 'col-eis-i',
+				name: 'Wichtig',
+				color: '#F59E0B',
+				match: { type: 'custom', value: 'important' },
+				onDrop: { setPriority: 'high' },
+			},
+			{
+				id: 'col-eis-u',
+				name: 'Dringend',
+				color: '#3B82F6',
+				match: { type: 'custom', value: 'urgent' },
+				onDrop: { setPriority: 'medium' },
+			},
+			{
+				id: 'col-eis-ni',
+				name: 'Weder noch',
+				color: '#6B7280',
+				match: { type: 'custom', value: 'neither' },
+				onDrop: { setPriority: 'low' },
+			},
+		],
+	},
+	{
+		id: 'view-priority',
+		name: 'Priorität',
+		icon: 'flag',
+		groupBy: 'priority',
+		layout: 'kanban',
+		order: 2,
+		columns: [
+			{
+				id: 'col-pri-urgent',
+				name: 'Dringend',
+				color: '#EF4444',
+				match: { type: 'priority', value: 'urgent' },
+				onDrop: { setPriority: 'urgent' },
+			},
+			{
+				id: 'col-pri-high',
+				name: 'Hoch',
+				color: '#F59E0B',
+				match: { type: 'priority', value: 'high' },
+				onDrop: { setPriority: 'high' },
+			},
+			{
+				id: 'col-pri-medium',
+				name: 'Mittel',
+				color: '#3B82F6',
+				match: { type: 'priority', value: 'medium' },
+				onDrop: { setPriority: 'medium' },
+			},
+			{
+				id: 'col-pri-low',
+				name: 'Niedrig',
+				color: '#6B7280',
+				match: { type: 'priority', value: 'low' },
+				onDrop: { setPriority: 'low' },
+			},
+		],
+	},
+	{
+		id: 'view-project',
+		name: 'Projekte',
+		icon: 'folders',
+		groupBy: 'project',
+		layout: 'kanban',
+		order: 3,
+		columns: [], // dynamically generated from projects
+	},
+	{
+		id: 'view-due',
+		name: 'Fälligkeit',
+		icon: 'calendar',
+		groupBy: 'dueDate',
+		layout: 'kanban',
+		order: 4,
+		columns: [
+			{
+				id: 'col-due-overdue',
+				name: 'Überfällig',
+				color: '#EF4444',
+				match: { type: 'dueDate', value: 'overdue' },
+			},
+			{
+				id: 'col-due-today',
+				name: 'Heute',
+				color: '#F59E0B',
+				match: { type: 'dueDate', value: 'today' },
+			},
+			{
+				id: 'col-due-tomorrow',
+				name: 'Morgen',
+				color: '#3B82F6',
+				match: { type: 'dueDate', value: 'tomorrow' },
+			},
+			{
+				id: 'col-due-week',
+				name: 'Diese Woche',
+				color: '#8B5CF6',
+				match: { type: 'dueDate', value: 'week' },
+			},
+			{
+				id: 'col-due-later',
+				name: 'Später',
+				color: '#6B7280',
+				match: { type: 'dueDate', value: 'later' },
+			},
+			{
+				id: 'col-due-none',
+				name: 'Ohne Datum',
+				color: '#9CA3AF',
+				match: { type: 'dueDate', value: 'none' },
+			},
+		],
+	},
+];
+
+// ─── Task Seed Data ─────────────────────────────────────────
 
 const now = new Date();
 const tomorrow = new Date(now);
@@ -85,7 +247,7 @@ export const guestTasks: LocalTask[] = [
 	},
 	{
 		id: 'onboard-4',
-		title: 'Wechsle zur Kanban-Ansicht über die Navigation',
+		title: 'Wechsle zur Board-Ansicht über die Navigation',
 		projectId: ONBOARDING_PROJECT_ID,
 		priority: 'low',
 		isCompleted: false,

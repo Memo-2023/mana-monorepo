@@ -10,8 +10,10 @@ import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import {
 	taskCollection,
 	projectCollection,
+	boardViewCollection,
 	type LocalTask,
 	type LocalProject,
+	type LocalBoardView,
 } from './local-store';
 import type { Task, Project } from '@todo/shared';
 import { isToday, isPast, isFuture, startOfDay, addDays } from 'date-fns';
@@ -79,6 +81,17 @@ export function useAllProjects() {
 		});
 		return locals.map(toProject);
 	}, [] as Project[]);
+}
+
+/** All board views, sorted by order. Auto-updates on any change. */
+export function useAllBoardViews() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await boardViewCollection.getAll(undefined, {
+			sortBy: 'order',
+			sortDirection: 'asc',
+		});
+		return locals;
+	}, [] as LocalBoardView[]);
 }
 
 // ─── Pure Filter Functions (for $derived) ──────────────────
