@@ -82,11 +82,13 @@ jobs:
   # Job 2: Build representative Docker images
   # ===========================================
   # Builds a subset that covers all shared packages:
-  #   - mana-auth: covers auth service (Hono + Bun)
+  #   - mana-auth: covers Hono + Bun service pattern
+  #   - mana-sync: covers Go service pattern
+  #   - mana-media: covers Hono + Bun with Sharp/BullMQ
   #   - todo-web: covers most shared-* web packages
   #   - zitare-web: covers content packages, shared-pwa
   #   - calendar-web: covers calendar shared packages
-  #   - todo-backend: covers NestJS backend pattern + shared packages
+  #   - todo-backend: covers app backend pattern
   # ===========================================
   build-docker-images:
     name: Build ${{ matrix.service }}
@@ -100,6 +102,12 @@ jobs:
           - service: mana-auth
             dockerfile: services/mana-auth/Dockerfile
             context: .
+          - service: mana-sync
+            dockerfile: services/mana-sync/Dockerfile
+            context: .
+          - service: mana-media
+            dockerfile: services/mana-media/apps/api/Dockerfile
+            context: services/mana-media/apps/api
           - service: todo-backend
             dockerfile: apps/todo/apps/backend/Dockerfile
             context: .

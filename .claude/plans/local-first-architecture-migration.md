@@ -403,8 +403,8 @@ Alle 5 Services laufen auf Hono + Bun.
 - [x] Prometheus Metrics für mana-sync (`/metrics` Endpoint)
 - [x] `services/mana-core-auth/` gelöscht + alle Referenzen bereinigt (15+ Dateien)
 - [x] `services/mana-media/` von NestJS auf Hono/Bun migriert (23 → 12 Files, -50% LOC)
-- [ ] Load Testing: Sync-Protokoll unter Last testen
-- [ ] CI/CD: Go Build + Bun Build Pipeline finalisieren
+- [x] Load Testing: k6 Test-Suite für mana-sync (HTTP sync + WebSocket stress)
+- [x] CI/CD: Go + Bun Build Pipeline (6 Go + 2 Hono Services in ci.yml + cd-macmini.yml)
 
 ---
 
@@ -472,7 +472,8 @@ Alle 5 Services laufen auf Hono + Bun.
 |---|---|---|
 | ~~mana-core-auth archivieren~~ | ~~Niedrig~~ | ✅ Gelöscht + alle Referenzen bereinigt |
 | ~~mana-media migrieren~~ | ~~Mittel~~ | ✅ NestJS → Hono/Bun (23 → 12 Files) |
-| Load Testing | Mittel | Sync-Protokoll unter Last testen (100K+ Connections) |
-| CI/CD finalisieren | Niedrig | Go Build + Bun Build Pipeline komplettieren |
+| ~~Load Testing~~ | ~~Mittel~~ | ✅ k6 Test-Suite: HTTP sync, WebSocket stress, mixed workload |
+| ~~CI/CD finalisieren~~ | ~~Niedrig~~ | ✅ 6 Go + 2 Hono Services in CI/CD Pipelines |
 
 **Zero NestJS im gesamten Monorepo.** Alle Services laufen auf Hono/Bun oder Go.
+**Alle 5 Phasen vollständig abgeschlossen.** Migration complete.

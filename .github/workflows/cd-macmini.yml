@@ -26,6 +26,14 @@ on:
           - all
           - matrix-web
           - mana-auth
+          - mana-sync
+          - mana-media
+          - mana-notify
+          - mana-api-gateway
+          - mana-crawler
+          - mana-credits
+          - mana-search
+          - mana-matrix-bot
           - chat-backend
           - chat-web
           - todo-backend
@@ -39,7 +47,6 @@ on:
           - mukke-web
           - storage-backend
           - storage-web
-          - mana-matrix-bot
 
 concurrency:
   group: cd-macmini
@@ -65,6 +72,13 @@ jobs:
     outputs:
       matrix-web: ${{ steps.changes.outputs.matrix-web }}
       mana-auth: ${{ steps.changes.outputs.mana-auth }}
+      mana-sync: ${{ steps.changes.outputs.mana-sync }}
+      mana-media: ${{ steps.changes.outputs.mana-media }}
+      mana-notify: ${{ steps.changes.outputs.mana-notify }}
+      mana-api-gateway: ${{ steps.changes.outputs.mana-api-gateway }}
+      mana-crawler: ${{ steps.changes.outputs.mana-crawler }}
+      mana-credits: ${{ steps.changes.outputs.mana-credits }}
+      mana-search: ${{ steps.changes.outputs.mana-search }}
       chat-backend: ${{ steps.changes.outputs.chat-backend }}
       chat-web: ${{ steps.changes.outputs.chat-web }}
       todo-backend: ${{ steps.changes.outputs.todo-backend }}
@@ -121,6 +135,13 @@ jobs:
 
           check_changes "matrix-web"       "apps/matrix/apps/web/" "apps/matrix/packages/"
           check_changes "mana-auth"          "services/mana-auth/"
+          check_changes "mana-sync"          "services/mana-sync/" "packages/shared-go/"
+          check_changes "mana-media"         "services/mana-media/"
+          check_changes "mana-notify"        "services/mana-notify/" "packages/shared-go/"
+          check_changes "mana-api-gateway"   "services/mana-api-gateway/" "packages/shared-go/"
+          check_changes "mana-crawler"       "services/mana-crawler/" "packages/shared-go/"
+          check_changes "mana-credits"       "services/mana-credits/"
+          check_changes "mana-search"        "services/mana-search/" "packages/shared-go/"
           check_changes "chat-backend"      "apps/chat/apps/backend/" "apps/chat/packages/"
           check_changes "chat-web"          "apps/chat/apps/web/" "apps/chat/packages/"
           check_changes "todo-backend"      "apps/todo/apps/backend/" "apps/todo/packages/"
@@ -140,7 +161,7 @@ jobs:
 
           # Check if anything needs deploying
           ANY="false"
-          for svc in matrix-web mana-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web mana-matrix-bot mana-landing-builder; do
+          for svc in matrix-web mana-auth mana-sync mana-media mana-notify mana-api-gateway mana-crawler mana-credits mana-search chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web mana-matrix-bot mana-landing-builder; do
             val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
             if [ "$val" == "true" ]; then
               ANY="true"
@@ -203,6 +224,13 @@ jobs:
             # Build list from detected changes
             if [ "${{ needs.detect-changes.outputs.matrix-web }}" == "true" ]; then SERVICES="$SERVICES matrix-web"; fi
             if [ "${{ needs.detect-changes.outputs.mana-auth }}" == "true" ]; then SERVICES="$SERVICES mana-auth"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-sync }}" == "true" ]; then SERVICES="$SERVICES mana-sync"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-media }}" == "true" ]; then SERVICES="$SERVICES mana-media"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-notify }}" == "true" ]; then SERVICES="$SERVICES mana-notify"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-api-gateway }}" == "true" ]; then SERVICES="$SERVICES mana-api-gateway"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-crawler }}" == "true" ]; then SERVICES="$SERVICES mana-crawler"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-credits }}" == "true" ]; then SERVICES="$SERVICES mana-credits"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-search }}" == "true" ]; then SERVICES="$SERVICES mana-search"; fi
             if [ "${{ needs.detect-changes.outputs.chat-backend }}" == "true" ]; then SERVICES="$SERVICES chat-backend"; fi
             if [ "${{ needs.detect-changes.outputs.chat-web }}" == "true" ]; then SERVICES="$SERVICES chat-web"; fi
             if [ "${{ needs.detect-changes.outputs.todo-backend }}" == "true" ]; then SERVICES="$SERVICES todo-backend"; fi

@@ -50,6 +50,12 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     outputs:
       mana-auth: ${{ steps.changes.outputs.mana-auth }}
+      mana-sync: ${{ steps.changes.outputs.mana-sync }}
+      mana-media: ${{ steps.changes.outputs.mana-media }}
+      mana-notify: ${{ steps.changes.outputs.mana-notify }}
+      mana-api-gateway: ${{ steps.changes.outputs.mana-api-gateway }}
+      mana-crawler: ${{ steps.changes.outputs.mana-crawler }}
+      mana-credits: ${{ steps.changes.outputs.mana-credits }}
       mana-search: ${{ steps.changes.outputs.mana-search }}
       manacore-web: ${{ steps.changes.outputs.manacore-web }}
       chat-backend: ${{ steps.changes.outputs.chat-backend }}
@@ -83,6 +89,12 @@ jobs:
           if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.force_build_all }}" == "true" ]; then
             echo "Force rebuild all services requested"
             echo "mana-auth=true" >> $GITHUB_OUTPUT
+            echo "mana-sync=true" >> $GITHUB_OUTPUT
+            echo "mana-media=true" >> $GITHUB_OUTPUT
+            echo "mana-notify=true" >> $GITHUB_OUTPUT
+            echo "mana-api-gateway=true" >> $GITHUB_OUTPUT
+            echo "mana-crawler=true" >> $GITHUB_OUTPUT
+            echo "mana-credits=true" >> $GITHUB_OUTPUT
             echo "mana-search=true" >> $GITHUB_OUTPUT
             echo "manacore-web=true" >> $GITHUB_OUTPUT
             echo "chat-backend=true" >> $GITHUB_OUTPUT
@@ -120,6 +132,12 @@ jobs:
             # workflow_dispatch without force - build all
             echo "Workflow dispatch without force_build_all - building all"
             echo "mana-auth=true" >> $GITHUB_OUTPUT
+            echo "mana-sync=true" >> $GITHUB_OUTPUT
+            echo "mana-media=true" >> $GITHUB_OUTPUT
+            echo "mana-notify=true" >> $GITHUB_OUTPUT
+            echo "mana-api-gateway=true" >> $GITHUB_OUTPUT
+            echo "mana-crawler=true" >> $GITHUB_OUTPUT
+            echo "mana-credits=true" >> $GITHUB_OUTPUT
             echo "mana-search=true" >> $GITHUB_OUTPUT
             echo "manacore-web=true" >> $GITHUB_OUTPUT
             echo "chat-backend=true" >> $GITHUB_OUTPUT
@@ -186,6 +204,29 @@ jobs:
           else
             echo "mana-search=false" >> $GITHUB_OUTPUT
           fi
+
+          # Go services (standalone — no COMMON trigger, only own path + shared-go)
+          SHARED_GO_PATTERN="packages/shared-go/"
+          SHARED_GO_CHANGED=$(check_pattern "$SHARED_GO_PATTERN")
+
+          for GO_SVC in mana-sync mana-notify mana-api-gateway mana-crawler; do
+            SVC_CHANGED=$(check_pattern "services/${GO_SVC}/")
+            if [ "$SVC_CHANGED" == "true" ] || [ "$SHARED_GO_CHANGED" == "true" ]; then
+              echo "${GO_SVC}=true" >> $GITHUB_OUTPUT
+            else
+              echo "${GO_SVC}=false" >> $GITHUB_OUTPUT
+            fi
+          done
+
+          # Hono/Bun services (standalone — only own path)
+          for HONO_SVC in mana-media mana-credits; do
+            SVC_CHANGED=$(check_pattern "services/${HONO_SVC}/")
+            if [ "$SVC_CHANGED" == "true" ]; then
+              echo "${HONO_SVC}=true" >> $GITHUB_OUTPUT
+            else
+              echo "${HONO_SVC}=false" >> $GITHUB_OUTPUT
+            fi
+          done
 
           # manacore-web: apps/manacore/apps/web + shared packages
           MANACORE_WEB_CHANGED=$(check_pattern "apps/manacore/apps/web/|apps/manacore/packages/")
@@ -353,6 +394,12 @@ jobs:
           echo "| Service | Will Build |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|------------|" >> $GITHUB_STEP_SUMMARY
           echo "| mana-auth | ${{ steps.changes.outputs.mana-auth }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mana-sync | ${{ steps.changes.outputs.mana-sync }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mana-media | ${{ steps.changes.outputs.mana-media }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mana-notify | ${{ steps.changes.outputs.mana-notify }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mana-api-gateway | ${{ steps.changes.outputs.mana-api-gateway }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mana-crawler | ${{ steps.changes.outputs.mana-crawler }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mana-credits | ${{ steps.changes.outputs.mana-credits }} |" >> $GITHUB_STEP_SUMMARY
           echo "| mana-search | ${{ steps.changes.outputs.mana-search }} |" >> $GITHUB_STEP_SUMMARY
           echo "| manacore-web | ${{ steps.changes.outputs.manacore-web }} |" >> $GITHUB_STEP_SUMMARY
           echo "| chat-backend | ${{ steps.changes.outputs.chat-backend }} |" >> $GITHUB_STEP_SUMMARY
@@ -492,6 +539,182 @@ jobs:
         with:
           context: .
           file: services/mana-search/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Go services
+  build-mana-sync:
+    name: Build mana-sync
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mana-sync == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/mana-sync
+          tags: type=raw,value=latest
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/mana-sync/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-mana-notify:
+    name: Build mana-notify
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mana-notify == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/mana-notify
+          tags: type=raw,value=latest
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/mana-notify/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-mana-api-gateway:
+    name: Build mana-api-gateway
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mana-api-gateway == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/mana-api-gateway
+          tags: type=raw,value=latest
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/mana-api-gateway/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-mana-crawler:
+    name: Build mana-crawler
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mana-crawler == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/mana-crawler
+          tags: type=raw,value=latest
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/mana-crawler/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Hono/Bun services
+  build-mana-media:
+    name: Build mana-media
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mana-media == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/mana-media
+          tags: type=raw,value=latest
+      - uses: docker/build-push-action@v5
+        with:
+          context: services/mana-media/apps/api
+          file: services/mana-media/apps/api/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-mana-credits:
+    name: Build mana-credits
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mana-credits == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/mana-credits
+          tags: type=raw,value=latest
+      - uses: docker/build-push-action@v5
+        with:
+          context: services/mana-credits
+          file: services/mana-credits/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
