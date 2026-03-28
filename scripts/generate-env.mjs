@@ -283,20 +283,7 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// SkillTree Backend (NestJS)
-	{
-		path: 'apps/skilltree/apps/backend/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.SKILLTREE_BACKEND_PORT || '3024',
-			DATABASE_URL: (env) => env.SKILLTREE_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			DEV_BYPASS_AUTH: () => 'true',
-			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
-			JWT_PUBLIC_KEY: (env) => env.JWT_PUBLIC_KEY,
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-		},
-	},
+	// SkillTree Backend: REMOVED — migrated to local-first
 
 	// SkillTree Web (SvelteKit)
 	{
@@ -591,19 +578,7 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// CityCorners Backend (NestJS)
-	{
-		path: 'apps/citycorners/apps/backend/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.CITYCORNERS_BACKEND_PORT || '3025',
-			DATABASE_URL: (env) => env.CITYCORNERS_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			DEV_BYPASS_AUTH: () => 'true',
-			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-		},
-	},
+	// CityCorners Backend: REMOVED — migrated to local-first
 
 	// CityCorners Web (SvelteKit)
 	{

@@ -162,7 +162,7 @@ for container in $ALL_PROBLEM_CONTAINERS; do
         mana-app-nutriphi-web) SERVICE_NAME="nutriphi-web" ;;
         mana-app-nutriphi-backend) SERVICE_NAME="nutriphi-backend" ;;
         mana-app-skilltree-web) SERVICE_NAME="skilltree-web" ;;
-        mana-app-skilltree-backend) SERVICE_NAME="skilltree-backend" ;;
+        # mana-app-skilltree-backend: REMOVED
         mana-app-photos-web) SERVICE_NAME="photos-web" ;;
         # mana-app-photos-backend: REMOVED
         mana-app-web) SERVICE_NAME="mana-web" ;;

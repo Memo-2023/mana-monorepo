@@ -192,7 +192,7 @@ setup_service() {
             ;;
         skilltree)
             create_db_if_not_exists "skilltree"
-            push_schema "@skilltree/backend" "skilltree"
+            # Schema managed by mana-sync (backend removed)
             ;;
         mukke)
             create_db_if_not_exists "mukke"
@@ -208,7 +208,7 @@ setup_service() {
             ;;
         citycorners)
             create_db_if_not_exists "citycorners"
-            push_schema "@citycorners/backend" "citycorners"
+            # Schema managed by mana-sync (backend removed)
             ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
