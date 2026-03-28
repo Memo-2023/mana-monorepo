@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+@import '@manacore/shared-tailwind/themes.css';
+
+/* Scan shared packages for Tailwind classes */
+@source "../../../packages/shared/src";
+@source "../../../../../packages/shared-ui/src";
+@source "../../../../../packages/shared-theme-ui/src";
+@source "../../../../../packages/shared-theme-ui/src/components";
+@source "../../../../../packages/shared-theme-ui/src/pages";
+
+:root {
+	--primary: 38 92% 50%;
+	--primary-foreground: 0 0% 100%;
+	--accent: 38 92% 50%;
+	--accent-foreground: 0 0% 100%;
+}
+
+/* Timer card glow */
+.timer-active {
+	box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+}
+
+/* Entry item transitions */
+.entry-item {
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.entry-item:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Duration display monospace */
+.duration-display {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Project color dot */
+.project-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}

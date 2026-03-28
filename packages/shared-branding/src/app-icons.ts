@@ -75,6 +75,9 @@ const playgroundSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" f
 // CityCorners icon (map pin with blue gradient)
 const citycornersSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#ccGrad)"/><path d="M512 200C408.3 200 324 284.3 324 388C324 536 512 800 512 800C512 800 700 536 700 388C700 284.3 615.7 200 512 200ZM512 468C467.8 468 432 432.2 432 388C432 343.8 467.8 308 512 308C556.2 308 592 343.8 592 388C592 432.2 556.2 468 512 468Z" fill="white"/><circle cx="512" cy="388" r="60" fill="#2563eb" fill-opacity="0.4"/><defs><linearGradient id="ccGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs></svg>`;
 
+// Taktik icon (clock with play button, amber gradient)
+const taktikSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#taktikGrad)"/><circle cx="512" cy="480" r="220" stroke="white" stroke-width="40"/><path d="M512 340V480L600 560" stroke="white" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><circle cx="512" cy="480" r="20" fill="white"/><path d="M480 700L560 740L480 780Z" fill="white" fill-opacity="0.6"/><defs><linearGradient id="taktikGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#f59e0b"/><stop offset="1" stop-color="#d97706"/></linearGradient></defs></svg>`;
+
 // Context icon (document/knowledge with sky blue gradient)
 const contextSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#contextGrad)"/><rect x="300" y="240" width="424" height="544" rx="24" fill="white"/><path d="M400 400H624" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round"/><path d="M400 480H580" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.6"/><path d="M400 560H540" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.4"/><path d="M400 640H600" stroke="#0ea5e9" stroke-width="24" stroke-linecap="round" stroke-opacity="0.3"/><path d="M620 240V380H760" stroke="white" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/><path d="M620 240L760 380" stroke="#0ea5e9" stroke-width="16" stroke-linecap="round" stroke-opacity="0.3"/><circle cx="680" cy="620" r="100" fill="#0ea5e9" fill-opacity="0.2" stroke="white" stroke-width="16"/><path d="M660 620L680 640L720 600" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="contextGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#0ea5e9"/><stop offset="1" stop-color="#0284c7"/></linearGradient></defs></svg>`;
 
@@ -106,6 +109,7 @@ export const APP_ICONS = {
 	playground: svgToDataUrl(playgroundSvg),
 	context: svgToDataUrl(contextSvg),
 	citycorners: svgToDataUrl(citycornersSvg),
+	taktik: svgToDataUrl(taktikSvg),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

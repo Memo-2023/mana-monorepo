@@ -341,6 +341,22 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 	},
 	{
+		id: 'taktik',
+		name: 'Taktik',
+		description: {
+			de: 'Zeiterfassung & Timetracking',
+			en: 'Time Tracking',
+		},
+		longDescription: {
+			de: 'Professionelle Zeiterfassung mit Timer, Projekten, Kunden, Reports und Gilden-Integration.',
+			en: 'Professional time tracking with timer, projects, clients, reports, and guild integration.',
+		},
+		icon: APP_ICONS.taktik,
+		color: '#f59e0b',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
 		id: 'citycorners',
 		name: 'CityCorners',
 		description: {
@@ -447,6 +463,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	playground: { dev: 'http://localhost:5190', prod: 'https://playground.mana.how' },
 	context: { dev: 'http://localhost:5192', prod: 'https://context.mana.how' },
 	citycorners: { dev: 'http://localhost:5196', prod: 'https://citycorners.mana.how' },
+	taktik: { dev: 'http://localhost:5197', prod: 'https://taktik.mana.how' },
 };
 
 /**

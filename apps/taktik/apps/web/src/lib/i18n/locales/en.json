@@ -1,0 +1,135 @@
+{
+	"app": {
+		"name": "Taktik",
+		"loading": "Loading...",
+		"tagline": "Your work rhythm, made measurable."
+	},
+	"nav": {
+		"timer": "Timer",
+		"entries": "Entries",
+		"projects": "Projects",
+		"clients": "Clients",
+		"reports": "Reports",
+		"settings": "Settings",
+		"templates": "Templates"
+	},
+	"timer": {
+		"start": "Start Timer",
+		"stop": "Stop Timer",
+		"resume": "Resume",
+		"running": "Running",
+		"noDescription": "No description",
+		"whatAreYouWorkingOn": "What are you working on?"
+	},
+	"entry": {
+		"create": "Create Entry",
+		"edit": "Edit Entry",
+		"delete": "Delete Entry",
+		"description": "Description",
+		"date": "Date",
+		"startTime": "Start Time",
+		"endTime": "End Time",
+		"duration": "Duration",
+		"billable": "Billable",
+		"notBillable": "Not Billable",
+		"noEntries": "No entries",
+		"today": "Today",
+		"thisWeek": "This Week",
+		"thisMonth": "This Month",
+		"manual": "Manual Entry"
+	},
+	"project": {
+		"create": "Create Project",
+		"edit": "Edit Project",
+		"delete": "Delete Project",
+		"name": "Name",
+		"description": "Description",
+		"client": "Client",
+		"billable": "Billable",
+		"budget": "Budget",
+		"noProjects": "No projects",
+		"archived": "Archived",
+		"internal": "Internal"
+	},
+	"client": {
+		"create": "Create Client",
+		"edit": "Edit Client",
+		"delete": "Delete Client",
+		"name": "Name",
+		"shortCode": "Short Code",
+		"email": "Email",
+		"billingRate": "Billing Rate",
+		"noClients": "No clients"
+	},
+	"report": {
+		"title": "Reports",
+		"totalHours": "Total Hours",
+		"billableHours": "Billable Hours",
+		"avgPerDay": "Avg/Day",
+		"topProject": "Top Project",
+		"byProject": "By Project",
+		"byClient": "By Client",
+		"byDay": "By Day",
+		"export": "Export",
+		"dateRange": "Date Range"
+	},
+	"template": {
+		"create": "Create Template",
+		"edit": "Edit Template",
+		"delete": "Delete Template",
+		"noTemplates": "No templates",
+		"useTemplate": "Use Template"
+	},
+	"settings": {
+		"title": "Settings",
+		"workingHours": "Working Hours/Day",
+		"workingDays": "Working Days/Week",
+		"rounding": "Rounding",
+		"roundingMethod": "Rounding Method",
+		"none": "None",
+		"up": "Round Up",
+		"down": "Round Down",
+		"nearest": "Nearest",
+		"currency": "Currency",
+		"billingRate": "Default Billing Rate",
+		"weekStart": "Week Starts On",
+		"monday": "Monday",
+		"sunday": "Sunday",
+		"timerReminder": "Timer Reminder (min)",
+		"autoStop": "Auto-Stop (hours)"
+	},
+	"auth": {
+		"login": "Login",
+		"logout": "Logout",
+		"register": "Register",
+		"email": "Email",
+		"password": "Password",
+		"forgotPassword": "Forgot password?"
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"add": "Add",
+		"close": "Close",
+		"search": "Search",
+		"error": "Error",
+		"success": "Success",
+		"loading": "Loading...",
+		"noResults": "No results",
+		"confirm": "Confirm",
+		"back": "Back",
+		"next": "Next",
+		"create": "Create",
+		"archive": "Archive",
+		"unarchive": "Restore",
+		"total": "Total",
+		"hours": "Hours",
+		"minutes": "Minutes"
+	},
+	"error": {
+		"notFound": "Page not found",
+		"backToHome": "Back to home"
+	}
+}
