@@ -8,6 +8,7 @@
 	import { theme } from '$lib/stores/theme';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { PillNavigation } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
@@ -189,4 +190,5 @@
 		onRegister={() => goto('/register')}
 		locale="de"
 	/>
+	<SyncIndicator />
 </AuthGate>

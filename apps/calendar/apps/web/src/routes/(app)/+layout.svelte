@@ -4,6 +4,7 @@
 	import { setContext } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, InputBarHelpModal, ImmersiveModeToggle } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -47,6 +48,7 @@
 	import { format } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import type { CreatePreview } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import {
 		parseEventInput,
 		resolveEventIds,
@@ -620,6 +622,7 @@
 	{#if authStore.isAuthenticated}
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 	{/if}
+	<SyncIndicator />
 </AuthGate>
 
 <style>

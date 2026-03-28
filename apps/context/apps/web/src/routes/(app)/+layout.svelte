@@ -4,6 +4,7 @@
 	import { onMount, setContext } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, CommandBar, TagStrip } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -335,6 +336,7 @@
 		onRegister={() => goto('/register')}
 		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 	/>
+	<SyncIndicator />
 </AuthGate>
 
 <style>

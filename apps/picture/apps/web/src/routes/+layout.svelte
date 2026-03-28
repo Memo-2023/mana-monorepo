@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { ToastContainer, setupGlobalErrorHandler } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import { onMount } from 'svelte';
 
 	// Import and initialize theme

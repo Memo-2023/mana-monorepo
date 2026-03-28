@@ -477,6 +477,7 @@
 	{#if authStore.isAuthenticated}
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 	{/if}
+	<SyncIndicator />
 </AuthGate>
 
 <style>

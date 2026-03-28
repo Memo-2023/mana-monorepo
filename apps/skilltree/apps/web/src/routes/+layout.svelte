@@ -45,4 +45,5 @@
 		{/if}
 		<SessionExpiredBanner locale="de" loginHref="/login" />
 	{/if}
+	<SyncIndicator />
 </AuthGate>

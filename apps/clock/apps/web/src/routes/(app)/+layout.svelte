@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, CommandBar, TagStrip } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -386,6 +387,7 @@
 	{#if authStore.isAuthenticated}
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 	{/if}
+	<SyncIndicator />
 </AuthGate>
 
 <style>

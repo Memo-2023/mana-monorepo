@@ -4,7 +4,9 @@
 	import { onMount } from 'svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, setupGlobalErrorHandler, TagStrip } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -20,6 +22,7 @@
 	import { getPillAppItems } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { ToastContainer } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import { storageOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -300,6 +303,7 @@
 		onRegister={() => goto('/register')}
 		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 	/>
+	<SyncIndicator />
 </AuthGate>
 
 <style>

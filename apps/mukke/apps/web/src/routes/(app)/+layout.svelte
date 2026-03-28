@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { PillNavigation, QuickInputBar, DevBuildBadge, TagStrip } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -304,6 +305,7 @@
 		onRegister={() => goto('/register')}
 		locale="de"
 	/>
+	<SyncIndicator />
 </AuthGate>
 
 <style>

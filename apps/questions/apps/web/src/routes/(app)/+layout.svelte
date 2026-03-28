@@ -16,6 +16,7 @@
 		searchQuestions,
 	} from '$lib/data/queries';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
 		PillDropdownItem,
@@ -262,6 +263,7 @@
 		onRegister={() => goto('/register')}
 		locale="de"
 	/>
+	<SyncIndicator />
 </AuthGate>
 
 <style>

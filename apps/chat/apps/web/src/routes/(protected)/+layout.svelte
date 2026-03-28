@@ -16,7 +16,9 @@
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { setContext } from 'svelte';
 	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -293,6 +295,7 @@
 		onRegister={() => goto('/register')}
 		locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 	/>
+	<SyncIndicator />
 </AuthGate>
 
 <style>

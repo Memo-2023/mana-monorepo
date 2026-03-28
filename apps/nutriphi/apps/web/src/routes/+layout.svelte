@@ -4,7 +4,9 @@
 	import { isLoading as i18nLoading, _ as t } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { QuickInputBar } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import type { QuickInputItem, CreatePreview } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { useAllMeals, searchMeals } from '$lib/data/queries';
 	import { parseMealInput, formatParsedMealPreview } from '$lib/utils/meal-parser';
@@ -112,4 +114,5 @@
 		onRegister={() => goto('/register')}
 		locale="de"
 	/>
+	<SyncIndicator />
 </AuthGate>

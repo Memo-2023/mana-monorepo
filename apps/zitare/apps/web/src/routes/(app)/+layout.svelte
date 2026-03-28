@@ -9,6 +9,7 @@
 		TagStrip,
 	} from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -388,6 +389,7 @@
 	{#if authStore.isAuthenticated}
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 	{/if}
+	<SyncIndicator />
 </AuthGate>
 
 <style>

@@ -8,7 +8,9 @@
 	import { theme } from '$lib/stores/theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -316,4 +318,5 @@
 	{#if authStore.isAuthenticated}
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 	{/if}
+	<SyncIndicator />
 </AuthGate>
