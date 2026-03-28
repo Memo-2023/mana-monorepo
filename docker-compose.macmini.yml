@@ -268,6 +268,7 @@ services:
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
       SMTP_PASS: ${SMTP_PASSWORD}
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET:-}
+      MAX_DAILY_SIGNUPS: ${MAX_DAILY_SIGNUPS:-0}
       CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://inventar.mana.how,https://link.mana.how,https://manadeck.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
     ports:
       - "3001:3001"
@@ -419,8 +420,8 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       SEARCH_SERVICE_URL: http://mana-search:3012
-      STT_SERVICE_URL: http://host.docker.internal:3026
-      TTS_SERVICE_URL: http://host.docker.internal:3022
+      STT_SERVICE_URL: ${STT_SERVICE_URL:-http://192.168.178.11:3020}
+      TTS_SERVICE_URL: ${TTS_SERVICE_URL:-http://192.168.178.11:3022}
       CORS_ORIGINS: https://api.mana.how,https://mana.how
       ADMIN_USER_IDS: ${ADMIN_USER_IDS:-}
     ports:
@@ -755,12 +756,12 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      # Voice services
-      STT_URL: http://host.docker.internal:3026
-      TTS_URL: http://host.docker.internal:3022
-      # AI
-      OLLAMA_URL: http://host.docker.internal:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
+      # Voice services (GPU server via LAN)
+      STT_URL: ${STT_SERVICE_URL:-http://192.168.178.11:3020}
+      TTS_URL: ${TTS_SERVICE_URL:-http://192.168.178.11:3022}
+      # AI (GPU server via LAN)
+      OLLAMA_URL: ${OLLAMA_URL:-http://192.168.178.11:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:12b}
       # Plugin tokens (all 21 bot identities)
       MATRIX_MANA_BOT_TOKEN: ${MATRIX_MANA_BOT_TOKEN}
       MATRIX_MANA_BOT_ROOMS: ${MATRIX_MANA_BOT_ROOMS:-}
@@ -1214,7 +1215,7 @@ services:
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
-      IMAGE_GEN_SERVICE_URL: http://host.docker.internal:3025
+      IMAGE_GEN_SERVICE_URL: ${IMAGE_GEN_SERVICE_URL:-http://192.168.178.11:3023}
       APP_ID: picture-app
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       S3_ENDPOINT: http://minio:9000
@@ -1298,8 +1299,8 @@ services:
     environment:
       PORT: 3020
       LOG_LEVEL: info
-      OLLAMA_URL: http://host.docker.internal:11434
-      OLLAMA_DEFAULT_MODEL: gemma3:4b
+      OLLAMA_URL: ${OLLAMA_URL:-http://192.168.178.11:11434}
+      OLLAMA_DEFAULT_MODEL: ${OLLAMA_MODEL:-gemma3:12b}
       OLLAMA_TIMEOUT: 120
       REDIS_URL: redis://redis:6379
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
@@ -1308,7 +1309,7 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       GOOGLE_DEFAULT_MODEL: gemini-2.0-flash
       AUTO_FALLBACK_ENABLED: "true"
-      OLLAMA_MAX_CONCURRENT: 3
+      OLLAMA_MAX_CONCURRENT: 5
       CORS_ORIGINS: https://playground.mana.how,https://mana.how,https://chat.mana.how
     extra_hosts:
       - "host.docker.internal:host-gateway"

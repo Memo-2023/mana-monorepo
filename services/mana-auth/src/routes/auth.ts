@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import type { AuthUser } from '../middleware/jwt-auth';
 import type { BetterAuthInstance } from '../auth/better-auth.config';
 import type { SecurityEventsService, AccountLockoutService } from '../services/security';
+import type { SignupLimitService } from '../services/signup-limit';
 import type { Config } from '../config';
 import { sourceAppStore, passwordResetRedirectStore } from '../auth/stores';
 
@@ -16,14 +17,36 @@ export function createAuthRoutes(
 	auth: BetterAuthInstance,
 	config: Config,
 	security: SecurityEventsService,
-	lockout: AccountLockoutService
+	lockout: AccountLockoutService,
+	signupLimit: SignupLimitService
 ) {
 	const app = new Hono<{ Variables: { user: AuthUser } }>();
 
 	// ─── Registration ────────────────────────────────────────
 
+	// ─── Signup Status (public) ─────────────────────────────
+
+	app.get('/signup-status', async (c) => {
+		const status = await signupLimit.getStatus();
+		return c.json(status);
+	});
+
 	app.post('/register', async (c) => {
 		const body = await c.req.json();
+
+		// Check daily signup limit
+		const limitCheck = await signupLimit.checkLimit();
+		if (!limitCheck.allowed) {
+			return c.json(
+				{
+					error: 'Registration limit reached',
+					message: 'Das tägliche Registrierungslimit ist erreicht. Versuche es morgen wieder.',
+					spotsRemaining: 0,
+					resetsAt: limitCheck.resetsAt,
+				},
+				429
+			);
+		}
 
 		// Store source app URL for email verification redirect
 		if (body.sourceAppUrl && body.email) {

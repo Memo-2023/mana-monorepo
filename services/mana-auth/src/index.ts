@@ -15,6 +15,7 @@ import { jwtAuth } from './middleware/jwt-auth';
 import { serviceAuth } from './middleware/service-auth';
 import { initializeEmail } from './email/send';
 import { SecurityEventsService, AccountLockoutService } from './services/security';
+import { SignupLimitService } from './services/signup-limit';
 import { ApiKeysService } from './services/api-keys';
 import { createAuthRoutes } from './routes/auth';
 import { createGuildRoutes } from './routes/guilds';
@@ -31,6 +32,7 @@ const auth = createBetterAuth(config.databaseUrl);
 initializeEmail(config.smtp);
 const security = new SecurityEventsService(db);
 const lockout = new AccountLockoutService(db);
+const signupLimit = new SignupLimitService(db);
 const apiKeysService = new ApiKeysService(db);
 
 // ─── App ────────────────────────────────────────────────────
@@ -61,7 +63,7 @@ app.get('/.well-known/openid-configuration', async (c) => auth.handler(c.req.raw
 
 // ─── Custom Auth Endpoints ──────────────────────────────────
 
-app.route('/api/v1/auth', createAuthRoutes(auth, config, security, lockout));
+app.route('/api/v1/auth', createAuthRoutes(auth, config, security, lockout, signupLimit));
 
 // ─── Guilds ─────────────────────────────────────────────────
 
