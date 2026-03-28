@@ -1,0 +1,76 @@
+# CI for Go Services
+# Runs on push to main or PRs — builds and tests all Go services
+# Compatible with both Forgejo Actions and GitHub Actions
+
+name: Go Services CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/mana-search-go/**'
+      - 'services/mana-notify-go/**'
+      - 'services/mana-crawler-go/**'
+      - 'services/mana-api-gateway-go/**'
+      - 'services/mana-sync/**'
+      - 'services/mana-matrix-bot/**'
+  pull_request:
+    paths:
+      - 'services/mana-*-go/**'
+      - 'services/mana-sync/**'
+      - 'services/mana-matrix-bot/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - mana-search-go
+          - mana-notify-go
+          - mana-crawler-go
+          - mana-api-gateway-go
+          - mana-sync
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Test ${{ matrix.service }}
+        run: |
+          cd services/${{ matrix.service }}
+          go vet ./...
+          go test ./... -v -count=1
+
+      - name: Build ${{ matrix.service }}
+        run: |
+          cd services/${{ matrix.service }}
+          CGO_ENABLED=0 go build -ldflags="-s -w" -o /dev/null ./cmd/server
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        include:
+          - service: mana-search-go
+            image: mana-search
+          - service: mana-notify-go
+            image: mana-notify
+          - service: mana-crawler-go
+            image: mana-crawler
+          - service: mana-api-gateway-go
+            image: mana-api-gateway
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f services/${{ matrix.service }}/Dockerfile \
+            -t ${{ matrix.image }}:${{ github.sha }} \
+            -t ${{ matrix.image }}:latest \
+            .

@@ -177,6 +177,65 @@ services:
       exit 0;
       "
 
+
+  # ============================================
+  # Tier 0b: Forgejo (Git + CI/CD + Registry)
+  # ============================================
+
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:11
+    container_name: mana-core-forgejo
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+      FORGEJO__database__DB_TYPE: postgres
+      FORGEJO__database__HOST: postgres:5432
+      FORGEJO__database__NAME: forgejo
+      FORGEJO__database__USER: postgres
+      FORGEJO__database__PASSWD: ${POSTGRES_PASSWORD:-mana123}
+      FORGEJO__server__DOMAIN: git.mana.how
+      FORGEJO__server__SSH_DOMAIN: git.mana.how
+      FORGEJO__server__ROOT_URL: https://git.mana.how/
+      FORGEJO__server__HTTP_PORT: 3000
+      FORGEJO__server__SSH_PORT: 2222
+      FORGEJO__server__LFS_START_SERVER: "true"
+      FORGEJO__service__DISABLE_REGISTRATION: "true"
+      FORGEJO__service__REQUIRE_SIGNIN_VIEW: "false"
+      FORGEJO__actions__ENABLED: "true"
+      FORGEJO__actions__DEFAULT_ACTIONS_URL: https://code.forgejo.org
+      FORGEJO__packages__ENABLED: "true"
+      FORGEJO__ui__DEFAULT_THEME: forgejo-dark
+      FORGEJO__ui__SHOW_USER_EMAIL: "false"
+      FORGEJO__mailer__ENABLED: "false"
+    volumes:
+      - /Volumes/ManaData/forgejo:/data
+    ports:
+      - "3041:3000"
+      - "2222:2222"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/v1/version"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  forgejo-runner:
+    image: codeberg.org/forgejo/runner:6
+    container_name: mana-core-forgejo-runner
+    restart: always
+    depends_on:
+      forgejo:
+        condition: service_healthy
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /Volumes/ManaData/forgejo-runner:/data
+
   # ============================================
   # Tier 1: Core Auth Service (Port 3001)
   # ============================================
@@ -208,7 +267,7 @@ services:
       # Cross-domain SSO: share session cookies across all *.mana.how subdomains
       COOKIE_DOMAIN: .mana.how
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      MANA_CREDITS_URL: http://mana-credits:3061
+      MANA_CREDITS_URL: http://mana-credits:3002
       SMTP_HOST: smtp-relay.brevo.com
       SMTP_PORT: 587
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
@@ -221,15 +280,15 @@ services:
       CHAT_BACKEND_URL: http://chat-backend:3030
       TODO_BACKEND_URL: http://todo-backend:3031
       CALENDAR_BACKEND_URL: http://calendar-backend:3032
-      CONTACTS_BACKEND_URL: http://contacts-backend:3034
-      PICTURE_BACKEND_URL: http://picture-backend:3040
+      CONTACTS_BACKEND_URL: http://contacts-backend:3033
+      PICTURE_BACKEND_URL: http://picture-backend:3035
       # PRESI_BACKEND_URL: removed — replaced by Hono server
       # ZITARE_BACKEND_URL: removed — migrated to local-first
       # PHOTOS_BACKEND_URL: removed — migrated to local-first
       # CLOCK_BACKEND_URL: removed — migrated to local-first
-      STORAGE_BACKEND_URL: http://storage-backend:3035
+      STORAGE_BACKEND_URL: http://storage-backend:3034
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      MANA_LLM_URL: http://mana-llm:3025
+      MANA_LLM_URL: http://mana-llm:3020
       # WebAuthn / Passkeys
       WEBAUTHN_RP_ID: mana.how
       WEBAUTHN_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://manadeck.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
@@ -260,7 +319,7 @@ services:
         condition: service_healthy
     environment:
       TZ: Europe/Berlin
-      PORT: 3061
+      PORT: 3002
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_credits
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
@@ -269,9 +328,9 @@ services:
       BASE_URL: https://credits.mana.how
       CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://picture.mana.how,https://todo.mana.how,https://zitare.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://manadeck.mana.how,https://presi.mana.how,https://storage.mana.how,https://nutriphi.mana.how,https://planta.mana.how,https://mukke.mana.how,https://context.mana.how,https://photos.mana.how,https://questions.mana.how
     ports:
-      - "3061:3061"
+      - "3002:3002"
     healthcheck:
-      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3061/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3002/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -280,7 +339,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.mana-credits.rule=Host(`credits.mana.how`)"
       - "traefik.http.routers.mana-credits.tls=true"
-      - "traefik.http.services.mana-credits.loadbalancer.server.port=3061"
+      - "traefik.http.services.mana-credits.loadbalancer.server.port=3002"
 
   # ============================================
   # Tier 2: Gateway & Search Services (Ports 3010-3029)
@@ -300,21 +359,21 @@ services:
         condition: service_healthy
     environment:
       TZ: Europe/Berlin
-      PORT: 3060
+      PORT: 3016
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
       MANA_CORE_AUTH_URL: http://mana-auth:3001
-      SEARCH_SERVICE_URL: http://mana-search:3020
+      SEARCH_SERVICE_URL: http://mana-search:3012
       STT_SERVICE_URL: http://host.docker.internal:3026
       TTS_SERVICE_URL: http://host.docker.internal:3022
       CORS_ORIGINS: https://api.mana.how,https://mana.how
       ADMIN_USER_IDS: ${ADMIN_USER_IDS:-}
     ports:
-      - "3060:3060"
+      - "3016:3016"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3060/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3016/health"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -349,7 +408,7 @@ services:
       searxng:
         condition: service_healthy
     environment:
-      PORT: 3020
+      PORT: 3012
       SEARXNG_URL: http://searxng:8080
       SEARXNG_TIMEOUT: 15000
       SEARXNG_DEFAULT_LANGUAGE: de-DE
@@ -361,9 +420,9 @@ services:
       EXTRACT_TIMEOUT: 10000
       EXTRACT_MAX_LENGTH: 50000
     ports:
-      - "3020:3020"
+      - "3012:3012"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3020/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3012/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -380,14 +439,14 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      PORT: 3051
+      PORT: 3010
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
       JWKS_URL: http://mana-core-auth:3001/api/v1/auth/jwks
       CORS_ORIGINS: "https://mana.how,https://*.mana.how"
     ports:
-      - "3051:3051"
+      - "3010:3010"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3051/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3010/health"]
       interval: 120s
       timeout: 5s
       retries: 3
@@ -404,7 +463,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      PORT: 3042
+      PORT: 3013
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
       SERVICE_KEY: ${NOTIFY_SERVICE_KEY:-dev-service-key}
       MANA_CORE_AUTH_URL: http://mana-core-auth:3001
@@ -417,9 +476,9 @@ services:
       MATRIX_HOMESERVER_URL: http://mana-matrix-synapse:8008
       MATRIX_ACCESS_TOKEN: ${MATRIX_NOTIFY_BOT_TOKEN:-}
     ports:
-      - "3042:3042"
+      - "3013:3013"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3042/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3013/health"]
       interval: 120s
       timeout: 5s
       retries: 3
@@ -439,7 +498,7 @@ services:
         condition: service_healthy
     environment:
       TZ: Europe/Berlin
-      PORT: 3023
+      PORT: 3014
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana?sslmode=disable
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -447,9 +506,9 @@ services:
       CRAWLER_USER_AGENT: "ManaCoreCrawler/1.0 (+https://mana.how/bot)"
       QUEUE_CONCURRENCY: 5
     ports:
-      - "3023:3023"
+      - "3014:3014"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3023/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3014/health"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -471,7 +530,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3015
+      PORT: 3011
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_media
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -487,9 +546,9 @@ services:
       PUBLIC_URL: https://media.mana.how/api/v1
       CORS_ORIGINS: https://mana.how,https://nutriphi.mana.how,https://contacts.mana.how,https://chat.mana.how,https://storage.mana.how,https://photos.mana.how
     ports:
-      - "3015:3015"
+      - "3011:3011"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3015/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3011/api/v1/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -507,15 +566,15 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3050
+      PORT: 3015
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
       CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
       ORG_LANDING_DOMAIN: mana.how
     ports:
-      - "3050:3050"
+      - "3015:3015"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3050/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3015/api/v1/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -541,7 +600,7 @@ services:
       PORT: 3030
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/chat
       MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_LLM_URL: http://mana-llm:3025
+      MANA_LLM_URL: http://mana-llm:3020
       LLM_TIMEOUT: 120000
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
@@ -630,7 +689,7 @@ services:
       # Removed: minio - lazy connect
     environment:
       NODE_ENV: production
-      PORT: 3034
+      PORT: 3033
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/contacts
       DB_HOST: postgres
       DB_PORT: 5432
@@ -645,9 +704,9 @@ services:
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       GLITCHTIP_DSN: http://a0d81e4b78694b57951a1a5de6d64ae7@glitchtip:8020/2
     ports:
-      - "3034:3034"
+      - "3033:3033"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3034/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3033/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -665,7 +724,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3035
+      PORT: 3034
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/storage
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://storage.mana.how,https://mana.how
@@ -680,9 +739,9 @@ services:
       ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       GLITCHTIP_DSN: http://f38d9b20ba2d416b80d1c559b81fc275@glitchtip:8020/17
     ports:
-      - "3035:3035"
+      - "3034:3034"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3035/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3034/api/v1/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -703,7 +762,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3009
+      PORT: 3036
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/manadeck
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://manadeck.mana.how,https://mana.how
@@ -714,9 +773,9 @@ services:
       S3_BUCKET: manadeck-storage
       GLITCHTIP_DSN: ""
     ports:
-      - "3009:3009"
+      - "3036:3036"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3009/api/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3036/api/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -734,19 +793,19 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3037
+      PORT: 3038
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/nutriphi
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_LLM_URL: http://mana-llm:3025
+      MANA_LLM_URL: http://mana-llm:3020
       CORS_ORIGINS: https://nutriphi.mana.how,https://mana.how
       GLITCHTIP_DSN: http://61b5689b903746b698bd1f77ae9e0be1@glitchtip:8020/11
     ports:
-      - "3037:3037"
+      - "3038:3038"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3037/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3038/api/v1/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -770,7 +829,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3010
+      PORT: 3037
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mukke
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://mukke.mana.how,https://mana.how
@@ -783,9 +842,9 @@ services:
       RUN_DB_PUSH: "true"
       GLITCHTIP_DSN: http://9f792851d49d4f018625f45855f0a030@glitchtip:8020/9
     ports:
-      - "3010:3010"
+      - "3037:3037"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3010/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3037/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -805,14 +864,14 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3022
+      PORT: 3039
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/planta
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: https://planta.mana.how,https://mana.how
-      MANA_LLM_URL: http://mana-llm:3025
+      MANA_LLM_URL: http://mana-llm:3020
       S3_ENDPOINT: http://minio:9000
       S3_PUBLIC_ENDPOINT: https://minio.mana.how
       S3_REGION: us-east-1
@@ -821,9 +880,9 @@ services:
       S3_BUCKET: planta-storage
       GLITCHTIP_DSN: http://646a927be6c54c989a75c145247d89f9@glitchtip:8020/13
     ports:
-      - "3022:3022"
+      - "3039:3039"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3022/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3039/api/v1/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -876,7 +935,7 @@ services:
     volumes:
       - ./docker/matrix/element-config.json:/app/config.json:ro
     ports:
-      - "4080:80"
+      - "4010:80"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 180s
@@ -896,12 +955,12 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5180
+      PORT: 4011
       PUBLIC_MANA_CORE_AUTH_URL: https://auth.mana.how
     ports:
-      - "4090:5180"
+      - "4011:4011"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5180/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4011/health"]
       interval: 180s
       timeout: 10s
       retries: 3
@@ -926,7 +985,7 @@ services:
         condition: service_healthy
     environment:
       TZ: Europe/Berlin
-      PORT: 4000
+      PORT: 4001
       # Matrix
       MATRIX_HOMESERVER_URL: http://synapse:8008
       MATRIX_STORAGE_PATH: /app/data
@@ -981,16 +1040,16 @@ services:
       TODO_BACKEND_URL: http://todo-backend:3031
       CALENDAR_BACKEND_URL: http://calendar-backend:3032
       # CLOCK_BACKEND_URL: removed — migrated to local-first
-      CONTACTS_BACKEND_URL: http://contacts-backend:3034
+      CONTACTS_BACKEND_URL: http://contacts-backend:3033
       # ZITARE_BACKEND_URL: removed — migrated to local-first
-      PLANTA_BACKEND_URL: http://planta-backend:3022
-      NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3037
-      STORAGE_BACKEND_URL: http://storage-backend:3035
+      PLANTA_BACKEND_URL: http://planta-backend:3039
+      NUTRIPHI_BACKEND_URL: http://nutriphi-backend:3038
+      STORAGE_BACKEND_URL: http://storage-backend:3034
     volumes:
       - matrix_bots_data:/app/data
     # No host port mapping needed — only communicates with synapse internally
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4000/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4001/health"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -1020,7 +1079,7 @@ services:
       PUBLIC_CALENDAR_API_URL: http://calendar-backend:3032
       PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.mana.how
       # PUBLIC_CLOCK_API_URL: removed — migrated to local-first
-      PUBLIC_CONTACTS_API_URL: http://contacts-backend:3034
+      PUBLIC_CONTACTS_API_URL: http://contacts-backend:3033
       PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.mana.how
     ports:
       - "5000:5000"
@@ -1095,7 +1154,7 @@ services:
       PORT: 5018
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3050
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
     ports:
       - "5018:5018"
     healthcheck:
@@ -1145,7 +1204,7 @@ services:
       PORT: 5013
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3050
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
     ports:
       - "5013:5013"
     healthcheck:
@@ -1160,7 +1219,7 @@ services:
       context: .
       dockerfile: apps/contacts/apps/web/Dockerfile
       args:
-        PUBLIC_BACKEND_URL: http://contacts-backend:3034
+        PUBLIC_BACKEND_URL: http://contacts-backend:3033
         PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
     image: contacts-web:local
     container_name: mana-app-contacts-web
@@ -1171,7 +1230,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5014
-      PUBLIC_BACKEND_URL: http://contacts-backend:3034
+      PUBLIC_BACKEND_URL: http://contacts-backend:3033
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://contacts-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
@@ -1190,7 +1249,7 @@ services:
       context: .
       dockerfile: apps/storage/apps/web/Dockerfile
       args:
-        PUBLIC_BACKEND_URL: http://storage-backend:3035
+        PUBLIC_BACKEND_URL: http://storage-backend:3034
         PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
     image: storage-web:local
     container_name: mana-app-storage-web
@@ -1201,7 +1260,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5015
-      PUBLIC_BACKEND_URL: http://storage-backend:3035
+      PUBLIC_BACKEND_URL: http://storage-backend:3034
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://storage-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
@@ -1226,7 +1285,7 @@ services:
       PORT: 5016
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3050
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
     ports:
       - "5016:5016"
     healthcheck:
@@ -1249,7 +1308,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5023
-      PUBLIC_BACKEND_URL: http://manadeck-backend:3009
+      PUBLIC_BACKEND_URL: http://manadeck-backend:3036
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://manadeck-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
@@ -1272,7 +1331,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5017
-      PUBLIC_BACKEND_URL: http://nutriphi-backend:3037
+      PUBLIC_BACKEND_URL: http://nutriphi-backend:3038
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://nutriphi-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
@@ -1302,7 +1361,7 @@ services:
       PORT: 5020
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-core-sync:3051
+      PUBLIC_SYNC_SERVER_URL: ws://mana-core-sync:3010
     ports:
       - "5020:5020"
     healthcheck:
@@ -1318,7 +1377,7 @@ services:
       dockerfile: apps/photos/apps/web/Dockerfile
       args:
         PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-        PUBLIC_MANA_MEDIA_URL: http://mana-media:3015
+        PUBLIC_MANA_MEDIA_URL: http://mana-media:3011
     image: photos-web:local
     container_name: mana-app-photos-web
     restart: always
@@ -1329,10 +1388,10 @@ services:
       NODE_ENV: production
       PORT: 5019
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_MEDIA_URL: http://mana-media:3015
+      PUBLIC_MANA_MEDIA_URL: http://mana-media:3011
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
       PUBLIC_MANA_MEDIA_URL_CLIENT: https://media.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3050
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
     ports:
       - "5019:5019"
     healthcheck:
@@ -1347,7 +1406,7 @@ services:
       context: .
       dockerfile: apps/mukke/apps/web/Dockerfile
       args:
-        PUBLIC_BACKEND_URL: http://mukke-backend:3010
+        PUBLIC_BACKEND_URL: http://mukke-backend:3037
         PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
     image: mukke-web:local
     container_name: mana-app-mukke-web
@@ -1357,15 +1416,15 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5180
-      PUBLIC_BACKEND_URL: http://mukke-backend:3010
+      PORT: 5024
+      PUBLIC_BACKEND_URL: http://mukke-backend:3037
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://mukke-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
-      - "5180:5180"
+      - "5024:5024"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5180/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5024/health"]
       interval: 180s
       timeout: 10s
       retries: 3
@@ -1388,7 +1447,7 @@ services:
       PORT: 5022
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-core-sync:3051
+      PUBLIC_SYNC_SERVER_URL: ws://mana-core-sync:3010
     ports:
       - "5022:5022"
     healthcheck:
@@ -1412,7 +1471,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3040
+      PORT: 3035
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/picture
       DB_HOST: postgres
       DB_PORT: 5432
@@ -1430,9 +1489,9 @@ services:
       S3_BUCKET: picture-storage
       CORS_ORIGINS: https://picture.mana.how,https://mana.how
     ports:
-      - "3040:3040"
+      - "3035:3035"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3040/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3035/health"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -1443,7 +1502,7 @@ services:
       context: .
       dockerfile: apps/picture/apps/web/Dockerfile
       args:
-        PUBLIC_BACKEND_URL: http://picture-backend:3040
+        PUBLIC_BACKEND_URL: http://picture-backend:3035
         PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
     image: picture-web:local
     container_name: mana-app-picture-web
@@ -1454,7 +1513,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5021
-      PUBLIC_BACKEND_URL: http://picture-backend:3040
+      PUBLIC_BACKEND_URL: http://picture-backend:3035
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_BACKEND_URL_CLIENT: https://picture-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
@@ -1479,13 +1538,13 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5190
+      PORT: 5025
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
-      - "5190:5190"
+      - "5025:5025"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5190/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5025/health"]
       interval: 180s
       timeout: 10s
       retries: 3
@@ -1501,7 +1560,7 @@ services:
       redis:
         condition: service_healthy
     environment:
-      PORT: 3025
+      PORT: 3020
       LOG_LEVEL: info
       OLLAMA_URL: http://host.docker.internal:11434
       OLLAMA_DEFAULT_MODEL: gemma3:4b
@@ -1518,9 +1577,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "3025:3025"
+      - "3020:3020"
     healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:3025/health').raise_for_status()"]
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:3020/health').raise_for_status()"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -1539,15 +1598,15 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5090
+      PORT: 5050
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_MANA_LLM_URL: http://mana-llm:3025
+      PUBLIC_MANA_LLM_URL: http://mana-llm:3020
       PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
     ports:
-      - "5090:5090"
+      - "5050:5050"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5090/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5050/health"]
       interval: 180s
       timeout: 10s
       retries: 3

@@ -18,6 +18,10 @@ ingress:
   - hostname: api.mana.how
     service: http://localhost:3060
 
+  # Forgejo (Git + CI/CD)
+  - hostname: git.mana.how
+    service: http://localhost:3041
+
   # Chat App
   - hostname: chat.mana.how
     service: http://localhost:5010
