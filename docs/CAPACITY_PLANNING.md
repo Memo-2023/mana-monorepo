@@ -113,6 +113,7 @@ Apps wie Todo, Calendar, Clock, Zitare, Contacts, etc.
 - [x] Ollama/FLUX.2/Telegram-Bot auf Mac Mini deaktiviert
 - [x] Registrierungslimit implementiert (MAX_DAILY_SIGNUPS, default: unlimitiert)
 - [x] Health-Checks und status.sh auf GPU-Server umgestellt
+- [x] Docker Desktop → Colima migrieren (~10 GB RAM gespart, MIT-Lizenz)
 - [ ] PgBouncer fuer Connection Pooling einrichten
 - [ ] Cloudflare Cache Rules fuer statische Assets
 - [ ] Registrierungslimit aktivieren (5/Tag) in .env auf Server

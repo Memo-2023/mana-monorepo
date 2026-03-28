@@ -4,7 +4,22 @@ Dokumentation des Mac Mini als Self-Hosted Server für ManaCore Apps.
 
 ## Übersicht
 
-Der Mac Mini dient als Self-Hosted Server für alle ManaCore-Anwendungen. Er ist über Cloudflare Tunnel öffentlich erreichbar und führt automatische Health Checks mit Benachrichtigungen durch.
+Der Mac Mini dient als Self-Hosted Server fuer alle ManaCore-Anwendungen. Er ist ueber Cloudflare Tunnel oeffentlich erreichbar und fuehrt automatische Health Checks mit Benachrichtigungen durch.
+
+### Container Runtime: Colima (MIT-Lizenz)
+
+Statt Docker Desktop nutzen wir **Colima** als Container-Runtime. Colima ist Open Source (MIT), Docker-CLI-kompatibel und verbraucht ~10 GB weniger RAM als Docker Desktop.
+
+| | Docker Desktop (vorher) | Colima (jetzt) |
+|--|------------------------|----------------|
+| VM-Overhead | ~12.5 GB | ~0.3-0.5 GB |
+| Lizenz | Proprietaer | MIT (Open Source) |
+| docker-compose | Identisch | Identisch |
+
+**Konfiguration:** 8 CPUs, 12 GB RAM, 200 GB Disk, Apple VZ, VirtioFS
+**LaunchAgent:** `~/Library/LaunchAgents/com.manacore.colima.plist`
+**Migration:** `./scripts/mac-mini/migrate-to-colima.sh`
+**Rollback:** `./scripts/mac-mini/migrate-to-colima.sh --rollback`
 
 ### Architektur
 
