@@ -58,21 +58,21 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install
 
 # Build shared packages that need building
 WORKDIR /app/packages/shared-vite-config
-RUN pnpm build
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 WORKDIR /app/packages/shared-auth
 RUN pnpm build || true
 
 WORKDIR /app/packages/shared-error-tracking
-RUN pnpm build
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 WORKDIR /app/packages/shared-pwa
-RUN pnpm build
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 # Build the web app
 WORKDIR /app/apps/calendar/apps/web
 RUN pnpm exec svelte-kit sync
-RUN pnpm build
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 # Production stage
 FROM node:20-alpine AS production
