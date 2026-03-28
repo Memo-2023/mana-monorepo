@@ -31,15 +31,30 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 
 ## Projects
 
-| Project      | Description                  | Apps                                                      |
-| ------------ | ---------------------------- | --------------------------------------------------------- |
-| **manacore** | Multi-app ecosystem platform | Expo mobile, SvelteKit web                                |
-| **manadeck** | Card/deck management         | NestJS backend, Expo mobile, SvelteKit web                |
-| **picture**  | AI image generation          | Expo mobile, SvelteKit web, Astro landing                 |
-| **chat**     | AI chat application          | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **zitare**   | Daily inspiration quotes     | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **contacts** | Contact management           | NestJS backend, SvelteKit web                             |
-| **citycorners** | City guide for Konstanz   | Astro landing                                             |
+| Project | Description | Apps |
+|---------|-------------|------|
+| **manacore** | Multi-app ecosystem platform | Mobile, Web |
+| **chat** | AI chat application | Backend, Mobile, Web, Landing |
+| **picture** | AI image generation | Backend, Mobile, Web, Landing |
+| **manadeck** | Card/deck management | Backend, Mobile, Web |
+| **todo** | Task management | Backend, Web, Landing |
+| **calendar** | Calendar & scheduling | Backend, Web, Landing |
+| **contacts** | Contact management | Backend, Web |
+| **storage** | Cloud file storage | Backend, Web |
+| **mukke** | Music production | Backend, Web, Landing |
+| **zitare** | Daily inspiration quotes | Web, Landing |
+| **clock** | World clock, alarms, timers | Web, Landing |
+| **presi** | Presentations | Mobile, Web, Landing |
+| **questions** | Research assistant | Backend, Web |
+| **context** | Document workspace | Backend, Mobile, Web |
+| **photos** | Photo management | Web |
+| **nutriphi** | Nutrition tracking | Backend, Web, Landing |
+| **planta** | Plant care | Backend, Web |
+| **skilltree** | Skill tracking | Web |
+| **citycorners** | City guide for Konstanz | Web, Landing |
+| **inventar** | Inventory management | Web |
+| **traces** | City exploration | Backend, Mobile |
+| **playground** | LLM playground | Web |
 
 ### Archived Projects (`apps-archived/`)
 
@@ -129,22 +144,25 @@ manacore-monorepo/
 ├── games/                   # Game projects
 │   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
-│   ├── mana-auth/           # Central authentication (Hono + Bun + Better Auth)
-│   ├── mana-credits/        # Credit system (Hono + Bun, extracted from auth)
-│   ├── mana-user/           # User settings, tags, storage (Hono + Bun, extracted from auth)
-│   ├── mana-subscriptions/  # Subscription billing (Hono + Bun, extracted from auth)
-│   ├── mana-analytics/      # Feedback & analytics (Hono + Bun, extracted from auth)
-│   ├── mana-search/      # Central search & content extraction (Go)
-│   ├── mana-crawler/     # Web crawler service (Go)
-│   ├── mana-llm/            # Central LLM abstraction service
-│   ├── mana-landing-builder/# Org landing page builder (Astro → Cloudflare Pages)
-│   ├── mana-media/          # Central media platform (CAS, thumbnails)
-│   ├── mana-api-gateway/ # API gateway with rate limiting (Go)
-│   ├── mana-notify/      # Notification service (Go)
-│   ├── mana-image-gen/      # Local AI image generation (FLUX)
-│   ├── mana-stt/            # Speech-to-text service
-│   ├── mana-tts/            # Text-to-speech service
-│   └── mana-voice-bot/      # Voice interaction bot
+│   ├── mana-core-auth/      # Central auth (NestJS + Better Auth, being replaced by mana-auth)
+│   ├── mana-auth/           # Central auth rewrite (Hono + Bun + Better Auth)
+│   ├── mana-credits/        # Credit system (Hono + Bun)
+│   ├── mana-user/           # User settings & tags (Hono + Bun)
+│   ├── mana-subscriptions/  # Subscription billing (Hono + Bun)
+│   ├── mana-analytics/      # Feedback & analytics (Hono + Bun)
+│   ├── mana-sync/           # Local-first data sync (Go, WebSocket)
+│   ├── mana-search/         # Search & content extraction (Go)
+│   ├── mana-crawler/        # Web crawler (Go)
+│   ├── mana-api-gateway/    # API gateway + rate limiting (Go)
+│   ├── mana-notify/         # Notifications: email, push, Matrix, webhook (Go)
+│   ├── mana-matrix-bot/     # 21 Matrix bot plugins (Go)
+│   ├── mana-media/          # Media platform: CAS, thumbnails (NestJS)
+│   ├── mana-llm/            # LLM abstraction (Python/FastAPI)
+│   ├── mana-image-gen/      # AI image generation with FLUX (Python/FastAPI)
+│   ├── mana-stt/            # Speech-to-text (Python/FastAPI)
+│   ├── mana-tts/            # Text-to-speech (Python/FastAPI)
+│   ├── mana-voice-bot/      # Voice assistant (Python/FastAPI)
+│   └── mana-landing-builder/# Org landing pages (Astro → Cloudflare Pages)
 ├── packages/                # Monorepo-wide shared packages
 └── docker/                  # Docker configuration files
 ```
@@ -404,7 +422,7 @@ Projects requiring web search and content extraction use **mana-search** as the 
 
 | Component | Purpose |
 |-----------|---------|
-| `services/mana-search` | NestJS search service with SearXNG + Redis |
+| `services/mana-search` | Go search service with SearXNG + Redis |
 | SearXNG | Meta-search engine aggregating multiple sources |
 | Redis | Caching layer (search: 1h TTL, extract: 24h TTL) |
 
