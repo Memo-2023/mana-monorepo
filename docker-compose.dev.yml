@@ -102,35 +102,23 @@ services:
     networks:
       - manacore-network
 
-  # Mana Core Auth Service
-  mana-core-auth:
+  # Mana Auth Service (Hono + Bun + Better Auth)
+  mana-auth:
     profiles: ["auth", "all"]
     build:
       context: .
-      dockerfile: ./services/mana-core-auth/Dockerfile
-    container_name: manacore-auth
+      dockerfile: ./services/mana-auth/Dockerfile
+    container_name: mana-auth
     restart: unless-stopped
     environment:
       NODE_ENV: development
       PORT: 3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/manacore
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-devpassword}
-      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
-      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
-      JWT_ACCESS_TOKEN_EXPIRY: ${JWT_ACCESS_TOKEN_EXPIRY:-15m}
-      JWT_REFRESH_TOKEN_EXPIRY: ${JWT_REFRESH_TOKEN_EXPIRY:-7d}
-      JWT_ISSUER: ${JWT_ISSUER:-manacore}
-      JWT_AUDIENCE: ${JWT_AUDIENCE:-manacore}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-manacore}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_auth
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret-change-me}
+      BETTER_AUTH_URL: http://localhost:3001
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:8081}
-      CREDITS_SIGNUP_BONUS: ${CREDITS_SIGNUP_BONUS:-150}
-      CREDITS_DAILY_FREE: ${CREDITS_DAILY_FREE:-5}
-      GOOGLE_GENAI_API_KEY: ${GOOGLE_GENAI_API_KEY}
     depends_on:
       postgres:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     ports:
       - "3001:3001"
@@ -157,7 +145,7 @@ services:
       AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
       AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY}
       AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-12-01-preview}
-      MANA_CORE_AUTH_URL: http://mana-core-auth:3001
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
     depends_on:
       postgres:
         condition: service_healthy

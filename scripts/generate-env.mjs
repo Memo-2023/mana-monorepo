@@ -56,30 +56,16 @@ function generateEnvContent(vars) {
 
 // App configurations - maps source variables to target variables
 const APP_CONFIGS = [
-	// Mana Core Auth Service
+	// Mana Auth Service (Hono + Bun)
 	{
-		path: 'services/mana-core-auth/.env',
+		path: 'services/mana-auth/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MANA_CORE_AUTH_PORT || '3001',
 			DATABASE_URL: (env) => env.MANA_CORE_AUTH_DATABASE_URL,
-			REDIS_HOST: (env) => env.REDIS_HOST,
-			REDIS_PORT: (env) => env.REDIS_PORT,
-			REDIS_PASSWORD: (env) => env.REDIS_PASSWORD || '',
-			JWT_PRIVATE_KEY: (env) => env.JWT_PRIVATE_KEY,
-			JWT_PUBLIC_KEY: (env) => env.JWT_PUBLIC_KEY,
-			JWT_ACCESS_TOKEN_EXPIRY: (env) => env.JWT_ACCESS_TOKEN_EXPIRY,
-			JWT_REFRESH_TOKEN_EXPIRY: (env) => env.JWT_REFRESH_TOKEN_EXPIRY,
-			JWT_ISSUER: (env) => env.JWT_ISSUER,
-			JWT_AUDIENCE: (env) => env.JWT_AUDIENCE,
-			STRIPE_SECRET_KEY: (env) => env.STRIPE_SECRET_KEY,
-			STRIPE_PUBLISHABLE_KEY: (env) => env.STRIPE_PUBLISHABLE_KEY,
-			STRIPE_WEBHOOK_SECRET: (env) => env.STRIPE_WEBHOOK_SECRET,
+			BETTER_AUTH_SECRET: (env) => env.BETTER_AUTH_SECRET || 'dev-secret-change-me',
+			BETTER_AUTH_URL: () => 'http://localhost:3001',
 			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-			CREDITS_SIGNUP_BONUS: (env) => env.CREDITS_SIGNUP_BONUS,
-			CREDITS_DAILY_FREE: (env) => env.CREDITS_DAILY_FREE,
-			RATE_LIMIT_TTL: (env) => env.RATE_LIMIT_TTL,
-			RATE_LIMIT_MAX: (env) => env.RATE_LIMIT_MAX,
 			GOOGLE_GENAI_API_KEY: (env) => env.GOOGLE_GENAI_API_KEY,
 		},
 	},

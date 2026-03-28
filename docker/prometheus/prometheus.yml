@@ -50,9 +50,9 @@ scrape_configs:
   # ============================================
 
   # Auth Service
-  - job_name: 'mana-core-auth'
+  - job_name: 'mana-auth'
     static_configs:
-      - targets: ['mana-core-auth:3001']
+      - targets: ['mana-auth:3001']
     metrics_path: '/metrics'
     scrape_interval: 30s
 

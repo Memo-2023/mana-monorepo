@@ -82,7 +82,7 @@ jobs:
   # Job 2: Build representative Docker images
   # ===========================================
   # Builds a subset that covers all shared packages:
-  #   - mana-core-auth: covers shared-storage, shared-nestjs-auth, shared-llm
+  #   - mana-auth: covers auth service (Hono + Bun)
   #   - todo-web: covers most shared-* web packages
   #   - zitare-web: covers content packages, shared-pwa
   #   - calendar-web: covers calendar shared packages
@@ -97,8 +97,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - service: mana-core-auth
-            dockerfile: services/mana-core-auth/Dockerfile
+          - service: mana-auth
+            dockerfile: services/mana-auth/Dockerfile
             context: .
           - service: todo-backend
             dockerfile: apps/todo/apps/backend/Dockerfile

@@ -166,7 +166,7 @@ for container in $ALL_PROBLEM_CONTAINERS; do
         mana-app-photos-web) SERVICE_NAME="photos-web" ;;
         # mana-app-photos-backend: REMOVED
         mana-app-web) SERVICE_NAME="mana-web" ;;
-        mana-core-auth) SERVICE_NAME="mana-auth" ;;
+        mana-auth) SERVICE_NAME="mana-auth" ;;
         mana-core-gateway) SERVICE_NAME="api-gateway" ;;
         mana-core-search) SERVICE_NAME="mana-search" ;;
         mana-core-searxng) SERVICE_NAME="searxng" ;;

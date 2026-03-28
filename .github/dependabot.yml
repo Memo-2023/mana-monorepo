@@ -56,7 +56,7 @@ updates:
 
   # Docker updates
   - package-ecosystem: "docker"
-    directory: "/services/mana-core-auth"
+    directory: "/services/mana-auth"
     schedule:
       interval: "weekly"
       day: "monday"

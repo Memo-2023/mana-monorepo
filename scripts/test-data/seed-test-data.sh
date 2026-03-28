@@ -29,11 +29,11 @@ export DATABASE_URL_TEMPLATE="postgresql://manacore:devpassword@localhost:5432"
 
 # Seed auth service
 seed_auth() {
-  echo -e "\n${GREEN}Seeding mana-core-auth...${NC}"
+  echo -e "\n${GREEN}Seeding mana-auth...${NC}"
 
-  export DATABASE_URL="${DATABASE_URL_TEMPLATE}/manacore"
+  export DATABASE_URL="${DATABASE_URL_TEMPLATE}/mana_auth"
 
-  cd services/mana-core-auth
+  cd services/mana-auth
 
   # Run migrations
   pnpm run db:push

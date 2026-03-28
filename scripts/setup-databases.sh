@@ -86,7 +86,7 @@ ALL_DATABASES=(
     "traces"
     "context"
     "citycorners"
-    # New Hono service databases (extracted from mana-core-auth)
+    # Hono service databases (extracted from former mana-core-auth)
     "mana_credits"
     "mana_user"
     "mana_subscriptions"
@@ -101,9 +101,9 @@ setup_service() {
     local service=$1
 
     case $service in
-        auth|mana-core-auth)
-            create_db_if_not_exists "manacore"
-            push_schema "mana-core-auth" "mana-core-auth"
+        auth|mana-auth)
+            create_db_if_not_exists "mana_auth"
+            push_schema "@mana/auth" "mana-auth"
             ;;
         chat)
             create_db_if_not_exists "chat"

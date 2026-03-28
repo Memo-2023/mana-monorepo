@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     outputs:
-      mana-core-auth: ${{ steps.changes.outputs.mana-core-auth }}
+      mana-auth: ${{ steps.changes.outputs.mana-auth }}
       mana-search: ${{ steps.changes.outputs.mana-search }}
       manacore-web: ${{ steps.changes.outputs.manacore-web }}
       chat-backend: ${{ steps.changes.outputs.chat-backend }}
@@ -82,7 +82,7 @@ jobs:
           # Force build all if workflow_dispatch with force_build_all
           if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.force_build_all }}" == "true" ]; then
             echo "Force rebuild all services requested"
-            echo "mana-core-auth=true" >> $GITHUB_OUTPUT
+            echo "mana-auth=true" >> $GITHUB_OUTPUT
             echo "mana-search=true" >> $GITHUB_OUTPUT
             echo "manacore-web=true" >> $GITHUB_OUTPUT
             echo "chat-backend=true" >> $GITHUB_OUTPUT
@@ -119,7 +119,7 @@ jobs:
           else
             # workflow_dispatch without force - build all
             echo "Workflow dispatch without force_build_all - building all"
-            echo "mana-core-auth=true" >> $GITHUB_OUTPUT
+            echo "mana-auth=true" >> $GITHUB_OUTPUT
             echo "mana-search=true" >> $GITHUB_OUTPUT
             echo "manacore-web=true" >> $GITHUB_OUTPUT
             echo "chat-backend=true" >> $GITHUB_OUTPUT
@@ -171,12 +171,12 @@ jobs:
           echo "Shared UI changed: $SHARED_UI_CHANGED"
           echo "Shared web changed: $SHARED_WEB_CHANGED"
 
-          # mana-core-auth: services/mana-core-auth + packages/shared-nestjs-auth
-          AUTH_CHANGED=$(check_pattern "services/mana-core-auth/|packages/shared-nestjs-auth/")
+          # mana-auth: services/mana-auth
+          AUTH_CHANGED=$(check_pattern "services/mana-auth/")
           if [ "$COMMON_CHANGED" == "true" ] || [ "$AUTH_CHANGED" == "true" ]; then
-            echo "mana-core-auth=true" >> $GITHUB_OUTPUT
+            echo "mana-auth=true" >> $GITHUB_OUTPUT
           else
-            echo "mana-core-auth=false" >> $GITHUB_OUTPUT
+            echo "mana-auth=false" >> $GITHUB_OUTPUT
           fi
 
           # mana-search: services/mana-search
@@ -352,7 +352,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Service | Will Build |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| mana-core-auth | ${{ steps.changes.outputs.mana-core-auth }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| mana-auth | ${{ steps.changes.outputs.mana-auth }} |" >> $GITHUB_STEP_SUMMARY
           echo "| mana-search | ${{ steps.changes.outputs.mana-search }} |" >> $GITHUB_STEP_SUMMARY
           echo "| manacore-web | ${{ steps.changes.outputs.manacore-web }} |" >> $GITHUB_STEP_SUMMARY
           echo "| chat-backend | ${{ steps.changes.outputs.chat-backend }} |" >> $GITHUB_STEP_SUMMARY
@@ -440,11 +440,11 @@ jobs:
   # Build Docker images - only changed services
   # ===========================================
 
-  build-mana-core-auth:
-    name: Build mana-core-auth
+  build-mana-auth:
+    name: Build mana-auth
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.mana-core-auth == 'true'
+    if: needs.detect-changes.outputs.mana-auth == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -457,12 +457,12 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/${{ github.repository_owner }}/mana-core-auth
+          images: ghcr.io/${{ github.repository_owner }}/mana-auth
           tags: type=raw,value=latest
       - uses: docker/build-push-action@v5
         with:
           context: .
-          file: services/mana-core-auth/Dockerfile
+          file: services/mana-auth/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

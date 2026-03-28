@@ -32,7 +32,7 @@ POSTGRES_PASSWORD=your-secure-password
 # Redis
 REDIS_PASSWORD=your-redis-password
 
-# JWT Keys (from mana-core-auth)
+# JWT Keys (from mana-auth)
 JWT_SECRET=your-jwt-secret
 JWT_PUBLIC_KEY=
 JWT_PRIVATE_KEY=

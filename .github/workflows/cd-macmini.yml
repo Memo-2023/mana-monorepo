@@ -25,7 +25,7 @@ on:
         options:
           - all
           - matrix-web
-          - mana-core-auth
+          - mana-auth
           - chat-backend
           - chat-web
           - todo-backend
@@ -64,7 +64,7 @@ jobs:
     if: github.event_name == 'push'
     outputs:
       matrix-web: ${{ steps.changes.outputs.matrix-web }}
-      mana-core-auth: ${{ steps.changes.outputs.mana-core-auth }}
+      mana-auth: ${{ steps.changes.outputs.mana-auth }}
       chat-backend: ${{ steps.changes.outputs.chat-backend }}
       chat-web: ${{ steps.changes.outputs.chat-web }}
       todo-backend: ${{ steps.changes.outputs.todo-backend }}
@@ -120,7 +120,7 @@ jobs:
           echo ""
 
           check_changes "matrix-web"       "apps/matrix/apps/web/" "apps/matrix/packages/"
-          check_changes "mana-core-auth"    "services/mana-core-auth/"
+          check_changes "mana-auth"          "services/mana-auth/"
           check_changes "chat-backend"      "apps/chat/apps/backend/" "apps/chat/packages/"
           check_changes "chat-web"          "apps/chat/apps/web/" "apps/chat/packages/"
           check_changes "todo-backend"      "apps/todo/apps/backend/" "apps/todo/packages/"
@@ -140,7 +140,7 @@ jobs:
 
           # Check if anything needs deploying
           ANY="false"
-          for svc in matrix-web mana-core-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web mana-matrix-bot mana-landing-builder; do
+          for svc in matrix-web mana-auth chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web mana-matrix-bot mana-landing-builder; do
             val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
             if [ "$val" == "true" ]; then
               ANY="true"
@@ -202,7 +202,7 @@ jobs:
           else
             # Build list from detected changes
             if [ "${{ needs.detect-changes.outputs.matrix-web }}" == "true" ]; then SERVICES="$SERVICES matrix-web"; fi
-            if [ "${{ needs.detect-changes.outputs.mana-core-auth }}" == "true" ]; then SERVICES="$SERVICES mana-auth"; fi
+            if [ "${{ needs.detect-changes.outputs.mana-auth }}" == "true" ]; then SERVICES="$SERVICES mana-auth"; fi
             if [ "${{ needs.detect-changes.outputs.chat-backend }}" == "true" ]; then SERVICES="$SERVICES chat-backend"; fi
             if [ "${{ needs.detect-changes.outputs.chat-web }}" == "true" ]; then SERVICES="$SERVICES chat-web"; fi
             if [ "${{ needs.detect-changes.outputs.todo-backend }}" == "true" ]; then SERVICES="$SERVICES todo-backend"; fi
