@@ -203,6 +203,7 @@ export type {
 // Immersive Mode
 export { default as ImmersiveModeToggle } from './components/ImmersiveModeToggle.svelte';
 export { default as DevBuildBadge } from './components/DevBuildBadge.svelte';
+export { default as SyncIndicator } from './components/SyncIndicator.svelte';
 
 // Toast & Global Error Handling
 export {
