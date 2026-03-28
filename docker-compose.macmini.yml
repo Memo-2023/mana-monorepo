@@ -224,9 +224,11 @@ services:
       start_period: 30s
 
   forgejo-runner:
-    image: codeberg.org/forgejo/runner:6
+    image: code.forgejo.org/forgejo/runner:6.3.1
     container_name: mana-core-forgejo-runner
+    command: forgejo-runner daemon
     restart: always
+    user: "0:0"
     depends_on:
       forgejo:
         condition: service_healthy
