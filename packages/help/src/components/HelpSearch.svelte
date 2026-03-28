@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { HelpSearchProps } from '../types.js';
 	import type { SearchResult } from '../content';
-	import { createSearcher } from '../loader';
+	import { createSearcher } from '../search-engine';
 
 	let { content, translations, placeholder, onResultSelect }: HelpSearchProps = $props();
 
