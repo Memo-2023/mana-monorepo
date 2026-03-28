@@ -27,6 +27,8 @@
  */
 
 // Factory functions
+export { createManaAuthStore } from './createManaAuthStore.svelte';
+export type { ManaAuthStoreConfig, ManaAuthStore } from './createManaAuthStore.svelte';
 export { createAuthStore } from './createAuthStore.svelte';
 export { createSupabaseAuthStore } from './createSupabaseAuthStore.svelte';
 export type {

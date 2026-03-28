@@ -30,6 +30,7 @@
 	},
 	"dependencies": {
 		"@manacore/shared-auth": "workspace:*",
+		"@manacore/shared-auth-stores": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-error-tracking": "workspace:*",
 		"@manacore/shared-icons": "workspace:*",

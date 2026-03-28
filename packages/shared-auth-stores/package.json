@@ -29,6 +29,7 @@
 		"typescript": "^5.0.0"
 	},
 	"dependencies": {
+		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-types": "workspace:*"
 	}
 }

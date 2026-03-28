@@ -4485,6 +4485,9 @@ importers:
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
+      '@manacore/shared-auth-stores':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-auth-stores
       '@manacore/shared-auth-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth-ui
@@ -4829,6 +4832,9 @@ importers:
 
   packages/shared-auth-stores:
     dependencies:
+      '@manacore/shared-auth':
+        specifier: workspace:*
+        version: link:../shared-auth
       '@manacore/shared-types':
         specifier: workspace:*
         version: link:../shared-types
