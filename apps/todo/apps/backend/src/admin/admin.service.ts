@@ -52,13 +52,6 @@ export class AdminService {
 			.where(eq(schema.reminders.userId, userId));
 		const remindersCount = remindersResult[0]?.count ?? 0;
 
-		// Count kanban boards
-		const kanbanBoardsResult = await this.db
-			.select({ count: sql<number>`count(*)::int` })
-			.from(schema.kanbanBoards)
-			.where(eq(schema.kanbanBoards.userId, userId));
-		const kanbanBoardsCount = kanbanBoardsResult[0]?.count ?? 0;
-
 		// Get last activity (most recent task update)
 		const lastTask = await this.db
 			.select({ updatedAt: schema.tasks.updatedAt })
@@ -73,11 +66,9 @@ export class AdminService {
 			{ entity: 'tasks', count: tasksCount, label: 'Tasks' },
 			{ entity: 'labels', count: labelsCount, label: 'Labels' },
 			{ entity: 'reminders', count: remindersCount, label: 'Reminders' },
-			{ entity: 'kanban_boards', count: kanbanBoardsCount, label: 'Kanban Boards' },
 		];
 
-		const totalCount =
-			projectsCount + tasksCount + labelsCount + remindersCount + kanbanBoardsCount;
+		const totalCount = projectsCount + tasksCount + labelsCount + remindersCount;
 
 		return {
 			entities,
@@ -150,38 +141,6 @@ export class AdminService {
 			label: 'Tasks',
 		});
 		totalDeleted += deletedTasks.length;
-
-		// Delete kanban columns (through boards owned by user)
-		const userBoards = await this.db
-			.select({ id: schema.kanbanBoards.id })
-			.from(schema.kanbanBoards)
-			.where(eq(schema.kanbanBoards.userId, userId));
-		const boardIds = userBoards.map((b) => b.id);
-
-		if (boardIds.length > 0) {
-			const deletedColumns = await this.db
-				.delete(schema.kanbanColumns)
-				.where(inArray(schema.kanbanColumns.boardId, boardIds))
-				.returning();
-			deletedCounts.push({
-				entity: 'kanban_columns',
-				count: deletedColumns.length,
-				label: 'Kanban Columns',
-			});
-			totalDeleted += deletedColumns.length;
-		}
-
-		// Delete kanban boards
-		const deletedBoards = await this.db
-			.delete(schema.kanbanBoards)
-			.where(eq(schema.kanbanBoards.userId, userId))
-			.returning();
-		deletedCounts.push({
-			entity: 'kanban_boards',
-			count: deletedBoards.length,
-			label: 'Kanban Boards',
-		});
-		totalDeleted += deletedBoards.length;
 
 		// Delete projects
 		const deletedProjects = await this.db

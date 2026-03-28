@@ -11,6 +11,7 @@ if (typeof globalThis.PointerEvent === 'undefined') {
 
 vi.mock('$lib/utils/calendarConstants', () => ({
 	SNAP_INTERVAL_MINUTES: 15,
+	DEFAULT_EVENT_DURATION_MINUTES: 30,
 }));
 
 import { useDragToCreate } from './useDragToCreate.svelte';

@@ -10,7 +10,6 @@ import { ProjectModule } from './project/project.module';
 import { TaskModule } from './task/task.module';
 import { LabelModule } from './label/label.module';
 import { ReminderModule } from './reminder/reminder.module';
-import { KanbanModule } from './kanban/kanban.module';
 import { NetworkModule } from './network/network.module';
 import { AdminModule } from './admin/admin.module';
 
@@ -46,7 +45,6 @@ import { AdminModule } from './admin/admin.module';
 		TaskModule,
 		LabelModule,
 		ReminderModule,
-		KanbanModule,
 		NetworkModule,
 		AdminModule,
 	],

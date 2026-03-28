@@ -14,6 +14,13 @@ vi.mock('@manacore/shared-ui', () => ({
 	toastStore: { error: vi.fn(), success: vi.fn() },
 }));
 
+vi.mock('svelte-i18n', () => {
+	const { readable } = require('svelte/store');
+	return {
+		_: readable((key: string) => key),
+	};
+});
+
 import * as api from '$lib/api/sync';
 import { externalCalendarsStore } from './external-calendars.svelte';
 import type { ExternalCalendar } from '@calendar/shared';

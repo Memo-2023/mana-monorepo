@@ -11,7 +11,6 @@ import {
 	foreignKey,
 } from 'drizzle-orm/pg-core';
 import { projects } from './projects.schema';
-import { kanbanColumns } from './kanban-columns.schema';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -75,8 +74,8 @@ export const tasks = pgTable(
 		// Ordering
 		order: integer('order').default(0),
 
-		// Kanban
-		columnId: uuid('column_id').references(() => kanbanColumns.id, { onDelete: 'set null' }),
+		// Kanban (legacy - kept for existing data, no longer referenced)
+		columnId: uuid('column_id'),
 		columnOrder: integer('column_order').default(0),
 
 		// Recurrence (RFC 5545 RRULE format)
