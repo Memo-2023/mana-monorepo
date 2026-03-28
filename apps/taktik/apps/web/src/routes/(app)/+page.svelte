@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import type { TimeEntry, Project, Client } from '@taktik/shared';
 	import {
@@ -13,6 +13,7 @@
 	import EntryList from '$lib/components/EntryList.svelte';
 	import EntryForm from '$lib/components/EntryForm.svelte';
 	import QuickStart from '$lib/components/QuickStart.svelte';
+	import KeyboardShortcuts from '$lib/components/KeyboardShortcuts.svelte';
 
 	const allTimeEntries = getContext<{ value: TimeEntry[] }>('timeEntries');
 
@@ -25,14 +26,6 @@
 	let todayBillable = $derived(getBillableDuration(todayEntries));
 
 	let showEntryForm = $state(false);
-
-	onMount(async () => {
-		await timerStore.initialize();
-	});
-
-	onDestroy(() => {
-		timerStore.destroy();
-	});
 </script>
 
 <svelte:head>
@@ -82,3 +75,4 @@
 
 <!-- Manual Entry Form -->
 <EntryForm visible={showEntryForm} onClose={() => (showEntryForm = false)} />
+<KeyboardShortcuts onNewEntry={() => (showEntryForm = true)} />

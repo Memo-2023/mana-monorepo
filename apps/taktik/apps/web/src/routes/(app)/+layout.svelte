@@ -2,9 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
-	import { setContext } from 'svelte';
+	import { setContext, onDestroy } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
+	import { timerStore } from '$lib/stores/timer.svelte';
+	import TimerIndicator from '$lib/components/TimerIndicator.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { SyncIndicator } from '@manacore/shared-ui';
@@ -51,6 +53,7 @@
 		}
 
 		viewStore.initialize();
+		await timerStore.initialize();
 		initialized = true;
 
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('taktik')) {
@@ -64,10 +67,15 @@
 		{ href: '/projects', label: $_('nav.projects'), icon: 'folder' },
 		{ href: '/clients', label: $_('nav.clients'), icon: 'buildings' },
 		{ href: '/reports', label: $_('nav.reports'), icon: 'chart-bar' },
+		{ href: '/templates', label: $_('nav.templates'), icon: 'bookmark' },
 		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
 		{ href: '/mana', label: 'Mana', icon: 'star' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
 	];
+
+	onDestroy(() => {
+		timerStore.destroy();
+	});
 
 	function handleLogout() {
 		authStore.signOut();
@@ -115,6 +123,9 @@
 							</a>
 						{/each}
 					</div>
+
+					<!-- Timer Indicator (visible when timer running) -->
+					<TimerIndicator />
 
 					<!-- Right side -->
 					<div class="flex items-center gap-2">

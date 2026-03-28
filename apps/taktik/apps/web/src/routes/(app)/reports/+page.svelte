@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import type { TimeEntry, Project, Client } from '@taktik/shared';
+	import { exportEntriesToCSV } from '$lib/utils/export';
 	import {
 		getTotalDuration,
 		getBillableDuration,
@@ -87,17 +88,25 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{$_('nav.reports')}</h1>
-		<div class="flex gap-1">
-			{#each ['week', 'month'] as p}
-				<button
-					onclick={() => (period = p as any)}
-					class="rounded-lg px-3 py-1.5 text-sm transition-colors {period === p
-						? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
-						: 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent)/0.1)]'}"
-				>
-					{p === 'week' ? $_('entry.thisWeek') : $_('entry.thisMonth')}
-				</button>
-			{/each}
+		<div class="flex items-center gap-2">
+			<div class="flex gap-1">
+				{#each ['week', 'month'] as p}
+					<button
+						onclick={() => (period = p as any)}
+						class="rounded-lg px-3 py-1.5 text-sm transition-colors {period === p
+							? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
+							: 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent)/0.1)]'}"
+					>
+						{p === 'week' ? $_('entry.thisWeek') : $_('entry.thisMonth')}
+					</button>
+				{/each}
+			</div>
+			<button
+				onclick={() => exportEntriesToCSV(entries(), allProjects.value, allClients.value)}
+				class="rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+			>
+				CSV Export
+			</button>
 		</div>
 	</div>
 
