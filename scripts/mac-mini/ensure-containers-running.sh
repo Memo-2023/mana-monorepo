@@ -159,7 +159,6 @@ for container in $ALL_PROBLEM_CONTAINERS; do
         mana-app-storage-web) SERVICE_NAME="storage-web" ;;
         mana-app-storage-backend) SERVICE_NAME="storage-backend" ;;
         mana-app-presi-web) SERVICE_NAME="presi-web" ;;
-        mana-app-presi-backend) SERVICE_NAME="presi-backend" ;;
         mana-app-nutriphi-web) SERVICE_NAME="nutriphi-web" ;;
         mana-app-nutriphi-backend) SERVICE_NAME="nutriphi-backend" ;;
         mana-app-skilltree-web) SERVICE_NAME="skilltree-web" ;;

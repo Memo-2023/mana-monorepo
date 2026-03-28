@@ -270,20 +270,7 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Presi Backend (NestJS)
-	{
-		path: 'apps/presi/apps/backend/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.PRESI_BACKEND_PORT || '3008',
-			DATABASE_URL: (env) => env.PRESI_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			DEV_BYPASS_AUTH: () => 'true',
-			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
-			JWT_PUBLIC_KEY: (env) => env.JWT_PUBLIC_KEY,
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-		},
-	},
+	// Presi Backend: REMOVED — replaced by Hono server (apps/presi/apps/server)
 
 	// Presi Web (SvelteKit)
 	{

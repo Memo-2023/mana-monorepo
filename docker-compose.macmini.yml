@@ -223,7 +223,7 @@ services:
       CALENDAR_BACKEND_URL: http://calendar-backend:3032
       CONTACTS_BACKEND_URL: http://contacts-backend:3034
       PICTURE_BACKEND_URL: http://picture-backend:3040
-      PRESI_BACKEND_URL: http://presi-backend:3036
+      # PRESI_BACKEND_URL: removed — replaced by Hono server
       # ZITARE_BACKEND_URL: removed — migrated to local-first
       PHOTOS_BACKEND_URL: http://photos-backend:3039
       # CLOCK_BACKEND_URL: removed — migrated to local-first
@@ -688,32 +688,8 @@ services:
       retries: 3
       start_period: 50s
 
-  presi-backend:
-    build:
-      context: .
-      dockerfile: apps/presi/apps/backend/Dockerfile
-    image: presi-backend:local
-    container_name: mana-app-presi-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3036
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/presi
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://presi.mana.how,https://mana.how
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: http://24df6aad72b646ba9fb68e54b566ad3e@glitchtip:8020/14
-    ports:
-      - "3036:3036"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3036/api/v1/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 55s
+  # presi-backend: REPLACED by lightweight Hono server (apps/presi/apps/server)
+  # TODO: Add presi-server container when Bun Docker image is ready
 
   manadeck-backend:
     build:
@@ -1329,15 +1305,14 @@ services:
     container_name: mana-app-presi-web
     restart: always
     depends_on:
-      presi-backend:
+      mana-auth:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 5016
-      PUBLIC_BACKEND_URL: http://presi-backend:3036
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://presi-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3050
     ports:
       - "5016:5016"
     healthcheck:

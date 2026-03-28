@@ -164,7 +164,7 @@ setup_service() {
             ;;
         presi)
             create_db_if_not_exists "presi"
-            push_schema "@presi/backend" "presi"
+            # Schema managed by mana-sync (NestJS backend removed, Hono server for shares)
             ;;
         storage)
             create_db_if_not_exists "storage"

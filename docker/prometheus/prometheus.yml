@@ -93,12 +93,7 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # Presi Backend
-  - job_name: 'presi-backend'
-    static_configs:
-      - targets: ['presi-backend:3036']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+  # Presi Backend: REMOVED — replaced by Hono server
 
   # Nutriphi Backend
   - job_name: 'nutriphi-backend'
