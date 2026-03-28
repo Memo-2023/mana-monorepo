@@ -1,5 +1,3 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 import { Readable } from 'stream';
 
@@ -11,23 +9,22 @@ export interface StorageObject {
 	etag: string;
 }
 
-@Injectable()
-export class StorageService implements OnModuleInit {
+export class StorageService {
 	private client: Minio.Client;
 	private bucket: string;
 
-	constructor(private config: ConfigService) {
+	constructor() {
 		this.client = new Minio.Client({
-			endPoint: this.config.get('S3_ENDPOINT', 'localhost'),
-			port: parseInt(this.config.get('S3_PORT', '9000')),
-			useSSL: this.config.get('S3_USE_SSL', 'false') === 'true',
-			accessKey: this.config.get('S3_ACCESS_KEY', 'minioadmin'),
-			secretKey: this.config.get('S3_SECRET_KEY', 'minioadmin'),
+			endPoint: process.env.S3_ENDPOINT || 'localhost',
+			port: parseInt(process.env.S3_PORT || '9000'),
+			useSSL: process.env.S3_USE_SSL === 'true',
+			accessKey: process.env.S3_ACCESS_KEY || 'minioadmin',
+			secretKey: process.env.S3_SECRET_KEY || 'minioadmin',
 		});
-		this.bucket = this.config.get('S3_BUCKET', 'mana-media');
+		this.bucket = process.env.S3_BUCKET || 'mana-media';
 	}
 
-	async onModuleInit() {
+	async init() {
 		const exists = await this.client.bucketExists(this.bucket);
 		if (!exists) {
 			await this.client.makeBucket(this.bucket);
@@ -87,16 +84,8 @@ export class StorageService implements OnModuleInit {
 		}
 	}
 
-	async getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
-		return this.client.presignedGetObject(this.bucket, key, expiresIn);
-	}
-
-	async getUploadUrl(key: string, expiresIn = 3600): Promise<string> {
-		return this.client.presignedPutObject(this.bucket, key, expiresIn);
-	}
-
 	getPublicUrl(key: string): string {
-		const endpoint = this.config.get('S3_PUBLIC_URL', `http://localhost:9000/${this.bucket}`);
+		const endpoint = process.env.S3_PUBLIC_URL || `http://localhost:9000/${this.bucket}`;
 		return `${endpoint}/${key}`;
 	}
 }

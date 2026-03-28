@@ -1,21 +1,18 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import * as mime from 'mime-types';
 import * as crypto from 'crypto';
-import { eq, and, or, gte, lte, like, isNotNull, sql, desc, asc, inArray } from 'drizzle-orm';
-import { StorageService } from '../storage/storage.service';
-import { MatrixService } from '../matrix/matrix.service';
-import { PROCESS_QUEUE } from '../process/process.constants';
-import { DATABASE_CONNECTION } from '../../db/database.module';
-import type { Database } from '../../db/connection';
+import { eq, and, gte, lte, like, isNotNull, sql, desc, asc, inArray } from 'drizzle-orm';
+import type { Database } from '../db';
+import { StorageService } from './storage';
+import { MatrixService } from './matrix';
+import { PROCESS_QUEUE } from '../constants';
 import {
 	media,
 	mediaReferences,
 	type Media,
 	type NewMedia,
 	type NewMediaReference,
-} from '../../db/schema';
+} from '../db/schema';
 
 export interface MediaRecord {
 	id: string;
@@ -24,8 +21,6 @@ export interface MediaRecord {
 	size: number;
 	hash: string;
 	status: 'uploading' | 'processing' | 'ready' | 'failed';
-	app?: string;
-	userId?: string;
 	keys: {
 		original: string;
 		thumbnail?: string;
@@ -79,72 +74,63 @@ export interface StatsResult {
 	byYear: Record<string, number>;
 }
 
-@Injectable()
 export class UploadService {
 	constructor(
+		private db: Database,
 		private storage: StorageService,
 		private matrixService: MatrixService,
-		@InjectQueue(PROCESS_QUEUE) private processQueue: Queue,
-		@Inject(DATABASE_CONNECTION) private db: Database
+		private processQueue: Queue
 	) {}
 
 	async upload(
-		file: Express.Multer.File,
-		options?: {
-			app?: string;
-			userId?: string;
-			skipProcessing?: boolean;
-		}
+		buffer: Buffer,
+		originalname: string,
+		mimetype: string,
+		fileSize: number,
+		options?: { app?: string; userId?: string; skipProcessing?: boolean }
 	): Promise<MediaRecord> {
-		const hash = this.computeHash(file.buffer);
+		const hash = this.computeHash(buffer);
 
-		// Check for existing media with same content hash
 		const existing = await this.findByHash(hash);
 		if (existing) {
-			// If userId and app provided, create a reference
 			if (options?.userId && options?.app) {
 				await this.createReference(existing.id, options.userId, options.app);
 			}
 			return this.toMediaRecord(existing);
 		}
 
-		// Generate storage key
-		const ext = mime.extension(file.mimetype) || 'bin';
+		const ext = mime.extension(mimetype) || 'bin';
 		const date = new Date();
 		const datePath = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
 		const id = crypto.randomUUID();
 		const originalKey = `originals/${datePath}/${id}.${ext}`;
 
-		// Upload to storage
-		await this.storage.upload(originalKey, file.buffer, file.mimetype, {
-			'x-amz-meta-original-name': file.originalname,
+		await this.storage.upload(originalKey, buffer, mimetype, {
+			'x-amz-meta-original-name': originalname,
 			'x-amz-meta-media-id': id,
 		});
 
-		// Insert into database
 		const [inserted] = await this.db
 			.insert(media)
 			.values({
 				id,
 				contentHash: hash,
-				originalName: file.originalname,
-				mimeType: file.mimetype,
-				size: file.size,
+				originalName: originalname,
+				mimeType: mimetype,
+				size: fileSize,
 				originalKey,
 				status: options?.skipProcessing ? 'ready' : 'processing',
 			} satisfies NewMedia)
 			.returning();
 
-		// Create reference if user provided
 		if (options?.userId && options?.app) {
 			await this.createReference(inserted.id, options.userId, options.app);
 		}
 
-		// Queue processing job
 		if (!options?.skipProcessing) {
 			await this.processQueue.add('process-media', {
 				mediaId: inserted.id,
-				mimeType: file.mimetype,
+				mimeType: mimetype,
 				originalKey,
 			});
 		}
@@ -152,48 +138,33 @@ export class UploadService {
 		return this.toMediaRecord(inserted);
 	}
 
-	/**
-	 * Import media from a Matrix MXC URL
-	 */
 	async importFromMatrix(
 		mxcUrl: string,
-		options: {
-			app: string;
-			userId: string;
-			skipProcessing?: boolean;
-		}
+		options: { app: string; userId: string; skipProcessing?: boolean }
 	): Promise<MediaRecord | null> {
-		// Download from Matrix
 		const matrixMedia = await this.matrixService.downloadFromMxc(mxcUrl);
-		if (!matrixMedia) {
-			return null;
-		}
+		if (!matrixMedia) return null;
 
 		const hash = this.computeHash(matrixMedia.buffer);
 
-		// Check for existing media
 		const existing = await this.findByHash(hash);
 		if (existing) {
-			// Create reference with source URL
 			await this.createReference(existing.id, options.userId, options.app, mxcUrl);
 			return this.toMediaRecord(existing);
 		}
 
-		// Generate storage key
 		const ext = mime.extension(matrixMedia.mimeType) || 'bin';
 		const date = new Date();
 		const datePath = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
 		const id = crypto.randomUUID();
 		const originalKey = `originals/${datePath}/${id}.${ext}`;
 
-		// Upload to storage
 		await this.storage.upload(originalKey, matrixMedia.buffer, matrixMedia.mimeType, {
 			'x-amz-meta-source': 'matrix',
 			'x-amz-meta-source-url': mxcUrl,
 			'x-amz-meta-media-id': id,
 		});
 
-		// Insert into database
 		const [inserted] = await this.db
 			.insert(media)
 			.values({
@@ -207,10 +178,8 @@ export class UploadService {
 			} satisfies NewMedia)
 			.returning();
 
-		// Create reference with source URL
 		await this.createReference(inserted.id, options.userId, options.app, mxcUrl);
 
-		// Queue processing job
 		if (!options?.skipProcessing) {
 			await this.processQueue.add('process-media', {
 				mediaId: inserted.id,
@@ -260,13 +229,9 @@ export class UploadService {
 	): Promise<MediaRecord | null> {
 		const [updated] = await this.db
 			.update(media)
-			.set({
-				...updates,
-				updatedAt: new Date(),
-			})
+			.set({ ...updates, updatedAt: new Date() })
 			.where(eq(media.id, id))
 			.returning();
-
 		return updated ? this.toMediaRecord(updated) : null;
 	}
 
@@ -274,7 +239,6 @@ export class UploadService {
 		const [record] = await this.db.select().from(media).where(eq(media.id, id)).limit(1);
 		if (!record) return false;
 
-		// Delete all associated storage files
 		const keys = [
 			record.originalKey,
 			record.thumbnailKey,
@@ -285,84 +249,55 @@ export class UploadService {
 			await this.storage.delete(key).catch(() => {});
 		}
 
-		// Delete from database (references will cascade)
 		await this.db.delete(media).where(eq(media.id, id));
 		return true;
 	}
 
 	async list(options?: { app?: string; userId?: string; limit?: number }): Promise<MediaRecord[]> {
-		// If filtering by user/app, we need to join with references
 		if (options?.userId || options?.app) {
-			const query = this.db
+			const conditions = [];
+			if (options.userId) conditions.push(eq(mediaReferences.userId, options.userId));
+			if (options.app) conditions.push(eq(mediaReferences.app, options.app));
+
+			const results = await this.db
 				.select({ media: media })
 				.from(media)
-				.innerJoin(mediaReferences, eq(media.id, mediaReferences.mediaId));
-
-			// Build conditions
-			const conditions = [];
-			if (options.userId) {
-				conditions.push(eq(mediaReferences.userId, options.userId));
-			}
-			if (options.app) {
-				conditions.push(eq(mediaReferences.app, options.app));
-			}
-
-			const results = await query
-				.where(conditions.length === 1 ? conditions[0] : undefined)
+				.innerJoin(mediaReferences, eq(media.id, mediaReferences.mediaId))
+				.where(conditions.length === 1 ? conditions[0] : and(...conditions))
 				.limit(options.limit || 50);
 
 			return results.map((r) => this.toMediaRecord(r.media));
 		}
 
-		// Simple list without filtering
 		const results = await this.db
 			.select()
 			.from(media)
 			.orderBy(media.createdAt)
 			.limit(options?.limit || 50);
-
 		return results.map((r) => this.toMediaRecord(r));
 	}
 
-	/**
-	 * List media across all apps for a user with advanced filtering
-	 */
 	async listAll(options: ListAllOptions): Promise<ListAllResult> {
 		const conditions = [eq(mediaReferences.userId, options.userId)];
 
-		// Filter by multiple apps
 		if (options.apps && options.apps.length > 0) {
 			conditions.push(inArray(mediaReferences.app, options.apps));
 		}
-
-		// Filter by MIME type (supports wildcards like "image/*")
 		if (options.mimeType) {
 			if (options.mimeType.endsWith('/*')) {
-				const prefix = options.mimeType.slice(0, -1);
-				conditions.push(like(media.mimeType, `${prefix}%`));
+				conditions.push(like(media.mimeType, `${options.mimeType.slice(0, -1)}%`));
 			} else {
 				conditions.push(eq(media.mimeType, options.mimeType));
 			}
 		}
-
-		// Filter by date range
-		if (options.dateFrom) {
-			conditions.push(gte(media.createdAt, options.dateFrom));
-		}
-		if (options.dateTo) {
-			conditions.push(lte(media.createdAt, options.dateTo));
-		}
-
-		// Filter by location
+		if (options.dateFrom) conditions.push(gte(media.createdAt, options.dateFrom));
+		if (options.dateTo) conditions.push(lte(media.createdAt, options.dateTo));
 		if (options.hasLocation) {
 			conditions.push(isNotNull(media.gpsLatitude));
 			conditions.push(isNotNull(media.gpsLongitude));
 		}
-
-		// Only show ready media
 		conditions.push(eq(media.status, 'ready'));
 
-		// Build order by
 		const orderColumn =
 			options.sortBy === 'dateTaken'
 				? media.dateTaken
@@ -371,7 +306,6 @@ export class UploadService {
 					: media.createdAt;
 		const orderFn = options.sortOrder === 'asc' ? asc : desc;
 
-		// Get total count
 		const countResult = await this.db
 			.select({ count: sql<number>`count(distinct ${media.id})` })
 			.from(media)
@@ -379,7 +313,6 @@ export class UploadService {
 			.where(and(...conditions));
 		const total = Number(countResult[0]?.count || 0);
 
-		// Get paginated results
 		const limit = options.limit || 50;
 		const offset = options.offset || 0;
 
@@ -399,11 +332,7 @@ export class UploadService {
 		};
 	}
 
-	/**
-	 * Get media statistics for a user
-	 */
 	async getStats(userId: string): Promise<StatsResult> {
-		// Total count and size
 		const totalResult = await this.db
 			.select({
 				count: sql<number>`count(distinct ${media.id})`,
@@ -413,7 +342,6 @@ export class UploadService {
 			.innerJoin(mediaReferences, eq(media.id, mediaReferences.mediaId))
 			.where(eq(mediaReferences.userId, userId));
 
-		// By app
 		const byAppResult = await this.db
 			.select({
 				app: mediaReferences.app,
@@ -425,7 +353,6 @@ export class UploadService {
 			.where(eq(mediaReferences.userId, userId))
 			.groupBy(mediaReferences.app);
 
-		// By year
 		const byYearResult = await this.db
 			.select({
 				year: sql<string>`extract(year from ${media.createdAt})::text`,

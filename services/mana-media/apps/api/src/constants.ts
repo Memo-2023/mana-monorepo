@@ -15,13 +15,3 @@ export const SUPPORTED_IMAGE_TYPES = [
 	'image/heic',
 	'image/heif',
 ];
-
-export const SUPPORTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm', 'video/mpeg'];
-
-export const SUPPORTED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm'];
-
-export const SUPPORTED_DOCUMENT_TYPES = [
-	'application/pdf',
-	'application/msword',
-	'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-];

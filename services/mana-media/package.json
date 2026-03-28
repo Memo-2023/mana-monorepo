@@ -3,9 +3,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "pnpm --filter @mana-media/api dev",
-		"build": "pnpm --filter @mana-media/api build",
-		"start": "pnpm --filter @mana-media/api start:prod",
-		"type-check": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p packages/client/tsconfig.json",
-		"lint": "eslint 'apps/api/src/**/*.ts'"
+		"start": "pnpm --filter @mana-media/api start",
+		"type-check": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p packages/client/tsconfig.json"
 	}
 }

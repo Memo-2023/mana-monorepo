@@ -2,6 +2,8 @@
 
 Central media handling service for all ManaCore applications with content-addressable storage (CAS) and automatic deduplication.
 
+**Stack:** Hono + Bun (migrated from NestJS 2026-03-28)
+
 ## Overview
 
 mana-media provides:
@@ -195,16 +197,14 @@ const customUrl = media.getTransformUrl(result.id, {
 ## Development
 
 ```bash
-# Run with watch mode
+# Run with watch mode (Bun)
 pnpm dev
 
 # Type check
 pnpm type-check
 
-# Build
-pnpm build
-
 # Database commands
+cd apps/api
 pnpm db:push    # Push schema to database
 pnpm db:studio  # Open Drizzle Studio
 ```

@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
 import sharp from 'sharp';
-import { StorageService } from '../storage/storage.service';
-import { ExifService, type ExifData } from '../exif/exif.service';
-import { IMAGE_VARIANTS, SUPPORTED_IMAGE_TYPES } from './process.constants';
+import { StorageService } from './storage';
+import { ExifService, type ExifData } from './exif';
+import { IMAGE_VARIANTS, SUPPORTED_IMAGE_TYPES } from '../constants';
 
 export interface ProcessResult {
 	thumbnail?: string;
@@ -17,7 +16,6 @@ export interface ProcessResult {
 	exif?: ExifData;
 }
 
-@Injectable()
 export class ProcessService {
 	constructor(
 		private storage: StorageService,
@@ -29,18 +27,11 @@ export class ProcessService {
 		originalKey: string,
 		mimeType: string
 	): Promise<ProcessResult> {
-		if (!SUPPORTED_IMAGE_TYPES.includes(mimeType)) {
-			return {};
-		}
+		if (!SUPPORTED_IMAGE_TYPES.includes(mimeType)) return {};
 
-		// Download original
 		const originalBuffer = await this.storage.download(originalKey);
-
-		// Get metadata
 		const image = sharp(originalBuffer);
 		const metadata = await image.metadata();
-
-		// Extract EXIF data
 		const exifData = await this.exifService.extract(originalBuffer);
 
 		const result: ProcessResult = {
@@ -53,7 +44,6 @@ export class ProcessService {
 			exif: exifData || undefined,
 		};
 
-		// Generate variants
 		const basePath = originalKey.replace(/^originals\//, 'processed/').replace(/\.[^.]+$/, '');
 
 		// Thumbnail
@@ -64,11 +54,10 @@ export class ProcessService {
 			})
 			.webp({ quality: 80 })
 			.toBuffer();
-
 		await this.storage.upload(thumbKey, thumbBuffer, 'image/webp');
 		result.thumbnail = thumbKey;
 
-		// Medium (only if original is larger)
+		// Medium
 		if (
 			(metadata.width || 0) > IMAGE_VARIANTS.medium.width ||
 			(metadata.height || 0) > IMAGE_VARIANTS.medium.height
@@ -81,12 +70,11 @@ export class ProcessService {
 				})
 				.webp({ quality: 85 })
 				.toBuffer();
-
 			await this.storage.upload(mediumKey, mediumBuffer, 'image/webp');
 			result.medium = mediumKey;
 		}
 
-		// Large (only if original is larger)
+		// Large
 		if (
 			(metadata.width || 0) > IMAGE_VARIANTS.large.width ||
 			(metadata.height || 0) > IMAGE_VARIANTS.large.height
@@ -99,22 +87,11 @@ export class ProcessService {
 				})
 				.webp({ quality: 90 })
 				.toBuffer();
-
 			await this.storage.upload(largeKey, largeBuffer, 'image/webp');
 			result.large = largeKey;
 		}
 
 		return result;
-	}
-
-	async generateThumbnail(
-		buffer: Buffer,
-		options?: { width?: number; height?: number }
-	): Promise<Buffer> {
-		const width = options?.width || IMAGE_VARIANTS.thumbnail.width;
-		const height = options?.height || IMAGE_VARIANTS.thumbnail.height;
-
-		return sharp(buffer).resize(width, height, { fit: 'cover' }).webp({ quality: 80 }).toBuffer();
 	}
 
 	async transformImage(

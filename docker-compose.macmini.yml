@@ -569,8 +569,7 @@ services:
 
   mana-media:
     build:
-      context: .
-      dockerfile: services/mana-media/apps/api/Dockerfile
+      context: services/mana-media/apps/api
     image: mana-media:local
     container_name: mana-core-media
     restart: always
@@ -601,11 +600,11 @@ services:
     ports:
       - "3011:3011"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3011/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3011/health"]
       interval: 120s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
 
   mana-landing-builder:
     build:
