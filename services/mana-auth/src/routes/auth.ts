@@ -1,0 +1,236 @@
+/**
+ * Auth routes — Custom endpoints wrapping Better Auth
+ *
+ * Adds business logic (security events, lockout, credit init)
+ * around Better Auth's native sign-in/sign-up.
+ */
+
+import { Hono } from 'hono';
+import type { AuthUser } from '../middleware/jwt-auth';
+import type { BetterAuthInstance } from '../auth/better-auth.config';
+import type { SecurityEventsService, AccountLockoutService } from '../services/security';
+import type { Config } from '../config';
+import { sourceAppStore, passwordResetRedirectStore } from '../auth/stores';
+
+export function createAuthRoutes(
+	auth: BetterAuthInstance,
+	config: Config,
+	security: SecurityEventsService,
+	lockout: AccountLockoutService
+) {
+	const app = new Hono<{ Variables: { user: AuthUser } }>();
+
+	// ─── Registration ────────────────────────────────────────
+
+	app.post('/register', async (c) => {
+		const body = await c.req.json();
+
+		// Store source app URL for email verification redirect
+		if (body.sourceAppUrl && body.email) {
+			sourceAppStore.set(body.email, body.sourceAppUrl);
+		}
+
+		const response = await auth.api.signUpEmail({
+			body: {
+				email: body.email,
+				password: body.password,
+				name: body.name || body.email.split('@')[0],
+			},
+			headers: c.req.raw.headers,
+		});
+
+		if (response?.user?.id) {
+			security.logEvent({ userId: response.user.id, eventType: 'REGISTER' });
+			// Init credits (fire-and-forget)
+			fetch(`${config.manaCreditsUrl}/api/v1/internal/credits/init`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-Service-Key': config.serviceKey },
+				body: JSON.stringify({ userId: response.user.id }),
+			}).catch(() => {});
+			// Redeem pending gifts
+			fetch(`${config.manaCreditsUrl}/api/v1/internal/gifts/redeem-pending`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-Service-Key': config.serviceKey },
+				body: JSON.stringify({ userId: response.user.id, email: body.email }),
+			}).catch(() => {});
+		}
+
+		return c.json(response);
+	});
+
+	// ─── Login ───────────────────────────────────────────────
+
+	app.post('/login', async (c) => {
+		const body = await c.req.json();
+
+		// Check lockout
+		const lockoutStatus = await lockout.checkLockout(body.email);
+		if (lockoutStatus.locked) {
+			return c.json(
+				{ error: 'Account locked', remainingSeconds: lockoutStatus.remainingSeconds },
+				429
+			);
+		}
+
+		const ip = c.req.header('x-forwarded-for') || 'unknown';
+
+		try {
+			const response = await auth.api.signInEmail({
+				body: { email: body.email, password: body.password },
+				headers: c.req.raw.headers,
+			});
+
+			if (response?.user?.id) {
+				security.logEvent({ userId: response.user.id, eventType: 'LOGIN_SUCCESS', ipAddress: ip });
+				lockout.clearAttempts(body.email);
+			}
+
+			return c.json(response);
+		} catch (error) {
+			security.logEvent({
+				eventType: 'LOGIN_FAILURE',
+				ipAddress: ip,
+				metadata: { email: body.email },
+			});
+			lockout.recordAttempt(body.email, false, ip);
+			return c.json({ error: 'Invalid credentials' }, 401);
+		}
+	});
+
+	// ─── Token Validation ────────────────────────────────────
+
+	app.post('/validate', async (c) => {
+		const { token } = await c.req.json();
+		if (!token) return c.json({ valid: false }, 400);
+
+		try {
+			const { jwtVerify, createRemoteJWKSet } = await import('jose');
+			const jwks = createRemoteJWKSet(new URL('/api/auth/jwks', config.baseUrl));
+			const { payload } = await jwtVerify(token, jwks, {
+				issuer: config.baseUrl,
+				audience: 'manacore',
+			});
+			return c.json({ valid: true, payload });
+		} catch {
+			return c.json({ valid: false }, 401);
+		}
+	});
+
+	// ─── Session & Logout ────────────────────────────────────
+
+	app.post('/logout', async (c) => {
+		return auth.handler(
+			new Request(new URL('/api/auth/sign-out', config.baseUrl), {
+				method: 'POST',
+				headers: c.req.raw.headers,
+			})
+		);
+	});
+
+	app.get('/session', async (c) => {
+		return auth.handler(
+			new Request(new URL('/api/auth/get-session', config.baseUrl), {
+				method: 'GET',
+				headers: c.req.raw.headers,
+			})
+		);
+	});
+
+	app.post('/refresh', async (c) => {
+		const body = await c.req.json();
+		// Better Auth handles refresh via session cookies
+		return auth.handler(
+			new Request(new URL('/api/auth/get-session', config.baseUrl), {
+				method: 'GET',
+				headers: c.req.raw.headers,
+			})
+		);
+	});
+
+	// ─── Password Management ─────────────────────────────────
+
+	app.post('/forgot-password', async (c) => {
+		const body = await c.req.json();
+		if (body.redirectTo && body.email) {
+			passwordResetRedirectStore.set(body.email, body.redirectTo);
+		}
+		await auth.api.forgetPassword({ body: { email: body.email, redirectTo: body.redirectTo } });
+		security.logEvent({ eventType: 'PASSWORD_RESET_REQUESTED', metadata: { email: body.email } });
+		return c.json({ success: true });
+	});
+
+	app.post('/reset-password', async (c) => {
+		const body = await c.req.json();
+		await auth.api.resetPassword({ body: { newPassword: body.newPassword, token: body.token } });
+		security.logEvent({ eventType: 'PASSWORD_RESET_COMPLETED' });
+		return c.json({ success: true });
+	});
+
+	app.post('/resend-verification', async (c) => {
+		const body = await c.req.json();
+		if (body.sourceAppUrl && body.email) {
+			sourceAppStore.set(body.email, body.sourceAppUrl);
+		}
+		await auth.api.sendVerificationEmail({ body: { email: body.email } });
+		return c.json({ success: true });
+	});
+
+	// ─── Profile ─────────────────────────────────────────────
+
+	app.get('/profile', async (c) => {
+		return auth.handler(
+			new Request(new URL('/api/auth/get-session', config.baseUrl), {
+				method: 'GET',
+				headers: c.req.raw.headers,
+			})
+		);
+	});
+
+	app.post('/profile', async (c) => {
+		const body = await c.req.json();
+		const result = await auth.api.updateUser({ body, headers: c.req.raw.headers });
+		security.logEvent({ eventType: 'PROFILE_UPDATED' });
+		return c.json(result);
+	});
+
+	app.post('/change-password', async (c) => {
+		const body = await c.req.json();
+		await auth.api.changePassword({
+			body: { currentPassword: body.currentPassword, newPassword: body.newPassword },
+			headers: c.req.raw.headers,
+		});
+		security.logEvent({ eventType: 'PASSWORD_CHANGED' });
+		return c.json({ success: true });
+	});
+
+	app.delete('/account', async (c) => {
+		const body = await c.req.json();
+		await auth.api.deleteUser({
+			body: { password: body.password },
+			headers: c.req.raw.headers,
+		});
+		security.logEvent({ eventType: 'ACCOUNT_DELETED' });
+		return c.json({ success: true });
+	});
+
+	// ─── Security Events ─────────────────────────────────────
+
+	app.get('/security-events', async (c) => {
+		const user = c.get('user');
+		const events = await security.getUserEvents(user.userId);
+		return c.json(events);
+	});
+
+	// ─── JWKS ────────────────────────────────────────────────
+
+	app.get('/jwks', async (c) => {
+		return auth.handler(
+			new Request(new URL('/api/auth/jwks', config.baseUrl), {
+				method: 'GET',
+				headers: c.req.raw.headers,
+			})
+		);
+	});
+
+	return app;
+}
