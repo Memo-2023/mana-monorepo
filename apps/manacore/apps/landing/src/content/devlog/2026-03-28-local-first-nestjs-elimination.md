@@ -1,5 +1,5 @@
 ---
-title: 'Local-First + NestJS-Elimination: 87% weniger Backend-Code'
+title: 'Local-First + NestJS-Elimination + Konsolidierung: ~89.000 LOC weniger'
 description: 'Komplette Architektur-Transformation: 19 Apps auf Local-First (IndexedDB + Sync), NestJS-Monolith aufgelöst in 5 Hono-Services, 12 App-Backends durch ~120-LOC Compute-Server ersetzt, 5 NestJS-Packages gelöscht. Netto: ~80.000 LOC weniger, 80% weniger RAM, 98% schnellere Cold Starts.'
 date: 2026-03-28
 author: 'Till Schneider'
@@ -20,11 +20,11 @@ tags:
     'better-auth',
   ]
 featured: true
-readTime: 18
+readTime: 24
 stats:
-  filesChanged: 1200
-  linesAdded: 12186
-  linesRemoved: 92600
+  filesChanged: 1400
+  linesAdded: 12800
+  linesRemoved: 101400
 contributors:
   - name: 'Till Schneider'
     handle: 'Till-JS'
@@ -330,3 +330,56 @@ Die wichtigsten Erkenntnisse:
 5. **Die beste UX ist keine Loading-Spinners.** Wenn Daten <1ms statt 200ms laden, fühlt sich die App nativ an.
 
 Das ManaCore-Monorepo ist jetzt NestJS-frei. Alle TypeScript-Services laufen auf Hono + Bun. Die Architektur ist einfacher, schneller, und braucht weniger Ressourcen — auf dem Server und im Client.
+
+---
+
+## Phase 2: Konsolidierung & Haertung
+
+Nach der grossen Migration wurden Altlasten bereinigt, der kritischste Service gehaertet, und die Developer Experience massiv verbessert.
+
+### Package-Konsolidierung: 58 → 43
+
+Viele Packages waren unnoetig fragmentiert — Types, Service und UI als separate Packages, obwohl sie immer zusammen benutzt werden:
+
+- shared-feedback-{types,service,ui} → `@manacore/feedback`
+- shared-help-{types,content,ui,mobile} → `@manacore/help`
+- shared-subscription-{types,ui} → `@manacore/subscriptions`
+- credit-operations + shared-credit-{service,ui} → `@manacore/credits`
+
+**26% weniger Packages**, alle Imports in allen 21 Apps aktualisiert.
+
+### Auth Store: 6.800 → 182 Zeilen
+
+21 Web-Apps hatten jeweils ~350 Zeilen identischen Auth-Code — SSO, Passkeys, 2FA, Token-Management, alles 21x kopiert. Neue `createManaAuthStore` Factory:
+
+```typescript
+// Vorher: 350 Zeilen Boilerplate pro App
+// Nachher:
+import { createManaAuthStore } from '@manacore/shared-auth-stores';
+export const authStore = createManaAuthStore({ devBackendPort: 3007 });
+```
+
+**97% weniger Auth-Code.** Aenderungen am Auth-Flow: 1 Datei statt 21.
+
+### mana-sync gehaertet
+
+Der Go Sync-Server — Rueckgrat aller 19 Local-First Apps — hatte kritische Luecken. WebSocket JWT war komplett kaputt, kein Body Size Limit, JSON-Fehler still ignoriert, null Tests. Jetzt: echte JWKS-Validierung, 10 MB Limit, 19 Unit Tests, vollstaendige Dokumentation.
+
+### Weitere Verbesserungen
+
+- **Port-Schema:** ~60 Services haben dokumentierte, konfliktfreie Ports
+- **Type-Safety:** 5 Apps die type-check uebersprangen repariert
+- **Expo SDK:** 7 Mobile-Apps von 3 SDKs (52/54/55) auf einheitliches SDK 55
+
+### Gesamtbilanz
+
+| Metrik | Wert |
+|--------|------|
+| Netto Code-Reduktion | **~88.600 LOC** |
+| NestJS-Services | 18 → **0** |
+| Packages | 58 → **43** |
+| Auth Store LOC | 6.800 → **182** |
+| RAM-Verbrauch | ~3.5GB → **~700MB** |
+| Expo SDK Versionen | 3 → **1** |
+
+Das ManaCore-Monorepo ist bereit fuer Production.
