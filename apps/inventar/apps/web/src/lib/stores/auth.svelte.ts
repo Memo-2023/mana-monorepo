@@ -4,7 +4,7 @@
  */
 
 import { browser } from '$app/environment';
-import { initializeWebAuth, type UserData } from '@manacore/shared-auth';
+import { initializeWebAuth, type UserData, type AuthServiceInterface } from '@manacore/shared-auth';
 
 const DEV_AUTH_URL = 'http://localhost:3001';
 
@@ -18,7 +18,7 @@ function getAuthUrl(): string {
 	return process.env.PUBLIC_MANA_CORE_AUTH_URL || DEV_AUTH_URL;
 }
 
-let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
+let _authService: AuthServiceInterface | null = null;
 let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
 
 function getAuthService() {

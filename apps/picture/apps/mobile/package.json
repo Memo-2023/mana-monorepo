@@ -13,7 +13,7 @@
 		"prebuild": "expo prebuild",
 		"lint": "eslint .",
 		"format": "eslint . --fix",
-		"type-check": "echo 'Skipping type-check: @picture/mobile needs theme system migration'",
+		"type-check": "tsc --noEmit",
 		"postinstall": "patch-package || true && ./scripts/build-workspace-deps.sh"
 	},
 	"dependencies": {

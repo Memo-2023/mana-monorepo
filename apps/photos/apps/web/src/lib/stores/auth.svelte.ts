@@ -32,7 +32,7 @@ function getBackendUrl(): string {
 }
 
 // Lazy initialization to avoid SSR issues with localStorage
-let _authService: ReturnType<typeof initializeWebAuth>['authService'] | null = null;
+let _authService: AuthServiceInterface | null = null;
 let _tokenManager: ReturnType<typeof initializeWebAuth>['tokenManager'] | null = null;
 
 function getAuthService() {
