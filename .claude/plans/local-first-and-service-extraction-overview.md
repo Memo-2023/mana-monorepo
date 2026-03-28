@@ -91,11 +91,14 @@ Fertige Endpoints: Better Auth nativ, Auth (Register/Login/Logout/Validate), Gui
 
 ## Teil 4: Verbleibende Aufgaben
 
-- [ ] NestJS Dependencies aus dem Monorepo entfernen (`@nestjs/*`)
-- [ ] `packages/shared-nestjs-auth` → `packages/shared-hono-auth`
-- [ ] `@mana-core/nestjs-integration` → `@mana-core/hono-integration`
-- [ ] Store-Migrationen vertiefen (11 Apps: Stores von API → IndexedDB)
-- [ ] mana-sync Go Server — Collections aller 19 Apps registrieren
+- [x] `packages/shared-hono` — Credits Client hinzugefügt (Ersatz für nestjs-integration)
+- [x] Store-Migrationen — Alle 19 Apps nutzen IndexedDB als primäre Datenquelle
+- [x] mana-sync — Generischer Go Server, braucht keine App-spezifische Config
+- [ ] App-Backends NestJS → Hono — 12 Backends haben server-seitige Logik (AI, Upload, etc.)
+  - CRUD-Last geht jetzt durch mana-sync, Backends nur noch für Compute
+  - Migration pro App: NestJS Boilerplate entfernen, Hono Server mit shared-hono aufsetzen
+  - Pragmatisch: bestehende NestJS-Backends laufen lassen, neue Features auf Hono
+- [ ] NestJS Packages deprecaten (`shared-nestjs-auth`, `nestjs-integration`)
 - [ ] CI/CD Pipeline anpassen (Go Build + Bun Build)
 - [ ] Load Testing: Sync-Protokoll unter Last testen
 
