@@ -1,10 +1,10 @@
 FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
-COPY services/mana-notify-go/go.mod services/mana-notify-go/go.sum ./
+COPY services/mana-notify/go.mod services/mana-notify/go.sum ./
 RUN go mod download
 
-COPY services/mana-notify-go/ .
+COPY services/mana-notify/ .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /mana-notify ./cmd/server
 
 FROM alpine:3.21

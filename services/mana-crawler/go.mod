@@ -3,6 +3,7 @@ module github.com/manacore/mana-crawler
 go 1.25.0
 
 require (
+	github.com/manacore/shared-go v0.0.0
 	github.com/PuerkitoBio/goquery v1.12.0
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/rs/cors v1.11.1
@@ -18,3 +19,5 @@ require (
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 )
+
+replace github.com/manacore/shared-go => ../../packages/shared-go

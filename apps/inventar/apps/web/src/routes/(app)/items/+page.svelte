@@ -1,22 +1,25 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
-	import { itemsStore } from '$lib/stores/items.svelte';
-	import { collectionsStore } from '$lib/stores/collections.svelte';
+	import { getContext } from 'svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
+	import { getFilteredItems, getSortedItems, getCollectionById } from '$lib/data/queries';
+	import type { Collection, Item, ItemStatus } from '@inventar/shared';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 	import ViewModeToggle from '$lib/components/ViewModeToggle.svelte';
-	import type { ItemStatus } from '@inventar/shared';
+
+	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
+	const itemsCtx: { readonly value: Item[] } = getContext('items');
 
 	let searchQuery = $state('');
 
 	let filteredItems = $derived(
-		itemsStore.getFiltered({
+		getFilteredItems(itemsCtx.value, {
 			search: searchQuery || undefined,
 			...viewStore.activeFilters,
 		})
 	);
-	let sortedItems = $derived(itemsStore.getSorted(filteredItems, viewStore.sort));
+	let sortedItems = $derived(getSortedItems(filteredItems, viewStore.sort));
 
 	const statuses: ItemStatus[] = ['owned', 'lent', 'stored', 'for_sale', 'disposed'];
 
@@ -33,7 +36,7 @@
 	}
 
 	function getCollectionName(collectionId: string): string {
-		return collectionsStore.getById(collectionId)?.name || '';
+		return getCollectionById(collectionsCtx.value, collectionId)?.name || '';
 	}
 </script>
 

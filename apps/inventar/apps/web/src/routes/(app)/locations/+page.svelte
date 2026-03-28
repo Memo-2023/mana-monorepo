@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { locationsStore } from '$lib/stores/locations.svelte';
+	import { getLocationTree } from '$lib/data/queries';
 	import type { Location } from '@inventar/shared';
+
+	const locationsCtx: { readonly value: Location[] } = getContext('locations');
 
 	let showForm = $state(false);
 	let editingId = $state<string | null>(null);
@@ -25,12 +29,12 @@
 		showForm = true;
 	}
 
-	function save() {
+	async function save() {
 		if (!name.trim()) return;
 		if (editingId) {
-			locationsStore.update(editingId, { name: name.trim(), icon: icon || undefined });
+			await locationsStore.update(editingId, { name: name.trim(), icon: icon || undefined });
 		} else {
-			locationsStore.create({ name: name.trim(), icon: icon || undefined, parentId });
+			await locationsStore.create({ name: name.trim(), icon: icon || undefined, parentId });
 		}
 		showForm = false;
 		name = '';
@@ -38,13 +42,13 @@
 		editingId = null;
 	}
 
-	function deleteLocation(id: string) {
+	async function deleteLocation(id: string) {
 		if (confirm('Standort und alle Unterstandorte löschen?')) {
-			locationsStore.delete(id);
+			await locationsStore.delete(id);
 		}
 	}
 
-	let tree = $derived(locationsStore.getTree());
+	let tree = $derived(getLocationTree(locationsCtx.value));
 
 	const inputClass =
 		'rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]';

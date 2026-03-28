@@ -1,8 +1,12 @@
 <script lang="ts">
-	import { skillStore } from '$lib/stores/skills.svelte';
+	import { useAllSkills } from '$lib/data/queries';
 	import { BRANCH_INFO, LEVEL_NAMES } from '$lib/types';
 	import type { SkillBranch } from '$lib/types';
 	import { ArrowLeft, Star } from '@manacore/shared-icons';
+
+	// Reactive live query
+	const allSkills = useAllSkills();
+	const skills = $derived(allSkills.value);
 
 	// Group skills by branch for radial layout
 	const branches = Object.keys(BRANCH_INFO) as SkillBranch[];
@@ -74,7 +78,7 @@
 	</header>
 
 	<main class="p-4">
-		{#if skillStore.skills.length === 0}
+		{#if skills.length === 0}
 			<div class="mt-16 text-center">
 				<p class="text-gray-400">Noch keine Skills vorhanden. Erstelle zuerst einige Skills!</p>
 				<a
@@ -88,7 +92,7 @@
 			<!-- Legend -->
 			<div class="mb-6 flex flex-wrap justify-center gap-4">
 				{#each Object.entries(BRANCH_INFO) as [branch, info]}
-					{@const count = skillStore.skills.filter((s) => s.branch === branch).length}
+					{@const count = skills.filter((s) => s.branch === branch).length}
 					{#if count > 0}
 						<div class="flex items-center gap-2 rounded-full bg-gray-800 px-3 py-1.5 text-sm">
 							<span class="h-3 w-3 rounded-full" style="background-color: {info.color}"></span>
@@ -145,7 +149,7 @@
 					<!-- Branch lines and labels -->
 					{#each branches as branch, i}
 						{@const pos = getBranchPosition(i, branches.length)}
-						{@const branchSkills = skillStore.skills.filter((s) => s.branch === branch)}
+						{@const branchSkills = skills.filter((s) => s.branch === branch)}
 						{#if branchSkills.length > 0}
 							<!-- Line from center to branch -->
 							<line

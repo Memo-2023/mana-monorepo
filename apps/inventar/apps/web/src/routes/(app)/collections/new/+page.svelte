@@ -23,9 +23,9 @@
 		step = 'details';
 	}
 
-	function handleCreate() {
+	async function handleCreate() {
 		if (!name.trim()) return;
-		collectionsStore.create({
+		await collectionsStore.create({
 			name: name.trim(),
 			description: description.trim() || undefined,
 			icon: icon || undefined,

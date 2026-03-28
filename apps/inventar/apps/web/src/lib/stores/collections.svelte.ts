@@ -1,102 +1,57 @@
-import { browser } from '$app/environment';
-import type { Collection, CollectionSchema } from '@inventar/shared';
+/**
+ * Collections Store — Mutations Only
+ *
+ * Reads come from useLiveQuery (see $lib/data/queries.ts).
+ * This store only handles writes to IndexedDB via local-store.
+ */
 
-const STORAGE_KEY = 'inventar_collections';
-
-function loadFromStorage(): Collection[] {
-	if (!browser) return [];
-	try {
-		const data = localStorage.getItem(STORAGE_KEY);
-		return data ? JSON.parse(data) : [];
-	} catch {
-		return [];
-	}
-}
-
-function saveToStorage(collections: Collection[]) {
-	if (!browser) return;
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(collections));
-}
-
-function generateId(): string {
-	return crypto.randomUUID();
-}
-
-let collections = $state<Collection[]>([]);
-let initialized = $state(false);
+import type { CollectionSchema } from '@inventar/shared';
+import { collectionCollection, type LocalCollection } from '$lib/data/local-store';
+import { toCollection } from '$lib/data/queries';
 
 export const collectionsStore = {
-	get collections() {
-		return collections;
-	},
-	get initialized() {
-		return initialized;
-	},
-
-	initialize() {
-		if (initialized) return;
-		collections = loadFromStorage();
-		initialized = true;
-	},
-
-	getById(id: string): Collection | undefined {
-		return collections.find((c) => c.id === id);
-	},
-
-	create(data: {
+	async create(data: {
 		name: string;
 		description?: string;
 		icon?: string;
 		color?: string;
 		schema: CollectionSchema;
 		templateId?: string;
-	}): Collection {
-		const now = new Date().toISOString();
-		const collection: Collection = {
-			id: generateId(),
+	}) {
+		const all = await collectionCollection.getAll();
+		const newLocal: LocalCollection = {
+			id: crypto.randomUUID(),
 			name: data.name,
-			description: data.description,
-			icon: data.icon,
-			color: data.color,
+			description: data.description ?? null,
+			icon: data.icon ?? null,
+			color: data.color ?? null,
 			schema: data.schema,
-			templateId: data.templateId,
-			order: collections.length,
+			templateId: data.templateId ?? null,
+			order: all.length,
 			itemCount: 0,
-			createdAt: now,
-			updatedAt: now,
 		};
-		collections = [...collections, collection];
-		saveToStorage(collections);
-		return collection;
+		const inserted = await collectionCollection.insert(newLocal);
+		return toCollection(inserted);
 	},
 
-	update(
+	async update(
 		id: string,
-		data: Partial<Pick<Collection, 'name' | 'description' | 'icon' | 'color' | 'schema'>>
+		data: Partial<Pick<LocalCollection, 'name' | 'description' | 'icon' | 'color' | 'schema'>>
 	) {
-		collections = collections.map((c) =>
-			c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c
-		);
-		saveToStorage(collections);
+		await collectionCollection.update(id, data);
 	},
 
-	delete(id: string) {
-		collections = collections.filter((c) => c.id !== id);
-		saveToStorage(collections);
+	async delete(id: string) {
+		await collectionCollection.delete(id);
 	},
 
-	reorder(orderedIds: string[]) {
-		collections = orderedIds
-			.map((id, index) => {
-				const c = collections.find((col) => col.id === id);
-				return c ? { ...c, order: index } : null;
-			})
-			.filter((c): c is Collection => c !== null);
-		saveToStorage(collections);
+	async reorder(orderedIds: string[]) {
+		for (let i = 0; i < orderedIds.length; i++) {
+			await collectionCollection.update(orderedIds[i], { order: i });
+		}
 	},
 
-	updateItemCount(collectionId: string, count: number) {
-		collections = collections.map((c) => (c.id === collectionId ? { ...c, itemCount: count } : c));
-		saveToStorage(collections);
+	async updateItemCount(collectionId: string, count: number) {
+		await collectionCollection.update(collectionId, { itemCount: count });
 	},
 };

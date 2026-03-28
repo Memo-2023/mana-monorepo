@@ -1,7 +1,22 @@
 <script lang="ts">
-	import { skillStore } from '$lib/stores/skills.svelte';
-	import { achievementStore } from '$lib/stores/achievements.svelte';
+	import {
+		useAllSkills,
+		useAllActivities,
+		useAllAchievements,
+		computeUserStats,
+	} from '$lib/data/queries';
+	import { buildAchievementStatus, getAchievementStats } from '$lib/stores/achievements.svelte';
 	import { Trophy, Lightning, Target, Fire, Medal } from '@manacore/shared-icons';
+
+	// Reactive live queries
+	const allSkills = useAllSkills();
+	const allActivities = useAllActivities();
+	const allAchievementsRaw = useAllAchievements();
+
+	const userStats = $derived(computeUserStats(allSkills.value, allActivities.value));
+	const achievementStats = $derived(
+		getAchievementStats(buildAchievementStatus(allAchievementsRaw.value))
+	);
 </script>
 
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -14,7 +29,7 @@
 			<div>
 				<p class="text-sm text-gray-400">Gesamt-XP</p>
 				<p class="text-2xl font-bold text-white">
-					{skillStore.userStats.totalXp.toLocaleString()}
+					{userStats.totalXp.toLocaleString()}
 				</p>
 			</div>
 		</div>
@@ -29,7 +44,7 @@
 			<div>
 				<p class="text-sm text-gray-400">Skills</p>
 				<p class="text-2xl font-bold text-white">
-					{skillStore.userStats.totalSkills}
+					{userStats.totalSkills}
 				</p>
 			</div>
 		</div>
@@ -42,9 +57,9 @@
 				<Trophy class="h-6 w-6 text-purple-500" />
 			</div>
 			<div>
-				<p class="text-sm text-gray-400">Höchstes Level</p>
+				<p class="text-sm text-gray-400">Hochstes Level</p>
 				<p class="text-2xl font-bold text-white">
-					{skillStore.userStats.highestLevel}
+					{userStats.highestLevel}
 				</p>
 			</div>
 		</div>
@@ -59,7 +74,7 @@
 			<div>
 				<p class="text-sm text-gray-400">Streak</p>
 				<p class="text-2xl font-bold text-white">
-					{skillStore.userStats.streakDays} Tage
+					{userStats.streakDays} Tage
 				</p>
 			</div>
 		</div>
@@ -77,8 +92,8 @@
 			<div>
 				<p class="text-sm text-gray-400">Achievements</p>
 				<p class="text-2xl font-bold text-white">
-					{achievementStore.stats().unlocked}<span class="text-sm font-normal text-gray-500"
-						>/{achievementStore.stats().total}</span
+					{achievementStats.unlocked}<span class="text-sm font-normal text-gray-500"
+						>/{achievementStats.total}</span
 					>
 				</p>
 			</div>

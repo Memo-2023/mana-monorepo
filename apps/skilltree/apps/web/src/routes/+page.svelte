@@ -1,6 +1,16 @@
 <script lang="ts">
 	import { skillStore } from '$lib/stores/skills.svelte';
 	import { achievementStore } from '$lib/stores/achievements.svelte';
+	import {
+		useAllSkills,
+		useAllActivities,
+		useAllAchievements,
+		filterByBranch,
+		getRecentActivities,
+		getSkillById,
+		computeUserStats,
+	} from '$lib/data/queries';
+	import { buildAchievementStatus, getAchievementStats } from '$lib/stores/achievements.svelte';
 	import { BRANCH_INFO } from '$lib/types';
 	import type { Skill, SkillBranch, AchievementUnlockResult } from '$lib/types';
 	import SkillCard from '$lib/components/SkillCard.svelte';
@@ -22,6 +32,18 @@
 		Trophy,
 	} from '@manacore/shared-icons';
 
+	// Reactive live queries — auto-update when IndexedDB changes
+	const allSkills = useAllSkills();
+	const allActivities = useAllActivities();
+	const allAchievementsRaw = useAllAchievements();
+
+	// Derived values from live queries
+	const skills = $derived(allSkills.value);
+	const activities = $derived(allActivities.value);
+	const achievements = $derived(buildAchievementStatus(allAchievementsRaw.value));
+	const achievementStats = $derived(getAchievementStats(achievements));
+	const userStats = $derived(computeUserStats(skills, activities));
+
 	// Modal states
 	let showAddSkillModal = $state(false);
 	let showAddXpModal = $state(false);
@@ -39,10 +61,7 @@
 	let showAchievementCelebration = $state(false);
 	let currentAchievementUnlock = $state<AchievementUnlockResult | null>(null);
 
-	const filteredSkills = $derived(() => {
-		if (selectedBranch === 'all') return skillStore.skills;
-		return skillStore.skills.filter((s) => s.branch === selectedBranch);
-	});
+	const filteredSkills = $derived(filterByBranch(skills, selectedBranch));
 
 	function openAddXpModal(skill: Skill) {
 		selectedSkill = skill;
@@ -78,15 +97,13 @@
 	}
 
 	async function checkAchievementsLocal(lastActivityXp?: number) {
-		if (!achievementStore.useApi) {
-			await achievementStore.checkLocal({
-				skills: skillStore.skills,
-				activities: skillStore.activities,
-				userStats: skillStore.userStats,
-				lastActivityXp,
-			});
-			showNextAchievement();
-		}
+		await achievementStore.checkLocal({
+			skills,
+			activities,
+			userStats,
+			lastActivityXp,
+		});
+		showNextAchievement();
 	}
 
 	async function handleAddXp(xp: number, description: string, duration?: number) {
@@ -158,11 +175,11 @@
 						title="Achievements"
 					>
 						<Trophy class="h-5 w-5" />
-						{#if achievementStore.stats().unlocked > 0}
+						{#if achievementStats.unlocked > 0}
 							<span
 								class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-gray-900"
 							>
-								{achievementStore.stats().unlocked}
+								{achievementStats.unlocked}
 							</span>
 						{/if}
 					</a>
@@ -224,10 +241,10 @@
 						? 'bg-emerald-600 text-white'
 						: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
 				>
-					Alle ({skillStore.skills.length})
+					Alle ({skills.length})
 				</button>
 				{#each Object.entries(BRANCH_INFO) as [branch, info]}
-					{@const count = skillStore.skills.filter((s) => s.branch === branch).length}
+					{@const count = skills.filter((s) => s.branch === branch).length}
 					{#if count > 0 || branch !== 'custom'}
 						<button
 							onclick={() => (selectedBranch = branch as SkillBranch)}
@@ -244,7 +261,7 @@
 		</div>
 
 		<!-- Skills Grid -->
-		{#if filteredSkills().length === 0}
+		{#if filteredSkills.length === 0}
 			<div class="mt-16 text-center">
 				<div
 					class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-800"
@@ -263,7 +280,7 @@
 			</div>
 		{:else}
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each filteredSkills() as skill (skill.id)}
+				{#each filteredSkills as skill (skill.id)}
 					<SkillCard
 						{skill}
 						onAddXp={() => openAddXpModal(skill)}
@@ -275,15 +292,15 @@
 		{/if}
 
 		<!-- Recent Activity -->
-		{#if skillStore.recentActivities().length > 0}
+		{#if getRecentActivities(activities).length > 0}
 			<div class="mt-12">
 				<h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
 					<Lightning class="h-5 w-5 text-yellow-500" />
 					Letzte Aktivitäten
 				</h2>
 				<div class="space-y-2">
-					{#each skillStore.recentActivities().slice(0, 5) as activity}
-						{@const skill = skillStore.getSkill(activity.skillId)}
+					{#each getRecentActivities(activities).slice(0, 5) as activity}
+						{@const skill = getSkillById(skills, activity.skillId)}
 						{#if skill}
 							<div class="flex items-center justify-between rounded-lg bg-gray-800/50 px-4 py-3">
 								<div class="flex items-center gap-3">

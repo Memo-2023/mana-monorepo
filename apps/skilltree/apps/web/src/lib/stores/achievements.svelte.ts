@@ -1,8 +1,8 @@
 /**
- * Achievements Store — Local-First with @manacore/local-store
+ * Achievements Store — Write Actions + Unlock Queue
  *
- * All achievement state stored in IndexedDB via Dexie.js.
- * Sync to server happens automatically when authenticated.
+ * Reads are handled by useLiveQuery hooks in queries.ts.
+ * This store handles achievement checking logic and the unlock celebration queue.
  */
 
 import type {
@@ -16,25 +16,47 @@ import type {
 import { ACHIEVEMENT_DEFINITIONS } from '$lib/types';
 import { achievementCollection, type LocalAchievement } from '$lib/data/local-store';
 
-// Reactive state
-let achievements = $state<AchievementWithStatus[]>([]);
-let isLoading = $state(true);
-let initialized = $state(false);
-
 // Queue of recently unlocked achievements to show celebrations
 let unlockQueue = $state<AchievementUnlockResult[]>([]);
 
-// ─── Derived values ──────────────────────────────────────────
+// ─── Derived helpers (pure functions for consumers) ──────────
 
-const unlockedAchievements = $derived(() => {
+/** Build achievement status list from stored records and definitions. */
+export function buildAchievementStatus(stored: LocalAchievement[]): AchievementWithStatus[] {
+	if (stored.length === 0) {
+		return ACHIEVEMENT_DEFINITIONS.map((def) => ({
+			...def,
+			unlocked: false,
+			unlockedAt: null,
+			progress: 0,
+		}));
+	}
+	return ACHIEVEMENT_DEFINITIONS.map((def) => {
+		const found = stored.find((s) => s.key === def.id || s.id === def.id);
+		return {
+			...def,
+			unlocked: found?.unlockedAt ? true : false,
+			unlockedAt: found?.unlockedAt || null,
+			progress: 0,
+		};
+	});
+}
+
+export function getUnlockedAchievements(
+	achievements: AchievementWithStatus[]
+): AchievementWithStatus[] {
 	return achievements.filter((a) => a.unlocked);
-});
+}
 
-const lockedAchievements = $derived(() => {
+export function getLockedAchievements(
+	achievements: AchievementWithStatus[]
+): AchievementWithStatus[] {
 	return achievements.filter((a) => !a.unlocked);
-});
+}
 
-const achievementsByCategory = $derived(() => {
+export function getAchievementsByCategory(
+	achievements: AchievementWithStatus[]
+): Record<AchievementCategory, AchievementWithStatus[]> {
 	const grouped: Record<AchievementCategory, AchievementWithStatus[]> = {
 		xp: [],
 		skills: [],
@@ -48,79 +70,39 @@ const achievementsByCategory = $derived(() => {
 		grouped[a.category].push(a);
 	}
 	return grouped;
-});
+}
 
-const stats = $derived(() => {
+export function getAchievementStats(achievements: AchievementWithStatus[]): {
+	total: number;
+	unlocked: number;
+} {
 	return {
 		total: achievements.length,
 		unlocked: achievements.filter((a) => a.unlocked).length,
 	};
-});
+}
 
-const completionPercentage = $derived(() => {
+export function getCompletionPercentage(achievements: AchievementWithStatus[]): number {
 	if (achievements.length === 0) return 0;
 	return Math.round((achievements.filter((a) => a.unlocked).length / achievements.length) * 100);
-});
+}
 
 // ─── Actions ─────────────────────────────────────────────────
 
-async function initialize() {
-	if (initialized) return;
-
-	isLoading = true;
-	try {
-		const stored = await achievementCollection.getAll();
-		if (stored.length === 0) {
-			// First time: seed from definitions
-			achievements = ACHIEVEMENT_DEFINITIONS.map((def) => ({
-				...def,
-				unlocked: false,
-				unlockedAt: null,
-				progress: 0,
-			}));
-			// Save each to IndexedDB
-			for (const a of achievements) {
-				await achievementCollection.insert({
-					id: a.id,
-					key: a.id,
-					name: a.name,
-					description: a.description,
-					icon: a.icon,
-					unlockedAt: '',
-				});
-			}
-		} else {
-			// Merge stored data with definitions (in case new achievements were added)
-			achievements = ACHIEVEMENT_DEFINITIONS.map((def) => {
-				const found = stored.find((s) => s.key === def.id || s.id === def.id);
-				return {
-					...def,
-					unlocked: found?.unlockedAt ? true : false,
-					unlockedAt: found?.unlockedAt || null,
-					progress: 0,
-				};
+async function seedIfEmpty() {
+	const stored = await achievementCollection.getAll();
+	if (stored.length === 0) {
+		for (const def of ACHIEVEMENT_DEFINITIONS) {
+			await achievementCollection.insert({
+				id: def.id,
+				key: def.id,
+				name: def.name,
+				description: def.description,
+				icon: def.icon,
+				unlockedAt: '',
 			});
 		}
-		initialized = true;
-	} catch (error) {
-		console.error('Failed to initialize achievements store:', error);
-		// Fallback to definitions
-		achievements = ACHIEVEMENT_DEFINITIONS.map((def) => ({
-			...def,
-			unlocked: false,
-			unlockedAt: null,
-			progress: 0,
-		}));
-	} finally {
-		isLoading = false;
 	}
-}
-
-async function reinitialize() {
-	initialized = false;
-	achievements = [];
-	unlockQueue = [];
-	await initialize();
 }
 
 /**
@@ -134,6 +116,10 @@ async function checkLocal(context: {
 	lastActivityXp?: number;
 }): Promise<AchievementUnlockResult[]> {
 	const { skills, activities: allActivities, userStats: stats, lastActivityXp } = context;
+
+	// Get current achievements from DB
+	const stored = await achievementCollection.getAll();
+	const achievements = buildAchievementStatus(stored);
 
 	const uniqueBranches = new Set(skills.map((s) => s.branch).filter((b) => b !== 'custom'));
 
@@ -161,8 +147,7 @@ async function checkLocal(context: {
 
 	const newlyUnlocked: AchievementUnlockResult[] = [];
 
-	for (let i = 0; i < achievements.length; i++) {
-		const a = achievements[i];
+	for (const a of achievements) {
 		if (a.unlocked) continue;
 
 		const condition = a.condition;
@@ -205,23 +190,10 @@ async function checkLocal(context: {
 		}
 
 		if (met) {
-			const unlocked: AchievementWithStatus = {
-				...a,
-				unlocked: true,
-				unlockedAt: new Date().toISOString(),
-				progress: condition.threshold,
-			};
-			achievements = [...achievements.slice(0, i), unlocked, ...achievements.slice(i + 1)];
 			await achievementCollection.update(a.id, {
-				unlockedAt: unlocked.unlockedAt!,
+				unlockedAt: new Date().toISOString(),
 			});
 			newlyUnlocked.push({ achievement: a, xpReward: a.xpReward });
-		} else {
-			// Update progress
-			const updated = { ...a, progress: Math.min(current, condition.threshold) };
-			if (updated.progress !== a.progress) {
-				achievements = [...achievements.slice(0, i), updated, ...achievements.slice(i + 1)];
-			}
 		}
 	}
 
@@ -232,31 +204,6 @@ async function checkLocal(context: {
 	return newlyUnlocked;
 }
 
-/**
- * Handle achievements returned from server sync.
- */
-function handleApiUnlocks(results: AchievementUnlockResult[]) {
-	if (results.length === 0) return;
-
-	for (const result of results) {
-		const index = achievements.findIndex((a) => a.id === result.achievement.id);
-		if (index !== -1) {
-			achievements = [
-				...achievements.slice(0, index),
-				{
-					...achievements[index],
-					unlocked: true,
-					unlockedAt: new Date().toISOString(),
-					progress: achievements[index].condition.threshold,
-				},
-				...achievements.slice(index + 1),
-			];
-		}
-	}
-
-	unlockQueue = [...unlockQueue, ...results];
-}
-
 function popUnlockQueue(): AchievementUnlockResult | null {
 	if (unlockQueue.length === 0) return null;
 	const [first, ...rest] = unlockQueue;
@@ -265,37 +212,11 @@ function popUnlockQueue(): AchievementUnlockResult | null {
 }
 
 export const achievementStore = {
-	get achievements() {
-		return achievements;
-	},
-	get isLoading() {
-		return isLoading;
-	},
-	get initialized() {
-		return initialized;
-	},
-	get unlockedAchievements() {
-		return unlockedAchievements;
-	},
-	get lockedAchievements() {
-		return lockedAchievements;
-	},
-	get achievementsByCategory() {
-		return achievementsByCategory;
-	},
-	get stats() {
-		return stats;
-	},
-	get completionPercentage() {
-		return completionPercentage;
-	},
 	get unlockQueue() {
 		return unlockQueue;
 	},
 
-	initialize,
-	reinitialize,
+	seedIfEmpty,
 	checkLocal,
-	handleApiUnlocks,
 	popUnlockQueue,
 };

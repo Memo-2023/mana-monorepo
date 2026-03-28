@@ -3,6 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/manacore/shared-go/httputil"
 	"time"
 
 	"github.com/manacore/mana-api-gateway/internal/middleware"
@@ -24,7 +26,7 @@ func NewApiKeysHandler(apiKeySvc *service.ApiKeyService, usageSvc *service.Usage
 func (h *ApiKeysHandler) CreateKey(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r)
 	if userID == "" {
-		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "not authenticated"})
+		httputil.WriteJSON(w, http.StatusUnauthorized, map[string]string{"error": "not authenticated"})
 		return
 	}
 
@@ -35,12 +37,12 @@ func (h *ApiKeysHandler) CreateKey(w http.ResponseWriter, r *http.Request) {
 		IsTest      bool   `json:"isTest"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+		httputil.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 		return
 	}
 
 	if body.Name == "" {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "name is required"})
+		httputil.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "name is required"})
 		return
 	}
 
@@ -50,11 +52,11 @@ func (h *ApiKeysHandler) CreateKey(w http.ResponseWriter, r *http.Request) {
 
 	rawKey, apiKey, err := h.apiKeyService.Create(r.Context(), userID, body.Name, body.Description, body.Tier, body.IsTest)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to create key"})
+		httputil.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to create key"})
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, map[string]any{
+	httputil.WriteJSON(w, http.StatusCreated, map[string]any{
 		"key":    rawKey,
 		"apiKey": apiKey,
 	})
@@ -64,13 +66,13 @@ func (h *ApiKeysHandler) CreateKey(w http.ResponseWriter, r *http.Request) {
 func (h *ApiKeysHandler) ListKeys(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r)
 	if userID == "" {
-		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "not authenticated"})
+		httputil.WriteJSON(w, http.StatusUnauthorized, map[string]string{"error": "not authenticated"})
 		return
 	}
 
 	keys, err := h.apiKeyService.ListByUser(r.Context(), userID)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to list keys"})
+		httputil.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to list keys"})
 		return
 	}
 
@@ -78,7 +80,7 @@ func (h *ApiKeysHandler) ListKeys(w http.ResponseWriter, r *http.Request) {
 		keys = []service.ApiKey{}
 	}
 
-	writeJSON(w, http.StatusOK, keys)
+	httputil.WriteJSON(w, http.StatusOK, keys)
 }
 
 // DeleteKey handles DELETE /api-keys/{id}
@@ -87,11 +89,11 @@ func (h *ApiKeysHandler) DeleteKey(w http.ResponseWriter, r *http.Request) {
 	keyID := r.PathValue("id")
 
 	if err := h.apiKeyService.Delete(r.Context(), keyID, userID); err != nil {
-		writeJSON(w, http.StatusNotFound, map[string]string{"error": "key not found"})
+		httputil.WriteJSON(w, http.StatusNotFound, map[string]string{"error": "key not found"})
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]string{"message": "key deleted"})
+	httputil.WriteJSON(w, http.StatusOK, map[string]string{"message": "key deleted"})
 }
 
 // GetUsage handles GET /api-keys/{id}/usage
@@ -100,7 +102,7 @@ func (h *ApiKeysHandler) GetUsage(w http.ResponseWriter, r *http.Request) {
 
 	usage, err := h.usageService.GetDailyUsage(r.Context(), keyID, 30)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to get usage"})
+		httputil.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to get usage"})
 		return
 	}
 
@@ -108,7 +110,7 @@ func (h *ApiKeysHandler) GetUsage(w http.ResponseWriter, r *http.Request) {
 		usage = []service.DailyUsage{}
 	}
 
-	writeJSON(w, http.StatusOK, usage)
+	httputil.WriteJSON(w, http.StatusOK, usage)
 }
 
 // GetUsageSummary handles GET /api-keys/{id}/usage/summary
@@ -118,15 +120,10 @@ func (h *ApiKeysHandler) GetUsageSummary(w http.ResponseWriter, r *http.Request)
 
 	summary, err := h.usageService.GetSummary(r.Context(), keyID, since)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to get summary"})
+		httputil.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to get summary"})
 		return
 	}
 
-	writeJSON(w, http.StatusOK, summary)
+	httputil.WriteJSON(w, http.StatusOK, summary)
 }
 
-func writeJSON(w http.ResponseWriter, status int, data any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
-}

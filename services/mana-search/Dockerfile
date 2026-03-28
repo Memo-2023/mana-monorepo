@@ -1,10 +1,10 @@
 FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
-COPY services/mana-search-go/go.mod services/mana-search-go/go.sum ./
+COPY services/mana-search/go.mod services/mana-search/go.sum ./
 RUN go mod download
 
-COPY services/mana-search-go/ .
+COPY services/mana-search/ .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /mana-search ./cmd/server
 
 FROM alpine:3.21

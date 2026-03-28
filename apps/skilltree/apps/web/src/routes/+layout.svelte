@@ -2,9 +2,8 @@
 	import '../app.css';
 	import '$lib/i18n';
 	import { isLoading as i18nLoading, _ as t } from 'svelte-i18n';
-	import { skillStore } from '$lib/stores/skills.svelte';
-	import { achievementStore } from '$lib/stores/achievements.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { achievementStore } from '$lib/stores/achievements.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { skilltreeOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { SessionExpiredBanner, AuthGate } from '@manacore/shared-auth-ui';
@@ -18,9 +17,8 @@
 		if (authStore.isAuthenticated) {
 			skilltreeStore.startSync(() => authStore.getValidToken());
 		}
-		// Load data from IndexedDB into reactive stores
-		await skillStore.initialize();
-		await achievementStore.initialize();
+		// Seed achievement definitions into IndexedDB if first run
+		await achievementStore.seedIfEmpty();
 	}
 </script>
 

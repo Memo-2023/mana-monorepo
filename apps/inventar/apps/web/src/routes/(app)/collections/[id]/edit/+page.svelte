@@ -2,12 +2,16 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { collectionsStore } from '$lib/stores/collections.svelte';
-	import type { CollectionSchema } from '@inventar/shared';
+	import { getCollectionById } from '$lib/data/queries';
+	import type { Collection, CollectionSchema } from '@inventar/shared';
 	import SchemaEditor from '$lib/components/fields/SchemaEditor.svelte';
 
+	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
+
 	let collectionId = $derived($page.params.id);
-	let collection = $derived(collectionsStore.getById(collectionId));
+	let collection = $derived(getCollectionById(collectionsCtx.value, collectionId));
 
 	let name = $state('');
 	let description = $state('');
@@ -25,9 +29,9 @@
 		}
 	});
 
-	function handleSave() {
+	async function handleSave() {
 		if (!collection || !name.trim()) return;
-		collectionsStore.update(collection.id, {
+		await collectionsStore.update(collection.id, {
 			name: name.trim(),
 			description: description.trim() || undefined,
 			icon: icon || undefined,

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { categoriesStore } from '$lib/stores/categories.svelte';
 	import type { Category } from '@inventar/shared';
+
+	const categoriesCtx: { readonly value: Category[] } = getContext('categories');
 
 	let showForm = $state(false);
 	let editingId = $state<string | null>(null);
@@ -25,16 +28,16 @@
 		showForm = true;
 	}
 
-	function save() {
+	async function save() {
 		if (!name.trim()) return;
 		if (editingId) {
-			categoriesStore.update(editingId, {
+			await categoriesStore.update(editingId, {
 				name: name.trim(),
 				icon: icon || undefined,
 				color: color || undefined,
 			});
 		} else {
-			categoriesStore.create({
+			await categoriesStore.create({
 				name: name.trim(),
 				icon: icon || undefined,
 				color: color || undefined,
@@ -43,11 +46,13 @@
 		showForm = false;
 	}
 
-	function deleteCategory(id: string) {
+	async function deleteCategory(id: string) {
 		if (confirm('Kategorie löschen?')) {
-			categoriesStore.delete(id);
+			await categoriesStore.delete(id);
 		}
 	}
+
+	let sortedCategories = $derived([...categoriesCtx.value].sort((a, b) => a.order - b.order));
 
 	const inputClass =
 		'rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--input))] px-3 py-2 text-sm text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]';
@@ -108,7 +113,7 @@
 		</div>
 	{/if}
 
-	{#if categoriesStore.categories.length === 0}
+	{#if sortedCategories.length === 0}
 		<div
 			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
 		>
@@ -117,7 +122,7 @@
 		</div>
 	{:else}
 		<div class="grid gap-3 sm:grid-cols-2">
-			{#each categoriesStore.categories.sort((a, b) => a.order - b.order) as category (category.id)}
+			{#each sortedCategories as category (category.id)}
 				<div
 					class="group flex items-center gap-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3"
 				>

@@ -2,10 +2,10 @@
 FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
-COPY services/mana-api-gateway-go/go.mod services/mana-api-gateway-go/go.sum ./
+COPY services/mana-api-gateway/go.mod services/mana-api-gateway/go.sum ./
 RUN go mod download
 
-COPY services/mana-api-gateway-go/ .
+COPY services/mana-api-gateway/ .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /mana-api-gateway ./cmd/server
 
 # Runtime stage

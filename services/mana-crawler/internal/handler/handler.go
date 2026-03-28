@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+
+	"github.com/manacore/shared-go/httputil"
 	"net/url"
 	"strconv"
 	"time"
@@ -33,18 +35,18 @@ func (h *Handler) StartCrawl(w http.ResponseWriter, r *http.Request) {
 		WebhookURL string               `json:"webhookUrl"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request"})
+		httputil.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request"})
 		return
 	}
 
 	if body.StartURL == "" {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "startUrl is required"})
+		httputil.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "startUrl is required"})
 		return
 	}
 
 	parsed, err := url.Parse(body.StartURL)
 	if err != nil || parsed.Host == "" {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid URL"})
+		httputil.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid URL"})
 		return
 	}
 
@@ -86,17 +88,17 @@ func (h *Handler) StartCrawl(w http.ResponseWriter, r *http.Request) {
 		string(configJSON), fmt.Sprintf(`{"format":"%s"}`, cfg.OutputFormat)).Scan(&jobID)
 	if err != nil {
 		slog.Error("create job failed", "error", err)
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to create job"})
+		httputil.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to create job"})
 		return
 	}
 
 	// Start crawl (use background context so it outlives the HTTP request)
 	if err := h.crawler.StartJob(context.Background(), jobID, body.StartURL, cfg); err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to start crawl"})
+		httputil.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to start crawl"})
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, map[string]any{
+	httputil.WriteJSON(w, http.StatusCreated, map[string]any{
 		"jobId":    jobID,
 		"status":   "running",
 		"startUrl": body.StartURL,
@@ -126,11 +128,11 @@ func (h *Handler) GetJob(w http.ResponseWriter, r *http.Request) {
 		FROM crawler.crawl_jobs WHERE id = $1
 	`, jobID).Scan(&job.ID, &job.StartURL, &job.Domain, &job.Status, &job.Progress, &job.Error, &job.StartedAt, &job.CompletedAt, &job.CreatedAt)
 	if err != nil {
-		writeJSON(w, http.StatusNotFound, map[string]string{"error": "job not found"})
+		httputil.WriteJSON(w, http.StatusNotFound, map[string]string{"error": "job not found"})
 		return
 	}
 
-	writeJSON(w, http.StatusOK, job)
+	httputil.WriteJSON(w, http.StatusOK, job)
 }
 
 // GetJobResults handles GET /api/v1/crawl/{jobId}/results
@@ -155,7 +157,7 @@ func (h *Handler) GetJobResults(w http.ResponseWriter, r *http.Request) {
 		FROM crawler.crawl_results WHERE job_id = $1 ORDER BY created_at LIMIT $2 OFFSET $3
 	`, jobID, limit, offset)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "query failed"})
+		httputil.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": "query failed"})
 		return
 	}
 	defer rows.Close()
@@ -180,7 +182,7 @@ func (h *Handler) GetJobResults(w http.ResponseWriter, r *http.Request) {
 		results = []map[string]any{}
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"results": results,
 		"pagination": map[string]any{
 			"page": page, "limit": limit, "total": total,
@@ -218,7 +220,7 @@ func (h *Handler) ListJobs(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := h.pool.Query(r.Context(), query, args...)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "query failed"})
+		httputil.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": "query failed"})
 		return
 	}
 	defer rows.Close()
@@ -237,7 +239,7 @@ func (h *Handler) ListJobs(w http.ResponseWriter, r *http.Request) {
 		jobs = []map[string]any{}
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"results": jobs,
 		"pagination": map[string]any{
 			"page": page, "limit": limit, "total": total,
@@ -263,7 +265,7 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	if dbOK != "ok" {
 		status = "degraded"
 	}
-	writeJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"status": status, "service": "mana-crawler", "database": dbOK,
 		"timestamp": time.Now().UTC().Format(time.RFC3339),
 	})
@@ -284,8 +286,3 @@ func (h *Handler) Metrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "mana_crawler_jobs{status=\"failed\"} %d\n", failed)
 }
 
-func writeJSON(w http.ResponseWriter, status int, data any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
-}

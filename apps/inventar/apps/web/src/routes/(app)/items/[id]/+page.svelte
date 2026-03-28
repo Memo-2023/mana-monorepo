@@ -2,18 +2,30 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { itemsStore } from '$lib/stores/items.svelte';
-	import { collectionsStore } from '$lib/stores/collections.svelte';
-	import { locationsStore } from '$lib/stores/locations.svelte';
-	import { categoriesStore } from '$lib/stores/categories.svelte';
-	import type { ItemStatus } from '@inventar/shared';
+	import {
+		getItemById,
+		getCollectionById,
+		getLocationById,
+		getLocationFullPath,
+		getCategoryById,
+	} from '$lib/data/queries';
+	import type { Collection, Item, Location, Category, ItemStatus } from '@inventar/shared';
 	import FieldRenderer from '$lib/components/fields/FieldRenderer.svelte';
 	import FieldEditor from '$lib/components/fields/FieldEditor.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 
+	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
+	const itemsCtx: { readonly value: Item[] } = getContext('items');
+	const locationsCtx: { readonly value: Location[] } = getContext('locations');
+	const categoriesCtx: { readonly value: Category[] } = getContext('categories');
+
 	let itemId = $derived($page.params.id);
-	let item = $derived(itemsStore.getById(itemId));
-	let collection = $derived(item ? collectionsStore.getById(item.collectionId) : undefined);
+	let item = $derived(getItemById(itemsCtx.value, itemId));
+	let collection = $derived(
+		item ? getCollectionById(collectionsCtx.value, item.collectionId) : undefined
+	);
 
 	let editing = $state(false);
 	let editName = $state('');
@@ -41,9 +53,9 @@
 		editing = true;
 	}
 
-	function saveEdit() {
+	async function saveEdit() {
 		if (!item || !editName.trim()) return;
-		itemsStore.update(item.id, {
+		await itemsStore.update(item.id, {
 			name: editName.trim(),
 			description: editDescription.trim() || undefined,
 			status: editStatus,
@@ -55,15 +67,15 @@
 		editing = false;
 	}
 
-	function addNote() {
+	async function addNote() {
 		if (!item || !newNote.trim()) return;
-		itemsStore.addNote(item.id, newNote.trim());
+		await itemsStore.addNote(item.id, newNote.trim());
 		newNote = '';
 	}
 
-	function deleteItem() {
+	async function deleteItem() {
 		if (!item || !confirm('Item endgültig löschen?')) return;
-		itemsStore.delete(item.id);
+		await itemsStore.delete(item.id);
 		goto(collection ? `/collections/${collection.id}` : '/items');
 	}
 
@@ -165,27 +177,27 @@
 						>
 						<input type="number" bind:value={editQuantity} min="1" class={inputClass} />
 					</div>
-					{#if locationsStore.locations.length > 0}
+					{#if locationsCtx.value.length > 0}
 						<div>
 							<label class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
 								>{$_('item.location')}</label
 							>
 							<select bind:value={editLocationId} class={inputClass}>
 								<option value={undefined}>— Kein Standort —</option>
-								{#each locationsStore.locations as loc}
+								{#each locationsCtx.value as loc}
 									<option value={loc.id}>{loc.path ? `${loc.path}/` : ''}{loc.name}</option>
 								{/each}
 							</select>
 						</div>
 					{/if}
-					{#if categoriesStore.categories.length > 0}
+					{#if categoriesCtx.value.length > 0}
 						<div>
 							<label class="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]"
 								>{$_('item.category')}</label
 							>
 							<select bind:value={editCategoryId} class={inputClass}>
 								<option value={undefined}>— Keine Kategorie —</option>
-								{#each categoriesStore.categories as cat}
+								{#each categoriesCtx.value as cat}
 									<option value={cat.id}>{cat.name}</option>
 								{/each}
 							</select>
@@ -227,15 +239,15 @@
 						>
 					{/if}
 					{#if item.locationId}
-						{@const loc = locationsStore.getById(item.locationId)}
+						{@const loc = getLocationById(locationsCtx.value, item.locationId)}
 						{#if loc}
 							<span class="flex items-center gap-1 text-sm text-[hsl(var(--muted-foreground))]">
-								📍 {locationsStore.getFullPath(loc.id)}
+								📍 {getLocationFullPath(locationsCtx.value, loc.id)}
 							</span>
 						{/if}
 					{/if}
 					{#if item.categoryId}
-						{@const cat = categoriesStore.getById(item.categoryId)}
+						{@const cat = getCategoryById(categoriesCtx.value, item.categoryId)}
 						{#if cat}
 							<span class="rounded-full bg-[hsl(var(--muted))] px-2 py-0.5 text-xs"
 								>{cat.icon || '🏷️'} {cat.name}</span

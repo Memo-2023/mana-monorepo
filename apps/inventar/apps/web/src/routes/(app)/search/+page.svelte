@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
-	import { itemsStore } from '$lib/stores/items.svelte';
-	import { collectionsStore } from '$lib/stores/collections.svelte';
+	import { getContext } from 'svelte';
+	import { getFilteredItems, getCollectionById } from '$lib/data/queries';
+	import type { Collection, Item } from '@inventar/shared';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 
+	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
+	const itemsCtx: { readonly value: Item[] } = getContext('items');
+
 	let query = $state('');
-	let results = $derived(query.length >= 2 ? itemsStore.getFiltered({ search: query }) : []);
+	let results = $derived(
+		query.length >= 2 ? getFilteredItems(itemsCtx.value, { search: query }) : []
+	);
 </script>
 
 <svelte:head>
@@ -53,7 +59,7 @@
 							<StatusBadge status={item.status} />
 						</div>
 						<p class="text-xs text-[hsl(var(--muted-foreground))]">
-							{collectionsStore.getById(item.collectionId)?.name || ''}
+							{getCollectionById(collectionsCtx.value, item.collectionId)?.name || ''}
 						</p>
 					</div>
 				</button>

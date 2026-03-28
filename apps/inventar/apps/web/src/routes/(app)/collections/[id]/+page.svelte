@@ -2,21 +2,23 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
-	import { collectionsStore } from '$lib/stores/collections.svelte';
+	import { getContext } from 'svelte';
 	import { itemsStore } from '$lib/stores/items.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
-	import { locationsStore } from '$lib/stores/locations.svelte';
-	import { categoriesStore } from '$lib/stores/categories.svelte';
-	import type { Item, ItemStatus } from '@inventar/shared';
+	import { getCollectionById, getItemsByCollection, getSortedItems } from '$lib/data/queries';
+	import type { Collection, Item, ItemStatus } from '@inventar/shared';
 	import FieldRenderer from '$lib/components/fields/FieldRenderer.svelte';
 	import FieldEditor from '$lib/components/fields/FieldEditor.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 	import ViewModeToggle from '$lib/components/ViewModeToggle.svelte';
 
+	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
+	const itemsCtx: { readonly value: Item[] } = getContext('items');
+
 	let collectionId = $derived($page.params.id);
-	let collection = $derived(collectionsStore.getById(collectionId));
-	let items = $derived(itemsStore.getByCollection(collectionId));
-	let sortedItems = $derived(itemsStore.getSorted(items, viewStore.sort));
+	let collection = $derived(getCollectionById(collectionsCtx.value, collectionId));
+	let items = $derived(getItemsByCollection(itemsCtx.value, collectionId));
+	let sortedItems = $derived(getSortedItems(items, viewStore.sort));
 
 	// Item creation
 	let showNewItem = $state(false);
@@ -24,9 +26,9 @@
 	let newItemFields = $state<Record<string, unknown>>({});
 	let newItemStatus = $state<ItemStatus>('owned');
 
-	function createItem() {
+	async function createItem() {
 		if (!newItemName.trim() || !collection) return;
-		itemsStore.create({
+		await itemsStore.create({
 			collectionId: collection.id,
 			name: newItemName.trim(),
 			status: newItemStatus,

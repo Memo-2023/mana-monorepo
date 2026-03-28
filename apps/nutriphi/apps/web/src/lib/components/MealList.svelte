@@ -1,74 +1,49 @@
 <script lang="ts">
 	import { mealsStore } from '$lib/stores/meals.svelte';
-	import { onMount } from 'svelte';
+	import { useAllMeals, getTodaysMeals } from '$lib/data/queries';
 	import { MEAL_TYPE_LABELS } from '@nutriphi/shared';
-	import {
-		Trash,
-		Camera,
-		PencilLine,
-		WarningCircle,
-		ArrowsClockwise,
-		CircleNotch,
-	} from '@manacore/shared-icons';
+	import { Trash, Camera, PencilLine, CircleNotch } from '@manacore/shared-icons';
+
+	// Reactive live query — auto-updates when IndexedDB changes
+	const allMeals = useAllMeals();
+	const todaysMeals = $derived(getTodaysMeals(allMeals.value));
 
 	let deleting = $state<string | null>(null);
-
-	onMount(() => {
-		mealsStore.fetchTodaysMeals();
-	});
+	let deleteError = $state<string | null>(null);
 
 	async function deleteMeal(id: string) {
-		if (confirm('Mahlzeit wirklich löschen?')) {
+		if (confirm('Mahlzeit wirklich loschen?')) {
 			deleting = id;
+			deleteError = null;
 			try {
 				await mealsStore.deleteMeal(id);
-			} catch {
-				// Error is handled in store
+			} catch (err) {
+				deleteError = err instanceof Error ? err.message : 'Mahlzeit konnte nicht geloscht werden';
 			} finally {
 				deleting = null;
 			}
 		}
 	}
-
-	function retry() {
-		mealsStore.clearErrors();
-		mealsStore.fetchTodaysMeals();
-	}
 </script>
 
 <div class="space-y-3">
-	{#if mealsStore.error}
-		<div
-			class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400"
-		>
-			<WarningCircle class="w-5 h-5 flex-shrink-0" />
-			<span class="flex-1 text-sm">{mealsStore.error}</span>
-			<button onclick={retry} class="p-2 hover:bg-red-500/20 rounded-lg transition-colors">
-				<ArrowsClockwise class="w-4 h-4" />
-			</button>
-		</div>
-	{/if}
-
-	{#if mealsStore.deleteError}
+	{#if deleteError}
 		<div
 			class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-2 text-red-400 text-sm"
 		>
-			<WarningCircle class="w-4 h-4 flex-shrink-0" />
-			<span>{mealsStore.deleteError}</span>
+			<span>{deleteError}</span>
 		</div>
 	{/if}
 
-	{#if mealsStore.loading}
-		<div class="text-center py-8 text-[var(--color-text-secondary)]">Laden...</div>
-	{:else if !mealsStore.error && mealsStore.meals.length === 0}
+	{#if todaysMeals.length === 0}
 		<div class="text-center py-8">
 			<p class="text-[var(--color-text-secondary)] mb-2">Noch keine Mahlzeiten heute</p>
 			<p class="text-sm text-[var(--color-text-muted)]">
-				Tippe auf + um deine erste Mahlzeit hinzuzufügen
+				Tippe auf + um deine erste Mahlzeit hinzuzufugen
 			</p>
 		</div>
 	{:else}
-		{#each mealsStore.meals as meal (meal.id)}
+		{#each todaysMeals as meal (meal.id)}
 			<div
 				class="bg-[var(--color-background-card)] rounded-xl p-4 border border-[var(--color-border)]"
 			>

@@ -3,6 +3,8 @@ package handler
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/manacore/shared-go/httputil"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -40,7 +42,7 @@ func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
 		status = "degraded"
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"status":    status,
 		"service":   "mana-api-gateway",
 		"timestamp": time.Now().UTC().Format(time.RFC3339),

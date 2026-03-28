@@ -1,15 +1,26 @@
 <script lang="ts">
-	import { achievementStore } from '$lib/stores/achievements.svelte';
+	import { useAllAchievements } from '$lib/data/queries';
+	import {
+		buildAchievementStatus,
+		getAchievementStats,
+		getCompletionPercentage,
+	} from '$lib/stores/achievements.svelte';
 	import { ACHIEVEMENT_CATEGORY_INFO, RARITY_INFO } from '$lib/types';
 	import type { AchievementCategory } from '$lib/types';
 	import AchievementCard from '$lib/components/AchievementCard.svelte';
 	import { ArrowLeft, Trophy, Star } from '@manacore/shared-icons';
 
+	// Reactive live query
+	const allAchievementsRaw = useAllAchievements();
+	const achievements = $derived(buildAchievementStatus(allAchievementsRaw.value));
+	const stats = $derived(getAchievementStats(achievements));
+	const completion = $derived(getCompletionPercentage(achievements));
+
 	let selectedCategory = $state<AchievementCategory | 'all'>('all');
 	let showOnlyUnlocked = $state(false);
 
 	const filteredAchievements = $derived(() => {
-		let list = achievementStore.achievements;
+		let list = achievements;
 		if (selectedCategory !== 'all') {
 			list = list.filter((a) => a.category === selectedCategory);
 		}
@@ -46,7 +57,7 @@
 					<div class="flex items-center gap-2 rounded-full bg-yellow-500/10 px-4 py-2">
 						<Trophy class="h-4 w-4 text-yellow-400" />
 						<span class="font-semibold text-yellow-400">
-							{achievementStore.stats().unlocked} / {achievementStore.stats().total}
+							{stats.unlocked} / {stats.total}
 						</span>
 					</div>
 				</div>
@@ -59,22 +70,18 @@
 		<div class="mb-8 rounded-xl border border-gray-700 bg-gray-800/50 p-6">
 			<div class="flex items-center justify-between mb-3">
 				<h2 class="text-lg font-semibold text-white">Fortschritt</h2>
-				<span class="text-2xl font-bold text-yellow-400"
-					>{achievementStore.completionPercentage()}%</span
-				>
+				<span class="text-2xl font-bold text-yellow-400">{completion}%</span>
 			</div>
 			<div class="h-3 overflow-hidden rounded-full bg-gray-700">
 				<div
 					class="h-full rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 transition-all duration-500"
-					style="width: {achievementStore.completionPercentage()}%"
+					style="width: {completion}%"
 				></div>
 			</div>
 			<div class="mt-3 flex flex-wrap gap-4 text-sm">
 				{#each Object.entries(RARITY_INFO) as [rarity, info]}
-					{@const count = achievementStore.achievements.filter(
-						(a) => a.rarity === rarity && a.unlocked
-					).length}
-					{@const total = achievementStore.achievements.filter((a) => a.rarity === rarity).length}
+					{@const count = achievements.filter((a) => a.rarity === rarity && a.unlocked).length}
+					{@const total = achievements.filter((a) => a.rarity === rarity).length}
 					<span class="flex items-center gap-1.5 {info.color}">
 						<Star class="h-3 w-3" />
 						{info.name}: {count}/{total}
@@ -92,10 +99,10 @@
 					? 'bg-yellow-500 text-gray-900'
 					: 'bg-gray-800 text-gray-300 hover:bg-gray-700'}"
 			>
-				Alle ({achievementStore.achievements.length})
+				Alle ({achievements.length})
 			</button>
 			{#each categoryEntries as [category, info]}
-				{@const count = achievementStore.achievements.filter((a) => a.category === category).length}
+				{@const count = achievements.filter((a) => a.category === category).length}
 				<button
 					onclick={() => (selectedCategory = category)}
 					class="rounded-full px-4 py-2 text-sm font-medium transition-colors {selectedCategory ===

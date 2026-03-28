@@ -1,12 +1,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { collectionsStore } from '$lib/stores/collections.svelte';
 	import { itemsStore } from '$lib/stores/items.svelte';
-	import type { Collection } from '@inventar/shared';
+	import {
+		getSortedCollections,
+		getItemCountByCollection,
+		getTotalItemCount,
+	} from '$lib/data/queries';
+	import type { Collection, Item } from '@inventar/shared';
+
+	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
+	const itemsCtx: { readonly value: Item[] } = getContext('items');
 
 	function getItemCount(collectionId: string): number {
-		return itemsStore.getCountByCollection(collectionId);
+		return getItemCountByCollection(itemsCtx.value, collectionId);
 	}
 
 	function handleCollectionClick(collection: Collection) {
@@ -22,8 +31,9 @@
 	}
 
 	// Stats
-	let totalItems = $derived(itemsStore.getTotalCount());
-	let totalCollections = $derived(collectionsStore.collections.length);
+	let totalItems = $derived(getTotalItemCount(itemsCtx.value));
+	let totalCollections = $derived(collectionsCtx.value.length);
+	let sortedCollections = $derived(getSortedCollections(collectionsCtx.value));
 </script>
 
 <svelte:head>
@@ -51,7 +61,7 @@
 	</div>
 
 	<!-- Collections grid -->
-	{#if collectionsStore.collections.length === 0}
+	{#if sortedCollections.length === 0}
 		<div
 			class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] py-16"
 		>
@@ -71,7 +81,7 @@
 		</div>
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{#each collectionsStore.collections.sort((a, b) => a.order - b.order) as collection (collection.id)}
+			{#each sortedCollections as collection (collection.id)}
 				<div
 					role="button"
 					tabindex="0"

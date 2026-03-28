@@ -1,100 +1,44 @@
-import { browser } from '$app/environment';
-import type { Category } from '@inventar/shared';
+/**
+ * Categories Store — Mutations Only
+ *
+ * Reads come from useLiveQuery (see $lib/data/queries.ts).
+ * This store only handles writes to IndexedDB via local-store.
+ */
 
-const STORAGE_KEY = 'inventar_categories';
-
-function loadFromStorage(): Category[] {
-	if (!browser) return [];
-	try {
-		const data = localStorage.getItem(STORAGE_KEY);
-		return data ? JSON.parse(data) : [];
-	} catch {
-		return [];
-	}
-}
-
-function saveToStorage(categories: Category[]) {
-	if (!browser) return;
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
-}
-
-function generateId(): string {
-	return crypto.randomUUID();
-}
-
-let categories = $state<Category[]>([]);
-let initialized = $state(false);
+import { categoryCollection, type LocalCategory } from '$lib/data/local-store';
+import { toCategory } from '$lib/data/queries';
 
 export const categoriesStore = {
-	get categories() {
-		return categories;
-	},
-	get initialized() {
-		return initialized;
-	},
+	async create(data: { name: string; icon?: string; color?: string; parentId?: string }) {
+		const all = await categoryCollection.getAll();
+		const siblings = all.filter((c) => c.parentId === data.parentId);
 
-	initialize() {
-		if (initialized) return;
-		categories = loadFromStorage();
-		initialized = true;
-	},
-
-	getById(id: string): Category | undefined {
-		return categories.find((c) => c.id === id);
-	},
-
-	getRootCategories(): Category[] {
-		return categories.filter((c) => !c.parentId).sort((a, b) => a.order - b.order);
-	},
-
-	getChildren(parentId: string): Category[] {
-		return categories.filter((c) => c.parentId === parentId).sort((a, b) => a.order - b.order);
-	},
-
-	getTree(): Category[] {
-		const buildTree = (parentId?: string): Category[] => {
-			return categories
-				.filter((c) => c.parentId === parentId)
-				.sort((a, b) => a.order - b.order)
-				.map((c) => ({ ...c, children: buildTree(c.id) }));
-		};
-		return buildTree(undefined);
-	},
-
-	create(data: { name: string; icon?: string; color?: string; parentId?: string }): Category {
-		const now = new Date().toISOString();
-		const siblings = categories.filter((c) => c.parentId === data.parentId);
-
-		const category: Category = {
-			id: generateId(),
-			parentId: data.parentId,
+		const newLocal: LocalCategory = {
+			id: crypto.randomUUID(),
+			parentId: data.parentId ?? null,
 			name: data.name,
-			icon: data.icon,
-			color: data.color,
+			icon: data.icon ?? null,
+			color: data.color ?? null,
 			order: siblings.length,
-			createdAt: now,
-			updatedAt: now,
 		};
-		categories = [...categories, category];
-		saveToStorage(categories);
-		return category;
+		const inserted = await categoryCollection.insert(newLocal);
+		return toCategory(inserted);
 	},
 
-	update(id: string, data: Partial<Pick<Category, 'name' | 'icon' | 'color'>>) {
-		categories = categories.map((c) =>
-			c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c
-		);
-		saveToStorage(categories);
+	async update(id: string, data: Partial<Pick<LocalCategory, 'name' | 'icon' | 'color'>>) {
+		await categoryCollection.update(id, data);
 	},
 
-	delete(id: string) {
+	async delete(id: string) {
+		const all = await categoryCollection.getAll();
 		const idsToDelete = new Set<string>();
 		const collectIds = (parentId: string) => {
 			idsToDelete.add(parentId);
-			categories.filter((c) => c.parentId === parentId).forEach((c) => collectIds(c.id));
+			all.filter((c) => c.parentId === parentId).forEach((c) => collectIds(c.id));
 		};
 		collectIds(id);
-		categories = categories.filter((c) => !idsToDelete.has(c.id));
-		saveToStorage(categories);
+		for (const deleteId of idsToDelete) {
+			await categoryCollection.delete(deleteId);
+		}
 	},
 };

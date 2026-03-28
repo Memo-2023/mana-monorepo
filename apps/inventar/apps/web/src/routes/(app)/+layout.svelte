@@ -2,11 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
+	import { setContext } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { collectionsStore } from '$lib/stores/collections.svelte';
-	import { itemsStore } from '$lib/stores/items.svelte';
-	import { locationsStore } from '$lib/stores/locations.svelte';
-	import { categoriesStore } from '$lib/stores/categories.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { setLocale, supportedLocales } from '$lib/i18n';
@@ -15,12 +12,30 @@
 	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { inventarStore } from '$lib/data/local-store';
+	import {
+		useAllCollections,
+		useAllItems,
+		useAllLocations,
+		useAllCategories,
+	} from '$lib/data/queries';
 
 	let { children } = $props();
 
 	let showNav = $state(true);
 	let initialized = $state(false);
 	let showGuestWelcome = $state(false);
+
+	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
+	const allCollections = useAllCollections();
+	const allItems = useAllItems();
+	const allLocations = useAllLocations();
+	const allCategories = useAllCategories();
+
+	// Provide data to child components via Svelte context
+	setContext('collections', allCollections);
+	setContext('items', allItems);
+	setContext('locations', allLocations);
+	setContext('categories', allCategories);
 
 	async function handleAuthReady() {
 		// Initialize local-first database
@@ -31,11 +46,7 @@
 			inventarStore.startSync(() => authStore.getValidToken());
 		}
 
-		// Initialize legacy localStorage stores (will be migrated to IndexedDB later)
-		collectionsStore.initialize();
-		itemsStore.initialize();
-		locationsStore.initialize();
-		categoriesStore.initialize();
+		// Initialize view preferences (still localStorage-based, not data)
 		viewStore.initialize();
 		initialized = true;
 

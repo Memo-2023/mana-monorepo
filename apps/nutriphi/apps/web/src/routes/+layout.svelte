@@ -6,7 +6,7 @@
 	import { QuickInputBar } from '@manacore/shared-ui';
 	import type { QuickInputItem, CreatePreview } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { mealsStore } from '$lib/stores/meals.svelte';
+	import { useAllMeals, searchMeals } from '$lib/data/queries';
 	import { parseMealInput, formatParsedMealPreview } from '$lib/utils/meal-parser';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
@@ -15,11 +15,12 @@
 
 	let showGuestWelcome = $state(false);
 
+	// Reactive live query for search
+	const allMeals = useAllMeals();
+
 	// QuickInputBar handlers - search recent meals
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
-		const q = query.toLowerCase();
-		return mealsStore.meals
-			.filter((m) => m.description?.toLowerCase().includes(q))
+		return searchMeals(allMeals.value, query)
 			.slice(0, 10)
 			.map((meal) => ({
 				id: meal.id,

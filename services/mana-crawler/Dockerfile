@@ -2,10 +2,10 @@
 FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
-COPY services/mana-crawler-go/go.mod services/mana-crawler-go/go.sum ./
+COPY services/mana-crawler/go.mod services/mana-crawler/go.sum ./
 RUN go mod download
 
-COPY services/mana-crawler-go/ .
+COPY services/mana-crawler/ .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /mana-crawler ./cmd/server
 
 # Runtime stage
