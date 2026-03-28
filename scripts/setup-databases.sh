@@ -56,6 +56,7 @@ push_schema() {
 # All databases that should exist
 ALL_DATABASES=(
     "manacore"
+    "mana_auth"
     "chat"
     "zitare"
     "contacts"
@@ -85,6 +86,12 @@ ALL_DATABASES=(
     "traces"
     "context"
     "citycorners"
+    # New Hono service databases (extracted from mana-core-auth)
+    "mana_credits"
+    "mana_user"
+    "mana_subscriptions"
+    "mana_analytics"
+    "mana_sync"
 )
 
 # Check if specific service requested

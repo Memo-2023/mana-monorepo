@@ -316,6 +316,84 @@ services:
       - "traefik.http.routers.mana-credits.tls=true"
       - "traefik.http.services.mana-credits.loadbalancer.server.port=3002"
 
+  mana-user:
+    build:
+      context: services/mana-user
+      dockerfile: Dockerfile
+    image: mana-user:local
+    container_name: mana-user
+    restart: always
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      TZ: Europe/Berlin
+      PORT: 3062
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_user
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://manadeck.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
+    ports:
+      - "3062:3062"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3062/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  mana-subscriptions:
+    build:
+      context: services/mana-subscriptions
+      dockerfile: Dockerfile
+    image: mana-subscriptions:local
+    container_name: mana-subscriptions
+    restart: always
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      TZ: Europe/Berlin
+      PORT: 3063
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_subscriptions
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_SUBSCRIPTIONS_WEBHOOK_SECRET:-}
+      BASE_URL: https://subscriptions.mana.how
+      CORS_ORIGINS: https://mana.how
+    ports:
+      - "3063:3063"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3063/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  mana-analytics:
+    build:
+      context: services/mana-analytics
+      dockerfile: Dockerfile
+    image: mana-analytics:local
+    container_name: mana-analytics
+    restart: always
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      TZ: Europe/Berlin
+      PORT: 3064
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_analytics
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      MANA_LLM_URL: http://mana-llm:3020
+      CORS_ORIGINS: https://mana.how
+    ports:
+      - "3064:3064"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3064/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
   # ============================================
   # Tier 2: Gateway & Search Services (Ports 3010-3029)
   # ============================================
@@ -556,314 +634,22 @@ services:
       start_period: 40s
 
   # ============================================
-  # Tier 3: App Backends (Ports 3030-3049)
+  # Tier 3: App Compute Servers (Hono + Bun)
+  # CRUD is handled by mana-sync. These only handle
+  # server-side compute (AI, file upload, external APIs).
   # ============================================
 
-  chat-backend:
-    build:
-      context: .
-      dockerfile: apps/chat/apps/backend/Dockerfile
-    image: chat-backend:local
-    container_name: mana-app-chat-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-      # Removed: postgres - lazy connect
-    environment:
-      NODE_ENV: production
-      PORT: 3030
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/chat
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_LLM_URL: http://mana-llm:3020
-      LLM_TIMEOUT: 120000
-      SUPABASE_URL: ${SUPABASE_URL:-}
-      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
-      CORS_ORIGINS: https://chat.mana.how,https://mana.how
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: http://7ffb55d23705497989dbabd486a42014@glitchtip:8020/4
-    ports:
-      - "3030:3030"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
-  todo-backend:
-    build:
-      context: .
-      dockerfile: apps/todo/apps/backend/Dockerfile
-    image: todo-backend:local
-    container_name: mana-app-todo-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3031
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/todo
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://todo.mana.how,https://mana.how,https://calendar.mana.how,https://contacts.mana.how
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: http://c774433d212c473d9088542a84224488@glitchtip:8020/3
-    ports:
-      - "3031:3031"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3031/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # --- App Compute Servers (Hono + Bun, ~120 LOC each) ---
+  # CRUD handled by mana-sync. These handle AI, uploads, external APIs.
+  # All use FROM oven/bun:1, ~160MB images, ~30MB RAM, <50ms cold start.
+  # Ports match the old NestJS backends for backward compatibility.
 
-  calendar-backend:
-    build:
-      context: .
-      dockerfile: apps/calendar/apps/backend/Dockerfile
-    image: calendar-backend:local
-    container_name: mana-app-calendar-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3032
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/calendar
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://calendar.mana.how,https://mana.how
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      ENCRYPTION_KEY: ${CALENDAR_ENCRYPTION_KEY:-}
-      GLITCHTIP_DSN: http://7dcf6e8648a04b85b2cb275921c059d5@glitchtip:8020/1
-    ports:
-      - "3032:3032"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3032/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # NOTE: These apps need Hono server Dockerfiles to be added.
+  # For now they share the same pattern:
+  #   build: { context: apps/{app}/apps/server, dockerfile: ../../Dockerfile.bun }
+  #   Requires: Dockerfile.bun in apps/ root (FROM oven/bun:1, COPY, CMD bun run src/index.ts)
 
-  # clock-backend: REMOVED — migrated to local-first (mana-sync handles CRUD)
-
-  contacts-backend:
-    build:
-      context: .
-      dockerfile: apps/contacts/apps/backend/Dockerfile
-    image: contacts-backend:local
-    container_name: mana-app-contacts-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-      # Removed: minio - lazy connect
-    environment:
-      NODE_ENV: production
-      PORT: 3033
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/contacts
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://contacts.mana.how,https://mana.how,https://calendar.mana.how
-      S3_ENDPOINT: http://minio:9000
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      S3_BUCKET: contacts-photos
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: http://a0d81e4b78694b57951a1a5de6d64ae7@glitchtip:8020/2
-    ports:
-      - "3033:3033"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3033/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 50s
-
-  storage-backend:
-    build:
-      context: .
-      dockerfile: apps/storage/apps/backend/Dockerfile
-    image: storage-backend:local
-    container_name: mana-app-storage-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3034
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/storage
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://storage.mana.how,https://mana.how
-      S3_ENDPOINT: http://minio:9000
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      S3_BUCKET: storage-storage
-      STORAGE_S3_PUBLIC_URL: https://storage-files.mana.how
-      MAX_FILE_SIZE: 104857600
-      MAX_FILES_PER_UPLOAD: 10
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      GLITCHTIP_DSN: http://f38d9b20ba2d416b80d1c559b81fc275@glitchtip:8020/17
-    ports:
-      - "3034:3034"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3034/api/v1/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 50s
-
-  # presi-backend: REPLACED by lightweight Hono server (apps/presi/apps/server)
-  # TODO: Add presi-server container when Bun Docker image is ready
-
-  manadeck-backend:
-    build:
-      context: .
-      dockerfile: apps/manadeck/apps/backend/Dockerfile
-    image: manadeck-backend:local
-    container_name: mana-app-manadeck-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3036
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/manadeck
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://manadeck.mana.how,https://mana.how
-      S3_ENDPOINT: http://minio:9000
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
-      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
-      S3_BUCKET: manadeck-storage
-      GLITCHTIP_DSN: ""
-    ports:
-      - "3036:3036"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3036/api/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 55s
-
-  nutriphi-backend:
-    build:
-      context: .
-      dockerfile: apps/nutriphi/apps/backend/Dockerfile
-    image: nutriphi-backend:local
-    container_name: mana-app-nutriphi-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3038
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/nutriphi
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      MANA_LLM_URL: http://mana-llm:3020
-      CORS_ORIGINS: https://nutriphi.mana.how,https://mana.how
-      GLITCHTIP_DSN: http://61b5689b903746b698bd1f77ae9e0be1@glitchtip:8020/11
-    ports:
-      - "3038:3038"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3038/api/v1/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # skilltree-backend: REMOVED — migrated to local-first (mana-sync handles CRUD)
-
-  # photos-backend: REMOVED — migrated to local-first (talks to mana-media directly)
-
-  # zitare-backend: REMOVED — migrated to local-first (mana-sync handles CRUD)
-
-  mukke-backend:
-    build:
-      context: .
-      dockerfile: apps/mukke/apps/backend/Dockerfile
-    image: mukke-backend:local
-    container_name: mana-app-mukke-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3037
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mukke
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://mukke.mana.how,https://mana.how
-      S3_ENDPOINT: http://minio:9000
-      S3_PUBLIC_ENDPOINT: https://minio.mana.how
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      S3_BUCKET: mukke-storage
-      RUN_DB_PUSH: "true"
-      GLITCHTIP_DSN: http://9f792851d49d4f018625f45855f0a030@glitchtip:8020/9
-    ports:
-      - "3037:3037"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3037/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  planta-backend:
-    build:
-      context: .
-      dockerfile: apps/planta/apps/backend/Dockerfile
-    image: planta-backend:local
-    container_name: mana-app-planta-backend
-    restart: always
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3039
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/planta
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: https://planta.mana.how,https://mana.how
-      MANA_LLM_URL: http://mana-llm:3020
-      S3_ENDPOINT: http://minio:9000
-      S3_PUBLIC_ENDPOINT: https://minio.mana.how
-      S3_REGION: us-east-1
-      S3_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      S3_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      S3_BUCKET: planta-storage
-      GLITCHTIP_DSN: http://646a927be6c54c989a75c145247d89f9@glitchtip:8020/13
-    ports:
-      - "3039:3039"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3039/api/v1/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # citycorners-backend: REMOVED — migrated to local-first (mana-sync handles CRUD)
 
   # ============================================
   # Tier 4: Matrix Stack (Ports 4000-4099)

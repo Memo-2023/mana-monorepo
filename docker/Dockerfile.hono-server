@@ -1,0 +1,28 @@
+# Shared Dockerfile for all Hono + Bun compute servers
+# Usage: docker build --build-arg APP=chat -f docker/Dockerfile.hono-server .
+
+ARG APP
+
+FROM oven/bun:1 AS production
+
+WORKDIR /app
+
+# Copy shared packages first (for workspace resolution)
+COPY packages/shared-hono/package.json packages/shared-hono/
+COPY packages/shared-hono/src packages/shared-hono/src
+COPY packages/shared-storage/package.json packages/shared-storage/ 2>/dev/null || true
+COPY packages/shared-storage/src packages/shared-storage/src 2>/dev/null || true
+
+# Copy app server
+COPY apps/${APP}/apps/server/package.json apps/${APP}/apps/server/
+COPY apps/${APP}/apps/server/src apps/${APP}/apps/server/src
+COPY apps/${APP}/apps/server/tsconfig.json apps/${APP}/apps/server/
+
+WORKDIR /app/apps/${APP}/apps/server
+
+RUN bun install 2>/dev/null || true
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD bun -e "const p=process.env.PORT||3000;fetch('http://127.0.0.1:'+p+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["bun", "run", "src/index.ts"]
