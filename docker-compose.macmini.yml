@@ -242,62 +242,35 @@ services:
 
   mana-auth:
     build:
-      context: .
-      dockerfile: services/mana-core-auth/Dockerfile
-    image: mana-core-auth:local
-    container_name: mana-core-auth
+      context: services/mana-auth
+      dockerfile: Dockerfile
+    image: mana-auth:local
+    container_name: mana-auth
     restart: always
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     environment:
+      TZ: Europe/Berlin
       NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_auth
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
-      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-me}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-${JWT_SECRET:-your-jwt-secret-change-me}}
-      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
-      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
       BASE_URL: https://auth.mana.how
-      # Cross-domain SSO: share session cookies across all *.mana.how subdomains
       COOKIE_DOMAIN: .mana.how
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      MANA_CREDITS_URL: http://mana-credits:3002
+      MANA_CREDITS_URL: http://mana-credits:3061
+      MANA_SUBSCRIPTIONS_URL: http://mana-subscriptions:3063
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-${JWT_SECRET:-your-jwt-secret-change-me}}
       SMTP_HOST: smtp-relay.brevo.com
       SMTP_PORT: 587
       SMTP_USER: ${SMTP_USER:-94cde5002@smtp-brevo.com}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
-      SMTP_FROM: Mana <noreply@mana.how>
-      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://inventar.mana.how,https://link.mana.how,https://manadeck.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
-      DUCKDB_PATH: /data/analytics/metrics.duckdb
+      SMTP_PASS: ${SMTP_PASSWORD}
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET:-}
-      # Backend URLs for user data aggregation (GDPR self-service)
-      CHAT_BACKEND_URL: http://chat-backend:3030
-      TODO_BACKEND_URL: http://todo-backend:3031
-      CALENDAR_BACKEND_URL: http://calendar-backend:3032
-      CONTACTS_BACKEND_URL: http://contacts-backend:3033
-      PICTURE_BACKEND_URL: http://picture-backend:3035
-      # PRESI_BACKEND_URL: removed — replaced by Hono server
-      # ZITARE_BACKEND_URL: removed — migrated to local-first
-      # PHOTOS_BACKEND_URL: removed — migrated to local-first
-      # CLOCK_BACKEND_URL: removed — migrated to local-first
-      STORAGE_BACKEND_URL: http://storage-backend:3034
-      ADMIN_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      MANA_LLM_URL: http://mana-llm:3020
-      # WebAuthn / Passkeys
-      WEBAUTHN_RP_ID: mana.how
-      WEBAUTHN_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://manadeck.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
-    volumes:
-      - analytics_data:/data/analytics
+      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://inventar.mana.how,https://link.mana.how,https://manadeck.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
     ports:
       - "3001:3001"
     healthcheck:
-      test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://127.0.0.1:3001/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 120s
       timeout: 10s
       retries: 3

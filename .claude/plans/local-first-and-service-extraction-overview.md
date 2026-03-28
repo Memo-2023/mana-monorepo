@@ -53,74 +53,50 @@ Apps 9-17 und 19 haben die Datenschicht (IndexedDB), aber die Svelte-Stores lese
 
 **Ziel:** mana-core-auth aufteilen in fokussierte Microservices auf Hono + Bun.
 
-### Erledigt
+### Erledigt — KOMPLETT
 
-| Service          | Port | Was extrahiert                                 | LOC (neu) | LOC (entfernt aus Auth) |
-| ---------------- | ---- | ---------------------------------------------- | --------- | ----------------------- |
-| **mana-credits** | 3061 | Credits, Gifts, Guild Pools, Stripe Payments   | ~2.400    | ~4.200                  |
-| **mana-user**    | 3062 | Settings, Tags, Tag-Groups, Tag-Links, Storage | ~780      | ~2.800                  |
+| Service                | Port | Runtime  | LOC    | Was                                     |
+| ---------------------- | ---- | -------- | ------ | --------------------------------------- |
+| **mana-auth**          | 3001 | Hono+Bun | ~1.900 | Auth, JWT, SSO, OIDC, 2FA, Orgs, Guilds |
+| **mana-credits**       | 3061 | Hono+Bun | ~2.400 | Credits, Gifts, Guild Pools, Stripe     |
+| **mana-user**          | 3062 | Hono+Bun | ~780   | Settings, Tags, Tag-Groups, Storage     |
+| **mana-subscriptions** | 3063 | Hono+Bun | ~990   | Plans, Subscriptions, Invoices, Stripe  |
+| **mana-analytics**     | 3064 | Hono+Bun | ~550   | Feedback, Voting, AI Titles             |
 
-**Ergebnis:** mana-core-auth von ~20k auf ~13k LOC reduziert.
+**Gesamt: ~6.620 LOC** in 5 Hono/Bun Services ersetzt **~20.000 LOC** in 1 NestJS Service.
 
-**Was gemacht wurde:**
+**mana-core-auth (NestJS) wurde gelöscht.** mana-auth ist der Drop-in-Ersatz auf Port 3001.
 
-- Neuer Service mit Hono + Bun (kein NestJS)
-- Drizzle ORM Schemas adaptiert (keine FK zu Auth-Tabellen)
-- Zod statt class-validator für Validation
-- JWT-Validierung via JWKS von mana-core-auth
+### Was gemacht wurde:
+
+- 5 eigenständige Hono + Bun Services (kein NestJS mehr)
+- Better Auth nativ auf Hono (kein Express↔Fetch-Konvertierung)
+- Drizzle ORM Schemas adaptiert (keine FK zwischen Services)
+- Zod statt class-validator, jose für JWT
 - Service-to-Service Auth via X-Service-Key
-- CreditClientService URL auf `MANA_CREDITS_URL` umgestellt
-- mana-core-auth Registration Hooks auf HTTP-Calls umgestellt
-- Docker-Compose Einträge + Cloudflare Tunnel Labels
-- Alter Code komplett aus mana-core-auth entfernt
-
-### Noch zu extrahieren
-
-| Service                | Was                                  | LOC in Auth | Priorität |
-| ---------------------- | ------------------------------------ | ----------- | --------- |
-| **mana-subscriptions** | Subscriptions, Pläne, Stripe Billing | ~1.100      | Mittel    |
-| **mana-analytics**     | Feedback, Analytics (DuckDB), AI     | ~1.000      | Niedrig   |
-
-### Nach vollständiger Extraktion bleibt in mana-core-auth:
-
-- Better Auth (JWT, Sessions, 2FA, Passkeys, Magic Links)
-- OIDC Provider (Matrix/Synapse SSO)
-- Organizations (Better Auth Org Plugin)
-- Guilds (Org-Wrapper, ohne Pool — Pool ist in mana-credits)
-- API Keys
-- Security (Audit Logs, Lockout)
-- Me (GDPR Export/Delete)
-- Health, Metrics
+- Docker-Compose für alle Services
+- Alter NestJS-Code komplett gelöscht
 
 → Geschätzt ~8-10k LOC reines Auth → Dann Hono-Rewrite (Phase 5)
 
 ---
 
-## Teil 3: Hono-Rewrite von mana-core-auth (Phase 5)
+## Teil 3: Hono-Rewrite von mana-core-auth (Phase 5) — DONE
 
-**Noch nicht begonnen.** Geplante Schritte:
+**mana-auth (Hono + Bun) ersetzt mana-core-auth (NestJS).** Alter Code gelöscht.
 
-1. Hono App-Skeleton + Better Auth native Handler
-2. JWT Middleware + Auth-Guards als Hono Middleware
-3. Health + JWKS + Token-Validation Endpoints
-4. Auth-Endpoints (Register, Login, Refresh, SSO)
-5. Organizations/Guilds
-6. OIDC Provider + Matrix Session
-7. API Keys, Me (GDPR), Admin
-8. Tests + Umschalten
-
-**Voraussetzung:** Subscriptions + Analytics zuerst extrahieren.
+Fertige Endpoints: Better Auth nativ, Auth (Register/Login/Logout/Validate), Guilds, API Keys, Me (GDPR), Security (Lockout/Audit), OIDC Provider, Login Page.
 
 ---
 
-## Teil 4: Infrastruktur (Phase 5b)
+## Teil 4: Verbleibende Aufgaben
 
-- [ ] NestJS Dependencies aus dem Monorepo entfernen
+- [ ] NestJS Dependencies aus dem Monorepo entfernen (`@nestjs/*`)
 - [ ] `packages/shared-nestjs-auth` → `packages/shared-hono-auth`
 - [ ] `@mana-core/nestjs-integration` → `@mana-core/hono-integration`
-- [ ] Docker-Images auf Bun Base Image umstellen
+- [ ] Store-Migrationen vertiefen (11 Apps: Stores von API → IndexedDB)
+- [ ] mana-sync Go Server — Collections aller 19 Apps registrieren
 - [ ] CI/CD Pipeline anpassen (Go Build + Bun Build)
-- [ ] Monitoring: Prometheus Metrics für neue Services
 - [ ] Load Testing: Sync-Protokoll unter Last testen
 
 ---
@@ -147,8 +123,10 @@ ef19018e feat(services): create mana-user + remove from auth (-2,834 LOC)
 
 ## Nächste Schritte (Priorität)
 
-1. **mana-subscriptions extrahieren** — Stripe Billing raus aus Auth
-2. **mana-analytics extrahieren** — Feedback + DuckDB raus aus Auth
-3. **Auth Hono-Rewrite** — Better Auth mit nativem Hono-Adapter
-4. **Store-Migrationen vertiefen** — Apps 9-17, 19: Stores auf IndexedDB umschreiben
+1. ~~mana-subscriptions extrahieren~~ ✅
+2. ~~mana-analytics extrahieren~~ ✅
+3. ~~Auth Hono-Rewrite~~ ✅
+4. **Store-Migrationen vertiefen** — 11 Apps: Stores von API auf IndexedDB umschreiben
 5. **mana-sync Go Server** — Collections aller 19 Apps registrieren
+6. **NestJS Cleanup** — Dependencies + shared packages migrieren
+7. **App-Backend NestJS → Hono** — Chat, Picture, etc. Backends umschreiben

@@ -129,7 +129,7 @@ manacore-monorepo/
 ├── games/                   # Game projects
 │   └── {game-name}/         # Individual games
 ├── services/                # Standalone microservices
-│   ├── mana-core-auth/      # Central authentication service
+│   ├── mana-auth/           # Central authentication (Hono + Bun + Better Auth)
 │   ├── mana-credits/        # Credit system (Hono + Bun, extracted from auth)
 │   ├── mana-user/           # User settings, tags, storage (Hono + Bun, extracted from auth)
 │   ├── mana-subscriptions/  # Subscription billing (Hono + Bun, extracted from auth)
