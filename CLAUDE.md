@@ -133,6 +133,7 @@ manacore-monorepo/
 │   ├── mana-credits/        # Credit system (Hono + Bun, extracted from auth)
 │   ├── mana-user/           # User settings, tags, storage (Hono + Bun, extracted from auth)
 │   ├── mana-subscriptions/  # Subscription billing (Hono + Bun, extracted from auth)
+│   ├── mana-analytics/      # Feedback & analytics (Hono + Bun, extracted from auth)
 │   ├── mana-search-go/      # Central search & content extraction (Go)
 │   ├── mana-crawler-go/     # Web crawler service (Go)
 │   ├── mana-llm/            # Central LLM abstraction service

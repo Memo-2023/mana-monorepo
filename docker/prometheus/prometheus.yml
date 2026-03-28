@@ -102,14 +102,11 @@ scrape_configs:
     metrics_path: '/metrics'
     scrape_interval: 30s
 
-  # SkillTree Backend
-  - job_name: 'skilltree-backend'
-    static_configs:
-      - targets: ['skilltree-backend:3038']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+  # SkillTree Backend: REMOVED — migrated to local-first
 
   # Photos Backend: REMOVED — migrated to local-first + direct mana-media
+
+  # CityCorners Backend: REMOVED — migrated to local-first
 
   # Zitare Backend: REMOVED — migrated to local-first
 

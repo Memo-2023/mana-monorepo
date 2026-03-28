@@ -5,16 +5,11 @@ import { APP_FILTER } from '@nestjs/core';
 import { LlmModule } from '@manacore/shared-llm';
 import configuration from './config/configuration';
 import { AdminModule } from './admin/admin.module';
-import { AiModule } from './ai/ai.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { AuthModule } from './auth/auth.module';
-import { FeedbackModule } from './feedback/feedback.module';
 import { GuildsModule } from './guilds/guilds.module';
 import { HealthModule } from './health/health.module';
 import { MeModule } from './me/me.module';
-import { SubscriptionsModule } from './subscriptions/subscriptions.module';
-import { StripeModule } from './stripe/stripe.module';
-import { AnalyticsModule } from './analytics';
 import { MetricsModule } from './metrics';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggerModule } from './common/logger';
@@ -43,17 +38,12 @@ import { SecurityModule } from './security';
 		LoggerModule,
 		SecurityModule,
 		MetricsModule,
-		AnalyticsModule,
 		AdminModule,
-		AiModule,
 		ApiKeysModule,
 		AuthModule,
-		FeedbackModule,
 		GuildsModule,
 		HealthModule,
 		MeModule,
-		StripeModule,
-		SubscriptionsModule,
 	],
 	providers: [
 		{
