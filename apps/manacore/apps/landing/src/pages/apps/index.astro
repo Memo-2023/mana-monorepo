@@ -3,38 +3,53 @@ import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/navigation/Navbar.astro';
 import Footer from '../../components/navigation/Footer.astro';
 
-const apps = [
-  // AI-Powered
-  { name: 'ManaChat', emoji: '💬', tagline: 'KI Chat Assistent', url: 'https://chat.mana.how' },
-  { name: 'ManaPicture', emoji: '🎨', tagline: 'KI Bildgenerierung', url: 'https://picture.mana.how' },
-  { name: 'Presi', emoji: '📊', tagline: 'KI Präsentationen', url: 'https://presi.mana.how' },
-  { name: 'Questions', emoji: '🔍', tagline: 'KI Research Assistent', url: 'https://questions.mana.how' },
-  { name: 'Context', emoji: '📄', tagline: 'Dokument-Workspace', url: 'https://context.mana.how' },
-  { name: 'Playground', emoji: '🧪', tagline: 'LLM Playground', url: 'https://playground.mana.how' },
+type Item =
+  | { type: 'heading'; label: string }
+  | { type: 'app'; name: string; emoji: string; tagline: string; url: string };
 
-  // Productivity
-  { name: 'ManaTodo', emoji: '✅', tagline: 'Aufgabenverwaltung', url: 'https://todo.mana.how' },
-  { name: 'ManaCalendar', emoji: '📅', tagline: 'Kalenderverwaltung', url: 'https://calendar.mana.how' },
-  { name: 'ManaContacts', emoji: '👥', tagline: 'Kontaktverwaltung', url: 'https://contacts.mana.how' },
-  { name: 'ManaDeck', emoji: '🎴', tagline: 'KI Karteikarten', url: 'https://manadeck.mana.how' },
-  { name: 'ManaStorage', emoji: '☁️', tagline: 'Cloud-Speicher', url: 'https://storage.mana.how' },
-  { name: 'Inventar', emoji: '📦', tagline: 'Inventarverwaltung', url: 'https://inventar.mana.how' },
+const items: Item[] = [
+  // --- KI & Kreativ ---
+  { type: 'heading', label: 'KI & Kreativ' },
+  { type: 'app', name: 'ManaChat', emoji: '💬', tagline: 'KI Chat Assistent', url: 'https://chat.mana.how' },
+  { type: 'app', name: 'ManaPicture', emoji: '🎨', tagline: 'KI Bildgenerierung', url: 'https://picture.mana.how' },
+  { type: 'app', name: 'Presi', emoji: '📊', tagline: 'KI Präsentationen', url: 'https://presi.mana.how' },
+  { type: 'app', name: 'Questions', emoji: '🔍', tagline: 'KI Research', url: 'https://questions.mana.how' },
+  { type: 'app', name: 'Context', emoji: '📄', tagline: 'Dokument-Workspace', url: 'https://context.mana.how' },
+  { type: 'app', name: 'Playground', emoji: '🧪', tagline: 'LLM Playground', url: 'https://playground.mana.how' },
 
-  // Creative & Media
-  { name: 'Mukke', emoji: '🎵', tagline: 'Musikproduktion', url: 'https://mukke.mana.how' },
-  { name: 'Photos', emoji: '📸', tagline: 'Fotoverwaltung', url: 'https://photos.mana.how' },
+  // --- Organisieren ---
+  { type: 'heading', label: 'Organisieren' },
+  { type: 'app', name: 'ManaTodo', emoji: '✅', tagline: 'Aufgaben', url: 'https://todo.mana.how' },
+  { type: 'app', name: 'ManaCalendar', emoji: '📅', tagline: 'Kalender', url: 'https://calendar.mana.how' },
+  { type: 'app', name: 'ManaContacts', emoji: '👥', tagline: 'Kontakte', url: 'https://contacts.mana.how' },
+  { type: 'app', name: 'ManaStorage', emoji: '☁️', tagline: 'Cloud-Speicher', url: 'https://storage.mana.how' },
+  { type: 'app', name: 'Inventar', emoji: '📦', tagline: 'Inventar', url: 'https://inventar.mana.how' },
 
-  // Lifestyle & Utility
-  { name: 'ManaClock', emoji: '⏰', tagline: 'Uhren & Timer', url: 'https://clock.mana.how' },
-  { name: 'Zitare', emoji: '💡', tagline: 'Tägliche Inspiration', url: 'https://zitare.mana.how' },
-  { name: 'NutriPhi', emoji: '🥗', tagline: 'Ernährungs-Tracker', url: 'https://nutriphi.mana.how' },
-  { name: 'Planta', emoji: '🌱', tagline: 'Pflanzenpflege', url: 'https://planta.mana.how' },
-  { name: 'SkilltTree', emoji: '🌳', tagline: 'Skill-Tracking', url: 'https://skilltree.mana.how' },
-  { name: 'CityCorners', emoji: '🏙️', tagline: 'Stadtführer Konstanz', url: 'https://citycorners.mana.how' },
-  { name: 'Traces', emoji: '🗺️', tagline: 'Stadt-Erkundung', url: 'https://traces.mana.how' },
+  // --- Lernen ---
+  { type: 'heading', label: 'Lernen' },
+  { type: 'app', name: 'ManaDeck', emoji: '🎴', tagline: 'KI Karteikarten', url: 'https://manadeck.mana.how' },
+  { type: 'app', name: 'SkilltTree', emoji: '🌳', tagline: 'Skill-Tracking', url: 'https://skilltree.mana.how' },
+  { type: 'app', name: 'Zitare', emoji: '💡', tagline: 'Zitate & Inspiration', url: 'https://zitare.mana.how' },
 
-  // Communication
-  { name: 'Matrix', emoji: '💬', tagline: 'Matrix Chat Client', url: 'https://matrix.mana.how' },
+  // --- Medien ---
+  { type: 'heading', label: 'Medien' },
+  { type: 'app', name: 'Mukke', emoji: '🎵', tagline: 'Musikproduktion', url: 'https://mukke.mana.how' },
+  { type: 'app', name: 'Photos', emoji: '📸', tagline: 'Fotoverwaltung', url: 'https://photos.mana.how' },
+
+  // --- Alltag & Gesundheit ---
+  { type: 'heading', label: 'Alltag & Gesundheit' },
+  { type: 'app', name: 'ManaClock', emoji: '⏰', tagline: 'Uhren & Timer', url: 'https://clock.mana.how' },
+  { type: 'app', name: 'NutriPhi', emoji: '🥗', tagline: 'Ernährung', url: 'https://nutriphi.mana.how' },
+  { type: 'app', name: 'Planta', emoji: '🌱', tagline: 'Pflanzenpflege', url: 'https://planta.mana.how' },
+
+  // --- Unterwegs ---
+  { type: 'heading', label: 'Unterwegs' },
+  { type: 'app', name: 'CityCorners', emoji: '🏙️', tagline: 'Stadtführer Konstanz', url: 'https://citycorners.mana.how' },
+  { type: 'app', name: 'Traces', emoji: '🗺️', tagline: 'Stadt-Erkundung', url: 'https://traces.mana.how' },
+
+  // --- Kommunikation ---
+  { type: 'heading', label: 'Kommunikation' },
+  { type: 'app', name: 'Matrix', emoji: '💬', tagline: 'Matrix Chat', url: 'https://matrix.mana.how' },
 ];
 ---
 
@@ -43,18 +58,24 @@ const apps = [
     <Navbar />
 
     <div class="app-grid">
-      {apps.map((app) => (
-        <a
-          href={app.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="group flex flex-col items-center justify-center text-center border border-gray-200 dark:border-gray-700 p-5 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-        >
-          <div class="text-4xl mb-2">{app.emoji}</div>
-          <span class="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1">{app.name}</span>
-          <span class="text-xs text-gray-500 dark:text-gray-400">{app.tagline}</span>
-        </a>
-      ))}
+      {items.map((item) =>
+        item.type === 'heading' ? (
+          <div class="heading-tile flex items-center border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-6 py-5">
+            <span class="font-bold text-base text-gray-900 dark:text-gray-100 tracking-tight">{item.label}</span>
+          </div>
+        ) : (
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group flex flex-col items-center justify-center text-center border border-gray-200 dark:border-gray-700 p-5 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <div class="text-4xl mb-2">{item.emoji}</div>
+            <span class="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1">{item.name}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{item.tagline}</span>
+          </a>
+        )
+      )}
     </div>
 
     <Footer />
@@ -67,9 +88,16 @@ const apps = [
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .heading-tile {
+    grid-column: span 2;
+  }
+
   @media (min-width: 640px) {
     .app-grid {
       grid-template-columns: repeat(3, 1fr);
+    }
+    .heading-tile {
+      grid-column: span 3;
     }
   }
 
@@ -77,17 +105,26 @@ const apps = [
     .app-grid {
       grid-template-columns: repeat(4, 1fr);
     }
+    .heading-tile {
+      grid-column: span 3;
+    }
   }
 
   @media (min-width: 1024px) {
     .app-grid {
       grid-template-columns: repeat(5, 1fr);
     }
+    .heading-tile {
+      grid-column: span 3;
+    }
   }
 
   @media (min-width: 1280px) {
     .app-grid {
       grid-template-columns: repeat(6, 1fr);
+    }
+    .heading-tile {
+      grid-column: span 3;
     }
   }
 </style>
