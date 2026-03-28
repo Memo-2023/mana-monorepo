@@ -350,24 +350,176 @@ Jede migrierte App bietet jetzt:
 
 ---
 
-## 8. Fazit
+## 8. Package-Konsolidierung
+
+Nach der Service-Migration wurde das Package-Oekosystem aufgeraeumt.
+
+### 8.1 Vorher: 58 Packages (zu granular)
+
+Viele Packages waren in 2-4 Teile aufgesplittet (types, service, ui), die immer zusammen verwendet wurden:
+
+```
+shared-feedback-types + shared-feedback-service + shared-feedback-ui  → 3 Packages
+shared-help-types + shared-help-content + shared-help-ui + shared-help-mobile → 4 Packages
+shared-subscription-types + shared-subscription-ui                     → 2 Packages
+credit-operations + shared-credit-service + shared-credit-ui           → 3 Packages
+shared-gpu, nutriphi-database                                          → 2 unbenutzt
+```
+
+### 8.2 Nachher: 43 Packages (-26%)
+
+| Aktion | Alt (Anzahl) | Neu | Diff |
+|--------|-------------|-----|------|
+| Feedback 3→1 | shared-feedback-{types,service,ui} | `@manacore/feedback` | -2 |
+| Help 4→1 | shared-help-{types,content,ui,mobile} | `@manacore/help` | -3 |
+| Subscription 2→1 | shared-subscription-{types,ui} | `@manacore/subscriptions` | -1 |
+| Credits 3→1 | credit-operations, shared-credit-{service,ui} | `@manacore/credits` | -2 |
+| Unbenutzt geloescht | shared-gpu, nutriphi-database | — | -2 |
+| NestJS-spezifisch entfernt | shared-nestjs-{auth,health,metrics,setup}, mana-core-nestjs-integration | — | -5 |
+| **Gesamt** | **58** | **43** | **-15** |
+
+Die neuen Packages nutzen sub-path Exports:
+```typescript
+import { CreditOperationType, CREDIT_COSTS } from '@manacore/credits';
+import { CreditBalance } from '@manacore/credits/web';
+import { FeedbackPage } from '@manacore/feedback';
+import { HelpPage, getManaFAQs } from '@manacore/help';
+import { SubscriptionPage } from '@manacore/subscriptions';
+```
+
+---
+
+## 9. Auth Store Zentralisierung
+
+### 9.1 Problem: 21 identische Kopien
+
+Jede der 21 Web-Apps hatte eine eigene `auth.svelte.ts` mit ~350 Zeilen — fast identischer Code. Nur der `DEV_BACKEND_URL` Port unterschied sich pro App.
+
+### 9.2 Loesung: createManaAuthStore Factory
+
+Neue Factory in `@manacore/shared-auth-stores`:
+
+```typescript
+// Vorher: 350 Zeilen pro App
+import { browser } from '$app/environment';
+import { initializeWebAuth, type UserData, type AuthServiceInterface } from '@manacore/shared-auth';
+const DEV_BACKEND_URL = 'http://localhost:3007';
+// ... 340 Zeilen SSO, Passkeys, 2FA, Token, Reset, etc.
+
+// Nachher: 5 Zeilen pro App
+import { createManaAuthStore } from '@manacore/shared-auth-stores';
+export const authStore = createManaAuthStore({ devBackendPort: 3007 });
+```
+
+### 9.3 Ergebnis
+
+| Metrik | Vorher | Nachher | Reduktion |
+|--------|--------|---------|-----------|
+| **Gesamt LOC** | 6.800 | 182 | **-97%** |
+| **Pro App** | ~350 | ~10 | -97% |
+| **Aenderungsaufwand** | 21 Dateien | 1 Factory | -95% |
+
+Die Factory unterstuetzt alle Auth-Features: SSO, Passkeys, 2FA (TOTP + Backup Codes), Magic Links, Token-Management (auto-refresh), Password Reset, und optionale `onAuthenticated`/`onSignOut` Callbacks fuer app-spezifische Hooks.
+
+---
+
+## 10. mana-sync Haertung
+
+Der Go Sync-Server war die kritischste Komponente (19 Apps abhaengig) mit nur 426 Zeilen und null Tests.
+
+### 10.1 Security-Fixes
+
+| Problem | Fix |
+|---------|-----|
+| WebSocket JWT war komplett kaputt (`client.UserID = "pending-auth"`) | Echte JWT-Validierung via JWKS, 10s Auth-Deadline |
+| Kein Body Size Limit | 10 MB Maximum |
+| Op-Feld nicht validiert | Muss insert/update/delete sein |
+| Table/ID nicht validiert | Muessen non-empty sein |
+| RecordChange-Fehler still ignoriert | Bricht Sync ab bei Fehler |
+| JSON Unmarshal-Fehler ignoriert | Gibt Error zurueck |
+
+### 10.2 Tests (0 → 19)
+
+| Bereich | Tests |
+|---------|-------|
+| Auth | Token-Extraktion, Validator-Init, fehlende Auth |
+| Config | Defaults, Env-Override, invalider Port |
+| Sync | Op-Validierung, Changeset-Validierung, Response-Format, FieldChange Round-Trip |
+
+### 10.3 Dokumentation
+
+Neues `services/mana-sync/CLAUDE.md` mit: Architektur, Sync-Protokoll, LWW-Erklaerung, API-Endpoints, Config, Security-Notes.
+
+---
+
+## 11. Infrastruktur-Verbesserungen
+
+### 11.1 Port-Schema
+
+Alle ~60 Services haben jetzt ein dokumentiertes Port-Schema (`docs/PORT_SCHEMA.md`) mit klaren Bereichen:
+
+| Bereich | Zweck | Beispiele |
+|---------|-------|-----------|
+| 3000-3009 | Core Platform | auth (3001), credits (3002), subscriptions (3003) |
+| 3010-3019 | Core Infra | sync (3010), media (3011), search (3012) |
+| 3020-3029 | AI/ML | llm (3020), stt (3021), tts (3022) |
+| 3030-3059 | App Backends | chat (3030), todo (3031), calendar (3032) |
+| 4000-4099 | Matrix Stack | synapse (4000), bot (4001) |
+| 5000-5059 | Web Frontends | mana-web (5000), chat-web (5010) |
+
+**Alle Port-Konflikte geloest** (vorher: 3050 3x belegt, 3023 2x, 4000 2x, 5180 2x).
+
+### 11.2 Type-Safety
+
+Problem: TypeScript's `ReturnType<>` Inferenz zeigte nur ~27 von 37 Auth-Methoden. 5 Apps uebersprangen type-check.
+
+Loesung: Explizites `AuthServiceInterface` mit allen 37 Methoden. Alle 5 Apps haben jetzt type-check re-enabled.
+
+### 11.3 Expo SDK Alignment
+
+| Vorher | Nachher |
+|--------|---------|
+| 3 verschiedene SDKs (52, 54, 55) | **1 SDK (55)** |
+| React 18.3 / 19.1 Mix | **React 19.2** |
+| RN 0.76 / 0.81 / 0.83 Mix | **RN 0.83.2** |
+| expo-router 4.x / 6.x / 55.x Mix | **expo-router ~55.0.5** |
+
+Alle 7 Mobile-Apps (chat, context, manacore, manadeck, matrix, picture, traces) auf einheitlichem Expo SDK 55.
+
+---
+
+## 12. Fazit
 
 ### Was erreicht wurde
 
-1. **NestJS komplett eliminiert** — Kein einziger NestJS-Service mehr im Monorepo
+1. **NestJS komplett eliminiert** — Kein einziger NestJS-Service mehr
 2. **87% weniger Backend-Code** — Von ~62.500 auf ~8.300 LOC
-3. **80% weniger RAM-Verbrauch** — Von ~3.5GB auf ~700MB für alle Backends
-4. **98% schnellere Cold Starts** — Von 2-5s auf ~50ms
-5. **99% schnellere Daten-Zugriffe** — Von 200-500ms auf <1ms
-6. **19 Apps offline-fähig** — Voller CRUD ohne Internet
-7. **19 Apps mit Guest-Mode** — Sofortiger Zugang ohne Registrierung
-8. **5 unabhängig deploybare Auth-Services** statt 1 Monolith
-9. **Einheitlicher Tech-Stack** — Hono + Bun für alle TypeScript-Services
+3. **97% weniger Auth-Boilerplate** — 6.800 → 182 LOC (21 Apps zentralisiert)
+4. **26% weniger Packages** — 58 → 43 (konsolidiert + aufgeraeumt)
+5. **80% weniger RAM-Verbrauch** — Von ~3.5GB auf ~700MB
+6. **19 Apps offline-faehig** mit Guest-Mode
+7. **mana-sync gehaertet** — Security-Fixes, Tests, Dokumentation
+8. **Null Port-Konflikte** — Dokumentiertes Schema
+9. **Einheitliches Expo SDK 55** — Alle 7 Mobile-Apps aligned
+10. **Alle type-checks aktiv** — Keine App ueberspringt mehr
 
-### Was die Migration ermöglicht
+### Gesamte Code-Reduktion
 
-- **Günstigeres Hosting** — 8GB Server reicht jetzt statt 16GB
-- **Schnellere Deployments** — Bun braucht keinen Build-Step
+| Metrik | Wert |
+|--------|------|
+| **Backend-Code geloescht** | ~92.600 LOC |
+| **Auth-Store-Duplikation eliminiert** | ~6.800 LOC |
+| **Package-Overhead reduziert** | ~2.000 LOC |
+| **Backend-Code neu (Hono)** | ~12.200 LOC |
+| **Factory + Shared Code** | ~600 LOC |
+| **Netto-Reduktion** | **~88.600 LOC** |
+
+### Was die Migration ermoeglicht
+
+- **Guenstigeres Hosting** — 8GB Server reicht jetzt statt 16GB
+- **Schnellere Deployments** — Bun braucht keinen Build-Step, ~5s statt ~90s
 - **Einfacheres Debugging** — ~120 LOC pro Service statt ~3.000
 - **Bessere User Experience** — Instant Loading, Offline, Guest-Mode
-- **Skalierbarkeit** — Jeder Service unabhängig skalierbar
+- **Weniger Wartungsaufwand** — 1 Auth Factory statt 21 Kopien, 43 statt 58 Packages
+- **Konsistenter Tech-Stack** — Hono + Bun (TS), Go (Infra), Python (AI)
+- **Skalierbarkeit** — Jeder Service unabhängig deploy- und skalierbar
