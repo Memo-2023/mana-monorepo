@@ -21,12 +21,16 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
-COPY patches/ ./patches/
 COPY packages/shared-auth ./packages/shared-auth
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-branding ./packages/shared-branding
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-i18n ./packages/shared-i18n
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-icons ./packages/shared-icons
+COPY packages/eslint-config ./packages/eslint-config
 # --- END AUTO-GENERATED ---
 
 # Copy llm-playground service

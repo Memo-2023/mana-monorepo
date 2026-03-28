@@ -21,24 +21,40 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
-COPY patches/ ./patches/
 COPY packages/help ./packages/help
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/local-store ./packages/local-store
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-api-client ./packages/shared-api-client
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-auth ./packages/shared-auth
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-auth-stores ./packages/shared-auth-stores
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-branding ./packages/shared-branding
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-i18n ./packages/shared-i18n
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-icons ./packages/shared-icons
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-pwa ./packages/shared-pwa
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-tailwind ./packages/shared-tailwind
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-theme ./packages/shared-theme
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-ui ./packages/shared-ui
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-utils ./packages/shared-utils
+COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-vite-config ./packages/shared-vite-config
+COPY packages/eslint-config ./packages/eslint-config
 # --- END AUTO-GENERATED ---
 
 # Copy skilltree web
