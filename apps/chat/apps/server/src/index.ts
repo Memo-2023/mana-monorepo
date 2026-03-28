@@ -13,7 +13,6 @@ import { consumeCredits, validateCredits } from '@manacore/shared-hono/credits';
 
 const PORT = parseInt(process.env.PORT || '3002', 10);
 const LLM_URL = process.env.MANA_LLM_URL || 'http://localhost:3025';
-const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');
 
 const app = new Hono();
@@ -114,7 +113,9 @@ app.post('/api/v1/chat/completions/stream', async (c) => {
 			}
 
 			await stream.writeSSE({ data: '[DONE]' });
-			consumeCredits(userId, 'AI_CHAT', cost, `Chat stream: ${model || 'gemma3:4b'}`).catch(() => {});
+			consumeCredits(userId, 'AI_CHAT', cost, `Chat stream: ${model || 'gemma3:4b'}`).catch(
+				() => {}
+			);
 		} catch (_err) {
 			await stream.writeSSE({ data: JSON.stringify({ error: 'Stream failed' }) });
 		}

@@ -10,10 +10,6 @@ import { cors } from 'hono/cors';
 import { authMiddleware, healthRoute, errorHandler, notFoundHandler } from '@manacore/shared-hono';
 
 const PORT = parseInt(process.env.PORT || '3010', 10);
-const S3_ENDPOINT = process.env.S3_ENDPOINT || 'http://localhost:9000';
-const S3_BUCKET = process.env.S3_BUCKET || 'mukke-storage';
-const S3_ACCESS_KEY = process.env.S3_ACCESS_KEY || 'minioadmin';
-const S3_SECRET_KEY = process.env.S3_SECRET_KEY || 'minioadmin';
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5180').split(',');
 
 const app = new Hono();
@@ -37,7 +33,7 @@ app.post('/api/v1/songs/upload', async (c) => {
 
 	// Generate presigned upload URL
 	try {
-		const { createMukkeStorage, generateUserFileKey } = await import('@manacore/shared-storage');
+		const { createMukkeStorage } = await import('@manacore/shared-storage');
 		const storage = createMukkeStorage();
 		const uploadUrl = await storage.getUploadUrl(key, { expiresIn: 3600 });
 
