@@ -81,12 +81,12 @@ const sections: Section[] = [
   <div class="min-h-screen bg-white dark:bg-gray-900">
     <Navbar />
 
-    {sections.map((section) => (
-      <div>
-        <div class="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-6 py-3">
-          <span class="font-bold text-sm text-gray-900 dark:text-gray-100 tracking-tight">{section.label}</span>
-        </div>
-        <div class="app-grid">
+    <div class="columns-layout">
+      {sections.map((section) => (
+        <div class="column">
+          <div class="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-4 py-3">
+            <span class="font-bold text-sm text-gray-900 dark:text-gray-100 tracking-tight">{section.label}</span>
+          </div>
           {section.apps.map((app) => (
             <a
               href={app.url}
@@ -100,40 +100,34 @@ const sections: Section[] = [
             </a>
           ))}
         </div>
-      </div>
-    ))}
+      ))}
+    </div>
 
     <Footer />
   </div>
 </Layout>
 
 <style>
-  .app-grid {
+  .columns-layout {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
   }
 
   @media (min-width: 640px) {
-    .app-grid {
+    .columns-layout {
       grid-template-columns: repeat(3, 1fr);
     }
   }
 
   @media (min-width: 768px) {
-    .app-grid {
+    .columns-layout {
       grid-template-columns: repeat(4, 1fr);
     }
   }
 
   @media (min-width: 1024px) {
-    .app-grid {
-      grid-template-columns: repeat(5, 1fr);
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .app-grid {
-      grid-template-columns: repeat(6, 1fr);
+    .columns-layout {
+      grid-template-columns: repeat(7, 1fr);
     }
   }
 </style>
