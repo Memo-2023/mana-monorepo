@@ -1,9 +1,7 @@
 package config
 
 import (
-	"os"
-	"strconv"
-	"strings"
+	"github.com/manacore/shared-go/envutil"
 )
 
 type Config struct {
@@ -18,7 +16,7 @@ type Config struct {
 	RedisPassword string
 
 	// Auth
-	ServiceKey     string
+	ServiceKey      string
 	ManaCoreAuthURL string
 
 	// SMTP (Brevo)
@@ -45,54 +43,31 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		Port: getEnvInt("PORT", 3040),
+		Port: envutil.GetInt("PORT", 3040),
 
-		DatabaseURL: getEnv("DATABASE_URL", "postgresql://manacore:manacore@localhost:5432/mana_notify"),
+		DatabaseURL: envutil.Get("DATABASE_URL", "postgresql://manacore:manacore@localhost:5432/mana_notify"),
 
-		RedisHost:     getEnv("REDIS_HOST", "localhost"),
-		RedisPort:     getEnvInt("REDIS_PORT", 6379),
-		RedisPassword: getEnv("REDIS_PASSWORD", ""),
+		RedisHost:     envutil.Get("REDIS_HOST", "localhost"),
+		RedisPort:     envutil.GetInt("REDIS_PORT", 6379),
+		RedisPassword: envutil.Get("REDIS_PASSWORD", ""),
 
-		ServiceKey:      getEnv("SERVICE_KEY", "dev-service-key"),
-		ManaCoreAuthURL: getEnv("MANA_CORE_AUTH_URL", "http://localhost:3001"),
+		ServiceKey:      envutil.Get("SERVICE_KEY", "dev-service-key"),
+		ManaCoreAuthURL: envutil.Get("MANA_CORE_AUTH_URL", "http://localhost:3001"),
 
-		SMTPHost:     getEnv("SMTP_HOST", "smtp-relay.brevo.com"),
-		SMTPPort:     getEnvInt("SMTP_PORT", 587),
-		SMTPUser:     getEnv("SMTP_USER", ""),
-		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
-		SMTPFrom:     getEnv("SMTP_FROM", "ManaCore <noreply@mana.how>"),
+		SMTPHost:     envutil.Get("SMTP_HOST", "smtp-relay.brevo.com"),
+		SMTPPort:     envutil.GetInt("SMTP_PORT", 587),
+		SMTPUser:     envutil.Get("SMTP_USER", ""),
+		SMTPPassword: envutil.Get("SMTP_PASSWORD", ""),
+		SMTPFrom:     envutil.Get("SMTP_FROM", "ManaCore <noreply@mana.how>"),
 
-		ExpoAccessToken: getEnv("EXPO_ACCESS_TOKEN", ""),
+		ExpoAccessToken: envutil.Get("EXPO_ACCESS_TOKEN", ""),
 
-		MatrixHomeserverURL: getEnv("MATRIX_HOMESERVER_URL", ""),
-		MatrixAccessToken:   getEnv("MATRIX_ACCESS_TOKEN", ""),
+		MatrixHomeserverURL: envutil.Get("MATRIX_HOMESERVER_URL", ""),
+		MatrixAccessToken:   envutil.Get("MATRIX_ACCESS_TOKEN", ""),
 
-		RateLimitEmailPerMinute: getEnvInt("RATE_LIMIT_EMAIL_PER_MINUTE", 10),
-		RateLimitPushPerMinute:  getEnvInt("RATE_LIMIT_PUSH_PER_MINUTE", 100),
+		RateLimitEmailPerMinute: envutil.GetInt("RATE_LIMIT_EMAIL_PER_MINUTE", 10),
+		RateLimitPushPerMinute:  envutil.GetInt("RATE_LIMIT_PUSH_PER_MINUTE", 100),
 
-		CORSOrigins: getEnvSlice("CORS_ORIGINS", []string{"http://localhost:3000", "http://localhost:5173"}),
+		CORSOrigins: envutil.GetSlice("CORS_ORIGINS", []string{"http://localhost:3000", "http://localhost:5173"}),
 	}
-}
-
-func getEnv(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
-}
-
-func getEnvInt(key string, fallback int) int {
-	if v := os.Getenv(key); v != "" {
-		if i, err := strconv.Atoi(v); err == nil {
-			return i
-		}
-	}
-	return fallback
-}
-
-func getEnvSlice(key string, fallback []string) []string {
-	if v := os.Getenv(key); v != "" {
-		return strings.Split(v, ",")
-	}
-	return fallback
 }

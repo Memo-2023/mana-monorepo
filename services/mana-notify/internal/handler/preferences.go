@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/manacore/shared-go/httputil"
+
 	"github.com/manacore/mana-notify/internal/auth"
 	"github.com/manacore/mana-notify/internal/db"
 )
@@ -20,7 +22,7 @@ func NewPreferencesHandler(database *db.DB) *PreferencesHandler {
 func (h *PreferencesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+		httputil.WriteError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
@@ -33,7 +35,7 @@ func (h *PreferencesHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		// Return defaults
-		writeJSON(w, http.StatusOK, map[string]any{
+		httputil.WriteJSON(w, http.StatusOK, map[string]any{
 			"preferences": map[string]any{
 				"emailEnabled":      false,
 				"pushEnabled":       true,
@@ -44,14 +46,14 @@ func (h *PreferencesHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"preferences": p})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"preferences": p})
 }
 
 // Update handles PUT /api/v1/preferences
 func (h *PreferencesHandler) Update(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+		httputil.WriteError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
@@ -65,7 +67,7 @@ func (h *PreferencesHandler) Update(w http.ResponseWriter, r *http.Request) {
 		CategoryPreferences map[string]any `json:"categoryPreferences,omitempty"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -87,9 +89,9 @@ func (h *PreferencesHandler) Update(w http.ResponseWriter, r *http.Request) {
 		req.QuietHoursStart, req.QuietHoursEnd, req.Timezone, catJSON,
 	)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to update preferences")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to update preferences")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"updated": true})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"updated": true})
 }

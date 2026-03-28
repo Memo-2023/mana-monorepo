@@ -2,6 +2,8 @@ package handler
 
 import (
 	"net/http"
+
+	"github.com/manacore/shared-go/httputil"
 	"time"
 
 	"github.com/manacore/mana-search/internal/cache"
@@ -34,7 +36,7 @@ func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
 		overall = "degraded"
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"status":  overall,
 		"service": "mana-search",
 		"version": "1.0.0",

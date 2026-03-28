@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+
+	"github.com/manacore/shared-go/httputil"
 	"time"
 
 	"github.com/manacore/mana-notify/internal/db"
@@ -77,12 +79,12 @@ type BatchRequest struct {
 func (h *NotificationsHandler) Send(w http.ResponseWriter, r *http.Request) {
 	var req SendRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	if err := validateSendRequest(&req); err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		httputil.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -93,7 +95,7 @@ func (h *NotificationsHandler) Send(w http.ResponseWriter, r *http.Request) {
 			`SELECT id FROM notify.notifications WHERE external_id = $1`, req.ExternalID,
 		).Scan(&existingID)
 		if err == nil {
-			writeJSON(w, http.StatusOK, map[string]any{
+			httputil.WriteJSON(w, http.StatusOK, map[string]any{
 				"notification": map[string]any{"id": existingID, "status": "existing"},
 				"deduplicated": true,
 			})
@@ -105,7 +107,7 @@ func (h *NotificationsHandler) Send(w http.ResponseWriter, r *http.Request) {
 	if req.UserID != "" {
 		blocked, reason := h.checkPreferences(r.Context(), req.UserID, req.Channel)
 		if blocked {
-			writeJSON(w, http.StatusOK, map[string]any{
+			httputil.WriteJSON(w, http.StatusOK, map[string]any{
 				"notification": map[string]any{"status": "cancelled", "reason": reason},
 			})
 			return
@@ -146,7 +148,7 @@ func (h *NotificationsHandler) Send(w http.ResponseWriter, r *http.Request) {
 	).Scan(&notificationID)
 	if err != nil {
 		slog.Error("create notification failed", "error", err)
-		writeError(w, http.StatusInternalServerError, "failed to create notification")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to create notification")
 		return
 	}
 
@@ -185,7 +187,7 @@ func (h *NotificationsHandler) Send(w http.ResponseWriter, r *http.Request) {
 
 	h.pool.Enqueue(job)
 
-	writeJSON(w, http.StatusAccepted, map[string]any{
+	httputil.WriteJSON(w, http.StatusAccepted, map[string]any{
 		"notification": map[string]any{
 			"id":     notificationID,
 			"status": "pending",
@@ -197,22 +199,22 @@ func (h *NotificationsHandler) Send(w http.ResponseWriter, r *http.Request) {
 func (h *NotificationsHandler) Schedule(w http.ResponseWriter, r *http.Request) {
 	var req ScheduleRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	scheduledFor, err := time.Parse(time.RFC3339, req.ScheduledFor)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "scheduledFor must be a valid RFC3339 timestamp")
+		httputil.WriteError(w, http.StatusBadRequest, "scheduledFor must be a valid RFC3339 timestamp")
 		return
 	}
 	if scheduledFor.Before(time.Now()) {
-		writeError(w, http.StatusBadRequest, "scheduledFor must be in the future")
+		httputil.WriteError(w, http.StatusBadRequest, "scheduledFor must be in the future")
 		return
 	}
 
 	if err := validateSendRequest(&req.SendRequest); err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		httputil.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -246,7 +248,7 @@ func (h *NotificationsHandler) Schedule(w http.ResponseWriter, r *http.Request) 
 		priority, nilIfEmpty(req.Recipient), nilIfEmpty(req.ExternalID), scheduledFor,
 	).Scan(&notificationID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to create notification")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to create notification")
 		return
 	}
 
@@ -262,7 +264,7 @@ func (h *NotificationsHandler) Schedule(w http.ResponseWriter, r *http.Request) 
 	}
 	h.pool.Enqueue(job)
 
-	writeJSON(w, http.StatusAccepted, map[string]any{
+	httputil.WriteJSON(w, http.StatusAccepted, map[string]any{
 		"notification": map[string]any{
 			"id":           notificationID,
 			"status":       "pending",
@@ -275,16 +277,16 @@ func (h *NotificationsHandler) Schedule(w http.ResponseWriter, r *http.Request) 
 func (h *NotificationsHandler) Batch(w http.ResponseWriter, r *http.Request) {
 	var req BatchRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 5<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	if len(req.Notifications) == 0 {
-		writeError(w, http.StatusBadRequest, "notifications array is required")
+		httputil.WriteError(w, http.StatusBadRequest, "notifications array is required")
 		return
 	}
 	if len(req.Notifications) > 100 {
-		writeError(w, http.StatusBadRequest, "maximum 100 notifications per batch")
+		httputil.WriteError(w, http.StatusBadRequest, "maximum 100 notifications per batch")
 		return
 	}
 
@@ -352,7 +354,7 @@ func (h *NotificationsHandler) Batch(w http.ResponseWriter, r *http.Request) {
 		succeeded++
 	}
 
-	writeJSON(w, http.StatusAccepted, map[string]any{
+	httputil.WriteJSON(w, http.StatusAccepted, map[string]any{
 		"results":   results,
 		"succeeded": succeeded,
 		"failed":    failed,
@@ -363,7 +365,7 @@ func (h *NotificationsHandler) Batch(w http.ResponseWriter, r *http.Request) {
 func (h *NotificationsHandler) GetNotification(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "notification id required")
+		httputil.WriteError(w, http.StatusBadRequest, "notification id required")
 		return
 	}
 
@@ -376,33 +378,33 @@ func (h *NotificationsHandler) GetNotification(w http.ResponseWriter, r *http.Re
 		&n.Attempts, &n.DeliveredAt, &n.ErrorMessage, &n.CreatedAt, &n.UpdatedAt)
 
 	if err != nil {
-		writeError(w, http.StatusNotFound, "notification not found")
+		httputil.WriteError(w, http.StatusNotFound, "notification not found")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"notification": n})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"notification": n})
 }
 
 // CancelNotification handles DELETE /api/v1/notifications/{id}
 func (h *NotificationsHandler) CancelNotification(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "notification id required")
+		httputil.WriteError(w, http.StatusBadRequest, "notification id required")
 		return
 	}
 
 	result, err := h.db.Pool.Exec(r.Context(),
 		`UPDATE notify.notifications SET status = 'cancelled', updated_at = NOW() WHERE id = $1 AND status = 'pending'`, id)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to cancel notification")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to cancel notification")
 		return
 	}
 	if result.RowsAffected() == 0 {
-		writeError(w, http.StatusNotFound, "notification not found or already processed")
+		httputil.WriteError(w, http.StatusNotFound, "notification not found or already processed")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"cancelled": true})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"cancelled": true})
 }
 
 func (h *NotificationsHandler) checkPreferences(ctx context.Context, userID, ch string) (bool, string) {

@@ -3,6 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/manacore/shared-go/httputil"
 	"net/url"
 	"time"
 
@@ -34,27 +36,27 @@ func (h *ExtractHandler) Extract(w http.ResponseWriter, r *http.Request) {
 
 	var req extract.ExtractRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	if req.URL == "" {
-		writeError(w, http.StatusBadRequest, "url is required")
+		httputil.WriteError(w, http.StatusBadRequest, "url is required")
 		return
 	}
 	if _, err := url.ParseRequestURI(req.URL); err != nil {
-		writeError(w, http.StatusBadRequest, "url must be a valid URL")
+		httputil.WriteError(w, http.StatusBadRequest, "url must be a valid URL")
 		return
 	}
 
 	// Validate options
 	if req.Options != nil {
 		if req.Options.MaxLength > 0 && (req.Options.MaxLength < 100 || req.Options.MaxLength > 100000) {
-			writeError(w, http.StatusBadRequest, "maxLength must be between 100 and 100000")
+			httputil.WriteError(w, http.StatusBadRequest, "maxLength must be between 100 and 100000")
 			return
 		}
 		if req.Options.Timeout > 0 && (req.Options.Timeout < 1000 || req.Options.Timeout > 30000) {
-			writeError(w, http.StatusBadRequest, "timeout must be between 1000 and 30000")
+			httputil.WriteError(w, http.StatusBadRequest, "timeout must be between 1000 and 30000")
 			return
 		}
 	}
@@ -68,7 +70,7 @@ func (h *ExtractHandler) Extract(w http.ResponseWriter, r *http.Request) {
 			cached.Meta.Cached = true
 			duration := time.Since(start).Seconds()
 			h.metrics.RecordRequest("extract", "200", duration)
-			writeJSON(w, http.StatusOK, cached)
+			httputil.WriteJSON(w, http.StatusOK, cached)
 			return
 		}
 	}
@@ -89,7 +91,7 @@ func (h *ExtractHandler) Extract(w http.ResponseWriter, r *http.Request) {
 	duration := time.Since(start).Seconds()
 	h.metrics.RecordRequest("extract", status, duration)
 
-	writeJSON(w, http.StatusOK, resp)
+	httputil.WriteJSON(w, http.StatusOK, resp)
 }
 
 // BulkExtract handles POST /api/v1/extract/bulk
@@ -98,22 +100,22 @@ func (h *ExtractHandler) BulkExtract(w http.ResponseWriter, r *http.Request) {
 
 	var req extract.BulkExtractRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	if len(req.URLs) == 0 {
-		writeError(w, http.StatusBadRequest, "urls is required")
+		httputil.WriteError(w, http.StatusBadRequest, "urls is required")
 		return
 	}
 	if len(req.URLs) > 20 {
-		writeError(w, http.StatusBadRequest, "maximum 20 URLs allowed")
+		httputil.WriteError(w, http.StatusBadRequest, "maximum 20 URLs allowed")
 		return
 	}
 
 	for _, u := range req.URLs {
 		if _, err := url.ParseRequestURI(u); err != nil {
-			writeError(w, http.StatusBadRequest, "invalid URL: "+u)
+			httputil.WriteError(w, http.StatusBadRequest, "invalid URL: "+u)
 			return
 		}
 	}
@@ -123,5 +125,5 @@ func (h *ExtractHandler) BulkExtract(w http.ResponseWriter, r *http.Request) {
 	duration := time.Since(start).Seconds()
 	h.metrics.RecordRequest("extract_bulk", "200", duration)
 
-	writeJSON(w, http.StatusOK, resp)
+	httputil.WriteJSON(w, http.StatusOK, resp)
 }

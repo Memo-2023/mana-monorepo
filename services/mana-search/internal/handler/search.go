@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	"github.com/manacore/shared-go/httputil"
 	"sort"
 	"time"
 
@@ -37,23 +39,23 @@ func (h *SearchHandler) Search(w http.ResponseWriter, r *http.Request) {
 
 	var req search.SearchRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	if req.Query == "" {
-		writeError(w, http.StatusBadRequest, "query is required")
+		httputil.WriteError(w, http.StatusBadRequest, "query is required")
 		return
 	}
 
 	// Validate options
 	if req.Options != nil {
 		if req.Options.Limit < 0 || req.Options.Limit > 50 {
-			writeError(w, http.StatusBadRequest, "limit must be between 1 and 50")
+			httputil.WriteError(w, http.StatusBadRequest, "limit must be between 1 and 50")
 			return
 		}
 		if req.Options.SafeSearch < 0 || req.Options.SafeSearch > 2 {
-			writeError(w, http.StatusBadRequest, "safeSearch must be 0, 1, or 2")
+			httputil.WriteError(w, http.StatusBadRequest, "safeSearch must be 0, 1, or 2")
 			return
 		}
 	}
@@ -69,7 +71,7 @@ func (h *SearchHandler) Search(w http.ResponseWriter, r *http.Request) {
 				cached.Meta.CacheKey = cacheKey
 				duration := time.Since(start).Seconds()
 				h.metrics.RecordRequest("search", "200", duration)
-				writeJSON(w, http.StatusOK, cached)
+				httputil.WriteJSON(w, http.StatusOK, cached)
 				return
 			}
 		}
@@ -81,7 +83,7 @@ func (h *SearchHandler) Search(w http.ResponseWriter, r *http.Request) {
 		slog.Error("search failed", "error", err, "query", req.Query)
 		duration := time.Since(start).Seconds()
 		h.metrics.RecordRequest("search", "502", duration)
-		writeError(w, http.StatusBadGateway, err.Error())
+		httputil.WriteError(w, http.StatusBadGateway, err.Error())
 		return
 	}
 
@@ -119,13 +121,13 @@ func (h *SearchHandler) Search(w http.ResponseWriter, r *http.Request) {
 
 	duration := time.Since(start).Seconds()
 	h.metrics.RecordRequest("search", "200", duration)
-	writeJSON(w, http.StatusOK, resp)
+	httputil.WriteJSON(w, http.StatusOK, resp)
 }
 
 // Engines handles GET /api/v1/search/engines
 func (h *SearchHandler) Engines(w http.ResponseWriter, r *http.Request) {
 	engines := h.provider.GetEngines(r.Context())
-	writeJSON(w, http.StatusOK, map[string]any{"engines": engines})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"engines": engines})
 }
 
 // Health handles GET /api/v1/search/health
@@ -134,7 +136,7 @@ func (h *SearchHandler) Health(w http.ResponseWriter, r *http.Request) {
 	redisHealth := h.cache.HealthCheck(r.Context())
 	cacheStats := h.cache.Stats()
 
-	writeJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"searxng": map[string]any{
 			"status":  sxStatus,
 			"latency": sxLatency,
@@ -148,10 +150,10 @@ func (h *SearchHandler) Health(w http.ResponseWriter, r *http.Request) {
 func (h *SearchHandler) ClearCache(w http.ResponseWriter, r *http.Request) {
 	deleted, err := h.cache.Clear(r.Context())
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to clear cache")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to clear cache")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
 		"cleared":     true,
 		"keysRemoved": deleted,
 	})

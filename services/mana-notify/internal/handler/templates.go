@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/manacore/shared-go/httputil"
+
 	"github.com/manacore/mana-notify/internal/db"
 	tmpl "github.com/manacore/mana-notify/internal/template"
 )
@@ -23,7 +25,7 @@ func (h *TemplatesHandler) List(w http.ResponseWriter, r *http.Request) {
 		`SELECT id, slug, app_id, channel, subject, body_template, locale, is_active, is_system, variables, created_at, updated_at
 		 FROM notify.templates ORDER BY slug`)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to list templates")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to list templates")
 		return
 	}
 	defer rows.Close()
@@ -38,7 +40,7 @@ func (h *TemplatesHandler) List(w http.ResponseWriter, r *http.Request) {
 		templates = append(templates, t)
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"templates": templates})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"templates": templates})
 }
 
 // Get handles GET /api/v1/templates/{slug}
@@ -56,11 +58,11 @@ func (h *TemplatesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	).Scan(&t.ID, &t.Slug, &t.AppID, &t.Channel, &t.Subject, &t.BodyTemplate,
 		&t.Locale, &t.IsActive, &t.IsSystem, &t.Variables, &t.CreatedAt, &t.UpdatedAt)
 	if err != nil {
-		writeError(w, http.StatusNotFound, "template not found")
+		httputil.WriteError(w, http.StatusNotFound, "template not found")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"template": t})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"template": t})
 }
 
 // Create handles POST /api/v1/templates
@@ -75,12 +77,12 @@ func (h *TemplatesHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Variables    any    `json:"variables,omitempty"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	if req.Slug == "" || req.Channel == "" || req.BodyTemplate == "" {
-		writeError(w, http.StatusBadRequest, "slug, channel, and bodyTemplate are required")
+		httputil.WriteError(w, http.StatusBadRequest, "slug, channel, and bodyTemplate are required")
 		return
 	}
 	if req.Locale == "" {
@@ -96,11 +98,11 @@ func (h *TemplatesHandler) Create(w http.ResponseWriter, r *http.Request) {
 		req.Slug, nilIfEmpty(req.AppID), req.Channel, nilIfEmpty(req.Subject), req.BodyTemplate, req.Locale, varsJSON,
 	).Scan(&id)
 	if err != nil {
-		writeError(w, http.StatusConflict, "template already exists for this slug+locale")
+		httputil.WriteError(w, http.StatusConflict, "template already exists for this slug+locale")
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, map[string]any{"id": id})
+	httputil.WriteJSON(w, http.StatusCreated, map[string]any{"id": id})
 }
 
 // Update handles PUT /api/v1/templates/{slug}
@@ -118,7 +120,7 @@ func (h *TemplatesHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Variables    any    `json:"variables,omitempty"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -132,15 +134,15 @@ func (h *TemplatesHandler) Update(w http.ResponseWriter, r *http.Request) {
 		nilIfEmpty(req.Subject), nilIfEmpty(req.BodyTemplate), req.IsActive, slug, locale,
 	)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to update template")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to update template")
 		return
 	}
 	if result.RowsAffected() == 0 {
-		writeError(w, http.StatusNotFound, "template not found or is a system template")
+		httputil.WriteError(w, http.StatusNotFound, "template not found or is a system template")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"updated": true})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"updated": true})
 }
 
 // Delete handles DELETE /api/v1/templates/{slug}
@@ -150,15 +152,15 @@ func (h *TemplatesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	result, err := h.db.Pool.Exec(r.Context(),
 		`DELETE FROM notify.templates WHERE slug = $1 AND is_system = false`, slug)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to delete template")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to delete template")
 		return
 	}
 	if result.RowsAffected() == 0 {
-		writeError(w, http.StatusNotFound, "template not found or is a system template")
+		httputil.WriteError(w, http.StatusNotFound, "template not found or is a system template")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"deleted": true})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"deleted": true})
 }
 
 // Preview handles POST /api/v1/templates/{slug}/preview
@@ -168,17 +170,17 @@ func (h *TemplatesHandler) Preview(w http.ResponseWriter, r *http.Request) {
 		Data map[string]any `json:"data"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	rendered, err := h.engine.RenderBySlug(r.Context(), slug, req.Data, "")
 	if err != nil {
-		writeError(w, http.StatusNotFound, "template not found")
+		httputil.WriteError(w, http.StatusNotFound, "template not found")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"subject": rendered.Subject, "body": rendered.Body})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"subject": rendered.Subject, "body": rendered.Body})
 }
 
 // PreviewCustom handles POST /api/v1/templates/preview
@@ -189,7 +191,7 @@ func (h *TemplatesHandler) PreviewCustom(w http.ResponseWriter, r *http.Request)
 		Data         map[string]any `json:"data"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -197,7 +199,7 @@ func (h *TemplatesHandler) PreviewCustom(w http.ResponseWriter, r *http.Request)
 	if req.Subject != "" {
 		s, err := tmpl.RenderDirect(req.Subject, req.Data)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, "invalid subject template: "+err.Error())
+			httputil.WriteError(w, http.StatusBadRequest, "invalid subject template: "+err.Error())
 			return
 		}
 		subject = s
@@ -205,9 +207,9 @@ func (h *TemplatesHandler) PreviewCustom(w http.ResponseWriter, r *http.Request)
 
 	body, err := tmpl.RenderDirect(req.BodyTemplate, req.Data)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalid body template: "+err.Error())
+		httputil.WriteError(w, http.StatusBadRequest, "invalid body template: "+err.Error())
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"subject": subject, "body": body})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"subject": subject, "body": body})
 }

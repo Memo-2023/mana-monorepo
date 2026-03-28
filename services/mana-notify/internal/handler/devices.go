@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/manacore/shared-go/httputil"
+
 	"github.com/manacore/mana-notify/internal/auth"
 	"github.com/manacore/mana-notify/internal/db"
 )
@@ -20,7 +22,7 @@ func NewDevicesHandler(database *db.DB) *DevicesHandler {
 func (h *DevicesHandler) Register(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+		httputil.WriteError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
@@ -32,12 +34,12 @@ func (h *DevicesHandler) Register(w http.ResponseWriter, r *http.Request) {
 		AppID      string `json:"appId,omitempty"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		httputil.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	if req.PushToken == "" {
-		writeError(w, http.StatusBadRequest, "pushToken is required")
+		httputil.WriteError(w, http.StatusBadRequest, "pushToken is required")
 		return
 	}
 
@@ -60,18 +62,18 @@ func (h *DevicesHandler) Register(w http.ResponseWriter, r *http.Request) {
 		user.UserID, req.PushToken, tokenType, nilIfEmpty(req.Platform), nilIfEmpty(req.DeviceName), nilIfEmpty(req.AppID),
 	).Scan(&id)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to register device")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to register device")
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, map[string]any{"device": map[string]any{"id": id}})
+	httputil.WriteJSON(w, http.StatusCreated, map[string]any{"device": map[string]any{"id": id}})
 }
 
 // List handles GET /api/v1/devices
 func (h *DevicesHandler) List(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+		httputil.WriteError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
@@ -79,7 +81,7 @@ func (h *DevicesHandler) List(w http.ResponseWriter, r *http.Request) {
 		`SELECT id, user_id, push_token, token_type, platform, device_name, app_id, is_active, last_seen_at, created_at, updated_at
 		 FROM notify.devices WHERE user_id = $1 AND is_active = true ORDER BY created_at DESC`, user.UserID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to list devices")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to list devices")
 		return
 	}
 	defer rows.Close()
@@ -94,14 +96,14 @@ func (h *DevicesHandler) List(w http.ResponseWriter, r *http.Request) {
 		devices = append(devices, d)
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"devices": devices})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"devices": devices})
 }
 
 // Delete handles DELETE /api/v1/devices/{id}
 func (h *DevicesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	user := auth.GetUser(r)
 	if user == nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+		httputil.WriteError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
@@ -109,13 +111,13 @@ func (h *DevicesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	result, err := h.db.Pool.Exec(r.Context(),
 		`UPDATE notify.devices SET is_active = false, updated_at = NOW() WHERE id = $1 AND user_id = $2`, id, user.UserID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to delete device")
+		httputil.WriteError(w, http.StatusInternalServerError, "failed to delete device")
 		return
 	}
 	if result.RowsAffected() == 0 {
-		writeError(w, http.StatusNotFound, "device not found")
+		httputil.WriteError(w, http.StatusNotFound, "device not found")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"deleted": true})
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{"deleted": true})
 }
