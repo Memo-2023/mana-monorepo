@@ -1,0 +1,91 @@
+# Smoke Tests: Verify all production services are healthy
+# Runs on schedule (every 6h) and manual trigger
+
+name: Smoke Tests
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  go-services:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Go services
+        run: |
+          FAILED=0
+          for svc in \
+            "mana-search:3012" \
+            "mana-notify:3013" \
+            "mana-crawler:3014" \
+            "mana-api-gateway:3016" \
+            "mana-sync:3051" \
+            "mana-matrix-bot:4000" \
+            "forgejo:3041"
+          do
+            NAME=$(echo $svc | cut -d: -f1)
+            PORT=$(echo $svc | cut -d: -f2)
+            if [ "$NAME" = "forgejo" ]; then
+              URL="http://mana-core-forgejo:$PORT/api/v1/version"
+            elif [ "$NAME" = "mana-matrix-bot" ]; then
+              URL="http://mana-matrix-bot:$PORT/health"
+            else
+              URL="http://$(echo $NAME | sed 's/mana-/mana-core-/;s/core-api/api/;s/core-crawler/crawler/;s/core-matrix/matrix/'):$PORT/health"
+            fi
+            echo -n "$NAME... "
+            STATUS=$(wget -qO- --timeout=5 "$URL" 2>/dev/null | grep -o '"status":"[a-z]*"' | head -1 || echo "UNREACHABLE")
+            if echo "$STATUS" | grep -qE 'ok|healthy'; then
+              echo "OK"
+            else
+              echo "FAILED ($STATUS)"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+          if [ $FAILED -gt 0 ]; then
+            echo "$FAILED service(s) failed health check"
+            exit 1
+          fi
+          echo "All services healthy"
+
+  web-apps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check web app health endpoints
+        run: |
+          FAILED=0
+          for app in \
+            "mana.how:5000" \
+            "chat:5010" \
+            "todo:5011" \
+            "calendar:5012" \
+            "clock:5013" \
+            "contacts:5014" \
+            "storage:5015" \
+            "presi:5016" \
+            "nutriphi:5017" \
+            "zitare:5018" \
+            "photos:5019" \
+            "skilltree:5020" \
+            "picture:5021" \
+            "citycorners:5022" \
+            "mukke:5180"
+          do
+            NAME=$(echo $app | cut -d: -f1)
+            PORT=$(echo $app | cut -d: -f2)
+            CONTAINER="mana-app-$(echo $NAME | sed 's/\.mana\.how//')-web"
+            [ "$NAME" = "mana.how" ] && CONTAINER="mana-app-web"
+            echo -n "$NAME... "
+            CODE=$(wget -qO /dev/null --timeout=5 -S "http://$CONTAINER:$PORT/" 2>&1 | grep "HTTP/" | tail -1 | awk '{print $2}' || echo "000")
+            if [ "$CODE" = "200" ] || [ "$CODE" = "302" ]; then
+              echo "OK ($CODE)"
+            else
+              echo "FAILED ($CODE)"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+          if [ $FAILED -gt 0 ]; then
+            echo "$FAILED app(s) failed"
+            exit 1
+          fi
+          echo "All web apps responding"
