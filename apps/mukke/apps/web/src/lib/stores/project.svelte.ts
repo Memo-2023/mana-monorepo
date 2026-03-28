@@ -1,8 +1,21 @@
+/**
+ * Project Store — Mutation + API Operations
+ *
+ * Reads for project lists are handled by useLiveQuery (see $lib/data/queries.ts).
+ * This store handles mutations + API-only operations (beats, lyrics, markers, export).
+ * The live queries will automatically pick up local changes.
+ */
+
 import type { Project, Beat, Lyrics, LyricLine, Marker } from '@mukke/shared';
 import { authStore } from './auth.svelte';
+import {
+	projectCollection,
+	markerCollection,
+	type LocalProject,
+	type LocalMarker,
+} from '$lib/data/local-store';
 
 interface ProjectState {
-	projects: Project[];
 	currentProject: Project | null;
 	currentBeat: Beat | null;
 	currentLyrics: Lyrics | null;
@@ -25,7 +38,6 @@ function getBackendUrl(): string {
 
 function createProjectStore() {
 	let state = $state<ProjectState>({
-		projects: [],
 		currentProject: null,
 		currentBeat: null,
 		currentLyrics: null,
@@ -55,9 +67,6 @@ function createProjectStore() {
 	}
 
 	return {
-		get projects() {
-			return state.projects;
-		},
 		get currentProject() {
 			return state.currentProject;
 		},
@@ -80,18 +89,7 @@ function createProjectStore() {
 			return state.error;
 		},
 
-		async loadProjects() {
-			state.isLoading = true;
-			state.error = null;
-			try {
-				const data = await fetchApi<{ projects: Project[] }>('/projects');
-				state.projects = data.projects;
-			} catch (e) {
-				state.error = e instanceof Error ? e.message : 'Failed to load projects';
-			}
-			state.isLoading = false;
-		},
-
+		/** Load project detail from backend (includes beat, lyrics). */
 		async loadProject(id: string) {
 			state.isLoading = true;
 			state.error = null;
@@ -124,36 +122,62 @@ function createProjectStore() {
 			state.isLoading = false;
 		},
 
+		/** Create project — writes to IndexedDB + backend. */
 		async createProject(title: string, description?: string) {
-			const data = await fetchApi<{ project: Project }>('/projects', {
-				method: 'POST',
-				body: JSON.stringify({ title, description }),
-			});
-			state.projects = [data.project, ...state.projects];
-			return data.project;
-		},
+			const newLocal: LocalProject = {
+				id: crypto.randomUUID(),
+				title,
+				description: description ?? null,
+				songId: null,
+			};
+			await projectCollection.insert(newLocal);
 
-		async updateProject(id: string, updates: { title?: string; description?: string }) {
-			const data = await fetchApi<{ project: Project }>(`/projects/${id}`, {
-				method: 'PUT',
-				body: JSON.stringify(updates),
-			});
-			state.projects = state.projects.map((p) => (p.id === id ? data.project : p));
-			if (state.currentProject?.id === id) {
-				state.currentProject = data.project;
+			try {
+				const data = await fetchApi<{ project: Project }>('/projects', {
+					method: 'POST',
+					body: JSON.stringify({ title, description }),
+				});
+				return data.project;
+			} catch {
+				return newLocal as unknown as Project;
 			}
-			return data.project;
 		},
 
+		/** Update project — writes to IndexedDB + backend. */
+		async updateProject(id: string, updates: { title?: string; description?: string }) {
+			const updateData: Partial<LocalProject> = {};
+			if (updates.title !== undefined) updateData.title = updates.title;
+			if (updates.description !== undefined) updateData.description = updates.description ?? null;
+			await projectCollection.update(id, updateData);
+
+			try {
+				const data = await fetchApi<{ project: Project }>(`/projects/${id}`, {
+					method: 'PUT',
+					body: JSON.stringify(updates),
+				});
+				if (state.currentProject?.id === id) {
+					state.currentProject = data.project;
+				}
+				return data.project;
+			} catch {
+				return updates as unknown as Project;
+			}
+		},
+
+		/** Delete project — removes from IndexedDB + backend. */
 		async deleteProject(id: string) {
-			await fetchApi(`/projects/${id}`, { method: 'DELETE' });
-			state.projects = state.projects.filter((p) => p.id !== id);
+			await projectCollection.delete(id);
 			if (state.currentProject?.id === id) {
 				state.currentProject = null;
 				state.currentBeat = null;
 				state.currentLyrics = null;
 				state.currentLines = [];
 				state.currentMarkers = [];
+			}
+			try {
+				await fetchApi(`/projects/${id}`, { method: 'DELETE' });
+			} catch {
+				// Sync will reconcile
 			}
 		},
 
@@ -249,29 +273,71 @@ function createProjectStore() {
 			return data.line;
 		},
 
+		/** Create marker — writes to IndexedDB + backend. */
 		async createMarker(beatId: string, marker: Omit<Marker, 'id' | 'beatId'>) {
-			const data = await fetchApi<{ marker: Marker }>('/markers', {
-				method: 'POST',
-				body: JSON.stringify({ beatId, ...marker }),
-			});
-			state.currentMarkers = [...state.currentMarkers, data.marker].sort(
-				(a, b) => a.startTime - b.startTime
-			);
-			return data.marker;
+			const newLocal: LocalMarker = {
+				id: crypto.randomUUID(),
+				beatId,
+				type: marker.type as LocalMarker['type'],
+				label: marker.label ?? null,
+				startTime: marker.startTime,
+				endTime: marker.endTime ?? null,
+				color: marker.color ?? null,
+				sortOrder: marker.sortOrder,
+			};
+			await markerCollection.insert(newLocal);
+
+			try {
+				const data = await fetchApi<{ marker: Marker }>('/markers', {
+					method: 'POST',
+					body: JSON.stringify({ beatId, ...marker }),
+				});
+				state.currentMarkers = [...state.currentMarkers, data.marker].sort(
+					(a, b) => a.startTime - b.startTime
+				);
+				return data.marker;
+			} catch {
+				state.currentMarkers = [...state.currentMarkers, newLocal as unknown as Marker].sort(
+					(a, b) => a.startTime - b.startTime
+				);
+				return newLocal as unknown as Marker;
+			}
 		},
 
+		/** Update marker — writes to IndexedDB + backend. */
 		async updateMarker(markerId: string, updates: Partial<Marker>) {
-			const data = await fetchApi<{ marker: Marker }>(`/markers/${markerId}`, {
-				method: 'PUT',
-				body: JSON.stringify(updates),
-			});
-			state.currentMarkers = state.currentMarkers.map((m) => (m.id === markerId ? data.marker : m));
-			return data.marker;
+			const updateData: Partial<LocalMarker> = {};
+			if (updates.type !== undefined) updateData.type = updates.type as LocalMarker['type'];
+			if (updates.label !== undefined) updateData.label = updates.label ?? null;
+			if (updates.startTime !== undefined) updateData.startTime = updates.startTime;
+			if (updates.endTime !== undefined) updateData.endTime = updates.endTime ?? null;
+			if (updates.color !== undefined) updateData.color = updates.color ?? null;
+			if (updates.sortOrder !== undefined) updateData.sortOrder = updates.sortOrder;
+			await markerCollection.update(markerId, updateData);
+
+			try {
+				const data = await fetchApi<{ marker: Marker }>(`/markers/${markerId}`, {
+					method: 'PUT',
+					body: JSON.stringify(updates),
+				});
+				state.currentMarkers = state.currentMarkers.map((m) =>
+					m.id === markerId ? data.marker : m
+				);
+				return data.marker;
+			} catch {
+				return updates as unknown as Marker;
+			}
 		},
 
+		/** Delete marker — removes from IndexedDB + backend. */
 		async deleteMarker(markerId: string) {
-			await fetchApi(`/markers/${markerId}`, { method: 'DELETE' });
+			await markerCollection.delete(markerId);
 			state.currentMarkers = state.currentMarkers.filter((m) => m.id !== markerId);
+			try {
+				await fetchApi(`/markers/${markerId}`, { method: 'DELETE' });
+			} catch {
+				// Sync will reconcile
+			}
 		},
 
 		clearCurrent() {

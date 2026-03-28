@@ -5,12 +5,16 @@
 	import { browser } from '$app/environment';
 	import { locale } from 'svelte-i18n';
 	import { authStore, collectionsStore, questionsStore } from '$lib/stores';
-	import { apiClient } from '$lib/api/client';
-	import { questionsApi } from '$lib/api/questions';
 	import { theme } from '$lib/stores/theme';
 	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { questionsAppStore } from '$lib/data/local-store';
+	import {
+		useAllCollections,
+		useAllQuestions,
+		filterByCollection,
+		searchQuestions,
+	} from '$lib/data/queries';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type {
 		PillNavItem,
@@ -29,6 +33,10 @@
 
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);
+
+	// Reactive live queries from IndexedDB
+	const allCollections = useAllCollections();
+	const allQuestions = useAllQuestions();
 
 	// App switcher items
 	const appItems = getPillAppItems('questions');
@@ -59,10 +67,6 @@
 			const getToken = () => authStore.getValidToken();
 			questionsAppStore.startSync(getToken);
 			tagMutations.startSync(getToken);
-			const token = await authStore.getValidToken();
-			apiClient.setAccessToken(token);
-			await collectionsStore.load();
-			await questionsStore.load();
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('questions')) {
 			showGuestWelcome = true;
@@ -93,31 +97,16 @@
 		}
 	}
 
-	// InputBar search - search questions
+	// InputBar search - search questions from liveQuery data
 	async function handleSearch(query: string): Promise<QuickInputItem[]> {
 		if (!query.trim()) return [];
 
-		// Demo mode: search from store
-		if (!authStore.isAuthenticated) {
-			await questionsStore.load({ search: query });
-			return questionsStore.questions.slice(0, 10).map((q) => ({
-				id: q.id,
-				title: q.title,
-				subtitle: q.status || 'pending',
-			}));
-		}
-
-		// Authenticated: search via API
-		try {
-			const response = await questionsApi.getAll({ search: query, limit: 10 });
-			return response.data.map((q) => ({
-				id: q.id,
-				title: q.title,
-				subtitle: q.status || 'pending',
-			}));
-		} catch {
-			return [];
-		}
+		const results = searchQuestions(allQuestions.value, query);
+		return results.slice(0, 10).map((q) => ({
+			id: q.id,
+			title: q.title,
+			subtitle: q.status || 'pending',
+		}));
 	}
 
 	function handleSelect(item: QuickInputItem) {
@@ -148,7 +137,7 @@
 		}
 	}
 
-	// Collection dropdown items
+	// Collection dropdown items — driven by liveQuery
 	let collectionItems = $derived<PillDropdownItem[]>([
 		{
 			id: 'all',
@@ -157,7 +146,7 @@
 			onClick: () => selectCollection(null),
 			active: !collectionsStore.selectedId,
 		},
-		...collectionsStore.collections.map((c) => ({
+		...allCollections.value.map((c) => ({
 			id: c.id,
 			label: c.name,
 			icon: 'folder',
@@ -168,18 +157,12 @@
 
 	let currentCollectionLabel = $derived(
 		collectionsStore.selectedId
-			? collectionsStore.collections.find((c) => c.id === collectionsStore.selectedId)?.name ||
-					'Collection'
+			? allCollections.value.find((c) => c.id === collectionsStore.selectedId)?.name || 'Collection'
 			: 'All Questions'
 	);
 
 	function selectCollection(id: string | null) {
 		collectionsStore.select(id);
-		if (id) {
-			questionsStore.load({ collectionId: id });
-		} else {
-			questionsStore.load();
-		}
 	}
 
 	// TagStrip visibility

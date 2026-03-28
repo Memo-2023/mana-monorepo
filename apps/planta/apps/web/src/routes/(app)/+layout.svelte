@@ -10,7 +10,13 @@
 	} from '@manacore/shared-stores';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { plantsApi } from '$lib/api/plants';
+	import { plantMutations } from '$lib/data/mutations';
+	import {
+		useAllPlants,
+		useAllPlantPhotos,
+		useAllWateringSchedules,
+		useAllWateringLogs,
+	} from '$lib/data/queries';
 	import {
 		parsePlantInput,
 		resolvePlantData,
@@ -23,7 +29,18 @@
 
 	let { children } = $props();
 
+	// Live queries for local-first data (auto-update on Dexie changes)
+	const allPlants = useAllPlants();
+	const allPlantPhotos = useAllPlantPhotos();
+	const allWateringSchedules = useAllWateringSchedules();
+	const allWateringLogs = useAllWateringLogs();
 	const allTags = useAllSharedTags();
+
+	// Set context for child components
+	setContext('plants', allPlants);
+	setContext('plantPhotos', allPlantPhotos);
+	setContext('wateringSchedules', allWateringSchedules);
+	setContext('wateringLogs', allWateringLogs);
 	setContext('tags', allTags);
 
 	let showGuestWelcome = $state(false);
@@ -37,7 +54,7 @@
 	// Navigation items for Planta
 	const navItems: PillNavItem[] = [
 		{ href: '/dashboard', label: 'Meine Pflanzen', icon: 'document' },
-		{ href: '/add', label: 'Hinzufügen', icon: 'plus' },
+		{ href: '/add', label: 'Hinzufuegen', icon: 'plus' },
 		{ href: '/settings', label: 'Einstellungen', icon: 'settings' },
 		{
 			href: '/',
@@ -59,9 +76,9 @@
 		goto('/login');
 	}
 
-	// QuickInputBar handlers
+	// QuickInputBar handlers — use live query data instead of API
 	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
-		const plants = await plantsApi.getAll();
+		const plants = allPlants.value;
 		const q = query.toLowerCase();
 		return plants
 			.filter(
@@ -79,7 +96,7 @@
 	}
 
 	function handleInputSelect(item: QuickInputItem) {
-		goto(`/plant/${item.id}`);
+		goto(`/plants/${item.id}`);
 	}
 
 	// Quick-Create handlers
@@ -99,12 +116,12 @@
 		const parsed = parsePlantInput(query);
 		if (!parsed.name) return;
 		const resolved = resolvePlantData(parsed);
-		const plant = await plantsApi.create({
+		const plant = await plantMutations.create({
 			name: resolved.name,
 			acquiredAt: resolved.acquiredAt,
 		});
 		if (plant?.id) {
-			goto(`/plant/${plant.id}`);
+			goto(`/plants/${plant.id}`);
 		}
 	}
 

@@ -2,8 +2,8 @@
 	import type { Image } from '$lib/api/images';
 	import Modal from '../ui/Modal.svelte';
 	import Button from '../ui/Button.svelte';
-	import { unarchiveImage, deleteImage, downloadImage } from '$lib/api/images';
-	import { archivedImages } from '$lib/stores/archive';
+	import { downloadImage } from '$lib/api/images';
+	import { imageCollection } from '$lib/data/local-store';
 	import { DownloadSimple, ArrowCounterClockwise, Trash } from '@manacore/shared-icons';
 
 	interface Props {
@@ -21,9 +21,8 @@
 
 		isUnarchiving = true;
 		try {
-			await unarchiveImage(image.id);
-			// Update store
-			archivedImages.update((current) => current.filter((img) => img.id !== image.id));
+			// Clear archivedAt locally (live query auto-refreshes)
+			await imageCollection.update(image.id, { archivedAt: null });
 			onClose();
 		} catch (error) {
 			console.error('Error unarchiving image:', error);
@@ -40,9 +39,8 @@
 
 		isDeleting = true;
 		try {
-			await deleteImage(image.id);
-			// Update store
-			archivedImages.update((current) => current.filter((img) => img.id !== image.id));
+			// Delete locally (live query auto-refreshes)
+			await imageCollection.delete(image.id);
 			onClose();
 		} catch (error) {
 			console.error('Error deleting image:', error);

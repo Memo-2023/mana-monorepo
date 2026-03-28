@@ -12,9 +12,7 @@
 
 	const allTags: { value: Tag[] } = getContext('tags');
 	import { addTagToImage, removeTagFromImage, getImageTags } from '$lib/api/tags';
-	import { archiveImage, unarchiveImage, deleteImage, toggleFavorite } from '$lib/api/images';
-	import { images } from '$lib/stores/images';
-	import { archivedImages } from '$lib/stores/archive';
+	import { imageCollection } from '$lib/data/local-store';
 	import { toastStore } from '@manacore/shared-ui';
 	import {
 		DownloadSimple,
@@ -122,9 +120,7 @@
 
 		if (confirm('Möchten Sie dieses Bild wirklich löschen?')) {
 			try {
-				await deleteImage($contextMenu.image.id);
-				// Remove from store
-				images.update((current) => current.filter((img) => img.id !== $contextMenu.image?.id));
+				await imageCollection.delete($contextMenu.image.id);
 				hideContextMenu();
 				toastStore.show('Bild gelöscht', 'success');
 			} catch (error) {
@@ -139,19 +135,15 @@
 
 		try {
 			if (isArchived) {
-				// Unarchive: Move back to gallery
-				await unarchiveImage($contextMenu.image.id);
-				// Remove from archive store
-				archivedImages.update((current) =>
-					current.filter((img) => img.id !== $contextMenu.image?.id)
-				);
+				// Unarchive: clear archivedAt
+				await imageCollection.update($contextMenu.image.id, { archivedAt: null });
 				hideContextMenu();
 				toastStore.show('Bild wiederhergestellt', 'success');
 			} else {
-				// Archive: Move to archive
-				await archiveImage($contextMenu.image.id);
-				// Remove from gallery store
-				images.update((current) => current.filter((img) => img.id !== $contextMenu.image?.id));
+				// Archive: set archivedAt
+				await imageCollection.update($contextMenu.image.id, {
+					archivedAt: new Date().toISOString(),
+				});
 				hideContextMenu();
 				toastStore.show('Bild archiviert', 'success');
 			}
@@ -166,19 +158,7 @@
 
 		try {
 			const newFavoriteStatus = !isFavorite;
-			await toggleFavorite($contextMenu.image.id, newFavoriteStatus);
-
-			// Update in all stores
-			images.update((current) =>
-				current.map((img) =>
-					img.id === $contextMenu.image?.id ? { ...img, isFavorite: newFavoriteStatus } : img
-				)
-			);
-			archivedImages.update((current) =>
-				current.map((img) =>
-					img.id === $contextMenu.image?.id ? { ...img, isFavorite: newFavoriteStatus } : img
-				)
-			);
+			await imageCollection.update($contextMenu.image.id, { isFavorite: newFavoriteStatus });
 
 			hideContextMenu();
 			toastStore.show(

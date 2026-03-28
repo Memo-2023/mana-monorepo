@@ -1,102 +1,47 @@
 /**
- * Favorites Store - Manages favorite locations using Svelte 5 runes
+ * Favorites Store — Mutation-Only
+ *
+ * All reads are handled by useLiveQuery (see $lib/data/queries.ts).
+ * This store only exposes mutations that write to IndexedDB.
+ * The live queries will automatically pick up the changes.
  */
 
-import { authStore } from './auth.svelte';
-import { api } from '$lib/api';
+import { favoriteCollection, type LocalFavorite } from '$lib/data/local-store';
 
-interface Favorite {
-	id: string;
-	userId: string;
-	locationId: string;
-	createdAt: string;
-}
-
-let favoriteLocationIds = $state<Set<string>>(new Set());
 let loading = $state(false);
 
 export const favoritesStore = {
-	get favoriteIds() {
-		return favoriteLocationIds;
-	},
 	get loading() {
 		return loading;
 	},
 
-	isFavorite(locationId: string): boolean {
-		return favoriteLocationIds.has(locationId);
-	},
-
-	async load() {
-		if (!authStore.isAuthenticated) return;
-
+	/**
+	 * Toggle a favorite — writes to / removes from IndexedDB instantly.
+	 */
+	async toggle(locationId: string) {
 		loading = true;
+
 		try {
-			const token = await authStore.getValidToken();
-			if (!token) return;
+			const all = await favoriteCollection.getAll();
+			const existing = all.find((f) => f.locationId === locationId);
 
-			const res = await fetch(`${api('/favorites')}`, {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-
-			if (res.ok) {
-				const data = await res.json();
-				favoriteLocationIds = new Set(data.favorites.map((f: Favorite) => f.locationId));
+			if (existing) {
+				await favoriteCollection.delete(existing.id);
+			} else {
+				const newFav: LocalFavorite = {
+					id: crypto.randomUUID(),
+					locationId,
+				};
+				await favoriteCollection.insert(newFav);
 			}
 		} catch (err) {
-			console.error('Failed to load favorites:', err);
+			console.error('Failed to toggle favorite:', err);
 		} finally {
 			loading = false;
 		}
 	},
 
-	async toggle(locationId: string) {
-		if (!authStore.isAuthenticated) return;
-
-		const token = await authStore.getValidToken();
-		if (!token) return;
-
-		const isFav = favoriteLocationIds.has(locationId);
-
-		// Optimistic update
-		const newSet = new Set(favoriteLocationIds);
-		if (isFav) {
-			newSet.delete(locationId);
-		} else {
-			newSet.add(locationId);
-		}
-		favoriteLocationIds = newSet;
-
-		try {
-			const res = await fetch(`${api(`/favorites/${locationId}`)}`, {
-				method: isFav ? 'DELETE' : 'POST',
-				headers: { Authorization: `Bearer ${token}` },
-			});
-
-			if (!res.ok) {
-				// Revert on error
-				const revertSet = new Set(favoriteLocationIds);
-				if (isFav) {
-					revertSet.add(locationId);
-				} else {
-					revertSet.delete(locationId);
-				}
-				favoriteLocationIds = revertSet;
-			}
-		} catch (err) {
-			console.error('Failed to toggle favorite:', err);
-			// Revert
-			const revertSet = new Set(favoriteLocationIds);
-			if (isFav) {
-				revertSet.add(locationId);
-			} else {
-				revertSet.delete(locationId);
-			}
-			favoriteLocationIds = revertSet;
-		}
-	},
-
 	clear() {
-		favoriteLocationIds = new Set();
+		// Nothing to clear — reads come from liveQuery
 	},
 };

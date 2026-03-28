@@ -4,6 +4,10 @@
 	import { researchApi } from '$lib/api/research';
 	import { ArrowLeft, Lightning, Clock, Sparkle } from '@manacore/shared-icons';
 	import type { ResearchDepth, QuestionPriority } from '$lib/types';
+	import { useAllCollections } from '$lib/data/queries';
+
+	// Live query for collections dropdown
+	const allCollections = useAllCollections();
 
 	let title = $state('');
 	let description = $state('');
@@ -129,7 +133,7 @@
 				class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 			>
 				<option value={undefined}>No collection</option>
-				{#each collectionsStore.collections as collection}
+				{#each allCollections.value as collection}
 					<option value={collection.id}>{collection.name}</option>
 				{/each}
 			</select>

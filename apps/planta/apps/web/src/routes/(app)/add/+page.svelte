@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { photosApi } from '$lib/api/photos';
 	import { analysisApi } from '$lib/api/analysis';
-	import { plantsApi } from '$lib/api/plants';
+	import { plantMutations } from '$lib/data/mutations';
 	import { PlantaEvents } from '@manacore/shared-utils/analytics';
 	import type { PlantPhoto, PlantAnalysis } from '@planta/shared';
 
@@ -94,8 +94,8 @@
 		saving = true;
 		error = '';
 
-		// Create plant
-		const plant = await plantsApi.create({
+		// Create plant (local-first)
+		const plant = await plantMutations.create({
 			name: plantName.trim(),
 			scientificName: analysis.scientificName || undefined,
 			commonName: analysis.commonNames?.[0] || undefined,

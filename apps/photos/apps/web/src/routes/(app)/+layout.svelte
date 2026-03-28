@@ -7,7 +7,6 @@
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { photoStore } from '$lib/stores/photos.svelte';
-	import { albumStore } from '$lib/stores/albums.svelte';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -19,9 +18,18 @@
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { photosStore } from '$lib/data/local-store';
+	import { useAllAlbums, useAllAlbumItems, useAllFavorites } from '$lib/data/queries';
 
-	// Live query for shared tags (local-first)
+	// Live queries for local-first data (auto-update on Dexie changes)
+	const allAlbums = useAllAlbums();
+	const allAlbumItems = useAllAlbumItems();
+	const allFavorites = useAllFavorites();
 	const allTags = useAllSharedTags();
+
+	// Set context for child components
+	setContext('albums', allAlbums);
+	setContext('albumItems', allAlbumItems);
+	setContext('favorites', allFavorites);
 	setContext('tags', allTags);
 
 	let { children } = $props();
@@ -89,14 +97,13 @@
 	async function handleLogout() {
 		await authStore.signOut();
 		photoStore.reset();
-		albumStore.reset();
 		goto('/login');
 	}
 
 	// QuickInputBar handlers
 	async function handleInputSearch(query: string): Promise<QuickInputItem[]> {
 		const q = query.toLowerCase();
-		const albums = albumStore.albums.filter((a) => a.name?.toLowerCase().includes(q));
+		const albums = allAlbums.value.filter((a) => a.name?.toLowerCase().includes(q));
 		const tags = allTags.value.filter((t) => t.name?.toLowerCase().includes(q));
 		const results: QuickInputItem[] = [];
 		for (const album of albums.slice(0, 5)) {
@@ -123,7 +130,7 @@
 		if (authStore.isAuthenticated) {
 			photosStore.startSync(() => authStore.getValidToken());
 			tagMutations.startSync(() => authStore.getValidToken());
-			await Promise.all([photoStore.loadStats(), albumStore.loadAlbums()]);
+			await photoStore.loadStats();
 		}
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('photos')) {
 			showGuestWelcome = true;

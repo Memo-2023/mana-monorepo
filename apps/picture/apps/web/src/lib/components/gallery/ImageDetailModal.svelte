@@ -8,7 +8,8 @@
 		publishImage,
 		unpublishImage,
 	} from '$lib/api/images';
-	import { images, selectedImage } from '$lib/stores/images';
+	import { selectedImage } from '$lib/stores/images';
+	import { imageCollection } from '$lib/data/local-store';
 	import { toastStore } from '@manacore/shared-ui';
 	import { fade, fly } from 'svelte/transition';
 	import { getImageTags, addTagToImage, removeTagFromImage } from '$lib/api/tags';
@@ -35,6 +36,7 @@
 	let { image, onClose }: Props = $props();
 
 	const sharedTags: { value: SharedTag[] } = getContext('tags');
+	const allImages: { value: Image[] } = getContext('allImages');
 
 	let isArchiving = $state(false);
 	let isDeleting = $state(false);
@@ -57,10 +59,12 @@
 	);
 
 	// Get current image index
-	const currentIndex = $derived(image ? $images.findIndex((img) => img.id === image?.id) : -1);
+	const currentIndex = $derived(
+		image ? allImages.value.findIndex((img) => img.id === image?.id) : -1
+	);
 
 	const hasPrevious = $derived(currentIndex > 0);
-	const hasNext = $derived(currentIndex >= 0 && currentIndex < $images.length - 1);
+	const hasNext = $derived(currentIndex >= 0 && currentIndex < allImages.value.length - 1);
 
 	// Load tags for current image
 	$effect(() => {
@@ -79,13 +83,13 @@
 
 	function navigatePrevious() {
 		if (hasPrevious) {
-			selectedImage.set($images[currentIndex - 1]);
+			selectedImage.set(allImages.value[currentIndex - 1]);
 		}
 	}
 
 	function navigateNext() {
 		if (hasNext) {
-			selectedImage.set($images[currentIndex + 1]);
+			selectedImage.set(allImages.value[currentIndex + 1]);
 		}
 	}
 
@@ -115,9 +119,8 @@
 
 		isArchiving = true;
 		try {
-			await archiveImage(imageId);
-			// Update store
-			images.update((current) => current.filter((img) => img.id !== imageId));
+			// Update locally (live query auto-refreshes)
+			await imageCollection.update(imageId, { archivedAt: new Date().toISOString() });
 			toastStore.show('Bild erfolgreich archiviert', 'success');
 			onClose();
 		} catch (error) {
@@ -140,9 +143,8 @@
 
 		isDeleting = true;
 		try {
-			await deleteImage(imageId);
-			// Update store
-			images.update((current) => current.filter((img) => img.id !== imageId));
+			// Delete locally (live query auto-refreshes)
+			await imageCollection.delete(imageId);
 			toastStore.show('Bild erfolgreich gelöscht', 'success');
 			onClose();
 		} catch (error) {

@@ -6,7 +6,6 @@
 	import { toastStore } from '@manacore/shared-ui';
 	import { PageHeader } from '@manacore/shared-ui';
 	import DropZone from '$lib/components/upload/DropZone.svelte';
-	import { images } from '$lib/stores/images';
 	import { Check, Image, CloudArrowUp, CheckCircle } from '@manacore/shared-icons';
 
 	let uploading = $state(false);
@@ -29,8 +28,7 @@
 
 			successCount = uploadedImages.length;
 
-			// Add uploaded images to store
-			images.update((current) => [...uploadedImages, ...current]);
+			// Images will appear in gallery automatically via live query
 
 			if (successCount === files.length) {
 				toastStore.show(

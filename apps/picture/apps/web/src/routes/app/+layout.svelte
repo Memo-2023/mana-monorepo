@@ -30,6 +30,12 @@
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { pictureStore } from '$lib/data/local-store';
+	import {
+		useAllImages,
+		useArchivedImages,
+		useAllBoards,
+		useAllImageTags,
+	} from '$lib/data/queries';
 	import { viewMode, setViewMode } from '$lib/stores/view';
 	import type { ViewMode } from '$lib/stores/view';
 	import { browser } from '$app/environment';
@@ -40,6 +46,19 @@
 	// Live query for shared tags (local-first)
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);
+
+	// Live queries for picture data (local-first)
+	const allImages = useAllImages();
+	setContext('allImages', allImages);
+
+	const archivedImages = useArchivedImages();
+	setContext('archivedImages', archivedImages);
+
+	const allBoards = useAllBoards();
+	setContext('allBoards', allBoards);
+
+	const allImageTags = useAllImageTags();
+	setContext('allImageTags', allImageTags);
 
 	let { children } = $props();
 

@@ -1,28 +1,13 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { authStore } from '$lib/stores/auth.svelte';
-	import {
-		boards,
-		isLoadingBoards,
-		currentBoardsPage,
-		hasBoardsMore,
-		showCreateBoardModal,
-		selectedBoard,
-		resetBoardsState,
-		addBoard,
-		removeBoardFromList,
-	} from '$lib/stores/boards';
+	import { showCreateBoardModal } from '$lib/stores/boards';
 	import type { BoardWithCount } from '$lib/api/boards';
 	import { boardCollection, boardItemCollection, type LocalBoard } from '$lib/data/local-store';
+	import { getContext } from 'svelte';
 	import { PageHeader, Button, Modal, toastStore } from '@manacore/shared-ui';
 	import { Plus, SquaresFour, Image, Trash } from '@manacore/shared-icons';
 
-	const PAGE_SIZE = 20;
-
-	let loadingMore = $state(false);
-	let observer: IntersectionObserver | null = null;
-	let loadMoreTrigger = $state<HTMLElement | null>(null);
+	const allBoards: { value: BoardWithCount[] } = getContext('allBoards');
 
 	// Create board modal state
 	let boardName = $state('');
@@ -32,101 +17,6 @@
 	// Delete confirmation modal
 	let showDeleteModal = $state(false);
 	let deletingBoard = $state<string | null>(null);
-
-	/** Convert LocalBoard to BoardWithCount for existing components. */
-	async function toBoardWithCount(local: LocalBoard): Promise<BoardWithCount> {
-		const items = await boardItemCollection.getAll({ boardId: local.id });
-		return {
-			id: local.id,
-			userId: 'local',
-			name: local.name,
-			description: local.description ?? undefined,
-			thumbnailUrl: local.thumbnailUrl ?? undefined,
-			canvasWidth: local.canvasWidth,
-			canvasHeight: local.canvasHeight,
-			backgroundColor: local.backgroundColor,
-			isPublic: local.isPublic,
-			createdAt: local.createdAt ?? new Date().toISOString(),
-			updatedAt: local.updatedAt ?? new Date().toISOString(),
-			itemCount: items.length,
-		};
-	}
-
-	onMount(() => {
-		resetBoardsState();
-		loadInitialBoards();
-
-		// Setup Intersection Observer for infinite scroll
-		observer = new IntersectionObserver(
-			(entries) => {
-				if (entries[0].isIntersecting && $hasBoardsMore && !$isLoadingBoards && !loadingMore) {
-					loadMoreBoards();
-				}
-			},
-			{
-				threshold: 0.1,
-				rootMargin: '100px',
-			}
-		);
-
-		if (loadMoreTrigger) {
-			observer.observe(loadMoreTrigger);
-		}
-
-		return () => {
-			if (observer) observer.disconnect();
-		};
-	});
-
-	async function loadInitialBoards() {
-		isLoadingBoards.set(true);
-		try {
-			const localBoards = await boardCollection.getAll();
-			// Sort by updatedAt descending
-			localBoards.sort(
-				(a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime()
-			);
-			const page1 = localBoards.slice(0, PAGE_SIZE);
-			const data = await Promise.all(page1.map(toBoardWithCount));
-			boards.set(data);
-			currentBoardsPage.set(1);
-			hasBoardsMore.set(localBoards.length > PAGE_SIZE);
-		} catch (error) {
-			console.error('Error loading boards:', error);
-			toastStore.show('Fehler beim Laden der Boards', 'error');
-		} finally {
-			isLoadingBoards.set(false);
-		}
-	}
-
-	async function loadMoreBoards() {
-		if (!$hasBoardsMore || $isLoadingBoards || loadingMore) return;
-
-		loadingMore = true;
-		const nextPage = $currentBoardsPage + 1;
-
-		try {
-			const localBoards = await boardCollection.getAll();
-			localBoards.sort(
-				(a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime()
-			);
-			const start = (nextPage - 1) * PAGE_SIZE;
-			const pageBoards = localBoards.slice(start, start + PAGE_SIZE);
-
-			if (pageBoards.length > 0) {
-				const data = await Promise.all(pageBoards.map(toBoardWithCount));
-				boards.update((current) => [...current, ...data]);
-				currentBoardsPage.set(nextPage);
-				hasBoardsMore.set(start + PAGE_SIZE < localBoards.length);
-			} else {
-				hasBoardsMore.set(false);
-			}
-		} catch (error) {
-			console.error('Error loading more boards:', error);
-		} finally {
-			loadingMore = false;
-		}
-	}
 
 	async function handleCreateBoard() {
 		if (!boardName.trim()) return;
@@ -142,9 +32,7 @@
 				backgroundColor: '#ffffff',
 				isPublic: false,
 			};
-			const inserted = await boardCollection.insert(newLocal);
-			const boardWithCount = await toBoardWithCount(inserted);
-			addBoard(boardWithCount);
+			await boardCollection.insert(newLocal);
 			showCreateBoardModal.set(false);
 			boardName = '';
 			boardDescription = '';
@@ -167,7 +55,6 @@
 				await boardItemCollection.delete(item.id);
 			}
 			await boardCollection.delete(deletingBoard);
-			removeBoardFromList(deletingBoard);
 			showDeleteModal = false;
 			deletingBoard = null;
 			toastStore.show('Board gelöscht', 'success');
@@ -192,7 +79,7 @@
 				backgroundColor: original.backgroundColor,
 				isPublic: false,
 			};
-			const inserted = await boardCollection.insert(duplicated);
+			await boardCollection.insert(duplicated);
 
 			// Duplicate board items
 			const originalItems = await boardItemCollection.getAll({ boardId });
@@ -204,8 +91,6 @@
 				});
 			}
 
-			const boardWithCount = await toBoardWithCount(inserted);
-			addBoard(boardWithCount);
 			toastStore.show('Board dupliziert', 'success');
 		} catch (error) {
 			console.error('Error duplicating board:', error);
@@ -241,18 +126,7 @@
 		{/snippet}
 	</PageHeader>
 
-	<!-- Loading State -->
-	{#if $isLoadingBoards}
-		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each Array(8) as _}
-				<div class="animate-pulse">
-					<div class="aspect-[4/3] rounded-lg bg-gray-200 dark:bg-gray-700"></div>
-					<div class="mt-3 h-6 rounded bg-gray-200 dark:bg-gray-700"></div>
-					<div class="mt-2 h-4 w-2/3 rounded bg-gray-200 dark:bg-gray-700"></div>
-				</div>
-			{/each}
-		</div>
-	{:else if $boards.length === 0}
+	{#if allBoards.value.length === 0}
 		<!-- Empty State -->
 		<div class="flex flex-col items-center justify-center py-20">
 			<SquaresFour size={96} weight="thin" class="text-gray-300 dark:text-gray-600" />
@@ -269,7 +143,7 @@
 	{:else}
 		<!-- Boards Grid -->
 		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each $boards as board (board.id)}
+			{#each allBoards.value as board (board.id)}
 				<div
 					class="group relative overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
 				>
@@ -330,19 +204,6 @@
 				</div>
 			{/each}
 		</div>
-
-		<!-- Infinite Scroll Trigger -->
-		{#if $hasBoardsMore}
-			<div bind:this={loadMoreTrigger} class="mt-8 flex justify-center">
-				{#if loadingMore}
-					<div
-						class="h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent dark:border-blue-400"
-					></div>
-				{:else}
-					<p class="text-sm text-gray-500 dark:text-gray-400">Scroll to load more</p>
-				{/if}
-			</div>
-		{/if}
 	{/if}
 </div>
 

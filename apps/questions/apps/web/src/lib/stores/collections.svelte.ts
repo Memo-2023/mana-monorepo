@@ -1,24 +1,21 @@
 /**
- * Collections Store - Manages collections state using Svelte 5 runes
- * Authenticated users: collections from API
- * Demo mode: static sample collection to showcase the app
+ * Collections Store — Mutation-Only
+ *
+ * All reads are handled by useLiveQuery (see $lib/data/queries.ts).
+ * This store only exposes mutations that write to IndexedDB.
+ * The live queries will automatically pick up the changes.
  */
 
-import { collectionsApi } from '$lib/api/collections';
+import { collectionCollection, type LocalCollection } from '$lib/data/local-store';
+import { toCollection } from '$lib/data/queries';
 import { QuestionsEvents } from '@manacore/shared-utils/analytics';
 import type { Collection, CreateCollectionDto, UpdateCollectionDto } from '$lib/types';
-import { authStore } from './auth.svelte';
-import { DEMO_COLLECTION, isDemoCollection } from '$lib/data/demo-questions';
 
-let collections = $state<Collection[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
 let selectedId = $state<string | null>(null);
 
 export const collectionsStore = {
-	get collections() {
-		return collections;
-	},
 	get loading() {
 		return loading;
 	},
@@ -28,57 +25,28 @@ export const collectionsStore = {
 	get selectedId() {
 		return selectedId;
 	},
-	get selected() {
-		return selectedId ? collections.find((c) => c.id === selectedId) : null;
-	},
 
 	/**
-	 * Load collections
-	 * Demo mode: shows static sample collection
-	 * Authenticated: fetches from API
-	 */
-	async load() {
-		loading = true;
-		error = null;
-
-		// Demo mode: load demo collection
-		if (!authStore.isAuthenticated) {
-			collections = [DEMO_COLLECTION];
-			loading = false;
-			return;
-		}
-
-		// Authenticated: fetch from API
-		try {
-			collections = await collectionsApi.getAll();
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load collections';
-			collections = [];
-		} finally {
-			loading = false;
-		}
-	},
-
-	/**
-	 * Create a new collection
-	 * Demo mode: returns auth_required error
-	 * Authenticated: creates via API
+	 * Create a new collection — writes to IndexedDB instantly.
 	 */
 	async create(data: CreateCollectionDto): Promise<Collection | null> {
-		// Demo mode: require authentication
-		if (!authStore.isAuthenticated) {
-			error = 'Login required to create collections';
-			return null;
-		}
-
 		loading = true;
 		error = null;
 
 		try {
-			const collection = await collectionsApi.create(data);
-			collections = [...collections, collection];
+			const newLocal: LocalCollection = {
+				id: crypto.randomUUID(),
+				name: data.name,
+				description: data.description ?? null,
+				color: data.color || '#6366f1',
+				icon: data.icon || 'folder',
+				isDefault: data.isDefault || false,
+				sortOrder: Date.now(),
+			};
+
+			const inserted = await collectionCollection.insert(newLocal);
 			QuestionsEvents.collectionCreated();
-			return collection;
+			return toCollection(inserted);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to create collection';
 			return null;
@@ -88,23 +56,22 @@ export const collectionsStore = {
 	},
 
 	/**
-	 * Update a collection
-	 * Demo mode: returns auth_required error
-	 * Authenticated: updates via API
+	 * Update a collection — writes to IndexedDB instantly.
 	 */
 	async update(id: string, data: UpdateCollectionDto): Promise<Collection | null> {
-		// Demo collection or not authenticated: require authentication
-		if (isDemoCollection(id) || !authStore.isAuthenticated) {
-			error = 'Login required to update collections';
-			return null;
-		}
-
 		error = null;
 
 		try {
-			const updated = await collectionsApi.update(id, data);
-			collections = collections.map((c) => (c.id === id ? updated : c));
-			return updated;
+			const updateData: Partial<LocalCollection> = {};
+			if (data.name !== undefined) updateData.name = data.name;
+			if (data.description !== undefined) updateData.description = data.description ?? null;
+			if (data.color !== undefined) updateData.color = data.color;
+			if (data.icon !== undefined) updateData.icon = data.icon;
+			if (data.isDefault !== undefined) updateData.isDefault = data.isDefault;
+
+			const updated = await collectionCollection.update(id, updateData);
+			if (updated) return toCollection(updated);
+			return null;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to update collection';
 			return null;
@@ -112,22 +79,13 @@ export const collectionsStore = {
 	},
 
 	/**
-	 * Delete a collection
-	 * Demo mode: returns auth_required error
-	 * Authenticated: deletes via API
+	 * Delete a collection — removes from IndexedDB instantly.
 	 */
 	async delete(id: string): Promise<boolean> {
-		// Demo collection or not authenticated: require authentication
-		if (isDemoCollection(id) || !authStore.isAuthenticated) {
-			error = 'Login required to delete collections';
-			return false;
-		}
-
 		error = null;
 
 		try {
-			await collectionsApi.delete(id);
-			collections = collections.filter((c) => c.id !== id);
+			await collectionCollection.delete(id);
 			QuestionsEvents.collectionDeleted();
 			if (selectedId === id) {
 				selectedId = null;
@@ -140,26 +98,15 @@ export const collectionsStore = {
 	},
 
 	/**
-	 * Reorder collections
-	 * Demo mode: returns auth_required error
-	 * Authenticated: reorders via API
+	 * Reorder collections — updates sortOrder in IndexedDB.
 	 */
 	async reorder(orderedIds: string[]): Promise<boolean> {
-		// Demo mode: require authentication
-		if (!authStore.isAuthenticated) {
-			error = 'Login required to reorder collections';
-			return false;
-		}
-
 		error = null;
 
 		try {
-			await collectionsApi.reorder(orderedIds);
-			// Reorder local state
-			const reordered = orderedIds
-				.map((id) => collections.find((c) => c.id === id))
-				.filter((c): c is Collection => c !== undefined);
-			collections = reordered;
+			for (let i = 0; i < orderedIds.length; i++) {
+				await collectionCollection.update(orderedIds[i], { sortOrder: i });
+			}
 			return true;
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to reorder collections';
@@ -171,19 +118,14 @@ export const collectionsStore = {
 		selectedId = id;
 	},
 
-	getById(id: string): Collection | undefined {
-		return collections.find((c) => c.id === id);
-	},
-
 	/**
-	 * Check if a collection is a demo collection
+	 * No longer relevant — all collections are local and editable.
 	 */
-	isDemoCollection(id: string): boolean {
-		return isDemoCollection(id);
+	isDemoCollection(_id: string): boolean {
+		return false;
 	},
 
 	clear() {
-		collections = [];
 		error = null;
 		selectedId = null;
 	},

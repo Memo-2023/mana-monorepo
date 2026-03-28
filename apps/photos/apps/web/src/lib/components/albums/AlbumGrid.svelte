@@ -2,7 +2,7 @@
 	import type { Album } from '@photos/shared';
 	import AlbumCard from './AlbumCard.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
-	import { albumStore } from '$lib/stores/albums.svelte';
+	import { albumMutations } from '$lib/stores/albums.svelte';
 	import { _ } from 'svelte-i18n';
 
 	interface Props {
@@ -43,7 +43,7 @@
 				id: 'delete',
 				label: $_('common.delete'),
 				variant: 'danger',
-				action: () => albumStore.deleteAlbum(album.id),
+				action: () => albumMutations.deleteAlbum(album.id),
 			},
 		];
 	}

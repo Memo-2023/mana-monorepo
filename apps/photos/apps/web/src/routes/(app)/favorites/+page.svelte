@@ -1,34 +1,18 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
+	import { getContext } from 'svelte';
 	import { photoStore } from '$lib/stores/photos.svelte';
-	import { favoriteCollection } from '$lib/data/local-store';
 	import PhotoGrid from '$lib/components/gallery/PhotoGrid.svelte';
 	import PhotoDetailModal from '$lib/components/gallery/PhotoDetailModal.svelte';
 	import type { Photo } from '@photos/shared';
+	import type { LocalFavorite } from '$lib/data/local-store';
 
-	let favorites = $state<Photo[]>([]);
-	let loading = $state(true);
-	let error = $state<string | null>(null);
+	const allFavorites: { readonly value: LocalFavorite[] } = getContext('favorites');
 
-	onMount(async () => {
-		await loadFavorites();
-	});
-
-	async function loadFavorites() {
-		loading = true;
-		error = null;
-
-		try {
-			const localFavs = await favoriteCollection.getAll();
-			// Favorited media IDs — full photo data would come from mana-media
-			favorites = localFavs.map((f) => ({ id: f.mediaId, isFavorited: true }) as Photo);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load favorites';
-		} finally {
-			loading = false;
-		}
-	}
+	// Derive favorite photos from live query (auto-updates when favorites change)
+	let favorites = $derived<Photo[]>(
+		allFavorites.value.map((f) => ({ id: f.mediaId, isFavorited: true }) as Photo)
+	);
 
 	function handlePhotoClick(photo: Photo) {
 		photoStore.selectPhoto(photo);
@@ -52,11 +36,7 @@
 		</span>
 	</header>
 
-	{#if error}
-		<div class="error-message">
-			<p>{error}</p>
-		</div>
-	{:else if favorites.length === 0 && !loading}
+	{#if favorites.length === 0}
 		<div class="empty-state">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +60,7 @@
 	{:else}
 		<PhotoGrid
 			photos={favorites}
-			{loading}
+			loading={false}
 			hasMore={false}
 			onPhotoClick={handlePhotoClick}
 			onLoadMore={() => {}}

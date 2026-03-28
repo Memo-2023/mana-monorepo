@@ -1,8 +1,21 @@
+/**
+ * Playlist Store — Mutation + API Operations
+ *
+ * Reads for playlist lists are handled by useLiveQuery (see $lib/data/queries.ts).
+ * This store handles mutations that write to IndexedDB + backend.
+ * The live queries will automatically pick up local changes.
+ */
+
 import type { Playlist, PlaylistWithSongs } from '@mukke/shared';
 import { authStore } from './auth.svelte';
+import {
+	playlistCollection,
+	playlistSongCollection,
+	type LocalPlaylist,
+	type LocalPlaylistSong,
+} from '$lib/data/local-store';
 
 interface PlaylistState {
-	playlists: Playlist[];
 	currentPlaylist: PlaylistWithSongs | null;
 	coverUrls: Record<string, string>;
 	isLoading: boolean;
@@ -22,7 +35,6 @@ function getBackendUrl(): string {
 
 function createPlaylistStore() {
 	let state = $state<PlaylistState>({
-		playlists: [],
 		currentPlaylist: null,
 		coverUrls: {},
 		isLoading: false,
@@ -49,9 +61,6 @@ function createPlaylistStore() {
 	}
 
 	return {
-		get playlists() {
-			return state.playlists;
-		},
 		get currentPlaylist() {
 			return state.currentPlaylist;
 		},
@@ -79,22 +88,7 @@ function createPlaylistStore() {
 			}
 		},
 
-		async loadPlaylists() {
-			state.isLoading = true;
-			state.error = null;
-			try {
-				const data = await fetchApi<{ playlists: Playlist[] }>('/playlists');
-				state.playlists = data.playlists;
-				const coverPaths = data.playlists
-					.map((p) => p.coverArtPath)
-					.filter((p): p is string => !!p);
-				if (coverPaths.length > 0) this.loadCoverUrls(coverPaths);
-			} catch (e) {
-				state.error = e instanceof Error ? e.message : 'Failed to load playlists';
-			}
-			state.isLoading = false;
-		},
-
+		/** Load a single playlist detail from backend. */
 		async loadPlaylist(id: string) {
 			state.isLoading = true;
 			state.error = null;
@@ -111,72 +105,150 @@ function createPlaylistStore() {
 			state.isLoading = false;
 		},
 
+		/** Create playlist — writes to IndexedDB + backend. */
 		async createPlaylist(name: string, description?: string) {
-			const data = await fetchApi<{ playlist: Playlist }>('/playlists', {
-				method: 'POST',
-				body: JSON.stringify({ name, description }),
-			});
-			state.playlists = [data.playlist, ...state.playlists];
-			return data.playlist;
-		},
+			const newLocal: LocalPlaylist = {
+				id: crypto.randomUUID(),
+				name,
+				description: description ?? null,
+				coverArtPath: null,
+			};
+			await playlistCollection.insert(newLocal);
 
-		async updatePlaylist(id: string, updates: { name?: string; description?: string }) {
-			const data = await fetchApi<{ playlist: Playlist }>(`/playlists/${id}`, {
-				method: 'PUT',
-				body: JSON.stringify(updates),
-			});
-			state.playlists = state.playlists.map((p) => (p.id === id ? data.playlist : p));
-			if (state.currentPlaylist?.id === id) {
-				state.currentPlaylist = { ...state.currentPlaylist, ...data.playlist };
+			// Also create on backend
+			try {
+				const data = await fetchApi<{ playlist: Playlist }>('/playlists', {
+					method: 'POST',
+					body: JSON.stringify({ name, description }),
+				});
+				return data.playlist;
+			} catch {
+				// Sync will reconcile
+				return newLocal as unknown as Playlist;
 			}
-			return data.playlist;
 		},
 
+		/** Update playlist — writes to IndexedDB + backend. */
+		async updatePlaylist(id: string, updates: { name?: string; description?: string }) {
+			const updateData: Partial<LocalPlaylist> = {};
+			if (updates.name !== undefined) updateData.name = updates.name;
+			if (updates.description !== undefined) updateData.description = updates.description ?? null;
+			await playlistCollection.update(id, updateData);
+
+			try {
+				const data = await fetchApi<{ playlist: Playlist }>(`/playlists/${id}`, {
+					method: 'PUT',
+					body: JSON.stringify(updates),
+				});
+				if (state.currentPlaylist?.id === id) {
+					state.currentPlaylist = { ...state.currentPlaylist, ...data.playlist };
+				}
+				return data.playlist;
+			} catch {
+				return updates as unknown as Playlist;
+			}
+		},
+
+		/** Delete playlist — removes from IndexedDB + backend. */
 		async deletePlaylist(id: string) {
-			await fetchApi(`/playlists/${id}`, { method: 'DELETE' });
-			state.playlists = state.playlists.filter((p) => p.id !== id);
+			await playlistCollection.delete(id);
+			// Also delete associated playlistSongs
+			const allPS = await playlistSongCollection.getAll();
+			for (const ps of allPS.filter((p) => p.playlistId === id)) {
+				await playlistSongCollection.delete(ps.id);
+			}
+
 			if (state.currentPlaylist?.id === id) {
 				state.currentPlaylist = null;
 			}
+
+			try {
+				await fetchApi(`/playlists/${id}`, { method: 'DELETE' });
+			} catch {
+				// Sync will reconcile
+			}
 		},
 
+		/** Add song to playlist — writes to IndexedDB + backend. */
 		async addSong(playlistId: string, songId: string) {
-			const data = await fetchApi<{ playlist: PlaylistWithSongs }>(
-				`/playlists/${playlistId}/songs`,
-				{
-					method: 'POST',
-					body: JSON.stringify({ songId }),
+			const allPS = await playlistSongCollection.getAll();
+			const maxSort = allPS
+				.filter((ps) => ps.playlistId === playlistId)
+				.reduce((max, ps) => Math.max(max, ps.sortOrder), -1);
+
+			const newPS: LocalPlaylistSong = {
+				id: crypto.randomUUID(),
+				playlistId,
+				songId,
+				sortOrder: maxSort + 1,
+			};
+			await playlistSongCollection.insert(newPS);
+
+			try {
+				const data = await fetchApi<{ playlist: PlaylistWithSongs }>(
+					`/playlists/${playlistId}/songs`,
+					{
+						method: 'POST',
+						body: JSON.stringify({ songId }),
+					}
+				);
+				if (state.currentPlaylist?.id === playlistId) {
+					state.currentPlaylist = data.playlist;
 				}
-			);
-			if (state.currentPlaylist?.id === playlistId) {
-				state.currentPlaylist = data.playlist;
+				return data.playlist;
+			} catch {
+				return null;
 			}
-			return data.playlist;
 		},
 
+		/** Remove song from playlist — removes from IndexedDB + backend. */
 		async removeSong(playlistId: string, songId: string) {
-			const data = await fetchApi<{ playlist: PlaylistWithSongs }>(
-				`/playlists/${playlistId}/songs/${songId}`,
-				{ method: 'DELETE' }
-			);
-			if (state.currentPlaylist?.id === playlistId) {
-				state.currentPlaylist = data.playlist;
+			const allPS = await playlistSongCollection.getAll();
+			const toRemove = allPS.find((ps) => ps.playlistId === playlistId && ps.songId === songId);
+			if (toRemove) {
+				await playlistSongCollection.delete(toRemove.id);
 			}
-			return data.playlist;
+
+			try {
+				const data = await fetchApi<{ playlist: PlaylistWithSongs }>(
+					`/playlists/${playlistId}/songs/${songId}`,
+					{ method: 'DELETE' }
+				);
+				if (state.currentPlaylist?.id === playlistId) {
+					state.currentPlaylist = data.playlist;
+				}
+				return data.playlist;
+			} catch {
+				return null;
+			}
 		},
 
+		/** Reorder songs in playlist — updates IndexedDB + backend. */
 		async reorderSongs(playlistId: string, songIds: string[]) {
-			const data = await fetchApi<{ playlist: PlaylistWithSongs }>(
-				`/playlists/${playlistId}/songs/reorder`,
-				{
-					method: 'PUT',
-					body: JSON.stringify({ songIds }),
+			const allPS = await playlistSongCollection.getAll();
+			const psForPlaylist = allPS.filter((ps) => ps.playlistId === playlistId);
+			for (let i = 0; i < songIds.length; i++) {
+				const ps = psForPlaylist.find((p) => p.songId === songIds[i]);
+				if (ps) {
+					await playlistSongCollection.update(ps.id, { sortOrder: i });
 				}
-			);
-			if (state.currentPlaylist?.id === playlistId) {
-				state.currentPlaylist = data.playlist;
 			}
-			return data.playlist;
+
+			try {
+				const data = await fetchApi<{ playlist: PlaylistWithSongs }>(
+					`/playlists/${playlistId}/songs/reorder`,
+					{
+						method: 'PUT',
+						body: JSON.stringify({ songIds }),
+					}
+				);
+				if (state.currentPlaylist?.id === playlistId) {
+					state.currentPlaylist = data.playlist;
+				}
+				return data.playlist;
+			} catch {
+				return null;
+			}
 		},
 	};
 }

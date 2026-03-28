@@ -10,6 +10,10 @@
 		DotsSixVertical,
 	} from '@manacore/shared-icons';
 	import type { Collection } from '$lib/types';
+	import { useAllCollections } from '$lib/data/queries';
+
+	// Live query — auto-updates on IndexedDB changes
+	const allCollections = useAllCollections();
 
 	let showModal = $state(false);
 	let editingCollection = $state<Collection | null>(null);
@@ -66,7 +70,7 @@
 	</div>
 
 	<!-- Collections List -->
-	{#if collectionsStore.collections.length === 0}
+	{#if allCollections.value.length === 0}
 		<div class="rounded-xl border border-dashed border-border p-8 text-center">
 			<div class="mb-4 text-4xl">📁</div>
 			<h2 class="mb-2 text-lg font-semibold text-foreground">No collections yet</h2>
@@ -83,7 +87,7 @@
 		</div>
 	{:else}
 		<div class="space-y-3">
-			{#each collectionsStore.collections as collection}
+			{#each allCollections.value as collection}
 				<div
 					class="flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/50"
 				>

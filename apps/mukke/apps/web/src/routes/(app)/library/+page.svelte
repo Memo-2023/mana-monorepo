@@ -8,6 +8,13 @@
 	import SongEditor from '$lib/components/SongEditor.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import type { Song } from '@mukke/shared';
+	import { useAllSongs } from '$lib/data/queries';
+	import type { LocalSong } from '$lib/data/local-store';
+
+	// Live query — auto-updates on IndexedDB changes
+	const allSongs = useAllSongs();
+	// Cast LocalSong[] to Song[] for compatibility with existing UI
+	let songs = $derived(allSongs.value as unknown as Song[]);
 
 	const tabs = ['songs', 'albums', 'artists', 'genres'] as const;
 
@@ -97,9 +104,6 @@
 
 	onMount(() => {
 		libraryStore.setActiveTab('songs');
-		if (libraryStore.songs.length === 0) {
-			libraryStore.loadSongs();
-		}
 	});
 
 	function formatDuration(seconds: number | null | undefined): string {
@@ -110,7 +114,7 @@
 	async function handleToggleFavorite(id: string, e: Event) {
 		e.preventDefault();
 		e.stopPropagation();
-		const song = libraryStore.songs.find((s) => s.id === id);
+		const song = songs.find((s) => s.id === id);
 		await libraryStore.toggleFavorite(id);
 		MukkeEvents.songFavorited(!song?.favorite);
 	}
@@ -122,7 +126,7 @@
 	}
 
 	function handlePlaySong(song: Song, index: number) {
-		playerStore.playSong(song, libraryStore.songs, index);
+		playerStore.playSong(song, songs, index);
 		MukkeEvents.songPlayed();
 	}
 
@@ -175,14 +179,11 @@
 	{:else if libraryStore.error}
 		<div class="text-center py-16">
 			<p class="text-red-500 mb-2">{libraryStore.error}</p>
-			<button onclick={() => libraryStore.loadSongs()} class="text-sm text-primary hover:underline">
-				Try again
-			</button>
 		</div>
 	{:else}
 		<!-- Songs Tab -->
 		{#if libraryStore.activeTab === 'songs'}
-			{#if libraryStore.songs.length === 0}
+			{#if songs.length === 0}
 				<div class="text-center py-16">
 					<svg
 						class="w-12 h-12 text-foreground-secondary mx-auto mb-3"
@@ -216,7 +217,7 @@
 						<span></span>
 					</div>
 					<!-- Song rows -->
-					{#each libraryStore.songs as song, index}
+					{#each songs as song, index}
 						<div
 							role="button"
 							tabindex="0"
@@ -472,7 +473,6 @@
 		open={editingSong !== null}
 		onclose={() => {
 			editingSong = null;
-			libraryStore.loadSongs();
 		}}
 	/>
 {/if}

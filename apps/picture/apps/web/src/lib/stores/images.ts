@@ -1,9 +1,10 @@
 import { writable } from 'svelte/store';
 import type { Image } from '$lib/api/images';
 
-export const images = writable<Image[]>([]);
+/**
+ * UI-only state for gallery image selection and filter toggles.
+ * Data reads are handled by useLiveQuery hooks in queries.ts.
+ */
+
 export const selectedImage = writable<Image | null>(null);
-export const isLoading = writable(false);
-export const hasMore = writable(true);
-export const currentPage = writable(1);
 export const showFavoritesOnly = writable(false);

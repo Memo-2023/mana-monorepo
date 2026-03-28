@@ -3,7 +3,12 @@
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { useAllFavorites, getFavoriteIds } from '$lib/data/queries';
 	import { api } from '$lib/api';
+
+	// Live query for favorites — auto-updates on IndexedDB changes
+	const allFavorites = useAllFavorites();
+	let favoriteIds = $derived(getFavoriteIds(allFavorites.value));
 
 	interface Location {
 		id: string;
@@ -36,7 +41,7 @@
 	// Collection detail view
 	let selectedCollection = $state<Collection | null>(null);
 
-	let favoriteLocations = $derived(allLocations.filter((l) => favoritesStore.isFavorite(l.id)));
+	let favoriteLocations = $derived(allLocations.filter((l) => favoriteIds.has(l.id)));
 
 	let selectedCollectionLocations = $derived(
 		selectedCollection
@@ -56,7 +61,6 @@
 		}
 
 		if (authStore.isAuthenticated) {
-			await favoritesStore.load();
 			await loadCollections();
 		}
 	});

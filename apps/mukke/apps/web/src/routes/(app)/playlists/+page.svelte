@@ -1,16 +1,15 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { playlistStore } from '$lib/stores/playlist.svelte';
 	import { MukkeEvents } from '@manacore/shared-utils/analytics';
+	import { useAllPlaylists } from '$lib/data/queries';
+
+	// Live query — auto-updates on IndexedDB changes
+	const allPlaylists = useAllPlaylists();
 
 	let showCreateModal = $state(false);
 	let newName = $state('');
 	let newDescription = $state('');
 	let isCreating = $state(false);
-
-	onMount(() => {
-		playlistStore.loadPlaylists();
-	});
 
 	async function handleCreate() {
 		if (!newName.trim()) return;
@@ -59,23 +58,7 @@
 		</button>
 	</div>
 
-	{#if playlistStore.isLoading}
-		<div class="flex items-center justify-center py-16">
-			<div
-				class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
-			></div>
-		</div>
-	{:else if playlistStore.error}
-		<div class="text-center py-16">
-			<p class="text-red-500 mb-2">{playlistStore.error}</p>
-			<button
-				onclick={() => playlistStore.loadPlaylists()}
-				class="text-sm text-primary hover:underline"
-			>
-				Try again
-			</button>
-		</div>
-	{:else if playlistStore.playlists.length === 0}
+	{#if allPlaylists.value.length === 0}
 		<div class="text-center py-16">
 			<svg
 				class="w-12 h-12 text-foreground-secondary mx-auto mb-3"
@@ -97,7 +80,7 @@
 		</div>
 	{:else}
 		<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-			{#each playlistStore.playlists as playlist}
+			{#each allPlaylists.value as playlist}
 				<a
 					href="/playlists/{playlist.id}"
 					class="bg-surface rounded-lg p-4 hover:bg-surface-hover transition-colors group relative"
@@ -105,12 +88,8 @@
 					<div
 						class="aspect-square bg-background rounded-lg mb-3 flex items-center justify-center overflow-hidden"
 					>
-						{#if playlist.coverArtPath && playlistStore.coverUrls[playlist.coverArtPath]}
-							<img
-								src={playlistStore.coverUrls[playlist.coverArtPath]}
-								alt={playlist.name}
-								class="w-full h-full object-cover"
-							/>
+						{#if playlist.coverArtPath && false}
+							<img src={false} alt={playlist.name} class="w-full h-full object-cover" />
 						{:else}
 							<svg
 								class="w-12 h-12 text-foreground-secondary"

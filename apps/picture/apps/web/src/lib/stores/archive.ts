@@ -1,7 +1,7 @@
-import { writable } from 'svelte/store';
-import type { Image } from '$lib/api/images';
+/**
+ * Archive store — UI-only state.
+ * Archived image reads are handled by useLiveQuery hooks in queries.ts.
+ */
 
-export const archivedImages = writable<Image[]>([]);
-export const isLoadingArchive = writable(false);
-export const hasMoreArchive = writable(true);
-export const currentArchivePage = writable(1);
+// This file is kept for backwards compatibility.
+// The archivedImages data is now provided via live query (useArchivedImages) from queries.ts.

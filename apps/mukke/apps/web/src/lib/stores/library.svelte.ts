@@ -1,3 +1,15 @@
+/**
+ * Library Store — Mutation + API Operations
+ *
+ * Reads for songs list are handled by useLiveQuery (see $lib/data/queries.ts).
+ * This store handles:
+ * - Mutations that write to IndexedDB (toggle favorite, delete)
+ * - API-only operations (upload, cover URLs, metadata extraction, write tags)
+ * - Aggregated views from backend (albums, artists, genres, stats)
+ *
+ * The live queries will automatically pick up local changes.
+ */
+
 import type {
 	Song,
 	Album,
@@ -8,10 +20,10 @@ import type {
 	SortDirection,
 } from '@mukke/shared';
 import { authStore } from './auth.svelte';
+import { songCollection, type LocalSong } from '$lib/data/local-store';
 import { trackEvent } from '@manacore/shared-utils/analytics';
 
 interface LibraryState {
-	songs: Song[];
 	albums: Album[];
 	artists: Artist[];
 	genres: Genre[];
@@ -37,7 +49,6 @@ function getBackendUrl(): string {
 
 function createLibraryStore() {
 	let state = $state<LibraryState>({
-		songs: [],
 		albums: [],
 		artists: [],
 		genres: [],
@@ -70,9 +81,6 @@ function createLibraryStore() {
 	}
 
 	return {
-		get songs() {
-			return state.songs;
-		},
 		get albums() {
 			return state.albums;
 		},
@@ -120,22 +128,7 @@ function createLibraryStore() {
 			}
 		},
 
-		async loadSongs() {
-			state.isLoading = true;
-			state.error = null;
-			try {
-				const data = await fetchApi<{ songs: Song[] }>(
-					`/songs?sort=${state.sortField}&direction=${state.sortDirection}`
-				);
-				state.songs = data.songs;
-				const coverPaths = data.songs.map((s) => s.coverArtPath).filter((p): p is string => !!p);
-				if (coverPaths.length > 0) this.loadCoverUrls(coverPaths);
-			} catch (e) {
-				state.error = e instanceof Error ? e.message : 'Failed to load songs';
-			}
-			state.isLoading = false;
-		},
-
+		/** Load albums from backend (aggregated view). */
 		async loadAlbums() {
 			state.isLoading = true;
 			state.error = null;
@@ -150,6 +143,7 @@ function createLibraryStore() {
 			state.isLoading = false;
 		},
 
+		/** Load artists from backend (aggregated view). */
 		async loadArtists() {
 			state.isLoading = true;
 			state.error = null;
@@ -162,6 +156,7 @@ function createLibraryStore() {
 			state.isLoading = false;
 		},
 
+		/** Load genres from backend (aggregated view). */
 		async loadGenres() {
 			state.isLoading = true;
 			state.error = null;
@@ -174,6 +169,7 @@ function createLibraryStore() {
 			state.isLoading = false;
 		},
 
+		/** Load stats from backend. */
 		async loadStats() {
 			try {
 				const data = await fetchApi<{ stats: LibraryStats }>('/library/stats');
@@ -183,57 +179,62 @@ function createLibraryStore() {
 			}
 		},
 
-		async loadAll() {
-			state.isLoading = true;
-			state.error = null;
-			try {
-				const [songsData, statsData] = await Promise.all([
-					fetchApi<{ songs: Song[] }>(
-						`/songs?sort=${state.sortField}&direction=${state.sortDirection}`
-					),
-					fetchApi<{ stats: LibraryStats }>('/library/stats'),
-				]);
-				state.songs = songsData.songs;
-				state.stats = statsData.stats;
-			} catch (e) {
-				state.error = e instanceof Error ? e.message : 'Failed to load library';
-			}
-			state.isLoading = false;
-		},
-
+		/** Toggle favorite — writes to IndexedDB instantly. */
 		async toggleFavorite(id: string) {
-			const data = await fetchApi<{ song: Song }>(`/songs/${id}/favorite`, {
-				method: 'PUT',
-			});
-			state.songs = state.songs.map((s) => (s.id === id ? data.song : s));
-			return data.song;
+			const local = await songCollection.get(id);
+			if (local) {
+				await songCollection.update(id, { favorite: !local.favorite } as Partial<LocalSong>);
+			}
+			// Also update backend
+			try {
+				await fetchApi<{ song: Song }>(`/songs/${id}/favorite`, { method: 'PUT' });
+			} catch {
+				// Sync will reconcile
+			}
 		},
 
 		async incrementPlayCount(id: string) {
-			const data = await fetchApi<{ song: Song }>(`/songs/${id}/play`, {
-				method: 'PUT',
-			});
-			state.songs = state.songs.map((s) => (s.id === id ? data.song : s));
-			return data.song;
+			const local = await songCollection.get(id);
+			if (local) {
+				await songCollection.update(id, {
+					playCount: (local.playCount || 0) + 1,
+					lastPlayedAt: new Date().toISOString(),
+				} as Partial<LocalSong>);
+			}
+			try {
+				await fetchApi<{ song: Song }>(`/songs/${id}/play`, { method: 'PUT' });
+			} catch {
+				// Sync will reconcile
+			}
 		},
 
+		/** Search songs from IndexedDB. */
 		async searchSongs(query: string) {
-			const data = await fetchApi<{ songs: Song[] }>(
-				`/songs/search?q=${encodeURIComponent(query)}`
-			);
-			return data.songs;
+			const all = await songCollection.getAll();
+			const q = query.toLowerCase();
+			return all
+				.filter(
+					(s) =>
+						s.title?.toLowerCase().includes(q) ||
+						s.artist?.toLowerCase().includes(q) ||
+						s.album?.toLowerCase().includes(q)
+				)
+				.slice(0, 20) as unknown as Song[];
 		},
 
+		/** Delete song — removes from IndexedDB instantly + backend. */
 		async deleteSong(id: string) {
-			await fetchApi(`/songs/${id}`, { method: 'DELETE' });
-			state.songs = state.songs.filter((s) => s.id !== id);
+			await songCollection.delete(id);
+			try {
+				await fetchApi(`/songs/${id}`, { method: 'DELETE' });
+			} catch {
+				// Sync will reconcile
+			}
 		},
 
 		setActiveTab(tab: 'songs' | 'albums' | 'artists' | 'genres') {
 			state.activeTab = tab;
-			if (tab === 'songs' && state.songs.length === 0) {
-				this.loadSongs();
-			} else if (tab === 'albums' && state.albums.length === 0) {
+			if (tab === 'albums' && state.albums.length === 0) {
 				this.loadAlbums();
 			} else if (tab === 'artists' && state.artists.length === 0) {
 				this.loadArtists();
@@ -242,16 +243,7 @@ function createLibraryStore() {
 			}
 		},
 
-		async setSortField(field: SortField) {
-			state.sortField = field;
-			await this.loadSongs();
-		},
-
-		async setSortDirection(direction: SortDirection) {
-			state.sortDirection = direction;
-			await this.loadSongs();
-		},
-
+		/** Upload song via API, then store metadata in IndexedDB. */
 		async uploadSong(file: File) {
 			const uploadData = await fetchApi<{ song: Song; uploadUrl: string }>('/songs/upload', {
 				method: 'POST',
@@ -267,25 +259,77 @@ function createLibraryStore() {
 				headers: { 'Content-Type': file.type },
 			});
 
-			state.songs = [uploadData.song, ...state.songs];
+			// Write to IndexedDB so liveQuery picks it up
+			const localSong: LocalSong = {
+				id: uploadData.song.id,
+				title: uploadData.song.title || file.name,
+				artist: uploadData.song.artist ?? null,
+				album: uploadData.song.album ?? null,
+				albumArtist: uploadData.song.albumArtist ?? null,
+				genre: uploadData.song.genre ?? null,
+				trackNumber: uploadData.song.trackNumber ?? null,
+				year: uploadData.song.year ?? null,
+				duration: uploadData.song.duration ?? null,
+				storagePath: uploadData.song.storagePath,
+				coverArtPath: uploadData.song.coverArtPath ?? null,
+				fileSize: uploadData.song.fileSize ?? null,
+				bpm: uploadData.song.bpm ?? null,
+				favorite: false,
+				playCount: 0,
+				lastPlayedAt: null,
+			};
+			await songCollection.insert(localSong);
+
 			trackEvent('song_uploaded');
 			return uploadData.song;
 		},
 
+		/** Update song metadata — writes to IndexedDB + backend. */
 		async updateSongMetadata(id: string, data: Partial<Song>) {
-			const result = await fetchApi<{ song: Song }>(`/songs/${id}`, {
-				method: 'PUT',
-				body: JSON.stringify(data),
-			});
-			state.songs = state.songs.map((s) => (s.id === id ? result.song : s));
-			return result.song;
+			const updateData: Partial<LocalSong> = {};
+			if (data.title !== undefined) updateData.title = data.title;
+			if (data.artist !== undefined) updateData.artist = data.artist ?? null;
+			if (data.album !== undefined) updateData.album = data.album ?? null;
+			if (data.albumArtist !== undefined) updateData.albumArtist = data.albumArtist ?? null;
+			if (data.genre !== undefined) updateData.genre = data.genre ?? null;
+			if (data.trackNumber !== undefined) updateData.trackNumber = data.trackNumber ?? null;
+			if (data.year !== undefined) updateData.year = data.year ?? null;
+			if (data.bpm !== undefined) updateData.bpm = data.bpm ?? null;
+
+			await songCollection.update(id, updateData);
+
+			// Also update backend
+			try {
+				const result = await fetchApi<{ song: Song }>(`/songs/${id}`, {
+					method: 'PUT',
+					body: JSON.stringify(data),
+				});
+				return result.song;
+			} catch {
+				// Sync will reconcile
+				return data as Song;
+			}
 		},
 
+		/** Extract metadata from file — server-side operation, then update IndexedDB. */
 		async extractMetadata(id: string) {
 			const result = await fetchApi<{ song: Song }>(`/songs/${id}/extract-metadata`, {
 				method: 'POST',
 			});
-			state.songs = state.songs.map((s) => (s.id === id ? result.song : s));
+			// Update IndexedDB with extracted metadata
+			const updateData: Partial<LocalSong> = {
+				title: result.song.title,
+				artist: result.song.artist ?? null,
+				album: result.song.album ?? null,
+				albumArtist: result.song.albumArtist ?? null,
+				genre: result.song.genre ?? null,
+				trackNumber: result.song.trackNumber ?? null,
+				year: result.song.year ?? null,
+				duration: result.song.duration ?? null,
+				coverArtPath: result.song.coverArtPath ?? null,
+				bpm: result.song.bpm ?? null,
+			};
+			await songCollection.update(id, updateData);
 			return result.song;
 		},
 

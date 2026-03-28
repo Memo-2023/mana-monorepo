@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { questionsStore, collectionsStore } from '$lib/stores';
-	import { QuestionSkeleton, ErrorAlert } from '$lib/components';
+	import { collectionsStore } from '$lib/stores';
+	import { ErrorAlert } from '$lib/components';
 	import {
 		MagnifyingGlass,
 		Funnel,
@@ -10,9 +10,35 @@
 		Archive,
 	} from '@manacore/shared-icons';
 	import type { QuestionStatus, ResearchDepth } from '$lib/types';
+	import {
+		useAllQuestions,
+		useAllCollections,
+		filterByCollection,
+		filterByStatus,
+		searchQuestions,
+	} from '$lib/data/queries';
+
+	// Live queries — auto-update on IndexedDB changes
+	const allQuestions = useAllQuestions();
+	const allCollections = useAllCollections();
 
 	let searchQuery = $state('');
 	let statusFilter = $state<QuestionStatus | ''>('');
+
+	// Derived filtered list — pure functions over liveQuery data
+	let filteredQuestions = $derived.by(() => {
+		let result = allQuestions.value;
+		result = filterByCollection(result, collectionsStore.selectedId);
+		if (statusFilter) result = filterByStatus(result, statusFilter);
+		if (searchQuery) result = searchQuestions(result, searchQuery);
+		return result;
+	});
+
+	let selectedCollection = $derived(
+		collectionsStore.selectedId
+			? allCollections.value.find((c) => c.id === collectionsStore.selectedId)
+			: null
+	);
 
 	const statusIcons = {
 		open: { icon: Clock, color: 'text-gray-500' },
@@ -26,14 +52,6 @@
 		standard: 'Standard',
 		deep: 'Deep',
 	};
-
-	async function handleSearch() {
-		const filters: Record<string, unknown> = {};
-		if (searchQuery) filters.search = searchQuery;
-		if (statusFilter) filters.status = statusFilter;
-		if (collectionsStore.selectedId) filters.collectionId = collectionsStore.selectedId;
-		await questionsStore.load(filters);
-	}
 
 	function formatDate(dateString: string): string {
 		const date = new Date(dateString);
@@ -57,10 +75,10 @@
 	<!-- Header -->
 	<div class="mb-6">
 		<h1 class="text-2xl font-bold text-foreground">
-			{collectionsStore.selected ? collectionsStore.selected.name : 'All Questions'}
+			{selectedCollection ? selectedCollection.name : 'All Questions'}
 		</h1>
 		<p class="mt-1 text-muted-foreground">
-			{questionsStore.total} question{questionsStore.total !== 1 ? 's' : ''}
+			{filteredQuestions.length} question{filteredQuestions.length !== 1 ? 's' : ''}
 		</p>
 	</div>
 
@@ -73,7 +91,6 @@
 			<input
 				type="text"
 				bind:value={searchQuery}
-				onkeyup={(e) => e.key === 'Enter' && handleSearch()}
 				placeholder="Search questions..."
 				class="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 			/>
@@ -81,7 +98,6 @@
 
 		<select
 			bind:value={statusFilter}
-			onchange={handleSearch}
 			class="rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
 		>
 			<option value="">All Status</option>
@@ -90,31 +106,17 @@
 			<option value="answered">Answered</option>
 			<option value="archived">Archived</option>
 		</select>
-
-		<button
-			onclick={handleSearch}
-			class="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-foreground hover:bg-secondary-hover"
-		>
-			<Funnel class="h-5 w-5" />
-			<span>Filter</span>
-		</button>
 	</div>
 
 	<!-- Error -->
-	{#if questionsStore.error}
+	{#if collectionsStore.error}
 		<div class="mb-6">
-			<ErrorAlert
-				message={questionsStore.error}
-				onRetry={() => questionsStore.load(questionsStore.filters)}
-				onDismiss={() => {}}
-			/>
+			<ErrorAlert message={collectionsStore.error} onRetry={() => {}} onDismiss={() => {}} />
 		</div>
 	{/if}
 
 	<!-- Questions List -->
-	{#if questionsStore.loading}
-		<QuestionSkeleton count={5} />
-	{:else if questionsStore.questions.length === 0}
+	{#if filteredQuestions.length === 0}
 		<div class="py-12 text-center">
 			<div class="mb-4 text-6xl">🤔</div>
 			<h2 class="mb-2 text-xl font-semibold text-foreground">No questions yet</h2>
@@ -130,7 +132,7 @@
 		</div>
 	{:else}
 		<div class="space-y-3">
-			{#each questionsStore.questions as question}
+			{#each filteredQuestions as question}
 				{@const StatusIcon = statusIcons[question.status]?.icon || Clock}
 				{@const statusColor = statusIcons[question.status]?.color || 'text-gray-500'}
 

@@ -1,8 +1,9 @@
 /**
- * Photos Store — Fetches from mana-media directly, favorites local-first.
+ * Photos Store — Server-fetched photos from mana-media + local-first mutations.
  *
- * Photo files live on mana-media. Albums/favorites/tags are local (Dexie).
- * This store calls mana-media for photo listing and enriches with local data.
+ * Photo files live on mana-media (server-side, not in Dexie).
+ * Favorites are local-first via Dexie — reads handled by live queries in queries.ts.
+ * This store handles server-fetched photo listing, selection, and favorite mutations.
  */
 
 import { favoriteCollection, type LocalFavorite } from '$lib/data/local-store';
@@ -32,7 +33,7 @@ async function mediaFetch<T>(path: string, options: RequestInit = {}): Promise<T
 	return response.json();
 }
 
-// State
+// State — server-fetched photos (not local-first)
 let photos = $state<Photo[]>([]);
 let loading = $state(false);
 let error = $state<string | null>(null);
@@ -45,13 +46,6 @@ let filters = $state<PhotoFilters>({
 });
 let stats = $state<PhotoStats | null>(null);
 let selectedPhoto = $state<Photo | null>(null);
-
-/** Enrich photos with local favorite status. */
-async function enrichWithFavorites(items: Photo[]): Promise<Photo[]> {
-	const favs = await favoriteCollection.getAll();
-	const favMediaIds = new Set(favs.map((f) => f.mediaId));
-	return items.map((p) => ({ ...p, isFavorited: favMediaIds.has(p.id) }));
-}
 
 export const photoStore = {
 	get photos() {
@@ -105,8 +99,7 @@ export const photoStore = {
 			);
 
 			if (result) {
-				const enriched = await enrichWithFavorites(result.items);
-				photos = reset ? enriched : [...photos, ...enriched];
+				photos = reset ? result.items : [...photos, ...result.items];
 				hasMore = result.hasMore;
 				filters = { ...filters, offset: (filters.offset || 0) + result.items.length };
 			}
@@ -141,7 +134,7 @@ export const photoStore = {
 		selectedPhoto = photo;
 	},
 
-	/** Toggle favorite — local-first via Dexie. */
+	/** Toggle favorite — local-first via Dexie. Live query handles read reactivity. */
 	async toggleFavorite(mediaId: string) {
 		try {
 			const existing = await favoriteCollection.getAll();
@@ -160,6 +153,7 @@ export const photoStore = {
 			}
 
 			PhotosEvents.photoFavorited(isFavorited);
+			// Update server-fetched photos in-memory for immediate UI feedback
 			photos = photos.map((p) => (p.id === mediaId ? { ...p, isFavorited } : p));
 			if (selectedPhoto?.id === mediaId) {
 				selectedPhoto = { ...selectedPhoto, isFavorited };

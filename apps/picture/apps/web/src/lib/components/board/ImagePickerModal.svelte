@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { authStore } from '$lib/stores/auth.svelte';
-	import { images, isLoading as isLoadingImages } from '$lib/stores/images';
 	import { canvasItems, addCanvasItem } from '$lib/stores/canvas';
-	import { getImages } from '$lib/api/images';
 	import { addBoardItem } from '$lib/api/boardItems';
 	import { toastStore, Modal, Button } from '@manacore/shared-ui';
 	import { MagnifyingGlass, Image as ImageIcon, Check } from '@manacore/shared-icons';
+	import { getContext } from 'svelte';
+	import type { Image } from '$lib/api/images';
 
 	interface Props {
 		open: boolean;
@@ -15,41 +14,13 @@
 
 	let { open, onClose }: Props = $props();
 
+	const allImages: { value: Image[] } = getContext('allImages');
+
 	let selectedImages = $state<Set<string>>(new Set());
 	let isAdding = $state(false);
 	let searchQuery = $state('');
-	let currentPage = $state(1);
-	let hasMore = $state(true);
 
 	const boardId = $derived($page.params.id);
-
-	// Load images when modal opens
-	$effect(() => {
-		if (open && authStore.user) {
-			loadImages();
-		}
-	});
-
-	async function loadImages() {
-		if (!authStore.user) return;
-
-		isLoadingImages.set(true);
-		try {
-			const data = await getImages({
-				page: 1,
-				limit: 50,
-				archived: false,
-			});
-			images.set(data);
-			currentPage = 1;
-			hasMore = data.length === 50;
-		} catch (error) {
-			console.error('Error loading images:', error);
-			toastStore.show('Fehler beim Laden der Bilder', 'error');
-		} finally {
-			isLoadingImages.set(false);
-		}
-	}
 
 	function toggleImageSelection(imageId: string) {
 		if (selectedImages.has(imageId)) {
@@ -83,7 +54,7 @@
 				}
 
 				// Get image details
-				const image = $images.find((img) => img.id === imageId);
+				const image = allImages.value.find((img) => img.id === imageId);
 				if (!image) continue;
 
 				// Add to board
@@ -116,7 +87,7 @@
 	}
 
 	function handleSelectAll() {
-		const availableImages = $images.filter((img) => !isImageAlreadyOnBoard(img.id));
+		const availableImages = allImages.value.filter((img) => !isImageAlreadyOnBoard(img.id));
 		selectedImages = new Set(availableImages.map((img) => img.id));
 	}
 
@@ -127,8 +98,10 @@
 
 	const filteredImages = $derived(
 		searchQuery.trim()
-			? $images.filter((img) => img.prompt?.toLowerCase().includes(searchQuery.toLowerCase()))
-			: $images
+			? allImages.value.filter((img) =>
+					img.prompt?.toLowerCase().includes(searchQuery.toLowerCase())
+				)
+			: allImages.value
 	);
 </script>
 
@@ -175,13 +148,7 @@
 
 		<!-- Images Grid -->
 		<div class="flex-1 overflow-y-auto">
-			{#if $isLoadingImages}
-				<div class="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-5">
-					{#each Array(15) as _}
-						<div class="aspect-square animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
-					{/each}
-				</div>
-			{:else if filteredImages.length === 0}
+			{#if filteredImages.length === 0}
 				<div class="flex h-full flex-col items-center justify-center py-12">
 					<ImageIcon size={64} weight="thin" class="text-gray-300 dark:text-gray-600" />
 					<p class="mt-4 text-gray-600 dark:text-gray-400">

@@ -6,8 +6,13 @@
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
+	import { useAllFavorites, getFavoriteIds } from '$lib/data/queries';
 	import { api } from '$lib/api';
 	import { isOpenNow } from '$lib/opening-hours';
+
+	// Live query for favorites — auto-updates on IndexedDB changes
+	const allFavorites = useAllFavorites();
+	let favoriteIds = $derived(getFavoriteIds(allFavorites.value));
 
 	interface TimelineEntry {
 		year: string;
@@ -138,10 +143,6 @@
 			console.error('Failed to load location:', err);
 		} finally {
 			loading = false;
-		}
-
-		if (authStore.isAuthenticated) {
-			favoritesStore.load();
 		}
 
 		// Load reviews
@@ -406,11 +407,9 @@
 				<button
 					class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition-all hover:bg-black/50"
 					onclick={() => favoritesStore.toggle(location!.id)}
-					title={favoritesStore.isFavorite(location.id)
-						? $_('favorites.remove')
-						: $_('favorites.add')}
+					title={favoriteIds.has(location.id) ? $_('favorites.remove') : $_('favorites.add')}
 				>
-					{#if favoritesStore.isFavorite(location.id)}
+					{#if favoriteIds.has(location.id)}
 						<svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
 							<path
 								d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"

@@ -1,9 +1,17 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
-	import { albumStore } from '$lib/stores/albums.svelte';
+	import { getContext } from 'svelte';
+	import { albumMutations } from '$lib/stores/albums.svelte';
+	import { enrichAlbumsWithCounts } from '$lib/data/queries';
 	import AlbumGrid from '$lib/components/albums/AlbumGrid.svelte';
 	import CreateAlbumModal from '$lib/components/albums/CreateAlbumModal.svelte';
+	import type { Album, AlbumItem } from '@photos/shared';
+
+	const allAlbums: { readonly value: Album[] } = getContext('albums');
+	const allAlbumItems: { readonly value: AlbumItem[] } = getContext('albumItems');
+
+	let albums = $derived(enrichAlbumsWithCounts(allAlbums.value, allAlbumItems.value));
 
 	let showCreateModal = $state(false);
 
@@ -12,7 +20,7 @@
 	}
 
 	async function handleCreateAlbum(data: { name: string; description?: string }) {
-		const album = await albumStore.createAlbum(data);
+		const album = await albumMutations.createAlbum(data);
 		if (album) {
 			showCreateModal = false;
 			goto(`/albums/${album.id}`);
@@ -47,11 +55,7 @@
 		</button>
 	</header>
 
-	{#if albumStore.error}
-		<div class="error-message">
-			<p>{albumStore.error}</p>
-		</div>
-	{:else if albumStore.albums.length === 0 && !albumStore.loading}
+	{#if albums.length === 0}
 		<div class="empty-state">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -76,11 +80,7 @@
 			</button>
 		</div>
 	{:else}
-		<AlbumGrid
-			albums={albumStore.albums}
-			loading={albumStore.loading}
-			onAlbumClick={handleAlbumClick}
-		/>
+		<AlbumGrid {albums} loading={false} onAlbumClick={handleAlbumClick} />
 	{/if}
 
 	{#if showCreateModal}

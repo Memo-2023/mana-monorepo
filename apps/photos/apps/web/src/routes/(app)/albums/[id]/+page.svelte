@@ -1,20 +1,22 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { albumStore } from '$lib/stores/albums.svelte';
+	import { albumMutations } from '$lib/stores/albums.svelte';
 	import { photoStore } from '$lib/stores/photos.svelte';
+	import { getAlbumById, getAlbumItemsForAlbum } from '$lib/data/queries';
 	import PhotoGrid from '$lib/components/gallery/PhotoGrid.svelte';
 	import PhotoDetailModal from '$lib/components/gallery/PhotoDetailModal.svelte';
+	import type { Album, AlbumItem, Photo } from '@photos/shared';
+
+	const allAlbums: { readonly value: Album[] } = getContext('albums');
+	const allAlbumItems: { readonly value: AlbumItem[] } = getContext('albumItems');
 
 	const albumId = $derived($page.params.id);
-
-	onMount(async () => {
-		if (albumId) {
-			await albumStore.loadAlbum(albumId);
-		}
-	});
+	let currentAlbum = $derived(getAlbumById(allAlbums.value, albumId));
+	let albumItems = $derived(getAlbumItemsForAlbum(allAlbumItems.value, albumId));
+	let albumPhotos = $derived(albumItems.map((item) => ({ id: item.mediaId }) as Photo));
 
 	function handlePhotoClick(photo: any) {
 		photoStore.selectPhoto(photo);
@@ -26,7 +28,7 @@
 
 	async function handleDeleteAlbum() {
 		if (confirm($_('albums.deleteConfirm'))) {
-			const success = await albumStore.deleteAlbum(albumId);
+			const success = await albumMutations.deleteAlbum(albumId);
 			if (success) {
 				goto('/albums');
 			}
@@ -35,19 +37,15 @@
 </script>
 
 <svelte:head>
-	<title>{albumStore.currentAlbum?.name || $_('albums.title')} | Photos</title>
+	<title>{currentAlbum?.name || $_('albums.title')} | Photos</title>
 </svelte:head>
 
 <div class="album-detail-page">
-	{#if albumStore.loading}
+	{#if !currentAlbum}
 		<div class="loading-state">
 			<div class="animate-pulse text-muted-foreground">{$_('common.loading')}</div>
 		</div>
-	{:else if albumStore.error}
-		<div class="error-message">
-			<p>{albumStore.error}</p>
-		</div>
-	{:else if albumStore.currentAlbum}
+	{:else}
 		<header class="page-header">
 			<div class="flex items-center gap-3">
 				<button class="icon-btn" onclick={() => goto('/albums')} title="Back">
@@ -66,15 +64,15 @@
 					</svg>
 				</button>
 				<div>
-					<h1 class="text-2xl font-bold">{albumStore.currentAlbum.name}</h1>
-					{#if albumStore.currentAlbum.description}
-						<p class="text-sm text-muted-foreground">{albumStore.currentAlbum.description}</p>
+					<h1 class="text-2xl font-bold">{currentAlbum.name}</h1>
+					{#if currentAlbum.description}
+						<p class="text-sm text-muted-foreground">{currentAlbum.description}</p>
 					{/if}
 				</div>
 			</div>
 			<div class="flex items-center gap-2">
 				<span class="text-sm text-muted-foreground">
-					{albumStore.albumPhotos.length}
+					{albumPhotos.length}
 					{$_('albums.items')}
 				</span>
 				<button
@@ -101,13 +99,13 @@
 			</div>
 		</header>
 
-		{#if albumStore.albumPhotos.length === 0}
+		{#if albumPhotos.length === 0}
 			<div class="empty-state">
 				<p class="text-muted-foreground">{$_('gallery.empty')}</p>
 			</div>
 		{:else}
 			<PhotoGrid
-				photos={albumStore.albumPhotos}
+				photos={albumPhotos}
 				loading={false}
 				hasMore={false}
 				onPhotoClick={handlePhotoClick}
