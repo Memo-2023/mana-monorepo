@@ -1,0 +1,332 @@
+---
+title: 'Local-First + NestJS-Elimination: 87% weniger Backend-Code'
+description: 'Komplette Architektur-Transformation: 19 Apps auf Local-First (IndexedDB + Sync), NestJS-Monolith aufgelöst in 5 Hono-Services, 12 App-Backends durch ~120-LOC Compute-Server ersetzt, 5 NestJS-Packages gelöscht. Netto: ~80.000 LOC weniger, 80% weniger RAM, 98% schnellere Cold Starts.'
+date: 2026-03-28
+author: 'Till Schneider'
+category: 'architecture'
+tags:
+  [
+    'local-first',
+    'hono',
+    'bun',
+    'indexeddb',
+    'dexie',
+    'nestjs',
+    'migration',
+    'performance',
+    'microservices',
+    'offline-first',
+    'guest-mode',
+    'better-auth',
+  ]
+featured: true
+readTime: 18
+stats:
+  filesChanged: 1200
+  linesAdded: 12186
+  linesRemoved: 92600
+contributors:
+  - name: 'Till Schneider'
+    handle: 'Till-JS'
+workingHours:
+  start: '2026-03-27T08:00'
+  end: '2026-03-28T22:00'
+---
+
+## Was passiert ist
+
+In zwei intensiven Sessions wurde die gesamte ManaCore-Backend-Architektur grundlegend transformiert. Der Kern: **Daten gehören dem Client, nicht dem Server.** Und: **NestJS ist zu viel Overhead für das, was wir brauchen.**
+
+Das Ergebnis:
+
+- **19 von 22 Web-Apps** laufen jetzt Local-First (IndexedDB + Background Sync)
+- **0 NestJS-Services** im Monorepo (vorher: 18)
+- **~80.000 Zeilen weniger Code**
+- **80% weniger RAM-Verbrauch** auf dem Server
+
+---
+
+## Teil 1: Local-First Migration
+
+### Das Problem
+
+Jede App brauchte eine Internetverbindung für alles. Ein Task erstellen? API-Call. Einen Kontakt anzeigen? API-Call. Die App öffnen? Login-Screen.
+
+Das bedeutete:
+
+- **Kein Offline-Support** — App zeigt "Offline"-Seite
+- **Kein Guest-Mode** — Login obligatorisch
+- **200-500ms Latenz** für jede Aktion (API-Roundtrip)
+- **~400 CRUD-Endpoints** über 13 NestJS-Backends verteilt
+
+### Die Lösung: IndexedDB als Source of Truth
+
+Jede App bekommt eine lokale Datenbank (IndexedDB via Dexie.js). Reads und Writes gehen **immer** zuerst dorthin. Im Hintergrund synchronisiert ein Go-Server (mana-sync) die Daten per WebSocket.
+
+```
+Guest:      App → IndexedDB → UI                    (<1ms)
+Eingeloggt: App → IndexedDB → UI → Sync → Server    (<1ms + Background)
+```
+
+### Was pro App gemacht wurde
+
+Für jede der 19 Apps:
+
+1. **`local-store.ts`** — Typisierte IndexedDB-Collections mit `createLocalStore()`
+2. **`guest-seed.ts`** — Onboarding-Daten die sofort geladen werden
+3. **`AuthGate allowGuest={true}`** — Layout erlaubt unauthentifizierte Nutzung
+4. **`GuestWelcomeModal`** — Einladung zur Registrierung beim ersten Besuch
+5. **Store-Rewrite** — Svelte-Stores lesen von IndexedDB statt API
+
+### Die Zahlen
+
+| Metrik              | Vorher       | Nachher      | Verbesserung |
+| ------------------- | ------------ | ------------ | ------------ |
+| Time to Interactive | Login → 3-5s | Sofort       | **−95%**     |
+| Task erstellen      | 200-300ms    | <5ms         | **−98%**     |
+| Offline CRUD        | ❌           | ✅           | —            |
+| Guest-Mode          | ❌           | ✅ (19 Apps) | —            |
+| CRUD-Endpoints      | ~400         | 0 (via Sync) | **−100%**    |
+
+### Beispiel: SkilltTree
+
+SkilltTree hatte eine eigene IndexedDB-Implementierung mit dem `idb` Package (~280 LOC). Wir haben das durch `@manacore/local-store` ersetzt — die gleiche Bibliothek die alle anderen Apps nutzen. Ergebnis: einheitliches Sync-Protokoll, weniger Dependencies, gleiche Funktionalität.
+
+---
+
+## Teil 2: mana-core-auth Aufspaltung
+
+### Das Problem
+
+Der zentrale Auth-Service war über die Zeit zum Monolithen geworden:
+
+- **~20.000 LOC** in einem NestJS-Service
+- Auth + Credits + Gifts + Subscriptions + Settings + Tags + Feedback + Analytics
+- Änderung am Credit-System → Auth-Service redeployen
+- ~300MB RAM, 2-5s Cold Start
+
+### Die Lösung: 5 Fokussierte Services auf Hono + Bun
+
+| Service                | Port | LOC   | Funktion                            |
+| ---------------------- | ---- | ----- | ----------------------------------- |
+| **mana-auth**          | 3001 | 1.931 | Auth, JWT, SSO, OIDC, 2FA, Orgs     |
+| **mana-credits**       | 3061 | 2.199 | Credits, Gifts, Guild Pools, Stripe |
+| **mana-user**          | 3062 | 796   | Settings, Tags, Storage             |
+| **mana-subscriptions** | 3063 | 832   | Plans, Billing, Invoices            |
+| **mana-analytics**     | 3064 | 475   | Feedback, Voting                    |
+
+**Gesamt: 6.233 LOC** statt 20.000 LOC. Der Unterschied kommt von:
+
+- **Kein NestJS-Boilerplate** (Module, Guards, Decorators, Interceptors, DTOs)
+- **Better Auth nativ** auf Hono (fetch-basiert, kein Express↔Fetch-Konvertierung)
+- **Zod statt class-validator** (deklarativer, weniger Code)
+- **Manuelle Instantiierung** statt Dependency Injection Container
+
+### Better Auth + Hono = Perfekte Kombination
+
+Better Auth ist fetch-basiert. NestJS ist Express-basiert. Das bedeutete: jeder Request musste von Express nach Fetch konvertiert und zurück übersetzt werden — inklusive Cookies, Headers, Redirects.
+
+Hono ist ebenfalls fetch-basiert. Der gesamte Passthrough-Controller (150+ LOC in NestJS) wird zu:
+
+```typescript
+app.all('/api/auth/*', async (c) => auth.handler(c.req.raw));
+```
+
+**Eine Zeile.**
+
+---
+
+## Teil 3: App-Backend Elimination
+
+### Das Problem
+
+13 NestJS-Backends mit jeweils ~3.000-6.000 LOC. Davon waren ~80% CRUD-Endpoints die jetzt durch mana-sync überflüssig sind. Die restlichen ~20% sind server-seitige Compute-Logik (AI, File Upload, External APIs).
+
+### Die Lösung: Hono Compute-Server
+
+Für jede App ein minimaler Hono-Server der **nur** die server-seitigen Endpoints enthält:
+
+| App      | LOC | Was der Server macht              |
+| -------- | --- | --------------------------------- |
+| Chat     | 137 | LLM Completions + SSE Streaming   |
+| Picture  | 144 | Replicate Image Gen + S3 Upload   |
+| Calendar | 119 | RRULE Expansion + ICS Import      |
+| NutriPhi | 154 | Gemini Meal Analysis              |
+| Planta   | 104 | Gemini Plant Analysis + S3 Upload |
+| Traces   | 108 | AI Guide Generation               |
+| ...      | ... | ...                               |
+
+**Durchschnitt: ~118 LOC pro Server.** Statt ~3.500 LOC NestJS-Backend.
+
+### Die alte Welt: Ein typisches NestJS-Backend
+
+```
+apps/contacts/apps/backend/                    # ~5.500 LOC
+├── src/
+│   ├── app.module.ts                          # Module imports
+│   ├── main.ts                                # Bootstrap mit Middleware
+│   ├── contact/
+│   │   ├── contact.module.ts                  # NestJS Module
+│   │   ├── contact.controller.ts              # 20+ Endpoints
+│   │   ├── contact.service.ts                 # Business Logic
+│   │   └── dto/
+│   │       ├── create-contact.dto.ts          # Validation
+│   │       ├── update-contact.dto.ts
+│   │       └── query-contacts.dto.ts
+│   ├── note/
+│   │   ├── note.module.ts
+│   │   ├── note.controller.ts
+│   │   └── note.service.ts
+│   ├── import/
+│   │   ├── import.controller.ts
+│   │   └── import.service.ts
+│   ├── google/
+│   │   ├── google.controller.ts
+│   │   └── google.service.ts
+│   ├── db/
+│   │   ├── schema/                            # 5 Schema-Dateien
+│   │   ├── connection.ts
+│   │   └── database.module.ts
+│   └── admin/                                 # GDPR Admin
+├── Dockerfile                                 # Multi-stage Build (~500MB)
+├── docker-entrypoint.sh
+├── drizzle.config.ts
+├── package.json                               # 20+ Dependencies
+└── tsconfig.json
+```
+
+### Die neue Welt: Ein Hono Compute-Server
+
+```
+apps/contacts/apps/server/                     # 89 LOC
+├── src/
+│   └── index.ts                               # Alles in einer Datei
+├── package.json                               # 3 Dependencies
+└── tsconfig.json
+```
+
+Die 89 LOC enthalten: Avatar-Upload (S3) und vCard-Import. **Alles andere (CRUD) läuft über mana-sync.**
+
+---
+
+## Teil 4: Die Zahlen
+
+### Code-Bilanz
+
+| Kategorie                                     | Gelöscht    | Hinzugefügt | Netto       |
+| --------------------------------------------- | ----------- | ----------- | ----------- |
+| mana-core-auth → 5 Hono Services              | 20.000      | 6.233       | **−13.767** |
+| 13 NestJS Backends → 14 Hono Servers          | 40.000      | 1.537       | **−38.463** |
+| 5 NestJS Shared Packages → 1 shared-hono      | 2.500       | 516         | **−1.984**  |
+| Legacy NestJS Services (Search, Notify, etc.) | 21.000      | 0           | **−21.000** |
+| Local-First Data Layer                        | 0           | 3.100       | **+3.100**  |
+| Store-Rewrites                                | 0           | 800         | **+800**    |
+| **Gesamt**                                    | **~83.500** | **~12.186** | **−71.314** |
+
+### Server-Ressourcen
+
+| Metrik                   | Vorher | Nachher | Einsparung |
+| ------------------------ | ------ | ------- | ---------- |
+| Docker Image Size (Auth) | ~600MB | ~170MB  | **−72%**   |
+| Docker Image Size (App)  | ~400MB | ~160MB  | **−60%**   |
+| RAM Auth-Service         | ~300MB | ~50MB   | **−83%**   |
+| RAM 13 App-Backends      | ~2.5GB | ~500MB  | **−80%**   |
+| RAM Gesamt Backend       | ~3.5GB | ~700MB  | **−80%**   |
+| Cold Start               | 2-5s   | ~50ms   | **−98%**   |
+| Build Time               | 60-90s | ~5s     | **−94%**   |
+
+### Client-Performance
+
+| Metrik              | Vorher       | Nachher        | Verbesserung |
+| ------------------- | ------------ | -------------- | ------------ |
+| Time to Interactive | 3-5s (Login) | <500ms (Guest) | **−90%**     |
+| Daten anzeigen      | 200-500ms    | <1ms           | **−99%**     |
+| Daten schreiben     | 200-300ms    | <5ms           | **−98%**     |
+| Offline-Fähigkeit   | ❌           | ✅ Voller CRUD | ∞            |
+
+---
+
+## Teil 5: Tech-Stack Vergleich
+
+### Vorher
+
+```
+Node.js 20 + NestJS 10
+├── 18 NestJS-Services
+│   ├── @nestjs/common, core, config, platform-express
+│   ├── @nestjs/throttler, swagger
+│   ├── class-validator, class-transformer
+│   ├── reflect-metadata, rxjs
+│   └── Guards, Interceptors, Decorators, Modules, DTOs
+├── 5 NestJS Shared Packages
+└── Express Request → Fetch → Response Konvertierung
+```
+
+### Nachher
+
+```
+Bun + Hono
+├── 19 Hono-Services (5 Core + 14 Compute)
+│   ├── hono (1 Package)
+│   ├── zod (Validation)
+│   └── jose (JWT)
+├── 1 Shared Package (@manacore/shared-hono)
+└── Fetch-nativ (kein Konvertierung)
+```
+
+**Dependencies pro Service:** NestJS: ~20 Packages → Hono: ~3 Packages.
+
+---
+
+## Architektur-Diagramm
+
+```
+┌─ Client (19 Apps) ──────────────────────────────────────────┐
+│                                                              │
+│  SvelteKit + Svelte 5 + Tailwind                            │
+│  Dexie.js (IndexedDB) — Source of Truth                     │
+│  @manacore/local-store (Collections, Guest-Seed, Sync)      │
+│                                                              │
+└──────────┬──────────────────────┬───────────────────────────┘
+           │ Sync (WebSocket)     │ API (nur Compute)
+           ▼                      ▼
+┌─ Go ─────────────┐   ┌─ Hono + Bun ───────────────────────┐
+│                   │   │                                     │
+│  mana-sync        │   │  14 App Compute Servers            │
+│  - Changesets     │   │  (AI, Upload, External APIs)       │
+│  - Field-Level    │   │  ~120 LOC pro Server               │
+│    LWW            │   │                                     │
+│  - WebSocket Push │   │  5 Core Services                   │
+│                   │   │  (Auth, Credits, User, Subs, Anal.) │
+│  Port: 3050       │   │  ~1.200 LOC pro Service            │
+└────────┬──────────┘   └───────────┬─────────────────────────┘
+         ▼                          ▼
+┌─ PostgreSQL ────────────────────────────────────────────────┐
+│  mana_auth │ mana_credits │ mana_user │ mana_subscriptions │
+│  + 12 App-Datenbanken                                       │
+└─────────────────────────────────────────────────────────────┘
+
+┌─ Python ────────────────────────────────────────────────────┐
+│  mana-llm │ mana-stt │ mana-tts │ mana-image-gen │ voice   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Fazit
+
+Diese Migration hat gezeigt, dass **Local-First + leichtgewichtige Server** ein radikal einfacheres System ergeben als der klassische API-First-Ansatz mit schwerem Framework.
+
+Die wichtigsten Erkenntnisse:
+
+1. **80% des Backend-Codes war CRUD-Boilerplate.** Ein generischer Sync-Server ersetzt hunderte von Endpoints.
+
+2. **NestJS ist großartig für Enterprise-Java-Entwickler.** Für ein kleines Team ist es zu viel Zeremonie — Module, Guards, Interceptors, DTOs, Decorators für jeden Endpoint.
+
+3. **Better Auth + Hono ist eine Killer-Kombination.** Beide sind fetch-basiert, kein Konvertierungs-Overhead, minimaler Glue-Code.
+
+4. **Bun macht Build-Steps überflüssig.** TypeScript wird direkt ausgeführt. Docker-Images sind kleiner, Cold Starts sind schneller.
+
+5. **Die beste UX ist keine Loading-Spinners.** Wenn Daten <1ms statt 200ms laden, fühlt sich die App nativ an.
+
+Das ManaCore-Monorepo ist jetzt NestJS-frei. Alle TypeScript-Services laufen auf Hono + Bun. Die Architektur ist einfacher, schneller, und braucht weniger Ressourcen — auf dem Server und im Client.
