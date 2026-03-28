@@ -6,8 +6,10 @@ import (
 	"log/slog"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/coder/websocket"
+	"github.com/manacore/mana-sync/internal/auth"
 )
 
 // Message types sent over WebSocket.
@@ -28,19 +30,21 @@ type Client struct {
 // Hub manages WebSocket connections and broadcasts sync notifications.
 type Hub struct {
 	// clients maps userID -> set of clients
-	clients map[string]map[*Client]struct{}
-	mu      sync.RWMutex
+	clients   map[string]map[*Client]struct{}
+	mu        sync.RWMutex
+	validator *auth.Validator
 }
 
 // NewHub creates a new WebSocket hub.
-func NewHub() *Hub {
+func NewHub(validator *auth.Validator) *Hub {
 	return &Hub{
-		clients: make(map[string]map[*Client]struct{}),
+		clients:   make(map[string]map[*Client]struct{}),
+		validator: validator,
 	}
 }
 
 // HandleWebSocket upgrades an HTTP connection to WebSocket and registers the client.
-// The userID is initially empty — the client must send an auth message first.
+// The client must send an auth message with a valid JWT before receiving notifications.
 func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request, appID string) {
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
 		OriginPatterns: []string{"*"},
@@ -66,9 +70,21 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request, appID stri
 func (h *Hub) NotifyUser(userID, appID, excludeClientID string, tables []string) {
 	h.mu.RLock()
 	clients, ok := h.clients[userID]
+	if !ok {
+		h.mu.RUnlock()
+		return
+	}
+
+	// Copy the client set under read lock to avoid holding lock during writes
+	clientsCopy := make([]*Client, 0, len(clients))
+	for client := range clients {
+		if client.AppID == appID {
+			clientsCopy = append(clientsCopy, client)
+		}
+	}
 	h.mu.RUnlock()
 
-	if !ok {
+	if len(clientsCopy) == 0 {
 		return
 	}
 
@@ -78,17 +94,15 @@ func (h *Hub) NotifyUser(userID, appID, excludeClientID string, tables []string)
 	}
 	data, err := json.Marshal(msg)
 	if err != nil {
+		slog.Error("failed to marshal notification", "error", err)
 		return
 	}
 
-	for client := range clients {
-		if client.AppID != appID {
-			continue
-		}
-		// Don't echo back to the sender (client ID is in the WS client)
+	for _, client := range clientsCopy {
 		go func(c *Client) {
-			err := c.Conn.Write(context.Background(), websocket.MessageText, data)
-			if err != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := c.Conn.Write(ctx, websocket.MessageText, data); err != nil {
 				h.removeClient(c)
 			}
 		}(client)
@@ -102,7 +116,21 @@ func (h *Hub) readLoop(ctx context.Context, client *Client) {
 		client.cancel()
 	}()
 
+	// Client must authenticate within 10 seconds
+	authDeadline := time.After(10 * time.Second)
+	authenticated := false
+
 	for {
+		select {
+		case <-authDeadline:
+			if !authenticated {
+				slog.Warn("websocket client failed to authenticate in time", "appID", client.AppID)
+				client.Conn.Close(websocket.StatusPolicyViolation, "auth timeout")
+				return
+			}
+		default:
+		}
+
 		_, data, err := client.Conn.Read(ctx)
 		if err != nil {
 			return
@@ -115,21 +143,44 @@ func (h *Hub) readLoop(ctx context.Context, client *Client) {
 
 		switch msg.Type {
 		case "auth":
-			// Client sends token after connecting — we store the userID
-			// In production, validate the token here. For now, trust it
-			// since the HTTP sync endpoint already validates.
-			if msg.Token != "" {
-				// The actual validation happens in the sync handler.
-				// Here we just need the user ID for routing notifications.
-				// A proper implementation would validate the JWT.
-				client.UserID = "pending-auth" // Placeholder
-				h.addClient(client)
+			if msg.Token == "" {
+				errMsg := Message{Type: "error", Tables: []string{"missing token"}}
+				errData, _ := json.Marshal(errMsg)
+				client.Conn.Write(ctx, websocket.MessageText, errData)
+				continue
 			}
 
+			// Validate JWT via JWKS (same as HTTP endpoints)
+			claims, err := h.validator.ValidateToken(msg.Token)
+			if err != nil {
+				slog.Warn("websocket auth failed", "error", err, "appID", client.AppID)
+				errMsg := Message{Type: "error", Tables: []string{"invalid token"}}
+				errData, _ := json.Marshal(errMsg)
+				client.Conn.Write(ctx, websocket.MessageText, errData)
+				client.Conn.Close(websocket.StatusPolicyViolation, "invalid token")
+				return
+			}
+
+			if claims.Subject == "" {
+				client.Conn.Close(websocket.StatusPolicyViolation, "missing subject")
+				return
+			}
+
+			client.UserID = claims.Subject
+			h.addClient(client)
+			authenticated = true
+
+			// Send auth confirmation
+			ackMsg := Message{Type: "auth-ok"}
+			ackData, _ := json.Marshal(ackMsg)
+			client.Conn.Write(ctx, websocket.MessageText, ackData)
+
+			slog.Info("websocket authenticated", "userID", client.UserID, "appID", client.AppID)
+
 		case "ping":
-			msg := Message{Type: "pong"}
-			data, _ := json.Marshal(msg)
-			client.Conn.Write(ctx, websocket.MessageText, data)
+			pongMsg := Message{Type: "pong"}
+			pongData, _ := json.Marshal(pongMsg)
+			client.Conn.Write(ctx, websocket.MessageText, pongData)
 		}
 	}
 }

@@ -118,10 +118,14 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 		}
 
 		if dataJSON != nil {
-			json.Unmarshal(dataJSON, &c.Data)
+			if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
+				return nil, fmt.Errorf("unmarshal data for record %s: %w", c.RecordID, err)
+			}
 		}
 		if ftJSON != nil {
-			json.Unmarshal(ftJSON, &c.FieldTimestamps)
+			if err := json.Unmarshal(ftJSON, &c.FieldTimestamps); err != nil {
+				return nil, fmt.Errorf("unmarshal field_timestamps for record %s: %w", c.RecordID, err)
+			}
 		}
 
 		changes = append(changes, c)
@@ -163,10 +167,14 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 		}
 
 		if dataJSON != nil {
-			json.Unmarshal(dataJSON, &c.Data)
+			if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
+				return nil, fmt.Errorf("unmarshal data for record %s: %w", c.RecordID, err)
+			}
 		}
 		if ftJSON != nil {
-			json.Unmarshal(ftJSON, &c.FieldTimestamps)
+			if err := json.Unmarshal(ftJSON, &c.FieldTimestamps); err != nil {
+				return nil, fmt.Errorf("unmarshal field_timestamps for record %s: %w", c.RecordID, err)
+			}
 		}
 
 		changes = append(changes, c)

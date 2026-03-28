@@ -46,8 +46,8 @@ func main() {
 	// Initialize JWT validator
 	validator := auth.NewValidator(cfg.JWKSUrl)
 
-	// Initialize WebSocket hub
-	hub := ws.NewHub()
+	// Initialize WebSocket hub (with JWT validator for auth)
+	hub := ws.NewHub(validator)
 
 	// Initialize sync handler
 	handler := syncHandler.NewHandler(db, validator, hub)

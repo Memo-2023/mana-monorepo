@@ -2,6 +2,7 @@ package sync
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -22,6 +23,12 @@ type Handler struct {
 func NewHandler(s *store.Store, v *auth.Validator, h *ws.Hub) *Handler {
 	return &Handler{store: s, validator: v, hub: h}
 }
+
+// maxBodySize is the maximum allowed request body (10 MB).
+const maxBodySize = 10 * 1024 * 1024
+
+// validOps are the allowed sync operation types.
+var validOps = map[string]bool{"insert": true, "update": true, "delete": true}
 
 // HandleSync processes a POST /sync/:appId request.
 // Receives a changeset from a client, records changes, and returns the server delta.
@@ -45,11 +52,26 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Limit request body size
+	r.Body = http.MaxBytesReader(w, r.Body, maxBodySize)
+
 	// Parse changeset
 	var changeset Changeset
 	if err := json.NewDecoder(r.Body).Decode(&changeset); err != nil {
 		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	// Validate changes
+	for i, change := range changeset.Changes {
+		if !validOps[change.Op] {
+			http.Error(w, fmt.Sprintf("invalid op %q in change %d", change.Op, i), http.StatusBadRequest)
+			return
+		}
+		if change.Table == "" || change.ID == "" {
+			http.Error(w, fmt.Sprintf("missing table or id in change %d", i), http.StatusBadRequest)
+			return
+		}
 	}
 
 	ctx := r.Context()
@@ -87,7 +109,8 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, change.Op, clientID, data, fieldTimestamps)
 		if err != nil {
 			slog.Error("failed to record change", "error", err, "table", change.Table, "id", change.ID)
-			// Continue processing other changes
+			http.Error(w, "failed to record change: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 	}
 
