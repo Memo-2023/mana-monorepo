@@ -13,6 +13,9 @@
 
 FROM node:20-alpine
 
+# Install system deps (git needed by some npm packages)
+RUN apk add --no-cache git
+
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
@@ -58,12 +61,8 @@ COPY packages/eslint-config ./packages/eslint-config
 COPY packages/shared-hono ./packages/shared-hono
 COPY packages/shared-storage ./packages/shared-storage
 COPY packages/shared-landing-ui ./packages/shared-landing-ui
-COPY packages/shared-llm ./packages/shared-llm
 COPY packages/subscriptions ./packages/subscriptions
 COPY packages/credits ./packages/credits
-COPY packages/notify-client ./packages/notify-client
-COPY packages/shared-errors ./packages/shared-errors
-COPY packages/shared-logger ./packages/shared-logger
 COPY packages/spiral-db ./packages/spiral-db
 COPY packages/wallpaper-generator ./packages/wallpaper-generator
 
