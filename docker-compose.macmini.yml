@@ -1311,8 +1311,6 @@ services:
       AUTO_FALLBACK_ENABLED: "true"
       OLLAMA_MAX_CONCURRENT: 5
       CORS_ORIGINS: https://playground.mana.how,https://mana.how,https://chat.mana.how
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
       - "3020:3020"
     healthcheck:

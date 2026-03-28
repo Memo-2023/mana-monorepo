@@ -46,7 +46,6 @@ check_launchd() {
 check_launchd "com.cloudflare.cloudflared" "Cloudflared Tunnel"
 check_launchd "com.manacore.docker-startup" "Docker Startup"
 check_launchd "com.manacore.health-check" "Health Check (5min)"
-check_launchd "com.manacore.stt" "STT Service (Whisper/Voxtral)"
 
 # ============================================
 # Docker Status
@@ -85,25 +84,25 @@ if docker info >/dev/null 2>&1; then
 fi
 
 # ============================================
-# Native Services (non-Docker)
+# GPU Server (192.168.178.11)
 # ============================================
 echo ""
-echo -e "${BOLD}Native Services:${NC}"
+echo -e "${BOLD}GPU Server (192.168.178.11):${NC}"
 
-# Ollama
-if curl -s --max-time 2 http://localhost:11434/api/tags >/dev/null 2>&1; then
-    OLLAMA_MODELS=$(curl -s http://localhost:11434/api/tags | grep -o '"name":"[^"]*"' | wc -l | tr -d ' ')
-    echo -e "  ${GREEN}[Running]${NC} Ollama (${OLLAMA_MODELS} models)"
-else
-    echo -e "  ${YELLOW}[Stopped]${NC} Ollama"
-fi
+check_gpu_service() {
+    local name=$1
+    local url=$2
+    if curl -s --max-time 3 "$url" >/dev/null 2>&1; then
+        echo -e "  ${GREEN}[Running]${NC} $name"
+    else
+        echo -e "  ${YELLOW}[Offline]${NC} $name"
+    fi
+}
 
-# STT Service
-if curl -s --max-time 2 http://localhost:3020/health >/dev/null 2>&1; then
-    echo -e "  ${GREEN}[Running]${NC} STT Service (port 3020)"
-else
-    echo -e "  ${YELLOW}[Stopped]${NC} STT Service"
-fi
+check_gpu_service "Ollama (LLM)" "http://192.168.178.11:11434/api/version"
+check_gpu_service "STT (Whisper)" "http://192.168.178.11:3020/health"
+check_gpu_service "TTS" "http://192.168.178.11:3022/health"
+check_gpu_service "Image Gen (FLUX)" "http://192.168.178.11:3023/health"
 
 # ============================================
 # Network/Tunnel Status

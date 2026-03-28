@@ -40,13 +40,10 @@ Stand: 2026-03-28
 | Sonstiges (Watchtower, Landing Builder, LLM) | 4 | ~0.5 GB |
 | **Gesamt** | **61** | **~10.6 GB** |
 
-### Native Services
+### Native Services (deaktiviert seit 2026-03-28)
 
-| Service | RAM (idle) | RAM (aktiv) |
-|---------|-----------|-------------|
-| Ollama (Gemma 3 4B) | ~0 MB (nach 5min entladen) | ~3.3 GB |
-| Ollama (Gemma 3 27B) | ~0 MB | ~16 GB (gesamter RAM!) |
-| FLUX.2 klein | ~0.5 GB | ~2 GB |
+Ollama, FLUX.2 und Telegram Bot wurden auf den GPU-Server migriert.
+Keine nativen AI-Services mehr auf dem Mac Mini.
 
 ### RAM-Budget
 
@@ -55,11 +52,11 @@ Verfuegbar:           16.0 GB
 Docker Container:    -10.6 GB
 macOS Overhead:       -1.5 GB
 ─────────────────────────────
-Frei:                  3.9 GB  ← fuer Ollama, Builds, Peaks
+Frei fuer Builds/Peaks: 3.9 GB  ← stabil, kein Ollama-Konflikt
 ```
 
-**Kritisch:** Bei aktivem Ollama (3.3 GB fuer 4B-Modell) bleiben nur ~0.6 GB fuer Peaks.
-Build-Script stoppt deshalb 13 Monitoring-Container (~2 GB) vor dem Bauen.
+Keine RAM-Konkurrenz mit LLM-Modellen mehr. Build-Script muss Monitoring-Container
+nur noch bei grossen Multi-App-Builds stoppen.
 
 ## Kapazitaetsschaetzung nach Workload-Typ
 
@@ -81,39 +78,41 @@ Apps wie Todo, Calendar, Clock, Zitare, Contacts, etc.
 | API Requests/sec | **~100-200** | NestJS/Hono koennen mehr, DB ist Limit |
 | Bottleneck | PostgreSQL Connections + RAM | |
 
-### Tier 3: AI-Workloads (Ollama, FLUX.2)
+### Tier 3: AI-Workloads (GPU-Server, RTX 3090)
 
 | Metrik | Wert | Begruendung |
 |--------|------|-------------|
-| LLM gleichzeitig | **1** | OLLAMA_NUM_PARALLEL=1, Modell belegt 3-16 GB |
-| LLM Durchsatz | **~53 tokens/sec** (4B) | ~260 tokens/sec Prompt Processing |
-| Bildgenerierung | **1 gleichzeitig** | ~1.5s pro 1024x1024 Bild |
-| Bottleneck | **RAM** (Ollama + Container konkurrieren) | |
+| LLM gleichzeitig | **5** | OLLAMA_MAX_CONCURRENT=5, 24 GB VRAM |
+| LLM Durchsatz | **~80-100 tokens/sec** (12B) | CUDA deutlich schneller als Metal |
+| Bildgenerierung | **3-5 gleichzeitig** | ~0.5s pro 1024x1024 Bild |
+| Bottleneck | **VRAM (24 GB)** | Aber kein Konflikt mit Hosting |
 
-### Gesamtschaetzung
+### Gesamtschaetzung (nach GPU-Offload)
 
 | Szenario | Max. gleichzeitige User |
 |----------|------------------------|
 | Nur Local-First Apps | ~200 |
-| Mixed (Local-First + API) | ~50-100 |
-| Mit aktiver LLM-Nutzung | ~20-30 |
-| Peak (alle Services + LLM + Bildgen) | **~10-20** |
+| Mixed (Local-First + API) | ~100-150 |
+| Mit aktiver LLM-Nutzung | ~80-120 |
+| Peak (alle Services + LLM + Bildgen) | **~80-150** |
 
 ## Bottleneck-Analyse
 
 | Rang | Bottleneck | Auswirkung | Loesung |
 |------|-----------|------------|---------|
-| 1 | **RAM (16 GB)** | Ollama + Container kaempfen um Speicher | RAM-Upgrade (neuer Mac Mini) oder GPU-Server fuer LLM |
-| 2 | **Cloudflare Tunnel Latenz** | ~4s TTFB fuer erste Requests | CDN/Workers fuer statische Assets |
-| 3 | **PostgreSQL Connections** | Max 20 pro Service, shared DB | Connection Pooling (PgBouncer) |
-| 4 | **Single Server** | Kein Failover, kein horizontales Scaling | Zweiter Mac Mini oder Cloud-Burst |
+| 1 | **Cloudflare Tunnel Latenz** | ~4s TTFB fuer erste Requests | CDN/Workers fuer statische Assets |
+| 2 | **PostgreSQL Connections** | Max 20 pro Service, shared DB | Connection Pooling (PgBouncer) |
+| 3 | **Single Server** | Kein Failover, kein horizontales Scaling | Zweiter Mac Mini oder Cloud-Burst |
+| 4 | **GPU-Server LAN-Latenz** | <1ms, vernachlaessigbar | Kein Handlungsbedarf |
 
 ## Scaling-Roadmap
 
 ### Phase 1: Optimierung (0 EUR)
 
 - [x] GPU-Server ueber LAN anbinden → alle AI-Last vom Mac Mini verlagert
+- [x] Ollama/FLUX.2/Telegram-Bot auf Mac Mini deaktiviert
 - [x] Registrierungslimit implementiert (MAX_DAILY_SIGNUPS, default: unlimitiert)
+- [x] Health-Checks und status.sh auf GPU-Server umgestellt
 - [ ] PgBouncer fuer Connection Pooling einrichten
 - [ ] Cloudflare Cache Rules fuer statische Assets
 - [ ] Registrierungslimit aktivieren (5/Tag) in .env auf Server

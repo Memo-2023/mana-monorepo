@@ -18,45 +18,37 @@ Cloudflare Tunnel (cloudflared)
 ┌─────────────────────────────────────────────────────────────┐
 │  Mac Mini M4 (mana-server)                                  │
 │                                                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌────────────┐  │
-│  │   PostgreSQL    │  │     Redis       │  │   Ollama   │  │
-│  │   (Docker)      │  │    (Docker)     │  │  (nativ)   │  │
-│  └─────────────────┘  └─────────────────┘  └────────────┘  │
+│  ┌─────────────────┐  ┌─────────────────┐                  │
+│  │   PostgreSQL    │  │     Redis       │                  │
+│  │   (Docker)      │  │    (Docker)     │                  │
+│  └─────────────────┘  └─────────────────┘                  │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  Docker Container                                    │   │
+│  │  Docker Container (~61 Services)                     │   │
 │  │  ├── mana-core-auth     (Port 3001)                 │   │
 │  │  ├── dashboard-web      (Port 5173)                 │   │
-│  │  ├── chat-backend       (Port 3002)                 │   │
 │  │  ├── chat-web           (Port 3000)                 │   │
-│  │  ├── todo-backend       (Port 3018)                 │   │
 │  │  ├── todo-web           (Port 5188)                 │   │
-│  │  ├── calendar-backend   (Port 3016)                 │   │
 │  │  ├── calendar-web       (Port 5186)                 │   │
-│  │  ├── clock-backend      (Port 3017)                 │   │
-│  │  └── clock-web          (Port 5187)                 │   │
+│  │  ├── clock-web          (Port 5187)                 │   │
+│  │  ├── mana-sync (Go)     (Port 3050)                 │   │
+│  │  ├── mana-llm           (Port 3020)                 │   │
+│  │  └── ... (19 web apps, core services, monitoring)   │   │
 │  └─────────────────────────────────────────────────────┘   │
-│                           ▲                                 │
-│                           │ host.docker.internal:11434      │
+│                           │                                 │
+│                           │ LAN (192.168.178.11)            │
 │                           ▼                                 │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  Ollama (Port 11434) - Gemma 3 4B                   │   │
-│  │  ~53 t/s Generation | Metal GPU Acceleration        │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │  Native Services                                    │   │
-│  │  ├── Ollama             (Port 11434) - LLM          │   │
-│  │  ├── Mana Image Gen     (Port 3025)  - FLUX.2 klein │   │
-│  │  └── Telegram Ollama Bot (Port 3301) - Chat Bot     │   │
+│  │  GPU Server (Windows, RTX 3090, 24 GB VRAM)         │   │
+│  │  ├── Ollama             (Port 11434) - gemma3:12b   │   │
+│  │  ├── STT (Whisper)      (Port 3020)                 │   │
+│  │  ├── TTS                (Port 3022)                 │   │
+│  │  └── Image Gen (FLUX)   (Port 3023)                 │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  LaunchAgents (Autostart)                           │   │
 │  │  ├── cloudflared            (Tunnel)                │   │
-│  │  ├── ollama                 (LLM Service)           │   │
-│  │  ├── mana-image-gen         (Bildgenerierung)       │   │
-│  │  ├── telegram-ollama-bot    (Chat Bot)              │   │
 │  │  ├── docker-startup         (Container beim Boot)   │   │
 │  │  └── health-check           (alle 5 Minuten)        │   │
 │  └─────────────────────────────────────────────────────┘   │
@@ -166,14 +158,14 @@ launchctl load ~/Library/LaunchAgents/com.manacore.docker-startup.plist
 
 ## Autostart-Konfiguration
 
-Fünf LaunchAgents sorgen für automatischen Betrieb:
+Drei LaunchAgents sorgen fuer automatischen Betrieb:
 
 ### 1. Cloudflare Tunnel
 
 **Datei:** `~/Library/LaunchAgents/com.cloudflare.cloudflared.plist`
 
 - Startet beim Login
-- Hält den Tunnel zu Cloudflare offen
+- Haelt den Tunnel zu Cloudflare offen
 - Automatischer Neustart bei Absturz
 
 ### 2. Docker Container Startup
@@ -182,32 +174,23 @@ Fünf LaunchAgents sorgen für automatischen Betrieb:
 
 - Startet beim Login
 - Wartet auf Docker Desktop
-- Führt `docker compose up -d` aus
+- Fuehrt `docker compose up -d` aus
 - Erstellt fehlende Datenbanken automatisch
 
 ### 3. Health Check
 
 **Datei:** `~/Library/LaunchAgents/com.manacore.health-check.plist`
 
-- Läuft alle 5 Minuten
-- Prüft alle Services (HTTP + Docker)
+- Laeuft alle 5 Minuten
+- Prueft alle Services (HTTP + Docker)
 - Sendet Benachrichtigungen bei Fehlern
 
-### 4. Ollama
+### Deaktivierte LaunchAgents
 
-**Datei:** `~/Library/LaunchAgents/homebrew.mxcl.ollama.plist`
-
-- Startet beim Login
-- LLM-Server auf Port 11434
-- Metal GPU-Beschleunigung
-
-### 5. Telegram Ollama Bot
-
-**Datei:** `~/Library/LaunchAgents/com.manacore.telegram-ollama-bot.plist`
-
-- Startet beim Login
-- Telegram Bot auf Port 3301
-- Verbindet zu Ollama für LLM-Anfragen
+Diese LaunchAgents sind seit der GPU-Server-Migration deaktiviert:
+- `homebrew.mxcl.ollama.plist` — LLM laeuft auf GPU-Server
+- `com.manacore.image-gen.plist` — Bildgenerierung laeuft auf GPU-Server
+- `com.manacore.telegram-ollama-bot.plist` — Bot deaktiviert
 
 ### Setup neu ausführen
 
@@ -514,16 +497,39 @@ docker image prune -a
 | `deploy.sh` | Pullt neue Images und startet neu |
 | `build-app.sh` | Baut einzelne Apps (stoppt Monitoring für RAM) |
 
-## Ollama (Lokale KI)
-
-Ollama läuft nativ auf dem Mac Mini für lokale LLM-Inferenz (Klassifizierung, Text-Analyse, etc.).
-
-### Hardware
+## Hardware
 
 - **Chip:** Apple M4 (10 Cores)
 - **RAM:** 16 GB Unified Memory
 - **Interne SSD:** 228 GB
 - **Externe SSD:** 4 TB (ManaData)
+
+## AI-Workloads (GPU-Server)
+
+Alle AI-Services (LLM, Bildgenerierung, STT, TTS) laufen auf dem Windows GPU-Server (RTX 3090, 24 GB VRAM) unter `192.168.178.11`. Der Mac Mini ist reiner Hosting-Server fuer Web, API, DB und Sync.
+
+| Service | GPU-Server Port | Zugriff aus Docker |
+|---------|----------------|-------------------|
+| Ollama (LLM) | 11434 | `http://192.168.178.11:11434` |
+| STT (Whisper) | 3020 | `http://192.168.178.11:3020` |
+| TTS | 3022 | `http://192.168.178.11:3022` |
+| Image Gen | 3023 | `http://192.168.178.11:3023` |
+
+Alle Werte sind per Env-Var ueberschreibbar (`OLLAMA_URL`, `STT_SERVICE_URL`, `TTS_SERVICE_URL`, `IMAGE_GEN_SERVICE_URL`).
+
+Cloud-Fallback bei GPU-Server-Ausfall: `mana-llm` hat `AUTO_FALLBACK_ENABLED=true` (OpenRouter, Groq, Google).
+
+### Ollama/FLUX.2 auf dem Mac Mini (deaktiviert)
+
+Ollama und FLUX.2 waren frueher lokal installiert, sind aber seit 2026-03-28 deaktiviert. Die Modelle liegen noch auf der SSD als Backup:
+- `/Volumes/ManaData/ollama/` (~58 GB)
+- `/Volumes/ManaData/flux2/` (~15 GB)
+
+Bei Bedarf reaktivieren:
+```bash
+brew services start ollama
+launchctl load ~/Library/LaunchAgents/com.manacore.image-gen.plist
+```
 
 ## Externe 4TB SSD
 
@@ -583,13 +589,13 @@ Die folgenden Services nutzen direkte SSD-Mounts (kein Docker Volume):
 | PostgreSQL | `/Volumes/ManaData/postgres` | `volumes: - /Volumes/ManaData/postgres:/var/lib/postgresql/data` |
 | MinIO | `/Volumes/ManaData/minio` | `volumes: - /Volumes/ManaData/minio:/data` |
 
-### Symlinks (für native Services)
+### Symlinks (archiviert, fuer Backup-Modelle)
 
-| Original | Symlink |
-|----------|---------|
-| `~/.ollama` | `/Volumes/ManaData/ollama` |
-| `~/stt-models` | `/Volumes/ManaData/stt-models` |
-| `~/flux2` | `/Volumes/ManaData/flux2` |
+| Original | Symlink | Status |
+|----------|---------|--------|
+| `~/.ollama` | `/Volumes/ManaData/ollama` | Deaktiviert (GPU-Server) |
+| `~/stt-models` | `/Volumes/ManaData/stt-models` | Deaktiviert (GPU-Server) |
+| `~/flux2` | `/Volumes/ManaData/flux2` | Deaktiviert (GPU-Server) |
 
 ### SSD prüfen
 
@@ -626,275 +632,6 @@ Docker Desktop benötigt "Full Disk Access" für SSD-Mounts:
 Systemeinstellungen → Datenschutz & Sicherheit → Voller Festplattenzugriff → Docker.app ✅
 ```
 
-### Installation
-
-```bash
-# Bereits installiert via Homebrew
-/opt/homebrew/bin/brew install ollama
-/opt/homebrew/bin/brew services start ollama
-```
-
-### Konfiguration
-
-**LaunchAgent:** `~/Library/LaunchAgents/homebrew.mxcl.ollama.plist`
-
-Optimierungen bereits aktiviert:
-- `OLLAMA_KEEP_ALIVE=5m` - Modelle nach 5min Inaktivität aus RAM entladen (spart 3-16 GB)
-- `OLLAMA_FLASH_ATTENTION=1` - Schnellere Attention-Berechnung
-- `OLLAMA_KV_CACHE_TYPE=q8_0` - Effizienterer KV-Cache
-- `OLLAMA_NUM_PARALLEL=1` - Max 1 paralleler Request (vorhersagbarer RAM)
-- `OLLAMA_MAX_LOADED_MODELS=1` - Max 1 Modell gleichzeitig im RAM
-
-Setup-Script: `./scripts/mac-mini/configure-ollama.sh`
-
-### Speicherort
-
-Die Modelle liegen auf der externen 4TB SSD für mehr Platz:
-- **Pfad:** `/Volumes/ManaData/ollama/models`
-- **Symlink:** `~/.ollama -> /Volumes/ManaData/ollama`
-
-### Verfügbare Modelle
-
-| Modell | Größe | Typ | Performance | Zweck |
-|--------|-------|-----|-------------|-------|
-| gemma3:4b | 3.3 GB | Text | ~53 t/s | Standard - schnell |
-| gemma3:12b | 8 GB | Text | ~30 t/s | Empfohlen - gute Balance |
-| gemma3:27b | 16 GB | Text | ~15 t/s | Beste Qualität |
-| phi3.5:latest | 2.2 GB | Text | ~60 t/s | Microsoft - kompakt |
-| ministral-3:3b | 3 GB | Text | ~55 t/s | Mistral Mini |
-| llava:7b | 4.7 GB | Vision | ~25 t/s | Bildverständnis |
-| qwen3-vl:4b | 3.3 GB | Vision | ~40 t/s | Vision-Language |
-| deepseek-ocr:latest | 6.7 GB | Vision | ~20 t/s | OCR & Dokumente |
-| qwen2.5-coder:7b | 4.7 GB | Code | ~35 t/s | Code-Generierung |
-| qwen2.5-coder:14b | 10 GB | Code | ~20 t/s | Erweiterte Code-Gen |
-
-Siehe [OLLAMA_MODELS.md](./OLLAMA_MODELS.md) für Details zum Hinzufügen neuer Modelle.
-
-```bash
-# Modelle auflisten
-/opt/homebrew/bin/ollama list
-
-# Neues Modell herunterladen
-/opt/homebrew/bin/ollama pull gemma3:12b
-```
-
-### Performance (gemessen)
-
-| Metrik | Wert |
-|--------|------|
-| Text Generation | ~53 tokens/sec |
-| Prompt Processing | ~260 tokens/sec |
-| Latenz (kurze Anfrage) | ~0.4 sec |
-
-### API-Zugriff
-
-**Lokaler Endpunkt:** `http://localhost:11434`
-
-```bash
-# Generate API
-curl http://localhost:11434/api/generate -d '{
-  "model": "gemma3:4b",
-  "prompt": "Klassifiziere: Newsletter oder Spam?",
-  "stream": false
-}'
-
-# OpenAI-kompatible API
-curl http://localhost:11434/v1/chat/completions -d '{
-  "model": "gemma3:4b",
-  "messages": [{"role": "user", "content": "Hallo"}]
-}'
-```
-
-### Zugriff aus Docker-Containern
-
-Docker-Container können Ollama über `host.docker.internal` erreichen:
-
-```bash
-# Aus einem Container heraus
-curl http://host.docker.internal:11434/api/generate -d '...'
-```
-
-Oder in Docker Compose Environment-Variablen:
-```yaml
-environment:
-  OLLAMA_URL: http://host.docker.internal:11434
-```
-
-### Ollama Management
-
-```bash
-# Service Status
-/opt/homebrew/bin/brew services info ollama
-
-# Service neustarten
-/opt/homebrew/bin/brew services restart ollama
-
-# Logs prüfen
-tail -f /opt/homebrew/var/log/ollama.log
-
-# Modell entfernen
-/opt/homebrew/bin/ollama rm gemma3:4b
-```
-
-### Troubleshooting
-
-```bash
-# Prüfen ob Ollama läuft
-curl http://localhost:11434/api/version
-
-# GPU-Nutzung prüfen (sollte Metal verwenden)
-/opt/homebrew/bin/ollama ps
-
-# Bei Problemen: Service neustarten
-/opt/homebrew/bin/brew services restart ollama
-```
-
-## Mana Image Generation (FLUX.2 klein)
-
-Lokale Bildgenerierung mit FLUX.2 klein 4B via flux2.c.
-
-### Service-Info
-
-| | |
-|--|--|
-| **Port** | 3025 |
-| **Health** | http://localhost:3025/health |
-| **Code** | `services/mana-image-gen/` |
-| **Model** | FLUX.2 klein 4B (4 Milliarden Parameter) |
-| **Lizenz** | Apache 2.0 (kommerziell nutzbar) |
-
-### Installation
-
-```bash
-# Setup-Script ausführen (installiert flux2.c + Modell)
-./scripts/mac-mini/setup-image-gen.sh
-```
-
-Das Script:
-1. Kompiliert flux2.c mit MPS-Unterstützung
-2. Lädt das FLUX.2 klein 4B Modell herunter (~16 GB)
-3. Richtet Python-Umgebung ein
-4. Erstellt LaunchAgent für Autostart
-
-### Performance
-
-| Auflösung | Schritte | Zeit |
-|-----------|----------|------|
-| 512x512 | 4 | ~0.3s |
-| 1024x1024 | 4 | ~0.8s |
-| 1024x1024 | 8 | ~1.5s |
-
-### API-Zugriff
-
-**Lokaler Endpunkt:** `http://localhost:3025`
-
-```bash
-# Health Check
-curl http://localhost:3025/health
-
-# Bild generieren
-curl -X POST http://localhost:3025/generate \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "A cat in space", "width": 1024, "height": 1024}'
-
-# Bild abrufen
-curl http://localhost:3025/images/{filename} --output image.png
-```
-
-### Zugriff aus Docker-Containern
-
-```yaml
-environment:
-  IMAGE_GEN_SERVICE_URL: http://host.docker.internal:3025
-```
-
-### Management
-
-```bash
-# Logs anzeigen
-tail -f /tmp/manacore-image-gen.log
-
-# Service neustarten
-launchctl unload ~/Library/LaunchAgents/com.manacore.image-gen.plist
-launchctl load ~/Library/LaunchAgents/com.manacore.image-gen.plist
-
-# Status prüfen
-launchctl list | grep image-gen
-```
-
-## Telegram Ollama Bot
-
-Telegram Bot für Interaktion mit dem lokalen Ollama LLM.
-
-### Bot-Info
-
-| | |
-|--|--|
-| **Telegram** | [@chat_mana_bot](https://t.me/chat_mana_bot) |
-| **Port** | 3301 |
-| **Health** | http://localhost:3301/health |
-| **Code** | `services/telegram-ollama-bot/` |
-
-### Telegram-Befehle
-
-| Befehl | Beschreibung |
-|--------|--------------|
-| `/start` | Hilfe anzeigen |
-| `/help` | Alle Befehle |
-| `/models` | Verfügbare Modelle anzeigen |
-| `/model [name]` | Modell wechseln |
-| `/mode [modus]` | System-Prompt ändern |
-| `/clear` | Chat-Verlauf löschen |
-| `/status` | Ollama-Status prüfen |
-
-### Modi
-
-| Modus | Beschreibung |
-|-------|--------------|
-| `default` | Allgemeiner Assistent |
-| `classify` | Text-Klassifizierung |
-| `summarize` | Zusammenfassungen |
-| `translate` | Übersetzungen |
-| `code` | Programmier-Hilfe |
-
-### LaunchAgent
-
-**Datei:** `~/Library/LaunchAgents/com.manacore.telegram-ollama-bot.plist`
-
-- Startet automatisch beim Login
-- Neustart bei Absturz (KeepAlive)
-- Logs: `~/Library/Logs/telegram-ollama-bot.log`
-
-### Bot Management
-
-```bash
-# Status prüfen
-curl http://localhost:3301/health
-
-# Logs anzeigen
-tail -f ~/Library/Logs/telegram-ollama-bot.log
-
-# Bot neustarten
-launchctl stop com.manacore.telegram-ollama-bot
-launchctl start com.manacore.telegram-ollama-bot
-
-# Bot manuell starten (für Debugging)
-cd ~/projects/manacore-monorepo/services/telegram-ollama-bot
-TELEGRAM_BOT_TOKEN=xxx OLLAMA_URL=http://localhost:11434 node dist/main.js
-```
-
-### Bot aktualisieren
-
-```bash
-cd ~/projects/manacore-monorepo
-git pull
-cd services/telegram-ollama-bot
-pnpm install
-pnpm build
-launchctl stop com.manacore.telegram-ollama-bot
-launchctl start com.manacore.telegram-ollama-bot
-```
-
 ## Matrix (DSGVO-konformes Messaging)
 
 Matrix ist eine DSGVO-konforme Alternative zu Telegram für Bot-Kommunikation.
@@ -913,7 +650,7 @@ Alle Matrix Bots laufen als Docker Container und werden via GHCR (GitHub Contain
 | Bot | Port | Beschreibung |
 |-----|------|--------------|
 | matrix-mana-bot | 4010 | Gateway - alle Features in einem Bot |
-| matrix-ollama-bot | 4011 | KI-Chat via lokalem Ollama |
+| matrix-ollama-bot | 4011 | KI-Chat via GPU-Server Ollama |
 | matrix-stats-bot | 4012 | Server-Statistiken & Monitoring |
 | matrix-project-doc-bot | 4013 | Projekt-Dokumentation aus Fotos/Voice/Text |
 | matrix-todo-bot | 4014 | Aufgabenverwaltung |
@@ -973,12 +710,13 @@ Siehe [MATRIX_SELF_HOSTING.md](./MATRIX_SELF_HOSTING.md) für detaillierte Anlei
 ## Chronologie der Einrichtung
 
 1. **Docker Setup** - PostgreSQL, Redis, App-Container
-2. **Cloudflare Tunnel** - Öffentliche Erreichbarkeit
+2. **Cloudflare Tunnel** - Oeffentliche Erreichbarkeit
 3. **SSH via Cloudflare Access** - Sicherer Remote-Zugang
 4. **LaunchAgents** - Autostart bei Boot
-5. **Health Checks** - Automatische Überwachung
+5. **Health Checks** - Automatische Ueberwachung
 6. **Telegram Notifications** - Alerts bei Fehlern
 7. **Email Notifications** - Redundante Benachrichtigung
-8. **Ollama** - Lokale LLM-Inferenz (Gemma 3 4B)
-9. **Telegram Ollama Bot** - Chat-Interface für Ollama
+8. ~~**Ollama** - Lokale LLM-Inferenz~~ → Migriert auf GPU-Server (2026-03-28)
+9. ~~**Telegram Ollama Bot**~~ → Deaktiviert (2026-03-28)
 10. **Matrix Synapse** - DSGVO-konformes Messaging
+11. **GPU-Server Offload** - Alle AI-Workloads auf RTX 3090 (2026-03-28)

@@ -254,10 +254,16 @@ check_service "Photos Web" "http://localhost:5019/health"
 
 echo ""
 echo "Core Services:"
-# API Gateway disabled - no GHCR image, no Dockerfile
 check_service "Search Service" "http://localhost:3020/api/v1/health"
 check_service "Media Service" "http://localhost:3015/api/v1/health"
 check_service "LLM Service" "http://localhost:3025/health"
+
+echo ""
+echo "GPU Server (192.168.178.11):"
+check_service "GPU Ollama" "http://192.168.178.11:11434/api/version" 3
+check_service "GPU STT" "http://192.168.178.11:3020/health" 3
+check_service "GPU TTS" "http://192.168.178.11:3022/health" 3
+check_service "GPU Image Gen" "http://192.168.178.11:3023/health" 3
 
 echo ""
 echo "Matrix:"
