@@ -22,18 +22,19 @@ COPY pnpm-lock.yaml ./
 
 # --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
 COPY patches/ ./patches/
+COPY packages/feedback ./packages/feedback
+COPY packages/help ./packages/help
+COPY packages/local-store ./packages/local-store
 COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-auth ./packages/shared-auth
+COPY packages/shared-auth-stores ./packages/shared-auth-stores
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
-COPY packages/shared-feedback-service ./packages/shared-feedback-service
-COPY packages/shared-feedback-ui ./packages/shared-feedback-ui
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-profile-ui ./packages/shared-profile-ui
 COPY packages/shared-pwa ./packages/shared-pwa
-COPY packages/shared-subscription-ui ./packages/shared-subscription-ui
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-theme-ui ./packages/shared-theme-ui
@@ -41,6 +42,7 @@ COPY packages/shared-types ./packages/shared-types
 COPY packages/shared-ui ./packages/shared-ui
 COPY packages/shared-utils ./packages/shared-utils
 COPY packages/shared-vite-config ./packages/shared-vite-config
+COPY packages/subscriptions ./packages/subscriptions
 COPY apps/nutriphi/packages/shared ./apps/nutriphi/packages/shared
 # --- END AUTO-GENERATED ---
 

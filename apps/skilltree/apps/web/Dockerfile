@@ -22,9 +22,12 @@ COPY pnpm-lock.yaml ./
 
 # --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
 COPY patches/ ./patches/
+COPY packages/help ./packages/help
+COPY packages/local-store ./packages/local-store
 COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-app-onboarding ./packages/shared-app-onboarding
 COPY packages/shared-auth ./packages/shared-auth
+COPY packages/shared-auth-stores ./packages/shared-auth-stores
 COPY packages/shared-auth-ui ./packages/shared-auth-ui
 COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-error-tracking ./packages/shared-error-tracking

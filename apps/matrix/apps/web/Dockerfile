@@ -20,12 +20,16 @@ COPY pnpm-lock.yaml ./
 
 # --- AUTO-GENERATED COPY STATEMENTS (do not edit manually) ---
 COPY patches/ ./patches/
+COPY packages/feedback ./packages/feedback
+COPY packages/help ./packages/help
 COPY packages/shared-auth ./packages/shared-auth
 COPY packages/shared-branding ./packages/shared-branding
 COPY packages/shared-error-tracking ./packages/shared-error-tracking
 COPY packages/shared-i18n ./packages/shared-i18n
 COPY packages/shared-icons ./packages/shared-icons
 COPY packages/shared-pwa ./packages/shared-pwa
+COPY packages/shared-stores ./packages/shared-stores
+COPY packages/shared-tags ./packages/shared-tags
 COPY packages/shared-tailwind ./packages/shared-tailwind
 COPY packages/shared-theme ./packages/shared-theme
 COPY packages/shared-ui ./packages/shared-ui
