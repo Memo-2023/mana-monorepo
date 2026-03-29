@@ -31,6 +31,7 @@
 		tagMutations,
 		useAllTags as useAllSharedTags,
 	} from '@manacore/shared-stores';
+	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { theme } from '$lib/stores/theme';
 	import TaskFilters from '$lib/components/TaskFilters.svelte';
 	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
@@ -317,18 +318,24 @@
 	async function handleLogout() {
 		await authStore.signOut();
 		tagMutations.stopSync();
+		linkMutations.stopSync();
 		goto('/login');
 	}
 
 	async function handleAuthReady() {
 		// Initialize local-first databases (opens IndexedDB, seeds guest data)
-		await Promise.all([todoStore.initialize(), tagLocalStore.initialize()]);
+		await Promise.all([
+			todoStore.initialize(),
+			tagLocalStore.initialize(),
+			linkLocalStore.initialize(),
+		]);
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
 			const getToken = () => authStore.getValidToken();
 			todoStore.startSync(getToken);
 			tagMutations.startSync(getToken);
+			linkMutations.startSync(getToken);
 		}
 
 		// Initialize split-panel from URL/localStorage

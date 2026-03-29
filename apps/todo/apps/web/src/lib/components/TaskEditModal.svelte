@@ -25,6 +25,7 @@
 		TagSelector,
 	} from './form';
 	import { ContactSelector, focusTrap } from '@manacore/shared-ui';
+	import { ManaLinkList } from '@manacore/shared-links/ui';
 
 	interface Props {
 		task: Task;
@@ -313,6 +314,12 @@
 				<div class="form-section">
 					<label class="form-label">Subtasks</label>
 					<SubtaskList {subtasks} onChange={handleSubtasksChange} />
+				</div>
+
+				<!-- Verknüpfungen -->
+				<div class="form-section">
+					<label class="form-label">Verknüpfungen</label>
+					<ManaLinkList recordRef={{ app: 'todo', collection: 'tasks', id: task.id }} editable />
 				</div>
 
 				<!-- Wiederholung -->
