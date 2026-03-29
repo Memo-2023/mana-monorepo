@@ -4,6 +4,7 @@
 	import { timeEntryCollection } from '$lib/data/local-store';
 	import { formatDurationCompact } from '$lib/data/queries';
 	import type { TimeEntry, Project, Client } from '@taktik/shared';
+	import ConfirmDialog from './ConfirmDialog.svelte';
 
 	let {
 		entry,
@@ -40,6 +41,8 @@
 		entry.clientId ? allClients.value.find((c) => c.id === entry.clientId) : undefined
 	);
 
+	let showDeleteConfirm = $state(false);
+
 	let saveDebounce: ReturnType<typeof setTimeout> | null = null;
 
 	function autoSave(updates: Record<string, unknown>) {
@@ -74,7 +77,12 @@
 	}
 
 	async function handleDelete() {
+		showDeleteConfirm = true;
+	}
+
+	async function confirmDelete() {
 		await timeEntryCollection.delete(entry.id);
+		showDeleteConfirm = false;
 		onCollapse?.();
 	}
 
@@ -197,3 +205,11 @@
 		</div>
 	{/if}
 </div>
+
+<ConfirmDialog
+	visible={showDeleteConfirm}
+	title={$_('common.delete')}
+	message={$_('entry.deleteConfirm')}
+	onConfirm={confirmDelete}
+	onCancel={() => (showDeleteConfirm = false)}
+/>

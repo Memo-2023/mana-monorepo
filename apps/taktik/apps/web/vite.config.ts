@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
 import { getBuildDefines } from '@manacore/shared-vite-config';
 
 export default defineConfig({
@@ -57,8 +57,4 @@ export default defineConfig({
 		port: 5197,
 	},
 	define: getBuildDefines(),
-	test: {
-		include: ['src/**/*.{test,spec}.{js,ts}'],
-		environment: 'jsdom',
-	},
 });

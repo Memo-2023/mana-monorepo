@@ -5,6 +5,7 @@
 	import { getTotalDuration, formatDurationCompact } from '$lib/data/queries';
 	import type { Project, Client, TimeEntry } from '@taktik/shared';
 	import { PROJECT_COLORS } from '@taktik/shared/constants';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 
 	const allProjects = getContext<{ value: Project[] }>('projects');
 	const allClients = getContext<{ value: Client[] }>('clients');
@@ -13,6 +14,7 @@
 	let showCreateForm = $state(false);
 	let editingProjectId = $state<string | null>(null);
 	let showArchived = $state(false);
+	let deleteConfirmId = $state<string | null>(null);
 
 	// New project form
 	let newName = $state('');
@@ -68,9 +70,15 @@
 		await projectCollection.update(id, { isArchived: archive });
 	}
 
-	async function handleDelete(id: string) {
-		await projectCollection.delete(id);
+	function handleDelete(id: string) {
+		deleteConfirmId = id;
+	}
+
+	async function confirmDelete() {
+		if (!deleteConfirmId) return;
+		await projectCollection.delete(deleteConfirmId);
 		editingProjectId = null;
+		deleteConfirmId = null;
 	}
 
 	// Inline edit state
@@ -354,3 +362,11 @@
 		</div>
 	{/if}
 </div>
+
+<ConfirmDialog
+	visible={deleteConfirmId !== null}
+	title={$_('common.delete')}
+	message={$_('project.deleteConfirm')}
+	onConfirm={confirmDelete}
+	onCancel={() => (deleteConfirmId = null)}
+/>

@@ -7,7 +7,12 @@
  */
 
 import { browser } from '$app/environment';
-import { timeEntryCollection, type LocalTimeEntry } from '$lib/data/local-store';
+import {
+	timeEntryCollection,
+	settingsCollection,
+	type LocalTimeEntry,
+} from '$lib/data/local-store';
+import { roundDuration } from '$lib/utils/rounding';
 
 let runningEntry = $state<LocalTimeEntry | null>(null);
 let elapsedSeconds = $state(0);
@@ -119,17 +124,24 @@ export const timerStore = {
 			? Math.floor((now.getTime() - new Date(runningEntry.startTime).getTime()) / 1000)
 			: elapsedSeconds;
 
+		// Apply rounding from settings
+		const settings = await settingsCollection.getAll();
+		const s = settings[0];
+		const roundedDuration = s
+			? roundDuration(finalDuration, s.roundingIncrement, s.roundingMethod)
+			: finalDuration;
+
 		await timeEntryCollection.update(runningEntry.id, {
 			isRunning: false,
 			endTime: now.toISOString(),
-			duration: finalDuration,
+			duration: roundedDuration,
 		});
 
 		const stoppedEntry = {
 			...runningEntry,
 			isRunning: false,
 			endTime: now.toISOString(),
-			duration: finalDuration,
+			duration: roundedDuration,
 		};
 		stopTicking();
 		runningEntry = null;

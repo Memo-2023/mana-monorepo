@@ -36,7 +36,8 @@
 		"today": "Today",
 		"thisWeek": "This Week",
 		"thisMonth": "This Month",
-		"manual": "Manual Entry"
+		"manual": "Manual Entry",
+		"deleteConfirm": "Are you sure you want to delete this time entry? This cannot be undone."
 	},
 	"project": {
 		"create": "Create Project",
@@ -49,7 +50,8 @@
 		"budget": "Budget",
 		"noProjects": "No projects",
 		"archived": "Archived",
-		"internal": "Internal"
+		"internal": "Internal",
+		"deleteConfirm": "Are you sure you want to delete this project? This cannot be undone."
 	},
 	"client": {
 		"create": "Create Client",
@@ -59,7 +61,8 @@
 		"shortCode": "Short Code",
 		"email": "Email",
 		"billingRate": "Billing Rate",
-		"noClients": "No clients"
+		"noClients": "No clients",
+		"deleteConfirm": "Are you sure you want to delete this client? This cannot be undone."
 	},
 	"report": {
 		"title": "Reports",

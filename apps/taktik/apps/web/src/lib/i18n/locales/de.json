@@ -36,7 +36,8 @@
 		"today": "Heute",
 		"thisWeek": "Diese Woche",
 		"thisMonth": "Dieser Monat",
-		"manual": "Manuell erfassen"
+		"manual": "Manuell erfassen",
+		"deleteConfirm": "Möchtest du diesen Zeiteintrag wirklich löschen? Dies kann nicht rückgängig gemacht werden."
 	},
 	"project": {
 		"create": "Projekt erstellen",
@@ -49,7 +50,8 @@
 		"budget": "Budget",
 		"noProjects": "Keine Projekte",
 		"archived": "Archiviert",
-		"internal": "Intern"
+		"internal": "Intern",
+		"deleteConfirm": "Möchtest du dieses Projekt wirklich löschen? Dies kann nicht rückgängig gemacht werden."
 	},
 	"client": {
 		"create": "Kunde erstellen",
@@ -59,7 +61,8 @@
 		"shortCode": "Kürzel",
 		"email": "E-Mail",
 		"billingRate": "Stundensatz",
-		"noClients": "Keine Kunden"
+		"noClients": "Keine Kunden",
+		"deleteConfirm": "Möchtest du diesen Kunden wirklich löschen? Dies kann nicht rückgängig gemacht werden."
 	},
 	"report": {
 		"title": "Reports",
