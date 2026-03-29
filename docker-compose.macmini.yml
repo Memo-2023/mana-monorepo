@@ -1399,6 +1399,60 @@ services:
       retries: 3
       start_period: 45s
 
+  uload-server:
+    build:
+      context: apps/uload/apps/server
+      dockerfile: Dockerfile
+    image: uload-server:local
+    container_name: mana-app-uload-server
+    restart: always
+    mem_limit: 256m
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3041
+      DATABASE_URL: postgresql://manacore:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/uload
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      CORS_ORIGINS: http://uload-web:5029,https://uload.mana.how,https://ulo.ad
+    ports:
+      - "3041:3041"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3041/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  uload-web:
+    build:
+      context: .
+      dockerfile: apps/uload/apps/web/Dockerfile
+    image: uload-web:local
+    container_name: mana-app-uload-web
+    restart: always
+    mem_limit: 128m
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5029
+      PUBLIC_ULOAD_SERVER_URL: http://uload-server:3041
+      PUBLIC_ULOAD_SERVER_URL_CLIENT: https://uload-api.mana.how
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
+    ports:
+      - "5029:5029"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5029/health"]
+      interval: 180s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+
   mana-llm:
     build:
       context: ./services/mana-llm
@@ -1701,7 +1755,7 @@ services:
       - '--storage.path=/alertmanager'
       - '--web.listen-address=:9093'
     volumes:
-      - ./docker/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./docker/alertmanager:/etc/alertmanager:ro
       - alertmanager_data:/alertmanager
     ports:
       - "9093:9093"
