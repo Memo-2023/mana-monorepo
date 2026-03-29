@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import {
 		Calculator,
-		FlaskConical,
+		Flask,
 		Code,
 		Ruler,
 		Coins,
@@ -29,7 +29,7 @@
 		},
 		{
 			href: '/scientific',
-			icon: FlaskConical,
+			icon: Flask,
 			label: 'Wissenschaftlich',
 			description: 'sin, cos, log & mehr',
 			color: 'bg-violet-500',
