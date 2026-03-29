@@ -8,9 +8,9 @@ async function bootstrap() {
 	// CORS configuration
 	app.enableCors({
 		origin: [
-			'http://localhost:4321', // Astro dev
+			'http://localhost:5210', // SvelteKit dev
+			'http://localhost:4321', // Legacy Astro dev
 			'http://localhost:3000', // Alternative dev
-			/\.netlify\.app$/, // Legacy Netlify
 		],
 		methods: ['GET', 'POST', 'OPTIONS'],
 		credentials: false,
