@@ -1,59 +1,28 @@
 <script lang="ts">
 	/**
-	 * ContactsFavoritesWidget - Favorite contacts
+	 * ContactsFavoritesWidget - Favorite contacts (local-first)
+	 *
+	 * Reads directly from Contacts' IndexedDB via cross-app reader.
+	 * Reactive: auto-updates when contacts change (sync, other tabs).
 	 */
 
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { contactsService, type Contact } from '$lib/api/services';
+	import { useFavoriteContacts } from '$lib/data/cross-app-queries';
+	import type { CrossAppContact } from '$lib/data/cross-app-stores';
 	import { APP_URLS } from '@manacore/shared-branding';
-	import WidgetSkeleton from '../WidgetSkeleton.svelte';
-	import WidgetError from '../WidgetError.svelte';
-
-	let state = $state<'loading' | 'success' | 'error'>('loading');
-	let data = $state<Contact[]>([]);
-	let error = $state<string | null>(null);
-	let retrying = $state(false);
-	let retryCount = $state(0);
 
 	const MAX_DISPLAY = 5;
+	const contacts = useFavoriteContacts(MAX_DISPLAY);
 
-	// Determine app URL based on environment
 	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 	const contactsUrl = isDev ? APP_URLS.contacts.dev : APP_URLS.contacts.prod;
 
-	async function load() {
-		state = 'loading';
-		retrying = true;
-
-		const result = await contactsService.getFavoriteContacts(MAX_DISPLAY);
-
-		if (result.data) {
-			data = result.data;
-			state = 'success';
-			retryCount = 0;
-		} else {
-			error = result.error;
-			state = 'error';
-
-			// Don't retry if service is unavailable (network error)
-			const isServiceUnavailable = error?.includes('nicht erreichbar');
-			if (!isServiceUnavailable && retryCount < 3) {
-				retryCount++;
-				setTimeout(load, 5000 * retryCount);
-			}
-		}
-
-		retrying = false;
+	function getDisplayName(contact: CrossAppContact): string {
+		const parts = [contact.firstName, contact.lastName].filter(Boolean);
+		return parts.length > 0 ? parts.join(' ') : contact.email || 'Unbekannt';
 	}
 
-	onMount(load);
-
-	function getDisplayName(contact: Contact): string {
-		return contactsService.getDisplayName(contact);
-	}
-
-	function getInitials(contact: Contact): string {
+	function getInitials(contact: CrossAppContact): string {
 		const name = getDisplayName(contact);
 		const parts = name.split(' ');
 		if (parts.length >= 2) {
@@ -66,18 +35,20 @@
 <div>
 	<div class="mb-3 flex items-center justify-between">
 		<h3 class="flex items-center gap-2 text-lg font-semibold">
-			<span>=e</span>
+			<span>👥</span>
 			{$_('dashboard.widgets.contacts.title')}
 		</h3>
 	</div>
 
-	{#if state === 'loading'}
-		<WidgetSkeleton lines={4} />
-	{:else if state === 'error'}
-		<WidgetError {error} onRetry={load} {retrying} />
-	{:else if data.length === 0}
+	{#if contacts.loading}
+		<div class="space-y-2">
+			{#each Array(4) as _}
+				<div class="h-10 animate-pulse rounded bg-surface-hover"></div>
+			{/each}
+		</div>
+	{:else if (contacts.value ?? []).length === 0}
 		<div class="py-6 text-center">
-			<div class="mb-2 text-3xl">=�</div>
+			<div class="mb-2 text-3xl">👤</div>
 			<p class="text-sm text-muted-foreground">
 				{$_('dashboard.widgets.contacts.empty')}
 			</p>
@@ -92,7 +63,7 @@
 		</div>
 	{:else}
 		<div class="space-y-2">
-			{#each data as contact}
+			{#each contacts.value ?? [] as contact (contact.id)}
 				<a
 					href="{contactsUrl}/contacts/{contact.id}"
 					target="_blank"
@@ -118,7 +89,7 @@
 							</p>
 						{/if}
 					</div>
-					<span class="text-amber-500">P</span>
+					<span class="text-amber-500">⭐</span>
 				</a>
 			{/each}
 		</div>
@@ -129,7 +100,7 @@
 			rel="noopener"
 			class="mt-3 block text-center text-sm text-primary hover:underline"
 		>
-			{$_('dashboard.widgets.contacts.view_all')} �
+			{$_('dashboard.widgets.contacts.view_all')} →
 		</a>
 	{/if}
 </div>

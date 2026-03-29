@@ -1,56 +1,25 @@
 <script lang="ts">
 	/**
-	 * CalendarEventsWidget - Upcoming calendar events
+	 * CalendarEventsWidget - Upcoming calendar events (local-first)
+	 *
+	 * Reads directly from Calendar's IndexedDB via cross-app reader.
+	 * Reactive: auto-updates when events change (sync, other tabs).
 	 */
 
 	import { _ } from 'svelte-i18n';
-	import { calendarService, type CalendarEvent } from '$lib/api/services';
-	import { useAutoRefresh } from '$lib/utils/autoRefresh';
-	import WidgetSkeleton from '../WidgetSkeleton.svelte';
-	import WidgetError from '../WidgetError.svelte';
+	import { useUpcomingEvents } from '$lib/data/cross-app-queries';
+	import type { CrossAppEvent } from '$lib/data/cross-app-stores';
 	import { APP_URLS } from '@manacore/shared-branding';
 
 	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 	const calendarUrl = isDev ? APP_URLS.calendar.dev : APP_URLS.calendar.prod;
 
-	let state = $state<'loading' | 'success' | 'error'>('loading');
-	let data = $state<CalendarEvent[]>([]);
-	let error = $state<string | null>(null);
-	let retrying = $state(false);
-	let retryCount = $state(0);
+	const events = useUpcomingEvents(7);
 
 	const MAX_DISPLAY = 5;
 
-	async function load() {
-		if (data.length === 0) state = 'loading';
-		retrying = true;
-
-		const result = await calendarService.getUpcomingEvents(7);
-
-		if (result.data) {
-			data = result.data;
-			state = 'success';
-			retryCount = 0;
-		} else {
-			if (data.length === 0) {
-				error = result.error;
-				state = 'error';
-			}
-
-			const isServiceUnavailable = error?.includes('nicht erreichbar');
-			if (!isServiceUnavailable && retryCount < 3) {
-				retryCount++;
-				setTimeout(load, 5000 * retryCount);
-			}
-		}
-
-		retrying = false;
-	}
-
-	useAutoRefresh(load, 60000);
-
-	function formatEventTime(event: CalendarEvent): string {
-		const start = new Date(event.startTime);
+	function formatEventTime(event: CrossAppEvent): string {
+		const start = new Date(event.startDate);
 		const today = new Date();
 		const tomorrow = new Date(today);
 		tomorrow.setDate(tomorrow.getDate() + 1);
@@ -68,7 +37,7 @@
 			});
 		}
 
-		if (event.isAllDay) {
+		if (event.allDay) {
 			return dateStr;
 		}
 
@@ -76,8 +45,8 @@
 		return `${dateStr}, ${timeStr}`;
 	}
 
-	const displayedEvents = $derived((data || []).slice(0, MAX_DISPLAY));
-	const remainingCount = $derived(Math.max(0, (data || []).length - MAX_DISPLAY));
+	const displayedEvents = $derived((events.value ?? []).slice(0, MAX_DISPLAY));
+	const remainingCount = $derived(Math.max(0, (events.value ?? []).length - MAX_DISPLAY));
 </script>
 
 <div>
@@ -86,18 +55,20 @@
 			<span>🗓️</span>
 			{$_('dashboard.widgets.calendar.title')}
 		</h3>
-		{#if (data || []).length > 0}
+		{#if (events.value ?? []).length > 0}
 			<span class="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">
-				{(data || []).length}
+				{(events.value ?? []).length}
 			</span>
 		{/if}
 	</div>
 
-	{#if state === 'loading'}
-		<WidgetSkeleton lines={4} />
-	{:else if state === 'error'}
-		<WidgetError {error} onRetry={load} {retrying} />
-	{:else if (data || []).length === 0}
+	{#if events.loading}
+		<div class="space-y-2">
+			{#each Array(4) as _}
+				<div class="h-10 animate-pulse rounded bg-surface-hover"></div>
+			{/each}
+		</div>
+	{:else if (events.value ?? []).length === 0}
 		<div class="py-6 text-center">
 			<div class="mb-2 text-3xl">📅</div>
 			<p class="text-sm text-muted-foreground">
@@ -106,7 +77,7 @@
 		</div>
 	{:else}
 		<div class="space-y-2">
-			{#each displayedEvents as event}
+			{#each displayedEvents as event (event.id)}
 				<div class="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-surface-hover">
 					<div
 						class="mt-1 h-3 w-3 flex-shrink-0 rounded-full"

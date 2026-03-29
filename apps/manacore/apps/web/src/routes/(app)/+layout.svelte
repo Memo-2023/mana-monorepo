@@ -10,6 +10,7 @@
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
 	import { manacoreStore } from '$lib/data/local-store';
+	import { todoReader, calendarReader, contactsReader } from '$lib/data/cross-app-stores';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import {
 		THEME_DEFINITIONS,
@@ -203,7 +204,14 @@
 		}
 
 		// Initialize local-first databases (opens IndexedDB, seeds guest data)
-		await Promise.all([manacoreStore.initialize(), tagLocalStore.initialize()]);
+		await Promise.all([
+			manacoreStore.initialize(),
+			tagLocalStore.initialize(),
+			// Cross-app readers (read-only, no sync — owning apps handle sync)
+			todoReader.initialize(),
+			calendarReader.initialize(),
+			contactsReader.initialize(),
+		]);
 
 		// Start syncing to server
 		const getToken = () => authStore.getValidToken();

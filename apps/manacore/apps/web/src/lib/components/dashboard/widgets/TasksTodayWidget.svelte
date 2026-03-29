@@ -1,18 +1,19 @@
 <script lang="ts">
 	/**
-	 * TasksTodayWidget - Today's tasks from Todo app
+	 * TasksTodayWidget - Today's tasks from Todo app (local-first)
+	 *
+	 * Reads directly from Todo's IndexedDB via cross-app reader.
+	 * Reactive: auto-updates when tasks change (sync, other tabs).
 	 */
 
 	import { _ } from 'svelte-i18n';
-	import { todoService, type Task } from '$lib/api/services';
-	import { useAutoRefresh } from '$lib/utils/autoRefresh';
+	import { useOpenTasks } from '$lib/data/cross-app-queries';
+	import { crossTaskCollection, type CrossAppTask } from '$lib/data/cross-app-stores';
 	import { APP_URLS } from '@manacore/shared-branding';
 	import { format, isToday, isTomorrow, isPast } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import WidgetSkeleton from '../WidgetSkeleton.svelte';
-	import WidgetError from '../WidgetError.svelte';
 
-	function formatDueDate(dueDate?: string): string | null {
+	function formatDueDate(dueDate?: string | null): string | null {
 		if (!dueDate) return null;
 		const date = new Date(dueDate);
 		if (isToday(date)) return 'Heute';
@@ -20,17 +21,13 @@
 		return format(date, 'dd. MMM', { locale: de });
 	}
 
-	function isOverdue(dueDate?: string): boolean {
+	function isOverdue(dueDate?: string | null): boolean {
 		if (!dueDate) return false;
 		const date = new Date(dueDate);
 		return isPast(date) && !isToday(date);
 	}
 
-	let state = $state<'loading' | 'success' | 'error'>('loading');
-	let data = $state<Task[]>([]);
-	let error = $state<string | null>(null);
-	let retrying = $state(false);
-	let retryCount = $state(0);
+	const tasks = useOpenTasks();
 
 	const MAX_DISPLAY = 5;
 
@@ -44,71 +41,31 @@
 		low: '#22c55e',
 	};
 
-	async function load() {
-		if (data.length === 0) state = 'loading';
-		retrying = true;
-
-		const result = await todoService.getAllOpenTasks();
-
-		if (result.data) {
-			data = result.data;
-			state = 'success';
-			retryCount = 0;
-		} else {
-			if (data.length === 0) {
-				error = result.error;
-				state = 'error';
-			}
-
-			const isServiceUnavailable = error?.includes('nicht erreichbar');
-			if (!isServiceUnavailable && retryCount < 3) {
-				retryCount++;
-				setTimeout(load, 5000 * retryCount);
-			}
-		}
-
-		retrying = false;
-	}
-
-	useAutoRefresh(load, 30000);
-
-	const displayedTasks = $derived((data || []).slice(0, MAX_DISPLAY));
-	const remainingCount = $derived(Math.max(0, (data || []).length - MAX_DISPLAY));
-	const completedCount = $derived((data || []).filter((t) => t.isCompleted).length);
-	const totalCount = $derived((data || []).length);
+	const displayedTasks = $derived((tasks.value ?? []).slice(0, MAX_DISPLAY));
+	const remainingCount = $derived(Math.max(0, (tasks.value ?? []).length - MAX_DISPLAY));
+	const totalCount = $derived((tasks.value ?? []).length);
 
 	// Track tasks being toggled (for optimistic UI)
 	let togglingIds: Set<string> = $state(new Set());
 
-	async function handleToggleComplete(e: MouseEvent, task: Task) {
+	async function handleToggleComplete(e: MouseEvent, task: CrossAppTask) {
 		e.preventDefault();
 		e.stopPropagation();
 
 		if (togglingIds.has(task.id)) return;
 
-		// Optimistic update
 		togglingIds = new Set([...togglingIds, task.id]);
-		const wasCompleted = task.isCompleted;
-		task.isCompleted = !wasCompleted;
 
-		const result = wasCompleted
-			? await todoService.uncompleteTask(task.id)
-			: await todoService.completeTask(task.id);
-
-		if (result.error) {
-			// Revert on error
-			task.isCompleted = wasCompleted;
-		} else if (!wasCompleted) {
-			// Task completed: remove from list after brief delay
-			setTimeout(() => {
-				data = data.filter((t) => t.id !== task.id);
-			}, 600);
-		}
+		// Write directly to IndexedDB — sync engine will push to server
+		await crossTaskCollection.update(task.id, {
+			isCompleted: !task.isCompleted,
+			completedAt: task.isCompleted ? null : new Date().toISOString(),
+		} as Partial<CrossAppTask>);
 
 		togglingIds = new Set([...togglingIds].filter((id) => id !== task.id));
 	}
 
-	function getSubtaskProgress(task: Task): string | null {
+	function getSubtaskProgress(task: CrossAppTask): string | null {
 		if (!task.subtasks || task.subtasks.length === 0) return null;
 		const done = task.subtasks.filter((s) => s.isCompleted).length;
 		return `${done}/${task.subtasks.length}`;
@@ -123,15 +80,17 @@
 		</h3>
 		{#if totalCount > 0}
 			<span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">
-				{completedCount}/{totalCount}
+				{totalCount}
 			</span>
 		{/if}
 	</div>
 
-	{#if state === 'loading'}
-		<WidgetSkeleton lines={4} />
-	{:else if state === 'error'}
-		<WidgetError {error} onRetry={load} {retrying} />
+	{#if tasks.loading}
+		<div class="space-y-2">
+			{#each Array(4) as _}
+				<div class="h-8 animate-pulse rounded bg-surface-hover"></div>
+			{/each}
+		</div>
 	{:else if totalCount === 0}
 		<div class="py-6 text-center">
 			<div class="mb-2 text-3xl">🎉</div>
@@ -141,7 +100,7 @@
 		</div>
 	{:else}
 		<div class="space-y-1">
-			{#each displayedTasks as task}
+			{#each displayedTasks as task (task.id)}
 				<a
 					href={todoUrl}
 					target="_blank"
@@ -198,41 +157,13 @@
 								</span>
 							{/if}
 						</div>
-						<!-- Meta row: time, subtasks, labels -->
-						{#if task.dueTime || getSubtaskProgress(task) || (task.labels && task.labels.length > 0)}
+						{#if task.dueTime || getSubtaskProgress(task)}
 							<div class="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
 								{#if task.dueTime}
 									<span>{task.dueTime}</span>
 								{/if}
 								{#if getSubtaskProgress(task)}
-									<span class="flex items-center gap-0.5">
-										<svg
-											class="h-3 w-3"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-											stroke-width="2"
-										>
-											<path
-												d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-											/>
-										</svg>
-										{getSubtaskProgress(task)}
-									</span>
-								{/if}
-								{#if task.labels && task.labels.length > 0}
-									{#each task.labels.slice(0, 2) as label}
-										<span class="flex items-center gap-1">
-											<span
-												class="inline-block h-2 w-2 rounded-full"
-												style="background-color: {label.color}"
-											></span>
-											{label.name}
-										</span>
-									{/each}
-									{#if task.labels.length > 2}
-										<span>+{task.labels.length - 2}</span>
-									{/if}
+									<span>{getSubtaskProgress(task)}</span>
 								{/if}
 							</div>
 						{/if}

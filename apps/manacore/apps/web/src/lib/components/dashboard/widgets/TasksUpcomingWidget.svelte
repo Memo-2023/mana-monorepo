@@ -1,20 +1,16 @@
 <script lang="ts">
 	/**
-	 * TasksUpcomingWidget - Upcoming tasks for the next 7 days
+	 * TasksUpcomingWidget - Upcoming tasks for the next 7 days (local-first)
+	 *
+	 * Reads directly from Todo's IndexedDB via cross-app reader.
+	 * Reactive: auto-updates when tasks change (sync, other tabs).
 	 */
 
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { todoService, type Task } from '$lib/api/services';
+	import { useUpcomingTasks } from '$lib/data/cross-app-queries';
 	import { APP_URLS } from '@manacore/shared-branding';
-	import WidgetSkeleton from '../WidgetSkeleton.svelte';
-	import WidgetError from '../WidgetError.svelte';
 
-	let state = $state<'loading' | 'success' | 'error'>('loading');
-	let data = $state<Task[]>([]);
-	let error = $state<string | null>(null);
-	let retrying = $state(false);
-	let retryCount = $state(0);
+	const tasks = useUpcomingTasks(7);
 
 	const MAX_DISPLAY = 5;
 
@@ -27,32 +23,6 @@
 		medium: '#eab308',
 		low: '#22c55e',
 	};
-
-	async function load() {
-		state = 'loading';
-		retrying = true;
-
-		const result = await todoService.getUpcomingTasks(7);
-
-		if (result.data) {
-			data = result.data;
-			state = 'success';
-			retryCount = 0;
-		} else {
-			error = result.error;
-			state = 'error';
-
-			const isServiceUnavailable = error?.includes('nicht erreichbar');
-			if (!isServiceUnavailable && retryCount < 3) {
-				retryCount++;
-				setTimeout(load, 5000 * retryCount);
-			}
-		}
-
-		retrying = false;
-	}
-
-	onMount(load);
 
 	function formatDate(dateStr: string): string {
 		const date = new Date(dateStr);
@@ -72,12 +42,12 @@
 		return date < today;
 	}
 
-	function isToday(dateStr: string): boolean {
+	function isTodayDate(dateStr: string): boolean {
 		return new Date(dateStr).toDateString() === new Date().toDateString();
 	}
 
-	const displayedTasks = $derived(data.slice(0, MAX_DISPLAY));
-	const remainingCount = $derived(Math.max(0, data.length - MAX_DISPLAY));
+	const displayedTasks = $derived((tasks.value ?? []).slice(0, MAX_DISPLAY));
+	const remainingCount = $derived(Math.max(0, (tasks.value ?? []).length - MAX_DISPLAY));
 </script>
 
 <div>
@@ -86,18 +56,20 @@
 			<span>📅</span>
 			{$_('dashboard.widgets.tasks_upcoming.title')}
 		</h3>
-		{#if data.length > 0}
+		{#if (tasks.value ?? []).length > 0}
 			<span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">
-				{data.length}
+				{(tasks.value ?? []).length}
 			</span>
 		{/if}
 	</div>
 
-	{#if state === 'loading'}
-		<WidgetSkeleton lines={4} />
-	{:else if state === 'error'}
-		<WidgetError {error} onRetry={load} {retrying} />
-	{:else if data.length === 0}
+	{#if tasks.loading}
+		<div class="space-y-2">
+			{#each Array(4) as _}
+				<div class="h-8 animate-pulse rounded bg-surface-hover"></div>
+			{/each}
+		</div>
+	{:else if (tasks.value ?? []).length === 0}
 		<div class="py-6 text-center">
 			<div class="mb-2 text-3xl">📭</div>
 			<p class="text-sm text-muted-foreground">
@@ -106,7 +78,7 @@
 		</div>
 	{:else}
 		<div class="space-y-1">
-			{#each displayedTasks as task}
+			{#each displayedTasks as task (task.id)}
 				<a
 					href={todoUrl}
 					target="_blank"
@@ -122,20 +94,6 @@
 					<!-- Content -->
 					<div class="min-w-0 flex-1">
 						<p class="truncate text-sm font-medium">{task.title}</p>
-						<!-- Meta row: labels -->
-						{#if task.labels && task.labels.length > 0}
-							<div class="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-								{#each task.labels.slice(0, 2) as label}
-									<span class="flex items-center gap-1">
-										<span
-											class="inline-block h-2 w-2 rounded-full"
-											style="background-color: {label.color}"
-										></span>
-										{label.name}
-									</span>
-								{/each}
-							</div>
-						{/if}
 					</div>
 
 					<!-- Date badge -->
@@ -145,7 +103,7 @@
 								task.dueDate
 							)
 								? 'bg-red-500/10 text-red-500'
-								: isToday(task.dueDate)
+								: isTodayDate(task.dueDate)
 									? 'bg-orange-500/10 text-orange-500'
 									: 'bg-muted text-muted-foreground'}"
 						>
