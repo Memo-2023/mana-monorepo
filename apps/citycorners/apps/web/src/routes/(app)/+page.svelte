@@ -7,6 +7,9 @@
 		useAllLocations,
 		searchCities,
 		getLocationCountByCity,
+		getPlatformStats,
+		filterByCity,
+		getCityStats,
 	} from '$lib/data/queries';
 
 	const allCities = useAllCities();
@@ -15,6 +18,7 @@
 	let searchQuery = $state('');
 
 	let locationCounts = $derived(getLocationCountByCity(allLocations.value));
+	let platformStats = $derived(getPlatformStats(allCities.value, allLocations.value));
 
 	let filtered = $derived(searchCities(allCities.value, searchQuery));
 </script>
@@ -40,6 +44,39 @@
 		</a>
 	{/if}
 </header>
+
+<!-- Platform stats -->
+{#if platformStats.totalCities > 0}
+	<div class="mb-6 flex flex-wrap gap-4 rounded-xl border border-border bg-background-card p-4">
+		<div class="flex items-center gap-2">
+			<span class="text-lg">🏙️</span>
+			<div>
+				<p class="text-lg font-semibold text-foreground">{platformStats.totalCities}</p>
+				<p class="text-xs text-foreground-secondary">{$_('nav.cities')}</p>
+			</div>
+		</div>
+		<div class="flex items-center gap-2">
+			<span class="text-lg">📍</span>
+			<div>
+				<p class="text-lg font-semibold text-foreground">{platformStats.totalLocations}</p>
+				<p class="text-xs text-foreground-secondary">{$_('home.title')}</p>
+			</div>
+		</div>
+		{#if platformStats.totalContributors > 0}
+			<div class="flex items-center gap-2">
+				<span class="text-lg">👥</span>
+				<div>
+					<p class="text-lg font-semibold text-foreground">{platformStats.totalContributors}</p>
+					<p class="text-xs text-foreground-secondary">
+						{$_('cities.totalContributors', {
+							values: { count: platformStats.totalContributors },
+						})}
+					</p>
+				</div>
+			</div>
+		{/if}
+	</div>
+{/if}
 
 <!-- Search -->
 <div class="mb-6">
@@ -99,13 +136,54 @@
 							{city.description}
 						</p>
 					{/if}
-					<div class="mt-2 text-xs text-foreground-secondary/60">
-						{@const count = locationCounts.get(city.id) || 0}
-						{#if count > 0}
-							{$_('cities.locationsCount', { values: { count } })}
-						{:else}
-							{$_('cities.noLocationsYet')}
+					{@const count = locationCounts.get(city.id) || 0}
+					{@const cityStats = getCityStats(filterByCity(allLocations.value, city.id))}
+					<div class="mt-2 flex flex-wrap items-center gap-2">
+						<span
+							class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
+						>
+							<svg
+								class="h-3 w-3"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0zM19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+								/>
+							</svg>
+							{count}
+						</span>
+						{#if cityStats.contributorCount > 0}
+							<span
+								class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs text-amber-600 dark:text-amber-400"
+							>
+								<svg
+									class="h-3 w-3"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"
+									/>
+								</svg>
+								{cityStats.contributorCount}
+							</span>
 						{/if}
+						{#each cityStats.topCategories.slice(0, 2) as { category }}
+							<span
+								class="rounded-full bg-background-card-hover px-2 py-0.5 text-xs text-foreground-secondary"
+							>
+								{$_(`categories.${category}`)}
+							</span>
+						{/each}
 					</div>
 				</div>
 			</a>

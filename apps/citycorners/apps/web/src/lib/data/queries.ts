@@ -109,3 +109,71 @@ export function getLocationCountByCity(locations: LocalLocation[]): Map<string, 
 	}
 	return counts;
 }
+
+/** Stats for a single city. */
+export interface CityStats {
+	locationCount: number;
+	categoryCounts: Record<string, number>;
+	topCategories: { category: string; count: number }[];
+	contributorCount: number;
+	hasCoordinates: number;
+	recentLocations: LocalLocation[];
+}
+
+/** Compute stats for a city's locations. */
+export function getCityStats(locations: LocalLocation[]): CityStats {
+	const categoryCounts: Record<string, number> = {};
+	const contributors = new Set<string>();
+	let hasCoordinates = 0;
+
+	for (const loc of locations) {
+		categoryCounts[loc.category] = (categoryCounts[loc.category] || 0) + 1;
+		if ((loc as any).createdBy) contributors.add((loc as any).createdBy);
+		if (loc.latitude && loc.longitude) hasCoordinates++;
+	}
+
+	const topCategories = Object.entries(categoryCounts)
+		.map(([category, count]) => ({ category, count }))
+		.sort((a, b) => b.count - a.count)
+		.slice(0, 5);
+
+	const recentLocations = [...locations]
+		.sort((a, b) => {
+			const aTime = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : 0;
+			const bTime = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : 0;
+			return bTime - aTime;
+		})
+		.slice(0, 3);
+
+	return {
+		locationCount: locations.length,
+		categoryCounts,
+		topCategories,
+		contributorCount: contributors.size,
+		hasCoordinates,
+		recentLocations,
+	};
+}
+
+/** Stats summary for the city discovery page. */
+export interface PlatformStats {
+	totalCities: number;
+	totalLocations: number;
+	totalContributors: number;
+}
+
+/** Compute platform-wide stats. */
+export function getPlatformStats(cities: LocalCity[], locations: LocalLocation[]): PlatformStats {
+	const contributors = new Set<string>();
+	for (const loc of locations) {
+		if ((loc as any).createdBy) contributors.add((loc as any).createdBy);
+	}
+	for (const city of cities) {
+		if (city.createdBy) contributors.add(city.createdBy);
+	}
+	return {
+		totalCities: cities.length,
+		totalLocations: locations.length,
+		totalContributors: contributors.size,
+	};
+}

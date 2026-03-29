@@ -20,7 +20,16 @@
 		"add": "Stadt hinzufügen",
 		"empty": "Noch keine Städte. Sei der Erste!",
 		"locationsCount": "{count} Orte",
-		"noLocationsYet": "Noch keine Orte"
+		"noLocationsYet": "Noch keine Orte",
+		"contributors": "{count} Beitragende",
+		"contributorsOne": "1 Beitragender",
+		"onMap": "{count} auf der Karte",
+		"recentlyAdded": "Zuletzt hinzugefügt",
+		"stats": "Statistiken",
+		"totalCities": "{count} Städte",
+		"totalLocations": "{count} Orte",
+		"totalContributors": "{count} Beitragende",
+		"topCategories": "Top-Kategorien"
 	},
 	"cityAdd": {
 		"title": "Neue Stadt anlegen",

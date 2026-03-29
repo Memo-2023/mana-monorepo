@@ -20,7 +20,16 @@
 		"add": "Add a city",
 		"empty": "No cities yet. Be the first!",
 		"locationsCount": "{count} places",
-		"noLocationsYet": "No places yet"
+		"noLocationsYet": "No places yet",
+		"contributors": "{count} contributors",
+		"contributorsOne": "1 contributor",
+		"onMap": "{count} on the map",
+		"recentlyAdded": "Recently added",
+		"stats": "Statistics",
+		"totalCities": "{count} cities",
+		"totalLocations": "{count} places",
+		"totalContributors": "{count} contributors",
+		"topCategories": "Top categories"
 	},
 	"cityAdd": {
 		"title": "Add a new city",
