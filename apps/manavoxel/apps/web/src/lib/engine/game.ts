@@ -3,9 +3,11 @@ import { Camera } from './camera';
 import { InputManager } from './input';
 import { TilemapRenderer } from './tilemap';
 import { Player } from './player';
+import { ParticleSystem } from './particles';
 import { AreaManager, generateDemoStreet, generateDemoInterior } from './area-manager';
 import { UndoStack, brushStroke, floodFill, pipette, type ToolType } from '$lib/editor/tools';
 import { DEFAULT_MATERIALS, MATERIAL_AIR, type Material } from '@manavoxel/shared';
+import type { Inventory } from './inventory';
 
 export class GameEngine {
 	app: Application;
@@ -15,11 +17,14 @@ export class GameEngine {
 	player: Player | null = null;
 	undo: UndoStack;
 	areaManager: AreaManager;
+	particles: ParticleSystem;
+	inventory: Inventory | null = null;
 
 	private _container: HTMLDivElement;
 	private _worldContainer: Container;
 	private _fadeOverlay: Graphics;
 	private _initialized = false;
+	private _useItemCooldown = 0;
 
 	// Editor state
 	private _editing = false;
@@ -71,6 +76,7 @@ export class GameEngine {
 		this.camera = new Camera(this._worldContainer);
 		this.input = new InputManager(container);
 		this.areaManager = new AreaManager(this._worldContainer);
+		this.particles = new ParticleSystem(this._worldContainer);
 
 		this._init();
 	}
@@ -167,6 +173,12 @@ export class GameEngine {
 			this.undo.redo(this.tilemap);
 		}
 
+		// Update particles
+		this.particles.update();
+
+		// Cooldown tick
+		if (this._useItemCooldown > 0) this._useItemCooldown--;
+
 		this.camera.update(this.app.screen.width, this.app.screen.height);
 	}
 
@@ -205,6 +217,47 @@ export class GameEngine {
 				this.areaManager.switchFloor(nextFloor);
 				this._currentFloor = nextFloor;
 				this.onStateChange?.();
+			}
+
+			// Use held item (Space key)
+			if (this.input.isKeyDown('Space') && this._useItemCooldown <= 0 && this.inventory) {
+				const heldItem = this.inventory.heldItem;
+				if (heldItem && heldItem.properties.damage > 0) {
+					this._useItemCooldown = 15; // ~0.25s cooldown
+
+					// Spawn particle effect at player facing direction
+					const dirOffsets = [
+						{ dx: 0, dy: -20 }, // up
+						{ dx: 20, dy: 0 }, // right
+						{ dx: 0, dy: 20 }, // down
+						{ dx: -20, dy: 0 }, // left
+					];
+					const off = dirOffsets[this.player.direction] ?? dirOffsets[2];
+					const effectX = this.player.worldX + off.dx;
+					const effectY = this.player.worldY + off.dy;
+
+					// Spawn particles based on item properties
+					const particleType = heldItem.properties.particle;
+					if (particleType && particleType !== 'none') {
+						this.particles.spawn(particleType, effectX, effectY);
+					} else {
+						this.particles.spawn('sparks', effectX, effectY);
+					}
+
+					// Pixel destruction in facing direction
+					if (heldItem.properties.damage >= 20) {
+						const worldTileX = Math.floor(effectX / this.tilemap.tileSize);
+						const worldTileY = Math.floor(effectY / this.tilemap.tileSize);
+						const radius = Math.min(3, Math.floor(heldItem.properties.damage / 30));
+						for (let dy = -radius; dy <= radius; dy++) {
+							for (let dxx = -radius; dxx <= radius; dxx++) {
+								if (Math.abs(dxx) + Math.abs(dy) <= radius) {
+									this.tilemap.setPixel(worldTileX + dxx, worldTileY + dy, MATERIAL_AIR);
+								}
+							}
+						}
+					}
+				}
 			}
 
 			// Camera follows player smoothly

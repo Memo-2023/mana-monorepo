@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { type Inventory, type GameItem, MAX_INVENTORY_SLOTS } from '$lib/engine/inventory';
 
-	let { inventory, onDrop = undefined as ((slot: number) => void) | undefined } = $props();
+	let {
+		inventory,
+		onDrop = undefined as ((slot: number) => void) | undefined,
+		onInspect = undefined as ((item: GameItem) => void) | undefined,
+	} = $props();
 
 	function drawSprite(canvas: HTMLCanvasElement, item: GameItem) {
 		const ctx = canvas.getContext('2d')!;
@@ -53,6 +57,9 @@
 					? `${rarityBorder[item.rarity] ?? 'border-gray-600'} bg-gray-900 hover:bg-gray-800`
 					: 'border-gray-700/50 bg-gray-900/30'}"
 			onclick={() => inventory.selectSlot(i)}
+			ondblclick={() => {
+				if (item) onInspect?.(item);
+			}}
 			oncontextmenu={(e) => {
 				e.preventDefault();
 				if (item) onDrop?.(i);

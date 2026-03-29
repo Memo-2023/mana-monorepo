@@ -6,7 +6,9 @@
 	import SpriteEditor from '$lib/editor/sprite-editor.svelte';
 	import type { SpriteData } from '$lib/editor/sprite-editor.svelte';
 	import InventoryUI from '$lib/components/Inventory.svelte';
-	import { Inventory, createItem } from '$lib/engine/inventory';
+	import PropertyPanel from '$lib/editor/property-panel.svelte';
+	import TriggerEditor from '$lib/editor/trigger-editor.svelte';
+	import { Inventory, createItem, type GameItem } from '$lib/engine/inventory';
 
 	let canvasContainer: HTMLDivElement;
 	let engine: GameEngine | null = $state(null);
@@ -18,6 +20,9 @@
 	let currentFloor = $state(0);
 	let totalFloors = $state(1);
 	let showSpriteEditor = $state(false);
+	let showPropertyPanel = $state(false);
+	let showTriggerEditor = $state(false);
+	let editingItem = $state<GameItem | null>(null);
 	let inventory = $state(new Inventory());
 	let itemCounter = $state(0);
 
@@ -32,6 +37,7 @@
 
 	onMount(() => {
 		const e = new GameEngine(canvasContainer);
+		e.inventory = inventory;
 		engine = e;
 
 		e.onStateChange = () => {
@@ -228,6 +234,11 @@
 					onDrop={(slot) => {
 						inventory.removeItem(slot);
 					}}
+					onInspect={(item) => {
+						editingItem = item;
+						showPropertyPanel = true;
+						showTriggerEditor = false;
+					}}
 				/>
 			</div>
 		{/if}
@@ -243,6 +254,64 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Item Editor Panels (right sidebar) -->
+	{#if editingItem && (showPropertyPanel || showTriggerEditor)}
+		<div class="pointer-events-auto absolute right-4 top-16 z-40 flex flex-col gap-2">
+			<!-- Tab buttons -->
+			<div class="flex gap-1">
+				<button
+					class="rounded-lg px-3 py-1 text-xs transition {showPropertyPanel && !showTriggerEditor
+						? 'bg-emerald-600 text-white'
+						: 'bg-gray-800 text-gray-400 hover:bg-gray-700'}"
+					onclick={() => {
+						showPropertyPanel = true;
+						showTriggerEditor = false;
+					}}
+				>
+					Properties
+				</button>
+				<button
+					class="rounded-lg px-3 py-1 text-xs transition {showTriggerEditor
+						? 'bg-emerald-600 text-white'
+						: 'bg-gray-800 text-gray-400 hover:bg-gray-700'}"
+					onclick={() => {
+						showTriggerEditor = true;
+						showPropertyPanel = false;
+					}}
+				>
+					Behaviors
+				</button>
+			</div>
+
+			{#if showPropertyPanel}
+				<PropertyPanel
+					item={editingItem}
+					onUpdate={(updated) => {
+						editingItem = updated;
+					}}
+					onClose={() => {
+						showPropertyPanel = false;
+						editingItem = null;
+					}}
+				/>
+			{/if}
+
+			{#if showTriggerEditor && editingItem}
+				<TriggerEditor
+					behaviors={[]}
+					onUpdate={(behaviors) => {
+						// Store behaviors on the item (extend GameItem type later)
+						console.log('Behaviors updated:', behaviors);
+					}}
+					onClose={() => {
+						showTriggerEditor = false;
+						if (!showPropertyPanel) editingItem = null;
+					}}
+				/>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Sprite Editor Modal -->
 	{#if showSpriteEditor}
