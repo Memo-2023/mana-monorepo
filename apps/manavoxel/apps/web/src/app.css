@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '@manacore/shared-tailwind';
+@import '@manacore/shared-tailwind/themes.css';
 
 /* ManaVoxel specific styles */
 :root {

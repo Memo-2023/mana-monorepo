@@ -95,9 +95,12 @@ services:
     container_name: mana-infra-landings
     restart: always
     volumes:
-      - ./docker/nginx/landings.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./docker/nginx/snippets:/etc/nginx/snippets:ro
+      - ./docker/nginx:/etc/nginx/host-config:ro
       - /Volumes/ManaData/landings:/srv/landings:ro
+    command: >
+      sh -c "cp /etc/nginx/host-config/landings.conf /etc/nginx/conf.d/default.conf &&
+             cp -r /etc/nginx/host-config/snippets/* /etc/nginx/snippets/ 2>/dev/null;
+             nginx -g 'daemon off;'"
     ports:
       - "4400:80"
     healthcheck:
@@ -438,8 +441,7 @@ services:
     container_name: mana-core-searxng
     restart: always
     volumes:
-      - ./services/mana-search/searxng/settings.yml:/etc/searxng/settings.yml:ro
-      - ./services/mana-search/searxng/limiter.toml:/etc/searxng/limiter.toml:ro
+      - ./services/mana-search/searxng:/etc/searxng:ro
     environment:
       SEARXNG_BASE_URL: http://searxng:8080
       SEARXNG_SECRET: ${SEARXNG_SECRET:-change-me-searxng-secret}
@@ -672,9 +674,7 @@ services:
       SYNAPSE_REGISTRATION_SECRET: ${SYNAPSE_REGISTRATION_SECRET:-change-me-registration-secret}
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET}
     volumes:
-      - ./docker/matrix/homeserver.yaml:/config/homeserver.yaml:ro
-      - ./docker/matrix/log.config.yaml:/config/log.config.yaml:ro
-      - ./docker/matrix/appservices:/appservices:ro
+      - ./docker/matrix/config:/config:ro
       - ./docker/matrix/data:/data
     ports:
       - "4000:8008"
@@ -1297,6 +1297,31 @@ services:
       retries: 3
       start_period: 20s
 
+  manavoxel-web:
+    build:
+      context: .
+      dockerfile: apps/manavoxel/apps/web/Dockerfile
+    image: manavoxel-web:local
+    container_name: mana-app-manavoxel-web
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5028
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
+    ports:
+      - "5028:5028"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5028/health"]
+      interval: 180s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+
   mana-llm:
     build:
       context: ./services/mana-llm
@@ -1307,7 +1332,7 @@ services:
       redis:
         condition: service_healthy
     environment:
-      PORT: 3020
+      PORT: 3025
       LOG_LEVEL: info
       OLLAMA_URL: ${OLLAMA_URL:-http://192.168.178.11:11434}
       OLLAMA_DEFAULT_MODEL: ${OLLAMA_MODEL:-gemma3:12b}
@@ -1431,8 +1456,7 @@ services:
       - '-selfScrapeInterval=15s'
       - '-search.latencyOffset=0s'
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./docker/prometheus:/etc/prometheus:ro
       - victoriametrics_data:/storage
     ports:
       - "9090:9090"
@@ -1449,7 +1473,7 @@ services:
     restart: always
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./docker/loki/local-config.yaml:/etc/loki/local-config.yaml:ro
+      - ./docker/loki:/etc/loki:ro
       - loki_data:/loki
     ports:
       - "3100:3100"
@@ -1565,7 +1589,7 @@ services:
       - '-evaluationInterval=30s'
       - '-httpListenAddr=:8880'
     volumes:
-      - ./docker/prometheus/alerts.yml:/etc/alerts/alerts.yml:ro
+      - ./docker/prometheus:/etc/alerts:ro
     ports:
       - "8880:8880"
     healthcheck:

@@ -35,7 +35,7 @@ export default defineConfig({
 		),
 	],
 	server: {
-		port: 5195,
+		port: 5028,
 		strictPort: true,
 	},
 	ssr: {
