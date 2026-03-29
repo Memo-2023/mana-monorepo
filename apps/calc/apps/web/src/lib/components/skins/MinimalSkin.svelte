@@ -1,8 +1,17 @@
 <script lang="ts">
 	import type { CalcSkinProps } from './types';
 
-	let { expression, display, error, onButton, onClear, onBackspace, onEquals }: CalcSkinProps =
-		$props();
+	let {
+		expression,
+		display,
+		error,
+		copied,
+		onButton,
+		onClear,
+		onBackspace,
+		onEquals,
+		onCopy,
+	}: CalcSkinProps = $props();
 
 	const buttons = [
 		['C', '(', ')', '%'],
@@ -23,8 +32,15 @@
 	<!-- Display: just big text -->
 	<div class="minimal-display">
 		<div class="minimal-expression">{expression || ' '}</div>
-		<div class="minimal-result" class:minimal-error={!!error}>
-			{error || display}
+		<div style="display: flex; align-items: flex-end; gap: 4px; justify-content: flex-end;">
+			<div class="minimal-result" style="flex: 1;" class:minimal-error={!!error}>
+				{error || display}
+			</div>
+			{#if display !== '0' && !error}
+				<button class="minimal-copy" onclick={onCopy}>
+					{copied ? '✓' : '⎘'}
+				</button>
+			{/if}
 		</div>
 	</div>
 
@@ -140,6 +156,20 @@
 		cursor: pointer;
 		background: transparent;
 		color: hsl(var(--muted-foreground));
+	}
+
+	.minimal-copy {
+		background: none;
+		border: none;
+		color: hsl(var(--muted-foreground));
+		opacity: 0.3;
+		font-size: 16px;
+		cursor: pointer;
+		padding: 2px;
+	}
+
+	.minimal-copy:hover {
+		opacity: 0.7;
 	}
 
 	.minimal-backspace:hover {

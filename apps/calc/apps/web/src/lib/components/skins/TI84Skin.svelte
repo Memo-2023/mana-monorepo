@@ -1,8 +1,17 @@
 <script lang="ts">
 	import type { CalcSkinProps } from './types';
 
-	let { expression, display, error, onButton, onClear, onBackspace, onEquals }: CalcSkinProps =
-		$props();
+	let {
+		expression,
+		display,
+		error,
+		copied,
+		onButton,
+		onClear,
+		onBackspace,
+		onEquals,
+		onCopy,
+	}: CalcSkinProps = $props();
 
 	const buttons = [
 		['C', '(', ')', '%'],
@@ -35,8 +44,15 @@
 		<div class="ti84-screen">
 			<div class="ti84-screen-inner">
 				<div class="ti84-expression">{expression || ' '}</div>
-				<div class="ti84-result" class:ti84-error={!!error}>
-					{error || display}
+				<div style="display: flex; align-items: flex-end; gap: 6px;">
+					<div class="ti84-result" style="flex: 1;" class:ti84-error={!!error}>
+						{error || display}
+					</div>
+					{#if display !== '0' && !error}
+						<button class="ti84-copy" onclick={onCopy} title="Kopieren">
+							{copied ? '✓' : '⎘'}
+						</button>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -155,6 +171,20 @@
 	.ti84-error {
 		color: #ffaa88;
 		font-size: 16px;
+	}
+
+	.ti84-copy {
+		background: none;
+		border: none;
+		color: #aaffaa;
+		opacity: 0.4;
+		font-size: 14px;
+		cursor: pointer;
+		padding: 2px 4px;
+	}
+
+	.ti84-copy:hover {
+		opacity: 1;
 	}
 
 	.ti84-nav {

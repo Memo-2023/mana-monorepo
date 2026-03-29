@@ -12,6 +12,16 @@
 	let display = $state('0');
 	let hasResult = $state(false);
 	let error = $state('');
+	let copied = $state(false);
+
+	async function copyToClipboard() {
+		if (display === '0' || error) return;
+		try {
+			await navigator.clipboard.writeText(display);
+			copied = true;
+			setTimeout(() => (copied = false), 1500);
+		} catch {}
+	}
 
 	// Skin state — persisted to localStorage
 	let activeSkin = $state<CalculatorSkin>('modern');
@@ -123,10 +133,12 @@
 		expression,
 		display,
 		error,
+		copied,
 		onButton: appendToExpression,
 		onClear: clear,
 		onBackspace: backspace,
 		onEquals: calculate,
+		onCopy: copyToClipboard,
 	});
 </script>
 

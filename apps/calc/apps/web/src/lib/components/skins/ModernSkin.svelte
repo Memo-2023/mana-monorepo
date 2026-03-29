@@ -1,8 +1,17 @@
 <script lang="ts">
 	import type { CalcSkinProps } from './types';
 
-	let { expression, display, error, onButton, onClear, onBackspace, onEquals }: CalcSkinProps =
-		$props();
+	let {
+		expression,
+		display,
+		error,
+		copied,
+		onButton,
+		onClear,
+		onBackspace,
+		onEquals,
+		onCopy,
+	}: CalcSkinProps = $props();
 
 	const buttons = [
 		['C', '(', ')', '%'],
@@ -32,11 +41,22 @@
 		<div class="text-sm text-muted-foreground min-h-[1.5rem] font-mono truncate">
 			{expression || ' '}
 		</div>
-		<div
-			class="text-4xl font-bold text-foreground font-mono text-right tabular-nums truncate"
-			class:text-red-400={!!error}
-		>
-			{error || display}
+		<div class="flex items-end gap-2">
+			<div
+				class="flex-1 text-4xl font-bold text-foreground font-mono text-right tabular-nums truncate"
+				class:text-red-400={!!error}
+			>
+				{error || display}
+			</div>
+			{#if display !== '0' && !error}
+				<button
+					class="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors text-xs"
+					onclick={onCopy}
+					title="Kopieren"
+				>
+					{copied ? '✓' : '⎘'}
+				</button>
+			{/if}
 		</div>
 	</div>
 

@@ -1,8 +1,17 @@
 <script lang="ts">
 	import type { CalcSkinProps } from './types';
 
-	let { expression, display, error, onButton, onClear, onBackspace, onEquals }: CalcSkinProps =
-		$props();
+	let {
+		expression,
+		display,
+		error,
+		copied,
+		onButton,
+		onClear,
+		onBackspace,
+		onEquals,
+		onCopy,
+	}: CalcSkinProps = $props();
 
 	// HP-35 had a distinctive layout - we adapt it for standard calc use
 	const buttons = [
@@ -36,8 +45,15 @@
 		<!-- LED Display (red on dark) -->
 		<div class="hp35-display">
 			<div class="hp35-expression">{expression || ' '}</div>
-			<div class="hp35-result" class:hp35-error={!!error}>
-				{error || display}
+			<div style="display: flex; align-items: flex-end; gap: 6px;">
+				<div class="hp35-result" style="flex: 1;" class:hp35-error={!!error}>
+					{error || display}
+				</div>
+				{#if display !== '0' && !error}
+					<button class="hp35-copy" onclick={onCopy} title="Kopieren">
+						{copied ? '✓' : '⎘'}
+					</button>
+				{/if}
 			</div>
 		</div>
 
@@ -201,6 +217,20 @@
 	.hp35-btn-op {
 		background: #3a3a5a;
 		color: #aaccff;
+	}
+
+	.hp35-copy {
+		background: none;
+		border: none;
+		color: #ff3333;
+		opacity: 0.5;
+		font-size: 14px;
+		cursor: pointer;
+		padding: 2px 4px;
+	}
+
+	.hp35-copy:hover {
+		opacity: 1;
 	}
 
 	.hp35-backspace {

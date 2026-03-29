@@ -1,8 +1,17 @@
 <script lang="ts">
 	import type { CalcSkinProps } from './types';
 
-	let { expression, display, error, onButton, onClear, onBackspace, onEquals }: CalcSkinProps =
-		$props();
+	let {
+		expression,
+		display,
+		error,
+		copied,
+		onButton,
+		onClear,
+		onBackspace,
+		onEquals,
+		onCopy,
+	}: CalcSkinProps = $props();
 
 	const buttons = [
 		['C', '(', ')', '%'],
@@ -41,8 +50,15 @@
 		<!-- LCD Display (green-gray) -->
 		<div class="casio-display">
 			<div class="casio-expression">{expression || ' '}</div>
-			<div class="casio-result" class:casio-error={!!error}>
-				{error || display}
+			<div style="display: flex; align-items: flex-end; gap: 4px;">
+				<div class="casio-result" style="flex: 1;" class:casio-error={!!error}>
+					{error || display}
+				</div>
+				{#if display !== '0' && !error}
+					<button class="casio-copy" onclick={onCopy} title="Kopieren">
+						{copied ? '✓' : '⎘'}
+					</button>
+				{/if}
 			</div>
 		</div>
 
@@ -164,6 +180,20 @@
 	.casio-error {
 		color: #8a2020;
 		font-size: 16px;
+	}
+
+	.casio-copy {
+		background: none;
+		border: none;
+		color: #3a4a2a;
+		opacity: 0.4;
+		font-size: 14px;
+		cursor: pointer;
+		padding: 2px 4px;
+	}
+
+	.casio-copy:hover {
+		opacity: 0.8;
 	}
 
 	.casio-keypad {
