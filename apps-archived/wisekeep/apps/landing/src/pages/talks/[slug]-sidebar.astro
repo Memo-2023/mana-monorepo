@@ -1,0 +1,362 @@
+---
+import { getCollection } from 'astro:content';
+import TalksSidebar from '../../components/TalksSidebar.astro';
+import ThemeSwitcher from '../../components/ThemeSwitcher.astro';
+import '../../styles/themes.css';
+
+export async function getStaticPaths() {
+	const talks = await getCollection('talks');
+	return talks.map((talk) => ({
+		params: { slug: talk.slug },
+		props: { talk },
+	}));
+}
+
+const { talk } = Astro.props;
+const { Content } = await talk.render();
+---
+
+<!doctype html>
+<html lang="de" data-theme="ocean">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{talk.data.title} - {talk.data.speaker} | YouTube Wisdom Library</title>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+
+			.app-container {
+				display: flex;
+				height: 100vh;
+				background: rgb(var(--theme-background));
+			}
+
+			.main-content {
+				flex: 1;
+				margin-left: 320px;
+				overflow-y: auto;
+				position: relative;
+			}
+
+			.content-wrapper {
+				max-width: 900px;
+				margin: 0 auto;
+				padding: 3rem 4rem;
+			}
+
+			.content-header {
+				margin-bottom: 2rem;
+				padding-bottom: 2rem;
+				border-bottom: 1px solid rgba(var(--theme-primary), 0.1);
+			}
+
+			.breadcrumb {
+				font-size: 0.85rem;
+				color: rgb(var(--theme-text-muted));
+				margin-bottom: 1rem;
+			}
+
+			.breadcrumb a {
+				color: rgb(var(--theme-primary));
+				text-decoration: none;
+			}
+
+			.breadcrumb a:hover {
+				text-decoration: underline;
+			}
+
+			h1 {
+				font-size: 2.5rem;
+				font-weight: 700;
+				color: rgb(var(--theme-text));
+				margin: 0 0 1rem 0;
+				line-height: 1.2;
+			}
+
+			.meta-info {
+				display: flex;
+				gap: 2rem;
+				flex-wrap: wrap;
+				font-size: 0.95rem;
+				color: rgb(var(--theme-text-muted));
+			}
+
+			.meta-item {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+			}
+
+			.highlight-box {
+				background: linear-gradient(
+					135deg,
+					rgba(var(--theme-primary), 0.08) 0%,
+					rgba(var(--theme-secondary), 0.05) 100%
+				);
+				border-left: 4px solid rgb(var(--theme-primary));
+				padding: 1.5rem;
+				border-radius: 0.5rem;
+				margin-bottom: 2rem;
+				font-size: 1.05rem;
+				line-height: 1.7;
+				color: rgb(var(--theme-text));
+			}
+
+			.content-body {
+				color: rgb(var(--theme-text));
+				line-height: 1.8;
+			}
+
+			/* Content styling */
+			.content-body h2 {
+				font-size: 1.8rem;
+				font-weight: 600;
+				color: rgb(var(--theme-primary));
+				margin: 3rem 0 1.5rem;
+				padding-bottom: 0.5rem;
+				border-bottom: 2px solid rgba(var(--theme-primary), 0.1);
+				cursor: pointer;
+				user-select: none;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			.content-body h2:hover {
+				color: rgb(var(--theme-secondary));
+			}
+
+			.content-body h3 {
+				font-size: 1.3rem;
+				font-weight: 600;
+				color: rgb(var(--theme-primary));
+				margin: 2rem 0 1rem;
+			}
+
+			.content-body p {
+				margin-bottom: 1.5rem;
+			}
+
+			.content-body ul,
+			.content-body ol {
+				margin: 1.5rem 0;
+				padding-left: 2rem;
+			}
+
+			.content-body li {
+				margin-bottom: 0.75rem;
+			}
+
+			.content-body blockquote {
+				background: rgba(var(--theme-primary), 0.05);
+				border-left: 4px solid rgb(var(--theme-primary));
+				padding: 1.25rem 1.5rem;
+				margin: 2rem 0;
+				border-radius: 0.5rem;
+				font-style: italic;
+			}
+
+			.content-body blockquote p {
+				margin: 0;
+			}
+
+			.content-body strong {
+				color: rgb(var(--theme-primary));
+				font-weight: 600;
+			}
+
+			.content-body em {
+				color: rgb(var(--theme-text-muted));
+			}
+
+			.content-body hr {
+				border: none;
+				border-top: 2px solid rgba(var(--theme-primary), 0.1);
+				margin: 3rem 0;
+			}
+
+			.section-wrapper {
+				margin-bottom: 2rem;
+			}
+
+			.section-collapsed {
+				display: none;
+			}
+
+			.collapse-arrow {
+				transition: transform 0.3s ease;
+				font-size: 1.2rem;
+			}
+
+			.collapse-arrow.collapsed {
+				transform: rotate(-90deg);
+			}
+
+			/* Mobile toggle button */
+			.mobile-menu-toggle {
+				display: none;
+				position: fixed;
+				top: 1rem;
+				left: 1rem;
+				z-index: 101;
+				background: rgb(var(--theme-card));
+				border: 1px solid rgba(var(--theme-primary), 0.2);
+				border-radius: 0.5rem;
+				padding: 0.5rem;
+				cursor: pointer;
+			}
+
+			@media (max-width: 1024px) {
+				.main-content {
+					margin-left: 0;
+				}
+
+				.content-wrapper {
+					padding: 2rem 1.5rem;
+				}
+
+				.mobile-menu-toggle {
+					display: block;
+				}
+
+				h1 {
+					font-size: 2rem;
+				}
+			}
+
+			@media (max-width: 768px) {
+				.content-wrapper {
+					padding: 1.5rem 1rem;
+				}
+
+				h1 {
+					font-size: 1.75rem;
+				}
+
+				.content-body h2 {
+					font-size: 1.5rem;
+				}
+			}
+		</style>
+	</head>
+	<body class="bg-theme-background text-theme-text">
+		<ThemeSwitcher />
+
+		<div class="app-container">
+			<TalksSidebar />
+
+			<button class="mobile-menu-toggle" id="menuToggle">
+				<svg
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M3 12H21M3 6H21M3 18H21"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"></path>
+				</svg>
+			</button>
+
+			<main class="main-content">
+				<div class="content-wrapper">
+					<div class="content-header">
+						<div class="breadcrumb">
+							<a href="/">Home</a> / <a href="/speakers">Speakers</a> / {talk.data.speaker}
+						</div>
+						<h1>{talk.data.title}</h1>
+						<div class="meta-info">
+							<div class="meta-item">
+								<span>🎤</span>
+								<span>{talk.data.speaker}</span>
+							</div>
+							<div class="meta-item">
+								<span>📅</span>
+								<span>{talk.data.venue}</span>
+							</div>
+							<div class="meta-item">
+								<span>⏱️</span>
+								<span>{talk.data.duration}</span>
+							</div>
+							<div class="meta-item">
+								<span>📖</span>
+								<span>{talk.data.readingTime} min read</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="highlight-box">
+						💡 {talk.data.summary}
+					</div>
+
+					<div class="content-body" id="content">
+						<Content />
+					</div>
+				</div>
+			</main>
+		</div>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				// Mobile menu toggle
+				const menuToggle = document.getElementById('menuToggle');
+				const sidebar = document.querySelector('.sidebar');
+
+				if (menuToggle && sidebar) {
+					menuToggle.addEventListener('click', () => {
+						sidebar.classList.toggle('open');
+					});
+				}
+
+				// Collapsible sections
+				const content = document.getElementById('content');
+				if (!content) return;
+
+				const headings = content.querySelectorAll('h2');
+
+				headings.forEach((heading) => {
+					// Add collapse arrow
+					const arrow = document.createElement('span');
+					arrow.className = 'collapse-arrow';
+					arrow.textContent = '▼';
+					heading.appendChild(arrow);
+
+					// Collect content until next h2
+					const wrapper = document.createElement('div');
+					wrapper.className = 'section-wrapper';
+
+					let sibling = heading.nextElementSibling;
+					const elements = [];
+
+					while (sibling && sibling.tagName !== 'H2') {
+						elements.push(sibling);
+						sibling = sibling.nextElementSibling;
+					}
+
+					elements.forEach((el) => wrapper.appendChild(el));
+					heading.insertAdjacentElement('afterend', wrapper);
+
+					// Collapse transcript by default
+					if (heading.textContent.toLowerCase().includes('transcript')) {
+						wrapper.classList.add('section-collapsed');
+						arrow.classList.add('collapsed');
+					}
+
+					// Toggle on click
+					heading.addEventListener('click', () => {
+						wrapper.classList.toggle('section-collapsed');
+						arrow.classList.toggle('collapsed');
+					});
+				});
+			});
+		</script>
+	</body>
+</html>

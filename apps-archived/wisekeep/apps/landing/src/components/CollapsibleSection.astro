@@ -1,0 +1,172 @@
+---
+export interface Props {
+	title: string;
+	icon?: string;
+	defaultCollapsed?: boolean;
+	className?: string;
+}
+
+const { title, icon = '📌', defaultCollapsed = false, className = '' } = Astro.props;
+const sectionId = title
+	.toLowerCase()
+	.replace(/\s+/g, '-')
+	.replace(/[^a-z0-9-]/g, '');
+---
+
+<div class={`collapsible-section ${className}`} data-section-id={sectionId}>
+	<button
+		class="section-header"
+		aria-expanded={!defaultCollapsed}
+		aria-controls={`content-${sectionId}`}
+	>
+		<span class="section-icon">{icon}</span>
+		<h2 class="section-title">{title}</h2>
+		<span class="section-arrow" data-collapsed={defaultCollapsed}>
+			<svg
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="M6 9L12 15L18 9"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"></path>
+			</svg>
+		</span>
+	</button>
+	<div id={`content-${sectionId}`} class="section-content" data-collapsed={defaultCollapsed}>
+		<div class="section-inner">
+			<slot />
+		</div>
+	</div>
+</div>
+
+<style>
+	.collapsible-section {
+		background: rgb(var(--theme-card));
+		border-radius: 1rem;
+		margin-bottom: 1.5rem;
+		overflow: hidden;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		transition: box-shadow 0.3s ease;
+	}
+
+	.collapsible-section:hover {
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	}
+
+	.section-header {
+		width: 100%;
+		padding: 1.5rem 2rem;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		text-align: left;
+		transition: background-color 0.2s ease;
+	}
+
+	.section-header:hover {
+		background: rgba(var(--theme-primary), 0.05);
+	}
+
+	.section-icon {
+		font-size: 1.5rem;
+		flex-shrink: 0;
+	}
+
+	.section-title {
+		flex: 1;
+		margin: 0;
+		font-size: 1.4rem;
+		font-weight: 600;
+		color: rgb(var(--theme-primary));
+	}
+
+	.section-arrow {
+		flex-shrink: 0;
+		transition: transform 0.3s ease;
+		color: rgb(var(--theme-primary));
+	}
+
+	.section-arrow[data-collapsed='true'] {
+		transform: rotate(-90deg);
+	}
+
+	.section-content {
+		max-height: 2000px;
+		overflow: hidden;
+		transition: max-height 0.4s ease-in-out;
+	}
+
+	.section-content[data-collapsed='true'] {
+		max-height: 0;
+	}
+
+	.section-inner {
+		padding: 0 2rem 2rem 2rem;
+	}
+
+	@media (max-width: 768px) {
+		.section-header {
+			padding: 1.25rem 1.5rem;
+		}
+
+		.section-inner {
+			padding: 0 1.5rem 1.5rem 1.5rem;
+		}
+
+		.section-title {
+			font-size: 1.2rem;
+		}
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const sections = document.querySelectorAll('.collapsible-section');
+
+		sections.forEach((section) => {
+			const header = section.querySelector('.section-header');
+			const content = section.querySelector('.section-content');
+			const arrow = section.querySelector('.section-arrow');
+
+			if (!header || !content || !arrow) return;
+
+			header.addEventListener('click', () => {
+				const isCollapsed = content.dataset.collapsed === 'true';
+
+				if (isCollapsed) {
+					content.dataset.collapsed = 'false';
+					arrow.dataset.collapsed = 'false';
+					header.setAttribute('aria-expanded', 'true');
+
+					// Calculate actual height for smooth animation
+					const inner = content.querySelector('.section-inner');
+					if (inner) {
+						content.style.maxHeight = inner.scrollHeight + 'px';
+					}
+				} else {
+					content.dataset.collapsed = 'true';
+					arrow.dataset.collapsed = 'true';
+					header.setAttribute('aria-expanded', 'false');
+					content.style.maxHeight = '0';
+				}
+			});
+
+			// Set initial max-height for expanded sections
+			if (content.dataset.collapsed === 'false') {
+				const inner = content.querySelector('.section-inner');
+				if (inner) {
+					content.style.maxHeight = inner.scrollHeight + 'px';
+				}
+			}
+		});
+	});
+</script>

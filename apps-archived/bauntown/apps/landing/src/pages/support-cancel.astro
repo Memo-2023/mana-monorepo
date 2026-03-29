@@ -1,0 +1,9 @@
+---
+import { defaultLang } from '../i18n/ui';
+---
+
+<meta http-equiv="refresh" content={`0;url=/${defaultLang}/support?error=cancelled`} />
+<script>
+	window.location.href = `/${defaultLang}/support?error=cancelled`;
+	localStorage.setItem('payment_status', 'cancelled');
+</script>

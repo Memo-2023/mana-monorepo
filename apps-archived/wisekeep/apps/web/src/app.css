@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: theme('colors.primary.600');
+  --color-primary-hover: theme('colors.primary.700');
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+  font-family: system-ui, -apple-system, sans-serif;
+}

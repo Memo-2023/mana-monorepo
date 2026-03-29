@@ -1,0 +1,221 @@
+---
+title: "Auto Layout und Responsive Design in Figma"
+description: "Lerne, wie du mit Auto Layout flexible, responsive Designs in Figma erstellst, die sich an verschiedene Bildschirmgrößen anpassen."
+pubDate: 2025-03-28
+category: "UI & UX"
+image: "/images/tutorials/nobackground/figma-basics-bauntown-tutorial.png"
+author: "Anna Schmidt"
+course: "figma-basics"
+courseName: "Figma Grundlagen"
+lessonNumber: 4
+---
+
+import YouTubeVideo from '../../../components/YouTubeVideo.astro';
+import FigmaEmbed from '../../../components/FigmaEmbed.astro';
+
+# Auto Layout und Responsive Design in Figma
+
+Willkommen zur vierten Lektion unseres Figma-Grundlagenkurses! In dieser Lektion vertiefen wir unser Verständnis von Auto Layout und lernen, wie wir responsive Designs erstellen, die sich an verschiedene Bildschirmgrößen anpassen.
+
+<FigmaEmbed figmaUrl="https://www.figma.com/file/W7TXEjKrAeDgXJMsEmqhkb/Figma-AutoLayout-Responsive-Übung" title="Auto Layout & Responsive Design Übungsdatei" />
+
+## Auto Layout: Aufbau auf den Grundlagen
+
+In der zweiten Lektion haben wir die Grundlagen von Auto Layout kennengelernt. Jetzt werden wir tiefer einsteigen und fortgeschrittene Techniken erkunden.
+
+### Warum Auto Layout so wichtig ist
+
+Auto Layout hat die Art und Weise, wie Designer in Figma arbeiten, revolutioniert:
+
+- **Reduzierter manueller Aufwand**: Keine Notwendigkeit, Elemente manuell neu zu positionieren
+- **Konsistenz**: Gleichmäßige Abstände und Ausrichtungen werden automatisch beibehalten
+- **Flexibilität**: Designs passen sich automatisch an Inhaltsänderungen an
+- **Responsive Design**: Einfache Erstellung von Layouts, die sich an verschiedene Bildschirmgrößen anpassen
+
+<YouTubeVideo videoId="6_5JTDYE8xo" title="Figma Auto Layout Masterclass" />
+
+## Auto Layout: Fortgeschrittene Techniken
+
+### Verschachtelte Auto Layouts
+
+Die wahre Kraft von Auto Layout entfaltet sich durch Verschachtelung:
+
+1. Erstelle einen übergeordneten vertikalen Auto Layout-Frame
+2. Füge horizontale Auto Layout-Frames hinzu
+3. Verschachtele weitere Auto Layouts nach Bedarf
+
+Beispiel einer verschachtelten Struktur:
+```
+Vertical Auto Layout (Card)
+├── Horizontal Auto Layout (Header)
+│   ├── Avatar
+│   └── Vertical Auto Layout (Meta)
+│       ├── Name
+│       └── Date
+├── Image
+└── Vertical Auto Layout (Content)
+    ├── Title
+    ├── Description
+    └── Horizontal Auto Layout (Actions)
+        ├── Button 1
+        └── Button 2
+```
+
+### Fill und Fixed Sizing
+
+Auto Layout-Elemente können auf zwei Arten dimensioniert werden:
+
+- **Hug Contents**: Element passt sich der Größe seines Inhalts an
+- **Fill**: Element dehnt sich aus, um den verfügbaren Platz zu füllen
+- **Fixed**: Element behält eine feste Größe, unabhängig vom Inhalt
+
+Durch Kombinieren dieser Optionen kannst du komplexe, responsive Layouts erstellen:
+
+1. Wähle ein Element in einem Auto Layout
+2. Im Properties-Panel, unter "Auto Layout"
+3. Setze Width/Height auf Hug, Fill oder Fixed
+
+### Alignment und Distribution
+
+Die Ausrichtung von Elementen innerhalb eines Auto Layouts ist entscheidend:
+
+1. Wähle einen Auto Layout-Frame
+2. Im Properties-Panel, unter "Auto Layout"
+3. Wähle die horizontale und vertikale Ausrichtung
+
+Optionen für die Verteilung von Elementen:
+- **Pack**: Elemente dicht aneinander packen (Standard)
+- **Space Between**: Gleichmäßiger Abstand zwischen Elementen
+- **Space Around**: Gleichmäßiger Abstand um Elemente herum
+
+### Padding vs. Gap
+
+Zwei wichtige Abstandskonzepte in Auto Layout:
+
+- **Padding**: Abstand zwischen dem Inhalt und dem Rand des Frames
+- **Gap**: Abstand zwischen den Elementen innerhalb des Frames
+
+Richtige Verwendung:
+- Verwende einheitliches Padding für konsistente Ränder
+- Passe den Gap an, um die Beziehung zwischen Elementen zu definieren
+
+### Resizing-Verhalten
+
+Auto Layout-Frames können unterschiedlich auf Größenänderungen reagieren:
+
+1. Wähle einen Auto Layout-Frame
+2. Im Properties-Panel, unter "Auto Layout"
+3. Konfiguriere das Resizing-Verhalten:
+   - **Hug Contents (Horizontal/Vertical)**: Schrumpft oder wächst mit dem Inhalt
+   - **Fill Container**: Dehnt sich aus, um den Container zu füllen
+   - **Fixed Width/Height**: Behält die festgelegte Größe bei
+
+## Responsive Design-Strategien in Figma
+
+### Constraints & Auto Layout kombinieren
+
+Für wirklich responsive Designs kombiniere Auto Layout mit Constraints:
+
+1. Verwende Auto Layout für dynamische Inhaltsanordnung
+2. Setze Constraints für Elemente, die bestimmten Regeln folgen sollen
+3. Verwende das "Fill" Property für Elemente, die sich ausdehnen sollen
+
+### Viewport-basiertes Design
+
+Erstelle mehrere Frames für verschiedene Viewports:
+
+1. Desktop (1440px breit)
+2. Tablet (768px breit)
+3. Smartphone (375px breit)
+
+Verwende dann:
+- Konsistente Komponenten über alle Viewports
+- Angepasste Auto Layouts für jede Größe
+- Prototypen-Verbindungen, um zu zeigen, wie das Design reagiert
+
+### Responsive Komponenten erstellen
+
+Komponenten können responsiv gestaltet werden:
+
+1. Erstelle eine Komponente mit Auto Layout
+2. Verwende "Fill" für Elemente, die sich strecken sollen
+3. Setze Textfelder auf "Fill horizontal" für Zeilenumbruch
+4. Erstelle Varianten für verschiedene Bildschirmgrößen
+
+### Breakpoints simulieren
+
+Simuliere CSS-Breakpoints in Figma:
+
+1. Erstelle mehrere Frames für verschiedene Breakpoints
+2. Passe das Layout für jeden Breakpoint an
+3. Dokumentiere die Anpassungen für Entwickler
+4. Verbinde die Frames im Prototype-Modus, um eine responsive Vorschau zu erstellen
+
+## Praktische Übungen
+
+Lass uns das Gelernte mit einigen praktischen Übungen festigen:
+
+### Übung 1: Responsive Navigationsleiste
+
+1. Erstelle eine horizontale Navigationsleiste mit Auto Layout
+2. Füge ein Logo links und Menüpunkte rechts hinzu
+3. Verwende "Space Between" für die Verteilung
+4. Erstelle eine Tablet- und Mobile-Variante
+5. Für Mobile: Konvertiere die Navigation in einen Burger-Menü-Button
+
+### Übung 2: Responsive Card-Layout
+
+1. Erstelle eine Card mit Bild, Titel, Text und Button
+2. Verwende Auto Layout für konsistentes Padding und Abstände
+3. Erstelle eine Version mit horizontal angeordnetem Inhalt für Desktop
+4. Erstelle eine vertikale Version für Mobile
+5. Stelle sicher, dass der Text korrekt umbricht
+
+### Übung 3: Responsives Raster
+
+1. Erstelle einen Container-Frame mit Auto Layout (vertikal)
+2. Füge mehrere Zeilen mit Auto Layout (horizontal) hinzu
+3. Füge Card-Komponenten in jede Zeile ein
+4. Passe die Anzahl der Cards pro Zeile für verschiedene Viewports an:
+   - Desktop: 3-4 Cards pro Zeile
+   - Tablet: 2 Cards pro Zeile
+   - Mobile: 1 Card pro Zeile
+
+## Best Practices für Auto Layout und Responsive Design
+
+- **8-Pixel-Grid**: Verwende ein 8-Pixel-Grid für konsistente Abstände
+- **Komponenten-basierter Ansatz**: Baue responsive Komponenten, die du in größeren Layouts verwendest
+- **Design-Tokens**: Verwende konsistente Werte für Abstände, Schriftgrößen, etc.
+- **Layout-Dokumentation**: Dokumentiere, wie sich dein Design bei verschiedenen Größen verhält
+- **Überprüfe Edge Cases**: Teste dein Design mit sehr kurzem und sehr langem Text
+- **Progressive Enhancement**: Beginne mit dem Mobile-Design und erweitere es für größere Bildschirme
+
+## Für Entwickler: Figma to Code
+
+Als Entwickler ist es wichtig zu verstehen, wie Figma Auto Layout zu CSS-Konzepten übersetzt wird:
+
+| Figma Auto Layout | CSS Equivalent |
+|-------------------|----------------|
+| Vertical/Horizontal | Flexbox: flex-direction |
+| Alignment | Flexbox: align-items, justify-content |
+| Gap | gap property in Flexbox |
+| Padding | padding property |
+| Fill | flex-grow: 1 |
+| Fixed | Specific width/height |
+| Space Between | justify-content: space-between |
+
+Diese Übersetzungstabelle hilft dir, Figma-Designs effizienter in Code umzusetzen.
+
+## Für die nächste Lektion
+
+In der nächsten Lektion werden wir uns mit **Prototyping und Interaktionen** beschäftigen. Du wirst lernen, wie du deine statischen Designs in interaktive Prototypen verwandelst, die Nutzerinteraktionen simulieren.
+
+Bis dahin empfehle ich dir, mit Auto Layout und responsivenDesigns zu experimentieren. Versuche, ein komplexes UI-Element zu erstellen, das sich an verschiedene Bildschirmgrößen anpasst.
+
+## Hilfreiche Ressourcen
+
+- [Figma Auto Layout Documentation](https://help.figma.com/hc/en-us/articles/360040451373-Create-dynamic-layouts-with-Auto-layout)
+- [Responsive Design in Figma](https://www.figma.com/best-practices/responsive-design-in-figma/)
+- [Figma's Official Auto Layout Tutorials](https://www.youtube.com/playlist?list=PLXDU_eVOJTx7QHLShNqIXL1Cgbxj7HlN4)
+
+Hast du Fragen zu Auto Layout oder Responsive Design? Hinterlasse gerne einen Kommentar unten!

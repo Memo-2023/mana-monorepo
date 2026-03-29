@@ -1,0 +1,437 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { defaultLang } from '../i18n/ui';
+---
+
+<Layout title="Danke für deine Unterstützung! | BaunTown">
+	<div class="success-container">
+		<div id="thankYouModal" class="thank-you-modal">
+			<div class="modal-content">
+				<div class="matrix-canvas-container">
+					<canvas id="matrixCanvas"></canvas>
+					<div class="fade-bottom"></div>
+				</div>
+				<div class="thank-you-content">
+					<h1>Vielen Dank für deinen Kaffee!</h1>
+					<p>
+						Deine Unterstützung hilft uns, BaunTown weiterzuentwickeln und mehr kostenlose Inhalte
+						zu erstellen.
+					</p>
+					<div class="coffee-animation">
+						<div class="coffee-cup">☕</div>
+						<div class="coffee-steam">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+					</div>
+					<a href={`/${defaultLang}`} class="btn-primary">Zurück zur Startseite</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.success-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: calc(100vh - 120px);
+		padding: 2rem;
+	}
+
+	.thank-you-modal {
+		position: relative;
+		width: 100%;
+		max-width: 700px;
+		background-color: var(--card-bg);
+		border-radius: 15px;
+		overflow: hidden;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+		animation: fadeIn 0.5s ease-out;
+	}
+
+	.modal-content {
+		position: relative;
+		width: 100%;
+		min-height: 500px;
+	}
+
+	.matrix-canvas-container {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1;
+		opacity: 0.25;
+		pointer-events: none;
+	}
+
+	.fade-bottom {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 100px;
+		background: linear-gradient(to top, var(--card-bg) 0%, rgba(0, 0, 0, 0) 100%);
+		z-index: 2;
+	}
+
+	canvas {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.thank-you-content {
+		position: relative;
+		z-index: 3;
+		padding: 3rem;
+		text-align: center;
+		color: var(--text-color);
+	}
+
+	h1 {
+		color: var(--accent-color);
+		font-size: 2.5rem;
+		margin-bottom: 1.5rem;
+		animation: popIn 0.5s ease-out 0.3s both;
+	}
+
+	p {
+		font-size: 1.2rem;
+		margin-bottom: 2rem;
+		line-height: 1.6;
+		max-width: 500px;
+		margin-left: auto;
+		margin-right: auto;
+		animation: fadeInUp 0.5s ease-out 0.6s both;
+	}
+
+	.coffee-animation {
+		position: relative;
+		height: 120px;
+		width: 120px;
+		margin: 2rem auto;
+		animation: fadeInUp 0.5s ease-out 0.9s both;
+	}
+
+	.coffee-cup {
+		font-size: 4rem;
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		animation: jiggle 2s ease-in-out infinite;
+	}
+
+	.coffee-steam {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 60px;
+		height: 30px;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.coffee-steam span {
+		width: 8px;
+		height: 30px;
+		background-color: var(--accent-color);
+		border-radius: 10px;
+		opacity: 0.25;
+		animation: steam 2s infinite;
+	}
+
+	.coffee-steam span:nth-child(1) {
+		animation-delay: 0.2s;
+		transform: translateY(0px);
+	}
+
+	.coffee-steam span:nth-child(2) {
+		animation-delay: 0.4s;
+		transform: translateY(5px);
+	}
+
+	.coffee-steam span:nth-child(3) {
+		animation-delay: 0.6s;
+		transform: translateY(0px);
+	}
+
+	.btn-primary {
+		display: inline-block;
+		background-color: var(--accent-color);
+		color: white;
+		padding: 0.85rem 2rem;
+		border-radius: 0.5rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition:
+			transform 0.2s,
+			background-color 0.2s;
+		margin-top: 1rem;
+		animation: fadeInUp 0.5s ease-out 1.2s both;
+	}
+
+	.btn-primary:hover {
+		background-color: var(--accent-hover, #2563eb);
+		transform: translateY(-2px);
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes popIn {
+		0% {
+			opacity: 0;
+			transform: scale(0.8);
+		}
+		70% {
+			transform: scale(1.1);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes steam {
+		0% {
+			transform: translateY(0) scaleX(1);
+			opacity: 0.25;
+		}
+		50% {
+			transform: translateY(-15px) scaleX(1.5);
+			opacity: 0.5;
+		}
+		100% {
+			transform: translateY(-30px) scaleX(1);
+			opacity: 0;
+		}
+	}
+
+	@keyframes jiggle {
+		0%,
+		100% {
+			transform: translateX(-50%) rotate(0deg);
+		}
+		25% {
+			transform: translateX(-50%) rotate(-3deg);
+		}
+		75% {
+			transform: translateX(-50%) rotate(3deg);
+		}
+	}
+
+	@media (max-width: 768px) {
+		.thank-you-modal {
+			max-width: 90%;
+		}
+
+		.thank-you-content {
+			padding: 2rem 1.5rem;
+		}
+
+		h1 {
+			font-size: 1.8rem;
+		}
+
+		p {
+			font-size: 1rem;
+		}
+	}
+</style>
+
+<script>
+	// TypeScript-Definition für Plausible
+	declare global {
+		interface Window {
+			plausible: (eventName: string, options?: { props?: Record<string, any> }) => void;
+		}
+	}
+
+	// Set payment success status for the support page if we go back there
+	localStorage.setItem('payment_status', 'success');
+
+	// Plausible Event für erfolgreiche Zahlung
+	window.plausible('payment-success', {
+		props: {
+			amount: new URLSearchParams(window.location.search).get('amount') || 'unknown',
+			type: new URLSearchParams(window.location.search).get('type') || 'unknown',
+			provider: new URLSearchParams(window.location.search).get('provider') || 'unknown',
+			coffeeSize: new URLSearchParams(window.location.search).get('coffeeSize') || 'unknown',
+		},
+	});
+
+	document.addEventListener('DOMContentLoaded', function () {
+		// Matrix animation
+		const canvas = document.getElementById('matrixCanvas') as HTMLCanvasElement;
+		const ctx = canvas.getContext('2d')!;
+
+		// Make canvas full size of container
+		function resizeCanvas() {
+			const container = canvas.parentElement as HTMLElement;
+			canvas.width = container.clientWidth;
+			canvas.height = container.clientHeight;
+		}
+
+		// Initial setup
+		resizeCanvas();
+		window.addEventListener('resize', resizeCanvas);
+
+		// Clear with solid black to start
+		ctx.fillStyle = '#000000';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		// Matrix code effect
+		class Column {
+			x: number;
+			fontSize: number;
+			rises: number[];
+			chars: string[];
+			colors: string[];
+			canvasHeight: number;
+			speed: number;
+
+			constructor(x: number, fontSize: number, canvasHeight: number) {
+				this.x = x;
+				this.fontSize = fontSize;
+				this.canvasHeight = canvasHeight;
+				this.rises = [];
+				this.chars = [];
+				this.colors = [];
+				this.speed = 0.02 + Math.random() * 0.015;
+
+				// Create random code samples with "Thank You" and "Coffee" themed words
+				const codeSnippets = [
+					'Thank you!',
+					'Vielen Dank!',
+					'Grazie mille!',
+					'BaunTown ☕',
+					'Coffee Time',
+					'Community',
+					'Build Together',
+					'Custom Build Future',
+					"function thankYou() { return '❤️'; }",
+					"const coffee = '☕';",
+					'BaunTown.grow();',
+					'// You are awesome!',
+					'/* We appreciate your support */',
+				];
+
+				// Initialize with positions from bottom
+				const snippet = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+				for (let i = 0; i < snippet.length; i++) {
+					// Position strings at different positions below the canvas
+					const y = canvasHeight + Math.random() * 100;
+					this.rises.push(y);
+					this.chars.push(snippet[i]);
+
+					// Varying orange shades
+					const hue = 20 + Math.floor(Math.random() * 20); // Orange hues
+					const saturation = 80 + Math.floor(Math.random() * 20);
+					const lightness = 50 + Math.floor(Math.random() * 20);
+
+					this.colors.push(`hsla(${hue}, ${saturation}%, ${lightness}%, 0.4)`);
+				}
+			}
+
+			draw(ctx: CanvasRenderingContext2D) {
+				for (let i = 0; i < this.rises.length; i++) {
+					// Calculate positions for current character
+					const x = this.x + i * this.fontSize * 0.6;
+					const y = this.rises[i];
+
+					// Draw the current character
+					ctx.fillStyle = this.colors[i];
+					ctx.font = `${this.fontSize}px 'Courier New', monospace`;
+					ctx.fillText(this.chars[i], x, y);
+
+					// Move the rise up slower
+					this.rises[i] -= this.fontSize * this.speed;
+
+					// Reset when off the top of the screen
+					if (this.rises[i] < 0 && Math.random() > 0.995) {
+						this.rises[i] = this.canvasHeight + this.fontSize;
+					}
+				}
+			}
+		}
+
+		// Create columns of code - sparse
+		let columns: Column[] = [];
+
+		function initColumns() {
+			columns = [];
+			const fontSize = canvas.width > 768 ? 16 : 12;
+			const columnSpacing = fontSize * 4;
+			const numColumns = Math.floor(canvas.width / columnSpacing) / 2; // Fewer columns for subtlety
+
+			// Create an array of possible x positions
+			const gridWidth = canvas.width;
+			const positions: number[] = [];
+
+			// Calculate positions with more spacing
+			for (let x = 0; x < gridWidth; x += columnSpacing * 1.5) {
+				positions.push(x);
+			}
+
+			// Add random offset to positions
+			for (let i = 0; i < positions.length; i++) {
+				const basePos: number = positions[i];
+				const randomOffset = (Math.random() - 0.5) * columnSpacing;
+				positions[i] = Math.max(0, Math.min(gridWidth - fontSize, basePos + randomOffset));
+			}
+
+			// Create columns at each position
+			for (let i = 0; i < positions.length; i++) {
+				columns.push(new Column(positions[i], fontSize, canvas.height));
+			}
+		}
+
+		// Animation loop
+		function animate() {
+			// Fade the canvas for a trails effect
+			ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+			// Draw all columns
+			columns.forEach((column) => column.draw(ctx));
+
+			requestAnimationFrame(animate);
+		}
+
+		// Initialize and start
+		initColumns();
+		animate();
+
+		// Reinitialize on resize
+		window.addEventListener('resize', () => {
+			resizeCanvas();
+			ctx.fillStyle = '#000000';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			initColumns();
+		});
+	});
+</script>

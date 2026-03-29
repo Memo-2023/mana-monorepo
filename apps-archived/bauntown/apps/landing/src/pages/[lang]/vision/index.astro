@@ -1,0 +1,339 @@
+---
+import { languages } from '../../../i18n/ui';
+import { getLangFromUrl, useTranslations } from '../../../utils/i18n';
+import Layout from '../../../layouts/Layout.astro';
+import VisionCard from '../../../components/VisionCard.astro';
+import ContentSubmission from '../../../components/ContentSubmission.astro';
+import HeroSection from '../../../components/HeroSection.astro';
+import { getCollection } from 'astro:content';
+
+// Define static paths for ALL supported languages
+export function getStaticPaths() {
+	return Object.keys(languages).map((lang) => ({ params: { lang } }));
+}
+
+// Get current language from URL
+const { lang } = Astro.params;
+const t = useTranslations(lang as keyof typeof languages);
+
+// Get visions in current language
+const allVisions = await getCollection('vision', ({ id }) => {
+	return id.startsWith(lang + '/');
+});
+
+// Sort by date with newest first
+const sortedVisions = allVisions.sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+// Group by category
+const categories = ['product', 'technology', 'community', 'future'] as const;
+const visionsByCategory = categories.reduce(
+	(acc, category) => {
+		acc[category] = sortedVisions.filter((vision) => vision.data.category === category);
+		return acc;
+	},
+	{} as Record<(typeof categories)[number], typeof sortedVisions>
+);
+
+// Group by status
+const statuses = ['current', 'planned', 'exploring'] as const;
+const visionsByStatus = statuses.reduce(
+	(acc, status) => {
+		acc[status] = sortedVisions.filter((vision) => vision.data.status === status);
+		return acc;
+	},
+	{} as Record<(typeof statuses)[number], typeof sortedVisions>
+);
+
+// Get current visions
+const currentVisions = visionsByStatus['current'];
+---
+
+<Layout title={`${t('nav.vision')} - BaunTown`}>
+	<HeroSection
+		title={t('vision.headerDescription')}
+		image="/images/vision-bauntown-coding-custom-build-future.png"
+		imageAlt="Vision illustration"
+	/>
+
+	<div class="sticky-wrapper">
+		<header class="page-header">
+			<div class="filter-container">
+				<a href="#all" class="filter-btn active">
+					{t('vision.filterAll')}
+				</a>
+				{
+					categories.map((category) => (
+						<a href={`#${category}`} class="filter-btn">
+							{t(`vision.category.${category}` as const)}
+						</a>
+					))
+				}
+			</div>
+		</header>
+	</div>
+
+	{
+		currentVisions.length > 0 && (
+			<section class="section">
+				<div class="section-header">
+					<h2>{t('vision.featured')}</h2>
+				</div>
+				<div class="grid">
+					{currentVisions
+						.filter((vision) => vision.data.featured)
+						.map((vision) => (
+							<VisionCard vision={vision} />
+						))}
+				</div>
+			</section>
+		)
+	}
+
+	<section id="all" class="section">
+		<div class="section-header">
+			<h2>{t('vision.allVisions')}</h2>
+		</div>
+		<div class="grid">
+			{sortedVisions.map((vision) => <VisionCard vision={vision} />)}
+		</div>
+	</section>
+
+	{
+		categories.map(
+			(category) =>
+				visionsByCategory[category].length > 0 && (
+					<section id={category} class="section">
+						<div class="section-header">
+							<h2>{t(`vision.category.${category}` as const)}</h2>
+						</div>
+						<div class="grid">
+							{visionsByCategory[category].map((vision) => (
+								<VisionCard vision={vision} />
+							))}
+						</div>
+					</section>
+				)
+		)
+	}
+
+	<section class="section submission-section">
+		<div class="section-header">
+			<h2>{t('join.addToPage')}</h2>
+		</div>
+		<div class="submission-container">
+			<ContentSubmission defaultType="vision" showTitle={false} />
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.submission-section {
+		margin-top: 4rem;
+		padding-top: 2rem;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.submission-container {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	.sticky-wrapper {
+		position: relative;
+		z-index: 900;
+	}
+
+	.page-header {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.75rem 0;
+		margin: 0;
+		position: fixed;
+		top: 64px; /* Position under the navbar */
+		left: 0;
+		right: 0;
+		background-color: rgba(var(--background-color-rgb, 255, 255, 255), 0.85);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		z-index: 999; /* Just below the navbar z-index */
+		border-bottom: 1px solid rgba(var(--border-color-rgb, 229, 231, 235), 0.5);
+		transition:
+			background-color 0.3s ease,
+			border-color 0.3s ease;
+		width: 100%;
+		height: 60px; /* Fixed height */
+	}
+
+	.filter-container {
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 0.5rem;
+		padding-bottom: 0.5rem;
+		overflow-x: auto;
+		width: 100%;
+		max-width: 800px;
+		margin: 0 auto;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: thin;
+		justify-content: center;
+		padding-left: 1rem;
+		padding-right: 1rem;
+	}
+
+	.filter-btn {
+		padding: 0.5rem 1rem;
+		border-radius: 2rem;
+		background-color: var(--card-bg);
+		color: var(--text-color);
+		text-decoration: none;
+		font-size: 0.875rem;
+		transition: all 0.2s ease-in-out;
+		border: 1px solid var(--border-color);
+		white-space: nowrap;
+	}
+
+	.filter-btn:hover,
+	.filter-btn.active {
+		background-color: var(--accent-color);
+		color: white;
+		border-color: var(--accent-color);
+	}
+
+	.section {
+		scroll-margin-top: 10rem;
+		padding-top: 1rem;
+		margin-top: 1rem;
+	}
+
+	/* Add spacing to account for fixed header */
+	#all {
+		margin-top: 70px;
+	}
+
+	@media (max-width: 1100px) {
+		.filter-container {
+			width: 100vw;
+			margin-left: calc(-50vw + 50%);
+			margin-right: calc(-50vw + 50%);
+			padding-left: 0;
+			padding-right: 0;
+			justify-content: flex-start;
+		}
+
+		.filter-container::before,
+		.filter-container::after {
+			content: '';
+			min-width: 16px;
+		}
+
+		.filter-btn:first-child {
+			margin-left: 16px;
+		}
+
+		.filter-btn:last-child {
+			margin-right: 16px;
+		}
+	}
+
+	.filter-container::-webkit-scrollbar {
+		height: 4px;
+	}
+
+	.filter-container::-webkit-scrollbar-track {
+		background: rgba(var(--border-color-rgb), 0.1);
+		border-radius: 4px;
+	}
+
+	.filter-container::-webkit-scrollbar-thumb {
+		background: rgba(var(--accent-color-rgb), 0.6);
+		border-radius: 4px;
+	}
+
+	/* Set height and alignment for the filter buttons */
+	@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+		.filter-container {
+			height: 38px;
+			padding: 0 1.25rem;
+			display: flex;
+			overflow: hidden;
+			align-items: flex-start;
+		}
+
+		.filter-btn {
+			padding: 0.6rem 1.1rem;
+			margin-top: 5px;
+			height: 40px;
+		}
+	}
+
+	/* Only apply these styles when mobile tab bar is visible */
+	@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+		.page-header {
+			top: unset; /* Remove top positioning */
+			bottom: 62px; /* Position right above the mobile nav bar */
+			height: 56px; /* Taller on mobile for better touch targets */
+			border-top: 1px solid rgba(var(--border-color-rgb, 229, 231, 235), 0.5);
+			border-bottom: none;
+			box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05); /* Subtle shadow for separation */
+		}
+
+		#all {
+			margin-top: 0; /* Remove top margin on mobile */
+			padding-bottom: 130px; /* Add bottom padding instead */
+		}
+
+		.section {
+			scroll-margin-bottom: 130px; /* Add bottom scroll margin */
+			margin-bottom: 1rem;
+		}
+
+		.filter-container {
+			padding-bottom: 0;
+		}
+	}
+
+	/* For desktop and larger devices, keep it at the top */
+	@media (min-width: 769px) or (hover: hover) {
+		#all {
+			margin-top: 70px; /* Keep top margin for desktop */
+			margin-bottom: 0;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.page-header {
+			padding-bottom: 1rem;
+			z-index: 1100; /* Higher than the mobile tab bar */
+		}
+
+		.grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+<script>
+	// Handle filter button clicks
+	document.addEventListener('DOMContentLoaded', () => {
+		const filterButtons = document.querySelectorAll('.filter-btn');
+
+		// Update active state based on hash
+		function updateActiveButton() {
+			const hash = window.location.hash || '#all';
+
+			filterButtons.forEach((btn) => {
+				const href = btn.getAttribute('href');
+				btn.classList.toggle('active', href === hash);
+			});
+		}
+
+		// Initial update
+		updateActiveButton();
+
+		// Listen for hash changes
+		window.addEventListener('hashchange', updateActiveButton);
+	});
+</script>

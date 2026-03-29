@@ -1,0 +1,289 @@
+---
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import ThemeSwitcher from '../../components/ThemeSwitcher.astro';
+import '../../styles/themes.css';
+
+const currentPath = Astro.url.pathname;
+
+// Sample speakers data - would come from API/database
+const speakers = [
+  {
+    id: "rory-sutherland",
+    name: "Rory Sutherland",
+    title: "Vice Chairman, Ogilvy UK",
+    bio: "Behavioral Economics & Marketing Psychology Expert",
+    talkCount: 12,
+    totalViews: "15M+",
+    topics: ["Behavioral Economics", "Marketing", "Psychology"],
+    imageUrl: null,
+    featured: true
+  },
+  {
+    id: "simon-sinek",
+    name: "Simon Sinek",
+    title: "Leadership Expert & Author",
+    bio: "Leadership Expert und Autor von 'Start With Why' - mit über 200M+ Views",
+    talkCount: 4,
+    totalViews: "200M+",
+    topics: ["Leadership", "Purpose", "Trust", "Team Building"],
+    imageUrl: null,
+    featured: true
+  },
+  {
+    id: "brene-brown",
+    name: "Brené Brown",
+    title: "Research Professor",
+    bio: "Vulnerability, Courage, and Leadership Researcher",
+    talkCount: 5,
+    totalViews: "35M+",
+    topics: ["Vulnerability", "Leadership", "Courage"],
+    imageUrl: null,
+    featured: true
+  },
+  {
+    id: "daniel-kahneman",
+    name: "Daniel Kahneman",
+    title: "Nobel Laureate Psychologist",
+    bio: "Autor von 'Thinking, Fast and Slow'",
+    talkCount: 6,
+    totalViews: "8M+",
+    topics: ["Psychology", "Decision Making", "Economics"],
+    imageUrl: null
+  },
+  {
+    id: "yuval-noah-harari",
+    name: "Yuval Noah Harari",
+    title: "Historian & Author",
+    bio: "Autor von 'Sapiens' und 'Homo Deus'",
+    talkCount: 9,
+    totalViews: "20M+",
+    topics: ["History", "Future", "Technology"],
+    imageUrl: null
+  },
+  {
+    id: "malcolm-gladwell",
+    name: "Malcolm Gladwell",
+    title: "Author & Journalist",
+    bio: "Bestselling Author und New Yorker Staff Writer",
+    talkCount: 7,
+    totalViews: "12M+",
+    topics: ["Social Science", "Psychology", "Success"],
+    imageUrl: null
+  }
+];
+
+const featuredSpeakers = speakers.filter(s => s.featured);
+const allSpeakers = speakers.sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<!DOCTYPE html>
+<html lang="de" data-theme="ocean">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprecher | YouTube Wisdom Library</title>
+    <meta name="description" content="Entdecken Sie führende Denker und ihre inspirierenden Vorträge in unserer kuratierten Sammlung.">
+</head>
+<body class="bg-theme-background text-theme-text min-h-screen">
+    <ThemeSwitcher />
+    <Navigation currentPath={currentPath} />
+    
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-theme-primary/10 to-theme-secondary/10 py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-theme-text mb-4">
+          Führende Denker & Sprecher
+        </h1>
+        <p class="text-xl text-theme-text-muted max-w-3xl mx-auto">
+          Entdecken Sie die brillantesten Köpfe unserer Zeit und ihre revolutionären Ideen, 
+          die die Art und Weise verändern, wie wir denken und handeln.
+        </p>
+      </div>
+    </section>
+    
+    <!-- Featured Speakers -->
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-theme-text mb-8">
+          Featured Speakers
+        </h2>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+          {featuredSpeakers.map(speaker => (
+            <a 
+              href={`/speakers/${speaker.id}`}
+              class="group bg-theme-card rounded-xl p-6 border border-theme-border/20 hover:border-theme-primary/30 transition-all duration-300 hover:shadow-xl"
+            >
+              <div class="flex items-start gap-4">
+                <!-- Avatar -->
+                <div class="flex-shrink-0">
+                  {speaker.imageUrl ? (
+                    <img 
+                      src={speaker.imageUrl} 
+                      alt={speaker.name}
+                      class="w-20 h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-theme-primary to-theme-secondary flex items-center justify-center">
+                      <span class="text-2xl text-white font-bold">
+                        {speaker.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <!-- Info -->
+                <div class="flex-1">
+                  <h3 class="text-xl font-semibold text-theme-text group-hover:text-theme-primary transition-colors mb-1">
+                    {speaker.name}
+                  </h3>
+                  <p class="text-sm text-theme-primary mb-2">
+                    {speaker.title}
+                  </p>
+                  <p class="text-theme-text-muted text-sm mb-3">
+                    {speaker.bio}
+                  </p>
+                  
+                  <!-- Stats -->
+                  <div class="flex items-center gap-4 text-xs text-theme-text-muted mb-3">
+                    <span class="flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      {speaker.talkCount} Talks
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      {speaker.totalViews}
+                    </span>
+                  </div>
+                  
+                  <!-- Topics -->
+                  <div class="flex flex-wrap gap-1">
+                    {speaker.topics.map(topic => (
+                      <span class="inline-block bg-theme-primary/10 text-theme-primary text-xs px-2 py-1 rounded-full">
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+    
+    <!-- All Speakers Grid -->
+    <section class="py-12 bg-theme-card/30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-3xl font-bold text-theme-text">
+            Alle Sprecher
+          </h2>
+          
+          <!-- Search/Filter -->
+          <div class="flex gap-4">
+            <input 
+              type="text" 
+              placeholder="Sprecher suchen..." 
+              class="bg-theme-card text-theme-text border border-theme-border/30 rounded-lg px-4 py-2 w-64"
+            />
+            <select class="bg-theme-card text-theme-text border border-theme-border/30 rounded-lg px-4 py-2">
+              <option>Alle Themen</option>
+              <option>Psychology</option>
+              <option>Leadership</option>
+              <option>Technology</option>
+              <option>Economics</option>
+              <option>Innovation</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {allSpeakers.map(speaker => (
+            <a 
+              href={`/speakers/${speaker.id}`}
+              class="group bg-theme-card rounded-xl p-6 border border-theme-border/20 hover:border-theme-primary/30 transition-all duration-300"
+            >
+              <div class="flex items-center gap-4">
+                <!-- Avatar -->
+                <div class="flex-shrink-0">
+                  {speaker.imageUrl ? (
+                    <img 
+                      src={speaker.imageUrl} 
+                      alt={speaker.name}
+                      class="w-16 h-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-theme-primary/50 to-theme-secondary/50 flex items-center justify-center">
+                      <span class="text-xl text-white font-bold">
+                        {speaker.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <!-- Info -->
+                <div class="flex-1">
+                  <h3 class="text-lg font-semibold text-theme-text group-hover:text-theme-primary transition-colors">
+                    {speaker.name}
+                  </h3>
+                  <p class="text-sm text-theme-text-muted mb-2">
+                    {speaker.bio}
+                  </p>
+                  <div class="flex items-center gap-3 text-xs text-theme-text-muted">
+                    <span>{speaker.talkCount} Talks</span>
+                    <span>•</span>
+                    <span>{speaker.totalViews} Views</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-theme-text mb-4">
+          Sprecher vorschlagen
+        </h2>
+        <p class="text-theme-text-muted mb-8">
+          Vermissen Sie einen wichtigen Denker in unserer Sammlung? 
+          Lassen Sie es uns wissen!
+        </p>
+        <button class="bg-theme-primary text-white px-8 py-3 rounded-lg hover:opacity-90 transition-opacity">
+          Sprecher vorschlagen
+        </button>
+      </div>
+    </section>
+    
+    <Footer />
+    
+    <script>
+      // Simple search functionality
+      const searchInput = document.querySelector('input[type="text"]');
+      const speakerCards = document.querySelectorAll('.grid a');
+      
+      searchInput?.addEventListener('input', (e) => {
+        const searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
+        
+        speakerCards.forEach(card => {
+          const text = card.textContent?.toLowerCase() || '';
+          if (text.includes(searchTerm)) {
+            (card as HTMLElement).style.display = 'block';
+          } else {
+            (card as HTMLElement).style.display = 'none';
+          }
+        });
+      });
+    </script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+---
+import { getCollection } from 'astro:content';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import ThemeSwitcher from '../../components/ThemeSwitcher.astro';
+import '../../styles/themes.css';
+
+export async function getStaticPaths() {
+	const talks = await getCollection('talks');
+	return talks.map((talk) => ({
+		params: { slug: talk.slug },
+		props: { talk },
+	}));
+}
+
+const { talk } = Astro.props;
+const { Content } = await talk.render();
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="de" data-theme="ocean">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{talk.data.title} - {talk.data.speaker} | YouTube Wisdom Library</title>
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				// Alle h2 Überschriften im Content-Bereich finden
+				const contentDiv = document.querySelector('.content');
+				if (!contentDiv) return;
+
+				const headings = contentDiv.querySelectorAll('h2');
+
+				headings.forEach((heading) => {
+					// Toggle-Button hinzufügen
+					heading.style.cursor = 'pointer';
+					heading.style.userSelect = 'none';
+					heading.style.position = 'relative';
+					heading.style.paddingLeft = '30px';
+
+					// Pfeil-Icon hinzufügen
+					const arrow = document.createElement('span');
+					arrow.textContent = '▼';
+					arrow.style.position = 'absolute';
+					arrow.style.left = '0';
+					arrow.style.transition = 'transform 0.3s ease';
+					arrow.style.display = 'inline-block';
+					arrow.className = 'section-arrow';
+					heading.insertBefore(arrow, heading.firstChild);
+
+					// Alle Elemente zwischen dieser und der nächsten h2 sammeln
+					const content = [];
+					let sibling = heading.nextElementSibling;
+
+					while (sibling && sibling.tagName !== 'H2') {
+						content.push(sibling);
+						sibling = sibling.nextElementSibling;
+					}
+
+					// Container für den Inhalt erstellen
+					const contentWrapper = document.createElement('div');
+					contentWrapper.className = 'collapsible-content';
+					contentWrapper.style.overflow = 'hidden';
+					contentWrapper.style.transition = 'max-height 0.3s ease';
+					contentWrapper.style.maxHeight = 'none';
+
+					// Inhalt in den Wrapper verschieben
+					content.forEach((elem) => {
+						contentWrapper.appendChild(elem);
+					});
+
+					// Wrapper nach der Überschrift einfügen
+					heading.insertAdjacentElement('afterend', contentWrapper);
+
+					// Initial-Zustand: Transkript eingeklappt, andere ausgeklappt
+					const isTranscript =
+						heading.textContent.includes('Full Transcript') ||
+						heading.textContent.includes('Transkript');
+
+					if (isTranscript) {
+						contentWrapper.style.maxHeight = '0';
+						arrow.style.transform = 'rotate(-90deg)';
+						contentWrapper.dataset.collapsed = 'true';
+					} else {
+						// Höhe berechnen für ausgeklappten Zustand
+						contentWrapper.style.maxHeight = contentWrapper.scrollHeight + 'px';
+						contentWrapper.dataset.collapsed = 'false';
+					}
+
+					// Click-Handler
+					heading.addEventListener('click', () => {
+						const isCollapsed = contentWrapper.dataset.collapsed === 'true';
+
+						if (isCollapsed) {
+							contentWrapper.style.maxHeight = contentWrapper.scrollHeight + 'px';
+							arrow.style.transform = 'rotate(0deg)';
+							contentWrapper.dataset.collapsed = 'false';
+						} else {
+							contentWrapper.style.maxHeight = '0';
+							arrow.style.transform = 'rotate(-90deg)';
+							contentWrapper.dataset.collapsed = 'true';
+						}
+					});
+				});
+			});
+		</script>
+		<style>
+			.article-header {
+				background: rgb(var(--theme-card));
+				padding: 3rem 0;
+				margin-bottom: 2rem;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+			}
+
+			.article-container {
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 0 2rem;
+			}
+
+			h1 {
+				color: rgb(var(--theme-primary));
+				font-size: 2.5rem;
+				margin-bottom: 1rem;
+			}
+
+			.meta {
+				display: flex;
+				gap: 2rem;
+				color: rgb(var(--theme-text-muted));
+				margin-bottom: 1rem;
+			}
+
+			.speaker {
+				font-weight: 600;
+				text-decoration: none;
+				color: inherit;
+			}
+
+			a.speaker:hover {
+				color: rgb(var(--theme-primary));
+			}
+
+			.tags {
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+				margin-top: 1rem;
+			}
+
+			.tag {
+				background: rgba(var(--theme-primary), 0.1);
+				padding: 0.25rem 0.75rem;
+				border-radius: 9999px;
+				font-size: 0.875rem;
+				color: rgb(var(--theme-primary));
+			}
+
+			.content {
+				background: rgb(var(--theme-card));
+				padding: 3rem;
+				border-radius: 1rem;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+				margin-bottom: 3rem;
+			}
+
+			.content h2 {
+				color: rgb(var(--theme-primary));
+				margin-top: 2rem;
+				margin-bottom: 1rem;
+				font-size: 1.8rem;
+				transition: opacity 0.2s ease;
+			}
+
+			.content h2:hover {
+				opacity: 0.8;
+			}
+
+			.collapsible-content {
+				margin-bottom: 1.5rem;
+			}
+
+			.content h3 {
+				color: rgb(var(--theme-primary));
+				margin-top: 1.5rem;
+				margin-bottom: 0.8rem;
+				font-size: 1.3rem;
+			}
+
+			.content p {
+				margin-bottom: 1.5rem;
+				line-height: 1.7;
+			}
+
+			.content ul,
+			.content ol {
+				margin-bottom: 1.5rem;
+				padding-left: 2rem;
+			}
+
+			.content li {
+				margin-bottom: 0.5rem;
+				line-height: 1.7;
+			}
+
+			.content strong {
+				color: rgb(var(--theme-primary));
+				font-weight: 600;
+			}
+
+			.content blockquote {
+				background: rgba(var(--theme-primary), 0.05);
+				border-left: 4px solid rgb(var(--theme-primary));
+				padding: 1rem 2rem;
+				margin: 2rem 0;
+				font-style: italic;
+			}
+
+			.content blockquote p {
+				margin-bottom: 0;
+			}
+
+			.back-link {
+				display: inline-block;
+				margin-bottom: 2rem;
+				color: rgb(var(--theme-primary));
+				text-decoration: none;
+				font-weight: 600;
+			}
+
+			.back-link:hover {
+				text-decoration: underline;
+			}
+
+			.content hr {
+				border: none;
+				border-top: 2px solid rgba(var(--theme-primary), 0.1);
+				margin: 3rem 0;
+			}
+
+			.content em {
+				font-style: italic;
+				color: rgb(var(--theme-text-muted));
+			}
+		</style>
+	</head>
+	<body class="bg-theme-background text-theme-text min-h-screen">
+		<ThemeSwitcher />
+		<Navigation currentPath={currentPath} />
+
+		<div class="article-header">
+			<div class="article-container">
+				<a href="/" class="back-link">← Zurück zur Übersicht</a>
+				<h1>{talk.data.title}</h1>
+				<div class="meta">
+					{
+						talk.data.speakerId ? (
+							<a
+								href={`/speakers/${talk.data.speakerId}`}
+								class="speaker hover:text-theme-primary transition-colors"
+							>
+								🎤 {talk.data.speaker}
+							</a>
+						) : (
+							<span class="speaker">🎤 {talk.data.speaker}</span>
+						)
+					}
+					<span>📅 {talk.data.venue}</span>
+					<span>⏱️ {talk.data.duration}</span>
+				</div>
+				<div class="tags">
+					{talk.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+				</div>
+			</div>
+		</div>
+
+		<div class="article-container">
+			<div class="content">
+				<Content />
+			</div>
+		</div>
+
+		<Footer />
+	</body>
+</html>

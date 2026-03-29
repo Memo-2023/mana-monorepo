@@ -1,0 +1,292 @@
+---
+import { getLangFromUrl, useTranslations } from '../utils/i18n';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+	mission: CollectionEntry<'missions'>;
+}
+
+const { mission } = Astro.props;
+const { data } = mission;
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Format date based on language
+const formattedDate = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-US', {
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+}).format(data.pubDate);
+
+// Generate mission URL - always include language segment
+let missionUrl;
+const slugParts = mission.slug.split('/');
+const fileName = slugParts[slugParts.length - 1];
+missionUrl = `/${lang}/missions/${fileName}`;
+
+// Get translated difficulty and status
+const difficultyKey = `missions.difficulty.${data.difficulty}` as const;
+const statusKey = `missions.status.${data.status}` as const;
+---
+
+<a href={missionUrl} class="mission-card-link">
+	<article class:list={['mission-card', { featured: data.featured }]}>
+		{
+			data.image && (
+				<div class="mission-image-container">
+					<img src={data.image} alt={data.title} class="mission-image" />
+					<div class="status-badge" data-status={data.status}>
+						{t(statusKey)}
+					</div>
+				</div>
+			)
+		}
+
+		<div class="content">
+			<div class="meta">
+				<span class="difficulty" data-difficulty={data.difficulty}>{t(difficultyKey)}</span>
+				<span class="date">{formattedDate}</span>
+			</div>
+
+			<h3>{data.title}</h3>
+			<p>{data.description}</p>
+
+			<div class="details">
+				<div class="detail-item">
+					<span class="detail-label">{t('missions.duration')}</span>
+					<span class="detail-value">{data.duration}</span>
+				</div>
+
+				<div class="detail-item">
+					<span class="detail-label">{t('missions.skills')}</span>
+					<div class="skills-list">
+						{data.skills.map((skill) => <span class="skill-tag">{skill}</span>)}
+					</div>
+				</div>
+			</div>
+
+			<div class="footer">
+				{
+					data.participants && data.participants.length > 0 && (
+						<div class="participants">
+							<span class="participants-count">{data.participants.length}</span>
+						</div>
+					)
+				}
+				<span class="read-more">{t('missions.readMore')} <span class="arrow">→</span></span>
+			</div>
+		</div>
+	</article>
+</a>
+
+<style>
+	.mission-card-link {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+		height: 100%;
+	}
+
+	.mission-card {
+		display: flex;
+		flex-direction: column;
+		border-radius: 0.75rem;
+		overflow: hidden;
+		background-color: var(--card-bg);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		box-shadow:
+			0 2px 4px -1px rgba(0, 0, 0, 0.06),
+			0 1px 2px -1px rgba(0, 0, 0, 0.03);
+		transition:
+			transform 0.2s ease,
+			border-color 0.2s ease,
+			box-shadow 0.2s ease;
+		height: 100%;
+	}
+
+	.mission-card-link:hover .mission-card {
+		transform: translateY(-2px);
+		border-color: rgba(var(--accent-color-rgb, 249, 115, 22), 0.5);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.08),
+			0 2px 4px -2px rgba(0, 0, 0, 0.04);
+	}
+
+	.mission-card.featured {
+		border: 2px solid rgba(var(--accent-color-rgb, 249, 115, 22), 0.3);
+	}
+
+	.mission-image-container {
+		width: 100%;
+		padding-top: 66.67%; /* Aspect ratio 3:2 */
+		position: relative;
+		overflow: hidden;
+	}
+
+	.mission-image {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		z-index: 1;
+	}
+
+	.status-badge {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		padding: 0.35rem 0.75rem;
+		border-radius: 2rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		z-index: 2;
+		color: white;
+	}
+
+	.status-badge[data-status='active'] {
+		background-color: #10b981; /* Green */
+	}
+
+	.status-badge[data-status='completed'] {
+		background-color: #6366f1; /* Purple */
+	}
+
+	.status-badge[data-status='upcoming'] {
+		background-color: #f59e0b; /* Amber */
+	}
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		padding: 1.5rem;
+		flex-grow: 1;
+	}
+
+	.meta {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.875rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.difficulty {
+		font-weight: 600;
+		padding: 0.2rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+	}
+
+	.difficulty[data-difficulty='beginner'] {
+		background-color: #dcfce7; /* Light green */
+		color: #16a34a;
+	}
+
+	.difficulty[data-difficulty='intermediate'] {
+		background-color: #e0f2fe; /* Light blue */
+		color: #0284c7;
+	}
+
+	.difficulty[data-difficulty='advanced'] {
+		background-color: #fee2e2; /* Light red */
+		color: #dc2626;
+	}
+
+	.date {
+		color: var(--text-muted);
+	}
+
+	h3 {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.25rem;
+		line-height: 1.4;
+	}
+
+	p {
+		margin: 0;
+		color: var(--text-muted);
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
+	}
+
+	.details {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.detail-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.detail-label {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		font-weight: 500;
+	}
+
+	.detail-value {
+		font-size: 0.875rem;
+	}
+
+	.skills-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.skill-tag {
+		font-size: 0.75rem;
+		background-color: rgba(var(--border-color-rgb), 0.3);
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+	}
+
+	.footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: auto;
+	}
+
+	.participants {
+		display: flex;
+		align-items: center;
+	}
+
+	.participants-count {
+		font-size: 0.875rem;
+		color: var(--text-muted);
+		display: flex;
+		align-items: center;
+	}
+
+	.participants-count::before {
+		content: '👥 ';
+		margin-right: 0.25rem;
+	}
+
+	.read-more {
+		display: inline-flex;
+		align-items: center;
+		color: var(--accent-color);
+		font-weight: 600;
+		font-size: 0.875rem;
+	}
+
+	.arrow {
+		display: inline-block;
+		margin-left: 4px;
+		transition: transform 0.2s ease;
+	}
+
+	.mission-card-link:hover .arrow {
+		transform: translateX(4px);
+	}
+</style>

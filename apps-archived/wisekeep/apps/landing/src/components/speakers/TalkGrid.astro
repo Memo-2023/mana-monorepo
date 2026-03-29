@@ -1,0 +1,128 @@
+---
+export interface Talk {
+  id: string;
+  title: string;
+  date: string;
+  duration: string;
+  thumbnail?: string;
+  description: string;
+  tags: string[];
+  url: string;
+  views?: string;
+}
+
+export interface Props {
+  talks: Talk[];
+  showFilters?: boolean;
+}
+
+const { talks, showFilters = true } = Astro.props;
+---
+
+<section class="py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+      <h2 class="text-3xl font-bold text-theme-text mb-4 md:mb-0">
+        Alle Vorträge
+      </h2>
+      
+      {showFilters && (
+        <div class="flex gap-4">
+          <select class="bg-theme-card text-theme-text border border-theme-border/30 rounded-lg px-4 py-2">
+            <option>Neueste zuerst</option>
+            <option>Älteste zuerst</option>
+            <option>Beliebteste</option>
+            <option>Längste Dauer</option>
+          </select>
+          
+          <select class="bg-theme-card text-theme-text border border-theme-border/30 rounded-lg px-4 py-2">
+            <option>Alle Themen</option>
+            <option>Behavioral Economics</option>
+            <option>Marketing</option>
+            <option>Psychology</option>
+            <option>Innovation</option>
+          </select>
+        </div>
+      )}
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {talks.map(talk => (
+        <article class="bg-theme-card rounded-xl overflow-hidden border border-theme-border/20 hover:border-theme-primary/30 transition-all duration-300 group">
+          <!-- Thumbnail -->
+          {talk.thumbnail ? (
+            <div class="relative aspect-video overflow-hidden bg-theme-background">
+              <img 
+                src={talk.thumbnail} 
+                alt={talk.title}
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                {talk.duration}
+              </div>
+            </div>
+          ) : (
+            <div class="relative aspect-video bg-gradient-to-br from-theme-primary/20 to-theme-secondary/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-theme-primary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                {talk.duration}
+              </div>
+            </div>
+          )}
+          
+          <!-- Content -->
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-theme-text mb-2 line-clamp-2 group-hover:text-theme-primary transition-colors">
+              <a href={talk.url} class="hover:underline">
+                {talk.title}
+              </a>
+            </h3>
+            
+            <p class="text-theme-text-muted text-sm mb-4 line-clamp-3">
+              {talk.description}
+            </p>
+            
+            <!-- Meta Info -->
+            <div class="flex items-center justify-between text-xs text-theme-text-muted mb-4">
+              <span>{talk.date}</span>
+              {talk.views && <span>{talk.views} Aufrufe</span>}
+            </div>
+            
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-2">
+              {talk.tags.slice(0, 3).map(tag => (
+                <span class="inline-block bg-theme-primary/10 text-theme-primary text-xs px-2 py-1 rounded-full">
+                  {tag}
+                </span>
+              ))}
+              {talk.tags.length > 3 && (
+                <span class="inline-block bg-theme-background text-theme-text-muted text-xs px-2 py-1 rounded-full">
+                  +{talk.tags.length - 3}
+                </span>
+              )}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

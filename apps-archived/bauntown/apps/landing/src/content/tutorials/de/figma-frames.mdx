@@ -1,0 +1,167 @@
+---
+title: "Frames und Layout in Figma"
+description: "Lerne, wie du mit Frames arbeitest, Layouts organisierst und responsive Designs in Figma erstellst."
+pubDate: 2025-03-26
+category: "UI & UX"
+image: "/images/tutorials/nobackground/figma-basics-bauntown-tutorial.png"
+author: "Anna Schmidt"
+course: "figma-basics"
+courseName: "Figma Grundlagen"
+lessonNumber: 2
+---
+
+import YouTubeVideo from '../../../components/YouTubeVideo.astro';
+import FigmaEmbed from '../../../components/FigmaEmbed.astro';
+
+# Frames und Layout in Figma
+
+Willkommen zur zweiten Lektion unseres Figma-Grundlagenkurses! Nachdem wir uns in der ersten Lektion mit den Grundlagen von Figma vertraut gemacht haben, tauchen wir nun tiefer in ein essenzielles Konzept ein: Frames und Layout-Strukturen.
+
+<FigmaEmbed figmaUrl="https://www.figma.com/file/Sv8VQMCbyzAULRn9yvzICt/Figma-Frames-Layout-Übung" title="Frames & Layout Übungsdatei" />
+
+## Was sind Frames?
+
+Frames sind die grundlegenden Container in Figma, vergleichbar mit Artboards in Adobe-Produkten oder Divs in der Webentwicklung. Sie helfen dir, dein Design zu organisieren und zu strukturieren.
+
+Die wichtigsten Merkmale von Frames:
+
+- **Feste Größe**: Frames haben definierte Dimensionen
+- **Verschachtelung**: Frames können innerhalb anderer Frames platziert werden
+- **Scrollverhalten**: Frames können für Prototyping scrollbar gemacht werden
+- **Layout-Einstellungen**: Frames können Auto-Layout-Funktionen nutzen
+
+Um einen neuen Frame zu erstellen, drücke einfach `F` auf deiner Tastatur oder wähle das Frame-Tool aus der Werkzeugleiste.
+
+## Mit Frames arbeiten
+
+### Vordefinierte Frame-Größen
+
+Figma bietet viele vordefinierte Frame-Größen für verschiedene Geräte und Zwecke:
+
+- **Mobilgeräte**: iPhone, Android-Telefone
+- **Tablets**: iPad, Android-Tablets
+- **Desktop**: Verschiedene Bildschirmgrößen
+- **Social Media**: Instagram-Post, Twitter-Header, etc.
+- **Benutzerdefiniert**: Eigene Größen für spezielle Anforderungen
+
+Beim Erstellen eines neuen Frames wird eine Liste dieser vordefinierten Größen angezeigt, aus der du wählen kannst.
+
+### Frame-Hierarchie
+
+In Figma können Frames verschachtelt werden, wodurch eine hierarchische Struktur entsteht. Dies ist besonders nützlich für:
+
+- **Organisieren von UI-Komponenten**: Header, Content, Footer
+- **Erstellen von komplexen Layouts**: Verschachtelte Grids und Strukturen
+- **Verbessern der Wiederverwendbarkeit**: Elemente gruppieren für leichtere Wiederverwendung
+
+Im Ebenen-Panel kannst du diese Hierarchie leicht erkennen und verwalten.
+
+## Layout-Grundlagen in Figma
+
+### Das Grid-System
+
+Grids helfen dir, deine Designs konsistent und ausgerichtet zu halten:
+
+1. Wähle einen Frame aus
+2. Im Eigenschaften-Panel, scrolle zum Abschnitt "Layout Grid"
+3. Klicke auf das "+"-Symbol, um ein Grid hinzuzufügen
+4. Wähle zwischen drei Grid-Typen:
+   - **Grid**: Ein gleichmäßiges Rastermuster
+   - **Columns**: Vertikale Spalten (wie in Web-Frameworks)
+   - **Rows**: Horizontale Zeilen
+
+Typischerweise verwenden Webdesigns ein 12-Spalten-Grid, aber du kannst dies nach Bedarf anpassen.
+
+### Constraints
+
+Constraints bestimmen, wie sich Elemente verhalten, wenn sich die Größe ihres übergeordneten Frames ändert:
+
+1. Wähle ein Element innerhalb eines Frames
+2. Im Eigenschaften-Panel, finde den Abschnitt "Constraints"
+3. Setze horizontale und vertikale Constraints
+
+Mögliche Constraints-Einstellungen:
+- **Left/Right/Center**: Horizontale Positionierung
+- **Top/Bottom/Center**: Vertikale Positionierung
+- **Left & Right/Top & Bottom**: Dehnen in eine Richtung
+- **Scale**: Proportionale Skalierung
+
+Mit Constraints kannst du responsive Designs erstellen, die sich an verschiedene Bildschirmgrößen anpassen.
+
+## Auto Layout
+
+Auto Layout ist eine der leistungsstärksten Funktionen in Figma, ähnlich wie Flexbox in CSS. Es ermöglicht dir, dynamische, responsive Layouts zu erstellen.
+
+### Auto Layout hinzufügen
+
+1. Wähle einen Frame oder mehrere Elemente aus
+2. Drücke `Shift + A` oder wähle "Auto Layout" aus dem Kontextmenü
+
+### Auto Layout-Eigenschaften
+
+Nach dem Hinzufügen von Auto Layout kannst du verschiedene Einstellungen anpassen:
+
+- **Direction**: Horizontal oder vertikal
+- **Spacing Between Items**: Abstand zwischen Elementen
+- **Padding**: Innenabstand des Frames
+- **Alignment**: Ausrichtung der Elemente innerhalb des Frames
+- **Distribution**: Wie der Platz zwischen Elementen verteilt wird
+
+### Verschachtelte Auto Layouts
+
+Du kannst Auto Layouts verschachteln, um komplexe, responsive UI-Strukturen zu erstellen:
+
+1. Erstelle einen vertikalen Auto Layout-Frame für die Hauptstruktur
+2. Füge horizontale Auto Layout-Frames für Zeilen hinzu
+3. Passe die Eigenschaften jedes Layouts an
+
+Dies ermöglicht komplexe Strukturen wie Cards, Listen oder ganze Seitenlayouts.
+
+<YouTubeVideo videoId="1JFl9Ut_HHw" title="Figma Auto Layout Tutorial" />
+
+## Praktische Übungen
+
+Lass uns das Gelernte mit einigen praktischen Übungen festigen:
+
+### Übung 1: Responsiver Header
+
+1. Erstelle einen Frame mit Auto Layout (horizontal)
+2. Füge ein Logo links und Navigationslinks rechts hinzu
+3. Wende "Space Between" für die Verteilung an
+4. Ändere die Frame-Breite und beobachte, wie das Layout reagiert
+
+### Übung 2: Card-Layout
+
+1. Erstelle einen Card-Frame mit Auto Layout (vertikal)
+2. Füge ein Bild, eine Überschrift, einen Text und einen Button hinzu
+3. Wende Padding und Abstände zwischen den Elementen an
+4. Dupliziere die Card und erstelle ein Grid von Cards
+
+### Übung 3: Verschachteltes Layout
+
+1. Erstelle einen App-Screen-Frame
+2. Füge einen Header, einen Content-Bereich und einen Footer hinzu
+3. Wende Auto Layout auf jeden Bereich an
+4. Experimentiere mit verschiedenen Constraints und Anpassungen
+
+## Tipps für effiziente Layouts
+
+- **Konsistente Abstände**: Verwende ein einheitliches Abstandssystem (8px, 16px, 24px, etc.)
+- **Frame-Komponenten**: Mache häufig verwendete Frame-Strukturen zu Komponenten
+- **Kommentare**: Füge Kommentare zu komplexen Layouts hinzu, um deinen Teammitgliedern zu helfen
+- **Ordentliche Namensgebung**: Benenne deine Frames und Ebenen klar und konsistent
+- **Layout-Grid anpassen**: Passe dein Grid an dein spezifisches Projekt an
+
+## Für die nächste Lektion
+
+In der dritten Lektion werden wir uns mit **Komponenten und Varianten** beschäftigen. Du wirst lernen, wie du wiederverwendbare UI-Elemente erstellst und verschiedene Zustände für interaktive Komponenten definierst.
+
+Bis dahin empfehle ich dir, mit Frames, Auto Layout und Constraints zu experimentieren. Versuche, einige gängige UI-Strukturen nachzubauen, um dein Verständnis zu festigen.
+
+## Hilfreiche Ressourcen
+
+- [Figma Auto Layout Documentation](https://help.figma.com/hc/en-us/articles/360040451373-Create-dynamic-layouts-with-Auto-layout)
+- [Figma Constraints Documentation](https://help.figma.com/hc/en-us/articles/360039957734-Apply-constraints-to-define-how-layers-resize)
+- [Layout Grid Best Practices](https://www.figma.com/resource-library/layout-grids-figma/)
+
+Hast du Fragen zu Frames und Layouts? Hinterlasse gerne einen Kommentar unten!

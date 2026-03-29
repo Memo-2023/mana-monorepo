@@ -1,0 +1,134 @@
+---
+export interface Props {
+	currentPath?: string;
+}
+
+const { currentPath = '/' } = Astro.props;
+---
+
+<nav
+	class="border-b border-theme-border/50 backdrop-blur-md sticky top-0 z-40 bg-theme-background/80"
+>
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="flex justify-between items-center h-16">
+			<a
+				href="/"
+				class="text-xl font-bold flex items-center gap-2 text-theme-text hover:text-theme-primary transition-colors"
+			>
+				<span class="text-2xl">🎥</span>
+				<span>Wisdom Library</span>
+			</a>
+
+			<div class="flex items-center gap-6">
+				<div class="hidden md:flex items-center gap-6">
+					<a
+						href="/talks"
+						class={`text-theme-text-muted hover:text-theme-primary transition-colors ${currentPath?.startsWith('/talks') ? 'text-theme-primary' : ''}`}
+					>
+						Vorträge
+					</a>
+					<a
+						href="/speakers"
+						class={`text-theme-text-muted hover:text-theme-primary transition-colors ${currentPath?.startsWith('/speakers') ? 'text-theme-primary' : ''}`}
+					>
+						Sprecher
+					</a>
+					<a
+						href="/categories"
+						class={`text-theme-text-muted hover:text-theme-primary transition-colors ${currentPath?.startsWith('/categories') ? 'text-theme-primary' : ''}`}
+					>
+						Kategorien
+					</a>
+					<a
+						href="/admin"
+						class={`text-theme-text-muted hover:text-theme-primary transition-colors ${currentPath?.startsWith('/admin') ? 'text-theme-primary' : ''}`}
+					>
+						Admin
+					</a>
+					<a
+						href="http://localhost:8000/docs"
+						target="_blank"
+						class="text-theme-text-muted hover:text-theme-primary transition-colors flex items-center gap-1"
+					>
+						API
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+							></path>
+						</svg>
+					</a>
+				</div>
+
+				<!-- Mobile menu button -->
+				<button class="md:hidden text-theme-text" id="mobile-menu-button">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-6 w-6"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h16"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<!-- Mobile menu -->
+		<div id="mobile-menu" class="hidden md:hidden pb-4">
+			<a
+				href="/talks"
+				class={`block py-2 text-theme-text-muted hover:text-theme-primary transition-colors ${currentPath?.startsWith('/talks') ? 'text-theme-primary' : ''}`}
+			>
+				Vorträge
+			</a>
+			<a
+				href="/speakers"
+				class={`block py-2 text-theme-text-muted hover:text-theme-primary transition-colors ${currentPath?.startsWith('/speakers') ? 'text-theme-primary' : ''}`}
+			>
+				Sprecher
+			</a>
+			<a
+				href="/categories"
+				class={`block py-2 text-theme-text-muted hover:text-theme-primary transition-colors ${currentPath?.startsWith('/categories') ? 'text-theme-primary' : ''}`}
+			>
+				Kategorien
+			</a>
+			<a
+				href="/admin"
+				class={`block py-2 text-theme-text-muted hover:text-theme-primary transition-colors ${currentPath?.startsWith('/admin') ? 'text-theme-primary' : ''}`}
+			>
+				Admin
+			</a>
+			<a
+				href="http://localhost:8000/docs"
+				target="_blank"
+				class="block py-2 text-theme-text-muted hover:text-theme-primary transition-colors"
+			>
+				API ↗
+			</a>
+		</div>
+	</div>
+</nav>
+
+<script>
+	const mobileMenuButton = document.getElementById('mobile-menu-button');
+	const mobileMenu = document.getElementById('mobile-menu');
+
+	mobileMenuButton?.addEventListener('click', () => {
+		mobileMenu?.classList.toggle('hidden');
+	});
+</script>

@@ -1,0 +1,180 @@
+---
+import { getLangFromUrl, useTranslations } from '../utils/i18n';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+	tutorial: CollectionEntry<'tutorials'>;
+}
+
+const { tutorial } = Astro.props;
+const { data } = tutorial;
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Format date based on language
+const formattedDate = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-US', {
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+}).format(data.pubDate);
+
+// Generate tutorial URL with language prefix
+let tutorialUrl;
+const slugParts = tutorial.slug.split('/');
+const fileName = slugParts[slugParts.length - 1];
+
+tutorialUrl = `/${lang}/tutorials/${fileName}`;
+
+// Category translation
+const categoryKey = `tutorials.categories.${data.category}` as const;
+---
+
+<a href={tutorialUrl} class="tutorial-card-link">
+	<article class:list={['tutorial-card', { featured: data.featured }]}>
+		{
+			data.image && (
+				<div class="tutorial-image-container">
+					<img src={data.image} alt={data.title} class="tutorial-image" />
+				</div>
+			)
+		}
+
+		<div class="content">
+			<div class="meta">
+				<span class="category">{t(categoryKey)}</span>
+				<span class="date">{formattedDate}</span>
+			</div>
+
+			<h3>{data.title}</h3>
+			<p>{data.description}</p>
+
+			<div class="footer">
+				<span class="author">{data.author}</span>
+				<span class="read-more">{t('tutorials.readMore')} <span class="arrow">→</span></span>
+			</div>
+		</div>
+	</article>
+</a>
+
+<style>
+	.tutorial-card-link {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+		height: 100%;
+	}
+
+	.tutorial-card {
+		display: flex;
+		flex-direction: column;
+		border-radius: 0.75rem;
+		overflow: hidden;
+		background-color: var(--card-bg);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		box-shadow:
+			0 2px 4px -1px rgba(0, 0, 0, 0.06),
+			0 1px 2px -1px rgba(0, 0, 0, 0.03);
+		transition:
+			transform 0.2s ease,
+			border-color 0.2s ease,
+			box-shadow 0.2s ease;
+		height: 100%;
+	}
+
+	.tutorial-card-link:hover .tutorial-card {
+		transform: translateY(-2px);
+		border-color: rgba(var(--accent-color-rgb, 249, 115, 22), 0.5);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.08),
+			0 2px 4px -2px rgba(0, 0, 0, 0.04);
+	}
+
+	.tutorial-card.featured {
+		border: 2px solid rgba(var(--accent-color-rgb, 249, 115, 22), 0.3);
+	}
+
+	.tutorial-image-container {
+		width: 100%;
+		padding-top: 66.67%; /* Aspect ratio 3:2 */
+		position: relative;
+		overflow: hidden;
+	}
+
+	.tutorial-image {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		z-index: 1;
+	}
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		padding: 1.5rem;
+		flex-grow: 1;
+	}
+
+	.meta {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.875rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.category {
+		color: var(--accent-color);
+		font-weight: 600;
+	}
+
+	.date {
+		color: var(--text-muted);
+	}
+
+	h3 {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.25rem;
+		line-height: 1.4;
+	}
+
+	p {
+		margin: 0;
+		color: var(--text-muted);
+		line-height: 1.6;
+		flex-grow: 1;
+		margin-bottom: 1.5rem;
+	}
+
+	.footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: auto;
+	}
+
+	.author {
+		font-size: 0.875rem;
+		color: var(--text-muted);
+	}
+
+	.read-more {
+		display: inline-flex;
+		align-items: center;
+		color: var(--accent-color);
+		font-weight: 600;
+		font-size: 0.875rem;
+	}
+
+	.arrow {
+		display: inline-block;
+		margin-left: 4px;
+		transition: transform 0.2s ease;
+	}
+
+	.tutorial-card-link:hover .arrow {
+		transform: translateX(4px);
+	}
+</style>

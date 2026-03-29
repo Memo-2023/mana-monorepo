@@ -1,0 +1,358 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../utils/i18n';
+import PaymentForm from '../../components/PaymentForm.astro';
+
+export async function getStaticPaths() {
+	return [{ params: { lang: 'en' } }, { params: { lang: 'de' } }, { params: { lang: 'it' } }];
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<Layout title={`${t('support.title')} | BaunTown`}>
+	<section class="support-header">
+		<div class="support-header-content">
+			<h1>{t('support.title')}</h1>
+			<p class="subtitle">{t('support.subtitle')}</p>
+			<p class="description">{t('support.description')}</p>
+		</div>
+	</section>
+
+	<section class="support-content">
+		<div class="support-layout">
+			<div class="support-intro">
+				<div class="coffee-illustration">
+					<div class="coffee-cup">
+						<div class="coffee-mug">
+							<div class="mug-body"></div>
+							<div class="mug-handle"></div>
+						</div>
+						<div class="coffee-liquid"></div>
+					</div>
+					<div class="coffee-steam">
+						<span></span>
+						<span></span>
+						<span></span>
+					</div>
+				</div>
+				<p class="support-message">{t('support.buyMeACoffee')}</p>
+			</div>
+
+			<div class="payment-form-container">
+				<PaymentForm lang={lang} />
+			</div>
+		</div>
+
+		<!-- Status message for payment success/failure -->
+		<div id="url-status-message"></div>
+	</section>
+</Layout>
+
+<script>
+	// URL-Parameter für Zahlungsstatus prüfen
+	document.addEventListener('DOMContentLoaded', () => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const statusMessage = document.getElementById('url-status-message');
+		const success = urlParams.get('success');
+		const error = urlParams.get('error');
+
+		if (success && statusMessage) {
+			statusMessage.textContent =
+				'Deine Zahlung war erfolgreich! Vielen Dank für deine Unterstützung.';
+			statusMessage.classList.add('success');
+			statusMessage.style.display = 'block';
+		} else if (error && statusMessage) {
+			statusMessage.textContent =
+				'Es gab ein Problem mit deiner Zahlung. Bitte versuche es erneut.';
+			statusMessage.classList.add('error');
+			statusMessage.style.display = 'block';
+		}
+
+		// Status aus localStorage prüfen (für Redirects von Erfolgs- oder Fehlerseiten)
+		const paymentStatus = localStorage.getItem('payment_status');
+		if (paymentStatus && statusMessage) {
+			if (paymentStatus === 'success') {
+				statusMessage.textContent =
+					'Deine Zahlung war erfolgreich! Vielen Dank für deine Unterstützung.';
+				statusMessage.classList.add('success');
+				statusMessage.style.display = 'block';
+			} else if (paymentStatus === 'cancelled') {
+				statusMessage.textContent = 'Deine Zahlung wurde abgebrochen.';
+				statusMessage.classList.add('error');
+				statusMessage.style.display = 'block';
+			}
+
+			// Status aus localStorage entfernen
+			localStorage.removeItem('payment_status');
+		}
+	});
+</script>
+
+<style>
+	/* Header styles */
+	.support-header {
+		padding: 7rem 0 4rem;
+		background:
+			linear-gradient(rgba(var(--background-color-rgb), 0.7), rgba(var(--background-color-rgb), 1)),
+			url('/background.svg');
+		background-size: cover;
+		text-align: center;
+		margin-top: -2rem;
+	}
+
+	.support-header-content {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 0 1.5rem;
+	}
+
+	h1 {
+		font-size: 3.5rem;
+		margin-bottom: 1.5rem;
+		color: var(--accent-color);
+		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	}
+
+	.subtitle {
+		font-size: 1.8rem;
+		margin-bottom: 1.5rem;
+		color: var(--text-color);
+	}
+
+	.description {
+		font-size: 1.2rem;
+		color: var(--text-muted);
+		max-width: 600px;
+		margin: 0 auto;
+		line-height: 1.6;
+	}
+
+	/* Content layout */
+	.support-content {
+		padding: 4rem 1.5rem;
+		max-width: 1200px;
+		margin: 0 auto;
+		position: relative;
+	}
+
+	.support-layout {
+		display: grid;
+		grid-template-columns: minmax(300px, 1fr) minmax(450px, 2fr);
+		gap: 3rem;
+		align-items: center;
+	}
+
+	.support-intro {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+	}
+
+	.support-message {
+		font-size: 1.4rem;
+		margin-top: 2rem;
+		color: var(--text-color);
+		font-weight: 500;
+	}
+
+	/* Coffee cup animation */
+	.coffee-illustration {
+		position: relative;
+		width: 200px;
+		height: 200px;
+		margin: 0 auto;
+	}
+
+	.coffee-cup {
+		position: relative;
+		width: 120px;
+		height: 140px;
+		margin: 0 auto;
+	}
+
+	.coffee-mug {
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		height: 90px;
+	}
+
+	.mug-body {
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		height: 80px;
+		background-color: #ffffff;
+		border-radius: 0 0 20px 20px;
+		border: 3px solid var(--text-color);
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+	}
+
+	.mug-handle {
+		position: absolute;
+		right: -30px;
+		top: 15px;
+		width: 25px;
+		height: 50px;
+		border: 3px solid var(--text-color);
+		border-left: none;
+		border-radius: 0 25px 25px 0;
+	}
+
+	.coffee-liquid {
+		position: absolute;
+		bottom: 8px;
+		left: 8px;
+		width: calc(100% - 16px);
+		height: 60px;
+		background-color: var(--accent-color);
+		border-radius: 0 0 10px 10px;
+		overflow: hidden;
+	}
+
+	.coffee-liquid::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 10px;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+		animation: coffee-wave 3s ease-in-out infinite;
+	}
+
+	.coffee-steam {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 80px;
+		height: 30px;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.coffee-steam span {
+		width: 10px;
+		height: 30px;
+		background-color: var(--accent-color);
+		border-radius: 10px;
+		opacity: 0.2;
+		animation: steam 3s infinite;
+	}
+
+	.coffee-steam span:nth-child(1) {
+		animation-delay: 0.2s;
+		height: 35px;
+	}
+
+	.coffee-steam span:nth-child(2) {
+		animation-delay: 0.6s;
+		height: 45px;
+	}
+
+	.coffee-steam span:nth-child(3) {
+		animation-delay: 0.4s;
+		height: 30px;
+	}
+
+	/* Payment form container */
+	.payment-form-container {
+		width: 100%;
+	}
+
+	/* Status message */
+	#url-status-message {
+		max-width: 600px;
+		margin: 2rem auto 0;
+		padding: 1.2rem;
+		border-radius: 10px;
+		text-align: center;
+		display: none;
+		font-size: 1.1rem;
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+	}
+
+	#url-status-message.success {
+		background-color: rgba(var(--accent-color-rgb), 0.1);
+		border: 1px solid var(--accent-color);
+		color: var(--accent-color);
+	}
+
+	#url-status-message.error {
+		background-color: rgba(255, 0, 0, 0.1);
+		border: 1px solid red;
+		color: red;
+	}
+
+	/* Animations */
+	@keyframes coffee-wave {
+		0%,
+		100% {
+			transform: translateX(-100%);
+		}
+		50% {
+			transform: translateX(100%);
+		}
+	}
+
+	@keyframes steam {
+		0% {
+			transform: translateY(0) scaleX(1);
+			opacity: 0.2;
+		}
+		40% {
+			opacity: 0.5;
+		}
+		100% {
+			transform: translateY(-40px) scaleX(0.5);
+			opacity: 0;
+		}
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 900px) {
+		.support-layout {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+
+		.support-intro {
+			margin-bottom: 1rem;
+		}
+
+		h1 {
+			font-size: 2.8rem;
+		}
+
+		.subtitle {
+			font-size: 1.5rem;
+		}
+
+		.support-header {
+			padding: 6rem 0 3rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		h1 {
+			font-size: 2.2rem;
+		}
+
+		.subtitle {
+			font-size: 1.3rem;
+		}
+
+		.description {
+			font-size: 1rem;
+		}
+
+		.support-content {
+			padding: 2rem 1rem;
+		}
+	}
+</style>

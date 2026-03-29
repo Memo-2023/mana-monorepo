@@ -1,0 +1,11 @@
+# Pocketbase
+pocketbase
+pb_data/
+pb_migrations/
+pb_public/
+*.db
+*.db-shm
+*.db-wal
+
+# Download files
+*.zip

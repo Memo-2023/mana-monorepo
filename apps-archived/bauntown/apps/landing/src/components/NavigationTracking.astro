@@ -1,0 +1,94 @@
+---
+// This component adds tracking to navigation elements
+---
+
+<script>
+	import { trackEvent, EVENTS } from '../scripts/analytics';
+
+	document.addEventListener('DOMContentLoaded', () => {
+		// Track navigation clicks
+		document.querySelectorAll('.nav-links a, .mobile-tab-bar a').forEach((link) => {
+			link.addEventListener('click', (e) => {
+				const target = e.currentTarget as HTMLAnchorElement;
+				const text = target.textContent?.trim() || '';
+				const href = target.getAttribute('href') || '';
+
+				trackEvent(EVENTS.NAV_CLICK, {
+					label: text,
+					destination: href,
+				});
+			});
+		});
+
+		// Track footer navigation clicks
+		document.querySelectorAll('footer a').forEach((link) => {
+			link.addEventListener('click', (e) => {
+				const target = e.currentTarget as HTMLAnchorElement;
+				const text = target.textContent?.trim() || '';
+				const href = target.getAttribute('href') || '';
+
+				// Skip external links (they're tracked separately)
+				if (!href.startsWith('http')) {
+					trackEvent(EVENTS.FOOTER_CLICK, {
+						label: text,
+						destination: href,
+					});
+				}
+			});
+		});
+
+		// Track language switcher
+		document.querySelectorAll('.language-switcher a, .language-option').forEach((link) => {
+			link.addEventListener('click', (e) => {
+				const target = e.currentTarget as HTMLElement;
+				const lang = target.getAttribute('href')?.split('/')[1] || target.dataset.lang || '';
+
+				trackEvent(EVENTS.LANGUAGE_SWITCH, {
+					from: document.documentElement.lang,
+					to: lang,
+				});
+			});
+		});
+
+		// Track theme toggle
+		const themeToggle = document.querySelector('.theme-toggle');
+		if (themeToggle) {
+			themeToggle.addEventListener('click', () => {
+				const currentTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+				trackEvent(EVENTS.THEME_TOGGLE, {
+					theme: currentTheme,
+				});
+			});
+		}
+
+		// Track CTA buttons
+		document.querySelectorAll('a[href*="/join"], .cta-button').forEach((button) => {
+			button.addEventListener('click', (e) => {
+				const target = e.currentTarget as HTMLElement;
+				const text = target.textContent?.trim() || '';
+				const href = target.getAttribute('href') || '';
+
+				trackEvent(EVENTS.JOIN_CLICK, {
+					label: text,
+					destination: href,
+					location: target.closest('section')?.id || 'unknown',
+				});
+			});
+		});
+
+		// Track support/coffee buttons
+		document.querySelectorAll('a[href*="/support"], .support-link').forEach((button) => {
+			button.addEventListener('click', (e) => {
+				const target = e.currentTarget as HTMLElement;
+				const text = target.textContent?.trim() || '';
+				const href = target.getAttribute('href') || '';
+
+				trackEvent(EVENTS.SUPPORT_CLICK, {
+					label: text,
+					destination: href,
+					location: target.closest('footer') ? 'footer' : 'page',
+				});
+			});
+		});
+	});
+</script>

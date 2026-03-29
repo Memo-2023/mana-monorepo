@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Hub - Save Article</title>
+  <style>
+    body {
+      width: 350px;
+      padding: 20px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-bottom: 20px;
+    }
+
+    .current-page {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .page-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 13px;
+      line-height: 1.3;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .page-url {
+      font-size: 11px;
+      opacity: 0.7;
+      word-break: break-all;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+
+    .save-button {
+      background: #3b82f6;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .save-button:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    .save-button:active {
+      transform: translateY(0);
+    }
+
+    .save-button:disabled {
+      background: #475569;
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 12px;
+      min-height: 16px;
+    }
+
+    .status.success {
+      color: #4ade80;
+    }
+
+    .status.error {
+      color: #f87171;
+    }
+
+    .login-notice {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+
+    .login-link {
+      color: #60a5fa;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">NEWS HUB</div>
+    <div class="subtitle">Save Article to Library</div>
+
+    <div id="loginNotice" class="login-notice" style="display: none;">
+      <div>Please log in to News Hub first:</div>
+      <div style="margin-top: 8px;">
+        <a href="#" id="loginLink" class="login-link">Open News Hub App</a>
+      </div>
+    </div>
+
+    <div id="currentPage" class="current-page">
+      <div class="page-title" id="pageTitle">Loading page info...</div>
+      <div class="page-url" id="pageUrl"></div>
+    </div>
+
+    <button id="saveButton" class="save-button" disabled>
+      <span id="buttonText">Ready to Save</span>
+    </button>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
