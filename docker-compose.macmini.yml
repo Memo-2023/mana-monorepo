@@ -269,7 +269,7 @@ services:
       SMTP_PASS: ${SMTP_PASSWORD}
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET:-}
       MAX_DAILY_SIGNUPS: ${MAX_DAILY_SIGNUPS:-0}
-      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://inventar.mana.how,https://link.mana.how,https://manadeck.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
+      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://inventar.mana.how,https://link.mana.how,https://manadeck.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://taktik.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
     ports:
       - "3001:3001"
     healthcheck:
@@ -1267,6 +1267,31 @@ services:
       - "5026:5026"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5026/health"]
+      interval: 180s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  taktik-web:
+    build:
+      context: .
+      dockerfile: apps/taktik/apps/web/Dockerfile
+    image: taktik-web:local
+    container_name: mana-app-taktik-web
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5027
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
+    ports:
+      - "5027:5027"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5027/health"]
       interval: 180s
       timeout: 10s
       retries: 3
