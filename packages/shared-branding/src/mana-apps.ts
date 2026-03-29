@@ -389,6 +389,22 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 	},
 	{
+		id: 'reader',
+		name: 'Reader',
+		description: {
+			de: 'Text-to-Speech mit Offline-Audio',
+			en: 'Text-to-Speech with Offline Audio',
+		},
+		longDescription: {
+			de: 'Texte in hochwertige Sprache umwandeln und offline anhören.',
+			en: 'Convert text to high-quality speech and listen offline.',
+		},
+		icon: APP_ICONS.reader,
+		color: '#f97316',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
 		id: 'news',
 		name: 'News Hub',
 		description: {
@@ -513,6 +529,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	citycorners: { dev: 'http://localhost:5196', prod: 'https://citycorners.mana.how' },
 	taktik: { dev: 'http://localhost:5197', prod: 'https://taktik.mana.how' },
 	uload: { dev: 'http://localhost:5173', prod: 'https://ulo.ad' },
+	reader: { dev: 'exp://localhost:8081', prod: 'https://reader.mana.how' },
 	news: { dev: 'http://localhost:5174', prod: 'https://news.mana.how' },
 	calc: { dev: 'http://localhost:5198', prod: 'https://calc.mana.how' },
 };

@@ -58,6 +58,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **uload** | URL shortener & link management | Server, Web, Landing |
 | **news** | AI news reader & personal library | Server, Web, Landing |
 | **wisekeep** | AI transcription & wisdom library | Server, Web, Landing |
+| **reader** | Text-to-Speech with offline audio | Mobile |
 | **calc** | Calculator & converter | Web |
 | **playground** | LLM playground | Web |
 
