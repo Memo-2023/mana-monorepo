@@ -8,7 +8,7 @@
 	import InventoryUI from '$lib/components/Inventory.svelte';
 	import PropertyPanel from '$lib/editor/property-panel.svelte';
 	import TriggerEditor from '$lib/editor/trigger-editor.svelte';
-	import { Inventory, createItem, type GameItem } from '$lib/engine/inventory';
+	import { Inventory, createItem, type GameItem } from '$lib/engine/inventory.svelte';
 	import { gameStore } from '$lib/data/local-store';
 	import { loadWorld, getAllWorlds } from '$lib/data/world-loader';
 

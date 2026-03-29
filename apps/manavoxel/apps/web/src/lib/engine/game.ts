@@ -7,7 +7,7 @@ import { ParticleSystem } from './particles';
 import { AreaManager, generateDemoStreet, generateDemoInterior } from './area-manager';
 import { UndoStack, brushStroke, floodFill, pipette, type ToolType } from '$lib/editor/tools';
 import { DEFAULT_MATERIALS, MATERIAL_AIR, type Material } from '@manavoxel/shared';
-import type { Inventory } from './inventory';
+import type { Inventory } from './inventory.svelte';
 
 export class GameEngine {
 	app: Application;

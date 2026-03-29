@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Inventory, type GameItem, MAX_INVENTORY_SLOTS } from '$lib/engine/inventory';
+	import { type Inventory, type GameItem, MAX_INVENTORY_SLOTS } from '$lib/engine/inventory.svelte';
 
 	let {
 		inventory,

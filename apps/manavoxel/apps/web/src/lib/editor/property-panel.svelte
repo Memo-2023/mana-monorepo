@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GameItem } from '$lib/engine/inventory';
+	import type { GameItem } from '$lib/engine/inventory.svelte';
 	import type { ElementType, Rarity } from '@manavoxel/shared';
 
 	let {
