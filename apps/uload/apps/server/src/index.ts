@@ -11,6 +11,7 @@ import { createRedirectRoutes } from './routes/redirect';
 import { createAnalyticsRoutes } from './routes/analytics';
 import { createStripeRoutes } from './routes/stripe';
 import { createEmailRoutes } from './routes/email';
+import { createPublicRoutes } from './routes/public';
 
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
@@ -26,8 +27,9 @@ app.use('*', cors({ origin: config.cors.origins, credentials: true }));
 // Health (no auth)
 app.route('/health', healthRoutes);
 
-// Redirect (no auth — public)
+// Public routes (no auth)
 app.route('/r', createRedirectRoutes(redirectService));
+app.route('/public', createPublicRoutes(db));
 
 // Analytics API (auth required)
 app.use('/api/v1/*', jwtAuth(config.manaAuthUrl));

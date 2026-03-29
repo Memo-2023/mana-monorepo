@@ -17,6 +17,7 @@
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.4",
 		"@tailwindcss/vite": "^4.1.11",
+		"@vite-pwa/sveltekit": "^1.1.0",
 		"@types/node": "^22.10.7",
 		"eslint": "^9.20.0",
 		"eslint-config-prettier": "^10.0.1",
@@ -33,6 +34,7 @@
 	},
 	"dependencies": {
 		"@manacore/local-store": "workspace:*",
+		"@manacore/shared-pwa": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-stores": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
