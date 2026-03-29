@@ -55,6 +55,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **inventar** | Inventory management | Web |
 | **traces** | City exploration | Backend, Mobile |
 | **taktik** | Time tracking | Web |
+| **calc** | Calculator & converter | Web |
 | **playground** | LLM playground | Web |
 
 ### Archived Projects (`apps-archived/`)
@@ -566,6 +567,7 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | SkilltTree | skills, activities, achievements | Done |
 | CityCorners | locations, favorites | Done |
 | Taktik | clients, projects, timeEntries, tags, templates, settings | Done |
+| Calc | calculations, savedFormulas | Done |
 
 **Not migrated (no CRUD data model):** ManaCore (hub), Matrix (protocol client), Playground (stateless)
 

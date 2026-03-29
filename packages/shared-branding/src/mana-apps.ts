@@ -372,6 +372,22 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 	},
+	{
+		id: 'calc',
+		name: 'Calc',
+		description: {
+			de: 'Taschenrechner & Umrechner',
+			en: 'Calculator & Converter',
+		},
+		longDescription: {
+			de: 'Taschenrechner mit Standard, Wissenschaftlich, Programmierer, Einheiten, Währung und Finanzrechnern.',
+			en: 'Calculator with standard, scientific, programmer, unit, currency and finance modes.',
+		},
+		icon: APP_ICONS.calc,
+		color: '#ec4899',
+		comingSoon: false,
+		status: 'development',
+	},
 ];
 
 /**
@@ -464,6 +480,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	context: { dev: 'http://localhost:5192', prod: 'https://context.mana.how' },
 	citycorners: { dev: 'http://localhost:5196', prod: 'https://citycorners.mana.how' },
 	taktik: { dev: 'http://localhost:5197', prod: 'https://taktik.mana.how' },
+	calc: { dev: 'http://localhost:5198', prod: 'https://calc.mana.how' },
 };
 
 /**
