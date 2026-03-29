@@ -3,8 +3,10 @@ FROM sveltekit-base:local AS builder
 
 ARG PUBLIC_BACKEND_URL=http://manadeck-server
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-auth:3001
+ARG PUBLIC_API_URL=http://manadeck-server
 ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
 ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+ENV PUBLIC_API_URL=$PUBLIC_API_URL
 
 COPY apps/manadeck/apps/web ./apps/manadeck/apps/web
 

@@ -3,8 +3,10 @@ FROM sveltekit-base:local AS builder
 
 ARG PUBLIC_BACKEND_URL=http://mana-auth
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-auth:3001
+ARG MIDDLEWARE_URL=http://mana-auth:3001
 ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
 ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+ENV MIDDLEWARE_URL=$MIDDLEWARE_URL
 
 COPY apps/manacore/apps/web ./apps/manacore/apps/web
 

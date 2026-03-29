@@ -1,12 +1,13 @@
 #!/bin/bash
 # Build and deploy specific app containers on the Mac Mini
-# Automatically frees RAM by stopping monitoring before build
+# Checks available memory and only stops monitoring if needed for builds.
 #
 # Usage:
 #   ./scripts/mac-mini/build-app.sh todo-web
 #   ./scripts/mac-mini/build-app.sh todo-web todo-backend
 #   ./scripts/mac-mini/build-app.sh --all-web    # rebuild all web apps
 #   ./scripts/mac-mini/build-app.sh --base        # rebuild base images only
+#   ./scripts/mac-mini/build-app.sh --force-free  # always stop monitoring
 
 set -e
 
@@ -14,6 +15,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.macmini.yml"
 DOCKER="${DOCKER_CMD:-/usr/local/bin/docker}"
+
+# Minimum free memory (in MB) needed for a Docker build
+BUILD_MEM_THRESHOLD_MB=3000
 
 # Monitoring containers (by container name — more reliable than compose service names)
 MONITORING_CONTAINERS=(
@@ -47,14 +51,56 @@ cleanup() {
 # Always restart monitoring on exit (success, failure, or interrupt)
 trap cleanup EXIT
 
-stop_monitoring() {
-  echo "=== Stopping monitoring to free RAM ==="
+get_available_memory_mb() {
+  # Get Colima VM total memory and current Docker usage
+  local vm_total_mb
+  vm_total_mb=$(colima list -j 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(int(d[0].get('memory',0) / 1048576))" 2>/dev/null || echo "12288")
+
+  # Sum all container memory usage
+  local used_mb
+  used_mb=$($DOCKER stats --no-stream --format '{{.MemUsage}}' 2>/dev/null | \
+    awk '{
+      split($1, a, "/");
+      val = a[1];
+      gsub(/[[:space:]]/, "", val);
+      if (index(val, "GiB") > 0) { gsub(/GiB/, "", val); total += val * 1024; }
+      else if (index(val, "MiB") > 0) { gsub(/MiB/, "", val); total += val; }
+      else if (index(val, "KiB") > 0) { gsub(/KiB/, "", val); total += val / 1024; }
+    } END { printf "%.0f", total }')
+
+  echo $(( vm_total_mb - used_mb ))
+}
+
+maybe_stop_monitoring() {
+  local force="${1:-false}"
+
+  if [ "$force" = "true" ]; then
+    echo "=== Force-freeing RAM (--force-free) ==="
+    stop_monitoring_now
+    return
+  fi
+
+  echo "=== Checking available memory ==="
+  local avail_mb
+  avail_mb=$(get_available_memory_mb)
+  echo "  Available: ${avail_mb} MB (need: ${BUILD_MEM_THRESHOLD_MB} MB)"
+
+  if [ "$avail_mb" -lt "$BUILD_MEM_THRESHOLD_MB" ]; then
+    echo "  → Not enough — stopping monitoring to free RAM"
+    stop_monitoring_now
+  else
+    echo "  → Sufficient — monitoring stays running ✓"
+    echo ""
+    # Still prune build cache
+    $DOCKER builder prune -f 2>/dev/null | tail -1 || true
+  fi
+}
+
+stop_monitoring_now() {
   $DOCKER stop "${MONITORING_CONTAINERS[@]}" 2>/dev/null || true
   MONITORING_STOPPED=true
-
-  # Also prune dangling build cache
   $DOCKER builder prune -f 2>/dev/null | tail -1 || true
-  echo "RAM freed."
+  echo "  RAM freed."
   echo ""
 }
 
@@ -104,17 +150,30 @@ if [ $# -eq 0 ]; then
   echo "  $0 --base                      # Rebuild base images"
   echo "  $0 --all-web                   # Rebuild all web apps"
   echo "  $0 mana-matrix-bot             # Build & restart consolidated Matrix bot (Go)"
+  echo "  $0 --force-free todo-web       # Force stop monitoring before build"
   exit 1
 fi
 
 cd "$PROJECT_ROOT"
 
+# Check for --force-free flag
+FORCE_FREE=false
+ARGS=()
+for arg in "$@"; do
+  if [ "$arg" = "--force-free" ]; then
+    FORCE_FREE=true
+  else
+    ARGS+=("$arg")
+  fi
+done
+set -- "${ARGS[@]}"
+
 # Pull latest code
 echo "=== Pulling latest code ==="
 git pull
 
-# Free RAM
-stop_monitoring
+# Smart memory check — only stop monitoring if needed
+maybe_stop_monitoring "$FORCE_FREE"
 
 case "$1" in
   --base)

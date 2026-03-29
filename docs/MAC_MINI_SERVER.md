@@ -458,12 +458,13 @@ Die Base Images enthalten alle Shared Packages (`packages/`) vorinstalliert und 
 
 ### Build-Script (`build-app.sh`)
 
-Das Script löst das RAM-Problem beim Bauen: Der Mac Mini hat 16 GB, davon sind ~10 GB durch laufende Container belegt. Docker Builds (besonders Vite/SvelteKit) brauchen 4+ GB.
+Das Script prüft vor dem Build den verfügbaren RAM und stoppt Monitoring-Container **nur wenn nötig** (< 3 GB frei). Alle Container haben explizite `mem_limit` Obergrenzen in der `docker-compose.macmini.yml`, sodass der tatsächliche Verbrauch typischerweise 50-70% der Limits beträgt und genug Headroom für Builds bleibt.
 
 **Was es tut:**
-1. Stoppt automatisch 13 Monitoring-Container (~2 GB RAM frei)
-2. Baut die angegebenen Services
-3. Startet Monitoring bei Exit automatisch wieder (auch bei Fehler/Ctrl+C via `trap`)
+1. Prüft verfügbaren RAM in der Colima VM
+2. Stoppt 13 Monitoring-Container nur wenn < 3 GB frei (vorher: immer)
+3. Baut die angegebenen Services
+4. Startet Monitoring bei Exit automatisch wieder (auch bei Fehler/Ctrl+C via `trap`)
 
 ```bash
 # Einzelne App
@@ -474,7 +475,42 @@ Das Script löst das RAM-Problem beim Bauen: Der Mac Mini hat 16 GB, davon sind 
 
 # Alle Web-Apps
 ./scripts/mac-mini/build-app.sh --all-web
+
+# Monitoring immer stoppen (altes Verhalten)
+./scripts/mac-mini/build-app.sh --force-free todo-web
 ```
+
+### Memory Baseline
+
+Misst den tatsächlichen RAM-Verbrauch aller Container, sortiert nach Kategorie:
+
+```bash
+# Einmalige Messung mit Zusammenfassung
+./scripts/mac-mini/memory-baseline.sh
+
+# Live-Monitoring (docker stats)
+./scripts/mac-mini/memory-baseline.sh --watch
+```
+
+### Memory-Limits
+
+Alle 63 Container haben explizite `mem_limit` in `docker-compose.macmini.yml`:
+
+| Kategorie | Container | Budget |
+|-----------|-----------|--------|
+| Infrastructure | 6 | 1.712 MB |
+| Forgejo | 2 | 768 MB |
+| Core (Hono/Bun) | 5 | 704 MB |
+| Go Services | 5 | 384 MB |
+| Other Backend | 3 | 576 MB |
+| Matrix | 4 | 784 MB |
+| Web Apps | 20 | 2.560 MB |
+| LLM | 2 | 384 MB |
+| Monitoring | 14 | 1.792 MB |
+| Games/Auto | 2 | 192 MB |
+| **Total** | **63** | **9.856 MB (9,6 GiB)** |
+
+Colima VM: 12 GiB → Headroom: ~2,4 GiB (Limits) / ~5-6 GiB (real)
 
 ### Backup
 
@@ -510,7 +546,8 @@ docker image prune -a
 | `restart.sh` | Startet alle Container neu |
 | `stop.sh` | Stoppt alle Container |
 | `deploy.sh` | Pullt neue Images und startet neu |
-| `build-app.sh` | Baut einzelne Apps (stoppt Monitoring für RAM) |
+| `build-app.sh` | Baut einzelne Apps (smart memory check, stoppt Monitoring nur wenn nötig) |
+| `memory-baseline.sh` | Misst RAM-Verbrauch aller Container nach Kategorie |
 
 ## Hardware
 

@@ -61,6 +61,7 @@
 		"butterchurn": "^2.6.7",
 		"butterchurn-presets": "^2.4.7",
 		"pixi.js": "^8.17.1",
+		"svelte-i18n": "^4.0.1",
 		"wavesurfer.js": "^7.8.0"
 	},
 	"type": "module"

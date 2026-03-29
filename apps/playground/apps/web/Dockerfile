@@ -1,10 +1,12 @@
 # syntax=docker/dockerfile:1
 FROM sveltekit-base:local AS builder
 
-ARG PUBLIC_BACKEND_URL=http://mana-auth
+ARG PUBLIC_BACKEND_URL=http://mana-llm:3025
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-auth:3001
+ARG PUBLIC_MANA_LLM_URL=http://mana-llm:3025
 ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
 ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
+ENV PUBLIC_MANA_LLM_URL=$PUBLIC_MANA_LLM_URL
 
 COPY apps/playground/apps/web ./apps/playground/apps/web
 
