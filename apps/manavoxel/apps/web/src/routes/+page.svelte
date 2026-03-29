@@ -9,9 +9,12 @@
 	import PropertyPanel from '$lib/editor/property-panel.svelte';
 	import TriggerEditor from '$lib/editor/trigger-editor.svelte';
 	import { Inventory, createItem, type GameItem } from '$lib/engine/inventory';
+	import { gameStore } from '$lib/data/local-store';
+	import { loadWorld, getAllWorlds } from '$lib/data/world-loader';
 
 	let canvasContainer: HTMLDivElement;
 	let engine: GameEngine | null = $state(null);
+	let loading = $state(true);
 	let isEditing = $state(false);
 	let selectedMaterial = $state(1);
 	let activeTool = $state<ToolType>('brush');
@@ -35,10 +38,29 @@
 
 	const materials = DEFAULT_MATERIALS.filter((m) => m.id !== MATERIAL_AIR);
 
-	onMount(() => {
-		const e = new GameEngine(canvasContainer);
+	onMount(async () => {
+		// Initialize local-first database (creates tables, seeds guest data)
+		await gameStore.initialize();
+
+		// Check for world ID in URL, otherwise load first world
+		const params = new URLSearchParams(window.location.search);
+		const requestedWorldId = params.get('world');
+
+		let worldData = null;
+		if (requestedWorldId) {
+			worldData = await loadWorld(requestedWorldId);
+		}
+		if (!worldData) {
+			const worlds = await getAllWorlds();
+			if (worlds.length > 0) {
+				worldData = await loadWorld(worlds[0].id);
+			}
+		}
+
+		const e = new GameEngine(canvasContainer, worldData ?? undefined);
 		e.inventory = inventory;
 		engine = e;
+		loading = false;
 
 		e.onStateChange = () => {
 			isEditing = e.isEditing;
@@ -94,7 +116,18 @@
 
 <div class="relative h-screen w-screen overflow-hidden bg-gray-900">
 	<!-- PixiJS Canvas -->
-	<div bind:this={canvasContainer} class="game-canvas h-full w-full"></div>
+	<!-- Loading screen -->
+	{#if loading}
+		<div class="flex h-full w-full items-center justify-center">
+			<div class="text-center">
+				<div class="mb-3 text-2xl font-bold text-emerald-400">ManaVoxel</div>
+				<div class="text-sm text-gray-500">Loading world...</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- PixiJS Canvas -->
+	<div bind:this={canvasContainer} class="game-canvas h-full w-full" class:hidden={loading}></div>
 
 	<!-- HUD Overlay -->
 	<div class="pointer-events-none absolute inset-0">
@@ -126,6 +159,12 @@
 				{/if}
 			</div>
 			<div class="flex gap-2">
+				<a
+					href="/worlds"
+					class="rounded-lg bg-gray-800/80 px-3 py-1.5 text-sm text-gray-400 backdrop-blur hover:bg-gray-700/80 hover:text-white"
+				>
+					Worlds
+				</a>
 				{#if isEditing}
 					<button
 						class="rounded-lg bg-blue-600/80 px-3 py-1.5 text-sm text-white backdrop-blur hover:bg-blue-500/80"

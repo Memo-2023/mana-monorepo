@@ -66,7 +66,10 @@ export class GameEngine {
 		return this._areaName;
 	}
 
-	constructor(container: HTMLDivElement) {
+	constructor(
+		container: HTMLDivElement,
+		worldData?: { world: { startAreaId: string }; areas: import('@manavoxel/shared').Area[] }
+	) {
 		this._container = container;
 		this.app = new Application();
 		this._worldContainer = new Container();
@@ -78,10 +81,13 @@ export class GameEngine {
 		this.areaManager = new AreaManager(this._worldContainer);
 		this.particles = new ParticleSystem(this._worldContainer);
 
-		this._init();
+		this._init(worldData);
 	}
 
-	private async _init() {
+	private async _init(worldData?: {
+		world: { startAreaId: string };
+		areas: import('@manavoxel/shared').Area[];
+	}) {
 		await this.app.init({
 			resizeTo: this._container,
 			background: '#1a1a2e',
@@ -99,13 +105,22 @@ export class GameEngine {
 		this.app.stage.addChild(this._fadeOverlay);
 		this._fadeOverlay.visible = false;
 
-		// Generate demo areas
-		const street = generateDemoStreet();
-		const interiorId = street.portals[0]?.targetAreaId;
-		const interior = generateDemoInterior(interiorId!, street.id);
+		// Load areas: from DB if available, otherwise generate demo
+		let startAreaId: string;
 
-		this.areaManager.registerArea(street);
-		this.areaManager.registerArea(interior);
+		if (worldData && worldData.areas.length > 0) {
+			for (const area of worldData.areas) {
+				this.areaManager.registerArea(area);
+			}
+			startAreaId = worldData.world.startAreaId;
+		} else {
+			const street = generateDemoStreet();
+			const interiorId = street.portals[0]?.targetAreaId;
+			const interior = generateDemoInterior(interiorId!, street.id);
+			this.areaManager.registerArea(street);
+			this.areaManager.registerArea(interior);
+			startAreaId = street.id;
+		}
 
 		// Area change callback
 		this.areaManager.onAreaChanged = (loaded) => {
@@ -126,15 +141,15 @@ export class GameEngine {
 		};
 
 		// Load starting area
-		const loaded = this.areaManager.loadArea(street.id);
+		const loaded = this.areaManager.loadArea(startAreaId);
 		if (loaded) {
 			this.tilemap = loaded.tilemap;
 			this._areaName = loaded.data.name;
 			this.player = new Player(
 				this._worldContainer,
 				this.tilemap,
-				street.spawnPoint.x,
-				street.spawnPoint.y
+				loaded.data.spawnPoint.x,
+				loaded.data.spawnPoint.y
 			);
 			this.camera.setPosition(this.player.worldX, this.player.worldY);
 		}
