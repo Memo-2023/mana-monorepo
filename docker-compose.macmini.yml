@@ -696,8 +696,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    entrypoint: >
+      sh -c "mkdir -p /config &&
+             cp /mnt/synapse-config/*.yaml /config/ 2>/dev/null;
+             cp -r /mnt/synapse-config/appservices /config/ 2>/dev/null;
+             exec python -m synapse.app.homeserver -c /config/homeserver.yaml"
     environment:
-      SYNAPSE_CONFIG_PATH: /config/homeserver.yaml
       TZ: Europe/Berlin
       SYNAPSE_DB_PASSWORD: ${SYNAPSE_DB_PASSWORD:-synapse-secure-password}
       SYNAPSE_PASSWORD_PEPPER: ${SYNAPSE_PASSWORD_PEPPER:-change-me-pepper}
@@ -706,7 +710,7 @@ services:
       SYNAPSE_REGISTRATION_SECRET: ${SYNAPSE_REGISTRATION_SECRET:-change-me-registration-secret}
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET}
     volumes:
-      - ./docker/matrix/config:/config:ro
+      - ./docker/matrix/config:/mnt/synapse-config:ro
       - ./docker/matrix/data:/data
     ports:
       - "4000:8008"
