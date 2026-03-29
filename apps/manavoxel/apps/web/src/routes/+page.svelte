@@ -5,6 +5,8 @@
 	import type { ToolType } from '$lib/editor/tools';
 	import SpriteEditor from '$lib/editor/sprite-editor.svelte';
 	import type { SpriteData } from '$lib/editor/sprite-editor.svelte';
+	import InventoryUI from '$lib/components/Inventory.svelte';
+	import { Inventory, createItem } from '$lib/engine/inventory';
 
 	let canvasContainer: HTMLDivElement;
 	let engine: GameEngine | null = $state(null);
@@ -16,7 +18,8 @@
 	let currentFloor = $state(0);
 	let totalFloors = $state(1);
 	let showSpriteEditor = $state(false);
-	let createdItems: SpriteData[] = $state([]);
+	let inventory = $state(new Inventory());
+	let itemCounter = $state(0);
 
 	const tools: { id: ToolType; label: string; key: string }[] = [
 		{ id: 'brush', label: 'Brush', key: 'B' },
@@ -217,6 +220,18 @@
 			</div>
 		{/if}
 
+		<!-- Inventory bar (bottom center, always visible) -->
+		{#if !showSpriteEditor}
+			<div class="pointer-events-auto absolute bottom-14 left-1/2 -translate-x-1/2">
+				<InventoryUI
+					{inventory}
+					onDrop={(slot) => {
+						inventory.removeItem(slot);
+					}}
+				/>
+			</div>
+		{/if}
+
 		<!-- Controls hint (bottom left) -->
 		<div class="pointer-events-auto absolute bottom-4 left-4">
 			<div class="rounded-lg bg-gray-800/60 px-3 py-1.5 text-[10px] text-gray-500 backdrop-blur">
@@ -236,7 +251,12 @@
 				width={16}
 				height={32}
 				onSave={(data) => {
-					createdItems = [...createdItems, data];
+					itemCounter++;
+					const item = createItem(`Item ${itemCounter}`, data);
+					const slot = inventory.addItem(item);
+					if (slot >= 0) {
+						inventory.selectSlot(slot);
+					}
 					showSpriteEditor = false;
 				}}
 				onClose={() => (showSpriteEditor = false)}
