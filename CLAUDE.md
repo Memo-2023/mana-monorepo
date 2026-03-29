@@ -62,7 +62,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 
 | Game | Description | Tech |
 |------|-------------|------|
-| **mana-games** | AI browser games platform (22+ games) | SvelteKit, NestJS, Gemini/Claude/GPT |
+| **arcade** | AI browser games platform (22+ games) | SvelteKit, NestJS, Gemini/Claude/GPT |
 | **voxelava** | Voxel game | SvelteKit |
 | **whopixels** | Phaser.js pixel game | Phaser, JavaScript |
 | **worldream** | World exploration game | SvelteKit |
@@ -153,7 +153,7 @@ manacore-monorepo/
 │   ├── uload/
 │   └── wisekeep/
 ├── games/                   # Game projects
-│   ├── mana-games/          # AI browser games platform (SvelteKit + NestJS)
+│   ├── arcade/          # AI browser games platform (SvelteKit + NestJS)
 │   ├── voxelava/            # Voxel game
 │   ├── whopixels/           # Phaser.js pixel game
 │   └── worldream/           # World exploration game

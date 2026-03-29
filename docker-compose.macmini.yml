@@ -1329,12 +1329,12 @@ services:
       retries: 3
       start_period: 20s
 
-  mana-games-web:
+  arcade-web:
     build:
       context: .
-      dockerfile: games/mana-games/apps/web/Dockerfile
-    image: mana-games-web:local
-    container_name: mana-app-mana-games-web
+      dockerfile: games/arcade/apps/web/Dockerfile
+    image: arcade-web:local
+    container_name: mana-app-arcade-web
     restart: always
     mem_limit: 128m
     depends_on:

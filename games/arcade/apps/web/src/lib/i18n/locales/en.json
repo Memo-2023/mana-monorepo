@@ -1,0 +1,66 @@
+{
+	"app": {
+		"name": "Arcade",
+		"loading": "Loading..."
+	},
+	"nav": {
+		"home": "Games",
+		"create": "Create",
+		"community": "Community",
+		"stats": "Statistics",
+		"settings": "Settings"
+	},
+	"home": {
+		"title": "Browser Games",
+		"subtitle": "22+ games to play right in your browser",
+		"search": "Search games...",
+		"noResults": "No games found",
+		"allGames": "All Games",
+		"favorites": "Favorites",
+		"recentlyPlayed": "Recently Played"
+	},
+	"game": {
+		"play": "Play",
+		"difficulty": "Difficulty",
+		"controls": "Controls",
+		"tags": "Tags",
+		"stats": "Statistics",
+		"highScore": "High Score",
+		"gamesPlayed": "Games Played",
+		"totalPlayTime": "Total Play Time",
+		"lastPlayed": "Last Played",
+		"back": "Back",
+		"fullscreen": "Fullscreen",
+		"editor": "View Code"
+	},
+	"create": {
+		"title": "Create Game",
+		"subtitle": "Describe your game and let AI generate it",
+		"prompt": "What kind of game should be created?",
+		"promptPlaceholder": "A neon snake game with particle effects...",
+		"generate": "Generate",
+		"generating": "Generating game...",
+		"model": "AI Model",
+		"iterate": "Improve",
+		"save": "Save",
+		"preview": "Preview"
+	},
+	"stats": {
+		"title": "Your Statistics",
+		"totalGames": "Games Played",
+		"totalTime": "Total Play Time",
+		"favoriteGame": "Favorite Game",
+		"noStats": "No statistics yet. Play some games!"
+	},
+	"difficulty": {
+		"Einfach": "Easy",
+		"Mittel": "Medium",
+		"Schwer": "Hard"
+	},
+	"time": {
+		"justNow": "Just now",
+		"minutesAgo": "{minutes} minutes ago",
+		"hoursAgo": "{hours} hours ago",
+		"daysAgo": "{days} days ago"
+	}
+}

@@ -2729,6 +2729,9 @@ importers:
       pixi.js:
         specifier: ^8.17.1
         version: 8.17.1
+      svelte-i18n:
+        specifier: ^4.0.1
+        version: 4.0.1(svelte@5.44.0)
       wavesurfer.js:
         specifier: ^7.8.0
         version: 7.12.1
@@ -3762,6 +3765,9 @@ importers:
       '@manacore/shared-auth':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth
+      '@manacore/shared-auth-stores':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-auth-stores
       '@manacore/shared-auth-ui':
         specifier: workspace:*
         version: link:../../../../packages/shared-auth-ui
@@ -5169,9 +5175,9 @@ importers:
         specifier: ^5.3.0
         version: 5.9.3
 
-  games/mana-games: {}
+  games/arcade: {}
 
-  games/mana-games/apps/backend:
+  games/arcade/apps/backend:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: ^0.65.0
@@ -5229,7 +5235,7 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
-  games/mana-games/apps/web:
+  games/arcade/apps/web:
     dependencies:
       '@manacore/feedback':
         specifier: workspace:*
@@ -33652,7 +33658,7 @@ snapshots:
       resolve-from: 5.0.0
     optionalDependencies:
       '@babel/runtime': 7.28.4
-      expo: 55.0.5(@babel/core@7.28.5)(@expo/dom-webview@55.0.3)(@expo/metro-runtime@6.1.2)(expo-router@55.0.5)(react-dom@19.2.0(react@19.2.0))(react-native-webview@13.12.2(react-native@0.83.2(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.2.0))(react@19.2.0))(react-native@0.83.2(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.2.0))(react@19.2.0)(typescript@5.3.3)
+      expo: 55.0.5(@babel/core@7.28.5)(@expo/dom-webview@55.0.3)(@expo/metro-runtime@6.1.2)(expo-router@55.0.5)(react-dom@19.2.4(react@19.2.4))(react-native-webview@13.12.2(react-native@0.84.1(@babel/core@7.28.5)(@types/react@19.2.14)(react@19.2.4))(react@19.2.4))(react-native@0.84.1(@babel/core@7.28.5)(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
