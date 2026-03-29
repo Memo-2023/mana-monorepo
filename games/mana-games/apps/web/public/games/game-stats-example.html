@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Stats Integration Example</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #00ff88;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+        
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+        }
+        
+        code {
+            color: #60a5fa;
+        }
+        
+        button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #00cc6a;
+        }
+        
+        .test-buttons {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Game Stats Integration Guide</h1>
+        
+        <div class="section">
+            <h2>1. Spiel laden</h2>
+            <p>Sende diese Nachricht wenn dein Spiel startet:</p>
+            <pre><code>window.parent.postMessage({
+    type: 'GAME_LOADED',
+    gameId: 'dein-spiel-slug'
+}, '*');</code></pre>
+        </div>
+        
+        <div class="section">
+            <h2>2. Score aktualisieren</h2>
+            <p>Sende diese Nachricht wenn sich der Score ändert:</p>
+            <pre><code>window.parent.postMessage({
+    type: 'GAME_EVENT',
+    gameId: 'dein-spiel-slug',
+    event: 'SCORE_UPDATE',
+    data: { score: 1250 }
+}, '*');</code></pre>
+        </div>
+        
+        <div class="section">
+            <h2>3. Game Over</h2>
+            <p>Sende diese Nachricht wenn das Spiel endet:</p>
+            <pre><code>window.parent.postMessage({
+    type: 'GAME_EVENT',
+    gameId: 'dein-spiel-slug',
+    event: 'GAME_OVER',
+    data: { score: 1250 }
+}, '*');</code></pre>
+        </div>
+        
+        <div class="section">
+            <h2>4. Achievement freischalten</h2>
+            <p>Sende diese Nachricht für Achievements:</p>
+            <pre><code>window.parent.postMessage({
+    type: 'GAME_EVENT',
+    gameId: 'dein-spiel-slug',
+    event: 'ACHIEVEMENT_UNLOCKED',
+    data: {
+        achievement: {
+            id: 'first-win',
+            name: 'Erster Sieg',
+            description: 'Gewinne dein erstes Spiel'
+        }
+    }
+}, '*');</code></pre>
+        </div>
+        
+        <div class="section">
+            <h2>5. Spiel beenden</h2>
+            <p>Optional: Sende diese Nachricht beim Verlassen:</p>
+            <pre><code>window.parent.postMessage({
+    type: 'GAME_ENDED',
+    gameId: 'dein-spiel-slug'
+}, '*');</code></pre>
+        </div>
+        
+        <div class="section">
+            <h2>Test-Buttons</h2>
+            <p>Teste die Integration mit diesen Buttons:</p>
+            <div class="test-buttons">
+                <button onclick="sendGameLoaded()">Game Loaded</button>
+                <button onclick="sendScore(100)">Score: 100</button>
+                <button onclick="sendScore(500)">Score: 500</button>
+                <button onclick="sendGameOver(750)">Game Over (750)</button>
+                <button onclick="sendAchievement()">Achievement</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Example game ID
+        const GAME_ID = 'test-game';
+        
+        // Send game loaded event on page load
+        window.addEventListener('load', () => {
+            window.parent.postMessage({
+                type: 'GAME_LOADED',
+                gameId: GAME_ID
+            }, '*');
+        });
+        
+        function sendGameLoaded() {
+            window.parent.postMessage({
+                type: 'GAME_LOADED',
+                gameId: GAME_ID
+            }, '*');
+            console.log('Sent: GAME_LOADED');
+        }
+        
+        function sendScore(score) {
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: GAME_ID,
+                event: 'SCORE_UPDATE',
+                data: { score }
+            }, '*');
+            console.log('Sent: SCORE_UPDATE', score);
+        }
+        
+        function sendGameOver(score) {
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: GAME_ID,
+                event: 'GAME_OVER',
+                data: { score }
+            }, '*');
+            console.log('Sent: GAME_OVER', score);
+        }
+        
+        function sendAchievement() {
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: GAME_ID,
+                event: 'ACHIEVEMENT_UNLOCKED',
+                data: {
+                    achievement: {
+                        id: 'test-achievement',
+                        name: 'Test Erfolg',
+                        description: 'Du hast den Test-Button gedrückt!'
+                    }
+                }
+            }, '*');
+            console.log('Sent: ACHIEVEMENT_UNLOCKED');
+        }
+    </script>
+</body>
+</html>

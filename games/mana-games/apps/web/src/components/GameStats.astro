@@ -1,0 +1,146 @@
+---
+import { statsService } from '../services/statsService';
+
+export interface Props {
+	gameId: string;
+	showDetails?: boolean;
+}
+
+const { gameId, showDetails = false } = Astro.props;
+const stats = statsService.getStats(gameId);
+---
+
+{
+	stats && (
+		<div class="game-stats">
+			<div class="stats-row">
+				{stats.highScore > 0 && (
+					<div class="stat-item highscore">
+						<span class="stat-icon">🏆</span>
+						<span class="stat-value">{stats.highScore.toLocaleString('de-DE')}</span>
+					</div>
+				)}
+
+				{stats.gamesPlayed > 0 && (
+					<div class="stat-item games-played">
+						<span class="stat-icon">🎮</span>
+						<span class="stat-value">{stats.gamesPlayed}x</span>
+					</div>
+				)}
+
+				{stats.totalPlayTime > 0 && (
+					<div class="stat-item play-time">
+						<span class="stat-icon">⏱️</span>
+						<span class="stat-value">{statsService.formatPlayTime(stats.totalPlayTime)}</span>
+					</div>
+				)}
+			</div>
+
+			{showDetails && stats.lastPlayed && (
+				<div class="last-played">
+					Zuletzt gespielt: {statsService.getRelativeTime(stats.lastPlayed)}
+				</div>
+			)}
+
+			{showDetails && stats.achievements && stats.achievements.length > 0 && (
+				<div class="achievements">
+					<h4>Achievements</h4>
+					<div class="achievement-list">
+						{stats.achievements.map((achievement) => (
+							<div class="achievement" title={achievement.description}>
+								<span class="achievement-icon">🏅</span>
+								<span class="achievement-name">{achievement.name}</span>
+							</div>
+						))}
+					</div>
+				</div>
+			)}
+		</div>
+	)
+}
+
+<style>
+	.game-stats {
+		margin-top: 0.5rem;
+		font-size: 0.85rem;
+	}
+
+	.stats-row {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.stat-item {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 12px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.stat-icon {
+		font-size: 0.9rem;
+	}
+
+	.stat-value {
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.highscore .stat-value {
+		color: #fbbf24;
+	}
+
+	.games-played .stat-value {
+		color: #60a5fa;
+	}
+
+	.play-time .stat-value {
+		color: #4ade80;
+	}
+
+	.last-played {
+		margin-top: 0.5rem;
+		color: var(--color-text-secondary);
+		font-size: 0.75rem;
+	}
+
+	.achievements {
+		margin-top: 1rem;
+	}
+
+	.achievements h4 {
+		margin: 0 0 0.5rem 0;
+		font-size: 0.9rem;
+		color: var(--color-text);
+	}
+
+	.achievement-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.achievement {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		background: rgba(255, 215, 0, 0.1);
+		border: 1px solid rgba(255, 215, 0, 0.3);
+		border-radius: 8px;
+		font-size: 0.75rem;
+	}
+
+	.achievement-icon {
+		font-size: 0.8rem;
+	}
+
+	.achievement-name {
+		color: #fbbf24;
+		font-weight: 500;
+	}
+</style>

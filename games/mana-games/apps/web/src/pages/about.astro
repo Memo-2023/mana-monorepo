@@ -1,0 +1,684 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+import { games } from '../data/games';
+
+// Statistiken berechnen
+const totalGames = games.length;
+const totalLines = games.reduce((sum, game) => sum + (game.codeStats?.total || 0), 0);
+const genres = [...new Set(games.flatMap((game) => game.tags))].length;
+const complexityBreakdown = {
+	Minimal: games.filter((g) => g.complexity === 'Minimal').length,
+	Einfach: games.filter((g) => g.complexity === 'Einfach').length,
+	Mittel: games.filter((g) => g.complexity === 'Mittel').length,
+	Komplex: games.filter((g) => g.complexity === 'Komplex').length,
+};
+---
+
+<Layout title="Über uns">
+	<div class="about-hero">
+		<div class="hero-background">
+			<div class="floating-element element-1"></div>
+			<div class="floating-element element-2"></div>
+			<div class="floating-element element-3"></div>
+		</div>
+		<div class="hero-content">
+			<h1 class="hero-title">
+				<span class="title-line">Mehr als nur</span>
+				<span class="title-highlight">Spiele</span>
+			</h1>
+			<p class="hero-subtitle">Eine Plattform für Kreativität, Lernen und Spaß</p>
+		</div>
+	</div>
+
+	<div class="about-container">
+		<!-- Mission Section -->
+		<section class="mission-section">
+			<div class="section-header">
+				<span class="section-number">01</span>
+				<h2>Unsere Mission</h2>
+			</div>
+			<div class="mission-grid">
+				<div class="mission-card">
+					<div class="card-icon">🎮</div>
+					<h3>Spielen ohne Grenzen</h3>
+					<p>
+						Keine Downloads, keine Installationen. Einfach spielen - direkt im Browser, auf jedem
+						Gerät.
+					</p>
+				</div>
+				<div class="mission-card">
+					<div class="card-icon">🎨</div>
+					<h3>Kreativität fördern</h3>
+					<p>
+						Jedes Spiel ist ein Kunstwerk aus Code. Von minimalistisch bis komplex - wir zeigen die
+						Vielfalt der Spieleentwicklung.
+					</p>
+				</div>
+				<div class="mission-card">
+					<div class="card-icon">📚</div>
+					<h3>Lernen durch Code</h3>
+					<p>
+						Unsere Spiele sind vollständig dokumentiert und dienen als Lernressource für angehende
+						Entwickler.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Stats Section -->
+		<section class="stats-section">
+			<div class="stats-grid">
+				<div class="stat-card">
+					<div class="stat-number">{totalGames}</div>
+					<div class="stat-label">Spiele</div>
+					<div class="stat-detail">und es werden mehr</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-number">{totalLines.toLocaleString('de-DE')}</div>
+					<div class="stat-label">Zeilen Code</div>
+					<div class="stat-detail">handgeschrieben</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-number">{genres}</div>
+					<div class="stat-label">Genres</div>
+					<div class="stat-detail">für jeden Geschmack</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-number">100%</div>
+					<div class="stat-label">Open Source</div>
+					<div class="stat-detail">lerne vom Code</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Games Showcase -->
+		<section class="showcase-section">
+			<div class="section-header">
+				<span class="section-number">02</span>
+				<h2>Unser Spielekatalog</h2>
+			</div>
+			<div class="showcase-content">
+				<div class="complexity-chart">
+					<h3>Komplexität unserer Spiele</h3>
+					<div class="chart-bars">
+						{
+							Object.entries(complexityBreakdown).map(([level, count]) => (
+								<div class="chart-bar">
+									<div class="bar-fill" style={`height: ${(count / totalGames) * 100}%`}>
+										<span class="bar-count">{count}</span>
+									</div>
+									<span class="bar-label">{level}</span>
+								</div>
+							))
+						}
+					</div>
+				</div>
+				<div class="featured-games">
+					<h3>Beliebte Kategorien</h3>
+					<div class="category-tags">
+						<span class="tag">🕹️ Arcade</span>
+						<span class="tag">🧩 Puzzle</span>
+						<span class="tag">🚀 Action</span>
+						<span class="tag">🎵 Rhythmus</span>
+						<span class="tag">🏃 Jump'n'Run</span>
+						<span class="tag">🗼 Tower Defense</span>
+					</div>
+					<p class="showcase-text">
+						Von klassischen Arcade-Spielen wie Snake bis zu innovativen Physik-Puzzles wie Gravity
+						Painter - unsere Sammlung wächst stetig. Jedes Spiel ist mit Liebe zum Detail entwickelt
+						und optimiert für flüssige Performance auf allen Geräten.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Technology Section -->
+		<section class="tech-section">
+			<div class="section-header">
+				<span class="section-number">03</span>
+				<h2>Moderne Technologie</h2>
+			</div>
+			<div class="tech-grid">
+				<div class="tech-card">
+					<div class="tech-icon">
+						<span>HTML5</span>
+					</div>
+					<h4>Canvas API</h4>
+					<p>Flüssige 60 FPS Grafiken direkt im Browser</p>
+				</div>
+				<div class="tech-card">
+					<div class="tech-icon">
+						<span>JS</span>
+					</div>
+					<h4>Vanilla JavaScript</h4>
+					<p>Keine Dependencies, pure Performance</p>
+				</div>
+				<div class="tech-card">
+					<div class="tech-icon">
+						<span>PWA</span>
+					</div>
+					<h4>Progressive Web App</h4>
+					<p>Installierbar, offline spielbar</p>
+				</div>
+				<div class="tech-card">
+					<div class="tech-icon">
+						<span>📱</span>
+					</div>
+					<h4>Responsive Design</h4>
+					<p>Perfekt auf jedem Bildschirm</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Philosophy Section -->
+		<section class="philosophy-section">
+			<div class="philosophy-content">
+				<h2>Unsere Philosophie</h2>
+				<blockquote>
+					"Spiele sollten mehr sein als nur Unterhaltung. Sie sind interaktive Kunst, technische
+					Meisterwerke und Lernwerkzeuge in einem."
+				</blockquote>
+				<div class="philosophy-points">
+					<div class="point">
+						<span class="point-icon">✨</span>
+						<div>
+							<strong>Qualität vor Quantität</strong>
+							<p>Jedes Spiel wird sorgfältig entwickelt und getestet</p>
+						</div>
+					</div>
+					<div class="point">
+						<span class="point-icon">🌍</span>
+						<div>
+							<strong>Zugänglichkeit für alle</strong>
+							<p>Kostenlos, werbefrei und ohne versteckte Kosten</p>
+						</div>
+					</div>
+					<div class="point">
+						<span class="point-icon">💡</span>
+						<div>
+							<strong>Innovation fördern</strong>
+							<p>Neue Spielkonzepte und kreative Mechaniken</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- CTA Section -->
+		<section class="cta-section">
+			<div class="cta-content">
+				<h2>Werde Teil der Community</h2>
+				<p>
+					Hast du Ideen für neue Spiele? Möchtest du zur Plattform beitragen? Oder einfach nur
+					Feedback geben? Wir freuen uns von dir zu hören!
+				</p>
+				<div class="cta-buttons">
+					<Button href="/" variant="primary" size="large"> Spiele entdecken </Button>
+					<Button href="/stats" variant="accent" size="large"> Deine Statistiken </Button>
+				</div>
+			</div>
+		</section>
+	</div>
+</Layout>
+
+<style>
+	/* Hero Section */
+	.about-hero {
+		position: relative;
+		min-height: 50vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		margin-bottom: 4rem;
+	}
+
+	.hero-background {
+		position: absolute;
+		inset: 0;
+		opacity: 0.1;
+	}
+
+	.floating-element {
+		position: absolute;
+		border: 2px solid var(--color-accent);
+		border-radius: 50%;
+		animation: float 20s ease-in-out infinite;
+	}
+
+	.element-1 {
+		width: 300px;
+		height: 300px;
+		top: -100px;
+		left: -100px;
+		animation-delay: 0s;
+	}
+
+	.element-2 {
+		width: 200px;
+		height: 200px;
+		bottom: -50px;
+		right: -50px;
+		animation-delay: 5s;
+	}
+
+	.element-3 {
+		width: 150px;
+		height: 150px;
+		top: 50%;
+		left: 80%;
+		animation-delay: 10s;
+	}
+
+	@keyframes float {
+		0%,
+		100% {
+			transform: translate(0, 0) rotate(0deg);
+		}
+		33% {
+			transform: translate(30px, -30px) rotate(120deg);
+		}
+		66% {
+			transform: translate(-20px, 20px) rotate(240deg);
+		}
+	}
+
+	.hero-content {
+		position: relative;
+		z-index: 1;
+		text-align: center;
+	}
+
+	.hero-title {
+		font-size: clamp(3rem, 8vw, 5rem);
+		font-weight: 900;
+		line-height: 1;
+		margin-bottom: 1rem;
+	}
+
+	.title-line {
+		display: block;
+		opacity: 0;
+		transform: translateY(20px);
+		animation: fadeInUp 0.6s ease forwards;
+	}
+
+	.title-highlight {
+		display: block;
+		background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		opacity: 0;
+		transform: translateY(20px);
+		animation: fadeInUp 0.6s ease 0.2s forwards;
+	}
+
+	.hero-subtitle {
+		font-size: 1.5rem;
+		color: var(--color-text-secondary);
+		opacity: 0;
+		transform: translateY(20px);
+		animation: fadeInUp 0.6s ease 0.4s forwards;
+	}
+
+	@keyframes fadeInUp {
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* Container */
+	.about-container {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	/* Sections */
+	section {
+		margin-bottom: 6rem;
+		opacity: 0;
+		transform: translateY(30px);
+		animation: fadeInUp 0.8s ease forwards;
+	}
+
+	.section-header {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 3rem;
+	}
+
+	.section-number {
+		font-size: 3rem;
+		font-weight: 900;
+		color: var(--color-accent);
+		opacity: 0.3;
+	}
+
+	h2 {
+		font-size: 2.5rem;
+		font-weight: 900;
+	}
+
+	/* Mission Section */
+	.mission-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 2rem;
+	}
+
+	.mission-card {
+		background: var(--color-bg-secondary);
+		border: 1px solid var(--color-border);
+		border-radius: 1rem;
+		padding: 2rem;
+		transition: all 0.3s ease;
+	}
+
+	.mission-card:hover {
+		transform: translateY(-5px);
+		border-color: var(--color-accent);
+		box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+	}
+
+	.card-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+	}
+
+	.mission-card h3 {
+		color: var(--color-text);
+		margin-bottom: 0.5rem;
+	}
+
+	.mission-card p {
+		color: var(--color-text-secondary);
+		line-height: 1.6;
+	}
+
+	/* Stats Section */
+	.stats-section {
+		background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), transparent);
+		border-radius: 2rem;
+		padding: 3rem;
+		margin: 4rem 0;
+	}
+
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 2rem;
+	}
+
+	.stat-card {
+		text-align: center;
+	}
+
+	.stat-number {
+		font-size: 3rem;
+		font-weight: 900;
+		background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.stat-label {
+		font-size: 1.2rem;
+		color: var(--color-text);
+		margin: 0.5rem 0;
+	}
+
+	.stat-detail {
+		font-size: 0.9rem;
+		color: var(--color-text-secondary);
+	}
+
+	/* Showcase Section */
+	.showcase-content {
+		display: grid;
+		grid-template-columns: 1fr 2fr;
+		gap: 3rem;
+		align-items: start;
+	}
+
+	.complexity-chart {
+		background: var(--color-bg-secondary);
+		border: 1px solid var(--color-border);
+		border-radius: 1rem;
+		padding: 2rem;
+	}
+
+	.complexity-chart h3 {
+		margin-bottom: 1.5rem;
+		color: var(--color-text);
+	}
+
+	.chart-bars {
+		display: flex;
+		justify-content: space-around;
+		align-items: flex-end;
+		height: 200px;
+		gap: 1rem;
+	}
+
+	.chart-bar {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.bar-fill {
+		width: 100%;
+		background: linear-gradient(to top, var(--color-accent), var(--color-accent-secondary));
+		border-radius: 0.5rem 0.5rem 0 0;
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		padding-top: 0.5rem;
+		transition: height 0.5s ease;
+	}
+
+	.bar-count {
+		color: #000;
+		font-weight: 700;
+	}
+
+	.bar-label {
+		font-size: 0.9rem;
+		color: var(--color-text-secondary);
+	}
+
+	.featured-games h3 {
+		margin-bottom: 1rem;
+		color: var(--color-text);
+	}
+
+	.category-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.tag {
+		background: rgba(0, 255, 136, 0.1);
+		border: 1px solid var(--color-accent);
+		color: var(--color-accent);
+		padding: 0.5rem 1rem;
+		border-radius: 2rem;
+		font-size: 0.9rem;
+	}
+
+	.showcase-text {
+		color: var(--color-text-secondary);
+		line-height: 1.8;
+	}
+
+	/* Tech Section */
+	.tech-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 2rem;
+	}
+
+	.tech-card {
+		background: var(--color-bg-secondary);
+		border: 1px solid var(--color-border);
+		border-radius: 1rem;
+		padding: 2rem;
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+
+	.tech-card:hover {
+		transform: translateY(-5px);
+		border-color: var(--color-accent);
+	}
+
+	.tech-icon {
+		width: 80px;
+		height: 80px;
+		margin: 0 auto 1rem;
+		background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
+		border-radius: 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 900;
+		font-size: 1.5rem;
+		color: #000;
+	}
+
+	.tech-card h4 {
+		color: var(--color-text);
+		margin-bottom: 0.5rem;
+	}
+
+	.tech-card p {
+		color: var(--color-text-secondary);
+		font-size: 0.9rem;
+	}
+
+	/* Philosophy Section */
+	.philosophy-section {
+		background: var(--color-bg-secondary);
+		border-radius: 2rem;
+		padding: 4rem;
+		margin: 4rem 0;
+	}
+
+	.philosophy-content h2 {
+		text-align: center;
+		margin-bottom: 2rem;
+	}
+
+	blockquote {
+		font-size: 1.5rem;
+		font-style: italic;
+		text-align: center;
+		color: var(--color-text-secondary);
+		margin: 2rem 0 3rem;
+		padding: 0 2rem;
+	}
+
+	.philosophy-points {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.point {
+		display: flex;
+		gap: 1.5rem;
+		align-items: start;
+	}
+
+	.point-icon {
+		font-size: 2rem;
+		flex-shrink: 0;
+	}
+
+	.point strong {
+		display: block;
+		color: var(--color-text);
+		margin-bottom: 0.25rem;
+	}
+
+	.point p {
+		color: var(--color-text-secondary);
+	}
+
+	/* CTA Section */
+	.cta-section {
+		text-align: center;
+		padding: 4rem;
+		background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), transparent);
+		border-radius: 2rem;
+	}
+
+	.cta-content h2 {
+		margin-bottom: 1rem;
+	}
+
+	.cta-content p {
+		font-size: 1.2rem;
+		color: var(--color-text-secondary);
+		margin-bottom: 2rem;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.cta-buttons {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.hero-title {
+			font-size: 3rem;
+		}
+
+		.hero-subtitle {
+			font-size: 1.2rem;
+		}
+
+		section {
+			margin-bottom: 4rem;
+		}
+
+		.section-header {
+			flex-direction: column;
+			text-align: center;
+		}
+
+		h2 {
+			font-size: 2rem;
+		}
+
+		.showcase-content {
+			grid-template-columns: 1fr;
+		}
+
+		.philosophy-section {
+			padding: 2rem;
+		}
+
+		blockquote {
+			font-size: 1.2rem;
+		}
+
+		.cta-section {
+			padding: 2rem;
+		}
+	}
+</style>

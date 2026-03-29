@@ -1,0 +1,356 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GameCard from '../components/GameCard.astro';
+import { games } from '../data/games';
+
+// Filter community games
+const communityGames = games.filter((game) => 'community' in game && game.community === true);
+
+// Try to load additional community games from JSON file
+let additionalCommunityGames = [];
+// TODO: When community-games.json exists, load it here
+// For now, we'll just use an empty array until the first game is submitted
+
+// Combine all community games
+const allCommunityGames = [...communityGames, ...additionalCommunityGames];
+---
+
+<Layout title="Community Spiele - MANA Games" description="Von der Community erstellte Spiele">
+	<main>
+		<div class="page-header">
+			<h1>Community Spiele</h1>
+			<p>Entdecke Spiele, die von unserer talentierten Community erstellt wurden!</p>
+		</div>
+
+		<div class="community-info">
+			<div class="info-card">
+				<h3>🎮 Werde Teil der Community!</h3>
+				<p>Hast du ein eigenes Spiel erstellt? Reiche es ein und teile es mit anderen Spielern!</p>
+				<a href="/submit" class="submit-button">
+					<span class="icon">📤</span>
+					Spiel einreichen
+				</a>
+			</div>
+
+			<div class="stats-grid">
+				<div class="stat-card">
+					<div class="stat-number">{allCommunityGames.length}</div>
+					<div class="stat-label">Community Spiele</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-number">🏆</div>
+					<div class="stat-label">Top bewertete Spiele</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-number">👥</div>
+					<div class="stat-label">Aktive Entwickler</div>
+				</div>
+			</div>
+		</div>
+
+		{
+			allCommunityGames.length > 0 ? (
+				<div class="games-section">
+					<h2>Eingereichte Spiele</h2>
+					<div class="games-grid">
+						{allCommunityGames.map((game) => (
+							<div class="community-game-card">
+								<GameCard game={game} />
+								{game.author && (
+									<div class="author-info">
+										<span class="author-label">Von:</span>
+										<span class="author-name">{game.author}</span>
+									</div>
+								)}
+								{game.submittedAt && (
+									<div class="submission-date">
+										Eingereicht am {new Date(game.submittedAt).toLocaleDateString('de-DE')}
+									</div>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
+			) : (
+				<div class="empty-state">
+					<div class="empty-icon">🎯</div>
+					<h2>Noch keine Community-Spiele</h2>
+					<p>Sei der Erste, der ein Spiel einreicht!</p>
+					<a href="/submit" class="submit-button">
+						<span class="icon">📤</span>
+						Erstes Spiel einreichen
+					</a>
+				</div>
+			)
+		}
+
+		<div class="pending-section">
+			<h2>🔄 In Prüfung</h2>
+			<p>Diese Spiele werden gerade von unserem Team geprüft:</p>
+			<div class="pending-list" id="pendingList">
+				<div class="loading">Lade ausstehende Einreichungen...</div>
+			</div>
+		</div>
+	</main>
+</Layout>
+
+<style>
+	.community-info {
+		display: grid;
+		gap: 2rem;
+		margin-bottom: 3rem;
+	}
+
+	.info-card {
+		background: #1a1a1a;
+		border: 1px solid #2a2a2a;
+		border-radius: 8px;
+		padding: 2rem;
+		text-align: center;
+	}
+
+	.info-card h3 {
+		color: #00ff88;
+		margin-bottom: 1rem;
+		font-size: 1.3rem;
+	}
+
+	.info-card p {
+		margin-bottom: 1.5rem;
+		color: #cccccc;
+	}
+
+	.submit-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: #00ff88;
+		color: #0a0a0a;
+		padding: 0.75rem 1.5rem;
+		border-radius: 4px;
+		text-decoration: none;
+		font-weight: 500;
+		transition: all 0.3s ease;
+	}
+
+	.submit-button:hover {
+		background: #00cc6a;
+		transform: translateY(-2px);
+	}
+
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: 1rem;
+		margin-top: 2rem;
+	}
+
+	.stat-card {
+		background: #1a1a1a;
+		border: 1px solid #2a2a2a;
+		border-radius: 8px;
+		padding: 1.5rem;
+		text-align: center;
+	}
+
+	.stat-number {
+		font-size: 2rem;
+		font-weight: bold;
+		color: #00ff88;
+		margin-bottom: 0.5rem;
+	}
+
+	.stat-label {
+		font-size: 0.9rem;
+		color: #888;
+	}
+
+	.games-section {
+		margin-bottom: 3rem;
+	}
+
+	.games-section h2 {
+		color: #00ff88;
+		margin-bottom: 1.5rem;
+	}
+
+	.games-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 2rem;
+	}
+
+	.community-game-card {
+		position: relative;
+	}
+
+	.author-info {
+		margin-top: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: rgba(0, 255, 136, 0.1);
+		border: 1px solid rgba(0, 255, 136, 0.3);
+		border-radius: 4px;
+		font-size: 0.9rem;
+	}
+
+	.author-label {
+		color: #888;
+		margin-right: 0.5rem;
+	}
+
+	.author-name {
+		color: #00ff88;
+		font-weight: 500;
+	}
+
+	.submission-date {
+		font-size: 0.8rem;
+		color: #666;
+		margin-top: 0.5rem;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: 4rem 2rem;
+		background: #1a1a1a;
+		border: 1px solid #2a2a2a;
+		border-radius: 8px;
+		margin: 2rem 0;
+	}
+
+	.empty-icon {
+		font-size: 4rem;
+		margin-bottom: 1rem;
+	}
+
+	.empty-state h2 {
+		color: #ffffff;
+		margin-bottom: 1rem;
+	}
+
+	.empty-state p {
+		color: #888;
+		margin-bottom: 2rem;
+	}
+
+	.pending-section {
+		margin-top: 3rem;
+		background: #1a1a1a;
+		border: 1px solid #2a2a2a;
+		border-radius: 8px;
+		padding: 2rem;
+	}
+
+	.pending-section h2 {
+		color: #00ff88;
+		margin-bottom: 1rem;
+	}
+
+	.pending-section p {
+		color: #888;
+		margin-bottom: 1.5rem;
+	}
+
+	.pending-list {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.pending-item {
+		background: #0a0a0a;
+		border: 1px solid #2a2a2a;
+		border-radius: 4px;
+		padding: 1rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.pending-info h4 {
+		color: #ffffff;
+		margin-bottom: 0.25rem;
+	}
+
+	.pending-info p {
+		font-size: 0.9rem;
+		color: #888;
+		margin: 0;
+	}
+
+	.pr-link {
+		color: #00ff88;
+		text-decoration: none;
+		font-size: 0.9rem;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.pr-link:hover {
+		text-decoration: underline;
+	}
+
+	.loading {
+		text-align: center;
+		color: #888;
+		padding: 2rem;
+	}
+
+	@media (max-width: 768px) {
+		.games-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.stats-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+<script>
+	// Fetch pending PRs from GitHub
+	async function fetchPendingGames() {
+		const pendingList = document.getElementById('pendingList');
+
+		try {
+			// For now, we'll show a placeholder since we need GitHub API access
+			// In production, this would fetch actual PRs
+			pendingList.innerHTML = `
+        <div class="pending-item">
+          <div class="pending-info">
+            <p>Ausstehende Einreichungen werden hier angezeigt, sobald das GitHub-Repository konfiguriert ist.</p>
+          </div>
+        </div>
+      `;
+
+			// Example of what it would look like with real data:
+			/*
+      const response = await fetch('/.netlify/functions/get-pending-games');
+      const pendingGames = await response.json();
+      
+      if (pendingGames.length === 0) {
+        pendingList.innerHTML = '<p style="color: #888; text-align: center;">Keine ausstehenden Einreichungen</p>';
+      } else {
+        pendingList.innerHTML = pendingGames.map(game => `
+          <div class="pending-item">
+            <div class="pending-info">
+              <h4>${game.title}</h4>
+              <p>Von ${game.author} • ${new Date(game.submittedAt).toLocaleDateString('de-DE')}</p>
+            </div>
+            <a href="${game.prUrl}" target="_blank" class="pr-link">
+              PR #${game.prNumber} →
+            </a>
+          </div>
+        `).join('');
+      }
+      */
+		} catch (error) {
+			console.error('Error fetching pending games:', error);
+			pendingList.innerHTML =
+				'<p style="color: #ff4444;">Fehler beim Laden der ausstehenden Spiele</p>';
+		}
+	}
+
+	// Load pending games on page load
+	fetchPendingGames();
+</script>

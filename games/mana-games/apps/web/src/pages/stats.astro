@@ -1,0 +1,1515 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { games } from '../data/games';
+---
+
+<Layout title="Meine Statistiken">
+	<div class="stats-page">
+		<h1>Meine Spielstatistiken</h1>
+
+		<div id="stats-container">
+			<!-- Wird von JavaScript gefüllt -->
+			<div class="loading">Lade Statistiken...</div>
+		</div>
+	</div>
+</Layout>
+
+<script define:vars={{ games }}>
+	// Stats service functions
+	const statsService = {
+		getStoredStats() {
+			try {
+				const stored = localStorage.getItem('mana-games-stats');
+				return stored ? JSON.parse(stored) : {};
+			} catch (error) {
+				console.error('Error reading stats:', error);
+				return {};
+			}
+		},
+
+		formatPlayTime(seconds) {
+			const hours = Math.floor(seconds / 3600);
+			const minutes = Math.floor((seconds % 3600) / 60);
+
+			if (hours > 0) {
+				return `${hours}h ${minutes}m`;
+			}
+			return `${minutes}m`;
+		},
+
+		getRelativeTime(dateString) {
+			const date = new Date(dateString);
+			const now = new Date();
+			const diffMs = now.getTime() - date.getTime();
+			const diffMins = Math.floor(diffMs / 60000);
+			const diffHours = Math.floor(diffMs / 3600000);
+			const diffDays = Math.floor(diffMs / 86400000);
+
+			if (diffMins < 1) return 'Gerade eben';
+			if (diffMins < 60) return `Vor ${diffMins} Minuten`;
+			if (diffHours < 24) return `Vor ${diffHours} Stunden`;
+			if (diffDays < 7) return `Vor ${diffDays} Tagen`;
+
+			return date.toLocaleDateString('de-DE');
+		},
+
+		formatScore(gameId, score) {
+			// Für Click Race: Zeit in Sekunden anzeigen
+			if (gameId === 'click-race') {
+				return `${(score / 1000).toFixed(2)}s`;
+			}
+			return score.toLocaleString('de-DE');
+		},
+	};
+
+	// Load stats on page load with performance optimization
+	window.addEventListener('DOMContentLoaded', () => {
+		const container = document.getElementById('stats-container');
+		const allStats = statsService.getStoredStats();
+		const statsArray = Object.entries(allStats);
+
+		// Use requestAnimationFrame for smoother rendering
+		requestAnimationFrame(() => {
+			// Calculate global stats
+			const totalGamesPlayed = statsArray.reduce((sum, [_, stat]) => sum + stat.gamesPlayed, 0);
+			const totalPlayTime = statsArray.reduce((sum, [_, stat]) => sum + stat.totalPlayTime, 0);
+
+			let favoriteGameId = null;
+			let maxPlays = 0;
+			statsArray.forEach(([gameId, stat]) => {
+				if (stat.gamesPlayed > maxPlays) {
+					maxPlays = stat.gamesPlayed;
+					favoriteGameId = gameId;
+				}
+			});
+
+			const favoriteGame = games.find((g) => g.slug === favoriteGameId);
+
+			// Build HTML
+			let html = `
+      <section class="global-stats">
+        <div class="stat-card total-games">
+          <div class="stat-icon">🎮</div>
+          <div class="stat-content">
+            <div class="stat-number">${totalGamesPlayed}</div>
+            <div class="stat-label">Spiele gespielt</div>
+          </div>
+        </div>
+        
+        <div class="stat-card total-time">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-content">
+            <div class="stat-number">${statsService.formatPlayTime(totalPlayTime)}</div>
+            <div class="stat-label">Gesamtspielzeit</div>
+          </div>
+        </div>
+        
+        ${
+					favoriteGame
+						? `
+          <div class="stat-card favorite">
+            <div class="stat-icon">❤️</div>
+            <div class="stat-content">
+              <div class="stat-number">${favoriteGame.title}</div>
+              <div class="stat-label">Lieblingsspiel</div>
+            </div>
+          </div>
+        `
+						: ''
+				}
+        
+        <div class="stat-card games-tried">
+          <div class="stat-icon">📊</div>
+          <div class="stat-content">
+            <div class="stat-number">${statsArray.length}/${games.length}</div>
+            <div class="stat-label">Spiele ausprobiert</div>
+          </div>
+        </div>
+      </section>
+    `;
+
+			if (statsArray.length > 0) {
+				html += `
+        <section class="games-stats">
+          <h2>Spieleübersicht</h2>
+          
+          <!-- Tabellen-Ansicht -->
+          <div class="table-controls">
+            <div class="view-toggle">
+              <button class="view-btn active" data-view="table">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <rect x="1" y="1" width="14" height="3" rx="0.5"/>
+                  <rect x="1" y="6" width="14" height="3" rx="0.5"/>
+                  <rect x="1" y="11" width="14" height="3" rx="0.5"/>
+                </svg>
+                Tabelle
+              </button>
+              <button class="view-btn" data-view="cards">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <rect x="1" y="1" width="6" height="6" rx="0.5"/>
+                  <rect x="9" y="1" width="6" height="6" rx="0.5"/>
+                  <rect x="1" y="9" width="6" height="6" rx="0.5"/>
+                  <rect x="9" y="9" width="6" height="6" rx="0.5"/>
+                </svg>
+                Karten
+              </button>
+            </div>
+            <div class="sort-control">
+              <label for="sort-select">Sortieren nach:</label>
+              <select id="sort-select" class="sort-select">
+                <option value="gamesPlayed">Meistgespielt</option>
+                <option value="highScore">Highscore</option>
+                <option value="totalPlayTime">Spielzeit</option>
+                <option value="lastPlayed">Zuletzt gespielt</option>
+                <option value="name">Name</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Tabellen-Ansicht -->
+          <div class="table-container" id="table-view">
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th class="th-game">Spiel</th>
+                  <th class="th-numeric sortable" data-sort="gamesPlayed">
+                    Gespielt
+                    <span class="sort-icon">↓</span>
+                  </th>
+                  <th class="th-numeric sortable" data-sort="highScore">
+                    Highscore
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th class="th-numeric sortable" data-sort="totalPlayTime">
+                    Spielzeit
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th class="th-date sortable" data-sort="lastPlayed">
+                    Zuletzt gespielt
+                    <span class="sort-icon"></span>
+                  </th>
+                  <th class="th-achievements">Achievements</th>
+                  <th class="th-action">Aktion</th>
+                </tr>
+              </thead>
+              <tbody id="stats-table-body">
+      `;
+
+				// Sort by games played initially
+				statsArray.sort((a, b) => b[1].gamesPlayed - a[1].gamesPlayed);
+
+				statsArray.forEach(([gameId, stat]) => {
+					const gameInfo = games.find((g) => g.slug === gameId);
+					if (gameInfo) {
+						html += `
+            <tr data-game-id="${gameId}" data-games-played="${stat.gamesPlayed}" data-high-score="${stat.highScore}" data-total-play-time="${stat.totalPlayTime}" data-last-played="${stat.lastPlayed}" data-name="${gameInfo.title}">
+              <td class="td-game">
+                <div class="game-cell">
+                  ${gameInfo.thumbnail ? `<img src="${gameInfo.thumbnail}" alt="${gameInfo.title}" class="game-thumb-small" />` : '<div class="game-thumb-placeholder">🎮</div>'}
+                  <span class="game-name">${gameInfo.title}</span>
+                </div>
+              </td>
+              <td class="td-numeric">
+                <span class="stat-value">${stat.gamesPlayed}x</span>
+              </td>
+              <td class="td-numeric">
+                <span class="stat-value highlight-score">${statsService.formatScore(gameId, stat.highScore)}</span>
+              </td>
+              <td class="td-numeric">
+                <span class="stat-value">${statsService.formatPlayTime(stat.totalPlayTime)}</span>
+              </td>
+              <td class="td-date">
+                <span class="date-value">${statsService.getRelativeTime(stat.lastPlayed)}</span>
+              </td>
+              <td class="td-achievements">
+                ${
+									stat.achievements && stat.achievements.length > 0
+										? `
+                  <div class="achievements-compact">
+                    <span class="achievement-count">${stat.achievements.length} 🏅</span>
+                    <div class="achievements-tooltip">
+                      ${stat.achievements
+												.map(
+													(achievement) => `
+                        <div class="tooltip-achievement">
+                          <span class="tooltip-icon">🏅</span>
+                          <div>
+                            <div class="tooltip-name">${achievement.name}</div>
+                            <div class="tooltip-desc">${achievement.description}</div>
+                          </div>
+                        </div>
+                      `
+												)
+												.join('')}
+                    </div>
+                  </div>
+                `
+										: '<span class="no-achievements">-</span>'
+								}
+              </td>
+              <td class="td-action">
+                <a href="/games/${gameId}" class="play-btn-small">
+                  Spielen →
+                </a>
+              </td>
+            </tr>
+          `;
+					}
+				});
+
+				html += `
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Karten-Ansicht (versteckt) -->
+          <div class="games-list" id="cards-view" style="display: none;">
+      `;
+
+				// Karten-Ansicht bleibt unverändert
+				statsArray.forEach(([gameId, stat]) => {
+					const gameInfo = games.find((g) => g.slug === gameId);
+					if (gameInfo) {
+						html += `
+            <div class="game-stat-card" data-game-id="${gameId}" data-games-played="${stat.gamesPlayed}" data-high-score="${stat.highScore}" data-total-play-time="${stat.totalPlayTime}" data-last-played="${stat.lastPlayed}" data-name="${gameInfo.title}">
+              <div class="game-header">
+                ${gameInfo.thumbnail ? `<img src="${gameInfo.thumbnail}" alt="${gameInfo.title}" class="game-thumb" />` : ''}
+                <div class="game-info">
+                  <h3>${gameInfo.title}</h3>
+                  <div class="game-meta">
+                    <span class="last-played">
+                      Zuletzt: ${statsService.getRelativeTime(stat.lastPlayed)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="game-stats-grid">
+                <div class="mini-stat">
+                  <span class="mini-label">Highscore</span>
+                  <span class="mini-value">${statsService.formatScore(gameId, stat.highScore)}</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-label">Gespielt</span>
+                  <span class="mini-value">${stat.gamesPlayed}x</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-label">Spielzeit</span>
+                  <span class="mini-value">${statsService.formatPlayTime(stat.totalPlayTime)}</span>
+                </div>
+              </div>
+              
+              ${
+								stat.achievements && stat.achievements.length > 0
+									? `
+                <div class="achievements-section">
+                  <h4>Achievements (${stat.achievements.length})</h4>
+                  <div class="achievement-badges">
+                    ${stat.achievements
+											.map(
+												(achievement) => `
+                      <div class="achievement-badge" title="${achievement.description}">
+                        🏅 ${achievement.name}
+                      </div>
+                    `
+											)
+											.join('')}
+                  </div>
+                </div>
+              `
+									: ''
+							}
+              
+              <a href="/games/${gameId}" class="play-again-btn">
+                Nochmal spielen →
+              </a>
+            </div>
+          `;
+					}
+				});
+
+				html += `
+          </div>
+        </section>
+      `;
+			} else {
+				html += `
+        <section class="empty-state">
+          <p>Du hast noch keine Spiele gespielt. Probiere eines aus!</p>
+          <a href="/" class="cta-button">Zu den Spielen</a>
+        </section>
+      `;
+			}
+
+			container.innerHTML = html;
+
+			// View Toggle
+			const viewBtns = document.querySelectorAll('.view-btn');
+			const tableView = document.getElementById('table-view');
+			const cardsView = document.getElementById('cards-view');
+
+			viewBtns.forEach((btn) => {
+				btn.addEventListener('click', () => {
+					const view = btn.getAttribute('data-view');
+
+					viewBtns.forEach((b) => b.classList.remove('active'));
+					btn.classList.add('active');
+
+					if (view === 'table') {
+						tableView.style.display = 'block';
+						cardsView.style.display = 'none';
+					} else {
+						tableView.style.display = 'none';
+						cardsView.style.display = 'grid';
+					}
+				});
+			});
+
+			// Sorting functionality
+			const sortSelect = document.getElementById('sort-select');
+			const tableBody = document.getElementById('stats-table-body');
+			const cardsContainer = document.getElementById('cards-view');
+			let currentSort = 'gamesPlayed';
+			let sortDirection = 'desc';
+
+			// Table header sorting
+			const sortableHeaders = document.querySelectorAll('.sortable');
+			sortableHeaders.forEach((header) => {
+				header.addEventListener('click', () => {
+					const sortBy = header.getAttribute('data-sort');
+
+					// Update sort direction
+					if (currentSort === sortBy) {
+						sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+					} else {
+						sortDirection = 'desc';
+					}
+
+					currentSort = sortBy;
+					sortSelect.value = sortBy;
+
+					// Update sort icons
+					sortableHeaders.forEach((h) => {
+						const icon = h.querySelector('.sort-icon');
+						icon.textContent = '';
+					});
+
+					const currentIcon = header.querySelector('.sort-icon');
+					currentIcon.textContent = sortDirection === 'desc' ? '↓' : '↑';
+
+					sortData();
+				});
+			});
+
+			// Dropdown sorting
+			sortSelect.addEventListener('change', (e) => {
+				currentSort = e.target.value;
+				sortDirection = 'desc';
+
+				// Update header icons
+				sortableHeaders.forEach((h) => {
+					const icon = h.querySelector('.sort-icon');
+					icon.textContent = h.getAttribute('data-sort') === currentSort ? '↓' : '';
+				});
+
+				sortData();
+			});
+
+			function sortData() {
+				// Sort table rows with performance optimization
+				const rows = Array.from(tableBody.querySelectorAll('tr'));
+				const fragment = document.createDocumentFragment();
+
+				rows.sort((a, b) => {
+					let aVal, bVal;
+
+					switch (currentSort) {
+						case 'gamesPlayed':
+							aVal = parseInt(a.getAttribute('data-games-played'));
+							bVal = parseInt(b.getAttribute('data-games-played'));
+							break;
+						case 'highScore':
+							aVal = parseInt(a.getAttribute('data-high-score'));
+							bVal = parseInt(b.getAttribute('data-high-score'));
+							break;
+						case 'totalPlayTime':
+							aVal = parseInt(a.getAttribute('data-total-play-time'));
+							bVal = parseInt(b.getAttribute('data-total-play-time'));
+							break;
+						case 'lastPlayed':
+							aVal = new Date(a.getAttribute('data-last-played')).getTime();
+							bVal = new Date(b.getAttribute('data-last-played')).getTime();
+							break;
+						case 'name':
+							aVal = a.getAttribute('data-name').toLowerCase();
+							bVal = b.getAttribute('data-name').toLowerCase();
+							break;
+					}
+
+					if (currentSort === 'name') {
+						return sortDirection === 'desc' ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+					}
+
+					return sortDirection === 'desc' ? bVal - aVal : aVal - bVal;
+				});
+
+				// Re-append sorted rows using fragment for better performance
+				rows.forEach((row) => fragment.appendChild(row));
+				tableBody.appendChild(fragment);
+
+				// Sort cards with performance optimization
+				const cards = Array.from(cardsContainer.querySelectorAll('.game-stat-card'));
+				const cardsFragment = document.createDocumentFragment();
+
+				cards.sort((a, b) => {
+					let aVal, bVal;
+
+					switch (currentSort) {
+						case 'gamesPlayed':
+							aVal = parseInt(a.getAttribute('data-games-played'));
+							bVal = parseInt(b.getAttribute('data-games-played'));
+							break;
+						case 'highScore':
+							aVal = parseInt(a.getAttribute('data-high-score'));
+							bVal = parseInt(b.getAttribute('data-high-score'));
+							break;
+						case 'totalPlayTime':
+							aVal = parseInt(a.getAttribute('data-total-play-time'));
+							bVal = parseInt(b.getAttribute('data-total-play-time'));
+							break;
+						case 'lastPlayed':
+							aVal = new Date(a.getAttribute('data-last-played')).getTime();
+							bVal = new Date(b.getAttribute('data-last-played')).getTime();
+							break;
+						case 'name':
+							aVal = a.getAttribute('data-name').toLowerCase();
+							bVal = b.getAttribute('data-name').toLowerCase();
+							break;
+					}
+
+					if (currentSort === 'name') {
+						return sortDirection === 'desc' ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+					}
+
+					return sortDirection === 'desc' ? bVal - aVal : aVal - bVal;
+				});
+
+				// Re-append sorted cards using fragment for better performance
+				cards.forEach((card) => cardsFragment.appendChild(card));
+				cardsContainer.appendChild(cardsFragment);
+			}
+		}); // Close requestAnimationFrame
+	});
+</script>
+
+<style is:inline>
+	.stats-page {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 2rem 1rem;
+		min-height: calc(100vh - 200px);
+	}
+
+	.loading {
+		text-align: center;
+		color: var(--color-text-secondary);
+		padding: 3rem;
+		font-size: 1.1rem;
+		opacity: 0.7;
+	}
+
+	h1 {
+		font-size: clamp(2rem, 5vw, 3.5rem);
+		font-weight: 900;
+		margin-bottom: 0.5rem;
+		text-align: center;
+		position: relative;
+		padding-bottom: 2rem;
+		background: linear-gradient(
+			90deg,
+			var(--color-accent),
+			var(--color-accent-secondary),
+			var(--color-accent)
+		);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		background-size: 200% auto;
+		animation: shine 3s linear infinite;
+	}
+
+	@keyframes shine {
+		to {
+			background-position: 200% center;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+		}
+	}
+
+	h1::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100px;
+		height: 4px;
+		background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+		border-radius: 2px;
+	}
+
+	h2 {
+		font-size: 1.5rem;
+		font-weight: 800;
+		margin-bottom: 2rem;
+		color: var(--color-text);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		position: relative;
+		padding-left: 1.5rem;
+	}
+
+	h2::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 4px;
+		height: 70%;
+		background: var(--color-accent);
+		border-radius: 2px;
+	}
+
+	/* Global Stats Section */
+	.global-stats {
+		display: flex;
+		gap: 1rem;
+		margin-bottom: 3rem;
+		padding: 1.5rem 0;
+		overflow-x: auto;
+		scrollbar-width: thin;
+		scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+	}
+
+	.global-stats::-webkit-scrollbar {
+		height: 6px;
+	}
+
+	.global-stats::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.global-stats::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
+	}
+
+	.stat-card {
+		flex: 1;
+		min-width: 140px;
+		position: relative;
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-radius: 1rem;
+		padding: 1.25rem 1rem;
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		transition:
+			transform 0.2s ease,
+			border-color 0.2s ease;
+		overflow: hidden;
+	}
+
+	.stat-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 3px;
+		background: linear-gradient(90deg, transparent, currentColor, transparent);
+		opacity: 0;
+		transition: opacity 0.2s ease;
+	}
+
+	.stat-card:hover {
+		transform: translateY(-4px);
+		border-color: rgba(255, 255, 255, 0.12);
+	}
+
+	.stat-card:hover::before {
+		opacity: 1;
+	}
+
+	.stat-icon {
+		font-size: 2rem;
+		flex-shrink: 0;
+	}
+
+	.stat-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		min-width: 0;
+	}
+
+	.stat-number {
+		font-size: 1.5rem;
+		font-weight: 900;
+		line-height: 1;
+		letter-spacing: -0.02em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.stat-label {
+		font-size: 0.75rem;
+		color: var(--color-text-secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		opacity: 0.7;
+		white-space: nowrap;
+	}
+
+	.total-games {
+		--card-color: #60a5fa;
+		color: var(--card-color);
+	}
+
+	.total-time {
+		--card-color: #4ade80;
+		color: var(--card-color);
+	}
+
+	.favorite {
+		--card-color: #f87171;
+		color: var(--card-color);
+	}
+
+	.games-tried {
+		--card-color: #fbbf24;
+		color: var(--card-color);
+	}
+
+	/* Games List Section */
+	.games-stats {
+		margin-bottom: 3rem;
+	}
+
+	.games-list {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+		gap: 2rem;
+	}
+
+	.game-stat-card {
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 1.5rem;
+		padding: 0;
+		overflow: hidden;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+	}
+
+	.game-stat-card::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(135deg, transparent 40%, rgba(0, 255, 136, 0.05));
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.game-stat-card:hover {
+		transform: translateY(-8px);
+		border-color: rgba(0, 255, 136, 0.3);
+		box-shadow:
+			0 20px 40px rgba(0, 0, 0, 0.4),
+			0 0 60px rgba(0, 255, 136, 0.1);
+	}
+
+	.game-stat-card:hover::after {
+		opacity: 1;
+	}
+
+	.game-header {
+		display: flex;
+		gap: 1.5rem;
+		padding: 1.5rem;
+		background: rgba(0, 0, 0, 0.3);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.game-thumb {
+		width: 100px;
+		height: 75px;
+		object-fit: cover;
+		border-radius: 0.75rem;
+		border: 2px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.game-info {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	.game-info h3 {
+		margin: 0 0 0.5rem 0;
+		font-size: 1.4rem;
+		font-weight: 800;
+		color: var(--color-text);
+		letter-spacing: -0.02em;
+	}
+
+	.last-played {
+		font-size: 0.85rem;
+		color: var(--color-text-secondary);
+		opacity: 0.7;
+	}
+
+	.game-stats-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1px;
+		background: rgba(255, 255, 255, 0.05);
+		padding: 1px;
+		margin: 1.5rem;
+		border-radius: 0.75rem;
+		overflow: hidden;
+	}
+
+	.mini-stat {
+		background: rgba(0, 0, 0, 0.4);
+		padding: 1.25rem 0.75rem;
+		text-align: center;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.mini-stat::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 40px;
+		height: 2px;
+		background: currentColor;
+		opacity: 0.3;
+	}
+
+	.mini-stat:nth-child(1) {
+		color: #60a5fa;
+	}
+	.mini-stat:nth-child(2) {
+		color: #4ade80;
+	}
+	.mini-stat:nth-child(3) {
+		color: #fbbf24;
+	}
+
+	.mini-label {
+		display: block;
+		font-size: 0.7rem;
+		color: var(--color-text-secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		margin-bottom: 0.5rem;
+		opacity: 0.6;
+	}
+
+	.mini-value {
+		display: block;
+		font-size: 1.5rem;
+		font-weight: 900;
+		letter-spacing: -0.02em;
+	}
+
+	/* Achievements */
+	.achievements-section {
+		padding: 1.5rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.achievements-section h4 {
+		font-size: 0.9rem;
+		margin-bottom: 1rem;
+		color: var(--color-text);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		opacity: 0.8;
+	}
+
+	.achievement-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+
+	.achievement-badge {
+		padding: 0.5rem 1rem;
+		background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+		border: 1px solid rgba(255, 215, 0, 0.3);
+		border-radius: 2rem;
+		font-size: 0.85rem;
+		color: #fbbf24;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		transition: all 0.2s ease;
+	}
+
+	.achievement-badge:hover {
+		background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.1));
+		border-color: #fbbf24;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+	}
+
+	/* Play Again Button */
+	.play-again-btn {
+		display: block;
+		margin: 1.5rem;
+		padding: 1rem;
+		background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
+		color: #000;
+		text-decoration: none;
+		border-radius: 0.75rem;
+		font-weight: 700;
+		text-align: center;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		font-size: 0.9rem;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.play-again-btn::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+		transition: left 0.5s ease;
+	}
+
+	.play-again-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+	}
+
+	.play-again-btn:hover::before {
+		left: 100%;
+	}
+
+	/* Empty State */
+	.empty-state {
+		text-align: center;
+		padding: 5rem 2rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2rem;
+	}
+
+	.empty-state::before {
+		content: '🎮';
+		font-size: 5rem;
+		opacity: 0.2;
+	}
+
+	.empty-state p {
+		font-size: 1.25rem;
+		color: var(--color-text-secondary);
+		max-width: 500px;
+		line-height: 1.6;
+	}
+
+	.cta-button {
+		display: inline-block;
+		padding: 1rem 3rem;
+		background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
+		color: #000;
+		text-decoration: none;
+		border-radius: 3rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.cta-button::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 0;
+		height: 0;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 50%;
+		transform: translate(-50%, -50%);
+		transition:
+			width 0.6s ease,
+			height 0.6s ease;
+	}
+
+	.cta-button:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 15px 40px rgba(0, 255, 136, 0.4);
+	}
+
+	.cta-button:hover::before {
+		width: 300px;
+		height: 300px;
+	}
+
+	/* Animations - Optimized for Performance */
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.stat-card {
+		animation: fadeIn 0.3s ease backwards;
+		will-change: transform;
+	}
+
+	.stat-card:nth-child(1) {
+		animation-delay: 0.05s;
+	}
+	.stat-card:nth-child(2) {
+		animation-delay: 0.1s;
+	}
+	.stat-card:nth-child(3) {
+		animation-delay: 0.15s;
+	}
+	.stat-card:nth-child(4) {
+		animation-delay: 0.2s;
+	}
+
+	.game-stat-card {
+		animation: fadeIn 0.3s ease backwards;
+		contain: layout style paint;
+	}
+
+	/* Table Controls */
+	.table-controls {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.5rem;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.view-toggle {
+		display: flex;
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 0.5rem;
+		padding: 0.25rem;
+		gap: 0.25rem;
+	}
+
+	.view-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: transparent;
+		border: none;
+		color: var(--color-text-secondary);
+		cursor: pointer;
+		border-radius: 0.375rem;
+		transition: all 0.2s ease;
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+
+	.view-btn svg {
+		width: 16px;
+		height: 16px;
+		opacity: 0.7;
+	}
+
+	.view-btn.active {
+		background: var(--color-accent);
+		color: #000;
+	}
+
+	.view-btn:hover:not(.active) {
+		background: rgba(255, 255, 255, 0.1);
+		color: var(--color-text);
+	}
+
+	.sort-control {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.sort-control label {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary);
+		font-weight: 500;
+	}
+
+	.sort-select {
+		padding: 0.5rem 2rem 0.5rem 1rem;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 0.5rem;
+		color: var(--color-text);
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		appearance: none;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8.5L1.5 4h9L6 8.5z'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 0.75rem center;
+	}
+
+	.sort-select:hover {
+		background-color: rgba(255, 255, 255, 0.08);
+		border-color: rgba(255, 255, 255, 0.2);
+	}
+
+	.sort-select:focus {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
+	}
+
+	/* Table Styles */
+	.table-container {
+		overflow-x: auto;
+		background: rgba(255, 255, 255, 0.02);
+		border-radius: 1rem;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.stats-table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	.stats-table thead {
+		background: rgba(0, 0, 0, 0.3);
+		border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.stats-table th {
+		padding: 1rem 1.5rem;
+		text-align: left;
+		font-weight: 700;
+		font-size: 0.875rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--color-text-secondary);
+		white-space: nowrap;
+	}
+
+	.stats-table th.sortable {
+		cursor: pointer;
+		user-select: none;
+		transition: color 0.2s ease;
+	}
+
+	.stats-table th.sortable:hover {
+		color: var(--color-text);
+	}
+
+	.sort-icon {
+		display: inline-block;
+		margin-left: 0.5rem;
+		color: var(--color-accent);
+		font-size: 0.75rem;
+	}
+
+	.th-numeric {
+		text-align: center;
+	}
+
+	.th-date {
+		text-align: center;
+	}
+
+	.th-achievements {
+		text-align: center;
+	}
+
+	.th-action {
+		text-align: center;
+	}
+
+	.stats-table tbody tr {
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		transition: background 0.2s ease;
+	}
+
+	.stats-table tbody tr:hover {
+		background: rgba(255, 255, 255, 0.03);
+	}
+
+	.stats-table td {
+		padding: 1rem 1.5rem;
+		font-size: 0.9rem;
+	}
+
+	.td-game {
+		min-width: 200px;
+	}
+
+	.game-cell {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.game-thumb-small {
+		width: 48px;
+		height: 36px;
+		object-fit: cover;
+		border-radius: 0.5rem;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.game-thumb-placeholder {
+		width: 48px;
+		height: 36px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 0.5rem;
+		font-size: 1.5rem;
+		opacity: 0.5;
+	}
+
+	.game-name {
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.td-numeric {
+		text-align: center;
+	}
+
+	.stat-value {
+		font-weight: 700;
+		color: var(--color-text);
+	}
+
+	.highlight-score {
+		color: var(--color-accent);
+		font-size: 1rem;
+	}
+
+	.td-date {
+		text-align: center;
+	}
+
+	.date-value {
+		color: var(--color-text-secondary);
+		font-size: 0.85rem;
+	}
+
+	.td-achievements {
+		text-align: center;
+	}
+
+	.achievements-compact {
+		position: relative;
+		display: inline-block;
+	}
+
+	.achievement-count {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.75rem;
+		background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+		border: 1px solid rgba(255, 215, 0, 0.3);
+		border-radius: 1rem;
+		font-size: 0.85rem;
+		color: #fbbf24;
+		cursor: help;
+		transition: all 0.2s ease;
+	}
+
+	.achievement-count:hover {
+		background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.1));
+		transform: translateY(-1px);
+	}
+
+	.achievements-tooltip {
+		position: absolute;
+		top: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		margin-top: 0.5rem;
+		background: rgba(0, 0, 0, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 0.75rem;
+		padding: 1rem;
+		min-width: 250px;
+		display: none;
+		z-index: 10;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+	}
+
+	.achievements-compact:hover .achievements-tooltip {
+		display: block;
+	}
+
+	.tooltip-achievement {
+		display: flex;
+		align-items: start;
+		gap: 0.75rem;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.tooltip-achievement:last-child {
+		border-bottom: none;
+	}
+
+	.tooltip-icon {
+		font-size: 1.25rem;
+		flex-shrink: 0;
+	}
+
+	.tooltip-name {
+		font-weight: 600;
+		color: #fbbf24;
+		margin-bottom: 0.25rem;
+	}
+
+	.tooltip-desc {
+		font-size: 0.85rem;
+		color: var(--color-text-secondary);
+		line-height: 1.4;
+	}
+
+	.no-achievements {
+		color: var(--color-text-secondary);
+		opacity: 0.5;
+	}
+
+	.td-action {
+		text-align: center;
+	}
+
+	.play-btn-small {
+		display: inline-block;
+		padding: 0.5rem 1rem;
+		background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
+		color: #000;
+		text-decoration: none;
+		border-radius: 0.5rem;
+		font-weight: 600;
+		font-size: 0.85rem;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+	}
+
+	.play-btn-small:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.stats-page {
+			padding: 1.5rem 0.75rem;
+		}
+
+		h1 {
+			font-size: 2rem;
+		}
+
+		.global-stats {
+			gap: 0.75rem;
+			padding: 1rem 0;
+		}
+
+		.stat-card {
+			min-width: 120px;
+			padding: 1rem 0.75rem;
+			gap: 0.75rem;
+		}
+
+		.stat-icon {
+			font-size: 1.75rem;
+		}
+
+		.stat-number {
+			font-size: 1.25rem;
+		}
+
+		.stat-label {
+			font-size: 0.7rem;
+		}
+
+		.games-list {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+
+		.game-stats-grid {
+			margin: 1rem;
+		}
+
+		.game-header {
+			flex-direction: column;
+			text-align: center;
+		}
+
+		.game-thumb {
+			width: 120px;
+			height: 90px;
+			margin: 0 auto;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.global-stats {
+			gap: 0.5rem;
+		}
+
+		.stat-card {
+			min-width: 100px;
+			padding: 0.75rem 0.5rem;
+			flex-direction: column;
+			text-align: center;
+		}
+
+		.stat-icon {
+			font-size: 1.5rem;
+		}
+
+		.stat-number {
+			font-size: 1.1rem;
+		}
+
+		.mini-stat {
+			padding: 1rem 0.5rem;
+		}
+
+		.mini-value {
+			font-size: 1.25rem;
+		}
+
+		/* Table Responsive */
+		.table-controls {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.view-toggle {
+			width: 100%;
+			justify-content: center;
+		}
+
+		.sort-control {
+			width: 100%;
+			justify-content: space-between;
+		}
+
+		.sort-select {
+			flex: 1;
+			max-width: 200px;
+		}
+
+		.table-container {
+			border-radius: 0.75rem;
+			margin: 0 -0.75rem;
+			border-left: none;
+			border-right: none;
+		}
+
+		.stats-table {
+			font-size: 0.85rem;
+		}
+
+		.stats-table th,
+		.stats-table td {
+			padding: 0.75rem 0.5rem;
+		}
+
+		.th-achievements,
+		.td-achievements {
+			display: none;
+		}
+
+		.game-thumb-small {
+			width: 40px;
+			height: 30px;
+		}
+
+		.game-thumb-placeholder {
+			width: 40px;
+			height: 30px;
+			font-size: 1.25rem;
+		}
+
+		.game-name {
+			font-size: 0.875rem;
+		}
+
+		.stat-value {
+			font-size: 0.875rem;
+		}
+
+		.highlight-score {
+			font-size: 0.9rem;
+		}
+
+		.date-value {
+			font-size: 0.8rem;
+		}
+
+		.play-btn-small {
+			padding: 0.375rem 0.75rem;
+			font-size: 0.8rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.stats-table th:nth-child(4),
+		.stats-table td:nth-child(4) {
+			display: none;
+		}
+
+		.game-cell {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.5rem;
+		}
+
+		.td-game {
+			min-width: unset;
+		}
+	}
+</style>

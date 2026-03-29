@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Mana</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            color: #eee;
+            user-select: none;
+        }
+
+        .game-container {
+            text-align: center;
+            position: relative;
+        }
+
+        .score {
+            font-size: 20px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            color: #f39c12;
+        }
+
+        canvas {
+            border: 3px solid #f39c12;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 100%);
+            display: block;
+            cursor: pointer;
+        }
+
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 46, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .start-screen h1 {
+            color: #f39c12;
+            margin-bottom: 20px;
+            font-size: 36px;
+        }
+
+        .start-button {
+            background: #f39c12;
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .start-button:hover {
+            background: #e67e22;
+            transform: scale(1.1);
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 26, 46, 0.95);
+            border: 3px solid #f39c12;
+            padding: 30px;
+            display: none;
+            text-align: center;
+        }
+
+        .game-over h2 {
+            color: #f39c12;
+            margin-bottom: 15px;
+        }
+
+        .restart-btn {
+            background: #f39c12;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .restart-btn:hover {
+            background: #e67e22;
+            transform: scale(1.05);
+        }
+
+        .instructions {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #bbb;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="score">SCORE: <span id="score">0</span></div>
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+        
+        <div class="start-screen" id="startScreen">
+            <h1>FLAPPY MANA</h1>
+            <p class="instructions">Klicke oder drücke SPACE zum Fliegen</p>
+            <p class="instructions">Weiche den Röhren aus!</p>
+            <button class="start-button" onclick="startGame()">START</button>
+        </div>
+        
+        <div class="game-over" id="gameOver">
+            <h2>GAME OVER</h2>
+            <div>SCORE: <span id="finalScore">0</span></div>
+            <div>BEST: <span id="bestScore">0</span></div>
+            <button class="restart-btn" onclick="restartGame()">RESTART</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const scoreElement = document.getElementById('score');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+        const bestScoreElement = document.getElementById('bestScore');
+        
+        const GAME_ID = 'flappy-mana';
+        
+        let gameRunning = false;
+        let gameStarted = false;
+        let score = 0;
+        let bestScore = localStorage.getItem('flappyManaBest') || 0;
+        let animationId = null;
+        
+        const bird = {
+            x: 100,
+            y: canvas.height / 2,
+            radius: 15,
+            velocity: 0,
+            gravity: 0.4,
+            jumpPower: -8,
+            color: '#f39c12',
+            rotation: 0
+        };
+        
+        const pipes = [];
+        const pipeWidth = 60;
+        const pipeGap = 180;
+        const pipeSpeed = 3;
+        let pipeTimer = 0;
+        
+        const particles = [];
+        
+        const clouds = [
+            { x: 100, y: 50, width: 60, height: 30, speed: 0.5 },
+            { x: 300, y: 100, width: 80, height: 40, speed: 0.3 },
+            { x: 500, y: 80, width: 70, height: 35, speed: 0.4 }
+        ];
+        
+        function jump() {
+            if (!gameStarted) {
+                gameStarted = true;
+                gameRunning = true;
+            }
+            if (gameRunning) {
+                bird.velocity = bird.jumpPower;
+                
+                for (let i = 0; i < 5; i++) {
+                    particles.push({
+                        x: bird.x - 10,
+                        y: bird.y + Math.random() * 10 - 5,
+                        vx: -Math.random() * 2 - 1,
+                        vy: Math.random() * 2 - 1,
+                        life: 1.0,
+                        color: '#fff'
+                    });
+                }
+            }
+        }
+        
+        function createPipe() {
+            const minHeight = 100;
+            const maxHeight = canvas.height - pipeGap - minHeight;
+            const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
+            
+            pipes.push({
+                x: canvas.width,
+                topHeight: topHeight,
+                bottomY: topHeight + pipeGap,
+                passed: false
+            });
+        }
+        
+        function updateBird() {
+            if (!gameStarted) return;
+            
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+            
+            bird.rotation = Math.min(Math.max(bird.velocity * 3, -30), 90);
+            
+            if (bird.y - bird.radius < 0) {
+                bird.y = bird.radius;
+                bird.velocity = 0;
+            }
+            
+            if (bird.y + bird.radius > canvas.height) {
+                gameOver();
+            }
+        }
+        
+        function updatePipes() {
+            if (!gameStarted) return;
+            
+            pipeTimer++;
+            if (pipeTimer > 90) {
+                createPipe();
+                pipeTimer = 0;
+            }
+            
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                const pipe = pipes[i];
+                pipe.x -= pipeSpeed;
+                
+                if (pipe.x + pipeWidth < bird.x && !pipe.passed) {
+                    pipe.passed = true;
+                    score++;
+                    scoreElement.textContent = score;
+                    
+                    window.parent.postMessage({
+                        type: 'GAME_EVENT',
+                        gameId: GAME_ID,
+                        event: 'SCORE_UPDATE',
+                        data: { score: score }
+                    }, '*');
+                    
+                    for (let j = 0; j < 10; j++) {
+                        particles.push({
+                            x: bird.x,
+                            y: bird.y,
+                            vx: Math.random() * 4 - 2,
+                            vy: Math.random() * 4 - 2,
+                            life: 1.0,
+                            color: '#f39c12'
+                        });
+                    }
+                }
+                
+                if (pipe.x + pipeWidth < 0) {
+                    pipes.splice(i, 1);
+                    continue;
+                }
+                
+                if (bird.x + bird.radius > pipe.x && 
+                    bird.x - bird.radius < pipe.x + pipeWidth) {
+                    if (bird.y - bird.radius < pipe.topHeight || 
+                        bird.y + bird.radius > pipe.bottomY) {
+                        gameOver();
+                    }
+                }
+            }
+        }
+        
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life -= 0.02;
+                
+                if (particle.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function updateClouds() {
+            clouds.forEach(cloud => {
+                cloud.x -= cloud.speed;
+                if (cloud.x + cloud.width < 0) {
+                    cloud.x = canvas.width + Math.random() * 100;
+                    cloud.y = Math.random() * 150;
+                }
+            });
+        }
+        
+        function drawBackground() {
+            // Himmel-Gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#98D8E8');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Wolken
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            clouds.forEach(cloud => {
+                ctx.beginPath();
+                ctx.arc(cloud.x, cloud.y, cloud.width/3, 0, Math.PI * 2);
+                ctx.arc(cloud.x + cloud.width/3, cloud.y, cloud.width/2.5, 0, Math.PI * 2);
+                ctx.arc(cloud.x + cloud.width/1.5, cloud.y, cloud.width/3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
+        function drawBird() {
+            ctx.save();
+            ctx.translate(bird.x, bird.y);
+            ctx.rotate(bird.rotation * Math.PI / 180);
+            
+            ctx.fillStyle = bird.color;
+            ctx.beginPath();
+            ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(5, -5, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(7, -5, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#e67e22';
+            ctx.beginPath();
+            ctx.moveTo(bird.radius - 5, 0);
+            ctx.lineTo(bird.radius + 5, 3);
+            ctx.lineTo(bird.radius + 5, -3);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        function drawPipes() {
+            pipes.forEach(pipe => {
+                const gradient = ctx.createLinearGradient(pipe.x, 0, pipe.x + pipeWidth, 0);
+                gradient.addColorStop(0, '#2ecc71');
+                gradient.addColorStop(0.5, '#27ae60');
+                gradient.addColorStop(1, '#229954');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+                ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
+                
+                ctx.fillStyle = '#27ae60';
+                ctx.fillRect(pipe.x - 5, pipe.topHeight - 30, pipeWidth + 10, 30);
+                ctx.fillRect(pipe.x - 5, pipe.bottomY, pipeWidth + 10, 30);
+                
+                ctx.strokeStyle = '#1e7e34';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+                ctx.strokeRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
+            });
+        }
+        
+        function drawParticles() {
+            particles.forEach(particle => {
+                ctx.globalAlpha = particle.life;
+                ctx.fillStyle = particle.color;
+                ctx.fillRect(particle.x - 2, particle.y - 2, 4, 4);
+            });
+            ctx.globalAlpha = 1;
+        }
+        
+        function gameLoop() {
+            drawBackground();
+            updateClouds();
+            
+            if (gameRunning) {
+                updateBird();
+                updatePipes();
+            }
+            
+            updateParticles();
+            
+            drawPipes();
+            drawBird();
+            drawParticles();
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('flappyManaBest', bestScore);
+            }
+            
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: GAME_ID,
+                event: 'GAME_OVER',
+                data: { score: score }
+            }, '*');
+            
+            if (score >= 50) {
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: GAME_ID,
+                    event: 'ACHIEVEMENT_UNLOCKED',
+                    data: {
+                        achievement: {
+                            id: 'flappy-expert',
+                            name: 'Flappy Experte',
+                            description: '50 Röhren gemeistert!'
+                        }
+                    }
+                }, '*');
+            }
+            
+            finalScoreElement.textContent = score;
+            bestScoreElement.textContent = bestScore;
+            gameOverElement.style.display = 'block';
+        }
+        
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameRunning = false;
+            gameStarted = false;
+            score = 0;
+            scoreElement.textContent = score;
+            bird.x = 100;
+            bird.y = canvas.height / 2;
+            bird.velocity = 0;
+            bird.rotation = 0;
+            pipes.length = 0;
+            particles.length = 0;
+            pipeTimer = 0;
+            
+            window.parent.postMessage({
+                type: 'GAME_LOADED',
+                gameId: GAME_ID
+            }, '*');
+            
+            if (!animationId) {
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+        
+        function restartGame() {
+            gameOverElement.style.display = 'none';
+            startGame();
+        }
+        
+        canvas.addEventListener('click', jump);
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                jump();
+            }
+        });
+        
+        window.parent.postMessage({
+            type: 'GAME_LOADED',
+            gameId: GAME_ID
+        }, '*');
+    </script>
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mana Runner</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px #00ffff;
+            max-width: 100%;
+            max-height: 100vh;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ffff;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px #00ffff;
+        }
+        
+        #gameOver h2 {
+            margin: 0 0 20px 0;
+            font-size: 32px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        #gameOver p {
+            margin: 10px 0;
+            font-size: 20px;
+        }
+        
+        #gameOver button {
+            margin-top: 20px;
+            padding: 10px 30px;
+            font-size: 18px;
+            background: #00ffff;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+        
+        #gameOver button:hover {
+            background: #00cccc;
+            transform: scale(1.1);
+        }
+        
+        #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ffff;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px #00ffff;
+        }
+        
+        #startScreen h1 {
+            margin: 0 0 20px 0;
+            font-size: 36px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        #startScreen p {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        
+        #startScreen button {
+            margin-top: 20px;
+            padding: 10px 30px;
+            font-size: 20px;
+            background: #00ffff;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+        
+        #startScreen button:hover {
+            background: #00cccc;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="startScreen">
+        <h1>🏃‍♂️ Mana Runner 🏃‍♂️</h1>
+        <p>Sammle Mana-Kristalle und weiche Hindernissen aus!</p>
+        <p><strong>Steuerung:</strong></p>
+        <p>Leertaste = Springen</p>
+        <p>Doppelsprung verfügbar nach 10 Kristallen!</p>
+        <button onclick="startGame()">Spiel Starten</button>
+    </div>
+    
+    <div id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Punkte: <span id="finalScore">0</span></p>
+        <p>Kristalle: <span id="finalCrystals">0</span></p>
+        <button onclick="restartGame()">Nochmal spielen</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOver');
+        
+        canvas.width = 800;
+        canvas.height = 400;
+        
+        let gameStarted = false;
+        let gameRunning = false;
+        let score = 0;
+        let crystals = 0;
+        let highScore = localStorage.getItem('manaRunnerHighScore') || 0;
+        let gameSpeed = 5;
+        let gravity = 0.5;
+        let jumpPower = -12;
+        let doubleJumpUnlocked = false;
+        let canDoubleJump = false;
+        
+        const player = {
+            x: 100,
+            y: 200,
+            width: 40,
+            height: 60,
+            velocityY: 0,
+            jumping: false,
+            grounded: false,
+            color: '#00ffff'
+        };
+        
+        const ground = {
+            x: 0,
+            y: canvas.height - 60,
+            width: canvas.width,
+            height: 60
+        };
+        
+        const obstacles = [];
+        const crystals_array = [];
+        const particles = [];
+        
+        let obstacleTimer = 0;
+        let crystalTimer = 0;
+        let backgroundOffset = 0;
+        
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.size = Math.random() * 3 + 1;
+                this.life = 1;
+                this.color = color;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.1;
+                this.life -= 0.02;
+                this.size *= 0.98;
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.restore();
+            }
+        }
+        
+        class Obstacle {
+            constructor() {
+                this.width = 40;
+                this.height = Math.random() * 80 + 40;
+                this.x = canvas.width;
+                this.y = ground.y - this.height;
+                this.passed = false;
+            }
+            
+            update() {
+                this.x -= gameSpeed;
+            }
+            
+            draw() {
+                ctx.fillStyle = '#ff0066';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff0066';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        class Crystal {
+            constructor() {
+                this.size = 20;
+                this.x = canvas.width;
+                this.y = Math.random() * (ground.y - 100) + 50;
+                this.collected = false;
+                this.rotation = 0;
+            }
+            
+            update() {
+                this.x -= gameSpeed;
+                this.rotation += 0.05;
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.size/2, this.y + this.size/2);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = '#ffff00';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffff00';
+                
+                ctx.beginPath();
+                ctx.moveTo(0, -this.size/2);
+                ctx.lineTo(this.size/2, 0);
+                ctx.lineTo(0, this.size/2);
+                ctx.lineTo(-this.size/2, 0);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+        
+        function drawBackground() {
+            ctx.fillStyle = '#1a0033';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#2a0055';
+            for (let i = 0; i < 5; i++) {
+                let x = (i * 200 - backgroundOffset) % (canvas.width + 200);
+                ctx.fillRect(x, 100, 150, 200);
+            }
+            
+            ctx.fillStyle = '#00ffff';
+            ctx.font = '20px Courier New';
+            for (let i = 0; i < 20; i++) {
+                let x = (i * 100 - backgroundOffset * 0.5) % (canvas.width + 100);
+                let y = Math.sin(x * 0.01) * 20 + 50;
+                ctx.fillText('✦', x, y);
+            }
+        }
+        
+        function drawGround() {
+            ctx.fillStyle = '#004444';
+            ctx.fillRect(ground.x, ground.y, ground.width, ground.height);
+            
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, ground.y);
+            ctx.lineTo(canvas.width, ground.y);
+            ctx.stroke();
+        }
+        
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(player.x + 10, player.y + 10, 5, 5);
+            ctx.fillRect(player.x + 25, player.y + 10, 5, 5);
+            
+            ctx.fillStyle = '#ff00ff';
+            ctx.fillRect(player.x + 15, player.y + 25, 10, 3);
+            
+            if (player.velocityY < 0) {
+                for (let i = 0; i < 3; i++) {
+                    particles.push(new Particle(
+                        player.x + player.width/2,
+                        player.y + player.height,
+                        '#00ffff'
+                    ));
+                }
+            }
+        }
+        
+        function drawUI() {
+            ctx.fillStyle = '#00ffff';
+            ctx.font = 'bold 24px Courier New';
+            ctx.fillText(`Punkte: ${score}`, 20, 40);
+            ctx.fillText(`Kristalle: ${crystals}`, 20, 70);
+            
+            if (doubleJumpUnlocked) {
+                ctx.fillStyle = '#ffff00';
+                ctx.fillText('Doppelsprung freigeschaltet!', 20, 100);
+            }
+            
+            ctx.fillStyle = '#ff00ff';
+            ctx.fillText(`High Score: ${highScore}`, canvas.width - 200, 40);
+        }
+        
+        function updatePlayer() {
+            player.velocityY += gravity;
+            player.y += player.velocityY;
+            
+            if (player.y + player.height >= ground.y) {
+                player.y = ground.y - player.height;
+                player.velocityY = 0;
+                player.grounded = true;
+                player.jumping = false;
+                canDoubleJump = doubleJumpUnlocked;
+            } else {
+                player.grounded = false;
+            }
+        }
+        
+        function jump() {
+            if (player.grounded) {
+                player.velocityY = jumpPower;
+                player.jumping = true;
+                canDoubleJump = doubleJumpUnlocked;
+            } else if (canDoubleJump && player.jumping) {
+                player.velocityY = jumpPower;
+                canDoubleJump = false;
+                
+                for (let i = 0; i < 10; i++) {
+                    particles.push(new Particle(
+                        player.x + player.width/2,
+                        player.y + player.height,
+                        '#ffff00'
+                    ));
+                }
+            }
+        }
+        
+        function checkCollisions() {
+            for (let obstacle of obstacles) {
+                if (player.x < obstacle.x + obstacle.width &&
+                    player.x + player.width > obstacle.x &&
+                    player.y < obstacle.y + obstacle.height &&
+                    player.y + player.height > obstacle.y) {
+                    endGame();
+                }
+                
+                if (!obstacle.passed && player.x > obstacle.x + obstacle.width) {
+                    obstacle.passed = true;
+                    score += 10;
+                }
+            }
+            
+            for (let crystal of crystals_array) {
+                if (!crystal.collected &&
+                    player.x < crystal.x + crystal.size &&
+                    player.x + player.width > crystal.x &&
+                    player.y < crystal.y + crystal.size &&
+                    player.y + player.height > crystal.y) {
+                    crystal.collected = true;
+                    crystals++;
+                    score += 50;
+                    
+                    if (crystals >= 10 && !doubleJumpUnlocked) {
+                        doubleJumpUnlocked = true;
+                    }
+                    
+                    for (let i = 0; i < 15; i++) {
+                        particles.push(new Particle(
+                            crystal.x + crystal.size/2,
+                            crystal.y + crystal.size/2,
+                            '#ffff00'
+                        ));
+                    }
+                }
+            }
+        }
+        
+        function updateGame() {
+            if (!gameRunning) return;
+            
+            backgroundOffset += gameSpeed * 0.5;
+            updatePlayer();
+            
+            obstacleTimer++;
+            if (obstacleTimer > 100 + Math.random() * 50) {
+                obstacles.push(new Obstacle());
+                obstacleTimer = 0;
+            }
+            
+            crystalTimer++;
+            if (crystalTimer > 150 + Math.random() * 100) {
+                crystals_array.push(new Crystal());
+                crystalTimer = 0;
+            }
+            
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].update();
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                }
+            }
+            
+            for (let i = crystals_array.length - 1; i >= 0; i--) {
+                if (!crystals_array[i].collected) {
+                    crystals_array[i].update();
+                }
+                if (crystals_array[i].x + crystals_array[i].size < 0) {
+                    crystals_array.splice(i, 1);
+                }
+            }
+            
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            checkCollisions();
+            
+            if (score > 0 && score % 100 === 0) {
+                gameSpeed += 0.1;
+            }
+        }
+        
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawGround();
+            
+            for (let crystal of crystals_array) {
+                if (!crystal.collected) {
+                    crystal.draw();
+                }
+            }
+            
+            for (let obstacle of obstacles) {
+                obstacle.draw();
+            }
+            
+            for (let particle of particles) {
+                particle.draw();
+            }
+            
+            drawPlayer();
+            drawUI();
+        }
+        
+        function gameLoop() {
+            updateGame();
+            drawGame();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function startGame() {
+            gameStarted = true;
+            gameRunning = true;
+            startScreen.style.display = 'none';
+            gameLoop();
+            
+            window.parent.postMessage({
+                type: 'GAME_LOADED',
+                gameId: 'mana-runner'
+            }, '*');
+        }
+        
+        function endGame() {
+            gameRunning = false;
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('manaRunnerHighScore', highScore);
+            }
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalCrystals').textContent = crystals;
+            gameOverScreen.style.display = 'block';
+            
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: 'mana-runner',
+                event: 'GAME_OVER',
+                data: { score: score }
+            }, '*');
+        }
+        
+        function restartGame() {
+            score = 0;
+            crystals = 0;
+            gameSpeed = 5;
+            player.y = 200;
+            player.velocityY = 0;
+            player.grounded = false;
+            obstacles.length = 0;
+            crystals_array.length = 0;
+            particles.length = 0;
+            obstacleTimer = 0;
+            crystalTimer = 0;
+            backgroundOffset = 0;
+            doubleJumpUnlocked = false;
+            canDoubleJump = false;
+            
+            gameOverScreen.style.display = 'none';
+            gameRunning = true;
+            
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: 'mana-runner',
+                event: 'GAME_STARTED',
+                data: {}
+            }, '*');
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && gameRunning) {
+                e.preventDefault();
+                jump();
+            }
+        });
+        
+        canvas.addEventListener('click', () => {
+            if (gameRunning) {
+                jump();
+            }
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (gameStarted) {
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: 'mana-runner',
+                    event: 'GAME_ENDED',
+                    data: { score: score }
+                }, '*');
+            }
+        });
+    </script>
+</body>
+</html>

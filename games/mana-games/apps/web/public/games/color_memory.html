@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Color Memory</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            text-align: center;
+            font-family: Arial;
+            padding: 50px;
+        }
+        .box {
+            width: 150px;
+            height: 150px;
+            display: inline-block;
+            margin: 10px;
+            cursor: pointer;
+            background: #333;
+            transition: 0.3s;
+        }
+        .box:hover {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <h1>COLOR MEMORY</h1>
+    <p id="info">Merke dir die Reihenfolge!</p>
+    <div>
+        <div class="box" onclick="check(0)"></div>
+        <div class="box" onclick="check(1)"></div>
+        <div class="box" onclick="check(2)"></div>
+        <div class="box" onclick="check(3)"></div>
+    </div>
+    <h2 id="score">Level: 1</h2>
+    
+    <script>
+        // Game ID für Statistiken
+        const GAME_ID = 'color-memory';
+        
+        let sequence = [];
+        let playerSeq = [];
+        let level = 1;
+        let playing = false;
+        const colors = ['#f00', '#0f0', '#00f', '#ff0'];
+        const boxes = document.querySelectorAll('.box');
+        
+        function nextLevel() {
+            playerSeq = [];
+            sequence.push(Math.floor(Math.random() * 4));
+            playing = false;
+            document.getElementById('info').textContent = 'Schau zu!';
+            
+            sequence.forEach((num, i) => {
+                setTimeout(() => {
+                    boxes[num].style.background = colors[num];
+                    setTimeout(() => boxes[num].style.background = '#333', 400);
+                }, i * 600 + 600);
+            });
+            
+            setTimeout(() => {
+                playing = true;
+                document.getElementById('info').textContent = 'Dein Zug!';
+            }, sequence.length * 600 + 600);
+        }
+        
+        function check(num) {
+            if (!playing) return;
+            
+            boxes[num].style.background = colors[num];
+            setTimeout(() => boxes[num].style.background = '#333', 200);
+            
+            playerSeq.push(num);
+            
+            if (playerSeq[playerSeq.length - 1] !== sequence[playerSeq.length - 1]) {
+                document.getElementById('info').textContent = `Game Over! Level ${level} erreicht`;
+                playing = false;
+                
+                // Sende Game Over Event
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: GAME_ID,
+                    event: 'GAME_OVER',
+                    data: { score: level * 100 }
+                }, '*');
+                
+                // Achievement prüfen
+                if (level >= 10) {
+                    window.parent.postMessage({
+                        type: 'GAME_EVENT',
+                        gameId: GAME_ID,
+                        event: 'ACHIEVEMENT_UNLOCKED',
+                        data: {
+                            achievementId: 'memory_master',
+                            name: 'Memory Master',
+                            description: 'Reach level 10 in Color Memory',
+                            icon: '🧠'
+                        }
+                    }, '*');
+                }
+                
+                if (level >= 15) {
+                    window.parent.postMessage({
+                        type: 'GAME_EVENT',
+                        gameId: GAME_ID,
+                        event: 'ACHIEVEMENT_UNLOCKED',
+                        data: {
+                            achievementId: 'photographic_memory',
+                            name: 'Photographic Memory',
+                            description: 'Reach level 15 in Color Memory',
+                            icon: '📸'
+                        }
+                    }, '*');
+                }
+                
+                setTimeout(() => location.reload(), 2000);
+            } else if (playerSeq.length === sequence.length) {
+                level++;
+                document.getElementById('score').textContent = `Level: ${level}`;
+                document.getElementById('info').textContent = 'Richtig!';
+                
+                // Sende Score Update für Statistiken
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: GAME_ID,
+                    event: 'SCORE_UPDATE',
+                    data: { score: level * 100 }
+                }, '*');
+                
+                setTimeout(nextLevel, 1000);
+            }
+        }
+        
+        nextLevel();
+        
+        // Sende Game Loaded Event für Statistiken
+        window.parent.postMessage({
+            type: 'GAME_LOADED',
+            gameId: GAME_ID
+        }, '*');
+    </script>
+</body>
+</html>

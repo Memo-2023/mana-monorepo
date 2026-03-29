@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mana Factory</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            min-height: 100vh;
+        }
+        
+        .main-panel {
+            flex: 1;
+            background: rgba(0, 20, 20, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px #00ffff;
+        }
+        
+        .side-panel {
+            width: 350px;
+            background: rgba(0, 20, 20, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px #00ffff;
+        }
+        
+        h1, h2, h3 {
+            text-align: center;
+            text-shadow: 0 0 10px #00ffff;
+            margin: 10px 0;
+        }
+        
+        .mana-display {
+            text-align: center;
+            font-size: 36px;
+            margin: 20px 0;
+            text-shadow: 0 0 15px #00ffff;
+        }
+        
+        .mana-per-second {
+            text-align: center;
+            font-size: 20px;
+            color: #00cccc;
+            margin-bottom: 30px;
+        }
+        
+        .click-button {
+            display: block;
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            background: radial-gradient(circle, #00ffff, #006666);
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            color: #000;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px #00ffff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .click-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px #00ffff;
+        }
+        
+        .click-button:active {
+            transform: scale(0.95);
+        }
+        
+        .click-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .click-button.pulse::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .generator {
+            background: rgba(0, 40, 40, 0.6);
+            border: 2px solid #006666;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .generator:hover {
+            border-color: #00ffff;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .generator.affordable {
+            border-color: #00ff00;
+        }
+        
+        .generator.maxed {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .generator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .generator-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .generator-count {
+            font-size: 24px;
+            color: #ffff00;
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        .generator-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #00cccc;
+        }
+        
+        .generator-cost {
+            color: #ff6666;
+        }
+        
+        .generator-cost.affordable {
+            color: #00ff00;
+        }
+        
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00ffff;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: rgba(0, 40, 40, 0.6);
+            border: 2px solid #006666;
+            border-bottom: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .tab:hover {
+            background: rgba(0, 60, 60, 0.8);
+        }
+        
+        .tab.active {
+            background: rgba(0, 80, 80, 0.9);
+            border-color: #00ffff;
+            color: #00ffff;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .upgrade {
+            background: rgba(0, 40, 40, 0.6);
+            border: 2px solid #006666;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upgrade:hover:not(.bought) {
+            border-color: #00ffff;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .upgrade.affordable {
+            border-color: #00ff00;
+        }
+        
+        .upgrade.bought {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #666666;
+        }
+        
+        .upgrade-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .upgrade-description {
+            font-size: 12px;
+            color: #00cccc;
+            margin-bottom: 4px;
+        }
+        
+        .upgrade-cost {
+            font-size: 14px;
+            color: #ff6666;
+        }
+        
+        .upgrade-cost.affordable {
+            color: #00ff00;
+        }
+        
+        .prestige-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+        
+        .prestige-button:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #ff00ff;
+        }
+        
+        .prestige-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .achievement {
+            background: rgba(0, 40, 40, 0.6);
+            border: 2px solid #666666;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+            transition: all 0.3s;
+        }
+        
+        .achievement.unlocked {
+            border-color: #ffff00;
+            box-shadow: 0 0 10px #ffff00;
+        }
+        
+        .achievement-name {
+            font-weight: bold;
+            color: #ffff00;
+        }
+        
+        .achievement-description {
+            font-size: 12px;
+            color: #00cccc;
+            margin-top: 4px;
+        }
+        
+        .stats {
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #003333;
+        }
+        
+        .floating-text {
+            position: absolute;
+            pointer-events: none;
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+            animation: float-up 1s ease-out;
+        }
+        
+        @keyframes float-up {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: particle-fall 10s linear infinite;
+        }
+        
+        @keyframes particle-fall {
+            0% {
+                transform: translateY(-100px);
+            }
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .side-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="main-panel">
+            <h1>🏭 Mana Factory 🏭</h1>
+            
+            <div class="mana-display">
+                💎 <span id="mana">0</span> Mana
+            </div>
+            
+            <div class="mana-per-second">
+                <span id="mps">0</span> Mana/Sek
+            </div>
+            
+            <button class="click-button" id="clickButton">
+                Kristall<br>Ernten
+            </button>
+            
+            <div class="tab-container">
+                <div class="tab active" data-tab="generators">Generatoren</div>
+                <div class="tab" data-tab="upgrades">Upgrades</div>
+                <div class="tab" data-tab="prestige">Aufstieg</div>
+            </div>
+            
+            <div class="tab-content active" id="generators">
+                <div class="generator" data-generator="fountain">
+                    <div class="generator-header">
+                        <span class="generator-name">💧 Mana-Brunnen</span>
+                        <span class="generator-count">0</span>
+                    </div>
+                    <div class="generator-info">
+                        <span>Produziert: <span class="production">1</span> Mana/s</span>
+                        <span class="generator-cost">Kosten: <span class="cost">10</span></span>
+                    </div>
+                </div>
+                
+                <div class="generator" data-generator="mine">
+                    <div class="generator-header">
+                        <span class="generator-name">⛏️ Kristall-Mine</span>
+                        <span class="generator-count">0</span>
+                    </div>
+                    <div class="generator-info">
+                        <span>Produziert: <span class="production">10</span> Mana/s</span>
+                        <span class="generator-cost">Kosten: <span class="cost">100</span></span>
+                    </div>
+                </div>
+                
+                <div class="generator" data-generator="reactor">
+                    <div class="generator-header">
+                        <span class="generator-name">⚡ Mana-Reaktor</span>
+                        <span class="generator-count">0</span>
+                    </div>
+                    <div class="generator-info">
+                        <span>Produziert: <span class="production">100</span> Mana/s</span>
+                        <span class="generator-cost">Kosten: <span class="cost">1000</span></span>
+                    </div>
+                </div>
+                
+                <div class="generator" data-generator="portal">
+                    <div class="generator-header">
+                        <span class="generator-name">🌀 Dimensions-Portal</span>
+                        <span class="generator-count">0</span>
+                    </div>
+                    <div class="generator-info">
+                        <span>Produziert: <span class="production">1000</span> Mana/s</span>
+                        <span class="generator-cost">Kosten: <span class="cost">10000</span></span>
+                    </div>
+                </div>
+                
+                <div class="generator" data-generator="nexus">
+                    <div class="generator-header">
+                        <span class="generator-name">🌟 Mana-Nexus</span>
+                        <span class="generator-count">0</span>
+                    </div>
+                    <div class="generator-info">
+                        <span>Produziert: <span class="production">10000</span> Mana/s</span>
+                        <span class="generator-cost">Kosten: <span class="cost">100000</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="upgrades">
+                <h3>Verbesserungen</h3>
+                <div id="upgradesList"></div>
+            </div>
+            
+            <div class="tab-content" id="prestige">
+                <h3>Aufstieg</h3>
+                <p style="text-align: center; margin: 20px 0;">
+                    Setze deinen Fortschritt zurück und erhalte Prestige-Punkte für permanente Boni!
+                </p>
+                <p style="text-align: center; font-size: 24px; color: #ff00ff;">
+                    Prestige-Punkte: <span id="prestigePoints">0</span>
+                </p>
+                <p style="text-align: center; font-size: 18px; color: #00ffff;">
+                    Nächster Aufstieg: <span id="nextPrestige">0</span> Punkte
+                </p>
+                <p style="text-align: center; font-size: 16px; color: #00cccc;">
+                    Multiplikator: x<span id="prestigeMultiplier">1</span>
+                </p>
+                <button class="prestige-button" id="prestigeButton" disabled>
+                    Aufstieg durchführen<br>
+                    (Benötigt 1,000,000 Mana)
+                </button>
+            </div>
+        </div>
+        
+        <div class="side-panel">
+            <h2>Statistiken</h2>
+            <div class="stats">
+                <div class="stats-row">
+                    <span>Gesamtes Mana:</span>
+                    <span id="totalMana">0</span>
+                </div>
+                <div class="stats-row">
+                    <span>Mana durch Klicks:</span>
+                    <span id="clickMana">0</span>
+                </div>
+                <div class="stats-row">
+                    <span>Mana durch Generatoren:</span>
+                    <span id="generatorMana">0</span>
+                </div>
+                <div class="stats-row">
+                    <span>Klicks gesamt:</span>
+                    <span id="totalClicks">0</span>
+                </div>
+                <div class="stats-row">
+                    <span>Spielzeit:</span>
+                    <span id="playTime">0:00</span>
+                </div>
+                <div class="stats-row">
+                    <span>Aufstiege:</span>
+                    <span id="totalPrestiges">0</span>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 30px;">Erfolge</h3>
+            <div id="achievementsList">
+                <div class="achievement" data-achievement="first-click">
+                    <div class="achievement-name">🎯 Erster Klick</div>
+                    <div class="achievement-description">Ernte deinen ersten Kristall</div>
+                </div>
+                <div class="achievement" data-achievement="first-generator">
+                    <div class="achievement-name">🏗️ Industrialisierung</div>
+                    <div class="achievement-description">Kaufe deinen ersten Generator</div>
+                </div>
+                <div class="achievement" data-achievement="hundred-mana">
+                    <div class="achievement-name">💯 Hundert!</div>
+                    <div class="achievement-description">Erreiche 100 Mana</div>
+                </div>
+                <div class="achievement" data-achievement="thousand-mana">
+                    <div class="achievement-name">📈 Tausender</div>
+                    <div class="achievement-description">Erreiche 1,000 Mana</div>
+                </div>
+                <div class="achievement" data-achievement="first-prestige">
+                    <div class="achievement-name">⭐ Aufgestiegen</div>
+                    <div class="achievement-description">Führe deinen ersten Aufstieg durch</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameData = {
+            mana: 0,
+            manaPerClick: 1,
+            manaPerSecond: 0,
+            totalMana: 0,
+            clickMana: 0,
+            generatorMana: 0,
+            totalClicks: 0,
+            playTime: 0,
+            prestigePoints: 0,
+            prestigeMultiplier: 1,
+            totalPrestiges: 0,
+            generators: {
+                fountain: { count: 0, baseCost: 10, baseProduction: 1 },
+                mine: { count: 0, baseCost: 100, baseProduction: 10 },
+                reactor: { count: 0, baseCost: 1000, baseProduction: 100 },
+                portal: { count: 0, baseCost: 10000, baseProduction: 1000 },
+                nexus: { count: 0, baseCost: 100000, baseProduction: 10000 }
+            },
+            upgrades: {},
+            achievements: {},
+            lastSave: Date.now(),
+            lastUpdate: Date.now()
+        };
+        
+        const upgrades = [
+            {
+                id: 'click1',
+                name: '✨ Verbesserter Griff',
+                description: 'Doppelte Mana pro Klick',
+                cost: 50,
+                effect: () => { gameData.manaPerClick *= 2; }
+            },
+            {
+                id: 'fountain1',
+                name: '💧 Tiefere Brunnen',
+                description: 'Mana-Brunnen sind doppelt so effektiv',
+                cost: 500,
+                requirement: () => gameData.generators.fountain.count >= 5,
+                effect: () => { gameData.generators.fountain.baseProduction *= 2; }
+            },
+            {
+                id: 'mine1',
+                name: '⛏️ Diamant-Spitzhacken',
+                description: 'Kristall-Minen sind doppelt so effektiv',
+                cost: 5000,
+                requirement: () => gameData.generators.mine.count >= 5,
+                effect: () => { gameData.generators.mine.baseProduction *= 2; }
+            },
+            {
+                id: 'click2',
+                name: '🌟 Magische Hände',
+                description: '5x Mana pro Klick',
+                cost: 10000,
+                requirement: () => gameData.totalClicks >= 100,
+                effect: () => { gameData.manaPerClick *= 5; }
+            },
+            {
+                id: 'global1',
+                name: '🌈 Synergie',
+                description: 'Alle Generatoren sind 50% effektiver',
+                cost: 50000,
+                requirement: () => gameData.manaPerSecond >= 100,
+                effect: () => {
+                    for (let gen in gameData.generators) {
+                        gameData.generators[gen].baseProduction *= 1.5;
+                    }
+                }
+            },
+            {
+                id: 'auto1',
+                name: '🤖 Auto-Klicker',
+                description: 'Generiert 10% deiner Klick-Mana pro Sekunde',
+                cost: 100000,
+                requirement: () => gameData.totalClicks >= 1000,
+                effect: () => { }
+            }
+        ];
+        
+        function formatNumber(num) {
+            if (num < 1000) return Math.floor(num).toString();
+            if (num < 1000000) return (num / 1000).toFixed(1) + 'K';
+            if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num < 1000000000000) return (num / 1000000000).toFixed(1) + 'B';
+            return (num / 1000000000000).toFixed(1) + 'T';
+        }
+        
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            if (hours > 0) {
+                return `${hours}:${minutes.toString().padStart(2, '0')}`;
+            }
+            return `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
+        }
+        
+        function getGeneratorCost(type) {
+            const gen = gameData.generators[type];
+            return Math.floor(gen.baseCost * Math.pow(1.15, gen.count));
+        }
+        
+        function getGeneratorProduction(type) {
+            const gen = gameData.generators[type];
+            let production = gen.baseProduction * gen.count;
+            
+            if (type === 'fountain' && gameData.upgrades.fountain1) production *= 2;
+            if (type === 'mine' && gameData.upgrades.mine1) production *= 2;
+            if (gameData.upgrades.global1) production *= 1.5;
+            
+            return production * gameData.prestigeMultiplier;
+        }
+        
+        function calculateManaPerSecond() {
+            let mps = 0;
+            for (let type in gameData.generators) {
+                mps += getGeneratorProduction(type);
+            }
+            
+            if (gameData.upgrades.auto1) {
+                mps += gameData.manaPerClick * 0.1;
+            }
+            
+            return mps;
+        }
+        
+        function updateDisplay() {
+            document.getElementById('mana').textContent = formatNumber(gameData.mana);
+            document.getElementById('mps').textContent = formatNumber(gameData.manaPerSecond);
+            document.getElementById('totalMana').textContent = formatNumber(gameData.totalMana);
+            document.getElementById('clickMana').textContent = formatNumber(gameData.clickMana);
+            document.getElementById('generatorMana').textContent = formatNumber(gameData.generatorMana);
+            document.getElementById('totalClicks').textContent = formatNumber(gameData.totalClicks);
+            document.getElementById('playTime').textContent = formatTime(gameData.playTime);
+            document.getElementById('totalPrestiges').textContent = gameData.totalPrestiges;
+            document.getElementById('prestigePoints').textContent = gameData.prestigePoints;
+            document.getElementById('prestigeMultiplier').textContent = gameData.prestigeMultiplier.toFixed(1);
+            
+            const nextPrestige = Math.floor(Math.sqrt(gameData.totalMana / 1000000));
+            document.getElementById('nextPrestige').textContent = nextPrestige;
+            
+            const prestigeButton = document.getElementById('prestigeButton');
+            if (gameData.mana >= 1000000) {
+                prestigeButton.disabled = false;
+            } else {
+                prestigeButton.disabled = true;
+            }
+            
+            for (let type in gameData.generators) {
+                const gen = gameData.generators[type];
+                const element = document.querySelector(`[data-generator="${type}"]`);
+                const cost = getGeneratorCost(type);
+                
+                element.querySelector('.generator-count').textContent = gen.count;
+                element.querySelector('.cost').textContent = formatNumber(cost);
+                element.querySelector('.production').textContent = formatNumber(gen.baseProduction);
+                
+                if (gameData.mana >= cost) {
+                    element.classList.add('affordable');
+                    element.querySelector('.generator-cost').classList.add('affordable');
+                } else {
+                    element.classList.remove('affordable');
+                    element.querySelector('.generator-cost').classList.remove('affordable');
+                }
+            }
+            
+            updateUpgrades();
+        }
+        
+        function updateUpgrades() {
+            const upgradesList = document.getElementById('upgradesList');
+            upgradesList.innerHTML = '';
+            
+            upgrades.forEach(upgrade => {
+                if (gameData.upgrades[upgrade.id]) return;
+                if (upgrade.requirement && !upgrade.requirement()) return;
+                
+                const div = document.createElement('div');
+                div.className = 'upgrade';
+                if (gameData.mana >= upgrade.cost) {
+                    div.classList.add('affordable');
+                }
+                
+                div.innerHTML = `
+                    <div class="upgrade-name">${upgrade.name}</div>
+                    <div class="upgrade-description">${upgrade.description}</div>
+                    <div class="upgrade-cost ${gameData.mana >= upgrade.cost ? 'affordable' : ''}">
+                        Kosten: ${formatNumber(upgrade.cost)} Mana
+                    </div>
+                `;
+                
+                div.onclick = () => buyUpgrade(upgrade);
+                upgradesList.appendChild(div);
+            });
+        }
+        
+        function buyGenerator(type) {
+            const cost = getGeneratorCost(type);
+            if (gameData.mana >= cost) {
+                gameData.mana -= cost;
+                gameData.generators[type].count++;
+                gameData.manaPerSecond = calculateManaPerSecond();
+                
+                checkAchievement('first-generator');
+                updateDisplay();
+            }
+        }
+        
+        function buyUpgrade(upgrade) {
+            if (gameData.mana >= upgrade.cost && !gameData.upgrades[upgrade.id]) {
+                gameData.mana -= upgrade.cost;
+                gameData.upgrades[upgrade.id] = true;
+                upgrade.effect();
+                gameData.manaPerSecond = calculateManaPerSecond();
+                updateDisplay();
+            }
+        }
+        
+        function clickCrystal(event) {
+            const button = document.getElementById('clickButton');
+            const rect = button.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const manaGained = gameData.manaPerClick * gameData.prestigeMultiplier;
+            gameData.mana += manaGained;
+            gameData.totalMana += manaGained;
+            gameData.clickMana += manaGained;
+            gameData.totalClicks++;
+            
+            checkAchievement('first-click');
+            
+            button.classList.add('pulse');
+            setTimeout(() => button.classList.remove('pulse'), 600);
+            
+            const floatingText = document.createElement('div');
+            floatingText.className = 'floating-text';
+            floatingText.textContent = `+${formatNumber(manaGained)}`;
+            floatingText.style.left = `${event.clientX}px`;
+            floatingText.style.top = `${event.clientY}px`;
+            document.body.appendChild(floatingText);
+            
+            setTimeout(() => floatingText.remove(), 1000);
+            
+            updateDisplay();
+        }
+        
+        function doPrestige() {
+            if (gameData.mana >= 1000000) {
+                const prestigeGain = Math.floor(Math.sqrt(gameData.totalMana / 1000000));
+                
+                gameData.mana = 0;
+                gameData.totalMana = 0;
+                gameData.clickMana = 0;
+                gameData.generatorMana = 0;
+                gameData.totalClicks = 0;
+                gameData.playTime = 0;
+                
+                for (let type in gameData.generators) {
+                    gameData.generators[type].count = 0;
+                }
+                
+                gameData.upgrades = {};
+                
+                gameData.prestigePoints += prestigeGain;
+                gameData.prestigeMultiplier = 1 + (gameData.prestigePoints * 0.1);
+                gameData.totalPrestiges++;
+                
+                gameData.manaPerSecond = 0;
+                
+                checkAchievement('first-prestige');
+                updateDisplay();
+                
+                window.parent.postMessage({
+                    type: 'GAME_EVENT',
+                    gameId: 'mana-factory',
+                    event: 'PRESTIGE',
+                    data: { prestigePoints: gameData.prestigePoints }
+                }, '*');
+            }
+        }
+        
+        function checkAchievement(id) {
+            if (gameData.achievements[id]) return;
+            
+            let unlocked = false;
+            
+            switch(id) {
+                case 'first-click':
+                    unlocked = gameData.totalClicks >= 1;
+                    break;
+                case 'first-generator':
+                    unlocked = Object.values(gameData.generators).some(g => g.count > 0);
+                    break;
+                case 'hundred-mana':
+                    unlocked = gameData.totalMana >= 100;
+                    break;
+                case 'thousand-mana':
+                    unlocked = gameData.totalMana >= 1000;
+                    break;
+                case 'first-prestige':
+                    unlocked = gameData.totalPrestiges >= 1;
+                    break;
+            }
+            
+            if (unlocked) {
+                gameData.achievements[id] = true;
+                const element = document.querySelector(`[data-achievement="${id}"]`);
+                if (element) {
+                    element.classList.add('unlocked');
+                }
+            }
+        }
+        
+        function gameLoop() {
+            const now = Date.now();
+            const delta = (now - gameData.lastUpdate) / 1000;
+            
+            if (gameData.manaPerSecond > 0) {
+                const manaGained = gameData.manaPerSecond * delta;
+                gameData.mana += manaGained;
+                gameData.totalMana += manaGained;
+                gameData.generatorMana += manaGained;
+            }
+            
+            gameData.playTime += delta;
+            gameData.lastUpdate = now;
+            
+            checkAchievement('hundred-mana');
+            checkAchievement('thousand-mana');
+            
+            updateDisplay();
+            
+            if (now - gameData.lastSave > 10000) {
+                saveGame();
+                gameData.lastSave = now;
+            }
+        }
+        
+        function saveGame() {
+            localStorage.setItem('manaFactorySave', JSON.stringify(gameData));
+        }
+        
+        function loadGame() {
+            const saved = localStorage.getItem('manaFactorySave');
+            if (saved) {
+                const loadedData = JSON.parse(saved);
+                Object.assign(gameData, loadedData);
+                
+                const offlineTime = (Date.now() - gameData.lastUpdate) / 1000;
+                const maxOfflineTime = 3600 * 24;
+                const actualOfflineTime = Math.min(offlineTime, maxOfflineTime);
+                
+                if (gameData.manaPerSecond > 0 && actualOfflineTime > 1) {
+                    const offlineMana = gameData.manaPerSecond * actualOfflineTime * 0.5;
+                    gameData.mana += offlineMana;
+                    gameData.totalMana += offlineMana;
+                    gameData.generatorMana += offlineMana;
+                    
+                    alert(`Willkommen zurück! Du hast ${formatNumber(offlineMana)} Mana während deiner Abwesenheit produziert.`);
+                }
+                
+                gameData.lastUpdate = Date.now();
+                gameData.manaPerSecond = calculateManaPerSecond();
+                
+                for (let id in gameData.achievements) {
+                    if (gameData.achievements[id]) {
+                        const element = document.querySelector(`[data-achievement="${id}"]`);
+                        if (element) element.classList.add('unlocked');
+                    }
+                }
+            }
+        }
+        
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        document.getElementById('clickButton').addEventListener('click', clickCrystal);
+        
+        document.querySelectorAll('.generator').forEach(element => {
+            element.addEventListener('click', () => {
+                buyGenerator(element.dataset.generator);
+            });
+        });
+        
+        document.getElementById('prestigeButton').addEventListener('click', doPrestige);
+        
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            saveGame();
+            
+            window.parent.postMessage({
+                type: 'GAME_EVENT',
+                gameId: 'mana-factory',
+                event: 'GAME_ENDED',
+                data: { 
+                    totalMana: gameData.totalMana,
+                    prestigePoints: gameData.prestigePoints 
+                }
+            }, '*');
+        });
+        
+        createParticles();
+        loadGame();
+        updateDisplay();
+        setInterval(gameLoop, 100);
+        
+        window.parent.postMessage({
+            type: 'GAME_LOADED',
+            gameId: 'mana-factory'
+        }, '*');
+    </script>
+</body>
+</html>
