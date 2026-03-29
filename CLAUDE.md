@@ -558,7 +558,7 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
                                   ← WebSocket push ←
 ```
 
-### Migrated Apps (20/23)
+### Migrated Apps (21/23)
 
 | App | Collections | Status |
 |-----|------------|--------|
@@ -584,8 +584,9 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | Taktik | clients, projects, timeEntries, tags, templates, settings | Done |
 | uLoad | links, tags, folders, linkTags | Done |
 | Calc | calculations, savedFormulas | Done |
+| ManaCore | userSettings, dashboardConfigs | Done |
 
-**Not migrated (no CRUD data model):** ManaCore (hub), Matrix (protocol client), Playground (stateless)
+**Not migrated (no CRUD data model):** Matrix (protocol client), Playground (stateless)
 
 ### Dev Commands (Local-First Stack)
 

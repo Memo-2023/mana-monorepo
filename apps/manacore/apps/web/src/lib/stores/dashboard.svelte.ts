@@ -1,18 +1,47 @@
 /**
- * Dashboard Store - Manages dashboard configuration using Svelte 5 runes
+ * Dashboard Store - Manages dashboard configuration using local-first IndexedDB
  *
- * Handles widget layout, edit mode, and persistence to localStorage.
+ * Reads/writes to the dashboardConfigs collection in @manacore/local-store.
+ * Changes sync across devices via mana-sync.
  */
 
 import { browser } from '$app/environment';
 import type { DashboardConfig, WidgetConfig, WidgetSize, WidgetType } from '$lib/types/dashboard';
-import { DEFAULT_DASHBOARD_CONFIG, DASHBOARD_STORAGE_KEY } from '$lib/config/default-dashboard';
+import { DEFAULT_DASHBOARD_CONFIG } from '$lib/config/default-dashboard';
 import { getWidgetMeta } from '$lib/types/dashboard';
+import { dashboardCollection, type LocalDashboardConfig } from '$lib/data/local-store';
 
 // State
 let config = $state<DashboardConfig>(structuredClone(DEFAULT_DASHBOARD_CONFIG));
 let isEditing = $state(false);
 let initialized = $state(false);
+
+/** Write current config to IndexedDB. */
+async function persist() {
+	if (!browser) return;
+
+	config.lastModified = new Date().toISOString();
+
+	const record: Partial<LocalDashboardConfig> = {
+		widgets: config.widgets,
+		gridColumns: config.gridColumns,
+		lastModified: config.lastModified,
+	};
+
+	try {
+		const existing = await dashboardCollection.get('dashboard-default');
+		if (existing) {
+			await dashboardCollection.update('dashboard-default', record);
+		} else {
+			await dashboardCollection.insert({
+				id: 'dashboard-default',
+				...record,
+			} as LocalDashboardConfig);
+		}
+	} catch (e) {
+		console.error('Failed to save dashboard config:', e);
+	}
+}
 
 /**
  * Dashboard store with Svelte 5 runes
@@ -36,19 +65,19 @@ export const dashboardStore = {
 	},
 
 	/**
-	 * Initialize dashboard from localStorage
+	 * Initialize dashboard from IndexedDB
 	 */
-	initialize() {
+	async initialize() {
 		if (!browser || initialized) return;
 
 		try {
-			const stored = localStorage.getItem(DASHBOARD_STORAGE_KEY);
-			if (stored) {
-				const parsed = JSON.parse(stored) as DashboardConfig;
-				// Validate structure
-				if (parsed.widgets && Array.isArray(parsed.widgets)) {
-					config = parsed;
-				}
+			const stored = await dashboardCollection.get('dashboard-default');
+			if (stored && stored.widgets && Array.isArray(stored.widgets)) {
+				config = {
+					widgets: stored.widgets,
+					gridColumns: stored.gridColumns || 12,
+					lastModified: stored.lastModified || new Date().toISOString(),
+				};
 			}
 		} catch (e) {
 			console.error('Failed to load dashboard config:', e);
@@ -58,18 +87,9 @@ export const dashboardStore = {
 	},
 
 	/**
-	 * Persist current config to localStorage
+	 * Persist current config to IndexedDB
 	 */
-	persist() {
-		if (!browser) return;
-
-		try {
-			config.lastModified = new Date().toISOString();
-			localStorage.setItem(DASHBOARD_STORAGE_KEY, JSON.stringify(config));
-		} catch (e) {
-			console.error('Failed to save dashboard config:', e);
-		}
-	},
+	persist,
 
 	/**
 	 * Enter edit mode
@@ -83,7 +103,7 @@ export const dashboardStore = {
 	 */
 	stopEditing() {
 		isEditing = false;
-		this.persist();
+		persist();
 	},
 
 	/**
@@ -121,7 +141,7 @@ export const dashboardStore = {
 		const widget = config.widgets.find((w) => w.id === widgetId);
 		if (widget) {
 			widget.size = size;
-			this.persist();
+			persist();
 		}
 	},
 
@@ -132,7 +152,7 @@ export const dashboardStore = {
 		const widget = config.widgets.find((w) => w.id === widgetId);
 		if (widget) {
 			widget.visible = !widget.visible;
-			this.persist();
+			persist();
 		}
 	},
 
@@ -149,7 +169,7 @@ export const dashboardStore = {
 			if (existing) {
 				// Just make it visible
 				existing.visible = true;
-				this.persist();
+				persist();
 				return;
 			}
 		}
@@ -171,7 +191,7 @@ export const dashboardStore = {
 		};
 
 		config.widgets = [...config.widgets, newWidget];
-		this.persist();
+		persist();
 	},
 
 	/**
@@ -179,7 +199,7 @@ export const dashboardStore = {
 	 */
 	removeWidget(widgetId: string) {
 		config.widgets = config.widgets.filter((w) => w.id !== widgetId);
-		this.persist();
+		persist();
 	},
 
 	/**
@@ -187,7 +207,7 @@ export const dashboardStore = {
 	 */
 	resetToDefault() {
 		config = structuredClone(DEFAULT_DASHBOARD_CONFIG);
-		this.persist();
+		persist();
 	},
 
 	/**

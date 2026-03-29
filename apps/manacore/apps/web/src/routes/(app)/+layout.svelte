@@ -8,7 +8,9 @@
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
-	import { tagStore } from '$lib/stores/tags.svelte';
+	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
+	import { manacoreStore } from '$lib/data/local-store';
+	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -83,6 +85,9 @@
 
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email);
+
+	// Tags (local-first reactive query)
+	const allTags = useAllTags();
 
 	// TagStrip visibility
 	let isTagStripVisible = $state(false);
@@ -162,6 +167,8 @@
 	}
 
 	async function handleSignOut() {
+		manacoreStore.stopSync();
+		tagMutations.stopSync();
 		await authStore.signOut();
 		goto('/login');
 	}
@@ -195,6 +202,17 @@
 			return;
 		}
 
+		// Initialize local-first databases (opens IndexedDB, seeds guest data)
+		await Promise.all([manacoreStore.initialize(), tagLocalStore.initialize()]);
+
+		// Start syncing to server
+		const getToken = () => authStore.getValidToken();
+		manacoreStore.startSync(getToken);
+		tagMutations.startSync(getToken);
+
+		// Initialize dashboard from IndexedDB
+		await dashboardStore.initialize();
+
 		// Initialize collapsed state from localStorage
 		const savedCollapsed = localStorage.getItem(STORAGE_KEYS.NAV_COLLAPSED);
 		if (savedCollapsed === 'true') {
@@ -202,14 +220,8 @@
 			collapsedStore.set(true);
 		}
 
-		// Load user settings from server (don't await - let it load in background)
-		// Silently catch errors since settings endpoint may not exist yet
-		userSettings.load().catch(() => {
-			// Settings API not available - use defaults
-		});
-
-		// Load tags
-		tagStore.fetchTags();
+		// Load user settings from server (still needed for shared-theme sync)
+		userSettings.load().catch(() => {});
 
 		// Load onboarding state and show wizard if needed
 		onboardingStore.load();
@@ -281,7 +293,7 @@
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
 			<TagStrip
-				tags={tagStore.tags.map((t) => ({
+				tags={(allTags.value ?? []).map((t) => ({
 					id: t.id,
 					name: t.name,
 					color: t.color || '#3b82f6',
@@ -290,7 +302,7 @@
 				onToggle={() => {}}
 				onClear={() => {}}
 				managementHref="/tags"
-				loading={tagStore.loading}
+				loading={allTags.loading}
 			/>
 		{/if}
 

@@ -9,8 +9,8 @@
 	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 	import DashboardGrid from '$lib/components/dashboard/DashboardGrid.svelte';
 
-	onMount(() => {
-		dashboardStore.initialize();
+	onMount(async () => {
+		await dashboardStore.initialize();
 	});
 
 	function handleToggleEditing() {

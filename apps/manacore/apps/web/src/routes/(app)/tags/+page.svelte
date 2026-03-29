@@ -1,12 +1,7 @@
 <script lang="ts">
-	import { tagStore } from '$lib/stores/tags.svelte';
-	import { onMount } from 'svelte';
+	import { useAllTags } from '$lib/stores/tags.svelte';
 
-	onMount(() => {
-		if (tagStore.tags.length === 0) {
-			tagStore.fetchTags();
-		}
-	});
+	const tags = useAllTags();
 </script>
 
 <svelte:head>
@@ -15,19 +10,19 @@
 
 <div class="tags-page">
 	<h1>Tags verwalten</h1>
-	<p class="text-sm text-muted-foreground mb-4">
+	<p class="mb-4 text-sm text-muted-foreground">
 		Tags sind app-übergreifend — Änderungen gelten in allen ManaCore-Apps.
 	</p>
 
-	{#if tagStore.loading}
+	{#if tags.loading}
 		<p>Lädt...</p>
-	{:else if tagStore.tags.length === 0}
+	{:else if (tags.value ?? []).length === 0}
 		<p>Keine Tags vorhanden.</p>
 	{:else}
 		<div class="grid gap-2">
-			{#each tagStore.tags as tag}
-				<div class="flex items-center gap-2 p-2 rounded-lg bg-card">
-					<span class="w-3 h-3 rounded-full" style="background-color: {tag.color}"></span>
+			{#each tags.value ?? [] as tag}
+				<div class="flex items-center gap-2 rounded-lg bg-card p-2">
+					<span class="h-3 w-3 rounded-full" style="background-color: {tag.color}"></span>
 					<span>{tag.name}</span>
 				</div>
 			{/each}
