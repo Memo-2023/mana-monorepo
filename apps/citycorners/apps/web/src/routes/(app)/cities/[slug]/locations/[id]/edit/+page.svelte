@@ -4,8 +4,7 @@
 	import { page } from '$app/stores';
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { api } from '$lib/api';
-	import type { LocalCity } from '$lib/data/local-store';
+	import { locationCollection, type LocalCity } from '$lib/data/local-store';
 
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
@@ -42,12 +41,9 @@
 
 	onMount(async () => {
 		try {
-			const res = await fetch(api(`/locations/${$page.params.id}`));
-			const data = await res.json();
-			const loc = data.location;
-
-			if (loc.createdBy && loc.createdBy !== authStore.user?.id) {
-				forbidden = true;
+			const loc = await locationCollection.getById($page.params.id);
+			if (!loc) {
+				error = $_('edit.loadError');
 				return;
 			}
 
@@ -56,8 +52,6 @@
 			description = loc.description || '';
 			address = loc.address || '';
 			imageUrl = loc.imageUrl || '';
-			website = loc.website || '';
-			phone = loc.phone || '';
 		} catch {
 			error = $_('edit.loadError');
 		} finally {
@@ -72,37 +66,14 @@
 		error = '';
 
 		try {
-			const token = await authStore.getValidToken();
-			if (!token) {
-				error = $_('add.loginRequired');
-				return;
-			}
-
-			const body: Record<string, unknown> = {
+			await locationCollection.update($page.params.id, {
 				name: name.trim(),
-				category,
+				category: category as any,
 				description: description.trim(),
-				address: address.trim() || undefined,
-				imageUrl: imageUrl.trim() || undefined,
-				website: website.trim() || undefined,
-				phone: phone.trim() || undefined,
-			};
-
-			const res = await fetch(api(`/locations/${$page.params.id}`), {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify(body),
+				address: address.trim() || null,
+				imageUrl: imageUrl.trim() || null,
 			});
-
-			if (res.ok) {
-				goto(`/cities/${citySlug}/locations/${$page.params.id}`);
-			} else {
-				const data = await res.json().catch(() => ({}));
-				error = data.message || $_('edit.error');
-			}
+			goto(`/cities/${citySlug}/locations/${$page.params.id}`);
 		} catch {
 			error = $_('edit.error');
 		} finally {

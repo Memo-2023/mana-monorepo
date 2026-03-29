@@ -4,18 +4,14 @@
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { api } from '$lib/api';
-	import type { LocalCity } from '$lib/data/local-store';
+	import { locationCollection, type LocalCity, type LocalLocation } from '$lib/data/local-store';
 
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
 	let citySlug = $derived($page.params.slug);
 
-	// Lookup state
-	let searchQuery = $state('');
-	let searching = $state(false);
-	let lookupDone = $state(false);
-	let sources = $state<{ url: string; title: string }[]>([]);
+	// Lookup state (skip lookup — no backend)
+	let lookupDone = $state(true);
 
 	// Form state
 	let name = $state('');
@@ -158,43 +154,23 @@
 		error = '';
 
 		try {
-			const token = await authStore.getValidToken();
-			if (!token) {
-				error = $_('add.loginRequired');
-				return;
-			}
+			const locId = `loc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-			const body: Record<string, unknown> = {
-				name: name.trim(),
-				category,
-				description: description.trim(),
+			const locData: Omit<LocalLocation, 'createdAt' | 'updatedAt' | 'deletedAt'> = {
+				id: locId,
 				cityId: city.id,
+				name: name.trim(),
+				category: category as LocalLocation['category'],
+				description: description.trim(),
+				address: address.trim() || null,
+				imageUrl: imageUrl.trim() && !imageError ? imageUrl.trim() : null,
+				latitude: latitude ?? null,
+				longitude: longitude ?? null,
+				timeline: null,
 			};
-			if (address.trim()) body.address = address.trim();
-			if (imageUrl.trim() && !imageError) body.imageUrl = imageUrl.trim();
-			if (website.trim()) body.website = website.trim();
-			if (phone.trim()) body.phone = phone.trim();
-			if (latitude !== undefined && longitude !== undefined) {
-				body.latitude = latitude;
-				body.longitude = longitude;
-			}
 
-			const res = await fetch(api('/locations'), {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify(body),
-			});
-
-			if (res.ok) {
-				const data = await res.json();
-				goto(`/cities/${citySlug}/locations/${data.location.id}`);
-			} else {
-				const data = await res.json().catch(() => ({}));
-				error = data.message || $_('add.error');
-			}
+			await locationCollection.insert(locData);
+			goto(`/cities/${citySlug}/locations/${locId}`);
 		} catch {
 			error = $_('add.error');
 		} finally {

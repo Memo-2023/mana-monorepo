@@ -3,26 +3,15 @@
 	import { browser } from '$app/environment';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
-	import { api } from '$lib/api';
-	import type { LocalCity } from '$lib/data/local-store';
+	import { useAllLocations, filterByCity } from '$lib/data/queries';
+	import type { LocalCity, LocalLocation } from '$lib/data/local-store';
 
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
 	let citySlug = $derived($page.params.slug);
 
-	interface Location {
-		id: string;
-		slug?: string;
-		name: string;
-		category: string;
-		description: string;
-		address?: string;
-		latitude?: number;
-		longitude?: number;
-		imageUrl?: string;
-	}
-
-	let locations = $state<Location[]>([]);
+	const allLocations = useAllLocations();
+	let cityLocations = $derived(city ? filterByCity(allLocations.value, city.id) : []);
 	let mapContainer: HTMLDivElement;
 	let map: any = null;
 	let locating = $state(false);
@@ -74,8 +63,8 @@
 		allMarkers = [];
 
 		const filtered = selectedCategory
-			? locations.filter((l) => l.category === selectedCategory)
-			: locations;
+			? cityLocations.filter((l) => l.category === selectedCategory)
+			: cityLocations;
 
 		const useCluster = filtered.length >= 10;
 
@@ -122,16 +111,6 @@
 	}
 
 	onMount(async () => {
-		try {
-			const params = new URLSearchParams({ limit: '100' });
-			if (city) params.set('cityId', city.id);
-			const res = await fetch(api(`/locations?${params}`));
-			const data = await res.json();
-			locations = data.locations;
-		} catch (err) {
-			console.error('Failed to load locations:', err);
-		}
-
 		if (!browser) return;
 
 		leafletLib = await import('leaflet');
@@ -158,7 +137,9 @@
 	});
 
 	$effect(() => {
-		const _ = selectedCategory;
+		// Re-render markers when category filter or locations change
+		const _cat = selectedCategory;
+		const _locs = cityLocations;
 		if (map && leafletLib) {
 			updateMarkers();
 		}

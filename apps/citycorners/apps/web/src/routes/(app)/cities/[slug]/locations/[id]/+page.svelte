@@ -6,10 +6,14 @@
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
-	import { useAllFavorites, getFavoriteIds } from '$lib/data/queries';
-	import { api } from '$lib/api';
+	import {
+		useAllFavorites,
+		useAllLocations,
+		getFavoriteIds,
+		filterByCity,
+	} from '$lib/data/queries';
+	import { locationCollection, type LocalCity } from '$lib/data/local-store';
 	import { isOpenNow } from '$lib/opening-hours';
-	import type { LocalCity } from '$lib/data/local-store';
 
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
@@ -127,27 +131,63 @@
 		return imgs;
 	});
 
+	const allLocs = useAllLocations();
+
 	onMount(async () => {
 		try {
-			const [locRes, nearbyRes] = await Promise.all([
-				fetch(api(`/locations/${$page.params.id}`)),
-				fetch(api(`/locations/${$page.params.id}/nearby`)),
-			]);
-			const locData = await locRes.json();
-			location = locData.location;
+			const locId = $page.params.id;
+			const loc = await locationCollection.getById(locId);
+			if (loc) {
+				location = {
+					id: loc.id,
+					name: loc.name,
+					category: loc.category,
+					description: loc.description || '',
+					address: loc.address || undefined,
+					latitude: loc.latitude || undefined,
+					longitude: loc.longitude || undefined,
+					imageUrl: loc.imageUrl || undefined,
+					timeline: loc.timeline?.map((t) => ({ year: String(t.year), event: t.event })),
+				};
 
-			if (nearbyRes.ok) {
-				const nearbyData = await nearbyRes.json();
-				nearbyLocations = nearbyData.locations || [];
+				// Find nearby locations from the same city
+				if (city && loc.latitude && loc.longitude) {
+					const cityLocs = filterByCity(allLocs.value, city.id).filter(
+						(l) => l.id !== locId && l.latitude && l.longitude
+					);
+					nearbyLocations = cityLocs
+						.map((l) => {
+							const dist = Math.round(
+								haversine(loc.latitude!, loc.longitude!, l.latitude!, l.longitude!)
+							);
+							return {
+								id: l.id,
+								name: l.name,
+								category: l.category,
+								imageUrl: l.imageUrl || undefined,
+								distance: dist,
+							};
+						})
+						.sort((a, b) => a.distance - b.distance)
+						.slice(0, 5);
+				}
 			}
 		} catch (err) {
 			console.error('Failed to load location:', err);
 		} finally {
 			loading = false;
 		}
-
-		loadReviews();
 	});
+
+	function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
+		const R = 6371000;
+		const dLat = ((lat2 - lat1) * Math.PI) / 180;
+		const dLon = ((lon2 - lon1) * Math.PI) / 180;
+		const a =
+			Math.sin(dLat / 2) ** 2 +
+			Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+		return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+	}
 
 	$effect(() => {
 		if (!browser || !location || !location.latitude || !location.longitude || !mapContainer) return;
@@ -199,115 +239,13 @@
 		if (!location || deleting) return;
 		deleting = true;
 		try {
-			const token = await authStore.getValidToken();
-			const res = await fetch(api(`/locations/${location.id}`), {
-				method: 'DELETE',
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			if (res.ok) goto(`/cities/${citySlug}`);
+			await locationCollection.delete(location.id);
+			goto(`/cities/${citySlug}`);
 		} catch {
 			// ignore
 		} finally {
 			deleting = false;
 			showDeleteConfirm = false;
-		}
-	}
-
-	async function handleAddPhoto() {
-		if (!newPhotoUrl.trim() || !location || addingPhoto) return;
-		addingPhoto = true;
-		photoError = '';
-		try {
-			const token = await authStore.getValidToken();
-			const res = await fetch(api(`/locations/${location.id}/images`), {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({ imageUrl: newPhotoUrl.trim() }),
-			});
-			if (res.ok) {
-				const data = await res.json();
-				location = data.location;
-				newPhotoUrl = '';
-				showAddPhoto = false;
-			} else {
-				photoError = $_('gallery.addError');
-			}
-		} catch {
-			photoError = $_('gallery.addError');
-		} finally {
-			addingPhoto = false;
-		}
-	}
-
-	async function loadReviews() {
-		if (!location) return;
-		try {
-			const res = await fetch(api(`/reviews/${location.id}`));
-			if (res.ok) {
-				const data = await res.json();
-				reviews = data.reviews || [];
-			}
-		} catch {
-			// ignore
-		}
-	}
-
-	async function handleSubmitReview() {
-		if (!location || submittingReview || reviewRating === 0) return;
-		submittingReview = true;
-		reviewError = '';
-		try {
-			const token = await authStore.getValidToken();
-			const res = await fetch(api(`/reviews/${location.id}`), {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({
-					rating: reviewRating,
-					comment: reviewComment.trim() || undefined,
-				}),
-			});
-			if (res.ok) {
-				reviewRating = 0;
-				reviewComment = '';
-				showReviewForm = false;
-				await loadReviews();
-				const statsRes = await fetch(api(`/reviews/${location.id}/stats`));
-				if (statsRes.ok) {
-					const statsData = await statsRes.json();
-					location = { ...location, reviewStats: statsData.stats };
-				}
-			} else {
-				reviewError = $_('reviews.error');
-			}
-		} catch {
-			reviewError = $_('reviews.error');
-		} finally {
-			submittingReview = false;
-		}
-	}
-
-	async function handleDeleteReview() {
-		if (!location) return;
-		try {
-			const token = await authStore.getValidToken();
-			await fetch(api(`/reviews/${location.id}`), {
-				method: 'DELETE',
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			await loadReviews();
-			const statsRes = await fetch(api(`/reviews/${location.id}/stats`));
-			if (statsRes.ok) {
-				const statsData = await statsRes.json();
-				location = { ...location, reviewStats: statsData.stats };
-			}
-		} catch {
-			// ignore
 		}
 	}
 

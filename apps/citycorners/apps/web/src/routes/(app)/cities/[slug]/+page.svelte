@@ -1,47 +1,26 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
-	import { useAllFavorites, getFavoriteIds } from '$lib/data/queries';
-	import { api } from '$lib/api';
+	import {
+		useAllLocations,
+		useAllFavorites,
+		getFavoriteIds,
+		filterByCity,
+		filterByCategory,
+	} from '$lib/data/queries';
 	import { isOpenNow } from '$lib/opening-hours';
 	import type { LocalCity } from '$lib/data/local-store';
 
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
 
+	const allLocations = useAllLocations();
 	const allFavorites = useAllFavorites();
 	let favoriteIds = $derived(getFavoriteIds(allFavorites.value));
 
-	interface Location {
-		id: string;
-		slug?: string;
-		name: string;
-		category: string;
-		description: string;
-		address?: string;
-		latitude?: number;
-		longitude?: number;
-		imageUrl?: string;
-		openingHours?: Record<string, string>;
-		reviewStats?: { averageRating: number; totalReviews: number };
-		createdBy?: string;
-	}
-
-	interface Pagination {
-		total: number;
-		page: number;
-		limit: number;
-		totalPages: number;
-	}
-
-	let locations = $state<Location[]>([]);
-	let pagination = $state<Pagination | null>(null);
-	let loading = $state(true);
-	let loadingMore = $state(false);
 	let selectedCategory = $state<string | null>(null);
 
 	const categoryKeys = [
@@ -58,64 +37,22 @@
 		'viewpoint',
 	];
 
+	// Filter locations by city
+	let cityLocations = $derived(city ? filterByCity(allLocations.value, city.id) : []);
+
 	let categoryCounts = $derived(
 		categoryKeys.reduce(
 			(acc, cat) => {
-				acc[cat] = locations.filter((l) => l.category === cat).length;
+				acc[cat] = cityLocations.filter((l) => l.category === cat).length;
 				return acc;
 			},
 			{} as Record<string, number>
 		)
 	);
 
-	let filtered = $derived(
-		selectedCategory ? locations.filter((l) => l.category === selectedCategory) : locations
-	);
-
-	let hasMore = $derived(pagination ? pagination.page < pagination.totalPages : false);
+	let filtered = $derived(filterByCategory(cityLocations, selectedCategory));
 
 	let citySlug = $derived($page.params.slug);
-
-	async function loadLocations(page = 1, append = false) {
-		if (page === 1) loading = true;
-		else loadingMore = true;
-
-		try {
-			const params = new URLSearchParams({ page: String(page), limit: '20' });
-			if (selectedCategory) params.set('category', selectedCategory);
-			if (city) params.set('cityId', city.id);
-			const res = await fetch(api(`/locations?${params}`));
-			const data = await res.json();
-			if (append) {
-				locations = [...locations, ...data.locations];
-			} else {
-				locations = data.locations;
-			}
-			pagination = data.pagination;
-		} catch (err) {
-			console.error('Failed to load locations:', err);
-		} finally {
-			loading = false;
-			loadingMore = false;
-		}
-	}
-
-	function loadMore() {
-		if (pagination && hasMore && !loadingMore) {
-			loadLocations(pagination.page + 1, true);
-		}
-	}
-
-	onMount(() => {
-		loadLocations();
-	});
-
-	$effect(() => {
-		const _ = selectedCategory;
-		if (!loading || locations.length > 0) {
-			loadLocations(1);
-		}
-	});
 
 	function handleFavoriteToggle(e: MouseEvent, locationId: string) {
 		e.preventDefault();
@@ -168,8 +105,7 @@
 			: 'bg-background-card text-foreground-secondary hover:bg-background-card-hover'}"
 		onclick={() => (selectedCategory = null)}
 	>
-		{$_('home.all')}
-		{pagination ? `(${pagination.total})` : ''}
+		{$_('home.all')} ({cityLocations.length})
 	</button>
 	{#each categoryKeys as cat}
 		{@const count = categoryCounts[cat] || 0}
@@ -186,13 +122,7 @@
 	{/each}
 </div>
 
-{#if loading}
-	<div class="flex items-center justify-center py-12">
-		<div
-			class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
-		></div>
-	</div>
-{:else if filtered.length === 0}
+{#if filtered.length === 0}
 	<div class="py-12 text-center">
 		<span class="mb-2 block text-4xl">📍</span>
 		<p class="text-foreground-secondary">
@@ -212,7 +142,7 @@
 	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 		{#each filtered as location}
 			<a
-				href="/cities/{citySlug}/locations/{location.slug || location.id}"
+				href="/cities/{citySlug}/locations/{location.id}"
 				class="group relative overflow-hidden rounded-xl border border-border bg-background-card transition-shadow hover:shadow-lg"
 			>
 				{#if location.imageUrl}
@@ -263,67 +193,17 @@
 						<span class="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
 							{$_(`categories.${location.category}`)}
 						</span>
-						{#if isOpenNow(location.openingHours) === true}
-							<span
-								class="inline-block rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400"
-							>
-								{$_('detail.openNow')}
-							</span>
-						{:else if isOpenNow(location.openingHours) === false}
-							<span
-								class="inline-block rounded-full bg-red-500/10 px-2 py-0.5 text-xs text-red-500 dark:text-red-400"
-							>
-								{$_('detail.closedNow')}
-							</span>
-						{/if}
 					</div>
 					<h2 class="text-lg font-semibold text-foreground group-hover:text-primary">
 						{location.name}
 					</h2>
-					<p class="mt-1 line-clamp-2 text-sm text-foreground-secondary">
-						{location.description}
-					</p>
-					{#if location.reviewStats && location.reviewStats.totalReviews > 0}
-						<div class="mt-2 flex items-center gap-1.5 text-xs text-foreground-secondary">
-							<div class="flex items-center gap-0.5">
-								{#each Array(5) as _, i}
-									<svg
-										class="h-3.5 w-3.5 {i < Math.round(location.reviewStats.averageRating)
-											? 'text-amber-400'
-											: 'text-gray-300 dark:text-gray-600'}"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-									>
-										<path
-											d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-										/>
-									</svg>
-								{/each}
-							</div>
-							<span>{location.reviewStats.averageRating.toFixed(1)}</span>
-							<span class="text-foreground-secondary/60">({location.reviewStats.totalReviews})</span
-							>
-						</div>
+					{#if location.description}
+						<p class="mt-1 line-clamp-2 text-sm text-foreground-secondary">
+							{location.description}
+						</p>
 					{/if}
 				</div>
 			</a>
 		{/each}
 	</div>
-
-	{#if hasMore}
-		<div class="mt-8 text-center">
-			<button
-				onclick={loadMore}
-				disabled={loadingMore}
-				class="rounded-lg border border-border bg-background-card px-6 py-2.5 text-sm font-medium text-foreground-secondary transition-colors hover:bg-background-card-hover hover:text-foreground disabled:opacity-50"
-			>
-				{#if loadingMore}
-					<div
-						class="inline-block h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2 align-middle"
-					></div>
-				{/if}
-				{$_('home.loadMore')}
-			</button>
-		</div>
-	{/if}
 {/if}
