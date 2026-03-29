@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from './task-parser';
+import {
+	parseTaskInput,
+	resolveTaskIds,
+	formatParsedTaskPreview,
+	parseMultiTaskInput,
+	formatDuration,
+} from './task-parser';
 
 describe('parseTaskInput', () => {
 	it('should parse a simple title', () => {
@@ -198,5 +204,138 @@ describe('formatParsedTaskPreview', () => {
 		const parsed = parseTaskInput('Task !!! @Arbeit');
 		const preview = formatParsedTaskPreview(parsed);
 		expect(preview).toContain(' · ');
+	});
+
+	it('should format duration in preview', () => {
+		const parsed = parseTaskInput('Meeting 30min');
+		const preview = formatParsedTaskPreview(parsed);
+		expect(preview).toContain('30min');
+	});
+});
+
+describe('duration extraction', () => {
+	it('should parse "30min"', () => {
+		const result = parseTaskInput('Meeting 30min');
+		expect(result.estimatedDuration).toBe(30);
+		expect(result.title).toBe('Meeting');
+	});
+
+	it('should parse "2h"', () => {
+		const result = parseTaskInput('Workshop 2h');
+		expect(result.estimatedDuration).toBe(120);
+		expect(result.title).toBe('Workshop');
+	});
+
+	it('should parse "1.5 Stunden"', () => {
+		const result = parseTaskInput('Recherche 1.5 Stunden');
+		expect(result.estimatedDuration).toBe(90);
+		expect(result.title).not.toContain('Stunden');
+	});
+
+	it('should parse "45 Minuten"', () => {
+		const result = parseTaskInput('Joggen 45 Minuten');
+		expect(result.estimatedDuration).toBe(45);
+	});
+
+	it('should parse "1,5h" with comma decimal', () => {
+		const result = parseTaskInput('Coding 1,5h');
+		expect(result.estimatedDuration).toBe(90);
+	});
+
+	it('should not extract duration when not present', () => {
+		const result = parseTaskInput('Einkaufen gehen');
+		expect(result.estimatedDuration).toBeUndefined();
+	});
+
+	it('should work with other fields', () => {
+		const result = parseTaskInput('Meeting 2h morgen !! @Arbeit');
+		expect(result.estimatedDuration).toBe(120);
+		expect(result.priority).toBe('high');
+		expect(result.projectName).toBe('Arbeit');
+	});
+});
+
+describe('parseMultiTaskInput', () => {
+	it('should return single task for simple input', () => {
+		const tasks = parseMultiTaskInput('Einkaufen gehen');
+		expect(tasks).toHaveLength(1);
+		expect(tasks[0].title).toBe('Einkaufen gehen');
+	});
+
+	it('should split on "danach"', () => {
+		const tasks = parseMultiTaskInput('Zahnarzt danach Einkaufen');
+		expect(tasks).toHaveLength(2);
+		expect(tasks[0].title).toBe('Zahnarzt');
+		expect(tasks[1].title).toBe('Einkaufen');
+	});
+
+	it('should split on "dann"', () => {
+		const tasks = parseMultiTaskInput('Kochen dann Abwaschen');
+		expect(tasks).toHaveLength(2);
+		expect(tasks[0].title).toBe('Kochen');
+		expect(tasks[1].title).toBe('Abwaschen');
+	});
+
+	it('should split on semicolon', () => {
+		const tasks = parseMultiTaskInput('Mails; Report; Meeting');
+		expect(tasks).toHaveLength(3);
+		expect(tasks[0].title).toBe('Mails');
+		expect(tasks[1].title).toBe('Report');
+		expect(tasks[2].title).toBe('Meeting');
+	});
+
+	it('should inherit date context from first task', () => {
+		const tasks = parseMultiTaskInput('Morgen Zahnarzt danach Einkaufen');
+		expect(tasks).toHaveLength(2);
+		expect(tasks[0].dueDate).toBeDefined();
+		expect(tasks[1].dueDate).toBeDefined();
+		// Both should be tomorrow
+		expect(tasks[0].dueDate!.toDateString()).toBe(tasks[1].dueDate!.toDateString());
+	});
+
+	it('should inherit project context from first task', () => {
+		const tasks = parseMultiTaskInput('Meeting @Arbeit danach Report schreiben');
+		expect(tasks).toHaveLength(2);
+		expect(tasks[0].projectName).toBe('Arbeit');
+		expect(tasks[1].projectName).toBe('Arbeit');
+	});
+
+	it('should offset time when first task has duration', () => {
+		const tasks = parseMultiTaskInput('Meeting 14 Uhr 1h danach Notizen');
+		expect(tasks).toHaveLength(2);
+		expect(tasks[0].dueDate).toBeDefined();
+		expect(tasks[1].dueDate).toBeDefined();
+		// Second task should start at 15:00
+		expect(tasks[1].dueDate!.getHours()).toBe(15);
+		expect(tasks[1].dueDate!.getMinutes()).toBe(0);
+	});
+
+	it('should not split on "dann" inside a word', () => {
+		const tasks = parseMultiTaskInput('Dokumentation lesen');
+		expect(tasks).toHaveLength(1);
+	});
+
+	it('should handle ", danach" pattern', () => {
+		const tasks = parseMultiTaskInput('Zahnarzt, danach Apotheke');
+		expect(tasks).toHaveLength(2);
+		expect(tasks[0].title).toBe('Zahnarzt');
+		expect(tasks[1].title).toBe('Apotheke');
+	});
+});
+
+describe('formatDuration', () => {
+	it('should format minutes only', () => {
+		expect(formatDuration(30)).toBe('30min');
+		expect(formatDuration(5)).toBe('5min');
+	});
+
+	it('should format full hours', () => {
+		expect(formatDuration(60)).toBe('1h');
+		expect(formatDuration(120)).toBe('2h');
+	});
+
+	it('should format hours and minutes', () => {
+		expect(formatDuration(90)).toBe('1h 30min');
+		expect(formatDuration(75)).toBe('1h 15min');
 	});
 });

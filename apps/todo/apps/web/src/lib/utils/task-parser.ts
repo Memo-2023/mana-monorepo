@@ -20,11 +20,13 @@ import type { TaskPriority } from '@todo/shared';
 export interface ParsedTask {
 	title: string;
 	dueDate?: Date;
+	dueTime?: string; // HH:mm format
 	priority?: TaskPriority;
 	projectName?: string;
 	labelNames: string[];
 	recurrenceRule?: string;
 	subtasks?: string[];
+	estimatedDuration?: number; // in minutes
 }
 
 interface Project {
@@ -40,11 +42,13 @@ interface Label {
 export interface ParsedTaskWithIds {
 	title: string;
 	dueDate?: string;
+	dueTime?: string;
 	priority?: TaskPriority;
 	projectId?: string;
 	labelIds: string[];
 	recurrenceRule?: string;
 	subtasks?: string[];
+	estimatedDuration?: number;
 }
 
 // Priority keyword translations per locale
@@ -58,6 +62,147 @@ const PRIORITY_KEYWORDS: Record<
 	es: { urgent: 'urgente', high: 'importante', medium: 'normal', low: 'despu[eé]s' },
 	it: { urgent: 'urgente', high: 'importante', medium: 'normale', low: 'dopo' },
 };
+
+// ─── Duration Extraction ───────────────────────────────────
+
+const DURATION_PATTERNS: Record<ParserLocale, RegExp[]> = {
+	de: [
+		/(\d+(?:[.,]\d+)?)\s*(?:std|stunden?)\b/i,
+		/(\d+(?:[.,]\d+)?)\s*h\b/i,
+		/(\d+)\s*min(?:uten?)?\b/i,
+		/(\d+(?:[.,]\d+)?)\s*(?:tage?)\b/i,
+	],
+	en: [
+		/(\d+(?:[.,]\d+)?)\s*(?:hours?|hrs?)\b/i,
+		/(\d+(?:[.,]\d+)?)\s*h\b/i,
+		/(\d+)\s*min(?:utes?)?\b/i,
+		/(\d+(?:[.,]\d+)?)\s*(?:days?)\b/i,
+	],
+	fr: [
+		/(\d+(?:[.,]\d+)?)\s*(?:heures?|hrs?)\b/i,
+		/(\d+(?:[.,]\d+)?)\s*h\b/i,
+		/(\d+)\s*min(?:utes?)?\b/i,
+		/(\d+(?:[.,]\d+)?)\s*(?:jours?)\b/i,
+	],
+	es: [
+		/(\d+(?:[.,]\d+)?)\s*(?:horas?|hrs?)\b/i,
+		/(\d+(?:[.,]\d+)?)\s*h\b/i,
+		/(\d+)\s*min(?:utos?)?\b/i,
+		/(\d+(?:[.,]\d+)?)\s*(?:días?)\b/i,
+	],
+	it: [
+		/(\d+(?:[.,]\d+)?)\s*(?:ore?)\b/i,
+		/(\d+(?:[.,]\d+)?)\s*h\b/i,
+		/(\d+)\s*min(?:uti?)?\b/i,
+		/(\d+(?:[.,]\d+)?)\s*(?:giorni?)\b/i,
+	],
+};
+
+// Multiplier: [hours, hours, minutes, days]
+const DURATION_MULTIPLIERS = [60, 60, 1, 480];
+
+/**
+ * Extract duration from text (e.g. "30min", "2h", "1.5 Stunden")
+ * Returns duration in minutes.
+ */
+function extractDuration(
+	text: string,
+	locale: ParserLocale = 'de'
+): { duration?: number; remaining: string } {
+	const patterns = DURATION_PATTERNS[locale];
+	for (let i = 0; i < patterns.length; i++) {
+		const match = text.match(patterns[i]);
+		if (match) {
+			const value = parseFloat(match[1].replace(',', '.'));
+			const minutes = Math.round(value * DURATION_MULTIPLIERS[i]);
+			if (minutes > 0) {
+				return {
+					duration: minutes,
+					remaining: text
+						.replace(match[0], '')
+						.replace(/\s{2,}/g, ' ')
+						.trim(),
+				};
+			}
+		}
+	}
+	return { remaining: text };
+}
+
+// ─── Multi-Task Splitting ──────────────────────────────────
+
+const TASK_SPLITTERS =
+	/\s*(?:,\s*(?:danach|dann|und dann|anschließend|außerdem|afterwards|then|and then|also)\s+|;\s*|\s+(?:danach|dann|und dann|anschließend|afterwards|then|and then)\s+)/i;
+
+/**
+ * Parse input that may contain multiple tasks separated by keywords.
+ * Subsequent tasks inherit date/time context from the first task.
+ *
+ * Examples:
+ * - "Morgen um 10 Zahnarzt, danach Einkaufen" → 2 tasks, both morgen
+ * - "Meeting 14 Uhr 1h; Report schreiben; Mails beantworten" → 3 tasks
+ */
+export function parseMultiTaskInput(input: string, locale: ParserLocale = 'de'): ParsedTask[] {
+	const parts = input.split(TASK_SPLITTERS).filter((s) => s.trim().length > 0);
+
+	if (parts.length <= 1) {
+		return [parseTaskInput(input, locale)];
+	}
+
+	const results: ParsedTask[] = [];
+	let contextDate: Date | undefined;
+	let contextTime: string | undefined;
+	let contextProject: string | undefined;
+	let lastEndMinutes: number | undefined; // track end time for "danach" offset
+
+	for (let i = 0; i < parts.length; i++) {
+		const parsed = parseTaskInput(parts[i].trim(), locale);
+
+		if (i === 0) {
+			// First task sets the context
+			contextDate = parsed.dueDate;
+			contextTime = parsed.dueTime;
+			contextProject = parsed.projectName;
+
+			// Calculate end time if duration is known
+			if (parsed.dueDate && parsed.estimatedDuration) {
+				lastEndMinutes =
+					parsed.dueDate.getHours() * 60 + parsed.dueDate.getMinutes() + parsed.estimatedDuration;
+			} else if (parsed.dueDate) {
+				lastEndMinutes = parsed.dueDate.getHours() * 60 + parsed.dueDate.getMinutes();
+			}
+		} else {
+			// Inherit context if not explicitly set
+			if (!parsed.dueDate && contextDate) {
+				// If we have a lastEndMinutes from previous task, use that as start time
+				if (lastEndMinutes !== undefined && lastEndMinutes > 0) {
+					const inherited = new Date(contextDate);
+					inherited.setHours(Math.floor(lastEndMinutes / 60), lastEndMinutes % 60, 0, 0);
+					parsed.dueDate = inherited;
+					parsed.dueTime = `${String(Math.floor(lastEndMinutes / 60)).padStart(2, '0')}:${String(lastEndMinutes % 60).padStart(2, '0')}`;
+				} else {
+					parsed.dueDate = contextDate;
+					parsed.dueTime = contextTime;
+				}
+			}
+			if (!parsed.projectName && contextProject) {
+				parsed.projectName = contextProject;
+			}
+
+			// Update end time for next task
+			if (parsed.dueDate && parsed.estimatedDuration) {
+				lastEndMinutes =
+					parsed.dueDate.getHours() * 60 + parsed.dueDate.getMinutes() + parsed.estimatedDuration;
+			} else if (parsed.dueDate) {
+				lastEndMinutes = undefined; // no duration → can't offset further
+			}
+		}
+
+		results.push(parsed);
+	}
+
+	return results;
+}
 
 /**
  * Extract subtasks from "Title: item1, item2, item3" pattern
@@ -139,6 +284,11 @@ export function parseTaskInput(input: string, locale: ParserLocale = 'de'): Pars
 	text = priorityResult.remaining;
 	const priority = priorityResult.priority;
 
+	// Extract duration (before date parsing to avoid "2h" being confused)
+	const durationResult = extractDuration(text, locale);
+	text = durationResult.remaining;
+	const estimatedDuration = durationResult.duration;
+
 	// Extract project (@ProjectName) - task-specific
 	const projectResult = extractAtReference(text);
 	text = projectResult.remaining;
@@ -150,17 +300,24 @@ export function parseTaskInput(input: string, locale: ParserLocale = 'de'): Pars
 	// Combine date and time
 	const dueDate = combineDateAndTime(base.date, base.time);
 
+	// Preserve time as HH:mm string for context inheritance
+	const dueTime = base.time
+		? `${String(base.time.hours).padStart(2, '0')}:${String(base.time.minutes).padStart(2, '0')}`
+		: undefined;
+
 	// Check for subtask pattern "Title: item1, item2, item3"
 	const subtaskResult = extractSubtasks(base.title);
 
 	return {
 		title: subtaskResult.title,
 		dueDate,
+		dueTime,
 		priority,
 		projectName,
 		labelNames: base.tagNames,
 		recurrenceRule,
 		subtasks: subtaskResult.subtasks,
+		estimatedDuration,
 	};
 }
 
@@ -196,11 +353,13 @@ export function resolveTaskIds(
 	return {
 		title: parsed.title,
 		dueDate: parsed.dueDate?.toISOString(),
+		dueTime: parsed.dueTime,
 		priority: parsed.priority,
 		projectId,
 		labelIds,
 		recurrenceRule: parsed.recurrenceRule,
 		subtasks: parsed.subtasks,
+		estimatedDuration: parsed.estimatedDuration,
 	};
 }
 
@@ -212,6 +371,16 @@ const PRIORITY_LABELS: Record<ParserLocale, Record<TaskPriority, string>> = {
 	es: { low: '🟢 Después', medium: '🟡 Normal', high: '🟠 Importante', urgent: '🔴 Urgente' },
 	it: { low: '🟢 Dopo', medium: '🟡 Normale', high: '🟠 Importante', urgent: '🔴 Urgente' },
 };
+
+/**
+ * Format duration in minutes to human-readable string
+ */
+export function formatDuration(minutes: number): string {
+	if (minutes < 60) return `${minutes}min`;
+	const h = Math.floor(minutes / 60);
+	const m = minutes % 60;
+	return m > 0 ? `${h}h ${m}min` : `${h}h`;
+}
 
 /**
  * Format parsed task for preview display
@@ -243,6 +412,10 @@ export function formatParsedTaskPreview(parsed: ParsedTask, locale: ParserLocale
 
 	if (parsed.recurrenceRule) {
 		parts.push(`🔄 ${parsed.recurrenceRule}`);
+	}
+
+	if (parsed.estimatedDuration) {
+		parts.push(`⏱️ ${formatDuration(parsed.estimatedDuration)}`);
 	}
 
 	if (parsed.subtasks && parsed.subtasks.length > 0) {

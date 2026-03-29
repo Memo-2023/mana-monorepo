@@ -234,6 +234,26 @@ Recognized patterns:
 - **Project**: @Projektname
 - **Labels**: #label1 #label2
 - **Recurrence**: jeden Tag, wöchentlich, monatlich
+- **Duration**: 30min, 2h, 1.5 Stunden (maps to `estimatedDuration`)
+
+### Multi-Task Input
+
+Split multiple tasks with keywords (`danach`, `dann`, `und dann`, `anschließend`, `außerdem`) or semicolons:
+
+```
+"Morgen um 10 Zahnarzt 1h, danach Einkaufen"
+→ Task 1: Zahnarzt (morgen 10:00, 1h)
+→ Task 2: Einkaufen (morgen 11:00, auto-offset)
+
+"Meeting 14 Uhr 1h @Arbeit; Report schreiben; Mails"
+→ 3 tasks, all inherit date + project from first task
+```
+
+Context inheritance: subsequent tasks inherit date, time, and project from the first task. If the first task has a duration, the next task's time is offset accordingly.
+
+### Time Estimation
+
+QuickAdd suggests a duration based on completed task history (weighted by project, labels, title similarity, priority). The suggestion appears after 500ms typing pause and can be accepted with one click. Runs fully offline against IndexedDB — no AI/API calls.
 
 ## Code Style Guidelines
 

@@ -5,6 +5,15 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import type { Project } from '@todo/shared';
 	import { getActiveProjects, getProjectById } from '$lib/data/task-queries';
+	import {
+		parseMultiTaskInput,
+		resolveTaskIds,
+		formatParsedTaskPreview,
+		formatDuration,
+	} from '$lib/utils/task-parser';
+	import { estimateDuration, type CompletedTaskData } from '$lib/utils/time-estimator';
+	import { taskCollection } from '$lib/data/local-store';
+	import { labelCollection } from '$lib/data/local-store';
 
 	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import type { TaskPriority } from '@todo/shared';
@@ -16,7 +25,7 @@
 	let isLoading = $state(false);
 	let inputRef: HTMLInputElement;
 
-	// Task options
+	// Task options (used as fallback when parser doesn't extract these)
 	let selectedDate = $state<Date>(new Date());
 	let selectedPriority = $state<TaskPriority>('medium');
 	let selectedProjectId = $state<string | undefined>(undefined);
@@ -25,6 +34,12 @@
 	let showDatePicker = $state(false);
 	let showPriorityPicker = $state(false);
 	let showProjectPicker = $state(false);
+
+	// Parser preview
+	let parsePreview = $state('');
+	let parsedTaskCount = $state(0);
+	let durationEstimate = $state<{ minutes: number; confidence: string } | null>(null);
+	let estimateDebounce: ReturnType<typeof setTimeout> | undefined;
 
 	// Quick date options
 	const dateOptions = [
@@ -46,6 +61,66 @@
 		return format(selectedDate, 'dd. MMM', { locale: de });
 	});
 
+	// Update parse preview on input change
+	$effect(() => {
+		const text = inputValue.trim();
+		if (!text) {
+			parsePreview = '';
+			parsedTaskCount = 0;
+			durationEstimate = null;
+			return;
+		}
+
+		const tasks = parseMultiTaskInput(text);
+		parsedTaskCount = tasks.length;
+
+		// Build preview from first task
+		if (tasks.length > 0) {
+			const previews = tasks.map((t) => formatParsedTaskPreview(t)).filter(Boolean);
+			if (tasks.length > 1) {
+				previews.unshift(`${tasks.length} Aufgaben`);
+			}
+			parsePreview = previews.join(' · ');
+		}
+
+		// Debounced duration estimation
+		clearTimeout(estimateDebounce);
+		if (tasks.length === 1 && !tasks[0].estimatedDuration) {
+			estimateDebounce = setTimeout(() => runEstimate(tasks[0]), 500);
+		} else {
+			durationEstimate = null;
+		}
+	});
+
+	async function runEstimate(parsed: ReturnType<typeof parseMultiTaskInput>[0]) {
+		try {
+			const allTasks = await taskCollection.getAll();
+			const completed: CompletedTaskData[] = allTasks
+				.filter((t) => t.isCompleted && t.completedAt)
+				.map((t) => ({
+					title: t.title,
+					projectId: t.projectId,
+					priority: t.priority,
+					estimatedDuration: t.estimatedDuration,
+					completedAt: t.completedAt,
+					createdAt: t.createdAt,
+				}));
+
+			const estimate = estimateDuration(
+				{
+					title: parsed.title,
+					projectId: selectedProjectId,
+					priority: selectedPriority,
+				},
+				completed
+			);
+
+			durationEstimate = estimate;
+		} catch {
+			durationEstimate = null;
+		}
+	}
+
 	onMount(() => {
 		inputRef?.focus();
 
@@ -58,21 +133,42 @@
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
 
-		const title = inputValue.trim();
-		if (!title || isLoading) return;
+		const text = inputValue.trim();
+		if (!text || isLoading) return;
 
 		isLoading = true;
 
 		try {
-			await tasksStore.createTask({
-				title,
-				projectId: selectedProjectId,
-				dueDate: selectedDate.toISOString(),
-				priority: selectedPriority,
-			});
+			const projects = projectsCtx.value.map((p) => ({ id: p.id, name: p.name }));
+			const allLabels = await labelCollection.getAll();
+			const labels = allLabels.map((l) => ({ id: l.id, name: l.name }));
+
+			const parsedTasks = parseMultiTaskInput(text);
+
+			for (const parsed of parsedTasks) {
+				const resolved = resolveTaskIds(parsed, projects, labels);
+
+				await tasksStore.createTask({
+					title: resolved.title,
+					projectId: resolved.projectId ?? selectedProjectId,
+					dueDate: resolved.dueDate ?? selectedDate.toISOString(),
+					priority: resolved.priority ?? selectedPriority,
+					labelIds: resolved.labelIds.length > 0 ? resolved.labelIds : undefined,
+					recurrenceRule: resolved.recurrenceRule,
+					subtasks: resolved.subtasks?.map((s, i) => ({
+						id: crypto.randomUUID(),
+						title: s,
+						isCompleted: false,
+						order: i,
+					})),
+				});
+			}
 
 			// Reset form
 			inputValue = '';
+			parsePreview = '';
+			parsedTaskCount = 0;
+			durationEstimate = null;
 			selectedDate = new Date();
 			selectedPriority = 'medium';
 			if (viewStore.currentView !== 'project') {
@@ -82,10 +178,16 @@
 			console.error('Failed to create task:', error);
 		} finally {
 			isLoading = false;
-			// Focus after isLoading is reset (input is no longer disabled)
 			requestAnimationFrame(() => {
 				inputRef?.focus();
 			});
+		}
+	}
+
+	function applyEstimate() {
+		if (durationEstimate) {
+			inputValue = `${inputValue.trim()} ${durationEstimate.minutes}min`;
+			durationEstimate = null;
 		}
 	}
 
@@ -142,6 +244,21 @@
 <svelte:window onclick={closeAllPickers} />
 
 <form onsubmit={handleSubmit} class="quick-add-form">
+	<!-- Parse preview + duration estimate -->
+	{#if parsePreview || durationEstimate}
+		<div class="parse-preview">
+			{#if parsePreview}
+				<span class="preview-text">{parsePreview}</span>
+			{/if}
+			{#if durationEstimate}
+				<button type="button" class="estimate-btn" onclick={applyEstimate}>
+					<span class="estimate-icon">~</span>
+					{formatDuration(durationEstimate.minutes)}
+				</button>
+			{/if}
+		</div>
+	{/if}
+
 	<div class="quick-add-wrapper">
 		<!-- Plus icon -->
 		<div class="quick-add-icon">
@@ -328,6 +445,44 @@
 <style>
 	.quick-add-form {
 		margin-bottom: 1.5rem;
+	}
+
+	.parse-preview {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.25rem 1rem;
+		margin-bottom: 0.25rem;
+		font-size: 0.75rem;
+		color: var(--color-muted-foreground, #6b7280);
+		flex-wrap: wrap;
+	}
+
+	.preview-text {
+		opacity: 0.8;
+	}
+
+	.estimate-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.125rem 0.5rem;
+		border: 1px dashed rgba(139, 92, 246, 0.4);
+		background: rgba(139, 92, 246, 0.08);
+		color: #8b5cf6;
+		border-radius: 9999px;
+		font-size: 0.7rem;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.estimate-btn:hover {
+		background: rgba(139, 92, 246, 0.15);
+		border-color: rgba(139, 92, 246, 0.6);
+	}
+
+	.estimate-icon {
+		font-weight: 600;
 	}
 
 	/* Mobile: Fixed at bottom */
