@@ -5,6 +5,8 @@
 
 set -euo pipefail
 
+DOCKER="${DOCKER_CMD:-/usr/local/bin/docker}"
+
 BOLD="\033[1m"
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
@@ -36,7 +38,7 @@ printf "${BOLD}%-40s %10s %10s %10s${RESET}\n" "CONTAINER" "MEM USAGE" "MEM LIMI
 echo "────────────────────────────────────────────────────────────────────────"
 
 # Collect stats and sort by memory usage (descending)
-docker stats --no-stream --format "{{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}" | \
+$DOCKER stats --no-stream --format "{{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}" | \
   sort -t$'\t' -k2 -h -r | \
   while IFS=$'\t' read -r name usage perc; do
     # Extract just the usage part (before " / ")
@@ -60,10 +62,10 @@ echo ""
 echo -e "${BOLD}── Category Summary ──${RESET}"
 echo ""
 
-# Category totals using docker stats
+# Category totals using $DOCKER stats
 get_category_mem() {
   local pattern="$1"
-  docker stats --no-stream --format "{{.Name}}\t{{.MemUsage}}" | \
+  $DOCKER stats --no-stream --format "{{.Name}}\t{{.MemUsage}}" | \
     grep "$pattern" | \
     awk -F'\t' '{
       split($2, a, "/");
@@ -98,8 +100,8 @@ printf "${BOLD}%-25s %8s MiB (%.1f GiB)${RESET}\n" "TOTAL:" "$total" "$(echo "sc
 echo ""
 echo -e "${BOLD}── Container Count ──${RESET}"
 echo ""
-running=$(docker ps -q | wc -l | xargs)
-stopped=$(docker ps -aq --filter "status=exited" | wc -l | xargs)
+running=$($DOCKER ps -q | wc -l | xargs)
+stopped=$($DOCKER ps -aq --filter "status=exited" | wc -l | xargs)
 echo "Running: $running | Stopped: $stopped | Total: $((running + stopped))"
 
 echo ""
@@ -119,5 +121,5 @@ if [ "${1:-}" = "--watch" ]; then
   echo ""
   echo -e "${CYAN}Entering watch mode (Ctrl+C to exit)...${RESET}"
   echo ""
-  docker stats --format "table {{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.CPUPerc}}"
+  $DOCKER stats --format "table {{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.CPUPerc}}"
 fi
