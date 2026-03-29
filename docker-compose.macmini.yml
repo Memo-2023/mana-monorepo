@@ -302,7 +302,7 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_CREDITS_WEBHOOK_SECRET:-}
       BASE_URL: https://credits.mana.how
-      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://picture.mana.how,https://todo.mana.how,https://zitare.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://manadeck.mana.how,https://presi.mana.how,https://storage.mana.how,https://nutriphi.mana.how,https://planta.mana.how,https://mukke.mana.how,https://context.mana.how,https://photos.mana.how,https://questions.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://picture.mana.how,https://todo.mana.how,https://zitare.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://manadeck.mana.how,https://presi.mana.how,https://storage.mana.how,https://nutriphi.mana.how,https://planta.mana.how,https://mukke.mana.how,https://context.mana.how,https://photos.mana.how,https://questions.mana.how,https://calc.mana.how
     ports:
       - "3002:3002"
     healthcheck:
@@ -332,7 +332,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_user
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://manadeck.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
+      CORS_ORIGINS: https://mana.how,https://calc.mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://manadeck.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
     ports:
       - "3062:3062"
     healthcheck:
@@ -906,14 +906,14 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 5018
+      PORT: 5026
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
       PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
     ports:
-      - "5018:5018"
+      - "5026:5026"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5018/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5026/health"]
       interval: 180s
       timeout: 10s
       retries: 3
@@ -1242,6 +1242,31 @@ services:
       - "5025:5025"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5025/health"]
+      interval: 180s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  calc-web:
+    build:
+      context: .
+      dockerfile: apps/calc/apps/web/Dockerfile
+    image: calc-web:local
+    container_name: mana-app-calc-web
+    restart: always
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5026
+      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
+      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
+    ports:
+      - "5026:5026"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5026/health"]
       interval: 180s
       timeout: 10s
       retries: 3

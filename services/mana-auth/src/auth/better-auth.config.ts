@@ -241,6 +241,7 @@ export function createBetterAuth(databaseUrl: string) {
 			'https://auth.mana.how',
 			'https://mana.how',
 			// Production domains - all apps (keep alphabetical)
+			'https://calc.mana.how',
 			'https://calendar.mana.how',
 			'https://chat.mana.how',
 			'https://clock.mana.how',

@@ -114,6 +114,10 @@ ingress:
   - hostname: picture-api.mana.how
     service: http://localhost:3040
 
+  # Calc App
+  - hostname: calc.mana.how
+    service: http://localhost:5026
+
   # LLM Services
   - hostname: playground.mana.how
     service: http://localhost:5090
