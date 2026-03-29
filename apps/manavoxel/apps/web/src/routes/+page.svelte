@@ -10,6 +10,9 @@
 	let selectedMaterial = $state(1);
 	let activeTool = $state<ToolType>('brush');
 	let brushSize = $state(1);
+	let areaName = $state('');
+	let currentFloor = $state(0);
+	let totalFloors = $state(1);
 
 	const tools: { id: ToolType; label: string; key: string }[] = [
 		{ id: 'brush', label: 'Brush', key: 'B' },
@@ -29,6 +32,9 @@
 			selectedMaterial = e.selectedMaterial;
 			activeTool = e.activeTool;
 			brushSize = e.brushSize;
+			areaName = e.areaName;
+			currentFloor = e.currentFloor;
+			totalFloors = e.totalFloors;
 		};
 
 		// Keyboard shortcuts
@@ -87,6 +93,14 @@
 				>
 					ManaVoxel
 				</div>
+				{#if areaName}
+					<div class="rounded-lg bg-gray-800/80 px-3 py-1.5 text-xs text-gray-300 backdrop-blur">
+						{areaName}
+						{#if totalFloors > 1}
+							<span class="ml-1 text-gray-500">F{currentFloor + 1}/{totalFloors}</span>
+						{/if}
+					</div>
+				{/if}
 				{#if !isEditing && engine?.player}
 					<div class="rounded-lg bg-gray-800/80 px-3 py-1.5 text-xs text-gray-300 backdrop-blur">
 						HP: {engine.player.hp}/{engine.player.maxHp}
@@ -197,7 +211,7 @@
 				{#if isEditing}
 					WASD: Pan | Scroll: Zoom | LClick: Place | RClick: Erase | 1-9: Material
 				{:else}
-					WASD: Move | Scroll: Zoom | Tab: Editor
+					WASD: Move | E: Door | F: Stairs | Scroll: Zoom | Tab: Editor
 				{/if}
 			</div>
 		</div>

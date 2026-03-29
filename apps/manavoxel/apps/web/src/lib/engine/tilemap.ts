@@ -16,7 +16,7 @@ interface Chunk {
 }
 
 export class TilemapRenderer {
-	readonly tileSize = 8; // Screen pixels per world pixel (at 1x zoom)
+	readonly tileSize: number; // Screen pixels per world pixel (at 1x zoom)
 	private _container: Container;
 	private _palette: Material[];
 	private _chunks = new Map<string, Chunk>();
@@ -29,11 +29,35 @@ export class TilemapRenderer {
 	get worldHeight() {
 		return this._worldHeight;
 	}
+	get container() {
+		return this._container;
+	}
 
-	constructor(worldContainer: Container, palette: Material[]) {
+	/**
+	 * @param resolution - meters per pixel (0.1 for streets, 0.05 for interiors)
+	 */
+	constructor(worldContainer: Container, palette: Material[], resolution = 0.1) {
+		this.tileSize = Math.round(8 * (0.1 / resolution));
 		this._container = new Container();
 		worldContainer.addChild(this._container);
 		this._palette = palette;
+	}
+
+	/** Set world bounds (used when loading an area) */
+	setWorldSize(width: number, height: number) {
+		this._worldWidth = width;
+		this._worldHeight = height;
+	}
+
+	/** Remove all chunks and clear the renderer */
+	clear() {
+		for (const chunk of this._chunks.values()) {
+			this._container.removeChild(chunk.graphics);
+			chunk.graphics.destroy();
+		}
+		this._chunks.clear();
+		this._worldWidth = 0;
+		this._worldHeight = 0;
 	}
 
 	/** Generate a flat world with grass floor and stone borders */

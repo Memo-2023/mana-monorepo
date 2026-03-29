@@ -1,8 +1,9 @@
-import { Application, Container } from 'pixi.js';
+import { Application, Container, Graphics } from 'pixi.js';
 import { Camera } from './camera';
 import { InputManager } from './input';
 import { TilemapRenderer } from './tilemap';
 import { Player } from './player';
+import { AreaManager, generateDemoStreet, generateDemoInterior } from './area-manager';
 import { UndoStack, brushStroke, floodFill, pipette, type ToolType } from '$lib/editor/tools';
 import { DEFAULT_MATERIALS, MATERIAL_AIR, type Material } from '@manavoxel/shared';
 
@@ -10,12 +11,14 @@ export class GameEngine {
 	app: Application;
 	camera: Camera;
 	input: InputManager;
-	tilemap: TilemapRenderer;
+	tilemap!: TilemapRenderer;
 	player: Player | null = null;
 	undo: UndoStack;
+	areaManager: AreaManager;
 
 	private _container: HTMLDivElement;
 	private _worldContainer: Container;
+	private _fadeOverlay: Graphics;
 	private _initialized = false;
 
 	// Editor state
@@ -24,7 +27,11 @@ export class GameEngine {
 	private _activeTool: ToolType = 'brush';
 	private _brushSize = 1;
 	private _palette: Material[] = DEFAULT_MATERIALS;
-	private _painting = false; // tracks whether we're in a continuous paint stroke
+	private _painting = false;
+
+	// Area state
+	private _currentFloor = 0;
+	private _areaName = '';
 
 	// Callbacks for UI reactivity
 	onStateChange: (() => void) | null = null;
@@ -44,16 +51,26 @@ export class GameEngine {
 	get palette() {
 		return this._palette;
 	}
+	get currentFloor() {
+		return this._currentFloor;
+	}
+	get totalFloors() {
+		return this.areaManager.currentArea?.data.floors ?? 1;
+	}
+	get areaName() {
+		return this._areaName;
+	}
 
 	constructor(container: HTMLDivElement) {
 		this._container = container;
 		this.app = new Application();
 		this._worldContainer = new Container();
+		this._fadeOverlay = new Graphics();
 		this.undo = new UndoStack();
 
 		this.camera = new Camera(this._worldContainer);
 		this.input = new InputManager(container);
-		this.tilemap = new TilemapRenderer(this._worldContainer, this._palette);
+		this.areaManager = new AreaManager(this._worldContainer);
 
 		this._init();
 	}
@@ -70,14 +87,51 @@ export class GameEngine {
 		this._container.appendChild(this.app.canvas);
 		this.app.stage.addChild(this._worldContainer);
 
-		// Generate demo world
-		this.tilemap.generateFlatWorld(500, 300);
+		// Fade overlay (on top of world, for transitions)
+		this._fadeOverlay.rect(0, 0, 1, 1);
+		this._fadeOverlay.fill('#000000');
+		this.app.stage.addChild(this._fadeOverlay);
+		this._fadeOverlay.visible = false;
 
-		// Spawn player in an open area
-		this.player = new Player(this._worldContainer, this.tilemap, 60, 160);
+		// Generate demo areas
+		const street = generateDemoStreet();
+		const interiorId = street.portals[0]?.targetAreaId;
+		const interior = generateDemoInterior(interiorId!, street.id);
 
-		// Center camera on player
-		this.camera.setPosition(this.player.worldX, this.player.worldY);
+		this.areaManager.registerArea(street);
+		this.areaManager.registerArea(interior);
+
+		// Area change callback
+		this.areaManager.onAreaChanged = (loaded) => {
+			this.tilemap = loaded.tilemap;
+			this._currentFloor = loaded.currentFloor;
+			this._areaName = loaded.data.name;
+
+			// Recreate player in new area
+			this.player?.destroy();
+			this.player = new Player(
+				this._worldContainer,
+				this.tilemap,
+				loaded.data.spawnPoint.x,
+				loaded.data.spawnPoint.y
+			);
+
+			this.onStateChange?.();
+		};
+
+		// Load starting area
+		const loaded = this.areaManager.loadArea(street.id);
+		if (loaded) {
+			this.tilemap = loaded.tilemap;
+			this._areaName = loaded.data.name;
+			this.player = new Player(
+				this._worldContainer,
+				this.tilemap,
+				street.spawnPoint.x,
+				street.spawnPoint.y
+			);
+			this.camera.setPosition(this.player.worldX, this.player.worldY);
+		}
 
 		// Game loop
 		this.app.ticker.add((ticker) => this._update(ticker.deltaTime));
@@ -117,6 +171,13 @@ export class GameEngine {
 	}
 
 	private _updateGame() {
+		// Don't process input during transitions
+		if (this.areaManager.isTransitioning) {
+			this.areaManager.update(1);
+			this._updateFadeOverlay();
+			return;
+		}
+
 		// Player movement
 		let dx = 0;
 		let dy = 0;
@@ -127,11 +188,42 @@ export class GameEngine {
 
 		if (this.player) {
 			this.player.move(dx, dy);
+
+			// Check for portal collision
+			const portal = this.areaManager.checkPortals(
+				this.player.x,
+				this.player.y,
+				this._currentFloor
+			);
+			if (portal && this.input.isKeyDown('KeyE')) {
+				this.areaManager.enterPortal(portal, this.player);
+			}
+
+			// Check for stairs (floor switch via E key on stair tiles)
+			if (this.input.isKeyDown('KeyF') && this.totalFloors > 1) {
+				const nextFloor = (this._currentFloor + 1) % this.totalFloors;
+				this.areaManager.switchFloor(nextFloor);
+				this._currentFloor = nextFloor;
+				this.onStateChange?.();
+			}
+
 			// Camera follows player smoothly
 			const lerpSpeed = 0.1;
 			const cx = this.camera.x + (this.player.worldX - this.camera.x) * lerpSpeed;
 			const cy = this.camera.y + (this.player.worldY - this.camera.y) * lerpSpeed;
 			this.camera.setPosition(cx, cy);
+		}
+	}
+
+	private _updateFadeOverlay() {
+		if (this.areaManager.isTransitioning) {
+			this._fadeOverlay.visible = true;
+			this._fadeOverlay.alpha = 1 - this.areaManager.transitionAlpha;
+			this._fadeOverlay.clear();
+			this._fadeOverlay.rect(0, 0, this.app.screen.width, this.app.screen.height);
+			this._fadeOverlay.fill('#000000');
+		} else {
+			this._fadeOverlay.visible = false;
 		}
 	}
 
