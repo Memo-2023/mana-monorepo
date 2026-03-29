@@ -3,6 +3,8 @@
 	import { GameEngine } from '$lib/engine/game';
 	import { DEFAULT_MATERIALS, MATERIAL_AIR } from '@manavoxel/shared';
 	import type { ToolType } from '$lib/editor/tools';
+	import SpriteEditor from '$lib/editor/sprite-editor.svelte';
+	import type { SpriteData } from '$lib/editor/sprite-editor.svelte';
 
 	let canvasContainer: HTMLDivElement;
 	let engine: GameEngine | null = $state(null);
@@ -13,6 +15,8 @@
 	let areaName = $state('');
 	let currentFloor = $state(0);
 	let totalFloors = $state(1);
+	let showSpriteEditor = $state(false);
+	let createdItems: SpriteData[] = $state([]);
 
 	const tools: { id: ToolType; label: string; key: string }[] = [
 		{ id: 'brush', label: 'Brush', key: 'B' },
@@ -113,6 +117,14 @@
 				{/if}
 			</div>
 			<div class="flex gap-2">
+				{#if isEditing}
+					<button
+						class="rounded-lg bg-blue-600/80 px-3 py-1.5 text-sm text-white backdrop-blur hover:bg-blue-500/80"
+						onclick={() => (showSpriteEditor = true)}
+					>
+						+ Item
+					</button>
+				{/if}
 				<button
 					class="rounded-lg px-3 py-1.5 text-sm text-white backdrop-blur transition {isEditing
 						? 'bg-emerald-600/80 hover:bg-emerald-500/80'
@@ -216,4 +228,19 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Sprite Editor Modal -->
+	{#if showSpriteEditor}
+		<div class="absolute inset-0 z-50 flex items-center justify-center bg-black/70">
+			<SpriteEditor
+				width={16}
+				height={32}
+				onSave={(data) => {
+					createdItems = [...createdItems, data];
+					showSpriteEditor = false;
+				}}
+				onClose={() => (showSpriteEditor = false)}
+			/>
+		</div>
+	{/if}
 </div>
