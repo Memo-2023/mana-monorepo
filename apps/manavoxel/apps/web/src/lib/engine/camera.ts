@@ -1,0 +1,63 @@
+import type { Container } from 'pixi.js';
+
+export class Camera {
+	private _container: Container;
+	private _x = 0;
+	private _y = 0;
+	private _scale = 2; // 2x zoom by default (each 10cm pixel = 2 screen pixels)
+	private _minScale = 0.5;
+	private _maxScale = 8;
+
+	get x() {
+		return this._x;
+	}
+	get y() {
+		return this._y;
+	}
+	get scale() {
+		return this._scale;
+	}
+
+	constructor(container: Container) {
+		this._container = container;
+	}
+
+	setPosition(x: number, y: number) {
+		this._x = x;
+		this._y = y;
+	}
+
+	move(dx: number, dy: number) {
+		this._x += dx / this._scale;
+		this._y += dy / this._scale;
+	}
+
+	zoom(factor: number) {
+		const newScale = this._scale * factor;
+		this._scale = Math.max(this._minScale, Math.min(this._maxScale, newScale));
+	}
+
+	setScale(scale: number) {
+		this._scale = Math.max(this._minScale, Math.min(this._maxScale, scale));
+	}
+
+	/** Convert screen coordinates to world coordinates */
+	screenToWorld(
+		screenX: number,
+		screenY: number,
+		screenWidth: number,
+		screenHeight: number
+	): { x: number; y: number } {
+		return {
+			x: (screenX - screenWidth / 2) / this._scale + this._x,
+			y: (screenY - screenHeight / 2) / this._scale + this._y,
+		};
+	}
+
+	/** Apply camera transform to the world container */
+	update(screenWidth: number, screenHeight: number) {
+		this._container.x = screenWidth / 2 - this._x * this._scale;
+		this._container.y = screenHeight / 2 - this._y * this._scale;
+		this._container.scale.set(this._scale);
+	}
+}

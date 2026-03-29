@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+@import '@manacore/shared-tailwind';
+
+/* ManaVoxel specific styles */
+:root {
+	--mv-accent: #10b981;
+	--mv-accent-hover: #059669;
+	--mv-grid: rgba(255, 255, 255, 0.05);
+}
+
+/* Prevent text selection during gameplay */
+.game-canvas {
+	user-select: none;
+	-webkit-user-select: none;
+	touch-action: none;
+}
+
+/* Pixel-perfect rendering for the canvas */
+canvas {
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+}
