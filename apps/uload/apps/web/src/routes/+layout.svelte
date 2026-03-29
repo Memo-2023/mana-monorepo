@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
 	import { Toaster } from 'svelte-sonner';
 	import { uloadStore } from '$lib/data/local-store';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	let { children } = $props();
 
@@ -13,6 +14,7 @@
 
 	onMount(async () => {
 		initLocale();
+		await authStore.initialize();
 		await uloadStore.initialize();
 		loading = false;
 	});

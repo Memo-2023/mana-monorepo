@@ -1,40 +1,33 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { LoginPage } from '@manacore/shared-auth-ui';
 	import { UloadLogo } from '@manacore/shared-branding';
-	import { pb } from '$lib/pocketbase';
-	import type { PageData } from './$types';
-
-	let { data }: { data: PageData } = $props();
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	async function handleSignIn(email: string, password: string) {
-		try {
-			await pb.collection('users').authWithPassword(email, password);
-			// Invalidate all data to refresh server-side auth state
-			await invalidateAll();
-			return { success: true };
-		} catch (err: any) {
-			return {
-				success: false,
-				error: err?.message || 'Ungültige E-Mail oder Passwort',
-			};
-		}
+		return authStore.signIn(email, password);
+	}
+
+	async function handleResendVerification(email: string) {
+		return authStore.resendVerificationEmail(email);
 	}
 </script>
 
 <LoginPage
 	appName="uLoad"
 	logo={UloadLogo}
-	primaryColor="#3b82f6"
+	primaryColor="#6366f1"
 	onSignIn={handleSignIn}
+	onResendVerification={handleResendVerification}
+	passkeyAvailable={authStore.isPasskeyAvailable()}
+	onSignInWithPasskey={() => authStore.signInWithPasskey()}
+	onVerifyTwoFactor={(code, trust) => authStore.verifyTwoFactor(code, trust)}
+	onVerifyBackupCode={(code) => authStore.verifyBackupCode(code)}
+	onSendMagicLink={(email) => authStore.sendMagicLink(email)}
 	{goto}
-	enableGoogle={false}
-	enableApple={false}
-	successRedirect="/my"
+	successRedirect="/my/links"
 	registerPath="/register"
 	forgotPasswordPath="/forgot-password"
-	lightBackground="#f8fafc"
-	darkBackground="#0f172a"
 	translations={{
 		title: 'Anmelden',
 		subtitle: 'Melde dich mit deinem uLoad Account an',
@@ -55,8 +48,6 @@
 		emailInvalid: 'Bitte gib eine gültige E-Mail-Adresse ein',
 		passwordRequired: 'Passwort ist erforderlich',
 		signInFailed: 'Anmeldung fehlgeschlagen',
-		googleSignInFailed: 'Google-Anmeldung fehlgeschlagen',
 		signInSuccess: 'Erfolgreich angemeldet. Weiterleitung...',
-		googleSignInSuccess: 'Erfolgreich mit Google angemeldet. Weiterleitung...',
 	}}
 />

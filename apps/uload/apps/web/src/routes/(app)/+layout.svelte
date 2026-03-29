@@ -5,13 +5,16 @@
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem } from '@manacore/shared-ui';
 	import { getPillAppItems } from '@manacore/shared-branding';
+	import { AuthGate, GuestWelcomeModal, SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { uloadStore } from '$lib/data/local-store';
 
 	let { children } = $props();
 
 	const appItems = getPillAppItems('uload');
 
-	// TODO: integrate mana-core-auth, set userEmail from authStore
-	let userEmail = $state('');
+	let userEmail = $derived(authStore.isAuthenticated ? (authStore.user?.email ?? '') : '');
 
 	const navItems: PillNavItem[] = [
 		{ href: '/my/links', label: 'Links', icon: 'link' },
@@ -20,10 +23,10 @@
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
 	];
 
-	let loading = $state(true);
 	let isSidebarMode = $state(false);
 	let isCollapsed = $state(false);
 	let isDark = $state(false);
+	let showGuestWelcome = $state(false);
 
 	const navRoutes = ['/my/links', '/my/tags', '/my/analytics', '/settings'];
 
@@ -59,11 +62,23 @@
 	}
 
 	async function handleLogout() {
-		localStorage?.removeItem('auth_token');
+		uloadStore.stopSync();
+		await authStore.signOut();
 		goto('/login');
 	}
 
-	onMount(() => {
+	function handleAuthReady() {
+		// Start sync if authenticated
+		if (authStore.isAuthenticated) {
+			uloadStore.startSync(() => authStore.getValidToken());
+		}
+
+		// Show guest welcome for first-time guests
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('uload')) {
+			showGuestWelcome = true;
+		}
+
+		// Restore nav preferences
 		const savedSidebar = localStorage?.getItem('uload-nav-sidebar');
 		if (savedSidebar === 'true') isSidebarMode = true;
 		const savedCollapsed = localStorage?.getItem('uload-nav-collapsed');
@@ -73,19 +88,12 @@
 			isDark = true;
 			document.documentElement.classList.add('dark');
 		}
-		loading = false;
-	});
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if loading}
-	<div class="flex min-h-screen items-center justify-center">
-		<div
-			class="inline-block h-10 w-10 animate-spin rounded-full border-4 border-solid border-indigo-500 border-r-transparent"
-		></div>
-	</div>
-{:else}
+<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
 	<div class="flex min-h-screen flex-col">
 		<PillNavigation
 			items={navItems}
@@ -124,4 +132,17 @@
 			</div>
 		</main>
 	</div>
-{/if}
+
+	<GuestWelcomeModal
+		appId="uload"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale="de"
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale="de" loginHref="/login" />
+	{/if}
+</AuthGate>
