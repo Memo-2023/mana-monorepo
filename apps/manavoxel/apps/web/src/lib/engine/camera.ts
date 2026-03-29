@@ -4,9 +4,9 @@ export class Camera {
 	private _container: Container;
 	private _x = 0;
 	private _y = 0;
-	private _scale = 2; // 2x zoom by default (each 10cm pixel = 2 screen pixels)
-	private _minScale = 0.5;
-	private _maxScale = 8;
+	private _scale = 1.5; // Start zoomed out more to see the village
+	private _minScale = 0.3;
+	private _maxScale = 6;
 
 	get x() {
 		return this._x;

@@ -12,9 +12,9 @@ let cached: { worlds: LocalWorld[]; areas: LocalArea[]; items: LocalItem[] } | n
 export function generateGuestWorld() {
 	if (cached) return cached;
 
-	const worldId = 'guest-world-001';
-	const streetId = 'guest-street-001';
-	const houseId = 'guest-house-001';
+	const worldId = 'guest-world-002';
+	const streetId = 'guest-street-002';
+	const houseId = 'guest-house-002';
 
 	// ─── Street (50m × 30m at 10cm) ─────────────────────────
 
@@ -25,47 +25,118 @@ export function generateGuestWorld() {
 
 	for (let y = 0; y < streetH; y++) {
 		for (let x = 0; x < streetW; x++) {
-			let mat = MATERIAL_AIR;
+			// Start with grass everywhere (top-down: everything needs a ground)
+			let mat = 3; // Grass
 
-			// Border
-			if (x === 0 || x === streetW - 1 || y === 0 || y === streetH - 1) mat = 1;
-			// Road
-			else if (y >= 130 && y <= 170) mat = 12;
-			// Grass patches
-			else if ((y > 170 || y < 130) && Math.random() < 0.25) mat = 3;
-			// House 1 (brick)
-			else if (x >= 40 && x <= 80 && y >= 40 && y <= 80) {
-				if (x === 40 || x === 80 || y === 40 || y === 80) mat = 8;
-				else if (y === 80 && x >= 56 && x <= 64)
-					mat = 0; // door
-				else if (y === 45 && (x === 50 || x === 55 || x === 65 || x === 70)) mat = 9;
+			// Stone border wall around the whole area
+			if (x <= 1 || x >= streetW - 2 || y <= 1 || y >= streetH - 2) {
+				mat = 1; // Stone wall
 			}
-			// House 2 (wood)
-			else if (x >= 120 && x <= 180 && y >= 30 && y <= 90) {
-				if (x === 120 || x === 180 || y === 30 || y === 90) mat = 4;
-				else if (y === 90 && x >= 145 && x <= 155) mat = 0;
-				else if (y === 40 && (x === 135 || x === 150 || x === 165)) mat = 9;
+			// Cobblestone road (horizontal, center)
+			else if (y >= 120 && y <= 180) {
+				mat = 12; // Cobblestone
+				// Road edge markings
+				if (y === 120 || y === 180) mat = 1;
 			}
-			// House 3 (stone)
-			else if (x >= 250 && x <= 310 && y >= 50 && y <= 100) {
-				if (x === 250 || x === 310 || y === 50 || y === 100) mat = 1;
-				else if (y === 100 && x >= 275 && x <= 285) mat = 0;
+			// Dirt path (vertical, connecting to road)
+			else if (x >= 148 && x <= 152 && y < 120) {
+				mat = 2; // Dirt
 			}
-			// Well (center of village)
-			else if (Math.abs(x - 150) <= 4 && Math.abs(y - 150) <= 4) {
-				if (Math.abs(x - 150) === 4 || Math.abs(y - 150) === 4) mat = 12;
-				else mat = 7; // water
+			// Sand area (bottom right, like a beach/playground)
+			else if (x >= 350 && y >= 200 && x <= 450 && y <= 270) {
+				mat = 6; // Sand
 			}
-			// Trees
-			else if (x === 350 && y >= 80 && y <= 95) mat = 4;
-			else if (Math.abs(x - 350) + Math.abs(y - 75) <= 7 && y < 82) mat = 13;
-			else if (x === 400 && y >= 100 && y <= 115) mat = 4;
-			else if (Math.abs(x - 400) + Math.abs(y - 95) <= 6 && y < 102) mat = 13;
-			// Torches
-			else if (y === 128 && x % 30 === 15) mat = 10;
-			else if (y === 172 && x % 30 === 15) mat = 10;
 
-			if (mat !== 0) streetView.setUint16((y * streetW + x) * 2, mat, true);
+			// ── Buildings (on top of ground) ──
+
+			// House 1: Brick house (top-left area)
+			if (x >= 40 && x <= 90 && y >= 40 && y <= 90) {
+				if (x === 40 || x === 90 || y === 40 || y === 90) {
+					mat = 8; // Brick walls
+				} else {
+					mat = 5; // Plank floor inside
+				}
+				// Door (south wall)
+				if (y === 90 && x >= 60 && x <= 70) mat = 2; // Dirt (open door)
+				// Windows
+				if (y === 40 && (x === 55 || x === 75)) mat = 9;
+			}
+
+			// House 2: Wood cabin (top-center)
+			if (x >= 130 && x <= 190 && y >= 35 && y <= 95) {
+				if (x === 130 || x === 190 || y === 35 || y === 95) {
+					mat = 4; // Wood walls
+				} else {
+					mat = 5; // Plank floor
+				}
+				if (y === 95 && x >= 155 && x <= 165) mat = 2; // Door
+				if (y === 35 && (x === 145 || x === 160 || x === 175)) mat = 9; // Windows
+			}
+
+			// House 3: Stone tower (top-right)
+			if (x >= 260 && x <= 300 && y >= 50 && y <= 110) {
+				if (x === 260 || x === 300 || y === 50 || y === 110) {
+					mat = 1; // Stone walls
+				} else {
+					mat = 12; // Stone floor
+				}
+				if (y === 110 && x >= 275 && x <= 285) mat = 2; // Door
+			}
+
+			// Well (center of village, on the road)
+			if (Math.abs(x - 250) <= 5 && Math.abs(y - 150) <= 5) {
+				if (Math.abs(x - 250) === 5 || Math.abs(y - 150) === 5) {
+					mat = 1; // Stone rim
+				} else {
+					mat = 7; // Water
+				}
+			}
+
+			// Market stalls (south of road)
+			if (x >= 60 && x <= 80 && y >= 200 && y <= 215) {
+				if (y === 200)
+					mat = 4; // Wood counter
+				else if (y === 215 && (x === 60 || x === 80)) mat = 4; // Posts
+			}
+			if (x >= 120 && x <= 140 && y >= 200 && y <= 215) {
+				if (y === 200) mat = 4;
+				else if (y === 215 && (x === 120 || x === 140)) mat = 4;
+			}
+
+			// ── Nature ──
+
+			// Trees (scattered, on grass areas only)
+			const trees = [
+				[30, 150],
+				[320, 80],
+				[380, 60],
+				[420, 140],
+				[350, 220],
+				[100, 250],
+				[200, 230],
+				[450, 90],
+				[20, 250],
+				[480, 200],
+			];
+			for (const [tx, ty] of trees) {
+				// Trunk
+				if (x === tx && y >= ty && y <= ty + 8) mat = 4;
+				// Leaves (diamond shape)
+				if (Math.abs(x - tx) + Math.abs(y - (ty - 3)) <= 6 && y < ty + 1 && y > ty - 8) {
+					mat = 13;
+				}
+			}
+
+			// Flower patches
+			if (mat === 3 && (x + y * 7) % 47 === 0) {
+				mat = 10; // Yellow flowers (torch color = yellow)
+			}
+
+			// Torches along the road
+			if (y === 119 && x % 25 === 12 && x > 5 && x < streetW - 5) mat = 10;
+			if (y === 181 && x % 25 === 12 && x > 5 && x < streetW - 5) mat = 10;
+
+			streetView.setUint16((y * streetW + x) * 2, mat, true);
 		}
 	}
 
@@ -167,7 +238,7 @@ export function generateGuestWorld() {
 					targetFloor: 0,
 				},
 			]),
-			spawnX: 60,
+			spawnX: 200,
 			spawnY: 150,
 			spawnFloor: 0,
 			createdAt: new Date().toISOString(),
