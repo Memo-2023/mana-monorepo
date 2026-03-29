@@ -1421,7 +1421,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3041
-      DATABASE_URL: postgresql://manacore:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/uload
+      DATABASE_URL: postgresql://manacore:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_sync
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: http://uload-web:5029,https://uload.mana.how,https://ulo.ad
     ports:

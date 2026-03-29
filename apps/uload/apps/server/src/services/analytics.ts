@@ -1,87 +1,82 @@
-import { eq, sql, and, gte, lte, desc } from 'drizzle-orm';
-import { clicks } from '@manacore/uload-database';
+import { sql } from 'drizzle-orm';
 import type { Database } from '../db/connection';
 
+/**
+ * Analytics service that reads click data from mana-sync's sync_changes table.
+ * Clicks are stored with app_id='uload', table_name='clicks'.
+ */
 export class AnalyticsService {
 	constructor(private db: Database) {}
 
-	async getClicksByLink(linkId: string, from?: Date, to?: Date) {
-		const conditions = [eq(clicks.linkId, linkId)];
-		if (from) conditions.push(gte(clicks.clickedAt, from));
-		if (to) conditions.push(lte(clicks.clickedAt, to));
-
-		return this.db
-			.select()
-			.from(clicks)
-			.where(and(...conditions))
-			.orderBy(desc(clicks.clickedAt));
-	}
-
 	async getClickStats(linkId: string) {
-		const [stats] = await this.db
-			.select({
-				totalClicks: sql<number>`count(*)`,
-				uniqueVisitors: sql<number>`count(distinct ${clicks.ipHash})`,
-				browsers: sql<Record<string, number>>`json_object_agg(
-					coalesce(${clicks.browser}, 'unknown'),
-					1
-				)`,
-			})
-			.from(clicks)
-			.where(eq(clicks.linkId, linkId));
-
-		return stats;
+		const result = await this.db.execute(sql`
+			SELECT
+				count(*)::int as "totalClicks",
+				count(DISTINCT data->>'ipHash')::int as "uniqueVisitors"
+			FROM sync_changes
+			WHERE app_id = 'uload' AND table_name = 'clicks'
+				AND data->>'linkId' = ${linkId}
+				AND op = 'insert'
+		`);
+		const rows = result as unknown as { totalClicks: number; uniqueVisitors: number }[];
+		return rows[0] ?? { totalClicks: 0, uniqueVisitors: 0 };
 	}
 
 	async getClicksOverTime(linkId: string, days = 30) {
-		const since = new Date();
-		since.setDate(since.getDate() - days);
-
-		return this.db
-			.select({
-				date: sql<string>`date_trunc('day', ${clicks.clickedAt})::date`,
-				count: sql<number>`count(*)`,
-			})
-			.from(clicks)
-			.where(and(eq(clicks.linkId, linkId), gte(clicks.clickedAt, since)))
-			.groupBy(sql`date_trunc('day', ${clicks.clickedAt})`)
-			.orderBy(sql`date_trunc('day', ${clicks.clickedAt})`);
+		return this.db.execute(sql`
+			SELECT
+				date_trunc('day', created_at)::date::text as date,
+				count(*)::int as count
+			FROM sync_changes
+			WHERE app_id = 'uload' AND table_name = 'clicks'
+				AND data->>'linkId' = ${linkId}
+				AND op = 'insert'
+				AND created_at >= now() - make_interval(days => ${days})
+			GROUP BY date_trunc('day', created_at)
+			ORDER BY date_trunc('day', created_at)
+		`) as unknown as { date: string; count: number }[];
 	}
 
 	async getTopReferrers(linkId: string, limit = 10) {
-		return this.db
-			.select({
-				referer: clicks.referer,
-				count: sql<number>`count(*)`,
-			})
-			.from(clicks)
-			.where(eq(clicks.linkId, linkId))
-			.groupBy(clicks.referer)
-			.orderBy(desc(sql`count(*)`))
-			.limit(limit);
+		return this.db.execute(sql`
+			SELECT
+				COALESCE(data->>'referer', 'Direct') as referer,
+				count(*)::int as count
+			FROM sync_changes
+			WHERE app_id = 'uload' AND table_name = 'clicks'
+				AND data->>'linkId' = ${linkId}
+				AND op = 'insert'
+			GROUP BY data->>'referer'
+			ORDER BY count(*) DESC
+			LIMIT ${limit}
+		`) as unknown as { referer: string; count: number }[];
 	}
 
 	async getDeviceBreakdown(linkId: string) {
-		return this.db
-			.select({
-				deviceType: clicks.deviceType,
-				count: sql<number>`count(*)`,
-			})
-			.from(clicks)
-			.where(eq(clicks.linkId, linkId))
-			.groupBy(clicks.deviceType)
-			.orderBy(desc(sql`count(*)`));
+		return this.db.execute(sql`
+			SELECT
+				COALESCE(data->>'deviceType', 'Unknown') as "deviceType",
+				count(*)::int as count
+			FROM sync_changes
+			WHERE app_id = 'uload' AND table_name = 'clicks'
+				AND data->>'linkId' = ${linkId}
+				AND op = 'insert'
+			GROUP BY data->>'deviceType'
+			ORDER BY count(*) DESC
+		`) as unknown as { deviceType: string; count: number }[];
 	}
 
 	async getCountryBreakdown(linkId: string) {
-		return this.db
-			.select({
-				country: clicks.country,
-				count: sql<number>`count(*)`,
-			})
-			.from(clicks)
-			.where(eq(clicks.linkId, linkId))
-			.groupBy(clicks.country)
-			.orderBy(desc(sql`count(*)`));
+		return this.db.execute(sql`
+			SELECT
+				COALESCE(data->>'country', 'Unknown') as country,
+				count(*)::int as count
+			FROM sync_changes
+			WHERE app_id = 'uload' AND table_name = 'clicks'
+				AND data->>'linkId' = ${linkId}
+				AND op = 'insert'
+			GROUP BY data->>'country'
+			ORDER BY count(*) DESC
+		`) as unknown as { country: string; count: number }[];
 	}
 }

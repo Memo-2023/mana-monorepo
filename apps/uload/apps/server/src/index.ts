@@ -31,10 +31,16 @@ app.route('/health', healthRoutes);
 app.route('/r', createRedirectRoutes(redirectService));
 app.route('/public', createPublicRoutes(db));
 
-// Analytics API (auth required)
+// Stripe webhook (no auth — signature verified internally)
+app.post('/api/v1/stripe/webhook', async (c) => {
+	const routes = createStripeRoutes(config);
+	return routes.fetch(c.req.raw);
+});
+
+// Authenticated API routes
 app.use('/api/v1/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/analytics', createAnalyticsRoutes(analyticsService));
-app.route('/api/v1/stripe', createStripeRoutes());
+app.route('/api/v1/stripe', createStripeRoutes(config));
 app.route('/api/v1/email', createEmailRoutes());
 
 console.log(`uload-server starting on port ${config.port}...`);

@@ -1,13 +1,12 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import * as schema from '@manacore/uload-database';
 
-let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let db: ReturnType<typeof drizzle> | null = null;
 
 export function getDb(databaseUrl: string) {
 	if (!db) {
 		const client = postgres(databaseUrl, { max: 10 });
-		db = drizzle(client, { schema });
+		db = drizzle(client);
 	}
 	return db;
 }

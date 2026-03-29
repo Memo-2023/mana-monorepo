@@ -1,35 +1,44 @@
 import { Hono } from 'hono';
-import { eq, and, desc } from 'drizzle-orm';
-import { links, users } from '@manacore/uload-database';
+import { sql } from 'drizzle-orm';
 import type { Database } from '../db/connection';
 
 export function createPublicRoutes(db: Database) {
 	return new Hono().get('/u/:username', async (c) => {
 		const username = c.req.param('username');
 
-		const [user] = await db
-			.select({ id: users.id, username: users.username, name: users.name, bio: users.bio })
-			.from(users)
-			.where(and(eq(users.username, username), eq(users.publicProfile, true)))
-			.limit(1);
+		// Query links for a user from sync_changes
+		// Note: In mana-sync, user_id is the auth user ID, not username.
+		// For public profiles, we'd need a user lookup. For now, treat username as user_id.
+		const result = await db.execute(sql`
+			SELECT DISTINCT ON (record_id)
+				record_id as id,
+				data->>'shortCode' as "shortCode",
+				data->>'title' as title,
+				data->>'description' as description,
+				COALESCE((data->>'clickCount')::int, 0) as "clickCount",
+				created_at as "createdAt"
+			FROM sync_changes
+			WHERE app_id = 'uload'
+				AND table_name = 'links'
+				AND user_id = ${username}
+				AND op != 'delete'
+				AND COALESCE((data->>'isActive')::boolean, true) = true
+			ORDER BY record_id, created_at DESC
+			LIMIT 50
+		`);
 
-		if (!user) {
-			return c.json({ error: 'User not found' }, 404);
-		}
+		const links = result as unknown as {
+			id: string;
+			shortCode: string;
+			title: string | null;
+			description: string | null;
+			clickCount: number;
+			createdAt: string;
+		}[];
 
-		const userLinks = await db
-			.select({
-				shortCode: links.shortCode,
-				title: links.title,
-				description: links.description,
-				clickCount: links.clickCount,
-				createdAt: links.createdAt,
-			})
-			.from(links)
-			.where(and(eq(links.userId, user.id), eq(links.isActive, true)))
-			.orderBy(desc(links.createdAt))
-			.limit(50);
-
-		return c.json({ user, links: userLinks });
+		return c.json({
+			user: { username, name: null, bio: null },
+			links,
+		});
 	});
 }

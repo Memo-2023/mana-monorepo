@@ -55,6 +55,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **inventar** | Inventory management | Web |
 | **traces** | City exploration | Backend, Mobile |
 | **taktik** | Time tracking | Web |
+| **uload** | URL shortener & link management | Server, Web, Landing |
 | **calc** | Calculator & converter | Web |
 | **playground** | LLM playground | Web |
 
@@ -88,6 +89,7 @@ pnpm dev:calendar:full   # Start calendar with auth + auto DB setup
 pnpm dev:clock:full      # Start clock with auth + auto DB setup
 pnpm dev:todo:full       # Start todo with auth + auto DB setup
 pnpm dev:picture:full    # Start picture with auth + auto DB setup
+pnpm dev:uload:full      # Start uload with auth + auto DB setup
 ```
 
 These commands automatically:
@@ -579,6 +581,7 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | SkilltTree | skills, activities, achievements | Done |
 | CityCorners | locations, favorites | Done |
 | Taktik | clients, projects, timeEntries, tags, templates, settings | Done |
+| uLoad | links, tags, folders, linkTags | Done |
 | Calc | calculations, savedFormulas | Done |
 
 **Not migrated (no CRUD data model):** ManaCore (hub), Matrix (protocol client), Playground (stateless)
