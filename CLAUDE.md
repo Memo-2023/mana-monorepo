@@ -57,6 +57,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **taktik** | Time tracking | Web |
 | **uload** | URL shortener & link management | Server, Web, Landing |
 | **news** | AI news reader & personal library | Server, Web, Landing |
+| **wisekeep** | AI transcription & wisdom library | Server, Web, Landing |
 | **calc** | Calculator & converter | Web |
 | **playground** | LLM playground | Web |
 
