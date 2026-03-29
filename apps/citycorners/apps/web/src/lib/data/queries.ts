@@ -8,13 +8,25 @@
 
 import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import {
+	cityCollection,
 	locationCollection,
 	favoriteCollection,
+	type LocalCity,
 	type LocalLocation,
 	type LocalFavorite,
 } from './local-store';
 
 // ─── Live Query Hooks (call during component init) ──────────
+
+/** All cities, sorted by name. Auto-updates on any change. */
+export function useAllCities() {
+	return useLiveQueryWithDefault(async () => {
+		return cityCollection.getAll(undefined, {
+			sortBy: 'name',
+			sortDirection: 'asc',
+		});
+	}, [] as LocalCity[]);
+}
 
 /** All locations, sorted by name. Auto-updates on any change. */
 export function useAllLocations() {
@@ -45,6 +57,11 @@ export function isFavorite(favorites: LocalFavorite[], locationId: string): bool
 	return favorites.some((f) => f.locationId === locationId);
 }
 
+/** Filter locations by city. */
+export function filterByCity(locations: LocalLocation[], cityId: string): LocalLocation[] {
+	return locations.filter((l) => l.cityId === cityId);
+}
+
 /** Filter locations by category. */
 export function filterByCategory(
 	locations: LocalLocation[],
@@ -64,4 +81,31 @@ export function searchLocations(locations: LocalLocation[], query: string): Loca
 			l.description?.toLowerCase().includes(search) ||
 			l.address?.toLowerCase().includes(search)
 	);
+}
+
+/** Filter cities by search query across name, country, state, description. */
+export function searchCities(cities: LocalCity[], query: string): LocalCity[] {
+	if (!query.trim()) return cities;
+	const search = query.toLowerCase().trim();
+	return cities.filter(
+		(c) =>
+			c.name.toLowerCase().includes(search) ||
+			c.country.toLowerCase().includes(search) ||
+			c.state?.toLowerCase().includes(search) ||
+			c.description?.toLowerCase().includes(search)
+	);
+}
+
+/** Find a city by slug. */
+export function findCityBySlug(cities: LocalCity[], slug: string): LocalCity | undefined {
+	return cities.find((c) => c.slug === slug);
+}
+
+/** Count locations per city. */
+export function getLocationCountByCity(locations: LocalLocation[]): Map<string, number> {
+	const counts = new Map<string, number>();
+	for (const loc of locations) {
+		counts.set(loc.cityId, (counts.get(loc.cityId) || 0) + 1);
+	}
+	return counts;
 }

@@ -1,16 +1,29 @@
 /**
  * CityCorners — Local-First Data Layer
  *
- * Locations and favorites stored locally for offline browsing.
+ * Cities, locations, and favorites stored locally for offline browsing.
  * Location lookup and web search remain server-side.
  */
 
 import { createLocalStore, type BaseRecord } from '@manacore/local-store';
-import { guestLocations } from './guest-seed';
+import { guestCities, guestLocations } from './guest-seed';
 
 // ─── Types ──────────────────────────────────────────────────
 
+export interface LocalCity extends BaseRecord {
+	name: string;
+	slug: string;
+	country: string;
+	state?: string | null;
+	description?: string | null;
+	latitude: number;
+	longitude: number;
+	imageUrl?: string | null;
+	createdBy?: string | null;
+}
+
 export interface LocalLocation extends BaseRecord {
+	cityId: string;
 	name: string;
 	category:
 		| 'sight'
@@ -44,8 +57,13 @@ export const citycornersStore = createLocalStore({
 	appId: 'citycorners',
 	collections: [
 		{
+			name: 'cities',
+			indexes: ['slug', 'country', 'name'],
+			guestSeed: guestCities,
+		},
+		{
 			name: 'locations',
-			indexes: ['category', 'name'],
+			indexes: ['cityId', 'category', 'name'],
 			guestSeed: guestLocations,
 		},
 		{
@@ -59,5 +77,6 @@ export const citycornersStore = createLocalStore({
 });
 
 // Typed collection accessors
+export const cityCollection = citycornersStore.collection<LocalCity>('cities');
 export const locationCollection = citycornersStore.collection<LocalLocation>('locations');
 export const favoriteCollection = citycornersStore.collection<LocalFavorite>('favorites');

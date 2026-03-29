@@ -68,20 +68,37 @@
 		isTagStripVisible = !isTagStripVisible;
 	}
 
-	let navItems = $derived<PillNavItem[]>([
-		{ href: '/', label: $_('nav.explore'), icon: 'compass' },
-		{ href: '/map', label: $_('nav.map'), icon: 'mappin' },
-		{ href: '/add', label: $_('nav.add'), icon: 'plus' },
-		{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
-		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
-		{
-			href: '/',
-			label: 'Tags',
-			icon: 'tag',
-			onClick: handleTagStripToggle,
-			active: isTagStripVisible,
-		},
-	]);
+	// Detect if we're inside a city context
+	let currentCitySlug = $derived.by(() => {
+		const path = $page.url.pathname;
+		const match = path.match(/^\/cities\/([^/]+)/);
+		return match ? match[1] : null;
+	});
+
+	let navItems = $derived.by<PillNavItem[]>(() => {
+		const slug = currentCitySlug;
+		if (slug) {
+			return [
+				{ href: `/cities/${slug}`, label: $_('nav.explore'), icon: 'compass' },
+				{ href: `/cities/${slug}/map`, label: $_('nav.map'), icon: 'mappin' },
+				{ href: `/cities/${slug}/add`, label: $_('nav.add'), icon: 'plus' },
+				{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
+				{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
+			];
+		}
+		return [
+			{ href: '/', label: $_('nav.cities'), icon: 'compass' },
+			{ href: '/favorites', label: $_('nav.favorites'), icon: 'heart' },
+			{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
+			{
+				href: '/',
+				label: 'Tags',
+				icon: 'tag',
+				onClick: handleTagStripToggle,
+				active: isTagStripVisible,
+			},
+		];
+	});
 
 	function handleToggleTheme() {
 		theme.toggleMode();
@@ -121,9 +138,13 @@
 		localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
 	}
 
+	function getLocationHref(locId: string): string {
+		const slug = currentCitySlug;
+		return slug ? `/cities/${slug}/locations/${locId}` : `/locations/${locId}`;
+	}
+
 	async function handleSearch(query: string): Promise<SearchItem[]> {
 		if (!query.trim()) {
-			// Show search history when empty
 			const history = getSearchHistory();
 			if (history.length === 0) return [];
 			return history.map((h) => ({
@@ -131,13 +152,12 @@
 				title: h.name,
 				subtitle: $_(`category.${h.category}`),
 				icon: 'clock' as const,
-				href: `/locations/${h.id}`,
+				href: getLocationHref(h.id),
 				isHistory: true,
 			}));
 		}
 
 		try {
-			// Use suggestions endpoint for prefix matching (faster)
 			const res = await fetch(api(`/locations/suggestions?q=${encodeURIComponent(query)}`));
 			if (!res.ok) return [];
 			const data = await res.json();
@@ -147,11 +167,10 @@
 					title: s.name,
 					subtitle: $_(`category.${s.category}`),
 					icon: 'mappin' as const,
-					href: `/locations/${s.id}`,
+					href: getLocationHref(s.id),
 				}));
 			}
 
-			// Fallback to full search
 			const fullRes = await fetch(api(`/locations/search?q=${encodeURIComponent(query)}`));
 			if (!fullRes.ok) return [];
 			const fullData = await fullRes.json();
@@ -160,7 +179,7 @@
 				title: loc.name,
 				subtitle: $_(`category.${loc.category}`),
 				icon: 'mappin' as const,
-				href: `/locations/${loc.id}`,
+				href: getLocationHref(loc.id),
 			}));
 		} catch {
 			return [];

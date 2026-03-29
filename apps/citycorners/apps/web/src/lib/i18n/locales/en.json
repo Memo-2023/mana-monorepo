@@ -1,7 +1,7 @@
 {
 	"app": {
 		"name": "CityCorners",
-		"tagline": "Discover Konstanz"
+		"tagline": "Discover cities worldwide"
 	},
 	"nav": {
 		"explore": "Explore",
@@ -10,14 +10,45 @@
 		"favorites": "Favorites",
 		"settings": "Settings",
 		"showNav": "Show navigation",
-		"hideNav": "Hide navigation"
+		"hideNav": "Hide navigation",
+		"cities": "Cities"
+	},
+	"cities": {
+		"title": "Discover cities",
+		"subtitle": "By the community, for the community",
+		"search": "Search cities...",
+		"add": "Add a city",
+		"empty": "No cities yet. Be the first!",
+		"locationsCount": "{count} places",
+		"noLocationsYet": "No places yet"
+	},
+	"cityAdd": {
+		"title": "Add a new city",
+		"subtitle": "Add a city, village, or town",
+		"name": "Name",
+		"namePlaceholder": "e.g. Berlin",
+		"country": "Country",
+		"countryPlaceholder": "e.g. Germany",
+		"state": "State / Region (optional)",
+		"statePlaceholder": "e.g. Bavaria",
+		"description": "Description (optional)",
+		"descriptionPlaceholder": "What makes this place special?",
+		"imageUrl": "Image URL (optional)",
+		"imageUrlPlaceholder": "https://example.com/image.jpg",
+		"submit": "Add city",
+		"submitting": "Creating...",
+		"loginRequired": "Sign in to add cities.",
+		"error": "Failed to create. Please try again.",
+		"geocoding": "Finding coordinates...",
+		"coordinatesFound": "Coordinates found",
+		"slugExists": "A city with this name already exists."
 	},
 	"home": {
-		"title": "Discover Konstanz",
+		"title": "Discover places",
 		"subtitle": "Sights, restaurants, museums and more",
 		"all": "All",
 		"loading": "Loading...",
-		"noResults": "No locations found.",
+		"noResults": "No places found.",
 		"noResultsCategory": "No {category} found.",
 		"addFirst": "Add the first place",
 		"loadMore": "Load more"
@@ -57,7 +88,7 @@
 		"linkCopied": "Link copied!",
 		"showDetails": "Details",
 		"back": "Back to overview",
-		"notFound": "Location not found.",
+		"notFound": "Place not found.",
 		"edit": "Edit",
 		"delete": "Delete",
 		"deleteConfirm": "Are you sure you want to delete this place? This cannot be undone.",
@@ -114,7 +145,7 @@
 	},
 	"map": {
 		"title": "Map",
-		"subtitle": "All places in Konstanz",
+		"subtitle": "All places on the map",
 		"locateMe": "My location",
 		"yourLocation": "You are here",
 		"geolocationNotSupported": "Geolocation is not supported.",
@@ -141,7 +172,7 @@
 		"login": "Sign in",
 		"register": "Sign up",
 		"about": "About CityCorners",
-		"aboutText": "CityCorners is a city guide for Konstanz at Lake Constance. Discover sights, restaurants, museums and shops."
+		"aboutText": "CityCorners is an open platform for city guides worldwide. Discover places shared by the community — or add your own city."
 	},
 	"auth": {
 		"loginTitle": "Login - CityCorners",
@@ -149,7 +180,7 @@
 	},
 	"add": {
 		"title": "Add a place",
-		"subtitle": "Share your favorite spot in Konstanz",
+		"subtitle": "Share your favorite spot",
 		"name": "Name",
 		"namePlaceholder": "e.g. Lakeside Cafe",
 		"category": "Category",
@@ -157,10 +188,10 @@
 		"descriptionPlaceholder": "What makes this place special?",
 		"minChars": "At least 10 characters",
 		"address": "Address (optional)",
-		"addressPlaceholder": "e.g. Seestrasse 1, 78462 Konstanz",
+		"addressPlaceholder": "e.g. Main Street 1",
 		"searchTitle": "Search for a place online",
 		"searchSubtitle": "We'll automatically find info and pre-fill the form for you.",
-		"searchPlaceholder": "e.g. Cafe Zeitlos Konstanz",
+		"searchPlaceholder": "e.g. Cafe Zeitlos",
 		"searchButton": "Search",
 		"skipSearch": "Skip and enter manually",
 		"foundSources": "Sources found:",

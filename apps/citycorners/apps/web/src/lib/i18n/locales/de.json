@@ -1,7 +1,7 @@
 {
 	"app": {
 		"name": "CityCorners",
-		"tagline": "Entdecke Konstanz"
+		"tagline": "Entdecke Städte weltweit"
 	},
 	"nav": {
 		"explore": "Entdecken",
@@ -10,14 +10,45 @@
 		"favorites": "Favoriten",
 		"settings": "Einstellungen",
 		"showNav": "Navigation einblenden",
-		"hideNav": "Navigation ausblenden"
+		"hideNav": "Navigation ausblenden",
+		"cities": "Städte"
+	},
+	"cities": {
+		"title": "Städte entdecken",
+		"subtitle": "Von der Community für die Community",
+		"search": "Stadt suchen...",
+		"add": "Stadt hinzufügen",
+		"empty": "Noch keine Städte. Sei der Erste!",
+		"locationsCount": "{count} Orte",
+		"noLocationsYet": "Noch keine Orte"
+	},
+	"cityAdd": {
+		"title": "Neue Stadt anlegen",
+		"subtitle": "Füge eine Stadt, ein Dorf oder einen Ort hinzu",
+		"name": "Name",
+		"namePlaceholder": "z.B. Konstanz",
+		"country": "Land",
+		"countryPlaceholder": "z.B. Deutschland",
+		"state": "Bundesland / Region (optional)",
+		"statePlaceholder": "z.B. Baden-Württemberg",
+		"description": "Beschreibung (optional)",
+		"descriptionPlaceholder": "Was macht diesen Ort besonders?",
+		"imageUrl": "Bild-URL (optional)",
+		"imageUrlPlaceholder": "https://example.com/bild.jpg",
+		"submit": "Stadt anlegen",
+		"submitting": "Wird angelegt...",
+		"loginRequired": "Melde dich an, um Städte anzulegen.",
+		"error": "Fehler beim Anlegen. Bitte versuche es erneut.",
+		"geocoding": "Koordinaten werden ermittelt...",
+		"coordinatesFound": "Koordinaten gefunden",
+		"slugExists": "Eine Stadt mit diesem Namen existiert bereits."
 	},
 	"home": {
-		"title": "Entdecke Konstanz",
+		"title": "Orte entdecken",
 		"subtitle": "Sehenswürdigkeiten, Restaurants, Museen und mehr",
 		"all": "Alle",
 		"loading": "Laden...",
-		"noResults": "Keine Locations gefunden.",
+		"noResults": "Keine Orte gefunden.",
 		"noResultsCategory": "Keine {category} gefunden.",
 		"addFirst": "Ersten Ort hinzufügen",
 		"loadMore": "Mehr laden"
@@ -57,7 +88,7 @@
 		"linkCopied": "Link kopiert!",
 		"showDetails": "Details",
 		"back": "Zurück zur Übersicht",
-		"notFound": "Location nicht gefunden.",
+		"notFound": "Ort nicht gefunden.",
 		"edit": "Bearbeiten",
 		"delete": "Löschen",
 		"deleteConfirm": "Bist du sicher, dass du diesen Ort löschen möchtest? Das kann nicht rückgängig gemacht werden.",
@@ -114,7 +145,7 @@
 	},
 	"map": {
 		"title": "Karte",
-		"subtitle": "Alle Orte in Konstanz",
+		"subtitle": "Alle Orte auf der Karte",
 		"locateMe": "Mein Standort",
 		"yourLocation": "Du bist hier",
 		"geolocationNotSupported": "Standortbestimmung wird nicht unterstützt.",
@@ -141,7 +172,7 @@
 		"login": "Anmelden",
 		"register": "Registrieren",
 		"about": "Über CityCorners",
-		"aboutText": "CityCorners ist ein Stadtführer für Konstanz am Bodensee. Entdecke Sehenswürdigkeiten, Restaurants, Museen und Läden."
+		"aboutText": "CityCorners ist eine offene Plattform für Stadtführer weltweit. Entdecke Orte, die von der Community geteilt werden — oder lege selbst eine Stadt an."
 	},
 	"auth": {
 		"loginTitle": "Login - CityCorners",
@@ -149,7 +180,7 @@
 	},
 	"add": {
 		"title": "Ort hinzufügen",
-		"subtitle": "Teile deinen Lieblingsort in Konstanz",
+		"subtitle": "Teile deinen Lieblingsort",
 		"name": "Name",
 		"namePlaceholder": "z.B. Café am See",
 		"category": "Kategorie",
@@ -157,10 +188,10 @@
 		"descriptionPlaceholder": "Was macht diesen Ort besonders?",
 		"minChars": "Mindestens 10 Zeichen",
 		"address": "Adresse (optional)",
-		"addressPlaceholder": "z.B. Seestraße 1, 78462 Konstanz",
+		"addressPlaceholder": "z.B. Seestraße 1",
 		"searchTitle": "Ort im Web suchen",
 		"searchSubtitle": "Wir suchen automatisch nach Infos und füllen das Formular vor.",
-		"searchPlaceholder": "z.B. Café Zeitlos Konstanz",
+		"searchPlaceholder": "z.B. Café Zeitlos",
 		"searchButton": "Suchen",
 		"skipSearch": "Überspringen und manuell eintragen",
 		"foundSources": "Quellen gefunden:",
