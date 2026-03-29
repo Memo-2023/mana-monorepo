@@ -29,6 +29,10 @@
 	let newUtmSource = $state('');
 	let newUtmMedium = $state('');
 	let newUtmCampaign = $state('');
+	let showAdvanced = $state(false);
+	let newExpiresAt = $state('');
+	let newPassword = $state('');
+	let newMaxClicks = $state('');
 
 	// Edit modal state
 	let editingLink = $state<LocalLink | null>(null);
@@ -38,6 +42,13 @@
 	let editUtmSource = $state('');
 	let editUtmMedium = $state('');
 	let editUtmCampaign = $state('');
+	let editExpiresAt = $state('');
+	let editPassword = $state('');
+	let editMaxClicks = $state('');
+
+	// Bulk selection state
+	let selectMode = $state(false);
+	let selectedIds = $state<Set<string>>(new Set());
 
 	// QR modal state
 	let qrLink = $state<LocalLink | null>(null);
@@ -89,6 +100,9 @@
 			utmSource: newUtmSource || null,
 			utmMedium: newUtmMedium || null,
 			utmCampaign: newUtmCampaign || null,
+			expiresAt: newExpiresAt || null,
+			password: newPassword || null,
+			maxClicks: newMaxClicks ? parseInt(newMaxClicks) : null,
 		});
 		toast.success(`Link erstellt: ${shortCode}`);
 		newUrl = '';
@@ -97,7 +111,11 @@
 		newUtmSource = '';
 		newUtmMedium = '';
 		newUtmCampaign = '';
+		newExpiresAt = '';
+		newPassword = '';
+		newMaxClicks = '';
 		showUtm = false;
+		showAdvanced = false;
 	}
 
 	function openEdit(link: LocalLink) {
@@ -108,6 +126,9 @@
 		editUtmSource = link.utmSource ?? '';
 		editUtmMedium = link.utmMedium ?? '';
 		editUtmCampaign = link.utmCampaign ?? '';
+		editExpiresAt = link.expiresAt ?? '';
+		editPassword = link.password ?? '';
+		editMaxClicks = link.maxClicks?.toString() ?? '';
 	}
 
 	async function saveEdit() {
@@ -119,9 +140,53 @@
 			utmSource: editUtmSource || null,
 			utmMedium: editUtmMedium || null,
 			utmCampaign: editUtmCampaign || null,
+			expiresAt: editExpiresAt || null,
+			password: editPassword || null,
+			maxClicks: editMaxClicks ? parseInt(editMaxClicks) : null,
 		});
 		toast.success('Link aktualisiert');
 		editingLink = null;
+	}
+
+	// Bulk actions
+	function toggleSelect(id: string) {
+		if (selectedIds.has(id)) {
+			selectedIds.delete(id);
+		} else {
+			selectedIds.add(id);
+		}
+		selectedIds = selectedIds;
+	}
+
+	function toggleSelectAll() {
+		if (selectedIds.size === filteredLinks.length) {
+			selectedIds.clear();
+		} else {
+			selectedIds = new Set(filteredLinks.map((l) => l.id));
+		}
+		selectedIds = selectedIds;
+	}
+
+	async function bulkDelete() {
+		if (!confirm(`${selectedIds.size} Link(s) löschen?`)) return;
+		for (const id of selectedIds) {
+			await linkCollection.delete(id);
+		}
+		toast.success(`${selectedIds.size} Links gelöscht`);
+		selectedIds.clear();
+		selectedIds = selectedIds;
+		selectMode = false;
+	}
+
+	async function bulkToggleActive() {
+		for (const id of selectedIds) {
+			const link = filteredLinks.find((l) => l.id === id);
+			if (link) await linkCollection.update(id, { isActive: !link.isActive });
+		}
+		toast.success(`${selectedIds.size} Links aktualisiert`);
+		selectedIds.clear();
+		selectedIds = selectedIds;
+		selectMode = false;
 	}
 
 	async function toggleActive(link: LocalLink) {
@@ -163,12 +228,28 @@
 					<span class="ml-2 text-2xl opacity-50">({filteredLinks.length})</span>
 				{/if}
 			</h1>
-			<button
-				onclick={() => (showCreateForm = !showCreateForm)}
-				class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white shadow-lg transition-all hover:scale-105 hover:bg-indigo-700"
-			>
-				{showCreateForm ? '- Ausblenden' : '+ Neuer Link'}
-			</button>
+			<div class="flex items-center gap-2">
+				<button
+					onclick={() => {
+						selectMode = !selectMode;
+						if (!selectMode) {
+							selectedIds.clear();
+							selectedIds = selectedIds;
+						}
+					}}
+					class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium transition-colors {selectMode
+						? 'bg-indigo-600 text-white'
+						: 'hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'}"
+				>
+					{selectMode ? 'Fertig' : 'Auswählen'}
+				</button>
+				<button
+					onclick={() => (showCreateForm = !showCreateForm)}
+					class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white shadow-lg transition-all hover:scale-105 hover:bg-indigo-700"
+				>
+					{showCreateForm ? '- Ausblenden' : '+ Neuer Link'}
+				</button>
+			</div>
 		</div>
 
 		<!-- Create Form -->
@@ -209,6 +290,67 @@
 						/>
 					</div>
 				</div>
+
+				<!-- Advanced Options (collapsible) -->
+				<button
+					onclick={() => (showAdvanced = !showAdvanced)}
+					class="mt-2 flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700"
+				>
+					<svg
+						class="h-4 w-4 transition-transform {showAdvanced ? 'rotate-90' : ''}"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5l7 7-7 7"
+						/>
+					</svg>
+					Erweitert
+				</button>
+				{#if showAdvanced}
+					<div class="mt-3 grid gap-3 md:grid-cols-3">
+						<div>
+							<label for="expires" class="mb-1 block text-xs font-medium opacity-70"
+								>Ablaufdatum</label
+							>
+							<input
+								id="expires"
+								type="datetime-local"
+								bind:value={newExpiresAt}
+								class={inputSmClass}
+							/>
+						</div>
+						<div>
+							<label for="password" class="mb-1 block text-xs font-medium opacity-70"
+								>Passwort</label
+							>
+							<input
+								id="password"
+								type="text"
+								bind:value={newPassword}
+								placeholder="Optional"
+								class={inputSmClass}
+							/>
+						</div>
+						<div>
+							<label for="maxclicks" class="mb-1 block text-xs font-medium opacity-70"
+								>Max Klicks</label
+							>
+							<input
+								id="maxclicks"
+								type="number"
+								bind:value={newMaxClicks}
+								placeholder="Unbegrenzt"
+								min="1"
+								class={inputSmClass}
+							/>
+						</div>
+					</div>
+				{/if}
 
 				<!-- UTM Parameters (collapsible) -->
 				<button
@@ -307,6 +449,34 @@
 			{/if}
 		</div>
 
+		<!-- Bulk Actions Bar -->
+		{#if selectMode && selectedIds.size > 0}
+			<div
+				class="mb-4 flex items-center gap-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-800 dark:bg-indigo-900/20"
+			>
+				<label class="flex cursor-pointer items-center gap-2">
+					<input
+						type="checkbox"
+						checked={selectedIds.size === filteredLinks.length}
+						onchange={toggleSelectAll}
+						class="h-4 w-4 rounded"
+					/>
+					<span class="text-sm font-medium">{selectedIds.size} ausgewählt</span>
+				</label>
+				<div class="h-4 w-px bg-indigo-300 dark:bg-indigo-700"></div>
+				<button
+					onclick={bulkToggleActive}
+					class="rounded px-3 py-1 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-800"
+					>Aktivieren/Deaktivieren</button
+				>
+				<button
+					onclick={bulkDelete}
+					class="rounded px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+					>Löschen</button
+				>
+			</div>
+		{/if}
+
 		<!-- Links List -->
 		{#if links.loading}
 			<div class="space-y-3">
@@ -334,8 +504,16 @@
 						class="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
 					>
 						<div class="flex items-center justify-between">
+							{#if selectMode}
+								<input
+									type="checkbox"
+									checked={selectedIds.has(link.id)}
+									onchange={() => toggleSelect(link.id)}
+									class="mr-3 h-4 w-4 shrink-0 rounded"
+								/>
+							{/if}
 							<div class="min-w-0 flex-1">
-								<div class="flex items-center gap-2">
+								<div class="flex flex-wrap items-center gap-2">
 									<span
 										class="inline-block h-2 w-2 shrink-0 rounded-full {link.isActive
 											? 'bg-green-500'
@@ -351,6 +529,24 @@
 										<span
 											class="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-700 dark:bg-amber-900 dark:text-amber-300"
 											>UTM</span
+										>
+									{/if}
+									{#if link.password}
+										<span
+											class="shrink-0 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700 dark:bg-red-900 dark:text-red-300"
+											>🔒</span
+										>
+									{/if}
+									{#if link.expiresAt}
+										<span
+											class="shrink-0 rounded bg-orange-100 px-1.5 py-0.5 text-xs text-orange-700 dark:bg-orange-900 dark:text-orange-300"
+											title="Läuft ab: {new Date(link.expiresAt).toLocaleDateString('de')}">⏰</span
+										>
+									{/if}
+									{#if link.maxClicks}
+										<span
+											class="shrink-0 rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+											title="Max: {link.maxClicks} Klicks">🎯 {link.maxClicks}</span
 										>
 									{/if}
 								</div>
@@ -522,6 +718,35 @@
 							placeholder="Campaign"
 							class={inputSmClass}
 						/>
+					</div>
+				</div>
+
+				<div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+					<p class="mb-2 text-sm font-medium opacity-70">Erweitert</p>
+					<div class="grid gap-3 md:grid-cols-3">
+						<div>
+							<label class="mb-1 block text-xs opacity-50">Ablaufdatum</label>
+							<input type="datetime-local" bind:value={editExpiresAt} class={inputSmClass} />
+						</div>
+						<div>
+							<label class="mb-1 block text-xs opacity-50">Passwort</label>
+							<input
+								type="text"
+								bind:value={editPassword}
+								placeholder="Optional"
+								class={inputSmClass}
+							/>
+						</div>
+						<div>
+							<label class="mb-1 block text-xs opacity-50">Max Klicks</label>
+							<input
+								type="number"
+								bind:value={editMaxClicks}
+								placeholder="Unbegrenzt"
+								min="1"
+								class={inputSmClass}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>

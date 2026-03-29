@@ -1,132 +1,128 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Project Overview
-
-uLoad is a URL shortener and link management platform built with SvelteKit and PocketBase.
+# uLoad — URL Shortener & Link Management
 
 **Live:** https://ulo.ad
+
+## Architecture
+
+uLoad uses a **local-first** architecture with a lightweight Hono/Bun server for redirects and analytics.
+
+```
+Browser → IndexedDB (Links, Tags, Folders)
+              ↕ sync
+         mana-sync → PostgreSQL
+
+Browser → /r/:code → Hono Server → PostgreSQL (redirect + click tracking)
+```
 
 ## Project Structure
 
 ```
-uload/
+apps/uload/
 ├── apps/
-│   └── web/              # SvelteKit web application
-│       ├── src/          # Source code
-│       │   ├── routes/   # SvelteKit pages
-│       │   └── lib/      # Components, services, utilities
-│       ├── static/       # Static assets
-│       └── e2e/          # End-to-end tests
-├── backend/              # PocketBase configuration
-│   ├── pb_migrations/    # Database migrations
-│   └── pb_schema.json    # Schema definition
-├── docs/                 # Documentation
-├── scripts/              # Utility scripts
-└── CLAUDE.md
+│   ├── web/              # SvelteKit web app (local-first)
+│   ├── server/           # Hono/Bun redirect & analytics server
+│   └── landing/          # Astro marketing page
+├── packages/
+│   └── uload-database/   # Shared Drizzle schema
+└── package.json
 ```
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Web** | SvelteKit 2, Svelte 5 (runes), Tailwind CSS 4 |
+| **Server** | Hono + Bun |
+| **Data** | Local-first (Dexie.js + mana-sync) |
+| **Database** | PostgreSQL via Drizzle ORM |
+| **Auth** | mana-core-auth (Better Auth + EdDSA JWT) |
+| **Landing** | Astro 5 |
+| **PWA** | @vite-pwa/sveltekit |
+| **i18n** | svelte-i18n (DE/EN) |
 
 ## Commands
 
-All commands should be run from `uload/apps/web/`:
-
-### Development
-
 ```bash
-pnpm run dev              # Start development server (http://localhost:5173)
-pnpm run preview          # Preview production build locally
+# Development
+pnpm dev:uload:web          # SvelteKit dev server
+pnpm dev:uload:server       # Hono/Bun server (port 3070)
+pnpm dev:uload:landing      # Landing page
+pnpm dev:uload:local        # Web + Sync + Server (no auth)
+pnpm dev:uload:full         # Everything incl. auth
+
+# Build & Deploy
+pnpm --filter @uload/web build
+pnpm --filter @uload/landing build
+pnpm deploy:landing:uload   # Deploy landing to Cloudflare Pages
+
+# Type Check
+pnpm --filter @uload/web check
+pnpm --filter @uload/server type-check
+pnpm --filter @manacore/uload-database type-check
 ```
 
-### Build & Deploy
+## Ports
+
+| Service | Dev Port | Prod Port |
+|---------|----------|-----------|
+| Web | 5173 | 5029 |
+| Server | 3070 | 3041 |
+| Landing | 4321 | Cloudflare Pages |
+
+## Hono Server Routes
+
+| Route | Auth | Description |
+|-------|------|-------------|
+| `GET /health` | No | Health check |
+| `GET /r/:code` | No | Redirect + click tracking |
+| `GET /public/u/:username` | No | Public user profile + links |
+| `GET /api/v1/analytics/:linkId` | JWT | Click stats |
+| `GET /api/v1/analytics/:linkId/timeline` | JWT | Clicks over time |
+| `GET /api/v1/analytics/:linkId/devices` | JWT | Device breakdown |
+| `GET /api/v1/analytics/:linkId/referrers` | JWT | Top referrers |
+| `GET /api/v1/analytics/:linkId/countries` | JWT | Country breakdown |
+| `POST /api/v1/stripe/checkout` | JWT | Stripe session (stub) |
+| `POST /api/v1/stripe/webhook` | No | Stripe webhook (stub) |
+| `POST /api/v1/email/send-invitation` | JWT | Team invite (stub) |
+
+## Local-First Collections
+
+| Collection | Fields |
+|-----------|--------|
+| `links` | shortCode, originalUrl, title, isActive, clickCount, utmSource/Medium/Campaign, folderId |
+| `tags` | name, slug, color, icon, isPublic, usageCount |
+| `folders` | name, color, order |
+| `linkTags` | linkId, tagId |
+
+## Web App Pages
+
+| Route | Description |
+|-------|-------------|
+| `/my/links` | Link management (CRUD, QR, UTM, bulk) |
+| `/my/tags` | Tag management |
+| `/my/analytics/[id]` | Per-link analytics dashboard |
+| `/settings` | Account & data settings |
+| `/pricing` | Subscription plans (static) |
+| `/u/[username]` | Public user profile |
+| `/login` | Login (shared-auth-ui) |
+| `/register` | Register (shared-auth-ui) |
+
+## Docker
 
 ```bash
-pnpm run build            # Create production build
+# Build
+./scripts/mac-mini/build-app.sh uload-web
+./scripts/mac-mini/build-app.sh uload-server
+
+# Services in docker-compose.macmini.yml:
+# - uload-server (port 3041, Bun)
+# - uload-web (port 5029, Node)
 ```
-
-### Code Quality
-
-```bash
-pnpm run format           # Auto-format code with Prettier
-pnpm run lint             # Run ESLint and Prettier checks
-pnpm run check            # Run Svelte type checking
-```
-
-### Testing
-
-```bash
-pnpm run test             # Run all tests (unit + e2e)
-pnpm run test:unit        # Run unit tests with Vitest
-pnpm run test:e2e         # Run end-to-end tests with Playwright
-```
-
-### Database
-
-```bash
-pnpm run db:generate      # Generate Drizzle migrations
-pnpm run db:migrate       # Run migrations
-pnpm run db:push          # Push schema changes
-pnpm run db:studio        # Open Drizzle Studio
-```
-
-## Technology Stack
-
-- **Framework**: SvelteKit v2.22 with Svelte 5.0
-- **Backend**: PocketBase (embedded SQLite)
-- **Database**: PostgreSQL via Drizzle ORM + Redis for caching
-- **Styling**: Tailwind CSS v4.0
-- **Testing**: Vitest + Playwright
-- **Payments**: Stripe
-- **Email**: Resend
-- **Storage**: Cloudflare R2
 
 ## Key Patterns
 
-### Svelte 5 Runes Mode
-
-- **NEVER use `$:` reactive statements** - use `$derived` instead
-- **NEVER use `let` for reactive values** - use `$state` for reactive state
-- **For side effects** - use `$effect` instead of `$:` statements
-
-```typescript
-// ✅ CORRECT - Svelte 5 runes
-let headerModule = $derived(card.config.modules?.find((m) => m.type === 'header'));
-let count = $state(0);
-
-$effect(() => {
-	console.log('Count changed:', count);
-});
-```
-
-### PocketBase Usage
-
-In server-side code (`+page.server.ts`, `+server.ts`):
-
-- **ALWAYS use `locals.pb`** from the request context
-- The imported `pb` is for client-side only
-
-```typescript
-// Server-side
-export const load: PageServerLoad = async ({ locals }) => {
-	const items = await locals.pb.collection('items').getList();
-};
-
-// Client-side
-import { pb } from '$lib/pocketbase';
-```
-
-## Environment Configuration
-
-Copy `.env.example` to `.env` and configure:
-
-- `DATABASE_URL` - PostgreSQL connection string
-- `R2_*` - Cloudflare R2 storage credentials
-- `RESEND_API_KEY` - Email service
-- `STRIPE_*` - Payment processing (see `.env.stripe.example`)
-
-## Code Style
-
-- Tabs for indentation
-- Single quotes for strings
-- 100 character line width
-- Prettier auto-sorts Tailwind classes
+- **Svelte 5 Runes**: Use `$state`, `$derived`, `$effect` — never `$:`
+- **Local-first**: All CRUD via `linkCollection.insert/update/delete` (IndexedDB)
+- **Analytics**: Fetched from Hono server, not local (server-only click data)
+- **Auth**: `authStore` from `@manacore/shared-auth-stores`, `AuthGate` with guest mode
+- **Sync**: Starts on login via `uloadStore.startSync()`, stops on logout

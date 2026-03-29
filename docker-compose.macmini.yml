@@ -462,7 +462,11 @@ services:
     restart: always
     mem_limit: 256m
     volumes:
-      - ./services/mana-search/searxng:/etc/searxng:ro
+      - ./services/mana-search/searxng:/mnt/searxng-config:ro
+    entrypoint: >
+      sh -c "cp /mnt/searxng-config/settings.yml /etc/searxng/settings.yml &&
+             cp /mnt/searxng-config/limiter.toml /etc/searxng/limiter.toml 2>/dev/null;
+             exec /usr/local/searxng/dockerfiles/docker-entrypoint.sh"
     environment:
       SEARXNG_BASE_URL: http://searxng:8080
       SEARXNG_SECRET: ${SEARXNG_SECRET:-change-me-searxng-secret}
@@ -1583,16 +1587,19 @@ services:
     container_name: mana-mon-victoria
     restart: always
     mem_limit: 256m
-    command:
-      - '-storageDataPath=/storage'
-      - '-retentionPeriod=2y'
-      - '-httpListenAddr=:9090'
-      - '-promscrape.config=/etc/prometheus/prometheus.yml'
-      - '-promscrape.config.strictParse=false'
-      - '-selfScrapeInterval=15s'
-      - '-search.latencyOffset=0s'
+    entrypoint: >
+      sh -c "mkdir -p /etc/prometheus &&
+             cp /mnt/prometheus-config/*.yml /etc/prometheus/ 2>/dev/null;
+             exec /victoria-metrics-prod
+             -storageDataPath=/storage
+             -retentionPeriod=2y
+             -httpListenAddr=:9090
+             -promscrape.config=/etc/prometheus/prometheus.yml
+             -promscrape.config.strictParse=false
+             -selfScrapeInterval=15s
+             -search.latencyOffset=0s"
     volumes:
-      - ./docker/prometheus:/etc/prometheus:ro
+      - ./docker/prometheus:/mnt/prometheus-config:ro
       - victoriametrics_data:/storage
     ports:
       - "9090:9090"
@@ -1608,9 +1615,12 @@ services:
     container_name: mana-mon-loki
     restart: always
     mem_limit: 192m
-    command: -config.file=/etc/loki/local-config.yaml
+    entrypoint: >
+      sh -c "mkdir -p /etc/loki &&
+             cp /mnt/loki-config/*.yaml /etc/loki/ 2>/dev/null;
+             exec /usr/bin/loki -config.file=/etc/loki/local-config.yaml"
     volumes:
-      - ./docker/loki:/etc/loki:ro
+      - ./docker/loki:/mnt/loki-config:ro
       - loki_data:/loki
     ports:
       - "3100:3100"
@@ -1723,16 +1733,19 @@ services:
         condition: service_healthy
       alertmanager:
         condition: service_healthy
-    command:
-      - '-datasource.url=http://victoriametrics:9090'
-      - '-notifier.url=http://alertmanager:9093'
-      - '-remoteWrite.url=http://victoriametrics:9090'
-      - '-remoteRead.url=http://victoriametrics:9090'
-      - '-rule=/etc/alerts/*.yml'
-      - '-evaluationInterval=30s'
-      - '-httpListenAddr=:8880'
+    entrypoint: >
+      sh -c "mkdir -p /etc/alerts &&
+             cp /mnt/alerts-config/*.yml /etc/alerts/ 2>/dev/null;
+             exec /vmalert-prod
+             -datasource.url=http://victoriametrics:9090
+             -notifier.url=http://alertmanager:9093
+             -remoteWrite.url=http://victoriametrics:9090
+             -remoteRead.url=http://victoriametrics:9090
+             -rule='/etc/alerts/*.yml'
+             -evaluationInterval=30s
+             -httpListenAddr=:8880"
     volumes:
-      - ./docker/prometheus:/etc/alerts:ro
+      - ./docker/prometheus:/mnt/alerts-config:ro
     ports:
       - "8880:8880"
     healthcheck:
@@ -1750,12 +1763,15 @@ services:
     depends_on:
       alert-notifier:
         condition: service_healthy
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--storage.path=/alertmanager'
-      - '--web.listen-address=:9093'
+    entrypoint: >
+      sh -c "mkdir -p /tmp/am-config &&
+             cp /mnt/alertmanager-config/*.yml /tmp/am-config/ 2>/dev/null;
+             exec /bin/alertmanager
+             --config.file=/tmp/am-config/alertmanager.yml
+             --storage.path=/alertmanager
+             --web.listen-address=:9093"
     volumes:
-      - ./docker/alertmanager:/etc/alertmanager:ro
+      - ./docker/alertmanager:/mnt/alertmanager-config:ro
       - alertmanager_data:/alertmanager
     ports:
       - "9093:9093"
