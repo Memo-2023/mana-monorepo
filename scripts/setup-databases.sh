@@ -86,6 +86,7 @@ ALL_DATABASES=(
     "traces"
     "context"
     "citycorners"
+    "uload"
     # Hono service databases (extracted from former mana-core-auth)
     "mana_credits"
     "mana_user"
@@ -217,9 +218,13 @@ setup_service() {
             create_db_if_not_exists "citycorners"
             # Schema managed by mana-sync (backend removed)
             ;;
+        uload)
+            create_db_if_not_exists "uload"
+            # Schema managed by mana-sync (local-first app)
+            ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, picture, photos, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, mukke, traces, context, citycorners"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, picture, photos, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, mukke, traces, context, citycorners, uload"
             exit 1
             ;;
     esac
