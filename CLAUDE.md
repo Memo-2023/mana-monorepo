@@ -56,6 +56,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **traces** | City exploration | Backend, Mobile |
 | **taktik** | Time tracking | Web |
 | **uload** | URL shortener & link management | Server, Web, Landing |
+| **news** | AI news reader & personal library | Server, Web, Landing |
 | **calc** | Calculator & converter | Web |
 | **playground** | LLM playground | Web |
 

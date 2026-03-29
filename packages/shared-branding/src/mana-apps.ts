@@ -389,6 +389,22 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 	},
 	{
+		id: 'news',
+		name: 'News Hub',
+		description: {
+			de: 'KI-Nachrichten & Leseliste',
+			en: 'AI News & Reading List',
+		},
+		longDescription: {
+			de: 'KI-kuratierte Nachrichten mit persönlicher Leseliste und Content-Extraction.',
+			en: 'AI-curated news with personal reading list and content extraction.',
+		},
+		icon: APP_ICONS.news,
+		color: '#10b981',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
 		id: 'calc',
 		name: 'Calc',
 		description: {
@@ -497,6 +513,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	citycorners: { dev: 'http://localhost:5196', prod: 'https://citycorners.mana.how' },
 	taktik: { dev: 'http://localhost:5197', prod: 'https://taktik.mana.how' },
 	uload: { dev: 'http://localhost:5173', prod: 'https://ulo.ad' },
+	news: { dev: 'http://localhost:5174', prod: 'https://news.mana.how' },
 	calc: { dev: 'http://localhost:5198', prod: 'https://calc.mana.how' },
 };
 

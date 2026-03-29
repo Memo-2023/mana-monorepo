@@ -117,6 +117,9 @@ export const APP_ICONS = {
 	uload: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ug" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#818cf8"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ug)"/><path d="M35 45a10 10 0 0 1 10-10h0a10 10 0 0 1 0 20h0M65 55a10 10 0 0 1-10 10h0a10 10 0 0 1 0-20h0M42 58l16-16" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/></svg>`
 	),
+	news: svgToDataUrl(
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#34d399"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ng)"/><rect x="22" y="25" width="56" height="50" rx="4" stroke="white" stroke-width="4" fill="none"/><line x1="30" y1="38" x2="55" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="48" x2="70" y2="48" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="58" x2="65" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;
