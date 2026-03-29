@@ -26,6 +26,8 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { gamesOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { gamesStore } from '$lib/data/local-store';
 	import {
 		tagLocalStore,
@@ -240,6 +242,10 @@
 			searchingText="Suche..."
 		/>
 	</div>
+
+	{#if gamesOnboarding.shouldShow}
+		<MiniOnboardingModal store={gamesOnboarding} appName="Mana Games" appEmoji="🎮" />
+	{/if}
 
 	<GuestWelcomeModal
 		appId="mana-games"
