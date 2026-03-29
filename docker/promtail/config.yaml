@@ -1,0 +1,109 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    batchwait: 3s
+    batchsize: 1048576  # 1 MB
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 30s
+        filters:
+          # Only collect from our compose project
+          - name: label
+            values: ["com.docker.compose.project"]
+
+    relabel_configs:
+      # Extract compose service name → label "service"
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_service"]
+        target_label: "service"
+
+      # Extract container name → label "container"
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        target_label: "container"
+
+      # Extract compose project → label "project"
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_project"]
+        target_label: "project"
+
+      # Tier labels based on container name prefix for easy filtering
+      # mana-infra-* → tier=infra
+      - source_labels: ["container"]
+        regex: "mana-infra-.*"
+        target_label: "tier"
+        replacement: "infra"
+      # mana-core-* → tier=core
+      - source_labels: ["container"]
+        regex: "mana-core-.*"
+        target_label: "tier"
+        replacement: "core"
+      # mana-auth/credits/user/subscriptions/analytics → tier=auth
+      - source_labels: ["container"]
+        regex: "mana-(auth|credits|user|subscriptions|analytics)"
+        target_label: "tier"
+        replacement: "auth"
+      # mana-app-* → tier=app
+      - source_labels: ["container"]
+        regex: "mana-app-.*"
+        target_label: "tier"
+        replacement: "app"
+      # mana-mon-* → tier=monitoring
+      - source_labels: ["container"]
+        regex: "mana-mon-.*"
+        target_label: "tier"
+        replacement: "monitoring"
+      # mana-matrix-* → tier=matrix
+      - source_labels: ["container"]
+        regex: "mana-matrix-.*"
+        target_label: "tier"
+        replacement: "matrix"
+      # mana-game-* → tier=games
+      - source_labels: ["container"]
+        regex: "mana-game-.*"
+        target_label: "tier"
+        replacement: "games"
+      # mana-service-* → tier=service
+      - source_labels: ["container"]
+        regex: "mana-service-.*"
+        target_label: "tier"
+        replacement: "service"
+
+      # Drop monitoring container logs to save space (they're noisy)
+      - source_labels: ["tier"]
+        regex: "monitoring"
+        action: drop
+
+    pipeline_stages:
+      # Try to parse JSON logs (Go services, Hono services)
+      - json:
+          expressions:
+            level: level
+            msg: msg
+            error: error
+            status: status
+            method: method
+            path: path
+            duration: duration
+            request_id: request_id
+      # Fall back: extract level from common log patterns
+      - regex:
+          expression: '(?i)(?P<level>error|warn|info|debug|fatal|panic)'
+      # Normalize level label
+      - labels:
+          level:
+      # Add timestamp from log if available
+      - timestamp:
+          source: time
+          format: RFC3339Nano
+          fallback_formats:
+            - "2006-01-02T15:04:05.000Z"
+            - "2006-01-02 15:04:05"
+          action_on_failure: fudge

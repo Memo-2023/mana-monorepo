@@ -34,6 +34,8 @@ MONITORING_CONTAINERS=(
   mana-mon-alert-notifier
   mana-mon-glitchtip
   mana-mon-glitchtip-worker
+  mana-mon-loki
+  mana-mon-promtail
 )
 
 # Track if we stopped monitoring
