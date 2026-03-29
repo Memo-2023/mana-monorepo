@@ -58,6 +58,15 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **calc** | Calculator & converter | Web |
 | **playground** | LLM playground | Web |
 
+### Games (`games/`)
+
+| Game | Description | Tech |
+|------|-------------|------|
+| **mana-games** | AI browser games platform (22+ games) | SvelteKit, NestJS, Gemini/Claude/GPT |
+| **voxelava** | Voxel game | SvelteKit |
+| **whopixels** | Phaser.js pixel game | Phaser, JavaScript |
+| **worldream** | World exploration game | SvelteKit |
+
 ### Archived Projects (`apps-archived/`)
 
 Currently empty. To archive a project, move it from `apps/` to `apps-archived/` (excluded from workspace).
@@ -144,7 +153,10 @@ manacore-monorepo/
 │   ├── uload/
 │   └── wisekeep/
 ├── games/                   # Game projects
-│   └── {game-name}/         # Individual games
+│   ├── mana-games/          # AI browser games platform (SvelteKit + NestJS)
+│   ├── voxelava/            # Voxel game
+│   ├── whopixels/           # Phaser.js pixel game
+│   └── worldream/           # World exploration game
 ├── services/                # Standalone microservices
 │   ├── mana-auth/           # Central auth (Hono + Bun + Better Auth)
 │   ├── mana-auth/           # Central auth rewrite (Hono + Bun + Better Auth)
