@@ -4972,6 +4972,9 @@ importers:
       '@eslint/js':
         specifier: ^9.20.0
         version: 9.39.1
+      '@manacore/shared-vite-config':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-vite-config
       '@playwright/test':
         specifier: ^1.51.0
         version: 1.57.0
@@ -5284,6 +5287,121 @@ importers:
         version: 5.9.3
 
   games/mana-games/apps/web:
+    dependencies:
+      '@manacore/feedback':
+        specifier: workspace:*
+        version: link:../../../../packages/feedback
+      '@manacore/help':
+        specifier: workspace:*
+        version: link:../../../../packages/help
+      '@manacore/local-store':
+        specifier: workspace:*
+        version: link:../../../../packages/local-store
+      '@manacore/shared-app-onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-app-onboarding
+      '@manacore/shared-auth':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-auth
+      '@manacore/shared-auth-stores':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-auth-stores
+      '@manacore/shared-auth-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-auth-ui
+      '@manacore/shared-branding':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-branding
+      '@manacore/shared-error-tracking':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-error-tracking
+      '@manacore/shared-i18n':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-i18n
+      '@manacore/shared-icons':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-icons
+      '@manacore/shared-profile-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-profile-ui
+      '@manacore/shared-stores':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-stores
+      '@manacore/shared-tags':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-tags
+      '@manacore/shared-tailwind':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-tailwind
+      '@manacore/shared-theme':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-theme
+      '@manacore/shared-theme-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-theme-ui
+      '@manacore/shared-ui':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-ui
+      '@manacore/shared-utils':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-utils
+      '@manacore/subscriptions':
+        specifier: workspace:*
+        version: link:../../../../packages/subscriptions
+      svelte-i18n:
+        specifier: ^4.0.1
+        version: 4.0.1(svelte@5.44.0)
+    devDependencies:
+      '@manacore/shared-pwa':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-pwa
+      '@manacore/shared-vite-config':
+        specifier: workspace:*
+        version: link:../../../../packages/shared-vite-config
+      '@sveltejs/adapter-node':
+        specifier: ^5.0.0
+        version: 5.4.0(@sveltejs/kit@2.49.0(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))
+      '@sveltejs/kit':
+        specifier: ^2.47.1
+        version: 2.49.0(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^5.0.0
+        version: 5.1.1(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
+      '@tailwindcss/vite':
+        specifier: ^4.1.7
+        version: 4.1.17(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.25
+      '@vite-pwa/sveltekit':
+        specifier: ^1.1.0
+        version: 1.1.0(@sveltejs/kit@2.49.0(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))(svelte@5.44.0)(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))(vite@6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))(workbox-build@7.4.0(@types/babel__core@7.20.5))(workbox-window@7.4.0)
+      prettier:
+        specifier: ^3.1.1
+        version: 3.6.2
+      prettier-plugin-svelte:
+        specifier: ^3.1.2
+        version: 3.4.0(prettier@3.6.2)(svelte@5.44.0)
+      svelte:
+        specifier: ^5.41.0
+        version: 5.44.0
+      svelte-check:
+        specifier: ^4.3.3
+        version: 4.3.4(picomatch@4.0.3)(svelte@5.44.0)(typescript@5.9.3)
+      tailwindcss:
+        specifier: ^4.1.7
+        version: 4.1.17
+      tslib:
+        specifier: ^2.4.1
+        version: 2.8.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.1(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)
+
+  games/mana-games/apps/web-astro:
     dependencies:
       astro:
         specifier: ^5.10.1

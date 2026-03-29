@@ -1,1 +1,6 @@
-<!-- This page redirects to /my/links via +page.server.ts -->
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+
+	onMount(() => goto('/my/links'));
+</script>

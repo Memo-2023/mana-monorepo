@@ -2,7 +2,6 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { themeStore } from '$lib/theme.svelte';
-	import { initLocale } from '$lib/locale';
 	import { onMount } from 'svelte';
 	import { Toaster } from 'svelte-sonner';
 	import { uloadStore } from '$lib/data/local-store';
@@ -13,7 +12,7 @@
 	let loading = $state(true);
 
 	onMount(async () => {
-		initLocale();
+		themeStore.initialize();
 		await authStore.initialize();
 		await uloadStore.initialize();
 		loading = false;

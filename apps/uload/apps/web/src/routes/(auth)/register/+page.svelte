@@ -18,14 +18,7 @@
 	successRedirect="/my/links"
 	loginPath="/login"
 	translations={{
-		title: 'Registrieren',
-		subtitle: 'Erstelle deinen uLoad Account',
 		emailPlaceholder: 'E-Mail',
 		passwordPlaceholder: 'Passwort',
-		confirmPasswordPlaceholder: 'Passwort bestätigen',
-		signUpButton: 'Registrieren',
-		signingUp: 'Wird erstellt...',
-		alreadyHaveAccount: 'Bereits registriert?',
-		signIn: 'Anmelden',
 	}}
 />

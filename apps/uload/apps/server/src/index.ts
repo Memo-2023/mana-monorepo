@@ -9,6 +9,8 @@ import { AnalyticsService } from './services/analytics';
 import { healthRoutes } from './routes/health';
 import { createRedirectRoutes } from './routes/redirect';
 import { createAnalyticsRoutes } from './routes/analytics';
+import { createStripeRoutes } from './routes/stripe';
+import { createEmailRoutes } from './routes/email';
 
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
@@ -30,6 +32,8 @@ app.route('/r', createRedirectRoutes(redirectService));
 // Analytics API (auth required)
 app.use('/api/v1/*', jwtAuth(config.manaAuthUrl));
 app.route('/api/v1/analytics', createAnalyticsRoutes(analyticsService));
+app.route('/api/v1/stripe', createStripeRoutes());
+app.route('/api/v1/email', createEmailRoutes());
 
 console.log(`uload-server starting on port ${config.port}...`);
 

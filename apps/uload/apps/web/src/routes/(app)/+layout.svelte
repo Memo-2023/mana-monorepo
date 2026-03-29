@@ -12,7 +12,7 @@
 
 	let { children } = $props();
 
-	const appItems = getPillAppItems('uload');
+	const appItems = getPillAppItems();
 
 	let userEmail = $derived(authStore.isAuthenticated ? (authStore.user?.email ?? '') : '');
 
@@ -103,8 +103,6 @@
 			onLogout={handleLogout}
 			onToggleTheme={handleToggleTheme}
 			{isDark}
-			{isSidebarMode}
-			onModeChange={handleModeChange}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
 			showThemeToggle={true}

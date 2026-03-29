@@ -373,6 +373,22 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 	},
 	{
+		id: 'uload',
+		name: 'uLoad',
+		description: {
+			de: 'URL-Shortener & Link-Management',
+			en: 'URL Shortener & Link Management',
+		},
+		longDescription: {
+			de: 'Kürze URLs, tracke Klicks und verwalte deine Links.',
+			en: 'Shorten URLs, track clicks, and manage your links.',
+		},
+		icon: APP_ICONS.uload,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'development',
+	},
+	{
 		id: 'calc',
 		name: 'Calc',
 		description: {
@@ -480,6 +496,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	context: { dev: 'http://localhost:5192', prod: 'https://context.mana.how' },
 	citycorners: { dev: 'http://localhost:5196', prod: 'https://citycorners.mana.how' },
 	taktik: { dev: 'http://localhost:5197', prod: 'https://taktik.mana.how' },
+	uload: { dev: 'http://localhost:5173', prod: 'https://ulo.ad' },
 	calc: { dev: 'http://localhost:5198', prod: 'https://calc.mana.how' },
 };
 

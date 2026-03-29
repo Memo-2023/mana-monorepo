@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { Snippet } from 'svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 
-	let { data, children }: { data: any; children: Snippet } = $props();
+	let { children } = $props();
 
 	$effect(() => {
-		// Redirect to dashboard if already logged in
-		if (data.user) {
-			goto('/my');
+		if (authStore.isAuthenticated) {
+			goto('/my/links');
 		}
 	});
 </script>

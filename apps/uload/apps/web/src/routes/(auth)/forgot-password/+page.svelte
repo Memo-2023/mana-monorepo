@@ -13,14 +13,11 @@
 	appName="uLoad"
 	logo={UloadLogo}
 	primaryColor="#6366f1"
-	onResetPassword={handleResetPassword}
+	onForgotPassword={handleResetPassword}
 	{goto}
 	loginPath="/login"
 	translations={{
-		title: 'Passwort zurücksetzen',
-		subtitle: 'Gib deine E-Mail-Adresse ein',
 		emailPlaceholder: 'E-Mail',
-		resetButton: 'Link senden',
 		backToLogin: 'Zurück zum Login',
 	}}
 />
