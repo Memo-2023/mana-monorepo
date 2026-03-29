@@ -478,6 +478,49 @@ EXPO_PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 </script>
 ```
 
+## Quick Add Syntax
+
+Natural language event creation via `event-parser.ts`:
+
+```
+"Meeting morgen 14 Uhr 1h @Arbeit #wichtig"
+```
+
+Recognized patterns:
+- **Date**: heute, morgen, nächsten Montag, 15.12.
+- **Time**: um 14 Uhr, 14:00
+- **Time Range**: 14-16 Uhr, 10:00-11:30
+- **Duration**: 30min, 2h, 1.5 Stunden, 2h30m
+- **All-Day**: ganztägig, ganzer Tag
+- **Calendar**: @Kalender (first @ref matches calendar)
+- **Attendees**: @Name (subsequent @refs become attendees)
+- **Tags**: #tag1 #tag2
+- **Location**: in Berlin, im Büro, bei Dr. Müller
+- **Recurrence**: jeden Tag, wöchentlich, monatlich
+
+### Multi-Event Input
+
+Split multiple events with keywords (`danach`, `dann`, `und dann`, `anschließend`) or semicolons:
+
+```
+"Meeting 14 Uhr 1h danach Review 30min"
+→ Event 1: Meeting (14:00-15:00)
+→ Event 2: Review (15:00-15:30, auto-offset)
+
+"Standup 9 Uhr 30min @Arbeit; Sprint Planning 1h; Code Review 30min"
+→ 3 events chained: 9:00-9:30, 9:30-10:30, 10:30-11:00
+```
+
+Context inheritance: subsequent events inherit date, time, and calendar from the first event. If the first event has a duration, the next event starts where it ends.
+
+### Duration Estimation
+
+`estimateEventDuration()` in `event-estimator.ts` suggests event duration based on past events. Uses weighted similarity (calendar, title overlap, tags). Runs fully offline against IndexedDB.
+
+### Conflict Detection
+
+`detectConflicts()` in `event-estimator.ts` checks for overlapping events. Ignores all-day events, supports exclude-by-ID for edit mode. Returns list of conflicting events with title and time.
+
 ## Quick Start
 
 ### 1. Datenbank erstellen

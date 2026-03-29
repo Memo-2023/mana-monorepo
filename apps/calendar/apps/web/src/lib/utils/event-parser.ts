@@ -312,6 +312,76 @@ export function parseEventInput(input: string, locale: ParserLocale = 'de'): Par
 }
 
 // ============================================================================
+// Multi-Event Splitting
+// ============================================================================
+
+const EVENT_SPLITTERS =
+	/\s*(?:,\s*(?:danach|dann|und dann|anschließend|außerdem|afterwards|then|and then|also)\s+|;\s*|\s+(?:danach|dann|und dann|anschließend|afterwards|then|and then)\s+)/i;
+
+/**
+ * Parse input that may contain multiple events separated by keywords.
+ * Subsequent events inherit date/time/calendar context from the first event.
+ * If the first event has a known end time, the next event starts there.
+ *
+ * Examples:
+ * - "Meeting 14 Uhr 1h danach Review 30min" → Meeting 14-15, Review 15-15:30
+ * - "Morgen Workshop 9-12 Uhr @Arbeit; Mittagessen; Retro 1h" → 3 events
+ */
+export function parseMultiEventInput(input: string, locale: ParserLocale = 'de'): ParsedEvent[] {
+	const parts = input.split(EVENT_SPLITTERS).filter((s) => s.trim().length > 0);
+
+	if (parts.length <= 1) {
+		return [parseEventInput(input, locale)];
+	}
+
+	const results: ParsedEvent[] = [];
+	let contextDate: Date | undefined;
+	let contextCalendar: string | undefined;
+	let lastEndDate: Date | undefined;
+
+	for (let i = 0; i < parts.length; i++) {
+		const parsed = parseEventInput(parts[i].trim(), locale);
+
+		if (i === 0) {
+			contextDate = parsed.startDate;
+			contextCalendar = parsed.calendarName;
+			lastEndDate = parsed.endDate;
+		} else {
+			// Inherit calendar
+			if (!parsed.calendarName && contextCalendar) {
+				parsed.calendarName = contextCalendar;
+			}
+
+			// Inherit date/time: use lastEndDate as start if no explicit time
+			if (!parsed.startDate && lastEndDate) {
+				parsed.startDate = new Date(lastEndDate);
+				// Calculate endDate
+				if (parsed.duration) {
+					parsed.endDate = new Date(parsed.startDate.getTime() + parsed.duration * 60_000);
+				} else {
+					// Default 1h
+					parsed.endDate = addHours(parsed.startDate, 1);
+				}
+			} else if (!parsed.startDate && contextDate) {
+				// Fallback: same date, no specific time
+				parsed.startDate = new Date(contextDate);
+				if (parsed.duration) {
+					parsed.endDate = new Date(parsed.startDate.getTime() + parsed.duration * 60_000);
+				} else {
+					parsed.endDate = addHours(parsed.startDate, 1);
+				}
+			}
+
+			lastEndDate = parsed.endDate;
+		}
+
+		results.push(parsed);
+	}
+
+	return results;
+}
+
+// ============================================================================
 // ID Resolution
 // ============================================================================
 

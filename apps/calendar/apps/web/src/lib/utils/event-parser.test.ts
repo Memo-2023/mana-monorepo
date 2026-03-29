@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { parseEventInput, resolveEventIds, formatParsedEventPreview } from './event-parser';
+import {
+	parseEventInput,
+	resolveEventIds,
+	formatParsedEventPreview,
+	parseMultiEventInput,
+} from './event-parser';
 
 describe('parseEventInput', () => {
 	it('should parse a simple title', () => {
@@ -271,5 +276,83 @@ describe('formatParsedEventPreview', () => {
 		const parsed = parseEventInput('Meeting morgen 14 Uhr 1h @Arbeit');
 		const preview = formatParsedEventPreview(parsed);
 		expect(preview).toContain(' · ');
+	});
+});
+
+describe('parseMultiEventInput', () => {
+	it('should return single event for simple input', () => {
+		const events = parseMultiEventInput('Meeting morgen');
+		expect(events).toHaveLength(1);
+		expect(events[0].title).toBe('Meeting');
+	});
+
+	it('should split on "danach"', () => {
+		const events = parseMultiEventInput('Meeting danach Review');
+		expect(events).toHaveLength(2);
+		expect(events[0].title).toBe('Meeting');
+		expect(events[1].title).toBe('Review');
+	});
+
+	it('should split on semicolon', () => {
+		const events = parseMultiEventInput('Meeting; Review; Retro');
+		expect(events).toHaveLength(3);
+	});
+
+	it('should inherit calendar from first event', () => {
+		const events = parseMultiEventInput('Meeting @Arbeit danach Review');
+		expect(events[0].calendarName).toBe('Arbeit');
+		expect(events[1].calendarName).toBe('Arbeit');
+	});
+
+	it('should offset time based on first event end', () => {
+		const events = parseMultiEventInput('Meeting 14 Uhr 1h danach Review 30min');
+		expect(events).toHaveLength(2);
+		expect(events[0].startDate).toBeDefined();
+		expect(events[0].startDate!.getHours()).toBe(14);
+		// Second event should start at 15:00 (14 + 1h)
+		expect(events[1].startDate).toBeDefined();
+		expect(events[1].startDate!.getHours()).toBe(15);
+		expect(events[1].startDate!.getMinutes()).toBe(0);
+		// Second event should end at 15:30
+		expect(events[1].endDate).toBeDefined();
+		expect(events[1].endDate!.getHours()).toBe(15);
+		expect(events[1].endDate!.getMinutes()).toBe(30);
+	});
+
+	it('should chain three events with time offsets', () => {
+		const events = parseMultiEventInput(
+			'Standup 9 Uhr 30min; Sprint Planning 1h; Code Review 30min'
+		);
+		expect(events).toHaveLength(3);
+		// Standup: 9:00-9:30
+		expect(events[0].startDate!.getHours()).toBe(9);
+		expect(events[0].endDate!.getHours()).toBe(9);
+		expect(events[0].endDate!.getMinutes()).toBe(30);
+		// Sprint Planning: 9:30-10:30
+		expect(events[1].startDate!.getHours()).toBe(9);
+		expect(events[1].startDate!.getMinutes()).toBe(30);
+		expect(events[1].endDate!.getHours()).toBe(10);
+		expect(events[1].endDate!.getMinutes()).toBe(30);
+		// Code Review: 10:30-11:00
+		expect(events[2].startDate!.getHours()).toBe(10);
+		expect(events[2].startDate!.getMinutes()).toBe(30);
+		expect(events[2].endDate!.getHours()).toBe(11);
+		expect(events[2].endDate!.getMinutes()).toBe(0);
+	});
+
+	it('should handle ", danach" pattern', () => {
+		const events = parseMultiEventInput('Zahnarzt, danach Apotheke');
+		expect(events).toHaveLength(2);
+		expect(events[0].title).toBe('Zahnarzt');
+		expect(events[1].title).toBe('Apotheke');
+	});
+
+	it('should default to 1h when no duration on follow-up events', () => {
+		const events = parseMultiEventInput('Meeting 14 Uhr 1h danach Review');
+		expect(events[1].startDate).toBeDefined();
+		expect(events[1].endDate).toBeDefined();
+		// Review default: 1h
+		const diff = events[1].endDate!.getTime() - events[1].startDate!.getTime();
+		expect(diff).toBe(60 * 60_000);
 	});
 });
