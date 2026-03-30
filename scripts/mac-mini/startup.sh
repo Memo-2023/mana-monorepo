@@ -49,6 +49,7 @@ else
         --vm-type vz \
         --vz-rosetta \
         --mount-type virtiofs \
+        --mount /Users/mana:w \
         --mount /Volumes/ManaData:w \
         2>&1 | tee -a "$LOG_FILE"
 
