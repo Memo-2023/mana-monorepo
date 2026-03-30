@@ -1401,14 +1401,14 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      PORT: 3041
+      PORT: 3070
       DATABASE_URL: postgresql://manacore:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_sync
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       CORS_ORIGINS: http://uload-web:5029,https://uload.mana.how,https://ulo.ad
     ports:
-      - "3041:3041"
+      - "3070:3070"
     healthcheck:
-      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3041/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3070/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1428,7 +1428,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5029
-      PUBLIC_ULOAD_SERVER_URL: http://uload-server:3041
+      PUBLIC_ULOAD_SERVER_URL: http://uload-server:3070
       PUBLIC_ULOAD_SERVER_URL_CLIENT: https://uload-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how

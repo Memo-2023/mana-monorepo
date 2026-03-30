@@ -268,9 +268,12 @@
 			<!-- List View -->
 			<div class="space-y-2">
 				{#each sortedItems as item (item.id)}
-					<button
+					<div
 						onclick={() => goto(`/items/${item.id}`)}
-						class="group flex w-full items-center gap-4 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 text-left transition-colors hover:border-[hsl(var(--primary)/0.3)]"
+						onkeydown={(e) => e.key === 'Enter' && goto(`/items/${item.id}`)}
+						role="button"
+						tabindex="0"
+						class="group flex w-full cursor-pointer items-center gap-4 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 text-left transition-colors hover:border-[hsl(var(--primary)/0.3)]"
 					>
 						<div class="flex-1 min-w-0">
 							<div class="flex items-center gap-2">
@@ -308,7 +311,7 @@
 								/>
 							</svg>
 						</button>
-					</button>
+					</div>
 				{/each}
 			</div>
 		{/if}
