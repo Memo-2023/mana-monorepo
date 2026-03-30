@@ -68,6 +68,9 @@ export interface JWTCustomPayload {
 
 	/** Session ID for reference */
 	sid: string;
+
+	/** Access tier for app-level gating (guest, public, beta, alpha, founder) */
+	tier: string;
 }
 
 /**
@@ -368,6 +371,7 @@ export function createBetterAuth(databaseUrl: string) {
 							email: user.email,
 							role: (user as { role?: string }).role || 'user',
 							sid: session.id,
+							tier: (user as { accessTier?: string }).accessTier || 'public',
 						};
 					},
 				},

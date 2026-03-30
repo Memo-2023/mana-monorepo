@@ -59,7 +59,7 @@
 	}
 
 	// App switcher items
-	const appItems = getPillAppItems('clock');
+	let appItems = $derived(getPillAppItems('clock', undefined, undefined, authStore.user?.tier));
 
 	let { children } = $props();
 

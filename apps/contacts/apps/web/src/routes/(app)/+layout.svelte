@@ -82,7 +82,7 @@
 	const modalContactId = $derived(contactDetailMatch?.[1] || null);
 
 	// App switcher items
-	const appItems = getPillAppItems('contacts');
+	let appItems = $derived(getPillAppItems('contacts', undefined, undefined, authStore.user?.tier));
 
 	// Split-Panel Store für Split-Screen Feature
 	const splitPanel = setSplitPanelContext('contacts', DEFAULT_APPS);

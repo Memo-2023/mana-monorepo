@@ -46,8 +46,8 @@
 
 	let { children }: { children: Snippet } = $props();
 
-	// App switcher items
-	const appItems = getPillAppItems('manacore');
+	// App switcher items (filtered by user's access tier)
+	let appItems = $derived(getPillAppItems('manacore', undefined, undefined, authStore.user?.tier));
 
 	let loading = $state(true);
 	let isCollapsed = $state(false);

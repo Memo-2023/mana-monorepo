@@ -28,7 +28,7 @@
 	import { presiStore } from '$lib/data/local-store';
 
 	// App switcher items
-	const appItems = getPillAppItems('presi');
+	let appItems = $derived(getPillAppItems('presi', undefined, undefined, auth.user?.tier));
 
 	// Shared tag store (local-first)
 	const allTags = useAllSharedTags();

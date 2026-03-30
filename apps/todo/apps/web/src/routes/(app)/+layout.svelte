@@ -77,8 +77,8 @@
 		}
 	}
 
-	// App switcher items
-	const appItems = getPillAppItems('todo');
+	// App switcher items (filtered by user's access tier)
+	let appItems = $derived(getPillAppItems('todo', undefined, undefined, authStore.user?.tier));
 
 	// Split-Panel Store für Split-Screen Feature
 	const splitPanel = setSplitPanelContext('todo', DEFAULT_APPS);

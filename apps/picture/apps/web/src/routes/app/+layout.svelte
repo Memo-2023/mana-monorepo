@@ -41,7 +41,7 @@
 	import { browser } from '$app/environment';
 
 	// App switcher items
-	const appItems = getPillAppItems('picture');
+	let appItems = $derived(getPillAppItems('picture', undefined, undefined, authStore.user?.tier));
 
 	// Live query for shared tags (local-first)
 	const allTags = useAllSharedTags();

@@ -47,7 +47,9 @@
 	setContext('tags', allTags);
 
 	// App switcher items
-	const appItems = getPillAppItems('mukke' as any);
+	let appItems = $derived(
+		getPillAppItems('mukke' as any, undefined, undefined, authStore.user?.tier)
+	);
 
 	// Split-Panel Store
 	const splitPanel = setSplitPanelContext('mukke' as any, DEFAULT_APPS);

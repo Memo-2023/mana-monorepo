@@ -70,7 +70,7 @@
 	let showGuestWelcome = $state(false);
 
 	// App switcher items
-	const appItems = getPillAppItems('calendar');
+	let appItems = $derived(getPillAppItems('calendar', undefined, undefined, authStore.user?.tier));
 
 	// Split-Panel Store für Split-Screen Feature
 	const splitPanel = setSplitPanelContext('calendar', DEFAULT_APPS);

@@ -8,6 +8,56 @@ import type { AppIconId } from './app-icons';
 
 export type AppStatus = 'published' | 'beta' | 'development' | 'planning';
 
+/**
+ * Access tier hierarchy (higher number = more access):
+ * guest(0) < public(1) < beta(2) < alpha(3) < founder(4)
+ */
+export type AccessTier = 'guest' | 'public' | 'beta' | 'alpha' | 'founder';
+
+const TIER_LEVELS: Record<AccessTier, number> = {
+	guest: 0,
+	public: 1,
+	beta: 2,
+	alpha: 3,
+	founder: 4,
+};
+
+/**
+ * Check if a user's tier meets the required tier for an app
+ */
+export function hasAppAccess(userTier: string, requiredTier: AccessTier): boolean {
+	const userLevel = TIER_LEVELS[userTier as AccessTier] ?? 0;
+	const requiredLevel = TIER_LEVELS[requiredTier] ?? 0;
+	return userLevel >= requiredLevel;
+}
+
+/**
+ * Get the numeric level for a tier (for comparisons)
+ */
+export function getTierLevel(tier: string): number {
+	return TIER_LEVELS[tier as AccessTier] ?? 0;
+}
+
+/**
+ * Tier display labels
+ */
+export const ACCESS_TIER_LABELS = {
+	de: {
+		guest: 'Gast',
+		public: 'Standard',
+		beta: 'Beta',
+		alpha: 'Alpha',
+		founder: 'Founder',
+	},
+	en: {
+		guest: 'Guest',
+		public: 'Standard',
+		beta: 'Beta',
+		alpha: 'Alpha',
+		founder: 'Founder',
+	},
+} as const;
+
 export interface ManaApp {
 	id: AppIconId;
 	name: string;
@@ -23,6 +73,8 @@ export interface ManaApp {
 	color: string;
 	comingSoon: boolean;
 	status: AppStatus;
+	/** Minimum access tier required to use this app */
+	requiredTier: AccessTier;
 	url?: string; // Optional URL for the app
 	/** Whether this app is archived (in apps-archived folder) */
 	archived?: boolean;
@@ -48,6 +100,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'beta',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'memoro',
@@ -64,6 +117,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f8d62b',
 		comingSoon: false,
 		status: 'published',
+		requiredTier: 'founder',
 		archived: true,
 	},
 	{
@@ -81,6 +135,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f97316',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'manadeck',
@@ -97,6 +152,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: true,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'picture',
@@ -113,6 +169,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#22c55e',
 		comingSoon: true,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'zitare',
@@ -129,6 +186,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f59e0b',
 		comingSoon: true,
 		status: 'development',
+		requiredTier: 'beta',
 	},
 	{
 		id: 'wisekeep',
@@ -145,6 +203,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: true,
 		status: 'planning',
+		requiredTier: 'founder',
 		archived: true,
 	},
 	{
@@ -162,6 +221,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#10b981',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'founder',
 		archived: true,
 	},
 	{
@@ -179,6 +239,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#3b82f6',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'beta',
 	},
 	{
 		id: 'calendar',
@@ -195,6 +256,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'beta',
 	},
 	{
 		id: 'storage',
@@ -211,6 +273,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#3b82f6',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'clock',
@@ -227,6 +290,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f59e0b',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'beta',
 	},
 	{
 		id: 'todo',
@@ -243,6 +307,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'beta',
 	},
 	{
 		id: 'mail',
@@ -259,6 +324,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'founder',
 	},
 	{
 		id: 'moodlit',
@@ -275,6 +341,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'inventory',
@@ -291,6 +358,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#14b8a6',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'questions',
@@ -307,6 +375,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'matrix',
@@ -323,6 +392,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#8b5cf6',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'context',
@@ -339,6 +409,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#0ea5e9',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'times',
@@ -355,6 +426,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f59e0b',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'citycorners',
@@ -371,6 +443,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#2563eb',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'uload',
@@ -387,6 +460,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'alpha',
 	},
 	{
 		id: 'reader',
@@ -403,6 +477,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#f97316',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'founder',
 	},
 	{
 		id: 'news',
@@ -419,6 +494,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#10b981',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'founder',
 	},
 	{
 		id: 'calc',
@@ -435,6 +511,7 @@ export const MANA_APPS: ManaApp[] = [
 		color: '#ec4899',
 		comingSoon: false,
 		status: 'development',
+		requiredTier: 'beta',
 	},
 ];
 
@@ -464,6 +541,14 @@ export function getAvailableManaApps(): ManaApp[] {
  */
 export function getActiveManaApps(): ManaApp[] {
 	return MANA_APPS.filter((app) => !app.archived);
+}
+
+/**
+ * Get apps accessible to a user based on their tier
+ * Only returns active (non-archived) apps the user has access to
+ */
+export function getAccessibleManaApps(userTier: string): ManaApp[] {
+	return MANA_APPS.filter((app) => !app.archived && hasAppAccess(userTier, app.requiredTier));
 }
 
 /**
@@ -548,21 +633,24 @@ export interface PillAppItemConfig {
 
 /**
  * Get app items for PillNavigation app switcher
- * Only returns active (non-archived) apps
+ * Only returns apps the user has access to (non-archived, tier-gated)
  * @param currentAppId - The ID of the current app to mark as active
  * @param isDev - Whether to use development URLs (default: auto-detect)
  * @param customUrls - Optional custom URL overrides per app
+ * @param userTier - The user's access tier (default: 'public')
  */
 export function getPillAppItems(
 	currentAppId?: AppIconId,
 	isDev?: boolean,
-	customUrls?: Partial<Record<AppIconId, string>>
+	customUrls?: Partial<Record<AppIconId, string>>,
+	userTier?: string
 ): PillAppItemConfig[] {
 	const isDevMode =
 		isDev ?? (typeof window !== 'undefined' && window.location.hostname === 'localhost');
 
-	// Only show active (non-archived) apps
-	return getActiveManaApps().map((app) => ({
+	const tier = userTier || 'public';
+	// Only show apps the user has access to
+	return getAccessibleManaApps(tier).map((app) => ({
 		id: app.id,
 		name: app.name,
 		url: customUrls?.[app.id] || (isDevMode ? APP_URLS[app.id].dev : APP_URLS[app.id].prod),

@@ -53,7 +53,7 @@
 		}
 	}
 
-	const appItems = getPillAppItems('calc');
+	let appItems = $derived(getPillAppItems('calc', undefined, undefined, authStore.user?.tier));
 
 	let { children } = $props();
 

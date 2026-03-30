@@ -33,7 +33,7 @@
 	import { manadeckStore } from '$lib/data/local-store';
 
 	// App switcher items
-	const appItems = getPillAppItems('manadeck');
+	let appItems = $derived(getPillAppItems('manadeck', undefined, undefined, authStore.user?.tier));
 
 	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
 	const allDecks = useAllDecks();

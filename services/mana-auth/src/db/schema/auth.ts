@@ -15,6 +15,16 @@ export const authSchema = pgSchema('auth');
 // Enum for user roles
 export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'service']);
 
+// Enum for access tiers (controls which apps a user can access)
+// Hierarchy: founder > alpha > beta > public > guest
+export const accessTierEnum = pgEnum('access_tier', [
+	'guest',
+	'public',
+	'beta',
+	'alpha',
+	'founder',
+]);
+
 // Users table (Better Auth schema)
 export const users = authSchema.table('users', {
 	id: text('id').primaryKey(), // Better Auth generates nanoid
@@ -26,6 +36,7 @@ export const users = authSchema.table('users', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 	// Custom fields (not required by Better Auth)
 	role: userRoleEnum('role').default('user').notNull(),
+	accessTier: accessTierEnum('access_tier').default('public').notNull(),
 	twoFactorEnabled: boolean('two_factor_enabled').default(false),
 	deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });

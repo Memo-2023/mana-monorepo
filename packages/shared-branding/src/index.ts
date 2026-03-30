@@ -54,12 +54,17 @@ export {
 	getManaAppsByStatus,
 	getAvailableManaApps,
 	getActiveManaApps,
+	getAccessibleManaApps,
+	hasAppAccess,
+	getTierLevel,
 	APP_STATUS_LABELS,
 	APP_SLIDER_LABELS,
 	APP_URLS,
+	ACCESS_TIER_LABELS,
 	getPillAppItems,
 	type ManaApp,
 	type AppStatus,
+	type AccessTier,
 	type PillAppItemConfig,
 } from './mana-apps';
 

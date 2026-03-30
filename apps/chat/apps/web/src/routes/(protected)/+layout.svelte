@@ -44,7 +44,7 @@
 	setContext('tags', allTags);
 
 	// App switcher items
-	const appItems = getPillAppItems('chat');
+	let appItems = $derived(getPillAppItems('chat', undefined, undefined, authStore.user?.tier));
 
 	let { children, data }: { children: any; data: LayoutData } = $props();
 

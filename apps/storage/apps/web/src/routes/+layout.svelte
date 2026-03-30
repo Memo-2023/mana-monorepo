@@ -31,7 +31,7 @@
 	import '../app.css';
 
 	// App switcher items
-	const appItems = getPillAppItems('storage');
+	let appItems = $derived(getPillAppItems('storage', undefined, undefined, authStore.user?.tier));
 
 	// Live query for shared tags (local-first)
 	const allTags = useAllSharedTags();

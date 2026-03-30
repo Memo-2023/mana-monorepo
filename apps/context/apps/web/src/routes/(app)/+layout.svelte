@@ -39,7 +39,7 @@
 		useAllTags as useAllSharedTags,
 	} from '@manacore/shared-stores';
 
-	const appItems = getPillAppItems('context');
+	let appItems = $derived(getPillAppItems('context', undefined, undefined, authStore.user?.tier));
 
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);

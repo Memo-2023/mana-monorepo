@@ -418,6 +418,82 @@ When adding a new app that should participate in cross-app SSO, update **all thr
 
 Missing any of these will silently break SSO for that app.
 
+### Access Tier System (Phased Release)
+
+Apps can be gated behind access tiers for phased rollouts (e.g., founder-only alpha, then beta, then public).
+
+#### Tier Hierarchy
+
+| Tier | Level | Who |
+|------|-------|-----|
+| `guest` | 0 | Unauthenticated visitors (local-only) |
+| `public` | 1 | Any registered user (default for new signups) |
+| `beta` | 2 | Beta testers |
+| `alpha` | 3 | Alpha testers / internal |
+| `founder` | 4 | Founding members |
+
+A user can access an app if their tier level >= the app's `requiredTier` level.
+
+#### How It Works
+
+1. **`mana-apps.ts`** defines `requiredTier` per app (e.g., `requiredTier: 'founder'`)
+2. **Users table** stores `accessTier` column (default: `'public'`)
+3. **JWT** includes a `tier` claim, set during token creation in better-auth config
+4. **AuthGate** checks the tier client-side and shows an "access restricted" state if insufficient
+
+#### Key Files
+
+| File | Purpose |
+|------|---------|
+| `packages/shared-branding/src/mana-apps.ts` | App registry with `requiredTier` |
+| `services/mana-auth/src/db/schema/auth.ts` | `accessTier` column on users |
+| `services/mana-auth/src/auth/better-auth.config.ts` | Adds `tier` to JWT claims |
+| `packages/shared-auth-ui/src/components/AuthGate.svelte` | Client-side tier gating |
+| `services/mana-auth/src/routes/admin.ts` | Admin API for tier management |
+
+#### Gating an App
+
+Pass `requiredTier` to AuthGate in the app's layout:
+
+```svelte
+<AuthGate requiredTier="beta">
+  <slot />
+</AuthGate>
+```
+
+The tier value comes from the app's entry in `mana-apps.ts`. Apps without `requiredTier` default to `'public'` (accessible to all registered users).
+
+#### Admin API
+
+```bash
+# Set a user's tier
+PUT /api/v1/admin/users/:id/tier
+{ "tier": "beta" }
+
+# Get a user's tier
+GET /api/v1/admin/users/:id/tier
+
+# List users (includes tier)
+GET /api/v1/admin/users
+```
+
+#### Releasing an App
+
+To widen access, change `requiredTier` in `mana-apps.ts`:
+
+```typescript
+// Founder-only alpha
+{ id: 'myapp', requiredTier: 'founder' }
+
+// Open to beta testers
+{ id: 'myapp', requiredTier: 'beta' }
+
+// Public release
+{ id: 'myapp', requiredTier: 'public' }
+```
+
+No database migration needed -- just update the config and redeploy the app.
+
 ### Search Architecture
 
 Projects requiring web search and content extraction use **mana-search** as the central search service:

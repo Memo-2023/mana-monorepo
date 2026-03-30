@@ -54,7 +54,7 @@
 	let showGuestWelcome = $state(false);
 
 	// App switcher items
-	const appItems = getPillAppItems('zitare');
+	let appItems = $derived(getPillAppItems('zitare', undefined, undefined, authStore.user?.tier));
 
 	// User settings for nav visibility
 	const userSettings = createUserSettingsStore({

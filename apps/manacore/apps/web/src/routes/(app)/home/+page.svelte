@@ -5,6 +5,7 @@
 		MANA_APPS,
 		APP_URLS,
 		APP_STATUS_LABELS,
+		getAccessibleManaApps,
 		type ManaApp,
 		type AppIconId,
 	} from '@manacore/shared-branding';
@@ -20,8 +21,9 @@
 	let currentLocale = $derived(($locale as 'de' | 'en') || 'de');
 	let statusLabels = $derived(APP_STATUS_LABELS[currentLocale] || APP_STATUS_LABELS['de']);
 
-	// Filter active (non-archived) apps
-	const activeApps = MANA_APPS.filter((app) => !app.archived);
+	// Filter apps by user's access tier
+	let userTier = $derived(authStore.user?.tier || 'public');
+	let activeApps = $derived(getAccessibleManaApps(userTier));
 
 	// Group apps by category
 	interface AppCategory {
@@ -38,13 +40,13 @@
 	const productivityIds: AppIconId[] = ['todo', 'calendar', 'contacts', 'manadeck', 'inventory'];
 	const utilityIds: AppIconId[] = ['clock', 'zitare', 'storage', 'moodlit', 'matrix'];
 
-	function getAppsForCategory(ids: AppIconId[]): ManaApp[] {
+	function getAppsForCategory(ids: AppIconId[], apps: ManaApp[]): ManaApp[] {
 		return ids
-			.map((id) => activeApps.find((app) => app.id === id))
+			.map((id) => apps.find((app) => app.id === id))
 			.filter((app): app is ManaApp => !!app);
 	}
 
-	const categories: AppCategory[] = [
+	let categories = $derived([
 		{
 			id: 'ai',
 			titleDe: 'KI & Kreativ',
@@ -52,7 +54,7 @@
 			descDe: 'Intelligente Assistenten und kreative Werkzeuge',
 			descEn: 'Intelligent assistants and creative tools',
 			icon: '🤖',
-			apps: getAppsForCategory(aiAppIds),
+			apps: getAppsForCategory(aiAppIds, activeApps),
 		},
 		{
 			id: 'productivity',
@@ -61,7 +63,7 @@
 			descDe: 'Organisiere deinen Alltag',
 			descEn: 'Organize your daily life',
 			icon: '📋',
-			apps: getAppsForCategory(productivityIds),
+			apps: getAppsForCategory(productivityIds, activeApps),
 		},
 		{
 			id: 'utility',
@@ -70,9 +72,9 @@
 			descDe: 'Praktische Helferlein',
 			descEn: 'Handy helpers',
 			icon: '🔧',
-			apps: getAppsForCategory(utilityIds),
+			apps: getAppsForCategory(utilityIds, activeApps),
 		},
-	];
+	] satisfies AppCategory[]);
 
 	function getStatusColor(status: ManaApp['status']): string {
 		const colors = {

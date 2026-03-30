@@ -10,7 +10,7 @@
 	import { moodlitStore } from '$lib/data/local-store';
 
 	let { children } = $props();
-	const appItems = getPillAppItems();
+	let appItems = $derived(getPillAppItems(undefined, undefined, undefined, authStore.user?.tier));
 	let userEmail = $derived(authStore.isAuthenticated ? (authStore.user?.email ?? '') : '');
 	let showGuestWelcome = $state(false);
 	let isCollapsed = $state(false);

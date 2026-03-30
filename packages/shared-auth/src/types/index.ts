@@ -24,6 +24,7 @@ export interface DecodedToken {
 	sub: string;
 	email?: string;
 	role?: string;
+	tier?: string;
 	exp: number;
 	iat: number;
 	aud?: string;
@@ -50,6 +51,7 @@ export interface UserData {
 	id: string;
 	email: string;
 	role: string;
+	tier: string;
 }
 
 /**

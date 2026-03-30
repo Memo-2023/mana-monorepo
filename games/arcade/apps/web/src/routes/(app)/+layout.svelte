@@ -45,7 +45,7 @@
 		}
 	}
 
-	const appItems = getPillAppItems('arcade');
+	let appItems = $derived(getPillAppItems('arcade', undefined, undefined, authStore.user?.tier));
 
 	let { children } = $props();
 

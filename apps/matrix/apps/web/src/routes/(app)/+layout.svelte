@@ -78,7 +78,7 @@
 	}
 
 	// App switcher items
-	const appItems = getPillAppItems('matrix');
+	let appItems = $derived(getPillAppItems('matrix'));
 
 	interface Props {
 		children: Snippet;

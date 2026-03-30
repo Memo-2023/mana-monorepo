@@ -24,7 +24,9 @@
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { api } from '$lib/api';
 
-	const appItems = getPillAppItems('citycorners');
+	let appItems = $derived(
+		getPillAppItems('citycorners', undefined, undefined, authStore.user?.tier)
+	);
 
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);

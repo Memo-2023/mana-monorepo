@@ -78,6 +78,7 @@ export function getUserFromToken(token: string, storedEmail?: string): UserData 
 			id: payload.sub,
 			email: email || 'user@example.com',
 			role: payload.role || 'user',
+			tier: payload.tier || 'public',
 		};
 	} catch (error) {
 		console.error('Error extracting user from token:', error);

@@ -40,7 +40,7 @@
 	const allQuestions = useAllQuestions();
 
 	// App switcher items
-	const appItems = getPillAppItems('questions');
+	let appItems = $derived(getPillAppItems('questions', undefined, undefined, authStore.user?.tier));
 
 	// Mobile detection
 	let isMobile = $state(false);
