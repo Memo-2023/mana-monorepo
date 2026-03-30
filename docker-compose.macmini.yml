@@ -239,21 +239,9 @@ services:
       retries: 3
       start_period: 30s
 
-  forgejo-runner:
-    image: code.forgejo.org/forgejo/runner:6.3.1
-    container_name: mana-core-forgejo-runner
-    command: forgejo-runner daemon
-    restart: always
-    mem_limit: 256m
-    user: "0:0"
-    depends_on:
-      forgejo:
-        condition: service_healthy
-    environment:
-      DOCKER_HOST: unix:///var/run/docker.sock
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /Volumes/ManaData/forgejo-runner:/data
+  # Forgejo runner removed — no macOS binary exists, Docker-based runner
+  # can't access host filesystem/SSH for CD. GitHub CD handles deployment
+  # via native self-hosted runner. Forgejo is kept as a mirror only.
 
   # ============================================
   # Tier 1: Core Auth Service (Port 3001)

@@ -1,9 +1,8 @@
 # Mirror GitHub → Forgejo on every push to main
-# Keeps Forgejo in sync so it can serve as the deployment source.
+# Keeps Forgejo in sync as a backup/visibility mirror.
+# GitHub handles CI/CD via native self-hosted runner; Forgejo is mirror-only.
 #
-# Requires GitHub secret:
-#   FORGEJO_DEPLOY_KEY  — private SSH key matching mac-mini-deploy key in Forgejo
-#   (key fingerprint: SHA256:baNsV+pq28d1vSWX+jtqyV0GqRnjUcHfDZM8RopcGDE)
+# Requires: Mac Mini self-hosted runner with SSH access to Forgejo (localhost:2222)
 
 name: Mirror to Forgejo
 
