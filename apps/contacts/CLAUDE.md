@@ -214,6 +214,34 @@ PUBLIC_MANA_CORE_AUTH_URL=http://localhost:3001
 - Utils: Search, filter, import/export functions
 - Configs: App configuration
 
+## Quick Input Syntax
+
+The NewContactModal includes a NL quick-input bar that parses contact info and pre-fills form fields:
+
+```
+"Max Mustermann @ACME Corp max@example.com +49 170 1234567 #kunde"
+→ firstName: Max, lastName: Mustermann, company: ACME Corp,
+  email: max@example.com, phone: +49 170..., tags: [kunde]
+```
+
+Recognized patterns:
+- **Name**: First and last name (remaining text after extraction)
+- **Company**: `@CompanyName` or `bei CompanyName` or `von CompanyName`
+- **Email**: Standard email format
+- **Phone**: International (+49...), German (0123...), or 6+ digit numbers
+- **Tags**: `#tag1 #tag2`
+
+Type the full text and press **Enter** to apply. Fields are pre-filled and can be edited before saving.
+
+### Live Duplicate Detection
+
+While typing in the name or email fields, the system checks for duplicates against IndexedDB in real-time:
+- **Email**: Exact match (case-insensitive)
+- **Name**: Fuzzy match (Levenshtein distance, tolerates typos)
+- Shows warning with matched contact name, company, and match type
+
+Implementation: `duplicate-detector.ts` — runs fully offline, no server calls.
+
 ## Code Style Guidelines
 
 - **TypeScript**: Strict typing with interfaces
