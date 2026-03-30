@@ -108,6 +108,27 @@ export function createAuthRoutes(
 				lockout.clearAttempts(body.email);
 			}
 
+			// signInEmail returns { token (session token), user, redirect }
+			// Use the session token to call Better Auth's JWT /token endpoint
+			const sessionToken = response?.token;
+			if (sessionToken) {
+				const tokenResponse = await auth.handler(
+					new Request(new URL('/api/auth/token', config.baseUrl), {
+						method: 'GET',
+						headers: new Headers({ cookie: `mana.session_token=${sessionToken}` }),
+					})
+				);
+
+				if (tokenResponse.ok) {
+					const tokenData = await tokenResponse.json();
+					return c.json({
+						...response,
+						accessToken: tokenData.token,
+						refreshToken: sessionToken,
+					});
+				}
+			}
+
 			return c.json(response);
 		} catch (error) {
 			security.logEvent({
@@ -118,6 +139,47 @@ export function createAuthRoutes(
 			lockout.recordAttempt(body.email, false, ip);
 			return c.json({ error: 'Invalid credentials' }, 401);
 		}
+	});
+
+	// ─── Session → JWT Token Exchange ───────────────────────
+	// Used by SSO (trySSO) and after 2FA verification to get JWT from session cookie
+
+	app.post('/session-to-token', async (c) => {
+		// First verify the session is valid
+		const sessionResponse = await auth.handler(
+			new Request(new URL('/api/auth/get-session', config.baseUrl), {
+				method: 'GET',
+				headers: c.req.raw.headers,
+			})
+		);
+
+		if (!sessionResponse.ok) {
+			return c.json({ error: 'No valid session' }, 401);
+		}
+
+		const sessionData = await sessionResponse.json();
+		if (!sessionData?.session?.token) {
+			return c.json({ error: 'No valid session' }, 401);
+		}
+
+		// Generate JWT from the session
+		const tokenResponse = await auth.handler(
+			new Request(new URL('/api/auth/token', config.baseUrl), {
+				method: 'GET',
+				headers: c.req.raw.headers,
+			})
+		);
+
+		if (!tokenResponse.ok) {
+			return c.json({ error: 'Token generation failed' }, 500);
+		}
+
+		const tokenData = await tokenResponse.json();
+		return c.json({
+			accessToken: tokenData.token,
+			// Session token serves as refresh mechanism via session cookie
+			refreshToken: sessionData.session.token,
+		});
 	});
 
 	// ─── Token Validation ────────────────────────────────────
@@ -160,14 +222,34 @@ export function createAuthRoutes(
 	});
 
 	app.post('/refresh', async (c) => {
-		const body = await c.req.json();
-		// Better Auth handles refresh via session cookies
-		return auth.handler(
+		// Generate a fresh JWT from the session cookie
+		const tokenResponse = await auth.handler(
+			new Request(new URL('/api/auth/token', config.baseUrl), {
+				method: 'GET',
+				headers: c.req.raw.headers,
+			})
+		);
+
+		if (!tokenResponse.ok) {
+			return c.json({ error: 'Session expired' }, 401);
+		}
+
+		const tokenData = await tokenResponse.json();
+
+		// Also get session data for the refresh token
+		const sessionResponse = await auth.handler(
 			new Request(new URL('/api/auth/get-session', config.baseUrl), {
 				method: 'GET',
 				headers: c.req.raw.headers,
 			})
 		);
+
+		const sessionData = sessionResponse.ok ? await sessionResponse.json() : null;
+
+		return c.json({
+			accessToken: tokenData.token,
+			refreshToken: sessionData?.session?.token,
+		});
 	});
 
 	// ─── Password Management ─────────────────────────────────
