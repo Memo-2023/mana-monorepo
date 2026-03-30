@@ -3,6 +3,12 @@
 	import { _ } from 'svelte-i18n';
 	import { timeEntryCollection } from '$lib/data/local-store';
 	import type { Project, Client } from '@times/shared';
+	import {
+		parseMultiEntryInput,
+		resolveEntryIds,
+		formatParsedEntryPreview,
+	} from '$lib/utils/entry-parser';
+	import { getContext as getCtx } from 'svelte';
 
 	let {
 		visible = false,
@@ -14,6 +20,7 @@
 
 	const allProjects = getContext<{ value: Project[] }>('projects');
 	const allClients = getContext<{ value: Client[] }>('clients');
+	const allTags = getContext<{ value: { id: string; name: string }[] }>('tags');
 
 	let description = $state('');
 	let projectId = $state('');
@@ -22,9 +29,82 @@
 	let durationMinutes = $state(0);
 	let isBillable = $state(false);
 
+	// Quick-input state
+	let quickInput = $state('');
+	let quickPreview = $state('');
+	let quickEntryCount = $state(0);
+
 	let activeProjects = $derived(
 		allProjects.value.filter((p) => !p.isArchived).sort((a, b) => a.order - b.order)
 	);
+
+	function handleQuickInput(e: Event) {
+		const text = (e.target as HTMLInputElement).value;
+		quickInput = text;
+
+		if (!text.trim()) {
+			quickPreview = '';
+			quickEntryCount = 0;
+			return;
+		}
+
+		const entries = parseMultiEntryInput(text);
+		quickEntryCount = entries.length;
+
+		const previews = entries.map((e) => formatParsedEntryPreview(e)).filter(Boolean);
+		if (entries.length > 1) previews.unshift(`${entries.length} Einträge`);
+		quickPreview = previews.join(' · ');
+	}
+
+	async function handleQuickSubmit() {
+		if (!quickInput.trim()) return;
+
+		const entries = parseMultiEntryInput(quickInput);
+		const projects = allProjects.value.map((p) => ({ id: p.id, name: p.name }));
+		const tags = allTags?.value?.map((t) => ({ id: t.id, name: t.name })) ?? [];
+
+		for (const parsed of entries) {
+			const resolved = resolveEntryIds(parsed, projects, tags);
+
+			const totalSeconds = resolved.duration || durationHours * 3600 + durationMinutes * 60;
+			if (totalSeconds <= 0) continue;
+
+			const project = resolved.projectId
+				? allProjects.value.find((p) => p.id === resolved.projectId)
+				: null;
+
+			await timeEntryCollection.insert({
+				id: crypto.randomUUID(),
+				projectId: resolved.projectId || null,
+				clientId: project?.clientId ?? null,
+				description: resolved.description,
+				date: resolved.date ? new Date(resolved.date).toISOString().split('T')[0] : date,
+				startTime: resolved.startTime || null,
+				endTime: resolved.endTime || null,
+				duration: totalSeconds,
+				isBillable: resolved.isBillable ?? isBillable,
+				isRunning: false,
+				tags: resolved.tagIds,
+				billingRate: null,
+				visibility: 'private',
+				guildId: null,
+				source: { app: 'manual' },
+			});
+		}
+
+		quickInput = '';
+		quickPreview = '';
+		quickEntryCount = 0;
+		resetForm();
+		onClose();
+	}
+
+	function handleQuickKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			handleQuickSubmit();
+		}
+	}
 
 	function resetForm() {
 		description = '';
@@ -109,6 +189,29 @@
 						/>
 					</svg>
 				</button>
+			</div>
+
+			<!-- Quick Input Bar -->
+			<div class="mb-4">
+				<input
+					type="text"
+					value={quickInput}
+					oninput={handleQuickInput}
+					onkeydown={handleQuickKeydown}
+					placeholder="Schnelleingabe: Meeting 2h @Projekt $; Review 1h"
+					class="w-full rounded-lg border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)] px-4 py-2.5 text-sm text-[hsl(var(--foreground))] placeholder:text-xs placeholder:text-[hsl(var(--muted-foreground))] focus:border-solid focus:border-[hsl(var(--primary)/0.5)] focus:bg-[hsl(var(--input))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.1)]"
+				/>
+				{#if quickPreview}
+					<div class="mt-1 px-1 text-[0.7rem] text-[hsl(var(--muted-foreground))]">
+						{quickPreview}
+					</div>
+				{/if}
+			</div>
+
+			<div class="mb-3 flex items-center gap-2">
+				<div class="h-px flex-1 bg-[hsl(var(--border))]"></div>
+				<span class="text-[0.65rem] text-[hsl(var(--muted-foreground))]">oder manuell</span>
+				<div class="h-px flex-1 bg-[hsl(var(--border))]"></div>
 			</div>
 
 			<form

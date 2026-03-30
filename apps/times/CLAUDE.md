@@ -46,11 +46,33 @@ pnpm --filter @times/shared type-check
 - Quick Start from recent entries or templates
 
 ### Time Entries
+- **Quick Input (NL)**: Type `"Meeting 2h @Projekt $; Review 1h; Mails 30min"` → creates 3 entries
 - Manual entry with quick-duration buttons (15m, 30m, 1h, 1.5h, 2h, 4h)
 - Inline-expand editing (click to expand, auto-save on change)
 - Day grouping with totals
 - Filter by week/month/all
 - CSV export (semicolon-delimited, UTF-8 BOM for Excel)
+
+### Quick Input Syntax
+
+The EntryForm includes a NL quick-input bar (press Enter to create):
+
+```
+"Meeting 2h @ClientX #team $"
+→ description: Meeting, duration: 2h, project: ClientX, tags: [team], billable: true
+
+"9-12 Workshop @Schulung; 13-15 Nachbereitung; Mails 30min"
+→ 3 entries with time ranges and context inheritance
+```
+
+Recognized patterns:
+- **Duration**: `30min`, `2h`, `1.5h`, `1h30m`, `1.5 Stunden`
+- **Time Range**: `9-12`, `14:00-16:30` (auto-calculates duration)
+- **Project**: `@ProjectName`
+- **Tags**: `#tag1 #tag2`
+- **Billable**: `$`, `billable`, `abrechenbar`
+- **Date**: `heute`, `morgen`, `gestern`, `montag`
+- **Multi-Entry**: Split with `;` or `danach`/`dann` (inherits date + project)
 
 ### Projects
 - Color-coded project cards with budget progress bars
