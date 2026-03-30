@@ -1,0 +1,21 @@
+{
+	"name": "@moodlit/server",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "bun run --watch src/index.ts",
+		"start": "bun run src/index.ts",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.44.7",
+		"hono": "^4.7.0",
+		"jose": "^6.1.2",
+		"postgres": "^3.4.7"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.0",
+		"typescript": "^5.0.0"
+	}
+}

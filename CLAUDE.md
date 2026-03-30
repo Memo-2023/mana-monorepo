@@ -60,6 +60,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **wisekeep** | AI transcription & wisdom library | Server, Web, Landing |
 | **reader** | Text-to-Speech with offline audio | Mobile |
 | **bauntown** | Developer community website | Landing |
+| **moodlit** | Ambient lighting & mood app | Server, Web, Landing |
 | **calc** | Calculator & converter | Web |
 | **playground** | LLM playground | Web |
 
