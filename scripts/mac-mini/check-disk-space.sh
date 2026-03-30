@@ -179,18 +179,33 @@ check_docker_disk() {
     local unused_volumes
     unused_volumes=$(docker volume ls -f "dangling=true" -q 2>/dev/null | wc -l | tr -d ' ')
 
-    if [ "$dangling_images" -gt 10 ] || [ "$unused_volumes" -gt 5 ]; then
-        log "Docker cleanup recommended: $dangling_images dangling images, $unused_volumes unused volumes"
+    log "Docker: $dangling_images dangling images, $unused_volumes unused volumes"
 
-        # Auto-cleanup if critical
-        local system_usage
-        system_usage=$(df -h / 2>/dev/null | awk 'NR==2 {gsub(/%/,""); print $5}')
+    # Always clean up dangling images (old build layers, no longer referenced)
+    if [ "$dangling_images" -gt 0 ]; then
+        log "Removing $dangling_images dangling images..."
+        docker image prune -f 2>/dev/null | tail -1
+    fi
 
-        if [ "$system_usage" -ge "$CRITICAL_THRESHOLD" ]; then
-            log "Running docker system prune due to critical disk usage..."
-            docker system prune -f --volumes 2>/dev/null || true
-            log "Docker cleanup completed"
-        fi
+    # Always clean up unused volumes (orphans from removed containers)
+    if [ "$unused_volumes" -gt 0 ]; then
+        log "Removing $unused_volumes unused volumes..."
+        docker volume prune -f 2>/dev/null | tail -1
+    fi
+
+    # Clean build cache older than 7 days
+    local build_cache
+    build_cache=$(docker system df --format '{{.Size}}' 2>/dev/null | tail -1)
+    log "Docker build cache: $build_cache"
+    docker builder prune -f --filter until=168h 2>/dev/null | tail -1
+
+    # Emergency: full prune if system disk critical
+    local system_usage
+    system_usage=$(df -h / 2>/dev/null | awk 'NR==2 {gsub(/%/,""); print $5}')
+    if [ "$system_usage" -ge "$CRITICAL_THRESHOLD" ]; then
+        log "CRITICAL disk usage at ${system_usage}% — running aggressive Docker cleanup..."
+        docker system prune -af --filter until=48h 2>/dev/null | tail -1
+        log "Aggressive cleanup completed"
     fi
 }
 
@@ -213,6 +228,21 @@ check_postgres_backups() {
 
     if [ "$old_backups" -gt 0 ]; then
         log "Note: $old_backups old daily backups could be cleaned up"
+    fi
+}
+
+check_stale_node_modules() {
+    # node_modules on the server is never needed — Docker builds inside containers
+    # If someone accidentally ran pnpm install, clean it up
+    local monorepo_nm="$PROJECT_ROOT/node_modules"
+    if [ -d "$monorepo_nm" ]; then
+        local nm_size
+        nm_size=$(du -sh "$monorepo_nm" 2>/dev/null | awk '{print $1}')
+        log "WARNING: Found node_modules on server (${nm_size}), removing..."
+        rm -rf "$monorepo_nm"
+        # Also remove nested node_modules
+        find "$PROJECT_ROOT" -name "node_modules" -type d -prune -exec rm -rf {} + 2>/dev/null || true
+        log "Removed all node_modules from server"
     fi
 }
 
@@ -262,7 +292,10 @@ fi
 # Push Colima VM disk metrics
 push_colima_metrics
 
-# Check Docker disk usage
+# Remove accidental node_modules on server
+check_stale_node_modules
+
+# Check Docker disk usage + auto-prune
 check_docker_disk
 
 # Check backup sizes
