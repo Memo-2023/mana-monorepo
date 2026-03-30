@@ -11,9 +11,35 @@ import {
 	crossTaskCollection,
 	crossEventCollection,
 	crossContactCollection,
+	crossConversationCollection,
+	crossFavoriteCollection,
+	crossImageCollection,
+	crossAlarmCollection,
+	crossTimerCollection,
+	crossFileCollection,
+	crossSongCollection,
+	crossPlaylistCollection,
+	crossPresiDeckCollection,
+	crossSpaceCollection,
+	crossDocumentCollection,
+	crossManadeckDeckCollection,
+	crossManadeckCardCollection,
 	type CrossAppTask,
 	type CrossAppEvent,
 	type CrossAppContact,
+	type CrossAppConversation,
+	type CrossAppFavorite,
+	type CrossAppImage,
+	type CrossAppAlarm,
+	type CrossAppTimer,
+	type CrossAppFile,
+	type CrossAppSong,
+	type CrossAppPlaylist,
+	type CrossAppDeck,
+	type CrossAppSpace,
+	type CrossAppDocument,
+	type CrossAppManadeckDeck,
+	type CrossAppManadeckCard,
 } from './cross-app-stores';
 
 // ─── Todo Queries ───────────────────────────────────────────
@@ -111,4 +137,171 @@ export function useFavoriteContacts(limit = 5) {
 
 		return all.filter((c) => c.isFavorite && !c.isArchived && !c.deletedAt).slice(0, limit);
 	}, [] as CrossAppContact[]);
+}
+
+// ─── Chat Queries ───────────────────────────────────────────
+
+/** Recent conversations, sorted by updatedAt desc. */
+export function useRecentConversations(limit = 5) {
+	return useLiveQueryWithDefault(async () => {
+		const all = await crossConversationCollection.getAll(undefined, {
+			sortBy: 'updatedAt',
+			sortDirection: 'desc',
+		});
+		return all.filter((c) => !c.isArchived && !c.deletedAt).slice(0, limit);
+	}, [] as CrossAppConversation[]);
+}
+
+// ─── Zitare Queries ─────────────────────────────────────────
+
+/** A random favorite quote. */
+export function useRandomFavorite() {
+	return useLiveQueryWithDefault(
+		async () => {
+			const all = await crossFavoriteCollection.getAll();
+			const active = all.filter((f) => !f.deletedAt);
+			if (active.length === 0) return null;
+			return active[Math.floor(Math.random() * active.length)];
+		},
+		null as CrossAppFavorite | null
+	);
+}
+
+// ─── Picture Queries ────────────────────────────────────────
+
+/** Recent generated images. */
+export function useRecentImages(limit = 6) {
+	return useLiveQueryWithDefault(async () => {
+		const all = await crossImageCollection.getAll(undefined, {
+			sortBy: 'createdAt',
+			sortDirection: 'desc',
+		});
+		return all.filter((i) => !i.archivedAt && !i.deletedAt).slice(0, limit);
+	}, [] as CrossAppImage[]);
+}
+
+// ─── Clock Queries ──────────────────────────────────────────
+
+/** Enabled alarms. */
+export function useEnabledAlarms() {
+	return useLiveQueryWithDefault(async () => {
+		const all = await crossAlarmCollection.getAll();
+		return all.filter((a) => a.enabled && !a.deletedAt);
+	}, [] as CrossAppAlarm[]);
+}
+
+/** Active/running timers. */
+export function useActiveTimers() {
+	return useLiveQueryWithDefault(async () => {
+		const all = await crossTimerCollection.getAll();
+		return all.filter((t) => (t.status === 'running' || t.status === 'paused') && !t.deletedAt);
+	}, [] as CrossAppTimer[]);
+}
+
+// ─── Storage Queries ────────────────────────────────────────
+
+/** Storage stats: total files and total size. */
+export function useStorageStats() {
+	return useLiveQueryWithDefault(
+		async () => {
+			const files = await crossFileCollection.getAll();
+			const active = files.filter((f) => !f.isDeleted && !f.deletedAt);
+			const totalSize = active.reduce((sum, f) => sum + (f.size || 0), 0);
+			const recent = active
+				.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+				.slice(0, 5);
+			return { totalFiles: active.length, totalSize, recentFiles: recent };
+		},
+		{ totalFiles: 0, totalSize: 0, recentFiles: [] as CrossAppFile[] }
+	);
+}
+
+// ─── Mukke Queries ──────────────────────────────────────────
+
+/** Mukke library stats + recent songs. */
+export function useMukkeStats() {
+	return useLiveQueryWithDefault(
+		async () => {
+			const songs = await crossSongCollection.getAll();
+			const playlists = await crossPlaylistCollection.getAll();
+			const activeSongs = songs.filter((s) => !s.deletedAt);
+			const activePlaylists = playlists.filter((p) => !p.deletedAt);
+			const recent = activeSongs
+				.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+				.slice(0, 5);
+			return {
+				totalSongs: activeSongs.length,
+				totalPlaylists: activePlaylists.length,
+				favoriteCount: activeSongs.filter((s) => s.favorite).length,
+				recentSongs: recent,
+			};
+		},
+		{ totalSongs: 0, totalPlaylists: 0, favoriteCount: 0, recentSongs: [] as CrossAppSong[] }
+	);
+}
+
+// ─── Presi Queries ──────────────────────────────────────────
+
+/** Recent presentation decks. */
+export function useRecentDecks(limit = 5) {
+	return useLiveQueryWithDefault(async () => {
+		const all = await crossPresiDeckCollection.getAll(undefined, {
+			sortBy: 'updatedAt',
+			sortDirection: 'desc',
+		});
+		return all.filter((d) => !d.deletedAt).slice(0, limit);
+	}, [] as CrossAppDeck[]);
+}
+
+// ─── Context Queries ────────────────────────────────────────
+
+/** Recent documents + spaces. */
+export function useRecentDocuments(limit = 5) {
+	return useLiveQueryWithDefault(async () => {
+		const all = await crossDocumentCollection.getAll(undefined, {
+			sortBy: 'updatedAt',
+			sortDirection: 'desc',
+		});
+		return all.filter((d) => !d.deletedAt).slice(0, limit);
+	}, [] as CrossAppDocument[]);
+}
+
+export function useSpaces() {
+	return useLiveQueryWithDefault(async () => {
+		const all = await crossSpaceCollection.getAll(undefined, {
+			sortBy: 'pinned',
+			sortDirection: 'desc',
+		});
+		return all.filter((s) => !s.deletedAt);
+	}, [] as CrossAppSpace[]);
+}
+
+// ─── ManaDeck Queries ───────────────────────────────────────
+
+/** ManaDeck learning progress. */
+export function useManadeckProgress() {
+	return useLiveQueryWithDefault(
+		async () => {
+			const decks = await crossManadeckDeckCollection.getAll();
+			const cards = await crossManadeckCardCollection.getAll();
+			const activeDecks = decks.filter((d) => !d.deletedAt);
+			const activeCards = cards.filter((c) => !c.deletedAt);
+			const now = new Date().toISOString();
+			const dueCards = activeCards.filter((c) => c.nextReview && c.nextReview <= now);
+			return {
+				totalDecks: activeDecks.length,
+				totalCards: activeCards.length,
+				cardsLearned: activeCards.filter((c) => (c.reviewCount ?? 0) > 0).length,
+				dueForReview: dueCards.length,
+				decks: activeDecks,
+			};
+		},
+		{
+			totalDecks: 0,
+			totalCards: 0,
+			cardsLearned: 0,
+			dueForReview: 0,
+			decks: [] as CrossAppManadeckDeck[],
+		}
+	);
 }

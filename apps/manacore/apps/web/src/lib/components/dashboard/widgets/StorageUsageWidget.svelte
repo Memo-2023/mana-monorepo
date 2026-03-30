@@ -1,115 +1,83 @@
 <script lang="ts">
 	/**
-	 * StorageUsageWidget - Displays storage usage and recent files
+	 * StorageUsageWidget - Storage stats and recent files (local-first)
 	 */
 
-	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
-	import { storageService, type StorageStats } from '$lib/api/services/storage';
-	import WidgetSkeleton from '../WidgetSkeleton.svelte';
-	import WidgetError from '../WidgetError.svelte';
+	import { useStorageStats } from '$lib/data/cross-app-queries';
 	import { APP_URLS } from '@manacore/shared-branding';
+
+	const stats = useStorageStats();
 
 	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 	const storageUrl = isDev ? APP_URLS.storage.dev : APP_URLS.storage.prod;
 
-	let state = $state<'loading' | 'success' | 'error'>('loading');
-	let data = $state<StorageStats | null>(null);
-	let error = $state<string | null>(null);
-	let retrying = $state(false);
-
-	async function load() {
-		state = 'loading';
-		retrying = true;
-
-		try {
-			const result = await storageService.getStats();
-
-			if (result.error) {
-				throw new Error(result.error);
-			}
-
-			data = result.data;
-			state = 'success';
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load storage stats';
-			state = 'error';
-		} finally {
-			retrying = false;
-		}
-	}
-
-	onMount(load);
-
 	function formatSize(bytes: number): string {
-		return storageService.formatSize(bytes);
+		if (bytes === 0) return '0 B';
+		const units = ['B', 'KB', 'MB', 'GB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(1024));
+		return `${(bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0)} ${units[i]}`;
 	}
 
-	function getFileIcon(mimeType: string): string {
+	function getFileIcon(mimeType?: string): string {
+		if (!mimeType) return '📄';
 		if (mimeType.startsWith('image/')) return '🖼️';
 		if (mimeType.startsWith('video/')) return '🎬';
 		if (mimeType.startsWith('audio/')) return '🎵';
-		if (mimeType.includes('pdf')) return '📄';
-		if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('tar'))
-			return '📦';
-		if (mimeType.includes('text') || mimeType.includes('document')) return '📝';
+		if (mimeType.includes('pdf')) return '📕';
 		if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return '📊';
-		return '📁';
+		if (mimeType.includes('document') || mimeType.includes('word')) return '📝';
+		return '📄';
 	}
 </script>
 
 <div>
-	<h3 class="mb-3 flex items-center gap-2 text-lg font-semibold">
-		<span>💾</span>
-		{$_('dashboard.widgets.storage.title')}
-	</h3>
+	<div class="mb-3">
+		<h3 class="flex items-center gap-2 text-lg font-semibold">
+			<span>💾</span>
+			{$_('dashboard.widgets.storage.title')}
+		</h3>
+	</div>
 
-	{#if state === 'loading'}
-		<WidgetSkeleton lines={4} />
-	{:else if state === 'error'}
-		<WidgetError {error} onRetry={load} {retrying} />
-	{:else if data}
-		<div class="space-y-4">
-			<!-- Storage Stats -->
-			<div class="grid grid-cols-2 gap-3">
-				<div class="rounded-lg bg-muted/50 p-3">
-					<p class="text-muted-foreground text-xs">{$_('dashboard.widgets.storage.total_size')}</p>
-					<p class="text-xl font-bold">{formatSize(data.totalSize)}</p>
-				</div>
-				<div class="rounded-lg bg-muted/50 p-3">
-					<p class="text-muted-foreground text-xs">{$_('dashboard.widgets.storage.files')}</p>
-					<p class="text-xl font-bold">{data.totalFiles}</p>
-				</div>
-			</div>
-
-			<!-- Recent Files -->
-			{#if data.recentFiles && data.recentFiles.length > 0}
-				<div>
-					<p class="text-muted-foreground mb-2 text-sm font-medium">
-						{$_('dashboard.widgets.storage.recent')}
-					</p>
-					<ul class="space-y-2">
-						{#each data.recentFiles.slice(0, 3) as file}
-							<li class="flex items-center gap-2 text-sm">
-								<span>{getFileIcon(file.mimeType)}</span>
-								<span class="flex-1 truncate">{file.name}</span>
-								<span class="text-muted-foreground text-xs">{formatSize(file.size)}</span>
-							</li>
-						{/each}
-					</ul>
-				</div>
-			{:else}
-				<p class="text-muted-foreground text-sm">{$_('dashboard.widgets.storage.empty')}</p>
-			{/if}
-
-			<a
-				href={storageUrl}
-				target="_blank"
-				rel="noopener"
-				class="mt-2 block w-full rounded-lg bg-primary/10 py-2 text-center text-sm font-medium text-primary hover:bg-primary/20"
-			>
-				{$_('dashboard.widgets.storage.open')}
-			</a>
+	{#if stats.loading}
+		<div class="space-y-2">
+			{#each Array(3) as _}
+				<div class="h-8 animate-pulse rounded bg-surface-hover"></div>
+			{/each}
 		</div>
+	{:else}
+		<div class="mb-3 flex gap-4 text-sm">
+			<div>
+				<span class="font-semibold">{stats.value.totalFiles}</span>
+				<span class="text-muted-foreground"> Dateien</span>
+			</div>
+			<div>
+				<span class="font-semibold">{formatSize(stats.value.totalSize)}</span>
+				<span class="text-muted-foreground"> gesamt</span>
+			</div>
+		</div>
+
+		{#if stats.value.recentFiles.length > 0}
+			<div class="space-y-1">
+				{#each stats.value.recentFiles as file (file.id)}
+					<div class="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-surface-hover">
+						<span>{getFileIcon(file.mimeType)}</span>
+						<span class="min-w-0 flex-1 truncate text-sm">{file.name}</span>
+						<span class="flex-shrink-0 text-xs text-muted-foreground">
+							{formatSize(file.size || 0)}
+						</span>
+					</div>
+				{/each}
+			</div>
+		{/if}
+
+		<a
+			href={storageUrl}
+			target="_blank"
+			rel="noopener"
+			class="mt-2 block text-center text-sm text-primary hover:underline"
+		>
+			Storage öffnen →
+		</a>
 	{/if}
 </div>

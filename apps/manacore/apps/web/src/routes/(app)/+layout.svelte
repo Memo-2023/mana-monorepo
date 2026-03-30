@@ -10,7 +10,20 @@
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
 	import { manacoreStore } from '$lib/data/local-store';
-	import { todoReader, calendarReader, contactsReader } from '$lib/data/cross-app-stores';
+	import {
+		todoReader,
+		calendarReader,
+		contactsReader,
+		chatReader,
+		zitareReader,
+		pictureReader,
+		clockReader,
+		storageReader,
+		mukkeReader,
+		presiReader,
+		contextReader,
+		manadeckReader,
+	} from '$lib/data/cross-app-stores';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import {
 		THEME_DEFINITIONS,
@@ -211,6 +224,15 @@
 			todoReader.initialize(),
 			calendarReader.initialize(),
 			contactsReader.initialize(),
+			chatReader.initialize(),
+			zitareReader.initialize(),
+			pictureReader.initialize(),
+			clockReader.initialize(),
+			storageReader.initialize(),
+			mukkeReader.initialize(),
+			presiReader.initialize(),
+			contextReader.initialize(),
+			manadeckReader.initialize(),
 		]);
 
 		// Start syncing to server
