@@ -9,13 +9,15 @@
 
 	function drawSprite(canvas: HTMLCanvasElement, item: GameItem) {
 		const ctx = canvas.getContext('2d')!;
-		const { pixels, width: w, height: h } = item.sprite;
+		const { pixels, width: w, height: h, frames = 1 } = item.sprite;
+		const frameSize = w * h * 4;
 		const scale = Math.min(32 / w, 32 / h);
 		ctx.clearRect(0, 0, 32, 32);
 
 		const offsetX = Math.floor((32 - w * scale) / 2);
 		const offsetY = Math.floor((32 - h * scale) / 2);
 
+		// Always draw first frame in inventory
 		for (let y = 0; y < h; y++) {
 			for (let x = 0; x < w; x++) {
 				const i = (y * w + x) * 4;
@@ -44,6 +46,12 @@
 		epic: 'border-purple-500',
 		legendary: 'border-yellow-500',
 	};
+
+	function durabilityColor(ratio: number): string {
+		if (ratio > 0.6) return '#22c55e'; // green
+		if (ratio > 0.3) return '#eab308'; // yellow
+		return '#ef4444'; // red
+	}
 </script>
 
 <div class="flex gap-1 rounded-lg bg-gray-800/90 p-1.5 backdrop-blur">
@@ -74,6 +82,15 @@
 					style="image-rendering: pixelated;"
 					use:itemCanvas={item}
 				></canvas>
+				{@const ratio = item.properties.durabilityCurrent / item.properties.durabilityMax}
+				{#if ratio < 1}
+					<div class="absolute bottom-0.5 left-0.5 right-0.5 h-[2px] rounded-full bg-gray-700/80">
+						<div
+							class="h-full rounded-full"
+							style="width: {ratio * 100}%; background-color: {durabilityColor(ratio)}"
+						></div>
+					</div>
+				{/if}
 			{/if}
 			<span class="absolute -bottom-0.5 -right-0.5 text-[8px] text-gray-600">{i + 1}</span>
 		</button>

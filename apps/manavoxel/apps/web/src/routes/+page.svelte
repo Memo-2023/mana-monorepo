@@ -4,13 +4,22 @@
 	import { DEFAULT_MATERIALS, MATERIAL_AIR } from '@manavoxel/shared';
 	import type { ToolType } from '$lib/editor/tools';
 	import SpriteEditor from '$lib/editor/sprite-editor.svelte';
-	import type { SpriteData } from '$lib/editor/sprite-editor.svelte';
+	import type { SpriteData } from '$lib/editor/types';
 	import InventoryUI from '$lib/components/Inventory.svelte';
 	import PropertyPanel from '$lib/editor/property-panel.svelte';
 	import TriggerEditor from '$lib/editor/trigger-editor.svelte';
 	import { Inventory, createItem, type GameItem } from '$lib/engine/inventory.svelte';
 	import { gameStore } from '$lib/data/local-store';
-	import { loadWorld, getAllWorlds } from '$lib/data/world-loader';
+	import {
+		loadWorld,
+		getAllWorlds,
+		saveItem,
+		loadAllItems,
+		saveInventory,
+		loadInventory,
+		saveAreaPixels,
+		saveAreaEntities,
+	} from '$lib/data/world-loader';
 
 	let canvasContainer: HTMLDivElement;
 	let engine: GameEngine | null = $state(null);
@@ -28,17 +37,39 @@
 	let editingItem = $state<GameItem | null>(null);
 	let inventory = $state(new Inventory());
 	let itemCounter = $state(0);
+	let timeString = $state('08:00');
+	let isNight = $state(false);
+	let dialogActive = $state(false);
+	let dialogLine = $state<{
+		speaker: string;
+		text: string;
+		options?: { label: string; action: string; nextIndex?: number }[];
+	} | null>(null);
 
 	const tools: { id: ToolType; label: string; key: string }[] = [
 		{ id: 'brush', label: 'Brush', key: 'B' },
 		{ id: 'eraser', label: 'Eraser', key: 'E' },
 		{ id: 'fill', label: 'Fill', key: 'G' },
 		{ id: 'pipette', label: 'Pick', key: 'I' },
+		{ id: 'npc', label: 'NPC', key: 'N' },
 	];
+
+	const npcTypes = [
+		{ value: 'hostile', label: 'Hostile', color: '#EF4444' },
+		{ value: 'passive', label: 'Passive', color: '#22C55E' },
+		{ value: 'merchant', label: 'Merchant', color: '#EAB308' },
+		{ value: 'guard', label: 'Guard', color: '#3B82F6' },
+	];
+	let selectedNpcType = $state('hostile');
 
 	const materials = DEFAULT_MATERIALS.filter((m) => m.id !== MATERIAL_AIR);
 
-	onMount(async () => {
+	const PLAYER_ID = 'local-player';
+	let autoSaveInterval: ReturnType<typeof setInterval>;
+	let timeUpdateInterval: ReturnType<typeof setInterval>;
+	let keydownHandler: ((ev: KeyboardEvent) => void) | null = null;
+
+	async function initGame() {
 		// Initialize local-first database (creates tables, seeds guest data)
 		await gameStore.initialize();
 
@@ -57,8 +88,26 @@
 			}
 		}
 
+		// Load saved items and restore inventory
+		const savedItems = await loadAllItems();
+		const savedInventory = await loadInventory(PLAYER_ID);
+		const itemMap = new Map(savedItems.map((i) => [i.id, i]));
+
+		for (let i = 0; i < savedInventory.slots.length; i++) {
+			const itemId = savedInventory.slots[i];
+			if (itemId) {
+				const item = itemMap.get(itemId);
+				if (item) inventory.slots[i] = item;
+			}
+		}
+		if (savedInventory.heldSlot >= 0) {
+			inventory.heldSlot = savedInventory.heldSlot;
+		}
+		itemCounter = savedItems.length;
+
 		const e = new GameEngine(canvasContainer, worldData ?? undefined);
 		e.inventory = inventory;
+		e.registerItemBehaviors();
 		engine = e;
 		loading = false;
 
@@ -70,10 +119,35 @@
 			areaName = e.areaName;
 			currentFloor = e.currentFloor;
 			totalFloors = e.totalFloors;
+			timeString = e.dayNight.timeString;
+			isNight = e.dayNight.isNight;
+			dialogActive = e.dialog.active;
+			dialogLine = e.dialog.currentLine;
 		};
 
+		// Update time display every second
+		timeUpdateInterval = setInterval(() => {
+			if (!e.dayNight) return;
+			timeString = e.dayNight.timeString;
+			isNight = e.dayNight.isNight;
+		}, 1000);
+
+		// Auto-save area data every 10 seconds
+		autoSaveInterval = setInterval(async () => {
+			const area = e.areaManager.currentArea;
+			if (!area) return;
+			const tilemap = area.tilemap;
+			if (tilemap.isDirty) {
+				tilemap.isDirty = false;
+				const pixelData = tilemap.exportPixelData();
+				await saveAreaPixels(area.data.id, pixelData);
+			}
+			// Always save entities (lightweight)
+			await saveAreaEntities(area.data.id, area.data.entities);
+		}, 10_000);
+
 		// Keyboard shortcuts
-		const onKey = (ev: KeyboardEvent) => {
+		keydownHandler = (ev: KeyboardEvent) => {
 			if (ev.target instanceof HTMLInputElement) return;
 			switch (ev.key.toLowerCase()) {
 				case 'tab':
@@ -92,6 +166,9 @@
 				case 'i':
 					e.setTool('pipette');
 					break;
+				case 'n':
+					e.setTool('npc');
+					break;
 				case '[':
 					e.setBrushSize(e.brushSize - 2);
 					break;
@@ -105,11 +182,26 @@
 				e.setMaterial(materials[num - 1].id);
 			}
 		};
-		window.addEventListener('keydown', onKey);
+		window.addEventListener('keydown', keydownHandler);
+	}
+
+	onMount(() => {
+		initGame();
 
 		return () => {
-			window.removeEventListener('keydown', onKey);
-			e.destroy();
+			clearInterval(autoSaveInterval);
+			clearInterval(timeUpdateInterval);
+			// Save on exit
+			if (engine) {
+				const area = engine.areaManager.currentArea;
+				if (area && area.tilemap.isDirty) {
+					const pixelData = area.tilemap.exportPixelData();
+					saveAreaPixels(area.data.id, pixelData);
+				}
+				engine.destroy();
+			}
+			saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
+			if (keydownHandler) window.removeEventListener('keydown', keydownHandler);
 		};
 	});
 </script>
@@ -150,6 +242,13 @@
 				{#if !isEditing && engine?.player}
 					<div class="rounded-lg bg-gray-800/80 px-3 py-1.5 text-xs text-gray-300 backdrop-blur">
 						HP: {engine.player.hp}/{engine.player.maxHp}
+					</div>
+					<div
+						class="rounded-lg px-3 py-1.5 text-xs backdrop-blur {isNight
+							? 'bg-indigo-900/80 text-indigo-300'
+							: 'bg-gray-800/80 text-yellow-300'}"
+					>
+						{timeString}
 					</div>
 				{/if}
 				{#if isEditing}
@@ -201,22 +300,49 @@
 					</button>
 				{/each}
 
-				<!-- Brush size -->
-				<div class="mt-2 rounded-lg bg-gray-800/80 px-3 py-2 text-xs text-white backdrop-blur">
-					<div class="mb-1 text-gray-400">Size: {brushSize}px</div>
-					<div class="flex gap-1">
-						{#each [1, 3, 5, 7] as size}
-							<button
-								class="rounded px-2 py-0.5 transition {brushSize === size
-									? 'bg-emerald-600'
-									: 'bg-gray-700 hover:bg-gray-600'}"
-								onclick={() => engine?.setBrushSize(size)}
-							>
-								{size}
-							</button>
-						{/each}
+				<!-- Brush size (only for paint tools) -->
+				{#if activeTool !== 'npc'}
+					<div class="mt-2 rounded-lg bg-gray-800/80 px-3 py-2 text-xs text-white backdrop-blur">
+						<div class="mb-1 text-gray-400">Size: {brushSize}px</div>
+						<div class="flex gap-1">
+							{#each [1, 3, 5, 7] as size}
+								<button
+									class="rounded px-2 py-0.5 transition {brushSize === size
+										? 'bg-emerald-600'
+										: 'bg-gray-700 hover:bg-gray-600'}"
+									onclick={() => engine?.setBrushSize(size)}
+								>
+									{size}
+								</button>
+							{/each}
+						</div>
 					</div>
-				</div>
+				{/if}
+
+				<!-- NPC type selector (when NPC tool active) -->
+				{#if activeTool === 'npc'}
+					<div class="mt-2 rounded-lg bg-gray-800/80 px-3 py-2 text-xs text-white backdrop-blur">
+						<div class="mb-1 text-gray-400">NPC Type</div>
+						<div class="flex flex-col gap-1">
+							{#each npcTypes as npc}
+								<button
+									class="flex items-center gap-2 rounded px-2 py-1 transition {selectedNpcType ===
+									npc.value
+										? 'bg-gray-600 ring-1 ring-white'
+										: 'bg-gray-700 hover:bg-gray-600'}"
+									onclick={() => {
+										selectedNpcType = npc.value;
+										engine?.setNpcBehavior(npc.value);
+									}}
+								>
+									<span class="h-2 w-2 rounded-full" style="background-color: {npc.color}"></span>
+									{npc.label}
+								</button>
+							{/each}
+						</div>
+						<div class="mt-2 text-[10px] text-gray-500">Click on map to place</div>
+					</div>
+				{/if}
 
 				<!-- Undo/Redo -->
 				<div class="mt-2 flex gap-1">
@@ -270,8 +396,9 @@
 			<div class="pointer-events-auto absolute bottom-14 left-1/2 -translate-x-1/2">
 				<InventoryUI
 					{inventory}
-					onDrop={(slot) => {
+					onDrop={async (slot) => {
 						inventory.removeItem(slot);
+						await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
 					}}
 					onInspect={(item) => {
 						editingItem = item;
@@ -326,8 +453,10 @@
 			{#if showPropertyPanel}
 				<PropertyPanel
 					item={editingItem}
-					onUpdate={(updated) => {
+					onUpdate={async (updated) => {
 						editingItem = updated;
+						await saveItem(updated);
+						engine?.registerItemBehaviors();
 					}}
 					onClose={() => {
 						showPropertyPanel = false;
@@ -338,10 +467,14 @@
 
 			{#if showTriggerEditor && editingItem}
 				<TriggerEditor
-					behaviors={[]}
-					onUpdate={(behaviors) => {
-						// Store behaviors on the item (extend GameItem type later)
-						console.log('Behaviors updated:', behaviors);
+					behaviors={editingItem.behaviors ?? []}
+					onUpdate={async (behaviors) => {
+						if (!editingItem) return;
+						editingItem.behaviors = behaviors;
+						// Persist to IndexedDB
+						await saveItem(editingItem);
+						// Re-register behaviors in engine
+						engine?.registerItemBehaviors();
 					}}
 					onClose={() => {
 						showTriggerEditor = false;
@@ -353,18 +486,52 @@
 	{/if}
 
 	<!-- Sprite Editor Modal -->
+	<!-- Dialog UI -->
+	{#if dialogActive && dialogLine}
+		<div class="absolute bottom-24 left-1/2 z-50 -translate-x-1/2">
+			<div class="w-96 rounded-xl bg-gray-900/95 p-4 shadow-2xl backdrop-blur">
+				<div class="mb-2 text-xs font-bold text-emerald-400">{dialogLine.speaker}</div>
+				<div class="mb-3 text-sm text-gray-200">{dialogLine.text}</div>
+				<div class="flex gap-2">
+					{#each dialogLine.options ?? [{ label: 'Close', action: 'close' }] as option}
+						<button
+							class="rounded-lg bg-gray-700 px-4 py-1.5 text-xs text-white transition hover:bg-gray-600"
+							onclick={() => {
+								if (engine) {
+									const result = engine.dialog.selectOption(option as any);
+									dialogActive = engine.dialog.active;
+									dialogLine = engine.dialog.currentLine;
+									if (result === 'trade') {
+										// TODO: Open trade UI
+										engine.dialog.close();
+										dialogActive = false;
+									}
+								}
+							}}
+						>
+							{option.label}
+						</button>
+					{/each}
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	{#if showSpriteEditor}
 		<div class="absolute inset-0 z-50 flex items-center justify-center bg-black/70">
 			<SpriteEditor
 				width={16}
 				height={32}
-				onSave={(data) => {
+				onSave={async (data) => {
 					itemCounter++;
 					const item = createItem(`Item ${itemCounter}`, data);
 					const slot = inventory.addItem(item);
 					if (slot >= 0) {
 						inventory.selectSlot(slot);
 					}
+					// Persist item and inventory to IndexedDB
+					await saveItem(item);
+					await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
 					showSpriteEditor = false;
 				}}
 				onClose={() => (showSpriteEditor = false)}

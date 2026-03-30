@@ -7,6 +7,8 @@ export class Camera {
 	private _scale = 1.5; // Start zoomed out more to see the village
 	private _minScale = 0.3;
 	private _maxScale = 6;
+	private _shakeIntensity = 0;
+	private _shakeDuration = 0;
 
 	get x() {
 		return this._x;
@@ -54,10 +56,26 @@ export class Camera {
 		};
 	}
 
+	/** Start a camera shake effect */
+	shake(intensity: number, durationFrames: number) {
+		this._shakeIntensity = intensity;
+		this._shakeDuration = durationFrames;
+	}
+
 	/** Apply camera transform to the world container */
 	update(screenWidth: number, screenHeight: number) {
-		this._container.x = screenWidth / 2 - this._x * this._scale;
-		this._container.y = screenHeight / 2 - this._y * this._scale;
+		let offsetX = 0;
+		let offsetY = 0;
+
+		if (this._shakeDuration > 0) {
+			offsetX = (Math.random() - 0.5) * this._shakeIntensity * 2;
+			offsetY = (Math.random() - 0.5) * this._shakeIntensity * 2;
+			this._shakeDuration--;
+			if (this._shakeDuration <= 0) this._shakeIntensity = 0;
+		}
+
+		this._container.x = screenWidth / 2 - this._x * this._scale + offsetX;
+		this._container.y = screenHeight / 2 - this._y * this._scale + offsetY;
 		this._container.scale.set(this._scale);
 	}
 }

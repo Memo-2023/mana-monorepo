@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { SpriteData } from './types';
 
 	// Props
 	let {
@@ -10,23 +11,21 @@
 		onClose = undefined as (() => void) | undefined,
 	} = $props();
 
-	export interface SpriteData {
-		pixels: Uint8Array; // RGBA flat array
-		width: number;
-		height: number;
-	}
-
 	// State
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D;
 	let previewCanvas: HTMLCanvasElement;
 	let previewCtx: CanvasRenderingContext2D;
 
-	let pixels: Uint8Array = $state(new Uint8Array(width * height * 4)); // RGBA
+	const frameSize = width * height * 4;
+	let frames: Uint8Array[] = $state([new Uint8Array(frameSize)]); // RGBA per frame
+	let currentFrame = $state(0);
 	let currentColor = $state('#FF4444');
 	let currentTool = $state<'brush' | 'eraser' | 'fill' | 'pipette'>('brush');
 	let isDrawing = $state(false);
 	let zoom = $state(8); // Each sprite pixel = 8 screen pixels
+	let animPlaying = $state(false);
+	let animInterval: ReturnType<typeof setInterval> | null = null;
 
 	// Color palette
 	const palette = [
@@ -61,23 +60,23 @@
 	let redoStack: Uint8Array[] = $state([]);
 
 	function saveUndo() {
-		undoStack = [...undoStack, new Uint8Array(pixels)];
+		undoStack = [...undoStack, new Uint8Array(frames[currentFrame])];
 		if (undoStack.length > 30) undoStack = undoStack.slice(-30);
 		redoStack = [];
 	}
 
 	function undo() {
 		if (undoStack.length === 0) return;
-		redoStack = [...redoStack, new Uint8Array(pixels)];
-		pixels = undoStack[undoStack.length - 1];
+		redoStack = [...redoStack, new Uint8Array(frames[currentFrame])];
+		frames[currentFrame] = undoStack[undoStack.length - 1];
 		undoStack = undoStack.slice(0, -1);
 		renderCanvas();
 	}
 
 	function redo() {
 		if (redoStack.length === 0) return;
-		undoStack = [...undoStack, new Uint8Array(pixels)];
-		pixels = redoStack[redoStack.length - 1];
+		undoStack = [...undoStack, new Uint8Array(frames[currentFrame])];
+		frames[currentFrame] = redoStack[redoStack.length - 1];
 		redoStack = redoStack.slice(0, -1);
 		renderCanvas();
 	}
@@ -91,17 +90,19 @@
 	}
 
 	function getPixel(x: number, y: number): [number, number, number, number] {
+		const p = frames[currentFrame];
 		const i = (y * width + x) * 4;
-		return [pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3]];
+		return [p[i], p[i + 1], p[i + 2], p[i + 3]];
 	}
 
 	function setPixel(x: number, y: number, r: number, g: number, b: number, a: number) {
 		if (x < 0 || x >= width || y < 0 || y >= height) return;
+		const p = frames[currentFrame];
 		const i = (y * width + x) * 4;
-		pixels[i] = r;
-		pixels[i + 1] = g;
-		pixels[i + 2] = b;
-		pixels[i + 3] = a;
+		p[i] = r;
+		p[i + 1] = g;
+		p[i + 2] = b;
+		p[i + 3] = a;
 	}
 
 	function colorsMatch(a: [number, number, number, number], b: [number, number, number, number]) {
@@ -239,46 +240,92 @@
 	// Mirror operations
 	function mirrorH() {
 		saveUndo();
-		const newPixels = new Uint8Array(pixels.length);
+		const src = frames[currentFrame];
+		const newPixels = new Uint8Array(src.length);
 		for (let y = 0; y < height; y++) {
 			for (let x = 0; x < width; x++) {
 				const srcI = (y * width + x) * 4;
 				const dstI = (y * width + (width - 1 - x)) * 4;
-				newPixels[dstI] = pixels[srcI];
-				newPixels[dstI + 1] = pixels[srcI + 1];
-				newPixels[dstI + 2] = pixels[srcI + 2];
-				newPixels[dstI + 3] = pixels[srcI + 3];
+				newPixels[dstI] = src[srcI];
+				newPixels[dstI + 1] = src[srcI + 1];
+				newPixels[dstI + 2] = src[srcI + 2];
+				newPixels[dstI + 3] = src[srcI + 3];
 			}
 		}
-		pixels = newPixels;
+		frames[currentFrame] = newPixels;
 		renderCanvas();
 	}
 
 	function mirrorV() {
 		saveUndo();
-		const newPixels = new Uint8Array(pixels.length);
+		const src = frames[currentFrame];
+		const newPixels = new Uint8Array(src.length);
 		for (let y = 0; y < height; y++) {
 			for (let x = 0; x < width; x++) {
 				const srcI = (y * width + x) * 4;
 				const dstI = ((height - 1 - y) * width + x) * 4;
-				newPixels[dstI] = pixels[srcI];
-				newPixels[dstI + 1] = pixels[srcI + 1];
-				newPixels[dstI + 2] = pixels[srcI + 2];
-				newPixels[dstI + 3] = pixels[srcI + 3];
+				newPixels[dstI] = src[srcI];
+				newPixels[dstI + 1] = src[srcI + 1];
+				newPixels[dstI + 2] = src[srcI + 2];
+				newPixels[dstI + 3] = src[srcI + 3];
 			}
 		}
-		pixels = newPixels;
+		frames[currentFrame] = newPixels;
 		renderCanvas();
 	}
 
 	function clearAll() {
 		saveUndo();
-		pixels = new Uint8Array(width * height * 4);
+		frames[currentFrame] = new Uint8Array(frameSize);
 		renderCanvas();
 	}
 
+	// Frame management
+	function addFrame() {
+		// Duplicate current frame
+		frames = [...frames, new Uint8Array(frames[currentFrame])];
+		currentFrame = frames.length - 1;
+		renderCanvas();
+	}
+
+	function removeFrame() {
+		if (frames.length <= 1) return;
+		frames = frames.filter((_, i) => i !== currentFrame);
+		if (currentFrame >= frames.length) currentFrame = frames.length - 1;
+		renderCanvas();
+	}
+
+	function prevFrame() {
+		currentFrame = (currentFrame - 1 + frames.length) % frames.length;
+		renderCanvas();
+	}
+
+	function nextFrame() {
+		currentFrame = (currentFrame + 1) % frames.length;
+		renderCanvas();
+	}
+
+	function togglePlayAnimation() {
+		if (animPlaying) {
+			if (animInterval) clearInterval(animInterval);
+			animInterval = null;
+			animPlaying = false;
+		} else {
+			animPlaying = true;
+			animInterval = setInterval(() => {
+				currentFrame = (currentFrame + 1) % frames.length;
+				renderPreview();
+			}, 150); // ~6.7 FPS
+		}
+	}
+
 	function handleSave() {
-		onSave?.({ pixels: new Uint8Array(pixels), width, height });
+		// Concatenate all frames into a single pixel buffer
+		const totalPixels = new Uint8Array(frameSize * frames.length);
+		for (let i = 0; i < frames.length; i++) {
+			totalPixels.set(frames[i], i * frameSize);
+		}
+		onSave?.({ pixels: totalPixels, width, height, frames: frames.length });
 	}
 
 	// Keyboard shortcuts
@@ -302,13 +349,22 @@
 		previewCtx = previewCanvas.getContext('2d')!;
 
 		if (initialData) {
-			pixels = new Uint8Array(initialData);
+			// Split initial data into frames
+			const numFrames = Math.max(1, Math.floor(initialData.length / frameSize));
+			frames = [];
+			for (let i = 0; i < numFrames; i++) {
+				frames.push(new Uint8Array(initialData.slice(i * frameSize, (i + 1) * frameSize)));
+			}
+			currentFrame = 0;
 		}
 
 		renderCanvas();
 
 		window.addEventListener('keydown', handleKeyDown);
-		return () => window.removeEventListener('keydown', handleKeyDown);
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+			if (animInterval) clearInterval(animInterval);
+		};
 	});
 </script>
 
@@ -347,6 +403,41 @@
 				class="mx-auto"
 				style="image-rendering: pixelated;"
 			></canvas>
+		</div>
+
+		<!-- Frames -->
+		<div class="rounded border border-gray-700 bg-gray-950 p-2">
+			<div class="mb-1 flex items-center justify-between text-xs text-gray-500">
+				<span>Frame {currentFrame + 1}/{frames.length}</span>
+				<button
+					class="rounded px-1.5 py-0.5 text-[10px] {animPlaying
+						? 'bg-red-600 text-white'
+						: 'bg-gray-700 text-gray-300 hover:bg-gray-600'}"
+					onclick={togglePlayAnimation}
+				>
+					{animPlaying ? 'Stop' : 'Play'}
+				</button>
+			</div>
+			<div class="flex gap-1">
+				<button
+					class="rounded bg-gray-700 px-2 py-0.5 text-xs text-gray-300 hover:bg-gray-600"
+					onclick={prevFrame}>←</button
+				>
+				<button
+					class="rounded bg-gray-700 px-2 py-0.5 text-xs text-gray-300 hover:bg-gray-600"
+					onclick={nextFrame}>→</button
+				>
+				<button
+					class="rounded bg-emerald-700 px-2 py-0.5 text-xs text-white hover:bg-emerald-600"
+					onclick={addFrame}>+</button
+				>
+				{#if frames.length > 1}
+					<button
+						class="rounded bg-red-700 px-2 py-0.5 text-xs text-white hover:bg-red-600"
+						onclick={removeFrame}>−</button
+					>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Tools -->

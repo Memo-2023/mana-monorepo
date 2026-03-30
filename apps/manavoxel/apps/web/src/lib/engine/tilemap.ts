@@ -17,6 +17,8 @@ interface Chunk {
 
 export class TilemapRenderer {
 	readonly tileSize: number; // Screen pixels per world pixel (at 1x zoom)
+	/** True when pixel data has been modified since last save */
+	isDirty = false;
 	private _container: Container;
 	private _palette: Material[];
 	private _chunks = new Map<string, Chunk>();
@@ -130,6 +132,7 @@ export class TilemapRenderer {
 	setPixel(x: number, y: number, material: number) {
 		if (x < 0 || x >= this._worldWidth || y < 0 || y >= this._worldHeight) return;
 		this._setPixelRaw(x, y, material);
+		this.isDirty = true;
 
 		const key = this._chunkKey(Math.floor(x / CHUNK_SIZE), Math.floor(y / CHUNK_SIZE));
 		const chunk = this._chunks.get(key);
@@ -149,6 +152,21 @@ export class TilemapRenderer {
 		const lx = x - cx * CHUNK_SIZE;
 		const ly = y - cy * CHUNK_SIZE;
 		return chunk.pixels[ly * CHUNK_SIZE + lx];
+	}
+
+	/** Export pixel data as Uint8Array (Uint16 little-endian per pixel) */
+	exportPixelData(): Uint8Array {
+		const data = new Uint8Array(this._worldWidth * this._worldHeight * 2);
+		const view = new DataView(data.buffer);
+		for (let y = 0; y < this._worldHeight; y++) {
+			for (let x = 0; x < this._worldWidth; x++) {
+				const mat = this.getPixel(x, y);
+				if (mat !== MATERIAL_AIR) {
+					view.setUint16((y * this._worldWidth + x) * 2, mat, true);
+				}
+			}
+		}
+		return data;
 	}
 
 	/** Check if a world pixel is solid (for collision) */

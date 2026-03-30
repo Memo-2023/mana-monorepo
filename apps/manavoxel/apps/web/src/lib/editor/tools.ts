@@ -67,7 +67,7 @@ export class UndoStack {
 
 // ─── Editor Tools ───────────────────────────────────────────
 
-export type ToolType = 'brush' | 'eraser' | 'fill' | 'pipette' | 'box' | 'line';
+export type ToolType = 'brush' | 'eraser' | 'fill' | 'pipette' | 'box' | 'line' | 'npc';
 
 /**
  * Place a single pixel (or brush area), recording to undo stack.

@@ -7,13 +7,25 @@ import {
 	worldCollection,
 	areaCollection,
 	itemCollection,
+	inventoryCollection,
 	decodeBytes,
 	encodeBytes,
 	type LocalWorld,
 	type LocalArea,
+	type LocalItem,
+	type LocalInventorySlot,
 } from './local-store';
-import type { Area, PortalDef, EntityDef, Material } from '@manavoxel/shared';
+import type {
+	Area,
+	PortalDef,
+	EntityDef,
+	Material,
+	ItemProperties,
+	TriggerAction,
+	Rarity,
+} from '@manavoxel/shared';
 import { DEFAULT_MATERIALS } from '@manavoxel/shared';
+import type { GameItem } from '$lib/engine/inventory.svelte';
 
 /** Load a world and all its areas from IndexedDB */
 export async function loadWorld(worldId: string): Promise<{
@@ -38,6 +50,17 @@ export async function getAllWorlds(): Promise<LocalWorld[]> {
 export async function saveAreaPixels(areaId: string, pixelData: Uint8Array) {
 	await areaCollection.update(areaId, {
 		pixelData: encodeBytes(pixelData),
+		updatedAt: new Date().toISOString(),
+	});
+}
+
+/** Save an area's entity definitions back to IndexedDB */
+export async function saveAreaEntities(
+	areaId: string,
+	entities: import('@manavoxel/shared').EntityDef[]
+) {
+	await areaCollection.update(areaId, {
+		entities: JSON.stringify(entities),
 		updatedAt: new Date().toISOString(),
 	});
 }
@@ -81,6 +104,117 @@ export async function deleteWorld(worldId: string) {
 		await areaCollection.delete(area.id);
 	}
 	await worldCollection.delete(worldId);
+}
+
+// ─── Item Persistence ──────────────────────────────────────
+
+/** Save a GameItem to IndexedDB */
+export async function saveItem(item: GameItem): Promise<void> {
+	const existing = await itemCollection.get(item.id);
+	const localItem: Partial<LocalItem> & { id: string } = {
+		id: item.id,
+		creatorId: 'local',
+		name: item.name,
+		description: '',
+		spriteData: encodeBytes(item.sprite.pixels),
+		spriteWidth: item.sprite.width,
+		spriteHeight: item.sprite.height,
+		animationFrames: item.sprite.frames || 1,
+		resolution: 0.01,
+		properties: JSON.stringify(item.properties),
+		behavior: JSON.stringify(item.behaviors ?? []),
+		rarity: item.rarity,
+		isPublished: false,
+	};
+
+	if (existing) {
+		await itemCollection.update(item.id, localItem);
+	} else {
+		await itemCollection.insert(localItem as LocalItem);
+	}
+}
+
+/** Load all items from IndexedDB */
+export async function loadAllItems(): Promise<GameItem[]> {
+	const dbItems = await itemCollection.getAll();
+	return dbItems.map(dbItemToGameItem);
+}
+
+/** Delete an item from IndexedDB */
+export async function deleteItem(itemId: string): Promise<void> {
+	await itemCollection.delete(itemId);
+}
+
+/** Save inventory state to IndexedDB */
+export async function saveInventory(
+	playerId: string,
+	slots: (GameItem | null)[],
+	heldSlot: number
+): Promise<void> {
+	// Clear existing inventory for this player
+	const existing = await inventoryCollection.getAll({ playerId });
+	for (const slot of existing) {
+		await inventoryCollection.delete(slot.id);
+	}
+
+	// Save current slots
+	for (let i = 0; i < slots.length; i++) {
+		const item = slots[i];
+		if (!item) continue;
+		await inventoryCollection.insert({
+			id: `${playerId}_slot_${i}`,
+			playerId,
+			itemId: item.id,
+			slot: i,
+			quantity: 1,
+			instanceData: JSON.stringify({ heldSlot }),
+		});
+	}
+}
+
+/** Load inventory from IndexedDB */
+export async function loadInventory(
+	playerId: string
+): Promise<{ slots: (string | null)[]; heldSlot: number }> {
+	const dbSlots = await inventoryCollection.getAll({ playerId });
+	const slots: (string | null)[] = Array(8).fill(null);
+	let heldSlot = -1;
+
+	for (const dbSlot of dbSlots) {
+		if (dbSlot.slot >= 0 && dbSlot.slot < slots.length) {
+			slots[dbSlot.slot] = dbSlot.itemId;
+		}
+		const data = safeJsonParse<{ heldSlot?: number }>(dbSlot.instanceData, {});
+		if (data.heldSlot !== undefined) heldSlot = data.heldSlot;
+	}
+
+	return { slots, heldSlot };
+}
+
+function dbItemToGameItem(dbItem: LocalItem): GameItem {
+	return {
+		id: dbItem.id,
+		name: dbItem.name,
+		sprite: {
+			pixels: decodeBytes(dbItem.spriteData),
+			width: dbItem.spriteWidth,
+			height: dbItem.spriteHeight,
+			frames: dbItem.animationFrames || 1,
+		},
+		properties: safeJsonParse<ItemProperties>(dbItem.properties, {
+			damage: 0,
+			range: 1,
+			speed: 1,
+			durabilityMax: 100,
+			durabilityCurrent: 100,
+			element: 'neutral',
+			rarity: 'common',
+			sound: 'hit_default',
+			particle: 'none',
+		}),
+		rarity: dbItem.rarity as Rarity,
+		behaviors: safeJsonParse<TriggerAction[]>(dbItem.behavior, []),
+	};
 }
 
 // ─── Converters ─────────────────────────────────────────────

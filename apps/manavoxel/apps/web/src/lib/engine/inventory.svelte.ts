@@ -1,5 +1,5 @@
-import type { SpriteData } from '$lib/editor/sprite-editor.svelte';
-import type { ItemProperties, Rarity, ElementType } from '@manavoxel/shared';
+import type { SpriteData } from '$lib/editor/types';
+import type { ItemProperties, Rarity, ElementType, TriggerAction } from '@manavoxel/shared';
 
 export interface GameItem {
 	id: string;
@@ -7,6 +7,7 @@ export interface GameItem {
 	sprite: SpriteData;
 	properties: ItemProperties;
 	rarity: Rarity;
+	behaviors: TriggerAction[];
 }
 
 const defaultProperties: ItemProperties = {
@@ -21,20 +22,20 @@ const defaultProperties: ItemProperties = {
 	particle: 'none',
 };
 
-let nextItemId = 1;
-
 /** Create a new item from sprite data */
 export function createItem(
 	name: string,
 	sprite: SpriteData,
-	partialProps?: Partial<ItemProperties>
+	partialProps?: Partial<ItemProperties>,
+	behaviors?: TriggerAction[]
 ): GameItem {
 	return {
-		id: `item_${nextItemId++}`,
+		id: crypto.randomUUID(),
 		name,
 		sprite,
 		properties: { ...defaultProperties, ...partialProps },
 		rarity: partialProps?.rarity ?? 'common',
+		behaviors: behaviors ?? [],
 	};
 }
 
@@ -44,6 +45,11 @@ export const MAX_EQUIPMENT_SLOTS = 1; // Held item
 export class Inventory {
 	slots: (GameItem | null)[] = $state(Array(MAX_INVENTORY_SLOTS).fill(null));
 	heldSlot: number = $state(-1); // -1 = nothing held
+
+	/** Called when an item is added to inventory */
+	onPickup: ((item: GameItem) => void) | null = null;
+	/** Called when an item is removed from inventory */
+	onDrop: ((item: GameItem) => void) | null = null;
 
 	get heldItem(): GameItem | null {
 		if (this.heldSlot < 0 || this.heldSlot >= this.slots.length) return null;
@@ -55,6 +61,7 @@ export class Inventory {
 		const emptySlot = this.slots.findIndex((s) => s === null);
 		if (emptySlot === -1) return -1;
 		this.slots[emptySlot] = item;
+		this.onPickup?.(item);
 		return emptySlot;
 	}
 
@@ -64,6 +71,7 @@ export class Inventory {
 		const item = this.slots[slot];
 		this.slots[slot] = null;
 		if (this.heldSlot === slot) this.heldSlot = -1;
+		if (item) this.onDrop?.(item);
 		return item;
 	}
 
