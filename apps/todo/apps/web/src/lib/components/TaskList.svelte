@@ -2,7 +2,7 @@
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
 	import type { Task, UpdateTaskInput } from '@todo/shared';
 	import TaskItem from './TaskItem.svelte';
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import type { Project } from '@todo/shared';
 	import { getActiveProjects } from '$lib/data/task-queries';
@@ -160,20 +160,35 @@
 	// Track which task is being animated for completion
 	let animatingTaskId = $state<string | null>(null);
 
-	// Create a stable key from task IDs and updatedAt to detect real changes
-	let lastTaskKey = '';
+	// After a drop, ignore external syncs until the timeout clears
+	let dropInProgress = false;
 
-	// Sync items with tasks when IDs change OR when tasks are updated
+	// Sync items with tasks prop — but preserve local order during/after DnD
 	$effect(() => {
-		// Include updatedAt in the key to detect task updates
-		const currentKey = tasks
-			.map((t) => `${t.id}:${t.updatedAt || ''}`)
-			.sort()
-			.join(',');
-		if (currentKey !== lastTaskKey) {
-			items = [...tasks];
-			lastTaskKey = currentKey;
-		}
+		// Subscribe to tasks (the reactive dependency)
+		const currentTasks = tasks;
+
+		// Read items without subscribing to avoid infinite loop
+		untrack(() => {
+			const taskIds = new Set(currentTasks.map((t) => t.id));
+			const itemIds = new Set(items.map((t) => t.id));
+
+			// Check if the actual set of IDs changed (task added or removed)
+			const idsChanged =
+				taskIds.size !== itemIds.size ||
+				currentTasks.some((t) => !itemIds.has(t.id)) ||
+				items.some((t) => !taskIds.has(t.id));
+
+			if (idsChanged) {
+				// Real structural change — full resync
+				items = [...currentTasks];
+				dropInProgress = false;
+			} else if (!dropInProgress) {
+				// Same IDs — update task data in current order (no reorder flicker)
+				const taskMap = new Map(currentTasks.map((t) => [t.id, t]));
+				items = items.map((item) => taskMap.get(item.id) || item);
+			}
+		});
 	});
 
 	const flipDurationMs = 200;
@@ -207,12 +222,12 @@
 			tasksStore.reorderTasks(taskIds);
 		}
 
-		// Update local state and sync lastTaskKey to prevent $effect from reverting
+		// Update local state and block sync from reverting order
 		items = newItems;
-		lastTaskKey = newItems
-			.map((t) => `${t.id}:${t.updatedAt || ''}`)
-			.sort()
-			.join(',');
+		dropInProgress = true;
+		setTimeout(() => {
+			dropInProgress = false;
+		}, 1000);
 	}
 
 	async function handleToggleComplete(task: Task) {
@@ -242,21 +257,25 @@
 		onconsider={handleDndConsider}
 		onfinalize={handleDndFinalize}
 	>
-		{#each items.filter((t) => t.id !== SHADOW_PLACEHOLDER_ITEM_ID) as task (task.id)}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div oncontextmenu={(e) => handleContextMenu(e, task)}>
-				<TaskItem
-					{task}
-					{showCompleted}
-					animateComplete={animatingTaskId === task.id}
-					isExpanded={expandedTaskId === task.id}
-					onToggleComplete={() => handleToggleComplete(task)}
-					onDelete={() => handleDelete(task.id)}
-					onExpand={() => handleExpandTask(task.id)}
-					onCollapse={handleCollapseTask}
-					onSave={(data) => handleSaveTask(task.id, data)}
-				/>
-			</div>
+		{#each items as task (task.id)}
+			{#if task.id === SHADOW_PLACEHOLDER_ITEM_ID}
+				<div class="dnd-shadow-placeholder"></div>
+			{:else}
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div oncontextmenu={(e) => handleContextMenu(e, task)}>
+					<TaskItem
+						{task}
+						{showCompleted}
+						animateComplete={animatingTaskId === task.id}
+						isExpanded={expandedTaskId === task.id}
+						onToggleComplete={() => handleToggleComplete(task)}
+						onDelete={() => handleDelete(task.id)}
+						onExpand={() => handleExpandTask(task.id)}
+						onCollapse={handleCollapseTask}
+						onSave={(data) => handleSaveTask(task.id, data)}
+					/>
+				</div>
+			{/if}
 		{/each}
 		{#if items.length === 0}
 			<div class="empty-placeholder">
@@ -340,6 +359,10 @@
 	:global(.dark [aria-grabbed='true']) {
 		background: rgba(40, 40, 40, 0.95);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+	}
+
+	.dnd-shadow-placeholder {
+		min-height: 3rem;
 	}
 
 	/* Shadow placeholder (where dragged item will land) */

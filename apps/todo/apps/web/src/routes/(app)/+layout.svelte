@@ -605,7 +605,7 @@
 		max-width: 900px;
 		margin-left: auto;
 		margin-right: auto;
-		padding: 1rem;
+		padding: 0.5rem;
 	}
 
 	.content-wrapper.full-width {
@@ -616,7 +616,7 @@
 
 	@media (min-width: 640px) {
 		.content-wrapper {
-			padding: 1.5rem;
+			padding: 1rem;
 		}
 		.content-wrapper.full-width {
 			padding-left: 0;

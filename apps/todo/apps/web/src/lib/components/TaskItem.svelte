@@ -515,11 +515,6 @@
 				{dueDateText()}
 			</span>
 		{/if}
-
-		<!-- Project indicator -->
-		{#if projectColor()}
-			<div class="project-dot" style="background-color: {projectColor()}"></div>
-		{/if}
 	</div>
 
 	<!-- Expanded inline edit form -->
@@ -1139,14 +1134,6 @@
 
 	:global(.dark) .completed-date-toggle .date-value {
 		color: #9ca3af;
-	}
-
-	/* Project dot */
-	.project-dot {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 9999px;
-		flex-shrink: 0;
 	}
 
 	/* Expand button */
