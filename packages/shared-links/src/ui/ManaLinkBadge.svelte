@@ -2,6 +2,7 @@
 	import type { LocalManaLink } from '../types.js';
 	import { getManaApp } from '@manacore/shared-branding';
 	import type { AppIconId } from '@manacore/shared-branding';
+	import { resolveDeepLink } from '../deep-links.js';
 
 	interface Props {
 		link: LocalManaLink;
@@ -17,20 +18,37 @@
 	);
 	let displayColor = $derived(link.cachedTarget?.color ?? targetApp?.color ?? '#6b7280');
 	let displayAppName = $derived(link.cachedTarget?.appName ?? targetApp?.name ?? link.targetApp);
+	let deepLinkUrl = $derived(resolveDeepLink(link.targetApp, link.targetCollection, link.targetId));
 </script>
 
 <span class="manalink-badge" role="group">
-	<button
-		class="manalink-main"
-		onclick={() => onclick?.(link)}
-		title="{displayAppName}: {displayTitle}"
-	>
-		<span class="manalink-dot" style:background-color={displayColor}></span>
-		<span class="manalink-title">{displayTitle}</span>
-		{#if link.cachedTarget?.subtitle}
-			<span class="manalink-subtitle">{link.cachedTarget.subtitle}</span>
-		{/if}
-	</button>
+	{#if onclick}
+		<button
+			class="manalink-main"
+			onclick={() => onclick(link)}
+			title="{displayAppName}: {displayTitle}"
+		>
+			<span class="manalink-dot" style:background-color={displayColor}></span>
+			<span class="manalink-title">{displayTitle}</span>
+			{#if link.cachedTarget?.subtitle}
+				<span class="manalink-subtitle">{link.cachedTarget.subtitle}</span>
+			{/if}
+		</button>
+	{:else}
+		<a
+			class="manalink-main"
+			href={deepLinkUrl}
+			target="_blank"
+			rel="noopener"
+			title="{displayAppName}: {displayTitle}"
+		>
+			<span class="manalink-dot" style:background-color={displayColor}></span>
+			<span class="manalink-title">{displayTitle}</span>
+			{#if link.cachedTarget?.subtitle}
+				<span class="manalink-subtitle">{link.cachedTarget.subtitle}</span>
+			{/if}
+		</a>
+	{/if}
 	{#if onRemove}
 		<button class="manalink-remove" onclick={() => onRemove?.(link.pairId)} title="Link entfernen">
 			<svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -70,6 +88,8 @@
 		padding: 0.25rem 0.625rem;
 		border: none;
 		background: transparent;
+		text-decoration: none;
+		color: inherit;
 		cursor: pointer;
 		font-size: inherit;
 		line-height: inherit;

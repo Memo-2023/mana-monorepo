@@ -24,3 +24,6 @@ export {
 
 // Resolvers
 export { buildCachedData, isCacheStale } from './resolvers.js';
+
+// Deep Links
+export { resolveDeepLink } from './deep-links.js';
