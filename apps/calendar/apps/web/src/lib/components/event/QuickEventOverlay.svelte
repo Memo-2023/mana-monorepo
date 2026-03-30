@@ -27,6 +27,19 @@
 	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';
 	import { tick, onMount, onDestroy } from 'svelte';
+	import {
+		parseEventInput,
+		formatParsedEventPreview,
+		type ParsedEvent,
+	} from '$lib/utils/event-parser';
+	import {
+		estimateEventDuration,
+		detectConflicts,
+		type HistoricalEventData,
+		type DurationEstimate,
+		type ConflictResult,
+	} from '$lib/utils/event-estimator';
+	import { eventCollection } from '$lib/data/local-store';
 
 	// Portal action - moves element to body to escape stacking contexts
 	function portal(node: HTMLElement) {
@@ -238,6 +251,140 @@
 		});
 	});
 
+	// ─── NL Parser State ───────────────────────────────────
+	let parsePreview = $state('');
+	let parsedEvent = $state<ParsedEvent | null>(null);
+	let durationEstimate = $state<DurationEstimate | null>(null);
+	let conflictResult = $state<ConflictResult | null>(null);
+	let estimateDebounce: ReturnType<typeof setTimeout> | undefined;
+	let parserApplied = $state(false); // track if we already applied parser results
+
+	// Parse title input in create mode for NL detection
+	function parseTitle(text: string) {
+		if (isEditMode || !text.trim()) {
+			parsePreview = '';
+			parsedEvent = null;
+			durationEstimate = null;
+			conflictResult = null;
+			return;
+		}
+
+		const parsed = parseEventInput(text);
+		parsedEvent = parsed;
+		parsePreview = formatParsedEventPreview(parsed);
+
+		// Debounced estimation + conflict check
+		clearTimeout(estimateDebounce);
+		estimateDebounce = setTimeout(() => runSmartFeatures(parsed), 400);
+	}
+
+	async function runSmartFeatures(parsed: ParsedEvent) {
+		try {
+			const allEvents = await eventCollection.getAll();
+
+			// Duration estimation (only if no explicit duration in input)
+			if (!parsed.duration && parsed.title) {
+				const history: HistoricalEventData[] = allEvents.map((e) => ({
+					title: e.title,
+					calendarId: e.calendarId,
+					startDate: e.startDate,
+					endDate: e.endDate,
+					allDay: e.allDay,
+				}));
+				durationEstimate = estimateEventDuration(
+					{ title: parsed.title, calendarId: calendarId || undefined },
+					history
+				);
+			} else {
+				durationEstimate = null;
+			}
+
+			// Conflict detection (only if we have a start+end time)
+			if (parsed.startDate && parsed.endDate) {
+				conflictResult = detectConflicts(
+					parsed.startDate.toISOString(),
+					parsed.endDate.toISOString(),
+					allEvents.map((e) => ({
+						id: e.id,
+						title: e.title,
+						startDate: e.startDate,
+						endDate: e.endDate,
+						calendarId: e.calendarId,
+						allDay: e.allDay,
+					}))
+				);
+			} else {
+				conflictResult = null;
+			}
+		} catch {
+			durationEstimate = null;
+			conflictResult = null;
+		}
+	}
+
+	/** Apply parsed NL results to form fields */
+	function applyParsedToForm() {
+		if (!parsedEvent || parserApplied) return;
+
+		const parsed = parsedEvent;
+
+		// Set clean title (without NL tokens)
+		title = parsed.title;
+
+		// Apply calendar if matched
+		if (parsed.calendarName) {
+			const matchedCal = calendarsCtx.value.find(
+				(c) => c.name.toLowerCase() === parsed.calendarName!.toLowerCase()
+			);
+			if (matchedCal) {
+				calendarId = matchedCal.id;
+				eventsStore.updateDraftEvent({ calendarId: matchedCal.id });
+			}
+		}
+
+		// Apply date/time
+		if (parsed.startDate) {
+			startDateStr = format(parsed.startDate, 'yyyy-MM-dd');
+			startTimeStr = format(parsed.startDate, 'HH:mm');
+		}
+		if (parsed.endDate) {
+			endDateStr = format(parsed.endDate, 'yyyy-MM-dd');
+			endTimeStr = format(parsed.endDate, 'HH:mm');
+		}
+
+		// Apply all-day
+		if (parsed.isAllDay) {
+			isAllDay = true;
+		}
+
+		// Apply location
+		if (parsed.location) {
+			location = parsed.location;
+		}
+
+		// Apply recurrence
+		if (parsed.recurrenceRule) {
+			recurrenceRule = parsed.recurrenceRule;
+		}
+
+		// Update draft event with new times
+		updateDraftTimes();
+		parserApplied = true;
+
+		// Clear preview after applying
+		parsePreview = '';
+		durationEstimate = null;
+	}
+
+	function applyDurationEstimate() {
+		if (!durationEstimate || !parsedEvent?.startDate) return;
+		const endDate = new Date(parsedEvent.startDate.getTime() + durationEstimate.minutes * 60_000);
+		endDateStr = format(endDate, 'yyyy-MM-dd');
+		endTimeStr = format(endDate, 'HH:mm');
+		updateDraftTimes();
+		durationEstimate = null;
+	}
+
 	// Editable date/time strings (for form inputs)
 	let startDateStr = $state('');
 	let startTimeStr = $state('');
@@ -340,8 +487,10 @@
 	function handleTitleChange(e: Event) {
 		const target = e.target as HTMLInputElement;
 		title = target.value;
+		parserApplied = false; // reset on new input
 		if (!isEditMode) {
 			eventsStore.updateDraftEvent({ title: target.value });
+			parseTitle(target.value);
 		}
 	}
 
@@ -512,6 +661,12 @@
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
+
+		// Apply NL parser results to form before submitting (create mode only)
+		if (!isEditMode && parsedEvent && !parserApplied) {
+			applyParsedToForm();
+		}
+
 		if (!title.trim() || !calendarId) return;
 
 		submitting = true;
@@ -742,10 +897,29 @@
 					value={title}
 					oninput={handleTitleChange}
 					bind:this={titleInputRef}
-					placeholder="Titel hinzufügen"
+					placeholder="Titel hinzufügen (z.B. Meeting morgen 14 Uhr 1h @Arbeit)"
 					aria-label="Terminname"
 					required
 				/>
+				{#if parsePreview || durationEstimate || (conflictResult && conflictResult.hasConflict)}
+					<div class="nl-hints">
+						{#if parsePreview}
+							<span class="nl-preview">{parsePreview}</span>
+						{/if}
+						{#if durationEstimate}
+							<button type="button" class="nl-estimate" onclick={applyDurationEstimate}>
+								~{durationEstimate.minutes < 60
+									? `${durationEstimate.minutes}min`
+									: `${Math.floor(durationEstimate.minutes / 60)}h${durationEstimate.minutes % 60 ? ` ${durationEstimate.minutes % 60}min` : ''}`}
+							</button>
+						{/if}
+						{#if conflictResult && conflictResult.hasConflict}
+							<span class="nl-conflict">
+								Konflikt: {conflictResult.conflicts.map((c) => c.title).join(', ')}
+							</span>
+						{/if}
+					</div>
+				{/if}
 			</div>
 
 			<!-- Time display under title -->
@@ -1283,6 +1457,41 @@
 
 	.title-input::placeholder {
 		color: hsl(var(--color-muted-foreground));
+	}
+
+	.nl-hints {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 1.25rem 0.5rem;
+		font-size: 0.7rem;
+	}
+
+	.nl-preview {
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.nl-estimate {
+		display: inline-flex;
+		padding: 0.0625rem 0.4rem;
+		border: 1px dashed hsl(var(--color-primary) / 0.4);
+		background: hsl(var(--color-primary) / 0.08);
+		color: hsl(var(--color-primary));
+		border-radius: 9999px;
+		font-size: 0.65rem;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.nl-estimate:hover {
+		background: hsl(var(--color-primary) / 0.15);
+		border-color: hsl(var(--color-primary) / 0.6);
+	}
+
+	.nl-conflict {
+		color: hsl(var(--color-destructive, 0 84% 60%));
+		font-weight: 500;
 	}
 
 	.time-display {
