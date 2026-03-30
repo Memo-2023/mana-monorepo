@@ -179,9 +179,12 @@
 			<!-- Grid View -->
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each sortedItems as item (item.id)}
-					<button
+					<div
 						onclick={() => goto(`/items/${item.id}`)}
-						class="item-card group rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 text-left"
+						onkeydown={(e) => e.key === 'Enter' && goto(`/items/${item.id}`)}
+						role="button"
+						tabindex="0"
+						class="item-card group cursor-pointer rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 text-left"
 					>
 						<div class="flex items-start justify-between">
 							<h3 class="font-semibold text-[hsl(var(--foreground))]">{item.name}</h3>
@@ -205,7 +208,7 @@
 						>
 							{$_('common.delete')}
 						</button>
-					</button>
+					</div>
 				{/each}
 			</div>
 		{:else if viewStore.viewMode === 'table'}
