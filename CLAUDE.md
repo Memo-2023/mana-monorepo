@@ -54,7 +54,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **citycorners** | City guide for Konstanz | Web, Landing |
 | **inventar** | Inventory management | Web |
 | **traces** | City exploration | Backend, Mobile |
-| **taktik** | Time tracking | Web |
+| **times** | Time tracking | Web |
 | **uload** | URL shortener & link management | Server, Web, Landing |
 | **news** | AI news reader & personal library | Server, Web, Landing |
 | **wisekeep** | AI transcription & wisdom library | Server, Web, Landing |
@@ -585,7 +585,7 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | Photos | albums, albumItems, favorites, tags, photoTags | Done |
 | SkilltTree | skills, activities, achievements | Done |
 | CityCorners | locations, favorites | Done |
-| Taktik | clients, projects, timeEntries, tags, templates, settings | Done |
+| Times | clients, projects, timeEntries, tags, templates, settings | Done |
 | uLoad | links, tags, folders, linkTags | Done |
 | Calc | calculations, savedFormulas | Done |
 | ManaCore | userSettings, dashboardConfigs | Done |

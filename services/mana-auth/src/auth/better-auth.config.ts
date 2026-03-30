@@ -264,7 +264,7 @@ export function createBetterAuth(databaseUrl: string) {
 			'https://questions.mana.how',
 			'https://skilltree.mana.how',
 			'https://storage.mana.how',
-			'https://taktik.mana.how',
+			'https://times.mana.how',
 			'https://todo.mana.how',
 			'https://traces.mana.how',
 			'https://zitare.mana.how',

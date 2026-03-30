@@ -1,0 +1,14 @@
+{
+	"name": "times",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Times - Zeiterfassung & Timetracking",
+	"scripts": {
+		"dev": "pnpm --filter @times/web dev",
+		"dev:web": "pnpm --filter @times/web dev"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	},
+	"packageManager": "pnpm@9.15.0"
+}

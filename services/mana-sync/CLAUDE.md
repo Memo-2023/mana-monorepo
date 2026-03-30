@@ -192,4 +192,4 @@ services/mana-sync/
 
 ## Connected Apps (19)
 
-Todo, Calendar, Clock, Contacts, Chat, Questions, Mukke, Context, Photos, ManaDeck, Picture, Presi, Storage, Zitare, SkillTree, CityCorners, NutriPhi, Planta, Inventar, uLoad, Taktik, Calc
+Todo, Calendar, Clock, Contacts, Chat, Questions, Mukke, Context, Photos, ManaDeck, Picture, Presi, Storage, Zitare, SkillTree, CityCorners, NutriPhi, Planta, Inventar, uLoad, Times, Calc
