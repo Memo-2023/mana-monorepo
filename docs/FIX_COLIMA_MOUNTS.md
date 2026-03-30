@@ -82,3 +82,10 @@ Alle sollten "Up" und "healthy" zeigen.
 `colima start --mount /Volumes/ManaData:w` wurde nur das externe SSD
 gemountet, nicht das Home-Directory `/Users/mana`. Ohne diesen Mount
 sieht VirtioFS alle Host-Dateien als leere Verzeichnisse.
+
+## Root Cause Fix (2026-03-30)
+
+Das `startup.sh` Script wurde gefixt:
+- `colima delete --force` entfernt (loeschte Mount-Config bei jedem Hard-Shutdown-Recovery)
+- `--mount /Users/mana:w` wird jetzt immer bei `colima start` mitgegeben
+- Damit tritt das Problem bei kuenftigen Neustarts nicht mehr auf

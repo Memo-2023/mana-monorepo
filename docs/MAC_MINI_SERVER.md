@@ -114,13 +114,26 @@ cd ~/projects/manacore-monorepo
 
 ## CI/CD
 
-Ein GitHub Actions Self-Hosted Runner läuft auf dem Mac Mini und deployt automatisch bei Push auf `main`.
+Ein GitHub Actions Self-Hosted Runner läuft nativ auf dem Mac Mini und deployt automatisch bei Push auf `main`.
 
-- **Workflow:** `.github/workflows/cd-macmini.yml`
-- **Runner:** `mac-mini` (self-hosted, macOS, ARM64)
-- **Setup-Doku:** [MAC_MINI_RUNNER_SETUP.md](MAC_MINI_RUNNER_SETUP.md)
+- **CD Workflow:** `.github/workflows/cd-macmini.yml`
+- **Mirror Workflow:** `.github/workflows/mirror-to-forgejo.yml` (GitHub → Forgejo Sync)
+- **Runner:** `mac-mini` (self-hosted, macOS, ARM64, LaunchAgent)
+- **Manuelles Deployment:** https://github.com/Memo-2023/manacore-monorepo/actions/workflows/cd-macmini.yml
 
-Manuelles Deployment: https://github.com/Memo-2023/manacore-monorepo/actions/workflows/cd-macmini.yml
+### Forgejo (Mirror-Only)
+
+Forgejo v11 läuft als Push-Mirror von GitHub — kein CI/CD, nur Backup und Sichtbarkeit.
+
+- **URL:** https://git.mana.how (Port 3041)
+- **SSH:** Port 2222
+- **Sync:** Automatisch bei jedem Push auf `main` via GitHub Actions
+- **Kein Runner:** Forgejo Runner hat kein macOS-Binary, Docker-Runner kann nicht auf Host zugreifen
+
+```
+lokal → git push → GitHub → CD (nativer Runner) → Docker deploy
+                          → Mirror → Forgejo (Backup)
+```
 
 ## Wichtige Befehle
 
@@ -499,7 +512,7 @@ Alle 63 Container haben explizite `mem_limit` in `docker-compose.macmini.yml`:
 | Kategorie | Container | Budget |
 |-----------|-----------|--------|
 | Infrastructure | 6 | 1.712 MB |
-| Forgejo | 2 | 768 MB |
+| Forgejo (mirror-only) | 1 | 512 MB |
 | Core (Hono/Bun) | 5 | 704 MB |
 | Go Services | 5 | 384 MB |
 | Other Backend | 3 | 576 MB |
