@@ -19,6 +19,8 @@ jobs:
         run: |
           cd /Users/mana/projects/manacore-monorepo
 
+          # Stash any local changes so pull never fails
+          git stash --quiet 2>/dev/null || true
           git pull origin main
 
           # Push to Forgejo via localhost SSH (runner is on the Mac Mini)
