@@ -82,12 +82,11 @@ scrape_configs:
         target_label: "tier"
         replacement: "other"
 
-      # Drop monitoring container logs to save space (they're noisy)
-      - source_labels: ["tier"]
-        regex: "monitoring"
-        action: drop
-
     pipeline_stages:
+      # Drop monitoring container logs to save space (they're noisy)
+      - match:
+          selector: '{tier="monitoring"}'
+          action: drop
       # Try to parse JSON logs (Go services, Hono services)
       - json:
           expressions:
