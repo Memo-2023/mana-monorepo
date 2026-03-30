@@ -44,6 +44,7 @@
 	"dependencies": {
 		"@manacore/credits": "workspace:^",
 		"@manacore/local-store": "workspace:*",
+		"@manacore/shared-links": "workspace:*",
 		"@manacore/qr-export": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",
 		"@manacore/shared-auth-stores": "workspace:*",

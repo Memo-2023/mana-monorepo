@@ -9,6 +9,7 @@
 	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
+	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { manacoreStore } from '$lib/data/local-store';
 	import {
 		todoReader,
@@ -220,6 +221,7 @@
 		await Promise.all([
 			manacoreStore.initialize(),
 			tagLocalStore.initialize(),
+			linkLocalStore.initialize(),
 			// Cross-app readers (read-only, no sync — owning apps handle sync)
 			todoReader.initialize(),
 			calendarReader.initialize(),
@@ -239,6 +241,7 @@
 		const getToken = () => authStore.getValidToken();
 		manacoreStore.startSync(getToken);
 		tagMutations.startSync(getToken);
+		linkMutations.startSync(getToken);
 
 		// Initialize dashboard from IndexedDB
 		await dashboardStore.initialize();

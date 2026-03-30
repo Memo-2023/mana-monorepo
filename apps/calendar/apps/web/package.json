@@ -43,6 +43,7 @@
 	},
 	"dependencies": {
 		"@calendar/shared": "workspace:*",
+		"@manacore/shared-links": "workspace:*",
 		"@manacore/shared-api-client": "workspace:*",
 		"@manacore/shared-app-onboarding": "workspace:*",
 		"@manacore/shared-auth": "workspace:*",

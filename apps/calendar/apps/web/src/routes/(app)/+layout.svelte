@@ -29,6 +29,7 @@
 		tagMutations,
 		useAllTags as useAllSharedTags,
 	} from '@manacore/shared-stores';
+	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { useAllCalendars, useAllEvents, getDefaultCalendar } from '$lib/data/queries';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
@@ -449,7 +450,11 @@
 
 	async function handleAuthReady() {
 		// Initialize local-first databases (opens IndexedDB, seeds guest data)
-		await Promise.all([calendarStore.initialize(), tagLocalStore.initialize()]);
+		await Promise.all([
+			calendarStore.initialize(),
+			tagLocalStore.initialize(),
+			linkLocalStore.initialize(),
+		]);
 
 		// Initialize split-panel from URL/localStorage
 		splitPanel.initialize();
@@ -464,6 +469,7 @@
 			const getToken = () => authStore.getValidToken();
 			calendarStore.startSync(getToken);
 			tagMutations.startSync(getToken);
+			linkMutations.startSync(getToken);
 
 			// Load user settings (requires auth)
 			await userSettings.load();

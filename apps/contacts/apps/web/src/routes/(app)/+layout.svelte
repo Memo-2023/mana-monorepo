@@ -52,6 +52,7 @@
 		tagMutations,
 		useAllTags as useAllSharedTags,
 	} from '@manacore/shared-stores';
+	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { contactsOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -305,13 +306,18 @@
 
 	async function handleAuthReady() {
 		// Initialize local-first databases (opens IndexedDB, seeds guest data)
-		await Promise.all([contactsLocalStore.initialize(), tagLocalStore.initialize()]);
+		await Promise.all([
+			contactsLocalStore.initialize(),
+			tagLocalStore.initialize(),
+			linkLocalStore.initialize(),
+		]);
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
 			const getToken = () => authStore.getValidToken();
 			contactsLocalStore.startSync(getToken);
 			tagMutations.startSync(getToken);
+			linkMutations.startSync(getToken);
 		}
 
 		// Initialize split-panel from URL/localStorage
