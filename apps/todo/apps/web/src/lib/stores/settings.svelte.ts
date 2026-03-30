@@ -34,6 +34,10 @@ export interface TodoAppSettings extends Record<string, unknown> {
 	dailyDigestEnabled: boolean;
 	overdueNotifications: boolean;
 
+	// Smart Duration
+	smartDurationEnabled: boolean;
+	defaultTaskDuration: number; // minutes, auto-learned or manual
+
 	// Productivity
 	focusMode: boolean;
 	pomodoroEnabled: boolean;
@@ -71,6 +75,10 @@ const DEFAULT_SETTINGS: TodoAppSettings = {
 	defaultReminderMinutes: null,
 	dailyDigestEnabled: false,
 	overdueNotifications: true,
+
+	// Smart Duration
+	smartDurationEnabled: true,
+	defaultTaskDuration: 30, // 30 min default, auto-learned over time
 
 	// Productivity
 	focusMode: false,
@@ -147,6 +155,12 @@ export const todoSettings = {
 	},
 	get overdueNotifications() {
 		return baseStore.settings.overdueNotifications;
+	},
+	get smartDurationEnabled() {
+		return baseStore.settings.smartDurationEnabled;
+	},
+	get defaultTaskDuration() {
+		return baseStore.settings.defaultTaskDuration;
 	},
 	get focusMode() {
 		return baseStore.settings.focusMode;

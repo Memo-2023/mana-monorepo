@@ -36,6 +36,7 @@ export interface CalendarAppSettings extends Record<string, unknown> {
 
 	// Event defaults
 	defaultEventDuration: number;
+	smartDurationEnabled: boolean;
 	defaultReminder: number;
 
 	// Voice input settings
@@ -67,6 +68,7 @@ const DEFAULT_SETTINGS: CalendarAppSettings = {
 	showBirthdays: true,
 	showBirthdayAge: true,
 	defaultEventDuration: 60,
+	smartDurationEnabled: true,
 	defaultReminder: 15,
 	sttLanguage: 'de',
 };
@@ -202,6 +204,9 @@ export const settingsStore = {
 	},
 	get defaultEventDuration() {
 		return baseStore.settings.defaultEventDuration;
+	},
+	get smartDurationEnabled() {
+		return baseStore.settings.smartDurationEnabled;
 	},
 	get defaultReminder() {
 		return baseStore.settings.defaultReminder;

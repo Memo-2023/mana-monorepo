@@ -27,6 +27,7 @@ export const tasksStore = {
 		labelIds?: string[];
 		subtasks?: Subtask[];
 		recurrenceRule?: string;
+		estimatedDuration?: number;
 	}) {
 		error = null;
 		try {
@@ -39,6 +40,7 @@ export const tasksStore = {
 				priority: data.priority ?? 'medium',
 				isCompleted: false,
 				dueDate: data.dueDate ?? null,
+				estimatedDuration: data.estimatedDuration ?? null,
 				order: count,
 				recurrenceRule: data.recurrenceRule ?? null,
 				subtasks: data.subtasks,

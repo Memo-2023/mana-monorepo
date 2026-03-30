@@ -14,6 +14,7 @@
 	import { estimateDuration, type CompletedTaskData } from '$lib/utils/time-estimator';
 	import { taskCollection } from '$lib/data/local-store';
 	import { labelCollection } from '$lib/data/local-store';
+	import { todoSettings } from '$lib/stores/settings.svelte';
 
 	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import type { TaskPriority } from '@todo/shared';
@@ -38,7 +39,7 @@
 	// Parser preview
 	let parsePreview = $state('');
 	let parsedTaskCount = $state(0);
-	let durationEstimate = $state<{ minutes: number; confidence: string } | null>(null);
+	let autoEstimatedDuration = $state<number | null>(null); // auto-applied, shown in preview
 	let estimateDebounce: ReturnType<typeof setTimeout> | undefined;
 
 	// Quick date options
@@ -67,7 +68,7 @@
 		if (!text) {
 			parsePreview = '';
 			parsedTaskCount = 0;
-			durationEstimate = null;
+			autoEstimatedDuration = null;
 			return;
 		}
 
@@ -83,16 +84,21 @@
 			parsePreview = previews.join(' · ');
 		}
 
-		// Debounced duration estimation
+		// Auto-estimate duration if enabled and no explicit duration
 		clearTimeout(estimateDebounce);
-		if (tasks.length === 1 && !tasks[0].estimatedDuration) {
-			estimateDebounce = setTimeout(() => runEstimate(tasks[0]), 500);
+		if (todoSettings.smartDurationEnabled && tasks.length === 1 && !tasks[0].estimatedDuration) {
+			estimateDebounce = setTimeout(() => runEstimate(tasks[0]), 400);
 		} else {
-			durationEstimate = null;
+			autoEstimatedDuration = null;
 		}
 	});
 
 	async function runEstimate(parsed: ReturnType<typeof parseMultiTaskInput>[0]) {
+		if (!todoSettings.smartDurationEnabled) {
+			autoEstimatedDuration = null;
+			return;
+		}
+
 		try {
 			const allTasks = await taskCollection.getAll();
 			const completed: CompletedTaskData[] = allTasks
@@ -115,9 +121,10 @@
 				completed
 			);
 
-			durationEstimate = estimate;
+			// Auto-apply: use estimate if available, otherwise fall back to default
+			autoEstimatedDuration = estimate?.minutes ?? todoSettings.defaultTaskDuration;
 		} catch {
-			durationEstimate = null;
+			autoEstimatedDuration = todoSettings.defaultTaskDuration;
 		}
 	}
 
@@ -148,6 +155,12 @@
 			for (const parsed of parsedTasks) {
 				const resolved = resolveTaskIds(parsed, projects, labels);
 
+				// Duration: explicit from parser > auto-estimated > default (if enabled)
+				const duration =
+					resolved.estimatedDuration ??
+					(todoSettings.smartDurationEnabled ? autoEstimatedDuration : undefined) ??
+					undefined;
+
 				await tasksStore.createTask({
 					title: resolved.title,
 					projectId: resolved.projectId ?? selectedProjectId,
@@ -155,6 +168,7 @@
 					priority: resolved.priority ?? selectedPriority,
 					labelIds: resolved.labelIds.length > 0 ? resolved.labelIds : undefined,
 					recurrenceRule: resolved.recurrenceRule,
+					estimatedDuration: duration,
 					subtasks: resolved.subtasks?.map((s, i) => ({
 						id: crypto.randomUUID(),
 						title: s,
@@ -168,7 +182,7 @@
 			inputValue = '';
 			parsePreview = '';
 			parsedTaskCount = 0;
-			durationEstimate = null;
+			autoEstimatedDuration = null;
 			selectedDate = new Date();
 			selectedPriority = 'medium';
 			if (viewStore.currentView !== 'project') {
@@ -181,13 +195,6 @@
 			requestAnimationFrame(() => {
 				inputRef?.focus();
 			});
-		}
-	}
-
-	function applyEstimate() {
-		if (durationEstimate) {
-			inputValue = `${inputValue.trim()} ${durationEstimate.minutes}min`;
-			durationEstimate = null;
 		}
 	}
 
@@ -244,17 +251,14 @@
 <svelte:window onclick={closeAllPickers} />
 
 <form onsubmit={handleSubmit} class="quick-add-form">
-	<!-- Parse preview + duration estimate -->
-	{#if parsePreview || durationEstimate}
+	<!-- Parse preview + auto-duration -->
+	{#if parsePreview || autoEstimatedDuration}
 		<div class="parse-preview">
 			{#if parsePreview}
 				<span class="preview-text">{parsePreview}</span>
 			{/if}
-			{#if durationEstimate}
-				<button type="button" class="estimate-btn" onclick={applyEstimate}>
-					<span class="estimate-icon">~</span>
-					{formatDuration(durationEstimate.minutes)}
-				</button>
+			{#if autoEstimatedDuration}
+				<span class="auto-duration">~{formatDuration(autoEstimatedDuration)}</span>
 			{/if}
 		</div>
 	{/if}
@@ -462,27 +466,13 @@
 		opacity: 0.8;
 	}
 
-	.estimate-btn {
+	.auto-duration {
 		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.125rem 0.5rem;
-		border: 1px dashed rgba(139, 92, 246, 0.4);
+		padding: 0.0625rem 0.4rem;
 		background: rgba(139, 92, 246, 0.08);
 		color: #8b5cf6;
 		border-radius: 9999px;
-		font-size: 0.7rem;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.estimate-btn:hover {
-		background: rgba(139, 92, 246, 0.15);
-		border-color: rgba(139, 92, 246, 0.6);
-	}
-
-	.estimate-icon {
-		font-weight: 600;
+		font-size: 0.65rem;
 	}
 
 	/* Mobile: Fixed at bottom */

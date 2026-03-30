@@ -614,6 +614,23 @@
 
 				<div class="setting-item">
 					<div class="setting-info">
+						<span class="setting-label">Smarte Dauer</span>
+						<span class="setting-description"
+							>Dauer automatisch aus vergangenen Terminen lernen</span
+						>
+					</div>
+					<label class="toggle-wrapper">
+						<input
+							type="checkbox"
+							checked={settingsStore.smartDurationEnabled}
+							onchange={() =>
+								settingsStore.set('smartDurationEnabled', !settingsStore.smartDurationEnabled)}
+						/>
+					</label>
+				</div>
+
+				<div class="setting-item">
+					<div class="setting-info">
 						<span class="setting-label">{$_('settings.defaultReminder')}</span>
 						<span class="setting-description">{$_('settings.defaultReminderDesc')}</span>
 					</div>

@@ -51,6 +51,17 @@
 		{ value: 1440, label: '1 Tag' },
 	];
 
+	const durationOptions = [
+		{ value: '5', label: '5 min' },
+		{ value: '10', label: '10 min' },
+		{ value: '15', label: '15 min' },
+		{ value: '30', label: '30 min' },
+		{ value: '45', label: '45 min' },
+		{ value: '60', label: '1 Stunde' },
+		{ value: '90', label: '1,5 Stunden' },
+		{ value: '120', label: '2 Stunden' },
+	];
+
 	// Project options for quick add (computed)
 	let projectOptions = $derived([
 		{ value: null, label: 'Inbox' },
@@ -233,6 +244,45 @@
 					</svg>
 				{/snippet}
 			</SettingsNumberInput>
+
+			<SettingsToggle
+				label="Smarte Dauer"
+				description="Dauer automatisch aus erledigten Tasks lernen und vorschlagen"
+				isOn={todoSettings.smartDurationEnabled}
+				onToggle={(v) => todoSettings.set('smartDurationEnabled', v)}
+			>
+				{#snippet icon()}
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 10V3L4 14h7v7l9-11h-7z"
+						/>
+					</svg>
+				{/snippet}
+			</SettingsToggle>
+
+			{#if todoSettings.smartDurationEnabled}
+				<SettingsSelect
+					label="Standard-Dauer"
+					description="Fallback wenn keine Historie vorhanden"
+					options={durationOptions}
+					value={String(todoSettings.defaultTaskDuration)}
+					onchange={(v) => todoSettings.set('defaultTaskDuration', Number(v))}
+				>
+					{#snippet icon()}
+						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					{/snippet}
+				</SettingsSelect>
+			{/if}
 
 			<SettingsToggle
 				label="Löschen bestätigen"

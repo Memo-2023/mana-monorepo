@@ -254,7 +254,7 @@
 	// ─── NL Parser State ───────────────────────────────────
 	let parsePreview = $state('');
 	let parsedEvent = $state<ParsedEvent | null>(null);
-	let durationEstimate = $state<DurationEstimate | null>(null);
+	let autoEstimatedDuration = $state<number | null>(null);
 	let conflictResult = $state<ConflictResult | null>(null);
 	let estimateDebounce: ReturnType<typeof setTimeout> | undefined;
 	let parserApplied = $state(false); // track if we already applied parser results
@@ -264,7 +264,7 @@
 		if (isEditMode || !text.trim()) {
 			parsePreview = '';
 			parsedEvent = null;
-			durationEstimate = null;
+			autoEstimatedDuration = null;
 			conflictResult = null;
 			return;
 		}
@@ -282,8 +282,8 @@
 		try {
 			const allEvents = await eventCollection.getAll();
 
-			// Duration estimation (only if no explicit duration in input)
-			if (!parsed.duration && parsed.title) {
+			// Auto-estimate duration (only if no explicit duration and smart duration enabled)
+			if (settingsStore.smartDurationEnabled && !parsed.duration && parsed.title) {
 				const history: HistoricalEventData[] = allEvents.map((e) => ({
 					title: e.title,
 					calendarId: e.calendarId,
@@ -291,12 +291,13 @@
 					endDate: e.endDate,
 					allDay: e.allDay,
 				}));
-				durationEstimate = estimateEventDuration(
+				const estimate = estimateEventDuration(
 					{ title: parsed.title, calendarId: calendarId || undefined },
 					history
 				);
+				autoEstimatedDuration = estimate?.minutes ?? settingsStore.defaultEventDuration;
 			} else {
-				durationEstimate = null;
+				autoEstimatedDuration = null;
 			}
 
 			// Conflict detection (only if we have a start+end time)
@@ -317,7 +318,7 @@
 				conflictResult = null;
 			}
 		} catch {
-			durationEstimate = null;
+			autoEstimatedDuration = null;
 			conflictResult = null;
 		}
 	}
@@ -367,22 +368,25 @@
 			recurrenceRule = parsed.recurrenceRule;
 		}
 
+		// Auto-apply estimated duration to endDate if no explicit end was parsed
+		if (
+			settingsStore.smartDurationEnabled &&
+			!parsed.duration &&
+			parsed.startDate &&
+			autoEstimatedDuration
+		) {
+			const endDate = new Date(parsed.startDate.getTime() + autoEstimatedDuration * 60_000);
+			endDateStr = format(endDate, 'yyyy-MM-dd');
+			endTimeStr = format(endDate, 'HH:mm');
+		}
+
 		// Update draft event with new times
 		updateDraftTimes();
 		parserApplied = true;
 
 		// Clear preview after applying
 		parsePreview = '';
-		durationEstimate = null;
-	}
-
-	function applyDurationEstimate() {
-		if (!durationEstimate || !parsedEvent?.startDate) return;
-		const endDate = new Date(parsedEvent.startDate.getTime() + durationEstimate.minutes * 60_000);
-		endDateStr = format(endDate, 'yyyy-MM-dd');
-		endTimeStr = format(endDate, 'HH:mm');
-		updateDraftTimes();
-		durationEstimate = null;
+		autoEstimatedDuration = null;
 	}
 
 	// Editable date/time strings (for form inputs)
@@ -901,17 +905,17 @@
 					aria-label="Terminname"
 					required
 				/>
-				{#if parsePreview || durationEstimate || (conflictResult && conflictResult.hasConflict)}
+				{#if parsePreview || autoEstimatedDuration || (conflictResult && conflictResult.hasConflict)}
 					<div class="nl-hints">
 						{#if parsePreview}
 							<span class="nl-preview">{parsePreview}</span>
 						{/if}
-						{#if durationEstimate}
-							<button type="button" class="nl-estimate" onclick={applyDurationEstimate}>
-								~{durationEstimate.minutes < 60
-									? `${durationEstimate.minutes}min`
-									: `${Math.floor(durationEstimate.minutes / 60)}h${durationEstimate.minutes % 60 ? ` ${durationEstimate.minutes % 60}min` : ''}`}
-							</button>
+						{#if autoEstimatedDuration}
+							<span class="nl-estimate">
+								~{autoEstimatedDuration < 60
+									? `${autoEstimatedDuration}min`
+									: `${Math.floor(autoEstimatedDuration / 60)}h${autoEstimatedDuration % 60 ? ` ${autoEstimatedDuration % 60}min` : ''}`}
+							</span>
 						{/if}
 						{#if conflictResult && conflictResult.hasConflict}
 							<span class="nl-conflict">
@@ -1475,18 +1479,10 @@
 	.nl-estimate {
 		display: inline-flex;
 		padding: 0.0625rem 0.4rem;
-		border: 1px dashed hsl(var(--color-primary) / 0.4);
 		background: hsl(var(--color-primary) / 0.08);
 		color: hsl(var(--color-primary));
 		border-radius: 9999px;
 		font-size: 0.65rem;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.nl-estimate:hover {
-		background: hsl(var(--color-primary) / 0.15);
-		border-color: hsl(var(--color-primary) / 0.6);
 	}
 
 	.nl-conflict {
