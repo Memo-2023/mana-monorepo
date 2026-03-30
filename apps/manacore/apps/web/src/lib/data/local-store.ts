@@ -8,6 +8,7 @@
 
 import { createLocalStore, type BaseRecord } from '@manacore/local-store';
 import type { WidgetConfig } from '$lib/types/dashboard';
+import type { TileNode } from '$lib/types/tiling';
 import { guestSettings, guestDashboardConfigs } from './guest-seed.js';
 
 // ─── Types ──────────────────────────────────────────────────
@@ -28,6 +29,8 @@ export interface LocalDashboardConfig extends BaseRecord {
 	widgets: WidgetConfig[];
 	gridColumns: number;
 	lastModified: string;
+	/** Tiling layout tree (binary tree of splits and leaves). */
+	tiling?: TileNode;
 }
 
 // ─── Store ──────────────────────────────────────────────────

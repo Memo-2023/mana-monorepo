@@ -6,6 +6,7 @@
  */
 
 import type { LocalUserSettings, LocalDashboardConfig } from './local-store';
+import { DEFAULT_TILING_ROOT } from '$lib/config/default-tiling';
 
 // ─── Default Settings ──────────────────────────────────────
 
@@ -54,5 +55,6 @@ export const guestDashboardConfigs: LocalDashboardConfig[] = [
 		],
 		gridColumns: 12,
 		lastModified: new Date().toISOString(),
+		tiling: DEFAULT_TILING_ROOT,
 	},
 ];

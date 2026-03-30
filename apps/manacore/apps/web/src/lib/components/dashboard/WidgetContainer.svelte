@@ -13,23 +13,7 @@
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
 
-	// Widget components
-	import CreditsWidget from './widgets/CreditsWidget.svelte';
-	import QuickActionsWidget from './widgets/QuickActionsWidget.svelte';
-	import TransactionsWidget from './widgets/TransactionsWidget.svelte';
-	import TasksTodayWidget from './widgets/TasksTodayWidget.svelte';
-	import TasksUpcomingWidget from './widgets/TasksUpcomingWidget.svelte';
-	import CalendarEventsWidget from './widgets/CalendarEventsWidget.svelte';
-	import ChatRecentWidget from './widgets/ChatRecentWidget.svelte';
-	import ContactsFavoritesWidget from './widgets/ContactsFavoritesWidget.svelte';
-	import ZitareQuoteWidget from './widgets/ZitareQuoteWidget.svelte';
-	import PictureRecentWidget from './widgets/PictureRecentWidget.svelte';
-	import ManadeckProgressWidget from './widgets/ManadeckProgressWidget.svelte';
-	import ClockTimersWidget from './widgets/ClockTimersWidget.svelte';
-	import StorageUsageWidget from './widgets/StorageUsageWidget.svelte';
-	import MukkeLibraryWidget from './widgets/MukkeLibraryWidget.svelte';
-	import PresiDecksWidget from './widgets/PresiDecksWidget.svelte';
-	import ContextDocsWidget from './widgets/ContextDocsWidget.svelte';
+	import { widgetComponents } from './widget-registry';
 
 	interface Props {
 		widget: WidgetConfig;
@@ -56,26 +40,6 @@
 		ManaCoreEvents.widgetRemoved(widget.type);
 		dashboardStore.removeWidget(widget.id);
 	}
-
-	// Widget component mapping
-	const widgetComponents = {
-		credits: CreditsWidget,
-		'quick-actions': QuickActionsWidget,
-		transactions: TransactionsWidget,
-		'tasks-today': TasksTodayWidget,
-		'tasks-upcoming': TasksUpcomingWidget,
-		'calendar-events': CalendarEventsWidget,
-		'chat-recent': ChatRecentWidget,
-		'contacts-favorites': ContactsFavoritesWidget,
-		'zitare-quote': ZitareQuoteWidget,
-		'picture-recent': PictureRecentWidget,
-		'manadeck-progress': ManadeckProgressWidget,
-		'clock-timers': ClockTimersWidget,
-		'storage-usage': StorageUsageWidget,
-		'mukke-library': MukkeLibraryWidget,
-		'presi-decks': PresiDecksWidget,
-		'context-docs': ContextDocsWidget,
-	} as const;
 
 	const WidgetComponent = $derived(widgetComponents[widget.type]);
 </script>
