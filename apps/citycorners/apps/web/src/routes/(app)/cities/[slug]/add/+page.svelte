@@ -27,6 +27,8 @@
 	let error = $state('');
 	let geocoding = $state(false);
 	let imageError = $state(false);
+	let searchQuery = $state('');
+	let searching = $state(false);
 
 	const categories = [
 		{ value: 'sight', labelKey: 'category.sight' },
