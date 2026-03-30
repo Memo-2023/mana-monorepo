@@ -42,13 +42,7 @@
 
 /* Task item transitions */
 .task-item {
-	transition:
-		transform 0.15s ease,
-		box-shadow 0.15s ease;
-}
-
-.task-item:hover {
-	transform: translateY(-1px);
+	transition: none;
 }
 
 /* Checkbox animations */
@@ -134,4 +128,64 @@
 .project-item.active {
 	background-color: var(--color-secondary);
 	border-left: 3px solid var(--color-primary);
+}
+
+/* Debug Mode - Toggle with Ctrl+Shift+D */
+.debug-mode * {
+	outline: 1px solid rgba(255, 0, 0, 0.3) !important;
+}
+
+.debug-mode div {
+	outline-color: rgba(255, 0, 0, 0.4) !important;
+}
+
+.debug-mode section {
+	outline-color: rgba(0, 100, 255, 0.5) !important;
+}
+
+.debug-mode nav {
+	outline-color: rgba(0, 180, 0, 0.5) !important;
+}
+
+.debug-mode main {
+	outline-color: rgba(255, 140, 0, 0.5) !important;
+}
+
+.debug-mode header,
+.debug-mode footer {
+	outline-color: rgba(128, 0, 128, 0.5) !important;
+}
+
+.debug-mode button {
+	outline-color: rgba(255, 220, 0, 0.6) !important;
+}
+
+.debug-mode input,
+.debug-mode textarea,
+.debug-mode select {
+	outline-color: rgba(139, 92, 246, 0.6) !important;
+}
+
+.debug-mode a {
+	outline-color: rgba(236, 72, 153, 0.5) !important;
+}
+
+.debug-mode img,
+.debug-mode svg {
+	outline-color: rgba(0, 200, 200, 0.5) !important;
+}
+
+.debug-mode ul,
+.debug-mode ol,
+.debug-mode li {
+	outline-color: rgba(234, 179, 8, 0.4) !important;
+}
+
+.debug-mode p,
+.debug-mode span,
+.debug-mode h1,
+.debug-mode h2,
+.debug-mode h3,
+.debug-mode h4 {
+	outline-color: rgba(107, 114, 128, 0.3) !important;
 }

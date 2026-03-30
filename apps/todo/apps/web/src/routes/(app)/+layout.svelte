@@ -602,10 +602,10 @@
 	}
 
 	.content-wrapper {
-		max-width: 900px;
+		max-width: none;
 		margin-left: auto;
 		margin-right: auto;
-		padding: 0.5rem;
+		padding: 0;
 	}
 
 	.content-wrapper.full-width {
@@ -615,9 +615,6 @@
 	}
 
 	@media (min-width: 640px) {
-		.content-wrapper {
-			padding: 1rem;
-		}
 		.content-wrapper.full-width {
 			padding-left: 0;
 			padding-right: 0;
@@ -625,19 +622,16 @@
 	}
 
 	@media (min-width: 1024px) {
-		.content-wrapper {
-			padding: 2rem;
-		}
 		.content-wrapper.full-width {
 			padding-left: 0;
 			padding-right: 0;
 		}
 	}
 
-	/* Mobile: More space for QuickInputBar + PillNav */
+	/* Mobile: Space for QuickInputBar + PillNav */
 	@media (max-width: 768px) {
 		.main-content {
-			padding-bottom: calc(150px + env(safe-area-inset-bottom));
+			padding-bottom: calc(100px + env(safe-area-inset-bottom));
 		}
 	}
 

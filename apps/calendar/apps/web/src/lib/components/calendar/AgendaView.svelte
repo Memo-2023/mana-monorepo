@@ -103,6 +103,41 @@
 		}
 	}
 
+	// Inline title editing
+	function handleTitleBlur(event: CalendarEvent, el: HTMLSpanElement) {
+		const trimmed = (el.textContent || '').trim();
+		if (trimmed && trimmed !== event.title) {
+			eventsStore.updateEvent(event.id, { title: trimmed });
+		} else {
+			el.textContent = event.title;
+		}
+	}
+
+	function handleTitleKeydown(e: KeyboardEvent, event: CalendarEvent) {
+		const target = e.target as HTMLSpanElement;
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			target.blur();
+		} else if (e.key === 'Escape') {
+			target.textContent = event.title;
+			target.blur();
+		} else if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+			const direction = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey) ? -1 : 1;
+			e.preventDefault();
+			const allTitles = Array.from(
+				document.querySelectorAll<HTMLElement>('.agenda-event-title[contenteditable]')
+			);
+			const currentIndex = allTitles.indexOf(target);
+			const next = allTitles[currentIndex + direction];
+			target.blur();
+			if (next) {
+				next.focus();
+			} else {
+				document.querySelector<HTMLInputElement>('.quick-input-bar input')?.focus();
+			}
+		}
+	}
+
 	// Context menu state
 	let contextMenuVisible = $state(false);
 	let contextMenuX = $state(0);
@@ -180,9 +215,9 @@
 
 					<div class="events-for-date">
 						{#each group.events as event}
-							<button
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div
 								class="event-item"
-								onclick={() => handleEventClick(event)}
 								oncontextmenu={(e) => {
 									e.preventDefault();
 									e.stopPropagation();
@@ -207,7 +242,18 @@
 											)}
 										{/if}
 									</div>
-									<div class="event-title">{event.title}</div>
+									<!-- svelte-ignore a11y_no_static_element_interactions -->
+									<span
+										class="event-title agenda-event-title"
+										contenteditable="true"
+										role="textbox"
+										spellcheck="true"
+										onkeydown={(e) => handleTitleKeydown(e, event)}
+										onblur={(e) => handleTitleBlur(event, e.target as HTMLSpanElement)}
+										onclick={(e) => e.stopPropagation()}
+									>
+										{event.title}
+									</span>
 									{#if event.location}
 										<div class="event-location">
 											<svg
@@ -233,15 +279,22 @@
 										</div>
 									{/if}
 								</div>
-								<svg class="chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 5l7 7-7 7"
-									/>
-								</svg>
-							</button>
+								<button
+									class="expand-btn"
+									onclick={() => handleEventClick(event)}
+									title="Details öffnen"
+									aria-label="Details öffnen"
+								>
+									<svg class="chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M9 5l7 7-7 7"
+										/>
+									</svg>
+								</button>
+							</div>
 						{/each}
 					</div>
 				</div>
@@ -329,25 +382,14 @@
 
 	.event-item {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: 0.75rem;
 		padding: 0.75rem 1rem;
-		cursor: pointer;
 		border: 1px solid hsl(var(--color-border));
 		border-radius: var(--radius-md);
 		text-align: left;
 		width: 100%;
 		background: hsl(var(--color-surface));
-		transition:
-			transform 150ms ease,
-			box-shadow 150ms ease,
-			border-color 150ms ease;
-	}
-
-	.event-item:hover {
-		transform: translateX(4px);
-		border-color: hsl(var(--color-border-hover, var(--color-border)));
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	}
 
 	.color-bar {
@@ -376,9 +418,13 @@
 		font-weight: 500;
 		font-size: 0.9375rem;
 		color: hsl(var(--color-foreground));
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		white-space: normal;
+		word-break: break-word;
+		cursor: text;
+		outline: none;
+		border-radius: 0.25rem;
+		padding: 0.0625rem 0.125rem;
+		margin: -0.0625rem -0.125rem;
 	}
 
 	.event-location {
@@ -396,15 +442,30 @@
 		flex-shrink: 0;
 	}
 
+	.expand-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.375rem;
+		margin-top: 0.25rem;
+		border: none;
+		background: transparent;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		flex-shrink: 0;
+		opacity: 0.4;
+		transition: opacity 0.15s;
+	}
+
+	.expand-btn:hover {
+		opacity: 1;
+		background: hsl(var(--color-surface-hover, var(--color-surface)));
+	}
+
 	.chevron-icon {
 		width: 1rem;
 		height: 1rem;
 		color: hsl(var(--color-muted-foreground));
-		opacity: 0.5;
 		flex-shrink: 0;
-	}
-
-	.event-item:hover .chevron-icon {
-		opacity: 1;
 	}
 </style>

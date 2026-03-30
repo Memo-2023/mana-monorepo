@@ -317,14 +317,10 @@
 
 <style>
 	.task-list {
-		min-height: 40px;
+		min-height: 2.5rem;
 		padding: 0;
 		border-radius: 0;
 		transition: background-color 0.15s ease;
-	}
-
-	.task-list :global(.task-item-wrapper:last-child .task-item) {
-		border-bottom: none;
 	}
 
 	.task-list.empty {
@@ -362,7 +358,7 @@
 	}
 
 	.dnd-shadow-placeholder {
-		min-height: 3rem;
+		min-height: 2.5rem;
 	}
 
 	/* Shadow placeholder (where dragged item will land) */

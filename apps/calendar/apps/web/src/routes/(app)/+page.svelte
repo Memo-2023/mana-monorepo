@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
+	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { todosStore } from '$lib/stores/todos.svelte';
@@ -141,6 +142,23 @@
 <svelte:head>
 	<title>{$_('app.name')}</title>
 </svelte:head>
+
+<svelte:window
+	onkeydown={(e) => {
+		if (viewStore.viewType !== 'agenda') return;
+		const target = e.target as HTMLElement;
+		const isInQuickInput = target.closest('.quick-input-bar');
+		if (isInQuickInput && (e.key === 'ArrowUp' || (e.key === 'Tab' && !e.shiftKey))) {
+			const firstTitle = document.querySelector<HTMLElement>(
+				'.agenda-event-title[contenteditable]'
+			);
+			if (firstTitle) {
+				e.preventDefault();
+				firstTitle.focus();
+			}
+		}
+	}}
+/>
 
 <div class="service-banners">
 	<ServiceStatusBanner

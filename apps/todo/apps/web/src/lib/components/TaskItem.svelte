@@ -180,30 +180,42 @@
 	}
 
 	// Inline title editing
-	let isEditingTitle = $state(false);
-	let editingTitle = $state('');
-	let titleEditRef = $state<HTMLInputElement | null>(null);
-
-	function handleTitleClick(e: MouseEvent) {
-		e.stopPropagation();
-		isEditingTitle = true;
-		editingTitle = task.title;
-		setTimeout(() => titleEditRef?.focus(), 0);
-	}
+	let titleRef = $state<HTMLSpanElement | null>(null);
 
 	function handleTitleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
-			commitTitleEdit();
+			e.preventDefault();
+			titleRef?.blur();
 		} else if (e.key === 'Escape') {
-			isEditingTitle = false;
+			if (titleRef) titleRef.textContent = task.title;
+			titleRef?.blur();
+		} else if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+			const direction = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey) ? -1 : 1;
+			e.preventDefault();
+			const allTitles = Array.from(
+				document.querySelectorAll<HTMLElement>('.task-title[contenteditable]')
+			);
+			const currentIndex = allTitles.indexOf(titleRef!);
+			const nextTitle = allTitles[currentIndex + direction];
+			titleRef?.blur();
+			if (nextTitle) {
+				nextTitle.focus();
+			} else {
+				// No next/prev todo — focus QuickInputBar
+				const input = document.querySelector<HTMLInputElement>('.quick-input-bar input');
+				input?.focus();
+			}
 		}
 	}
 
-	function commitTitleEdit() {
-		isEditingTitle = false;
-		const trimmed = editingTitle.trim();
+	function handleTitleBlur() {
+		if (!titleRef) return;
+		const trimmed = (titleRef.textContent || '').trim();
 		if (trimmed && trimmed !== task.title) {
 			onSave?.({ title: trimmed });
+		} else {
+			// Revert if empty or unchanged
+			titleRef.textContent = task.title;
 		}
 	}
 
@@ -409,22 +421,20 @@
 
 		<!-- Content -->
 		<div class="task-content">
-			{#if isEditingTitle}
-				<input
-					bind:this={titleEditRef}
-					class="task-title-input"
-					type="text"
-					bind:value={editingTitle}
-					onkeydown={handleTitleKeydown}
-					onblur={commitTitleEdit}
-				/>
-			{:else}
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<span class="task-title" class:line-through={task.isCompleted} onclick={handleTitleClick}>
-					{task.title}
-				</span>
-			{/if}
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<span
+				bind:this={titleRef}
+				class="task-title"
+				class:line-through={task.isCompleted}
+				contenteditable="true"
+				role="textbox"
+				spellcheck="true"
+				onkeydown={handleTitleKeydown}
+				onblur={handleTitleBlur}
+				onclick={(e) => e.stopPropagation()}
+			>
+				{task.title}
+			</span>
 
 			<!-- Labels and subtasks below title -->
 			{#if subtaskProgress() || (task.labels && task.labels.length > 0)}
@@ -721,13 +731,14 @@
 		display: flex;
 		align-items: center;
 		gap: 0.625rem;
-		padding: 0.5rem 0.75rem;
+		min-height: 2.5rem; /* matches notepad --line-height */
+		padding: 0 1.5rem;
 		border-radius: 0;
 		background: transparent;
 		backdrop-filter: none;
 		-webkit-backdrop-filter: none;
 		border: none;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+		border-bottom: none;
 		box-shadow: none;
 		transition: all 0.2s;
 	}
@@ -748,21 +759,14 @@
 	:global(.dark) .task-item {
 		background: transparent;
 		border: none;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 	}
 
 	.task-item:hover {
-		background: rgba(0, 0, 0, 0.02);
-		box-shadow: none;
+		background: transparent;
 	}
 
 	:global(.dark) .task-item:hover {
-		background: rgba(255, 255, 255, 0.04);
-	}
-
-	.task-item-wrapper.expanded .task-item:hover {
 		background: transparent;
-		box-shadow: none;
 	}
 
 	.task-item.completed {
@@ -780,23 +784,24 @@
 		border-bottom-color: rgba(34, 197, 94, 0.3);
 	}
 
-	/* Drag handle */
+	/* Drag handle — sticks out left beyond the content area */
 	.drag-handle {
 		cursor: grab;
-		opacity: 0.25;
+		opacity: 0;
 		transition: opacity 0.15s;
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.5rem 0.375rem;
-		margin-left: -0.25rem;
+		padding: 0.25rem 0.25rem;
+		margin-left: -2rem;
+		margin-right: -0.5rem;
+		margin-top: 0.125rem;
 		border-radius: 0.25rem;
-		min-height: 2rem;
 	}
 
 	.task-item:hover .drag-handle {
-		opacity: 0.5;
+		opacity: 0.4;
 	}
 
 	.drag-handle:hover {
@@ -828,6 +833,7 @@
 
 	/* Checkbox with priority color fill */
 	.task-checkbox {
+		margin-top: 0.1875rem;
 		width: 1.25rem;
 		height: 1.25rem;
 		border-radius: 9999px;
@@ -947,40 +953,21 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		color: #374151;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		white-space: normal;
+		word-break: break-word;
 		cursor: text;
 		border-radius: 0.25rem;
 		padding: 0.125rem 0.25rem;
 		margin: -0.125rem -0.25rem;
+		outline: none;
 	}
 
 	.task-title:hover {
-		background: rgba(0, 0, 0, 0.04);
+		background: transparent;
 	}
 
 	:global(.dark) .task-title:hover {
-		background: rgba(255, 255, 255, 0.06);
-	}
-
-	.task-title-input {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
-		background: rgba(0, 0, 0, 0.04);
-		border: 1px solid #8b5cf6;
-		border-radius: 0.25rem;
-		padding: 0.125rem 0.25rem;
-		margin: -0.125rem -0.25rem;
-		outline: none;
-		width: 100%;
-	}
-
-	:global(.dark) .task-title-input {
-		color: #f3f4f6;
-		background: rgba(255, 255, 255, 0.08);
-		border-color: #8b5cf6;
+		background: transparent;
 	}
 
 	:global(.dark) .task-title {
@@ -1084,6 +1071,7 @@
 		color: #6b7280;
 		flex-shrink: 0;
 		white-space: nowrap;
+		margin-top: 0.25rem;
 	}
 
 	:global(.dark) .due-date {
@@ -1109,12 +1097,12 @@
 		border: none;
 		cursor: pointer;
 		padding: 0.125rem 0;
-		opacity: 0.5;
+		opacity: 0.7;
 		transition: opacity 0.15s;
 	}
 
 	.completed-date-toggle:hover {
-		opacity: 0.8;
+		opacity: 1;
 	}
 
 	.completed-date-toggle .date-label {

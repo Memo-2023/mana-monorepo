@@ -5,6 +5,7 @@
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
 	import { contactsSettings } from '$lib/stores/settings.svelte';
+	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import AlphabetNavContextMenu from '$lib/components/AlphabetNavContextMenu.svelte';
 
 	interface Props {
@@ -100,6 +101,50 @@
 	// Available letters (letters that have contacts)
 	let availableLetters = $derived(Object.keys(groupedContacts).sort());
 
+	// Inline name editing
+	function handleNameBlur(contact: Contact, el: HTMLSpanElement) {
+		const trimmed = (el.textContent || '').trim();
+		const currentName = getDisplayName(contact);
+		if (trimmed && trimmed !== currentName) {
+			// Parse display name back into first/last name
+			const parts = trimmed.split(/\s+/);
+			const firstName = parts[0] || '';
+			const lastName = parts.slice(1).join(' ') || '';
+			contactsStore.updateContact(contact.id, {
+				firstName,
+				lastName,
+				displayName: trimmed,
+			});
+		} else {
+			el.textContent = currentName;
+		}
+	}
+
+	function handleNameKeydown(e: KeyboardEvent, contact: Contact) {
+		const target = e.target as HTMLSpanElement;
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			target.blur();
+		} else if (e.key === 'Escape') {
+			target.textContent = getDisplayName(contact);
+			target.blur();
+		} else if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+			const direction = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey) ? -1 : 1;
+			e.preventDefault();
+			const allNames = Array.from(
+				document.querySelectorAll<HTMLElement>('.contact-name-editable[contenteditable]')
+			);
+			const currentIndex = allNames.indexOf(target);
+			const next = allNames[currentIndex + direction];
+			target.blur();
+			if (next) {
+				next.focus();
+			} else {
+				document.querySelector<HTMLInputElement>('.quick-input-bar input')?.focus();
+			}
+		}
+	}
+
 	function scrollToLetter(letter: string) {
 		const element = document.getElementById(`section-${letter}`);
 		if (element) {
@@ -162,10 +207,6 @@
 				<div class="section-contacts">
 					{#each groupedContacts[letter] as contact (contact.id)}
 						<div
-							role="button"
-							tabindex="0"
-							onclick={() => onContactClick(contact.id)}
-							onkeydown={(e) => e.key === 'Enter' && onContactClick(contact.id)}
 							class="alphabet-contact-card {selectionMode && selectedIds.has(contact.id)
 								? 'selected'
 								: ''}"
@@ -188,8 +229,12 @@
 								</button>
 							{/if}
 
-							<!-- Avatar -->
-							<div class="avatar-sm">
+							<!-- Avatar — click opens detail -->
+							<button
+								class="avatar-sm avatar-btn"
+								onclick={() => onContactClick(contact.id)}
+								title="Details öffnen"
+							>
 								{#if contact.photoUrl}
 									<img
 										src={contact.photoUrl}
@@ -199,12 +244,23 @@
 								{:else}
 									{getInitials(contact)}
 								{/if}
-							</div>
+							</button>
 
 							<!-- Contact Info -->
 							<div class="contact-info">
 								<div class="contact-main-row">
-									<span class="contact-name">{getDisplayName(contact)}</span>
+									<!-- svelte-ignore a11y_no_static_element_interactions -->
+									<span
+										class="contact-name contact-name-editable"
+										contenteditable="true"
+										role="textbox"
+										spellcheck="true"
+										onkeydown={(e) => handleNameKeydown(e, contact)}
+										onblur={(e) => handleNameBlur(contact, e.target as HTMLSpanElement)}
+										onclick={(e) => e.stopPropagation()}
+									>
+										{getDisplayName(contact)}
+									</span>
 									{#if contact.isFavorite}
 										<svg class="favorite-badge" fill="currentColor" viewBox="0 0 24 24">
 											<path
@@ -238,7 +294,6 @@
 								{#if contact.phone || contact.mobile}
 									<a
 										href="tel:{contact.mobile || contact.phone}"
-										onclick={(e) => e.stopPropagation()}
 										class="action-chip"
 										title={contact.mobile || contact.phone}
 									>
@@ -253,12 +308,7 @@
 									</a>
 								{/if}
 								{#if contact.email}
-									<a
-										href="mailto:{contact.email}"
-										onclick={(e) => e.stopPropagation()}
-										class="action-chip"
-										title={contact.email}
-									>
+									<a href="mailto:{contact.email}" class="action-chip" title={contact.email}>
 										<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path
 												stroke-linecap="round"
@@ -413,14 +463,7 @@
 		background-color: hsl(var(--card));
 		border: 1px solid hsl(var(--border));
 		border-radius: var(--radius-md);
-		cursor: pointer;
-		transition: all var(--transition-fast);
 		min-width: 0;
-	}
-
-	.alphabet-contact-card:hover {
-		border-color: hsl(var(--primary));
-		background-color: hsl(var(--accent));
 	}
 
 	.avatar-sm {
@@ -458,6 +501,24 @@
 		font-size: 0.9375rem;
 		color: hsl(var(--foreground));
 		white-space: nowrap;
+	}
+
+	.contact-name-editable {
+		cursor: text;
+		outline: none;
+		border-radius: 0.25rem;
+		padding: 0.0625rem 0.125rem;
+		margin: -0.0625rem -0.125rem;
+	}
+
+	.avatar-btn {
+		border: none;
+		cursor: pointer;
+		transition: opacity 0.15s;
+	}
+
+	.avatar-btn:hover {
+		opacity: 0.8;
 	}
 
 	.favorite-badge {

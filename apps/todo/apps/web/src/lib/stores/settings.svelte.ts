@@ -9,6 +9,17 @@ import type { TaskPriority } from '@todo/shared';
 // Settings types
 export type TodoView = 'inbox' | 'today' | 'upcoming' | 'kanban' | 'completed';
 export type KanbanCardSize = 'compact' | 'normal' | 'large';
+export type PageMode = 'date' | 'priority' | 'custom';
+
+export interface PageConfig {
+	id: string;
+	label: string;
+	filter: {
+		priorities?: ('low' | 'medium' | 'high' | 'urgent')[];
+		completed?: boolean;
+		dateRange?: 'overdue' | 'today' | 'tomorrow' | 'upcoming' | 'any';
+	};
+}
 
 export interface TodoAppSettings extends Record<string, unknown> {
 	// Task Behavior
@@ -50,6 +61,10 @@ export interface TodoAppSettings extends Record<string, unknown> {
 	// Navigation UI
 	pillNavCollapsed: boolean;
 	filterStripCollapsed: boolean;
+
+	// Page mode
+	pageMode: PageMode;
+	customPages: PageConfig[];
 }
 
 const DEFAULT_SETTINGS: TodoAppSettings = {
@@ -92,6 +107,10 @@ const DEFAULT_SETTINGS: TodoAppSettings = {
 	// Navigation UI
 	pillNavCollapsed: true, // PillNav hidden by default, shown via FAB
 	filterStripCollapsed: false, // FilterStrip shown by default when PillNav is visible
+
+	// Page mode
+	pageMode: 'priority' as PageMode,
+	customPages: [] as PageConfig[],
 };
 
 // Create base store using factory
@@ -182,6 +201,12 @@ export const todoSettings = {
 	},
 	get filterStripCollapsed() {
 		return baseStore.settings.filterStripCollapsed;
+	},
+	get pageMode() {
+		return baseStore.settings.pageMode;
+	},
+	get customPages() {
+		return baseStore.settings.customPages;
 	},
 
 	// Toggle methods
