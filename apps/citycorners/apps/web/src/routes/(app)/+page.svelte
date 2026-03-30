@@ -101,6 +101,8 @@
 {:else}
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		{#each filtered as city}
+			{@const count = locationCounts.get(city.id) || 0}
+			{@const cityStats = getCityStats(filterByCity(allLocations.value, city.id))}
 			<a
 				href="/cities/{city.slug}"
 				class="group relative overflow-hidden rounded-xl border border-border bg-background-card transition-shadow hover:shadow-lg"
@@ -136,8 +138,6 @@
 							{city.description}
 						</p>
 					{/if}
-					{@const count = locationCounts.get(city.id) || 0}
-					{@const cityStats = getCityStats(filterByCity(allLocations.value, city.id))}
 					<div class="mt-2 flex flex-wrap items-center gap-2">
 						<span
 							class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
