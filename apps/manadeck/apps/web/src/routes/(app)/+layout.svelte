@@ -23,7 +23,7 @@
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { useAllDecks } from '$lib/data/queries';
 	import { manadeckOnboarding } from '$lib/stores/app-onboarding.svelte';
@@ -228,7 +228,14 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('manadeck')?.requiredTier}
+	appName={getManaApp('manadeck')?.name}
+>
 	<div class="min-h-screen bg-background">
 		<!-- Pill Navigation -->
 		<PillNavigation

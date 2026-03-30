@@ -9,6 +9,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { useAllMeals, searchMeals } from '$lib/data/queries';
 	import { parseMealInput, formatParsedMealPreview } from '$lib/utils/meal-parser';
+	import { getManaApp } from '@manacore/shared-branding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { nutriphiStore } from '$lib/data/local-store';
@@ -76,7 +77,14 @@
 	{/if}
 </svelte:head>
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('nutriphi')?.requiredTier}
+	appName={getManaApp('nutriphi')?.name}
+>
 	{#if $i18nLoading}
 		<div class="flex min-h-screen items-center justify-center bg-background">
 			<div

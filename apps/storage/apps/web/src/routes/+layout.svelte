@@ -18,7 +18,7 @@
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { ToastContainer } from '@manacore/shared-ui';
 	import { storageOnboarding } from '$lib/stores/app-onboarding.svelte';
@@ -216,7 +216,14 @@
 
 <ToastContainer />
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('storage')?.requiredTier}
+	appName={getManaApp('storage')?.name}
+>
 	{#if isAuthPage}
 		<!-- Auth pages without navigation -->
 		{@render children()}

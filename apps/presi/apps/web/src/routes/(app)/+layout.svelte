@@ -17,7 +17,7 @@
 	import { THEME_DEFINITIONS } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { decksStore } from '$lib/stores/decks.svelte';
 	import { useAllDecks } from '$lib/data/queries';
@@ -200,7 +200,14 @@
 		{@render children()}
 	</main>
 {:else}
-	<AuthGate authStore={auth} {goto} allowGuest={true} onReady={handleAuthReady}>
+	<AuthGate
+		authStore={auth}
+		{goto}
+		allowGuest={true}
+		onReady={handleAuthReady}
+		requiredTier={getManaApp('presi')?.requiredTier}
+		appName={getManaApp('presi')?.name}
+	>
 		<!-- Navigation Layout -->
 		<div class="layout-container">
 			<!-- Floating Pill Navigation -->

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FeedbackPage } from '@manacore/shared-ui';
+	import { FeedbackPage } from '@manacore/feedback';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { feedbackService } from '$lib/services/feedback';
 </script>

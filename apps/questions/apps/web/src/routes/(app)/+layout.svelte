@@ -23,7 +23,7 @@
 		QuickInputItem,
 		CreatePreview,
 	} from '@manacore/shared-ui';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -189,7 +189,14 @@
 
 <svelte:window onresize={updateMobileState} />
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('questions')?.requiredTier}
+	appName={getManaApp('questions')?.name}
+>
 	<div class="layout-container">
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}

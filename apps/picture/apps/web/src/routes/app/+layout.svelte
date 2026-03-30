@@ -14,7 +14,7 @@
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import KeyboardShortcutsModal from '$lib/components/ui/KeyboardShortcutsModal.svelte';
 	import { theme } from '$lib/stores/theme';
@@ -301,7 +301,15 @@
 
 <svelte:window on:keydown={handleKeyDown} />
 
-<AuthGate {authStore} {goto} loginHref="/auth/login" allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	loginHref="/auth/login"
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('picture')?.requiredTier}
+	appName={getManaApp('picture')?.name}
+>
 	<div class="min-h-screen" style="background-color: hsl(var(--color-background));">
 		<!-- PillNavigation (conditionally visible) -->
 		{#if $isUIVisible}

@@ -34,7 +34,7 @@
 	} from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { setContext } from 'svelte';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -266,7 +266,14 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('zitare')?.requiredTier}
+	appName={getManaApp('zitare')?.name}
+>
 	<div class="layout-container">
 		{#if !zitareSettings.immersiveModeEnabled}
 			<!-- PillNav (shown/hidden via FAB) -->

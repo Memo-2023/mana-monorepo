@@ -31,7 +31,7 @@
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { filterHiddenNavItems } from '@manacore/shared-theme';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import ContactDetailModal from '$lib/components/ContactDetailModal.svelte';
 	import NewContactModal from '$lib/components/NewContactModal.svelte';
@@ -340,7 +340,14 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('contacts')?.requiredTier}
+	appName={getManaApp('contacts')?.name}
+>
 	<SplitPaneContainer>
 		<!-- Navigation Layout -->
 		<div class="layout-container">

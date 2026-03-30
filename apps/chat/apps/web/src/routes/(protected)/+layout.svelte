@@ -23,7 +23,7 @@
 		tagMutations,
 		useAllTags as useAllSharedTags,
 	} from '@manacore/shared-stores';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import type { LayoutData } from './$types';
@@ -213,7 +213,14 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('chat')?.requiredTier}
+	appName={getManaApp('chat')?.name}
+>
 	<!-- Navigation Layout -->
 	<div class="layout-container">
 		<!-- Floating Pill Navigation -->

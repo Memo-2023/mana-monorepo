@@ -10,7 +10,7 @@
 	import { theme } from '$lib/stores/theme';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { timesStore } from '$lib/data/local-store';
@@ -83,7 +83,14 @@
 	}
 </script>
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('times')?.requiredTier}
+	appName={getManaApp('times')?.name}
+>
 	<div class="flex min-h-screen flex-col">
 		<!-- Top Navigation -->
 		{#if showNav}

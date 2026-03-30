@@ -19,7 +19,7 @@
 	import { citycornersStore } from '$lib/data/local-store';
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
 	import type { ThemeVariant } from '@manacore/shared-theme';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { api } from '$lib/api';
@@ -221,7 +221,14 @@
 	}
 </script>
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('citycorners')?.requiredTier}
+	appName={getManaApp('citycorners')?.name}
+>
 	<div class="layout-container">
 		{#if showNav}
 			<PillNavigation

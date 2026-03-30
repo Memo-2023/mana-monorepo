@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import type { PillNavItem } from '@manacore/shared-ui';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { AuthGate, GuestWelcomeModal, SessionExpiredBanner } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -45,7 +45,14 @@
 	}
 </script>
 
-<AuthGate {authStore} {goto} allowGuest={true} onReady={handleAuthReady}>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('moodlit')?.requiredTier}
+	appName={getManaApp('moodlit')?.name}
+>
 	<div class="flex min-h-screen flex-col">
 		<PillNavigation
 			items={navItems}
