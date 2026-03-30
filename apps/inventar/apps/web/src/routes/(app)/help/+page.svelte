@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { HelpPage } from '@manacore/shared-ui';
+	import { HelpPage } from '@manacore/help';
 </script>
 
 <HelpPage appName="Inventar" defaultSection="faq" />
