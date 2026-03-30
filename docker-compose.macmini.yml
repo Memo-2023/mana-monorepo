@@ -1736,7 +1736,7 @@ services:
         condition: service_healthy
       alertmanager:
         condition: service_healthy
-    entrypoint: ["sh", "-c", "mkdir -p /etc/alerts && cp /mnt/alerts-config/*.yml /etc/alerts/ 2>/dev/null; exec /vmalert-prod -datasource.url=http://victoriametrics:9090 -notifier.url=http://alertmanager:9093 -remoteWrite.url=http://victoriametrics:9090 -remoteRead.url=http://victoriametrics:9090 -rule='/etc/alerts/*.yml' -evaluationInterval=30s -httpListenAddr=:8880"]
+    entrypoint: ["sh", "-c", "mkdir -p /etc/alerts && cp /mnt/alerts-config/alerts.yml /etc/alerts/ 2>/dev/null; exec /vmalert-prod -datasource.url=http://victoriametrics:9090 -notifier.url=http://alertmanager:9093 -remoteWrite.url=http://victoriametrics:9090 -remoteRead.url=http://victoriametrics:9090 -rule='/etc/alerts/alerts.yml' -evaluationInterval=30s -httpListenAddr=:8880"]
     volumes:
       - ./docker/prometheus:/mnt/alerts-config:ro
     ports:
