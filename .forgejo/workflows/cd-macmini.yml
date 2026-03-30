@@ -174,7 +174,8 @@ jobs:
       - name: Pull latest code
         run: |
           cd "${{ env.PROJECT_DIR }}"
-          git pull origin main
+          GIT_SSH_COMMAND='ssh -p 2222 -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no' \
+            git pull forgejo main
 
       - name: Init deploy tracking
         id: init

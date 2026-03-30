@@ -1,0 +1,28 @@
+# Mirror GitHub → Forgejo on every push to main
+# Keeps Forgejo in sync so it can serve as the deployment source.
+#
+# Requires GitHub secret:
+#   FORGEJO_DEPLOY_KEY  — private SSH key matching mac-mini-deploy key in Forgejo
+#   (key fingerprint: SHA256:baNsV+pq28d1vSWX+jtqyV0GqRnjUcHfDZM8RopcGDE)
+
+name: Mirror to Forgejo
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  mirror:
+    name: Push to Forgejo
+    runs-on: self-hosted
+    steps:
+      - name: Mirror to Forgejo via SSH
+        run: |
+          cd /Users/mana/projects/manacore-monorepo
+
+          git pull origin main
+
+          # Push to Forgejo via localhost SSH (runner is on the Mac Mini)
+          GIT_SSH_COMMAND='ssh -p 2222 -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no' \
+            git push ssh://git@localhost:2222/till/manacore-monorepo.git main 2>&1
+          echo "Mirrored to Forgejo"
