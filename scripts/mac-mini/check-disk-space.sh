@@ -58,9 +58,48 @@ send_notification() {
     fi
 }
 
+PUSHGATEWAY_URL="${PUSHGATEWAY_URL:-http://localhost:9091}"
+
+push_disk_metrics() {
+    local disk_label="$1"
+    local mount_point="$2"
+    local usage_pct="$3"
+    local avail_human="$4"
+    local avail_bytes="${5:-0}"
+    local size_bytes="${6:-0}"
+
+    cat <<PROMEOF | curl -s --data-binary @- "${PUSHGATEWAY_URL}/metrics/job/mac_disk/disk/${disk_label}" >/dev/null 2>&1 || true
+# HELP mac_disk_used_percent Disk usage percent on macOS host
+# TYPE mac_disk_used_percent gauge
+mac_disk_used_percent{disk="${disk_label}",mountpoint="${mount_point}",avail_human="${avail_human}"} ${usage_pct}
+# HELP mac_disk_avail_bytes Disk available bytes on macOS host
+# TYPE mac_disk_avail_bytes gauge
+mac_disk_avail_bytes{disk="${disk_label}",mountpoint="${mount_point}"} ${avail_bytes}
+# HELP mac_disk_size_bytes Total disk size bytes on macOS host
+# TYPE mac_disk_size_bytes gauge
+mac_disk_size_bytes{disk="${disk_label}",mountpoint="${mount_point}"} ${size_bytes}
+PROMEOF
+}
+
+push_colima_metrics() {
+    local colima_disk="/Users/mana/.colima/_lima/_disks/colima/datadisk"
+    [ -f "$colima_disk" ] || return 0
+    local used_kb
+    used_kb=$(du -sk "$colima_disk" 2>/dev/null | awk '{print $1}')
+    local used_gb
+    used_gb=$(awk "BEGIN {printf \"%.1f\", ${used_kb:-0} / 1048576}")
+    cat <<PROMEOF | curl -s --data-binary @- "${PUSHGATEWAY_URL}/metrics/job/mac_disk/disk/colima" >/dev/null 2>&1 || true
+# HELP mac_colima_disk_used_gb Colima VM datadisk actual on-disk usage in GB
+# TYPE mac_colima_disk_used_gb gauge
+mac_colima_disk_used_gb ${used_gb}
+PROMEOF
+    log "Colima VM disk: ${used_gb}GB on disk"
+}
+
 check_disk() {
     local mount_point="$1"
     local name="$2"
+    local disk_label="${3:-}"
 
     # Check if mount point exists
     if [ ! -d "$mount_point" ]; then
@@ -77,11 +116,19 @@ check_disk() {
         return 1
     fi
 
-    # Get available space
+    # Get available and total space
     local available
     available=$(df -h "$mount_point" 2>/dev/null | awk 'NR==2 {print $4}')
+    local avail_bytes size_bytes
+    avail_bytes=$(df "$mount_point" 2>/dev/null | awk 'NR==2 {print $4 * 512}')
+    size_bytes=$(df "$mount_point" 2>/dev/null | awk 'NR==2 {print $2 * 512}')
 
     log "$name: ${usage}% used (${available} free)"
+
+    # Push metrics to Pushgateway → Prometheus → vmalert → Telegram
+    if [ -n "$disk_label" ]; then
+        push_disk_metrics "$disk_label" "$mount_point" "$usage" "$available" "${avail_bytes:-0}" "${size_bytes:-0}"
+    fi
 
     # Check thresholds
     if [ "$usage" -ge "$CRITICAL_THRESHOLD" ]; then
@@ -204,13 +251,16 @@ log "=== ManaCore Disk Space Check ==="
 
 ALERT_STATUS=0
 
-# Check system disk
-check_disk "/" "System Disk" || ALERT_STATUS=$?
+# Check system disk (internal SSD)
+check_disk "/" "System Disk" "internal" || ALERT_STATUS=$?
 
 # Check ManaData volume (external SSD)
 if [ -d "/Volumes/ManaData" ]; then
-    check_disk "/Volumes/ManaData" "ManaData SSD" || ALERT_STATUS=$?
+    check_disk "/Volumes/ManaData" "ManaData SSD" "manaData" || ALERT_STATUS=$?
 fi
+
+# Push Colima VM disk metrics
+push_colima_metrics
 
 # Check Docker disk usage
 check_docker_disk

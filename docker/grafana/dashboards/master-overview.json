@@ -1277,6 +1277,91 @@
 			],
 			"title": "New This Month",
 			"type": "stat"
+		},
+		{
+			"collapsed": false,
+			"gridPos": { "h": 1, "w": 24, "x": 0, "y": 99 },
+			"id": 900,
+			"panels": [],
+			"title": "Recent Errors (Loki)",
+			"type": "row"
+		},
+		{
+			"datasource": { "type": "loki", "uid": "loki" },
+			"gridPos": { "h": 8, "w": 24, "x": 0, "y": 100 },
+			"id": 901,
+			"title": "Errors across all services (last 30 min)",
+			"type": "logs",
+			"options": {
+				"showTime": true,
+				"showLabels": false,
+				"showCommonLabels": false,
+				"wrapLogMessage": false,
+				"prettifyLogMessage": false,
+				"enableLogDetails": true,
+				"dedupStrategy": "none",
+				"sortOrder": "Descending"
+			},
+			"targets": [
+				{
+					"datasource": { "type": "loki", "uid": "loki" },
+					"expr": "{tier=~\".+\"} |~ \"(?i)(error|fatal|panic)\" | tier != \"other\"",
+					"refId": "A"
+				}
+			],
+			"links": [
+				{
+					"title": "Open Logs Explorer",
+					"url": "/d/logs-explorer",
+					"targetBlank": false
+				}
+			]
+		},
+		{
+			"datasource": { "type": "loki", "uid": "loki" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"custom": {
+						"drawStyle": "bars",
+						"fillOpacity": 70,
+						"stacking": { "group": "A", "mode": "normal" }
+					}
+				}
+			},
+			"gridPos": { "h": 5, "w": 12, "x": 0, "y": 108 },
+			"id": 902,
+			"title": "Error Rate by Service (last 1h)",
+			"type": "timeseries",
+			"targets": [
+				{
+					"datasource": { "type": "loki", "uid": "loki" },
+					"expr": "sum by (service) (count_over_time({tier=~\".+\"} |~ \"(?i)(error|fatal|panic)\" [$__interval]))",
+					"refId": "A"
+				}
+			]
+		},
+		{
+			"datasource": { "type": "loki", "uid": "loki" },
+			"fieldConfig": {
+				"defaults": {
+					"color": { "mode": "palette-classic" },
+					"custom": { "displayMode": "gradient", "showValue": "auto" }
+				}
+			},
+			"gridPos": { "h": 5, "w": 12, "x": 12, "y": 108 },
+			"id": 903,
+			"title": "Top Error Sources (last 1h)",
+			"type": "barchart",
+			"options": { "xTickLabelRotation": -45 },
+			"targets": [
+				{
+					"datasource": { "type": "loki", "uid": "loki" },
+					"expr": "topk(8, sum by (service) (count_over_time({tier=~\".+\"} |~ \"(?i)(error|fatal|panic)\" [1h])))",
+					"refId": "A",
+					"instant": true
+				}
+			]
 		}
 	],
 	"refresh": "30s",
