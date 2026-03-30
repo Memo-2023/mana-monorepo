@@ -95,6 +95,11 @@ log "Starting Docker containers..."
 cd "$PROJECT_ROOT"
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --no-build 2>&1 | tee -a "$LOG_FILE"
 
+# ─── Force-recreate stateful containers that cache config ───
+# synapse copies homeserver.yaml at startup; stale container uses old cached config
+log "Force-recreating config-sensitive containers..."
+docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --no-build --force-recreate synapse 2>&1 | tee -a "$LOG_FILE"
+
 # ─── Wait and verify ───
 log "Waiting 45s for services to initialize..."
 sleep 45
