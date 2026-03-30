@@ -37,9 +37,8 @@ if colima status 2>/dev/null | grep -q "running"; then
 else
     log "Starting Colima..."
 
-    # Clean stale state from hard shutdown
+    # Clear stale process state from hard shutdown (stop only, never delete — delete wipes all images)
     colima stop --force 2>/dev/null || true
-    colima delete --force 2>/dev/null || true
     sleep 2
 
     colima start \
