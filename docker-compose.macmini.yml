@@ -231,7 +231,7 @@ services:
       - /Volumes/ManaData/forgejo:/data
     ports:
       - "3041:3000"
-      - "2222:2222"
+      - "2222:22"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/v1/version"]
       interval: 120s
