@@ -142,3 +142,166 @@ export class DialogManager {
 		this._currentIndex = 0;
 	}
 }
+
+// ─── Merchant Trade Offers ────────────────────────────────────
+
+export interface MerchantOffer {
+	name: string;
+	description: string;
+	cost: number; // durability points from held item
+	damage: number;
+	range: number;
+	speed: number;
+	durabilityMax: number;
+	element: string;
+	rarity: string;
+	particle: string;
+}
+
+export const MERCHANT_OFFERS: MerchantOffer[] = [
+	{
+		name: 'Stone Sword',
+		description: 'A basic blade. Gets the job done.',
+		cost: 20,
+		damage: 25,
+		range: 3,
+		speed: 4,
+		durabilityMax: 80,
+		element: 'neutral',
+		rarity: 'common',
+		particle: 'sparks',
+	},
+	{
+		name: 'Fire Wand',
+		description: 'Shoots bursts of flame.',
+		cost: 40,
+		damage: 35,
+		range: 6,
+		speed: 2,
+		durabilityMax: 50,
+		element: 'fire',
+		rarity: 'uncommon',
+		particle: 'fire_burst',
+	},
+	{
+		name: 'Ice Shard',
+		description: 'Freezes on contact.',
+		cost: 40,
+		damage: 30,
+		range: 5,
+		speed: 3,
+		durabilityMax: 60,
+		element: 'ice',
+		rarity: 'uncommon',
+		particle: 'ice_shards',
+	},
+	{
+		name: 'Healing Herb',
+		description: 'Restores 30 HP when used.',
+		cost: 15,
+		damage: 0,
+		range: 1,
+		speed: 5,
+		durabilityMax: 3,
+		element: 'neutral',
+		rarity: 'common',
+		particle: 'heal_glow',
+	},
+	{
+		name: 'Thunder Hammer',
+		description: 'Devastating area damage.',
+		cost: 60,
+		damage: 60,
+		range: 4,
+		speed: 1,
+		durabilityMax: 40,
+		element: 'lightning',
+		rarity: 'rare',
+		particle: 'lightning_bolt',
+	},
+];
+
+// ─── Loot Tables ──────────────────────────────────────────────
+
+export interface LootDrop {
+	name: string;
+	chance: number; // 0-1
+	damage: number;
+	range: number;
+	speed: number;
+	durabilityMax: number;
+	element: string;
+	rarity: string;
+	particle: string;
+}
+
+const HOSTILE_LOOT: LootDrop[] = [
+	{
+		name: 'Bone Club',
+		chance: 0.4,
+		damage: 15,
+		range: 2,
+		speed: 3,
+		durabilityMax: 40,
+		element: 'neutral',
+		rarity: 'common',
+		particle: 'sparks',
+	},
+	{
+		name: 'Poison Fang',
+		chance: 0.2,
+		damage: 20,
+		range: 2,
+		speed: 5,
+		durabilityMax: 30,
+		element: 'poison',
+		rarity: 'uncommon',
+		particle: 'poison_cloud',
+	},
+	{
+		name: 'Dark Crystal',
+		chance: 0.1,
+		damage: 40,
+		range: 4,
+		speed: 2,
+		durabilityMax: 25,
+		element: 'lightning',
+		rarity: 'rare',
+		particle: 'lightning_bolt',
+	},
+];
+
+const GUARD_LOOT: LootDrop[] = [
+	{
+		name: 'Iron Shield',
+		chance: 0.3,
+		damage: 5,
+		range: 1,
+		speed: 2,
+		durabilityMax: 150,
+		element: 'neutral',
+		rarity: 'uncommon',
+		particle: 'sparks',
+	},
+	{
+		name: 'Guard Sword',
+		chance: 0.15,
+		damage: 30,
+		range: 3,
+		speed: 3,
+		durabilityMax: 100,
+		element: 'neutral',
+		rarity: 'rare',
+		particle: 'sparks',
+	},
+];
+
+/** Roll loot for a defeated NPC. Returns null if nothing drops. */
+export function rollLoot(npcBehavior: string): LootDrop | null {
+	const table = npcBehavior === 'guard' ? GUARD_LOOT : HOSTILE_LOOT;
+
+	for (const drop of table) {
+		if (Math.random() < drop.chance) return drop;
+	}
+	return null;
+}

@@ -54,6 +54,7 @@ export class GameEngine {
 
 	// Callbacks for UI reactivity
 	onStateChange: (() => void) | null = null;
+	onNpcDeath: ((npcX: number, npcY: number, behavior: string) => void) | null = null;
 
 	get isEditing() {
 		return this._editing;
@@ -405,6 +406,7 @@ export class GameEngine {
 							playSound('explosion');
 							this.particles.spawn('shatter', target.worldX, target.worldY);
 							this._showMessage(`Defeated ${target.behavior} NPC!`);
+							this.onNpcDeath?.(target.worldX, target.worldY, target.behavior);
 						}
 					}
 				}

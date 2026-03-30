@@ -10,6 +10,7 @@
 	import TriggerEditor from '$lib/editor/trigger-editor.svelte';
 	import { Inventory, createItem, type GameItem } from '$lib/engine/inventory.svelte';
 	import { gameStore } from '$lib/data/local-store';
+	import { MERCHANT_OFFERS, rollLoot, type MerchantOffer, type LootDrop } from '$lib/engine/dialog';
 	import {
 		loadWorld,
 		getAllWorlds,
@@ -40,6 +41,8 @@
 	let timeString = $state('08:00');
 	let isNight = $state(false);
 	let dialogActive = $state(false);
+	let showTradeUI = $state(false);
+	let groundItems = $state<{ x: number; y: number; loot: LootDrop }[]>([]);
 	let dialogLine = $state<{
 		speaker: string;
 		text: string;
@@ -63,6 +66,30 @@
 	let selectedNpcType = $state('hostile');
 
 	const materials = DEFAULT_MATERIALS.filter((m) => m.id !== MATERIAL_AIR);
+
+	/** Generate a simple colored sprite for trade/loot items */
+	function generateTradeSprite(): import('$lib/editor/types').SpriteData {
+		const w = 16,
+			h = 32;
+		const pixels = new Uint8Array(w * h * 4);
+		// Draw a simple diamond shape
+		for (let y = 0; y < h; y++) {
+			for (let x = 0; x < w; x++) {
+				const cx = w / 2,
+					cy = h / 2;
+				const dist = Math.abs(x - cx) / cx + Math.abs(y - cy) / cy;
+				if (dist < 0.8) {
+					const i = (y * w + x) * 4;
+					const hue = (x * 17 + y * 31) % 256;
+					pixels[i] = 100 + (hue % 156);
+					pixels[i + 1] = 80 + ((hue * 3) % 176);
+					pixels[i + 2] = 120 + ((hue * 7) % 136);
+					pixels[i + 3] = 255;
+				}
+			}
+		}
+		return { pixels, width: w, height: h, frames: 1 };
+	}
 
 	const PLAYER_ID = 'local-player';
 	let autoSaveInterval: ReturnType<typeof setInterval>;
@@ -110,6 +137,14 @@
 		e.registerItemBehaviors();
 		engine = e;
 		loading = false;
+
+		// Loot drops when NPCs die
+		e.onNpcDeath = (npcX, npcY, behavior) => {
+			const loot = rollLoot(behavior);
+			if (loot) {
+				groundItems = [...groundItems, { x: npcX, y: npcY, loot }];
+			}
+		};
 
 		e.onStateChange = () => {
 			isEditing = e.isEditing;
@@ -502,9 +537,7 @@
 									dialogActive = engine.dialog.active;
 									dialogLine = engine.dialog.currentLine;
 									if (result === 'trade') {
-										// TODO: Open trade UI
-										engine.dialog.close();
-										dialogActive = false;
+										showTradeUI = true;
 									}
 								}
 							}}
@@ -515,6 +548,113 @@
 				</div>
 			</div>
 		</div>
+	{/if}
+
+	<!-- Trade UI -->
+	{#if showTradeUI}
+		<div class="absolute inset-0 z-50 flex items-center justify-center bg-black/60">
+			<div class="w-[420px] rounded-xl bg-gray-900/95 p-5 shadow-2xl backdrop-blur">
+				<div class="mb-4 flex items-center justify-between">
+					<h3 class="text-sm font-bold text-emerald-400">Merchant's Wares</h3>
+					<button
+						class="text-xs text-gray-500 hover:text-white"
+						onclick={() => {
+							showTradeUI = false;
+							engine?.dialog.close();
+							dialogActive = false;
+						}}>Close</button
+					>
+				</div>
+				<div class="flex max-h-80 flex-col gap-2 overflow-y-auto">
+					{#each MERCHANT_OFFERS as offer}
+						{@const rarityColor =
+							offer.rarity === 'rare'
+								? 'border-blue-500'
+								: offer.rarity === 'uncommon'
+									? 'border-green-500'
+									: 'border-gray-600'}
+						<div
+							class="flex items-center justify-between rounded-lg border {rarityColor} bg-gray-800/80 p-3"
+						>
+							<div>
+								<div class="text-sm font-medium text-white">{offer.name}</div>
+								<div class="text-[10px] text-gray-400">{offer.description}</div>
+								<div class="mt-1 flex gap-2 text-[10px] text-gray-500">
+									{#if offer.damage > 0}<span>⚔ {offer.damage}</span>{/if}
+									<span>↔ {offer.range}</span>
+									<span>⚡ {offer.speed}</span>
+									<span>🛡 {offer.durabilityMax}</span>
+									{#if offer.element !== 'neutral'}<span class="capitalize text-yellow-400"
+											>{offer.element}</span
+										>{/if}
+								</div>
+							</div>
+							<button
+								class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs text-white hover:bg-emerald-500 disabled:opacity-30"
+								disabled={inventory.isFull}
+								onclick={async () => {
+									const item = createItem(offer.name, generateTradeSprite(), {
+										damage: offer.damage,
+										range: offer.range,
+										speed: offer.speed,
+										durabilityMax: offer.durabilityMax,
+										durabilityCurrent: offer.durabilityMax,
+										element: offer.element as any,
+										rarity: offer.rarity as any,
+										particle: offer.particle,
+										sound: 'hit_default',
+									});
+									const slot = inventory.addItem(item);
+									if (slot >= 0) {
+										inventory.selectSlot(slot);
+										await saveItem(item);
+										await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
+									}
+								}}
+							>
+								{inventory.isFull ? 'Full' : 'Buy'}
+							</button>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Loot pickup hint -->
+	{#if groundItems.length > 0 && engine?.player}
+		{@const nearby = groundItems.find((g) => {
+			const dx = g.x - (engine?.player?.worldX ?? 0);
+			const dy = g.y - (engine?.player?.worldY ?? 0);
+			return Math.sqrt(dx * dx + dy * dy) < 80;
+		})}
+		{#if nearby}
+			<div class="absolute bottom-36 left-1/2 z-30 -translate-x-1/2">
+				<button
+					class="rounded-lg bg-yellow-600/90 px-4 py-2 text-sm text-white shadow-lg backdrop-blur hover:bg-yellow-500"
+					onclick={async () => {
+						if (inventory.isFull) return;
+						const item = createItem(nearby.loot.name, generateTradeSprite(), {
+							damage: nearby.loot.damage,
+							range: nearby.loot.range,
+							speed: nearby.loot.speed,
+							durabilityMax: nearby.loot.durabilityMax,
+							durabilityCurrent: nearby.loot.durabilityMax,
+							element: nearby.loot.element as any,
+							rarity: nearby.loot.rarity as any,
+							particle: nearby.loot.particle,
+							sound: 'hit_default',
+						});
+						inventory.addItem(item);
+						await saveItem(item);
+						await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
+						groundItems = groundItems.filter((g) => g !== nearby);
+					}}
+				>
+					Pick up {nearby.loot.name} (E)
+				</button>
+			</div>
+		{/if}
 	{/if}
 
 	{#if showSpriteEditor}
