@@ -25,7 +25,8 @@
 		TagSelector,
 	} from './form';
 	import { ContactSelector, focusTrap } from '@manacore/shared-ui';
-	import { ManaLinkList } from '@manacore/shared-links/ui';
+	import { ManaLinkList, ManaLinkPicker } from '@manacore/shared-links/ui';
+	import { searchCrossApp } from '$lib/data/cross-app-search';
 
 	interface Props {
 		task: Task;
@@ -53,6 +54,8 @@
 	let storyPoints = $state<number | null>(null);
 	let effectiveDuration = $state<EffectiveDuration | null>(null);
 	let funRating = $state<number | null>(null);
+	// Link picker state
+	let showLinkPicker = $state(false);
 	// Contact associations
 	let assignee = $state<ContactOrManual[]>([]);
 	let involvedContacts = $state<ContactOrManual[]>([]);
@@ -318,9 +321,26 @@
 
 				<!-- Verknüpfungen -->
 				<div class="form-section">
-					<label class="form-label">Verknüpfungen</label>
+					<div class="flex items-center justify-between">
+						<label class="form-label">Verknüpfungen</label>
+						<button
+							type="button"
+							class="text-xs text-primary hover:underline"
+							onclick={() => (showLinkPicker = true)}
+						>
+							+ Verknüpfen
+						</button>
+					</div>
 					<ManaLinkList recordRef={{ app: 'todo', collection: 'tasks', id: task.id }} editable />
 				</div>
+
+				<ManaLinkPicker
+					sourceRef={{ app: 'todo', collection: 'tasks', id: task.id }}
+					sourceTitle={title || task.title}
+					open={showLinkPicker}
+					onClose={() => (showLinkPicker = false)}
+					onSearch={searchCrossApp}
+				/>
 
 				<!-- Wiederholung -->
 				<div class="form-section">
