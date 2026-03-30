@@ -119,29 +119,39 @@ groups:
           summary: "Very high memory usage on host"
           description: "Memory usage is {{ $value | humanize }}%"
 
-      # High Disk Usage (> 80%)
+      # High Disk Usage — macOS host disks (via Pushgateway, since node-exporter runs in VM)
+      # Metrics pushed by scripts/mac-mini/disk-metrics.sh (runs every 5 min via launchd)
       - alert: HighDiskUsage
         expr: |
-          (1 - (node_filesystem_avail_bytes{mountpoint=~"/host_mnt/Users|/|/host_mnt/Volumes/ManaData"}
-          / node_filesystem_size_bytes{mountpoint=~"/host_mnt/Users|/|/host_mnt/Volumes/ManaData"})) * 100 > 80
+          mac_disk_used_percent{disk=~"internal|manaData"} > 80
         for: 10m
         labels:
           severity: warning
         annotations:
-          summary: "High disk usage on {{ $labels.mountpoint }}"
-          description: "Disk usage is {{ $value | humanize }}%"
+          summary: "High disk usage on {{ $labels.disk }} ({{ $labels.mountpoint }})"
+          description: "Disk usage is {{ $value | humanize }}% — {{ $labels.avail_human }} free"
 
-      # Very High Disk Usage (> 90%)
+      # Very High Disk Usage (> 90%) — immediate alert
       - alert: VeryHighDiskUsage
         expr: |
-          (1 - (node_filesystem_avail_bytes{mountpoint=~"/host_mnt/Users|/|/host_mnt/Volumes/ManaData"}
-          / node_filesystem_size_bytes{mountpoint=~"/host_mnt/Users|/|/host_mnt/Volumes/ManaData"})) * 100 > 90
-        for: 5m
+          mac_disk_used_percent{disk=~"internal|manaData"} > 90
+        for: 2m
         labels:
           severity: critical
         annotations:
-          summary: "Very high disk usage on {{ $labels.mountpoint }}"
-          description: "Disk usage is {{ $value | humanize }}%"
+          summary: "CRITICAL: Disk {{ $labels.disk }} almost full ({{ $labels.mountpoint }})"
+          description: "Disk usage is {{ $value | humanize }}% — only {{ $labels.avail_human }} free. Server may crash."
+
+      # Colima VM disk large (> 150GB actual usage on sparse datadisk)
+      - alert: ColimaVMDiskLarge
+        expr: |
+          mac_colima_disk_used_gb > 150
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Colima VM disk is {{ $value | humanize }}GB — consider pruning Docker images"
+          description: "Run: docker system prune -f && docker image prune -a"
 
   - name: database_alerts
     rules:
