@@ -11,9 +11,23 @@ export type TodoView = 'inbox' | 'today' | 'upcoming' | 'kanban' | 'completed';
 export type KanbanCardSize = 'compact' | 'normal' | 'large';
 export type PageMode = 'date' | 'priority' | 'custom';
 
+export type PageIcon =
+	| 'warning'
+	| 'calendar'
+	| 'calendar-dots'
+	| 'check'
+	| 'star'
+	| 'lightning'
+	| 'clock'
+	| 'fire'
+	| 'leaf'
+	| 'heart';
+export type PageWidth = 'narrow' | 'medium' | 'wide' | 'full';
+
 export interface PageConfig {
 	id: string;
 	label: string;
+	icon?: PageIcon;
 	filter: {
 		priorities?: ('low' | 'medium' | 'high' | 'urgent')[];
 		completed?: boolean;
@@ -64,6 +78,7 @@ export interface TodoAppSettings extends Record<string, unknown> {
 
 	// Page mode
 	pageMode: PageMode;
+	pageWidth: PageWidth;
 	customPages: PageConfig[];
 }
 
@@ -110,6 +125,7 @@ const DEFAULT_SETTINGS: TodoAppSettings = {
 
 	// Page mode
 	pageMode: 'priority' as PageMode,
+	pageWidth: 'medium' as PageWidth,
 	customPages: [] as PageConfig[],
 };
 
@@ -204,6 +220,9 @@ export const todoSettings = {
 	},
 	get pageMode() {
 		return baseStore.settings.pageMode;
+	},
+	get pageWidth() {
+		return baseStore.settings.pageWidth;
 	},
 	get customPages() {
 		return baseStore.settings.customPages;
