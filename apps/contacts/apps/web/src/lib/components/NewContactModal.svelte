@@ -5,6 +5,9 @@
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import SocialMediaFields from './forms/SocialMediaFields.svelte';
 	import DateFields from './forms/DateFields.svelte';
+	import { parseContactInput, formatParsedContactPreview } from '$lib/utils/contact-parser';
+	import { findDuplicates, type DuplicateMatch } from '$lib/utils/duplicate-detector';
+	import { contactCollection } from '$lib/data/local-store';
 
 	interface Props {
 		onClose: () => void;
@@ -16,6 +19,7 @@
 	let saving = $state(false);
 	let error = $state<string | null>(null);
 	let firstNameInput: HTMLInputElement;
+	let quickInputRef: HTMLInputElement;
 	let fileInput: HTMLInputElement;
 
 	// Photo state
@@ -54,6 +58,86 @@
 	let signal = $state('');
 	let discord = $state('');
 	let bluesky = $state('');
+
+	// ─── Quick Input (NL Parser) ───────────────────────────
+	let quickInput = $state('');
+	let quickPreview = $state('');
+	let quickApplied = $state(false);
+
+	function handleQuickInput(e: Event) {
+		const text = (e.target as HTMLInputElement).value;
+		quickInput = text;
+		quickApplied = false;
+
+		if (!text.trim()) {
+			quickPreview = '';
+			return;
+		}
+
+		const parsed = parseContactInput(text);
+		quickPreview = formatParsedContactPreview(parsed);
+	}
+
+	function applyQuickInput() {
+		if (!quickInput.trim() || quickApplied) return;
+
+		const parsed = parseContactInput(quickInput);
+
+		if (parsed.firstName) firstName = parsed.firstName;
+		if (parsed.lastName) lastName = parsed.lastName;
+		if (parsed.email) email = parsed.email;
+		if (parsed.phone) phone = parsed.phone;
+		if (parsed.company) company = parsed.company;
+
+		quickApplied = true;
+		quickInput = '';
+		quickPreview = '';
+	}
+
+	function handleQuickKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			applyQuickInput();
+			// Move focus to first name field
+			firstNameInput?.focus();
+		}
+	}
+
+	// ─── Live Duplicate Detection ──────────────────────────
+	let duplicates = $state<DuplicateMatch[]>([]);
+	let dupDebounce: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => {
+		// Watch for changes in name or email fields
+		const fn = firstName;
+		const ln = lastName;
+		const em = email;
+
+		clearTimeout(dupDebounce);
+		if (fn || ln || em) {
+			dupDebounce = setTimeout(() => checkDuplicates(fn, ln, em), 300);
+		} else {
+			duplicates = [];
+		}
+	});
+
+	async function checkDuplicates(fn: string, ln: string, em: string) {
+		try {
+			const allContacts = await contactCollection.getAll();
+			duplicates = findDuplicates(
+				{ firstName: fn, lastName: ln, email: em },
+				allContacts.map((c) => ({
+					id: c.id,
+					firstName: c.firstName,
+					lastName: c.lastName,
+					email: c.email,
+					company: c.company,
+				}))
+			);
+		} catch {
+			duplicates = [];
+		}
+	}
 
 	const initials = $derived(() => {
 		const f = firstName?.[0] || '';
@@ -240,6 +324,47 @@
 
 		<!-- Modal Body -->
 		<div class="modal-body">
+			<!-- Quick Input Bar -->
+			<div class="quick-input-section">
+				<input
+					type="text"
+					class="quick-input"
+					bind:this={quickInputRef}
+					value={quickInput}
+					oninput={handleQuickInput}
+					onkeydown={handleQuickKeydown}
+					placeholder="Schnelleingabe: Max Müller @Firma max@mail.de +49... #tag"
+				/>
+				{#if quickPreview}
+					<div class="quick-preview">{quickPreview}</div>
+				{/if}
+			</div>
+
+			<!-- Duplicate Warning -->
+			{#if duplicates.length > 0}
+				<div class="duplicate-warning" role="alert">
+					<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+						/>
+					</svg>
+					<div class="duplicate-info">
+						<span class="duplicate-label">Mögliches Duplikat:</span>
+						{#each duplicates.slice(0, 3) as dup}
+							<span class="duplicate-name">
+								{dup.displayName}
+								<span class="duplicate-field"
+									>({dup.matchField === 'email' ? 'E-Mail' : 'Name'})</span
+								>
+							</span>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
 			{#if error}
 				<div class="error-banner" role="alert">
 					<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -655,6 +780,78 @@
 		flex: 1;
 		overflow-y: auto;
 		padding: 0 1.5rem 1.5rem;
+	}
+
+	.quick-input-section {
+		margin-bottom: 1rem;
+	}
+
+	.quick-input {
+		width: 100%;
+		padding: 0.625rem 0.875rem;
+		border: 1px dashed hsl(var(--color-border));
+		border-radius: 0.75rem;
+		background: hsl(var(--color-muted) / 0.3);
+		color: hsl(var(--color-foreground));
+		font-size: 0.8125rem;
+		outline: none;
+		transition: all 0.15s;
+	}
+
+	.quick-input:focus {
+		border-style: solid;
+		border-color: hsl(var(--color-primary) / 0.5);
+		background: hsl(var(--color-background));
+		box-shadow: 0 0 0 3px hsl(var(--color-primary) / 0.1);
+	}
+
+	.quick-input::placeholder {
+		color: hsl(var(--color-muted-foreground));
+		font-size: 0.75rem;
+	}
+
+	.quick-preview {
+		margin-top: 0.25rem;
+		padding: 0 0.5rem;
+		font-size: 0.7rem;
+		color: hsl(var(--color-muted-foreground));
+	}
+
+	.duplicate-warning {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		padding: 0.625rem 0.875rem;
+		margin-bottom: 0.75rem;
+		border-radius: 0.75rem;
+		background: hsl(35 100% 95%);
+		color: hsl(25 80% 40%);
+		font-size: 0.8125rem;
+	}
+
+	:global(.dark) .duplicate-warning {
+		background: hsl(35 60% 15%);
+		color: hsl(35 90% 75%);
+	}
+
+	.duplicate-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.duplicate-label {
+		font-weight: 600;
+		font-size: 0.75rem;
+	}
+
+	.duplicate-name {
+		font-size: 0.8125rem;
+	}
+
+	.duplicate-field {
+		font-size: 0.7rem;
+		opacity: 0.7;
 	}
 
 	.back-button {
