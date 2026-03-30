@@ -251,9 +251,14 @@ Split multiple tasks with keywords (`danach`, `dann`, `und dann`, `anschließend
 
 Context inheritance: subsequent tasks inherit date, time, and project from the first task. If the first task has a duration, the next task's time is offset accordingly.
 
-### Time Estimation
+### Smart Duration (Auto-Estimation)
 
-QuickAdd suggests a duration based on completed task history (weighted by project, labels, title similarity, priority). The suggestion appears after 500ms typing pause and can be accepted with one click. Runs fully offline against IndexedDB — no AI/API calls.
+Duration is **automatically applied** to new tasks when no explicit duration is typed. The system uses history-based estimation (weighted by project, labels, title similarity, priority) with a configurable default as fallback. Controllable via Settings > Task-Verhalten:
+
+- **Smarte Dauer** toggle (`smartDurationEnabled`, default: on)
+- **Standard-Dauer** fallback (`defaultTaskDuration`, default: 30min)
+
+Priority: explicit duration in text > history estimate > default fallback > none (if disabled).
 
 ## Code Style Guidelines
 

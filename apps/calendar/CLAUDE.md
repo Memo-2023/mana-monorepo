@@ -513,9 +513,14 @@ Split multiple events with keywords (`danach`, `dann`, `und dann`, `anschließen
 
 Context inheritance: subsequent events inherit date, time, and calendar from the first event. If the first event has a duration, the next event starts where it ends.
 
-### Duration Estimation
+### Smart Duration (Auto-Estimation)
 
-`estimateEventDuration()` in `event-estimator.ts` suggests event duration based on past events. Uses weighted similarity (calendar, title overlap, tags). Runs fully offline against IndexedDB.
+Duration is **automatically applied** to new events when no explicit duration is typed. Uses `estimateEventDuration()` from `event-estimator.ts` with weighted similarity (calendar, title overlap, tags). Falls back to `defaultEventDuration` from settings. Controllable via Settings > Termin-Einstellungen:
+
+- **Smarte Dauer** toggle (`smartDurationEnabled`, default: on)
+- **Standard-Dauer** fallback (`defaultEventDuration`, default: 60min)
+
+Priority: explicit duration in text > history estimate > default fallback > 1h (if disabled). Runs fully offline against IndexedDB.
 
 ### Conflict Detection
 
