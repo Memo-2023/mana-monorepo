@@ -49,7 +49,10 @@
 		"resendVerification": "Resend verification email",
 		"resendingVerification": "Sending...",
 		"verificationEmailSent": "Verification email sent! Please check your inbox.",
-		"checkYourEmail": "Check your email"
+		"checkYourEmail": "Check your email",
+		"emailAlreadyRegistered": "Email already registered",
+		"emailAlreadyRegisteredMessage": "An account with this email already exists. If you haven't verified your email yet, resend the verification email.",
+		"goToLogin": "Sign in instead"
 	},
 	"forgotPassword": {
 		"titleForm": "Reset Password",

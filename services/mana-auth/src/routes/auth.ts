@@ -53,14 +53,25 @@ export function createAuthRoutes(
 			sourceAppStore.set(body.email, body.sourceAppUrl);
 		}
 
-		const response = await auth.api.signUpEmail({
-			body: {
-				email: body.email,
-				password: body.password,
-				name: body.name || body.email.split('@')[0],
-			},
-			headers: c.req.raw.headers,
-		});
+		let response;
+		try {
+			response = await auth.api.signUpEmail({
+				body: {
+					email: body.email,
+					password: body.password,
+					name: body.name || body.email.split('@')[0],
+				},
+				headers: c.req.raw.headers,
+			});
+		} catch (error) {
+			const isUserExists =
+				(error as any)?.body?.code === 'USER_ALREADY_EXISTS' ||
+				(error as any)?.status === 'UNPROCESSABLE_ENTITY';
+			if (isUserExists) {
+				return c.json({ error: 'Email already registered', code: 'EMAIL_ALREADY_REGISTERED' }, 409);
+			}
+			throw error;
+		}
 
 		if (response?.user?.id) {
 			security.logEvent({ userId: response.user.id, eventType: 'REGISTER' });

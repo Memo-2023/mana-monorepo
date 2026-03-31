@@ -33,6 +33,9 @@
 		resendingVerification?: string;
 		verificationEmailSent?: string;
 		checkYourEmail?: string;
+		emailAlreadyRegistered?: string;
+		emailAlreadyRegisteredMessage?: string;
+		goToLogin?: string;
 	}
 
 	/** Default English translations */
@@ -63,6 +66,10 @@
 		resendingVerification: 'Sending...',
 		verificationEmailSent: 'Verification email sent! Please check your inbox.',
 		checkYourEmail: 'Check your email',
+		emailAlreadyRegistered: 'Email already registered',
+		emailAlreadyRegisteredMessage:
+			"An account with this email already exists. If you haven't verified your email yet, resend the verification email.",
+		goToLogin: 'Sign in instead',
 	};
 
 	interface Props {
@@ -124,6 +131,7 @@
 	let showConfirmPassword = $state(false);
 	let resendingVerification = $state(false);
 	let verificationEmailSent = $state(false);
+	let emailAlreadyRegistered = $state(false);
 
 	// Theme state - can be toggled manually, defaults to system preference
 	let userThemePreference = $state<'light' | 'dark' | null>(null);
@@ -217,6 +225,12 @@
 			} else {
 				goto(successRedirect);
 			}
+		} else if (result.error === 'EMAIL_ALREADY_REGISTERED') {
+			emailAlreadyRegistered = true;
+			needsVerification = true;
+			success = true;
+			password = '';
+			confirmPassword = '';
 		} else {
 			error = result.error || t.registrationFailed;
 		}
@@ -322,54 +336,88 @@
 					</div>
 				{/if}
 
-				<!-- Success: Needs Verification -->
+				<!-- Success: Needs Verification / Already Registered -->
 				{#if success && needsVerification}
-					<div class="mb-6 rounded-xl p-5 bg-green-500/15 border-2 border-green-500/40">
+					<div
+						class="mb-6 rounded-xl p-5 border-2"
+						class:bg-green-500={false}
+						style:background-color={emailAlreadyRegistered
+							? 'color-mix(in srgb, #f59e0b 15%, transparent)'
+							: 'color-mix(in srgb, #22c55e 15%, transparent)'}
+						style:border-color={emailAlreadyRegistered
+							? 'color-mix(in srgb, #f59e0b 40%, transparent)'
+							: 'color-mix(in srgb, #22c55e 40%, transparent)'}
+					>
 						<div class="flex items-start gap-3 mb-4">
 							<div
-								class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-green-500/20"
+								class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+								style:background-color={emailAlreadyRegistered
+									? 'color-mix(in srgb, #f59e0b 20%, transparent)'
+									: 'color-mix(in srgb, #22c55e 20%, transparent)'}
 							>
-								<svg
-									class="w-5 h-5 text-green-500"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-									></path>
-								</svg>
+								{#if emailAlreadyRegistered}
+									<svg
+										class="w-5 h-5"
+										style:color="#f59e0b"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										></path>
+									</svg>
+								{:else}
+									<svg
+										class="w-5 h-5 text-green-500"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+										></path>
+									</svg>
+								{/if}
 							</div>
 							<div>
 								<h3
 									class="font-semibold text-base mb-1"
-									style:color={isDark ? '#22c55e' : '#16a34a'}
+									style:color={emailAlreadyRegistered
+										? isDark
+											? '#fbbf24'
+											: '#d97706'
+										: isDark
+											? '#22c55e'
+											: '#16a34a'}
 								>
-									{t.checkYourEmail || 'Check your email'}
+									{emailAlreadyRegistered
+										? t.emailAlreadyRegistered || 'Email already registered'
+										: t.checkYourEmail || 'Check your email'}
 								</h3>
 								<p
 									class="text-sm"
 									style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
 								>
-									{t.accountCreated}
+									{emailAlreadyRegistered
+										? t.emailAlreadyRegisteredMessage ||
+											"An account with this email already exists. If you haven't verified your email yet, resend the verification email."
+										: t.accountCreated}
 								</p>
 							</div>
 						</div>
 
-						{#if onResendVerification}
-							<div
-								class="pt-3 border-t"
-								style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
-							>
-								<p
-									class="text-xs mb-2"
-									style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
-								>
-									Didn't receive the email?
-								</p>
+						<div
+							class="pt-3 border-t flex flex-col gap-2"
+							style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+						>
+							{#if onResendVerification}
 								<button
 									type="button"
 									onclick={handleResendVerification}
@@ -402,8 +450,20 @@
 										{t.resendVerification}
 									{/if}
 								</button>
-							</div>
-						{/if}
+							{/if}
+							{#if emailAlreadyRegistered}
+								<button
+									type="button"
+									onclick={() => goto(loginPath)}
+									class="w-full flex items-center justify-center h-11 rounded-lg font-medium transition-opacity hover:opacity-80 border-[1.5px]"
+									style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}
+									style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+									style:background-color="transparent"
+								>
+									{t.goToLogin || 'Sign in instead'}
+								</button>
+							{/if}
+						</div>
 					</div>
 				{/if}
 

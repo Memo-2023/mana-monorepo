@@ -161,7 +161,13 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 					const errorData = await response.json();
 
 					if (response.status === 409) {
-						return { success: false, error: 'Email already in use' };
+						return {
+							success: false,
+							error:
+								errorData.code === 'EMAIL_ALREADY_REGISTERED'
+									? 'EMAIL_ALREADY_REGISTERED'
+									: 'Email already in use',
+						};
 					} else if (response.status === 400) {
 						return { success: false, error: errorData.message || 'Invalid email or password' };
 					}

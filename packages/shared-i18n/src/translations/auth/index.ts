@@ -65,6 +65,9 @@ export interface AuthTranslations {
 		resendingVerification?: string;
 		verificationEmailSent?: string;
 		checkYourEmail?: string;
+		emailAlreadyRegistered?: string;
+		emailAlreadyRegisteredMessage?: string;
+		goToLogin?: string;
 	};
 	forgotPassword: {
 		titleForm: string;

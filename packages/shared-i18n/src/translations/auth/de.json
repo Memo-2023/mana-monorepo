@@ -49,7 +49,10 @@
 		"resendVerification": "Bestätigungs-E-Mail erneut senden",
 		"resendingVerification": "Wird gesendet...",
 		"verificationEmailSent": "Bestätigungs-E-Mail wurde gesendet! Bitte überprüfe deinen Posteingang.",
-		"checkYourEmail": "Überprüfe deine E-Mails"
+		"checkYourEmail": "Überprüfe deine E-Mails",
+		"emailAlreadyRegistered": "E-Mail bereits registriert",
+		"emailAlreadyRegisteredMessage": "Ein Konto mit dieser E-Mail-Adresse existiert bereits. Falls du deine E-Mail noch nicht bestätigt hast, sende die Bestätigungs-E-Mail erneut.",
+		"goToLogin": "Stattdessen anmelden"
 	},
 	"forgotPassword": {
 		"titleForm": "Passwort zurücksetzen",
