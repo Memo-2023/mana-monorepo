@@ -113,7 +113,6 @@ if (browser) {
 				'tagStripCollapsed',
 				'selectedTagIds',
 				'immersiveModeEnabled',
-				'showTasksInCalendar',
 				'sidebarCollapsed',
 				'quickViewPillViews',
 				'customDayCount',
