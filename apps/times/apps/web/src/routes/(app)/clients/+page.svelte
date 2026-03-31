@@ -5,7 +5,7 @@
 	import { getTotalDuration, formatDurationCompact } from '$lib/data/queries';
 	import type { Client, Project, TimeEntry } from '@times/shared';
 	import { PROJECT_COLORS } from '@times/shared/constants';
-	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import { ConfirmationModal } from '@manacore/shared-ui';
 	import { CaretRight } from '@manacore/shared-icons';
 
 	const allClients = getContext<{ value: Client[] }>('clients');
@@ -348,10 +348,10 @@
 	{/if}
 </div>
 
-<ConfirmDialog
+<ConfirmationModal
 	visible={deleteConfirmId !== null}
 	title={$_('common.delete')}
 	message={$_('client.deleteConfirm')}
 	onConfirm={confirmDelete}
-	onCancel={() => (deleteConfirmId = null)}
+	onClose={() => (deleteConfirmId = null)}
 />

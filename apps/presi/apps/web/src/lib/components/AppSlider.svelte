@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { AppSlider } from '@manacore/shared-ui';
 	import type { AppItem } from '@manacore/shared-ui';
-	import { MANA_APPS, APP_STATUS_LABELS, APP_SLIDER_LABELS } from '@manacore/shared-branding';
+	import { getActiveManaApps, APP_STATUS_LABELS, APP_SLIDER_LABELS } from '@manacore/shared-branding';
 
-	// Convert MANA_APPS to AppItem format (English)
-	const apps: AppItem[] = MANA_APPS.map((app) => ({
+	// Convert active apps to AppItem format (English)
+	const apps: AppItem[] = getActiveManaApps().map((app) => ({
 		name: app.name,
 		description: app.description.en,
 		longDescription: app.longDescription.en,

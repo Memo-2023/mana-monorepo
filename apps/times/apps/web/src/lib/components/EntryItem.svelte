@@ -5,7 +5,7 @@
 	import { formatDurationCompact } from '$lib/data/queries';
 	import { CurrencyDollar } from '@manacore/shared-icons';
 	import type { TimeEntry, Project, Client } from '@times/shared';
-	import ConfirmDialog from './ConfirmDialog.svelte';
+	import { ConfirmationModal } from '@manacore/shared-ui';
 
 	let {
 		entry,
@@ -200,10 +200,10 @@
 	{/if}
 </div>
 
-<ConfirmDialog
+<ConfirmationModal
 	visible={showDeleteConfirm}
 	title={$_('common.delete')}
 	message={$_('entry.deleteConfirm')}
 	onConfirm={confirmDelete}
-	onCancel={() => (showDeleteConfirm = false)}
+	onClose={() => (showDeleteConfirm = false)}
 />

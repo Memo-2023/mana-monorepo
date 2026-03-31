@@ -9,7 +9,7 @@
 	import { tokensStore } from '$lib/stores/tokens.svelte';
 	import DocumentEditor from '$lib/components/DocumentEditor.svelte';
 	import AIToolbar from '$lib/components/AIToolbar.svelte';
-	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import { ConfirmationModal } from '@manacore/shared-ui';
 	import type { Document, DocumentType } from '$lib/types';
 	import type { InsertionMode } from '$lib/services/ai';
 
@@ -164,12 +164,11 @@
 	{/if}
 </div>
 
-<ConfirmDialog
-	open={showDeleteConfirm}
+<ConfirmationModal
+	visible={showDeleteConfirm}
 	title="Dokument löschen?"
 	message="Das Dokument wird unwiderruflich gelöscht."
 	confirmLabel="Löschen"
-	destructive
 	onConfirm={handleDelete}
-	onCancel={() => (showDeleteConfirm = false)}
+	onClose={() => (showDeleteConfirm = false)}
 />

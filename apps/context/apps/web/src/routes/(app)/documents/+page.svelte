@@ -11,7 +11,7 @@
 		getAllDocumentTags,
 	} from '$lib/data/queries';
 	import DocumentCard from '$lib/components/DocumentCard.svelte';
-	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import { ConfirmationModal } from '@manacore/shared-ui';
 	import type { DocumentType } from '$lib/types';
 
 	let deleteTarget = $state<string | null>(null);
@@ -190,12 +190,11 @@
 	{/if}
 </div>
 
-<ConfirmDialog
-	open={deleteTarget !== null}
+<ConfirmationModal
+	visible={deleteTarget !== null}
 	title="Dokument löschen?"
 	message="Das Dokument wird unwiderruflich gelöscht."
 	confirmLabel="Löschen"
-	destructive
 	onConfirm={handleDeleteConfirm}
-	onCancel={() => (deleteTarget = null)}
+	onClose={() => (deleteTarget = null)}
 />

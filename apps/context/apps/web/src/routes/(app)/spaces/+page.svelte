@@ -6,7 +6,7 @@
 	import { useAllSpaces } from '$lib/data/queries';
 	import SpaceCard from '$lib/components/SpaceCard.svelte';
 	import CreateSpaceModal from '$lib/components/CreateSpaceModal.svelte';
-	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import { ConfirmationModal } from '@manacore/shared-ui';
 	import type { Space } from '$lib/types';
 
 	let searchQuery = $state('');
@@ -131,12 +131,11 @@
 	onClose={() => (showCreateModal = false)}
 />
 
-<ConfirmDialog
-	open={deleteTarget !== null}
+<ConfirmationModal
+	visible={deleteTarget !== null}
 	title="Space löschen?"
 	message="Alle Dokumente in diesem Space werden ebenfalls gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
 	confirmLabel="Löschen"
-	destructive
 	onConfirm={handleDeleteConfirm}
-	onCancel={() => (deleteTarget = null)}
+	onClose={() => (deleteTarget = null)}
 />
