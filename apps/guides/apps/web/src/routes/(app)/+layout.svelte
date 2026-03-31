@@ -1,12 +1,27 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { locale } from 'svelte-i18n';
 	import { onMount, setContext } from 'svelte';
-	import { AuthGate } from '@manacore/shared-auth-ui';
+	import { PillNavigation } from '@manacore/shared-ui';
+	import { SyncIndicator } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { guidesStore } from '$lib/stores/guides.svelte';
 	import { guidesStore as dbStore } from '$lib/data/local-store.js';
-	import { BookOpen, StackSimple, ClockCounterClockwise, Plus } from '@manacore/shared-icons';
+	import {
+		THEME_DEFINITIONS,
+		DEFAULT_THEME_VARIANTS,
+		EXTENDED_THEME_VARIANTS,
+		filterHiddenNavItems,
+	} from '@manacore/shared-theme';
+	import type { ThemeVariant } from '@manacore/shared-theme';
+	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
+	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
+	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { AuthGate, GuestWelcomeModal, SessionExpiredBanner } from '@manacore/shared-auth-ui';
+	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 
 	let { children } = $props();
 
@@ -16,102 +31,168 @@
 	setContext('openCreateGuide', () => { showCreateModal = true; });
 	setContext('openImportGuide', () => { showImportModal = true; });
 
+	// App switcher
+	let appItems = $derived(getPillAppItems('guides', undefined, undefined, authStore.user?.tier));
+
+	// Collapsed state
+	let isCollapsed = $state(false);
+
+	// Theme
+	let isDark = $derived(theme.isDark);
+	let pinnedThemes = $derived<ThemeVariant[]>(
+		[].filter((t): t is ThemeVariant => EXTENDED_THEME_VARIANTS.includes(t as ThemeVariant))
+	);
+	let visibleThemes = $derived<ThemeVariant[]>([...DEFAULT_THEME_VARIANTS, ...pinnedThemes]);
+	let themeVariantItems = $derived<PillDropdownItem[]>([
+		...visibleThemes.map((variant) => ({
+			id: variant,
+			label: THEME_DEFINITIONS[variant]?.label || variant,
+			icon: THEME_DEFINITIONS[variant]?.icon || '🎨',
+			onClick: () => theme.setVariant(variant),
+			active: (theme.variant || 'lume') === variant,
+		})),
+		{
+			id: 'all-themes',
+			label: 'Alle Themes',
+			icon: 'palette',
+			onClick: () => goto('/themes'),
+			active: false,
+		},
+	]);
+	let currentThemeVariantLabel = $derived(
+		THEME_DEFINITIONS[theme.variant]?.label || THEME_DEFINITIONS.lume?.label || 'Lume'
+	);
+
+	// Language
+	let currentLocale = $derived($locale || 'de');
+	function handleLocaleChange(newLocale: string) {
+		setLocale(newLocale as Parameters<typeof setLocale>[0]);
+	}
+	let languageItems = $derived(
+		getLanguageDropdownItems(supportedLocales, currentLocale, handleLocaleChange)
+	);
+	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
+
+	// User
+	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
+
 	// Nav items
-	const navItems = [
-		{ href: '/', icon: BookOpen, label: 'Bibliothek' },
-		{ href: '/collections', icon: StackSimple, label: 'Sammlungen' },
-		{ href: '/history', icon: ClockCounterClockwise, label: 'Verlauf' },
+	const baseNavItems: PillNavItem[] = [
+		{ href: '/', label: 'Bibliothek', icon: 'book' },
+		{ href: '/collections', label: 'Sammlungen', icon: 'stack' },
+		{ href: '/history', label: 'Verlauf', icon: 'clock-counter-clockwise' },
 	];
 
-	let currentPath = $derived($page.url.pathname);
-	let isActive = (href: string) =>
-		href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+	const navItems = $derived(filterHiddenNavItems('guides', baseNavItems, {}));
 
-	onMount(async () => {
+	// Guest welcome
+	let showGuestWelcome = $state(false);
+	function initGuestWelcome() {
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('guides')) {
+			showGuestWelcome = true;
+		}
+	}
+
+	function handleCollapsedChange(collapsed: boolean) {
+		isCollapsed = collapsed;
+	}
+	function handleToggleTheme() { theme.toggleMode(); }
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') { theme.setMode(mode); }
+	async function handleLogout() {
+		await authStore.signOut();
+		goto('/login');
+	}
+
+	async function handleAuthReady() {
 		await dbStore.initialize();
-		if (authStore.isLoggedIn) {
+		if (authStore.isAuthenticated) {
 			dbStore.startSync(() => authStore.getValidToken());
 		}
-	});
+		const savedCollapsed = localStorage.getItem('guides-nav-collapsed');
+		if (savedCollapsed === 'true') isCollapsed = true;
+		initGuestWelcome();
+	}
 </script>
 
-<AuthGate requiredTier="beta" allowGuest={true}>
-	<div class="flex h-screen overflow-hidden">
-		<!-- Sidebar (desktop) -->
-		<aside class="hidden w-56 flex-shrink-0 flex-col border-r border-border bg-surface md:flex">
-			<div class="flex items-center gap-2 px-4 py-5">
-				<span class="text-xl">📖</span>
-				<span class="text-lg font-semibold text-foreground">Guides</span>
-			</div>
+<svelte:window onkeydown={(e) => {
+	if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+		const num = parseInt(e.key);
+		if (num >= 1 && num <= baseNavItems.length) {
+			e.preventDefault();
+			goto(baseNavItems[num - 1].href);
+		}
+	}
+}} />
 
-			<nav class="flex flex-1 flex-col gap-1 px-2">
-				{#each navItems as item}
-					<a
-						href={item.href}
-						class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors
-						{isActive(item.href)
-							? 'bg-primary/10 text-primary font-medium'
-							: 'text-muted-foreground hover:bg-accent hover:text-foreground'}"
-					>
-						<item.icon class="h-4 w-4" />
-						{item.label}
-					</a>
-				{/each}
-			</nav>
+<AuthGate
+	{authStore}
+	{goto}
+	allowGuest={true}
+	onReady={handleAuthReady}
+	requiredTier={getManaApp('guides')?.requiredTier}
+	appName={getManaApp('guides')?.name}
+>
+	<div class="flex flex-col min-h-screen">
+		<PillNavigation
+			items={navItems}
+			currentPath={$page.url.pathname}
+			appName="Guides"
+			homeRoute="/"
+			onToggleTheme={handleToggleTheme}
+			{isDark}
+			{isCollapsed}
+			onCollapsedChange={handleCollapsedChange}
+			showThemeToggle={true}
+			showThemeVariants={true}
+			{themeVariantItems}
+			{currentThemeVariantLabel}
+			themeMode={theme.mode}
+			onThemeModeChange={handleThemeModeChange}
+			showLanguageSwitcher={true}
+			{languageItems}
+			{currentLanguageLabel}
+			showLogout={authStore.isAuthenticated}
+			onLogout={handleLogout}
+			loginHref="/login"
+			primaryColor="#0d9488"
+			showAppSwitcher={true}
+			{appItems}
+			{userEmail}
+			allAppsHref="/apps"
+		/>
 
-			<div class="p-3 flex flex-col gap-2">
-				<button
-					onclick={() => (showCreateModal = true)}
-					class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
-				>
-					<Plus class="h-4 w-4" />
-					Neue Anleitung
-				</button>
-				<button
-					onclick={() => (showImportModal = true)}
-					class="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-				>
-					↓ Importieren
-				</button>
-			</div>
-		</aside>
-
-		<!-- Main content -->
-		<main class="flex flex-1 flex-col overflow-hidden">
-			<div class="flex-1 overflow-y-auto pb-20 md:pb-0">
-				{@render children()}
-			</div>
+		<main class="relative z-0 pb-24" style="padding-top: 0">
+			{@render children()}
 		</main>
+
+		<SyncIndicator />
 	</div>
 
-	<!-- Bottom nav (mobile) -->
-	<nav class="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-surface md:hidden">
-		<div class="flex">
-			{#each navItems as item}
-				<a
-					href={item.href}
-					class="flex flex-1 flex-col items-center gap-1 py-3 text-xs transition-colors
-					{isActive(item.href) ? 'text-primary' : 'text-muted-foreground'}"
-				>
-					<item.icon class="h-5 w-5" />
-					{item.label}
-				</a>
-			{/each}
-		</div>
-	</nav>
-
-	<!-- FAB (mobile) -->
+	<!-- FAB -->
 	<button
 		onclick={() => (showCreateModal = true)}
-		class="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 active:scale-95 md:hidden"
+		class="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
 		aria-label="Neue Anleitung erstellen"
 	>
-		<Plus class="h-6 w-6" />
+		<svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"><path d="M228 128a12 12 0 0 1-12 12h-76v76a12 12 0 0 1-24 0v-76H40a12 12 0 0 1 0-24h76V40a12 12 0 0 1 24 0v76h76a12 12 0 0 1 12 12Z"/></svg>
 	</button>
+
+	<!-- Guest Welcome -->
+	<GuestWelcomeModal
+		appId="guides"
+		visible={showGuestWelcome}
+		onClose={() => (showGuestWelcome = false)}
+		onLogin={() => goto('/login')}
+		onRegister={() => goto('/register')}
+		locale={currentLocale === 'de' ? 'de' : 'en'}
+	/>
+
+	{#if authStore.isAuthenticated}
+		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{/if}
 </AuthGate>
 
 {#if showCreateModal}
-	<!-- GuideEditModal dynamically imported to keep bundle small -->
 	{#await import('$lib/components/GuideEditModal.svelte') then { default: GuideEditModal }}
 		<GuideEditModal
 			open={true}
