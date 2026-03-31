@@ -848,3 +848,38 @@ curl http://localhost:3001/api/v1/auth/jwks
 2. Check token format: `Bearer <token>`
 3. Check token hasn't expired
 4. Check MANA_CORE_AUTH_URL is correct
+
+---
+
+## Auth UX Patterns
+
+### Email Verification Flow
+
+**Rule: Distinguish all email-related error states, never show a generic error.**
+
+| User Action | State | Expected UX |
+|-------------|-------|-------------|
+| Register with new email | `needsVerification: true` | Green "Check your email" panel + Resend button |
+| Register with existing **unverified** email | `EMAIL_ALREADY_REGISTERED` | Amber warning panel + Resend button + "Sign in instead" link |
+| Register with existing **verified** email | `EMAIL_ALREADY_REGISTERED` | Same amber panel — user should click "Sign in instead" |
+| Login with unverified email | `EMAIL_NOT_VERIFIED` | Inline error + Resend button (not generic "invalid credentials") |
+| Login with wrong password | `INVALID_CREDENTIALS` | Inline error — no resend button |
+
+**Implementation:**
+
+- Backend (`auth.ts`): catch `USER_ALREADY_EXISTS` from Better Auth → return `{ code: 'EMAIL_ALREADY_REGISTERED' }` (409)
+- Backend (`auth.ts`): catch `EMAIL_NOT_VERIFIED` / `status: 'FORBIDDEN'` on login → return `{ code: 'EMAIL_NOT_VERIFIED' }` (403)
+- `authService.ts`: map both codes to typed error strings, never swallow as generic error
+- `RegisterPage`: `emailAlreadyRegistered` state triggers amber panel with dual CTAs
+- `LoginPage`: `showEmailNotVerified` state triggers resend button below error message
+
+**Key principle:** A user who registered but never verified should always be able to request a new verification email, from *both* the login and register pages, without knowing which page to go to.
+
+### Verification Email Redirect
+
+The verification email must redirect back to the source app, not to `auth.mana.how/`.
+
+- `sourceAppStore.set(email, sourceAppUrl)` is called before `signUpEmail` and before `sendVerificationEmail`
+- The `sendVerificationEmail` callback in `better-auth.config.ts` sets **`callbackURL`** (not `redirectTo`) on the verification URL
+- Better Auth uses `callbackURL` for the post-verification redirect; `redirectTo` is ignored
+- `sourceAppUrl` comes from `window.location.origin` in the browser (set by `createManaAuthStore`)
