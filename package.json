@@ -16,6 +16,7 @@
 		"clean": "turbo run clean",
 		"format": "prettier --config .prettierrc.json --write \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
 		"format:check": "prettier --config .prettierrc.json --check \"**/*.{ts,tsx,js,jsx,json,md,svelte,astro}\"",
+		"check:status": "bash scripts/check-status.sh",
 		"validate:dockerfiles": "node scripts/validate-dockerfiles.mjs",
 		"audit:deps": "node scripts/audit-workspace-deps.mjs",
 		"generate:dockerfiles": "node scripts/generate-dockerfiles.mjs",

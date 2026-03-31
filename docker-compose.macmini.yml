@@ -1710,6 +1710,23 @@ services:
       retries: 3
       start_period: 20s
 
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: mana-mon-blackbox
+    restart: always
+    mem_limit: 32m
+    command: ["--config.file=/etc/blackbox/blackbox.yml"]
+    volumes:
+      - ./docker/blackbox/blackbox.yml:/etc/blackbox/blackbox.yml:ro
+    ports:
+      - "9115:9115"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9115/"]
+      interval: 300s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   # ============================================
   # Alerting Stack (Ports 9093-9095)
   # ============================================

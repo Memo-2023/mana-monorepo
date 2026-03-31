@@ -243,6 +243,111 @@ scrape_configs:
     scrape_interval: 30s
 
   # ============================================
+  # Blackbox Exporter — HTTP Uptime Probes
+  # ============================================
+
+  # Web Apps (SvelteKit frontends)
+  - job_name: 'blackbox-web'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://mana.how
+          - https://chat.mana.how
+          - https://todo.mana.how
+          - https://calendar.mana.how
+          - https://contacts.mana.how
+          - https://clock.mana.how
+          - https://photos.mana.how
+          - https://picture.mana.how
+          - https://storage.mana.how
+          - https://presi.mana.how
+          - https://nutriphi.mana.how
+          - https://planta.mana.how
+          - https://calc.mana.how
+          - https://zitare.mana.how
+          - https://manadeck.mana.how
+          - https://skilltree.mana.how
+          - https://mukke.mana.how
+          - https://citycorners.mana.how
+          - https://playground.mana.how
+          - https://whopxl.mana.how
+          - https://arcade.mana.how
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # API Health Endpoints
+  - job_name: 'blackbox-api'
+    metrics_path: /probe
+    params:
+      module: [http_health]
+    static_configs:
+      - targets:
+          - https://auth.mana.how/health
+          - https://api.mana.how/health
+          - https://chat-api.mana.how/health
+          - https://todo-api.mana.how/health
+          - https://calendar-api.mana.how/health
+          - https://contacts-api.mana.how/health
+          - https://storage-api.mana.how/health
+          - https://nutriphi-api.mana.how/health
+          - https://planta-api.mana.how/health
+          - https://picture-api.mana.how/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # Infrastructure & Monitoring Tools
+  - job_name: 'blackbox-infra'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://git.mana.how
+          - https://grafana.mana.how
+          - https://stats.mana.how
+          - https://glitchtip.mana.how
+          - https://matrix.mana.how
+          - https://element.mana.how
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # GPU Server Services
+  - job_name: 'blackbox-gpu'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://gpu-ollama.mana.how
+          - https://gpu-stt.mana.how
+          - https://gpu-tts.mana.how
+          - https://gpu-img.mana.how
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # ============================================
   # Pushgateway (deploy metrics, batch jobs)
   # ============================================
   - job_name: 'pushgateway'

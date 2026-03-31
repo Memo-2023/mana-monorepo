@@ -367,6 +367,58 @@ groups:
           summary: "OIDC token endpoint errors"
           description: "OIDC token endpoint is returning 5xx errors. SSO may be affected."
 
+  - name: uptime_alerts
+    rules:
+      # Web App offline (HTTP probe failed)
+      - alert: WebAppDown
+        expr: probe_success{job="blackbox-web"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Web App offline: {{ $labels.instance }}"
+          description: "{{ $labels.instance }} hat seit 2 Minuten keine gültige HTTP-Antwort zurückgegeben."
+
+      # API Health Endpoint offline
+      - alert: APIDown
+        expr: probe_success{job="blackbox-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API offline: {{ $labels.instance }}"
+          description: "{{ $labels.instance }} antwortet nicht auf den Health-Endpoint."
+
+      # Infra Tool offline (Grafana, Git, etc.)
+      - alert: InfraToolDown
+        expr: probe_success{job="blackbox-infra"} == 0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Infra-Dienst offline: {{ $labels.instance }}"
+          description: "{{ $labels.instance }} ist seit 3 Minuten nicht erreichbar."
+
+      # GPU Server Service offline
+      - alert: GPUServiceDown
+        expr: probe_success{job="blackbox-gpu"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GPU-Dienst offline: {{ $labels.instance }}"
+          description: "{{ $labels.instance }} (GPU-Server) ist seit 5 Minuten nicht erreichbar."
+
+      # Slow HTTP response (> 5s)
+      - alert: SlowHTTPResponse
+        expr: probe_duration_seconds{job=~"blackbox-web|blackbox-api"} > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Langsame HTTP-Antwort: {{ $labels.instance }}"
+          description: "{{ $labels.instance }} antwortet mit {{ $value | humanizeDuration }} (> 5s)."
+
   - name: llm_alerts
     rules:
       # mana-llm Down
