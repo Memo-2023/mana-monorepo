@@ -22,6 +22,7 @@
 	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { getLanguageDropdownItems, getCurrentLanguageLabel } from '@manacore/shared-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { List, X } from '@manacore/shared-icons';
 	import { api } from '$lib/api';
 
 	let appItems = $derived(
@@ -295,23 +296,9 @@
 			title={showNav ? $_('nav.hideNav') : $_('nav.showNav')}
 		>
 			{#if !showNav}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h16"
-					/>
-				</svg>
+				<List size={24} class="fab-icon" />
 			{:else}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
+				<X size={24} class="fab-icon" />
 			{/if}
 		</button>
 

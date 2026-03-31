@@ -5,6 +5,7 @@
 	import { templatesStore } from '$lib/stores/templates.svelte';
 	import { conversationService } from '$lib/services/conversation';
 	import { PageHeader } from '@manacore/shared-ui';
+	import { Plus, FileText } from '@manacore/shared-icons';
 	import TemplateCard from '$lib/components/templates/TemplateCard.svelte';
 	import TemplateForm from '$lib/components/templates/TemplateForm.svelte';
 	import type { Template } from '@chat/types';
@@ -111,14 +112,7 @@
 					class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium
                    hover:bg-primary/90 transition-colors"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<Plus size={20} />
 					Neue Vorlage
 				</button>
 			{/snippet}
@@ -128,19 +122,7 @@
 		{#if templates.length === 0}
 			<!-- Empty State -->
 			<div class="text-center py-16">
-				<svg
-					class="w-16 h-16 text-muted-foreground mx-auto mb-4"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="1.5"
-						d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-					/>
-				</svg>
+				<FileText size={64} class="text-muted-foreground mx-auto mb-4" />
 				<h3 class="text-lg font-medium text-foreground mb-1">Keine Vorlagen vorhanden</h3>
 				<p class="text-muted-foreground mb-4">Erstelle deine erste Vorlage, um loszulegen</p>
 				<button
@@ -148,14 +130,7 @@
 					class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium
                  hover:bg-primary/90 transition-colors"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<Plus size={20} />
 					Erste Vorlage erstellen
 				</button>
 			</div>

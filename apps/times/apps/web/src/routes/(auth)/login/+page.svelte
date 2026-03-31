@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { Clock } from '@manacore/shared-icons';
 	import { getPillAppItems } from '@manacore/shared-branding';
 
 	let email = $state('');
@@ -106,14 +107,7 @@
 			<div
 				class="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--primary))]"
 			>
-				<svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-					/>
-				</svg>
+				<Clock size={32} class="text-white" />
 			</div>
 			<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">Times</h1>
 			<p class="mt-1 text-sm text-[hsl(var(--muted-foreground))]">Zeiterfassung</p>

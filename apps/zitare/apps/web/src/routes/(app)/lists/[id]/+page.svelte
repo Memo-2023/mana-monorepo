@@ -10,6 +10,14 @@
 	import { toast } from '$lib/stores/toast.svelte';
 	import { QUOTES, type Quote } from '@zitare/content';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
+	import {
+		MagnifyingGlass,
+		X,
+		PencilSimple,
+		Plus,
+		ListBullets,
+		Trash,
+	} from '@manacore/shared-icons';
 
 	const allQuotes = QUOTES;
 	const allLists: { readonly value: QuoteList[] } = getContext('lists');
@@ -198,23 +206,11 @@
 				<div class="header-actions">
 					{#if listQuotes.length > 0}
 						<button class="icon-btn" onclick={toggleSearch} aria-label={$_('common.search')}>
-							<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								{#if isSearchOpen}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								{:else}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-									/>
-								{/if}
-							</svg>
+							{#if isSearchOpen}
+								<X size={20} />
+							{:else}
+								<MagnifyingGlass size={20} />
+							{/if}
 						</button>
 					{/if}
 
@@ -223,14 +219,7 @@
 						onclick={openEditModal}
 						aria-label={$_('lists.detail.editModal.title')}
 					>
-						<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-							/>
-						</svg>
+						<PencilSimple size={20} />
 					</button>
 
 					<button
@@ -238,14 +227,7 @@
 						onclick={openAddQuotesModal}
 						aria-label={$_('lists.detail.addQuotes')}
 					>
-						<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 4v16m8-8H4"
-							/>
-						</svg>
+						<Plus size={20} weight="bold" />
 					</button>
 				</div>
 			</div>
@@ -266,52 +248,19 @@
 		{#if listQuotes.length === 0}
 			<div class="empty-state">
 				<div class="empty-icon">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="64"
-						height="64"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="1.5"
-					>
-						<line x1="8" y1="6" x2="21" y2="6"></line>
-						<line x1="8" y1="12" x2="21" y2="12"></line>
-						<line x1="8" y1="18" x2="21" y2="18"></line>
-						<line x1="3" y1="6" x2="3.01" y2="6"></line>
-						<line x1="3" y1="12" x2="3.01" y2="12"></line>
-						<line x1="3" y1="18" x2="3.01" y2="18"></line>
-					</svg>
+					<ListBullets size={64} />
 				</div>
 				<h3>{$_('lists.detail.emptyTitle')}</h3>
 				<p>{$_('lists.detail.emptyDescription')}</p>
 				<button class="cta-button" onclick={openAddQuotesModal}>
-					<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<Plus size={20} weight="bold" />
 					{$_('lists.detail.addQuotes')}
 				</button>
 			</div>
 		{:else if filteredQuotes.length === 0}
 			<div class="empty-state">
 				<div class="empty-icon">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="64"
-						height="64"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="1.5"
-					>
-						<circle cx="11" cy="11" r="8"></circle>
-						<path d="m21 21-4.35-4.35"></path>
-					</svg>
+					<MagnifyingGlass size={64} />
 				</div>
 				<h3>{$_('lists.detail.noSearchResults')}</h3>
 				<p>{$_('lists.detail.noSearchResultsDescription')}</p>
@@ -332,14 +281,7 @@
 									class="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin"
 								></div>
 							{:else}
-								<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								</svg>
+								<X size={16} />
 							{/if}
 							{$_('lists.detail.remove')}
 						</button>

@@ -4,6 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { documentService } from '$lib/services/document';
 	import { PageHeader } from '@manacore/shared-ui';
+	import { ArrowsClockwise, FileText } from '@manacore/shared-icons';
 	import type { DocumentWithConversation } from '@chat/types';
 
 	let documents = $state<DocumentWithConversation[]>([]);
@@ -92,14 +93,7 @@
                    hover:bg-muted rounded-lg transition-colors"
 					aria-label="Aktualisieren"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-						/>
-					</svg>
+					<ArrowsClockwise size={20} />
 				</button>
 			{/snippet}
 		</PageHeader>
@@ -114,19 +108,7 @@
 		{:else if documents.length === 0}
 			<!-- Empty State -->
 			<div class="text-center py-16">
-				<svg
-					class="w-16 h-16 text-muted-foreground mx-auto mb-4"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="1.5"
-						d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-					/>
-				</svg>
+				<FileText size={64} class="text-muted-foreground mx-auto mb-4" />
 				<h3 class="text-lg font-medium text-foreground mb-1">Keine Dokumente gefunden</h3>
 				<p class="text-muted-foreground max-w-sm mx-auto">
 					Erstelle ein neues Dokument in einer Konversation mit aktiviertem Dokumentmodus.

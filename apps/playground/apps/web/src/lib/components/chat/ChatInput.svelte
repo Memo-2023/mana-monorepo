@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { chatStore } from '$lib/stores/chat.svelte';
 	import { comparisonStore } from '$lib/stores/comparison.svelte';
+	import { Stop, PaperPlaneRight } from '@manacore/shared-icons';
 
 	let input = $state('');
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
@@ -62,9 +63,7 @@
 				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors"
 				style="background-color: var(--color-error);"
 			>
-				<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-					<rect x="6" y="6" width="12" height="12" rx="1" />
-				</svg>
+				<Stop size={20} weight="fill" />
 			</button>
 		{:else}
 			<button
@@ -74,14 +73,7 @@
 				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors disabled:opacity-50"
 				style="background-color: var(--color-primary);"
 			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-					/>
-				</svg>
+				<PaperPlaneRight size={20} />
 			</button>
 		{/if}
 	</div>

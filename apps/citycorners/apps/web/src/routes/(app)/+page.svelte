@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Plus, MapPin, User } from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -38,9 +39,7 @@
 			class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-all hover:bg-primary/90 hover:shadow-lg"
 			title={$_('cities.add')}
 		>
-			<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-			</svg>
+			<Plus size={20} weight="bold" />
 		</a>
 	{/if}
 </header>
@@ -142,38 +141,14 @@
 						<span
 							class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
 						>
-							<svg
-								class="h-3 w-3"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0zM19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-								/>
-							</svg>
+							<MapPin size={12} />
 							{count}
 						</span>
 						{#if cityStats.contributorCount > 0}
 							<span
 								class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs text-amber-600 dark:text-amber-400"
 							>
-								<svg
-									class="h-3 w-3"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"
-									/>
-								</svg>
+								<User size={12} />
 								{cityStats.contributorCount}
 							</span>
 						{/if}

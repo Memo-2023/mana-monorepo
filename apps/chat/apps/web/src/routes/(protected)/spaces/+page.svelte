@@ -4,6 +4,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { spacesStore } from '$lib/stores/spaces.svelte';
 	import { PageHeader } from '@manacore/shared-ui';
+	import { Plus, UsersThree } from '@manacore/shared-icons';
 	import SpaceCard from '$lib/components/spaces/SpaceCard.svelte';
 	import SpaceForm from '$lib/components/spaces/SpaceForm.svelte';
 	import type { Space } from '@chat/types';
@@ -99,14 +100,7 @@
 					class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium
                    hover:bg-primary/90 transition-colors"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<Plus size={20} />
 					Neuen Space erstellen
 				</button>
 			{/snippet}
@@ -122,19 +116,7 @@
 		{:else if spacesStore.spaces.length === 0}
 			<!-- Empty State -->
 			<div class="text-center py-16">
-				<svg
-					class="w-16 h-16 text-muted-foreground mx-auto mb-4"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="1.5"
-						d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-					/>
-				</svg>
+				<UsersThree size={64} class="text-muted-foreground mx-auto mb-4" />
 				<h3 class="text-lg font-medium text-foreground mb-1">Keine Spaces gefunden</h3>
 				<p class="text-muted-foreground mb-4">
 					Erstelle einen neuen Space oder frage nach einer Einladung
@@ -144,14 +126,7 @@
 					class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium
                  hover:bg-primary/90 transition-colors"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<Plus size={20} />
 					Ersten Space erstellen
 				</button>
 			</div>

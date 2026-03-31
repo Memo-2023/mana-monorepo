@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import { templateCollection, timeEntryCollection } from '$lib/data/local-store';
 	import { timerStore } from '$lib/stores/timer.svelte';
+	import { X } from '@manacore/shared-icons';
 	import type { EntryTemplate, Project, Client } from '@times/shared';
 
 	const allTemplates = getContext<{ value: EntryTemplate[] }>('templates');
@@ -181,14 +182,7 @@
 						onclick={() => deleteTemplate(template.id)}
 						class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-red-500"
 					>
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={16} />
 					</button>
 				</div>
 			{/each}

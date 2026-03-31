@@ -9,6 +9,7 @@
 	import TimerIndicator from '$lib/components/TimerIndicator.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { setLocale, supportedLocales } from '$lib/i18n';
+	import { Clock, User, SignOut, Play } from '@manacore/shared-icons';
 	import { SyncIndicator } from '@manacore/shared-ui';
 	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
@@ -103,14 +104,7 @@
 						<div
 							class="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--primary))]"
 						>
-							<svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
+							<Clock size={16} class="text-white" />
 						</div>
 						<span class="text-lg font-bold text-[hsl(var(--foreground))]">Times</span>
 					</a>
@@ -149,14 +143,7 @@
 							href="/profile"
 							class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
 						>
-							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-								/>
-							</svg>
+							<User size={20} />
 						</a>
 
 						<button
@@ -164,14 +151,7 @@
 							class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-red-500"
 							title="Abmelden"
 						>
-							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-								/>
-							</svg>
+							<SignOut size={20} />
 						</button>
 					</div>
 				</div>
@@ -204,9 +184,7 @@
 		onclick={() => goto('/?action=start')}
 		class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-lg transition-transform hover:scale-105 md:hidden"
 	>
-		<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-			<polygon points="5 3 19 12 5 21 5 3" />
-		</svg>
+		<Play size={24} weight="fill" />
 	</button>
 
 	<GuestWelcomeModal

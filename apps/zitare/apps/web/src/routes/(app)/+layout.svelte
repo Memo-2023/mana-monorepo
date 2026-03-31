@@ -41,6 +41,7 @@
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { QUOTES, type Quote } from '@zitare/content';
 	import { zitareStore } from '$lib/data/local-store';
+	import { List as ListIcon, X } from '@manacore/shared-icons';
 
 	const allTags = useAllSharedTags();
 	setContext('tags', allTags);
@@ -350,23 +351,9 @@
 				title={zitareSettings.pillNavCollapsed ? $_('nav.showNav') : $_('nav.hideNav')}
 			>
 				{#if zitareSettings.pillNavCollapsed}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 6h16M4 12h16M4 18h16"
-						/>
-					</svg>
+					<ListIcon size={24} class="fab-icon" />
 				{:else}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X size={24} class="fab-icon" />
 				{/if}
 			</button>
 		{/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { Plus } from '@manacore/shared-icons';
 	import { getContext } from 'svelte';
 	import { categoriesStore } from '$lib/stores/categories.svelte';
 	import type { Category } from '@inventar/shared';
@@ -69,9 +70,7 @@
 			onclick={startCreate}
 			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
 		>
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={16} />
 			{$_('category.create')}
 		</button>
 	</div>

@@ -9,6 +9,7 @@
 		formatDurationCompact,
 		formatDurationDecimal,
 	} from '$lib/data/queries';
+	import { CaretLeft } from '@manacore/shared-icons';
 	import EntryList from '$lib/components/EntryList.svelte';
 	import type { Project, Client, TimeEntry } from '@times/shared';
 
@@ -58,14 +59,7 @@
 				href="/clients"
 				class="mb-3 inline-flex items-center gap-1 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
 			>
-				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 19l-7-7 7-7"
-					/>
-				</svg>
+				<CaretLeft size={16} />
 				{$_('nav.clients')}
 			</a>
 

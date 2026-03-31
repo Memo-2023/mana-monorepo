@@ -139,17 +139,18 @@
 	.view-column {
 		min-height: 250px;
 		max-height: calc(100vh - 280px);
-		background: rgba(255, 255, 255, 0.5);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		border-radius: 1.5rem;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+		background: #fffef5;
+		border-radius: 0.375rem;
+		box-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.08),
+			0 0 0 1px rgba(0, 0, 0, 0.04);
 	}
 
 	:global(.dark) .view-column {
-		background: rgba(255, 255, 255, 0.08);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		background: #252220;
+		box-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.25),
+			0 0 0 1px rgba(255, 255, 255, 0.06);
 	}
 
 	.tasks-container {
@@ -185,7 +186,7 @@
 	:global(.drop-target) {
 		outline: 2px dashed #8b5cf6;
 		outline-offset: -2px;
-		border-radius: 1.5rem;
-		background: rgba(139, 92, 246, 0.05);
+		border-radius: 0.375rem;
+		background: rgba(139, 92, 246, 0.04);
 	}
 </style>
