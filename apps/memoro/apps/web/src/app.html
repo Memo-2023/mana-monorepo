@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<!-- Prevent flash of wrong theme - must be first -->
+		<style>
+			html, body { background-color: #101010; }
+			html:not(.dark), html:not(.dark) body { background-color: #dddddd; }
+		</style>
+		<script>
+			(function() {
+				const THEME_STORAGE_KEY = 'memoro-theme';
+				let isDark = true; // Default to dark to prevent white flash
+
+				try {
+					const stored = localStorage.getItem(THEME_STORAGE_KEY);
+					if (stored) {
+						const parsed = JSON.parse(stored);
+						if (parsed.mode === 'dark') {
+							isDark = true;
+						} else if (parsed.mode === 'light') {
+							isDark = false;
+						} else {
+							isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+						}
+					} else {
+						isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+					}
+				} catch (e) {
+					isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				}
+
+				// Apply immediately to both html and body
+				var bg = isDark ? '#101010' : '#dddddd';
+				document.documentElement.style.setProperty('background-color', bg, 'important');
+				if (isDark) {
+					document.documentElement.classList.add('dark');
+				} else {
+					document.documentElement.classList.remove('dark');
+				}
+			})();
+		</script>
+
+		<!-- Favicon -->
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<meta name="theme-color" content="#F7D44C" />
+
+		<!-- Google Identity Services -->
+		<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+		<!-- Apple Sign In JS SDK -->
+		<script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover" style="background-color: inherit;">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

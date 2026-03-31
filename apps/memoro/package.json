@@ -1,0 +1,15 @@
+{
+	"name": "memoro",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Memoro - AI-powered voice recording & memo management",
+	"scripts": {
+		"dev": "pnpm run --filter=@memoro/* --parallel dev",
+		"dev:backend": "pnpm --filter @memoro/backend start:dev",
+		"dev:audio-backend": "pnpm --filter @memoro/audio-backend start:dev",
+		"dev:web": "pnpm --filter @memoro/web dev",
+		"dev:mobile": "pnpm --filter @memoro/mobile start",
+		"dev:landing": "pnpm --filter @memoro/landing dev"
+	},
+	"packageManager": "pnpm@9.15.0"
+}
