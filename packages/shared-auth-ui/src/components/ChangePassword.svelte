@@ -221,26 +221,18 @@
 	.change-password {
 		padding: 1rem;
 		border-radius: 0.75rem;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	:global(.light) .change-password {
-		border-color: rgba(0, 0, 0, 0.1);
-		background: rgba(0, 0, 0, 0.02);
+		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		background: hsl(var(--theme-surface, 0 0% 100%) / 0.5);
 	}
 
 	.section-title {
 		font-size: 1rem;
 		font-weight: 600;
 		margin: 0 0 1rem;
-		color: rgba(255, 255, 255, 0.9);
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 	}
 
-	:global(.light) .section-title {
-		color: rgba(0, 0, 0, 0.9);
-	}
-
+	/* Semantic green kept */
 	.success-message {
 		padding: 0.625rem 0.75rem;
 		margin-bottom: 0.75rem;
@@ -255,6 +247,7 @@
 		margin: 0;
 	}
 
+	/* Semantic red kept */
 	.error-message {
 		padding: 0.625rem 0.75rem;
 		margin-bottom: 0.75rem;
@@ -278,11 +271,7 @@
 		font-size: 0.8125rem;
 		font-weight: 500;
 		margin-bottom: 0.375rem;
-		color: rgba(255, 255, 255, 0.7);
-	}
-
-	:global(.light) .input-label {
-		color: rgba(0, 0, 0, 0.7);
+		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
 	}
 
 	.input-wrapper {
@@ -293,20 +282,14 @@
 		width: 100%;
 		height: 2.75rem;
 		padding: 0 0.75rem;
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
 		border-radius: 0.5rem;
 		font-size: 0.9375rem;
-		background: rgba(0, 0, 0, 0.2);
-		color: #fff;
+		background: hsl(var(--theme-background, 0 0% 100%));
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 		transition:
 			border-color 0.2s,
 			box-shadow 0.2s;
-	}
-
-	:global(.light) .input-field {
-		background: rgba(255, 255, 255, 0.8);
-		border-color: rgba(0, 0, 0, 0.1);
-		color: #000;
 	}
 
 	.input-field.has-icon {
@@ -318,6 +301,7 @@
 		box-shadow: 0 0 0 2px var(--ring-color, currentColor);
 	}
 
+	/* Semantic red kept */
 	.input-field.input-error {
 		border-color: #ef4444;
 	}
@@ -329,7 +313,7 @@
 		transform: translateY(-50%);
 		background: none;
 		border: none;
-		color: rgba(255, 255, 255, 0.5);
+		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
 		cursor: pointer;
 		padding: 0.25rem;
 		display: flex;
@@ -337,28 +321,17 @@
 		justify-content: center;
 	}
 
-	:global(.light) .password-toggle {
-		color: rgba(0, 0, 0, 0.5);
-	}
-
 	.password-toggle:hover {
-		color: rgba(255, 255, 255, 0.8);
-	}
-
-	:global(.light) .password-toggle:hover {
-		color: rgba(0, 0, 0, 0.8);
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 	}
 
 	.field-hint {
 		font-size: 0.75rem;
 		margin: 0.25rem 0 0;
-		color: rgba(255, 255, 255, 0.4);
+		color: hsl(var(--theme-muted-foreground, 220 9% 46%) / 0.7);
 	}
 
-	:global(.light) .field-hint {
-		color: rgba(0, 0, 0, 0.4);
-	}
-
+	/* Semantic red kept */
 	.field-hint.error {
 		color: #ef4444;
 	}
@@ -372,12 +345,8 @@
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: opacity 0.2s;
-		color: rgba(255, 255, 255, 0.9);
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 		margin-top: 0.5rem;
-	}
-
-	:global(.light) .submit-button {
-		color: rgba(0, 0, 0, 0.9);
 	}
 
 	.submit-button:hover:not(:disabled) {

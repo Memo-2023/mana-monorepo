@@ -184,32 +184,23 @@
 		text-align: center;
 		padding: 2rem;
 		border-radius: 1rem;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	:global(.light) .onboarding-card {
-		border-color: rgba(0, 0, 0, 0.1);
-		background: rgba(0, 0, 0, 0.02);
+		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		background: hsl(var(--theme-surface, 0 0% 100%) / 0.5);
 	}
 
 	.icon-circle {
 		width: 4rem;
 		height: 4rem;
 		border-radius: 50%;
-		border: 2px solid rgba(255, 255, 255, 0.2);
+		border: 2px solid hsl(var(--theme-border, 220 13% 91%));
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-bottom: 1.25rem;
-		color: rgba(255, 255, 255, 0.8);
+		color: hsl(var(--theme-foreground, 220 9% 10%) / 0.7);
 	}
 
-	:global(.light) .icon-circle {
-		border-color: rgba(0, 0, 0, 0.15);
-		color: rgba(0, 0, 0, 0.7);
-	}
-
+	/* Semantic green kept */
 	.success-icon {
 		border-color: #22c55e;
 		color: #22c55e;
@@ -219,24 +210,17 @@
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin: 0 0 0.5rem;
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	:global(.light) .onboarding-title {
-		color: rgba(0, 0, 0, 0.9);
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 	}
 
 	.onboarding-description {
 		font-size: 0.875rem;
-		color: rgba(255, 255, 255, 0.6);
+		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
 		margin: 0 0 1.5rem;
 		line-height: 1.5;
 	}
 
-	:global(.light) .onboarding-description {
-		color: rgba(0, 0, 0, 0.6);
-	}
-
+	/* Semantic red kept */
 	.error-message {
 		width: 100%;
 		padding: 0.625rem 0.75rem;
@@ -261,22 +245,13 @@
 		gap: 0.75rem;
 		padding: 1.25rem;
 		border-radius: 0.75rem;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid hsl(var(--theme-border, 220 13% 91%));
+		background: hsl(var(--theme-surface, 0 0% 100%) / 0.5);
 		margin-bottom: 1rem;
 	}
 
-	:global(.light) .option-card {
-		border-color: rgba(0, 0, 0, 0.1);
-		background: rgba(0, 0, 0, 0.02);
-	}
-
 	.option-icon {
-		color: rgba(255, 255, 255, 0.7);
-	}
-
-	:global(.light) .option-icon {
-		color: rgba(0, 0, 0, 0.6);
+		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
 	}
 
 	.option-content {
@@ -287,22 +262,14 @@
 		font-size: 0.9375rem;
 		font-weight: 600;
 		margin: 0 0 0.25rem;
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	:global(.light) .option-title {
-		color: rgba(0, 0, 0, 0.9);
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 	}
 
 	.option-description {
 		font-size: 0.8125rem;
-		color: rgba(255, 255, 255, 0.5);
+		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
 		margin: 0;
 		line-height: 1.4;
-	}
-
-	:global(.light) .option-description {
-		color: rgba(0, 0, 0, 0.5);
 	}
 
 	.setup-button {
@@ -314,12 +281,8 @@
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: opacity 0.2s;
-		color: rgba(255, 255, 255, 0.9);
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 		background: transparent;
-	}
-
-	:global(.light) .setup-button {
-		color: rgba(0, 0, 0, 0.9);
 	}
 
 	.setup-button:hover:not(:disabled) {
@@ -333,12 +296,8 @@
 
 	.hint-text {
 		font-size: 0.8125rem;
-		color: rgba(255, 255, 255, 0.4);
+		color: hsl(var(--theme-muted-foreground, 220 9% 46%) / 0.7);
 		margin: 0 0 1.25rem;
-	}
-
-	:global(.light) .hint-text {
-		color: rgba(0, 0, 0, 0.4);
 	}
 
 	.skip-button {
@@ -346,22 +305,14 @@
 		border: none;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: rgba(255, 255, 255, 0.5);
+		color: hsl(var(--theme-muted-foreground, 220 9% 46%));
 		cursor: pointer;
 		padding: 0.5rem 1rem;
 		transition: color 0.2s;
 	}
 
-	:global(.light) .skip-button {
-		color: rgba(0, 0, 0, 0.5);
-	}
-
 	.skip-button:hover {
-		color: rgba(255, 255, 255, 0.8);
-	}
-
-	:global(.light) .skip-button:hover {
-		color: rgba(0, 0, 0, 0.8);
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 	}
 
 	.primary-button {
@@ -373,11 +324,7 @@
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: opacity 0.2s;
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	:global(.light) .primary-button {
-		color: rgba(0, 0, 0, 0.9);
+		color: hsl(var(--theme-foreground, 220 9% 10%));
 	}
 
 	.primary-button:hover {

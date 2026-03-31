@@ -286,32 +286,29 @@
 		overflow-y: auto;
 		background: linear-gradient(
 			145deg,
-			rgba(255, 255, 255, 0.08) 0%,
-			rgba(255, 255, 255, 0.04) 100%
+			rgba(255, 255, 255, 0.95) 0%,
+			rgba(255, 255, 255, 0.9) 100%
 		);
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(0, 0, 0, 0.1);
 		border-radius: 1.5rem;
 		padding: 2rem 1.5rem;
 		backdrop-filter: blur(20px);
 		box-shadow:
-			0 25px 50px -12px rgba(0, 0, 0, 0.4),
-			0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+			0 25px 50px -12px rgba(0, 0, 0, 0.15),
+			0 0 0 1px rgba(0, 0, 0, 0.05) inset;
 		animation: slideUp 0.3s ease-out;
 	}
 
-	/* Light mode support */
-	@media (prefers-color-scheme: light) {
-		.modal-content {
-			background: linear-gradient(
-				145deg,
-				rgba(255, 255, 255, 0.95) 0%,
-				rgba(255, 255, 255, 0.9) 100%
-			);
-			border-color: rgba(0, 0, 0, 0.1);
-			box-shadow:
-				0 25px 50px -12px rgba(0, 0, 0, 0.15),
-				0 0 0 1px rgba(0, 0, 0, 0.05) inset;
-		}
+	:global(.dark) .modal-content {
+		background: linear-gradient(
+			145deg,
+			rgba(255, 255, 255, 0.08) 0%,
+			rgba(255, 255, 255, 0.04) 100%
+		);
+		border-color: rgba(255, 255, 255, 0.12);
+		box-shadow:
+			0 25px 50px -12px rgba(0, 0, 0, 0.4),
+			0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 	}
 
 	.close-button {
@@ -325,28 +322,26 @@
 		justify-content: center;
 		border: none;
 		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.1);
-		color: rgba(255, 255, 255, 0.6);
+		background: rgba(0, 0, 0, 0.05);
+		color: rgba(0, 0, 0, 0.5);
 		cursor: pointer;
 		transition: all 0.2s ease;
 	}
 
 	.close-button:hover {
-		background: rgba(255, 255, 255, 0.15);
-		color: rgba(255, 255, 255, 0.9);
+		background: rgba(0, 0, 0, 0.1);
+		color: rgba(0, 0, 0, 0.8);
 		transform: scale(1.05);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.close-button {
-			background: rgba(0, 0, 0, 0.05);
-			color: rgba(0, 0, 0, 0.5);
-		}
+	:global(.dark) .close-button {
+		background: rgba(255, 255, 255, 0.1);
+		color: rgba(255, 255, 255, 0.6);
+	}
 
-		.close-button:hover {
-			background: rgba(0, 0, 0, 0.1);
-			color: rgba(0, 0, 0, 0.8);
-		}
+	:global(.dark) .close-button:hover {
+		background: rgba(255, 255, 255, 0.15);
+		color: rgba(255, 255, 255, 0.9);
 	}
 
 	.icon-container {
@@ -379,13 +374,11 @@
 		font-size: 1.5rem;
 		font-weight: 700;
 		text-align: center;
-		color: rgba(255, 255, 255, 0.95);
+		color: rgba(0, 0, 0, 0.9);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.app-name {
-			color: rgba(0, 0, 0, 0.9);
-		}
+	:global(.dark) .app-name {
+		color: rgba(255, 255, 255, 0.95);
 	}
 
 	.app-description {
@@ -393,25 +386,21 @@
 		font-size: 0.9rem;
 		line-height: 1.5;
 		text-align: center;
-		color: rgba(255, 255, 255, 0.6);
+		color: rgba(0, 0, 0, 0.6);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.app-description {
-			color: rgba(0, 0, 0, 0.6);
-		}
+	:global(.dark) .app-description {
+		color: rgba(255, 255, 255, 0.6);
 	}
 
 	.divider {
 		height: 1px;
 		margin: 1rem 0;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+		background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.divider {
-			background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
-		}
+	:global(.dark) .divider {
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
 	}
 
 	.features-section {
@@ -428,13 +417,11 @@
 	.section-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: rgba(255, 255, 255, 0.8);
+		color: rgba(0, 0, 0, 0.8);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.section-title {
-			color: rgba(0, 0, 0, 0.8);
-		}
+	:global(.dark) .section-title {
+		color: rgba(255, 255, 255, 0.8);
 	}
 
 	.section-icon {
@@ -461,23 +448,19 @@
 		gap: 0.5rem;
 		padding: 0.35rem 0;
 		font-size: 0.875rem;
+		color: rgba(0, 0, 0, 0.7);
+	}
+
+	:global(.dark) .feature-item {
 		color: rgba(255, 255, 255, 0.7);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.feature-item {
-			color: rgba(0, 0, 0, 0.7);
-		}
-	}
-
 	.feature-bullet {
-		color: rgba(255, 255, 255, 0.4);
+		color: rgba(0, 0, 0, 0.3);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.feature-bullet {
-			color: rgba(0, 0, 0, 0.3);
-		}
+	:global(.dark) .feature-bullet {
+		color: rgba(255, 255, 255, 0.4);
 	}
 
 	.warning-section {
@@ -495,13 +478,11 @@
 		margin: 0;
 		font-size: 0.8rem;
 		line-height: 1.5;
-		color: rgba(255, 255, 255, 0.75);
+		color: rgba(0, 0, 0, 0.75);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.warning-text {
-			color: rgba(0, 0, 0, 0.75);
-		}
+	:global(.dark) .warning-text {
+		color: rgba(255, 255, 255, 0.75);
 	}
 
 	.buttons-section {
@@ -551,47 +532,43 @@
 	}
 
 	.btn-tertiary {
-		background: rgba(255, 255, 255, 0.08);
-		color: rgba(255, 255, 255, 0.8);
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		background: rgba(0, 0, 0, 0.05);
+		color: rgba(0, 0, 0, 0.7);
+		border: 1px solid rgba(0, 0, 0, 0.1);
 	}
 
 	.btn-tertiary:hover {
+		background: rgba(0, 0, 0, 0.08);
+		color: rgba(0, 0, 0, 0.9);
+	}
+
+	:global(.dark) .btn-tertiary {
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.8);
+		border-color: rgba(255, 255, 255, 0.12);
+	}
+
+	:global(.dark) .btn-tertiary:hover {
 		background: rgba(255, 255, 255, 0.12);
 		color: rgba(255, 255, 255, 0.95);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.btn-tertiary {
-			background: rgba(0, 0, 0, 0.05);
-			color: rgba(0, 0, 0, 0.7);
-			border-color: rgba(0, 0, 0, 0.1);
-		}
-
-		.btn-tertiary:hover {
-			background: rgba(0, 0, 0, 0.08);
-			color: rgba(0, 0, 0, 0.9);
-		}
-	}
-
 	.btn-ghost {
 		background: transparent;
-		color: rgba(255, 255, 255, 0.5);
+		color: rgba(0, 0, 0, 0.5);
 		padding: 0.625rem 1rem;
 	}
 
 	.btn-ghost:hover {
-		color: rgba(255, 255, 255, 0.8);
+		color: rgba(0, 0, 0, 0.8);
 	}
 
-	@media (prefers-color-scheme: light) {
-		.btn-ghost {
-			color: rgba(0, 0, 0, 0.5);
-		}
+	:global(.dark) .btn-ghost {
+		color: rgba(255, 255, 255, 0.5);
+	}
 
-		.btn-ghost:hover {
-			color: rgba(0, 0, 0, 0.8);
-		}
+	:global(.dark) .btn-ghost:hover {
+		color: rgba(255, 255, 255, 0.8);
 	}
 
 	/* Animations */
