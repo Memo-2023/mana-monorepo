@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { PageHeader } from '@manacore/shared-ui';
-	import {
 	import { Clock } from '@manacore/shared-icons';
+	import {
 		stopwatchesStore,
 		formatTime,
 		formatLapTime,
