@@ -28,6 +28,9 @@
 	let showModal = $state(false);
 	let showDeleteConfirm = $state(false);
 
+	// Completion animation
+	let isAnimatingComplete = $state(false);
+
 	// Inline edit state
 	let isEditingTitle = $state(false);
 	let editTitle = $state('');
@@ -58,11 +61,25 @@
 
 	// Click to open modal
 	function handleCardClick(e: MouseEvent) {
-		// Don't open modal if clicking on checkbox or during inline edit
-		if (isEditingTitle) return;
+		// Don't open modal if clicking on checkbox or during inline edit or animation
+		if (isEditingTitle || isAnimatingComplete) return;
 		const target = e.target as HTMLElement;
 		if (target.closest('.task-checkbox')) return;
 		showModal = true;
+	}
+
+	function handleCheckboxClick(e: MouseEvent) {
+		e.stopPropagation();
+		if (task.isCompleted) {
+			onToggleComplete?.();
+			return;
+		}
+		if (isAnimatingComplete) return;
+		isAnimatingComplete = true;
+		setTimeout(() => {
+			isAnimatingComplete = false;
+			onToggleComplete?.();
+		}, 500);
 	}
 
 	// Double-click to edit title inline
@@ -172,6 +189,7 @@
 <div
 	class="kanban-card group"
 	class:completed={task.isCompleted}
+	class:completing={isAnimatingComplete}
 	onclick={handleCardClick}
 	oncontextmenu={handleContextMenu}
 	role="button"
@@ -182,8 +200,12 @@
 
 	<!-- Checkbox -->
 	{#if onToggleComplete}
-		<button class="task-checkbox" class:checked={task.isCompleted} onclick={onToggleComplete}>
-			{#if task.isCompleted}
+		<button
+			class="task-checkbox"
+			class:checked={task.isCompleted || isAnimatingComplete}
+			onclick={handleCheckboxClick}
+		>
+			{#if task.isCompleted || isAnimatingComplete}
 				<Check size={20} class="check-icon" />
 			{/if}
 		</button>
@@ -203,7 +225,7 @@
 		{:else}
 			<span
 				class="task-title"
-				class:line-through={task.isCompleted}
+				class:line-through={task.isCompleted || isAnimatingComplete}
 				ondblclick={handleTitleDoubleClick}
 			>
 				{task.title}
@@ -361,6 +383,30 @@
 
 	.kanban-card.completed {
 		opacity: 0.45;
+	}
+
+	.kanban-card.completing {
+		opacity: 0.5;
+		pointer-events: none;
+		transition: opacity 0.4s ease;
+	}
+
+	@keyframes checkPop {
+		0% {
+			transform: scale(0.5);
+			opacity: 0;
+		}
+		60% {
+			transform: scale(1.25);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	.task-checkbox.checked {
+		animation: checkPop 0.3s ease-out;
 	}
 
 	/* Priority dot — slim left accent, aligned to first line */

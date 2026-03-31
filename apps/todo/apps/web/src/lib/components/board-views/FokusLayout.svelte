@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID, type DndEvent } from 'svelte-dnd-action';
+	import { getContext } from 'svelte';
+	import { isToday } from 'date-fns';
 	import type { Task } from '@todo/shared';
 	import type { GroupedColumn } from '$lib/data/view-grouping';
 	import KanbanTaskCard from '../kanban/KanbanTaskCard.svelte';
@@ -33,6 +35,12 @@
 		onColumnDelete,
 		onAddColumn,
 	}: Props = $props();
+
+	// Today's completed tasks — shown at the bottom of every sheet
+	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
+	let completedToday = $derived(
+		tasksCtx.value.filter((t) => t.isCompleted && t.completedAt && isToday(new Date(t.completedAt)))
+	);
 
 	const PAGE_WIDTH_MAP: Record<string, string> = {
 		narrow: 'min(360px, 85vw)',
@@ -161,6 +169,22 @@
 				<div class="sheet-footer">
 					<QuickAddTaskInline onAdd={(title) => handleAddTask(column, title)} />
 				</div>
+
+				{#if completedToday.length > 0}
+					<div class="completed-today">
+						<div class="completed-today-label">Heute erledigt</div>
+						{#each completedToday as task (task.id)}
+							<div class="completed-today-item">
+								<KanbanTaskCard
+									{task}
+									onToggleComplete={() => onTaskToggle(task)}
+									onSave={(data) => onTaskUpdate(task.id, data)}
+									onDelete={() => onTaskDelete(task.id)}
+								/>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		{/each}
 
@@ -307,6 +331,42 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		color: #8b5cf6;
+	}
+
+	/* Heute erledigt section */
+	.completed-today {
+		padding: 0.75rem 1rem 1rem;
+		border-top: 1px solid rgba(0, 0, 0, 0.08);
+		margin-top: 0.25rem;
+	}
+	:global(.dark) .completed-today {
+		border-top-color: rgba(255, 255, 255, 0.08);
+	}
+	.completed-today-label {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: rgba(0, 0, 0, 0.3);
+		margin-bottom: 0.5rem;
+	}
+	:global(.dark) .completed-today-label {
+		color: rgba(255, 255, 255, 0.3);
+	}
+
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.completed-today-item {
+		animation: slideDown 0.35s ease-out both;
 	}
 
 	/* Page dots */
