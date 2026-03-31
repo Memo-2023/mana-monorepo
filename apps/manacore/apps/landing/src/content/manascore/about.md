@@ -237,6 +237,57 @@ Misst wie konsequent eine App die shared Packages des Monorepos nutzt:
 
 ---
 
+### Ecosystem Health Score
+
+Der **Ecosystem Health Score** ist ein eigenständiges Dashboard unter `/manascore/ecosystem`, das die **Konsistenz und Vereinheitlichung über alle Apps hinweg** misst. Während der ManaScore jede App einzeln bewertet, bewertet der Ecosystem Health Score das **Gesamtsystem**.
+
+**Script:** `node scripts/ecosystem-audit.mjs` — scannt den gesamten Monorepo und generiert `ecosystem-health.json`.
+
+#### 12 Metriken (gewichteter Durchschnitt = Gesamtscore)
+
+| Metrik                | Gewicht | Was wird gemessen                                                                                                                                   |
+| --------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Shared Packages**   | 20%     | Adoption der 6 Core-Packages (`shared-auth`, `shared-ui`, `shared-theme`, `shared-branding`, `shared-i18n`, `shared-error-tracking`) über alle Apps |
+| **Icon Consistency**  | 10%     | Verhältnis Phosphor-Icon-Imports vs. verbleibende inline SVGs                                                                                       |
+| **i18n Coverage**     | 10%     | Apps mit `svelte-i18n` Internationalisierung                                                                                                        |
+| **Style Consistency** | 10%     | Apps mit Theme-CSS-Variablen + Tailwind CSS                                                                                                         |
+| **Local-First**       | 8%      | Apps mit `@manacore/local-store` (Offline-fähig)                                                                                                    |
+| **Error Boundaries**  | 8%      | Apps mit `+error.svelte` Error Page + Offline Page                                                                                                  |
+| **TypeScript Strict** | 7%      | Apps mit `strict: true` in tsconfig                                                                                                                 |
+| **Test Coverage**     | 7%      | Apps mit mindestens einem Unit- oder E2E-Test                                                                                                       |
+| **Modal Consistency** | 5%      | Anteil Modals die `shared-ui Modal` nutzen vs. Custom                                                                                               |
+| **Error Handling**    | 5%      | Shared `getErrorMessage()`/`withErrorHandling()` vs. inline `instanceof Error`                                                                      |
+| **PWA Support**       | 5%      | Apps mit manifest.json + Service Worker                                                                                                             |
+| **Maintainability**   | 5%      | Anteil Dateien unter 500 Zeilen (große Dateien = Refactoring-Bedarf)                                                                                |
+
+#### Wie der Score berechnet wird
+
+```
+Ecosystem Health Score = Σ (Metrik × Gewicht) / Σ Gewichte
+```
+
+Jede Metrik ist ein Prozentwert (0-100%):
+
+- **Package-basierte Metriken** (Shared Packages, Local-First, PWA): Anteil der Apps die das Package nutzen
+- **Pattern-basierte Metriken** (Icons, Modals, Errors): Verhältnis shared/standard vs. custom/inline
+- **Feature-basierte Metriken** (Error Boundaries, Tests, i18n): Anteil der Apps die das Feature haben
+- **Code-Quality-Metriken** (Maintainability): Inverse Relation zu großen Dateien
+
+#### Wie man den Score verbessert
+
+| Metrik              | Aktion                                                                          |
+| ------------------- | ------------------------------------------------------------------------------- |
+| Shared Packages ↑   | Fehlende Core-Packages in `package.json` hinzufügen                             |
+| Icon Consistency ↑  | Inline SVGs durch `@manacore/shared-icons` Phosphor-Komponenten ersetzen        |
+| Modal Consistency ↑ | Custom-Modals auf `<Modal>` aus `@manacore/shared-ui` migrieren                 |
+| Error Handling ↑    | `instanceof Error` durch shared `getErrorMessage()` Helper ersetzen             |
+| Error Boundaries ↑  | `+error.svelte` in jeder App anlegen                                            |
+| Test Coverage ↑     | Mindestens einen Unit-Test pro App schreiben                                    |
+| PWA Support ↑       | `manifest.json` + `service-worker.ts` hinzufügen                                |
+| Maintainability ↑   | Dateien >500 Zeilen refactoren (Composables extrahieren, Komponenten aufteilen) |
+
+---
+
 ## Reifegradstufen
 
 | Stufe          | Score  | Bedeutung                                            |

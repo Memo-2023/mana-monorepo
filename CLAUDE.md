@@ -887,6 +887,16 @@ Backend, Frontend, Database, Testing, Deployment, Documentation, Security, UX
 | **Dependency Health** | Outdated packages, vulnerabilities by severity |
 | **API Conformity** | 7 checks (responses, errors, pagination, versioning, docs, health, validation) |
 | **Cross-App Consistency** | Shared package usage (auth, ui, theme, branding, i18n, error-tracking) |
+| **Analytics Maturity** | 5 checks (page views, custom events, auth tracking, landing, dashboard) |
+
+### Ecosystem Health Score
+
+Measures consistency and unification **across all apps** (vs. ManaScore which rates each app individually).
+
+**Dashboard:** `/manascore/ecosystem`
+**Script:** `node scripts/ecosystem-audit.mjs` — scans the monorepo, generates `ecosystem-health.json`
+
+12 metrics with weighted average: Shared Packages (20%), Icon Consistency (10%), i18n (10%), Styles (10%), Local-First (8%), Error Boundaries (8%), TypeScript Strict (7%), Tests (7%), Modals (5%), Error Handling (5%), PWA (5%), Maintainability (5%).
 
 ### Maturity Levels
 
