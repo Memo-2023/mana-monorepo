@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { exportApi, type ExportFormat } from '$lib/api/export';
 	import { ContactsEvents } from '@manacore/shared-utils/analytics';
+	import { X, AddressBook, ChartBar, Upload } from '@manacore/shared-icons';
 
 	interface Props {
 		isOpen: boolean;
@@ -65,14 +66,7 @@
 					onclick={onClose}
 					class="text-muted-foreground hover:text-foreground transition-colors"
 				>
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X size={24} />
 				</button>
 			</div>
 
@@ -105,19 +99,7 @@
 							: 'border-border hover:border-muted-foreground'}"
 					>
 						<div class="flex items-center gap-3">
-							<svg
-								class="w-8 h-8 text-primary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
-								/>
-							</svg>
+							<AddressBook size={32} class="text-primary" />
 							<div>
 								<div class="font-medium text-foreground">vCard</div>
 								<div class="text-xs text-muted-foreground">.vcf</div>
@@ -131,19 +113,7 @@
 							{format === 'csv' ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground'}"
 					>
 						<div class="flex items-center gap-3">
-							<svg
-								class="w-8 h-8 text-green-500"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-								/>
-							</svg>
+							<ChartBar size={32} class="text-green-500" />
 							<div>
 								<div class="font-medium text-foreground">CSV</div>
 								<div class="text-xs text-muted-foreground">.csv</div>
@@ -180,14 +150,7 @@
 						</span>
 					{:else}
 						<span class="inline-flex items-center gap-2">
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-								/>
-							</svg>
+							<Upload size={20} />
 							{$_('export.button')}
 						</span>
 					{/if}

@@ -13,6 +13,7 @@
 		subMonths,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { CaretLeft, CaretRight } from '@manacore/shared-icons';
 
 	interface Props {
 		selectedDate: Date;
@@ -51,15 +52,11 @@
 <div class="mini-calendar card">
 	<div class="calendar-header">
 		<button class="nav-btn" onclick={previousMonth} aria-label="Vorheriger Monat">
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
+			<CaretLeft size={16} />
 		</button>
 		<span class="month-label">{format(currentMonth, 'MMMM yyyy', { locale: de })}</span>
 		<button class="nav-btn" onclick={nextMonth} aria-label="Nächster Monat">
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-			</svg>
+			<CaretRight size={16} />
 		</button>
 	</div>
 

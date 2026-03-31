@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
 	import type { CalendarViewType } from '@calendar/shared';
+	import { SquaresFour } from '@manacore/shared-icons';
 	interface Props {
 		/** Bottom offset from viewport bottom (default: '70px') */
 		bottomOffset?: string;
@@ -41,14 +42,7 @@
 <div class="views-bar" style="--bottom-offset: {bottomOffset}">
 	<div class="views-container">
 		<div class="views-icon">
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
-				/>
-			</svg>
+			<SquaresFour size={20} />
 		</div>
 
 		<div class="views-buttons">

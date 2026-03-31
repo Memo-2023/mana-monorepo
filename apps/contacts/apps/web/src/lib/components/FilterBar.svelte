@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { onMount } from 'svelte';
+	import { Funnel, X } from '@manacore/shared-icons';
 	import { fly } from 'svelte/transition';
 	import { tagsApi, type ContactTag, type Contact } from '$lib/api/contacts';
 
@@ -125,14 +126,7 @@
 			onclick={toggleFilters}
 			title={$_('filters.title')}
 		>
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-				/>
-			</svg>
+			<Funnel size={16} />
 			{#if activeFilterCount > 0}
 				<span class="filter-badge-embedded">{activeFilterCount}</span>
 			{/if}
@@ -236,14 +230,7 @@
 			class:active={showFilters || activeFilterCount > 0}
 			onclick={() => (showFilters = !showFilters)}
 		>
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-				/>
-			</svg>
+			<Funnel size={16} />
 			<span>{$_('filters.title')}</span>
 			{#if activeFilterCount > 0}
 				<span class="filter-badge">{activeFilterCount}</span>
@@ -259,54 +246,26 @@
 						<button type="button" class="filter-pill" onclick={() => onTagChange(null)}>
 							<span class="pill-color" style="background: {tag.color || '#6366f1'}"></span>
 							{tag.name}
-							<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
+							<X size={12} />
 						</button>
 					{/if}
 				{/if}
 				{#if contactFilter !== 'all' && contactFilter !== 'favorites'}
 					<button type="button" class="filter-pill" onclick={() => onContactFilterChange('all')}>
 						{$_(`filters.contact.${contactFilter}`)}
-						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={12} />
 					</button>
 				{/if}
 				{#if birthdayFilter !== 'all'}
 					<button type="button" class="filter-pill" onclick={() => onBirthdayFilterChange('all')}>
 						{$_(`filters.birthday.${birthdayFilter}`)}
-						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={12} />
 					</button>
 				{/if}
 				{#if selectedCompany}
 					<button type="button" class="filter-pill" onclick={() => onCompanyChange(null)}>
 						{selectedCompany}
-						<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={12} />
 					</button>
 				{/if}
 				<button type="button" class="clear-all-btn" onclick={clearAllFilters}>

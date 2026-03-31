@@ -14,6 +14,7 @@
 	import type { CalendarEvent, Calendar } from '@calendar/shared';
 	import { addMinutes } from 'date-fns';
 	import { browser } from '$app/environment';
+	import { CaretDoubleLeft } from '@manacore/shared-icons';
 
 	// Get calendars from layout context (live query)
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
@@ -186,14 +187,7 @@
 			onclick={() => settingsStore.toggleSidebar()}
 			title={$_('calendar.hideSidebar')}
 		>
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-				/>
-			</svg>
+			<CaretDoubleLeft size={16} />
 		</button>
 
 		<TodoSidebarSection maxItems={5} />

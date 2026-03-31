@@ -16,7 +16,16 @@
 		FilterDropdown,
 		type FilterDropdownOption,
 	} from '@manacore/shared-ui';
-	import { X } from '@manacore/shared-icons';
+	import {
+		X,
+		CalendarBlank,
+		Plus,
+		Eye,
+		Clock,
+		Microphone,
+		Cake,
+		User,
+	} from '@manacore/shared-icons';
 	import { focusTrap } from '@manacore/shared-ui';
 	import type { CalendarViewType, Calendar } from '@calendar/shared';
 
@@ -237,14 +246,7 @@
 			<!-- Meine Kalender -->
 			<SettingsSection title="Meine Kalender">
 				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-						/>
-					</svg>
+					<CalendarBlank size={24} />
 				{/snippet}
 				<SettingsCard>
 					<div class="p-4">
@@ -253,14 +255,7 @@
 								class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary))]/90"
 								onclick={() => (showNewCalendarForm = true)}
 							>
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M12 4v16m8-8H4"
-									/>
-								</svg>
+								<Plus size={16} />
 								Neuer Kalender
 							</button>
 						</div>
@@ -409,20 +404,7 @@
 			<!-- Kalender-Ansicht -->
 			<SettingsSection title="Kalender-Ansicht">
 				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-						/>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-						/>
-					</svg>
+					<Eye size={24} />
 				{/snippet}
 				<SettingsCard>
 					<div class="p-4 space-y-3">
@@ -577,14 +559,7 @@
 			<!-- Termin-Einstellungen -->
 			<SettingsSection title="Termine">
 				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					</svg>
+					<Clock size={24} />
 				{/snippet}
 				<SettingsCard>
 					<div class="p-4 space-y-3">
@@ -620,14 +595,7 @@
 			<!-- Spracheingabe -->
 			<SettingsSection title="Spracheingabe">
 				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-						/>
-					</svg>
+					<Microphone size={24} />
 				{/snippet}
 				<SettingsCard>
 					<div class="p-4 space-y-3">
@@ -662,14 +630,7 @@
 			<!-- Geburtstage -->
 			<SettingsSection title="Geburtstage">
 				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"
-						/>
-					</svg>
+					<Cake size={24} />
 				{/snippet}
 				<SettingsCard>
 					<div class="p-4 space-y-3">
@@ -714,14 +675,7 @@
 			<!-- Konto -->
 			<SettingsSection title="Konto">
 				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-						/>
-					</svg>
+					<User size={24} />
 				{/snippet}
 				<SettingsCard>
 					<div class="p-4 space-y-3">

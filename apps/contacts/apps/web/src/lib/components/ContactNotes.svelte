@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';
+	import { NotePencil, Plus, PushPin, PencilSimple, Trash } from '@manacore/shared-icons';
 	import { notesApi, type ContactNote } from '$lib/api/contacts';
 	import { ContactNotesSkeleton } from '$lib/components/skeletons';
 
@@ -137,14 +138,7 @@
 <section class="notes-section">
 	<div class="section-header">
 		<div class="section-icon">
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-				/>
-			</svg>
+			<NotePencil size={16} />
 		</div>
 		<h3 class="section-title">{$_('notes.title')}</h3>
 		<button
@@ -152,9 +146,7 @@
 			class="add-note-btn"
 			aria-label={$_('notes.add')}
 		>
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={16} />
 		</button>
 	</div>
 
@@ -233,9 +225,7 @@
 						<div class="note-content">
 							{#if note.isPinned}
 								<span class="pin-badge">
-									<svg fill="currentColor" viewBox="0 0 24 24">
-										<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z" />
-									</svg>
+									<PushPin size={14} weight="fill" />
 								</span>
 							{/if}
 							<p class="note-text">{note.content}</p>
@@ -249,18 +239,7 @@
 								aria-label={note.isPinned ? $_('notes.unpin') : $_('notes.pin')}
 								title={note.isPinned ? $_('notes.unpin') : $_('notes.pin')}
 							>
-								<svg
-									fill={note.isPinned ? 'currentColor' : 'none'}
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"
-									/>
-								</svg>
+								<PushPin size={14} weight={note.isPinned ? 'fill' : 'regular'} />
 							</button>
 							<button
 								onclick={() => startEditing(note)}
@@ -268,14 +247,7 @@
 								aria-label={$_('actions.edit')}
 								title={$_('actions.edit')}
 							>
-								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-									/>
-								</svg>
+								<PencilSimple size={14} />
 							</button>
 							<button
 								onclick={() => handleDelete(note.id)}
@@ -283,14 +255,7 @@
 								aria-label={$_('actions.delete')}
 								title={$_('actions.delete')}
 							>
-								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-									/>
-								</svg>
+								<Trash size={14} />
 							</button>
 						</div>
 					{/if}

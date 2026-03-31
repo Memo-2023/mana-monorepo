@@ -8,6 +8,23 @@
 	import SocialMediaFields from './forms/SocialMediaFields.svelte';
 	import DateFields from './forms/DateFields.svelte';
 	import SocialMediaLinks from './SocialMediaLinks.svelte';
+	import {
+		X,
+		PencilSimple,
+		Trash,
+		Warning,
+		Camera,
+		Heart,
+		Phone,
+		Envelope,
+		ChatCircle,
+		User,
+		Briefcase,
+		MapPin,
+		CalendarBlank,
+		Check,
+		Note,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		contactId: string;
@@ -288,14 +305,7 @@
 		<!-- Header -->
 		<header class="modal-header">
 			<button onclick={onClose} class="back-button" aria-label="Schließen">
-				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
+				<X size={24} class="icon" />
 			</button>
 			<h1 id="modal-title" class="title">{editing ? 'Bearbeiten' : 'Kontakt'}</h1>
 			{#if contact && !editing && !loading}
@@ -308,14 +318,7 @@
 						class="action-btn"
 						aria-label="Bearbeiten"
 					>
-						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-							/>
-						</svg>
+						<PencilSimple size={24} class="icon" />
 					</button>
 					{#if !contact?.isSelf}
 						<button
@@ -324,14 +327,7 @@
 							class="action-btn action-btn-danger"
 							aria-label="Löschen"
 						>
-							<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-								/>
-							</svg>
+							<Trash size={24} class="icon" />
 						</button>
 					{/if}
 				</div>
@@ -347,14 +343,7 @@
 			{:else if error && !contact}
 				<div class="error-container">
 					<div class="error-icon-wrapper">
-						<svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-							/>
-						</svg>
+						<Warning size={48} class="error-icon" />
 					</div>
 					<p class="error-text">{error}</p>
 					<button onclick={onClose} class="btn btn-secondary">Schließen</button>
@@ -362,14 +351,7 @@
 			{:else if contact}
 				{#if error}
 					<div class="error-banner" role="alert">
-						<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-							/>
-						</svg>
+						<Warning size={20} class="icon-sm" />
 						<span>{error}</span>
 					</div>
 				{/if}
@@ -399,14 +381,7 @@
 						<section class="form-section">
 							<div class="section-header">
 								<div class="section-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-										/>
-									</svg>
+									<User size={20} />
 								</div>
 								<h2 class="section-title">Name</h2>
 							</div>
@@ -426,14 +401,7 @@
 						<section class="form-section">
 							<div class="section-header">
 								<div class="section-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-										/>
-									</svg>
+									<Envelope size={20} />
 								</div>
 								<h2 class="section-title">Kontakt</h2>
 							</div>
@@ -457,14 +425,7 @@
 						<section class="form-section">
 							<div class="section-header">
 								<div class="section-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-										/>
-									</svg>
+									<Briefcase size={20} />
 								</div>
 								<h2 class="section-title">Arbeit</h2>
 							</div>
@@ -482,20 +443,7 @@
 						<section class="form-section">
 							<div class="section-header">
 								<div class="section-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-										/>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-										/>
-									</svg>
+									<MapPin size={20} />
 								</div>
 								<h2 class="section-title">Adresse</h2>
 							</div>
@@ -523,14 +471,7 @@
 						<section class="form-section">
 							<div class="section-header">
 								<div class="section-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-										/>
-									</svg>
+									<PencilSimple size={20} />
 								</div>
 								<h2 class="section-title">Notizen</h2>
 							</div>
@@ -588,14 +529,7 @@
 									</svg>
 									<span>Speichern...</span>
 								{:else}
-									<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M5 13l4 4L19 7"
-										/>
-									</svg>
+									<Check size={16} class="icon-sm" />
 									<span>Speichern</span>
 								{/if}
 							</button>
@@ -645,14 +579,7 @@
 											/>
 										</svg>
 									{:else}
-										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M6 18L18 6M6 6l12 12"
-											/>
-										</svg>
+										<X size={16} />
 									{/if}
 								</button>
 							{:else}
@@ -683,20 +610,7 @@
 									{:else}
 										<span class="avatar-initials">{initials()}</span>
 										<span class="avatar-upload-overlay">
-											<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-												/>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-												/>
-											</svg>
+											<Camera size={24} />
 										</span>
 									{/if}
 								</button>
@@ -709,20 +623,9 @@
 									: 'Zu Favoriten hinzufügen'}
 							>
 								{#if contact.isFavorite}
-									<svg class="favorite-icon favorite-active" viewBox="0 0 24 24">
-										<path
-											d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-										/>
-									</svg>
+									<Heart size={24} weight="fill" class="favorite-icon favorite-active" />
 								{:else}
-									<svg class="favorite-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-										/>
-									</svg>
+									<Heart size={24} class="favorite-icon" />
 								{/if}
 							</button>
 						</div>
@@ -739,14 +642,7 @@
 						{#if contact.phone}
 							<a href="tel:{contact.phone}" class="quick-action">
 								<div class="quick-action-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-										/>
-									</svg>
+									<Phone size={24} />
 								</div>
 								<span>Anrufen</span>
 							</a>
@@ -754,14 +650,7 @@
 						{#if contact.email}
 							<a href="mailto:{contact.email}" class="quick-action">
 								<div class="quick-action-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-										/>
-									</svg>
+									<Envelope size={24} />
 								</div>
 								<span>E-Mail</span>
 							</a>
@@ -769,14 +658,7 @@
 						{#if contact.mobile}
 							<a href="sms:{contact.mobile}" class="quick-action">
 								<div class="quick-action-icon">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-										/>
-									</svg>
+									<ChatCircle size={24} />
 								</div>
 								<span>Nachricht</span>
 							</a>
@@ -789,14 +671,7 @@
 							<section class="detail-section">
 								<div class="section-header">
 									<div class="section-icon">
-										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-											/>
-										</svg>
+										<Envelope size={20} />
 									</div>
 									<h3 class="section-title">Kontakt</h3>
 								</div>
@@ -833,14 +708,7 @@
 							<section class="detail-section">
 								<div class="section-header">
 									<div class="section-icon">
-										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-											/>
-										</svg>
+										<Briefcase size={20} />
 									</div>
 									<h3 class="section-title">Arbeit</h3>
 								</div>
@@ -869,20 +737,7 @@
 							<section class="detail-section">
 								<div class="section-header">
 									<div class="section-icon">
-										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-											/>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-											/>
-										</svg>
+										<MapPin size={20} />
 									</div>
 									<h3 class="section-title">Adresse</h3>
 								</div>
@@ -902,14 +757,7 @@
 							<section class="detail-section">
 								<div class="section-header">
 									<div class="section-icon">
-										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-											/>
-										</svg>
+										<CalendarBlank size={20} />
 									</div>
 									<h3 class="section-title">Daten</h3>
 								</div>
@@ -952,14 +800,7 @@
 							<section class="detail-section">
 								<div class="section-header">
 									<div class="section-icon">
-										<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-											/>
-										</svg>
+										<Note size={20} />
 									</div>
 									<h3 class="section-title">Notizen</h3>
 								</div>

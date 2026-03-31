@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Plus, Check, Heart, Phone, Envelope } from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
@@ -118,14 +119,7 @@
 		>
 			<!-- Plus Avatar -->
 			<div class="grid-avatar new-contact-avatar">
-				<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
+				<Plus size={40} />
 			</div>
 
 			<!-- Info -->
@@ -154,9 +148,7 @@
 					aria-label={selectedIds.has(contact.id) ? 'Auswahl aufheben' : 'Auswählen'}
 				>
 					{#if selectedIds.has(contact.id)}
-						<svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-						</svg>
+						<Check size={20} class="text-primary" />
 					{:else}
 						<div class="w-5 h-5 rounded border-2 border-border"></div>
 					{/if}
@@ -170,25 +162,9 @@
 				title={contact.isFavorite ? $_('contacts.unfavorite') : $_('contacts.favorite')}
 			>
 				{#if contact.isFavorite}
-					<svg class="w-5 h-5 text-red-500 fill-current" viewBox="0 0 24 24">
-						<path
-							d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-						/>
-					</svg>
+					<Heart size={20} weight="fill" class="text-red-500" />
 				{:else}
-					<svg
-						class="w-5 h-5 text-muted-foreground"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-						/>
-					</svg>
+					<Heart size={20} class="text-muted-foreground" />
 				{/if}
 			</button>
 
@@ -225,14 +201,7 @@
 						class="action-btn"
 						title={$_('contacts.call')}
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-							/>
-						</svg>
+						<Phone size={16} />
 					</a>
 				{/if}
 				{#if contact.email}
@@ -242,14 +211,7 @@
 						class="action-btn"
 						title={$_('contacts.email')}
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-							/>
-						</svg>
+						<Envelope size={16} />
 					</a>
 				{/if}
 			</div>

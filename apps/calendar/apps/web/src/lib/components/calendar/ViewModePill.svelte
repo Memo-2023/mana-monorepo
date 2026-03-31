@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { viewStore } from '$lib/stores/view.svelte';
+	import { Columns, CalendarBlank, List } from '@manacore/shared-icons';
 	import type { CalendarViewType } from '@calendar/shared';
 	interface Props {
 		isToolbarExpanded?: boolean;
@@ -33,27 +34,11 @@
 			title={viewTitles[view]}
 		>
 			{#if view === 'week'}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-width="2"
-						d="M3 4v16M6.5 4v16M10 4v16M13.5 4v16M17 4v16M20.5 4v16M24 4v16"
-					/>
-				</svg>
+				<Columns size={18} />
 			{:else if view === 'month'}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2" />
-					<path stroke-linecap="round" stroke-width="2" d="M3 9h18M8 4v4M16 4v4" />
-					<path
-						stroke-linecap="round"
-						stroke-width="1.5"
-						d="M7 13h2M11 13h2M15 13h2M7 17h2M11 17h2"
-					/>
-				</svg>
+				<CalendarBlank size={18} />
 			{:else if view === 'agenda'}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h12" />
-				</svg>
+				<List size={18} />
 			{/if}
 		</button>
 	{/each}

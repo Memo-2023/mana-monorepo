@@ -8,6 +8,17 @@
 	import { parseContactInput, formatParsedContactPreview } from '$lib/utils/contact-parser';
 	import { findDuplicates, type DuplicateMatch } from '$lib/utils/duplicate-detector';
 	import { contactCollection } from '$lib/data/local-store';
+	import {
+		X,
+		Warning,
+		Camera,
+		User,
+		Envelope,
+		Briefcase,
+		MapPin,
+		PencilSimple,
+		Check,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		onClose: () => void;
@@ -309,14 +320,7 @@
 		<!-- Header -->
 		<header class="modal-header">
 			<button onclick={onClose} class="back-button" aria-label="Schließen">
-				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
+				<X size={24} class="icon" />
 			</button>
 			<h1 id="modal-title" class="title">Neuer Kontakt</h1>
 			<div class="header-spacer"></div>
@@ -343,14 +347,7 @@
 			<!-- Duplicate Warning -->
 			{#if duplicates.length > 0}
 				<div class="duplicate-warning" role="alert">
-					<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-						/>
-					</svg>
+					<Warning size={20} class="icon-sm" />
 					<div class="duplicate-info">
 						<span class="duplicate-label">Mögliches Duplikat:</span>
 						{#each duplicates.slice(0, 3) as dup}
@@ -367,14 +364,7 @@
 
 			{#if error}
 				<div class="error-banner" role="alert">
-					<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-						/>
-					</svg>
+					<Warning size={20} class="icon-sm" />
 					<span>{error}</span>
 				</div>
 			{/if}
@@ -398,37 +388,11 @@
 						{#if photoPreview}
 							<img src={photoPreview} alt="Vorschau" class="avatar-image" />
 							<div class="avatar-overlay">
-								<svg class="camera-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-									/>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-									/>
-								</svg>
+								<Camera size={24} class="camera-icon" />
 							</div>
 						{:else}
 							<div class="avatar-circle empty">
-								<svg class="add-photo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="1.5"
-										d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-									/>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="1.5"
-										d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-									/>
-								</svg>
+								<Camera size={24} class="add-photo-icon" />
 							</div>
 						{/if}
 					</button>
@@ -439,14 +403,7 @@
 							onclick={removePhoto}
 							title="Foto entfernen"
 						>
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
+							<X size={16} />
 						</button>
 					{/if}
 				</div>
@@ -467,14 +424,7 @@
 				<section class="form-section">
 					<div class="section-header">
 						<div class="section-icon">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-								/>
-							</svg>
+							<User size={20} />
 						</div>
 						<h2 class="section-title">Name</h2>
 					</div>
@@ -507,14 +457,7 @@
 				<section class="form-section">
 					<div class="section-header">
 						<div class="section-icon">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-								/>
-							</svg>
+							<Envelope size={20} />
 						</div>
 						<h2 class="section-title">Kontakt</h2>
 					</div>
@@ -556,14 +499,7 @@
 				<section class="form-section">
 					<div class="section-header">
 						<div class="section-icon">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-								/>
-							</svg>
+							<Briefcase size={20} />
 						</div>
 						<h2 class="section-title">Arbeit</h2>
 					</div>
@@ -593,20 +529,7 @@
 				<section class="form-section">
 					<div class="section-header">
 						<div class="section-icon">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-								/>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-								/>
-							</svg>
+							<MapPin size={20} />
 						</div>
 						<h2 class="section-title">Adresse</h2>
 					</div>
@@ -652,14 +575,7 @@
 				<section class="form-section">
 					<div class="section-header">
 						<div class="section-icon">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-								/>
-							</svg>
+							<PencilSimple size={20} />
 						</div>
 						<h2 class="section-title">Notizen</h2>
 					</div>
@@ -714,14 +630,7 @@
 							</svg>
 							<span>Speichern...</span>
 						{:else}
-							<svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M5 13l4 4L19 7"
-								/>
-							</svg>
+							<Check size={20} class="icon-sm" />
 							<span>Kontakt erstellen</span>
 						{/if}
 					</button>

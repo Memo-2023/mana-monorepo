@@ -3,6 +3,7 @@
 	import { calendarsStore } from '$lib/stores/calendars.svelte';
 	import type { Calendar } from '@calendar/shared';
 	import { goto } from '$app/navigation';
+	import { CalendarBlank, CaretDown, Plus } from '@manacore/shared-icons';
 
 	// Get calendars from layout context (live query)
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
@@ -74,24 +75,9 @@
 		class:glass-pill={!embedded}
 		class:embedded-btn={embedded}
 	>
-		<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-			/>
-		</svg>
+		<CalendarBlank size={16} class="pill-icon" />
 		<span class="pill-label">{visibleCount}/{totalCount}</span>
-		<svg
-			class="chevron-icon"
-			class:rotated={isOpen}
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-		</svg>
+		<CaretDown size={12} class="chevron-icon {isOpen ? 'rotated' : ''}" />
 	</button>
 
 	{#if isOpen}
@@ -116,14 +102,7 @@
 			<div class="dropdown-header">
 				<span class="header-title">Kalender</span>
 				<button class="add-btn" onclick={handleAddCalendar} aria-label="Kalender hinzufügen">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<Plus size={16} />
 				</button>
 			</div>
 

@@ -8,6 +8,7 @@
 	// Live data from layout context
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 	const tagsCtx: { readonly value: SharedTag[] } = getContext('tags');
+	import { CaretRight } from '@manacore/shared-icons';
 	import {
 		TagSelector,
 		FilterDropdown,
@@ -391,16 +392,7 @@
 			aria-expanded={showLocationDetails}
 			aria-controls="location-details"
 		>
-			<svg
-				class="w-4 h-4 transition-transform"
-				class:rotate-90={showLocationDetails}
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-				aria-hidden="true"
-			>
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-			</svg>
+			<CaretRight size={16} class="transition-transform {showLocationDetails ? 'rotate-90' : ''}" />
 			{showLocationDetails ? 'Adressdetails ausblenden' : 'Adressdetails hinzufügen'}
 		</button>
 

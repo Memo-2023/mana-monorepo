@@ -2,6 +2,7 @@
 	import { locale } from 'svelte-i18n';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import type { SupportedLocale } from '$lib/i18n';
+	import { CaretDown } from '@manacore/shared-icons';
 
 	const languageLabels: Record<SupportedLocale, string> = {
 		de: 'Deutsch',
@@ -25,9 +26,7 @@
 		class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
 	>
 		{languageLabels[$locale as SupportedLocale] || 'Language'}
-		<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-		</svg>
+		<CaretDown size={16} />
 	</button>
 
 	{#if isOpen}

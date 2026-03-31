@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Plus, Check, Heart, Phone, Envelope, TextAa, CaretDown } from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
 	import type { SortField } from '$lib/components/SortToggle.svelte';
@@ -173,14 +174,7 @@
 			>
 				<!-- Plus Avatar -->
 				<div class="avatar-sm new-contact-avatar">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<Plus size={18} />
 				</div>
 
 				<!-- Text -->
@@ -220,9 +214,7 @@
 									aria-label={selectedIds.has(contact.id) ? 'Auswahl aufheben' : 'Auswählen'}
 								>
 									{#if selectedIds.has(contact.id)}
-										<svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-										</svg>
+										<Check size={20} class="text-primary" />
 									{:else}
 										<div class="w-5 h-5 rounded border-2 border-border"></div>
 									{/if}
@@ -262,11 +254,7 @@
 										{getDisplayName(contact)}
 									</span>
 									{#if contact.isFavorite}
-										<svg class="favorite-badge" fill="currentColor" viewBox="0 0 24 24">
-											<path
-												d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-											/>
-										</svg>
+										<Heart size={13} weight="fill" class="favorite-badge" />
 									{/if}
 									{#if contact.company}
 										<span class="contact-company-inline">@ {contact.company}</span>
@@ -297,26 +285,12 @@
 										class="action-chip"
 										title={contact.mobile || contact.phone}
 									>
-										<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-											/>
-										</svg>
+										<Phone size={16} class="action-icon" />
 									</a>
 								{/if}
 								{#if contact.email}
 									<a href="mailto:{contact.email}" class="action-chip" title={contact.email}>
-										<svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-											/>
-										</svg>
+										<Envelope size={16} class="action-icon" />
 									</a>
 								{/if}
 							</div>
@@ -339,22 +313,11 @@
 				? 'Alphabet-Navigation öffnen (Rechtsklick für Optionen)'
 				: 'Alphabet-Navigation schließen (Rechtsklick für Optionen)'}
 		>
-			<svg class="fab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				{#if isAlphabetNavCollapsed}
-					<!-- ABC/Alphabet icon -->
-					<text x="3" y="17" font-size="12" font-weight="bold" fill="currentColor" stroke="none"
-						>AZ</text
-					>
-				{:else}
-					<!-- Chevron down icon -->
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 9l-7 7-7-7"
-					/>
-				{/if}
-			</svg>
+			{#if isAlphabetNavCollapsed}
+				<TextAa size={24} class="fab-icon" />
+			{:else}
+				<CaretDown size={24} class="fab-icon" />
+			{/if}
 		</button>
 	</div>
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { CalendarBlank, CaretDown, Cake, Trash, Plus } from '@manacore/shared-icons';
+
 	interface CustomDate {
 		id: string;
 		label: string;
@@ -53,25 +55,10 @@
 		onclick={() => (isOpen = !isOpen)}
 	>
 		<div class="section-icon">
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-				/>
-			</svg>
+			<CalendarBlank size={18} />
 		</div>
 		<h2 class="section-title">Daten</h2>
-		<svg
-			class="chevron-icon"
-			class:chevron-open={isOpen}
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-		</svg>
+		<CaretDown size={20} class="chevron-icon {isOpen ? 'chevron-open' : ''}" />
 	</button>
 	{#if isOpen}
 		<div class="dates-container">
@@ -79,14 +66,7 @@
 			<div class="form-field birthday-field">
 				<label for="birthday" class="label date-label">
 					<span class="date-icon-label">
-						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0A2.704 2.704 0 003 15.546V20a1 1 0 001 1h16a1 1 0 001-1v-4.454zM3 15.546V12a2 2 0 012-2h14a2 2 0 012 2v3.546M9 10V4a2 2 0 012-2h2a2 2 0 012 2v6"
-							/>
-						</svg>
+						<Cake size={14} />
 					</span>
 					Geburtstag
 				</label>
@@ -123,28 +103,14 @@
 						onclick={() => removeCustomDate(customDate.id)}
 						aria-label="Datum entfernen"
 					>
-						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-							/>
-						</svg>
+						<Trash size={18} />
 					</button>
 				</div>
 			{/each}
 
 			<!-- Add button -->
 			<button type="button" class="add-button" onclick={addCustomDate}>
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
+				<Plus size={16} />
 				Datum hinzufügen
 			</button>
 		</div>

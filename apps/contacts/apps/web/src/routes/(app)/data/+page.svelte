@@ -10,6 +10,14 @@
 	// contactsStore removed — live queries auto-update
 	import { ImportPreviewSkeleton } from '$lib/components/skeletons';
 	import { ContactsEvents } from '@manacore/shared-utils/analytics';
+	import {
+		Upload,
+		DownloadSimple,
+		File,
+		FileText,
+		AddressBook,
+		Check,
+	} from '@manacore/shared-icons';
 	import '$lib/i18n';
 
 	type Tab = 'import' | 'export';
@@ -187,14 +195,7 @@
 				? 'bg-card text-foreground shadow-sm'
 				: 'text-muted-foreground hover:text-foreground'}"
 		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-				/>
-			</svg>
+			<Upload size={20} />
 			Import
 		</button>
 		<button
@@ -205,14 +206,7 @@
 				? 'bg-card text-foreground shadow-sm'
 				: 'text-muted-foreground hover:text-foreground'}"
 		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-				/>
-			</svg>
+			<DownloadSimple size={20} />
 			Export
 		</button>
 	</div>
@@ -230,14 +224,7 @@
 					: 'border-transparent text-muted-foreground hover:text-foreground'}"
 			>
 				<span class="flex items-center gap-2">
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-						/>
-					</svg>
+					<File size={20} />
 					Datei
 				</span>
 			</button>
@@ -292,14 +279,7 @@
 									<div
 										class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0"
 									>
-										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0"
-											/>
-										</svg>
+										<AddressBook size={20} />
 									</div>
 									<div>
 										<div class="font-medium text-foreground">vCard (.vcf)</div>
@@ -312,14 +292,7 @@
 									<div
 										class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500 flex-shrink-0"
 									>
-										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-											/>
-										</svg>
+										<FileText size={20} />
 									</div>
 									<div>
 										<div class="font-medium text-foreground">CSV (.csv)</div>
@@ -336,14 +309,7 @@
 									onclick={handleDownloadTemplate}
 									class="text-primary hover:underline text-sm inline-flex items-center gap-2"
 								>
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-										/>
-									</svg>
+									<DownloadSimple size={16} />
 									CSV-Vorlage herunterladen
 								</button>
 							</div>
@@ -366,14 +332,7 @@
 					<div
 						class="w-20 h-20 mx-auto rounded-full bg-green-500/10 flex items-center justify-center text-green-500"
 					>
-						<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M5 13l4 4L19 7"
-							/>
-						</svg>
+						<Check size={40} />
 					</div>
 
 					<div>
@@ -433,14 +392,7 @@
 				<div
 					class="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-green-600 dark:text-green-400 flex items-center gap-3"
 				>
-					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M5 13l4 4L19 7"
-						/>
-					</svg>
+					<Check size={20} class="flex-shrink-0" />
 					Export erfolgreich! Die Datei wurde heruntergeladen.
 				</div>
 			{/if}
@@ -468,14 +420,7 @@
 							<div
 								class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
 							>
-								<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
-									/>
-								</svg>
+								<AddressBook size={24} />
 							</div>
 							<div>
 								<div class="font-medium text-foreground">vCard</div>
@@ -495,14 +440,7 @@
 							<div
 								class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"
 							>
-								<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-									/>
-								</svg>
+								<FileText size={24} />
 							</div>
 							<div>
 								<div class="font-medium text-foreground">CSV</div>
@@ -592,14 +530,7 @@
 						</span>
 					{:else}
 						<span class="inline-flex items-center gap-2">
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-								/>
-							</svg>
+							<DownloadSimple size={20} />
 							Kontakte exportieren
 						</span>
 					{/if}

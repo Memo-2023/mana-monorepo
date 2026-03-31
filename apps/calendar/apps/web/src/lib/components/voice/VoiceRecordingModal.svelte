@@ -2,6 +2,7 @@
 	import { voiceRecordingStore } from '$lib/stores/voice-recording.svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { focusTrap } from '@manacore/shared-ui';
+	import { WarningCircle, X, Check } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Called when recording completes with transcription */
@@ -87,14 +88,7 @@
 			<!-- Error state -->
 			<div class="modal-content error">
 				<div class="error-icon">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					</svg>
+					<WarningCircle size={48} />
 				</div>
 				<p class="error-message">{errorMessage}</p>
 				<button class="btn btn-primary" onclick={handleCancel}>Schließen</button>
@@ -120,14 +114,7 @@
 				<!-- Controls -->
 				<div class="controls">
 					<button class="btn btn-icon btn-cancel" onclick={handleCancel} title="Abbrechen (Esc)">
-						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={24} />
 					</button>
 
 					<button
@@ -135,14 +122,7 @@
 						onclick={handleStop}
 						title="Aufnahme beenden (Enter)"
 					>
-						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M5 13l4 4L19 7"
-							/>
-						</svg>
+						<Check size={24} />
 					</button>
 				</div>
 

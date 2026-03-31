@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext, type Snippet } from 'svelte';
+	import { Stack, X } from '@manacore/shared-icons';
 	import { QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import type { QuickInputItem, CreatePreview } from '@manacore/shared-ui';
 	import { unifiedBarStore } from '$lib/stores/unified-bar.svelte';
@@ -180,20 +181,7 @@
 		<!-- Layers Menu FAB (only on calendar main page) -->
 		{#if showCalendarLayers}
 			<button class="layers-fab" onclick={toggleOverlay} title="Leisten anpassen">
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				>
-					<path d="M12 2L2 7l10 5 10-5-10-5z" />
-					<path d="M2 17l10 5 10-5" />
-					<path d="M2 12l10 5 10-5" />
-				</svg>
+				<Stack size={20} />
 			</button>
 		{/if}
 	</div>
@@ -208,19 +196,7 @@
 			<div class="overlay-header">
 				<h3>Leisten</h3>
 				<button class="overlay-close-btn" onclick={toggleOverlay} aria-label="Schließen">
-					<svg
-						width="18"
-						height="18"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<line x1="18" y1="6" x2="6" y2="18" />
-						<line x1="6" y1="6" x2="18" y2="18" />
-					</svg>
+					<X size={18} weight="bold" />
 				</button>
 			</div>
 

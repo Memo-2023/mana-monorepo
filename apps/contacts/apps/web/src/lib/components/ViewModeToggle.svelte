@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { viewModeStore, type ViewMode } from '$lib/stores/view-mode.svelte';
+	import { SquaresFour, SortAscending } from '@manacore/shared-icons';
 
 	const modes: { id: ViewMode; icon: string; label: string }[] = [
 		{ id: 'alphabet', icon: 'alphabet', label: 'views.alphabet' },
@@ -18,23 +19,9 @@
 			title={$_(mode.label)}
 		>
 			{#if mode.icon === 'grid'}
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
-					/>
-				</svg>
+				<SquaresFour size={20} />
 			{:else if mode.icon === 'alphabet'}
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-					/>
-				</svg>
+				<SortAscending size={20} />
 			{/if}
 		</button>
 	{/each}
