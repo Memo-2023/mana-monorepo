@@ -54,8 +54,6 @@
 		useAllBoardViews,
 		getActiveProjects,
 	} from '$lib/data/task-queries';
-	import { boardViewsStore } from '$lib/stores/board-views.svelte';
-	import { ViewEditorModal } from '$lib/components/board-views';
 	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
 	import { List, X } from '@manacore/shared-icons';
 
@@ -69,16 +67,6 @@
 
 	// Use first board view as the single active view
 	let activeView = $derived(boardViews.value[0] ?? null);
-
-	// View Editor Modal (opened via Layout pill)
-	let showViewEditor = $state(false);
-
-	async function handleSaveView(data: Partial<LocalBoardView>) {
-		if (activeView) {
-			await boardViewsStore.updateView(activeView.id, data);
-		}
-		showViewEditor = false;
-	}
 
 	// Provide data to child components via Svelte context
 	setContext('projects', allProjects);
@@ -279,12 +267,12 @@
 			? [
 					{
 						href: '/',
-						label: 'Layout',
-						icon: 'grid',
+						label: editMode ? 'Fertig' : 'Layout',
+						icon: editMode ? 'check' : 'grid',
 						onClick: () => {
-							showViewEditor = true;
+							editMode = !editMode;
 						},
-						active: showViewEditor,
+						active: editMode,
 					},
 				]
 			: []),
@@ -574,16 +562,6 @@
 	{#if authStore.isAuthenticated}
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
 	{/if}
-
-	<!-- View Editor Modal -->
-	<ViewEditorModal
-		open={showViewEditor}
-		view={activeView}
-		onSave={handleSaveView}
-		onClose={() => {
-			showViewEditor = false;
-		}}
-	/>
 </AuthGate>
 
 <style>
