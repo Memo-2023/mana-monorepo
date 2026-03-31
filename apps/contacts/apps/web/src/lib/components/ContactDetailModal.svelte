@@ -9,6 +9,7 @@
 	import SocialMediaFields from './forms/SocialMediaFields.svelte';
 	import DateFields from './forms/DateFields.svelte';
 	import SocialMediaLinks from './SocialMediaLinks.svelte';
+	import { getErrorMessage } from '$lib/utils/error-helpers';
 	import {
 		X,
 		PencilSimple,
@@ -136,7 +137,7 @@
 			contact = await contactsApi.get(contactId);
 			populateForm();
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Laden des Kontakts';
+			error = getErrorMessage(e, 'Fehler beim Laden des Kontakts');
 		} finally {
 			loading = false;
 		}
@@ -179,7 +180,7 @@
 			});
 			editing = false;
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Speichern';
+			error = getErrorMessage(e, 'Fehler beim Speichern');
 		} finally {
 			saving = false;
 		}
@@ -192,7 +193,7 @@
 			await contactsApi.delete(contactId);
 			onClose();
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Löschen';
+			error = getErrorMessage(e, 'Fehler beim Löschen');
 			deleting = false;
 		}
 	}
@@ -203,7 +204,7 @@
 		try {
 			contact = await contactsApi.toggleFavorite(contactId);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler';
+			error = getErrorMessage(e, 'Fehler');
 		}
 	}
 
@@ -235,7 +236,7 @@
 			const result = await photoApi.upload(contactId, file);
 			contact = { ...contact, photoUrl: result.photoUrl };
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Hochladen';
+			error = getErrorMessage(e, 'Fehler beim Hochladen');
 		} finally {
 			uploadingPhoto = false;
 			// Reset input to allow re-selecting same file
@@ -254,7 +255,7 @@
 			await photoApi.delete(contactId);
 			contact = { ...contact, photoUrl: null };
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Löschen';
+			error = getErrorMessage(e, 'Fehler beim Löschen');
 		} finally {
 			uploadingPhoto = false;
 		}

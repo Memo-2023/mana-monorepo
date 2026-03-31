@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import { _ } from 'svelte-i18n';
 	import { Heart, Archive, Trash } from '@manacore/shared-icons';
+	import { getErrorMessage } from '$lib/utils/error-helpers';
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { viewModeStore } from '$lib/stores/view-mode.svelte';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
@@ -188,7 +189,7 @@
 			selectedIds = new Set();
 			selectionMode = false;
 		} catch (e) {
-			toastStore.error(e instanceof Error ? e.message : 'Fehler beim Löschen');
+			toastStore.error(getErrorMessage(e, 'Fehler beim Löschen'));
 		} finally {
 			batchLoading = false;
 		}
@@ -204,7 +205,7 @@
 			selectedIds = new Set();
 			selectionMode = false;
 		} catch (e) {
-			toastStore.error(e instanceof Error ? e.message : 'Fehler beim Archivieren');
+			toastStore.error(getErrorMessage(e, 'Fehler beim Archivieren'));
 		} finally {
 			batchLoading = false;
 		}
@@ -220,7 +221,7 @@
 			selectedIds = new Set();
 			selectionMode = false;
 		} catch (e) {
-			toastStore.error(e instanceof Error ? e.message : 'Fehler');
+			toastStore.error(getErrorMessage(e, 'Fehler'));
 		} finally {
 			batchLoading = false;
 		}
