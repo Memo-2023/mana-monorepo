@@ -140,6 +140,11 @@ lokal → git push → GitHub → CD (nativer Runner) → Docker deploy
 ### Status & Monitoring
 
 ```bash
+# HTTP-Erreichbarkeit aller mana.how Domains prüfen (liest aus cloudflared-config.yml)
+pnpm check:status
+# oder direkt:
+bash scripts/check-status.sh
+
 # Übersicht aller Services
 ./scripts/mac-mini/status.sh
 
@@ -153,6 +158,10 @@ docker ps
 docker logs manacore-chat-backend
 docker logs -f manacore-chat-backend  # Live-Logs
 ```
+
+**Grafana Uptime-Dashboard:** `grafana.mana.how` → Ordner "ManaCore" → **"ManaCore Uptime"**
+Zeigt probe_success und probe_duration_seconds aller Dienste via Blackbox Exporter (Port 9115).
+Alerts: WebAppDown (2 min), APIDown (1 min), InfraToolDown (3 min), GPUServiceDown (5 min), SlowHTTPResponse (5 min > 5s).
 
 ### Service Management
 
