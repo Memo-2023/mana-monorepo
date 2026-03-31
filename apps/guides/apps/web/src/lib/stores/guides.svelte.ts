@@ -3,6 +3,7 @@
  * Reads happen via Dexie liveQuery in components.
  */
 
+import type { BaseRecord } from '@manacore/local-store';
 import {
 	guideCollection,
 	sectionCollection,
@@ -39,7 +40,7 @@ export const guidesStore = {
 	},
 
 	async createGuide(
-		data: Omit<LocalGuide, keyof import('@manacore/local-store').BaseRecord>
+		data: Omit<LocalGuide, keyof BaseRecord>
 	): Promise<LocalGuide | null> {
 		return withErrorHandling(async () => {
 			return guideCollection.insert({
@@ -70,7 +71,7 @@ export const guidesStore = {
 
 	// ─── Sections ──────────────────────────────────────────
 
-	async createSection(data: Omit<LocalSection, keyof import('@manacore/local-store').BaseRecord>): Promise<LocalSection | null> {
+	async createSection(data: Omit<LocalSection, keyof BaseRecord>): Promise<LocalSection | null> {
 		return withErrorHandling(
 			() => sectionCollection.insert({ id: crypto.randomUUID(), ...data }),
 			'Abschnitt konnte nicht erstellt werden'
@@ -94,7 +95,7 @@ export const guidesStore = {
 
 	// ─── Steps ─────────────────────────────────────────────
 
-	async createStep(data: Omit<LocalStep, keyof import('@manacore/local-store').BaseRecord>): Promise<LocalStep | null> {
+	async createStep(data: Omit<LocalStep, keyof BaseRecord>): Promise<LocalStep | null> {
 		return withErrorHandling(
 			() => stepCollection.insert({ id: crypto.randomUUID(), ...data }),
 			'Schritt konnte nicht erstellt werden'
@@ -118,7 +119,7 @@ export const guidesStore = {
 	// ─── Collections ───────────────────────────────────────
 
 	async createCollection(
-		data: Omit<LocalCollection, keyof import('@manacore/local-store').BaseRecord>
+		data: Omit<LocalCollection, keyof BaseRecord>
 	): Promise<LocalCollection | null> {
 		return withErrorHandling(
 			() => collectionCollection.insert({ id: crypto.randomUUID(), ...data }),

@@ -5,8 +5,7 @@
 	import { AuthGate } from '@manacore/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { guidesStore } from '$lib/stores/guides.svelte';
-	import { guidesStore as localStore } from '$lib/data/local-store.js';
-	import { getPillAppItems } from '@manacore/shared-branding';
+	import { guidesStore as dbStore } from '$lib/data/local-store.js';
 	import { BookOpen, StackSimple, ClockCounterClockwise, Plus } from '@manacore/shared-icons';
 
 	let { children } = $props();
@@ -27,9 +26,9 @@
 		href === '/' ? currentPath === '/' : currentPath.startsWith(href);
 
 	onMount(async () => {
-		await localStore.initialize();
+		await dbStore.initialize();
 		if (authStore.isLoggedIn) {
-			localStore.startSync(() => authStore.getAccessToken());
+			dbStore.startSync(() => authStore.getValidToken());
 		}
 	});
 </script>

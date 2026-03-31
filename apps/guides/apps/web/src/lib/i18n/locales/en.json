@@ -1,0 +1,22 @@
+{
+	"app.name": "Guides",
+	"app.description": "Step-by-Step Guides",
+	"nav.library": "Library",
+	"nav.collections": "Collections",
+	"nav.history": "History",
+	"guide.new": "New Guide",
+	"guide.start_run": "Start Run",
+	"guide.continue_run": "Continue",
+	"guide.finish_run": "Complete Run",
+	"guide.steps": "Steps",
+	"guide.difficulty.easy": "Easy",
+	"guide.difficulty.medium": "Medium",
+	"guide.difficulty.hard": "Hard",
+	"run.mode.scroll": "Scroll Mode",
+	"run.mode.focus": "Focus Mode",
+	"common.save": "Save",
+	"common.cancel": "Cancel",
+	"common.delete": "Delete",
+	"common.create": "Create",
+	"common.back": "Back"
+}

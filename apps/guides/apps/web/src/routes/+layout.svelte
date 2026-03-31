@@ -3,7 +3,7 @@
 	import '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { isLoading as i18nLoading } from 'svelte-i18n';
-	import { theme } from '@manacore/shared-theme';
+	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 
 	let { children } = $props();

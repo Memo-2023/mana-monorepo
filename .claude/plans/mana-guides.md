@@ -133,19 +133,22 @@ apps/guides/apps/web/src/routes/
 
 ## Phasen
 
-### Phase 1 — MVP (jetzt implementiert) ✓
+### Phase 1 — MVP ✅ Abgeschlossen
 - [x] Monorepo-Skelett (package.json, config-files)
 - [x] Local-Store (5 Collections)
 - [x] Guest-Seed (3 Demo-Guides)
+- [x] i18n Setup (de + en)
+- [x] version.ts
+- [x] theme Store
 - [x] Root-Layout + Auth-Layout
+- [x] Auth-Routes (login, register, forgot-password, reset-password)
 - [x] Bibliothek-View (+page.svelte)
 - [x] Guide-Detail-View
 - [x] Run-Modus (Scroll + Fokus)
-- [x] Collections-View
+- [x] Collections-View + Collections-Detail [id]
 - [x] Verlauf-View
 - [x] GuideCard-Komponente
 - [x] GuideEditModal
-- [x] RunView-Komponente
 - [x] Registrierung in mana-apps.ts + app-icons.ts
 
 ### Phase 2 — Web-Import & Sharing

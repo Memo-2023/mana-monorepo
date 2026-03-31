@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { LocalGuide, Difficulty } from '$lib/data/local-store.js';
+	import type { BaseRecord } from '@manacore/local-store';
 
-	type GuideInput = Omit<LocalGuide, keyof import('@manacore/local-store').BaseRecord>;
+	type GuideInput = Omit<LocalGuide, keyof BaseRecord>;
 
 	interface Props {
 		open: boolean;
