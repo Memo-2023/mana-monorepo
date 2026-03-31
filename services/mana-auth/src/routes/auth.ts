@@ -131,6 +131,15 @@ export function createAuthRoutes(
 
 			return c.json(response);
 		} catch (error) {
+			console.log(
+				'[login debug] caught error:',
+				JSON.stringify({
+					msg: (error as any)?.message,
+					status: (error as any)?.status,
+					body: (error as any)?.body,
+					name: (error as any)?.name,
+				})
+			);
 			// Better Auth throws APIError.from("FORBIDDEN", "EMAIL_NOT_VERIFIED") for unverified emails
 			const isEmailNotVerified =
 				(error as any)?.status === 403 ||
