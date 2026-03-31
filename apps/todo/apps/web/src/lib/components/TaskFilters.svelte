@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { TaskPriority } from '@todo/shared';
 	import { getContext } from 'svelte';
 	import type { Project } from '@todo/shared';
@@ -139,19 +140,24 @@
 			</button>
 
 			<!-- Tag Chips -->
-			{#if showTags && tagsCtx.value.length > 0}
-				{#each tagsCtx.value as tag (tag.id)}
-					<button
-						class="tag-chip glass-pill"
-						class:selected={selectedLabelIds.includes(tag.id)}
-						onclick={() => toggleLabel(tag.id)}
-						title={tag.name}
-						style="--tag-color: {tag.color || '#6b7280'}"
-					>
-						<span class="tag-dot"></span>
-						<span class="pill-label">{tag.name}</span>
-					</button>
-				{/each}
+			{#if showTags}
+				<button class="label-pill glass-pill" onclick={() => goto('/tags')} title="Tags verwalten">
+					<span class="pill-label label-text">Tags:</span>
+				</button>
+				{#if tagsCtx.value.length > 0}
+					{#each tagsCtx.value as tag (tag.id)}
+						<button
+							class="tag-chip glass-pill"
+							class:selected={selectedLabelIds.includes(tag.id)}
+							onclick={() => toggleLabel(tag.id)}
+							title={tag.name}
+							style="--tag-color: {tag.color || '#6b7280'}"
+						>
+							<span class="tag-dot"></span>
+							<span class="pill-label">{tag.name}</span>
+						</button>
+					{/each}
+				{/if}
 				<span class="strip-divider"></span>
 			{/if}
 
@@ -495,6 +501,28 @@
 	}
 
 	.glass-pill.active .pill-label {
+		color: #8b5cf6;
+	}
+
+	/* Label pill (section header) */
+	.label-pill {
+		padding: 0.5rem 0.75rem;
+		cursor: pointer;
+	}
+
+	.label-pill .label-text {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		color: #6b7280;
+	}
+
+	:global(.dark) .label-pill .label-text {
+		color: #9ca3af;
+	}
+
+	.label-pill:hover .label-text {
 		color: #8b5cf6;
 	}
 
