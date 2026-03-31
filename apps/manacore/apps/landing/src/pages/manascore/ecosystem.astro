@@ -106,6 +106,18 @@ const categories = [
 		icon: '📏',
 		description: 'Dateien unter 500 Zeilen',
 	},
+	{
+		key: 'securityHeaders',
+		label: 'Security Headers',
+		icon: '🔐',
+		description: 'CSP, X-Frame-Options via setSecurityHeaders()',
+	},
+	{
+		key: 'skeletonLoading',
+		label: 'Skeleton Loading',
+		icon: '💀',
+		description: 'Skeleton-Komponenten für Loading States',
+	},
 ];
 
 const packageDetails = details.packages.perPackage;
@@ -267,6 +279,34 @@ const generatedDate = new Date(ecosystemData.generatedAt).toLocaleDateString('de
 						</div>
 					</div>
 				</div>
+
+				<!-- Technical Debt (TODO/FIXME) -->
+				{
+					details.todos && details.todos.totalCount > 0 && (
+						<div class="mb-12">
+							<h2 class="text-foreground mb-6 text-xl font-semibold">
+								Technical Debt (TODO/FIXME/HACK)
+							</h2>
+							<div class="border-border/50 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-4">
+								<div class="mb-3 flex items-center justify-between">
+									<span class="text-muted-foreground text-sm">Gesamt im Codebase</span>
+									<span
+										class={`text-2xl font-bold ${details.todos.totalCount > 50 ? 'text-red-500' : details.todos.totalCount > 20 ? 'text-orange-500' : 'text-yellow-500'}`}
+									>
+										{details.todos.totalCount}
+									</span>
+								</div>
+								<div class="flex flex-wrap gap-2">
+									{Object.entries(details.todos.perApp).map(([app, count]: [string, any]) => (
+										<span class="text-muted-foreground border-border/50 rounded-full border px-3 py-1 text-xs">
+											{app}: <span class="text-foreground font-medium">{count}</span>
+										</span>
+									))}
+								</div>
+							</div>
+						</div>
+					)
+				}
 
 				<!-- File Size Top Offenders -->
 				{

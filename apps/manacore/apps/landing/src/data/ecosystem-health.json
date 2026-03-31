@@ -1,11 +1,11 @@
 {
-	"generatedAt": "2026-03-31T12:04:45.568Z",
-	"overallScore": 70,
+	"generatedAt": "2026-03-31T12:12:26.680Z",
+	"overallScore": 72,
 	"scores": {
 		"sharedPackages": 90,
 		"iconConsistency": 89,
 		"modalConsistency": 19,
-		"errorHandling": 20,
+		"errorHandling": 17,
 		"i18nCoverage": 86,
 		"localFirst": 93,
 		"styleConsistency": 87,
@@ -13,7 +13,9 @@
 		"typescriptStrict": 100,
 		"testCoverage": 72,
 		"pwaSupport": 2,
-		"maintainability": 0
+		"maintainability": 0,
+		"securityHeaders": 76,
+		"skeletonLoading": 76
 	},
 	"weights": {
 		"sharedPackages": 20,
@@ -26,13 +28,15 @@
 		"errorBoundaries": 8,
 		"typescriptStrict": 7,
 		"testCoverage": 7,
-		"pwaSupport": 5,
-		"maintainability": 5
+		"pwaSupport": 4,
+		"maintainability": 4,
+		"securityHeaders": 5,
+		"skeletonLoading": 3
 	},
 	"details": {
 		"icons": {
 			"adoption": 89,
-			"phosphorFiles": 354,
+			"phosphorFiles": 347,
 			"inlineSvgFiles": 45,
 			"perApp": {
 				"calc": {
@@ -40,7 +44,7 @@
 					"inlineSvg": 0
 				},
 				"calendar": {
-					"phosphor": 35,
+					"phosphor": 28,
 					"inlineSvg": 0
 				},
 				"chat": {
@@ -155,9 +159,9 @@
 		},
 		"modals": {
 			"adoption": 19,
-			"total": 64,
+			"total": 63,
 			"sharedUsage": 12,
-			"focusTrapUsage": 7
+			"focusTrapUsage": 6
 		},
 		"packages": {
 			"coreAdoption": 90,
@@ -206,9 +210,9 @@
 			}
 		},
 		"errors": {
-			"adoption": 20,
+			"adoption": 17,
 			"inline": 193,
-			"shared": 47
+			"shared": 40
 		},
 		"i18n": {
 			"adoption": 86,
@@ -266,7 +270,7 @@
 			"e2eAdoption": 14,
 			"appsWithTests": 21,
 			"appsWithE2e": 4,
-			"totalTestFiles": 111,
+			"totalTestFiles": 110,
 			"noTests": [
 				"calc",
 				"inventar",
@@ -341,12 +345,12 @@
 				{
 					"app": "todo",
 					"file": "lib/components/TaskItem.svelte",
-					"lines": 1217
+					"lines": 1194
 				},
 				{
 					"app": "todo",
 					"file": "lib/components/board-views/ViewEditorModal.svelte",
-					"lines": 1190
+					"lines": 1187
 				},
 				{
 					"app": "contacts",
@@ -356,7 +360,7 @@
 				{
 					"app": "calendar",
 					"file": "lib/components/calendar/WeekView.svelte",
-					"lines": 1043
+					"lines": 959
 				},
 				{
 					"app": "zitare",
@@ -374,6 +378,26 @@
 					"lines": 849
 				}
 			]
+		},
+		"todos": {
+			"totalCount": 22,
+			"perApp": {
+				"manacore": 13,
+				"contacts": 5,
+				"todo": 2,
+				"chat": 1,
+				"picture": 1
+			}
+		},
+		"securityHeaders": {
+			"adoption": 76,
+			"appsWithHeaders": 22,
+			"missing": ["manavoxel", "moodlit", "news", "playground", "times", "uload", "wisekeep"]
+		},
+		"skeletons": {
+			"adoption": 76,
+			"appsWithSkeletons": 22,
+			"missing": ["citycorners", "manadeck", "manavoxel", "planta", "presi", "times", "zitare"]
 		}
 	},
 	"apps": [

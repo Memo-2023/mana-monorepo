@@ -513,6 +513,94 @@ function measureFileSizes() {
 	};
 }
 
+function measureTodoFixmeCount() {
+	console.log('📊 Measuring TODO/FIXME Count...');
+	let totalCount = 0;
+	const perApp = {};
+
+	for (const app of WEB_APPS) {
+		const webSrc = join(APPS_DIR, app, 'apps/web/src');
+		if (!existsSync(webSrc)) continue;
+
+		const count =
+			grepOccurrences('TODO', webSrc, '*.svelte') +
+			grepOccurrences('TODO', webSrc, '*.ts') +
+			grepOccurrences('FIXME', webSrc, '*.svelte') +
+			grepOccurrences('FIXME', webSrc, '*.ts') +
+			grepOccurrences('HACK', webSrc, '*.svelte') +
+			grepOccurrences('HACK', webSrc, '*.ts');
+
+		if (count > 0) {
+			perApp[app] = count;
+			totalCount += count;
+		}
+	}
+
+	const sorted = Object.entries(perApp).sort(([, a], [, b]) => b - a);
+	console.log(`  Total TODO/FIXME/HACK: ${totalCount}`);
+	if (sorted.length > 0) {
+		sorted.slice(0, 5).forEach(([app, count]) => console.log(`    ${app}: ${count}`));
+	}
+	console.log('');
+
+	return { totalCount, perApp: Object.fromEntries(sorted) };
+}
+
+function measureSecurityHeaders() {
+	console.log('📊 Measuring Security Headers...');
+	let appsWithHeaders = 0;
+	const missing = [];
+
+	for (const app of WEB_APPS) {
+		const webSrc = join(APPS_DIR, app, 'apps/web/src');
+		if (!existsSync(webSrc)) continue;
+
+		const hasHeaders =
+			grepCount('setSecurityHeaders', webSrc, '*.ts') > 0 ||
+			grepCount('Content-Security-Policy', webSrc, '*.ts') > 0 ||
+			grepCount('X-Frame-Options', webSrc, '*.ts') > 0;
+
+		if (hasHeaders) appsWithHeaders++;
+		else missing.push(app);
+	}
+
+	const adoption = Math.round((appsWithHeaders / WEB_APPS.length) * 100);
+	console.log(`  Apps with security headers: ${appsWithHeaders}/${WEB_APPS.length} (${adoption}%)`);
+	if (missing.length > 0 && missing.length <= 10) console.log(`  Missing: ${missing.join(', ')}`);
+	console.log('');
+
+	return { adoption, appsWithHeaders, missing };
+}
+
+function measureSkeletonLoading() {
+	console.log('📊 Measuring Skeleton Loading States...');
+	let appsWithSkeletons = 0;
+	const missing = [];
+
+	for (const app of WEB_APPS) {
+		const webSrc = join(APPS_DIR, app, 'apps/web/src');
+		if (!existsSync(webSrc)) continue;
+
+		const hasSkeletons =
+			fileCount('*Skeleton*', webSrc) > 0 ||
+			fileCount('*skeleton*', webSrc) > 0 ||
+			grepCount('Skeleton', webSrc, '*.svelte') > 0 ||
+			grepCount('animate-pulse', webSrc, '*.svelte') > 0;
+
+		if (hasSkeletons) appsWithSkeletons++;
+		else missing.push(app);
+	}
+
+	const adoption = Math.round((appsWithSkeletons / WEB_APPS.length) * 100);
+	console.log(
+		`  Apps with skeleton loading: ${appsWithSkeletons}/${WEB_APPS.length} (${adoption}%)`
+	);
+	if (missing.length > 0 && missing.length <= 10) console.log(`  Missing: ${missing.join(', ')}`);
+	console.log('');
+
+	return { adoption, appsWithSkeletons, missing };
+}
+
 // ============================================================
 // Main
 // ============================================================
@@ -532,6 +620,9 @@ const typescript = measureTypeScriptStrictness();
 const tests = measureTestCoverage();
 const pwa = measurePwaSupport();
 const fileSizes = measureFileSizes();
+const todos = measureTodoFixmeCount();
+const securityHeaders = measureSecurityHeaders();
+const skeletons = measureSkeletonLoading();
 
 // Calculate overall scores
 const scores = {
@@ -547,6 +638,8 @@ const scores = {
 	testCoverage: tests.adoption,
 	pwaSupport: pwa.adoption,
 	maintainability: fileSizes.adoption,
+	securityHeaders: securityHeaders.adoption,
+	skeletonLoading: skeletons.adoption,
 };
 
 // Weighted overall score
@@ -561,8 +654,10 @@ const weights = {
 	errorBoundaries: 8,
 	typescriptStrict: 7,
 	testCoverage: 7,
-	pwaSupport: 5,
-	maintainability: 5,
+	pwaSupport: 4,
+	maintainability: 4,
+	securityHeaders: 5,
+	skeletonLoading: 3,
 };
 
 let totalWeight = 0;
@@ -616,6 +711,9 @@ const output = {
 		tests,
 		pwa,
 		fileSizes,
+		todos,
+		securityHeaders,
+		skeletons,
 	},
 	apps: WEB_APPS,
 };
