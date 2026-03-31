@@ -209,7 +209,8 @@
 
 	function toggleSubtask(subtaskId: string) {
 		if (!onSave) return;
-		const updated = (task.subtasks ?? []).map((s) =>
+		const subtasks = $state.snapshot(task.subtasks) ?? [];
+		const updated = subtasks.map((s) =>
 			s.id === subtaskId
 				? {
 						...s,
