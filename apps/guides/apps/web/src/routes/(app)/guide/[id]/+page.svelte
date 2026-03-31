@@ -77,6 +77,25 @@
 	let editingStep = $state<LocalStep | undefined>(undefined);
 	let stepModalSectionId = $state<string | undefined>(undefined);
 
+	// Quick-add state (inline, no modal)
+	let quickAddSectionId = $state<string | 'root' | null>(null);
+	let quickAddTitle = $state('');
+
+	async function quickAddStep(sectionId?: string) {
+		if (!quickAddTitle.trim()) { quickAddSectionId = null; return; }
+		const targetSteps = sectionId ? getStepsForSection(sectionId) : getUnsectionedSteps();
+		await guidesStore.createStep({
+			guideId,
+			sectionId,
+			order: targetSteps.length,
+			title: quickAddTitle.trim(),
+			type: 'instruction',
+			checkable: true,
+		});
+		quickAddTitle = '';
+		// keep open for next step
+	}
+
 	function openAddStep(sectionId?: string) {
 		editingStep = undefined;
 		stepModalSectionId = sectionId;
@@ -305,13 +324,26 @@
 							{/each}
 
 							{#if editMode}
-								<button
-									onclick={() => openAddStep(section.id)}
-									class="flex w-full items-center gap-2 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-								>
-									<span class="text-lg leading-none">+</span>
-									Schritt hinzufügen
-								</button>
+								{#if quickAddSectionId === section.id}
+									<div class="flex gap-2">
+										<input type="text" bind:value={quickAddTitle}
+											placeholder="Schritt-Titel (Enter = hinzufügen)" autofocus
+											onkeydown={async (e) => {
+												if (e.key === 'Enter') await quickAddStep(section.id);
+												if (e.key === 'Escape') { quickAddSectionId = null; quickAddTitle = ''; }
+											}}
+											class="flex-1 rounded-xl border border-primary/50 bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+										/>
+										<button onclick={() => quickAddStep(section.id)} class="rounded-xl bg-primary px-3 py-2 text-sm text-white">+</button>
+										<button onclick={() => { quickAddSectionId = null; quickAddTitle = ''; }} class="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">✕</button>
+										<button onclick={() => openAddStep(section.id)} class="rounded-xl border border-border px-2 py-2 text-xs text-muted-foreground hover:bg-accent" title="Erweitert">⋯</button>
+									</div>
+								{:else}
+									<button onclick={() => { quickAddSectionId = section.id; quickAddTitle = ''; }}
+										class="flex w-full items-center gap-2 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:border-primary/40 hover:text-primary">
+										<span class="text-lg leading-none">+</span> Schritt hinzufügen
+									</button>
+								{/if}
 							{/if}
 						</div>
 					</div>
@@ -344,13 +376,32 @@
 					{/each}
 
 					{#if editMode}
-						<button
-							onclick={() => openAddStep()}
-							class="flex w-full items-center gap-2 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-						>
-							<span class="text-lg leading-none">+</span>
-							Schritt hinzufügen
-						</button>
+						{#if quickAddSectionId === 'root'}
+							<div class="flex gap-2">
+								<input
+									type="text"
+									bind:value={quickAddTitle}
+									placeholder="Schritt-Titel (Enter = hinzufügen)"
+									autofocus
+									onkeydown={async (e) => {
+										if (e.key === 'Enter') await quickAddStep(undefined);
+										if (e.key === 'Escape') { quickAddSectionId = null; quickAddTitle = ''; }
+									}}
+									class="flex-1 rounded-xl border border-primary/50 bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+								/>
+								<button onclick={() => quickAddStep(undefined)} class="rounded-xl bg-primary px-3 py-2 text-sm text-white hover:bg-primary-hover">+</button>
+								<button onclick={() => { quickAddSectionId = null; quickAddTitle = ''; }} class="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">✕</button>
+								<button onclick={() => openAddStep(undefined)} class="rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground hover:bg-accent" title="Erweitert bearbeiten">⋯</button>
+							</div>
+						{:else}
+							<button
+								onclick={() => { quickAddSectionId = 'root'; quickAddTitle = ''; }}
+								class="flex w-full items-center gap-2 rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+							>
+								<span class="text-lg leading-none">+</span>
+								Schritt hinzufügen
+							</button>
+						{/if}
 					{/if}
 				</div>
 			{/if}

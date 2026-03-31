@@ -1,5 +1,7 @@
 <script lang="ts">
-	import type { LocalGuide, Difficulty } from '$lib/data/local-store.js';
+	import { liveQuery } from 'dexie';
+	import type { LocalGuide, Difficulty, LocalCollection } from '$lib/data/local-store.js';
+	import { collectionCollection } from '$lib/data/local-store.js';
 	import type { BaseRecord } from '@manacore/local-store';
 
 	type GuideInput = Omit<LocalGuide, keyof BaseRecord>;
@@ -22,7 +24,17 @@
 	let difficulty = $state<Difficulty>(guide?.difficulty ?? 'easy');
 	let estimatedMinutes = $state(guide?.estimatedMinutes ?? 0);
 	let tagsInput = $state((guide?.tags ?? []).join(', '));
+	let collectionId = $state<string | undefined>(guide?.collectionId);
 	let saving = $state(false);
+
+	// Live collections for selector
+	let allCollections = $state<LocalCollection[]>([]);
+	$effect(() => {
+		const sub = liveQuery(() => collectionCollection.getAll()).subscribe((cols) => {
+			allCollections = cols;
+		});
+		return () => sub.unsubscribe();
+	});
 
 	// Re-init when guide prop changes
 	$effect(() => {
@@ -34,6 +46,7 @@
 			difficulty = guide.difficulty;
 			estimatedMinutes = guide.estimatedMinutes ?? 0;
 			tagsInput = guide.tags.join(', ');
+			collectionId = guide.collectionId;
 		}
 	});
 
@@ -68,7 +81,7 @@
 				difficulty,
 				estimatedMinutes: estimatedMinutes > 0 ? estimatedMinutes : undefined,
 				tags,
-				collectionId: guide?.collectionId,
+				collectionId: collectionId || undefined,
 				orderInCollection: guide?.orderInCollection,
 				xpReward: guide?.xpReward,
 				skillId: guide?.skillId,
@@ -217,6 +230,22 @@
 						class="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
 					/>
 				</div>
+
+				<!-- Collection -->
+				{#if allCollections.length > 0}
+					<div>
+						<label class="mb-1 block text-xs font-medium text-muted-foreground">Sammlung</label>
+						<select
+							bind:value={collectionId}
+							class="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+						>
+							<option value={undefined}>Keine Sammlung</option>
+							{#each allCollections as col}
+								<option value={col.id}>{col.coverEmoji ?? ''} {col.title}</option>
+							{/each}
+						</select>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Footer -->
