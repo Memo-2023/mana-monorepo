@@ -5,8 +5,10 @@
 	import MergeModal from '$lib/components/duplicates/MergeModal.svelte';
 	import { DuplicateListSkeleton } from '$lib/components/skeletons';
 	import { toastStore } from '@manacore/shared-ui';
+	import { getErrorMessage } from '$lib/utils/error-helpers';
 	import { ArrowsClockwise } from '@manacore/shared-icons';
 	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
+	import { getMatchTypeLabel } from '$lib/constants/contact-fields';
 
 	let duplicates = $state<DuplicateGroup[]>([]);
 	let loading = $state(true);
@@ -21,21 +23,10 @@
 			const result = await duplicatesApi.findDuplicates();
 			duplicates = result.duplicates;
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Laden der Duplikate';
+			error = getErrorMessage(e, 'Fehler beim Laden der Duplikate');
 			console.error('Failed to load duplicates:', e);
 		} finally {
 			loading = false;
-		}
-	}
-
-	function getMatchTypeLabel(type: 'email' | 'phone' | 'name') {
-		switch (type) {
-			case 'email':
-				return 'E-Mail';
-			case 'phone':
-				return 'Telefon';
-			case 'name':
-				return 'Name';
 		}
 	}
 
@@ -70,7 +61,7 @@
 			}
 			handleCloseMergeModal();
 		} catch (e) {
-			toastStore.error(e instanceof Error ? e.message : 'Fehler beim Zusammenführen');
+			toastStore.error(getErrorMessage(e, 'Fehler beim Zusammenführen'));
 		}
 	}
 

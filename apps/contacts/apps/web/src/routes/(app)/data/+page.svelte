@@ -18,6 +18,7 @@
 		AddressBook,
 		Check,
 	} from '@manacore/shared-icons';
+	import { getErrorMessage } from '$lib/utils/error-helpers';
 	import '$lib/i18n';
 
 	type Tab = 'import' | 'export';
@@ -105,7 +106,7 @@
 			preview = await importApi.preview(file);
 			importStep = 'preview';
 		} catch (e) {
-			importError = e instanceof Error ? e.message : 'Fehler beim Verarbeiten der Datei';
+			importError = getErrorMessage(e, 'Fehler beim Verarbeiten der Datei');
 		} finally {
 			isLoading = false;
 		}
@@ -124,7 +125,7 @@
 			ContactsEvents.contactImported(fileExt as 'csv' | 'vcard', importResult?.imported);
 			// Live query auto-updates — no manual reload needed
 		} catch (e) {
-			importError = e instanceof Error ? e.message : 'Fehler beim Importieren';
+			importError = getErrorMessage(e, 'Fehler beim Importieren');
 		} finally {
 			isImporting = false;
 		}
@@ -146,7 +147,7 @@
 		try {
 			await importApi.downloadTemplate();
 		} catch (e) {
-			importError = e instanceof Error ? e.message : 'Fehler beim Herunterladen';
+			importError = getErrorMessage(e, 'Fehler beim Herunterladen');
 		}
 	}
 
@@ -164,7 +165,7 @@
 			});
 			exportSuccess = true;
 		} catch (e) {
-			exportError = e instanceof Error ? e.message : 'Export fehlgeschlagen';
+			exportError = getErrorMessage(e, 'Export fehlgeschlagen');
 		} finally {
 			isExporting = false;
 		}

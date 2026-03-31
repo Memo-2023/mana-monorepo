@@ -5,6 +5,7 @@
 	import type { Contact } from '$lib/api/contacts';
 	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
 	import { ContactListSkeleton } from '$lib/components/skeletons';
+	import { getErrorMessage } from '$lib/utils/error-helpers';
 	import '$lib/i18n';
 	import {
 		CaretLeft,
@@ -42,7 +43,7 @@
 			const result = await contactsApi.list({ isArchived: true });
 			contacts = result.contacts || result;
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Laden des Archivs';
+			error = getErrorMessage(e, 'Fehler beim Laden des Archivs');
 		} finally {
 			loading = false;
 		}
@@ -58,7 +59,7 @@
 			await contactsApi.toggleArchive(contact.id);
 			contacts = contacts.filter((c) => c.id !== contact.id);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Wiederherstellen';
+			error = getErrorMessage(e, 'Fehler beim Wiederherstellen');
 		}
 	}
 
@@ -70,7 +71,7 @@
 			await contactsApi.delete(contact.id);
 			contacts = contacts.filter((c) => c.id !== contact.id);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Löschen';
+			error = getErrorMessage(e, 'Fehler beim Löschen');
 		}
 	}
 

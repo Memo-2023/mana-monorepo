@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
 	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
+	import { CONTACT_FIELD_LABELS, getMatchTypeLabel } from '$lib/constants/contact-fields';
 
 	interface Props {
 		isOpen: boolean;
@@ -25,17 +26,6 @@
 		}
 	});
 
-	function getMatchTypeLabel(type: 'email' | 'phone' | 'name') {
-		switch (type) {
-			case 'email':
-				return 'E-Mail';
-			case 'phone':
-				return 'Telefon';
-			case 'name':
-				return 'Name';
-		}
-	}
-
 	function getFieldValue(contact: Contact, field: keyof Contact): string {
 		const value = contact[field];
 		if (value === null || value === undefined) return '-';
@@ -52,16 +42,20 @@
 	}
 
 	// Fields to display in comparison
-	const comparisonFields: { key: keyof Contact; label: string }[] = [
-		{ key: 'firstName', label: 'Vorname' },
-		{ key: 'lastName', label: 'Nachname' },
-		{ key: 'email', label: 'E-Mail' },
-		{ key: 'phone', label: 'Telefon' },
-		{ key: 'mobile', label: 'Mobil' },
-		{ key: 'company', label: 'Firma' },
-		{ key: 'jobTitle', label: 'Position' },
-		{ key: 'city', label: 'Stadt' },
+	const comparisonFieldKeys: (keyof Contact)[] = [
+		'firstName',
+		'lastName',
+		'email',
+		'phone',
+		'mobile',
+		'company',
+		'jobTitle',
+		'city',
 	];
+	const comparisonFields = comparisonFieldKeys.map((key) => ({
+		key,
+		label: CONTACT_FIELD_LABELS[key] || key,
+	}));
 </script>
 
 {#if isOpen}
