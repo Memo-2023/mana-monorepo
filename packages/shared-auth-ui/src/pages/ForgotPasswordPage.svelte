@@ -250,6 +250,7 @@
 						<button
 							type="submit"
 							disabled={loading}
+							aria-disabled={loading}
 							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 							style:background-color={primaryColor + '60'}
 							style:border-color={primaryColor}

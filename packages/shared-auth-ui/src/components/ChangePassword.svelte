@@ -208,6 +208,7 @@
 		<button
 			type="submit"
 			disabled={!canSubmit}
+			aria-disabled={!canSubmit}
 			class="submit-button"
 			style:background-color={primaryColor + '60'}
 			style:border-color={primaryColor}

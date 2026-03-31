@@ -242,6 +242,7 @@
 										class="pm-btn pm-btn-cancel"
 										onclick={cancelDelete}
 										disabled={loading}
+										aria-disabled={loading}
 									>
 										{t.cancelButton}
 									</button>
@@ -250,6 +251,7 @@
 										class="pm-btn pm-btn-danger"
 										onclick={executeDelete}
 										disabled={loading}
+										aria-disabled={loading}
 									>
 										{#if loading}
 											<svg
@@ -287,6 +289,7 @@
 										class="pm-btn pm-btn-cancel"
 										onclick={cancelRename}
 										disabled={loading}
+										aria-disabled={loading}
 									>
 										{t.cancelButton}
 									</button>
@@ -295,6 +298,7 @@
 										class="pm-btn pm-btn-primary"
 										onclick={() => saveRename(passkey.id)}
 										disabled={loading || !editName.trim()}
+										aria-disabled={loading || !editName.trim()}
 									>
 										{t.saveButton}
 									</button>
@@ -363,6 +367,7 @@
 						class="pm-btn pm-btn-cancel"
 						onclick={cancelRegister}
 						disabled={loading}
+						aria-disabled={loading}
 					>
 						{t.cancelButton}
 					</button>
@@ -371,6 +376,7 @@
 						class="pm-btn pm-btn-primary"
 						onclick={handleRegister}
 						disabled={loading}
+						aria-disabled={loading}
 					>
 						{#if loading}
 							<svg
@@ -394,6 +400,7 @@
 				class="pm-btn pm-btn-register"
 				onclick={openRegisterForm}
 				disabled={loading}
+				aria-disabled={loading}
 			>
 				<svg
 					width="18"

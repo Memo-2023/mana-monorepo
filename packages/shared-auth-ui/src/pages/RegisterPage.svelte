@@ -374,6 +374,7 @@
 									type="button"
 									onclick={handleResendVerification}
 									disabled={resendingVerification}
+									aria-disabled={resendingVerification}
 									class="w-full flex items-center justify-center gap-2 h-11 rounded-lg font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed border-[1.5px]"
 									style:background-color="{primaryColor}40"
 									style:border-color={primaryColor}
@@ -504,6 +505,7 @@
 					<button
 						type="submit"
 						disabled={loading}
+						aria-disabled={loading}
 						class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 						style:background-color="{primaryColor}60"
 						style:border-color={primaryColor}

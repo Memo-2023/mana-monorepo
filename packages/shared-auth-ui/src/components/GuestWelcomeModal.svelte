@@ -164,6 +164,44 @@
 			handleContinueAsGuest();
 		}
 	}
+
+	function trapFocus(node: HTMLElement) {
+		const focusableSelectors =
+			'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+		function handleKeydown(e: KeyboardEvent) {
+			if (e.key !== 'Tab') return;
+
+			const focusable = Array.from(node.querySelectorAll(focusableSelectors)) as HTMLElement[];
+			if (focusable.length === 0) return;
+
+			const first = focusable[0];
+			const last = focusable[focusable.length - 1];
+
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
+		}
+
+		node.addEventListener('keydown', handleKeydown);
+		// Auto-focus the primary (login) button - skip close button (index 0)
+		const focusable = node.querySelectorAll(focusableSelectors) as NodeListOf<HTMLElement>;
+		if (focusable.length > 1) {
+			focusable[1].focus();
+		} else if (focusable.length > 0) {
+			focusable[0].focus();
+		}
+
+		return {
+			destroy() {
+				node.removeEventListener('keydown', handleKeydown);
+			},
+		};
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -186,6 +224,7 @@
 			class="modal-content"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
+			use:trapFocus
 		>
 			<!-- Close Button -->
 			<button type="button" class="close-button" onclick={handleContinueAsGuest} aria-label="Close">

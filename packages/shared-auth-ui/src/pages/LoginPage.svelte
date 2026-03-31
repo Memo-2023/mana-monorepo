@@ -561,6 +561,7 @@
 						<button
 							type="submit"
 							disabled={loading || !twoFactorCode}
+							aria-disabled={loading || !twoFactorCode}
 							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 							style:background-color={primaryColor + '60'}
 							style:border-color={primaryColor}
@@ -636,6 +637,7 @@
 							type="button"
 							onclick={handlePasskeySignIn}
 							disabled={loading || showSuccess}
+							aria-disabled={loading || showSuccess}
 							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity bg-transparent hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 							style:border-color={primaryColor}
 							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
@@ -726,6 +728,7 @@
 										class="bg-transparent border-none cursor-pointer font-medium text-sm p-0 text-left underline hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
 										onclick={handleResendVerification}
 										disabled={resendingVerification}
+										aria-disabled={resendingVerification}
 										style:color={primaryColor}
 									>
 										{resendingVerification ? t.resendingVerification : t.resendVerification}
@@ -842,6 +845,7 @@
 						<button
 							type="submit"
 							disabled={loading || showSuccess || rateLimitCountdown > 0}
+							aria-disabled={loading || showSuccess || rateLimitCountdown > 0}
 							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 							style:background-color={showSuccess ? '#22c55e' : primaryColor + '60'}
 							style:border-color={showSuccess ? '#22c55e' : primaryColor}
@@ -892,6 +896,7 @@
 								type="button"
 								onclick={handleSendMagicLink}
 								disabled={sendingMagicLink || !email}
+								aria-disabled={sendingMagicLink || !email}
 								class="w-full bg-transparent border-none cursor-pointer font-medium text-sm p-3 text-center transition-opacity hover:opacity-70 disabled:opacity-40 disabled:cursor-not-allowed"
 								style:color={primaryColor}
 							>

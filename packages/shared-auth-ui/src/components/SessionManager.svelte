@@ -202,6 +202,7 @@
 			class="refresh-button"
 			onclick={onRefresh}
 			disabled={loading}
+			aria-disabled={loading}
 			aria-label={t.refresh}
 		>
 			<svg
@@ -289,6 +290,7 @@
 							class="revoke-button"
 							onclick={() => handleRevoke(session.id)}
 							disabled={revoking === session.id || revokingAll}
+							aria-disabled={revoking === session.id || revokingAll}
 						>
 							{#if revoking === session.id}
 								<span class="revoke-spinner"></span>
@@ -307,6 +309,7 @@
 				class="revoke-all-button"
 				onclick={handleRevokeAll}
 				disabled={revokingAll}
+				aria-disabled={revokingAll}
 			>
 				{#if revokingAll}
 					<span class="revoke-spinner"></span>
