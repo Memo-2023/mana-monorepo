@@ -1,13 +1,5 @@
 <script lang="ts">
-	import type {
-		Task,
-		Subtask,
-		TaskPriority,
-		TaskStatus,
-		EffectiveDuration,
-		UpdateTaskInput,
-	} from '@todo/shared';
-	import type { ContactReference, ContactOrManual } from '@manacore/shared-types';
+	import type { Task, Subtask, UpdateTaskInput } from '@todo/shared';
 	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
 	import { getContext } from 'svelte';
 	import type { Project } from '@todo/shared';
@@ -15,7 +7,7 @@
 
 	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { contactsStore } from '$lib/stores/contacts.svelte';
-	import { format } from 'date-fns';
+	import { useTaskForm } from '$lib/composables/useTaskForm.svelte';
 	import SubtaskList from './SubtaskList.svelte';
 	import {
 		PrioritySelector,
@@ -39,61 +31,15 @@
 
 	let { task, open, onClose, onSave, onDelete }: Props = $props();
 
-	// Form state - initialized from task
-	let title = $state('');
-	let description = $state('');
-	let dueDate = $state('');
-	let dueTime = $state('');
-	let startDate = $state('');
-	let priority = $state<TaskPriority>('medium');
-	let status = $state<TaskStatus>('pending');
-	let projectId = $state<string | null>(null);
-	let selectedLabelIds = $state<string[]>([]);
-	let subtasks = $state<Subtask[]>([]);
-	let recurrenceRule = $state('');
-	let notes = $state('');
-	let storyPoints = $state<number | null>(null);
-	let effectiveDuration = $state<EffectiveDuration | null>(null);
-	let funRating = $state<number | null>(null);
+	const form = useTaskForm();
+
 	// Link picker state
 	let showLinkPicker = $state(false);
-	// Contact associations
-	let assignee = $state<ContactOrManual[]>([]);
-	let involvedContacts = $state<ContactOrManual[]>([]);
-	let contactsAvailable = $state<boolean | null>(null);
-
-	// UI state
-	let isLoading = $state(false);
-	let showDeleteConfirm = $state(false);
 
 	// Initialize form when task changes or modal opens
 	$effect(() => {
 		if (open && task) {
-			title = task.title || '';
-			description = task.description || '';
-			dueDate = task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '';
-			dueTime = task.dueTime || '';
-			startDate = task.startDate ? format(new Date(task.startDate), 'yyyy-MM-dd') : '';
-			priority = task.priority || 'medium';
-			status = task.status || 'pending';
-			projectId = task.projectId || null;
-			selectedLabelIds = task.labels?.map((l) => l.id) || [];
-			subtasks = task.subtasks ? [...task.subtasks] : [];
-			recurrenceRule = task.recurrenceRule || '';
-			notes = task.metadata?.notes || '';
-			// Metadata fields
-			storyPoints = task.metadata?.storyPoints ?? null;
-			effectiveDuration = task.metadata?.effectiveDuration ?? null;
-			funRating = task.metadata?.funRating ?? null;
-			// Contact associations
-			assignee = task.metadata?.assignee ? [task.metadata.assignee] : [];
-			involvedContacts = task.metadata?.involvedContacts || [];
-			showDeleteConfirm = false;
-
-			// Check contacts availability
-			contactsStore.checkAvailability().then((available) => {
-				contactsAvailable = available;
-			});
+			form.initFromTask(task);
 		}
 	});
 
@@ -112,65 +58,27 @@
 		}
 	}
 
-	// Extract ContactReference from ContactOrManual (filter out manual entries for now)
-	function toContactReference(contact: ContactOrManual): ContactReference | null {
-		if ('isManual' in contact && contact.isManual) {
-			return null; // Manual entries not stored as contacts
-		}
-		return contact as ContactReference;
-	}
-
 	async function handleSave() {
-		if (!title.trim()) return;
+		if (!form.title.trim()) return;
 
-		isLoading = true;
+		form.isLoading = true;
 		try {
-			// Convert assignee array to single ContactReference
-			const assigneeRef = assignee.length > 0 ? toContactReference(assignee[0]) : null;
-			// Convert involved contacts to array of ContactReferences
-			const involvedRefs = involvedContacts
-				.map(toContactReference)
-				.filter((c): c is ContactReference => c !== null);
-
-			const data: UpdateTaskInput = {
-				title: title.trim(),
-				description: description.trim() || null,
-				dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-				dueTime: dueTime || null,
-				startDate: startDate ? new Date(startDate).toISOString() : null,
-				priority,
-				status,
-				projectId: projectId || null,
-				subtasks: subtasks.length > 0 ? subtasks : null,
-				recurrenceRule: recurrenceRule || null,
-				metadata: {
-					...task.metadata,
-					notes: notes.trim() || undefined,
-					storyPoints: storyPoints ?? undefined,
-					effectiveDuration: effectiveDuration ?? undefined,
-					funRating: funRating ?? undefined,
-					assignee: assigneeRef ?? undefined,
-					involvedContacts: involvedRefs.length > 0 ? involvedRefs : undefined,
-				},
-				labelIds: selectedLabelIds,
-			};
-
-			onSave(data);
+			onSave(form.buildUpdateInput(task));
 		} finally {
-			isLoading = false;
+			form.isLoading = false;
 		}
 	}
 
 	function handleDelete() {
-		if (showDeleteConfirm) {
+		if (form.showDeleteConfirm) {
 			onDelete(task.id);
 		} else {
-			showDeleteConfirm = true;
+			form.showDeleteConfirm = true;
 		}
 	}
 
 	function handleSubtasksChange(newSubtasks: Subtask[]) {
-		subtasks = newSubtasks;
+		form.subtasks = newSubtasks;
 	}
 </script>
 
@@ -202,7 +110,7 @@
 						id="task-title"
 						type="text"
 						class="form-input"
-						bind:value={title}
+						bind:value={form.title}
 						placeholder="Aufgabentitel..."
 					/>
 				</div>
@@ -213,7 +121,7 @@
 					<textarea
 						id="task-description"
 						class="form-textarea"
-						bind:value={description}
+						bind:value={form.description}
 						placeholder="Beschreibung hinzufügen..."
 						rows="3"
 					></textarea>
@@ -223,15 +131,15 @@
 				<div class="form-section">
 					<label class="form-label">Zuständig</label>
 					<ContactSelector
-						selectedContacts={assignee}
-						onContactsChange={(contacts) => (assignee = contacts)}
+						selectedContacts={form.assignee}
+						onContactsChange={(contacts) => (form.assignee = contacts)}
 						onSearch={(q) => contactsStore.searchContacts(q)}
 						singleSelect={true}
 						allowManualEntry={false}
 						placeholder="Person zuweisen..."
 						addLabel="Zuweisen"
 						searchPlaceholder="Name oder E-Mail..."
-						isAvailable={contactsAvailable ?? false}
+						isAvailable={form.contactsAvailable ?? false}
 					/>
 				</div>
 
@@ -239,14 +147,14 @@
 				<div class="form-section">
 					<label class="form-label">Beteiligte</label>
 					<ContactSelector
-						selectedContacts={involvedContacts}
-						onContactsChange={(contacts) => (involvedContacts = contacts)}
+						selectedContacts={form.involvedContacts}
+						onContactsChange={(contacts) => (form.involvedContacts = contacts)}
 						onSearch={(q) => contactsStore.searchContacts(q)}
 						allowManualEntry={false}
 						placeholder="Personen hinzufügen..."
 						addLabel="Person hinzufügen"
 						searchPlaceholder="Name oder E-Mail..."
-						isAvailable={contactsAvailable ?? false}
+						isAvailable={form.contactsAvailable ?? false}
 					/>
 				</div>
 
@@ -256,15 +164,20 @@
 					<div class="form-row">
 						<div class="form-field">
 							<label class="form-sublabel" for="due-date">Fälligkeitsdatum</label>
-							<input id="due-date" type="date" class="form-input-sm" bind:value={dueDate} />
+							<input id="due-date" type="date" class="form-input-sm" bind:value={form.dueDate} />
 						</div>
 						<div class="form-field">
 							<label class="form-sublabel" for="due-time">Uhrzeit</label>
-							<input id="due-time" type="time" class="form-input-sm" bind:value={dueTime} />
+							<input id="due-time" type="time" class="form-input-sm" bind:value={form.dueTime} />
 						</div>
 						<div class="form-field">
 							<label class="form-sublabel" for="start-date">Startdatum</label>
-							<input id="start-date" type="date" class="form-input-sm" bind:value={startDate} />
+							<input
+								id="start-date"
+								type="date"
+								class="form-input-sm"
+								bind:value={form.startDate}
+							/>
 						</div>
 					</div>
 				</div>
@@ -272,13 +185,13 @@
 				<!-- Priorität -->
 				<div class="form-section">
 					<label class="form-label">Priorität</label>
-					<PrioritySelector value={priority} onChange={(p) => (priority = p)} />
+					<PrioritySelector value={form.priority} onChange={(p) => (form.priority = p)} />
 				</div>
 
 				<!-- Status -->
 				<div class="form-section">
 					<label class="form-label" for="task-status">Status</label>
-					<select id="task-status" class="form-select" bind:value={status}>
+					<select id="task-status" class="form-select" bind:value={form.status}>
 						{#each STATUS_OPTIONS as s}
 							<option value={s.value}>{s.label}</option>
 						{/each}
@@ -288,7 +201,7 @@
 				<!-- Projekt -->
 				<div class="form-section">
 					<label class="form-label" for="task-project">Projekt</label>
-					<select id="task-project" class="form-select" bind:value={projectId}>
+					<select id="task-project" class="form-select" bind:value={form.projectId}>
 						<option value={null}>Kein Projekt</option>
 						{#each getActiveProjects(projectsCtx.value) as project}
 							<option value={project.id}>
@@ -302,15 +215,15 @@
 				<div class="form-section">
 					<label class="form-label">Tags</label>
 					<TagSelector
-						selectedIds={selectedLabelIds}
-						onChange={(ids) => (selectedLabelIds = ids)}
+						selectedIds={form.selectedLabelIds}
+						onChange={(ids) => (form.selectedLabelIds = ids)}
 					/>
 				</div>
 
 				<!-- Subtasks -->
 				<div class="form-section">
 					<label class="form-label">Subtasks</label>
-					<SubtaskList {subtasks} onChange={handleSubtasksChange} />
+					<SubtaskList subtasks={form.subtasks} onChange={handleSubtasksChange} />
 				</div>
 
 				<!-- Verknüpfungen -->
@@ -330,7 +243,7 @@
 
 				<ManaLinkPicker
 					sourceRef={{ app: 'todo', collection: 'tasks', id: task.id }}
-					sourceTitle={title || task.title}
+					sourceTitle={form.title || task.title}
 					open={showLinkPicker}
 					onClose={() => (showLinkPicker = false)}
 					onSearch={searchCrossApp}
@@ -339,7 +252,7 @@
 				<!-- Wiederholung -->
 				<div class="form-section">
 					<label class="form-label" for="task-recurrence">Wiederholung</label>
-					<select id="task-recurrence" class="form-select" bind:value={recurrenceRule}>
+					<select id="task-recurrence" class="form-select" bind:value={form.recurrenceRule}>
 						{#each RECURRENCE_OPTIONS as option}
 							<option value={option.value}>{option.label}</option>
 						{/each}
@@ -352,7 +265,7 @@
 					<textarea
 						id="task-notes"
 						class="form-textarea"
-						bind:value={notes}
+						bind:value={form.notes}
 						placeholder="Zusätzliche Notizen..."
 						rows="3"
 					></textarea>
@@ -361,41 +274,55 @@
 				<!-- Storypoints -->
 				<div class="form-section">
 					<label class="form-label">Storypoints</label>
-					<StorypointsSelector value={storyPoints} onChange={(v) => (storyPoints = v)} />
+					<StorypointsSelector value={form.storyPoints} onChange={(v) => (form.storyPoints = v)} />
 				</div>
 
 				<!-- Effektive Dauer -->
 				<div class="form-section">
 					<label class="form-label">Effektive Dauer</label>
-					<DurationPicker value={effectiveDuration} onChange={(v) => (effectiveDuration = v)} />
+					<DurationPicker
+						value={form.effectiveDuration}
+						onChange={(v) => (form.effectiveDuration = v)}
+					/>
 				</div>
 
 				<!-- Spaß-Faktor -->
 				<div class="form-section">
 					<label class="form-label">
-						Spaß-Faktor{#if funRating !== null}: <span class="fun-rating-value">{funRating}</span
+						Spaß-Faktor{#if form.funRating !== null}: <span class="fun-rating-value"
+								>{form.funRating}</span
 							>{/if}
 					</label>
-					<FunRatingPicker value={funRating} onChange={(v) => (funRating = v)} />
+					<FunRatingPicker value={form.funRating} onChange={(v) => (form.funRating = v)} />
 				</div>
 			</div>
 
 			<!-- Footer -->
 			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" onclick={handleDelete} disabled={isLoading}>
-					{showDeleteConfirm ? 'Wirklich löschen?' : 'Löschen'}
+				<button
+					type="button"
+					class="btn btn-danger"
+					onclick={handleDelete}
+					disabled={form.isLoading}
+				>
+					{form.showDeleteConfirm ? 'Wirklich löschen?' : 'Löschen'}
 				</button>
 				<div class="footer-right">
-					<button type="button" class="btn btn-secondary" onclick={onClose} disabled={isLoading}>
+					<button
+						type="button"
+						class="btn btn-secondary"
+						onclick={onClose}
+						disabled={form.isLoading}
+					>
 						Abbrechen
 					</button>
 					<button
 						type="button"
 						class="btn btn-primary"
 						onclick={handleSave}
-						disabled={isLoading || !title.trim()}
+						disabled={form.isLoading || !form.title.trim()}
 					>
-						{#if isLoading}
+						{#if form.isLoading}
 							<div class="spinner"></div>
 						{:else}
 							Speichern

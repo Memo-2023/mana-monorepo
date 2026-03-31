@@ -1,18 +1,11 @@
 <script lang="ts">
-	import type {
-		Task,
-		Subtask,
-		TaskPriority,
-		TaskStatus,
-		EffectiveDuration,
-		UpdateTaskInput,
-	} from '@todo/shared';
-	import type { ContactReference, ContactOrManual } from '@manacore/shared-types';
+	import type { Task, Subtask, UpdateTaskInput } from '@todo/shared';
 	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
 	import { format, isToday, isPast } from 'date-fns';
 	import { de } from 'date-fns/locale';
 	import { formatDueDate } from '$lib/utils/date-display';
 	import { getSubtaskProgress } from '$lib/utils/task-helpers';
+	import { useTaskForm } from '$lib/composables/useTaskForm.svelte';
 	import { getContext } from 'svelte';
 	import type { Project } from '@todo/shared';
 	import { getActiveProjects, getProjectColor } from '$lib/data/task-queries';
@@ -58,27 +51,9 @@
 	// Toggle for showing created date on completed tasks
 	let showCreatedDate = $state(false);
 
-	// Form state for expanded mode
-	let title = $state('');
-	let description = $state('');
-	let dueDate = $state('');
-	let dueTime = $state('');
-	let startDate = $state('');
-	let priority = $state<TaskPriority>('medium');
-	let status = $state<TaskStatus>('pending');
-	let projectId = $state<string | null>(null);
-	let selectedLabelIds = $state<string[]>([]);
-	let subtasks = $state<Subtask[]>([]);
-	let recurrenceRule = $state('');
-	let notes = $state('');
-	let storyPoints = $state<number | null>(null);
-	let effectiveDuration = $state<EffectiveDuration | null>(null);
-	let funRating = $state<number | null>(null);
-	let assignee = $state<ContactOrManual[]>([]);
-	let involvedContacts = $state<ContactOrManual[]>([]);
-	let contactsAvailable = $state<boolean | null>(null);
-	let isLoading = $state(false);
-	let showDeleteConfirm = $state(false);
+	// Shared form state
+	const form = useTaskForm();
+
 	let titleInputRef = $state<HTMLInputElement | null>(null);
 	let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
 	let isInitializing = $state(false);
@@ -95,28 +70,7 @@
 	$effect(() => {
 		if (isExpanded && task) {
 			isInitializing = true;
-			title = task.title || '';
-			description = task.description || '';
-			dueDate = task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : '';
-			dueTime = task.dueTime || '';
-			startDate = task.startDate ? format(new Date(task.startDate), 'yyyy-MM-dd') : '';
-			priority = task.priority || 'medium';
-			status = task.status || 'pending';
-			projectId = task.projectId || null;
-			selectedLabelIds = task.labels?.map((l) => l.id) || [];
-			subtasks = task.subtasks ? [...task.subtasks] : [];
-			recurrenceRule = task.recurrenceRule || '';
-			notes = task.metadata?.notes || '';
-			storyPoints = task.metadata?.storyPoints ?? null;
-			effectiveDuration = task.metadata?.effectiveDuration ?? null;
-			funRating = task.metadata?.funRating ?? null;
-			assignee = task.metadata?.assignee ? [task.metadata.assignee] : [];
-			involvedContacts = task.metadata?.involvedContacts || [];
-			showDeleteConfirm = false;
-
-			contactsStore.checkAvailability().then((available) => {
-				contactsAvailable = available;
-			});
+			form.initFromTask(task);
 
 			// Allow a tick for all state to settle before enabling auto-save
 			setTimeout(() => {
@@ -138,23 +92,23 @@
 	$effect(() => {
 		// Read all reactive form fields to create dependencies
 		void [
-			title,
-			description,
-			dueDate,
-			dueTime,
-			startDate,
-			priority,
-			status,
-			projectId,
-			selectedLabelIds,
-			subtasks,
-			recurrenceRule,
-			notes,
-			storyPoints,
-			effectiveDuration,
-			funRating,
-			assignee,
-			involvedContacts,
+			form.title,
+			form.description,
+			form.dueDate,
+			form.dueTime,
+			form.startDate,
+			form.priority,
+			form.status,
+			form.projectId,
+			form.selectedLabelIds,
+			form.subtasks,
+			form.recurrenceRule,
+			form.notes,
+			form.storyPoints,
+			form.effectiveDuration,
+			form.funRating,
+			form.assignee,
+			form.involvedContacts,
 		];
 		scheduleAutoSave();
 	});
@@ -236,62 +190,28 @@
 		}
 	}
 
-	function toContactReference(contact: ContactOrManual): ContactReference | null {
-		if ('isManual' in contact && contact.isManual) {
-			return null;
-		}
-		return contact as ContactReference;
-	}
-
 	async function handleSave() {
-		if (!title.trim() || !onSave) return;
+		if (!form.title.trim() || !onSave) return;
 
-		isLoading = true;
+		form.isLoading = true;
 		try {
-			const assigneeRef = assignee.length > 0 ? toContactReference(assignee[0]) : null;
-			const involvedRefs = involvedContacts
-				.map(toContactReference)
-				.filter((c): c is ContactReference => c !== null);
-
-			const data: UpdateTaskInput = {
-				title: title.trim(),
-				description: description.trim() || null,
-				dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-				dueTime: dueTime || null,
-				startDate: startDate ? new Date(startDate).toISOString() : null,
-				priority,
-				status,
-				projectId: projectId || null,
-				subtasks: subtasks.length > 0 ? subtasks : null,
-				recurrenceRule: recurrenceRule || null,
-				metadata: {
-					...task.metadata,
-					notes: notes.trim() || undefined,
-					storyPoints: storyPoints ?? undefined,
-					effectiveDuration: effectiveDuration ?? undefined,
-					funRating: funRating ?? undefined,
-					assignee: assigneeRef ?? undefined,
-					involvedContacts: involvedRefs.length > 0 ? involvedRefs : undefined,
-				},
-				labelIds: selectedLabelIds,
-			};
-
+			const data = form.buildUpdateInput(task);
 			onSave(data);
 		} finally {
-			isLoading = false;
+			form.isLoading = false;
 		}
 	}
 
 	function handleDeleteClick() {
-		if (showDeleteConfirm) {
+		if (form.showDeleteConfirm) {
 			onDelete();
 		} else {
-			showDeleteConfirm = true;
+			form.showDeleteConfirm = true;
 		}
 	}
 
 	function handleSubtasksChange(newSubtasks: Subtask[]) {
-		subtasks = newSubtasks;
+		form.subtasks = newSubtasks;
 	}
 
 	const priorityColors = PRIORITY_COLORS;
@@ -502,7 +422,7 @@
 					id="task-title-{task.id}"
 					type="text"
 					class="form-input"
-					bind:value={title}
+					bind:value={form.title}
 					placeholder="Aufgabentitel..."
 				/>
 			</div>
@@ -513,7 +433,7 @@
 				<textarea
 					id="task-description-{task.id}"
 					class="form-textarea"
-					bind:value={description}
+					bind:value={form.description}
 					placeholder="Beschreibung hinzufügen..."
 					rows="2"
 				></textarea>
@@ -525,11 +445,21 @@
 				<div class="form-row">
 					<div class="form-field">
 						<label class="form-sublabel" for="due-date-{task.id}">Fällig</label>
-						<input id="due-date-{task.id}" type="date" class="form-input-sm" bind:value={dueDate} />
+						<input
+							id="due-date-{task.id}"
+							type="date"
+							class="form-input-sm"
+							bind:value={form.dueDate}
+						/>
 					</div>
 					<div class="form-field">
 						<label class="form-sublabel" for="due-time-{task.id}">Uhrzeit</label>
-						<input id="due-time-{task.id}" type="time" class="form-input-sm" bind:value={dueTime} />
+						<input
+							id="due-time-{task.id}"
+							type="time"
+							class="form-input-sm"
+							bind:value={form.dueTime}
+						/>
 					</div>
 					<div class="form-field">
 						<label class="form-sublabel" for="start-date-{task.id}">Start</label>
@@ -537,7 +467,7 @@
 							id="start-date-{task.id}"
 							type="date"
 							class="form-input-sm"
-							bind:value={startDate}
+							bind:value={form.startDate}
 						/>
 					</div>
 				</div>
@@ -546,14 +476,14 @@
 			<!-- Priority -->
 			<div class="form-section">
 				<label class="form-label">Priorität</label>
-				<PrioritySelector value={priority} onChange={(p) => (priority = p)} />
+				<PrioritySelector value={form.priority} onChange={(p) => (form.priority = p)} />
 			</div>
 
 			<!-- Status & Project row -->
 			<div class="form-row-2">
 				<div class="form-section">
 					<label class="form-label" for="task-status-{task.id}">Status</label>
-					<select id="task-status-{task.id}" class="form-select" bind:value={status}>
+					<select id="task-status-{task.id}" class="form-select" bind:value={form.status}>
 						{#each STATUS_OPTIONS as s}
 							<option value={s.value}>{s.label}</option>
 						{/each}
@@ -561,7 +491,7 @@
 				</div>
 				<div class="form-section">
 					<label class="form-label" for="task-project-{task.id}">Projekt</label>
-					<select id="task-project-{task.id}" class="form-select" bind:value={projectId}>
+					<select id="task-project-{task.id}" class="form-select" bind:value={form.projectId}>
 						<option value={null}>Kein Projekt</option>
 						{#each getActiveProjects(projectsCtx.value) as project}
 							<option value={project.id}>{project.name}</option>
@@ -573,19 +503,22 @@
 			<!-- Tags -->
 			<div class="form-section">
 				<label class="form-label">Tags</label>
-				<TagSelector selectedIds={selectedLabelIds} onChange={(ids) => (selectedLabelIds = ids)} />
+				<TagSelector
+					selectedIds={form.selectedLabelIds}
+					onChange={(ids) => (form.selectedLabelIds = ids)}
+				/>
 			</div>
 
 			<!-- Subtasks -->
 			<div class="form-section">
 				<label class="form-label">Subtasks</label>
-				<SubtaskList {subtasks} onChange={handleSubtasksChange} />
+				<SubtaskList subtasks={form.subtasks} onChange={handleSubtasksChange} />
 			</div>
 
 			<!-- Recurrence -->
 			<div class="form-section">
 				<label class="form-label" for="task-recurrence-{task.id}">Wiederholung</label>
-				<select id="task-recurrence-{task.id}" class="form-select" bind:value={recurrenceRule}>
+				<select id="task-recurrence-{task.id}" class="form-select" bind:value={form.recurrenceRule}>
 					{#each RECURRENCE_OPTIONS as option}
 						<option value={option.value}>{option.label}</option>
 					{/each}
@@ -596,15 +529,15 @@
 			<div class="form-section">
 				<label class="form-label">Zuständig</label>
 				<ContactSelector
-					selectedContacts={assignee}
-					onContactsChange={(contacts) => (assignee = contacts)}
+					selectedContacts={form.assignee}
+					onContactsChange={(contacts) => (form.assignee = contacts)}
 					onSearch={(q) => contactsStore.searchContacts(q)}
 					singleSelect={true}
 					allowManualEntry={false}
 					placeholder="Person zuweisen..."
 					addLabel="Zuweisen"
 					searchPlaceholder="Name oder E-Mail..."
-					isAvailable={contactsAvailable ?? false}
+					isAvailable={form.contactsAvailable ?? false}
 				/>
 			</div>
 
@@ -612,14 +545,14 @@
 			<div class="form-section">
 				<label class="form-label">Beteiligte</label>
 				<ContactSelector
-					selectedContacts={involvedContacts}
-					onContactsChange={(contacts) => (involvedContacts = contacts)}
+					selectedContacts={form.involvedContacts}
+					onContactsChange={(contacts) => (form.involvedContacts = contacts)}
 					onSearch={(q) => contactsStore.searchContacts(q)}
 					allowManualEntry={false}
 					placeholder="Personen hinzufügen..."
 					addLabel="Person hinzufügen"
 					searchPlaceholder="Name oder E-Mail..."
-					isAvailable={contactsAvailable ?? false}
+					isAvailable={form.contactsAvailable ?? false}
 				/>
 			</div>
 
@@ -629,7 +562,7 @@
 				<textarea
 					id="task-notes-{task.id}"
 					class="form-textarea"
-					bind:value={notes}
+					bind:value={form.notes}
 					placeholder="Zusätzliche Notizen..."
 					rows="2"
 				></textarea>
@@ -639,15 +572,18 @@
 			<div class="form-row-3">
 				<div class="form-section">
 					<label class="form-label">Storypoints</label>
-					<StorypointsSelector value={storyPoints} onChange={(v) => (storyPoints = v)} />
+					<StorypointsSelector value={form.storyPoints} onChange={(v) => (form.storyPoints = v)} />
 				</div>
 				<div class="form-section">
 					<label class="form-label">Dauer</label>
-					<DurationPicker value={effectiveDuration} onChange={(v) => (effectiveDuration = v)} />
+					<DurationPicker
+						value={form.effectiveDuration}
+						onChange={(v) => (form.effectiveDuration = v)}
+					/>
 				</div>
 				<div class="form-section">
 					<label class="form-label">Spaß</label>
-					<FunRatingPicker value={funRating} onChange={(v) => (funRating = v)} />
+					<FunRatingPicker value={form.funRating} onChange={(v) => (form.funRating = v)} />
 				</div>
 			</div>
 
@@ -657,9 +593,9 @@
 					type="button"
 					class="btn btn-danger"
 					onclick={handleDeleteClick}
-					disabled={isLoading}
+					disabled={form.isLoading}
 				>
-					{showDeleteConfirm ? 'Wirklich löschen?' : 'Löschen'}
+					{form.showDeleteConfirm ? 'Wirklich löschen?' : 'Löschen'}
 				</button>
 			</div>
 		</div>
