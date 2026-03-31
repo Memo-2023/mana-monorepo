@@ -53,30 +53,24 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0 0.5rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--color-border);
 		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--color-surface);
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--color-foreground);
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
-	:global(.dark) .storypoint-btn {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #e5e7eb;
-	}
-
 	.storypoint-btn:hover {
-		border-color: #8b5cf6;
+		border-color: var(--color-primary);
 	}
 
 	.storypoint-btn.selected {
-		background: rgba(139, 92, 246, 0.15);
-		border-color: #8b5cf6;
-		color: #8b5cf6;
+		background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+		border-color: var(--color-primary);
+		color: var(--color-primary);
 	}
 
 	.storypoint-clear {
@@ -88,13 +82,13 @@
 		padding: 0;
 		border: none;
 		border-radius: 9999px;
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
+		background: color-mix(in srgb, var(--color-error) 10%, transparent);
+		color: var(--color-error);
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
 	.storypoint-clear:hover {
-		background: rgba(239, 68, 68, 0.2);
+		background: color-mix(in srgb, var(--color-error) 20%, transparent);
 	}
 </style>

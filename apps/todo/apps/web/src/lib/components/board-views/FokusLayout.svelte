@@ -299,25 +299,21 @@
 	}
 
 	:global(.fokus-drop-target) {
-		outline: 2px dashed #8b5cf6;
+		outline: 2px dashed var(--color-primary);
 		outline-offset: -2px;
 		border-radius: 0.375rem;
-		background: rgba(139, 92, 246, 0.04);
+		background: color-mix(in srgb, var(--color-primary) 4%, transparent);
 	}
 
 	/* Add sheet */
 	.add-sheet {
-		border: 2px dashed rgba(139, 92, 246, 0.3) !important;
-		background: rgba(139, 92, 246, 0.02) !important;
+		border: 2px dashed color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
+		background: color-mix(in srgb, var(--color-primary) 2%, transparent) !important;
 		box-shadow: none !important;
 	}
 	.add-sheet:hover {
-		border-color: #8b5cf6 !important;
-		background: rgba(139, 92, 246, 0.06) !important;
-	}
-	:global(.dark) .add-sheet {
-		border-color: rgba(139, 92, 246, 0.25) !important;
-		background: rgba(139, 92, 246, 0.04) !important;
+		border-color: var(--color-primary) !important;
+		background: color-mix(in srgb, var(--color-primary) 6%, transparent) !important;
 	}
 
 	.add-sheet-btn {
@@ -336,13 +332,13 @@
 	.add-sheet-icon {
 		font-size: 2rem;
 		font-weight: 300;
-		color: #8b5cf6;
+		color: var(--color-primary);
 		line-height: 1;
 	}
 	.add-sheet-label {
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: #8b5cf6;
+		color: var(--color-primary);
 	}
 
 	/* Heute erledigt section */
@@ -392,17 +388,11 @@
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
-		background: rgba(0, 0, 0, 0.15);
+		background: var(--color-border);
 		transition: all 0.2s ease;
 	}
 	.page-dot.active {
-		background: hsl(var(--color-primary));
+		background: var(--color-primary);
 		transform: scale(1.3);
-	}
-	:global(.dark) .page-dot {
-		background: rgba(255, 255, 255, 0.2);
-	}
-	:global(.dark) .page-dot.active {
-		background: hsl(var(--color-primary));
 	}
 </style>

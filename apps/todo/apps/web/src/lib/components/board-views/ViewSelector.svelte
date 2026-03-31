@@ -323,19 +323,10 @@
 		z-index: 200;
 		min-width: 160px;
 		padding: 0.375rem;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-elevated-3);
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
-		box-shadow:
-			0 10px 25px -5px rgba(0, 0, 0, 0.15),
-			0 4px 6px -2px rgba(0, 0, 0, 0.1);
-	}
-
-	:global(.dark) .context-menu {
-		background: rgba(30, 30, 40, 0.95);
-		border-color: rgba(255, 255, 255, 0.12);
+		box-shadow: var(--shadow-xl);
 	}
 
 	.context-item {
@@ -346,7 +337,7 @@
 		padding: 0.5rem 0.75rem;
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--color-foreground);
 		background: transparent;
 		border: none;
 		border-radius: 0.5rem;
@@ -355,14 +346,6 @@
 	}
 
 	.context-item:hover {
-		background: rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .context-item {
-		color: #e5e7eb;
-	}
-
-	:global(.dark) .context-item:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: var(--color-surface-hover);
 	}
 </style>

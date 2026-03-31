@@ -169,29 +169,19 @@
 
 	/* Clear filter pill */
 	.clear-filter-pill {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.1) !important;
-		border-color: rgba(239, 68, 68, 0.3) !important;
+		color: var(--color-error);
+		background: color-mix(in srgb, var(--color-error) 10%, transparent) !important;
+		border-color: color-mix(in srgb, var(--color-error) 30%, transparent) !important;
 	}
 
 	.clear-filter-pill .tag-name {
-		color: #ef4444;
+		color: var(--color-error);
 		font-weight: 600;
 	}
 
-	:global(.dark) .clear-filter-pill {
-		color: #f87171;
-		background: rgba(239, 68, 68, 0.15) !important;
-		border-color: rgba(239, 68, 68, 0.3) !important;
-	}
-
-	:global(.dark) .clear-filter-pill .tag-name {
-		color: #f87171;
-	}
-
 	.clear-filter-pill:hover:not(.hidden) {
-		background: rgba(239, 68, 68, 0.2) !important;
-		border-color: rgba(239, 68, 68, 0.5) !important;
+		background: color-mix(in srgb, var(--color-error) 20%, transparent) !important;
+		border-color: color-mix(in srgb, var(--color-error) 50%, transparent) !important;
 	}
 
 	.clear-filter-pill.hidden {
@@ -201,38 +191,22 @@
 
 	/* More pill with neutral style */
 	.more-pill {
-		color: #374151;
+		color: var(--color-foreground);
 	}
 
 	.more-pill .tag-name {
-		color: #374151;
+		color: var(--color-foreground);
 		font-weight: 500;
-	}
-
-	:global(.dark) .more-pill {
-		color: #f3f4f6;
-	}
-
-	:global(.dark) .more-pill .tag-name {
-		color: #f3f4f6;
 	}
 
 	/* Create pill with neutral style */
 	.create-pill {
-		color: #374151;
+		color: var(--color-foreground);
 	}
 
 	.create-pill .tag-name {
-		color: #374151;
+		color: var(--color-foreground);
 		font-weight: 500;
-	}
-
-	:global(.dark) .create-pill {
-		color: #f3f4f6;
-	}
-
-	:global(.dark) .create-pill .tag-name {
-		color: #f3f4f6;
 	}
 
 	/* Glass tag styling */
@@ -282,17 +256,13 @@
 	.tag-name {
 		font-size: 0.9375rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--color-foreground);
 		white-space: nowrap;
-	}
-
-	:global(.dark) .tag-name {
-		color: #f3f4f6;
 	}
 
 	.loading-state {
 		font-size: 0.875rem;
-		color: hsl(var(--color-muted-foreground));
+		color: var(--color-muted-foreground);
 		padding: 0.5rem;
 	}
 
@@ -301,18 +271,14 @@
 		align-items: center;
 		gap: 0.5rem;
 		cursor: pointer;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 		font-size: 0.875rem;
 		flex-shrink: 0;
 	}
 
-	:global(.dark) .empty-state {
-		color: #9ca3af;
-	}
-
 	.add-hint {
 		font-size: 0.875rem;
-		color: #8b5cf6;
+		color: var(--color-primary);
 		font-weight: 500;
 	}
 

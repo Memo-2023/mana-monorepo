@@ -470,9 +470,10 @@
 	}
 
 	.modal-container {
-		background: hsl(var(--color-surface));
+		background: var(--color-surface-elevated-2);
+		border: 1px solid var(--color-border-strong);
 		border-radius: var(--radius-lg);
-		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 		width: 100%;
 		max-width: 500px;
 		max-height: 90vh;

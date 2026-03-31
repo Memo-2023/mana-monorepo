@@ -81,12 +81,8 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		border-radius: 9999px;
-		background: rgba(0, 0, 0, 0.1);
+		background: var(--color-border);
 		transition: all 0.15s;
-	}
-
-	:global(.dark) .fun-rating-dot .dot {
-		background: rgba(255, 255, 255, 0.15);
 	}
 
 	.fun-rating-dot.filled .dot {
@@ -98,7 +94,7 @@
 		justify-content: space-between;
 		padding: 0 0.25rem;
 		font-size: 0.6875rem;
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 	}
 
 	.fun-rating-clear {
@@ -110,13 +106,13 @@
 		padding: 0;
 		border: none;
 		border-radius: 9999px;
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
+		background: color-mix(in srgb, var(--color-error) 10%, transparent);
+		color: var(--color-error);
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
 	.fun-rating-clear:hover {
-		background: rgba(239, 68, 68, 0.2);
+		background: color-mix(in srgb, var(--color-error) 20%, transparent);
 	}
 </style>

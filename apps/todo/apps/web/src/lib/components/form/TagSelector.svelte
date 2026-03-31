@@ -148,16 +148,10 @@
 		overflow-y: auto;
 		padding: 0.375rem;
 		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-elevated-3);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-xl);
 		z-index: 10;
-	}
-
-	:global(.dark) .tag-dropdown {
-		background: rgba(40, 40, 40, 0.95);
-		border-color: rgba(255, 255, 255, 0.15);
 	}
 
 	.tag-option {
@@ -175,15 +169,11 @@
 	}
 
 	.tag-option:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .tag-option:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: var(--color-surface-hover);
 	}
 
 	.tag-option.selected {
-		background: rgba(139, 92, 246, 0.1);
+		background: color-mix(in srgb, var(--color-primary) 12%, transparent);
 	}
 
 	.tag-dot {
@@ -196,23 +186,19 @@
 	.tag-name {
 		flex: 1;
 		font-size: 0.875rem;
-		color: #374151;
-	}
-
-	:global(.dark) .tag-name {
-		color: #e5e7eb;
+		color: var(--color-foreground);
 	}
 
 	.check-icon {
 		width: 1rem;
 		height: 1rem;
-		color: #8b5cf6;
+		color: var(--color-primary);
 	}
 
 	.no-tags {
 		padding: 0.75rem;
 		text-align: center;
 		font-size: 0.875rem;
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 	}
 </style>

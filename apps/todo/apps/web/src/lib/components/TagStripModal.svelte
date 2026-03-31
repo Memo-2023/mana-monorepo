@@ -328,22 +328,13 @@
 		max-width: 500px;
 		max-height: 70vh;
 		z-index: 100;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(20px);
-		-webkit-backdrop-filter: blur(20px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-elevated-2);
+		border: 1px solid var(--color-border);
 		border-radius: 1rem;
-		box-shadow:
-			0 25px 50px -12px rgba(0, 0, 0, 0.25),
-			0 0 0 1px rgba(255, 255, 255, 0.1);
+		box-shadow: var(--shadow-xl);
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
-	}
-
-	:global(.dark) .tag-modal {
-		background: rgba(30, 30, 30, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	.modal-header {
@@ -356,11 +347,7 @@
 	.modal-title {
 		font-size: 1.125rem;
 		font-weight: 600;
-		color: #1f2937;
-	}
-
-	:global(.dark) .modal-title {
-		color: #f3f4f6;
+		color: var(--color-foreground);
 	}
 
 	.header-actions {
@@ -379,38 +366,22 @@
 		background: transparent;
 		border: none;
 		cursor: pointer;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 		transition: all 0.15s ease;
 	}
 
 	.header-btn:hover {
-		background: rgba(0, 0, 0, 0.05);
-		color: #1f2937;
-	}
-
-	:global(.dark) .header-btn {
-		color: #9ca3af;
-	}
-
-	:global(.dark) .header-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #f3f4f6;
+		background: var(--color-surface-hover);
+		color: var(--color-foreground);
 	}
 
 	/* Search (sticky bottom) */
 	.search-wrapper {
 		position: relative;
 		padding: 0.75rem 1rem;
-		border-top: 1px solid rgba(0, 0, 0, 0.08);
-		background: rgba(255, 255, 255, 0.9);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
+		border-top: 1px solid var(--color-border);
+		background: var(--color-surface-elevated-2);
 		flex-shrink: 0;
-	}
-
-	:global(.dark) .search-wrapper {
-		border-top-color: rgba(255, 255, 255, 0.08);
-		background: rgba(30, 30, 30, 0.9);
 	}
 
 	.search-wrapper :global(.search-icon) {
@@ -418,36 +389,25 @@
 		left: 1.75rem;
 		top: 50%;
 		transform: translateY(-50%);
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 		pointer-events: none;
 	}
 
 	.search-input {
 		width: 100%;
 		padding: 0.5rem 2rem 0.5rem 2.25rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--color-border);
 		border-radius: 0.5rem;
-		background: rgba(0, 0, 0, 0.03);
-		color: #374151;
+		background: var(--color-surface);
+		color: var(--color-foreground);
 		font-size: 0.8125rem;
 		outline: none;
 		transition: all 0.15s ease;
 	}
 
 	.search-input:focus {
-		border-color: #8b5cf6;
-		background: white;
-	}
-
-	:global(.dark) .search-input {
-		background: rgba(255, 255, 255, 0.05);
-		border-color: rgba(255, 255, 255, 0.1);
-		color: #f3f4f6;
-	}
-
-	:global(.dark) .search-input:focus {
-		border-color: #a78bfa;
-		background: rgba(255, 255, 255, 0.1);
+		border-color: var(--color-primary);
+		background: var(--color-surface-elevated-2);
 	}
 
 	.search-clear {
@@ -461,25 +421,20 @@
 		width: 1.25rem;
 		height: 1.25rem;
 		border-radius: 50%;
-		background: rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-hover);
 		border: none;
 		cursor: pointer;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 	}
 
 	.search-clear:hover {
-		background: rgba(0, 0, 0, 0.15);
-	}
-
-	:global(.dark) .search-clear {
-		background: rgba(255, 255, 255, 0.1);
-		color: #9ca3af;
+		background: var(--color-border);
 	}
 
 	.search-empty {
 		text-align: center;
 		padding: 1.5rem;
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 		font-size: 0.875rem;
 	}
 
@@ -496,14 +451,9 @@
 		align-items: center;
 		justify-content: center;
 		padding: 2rem;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 		font-size: 0.875rem;
 		gap: 1rem;
-	}
-
-	:global(.dark) .loading-state,
-	:global(.dark) .empty-state {
-		color: #9ca3af;
 	}
 
 	.create-btn {
@@ -511,7 +461,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem 1rem;
-		background: #8b5cf6;
+		background: var(--color-primary);
 		color: white;
 		border: none;
 		border-radius: 9999px;
@@ -522,21 +472,16 @@
 	}
 
 	.create-btn:hover {
-		background: #7c3aed;
+		background: var(--color-primary-hover);
 	}
 
 	/* Edit Form Section */
 	.edit-form-section {
-		background: rgba(139, 92, 246, 0.05);
-		border: 1px solid rgba(139, 92, 246, 0.2);
+		background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
 		border-radius: 0.75rem;
 		margin-bottom: 0.75rem;
 		overflow: hidden;
-	}
-
-	:global(.dark) .edit-form-section {
-		background: rgba(167, 139, 250, 0.1);
-		border-color: rgba(167, 139, 250, 0.2);
 	}
 
 	.edit-form-header {
@@ -544,23 +489,15 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.5rem 0.75rem;
-		background: rgba(139, 92, 246, 0.1);
-	}
-
-	:global(.dark) .edit-form-header {
-		background: rgba(167, 139, 250, 0.15);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
 	.edit-form-title {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: #8b5cf6;
+		color: var(--color-primary);
 		text-transform: uppercase;
 		letter-spacing: 0.025em;
-	}
-
-	:global(.dark) .edit-form-title {
-		color: #a78bfa;
 	}
 
 	.edit-form {
@@ -581,39 +518,24 @@
 		height: 24px;
 		border-radius: 50%;
 		flex-shrink: 0;
-		border: 2px solid rgba(0, 0, 0, 0.1);
-	}
-
-	:global(.dark) .color-preview {
-		border-color: rgba(255, 255, 255, 0.2);
+		border: 2px solid var(--color-border);
 	}
 
 	.name-input {
 		flex: 1;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid rgba(0, 0, 0, 0.15);
+		border: 1px solid var(--color-border);
 		border-radius: 0.5rem;
-		background: white;
-		color: #374151;
+		background: var(--color-surface);
+		color: var(--color-foreground);
 		font-size: 0.875rem;
 		outline: none;
 		transition: all 0.15s ease;
 	}
 
 	.name-input:focus {
-		border-color: #8b5cf6;
-		box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
-	}
-
-	:global(.dark) .name-input {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.2);
-		color: #f3f4f6;
-	}
-
-	:global(.dark) .name-input:focus {
-		border-color: #a78bfa;
-		box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
 	}
 
 	.color-picker-row {
@@ -651,12 +573,12 @@
 	}
 
 	.btn-primary {
-		background: #8b5cf6;
+		background: var(--color-primary);
 		color: white;
 	}
 
 	.btn-primary:hover:not(:disabled) {
-		background: #7c3aed;
+		background: var(--color-primary-hover);
 	}
 
 	.btn-primary:disabled {
@@ -665,12 +587,12 @@
 	}
 
 	.btn-danger {
-		background: #ef4444;
+		background: var(--color-error);
 		color: white;
 	}
 
 	.btn-danger:hover {
-		background: #dc2626;
+		background: color-mix(in srgb, var(--color-error) 85%, black);
 	}
 
 	.icon-btn {
@@ -683,22 +605,13 @@
 		background: transparent;
 		border: none;
 		cursor: pointer;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 		transition: all 0.15s ease;
 	}
 
 	.icon-btn:hover {
-		background: rgba(0, 0, 0, 0.1);
-		color: #374151;
-	}
-
-	:global(.dark) .icon-btn {
-		color: #9ca3af;
-	}
-
-	:global(.dark) .icon-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #f3f4f6;
+		background: var(--color-surface-hover);
+		color: var(--color-foreground);
 	}
 
 	/* Tags grid */
@@ -758,12 +671,8 @@
 	.tag-name {
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--color-foreground);
 		white-space: nowrap;
-	}
-
-	:global(.dark) .tag-name {
-		color: #f3f4f6;
 	}
 
 	.tag-edit-btn {
@@ -773,10 +682,10 @@
 		width: 1rem;
 		height: 1rem;
 		border-radius: 50%;
-		background: rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-hover);
 		border: none;
 		cursor: pointer;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 		opacity: 0;
 		transition: all 0.15s ease;
 		margin-left: 0.125rem;
@@ -787,17 +696,7 @@
 	}
 
 	.tag-edit-btn:hover {
-		background: rgba(0, 0, 0, 0.2);
-		color: #374151;
-	}
-
-	:global(.dark) .tag-edit-btn {
-		background: rgba(255, 255, 255, 0.15);
-		color: #9ca3af;
-	}
-
-	:global(.dark) .tag-edit-btn:hover {
-		background: rgba(255, 255, 255, 0.25);
-		color: #f3f4f6;
+		background: var(--color-border);
+		color: var(--color-foreground);
 	}
 </style>

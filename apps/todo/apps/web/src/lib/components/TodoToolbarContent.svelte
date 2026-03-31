@@ -244,12 +244,10 @@
 		transform: translateX(-50%);
 		min-width: 260px;
 		padding: 0.75rem;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-elevated-3);
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
-		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+		box-shadow: var(--shadow-xl);
 		z-index: 100;
 	}
 
@@ -257,11 +255,6 @@
 	.filter-dropdown.vertical {
 		bottom: auto;
 		top: calc(100% + 0.5rem);
-	}
-
-	:global(.dark) .filter-dropdown {
-		background: rgba(30, 30, 30, 0.95);
-		border-color: rgba(255, 255, 255, 0.1);
 	}
 
 	.filter-section {

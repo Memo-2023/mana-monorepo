@@ -117,29 +117,29 @@
 	}
 
 	.dot-synced {
-		background: #22c55e;
-		box-shadow: 0 0 4px rgba(34, 197, 94, 0.5);
+		background: var(--color-success);
+		box-shadow: 0 0 4px color-mix(in srgb, var(--color-success) 50%, transparent);
 	}
 
 	.dot-syncing {
-		background: #3b82f6;
+		background: var(--color-primary);
 		animation: pulse 1s ease-in-out infinite;
 	}
 
 	.dot-pending {
-		background: #f59e0b;
+		background: var(--color-warning);
 	}
 
 	.dot-offline {
-		background: #f97316;
+		background: var(--color-warning);
 	}
 
 	.dot-error {
-		background: #ef4444;
+		background: var(--color-error);
 	}
 
 	.dot-local {
-		background: #8b5cf6;
+		background: var(--color-primary);
 	}
 
 	.dot-idle {

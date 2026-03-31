@@ -37,19 +37,13 @@
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0.5rem 0.875rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--color-border);
 		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--color-surface);
 		font-size: 0.8125rem;
-		color: #374151;
+		color: var(--color-foreground);
 		cursor: pointer;
 		transition: all 0.15s;
-	}
-
-	:global(.dark) .priority-btn {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #e5e7eb;
 	}
 
 	.priority-btn:hover {

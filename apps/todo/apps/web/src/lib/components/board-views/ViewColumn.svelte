@@ -190,26 +190,18 @@
 	}
 
 	.tasks-container::-webkit-scrollbar-thumb {
-		background: rgba(0, 0, 0, 0.1);
+		background: var(--color-border);
 		border-radius: 3px;
 	}
 
-	:global(.dark) .tasks-container::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.15);
-	}
-
 	.tasks-container::-webkit-scrollbar-thumb:hover {
-		background: rgba(0, 0, 0, 0.2);
-	}
-
-	:global(.dark) .tasks-container::-webkit-scrollbar-thumb:hover {
-		background: rgba(255, 255, 255, 0.25);
+		background: var(--color-muted-foreground);
 	}
 
 	:global(.drop-target) {
-		outline: 2px dashed #8b5cf6;
+		outline: 2px dashed var(--color-primary);
 		outline-offset: -2px;
 		border-radius: 0.375rem;
-		background: rgba(139, 92, 246, 0.04);
+		background: color-mix(in srgb, var(--color-primary) 4%, transparent);
 	}
 </style>

@@ -597,17 +597,10 @@
 		z-index: 100;
 		min-width: 160px;
 		padding: 0.375rem;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-elevated-3);
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
-		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-	}
-
-	:global(.dark) .context-menu {
-		background: rgba(40, 40, 40, 0.95);
-		border-color: rgba(255, 255, 255, 0.15);
+		box-shadow: var(--shadow-xl);
 	}
 
 	.context-item {
@@ -619,31 +612,23 @@
 		border: none;
 		background: transparent;
 		font-size: 0.875rem;
-		color: #374151;
+		color: var(--color-foreground);
 		cursor: pointer;
 		border-radius: 0.5rem;
 		transition: background 0.15s;
 		text-align: left;
 	}
 
-	:global(.dark) .context-item {
-		color: #e5e7eb;
-	}
-
 	.context-item:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .context-item:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: var(--color-surface-hover);
 	}
 
 	.context-item.danger {
-		color: #ef4444;
+		color: var(--color-error);
 	}
 
 	.context-item.danger:hover {
-		background: rgba(239, 68, 68, 0.1);
+		background: color-mix(in srgb, var(--color-error) 10%, transparent);
 	}
 
 	.context-icon {
@@ -654,12 +639,8 @@
 
 	.context-divider {
 		height: 1px;
-		background: rgba(0, 0, 0, 0.1);
+		background: var(--color-border);
 		margin: 0.25rem 0.5rem;
-	}
-
-	:global(.dark) .context-divider {
-		background: rgba(255, 255, 255, 0.1);
 	}
 
 	/* Inline subtasks — same size as title, just indented */

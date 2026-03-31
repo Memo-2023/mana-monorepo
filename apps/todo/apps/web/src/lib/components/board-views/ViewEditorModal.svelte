@@ -949,16 +949,10 @@
 		gap: 0.25rem;
 		padding: 0.5rem;
 		margin-top: 0.25rem;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-elevated-3);
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
-		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-	}
-
-	:global(.dark) .color-picker-dropdown {
-		background: rgba(30, 30, 40, 0.95);
-		border-color: rgba(255, 255, 255, 0.15);
+		box-shadow: var(--shadow-xl);
 	}
 
 	.color-swatch {

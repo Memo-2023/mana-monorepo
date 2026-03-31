@@ -200,25 +200,17 @@
 		gap: 0.5rem;
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.75rem;
-		background: rgba(0, 0, 0, 0.03);
+		background: var(--color-surface);
 		transition: all 0.15s;
 	}
 
-	:global(.dark) .subtask-item {
-		background: rgba(255, 255, 255, 0.05);
-	}
-
 	.subtask-item:hover {
-		background: rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .subtask-item:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: var(--color-surface-hover);
 	}
 
 	.drag-handle {
 		cursor: grab;
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 		padding: 0.25rem;
 		opacity: 0.5;
 		transition: opacity 0.15s;
@@ -236,7 +228,7 @@
 		width: 1.125rem;
 		height: 1.125rem;
 		border-radius: 0.25rem;
-		border: 2px solid rgba(0, 0, 0, 0.2);
+		border: 2px solid var(--color-border);
 		background: transparent;
 		display: flex;
 		align-items: center;
@@ -247,18 +239,14 @@
 		padding: 0;
 	}
 
-	:global(.dark) .subtask-checkbox {
-		border-color: rgba(255, 255, 255, 0.3);
-	}
-
 	.subtask-checkbox:hover {
-		border-color: #8b5cf6;
-		background: rgba(139, 92, 246, 0.1);
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
 	.subtask-checkbox.checked {
-		background: #8b5cf6;
-		border-color: #8b5cf6;
+		background: var(--color-primary);
+		border-color: var(--color-primary);
 	}
 
 	.check-icon {
@@ -274,33 +262,24 @@
 		border: none;
 		padding: 0;
 		font-size: 0.875rem;
-		color: #374151;
+		color: var(--color-foreground);
 		cursor: text;
-	}
-
-	:global(.dark) .subtask-title {
-		color: #e5e7eb;
 	}
 
 	.subtask-title.completed {
 		text-decoration: line-through;
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 	}
 
 	.subtask-edit-input {
 		flex: 1;
-		background: white;
-		border: 1px solid #8b5cf6;
+		background: var(--color-surface-elevated-3);
+		border: 1px solid var(--color-primary);
 		border-radius: 0.375rem;
 		padding: 0.25rem 0.5rem;
 		font-size: 0.875rem;
-		color: #374151;
+		color: var(--color-foreground);
 		outline: none;
-	}
-
-	:global(.dark) .subtask-edit-input {
-		background: rgba(255, 255, 255, 0.1);
-		color: #e5e7eb;
 	}
 
 	.subtask-delete {
@@ -308,7 +287,7 @@
 		padding: 0.25rem;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 		cursor: pointer;
 		border-radius: 0.375rem;
 		transition: all 0.15s;
@@ -319,8 +298,8 @@
 	}
 
 	.subtask-delete:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.1);
+		color: var(--color-error);
+		background: color-mix(in srgb, var(--color-error) 10%, transparent);
 	}
 
 	/* Add subtask */
@@ -330,21 +309,17 @@
 		gap: 0.5rem;
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.75rem;
-		border: 1px dashed rgba(0, 0, 0, 0.15);
+		border: 1px dashed var(--color-border);
 		transition: all 0.15s;
 	}
 
-	:global(.dark) .add-subtask {
-		border-color: rgba(255, 255, 255, 0.15);
-	}
-
 	.add-subtask:focus-within {
-		border-color: #8b5cf6;
-		background: rgba(139, 92, 246, 0.05);
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 5%, transparent);
 	}
 
 	.add-icon {
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 	}
 
 	.add-input {
@@ -353,15 +328,11 @@
 		border: none;
 		outline: none;
 		font-size: 0.875rem;
-		color: #374151;
+		color: var(--color-foreground);
 	}
 
 	.add-input::placeholder {
-		color: #9ca3af;
-	}
-
-	:global(.dark) .add-input {
-		color: #e5e7eb;
+		color: var(--color-muted-foreground);
 	}
 
 	.add-btn {
@@ -369,7 +340,7 @@
 		font-size: 0.75rem;
 		font-weight: 500;
 		color: white;
-		background: #8b5cf6;
+		background: var(--color-primary);
 		border: none;
 		border-radius: 0.5rem;
 		cursor: pointer;
@@ -377,6 +348,6 @@
 	}
 
 	.add-btn:hover {
-		background: #7c3aed;
+		background: var(--color-primary-hover);
 	}
 </style>

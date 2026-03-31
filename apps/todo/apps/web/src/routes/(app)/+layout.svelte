@@ -601,13 +601,9 @@
 		width: 54px;
 		height: 54px;
 		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.9);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow:
-			0 4px 12px rgba(0, 0, 0, 0.15),
-			0 2px 4px rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-elevated-2);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-xl);
 		cursor: pointer;
 		display: flex;
 		align-items: center;
@@ -616,16 +612,8 @@
 		transition: all 0.2s ease;
 	}
 
-	:global(.dark) .pillnav-fab {
-		background: rgba(30, 30, 30, 0.9);
-		border-color: rgba(255, 255, 255, 0.15);
-	}
-
 	.pillnav-fab:hover {
 		transform: scale(1.05);
-		box-shadow:
-			0 6px 16px rgba(0, 0, 0, 0.2),
-			0 3px 6px rgba(0, 0, 0, 0.15);
 	}
 
 	.pillnav-fab:active {
@@ -635,10 +623,6 @@
 	.fab-icon {
 		width: 24px;
 		height: 24px;
-		color: #374151;
-	}
-
-	:global(.dark) .fab-icon {
-		color: #f3f4f6;
+		color: var(--color-foreground);
 	}
 </style>

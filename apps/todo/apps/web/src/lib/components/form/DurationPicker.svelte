@@ -137,29 +137,23 @@
 
 	.duration-btn {
 		padding: 0.5rem 0.75rem;
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--color-border);
 		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--color-surface);
 		font-size: 0.8125rem;
-		color: #374151;
+		color: var(--color-foreground);
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
-	:global(.dark) .duration-btn {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #e5e7eb;
-	}
-
 	.duration-btn:hover {
-		border-color: #8b5cf6;
+		border-color: var(--color-primary);
 	}
 
 	.duration-btn.selected {
-		background: rgba(139, 92, 246, 0.15);
-		border-color: #8b5cf6;
-		color: #8b5cf6;
+		background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+		border-color: var(--color-primary);
+		color: var(--color-primary);
 	}
 
 	.duration-clear {
@@ -171,14 +165,14 @@
 		padding: 0;
 		border: none;
 		border-radius: 9999px;
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
+		background: color-mix(in srgb, var(--color-error) 10%, transparent);
+		color: var(--color-error);
 		cursor: pointer;
 		transition: all 0.15s;
 	}
 
 	.duration-clear:hover {
-		background: rgba(239, 68, 68, 0.2);
+		background: color-mix(in srgb, var(--color-error) 20%, transparent);
 	}
 
 	.duration-custom {
@@ -189,44 +183,32 @@
 	.duration-input {
 		width: 80px;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid rgba(0, 0, 0, 0.15);
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--color-surface);
 		font-size: 0.875rem;
-		color: #374151;
-	}
-
-	:global(.dark) .duration-input {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #f3f4f6;
+		color: var(--color-foreground);
 	}
 
 	.duration-input:focus {
 		outline: none;
-		border-color: #8b5cf6;
-		box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
 	.duration-unit {
 		width: 120px;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid rgba(0, 0, 0, 0.15);
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--color-surface);
 		font-size: 0.875rem;
-		color: #374151;
-	}
-
-	:global(.dark) .duration-unit {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #f3f4f6;
+		color: var(--color-foreground);
 	}
 
 	.duration-unit:focus {
 		outline: none;
-		border-color: #8b5cf6;
-		box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 </style>

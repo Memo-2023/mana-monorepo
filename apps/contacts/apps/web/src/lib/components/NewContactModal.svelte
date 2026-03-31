@@ -5,7 +5,6 @@
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import SocialMediaFields from './forms/SocialMediaFields.svelte';
 	import DateFields from './forms/DateFields.svelte';
-	import { parseContactInput, formatParsedContactPreview } from '$lib/utils/contact-parser';
 	import { findDuplicates, type DuplicateMatch } from '$lib/utils/duplicate-detector';
 	import { contactCollection } from '$lib/data/local-store';
 	import {
@@ -30,7 +29,6 @@
 	let saving = $state(false);
 	let error = $state<string | null>(null);
 	let firstNameInput: HTMLInputElement;
-	let quickInputRef: HTMLInputElement;
 	let fileInput: HTMLInputElement;
 
 	// Photo state
@@ -69,50 +67,6 @@
 	let signal = $state('');
 	let discord = $state('');
 	let bluesky = $state('');
-
-	// ─── Quick Input (NL Parser) ───────────────────────────
-	let quickInput = $state('');
-	let quickPreview = $state('');
-	let quickApplied = $state(false);
-
-	function handleQuickInput(e: Event) {
-		const text = (e.target as HTMLInputElement).value;
-		quickInput = text;
-		quickApplied = false;
-
-		if (!text.trim()) {
-			quickPreview = '';
-			return;
-		}
-
-		const parsed = parseContactInput(text);
-		quickPreview = formatParsedContactPreview(parsed);
-	}
-
-	function applyQuickInput() {
-		if (!quickInput.trim() || quickApplied) return;
-
-		const parsed = parseContactInput(quickInput);
-
-		if (parsed.firstName) firstName = parsed.firstName;
-		if (parsed.lastName) lastName = parsed.lastName;
-		if (parsed.email) email = parsed.email;
-		if (parsed.phone) phone = parsed.phone;
-		if (parsed.company) company = parsed.company;
-
-		quickApplied = true;
-		quickInput = '';
-		quickPreview = '';
-	}
-
-	function handleQuickKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			e.preventDefault();
-			applyQuickInput();
-			// Move focus to first name field
-			firstNameInput?.focus();
-		}
-	}
 
 	// ─── Live Duplicate Detection ──────────────────────────
 	let duplicates = $state<DuplicateMatch[]>([]);
@@ -328,22 +282,6 @@
 
 		<!-- Modal Body -->
 		<div class="modal-body">
-			<!-- Quick Input Bar -->
-			<div class="quick-input-section">
-				<input
-					type="text"
-					class="quick-input"
-					bind:this={quickInputRef}
-					value={quickInput}
-					oninput={handleQuickInput}
-					onkeydown={handleQuickKeydown}
-					placeholder="Schnelleingabe: Max Müller @Firma max@mail.de +49... #tag"
-				/>
-				{#if quickPreview}
-					<div class="quick-preview">{quickPreview}</div>
-				{/if}
-			</div>
-
 			<!-- Duplicate Warning -->
 			{#if duplicates.length > 0}
 				<div class="duplicate-warning" role="alert">
@@ -654,14 +592,15 @@
 	}
 
 	.modal-container {
-		background: hsl(var(--color-background));
+		background: var(--color-surface-elevated-2);
+		border: 1px solid var(--color-border-strong);
 		border-radius: 1.5rem;
 		width: 100%;
 		max-width: 560px;
 		max-height: 90vh;
 		display: flex;
 		flex-direction: column;
-		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 		animation: modalIn 0.2s ease-out;
 	}
 
@@ -689,41 +628,6 @@
 		flex: 1;
 		overflow-y: auto;
 		padding: 0 1.5rem 1.5rem;
-	}
-
-	.quick-input-section {
-		margin-bottom: 1rem;
-	}
-
-	.quick-input {
-		width: 100%;
-		padding: 0.625rem 0.875rem;
-		border: 1px dashed hsl(var(--color-border));
-		border-radius: 0.75rem;
-		background: hsl(var(--color-muted) / 0.3);
-		color: hsl(var(--color-foreground));
-		font-size: 0.8125rem;
-		outline: none;
-		transition: all 0.15s;
-	}
-
-	.quick-input:focus {
-		border-style: solid;
-		border-color: hsl(var(--color-primary) / 0.5);
-		background: hsl(var(--color-background));
-		box-shadow: 0 0 0 3px hsl(var(--color-primary) / 0.1);
-	}
-
-	.quick-input::placeholder {
-		color: hsl(var(--color-muted-foreground));
-		font-size: 0.75rem;
-	}
-
-	.quick-preview {
-		margin-top: 0.25rem;
-		padding: 0 0.5rem;
-		font-size: 0.7rem;
-		color: hsl(var(--color-muted-foreground));
 	}
 
 	.duplicate-warning {

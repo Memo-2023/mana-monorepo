@@ -146,11 +146,11 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 		z-index: 201;
-		background: hsl(var(--color-surface));
+		background: var(--color-surface-elevated-2);
 		border-radius: 1.5rem;
 		box-shadow:
-			0 25px 50px -12px rgba(0, 0, 0, 0.25),
-			0 0 0 1px hsl(var(--color-border));
+			0 25px 50px -12px rgba(0, 0, 0, 0.5),
+			0 0 0 1px var(--color-border-strong);
 		padding: 2rem;
 		min-width: 280px;
 		max-width: 90vw;

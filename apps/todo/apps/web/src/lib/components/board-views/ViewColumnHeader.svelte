@@ -279,18 +279,12 @@
 		top: calc(100% + 0.5rem);
 		left: 0;
 		z-index: 51;
-		background: rgba(255, 255, 255, 0.97);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: var(--color-surface-elevated-3);
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
-		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+		box-shadow: var(--shadow-xl);
 		padding: 0.625rem;
 		min-width: 170px;
-	}
-	:global(.dark) .color-picker {
-		background: rgba(30, 30, 30, 0.97);
-		border-color: rgba(255, 255, 255, 0.12);
 	}
 
 	.picker-grid {
@@ -313,7 +307,7 @@
 		transform: scale(1.15);
 	}
 	.picker-swatch.active {
-		border-color: white;
+		border-color: var(--color-surface-elevated-3);
 		box-shadow: 0 0 0 2px currentColor;
 	}
 
@@ -322,19 +316,13 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding-top: 0.375rem;
-		border-top: 1px solid rgba(0, 0, 0, 0.06);
-	}
-	:global(.dark) .custom-color-row {
-		border-top-color: rgba(255, 255, 255, 0.08);
+		border-top: 1px solid var(--color-border);
 	}
 
 	.custom-label {
 		font-size: 0.6875rem;
 		font-weight: 500;
-		color: #6b7280;
-	}
-	:global(.dark) .custom-label {
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 	}
 
 	.custom-color-input {
@@ -350,7 +338,7 @@
 		padding: 0;
 	}
 	.custom-color-input::-webkit-color-swatch {
-		border: 2px solid rgba(0, 0, 0, 0.1);
+		border: 2px solid var(--color-border);
 		border-radius: 50%;
 	}
 </style>

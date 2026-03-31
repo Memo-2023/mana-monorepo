@@ -117,9 +117,10 @@
 	}
 
 	.modal-content {
-		background-color: var(--color-background, white);
+		background-color: var(--color-surface-elevated-2);
+		border: 1px solid var(--color-border-strong);
 		border-radius: 0.75rem;
-		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 		max-width: 28rem;
 		width: 100%;
 		padding: 1.5rem;
