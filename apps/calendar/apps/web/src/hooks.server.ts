@@ -21,8 +21,7 @@ const PUBLIC_BACKEND_URL_CLIENT =
 	'http://localhost:3014';
 const PUBLIC_STT_URL = process.env.PUBLIC_STT_URL || 'https://stt-api.mana.how';
 
-// Cross-app integration URLs (for todo and contacts APIs)
-const PUBLIC_TODO_BACKEND_URL = process.env.PUBLIC_TODO_BACKEND_URL || 'http://localhost:3018';
+// Cross-app integration URLs (for contacts API)
 const PUBLIC_CONTACTS_API_URL = process.env.PUBLIC_CONTACTS_API_URL || 'http://localhost:3015';
 const PUBLIC_GLITCHTIP_DSN = process.env.PUBLIC_GLITCHTIP_DSN || '';
 
@@ -35,7 +34,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 window.__PUBLIC_MANA_CORE_AUTH_URL__ = ${JSON.stringify(PUBLIC_MANA_CORE_AUTH_URL_CLIENT)};
 window.__PUBLIC_BACKEND_URL__ = ${JSON.stringify(PUBLIC_BACKEND_URL_CLIENT)};
 window.__PUBLIC_STT_URL__ = ${JSON.stringify(PUBLIC_STT_URL)};
-window.__PUBLIC_TODO_BACKEND_URL__ = ${JSON.stringify(PUBLIC_TODO_BACKEND_URL)};
 window.__PUBLIC_CONTACTS_API_URL__ = ${JSON.stringify(PUBLIC_CONTACTS_API_URL)};
 window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 </script>`;
@@ -48,7 +46,6 @@ window.__PUBLIC_GLITCHTIP_DSN__ = ${JSON.stringify(PUBLIC_GLITCHTIP_DSN)};
 			PUBLIC_MANA_CORE_AUTH_URL_CLIENT,
 			PUBLIC_BACKEND_URL_CLIENT,
 			PUBLIC_STT_URL,
-			PUBLIC_TODO_BACKEND_URL,
 			PUBLIC_CONTACTS_API_URL,
 		],
 	});

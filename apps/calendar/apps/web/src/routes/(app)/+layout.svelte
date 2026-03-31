@@ -14,7 +14,6 @@
 		PillNavItem,
 		PillDropdownItem,
 		QuickInputItem,
-		PillTabGroupConfig,
 		PillTagSelectorConfig,
 		PillNavElement,
 	} from '@manacore/shared-ui';
@@ -268,8 +267,7 @@
 	// User email for user dropdown — empty string for guests so PillNav shows login button
 	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
-	// Base navigation items for Calendar (without Kalender/Aufgaben - handled by tab group)
-	// Tags are now in the tag-selector dropdown in prependElements
+	// Base navigation items for Calendar
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/',
@@ -284,20 +282,6 @@
 		filterHiddenNavItems('calendar', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
-	// Active tab based on sidebar state: 'tasks' when sidebar is open, 'calendar' when closed
-	let activeTab = $derived(settingsStore.sidebarCollapsed ? 'calendar' : 'tasks');
-
-	// Tab group for Kalender/Aufgaben
-	let calendarTasksTabGroup = $derived<PillTabGroupConfig>({
-		type: 'tabs',
-		options: [
-			{ id: 'calendar', icon: 'calendar', label: 'Kalender', title: 'Kalender anzeigen' },
-			{ id: 'tasks', icon: 'check-square', label: 'Aufgaben', title: 'Aufgaben-Sidebar öffnen' },
-		],
-		value: activeTab,
-		onChange: handleTabChange,
-	});
-
 	// Tag selector config for PillNavigation
 	let tagSelectorConfig = $derived<PillTagSelectorConfig>({
 		type: 'tag-selector',
@@ -309,33 +293,10 @@
 		label: 'Tags',
 	});
 
-	// Prepended elements (tab groups at the start of navigation)
-	// Note: View switcher moved to ViewsBar component
-	let prependElements = $derived<PillNavElement[]>(
-		showCalendarToolbar
-			? [calendarTasksTabGroup, { type: 'divider' }, tagSelectorConfig]
-			: [calendarTasksTabGroup]
-	);
+	// Prepended elements
+	let prependElements = $derived<PillNavElement[]>(showCalendarToolbar ? [tagSelectorConfig] : []);
 
-	// Handle tab change: toggle sidebar for tasks, close for calendar
-	function handleTabChange(tabId: string) {
-		// Always navigate to main calendar page if not there
-		if ($page.url.pathname !== '/') {
-			goto('/');
-		}
-
-		if (tabId === 'tasks') {
-			// Toggle behavior: if sidebar is already open, close it
-			settingsStore.toggleSidebar();
-		} else if (tabId === 'calendar') {
-			// Kalender-Tab: close sidebar if open
-			if (!settingsStore.sidebarCollapsed) {
-				settingsStore.toggleSidebar();
-			}
-		}
-	}
-
-	// Navigation shortcuts (Ctrl+1 = Kalender, Ctrl+2 = Aufgaben toggle, Ctrl+3+ = other nav items)
+	// Navigation shortcuts
 	function handleKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
 
@@ -346,17 +307,11 @@
 		if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
 			const num = parseInt(event.key);
 			if (num === 1) {
-				// Ctrl+1: Kalender (close sidebar)
 				event.preventDefault();
-				handleTabChange('calendar');
-			} else if (num === 2) {
-				// Ctrl+2: Aufgaben (toggle sidebar)
+				goto('/');
+			} else if (num >= 2 && num <= baseNavItems.length + 1) {
 				event.preventDefault();
-				handleTabChange('tasks');
-			} else if (num >= 3 && num <= baseNavItems.length + 2) {
-				// Ctrl+3+: other nav items (offset by 2 for the tab group)
-				event.preventDefault();
-				const route = baseNavItems[num - 3]?.href;
+				const route = baseNavItems[num - 2]?.href;
 				if (route) {
 					goto(route);
 				}
@@ -595,7 +550,7 @@
 			>
 				<div
 					class="content-wrapper"
-					class:calendar-expanded={settingsStore.sidebarCollapsed && $page.url.pathname === '/'}
+					class:calendar-expanded={$page.url.pathname === '/'}
 					class:immersive={settingsStore.immersiveModeEnabled}
 				>
 					{@render children()}

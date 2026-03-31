@@ -1,4 +1,4 @@
-import { NavigationArrow, CalendarBlank, ListChecks } from '@manacore/shared-icons';
+import { NavigationArrow, CalendarBlank } from '@manacore/shared-icons';
 import {
 	COMMON_SHORTCUTS,
 	COMMON_SYNTAX,
@@ -26,12 +26,6 @@ const CALENDAR_SHORTCUTS: ShortcutCategory[] = [
 			{
 				keys: ['Cmd', '2'],
 				altKeys: ['Ctrl', '2'],
-				description: 'Aufgaben öffnen',
-				category: 'navigation',
-			},
-			{
-				keys: ['Cmd', '3'],
-				altKeys: ['Ctrl', '3'],
 				description: 'Einstellungen öffnen',
 				category: 'navigation',
 			},
@@ -56,23 +50,6 @@ const CALENDAR_SHORTCUTS: ShortcutCategory[] = [
 				keys: ['Esc'],
 				description: 'Drag/Resize abbrechen',
 				category: 'calendar',
-			},
-		],
-	},
-	{
-		id: 'tasks',
-		title: 'Aufgaben',
-		icon: ListChecks,
-		shortcuts: [
-			{
-				keys: ['Enter'],
-				description: 'Aufgabe öffnen',
-				category: 'tasks',
-			},
-			{
-				keys: ['Space'],
-				description: 'Aufgabe abhaken',
-				category: 'tasks',
 			},
 		],
 	},

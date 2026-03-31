@@ -4,40 +4,28 @@
 	import { viewStore } from '$lib/stores/view.svelte';
 	import { eventsStore } from '$lib/stores/events.svelte';
 	import { settingsStore } from '$lib/stores/settings.svelte';
-	import { todosStore } from '$lib/stores/todos.svelte';
 	import { birthdaysStore } from '$lib/stores/birthdays.svelte';
 	import { getDefaultCalendar } from '$lib/data/queries';
 	import ViewCarousel from '$lib/components/calendar/ViewCarousel.svelte';
-	import TodoSidebarSection from '$lib/components/calendar/TodoSidebarSection.svelte';
 	import QuickEventOverlay from '$lib/components/event/QuickEventOverlay.svelte';
 	import ServiceStatusBanner from '$lib/components/ServiceStatusBanner.svelte';
 	import type { CalendarEvent, Calendar } from '@calendar/shared';
 	import { addMinutes } from 'date-fns';
 	import { browser } from '$app/environment';
-	import { CaretDoubleLeft } from '@manacore/shared-icons';
 
 	// Get calendars from layout context (live query)
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 
-	// Quick event overlay state - for both create and edit
 	let showQuickOverlay = $state(false);
 	let quickCreateDate = $state<Date>(new Date());
 	let editingEvent = $state<CalendarEvent | null>(null);
-
-	// Generate a unique key for the overlay to force remount
 	let overlayKey = $state(0);
 
 	function handleQuickCreate(date: Date, position: { x: number; y: number }, endDate?: Date) {
-		// Close any existing overlay first
 		editingEvent = null;
-
 		quickCreateDate = date;
-
-		// Create draft event immediately so it appears in the grid
 		const defaultCalendar = getDefaultCalendar(calendarsCtx.value);
-		// Use provided endDate or calculate from default duration
 		const endTime = endDate ?? addMinutes(date, settingsStore.defaultEventDuration);
-
 		eventsStore.createDraftEvent({
 			calendarId: defaultCalendar?.id || '',
 			title: '',
@@ -45,15 +33,12 @@
 			endTime: endTime.toISOString(),
 			isAllDay: false,
 		});
-
 		overlayKey++;
 		showQuickOverlay = true;
 	}
 
 	function handleEventClick(event: CalendarEvent) {
-		// Close any existing overlay/draft first
 		eventsStore.clearDraftEvent();
-
 		editingEvent = event;
 		overlayKey++;
 		showQuickOverlay = true;
@@ -66,19 +51,12 @@
 	}
 
 	function handleEventCreated() {
-		// Event is automatically added to store, draft is cleared
 		eventsStore.clearDraftEvent();
 	}
 
-	function handleEventUpdated() {
-		// Event is automatically updated in store
-	}
+	function handleEventUpdated() {}
+	function handleEventDeleted() {}
 
-	function handleEventDeleted() {
-		// Event is automatically removed from store
-	}
-
-	// Voice event creation handler
 	interface VoiceEventData {
 		title: string;
 		startTime?: Date;
@@ -92,16 +70,10 @@
 
 	function handleVoiceEventCreate(event: CustomEvent<VoiceEventData>) {
 		const data = event.detail;
-
-		// Close any existing overlay first
 		editingEvent = null;
 		eventsStore.clearDraftEvent();
-
-		// Determine start time - use parsed time or default to now
 		const startTime = data.startTime || new Date();
 		quickCreateDate = startTime;
-
-		// Calculate end time
 		let endTime: Date;
 		if (data.endTime) {
 			endTime = data.endTime;
@@ -111,11 +83,7 @@
 		} else {
 			endTime = addMinutes(startTime, settingsStore.defaultEventDuration);
 		}
-
-		// Get default calendar
 		const defaultCalendar = getDefaultCalendar(calendarsCtx.value);
-
-		// Create draft event with voice transcription data
 		eventsStore.createDraftEvent({
 			calendarId: defaultCalendar?.id || '',
 			title: data.title,
@@ -125,12 +93,10 @@
 			location: data.location,
 			description: data.description ? `Sprachnotiz: ${data.description}` : undefined,
 		});
-
 		overlayKey++;
 		showQuickOverlay = true;
 	}
 
-	// Listen for voice event creation from layout
 	$effect(() => {
 		if (browser) {
 			const handler = (e: Event) => handleVoiceEventCreate(e as CustomEvent<VoiceEventData>);
@@ -162,12 +128,6 @@
 />
 
 <div class="service-banners">
-	<ServiceStatusBanner
-		serviceName="Todo-Service"
-		available={todosStore.serviceAvailable}
-		error={todosStore.error}
-		onRetry={() => todosStore.fetchTodos()}
-	/>
 	{#if settingsStore.showBirthdays}
 		<ServiceStatusBanner
 			serviceName="Geburtstage (Kontakte)"
@@ -179,36 +139,12 @@
 </div>
 
 <div class="calendar-layout">
-	<!-- Desktop: Left Sidebar -->
-	<aside class="calendar-sidebar desktop-only" class:collapsed={settingsStore.sidebarCollapsed}>
-		<!-- Collapse button at top -->
-		<button
-			class="sidebar-collapse-btn"
-			onclick={() => settingsStore.toggleSidebar()}
-			title={$_('calendar.hideSidebar')}
-		>
-			<CaretDoubleLeft size={16} />
-		</button>
-
-		<TodoSidebarSection maxItems={5} />
-	</aside>
-
-	<!-- Main Calendar Area -->
-	<div class="calendar-main" class:expanded={settingsStore.sidebarCollapsed}>
+	<div class="calendar-main">
 		<div class="calendar-content">
 			<ViewCarousel onQuickCreate={handleQuickCreate} onEventClick={handleEventClick} />
 		</div>
 	</div>
 
-	<!-- Mobile: Bottom Todo Section -->
-	<aside
-		class="calendar-sidebar-mobile mobile-only"
-		class:collapsed={settingsStore.sidebarCollapsed}
-	>
-		<TodoSidebarSection maxItems={3} />
-	</aside>
-
-	<!-- Quick Event Overlay (for both create and edit) -->
 	{#if showQuickOverlay}
 		{#key overlayKey}
 			<QuickEventOverlay
@@ -226,67 +162,10 @@
 <style>
 	.calendar-layout {
 		display: flex;
-		gap: 1.5rem;
 		width: 100%;
 		flex: 1;
 		min-height: 0;
 		position: relative;
-	}
-
-	/* Desktop only elements */
-	.desktop-only {
-		display: flex;
-	}
-
-	/* Mobile only elements - hidden by default */
-	.mobile-only {
-		display: none;
-	}
-
-	.calendar-sidebar {
-		width: 260px;
-		flex-shrink: 0;
-		flex-direction: column;
-		gap: 1rem;
-		position: relative;
-		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-		transform-origin: left top;
-	}
-
-	.calendar-sidebar.collapsed {
-		width: 0;
-		opacity: 0;
-		overflow: hidden;
-		pointer-events: none;
-		padding: 0;
-		margin: 0;
-	}
-
-	.calendar-layout:has(.calendar-sidebar.collapsed) {
-		gap: 0;
-	}
-
-	.sidebar-collapse-btn {
-		position: absolute;
-		top: 0;
-		right: -12px;
-		width: 24px;
-		height: 24px;
-		border-radius: var(--radius-full);
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		z-index: 10;
-		transition: all 150ms ease;
-		color: var(--color-muted-foreground);
-	}
-
-	.sidebar-collapse-btn:hover {
-		background: var(--color-muted);
-		color: var(--color-foreground);
 	}
 
 	.calendar-main {
@@ -296,15 +175,6 @@
 		min-width: 0;
 		min-height: 0;
 		overflow: hidden;
-		background: var(--color-surface);
-		border-radius: var(--radius-lg);
-		border: 1px solid var(--color-border);
-		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.calendar-main.expanded {
-		border-radius: 0;
-		border: none;
 	}
 
 	.calendar-content {
@@ -313,27 +183,6 @@
 		overflow: hidden;
 	}
 
-	/* Mobile: Bottom Todo Section */
-	.calendar-sidebar-mobile {
-		width: 100%;
-		flex-direction: column;
-		background: var(--color-surface);
-		border-top: 1px solid var(--color-border);
-		padding: 0.75rem;
-		overflow-y: auto;
-		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.calendar-sidebar-mobile.collapsed {
-		height: 0;
-		flex: 0;
-		padding: 0;
-		opacity: 0;
-		overflow: hidden;
-		border: none;
-	}
-
-	/* Mobile Layout - 50/50 Splitscreen */
 	@media (max-width: 768px) {
 		.calendar-layout {
 			flex-direction: column;
@@ -344,27 +193,7 @@
 			overflow: hidden;
 		}
 
-		.desktop-only {
-			display: none !important;
-		}
-
-		.mobile-only {
-			display: flex;
-		}
-
 		.calendar-main {
-			border-radius: 0;
-			border: none;
-			min-height: 0;
-			overflow: hidden;
-		}
-
-		.calendar-layout:has(.calendar-sidebar-mobile:not(.collapsed)) .calendar-main {
-			flex: 0 0 50%;
-			height: 50%;
-		}
-
-		.calendar-layout:has(.calendar-sidebar-mobile.collapsed) .calendar-main {
 			flex: 1;
 			height: 100%;
 		}
@@ -372,37 +201,6 @@
 		.calendar-content {
 			height: 100%;
 			overflow-y: auto;
-		}
-
-		.calendar-sidebar-mobile {
-			display: flex;
-			flex-direction: column;
-			flex: 0 0 50%;
-			height: 50%;
-			max-height: none;
-			border-radius: 0;
-			margin-bottom: 0;
-			padding: 0;
-			border-top: none;
-			overflow: hidden;
-		}
-
-		.calendar-sidebar-mobile > :global(*) {
-			flex: 1;
-			min-height: 0;
-		}
-
-		.calendar-sidebar-mobile.collapsed {
-			flex: 0;
-			height: 0;
-			padding: 0;
-			border: none;
-		}
-	}
-
-	@media (min-width: 769px) and (max-width: 1024px) {
-		.calendar-sidebar {
-			width: 220px;
 		}
 	}
 

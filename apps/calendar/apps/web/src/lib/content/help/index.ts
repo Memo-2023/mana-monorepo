@@ -169,10 +169,6 @@ export function getCalendarHelpContent(locale: string): HelpContent {
 					},
 					{
 						shortcut: 'Cmd/Ctrl + 2',
-						action: t('Aufgaben öffnen', 'Open Tasks'),
-					},
-					{
-						shortcut: 'Cmd/Ctrl + 3',
 						action: t('Einstellungen öffnen', 'Open Settings'),
 					},
 				],

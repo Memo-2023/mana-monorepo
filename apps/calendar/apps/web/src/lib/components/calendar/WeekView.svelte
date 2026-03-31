@@ -12,7 +12,6 @@
 	} from '$lib/data/queries';
 	import type { Calendar } from '@calendar/shared';
 	import { searchStore } from '$lib/stores/search.svelte';
-	import { todosStore, type Task } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import {
@@ -20,8 +19,6 @@
 		useCurrentTimeIndicator,
 		useBirthdayPopover,
 		useEventDragDrop,
-		useTaskDragDrop,
-		useSidebarDrop,
 		useDragToCreate,
 		useCalendarKeyboard,
 	} from '$lib/composables';
@@ -34,7 +31,6 @@
 		type OverflowEvents,
 	} from '$lib/utils/eventFiltering';
 	import EventCard from './EventCard.svelte';
-	import TaskBlock from './TaskBlock.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import { goto } from '$app/navigation';
 	import {
@@ -58,10 +54,9 @@
 		date?: Date;
 		onQuickCreate?: (date: Date, position: { x: number; y: number }, endDate?: Date) => void;
 		onEventClick?: (event: CalendarEvent) => void;
-		onTaskClick?: (task: Task) => void;
 	}
 
-	let { date, onQuickCreate, onEventClick, onTaskClick }: Props = $props();
+	let { date, onQuickCreate, onEventClick }: Props = $props();
 
 	// Get calendars and events from layout context (live queries)
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
@@ -150,18 +145,6 @@
 		minutesToPercent,
 	}));
 
-	const taskDragDrop = useTaskDragDrop(() => ({
-		containerEl: daysContainerEl,
-		days,
-		firstVisibleHour,
-		totalVisibleHours,
-	}));
-
-	const sidebarDrop = useSidebarDrop(() => ({
-		firstVisibleHour,
-		totalVisibleHours,
-	}));
-
 	const dragToCreate = useDragToCreate(() => ({
 		containerEl: daysContainerEl,
 		days,
@@ -170,11 +153,7 @@
 		totalVisibleHours,
 		hourHeight: HOUR_HEIGHT,
 		minutesToPercent,
-		isOtherOperationActive: () =>
-			eventDragDrop.isDragging ||
-			eventDragDrop.isResizing ||
-			taskDragDrop.isTaskDragging ||
-			taskDragDrop.isTaskResizing,
+		isOtherOperationActive: () => eventDragDrop.isDragging || eventDragDrop.isResizing,
 		onCreateEnd: (startTime, endTime, position) => {
 			if (onQuickCreate) {
 				onQuickCreate(startTime, position, endTime);
@@ -188,10 +167,6 @@
 		{
 			isActive: () => eventDragDrop.isDragging || eventDragDrop.isResizing,
 			cancel: eventDragDrop.cancel,
-		},
-		{
-			isActive: () => taskDragDrop.isTaskDragging || taskDragDrop.isTaskResizing,
-			cancel: taskDragDrop.cancel,
 		},
 		{ isActive: () => dragToCreate.isCreating, cancel: dragToCreate.cancel },
 	]);
@@ -307,37 +282,6 @@
 
 	function formatEventTimeRange(event: CalendarEvent): string {
 		return `${formatEventTime(event.startTime)} - ${formatEventTime(event.endTime)}`;
-	}
-
-	/**
-	 * Get style for a scheduled task (time-blocking)
-	 */
-	function getTaskStyle(task: Task): string {
-		if (!task.scheduledStartTime) return '';
-
-		// Parse HH:mm time
-		const [startHour, startMin] = task.scheduledStartTime.split(':').map(Number);
-		const startMinutes = startHour * 60 + startMin;
-
-		// Calculate duration - use estimatedDuration or scheduledEndTime or default 30 min
-		let duration = task.estimatedDuration || 30;
-		if (task.scheduledEndTime) {
-			const [endHour, endMin] = task.scheduledEndTime.split(':').map(Number);
-			const endMinutes = endHour * 60 + endMin;
-			duration = endMinutes - startMinutes;
-		}
-
-		const top = minutesToPercent(startMinutes);
-		const height = Math.max((duration / (totalVisibleHours * 60)) * 100, 2);
-
-		return `top: ${top}%; height: ${height}%;`;
-	}
-
-	/**
-	 * Get scheduled tasks for a specific day
-	 */
-	function getScheduledTasksForDay(day: Date): Task[] {
-		return todosStore.getScheduledTasksForDay(day);
 	}
 
 	function formatEventTime(date: Date | string): string {
@@ -514,14 +458,10 @@
 				<div
 					class="day-column"
 					class:today={isToday(day)}
-					class:drop-target={sidebarDrop.dropTarget && isSameDay(day, sidebarDrop.dropTarget.day)}
 					class:creating={dragToCreate.isCreating &&
 						dragToCreate.createTargetDay &&
 						isSameDay(day, dragToCreate.createTargetDay)}
 					onpointerdown={dragToCreate.startCreate}
-					ondragover={(e) => sidebarDrop.handleDragOver(e, day)}
-					ondragleave={sidebarDrop.handleDragLeave}
-					ondrop={(e) => sidebarDrop.handleDrop(e, day)}
 				>
 					{#each hours as hour}
 						<div
@@ -581,43 +521,6 @@
 							onResizeStart={eventDragDrop.startResize}
 						/>
 					{/each}
-
-					<!-- Scheduled Tasks (Time-Blocking) - only shown if enabled in settings -->
-					{#if settingsStore.showTasksInCalendar}
-						{#each getScheduledTasksForDay(day) as task (task.id)}
-							{@const isTaskBeingDragged =
-								taskDragDrop.isTaskDragging && taskDragDrop.draggedTask?.id === task.id}
-							{@const isTaskBeingResized =
-								taskDragDrop.isTaskResizing && taskDragDrop.resizeTask?.id === task.id}
-							{@const isTaskCrossDayDrag =
-								isTaskBeingDragged &&
-								taskDragDrop.taskDragTargetDay !== null &&
-								!isSameDay(day, taskDragDrop.taskDragTargetDay)}
-							<TaskBlock
-								{task}
-								style={isTaskBeingDragged && !isTaskCrossDayDrag
-									? `top: ${taskDragDrop.taskDragPreviewTop}%; height: ${taskDragDrop.taskDragPreviewHeight}%;`
-									: isTaskBeingResized
-										? `top: ${taskDragDrop.taskResizePreviewTop}%; height: ${taskDragDrop.taskResizePreviewHeight}%;`
-										: getTaskStyle(task)}
-								{onTaskClick}
-								onDragStart={taskDragDrop.startDrag}
-								onResizeStart={taskDragDrop.startResize}
-								isDragging={isTaskBeingDragged && !isTaskCrossDayDrag}
-								isResizing={isTaskBeingResized}
-								isDraggingSource={isTaskCrossDayDrag}
-							/>
-						{/each}
-
-						<!-- Task Drag preview (solid) for cross-day dragging -->
-						{#if taskDragDrop.isTaskDragging && taskDragDrop.draggedTask && taskDragDrop.taskDragTargetDay && isSameDay(day, taskDragDrop.taskDragTargetDay) && !getScheduledTasksForDay(day).some((t) => t.id === taskDragDrop.draggedTask!.id)}
-							<TaskBlock
-								task={taskDragDrop.draggedTask}
-								style="top: {taskDragDrop.taskDragPreviewTop}%; height: {taskDragDrop.taskDragPreviewHeight}%;"
-								isDragging={true}
-							/>
-						{/if}
-					{/if}
 
 					<!-- Drag preview (solid) for cross-day dragging -->
 					{#if eventDragDrop.isDragging && eventDragDrop.draggedEvent && eventDragDrop.dragTargetDay && isSameDay(day, eventDragDrop.dragTargetDay) && !getEventsForDay(day).some((e) => e.id === eventDragDrop.draggedEvent!.id)}

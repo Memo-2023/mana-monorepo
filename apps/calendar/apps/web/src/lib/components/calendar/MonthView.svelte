@@ -11,9 +11,7 @@
 	} from '$lib/data/queries';
 	import type { Calendar } from '@calendar/shared';
 	import { searchStore } from '$lib/stores/search.svelte';
-	import { todosStore } from '$lib/stores/todos.svelte';
 	import { birthdaysStore, type BirthdayEvent } from '$lib/stores/birthdays.svelte';
-	import TodoDayCell from './TodoDayCell.svelte';
 	import BirthdayPopover from '$lib/components/birthday/BirthdayPopover.svelte';
 	import { useBirthdayPopover } from '$lib/composables';
 	import { goto } from '$app/navigation';
@@ -326,11 +324,6 @@
 								{format(day, 'd')}
 							</span>
 						</div>
-
-						<!-- Todos for this day -->
-						{#if todosStore.serviceAvailable}
-							<TodoDayCell date={day} maxVisible={2} />
-						{/if}
 
 						<div class="day-events">
 							{#each getEventsForDay(day) as event}

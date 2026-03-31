@@ -48,7 +48,6 @@ let _dateStripCollapsed = $state(false);
 let _tagStripCollapsed = $state(true);
 let _selectedTagIds = $state<string[]>([]);
 let _immersiveModeEnabled = $state(false);
-let _showTasksInCalendar = $state(false);
 let _sidebarCollapsed = $state(true);
 
 const DEFAULT_SETTINGS: CalendarAppSettings = {
@@ -234,9 +233,6 @@ export const settingsStore = {
 	get immersiveModeEnabled() {
 		return _immersiveModeEnabled;
 	},
-	get showTasksInCalendar() {
-		return _showTasksInCalendar;
-	},
 	get sidebarCollapsed() {
 		return _sidebarCollapsed;
 	},
@@ -281,10 +277,6 @@ export const settingsStore = {
 
 	clearTagSelection() {
 		_selectedTagIds = [];
-	},
-
-	toggleTasksInCalendar() {
-		_showTasksInCalendar = !_showTasksInCalendar;
 	},
 
 	toggleImmersiveMode() {

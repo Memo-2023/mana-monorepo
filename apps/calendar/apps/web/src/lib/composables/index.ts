@@ -14,12 +14,6 @@ export {
 	type EventResizeState,
 } from './useEventDragDrop.svelte';
 
-// Task drag/drop and resize
-export { useTaskDragDrop, type TaskDragDropConfig } from './useTaskDragDrop.svelte';
-
-// Sidebar task drop handling
-export { useSidebarDrop, type SidebarDropConfig } from './useSidebarDrop.svelte';
-
 // Drag-to-create
 export { useDragToCreate, type DragToCreateConfig } from './useDragToCreate.svelte';
 

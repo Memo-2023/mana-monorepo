@@ -1,6 +1,6 @@
 /**
  * Birthdays Store - Manages contact birthdays for calendar display
- * Cross-app integration with Contacts Backend (similar to todosStore)
+ * Cross-app integration with Contacts Backend
  */
 
 import { browser } from '$app/environment';

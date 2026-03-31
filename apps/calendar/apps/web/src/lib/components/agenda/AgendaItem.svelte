@@ -1,110 +1,46 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { CalendarEvent, Calendar as CalendarType } from '@calendar/shared';
-	import type { Task } from '$lib/api/todos';
-	import { PRIORITY_COLORS, PRIORITY_LABELS } from '$lib/api/todos';
 	import { getCalendarColorWithBirthdays } from '$lib/data/queries';
-	import { todosStore } from '$lib/stores/todos.svelte';
-	import TodoCheckbox from '$lib/components/todo/TodoCheckbox.svelte';
-	import PriorityBadge from '$lib/components/todo/PriorityBadge.svelte';
-	import { Calendar, MapPin, Clock } from '@manacore/shared-icons';
+	import { Calendar, MapPin } from '@manacore/shared-icons';
 	import { format } from 'date-fns';
-	import { de } from 'date-fns/locale';
 	import { toDate } from '$lib/utils/eventDateHelpers';
 
-	type ItemType = 'event' | 'todo';
-
 	interface Props {
-		type: ItemType;
-		event?: CalendarEvent;
-		todo?: Task;
+		event: CalendarEvent;
 		onclick?: () => void;
 	}
 
-	let { type, event, todo, onclick }: Props = $props();
+	let { event, onclick }: Props = $props();
 
-	// Get calendars from layout context (live query)
 	const calendarsCtx: { readonly value: CalendarType[] } = getContext('calendars');
 
-	let isToggling = $state(false);
-
-	// Event helpers
-	const eventColor = $derived(
-		event ? getCalendarColorWithBirthdays(calendarsCtx.value, event.calendarId) : undefined
-	);
+	const eventColor = $derived(getCalendarColorWithBirthdays(calendarsCtx.value, event.calendarId));
 	const eventTimeLabel = $derived.by(() => {
-		if (!event) return '';
 		if (event.isAllDay) return 'Ganztägig';
-
 		const start = toDate(event.startTime);
 		const end = toDate(event.endTime);
-
 		return `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`;
 	});
-
-	// Todo helpers
-	const todoTimeLabel = $derived.by(() => {
-		if (!todo) return '';
-		if (todo.dueTime) return `Fällig: ${todo.dueTime}`;
-		return 'Heute fällig';
-	});
-
-	async function handleToggleTodo() {
-		if (!todo) return;
-		isToggling = true;
-		await todosStore.toggleComplete(todo.id);
-		isToggling = false;
-	}
 </script>
 
-{#if type === 'event' && event}
-	<button type="button" class="agenda-item event" style="--item-color: {eventColor};" {onclick}>
-		<div class="item-indicator">
-			<Calendar size={14} />
-		</div>
-		<div class="item-content">
-			<div class="item-header">
-				<span class="item-time">{eventTimeLabel}</span>
-			</div>
-			<span class="item-title">{event.title}</span>
-			{#if event.location}
-				<div class="item-meta">
-					<MapPin size={12} />
-					<span>{event.location}</span>
-				</div>
-			{/if}
-		</div>
-	</button>
-{:else if type === 'todo' && todo}
-	<div
-		class="agenda-item todo"
-		class:completed={todo.isCompleted}
-		style="--item-color: {PRIORITY_COLORS[todo.priority]};"
-	>
-		<div class="item-checkbox">
-			<TodoCheckbox
-				checked={todo.isCompleted}
-				loading={isToggling}
-				size="md"
-				onchange={handleToggleTodo}
-			/>
-		</div>
-		<button type="button" class="item-content" {onclick}>
-			<div class="item-header">
-				<PriorityBadge priority={todo.priority} variant="dot" size="sm" />
-				<span class="item-time">{todoTimeLabel}</span>
-			</div>
-			<span class="item-title">{todo.title}</span>
-			{#if todo.project}
-				<div class="item-meta">
-					<span class="project-tag" style="color: {todo.project.color};">
-						{todo.project.name}
-					</span>
-				</div>
-			{/if}
-		</button>
+<button type="button" class="agenda-item event" style="--item-color: {eventColor};" {onclick}>
+	<div class="item-indicator">
+		<Calendar size={14} />
 	</div>
-{/if}
+	<div class="item-content">
+		<div class="item-header">
+			<span class="item-time">{eventTimeLabel}</span>
+		</div>
+		<span class="item-title">{event.title}</span>
+		{#if event.location}
+			<div class="item-meta">
+				<MapPin size={12} />
+				<span>{event.location}</span>
+			</div>
+		{/if}
+	</div>
+</button>
 
 <style>
 	.agenda-item {
@@ -115,34 +51,16 @@
 		border-radius: var(--radius-md);
 		background: hsl(var(--color-surface));
 		transition: all 150ms ease;
-	}
-
-	.agenda-item.event {
 		border: none;
 		cursor: pointer;
 		text-align: left;
 		width: 100%;
 		border-left: 4px solid var(--item-color);
 	}
-
-	.agenda-item.event:hover {
+	.agenda-item:hover {
 		background: hsl(var(--color-muted) / 0.5);
 		transform: translateX(4px);
 	}
-
-	.agenda-item.todo {
-		border-left: 3px solid var(--item-color);
-	}
-
-	.agenda-item.todo.completed {
-		opacity: 0.6;
-	}
-
-	.agenda-item.todo.completed .item-title {
-		text-decoration: line-through;
-		color: hsl(var(--color-muted-foreground));
-	}
-
 	.item-indicator {
 		display: flex;
 		align-items: center;
@@ -154,12 +72,6 @@
 		color: white;
 		flex-shrink: 0;
 	}
-
-	.item-checkbox {
-		flex-shrink: 0;
-		padding-top: 2px;
-	}
-
 	.item-content {
 		flex: 1;
 		min-width: 0;
@@ -167,31 +79,16 @@
 		flex-direction: column;
 		gap: 0.25rem;
 	}
-
-	.todo .item-content {
-		border: none;
-		background: transparent;
-		padding: 0;
-		cursor: pointer;
-		text-align: left;
-	}
-
-	.todo .item-content:hover .item-title {
-		color: hsl(var(--color-primary));
-	}
-
 	.item-header {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 	}
-
 	.item-time {
 		font-size: 0.75rem;
 		font-weight: 500;
 		color: hsl(var(--color-muted-foreground));
 	}
-
 	.item-title {
 		font-size: 0.9375rem;
 		font-weight: 500;
@@ -199,9 +96,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		transition: color 150ms ease;
 	}
-
 	.item-meta {
 		display: flex;
 		align-items: center;
@@ -209,16 +104,7 @@
 		font-size: 0.75rem;
 		color: hsl(var(--color-muted-foreground));
 	}
-
 	.item-meta :global(svg) {
 		flex-shrink: 0;
-	}
-
-	.project-tag {
-		font-size: 0.6875rem;
-		font-weight: 500;
-		background: color-mix(in srgb, currentColor 15%, transparent);
-		padding: 1px 6px;
-		border-radius: 4px;
 	}
 </style>

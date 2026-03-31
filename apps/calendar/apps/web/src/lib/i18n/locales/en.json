@@ -202,17 +202,6 @@
 		"eventCreated": "Event created",
 		"eventDeleted": "Event deleted"
 	},
-	"priority": {
-		"urgent": "Urgent",
-		"high": "High",
-		"medium": "Normal",
-		"low": "Low"
-	},
-	"todo": {
-		"task": "Task",
-		"markComplete": "Mark as complete",
-		"markIncomplete": "Mark as incomplete"
-	},
 	"a11y": {
 		"createEventOn": "Create event on {date}",
 		"slotTime": "{day} {time}"
