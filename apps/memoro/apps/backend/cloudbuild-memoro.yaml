@@ -1,0 +1,8 @@
+# cloudbuild-memoro.yaml
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'europe-west3-docker.pkg.dev/memo-2c4c4/memoro-service/memoro-service:v4.9.8', '.'] # Assumes Dockerfile is in ./memoro-service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'europe-west3-docker.pkg.dev/memo-2c4c4/memoro-service/memoro-service:v4.9.8']
+images:
+  - 'europe-west3-docker.pkg.dev/memo-2c4c4/memoro-service/memoro-service:v4.9.8'

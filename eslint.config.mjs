@@ -55,6 +55,7 @@ export default [
 			'apps/*/apps/mobile/**',
 			'apps/*/apps/web/**',
 			'apps/*/apps/backend/**',
+			'apps/*/apps/audio-backend/**',
 			'apps/*/apps/landing/**',
 			'apps/*/packages/**', // Project-specific packages
 			'games/*/apps/**',

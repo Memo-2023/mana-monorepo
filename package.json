@@ -303,8 +303,6 @@
 	"pnpm": {
 		"peerDependencyRules": {
 			"allowedVersions": {
-				"@mana-core/nestjs-integration>@nestjs/common": "^11.0.0",
-				"@mana-core/nestjs-integration>@nestjs/core": "^11.0.0",
 				"react-native>react": ">=18.0.0",
 				"react-native>@types/react": ">=18.0.0",
 				"@sveltejs/vite-plugin-svelte>vite": ">=6.0.0",

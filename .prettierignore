@@ -88,3 +88,9 @@ apps/picture/apps/landing/src/components/promptTemplates/CategoryGrid.astro
 **/*QUICK*.md
 **/*QUICKSTART*.md
 
+# Legacy memoro apps (not yet migrated to monorepo standards, have their own tooling)
+apps/memoro/apps/backend/**
+apps/memoro/apps/audio-backend/**
+apps/memoro/apps/mobile/**
+apps/memoro/apps/landing/**
+
