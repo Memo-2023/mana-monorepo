@@ -150,6 +150,20 @@
 		onDelete?.();
 		showModal = false;
 	}
+
+	function toggleSubtask(subtaskId: string) {
+		if (!onSave) return;
+		const updated = (task.subtasks ?? []).map((s) =>
+			s.id === subtaskId
+				? {
+						...s,
+						isCompleted: !s.isCompleted,
+						completedAt: !s.isCompleted ? new Date().toISOString() : null,
+					}
+				: s
+		);
+		onSave({ subtasks: updated });
+	}
 </script>
 
 <svelte:window onclick={handleClickOutside} />
@@ -253,6 +267,27 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Inline subtasks -->
+{#if task.subtasks && task.subtasks.length > 0 && !task.isCompleted}
+	<div class="subtasks-inline">
+		{#each task.subtasks as subtask (subtask.id)}
+			<button
+				class="subtask-row"
+				class:done={subtask.isCompleted}
+				onclick={(e) => {
+					e.stopPropagation();
+					toggleSubtask(subtask.id);
+				}}
+			>
+				<span class="subtask-check" class:checked={subtask.isCompleted}>
+					{#if subtask.isCompleted}<Check size={10} />{/if}
+				</span>
+				<span class="subtask-title">{subtask.title}</span>
+			</button>
+		{/each}
+	</div>
+{/if}
 
 <!-- Context Menu -->
 {#if showContextMenu}
@@ -594,5 +629,84 @@
 
 	:global(.dark) .context-divider {
 		background: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Inline subtasks */
+	.subtasks-inline {
+		display: flex;
+		flex-direction: column;
+		padding-left: calc(0.5rem + 1.25rem + 0.75rem + 1.25rem);
+		margin-top: 0.125rem;
+		position: relative;
+	}
+
+	.subtasks-inline::before {
+		content: '';
+		position: absolute;
+		left: calc(0.5rem + 1.25rem + 0.375rem);
+		top: 0;
+		bottom: 0.375rem;
+		width: 1px;
+		background: rgba(0, 0, 0, 0.12);
+	}
+
+	:global(.dark) .subtasks-inline::before {
+		background: rgba(255, 255, 255, 0.12);
+	}
+
+	.subtask-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.125rem 0;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		text-align: left;
+		width: 100%;
+	}
+
+	.subtask-check {
+		width: 0.875rem;
+		height: 0.875rem;
+		border-radius: 50%;
+		border: 1.5px solid rgba(0, 0, 0, 0.2);
+		background: transparent;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		transition: all 0.15s;
+		color: white;
+	}
+
+	:global(.dark) .subtask-check {
+		border-color: rgba(255, 255, 255, 0.25);
+	}
+
+	.subtask-check.checked {
+		background: #8b5cf6;
+		border-color: #8b5cf6;
+	}
+
+	.subtask-title {
+		font-size: 0.75rem;
+		color: #6b7280;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	:global(.dark) .subtask-title {
+		color: #9ca3af;
+	}
+
+	.subtask-row.done .subtask-title {
+		text-decoration: line-through;
+		color: #9ca3af;
+	}
+
+	:global(.dark) .subtask-row.done .subtask-title {
+		color: #6b7280;
 	}
 </style>
