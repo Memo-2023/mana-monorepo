@@ -223,24 +223,8 @@
 		todoSettings.toggleFilterStrip();
 	}
 
-	// View mode switching (state-based, not route-based)
-	let viewTabGroup = $derived<PillNavElement>({
-		type: 'tabs' as const,
-		options: [
-			{ id: 'fokus', icon: 'list', label: 'Fokus', title: 'Fokus-Ansicht' },
-			{ id: 'uebersicht', icon: 'columns', label: 'Übersicht', title: 'Übersicht' },
-			{ id: 'matrix', icon: 'grid', label: 'Matrix', title: 'Eisenhower-Matrix' },
-		],
-		value: todoSettings.activeLayoutMode,
-		onChange: (id: string) => {
-			todoSettings.set('activeLayoutMode', id as 'fokus' | 'uebersicht' | 'matrix');
-			// Navigate to homepage if not already there
-			if ($page.url.pathname !== '/') goto('/');
-		},
-	});
-
 	// Keep navRoutes for keyboard shortcuts (Ctrl+1-3)
-	const viewRoutes: Record<string, string> = { fokus: '/', uebersicht: '/', matrix: '/' };
+	const viewRoutes: Record<string, string> = { fokus: '/' };
 
 	// Filter, Tags, and Layout stay as standalone pills (toggle behavior, not navigation)
 	let baseNavItems = $derived<PillNavItem[]>([
@@ -362,16 +346,8 @@
 			await userSettings.load();
 		}
 
-		// Redirect /kanban to / with Übersicht mode
-		const currentPath = window.location.pathname;
-		if (currentPath === '/kanban') {
-			todoSettings.set('activeLayoutMode', 'uebersicht');
-			goto('/', { replaceState: true });
-			return;
-		}
-
 		// Redirect to start page if on root and a custom start page is set
-		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
+		if ($page.url.pathname === '/' && userSettings.startPage && userSettings.startPage !== '/') {
 			goto(userSettings.startPage, { replaceState: true });
 		}
 
@@ -412,7 +388,6 @@
 				{#if !isPillNavCollapsed}
 					<PillNavigation
 						items={navItems}
-						prependElements={[viewTabGroup]}
 						currentPath={$page.url.pathname}
 						appName="Todo"
 						homeRoute="/"
@@ -521,7 +496,7 @@
 				</div>
 				<div
 					class="content-wrapper"
-					class:full-width={todoSettings.activeLayoutMode !== 'fokus'}
+					class:full-width={false}
 					class:immersive={todoSettings.immersiveModeEnabled}
 				>
 					{@render children()}

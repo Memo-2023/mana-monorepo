@@ -11,14 +11,6 @@
 		getContext('editMode');
 
 	let editMode = $derived(editModeCtx.active);
-
-	const LAYOUT_MAP = {
-		fokus: 'fokus',
-		uebersicht: 'kanban',
-		matrix: 'grid',
-	} as const;
-
-	let layoutOverride = $derived(LAYOUT_MAP[todoSettings.activeLayoutMode]);
 	let activeView = $derived(activeViewCtx.value);
 	let pageTitle = $derived(activeView?.name ?? 'Aufgaben');
 
@@ -151,7 +143,7 @@
 	{#if activeView}
 		<BoardViewRenderer
 			view={activeView}
-			{layoutOverride}
+			layoutOverride="fokus"
 			onColumnRename={columnsEditable ? (i, name) => updateColumn(i, { name }) : undefined}
 			onColumnColorChange={columnsEditable ? (i, color) => updateColumn(i, { color }) : undefined}
 			onColumnMove={columnsEditable ? moveColumn : undefined}
