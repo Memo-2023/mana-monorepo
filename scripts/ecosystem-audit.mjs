@@ -754,6 +754,123 @@ function measureBundleSize() {
 	return { adoption, appsWithBundleConfig };
 }
 
+function measureGitActivity() {
+	console.log('📊 Measuring Git Activity (last 30 days)...');
+	let activeApps = 0;
+	const perApp = {};
+
+	for (const app of WEB_APPS) {
+		const appDir = join(APPS_DIR, app);
+		try {
+			const result = execSync(
+				`git log --since="30 days ago" --oneline -- "${appDir}" 2>/dev/null | wc -l`,
+				{ encoding: 'utf-8' }
+			);
+			const commits = parseInt(result.trim()) || 0;
+			perApp[app] = commits;
+			if (commits > 0) activeApps++;
+		} catch {
+			perApp[app] = 0;
+		}
+	}
+
+	const adoption = Math.round((activeApps / WEB_APPS.length) * 100);
+	const sorted = Object.entries(perApp).sort(([, a], [, b]) => b - a);
+	console.log(`  Active apps (≥1 commit): ${activeApps}/${WEB_APPS.length} (${adoption}%)`);
+	sorted.slice(0, 5).forEach(([a, c]) => console.log(`    ${a}: ${c} commits`));
+	console.log('');
+
+	return { adoption, activeApps, perApp: Object.fromEntries(sorted) };
+}
+
+function measureA11yIndicators() {
+	console.log('📊 Measuring Accessibility Indicators...');
+	let totalImgFiles = 0;
+	let totalImgWithAlt = 0;
+	let appsWithDialogRole = 0;
+	let appsWithFocusTrap = 0;
+
+	for (const app of WEB_APPS) {
+		const webSrc = join(APPS_DIR, app, 'apps/web/src');
+		if (!existsSync(webSrc)) continue;
+
+		// img tags with and without alt
+		const imgWithAlt = grepOccurrences('<img[^>]*alt=', webSrc, '*.svelte');
+		const imgWithoutAlt = grepOccurrences('<img(?![^>]*alt=)', webSrc, '*.svelte');
+		totalImgWithAlt += imgWithAlt;
+		totalImgFiles += imgWithAlt + imgWithoutAlt;
+
+		if (grepCount('role="dialog"', webSrc, '*.svelte') > 0) appsWithDialogRole++;
+		if (grepCount('use:focusTrap', webSrc, '*.svelte') > 0) appsWithFocusTrap++;
+	}
+
+	// Score: alt text coverage + dialog/focusTrap presence
+	const altAdoption = totalImgFiles > 0 ? Math.round((totalImgWithAlt / totalImgFiles) * 100) : 100;
+	const dialogAdoption = Math.round((appsWithDialogRole / WEB_APPS.length) * 100);
+	const trapAdoption = Math.round((appsWithFocusTrap / WEB_APPS.length) * 100);
+	const adoption = Math.round((altAdoption + dialogAdoption + trapAdoption) / 3);
+
+	console.log(`  img with alt: ${totalImgWithAlt}/${totalImgFiles} (${altAdoption}%)`);
+	console.log(
+		`  Apps with role=dialog: ${appsWithDialogRole}/${WEB_APPS.length} (${dialogAdoption}%)`
+	);
+	console.log(`  Apps with focusTrap: ${appsWithFocusTrap}/${WEB_APPS.length} (${trapAdoption}%)`);
+	console.log(`  Combined: ${adoption}%\n`);
+
+	return { adoption, altAdoption, dialogAdoption, trapAdoption, totalImgFiles, totalImgWithAlt };
+}
+
+function measureAuthGuardCoverage() {
+	console.log('📊 Measuring Auth Guard Coverage...');
+	let appsWithAuthGuard = 0;
+	const missing = [];
+
+	for (const app of WEB_APPS) {
+		const webSrc = join(APPS_DIR, app, 'apps/web/src');
+		if (!existsSync(webSrc)) continue;
+
+		const hasAuthGuard =
+			grepCount('AuthGate', webSrc, '*.svelte') > 0 ||
+			grepCount('authGuard', webSrc, '*.ts') > 0 ||
+			grepCount('authGuard', webSrc, '*.server.ts') > 0 ||
+			grepCount('requireAuth', webSrc, '*.ts') > 0;
+
+		if (hasAuthGuard) appsWithAuthGuard++;
+		else missing.push(app);
+	}
+
+	const adoption = Math.round((appsWithAuthGuard / WEB_APPS.length) * 100);
+	console.log(`  Apps with auth guard: ${appsWithAuthGuard}/${WEB_APPS.length} (${adoption}%)`);
+	if (missing.length > 0 && missing.length <= 10) console.log(`  Missing: ${missing.join(', ')}`);
+	console.log('');
+
+	return { adoption, appsWithAuthGuard, missing };
+}
+
+function measureDockerReadiness() {
+	console.log('📊 Measuring Docker Readiness...');
+	let appsWithDockerfile = 0;
+	const missing = [];
+
+	for (const app of WEB_APPS) {
+		const appDir = join(APPS_DIR, app);
+		const hasDockerfile =
+			existsSync(join(appDir, 'apps/web/Dockerfile')) ||
+			existsSync(join(appDir, 'Dockerfile')) ||
+			fileCount('Dockerfile', appDir) > 0;
+
+		if (hasDockerfile) appsWithDockerfile++;
+		else missing.push(app);
+	}
+
+	const adoption = Math.round((appsWithDockerfile / WEB_APPS.length) * 100);
+	console.log(`  Apps with Dockerfile: ${appsWithDockerfile}/${WEB_APPS.length} (${adoption}%)`);
+	if (missing.length > 0 && missing.length <= 10) console.log(`  Missing: ${missing.join(', ')}`);
+	console.log('');
+
+	return { adoption, appsWithDockerfile, missing };
+}
+
 // ============================================================
 // Main
 // ============================================================
@@ -781,6 +898,10 @@ const storePattern = measureStorePattern();
 const sharedTypes = measureSharedTypeUsage();
 const depFreshness = measureDependencyFreshness();
 const bundleSize = measureBundleSize();
+const gitActivity = measureGitActivity();
+const a11y = measureA11yIndicators();
+const authGuard = measureAuthGuardCoverage();
+const docker = measureDockerReadiness();
 
 // Calculate overall scores
 const scores = {
@@ -803,6 +924,10 @@ const scores = {
 	sharedTypes: sharedTypes.adoption,
 	depFreshness: depFreshness.adoption,
 	bundleConfig: bundleSize.adoption,
+	gitActivity: gitActivity.adoption,
+	a11yIndicators: a11y.adoption,
+	authGuardCoverage: authGuard.adoption,
+	dockerReadiness: docker.adoption,
 };
 
 // Weighted overall score
@@ -826,6 +951,10 @@ const weights = {
 	sharedTypes: 3,
 	depFreshness: 2,
 	bundleConfig: 2,
+	gitActivity: 3,
+	a11yIndicators: 4,
+	authGuardCoverage: 5,
+	dockerReadiness: 3,
 };
 
 let totalWeight = 0;
@@ -887,6 +1016,10 @@ const output = {
 		sharedTypes,
 		depFreshness,
 		bundleSize,
+		gitActivity,
+		a11y,
+		authGuard,
+		docker,
 	},
 	apps: WEB_APPS,
 };
