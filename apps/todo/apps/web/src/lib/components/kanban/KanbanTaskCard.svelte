@@ -336,20 +336,17 @@
 />
 
 <style>
+	/* Paper-style: no card, no border, just text on the page */
 	.kanban-card {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.625rem 1rem;
-		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		transition: all 0.2s;
+		gap: 0.625rem;
+		padding: 0.2rem 0;
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		border-radius: 0;
+		transition: opacity 0.15s;
 		user-select: none;
 		cursor: pointer;
 	}
@@ -358,43 +355,28 @@
 		cursor: grabbing;
 	}
 
-	:global(.dark) .kanban-card {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-	}
-
 	.kanban-card:hover {
-		background: rgba(255, 255, 255, 0.95);
-		border-color: rgba(0, 0, 0, 0.15);
-		transform: translateY(-1px);
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .kanban-card:hover {
-		background: rgba(255, 255, 255, 0.2);
-		border-color: rgba(255, 255, 255, 0.25);
+		opacity: 0.85;
 	}
 
 	.kanban-card.completed {
-		opacity: 0.6;
+		opacity: 0.45;
 	}
 
-	/* Priority dot */
+	/* Priority dot — slim left accent */
 	.priority-dot {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 9999px;
+		width: 3px;
+		height: 1rem;
+		border-radius: 2px;
 		flex-shrink: 0;
 	}
 
-	/* Checkbox */
+	/* Checkbox — sized to match title text height */
 	.task-checkbox {
-		width: 1.25rem;
-		height: 1.25rem;
-		border-radius: 9999px;
-		border: 2px solid rgba(0, 0, 0, 0.2);
+		width: 1.1rem;
+		height: 1.1rem;
+		border-radius: 50%;
+		border: 1.5px solid rgba(0, 0, 0, 0.3);
 		background: transparent;
 		display: flex;
 		align-items: center;
@@ -406,12 +388,12 @@
 	}
 
 	:global(.dark) .task-checkbox {
-		border-color: rgba(255, 255, 255, 0.3);
+		border-color: rgba(255, 255, 255, 0.35);
 	}
 
 	.task-checkbox:hover {
 		border-color: #8b5cf6;
-		background: rgba(139, 92, 246, 0.1);
+		background: rgba(139, 92, 246, 0.08);
 	}
 
 	.task-checkbox.checked {
@@ -420,8 +402,8 @@
 	}
 
 	.check-icon {
-		width: 0.75rem;
-		height: 0.75rem;
+		width: 0.6rem;
+		height: 0.6rem;
 		color: white;
 	}
 
@@ -431,26 +413,27 @@
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.2rem;
 	}
 
 	.task-title {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
+		font-size: 0.9375rem;
+		font-weight: 400;
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		cursor: pointer;
+		line-height: 1.4;
 	}
 
 	:global(.dark) .task-title {
-		color: #f3f4f6;
+		color: hsl(var(--color-foreground));
 	}
 
 	.task-title.line-through {
 		text-decoration: line-through;
-		color: #9ca3af;
+		opacity: 0.5;
 	}
 
 	/* Inline title input */
@@ -633,34 +616,35 @@
 		background: rgba(255, 255, 255, 0.1);
 	}
 
-	/* Inline subtasks */
+	/* Inline subtasks — same size as title, just indented */
 	.subtasks-inline {
 		display: flex;
 		flex-direction: column;
-		padding-left: calc(0.5rem + 1.25rem + 0.75rem + 1.25rem);
-		margin-top: 0.125rem;
+		/* indent = priority-dot(3px) + gap(0.625rem) + checkbox(1.1rem) + gap(0.625rem) */
+		padding-left: calc(3px + 0.625rem + 1.1rem + 0.625rem);
+		margin-top: 0;
 		position: relative;
 	}
 
 	.subtasks-inline::before {
 		content: '';
 		position: absolute;
-		left: calc(0.5rem + 1.25rem + 0.375rem);
-		top: 0;
-		bottom: 0.375rem;
+		left: calc(3px + 0.625rem + 0.55rem);
+		top: 0.2rem;
+		bottom: 0.3rem;
 		width: 1px;
-		background: rgba(0, 0, 0, 0.12);
+		background: rgba(0, 0, 0, 0.15);
 	}
 
 	:global(.dark) .subtasks-inline::before {
-		background: rgba(255, 255, 255, 0.12);
+		background: rgba(255, 255, 255, 0.15);
 	}
 
 	.subtask-row {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.125rem 0;
+		gap: 0.625rem;
+		padding: 0.15rem 0;
 		background: transparent;
 		border: none;
 		cursor: pointer;
@@ -669,10 +653,10 @@
 	}
 
 	.subtask-check {
-		width: 0.875rem;
-		height: 0.875rem;
+		width: 1.1rem;
+		height: 1.1rem;
 		border-radius: 50%;
-		border: 1.5px solid rgba(0, 0, 0, 0.2);
+		border: 1.5px solid rgba(0, 0, 0, 0.3);
 		background: transparent;
 		display: flex;
 		align-items: center;
@@ -683,7 +667,11 @@
 	}
 
 	:global(.dark) .subtask-check {
-		border-color: rgba(255, 255, 255, 0.25);
+		border-color: rgba(255, 255, 255, 0.35);
+	}
+
+	.subtask-check:hover {
+		border-color: #8b5cf6;
 	}
 
 	.subtask-check.checked {
@@ -692,23 +680,21 @@
 	}
 
 	.subtask-title {
-		font-size: 0.75rem;
-		color: #6b7280;
+		font-size: 0.9375rem;
+		font-weight: 400;
+		color: hsl(var(--color-foreground));
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		line-height: 1.4;
 	}
 
 	:global(.dark) .subtask-title {
-		color: #9ca3af;
+		color: hsl(var(--color-foreground));
 	}
 
 	.subtask-row.done .subtask-title {
 		text-decoration: line-through;
-		color: #9ca3af;
-	}
-
-	:global(.dark) .subtask-row.done .subtask-title {
-		color: #6b7280;
+		opacity: 0.45;
 	}
 </style>
