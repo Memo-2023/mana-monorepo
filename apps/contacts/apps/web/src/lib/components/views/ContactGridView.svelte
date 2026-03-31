@@ -2,6 +2,7 @@
 	import { Plus, Check, Heart, Phone, Envelope } from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
+	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
@@ -73,20 +74,6 @@
 	function handleCheckboxClick(e: MouseEvent, id: string) {
 		e.stopPropagation();
 		onToggleSelection?.(id);
-	}
-
-	function getInitials(contact: Contact) {
-		const first = contact.firstName?.[0] || '';
-		const last = contact.lastName?.[0] || '';
-		return (first + last).toUpperCase() || contact.email?.[0]?.toUpperCase() || '?';
-	}
-
-	function getDisplayName(contact: Contact) {
-		if (contact.displayName) return contact.displayName;
-		if (contact.firstName || contact.lastName) {
-			return [contact.firstName, contact.lastName].filter(Boolean).join(' ');
-		}
-		return contact.email || 'Unbekannt';
 	}
 
 	// Generate a consistent gradient based on contact name

@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { contactsApi, photoApi, type Contact } from '$lib/api/contacts';
+	import { getDisplayName } from '$lib/utils/contact-display';
 	import ContactNotes from './ContactNotes.svelte';
 	import ContactTasks from './ContactTasks.svelte';
 	import { ContactDetailSkeleton } from '$lib/components/skeletons';
@@ -126,15 +127,6 @@
 		signal = contact.signal || '';
 		discord = contact.discord || '';
 		bluesky = contact.bluesky || '';
-	}
-
-	function getDisplayName() {
-		if (!contact) return '';
-		if (contact.displayName) return contact.displayName;
-		if (contact.firstName || contact.lastName) {
-			return [contact.firstName, contact.lastName].filter(Boolean).join(' ');
-		}
-		return contact.email || 'Unbekannt';
 	}
 
 	async function loadContact() {
@@ -551,7 +543,7 @@
 							{#if contact.photoUrl}
 								<img
 									src={contact.photoUrl}
-									alt={getDisplayName()}
+									alt={getDisplayName(contact)}
 									class="avatar-image avatar-large"
 								/>
 								<button
@@ -629,7 +621,7 @@
 								{/if}
 							</button>
 						</div>
-						<h2 class="profile-name">{getDisplayName()}</h2>
+						<h2 class="profile-name">{getDisplayName(contact)}</h2>
 						{#if contact.company || contact.jobTitle}
 							<p class="profile-subtitle">
 								{[contact.jobTitle, contact.company].filter(Boolean).join(' @ ')}

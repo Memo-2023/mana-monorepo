@@ -2,6 +2,7 @@
 	import { Plus, Check, Heart, Phone, Envelope, TextAa, CaretDown } from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
+	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
 	import type { SortField } from '$lib/components/SortToggle.svelte';
 	import { newContactModalStore } from '$lib/stores/new-contact-modal.svelte';
 	import { contactsFilterStore } from '$lib/stores/filter.svelte';
@@ -60,20 +61,6 @@
 		}
 		return letters;
 	});
-
-	function getInitials(contact: Contact) {
-		const first = contact.firstName?.[0] || '';
-		const last = contact.lastName?.[0] || '';
-		return (first + last).toUpperCase() || contact.email?.[0]?.toUpperCase() || '?';
-	}
-
-	function getDisplayName(contact: Contact) {
-		if (contact.displayName) return contact.displayName;
-		if (contact.firstName || contact.lastName) {
-			return [contact.firstName, contact.lastName].filter(Boolean).join(' ');
-		}
-		return contact.email || 'Unbekannt';
-	}
 
 	function getFirstLetter(contact: Contact): string {
 		const name =

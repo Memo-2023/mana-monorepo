@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { contactsApi } from '$lib/api/contacts';
 	import type { Contact } from '$lib/api/contacts';
+	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
 	import { ContactListSkeleton } from '$lib/components/skeletons';
 	import '$lib/i18n';
 	import {
@@ -45,20 +46,6 @@
 		} finally {
 			loading = false;
 		}
-	}
-
-	function getDisplayName(contact: Contact) {
-		if (contact.displayName) return contact.displayName;
-		if (contact.firstName || contact.lastName) {
-			return [contact.firstName, contact.lastName].filter(Boolean).join(' ');
-		}
-		return contact.email || 'Unbekannt';
-	}
-
-	function getInitials(contact: Contact) {
-		const first = contact.firstName?.[0] || '';
-		const last = contact.lastName?.[0] || '';
-		return (first + last).toUpperCase() || contact.email?.[0]?.toUpperCase() || '?';
 	}
 
 	function handleContactClick(id: string) {

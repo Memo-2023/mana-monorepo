@@ -9,8 +9,10 @@
 	} from '@todo/shared';
 	import type { ContactReference, ContactOrManual } from '@manacore/shared-types';
 	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
-	import { isToday, isPast } from 'date-fns';
+	import { format, isToday, isPast } from 'date-fns';
+	import { de } from 'date-fns/locale';
 	import { formatDueDate } from '$lib/utils/date-display';
+	import { getSubtaskProgress } from '$lib/utils/task-helpers';
 	import { getContext } from 'svelte';
 	import type { Project } from '@todo/shared';
 	import { getActiveProjects, getProjectColor } from '$lib/data/task-queries';
@@ -314,11 +316,7 @@
 	});
 
 	// Subtasks progress
-	let subtaskProgress = $derived(() => {
-		if (!task.subtasks || task.subtasks.length === 0) return null;
-		const completed = task.subtasks.filter((s) => s.isCompleted).length;
-		return `${completed}/${task.subtasks.length}`;
-	});
+	let subtaskProgress = $derived(() => getSubtaskProgress(task.subtasks));
 
 	// Long press to expand (mobile)
 	let longPressTimer: ReturnType<typeof setTimeout> | null = null;

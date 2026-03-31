@@ -6,6 +6,7 @@
 	import { DuplicateListSkeleton } from '$lib/components/skeletons';
 	import { toastStore } from '@manacore/shared-ui';
 	import { ArrowsClockwise } from '@manacore/shared-icons';
+	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
 
 	let duplicates = $state<DuplicateGroup[]>([]);
 	let loading = $state(true);
@@ -47,20 +48,6 @@
 			case 'name':
 				return '👤';
 		}
-	}
-
-	function getInitials(contact: DuplicateGroup['contacts'][0]) {
-		const first = contact.firstName?.[0] || '';
-		const last = contact.lastName?.[0] || '';
-		return (first + last).toUpperCase() || contact.email?.[0]?.toUpperCase() || '?';
-	}
-
-	function getDisplayName(contact: DuplicateGroup['contacts'][0]) {
-		if (contact.displayName) return contact.displayName;
-		if (contact.firstName || contact.lastName) {
-			return [contact.firstName, contact.lastName].filter(Boolean).join(' ');
-		}
-		return contact.email || 'Unbekannt';
 	}
 
 	function handleOpenMerge(group: DuplicateGroup) {

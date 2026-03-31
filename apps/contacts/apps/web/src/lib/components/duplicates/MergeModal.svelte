@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
+	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
 
 	interface Props {
 		isOpen: boolean;
@@ -23,20 +24,6 @@
 			selectedPrimaryId = contacts[0].id;
 		}
 	});
-
-	function getInitials(contact: Contact) {
-		const first = contact.firstName?.[0] || '';
-		const last = contact.lastName?.[0] || '';
-		return (first + last).toUpperCase() || contact.email?.[0]?.toUpperCase() || '?';
-	}
-
-	function getDisplayName(contact: Contact) {
-		if (contact.displayName) return contact.displayName;
-		if (contact.firstName || contact.lastName) {
-			return [contact.firstName, contact.lastName].filter(Boolean).join(' ');
-		}
-		return contact.email || 'Unbekannt';
-	}
 
 	function getMatchTypeLabel(type: 'email' | 'phone' | 'name') {
 		switch (type) {

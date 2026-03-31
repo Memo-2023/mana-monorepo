@@ -2,6 +2,7 @@
 	import type { Task } from '@todo/shared';
 	import { isToday, isPast } from 'date-fns';
 	import { formatDueDate } from '$lib/utils/date-display';
+	import { getSubtaskProgress } from '$lib/utils/task-helpers';
 	import { ConfirmationModal, ContactAvatar } from '@manacore/shared-ui';
 	import TaskEditModal from '../TaskEditModal.svelte';
 	import {
@@ -53,11 +54,7 @@
 	});
 
 	// Subtasks progress
-	let subtaskProgress = $derived(() => {
-		if (!task.subtasks || task.subtasks.length === 0) return null;
-		const completed = task.subtasks.filter((s) => s.isCompleted).length;
-		return `${completed}/${task.subtasks.length}`;
-	});
+	let subtaskProgress = $derived(() => getSubtaskProgress(task.subtasks));
 
 	// Click to open modal
 	function handleCardClick(e: MouseEvent) {
