@@ -9,7 +9,8 @@
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { ContactAvatar, ContactSelector } from '@manacore/shared-ui';
 	import SubtaskList from './SubtaskList.svelte';
-	import { Check, CheckSquare, DotsSixVertical } from '@manacore/shared-icons';
+	import { Check, CheckSquare, DotsSixVertical, ArrowsOutSimple } from '@manacore/shared-icons';
+	import TaskEditModal from './TaskEditModal.svelte';
 	import {
 		PrioritySelector,
 		StorypointsSelector,
@@ -45,6 +46,27 @@
 
 	// Toggle for showing created date on completed tasks
 	let showCreatedDate = $state(false);
+
+	// Detail modal
+	let showModal = $state(false);
+
+	function handleOpenModal(e: MouseEvent) {
+		e.stopPropagation();
+		showModal = true;
+	}
+
+	function handleModalClose() {
+		showModal = false;
+	}
+
+	function handleModalSave(data: Partial<Task>) {
+		onSave?.(data as UpdateTaskInput);
+	}
+
+	function handleModalDelete(_taskId: string) {
+		onDelete();
+		showModal = false;
+	}
 
 	// Shared form state
 	const form = useTaskForm();
@@ -402,6 +424,17 @@
 				{dueDateText()}
 			</span>
 		{/if}
+
+		<!-- Detail modal button -->
+		<button
+			type="button"
+			class="detail-btn"
+			onclick={handleOpenModal}
+			title="Details öffnen"
+			tabindex="-1"
+		>
+			<ArrowsOutSimple size={14} />
+		</button>
 	</div>
 
 	<!-- Inline subtasks -->
@@ -421,6 +454,15 @@
 			{/each}
 		</div>
 	{/if}
+
+	<!-- Detail modal -->
+	<TaskEditModal
+		{task}
+		open={showModal}
+		onClose={handleModalClose}
+		onSave={handleModalSave}
+		onDelete={handleModalDelete}
+	/>
 
 	<!-- Expanded inline edit form -->
 	{#if isExpanded}
@@ -601,18 +643,11 @@
 	.task-item-wrapper.expanded {
 		position: relative;
 		z-index: 9990;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(139, 92, 246, 0.3);
+		background: var(--color-surface-elevated-2);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
 		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 		border-radius: 0.75rem;
 		margin-bottom: 0.75rem;
-	}
-
-	:global(.dark) .task-item-wrapper.expanded {
-		background: rgba(30, 30, 30, 0.95);
-		border-color: rgba(139, 92, 246, 0.4);
 	}
 
 	.task-item {
@@ -637,23 +672,10 @@
 		box-shadow: none;
 		backdrop-filter: none;
 		border-radius: 0.75rem 0.75rem 0 0;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-	}
-
-	:global(.dark) .task-item-wrapper.expanded .task-item {
-		border-bottom-color: rgba(255, 255, 255, 0.1);
-	}
-
-	:global(.dark) .task-item {
-		background: transparent;
-		border: none;
+		border-bottom: 1px solid var(--color-border);
 	}
 
 	.task-item:hover {
-		background: transparent;
-	}
-
-	:global(.dark) .task-item:hover {
 		background: transparent;
 	}
 
@@ -663,13 +685,7 @@
 
 	/* Completing animation */
 	.task-item.completing {
-		background: rgba(34, 197, 94, 0.08);
-		border-bottom-color: rgba(34, 197, 94, 0.2);
-	}
-
-	:global(.dark) .task-item.completing {
-		background: rgba(34, 197, 94, 0.12);
-		border-bottom-color: rgba(34, 197, 94, 0.3);
+		background: color-mix(in srgb, var(--color-success) 8%, transparent);
 	}
 
 	/* Drag handle — sticks out left beyond the content area */
@@ -694,11 +710,7 @@
 
 	.drag-handle:hover {
 		opacity: 0.8 !important;
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .drag-handle:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: var(--color-surface-hover);
 	}
 
 	.drag-handle:active {
@@ -715,8 +727,37 @@
 	/* During drag, disable pointer events on interactive elements */
 	:global([aria-grabbed='true']) .task-checkbox,
 	:global([aria-grabbed='true']) .task-content,
-	:global([aria-grabbed='true']) .expand-btn {
+	:global([aria-grabbed='true']) .expand-btn,
+	:global([aria-grabbed='true']) .detail-btn {
 		pointer-events: none;
+	}
+
+	/* Detail modal button */
+	.detail-btn {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border: none;
+		background: transparent;
+		color: var(--color-muted-foreground);
+		cursor: pointer;
+		border-radius: 0.375rem;
+		opacity: 0;
+		transition: all 0.15s;
+		padding: 0;
+	}
+
+	.task-item:hover .detail-btn {
+		opacity: 1;
+	}
+
+	.detail-btn:hover {
+		color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+		opacity: 1;
 	}
 
 	/* Checkbox with priority color fill */
@@ -775,8 +816,8 @@
 	}
 
 	.task-checkbox.checked {
-		background: #8b5cf6;
-		border-color: #8b5cf6;
+		background: var(--color-primary);
+		border-color: var(--color-primary);
 		border-style: solid;
 	}
 
@@ -785,8 +826,8 @@
 	}
 
 	.task-checkbox.animating {
-		background: #22c55e;
-		border-color: #22c55e;
+		background: var(--color-success);
+		border-color: var(--color-success);
 		border-style: solid;
 		transform: scale(1.2);
 	}
@@ -840,7 +881,7 @@
 	.task-title {
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--color-foreground);
 		white-space: normal;
 		word-break: break-word;
 		cursor: text;
@@ -848,23 +889,17 @@
 		padding: 0.125rem 0.25rem;
 		margin: -0.125rem -0.25rem;
 		outline: none;
+		transition: background 0.1s;
 	}
 
-	.task-title:hover {
-		background: transparent;
-	}
-
-	:global(.dark) .task-title:hover {
-		background: transparent;
-	}
-
-	:global(.dark) .task-title {
-		color: #f3f4f6;
+	.task-title:focus {
+		background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+		outline: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
 	}
 
 	.task-title.line-through {
 		text-decoration: line-through;
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 	}
 
 	/* Meta info */
@@ -880,11 +915,7 @@
 		align-items: center;
 		gap: 0.25rem;
 		font-size: 0.75rem;
-		color: #6b7280;
-	}
-
-	:global(.dark) .meta-item {
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 	}
 
 	.meta-icon {
@@ -920,13 +951,9 @@
 		right: -1px;
 		width: 6px;
 		height: 6px;
-		background: #8b5cf6;
+		background: var(--color-primary);
 		border-radius: 50%;
-		border: 1px solid white;
-	}
-
-	:global(.dark) .assignee-avatar::after {
-		border-color: rgba(30, 30, 30, 1);
+		border: 1px solid var(--color-surface-elevated-2);
 	}
 
 	.involved-avatars {
@@ -944,34 +971,26 @@
 
 	.more-contacts {
 		font-size: 0.625rem;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 		margin-left: 0.25rem;
 		font-weight: 500;
-	}
-
-	:global(.dark) .more-contacts {
-		color: #9ca3af;
 	}
 
 	/* Due date */
 	.due-date {
 		font-size: 0.75rem;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 		flex-shrink: 0;
 		white-space: nowrap;
 		margin-top: 0.25rem;
 	}
 
-	:global(.dark) .due-date {
-		color: #9ca3af;
-	}
-
 	.due-date.overdue {
-		color: #ef4444;
+		color: var(--color-error);
 	}
 
 	.due-date.today {
-		color: #f97316;
+		color: var(--color-warning);
 	}
 
 	/* Completed date toggle */
@@ -1017,20 +1036,16 @@
 		padding: 0.25rem;
 		border: none;
 		background: transparent;
-		color: #9ca3af;
+		color: var(--color-muted-foreground);
 		cursor: pointer;
 		border-radius: 9999px;
 		transition: all 0.15s;
 		flex-shrink: 0;
 	}
 
-	.task-item:hover .expand-btn {
-		color: #6b7280;
-	}
-
 	.expand-btn:hover {
-		color: #8b5cf6;
-		background: rgba(139, 92, 246, 0.1);
+		color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
 	.expand-icon {
@@ -1072,18 +1087,14 @@
 	.form-label {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: #374151;
+		color: var(--color-foreground);
 		text-transform: uppercase;
 		letter-spacing: 0.025em;
 	}
 
-	:global(.dark) .form-label {
-		color: #d1d5db;
-	}
-
 	.form-sublabel {
 		font-size: 0.6875rem;
-		color: #6b7280;
+		color: var(--color-muted-foreground);
 	}
 
 	.form-row {
@@ -1124,21 +1135,12 @@
 	.form-input-sm {
 		width: 100%;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid rgba(0, 0, 0, 0.15);
+		border: 1px solid var(--color-border);
 		border-radius: 0.5rem;
-		background: rgba(255, 255, 255, 0.8);
+		background: var(--color-surface);
 		font-size: 0.875rem;
-		color: #374151;
+		color: var(--color-foreground);
 		transition: all 0.15s;
-	}
-
-	:global(.dark) .form-input,
-	:global(.dark) .form-textarea,
-	:global(.dark) .form-select,
-	:global(.dark) .form-input-sm {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #f3f4f6;
 	}
 
 	.form-input:focus,
@@ -1146,8 +1148,8 @@
 	.form-select:focus,
 	.form-input-sm:focus {
 		outline: none;
-		border-color: #8b5cf6;
-		box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
 	.form-input-sm {
@@ -1166,12 +1168,8 @@
 		align-items: center;
 		justify-content: space-between;
 		padding-top: 0.75rem;
-		border-top: 1px solid rgba(0, 0, 0, 0.08);
+		border-top: 1px solid var(--color-border);
 		margin-top: 0.5rem;
-	}
-
-	:global(.dark) .form-actions {
-		border-top-color: rgba(255, 255, 255, 0.1);
 	}
 
 	.btn {
@@ -1194,12 +1192,12 @@
 	}
 
 	.btn-danger {
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
+		background: color-mix(in srgb, var(--color-error) 10%, transparent);
+		color: var(--color-error);
 	}
 
 	.btn-danger:hover:not(:disabled) {
-		background: #ef4444;
+		background: var(--color-error);
 		color: white;
 	}
 
