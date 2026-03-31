@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PencilSimple, Tag, Trash } from '@manacore/shared-icons';
+	import { PencilSimple, Tag as TagIcon, Trash } from '@manacore/shared-icons';
 	import { DEFAULT_TAG_COLOR } from './constants';
 	import type { Tag } from './constants';
 
@@ -66,7 +66,7 @@
 		<div
 			class="w-16 h-16 mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center"
 		>
-			<Tag size={32} class="text-gray-400" />
+			<TagIcon size={32} class="text-gray-400" />
 		</div>
 		<h3 class="text-lg font-medium text-foreground mb-1">{emptyMessage}</h3>
 		<p class="text-sm text-muted-foreground">{emptyDescription}</p>
