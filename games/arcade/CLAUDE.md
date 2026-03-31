@@ -27,11 +27,11 @@ games/arcade/
 │   │       ├── games/              # 22 HTML-Spiele
 │   │       └── screenshots/        # Game-Thumbnails
 │   ├── web-astro/        # Alte Astro-App (Referenz, zum Löschen)
-│   └── backend/          # NestJS API (@arcade/backend)
+│   └── server/           # Hono/Bun Compute Server (@arcade/server)
 │       └── src/
-│           ├── game-generator/   # AI-Spielgenerierung (Gemini, Claude, GPT-4)
-│           ├── game-submission/  # Community-Einreichungen (GitHub API)
-│           └── health/
+│           ├── routes/
+│           │   └── games.ts      # AI-Spielgenerierung + Community-Einreichungen
+│           └── index.ts
 └── package.json          # Root (arcade)
 ```
 
@@ -47,7 +47,7 @@ games/arcade/
 | i18n | svelte-i18n (DE + EN) |
 | UI | @manacore/shared-ui (PillNav, AuthGate, etc.) |
 | Theming | @manacore/shared-theme (multi-theme) |
-| Backend | NestJS (AI-Generierung, Community) |
+| Server | Hono + Bun (AI-Generierung, Community) |
 
 ## Entwicklung
 
@@ -58,8 +58,8 @@ pnpm arcade:dev
 # Nur Web (SvelteKit)
 pnpm dev:arcade:web
 
-# Nur Backend (NestJS)
-pnpm dev:arcade:backend
+# Nur Server (Hono/Bun)
+pnpm dev:arcade:server
 
 # Web + Backend zusammen
 pnpm dev:arcade:app
@@ -67,7 +67,7 @@ pnpm dev:arcade:app
 
 **Ports:**
 - Web: http://localhost:5210
-- Backend: http://localhost:3011
+- Server: http://localhost:3011
 
 ## Local-First Daten
 

@@ -36,6 +36,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **manacore** | Multi-app ecosystem platform | Mobile, Web |
 | **chat** | AI chat application | Backend, Mobile, Web, Landing |
 | **picture** | AI image generation | Backend, Mobile, Web, Landing |
+| **memoro** | AI voice recording & memo management | Backend, Audio-Backend, Mobile, Web, Landing |
 | **manadeck** | Card/deck management | Backend, Mobile, Web |
 | **todo** | Task management | Backend, Web, Landing |
 | **calendar** | Calendar & scheduling | Backend, Web, Landing |
@@ -68,7 +69,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 
 | Game | Description | Tech |
 |------|-------------|------|
-| **arcade** | AI browser games platform (22+ games) | SvelteKit, NestJS, Gemini/Claude/GPT |
+| **arcade** | AI browser games platform (22+ games) | SvelteKit, Hono+Bun, Gemini/Claude/GPT |
 | **voxelava** | Voxel game | SvelteKit |
 | **whopixels** | Phaser.js pixel game | Phaser, JavaScript |
 | **worldream** | World exploration game | SvelteKit |
@@ -115,6 +116,7 @@ pnpm setup:db:auth       # Setup just auth
 ```bash
 # Start specific project (runs all apps in project)
 pnpm run manacore:dev
+pnpm run memoro:dev
 pnpm run manadeck:dev
 pnpm run picture:dev
 pnpm run chat:dev
@@ -161,7 +163,7 @@ manacore-monorepo/
 │   ├── uload/
 │   └── wisekeep/
 ├── games/                   # Game projects
-│   ├── arcade/          # AI browser games platform (SvelteKit + NestJS)
+│   ├── arcade/          # AI browser games platform (SvelteKit + Hono/Bun)
 │   ├── voxelava/            # Voxel game
 │   ├── whopixels/           # Phaser.js pixel game
 │   └── worldream/           # World exploration game

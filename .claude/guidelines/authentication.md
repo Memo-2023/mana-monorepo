@@ -87,7 +87,6 @@ Always use `text` type for `user_id` columns in all database schemas.
 |---------|---------|----------|
 | `@manacore/shared-hono` | Hono auth middleware + helpers | All compute servers (Hono/Bun) |
 | `@manacore/shared-auth` | Client auth service | Web/Mobile apps |
-| `@mana-core/nestjs-integration` | Auth + Credits for NestJS | `@arcade/backend` only |
 
 ## Server Integration (Hono/Bun)
 
@@ -113,23 +112,7 @@ app.get('/api/v1/data', (c) => {
 });
 ```
 
-### NestJS (arcade only)
-
-`@arcade/backend` still uses NestJS with `@mana-core/nestjs-integration`:
-
-```typescript
-import { AuthGuard } from '@mana-core/nestjs-integration/guards';
-import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
-
-@Controller('api')
-@UseGuards(AuthGuard)
-export class ApiController {
-  @Get('data')
-  getData(@CurrentUser() user: any) {
-    return this.service.findAll(user.sub);
-  }
-}
-```
+> Note: Arcade's server (`@arcade/server`) does not require auth — game generation and community submission are public endpoints.
 
 ## Environment Variables
 

@@ -282,9 +282,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Arcade Backend (NestJS)
+	// Arcade Server (Hono/Bun)
 	{
-		path: 'games/arcade/apps/backend/.env',
+		path: 'games/arcade/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MANA_GAMES_BACKEND_PORT || '3011',
