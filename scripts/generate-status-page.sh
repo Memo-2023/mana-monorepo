@@ -386,8 +386,10 @@ echo "$SUCCESS_JSON" | jq \
         key: (
           .metric.instance
           | ltrimstr("https://")
+          | rtrimstr("/health")
+          | rtrimstr("/")
           | if . == "mana.how" then "manacore"
-            else (. | rtrimstr(".mana.how") | rtrimstr("/health"))
+            else rtrimstr(".mana.how")
             end
         ),
         value: (.value[1] == "1")
