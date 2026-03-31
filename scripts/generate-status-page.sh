@@ -368,3 +368,31 @@ HTMLEOF
 
 mv "${OUTPUT}.tmp" "$OUTPUT"
 echo "$(date '+%H:%M:%S') Status-Seite generiert → $OUTPUT (${total_up}/${total_all} online)"
+
+# ── status.json für ManaScore Live-Badge ─────────────────────────────────────
+
+JSON_OUTPUT="$(dirname "$OUTPUT")/status.json"
+TIMESTAMP_ISO="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+echo "$SUCCESS_JSON" | jq \
+  --arg ts "$TIMESTAMP_ISO" \
+  --argjson total_up "$total_up" \
+  --argjson total_all "$total_all" \
+  '{
+    updated: $ts,
+    summary: { up: $total_up, total: $total_all },
+    services: (
+      .data.result | map({
+        key: (
+          .metric.instance
+          | ltrimstr("https://")
+          | if . == "mana.how" then "manacore"
+            else (. | rtrimstr(".mana.how") | rtrimstr("/health"))
+            end
+        ),
+        value: (.value[1] == "1")
+      }) | from_entries
+    )
+  }' > "${JSON_OUTPUT}.tmp" && mv "${JSON_OUTPUT}.tmp" "$JSON_OUTPUT"
+
+echo "$(date '+%H:%M:%S') status.json generiert → $JSON_OUTPUT"

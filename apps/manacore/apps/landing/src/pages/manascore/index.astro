@@ -170,6 +170,7 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 											<span class="text-muted-foreground truncate text-xs font-medium">
 												{data.app}
 											</span>
+											<span class="live-badge shrink-0" data-app={data.app} />
 											<span class="text-muted-foreground/50 text-[10px]">
 												{data.date.toLocaleDateString('de-DE', {
 													day: '2-digit',
@@ -547,4 +548,25 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 
 	// Sort select
 	sortSelect.addEventListener('change', applySort);
+
+	// Live uptime badges from status.mana.how/status.json
+	(async () => {
+		try {
+			const res = await fetch('https://status.mana.how/status.json', { cache: 'no-store' });
+			if (!res.ok) return;
+			const data = await res.json();
+			const services: Record<string, boolean> = data.services ?? {};
+
+			document.querySelectorAll<HTMLElement>('.live-badge').forEach((badge) => {
+				const app = badge.dataset.app;
+				if (!app || !(app in services)) return;
+				const up = services[app];
+				badge.innerHTML = up
+					? '<span style="color:#22c55e;font-size:9px;font-weight:600;letter-spacing:.04em">● LIVE</span>'
+					: '<span style="color:#ef4444;font-size:9px;font-weight:600;letter-spacing:.04em">● DOWN</span>';
+			});
+		} catch {
+			// status.mana.how unreachable — silently skip badges
+		}
+	})();
 </script>
