@@ -339,7 +339,7 @@
 	/* Paper-style: no card, no border, just text on the page */
 	.kanban-card {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: 0.625rem;
 		padding: 0.2rem 0;
 		background: transparent;
@@ -363,15 +363,16 @@
 		opacity: 0.45;
 	}
 
-	/* Priority dot — slim left accent */
+	/* Priority dot — slim left accent, aligned to first line */
 	.priority-dot {
 		width: 3px;
 		height: 1rem;
 		border-radius: 2px;
 		flex-shrink: 0;
+		margin-top: 0.2rem;
 	}
 
-	/* Checkbox — sized to match title text height */
+	/* Checkbox — sized to match title text height, aligned to first line */
 	.task-checkbox {
 		width: 1.1rem;
 		height: 1.1rem;
@@ -385,6 +386,7 @@
 		transition: all 0.15s;
 		flex-shrink: 0;
 		padding: 0;
+		margin-top: 0.2rem;
 	}
 
 	:global(.dark) .task-checkbox {
@@ -420,11 +422,9 @@
 		font-size: 0.9375rem;
 		font-weight: 400;
 		color: hsl(var(--color-foreground));
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
 		cursor: pointer;
 		line-height: 1.4;
+		word-break: break-word;
 	}
 
 	:global(.dark) .task-title {
@@ -642,7 +642,7 @@
 
 	.subtask-row {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: 0.625rem;
 		padding: 0.15rem 0;
 		background: transparent;
@@ -664,6 +664,7 @@
 		flex-shrink: 0;
 		transition: all 0.15s;
 		color: white;
+		margin-top: 0.2rem;
 	}
 
 	:global(.dark) .subtask-check {
@@ -683,10 +684,8 @@
 		font-size: 0.9375rem;
 		font-weight: 400;
 		color: hsl(var(--color-foreground));
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
 		line-height: 1.4;
+		word-break: break-word;
 	}
 
 	:global(.dark) .subtask-title {
