@@ -8,6 +8,12 @@ const config = {
 		adapter: adapter({
 			out: 'build',
 		}),
+		prerender: {
+			handleHttpError: ({ path, message }) => {
+				if (path === '/favicon.png') return;
+				throw new Error(message);
+			},
+		},
 	},
 };
 
