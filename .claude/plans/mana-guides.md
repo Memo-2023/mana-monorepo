@@ -151,7 +151,15 @@ apps/guides/apps/web/src/routes/
 - [x] GuideEditModal
 - [x] Registrierung in mana-apps.ts + app-icons.ts
 
-### Phase 2 — Web-Import & Sharing
+### Phase 2 — Content-Editing ✅ Abgeschlossen
+- [x] StepEditorModal (Typ, Titel, Content, Checkable-Toggle)
+- [x] Guide-Detail Edit-Mode (Steps hinzufügen, bearbeiten, löschen, sortieren ↑↓)
+- [x] Abschnitt-Verwaltung im Edit-Mode (hinzufügen, löschen)
+- [x] Guide löschen (mit Bestätigungs-Dialog)
+- [x] CollectionEditModal (Emoji, Farbe, Typ path/library)
+- [x] Collections erstellen/bearbeiten aus Collections-View
+
+### Phase 3 — Web-Import & Sharing
 - [ ] Hono/Bun-Server (apps/guides/apps/server/)
 - [ ] Web-Import: URL → Guide via mana-search
 - [ ] Guide-Export: JSON / Markdown
