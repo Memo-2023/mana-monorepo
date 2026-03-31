@@ -112,6 +112,17 @@ export function createBetterAuth(databaseUrl: string) {
 			},
 		}),
 
+		// Custom user fields (must be declared so Better Auth includes them in the user object)
+		user: {
+			additionalFields: {
+				accessTier: {
+					type: 'string',
+					defaultValue: 'public',
+					input: false, // Not settable via sign-up
+				},
+			},
+		},
+
 		// Email/password authentication with password reset
 		emailAndPassword: {
 			enabled: true,
