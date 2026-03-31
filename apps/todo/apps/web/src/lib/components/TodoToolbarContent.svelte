@@ -1,11 +1,6 @@
 <script lang="ts">
 	import type { TaskPriority } from '@todo/shared';
 	import { PRIORITY_OPTIONS } from '@todo/shared';
-	import { getContext } from 'svelte';
-	import type { Project } from '@todo/shared';
-	import { getActiveProjects } from '$lib/data/task-queries';
-
-	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
 	import { PillToolbarButton, PillToolbarDivider, PillViewSwitcher } from '@manacore/shared-ui';
@@ -35,7 +30,6 @@
 	// Filter dropdown states
 	let showFilterDropdown = $state(false);
 	let selectedPriorityFilters = $state<TaskPriority[]>([]);
-	let selectedProjectFilter = $state<string | null>(null);
 	let selectedLabelFilters = $state<string[]>([]);
 
 	const priorities: { value: TaskPriority; label: string; color: string }[] = [
@@ -53,9 +47,7 @@
 	];
 
 	// Count active filters
-	let activeFilterCount = $derived(
-		selectedPriorityFilters.length + (selectedProjectFilter ? 1 : 0) + selectedLabelFilters.length
-	);
+	let activeFilterCount = $derived(selectedPriorityFilters.length + selectedLabelFilters.length);
 
 	function handleSortChange(value: string) {
 		onSortChange(value as SortBy);
@@ -75,7 +67,6 @@
 
 	function clearAllFilters() {
 		selectedPriorityFilters = [];
-		selectedProjectFilter = null;
 		selectedLabelFilters = [];
 	}
 </script>
@@ -131,20 +122,6 @@
 							</button>
 						{/each}
 					</div>
-				</div>
-
-				<div class="filter-section">
-					<div class="filter-section-header">Projekt</div>
-					<select
-						class="filter-select"
-						value={selectedProjectFilter || ''}
-						onchange={(e) => (selectedProjectFilter = e.currentTarget.value || null)}
-					>
-						<option value="">Alle Projekte</option>
-						{#each getActiveProjects(projectsCtx.value) as project}
-							<option value={project.id}>{project.name}</option>
-						{/each}
-					</select>
 				</div>
 
 				{#if activeFilterCount > 0}

@@ -2,7 +2,6 @@ import type { Task, TaskPriority } from '@todo/shared';
 
 export interface TaskFilterCriteria {
 	priorities: TaskPriority[];
-	projectId: string | null;
 	labelIds: string[];
 	searchQuery: string;
 }
@@ -16,10 +15,6 @@ export function applyTaskFilters(tasks: Task[], filters: TaskFilterCriteria): Ta
 
 	if (filters.priorities.length > 0) {
 		filtered = filtered.filter((t) => filters.priorities.includes(t.priority));
-	}
-
-	if (filters.projectId) {
-		filtered = filtered.filter((t) => t.projectId === filters.projectId);
 	}
 
 	if (filters.labelIds.length > 0) {

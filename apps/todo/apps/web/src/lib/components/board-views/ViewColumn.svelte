@@ -76,7 +76,6 @@
 		const updateData: Record<string, unknown> = {};
 		if (data.title !== undefined) updateData.title = data.title;
 		if (data.description !== undefined) updateData.description = data.description;
-		if (data.projectId !== undefined) updateData.projectId = data.projectId;
 		if (data.dueDate !== undefined) {
 			updateData.dueDate = data.dueDate instanceof Date ? data.dueDate.toISOString() : data.dueDate;
 		}
@@ -104,14 +103,10 @@
 			if (column.onDrop.setPriority) {
 				createData.priority = column.onDrop.setPriority;
 			}
-			if (column.onDrop.setProjectId !== undefined) {
-				createData.projectId = column.onDrop.setProjectId;
-			}
 		}
 		await tasksStore.createTask(
 			createData as {
 				title: string;
-				projectId?: string;
 				priority?: 'low' | 'medium' | 'high' | 'urgent';
 			}
 		);

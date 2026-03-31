@@ -4,10 +4,6 @@
 	import TaskItem from './TaskItem.svelte';
 	import { getContext, untrack } from 'svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
-	import type { Project } from '@todo/shared';
-	import { getActiveProjects } from '$lib/data/task-queries';
-
-	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 
 	// Context menu state
@@ -67,27 +63,7 @@
 			},
 		];
 
-		// Add project move options if there are projects
-		const projects = getActiveProjects(projectsCtx.value);
-		if (projects.length > 0) {
-			items.push({ id: 'divider-2', label: '', type: 'divider' });
-			items.push({
-				id: 'move-inbox',
-				label: 'In Inbox verschieben',
-				action: () => tasksStore.moveTask(task.id, null),
-				disabled: !task.projectId,
-			});
-			for (const project of projects) {
-				items.push({
-					id: `move-${project.id}`,
-					label: project.name,
-					action: () => tasksStore.moveTask(task.id, project.id),
-					disabled: task.projectId === project.id,
-				});
-			}
-		}
-
-		items.push({ id: 'divider-3', label: '', type: 'divider' });
+		items.push({ id: 'divider-2', label: '', type: 'divider' });
 		items.push({
 			id: 'delete',
 			label: 'Löschen',

@@ -10,10 +10,6 @@
 		type KanbanCardSize,
 		type PageMode,
 	} from '$lib/stores/settings.svelte';
-	import { getContext } from 'svelte';
-	import type { Project } from '@todo/shared';
-
-	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import type { TaskPriority } from '@todo/shared';
 	import { PRIORITY_OPTIONS } from '@todo/shared';
 	import {
@@ -40,7 +36,6 @@
 		EnvelopeSimple,
 		Eye,
 		Fire,
-		FolderSimple,
 		GraduationCap,
 		GridFour,
 		Hash,
@@ -56,7 +51,6 @@
 		SignOut,
 		SortAscending,
 		SquaresFour,
-		Stack,
 		Tag,
 		Timer,
 		Trash,
@@ -106,12 +100,6 @@
 		{ value: '90', label: '1,5 Stunden' },
 		{ value: '120', label: '2 Stunden' },
 	];
-
-	// Project options for quick add (computed)
-	let projectOptions = $derived([
-		{ value: null, label: 'Inbox' },
-		...projectsCtx.value.map((p) => ({ value: p.id, label: p.name })),
-	]);
 
 	onMount(async () => {
 		// Load user settings and projects from server (only if authenticated)
@@ -227,19 +215,6 @@
 				{/snippet}
 			</SettingsTimeInput>
 
-			<SettingsSelect
-				label="Standard-Projekt"
-				description="Projekt für Quick-Add"
-				options={projectOptions}
-				value={todoSettings.quickAddProject}
-				onchange={(v: string | number | null) =>
-					todoSettings.set('quickAddProject', v as string | null)}
-			>
-				{#snippet icon()}
-					<FolderSimple size={20} />
-				{/snippet}
-			</SettingsSelect>
-
 			<SettingsNumberInput
 				label="Auto-Archivierung"
 				description="Erledigte Tasks nach X Tagen archivieren"
@@ -339,21 +314,10 @@
 				description="Fortschrittsbalken für Subtasks anzeigen"
 				isOn={todoSettings.showSubtaskProgress}
 				onToggle={(v) => todoSettings.set('showSubtaskProgress', v)}
-			>
-				{#snippet icon()}
-					<ChartBar size={20} />
-				{/snippet}
-			</SettingsToggle>
-
-			<SettingsToggle
-				label="Nach Projekt gruppieren"
-				description="Tasks nach Projekt gruppieren"
-				isOn={todoSettings.groupByProject}
-				onToggle={(v) => todoSettings.set('groupByProject', v)}
 				border={false}
 			>
 				{#snippet icon()}
-					<Stack size={20} />
+					<ChartBar size={20} />
 				{/snippet}
 			</SettingsToggle>
 		</SettingsCard>

@@ -5,31 +5,7 @@
  * They serve as onboarding content that teaches the user how the app works.
  */
 
-import type { LocalTask, LocalProject, LocalLabel, LocalBoardView } from './local-store';
-
-const ONBOARDING_PROJECT_ID = 'onboarding-project';
-const PERSONAL_PROJECT_ID = 'personal-project';
-
-export const guestProjects: LocalProject[] = [
-	{
-		id: ONBOARDING_PROJECT_ID,
-		name: 'Erste Schritte',
-		color: '#3b82f6',
-		icon: 'sparkle',
-		order: 0,
-		isArchived: false,
-		isDefault: false,
-	},
-	{
-		id: PERSONAL_PROJECT_ID,
-		name: 'Persönlich',
-		color: '#10b981',
-		icon: 'home',
-		order: 1,
-		isArchived: false,
-		isDefault: true,
-	},
-];
+import type { LocalTask, LocalLabel, LocalBoardView } from './local-store';
 
 export const guestLabels: LocalLabel[] = [
 	{
@@ -148,21 +124,12 @@ export const guestBoardViews: LocalBoardView[] = [
 		],
 	},
 	{
-		id: 'view-project',
-		name: 'Projekte',
-		icon: 'folders',
-		groupBy: 'project',
-		layout: 'kanban',
-		order: 3,
-		columns: [], // dynamically generated from projects
-	},
-	{
 		id: 'view-due',
 		name: 'Fälligkeit',
 		icon: 'calendar',
 		groupBy: 'dueDate',
 		layout: 'kanban',
-		order: 4,
+		order: 3,
 		columns: [
 			{
 				id: 'col-due-overdue',
@@ -219,7 +186,6 @@ export const guestTasks: LocalTask[] = [
 		title: 'Willkommen bei Todo! Tippe hier, um diese Aufgabe zu bearbeiten ✏️',
 		description:
 			'Du kannst Titel, Beschreibung, Priorität und Fälligkeitsdatum ändern. Probiere es aus!',
-		projectId: ONBOARDING_PROJECT_ID,
 		priority: 'medium',
 		isCompleted: false,
 		order: 0,
@@ -232,7 +198,6 @@ export const guestTasks: LocalTask[] = [
 	{
 		id: 'onboard-2',
 		title: 'Klicke den Kreis links, um diese Aufgabe abzuschließen ✓',
-		projectId: ONBOARDING_PROJECT_ID,
 		priority: 'low',
 		isCompleted: false,
 		order: 1,
@@ -240,7 +205,6 @@ export const guestTasks: LocalTask[] = [
 	{
 		id: 'onboard-3',
 		title: 'Erstelle eine neue Aufgabe mit dem + Button oben',
-		projectId: ONBOARDING_PROJECT_ID,
 		priority: 'medium',
 		isCompleted: false,
 		order: 2,
@@ -248,7 +212,6 @@ export const guestTasks: LocalTask[] = [
 	{
 		id: 'onboard-4',
 		title: 'Wechsle zur Board-Ansicht über die Navigation',
-		projectId: ONBOARDING_PROJECT_ID,
 		priority: 'low',
 		isCompleted: false,
 		order: 3,
@@ -258,7 +221,6 @@ export const guestTasks: LocalTask[] = [
 		title: 'Melde dich an, um deine Aufgaben auf allen Geräten zu synchronisieren',
 		description:
 			'Ohne Anmeldung werden deine Daten nur in diesem Browser gespeichert. Mit einem Account synchronisieren wir sie automatisch.',
-		projectId: ONBOARDING_PROJECT_ID,
 		priority: 'high',
 		isCompleted: false,
 		order: 4,
@@ -269,7 +231,6 @@ export const guestTasks: LocalTask[] = [
 		id: 'sample-1',
 		title: 'Einkaufen gehen',
 		description: 'Milch, Brot, Obst',
-		projectId: PERSONAL_PROJECT_ID,
 		priority: 'medium',
 		isCompleted: false,
 		dueDate: tomorrow.toISOString(),
@@ -283,7 +244,6 @@ export const guestTasks: LocalTask[] = [
 	{
 		id: 'sample-2',
 		title: 'Wohnung aufräumen',
-		projectId: PERSONAL_PROJECT_ID,
 		priority: 'low',
 		isCompleted: false,
 		dueDate: nextWeek.toISOString(),

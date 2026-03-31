@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getContext } from 'svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { viewStore } from '$lib/stores/view.svelte';
-	import type { Project } from '@todo/shared';
-	import { getActiveProjects, getProjectById } from '$lib/data/task-queries';
 	import {
 		parseMultiTaskInput,
 		resolveTaskIds,
@@ -16,12 +13,11 @@
 	import { labelCollection } from '$lib/data/local-store';
 	import { todoSettings } from '$lib/stores/settings.svelte';
 
-	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import type { TaskPriority } from '@todo/shared';
 	import { PRIORITY_OPTIONS } from '@todo/shared';
 	import { format, addDays } from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import { CalendarBlank, Folder, Plus, Flag, ArrowRight } from '@manacore/shared-icons';
+	import { CalendarBlank, Plus, Flag, ArrowRight } from '@manacore/shared-icons';
 
 	let inputValue = $state('');
 	let isLoading = $state(false);
@@ -30,12 +26,10 @@
 	// Task options (used as fallback when parser doesn't extract these)
 	let selectedDate = $state<Date>(new Date());
 	let selectedPriority = $state<TaskPriority>('medium');
-	let selectedProjectId = $state<string | undefined>(undefined);
 
 	// Dropdown states
 	let showDatePicker = $state(false);
 	let showPriorityPicker = $state(false);
-	let showProjectPicker = $state(false);
 
 	// Parser preview
 	let parsePreview = $state('');
@@ -53,9 +47,6 @@
 
 	// Derived values
 	let currentPriority = $derived(PRIORITY_OPTIONS.find((p) => p.value === selectedPriority)!);
-	let selectedProject = $derived(
-		selectedProjectId ? getProjectById(projectsCtx.value, selectedProjectId) : undefined
-	);
 	let dateLabel = $derived(() => {
 		const today = new Date();
 		if (selectedDate.toDateString() === today.toDateString()) return 'Heute';
@@ -106,7 +97,6 @@
 				.filter((t) => t.isCompleted && t.completedAt)
 				.map((t) => ({
 					title: t.title,
-					projectId: t.projectId,
 					priority: t.priority,
 					estimatedDuration: t.estimatedDuration,
 					completedAt: t.completedAt,
@@ -116,7 +106,6 @@
 			const estimate = estimateDuration(
 				{
 					title: parsed.title,
-					projectId: selectedProjectId,
 					priority: selectedPriority,
 				},
 				completed
@@ -131,11 +120,6 @@
 
 	onMount(() => {
 		inputRef?.focus();
-
-		// Set project if in project view
-		if (viewStore.currentView === 'project' && viewStore.currentProjectId) {
-			selectedProjectId = viewStore.currentProjectId;
-		}
 	});
 
 	async function handleSubmit(event: Event) {
@@ -147,14 +131,13 @@
 		isLoading = true;
 
 		try {
-			const projects = projectsCtx.value.map((p) => ({ id: p.id, name: p.name }));
 			const allLabels = await labelCollection.getAll();
 			const labels = allLabels.map((l) => ({ id: l.id, name: l.name }));
 
 			const parsedTasks = parseMultiTaskInput(text);
 
 			for (const parsed of parsedTasks) {
-				const resolved = resolveTaskIds(parsed, projects, labels);
+				const resolved = resolveTaskIds(parsed, labels);
 
 				// Duration: explicit from parser > auto-estimated > default (if enabled)
 				const duration =
@@ -164,7 +147,6 @@
 
 				await tasksStore.createTask({
 					title: resolved.title,
-					projectId: resolved.projectId ?? selectedProjectId,
 					dueDate: resolved.dueDate ?? selectedDate.toISOString(),
 					priority: resolved.priority ?? selectedPriority,
 					labelIds: resolved.labelIds.length > 0 ? resolved.labelIds : undefined,
@@ -186,9 +168,6 @@
 			autoEstimatedDuration = null;
 			selectedDate = new Date();
 			selectedPriority = 'medium';
-			if (viewStore.currentView !== 'project') {
-				selectedProjectId = undefined;
-			}
 		} catch (error) {
 			console.error('Failed to create task:', error);
 		} finally {
@@ -204,7 +183,6 @@
 			inputValue = '';
 			showDatePicker = false;
 			showPriorityPicker = false;
-			showProjectPicker = false;
 			inputRef?.blur();
 		}
 	}
@@ -212,25 +190,16 @@
 	function closeAllPickers() {
 		showDatePicker = false;
 		showPriorityPicker = false;
-		showProjectPicker = false;
 	}
 
 	function toggleDatePicker() {
 		showDatePicker = !showDatePicker;
 		showPriorityPicker = false;
-		showProjectPicker = false;
 	}
 
 	function togglePriorityPicker() {
 		showPriorityPicker = !showPriorityPicker;
 		showDatePicker = false;
-		showProjectPicker = false;
-	}
-
-	function toggleProjectPicker() {
-		showProjectPicker = !showProjectPicker;
-		showDatePicker = false;
-		showPriorityPicker = false;
 	}
 
 	function selectDate(date: Date) {
@@ -241,11 +210,6 @@
 	function selectPriority(priority: TaskPriority) {
 		selectedPriority = priority;
 		showPriorityPicker = false;
-	}
-
-	function selectProject(projectId: string | undefined) {
-		selectedProjectId = projectId;
-		showProjectPicker = false;
 	}
 </script>
 
@@ -341,47 +305,6 @@
 							>
 								<span class="priority-dot" style="background-color: {priority.color}"></span>
 								{priority.label}
-							</button>
-						{/each}
-					</div>
-				{/if}
-			</div>
-
-			<!-- Project picker -->
-			<div class="option-wrapper">
-				<button
-					type="button"
-					class="option-btn"
-					class:active={showProjectPicker}
-					onclick={(e) => {
-						e.stopPropagation();
-						toggleProjectPicker();
-					}}
-					title="Projekt"
-				>
-					<Folder size={20} class="option-icon" />
-				</button>
-
-				{#if showProjectPicker}
-					<div class="dropdown" onclick={(e) => e.stopPropagation()} role="menu">
-						<button
-							type="button"
-							class="dropdown-item"
-							class:selected={!selectedProjectId}
-							onclick={() => selectProject(undefined)}
-						>
-							<span class="project-dot" style="background-color: #6b7280"></span>
-							Kein Projekt
-						</button>
-						{#each getActiveProjects(projectsCtx.value) as project}
-							<button
-								type="button"
-								class="dropdown-item"
-								class:selected={selectedProjectId === project.id}
-								onclick={() => selectProject(project.id)}
-							>
-								<span class="project-dot" style="background-color: {project.color}"></span>
-								{project.name}
 							</button>
 						{/each}
 					</div>

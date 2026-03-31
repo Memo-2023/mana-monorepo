@@ -9,13 +9,11 @@
 import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import {
 	taskCollection,
-	projectCollection,
 	boardViewCollection,
 	type LocalTask,
-	type LocalProject,
 	type LocalBoardView,
 } from './local-store';
-import type { Task, Project } from '@todo/shared';
+import type { Task } from '@todo/shared';
 import { isToday, isPast, isFuture, startOfDay, addDays } from 'date-fns';
 
 // ─── Type Converters ───────────────────────────────────────
@@ -23,7 +21,6 @@ import { isToday, isPast, isFuture, startOfDay, addDays } from 'date-fns';
 export function toTask(local: LocalTask): Task {
 	return {
 		id: local.id,
-		projectId: local.projectId,
 		userId: local.userId ?? 'guest',
 		title: local.title,
 		description: local.description,
@@ -44,21 +41,6 @@ export function toTask(local: LocalTask): Task {
 	};
 }
 
-export function toProject(local: LocalProject): Project {
-	return {
-		id: local.id,
-		userId: local.userId ?? 'guest',
-		name: local.name,
-		color: local.color,
-		icon: local.icon,
-		order: local.order,
-		isArchived: local.isArchived,
-		isDefault: local.isDefault,
-		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
-	};
-}
-
 // ─── Live Query Hooks (call during component init) ─────────
 
 /** All tasks, sorted by order. Auto-updates on any change. */
@@ -70,17 +52,6 @@ export function useAllTasks() {
 		});
 		return locals.map(toTask);
 	}, [] as Task[]);
-}
-
-/** All projects, sorted by order. Auto-updates on any change. */
-export function useAllProjects() {
-	return useLiveQueryWithDefault(async () => {
-		const locals = await projectCollection.getAll(undefined, {
-			sortBy: 'order',
-			sortDirection: 'asc',
-		});
-		return locals.map(toProject);
-	}, [] as Project[]);
 }
 
 /** All board views, sorted by order. Auto-updates on any change. */
@@ -132,36 +103,6 @@ export function filterUpcoming(tasks: Task[]): Task[] {
 	});
 }
 
-export function filterByProject(tasks: Task[], projectId: string | null): Task[] {
-	if (projectId === null) {
-		return tasks.filter((t) => !t.projectId);
-	}
-	return tasks.filter((t) => t.projectId === projectId);
-}
-
 export function filterByLabel(tasks: Task[], labelId: string): Task[] {
 	return tasks.filter((t) => t.labels?.some((l) => l.id === labelId));
-}
-
-// ─── Pure Project Helpers ──────────────────────────────────
-
-export function getActiveProjects(projects: Project[]): Project[] {
-	return projects.filter((p) => !p.isArchived).sort((a, b) => a.order - b.order);
-}
-
-export function getArchivedProjects(projects: Project[]): Project[] {
-	return projects.filter((p) => p.isArchived);
-}
-
-export function getInboxProject(projects: Project[]): Project | undefined {
-	return projects.find((p) => p.isDefault);
-}
-
-export function getProjectById(projects: Project[], id: string): Project | undefined {
-	return projects.find((p) => p.id === id);
-}
-
-export function getProjectColor(projects: Project[], projectId: string): string {
-	const project = projects.find((p) => p.id === projectId);
-	return project?.color || '#6b7280';
 }

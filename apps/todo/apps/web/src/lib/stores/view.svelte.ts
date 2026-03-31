@@ -4,20 +4,12 @@
 
 import type { TaskPriority } from '@todo/shared';
 
-export type ViewType =
-	| 'inbox'
-	| 'today'
-	| 'upcoming'
-	| 'project'
-	| 'label'
-	| 'completed'
-	| 'search';
+export type ViewType = 'inbox' | 'today' | 'upcoming' | 'label' | 'completed' | 'search';
 export type SortBy = 'dueDate' | 'priority' | 'title' | 'createdAt' | 'order';
 export type SortOrder = 'asc' | 'desc';
 
 // State
 let currentView = $state<ViewType>('inbox');
-let currentProjectId = $state<string | null>(null);
 let currentLabelId = $state<string | null>(null);
 let searchQuery = $state('');
 let sortBy = $state<SortBy>('order');
@@ -26,7 +18,6 @@ let showCompleted = $state(false);
 
 // Filter state (used by TaskFilters strip in list view)
 let filterPriorities = $state<TaskPriority[]>([]);
-let filterProjectId = $state<string | null>(null);
 let filterLabelIds = $state<string[]>([]);
 let filterSearchQuery = $state('');
 
@@ -34,9 +25,6 @@ export const viewStore = {
 	// Getters
 	get currentView() {
 		return currentView;
-	},
-	get currentProjectId() {
-		return currentProjectId;
 	},
 	get currentLabelId() {
 		return currentLabelId;
@@ -56,9 +44,6 @@ export const viewStore = {
 	get filterPriorities() {
 		return filterPriorities;
 	},
-	get filterProjectId() {
-		return filterProjectId;
-	},
 	get filterLabelIds() {
 		return filterLabelIds;
 	},
@@ -71,7 +56,6 @@ export const viewStore = {
 	 */
 	setInbox() {
 		currentView = 'inbox';
-		currentProjectId = null;
 		currentLabelId = null;
 		searchQuery = '';
 	},
@@ -81,7 +65,6 @@ export const viewStore = {
 	 */
 	setToday() {
 		currentView = 'today';
-		currentProjectId = null;
 		currentLabelId = null;
 		searchQuery = '';
 	},
@@ -91,17 +74,6 @@ export const viewStore = {
 	 */
 	setUpcoming() {
 		currentView = 'upcoming';
-		currentProjectId = null;
-		currentLabelId = null;
-		searchQuery = '';
-	},
-
-	/**
-	 * Set current view to a specific project
-	 */
-	setProject(projectId: string) {
-		currentView = 'project';
-		currentProjectId = projectId;
 		currentLabelId = null;
 		searchQuery = '';
 	},
@@ -111,7 +83,6 @@ export const viewStore = {
 	 */
 	setLabel(labelId: string) {
 		currentView = 'label';
-		currentProjectId = null;
 		currentLabelId = labelId;
 		searchQuery = '';
 	},
@@ -121,7 +92,6 @@ export const viewStore = {
 	 */
 	setCompleted() {
 		currentView = 'completed';
-		currentProjectId = null;
 		currentLabelId = null;
 		searchQuery = '';
 	},
@@ -131,7 +101,6 @@ export const viewStore = {
 	 */
 	setSearch(query: string) {
 		currentView = 'search';
-		currentProjectId = null;
 		currentLabelId = null;
 		searchQuery = query;
 	},
@@ -173,13 +142,6 @@ export const viewStore = {
 	},
 
 	/**
-	 * Set filter project
-	 */
-	setFilterProjectId(id: string | null) {
-		filterProjectId = id;
-	},
-
-	/**
 	 * Set filter label IDs
 	 */
 	setFilterLabelIds(ids: string[]) {
@@ -198,7 +160,6 @@ export const viewStore = {
 	 */
 	clearFilters() {
 		filterPriorities = [];
-		filterProjectId = null;
 		filterLabelIds = [];
 		filterSearchQuery = '';
 	},
@@ -208,14 +169,12 @@ export const viewStore = {
 	 */
 	reset() {
 		currentView = 'inbox';
-		currentProjectId = null;
 		currentLabelId = null;
 		searchQuery = '';
 		sortBy = 'order';
 		sortOrder = 'asc';
 		showCompleted = false;
 		filterPriorities = [];
-		filterProjectId = null;
 		filterLabelIds = [];
 		filterSearchQuery = '';
 	},

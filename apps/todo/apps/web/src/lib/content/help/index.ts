@@ -14,8 +14,8 @@ export function getTodoHelpContent(locale: string): HelpContent {
 				id: 'faq-quick-add',
 				question: isDE ? 'Wie funktioniert die Schnelleingabe?' : 'How does quick add work?',
 				answer: isDE
-					? '<p>Die Schnelleingabe erkennt automatisch verschiedene Muster:</p><ul><li><strong>Priorität</strong>: <code>!!!</code> (dringend), <code>!!</code> (hoch), <code>!</code> (mittel)</li><li><strong>Projekt</strong>: <code>@Projektname</code></li><li><strong>Labels</strong>: <code>#label1 #label2</code></li><li><strong>Datum</strong>: heute, morgen, nächsten Montag, 15.12.</li><li><strong>Wiederholung</strong>: täglich, wöchentlich, monatlich</li><li><strong>Unteraufgaben</strong>: <code>Titel: Item1, Item2, Item3</code></li></ul><p>Beispiel: <code>Einkaufen: Milch, Brot morgen !! @Privat #wichtig</code></p>'
-					: '<p>Quick add automatically recognizes various patterns:</p><ul><li><strong>Priority</strong>: <code>!!!</code> (urgent), <code>!!</code> (high), <code>!</code> (medium)</li><li><strong>Project</strong>: <code>@ProjectName</code></li><li><strong>Labels</strong>: <code>#label1 #label2</code></li><li><strong>Date</strong>: today, tomorrow, next Monday</li><li><strong>Recurrence</strong>: daily, weekly, monthly</li><li><strong>Subtasks</strong>: <code>Title: Item1, Item2, Item3</code></li></ul><p>Example: <code>Shopping: Milk, Bread tomorrow !! @Personal #important</code></p>',
+					? '<p>Die Schnelleingabe erkennt automatisch verschiedene Muster:</p><ul><li><strong>Priorität</strong>: <code>!!!</code> (dringend), <code>!!</code> (hoch), <code>!</code> (mittel)</li><li><strong>Labels</strong>: <code>#label1 #label2</code></li><li><strong>Datum</strong>: heute, morgen, nächsten Montag, 15.12.</li><li><strong>Wiederholung</strong>: täglich, wöchentlich, monatlich</li><li><strong>Unteraufgaben</strong>: <code>Titel: Item1, Item2, Item3</code></li></ul><p>Beispiel: <code>Einkaufen: Milch, Brot morgen !! #wichtig</code></p>'
+					: '<p>Quick add automatically recognizes various patterns:</p><ul><li><strong>Priority</strong>: <code>!!!</code> (urgent), <code>!!</code> (high), <code>!</code> (medium)</li><li><strong>Labels</strong>: <code>#label1 #label2</code></li><li><strong>Date</strong>: today, tomorrow, next Monday</li><li><strong>Recurrence</strong>: daily, weekly, monthly</li><li><strong>Subtasks</strong>: <code>Title: Item1, Item2, Item3</code></li></ul><p>Example: <code>Shopping: Milk, Bread tomorrow !! #important</code></p>',
 				category: 'features',
 				order: 1,
 				language: isDE ? 'de' : 'en',
@@ -23,19 +23,17 @@ export function getTodoHelpContent(locale: string): HelpContent {
 				tags: isDE ? ['schnelleingabe', 'erstellen', 'syntax'] : ['quick-add', 'create', 'syntax'],
 			},
 			{
-				id: 'faq-projects',
+				id: 'faq-tags',
 				question: isDE
-					? 'Wie organisiere ich Aufgaben in Projekten?'
-					: 'How do I organize tasks in projects?',
+					? 'Wie organisiere ich Aufgaben mit Tags?'
+					: 'How do I organize tasks with tags?',
 				answer: isDE
-					? '<p>Projekte helfen dir, Aufgaben thematisch zu gruppieren:</p><ul><li>Erstelle Projekte über das <strong>+</strong> Symbol in der Seitenleiste</li><li>Weise jeder Aufgabe ein Projekt zu (oder lasse sie im Posteingang)</li><li>Jedes Projekt hat eine eigene Farbe zur visuellen Unterscheidung</li><li>Ziehe Aufgaben per Drag & Drop zwischen Projekten</li></ul>'
-					: '<p>Projects help you group tasks by topic:</p><ul><li>Create projects via the <strong>+</strong> icon in the sidebar</li><li>Assign tasks to a project (or leave them in the inbox)</li><li>Each project has its own color for visual distinction</li><li>Drag and drop tasks between projects</li></ul>',
+					? '<p>Tags helfen dir, Aufgaben flexibel zu organisieren:</p><ul><li>Erstelle Tags in der Tags-Ansicht</li><li>Weise Aufgaben beliebig viele Tags zu</li><li>Jeder Tag hat eine eigene Farbe zur visuellen Unterscheidung</li><li>Filtere Aufgaben über die Filterleiste nach Tags</li></ul>'
+					: '<p>Tags help you organize tasks flexibly:</p><ul><li>Create tags in the Tags view</li><li>Assign any number of tags to tasks</li><li>Each tag has its own color for visual distinction</li><li>Filter tasks by tags using the filter strip</li></ul>',
 				category: 'features',
 				order: 2,
 				language: isDE ? 'de' : 'en',
-				tags: isDE
-					? ['projekte', 'organisation', 'sortierung']
-					: ['projects', 'organize', 'sorting'],
+				tags: isDE ? ['tags', 'organisation', 'sortierung'] : ['tags', 'organize', 'sorting'],
 			},
 			{
 				id: 'faq-kanban',
@@ -73,8 +71,8 @@ export function getTodoHelpContent(locale: string): HelpContent {
 				icon: '⚡',
 				category: 'core',
 				highlights: isDE
-					? ['Automatische Erkennung', 'Datum & Priorität', 'Projekte & Labels']
-					: ['Auto-detection', 'Date & priority', 'Projects & labels'],
+					? ['Automatische Erkennung', 'Datum & Priorität', 'Tags & Labels']
+					: ['Auto-detection', 'Date & priority', 'Tags & labels'],
 				content: '',
 				order: 1,
 				language: isDE ? 'de' : 'en',
@@ -95,16 +93,16 @@ export function getTodoHelpContent(locale: string): HelpContent {
 				language: isDE ? 'de' : 'en',
 			},
 			{
-				id: 'feature-projects',
-				title: isDE ? 'Projekte' : 'Projects',
+				id: 'feature-tags',
+				title: 'Tags',
 				description: isDE
-					? 'Organisiere Aufgaben in farbcodierten Projekten'
-					: 'Organize tasks in color-coded projects',
-				icon: '📁',
+					? 'Organisiere Aufgaben mit farbcodierten Tags'
+					: 'Organize tasks with color-coded tags',
+				icon: '🏷️',
 				category: 'core',
 				highlights: isDE
-					? ['Farbcodierung', 'Drag & Drop', 'Archivierung']
-					: ['Color coding', 'Drag & drop', 'Archiving'],
+					? ['Farbcodierung', 'Mehrere Tags pro Aufgabe', 'Filterbar']
+					: ['Color coding', 'Multiple tags per task', 'Filterable'],
 				content: '',
 				order: 3,
 				language: isDE ? 'de' : 'en',

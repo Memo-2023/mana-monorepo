@@ -9,7 +9,6 @@
 
 export interface CompletedTaskData {
 	title: string;
-	projectId?: string | null;
 	labelIds?: string[];
 	priority: string;
 	estimatedDuration?: number | null; // minutes
@@ -104,16 +103,11 @@ function titleOverlap(a: string[], b: string[]): number {
  * Compute similarity score between a new task and a historical task
  */
 function similarity(
-	newTask: { title: string; projectId?: string | null; labelIds?: string[]; priority: string },
+	newTask: { title: string; labelIds?: string[]; priority: string },
 	historical: CompletedTaskData,
 	newTokens: string[]
 ): number {
 	let score = 0;
-
-	// Same project is the strongest signal
-	if (newTask.projectId && historical.projectId && newTask.projectId === historical.projectId) {
-		score += 3;
-	}
 
 	// Shared labels
 	if (newTask.labelIds && historical.labelIds) {
@@ -168,7 +162,7 @@ function getEffectiveDuration(task: CompletedTaskData): number | null {
  * @returns Estimate or null if insufficient data
  */
 export function estimateDuration(
-	newTask: { title: string; projectId?: string | null; labelIds?: string[]; priority: string },
+	newTask: { title: string; labelIds?: string[]; priority: string },
 	history: CompletedTaskData[],
 	minSamples = 3
 ): DurationEstimate | null {

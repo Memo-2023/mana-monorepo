@@ -12,10 +12,6 @@ describe('viewStore filter methods', () => {
 			expect(viewStore.filterPriorities).toEqual([]);
 		});
 
-		it('has null filter project', () => {
-			expect(viewStore.filterProjectId).toBeNull();
-		});
-
 		it('has empty filter labels', () => {
 			expect(viewStore.filterLabelIds).toEqual([]);
 		});
@@ -39,19 +35,6 @@ describe('viewStore filter methods', () => {
 		});
 	});
 
-	describe('setFilterProjectId', () => {
-		it('sets project ID', () => {
-			viewStore.setFilterProjectId('proj-1');
-			expect(viewStore.filterProjectId).toBe('proj-1');
-		});
-
-		it('can clear to null', () => {
-			viewStore.setFilterProjectId('proj-1');
-			viewStore.setFilterProjectId(null);
-			expect(viewStore.filterProjectId).toBeNull();
-		});
-	});
-
 	describe('setFilterLabelIds', () => {
 		it('sets label IDs', () => {
 			viewStore.setFilterLabelIds(['label-1', 'label-2']);
@@ -70,14 +53,12 @@ describe('viewStore filter methods', () => {
 	describe('clearFilters', () => {
 		it('resets all filter state', () => {
 			viewStore.setFilterPriorities(['urgent']);
-			viewStore.setFilterProjectId('proj-1');
 			viewStore.setFilterLabelIds(['label-1']);
 			viewStore.setFilterSearchQuery('test');
 
 			viewStore.clearFilters();
 
 			expect(viewStore.filterPriorities).toEqual([]);
-			expect(viewStore.filterProjectId).toBeNull();
 			expect(viewStore.filterLabelIds).toEqual([]);
 			expect(viewStore.filterSearchQuery).toBe('');
 		});
@@ -99,13 +80,11 @@ describe('viewStore filter methods', () => {
 	describe('reset', () => {
 		it('resets filter state along with everything else', () => {
 			viewStore.setFilterPriorities(['urgent']);
-			viewStore.setFilterProjectId('proj-1');
 			viewStore.setSort('title', 'desc');
 
 			viewStore.reset();
 
 			expect(viewStore.filterPriorities).toEqual([]);
-			expect(viewStore.filterProjectId).toBeNull();
 			expect(viewStore.sortBy).toBe('order');
 			expect(viewStore.sortOrder).toBe('asc');
 			expect(viewStore.currentView).toBe('inbox');

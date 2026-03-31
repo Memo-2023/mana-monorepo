@@ -102,13 +102,10 @@
 		const createData: Record<string, unknown> = { title };
 		if (column.onDrop) {
 			if (column.onDrop.setPriority) createData.priority = column.onDrop.setPriority;
-			if (column.onDrop.setProjectId !== undefined)
-				createData.projectId = column.onDrop.setProjectId;
 		}
 		tasksStore.createTask(
 			createData as {
 				title: string;
-				projectId?: string;
 				priority?: 'low' | 'medium' | 'high' | 'urgent';
 			}
 		);

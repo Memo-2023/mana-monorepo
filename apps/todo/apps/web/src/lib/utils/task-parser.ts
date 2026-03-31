@@ -8,7 +8,6 @@
 
 import {
 	parseBaseInput,
-	extractAtReference,
 	extractRecurrence,
 	combineDateAndTime,
 	formatDatePreview,
@@ -22,16 +21,10 @@ export interface ParsedTask {
 	dueDate?: Date;
 	dueTime?: string; // HH:mm format
 	priority?: TaskPriority;
-	projectName?: string;
 	labelNames: string[];
 	recurrenceRule?: string;
 	subtasks?: string[];
 	estimatedDuration?: number; // in minutes
-}
-
-interface Project {
-	id: string;
-	name: string;
 }
 
 interface Label {
@@ -44,7 +37,6 @@ export interface ParsedTaskWithIds {
 	dueDate?: string;
 	dueTime?: string;
 	priority?: TaskPriority;
-	projectId?: string;
 	labelIds: string[];
 	recurrenceRule?: string;
 	subtasks?: string[];
@@ -152,7 +144,6 @@ export function parseMultiTaskInput(input: string, locale: ParserLocale = 'de'):
 	const results: ParsedTask[] = [];
 	let contextDate: Date | undefined;
 	let contextTime: string | undefined;
-	let contextProject: string | undefined;
 	let lastEndMinutes: number | undefined; // track end time for "danach" offset
 
 	for (let i = 0; i < parts.length; i++) {
@@ -162,7 +153,6 @@ export function parseMultiTaskInput(input: string, locale: ParserLocale = 'de'):
 			// First task sets the context
 			contextDate = parsed.dueDate;
 			contextTime = parsed.dueTime;
-			contextProject = parsed.projectName;
 
 			// Calculate end time if duration is known
 			if (parsed.dueDate && parsed.estimatedDuration) {
@@ -185,10 +175,6 @@ export function parseMultiTaskInput(input: string, locale: ParserLocale = 'de'):
 					parsed.dueTime = contextTime;
 				}
 			}
-			if (!parsed.projectName && contextProject) {
-				parsed.projectName = contextProject;
-			}
-
 			// Update end time for next task
 			if (parsed.dueDate && parsed.estimatedDuration) {
 				lastEndMinutes =
@@ -289,11 +275,6 @@ export function parseTaskInput(input: string, locale: ParserLocale = 'de'): Pars
 	text = durationResult.remaining;
 	const estimatedDuration = durationResult.duration;
 
-	// Extract project (@ProjectName) - task-specific
-	const projectResult = extractAtReference(text);
-	text = projectResult.remaining;
-	const projectName = projectResult.value;
-
 	// Use base parser for common patterns (date, time, tags)
 	const base = parseBaseInput(text, locale);
 
@@ -313,7 +294,6 @@ export function parseTaskInput(input: string, locale: ParserLocale = 'de'): Pars
 		dueDate,
 		dueTime,
 		priority,
-		projectName,
 		labelNames: base.tagNames,
 		recurrenceRule,
 		subtasks: subtaskResult.subtasks,
@@ -322,25 +302,10 @@ export function parseTaskInput(input: string, locale: ParserLocale = 'de'): Pars
 }
 
 /**
- * Resolve project and label names to IDs
+ * Resolve label names to IDs
  */
-export function resolveTaskIds(
-	parsed: ParsedTask,
-	projects: Project[],
-	labels: Label[]
-): ParsedTaskWithIds {
-	let projectId: string | undefined;
+export function resolveTaskIds(parsed: ParsedTask, labels: Label[]): ParsedTaskWithIds {
 	const labelIds: string[] = [];
-
-	// Find project by name (case-insensitive)
-	if (parsed.projectName) {
-		const project = projects.find(
-			(p) => p.name.toLowerCase() === parsed.projectName!.toLowerCase()
-		);
-		if (project) {
-			projectId = project.id;
-		}
-	}
 
 	// Find labels by name (case-insensitive)
 	for (const labelName of parsed.labelNames) {
@@ -355,7 +320,6 @@ export function resolveTaskIds(
 		dueDate: parsed.dueDate?.toISOString(),
 		dueTime: parsed.dueTime,
 		priority: parsed.priority,
-		projectId,
 		labelIds,
 		recurrenceRule: parsed.recurrenceRule,
 		subtasks: parsed.subtasks,
@@ -404,10 +368,6 @@ export function formatParsedTaskPreview(parsed: ParsedTask, locale: ParserLocale
 
 	if (parsed.priority) {
 		parts.push(PRIORITY_LABELS[locale][parsed.priority]);
-	}
-
-	if (parsed.projectName) {
-		parts.push(`📁 ${parsed.projectName}`);
 	}
 
 	if (parsed.recurrenceRule) {

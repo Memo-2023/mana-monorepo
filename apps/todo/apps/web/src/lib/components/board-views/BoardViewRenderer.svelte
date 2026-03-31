@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import type { Task, Project } from '@todo/shared';
+	import type { Task } from '@todo/shared';
 	import type { LocalBoardView } from '$lib/data/local-store';
 	import { groupTasksByView, getDropActionUpdate } from '$lib/data/view-grouping';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
@@ -30,12 +30,11 @@
 
 	let activeLayout = $derived(layoutOverride || view.layout);
 
-	// Get tasks and projects from context (set by layout)
+	// Get tasks from context (set by layout)
 	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
-	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 
 	// Group tasks by the current view configuration
-	let columns = $derived(groupTasksByView(view, tasksCtx.value, projectsCtx.value));
+	let columns = $derived(groupTasksByView(view, tasksCtx.value));
 
 	// ─── Task Callbacks ──────────────────────────────────────
 
@@ -65,7 +64,6 @@
 		const updateData: Record<string, unknown> = {};
 		if (data.title !== undefined) updateData.title = data.title;
 		if (data.description !== undefined) updateData.description = data.description;
-		if (data.projectId !== undefined) updateData.projectId = data.projectId;
 		if (data.dueDate !== undefined) {
 			updateData.dueDate = data.dueDate instanceof Date ? data.dueDate.toISOString() : data.dueDate;
 		}

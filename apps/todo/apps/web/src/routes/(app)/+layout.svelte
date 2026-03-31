@@ -19,7 +19,6 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
-	import { projectsStore } from '$lib/stores/projects.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import {
 		tagLocalStore,
@@ -48,18 +47,12 @@
 	import { TodoEvents } from '@manacore/shared-utils/analytics';
 	import { todoStore, taskCollection } from '$lib/data/local-store';
 	import type { LocalBoardView } from '$lib/data/local-store';
-	import {
-		useAllTasks,
-		useAllProjects,
-		useAllBoardViews,
-		getActiveProjects,
-	} from '$lib/data/task-queries';
+	import { useAllTasks, useAllBoardViews } from '$lib/data/task-queries';
 	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
 	import { List, X } from '@manacore/shared-icons';
 
 	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
 	const allTasks = useAllTasks();
-	const allProjects = useAllProjects();
 	const allTags = useAllSharedTags();
 
 	// ─── Board View Management ──────────────────────────────
@@ -69,7 +62,6 @@
 	let activeView = $derived(boardViews.value[0] ?? null);
 
 	// Provide data to child components via Svelte context
-	setContext('projects', allProjects);
 	setContext('tasks', allTasks);
 	setContext('tags', allTags);
 	setContext('activeView', {
@@ -91,9 +83,6 @@
 			editMode = val;
 		},
 	});
-
-	// Derived active projects for UI
-	let activeProjects = $derived(getActiveProjects(allProjects.value));
 
 	// Guest welcome modal state
 	let showGuestWelcome = $state(false);
@@ -162,13 +151,12 @@
 
 		try {
 			const parsed = parseTaskInput(query);
-			const resolved = resolveTaskIds(parsed, allProjects.value, allTags.value);
+			const resolved = resolveTaskIds(parsed, allTags.value);
 
 			await tasksStore.createTask({
 				title: resolved.title,
 				dueDate: resolved.dueDate,
 				priority: resolved.priority,
-				projectId: resolved.projectId,
 				labelIds: resolved.labelIds,
 			});
 			TodoEvents.quickAddUsed();
@@ -462,11 +450,9 @@
 						<TaskFilters
 							variant="strip"
 							selectedPriorities={viewStore.filterPriorities}
-							selectedProjectId={viewStore.filterProjectId}
 							selectedLabelIds={viewStore.filterLabelIds}
 							searchQuery={viewStore.filterSearchQuery}
 							onPrioritiesChange={(p: TaskPriority[]) => viewStore.setFilterPriorities(p)}
-							onProjectChange={(id: string | null) => viewStore.setFilterProjectId(id)}
 							onLabelsChange={(ids: string[]) => viewStore.setFilterLabelIds(ids)}
 							onSearchChange={(q: string) => viewStore.setFilterSearchQuery(q)}
 							onClearFilters={() => viewStore.clearFilters()}

@@ -1,11 +1,6 @@
 <script lang="ts">
 	import type { Task, Subtask, UpdateTaskInput } from '@todo/shared';
 	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
-	import { getContext } from 'svelte';
-	import type { Project } from '@todo/shared';
-	import { getActiveProjects } from '$lib/data/task-queries';
-
-	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { useTaskForm } from '$lib/composables/useTaskForm.svelte';
 	import SubtaskList from './SubtaskList.svelte';
@@ -194,19 +189,6 @@
 					<select id="task-status" class="form-select" bind:value={form.status}>
 						{#each STATUS_OPTIONS as s}
 							<option value={s.value}>{s.label}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Projekt -->
-				<div class="form-section">
-					<label class="form-label" for="task-project">Projekt</label>
-					<select id="task-project" class="form-select" bind:value={form.projectId}>
-						<option value={null}>Kein Projekt</option>
-						{#each getActiveProjects(projectsCtx.value) as project}
-							<option value={project.id}>
-								{project.name}
-							</option>
 						{/each}
 					</select>
 				</div>

@@ -27,7 +27,6 @@
 	const GROUPBY_OPTIONS = [
 		{ value: 'status', label: 'Status' },
 		{ value: 'priority', label: 'Priorität' },
-		{ value: 'project', label: 'Projekt' },
 		{ value: 'dueDate', label: 'Fälligkeit' },
 		{ value: 'custom', label: 'Benutzerdefiniert' },
 	];

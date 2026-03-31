@@ -2,10 +2,6 @@
 	import { goto } from '$app/navigation';
 	import type { TaskPriority } from '@todo/shared';
 	import { getContext } from 'svelte';
-	import type { Project } from '@todo/shared';
-	import { getActiveProjects } from '$lib/data/task-queries';
-
-	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import type { Tag } from '@manacore/shared-tags';
 
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
@@ -18,13 +14,11 @@
 
 		// Filter state (owned by parent)
 		selectedPriorities: TaskPriority[];
-		selectedProjectId: string | null;
 		selectedLabelIds: string[];
 		searchQuery: string;
 
 		// Callbacks
 		onPrioritiesChange: (priorities: TaskPriority[]) => void;
-		onProjectChange: (projectId: string | null) => void;
 		onLabelsChange: (labelIds: string[]) => void;
 		onSearchChange: (query: string) => void;
 		onClearFilters: () => void;
@@ -49,11 +43,9 @@
 	let {
 		variant,
 		selectedPriorities,
-		selectedProjectId,
 		selectedLabelIds,
 		searchQuery,
 		onPrioritiesChange,
-		onProjectChange,
 		onLabelsChange,
 		onSearchChange,
 		onClearFilters,
@@ -86,10 +78,7 @@
 	let showLabelsDropdown = $state(false);
 
 	let hasActiveFilters = $derived(
-		selectedPriorities.length > 0 ||
-			selectedProjectId !== null ||
-			selectedLabelIds.length > 0 ||
-			searchQuery.trim() !== ''
+		selectedPriorities.length > 0 || selectedLabelIds.length > 0 || searchQuery.trim() !== ''
 	);
 
 	function togglePriority(priority: TaskPriority) {
@@ -165,23 +154,6 @@
 					<span class="pill-label">{priority.label}</span>
 				</button>
 			{/each}
-
-			<!-- Project Filter Pills -->
-			{#if getActiveProjects(projectsCtx.value).length > 0}
-				<span class="strip-divider"></span>
-				{#each getActiveProjects(projectsCtx.value) as project (project.id)}
-					<button
-						class="project-pill glass-pill"
-						class:selected={selectedProjectId === project.id}
-						onclick={() => onProjectChange(selectedProjectId === project.id ? null : project.id)}
-						title={project.name}
-						style="--project-color: {project.color || '#6b7280'}"
-					>
-						<span class="project-dot"></span>
-						<span class="pill-label">{project.name}</span>
-					</button>
-				{/each}
-			{/if}
 
 			<!-- Sort Pills -->
 			{#if showSort && onSortChange}
@@ -274,25 +246,6 @@
 							</button>
 						{/each}
 					</div>
-				</div>
-
-				<div class="h-6 w-px bg-border hidden sm:block"></div>
-
-				<!-- Project filter -->
-				<div class="filter-group flex items-center gap-2">
-					<span class="text-xs font-medium text-muted-foreground uppercase tracking-wide"
-						>Projekt</span
-					>
-					<select
-						class="px-3 py-1.5 text-sm bg-background border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all cursor-pointer"
-						value={selectedProjectId || ''}
-						onchange={(e) => onProjectChange(e.currentTarget.value || null)}
-					>
-						<option value="">Alle Projekte</option>
-						{#each getActiveProjects(projectsCtx.value) as project}
-							<option value={project.id}>{project.name}</option>
-						{/each}
-					</select>
 				</div>
 
 				<!-- Labels filter -->
@@ -536,28 +489,6 @@
 
 	:global(.dark) .strip-divider {
 		background: rgba(255, 255, 255, 0.15);
-	}
-
-	/* Project pills */
-	.project-pill .project-dot {
-		width: 10px;
-		height: 10px;
-		border-radius: 50%;
-		background-color: var(--project-color);
-		flex-shrink: 0;
-	}
-
-	.project-pill.selected {
-		background: var(--project-color) !important;
-		border-color: var(--project-color) !important;
-	}
-
-	.project-pill.selected .project-dot {
-		background-color: white;
-	}
-
-	.project-pill.selected .pill-label {
-		color: white;
 	}
 
 	/* Priority pills */

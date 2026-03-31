@@ -34,33 +34,30 @@ function makeTask(overrides: Partial<Task> = {}): Task {
 
 const emptyFilters: TaskFilterCriteria = {
 	priorities: [],
-	projectId: null,
 	labelIds: [],
 	searchQuery: '',
 };
 
 describe('applyTaskFilters', () => {
 	const tasks: Task[] = [
-		makeTask({ id: '1', title: 'Buy groceries', priority: 'low', projectId: 'proj-a' }),
+		makeTask({ id: '1', title: 'Buy groceries', priority: 'low' }),
 		makeTask({
 			id: '2',
 			title: 'Urgent meeting',
 			priority: 'urgent',
-			projectId: 'proj-b',
 			labels: [makeLabel({ id: 'label-1', name: 'Work', color: '#f00' })],
 		}),
 		makeTask({
 			id: '3',
 			title: 'Write report',
 			priority: 'high',
-			projectId: 'proj-a',
 			description: 'Quarterly financial report',
 			labels: [
 				makeLabel({ id: 'label-1', name: 'Work', color: '#f00' }),
 				makeLabel({ id: 'label-2', name: 'Important', color: '#0f0' }),
 			],
 		}),
-		makeTask({ id: '4', title: 'Relax', priority: 'low', projectId: null }),
+		makeTask({ id: '4', title: 'Relax', priority: 'low' }),
 	];
 
 	it('returns all tasks when no filters are active', () => {
@@ -96,26 +93,6 @@ describe('applyTaskFilters', () => {
 		});
 	});
 
-	// Project filtering
-	describe('project filter', () => {
-		it('filters by project ID', () => {
-			const result = applyTaskFilters(tasks, { ...emptyFilters, projectId: 'proj-a' });
-			expect(result).toHaveLength(2);
-			expect(result.map((t) => t.id).sort()).toEqual(['1', '3']);
-		});
-
-		it('does not match tasks with null projectId when filtering', () => {
-			const result = applyTaskFilters(tasks, { ...emptyFilters, projectId: 'proj-b' });
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe('2');
-		});
-
-		it('skips project filter when null', () => {
-			const result = applyTaskFilters(tasks, { ...emptyFilters, projectId: null });
-			expect(result).toHaveLength(4);
-		});
-	});
-
 	// Label filtering
 	describe('label filter', () => {
 		it('filters by single label', () => {
@@ -140,7 +117,6 @@ describe('applyTaskFilters', () => {
 
 		it('excludes tasks with no labels', () => {
 			const result = applyTaskFilters(tasks, { ...emptyFilters, labelIds: ['label-1'] });
-			// Tasks 1 and 4 have no labels
 			expect(result.find((t) => t.id === '1')).toBeUndefined();
 			expect(result.find((t) => t.id === '4')).toBeUndefined();
 		});
@@ -180,16 +156,6 @@ describe('applyTaskFilters', () => {
 
 	// Combined filters
 	describe('combined filters', () => {
-		it('applies priority + project filter together (AND)', () => {
-			const result = applyTaskFilters(tasks, {
-				...emptyFilters,
-				priorities: ['low'],
-				projectId: 'proj-a',
-			});
-			expect(result).toHaveLength(1);
-			expect(result[0].id).toBe('1');
-		});
-
 		it('applies priority + label filter together', () => {
 			const result = applyTaskFilters(tasks, {
 				...emptyFilters,
@@ -203,7 +169,6 @@ describe('applyTaskFilters', () => {
 		it('applies all filters together', () => {
 			const result = applyTaskFilters(tasks, {
 				priorities: ['high'],
-				projectId: 'proj-a',
 				labelIds: ['label-1'],
 				searchQuery: 'report',
 			});
@@ -213,9 +178,8 @@ describe('applyTaskFilters', () => {
 
 		it('returns empty when combined filters contradict', () => {
 			const result = applyTaskFilters(tasks, {
-				priorities: ['urgent'],
-				projectId: 'proj-a', // task 2 is urgent but in proj-b
-				labelIds: [],
+				priorities: ['low'],
+				labelIds: ['label-1'], // tasks 1,4 are low but have no label-1
 				searchQuery: '',
 			});
 			expect(result).toHaveLength(0);

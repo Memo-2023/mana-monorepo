@@ -6,11 +6,6 @@
 	import { formatDueDate } from '$lib/utils/date-display';
 	import { getSubtaskProgress } from '$lib/utils/task-helpers';
 	import { useTaskForm } from '$lib/composables/useTaskForm.svelte';
-	import { getContext } from 'svelte';
-	import type { Project } from '@todo/shared';
-	import { getActiveProjects, getProjectColor } from '$lib/data/task-queries';
-
-	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { ContactAvatar, ContactSelector } from '@manacore/shared-ui';
 	import SubtaskList from './SubtaskList.svelte';
@@ -99,7 +94,6 @@
 			form.startDate,
 			form.priority,
 			form.status,
-			form.projectId,
 			form.selectedLabelIds,
 			form.subtasks,
 			form.recurrenceRule,
@@ -227,12 +221,6 @@
 		if (!task.dueDate || task.isCompleted) return false;
 		const date = new Date(task.dueDate);
 		return isPast(date) && !isToday(date);
-	});
-
-	// Get project color
-	let projectColor = $derived(() => {
-		if (!task.projectId) return null;
-		return getProjectColor(projectsCtx.value, task.projectId);
 	});
 
 	// Subtasks progress
@@ -479,25 +467,14 @@
 				<PrioritySelector value={form.priority} onChange={(p) => (form.priority = p)} />
 			</div>
 
-			<!-- Status & Project row -->
-			<div class="form-row-2">
-				<div class="form-section">
-					<label class="form-label" for="task-status-{task.id}">Status</label>
-					<select id="task-status-{task.id}" class="form-select" bind:value={form.status}>
-						{#each STATUS_OPTIONS as s}
-							<option value={s.value}>{s.label}</option>
-						{/each}
-					</select>
-				</div>
-				<div class="form-section">
-					<label class="form-label" for="task-project-{task.id}">Projekt</label>
-					<select id="task-project-{task.id}" class="form-select" bind:value={form.projectId}>
-						<option value={null}>Kein Projekt</option>
-						{#each getActiveProjects(projectsCtx.value) as project}
-							<option value={project.id}>{project.name}</option>
-						{/each}
-					</select>
-				</div>
+			<!-- Status -->
+			<div class="form-section">
+				<label class="form-label" for="task-status-{task.id}">Status</label>
+				<select id="task-status-{task.id}" class="form-select" bind:value={form.status}>
+					{#each STATUS_OPTIONS as s}
+						<option value={s.value}>{s.label}</option>
+					{/each}
+				</select>
 			</div>
 
 			<!-- Tags -->

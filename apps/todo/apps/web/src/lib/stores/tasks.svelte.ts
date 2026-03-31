@@ -23,7 +23,6 @@ export const tasksStore = {
 	async createTask(data: {
 		title: string;
 		description?: string;
-		projectId?: string;
 		dueDate?: string;
 		priority?: TaskPriority;
 		labelIds?: string[];
@@ -39,7 +38,6 @@ export const tasksStore = {
 					id: crypto.randomUUID(),
 					title: data.title,
 					description: data.description,
-					projectId: data.projectId ?? null,
 					priority: data.priority ?? 'medium',
 					isCompleted: false,
 					dueDate: data.dueDate ?? null,
@@ -62,7 +60,6 @@ export const tasksStore = {
 		data: {
 			title?: string;
 			description?: string | null;
-			projectId?: string | null;
 			parentTaskId?: string | null;
 			dueDate?: string | null;
 			dueTime?: string | null;
@@ -149,19 +146,6 @@ export const tasksStore = {
 				}
 			},
 			'Failed to uncomplete task'
-		);
-	},
-
-	async moveTask(id: string, projectId: string | null) {
-		return withErrorHandling(
-			setError,
-			async () => {
-				const updated = await taskCollection.update(id, { projectId } as Partial<LocalTask>);
-				if (updated) {
-					return toTask(updated);
-				}
-			},
-			'Failed to move task'
 		);
 	},
 

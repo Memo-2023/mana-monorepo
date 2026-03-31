@@ -54,7 +54,7 @@ const todoOnboardingSteps: AppOnboardingStep[] = [
 			{
 				id: 'normal',
 				label: 'Normal',
-				description: 'Mit Projekt, Labels und Fälligkeit',
+				description: 'Mit Tags, Labels und Fälligkeit',
 				emoji: '📝',
 			},
 			{
@@ -74,10 +74,10 @@ const todoOnboardingSteps: AppOnboardingStep[] = [
 		emoji: '🎉',
 		gradient: { from: 'primary', to: 'primary/70' },
 		bullets: [
-			'Schnelleingabe: "Meeting morgen 14 Uhr !hoch @Arbeit #wichtig"',
-			'Nutze @Projekt und #Label direkt beim Erstellen',
+			'Schnelleingabe: "Meeting morgen 14 Uhr !hoch #wichtig"',
+			'Nutze #Tags direkt beim Erstellen',
 			'Drücke "F" für den Fokus-Modus ohne Ablenkungen',
-			'Erstelle Projekte, um Aufgaben zu organisieren',
+			'Nutze Tags, um Aufgaben zu organisieren',
 		],
 	},
 ];

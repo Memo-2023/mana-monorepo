@@ -68,7 +68,6 @@
 	const groupByOptions = [
 		{ value: 'status', label: 'Status' },
 		{ value: 'priority', label: 'Priorität' },
-		{ value: 'project', label: 'Projekt' },
 		{ value: 'dueDate', label: 'Fälligkeit' },
 		{ value: 'tag', label: 'Tag' },
 		{ value: 'custom', label: 'Manuell' },
@@ -181,8 +180,6 @@
 						onDrop: { setPriority: 'low' },
 					},
 				];
-			case 'project':
-				return []; // dynamically generated
 			case 'dueDate':
 				return [
 					{

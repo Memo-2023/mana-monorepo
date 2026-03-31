@@ -5,7 +5,7 @@
  * No side effects, no store dependencies — easy to test.
  */
 
-import type { Task, Project } from '@todo/shared';
+import type { Task } from '@todo/shared';
 import type { LocalBoardView, ViewColumn, DropAction } from './local-store';
 import { isToday, isPast, isTomorrow, startOfDay, addDays, isFuture } from 'date-fns';
 
@@ -21,11 +21,7 @@ export interface GroupedColumn {
 
 // ─── Main Grouping Function ────────────────────────────────
 
-export function groupTasksByView(
-	view: LocalBoardView,
-	tasks: Task[],
-	projects: Project[]
-): GroupedColumn[] {
+export function groupTasksByView(view: LocalBoardView, tasks: Task[]): GroupedColumn[] {
 	// Only group incomplete tasks (unless status view includes completed)
 	const activeTasks = view.groupBy === 'status' ? tasks : tasks.filter((t) => !t.isCompleted);
 
@@ -37,8 +33,6 @@ export function groupTasksByView(
 			return groupByStatus(filtered, view.columns);
 		case 'priority':
 			return groupByPriority(filtered, view.columns);
-		case 'project':
-			return groupByProject(filtered, view.columns, projects);
 		case 'dueDate':
 			return groupByDueDate(filtered, view.columns);
 		case 'tag':
@@ -73,44 +67,6 @@ function groupByPriority(tasks: Task[], columns: ViewColumn[]): GroupedColumn[] 
 		color: col.color,
 		onDrop: col.onDrop,
 		tasks: tasks.filter((t) => t.priority === col.match.value),
-	}));
-}
-
-function groupByProject(
-	tasks: Task[],
-	columns: ViewColumn[],
-	projects: Project[]
-): GroupedColumn[] {
-	// Dynamic: generate columns from projects
-	if (columns.length === 0) {
-		const activeProjects = projects.filter((p) => !p.isArchived);
-		const dynamicColumns: GroupedColumn[] = [
-			{
-				id: 'col-inbox',
-				name: 'Inbox',
-				color: '#6B7280',
-				tasks: tasks.filter((t) => !t.projectId),
-				onDrop: { setProjectId: null },
-			},
-			...activeProjects.map((p) => ({
-				id: `col-proj-${p.id}`,
-				name: p.name,
-				color: p.color,
-				tasks: tasks.filter((t) => t.projectId === p.id),
-				onDrop: { setProjectId: p.id } as DropAction,
-			})),
-		];
-		return dynamicColumns;
-	}
-	// Static columns from config
-	return columns.map((col) => ({
-		id: col.id,
-		name: col.name,
-		color: col.color,
-		onDrop: col.onDrop,
-		tasks: tasks.filter((t) =>
-			col.match.value === null ? !t.projectId : t.projectId === col.match.value
-		),
 	}));
 }
 
@@ -152,9 +108,7 @@ function groupByTag(tasks: Task[], columns: ViewColumn[]): GroupedColumn[] {
 		name: col.name,
 		color: col.color,
 		onDrop: col.onDrop,
-		tasks: tasks.filter(
-			(t) => t.labels?.some((l) => l.id === col.match.value) ?? false
-		),
+		tasks: tasks.filter((t) => t.labels?.some((l) => l.id === col.match.value) ?? false),
 	}));
 }
 
@@ -236,13 +190,13 @@ function groupEisenhower(tasks: Task[], columns: ViewColumn[]): GroupedColumn[] 
 
 // ─── Helpers ───────────────────────────────────────────────
 
-function applyViewFilter(tasks: Task[], filter?: { projectId?: string; tagIds?: string[]; priorities?: string[] }): Task[] {
+function applyViewFilter(
+	tasks: Task[],
+	filter?: { tagIds?: string[]; priorities?: string[] }
+): Task[] {
 	if (!filter) return tasks;
 	let result = tasks;
 
-	if (filter.projectId) {
-		result = result.filter((t) => t.projectId === filter.projectId);
-	}
 	if (filter.priorities && filter.priorities.length > 0) {
 		result = result.filter((t) => filter.priorities!.includes(t.priority));
 	}
@@ -263,6 +217,5 @@ export function getDropActionUpdate(action: DropAction): Record<string, unknown>
 		update.completedAt = action.setCompleted ? new Date().toISOString() : null;
 	}
 	if (action.setPriority) update.priority = action.setPriority;
-	if (action.setProjectId !== undefined) update.projectId = action.setProjectId;
 	return update;
 }

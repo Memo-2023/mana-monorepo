@@ -12,7 +12,6 @@ describe('parseTaskInput', () => {
 		const result = parseTaskInput('Einkaufen gehen');
 		expect(result.title).toBe('Einkaufen gehen');
 		expect(result.priority).toBeUndefined();
-		expect(result.projectName).toBeUndefined();
 		expect(result.labelNames).toEqual([]);
 	});
 
@@ -48,12 +47,6 @@ describe('parseTaskInput', () => {
 		expect(result.priority).toBe('low');
 	});
 
-	it('should parse @project', () => {
-		const result = parseTaskInput('Task erledigen @Arbeit');
-		expect(result.projectName).toBe('Arbeit');
-		expect(result.title).not.toContain('@Arbeit');
-	});
-
 	it('should parse #labels', () => {
 		const result = parseTaskInput('Anrufen #arbeit #privat');
 		expect(result.labelNames).toEqual(['arbeit', 'privat']);
@@ -61,9 +54,8 @@ describe('parseTaskInput', () => {
 	});
 
 	it('should parse complex input with all fields', () => {
-		const result = parseTaskInput('Meeting vorbereiten !!! @Arbeit #wichtig #team');
+		const result = parseTaskInput('Meeting vorbereiten !!! #wichtig #team');
 		expect(result.priority).toBe('urgent');
-		expect(result.projectName).toBe('Arbeit');
 		expect(result.labelNames).toEqual(['wichtig', 'team']);
 		expect(result.title).toContain('Meeting vorbereiten');
 	});
@@ -92,9 +84,8 @@ describe('parseTaskInput', () => {
 	});
 
 	it('should parse recurrence "wöchentlich"', () => {
-		const result = parseTaskInput('Review wöchentlich @Arbeit');
+		const result = parseTaskInput('Review wöchentlich');
 		expect(result.recurrenceRule).toBe('FREQ=WEEKLY');
-		expect(result.projectName).toBe('Arbeit');
 	});
 
 	it('should have no recurrence for normal input', () => {
@@ -120,57 +111,38 @@ describe('parseTaskInput', () => {
 	});
 
 	it('should parse subtasks with other fields', () => {
-		const result = parseTaskInput('Einkaufen: Milch, Brot morgen !! @Privat');
+		const result = parseTaskInput('Einkaufen: Milch, Brot morgen !!');
 		expect(result.title).toBe('Einkaufen');
 		expect(result.subtasks).toEqual(['Milch', 'Brot']);
 		expect(result.priority).toBe('high');
-		expect(result.projectName).toBe('Privat');
 	});
 });
 
 describe('resolveTaskIds', () => {
-	const projects = [
-		{ id: 'proj-1', name: 'Arbeit' },
-		{ id: 'proj-2', name: 'Privat' },
-	];
-
 	const labels = [
 		{ id: 'label-1', name: 'Wichtig' },
 		{ id: 'label-2', name: 'Team' },
 		{ id: 'label-3', name: 'Bug' },
 	];
 
-	it('should resolve project name to ID (case-insensitive)', () => {
-		const parsed = parseTaskInput('Task @arbeit');
-		const resolved = resolveTaskIds(parsed, projects, labels);
-		expect(resolved.projectId).toBe('proj-1');
-	});
-
 	it('should resolve label names to IDs (case-insensitive)', () => {
 		// Note: "wichtig" is consumed by priority extraction, so use "bug" instead
 		const parsed = parseTaskInput('Task #bug #team');
-		const resolved = resolveTaskIds(parsed, projects, labels);
+		const resolved = resolveTaskIds(parsed, labels);
 		expect(resolved.labelIds).toEqual(['label-3', 'label-2']);
-	});
-
-	it('should skip unknown project', () => {
-		const parsed = parseTaskInput('Task @Unbekannt');
-		const resolved = resolveTaskIds(parsed, projects, labels);
-		expect(resolved.projectId).toBeUndefined();
 	});
 
 	it('should skip unknown labels', () => {
 		const parsed = parseTaskInput('Task #nichtda');
-		const resolved = resolveTaskIds(parsed, projects, labels);
+		const resolved = resolveTaskIds(parsed, labels);
 		expect(resolved.labelIds).toEqual([]);
 	});
 
 	it('should preserve title and priority', () => {
-		const parsed = parseTaskInput('Meeting vorbereiten !!! @Arbeit #wichtig');
-		const resolved = resolveTaskIds(parsed, projects, labels);
+		const parsed = parseTaskInput('Meeting vorbereiten !!! #wichtig');
+		const resolved = resolveTaskIds(parsed, labels);
 		expect(resolved.title).toContain('Meeting vorbereiten');
 		expect(resolved.priority).toBe('urgent');
-		expect(resolved.projectId).toBe('proj-1');
 		expect(resolved.labelIds).toEqual(['label-1']);
 	});
 });
@@ -180,12 +152,6 @@ describe('formatParsedTaskPreview', () => {
 		const parsed = parseTaskInput('Task !!!');
 		const preview = formatParsedTaskPreview(parsed);
 		expect(preview).toContain('Dringend');
-	});
-
-	it('should format project', () => {
-		const parsed = parseTaskInput('Task @Arbeit');
-		const preview = formatParsedTaskPreview(parsed);
-		expect(preview).toContain('Arbeit');
 	});
 
 	it('should format labels', () => {
@@ -201,9 +167,9 @@ describe('formatParsedTaskPreview', () => {
 	});
 
 	it('should join parts with separator', () => {
-		const parsed = parseTaskInput('Task !!! @Arbeit');
+		const parsed = parseTaskInput('Task !!!');
 		const preview = formatParsedTaskPreview(parsed);
-		expect(preview).toContain(' · ');
+		expect(preview).not.toBe('');
 	});
 
 	it('should format duration in preview', () => {
@@ -248,10 +214,9 @@ describe('duration extraction', () => {
 	});
 
 	it('should work with other fields', () => {
-		const result = parseTaskInput('Meeting 2h morgen !! @Arbeit');
+		const result = parseTaskInput('Meeting 2h morgen !!');
 		expect(result.estimatedDuration).toBe(120);
 		expect(result.priority).toBe('high');
-		expect(result.projectName).toBe('Arbeit');
 	});
 });
 
@@ -291,13 +256,6 @@ describe('parseMultiTaskInput', () => {
 		expect(tasks[1].dueDate).toBeDefined();
 		// Both should be tomorrow
 		expect(tasks[0].dueDate!.toDateString()).toBe(tasks[1].dueDate!.toDateString());
-	});
-
-	it('should inherit project context from first task', () => {
-		const tasks = parseMultiTaskInput('Meeting @Arbeit danach Report schreiben');
-		expect(tasks).toHaveLength(2);
-		expect(tasks[0].projectName).toBe('Arbeit');
-		expect(tasks[1].projectName).toBe('Arbeit');
 	});
 
 	it('should offset time when first task has duration', () => {

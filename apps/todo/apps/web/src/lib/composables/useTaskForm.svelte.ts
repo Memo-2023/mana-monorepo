@@ -23,7 +23,6 @@ export function useTaskForm() {
 	let startDate = $state('');
 	let priority = $state<TaskPriority>('medium');
 	let status = $state<TaskStatus>('pending');
-	let projectId = $state<string | null>(null);
 	let selectedLabelIds = $state<string[]>([]);
 	let subtasks = $state<Subtask[]>([]);
 	let recurrenceRule = $state('');
@@ -51,7 +50,6 @@ export function useTaskForm() {
 		startDate = task.startDate ? format(new Date(task.startDate), 'yyyy-MM-dd') : '';
 		priority = task.priority || 'medium';
 		status = task.status || 'pending';
-		projectId = task.projectId || null;
 		selectedLabelIds = task.labels?.map((l) => l.id) || [];
 		subtasks = task.subtasks ? [...task.subtasks] : [];
 		recurrenceRule = task.recurrenceRule || '';
@@ -97,7 +95,6 @@ export function useTaskForm() {
 			startDate: startDate ? new Date(startDate).toISOString() : null,
 			priority,
 			status,
-			projectId: projectId || null,
 			subtasks: subtasks.length > 0 ? subtasks : null,
 			recurrenceRule: recurrenceRule || null,
 			metadata: {
@@ -156,12 +153,6 @@ export function useTaskForm() {
 		},
 		set status(v: TaskStatus) {
 			status = v;
-		},
-		get projectId() {
-			return projectId;
-		},
-		set projectId(v: string | null) {
-			projectId = v;
 		},
 		get selectedLabelIds() {
 			return selectedLabelIds;
