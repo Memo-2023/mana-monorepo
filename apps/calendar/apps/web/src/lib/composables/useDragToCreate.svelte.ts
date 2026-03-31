@@ -3,10 +3,8 @@
  * Handles click-and-drag on the calendar grid to create new events
  */
 
-import {
-	SNAP_INTERVAL_MINUTES,
-	DEFAULT_EVENT_DURATION_MINUTES,
-} from '$lib/utils/calendarConstants';
+import { DEFAULT_EVENT_DURATION_MINUTES } from '$lib/utils/calendarConstants';
+import { formatTime, getSnapMinutes, getDayFromX, getMinutesFromY } from '$lib/utils/drag-helpers';
 
 export interface DragToCreateConfig {
 	containerEl: HTMLElement | null;
@@ -30,38 +28,21 @@ export function useDragToCreate(getConfig: () => DragToCreateConfig) {
 	let createPreviewHeight = $state(0);
 	let hasMoved = $state(false);
 
-	function getSnapMinutes(): number {
-		return getConfig().snapMinutes ?? SNAP_INTERVAL_MINUTES;
+	function dayFromX(clientX: number): Date | null {
+		const config = getConfig();
+		return getDayFromX(clientX, config.containerEl, config.days);
 	}
 
-	function getDayFromX(clientX: number): Date | null {
+	function minutesFromY(clientY: number): number {
 		const config = getConfig();
-		if (!config.containerEl) return null;
-
-		const rect = config.containerEl.getBoundingClientRect();
-		const relativeX = clientX - rect.left;
-		const dayWidth = rect.width / config.days.length;
-		const dayIndex = Math.floor(relativeX / dayWidth);
-
-		if (dayIndex >= 0 && dayIndex < config.days.length) {
-			return config.days[dayIndex];
-		}
-		return null;
-	}
-
-	function getMinutesFromY(clientY: number): number {
-		const config = getConfig();
-		if (!config.containerEl) return 0;
-
-		const rect = config.containerEl.getBoundingClientRect();
-		const scrollTop = config.containerEl.parentElement?.scrollTop || 0;
-		const relativeY = clientY - rect.top + scrollTop;
-		const visibleMinutes =
-			(relativeY / (config.totalVisibleHours * config.hourHeight)) * config.totalVisibleHours * 60;
-		const totalMinutes = visibleMinutes + config.firstVisibleHour * 60;
-
-		const snap = getSnapMinutes();
-		return Math.round(totalMinutes / snap) * snap;
+		return getMinutesFromY(
+			clientY,
+			config.containerEl,
+			config.totalVisibleHours,
+			config.hourHeight,
+			config.firstVisibleHour,
+			config.snapMinutes
+		);
 	}
 
 	function updatePreview() {
@@ -87,11 +68,11 @@ export function useDragToCreate(getConfig: () => DragToCreateConfig) {
 
 		e.preventDefault();
 
-		const day = getDayFromX(e.clientX);
+		const day = dayFromX(e.clientX);
 		if (!day) return;
 
-		const minutes = getMinutesFromY(e.clientY);
-		const snap = getSnapMinutes();
+		const minutes = minutesFromY(e.clientY);
+		const snap = getSnapMinutes(config.snapMinutes);
 		const snappedMinutes = Math.round(minutes / snap) * snap;
 
 		isCreating = true;
@@ -111,12 +92,12 @@ export function useDragToCreate(getConfig: () => DragToCreateConfig) {
 
 		hasMoved = true;
 		const config = getConfig();
-		const snap = getSnapMinutes();
+		const snap = getSnapMinutes(config.snapMinutes);
 
-		const day = getDayFromX(e.clientX);
+		const day = dayFromX(e.clientX);
 		if (day) createTargetDay = day;
 
-		const minutes = getMinutesFromY(e.clientY);
+		const minutes = minutesFromY(e.clientY);
 		const snappedMinutes = Math.round(minutes / snap) * snap;
 
 		if (snappedMinutes >= createStartMinutes) {
@@ -156,8 +137,7 @@ export function useDragToCreate(getConfig: () => DragToCreateConfig) {
 	}
 
 	function getCreatePreviewTime(): string {
-		const pad = (n: number) => n.toString().padStart(2, '0');
-		return `${pad(Math.floor(createStartMinutes / 60))}:${pad(createStartMinutes % 60)} - ${pad(Math.floor(createEndMinutes / 60))}:${pad(createEndMinutes % 60)}`;
+		return `${formatTime(Math.floor(createStartMinutes / 60), createStartMinutes % 60)} - ${formatTime(Math.floor(createEndMinutes / 60), createEndMinutes % 60)}`;
 	}
 
 	function cancel() {

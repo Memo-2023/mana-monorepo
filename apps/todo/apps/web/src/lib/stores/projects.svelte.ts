@@ -10,8 +10,10 @@ import type { Project } from '@todo/shared';
 import { projectCollection, type LocalProject } from '$lib/data/local-store';
 import { toProject } from '$lib/data/task-queries';
 import { TodoEvents } from '@manacore/shared-utils/analytics';
+import { withErrorHandling } from './store-helpers';
 
 let error = $state<string | null>(null);
+const setError = (e: string | null) => (error = e);
 
 export const projectsStore = {
 	get error() {
@@ -19,85 +21,80 @@ export const projectsStore = {
 	},
 
 	async createProject(data: { name: string; description?: string; color?: string; icon?: string }) {
-		error = null;
-		try {
-			const count = await projectCollection.count();
-			const newLocal: LocalProject = {
-				id: crypto.randomUUID(),
-				name: data.name,
-				color: data.color ?? '#6b7280',
-				icon: data.icon ?? null,
-				order: count,
-				isArchived: false,
-				isDefault: false,
-			};
+		return withErrorHandling(
+			setError,
+			async () => {
+				const count = await projectCollection.count();
+				const newLocal: LocalProject = {
+					id: crypto.randomUUID(),
+					name: data.name,
+					color: data.color ?? '#6b7280',
+					icon: data.icon ?? null,
+					order: count,
+					isArchived: false,
+					isDefault: false,
+				};
 
-			const inserted = await projectCollection.insert(newLocal);
-			TodoEvents.projectCreated();
-			return toProject(inserted);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to create project';
-			console.error('Failed to create project:', e);
-			throw e;
-		}
+				const inserted = await projectCollection.insert(newLocal);
+				TodoEvents.projectCreated();
+				return toProject(inserted);
+			},
+			'Failed to create project'
+		);
 	},
 
 	async updateProject(
 		id: string,
 		data: { name?: string; description?: string; color?: string; icon?: string }
 	) {
-		error = null;
-		try {
-			const updated = await projectCollection.update(id, data as Partial<LocalProject>);
-			if (updated) {
-				return toProject(updated);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update project';
-			console.error('Failed to update project:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const updated = await projectCollection.update(id, data as Partial<LocalProject>);
+				if (updated) {
+					return toProject(updated);
+				}
+			},
+			'Failed to update project'
+		);
 	},
 
 	async deleteProject(id: string) {
-		error = null;
-		try {
-			await projectCollection.delete(id);
-			TodoEvents.projectDeleted();
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to delete project';
-			console.error('Failed to delete project:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				await projectCollection.delete(id);
+				TodoEvents.projectDeleted();
+			},
+			'Failed to delete project'
+		);
 	},
 
 	async archiveProject(id: string) {
-		error = null;
-		try {
-			const updated = await projectCollection.update(id, {
-				isArchived: true,
-			} as Partial<LocalProject>);
-			if (updated) {
-				return toProject(updated);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to archive project';
-			console.error('Failed to archive project:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const updated = await projectCollection.update(id, {
+					isArchived: true,
+				} as Partial<LocalProject>);
+				if (updated) {
+					return toProject(updated);
+				}
+			},
+			'Failed to archive project'
+		);
 	},
 
 	async reorderProjects(projectIds: string[]) {
-		error = null;
-		try {
-			for (let i = 0; i < projectIds.length; i++) {
-				await projectCollection.update(projectIds[i], { order: i } as Partial<LocalProject>);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to reorder projects';
-			console.error('Failed to reorder projects:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				for (let i = 0; i < projectIds.length; i++) {
+					await projectCollection.update(projectIds[i], { order: i } as Partial<LocalProject>);
+				}
+			},
+			'Failed to reorder projects'
+		);
 	},
 
 	get guestInboxId() {

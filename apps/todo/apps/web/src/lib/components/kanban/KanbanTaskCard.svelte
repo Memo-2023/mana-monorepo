@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Task } from '@todo/shared';
-	import { format, isToday, isPast, isTomorrow } from 'date-fns';
-	import { de } from 'date-fns/locale';
+	import { isToday, isPast } from 'date-fns';
+	import { formatDueDate } from '$lib/utils/date-display';
 	import { ConfirmationModal, ContactAvatar } from '@manacore/shared-ui';
 	import TaskEditModal from '../TaskEditModal.svelte';
 	import {
@@ -12,6 +12,7 @@
 		Note,
 		Trash,
 	} from '@manacore/shared-icons';
+	import { PRIORITY_BG_CLASSES } from '$lib/constants/priority';
 
 	interface Props {
 		task: Task;
@@ -36,21 +37,12 @@
 	let contextMenuX = $state(0);
 	let contextMenuY = $state(0);
 
-	// Priority colors (consistent with KanbanFilters)
-	const priorityColors: Record<string, string> = {
-		low: 'bg-blue-500',
-		medium: 'bg-yellow-500',
-		high: 'bg-orange-500',
-		urgent: 'bg-red-500',
-	};
+	const priorityColors = PRIORITY_BG_CLASSES;
 
 	// Format due date
 	let dueDateText = $derived(() => {
 		if (!task.dueDate) return null;
-		const date = new Date(task.dueDate);
-		if (isToday(date)) return 'Heute';
-		if (isTomorrow(date)) return 'Morgen';
-		return format(date, 'dd. MMM', { locale: de });
+		return formatDueDate(new Date(task.dueDate));
 	});
 
 	// Check if overdue

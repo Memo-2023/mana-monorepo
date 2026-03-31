@@ -10,8 +10,10 @@ import type { Task, TaskPriority, TaskStatus, Subtask } from '@todo/shared';
 import { taskCollection, type LocalTask } from '$lib/data/local-store';
 import { toTask } from '$lib/data/task-queries';
 import { TodoEvents } from '@manacore/shared-utils/analytics';
+import { withErrorHandling } from './store-helpers';
 
 let error = $state<string | null>(null);
+const setError = (e: string | null) => (error = e);
 
 export const tasksStore = {
 	get error() {
@@ -29,31 +31,30 @@ export const tasksStore = {
 		recurrenceRule?: string;
 		estimatedDuration?: number;
 	}) {
-		error = null;
-		try {
-			const count = await taskCollection.count();
-			const newLocal: LocalTask = {
-				id: crypto.randomUUID(),
-				title: data.title,
-				description: data.description,
-				projectId: data.projectId ?? null,
-				priority: data.priority ?? 'medium',
-				isCompleted: false,
-				dueDate: data.dueDate ?? null,
-				estimatedDuration: data.estimatedDuration ?? null,
-				order: count,
-				recurrenceRule: data.recurrenceRule ?? null,
-				subtasks: data.subtasks,
-			};
+		return withErrorHandling(
+			setError,
+			async () => {
+				const count = await taskCollection.count();
+				const newLocal: LocalTask = {
+					id: crypto.randomUUID(),
+					title: data.title,
+					description: data.description,
+					projectId: data.projectId ?? null,
+					priority: data.priority ?? 'medium',
+					isCompleted: false,
+					dueDate: data.dueDate ?? null,
+					estimatedDuration: data.estimatedDuration ?? null,
+					order: count,
+					recurrenceRule: data.recurrenceRule ?? null,
+					subtasks: data.subtasks,
+				};
 
-			const inserted = await taskCollection.insert(newLocal);
-			TodoEvents.taskCreated(!!data.dueDate);
-			return toTask(inserted);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to create task';
-			console.error('Failed to create task:', e);
-			throw e;
-		}
+				const inserted = await taskCollection.insert(newLocal);
+				TodoEvents.taskCreated(!!data.dueDate);
+				return toTask(inserted);
+			},
+			'Failed to create task'
+		);
 	},
 
 	async updateTask(
@@ -77,17 +78,16 @@ export const tasksStore = {
 			labelIds?: string[];
 		}
 	) {
-		error = null;
-		try {
-			const updated = await taskCollection.update(id, data as Partial<LocalTask>);
-			if (updated) {
-				return toTask(updated);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update task';
-			console.error('Failed to update task:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const updated = await taskCollection.update(id, data as Partial<LocalTask>);
+				if (updated) {
+					return toTask(updated);
+				}
+			},
+			'Failed to update task'
+		);
 	},
 
 	async updateTaskOptimistic(
@@ -108,107 +108,102 @@ export const tasksStore = {
 	},
 
 	async deleteTask(id: string) {
-		error = null;
-		try {
-			await taskCollection.delete(id);
-			TodoEvents.taskDeleted();
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to delete task';
-			console.error('Failed to delete task:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				await taskCollection.delete(id);
+				TodoEvents.taskDeleted();
+			},
+			'Failed to delete task'
+		);
 	},
 
 	async completeTask(id: string) {
-		error = null;
-		try {
-			const updated = await taskCollection.update(id, {
-				isCompleted: true,
-				completedAt: new Date().toISOString(),
-			} as Partial<LocalTask>);
-			if (updated) {
-				TodoEvents.taskCompleted();
-				return toTask(updated);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to complete task';
-			console.error('Failed to complete task:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const updated = await taskCollection.update(id, {
+					isCompleted: true,
+					completedAt: new Date().toISOString(),
+				} as Partial<LocalTask>);
+				if (updated) {
+					TodoEvents.taskCompleted();
+					return toTask(updated);
+				}
+			},
+			'Failed to complete task'
+		);
 	},
 
 	async uncompleteTask(id: string) {
-		error = null;
-		try {
-			const updated = await taskCollection.update(id, {
-				isCompleted: false,
-				completedAt: null,
-			} as Partial<LocalTask>);
-			if (updated) {
-				TodoEvents.taskUncompleted();
-				return toTask(updated);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to uncomplete task';
-			console.error('Failed to uncomplete task:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const updated = await taskCollection.update(id, {
+					isCompleted: false,
+					completedAt: null,
+				} as Partial<LocalTask>);
+				if (updated) {
+					TodoEvents.taskUncompleted();
+					return toTask(updated);
+				}
+			},
+			'Failed to uncomplete task'
+		);
 	},
 
 	async moveTask(id: string, projectId: string | null) {
-		error = null;
-		try {
-			const updated = await taskCollection.update(id, { projectId } as Partial<LocalTask>);
-			if (updated) {
-				return toTask(updated);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to move task';
-			console.error('Failed to move task:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const updated = await taskCollection.update(id, { projectId } as Partial<LocalTask>);
+				if (updated) {
+					return toTask(updated);
+				}
+			},
+			'Failed to move task'
+		);
 	},
 
 	async updateLabels(id: string, labelIds: string[]) {
-		error = null;
-		try {
-			const updated = await taskCollection.update(id, {
-				metadata: { labelIds },
-			} as Partial<LocalTask>);
-			if (updated) {
-				return toTask(updated);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update labels';
-			console.error('Failed to update labels:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const updated = await taskCollection.update(id, {
+					metadata: { labelIds },
+				} as Partial<LocalTask>);
+				if (updated) {
+					return toTask(updated);
+				}
+			},
+			'Failed to update labels'
+		);
 	},
 
 	async updateSubtasks(id: string, subtasks: Subtask[]) {
-		error = null;
-		try {
-			const updated = await taskCollection.update(id, { subtasks } as Partial<LocalTask>);
-			if (updated) {
-				return toTask(updated);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update subtasks';
-			console.error('Failed to update subtasks:', e);
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const updated = await taskCollection.update(id, { subtasks } as Partial<LocalTask>);
+				if (updated) {
+					return toTask(updated);
+				}
+			},
+			'Failed to update subtasks'
+		);
 	},
 
 	async reorderTasks(taskIds: string[]) {
-		error = null;
-		try {
-			for (let i = 0; i < taskIds.length; i++) {
-				await taskCollection.update(taskIds[i], { order: i } as Partial<LocalTask>);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to reorder tasks';
-			console.error('Failed to reorder tasks:', e);
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				for (let i = 0; i < taskIds.length; i++) {
+					await taskCollection.update(taskIds[i], { order: i } as Partial<LocalTask>);
+				}
+			},
+			'Failed to reorder tasks',
+			{ rethrow: false }
+		);
 	},
 
 	isDemoTask(_taskId: string) {

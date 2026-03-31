@@ -6,8 +6,10 @@
  */
 
 import { boardViewCollection, type LocalBoardView, type ViewColumn } from '$lib/data/local-store';
+import { withErrorHandling } from './store-helpers';
 
 let error = $state<string | null>(null);
+const setError = (e: string | null) => (error = e);
 
 export const boardViewsStore = {
 	get error() {
@@ -15,70 +17,74 @@ export const boardViewsStore = {
 	},
 
 	async createView(data: Omit<LocalBoardView, 'id'>) {
-		error = null;
-		try {
-			const count = await boardViewCollection.count();
-			const newView: LocalBoardView = {
-				...data,
-				id: crypto.randomUUID(),
-				order: data.order ?? count,
-			};
-			return await boardViewCollection.insert(newView);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to create view';
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				const count = await boardViewCollection.count();
+				const newView: LocalBoardView = {
+					...data,
+					id: crypto.randomUUID(),
+					order: data.order ?? count,
+				};
+				return await boardViewCollection.insert(newView);
+			},
+			'Failed to create view',
+			{ log: false }
+		);
 	},
 
 	async updateView(id: string, data: Partial<LocalBoardView>) {
-		error = null;
-		try {
-			return await boardViewCollection.update(id, data as Partial<LocalBoardView>);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update view';
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				return await boardViewCollection.update(id, data as Partial<LocalBoardView>);
+			},
+			'Failed to update view',
+			{ log: false }
+		);
 	},
 
 	async deleteView(id: string) {
-		error = null;
-		try {
-			await boardViewCollection.delete(id);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to delete view';
-			throw e;
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				await boardViewCollection.delete(id);
+			},
+			'Failed to delete view',
+			{ log: false }
+		);
 	},
 
 	async reorderViews(viewIds: string[]) {
-		error = null;
-		try {
-			for (let i = 0; i < viewIds.length; i++) {
-				await boardViewCollection.update(viewIds[i], { order: i } as Partial<LocalBoardView>);
-			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to reorder views';
-		}
+		return withErrorHandling(
+			setError,
+			async () => {
+				for (let i = 0; i < viewIds.length; i++) {
+					await boardViewCollection.update(viewIds[i], { order: i } as Partial<LocalBoardView>);
+				}
+			},
+			'Failed to reorder views',
+			{ rethrow: false, log: false }
+		);
 	},
 
 	/** Update a column's taskIds (for custom groupBy with manual task assignment) */
 	async updateColumnTaskIds(viewId: string, columnId: string, taskIds: string[]) {
-		error = null;
-		try {
-			const view = await boardViewCollection.get(viewId);
-			if (!view) return;
+		return withErrorHandling(
+			setError,
+			async () => {
+				const view = await boardViewCollection.get(viewId);
+				if (!view) return;
 
-			const updatedColumns = view.columns.map((col: ViewColumn) =>
-				col.id === columnId
-					? { ...col, match: { ...col.match, taskIds } }
-					: col
-			);
-			await boardViewCollection.update(viewId, {
-				columns: updatedColumns,
-			} as Partial<LocalBoardView>);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update column';
-			throw e;
-		}
+				const updatedColumns = view.columns.map((col: ViewColumn) =>
+					col.id === columnId ? { ...col, match: { ...col.match, taskIds } } : col
+				);
+				await boardViewCollection.update(viewId, {
+					columns: updatedColumns,
+				} as Partial<LocalBoardView>);
+			},
+			'Failed to update column',
+			{ log: false }
+		);
 	},
 };

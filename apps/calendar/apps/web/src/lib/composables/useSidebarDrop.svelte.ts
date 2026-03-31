@@ -5,7 +5,7 @@
 
 import { todosStore } from '$lib/stores/todos.svelte';
 import { format } from 'date-fns';
-import { SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
+import { formatTime, getSnapMinutes } from '$lib/utils/drag-helpers';
 
 export interface SidebarDropConfig {
 	/** First visible hour (for filtered hours mode) */
@@ -19,14 +19,6 @@ export interface SidebarDropConfig {
 export function useSidebarDrop(getConfig: () => SidebarDropConfig) {
 	// Track active drop target (for visual feedback)
 	let dropTarget = $state<{ day: Date; y: number } | null>(null);
-
-	function getSnapMinutes(): number {
-		return getConfig().snapMinutes ?? SNAP_INTERVAL_MINUTES;
-	}
-
-	function formatTime(hours: number, minutes: number): string {
-		return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-	}
 
 	/**
 	 * Handle dragover event on a day column
@@ -82,7 +74,7 @@ export function useSidebarDrop(getConfig: () => SidebarDropConfig) {
 
 			const minutesPerPercent = (config.totalVisibleHours * 60) / 100;
 			const rawMinutes = percentY * minutesPerPercent;
-			const snapMinutes = getSnapMinutes();
+			const snapMinutes = getSnapMinutes(getConfig().snapMinutes);
 			const snappedMinutes = Math.round(rawMinutes / snapMinutes) * snapMinutes;
 			const totalMinutes = config.firstVisibleHour * 60 + snappedMinutes;
 

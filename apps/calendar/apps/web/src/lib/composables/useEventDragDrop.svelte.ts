@@ -7,7 +7,7 @@ import type { CalendarEvent } from '@calendar/shared';
 import { differenceInMinutes, addMinutes, setHours, setMinutes } from 'date-fns';
 import { toDate } from '$lib/utils/eventDateHelpers';
 import { eventsStore } from '$lib/stores/events.svelte';
-import { SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
+import { formatTime, getDayFromX, getMinutesFromY } from '$lib/utils/drag-helpers';
 
 export interface EventDragDropConfig {
 	/** Reference to the container element for position calculations */
@@ -69,51 +69,21 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 
 	// ========== Helper Functions ==========
 
-	function getSnapMinutes(): number {
-		return getConfig().snapMinutes ?? SNAP_INTERVAL_MINUTES;
-	}
-
-	function snapToGrid(minutes: number): number {
-		const snap = getSnapMinutes();
-		return Math.round(minutes / snap) * snap;
-	}
-
-	/**
-	 * Get day from X coordinate (for multi-day views)
-	 */
-	function getDayFromX(clientX: number): Date | null {
+	function dayFromX(clientX: number): Date | null {
 		const config = getConfig();
-		if (!config.containerEl) return null;
-
-		const rect = config.containerEl.getBoundingClientRect();
-		const relativeX = clientX - rect.left;
-		const dayWidth = rect.width / config.days.length;
-		const dayIndex = Math.floor(relativeX / dayWidth);
-
-		if (dayIndex >= 0 && dayIndex < config.days.length) {
-			return config.days[dayIndex];
-		}
-		return null;
+		return getDayFromX(clientX, config.containerEl, config.days);
 	}
 
-	/**
-	 * Get minutes from Y coordinate
-	 */
-	function getMinutesFromY(clientY: number): number {
+	function minutesFromY(clientY: number): number {
 		const config = getConfig();
-		if (!config.containerEl) return 0;
-
-		const rect = config.containerEl.getBoundingClientRect();
-		const scrollTop = config.containerEl.parentElement?.scrollTop || 0;
-		const relativeY = clientY - rect.top + scrollTop;
-
-		// Account for hidden early hours
-		const visibleMinutes =
-			(relativeY / (config.totalVisibleHours * config.hourHeight)) * config.totalVisibleHours * 60;
-		const totalMinutes = visibleMinutes + config.firstVisibleHour * 60;
-
-		// Snap to interval
-		return snapToGrid(totalMinutes);
+		return getMinutesFromY(
+			clientY,
+			config.containerEl,
+			config.totalVisibleHours,
+			config.hourHeight,
+			config.firstVisibleHour,
+			config.snapMinutes
+		);
 	}
 
 	// ========== Drag Functions ==========
@@ -139,7 +109,7 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 		dragTargetDay = start;
 
 		// Calculate offset from event start to click position
-		const clickMinutes = getMinutesFromY(e.clientY);
+		const clickMinutes = minutesFromY(e.clientY);
 		dragOffsetMinutes = clickMinutes - startMinutes;
 
 		document.addEventListener('pointermove', handleDragMove);
@@ -153,8 +123,8 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 		hasMoved = true;
 
 		// Calculate new position
-		const newDay = getDayFromX(e.clientX);
-		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
+		const newDay = dayFromX(e.clientX);
+		const newMinutes = minutesFromY(e.clientY) - dragOffsetMinutes;
 
 		// Clamp to valid range
 		const clampedMinutes = Math.max(
@@ -183,7 +153,7 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 		const duration = differenceInMinutes(end, start);
 
 		// Calculate new start time
-		const newMinutes = getMinutesFromY(e.clientY) - dragOffsetMinutes;
+		const newMinutes = minutesFromY(e.clientY) - dragOffsetMinutes;
 		const clampedMinutes = Math.max(0, Math.min(24 * 60 - 15, newMinutes));
 		const newHours = Math.floor(clampedMinutes / 60);
 		const newMins = clampedMinutes % 60;
@@ -244,7 +214,7 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 		resizePreviewHeight = (duration / (config.totalVisibleHours * 60)) * 100;
 
 		// Calculate offset between snapped click position and actual event boundary
-		const clickMinutes = getMinutesFromY(e.clientY);
+		const clickMinutes = minutesFromY(e.clientY);
 		if (edge === 'top') {
 			resizeOffsetMinutes = clickMinutes - startMinutes;
 		} else {
@@ -261,7 +231,7 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 		const config = getConfig();
 		hasMoved = true;
 
-		const currentMinutes = getMinutesFromY(e.clientY);
+		const currentMinutes = minutesFromY(e.clientY);
 		// Apply offset to prevent jumping when drag starts
 		const adjustedMinutes = currentMinutes - resizeOffsetMinutes;
 		const originalStartMinutes =
@@ -298,7 +268,7 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 		}
 
 		const config = getConfig();
-		const currentMinutes = getMinutesFromY(e.clientY);
+		const currentMinutes = minutesFromY(e.clientY);
 		// Apply offset to prevent jumping
 		const adjustedMinutes = currentMinutes - resizeOffsetMinutes;
 		const originalStartMinutes =
@@ -399,8 +369,7 @@ export function useEventDragDrop(getConfig: () => EventDragDropConfig) {
 			endMin = Math.round(previewEndMinutes);
 		}
 
-		const pad = (n: number) => n.toString().padStart(2, '0');
-		return `${pad(Math.floor(startMin / 60))}:${pad(startMin % 60)} - ${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`;
+		return `${formatTime(Math.floor(startMin / 60), startMin % 60)} - ${formatTime(Math.floor(endMin / 60), endMin % 60)}`;
 	}
 
 	return {

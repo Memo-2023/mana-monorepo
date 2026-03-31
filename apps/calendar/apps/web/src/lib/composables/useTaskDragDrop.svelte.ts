@@ -8,7 +8,7 @@
 import type { Task } from '$lib/stores/todos.svelte';
 import { todosStore } from '$lib/stores/todos.svelte';
 import { format } from 'date-fns';
-import { SNAP_INTERVAL_MINUTES } from '$lib/utils/calendarConstants';
+import { formatTime, getSnapMinutes } from '$lib/utils/drag-helpers';
 
 export interface TaskDragDropConfig {
 	/** Reference to the container element for position calculations */
@@ -42,14 +42,6 @@ export function useTaskDragDrop(getConfig: () => TaskDragDropConfig) {
 	let hasMoved = $state(false);
 
 	// ========== Helper Functions ==========
-
-	function getSnapMinutes(): number {
-		return getConfig().snapMinutes ?? SNAP_INTERVAL_MINUTES;
-	}
-
-	function formatTime(hours: number, minutes: number): string {
-		return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-	}
 
 	// ========== Drag Functions ==========
 
@@ -105,7 +97,7 @@ export function useTaskDragDrop(getConfig: () => TaskDragDropConfig) {
 		// Snap to intervals
 		const minutesPerPercent = (config.totalVisibleHours * 60) / 100;
 		const rawMinutes = percentY * minutesPerPercent;
-		const snapMinutes = getSnapMinutes();
+		const snapMinutes = getSnapMinutes(getConfig().snapMinutes);
 		const snappedMinutes = Math.round(rawMinutes / snapMinutes) * snapMinutes;
 		taskDragPreviewTop = (snappedMinutes / (config.totalVisibleHours * 60)) * 100;
 	}
@@ -192,7 +184,7 @@ export function useTaskDragDrop(getConfig: () => TaskDragDropConfig) {
 		const percentY = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
 
 		const minutesPerPercent = (config.totalVisibleHours * 60) / 100;
-		const snapMinutes = getSnapMinutes();
+		const snapMinutes = getSnapMinutes(getConfig().snapMinutes);
 
 		if (taskResizeEdge === 'top') {
 			// Adjust start time, keep end fixed

@@ -9,8 +9,8 @@
 	} from '@todo/shared';
 	import type { ContactReference, ContactOrManual } from '@manacore/shared-types';
 	import { STATUS_OPTIONS, RECURRENCE_OPTIONS } from '@todo/shared';
-	import { format, isToday, isPast, isTomorrow } from 'date-fns';
-	import { de } from 'date-fns/locale';
+	import { isToday, isPast } from 'date-fns';
+	import { formatDueDate } from '$lib/utils/date-display';
 	import { getContext } from 'svelte';
 	import type { Project } from '@todo/shared';
 	import { getActiveProjects, getProjectColor } from '$lib/data/task-queries';
@@ -27,6 +27,7 @@
 		FunRatingPicker,
 		TagSelector,
 	} from './form';
+	import { PRIORITY_COLORS } from '$lib/constants/priority';
 
 	interface Props {
 		task: Task;
@@ -291,21 +292,12 @@
 		subtasks = newSubtasks;
 	}
 
-	// Priority colors
-	const priorityColors: Record<string, string> = {
-		low: '#22c55e',
-		medium: '#eab308',
-		high: '#f97316',
-		urgent: '#ef4444',
-	};
+	const priorityColors = PRIORITY_COLORS;
 
 	// Format due date
 	let dueDateText = $derived(() => {
 		if (!task.dueDate) return null;
-		const date = new Date(task.dueDate);
-		if (isToday(date)) return 'Heute';
-		if (isTomorrow(date)) return 'Morgen';
-		return format(date, 'dd. MMM', { locale: de });
+		return formatDueDate(new Date(task.dueDate));
 	});
 
 	// Check if overdue
