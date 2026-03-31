@@ -188,7 +188,7 @@
 		}
 
 		// Send password reset email
-		const result = await authService.forgotPassword(email);
+		const result = await authStore.resetPassword(email);
 
 		loading = false;
 
