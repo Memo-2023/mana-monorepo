@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Monorepo Overview
 
-This is a pnpm workspace monorepo containing multiple product applications with shared packages. All projects use Supabase for database/auth and follow similar architectural patterns.
+This is a pnpm workspace monorepo containing multiple product applications with shared packages. All projects use a local-first architecture (Dexie.js + mana-sync) with Hono/Bun compute servers and follow consistent patterns.
 
 **Package Manager:** pnpm 9.15.0 (use `pnpm` for all commands)
 **Build System:** Turborepo
@@ -20,7 +20,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | [`.claude/guidelines/code-style.md`](.claude/guidelines/code-style.md) | Formatting, naming, linting |
 | [`.claude/guidelines/database.md`](.claude/guidelines/database.md) | Drizzle ORM, schema patterns |
 | [`.claude/guidelines/testing.md`](.claude/guidelines/testing.md) | Jest/Vitest, mock factories |
-| [`.claude/guidelines/nestjs-backend.md`](.claude/guidelines/nestjs-backend.md) | Controllers, services, DTOs |
+| [`.claude/guidelines/hono-server.md`](.claude/guidelines/hono-server.md) | Hono/Bun compute servers |
 | [`.claude/guidelines/error-handling.md`](.claude/guidelines/error-handling.md) | Go-style Result types, error codes |
 | [`.claude/guidelines/sveltekit-web.md`](.claude/guidelines/sveltekit-web.md) | Svelte 5 runes, stores |
 | [`.claude/guidelines/expo-mobile.md`](.claude/guidelines/expo-mobile.md) | React Native, NativeWind |
@@ -123,8 +123,9 @@ pnpm run contacts:dev
 
 # Start specific app within project
 pnpm run dev:chat:mobile     # Just mobile app
-pnpm run dev:chat:backend    # Just NestJS backend
-pnpm run dev:chat:app        # Web + backend together
+pnpm run dev:chat:server     # Just Hono/Bun server
+pnpm run dev:chat:local      # sync + server + web (no auth needed)
+pnpm run dev:chat:app        # Server + web together
 
 # Build & quality
 pnpm run build
@@ -143,7 +144,7 @@ manacore-monorepo/
 ├── apps/                    # Active SaaS product applications
 │   ├── chat/
 │   │   ├── apps/
-│   │   │   ├── backend/     # NestJS API
+│   │   │   ├── server/      # Hono/Bun compute server
 │   │   │   ├── mobile/      # Expo React Native app
 │   │   │   ├── web/         # SvelteKit web app
 │   │   │   └── landing/     # Astro marketing page
@@ -193,7 +194,7 @@ manacore-monorepo/
 ```
 apps/{project}/
 ├── apps/
-│   ├── backend/     # NestJS API (when present)
+│   ├── server/      # Hono/Bun compute server (when present)
 │   ├── mobile/      # Expo React Native app
 │   ├── web/         # SvelteKit web app
 │   └── landing/     # Astro marketing page
@@ -259,11 +260,11 @@ Parent workspace packages (e.g., `apps/chat/package.json`, `apps/zitare/package.
 - Tailwind CSS
 - Static site generation
 
-**Backends (NestJS):**
+**Compute Servers (Hono + Bun):**
 
-- NestJS 10-11
-- TypeScript
-- Supabase integration
+- Hono 4.x + Bun runtime
+- TypeScript, Drizzle ORM (where needed)
+- `@manacore/shared-hono` for auth middleware
 
 ### Authentication Architecture
 
@@ -271,8 +272,8 @@ All projects use **mana-core-auth** as the central authentication service:
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌────────────────┐
-│   Client    │────>│  Backend    │────>│ mana-core-auth │
-│ (Web/Mobile)│     │  (NestJS)   │     │  (port 3001)   │
+│   Client    │────>│  Server     │────>│   mana-auth    │
+│ (Web/Mobile)│     │ (Hono/Bun)  │     │  (port 3001)   │
 └─────────────┘     └─────────────┘     └────────────────┘
       │                   │                     │
       │ Bearer token      │ POST /validate      │
@@ -287,82 +288,36 @@ All projects use **mana-core-auth** as the central authentication service:
 
 | Component                       | Purpose                                            |
 | ------------------------------- | -------------------------------------------------- |
-| `services/mana-core-auth`       | Central auth service (Better Auth + EdDSA JWT)     |
-| `@manacore/shared-nestjs-auth`  | Shared NestJS guards/decorators for JWT validation |
-| `@mana-core/nestjs-integration` | Extended NestJS module with auth + credits         |
+| `services/mana-auth`            | Central auth service (Better Auth + EdDSA JWT)     |
+| `@manacore/shared-hono`         | Shared Hono middleware for JWT validation           |
 | `@manacore/shared-auth`         | Client-side auth for web/mobile apps               |
 
-#### NestJS Backend Integration
+#### Hono Server Auth Integration
 
-**Option 1: Simple auth only** - Use `@manacore/shared-nestjs-auth`:
-
-```typescript
-// In your controller
-import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
-
-@Controller('api')
-@UseGuards(JwtAuthGuard)
-export class MyController {
-	@Get('profile')
-	getProfile(@CurrentUser() user: CurrentUserData) {
-		return { userId: user.userId, email: user.email };
-	}
-}
-```
-
-**Option 2: Auth + Credits** - Use `@mana-core/nestjs-integration`:
+All compute servers use `@manacore/shared-hono` for auth:
 
 ```typescript
-// app.module.ts
-import { ManaCoreModule } from '@mana-core/nestjs-integration';
+import { authMiddleware, healthRoute, errorHandler, notFoundHandler } from '@manacore/shared-hono';
 
-@Module({
-	imports: [
-		ManaCoreModule.forRootAsync({
-			imports: [ConfigModule],
-			useFactory: (config: ConfigService) => ({
-				appId: config.get('APP_ID'),
-				serviceKey: config.get('MANA_CORE_SERVICE_KEY'),
-				debug: config.get('NODE_ENV') === 'development',
-			}),
-			inject: [ConfigService],
-		}),
-	],
-})
-export class AppModule {}
+const app = new Hono();
+app.onError(errorHandler);
+app.notFound(notFoundHandler);
+app.route('/health', healthRoute('my-server'));
+app.use('/api/*', authMiddleware());
 
-// In controller
-import { AuthGuard } from '@mana-core/nestjs-integration/guards';
-import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
-import { CreditClientService } from '@mana-core/nestjs-integration';
-
-@Controller('api')
-@UseGuards(AuthGuard)
-export class ApiController {
-	constructor(private creditClient: CreditClientService) {}
-
-	@Post('generate')
-	async generate(@CurrentUser() user: any) {
-		await this.creditClient.consumeCredits(user.sub, 'generation', 10, 'AI generation');
-		// ... do work
-	}
-}
+// In route handlers, get user from context:
+app.get('/api/v1/data', (c) => {
+  const userId = c.get('userId');
+  // ...
+});
 ```
 
 #### Required Environment Variables
 
 ```env
-# All backends need this
+# All servers need this
 MANA_CORE_AUTH_URL=http://localhost:3001
-
-# For development bypass (optional)
-NODE_ENV=development
-DEV_BYPASS_AUTH=true
-DEV_USER_ID=your-test-user-id
-
-# For credit operations (optional)
-MANA_CORE_SERVICE_KEY=your-service-key
-APP_ID=your-app-id
+CORS_ORIGINS=http://localhost:5173
 ```
 
 #### JWT Token Structure (EdDSA)
@@ -382,11 +337,11 @@ APP_ID=your-app-id
 #### Testing Auth Integration
 
 ```bash
-# 1. Start mana-core-auth
+# 1. Start mana-auth
 pnpm dev:auth
 
-# 2. Start a backend (e.g., Zitare)
-pnpm dev:zitare:backend
+# 2. Start an app locally
+pnpm dev:contacts:local
 
 # 3. Get a token
 TOKEN=$(curl -s -X POST http://localhost:3001/api/v1/auth/login \
@@ -394,19 +349,9 @@ TOKEN=$(curl -s -X POST http://localhost:3001/api/v1/auth/login \
   -d '{"email": "test@example.com", "password": "password"}' | jq -r '.accessToken')
 
 # 4. Call protected endpoint
-curl http://localhost:3007/api/favorites \
+curl http://localhost:3033/api/v1/import/vcard \
   -H "Authorization: Bearer $TOKEN"
 ```
-
-#### Integrated Backends
-
-| Backend  | Package                         | Port |
-| -------- | ------------------------------- | ---- |
-| Chat     | `@mana-core/nestjs-integration` | 3002 |
-| Picture  | `@manacore/shared-nestjs-auth`  | 3006 |
-| Zitare   | `@manacore/shared-nestjs-auth`  | 3007 |
-| Presi    | Custom (same pattern)           | 3008 |
-| ManaDeck | `@mana-core/nestjs-integration` | 3009 |
 
 #### Adding a New App to SSO
 
@@ -585,7 +530,7 @@ CACHE_SEARCH_TTL=3600
 CACHE_EXTRACT_TTL=86400
 ```
 
-#### Usage in Backend
+#### Usage in Server
 
 ```typescript
 // Direct fetch
@@ -674,8 +619,8 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 pnpm dev:sync              # Go sync server (port 3050)
 pnpm dev:sync:build        # Compile Go binary
 pnpm dev:todo:server       # Hono/Bun compute server (port 3019)
-pnpm dev:todo:local        # Web + sync + Hono (no auth/NestJS needed)
-pnpm dev:todo:full         # Everything incl. auth + NestJS legacy
+pnpm dev:todo:local        # Web + sync + server (no auth needed)
+pnpm dev:todo:full         # Everything incl. auth + DB setup
 ```
 
 ### Adding Local-First to a New App
@@ -696,8 +641,7 @@ Full migration plan: `.claude/plans/local-first-architecture-migration.md`
 | Package                         | Purpose                                         |
 | ------------------------------- | ----------------------------------------------- |
 | `@manacore/local-store`         | Local-first data layer (Dexie.js + sync engine) |
-| `@manacore/shared-nestjs-auth`  | NestJS JWT validation guards via mana-core-auth |
-| `@mana-core/nestjs-integration` | NestJS module with auth guards + credit client  |
+| `@manacore/shared-hono`         | Shared Hono middleware (auth, health, errors)   |
 | `@manacore/shared-auth`         | Client-side auth service for web/mobile apps    |
 | `@manacore/shared-storage`      | S3-compatible storage (MinIO)                     |
 | `@manacore/shared-types`        | Common TypeScript types                         |
@@ -756,7 +700,7 @@ pnpm docker:up
 | `contacts-storage` | Contacts | Contact avatars/files |
 | `storage-storage` | Storage | Cloud drive files |
 
-### Usage in Backend
+### Usage in Server
 
 ```typescript
 import { createPictureStorage, generateUserFileKey, getContentType } from '@manacore/shared-storage';
@@ -944,7 +888,7 @@ docker compose -f docker-compose.macmini.yml logs -f  # View logs
 All apps build on shared base images to reduce build time and memory usage:
 
 - **`sveltekit-base:local`** (`docker/Dockerfile.sveltekit-base`) — All shared packages for SvelteKit web apps
-- **`nestjs-base:local`** (`docker/Dockerfile.nestjs-base`) — All shared packages for NestJS backends
+- **`hono-server`** (`docker/Dockerfile.hono-server`) — Hono/Bun compute server template
 
 Rebuild base images after shared package changes: `./scripts/mac-mini/build-app.sh --base`
 
@@ -1010,7 +954,7 @@ The script reads `.env.development` and generates platform-specific `.env` files
 
 - **Expo mobile**: `EXPO_PUBLIC_*` prefix
 - **SvelteKit web**: `PUBLIC_*` prefix
-- **NestJS backend**: No prefix
+- **Hono/Bun server**: No prefix
 
 ### Key Files
 
@@ -1041,12 +985,12 @@ PUBLIC_SUPABASE_URL=...
 PUBLIC_SUPABASE_ANON_KEY=...
 ```
 
-**Backend (NestJS):**
+**Server (Hono/Bun):**
 
 ```
-SUPABASE_URL=...
-SUPABASE_SERVICE_ROLE_KEY=...
 PORT=...
+DATABASE_URL=...
+MANA_CORE_AUTH_URL=...
 ```
 
 ## Project-Specific Documentation

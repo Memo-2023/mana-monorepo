@@ -70,9 +70,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Chat Backend
+	// Chat Server (Hono/Bun)
 	{
-		path: 'apps/chat/apps/backend/.env',
+		path: 'apps/chat/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CHAT_BACKEND_PORT || '3002',
@@ -130,9 +130,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Manadeck Backend
+	// Manadeck Server (Hono/Bun)
 	{
-		path: 'apps/manadeck/apps/backend/.env',
+		path: 'apps/manadeck/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MANADECK_BACKEND_PORT || '3004',
@@ -154,9 +154,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Picture Backend (NestJS)
+	// Picture Server (Hono/Bun)
 	{
-		path: 'apps/picture/apps/backend/.env',
+		path: 'apps/picture/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.PICTURE_BACKEND_PORT || '3006',
@@ -204,9 +204,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Nutriphi Backend (NestJS)
+	// Nutriphi Server (Hono/Bun)
 	{
-		path: 'apps/nutriphi/apps/backend/.env',
+		path: 'apps/nutriphi/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.NUTRIPHI_BACKEND_PORT || '3002',
@@ -282,9 +282,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Mana Games Backend (NestJS)
+	// Arcade Backend (NestJS)
 	{
-		path: 'games/mana-games/apps/backend/.env',
+		path: 'games/arcade/apps/backend/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MANA_GAMES_BACKEND_PORT || '3011',
@@ -304,17 +304,17 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Mana Games Web (Astro)
+	// Arcade Web (Astro)
 	{
-		path: 'games/mana-games/apps/web/.env',
+		path: 'games/arcade/apps/web/.env',
 		vars: {
 			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MANA_GAMES_BACKEND_PORT || '3011'}`,
 		},
 	},
 
-	// Context Backend (NestJS)
+	// Context Server (Hono/Bun)
 	{
-		path: 'apps/context/apps/backend/.env',
+		path: 'apps/context/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CONTEXT_BACKEND_PORT || '3020',
@@ -338,9 +338,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Calendar Backend (NestJS)
+	// Calendar Server (Hono/Bun)
 	{
-		path: 'apps/calendar/apps/backend/.env',
+		path: 'apps/calendar/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CALENDAR_BACKEND_PORT || '3014',
@@ -379,9 +379,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Contacts Backend (NestJS)
+	// Contacts Server (Hono/Bun)
 	{
-		path: 'apps/contacts/apps/backend/.env',
+		path: 'apps/contacts/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.CONTACTS_BACKEND_PORT || '3015',
@@ -422,9 +422,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Storage Backend (NestJS)
+	// Storage Server (Hono/Bun)
 	{
-		path: 'apps/storage/apps/backend/.env',
+		path: 'apps/storage/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.STORAGE_BACKEND_PORT || '3016',
@@ -467,9 +467,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Todo Backend (NestJS)
+	// Todo Server (Hono/Bun)
 	{
-		path: 'apps/todo/apps/backend/.env',
+		path: 'apps/todo/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.TODO_BACKEND_PORT || '3018',
@@ -492,9 +492,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Moodlit Backend (NestJS)
+	// Moodlit Server (Hono/Bun)
 	{
-		path: 'apps/moodlit/apps/backend/.env',
+		path: 'apps/moodlit/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MOODLIT_BACKEND_PORT || '3012',
@@ -524,37 +524,7 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Finance Backend (NestJS)
-	{
-		path: 'apps/finance/apps/backend/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.FINANCE_BACKEND_PORT || '3019',
-			DATABASE_URL: (env) => env.FINANCE_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			DEV_BYPASS_AUTH: () => 'true',
-			DEV_USER_ID: (env) => env.DEV_USER_ID || '00000000-0000-0000-0000-000000000000',
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-		},
-	},
-
-	// Finance Mobile (Expo)
-	{
-		path: 'apps/finance/apps/mobile/.env',
-		vars: {
-			EXPO_PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.FINANCE_BACKEND_PORT || '3019'}`,
-			EXPO_PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-		},
-	},
-
-	// Finance Web (SvelteKit)
-	{
-		path: 'apps/finance/apps/web/.env',
-		vars: {
-			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.FINANCE_BACKEND_PORT || '3019'}`,
-			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-		},
-	},
+	// Finance: REMOVED
 
 	// Worldream Web (SvelteKit)
 	{
@@ -576,29 +546,11 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// TechBase Backend (NestJS)
-	{
-		path: 'apps/techbase/apps/backend/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.TECHBASE_BACKEND_PORT || '3021',
-			DATABASE_URL: (env) => env.TECHBASE_DATABASE_URL,
-			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			CORS_ORIGINS: () => 'http://localhost:4321,http://localhost:5173',
-		},
-	},
+	// TechBase: REMOVED
 
-	// TechBase Web (Astro)
+	// Traces Server (Hono/Bun)
 	{
-		path: 'apps/techbase/apps/web/.env',
-		vars: {
-			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.TECHBASE_BACKEND_PORT || '3021'}`,
-		},
-	},
-
-	// Traces Backend (NestJS)
-	{
-		path: 'apps/traces/apps/backend/.env',
+		path: 'apps/traces/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.TRACES_BACKEND_PORT || '3026',
@@ -657,9 +609,9 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Mukke Backend (NestJS)
+	// Mukke Server (Hono/Bun)
 	{
-		path: 'apps/mukke/apps/backend/.env',
+		path: 'apps/mukke/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
 			PORT: (env) => env.MUKKE_BACKEND_PORT || '3010',

@@ -454,16 +454,15 @@ git pull
 
 ### Docker Base Images
 
-Alle Apps werden auf vorgebauten Base Images aufgebaut, um Build-Zeit und Memory-Verbrauch zu reduzieren:
+Alle Web-Apps werden auf einem vorgebauten Base Image aufgebaut, um Build-Zeit und Memory-Verbrauch zu reduzieren. Backend-Server verwenden `docker/Dockerfile.hono-server` (Hono + Bun) direkt.
 
 | Base Image | Dockerfile | Verwendet von |
 |------------|-----------|---------------|
 | `sveltekit-base:local` | `docker/Dockerfile.sveltekit-base` | Alle SvelteKit Web-Apps |
-| `nestjs-base:local` | `docker/Dockerfile.nestjs-base` | Alle NestJS Backends |
 
-Die Base Images enthalten alle Shared Packages (`packages/`) vorinstalliert und vorgebaut. App-Dockerfiles müssen nur noch ihren app-spezifischen Code kopieren.
+Das Base Image enthaelt alle Shared Packages (`packages/`) vorinstalliert und vorgebaut. App-Dockerfiles muessen nur noch ihren app-spezifischen Code kopieren.
 
-**Base Images neu bauen** wenn sich Shared Packages ändern:
+**Base Image neu bauen** wenn sich Shared Packages aendern:
 
 ```bash
 ./scripts/mac-mini/build-app.sh --base

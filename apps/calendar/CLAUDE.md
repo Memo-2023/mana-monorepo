@@ -6,7 +6,7 @@
 
 | App | Port | URL |
 |-----|------|-----|
-| Backend | 3014 | http://localhost:3014 |
+| Server | 3014 | http://localhost:3014 |
 | Web App | 5179 | http://localhost:5179 |
 | Landing Page | 4322 | http://localhost:4322 |
 | Mobile | 8081 | Expo Go |
@@ -16,7 +16,7 @@
 ```
 apps/calendar/
 ├── apps/
-│   ├── backend/      # NestJS API server (@calendar/backend)
+│   ├── server/       # Hono/Bun compute server (@calendar/server)
 │   │   └── src/
 │   │       ├── main.ts
 │   │       ├── app.module.ts
@@ -114,11 +114,12 @@ apps/calendar/
 pnpm calendar:dev                 # Run all calendar apps
 
 # Einzelne Apps starten
-pnpm dev:calendar:backend         # Start backend server (port 3014)
+pnpm dev:calendar:server          # Start server (port 3014)
 pnpm dev:calendar:web             # Start web app (port 5179)
 pnpm dev:calendar:landing         # Start landing page (port 4322)
 pnpm dev:calendar:mobile          # Start mobile app [TODO]
-pnpm dev:calendar:app             # Start web + backend together
+pnpm dev:calendar:app             # Start web + server together
+pnpm dev:calendar:local           # Start web + sync (no auth needed)
 
 # Datenbank
 pnpm calendar:db:push             # Push schema to database
@@ -126,7 +127,7 @@ pnpm calendar:db:studio           # Open Drizzle Studio
 pnpm calendar:db:seed             # Seed initial data
 ```
 
-### Backend (apps/calendar/apps/backend)
+### Server (apps/calendar/apps/server)
 
 ```bash
 pnpm dev                         # Start with hot reload
@@ -157,7 +158,7 @@ pnpm preview                     # Preview build
 
 | Layer | Technology |
 |-------|------------|
-| **Backend** | NestJS 10, Drizzle ORM, PostgreSQL |
+| **Server** | Hono + Bun, Drizzle ORM, PostgreSQL |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Landing** | Astro 5.x, Tailwind CSS |
 | **Mobile** | React Native 0.81 + Expo SDK 54, NativeWind [TODO] |
@@ -224,7 +225,7 @@ eventsStore.updateEvent(id, data)
 eventsStore.deleteEvent(id)
 ```
 
-### Backend API Endpoints
+### Server API Endpoints
 
 #### Health
 
@@ -400,7 +401,7 @@ FREQ=WEEKLY;UNTIL=20241231T235959Z   # Wöchentlich bis Ende 2024
 
 ## Environment Variables
 
-### Backend (.env)
+### Server (.env)
 
 ```env
 NODE_ENV=development
@@ -544,11 +545,11 @@ pnpm calendar:db:push
 ### 2. Apps starten
 
 ```bash
-# Backend + Web zusammen
+# Server + Web zusammen
 pnpm dev:calendar:app
 
 # Oder einzeln:
-pnpm dev:calendar:backend  # Terminal 1
+pnpm dev:calendar:server   # Terminal 1
 pnpm dev:calendar:web      # Terminal 2
 pnpm dev:calendar:landing  # Terminal 3 (optional)
 ```
@@ -653,7 +654,7 @@ pnpm --filter @calendar/web test:e2e
 
 1. **Authentication**: Nutzt Mana Core Auth (JWT im Authorization Header)
 2. **Database**: PostgreSQL mit Drizzle ORM (Port 5432)
-3. **Port**: Backend läuft auf Port 3014
+3. **Port**: Server läuft auf Port 3014
 4. **Recurrence**: Verwendet RFC 5545 RRULE Format
 5. **i18n**: 5 Sprachen unterstützt (DE, EN, FR, ES, IT)
 6. **Theme**: Ocean-Theme (Blautöne) als Standard

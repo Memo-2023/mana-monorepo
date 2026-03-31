@@ -5,7 +5,7 @@
 ```
 apps/planta/
 ├── apps/
-│   ├── backend/      # NestJS API server (@planta/backend)
+│   ├── backend/      # Hono/Bun compute server (@planta/server)
 │   └── web/          # SvelteKit web application (@planta/web)
 ├── packages/
 │   └── shared/       # Shared types, utils (@planta/shared)
@@ -19,7 +19,7 @@ apps/planta/
 ```bash
 pnpm planta:dev                   # Run all planta apps
 pnpm dev:planta:web               # Start web app
-pnpm dev:planta:backend           # Start backend server
+pnpm dev:planta:server           # Start backend server
 pnpm dev:planta:app               # Start web + backend together
 pnpm dev:planta:full              # Start auth + backend + web with DB setup
 ```
@@ -45,7 +45,7 @@ pnpm preview                     # Preview production build
 ## Technology Stack
 
 - **Web**: SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS
-- **Backend**: NestJS 10, Drizzle ORM, PostgreSQL
+- **Backend**: Hono + Bun, Drizzle ORM, PostgreSQL
 - **AI**: Google Gemini Vision for plant analysis
 - **Storage**: MinIO (S3-compatible)
 - **Auth**: Mana Core Auth (JWT)

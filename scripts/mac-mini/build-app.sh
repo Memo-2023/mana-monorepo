@@ -111,11 +111,6 @@ build_base_images() {
   $DOCKER build -f "$PROJECT_ROOT/docker/Dockerfile.sveltekit-base" -t sveltekit-base:local "$PROJECT_ROOT"
   echo "sveltekit-base:local built."
   echo ""
-
-  echo "=== Building nestjs-base image ==="
-  $DOCKER build -f "$PROJECT_ROOT/docker/Dockerfile.nestjs-base" -t nestjs-base:local "$PROJECT_ROOT"
-  echo "nestjs-base:local built."
-  echo ""
 }
 
 build_services() {

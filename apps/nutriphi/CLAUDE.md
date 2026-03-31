@@ -15,7 +15,7 @@
 ```
 apps/nutriphi/
 ├── apps/
-│   ├── backend/      # NestJS API server (@nutriphi/backend)
+│   ├── backend/      # Hono/Bun compute server (@nutriphi/server)
 │   │   └── src/
 │   │       ├── main.ts
 │   │       ├── app.module.ts
@@ -71,7 +71,7 @@ apps/nutriphi/
 pnpm nutriphi:dev
 
 # Individual apps
-pnpm dev:nutriphi:backend     # Backend (port 3015)
+pnpm dev:nutriphi:server     # Backend (port 3015)
 pnpm dev:nutriphi:web         # Web app (port 5180)
 pnpm dev:nutriphi:landing     # Landing page (port 4323)
 pnpm dev:nutriphi:app         # Web + backend together
@@ -108,7 +108,7 @@ pnpm build                    # Build for production
 
 | Layer | Technology |
 |-------|------------|
-| **Backend** | NestJS 10, Drizzle ORM, PostgreSQL |
+| **Backend** | Hono + Bun, Drizzle ORM, PostgreSQL |
 | **AI** | Google Gemini 2.5 Flash |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Landing** | Astro 5.x, Tailwind CSS |
@@ -306,7 +306,7 @@ GEMINI_API_KEY=your-gemini-api-key
 pnpm dev:nutriphi:app
 
 # Or individually:
-pnpm dev:nutriphi:backend  # Terminal 1
+pnpm dev:nutriphi:server  # Terminal 1
 pnpm dev:nutriphi:web      # Terminal 2
 pnpm dev:nutriphi:landing  # Terminal 3
 ```

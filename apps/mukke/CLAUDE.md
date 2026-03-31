@@ -7,7 +7,7 @@ Mukke is a web application for managing your music library, playing tracks, and 
 ```
 apps/mukke/
 ├── apps/
-│   ├── backend/          # NestJS API (port 3010)
+│   ├── backend/          # Hono/Bun server (port 3010)
 │   ├── web/              # SvelteKit app (port 5180)
 │   └── landing/          # Astro marketing page
 ├── packages/
@@ -23,7 +23,7 @@ pnpm dev:mukke:full
 
 # Or start components individually
 pnpm docker:up                        # Start PostgreSQL, Redis, MinIO
-pnpm --filter @mukke/backend dev      # Backend on port 3010
+pnpm --filter @mukke/server dev      # Server on port 3010
 pnpm --filter @mukke/web dev          # Web on port 5180
 pnpm --filter @mukke/landing dev      # Landing page
 ```
@@ -150,7 +150,7 @@ Playback uses HTML5 Audio (browser-native codec support). Upload accepts any `au
 | Waveform | wavesurfer.js 7.x |
 | BPM Detection | Web Audio API (peak detection) |
 | Metadata | music-metadata (server-side) |
-| Backend | NestJS 10, Drizzle ORM |
+| Backend | Hono + Bun, Drizzle ORM |
 | Database | PostgreSQL |
 | Storage | MinIO (S3-compatible) |
 | Auth | mana-core-auth |
@@ -178,14 +178,14 @@ PUBLIC_BACKEND_URL=http://localhost:3010
 
 ```bash
 # Database
-pnpm --filter @mukke/backend db:push     # Push schema
-pnpm --filter @mukke/backend db:studio   # Open Drizzle Studio
+pnpm --filter @mukke/server db:push     # Push schema
+pnpm --filter @mukke/server db:studio   # Open Drizzle Studio
 
 # Type checking
-pnpm --filter @mukke/backend type-check
+pnpm --filter @mukke/server type-check
 pnpm --filter @mukke/web type-check
 
 # Build
-pnpm --filter @mukke/backend build
+pnpm --filter @mukke/server build
 pnpm --filter @mukke/web build
 ```

@@ -236,13 +236,12 @@ All SvelteKit web apps use **Phosphor icons** via `@manacore/shared-icons` (re-e
 - **Ideal**: 10-25 lines
 - Extract complex logic into helper functions
 
-### Module Structure (NestJS)
+### Module Structure (Hono/Bun Server)
 
 ```
 feature/
-├── feature.controller.ts     # HTTP layer
+├── feature.routes.ts         # HTTP routes
 ├── feature.service.ts        # Business logic
-├── feature.module.ts         # DI configuration
 ├── feature.spec.ts           # Tests
 └── dto/
     ├── create-feature.dto.ts
@@ -340,5 +339,5 @@ pnpm format
 pnpm format:check
 
 # Format specific project
-pnpm --filter @chat/backend format
+pnpm --filter @chat/server format
 ```

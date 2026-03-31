@@ -15,7 +15,7 @@
 ```
 apps/todo/
 ├── apps/
-│   ├── backend/      # NestJS API server (@todo/backend)
+│   ├── backend/      # Hono/Bun compute server (@todo/server)
 │   ├── web/          # SvelteKit web application (@todo/web)
 │   └── landing/      # Astro marketing landing page (@todo/landing)
 ├── packages/
@@ -75,7 +75,7 @@ pnpm preview                     # Preview build
 
 | Layer | Technology |
 |-------|------------|
-| **Backend** | NestJS 10, Drizzle ORM, PostgreSQL |
+| **Backend** | Hono + Bun, Drizzle ORM, PostgreSQL |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Landing** | Astro 5.x, Tailwind CSS |
 | **Auth** | Mana Core Auth (JWT) |
@@ -300,7 +300,7 @@ Priority: explicit duration in text > history estimate > default fallback > none
 
 ```bash
 # Unit tests
-pnpm --filter @todo/backend test
+pnpm --filter @todo/server test
 pnpm --filter @todo/web test
 
 # E2E tests

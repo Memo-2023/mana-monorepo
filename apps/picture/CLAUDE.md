@@ -7,7 +7,7 @@ AI image generation app using Replicate API with freemium credit system.
 ```
 apps/picture/
 ├── apps/
-│   ├── backend/     # NestJS API (port 3006)
+│   ├── backend/     # Hono/Bun server (port 3006)
 │   ├── mobile/      # Expo React Native app
 │   ├── web/         # SvelteKit web app
 │   └── landing/     # Astro marketing page
@@ -21,7 +21,7 @@ apps/picture/
 pnpm dev:picture:full    # Start backend + web + auto DB setup
 
 # Individual apps
-pnpm --filter @picture/backend dev    # Backend only (port 3006)
+pnpm --filter @picture/server dev    # Backend only (port 3006)
 pnpm --filter @picture/web dev        # Web only
 pnpm --filter @picture/mobile dev     # Mobile only
 ```

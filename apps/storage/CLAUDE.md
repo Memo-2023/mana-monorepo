@@ -5,7 +5,7 @@
 ```
 apps/storage/
 ├── apps/
-│   ├── backend/      # NestJS API server (@storage/backend) - Port 3016
+│   ├── backend/      # Hono/Bun compute server (@storage/server) - Port 3016
 │   ├── landing/      # Astro marketing landing page (@storage/landing)
 │   └── web/          # SvelteKit web application (@storage/web) - Port 5185
 ├── packages/

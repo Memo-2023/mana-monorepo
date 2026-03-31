@@ -90,12 +90,6 @@ function getWorkspaceDeps(pkgJsonPath) {
 	return deps;
 }
 
-// Check if a Dockerfile uses nestjs-base:local as its base image
-function usesNestjsBase(dockerfilePath) {
-	const content = readFileSync(dockerfilePath, 'utf8');
-	return content.includes('FROM nestjs-base:local');
-}
-
 // Check if a Dockerfile is a non-monorepo build (standalone, no workspace COPY needed)
 function isStandaloneBuild(dockerfilePath) {
 	const content = readFileSync(dockerfilePath, 'utf8');
@@ -133,22 +127,6 @@ function getDockerfileCopyPaths(dockerfilePath) {
 	return { copyPaths, hasPatchesCopy };
 }
 
-// Get packages pre-built in nestjs-base image
-function getNestjsBasePackages() {
-	const baseDockerfile = join(ROOT, 'docker', 'Dockerfile.nestjs-base');
-	if (!existsSync(baseDockerfile)) return new Set();
-	const content = readFileSync(baseDockerfile, 'utf8');
-	const paths = new Set();
-	for (const line of content.split('\n')) {
-		const trimmed = line.trim();
-		const copyMatch = trimmed.match(/^COPY\s+(packages\/\S+)/);
-		if (copyMatch) {
-			paths.add(copyMatch[1]);
-		}
-	}
-	return paths;
-}
-
 // Extract @scope/package imports from a source file
 function extractImports(filePath) {
 	if (!existsSync(filePath)) return [];
@@ -173,13 +151,7 @@ function extractImports(filePath) {
 
 // Validate a single Dockerfile and return result
 function validateDockerfile(dockerfilePath, pkgJsonPath, relPath, packageMap, opts = {}) {
-	const {
-		isNestjsBase = false,
-		nestjsBasePackagePaths = new Set(),
-		checkImports = false,
-		appDir = null,
-		checkPatches = false,
-	} = opts;
+	const { checkImports = false, appDir = null, checkPatches = false } = opts;
 
 	if (!existsSync(pkgJsonPath)) {
 		return {
@@ -203,14 +175,6 @@ function validateDockerfile(dockerfilePath, pkgJsonPath, relPath, packageMap, op
 			continue;
 		}
 
-		// For nestjs-base backends, packages/* are pre-built in the base image
-		if (isNestjsBase && dirPath.startsWith('packages/')) {
-			const isCoveredByBase = [...nestjsBasePackagePaths].some(
-				(bp) => bp === dirPath || dirPath.startsWith(bp + '/') || bp.startsWith(dirPath)
-			);
-			if (isCoveredByBase) continue;
-		}
-
 		// Check if any COPY path matches or is a parent directory of this package
 		const found = [...copyPaths].some(
 			(cp) => cp === dirPath || dirPath.startsWith(cp + '/') || cp.startsWith(dirPath)
@@ -221,7 +185,7 @@ function validateDockerfile(dockerfilePath, pkgJsonPath, relPath, packageMap, op
 	}
 
 	// Check patches (only for web apps that need them)
-	if (checkPatches && !isNestjsBase && !hasPatchesCopy) {
+	if (checkPatches && !hasPatchesCopy) {
 		errors.push('MISSING: patches/ directory → add: COPY patches/ ./patches/');
 	}
 
@@ -281,7 +245,6 @@ function main() {
 	const servicesDir = join(ROOT, 'services');
 	let hasErrors = false;
 	const results = [];
-	const nestjsBasePackagePaths = getNestjsBasePackages();
 
 	// Find all app directories
 	const appDirs = readdirSync(appsDir, { withFileTypes: true })
@@ -317,12 +280,8 @@ function main() {
 
 		const pkgJsonPath = join(appsDir, appName, 'apps', 'backend', 'package.json');
 		const relPath = `apps/${appName}/apps/backend/Dockerfile`;
-		const isNestjsBase = usesNestjsBase(dockerfilePath);
 
-		const result = validateDockerfile(dockerfilePath, pkgJsonPath, relPath, packageMap, {
-			isNestjsBase,
-			nestjsBasePackagePaths,
-		});
+		const result = validateDockerfile(dockerfilePath, pkgJsonPath, relPath, packageMap);
 		if (result.errors.length > 0) hasErrors = true;
 		results.push(result);
 		printResult(result);

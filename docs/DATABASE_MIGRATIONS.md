@@ -246,8 +246,8 @@ pnpm --filter mana-core-auth db:generate
 pnpm --filter mana-core-auth db:migrate
 
 # chat-backend
-pnpm --filter @chat/backend db:push
-pnpm --filter @chat/backend db:migrate
+pnpm --filter @chat/server db:push
+pnpm --filter @chat/server db:migrate
 ```
 
 ---

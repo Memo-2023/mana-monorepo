@@ -13,7 +13,7 @@ AI-powered document management and context system for knowledge organization.
 ```
 apps/context/
 ├── apps/
-│   ├── backend/     # NestJS API server (@context/backend)
+│   ├── backend/     # Hono/Bun compute server (@context/server)
 │   │   └── src/
 │   │       ├── main.ts
 │   │       ├── app.module.ts
@@ -45,7 +45,7 @@ apps/context/
 ```bash
 # From monorepo root
 pnpm dev:context:full          # Start auth + backend + web (with DB setup)
-pnpm dev:context:backend       # Start backend only (port 3020)
+pnpm dev:context:server       # Start backend only (port 3020)
 pnpm dev:context:web           # Start web only (port 5192)
 pnpm dev:context:app           # Start web + backend together
 pnpm dev:context:mobile        # Start mobile app
@@ -61,7 +61,7 @@ pnpm setup:db:context          # Create DB + push schema
 
 | Layer | Technology |
 |-------|------------|
-| **Backend** | NestJS 10, Drizzle ORM, PostgreSQL |
+| **Backend** | Hono + Bun, Drizzle ORM, PostgreSQL |
 | **Web** | SvelteKit 2.x, Svelte 5 (runes mode), Tailwind CSS 4 |
 | **Mobile** | React Native 0.76 + Expo SDK 52, NativeWind |
 | **Auth** | Mana Core Auth (JWT) |

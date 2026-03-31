@@ -46,23 +46,23 @@ Canonical port assignments for all ManaCore services. This is the single source 
 | 3024 | mana-voice-bot | Python | Voice-to-voice assistant |
 | 3025-3029 | *(reserved)* | | |
 
-## 3030-3059: App Backends
+## 3030-3059: App Compute Servers
 
 Only apps that need server-side compute (AI, external APIs, file operations).
 Pure CRUD apps use mana-sync directly.
 
 | Port | Service | Runtime | Description |
 |------|---------|---------|-------------|
-| 3030 | chat-backend | NestJS | AI chat, streaming, spaces |
+| 3030 | chat-server | Hono/Bun | AI chat, streaming, spaces |
 | 3031 | todo-server | Hono/Bun | RRULE expansion, reminders |
-| 3032 | calendar-backend | NestJS | CalDAV sync, Google Calendar, notifications |
-| 3033 | contacts-backend | NestJS | Google Contacts, vCard import/export |
-| 3034 | storage-backend | NestJS | S3 file ops, versioning, shares |
-| 3035 | picture-backend | NestJS | Replicate AI, generation orchestration |
-| 3036 | manadeck-backend | NestJS | AI card generation |
-| 3037 | mukke-backend | NestJS | Audio processing, BPM, ID3 tags |
-| 3038 | nutriphi-backend | NestJS | Gemini meal analysis |
-| 3039 | planta-backend | NestJS | Gemini plant analysis |
+| 3032 | calendar-server | Hono/Bun | CalDAV sync, Google Calendar, notifications |
+| 3033 | contacts-server | Hono/Bun | Google Contacts, vCard import/export |
+| 3034 | storage-server | Hono/Bun | S3 file ops, versioning, shares |
+| 3035 | picture-server | Hono/Bun | Replicate AI, generation orchestration |
+| 3036 | manadeck-server | Hono/Bun | AI card generation |
+| 3037 | mukke-server | Hono/Bun | Audio processing, BPM, ID3 tags |
+| 3038 | nutriphi-server | Hono/Bun | Gemini meal analysis |
+| 3039 | planta-server | Hono/Bun | Gemini plant analysis |
 | 3040 | presi-server | Hono/Bun | Share links |
 | 3041-3059 | *(reserved)* | | |
 
@@ -78,28 +78,28 @@ Pure CRUD apps use mana-sync directly.
 
 ## 5000-5059: Web Frontends (SvelteKit)
 
-| Port | Service | Corresponds to Backend |
+| Port | Service | Corresponds to Server |
 |------|---------|----------------------|
 | 5000 | mana-web | Hub/Dashboard |
-| 5010 | chat-web | 3030 chat-backend |
+| 5010 | chat-web | 3030 chat-server |
 | 5011 | todo-web | 3031 todo-server |
-| 5012 | calendar-web | 3032 calendar-backend |
+| 5012 | calendar-web | 3032 calendar-server |
 | 5013 | clock-web | *(local-first only)* |
-| 5014 | contacts-web | 3033 contacts-backend |
-| 5015 | storage-web | 3034 storage-backend |
+| 5014 | contacts-web | 3033 contacts-server |
+| 5015 | storage-web | 3034 storage-server |
 | 5016 | presi-web | 3040 presi-server |
-| 5017 | nutriphi-web | 3038 nutriphi-backend |
+| 5017 | nutriphi-web | 3038 nutriphi-server |
 | 5018 | zitare-web | *(local-first only)* |
 | 5019 | photos-web | *(local-first + mana-media)* |
 | 5020 | skilltree-web | *(local-first only)* |
-| 5021 | picture-web | 3035 picture-backend |
+| 5021 | picture-web | 3035 picture-server |
 | 5022 | citycorners-web | *(local-first only)* |
-| 5023 | manadeck-web | 3036 manadeck-backend |
-| 5024 | mukke-web | 3037 mukke-backend |
+| 5023 | manadeck-web | 3036 manadeck-server |
+| 5024 | mukke-web | 3037 mukke-server |
 | 5025 | inventar-web | *(local-first only)* |
 | 5026 | context-web | *(local-first only)* |
 | 5027 | questions-web | *(local-first only)* |
-| 5028 | planta-web | 3039 planta-backend |
+| 5028 | planta-web | 3039 planta-server |
 | 5029 | moodlit-web | *(future)* |
 | 5030-5049 | *(reserved)* | |
 

@@ -8,7 +8,7 @@ GPS tracking app with AI city guides. Location tracking runs locally via AsyncSt
 apps/traces/
 ├── package.json              # Orchestrator (name: traces)
 ├── apps/
-│   ├── backend/              # @traces/backend (NestJS, Port 3026)
+│   ├── backend/              # @traces/server (NestJS, Port 3026)
 │   │   └── src/
 │   │       ├── main.ts
 │   │       ├── app.module.ts
@@ -31,7 +31,7 @@ apps/traces/
 ```bash
 # Development
 pnpm dev:traces:mobile        # Start Expo app
-pnpm dev:traces:backend       # Start NestJS backend
+pnpm dev:traces:server       # Start NestJS backend
 pnpm dev:traces:full          # Start auth + backend + mobile
 
 # Database

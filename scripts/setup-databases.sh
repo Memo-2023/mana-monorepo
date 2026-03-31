@@ -66,13 +66,8 @@ ALL_DATABASES=(
     "manadeck"
     "storage"
     "presi"
-    "mail"
     "moodlit"
-    "finance"
     "inventory"
-    "techbase"
-    "voxel_lava"
-    "figgos"
     "planta"
     "nutriphi"
     "photos"
@@ -108,7 +103,7 @@ setup_service() {
             ;;
         chat)
             create_db_if_not_exists "chat"
-            push_schema "@chat/backend" "chat"
+            push_schema "@chat/server" "chat"
             ;;
         zitare)
             create_db_if_not_exists "zitare"
@@ -116,11 +111,11 @@ setup_service() {
             ;;
         contacts)
             create_db_if_not_exists "contacts"
-            push_schema "@contacts/backend" "contacts"
+            # Schema managed by mana-sync (local-first)
             ;;
         calendar)
             create_db_if_not_exists "calendar"
-            push_schema "@calendar/backend" "calendar"
+            # Schema managed by mana-sync (local-first)
             ;;
         clock)
             create_db_if_not_exists "clock"
@@ -128,47 +123,31 @@ setup_service() {
             ;;
         todo)
             create_db_if_not_exists "todo"
-            push_schema "@todo/backend" "todo"
+            push_schema "@todo/server" "todo"
             ;;
         manadeck)
             create_db_if_not_exists "manadeck"
-            push_schema "@manadeck/backend" "manadeck"
-            ;;
-        mail)
-            create_db_if_not_exists "mail"
-            push_schema "@mail/backend" "mail"
+            # Schema managed by mana-sync (local-first)
             ;;
         moodlit)
             create_db_if_not_exists "moodlit"
-            push_schema "@moodlit/backend" "moodlit"
+            push_schema "@moodlit/server" "moodlit"
             ;;
         picture)
             create_db_if_not_exists "picture"
-            push_schema "@picture/backend" "picture"
+            # Schema managed by mana-sync (local-first)
             ;;
         photos)
             create_db_if_not_exists "photos"
             # Schema managed by mana-sync (backend removed)
             ;;
-        finance)
-            create_db_if_not_exists "finance"
-            push_schema "@finance/backend" "finance"
-            ;;
-        voxel-lava)
-            create_db_if_not_exists "voxel_lava"
-            push_schema "@voxel-lava/backend" "voxel-lava"
-            ;;
-        figgos)
-            create_db_if_not_exists "figgos"
-            push_schema "@figgos/backend" "figgos"
-            ;;
         planta)
             create_db_if_not_exists "planta"
-            push_schema "@planta/backend" "planta"
+            push_schema "@planta/server" "planta"
             ;;
         nutriphi)
             create_db_if_not_exists "nutriphi"
-            push_schema "@nutriphi/backend" "nutriphi"
+            # Schema managed by mana-sync (local-first)
             ;;
         presi)
             create_db_if_not_exists "presi"
@@ -176,7 +155,7 @@ setup_service() {
             ;;
         storage)
             create_db_if_not_exists "storage"
-            push_schema "@storage/backend" "storage"
+            # Schema managed by mana-sync (local-first)
             ;;
         projectdoc)
             create_db_if_not_exists "projectdoc"
@@ -196,7 +175,7 @@ setup_service() {
             ;;
         questions)
             create_db_if_not_exists "questions"
-            push_schema "@questions/backend" "questions"
+            # Schema managed by mana-sync (local-first)
             ;;
         skilltree)
             create_db_if_not_exists "skilltree"
@@ -204,15 +183,15 @@ setup_service() {
             ;;
         mukke)
             create_db_if_not_exists "mukke"
-            push_schema "@mukke/backend" "mukke"
+            push_schema "@mukke/server" "mukke"
             ;;
         traces)
             create_db_if_not_exists "traces"
-            push_schema "@traces/backend" "traces"
+            push_schema "@traces/server" "traces"
             ;;
         context)
             create_db_if_not_exists "context"
-            push_schema "@context/backend" "context"
+            push_schema "@context/server" "context"
             ;;
         citycorners)
             create_db_if_not_exists "citycorners"
@@ -224,7 +203,7 @@ setup_service() {
             ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, mail, moodlit, picture, photos, finance, voxel-lava, figgos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, mukke, traces, context, citycorners, uload"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, moodlit, picture, photos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, mukke, traces, context, citycorners, uload"
             exit 1
             ;;
     esac
@@ -248,7 +227,7 @@ echo -e "\n${GREEN}Step 2: Pushing schemas${NC}"
 echo "--------------------------------------"
 
 # Push schemas for all known services
-for service in auth chat zitare contacts calendar clock todo manadeck picture photos mail moodlit finance voxel-lava figgos planta nutriphi presi storage questions skilltree mukke traces context citycorners; do
+for service in auth chat zitare contacts calendar clock todo manadeck picture photos moodlit planta nutriphi presi storage questions skilltree mukke traces context citycorners; do
     setup_service "$service" 2>/dev/null || true
 done
 

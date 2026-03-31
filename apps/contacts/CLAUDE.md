@@ -5,7 +5,7 @@
 ```
 apps/contacts/
 ├── apps/
-│   ├── backend/      # NestJS API server (@contacts/backend) - Port 3015
+│   ├── server/       # Hono/Bun compute server (@contacts/server) - Port 3015
 │   ├── landing/      # Astro marketing landing page (@contacts/landing)
 │   ├── web/          # SvelteKit web application (@contacts/web) - Port 5184
 │   └── mobile/       # Expo/React Native mobile app (@contacts/mobile)
@@ -23,8 +23,9 @@ pnpm contacts:dev                   # Run all contacts apps
 pnpm dev:contacts:mobile            # Start mobile app
 pnpm dev:contacts:web               # Start web app
 pnpm dev:contacts:landing           # Start landing page
-pnpm dev:contacts:backend           # Start backend server
-pnpm dev:contacts:app               # Start web + backend together
+pnpm dev:contacts:server            # Start server
+pnpm dev:contacts:app               # Start web + server together
+pnpm dev:contacts:local             # Start web + sync (no auth needed)
 ```
 
 ### Mobile App (apps/contacts/apps/mobile)

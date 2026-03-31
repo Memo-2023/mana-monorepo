@@ -5,7 +5,7 @@
 ```
 apps/chat/
 ├── apps/
-│   ├── backend/      # NestJS API server (@chat/backend)
+│   ├── server/       # Hono/Bun compute server (@chat/server)
 │   ├── landing/      # Astro marketing landing page (@chat/landing)
 │   ├── web/          # SvelteKit web application (@chat/web)
 │   └── mobile/       # Expo/React Native mobile app (@chat/mobile)
@@ -23,8 +23,9 @@ pnpm chat:dev                    # Run all chat apps
 pnpm dev:chat:mobile             # Start mobile app
 pnpm dev:chat:web                # Start web app
 pnpm dev:chat:landing            # Start landing page
-pnpm dev:chat:backend            # Start backend server
-pnpm dev:chat:full               # Start backend + web + auth together
+pnpm dev:chat:server             # Start server
+pnpm dev:chat:local              # Start web + sync (no auth needed)
+pnpm dev:chat:full               # Start server + web + auth together
 ```
 
 ### Mobile App (chat/apps/mobile)
@@ -38,7 +39,7 @@ pnpm build:preview               # Build preview version
 pnpm build:prod                  # Build production version
 ```
 
-### Backend (apps/chat/apps/backend)
+### Server (apps/chat/apps/server)
 
 ```bash
 pnpm start:dev                   # Start with hot reload
@@ -70,13 +71,13 @@ pnpm preview                     # Preview production build
 - **Mobile**: React Native 0.76.7 + Expo SDK 52, NativeWind, Expo Router
 - **Web**: SvelteKit 2.x, Svelte 5, Tailwind CSS 4
 - **Landing**: Astro 5.16, Tailwind CSS
-- **Backend**: NestJS 10, OpenRouter AI + mana-llm (local), Drizzle ORM, PostgreSQL
+- **Server**: Hono + Bun, OpenRouter AI + mana-llm (local), Drizzle ORM, PostgreSQL
 - **Auth**: Mana Core Auth (JWT)
 - **Types**: TypeScript 5.x
 
 ## Architecture
 
-### Backend API Endpoints
+### Server API Endpoints
 
 | Endpoint                          | Method | Description                 |
 | --------------------------------- | ------ | --------------------------- |
@@ -91,7 +92,7 @@ pnpm preview                     # Preview production build
 
 ### Environment Variables
 
-#### Backend (.env)
+#### Server (.env)
 
 ```env
 # Cloud AI models via OpenRouter (optional if using only local models)
@@ -162,13 +163,13 @@ PUBLIC_BACKEND_URL=http://localhost:3002
 
 ```bash
 # Add new models to existing database
-pnpm --filter @chat/backend db:add-local-models
+pnpm --filter @chat/server db:add-local-models
 ```
 
 ## Quick Start
 
 1. **Get OpenRouter API key** at https://openrouter.ai/keys
-2. **Create `.env`** in `apps/chat/apps/backend/`:
+2. **Create `.env`** in `apps/chat/apps/server/`:
    ```env
    OPENROUTER_API_KEY=sk-or-v1-xxx
    DATABASE_URL=postgresql://manacore:devpassword@localhost:5432/chat
@@ -182,13 +183,13 @@ pnpm --filter @chat/backend db:add-local-models
    ```
 4. **Seed database** (first time only):
    ```bash
-   pnpm --filter @chat/backend db:push
-   pnpm --filter @chat/backend db:seed
+   pnpm --filter @chat/server db:push
+   pnpm --filter @chat/server db:seed
    ```
 
 ## Important Notes
 
-1. **Security**: API keys are stored in the backend only - never in client apps
+1. **Security**: API keys are stored in the server only - never in client apps
 2. **Authentication**: Uses Mana Core Auth (JWT tokens)
 3. **Database**: PostgreSQL with Drizzle ORM (uses shared Docker container)
-4. **Deployment**: Backend runs on port 3002
+4. **Deployment**: Server runs on port 3002

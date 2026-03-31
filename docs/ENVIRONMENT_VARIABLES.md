@@ -32,7 +32,7 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 |----------|--------|---------|
 | Expo (mobile) | `EXPO_PUBLIC_` | `EXPO_PUBLIC_SUPABASE_URL` |
 | SvelteKit (web) | `PUBLIC_` | `PUBLIC_SUPABASE_URL` |
-| NestJS (backend) | None | `SUPABASE_URL` |
+| Hono/Bun (server) | None | `DATABASE_URL` |
 
 ## File Locations
 
@@ -40,19 +40,17 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 - **`.env.development`** - Single source of truth, committed to git
 
 ### Generated Files (gitignored)
-- `services/mana-core-auth/.env`
-- `apps/chat/apps/backend/.env`
+- `services/mana-auth/.env`
+- `apps/chat/apps/server/.env`
 - `apps/chat/apps/mobile/.env`
 - `apps/chat/apps/web/.env`
-- `apps/maerchenzauber/apps/backend/.env`
-- `apps/maerchenzauber/apps/mobile/.env`
-- `apps/maerchenzauber/apps/web/.env`
 - `apps/manacore/apps/mobile/.env`
 - `apps/manacore/apps/web/.env`
-- `apps/memoro/apps/mobile/.env`
-- `apps/memoro/apps/web/.env`
-- `apps/manadeck/apps/backend/.env`
+- `apps/manadeck/apps/server/.env`
 - `apps/manadeck/apps/web/.env`
+- `apps/*/apps/server/.env` (all apps with compute servers)
+- `apps/*/apps/web/.env` (all web apps)
+- `apps/*/apps/mobile/.env` (all mobile apps)
 
 ## Variable Reference
 
@@ -97,28 +95,6 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | `AZURE_OPENAI_API_VERSION` | API version | `2024-12-01-preview` |
 | `CHAT_SUPABASE_URL` | Supabase project URL | - |
 | `CHAT_SUPABASE_ANON_KEY` | Supabase anonymous key | - |
-
-### Maerchenzauber Project
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MAERCHENZAUBER_BACKEND_PORT` | Backend service port | `3003` |
-| `MAERCHENZAUBER_APP_ID` | Mana Core app ID | - |
-| `MAERCHENZAUBER_SUPABASE_URL` | Supabase project URL | - |
-| `MAERCHENZAUBER_SUPABASE_ANON_KEY` | Supabase anonymous key | - |
-| `MAERCHENZAUBER_JWT_SECRET` | JWT secret for Supabase | - |
-| `MAERCHENZAUBER_AZURE_OPENAI_KEY` | Azure OpenAI key | - |
-| `MAERCHENZAUBER_AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint | - |
-| `MAERCHENZAUBER_REPLICATE_API_KEY` | Replicate API key (images) | - |
-
-### Memoro Project
-
-| Variable | Description |
-|----------|-------------|
-| `MEMORO_SUPABASE_URL` | Supabase project URL |
-| `MEMORO_SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `MEMORO_MIDDLEWARE_API_URL` | Middleware API URL |
-| `MEMORO_APPID` | Mana Core app ID |
 
 ### Manacore Project
 
@@ -168,9 +144,9 @@ Edit `scripts/generate-env.mjs` and add your app config:
   },
 },
 {
-  path: 'apps/my-project/apps/backend/.env',
+  path: 'apps/my-project/apps/server/.env',
   vars: {
-    // For NestJS, no prefix needed
+    // For Hono/Bun servers, no prefix needed
     API_KEY: (env) => env.MY_NEW_PROJECT_API_KEY,
     API_URL: (env) => env.MY_NEW_PROJECT_URL,
   },

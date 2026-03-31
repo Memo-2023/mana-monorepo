@@ -9,7 +9,7 @@ This directory contains comprehensive guidelines for working in the Mana Univers
 | [Code Style](./guidelines/code-style.md) | Formatting, naming conventions, linting rules |
 | [Database](./guidelines/database.md) | Drizzle ORM patterns, schema design, migrations |
 | [Testing](./guidelines/testing.md) | Jest/Vitest patterns, mock factories, coverage |
-| [NestJS Backend](./guidelines/nestjs-backend.md) | Controllers, services, DTOs, modules |
+| [Hono Server](./guidelines/hono-server.md) | Compute servers (Hono + Bun) |
 | [Error Handling](./guidelines/error-handling.md) | Go-style errors, error codes, Result types |
 | [SvelteKit Web](./guidelines/sveltekit-web.md) | Svelte 5 runes, stores, routing |
 | [Expo Mobile](./guidelines/expo-mobile.md) | React Native, NativeWind, navigation |
@@ -44,7 +44,7 @@ This directory contains comprehensive guidelines for working in the Mana Univers
 |-------|------------|-------|
 | **Package Manager** | pnpm 9.15+ | Workspace monorepo |
 | **Build System** | Turborepo | Parallel task execution |
-| **Backend** | NestJS 10-11 | TypeScript, Drizzle ORM |
+| **Server** | Hono + Bun | TypeScript, Drizzle ORM |
 | **Web** | SvelteKit 2 + Svelte 5 | Runes mode only |
 | **Mobile** | Expo SDK 52-54 | React Native, NativeWind |
 | **Database** | PostgreSQL | Via Drizzle ORM |
@@ -62,15 +62,15 @@ manacore-monorepo/
 ├── apps/                      # Product applications
 │   └── {project}/
 │       ├── apps/
-│       │   ├── backend/       # NestJS API
+│       │   ├── server/        # Hono/Bun compute server
 │       │   ├── web/           # SvelteKit web
 │       │   ├── mobile/        # Expo app
 │       │   └── landing/       # Astro landing
 │       └── packages/          # Project-specific shared
 ├── packages/                  # Monorepo-wide shared
 │   ├── shared-errors/         # Error codes & Result types
-│   ├── shared-nestjs-auth/    # NestJS auth guards
 │   ├── shared-auth/           # Client auth service
+│   ├── local-store/           # Local-first data layer (Dexie.js + sync)
 │   └── ...
 ├── services/                  # Standalone microservices
 │   └── mana-core-auth/        # Central auth service
@@ -114,7 +114,8 @@ See [Error Handling](./guidelines/error-handling.md) for complete details.
 # Development
 pnpm install                    # Install dependencies
 pnpm {project}:dev              # Start project (all apps)
-pnpm dev:{project}:backend      # Start just backend
+pnpm dev:{project}:server       # Start just Hono server
+pnpm dev:{project}:local        # Start sync + server + web (no auth)
 pnpm dev:{project}:web          # Start just web
 
 # Quality
@@ -122,7 +123,7 @@ pnpm type-check                 # TypeScript validation
 pnpm format                     # Format code
 pnpm test                       # Run tests
 
-# Database
-pnpm {project}:db:push          # Push schema changes
-pnpm {project}:db:studio        # Open Drizzle Studio
+# Database (for apps with Drizzle in server)
+pnpm --filter @{project}/server db:push    # Push schema changes
+pnpm --filter @{project}/server db:studio  # Open Drizzle Studio
 ```

@@ -412,7 +412,7 @@ nutriphi/
 │   ├── mobile/       # Expo React Native App (@nutriphi/mobile)
 │   ├── web/          # SvelteKit Web App (@nutriphi/web)
 │   └── landing/      # Astro Landing Page (@nutriphi/landing)
-├── backend/          # NestJS API Server (@nutriphi/backend)
+├── server/           # Hono/Bun server (@nutriphi/server)
 ```
 
 #### API Endpoints

@@ -15,7 +15,7 @@ AI chat application supporting multiple language models including local (Ollama)
 
 | Component | Technology | Port |
 |-----------|------------|------|
-| Backend | NestJS | 3002 |
+| Server | Hono/Bun | 3002 |
 | Web | SvelteKit | 5173 |
 | Mobile | Expo | - |
 | Landing | Astro | - |
@@ -27,7 +27,7 @@ AI chat application supporting multiple language models including local (Ollama)
 pnpm dev:chat:full
 
 # Or individual components
-pnpm dev:chat:backend
+pnpm dev:chat:server
 pnpm dev:chat:web
 pnpm dev:chat:mobile
 ```
@@ -36,8 +36,8 @@ pnpm dev:chat:mobile
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Client    │────>│   Backend   │────>│  AI Models  │
-│ (Web/Mobile)│     │   (NestJS)  │     │ Ollama/API  │
+│   Client    │────>│   Server    │────>│  AI Models  │
+│ (Web/Mobile)│     │ (Hono/Bun)  │     │ Ollama/API  │
 └─────────────┘     └──────┬──────┘     └─────────────┘
                            │
                            ▼
@@ -147,21 +147,21 @@ export const messages = pgTable('messages', {
 First time setup requires seeding AI models:
 
 ```bash
-pnpm --filter @chat/backend db:push
-pnpm --filter @chat/backend db:seed
+pnpm --filter @chat/server db:push
+pnpm --filter @chat/server db:seed
 ```
 
 ### Run Tests
 
 ```bash
-pnpm --filter @chat/backend test
-pnpm --filter @chat/backend test:e2e
+pnpm --filter @chat/server test
+pnpm --filter @chat/server test:e2e
 ```
 
 ### Open Database GUI
 
 ```bash
-pnpm --filter @chat/backend db:studio
+pnpm --filter @chat/server db:studio
 ```
 
 ## Links

@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "turbo run dev",
 		"dev:web": "pnpm --filter @context/web dev",
-		"dev:backend": "pnpm --filter @context/backend dev",
+		"dev:server": "pnpm --filter @context/server dev",
 		"dev:mobile": "pnpm --filter @context/mobile dev"
 	}
 }

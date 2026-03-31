@@ -546,7 +546,7 @@ pnpm test
 pnpm test:cov
 
 # Run specific project
-pnpm --filter @storage/backend test
+pnpm --filter @storage/server test
 
 # Run in watch mode
 pnpm test:watch

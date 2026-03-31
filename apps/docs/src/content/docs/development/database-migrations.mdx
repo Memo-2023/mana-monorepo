@@ -25,16 +25,16 @@ Each backend service has its own database and schema:
 
 ```bash
 # Push schema changes (development)
-pnpm --filter @chat/backend db:push
+pnpm --filter @chat/server db:push
 
 # Generate migration files
-pnpm --filter @chat/backend db:generate
+pnpm --filter @chat/server db:generate
 
 # Run migrations
-pnpm --filter @chat/backend db:migrate
+pnpm --filter @chat/server db:migrate
 
 # Open Drizzle Studio (database GUI)
-pnpm --filter @chat/backend db:studio
+pnpm --filter @chat/server db:studio
 ```
 
 ## Development Workflow
@@ -60,13 +60,13 @@ For local development, use `db:push` to quickly sync schema changes:
 2. **Push changes**
 
    ```bash
-   pnpm --filter @chat/backend db:push
+   pnpm --filter @chat/server db:push
    ```
 
 3. **Verify in Studio**
 
    ```bash
-   pnpm --filter @chat/backend db:studio
+   pnpm --filter @chat/server db:studio
    ```
 </Steps>
 
@@ -82,7 +82,7 @@ For production, use proper migration files:
 1. **Generate migration**
 
    ```bash
-   pnpm --filter @chat/backend db:generate
+   pnpm --filter @chat/server db:generate
    ```
 
    This creates a timestamped SQL file in `drizzle/migrations/`.
@@ -99,7 +99,7 @@ For production, use proper migration files:
 3. **Run migration**
 
    ```bash
-   pnpm --filter @chat/backend db:migrate
+   pnpm --filter @chat/server db:migrate
    ```
 </Steps>
 
@@ -241,7 +241,7 @@ export class UsersService {
 Schema not pushed:
 
 ```bash
-pnpm --filter @chat/backend db:push --force
+pnpm --filter @chat/server db:push --force
 ```
 
 ### Migration conflicts
@@ -253,7 +253,7 @@ Reset and regenerate:
 rm -rf apps/chat/apps/backend/drizzle/migrations/*
 
 # Regenerate
-pnpm --filter @chat/backend db:generate
+pnpm --filter @chat/server db:generate
 ```
 
 ### Connection refused

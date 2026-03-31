@@ -5,12 +5,12 @@
 	"description": "Todo App - Task Management for ManaCore Ecosystem",
 	"scripts": {
 		"dev": "pnpm run --filter=@todo/* --parallel dev",
-		"dev:backend": "pnpm --filter @todo/backend dev",
+		"dev:server": "pnpm --filter @todo/server dev",
 		"dev:web": "pnpm --filter @todo/web dev",
 		"dev:landing": "pnpm --filter @todo/landing dev",
-		"db:push": "pnpm --filter @todo/backend db:push",
-		"db:studio": "pnpm --filter @todo/backend db:studio",
-		"db:seed": "pnpm --filter @todo/backend db:seed"
+		"db:push": "pnpm --filter @todo/server db:push",
+		"db:studio": "pnpm --filter @todo/server db:studio",
+		"db:seed": "pnpm --filter @todo/server db:seed"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3"

@@ -259,16 +259,6 @@ jobs:
           SERVICES="${{ steps.services.outputs.services }}"
           DEPLOY_ALL="${{ steps.services.outputs.deploy-all }}"
 
-          # Check if any backend service is being deployed
-          NEEDS_BASE=false
-          if [ "$DEPLOY_ALL" == "true" ]; then
-            NEEDS_BASE=true
-          else
-            for svc in $SERVICES; do
-              case "$svc" in *-backend) NEEDS_BASE=true; break ;; esac
-            done
-          fi
-
           NEEDS_WEB_BASE=false
           if [ "$DEPLOY_ALL" == "true" ]; then
             NEEDS_WEB_BASE=true
@@ -276,14 +266,6 @@ jobs:
             for svc in $SERVICES; do
               case "$svc" in *-web) NEEDS_WEB_BASE=true; break ;; esac
             done
-          fi
-
-          if [ "$NEEDS_BASE" == "true" ]; then
-            echo "=== Building shared NestJS base image ==="
-            docker build -f docker/Dockerfile.nestjs-base -t nestjs-base:local . 2>&1 | tail -5
-            echo "NestJS base image built"
-          else
-            echo "No backends to deploy, skipping NestJS base image"
           fi
 
           if [ "$NEEDS_WEB_BASE" == "true" ]; then

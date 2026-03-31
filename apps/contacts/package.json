@@ -5,13 +5,13 @@
 	"description": "Contacts App - Contact Management with Manacore Integration",
 	"scripts": {
 		"dev": "pnpm run --filter=@contacts/* --parallel dev",
-		"dev:backend": "pnpm --filter @contacts/backend dev",
+		"dev:server": "pnpm --filter @contacts/server dev",
 		"dev:web": "pnpm --filter @contacts/web dev",
 		"dev:landing": "pnpm --filter @contacts/landing dev",
 		"dev:mobile": "pnpm --filter @contacts/mobile dev",
-		"db:push": "pnpm --filter @contacts/backend db:push",
-		"db:studio": "pnpm --filter @contacts/backend db:studio",
-		"db:seed": "pnpm --filter @contacts/backend db:seed"
+		"db:push": "pnpm --filter @contacts/server db:push",
+		"db:studio": "pnpm --filter @contacts/server db:studio",
+		"db:seed": "pnpm --filter @contacts/server db:seed"
 	},
 	"devDependencies": {
 		"typescript": "^5.9.3"

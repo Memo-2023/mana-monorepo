@@ -8,8 +8,8 @@ All authentication is handled by **Mana Core Auth**, a centralized authenticatio
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌──────────────────┐
-│   Web/Mobile    │────>│  Backend API    │────>│  mana-core-auth  │
-│     Client      │     │    (NestJS)     │     │   (port 3001)    │
+│   Web/Mobile    │────>│  Compute Server │────>│    mana-auth     │
+│     Client      │     │  (Hono/Bun)     │     │   (port 3001)    │
 └─────────────────┘     └─────────────────┘     └──────────────────┘
         │                       │                       │
         │ 1. Login              │                       │
@@ -85,101 +85,48 @@ Always use `text` type for `user_id` columns in all database schemas.
 
 | Package | Purpose | Use Case |
 |---------|---------|----------|
-| `@manacore/shared-nestjs-auth` | NestJS guards/decorators | Backend APIs |
-| `@mana-core/nestjs-integration` | Auth + Credits integration | Backends with credits |
+| `@manacore/shared-hono` | Hono auth middleware + helpers | All compute servers (Hono/Bun) |
 | `@manacore/shared-auth` | Client auth service | Web/Mobile apps |
+| `@mana-core/nestjs-integration` | Auth + Credits for NestJS | `@arcade/backend` only |
 
-## Backend Integration
+## Server Integration (Hono/Bun)
 
-### Option 1: Simple Auth Only
-
-Use `@manacore/shared-nestjs-auth` for JWT validation:
+All compute servers use `@manacore/shared-hono`:
 
 ```typescript
-// app.module.ts
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { Hono } from 'hono';
+import { authMiddleware, healthRoute, errorHandler, notFoundHandler } from '@manacore/shared-hono';
 
-@Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    // No auth module needed - guards handle it
-  ],
-})
-export class AppModule {}
+const app = new Hono();
+app.onError(errorHandler);
+app.notFound(notFoundHandler);
+app.route('/health', healthRoute('my-server'));
+
+// Protect all /api/* routes
+app.use('/api/*', authMiddleware());
+
+// Access user in route handlers
+app.get('/api/v1/data', (c) => {
+  const userId = c.get('userId');   // Better Auth user ID (not UUID)
+  const email = c.get('userEmail');
+  return c.json({ userId });
+});
 ```
 
-```typescript
-// file.controller.ts
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard, CurrentUser, CurrentUserData } from '@manacore/shared-nestjs-auth';
+### NestJS (arcade only)
 
-@Controller('files')
-@UseGuards(JwtAuthGuard)  // Apply to all routes
-export class FileController {
-  @Get()
-  async listFiles(@CurrentUser() user: CurrentUserData) {
-    // user.userId, user.email, user.role available
-    return this.fileService.findAll(user.userId);
-  }
-}
-```
-
-### Option 2: Auth + Credits
-
-Use `@mana-core/nestjs-integration` for full integration:
+`@arcade/backend` still uses NestJS with `@mana-core/nestjs-integration`:
 
 ```typescript
-// app.module.ts
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ManaCoreModule } from '@mana-core/nestjs-integration';
-
-@Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    ManaCoreModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        appId: config.get('APP_ID'),
-        serviceKey: config.get('MANA_CORE_SERVICE_KEY'),
-        debug: config.get('NODE_ENV') === 'development',
-      }),
-      inject: [ConfigService],
-    }),
-  ],
-})
-export class AppModule {}
-```
-
-```typescript
-// generation.controller.ts
-import { Controller, Post, UseGuards, Body } from '@nestjs/common';
 import { AuthGuard } from '@mana-core/nestjs-integration/guards';
 import { CurrentUser } from '@mana-core/nestjs-integration/decorators';
-import { CreditClientService } from '@mana-core/nestjs-integration';
 
-@Controller('generations')
+@Controller('api')
 @UseGuards(AuthGuard)
-export class GenerationController {
-  constructor(private creditClient: CreditClientService) {}
-
-  @Post()
-  async generate(@CurrentUser() user: any, @Body() dto: GenerateDto) {
-    // Check and consume credits
-    const result = await this.creditClient.consumeCredits(
-      user.sub,
-      'ai_generation',
-      10,
-      'AI image generation'
-    );
-
-    if (!result.ok) {
-      throw new AppException(result.error);
-    }
-
-    // Proceed with generation
-    return this.generationService.generate(user.sub, dto);
+export class ApiController {
+  @Get('data')
+  getData(@CurrentUser() user: any) {
+    return this.service.findAll(user.sub);
   }
 }
 ```
@@ -187,7 +134,7 @@ export class GenerationController {
 ## Environment Variables
 
 ```env
-# Required for all backends
+# Required for all servers
 MANA_CORE_AUTH_URL=http://localhost:3001
 
 # Development bypass (optional)
