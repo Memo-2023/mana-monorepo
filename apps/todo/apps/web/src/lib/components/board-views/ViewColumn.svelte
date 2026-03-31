@@ -9,13 +9,31 @@
 
 	interface Props {
 		column: GroupedColumn;
+		columnIndex?: number;
+		totalColumns?: number;
 		onTaskDrop: (taskId: string, columnId: string) => void;
 		onTaskToggle: (task: Task) => void;
 		onTaskDelete: (taskId: string) => void;
 		onTaskUpdate: (taskId: string, data: Partial<Task>) => void;
+		onColumnRename?: (name: string) => void;
+		onColumnColorChange?: (color: string) => void;
+		onColumnMove?: (dir: -1 | 1) => void;
+		onColumnDelete?: () => void;
 	}
 
-	let { column, onTaskDrop, onTaskToggle, onTaskDelete, onTaskUpdate }: Props = $props();
+	let {
+		column,
+		columnIndex = 0,
+		totalColumns = 1,
+		onTaskDrop,
+		onTaskToggle,
+		onTaskDelete,
+		onTaskUpdate,
+		onColumnRename,
+		onColumnColorChange,
+		onColumnMove,
+		onColumnDelete,
+	}: Props = $props();
 
 	// Local tasks state for drag and drop
 	let localTasks = $state<Task[]>([]);
@@ -102,7 +120,17 @@
 
 <div class="view-column flex flex-col">
 	<!-- Header -->
-	<ViewColumnHeader name={column.name} color={column.color} taskCount={localTasks.length} />
+	<ViewColumnHeader
+		name={column.name}
+		color={column.color}
+		taskCount={localTasks.length}
+		{columnIndex}
+		{totalColumns}
+		onRename={onColumnRename}
+		onColorChange={onColumnColorChange}
+		onMove={onColumnMove}
+		onDelete={onColumnDelete}
+	/>
 
 	<!-- Tasks list with drag and drop -->
 	<div

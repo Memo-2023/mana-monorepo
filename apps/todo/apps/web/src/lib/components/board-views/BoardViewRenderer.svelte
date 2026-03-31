@@ -11,9 +11,20 @@
 	interface Props {
 		view: LocalBoardView;
 		layoutOverride?: 'kanban' | 'grid' | 'fokus';
+		onColumnRename?: (colIdx: number, name: string) => void;
+		onColumnColorChange?: (colIdx: number, color: string) => void;
+		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
+		onColumnDelete?: (colIdx: number) => void;
 	}
 
-	let { view, layoutOverride }: Props = $props();
+	let {
+		view,
+		layoutOverride,
+		onColumnRename,
+		onColumnColorChange,
+		onColumnMove,
+		onColumnDelete,
+	}: Props = $props();
 
 	let activeLayout = $derived(layoutOverride || view.layout);
 
@@ -74,6 +85,10 @@
 		onTaskToggle={handleTaskToggle}
 		onTaskDelete={handleTaskDelete}
 		onTaskUpdate={handleTaskUpdate}
+		{onColumnRename}
+		{onColumnColorChange}
+		{onColumnMove}
+		{onColumnDelete}
 	/>
 {:else if activeLayout === 'grid'}
 	<GridLayout
@@ -82,6 +97,10 @@
 		onTaskToggle={handleTaskToggle}
 		onTaskDelete={handleTaskDelete}
 		onTaskUpdate={handleTaskUpdate}
+		{onColumnRename}
+		{onColumnColorChange}
+		{onColumnMove}
+		{onColumnDelete}
 	/>
 {:else}
 	<KanbanLayout
@@ -90,5 +109,9 @@
 		onTaskToggle={handleTaskToggle}
 		onTaskDelete={handleTaskDelete}
 		onTaskUpdate={handleTaskUpdate}
+		{onColumnRename}
+		{onColumnColorChange}
+		{onColumnMove}
+		{onColumnDelete}
 	/>
 {/if}

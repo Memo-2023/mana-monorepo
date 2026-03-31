@@ -14,15 +14,29 @@
 		onTaskToggle: (task: Task) => void;
 		onTaskDelete: (taskId: string) => void;
 		onTaskUpdate: (taskId: string, data: Partial<Task>) => void;
+		onColumnRename?: (colIdx: number, name: string) => void;
+		onColumnColorChange?: (colIdx: number, color: string) => void;
+		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
+		onColumnDelete?: (colIdx: number) => void;
 	}
 
-	let { columns, onTaskDrop, onTaskToggle, onTaskDelete, onTaskUpdate }: Props = $props();
+	let {
+		columns,
+		onTaskDrop,
+		onTaskToggle,
+		onTaskDelete,
+		onTaskUpdate,
+		onColumnRename,
+		onColumnColorChange,
+		onColumnMove,
+		onColumnDelete,
+	}: Props = $props();
 
 	const PAGE_WIDTH_MAP: Record<string, string> = {
-		narrow: 'min(640px, 85vw)',
-		medium: 'min(840px, 85vw)',
-		wide: 'min(1024px, 92vw)',
-		full: '92vw',
+		narrow: 'min(360px, 85vw)',
+		medium: 'min(480px, 85vw)',
+		wide: 'min(640px, 90vw)',
+		full: 'min(840px, 95vw)',
 	};
 
 	let sheetWidth = $derived(PAGE_WIDTH_MAP[todoSettings.pageWidth] || PAGE_WIDTH_MAP.medium);
@@ -106,10 +120,20 @@
 		bind:this={scrollContainer}
 		onscroll={handleScroll}
 	>
-		{#each columns as column (column.id)}
+		{#each columns as column, i (column.id)}
 			{@const tasks = localTasksByColumn[column.id] || column.tasks}
 			<div class="fokus-sheet" class:sheet-completed={column.name === 'Erledigt'}>
-				<ViewColumnHeader name={column.name} color={column.color} taskCount={tasks.length} />
+				<ViewColumnHeader
+					name={column.name}
+					color={column.color}
+					taskCount={tasks.length}
+					columnIndex={i}
+					totalColumns={columns.length}
+					onRename={onColumnRename ? (name) => onColumnRename(i, name) : undefined}
+					onColorChange={onColumnColorChange ? (c) => onColumnColorChange(i, c) : undefined}
+					onMove={onColumnMove ? (dir) => onColumnMove(i, dir) : undefined}
+					onDelete={onColumnDelete ? () => onColumnDelete(i) : undefined}
+				/>
 
 				<div
 					class="sheet-content"

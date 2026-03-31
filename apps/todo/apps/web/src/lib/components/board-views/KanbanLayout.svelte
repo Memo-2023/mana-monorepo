@@ -9,20 +9,40 @@
 		onTaskToggle: (task: Task) => void;
 		onTaskDelete: (taskId: string) => void;
 		onTaskUpdate: (taskId: string, data: Partial<Task>) => void;
+		onColumnRename?: (colIdx: number, name: string) => void;
+		onColumnColorChange?: (colIdx: number, color: string) => void;
+		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
+		onColumnDelete?: (colIdx: number) => void;
 	}
 
-	let { columns, onTaskDrop, onTaskToggle, onTaskDelete, onTaskUpdate }: Props = $props();
+	let {
+		columns,
+		onTaskDrop,
+		onTaskToggle,
+		onTaskDelete,
+		onTaskUpdate,
+		onColumnRename,
+		onColumnColorChange,
+		onColumnMove,
+		onColumnDelete,
+	}: Props = $props();
 </script>
 
 <div class="kanban-layout">
-	{#each columns as column (column.id)}
+	{#each columns as column, i (column.id)}
 		<div class="kanban-column-wrapper">
 			<ViewColumn
 				{column}
+				columnIndex={i}
+				totalColumns={columns.length}
 				{onTaskDrop}
 				{onTaskToggle}
 				{onTaskDelete}
 				{onTaskUpdate}
+				onColumnRename={onColumnRename ? (name) => onColumnRename(i, name) : undefined}
+				onColumnColorChange={onColumnColorChange ? (c) => onColumnColorChange(i, c) : undefined}
+				onColumnMove={onColumnMove ? (dir) => onColumnMove(i, dir) : undefined}
+				onColumnDelete={onColumnDelete ? () => onColumnDelete(i) : undefined}
 			/>
 		</div>
 	{/each}
