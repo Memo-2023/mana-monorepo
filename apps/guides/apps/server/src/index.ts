@@ -43,7 +43,7 @@ app.get('/health', (c) =>
 	})
 );
 
-const port = Number(process.env.PORT ?? 3025);
+const port = Number(process.env.PORT ?? 3027);
 console.log(`🚀 Guides server (Hono + Bun) starting on port ${port}`);
 
 export default { port, fetch: app.fetch };

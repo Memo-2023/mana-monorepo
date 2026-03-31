@@ -12,7 +12,9 @@
 
 	// Context for child pages
 	let showCreateModal = $state(false);
+	let showImportModal = $state(false);
 	setContext('openCreateGuide', () => { showCreateModal = true; });
+	setContext('openImportGuide', () => { showImportModal = true; });
 
 	// Nav items
 	const navItems = [
@@ -57,13 +59,19 @@
 				{/each}
 			</nav>
 
-			<div class="p-3">
+			<div class="p-3 flex flex-col gap-2">
 				<button
 					onclick={() => (showCreateModal = true)}
 					class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
 				>
 					<Plus class="h-4 w-4" />
 					Neue Anleitung
+				</button>
+				<button
+					onclick={() => (showImportModal = true)}
+					class="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+				>
+					↓ Importieren
 				</button>
 			</div>
 		</aside>
@@ -111,6 +119,19 @@
 			onSave={async (data) => {
 				await guidesStore.createGuide(data);
 				showCreateModal = false;
+			}}
+		/>
+	{/await}
+{/if}
+
+{#if showImportModal}
+	{#await import('$lib/components/ImportModal.svelte') then { default: ImportModal }}
+		<ImportModal
+			open={true}
+			onClose={() => (showImportModal = false)}
+			onImported={(id) => {
+				showImportModal = false;
+				goto(`/guide/${id}`);
 			}}
 		/>
 	{/await}

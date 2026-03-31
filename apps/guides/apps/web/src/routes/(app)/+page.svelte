@@ -48,6 +48,7 @@
 	);
 
 	const openCreateGuide = getContext<() => void>('openCreateGuide');
+	const openImportGuide = getContext<() => void>('openImportGuide');
 
 	const difficultyLabels = { easy: 'Einfach', medium: 'Mittel', hard: 'Schwer' };
 </script>
@@ -59,12 +60,20 @@
 			<h1 class="text-2xl font-bold text-foreground">Bibliothek</h1>
 			<p class="text-sm text-muted-foreground">{allGuides.length} Anleitungen</p>
 		</div>
-		<button
-			onclick={openCreateGuide}
-			class="hidden rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover md:flex items-center gap-2"
-		>
-			+ Neue Anleitung
-		</button>
+		<div class="hidden md:flex items-center gap-2">
+			<button
+				onclick={openImportGuide}
+				class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+			>
+				↓ Importieren
+			</button>
+			<button
+				onclick={openCreateGuide}
+				class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover flex items-center gap-2"
+			>
+				+ Neue Anleitung
+			</button>
+		</div>
 	</div>
 
 	<!-- Search & Filters -->

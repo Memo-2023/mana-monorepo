@@ -164,6 +164,40 @@
 		if (activeRun) goto(`/guide/${guideId}/run?runId=${activeRun.id}&mode=${activeRun.mode}`);
 	}
 
+	// ── Share ────────────────────────────────────────────────
+
+	const SERVER_URL = import.meta.env.PUBLIC_GUIDES_SERVER_URL || 'http://localhost:3027';
+	let shareUrl = $state<string | null>(null);
+	let shareLoading = $state(false);
+	let shareCopied = $state(false);
+
+	async function shareGuide() {
+		if (!guide) return;
+		shareLoading = true;
+		try {
+			const res = await fetch(`${SERVER_URL}/api/v1/share`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ guide, sections: steps }),
+			});
+			if (res.ok) {
+				const data = await res.json<{ url: string }>();
+				shareUrl = data.url;
+			}
+		} catch {
+			// silently fail — share is optional
+		} finally {
+			shareLoading = false;
+		}
+	}
+
+	async function copyShareUrl() {
+		if (!shareUrl) return;
+		await navigator.clipboard.writeText(shareUrl);
+		shareCopied = true;
+		setTimeout(() => { shareCopied = false; }, 2000);
+	}
+
 	// ── Display config ───────────────────────────────────────
 
 	const difficultyConfig = {
@@ -194,6 +228,14 @@
 				← Bibliothek
 			</a>
 			<div class="flex items-center gap-2">
+				<button
+					onclick={shareGuide}
+					disabled={shareLoading}
+					class="rounded-lg px-3 py-1.5 text-xs font-medium border border-border text-muted-foreground hover:bg-accent transition-colors disabled:opacity-50"
+					title="Guide teilen"
+				>
+					{shareLoading ? '…' : '↗ Teilen'}
+				</button>
 				<button
 					onclick={() => (editMode = !editMode)}
 					class="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors
@@ -245,6 +287,19 @@
 				{/if}
 			</div>
 		</div>
+
+		<!-- Share URL banner -->
+		{#if shareUrl}
+			<div class="mb-4 flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 dark:border-teal-800 dark:bg-teal-950/30 px-4 py-3">
+				<span class="text-xs text-teal-700 dark:text-teal-300 flex-1 truncate">{shareUrl}</span>
+				<button
+					onclick={copyShareUrl}
+					class="shrink-0 rounded-lg px-3 py-1 text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 transition-colors"
+				>
+					{shareCopied ? '✓ Kopiert' : 'Kopieren'}
+				</button>
+			</div>
+		{/if}
 
 		<!-- Active run banner -->
 		{#if activeRun && !editMode}
