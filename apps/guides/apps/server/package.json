@@ -1,0 +1,20 @@
+{
+	"name": "@guides/server",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Guides server (Hono + Bun) — web import, guide sharing, AI generation",
+	"type": "module",
+	"scripts": {
+		"dev": "bun run --watch src/index.ts",
+		"start": "bun run src/index.ts",
+		"type-check": "bun x tsc --noEmit"
+	},
+	"dependencies": {
+		"@manacore/shared-hono": "workspace:*",
+		"hono": "^4.7.0"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.0",
+		"typescript": "^5.9.3"
+	}
+}
