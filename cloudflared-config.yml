@@ -132,6 +132,10 @@ ingress:
   - hostname: whopxl.mana.how
     service: http://localhost:5100
 
+  # Public Status Page (generated every 60s by mana-status-gen container)
+  - hostname: status.mana.how
+    service: http://localhost:4400
+
   # Monitoring & Tools
   - hostname: grafana.mana.how
     service: http://localhost:8000

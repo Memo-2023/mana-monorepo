@@ -1710,6 +1710,31 @@ services:
       retries: 3
       start_period: 20s
 
+  status-page-gen:
+    image: alpine:3.20
+    container_name: mana-status-gen
+    restart: always
+    mem_limit: 32m
+    depends_on:
+      victoriametrics:
+        condition: service_healthy
+    environment:
+      VICTORIAMETRICS_URL: http://victoriametrics:9090
+      OUTPUT_FILE: /output/index.html
+    volumes:
+      - ./scripts/generate-status-page.sh:/generate.sh:ro
+      - /Volumes/ManaData/landings/status:/output
+    command:
+      - sh
+      - -c
+      - |
+        apk add --no-cache curl jq > /dev/null 2>&1
+        mkdir -p /output
+        while true; do
+          sh /generate.sh || echo "$(date '+%H:%M:%S') Fehler beim Generieren"
+          sleep 60
+        done
+
   blackbox-exporter:
     image: prom/blackbox-exporter:v0.25.0
     container_name: mana-mon-blackbox
