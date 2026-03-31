@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { PencilSimple, Tag as TagIcon, Trash } from '@manacore/shared-icons';
 	import { DEFAULT_TAG_COLOR } from './constants';
-	import type { Tag } from './constants';
+	import type { Tag as TagType } from './constants';
 
 	interface Props {
-		tags: Tag[];
-		onEdit?: (tag: Tag) => void;
-		onDelete?: (tag: Tag) => void;
-		onClick?: (tag: Tag) => void;
+		tags: TagType[];
+		onEdit?: (tag: TagType) => void;
+		onDelete?: (tag: TagType) => void;
+		onClick?: (tag: TagType) => void;
 		layout?: 'grid' | 'list';
 		emptyMessage?: string;
 		emptyDescription?: string;
@@ -25,7 +25,7 @@
 		loading = false,
 	}: Props = $props();
 
-	function getTagColor(tag: Tag): string {
+	function getTagColor(tag: TagType): string {
 		return tag.color ?? tag.style?.color ?? DEFAULT_TAG_COLOR;
 	}
 
