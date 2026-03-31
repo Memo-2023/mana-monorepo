@@ -41,6 +41,7 @@
 		"@manacore/shared-branding": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"lucide-svelte": "^0.539.0",
+		"svelte-i18n": "^4.0.1",
 		"svelte-sonner": "^1.0.5"
 	}
 }
