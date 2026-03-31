@@ -26,7 +26,6 @@ export function useTaskForm() {
 	let selectedLabelIds = $state<string[]>([]);
 	let subtasks = $state<Subtask[]>([]);
 	let recurrenceRule = $state('');
-	let notes = $state('');
 	let storyPoints = $state<number | null>(null);
 	let effectiveDuration = $state<EffectiveDuration | null>(null);
 	let funRating = $state<number | null>(null);
@@ -53,7 +52,6 @@ export function useTaskForm() {
 		selectedLabelIds = task.labels?.map((l) => l.id) || [];
 		subtasks = task.subtasks ? [...task.subtasks] : [];
 		recurrenceRule = task.recurrenceRule || '';
-		notes = task.metadata?.notes || '';
 		storyPoints = task.metadata?.storyPoints ?? null;
 		effectiveDuration = task.metadata?.effectiveDuration ?? null;
 		funRating = task.metadata?.funRating ?? null;
@@ -99,7 +97,6 @@ export function useTaskForm() {
 			recurrenceRule: recurrenceRule || null,
 			metadata: {
 				...task.metadata,
-				notes: notes.trim() || undefined,
 				storyPoints: storyPoints ?? undefined,
 				effectiveDuration: effectiveDuration ?? undefined,
 				funRating: funRating ?? undefined,
@@ -171,12 +168,6 @@ export function useTaskForm() {
 		},
 		set recurrenceRule(v: string) {
 			recurrenceRule = v;
-		},
-		get notes() {
-			return notes;
-		},
-		set notes(v: string) {
-			notes = v;
 		},
 		get storyPoints() {
 			return storyPoints;

@@ -14,7 +14,7 @@
 	import { ContactSelector, focusTrap } from '@manacore/shared-ui';
 	import { ManaLinkList, ManaLinkPicker } from '@manacore/shared-links/ui';
 	import { searchCrossApp } from '$lib/data/cross-app-search';
-	import { X } from '@manacore/shared-icons';
+	import { X, Trash } from '@manacore/shared-icons';
 
 	interface Props {
 		task: Task;
@@ -27,35 +27,26 @@
 	let { task, open, onClose, onSave, onDelete }: Props = $props();
 
 	const form = useTaskForm();
-
-	// Link picker state
 	let showLinkPicker = $state(false);
 
-	// Initialize form when task changes or modal opens
 	$effect(() => {
-		if (open && task) {
-			form.initFromTask(task);
-		}
+		if (open && task) form.initFromTask(task);
 	});
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape') {
-			onClose();
-		} else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+		if (e.key === 'Escape') onClose();
+		else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
 			e.preventDefault();
 			handleSave();
 		}
 	}
 
 	function handleBackdropClick(e: MouseEvent) {
-		if (e.target === e.currentTarget) {
-			onClose();
-		}
+		if (e.target === e.currentTarget) onClose();
 	}
 
 	async function handleSave() {
 		if (!form.title.trim()) return;
-
 		form.isLoading = true;
 		try {
 			onSave(form.buildUpdateInput(task));
@@ -65,203 +56,199 @@
 	}
 
 	function handleDelete() {
-		if (form.showDeleteConfirm) {
-			onDelete(task.id);
-		} else {
-			form.showDeleteConfirm = true;
-		}
+		if (form.showDeleteConfirm) onDelete(task.id);
+		else form.showDeleteConfirm = true;
 	}
 
 	function handleSubtasksChange(newSubtasks: Subtask[]) {
 		form.subtasks = newSubtasks;
+	}
+
+	function autoGrow(node: HTMLTextAreaElement) {
+		function resize() {
+			node.style.height = 'auto';
+			node.style.height = node.scrollHeight + 'px';
+		}
+		node.addEventListener('input', resize);
+		resize();
+		return { destroy: () => node.removeEventListener('input', resize) };
 	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
 
 {#if open}
-	<div
-		class="modal-backdrop"
-		onclick={handleBackdropClick}
-		role="dialog"
-		aria-modal="true"
-		use:focusTrap
-	>
-		<div class="modal-container">
-			<!-- Header -->
-			<div class="modal-header">
-				<h2 class="modal-title">Aufgabe bearbeiten</h2>
-				<button type="button" class="close-btn" onclick={onClose} title="Schließen">
-					<X size={20} />
-				</button>
+	<div class="backdrop" onclick={handleBackdropClick} role="dialog" aria-modal="true" use:focusTrap>
+		<div class="page">
+			<!-- Top bar -->
+			<div class="top-bar">
+				<div class="top-left">
+					{#if form.showDeleteConfirm}
+						<span class="delete-confirm-text">Wirklich löschen?</span>
+						<button class="btn-ghost-danger" onclick={handleDelete}>Ja, löschen</button>
+						<button class="btn-ghost" onclick={() => (form.showDeleteConfirm = false)}
+							>Abbrechen</button
+						>
+					{:else}
+						<button class="btn-icon-danger" onclick={handleDelete} title="Aufgabe löschen">
+							<Trash size={16} />
+						</button>
+					{/if}
+				</div>
+				<div class="top-right">
+					<button
+						class="btn-save"
+						onclick={handleSave}
+						disabled={form.isLoading || !form.title.trim()}
+					>
+						{#if form.isLoading}<span class="spinner"></span>{:else}Speichern{/if}
+					</button>
+					<button class="btn-close" onclick={onClose} title="Schließen"><X size={18} /></button>
+				</div>
 			</div>
 
-			<!-- Content -->
-			<div class="modal-content">
-				<!-- Titel -->
-				<div class="form-section">
-					<label class="form-label" for="task-title">Titel</label>
-					<input
-						id="task-title"
-						type="text"
-						class="form-input"
-						bind:value={form.title}
-						placeholder="Aufgabentitel..."
-					/>
-				</div>
+			<!-- Title -->
+			<div class="title-area">
+				<textarea
+					class="title-input"
+					bind:value={form.title}
+					placeholder="Aufgabentitel..."
+					rows="1"
+					use:autoGrow
+				></textarea>
+			</div>
 
-				<!-- Beschreibung -->
-				<div class="form-section">
-					<label class="form-label" for="task-description">Beschreibung</label>
+			<!-- Content: Description (left) + Subtasks/Links (right) -->
+			<div class="content-grid">
+				<div class="col-desc">
+					<span class="col-label">Beschreibung</span>
 					<textarea
-						id="task-description"
-						class="form-textarea"
+						class="desc-textarea"
 						bind:value={form.description}
 						placeholder="Beschreibung hinzufügen..."
-						rows="3"
+						rows="5"
 					></textarea>
 				</div>
 
-				<!-- Zuständige Person -->
-				<div class="form-section">
-					<label class="form-label">Zuständig</label>
-					<ContactSelector
-						selectedContacts={form.assignee}
-						onContactsChange={(contacts) => (form.assignee = contacts)}
-						onSearch={(q) => contactsStore.searchContacts(q)}
-						singleSelect={true}
-						allowManualEntry={false}
-						placeholder="Person zuweisen..."
-						addLabel="Zuweisen"
-						searchPlaceholder="Name oder E-Mail..."
-						isAvailable={form.contactsAvailable ?? false}
-					/>
-				</div>
+				<div class="col-subtasks">
+					<span class="col-label">Subtasks</span>
+					<SubtaskList subtasks={form.subtasks} onChange={handleSubtasksChange} />
 
-				<!-- Beteiligte Personen -->
-				<div class="form-section">
-					<label class="form-label">Beteiligte</label>
-					<ContactSelector
-						selectedContacts={form.involvedContacts}
-						onContactsChange={(contacts) => (form.involvedContacts = contacts)}
-						onSearch={(q) => contactsStore.searchContacts(q)}
-						allowManualEntry={false}
-						placeholder="Personen hinzufügen..."
-						addLabel="Person hinzufügen"
-						searchPlaceholder="Name oder E-Mail..."
-						isAvailable={form.contactsAvailable ?? false}
-					/>
-				</div>
-
-				<!-- Zeitplanung -->
-				<div class="form-section">
-					<label class="form-label">Zeitplanung</label>
-					<div class="form-row">
-						<div class="form-field">
-							<label class="form-sublabel" for="due-date">Fälligkeitsdatum</label>
-							<input id="due-date" type="date" class="form-input-sm" bind:value={form.dueDate} />
+					<div class="links-block">
+						<div class="links-header">
+							<span class="col-label">Verknüpfungen</span>
+							<button class="link-add" onclick={() => (showLinkPicker = true)}>+ Verknüpfen</button>
 						</div>
-						<div class="form-field">
-							<label class="form-sublabel" for="due-time">Uhrzeit</label>
-							<input id="due-time" type="time" class="form-input-sm" bind:value={form.dueTime} />
-						</div>
-						<div class="form-field">
-							<label class="form-sublabel" for="start-date">Startdatum</label>
-							<input
-								id="start-date"
-								type="date"
-								class="form-input-sm"
-								bind:value={form.startDate}
-							/>
-						</div>
+						<ManaLinkList recordRef={{ app: 'todo', collection: 'tasks', id: task.id }} editable />
 					</div>
 				</div>
+			</div>
 
-				<!-- Priorität -->
-				<div class="form-section">
-					<label class="form-label">Priorität</label>
-					<PrioritySelector value={form.priority} onChange={(p) => (form.priority = p)} />
-				</div>
-
+			<!-- Properties strip: all metadata horizontal -->
+			<div class="props-strip">
 				<!-- Status -->
-				<div class="form-section">
-					<label class="form-label" for="task-status">Status</label>
-					<select id="task-status" class="form-select" bind:value={form.status}>
+				<div class="prop">
+					<span class="prop-label">Status</span>
+					<select class="prop-select" bind:value={form.status}>
 						{#each STATUS_OPTIONS as s}
 							<option value={s.value}>{s.label}</option>
 						{/each}
 					</select>
 				</div>
 
+				<div class="prop-divider"></div>
+
+				<!-- Priorität -->
+				<div class="prop prop-priority">
+					<span class="prop-label">Priorität</span>
+					<PrioritySelector value={form.priority} onChange={(p) => (form.priority = p)} />
+				</div>
+
+				<div class="prop-divider"></div>
+
+				<!-- Fälligkeit -->
+				<div class="prop">
+					<span class="prop-label">Fälligkeit</span>
+					<input type="date" class="prop-input" bind:value={form.dueDate} />
+				</div>
+
+				<!-- Uhrzeit -->
+				<div class="prop">
+					<span class="prop-label">Uhrzeit</span>
+					<input type="time" class="prop-input" bind:value={form.dueTime} />
+				</div>
+
+				<!-- Startdatum -->
+				<div class="prop">
+					<span class="prop-label">Startdatum</span>
+					<input type="date" class="prop-input" bind:value={form.startDate} />
+				</div>
+
+				<!-- Wiederholung -->
+				<div class="prop">
+					<span class="prop-label">Wiederholung</span>
+					<select class="prop-select" bind:value={form.recurrenceRule}>
+						{#each RECURRENCE_OPTIONS as o}
+							<option value={o.value}>{o.label}</option>
+						{/each}
+					</select>
+				</div>
+
+				<div class="prop-divider"></div>
+
 				<!-- Tags -->
-				<div class="form-section">
-					<label class="form-label">Tags</label>
+				<div class="prop prop-tags">
+					<span class="prop-label">Tags</span>
 					<TagSelector
 						selectedIds={form.selectedLabelIds}
 						onChange={(ids) => (form.selectedLabelIds = ids)}
 					/>
 				</div>
 
-				<!-- Subtasks -->
-				<div class="form-section">
-					<label class="form-label">Subtasks</label>
-					<SubtaskList subtasks={form.subtasks} onChange={handleSubtasksChange} />
+				<div class="prop-divider"></div>
+
+				<!-- Zuständig -->
+				<div class="prop prop-contact">
+					<span class="prop-label">Zuständig</span>
+					<ContactSelector
+						selectedContacts={form.assignee}
+						onContactsChange={(c) => (form.assignee = c)}
+						onSearch={(q) => contactsStore.searchContacts(q)}
+						singleSelect={true}
+						allowManualEntry={false}
+						placeholder="Zuweisen..."
+						addLabel="Zuweisen"
+						searchPlaceholder="Name oder E-Mail..."
+						isAvailable={form.contactsAvailable ?? false}
+					/>
 				</div>
 
-				<!-- Verknüpfungen -->
-				<div class="form-section">
-					<div class="flex items-center justify-between">
-						<label class="form-label">Verknüpfungen</label>
-						<button
-							type="button"
-							class="text-xs text-primary hover:underline"
-							onclick={() => (showLinkPicker = true)}
-						>
-							+ Verknüpfen
-						</button>
-					</div>
-					<ManaLinkList recordRef={{ app: 'todo', collection: 'tasks', id: task.id }} editable />
+				<!-- Beteiligte -->
+				<div class="prop prop-contact">
+					<span class="prop-label">Beteiligte</span>
+					<ContactSelector
+						selectedContacts={form.involvedContacts}
+						onContactsChange={(c) => (form.involvedContacts = c)}
+						onSearch={(q) => contactsStore.searchContacts(q)}
+						allowManualEntry={false}
+						placeholder="Hinzufügen..."
+						addLabel="Hinzufügen"
+						searchPlaceholder="Name oder E-Mail..."
+						isAvailable={form.contactsAvailable ?? false}
+					/>
 				</div>
 
-				<ManaLinkPicker
-					sourceRef={{ app: 'todo', collection: 'tasks', id: task.id }}
-					sourceTitle={form.title || task.title}
-					open={showLinkPicker}
-					onClose={() => (showLinkPicker = false)}
-					onSearch={searchCrossApp}
-				/>
-
-				<!-- Wiederholung -->
-				<div class="form-section">
-					<label class="form-label" for="task-recurrence">Wiederholung</label>
-					<select id="task-recurrence" class="form-select" bind:value={form.recurrenceRule}>
-						{#each RECURRENCE_OPTIONS as option}
-							<option value={option.value}>{option.label}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Notizen -->
-				<div class="form-section">
-					<label class="form-label" for="task-notes">Notizen</label>
-					<textarea
-						id="task-notes"
-						class="form-textarea"
-						bind:value={form.notes}
-						placeholder="Zusätzliche Notizen..."
-						rows="3"
-					></textarea>
-				</div>
+				<div class="prop-divider"></div>
 
 				<!-- Storypoints -->
-				<div class="form-section">
-					<label class="form-label">Storypoints</label>
+				<div class="prop">
+					<span class="prop-label">Storypoints</span>
 					<StorypointsSelector value={form.storyPoints} onChange={(v) => (form.storyPoints = v)} />
 				</div>
 
 				<!-- Effektive Dauer -->
-				<div class="form-section">
-					<label class="form-label">Effektive Dauer</label>
+				<div class="prop">
+					<span class="prop-label">Dauer</span>
 					<DurationPicker
 						value={form.effectiveDuration}
 						onChange={(v) => (form.effectiveDuration = v)}
@@ -269,313 +256,423 @@
 				</div>
 
 				<!-- Spaß-Faktor -->
-				<div class="form-section">
-					<label class="form-label">
-						Spaß-Faktor{#if form.funRating !== null}: <span class="fun-rating-value"
-								>{form.funRating}</span
-							>{/if}
-					</label>
+				<div class="prop">
+					<span class="prop-label">Spaß{form.funRating !== null ? ` (${form.funRating})` : ''}</span
+					>
 					<FunRatingPicker value={form.funRating} onChange={(v) => (form.funRating = v)} />
 				</div>
 			</div>
 
-			<!-- Footer -->
-			<div class="modal-footer">
-				<button
-					type="button"
-					class="btn btn-danger"
-					onclick={handleDelete}
-					disabled={form.isLoading}
-				>
-					{form.showDeleteConfirm ? 'Wirklich löschen?' : 'Löschen'}
-				</button>
-				<div class="footer-right">
-					<button
-						type="button"
-						class="btn btn-secondary"
-						onclick={onClose}
-						disabled={form.isLoading}
-					>
-						Abbrechen
-					</button>
-					<button
-						type="button"
-						class="btn btn-primary"
-						onclick={handleSave}
-						disabled={form.isLoading || !form.title.trim()}
-					>
-						{#if form.isLoading}
-							<div class="spinner"></div>
-						{:else}
-							Speichern
-						{/if}
-					</button>
-				</div>
-			</div>
+			<ManaLinkPicker
+				sourceRef={{ app: 'todo', collection: 'tasks', id: task.id }}
+				sourceTitle={form.title || task.title}
+				open={showLinkPicker}
+				onClose={() => (showLinkPicker = false)}
+				onSearch={searchCrossApp}
+			/>
 		</div>
 	</div>
 {/if}
 
 <style>
-	.modal-backdrop {
+	/* ── Backdrop ─────────────────────────────────────────── */
+	.backdrop {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.5);
-		backdrop-filter: blur(4px);
+		background: rgba(0, 0, 0, 0.45);
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		z-index: 9995;
-		padding: 4rem 2rem;
+		padding: 2rem;
 	}
 
-	.modal-container {
+	/* ── Page ─────────────────────────────────────────────── */
+	.page {
+		container-type: inline-size;
 		width: 100%;
-		max-width: 600px;
-		max-height: 80vh;
+		max-width: 1040px;
+		max-height: calc(100vh - 4rem);
 		display: flex;
 		flex-direction: column;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(20px);
-		-webkit-backdrop-filter: blur(20px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		background: var(--surface, #ffffff);
+		border: 1px solid rgba(0, 0, 0, 0.08);
 		border-radius: 1.5rem;
-		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+		box-shadow:
+			0 32px 64px -12px rgba(0, 0, 0, 0.2),
+			0 0 0 1px rgba(0, 0, 0, 0.04);
 		overflow: hidden;
 	}
 
-	:global(.dark) .modal-container {
-		background: rgba(30, 30, 30, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+	:global(.dark) .page {
+		background: #1a1a1f;
+		border-color: rgba(255, 255, 255, 0.1);
 	}
 
-	/* Mobile: Full screen from bottom, modal covers all UI elements */
-	@media (max-width: 640px) {
-		.modal-backdrop {
-			align-items: flex-end;
-			padding: 0;
-		}
-
-		.modal-container {
-			max-width: 100%;
-			max-height: calc(100vh - 60px - env(safe-area-inset-top, 0px));
-			border-radius: 1.5rem 1.5rem 0 0;
-			margin-bottom: env(safe-area-inset-bottom, 0px);
-		}
-	}
-
-	/* Header */
-	.modal-header {
+	/* ── Top bar ──────────────────────────────────────────── */
+	.top-bar {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 1.25rem 1.5rem;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+		padding: 0.625rem 1.25rem;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+		flex-shrink: 0;
 	}
 
-	:global(.dark) .modal-header {
-		border-bottom-color: rgba(255, 255, 255, 0.1);
+	:global(.dark) .top-bar {
+		border-bottom-color: rgba(255, 255, 255, 0.08);
 	}
 
-	.modal-title {
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: #1f2937;
+	.top-left,
+	.top-right {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
-	:global(.dark) .modal-title {
-		color: #f3f4f6;
+	.delete-confirm-text {
+		font-size: 0.8125rem;
+		color: #ef4444;
+		font-weight: 500;
 	}
 
-	.close-btn {
-		padding: 0.5rem;
+	.btn-ghost {
+		padding: 0.3rem 0.625rem;
 		border: none;
 		background: transparent;
+		font-size: 0.8125rem;
 		color: #6b7280;
+		cursor: pointer;
+		border-radius: 0.5rem;
+		transition: background 0.15s;
+	}
+
+	.btn-ghost:hover {
+		background: rgba(0, 0, 0, 0.06);
+	}
+
+	.btn-ghost-danger {
+		padding: 0.3rem 0.625rem;
+		border: none;
+		background: transparent;
+		font-size: 0.8125rem;
+		color: #ef4444;
+		cursor: pointer;
+		border-radius: 0.5rem;
+		transition: background 0.15s;
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.btn-ghost-danger:hover {
+		background: rgba(239, 68, 68, 0.08);
+	}
+
+	.btn-icon-danger {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.875rem;
+		height: 1.875rem;
+		border: none;
+		background: transparent;
+		color: #9ca3af;
 		cursor: pointer;
 		border-radius: 0.5rem;
 		transition: all 0.15s;
 	}
 
-	.close-btn:hover {
-		background: rgba(0, 0, 0, 0.05);
+	.btn-icon-danger:hover {
+		background: rgba(239, 68, 68, 0.08);
+		color: #ef4444;
+	}
+
+	.btn-save {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.875rem;
+		background: #8b5cf6;
+		color: white;
+		border: none;
+		border-radius: 0.625rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+
+	.btn-save:hover:not(:disabled) {
+		background: #7c3aed;
+	}
+
+	.btn-save:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	.btn-close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.875rem;
+		height: 1.875rem;
+		border: none;
+		background: transparent;
+		color: #9ca3af;
+		cursor: pointer;
+		border-radius: 0.5rem;
+		transition: all 0.15s;
+	}
+
+	.btn-close:hover {
+		background: rgba(0, 0, 0, 0.06);
 		color: #374151;
 	}
 
-	:global(.dark) .close-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
+	:global(.dark) .btn-close:hover {
+		background: rgba(255, 255, 255, 0.08);
 		color: #e5e7eb;
 	}
 
-	/* Content */
-	.modal-content {
+	/* ── Title ────────────────────────────────────────────── */
+	.title-area {
+		padding: 1rem 1.5rem 0.75rem;
+		flex-shrink: 0;
+	}
+
+	.title-input {
+		width: 100%;
+		border: none;
+		background: transparent;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: #111827;
+		line-height: 1.3;
+		resize: none;
+		overflow: hidden;
+		padding: 0;
+		outline: none;
+		font-family: inherit;
+	}
+
+	:global(.dark) .title-input {
+		color: #f9fafb;
+	}
+
+	.title-input::placeholder {
+		color: #d1d5db;
+	}
+
+	:global(.dark) .title-input::placeholder {
+		color: #4b5563;
+	}
+
+	/* ── Content grid: Description | Subtasks/Links ───────── */
+	.content-grid {
 		flex: 1;
-		overflow-y: auto;
-		padding: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1.25rem;
-	}
-
-	/* Form sections */
-	.form-section {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.form-label {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: #374151;
-	}
-
-	:global(.dark) .form-label {
-		color: #e5e7eb;
-	}
-
-	.form-sublabel {
-		font-size: 0.75rem;
-		color: #6b7280;
-	}
-
-	.form-row {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 0.75rem;
+		grid-template-columns: 1fr 1fr;
+		gap: 0;
+		border-top: 1px solid rgba(0, 0, 0, 0.07);
+		overflow: hidden;
+		min-height: 0;
 	}
 
-	@media (max-width: 480px) {
-		.form-row {
+	:global(.dark) .content-grid {
+		border-top-color: rgba(255, 255, 255, 0.08);
+	}
+
+	/* Single column on narrow */
+	@container (max-width: 600px) {
+		.content-grid {
 			grid-template-columns: 1fr;
 		}
 	}
 
-	.form-field {
+	.col-desc,
+	.col-subtasks {
+		padding: 1rem 1.25rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.625rem;
+		overflow-y: auto;
 	}
 
-	.form-input,
-	.form-textarea,
-	.form-select,
-	.form-input-sm {
+	.col-subtasks {
+		border-left: 1px solid rgba(0, 0, 0, 0.07);
+	}
+
+	:global(.dark) .col-subtasks {
+		border-left-color: rgba(255, 255, 255, 0.08);
+	}
+
+	.col-label {
+		font-size: 0.6875rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #9ca3af;
+		flex-shrink: 0;
+	}
+
+	:global(.dark) .col-label {
+		color: #6b7280;
+	}
+
+	.desc-textarea {
+		flex: 1;
 		width: 100%;
-		padding: 0.625rem 0.875rem;
-		border: 1px solid rgba(0, 0, 0, 0.15);
-		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.8);
-		font-size: 0.875rem;
-		color: #374151;
-		transition: all 0.15s;
-	}
-
-	:global(.dark) .form-input,
-	:global(.dark) .form-textarea,
-	:global(.dark) .form-select,
-	:global(.dark) .form-input-sm {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: #f3f4f6;
-	}
-
-	.form-input:focus,
-	.form-textarea:focus,
-	.form-select:focus,
-	.form-input-sm:focus {
-		outline: none;
-		border-color: #8b5cf6;
-		box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-	}
-
-	.form-input-sm {
-		padding: 0.5rem 0.75rem;
-	}
-
-	.form-textarea {
-		resize: vertical;
-		min-height: 80px;
-	}
-
-	/* Footer */
-	.modal-footer {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 1rem 1.5rem;
-		border-top: 1px solid rgba(0, 0, 0, 0.1);
-	}
-
-	:global(.dark) .modal-footer {
-		border-top-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.footer-right {
-		display: flex;
-		gap: 0.75rem;
-	}
-
-	/* Buttons */
-	.btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.625rem 1.25rem;
 		border: none;
-		border-radius: 0.75rem;
+		background: transparent;
 		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.btn:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.btn-primary {
-		background: #8b5cf6;
-		color: white;
-	}
-
-	.btn-primary:hover:not(:disabled) {
-		background: #7c3aed;
-	}
-
-	.btn-secondary {
-		background: rgba(0, 0, 0, 0.05);
 		color: #374151;
+		resize: none;
+		font-family: inherit;
+		line-height: 1.6;
+		outline: none;
+		min-height: 100px;
 	}
 
-	:global(.dark) .btn-secondary {
-		background: rgba(255, 255, 255, 0.1);
+	:global(.dark) .desc-textarea {
 		color: #e5e7eb;
 	}
 
-	.btn-secondary:hover:not(:disabled) {
-		background: rgba(0, 0, 0, 0.1);
+	.desc-textarea::placeholder {
+		color: #d1d5db;
 	}
 
-	:global(.dark) .btn-secondary:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.15);
+	:global(.dark) .desc-textarea::placeholder {
+		color: #4b5563;
 	}
 
-	.btn-danger {
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
+	.links-block {
+		margin-top: 0.75rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
 	}
 
-	.btn-danger:hover:not(:disabled) {
-		background: #ef4444;
-		color: white;
+	.links-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 	}
 
+	.link-add {
+		border: none;
+		background: transparent;
+		font-size: 0.75rem;
+		color: #8b5cf6;
+		cursor: pointer;
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.375rem;
+		transition: background 0.15s;
+	}
+
+	.link-add:hover {
+		background: rgba(139, 92, 246, 0.08);
+	}
+
+	/* ── Properties strip ─────────────────────────────────── */
+	.props-strip {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: stretch;
+		flex-shrink: 0;
+		border-top: 1px solid rgba(0, 0, 0, 0.07);
+		background: rgba(0, 0, 0, 0.02);
+	}
+
+	:global(.dark) .props-strip {
+		border-top-color: rgba(255, 255, 255, 0.08);
+		background: rgba(255, 255, 255, 0.02);
+	}
+
+	.prop {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0.5rem 0.875rem;
+		border-right: 1px solid rgba(0, 0, 0, 0.06);
+	}
+
+	:global(.dark) .prop {
+		border-right-color: rgba(255, 255, 255, 0.06);
+	}
+
+	.prop:last-child {
+		border-right: none;
+	}
+
+	.prop-priority {
+		min-width: 200px;
+	}
+
+	.prop-tags {
+		min-width: 140px;
+		flex: 1;
+	}
+
+	.prop-contact {
+		min-width: 130px;
+	}
+
+	.prop-label {
+		font-size: 0.625rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: #9ca3af;
+		white-space: nowrap;
+	}
+
+	:global(.dark) .prop-label {
+		color: #6b7280;
+	}
+
+	.prop-input,
+	.prop-select {
+		border: none;
+		background: transparent;
+		font-size: 0.8125rem;
+		color: #374151;
+		font-family: inherit;
+		padding: 0;
+		outline: none;
+		cursor: pointer;
+		min-width: 0;
+	}
+
+	:global(.dark) .prop-input,
+	:global(.dark) .prop-select {
+		color: #e5e7eb;
+		color-scheme: dark;
+	}
+
+	.prop-input:focus,
+	.prop-select:focus {
+		color: #8b5cf6;
+	}
+
+	.prop-divider {
+		width: 1px;
+		background: rgba(0, 0, 0, 0.08);
+		margin: 0.375rem 0;
+		flex-shrink: 0;
+	}
+
+	:global(.dark) .prop-divider {
+		background: rgba(255, 255, 255, 0.08);
+	}
+
+	/* ── Spinner ──────────────────────────────────────────── */
 	.spinner {
-		width: 1rem;
-		height: 1rem;
+		width: 0.875rem;
+		height: 0.875rem;
 		border: 2px solid transparent;
 		border-top-color: white;
 		border-radius: 9999px;
@@ -588,7 +685,32 @@
 		}
 	}
 
-	.fun-rating-value {
-		font-weight: 600;
+	/* ── Mobile ───────────────────────────────────────────── */
+	@media (max-width: 640px) {
+		.backdrop {
+			align-items: flex-end;
+			padding: 0;
+		}
+
+		.page {
+			max-width: 100%;
+			max-height: calc(100vh - 60px - env(safe-area-inset-top, 0px));
+			border-radius: 1.5rem 1.5rem 0 0;
+			margin-bottom: env(safe-area-inset-bottom, 0px);
+		}
+
+		.content-grid {
+			grid-template-columns: 1fr;
+			overflow-y: auto;
+		}
+
+		.col-subtasks {
+			border-left: none;
+			border-top: 1px solid rgba(0, 0, 0, 0.07);
+		}
+
+		:global(.dark) .col-subtasks {
+			border-top-color: rgba(255, 255, 255, 0.08);
+		}
 	}
 </style>

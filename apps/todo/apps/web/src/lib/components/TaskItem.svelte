@@ -97,7 +97,6 @@
 			form.selectedLabelIds,
 			form.subtasks,
 			form.recurrenceRule,
-			form.notes,
 			form.storyPoints,
 			form.effectiveDuration,
 			form.funRating,
@@ -208,6 +207,20 @@
 		form.subtasks = newSubtasks;
 	}
 
+	function toggleSubtask(subtaskId: string) {
+		if (!onSave) return;
+		const updated = (task.subtasks ?? []).map((s) =>
+			s.id === subtaskId
+				? {
+						...s,
+						isCompleted: !s.isCompleted,
+						completedAt: !s.isCompleted ? new Date().toISOString() : null,
+					}
+				: s
+		);
+		onSave({ subtasks: updated });
+	}
+
 	const priorityColors = PRIORITY_COLORS;
 
 	// Format due date
@@ -224,7 +237,7 @@
 	});
 
 	// Subtasks progress
-	let subtaskProgress = $derived(() => getSubtaskProgress(task.subtasks));
+	let subtaskProgress = $derived(() => getSubtaskProgress(task.subtasks ?? undefined));
 
 	// Long press to expand (mobile)
 	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
@@ -315,25 +328,16 @@
 				{task.title}
 			</span>
 
-			<!-- Labels and subtasks below title -->
-			{#if subtaskProgress() || (task.labels && task.labels.length > 0)}
+			<!-- Labels below title -->
+			{#if task.labels && task.labels.length > 0}
 				<div class="task-meta">
-					{#if subtaskProgress()}
-						<span class="meta-item">
-							<CheckSquare size={20} class="meta-icon" />
-							{subtaskProgress()}
+					{#each task.labels.slice(0, 2) as label}
+						<span class="label-tag" style="--label-color: {label.color}">
+							{label.name}
 						</span>
-					{/if}
-
-					{#if task.labels && task.labels.length > 0}
-						{#each task.labels.slice(0, 2) as label}
-							<span class="label-tag" style="--label-color: {label.color}">
-								{label.name}
-							</span>
-						{/each}
-						{#if task.labels.length > 2}
-							<span class="meta-item">+{task.labels.length - 2}</span>
-						{/if}
+					{/each}
+					{#if task.labels.length > 2}
+						<span class="meta-item">+{task.labels.length - 2}</span>
 					{/if}
 				</div>
 			{/if}
@@ -398,6 +402,24 @@
 			</span>
 		{/if}
 	</div>
+
+	<!-- Inline subtasks -->
+	{#if task.subtasks && task.subtasks.length > 0 && !task.isCompleted}
+		<div class="subtasks-inline">
+			{#each task.subtasks as subtask (subtask.id)}
+				<button
+					class="subtask-row"
+					class:done={subtask.isCompleted}
+					onclick={() => toggleSubtask(subtask.id)}
+				>
+					<span class="subtask-check" class:checked={subtask.isCompleted}>
+						{#if subtask.isCompleted}<Check size={10} />{/if}
+					</span>
+					<span class="subtask-title">{subtask.title}</span>
+				</button>
+			{/each}
+		</div>
+	{/if}
 
 	<!-- Expanded inline edit form -->
 	{#if isExpanded}
@@ -531,18 +553,6 @@
 					searchPlaceholder="Name oder E-Mail..."
 					isAvailable={form.contactsAvailable ?? false}
 				/>
-			</div>
-
-			<!-- Notes -->
-			<div class="form-section">
-				<label class="form-label" for="task-notes-{task.id}">Notizen</label>
-				<textarea
-					id="task-notes-{task.id}"
-					class="form-textarea"
-					bind:value={form.notes}
-					placeholder="Zusätzliche Notizen..."
-					rows="2"
-				></textarea>
 			</div>
 
 			<!-- Story Points & Duration & Fun Rating row -->
@@ -1190,5 +1200,87 @@
 	.btn-danger:hover:not(:disabled) {
 		background: #ef4444;
 		color: white;
+	}
+
+	/* ── Inline subtasks ────────────────────────────── */
+	.subtasks-inline {
+		display: flex;
+		flex-direction: column;
+		/* align with task title: padding-left + gap + checkbox + gap */
+		padding: 0.125rem 1.5rem 0.375rem calc(1.5rem + 1.25rem + 1.25rem);
+		position: relative;
+	}
+
+	.subtasks-inline::before {
+		content: '';
+		position: absolute;
+		left: calc(1.5rem + 0.625rem + 0.625rem);
+		top: 0;
+		bottom: 0.375rem;
+		width: 1px;
+		background: rgba(0, 0, 0, 0.1);
+	}
+
+	:global(.dark) .subtasks-inline::before {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.subtask-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.1875rem 0;
+		background: none;
+		border: none;
+		cursor: pointer;
+		text-align: left;
+		width: 100%;
+		border-radius: 0.25rem;
+		transition: background 0.1s;
+	}
+
+	.subtask-row:hover {
+		background: rgba(0, 0, 0, 0.03);
+	}
+
+	:global(.dark) .subtask-row:hover {
+		background: rgba(255, 255, 255, 0.04);
+	}
+
+	.subtask-check {
+		width: 0.875rem;
+		height: 0.875rem;
+		border-radius: 50%;
+		border: 1.5px solid rgba(0, 0, 0, 0.2);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		transition: all 0.15s;
+		color: white;
+	}
+
+	:global(.dark) .subtask-check {
+		border-color: rgba(255, 255, 255, 0.25);
+	}
+
+	.subtask-check.checked {
+		background: #8b5cf6;
+		border-color: #8b5cf6;
+	}
+
+	.subtask-title {
+		font-size: 0.8125rem;
+		color: #374151;
+		line-height: 1.4;
+	}
+
+	:global(.dark) .subtask-title {
+		color: #d1d5db;
+	}
+
+	.subtask-row.done .subtask-title {
+		text-decoration: line-through;
+		color: #9ca3af;
 	}
 </style>

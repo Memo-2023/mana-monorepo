@@ -20,7 +20,6 @@ export interface EffectiveDuration {
 }
 
 export interface TaskMetadata {
-	notes?: string;
 	attachments?: string[];
 	linkedCalendarEventId?: string | null;
 	// Agile/Productivity metadata

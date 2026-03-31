@@ -54,7 +54,7 @@
 	});
 
 	// Subtasks progress
-	let subtaskProgress = $derived(() => getSubtaskProgress(task.subtasks));
+	let subtaskProgress = $derived(() => getSubtaskProgress(task.subtasks ?? undefined));
 
 	// Click to open modal
 	function handleCardClick(e: MouseEvent) {
