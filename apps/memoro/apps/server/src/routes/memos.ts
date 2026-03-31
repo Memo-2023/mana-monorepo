@@ -119,7 +119,7 @@ memoRoutes.post('/:id/append', async (c) => {
 		callAudioServer({
 			memoId,
 			userId,
-			filePath: body.filePath,
+			audioPath: body.filePath,
 			duration: body.duration,
 			recordingIndex,
 			recordingLanguages: body.recordingLanguages,
@@ -158,7 +158,7 @@ memoRoutes.post('/:id/retry-transcription', async (c) => {
 	await updateMemoProcessingStatus(memoId, 'transcription', 'pending');
 
 	queueMicrotask(() => {
-		callAudioServer({ memoId, userId, filePath, duration }).catch((err) =>
+		callAudioServer({ memoId, userId, audioPath: filePath, duration }).catch((err) =>
 			console.error(`[memos] Retry transcription failed: ${err}`)
 		);
 	});

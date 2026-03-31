@@ -1455,6 +1455,76 @@ services:
       retries: 3
       start_period: 45s
 
+  memoro-server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.hono-server
+      args:
+        APP: memoro
+    image: memoro-server:local
+    container_name: mana-app-memoro-server
+    restart: always
+    mem_limit: 256m
+    depends_on:
+      mana-auth:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3015
+      MANA_CORE_AUTH_URL: http://mana-auth:3001
+      CORS_ORIGINS: http://memoro-web:5038,https://memoro.mana.how
+      MEMORO_SUPABASE_URL: ${MEMORO_SUPABASE_URL}
+      MEMORO_SUPABASE_SERVICE_KEY: ${MEMORO_SUPABASE_SERVICE_KEY}
+      SERVICE_KEY: ${MEMORO_SERVICE_KEY}
+      AUDIO_SERVER_URL: http://memoro-audio-server:3016
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+      AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT}
+      MANA_CREDITS_URL: http://mana-credits:3006
+      MANA_CREDITS_SERVICE_KEY: ${MANA_CREDITS_SERVICE_KEY}
+    ports:
+      - "3015:3015"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3015/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  memoro-audio-server:
+    build:
+      context: apps/memoro/apps/audio-server
+      dockerfile: Dockerfile
+    image: memoro-audio-server:local
+    container_name: mana-app-memoro-audio-server
+    restart: always
+    mem_limit: 512m
+    environment:
+      NODE_ENV: production
+      PORT: 3016
+      SERVICE_KEY: ${MEMORO_SERVICE_KEY}
+      MEMORO_SERVER_URL: http://memoro-server:3015
+      MEMORO_SUPABASE_URL: ${MEMORO_SUPABASE_URL}
+      MEMORO_SUPABASE_SERVICE_KEY: ${MEMORO_SUPABASE_SERVICE_KEY}
+      AZURE_SPEECH_KEY_1: ${AZURE_SPEECH_KEY_1}
+      AZURE_SPEECH_KEY_2: ${AZURE_SPEECH_KEY_2}
+      AZURE_SPEECH_KEY_3: ${AZURE_SPEECH_KEY_3}
+      AZURE_SPEECH_KEY_4: ${AZURE_SPEECH_KEY_4}
+      AZURE_SPEECH_REGION: ${AZURE_SPEECH_REGION:-germanywestcentral}
+      AZURE_SPEECH_ENDPOINT: ${AZURE_SPEECH_ENDPOINT}
+      AZURE_STORAGE_ACCOUNT_NAME: ${AZURE_STORAGE_ACCOUNT_NAME}
+      AZURE_STORAGE_ACCOUNT_KEY: ${AZURE_STORAGE_ACCOUNT_KEY}
+      AZURE_STORAGE_CONTAINER: ${AZURE_STORAGE_CONTAINER:-memoro-batch-audio}
+    ports:
+      - "3016:3016"
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3016/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   mana-llm:
     build:
       context: ./services/mana-llm

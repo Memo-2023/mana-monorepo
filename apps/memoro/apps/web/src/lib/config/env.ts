@@ -7,6 +7,7 @@ import {
 	PUBLIC_SUPABASE_URL,
 	PUBLIC_SUPABASE_ANON_KEY,
 	PUBLIC_MEMORO_MIDDLEWARE_URL,
+	PUBLIC_MEMORO_SERVER_URL,
 	PUBLIC_MANA_MIDDLEWARE_URL,
 	PUBLIC_MIDDLEWARE_APP_ID,
 	PUBLIC_STORAGE_BUCKET,
@@ -25,7 +26,12 @@ export const env = {
 		anonKey: PUBLIC_SUPABASE_ANON_KEY,
 	},
 
-	// Middleware APIs
+	// API servers
+	server: {
+		memoroUrl: PUBLIC_MEMORO_SERVER_URL,
+	},
+
+	// Middleware APIs (legacy — kept for authService compatibility during migration)
 	middleware: {
 		memoroUrl: PUBLIC_MEMORO_MIDDLEWARE_URL,
 		manaUrl: PUBLIC_MANA_MIDDLEWARE_URL,
