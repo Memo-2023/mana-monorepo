@@ -107,8 +107,9 @@ services:
       - ./docker/nginx:/etc/nginx/host-config:ro
       - /Volumes/ManaData/landings:/srv/landings:ro
     command: >
-      sh -c "cp /etc/nginx/host-config/landings.conf /etc/nginx/conf.d/default.conf &&
-             cp -r /etc/nginx/host-config/snippets/* /etc/nginx/snippets/ 2>/dev/null;
+      sh -c "mkdir -p /etc/nginx/snippets &&
+             cp /etc/nginx/host-config/landings.conf /etc/nginx/conf.d/default.conf &&
+             cp /etc/nginx/host-config/snippets/* /etc/nginx/snippets/ &&
              nginx -g 'daemon off;'"
     ports:
       - "4400:80"
