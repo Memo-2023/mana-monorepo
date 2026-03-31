@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { PillDropdownItem } from './types';
+	import { Columns } from '@manacore/shared-icons';
 
 	interface Props {
 		items: PillDropdownItem[];
@@ -258,14 +259,7 @@
 								class="split-button glass-pill"
 								title="Open in split panel (Ctrl/Cmd+Click)"
 							>
-								<svg class="split-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4a1 1 0 001-1V5a1 1 0 00-1-1zM19 4h-4a1 1 0 00-1 1v14a1 1 0 001 1h4a1 1 0 001-1V5a1 1 0 00-1-1z"
-									/>
-								</svg>
+								<Columns size={20} class="split-icon" />
 							</button>
 						{/if}
 					</div>

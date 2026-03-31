@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { Text } from '../../atoms';
+	import { Pause, Play, SkipBack, SkipForward } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Audio source URL */
@@ -130,14 +131,7 @@
 			{#if skipBackIcon}
 				{@render skipBackIcon()}
 			{:else}
-				<svg class="h-6 w-6 text-theme" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"
-					/>
-				</svg>
+				<SkipForward size={20} class="text-theme" />
 			{/if}
 		</button>
 
@@ -163,16 +157,12 @@
 				{#if pauseIcon}
 					{@render pauseIcon()}
 				{:else}
-					<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-						<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-					</svg>
+					<Pause size={20} weight="fill" />
 				{/if}
 			{:else if playIcon}
 				{@render playIcon()}
 			{:else}
-				<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-					<path d="M8 5v14l11-7z" />
-				</svg>
+				<Play size={20} weight="fill" />
 			{/if}
 		</button>
 
@@ -187,14 +177,7 @@
 			{#if skipForwardIcon}
 				{@render skipForwardIcon()}
 			{:else}
-				<svg class="h-6 w-6 text-theme" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"
-					/>
-				</svg>
+				<SkipBack size={20} class="text-theme" />
 			{/if}
 		</button>
 

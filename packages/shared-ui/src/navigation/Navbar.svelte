@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { NavItem } from './types';
 	import NavLink from './NavLink.svelte';
+	import { List, X } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Navigation items to display */
@@ -90,23 +91,9 @@
 				aria-label="Toggle menu"
 			>
 				{#if mobileMenuOpen}
-					<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X size={24} />
 				{:else}
-					<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 6h16M4 12h16M4 18h16"
-						/>
-					</svg>
+					<List size={24} />
 				{/if}
 			</button>
 		</div>

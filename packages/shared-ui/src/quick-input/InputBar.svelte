@@ -30,6 +30,14 @@
 	}
 
 	import type { Snippet } from 'svelte';
+	import {
+		ArrowRight,
+		Check,
+		CheckSquare,
+		Heart,
+		MagnifyingGlass,
+		Plus,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		onSearch: (query: string) => Promise<QuickInputItem[]>;
@@ -394,14 +402,7 @@
 							{#if creating}
 								<div class="loading-spinner-small"></div>
 							{:else}
-								<svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M12 4v16m8-8H4"
-									/>
-								</svg>
+								<Plus size={20} />
 							{/if}
 						</div>
 						<div class="result-info">
@@ -424,14 +425,7 @@
 						onmouseenter={() => (selectedIndex = searchOptionIndex)}
 					>
 						<div class="result-avatar search-avatar">
-							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-								/>
-							</svg>
+							<MagnifyingGlass size={20} />
 						</div>
 						<div class="result-info">
 							<div class="result-name">"{searchQuery}" {searchText.toLowerCase()}</div>
@@ -474,11 +468,7 @@
 								{/if}
 							</div>
 							{#if item.isFavorite}
-								<svg class="favorite-icon" fill="currentColor" viewBox="0 0 24 24">
-									<path
-										d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-									/>
-								</svg>
+								<Heart size={20} weight="fill" class="favorite-icon" />
 							{/if}
 						</button>
 					{/each}
@@ -504,47 +494,9 @@
 		<div class="app-icon" class:success-icon={createSuccess}>
 			{#if createSuccess}
 				<!-- Checkmark icon -->
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2.5"
-						d="M5 13l4 4L19 7"
-					/>
-				</svg>
+				<Check size={20} />
 			{:else}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					{#if appIcon === 'check-square' || appIcon === 'todo'}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-						/>
-					{:else if appIcon === 'calendar'}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-						/>
-					{:else if appIcon === 'users' || appIcon === 'contacts'}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-						/>
-					{:else}
-						<!-- Default search icon -->
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-						/>
-					{/if}
-				</svg>
+				<CheckSquare size={20} />
 			{/if}
 		</div>
 
@@ -578,14 +530,7 @@
 				{#if creating}
 					<div class="loading-spinner-small"></div>
 				{:else}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M14 5l7 7m0 0l-7 7m7-7H3"
-						/>
-					</svg>
+					<ArrowRight size={20} />
 				{/if}
 			</button>
 		{/if}

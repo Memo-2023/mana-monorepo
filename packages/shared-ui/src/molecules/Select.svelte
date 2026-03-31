@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SelectOption } from './Select.types';
+	import { CaretDown } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Current selected value */
@@ -73,9 +74,7 @@
 			{/each}
 		</select>
 		<div class="select-icon">
-			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-			</svg>
+			<CaretDown size={16} />
 		</div>
 	</div>
 

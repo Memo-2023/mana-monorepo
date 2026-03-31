@@ -13,63 +13,63 @@
 	import PillTagSelector from './PillTagSelector.svelte';
 	// Phosphor Icons (via shared-icons)
 	import {
-		House,
-		Users,
-		Tag,
-		Heart,
-		Gear,
-		ChatCircle,
-		Question,
-		ShareNetwork,
+		Archive,
 		Bell,
-		Clock,
-		Timer,
-		Target,
-		Globe,
-		Tray,
+		Buildings,
+		CalendarBlank,
+		CaretDown,
+		CaretLeft,
+		CaretRight,
+		CaretUp,
+		ChartBar,
+		ChatCircle,
 		Check,
 		CheckCircle,
 		CheckSquare,
-		Plus,
+		Clock,
 		Columns,
-		Microphone,
-		CalendarBlank,
-		Folder,
-		Archive,
-		Upload,
-		MusicNote,
-		File,
-		ChartBar,
-		MagnifyingGlass,
-		List,
 		Compass,
-		Moon,
-		Sun,
-		SignOut,
-		CaretDown,
-		CaretUp,
-		CaretLeft,
-		Fire,
-		GridFour,
-		Palette,
 		CreditCard,
-		Buildings,
-		User,
-		Scales,
-		Robot,
-		Key,
-		Shield,
-		Gift,
-		MusicNotes,
-		Playlist,
-		Waveform,
+		File,
 		FileText,
+		Fire,
+		Folder,
+		Funnel,
+		Gear,
+		Gift,
+		Globe,
+		GridFour,
+		Heart,
+		House,
+		Key,
+		List,
+		MagnifyingGlass,
+		Microphone,
+		Moon,
+		MusicNote,
+		MusicNotes,
+		Palette,
+		Playlist,
+		Plus,
+		Question,
+		Robot,
+		Scales,
+		ShareFat,
+		ShareNetwork,
+		Shield,
+		SignOut,
 		Sparkle,
 		Spiral,
-		ShareFat,
+		Sun,
+		Tag,
+		Target,
+		Timer,
 		Trash,
-		Funnel,
-		CaretRight,
+		Tray,
+		Upload,
+		User,
+		Users,
+		Waveform,
 	} from '@manacore/shared-icons';
 
 	// Map icon names to Phosphor components
@@ -593,16 +593,7 @@
 									title="Hoher Kontrast"
 									aria-pressed={a11yContrast === 'high'}
 								>
-									<svg
-										class="a11y-icon"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-									>
-										<circle cx="12" cy="12" r="10" />
-										<path d="M12 2v20M12 2a10 10 0 0 1 0 20" fill="currentColor" />
-									</svg>
+									<Sun size={20} class="a11y-icon" />
 								</button>
 								<!-- Reduce Motion Toggle -->
 								<button

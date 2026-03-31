@@ -41,6 +41,7 @@
 
 	import type { Snippet } from 'svelte';
 	import { Text } from '../atoms';
+	import { CaretLeft } from '@manacore/shared-icons';
 
 	type HeaderSize = 'sm' | 'md' | 'lg';
 
@@ -125,14 +126,7 @@
 					class="absolute left-0 p-1.5 rounded-lg text-theme-secondary hover:text-theme hover:bg-theme-secondary/10 transition-colors"
 					aria-label="Zurück"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 19l-7-7 7-7"
-						/>
-					</svg>
+					<CaretLeft size={20} />
 				</a>
 			{/if}
 
@@ -171,14 +165,7 @@
 						class="page-header__back flex-shrink-0 p-1.5 -ml-1.5 rounded-lg text-theme-secondary hover:text-theme hover:bg-theme-secondary/10 transition-colors"
 						aria-label="Zurück"
 					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M15 19l-7-7 7-7"
-							/>
-						</svg>
+						<CaretLeft size={20} />
 					</a>
 				{/if}
 

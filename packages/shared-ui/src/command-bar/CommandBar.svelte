@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { CommandBarItem, QuickAction, CreatePreview } from './CommandBar.types';
+	import { Heart, MagnifyingGlass, Plus } from '@manacore/shared-icons';
 
 	// Syntax highlighting patterns for command keywords
 	interface HighlightPattern {
@@ -245,14 +246,7 @@
 		<div class="command-modal">
 			<!-- Search Input with Syntax Highlighting -->
 			<div class="command-input-wrapper">
-				<svg class="command-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-					/>
-				</svg>
+				<MagnifyingGlass size={20} class="command-icon" />
 				<div class="input-highlight-container">
 					<!-- Highlight backdrop (shows colored keywords) -->
 					<div class="input-highlight-backdrop" aria-hidden="true">
@@ -288,14 +282,7 @@
 								{#if creating}
 									<div class="loading-spinner-small"></div>
 								{:else}
-									<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M12 4v16m8-8H4"
-										/>
-									</svg>
+									<Plus size={20} />
 								{/if}
 							</div>
 							<div class="result-info">
@@ -352,11 +339,7 @@
 									{/if}
 								</div>
 								{#if item.isFavorite}
-									<svg class="result-favorite" fill="currentColor" viewBox="0 0 24 24">
-										<path
-											d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-										/>
-									</svg>
+									<Heart size={20} weight="fill" class="result-favorite" />
 								{/if}
 							</button>
 						{/each}
@@ -373,78 +356,7 @@
 							onclick={() => handleQuickAction(action)}
 							onmouseenter={() => (selectedIndex = index)}
 						>
-							<svg class="quick-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								{#if action.icon === 'plus'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M12 4v16m8-8H4"
-									/>
-								{:else if action.icon === 'heart'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-									/>
-								{:else if action.icon === 'tag'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-									/>
-								{:else if action.icon === 'upload'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-									/>
-								{:else if action.icon === 'calendar'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-									/>
-								{:else if action.icon === 'clock'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-									/>
-								{:else if action.icon === 'check'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-									/>
-								{:else if action.icon === 'settings'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-									/>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-									/>
-								{:else if action.icon === 'list'}
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M4 6h16M4 10h16M4 14h16M4 18h16"
-									/>
-								{/if}
-							</svg>
+							<Plus size={20} class="quick-action-icon" />
 							<span>{action.label}</span>
 							{#if action.shortcut}
 								<kbd>{action.shortcut}</kbd>
