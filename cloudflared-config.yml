@@ -56,7 +56,7 @@ ingress:
 
   # Zitare App
   - hostname: zitare.mana.how
-    service: http://localhost:5018
+    service: http://localhost:5026
   - hostname: zitare-api.mana.how
     service: http://localhost:3007
 
@@ -66,11 +66,9 @@ ingress:
   - hostname: skilltree-api.mana.how
     service: http://localhost:3038
 
-  # Planta App
-  - hostname: planta.mana.how
-    service: http://localhost:5022
-  - hostname: planta-api.mana.how
-    service: http://localhost:3022
+  # Planta App (nicht aktiv deployt — Container fehlt noch)
+  # - hostname: planta.mana.how
+  #   service: http://localhost:XXXX
 
   # ManaDeck App
   - hostname: manadeck.mana.how
@@ -104,7 +102,7 @@ ingress:
 
   # Mukke App
   - hostname: mukke.mana.how
-    service: http://localhost:5180
+    service: http://localhost:5024
   - hostname: mukke-api.mana.how
     service: http://localhost:3010
 
@@ -116,13 +114,33 @@ ingress:
 
   # Calc App
   - hostname: calc.mana.how
-    service: http://localhost:5026
+    service: http://localhost:5031
 
-  # LLM Services
+  # CityCorners App
+  - hostname: citycorners.mana.how
+    service: http://localhost:5022
+
+  # Inventar App
+  - hostname: inventar.mana.how
+    service: http://localhost:5025
+
+  # Times App
+  - hostname: times.mana.how
+    service: http://localhost:5027
+
+  # ULoad App
+  - hostname: uload.mana.how
+    service: http://localhost:5029
+
+  # LLM Playground
   - hostname: playground.mana.how
-    service: http://localhost:5090
+    service: http://localhost:5050
 
-  # AI Voice Services
+  # ManaVoxel App (Port TBD — Container läuft noch ohne Portexpose)
+  # - hostname: manavoxel.mana.how
+  #   service: http://localhost:5028
+
+  # AI Voice Services (local STT/TTS, läuft über mana-service-llm)
   - hostname: stt-api.mana.how
     service: http://localhost:3020
   - hostname: tts-api.mana.how
@@ -131,6 +149,8 @@ ingress:
   # Games
   - hostname: whopxl.mana.how
     service: http://localhost:5100
+  - hostname: arcade.mana.how
+    service: http://localhost:5210
 
   # Public Status Page (generated every 60s by mana-status-gen container)
   - hostname: status.mana.how
@@ -146,7 +166,7 @@ ingress:
   - hostname: matrix.mana.how
     service: http://localhost:4000
   - hostname: element.mana.how
-    service: http://localhost:4080
+    service: http://localhost:4010
   - hostname: link.mana.how
     service: http://localhost:4090
 
@@ -166,10 +186,6 @@ ingress:
   - hostname: presis.mana.how
     service: http://localhost:4400
   - hostname: clocks.mana.how
-    service: http://localhost:4400
-  - hostname: nutriphi.mana.how
-    service: http://localhost:4400
-  - hostname: citycorners.mana.how
     service: http://localhost:4400
   - hostname: docs.mana.how
     service: http://localhost:4400
