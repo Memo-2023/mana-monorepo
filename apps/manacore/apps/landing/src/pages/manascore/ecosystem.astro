@@ -76,6 +76,36 @@ const categories = [
 		icon: '🎭',
 		description: 'Theme-Variablen + Tailwind CSS Nutzung',
 	},
+	{
+		key: 'errorBoundaries',
+		label: 'Error Boundaries',
+		icon: '🛡️',
+		description: '+error.svelte + Offline Page pro App',
+	},
+	{
+		key: 'typescriptStrict',
+		label: 'TypeScript Strict',
+		icon: '🔒',
+		description: 'Strict Mode in allen Apps',
+	},
+	{
+		key: 'testCoverage',
+		label: 'Test Coverage',
+		icon: '🧪',
+		description: 'Apps mit mindestens einem Test',
+	},
+	{
+		key: 'pwaSupport',
+		label: 'PWA Support',
+		icon: '📱',
+		description: 'Manifest + Service Worker',
+	},
+	{
+		key: 'maintainability',
+		label: 'Maintainability',
+		icon: '📏',
+		description: 'Dateien unter 500 Zeilen',
+	},
 ];
 
 const packageDetails = details.packages.perPackage;
@@ -237,6 +267,62 @@ const generatedDate = new Date(ecosystemData.generatedAt).toLocaleDateString('de
 						</div>
 					</div>
 				</div>
+
+				<!-- File Size Top Offenders -->
+				{
+					details.fileSizes?.topOffenders?.length > 0 && (
+						<div class="mb-12">
+							<h2 class="text-foreground mb-6 text-xl font-semibold">
+								Largest Files (Refactoring-Kandidaten)
+							</h2>
+							<div class="border-border/50 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] overflow-hidden">
+								<table class="w-full text-sm">
+									<thead>
+										<tr class="border-border/50 border-b">
+											<th class="text-muted-foreground px-4 py-3 text-left font-medium">Datei</th>
+											<th class="text-muted-foreground px-4 py-3 text-right font-medium">Zeilen</th>
+										</tr>
+									</thead>
+									<tbody>
+										{details.fileSizes.topOffenders.slice(0, 10).map((f: any) => (
+											<tr class="border-border/30 border-b last:border-0">
+												<td class="px-4 py-2">
+													<span class="text-muted-foreground">{f.app}/</span>
+													<span class="text-foreground">{f.file}</span>
+												</td>
+												<td
+													class={`px-4 py-2 text-right font-mono font-medium ${f.lines > 1000 ? 'text-red-500' : 'text-orange-500'}`}
+												>
+													{f.lines}
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					)
+				}
+
+				<!-- Apps without Tests -->
+				{
+					details.tests?.noTests?.length > 0 && (
+						<div class="mb-12">
+							<h2 class="text-foreground mb-6 text-xl font-semibold">Apps ohne Tests</h2>
+							<div class="flex flex-wrap gap-2">
+								{details.tests.noTests.map((app: string) => (
+									<span class="text-orange-500 border-orange-500/30 rounded-full border bg-orange-500/10 px-3 py-1 text-xs font-medium">
+										{app}
+									</span>
+								))}
+							</div>
+							<p class="text-muted-foreground mt-3 text-sm">
+								{details.tests.totalTestFiles} Test-Dateien gesamt &middot;{' '}
+								{details.tests.appsWithE2e} Apps mit E2E-Tests
+							</p>
+						</div>
+					)
+				}
 
 				<!-- Back link -->
 				<div class="text-center">

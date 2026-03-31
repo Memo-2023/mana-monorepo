@@ -1,28 +1,38 @@
 {
-	"generatedAt": "2026-03-31T11:53:48.040Z",
-	"overallScore": 76,
+	"generatedAt": "2026-03-31T12:04:45.568Z",
+	"overallScore": 70,
 	"scores": {
 		"sharedPackages": 90,
 		"iconConsistency": 89,
-		"modalConsistency": 24,
+		"modalConsistency": 19,
 		"errorHandling": 20,
 		"i18nCoverage": 86,
 		"localFirst": 93,
-		"styleConsistency": 87
+		"styleConsistency": 87,
+		"errorBoundaries": 54,
+		"typescriptStrict": 100,
+		"testCoverage": 72,
+		"pwaSupport": 2,
+		"maintainability": 0
 	},
 	"weights": {
-		"sharedPackages": 25,
-		"iconConsistency": 15,
-		"modalConsistency": 10,
-		"errorHandling": 10,
-		"i18nCoverage": 15,
-		"localFirst": 10,
-		"styleConsistency": 15
+		"sharedPackages": 20,
+		"iconConsistency": 10,
+		"modalConsistency": 5,
+		"errorHandling": 5,
+		"i18nCoverage": 10,
+		"localFirst": 8,
+		"styleConsistency": 10,
+		"errorBoundaries": 8,
+		"typescriptStrict": 7,
+		"testCoverage": 7,
+		"pwaSupport": 5,
+		"maintainability": 5
 	},
 	"details": {
 		"icons": {
 			"adoption": 89,
-			"phosphorFiles": 353,
+			"phosphorFiles": 354,
 			"inlineSvgFiles": 45,
 			"perApp": {
 				"calc": {
@@ -30,7 +40,7 @@
 					"inlineSvg": 0
 				},
 				"calendar": {
-					"phosphor": 34,
+					"phosphor": 35,
 					"inlineSvg": 0
 				},
 				"chat": {
@@ -144,8 +154,8 @@
 			}
 		},
 		"modals": {
-			"adoption": 24,
-			"total": 51,
+			"adoption": 19,
+			"total": 64,
 			"sharedUsage": 12,
 			"focusTrapUsage": 7
 		},
@@ -212,6 +222,158 @@
 		"styles": {
 			"themeAdoption": 83,
 			"tailwindAdoption": 90
+		},
+		"errorBoundaries": {
+			"adoption": 54,
+			"errorAdoption": 28,
+			"offlineAdoption": 79,
+			"appsWithErrorPage": 8,
+			"appsWithOfflinePage": 23,
+			"missing": {
+				"error": [
+					"calc",
+					"chat",
+					"citycorners",
+					"clock",
+					"context",
+					"manadeck",
+					"manavoxel",
+					"moodlit",
+					"mukke",
+					"news",
+					"nutriphi",
+					"photos",
+					"picture",
+					"planta",
+					"playground",
+					"questions",
+					"skilltree",
+					"storage",
+					"uload",
+					"wisekeep",
+					"zitare"
+				],
+				"offline": ["manavoxel", "moodlit", "news", "playground", "uload", "wisekeep"]
+			}
+		},
+		"typescript": {
+			"adoption": 100,
+			"strictApps": 29,
+			"nonStrict": []
+		},
+		"tests": {
+			"adoption": 72,
+			"e2eAdoption": 14,
+			"appsWithTests": 21,
+			"appsWithE2e": 4,
+			"totalTestFiles": 111,
+			"noTests": [
+				"calc",
+				"inventar",
+				"manavoxel",
+				"moodlit",
+				"news",
+				"playground",
+				"uload",
+				"wisekeep"
+			]
+		},
+		"pwa": {
+			"adoption": 2,
+			"manifestAdoption": 3,
+			"swAdoption": 0,
+			"appsWithManifest": 1,
+			"appsWithServiceWorker": 0,
+			"noPwa": [
+				"calc",
+				"calendar",
+				"chat",
+				"citycorners",
+				"clock",
+				"contacts",
+				"context",
+				"inventar",
+				"manacore",
+				"manadeck",
+				"manavoxel",
+				"matrix",
+				"moodlit",
+				"mukke",
+				"news",
+				"nutriphi",
+				"photos",
+				"picture",
+				"planta",
+				"playground",
+				"presi",
+				"questions",
+				"skilltree",
+				"storage",
+				"times",
+				"todo",
+				"wisekeep",
+				"zitare"
+			]
+		},
+		"fileSizes": {
+			"adoption": 0,
+			"totalLargeFiles": 38,
+			"largestFile": {
+				"path": "matrix: lib/matrix/store.svelte.ts",
+				"lines": 2019
+			},
+			"topOffenders": [
+				{
+					"app": "matrix",
+					"file": "lib/matrix/store.svelte.ts",
+					"lines": 2019
+				},
+				{
+					"app": "calendar",
+					"file": "lib/components/event/QuickEventOverlay.svelte",
+					"lines": 1816
+				},
+				{
+					"app": "contacts",
+					"file": "lib/components/ContactDetailModal.svelte",
+					"lines": 1511
+				},
+				{
+					"app": "todo",
+					"file": "lib/components/TaskItem.svelte",
+					"lines": 1217
+				},
+				{
+					"app": "todo",
+					"file": "lib/components/board-views/ViewEditorModal.svelte",
+					"lines": 1190
+				},
+				{
+					"app": "contacts",
+					"file": "lib/components/NewContactModal.svelte",
+					"lines": 1130
+				},
+				{
+					"app": "calendar",
+					"file": "lib/components/calendar/WeekView.svelte",
+					"lines": 1043
+				},
+				{
+					"app": "zitare",
+					"file": "routes/(app)/lists/[id]/+page.svelte",
+					"lines": 958
+				},
+				{
+					"app": "calendar",
+					"file": "routes/(app)/settings/sync/+page.svelte",
+					"lines": 898
+				},
+				{
+					"app": "matrix",
+					"file": "routes/(auth)/login/+page.svelte",
+					"lines": 849
+				}
+			]
 		}
 	},
 	"apps": [
