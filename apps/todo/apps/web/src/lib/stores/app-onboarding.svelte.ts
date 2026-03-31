@@ -40,12 +40,6 @@ const todoOnboardingSteps: AppOnboardingStep[] = [
 				description: 'Alle unsortierten Aufgaben',
 				emoji: '📥',
 			},
-			{
-				id: 'kanban',
-				label: 'Kanban Board',
-				description: 'Spalten-basierte Aufgabenverwaltung',
-				emoji: '📊',
-			},
 		],
 		defaultValue: 'today',
 	},
@@ -98,7 +92,7 @@ export const todoOnboarding = createAppOnboardingStore({
 	onComplete: async (preferences) => {
 		// Apply default view
 		const view = preferences.defaultView as string;
-		if (view === 'today' || view === 'inbox' || view === 'kanban') {
+		if (view === 'today' || view === 'inbox') {
 			todoSettings.set('defaultView', view);
 		}
 

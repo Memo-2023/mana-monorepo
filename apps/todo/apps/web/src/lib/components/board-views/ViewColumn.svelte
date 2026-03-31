@@ -90,7 +90,13 @@
 				createData.projectId = column.onDrop.setProjectId;
 			}
 		}
-		await tasksStore.createTask(createData as { title: string; projectId?: string; priority?: 'low' | 'medium' | 'high' | 'urgent' });
+		await tasksStore.createTask(
+			createData as {
+				title: string;
+				projectId?: string;
+				priority?: 'low' | 'medium' | 'high' | 'urgent';
+			}
+		);
 	}
 </script>
 
@@ -106,7 +112,7 @@
 			flipDurationMs,
 			dropTargetStyle: {},
 			dropTargetClasses: ['drop-target'],
-			type: 'board-view-tasks',
+			type: 'task-dnd',
 		}}
 		onconsider={handleDndConsider}
 		onfinalize={handleDndFinalize}

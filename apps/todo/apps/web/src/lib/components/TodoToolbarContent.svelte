@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import type { TaskPriority } from '@todo/shared';
 	import { PRIORITY_OPTIONS } from '@todo/shared';
 	import { getContext } from 'svelte';
@@ -8,6 +7,7 @@
 
 	const projectsCtx: { readonly value: Project[] } = getContext('projects');
 	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
+	import { todoSettings } from '$lib/stores/settings.svelte';
 	import { PillToolbarButton, PillToolbarDivider, PillViewSwitcher } from '@manacore/shared-ui';
 
 	interface Props {
@@ -82,8 +82,15 @@
 <svelte:window onclick={closeAllDropdowns} />
 
 <div class="toolbar-content" class:vertical>
-	<!-- Kanban View Button -->
-	<PillToolbarButton onclick={() => goto('/kanban')} title="Kanban-Ansicht">
+	<!-- Board View Button — cycle layout mode -->
+	<PillToolbarButton
+		onclick={() => {
+			const modes = ['fokus', 'uebersicht', 'matrix'] as const;
+			const idx = modes.indexOf(todoSettings.activeLayoutMode);
+			todoSettings.set('activeLayoutMode', modes[(idx + 1) % modes.length]);
+		}}
+		title="Ansicht wechseln"
+	>
 		<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"

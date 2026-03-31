@@ -6,12 +6,16 @@
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import KanbanLayout from './KanbanLayout.svelte';
 	import GridLayout from './GridLayout.svelte';
+	import FokusLayout from './FokusLayout.svelte';
 
 	interface Props {
 		view: LocalBoardView;
+		layoutOverride?: 'kanban' | 'grid' | 'fokus';
 	}
 
-	let { view }: Props = $props();
+	let { view, layoutOverride }: Props = $props();
+
+	let activeLayout = $derived(layoutOverride || view.layout);
 
 	// Get tasks and projects from context (set by layout)
 	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
@@ -63,7 +67,15 @@
 	}
 </script>
 
-{#if view.layout === 'grid'}
+{#if activeLayout === 'fokus'}
+	<FokusLayout
+		{columns}
+		onTaskDrop={handleTaskDrop}
+		onTaskToggle={handleTaskToggle}
+		onTaskDelete={handleTaskDelete}
+		onTaskUpdate={handleTaskUpdate}
+	/>
+{:else if activeLayout === 'grid'}
 	<GridLayout
 		{columns}
 		onTaskDrop={handleTaskDrop}

@@ -25,12 +25,6 @@ export default defineConfig({
 						url: '/?action=new',
 					},
 					{
-						name: 'Kanban Board',
-						short_name: 'Kanban',
-						description: 'Kanban-Ansicht öffnen',
-						url: '/kanban',
-					},
-					{
 						name: 'Einstellungen',
 						short_name: 'Settings',
 						description: 'App-Einstellungen öffnen',

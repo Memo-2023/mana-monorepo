@@ -229,30 +229,24 @@
 		isTagStripVisible = !isTagStripVisible;
 	}
 
-	// View routes for the tab group (pages that navigate)
-	const viewRoutes: Record<string, string> = {
-		liste: '/',
-		kanban: '/kanban',
-	};
-
-	// Determine active view tab from current path
-	let activeViewTab = $derived(
-		Object.entries(viewRoutes).find(([_, path]) => $page.url.pathname === path)?.[0] || 'liste'
-	);
-
-	// Tab group for view switching (Liste, Kanban) - grouped in one pill
+	// View mode switching (state-based, not route-based)
 	let viewTabGroup = $derived<PillNavElement>({
 		type: 'tabs' as const,
 		options: [
-			{ id: 'liste', icon: 'list', label: 'Liste', title: 'Listenansicht' },
-			{ id: 'kanban', icon: 'columns', label: 'Kanban', title: 'Kanban-Board' },
+			{ id: 'fokus', icon: 'list', label: 'Fokus', title: 'Fokus-Ansicht' },
+			{ id: 'uebersicht', icon: 'columns', label: 'Übersicht', title: 'Übersicht' },
+			{ id: 'matrix', icon: 'grid', label: 'Matrix', title: 'Eisenhower-Matrix' },
 		],
-		value: activeViewTab,
+		value: todoSettings.activeLayoutMode,
 		onChange: (id: string) => {
-			const route = viewRoutes[id];
-			if (route) goto(route);
+			todoSettings.set('activeLayoutMode', id as 'fokus' | 'uebersicht' | 'matrix');
+			// Navigate to homepage if not already there
+			if ($page.url.pathname !== '/') goto('/');
 		},
 	});
+
+	// Keep navRoutes for keyboard shortcuts (Ctrl+1-3)
+	const viewRoutes: Record<string, string> = { fokus: '/', uebersicht: '/', matrix: '/' };
 
 	// Handle edit mode toggle
 	function handleEditToggle() {
@@ -384,8 +378,15 @@
 			await userSettings.load();
 		}
 
-		// Redirect to start page if on root and a custom start page is set
+		// Redirect /kanban to / with Übersicht mode
 		const currentPath = window.location.pathname;
+		if (currentPath === '/kanban') {
+			todoSettings.set('activeLayoutMode', 'uebersicht');
+			goto('/', { replaceState: true });
+			return;
+		}
+
+		// Redirect to start page if on root and a custom start page is set
 		if (currentPath === '/' && userSettings.startPage && userSettings.startPage !== '/') {
 			goto(userSettings.startPage, { replaceState: true });
 		}
@@ -508,7 +509,7 @@
 				{/if}
 
 				<!-- Global Quick Input Bar - only on list and kanban views -->
-				{#if $page.url.pathname === '/' || $page.url.pathname === '/kanban'}
+				{#if $page.url.pathname === '/' || $page.url.pathname === '/kanban' || $page.url.pathname === '/statistics'}
 					<QuickInputBar
 						onSearch={handleSearch}
 						onSelect={handleSelect}
@@ -575,7 +576,7 @@
 				</div>
 				<div
 					class="content-wrapper"
-					class:full-width={$page.url.pathname === '/kanban'}
+					class:full-width={todoSettings.activeLayoutMode !== 'fokus'}
 					class:immersive={todoSettings.immersiveModeEnabled}
 				>
 					{@render children()}

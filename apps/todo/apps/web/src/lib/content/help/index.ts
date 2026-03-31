@@ -41,8 +41,8 @@ export function getTodoHelpContent(locale: string): HelpContent {
 				id: 'faq-kanban',
 				question: isDE ? 'Was ist die Kanban-Ansicht?' : 'What is the Kanban view?',
 				answer: isDE
-					? '<p>Die Kanban-Ansicht zeigt deine Aufgaben als Karten in Spalten an. Du kannst:</p><ul><li>Aufgaben per Drag & Drop zwischen Spalten verschieben</li><li>Den Fortschritt visuell verfolgen</li><li>Spalten nach Priorität oder Status organisieren</li></ul><p>Wechsle mit <kbd>Ctrl+2</kbd> zur Kanban-Ansicht.</p>'
-					: '<p>The Kanban view shows your tasks as cards in columns. You can:</p><ul><li>Drag and drop tasks between columns</li><li>Track progress visually</li><li>Organize columns by priority or status</li></ul><p>Switch to Kanban view with <kbd>Ctrl+2</kbd>.</p>',
+					? '<p>Die Board-Ansicht zeigt deine Aufgaben als Karten in Spalten an. Du kannst:</p><ul><li>Aufgaben per Drag & Drop zwischen Spalten verschieben</li><li>Den Fortschritt visuell verfolgen</li><li>Spalten nach Priorität oder Status organisieren</li></ul><p>Wechsle über die Tabs (Fokus / Übersicht / Matrix) zwischen den Ansichten.</p>'
+					: '<p>The board view shows your tasks as cards in columns. You can:</p><ul><li>Drag and drop tasks between columns</li><li>Track progress visually</li><li>Organize columns by priority or status</li></ul><p>Switch between views using the tabs (Fokus / Übersicht / Matrix).</p>',
 				category: 'features',
 				order: 3,
 				language: isDE ? 'de' : 'en',

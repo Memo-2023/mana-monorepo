@@ -9,7 +9,8 @@ import type { TaskPriority } from '@todo/shared';
 // Settings types
 export type TodoView = 'inbox' | 'today' | 'upcoming' | 'kanban' | 'completed';
 export type KanbanCardSize = 'compact' | 'normal' | 'large';
-export type PageMode = 'date' | 'priority' | 'custom';
+export type LayoutMode = 'fokus' | 'uebersicht' | 'matrix';
+export type PageMode = 'date' | 'priority' | 'custom'; // deprecated — will be replaced by BoardView
 
 export type PageIcon =
 	| 'warning'
@@ -76,7 +77,10 @@ export interface TodoAppSettings extends Record<string, unknown> {
 	pillNavCollapsed: boolean;
 	filterStripCollapsed: boolean;
 
-	// Page mode
+	// View layout
+	activeLayoutMode: LayoutMode;
+
+	// Page mode (deprecated — migrating to BoardView)
 	pageMode: PageMode;
 	pageWidth: PageWidth;
 	customPages: PageConfig[];
@@ -123,7 +127,10 @@ const DEFAULT_SETTINGS: TodoAppSettings = {
 	pillNavCollapsed: true, // PillNav hidden by default, shown via FAB
 	filterStripCollapsed: false, // FilterStrip shown by default when PillNav is visible
 
-	// Page mode
+	// View layout
+	activeLayoutMode: 'fokus' as LayoutMode,
+
+	// Page mode (deprecated)
 	pageMode: 'priority' as PageMode,
 	pageWidth: 'medium' as PageWidth,
 	customPages: [] as PageConfig[],
@@ -217,6 +224,9 @@ export const todoSettings = {
 	},
 	get filterStripCollapsed() {
 		return baseStore.settings.filterStripCollapsed;
+	},
+	get activeLayoutMode() {
+		return baseStore.settings.activeLayoutMode;
 	},
 	get pageMode() {
 		return baseStore.settings.pageMode;

@@ -37,7 +37,6 @@
 		{ value: 'inbox', label: 'Inbox' },
 		{ value: 'today', label: 'Heute' },
 		{ value: 'upcoming', label: 'Anstehend' },
-		{ value: 'kanban', label: 'Kanban' },
 		{ value: 'completed', label: 'Erledigt' },
 	];
 
@@ -153,7 +152,6 @@
 		appId="todo"
 		navItems={[
 			{ href: '/', label: 'Aufgaben', icon: 'list' },
-			{ href: '/kanban', label: 'Kanban', icon: 'columns' },
 			{ href: '/statistics', label: 'Statistiken', icon: 'chart' },
 			{ href: '/tags', label: 'Tags', icon: 'tag' },
 			{ href: '/network', label: 'Netzwerk', icon: 'share-2' },

@@ -95,7 +95,7 @@ export interface LocalBoardView extends BaseRecord {
 	groupBy: 'status' | 'priority' | 'project' | 'dueDate' | 'tag' | 'custom';
 	columns: ViewColumn[];
 	filter?: ViewFilter;
-	layout: 'kanban' | 'grid';
+	layout: 'kanban' | 'grid' | 'fokus';
 	order: number;
 }
 
