@@ -247,7 +247,7 @@ export class TranscriptionService {
       throw new Error(`Azure Speech API error: ${response.status} - ${errorText}`);
     }
 
-    const azureResult = await response.json();
+    const azureResult = (await response.json()) as Parameters<typeof this.processTranscriptionResult>[0];
     console.log(`[Azure] Transcription response received from ${speechService.name}`);
     console.log(`[Azure] Phrase count: ${azureResult?.phrases?.length ?? 0}`);
 
