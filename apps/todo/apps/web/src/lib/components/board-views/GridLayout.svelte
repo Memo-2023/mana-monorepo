@@ -13,6 +13,7 @@
 		onColumnColorChange?: (colIdx: number, color: string) => void;
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
+		onAddColumn?: () => void;
 	}
 
 	let {
@@ -25,6 +26,7 @@
 		onColumnColorChange,
 		onColumnMove,
 		onColumnDelete,
+		onAddColumn,
 	}: Props = $props();
 </script>
 
@@ -46,6 +48,15 @@
 			/>
 		</div>
 	{/each}
+
+	{#if onAddColumn}
+		<div class="grid-cell">
+			<button class="add-column-card" onclick={onAddColumn}>
+				<span class="add-icon">+</span>
+				<span class="add-label">Neues Board</span>
+			</button>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -88,5 +99,41 @@
 	.grid-cell :global(.view-column) {
 		height: 100%;
 		max-height: none;
+	}
+
+	.add-column-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		width: 100%;
+		height: 100%;
+		min-height: 200px;
+		border: 2px dashed rgba(139, 92, 246, 0.3);
+		border-radius: 0.375rem;
+		background: rgba(139, 92, 246, 0.03);
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.add-column-card:hover {
+		border-color: #8b5cf6;
+		background: rgba(139, 92, 246, 0.08);
+	}
+	:global(.dark) .add-column-card {
+		background: rgba(139, 92, 246, 0.05);
+	}
+	:global(.dark) .add-column-card:hover {
+		background: rgba(139, 92, 246, 0.12);
+	}
+	.add-icon {
+		font-size: 1.5rem;
+		font-weight: 300;
+		color: #8b5cf6;
+	}
+	.add-label {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: #8b5cf6;
 	}
 </style>

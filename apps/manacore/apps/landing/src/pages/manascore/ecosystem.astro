@@ -1,0 +1,252 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/navigation/Navbar.astro';
+import Footer from '../../components/navigation/Footer.astro';
+import Section from '../../components/content/Section.astro';
+import Container from '../../components/layout/Container.astro';
+import HeroSection from '../../components/content/HeroSection.astro';
+import ecosystemData from '../../data/ecosystem-health.json';
+
+const { overallScore, scores, weights, details } = ecosystemData;
+
+function getScoreColor(score: number): string {
+	if (score >= 85) return 'text-emerald-500';
+	if (score >= 70) return 'text-green-500';
+	if (score >= 50) return 'text-yellow-500';
+	if (score >= 30) return 'text-orange-500';
+	return 'text-red-500';
+}
+
+function getBarColor(score: number): string {
+	if (score >= 85) return 'bg-emerald-500';
+	if (score >= 70) return 'bg-green-500';
+	if (score >= 50) return 'bg-yellow-500';
+	if (score >= 30) return 'bg-orange-500';
+	return 'bg-red-500';
+}
+
+function getBarBg(score: number): string {
+	if (score >= 85) return 'bg-emerald-500/10';
+	if (score >= 70) return 'bg-green-500/10';
+	if (score >= 50) return 'bg-yellow-500/10';
+	if (score >= 30) return 'bg-orange-500/10';
+	return 'bg-red-500/10';
+}
+
+const categories = [
+	{
+		key: 'sharedPackages',
+		label: 'Shared Packages',
+		icon: '📦',
+		description: 'Adoption der 6 Core-Packages über alle Apps',
+	},
+	{
+		key: 'iconConsistency',
+		label: 'Icon Consistency',
+		icon: '🎨',
+		description: 'Phosphor Icons vs inline SVGs',
+	},
+	{
+		key: 'modalConsistency',
+		label: 'Modal Consistency',
+		icon: '🪟',
+		description: 'shared-ui Modal vs Custom-Implementierungen',
+	},
+	{
+		key: 'errorHandling',
+		label: 'Error Handling',
+		icon: '⚠️',
+		description: 'Shared Helper vs inline instanceof Error',
+	},
+	{
+		key: 'i18nCoverage',
+		label: 'i18n Coverage',
+		icon: '🌍',
+		description: 'Apps mit Internationalisierung',
+	},
+	{
+		key: 'localFirst',
+		label: 'Local-First',
+		icon: '💾',
+		description: 'Apps mit Offline-fähigem Local Store',
+	},
+	{
+		key: 'styleConsistency',
+		label: 'Style Consistency',
+		icon: '🎭',
+		description: 'Theme-Variablen + Tailwind CSS Nutzung',
+	},
+];
+
+const packageDetails = details.packages.perPackage;
+const generatedDate = new Date(ecosystemData.generatedAt).toLocaleDateString('de-DE', {
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+});
+---
+
+<Layout
+	title="Ecosystem Health - ManaScore"
+	description="Ecosystem-weite Konsistenz- und Qualitätsmetriken für das ManaCore Ökosystem"
+>
+	<Navbar />
+
+	<HeroSection
+		badge="ManaScore"
+		title="Ecosystem Health"
+		subtitle="Wie konsistent und einheitlich ist das ManaCore Ökosystem? Diese Metriken messen die Adoption gemeinsamer Packages, Patterns und Konventionen über alle Apps hinweg."
+	/>
+
+	<Section>
+		<Container>
+			<div class="mx-auto max-w-4xl">
+				<!-- Overall Score -->
+				<div class="mb-12 text-center">
+					<div class={`text-7xl font-bold ${getScoreColor(overallScore)} mb-2`}>
+						{overallScore}
+					</div>
+					<div class="text-muted-foreground text-lg">Ecosystem Health Score</div>
+					<div class="text-muted-foreground/60 mt-1 text-sm">
+						{details.packages.totalApps} Web Apps analysiert &middot; Stand: {generatedDate}
+					</div>
+				</div>
+
+				<!-- Score Breakdown -->
+				<div class="mb-12 space-y-4">
+					<h2 class="text-foreground mb-6 text-xl font-semibold">Score Breakdown</h2>
+
+					{
+						categories.map(({ key, label, icon, description }) => {
+							const score = scores[key as keyof typeof scores];
+							const weight = weights[key as keyof typeof weights];
+							return (
+								<div class="border-border/50 rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-4">
+									<div class="flex items-center justify-between mb-2">
+										<div class="flex items-center gap-3">
+											<span class="text-lg">{icon}</span>
+											<div>
+												<div class="text-foreground font-medium text-sm">{label}</div>
+												<div class="text-muted-foreground text-xs">{description}</div>
+											</div>
+										</div>
+										<div class="flex items-center gap-3">
+											<span class="text-muted-foreground text-xs">Gewicht: {weight}%</span>
+											<span class={`text-2xl font-bold ${getScoreColor(score)}`}>{score}%</span>
+										</div>
+									</div>
+									<div class={`h-2 rounded-full ${getBarBg(score)}`}>
+										<div
+											class={`h-2 rounded-full transition-all ${getBarColor(score)}`}
+											style={`width: ${score}%`}
+										/>
+									</div>
+								</div>
+							);
+						})
+					}
+				</div>
+
+				<!-- Shared Package Details -->
+				<div class="mb-12">
+					<h2 class="text-foreground mb-6 text-xl font-semibold">Shared Package Adoption</h2>
+					<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+						{
+							Object.entries(packageDetails).map(([name, data]: [string, any]) => (
+								<div class="border-border/50 rounded-lg border bg-gradient-to-br from-white/5 to-white/[0.02] p-4 text-center">
+									<div class={`text-2xl font-bold ${getScoreColor(data.adoption)}`}>
+										{data.adoption}%
+									</div>
+									<div class="text-foreground mt-1 text-sm font-medium">{name}</div>
+									<div class="text-muted-foreground text-xs">
+										{data.count}/{data.total} Apps
+									</div>
+								</div>
+							))
+						}
+					</div>
+				</div>
+
+				<!-- Icon Details -->
+				<div class="mb-12">
+					<h2 class="text-foreground mb-6 text-xl font-semibold">Icon Consistency Details</h2>
+					<div class="grid grid-cols-2 gap-4">
+						<div
+							class="border-border/50 rounded-lg border bg-gradient-to-br from-white/5 to-white/[0.02] p-4"
+						>
+							<div class="text-emerald-500 text-3xl font-bold">{details.icons.phosphorFiles}</div>
+							<div class="text-muted-foreground text-sm">Dateien mit Phosphor Icons</div>
+						</div>
+						<div
+							class="border-border/50 rounded-lg border bg-gradient-to-br from-white/5 to-white/[0.02] p-4"
+						>
+							<div
+								class={`text-3xl font-bold ${details.icons.inlineSvgFiles > 0 ? 'text-orange-500' : 'text-emerald-500'}`}
+							>
+								{details.icons.inlineSvgFiles}
+							</div>
+							<div class="text-muted-foreground text-sm">Dateien mit Inline SVGs</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Modal Details -->
+				<div class="mb-12">
+					<h2 class="text-foreground mb-6 text-xl font-semibold">Modal Consistency</h2>
+					<div class="grid grid-cols-3 gap-4">
+						<div
+							class="border-border/50 rounded-lg border bg-gradient-to-br from-white/5 to-white/[0.02] p-4 text-center"
+						>
+							<div class="text-foreground text-3xl font-bold">{details.modals.total}</div>
+							<div class="text-muted-foreground text-sm">Modals gesamt</div>
+						</div>
+						<div
+							class="border-border/50 rounded-lg border bg-gradient-to-br from-white/5 to-white/[0.02] p-4 text-center"
+						>
+							<div class="text-emerald-500 text-3xl font-bold">{details.modals.sharedUsage}</div>
+							<div class="text-muted-foreground text-sm">Nutzen shared-ui Modal</div>
+						</div>
+						<div
+							class="border-border/50 rounded-lg border bg-gradient-to-br from-white/5 to-white/[0.02] p-4 text-center"
+						>
+							<div class="text-foreground text-3xl font-bold">{details.modals.focusTrapUsage}</div>
+							<div class="text-muted-foreground text-sm">Mit focusTrap (A11y)</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Error Handling -->
+				<div class="mb-12">
+					<h2 class="text-foreground mb-6 text-xl font-semibold">Error Handling Patterns</h2>
+					<div class="grid grid-cols-2 gap-4">
+						<div
+							class="border-border/50 rounded-lg border bg-gradient-to-br from-white/5 to-white/[0.02] p-4"
+						>
+							<div class="text-emerald-500 text-3xl font-bold">{details.errors.shared}</div>
+							<div class="text-muted-foreground text-sm">Shared Helper Nutzungen</div>
+						</div>
+						<div
+							class="border-border/50 rounded-lg border bg-gradient-to-br from-white/5 to-white/[0.02] p-4"
+						>
+							<div
+								class={`text-3xl font-bold ${details.errors.inline > 20 ? 'text-orange-500' : 'text-yellow-500'}`}
+							>
+								{details.errors.inline}
+							</div>
+							<div class="text-muted-foreground text-sm">Inline instanceof Error</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Back link -->
+				<div class="text-center">
+					<a href="/manascore" class="text-primary hover:text-primary/80 text-sm transition-colors">
+						&larr; Zurück zur ManaScore Übersicht
+					</a>
+				</div>
+			</div>
+		</Container>
+	</Section>
+
+	<Footer />
+</Layout>

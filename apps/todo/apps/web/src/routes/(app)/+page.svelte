@@ -4,7 +4,6 @@
 	import { BoardViewRenderer } from '$lib/components/board-views';
 	import { todoSettings, type PageWidth } from '$lib/stores/settings.svelte';
 	import { boardViewsStore } from '$lib/stores/board-views.svelte';
-	import { Plus } from '@manacore/shared-icons';
 
 	// Get active view + edit mode from layout context
 	const activeViewCtx: { readonly value: LocalBoardView | null } = getContext('activeView');
@@ -147,17 +146,6 @@
 				</div>
 			</div>
 		</div>
-
-		{#if columnsEditable}
-			<div class="add-col-bar">
-				<button class="col-add-btn" onclick={addColumn} title="Spalte hinzufügen">
-					<Plus size={14} />
-					<span>Spalte</span>
-				</button>
-			</div>
-		{:else}
-			<p class="columns-hint">Spalten werden automatisch aus der Gruppierung erzeugt.</p>
-		{/if}
 	{/if}
 
 	<!-- Board Content -->
@@ -169,6 +157,7 @@
 			onColumnColorChange={columnsEditable ? (i, color) => updateColumn(i, { color }) : undefined}
 			onColumnMove={columnsEditable ? moveColumn : undefined}
 			onColumnDelete={columnsEditable ? removeColumn : undefined}
+			onAddColumn={columnsEditable && editMode ? addColumn : undefined}
 		/>
 	{:else}
 		<div class="empty-state">
@@ -278,39 +267,5 @@
 		background: #8b5cf6;
 		border-color: #8b5cf6;
 		color: white;
-	}
-
-	/* ── Add Column Bar ───────────────────────────────────── */
-	.add-col-bar {
-		display: flex;
-		padding: 0.5rem 1.5rem;
-		flex-shrink: 0;
-		border-bottom: 1px solid rgba(139, 92, 246, 0.08);
-	}
-
-	.col-add-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.25rem 0.75rem;
-		font-size: 0.75rem;
-		font-weight: 500;
-		border-radius: 9999px;
-		border: 1px dashed rgba(139, 92, 246, 0.4);
-		color: #8b5cf6;
-		background: transparent;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.col-add-btn:hover {
-		border-color: #8b5cf6;
-		background: rgba(139, 92, 246, 0.08);
-	}
-
-	.columns-hint {
-		padding: 0.5rem 1.5rem;
-		font-size: 0.75rem;
-		color: #9ca3af;
-		flex-shrink: 0;
 	}
 </style>

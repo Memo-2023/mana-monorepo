@@ -6,6 +6,7 @@ import Section from '../../components/content/Section.astro';
 import Container from '../../components/layout/Container.astro';
 import HeroSection from '../../components/content/HeroSection.astro';
 import { getCollection } from 'astro:content';
+import ecosystemData from '../../data/ecosystem-health.json';
 
 const scores = await getCollection('manascore');
 // Default: sort by score descending
@@ -53,6 +54,31 @@ const statuses = [...new Set(sortedAudits.map((a) => a.data.status))];
 
 	<Section>
 		<Container>
+			{/* Ecosystem Health Link */}
+			<div class="mx-auto mb-8 max-w-4xl">
+				<a
+					href="/manascore/ecosystem"
+					class="border-border/50 hover:border-primary/50 group flex items-center justify-between rounded-xl border bg-gradient-to-br from-white/5 to-white/[0.02] p-5 transition-all hover:shadow-lg"
+				>
+					<div>
+						<div class="text-foreground flex items-center gap-2 font-semibold">
+							<span class="text-lg">🌐</span>
+							Ecosystem Health
+						</div>
+						<div class="text-muted-foreground mt-1 text-sm">
+							Konsistenz- und Vereinheitlichungsmetriken über alle {ecosystemData.apps.length} Apps
+						</div>
+					</div>
+					<div class="flex items-center gap-3">
+						<span class={`text-3xl font-bold ${getScoreColor(ecosystemData.overallScore)}`}>
+							{ecosystemData.overallScore}
+						</span>
+						<span class="text-muted-foreground transition-transform group-hover:translate-x-1"
+							>&rarr;</span
+						>
+					</div>
+				</a>
+			</div>
 			{/* Filter bar */}
 			<div class="mx-auto mb-6 flex max-w-4xl flex-wrap items-center gap-3">
 				{/* Status filter */}

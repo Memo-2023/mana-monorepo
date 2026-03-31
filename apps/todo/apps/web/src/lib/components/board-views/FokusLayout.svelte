@@ -18,6 +18,7 @@
 		onColumnColorChange?: (colIdx: number, color: string) => void;
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
+		onAddColumn?: () => void;
 	}
 
 	let {
@@ -30,6 +31,7 @@
 		onColumnColorChange,
 		onColumnMove,
 		onColumnDelete,
+		onAddColumn,
 	}: Props = $props();
 
 	const PAGE_WIDTH_MAP: Record<string, string> = {
@@ -164,6 +166,15 @@
 				</div>
 			</div>
 		{/each}
+
+		{#if onAddColumn}
+			<div class="fokus-sheet add-sheet">
+				<button class="add-sheet-btn" onclick={onAddColumn}>
+					<span class="add-sheet-icon">+</span>
+					<span class="add-sheet-label">Neues Board</span>
+				</button>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Page dots -->
@@ -259,6 +270,46 @@
 		outline-offset: -2px;
 		border-radius: 0.375rem;
 		background: rgba(139, 92, 246, 0.04);
+	}
+
+	/* Add sheet */
+	.add-sheet {
+		border: 2px dashed rgba(139, 92, 246, 0.3) !important;
+		background: rgba(139, 92, 246, 0.02) !important;
+		box-shadow: none !important;
+	}
+	.add-sheet:hover {
+		border-color: #8b5cf6 !important;
+		background: rgba(139, 92, 246, 0.06) !important;
+	}
+	:global(.dark) .add-sheet {
+		border-color: rgba(139, 92, 246, 0.25) !important;
+		background: rgba(139, 92, 246, 0.04) !important;
+	}
+
+	.add-sheet-btn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		width: 100%;
+		height: 100%;
+		min-height: 200px;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+	}
+	.add-sheet-icon {
+		font-size: 2rem;
+		font-weight: 300;
+		color: #8b5cf6;
+		line-height: 1;
+	}
+	.add-sheet-label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #8b5cf6;
 	}
 
 	/* Page dots */

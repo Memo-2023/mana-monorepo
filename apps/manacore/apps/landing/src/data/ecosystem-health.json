@@ -1,0 +1,248 @@
+{
+	"generatedAt": "2026-03-31T11:53:48.040Z",
+	"overallScore": 76,
+	"scores": {
+		"sharedPackages": 90,
+		"iconConsistency": 89,
+		"modalConsistency": 24,
+		"errorHandling": 20,
+		"i18nCoverage": 86,
+		"localFirst": 93,
+		"styleConsistency": 87
+	},
+	"weights": {
+		"sharedPackages": 25,
+		"iconConsistency": 15,
+		"modalConsistency": 10,
+		"errorHandling": 10,
+		"i18nCoverage": 15,
+		"localFirst": 10,
+		"styleConsistency": 15
+	},
+	"details": {
+		"icons": {
+			"adoption": 89,
+			"phosphorFiles": 353,
+			"inlineSvgFiles": 45,
+			"perApp": {
+				"calc": {
+					"phosphor": 1,
+					"inlineSvg": 0
+				},
+				"calendar": {
+					"phosphor": 34,
+					"inlineSvg": 0
+				},
+				"chat": {
+					"phosphor": 18,
+					"inlineSvg": 0
+				},
+				"citycorners": {
+					"phosphor": 9,
+					"inlineSvg": 0
+				},
+				"clock": {
+					"phosphor": 3,
+					"inlineSvg": 7
+				},
+				"contacts": {
+					"phosphor": 27,
+					"inlineSvg": 4
+				},
+				"context": {
+					"phosphor": 13,
+					"inlineSvg": 0
+				},
+				"inventar": {
+					"phosphor": 12,
+					"inlineSvg": 1
+				},
+				"manacore": {
+					"phosphor": 34,
+					"inlineSvg": 25
+				},
+				"manadeck": {
+					"phosphor": 2,
+					"inlineSvg": 1
+				},
+				"manavoxel": {
+					"phosphor": 0,
+					"inlineSvg": 0
+				},
+				"matrix": {
+					"phosphor": 26,
+					"inlineSvg": 0
+				},
+				"moodlit": {
+					"phosphor": 5,
+					"inlineSvg": 0
+				},
+				"mukke": {
+					"phosphor": 21,
+					"inlineSvg": 0
+				},
+				"news": {
+					"phosphor": 1,
+					"inlineSvg": 0
+				},
+				"nutriphi": {
+					"phosphor": 6,
+					"inlineSvg": 1
+				},
+				"photos": {
+					"phosphor": 11,
+					"inlineSvg": 3
+				},
+				"picture": {
+					"phosphor": 27,
+					"inlineSvg": 0
+				},
+				"planta": {
+					"phosphor": 0,
+					"inlineSvg": 0
+				},
+				"playground": {
+					"phosphor": 4,
+					"inlineSvg": 1
+				},
+				"presi": {
+					"phosphor": 6,
+					"inlineSvg": 0
+				},
+				"questions": {
+					"phosphor": 7,
+					"inlineSvg": 0
+				},
+				"skilltree": {
+					"phosphor": 12,
+					"inlineSvg": 1
+				},
+				"storage": {
+					"phosphor": 25,
+					"inlineSvg": 1
+				},
+				"times": {
+					"phosphor": 13,
+					"inlineSvg": 0
+				},
+				"todo": {
+					"phosphor": 22,
+					"inlineSvg": 0
+				},
+				"uload": {
+					"phosphor": 3,
+					"inlineSvg": 0
+				},
+				"wisekeep": {
+					"phosphor": 2,
+					"inlineSvg": 0
+				},
+				"zitare": {
+					"phosphor": 9,
+					"inlineSvg": 0
+				}
+			}
+		},
+		"modals": {
+			"adoption": 24,
+			"total": 51,
+			"sharedUsage": 12,
+			"focusTrapUsage": 7
+		},
+		"packages": {
+			"coreAdoption": 90,
+			"totalApps": 29,
+			"perPackage": {
+				"Auth": {
+					"count": 29,
+					"total": 29,
+					"adoption": 100
+				},
+				"UI": {
+					"count": 28,
+					"total": 29,
+					"adoption": 97
+				},
+				"Theme": {
+					"count": 24,
+					"total": 29,
+					"adoption": 83
+				},
+				"Branding": {
+					"count": 28,
+					"total": 29,
+					"adoption": 97
+				},
+				"i18n": {
+					"count": 23,
+					"total": 29,
+					"adoption": 79
+				},
+				"Error Tracking": {
+					"count": 24,
+					"total": 29,
+					"adoption": 83
+				},
+				"Icons": {
+					"count": 25,
+					"total": 29,
+					"adoption": 86
+				},
+				"Local Store": {
+					"count": 27,
+					"total": 29,
+					"adoption": 93
+				}
+			}
+		},
+		"errors": {
+			"adoption": 20,
+			"inline": 193,
+			"shared": 47
+		},
+		"i18n": {
+			"adoption": 86,
+			"withI18n": 25,
+			"without": 4
+		},
+		"localFirst": {
+			"adoption": 93,
+			"count": 27
+		},
+		"styles": {
+			"themeAdoption": 83,
+			"tailwindAdoption": 90
+		}
+	},
+	"apps": [
+		"calc",
+		"calendar",
+		"chat",
+		"citycorners",
+		"clock",
+		"contacts",
+		"context",
+		"inventar",
+		"manacore",
+		"manadeck",
+		"manavoxel",
+		"matrix",
+		"moodlit",
+		"mukke",
+		"news",
+		"nutriphi",
+		"photos",
+		"picture",
+		"planta",
+		"playground",
+		"presi",
+		"questions",
+		"skilltree",
+		"storage",
+		"times",
+		"todo",
+		"uload",
+		"wisekeep",
+		"zitare"
+	]
+}

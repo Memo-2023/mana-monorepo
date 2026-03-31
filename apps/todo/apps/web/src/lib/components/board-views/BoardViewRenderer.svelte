@@ -15,6 +15,7 @@
 		onColumnColorChange?: (colIdx: number, color: string) => void;
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
+		onAddColumn?: () => void;
 	}
 
 	let {
@@ -24,6 +25,7 @@
 		onColumnColorChange,
 		onColumnMove,
 		onColumnDelete,
+		onAddColumn,
 	}: Props = $props();
 
 	let activeLayout = $derived(layoutOverride || view.layout);
@@ -89,6 +91,7 @@
 		{onColumnColorChange}
 		{onColumnMove}
 		{onColumnDelete}
+		{onAddColumn}
 	/>
 {:else if activeLayout === 'grid'}
 	<GridLayout
@@ -101,6 +104,7 @@
 		{onColumnColorChange}
 		{onColumnMove}
 		{onColumnDelete}
+		{onAddColumn}
 	/>
 {:else}
 	<KanbanLayout
@@ -113,5 +117,6 @@
 		{onColumnColorChange}
 		{onColumnMove}
 		{onColumnDelete}
+		{onAddColumn}
 	/>
 {/if}

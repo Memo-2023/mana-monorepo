@@ -13,6 +13,7 @@
 		onColumnColorChange?: (colIdx: number, color: string) => void;
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
+		onAddColumn?: () => void;
 	}
 
 	let {
@@ -25,6 +26,7 @@
 		onColumnColorChange,
 		onColumnMove,
 		onColumnDelete,
+		onAddColumn,
 	}: Props = $props();
 </script>
 
@@ -46,6 +48,15 @@
 			/>
 		</div>
 	{/each}
+
+	{#if onAddColumn}
+		<div class="kanban-column-wrapper">
+			<button class="add-column-card" onclick={onAddColumn}>
+				<span class="add-column-icon">+</span>
+				<span class="add-column-label">Neues Board</span>
+			</button>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -93,5 +104,43 @@
 		min-width: 300px;
 		max-width: 340px;
 		flex-shrink: 0;
+	}
+
+	.add-column-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		width: 100%;
+		min-height: 250px;
+		border: 2px dashed rgba(139, 92, 246, 0.3);
+		border-radius: 0.375rem;
+		background: rgba(139, 92, 246, 0.03);
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.add-column-card:hover {
+		border-color: #8b5cf6;
+		background: rgba(139, 92, 246, 0.08);
+	}
+	:global(.dark) .add-column-card {
+		background: rgba(139, 92, 246, 0.05);
+		border-color: rgba(139, 92, 246, 0.25);
+	}
+	:global(.dark) .add-column-card:hover {
+		border-color: #8b5cf6;
+		background: rgba(139, 92, 246, 0.12);
+	}
+	.add-column-icon {
+		font-size: 1.5rem;
+		font-weight: 300;
+		color: #8b5cf6;
+		line-height: 1;
+	}
+	.add-column-label {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: #8b5cf6;
 	}
 </style>
