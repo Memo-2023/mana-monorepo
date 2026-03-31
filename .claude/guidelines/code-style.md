@@ -190,6 +190,38 @@ async consume(userId: string, amount: number, reason: string): Promise<Result<Ba
 }
 ```
 
+## Icons
+
+All SvelteKit web apps use **Phosphor icons** via `@manacore/shared-icons` (re-exports `phosphor-svelte`).
+
+### Usage
+
+```svelte
+<script>
+	import { Plus, Trash, MagnifyingGlass } from '@manacore/shared-icons';
+</script>
+
+<Plus size={20} />
+<Trash size={16} class="text-red-500" />
+<MagnifyingGlass size={20} weight="bold" />
+```
+
+### Rules
+
+- **Never use inline SVG `<path d="...">` for icons.** Always use Phosphor components.
+- Available weights: `thin`, `light`, `regular` (default), `bold`, `fill`, `duotone`
+- Use `weight="fill"` for filled variants (e.g., filled heart, filled star)
+- Size prop replaces Tailwind `w-N h-N` classes: `w-4 h-4` → `size={16}`, `w-5 h-5` → `size={20}`
+- Browse icons at [phosphoricons.com](https://phosphoricons.com)
+
+### Exceptions (inline SVG allowed)
+
+- **Spinners/loading animations** (circle + arc with `stroke-opacity`)
+- **Brand logos** (Mana, Google, app-specific logos)
+- **Charts & data visualizations** (DonutChart, RadarChart, etc.)
+- **Complex decorative illustrations** (maps, scenes)
+- **Dynamic icon rendering** via `{@html}` (Icon.svelte wrappers)
+
 ## Code Organization
 
 ### File Size
