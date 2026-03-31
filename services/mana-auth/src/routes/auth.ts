@@ -131,6 +131,14 @@ export function createAuthRoutes(
 
 			return c.json(response);
 		} catch (error) {
+			// Check if Better Auth rejected login due to unverified email
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			const isEmailNotVerified =
+				errorMessage.includes('email') && errorMessage.toLowerCase().includes('verif');
+			if (isEmailNotVerified) {
+				return c.json({ error: 'Email not verified', code: 'EMAIL_NOT_VERIFIED' }, 403);
+			}
+
 			security.logEvent({
 				eventType: 'LOGIN_FAILURE',
 				ipAddress: ip,

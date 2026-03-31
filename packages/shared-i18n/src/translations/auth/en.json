@@ -19,6 +19,7 @@
 		"emailInvalid": "Please enter a valid email address",
 		"passwordRequired": "Password is required",
 		"signInFailed": "Sign in failed",
+		"invalidCredentials": "Invalid email or password",
 		"signInSuccess": "Successfully signed in. Redirecting...",
 		"emailVerified": "Email successfully verified! Please sign in.",
 		"emailNotVerified": "Email not verified.",

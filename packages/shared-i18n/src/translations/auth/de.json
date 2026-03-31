@@ -19,6 +19,7 @@
 		"emailInvalid": "Bitte gib eine gültige E-Mail-Adresse ein",
 		"passwordRequired": "Passwort ist erforderlich",
 		"signInFailed": "Anmeldung fehlgeschlagen",
+		"invalidCredentials": "Ungültige E-Mail oder Passwort",
 		"signInSuccess": "Erfolgreich angemeldet. Weiterleitung...",
 		"emailVerified": "E-Mail erfolgreich bestätigt! Bitte melde dich an.",
 		"emailNotVerified": "E-Mail nicht bestätigt.",

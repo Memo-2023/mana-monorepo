@@ -169,13 +169,12 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 					return { success: false, error: errorData.message || 'Sign up failed' };
 				}
 
-				// Consume response to avoid unhandled promise
-				await response.json();
+				const data = await response.json();
 
-				// Mana Core Auth returns user data immediately on registration
-				// User needs to sign in separately to get tokens
+				// If emailVerified is false, the user needs to verify their email before login
+				const needsVerification = data?.user?.emailVerified === false;
 				trackAuth('signup', { method: 'email' });
-				return { success: true, needsVerification: false };
+				return { success: true, needsVerification };
 			} catch (error) {
 				console.error('Error signing up:', error);
 				trackAuth('signup_failed', { method: 'email' });

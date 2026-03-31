@@ -34,6 +34,7 @@ export interface AuthTranslations {
 		emailInvalid: string;
 		passwordRequired: string;
 		signInFailed: string;
+		invalidCredentials?: string;
 		signInSuccess: string;
 		emailVerified?: string;
 		emailNotVerified?: string;
