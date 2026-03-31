@@ -60,7 +60,7 @@
 		getActiveProjects,
 	} from '$lib/data/task-queries';
 	import { boardViewsStore } from '$lib/stores/board-views.svelte';
-	import { ViewSelector, ViewEditorModal } from '$lib/components/board-views';
+	import { ViewEditorModal } from '$lib/components/board-views';
 	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
 	import { List, X } from '@manacore/shared-icons';
 
@@ -71,77 +71,18 @@
 
 	// ─── Board View Management ──────────────────────────────
 	const boardViews = useAllBoardViews();
-	const ACTIVE_VIEW_KEY = 'todo:activeViewId';
-	let activeViewId = $state<string | null>(null);
 
-	// Auto-select first view when views load and nothing is selected
-	$effect(() => {
-		if (boardViews.value.length > 0 && !activeViewId) {
-			const stored =
-				typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_VIEW_KEY) : null;
-			activeViewId =
-				stored && boardViews.value.find((v) => v.id === stored) ? stored : boardViews.value[0].id;
-		}
-		if (
-			activeViewId &&
-			boardViews.value.length > 0 &&
-			!boardViews.value.find((v) => v.id === activeViewId)
-		) {
-			activeViewId = boardViews.value[0].id;
-		}
-	});
+	// Use first board view as the single active view
+	let activeView = $derived(boardViews.value[0] ?? null);
 
-	let activeView = $derived(boardViews.value.find((v) => v.id === activeViewId) ?? null);
-
-	function handleSelectView(viewId: string) {
-		activeViewId = viewId;
-		localStorage.setItem(ACTIVE_VIEW_KEY, viewId);
-	}
-
-	// ViewSelector visibility (toggled via Layout pill)
-	let isViewSelectorVisible = $state(false);
-
-	// View Editor Modal
+	// View Editor Modal (opened via Layout pill)
 	let showViewEditor = $state(false);
-	let editingView = $state<LocalBoardView | null>(null);
-
-	function handleCreateView() {
-		editingView = null;
-		showViewEditor = true;
-	}
-
-	function handleEditView(view: LocalBoardView) {
-		editingView = view;
-		showViewEditor = true;
-	}
 
 	async function handleSaveView(data: Partial<LocalBoardView>) {
-		if (editingView) {
-			await boardViewsStore.updateView(editingView.id, data);
-		} else {
-			const newView = await boardViewsStore.createView({
-				name: data.name ?? 'Neue View',
-				icon: data.icon ?? 'columns',
-				groupBy: data.groupBy ?? 'status',
-				layout: data.layout ?? 'kanban',
-				columns: data.columns ?? [],
-				order: boardViews.value.length,
-			});
-			if (newView?.id) handleSelectView(newView.id);
+		if (activeView) {
+			await boardViewsStore.updateView(activeView.id, data);
 		}
 		showViewEditor = false;
-		editingView = null;
-	}
-
-	async function handleDeleteView() {
-		if (!editingView) return;
-		await boardViewsStore.deleteView(editingView.id);
-		showViewEditor = false;
-		editingView = null;
-	}
-
-	async function handleReorderViews(viewIds: string[]) {
-		await boardViewsStore.reorderViews(viewIds);
 	}
 
 	// Provide data to child components via Svelte context
@@ -337,11 +278,6 @@
 	// Keep navRoutes for keyboard shortcuts (Ctrl+1-3)
 	const viewRoutes: Record<string, string> = { fokus: '/', uebersicht: '/', matrix: '/' };
 
-	// Handle view selector toggle (Layout pill)
-	function handleViewSelectorToggle() {
-		isViewSelectorVisible = !isViewSelectorVisible;
-	}
-
 	// Filter, Tags, and Layout stay as standalone pills (toggle behavior, not navigation)
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
@@ -362,10 +298,12 @@
 			? [
 					{
 						href: '/',
-						label: activeView?.name ?? 'Layout',
+						label: 'Layout',
 						icon: 'grid',
-						onClick: handleViewSelectorToggle,
-						active: isViewSelectorVisible,
+						onClick: () => {
+							showViewEditor = true;
+						},
+						active: showViewEditor,
 					},
 				]
 			: []),
@@ -550,18 +488,6 @@
 						ariaLabel="Hauptnavigation"
 					/>
 
-					<!-- ViewSelector strip (toggled via Layout pill) -->
-					{#if isViewSelectorVisible && ($page.url.pathname === '/' || $page.url.pathname === '')}
-						<ViewSelector
-							views={boardViews.value}
-							{activeViewId}
-							onSelect={handleSelectView}
-							onCreate={handleCreateView}
-							onEdit={handleEditView}
-							onReorder={handleReorderViews}
-						/>
-					{/if}
-
 					<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 					{#if isTagStripVisible}
 						<TagStrip
@@ -694,12 +620,10 @@
 	<!-- View Editor Modal -->
 	<ViewEditorModal
 		open={showViewEditor}
-		view={editingView}
+		view={activeView}
 		onSave={handleSaveView}
-		onDelete={handleDeleteView}
 		onClose={() => {
 			showViewEditor = false;
-			editingView = null;
 		}}
 	/>
 </AuthGate>
