@@ -10,14 +10,7 @@
 
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 	import type { SortBy, SortOrder } from '$lib/stores/view.svelte';
-	import {
-		CaretDown,
-		Check,
-		CheckCircle,
-		DotsThree,
-		MagnifyingGlass,
-		X,
-	} from '@manacore/shared-icons';
+	import { CaretDown, Check, CheckCircle, MagnifyingGlass, X } from '@manacore/shared-icons';
 
 	interface Props {
 		// Layout
@@ -90,7 +83,6 @@
 	];
 
 	// Dropdown states
-	let showFilterDropdown = $state(false);
 	let showLabelsDropdown = $state(false);
 
 	let hasActiveFilters = $derived(
@@ -115,13 +107,7 @@
 			onLabelsChange([...selectedLabelIds, labelId]);
 		}
 	}
-
-	function closeFilterDropdown() {
-		showFilterDropdown = false;
-	}
 </script>
-
-<svelte:window onclick={closeFilterDropdown} />
 
 {#if variant === 'strip'}
 	<!-- ==================== STRIP VARIANT ==================== -->
@@ -161,6 +147,11 @@
 				<span class="strip-divider"></span>
 			{/if}
 
+			<!-- Filter Label -->
+			<span class="label-pill glass-pill" role="presentation">
+				<span class="pill-label label-text">Filter:</span>
+			</span>
+
 			<!-- Priority Filter Pills -->
 			{#each priorities as priority (priority.value)}
 				<button
@@ -175,8 +166,26 @@
 				</button>
 			{/each}
 
+			<!-- Project Filter Pills -->
+			{#if getActiveProjects(projectsCtx.value).length > 0}
+				<span class="strip-divider"></span>
+				{#each getActiveProjects(projectsCtx.value) as project (project.id)}
+					<button
+						class="project-pill glass-pill"
+						class:selected={selectedProjectId === project.id}
+						onclick={() => onProjectChange(selectedProjectId === project.id ? null : project.id)}
+						title={project.name}
+						style="--project-color: {project.color || '#6b7280'}"
+					>
+						<span class="project-dot"></span>
+						<span class="pill-label">{project.name}</span>
+					</button>
+				{/each}
+			{/if}
+
 			<!-- Sort Pills -->
 			{#if showSort && onSortChange}
+				<span class="strip-divider"></span>
 				{#each sortOptions as option (option.id)}
 					<button
 						class="sort-pill glass-pill"
@@ -201,36 +210,6 @@
 					<span class="pill-label">Erledigt</span>
 				</button>
 			{/if}
-
-			<!-- More Options (Project Filter + Labels) -->
-			<div class="filter-dropdown-container" onclick={(e) => e.stopPropagation()}>
-				<button
-					class="more-pill glass-pill"
-					onclick={() => (showFilterDropdown = !showFilterDropdown)}
-					title="Weitere Filter"
-				>
-					<DotsThree size={18} weight="bold" />
-					<span class="pill-label">Mehr</span>
-				</button>
-
-				{#if showFilterDropdown}
-					<div class="filter-dropdown" onclick={(e) => e.stopPropagation()}>
-						<div class="filter-section">
-							<div class="filter-section-header">Projekt</div>
-							<select
-								class="filter-select"
-								value={selectedProjectId || ''}
-								onchange={(e) => onProjectChange(e.currentTarget.value || null)}
-							>
-								<option value="">Alle Projekte</option>
-								{#each getActiveProjects(projectsCtx.value) as project}
-									<option value={project.id}>{project.name}</option>
-								{/each}
-							</select>
-						</div>
-					</div>
-				{/if}
-			</div>
 		</div>
 	</div>
 {:else}
@@ -559,6 +538,28 @@
 		background: rgba(255, 255, 255, 0.15);
 	}
 
+	/* Project pills */
+	.project-pill .project-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background-color: var(--project-color);
+		flex-shrink: 0;
+	}
+
+	.project-pill.selected {
+		background: var(--project-color) !important;
+		border-color: var(--project-color) !important;
+	}
+
+	.project-pill.selected .project-dot {
+		background-color: white;
+	}
+
+	.project-pill.selected .pill-label {
+		color: white;
+	}
+
 	/* Priority pills */
 	.priority-pill.selected {
 		background: var(--priority-color) !important;
@@ -611,82 +612,6 @@
 	.clear-filter-pill.hidden {
 		visibility: hidden;
 		pointer-events: none;
-	}
-
-	/* Filter dropdown */
-	.filter-dropdown-container {
-		position: relative;
-		display: flex;
-		align-items: center;
-	}
-
-	.filter-dropdown {
-		position: absolute;
-		bottom: calc(100% + 0.5rem);
-		left: 50%;
-		transform: translateX(-50%);
-		min-width: 220px;
-		padding: 0.75rem;
-		background: rgba(255, 255, 255, 0.95);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 0.75rem;
-		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-		z-index: 100;
-	}
-
-	:global(.dark) .filter-dropdown {
-		background: rgba(30, 30, 30, 0.95);
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.filter-section {
-		margin-bottom: 0.75rem;
-	}
-
-	.filter-section:last-child {
-		margin-bottom: 0;
-	}
-
-	.filter-section-header {
-		font-size: 0.6875rem;
-		font-weight: 600;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin-bottom: 0.5rem;
-	}
-
-	:global(.dark) .filter-section-header {
-		color: #9ca3af;
-	}
-
-	.filter-select {
-		width: 100%;
-		padding: 0.5rem 0.75rem;
-		font-size: 0.8125rem;
-		color: #374151;
-		background: rgba(0, 0, 0, 0.05);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 0.5rem;
-		cursor: pointer;
-		transition: border-color 0.15s;
-	}
-
-	:global(.dark) .filter-select {
-		color: #f3f4f6;
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.filter-select:hover {
-		border-color: rgba(139, 92, 246, 0.5);
-	}
-
-	.filter-select:focus {
-		outline: none;
-		border-color: #8b5cf6;
 	}
 
 	/* Responsive strip */
