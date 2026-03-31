@@ -3,12 +3,7 @@
 	import { page } from '$app/stores';
 	import { setContext } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import {
-		PillNavigation,
-		QuickInputBar,
-		ImmersiveModeToggle,
-		TagStrip,
-	} from '@manacore/shared-ui';
+	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -252,13 +247,6 @@
 		todoSettings.toggleFilterStrip();
 	}
 
-	// TagStrip visibility (toggle via Tags button in PillNav)
-	let isTagStripVisible = $state(true);
-
-	function handleTagStripToggle() {
-		isTagStripVisible = !isTagStripVisible;
-	}
-
 	// View mode switching (state-based, not route-based)
 	let viewTabGroup = $derived<PillNavElement>({
 		type: 'tabs' as const,
@@ -286,13 +274,6 @@
 			icon: 'filter',
 			onClick: handleFilterToggle,
 			active: isFilterStripVisible,
-		},
-		{
-			href: '/',
-			label: 'Tags',
-			icon: 'tag',
-			onClick: handleTagStripToggle,
-			active: isTagStripVisible,
 		},
 		...($page.url.pathname === '/' || $page.url.pathname === ''
 			? [
@@ -488,30 +469,7 @@
 						ariaLabel="Hauptnavigation"
 					/>
 
-					<!-- TagStrip (above PillNav, toggled via Tags pill) -->
-					{#if isTagStripVisible}
-						<TagStrip
-							tags={allTags.value.map((t) => ({
-								id: t.id,
-								name: t.name,
-								color: t.color || '#6b7280',
-							}))}
-							selectedIds={viewStore.filterLabelIds}
-							onToggle={(tagId) => {
-								const current = viewStore.filterLabelIds;
-								if (current.includes(tagId)) {
-									viewStore.setFilterLabelIds(current.filter((id) => id !== tagId));
-								} else {
-									viewStore.setFilterLabelIds([...current, tagId]);
-								}
-							}}
-							onClear={() => viewStore.setFilterLabelIds([])}
-							managementHref="/tags"
-							aboveFilterStrip={isFilterStripVisible}
-						/>
-					{/if}
-
-					<!-- TaskFilters strip (shown when Filter pill is active in PillNav) -->
+					<!-- Unified filter strip (tags + priorities + sort, toggled via Filter pill) -->
 					{#if isFilterStripVisible}
 						<TaskFilters
 							variant="strip"
@@ -528,7 +486,7 @@
 							onSortChange={(s: SortBy) => viewStore.setSort(s, viewStore.sortOrder)}
 							showSort={true}
 							showCompleted={true}
-							showKanbanNav={true}
+							showTags={true}
 							isCompletedVisible={viewStore.showCompleted}
 							onToggleCompleted={() => viewStore.toggleShowCompleted()}
 						/>

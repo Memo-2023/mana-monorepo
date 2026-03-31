@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import type { TaskPriority } from '@todo/shared';
 	import { getContext } from 'svelte';
 	import type { Project } from '@todo/shared';
@@ -14,7 +13,6 @@
 		CaretDown,
 		Check,
 		CheckCircle,
-		Columns,
 		DotsThree,
 		MagnifyingGlass,
 		X,
@@ -47,7 +45,7 @@
 		showSearch?: boolean;
 		showLabels?: boolean;
 		showCompleted?: boolean;
-		showKanbanNav?: boolean;
+		showTags?: boolean;
 
 		// Completed toggle
 		isCompletedVisible?: boolean;
@@ -72,7 +70,7 @@
 		showSearch = false,
 		showLabels = false,
 		showCompleted = false,
-		showKanbanNav = false,
+		showTags = false,
 		isCompletedVisible = false,
 		onToggleCompleted,
 	}: Props = $props();
@@ -140,12 +138,21 @@
 				<span class="pill-label">Filter</span>
 			</button>
 
-			<!-- Kanban View Button -->
-			{#if showKanbanNav}
-				<button class="glass-pill" onclick={() => goto('/kanban')} title="Kanban-Ansicht">
-					<Columns size={18} />
-					<span class="pill-label">Kanban</span>
-				</button>
+			<!-- Tag Chips -->
+			{#if showTags && tagsCtx.value.length > 0}
+				{#each tagsCtx.value as tag (tag.id)}
+					<button
+						class="tag-chip glass-pill"
+						class:selected={selectedLabelIds.includes(tag.id)}
+						onclick={() => toggleLabel(tag.id)}
+						title={tag.name}
+						style="--tag-color: {tag.color || '#6b7280'}"
+					>
+						<span class="tag-dot"></span>
+						<span class="pill-label">{tag.name}</span>
+					</button>
+				{/each}
+				<span class="strip-divider"></span>
 			{/if}
 
 			<!-- Priority Filter Pills -->
@@ -489,6 +496,39 @@
 
 	.glass-pill.active .pill-label {
 		color: #8b5cf6;
+	}
+
+	/* Tag chips */
+	.tag-chip .tag-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background-color: var(--tag-color);
+		flex-shrink: 0;
+	}
+
+	.tag-chip.selected {
+		background: var(--tag-color) !important;
+		border-color: var(--tag-color) !important;
+	}
+
+	.tag-chip.selected .tag-dot {
+		background-color: white;
+	}
+
+	.tag-chip.selected .pill-label {
+		color: white;
+	}
+
+	.strip-divider {
+		width: 1px;
+		height: 24px;
+		background: rgba(0, 0, 0, 0.1);
+		flex-shrink: 0;
+	}
+
+	:global(.dark) .strip-divider {
+		background: rgba(255, 255, 255, 0.15);
 	}
 
 	/* Priority pills */
