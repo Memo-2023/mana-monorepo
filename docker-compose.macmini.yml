@@ -1715,11 +1715,11 @@ services:
     container_name: mana-status-gen
     restart: always
     mem_limit: 32m
-    depends_on:
-      victoriametrics:
-        condition: service_healthy
+    # host network: direkter Zugriff auf VictoriaMetrics via localhost:9090
+    # (kein depends_on möglich mit network_mode: host)
+    network_mode: host
     environment:
-      VICTORIAMETRICS_URL: http://victoriametrics:9090
+      VICTORIAMETRICS_URL: http://localhost:9090
       OUTPUT_FILE: /output/index.html
     volumes:
       - ./scripts/generate-status-page.sh:/generate.sh:ro
@@ -1728,10 +1728,10 @@ services:
       - sh
       - -c
       - |
-        apk add --no-cache curl jq > /dev/null 2>&1
+        apk add --no-cache curl jq
         mkdir -p /output
         while true; do
-          sh /generate.sh || echo "$(date '+%H:%M:%S') Fehler beim Generieren"
+          sh /generate.sh
           sleep 60
         done
 
