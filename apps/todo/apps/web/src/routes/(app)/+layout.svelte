@@ -65,6 +65,20 @@
 	setContext('tasks', allTasks);
 	setContext('tags', allTags);
 
+	// Edit mode state — shared between layout (PillNav button) and page (editor)
+	let editMode = $state(false);
+	setContext('editMode', {
+		get active() {
+			return editMode;
+		},
+		toggle() {
+			editMode = !editMode;
+		},
+		set(val: boolean) {
+			editMode = val;
+		},
+	});
+
 	// Derived active projects for UI
 	let activeProjects = $derived(getActiveProjects(allProjects.value));
 
@@ -240,7 +254,12 @@
 		},
 	});
 
-	// Filter and Tags stay as standalone pills (toggle behavior, not navigation)
+	// Handle edit mode toggle
+	function handleEditToggle() {
+		editMode = !editMode;
+	}
+
+	// Filter, Tags, and Edit stay as standalone pills (toggle behavior, not navigation)
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/',
@@ -256,6 +275,17 @@
 			onClick: handleTagStripToggle,
 			active: isTagStripVisible,
 		},
+		...($page.url.pathname === '/' || $page.url.pathname === ''
+			? [
+					{
+						href: '/',
+						label: editMode ? 'Fertig' : 'Layout',
+						icon: editMode ? 'check' : 'grid',
+						onClick: handleEditToggle,
+						active: editMode,
+					},
+				]
+			: []),
 	]);
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)

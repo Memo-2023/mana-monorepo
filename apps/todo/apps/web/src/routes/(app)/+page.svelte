@@ -13,9 +13,7 @@
 		CheckCircle,
 		Plus,
 		Trash,
-		PencilSimple,
 		GearSix,
-		X,
 		Star,
 		Lightning,
 		Clock,
@@ -41,8 +39,11 @@
 	const allTasks: { readonly value: Task[]; readonly loading: boolean; readonly error: unknown } =
 		getContext('tasks');
 
+	const editModeCtx: { readonly active: boolean; toggle(): void; set(val: boolean): void } =
+		getContext('editMode');
+
+	let editMode = $derived(editModeCtx.active);
 	let tipDismissed = $state(false);
-	let editMode = $state(false);
 	let filterOpenId = $state<string | null>(null);
 
 	const today = startOfDay(new Date());
@@ -297,17 +298,17 @@
 		];
 	}
 
-	function enterEditMode() {
-		const pages = ensureCustomPages();
-		todoSettings.set('customPages', pages);
-		todoSettings.set('pageMode', 'custom');
-		editMode = true;
-	}
-
-	function exitEditMode() {
-		editMode = false;
-		filterOpenId = null;
-	}
+	// When edit mode activates (from PillNav), ensure custom pages exist
+	$effect(() => {
+		if (editMode && todoSettings.pageMode !== 'custom') {
+			const pages = ensureCustomPages();
+			todoSettings.set('customPages', pages);
+			todoSettings.set('pageMode', 'custom');
+		}
+		if (!editMode) {
+			filterOpenId = null;
+		}
+	});
 
 	function updatePageLabel(id: string, label: string) {
 		const pages = clonePages(todoSettings.customPages);
@@ -382,7 +383,7 @@
 <svelte:window
 	onkeydown={(e) => {
 		if (e.key === 'Escape' && editMode) {
-			exitEditMode();
+			editModeCtx.set(false);
 			return;
 		}
 		const target = e.target as HTMLElement;
@@ -784,20 +785,6 @@
 			</div>
 		{/if}
 	</div>
-
-	<!-- Edit FAB -->
-	<button
-		class="edit-fab"
-		class:active={editMode}
-		onclick={() => (editMode ? exitEditMode() : enterEditMode())}
-		title={editMode ? 'Fertig' : 'Seiten bearbeiten'}
-	>
-		{#if editMode}
-			<CheckCircle size={22} weight="bold" />
-		{:else}
-			<PencilSimple size={20} weight="bold" />
-		{/if}
-	</button>
 {/if}
 
 <style>
@@ -1201,50 +1188,6 @@
 		border-color: hsl(var(--color-primary) / 0.5);
 		color: hsl(var(--color-primary));
 		background: hsl(var(--color-primary) / 0.05);
-	}
-
-	/* ── Edit FAB ── */
-	.edit-fab {
-		position: fixed;
-		bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem);
-		right: 1rem;
-		width: 44px;
-		height: 44px;
-		border-radius: 50%;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: rgba(255, 255, 255, 0.9);
-		color: #6b7280;
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.12),
-			0 0 0 1px rgba(0, 0, 0, 0.06);
-		transition: all 0.2s ease;
-		z-index: 1001;
-	}
-	.edit-fab:hover {
-		transform: scale(1.05);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-	}
-	.edit-fab.active {
-		background: hsl(var(--color-primary));
-		color: white;
-		box-shadow: 0 2px 12px hsl(var(--color-primary) / 0.4);
-	}
-	:global(.dark) .edit-fab {
-		background: rgba(30, 30, 30, 0.9);
-		color: #9ca3af;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.3),
-			0 0 0 1px rgba(255, 255, 255, 0.1);
-	}
-	:global(.dark) .edit-fab.active {
-		background: hsl(var(--color-primary));
-		color: white;
 	}
 
 	/* ── Subsections ── */
