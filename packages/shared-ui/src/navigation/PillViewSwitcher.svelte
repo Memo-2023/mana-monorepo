@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { CalendarBlank, List, GridFour, ClipboardText, ListChecks } from '@manacore/shared-icons';
 
 	export interface ViewOption {
 		/** Unique identifier */
@@ -58,24 +59,17 @@
 		}
 	}
 
-	// Icon SVG paths
-	const icons: Record<string, string> = {
-		day: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-		week: 'M4 6h16M4 10h16M4 14h16M4 18h16',
-		month:
-			'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
-		year: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
-		agenda:
-			'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
-		list: 'M4 6h16M4 10h16M4 14h16M4 18h16',
-		grid: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z',
-		calendar:
-			'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+	// Map icon names to Phosphor components
+	const phosphorIcons: Record<string, any> = {
+		day: CalendarBlank,
+		week: List,
+		month: GridFour,
+		year: ClipboardText,
+		agenda: ListChecks,
+		list: List,
+		grid: GridFour,
+		calendar: CalendarBlank,
 	};
-
-	function getIconPath(name: string): string {
-		return icons[name] || '';
-	}
 </script>
 
 <div
@@ -98,15 +92,9 @@
 			title={option.title || option.label}
 			disabled={option.disabled}
 		>
-			{#if option.icon && getIconPath(option.icon)}
-				<svg class="switcher-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d={getIconPath(option.icon)}
-					/>
-				</svg>
+			{#if option.icon && phosphorIcons[option.icon]}
+				{@const IconComponent = phosphorIcons[option.icon]}
+				<IconComponent size={16} class="switcher-icon" />
 			{/if}
 			<span class="switcher-label">{option.label}</span>
 		</button>
