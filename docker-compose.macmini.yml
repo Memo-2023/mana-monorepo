@@ -1714,7 +1714,7 @@ services:
     image: alpine:3.20
     container_name: mana-status-gen
     restart: always
-    mem_limit: 32m
+    mem_limit: 64m
     # host network: direkter Zugriff auf VictoriaMetrics via localhost:9090
     # (kein depends_on möglich mit network_mode: host)
     network_mode: host
@@ -1728,7 +1728,7 @@ services:
       - sh
       - -c
       - |
-        apk add --no-cache curl jq
+        apk add --no-cache curl jq || { echo "apk add fehlgeschlagen, retry in 10s"; sleep 10; exit 1; }
         mkdir -p /output
         while true; do
           sh /generate.sh
