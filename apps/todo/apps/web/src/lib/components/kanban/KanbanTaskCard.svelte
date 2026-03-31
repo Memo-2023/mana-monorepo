@@ -270,7 +270,8 @@
 
 <!-- Inline subtasks -->
 {#if task.subtasks && task.subtasks.length > 0 && !task.isCompleted}
-	<div class="subtasks-inline">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="subtasks-inline" onpointerdown={(e) => e.stopPropagation()}>
 		{#each task.subtasks as subtask (subtask.id)}
 			<button
 				class="subtask-row"
