@@ -188,11 +188,12 @@ export function createBetterAuth(databaseUrl: string) {
 				// during the verification process in the passthrough controller
 				const sourceAppUrl = sourceAppStore.get(user.email);
 
-				// Modify verification URL to include redirectTo parameter
+				// Modify verification URL: set callbackURL so Better Auth redirects
+				// back to the source app after email verification
 				let verificationUrl = url;
 				if (sourceAppUrl) {
 					const urlObj = new URL(url);
-					urlObj.searchParams.set('redirectTo', sourceAppUrl);
+					urlObj.searchParams.set('callbackURL', sourceAppUrl);
 					verificationUrl = urlObj.toString();
 				}
 
