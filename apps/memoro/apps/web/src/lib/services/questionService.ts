@@ -1,14 +1,17 @@
 /**
  * Question Service for memoro-web
- * Handles Q&A functionality for memos
+ * Handles Q&A functionality for memos via memoro-server (Hono/Bun).
  */
 
 import { env } from '$lib/config/env';
-import { tokenManager } from './tokenManager';
+import { authStore } from '$lib/stores/auth.svelte';
 import { createAuthClient } from '$lib/supabaseClient';
+
+const SERVER_URL = () => env.server.memoroUrl.replace(/\/$/, '');
 
 export interface QuestionResult {
 	success: boolean;
+	answer?: string;
 	memoryId?: string;
 	error?: string;
 	creditsConsumed?: number;
@@ -22,113 +25,50 @@ export interface Memory {
 }
 
 class QuestionService {
-	/**
-	 * Ask a question about a memo
-	 * This calls the memoro middleware service to generate an AI answer
-	 */
 	async askQuestion(memoId: string, question: string): Promise<QuestionResult> {
 		if (!memoId || !question.trim()) {
-			return {
-				success: false,
-				error: 'Invalid memo ID or question',
-			};
+			return { success: false, error: 'Invalid memo ID or question' };
 		}
 
 		try {
-			// Get a valid token
-			const token = await tokenManager.getValidToken();
+			const token = await authStore.getAccessToken();
 			if (!token) {
-				return {
-					success: false,
-					error: 'Nicht authentifiziert. Bitte melden Sie sich erneut an.',
-				};
+				return { success: false, error: 'Nicht authentifiziert. Bitte melden Sie sich erneut an.' };
 			}
 
-			// Get the memoro service URL
-			const memoroServiceUrl = env.middleware.memoroUrl?.replace(/\/$/, '');
-			if (!memoroServiceUrl) {
-				return {
-					success: false,
-					error: 'Memoro service URL nicht konfiguriert',
-				};
-			}
-
-			// Call the memoro service
-			const response = await fetch(`${memoroServiceUrl}/memoro/question-memo`, {
+			const response = await fetch(`${SERVER_URL()}/api/v1/memos/${memoId}/question`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${token}`,
 				},
-				body: JSON.stringify({
-					memo_id: memoId,
-					question: question.trim(),
-				}),
+				body: JSON.stringify({ question: question.trim() }),
 			});
 
 			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-
-				// Handle specific error codes
 				if (response.status === 402) {
-					return {
-						success: false,
-						error: 'Nicht genügend Mana. Bitte laden Sie Ihr Konto auf.',
-					};
+					return { success: false, error: 'Nicht genügend Mana. Bitte laden Sie Ihr Konto auf.' };
 				}
-
 				if (response.status === 401) {
-					return {
-						success: false,
-						error: 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.',
-					};
+					return { success: false, error: 'Sitzung abgelaufen. Bitte melden Sie sich erneut an.' };
 				}
-
-				return {
-					success: false,
-					error: errorData.message || `Fehler: ${response.status} ${response.statusText}`,
-				};
+				const d = await response.json().catch(() => ({}));
+				return { success: false, error: d.error || `Fehler: ${response.status}` };
 			}
 
 			const data = await response.json();
-
-			if (data?.success && data?.memory_id) {
-				return {
-					success: true,
-					memoryId: data.memory_id,
-					creditsConsumed: data.creditsConsumed,
-				};
-			}
-
-			return {
-				success: false,
-				error: data?.error || 'Unbekannter Fehler bei der Verarbeitung',
-			};
+			return { success: true, answer: data.answer, creditsConsumed: data.creditsConsumed };
 		} catch (error) {
-			console.error('Error asking question:', error);
-
-			// Check for network errors
 			if (error instanceof TypeError && error.message.includes('fetch')) {
-				return {
-					success: false,
-					error: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung.',
-				};
+				return { success: false, error: 'Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung.' };
 			}
-
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : 'Unbekannter Fehler',
-			};
+			return { success: false, error: error instanceof Error ? error.message : 'Unbekannter Fehler' };
 		}
 	}
 
-	/**
-	 * Load memories for a memo
-	 */
 	async loadMemories(memoId: string): Promise<Memory[]> {
 		try {
 			const supabase = await createAuthClient();
-
 			const { data, error } = await supabase
 				.from('memories')
 				.select('id, title, content, metadata')
@@ -140,7 +80,6 @@ class QuestionService {
 				console.error('Error loading memories:', error);
 				return [];
 			}
-
 			return data || [];
 		} catch (error) {
 			console.error('Error loading memories:', error);
@@ -149,5 +88,4 @@ class QuestionService {
 	}
 }
 
-// Export singleton instance
 export const questionService = new QuestionService();

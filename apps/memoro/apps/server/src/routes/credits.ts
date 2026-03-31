@@ -4,12 +4,25 @@
 
 import { Hono } from 'hono';
 import { validateCredits, consumeCredits, COSTS } from '../lib/credits';
+import { getBalance } from '@manacore/shared-hono';
 
 export const creditRoutes = new Hono();
 
 // GET /pricing — public, returns cost constants
 creditRoutes.get('/pricing', (c) => {
 	return c.json({ costs: COSTS });
+});
+
+// GET /balance — authenticated, returns user's credit balance
+creditRoutes.get('/balance', async (c) => {
+	const userId = c.get('userId') as string;
+	try {
+		const balance = await getBalance(userId);
+		return c.json({ credits: balance.balance, totalEarned: balance.totalEarned, totalSpent: balance.totalSpent });
+	} catch (err) {
+		console.error('[credits] Balance error:', err);
+		return c.json({ error: 'Failed to fetch balance' }, 500);
+	}
 });
 
 // POST /check — validate credits (requires auth via parent router)

@@ -125,7 +125,7 @@ export async function uploadAndProcessAudio({
 			blueprintId,
 			recordingLanguages,
 			enableDiarization,
-			appToken,
+			accessToken: appToken,
 			mediaType,
 		});
 
