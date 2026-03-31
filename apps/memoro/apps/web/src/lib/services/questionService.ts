@@ -19,9 +19,12 @@ export interface QuestionResult {
 
 export interface Memory {
 	id: string;
+	memo_id: string;
 	title: string;
-	content: string;
-	metadata?: Record<string, unknown>;
+	content: string | null;
+	metadata?: Record<string, unknown> | null;
+	created_at: string;
+	updated_at: string;
 }
 
 class QuestionService {

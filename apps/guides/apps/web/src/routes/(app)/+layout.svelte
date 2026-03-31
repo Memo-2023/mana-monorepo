@@ -158,7 +158,6 @@
 			showAppSwitcher={true}
 			{appItems}
 			{userEmail}
-			allAppsHref="/apps"
 		/>
 
 		<main class="relative z-0 pb-24" style="padding-top: 0">

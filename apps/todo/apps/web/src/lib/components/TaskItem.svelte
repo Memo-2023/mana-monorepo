@@ -153,43 +153,39 @@
 	}
 
 	// Inline title editing
-	let titleRef = $state<HTMLSpanElement | null>(null);
+	let inlineTitleInputRef = $state<HTMLInputElement | null>(null);
+	let isEditingTitle = $state(false);
+	let editTitleValue = $state('');
 
-	function handleTitleKeydown(e: KeyboardEvent) {
+	function startTitleEdit(e: MouseEvent) {
+		e.stopPropagation();
+		editTitleValue = task.title;
+		isEditingTitle = true;
+	}
+
+	$effect(() => {
+		if (isEditingTitle && inlineTitleInputRef) {
+			inlineTitleInputRef.focus();
+			inlineTitleInputRef.select();
+		}
+	});
+
+	function handleInlineTitleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
-			titleRef?.blur();
+			inlineTitleInputRef?.blur();
 		} else if (e.key === 'Escape') {
-			if (titleRef) titleRef.textContent = task.title;
-			titleRef?.blur();
-		} else if (e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-			const direction = e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey) ? -1 : 1;
-			e.preventDefault();
-			const allTitles = Array.from(
-				document.querySelectorAll<HTMLElement>('.task-title[contenteditable]')
-			);
-			const currentIndex = allTitles.indexOf(titleRef!);
-			const nextTitle = allTitles[currentIndex + direction];
-			titleRef?.blur();
-			if (nextTitle) {
-				nextTitle.focus();
-			} else {
-				// No next/prev todo — focus QuickInputBar
-				const input = document.querySelector<HTMLInputElement>('.quick-input-bar input');
-				input?.focus();
-			}
+			editTitleValue = task.title;
+			isEditingTitle = false;
 		}
 	}
 
-	function handleTitleBlur() {
-		if (!titleRef) return;
-		const trimmed = (titleRef.textContent || '').trim();
+	function handleInlineTitleBlur() {
+		const trimmed = editTitleValue.trim();
 		if (trimmed && trimmed !== task.title) {
 			onSave?.({ title: trimmed });
-		} else {
-			// Revert if empty or unchanged
-			titleRef.textContent = task.title;
 		}
+		isEditingTitle = false;
 	}
 
 	function handleContentClick() {
@@ -336,20 +332,25 @@
 
 		<!-- Content -->
 		<div class="task-content">
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<span
-				bind:this={titleRef}
-				class="task-title"
-				class:line-through={task.isCompleted}
-				contenteditable="true"
-				role="textbox"
-				spellcheck="true"
-				onkeydown={handleTitleKeydown}
-				onblur={handleTitleBlur}
-				onclick={(e) => e.stopPropagation()}
-			>
-				{task.title}
-			</span>
+			{#if isEditingTitle}
+				<input
+					bind:this={inlineTitleInputRef}
+					class="task-title-edit"
+					bind:value={editTitleValue}
+					onclick={(e) => e.stopPropagation()}
+					onkeydown={handleInlineTitleKeydown}
+					onblur={handleInlineTitleBlur}
+				/>
+			{:else}
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<span
+					class="task-title"
+					class:line-through={task.isCompleted}
+					onclick={startTitleEdit}
+				>
+					{task.title}
+				</span>
+			{/if}
 
 			<!-- Labels below title -->
 			{#if task.labels && task.labels.length > 0}
@@ -746,12 +747,14 @@
 		cursor: pointer;
 		border-radius: 0.375rem;
 		opacity: 0;
+		pointer-events: none;
 		transition: all 0.15s;
 		padding: 0;
 	}
 
 	.task-item:hover .detail-btn {
 		opacity: 1;
+		pointer-events: auto;
 	}
 
 	.detail-btn:hover {
@@ -888,18 +891,30 @@
 		border-radius: 0.25rem;
 		padding: 0.125rem 0.25rem;
 		margin: -0.125rem -0.25rem;
-		outline: none;
-		transition: background 0.1s;
+		user-select: none;
 	}
 
-	.task-title:focus {
-		background: color-mix(in srgb, var(--color-primary) 6%, transparent);
-		outline: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+	.task-title:hover {
+		background: color-mix(in srgb, var(--color-primary) 5%, transparent);
 	}
 
 	.task-title.line-through {
 		text-decoration: line-through;
 		color: var(--color-muted-foreground);
+	}
+
+	.task-title-edit {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-foreground);
+		background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+		border-radius: 0.25rem;
+		padding: 0.125rem 0.25rem;
+		margin: -0.125rem -0.25rem;
+		outline: none;
+		width: calc(100% + 0.5rem);
+		word-break: break-word;
 	}
 
 	/* Meta info */

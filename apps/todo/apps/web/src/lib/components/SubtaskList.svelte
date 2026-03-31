@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Subtask } from '@todo/shared';
-	import { dndzone } from 'svelte-dnd-action';
+	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
+	import { untrack } from 'svelte';
 	import { Check, Plus, X, DotsSixVertical } from '@manacore/shared-icons';
 
 	interface Props {
@@ -12,24 +13,36 @@
 	let { subtasks, onChange }: Props = $props();
 
 	let newSubtaskTitle = $state('');
-	let editingId = $state<string | null>(null);
-	let editingTitle = $state('');
+	let items = $state<Subtask[]>([]);
+	let dropInProgress = false;
 
-	// Convert subtasks to items with id for dnd
-	let items = $derived(
-		subtasks.map((s, index) => ({
-			...s,
-			id: s.id,
-			order: index,
-		}))
-	);
+	$effect(() => {
+		const current = subtasks;
+		untrack(() => {
+			const currentIds = new Set(current.map((s) => s.id));
+			const itemIds = new Set(items.filter((i) => i.id !== SHADOW_PLACEHOLDER_ITEM_ID).map((i) => i.id));
+			const idsChanged =
+				currentIds.size !== itemIds.size || current.some((s) => !itemIds.has(s.id));
+
+			if (idsChanged) {
+				items = current.map((s, i) => ({ ...s, order: i }));
+				dropInProgress = false;
+			} else if (!dropInProgress) {
+				const map = new Map(current.map((s) => [s.id, s]));
+				items = items.map((item) => map.get(item.id) ?? item);
+			}
+		});
+	});
 
 	function handleDndConsider(e: CustomEvent<{ items: Subtask[] }>) {
-		onChange(e.detail.items.map((item, index) => ({ ...item, order: index })));
+		items = e.detail.items;
 	}
 
 	function handleDndFinalize(e: CustomEvent<{ items: Subtask[] }>) {
-		onChange(e.detail.items.map((item, index) => ({ ...item, order: index })));
+		items = e.detail.items.filter((item) => item.id !== SHADOW_PLACEHOLDER_ITEM_ID);
+		onChange(items.map((item, index) => ({ ...item, order: index })));
+		dropInProgress = true;
+		setTimeout(() => { dropInProgress = false; }, 500);
 	}
 
 	function toggleComplete(id: string) {
@@ -49,34 +62,24 @@
 		onChange(subtasks.filter((s) => s.id !== id));
 	}
 
-	function startEditing(subtask: Subtask) {
-		editingId = subtask.id;
-		editingTitle = subtask.title;
-	}
-
-	function saveEdit() {
-		if (!editingId || !editingTitle.trim()) {
-			cancelEdit();
-			return;
+	function handleTitleBlur(e: FocusEvent, subtask: Subtask) {
+		const el = e.target as HTMLElement;
+		const trimmed = (el.textContent || '').trim();
+		if (trimmed && trimmed !== subtask.title) {
+			onChange(subtasks.map((s) => (s.id === subtask.id ? { ...s, title: trimmed } : s)));
+		} else {
+			el.textContent = subtask.title;
 		}
-		const updated = subtasks.map((s) =>
-			s.id === editingId ? { ...s, title: editingTitle.trim() } : s
-		);
-		onChange(updated);
-		cancelEdit();
 	}
 
-	function cancelEdit() {
-		editingId = null;
-		editingTitle = '';
-	}
-
-	function handleEditKeydown(e: KeyboardEvent) {
+	function handleTitleKeydown(e: KeyboardEvent, subtask: Subtask) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
-			saveEdit();
+			(e.target as HTMLElement).blur();
 		} else if (e.key === 'Escape') {
-			cancelEdit();
+			const el = e.target as HTMLElement;
+			el.textContent = subtask.title;
+			el.blur();
 		}
 	}
 
@@ -111,7 +114,13 @@
 			onfinalize={handleDndFinalize}
 		>
 			{#each items as subtask (subtask.id)}
-				<div class="subtask-item" animate:flip={{ duration: 200 }}>
+				<div
+					class="subtask-item"
+					animate:flip={{ duration: 200 }}
+					onpointerdown={(e) => {
+						if (!(e.target as HTMLElement).closest('.drag-handle')) e.stopPropagation();
+					}}
+				>
 					<!-- Drag handle -->
 					<div class="drag-handle" aria-label="Ziehen zum Sortieren">
 						<DotsSixVertical size={16} />
@@ -129,25 +138,17 @@
 						{/if}
 					</button>
 
-					<!-- Title (editable) -->
-					{#if editingId === subtask.id}
-						<input
-							type="text"
-							class="subtask-edit-input"
-							bind:value={editingTitle}
-							onkeydown={handleEditKeydown}
-							onblur={saveEdit}
-						/>
-					{:else}
-						<button
-							type="button"
-							class="subtask-title"
-							class:completed={subtask.isCompleted}
-							ondblclick={() => startEditing(subtask)}
-						>
-							{subtask.title}
-						</button>
-					{/if}
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<span
+						class="subtask-title"
+						class:completed={subtask.isCompleted}
+						contenteditable="true"
+						role="textbox"
+						spellcheck="false"
+						onclick={(e) => e.stopPropagation()}
+						onkeydown={(e) => handleTitleKeydown(e, subtask)}
+						onblur={(e) => handleTitleBlur(e, subtask)}
+					>{subtask.title}</span>
 
 					<!-- Delete button -->
 					<button
@@ -257,29 +258,17 @@
 
 	.subtask-title {
 		flex: 1;
-		text-align: left;
-		background: none;
-		border: none;
-		padding: 0;
 		font-size: 0.875rem;
 		color: var(--color-foreground);
 		cursor: text;
+		outline: none;
+		word-break: break-word;
+		min-width: 0;
 	}
 
 	.subtask-title.completed {
 		text-decoration: line-through;
 		color: var(--color-muted-foreground);
-	}
-
-	.subtask-edit-input {
-		flex: 1;
-		background: var(--color-surface-elevated-3);
-		border: 1px solid var(--color-primary);
-		border-radius: 0.375rem;
-		padding: 0.25rem 0.5rem;
-		font-size: 0.875rem;
-		color: var(--color-foreground);
-		outline: none;
 	}
 
 	.subtask-delete {

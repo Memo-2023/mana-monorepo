@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Task } from '@todo/shared';
+	import type { Task, Subtask } from '@todo/shared';
 	import { isToday, isPast } from 'date-fns';
 	import { formatDueDate } from '$lib/utils/date-display';
 	import { getSubtaskProgress } from '$lib/utils/task-helpers';
@@ -7,13 +7,18 @@
 	import TaskEditModal from '../TaskEditModal.svelte';
 	import {
 		ArrowsClockwise,
+		ArrowsOutSimple,
 		CalendarBlank,
 		Check,
 		CheckSquare,
+		DotsSixVertical,
 		Note,
 		Trash,
 	} from '@manacore/shared-icons';
 	import { PRIORITY_BG_CLASSES } from '$lib/constants/priority';
+	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID } from 'svelte-dnd-action';
+	import { flip } from 'svelte/animate';
+	import { untrack } from 'svelte';
 
 	interface Props {
 		task: Task;
@@ -31,10 +36,7 @@
 	// Completion animation
 	let isAnimatingComplete = $state(false);
 
-	// Inline edit state
-	let isEditingTitle = $state(false);
-	let editTitle = $state('');
-	let titleInputRef = $state<HTMLInputElement | null>(null);
+	let titleSpanRef = $state<HTMLElement | null>(null);
 
 	// Context menu state
 	let showContextMenu = $state(false);
@@ -61,8 +63,7 @@
 
 	// Click to open modal
 	function handleCardClick(e: MouseEvent) {
-		// Don't open modal if clicking on checkbox or during inline edit or animation
-		if (isEditingTitle || isAnimatingComplete) return;
+		if (isAnimatingComplete) return;
 		const target = e.target as HTMLElement;
 		if (target.closest('.task-checkbox')) return;
 		showModal = true;
@@ -82,40 +83,29 @@
 		}, 500);
 	}
 
-	// Double-click to edit title inline
-	function handleTitleDoubleClick(e: MouseEvent) {
+	function handleOpenModal(e: MouseEvent) {
 		e.stopPropagation();
-		editTitle = task.title;
-		isEditingTitle = true;
-		// Focus input after render
-		setTimeout(() => {
-			titleInputRef?.focus();
-			titleInputRef?.select();
-		}, 0);
+		showModal = true;
 	}
 
-	// Save inline title edit
-	function saveInlineTitle() {
-		if (editTitle.trim() && editTitle.trim() !== task.title) {
-			onSave?.({ title: editTitle.trim() });
+	function handleTitleBlur(e: FocusEvent) {
+		const el = e.target as HTMLElement;
+		const trimmed = (el.textContent || '').trim();
+		if (trimmed && trimmed !== task.title) {
+			onSave?.({ title: trimmed });
+		} else {
+			el.textContent = task.title;
 		}
-		isEditingTitle = false;
 	}
 
-	// Cancel inline title edit
-	function cancelInlineTitle() {
-		isEditingTitle = false;
-		editTitle = '';
-	}
-
-	// Handle title input keydown
 	function handleTitleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
-			saveInlineTitle();
+			(e.target as HTMLElement).blur();
 		} else if (e.key === 'Escape') {
-			e.preventDefault();
-			cancelInlineTitle();
+			const el = e.target as HTMLElement;
+			el.textContent = task.title;
+			el.blur();
 		}
 	}
 
@@ -168,6 +158,37 @@
 		showModal = false;
 	}
 
+	// Inline subtask DnD state
+	let subtaskItems = $state<Subtask[]>([]);
+	let subtaskDropInProgress = false;
+
+	$effect(() => {
+		const current = task.subtasks ?? [];
+		untrack(() => {
+			const newIds = new Set(current.map((s) => s.id));
+			const oldIds = new Set(subtaskItems.filter((s) => s.id !== SHADOW_PLACEHOLDER_ITEM_ID).map((s) => s.id));
+			const idsChanged = newIds.size !== oldIds.size || current.some((s) => !oldIds.has(s.id));
+			if (idsChanged) {
+				subtaskItems = [...current];
+				subtaskDropInProgress = false;
+			} else if (!subtaskDropInProgress) {
+				const map = new Map(current.map((s) => [s.id, s]));
+				subtaskItems = subtaskItems.map((item) => map.get(item.id) ?? item);
+			}
+		});
+	});
+
+	function handleSubtaskConsider(e: CustomEvent<{ items: Subtask[] }>) {
+		subtaskItems = e.detail.items;
+	}
+
+	function handleSubtaskFinalize(e: CustomEvent<{ items: Subtask[] }>) {
+		subtaskItems = e.detail.items.filter((s) => s.id !== SHADOW_PLACEHOLDER_ITEM_ID);
+		onSave?.({ subtasks: subtaskItems });
+		subtaskDropInProgress = true;
+		setTimeout(() => { subtaskDropInProgress = false; }, 500);
+	}
+
 	function toggleSubtask(subtaskId: string) {
 		if (!onSave) return;
 		const subtasks = $state.snapshot(task.subtasks) ?? [];
@@ -213,24 +234,18 @@
 
 	<!-- Content -->
 	<div class="task-content">
-		{#if isEditingTitle}
-			<input
-				bind:this={titleInputRef}
-				type="text"
-				class="title-input"
-				bind:value={editTitle}
-				onkeydown={handleTitleKeydown}
-				onblur={saveInlineTitle}
-			/>
-		{:else}
-			<span
-				class="task-title"
-				class:line-through={task.isCompleted || isAnimatingComplete}
-				ondblclick={handleTitleDoubleClick}
-			>
-				{task.title}
-			</span>
-		{/if}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<span
+			bind:this={titleSpanRef}
+			class="task-title"
+			class:line-through={task.isCompleted || isAnimatingComplete}
+			contenteditable={!task.isCompleted && !isAnimatingComplete}
+			role="textbox"
+			spellcheck="false"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={handleTitleKeydown}
+			onblur={handleTitleBlur}
+		>{task.title}</span>
 
 		<!-- Meta info -->
 		{#if dueDateText() || subtaskProgress() || (task.labels && task.labels.length > 0)}
@@ -263,6 +278,17 @@
 		{/if}
 	</div>
 
+	<!-- Detail modal button -->
+	<button
+		type="button"
+		class="detail-btn"
+		onclick={handleOpenModal}
+		title="Details öffnen"
+		tabindex="-1"
+	>
+		<ArrowsOutSimple size={14} />
+	</button>
+
 	<!-- Contacts display -->
 	{#if task.metadata?.assignee || (task.metadata?.involvedContacts && task.metadata.involvedContacts.length > 0)}
 		<div class="contacts-display">
@@ -292,23 +318,38 @@
 </div>
 
 <!-- Inline subtasks — shown while incomplete; during animation all appear as done -->
-{#if task.subtasks && task.subtasks.length > 0 && !task.isCompleted}
+{#if subtaskItems.length > 0 && !task.isCompleted}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="subtasks-inline" onpointerdown={(e) => e.stopPropagation()}>
-		{#each task.subtasks as subtask (subtask.id)}
-			<button
+	<div
+		class="subtasks-inline"
+		use:dndzone={{ items: subtaskItems, flipDurationMs: 150, dropTargetStyle: {}, type: 'subtask-inline' }}
+		onconsider={handleSubtaskConsider}
+		onfinalize={handleSubtaskFinalize}
+	>
+		{#each subtaskItems.filter((s) => s.id !== SHADOW_PLACEHOLDER_ITEM_ID) as subtask (subtask.id)}
+			<div
 				class="subtask-row"
 				class:done={subtask.isCompleted || isAnimatingComplete}
-				onclick={(e) => {
-					e.stopPropagation();
-					if (!isAnimatingComplete) toggleSubtask(subtask.id);
+				animate:flip={{ duration: 150 }}
+				onpointerdown={(e) => {
+					if (!(e.target as HTMLElement).closest('.subtask-drag-handle')) e.stopPropagation();
 				}}
 			>
-				<span class="subtask-check" class:checked={subtask.isCompleted || isAnimatingComplete}>
-					{#if subtask.isCompleted || isAnimatingComplete}<Check size={10} />{/if}
-				</span>
+				<span class="subtask-drag-handle"><DotsSixVertical size={10} /></span>
+				<button
+					class="subtask-check-btn"
+					class:checked={subtask.isCompleted || isAnimatingComplete}
+					onclick={(e) => {
+						e.stopPropagation();
+						if (!isAnimatingComplete) toggleSubtask(subtask.id);
+					}}
+				>
+					<span class="subtask-check" class:checked={subtask.isCompleted || isAnimatingComplete}>
+						{#if subtask.isCompleted || isAnimatingComplete}<Check size={10} />{/if}
+					</span>
+				</button>
 				<span class="subtask-title">{subtask.title}</span>
-			</button>
+			</div>
 		{/each}
 	</div>
 {/if}
@@ -455,6 +496,37 @@
 		color: white;
 	}
 
+	/* Detail modal button */
+	.detail-btn {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border: none;
+		background: transparent;
+		color: var(--color-muted-foreground);
+		cursor: pointer;
+		border-radius: 0.375rem;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.15s;
+		padding: 0;
+		margin-top: 0.1rem;
+	}
+
+	.kanban-card:hover .detail-btn {
+		opacity: 0.6;
+		pointer-events: auto;
+	}
+
+	.detail-btn:hover {
+		opacity: 1 !important;
+		color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+	}
+
 	/* Content */
 	.task-content {
 		flex: 1;
@@ -468,9 +540,22 @@
 		font-size: 0.9375rem;
 		font-weight: 400;
 		color: hsl(var(--color-foreground));
-		cursor: pointer;
+		cursor: text;
 		line-height: 1.4;
 		word-break: break-word;
+		border-radius: 0.25rem;
+		padding: 0.125rem 0.25rem;
+		margin: -0.125rem -0.25rem;
+		transition: background 0.1s;
+		outline: none;
+	}
+
+	.task-title:hover {
+		background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+	}
+
+	.task-title:focus {
+		background: color-mix(in srgb, var(--color-primary) 5%, transparent);
 	}
 
 	:global(.dark) .task-title {
@@ -482,24 +567,6 @@
 		opacity: 0.5;
 	}
 
-	/* Inline title input */
-	.title-input {
-		width: 100%;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
-		background: rgba(255, 255, 255, 0.9);
-		border: 1px solid #8b5cf6;
-		border-radius: 0.5rem;
-		padding: 0.25rem 0.5rem;
-		outline: none;
-	}
-
-	:global(.dark) .title-input {
-		background: rgba(30, 30, 30, 0.9);
-		color: #f3f4f6;
-		border-color: #8b5cf6;
-	}
 
 	/* Meta info */
 	.task-meta {
@@ -670,13 +737,36 @@
 	.subtask-row {
 		display: flex;
 		align-items: flex-start;
-		gap: 0.625rem;
+		gap: 0.375rem;
 		padding: 0.15rem 0;
+		width: 100%;
+	}
+
+	.subtask-drag-handle {
+		display: flex;
+		align-items: center;
+		color: var(--color-muted-foreground);
+		opacity: 0;
+		cursor: grab;
+		flex-shrink: 0;
+		margin-top: 0.2rem;
+		transition: opacity 0.15s;
+	}
+
+	.subtask-row:hover .subtask-drag-handle {
+		opacity: 0.5;
+	}
+
+	.subtask-drag-handle:hover {
+		opacity: 1 !important;
+	}
+
+	.subtask-check-btn {
 		background: transparent;
 		border: none;
+		padding: 0;
 		cursor: pointer;
-		text-align: left;
-		width: 100%;
+		flex-shrink: 0;
 	}
 
 	.subtask-check {
@@ -688,7 +778,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		flex-shrink: 0;
 		transition: all 0.15s;
 		color: white;
 		margin-top: 0.2rem;
@@ -698,7 +787,7 @@
 		border-color: rgba(255, 255, 255, 0.35);
 	}
 
-	.subtask-check:hover {
+	.subtask-check-btn:hover .subtask-check {
 		border-color: #8b5cf6;
 	}
 
@@ -708,15 +797,12 @@
 	}
 
 	.subtask-title {
+		flex: 1;
 		font-size: 0.9375rem;
 		font-weight: 400;
 		color: hsl(var(--color-foreground));
 		line-height: 1.4;
 		word-break: break-word;
-	}
-
-	:global(.dark) .subtask-title {
-		color: hsl(var(--color-foreground));
 	}
 
 	.subtask-row.done .subtask-title {
