@@ -40,6 +40,8 @@
 		requiredTier?: AccessTier;
 		/** App name shown on the access denied screen */
 		appName?: string;
+		/** Locale for tier-denied screen (default: 'de') */
+		locale?: 'de' | 'en';
 		/** Callback invoked after auth is confirmed, before children are rendered.
 		 *  Use this for loading app-specific data (projects, calendars, etc.) */
 		onReady?: () => void | Promise<void>;
@@ -55,6 +57,7 @@
 		allowGuest = false,
 		requiredTier,
 		appName,
+		locale = 'de',
 		onReady,
 		goto: gotoFn,
 		children,
@@ -91,8 +94,9 @@
 		if (requiredTier && authStore.isAuthenticated && authStore.user) {
 			const userTier = authStore.user.tier || 'public';
 			if (!hasAppAccess(userTier, requiredTier)) {
-				userTierLabel = ACCESS_TIER_LABELS['de'][userTier as AccessTier] || userTier;
-				requiredTierLabel = ACCESS_TIER_LABELS['de'][requiredTier] || requiredTier;
+				const labels = ACCESS_TIER_LABELS[locale] || ACCESS_TIER_LABELS['de'];
+				userTierLabel = labels[userTier as AccessTier] || userTier;
+				requiredTierLabel = labels[requiredTier] || requiredTier;
 				tierDenied = true;
 				return;
 			}
@@ -107,28 +111,57 @@
 </script>
 
 {#if tierDenied}
-	<div class="tier-denied">
-		<div class="tier-denied-card">
+	<div
+		class="flex items-center justify-center min-h-screen p-6"
+		style:background-color="hsl(var(--background, 0 0% 100%))"
+	>
+		<div
+			class="max-w-96 w-full text-center py-10 px-8 rounded-2xl border shadow-sm"
+			style:border-color="hsl(var(--border, 0 0% 90%))"
+			style:background-color="hsl(var(--card, 0 0% 100%))"
+		>
 			{#if appName}
-				<h1 class="tier-denied-title">{appName}</h1>
+				<h1 class="text-xl font-bold mb-4" style:color="hsl(var(--foreground, 0 0% 9%))">
+					{appName}
+				</h1>
 			{/if}
-			<div class="tier-denied-icon">🔒</div>
-			<p class="tier-denied-message">
-				Diese App ist aktuell in der geschlossenen <strong>{requiredTierLabel}</strong>-Phase.
+			<div class="text-5xl mb-4">🔒</div>
+			<p
+				class="text-[0.9375rem] leading-relaxed mb-6"
+				style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+			>
+				{locale === 'en'
+					? `This app is currently in closed `
+					: `Diese App ist aktuell in der geschlossenen `}<strong>{requiredTierLabel}</strong
+				>{locale === 'en' ? ' phase.' : '-Phase.'}
 			</p>
-			<div class="tier-denied-info">
-				<div class="tier-row">
-					<span class="tier-label">Dein Zugang:</span>
-					<span class="tier-value">{userTierLabel}</span>
+			<div
+				class="flex flex-col gap-2 p-4 rounded-xl mb-6"
+				style:background-color="hsl(var(--muted, 0 0% 96%))"
+			>
+				<div class="flex justify-between items-center text-sm">
+					<span style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+						>{locale === 'en' ? 'Your access:' : 'Dein Zugang:'}</span
+					>
+					<span class="font-semibold" style:color="hsl(var(--foreground, 0 0% 9%))"
+						>{userTierLabel}</span
+					>
 				</div>
-				<div class="tier-row">
-					<span class="tier-label">Benötigt:</span>
-					<span class="tier-value tier-required">{requiredTierLabel}</span>
+				<div class="flex justify-between items-center text-sm">
+					<span style:color="hsl(var(--muted-foreground, 0 0% 45%))"
+						>{locale === 'en' ? 'Required:' : 'Benötigt:'}</span
+					>
+					<span class="font-semibold text-violet-500">{requiredTierLabel}</span>
 				</div>
 			</div>
-			<div class="tier-denied-actions">
-				<button class="tier-btn-primary" onclick={goHome}> Zur Übersicht </button>
-			</div>
+			<button
+				class="w-full py-2.5 px-4 rounded-lg border-none text-sm font-medium cursor-pointer transition-opacity hover:opacity-90"
+				style:background-color="hsl(var(--primary, 239 84% 67%))"
+				style:color="hsl(var(--primary-foreground, 0 0% 100%))"
+				onclick={goHome}
+			>
+				{locale === 'en' ? 'Back to overview' : 'Zur Übersicht'}
+			</button>
 		</div>
 	</div>
 {:else if !ready}
@@ -138,97 +171,3 @@
 {:else}
 	{@render children()}
 {/if}
-
-<style>
-	.tier-denied {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 100vh;
-		background: hsl(var(--background, 0 0% 100%));
-		padding: 1.5rem;
-	}
-
-	.tier-denied-card {
-		max-width: 24rem;
-		width: 100%;
-		text-align: center;
-		padding: 2.5rem 2rem;
-		border-radius: 1rem;
-		border: 1px solid hsl(var(--border, 0 0% 90%));
-		background: hsl(var(--card, 0 0% 100%));
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-	}
-
-	.tier-denied-title {
-		font-size: 1.25rem;
-		font-weight: 700;
-		color: hsl(var(--foreground, 0 0% 9%));
-		margin: 0 0 1rem;
-	}
-
-	.tier-denied-icon {
-		font-size: 3rem;
-		margin-bottom: 1rem;
-	}
-
-	.tier-denied-message {
-		font-size: 0.9375rem;
-		color: hsl(var(--muted-foreground, 0 0% 45%));
-		margin: 0 0 1.5rem;
-		line-height: 1.5;
-	}
-
-	.tier-denied-info {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		padding: 1rem;
-		border-radius: 0.75rem;
-		background: hsl(var(--muted, 0 0% 96%));
-		margin-bottom: 1.5rem;
-	}
-
-	.tier-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		font-size: 0.875rem;
-	}
-
-	.tier-label {
-		color: hsl(var(--muted-foreground, 0 0% 45%));
-	}
-
-	.tier-value {
-		font-weight: 600;
-		color: hsl(var(--foreground, 0 0% 9%));
-	}
-
-	.tier-required {
-		color: #8b5cf6;
-	}
-
-	.tier-denied-actions {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.tier-btn-primary {
-		width: 100%;
-		padding: 0.625rem 1rem;
-		border-radius: 0.5rem;
-		border: none;
-		background: hsl(var(--primary, 239 84% 67%));
-		color: hsl(var(--primary-foreground, 0 0% 100%));
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: opacity 0.15s;
-	}
-
-	.tier-btn-primary:hover {
-		opacity: 0.9;
-	}
-</style>

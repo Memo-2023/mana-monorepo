@@ -29,6 +29,23 @@
 		resendVerification?: string;
 		resendingVerification?: string;
 		verificationEmailSent?: string;
+		twoFactorTitle?: string;
+		twoFactorSubtitle?: string;
+		twoFactorBackupSubtitle?: string;
+		twoFactorBackupPlaceholder?: string;
+		twoFactorTrustDevice?: string;
+		twoFactorVerifying?: string;
+		twoFactorConfirm?: string;
+		twoFactorUseAuthenticator?: string;
+		twoFactorUseBackupCode?: string;
+		twoFactorBackToLogin?: string;
+		accountLocked?: string;
+		tooManyAttempts?: string;
+		retryIn?: string;
+		resetPassword?: string;
+		magicLinkSent?: string;
+		magicLinkSending?: string;
+		magicLinkButton?: string;
 	}
 
 	const defaultTranslations: LoginTranslations = {
@@ -57,6 +74,23 @@
 		resendVerification: 'Resend verification email',
 		resendingVerification: 'Sending...',
 		verificationEmailSent: 'Verification email sent! Please check your inbox.',
+		twoFactorTitle: 'Zwei-Faktor-Authentifizierung',
+		twoFactorSubtitle: 'Gib den Code aus deiner Authenticator-App ein',
+		twoFactorBackupSubtitle: 'Gib einen Backup-Code ein',
+		twoFactorBackupPlaceholder: 'Backup-Code',
+		twoFactorTrustDevice: 'Diesem Gerät 30 Tage vertrauen',
+		twoFactorVerifying: 'Prüfe...',
+		twoFactorConfirm: 'Bestätigen',
+		twoFactorUseAuthenticator: 'Authenticator-App verwenden',
+		twoFactorUseBackupCode: 'Backup-Code verwenden',
+		twoFactorBackToLogin: 'Zurück zum Login',
+		accountLocked: 'Konto vorübergehend gesperrt',
+		tooManyAttempts: 'Zu viele fehlgeschlagene Anmeldeversuche.',
+		retryIn: 'Erneut versuchen in',
+		resetPassword: 'Passwort zurücksetzen',
+		magicLinkSent: 'Login-Link an {email} gesendet!',
+		magicLinkSending: 'Wird gesendet...',
+		magicLinkButton: 'Login-Link per E-Mail senden',
 	};
 
 	interface Props {
@@ -462,15 +496,13 @@
 							class="text-xl font-semibold"
 							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
 						>
-							Zwei-Faktor-Authentifizierung
+							{t.twoFactorTitle}
 						</h2>
 						<p
 							class="text-sm mt-2"
 							style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
 						>
-							{useBackupCode
-								? 'Gib einen Backup-Code ein'
-								: 'Gib den Code aus deiner Authenticator-App ein'}
+							{useBackupCode ? t.twoFactorBackupSubtitle : t.twoFactorSubtitle}
 						</p>
 					</div>
 
@@ -494,7 +526,7 @@
 							<input
 								type="text"
 								bind:value={twoFactorCode}
-								placeholder={useBackupCode ? 'Backup-Code' : '000000'}
+								placeholder={useBackupCode ? t.twoFactorBackupPlaceholder : '000000'}
 								required
 								autocomplete="one-time-code"
 								inputmode={useBackupCode ? 'text' : 'numeric'}
@@ -522,7 +554,7 @@
 									bind:checked={trustDevice}
 									style:accent-color={primaryColor}
 								/>
-								<span>Diesem Gerät 30 Tage vertrauen</span>
+								<span>{t.twoFactorTrustDevice}</span>
 							</label>
 						{/if}
 
@@ -534,7 +566,7 @@
 							style:border-color={primaryColor}
 							style:color={isDark ? '#fff' : '#000'}
 						>
-							{loading ? 'Prüfe...' : 'Bestätigen'}
+							{loading ? t.twoFactorVerifying : t.twoFactorConfirm}
 						</button>
 					</form>
 
@@ -548,7 +580,7 @@
 							clearError();
 						}}
 					>
-						{useBackupCode ? 'Authenticator-App verwenden' : 'Backup-Code verwenden'}
+						{useBackupCode ? t.twoFactorUseAuthenticator : t.twoFactorUseBackupCode}
 					</button>
 
 					<button
@@ -562,7 +594,7 @@
 							clearError();
 						}}
 					>
-						Zurück zum Login
+						{t.twoFactorBackToLogin}
 					</button>
 				{:else}
 					{#if showVerifiedBanner}
@@ -661,13 +693,11 @@
 								<Warning size={24} />
 							</div>
 							<div class="flex flex-col gap-1">
-								<p class="font-semibold text-[0.9rem]">Konto vorübergehend gesperrt</p>
+								<p class="font-semibold text-[0.9rem]">{t.accountLocked}</p>
 								<p class="text-[0.8rem] opacity-90">
-									Zu viele fehlgeschlagene Anmeldeversuche.
+									{t.tooManyAttempts}
 									{#if rateLimitCountdown > 0}
-										Erneut versuchen in <strong>{formatCountdown(rateLimitCountdown)}</strong>
-									{:else}
-										Du kannst es jetzt erneut versuchen.
+										{t.retryIn} <strong>{formatCountdown(rateLimitCountdown)}</strong>
 									{/if}
 								</p>
 								<button
@@ -676,7 +706,7 @@
 									onclick={() => goto(forgotPasswordPath)}
 									style:color={primaryColor}
 								>
-									Passwort zurücksetzen
+									{t.resetPassword}
 								</button>
 							</div>
 						</div>
@@ -703,7 +733,8 @@
 								{/if}
 								{#if rateLimitCountdown > 0}
 									<p class="font-semibold mt-1">
-										Erneut versuchen in {formatCountdown(rateLimitCountdown)}
+										{t.retryIn}
+										{formatCountdown(rateLimitCountdown)}
 									</p>
 								{/if}
 							</div>
@@ -846,7 +877,7 @@
 								aria-live="polite"
 							>
 								<Check size={18} class="text-green-500 shrink-0" />
-								<p>Login-Link an {email} gesendet!</p>
+								<p>{t.magicLinkSent?.replace('{email}', email)}</p>
 								<button
 									type="button"
 									class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
@@ -864,7 +895,7 @@
 								class="w-full bg-transparent border-none cursor-pointer font-medium text-sm p-3 text-center transition-opacity hover:opacity-70 disabled:opacity-40 disabled:cursor-not-allowed"
 								style:color={primaryColor}
 							>
-								{sendingMagicLink ? 'Wird gesendet...' : 'Login-Link per E-Mail senden'}
+								{sendingMagicLink ? t.magicLinkSending : t.magicLinkButton}
 							</button>
 						{/if}
 					{/if}

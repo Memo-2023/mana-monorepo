@@ -13,9 +13,16 @@
 		onRefresh: () => Promise<void>;
 		loading?: boolean;
 		primaryColor?: string;
+		locale?: 'de' | 'en';
 	}
 
-	let { events, onRefresh, loading = false, primaryColor = '#6366f1' }: Props = $props();
+	let {
+		events,
+		onRefresh,
+		loading = false,
+		primaryColor = '#6366f1',
+		locale = 'de',
+	}: Props = $props();
 
 	interface EventInfo {
 		label: string;
@@ -23,41 +30,88 @@
 		badgeText: string;
 	}
 
+	const eventLabelsDE: Record<string, { label: string; badgeText: string }> = {
+		login_success: { label: 'Anmeldung erfolgreich', badgeText: '' },
+		login_failure: { label: 'Anmeldung fehlgeschlagen', badgeText: '' },
+		register: { label: 'Konto erstellt', badgeText: 'Neu' },
+		logout: { label: 'Abgemeldet', badgeText: '' },
+		password_changed: { label: 'Passwort geändert', badgeText: '' },
+		password_reset_requested: { label: 'Passwort-Reset angefordert', badgeText: '' },
+		password_reset_completed: { label: 'Passwort zurückgesetzt', badgeText: '' },
+		passkey_registered: { label: 'Passkey registriert', badgeText: '' },
+		passkey_login_success: { label: 'Passkey-Anmeldung', badgeText: '' },
+		passkey_deleted: { label: 'Passkey gelöscht', badgeText: '' },
+		two_factor_enabled: { label: '2FA aktiviert', badgeText: '' },
+		two_factor_disabled: { label: '2FA deaktiviert', badgeText: '' },
+		account_locked: { label: 'Konto gesperrt', badgeText: '' },
+		account_deleted: { label: 'Konto gelöscht', badgeText: '' },
+		sso_token_exchange: { label: 'SSO-Anmeldung', badgeText: '' },
+	};
+
+	const eventLabelsEN: Record<string, { label: string; badgeText: string }> = {
+		login_success: { label: 'Login successful', badgeText: '' },
+		login_failure: { label: 'Login failed', badgeText: '' },
+		register: { label: 'Account created', badgeText: 'New' },
+		logout: { label: 'Logged out', badgeText: '' },
+		password_changed: { label: 'Password changed', badgeText: '' },
+		password_reset_requested: { label: 'Password reset requested', badgeText: '' },
+		password_reset_completed: { label: 'Password reset', badgeText: '' },
+		passkey_registered: { label: 'Passkey registered', badgeText: '' },
+		passkey_login_success: { label: 'Passkey login', badgeText: '' },
+		passkey_deleted: { label: 'Passkey deleted', badgeText: '' },
+		two_factor_enabled: { label: '2FA enabled', badgeText: '' },
+		two_factor_disabled: { label: '2FA disabled', badgeText: '' },
+		account_locked: { label: 'Account locked', badgeText: '' },
+		account_deleted: { label: 'Account deleted', badgeText: '' },
+		sso_token_exchange: { label: 'SSO login', badgeText: '' },
+	};
+
+	const badgeClasses: Record<string, string> = {
+		login_success: 'badge-success',
+		login_failure: 'badge-danger',
+		register: 'badge-info',
+		logout: 'badge-neutral',
+		password_changed: 'badge-warning',
+		password_reset_requested: 'badge-warning',
+		password_reset_completed: 'badge-warning',
+		passkey_registered: 'badge-warning',
+		passkey_login_success: 'badge-success',
+		passkey_deleted: 'badge-danger',
+		two_factor_enabled: 'badge-success',
+		two_factor_disabled: 'badge-warning',
+		account_locked: 'badge-danger',
+		account_deleted: 'badge-danger',
+		sso_token_exchange: 'badge-success',
+	};
+
+	const auditTextsDE = {
+		title: 'Sicherheitsprotokoll',
+		subtitle: 'Letzte Aktivitäten deines Kontos',
+		refresh: 'Aktualisieren',
+		empty: 'Keine Sicherheitsereignisse vorhanden.',
+		today: 'Heute',
+		yesterday: 'Gestern',
+	};
+
+	const auditTextsEN = {
+		title: 'Security Log',
+		subtitle: 'Recent activity on your account',
+		refresh: 'Refresh',
+		empty: 'No security events found.',
+		today: 'Today',
+		yesterday: 'Yesterday',
+	};
+
+	const txt = $derived(locale === 'en' ? auditTextsEN : auditTextsDE);
+
 	function getEventInfo(eventType: string): EventInfo {
-		switch (eventType) {
-			case 'login_success':
-				return { label: 'Anmeldung erfolgreich', badgeClass: 'badge-success', badgeText: '' };
-			case 'login_failure':
-				return { label: 'Anmeldung fehlgeschlagen', badgeClass: 'badge-danger', badgeText: '' };
-			case 'register':
-				return { label: 'Konto erstellt', badgeClass: 'badge-info', badgeText: 'Neu' };
-			case 'logout':
-				return { label: 'Abgemeldet', badgeClass: 'badge-neutral', badgeText: '' };
-			case 'password_changed':
-				return { label: 'Passwort geändert', badgeClass: 'badge-warning', badgeText: '' };
-			case 'password_reset_requested':
-				return { label: 'Passwort-Reset angefordert', badgeClass: 'badge-warning', badgeText: '' };
-			case 'password_reset_completed':
-				return { label: 'Passwort zurückgesetzt', badgeClass: 'badge-warning', badgeText: '' };
-			case 'passkey_registered':
-				return { label: 'Passkey registriert', badgeClass: 'badge-warning', badgeText: '' };
-			case 'passkey_login_success':
-				return { label: 'Passkey-Anmeldung', badgeClass: 'badge-success', badgeText: '' };
-			case 'passkey_deleted':
-				return { label: 'Passkey gelöscht', badgeClass: 'badge-danger', badgeText: '' };
-			case 'two_factor_enabled':
-				return { label: '2FA aktiviert', badgeClass: 'badge-success', badgeText: '' };
-			case 'two_factor_disabled':
-				return { label: '2FA deaktiviert', badgeClass: 'badge-warning', badgeText: '' };
-			case 'account_locked':
-				return { label: 'Konto gesperrt', badgeClass: 'badge-danger', badgeText: '' };
-			case 'account_deleted':
-				return { label: 'Konto gelöscht', badgeClass: 'badge-danger', badgeText: '' };
-			case 'sso_token_exchange':
-				return { label: 'SSO-Anmeldung', badgeClass: 'badge-success', badgeText: '' };
-			default:
-				return { label: eventType, badgeClass: 'badge-neutral', badgeText: '' };
+		const labels = locale === 'en' ? eventLabelsEN : eventLabelsDE;
+		const info = labels[eventType];
+		const badgeClass = badgeClasses[eventType] || 'badge-neutral';
+		if (info) {
+			return { label: info.label, badgeClass, badgeText: info.badgeText };
 		}
+		return { label: eventType, badgeClass: 'badge-neutral', badgeText: '' };
 	}
 
 	function formatDate(dateStr: string): string {
@@ -65,18 +119,19 @@
 		const now = new Date();
 		const diffMs = now.getTime() - date.getTime();
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+		const dateLocale = locale === 'en' ? 'en-US' : 'de-DE';
 
-		const timeStr = date.toLocaleTimeString('de-DE', {
+		const timeStr = date.toLocaleTimeString(dateLocale, {
 			hour: '2-digit',
 			minute: '2-digit',
 		});
 
 		if (diffDays === 0) {
-			return `Heute, ${timeStr}`;
+			return `${txt.today}, ${timeStr}`;
 		} else if (diffDays === 1) {
-			return `Gestern, ${timeStr}`;
+			return `${txt.yesterday}, ${timeStr}`;
 		} else {
-			const dateFormatted = date.toLocaleDateString('de-DE', {
+			const dateFormatted = date.toLocaleDateString(dateLocale, {
 				day: '2-digit',
 				month: '2-digit',
 				year: 'numeric',
@@ -124,8 +179,8 @@
 				</svg>
 			</div>
 			<div>
-				<h3 class="audit-title">Sicherheitsprotokoll</h3>
-				<p class="audit-subtitle">Letzte Aktivitäten deines Kontos</p>
+				<h3 class="audit-title">{txt.title}</h3>
+				<p class="audit-subtitle">{txt.subtitle}</p>
 			</div>
 		</div>
 		<button
@@ -133,7 +188,7 @@
 			class="refresh-button"
 			onclick={onRefresh}
 			disabled={loading}
-			aria-label="Aktualisieren"
+			aria-label={txt.refresh}
 		>
 			<svg
 				class="refresh-icon"
@@ -157,7 +212,7 @@
 			<div class="loading-spinner"></div>
 		</div>
 	{:else if events.length === 0}
-		<p class="empty-state">Keine Sicherheitsereignisse vorhanden.</p>
+		<p class="empty-state">{txt.empty}</p>
 	{:else}
 		<div class="event-list">
 			{#each events as event (event.id)}

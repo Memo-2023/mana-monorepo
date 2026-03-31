@@ -5,9 +5,10 @@
 	interface Props {
 		password: string;
 		primaryColor?: string;
+		locale?: 'de' | 'en';
 	}
 
-	let { password, primaryColor = '#6366f1' }: Props = $props();
+	let { password, primaryColor = '#6366f1', locale = 'de' }: Props = $props();
 
 	let score = $state(0);
 	let feedback = $state('');
@@ -29,7 +30,9 @@
 		initialized = true;
 	}
 
-	const labels = ['Sehr schwach', 'Schwach', 'OK', 'Stark', 'Sehr stark'];
+	const labelsDE = ['Sehr schwach', 'Schwach', 'OK', 'Stark', 'Sehr stark'];
+	const labelsEN = ['Very weak', 'Weak', 'OK', 'Strong', 'Very strong'];
+	const labels = $derived(locale === 'en' ? labelsEN : labelsDE);
 	const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
 
 	$effect(() => {

@@ -61,6 +61,8 @@ export interface AuthResult {
 	success: boolean;
 	error?: string;
 	needsVerification?: boolean;
+	twoFactorRedirect?: boolean;
+	retryAfter?: number;
 }
 
 /**

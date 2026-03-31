@@ -4,9 +4,48 @@
 		onSkip: () => void;
 		passkeyAvailable: boolean;
 		primaryColor?: string;
+		locale?: 'de' | 'en';
 	}
 
-	let { onSetupPasskey, onSkip, passkeyAvailable, primaryColor = '#6366f1' }: Props = $props();
+	let {
+		onSetupPasskey,
+		onSkip,
+		passkeyAvailable,
+		primaryColor = '#6366f1',
+		locale = 'de',
+	}: Props = $props();
+
+	const textsDE = {
+		passkeySetup: 'Passkey eingerichtet!',
+		passkeySetupDescription:
+			'Dein Konto ist jetzt mit einem Passkey gesichert. Du kannst dich ab sofort ohne Passwort anmelden.',
+		continue: 'Weiter',
+		secureYourAccount: 'Sichere dein Konto',
+		secureDescription: 'Schütze dein Konto mit zusätzlicher Sicherheit.',
+		setupPasskey: 'Passkey einrichten',
+		passkeyDescription: 'Anmelden ohne Passwort mit Touch ID, Face ID oder Windows Hello',
+		setupNow: 'Jetzt einrichten',
+		hint2fa: 'Du kannst 2FA jederzeit in den Einstellungen aktivieren.',
+		skip: 'Überspringen',
+		defaultError: 'Fehler beim Einrichten des Passkeys',
+	};
+
+	const textsEN = {
+		passkeySetup: 'Passkey set up!',
+		passkeySetupDescription:
+			'Your account is now secured with a passkey. You can sign in without a password from now on.',
+		continue: 'Continue',
+		secureYourAccount: 'Secure your account',
+		secureDescription: 'Protect your account with additional security.',
+		setupPasskey: 'Set up Passkey',
+		passkeyDescription: 'Sign in without a password using Touch ID, Face ID, or Windows Hello',
+		setupNow: 'Set up now',
+		hint2fa: 'You can enable 2FA at any time in Settings.',
+		skip: 'Skip',
+		defaultError: 'Error setting up passkey',
+	};
+
+	const txt = $derived(locale === 'en' ? textsEN : textsDE);
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
@@ -23,7 +62,7 @@
 		if (result.success) {
 			success = true;
 		} else {
-			error = result.error || 'Fehler beim Einrichten des Passkeys';
+			error = result.error || txt.defaultError;
 		}
 	}
 </script>
@@ -45,10 +84,9 @@
 					<polyline points="20 6 9 17 4 12" />
 				</svg>
 			</div>
-			<h2 class="onboarding-title">Passkey eingerichtet!</h2>
+			<h2 class="onboarding-title">{txt.passkeySetup}</h2>
 			<p class="onboarding-description">
-				Dein Konto ist jetzt mit einem Passkey gesichert. Du kannst dich ab sofort ohne Passwort
-				anmelden.
+				{txt.passkeySetupDescription}
 			</p>
 			<button
 				type="button"
@@ -57,7 +95,7 @@
 				style:border-color={primaryColor}
 				onclick={onSkip}
 			>
-				Weiter
+				{txt.continue}
 			</button>
 		</div>
 	{:else}
@@ -77,8 +115,8 @@
 					<path d="M7 11V7a5 5 0 0 1 10 0v4" />
 				</svg>
 			</div>
-			<h2 class="onboarding-title">Sichere dein Konto</h2>
-			<p class="onboarding-description">Schütze dein Konto mit zusätzlicher Sicherheit.</p>
+			<h2 class="onboarding-title">{txt.secureYourAccount}</h2>
+			<p class="onboarding-description">{txt.secureDescription}</p>
 
 			{#if error}
 				<div class="error-message" role="alert">
@@ -104,9 +142,9 @@
 						</svg>
 					</div>
 					<div class="option-content">
-						<h3 class="option-title">Passkey einrichten</h3>
+						<h3 class="option-title">{txt.setupPasskey}</h3>
 						<p class="option-description">
-							Anmelden ohne Passwort mit Touch ID, Face ID oder Windows Hello
+							{txt.passkeyDescription}
 						</p>
 					</div>
 					<button
@@ -117,14 +155,14 @@
 						disabled={loading}
 						onclick={handleSetupPasskey}
 					>
-						{loading ? '...' : 'Jetzt einrichten'}
+						{loading ? '...' : txt.setupNow}
 					</button>
 				</div>
 			{/if}
 
-			<p class="hint-text">Du kannst 2FA jederzeit in den Einstellungen aktivieren.</p>
+			<p class="hint-text">{txt.hint2fa}</p>
 
-			<button type="button" class="skip-button" onclick={onSkip}> Überspringen </button>
+			<button type="button" class="skip-button" onclick={onSkip}> {txt.skip} </button>
 		</div>
 	{/if}
 </div>
