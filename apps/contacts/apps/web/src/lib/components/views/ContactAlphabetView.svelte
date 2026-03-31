@@ -1,5 +1,17 @@
 <script lang="ts">
-	import { Plus, Check, Heart, Phone, Envelope, TextAa, CaretDown } from '@manacore/shared-icons';
+	import {
+		Plus,
+		Check,
+		Heart,
+		HeartBreak,
+		Phone,
+		Envelope,
+		TextAa,
+		CaretDown,
+		ArrowSquareOut,
+		Trash,
+	} from '@manacore/shared-icons';
+	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
 	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
@@ -14,6 +26,7 @@
 		contacts: Contact[];
 		onContactClick: (id: string) => void;
 		onToggleFavorite: (e: MouseEvent, id: string) => void;
+		onDeleteContact?: (id: string) => void;
 		selectionMode?: boolean;
 		selectedIds?: Set<string>;
 		onToggleSelection?: (id: string) => void;
@@ -25,12 +38,62 @@
 		contacts,
 		onContactClick,
 		onToggleFavorite,
+		onDeleteContact,
 		selectionMode = false,
 		selectedIds = new Set(),
 		onToggleSelection,
 		sortField = 'lastName',
 		showNewContactCard = true,
 	}: Props = $props();
+
+	// Context menu state
+	let contactContextMenu = $state({ visible: false, x: 0, y: 0, target: null as Contact | null });
+
+	function handleContactContextMenu(e: MouseEvent, contact: Contact) {
+		e.preventDefault();
+		e.stopPropagation();
+		contactContextMenu = { visible: true, x: e.clientX, y: e.clientY, target: contact };
+	}
+
+	function getContactContextMenuItems(contact: Contact): ContextMenuItem[] {
+		return [
+			{
+				id: 'open',
+				label: 'Öffnen',
+				icon: ArrowSquareOut,
+				action: () => onContactClick(contact.id),
+			},
+			{
+				id: 'favorite',
+				label: contact.isFavorite ? 'Favorit entfernen' : 'Zu Favoriten',
+				icon: contact.isFavorite ? HeartBreak : Heart,
+				action: () => onToggleFavorite(new MouseEvent('click'), contact.id),
+			},
+			{ id: 'divider-1', label: '', type: 'divider' },
+			{
+				id: 'call',
+				label: 'Anrufen',
+				icon: Phone,
+				disabled: !contact.phone && !contact.mobile,
+				action: () => window.open('tel:' + (contact.mobile || contact.phone)),
+			},
+			{
+				id: 'email',
+				label: 'E-Mail schreiben',
+				icon: Envelope,
+				disabled: !contact.email,
+				action: () => window.open('mailto:' + contact.email),
+			},
+			{ id: 'divider-2', label: '', type: 'divider' },
+			{
+				id: 'delete',
+				label: 'Löschen',
+				icon: Trash,
+				variant: 'danger',
+				action: () => onDeleteContact?.(contact.id),
+			},
+		];
+	}
 
 	// Derived state for toolbar positioning
 	let isToolbarExpanded = $derived(!contactsFilterStore.isToolbarCollapsed);
@@ -194,6 +257,7 @@
 								? 'selected'
 								: ''}"
 							onclick={() => onContactClick(contact.id)}
+							oncontextmenu={(e) => handleContactContextMenu(e, contact)}
 						>
 							<!-- Selection Checkbox -->
 							{#if selectionMode}
@@ -360,6 +424,14 @@
 	<AlphabetNavContextMenu bind:this={alphabetContextMenu} />
 </div>
 
+<ContextMenu
+	visible={contactContextMenu.visible}
+	x={contactContextMenu.x}
+	y={contactContextMenu.y}
+	items={contactContextMenu.target ? getContactContextMenuItems(contactContextMenu.target) : []}
+	onClose={() => (contactContextMenu = { visible: false, x: 0, y: 0, target: null })}
+/>
+
 <style>
 	.alphabet-view {
 		display: block;
@@ -423,6 +495,12 @@
 		border: 1px solid hsl(var(--border));
 		border-radius: var(--radius-md);
 		min-width: 0;
+		cursor: pointer;
+		transition: background-color 150ms ease;
+	}
+
+	.alphabet-contact-card:hover {
+		background-color: hsl(var(--accent));
 	}
 
 	.avatar-sm {

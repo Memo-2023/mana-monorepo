@@ -228,6 +228,11 @@
 	}
 
 	// Tag filtering is now client-side via the filteredContacts $derived
+
+	async function handleDeleteContact(id: string) {
+		if (!confirm('Kontakt wirklich löschen?')) return;
+		await contactsStore.deleteContact(id);
+	}
 </script>
 
 <div class="space-y-6">
@@ -308,6 +313,7 @@
 				contacts={sortedContacts}
 				onContactClick={handleContactClick}
 				onToggleFavorite={handleToggleFavorite}
+				onDeleteContact={handleDeleteContact}
 				{selectionMode}
 				{selectedIds}
 				onToggleSelection={toggleSelection}
@@ -317,6 +323,7 @@
 				contacts={sortedContacts}
 				onContactClick={handleContactClick}
 				onToggleFavorite={handleToggleFavorite}
+				onDeleteContact={handleDeleteContact}
 				{selectionMode}
 				{selectedIds}
 				onToggleSelection={toggleSelection}

@@ -1,5 +1,15 @@
 <script lang="ts">
-	import { Plus, Check, Heart, Phone, Envelope } from '@manacore/shared-icons';
+	import {
+		Plus,
+		Check,
+		Heart,
+		HeartBreak,
+		Phone,
+		Envelope,
+		ArrowSquareOut,
+		Trash,
+		Archive,
+	} from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import type { Contact } from '$lib/api/contacts';
 	import { getDisplayName, getInitials } from '$lib/utils/contact-display';
@@ -41,23 +51,27 @@
 			{
 				id: 'open',
 				label: 'Öffnen',
+				icon: ArrowSquareOut,
 				action: () => onContactClick(contact.id),
 			},
 			{
 				id: 'favorite',
-				label: contact.isFavorite ? 'Favorit entfernen' : 'Favorit',
+				label: contact.isFavorite ? 'Favorit entfernen' : 'Zu Favoriten',
+				icon: contact.isFavorite ? HeartBreak : Heart,
 				action: () => onToggleFavorite(new MouseEvent('click'), contact.id),
 			},
 			{ id: 'divider-1', label: '', type: 'divider' },
 			{
 				id: 'call',
 				label: 'Anrufen',
+				icon: Phone,
 				disabled: !contact.phone && !contact.mobile,
 				action: () => window.open('tel:' + (contact.mobile || contact.phone)),
 			},
 			{
 				id: 'email',
-				label: 'E-Mail',
+				label: 'E-Mail schreiben',
+				icon: Envelope,
 				disabled: !contact.email,
 				action: () => window.open('mailto:' + contact.email),
 			},
@@ -65,6 +79,7 @@
 			{
 				id: 'delete',
 				label: 'Löschen',
+				icon: Trash,
 				variant: 'danger',
 				action: () => onDeleteContact?.(contact.id),
 			},

@@ -5,6 +5,16 @@
 	import { getContext, untrack } from 'svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import {
+		PencilSimple,
+		CheckSquare,
+		ArrowCircleUp,
+		ArrowDown,
+		ArrowRight,
+		ArrowUp,
+		Lightning,
+		Trash,
+	} from '@manacore/shared-icons';
 
 	// Context menu state
 	let contextMenuVisible = $state(false);
@@ -29,35 +39,41 @@
 			{
 				id: 'edit',
 				label: 'Bearbeiten',
+				icon: PencilSimple,
 				action: () => handleExpandTask(task.id),
 			},
 			{
 				id: 'toggle-complete',
 				label: task.isCompleted ? 'Als offen markieren' : 'Als erledigt markieren',
+				icon: task.isCompleted ? ArrowCircleUp : CheckSquare,
 				action: () => handleToggleComplete(task),
 			},
 			{ id: 'divider-1', label: '', type: 'divider' },
 			{
 				id: 'priority-low',
 				label: 'Niedrig',
+				icon: ArrowDown,
 				action: () => handleSetPriority(task.id, 'low'),
 				disabled: task.priority === 'low',
 			},
 			{
 				id: 'priority-medium',
 				label: 'Mittel',
+				icon: ArrowRight,
 				action: () => handleSetPriority(task.id, 'medium'),
 				disabled: task.priority === 'medium',
 			},
 			{
 				id: 'priority-high',
 				label: 'Hoch',
+				icon: ArrowUp,
 				action: () => handleSetPriority(task.id, 'high'),
 				disabled: task.priority === 'high',
 			},
 			{
 				id: 'priority-urgent',
 				label: 'Dringend',
+				icon: Lightning,
 				action: () => handleSetPriority(task.id, 'urgent'),
 				disabled: task.priority === 'urgent',
 			},
@@ -67,6 +83,7 @@
 		items.push({
 			id: 'delete',
 			label: 'Löschen',
+			icon: Trash,
 			variant: 'danger',
 			action: () => handleDelete(task.id),
 		});
