@@ -13,11 +13,11 @@ export function parseUserAgent(ua: string | null): { browser: string; os: string
 	else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browser = 'Safari';
 	else if (ua.includes('Opera/') || ua.includes('OPR/')) browser = 'Opera';
 
-	if (ua.includes('Windows')) os = 'Windows';
-	else if (ua.includes('Mac OS X') || ua.includes('Macintosh')) os = 'macOS';
-	else if (ua.includes('Linux') && !ua.includes('Android')) os = 'Linux';
+	if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
 	else if (ua.includes('Android')) os = 'Android';
-	else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+	else if (ua.includes('Windows')) os = 'Windows';
+	else if (ua.includes('Mac OS X') || ua.includes('Macintosh')) os = 'macOS';
+	else if (ua.includes('Linux')) os = 'Linux';
 
 	return { browser, os };
 }

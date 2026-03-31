@@ -18,7 +18,9 @@
 		"src"
 	],
 	"scripts": {
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"peerDependencies": {
 		"@manacore/shared-auth": "workspace:*",
