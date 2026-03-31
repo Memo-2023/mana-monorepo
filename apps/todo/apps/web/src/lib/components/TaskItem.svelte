@@ -19,8 +19,8 @@
 	import { contactsStore } from '$lib/stores/contacts.svelte';
 	import { ContactAvatar, ContactSelector } from '@manacore/shared-ui';
 	import SubtaskList from './SubtaskList.svelte';
-	import {
 	import { Check, CheckSquare, DotsSixVertical } from '@manacore/shared-icons';
+	import {
 		PrioritySelector,
 		StorypointsSelector,
 		DurationPicker,
