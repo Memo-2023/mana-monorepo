@@ -822,7 +822,7 @@
 	}
 
 	.modal-container {
-		background: hsl(var(--color-background));
+		background: hsl(var(--color-surface-elevated));
 		border-radius: 1.5rem;
 		width: 100%;
 		max-width: 560px;
