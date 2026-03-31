@@ -4,6 +4,7 @@
 	import { setLocale, supportedLocales, type SupportedLocale } from '$lib/i18n';
 	import { THEME_DEFINITIONS, DEFAULT_THEME_VARIANTS } from '@manacore/shared-theme';
 	import { APP_VERSION } from '$lib/version';
+	import { Moon, Sun } from '@manacore/shared-icons';
 
 	let selectedLocale = $state<SupportedLocale>('de');
 
@@ -36,25 +37,7 @@
 						class:active={theme.mode === 'light'}
 						onclick={() => theme.setMode('light')}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="18"
-							height="18"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<circle cx="12" cy="12" r="4" />
-							<path d="M12 2v2" />
-							<path d="M12 20v2" />
-							<path d="m4.93 4.93 1.41 1.41" />
-							<path d="m17.66 17.66 1.41 1.41" />
-							<path d="M2 12h2" />
-							<path d="M20 12h2" />
-							<path d="m6.34 17.66-1.41 1.41" />
-							<path d="m19.07 4.93-1.41 1.41" />
-						</svg>
+						<Sun size={20} />
 						Light
 					</button>
 					<button
@@ -62,17 +45,7 @@
 						class:active={theme.mode === 'dark'}
 						onclick={() => theme.setMode('dark')}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="18"
-							height="18"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-						</svg>
+						<Moon size={20} />
 						Dark
 					</button>
 					<button

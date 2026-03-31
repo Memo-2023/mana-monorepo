@@ -9,6 +9,7 @@
 	import PhotoGrid from '$lib/components/gallery/PhotoGrid.svelte';
 	import PhotoDetailModal from '$lib/components/gallery/PhotoDetailModal.svelte';
 	import type { Album, AlbumItem, Photo } from '@photos/shared';
+	import { CaretRight, Minus } from '@manacore/shared-icons';
 
 	const allAlbums: { readonly value: Album[] } = getContext('albums');
 	const allAlbumItems: { readonly value: AlbumItem[] } = getContext('albumItems');
@@ -49,19 +50,7 @@
 		<header class="page-header">
 			<div class="flex items-center gap-3">
 				<button class="icon-btn" onclick={() => goto('/albums')} title="Back">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="20"
-						height="20"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<path d="m15 18-6-6 6-6" />
-					</svg>
+					<CaretRight size={20} />
 				</button>
 				<div>
 					<h1 class="text-2xl font-bold">{currentAlbum.name}</h1>
@@ -80,21 +69,7 @@
 					onclick={handleDeleteAlbum}
 					title={$_('albums.delete')}
 				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="20"
-						height="20"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<path d="M3 6h18" />
-						<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-						<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-					</svg>
+					<Minus size={20} />
 				</button>
 			</div>
 		</header>

@@ -6,6 +6,7 @@
 
 	const MEDIA_URL = import.meta.env.PUBLIC_MANA_MEDIA_URL || 'http://localhost:3015';
 	import UploadDropzone from '$lib/components/upload/UploadDropzone.svelte';
+	import { X } from '@manacore/shared-icons';
 
 	interface UploadFile {
 		file: File;
@@ -130,18 +131,7 @@
 						<div class="file-overlay">
 							{#if file.status === 'pending'}
 								<button class="remove-btn" onclick={() => removeFile(index)}>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="16"
-										height="16"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-									>
-										<path d="M18 6 6 18" />
-										<path d="m6 6 12 12" />
-									</svg>
+									<X size={20} />
 								</button>
 							{:else if file.status === 'uploading'}
 								<div class="progress-ring">
@@ -173,18 +163,7 @@
 								</div>
 							{:else if file.status === 'error'}
 								<div class="status-icon error" title={file.error}>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="24"
-										height="24"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-									>
-										<path d="M18 6 6 18" />
-										<path d="m6 6 12 12" />
-									</svg>
+									<X size={20} />
 								</div>
 							{/if}
 						</div>

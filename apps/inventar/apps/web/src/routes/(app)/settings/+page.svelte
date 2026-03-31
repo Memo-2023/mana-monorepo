@@ -3,8 +3,7 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { APP_VERSION } from '$lib/version';
-	import {
-	import { Envelope, SignOut, Tag, User } from '@manacore/shared-icons';
+	import { Info, SignOut, Tag, User, import { Envelope } from '@manacore/shared-icons';
 		SettingsPage,
 		SettingsSection,
 		SettingsCard,
@@ -58,14 +57,7 @@
 
 	<SettingsSection title="Über">
 		{#snippet icon()}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
+			<Info size={20} />
 		{/snippet}
 		<SettingsCard>
 			<SettingsRow label="Version" border={false}>

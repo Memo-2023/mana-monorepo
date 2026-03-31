@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { libraryStore } from '$lib/stores/library.svelte';
 	import { MukkeEvents } from '@manacore/shared-utils/analytics';
-	import { Check, DownloadSimple, Plus, X } from '@manacore/shared-icons';
+	import { Check, DownloadSimple, Plus, Warning, X } from '@manacore/shared-icons';
 
 	interface UploadFile {
 		file: File;
@@ -187,19 +187,7 @@
 							{:else if uf.status === 'uploaded'}
 								<Check size={20} class="text-green-500" />
 							{:else if uf.status === 'error'}
-								<svg
-									class="w-5 h-5 text-red-500 flex-shrink-0"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-									/>
-								</svg>
+								<Warning size={20} class="text-red-500 flex-shrink-0" />
 							{:else}
 								<div class="w-5 h-5 rounded-full bg-foreground-secondary/20 flex-shrink-0"></div>
 							{/if}

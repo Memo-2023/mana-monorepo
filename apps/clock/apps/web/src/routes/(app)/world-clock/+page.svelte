@@ -6,6 +6,7 @@
 	import { POPULAR_TIMEZONES } from '@clock/shared';
 	import type { WorldClock } from '@clock/shared';
 	import WorldMap from '$lib/components/WorldMap.svelte';
+	import { Monitor } from '@manacore/shared-icons';
 
 	// Get live query data from layout context
 	const allWorldClocks: { readonly value: WorldClock[] } = getContext('worldClocks');
@@ -159,21 +160,7 @@
 				onclick={() => (showMap = !showMap)}
 				title={showMap ? 'Karte ausblenden' : 'Karte anzeigen'}
 			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="18"
-					height="18"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				>
-					<circle cx="12" cy="12" r="10" />
-					<path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-					<path d="M2 12h20" />
-				</svg>
+				<Monitor size={20} />
 			</button>
 			<button class="btn btn-primary btn-sm" onclick={openAddModal}>
 				+ {$_('worldClock.add')}

@@ -7,6 +7,7 @@
 	import AlbumGrid from '$lib/components/albums/AlbumGrid.svelte';
 	import CreateAlbumModal from '$lib/components/albums/CreateAlbumModal.svelte';
 	import type { Album, AlbumItem } from '@photos/shared';
+	import { Folder, Minus } from '@manacore/shared-icons';
 
 	const allAlbums: { readonly value: Album[] } = getContext('albums');
 	const allAlbumItems: { readonly value: AlbumItem[] } = getContext('albumItems');
@@ -36,43 +37,14 @@
 	<header class="page-header">
 		<h1 class="text-2xl font-bold">{$_('albums.title')}</h1>
 		<button class="btn btn-primary" onclick={() => (showCreateModal = true)}>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="18"
-				height="18"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class="mr-1"
-			>
-				<path d="M5 12h14" />
-				<path d="M12 5v14" />
-			</svg>
+			<Minus size={20} class="mr-1" />
 			{$_('albums.create')}
 		</button>
 	</header>
 
 	{#if albums.length === 0}
 		<div class="empty-state">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="64"
-				height="64"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class="text-muted-foreground"
-			>
-				<path
-					d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
-				/>
-			</svg>
+			<Folder size={20} class="text-muted-foreground" />
 			<h2 class="text-lg font-medium mt-4">{$_('albums.empty')}</h2>
 			<p class="text-muted-foreground">{$_('albums.emptyHint')}</p>
 			<button class="btn btn-primary mt-4" onclick={() => (showCreateModal = true)}>

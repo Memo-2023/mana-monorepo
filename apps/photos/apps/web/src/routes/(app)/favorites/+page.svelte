@@ -6,6 +6,7 @@
 	import PhotoDetailModal from '$lib/components/gallery/PhotoDetailModal.svelte';
 	import type { Photo } from '@photos/shared';
 	import type { LocalFavorite } from '$lib/data/local-store';
+	import { Heart } from '@manacore/shared-icons';
 
 	const allFavorites: { readonly value: LocalFavorite[] } = getContext('favorites');
 
@@ -38,22 +39,7 @@
 
 	{#if favorites.length === 0}
 		<div class="empty-state">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="64"
-				height="64"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class="text-muted-foreground"
-			>
-				<path
-					d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
-				/>
-			</svg>
+			<Heart size={20} class="text-muted-foreground" />
 			<h2 class="text-lg font-medium mt-4">{$_('favorites.empty')}</h2>
 			<p class="text-muted-foreground">{$_('favorites.emptyHint')}</p>
 		</div>

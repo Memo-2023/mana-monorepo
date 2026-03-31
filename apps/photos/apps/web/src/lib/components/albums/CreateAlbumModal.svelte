@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { X } from '@manacore/shared-icons';
 
 	interface Props {
 		onClose: () => void;
@@ -45,18 +46,7 @@
 		<header class="modal-header">
 			<h2 class="text-lg font-semibold">{$_('albums.create')}</h2>
 			<button class="close-btn" onclick={onClose} type="button">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-				>
-					<path d="M18 6 6 18" />
-					<path d="m6 6 12 12" />
-				</svg>
+				<X size={20} />
 			</button>
 		</header>
 

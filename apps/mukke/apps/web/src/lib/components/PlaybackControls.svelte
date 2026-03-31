@@ -2,7 +2,14 @@
 	import { audioStore } from '$lib/stores/audio.svelte';
 	import { editorStore } from '$lib/stores/editor.svelte';
 	import { formatTime } from '$lib/utils/time-format';
-	import { Pause, Play, SkipBack, SkipForward } from '@manacore/shared-icons';
+	import {
+		MagnifyingGlassMinus,
+		MagnifyingGlassPlus,
+		Pause,
+		Play,
+		SkipBack,
+		SkipForward,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		onPlay?: () => void;
@@ -145,14 +152,7 @@
 				class="p-2 rounded-lg hover:bg-surface-hover transition-colors"
 				aria-label="Zoom out"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"
-					/>
-				</svg>
+				<MagnifyingGlassMinus size={16} />
 			</button>
 			<span class="text-xs text-foreground-secondary min-w-[40px] text-center">
 				{Math.round(editorStore.zoom * 100)}%
@@ -162,14 +162,7 @@
 				class="p-2 rounded-lg hover:bg-surface-hover transition-colors"
 				aria-label="Zoom in"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"
-					/>
-				</svg>
+				<MagnifyingGlassPlus size={16} />
 			</button>
 		</div>
 

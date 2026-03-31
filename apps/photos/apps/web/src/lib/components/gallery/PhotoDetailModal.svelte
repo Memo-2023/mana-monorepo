@@ -3,6 +3,14 @@
 	import { format } from 'date-fns';
 	import type { Photo } from '@photos/shared';
 	import { photoStore } from '$lib/stores/photos.svelte';
+	import {
+		ArrowDown,
+		CaretRight,
+		DownloadSimple,
+		Heart,
+		ShareNetwork,
+		X,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		photo: Photo;
@@ -49,18 +57,7 @@
 	<div class="lightbox-container">
 		<!-- Close button -->
 		<button class="close-btn" onclick={onClose} title={$_('common.close')}>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-			>
-				<path d="M18 6 6 18" />
-				<path d="m6 6 12 12" />
-			</svg>
+			<X size={20} />
 		</button>
 
 		<!-- Main image -->
@@ -79,52 +76,18 @@
 						title={$_('photo.hideInfo')}
 						aria-label={$_('photo.hideInfo')}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="18"
-							height="18"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path d="m15 18-6-6 6-6" />
-						</svg>
+						<CaretRight size={20} />
 					</button>
 				</div>
 
 				<!-- Actions -->
 				<div class="info-actions">
 					<button class="action-btn" class:favorited={photo.isFavorited} onclick={handleFavorite}>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="18"
-							height="18"
-							viewBox="0 0 24 24"
-							fill={photo.isFavorited ? 'currentColor' : 'none'}
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path
-								d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
-							/>
-						</svg>
+						<Heart size={20} />
 						{photo.isFavorited ? $_('photo.unfavorite') : $_('photo.favorite')}
 					</button>
 					<a class="action-btn" href={photo.url} download target="_blank" rel="noopener noreferrer">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="18"
-							height="18"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-							<polyline points="7 10 12 15 17 10" />
-							<line x1="12" x2="12" y1="15" y2="3" />
-						</svg>
+						<DownloadSimple size={20} />
 						{$_('photo.download')}
 					</a>
 				</div>
@@ -195,19 +158,7 @@
 								rel="noopener noreferrer"
 							>
 								View on map
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="14"
-									height="14"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-									<polyline points="15 3 21 3 21 9" />
-									<line x1="10" x2="21" y1="14" y2="3" />
-								</svg>
+								<ShareNetwork size={20} />
 							</a>
 						</div>
 					{/if}
@@ -229,19 +180,7 @@
 			</div>
 		{:else}
 			<button class="show-info-btn" onclick={() => (showInfo = true)} title="Show info">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-				>
-					<circle cx="12" cy="12" r="10" />
-					<path d="M12 16v-4" />
-					<path d="M12 8h.01" />
-				</svg>
+				<ArrowDown size={20} />
 			</button>
 		{/if}
 	</div>
