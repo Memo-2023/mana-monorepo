@@ -31,6 +31,28 @@ if pgrep -f "Docker.app" >/dev/null 2>&1; then
     log "Docker Desktop stopped"
 fi
 
+# ─── Verify Colima datadisk symlink (must be on external SSD) ───
+COLIMA_DISK_LINK="$HOME/.colima/_lima/_disks/colima"
+EXPECTED_TARGET="/Volumes/ManaData/colima-disk"
+if [ -e "$COLIMA_DISK_LINK" ] && [ ! -L "$COLIMA_DISK_LINK" ]; then
+    log "ERROR: Colima datadisk is a directory, not a symlink!"
+    log "The datadisk must live on the external SSD to prevent filling the internal SSD."
+    log "Run: scripts/mac-mini/move-colima-to-external-ssd.sh"
+    exit 1
+fi
+if [ -L "$COLIMA_DISK_LINK" ]; then
+    actual_target=$(readlink "$COLIMA_DISK_LINK")
+    if [ "$actual_target" != "$EXPECTED_TARGET" ]; then
+        log "WARNING: Colima datadisk symlink points to $actual_target (expected $EXPECTED_TARGET)"
+    else
+        log "Colima datadisk symlink OK → $EXPECTED_TARGET"
+    fi
+fi
+if [ ! -d "/Volumes/ManaData" ]; then
+    log "ERROR: External SSD /Volumes/ManaData not mounted!"
+    exit 1
+fi
+
 # ─── Start Colima ───
 if colima status 2>/dev/null | grep -q "running"; then
     log "Colima already running"
