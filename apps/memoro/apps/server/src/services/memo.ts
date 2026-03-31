@@ -136,7 +136,7 @@ export async function createMemoFromUploadedFile(params: CreateMemoParams): Prom
 			userId,
 			audioPath: filePath,
 			duration,
-			blueprintId,
+			...(blueprintId ? { blueprintId } : {}),
 		}).catch((err) => {
 			console.error(`[memo] Audio server call failed for memo ${memoId}:`, err);
 			updateMemoProcessingStatus(memoId, 'transcription', 'failed', {
@@ -208,7 +208,7 @@ export async function handleTranscriptionCompleted(
 	consumeCredits(userId, 'transcription', cost, `Transcription for memo ${memoId}`, {
 		memoId,
 		durationSeconds: duration,
-	}).catch((err) => console.error('[memo] Failed to consume credits:', err));
+	}).catch((err: unknown) => console.error('[memo] Failed to consume credits:', err));
 
 	// Fire headline generation asynchronously
 	queueMicrotask(() => {

@@ -3,10 +3,11 @@
  */
 
 import { Hono } from 'hono';
+import type { AuthVariables } from '@manacore/shared-hono';
 import { validateCredits, consumeCredits, COSTS } from '../lib/credits';
 import { getBalance } from '@manacore/shared-hono';
 
-export const creditRoutes = new Hono();
+export const creditRoutes = new Hono<{ Variables: AuthVariables }>();
 
 // GET /pricing — public, returns cost constants
 creditRoutes.get('/pricing', (c) => {

@@ -3,6 +3,7 @@
  */
 
 import { Hono } from 'hono';
+import type { AuthVariables } from '@manacore/shared-hono';
 import { createServiceClient } from '../lib/supabase';
 import {
 	getSpaces,
@@ -17,7 +18,7 @@ import {
 	createInvite,
 } from '../services/space';
 
-export const spaceRoutes = new Hono();
+export const spaceRoutes = new Hono<{ Variables: AuthVariables }>();
 
 // GET / — list user's spaces
 spaceRoutes.get('/', async (c) => {

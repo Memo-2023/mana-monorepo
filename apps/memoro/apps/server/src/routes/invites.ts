@@ -3,9 +3,10 @@
  */
 
 import { Hono } from 'hono';
+import type { AuthVariables } from '@manacore/shared-hono';
 import { acceptInvite, declineInvite, getPendingInvites } from '../services/space';
 
-export const inviteRoutes = new Hono();
+export const inviteRoutes = new Hono<{ Variables: AuthVariables }>();
 
 // GET /pending — list pending invites for current user
 inviteRoutes.get('/pending', async (c) => {

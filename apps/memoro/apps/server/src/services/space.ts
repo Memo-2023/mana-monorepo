@@ -369,7 +369,7 @@ export async function acceptInvite(
 
 export async function declineInvite(
 	inviteId: string,
-	userId: string
+	_userId: string
 ): Promise<{ success: boolean }> {
 	const supabase = createServiceClient();
 

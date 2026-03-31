@@ -6,10 +6,7 @@
 
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import {
-	handleTranscriptionCompleted,
-	updateMemoProcessingStatus,
-} from '../services/memo';
+import { handleTranscriptionCompleted } from '../services/memo';
 import { createServiceClient } from '../lib/supabase';
 
 export const internalRoutes = new Hono();
@@ -54,11 +51,11 @@ internalRoutes.post('/transcription-completed', async (c) => {
 		await handleTranscriptionCompleted({
 			memoId: body.memoId,
 			userId: body.userId,
-			transcriptionResult: body.transcriptionResult,
-			route: body.route,
+			...(body.transcriptionResult ? { transcriptionResult: body.transcriptionResult } : {}),
+			...(body.route ? { route: body.route } : {}),
 			success: body.success,
-			error: body.error,
-			fallbackStage: body.fallbackStage,
+			...(body.error ? { error: body.error } : {}),
+			...(body.fallbackStage ? { fallbackStage: body.fallbackStage } : {}),
 		});
 		return c.json({ success: true, memoId: body.memoId });
 	} catch (err) {

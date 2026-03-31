@@ -62,7 +62,7 @@ export async function getBalance(userId: string): Promise<CreditBalance> {
  */
 export async function validateCredits(
 	userId: string,
-	operation: string,
+	_operation: string,
 	amount: number
 ): Promise<CreditValidationResult> {
 	try {

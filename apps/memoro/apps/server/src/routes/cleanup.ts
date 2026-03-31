@@ -38,7 +38,7 @@ cleanupRoutes.post('/run', async (c) => {
 
 // POST /manual — manual trigger with optional user IDs
 cleanupRoutes.post('/manual', async (c) => {
-	const body = await c.req.json<{ userIds?: string[] }>().catch(() => ({}));
+	const body = await c.req.json<{ userIds?: string[] }>().catch(() => ({ userIds: undefined }));
 	const userIds = body.userIds ?? [];
 
 	console.log(

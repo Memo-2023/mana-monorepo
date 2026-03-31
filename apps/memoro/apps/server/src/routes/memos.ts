@@ -3,10 +3,10 @@
  */
 
 import { Hono } from 'hono';
+import type { AuthVariables } from '@manacore/shared-hono';
 import { v4 as uuidv4 } from 'uuid';
 import {
 	createMemoFromUploadedFile,
-	handleTranscriptionCompleted,
 	callAudioServer,
 	updateMemoProcessingStatus,
 } from '../services/memo';
@@ -15,7 +15,7 @@ import { createServiceClient } from '../lib/supabase';
 import { validateCredits, consumeCredits, COSTS } from '../lib/credits';
 import { generateText } from '../lib/ai';
 
-export const memoRoutes = new Hono();
+export const memoRoutes = new Hono<{ Variables: AuthVariables }>();
 
 // POST / — create memo from uploaded file
 memoRoutes.post('/', async (c) => {
@@ -40,12 +40,12 @@ memoRoutes.post('/', async (c) => {
 			userId,
 			filePath: body.filePath,
 			duration: body.duration,
-			spaceId: body.spaceId,
-			blueprintId: body.blueprintId,
-			memoId: body.memoId,
-			recordingStartedAt: body.recordingStartedAt,
-			location: body.location,
-			mediaType: body.mediaType,
+			...(body.spaceId ? { spaceId: body.spaceId } : {}),
+			...(body.blueprintId ? { blueprintId: body.blueprintId } : {}),
+			...(body.memoId ? { memoId: body.memoId } : {}),
+			...(body.recordingStartedAt ? { recordingStartedAt: body.recordingStartedAt } : {}),
+			...(body.location !== undefined ? { location: body.location } : {}),
+			...(body.mediaType ? { mediaType: body.mediaType } : {}),
 		});
 		return c.json(result, 201);
 	} catch (err) {
@@ -122,8 +122,8 @@ memoRoutes.post('/:id/append', async (c) => {
 			audioPath: body.filePath,
 			duration: body.duration,
 			recordingIndex,
-			recordingLanguages: body.recordingLanguages,
-			enableDiarization: body.enableDiarization,
+			...(body.recordingLanguages ? { recordingLanguages: body.recordingLanguages } : {}),
+			...(body.enableDiarization !== undefined ? { enableDiarization: body.enableDiarization } : {}),
 			isAppend: true,
 		}).catch((err) => console.error(`[memos] Append transcription call failed: ${err}`));
 	});

@@ -5,9 +5,10 @@
  */
 
 import { Hono } from 'hono';
+import type { AuthVariables } from '@manacore/shared-hono';
 import { createServiceClient } from '../lib/supabase';
 
-export const settingsRoutes = new Hono();
+export const settingsRoutes = new Hono<{ Variables: AuthVariables }>();
 
 // GET / — get all user settings
 settingsRoutes.get('/', async (c) => {
