@@ -8,21 +8,11 @@
 
 	let { children }: { children: Snippet } = $props();
 	let isDark = $derived(theme.isDark);
-	let hasCheckedAuth = $state(false);
-
-	// Check auth status on mount
+	// If user is already authenticated when visiting auth pages, redirect to home
 	onMount(async () => {
 		await authStore.initialize();
-		hasCheckedAuth = true;
 		if (authStore.isAuthenticated) {
-			goto('/dashboard');
-		}
-	});
-
-	// Also react to auth state changes (e.g., after successful login)
-	$effect(() => {
-		if (hasCheckedAuth && authStore.isAuthenticated) {
-			goto('/dashboard');
+			goto('/home');
 		}
 	});
 </script>
