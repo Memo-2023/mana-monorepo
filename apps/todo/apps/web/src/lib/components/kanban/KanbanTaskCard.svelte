@@ -291,21 +291,21 @@
 	{/if}
 </div>
 
-<!-- Inline subtasks -->
+<!-- Inline subtasks — shown while incomplete; during animation all appear as done -->
 {#if task.subtasks && task.subtasks.length > 0 && !task.isCompleted}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="subtasks-inline" onpointerdown={(e) => e.stopPropagation()}>
 		{#each task.subtasks as subtask (subtask.id)}
 			<button
 				class="subtask-row"
-				class:done={subtask.isCompleted}
+				class:done={subtask.isCompleted || isAnimatingComplete}
 				onclick={(e) => {
 					e.stopPropagation();
-					toggleSubtask(subtask.id);
+					if (!isAnimatingComplete) toggleSubtask(subtask.id);
 				}}
 			>
-				<span class="subtask-check" class:checked={subtask.isCompleted}>
-					{#if subtask.isCompleted}<Check size={10} />{/if}
+				<span class="subtask-check" class:checked={subtask.isCompleted || isAnimatingComplete}>
+					{#if subtask.isCompleted || isAnimatingComplete}<Check size={10} />{/if}
 				</span>
 				<span class="subtask-title">{subtask.title}</span>
 			</button>

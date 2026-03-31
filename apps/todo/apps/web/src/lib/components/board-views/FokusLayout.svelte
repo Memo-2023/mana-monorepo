@@ -142,39 +142,21 @@
 					onDelete={onColumnDelete ? () => onColumnDelete(i) : undefined}
 				/>
 
-				<div
-					class="sheet-content"
-					use:dndzone={{
-						items: tasks,
-						flipDurationMs: 200,
-						dropTargetStyle: {},
-						dropTargetClasses: ['fokus-drop-target'],
-						type: 'task-dnd',
-					}}
-					onconsider={(e) => handleDndConsider(column.id, e)}
-					onfinalize={(e) => handleDndFinalize(column.id, column, e)}
-				>
-					{#each tasks.filter((t) => t.id !== SHADOW_PLACEHOLDER_ITEM_ID) as task (task.id)}
-						<div class="task-card-wrapper">
-							<KanbanTaskCard
-								{task}
-								onToggleComplete={() => onTaskToggle(task)}
-								onSave={(data) => onTaskUpdate(task.id, data)}
-								onDelete={() => onTaskDelete(task.id)}
-							/>
-						</div>
-					{/each}
-				</div>
-
-				<div class="sheet-footer">
-					<QuickAddTaskInline onAdd={(title) => handleAddTask(column, title)} />
-				</div>
-
-				{#if completedToday.length > 0}
-					<div class="completed-today">
-						<div class="completed-today-label">Heute erledigt</div>
-						{#each completedToday as task (task.id)}
-							<div class="completed-today-item">
+				<div class="sheet-body">
+					<div
+						class="sheet-content"
+						use:dndzone={{
+							items: tasks,
+							flipDurationMs: 200,
+							dropTargetStyle: {},
+							dropTargetClasses: ['fokus-drop-target'],
+							type: 'task-dnd',
+						}}
+						onconsider={(e) => handleDndConsider(column.id, e)}
+						onfinalize={(e) => handleDndFinalize(column.id, column, e)}
+					>
+						{#each tasks.filter((t) => t.id !== SHADOW_PLACEHOLDER_ITEM_ID) as task (task.id)}
+							<div class="task-card-wrapper">
 								<KanbanTaskCard
 									{task}
 									onToggleComplete={() => onTaskToggle(task)}
@@ -184,7 +166,27 @@
 							</div>
 						{/each}
 					</div>
-				{/if}
+
+					<div class="sheet-footer">
+						<QuickAddTaskInline onAdd={(title) => handleAddTask(column, title)} />
+					</div>
+
+					{#if completedToday.length > 0}
+						<div class="completed-today">
+							<div class="completed-today-label">Heute erledigt</div>
+							{#each completedToday as task (task.id)}
+								<div class="completed-today-item">
+									<KanbanTaskCard
+										{task}
+										onToggleComplete={() => onTaskToggle(task)}
+										onSave={(data) => onTaskUpdate(task.id, data)}
+										onDelete={() => onTaskDelete(task.id)}
+									/>
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
 			</div>
 		{/each}
 
@@ -250,25 +252,35 @@
 		opacity: 0.75;
 	}
 
-	.sheet-content {
+	/* Scrollable wrapper for DnD zone + footer + completed section */
+	.sheet-body {
 		flex: 1;
 		overflow-y: auto;
-		padding: 0.75rem 1rem;
-		min-height: 120px;
+		display: flex;
+		flex-direction: column;
+		scrollbar-width: thin;
+		scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
 	}
-
-	.sheet-content::-webkit-scrollbar {
+	:global(.dark) .sheet-body {
+		scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+	}
+	.sheet-body::-webkit-scrollbar {
 		width: 4px;
 	}
-	.sheet-content::-webkit-scrollbar-track {
+	.sheet-body::-webkit-scrollbar-track {
 		background: transparent;
 	}
-	.sheet-content::-webkit-scrollbar-thumb {
+	.sheet-body::-webkit-scrollbar-thumb {
 		background: rgba(0, 0, 0, 0.08);
 		border-radius: 2px;
 	}
-	:global(.dark) .sheet-content::-webkit-scrollbar-thumb {
+	:global(.dark) .sheet-body::-webkit-scrollbar-thumb {
 		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.sheet-content {
+		padding: 0.75rem 1rem;
+		min-height: 120px;
 	}
 
 	.task-card-wrapper {
