@@ -8,6 +8,7 @@
 		QuickInputBar,
 		ImmersiveModeToggle,
 		TagStrip,
+		SyncIndicator,
 	} from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
@@ -77,7 +78,7 @@
 	setContext('contacts', allContacts);
 
 	// Check if we're on a contact detail route
-	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([0-9a-f-]{36})$/i));
+	const contactDetailMatch = $derived($page.url.pathname.match(/^\/contacts\/([a-z0-9_-]+)$/i));
 	const showContactModal = $derived(!!contactDetailMatch);
 	const modalContactId = $derived(contactDetailMatch?.[1] || null);
 

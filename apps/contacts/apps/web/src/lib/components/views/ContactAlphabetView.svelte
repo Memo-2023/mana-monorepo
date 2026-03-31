@@ -187,10 +187,13 @@
 				<!-- Contacts in this section -->
 				<div class="section-contacts">
 					{#each groupedContacts[letter] as contact (contact.id)}
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
 						<div
 							class="alphabet-contact-card {selectionMode && selectedIds.has(contact.id)
 								? 'selected'
 								: ''}"
+							onclick={() => onContactClick(contact.id)}
 						>
 							<!-- Selection Checkbox -->
 							{#if selectionMode}
@@ -271,12 +274,18 @@
 										href="tel:{contact.mobile || contact.phone}"
 										class="action-chip"
 										title={contact.mobile || contact.phone}
+										onclick={(e) => e.stopPropagation()}
 									>
 										<Phone size={16} class="action-icon" />
 									</a>
 								{/if}
 								{#if contact.email}
-									<a href="mailto:{contact.email}" class="action-chip" title={contact.email}>
+									<a
+										href="mailto:{contact.email}"
+										class="action-chip"
+										title={contact.email}
+										onclick={(e) => e.stopPropagation()}
+									>
 										<Envelope size={16} class="action-icon" />
 									</a>
 								{/if}

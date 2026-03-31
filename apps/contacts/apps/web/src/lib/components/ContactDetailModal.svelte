@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { contactsApi, photoApi, type Contact } from '$lib/api/contacts';
+	import { type Contact } from '$lib/api/contacts';
+	import { contactCollection } from '$lib/data/local-store';
+	import { toContact } from '$lib/data/queries';
 	import { getDisplayName } from '$lib/utils/contact-display';
 	import ContactNotes from './ContactNotes.svelte';
 	import ContactTasks from './ContactTasks.svelte';
@@ -134,7 +136,12 @@
 		loading = true;
 		error = null;
 		try {
-			contact = await contactsApi.get(contactId);
+			const local = await contactCollection.get(contactId);
+			if (!local) {
+				error = 'Kontakt nicht gefunden';
+				return;
+			}
+			contact = toContact(local);
 			populateForm();
 		} catch (e) {
 			error = getErrorMessage(e, 'Fehler beim Laden des Kontakts');
@@ -147,37 +154,19 @@
 		saving = true;
 		error = null;
 		try {
-			contact = await contactsApi.update(contactId, {
-				firstName: firstName || null,
-				lastName: lastName || null,
-				email: email || null,
-				phone: phone || null,
-				mobile: mobile || null,
-				company: company || null,
-				jobTitle: jobTitle || null,
-				street: street || null,
-				city: city || null,
-				postalCode: postalCode || null,
-				country: country || null,
-				notes: notes || null,
-				// Dates
-				birthday: birthday || null,
-				customDates: customDates.filter((d) => d.label && d.date),
-				// Social Media
-				linkedin: linkedin || null,
-				twitter: twitter || null,
-				facebook: facebook || null,
-				instagram: instagram || null,
-				xing: xing || null,
-				github: github || null,
-				youtube: youtube || null,
-				tiktok: tiktok || null,
-				telegram: telegram || null,
-				whatsapp: whatsapp || null,
-				signal: signal || null,
-				discord: discord || null,
-				bluesky: bluesky || null,
+			await contactCollection.update(contactId, {
+				firstName: firstName || undefined,
+				lastName: lastName || undefined,
+				email: email || undefined,
+				phone: phone || undefined,
+				company: company || undefined,
+				jobTitle: jobTitle || undefined,
+				notes: notes || undefined,
+				birthday: birthday || undefined,
 			});
+			// Reload from local store
+			const local = await contactCollection.get(contactId);
+			if (local) contact = toContact(local);
 			editing = false;
 		} catch (e) {
 			error = getErrorMessage(e, 'Fehler beim Speichern');
@@ -190,7 +179,7 @@
 		if (!confirm('Kontakt wirklich löschen?')) return;
 		deleting = true;
 		try {
-			await contactsApi.delete(contactId);
+			await contactCollection.delete(contactId);
 			onClose();
 		} catch (e) {
 			error = getErrorMessage(e, 'Fehler beim Löschen');
@@ -202,7 +191,9 @@
 		if (!contact) return;
 
 		try {
-			contact = await contactsApi.toggleFavorite(contactId);
+			await contactCollection.update(contactId, { isFavorite: !contact.isFavorite });
+			const local = await contactCollection.get(contactId);
+			if (local) contact = toContact(local);
 		} catch (e) {
 			error = getErrorMessage(e, 'Fehler');
 		}
