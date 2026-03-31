@@ -331,6 +331,13 @@ docker compose -f docker-compose.macmini.yml restart chat-backend
 
 **Datei:** `~/.cloudflared/config.yml`
 
+> ⚠️ **Wichtig:** Dies ist eine separate Datei vom Repo-File `cloudflared-config.yml`.
+> Neue Hostnames müssen in **beiden** Dateien eingetragen werden:
+> 1. `cloudflared-config.yml` im Repo (für Dokumentation und Git-History)
+> 2. `~/.cloudflared/config.yml` auf dem Server (was cloudflared tatsächlich liest)
+> 3. DNS-Eintrag anlegen: `cloudflared tunnel route dns <tunnel-id> <hostname>`
+> 4. Cloudflared neu starten: `launchctl stop com.cloudflare.cloudflared && launchctl start com.cloudflare.cloudflared`
+
 ```yaml
 tunnel: manacore-tunnel
 credentials-file: ~/.cloudflared/credentials.json
