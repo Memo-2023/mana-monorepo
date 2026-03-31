@@ -3,7 +3,8 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { APP_VERSION } from '$lib/version';
-	import { Info, SignOut, Tag, User, import { Envelope } from '@manacore/shared-icons';
+	import { Envelope, Info, SignOut, Tag, User } from '@manacore/shared-icons';
+	import {
 		SettingsPage,
 		SettingsSection,
 		SettingsCard,

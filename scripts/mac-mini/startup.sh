@@ -131,8 +131,16 @@ log "Containers running: $RUNNING"
 
 # ─── Create missing databases ───
 log "Ensuring databases exist..."
-for db in mana_auth mana_credits chat todo calendar clock contacts storage; do
+for db in mana_auth mana_credits chat todo calendar clock contacts storage umami; do
     docker exec mana-infra-postgres psql -U postgres -c "CREATE DATABASE $db;" 2>/dev/null || true
 done
+
+# Matrix Synapse: needs its own user and C-locale database
+docker exec mana-infra-postgres psql -U postgres -c \
+    "DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='synapse') THEN CREATE USER synapse WITH PASSWORD 'synapse-secure-password'; END IF; END \$\$;" \
+    2>/dev/null || true
+docker exec mana-infra-postgres psql -U postgres -c \
+    "CREATE DATABASE matrix OWNER synapse ENCODING UTF8 LC_COLLATE='C' LC_CTYPE='C' TEMPLATE template0;" \
+    2>/dev/null || true
 
 log "=== Startup Complete ($RUNNING containers running) ==="
