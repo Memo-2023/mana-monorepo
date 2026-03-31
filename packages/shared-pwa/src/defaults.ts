@@ -17,7 +17,7 @@ export const DEFAULT_CATEGORIES = ['productivity', 'utilities'];
 /**
  * Default assets to include in PWA
  */
-export const DEFAULT_INCLUDE_ASSETS = ['favicon.png', 'favicon.svg'];
+export const DEFAULT_INCLUDE_ASSETS = ['favicon.svg'];
 
 /**
  * Default glob patterns for precaching

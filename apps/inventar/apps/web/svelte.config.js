@@ -8,13 +8,6 @@ const config = {
 		adapter: adapter({
 			out: 'build',
 		}),
-		prerender: {
-			handleHttpError: ({ path, message }) => {
-				// Ignore missing PNG assets (app only provides favicon.svg)
-				if (path.endsWith('.png')) return;
-				throw new Error(message);
-			},
-		},
 	},
 };
 
