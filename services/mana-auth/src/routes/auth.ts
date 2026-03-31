@@ -131,22 +131,10 @@ export function createAuthRoutes(
 
 			return c.json(response);
 		} catch (error) {
-			console.log(
-				'[login debug] caught error:',
-				JSON.stringify({
-					msg: (error as any)?.message,
-					status: (error as any)?.status,
-					body: (error as any)?.body,
-					name: (error as any)?.name,
-				})
-			);
-			// Better Auth throws APIError.from("FORBIDDEN", "EMAIL_NOT_VERIFIED") for unverified emails
+			// Better Auth throws APIError (status="FORBIDDEN", body.code="EMAIL_NOT_VERIFIED")
 			const isEmailNotVerified =
-				(error as any)?.status === 403 ||
 				(error as any)?.body?.code === 'EMAIL_NOT_VERIFIED' ||
-				String((error as any)?.message ?? error)
-					.toLowerCase()
-					.includes('not verified');
+				(error as any)?.status === 'FORBIDDEN';
 			if (isEmailNotVerified) {
 				return c.json({ error: 'Email not verified', code: 'EMAIL_NOT_VERIFIED' }, 403);
 			}
