@@ -13,6 +13,7 @@
 	"type": "module",
 	"devDependencies": {
 		"@manacore/shared-vite-config": "workspace:*",
+		"@tailwindcss/forms": "^0.5.10",
 		"@sveltejs/adapter-node": "^5.0.0",
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.4",
