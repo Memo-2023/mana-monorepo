@@ -23,6 +23,7 @@ export {
 	resetGuestWelcome,
 	resetAllGuestWelcome,
 } from './utils/guestWelcome';
+export { parseUserAgent, getDeviceType, formatUserAgent } from './utils/userAgent';
 
 // Types
 export type {

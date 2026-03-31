@@ -784,4 +784,13 @@
 			transform: rotate(360deg);
 		}
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.pm-spinner {
+			animation: none;
+		}
+		* {
+			transition-duration: 0.01ms !important;
+		}
+	}
 </style>

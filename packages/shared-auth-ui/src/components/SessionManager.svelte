@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { parseUserAgent, getDeviceType } from '../utils/userAgent';
+
 	export interface SessionManagerTranslations {
 		title?: string;
 		subtitle?: string;
@@ -10,6 +12,14 @@
 		confirmRevokeAll?: string;
 		noSessions?: string;
 		unknown?: string;
+		refresh?: string;
+		revokeError?: string;
+		revokeAllError?: string;
+		justNow?: string;
+		minutesAgo?: string;
+		hoursAgo?: string;
+		yesterday?: string;
+		daysAgo?: string;
 	}
 
 	interface Session {
@@ -30,10 +40,11 @@
 		onRefresh: () => Promise<void>;
 		loading?: boolean;
 		primaryColor?: string;
+		locale?: 'de' | 'en';
 		translations?: SessionManagerTranslations;
 	}
 
-	const defaultTranslations: Required<SessionManagerTranslations> = {
+	const defaultTranslationsDE: Required<SessionManagerTranslations> = {
 		title: 'Aktive Sitzungen',
 		subtitle: 'Geräte, die aktuell angemeldet sind',
 		current: 'Aktuell',
@@ -44,6 +55,35 @@
 		confirmRevokeAll: 'Alle anderen Sitzungen wirklich beenden?',
 		noSessions: 'Keine aktiven Sitzungen gefunden.',
 		unknown: 'Unbekanntes Gerät',
+		refresh: 'Aktualisieren',
+		revokeError: 'Fehler beim Beenden der Sitzung',
+		revokeAllError: 'Fehler beim Beenden der Sitzungen',
+		justNow: 'gerade eben',
+		minutesAgo: 'Min',
+		hoursAgo: 'Std',
+		yesterday: 'Gestern',
+		daysAgo: 'Tagen',
+	};
+
+	const defaultTranslationsEN: Required<SessionManagerTranslations> = {
+		title: 'Active Sessions',
+		subtitle: 'Devices currently signed in',
+		current: 'Current',
+		revoke: 'Revoke',
+		revokeAll: 'Revoke all other sessions',
+		lastActivity: 'Last activity',
+		confirmRevoke: 'Really revoke this session?',
+		confirmRevokeAll: 'Really revoke all other sessions?',
+		noSessions: 'No active sessions found.',
+		unknown: 'Unknown device',
+		refresh: 'Refresh',
+		revokeError: 'Error revoking session',
+		revokeAllError: 'Error revoking sessions',
+		justNow: 'just now',
+		minutesAgo: 'min',
+		hoursAgo: 'hrs',
+		yesterday: 'Yesterday',
+		daysAgo: 'days',
 	};
 
 	let {
@@ -53,42 +93,15 @@
 		onRefresh,
 		loading = false,
 		primaryColor = '#6366f1',
+		locale = 'de',
 		translations,
 	}: Props = $props();
 
-	let t = $derived({ ...defaultTranslations, ...translations });
+	const defaults = $derived(locale === 'en' ? defaultTranslationsEN : defaultTranslationsDE);
+	let t = $derived({ ...defaults, ...translations });
 	let revoking = $state<string | null>(null);
 	let revokingAll = $state(false);
 	let error = $state<string | null>(null);
-
-	function parseUserAgent(ua: string | null): { browser: string; os: string } {
-		if (!ua) return { browser: '', os: '' };
-
-		let browser = '';
-		let os = '';
-
-		if (ua.includes('Firefox/')) browser = 'Firefox';
-		else if (ua.includes('Edg/')) browser = 'Edge';
-		else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browser = 'Chrome';
-		else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browser = 'Safari';
-		else if (ua.includes('Opera/') || ua.includes('OPR/')) browser = 'Opera';
-
-		if (ua.includes('Windows')) os = 'Windows';
-		else if (ua.includes('Mac OS X') || ua.includes('Macintosh')) os = 'macOS';
-		else if (ua.includes('Linux') && !ua.includes('Android')) os = 'Linux';
-		else if (ua.includes('Android')) os = 'Android';
-		else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-
-		return { browser, os };
-	}
-
-	function getDeviceType(ua: string | null): 'mobile' | 'desktop' | 'tablet' {
-		if (!ua) return 'desktop';
-		if (ua.includes('iPhone') || (ua.includes('Android') && !ua.includes('Tablet')))
-			return 'mobile';
-		if (ua.includes('iPad') || ua.includes('Tablet')) return 'tablet';
-		return 'desktop';
-	}
 
 	function formatRelativeTime(dateStr: string | null): string {
 		if (!dateStr) return '';
@@ -99,14 +112,15 @@
 		const diffMin = Math.floor(diffSec / 60);
 		const diffHours = Math.floor(diffMin / 60);
 		const diffDays = Math.floor(diffHours / 24);
+		const dateLocale = locale === 'en' ? 'en-US' : 'de-DE';
 
-		if (diffSec < 60) return 'gerade eben';
-		if (diffMin < 60) return `vor ${diffMin} Min`;
-		if (diffHours < 24) return `vor ${diffHours} Std`;
-		if (diffDays === 1) return 'Gestern';
-		if (diffDays < 7) return `vor ${diffDays} Tagen`;
+		if (diffSec < 60) return t.justNow!;
+		if (diffMin < 60) return `${diffMin} ${t.minutesAgo}`;
+		if (diffHours < 24) return `${diffHours} ${t.hoursAgo}`;
+		if (diffDays === 1) return t.yesterday!;
+		if (diffDays < 7) return `${diffDays} ${t.daysAgo}`;
 
-		return date.toLocaleDateString('de-DE', {
+		return date.toLocaleDateString(dateLocale, {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -132,12 +146,12 @@
 		try {
 			const result = await onRevoke(sessionId);
 			if (!result.success) {
-				error = result.error || 'Fehler beim Beenden der Sitzung';
+				error = result.error || t.revokeError!;
 			} else {
 				await onRefresh();
 			}
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Beenden der Sitzung';
+			error = e instanceof Error ? e.message : t.revokeError!;
 		} finally {
 			revoking = null;
 		}
@@ -154,7 +168,7 @@
 			}
 			await onRefresh();
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Fehler beim Beenden der Sitzungen';
+			error = e instanceof Error ? e.message : t.revokeAllError!;
 		} finally {
 			revokingAll = false;
 		}
@@ -188,7 +202,7 @@
 			class="refresh-button"
 			onclick={onRefresh}
 			disabled={loading}
-			aria-label="Aktualisieren"
+			aria-label={t.refresh}
 		>
 			<svg
 				class="refresh-icon"

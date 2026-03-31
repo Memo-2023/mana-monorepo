@@ -203,6 +203,15 @@
 		background: rgba(255, 255, 255, 0.1);
 	}
 
+	@media (prefers-reduced-motion: reduce) {
+		.session-expired-banner {
+			animation: none;
+		}
+		* {
+			transition-duration: 0.01ms !important;
+		}
+	}
+
 	/* Mobile: stack vertically */
 	@media (max-width: 480px) {
 		.session-expired-content {

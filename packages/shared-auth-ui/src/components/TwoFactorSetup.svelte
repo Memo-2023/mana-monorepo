@@ -653,4 +653,10 @@
 		text-align: center;
 		color: hsl(var(--theme-foreground, 220 9% 10%));
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			transition-duration: 0.01ms !important;
+		}
+	}
 </style>

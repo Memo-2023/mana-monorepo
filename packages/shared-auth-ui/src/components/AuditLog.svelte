@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { formatUserAgent } from '../utils/userAgent';
+
 	interface SecurityEvent {
 		id: string;
 		eventType: string;
@@ -139,30 +141,6 @@
 			return `${dateFormatted}, ${timeStr}`;
 		}
 	}
-
-	function parseUserAgent(ua: string | null): string {
-		if (!ua) return '';
-
-		let browser = '';
-		let os = '';
-
-		// Detect browser
-		if (ua.includes('Firefox/')) browser = 'Firefox';
-		else if (ua.includes('Edg/')) browser = 'Edge';
-		else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browser = 'Chrome';
-		else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browser = 'Safari';
-		else if (ua.includes('Opera/') || ua.includes('OPR/')) browser = 'Opera';
-
-		// Detect OS
-		if (ua.includes('Windows')) os = 'Windows';
-		else if (ua.includes('Mac OS X') || ua.includes('Macintosh')) os = 'macOS';
-		else if (ua.includes('Linux') && !ua.includes('Android')) os = 'Linux';
-		else if (ua.includes('Android')) os = 'Android';
-		else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-
-		const parts = [browser, os].filter(Boolean);
-		return parts.length > 0 ? parts.join(' · ') : '';
-	}
 </script>
 
 <div class="audit-log" style:--primary-color={primaryColor}>
@@ -233,9 +211,9 @@
 								<span>{event.ipAddress}</span>
 							{/if}
 						</div>
-						{#if parseUserAgent(event.userAgent)}
+						{#if formatUserAgent(event.userAgent)}
 							<div class="event-device">
-								{parseUserAgent(event.userAgent)}
+								{formatUserAgent(event.userAgent)}
 							</div>
 						{/if}
 					</div>
