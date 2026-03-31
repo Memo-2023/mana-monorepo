@@ -123,6 +123,9 @@ export const APP_ICONS = {
 	news: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#34d399"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ng)"/><rect x="22" y="25" width="56" height="50" rx="4" stroke="white" stroke-width="4" fill="none"/><line x1="30" y1="38" x2="55" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="48" x2="70" y2="48" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="58" x2="65" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`
 	),
+	guides: svgToDataUrl(
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0d9488"/><stop offset="100%" style="stop-color:#0f766e"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#gg)"/><rect x="18" y="25" width="28" height="50" rx="3" fill="white" fill-opacity="0.15"/><rect x="54" y="25" width="28" height="50" rx="3" fill="white" fill-opacity="0.15"/><rect x="46" y="25" width="8" height="50" fill="white" fill-opacity="0.25"/><circle cx="27" cy="40" r="4" fill="white" fill-opacity="0.9"/><rect x="34" y="37" width="11" height="3" rx="1.5" fill="white" fill-opacity="0.6"/><circle cx="27" cy="52" r="4" fill="white" fill-opacity="0.55"/><rect x="34" y="49" width="9" height="3" rx="1.5" fill="white" fill-opacity="0.4"/><circle cx="27" cy="64" r="4" fill="white" fill-opacity="0.3"/><rect x="34" y="61" width="10" height="3" rx="1.5" fill="white" fill-opacity="0.25"/><path d="M60 52l6 7 12-14" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`
+	),
 } as const;
 
 export type AppIconId = keyof typeof APP_ICONS;

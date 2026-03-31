@@ -513,6 +513,23 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		requiredTier: 'beta',
 	},
+	{
+		id: 'guides',
+		name: 'Guides',
+		description: {
+			de: 'Schritt-für-Schritt Anleitungen',
+			en: 'Step-by-Step Guides',
+		},
+		longDescription: {
+			de: 'Erstelle und führe strukturierte Anleitungen aus — Rezepte, SOPs, Lernpfade und Playbooks mit Ausführungshistorie.',
+			en: 'Create and execute structured guides — recipes, SOPs, learning paths, and playbooks with run history.',
+		},
+		icon: APP_ICONS.guides,
+		color: '#0d9488',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'beta',
+	},
 ];
 
 /**
@@ -617,6 +634,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	reader: { dev: 'exp://localhost:8081', prod: 'https://reader.mana.how' },
 	news: { dev: 'http://localhost:5174', prod: 'https://news.mana.how' },
 	calc: { dev: 'http://localhost:5198', prod: 'https://calc.mana.how' },
+	guides: { dev: 'http://localhost:5200', prod: 'https://guides.mana.how' },
 };
 
 /**
