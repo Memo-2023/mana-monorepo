@@ -386,7 +386,11 @@
 	<meta name="theme-color" content={lightBackground} media="(prefers-color-scheme: light)" />
 </svelte:head>
 
-<button class="skip-link" onclick={skipToForm} type="button">
+<button
+	class="absolute -top-10 left-0 bg-black text-white px-4 py-2 z-[100] font-medium focus:top-0"
+	onclick={skipToForm}
+	type="button"
+>
 	{t.skipToForm}
 </button>
 
@@ -395,18 +399,18 @@
 </div>
 
 <div
-	class="page-container"
-	class:dark={isDark}
-	class:light={!isDark}
-	style:--light-bg={lightBackground}
-	style:--dark-bg={darkBackground}
+	class="flex flex-col min-h-screen min-h-dvh w-full max-w-[100vw] overflow-x-hidden m-0 p-0"
+	style:background-color={isDark ? darkBackground || '#121212' : lightBackground || '#f5f5f5'}
 	style:--primary-color={primaryColor}
 >
 	<!-- Theme Toggle - Top Left -->
 	<button
 		type="button"
 		onclick={toggleTheme}
-		class="theme-toggle"
+		class="absolute top-4 left-4 z-50 flex items-center justify-center w-10 h-10 rounded-lg border cursor-pointer transition-all"
+		style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}
+		style:background-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
+		style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
 		aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 	>
 		{#if isDark}
@@ -417,20 +421,21 @@
 	</button>
 
 	{#if headerControls}
-		<div class="header-controls">
+		<div class="absolute top-4 right-4 z-50 opacity-60 flex gap-3">
 			{@render headerControls()}
 		</div>
 	{/if}
 
-	<main class="main-content">
+	<main class="flex-1 flex flex-col">
 		<!-- Logo Section -->
-		<div class="logo-section">
+		<div class="flex flex-col items-center pt-12 max-[480px]:pt-8 px-4 pb-6 anim-fade-in-scale">
 			<button
 				type="button"
 				onclick={fillDevCredentials}
-				class="logo-button"
+				class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 cursor-pointer transition-transform shadow-lg hover:scale-105 active:scale-95"
 				class:success-pulse={showSuccess}
 				style:border-color={showSuccess ? '#22c55e' : primaryColor}
+				style:background-color={isDark ? '#000' : '#fff'}
 				aria-label="{appName} logo"
 			>
 				{#if showSuccess}
@@ -439,17 +444,30 @@
 					<Logo size={55} color={primaryColor} />
 				{/if}
 			</button>
-			<h1 class="app-name">{appName}</h1>
+			<h1 class="text-2xl font-semibold" style:color={isDark ? '#fff' : '#000'}>{appName}</h1>
 		</div>
 
 		<!-- Form Section -->
-		<div class="form-section">
-			<div class="form-card" class:shake={shakeError}>
+		<div class="flex-1 flex justify-center px-4 pt-4 pb-8">
+			<div
+				class="w-full max-w-[400px] rounded-2xl p-6 max-[480px]:p-5 border backdrop-blur-[10px] anim-fade-in-up"
+				class:shake={shakeError}
+				style:background-color={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)'}
+				style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+			>
 				{#if showTwoFactor}
 					<!-- 2FA Verification -->
-					<div class="form-header">
-						<h2 class="form-title">Zwei-Faktor-Authentifizierung</h2>
-						<p class="form-subtitle">
+					<div class="text-center mb-6">
+						<h2
+							class="text-xl font-semibold"
+							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
+						>
+							Zwei-Faktor-Authentifizierung
+						</h2>
+						<p
+							class="text-sm mt-2"
+							style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+						>
 							{useBackupCode
 								? 'Gib einen Backup-Code ein'
 								: 'Gib den Code aus deiner Authenticator-App ein'}
@@ -457,7 +475,10 @@
 					</div>
 
 					{#if error}
-						<div class="error-message" role="alert">
+						<div
+							class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
+							role="alert"
+						>
 							<Warning size={18} class="text-red-500 shrink-0" />
 							<p>{error}</p>
 						</div>
@@ -469,7 +490,7 @@
 							handleTwoFactorVerify();
 						}}
 					>
-						<div class="input-group">
+						<div class="mb-3">
 							<input
 								type="text"
 								bind:value={twoFactorCode}
@@ -478,16 +499,24 @@
 								autocomplete="one-time-code"
 								inputmode={useBackupCode ? 'text' : 'numeric'}
 								maxlength={useBackupCode ? 20 : 6}
-								class="input-field"
+								class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
 								style:--ring-color={primaryColor}
+								style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+								style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+								style:color={isDark ? '#fff' : '#000'}
 								style:text-align="center"
 								style:font-size="1.5rem"
 								style:letter-spacing="0.5rem"
+								style:--tw-ring-color="var(--ring-color)"
 							/>
 						</div>
 
 						{#if !useBackupCode}
-							<label class="remember-label" style:margin-bottom="1rem">
+							<label
+								class="remember-label flex items-center gap-2 cursor-pointer"
+								style:margin-bottom="1rem"
+								style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+							>
 								<input
 									type="checkbox"
 									bind:checked={trustDevice}
@@ -500,9 +529,10 @@
 						<button
 							type="submit"
 							disabled={loading || !twoFactorCode}
-							class="submit-button"
+							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 							style:background-color={primaryColor + '60'}
 							style:border-color={primaryColor}
+							style:color={isDark ? '#fff' : '#000'}
 						>
 							{loading ? 'Prüfe...' : 'Bestätigen'}
 						</button>
@@ -510,12 +540,8 @@
 
 					<button
 						type="button"
-						class="forgot-link"
+						class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70 block w-full text-center mt-4"
 						style:color={primaryColor}
-						style:display="block"
-						style:width="100%"
-						style:text-align="center"
-						style:margin-top="1rem"
 						onclick={() => {
 							useBackupCode = !useBackupCode;
 							twoFactorCode = '';
@@ -527,12 +553,8 @@
 
 					<button
 						type="button"
-						class="forgot-link"
+						class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70 block w-full text-center mt-2"
 						style:color={primaryColor}
-						style:display="block"
-						style:width="100%"
-						style:text-align="center"
-						style:margin-top="0.5rem"
 						onclick={() => {
 							showTwoFactor = false;
 							twoFactorCode = '';
@@ -544,12 +566,16 @@
 					</button>
 				{:else}
 					{#if showVerifiedBanner}
-						<div class="verified-banner" role="status" aria-live="polite">
+						<div
+							class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
+							role="status"
+							aria-live="polite"
+						>
 							<Check size={18} class="text-green-500 shrink-0" />
 							<p>{t.emailVerified}</p>
 							<button
 								type="button"
-								class="verified-banner-close"
+								class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
 								onclick={() => (showVerifiedBanner = false)}
 								aria-label="Close"
 							>
@@ -558,9 +584,19 @@
 						</div>
 					{/if}
 
-					<div class="form-header">
-						<h2 class="form-title">{t.title}</h2>
-						<p class="form-subtitle">{t.subtitle}</p>
+					<div class="text-center mb-6">
+						<h2
+							class="text-xl font-semibold"
+							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
+						>
+							{t.title}
+						</h2>
+						<p
+							class="text-sm mt-2"
+							style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+						>
+							{t.subtitle}
+						</p>
 					</div>
 
 					{#if passkeyAvailable && onSignInWithPasskey}
@@ -568,8 +604,9 @@
 							type="button"
 							onclick={handlePasskeySignIn}
 							disabled={loading || showSuccess}
-							class="passkey-button"
+							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity bg-transparent hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 							style:border-color={primaryColor}
+							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
 						>
 							<svg
 								width="20"
@@ -586,18 +623,26 @@
 							</svg>
 							<span>Passkey</span>
 						</button>
-						<div class="divider">
-							<span>{t.orDivider}</span>
+						<div class="divider flex items-center gap-4 my-5">
+							<span
+								class="text-xs"
+								style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
+								>{t.orDivider}</span
+							>
 						</div>
 					{/if}
 
 					{#if verificationEmailSent}
-						<div class="verified-banner" role="status" aria-live="polite">
+						<div
+							class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
+							role="status"
+							aria-live="polite"
+						>
 							<Check size={18} class="text-green-500 shrink-0" />
 							<p>{t.verificationEmailSent}</p>
 							<button
 								type="button"
-								class="verified-banner-close"
+								class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
 								onclick={() => (verificationEmailSent = false)}
 								aria-label="Close"
 							>
@@ -607,13 +652,17 @@
 					{/if}
 
 					{#if isLockedOut}
-						<div class="lockout-banner" role="alert" aria-live="assertive">
-							<div class="lockout-icon">
+						<div
+							class="flex gap-3 p-4 mb-4 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500"
+							role="alert"
+							aria-live="assertive"
+						>
+							<div class="shrink-0 mt-0.5">
 								<Warning size={24} />
 							</div>
-							<div class="lockout-content">
-								<p class="lockout-title">Konto vorübergehend gesperrt</p>
-								<p class="lockout-text">
+							<div class="flex flex-col gap-1">
+								<p class="font-semibold text-[0.9rem]">Konto vorübergehend gesperrt</p>
+								<p class="text-[0.8rem] opacity-90">
 									Zu viele fehlgeschlagene Anmeldeversuche.
 									{#if rateLimitCountdown > 0}
 										Erneut versuchen in <strong>{formatCountdown(rateLimitCountdown)}</strong>
@@ -623,7 +672,7 @@
 								</p>
 								<button
 									type="button"
-									class="lockout-reset-link"
+									class="bg-transparent border-none cursor-pointer font-medium text-[0.8rem] p-0 text-left underline mt-1"
 									onclick={() => goto(forgotPasswordPath)}
 									style:color={primaryColor}
 								>
@@ -632,14 +681,19 @@
 							</div>
 						</div>
 					{:else if error}
-						<div class="error-message" id="form-error" role="alert" aria-live="assertive">
+						<div
+							class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
+							id="form-error"
+							role="alert"
+							aria-live="assertive"
+						>
 							<Warning size={18} class="text-red-500 shrink-0" />
-							<div class="error-content">
+							<div class="flex flex-col gap-1">
 								<p>{error}</p>
 								{#if showEmailNotVerified && onResendVerification}
 									<button
 										type="button"
-										class="resend-link"
+										class="bg-transparent border-none cursor-pointer font-medium text-sm p-0 text-left underline hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
 										onclick={handleResendVerification}
 										disabled={resendingVerification}
 										style:color={primaryColor}
@@ -648,7 +702,7 @@
 									</button>
 								{/if}
 								{#if rateLimitCountdown > 0}
-									<p class="retry-countdown">
+									<p class="font-semibold mt-1">
 										Erneut versuchen in {formatCountdown(rateLimitCountdown)}
 									</p>
 								{/if}
@@ -664,7 +718,7 @@
 						aria-busy={loading}
 					>
 						<!-- Email -->
-						<div class="input-group">
+						<div class="mb-3">
 							<label for="email" class="sr-only">{t.emailPlaceholder}</label>
 							<input
 								id="email"
@@ -675,16 +729,24 @@
 								required
 								autocomplete={passkeyAvailable ? 'username webauthn' : 'email'}
 								aria-invalid={errorField === 'email'}
-								class="input-field"
-								class:input-error={errorField === 'email'}
+								class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+								class:border-red-500={errorField === 'email'}
 								style:--ring-color={errorField === 'email' ? '#ef4444' : primaryColor}
+								style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+								style:border-color={errorField === 'email'
+									? '#ef4444'
+									: isDark
+										? 'rgba(255,255,255,0.2)'
+										: 'rgba(0,0,0,0.1)'}
+								style:color={isDark ? '#fff' : '#000'}
+								style:--tw-ring-color="var(--ring-color)"
 							/>
 						</div>
 
 						<!-- Password -->
-						<div class="input-group">
+						<div class="mb-3">
 							<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
-							<div class="input-wrapper">
+							<div class="relative">
 								<input
 									id="password"
 									type={showPassword ? 'text' : 'password'}
@@ -694,14 +756,23 @@
 									required
 									autocomplete="current-password"
 									aria-invalid={errorField === 'password'}
-									class="input-field has-icon"
-									class:input-error={errorField === 'password'}
+									class="w-full h-14 px-4 pr-12 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+									class:border-red-500={errorField === 'password'}
 									style:--ring-color={errorField === 'password' ? '#ef4444' : primaryColor}
+									style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+									style:border-color={errorField === 'password'
+										? '#ef4444'
+										: isDark
+											? 'rgba(255,255,255,0.2)'
+											: 'rgba(0,0,0,0.1)'}
+									style:color={isDark ? '#fff' : '#000'}
+									style:--tw-ring-color="var(--ring-color)"
 								/>
 								<button
 									type="button"
 									onclick={() => (showPassword = !showPassword)}
-									class="password-toggle"
+									class="absolute right-0 top-0 h-full w-12 flex items-center justify-center bg-transparent border-none cursor-pointer transition-opacity hover:opacity-80"
+									style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
 									aria-label={showPassword ? t.hidePassword : t.showPassword}
 								>
 									{#if showPassword}
@@ -714,8 +785,11 @@
 						</div>
 
 						<!-- Remember & Forgot -->
-						<div class="options-row">
-							<label class="remember-label">
+						<div class="flex justify-between items-center mb-4 text-sm">
+							<label
+								class="remember-label flex items-center gap-2 cursor-pointer"
+								style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+							>
 								<input
 									type="checkbox"
 									bind:checked={rememberMe}
@@ -726,7 +800,7 @@
 							<button
 								type="button"
 								onclick={() => goto(forgotPasswordPath)}
-								class="forgot-link"
+								class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70"
 								style:color={primaryColor}
 							>
 								{t.forgotPassword}
@@ -737,9 +811,10 @@
 						<button
 							type="submit"
 							disabled={loading || showSuccess || rateLimitCountdown > 0}
-							class="submit-button"
+							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 							style:background-color={showSuccess ? '#22c55e' : primaryColor + '60'}
 							style:border-color={showSuccess ? '#22c55e' : primaryColor}
+							style:color={isDark ? '#fff' : '#000'}
 						>
 							{#if loading}
 								<svg
@@ -765,12 +840,16 @@
 
 					{#if onSendMagicLink}
 						{#if magicLinkSent}
-							<div class="verified-banner" role="status" aria-live="polite">
+							<div
+								class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
+								role="status"
+								aria-live="polite"
+							>
 								<Check size={18} class="text-green-500 shrink-0" />
 								<p>Login-Link an {email} gesendet!</p>
 								<button
 									type="button"
-									class="verified-banner-close"
+									class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
 									onclick={() => (magicLinkSent = false)}
 									aria-label="Close"
 								>
@@ -782,7 +861,7 @@
 								type="button"
 								onclick={handleSendMagicLink}
 								disabled={sendingMagicLink || !email}
-								class="magic-link-button"
+								class="w-full bg-transparent border-none cursor-pointer font-medium text-sm p-3 text-center transition-opacity hover:opacity-70 disabled:opacity-40 disabled:cursor-not-allowed"
 								style:color={primaryColor}
 							>
 								{sendingMagicLink ? 'Wird gesendet...' : 'Login-Link per E-Mail senden'}
@@ -790,9 +869,17 @@
 						{/if}
 					{/if}
 
-					<p class="register-link">
+					<p
+						class="text-center text-sm mt-4"
+						style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+					>
 						{t.noAccount}
-						<button type="button" onclick={() => goto(registerPath)} style:color={primaryColor}>
+						<button
+							type="button"
+							class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70"
+							onclick={() => goto(registerPath)}
+							style:color={primaryColor}
+						>
 							{t.createAccount}
 						</button>
 					</p>
@@ -802,13 +889,15 @@
 	</main>
 
 	{#if appSlider}
-		<footer class="app-slider-section">
+		<footer class="w-full pb-4 anim-fade-in">
 			{@render appSlider()}
 		</footer>
 	{/if}
 
 	{#if version}
-		<p class="version-label">
+		<p
+			class="fixed bottom-2 right-3 text-[10px] text-gray-400/60 select-none pointer-events-none m-0"
+		>
 			v{version}{#if buildTime}
 				· {new Date(buildTime).toLocaleDateString('de-DE', {
 					day: '2-digit',
@@ -829,574 +918,6 @@
 		padding: 0;
 		width: 100%;
 		height: 100%;
-	}
-
-	.page-container {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-		min-height: 100dvh;
-		width: 100%;
-		max-width: 100vw;
-		overflow-x: hidden;
-		margin: 0;
-		padding: 0;
-		/* Dark mode default */
-		background-color: var(--dark-bg, #121212);
-	}
-
-	.page-container.light {
-		background-color: var(--light-bg, #f5f5f5);
-	}
-
-	.theme-toggle {
-		position: absolute;
-		top: 1rem;
-		left: 1rem;
-		z-index: 50;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.5rem;
-		height: 2.5rem;
-		border-radius: 0.5rem;
-		border: 1px solid rgba(255, 255, 255, 0.2);
-		background: rgba(255, 255, 255, 0.1);
-		color: rgba(255, 255, 255, 0.7);
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.light .theme-toggle {
-		border-color: rgba(0, 0, 0, 0.2);
-		background: rgba(0, 0, 0, 0.05);
-		color: rgba(0, 0, 0, 0.7);
-	}
-
-	.theme-toggle:hover {
-		background: rgba(255, 255, 255, 0.2);
-		color: #fff;
-	}
-
-	.light .theme-toggle:hover {
-		background: rgba(0, 0, 0, 0.1);
-		color: #000;
-	}
-
-	.header-controls {
-		position: absolute;
-		top: 1rem;
-		right: 1rem;
-		z-index: 50;
-		opacity: 0.6;
-		display: flex;
-		gap: 0.75rem;
-	}
-
-	.main-content {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.logo-section {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 3rem 1rem 1.5rem;
-	}
-
-	.logo-button {
-		width: 100px;
-		height: 100px;
-		border-radius: 50%;
-		border: 3px solid;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 0.75rem;
-		cursor: pointer;
-		transition: transform 0.2s;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		/* Dark mode default */
-		background-color: #000;
-	}
-
-	.light .logo-button {
-		background-color: #fff;
-	}
-
-	.logo-button:hover {
-		transform: scale(1.05);
-	}
-
-	.logo-button:active {
-		transform: scale(0.95);
-	}
-
-	.app-name {
-		font-size: 1.5rem;
-		font-weight: 600;
-		color: #fff;
-	}
-
-	.light .app-name {
-		color: #000;
-	}
-
-	.form-section {
-		flex: 1;
-		display: flex;
-		justify-content: center;
-		padding: 1rem 1rem 2rem;
-	}
-
-	.form-card {
-		width: 100%;
-		max-width: 400px;
-		border-radius: 1rem;
-		padding: 1.5rem;
-		border: 1px solid;
-		backdrop-filter: blur(10px);
-		/* Dark mode default */
-		background-color: rgba(255, 255, 255, 0.08);
-		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.light .form-card {
-		background-color: rgba(255, 255, 255, 0.7);
-		border-color: rgba(0, 0, 0, 0.1);
-	}
-
-	.form-header {
-		text-align: center;
-		margin-bottom: 1.5rem;
-	}
-
-	.form-title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	.form-subtitle {
-		font-size: 0.875rem;
-		margin-top: 0.5rem;
-		color: rgba(255, 255, 255, 0.6);
-	}
-
-	.light .form-title {
-		color: rgba(0, 0, 0, 0.9);
-	}
-
-	.light .form-subtitle {
-		color: rgba(0, 0, 0, 0.6);
-	}
-
-	.verified-banner {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem;
-		margin-bottom: 1rem;
-		border-radius: 0.75rem;
-		background: rgba(34, 197, 94, 0.15);
-		border: 1px solid rgba(34, 197, 94, 0.3);
-		color: #22c55e;
-		font-size: 0.875rem;
-		position: relative;
-	}
-
-	.verified-banner-close {
-		position: absolute;
-		right: 0.5rem;
-		top: 50%;
-		transform: translateY(-50%);
-		background: none;
-		border: none;
-		color: #22c55e;
-		font-size: 1.25rem;
-		cursor: pointer;
-		padding: 0.25rem;
-		line-height: 1;
-		opacity: 0.7;
-	}
-
-	.verified-banner-close:hover {
-		opacity: 1;
-	}
-
-	.error-message {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.5rem;
-		padding: 0.75rem;
-		margin-bottom: 1rem;
-		border-radius: 0.75rem;
-		background: rgba(239, 68, 68, 0.15);
-		border: 1px solid rgba(239, 68, 68, 0.3);
-		color: #ef4444;
-		font-size: 0.875rem;
-	}
-
-	.error-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.retry-countdown {
-		font-weight: 600;
-		margin-top: 0.25rem;
-	}
-
-	.lockout-banner {
-		display: flex;
-		gap: 0.75rem;
-		padding: 1rem;
-		margin-bottom: 1rem;
-		border-radius: 0.75rem;
-		background: rgba(245, 158, 11, 0.15);
-		border: 1px solid rgba(245, 158, 11, 0.3);
-		color: #f59e0b;
-	}
-
-	.lockout-icon {
-		flex-shrink: 0;
-		margin-top: 0.125rem;
-	}
-
-	.lockout-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.lockout-title {
-		font-weight: 600;
-		font-size: 0.9rem;
-	}
-
-	.lockout-text {
-		font-size: 0.8rem;
-		opacity: 0.9;
-	}
-
-	.lockout-reset-link {
-		background: none;
-		border: none;
-		cursor: pointer;
-		font-weight: 500;
-		font-size: 0.8rem;
-		padding: 0;
-		text-align: left;
-		text-decoration: underline;
-		margin-top: 0.25rem;
-	}
-
-	.resend-link {
-		background: none;
-		border: none;
-		cursor: pointer;
-		font-weight: 500;
-		font-size: 0.875rem;
-		padding: 0;
-		text-align: left;
-		text-decoration: underline;
-	}
-
-	.resend-link:hover {
-		opacity: 0.8;
-	}
-
-	.resend-link:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.input-group {
-		margin-bottom: 0.75rem;
-	}
-
-	.input-wrapper {
-		position: relative;
-	}
-
-	.input-field {
-		width: 100%;
-		height: 3.5rem;
-		padding: 0 1rem;
-		border: 1px solid;
-		border-radius: 0.75rem;
-		font-size: 1rem;
-		transition:
-			border-color 0.2s,
-			box-shadow 0.2s;
-		/* Dark mode default */
-		background-color: rgba(0, 0, 0, 0.2);
-		border-color: rgba(255, 255, 255, 0.2);
-		color: #fff;
-	}
-
-	.input-field.input-error {
-		border-color: #ef4444;
-	}
-
-	.light .input-field {
-		background-color: rgba(255, 255, 255, 0.8);
-		border-color: rgba(0, 0, 0, 0.1);
-		color: #000;
-	}
-
-	.light .input-field.input-error {
-		border-color: #ef4444;
-	}
-
-	.input-field:focus {
-		outline: none;
-		box-shadow: 0 0 0 2px var(--ring-color, currentColor);
-	}
-
-	.input-field.has-icon {
-		padding-right: 3rem;
-	}
-
-	.password-toggle {
-		position: absolute;
-		right: 0;
-		top: 0;
-		height: 100%;
-		width: 3rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: none;
-		border: none;
-		cursor: pointer;
-		transition: opacity 0.2s;
-		color: rgba(255, 255, 255, 0.5);
-	}
-
-	.light .password-toggle {
-		color: rgba(0, 0, 0, 0.4);
-	}
-
-	.password-toggle:hover {
-		opacity: 0.8;
-	}
-
-	.options-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-		font-size: 0.875rem;
-	}
-
-	.remember-label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		cursor: pointer;
-		color: rgba(255, 255, 255, 0.7);
-	}
-
-	.light .remember-label {
-		color: rgba(0, 0, 0, 0.7);
-	}
-
-	.remember-label input[type='checkbox'] {
-		width: 1.125rem;
-		height: 1.125rem;
-		cursor: pointer;
-		background-color: transparent;
-		border: 1.5px solid rgba(255, 255, 255, 0.4);
-		border-radius: 0.25rem;
-		appearance: none;
-		-webkit-appearance: none;
-		display: grid;
-		place-content: center;
-	}
-
-	.remember-label input[type='checkbox']::before {
-		content: '';
-		width: 0.65rem;
-		height: 0.65rem;
-		transform: scale(0);
-		transition: transform 0.1s ease-in-out;
-		box-shadow: inset 1rem 1rem var(--primary-color, #fff);
-		clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-	}
-
-	.remember-label input[type='checkbox']:checked {
-		border-color: var(--primary-color, #fff);
-	}
-
-	.remember-label input[type='checkbox']:checked::before {
-		transform: scale(1);
-	}
-
-	.light .remember-label input[type='checkbox'] {
-		border-color: rgba(0, 0, 0, 0.3);
-	}
-
-	.forgot-link {
-		background: none;
-		border: none;
-		cursor: pointer;
-		font-weight: 500;
-		padding: 0.25rem;
-	}
-
-	.forgot-link:hover {
-		opacity: 0.7;
-	}
-
-	.submit-button {
-		width: 100%;
-		height: 3.5rem;
-		border: 2px solid;
-		border-radius: 0.75rem;
-		font-weight: 500;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		cursor: pointer;
-		transition: opacity 0.2s;
-		color: #fff;
-	}
-
-	.light .submit-button {
-		color: #000;
-	}
-
-	.submit-button:hover:not(:disabled) {
-		opacity: 0.85;
-	}
-
-	.submit-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.passkey-button {
-		width: 100%;
-		height: 3.5rem;
-		border: 2px solid;
-		border-radius: 0.75rem;
-		font-weight: 500;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		cursor: pointer;
-		transition: opacity 0.2s;
-		color: rgba(255, 255, 255, 0.9);
-		background: transparent;
-		margin-bottom: 0;
-	}
-
-	.light .passkey-button {
-		color: rgba(0, 0, 0, 0.9);
-	}
-
-	.passkey-button:hover:not(:disabled) {
-		opacity: 0.85;
-	}
-
-	.passkey-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.divider {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin: 1.25rem 0;
-	}
-
-	.divider::before,
-	.divider::after {
-		content: '';
-		flex: 1;
-		height: 1px;
-		background: currentColor;
-		opacity: 0.2;
-	}
-
-	.divider span {
-		font-size: 0.75rem;
-		color: rgba(255, 255, 255, 0.5);
-	}
-
-	.light .divider span {
-		color: rgba(0, 0, 0, 0.5);
-	}
-
-	.magic-link-button {
-		width: 100%;
-		background: none;
-		border: none;
-		cursor: pointer;
-		font-weight: 500;
-		font-size: 0.875rem;
-		padding: 0.75rem;
-		text-align: center;
-		transition: opacity 0.2s;
-	}
-
-	.magic-link-button:hover:not(:disabled) {
-		opacity: 0.7;
-	}
-
-	.magic-link-button:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
-	}
-
-	.register-link {
-		text-align: center;
-		font-size: 0.875rem;
-		margin-top: 1rem;
-		color: rgba(255, 255, 255, 0.6);
-	}
-
-	.light .register-link {
-		color: rgba(0, 0, 0, 0.6);
-	}
-
-	.register-link button {
-		background: none;
-		border: none;
-		cursor: pointer;
-		font-weight: 500;
-		padding: 0.25rem;
-	}
-
-	.register-link button:hover {
-		opacity: 0.7;
-	}
-
-	.app-slider-section {
-		width: 100%;
-		padding: 0 0 1rem;
-	}
-
-	.version-label {
-		position: fixed;
-		bottom: 0.5rem;
-		right: 0.75rem;
-		font-size: 10px;
-		color: rgba(156, 163, 175, 0.6);
-		user-select: none;
-		pointer-events: none;
-		margin: 0;
-	}
-
-	.light .version-label {
-		color: rgba(156, 163, 175, 0.6);
 	}
 
 	/* Entrance Animations */
@@ -1431,15 +952,15 @@
 		}
 	}
 
-	.logo-section {
+	.anim-fade-in-scale {
 		animation: fadeInScale 0.5s ease-out both;
 	}
 
-	.form-card {
+	.anim-fade-in-up {
 		animation: fadeInUp 0.5s ease-out 0.15s both;
 	}
 
-	.app-slider-section {
+	.anim-fade-in {
 		animation: fadeIn 0.5s ease-out 0.3s both;
 	}
 
@@ -1494,39 +1015,60 @@
 		animation: success-pulse 0.6s ease-in-out;
 	}
 
-	/* Accessibility */
-	.sr-only {
-		position: absolute;
-		width: 1px;
+	/* Divider pseudo-elements */
+	.divider::before,
+	.divider::after {
+		content: '';
+		flex: 1;
 		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
+		background: currentColor;
+		opacity: 0.2;
 	}
 
-	.skip-link {
-		position: absolute;
-		top: -40px;
-		left: 0;
-		background: #000;
-		color: #fff;
-		padding: 0.5rem 1rem;
-		z-index: 100;
-		font-weight: 500;
+	/* Custom checkbox styling */
+	.remember-label input[type='checkbox'] {
+		width: 1.125rem;
+		height: 1.125rem;
+		cursor: pointer;
+		background-color: transparent;
+		border: 1.5px solid currentColor;
+		border-radius: 0.25rem;
+		appearance: none;
+		-webkit-appearance: none;
+		display: grid;
+		place-content: center;
+		opacity: 0.5;
 	}
 
-	.skip-link:focus {
-		top: 0;
+	.remember-label input[type='checkbox']::before {
+		content: '';
+		width: 0.65rem;
+		height: 0.65rem;
+		transform: scale(0);
+		transition: transform 0.1s ease-in-out;
+		box-shadow: inset 1rem 1rem var(--primary-color, #fff);
+		clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+	}
+
+	.remember-label input[type='checkbox']:checked {
+		border-color: var(--primary-color, #fff);
+		opacity: 1;
+	}
+
+	.remember-label input[type='checkbox']:checked::before {
+		transform: scale(1);
+	}
+
+	/* Focus ring color via CSS variable */
+	input:focus {
+		--tw-ring-color: var(--ring-color, currentColor);
 	}
 
 	/* Reduced motion */
 	@media (prefers-reduced-motion: reduce) {
-		.logo-section,
-		.form-card,
-		.app-slider-section,
+		.anim-fade-in-scale,
+		.anim-fade-in-up,
+		.anim-fade-in,
 		.shake,
 		.spinner,
 		.success-pulse {
@@ -1534,27 +1076,6 @@
 		}
 		* {
 			transition-duration: 0.01ms !important;
-		}
-	}
-
-	/* Mobile adjustments */
-	@media (max-width: 480px) {
-		.logo-section {
-			padding-top: 2rem;
-		}
-
-		.logo-button {
-			width: 80px;
-			height: 80px;
-		}
-
-		.logo-button :global(svg) {
-			width: 40px;
-			height: 40px;
-		}
-
-		.form-card {
-			padding: 1.25rem;
 		}
 	}
 </style>
