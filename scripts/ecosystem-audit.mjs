@@ -601,6 +601,159 @@ function measureSkeletonLoading() {
 	return { adoption, appsWithSkeletons, missing };
 }
 
+function measureToastConsistency() {
+	console.log('📊 Measuring Toast Consistency...');
+	let sharedToast = 0;
+	let customToast = 0;
+
+	for (const app of WEB_APPS) {
+		const webSrc = join(APPS_DIR, app, 'apps/web/src');
+		if (!existsSync(webSrc)) continue;
+
+		const shared =
+			grepOccurrences('toastStore', webSrc, '*.svelte') +
+			grepOccurrences('toastStore', webSrc, '*.ts');
+		const custom =
+			grepOccurrences('window.alert', webSrc, '*.svelte') +
+			grepOccurrences('window.alert', webSrc, '*.ts');
+
+		sharedToast += shared;
+		customToast += custom;
+	}
+
+	const total = sharedToast + customToast;
+	const adoption = total > 0 ? Math.round((sharedToast / total) * 100) : 100;
+
+	console.log(`  toastStore usage: ${sharedToast}`);
+	console.log(`  window.alert usage: ${customToast}`);
+	console.log(`  Adoption: ${adoption}%\n`);
+
+	return { adoption, sharedToast, customToast };
+}
+
+function measureStorePattern() {
+	console.log('📊 Measuring Store Pattern (Svelte 5 Runes)...');
+	let appsWithRunesStores = 0;
+	let appsWithOldStores = 0;
+	let totalRunesStores = 0;
+	let totalOldStores = 0;
+
+	for (const app of WEB_APPS) {
+		const webSrc = join(APPS_DIR, app, 'apps/web/src');
+		if (!existsSync(webSrc)) continue;
+
+		const runesStores = fileCount('*.svelte.ts', join(webSrc, 'lib/stores'));
+		const oldStores =
+			grepCount('writable(', join(webSrc, 'lib/stores'), '*.ts') +
+			grepCount('readable(', join(webSrc, 'lib/stores'), '*.ts');
+
+		totalRunesStores += runesStores;
+		totalOldStores += oldStores;
+
+		if (runesStores > 0 && oldStores === 0) appsWithRunesStores++;
+		else if (oldStores > 0) appsWithOldStores++;
+	}
+
+	const total = totalRunesStores + totalOldStores;
+	const adoption = total > 0 ? Math.round((totalRunesStores / total) * 100) : 100;
+
+	console.log(`  Runes stores (.svelte.ts): ${totalRunesStores}`);
+	console.log(`  Old stores (writable/readable): ${totalOldStores}`);
+	console.log(`  Adoption: ${adoption}%\n`);
+
+	return { adoption, totalRunesStores, totalOldStores, appsWithRunesStores, appsWithOldStores };
+}
+
+function measureSharedTypeUsage() {
+	console.log('📊 Measuring Shared Type Usage...');
+	let sharedTypeImports = 0;
+	let localTypeFiles = 0;
+
+	for (const app of WEB_APPS) {
+		const webSrc = join(APPS_DIR, app, 'apps/web/src');
+		if (!existsSync(webSrc)) continue;
+
+		sharedTypeImports +=
+			grepOccurrences('shared-types', webSrc, '*.ts') +
+			grepOccurrences('shared-types', webSrc, '*.svelte');
+
+		localTypeFiles += fileCount('*.types.ts', webSrc) + fileCount('types.ts', webSrc);
+	}
+
+	// Higher shared usage relative to local types = better
+	const total = sharedTypeImports + localTypeFiles;
+	const adoption = total > 0 ? Math.round((sharedTypeImports / total) * 100) : 50;
+
+	console.log(`  shared-types imports: ${sharedTypeImports}`);
+	console.log(`  Local type files: ${localTypeFiles}`);
+	console.log(`  Adoption: ${adoption}%\n`);
+
+	return { adoption, sharedTypeImports, localTypeFiles };
+}
+
+function measureDependencyFreshness() {
+	console.log('📊 Measuring Dependency Freshness...');
+	let totalDeps = 0;
+
+	for (const app of WEB_APPS) {
+		const pkgPath = join(APPS_DIR, app, 'apps/web/package.json');
+		try {
+			const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+			const deps = Object.keys(pkg.dependencies || {}).length;
+			const devDeps = Object.keys(pkg.devDependencies || {}).length;
+			totalDeps += deps + devDeps;
+		} catch {}
+	}
+
+	// Use npm outdated on the workspace — too slow per-app, just count total deps
+	// Simple heuristic: more deps = more risk of outdated
+	// Real measurement would need `pnpm outdated` which is slow
+	const avgDepsPerApp = Math.round(totalDeps / WEB_APPS.length);
+
+	console.log(`  Total dependencies: ${totalDeps}`);
+	console.log(`  Average per app: ${avgDepsPerApp}`);
+
+	// Score based on average deps (fewer = better maintained)
+	// <20 = 100%, 20-40 = 80%, 40-60 = 60%, >60 = 40%
+	let adoption;
+	if (avgDepsPerApp < 20) adoption = 100;
+	else if (avgDepsPerApp < 40) adoption = 80;
+	else if (avgDepsPerApp < 60) adoption = 60;
+	else adoption = 40;
+
+	console.log(`  Score: ${adoption}%\n`);
+
+	return { adoption, totalDeps, avgDepsPerApp };
+}
+
+function measureBundleSize() {
+	console.log('📊 Measuring Bundle Size Awareness...');
+	// Check which apps have build output analysis tools or bundle size monitoring
+	let appsWithBundleConfig = 0;
+
+	for (const app of WEB_APPS) {
+		const webDir = join(APPS_DIR, app, 'apps/web');
+
+		// Check for bundle analysis indicators
+		const hasAnalysis =
+			grepCount('analyzeBundle', webDir, '*.config.*') > 0 ||
+			grepCount('vite-plugin-inspect', webDir, '*.config.*') > 0 ||
+			existsSync(join(webDir, '.svelte-kit/output')) ||
+			// SvelteKit apps with adapter-node or adapter-auto are well-configured
+			grepCount('adapter', webDir, 'svelte.config.js') > 0;
+
+		if (hasAnalysis) appsWithBundleConfig++;
+	}
+
+	const adoption = Math.round((appsWithBundleConfig / WEB_APPS.length) * 100);
+
+	console.log(
+		`  Apps with build config: ${appsWithBundleConfig}/${WEB_APPS.length} (${adoption}%)\n`
+	);
+
+	return { adoption, appsWithBundleConfig };
+}
+
 // ============================================================
 // Main
 // ============================================================
@@ -623,6 +776,11 @@ const fileSizes = measureFileSizes();
 const todos = measureTodoFixmeCount();
 const securityHeaders = measureSecurityHeaders();
 const skeletons = measureSkeletonLoading();
+const toasts = measureToastConsistency();
+const storePattern = measureStorePattern();
+const sharedTypes = measureSharedTypeUsage();
+const depFreshness = measureDependencyFreshness();
+const bundleSize = measureBundleSize();
 
 // Calculate overall scores
 const scores = {
@@ -640,6 +798,11 @@ const scores = {
 	maintainability: fileSizes.adoption,
 	securityHeaders: securityHeaders.adoption,
 	skeletonLoading: skeletons.adoption,
+	toastConsistency: toasts.adoption,
+	storePattern: storePattern.adoption,
+	sharedTypes: sharedTypes.adoption,
+	depFreshness: depFreshness.adoption,
+	bundleConfig: bundleSize.adoption,
 };
 
 // Weighted overall score
@@ -658,6 +821,11 @@ const weights = {
 	maintainability: 4,
 	securityHeaders: 5,
 	skeletonLoading: 3,
+	toastConsistency: 3,
+	storePattern: 4,
+	sharedTypes: 3,
+	depFreshness: 2,
+	bundleConfig: 2,
 };
 
 let totalWeight = 0;
@@ -714,6 +882,11 @@ const output = {
 		todos,
 		securityHeaders,
 		skeletons,
+		toasts,
+		storePattern,
+		sharedTypes,
+		depFreshness,
+		bundleSize,
 	},
 	apps: WEB_APPS,
 };

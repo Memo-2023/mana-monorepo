@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-03-31T12:12:26.680Z",
-	"overallScore": 72,
+	"generatedAt": "2026-03-31T12:18:59.699Z",
+	"overallScore": 74,
 	"scores": {
 		"sharedPackages": 90,
 		"iconConsistency": 89,
@@ -15,7 +15,12 @@
 		"pwaSupport": 2,
 		"maintainability": 0,
 		"securityHeaders": 76,
-		"skeletonLoading": 76
+		"skeletonLoading": 76,
+		"toastConsistency": 100,
+		"storePattern": 95,
+		"sharedTypes": 62,
+		"depFreshness": 80,
+		"bundleConfig": 100
 	},
 	"weights": {
 		"sharedPackages": 20,
@@ -31,7 +36,12 @@
 		"pwaSupport": 4,
 		"maintainability": 4,
 		"securityHeaders": 5,
-		"skeletonLoading": 3
+		"skeletonLoading": 3,
+		"toastConsistency": 3,
+		"storePattern": 4,
+		"sharedTypes": 3,
+		"depFreshness": 2,
+		"bundleConfig": 2
 	},
 	"details": {
 		"icons": {
@@ -358,14 +368,14 @@
 					"lines": 1130
 				},
 				{
-					"app": "calendar",
-					"file": "lib/components/calendar/WeekView.svelte",
-					"lines": 959
-				},
-				{
 					"app": "zitare",
 					"file": "routes/(app)/lists/[id]/+page.svelte",
 					"lines": 958
+				},
+				{
+					"app": "calendar",
+					"file": "lib/components/calendar/WeekView.svelte",
+					"lines": 953
 				},
 				{
 					"app": "calendar",
@@ -398,6 +408,32 @@
 			"adoption": 76,
 			"appsWithSkeletons": 22,
 			"missing": ["citycorners", "manadeck", "manavoxel", "planta", "presi", "times", "zitare"]
+		},
+		"toasts": {
+			"adoption": 100,
+			"sharedToast": 204,
+			"customToast": 0
+		},
+		"storePattern": {
+			"adoption": 95,
+			"totalRunesStores": 176,
+			"totalOldStores": 9,
+			"appsWithRunesStores": 24,
+			"appsWithOldStores": 4
+		},
+		"sharedTypes": {
+			"adoption": 62,
+			"sharedTypeImports": 8,
+			"localTypeFiles": 5
+		},
+		"depFreshness": {
+			"adoption": 80,
+			"totalDeps": 1068,
+			"avgDepsPerApp": 37
+		},
+		"bundleSize": {
+			"adoption": 100,
+			"appsWithBundleConfig": 29
 		}
 	},
 	"apps": [
