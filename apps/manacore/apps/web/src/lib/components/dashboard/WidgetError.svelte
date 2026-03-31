@@ -6,6 +6,7 @@
 	 */
 
 	import { _ } from 'svelte-i18n';
+	import { ArrowsClockwise } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Error message to display */
@@ -42,10 +43,7 @@
 			</svg>
 			{$_('common.loading')}
 		{:else}
-			<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<path d="M1 4v6h6" />
-				<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-			</svg>
+			<ArrowsClockwise size={16} />
 			{$_('dashboard.retry')}
 		{/if}
 	</button>

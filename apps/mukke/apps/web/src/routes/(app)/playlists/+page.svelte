@@ -2,6 +2,7 @@
 	import { playlistStore } from '$lib/stores/playlist.svelte';
 	import { MukkeEvents } from '@manacore/shared-utils/analytics';
 	import { useAllPlaylists } from '$lib/data/queries';
+	import { List, MusicNote, Plus, Trash } from '@manacore/shared-icons';
 
 	// Live query — auto-updates on IndexedDB changes
 	const allPlaylists = useAllPlaylists();
@@ -51,28 +52,14 @@
 			onclick={() => (showCreateModal = true)}
 			class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
 		>
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={16} />
 			Create Playlist
 		</button>
 	</div>
 
 	{#if allPlaylists.value.length === 0}
 		<div class="text-center py-16">
-			<svg
-				class="w-12 h-12 text-foreground-secondary mx-auto mb-3"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 6h16M4 10h16M4 14h16M4 18h16"
-				/>
-			</svg>
+			<List size={48} class="text-foreground-secondary mx-auto mb-3" />
 			<p class="text-foreground-secondary mb-3">No playlists yet</p>
 			<button onclick={() => (showCreateModal = true)} class="text-sm text-primary hover:underline">
 				Create your first playlist
@@ -91,19 +78,7 @@
 						{#if playlist.coverArtPath && false}
 							<img src={false} alt={playlist.name} class="w-full h-full object-cover" />
 						{:else}
-							<svg
-								class="w-12 h-12 text-foreground-secondary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-								/>
-							</svg>
+							<MusicNote size={48} class="text-foreground-secondary" />
 						{/if}
 					</div>
 					<h3 class="font-medium truncate group-hover:text-primary transition-colors">
@@ -119,14 +94,7 @@
 						class="absolute top-3 right-3 p-1.5 rounded-lg bg-background/80 text-foreground-secondary hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
 						title="Delete playlist"
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-							/>
-						</svg>
+						<Trash size={16} />
 					</button>
 				</a>
 			{/each}

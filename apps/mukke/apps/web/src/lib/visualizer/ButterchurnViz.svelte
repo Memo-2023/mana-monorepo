@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { playerStore } from '$lib/stores/player.svelte';
 	import { connectAnalyzer, getAudioContext, getSourceNode, resumeAudioContext } from './analyzer';
+	import { CaretLeft, CaretRight } from '@manacore/shared-icons';
 
 	interface Props {
 		height?: number;
@@ -159,9 +160,7 @@
 				class="p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
 				aria-label="Previous preset"
 			>
-				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-					<path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-				</svg>
+				<CaretRight size={16} weight="fill" />
 			</button>
 
 			<span class="text-xs text-white/80 bg-black/50 px-2 py-1 rounded truncate max-w-[60%]">
@@ -173,9 +172,7 @@
 				class="p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
 				aria-label="Next preset"
 			>
-				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-					<path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
-				</svg>
+				<CaretLeft size={16} weight="fill" />
 			</button>
 		</div>
 	{/if}

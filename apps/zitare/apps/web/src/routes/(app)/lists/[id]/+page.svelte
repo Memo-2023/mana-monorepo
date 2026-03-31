@@ -307,14 +307,7 @@
 			<div class="modal-header">
 				<h3>{$_('lists.detail.editModal.title')}</h3>
 				<button class="close-btn" onclick={closeEditModal} aria-label={$_('common.close')}>
-					<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X size={24} />
 				</button>
 			</div>
 
@@ -342,14 +335,7 @@
 				</div>
 
 				<button class="danger-btn" onclick={handleDeleteList}>
-					<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-						/>
-					</svg>
+					<Trash size={20} />
 					{$_('lists.detail.editModal.deleteList')}
 				</button>
 			</div>
@@ -385,14 +371,7 @@
 			<div class="modal-header">
 				<h3>{$_('lists.detail.addModal.title')}</h3>
 				<button class="close-btn" onclick={closeAddQuotesModal} aria-label={$_('common.close')}>
-					<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X size={24} />
 				</button>
 			</div>
 

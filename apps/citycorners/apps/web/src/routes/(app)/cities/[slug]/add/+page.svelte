@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
+	import { CaretLeft } from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import { page } from '$app/stores';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -191,9 +192,7 @@
 			href="/cities/{citySlug}"
 			class="text-foreground-secondary hover:text-primary transition-colors"
 		>
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-			</svg>
+			<CaretLeft size={16} />
 		</a>
 		<h1 class="text-2xl font-bold text-foreground">{$_('add.title')}</h1>
 	</div>

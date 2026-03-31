@@ -4,6 +4,7 @@
 	import { userSettings } from '$lib/stores/user-settings.svelte';
 	import { APP_VERSION } from '$lib/version';
 	import {
+	import { Envelope, SignOut, Tag, User } from '@manacore/shared-icons';
 		SettingsPage,
 		SettingsSection,
 		SettingsCard,
@@ -26,14 +27,7 @@
 <SettingsPage title="Einstellungen" subtitle="Verwalte dein Konto und passe die App an.">
 	<SettingsSection title="Konto">
 		{#snippet icon()}
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-				/>
-			</svg>
+			<User size={20} />
 		{/snippet}
 		<SettingsCard>
 			<SettingsRow
@@ -42,14 +36,7 @@
 				border={false}
 			>
 				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-						/>
-					</svg>
+					<Envelope size={20} />
 				{/snippet}
 			</SettingsRow>
 		</SettingsCard>
@@ -83,14 +70,7 @@
 		<SettingsCard>
 			<SettingsRow label="Version" border={false}>
 				{#snippet icon()}
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-						/>
-					</svg>
+					<Tag size={20} />
 				{/snippet}
 				<span class="text-[hsl(var(--muted-foreground))]">{APP_VERSION}</span>
 			</SettingsRow>
@@ -106,14 +86,7 @@
 			border={false}
 		>
 			{#snippet icon()}
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-					/>
-				</svg>
+				<SignOut size={20} />
 			{/snippet}
 		</SettingsDangerButton>
 	</SettingsDangerZone>

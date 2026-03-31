@@ -3,6 +3,7 @@
 	import { playerStore } from '$lib/stores/player.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import type { Song } from '@mukke/shared';
+	import { CaretLeft, MusicNote } from '@manacore/shared-icons';
 
 	function getBackendUrl(): string {
 		let baseUrl = 'http://localhost:3010';
@@ -89,9 +90,7 @@
 		href="/library"
 		class="inline-flex items-center gap-1 text-sm text-foreground-secondary hover:text-foreground mb-6 transition-colors"
 	>
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-		</svg>
+		<CaretLeft size={16} />
 		Back to Library
 	</a>
 
@@ -114,19 +113,7 @@
 				{#if coverUrl}
 					<img src={coverUrl} alt={albumName} class="w-full h-full object-cover" />
 				{:else}
-					<svg
-						class="w-16 h-16 text-foreground-secondary"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-						/>
-					</svg>
+					<MusicNote size={20} class="text-foreground-secondary" />
 				{/if}
 			</div>
 			<div>

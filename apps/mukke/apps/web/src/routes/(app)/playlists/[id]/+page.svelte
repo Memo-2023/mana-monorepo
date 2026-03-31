@@ -5,6 +5,7 @@
 	import { playerStore } from '$lib/stores/player.svelte';
 	import { MukkeEvents } from '@manacore/shared-utils/analytics';
 	import type { Song } from '@mukke/shared';
+	import { CaretLeft, FileText, MusicNote, Play, Plus, X } from '@manacore/shared-icons';
 
 	let isEditingName = $state(false);
 	let editName = $state('');
@@ -86,9 +87,7 @@
 		href="/playlists"
 		class="inline-flex items-center gap-1 text-sm text-foreground-secondary hover:text-foreground transition-colors mb-4"
 	>
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-		</svg>
+		<CaretLeft size={16} />
 		Back to Playlists
 	</a>
 
@@ -147,9 +146,7 @@
 				disabled={playlistStore.currentPlaylist.songs.length === 0}
 				class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
 			>
-				<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-					<path d="M8 5v14l11-7z" />
-				</svg>
+				<Play size={16} weight="fill" />
 				Play All
 			</button>
 			<button
@@ -157,28 +154,14 @@
 				disabled={playlistStore.currentPlaylist.songs.length === 0}
 				class="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-lg hover:bg-background transition-colors text-sm font-medium disabled:opacity-50"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 4h7l5 5v11H4V4zm10 0h6v6m-6-6l6 6M4 20l6-6"
-					/>
-				</svg>
+				<FileText size={16} />
 				Shuffle
 			</button>
 			<a
 				href="/library"
 				class="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-lg hover:bg-background transition-colors text-sm font-medium"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
+				<Plus size={16} />
 				Add Songs
 			</a>
 		</div>
@@ -186,19 +169,7 @@
 		<!-- Song list -->
 		{#if playlistStore.currentPlaylist.songs.length === 0}
 			<div class="text-center py-16">
-				<svg
-					class="w-12 h-12 text-foreground-secondary mx-auto mb-3"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-					/>
-				</svg>
+				<MusicNote size={48} class="text-foreground-secondary mx-auto mb-3" />
 				<p class="text-foreground-secondary mb-2">No songs in this playlist</p>
 				<a href="/library" class="text-sm text-primary hover:underline">
 					Browse your library to add songs
@@ -238,19 +209,7 @@
 									class="w-full h-full object-cover"
 								/>
 							{:else}
-								<svg
-									class="w-5 h-5 text-foreground-secondary"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-									/>
-								</svg>
+								<MusicNote size={20} class="text-foreground-secondary" />
 							{/if}
 						</div>
 						<span class="truncate font-medium">{song.title}</span>
@@ -264,14 +223,7 @@
 							class="p-1 text-foreground-secondary hover:text-red-500 transition-colors"
 							title="Remove from playlist"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
+							<X size={16} />
 						</button>
 					</div>
 				{/each}

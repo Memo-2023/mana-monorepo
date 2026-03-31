@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { X } from '@manacore/shared-icons';
+
 	interface Props {
 		value: number | null;
 		onChange: (value: number | null) => void;
@@ -38,14 +40,7 @@
 		{/each}
 		{#if value !== null}
 			<button type="button" class="fun-rating-clear" onclick={handleClear} title="Zurücksetzen">
-				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
+				<X size={16} />
 			</button>
 		{/if}
 	</div>

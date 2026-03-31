@@ -3,6 +3,20 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
+	import {
+		CaretLeft,
+		Check,
+		ShareNetwork,
+		Heart,
+		Plus,
+		MapPin,
+		PencilSimple,
+		Trash,
+		MapTrifold,
+		NavigationArrow,
+		ArrowSquareOut,
+		Star,
+	} from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { favoritesStore } from '$lib/stores/favorites.svelte';
@@ -299,9 +313,7 @@
 				href="/cities/{citySlug}"
 				class="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-black/50"
 			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-				</svg>
+				<CaretLeft size={20} />
 			</a>
 		</div>
 
@@ -313,29 +325,9 @@
 				title={$_('detail.share')}
 			>
 				{#if shareSuccess}
-					<svg
-						class="h-5 w-5 text-green-400"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						viewBox="0 0 24 24"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-					</svg>
+					<Check size={20} class="text-green-400" />
 				{:else}
-					<svg
-						class="h-5 w-5"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
-						/>
-					</svg>
+					<ShareNetwork size={20} />
 				{/if}
 			</button>
 
@@ -346,25 +338,9 @@
 					title={favoriteIds.has(location.id) ? $_('favorites.remove') : $_('favorites.add')}
 				>
 					{#if favoriteIds.has(location.id)}
-						<svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-							<path
-								d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"
-							/>
-						</svg>
+						<Heart size={20} weight="fill" class="text-red-500" />
 					{:else}
-						<svg
-							class="h-5 w-5 text-white"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-							/>
-						</svg>
+						<Heart size={20} class="text-white" />
 					{/if}
 				</button>
 			{/if}
@@ -421,15 +397,7 @@
 					class="flex h-16 w-20 flex-shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-border text-foreground-secondary transition-colors hover:border-primary hover:text-primary"
 					title={$_('gallery.addPhoto')}
 				>
-					<svg
-						class="h-5 w-5"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						viewBox="0 0 24 24"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-					</svg>
+					<Plus size={20} />
 				</button>
 			{/if}
 		</div>
@@ -476,24 +444,7 @@
 			<h1 class="text-3xl font-bold text-foreground">{location.name}</h1>
 			{#if location.address}
 				<p class="mt-2 flex items-center gap-1.5 text-foreground-secondary">
-					<svg
-						class="h-4 w-4 flex-shrink-0"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-						/>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-						/>
-					</svg>
+					<MapPin size={16} class="flex-shrink-0" />
 					{location.address}
 				</p>
 			{/if}
@@ -562,17 +513,13 @@
 						<div class="flex items-center gap-1.5">
 							<div class="flex items-center gap-0.5">
 								{#each Array(5) as _, i}
-									<svg
-										class="h-4 w-4 {i < Math.round(location.reviewStats.averageRating)
+									<Star
+										size={16}
+										weight="fill"
+										class={i < Math.round(location.reviewStats.averageRating)
 											? 'text-amber-400'
-											: 'text-gray-300 dark:text-gray-600'}"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-									>
-										<path
-											d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-										/>
-									</svg>
+											: 'text-gray-300 dark:text-gray-600'}
+									/>
 								{/each}
 							</div>
 							<span class="text-sm font-medium text-foreground">
@@ -608,17 +555,13 @@
 								onclick={() => (reviewRating = star)}
 								class="transition-transform hover:scale-110"
 							>
-								<svg
-									class="h-8 w-8 {star <= reviewRating
+								<Star
+									size={32}
+									weight="fill"
+									class={star <= reviewRating
 										? 'text-amber-400'
-										: 'text-gray-300 dark:text-gray-600'}"
-									fill="currentColor"
-									viewBox="0 0 20 20"
-								>
-									<path
-										d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-									/>
-								</svg>
+										: 'text-gray-300 dark:text-gray-600'}
+								/>
 							</button>
 						{/each}
 					</div>
@@ -645,17 +588,13 @@
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-1">
 									{#each Array(5) as _, i}
-										<svg
-											class="h-4 w-4 {i < review.rating
+										<Star
+											size={16}
+											weight="fill"
+											class={i < review.rating
 												? 'text-amber-400'
-												: 'text-gray-300 dark:text-gray-600'}"
-											fill="currentColor"
-											viewBox="0 0 20 20"
-										>
-											<path
-												d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-											/>
-										</svg>
+												: 'text-gray-300 dark:text-gray-600'}
+										/>
 									{/each}
 								</div>
 								<div class="flex items-center gap-2">
@@ -690,38 +629,14 @@
 					href="/cities/{citySlug}/locations/{location.id}/edit"
 					class="flex items-center gap-2 rounded-lg border border-border bg-background-card px-4 py-2.5 text-sm font-medium text-foreground-secondary transition-colors hover:bg-background-card-hover hover:text-foreground"
 				>
-					<svg
-						class="h-4 w-4"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-						/>
-					</svg>
+					<PencilSimple size={16} />
 					{$_('detail.edit')}
 				</a>
 				<button
 					onclick={() => (showDeleteConfirm = true)}
 					class="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
 				>
-					<svg
-						class="h-4 w-4"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-						/>
-					</svg>
+					<Trash size={16} />
 					{$_('detail.delete')}
 				</button>
 			</div>
@@ -760,19 +675,7 @@
 						href="/cities/{citySlug}/map"
 						class="flex flex-1 items-center justify-center gap-2 bg-background-card px-4 py-2.5 text-sm text-foreground-secondary transition-colors hover:text-primary"
 					>
-						<svg
-							class="h-4 w-4"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"
-							/>
-						</svg>
+						<MapTrifold size={16} />
 						{$_('detail.showOnMap')}
 					</a>
 					<a
@@ -781,19 +684,7 @@
 						rel="noopener noreferrer"
 						class="flex flex-1 items-center justify-center gap-2 bg-background-card px-4 py-2.5 text-sm text-foreground-secondary transition-colors hover:text-primary"
 					>
-						<svg
-							class="h-4 w-4"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-							/>
-						</svg>
+						<NavigationArrow size={16} />
 						{$_('detail.directions')}
 					</a>
 					<a
@@ -802,19 +693,7 @@
 						rel="noopener noreferrer"
 						class="flex flex-1 items-center justify-center gap-2 bg-background-card px-4 py-2.5 text-sm text-foreground-secondary transition-colors hover:text-primary"
 					>
-						<svg
-							class="h-4 w-4"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-							/>
-						</svg>
+						<ArrowSquareOut size={16} />
 						{$_('detail.openInMaps')}
 					</a>
 				</div>

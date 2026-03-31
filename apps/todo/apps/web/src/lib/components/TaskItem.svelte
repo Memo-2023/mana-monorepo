@@ -20,6 +20,7 @@
 	import { ContactAvatar, ContactSelector } from '@manacore/shared-ui';
 	import SubtaskList from './SubtaskList.svelte';
 	import {
+	import { Check, CheckSquare, DotsSixVertical } from '@manacore/shared-icons';
 		PrioritySelector,
 		StorypointsSelector,
 		DurationPicker,
@@ -381,14 +382,7 @@
 	>
 		<!-- Drag handle -->
 		<div class="drag-handle">
-			<svg class="drag-icon" viewBox="0 0 24 24" fill="currentColor">
-				<circle cx="9" cy="6" r="1.5" />
-				<circle cx="15" cy="6" r="1.5" />
-				<circle cx="9" cy="12" r="1.5" />
-				<circle cx="15" cy="12" r="1.5" />
-				<circle cx="9" cy="18" r="1.5" />
-				<circle cx="15" cy="18" r="1.5" />
-			</svg>
+			<DotsSixVertical size={16} class="drag-icon" />
 		</div>
 
 		<!-- Checkbox with priority fill -->
@@ -400,20 +394,7 @@
 			onclick={handleToggleClick}
 		>
 			{#if task.isCompleted || isAnimatingComplete}
-				<svg
-					class="check-icon"
-					class:animate-check={isAnimatingComplete}
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="3"
-						d="M5 13l4 4L19 7"
-					/>
-				</svg>
+				<Check size={20} class="check-icon" />
 			{:else if task.priority === 'urgent'}
 				<span class="priority-bang">!</span>
 			{/if}
@@ -441,14 +422,7 @@
 				<div class="task-meta">
 					{#if subtaskProgress()}
 						<span class="meta-item">
-							<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-								/>
-							</svg>
+							<CheckSquare size={20} class="meta-icon" />
 							{subtaskProgress()}
 						</span>
 					{/if}

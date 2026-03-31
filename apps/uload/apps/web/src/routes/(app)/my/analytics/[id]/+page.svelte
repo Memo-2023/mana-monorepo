@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { CaretLeft } from '@manacore/shared-icons';
 	import { useLiveQuery } from '@manacore/local-store/svelte';
 	import { linkCollection } from '$lib/data/local-store';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -68,9 +69,7 @@
 			class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
 			title="Zurück"
 		>
-			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
+			<CaretLeft size={20} />
 		</a>
 		<div>
 			<h1 class="text-3xl font-bold">Analytics</h1>

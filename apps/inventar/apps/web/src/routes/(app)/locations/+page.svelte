@@ -4,6 +4,7 @@
 	import { locationsStore } from '$lib/stores/locations.svelte';
 	import { getLocationTree } from '$lib/data/queries';
 	import type { Location } from '@inventar/shared';
+	import { Plus } from '@manacore/shared-icons';
 
 	const locationsCtx: { readonly value: Location[] } = getContext('locations');
 
@@ -65,9 +66,7 @@
 			onclick={() => startCreate()}
 			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))]"
 		>
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={20} />
 			{$_('location.create')}
 		</button>
 	</div>

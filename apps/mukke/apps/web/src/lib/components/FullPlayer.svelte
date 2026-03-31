@@ -2,6 +2,16 @@
 	import { playerStore } from '$lib/stores/player.svelte';
 	import VisualizerRenderer from '$lib/visualizer/VisualizerRenderer.svelte';
 	import { visualizerStore } from '$lib/visualizer/registry.svelte';
+	import {
+		CaretDown,
+		Pause,
+		Play,
+		Playlist,
+		Repeat,
+		SkipForward,
+		SpeakerHigh,
+		X,
+	} from '@manacore/shared-icons';
 
 	let innerHeight = $state(typeof window !== 'undefined' ? window.innerHeight : 800);
 
@@ -49,14 +59,7 @@
 					class="p-2 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors text-white"
 					aria-label="Close player"
 				>
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 9l-7 7-7-7"
-						/>
-					</svg>
+					<CaretDown size={24} />
 				</button>
 				<div class="text-sm text-white/70">Now Playing</div>
 				<!-- Visualizer switcher -->
@@ -128,11 +131,7 @@
 							: 'text-white/40 hover:text-white/70'}"
 						aria-label="Toggle shuffle"
 					>
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-							<path
-								d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"
-							/>
-						</svg>
+						<X size={20} weight="fill" />
 					</button>
 
 					<!-- Previous -->
@@ -141,9 +140,7 @@
 						class="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
 						aria-label="Previous track"
 					>
-						<svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
-						</svg>
+						<SkipForward size={20} weight="fill" />
 					</button>
 
 					<!-- Play/Pause -->
@@ -153,13 +150,9 @@
 						aria-label={playerStore.isPlaying ? 'Pause' : 'Play'}
 					>
 						{#if playerStore.isPlaying}
-							<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-								<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-							</svg>
+							<Pause size={32} weight="fill" />
 						{:else}
-							<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-								<path d="M8 5v14l11-7z" />
-							</svg>
+							<Play size={32} weight="fill" />
 						{/if}
 					</button>
 
@@ -169,9 +162,7 @@
 						class="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
 						aria-label="Next track"
 					>
-						<svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z" />
-						</svg>
+						<Play size={20} weight="fill" />
 					</button>
 
 					<!-- Repeat -->
@@ -182,9 +173,7 @@
 							: 'text-white/40 hover:text-white/70'}"
 						aria-label="Toggle repeat ({playerStore.repeatMode})"
 					>
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
-						</svg>
+						<Repeat size={20} weight="fill" />
 						{#if playerStore.repeatMode === 'one'}
 							<span
 								class="absolute -top-1 -right-1 text-[10px] font-bold bg-white text-black rounded-full w-4 h-4 flex items-center justify-center"
@@ -196,11 +185,7 @@
 
 				<!-- Volume + Queue row -->
 				<div class="flex items-center justify-center gap-4">
-					<svg class="w-4 h-4 text-white/50 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-						<path
-							d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
-						/>
-					</svg>
+					<SpeakerHigh size={16} weight="fill" class="text-white/50 shrink-0" />
 					<input
 						type="range"
 						min="0"
@@ -217,11 +202,7 @@
 							: 'text-white/40 hover:text-white/70'}"
 						aria-label="Toggle queue"
 					>
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-							<path
-								d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"
-							/>
-						</svg>
+						<Playlist size={20} weight="fill" />
 					</button>
 				</div>
 			</div>

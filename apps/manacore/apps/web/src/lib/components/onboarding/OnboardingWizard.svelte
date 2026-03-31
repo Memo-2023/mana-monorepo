@@ -7,6 +7,7 @@
 	import AppsStep from './steps/AppsStep.svelte';
 	import CreditsStep from './steps/CreditsStep.svelte';
 	import CompleteStep from './steps/CompleteStep.svelte';
+	import { Check } from '@manacore/shared-icons';
 
 	interface Props {
 		onComplete: () => void;
@@ -123,14 +124,7 @@
 									: 'bg-muted text-muted-foreground'}"
 						>
 							{#if index < currentStep}
-								<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M5 13l4 4L19 7"
-									/>
-								</svg>
+								<Check size={20} />
 							{:else}
 								{index + 1}
 							{/if}

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Plus, X } from '@manacore/shared-icons';
+
 	interface Props {
 		onAdd: (title: string) => void;
 		placeholder?: string;
@@ -54,14 +56,7 @@
 					onmousedown={(e) => e.preventDefault()}
 					onclick={handleSubmit}
 				>
-					<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
+					<Plus size={14} />
 					Hinzufügen
 				</button>
 				<button
@@ -72,14 +67,7 @@
 						isAdding = false;
 					}}
 				>
-					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X size={16} />
 				</button>
 			</div>
 		</div>
@@ -91,14 +79,7 @@
 			<div
 				class="w-5 h-5 rounded-full border-2 border-dashed border-current group-hover:border-primary group-hover:text-primary flex items-center justify-center transition-colors"
 			>
-				<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
+				<Plus size={14} />
 			</div>
 			<span class="group-hover:text-foreground transition-colors">Aufgabe hinzufügen</span>
 		</button>

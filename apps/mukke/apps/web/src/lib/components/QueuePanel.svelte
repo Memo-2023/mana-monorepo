@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { playerStore } from '$lib/stores/player.svelte';
+	import { X } from '@manacore/shared-icons';
 
 	function formatTime(s: number | null): string {
 		if (!s || !isFinite(s)) return '0:00';
@@ -27,14 +28,7 @@
 				class="p-2 rounded-lg hover:bg-surface-hover transition-colors text-foreground-secondary"
 				aria-label="Close queue"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
+				<X size={20} />
 			</button>
 		</div>
 
@@ -96,14 +90,7 @@
 								class="p-1.5 rounded-lg hover:bg-surface-hover transition-colors text-foreground-secondary hover:text-foreground shrink-0"
 								aria-label="Remove from queue"
 							>
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								</svg>
+								<X size={16} />
 							</button>
 						{/if}
 					</div>

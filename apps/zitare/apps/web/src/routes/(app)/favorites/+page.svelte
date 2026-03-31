@@ -9,6 +9,7 @@
 	import { zitareSettings } from '$lib/stores/settings.svelte';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
 	import { ContextMenu, type ContextMenuItem } from '@manacore/shared-ui';
+	import { Heart, User } from '@manacore/shared-icons';
 
 	const allFavorites: { readonly value: Favorite[] } = getContext('favorites');
 
@@ -91,19 +92,7 @@
 	{#if !authStore.isAuthenticated}
 		<!-- Not logged in -->
 		<div class="text-center py-12 bg-surface-elevated rounded-2xl">
-			<svg
-				class="w-16 h-16 mx-auto text-foreground-muted mb-4"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="1.5"
-					d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-				/>
-			</svg>
+			<User size={20} class="mx-auto text-foreground-muted mb-4" />
 			<p class="text-foreground-secondary mb-4">{$_('favorites.loginPrompt')}</p>
 			<button
 				onclick={() => goto('/login')}
@@ -115,19 +104,7 @@
 	{:else if favoriteQuotes.length === 0}
 		<!-- Empty state -->
 		<div class="text-center py-12 bg-surface-elevated rounded-2xl">
-			<svg
-				class="w-16 h-16 mx-auto text-foreground-muted mb-4"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="1.5"
-					d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-				/>
-			</svg>
+			<Heart size={20} class="mx-auto text-foreground-muted mb-4" />
 			<p class="text-lg font-medium text-foreground mb-2">{$_('favorites.empty')}</p>
 			<p class="text-foreground-secondary">{$_('favorites.emptyDescription')}</p>
 		</div>

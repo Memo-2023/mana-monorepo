@@ -7,6 +7,7 @@
 	import { boardViewsStore } from '$lib/stores/board-views.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
 	import TaskFilters from '$lib/components/TaskFilters.svelte';
+	import { Funnel, FloppyDisk } from '@manacore/shared-icons';
 
 	// Live query for board views
 	const boardViews = useAllBoardViews();
@@ -193,9 +194,7 @@
 				? 'active'
 				: ''}"
 		>
-			<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-			</svg>
+			<Funnel size={16} />
 			Filter
 			{#if hasActiveFilters}
 				<span
@@ -230,17 +229,7 @@
 			{#if hasActiveFilters}
 				<div class="mt-2 flex items-center gap-2">
 					<button type="button" class="save-filter-btn" onclick={saveFiltersToView}>
-						<svg
-							class="h-3.5 w-3.5"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
-							<polyline points="17 21 17 13 7 13 7 21" />
-							<polyline points="7 3 7 8 15 8" />
-						</svg>
+						<FloppyDisk size={14} />
 						Filter speichern
 					</button>
 					{#if activeView?.filter}

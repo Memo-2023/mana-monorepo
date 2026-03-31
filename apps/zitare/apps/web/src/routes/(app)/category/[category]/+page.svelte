@@ -6,6 +6,7 @@
 	import { quotesStore } from '$lib/stores/quotes.svelte';
 	import { zitareSettings } from '$lib/stores/settings.svelte';
 	import QuoteCard from '$lib/components/QuoteCard.svelte';
+	import { CaretLeft, MagnifyingGlass } from '@manacore/shared-icons';
 
 	// Get category from URL
 	let category = $derived($page.params.category as Category);
@@ -68,9 +69,7 @@
 		onclick={() => goto('/categories')}
 		class="flex items-center gap-2 text-foreground-secondary hover:text-foreground mb-6 transition-colors"
 	>
-		<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-		</svg>
+		<CaretLeft size={20} />
 		{$_('categories.title')}
 	</button>
 
@@ -83,19 +82,9 @@
 		<!-- Search & Sort Bar -->
 		<div class="flex gap-3 mb-8">
 			<div class="relative flex-1">
-				<svg
-					class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-					/>
-				</svg>
+				<div class="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
+					<MagnifyingGlass size={16} />
+				</div>
 				<input
 					type="text"
 					placeholder={$_('categories.searchInCategory')}

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { CaretLeft, Check, Warning, CheckCircle, WarningCircle } from '@manacore/shared-icons';
 	import StatCard from '$lib/components/admin/StatCard.svelte';
 	import ProjectDataCard from '$lib/components/admin/ProjectDataCard.svelte';
 	import {
@@ -86,9 +87,7 @@
 			class="p-2 rounded-lg hover:bg-muted transition-colors"
 			aria-label="Zuruck zur Nutzerliste"
 		>
-			<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
+			<CaretLeft size={20} />
 		</button>
 		<div class="flex-1">
 			<h1 class="text-2xl font-bold">Nutzerdaten</h1>
@@ -150,24 +149,12 @@
 						</span>
 						{#if userData.user.emailVerified}
 							<span class="text-xs text-green-600 flex items-center gap-1">
-								<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-									<path
-										fill-rule="evenodd"
-										d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-										clip-rule="evenodd"
-									/>
-								</svg>
+								<CheckCircle size={12} weight="fill" />
 								Email verifiziert
 							</span>
 						{:else}
 							<span class="text-xs text-yellow-600 flex items-center gap-1">
-								<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-									<path
-										fill-rule="evenodd"
-										d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-										clip-rule="evenodd"
-									/>
-								</svg>
+								<WarningCircle size={12} weight="fill" />
 								Email nicht verifiziert
 							</span>
 						{/if}
@@ -267,19 +254,7 @@
 						<div
 							class="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
 						>
-							<svg
-								class="h-5 w-5 text-green-600"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M5 13l4 4L19 7"
-								/>
-							</svg>
+							<Check size={20} class="text-green-600" />
 						</div>
 						<h3 class="text-lg font-semibold">Loschung abgeschlossen</h3>
 					</div>
@@ -325,19 +300,7 @@
 						<div
 							class="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
 						>
-							<svg
-								class="h-5 w-5 text-red-600"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-								/>
-							</svg>
+							<Warning size={20} class="text-red-600" />
 						</div>
 						<h3 class="text-lg font-semibold text-red-600">Daten unwiderruflich loschen?</h3>
 					</div>

@@ -3,6 +3,7 @@
 	import { transcriptCollection } from '$lib/data/local-store';
 	import type { LocalTranscript } from '$lib/data/local-store';
 	import { toast } from 'svelte-sonner';
+	import { CaretDown } from '@manacore/shared-icons';
 
 	const transcripts = useLiveQuery(() => transcriptCollection.getAll({ isArchived: false }));
 
@@ -82,21 +83,12 @@
 								<span>{t.language.toUpperCase()}</span>
 							</div>
 						</div>
-						<svg
-							class="h-5 w-5 shrink-0 text-gray-500 transition-transform {expandedId === t.id
+						<CaretDown
+							size={20}
+							class="shrink-0 text-gray-500 transition-transform {expandedId === t.id
 								? 'rotate-180'
 								: ''}"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 9l-7 7-7-7"
-							/>
-						</svg>
+						/>
 					</button>
 					{#if expandedId === t.id}
 						<div class="border-t border-gray-800 p-4">

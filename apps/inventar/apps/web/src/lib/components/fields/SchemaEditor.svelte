@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { FieldDefinition, FieldType } from '@inventar/shared';
 	import { _ } from 'svelte-i18n';
+	import { Plus, Trash } from '@manacore/shared-icons';
 
 	interface Props {
 		fields: FieldDefinition[];
@@ -199,14 +200,7 @@
 					class="mt-1 text-[hsl(var(--muted-foreground))] hover:text-red-500"
 					title={$_('field.removeField')}
 				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-						/>
-					</svg>
+					<Trash size={20} />
 				</button>
 			</div>
 		</div>
@@ -217,9 +211,7 @@
 		onclick={addField}
 		class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[hsl(var(--border))] py-3 text-sm text-[hsl(var(--muted-foreground))] transition-colors hover:border-[hsl(var(--primary))] hover:text-[hsl(var(--primary))]"
 	>
-		<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-		</svg>
+		<Plus size={20} />
 		{$_('collection.addField')}
 	</button>
 </div>

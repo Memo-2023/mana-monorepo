@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { Check } from '@manacore/shared-icons';
 </script>
 
 <svelte:head>
@@ -14,14 +15,7 @@
 		<div
 			class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
 		>
-			<svg
-				class="h-10 w-10 text-green-600 dark:text-green-400"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-			</svg>
+			<Check size={20} class="text-green-600 dark:text-green-400" />
 		</div>
 
 		<h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">E-Mail bestätigt!</h1>

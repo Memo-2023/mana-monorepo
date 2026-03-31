@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { matrixStore, type SimpleMessage } from '$lib/matrix';
 	import { RoomHeader, Timeline, MessageInput, DropZoneOverlay } from '$lib/components/chat';
+	import { CaretLeft } from '@manacore/shared-icons';
 	import RoomSettingsPanel from '$lib/components/chat/RoomSettingsPanel.svelte';
 	import SearchDialog from '$lib/components/chat/SearchDialog.svelte';
 	import ForwardMessageDialog from '$lib/components/chat/ForwardMessageDialog.svelte';
@@ -249,14 +250,7 @@
 			<div
 				class="w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center"
 			>
-				<svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 19l-7-7 7-7"
-					/>
-				</svg>
+				<CaretLeft size={20} class="text-primary" />
 			</div>
 		</div>
 	{/if}

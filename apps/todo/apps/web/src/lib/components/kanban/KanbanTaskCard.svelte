@@ -4,6 +4,14 @@
 	import { de } from 'date-fns/locale';
 	import { ConfirmationModal, ContactAvatar } from '@manacore/shared-ui';
 	import TaskEditModal from '../TaskEditModal.svelte';
+	import {
+		ArrowsClockwise,
+		CalendarBlank,
+		Check,
+		CheckSquare,
+		Note,
+		Trash,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		task: Task;
@@ -172,14 +180,7 @@
 	{#if onToggleComplete}
 		<button class="task-checkbox" class:checked={task.isCompleted} onclick={onToggleComplete}>
 			{#if task.isCompleted}
-				<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="3"
-						d="M5 13l4 4L19 7"
-					/>
-				</svg>
+				<Check size={20} class="check-icon" />
 			{/if}
 		</button>
 	{/if}
@@ -210,28 +211,14 @@
 			<div class="task-meta">
 				{#if dueDateText()}
 					<span class="meta-item" class:overdue={isOverdue()}>
-						<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-							/>
-						</svg>
+						<CalendarBlank size={20} class="meta-icon" />
 						{dueDateText()}
 					</span>
 				{/if}
 
 				{#if subtaskProgress()}
 					<span class="meta-item">
-						<svg class="meta-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-							/>
-						</svg>
+						<CheckSquare size={20} class="meta-icon" />
 						{subtaskProgress()}
 					</span>
 				{/if}
@@ -286,46 +273,16 @@
 		onclick={(e) => e.stopPropagation()}
 	>
 		<button class="context-item" onclick={handleContextEdit}>
-			<svg class="context-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-				/>
-			</svg>
+			<Note size={20} class="context-icon" />
 			Bearbeiten
 		</button>
 		<button class="context-item" onclick={handleContextToggleComplete}>
-			<svg class="context-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				{#if task.isCompleted}
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-					/>
-				{:else}
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M5 13l4 4L19 7"
-					/>
-				{/if}
-			</svg>
+			<ArrowsClockwise size={20} class="context-icon" />
 			{task.isCompleted ? 'Wiederherstellen' : 'Erledigen'}
 		</button>
 		<div class="context-divider"></div>
 		<button class="context-item danger" onclick={handleContextDelete}>
-			<svg class="context-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-				/>
-			</svg>
+			<Trash size={20} class="context-icon" />
 			Löschen
 		</button>
 	</div>

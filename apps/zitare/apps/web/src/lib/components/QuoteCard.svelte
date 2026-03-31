@@ -9,6 +9,7 @@
 	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { isFavorite as checkIsFavorite, type Favorite } from '$lib/data/queries';
+	import { Info, ShareNetwork, Heart } from '@manacore/shared-icons';
 
 	interface Props {
 		quote: Quote;
@@ -126,14 +127,7 @@
 						class="inline-flex ml-1 text-foreground-muted hover:text-primary transition-colors align-middle"
 						aria-label="Info"
 					>
-						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
+						<Info size={16} />
 					</button>
 				{/if}
 			</p>
@@ -158,22 +152,10 @@
 		<div class="flex items-center gap-2">
 			<button
 				onclick={shareQuote}
-				class="p-2 rounded-full hover:bg-surface-hover transition-colors"
+				class="p-2 rounded-full hover:bg-surface-hover transition-colors text-foreground-secondary"
 				aria-label={$_('home.share')}
 			>
-				<svg
-					class="w-5 h-5 text-foreground-secondary"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-					/>
-				</svg>
+				<ShareNetwork size={20} />
 			</button>
 
 			{#if authStore.isAuthenticated}
@@ -182,21 +164,12 @@
 					class="p-2 rounded-full hover:bg-surface-hover transition-colors"
 					aria-label={isFavorite ? $_('home.unfavorite') : $_('home.favorite')}
 				>
-					<svg
-						class="w-5 h-5 transition-colors {isFavorite
+					<Heart
+						size={20}
+						class="transition-colors {isFavorite
 							? 'text-red-500 fill-red-500'
 							: 'text-foreground-secondary'}"
-						fill={isFavorite ? 'currentColor' : 'none'}
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-						/>
-					</svg>
+					/>
 				</button>
 			{/if}
 		</div>

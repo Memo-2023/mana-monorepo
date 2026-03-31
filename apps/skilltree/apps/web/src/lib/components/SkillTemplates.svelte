@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Skill, SkillBranch } from '$lib/types';
 	import { BRANCH_INFO } from '$lib/types';
-	import { X, Plus, Sparkle } from '@manacore/shared-icons';
+	import { X, Plus, Sparkle, Check } from '@manacore/shared-icons';
 
 	interface Props {
 		onClose: () => void;
@@ -184,14 +184,7 @@
 											: 'bg-gray-700 text-gray-300 hover:bg-gray-600'}"
 									>
 										{#if isAdded}
-											<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M5 13l4 4L19 7"
-												/>
-											</svg>
+											<Check size={16} />
 										{:else}
 											<Plus class="h-4 w-4" />
 										{/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { DeleteUserDataResponse } from '$lib/api/services/admin';
+	import { Check, Warning, XCircle } from '@manacore/shared-icons';
 
 	interface Props {
 		show: boolean;
@@ -49,19 +50,7 @@
 						<div
 							class="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
 						>
-							<svg
-								class="h-5 w-5 text-green-600"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M5 13l4 4L19 7"
-								/>
-							</svg>
+							<Check size={20} class="text-green-600" />
 						</div>
 						<h3 class="text-lg font-semibold">Daten geloscht</h3>
 					</div>
@@ -116,19 +105,7 @@
 						<div
 							class="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
 						>
-							<svg
-								class="h-5 w-5 text-red-600"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-								/>
-							</svg>
+							<Warning size={20} class="text-red-600" />
 						</div>
 						<h3 class="text-lg font-semibold text-red-600">Alle Daten loschen?</h3>
 					</div>
@@ -149,43 +126,19 @@
 
 					<ul class="text-sm text-muted-foreground mb-6 space-y-2">
 						<li class="flex items-center gap-2">
-							<svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-									clip-rule="evenodd"
-								/>
-							</svg>
+							<XCircle size={16} weight="fill" class="text-red-500" />
 							<span>Alle Projektdaten (Chats, Todos, Termine, Kontakte, etc.)</span>
 						</li>
 						<li class="flex items-center gap-2">
-							<svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-									clip-rule="evenodd"
-								/>
-							</svg>
+							<XCircle size={16} weight="fill" class="text-red-500" />
 							<span>Alle Sessions und Anmeldedaten</span>
 						</li>
 						<li class="flex items-center gap-2">
-							<svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-									clip-rule="evenodd"
-								/>
-							</svg>
+							<XCircle size={16} weight="fill" class="text-red-500" />
 							<span>Credits und Transaktionshistorie</span>
 						</li>
 						<li class="flex items-center gap-2">
-							<svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-									clip-rule="evenodd"
-								/>
-							</svg>
+							<XCircle size={16} weight="fill" class="text-red-500" />
 							<span>Dein Nutzerkonto</span>
 						</li>
 					</ul>

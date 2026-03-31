@@ -8,6 +8,7 @@
 	import TilingLayout from '$lib/components/dashboard/TilingLayout.svelte';
 	import { collectLeaves } from '$lib/utils/tiling-tree';
 	import TilePanel from '$lib/components/dashboard/TilePanel.svelte';
+	import { Check, PencilSimple } from '@manacore/shared-icons';
 
 	let isMobile = $state(false);
 
@@ -53,29 +54,12 @@
 			>
 				{#if tilingStore.isEditing}
 					<span class="flex items-center gap-2">
-						<svg
-							class="h-4 w-4"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path d="M5 13l4 4L19 7" />
-						</svg>
+						<Check size={20} />
 						{$_('dashboard.done')}
 					</span>
 				{:else}
 					<span class="flex items-center gap-2">
-						<svg
-							class="h-4 w-4"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-							<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-						</svg>
+						<PencilSimple size={16} />
 						{$_('dashboard.customize')}
 					</span>
 				{/if}

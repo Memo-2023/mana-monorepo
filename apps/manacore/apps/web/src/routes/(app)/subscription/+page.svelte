@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { Card, PageHeader } from '@manacore/shared-ui';
+	import { Check } from '@manacore/shared-icons';
 	import {
 		subscriptionsService,
 		type SubscriptionPlan,
@@ -87,15 +88,30 @@
 	function getStatusBadge(status: string): { text: string; class: string } {
 		switch (status) {
 			case 'active':
-				return { text: 'Aktiv', class: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' };
+				return {
+					text: 'Aktiv',
+					class: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+				};
 			case 'canceled':
-				return { text: 'Gekündigt', class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' };
+				return {
+					text: 'Gekündigt',
+					class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+				};
 			case 'past_due':
-				return { text: 'Überfällig', class: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' };
+				return {
+					text: 'Überfällig',
+					class: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+				};
 			case 'trialing':
-				return { text: 'Testphase', class: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' };
+				return {
+					text: 'Testphase',
+					class: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+				};
 			default:
-				return { text: status, class: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400' };
+				return {
+					text: status,
+					class: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
+				};
 		}
 	}
 
@@ -113,7 +129,10 @@
 			const { url } = await subscriptionsService.createCheckout(plan.id, billingInterval);
 			window.location.href = url;
 		} catch (e) {
-			showToast(e instanceof Error ? e.message : 'Fehler beim Erstellen der Checkout-Session', 'error');
+			showToast(
+				e instanceof Error ? e.message : 'Fehler beim Erstellen der Checkout-Session',
+				'error'
+			);
 		} finally {
 			processingPlanId = null;
 		}
@@ -132,7 +151,11 @@
 	}
 
 	async function handleCancelSubscription() {
-		if (!confirm('Möchtest du dein Abonnement wirklich kündigen? Du kannst es bis zum Ende der Laufzeit weiter nutzen.')) {
+		if (
+			!confirm(
+				'Möchtest du dein Abonnement wirklich kündigen? Du kannst es bis zum Ende der Laufzeit weiter nutzen.'
+			)
+		) {
 			return;
 		}
 
@@ -179,7 +202,9 @@
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+			<div
+				class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+			></div>
 		</div>
 	{:else if error}
 		<Card>
@@ -220,8 +245,19 @@
 						>
 							{#if openingPortal}
 								<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									></circle>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
 								</svg>
 							{/if}
 							Zahlungsmethode verwalten
@@ -272,13 +308,13 @@
 					<div>
 						<div class="flex items-center gap-3">
 							<h2 class="text-xl font-bold">Free Plan</h2>
-							<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400">
+							<span
+								class="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400"
+							>
 								Aktuell
 							</span>
 						</div>
-						<p class="text-sm text-muted-foreground mt-1">
-							150 Mana / Monat
-						</p>
+						<p class="text-sm text-muted-foreground mt-1">150 Mana / Monat</p>
 					</div>
 					<p class="text-sm text-muted-foreground">
 						Upgrade auf einen bezahlten Plan für mehr Mana und Features.
@@ -314,7 +350,8 @@
 				<div class="inline-flex items-center gap-2 p-1 bg-muted rounded-lg">
 					<button
 						onclick={() => (billingInterval = 'month')}
-						class="px-4 py-2 rounded-md text-sm font-medium transition-colors {billingInterval === 'month'
+						class="px-4 py-2 rounded-md text-sm font-medium transition-colors {billingInterval ===
+						'month'
 							? 'bg-background shadow-sm'
 							: 'hover:text-foreground'}"
 					>
@@ -322,7 +359,8 @@
 					</button>
 					<button
 						onclick={() => (billingInterval = 'year')}
-						class="px-4 py-2 rounded-md text-sm font-medium transition-colors {billingInterval === 'year'
+						class="px-4 py-2 rounded-md text-sm font-medium transition-colors {billingInterval ===
+						'year'
 							? 'bg-background shadow-sm'
 							: 'hover:text-foreground'}"
 					>
@@ -336,12 +374,18 @@
 			<div class="grid gap-6 md:grid-cols-3">
 				{#each plans as plan}
 					{@const isCurrentPlan = currentSubscription?.plan?.id === plan.id}
-					{@const price = billingInterval === 'year' ? plan.priceYearlyEuroCents : plan.priceMonthlyEuroCents}
-					{@const savings = getSavingsPercent(plan.priceMonthlyEuroCents, plan.priceYearlyEuroCents)}
+					{@const price =
+						billingInterval === 'year' ? plan.priceYearlyEuroCents : plan.priceMonthlyEuroCents}
+					{@const savings = getSavingsPercent(
+						plan.priceMonthlyEuroCents,
+						plan.priceYearlyEuroCents
+					)}
 					<Card>
 						<div class="text-center p-2">
 							{#if isCurrentPlan}
-								<span class="inline-block px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary mb-4">
+								<span
+									class="inline-block px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary mb-4"
+								>
 									Dein Plan
 								</span>
 							{/if}
@@ -375,9 +419,7 @@
 								<ul class="mt-6 space-y-3 text-left">
 									{#each plan.features as feature}
 										<li class="flex items-start gap-2 text-sm">
-											<svg class="h-5 w-5 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-											</svg>
+											<Check size={20} class="text-green-500 flex-shrink-0" />
 											<span>{feature}</span>
 										</li>
 									{/each}
@@ -389,13 +431,24 @@
 								disabled={isCurrentPlan || processingPlanId === plan.id || plan.isDefault}
 								class="mt-6 w-full py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2
 									{isCurrentPlan || plan.isDefault
-										? 'bg-muted text-muted-foreground'
-										: 'bg-primary text-primary-foreground hover:bg-primary/90'}"
+									? 'bg-muted text-muted-foreground'
+									: 'bg-primary text-primary-foreground hover:bg-primary/90'}"
 							>
 								{#if processingPlanId === plan.id}
 									<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+										<circle
+											class="opacity-25"
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											stroke-width="4"
+										></circle>
+										<path
+											class="opacity-75"
+											fill="currentColor"
+											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+										></path>
 									</svg>
 									Wird verarbeitet...
 								{:else if isCurrentPlan}
@@ -445,11 +498,15 @@
 										</td>
 										<td class="py-3 pr-4">
 											{#if invoice.status === 'paid'}
-												<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+												<span
+													class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+												>
 													Bezahlt
 												</span>
 											{:else}
-												<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+												<span
+													class="px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+												>
 													{invoice.status}
 												</span>
 											{/if}
@@ -480,7 +537,8 @@
 <!-- Toast Notification -->
 {#if toastMessage}
 	<div
-		class="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg animate-fade-in {toastType === 'success'
+		class="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg animate-fade-in {toastType ===
+		'success'
 			? 'bg-green-600 text-white'
 			: 'bg-red-600 text-white'}"
 	>

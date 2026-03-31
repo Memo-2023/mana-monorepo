@@ -3,6 +3,7 @@
 	import { playerStore } from '$lib/stores/player.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import type { Song } from '@mukke/shared';
+	import { CaretLeft, User } from '@manacore/shared-icons';
 
 	function getBackendUrl(): string {
 		let baseUrl = 'http://localhost:3010';
@@ -77,9 +78,7 @@
 		href="/library"
 		class="inline-flex items-center gap-1 text-sm text-foreground-secondary hover:text-foreground mb-6 transition-colors"
 	>
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-		</svg>
+		<CaretLeft size={16} />
 		Back to Library
 	</a>
 
@@ -97,19 +96,7 @@
 		<!-- Artist header -->
 		<div class="flex items-end gap-6 mb-8">
 			<div class="w-36 h-36 bg-surface rounded-full flex items-center justify-center flex-shrink-0">
-				<svg
-					class="w-14 h-14 text-foreground-secondary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-					/>
-				</svg>
+				<User size={20} class="text-foreground-secondary" />
 			</div>
 			<div>
 				<h1 class="text-3xl font-bold mb-1">{artistName}</h1>

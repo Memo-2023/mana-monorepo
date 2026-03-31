@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Check, X } from '@manacore/shared-icons';
 	import type { Template, AIModel } from '@chat/types';
 	import { chatService } from '$lib/services/chat';
 	import { onMount } from 'svelte';
@@ -183,14 +184,7 @@
 						aria-label="Farbe {color}"
 					>
 						{#if selectedColor === color}
-							<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="3"
-									d="M5 13l4 4L19 7"
-								/>
-							</svg>
+							<Check size={16} weight="bold" class="text-white" />
 						{/if}
 					</button>
 				{/each}
@@ -238,23 +232,9 @@
                  {documentMode ? 'bg-primary' : 'bg-muted-foreground'}"
 				>
 					{#if documentMode}
-						<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M5 13l4 4L19 7"
-							/>
-						</svg>
+						<Check size={16} class="text-white" />
 					{:else}
-						<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={16} class="text-white" />
 					{/if}
 				</div>
 			</button>

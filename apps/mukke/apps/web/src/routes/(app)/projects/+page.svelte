@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { projectStore } from '$lib/stores/project.svelte';
 	import { MukkeEvents } from '@manacore/shared-utils/analytics';
+	import { MusicNote, Plus, Trash } from '@manacore/shared-icons';
 
 	let showCreateModal = $state(false);
 	let newProjectTitle = $state('');
@@ -58,9 +59,7 @@
 			onclick={() => (showCreateModal = true)}
 			class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-2"
 		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={20} />
 			New Project
 		</button>
 	</div>
@@ -74,19 +73,7 @@
 	{:else if projectStore.projects.length === 0}
 		<div class="text-center py-16">
 			<div class="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-4">
-				<svg
-					class="w-8 h-8 text-foreground-secondary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-					/>
-				</svg>
+				<MusicNote size={32} class="text-foreground-secondary" />
 			</div>
 			<h3 class="text-lg font-medium mb-2">No projects yet</h3>
 			<p class="text-foreground-secondary mb-4">Create your first project to get started</p>
@@ -112,14 +99,7 @@
 							onclick={(e) => handleDeleteProject(project.id, e)}
 							class="p-1 text-foreground-secondary hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-								/>
-							</svg>
+							<Trash size={16} />
 						</button>
 					</div>
 					{#if project.description}

@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
+	import { CaretLeft } from '@manacore/shared-icons';
 	import { getContext } from 'svelte';
 	import { itemsStore } from '$lib/stores/items.svelte';
 	import {
@@ -101,14 +102,7 @@
 					onclick={() => goto(collection ? `/collections/${collection.id}` : '/items')}
 					class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
 				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 19l-7-7 7-7"
-						/>
-					</svg>
+					<CaretLeft size={20} />
 				</button>
 				{#if !editing}
 					<div>

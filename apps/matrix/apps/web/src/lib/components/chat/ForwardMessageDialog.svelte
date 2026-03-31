@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { matrixStore, type SimpleMessage, type SimpleRoom } from '$lib/matrix';
-	import { X, MagnifyingGlass, PaperPlaneTilt, User, Users } from '@manacore/shared-icons';
+	import { Check, MagnifyingGlass, PaperPlaneTilt, User, Users, X } from '@manacore/shared-icons';
 
 	interface Props {
 		open: boolean;
@@ -125,19 +125,7 @@
 									: 'border-black/20 dark:border-white/20'}"
 							>
 								{#if selectedRooms.has(room.id)}
-									<svg
-										class="w-3 h-3 text-white"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="3"
-											d="M5 13l4 4L19 7"
-										/>
-									</svg>
+									<Check size={14} class="text-white" />
 								{/if}
 							</div>
 

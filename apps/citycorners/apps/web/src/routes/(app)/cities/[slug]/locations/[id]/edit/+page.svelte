@@ -2,6 +2,7 @@
 	import { onMount, getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { CaretLeft } from '@manacore/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { locationCollection, type LocalCity } from '$lib/data/local-store';
@@ -92,9 +93,7 @@
 			href="/cities/{citySlug}/locations/{$page.params.id}"
 			class="text-foreground-secondary hover:text-primary transition-colors"
 		>
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-			</svg>
+			<CaretLeft size={16} />
 		</a>
 		<h1 class="text-2xl font-bold text-foreground">{$_('edit.title')}</h1>
 	</div>

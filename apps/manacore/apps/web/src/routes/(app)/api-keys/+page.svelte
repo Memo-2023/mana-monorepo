@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, Badge } from '@manacore/shared-ui';
+	import { Check, Copy, Info, Key, Plus, Prohibit } from '@manacore/shared-icons';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { apiKeysService, type ApiKey, type ApiKeyWithSecret } from '$lib/api/api-keys';
 
@@ -133,14 +134,7 @@
 	>
 		{#snippet actions()}
 			<Button onclick={() => (showCreateModal = true)}>
-				<svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
-				</svg>
+				<Plus size={16} class="mr-2" />
 				Create API Key
 			</Button>
 		{/snippet}
@@ -169,14 +163,7 @@
 						<div
 							class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400"
 						>
-							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-								/>
-							</svg>
+							<Key size={20} />
 						</div>
 						<div>
 							<h2 class="text-lg font-semibold">Active Keys</h2>
@@ -188,19 +175,7 @@
 
 					{#if activeKeys.length === 0}
 						<div class="text-center py-8 text-muted-foreground">
-							<svg
-								class="h-12 w-12 mx-auto mb-4 opacity-50"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-								/>
-							</svg>
+							<Key size={48} class="mx-auto mb-4 opacity-50" />
 							<p class="font-medium">No API keys yet</p>
 							<p class="text-sm mt-1">Create your first API key to get started</p>
 						</div>
@@ -214,7 +189,9 @@
 											<Badge variant="secondary">{key.scopes.join(', ')}</Badge>
 											<Badge variant="outline">{key.rateLimitRequests}/min</Badge>
 										</div>
-										<div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
+										<div
+											class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap"
+										>
 											<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"
 												>{key.keyPrefix}</code
 											>
@@ -245,14 +222,7 @@
 							<div
 								class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400"
 							>
-								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-									/>
-								</svg>
+								<Prohibit size={20} />
 							</div>
 							<div>
 								<h2 class="text-lg font-semibold">Revoked Keys</h2>
@@ -293,14 +263,7 @@
 						<div
 							class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
 						>
-							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-								/>
-							</svg>
+							<Info size={20} />
 						</div>
 						<div>
 							<h2 class="text-lg font-semibold">How to Use</h2>
@@ -350,14 +313,7 @@
 					<div
 						class="flex h-12 w-12 mx-auto mb-4 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400"
 					>
-						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M5 13l4 4L19 7"
-							/>
-						</svg>
+						<Check size={20} />
 					</div>
 
 					<h3 class="text-lg font-semibold mb-2">API Key Created</h3>
@@ -376,28 +332,9 @@
 							onclick={() => copyToClipboard(createdKey!.key)}
 						>
 							{#if copied}
-								<svg
-									class="h-5 w-5 text-green-600"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M5 13l4 4L19 7"
-									/>
-								</svg>
+								<Check size={20} class="text-green-600" />
 							{:else}
-								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-									/>
-								</svg>
+								<Copy size={20} />
 							{/if}
 						</button>
 					</div>
@@ -444,7 +381,9 @@
 							<span class="text-sm">Text-to-Speech (tts)</span>
 						</label>
 					</div>
-					<p class="mt-1 text-xs text-muted-foreground">Select which services this key can access</p>
+					<p class="mt-1 text-xs text-muted-foreground">
+						Select which services this key can access
+					</p>
 				</div>
 
 				<!-- Rate Limit -->

@@ -10,6 +10,7 @@
 	import type { Song } from '@mukke/shared';
 	import { useAllSongs } from '$lib/data/queries';
 	import type { LocalSong } from '$lib/data/local-store';
+	import { Heart, MusicNote, Pause, PencilSimple, Play, User } from '@manacore/shared-icons';
 
 	// Live query — auto-updates on IndexedDB changes
 	const allSongs = useAllSongs();
@@ -185,19 +186,7 @@
 		{#if libraryStore.activeTab === 'songs'}
 			{#if songs.length === 0}
 				<div class="text-center py-16">
-					<svg
-						class="w-12 h-12 text-foreground-secondary mx-auto mb-3"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-						/>
-					</svg>
+					<MusicNote size={48} class="text-foreground-secondary mx-auto mb-3" />
 					<p class="text-foreground-secondary mb-2">No songs in your library</p>
 					<a href="/upload" class="text-sm text-primary hover:underline">Upload your first song</a>
 				</div>
@@ -247,39 +236,26 @@
 										}}
 									/>
 								{:else}
-									<svg
-										class="w-5 h-5 text-foreground-secondary transition-opacity {playerStore
-											.currentSong?.id === song.id && playerStore.isPlaying
+									<MusicNote
+										size={20}
+										class="text-foreground-secondary transition-opacity {playerStore.currentSong
+											?.id === song.id && playerStore.isPlaying
 											? 'opacity-0'
 											: 'group-hover:opacity-0'}"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-										/>
-									</svg>
+									/>
 								{/if}
 								<!-- Playing indicator or play icon on hover -->
 								{#if playerStore.currentSong?.id === song.id && playerStore.isPlaying}
 									<div
 										class="absolute inset-0 flex items-center justify-center bg-black/40 rounded"
 									>
-										<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-										</svg>
+										<Pause size={20} weight="fill" class="text-white" />
 									</div>
 								{:else}
 									<div
 										class="absolute inset-0 items-center justify-center bg-black/40 rounded hidden group-hover:flex"
 									>
-										<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M8 5v14l11-7z" />
-										</svg>
+										<Play size={20} weight="fill" class="text-white" />
 									</div>
 								{/if}
 							</div>
@@ -298,28 +274,14 @@
 								class="p-1 text-foreground-secondary hover:text-primary transition-colors"
 								title="Edit metadata"
 							>
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-									/>
-								</svg>
+								<PencilSimple size={16} />
 							</button>
 							<button
 								onclick={(e) => openInEditor(song.id, e)}
 								class="p-1 text-foreground-secondary hover:text-primary transition-colors"
 								title="Open in Editor"
 							>
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-									/>
-								</svg>
+								<MusicNote size={16} />
 							</button>
 							<button
 								onclick={(e) => handleToggleFavorite(song.id, e)}
@@ -328,19 +290,7 @@
 									: 'text-foreground-secondary hover:text-red-500'}"
 								title={song.favorite ? 'Remove from favorites' : 'Add to favorites'}
 							>
-								<svg
-									class="w-4 h-4"
-									fill={song.favorite ? 'currentColor' : 'none'}
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-									/>
-								</svg>
+								<Heart size={16} />
 							</button>
 						</div>
 					{/each}
@@ -375,19 +325,7 @@
 										}}
 									/>
 								{:else}
-									<svg
-										class="w-12 h-12 text-foreground-secondary"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-										/>
-									</svg>
+									<MusicNote size={48} class="text-foreground-secondary" />
 								{/if}
 							</div>
 							<h3 class="font-medium truncate group-hover:text-primary transition-colors">
@@ -420,14 +358,7 @@
 								<div
 									class="w-10 h-10 rounded-full bg-background flex items-center justify-center text-foreground-secondary"
 								>
-									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-										/>
-									</svg>
+									<User size={20} />
 								</div>
 								<span class="font-medium">{artist.artist}</span>
 							</div>

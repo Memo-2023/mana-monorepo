@@ -6,6 +6,7 @@
 	import type { Project, Client, TimeEntry } from '@times/shared';
 	import { PROJECT_COLORS } from '@times/shared/constants';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import { CaretRight } from '@manacore/shared-icons';
 
 	const allProjects = getContext<{ value: Project[] }>('projects');
 	const allClients = getContext<{ value: Client[] }>('clients');
@@ -330,14 +331,7 @@
 				onclick={() => (showArchived = !showArchived)}
 				class="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]"
 			>
-				<svg
-					class="h-4 w-4 transition-transform {showArchived ? 'rotate-90' : ''}"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-				</svg>
+				<CaretRight size={20} class="transition-transform {showArchived ? 'rotate-90' : ''}" />
 				{$_('project.archived')} ({archivedProjects.length})
 			</button>
 

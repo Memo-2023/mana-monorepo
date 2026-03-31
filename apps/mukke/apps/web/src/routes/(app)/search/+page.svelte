@@ -3,6 +3,7 @@
 	import { playerStore } from '$lib/stores/player.svelte';
 	import { playlistStore } from '$lib/stores/playlist.svelte';
 	import type { Song } from '@mukke/shared';
+	import { Heart, MagnifyingGlass, Note, Plus } from '@manacore/shared-icons';
 
 	let query = $state('');
 	let results = $state<Song[]>([]);
@@ -80,19 +81,10 @@
 
 	<!-- Search input -->
 	<div class="relative mb-6">
-		<svg
-			class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-secondary"
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-			/>
-		</svg>
+		<MagnifyingGlass
+			size={20}
+			class="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-secondary"
+		/>
 		<input
 			type="text"
 			bind:value={query}
@@ -113,19 +105,7 @@
 	{:else if !hasSearched}
 		<!-- Empty state before searching -->
 		<div class="text-center py-16">
-			<svg
-				class="w-12 h-12 text-foreground-secondary mx-auto mb-3"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-				/>
-			</svg>
+			<MagnifyingGlass size={48} class="text-foreground-secondary mx-auto mb-3" />
 			<p class="text-foreground-secondary">Search your music library</p>
 		</div>
 	{:else if results.length === 0}
@@ -176,19 +156,7 @@
 								: 'text-foreground-secondary hover:text-red-500'}"
 							title={song.favorite ? 'Remove from favorites' : 'Add to favorites'}
 						>
-							<svg
-								class="w-4 h-4"
-								fill={song.favorite ? 'currentColor' : 'none'}
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-								/>
-							</svg>
+							<Heart size={16} />
 						</button>
 						<!-- Add to Playlist -->
 						<div class="relative">
@@ -197,14 +165,7 @@
 								class="p-1 text-foreground-secondary hover:text-foreground transition-colors"
 								title="Add to playlist"
 							>
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M12 4v16m8-8H4"
-									/>
-								</svg>
+								<Plus size={16} />
 							</button>
 							{#if activePlaylistDropdown === song.id}
 								<div
@@ -232,14 +193,7 @@
 							class="p-1 text-foreground-secondary hover:text-foreground transition-colors"
 							title="Open in editor"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-								/>
-							</svg>
+							<Note size={16} />
 						</a>
 					</div>
 				</div>

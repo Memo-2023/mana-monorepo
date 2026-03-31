@@ -27,6 +27,7 @@
 	import { ContactSelector, focusTrap } from '@manacore/shared-ui';
 	import { ManaLinkList, ManaLinkPicker } from '@manacore/shared-links/ui';
 	import { searchCrossApp } from '$lib/data/cross-app-search';
+	import { X } from '@manacore/shared-icons';
 
 	interface Props {
 		task: Task;
@@ -188,14 +189,7 @@
 			<div class="modal-header">
 				<h2 class="modal-title">Aufgabe bearbeiten</h2>
 				<button type="button" class="close-btn" onclick={onClose} title="Schließen">
-					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X size={20} />
 				</button>
 			</div>
 

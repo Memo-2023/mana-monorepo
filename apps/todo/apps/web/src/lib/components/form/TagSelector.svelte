@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { Tag } from '@manacore/shared-tags';
+	import { CaretDown, Check } from '@manacore/shared-icons';
 
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
@@ -52,9 +53,7 @@
 				{/if}
 			</div>
 		{/if}
-		<svg class="dropdown-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-		</svg>
+		<CaretDown size={20} class="dropdown-arrow" />
 	</button>
 
 	{#if showDropdown}
@@ -71,14 +70,7 @@
 					<span class="tag-dot" style="background-color: {tag.color}"></span>
 					<span class="tag-name">{tag.name}</span>
 					{#if selectedIds.includes(tag.id)}
-						<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M5 13l4 4L19 7"
-							/>
-						</svg>
+						<Check size={20} class="check-icon" />
 					{/if}
 				</button>
 			{/each}

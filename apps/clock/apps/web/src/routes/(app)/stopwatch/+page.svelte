@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import { PageHeader } from '@manacore/shared-ui';
 	import {
+	import { Clock } from '@manacore/shared-icons';
 		stopwatchesStore,
 		formatTime,
 		formatLapTime,
@@ -72,20 +73,7 @@
 	<!-- Empty State -->
 	<div class="flex flex-col items-center justify-center py-16 text-center">
 		<div class="w-24 h-24 mb-6 rounded-full bg-muted flex items-center justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-12 w-12 text-muted-foreground"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="1.5"
-					d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
+			<Clock size={20} class="text-muted-foreground" />
 		</div>
 		<h2 class="text-xl font-medium text-foreground mb-2">{$_('stopwatch.noStopwatches')}</h2>
 		<p class="text-muted-foreground mb-6 max-w-sm">{$_('stopwatch.noStopwatchesDescription')}</p>

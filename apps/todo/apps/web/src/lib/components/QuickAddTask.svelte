@@ -21,6 +21,7 @@
 	import { PRIORITY_OPTIONS } from '@todo/shared';
 	import { format, addDays } from 'date-fns';
 	import { de } from 'date-fns/locale';
+	import { CalendarBlank, Folder, Plus, Flag, ArrowRight } from '@manacore/shared-icons';
 
 	let inputValue = $state('');
 	let isLoading = $state(false);
@@ -266,9 +267,7 @@
 	<div class="quick-add-wrapper">
 		<!-- Plus icon -->
 		<div class="quick-add-icon">
-			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={16} />
 		</div>
 
 		<!-- Input -->
@@ -296,14 +295,7 @@
 					}}
 					title="Fälligkeitsdatum"
 				>
-					<svg class="option-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-						/>
-					</svg>
+					<CalendarBlank size={20} class="option-icon" />
 					<span class="option-label">{dateLabel()}</span>
 				</button>
 
@@ -335,20 +327,7 @@
 					}}
 					title="Priorität"
 				>
-					<svg
-						class="option-icon"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke={currentPriority.color}
-						style="color: {currentPriority.color}"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
-						/>
-					</svg>
+					<Flag size={16} color={currentPriority.color} />
 				</button>
 
 				{#if showPriorityPicker}
@@ -380,20 +359,7 @@
 					}}
 					title="Projekt"
 				>
-					<svg
-						class="option-icon"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke={selectedProject?.color || 'currentColor'}
-						style={selectedProject ? `color: ${selectedProject.color}` : ''}
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-						/>
-					</svg>
+					<Folder size={20} class="option-icon" />
 				</button>
 
 				{#if showProjectPicker}
@@ -432,14 +398,7 @@
 						class="animate-spin h-4 w-4 border-2 border-white border-r-transparent rounded-full"
 					></div>
 				{:else}
-					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M13 7l5 5m0 0l-5 5m5-5H6"
-						/>
-					</svg>
+					<ArrowRight size={16} />
 				{/if}
 			</button>
 		</div>

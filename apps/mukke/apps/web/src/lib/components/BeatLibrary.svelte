@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
+	import { MusicNote, Pause, Play } from '@manacore/shared-icons';
 
 	interface LibraryBeat {
 		id: string;
@@ -134,14 +135,7 @@
 	{:else if beats.length === 0}
 		<div class="text-center py-12 text-foreground-secondary">
 			<div class="w-16 h-16 mx-auto mb-4 opacity-50">
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-					/>
-				</svg>
+				<MusicNote size={20} class="w-full h-full" />
 			</div>
 			<p>No beats available in the library yet.</p>
 			<p class="text-sm mt-2">Upload your own beat instead.</p>
@@ -159,13 +153,9 @@
 						aria-label={previewingBeat === beat.id ? 'Stop preview' : 'Play preview'}
 					>
 						{#if previewingBeat === beat.id}
-							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-								<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-							</svg>
+							<Pause size={20} weight="fill" />
 						{:else}
-							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-								<path d="M8 5v14l11-7z" />
-							</svg>
+							<Play size={20} weight="fill" />
 						{/if}
 					</button>
 

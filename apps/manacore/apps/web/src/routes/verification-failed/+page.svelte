@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { X } from '@manacore/shared-icons';
 
 	// Get error from URL query params
 	const error = $derived($page.url.searchParams.get('error') || 'unknown_error');
@@ -30,19 +31,7 @@
 		<div
 			class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30"
 		>
-			<svg
-				class="h-10 w-10 text-red-600 dark:text-red-400"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M6 18L18 6M6 6l12 12"
-				/>
-			</svg>
+			<X size={20} class="text-red-600 dark:text-red-400" />
 		</div>
 
 		<h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">

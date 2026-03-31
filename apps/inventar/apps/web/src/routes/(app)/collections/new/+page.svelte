@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
+	import { CaretLeft } from '@manacore/shared-icons';
 	import { collectionsStore } from '$lib/stores/collections.svelte';
 	import { DEFAULT_TEMPLATES } from '@inventar/shared';
 	import type { CollectionSchema, Template } from '@inventar/shared';
@@ -49,9 +50,7 @@
 			onclick={() => (step === 'details' && selectedTemplate ? (step = 'template') : goto('/'))}
 			class="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
 		>
-			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
+			<CaretLeft size={20} />
 		</button>
 		<h1 class="text-2xl font-bold text-[hsl(var(--foreground))]">{$_('collection.create')}</h1>
 	</div>

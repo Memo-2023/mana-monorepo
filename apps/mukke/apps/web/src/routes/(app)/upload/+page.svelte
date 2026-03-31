@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { libraryStore } from '$lib/stores/library.svelte';
 	import { MukkeEvents } from '@manacore/shared-utils/analytics';
+	import { Check, DownloadSimple, Plus, X } from '@manacore/shared-icons';
 
 	interface UploadFile {
 		file: File;
@@ -159,27 +160,13 @@
 		ondrop={handleDrop}
 		role="region"
 	>
-		<svg
-			class="w-12 h-12 mx-auto mb-4 text-foreground-secondary"
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-			/>
-		</svg>
+		<DownloadSimple size={48} class="mx-auto mb-4 text-foreground-secondary" />
 		<p class="text-foreground-secondary mb-2">Drag and drop audio files here</p>
 		<p class="text-sm text-foreground-secondary mb-4">or</p>
 		<label
 			class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium cursor-pointer"
 		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={20} />
 			Browse Files
 			<input type="file" accept="audio/*" multiple class="hidden" onchange={handleFileInput} />
 		</label>
@@ -198,19 +185,7 @@
 									class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin flex-shrink-0"
 								></div>
 							{:else if uf.status === 'uploaded'}
-								<svg
-									class="w-5 h-5 text-green-500 flex-shrink-0"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M5 13l4 4L19 7"
-									/>
-								</svg>
+								<Check size={20} class="text-green-500" />
 							{:else if uf.status === 'error'}
 								<svg
 									class="w-5 h-5 text-red-500 flex-shrink-0"
@@ -234,14 +209,7 @@
 							onclick={() => removeFile(uf.id)}
 							class="p-1 text-foreground-secondary hover:text-foreground flex-shrink-0"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
+							<X size={16} />
 						</button>
 					</div>
 

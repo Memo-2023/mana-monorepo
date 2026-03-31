@@ -3,6 +3,7 @@
 	import { moodCollection } from '$lib/data/local-store';
 	import type { LocalMood } from '$lib/data/local-store';
 	import { toast } from 'svelte-sonner';
+	import { X } from '@manacore/shared-icons';
 
 	const moods = useLiveQuery(() => moodCollection.getAll());
 
@@ -156,14 +157,7 @@
 							}}
 							class="absolute right-2 top-2 rounded-full p-1 text-gray-500 opacity-0 hover:bg-gray-800 hover:text-red-400 group-hover:opacity-100"
 						>
-							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-								><path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/></svg
-							>
+							<X size={16} />
 						</button>
 					{/if}
 				</button>

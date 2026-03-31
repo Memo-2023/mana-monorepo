@@ -2,6 +2,17 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Card, PageHeader } from '@manacore/shared-ui';
+	import {
+		QrCode,
+		DownloadSimple,
+		Info,
+		ShieldCheck,
+		CurrencyCircleDollar,
+		Clock,
+		Warning,
+		CheckCircle,
+		WarningCircle,
+	} from '@manacore/shared-icons';
 	import Breadcrumbs from '$lib/components/Breadcrumbs.svelte';
 	import StatCard from '$lib/components/admin/StatCard.svelte';
 	import ProjectDataCard from '$lib/components/admin/ProjectDataCard.svelte';
@@ -117,14 +128,7 @@
 					class="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors"
 					title="Als QR-Code exportieren"
 				>
-					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-						/>
-					</svg>
+					<QrCode size={16} />
 					<span>QR-Code</span>
 				</button>
 				<button
@@ -149,14 +153,7 @@
 							></path>
 						</svg>
 					{:else}
-						<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-							/>
-						</svg>
+						<DownloadSimple size={16} />
 					{/if}
 					<span>{exporting ? 'Exportiere...' : 'Daten exportieren'}</span>
 				</button>
@@ -169,19 +166,7 @@
 		class="rounded-lg border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 p-4"
 	>
 		<div class="flex items-start gap-3">
-			<svg
-				class="h-5 w-5 text-blue-500 mt-0.5 shrink-0"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
+			<Info size={20} class="text-blue-500 mt-0.5 shrink-0" />
 			<div class="flex-1">
 				<p class="text-sm text-blue-800 dark:text-blue-200">
 					Hier siehst du alle Daten, die wir uber dich speichern. Mehr Informationen findest du in
@@ -245,24 +230,12 @@
 							</span>
 							{#if userData.user.emailVerified}
 								<span class="text-xs text-green-600 flex items-center gap-1">
-									<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-										<path
-											fill-rule="evenodd"
-											d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-											clip-rule="evenodd"
-										/>
-									</svg>
+									<CheckCircle size={12} weight="fill" />
 									Email verifiziert
 								</span>
 							{:else}
 								<span class="text-xs text-yellow-600 flex items-center gap-1">
-									<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-										<path
-											fill-rule="evenodd"
-											d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-											clip-rule="evenodd"
-										/>
-									</svg>
+									<WarningCircle size={12} weight="fill" />
 									Email nicht verifiziert
 								</span>
 							{/if}
@@ -293,19 +266,7 @@
 			<Card>
 				<div class="p-6">
 					<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-						<svg
-							class="h-5 w-5 text-blue-500"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-							/>
-						</svg>
+						<ShieldCheck size={20} class="text-blue-500" />
 						Authentifizierung
 					</h3>
 					<div class="space-y-3">
@@ -337,19 +298,7 @@
 			<Card>
 				<div class="p-6">
 					<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-						<svg
-							class="h-5 w-5 text-yellow-500"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
+						<CurrencyCircleDollar size={20} class="text-yellow-500" />
 						Credits
 					</h3>
 					<div class="space-y-3">
@@ -388,14 +337,7 @@
 		<Card>
 			<div class="p-6">
 				<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-					<svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					</svg>
+					<Clock size={20} class="text-gray-500" />
 					Aufbewahrungsfristen
 				</h3>
 				<p class="text-sm text-muted-foreground mb-4">So lange speichern wir deine Daten:</p>
@@ -431,14 +373,7 @@
 					<div
 						class="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
 					>
-						<svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-							/>
-						</svg>
+						<Warning size={20} class="text-red-600" />
 					</div>
 					<div>
 						<h3 class="text-lg font-semibold text-red-600">Gefahrenzone</h3>

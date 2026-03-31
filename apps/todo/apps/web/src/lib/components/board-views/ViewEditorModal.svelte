@@ -1,6 +1,40 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID, type DndEvent } from 'svelte-dnd-action';
 	import type { LocalBoardView, ViewColumn } from '$lib/data/local-store';
+	import {
+		X,
+		Plus,
+		Columns,
+		GridFour,
+		Flag,
+		Folder,
+		CalendarBlank,
+		List,
+		Star,
+		Tag,
+		Clock,
+		Crosshair,
+		Lightning,
+		Heart,
+		DotsSixVertical,
+	} from '@manacore/shared-icons';
+	import type { ComponentType } from 'svelte';
+
+	// Map icon names to Phosphor components
+	const phosphorIconMap: Record<string, ComponentType> = {
+		columns: Columns,
+		'grid-four': GridFour,
+		flag: Flag,
+		folders: Folder,
+		calendar: CalendarBlank,
+		list: List,
+		star: Star,
+		tag: Tag,
+		clock: Clock,
+		target: Crosshair,
+		lightning: Lightning,
+		heart: Heart,
+	};
 
 	interface Props {
 		open: boolean;
@@ -29,24 +63,6 @@
 		{ value: 'lightning', label: 'Blitz' },
 		{ value: 'heart', label: 'Herz' },
 	] as const;
-
-	const iconPathMap: Record<string, string> = {
-		columns: 'M9 4h6v16H9zM3 4h4v16H3zM17 4h4v16h-4z',
-		'grid-four': 'M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z',
-		flag: 'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7',
-		folders: 'M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z',
-		calendar:
-			'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-		list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
-		star: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
-		tag: 'M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82zM7 7h.01',
-		clock: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v6l4 2',
-		target:
-			'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 18a6 6 0 100-12 6 6 0 000 12zM12 14a2 2 0 100-4 2 2 0 000 4z',
-		lightning: 'M13 2L3 14h9l-1 10 10-12h-9l1-10z',
-		heart:
-			'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z',
-	};
 
 	// ─── GroupBy options ────────────────────────────────────
 	const groupByOptions = [
@@ -324,15 +340,7 @@
 			<div class="modal-header">
 				<h2 class="modal-title">{isEditMode ? 'View bearbeiten' : 'Neue View'}</h2>
 				<button type="button" class="close-btn" onclick={onClose} aria-label="Schließen">
-					<svg
-						class="h-5 w-5"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-					>
-						<path d="M18 6L6 18M6 6l12 12" />
-					</svg>
+					<X size={20} />
 				</button>
 			</div>
 
@@ -363,18 +371,9 @@
 								onclick={() => (icon = opt.value)}
 								title={opt.label}
 							>
-								{#if iconPathMap[opt.value]}
-									<svg
-										class="h-5 w-5"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="1.5"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-									>
-										<path d={iconPathMap[opt.value]} />
-									</svg>
+								{#if phosphorIconMap[opt.value]}
+									{@const IconComp = phosphorIconMap[opt.value]}
+									<IconComp size={20} />
 								{/if}
 								<span class="icon-label">{opt.label}</span>
 							</button>
@@ -402,15 +401,7 @@
 							class:selected={layout === 'kanban'}
 							onclick={() => (layout = 'kanban')}
 						>
-							<svg
-								class="h-4 w-4"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<path d={iconPathMap.columns} />
-							</svg>
+							<Columns size={16} />
 							Kanban
 						</button>
 						<button
@@ -419,15 +410,7 @@
 							class:selected={layout === 'grid'}
 							onclick={() => (layout = 'grid')}
 						>
-							<svg
-								class="h-4 w-4"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<path d={iconPathMap['grid-four']} />
-							</svg>
+							<GridFour size={16} />
 							Grid
 						</button>
 					</div>
@@ -439,15 +422,7 @@
 						<label class="field-label">Spalten</label>
 						{#if columnsEditable}
 							<button type="button" class="add-col-btn" onclick={addColumn}>
-								<svg
-									class="h-3.5 w-3.5"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<path d="M12 5v14M5 12h14" />
-								</svg>
+								<Plus size={14} />
 								Hinzufügen
 							</button>
 						{/if}
@@ -482,16 +457,7 @@
 									<!-- Drag handle -->
 									{#if columnsEditable}
 										<span class="drag-handle" aria-label="Spalte verschieben">
-											<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-												<circle cx="9" cy="5" r="1.5" />
-												<circle cx="15" cy="5" r="1.5" />
-												<circle cx="9" cy="10" r="1.5" />
-												<circle cx="15" cy="10" r="1.5" />
-												<circle cx="9" cy="15" r="1.5" />
-												<circle cx="15" cy="15" r="1.5" />
-												<circle cx="9" cy="20" r="1.5" />
-												<circle cx="15" cy="20" r="1.5" />
-											</svg>
+											<DotsSixVertical size={16} weight="bold" />
 										</span>
 									{/if}
 
@@ -540,15 +506,7 @@
 											onclick={() => removeColumn(col.id)}
 											title="Spalte entfernen"
 										>
-											<svg
-												class="h-3.5 w-3.5"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												stroke-width="2"
-											>
-												<path d="M18 6L6 18M6 6l12 12" />
-											</svg>
+											<X size={14} />
 										</button>
 									{/if}
 								</div>

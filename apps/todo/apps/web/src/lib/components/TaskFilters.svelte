@@ -10,7 +10,15 @@
 
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 	import type { SortBy, SortOrder } from '$lib/stores/view.svelte';
-	import { X, DotsThree } from '@manacore/shared-icons';
+	import {
+		CaretDown,
+		Check,
+		CheckCircle,
+		Columns,
+		DotsThree,
+		MagnifyingGlass,
+		X,
+	} from '@manacore/shared-icons';
 
 	interface Props {
 		// Layout
@@ -135,14 +143,7 @@
 			<!-- Kanban View Button -->
 			{#if showKanbanNav}
 				<button class="glass-pill" onclick={() => goto('/kanban')} title="Kanban-Ansicht">
-					<svg class="pill-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-						/>
-					</svg>
+					<Columns size={18} />
 					<span class="pill-label">Kanban</span>
 				</button>
 			{/if}
@@ -183,19 +184,7 @@
 					onclick={onToggleCompleted}
 					title={isCompletedVisible ? 'Erledigte ausblenden' : 'Erledigte anzeigen'}
 				>
-					<svg
-						class="pill-icon"
-						fill={isCompletedVisible ? 'currentColor' : 'none'}
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					</svg>
+					<CheckCircle size={20} class="pill-icon" />
 					<span class="pill-label">Erledigt</span>
 				</button>
 			{/if}
@@ -239,19 +228,10 @@
 			{#if showSearch}
 				<div class="flex items-center gap-4">
 					<div class="relative flex-1 max-w-xs">
-						<svg
-							class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-							/>
-						</svg>
+						<MagnifyingGlass
+							size={16}
+							class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+						/>
 						<input
 							type="text"
 							value={searchQuery}
@@ -264,14 +244,7 @@
 								class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors"
 								onclick={() => onSearchChange('')}
 							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/>
-								</svg>
+								<X size={16} />
 							</button>
 						{/if}
 					</div>
@@ -281,14 +254,7 @@
 							class="ml-auto px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors flex items-center gap-2"
 							onclick={onClearFilters}
 						>
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
+							<X size={16} />
 							Zurücksetzen
 						</button>
 					{/if}
@@ -368,21 +334,12 @@
 							{:else}
 								<span class="text-muted-foreground">Auswählen</span>
 							{/if}
-							<svg
-								class="w-4 h-4 text-muted-foreground transition-transform {showLabelsDropdown
+							<CaretDown
+								size={16}
+								class="text-muted-foreground transition-transform {showLabelsDropdown
 									? 'rotate-180'
 									: ''}"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 9l-7 7-7-7"
-								/>
-							</svg>
+							/>
 						</button>
 
 						{#if showLabelsDropdown}
@@ -410,19 +367,7 @@
 												></div>
 												<span class="flex-1 text-left truncate">{label.name}</span>
 												{#if selectedLabelIds.includes(label.id)}
-													<svg
-														class="w-4 h-4 text-primary flex-shrink-0"
-														fill="none"
-														viewBox="0 0 24 24"
-														stroke="currentColor"
-													>
-														<path
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															stroke-width="2"
-															d="M5 13l4 4L19 7"
-														/>
-													</svg>
+													<Check size={16} class="text-primary" />
 												{/if}
 											</button>
 										{/each}

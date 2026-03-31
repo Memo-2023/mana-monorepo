@@ -10,6 +10,7 @@
 		getTotalItemCount,
 	} from '$lib/data/queries';
 	import type { Collection, Item } from '@inventar/shared';
+	import { Plus, Trash } from '@manacore/shared-icons';
 
 	const collectionsCtx: { readonly value: Collection[] } = getContext('collections');
 	const itemsCtx: { readonly value: Item[] } = getContext('items');
@@ -53,9 +54,7 @@
 			href="/collections/new"
 			class="flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--primary-foreground))] transition-colors hover:opacity-90"
 		>
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={20} />
 			{$_('collection.create')}
 		</a>
 	</div>
@@ -104,14 +103,7 @@
 							onclick={(e) => handleDelete(e, collection.id)}
 							class="rounded p-1 text-[hsl(var(--muted-foreground))] opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
 						>
-							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-								/>
-							</svg>
+							<Trash size={20} />
 						</button>
 					</div>
 

@@ -9,6 +9,7 @@
 	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
 	import { PillToolbarButton, PillToolbarDivider, PillViewSwitcher } from '@manacore/shared-ui';
+	import { CheckCircle, Columns, Funnel } from '@manacore/shared-icons';
 
 	interface Props {
 		/** Vertical layout (for sidebar mode) */
@@ -91,14 +92,7 @@
 		}}
 		title="Ansicht wechseln"
 	>
-		<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-			/>
-		</svg>
+		<Columns size={20} />
 	</PillToolbarButton>
 
 	{#if !vertical}
@@ -114,14 +108,7 @@
 			active={activeFilterCount > 0}
 			title="Filter"
 		>
-			<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-				/>
-			</svg>
+			<Funnel size={20} />
 			{#if activeFilterCount > 0}
 				<span class="filter-count">{activeFilterCount}</span>
 			{/if}
@@ -191,14 +178,7 @@
 		active={showCompleted}
 		title={showCompleted ? 'Erledigte ausblenden' : 'Erledigte anzeigen'}
 	>
-		<svg fill={showCompleted ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-			/>
-		</svg>
+		<CheckCircle size={20} />
 	</PillToolbarButton>
 </div>
 

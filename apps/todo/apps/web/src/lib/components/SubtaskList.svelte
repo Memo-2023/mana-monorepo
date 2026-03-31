@@ -2,6 +2,7 @@
 	import type { Subtask } from '@todo/shared';
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
+	import { Check, Plus, X, DotsSixVertical } from '@manacore/shared-icons';
 
 	interface Props {
 		subtasks: Subtask[];
@@ -113,14 +114,7 @@
 				<div class="subtask-item" animate:flip={{ duration: 200 }}>
 					<!-- Drag handle -->
 					<div class="drag-handle" aria-label="Ziehen zum Sortieren">
-						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 8h16M4 16h16"
-							/>
-						</svg>
+						<DotsSixVertical size={16} />
 					</div>
 
 					<!-- Checkbox -->
@@ -131,14 +125,7 @@
 						onclick={() => toggleComplete(subtask.id)}
 					>
 						{#if subtask.isCompleted}
-							<svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="3"
-									d="M5 13l4 4L19 7"
-								/>
-							</svg>
+							<Check size={20} class="check-icon" />
 						{/if}
 					</button>
 
@@ -169,14 +156,7 @@
 						onclick={() => deleteSubtask(subtask.id)}
 						title="Löschen"
 					>
-						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={16} />
 					</button>
 				</div>
 			{/each}
@@ -186,9 +166,7 @@
 	<!-- Add new subtask -->
 	<div class="add-subtask">
 		<div class="add-icon">
-			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-			</svg>
+			<Plus size={16} />
 		</div>
 		<input
 			type="text"

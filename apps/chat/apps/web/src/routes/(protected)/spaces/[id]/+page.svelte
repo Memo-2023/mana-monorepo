@@ -9,6 +9,7 @@
 	import { chatService } from '$lib/services/chat';
 	import { PageHeader } from '@manacore/shared-ui';
 	import type { Space, Conversation, AIModel } from '@chat/types';
+	import { ChatCircle } from '@manacore/shared-icons';
 
 	const spaceId = $derived($page.params.id ?? '');
 
@@ -128,19 +129,7 @@
 
 				{#if conversations.length === 0}
 					<div class="text-center py-12 bg-surface rounded-xl border border-border">
-						<svg
-							class="w-12 h-12 text-muted-foreground mx-auto mb-3"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="1.5"
-								d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-							/>
-						</svg>
+						<ChatCircle size={48} class="text-muted-foreground mx-auto mb-3" />
 						<p class="text-muted-foreground">Noch keine Konversationen in diesem Space.</p>
 					</div>
 				{:else}

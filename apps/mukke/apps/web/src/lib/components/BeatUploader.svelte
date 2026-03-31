@@ -3,6 +3,7 @@
 	import { audioStore } from '$lib/stores/audio.svelte';
 	import { detectBpmFromFile } from '$lib/utils/bpm-detector';
 	import BeatLibrary from './BeatLibrary.svelte';
+	import { MusicNote, Upload, Warning } from '@manacore/shared-icons';
 
 	interface Props {
 		projectId: string;
@@ -138,14 +139,7 @@
 				: 'text-foreground-secondary hover:text-foreground'}"
 		>
 			<span class="flex items-center justify-center gap-2">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-					/>
-				</svg>
+				<Upload size={16} />
 				Upload
 			</span>
 			{#if activeTab === 'upload'}
@@ -160,14 +154,7 @@
 				: 'text-foreground-secondary hover:text-foreground'}"
 		>
 			<span class="flex items-center justify-center gap-2">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-					/>
-				</svg>
+				<MusicNote size={16} />
 				Library
 			</span>
 			{#if activeTab === 'library'}
@@ -198,19 +185,7 @@
 				<div class="space-y-4">
 					<div class="w-16 h-16 mx-auto">
 						{#if isDetectingBpm}
-							<svg
-								class="w-full h-full text-primary animate-pulse"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-								/>
-							</svg>
+							<MusicNote size={20} class="w-full h-full text-primary animate-pulse" />
 						{:else}
 							<div
 								class="w-full h-full border-4 border-primary border-t-transparent rounded-full animate-spin"
@@ -230,14 +205,7 @@
 			{:else}
 				<label for="beat-upload" class="cursor-pointer block">
 					<div class="w-16 h-16 mx-auto mb-4 text-foreground-secondary">
-						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-full h-full">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-							/>
-						</svg>
+						<Upload size={20} class="w-full h-full" />
 					</div>
 					<p class="text-lg font-medium mb-2">Upload a Beat</p>
 					<p class="text-foreground-secondary text-sm">
@@ -271,19 +239,7 @@
 			</div>
 		{:else if transcriptionError}
 			<div class="flex items-center gap-3 p-4 bg-red-500/10 rounded-lg border border-red-500/30">
-				<svg
-					class="w-5 h-5 text-red-500 flex-shrink-0"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-					/>
-				</svg>
+				<Warning size={20} class="text-red-500" />
 				<div class="flex-1">
 					<p class="text-sm font-medium text-red-500">Transcription failed</p>
 					<p class="text-xs text-foreground-secondary">{transcriptionError}</p>

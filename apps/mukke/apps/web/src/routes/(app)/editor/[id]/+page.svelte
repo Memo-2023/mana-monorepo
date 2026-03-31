@@ -16,6 +16,7 @@
 	import BeatUploader from '$lib/components/BeatUploader.svelte';
 	import { ThemeToggle } from '@manacore/shared-theme-ui';
 	import { theme } from '$lib/stores/theme.svelte';
+	import { ArrowLeft, DownloadSimple, MusicNote } from '@manacore/shared-icons';
 
 	let waveformEditor: WaveformEditor;
 	let showExportMenu = $state(false);
@@ -268,14 +269,7 @@
 					href="/"
 					class="text-foreground-secondary hover:text-foreground transition-colors shrink-0"
 				>
-					<svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M10 19l-7-7m0 0l7-7m-7 7h18"
-						/>
-					</svg>
+					<ArrowLeft size={20} class="md: md:" />
 				</a>
 				<div class="min-w-0">
 					<h1 class="font-semibold text-sm md:text-base truncate">
@@ -305,14 +299,7 @@
 								class="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin"
 							></div>
 						{:else}
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-								/>
-							</svg>
+							<DownloadSimple size={16} />
 						{/if}
 						<span class="hidden sm:inline">Export</span>
 					</button>
@@ -370,14 +357,7 @@
 							<div
 								class="flex items-center gap-2 text-xs md:text-sm text-foreground-secondary truncate"
 							>
-								<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-									/>
-								</svg>
+								<MusicNote size={16} class="shrink-0" />
 								<span class="truncate">{projectStore.currentBeat.filename}</span>
 							</div>
 							<button

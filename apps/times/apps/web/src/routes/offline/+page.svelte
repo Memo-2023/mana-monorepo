@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { Clock } from '@manacore/shared-icons';
 </script>
 
 <svelte:head>
@@ -11,19 +12,7 @@
 		<div
 			class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[hsl(var(--muted))]"
 		>
-			<svg
-				class="h-10 w-10 text-[hsl(var(--muted-foreground))]"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-				/>
-			</svg>
+			<Clock size={20} class="text-[hsl(var(--muted-foreground))]" />
 		</div>
 		<h1 class="mb-2 text-2xl font-bold text-[hsl(var(--foreground))]">Offline</h1>
 		<p class="mb-6 text-[hsl(var(--muted-foreground))]">

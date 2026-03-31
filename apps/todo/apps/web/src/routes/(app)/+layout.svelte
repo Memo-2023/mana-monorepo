@@ -54,6 +54,7 @@
 	import { todoStore, taskCollection } from '$lib/data/local-store';
 	import { useAllTasks, useAllProjects, getActiveProjects } from '$lib/data/task-queries';
 	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
+	import { List, X } from '@manacore/shared-icons';
 
 	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
 	const allTasks = useAllTasks();
@@ -537,24 +538,10 @@
 				>
 					{#if isPillNavCollapsed}
 						<!-- Menu icon -->
-						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 6h16M4 12h16M4 18h16"
-							/>
-						</svg>
+						<List size={20} class="fab-icon" />
 					{:else}
 						<!-- Close icon -->
-						<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="fab-icon">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X size={20} class="fab-icon" />
 					{/if}
 				</button>
 			{/if}

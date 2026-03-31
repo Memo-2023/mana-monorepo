@@ -3,6 +3,7 @@
 	import EntryItem from './EntryItem.svelte';
 	import { groupEntriesByDate, getTotalDuration, formatDurationCompact } from '$lib/data/queries';
 	import type { TimeEntry } from '@times/shared';
+	import { Clock } from '@manacore/shared-icons';
 
 	let { entries }: { entries: TimeEntry[] } = $props();
 
@@ -33,19 +34,7 @@
 	<div
 		class="rounded-xl border border-dashed border-[hsl(var(--border))] p-8 text-center text-[hsl(var(--muted-foreground))]"
 	>
-		<svg
-			class="mx-auto mb-3 h-10 w-10 opacity-50"
-			fill="none"
-			stroke="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="1.5"
-				d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-			/>
-		</svg>
+		<Clock size={20} class="mx-auto mb-3 opacity-50" />
 		<p>{$_('entry.noEntries')}</p>
 	</div>
 {:else}

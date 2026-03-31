@@ -3,6 +3,7 @@
 	import { _ } from 'svelte-i18n';
 	import { timerStore } from '$lib/stores/timer.svelte';
 	import { formatDuration } from '$lib/data/queries';
+	import { Stop } from '@manacore/shared-icons';
 	import type { Project } from '@times/shared';
 
 	const allProjects = getContext<{ value: Project[] }>('projects');
@@ -54,9 +55,7 @@
 			class="flex h-5 w-5 items-center justify-center rounded bg-red-500 text-white transition-colors hover:bg-red-600"
 			title={$_('timer.stop')}
 		>
-			<svg class="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 24 24">
-				<rect x="6" y="6" width="12" height="12" rx="1" />
-			</svg>
+			<Stop size={10} weight="fill" />
 		</button>
 	</div>
 {/if}
