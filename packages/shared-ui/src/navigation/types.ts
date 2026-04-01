@@ -171,6 +171,8 @@ export interface PillNavigationProps {
 	prependElements?: PillNavElement[];
 	/** Additional elements to show after nav items (tab groups, dividers) */
 	elements?: PillNavElement[];
+	/** Bottom offset from viewport bottom (default: '0px'). Use to position above other fixed bars. */
+	bottomOffset?: string;
 }
 
 export interface NavItem {

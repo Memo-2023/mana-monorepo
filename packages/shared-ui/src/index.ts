@@ -234,8 +234,8 @@ export type {
 } from './toast';
 
 // Bottom Stack
-export { BottomStack, MinimizedTabs } from './bottom-stack';
-export type { MinimizedPage, MinimizedTabsCallbacks } from './bottom-stack';
+export { BottomStack, MinimizedTabs, NotificationBar } from './bottom-stack';
+export type { MinimizedPage, MinimizedTabsCallbacks, BottomNotification } from './bottom-stack';
 
 // Actions
 export { focusTrap } from './actions';
