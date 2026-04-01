@@ -1,0 +1,26 @@
+{
+	"name": "@manacore/local-llm",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Client-side LLM inference via WebLLM (Qwen 2.5 1.5B) with Svelte 5 reactive stores",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"type-check": "tsc --noEmit",
+		"clean": "rm -rf dist"
+	},
+	"dependencies": {
+		"@mlc-ai/web-llm": "^0.2.78"
+	},
+	"devDependencies": {
+		"@types/node": "^24.10.1",
+		"svelte": "^5.0.0",
+		"typescript": "^5.9.3"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	}
+}
