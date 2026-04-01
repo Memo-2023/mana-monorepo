@@ -126,6 +126,22 @@
 				"documents": "Documents",
 				"empty": "No documents",
 				"open": "Open Context"
+			},
+			"contacts_recent": {
+				"title": "Recent Contacts",
+				"description": "Recently updated contacts"
+			},
+			"active_timer": {
+				"title": "Time Tracking",
+				"description": "Running timer"
+			},
+			"nutrition": {
+				"title": "Nutrition",
+				"description": "Today's calorie progress"
+			},
+			"plant_watering": {
+				"title": "Plant Care",
+				"description": "Plants that need watering"
 			}
 		}
 	},

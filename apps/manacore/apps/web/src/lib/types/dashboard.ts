@@ -16,6 +16,7 @@ export type WidgetType =
 	| 'calendar-events' // Calendar API: upcoming events
 	| 'chat-recent' // Chat API: recent conversations
 	| 'contacts-favorites' // Contacts API: favorite contacts
+	| 'contacts-recent' // Contacts: recently updated
 	| 'zitare-quote' // Zitare API: daily inspiration quote
 	| 'picture-recent' // Picture API: recent generations
 	| 'cards-progress' // Cards API: learning progress
@@ -23,7 +24,10 @@ export type WidgetType =
 	| 'storage-usage' // Storage: file storage stats
 	| 'mukke-library' // Mukke: music library stats
 	| 'presi-decks' // Presi: recent presentations
-	| 'context-docs'; // Context: recent documents & spaces
+	| 'context-docs' // Context: recent documents & spaces
+	| 'active-timer' // Times: running timer
+	| 'nutrition-progress' // NutriPhi: today's calorie progress
+	| 'plant-watering'; // Planta: plants due for watering
 
 /**
  * Widget size - maps to CSS Grid columns
@@ -121,6 +125,9 @@ export interface WidgetMeta {
 		| 'mukke'
 		| 'presi'
 		| 'context'
+		| 'times'
+		| 'nutriphi'
+		| 'planta'
 		| 'mana-core-auth';
 }
 
@@ -270,6 +277,42 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		defaultSize: 'medium',
 		allowMultiple: false,
 		requiredBackend: 'context',
+	},
+	{
+		type: 'contacts-recent',
+		nameKey: 'dashboard.widgets.contacts_recent.title',
+		descriptionKey: 'dashboard.widgets.contacts_recent.description',
+		icon: '👤',
+		defaultSize: 'medium',
+		allowMultiple: false,
+		requiredBackend: 'contacts',
+	},
+	{
+		type: 'active-timer',
+		nameKey: 'dashboard.widgets.active_timer.title',
+		descriptionKey: 'dashboard.widgets.active_timer.description',
+		icon: '⏱️',
+		defaultSize: 'small',
+		allowMultiple: false,
+		requiredBackend: 'times',
+	},
+	{
+		type: 'nutrition-progress',
+		nameKey: 'dashboard.widgets.nutrition.title',
+		descriptionKey: 'dashboard.widgets.nutrition.description',
+		icon: '🍽️',
+		defaultSize: 'small',
+		allowMultiple: false,
+		requiredBackend: 'nutriphi',
+	},
+	{
+		type: 'plant-watering',
+		nameKey: 'dashboard.widgets.plant_watering.title',
+		descriptionKey: 'dashboard.widgets.plant_watering.description',
+		icon: '🌱',
+		defaultSize: 'small',
+		allowMultiple: false,
+		requiredBackend: 'planta',
 	},
 ];
 

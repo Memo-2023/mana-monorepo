@@ -25,6 +25,12 @@ import MukkeLibraryWidget from './widgets/MukkeLibraryWidget.svelte';
 import PresiDecksWidget from './widgets/PresiDecksWidget.svelte';
 import ContextDocsWidget from './widgets/ContextDocsWidget.svelte';
 
+// Phase 4: Unified app widgets (direct Dexie queries, internal routing)
+import RecentContactsWidget from '$lib/modules/core/widgets/RecentContactsWidget.svelte';
+import ActiveTimerWidget from '$lib/modules/core/widgets/ActiveTimerWidget.svelte';
+import NutritionProgressWidget from '$lib/modules/core/widgets/NutritionProgressWidget.svelte';
+import PlantWateringWidget from '$lib/modules/core/widgets/PlantWateringWidget.svelte';
+
 export const widgetComponents: Record<WidgetType, Component> = {
 	credits: CreditsWidget,
 	'quick-actions': QuickActionsWidget,
@@ -34,6 +40,7 @@ export const widgetComponents: Record<WidgetType, Component> = {
 	'calendar-events': CalendarEventsWidget,
 	'chat-recent': ChatRecentWidget,
 	'contacts-favorites': ContactsFavoritesWidget,
+	'contacts-recent': RecentContactsWidget,
 	'zitare-quote': ZitareQuoteWidget,
 	'picture-recent': PictureRecentWidget,
 	'cards-progress': CardsProgressWidget,
@@ -42,4 +49,7 @@ export const widgetComponents: Record<WidgetType, Component> = {
 	'mukke-library': MukkeLibraryWidget,
 	'presi-decks': PresiDecksWidget,
 	'context-docs': ContextDocsWidget,
+	'active-timer': ActiveTimerWidget,
+	'nutrition-progress': NutritionProgressWidget,
+	'plant-watering': PlantWateringWidget,
 };

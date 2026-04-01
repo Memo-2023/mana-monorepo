@@ -126,6 +126,22 @@
 				"documents": "Dokumente",
 				"empty": "Keine Dokumente",
 				"open": "Context öffnen"
+			},
+			"contacts_recent": {
+				"title": "Letzte Kontakte",
+				"description": "Kürzlich aktualisierte Kontakte"
+			},
+			"active_timer": {
+				"title": "Zeiterfassung",
+				"description": "Laufender Timer"
+			},
+			"nutrition": {
+				"title": "Ernährung",
+				"description": "Heutiger Kalorienfortschritt"
+			},
+			"plant_watering": {
+				"title": "Pflanzenpflege",
+				"description": "Pflanzen die gegossen werden müssen"
 			}
 		}
 	},
