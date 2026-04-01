@@ -10,6 +10,7 @@
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
 	import { X, DotsSixVertical } from '@manacore/shared-icons';
+	import { registerSvelteActionDrag, clearSvelteActionDrag } from '@manacore/shared-ui/dnd';
 
 	interface Props {
 		columns: GroupedColumn[];
@@ -89,6 +90,10 @@
 
 	function handleDndConsider(columnId: string, e: CustomEvent<DndEvent<Task>>) {
 		localTasksByColumn = { ...localTasksByColumn, [columnId]: e.detail.items };
+		registerSvelteActionDrag({
+			type: 'task',
+			data: { id: e.detail.info.id, title: '' },
+		});
 	}
 
 	function handleDndFinalize(
@@ -107,6 +112,7 @@
 		}
 
 		localTasksByColumn = { ...localTasksByColumn, [columnId]: newItems };
+		clearSvelteActionDrag();
 	}
 
 	function handleAddTask(column: GroupedColumn, title: string) {

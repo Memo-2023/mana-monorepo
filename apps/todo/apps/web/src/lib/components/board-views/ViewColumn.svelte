@@ -6,6 +6,7 @@
 	import QuickAddTaskInline from '../kanban/QuickAddTaskInline.svelte';
 	import ViewColumnHeader from './ViewColumnHeader.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
+	import { registerSvelteActionDrag, clearSvelteActionDrag } from '@manacore/shared-ui/dnd';
 
 	interface Props {
 		column: GroupedColumn;
@@ -47,6 +48,10 @@
 
 	function handleDndConsider(e: CustomEvent<DndEvent<Task>>) {
 		localTasks = e.detail.items;
+		registerSvelteActionDrag({
+			type: 'task',
+			data: { id: e.detail.info.id, title: '' },
+		});
 	}
 
 	function handleDndFinalize(e: CustomEvent<DndEvent<Task>>) {
@@ -66,6 +71,7 @@
 		}
 
 		localTasks = newItems;
+		clearSvelteActionDrag();
 	}
 
 	function handleToggleComplete(task: Task) {

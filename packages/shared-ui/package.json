@@ -26,6 +26,11 @@
 			"svelte": "./src/organisms/index.ts",
 			"types": "./src/organisms/index.ts",
 			"default": "./src/organisms/index.ts"
+		},
+		"./dnd": {
+			"svelte": "./src/dnd/index.ts",
+			"types": "./src/dnd/index.ts",
+			"default": "./src/dnd/index.ts"
 		}
 	},
 	"scripts": {

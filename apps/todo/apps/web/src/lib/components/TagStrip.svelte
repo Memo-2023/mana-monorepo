@@ -5,12 +5,33 @@
 	import { DotsThree, Plus, X } from '@manacore/shared-icons';
 	import TagStripModal from './TagStripModal.svelte';
 	import { t } from 'svelte-i18n';
+	import { dragSource, passiveDropZone } from '@manacore/shared-ui/dnd';
+	import type { DragPayload, TaskDragData } from '@manacore/shared-ui/dnd';
+	import { tasksStore } from '$lib/stores/tasks.svelte';
+	import { taskCollection, type LocalTask } from '$lib/data/local-store';
+
+	interface Props {
+		bottomOffset?: string;
+	}
+
+	let { bottomOffset = '72px' }: Props = $props();
 
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 	const activeTagFilter: { readonly ids: string[]; set(ids: string[]): void } =
 		getContext('activeTagFilter');
 
 	let showModal = $state(false);
+
+	// ── DnD: assign tag when task is dropped on tag pill ────
+	async function handleTaskDropOnTag(tagId: string, payload: DragPayload) {
+		const taskData = payload.data as TaskDragData;
+		const task = await taskCollection.get(taskData.id);
+		if (!task) return;
+		const currentLabels: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
+		if (!currentLabels.includes(tagId)) {
+			tasksStore.updateLabels(taskData.id, [...currentLabels, tagId]);
+		}
+	}
 
 	function handleTagClick(tagId: string) {
 		const current = activeTagFilter.ids;
@@ -42,7 +63,7 @@
 	const hasTags = $derived(tagsCtx.value.length > 0);
 </script>
 
-<div class="tag-strip-wrapper">
+<div class="tag-strip-wrapper" style="--tag-strip-bottom: {bottomOffset}">
 	<div class="tag-strip-container">
 		<!-- Clear Filter Button (always rendered to prevent layout shift) -->
 		<button
@@ -75,6 +96,15 @@
 					onclick={() => handleTagClick(tag.id)}
 					title={tag.name}
 					style="--tag-color: {tag.color || '#8b5cf6'}"
+					use:dragSource={{
+						type: 'tag',
+						data: () => ({ id: tag.id, name: tag.name, color: tag.color || '#8b5cf6' }),
+					}}
+					use:passiveDropZone={{
+						accepts: ['task'],
+						onDrop: (payload) => handleTaskDropOnTag(tag.id, payload),
+						highlightClass: 'tag-drop-highlight',
+					}}
 				>
 					<span class="tag-dot"></span>
 					<span class="tag-name">{tag.name}</span>
@@ -100,7 +130,7 @@
 <style>
 	.tag-strip-wrapper {
 		position: fixed;
-		bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+		bottom: calc(var(--tag-strip-bottom, 72px) + env(safe-area-inset-bottom, 0px));
 		left: 0;
 		right: 0;
 		z-index: 49;
@@ -270,6 +300,45 @@
 		font-size: 0.875rem;
 		color: var(--color-primary);
 		font-weight: 500;
+	}
+
+	/* DnD: Tag is being dragged */
+	:global(.tag-pill.mana-drag-source-active) {
+		opacity: 0.5;
+		transform: scale(0.95) !important;
+	}
+
+	/* DnD: Task hovering over tag pill */
+	.tag-drop-highlight {
+		transform: scale(1.15) !important;
+		background: var(--tag-color) !important;
+		border-color: var(--tag-color) !important;
+		box-shadow: 0 0 16px color-mix(in srgb, var(--tag-color) 40%, transparent) !important;
+	}
+
+	.tag-drop-highlight .tag-dot {
+		background-color: white !important;
+	}
+
+	.tag-drop-highlight .tag-name {
+		color: white !important;
+	}
+
+	/* DnD: Success flash after drop */
+	:global(.tag-pill.mana-passive-zone-success) {
+		animation: tag-drop-success 400ms ease-out;
+	}
+
+	@keyframes tag-drop-success {
+		0% {
+			transform: scale(1.2);
+		}
+		50% {
+			transform: scale(0.95);
+		}
+		100% {
+			transform: scale(1);
+		}
 	}
 
 	/* Responsive */

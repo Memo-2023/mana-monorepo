@@ -16,6 +16,12 @@
 		Trash,
 	} from '@manacore/shared-icons';
 	import { TodoEvents } from '@manacore/shared-utils/analytics';
+	import {
+		dropTarget,
+		registerSvelteActionDrag,
+		clearSvelteActionDrag,
+	} from '@manacore/shared-ui/dnd';
+	import type { DragPayload, TagDragData } from '@manacore/shared-ui/dnd';
 
 	// Context menu state
 	let contextMenuVisible = $state(false);
@@ -188,8 +194,13 @@
 
 	const flipDurationMs = 200;
 
-	function handleDndConsider(e: CustomEvent<{ items: Task[] }>) {
+	function handleDndConsider(e: CustomEvent<{ items: Task[]; info: { id: string } }>) {
 		items = e.detail.items;
+		// Inform passive drop zones that a task is being dragged
+		registerSvelteActionDrag({
+			type: 'task',
+			data: { id: e.detail.info.id, title: '' },
+		});
 	}
 
 	function handleDndFinalize(e: CustomEvent<{ items: Task[]; info: { id: string } }>) {
@@ -223,6 +234,9 @@
 		setTimeout(() => {
 			dropInProgress = false;
 		}, 1000);
+
+		// Clear passive drop zone state
+		clearSvelteActionDrag();
 	}
 
 	async function handleToggleComplete(task: Task) {
@@ -235,6 +249,23 @@
 
 	async function handleDelete(taskId: string) {
 		await tasksStore.deleteTask(taskId);
+	}
+
+	// ── DnD Layer 1: handle tag dropped onto a task ─────────
+	function handleTagDrop(task: Task, payload: DragPayload) {
+		const tagData = payload.data as TagDragData;
+		const currentLabels: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
+		if (!currentLabels.includes(tagData.id)) {
+			tasksStore.updateLabels(task.id, [...currentLabels, tagData.id]);
+		}
+	}
+
+	function tagNotAlreadyOnTask(task: Task) {
+		return (payload: DragPayload) => {
+			const tagData = payload.data as TagDragData;
+			const currentLabels: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
+			return !currentLabels.includes(tagData.id);
+		};
 	}
 </script>
 
@@ -257,7 +288,14 @@
 				<div class="dnd-shadow-placeholder"></div>
 			{:else}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div oncontextmenu={(e) => handleContextMenu(e, task)}>
+				<div
+					oncontextmenu={(e) => handleContextMenu(e, task)}
+					use:dropTarget={{
+						accepts: ['tag'],
+						onDrop: (payload) => handleTagDrop(task, payload),
+						canDrop: tagNotAlreadyOnTask(task),
+					}}
+				>
 					<TaskItem
 						{task}
 						{showCompleted}
@@ -282,7 +320,14 @@
 	<div class="task-list">
 		{#each tasks as task (task.id)}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div oncontextmenu={(e) => handleContextMenu(e, task)}>
+			<div
+				oncontextmenu={(e) => handleContextMenu(e, task)}
+				use:dropTarget={{
+					accepts: ['tag'],
+					onDrop: (payload) => handleTagDrop(task, payload),
+					canDrop: tagNotAlreadyOnTask(task),
+				}}
+			>
 				<TaskItem
 					{task}
 					{showCompleted}
@@ -367,5 +412,34 @@
 	:global(.dark .task-list [data-is-dnd-shadow-item-hint]) {
 		background: rgba(139, 92, 246, 0.1);
 		border-color: rgba(139, 92, 246, 0.4);
+	}
+
+	/* Tag-on-Task drop target hover */
+	:global(.mana-drop-target-hover) {
+		outline: 2px solid var(--color-primary, #8b5cf6);
+		outline-offset: -2px;
+		border-radius: 0.375rem;
+		background: rgba(139, 92, 246, 0.06);
+		transition: all 0.15s ease;
+	}
+
+	:global(.dark .mana-drop-target-hover) {
+		background: rgba(139, 92, 246, 0.12);
+	}
+
+	/* Brief success pulse after tag assigned */
+	:global(.mana-drop-target-success) {
+		animation: drop-success-pulse 400ms ease-out;
+	}
+
+	@keyframes drop-success-pulse {
+		0% {
+			outline-color: #10b981;
+			background: rgba(16, 185, 129, 0.1);
+		}
+		100% {
+			outline-color: transparent;
+			background: transparent;
+		}
 	}
 </style>

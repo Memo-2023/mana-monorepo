@@ -233,5 +233,32 @@ export type {
 	GlobalErrorHandlerTranslations,
 } from './toast';
 
+// Bottom Stack
+export { BottomStack, MinimizedTabs } from './bottom-stack';
+export type { MinimizedPage, MinimizedTabsCallbacks } from './bottom-stack';
+
 // Actions
 export { focusTrap } from './actions';
+
+// Drag & Drop
+export {
+	dragSource,
+	dropTarget,
+	passiveDropZone,
+	dragState,
+	registerSvelteActionDrag,
+	clearSvelteActionDrag,
+	isTypeBeingDragged,
+	DragPreview,
+	ActionZone,
+} from './dnd';
+export type {
+	DragType,
+	DragPayload,
+	TagDragData,
+	TaskDragData,
+	DragSourceOptions,
+	DropTargetOptions,
+	PassiveDropZoneOptions,
+	ActionZoneProps,
+} from './dnd';

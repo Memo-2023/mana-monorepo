@@ -35,6 +35,7 @@
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { theme } from '$lib/stores/theme';
 	import TagStrip from '$lib/components/TagStrip.svelte';
+	import { DragPreview, ActionZone } from '@manacore/shared-ui/dnd';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -59,12 +60,33 @@
 	import type { LocalBoardView } from '$lib/data/local-store';
 	import { useAllTasks, useAllBoardViews } from '$lib/data/task-queries';
 	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
-	import { List, X } from '@manacore/shared-icons';
 	import { createMinimizedPagesContext } from '$lib/stores/minimized-pages.svelte';
 
 	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
-	const allTasks = useAllTasks();
+	const rawTasks = useAllTasks();
 	const allTags = useAllSharedTags();
+
+	// ─── Enrich tasks with resolved labels from shared tags ──
+	const allTasks = {
+		get value() {
+			const tagMap = new Map(allTags.value.map((t) => [t.id, t]));
+			return rawTasks.value.map((task) => {
+				const labelIds: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
+				if (labelIds.length === 0) return task;
+				const labels = labelIds
+					.map((id) => tagMap.get(id))
+					.filter((t): t is NonNullable<typeof t> => t != null)
+					.map((t) => ({
+						id: t.id,
+						userId: t.userId,
+						name: t.name,
+						color: t.color,
+						createdAt: t.createdAt,
+					}));
+				return { ...task, labels };
+			});
+		},
+	};
 
 	// ─── Board View Management ──────────────────────────────
 	const boardViews = useAllBoardViews();
@@ -83,10 +105,14 @@
 		},
 	};
 
+	// Minimized pages context (layout owns state, page syncs via context)
+	const minimizedPages = createMinimizedPagesContext();
+
 	// Provide data to child components via Svelte context
 	setContext('tasks', allTasks);
 	setContext('tags', allTags);
 	setContext('activeTagFilter', activeTagFilter);
+	setContext('minimizedPages', minimizedPages);
 	setContext('activeView', {
 		get value() {
 			return activeView;
@@ -174,15 +200,12 @@
 		}
 	}
 
-	// PillNav collapsed state (controlled by FAB)
-	let isPillNavCollapsed = $state(true);
-
 	// FilterStrip visibility (toggle via Filter button in PillNav)
 	let isFilterStripVisible = $derived(!todoSettings.filterStripCollapsed);
 
-	// Minimized page tabs add extra height to the bottom bar stack
-	let hasMinimizedTabs = $derived(minimizedPagesStore.hasPages);
-	const MINIMIZED_TABS_HEIGHT = 36; // px
+	// BottomStack computes these offsets automatically
+	let pillNavOffset = $state('0px');
+	let tagStripOffset = $state('72px');
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -291,16 +314,6 @@
 		}
 	}
 
-	// Toggle PillNav visibility (called by FAB)
-	function handlePillNavToggle() {
-		isPillNavCollapsed = !isPillNavCollapsed;
-		try {
-			localStorage?.setItem('todo-pillnav-collapsed', String(isPillNavCollapsed));
-		} catch {
-			// localStorage not available or quota exceeded
-		}
-	}
-
 	function handleToggleTheme() {
 		theme.toggleMode();
 	}
@@ -375,16 +388,6 @@
 		if ($page.url.pathname === '/' && userSettings.startPage && userSettings.startPage !== '/') {
 			goto(userSettings.startPage, { replaceState: true });
 		}
-
-		// Initialize PillNav collapsed state from localStorage
-		try {
-			const savedPillNavCollapsed = localStorage?.getItem('todo-pillnav-collapsed');
-			if (savedPillNavCollapsed === 'false') {
-				isPillNavCollapsed = false;
-			}
-		} catch {
-			// localStorage not available
-		}
 	}
 </script>
 
@@ -410,96 +413,23 @@
 
 			<!-- UI Elements (hidden in immersive mode) -->
 			{#if !todoSettings.immersiveModeEnabled}
-				<!-- PillNav (shown/hidden via FAB) -->
-				{#if !isPillNavCollapsed}
-					<PillNavigation
-						items={navItems}
-						currentPath={$page.url.pathname}
-						appName="Todo"
-						homeRoute="/"
-						onToggleTheme={handleToggleTheme}
-						{isDark}
-						showThemeToggle={true}
-						showThemeVariants={true}
-						{themeVariantItems}
-						{currentThemeVariantLabel}
-						themeMode={theme.mode}
-						onThemeModeChange={handleThemeModeChange}
-						showLanguageSwitcher={true}
-						{languageItems}
-						{currentLanguageLabel}
-						showLogout={authStore.isAuthenticated}
-						onLogout={handleLogout}
-						loginHref="/login"
-						primaryColor="#8b5cf6"
-						showAppSwitcher={true}
-						{appItems}
-						{userEmail}
-						settingsHref="/settings"
-						manaHref="/mana"
-						profileHref="/profile"
-						allAppsHref="/apps"
-						themesHref="/themes"
-						spiralHref="/spiral"
-						helpHref="/help"
-						onOpenInPanel={handleOpenInPanel}
-						ariaLabel="Hauptnavigation"
-						{spotlightActions}
+				<!-- BottomStack: computes offsets for the entire bottom bar stack -->
+				<BottomStack
+					pillNavVisible={true}
+					tagStripVisible={isFilterStripVisible}
+					bind:pillNavOffset
+					bind:tagStripOffset
+				>
+					<MinimizedTabs
+						pages={minimizedPages.pages}
+						onRestore={(id) => minimizedPages.restore(id)}
+						onRemove={(id) => minimizedPages.remove(id)}
+						onMaximize={(id) => minimizedPages.maximize(id)}
+						onAdd={() => minimizedPages.togglePicker()}
 					/>
+				</BottomStack>
 
-					<!-- Tag strip (toggled via Tags pill) -->
-					{#if isFilterStripVisible}
-						<TagStrip />
-					{/if}
-				{/if}
-
-				<!-- Minimized Page Tabs (between PillNav and QuickInputBar) -->
-				{#if hasMinimizedTabs}
-					<div
-						class="minimized-tabs-bar"
-						style="--tabs-bottom: {(() => {
-							let offset = 16;
-							if (!isPillNavCollapsed) offset += 68;
-							if (!isPillNavCollapsed && isFilterStripVisible) offset += 50;
-							return `${offset}px`;
-						})()}"
-					>
-						<div class="minimized-tabs-inner">
-							{#each minimizedPagesStore.pages as pg (pg.id)}
-								<div
-									class="minimized-tab"
-									role="button"
-									tabindex="0"
-									onclick={() => {
-										window.dispatchEvent(new CustomEvent('restore-page', { detail: pg.id }));
-									}}
-								>
-									<span class="minimized-tab-dot" style="background-color: {pg.color}"></span>
-									<span class="minimized-tab-title">{pg.title}</span>
-									<button
-										class="minimized-tab-close"
-										onclick={(e) => {
-											e.stopPropagation();
-											window.dispatchEvent(new CustomEvent('remove-page', { detail: pg.id }));
-										}}
-										title="Schließen"
-									>
-										<X size={10} />
-									</button>
-								</div>
-							{/each}
-							<button
-								class="minimized-tab-add"
-								onclick={() => window.dispatchEvent(new CustomEvent('toggle-page-picker'))}
-								title="Neue Seite hinzufügen"
-							>
-								<Plus size={14} />
-							</button>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Global Quick Input Bar -->
+				<!-- 1. QuickInputBar (always at bottom) -->
 				{#if $page.url.pathname === '/'}
 					<QuickInputBar
 						onSearch={handleSearch}
@@ -514,40 +444,60 @@
 						deferSearch={true}
 						locale={$locale || 'de'}
 						appIcon="todo"
-						hasFabRight={true}
-						bottomOffset={(() => {
-							let offset = 16;
-							if (!isPillNavCollapsed) offset += 68;
-							if (!isPillNavCollapsed && isFilterStripVisible) offset += 50;
-							if (hasMinimizedTabs) offset += MINIMIZED_TABS_HEIGHT;
-							return `${offset}px`;
-						})()}
+						bottomOffset="16px"
 					/>
 				{/if}
 
-				<!-- FAB to toggle PillNav visibility -->
-				<button
-					class="pillnav-fab"
-					style="--fab-bottom: {(() => {
-						let offset = 20;
-						if (!isPillNavCollapsed) offset += 68;
-						if (!isPillNavCollapsed && isFilterStripVisible) offset += 50;
-						if (hasMinimizedTabs) offset += MINIMIZED_TABS_HEIGHT;
-						return `${offset}px`;
-					})()}"
-					onclick={handlePillNavToggle}
-					title={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
-					aria-label={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
-					data-umami-event="pillnav-toggle"
-				>
-					{#if isPillNavCollapsed}
-						<!-- Menu icon -->
-						<List size="48" weight="bold" />
-					{:else}
-						<!-- Close icon -->
-						<X size="48" weight="bold" />
-					{/if}
-				</button>
+				<!-- 2. PillNav (above InputBar, always visible) -->
+				<PillNavigation
+					items={navItems}
+					currentPath={$page.url.pathname}
+					appName="Todo"
+					homeRoute="/"
+					onToggleTheme={handleToggleTheme}
+					{isDark}
+					showThemeToggle={true}
+					showThemeVariants={true}
+					{themeVariantItems}
+					{currentThemeVariantLabel}
+					themeMode={theme.mode}
+					onThemeModeChange={handleThemeModeChange}
+					showLanguageSwitcher={true}
+					{languageItems}
+					{currentLanguageLabel}
+					showLogout={authStore.isAuthenticated}
+					onLogout={handleLogout}
+					loginHref="/login"
+					primaryColor="#8b5cf6"
+					showAppSwitcher={true}
+					{appItems}
+					{userEmail}
+					settingsHref="/settings"
+					manaHref="/mana"
+					profileHref="/profile"
+					allAppsHref="/apps"
+					themesHref="/themes"
+					spiralHref="/spiral"
+					helpHref="/help"
+					onOpenInPanel={handleOpenInPanel}
+					ariaLabel="Hauptnavigation"
+					{spotlightActions}
+					bottomOffset={pillNavOffset}
+				/>
+
+				<!-- 3. TagStrip (above PillNav) -->
+				{#if isFilterStripVisible}
+					<TagStrip bottomOffset={tagStripOffset} />
+				{/if}
+
+				<!-- DnD: floating preview + action zones -->
+				<DragPreview />
+				<ActionZone
+					accepts={['task']}
+					onDrop={(payload) => tasksStore.deleteTask(payload.data.id)}
+					variant="danger"
+					label="Löschen"
+				/>
 			{/if}
 
 			<!-- Immersive Mode Toggle (always visible) -->
@@ -669,150 +619,5 @@
 		.main-content {
 			padding-bottom: calc(100px + env(safe-area-inset-bottom));
 		}
-	}
-
-	/* FAB to toggle PillNav — sits right next to the centered QuickInputBar */
-	.pillnav-fab {
-		position: fixed;
-		bottom: calc(var(--fab-bottom, 16px) + env(safe-area-inset-bottom, 0px));
-		/* Anchor to center, then offset by half of InputBar max-width (350px) + gap */
-		left: calc(50% + 350px + 0.75rem);
-		width: 56px;
-		height: 56px;
-		border-radius: 50%;
-		background: var(--color-surface-elevated-2);
-		border: 1px solid var(--color-border);
-		box-shadow: var(--shadow-xl);
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1002;
-		transition: all 0.2s ease;
-	}
-
-	/* On narrower screens, FAB sits at the right edge of the padded input area */
-	@media (max-width: 900px) {
-		.pillnav-fab {
-			left: auto;
-			right: 1rem;
-		}
-	}
-
-	.pillnav-fab:hover {
-		transform: scale(1.05);
-	}
-
-	.pillnav-fab:active {
-		transform: scale(0.95);
-	}
-
-	.pillnav-fab :global(svg) {
-		color: var(--color-foreground);
-	}
-
-	/* ── Minimized Page Tabs Bar ─────────────────────────── */
-	.minimized-tabs-bar {
-		position: fixed;
-		bottom: calc(var(--tabs-bottom, 16px) + env(safe-area-inset-bottom, 0px));
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 1001;
-	}
-
-	.minimized-tabs-inner {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.3rem 0.5rem;
-		background: var(--color-surface-elevated, #fffef5);
-		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
-		border-radius: 0.625rem;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-		overflow-x: auto;
-		scrollbar-width: none;
-	}
-	:global(.dark) .minimized-tabs-inner {
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-	}
-	.minimized-tabs-inner::-webkit-scrollbar {
-		display: none;
-	}
-
-	.minimized-tab {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.25rem 0.5rem;
-		background: transparent;
-		border: none;
-		border-radius: 0.3rem;
-		cursor: pointer;
-		transition: all 0.15s;
-		white-space: nowrap;
-		flex-shrink: 0;
-		font-family: inherit;
-	}
-	.minimized-tab:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-	:global(.dark) .minimized-tab:hover {
-		background: rgba(255, 255, 255, 0.08);
-	}
-
-	.minimized-tab-dot {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 9999px;
-		flex-shrink: 0;
-	}
-
-	.minimized-tab-title {
-		font-size: 0.75rem;
-		font-weight: 500;
-		color: var(--color-muted-foreground, #6b7280);
-	}
-
-	.minimized-tab-close {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 16px;
-		height: 16px;
-		border: none;
-		background: transparent;
-		color: var(--color-muted-foreground, #d1d5db);
-		border-radius: 0.125rem;
-		cursor: pointer;
-		padding: 0;
-		transition: all 0.15s;
-		opacity: 0.5;
-	}
-	.minimized-tab-close:hover {
-		opacity: 1;
-		background: rgba(0, 0, 0, 0.06);
-	}
-	:global(.dark) .minimized-tab-close:hover {
-		background: rgba(255, 255, 255, 0.08);
-	}
-
-	.minimized-tab-add {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: 0.3rem;
-		border: none;
-		background: transparent;
-		color: var(--color-muted-foreground, #9ca3af);
-		cursor: pointer;
-		flex-shrink: 0;
-		transition: all 0.15s;
-		opacity: 0.6;
-	}
-	.minimized-tab-add:hover {
-		opacity: 1;
-		color: var(--color-primary, #8b5cf6);
 	}
 </style>
