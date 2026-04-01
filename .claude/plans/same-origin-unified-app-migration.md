@@ -18,10 +18,28 @@
 | 1 | **calc** | collections, components (5 skins), engine, stores, queries | `/calc`, `/calc/standard` | **Done** |
 | 2 | **zitare** | collections, stores (5), components (2), queries | `/zitare` + 6 Sub-Routen | **Done** |
 | 3 | **clock** | collections, stores (6), components (2), queries | `/clock`, `/clock/alarms` | **Done** |
-| 4 | **skilltree** | collections, stores (2), components (9), queries | Ordner-Struktur, keine .svelte-Dateien | **Modul done, Routen fehlen** |
+| 4 | **skilltree** | collections, stores (2), components (9), queries | `/skilltree`, `/skilltree/tree`, `/skilltree/achievements` | **Done** |
 | 5 | **moodlit** | collections, stores (2), components (3), queries | `/moodlit`, `/moodlit/moods`, `/moodlit/sequences` | **Done** |
-| 6 | **inventar** | collections, queries, types (kein stores/components-Ordner) | Ordner-Struktur, keine .svelte-Dateien | **Modul teilweise, Routen fehlen** |
-| 7-25 | times, planta, citycorners, photos, presi, uload, context, questions, nutriphi, storage, cards, contacts, todo, calendar, picture, chat, mukke, memoro, playground | Leere Modul-Ordner existieren | — | **Nicht begonnen** |
+| 6 | **inventar** | stores (5), components (5), constants, queries | 9 routes (collections, items, locations, categories, search) | **Done** |
+| 7 | **times** | stores (2), components (7), utils (3), queries | 8 routes (timer, entries, clients, projects, reports, templates) | **Done** |
+| 8 | **planta** | mutations, queries, utils (2), stores (1) | 4 routes (dashboard, add, detail, tags) | **Done** |
+| 9 | **citycorners** | stores (1), queries, utils (1) | 13 routes (cities, locations, map, favorites) | **Done** |
+| 10 | **photos** | stores (3), components (8), queries | 6 routes (gallery, favorites, albums, upload) | **Done** |
+| 11 | **presi** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 12 | **uload** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 13 | **context** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 14 | **questions** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 15 | **nutriphi** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 16 | **storage** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 17 | **cards** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 18 | **contacts** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 19 | **todo** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 20 | **calendar** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 21 | **picture** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 22 | **chat** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 23 | **mukke** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 24 | **memoro** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 25 | **playground** | leerer Modul-Ordner | — | **Nicht begonnen** |
 
 ### Offene Phasen
 
@@ -33,10 +51,10 @@
 
 ### Nächste Schritte
 
-1. Skilltree + Inventar Route-Dateien erstellen (.svelte)
-2. Weiter mit **times** (#7), **planta** (#8), **citycorners** (#9) — alle ohne Backend
-3. Danach mittlere Apps: photos, presi, uload, context, questions
-4. Zuletzt komplexe Apps: contacts, todo, calendar, picture, chat, mukke, memoro
+1. Mittlere Apps: **presi** (#11), **uload** (#12), **context** (#13), **questions** (#14), **nutriphi** (#15)
+2. Backend-Apps: **storage** (#16), **cards** (#17)
+3. Komplexe Apps: **contacts**, **todo**, **calendar**, **picture**, **chat**, **mukke**, **memoro**
+4. Extra: **playground** (#25)
 
 ---
 
