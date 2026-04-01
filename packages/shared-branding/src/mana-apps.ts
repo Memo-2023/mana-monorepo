@@ -530,6 +530,108 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'development',
 		requiredTier: 'beta',
 	},
+	{
+		id: 'mukke',
+		name: 'Mukke',
+		description: {
+			de: 'Musikproduktion',
+			en: 'Music Production',
+		},
+		longDescription: {
+			de: 'Erstelle und verwalte Songs, Playlists und Musikprojekte mit Markern und Arrangements.',
+			en: 'Create and manage songs, playlists, and music projects with markers and arrangements.',
+		},
+		icon: APP_ICONS.mukke,
+		color: '#ec4899',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'alpha',
+	},
+	{
+		id: 'photos',
+		name: 'Photos',
+		description: {
+			de: 'Fotoverwaltung',
+			en: 'Photo Management',
+		},
+		longDescription: {
+			de: 'Verwalte deine Fotos mit Alben, Tags und Favoriten.',
+			en: 'Manage your photos with albums, tags, and favorites.',
+		},
+		icon: APP_ICONS.photos,
+		color: '#8b5cf6',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'alpha',
+	},
+	{
+		id: 'planta',
+		name: 'Planta',
+		description: {
+			de: 'Pflanzenpflege',
+			en: 'Plant Care',
+		},
+		longDescription: {
+			de: 'Verwalte deine Pflanzen mit Gießplänen, Fotos und Pflegeprotokollen.',
+			en: 'Manage your plants with watering schedules, photos, and care logs.',
+		},
+		icon: APP_ICONS.planta,
+		color: '#22c55e',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'alpha',
+	},
+	{
+		id: 'skilltree',
+		name: 'SkillTree',
+		description: {
+			de: 'Skill-Tracking',
+			en: 'Skill Tracking',
+		},
+		longDescription: {
+			de: 'Verfolge deinen Lernfortschritt mit Skills, Aktivitäten und Achievements.',
+			en: 'Track your learning progress with skills, activities, and achievements.',
+		},
+		icon: APP_ICONS.skilltree,
+		color: '#f59e0b',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'alpha',
+	},
+	{
+		id: 'playground',
+		name: 'Playground',
+		description: {
+			de: 'LLM Playground',
+			en: 'LLM Playground',
+		},
+		longDescription: {
+			de: 'Experimentiere mit verschiedenen KI-Modellen in einer interaktiven Spielwiese.',
+			en: 'Experiment with different AI models in an interactive playground.',
+		},
+		icon: APP_ICONS.playground,
+		color: '#06b6d4',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'alpha',
+	},
+	{
+		id: 'arcade',
+		name: 'Arcade',
+		description: {
+			de: 'KI Browser-Spiele',
+			en: 'AI Browser Games',
+		},
+		longDescription: {
+			de: 'Sammlung von KI-generierten Browser-Spielen zum sofortigen Spielen.',
+			en: 'Collection of AI-generated browser games to play instantly.',
+		},
+		icon: APP_ICONS.arcade,
+		color: '#ef4444',
+		comingSoon: false,
+		status: 'development',
+		requiredTier: 'beta',
+	},
 ];
 
 /**
@@ -635,6 +737,11 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	news: { dev: 'http://localhost:5174', prod: 'https://news.mana.how' },
 	calc: { dev: 'http://localhost:5198', prod: 'https://calc.mana.how' },
 	guides: { dev: 'http://localhost:5200', prod: 'https://guides.mana.how' },
+	mukke: { dev: 'http://localhost:5191', prod: 'https://mukke.mana.how' },
+	photos: { dev: 'http://localhost:5193', prod: 'https://photos.mana.how' },
+	planta: { dev: 'http://localhost:5194', prod: 'https://planta.mana.how' },
+	skilltree: { dev: 'http://localhost:5195', prod: 'https://skilltree.mana.how' },
+	arcade: { dev: 'http://localhost:5201', prod: 'https://arcade.mana.how' },
 };
 
 /**

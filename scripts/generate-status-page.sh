@@ -178,6 +178,8 @@ get_tier_badge() {
   case "$subdomain" in *-api) return ;; esac
   # Spezialfall: mana.how selbst → manacore (kein Tier)
   [ "$subdomain" = "mana.how" ] && return
+  # Subdomain-Aliase (alte Subdomains → aktuelle App-IDs)
+  case "$subdomain" in manadeck) subdomain="cards" ;; esac
 
   echo "$TIER_APPS" | while IFS='|' read -r id name tier st; do
     [ "$id" = "$subdomain" ] || continue
