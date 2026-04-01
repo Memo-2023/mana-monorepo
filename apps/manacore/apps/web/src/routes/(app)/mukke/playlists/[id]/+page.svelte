@@ -15,7 +15,9 @@
 		PencilSimple,
 		Check,
 		X,
+		ShareNetwork,
 	} from '@manacore/shared-icons';
+	import { ShareModal } from '@manacore/shared-uload';
 
 	const songsCtx: { readonly value: Song[] } = getContext('songs');
 	const playlistsCtx: { readonly value: Playlist[] } = getContext('playlists');
@@ -27,6 +29,10 @@
 
 	let isEditingName = $state(false);
 	let editName = $state('');
+	let showShare = $state(false);
+	let shareUrl = $derived(
+		`${typeof window !== 'undefined' ? window.location.origin : ''}/mukke/playlists/${playlistId}`
+	);
 
 	function startEdit() {
 		editName = playlist?.name ?? '';
@@ -124,6 +130,13 @@
 				</button>
 			{/if}
 			<button
+				onclick={() => (showShare = true)}
+				class="rounded-lg p-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+				title="Kurzlink teilen"
+			>
+				<ShareNetwork size={20} />
+			</button>
+			<button
 				onclick={handleDeletePlaylist}
 				class="rounded-lg p-2 text-[hsl(var(--muted-foreground))] hover:text-red-500"
 				title="Playlist loschen"
@@ -202,3 +215,13 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Share Modal (uLoad integration) -->
+<ShareModal
+	visible={showShare}
+	onClose={() => (showShare = false)}
+	url={shareUrl}
+	title={playlist?.name ?? 'Playlist'}
+	source="mukke"
+	description="{songs.length} {songs.length === 1 ? 'Song' : 'Songs'}"
+/>

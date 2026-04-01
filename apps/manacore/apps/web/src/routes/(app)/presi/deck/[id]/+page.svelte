@@ -17,7 +17,9 @@
 		PencilSimple,
 		X,
 		FloppyDisk,
+		ShareNetwork,
 	} from '@manacore/shared-icons';
+	import { ShareModal } from '@manacore/shared-uload';
 
 	let showSlideModal = $state(false);
 	let editingSlide = $state<Slide | null>(null);
@@ -29,6 +31,7 @@
 	let slideBulletPoints = $state<string[]>(['']);
 	let slideImageUrl = $state('');
 	let isSaving = $state(false);
+	let showShare = $state(false);
 
 	const deckId = $page.params.id as string;
 	const deckQuery = useDeck(deckId);
@@ -148,6 +151,13 @@
 					class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-colors"
 				>
 					<Plus class="w-5 h-5" /> Add Slide
+				</button>
+				<button
+					onclick={() => (showShare = true)}
+					class="rounded-lg p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+					title="Kurzlink teilen"
+				>
+					<ShareNetwork size={20} />
 				</button>
 				{#if currentSlides.length > 0}
 					<a
@@ -386,3 +396,13 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Share Modal (uLoad integration) -->
+<ShareModal
+	visible={showShare}
+	onClose={() => (showShare = false)}
+	url={typeof window !== 'undefined' ? `${window.location.origin}/presi/deck/${deckId}` : ''}
+	title={currentDeck?.name ?? 'Presentation'}
+	source="presi"
+	description={currentDeck?.description ?? ''}
+/>
