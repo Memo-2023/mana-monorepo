@@ -197,6 +197,13 @@ export const TodoEvents = {
 	viewChanged: (view: string) => trackEvent('view_changed', { view }),
 	quickAddUsed: () => trackEvent('quick_add_used'),
 	filterUsed: (filterType: string) => trackEvent('filter_used', { filter: filterType }),
+	reminderCreated: (type: 'relative' | 'absolute') => trackEvent('reminder_created', { type }),
+	recurringTaskCreated: (pattern: string) => trackEvent('recurring_task_created', { pattern }),
+	taskReordered: () => trackEvent('task_reordered'),
+	keyboardShortcutUsed: (shortcut: string) => trackEvent('keyboard_shortcut_used', { shortcut }),
+	taskEdited: () => trackEvent('task_edited'),
+	dueDateSet: () => trackEvent('due_date_set'),
+	priorityChanged: (priority: string) => trackEvent('priority_changed', { priority }),
 };
 
 /**

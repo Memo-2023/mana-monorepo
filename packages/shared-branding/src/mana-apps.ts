@@ -135,7 +135,6 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'published',
 		requiredTier: 'founder',
-		archived: true,
 	},
 	{
 		id: 'presi',
@@ -255,8 +254,8 @@ export const MANA_APPS: ManaApp[] = [
 		icon: APP_ICONS.contacts,
 		color: '#3b82f6',
 		comingSoon: false,
-		status: 'beta',
-		requiredTier: 'beta',
+		status: 'published',
+		requiredTier: 'public',
 	},
 	{
 		id: 'calendar',
@@ -272,8 +271,8 @@ export const MANA_APPS: ManaApp[] = [
 		icon: APP_ICONS.calendar,
 		color: '#0ea5e9',
 		comingSoon: false,
-		status: 'beta',
-		requiredTier: 'beta',
+		status: 'published',
+		requiredTier: 'public',
 	},
 	{
 		id: 'storage',
@@ -323,8 +322,8 @@ export const MANA_APPS: ManaApp[] = [
 		icon: APP_ICONS.todo,
 		color: '#8b5cf6',
 		comingSoon: false,
-		status: 'beta',
-		requiredTier: 'beta',
+		status: 'published',
+		requiredTier: 'public',
 	},
 	{
 		id: 'mail',
