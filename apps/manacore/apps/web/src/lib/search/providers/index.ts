@@ -5,6 +5,11 @@ import { contactsSearchProvider } from './contacts';
 import { chatSearchProvider } from './chat';
 import { storageSearchProvider } from './storage';
 import { cardsSearchProvider } from './cards';
+import { pictureSearchProvider } from './picture';
+import { presiSearchProvider } from './presi';
+import { mukkeSearchProvider } from './mukke';
+import { zitareSearchProvider } from './zitare';
+import { clockSearchProvider } from './clock';
 
 export function registerAllProviders(registry: SearchRegistry): void {
 	registry.register(todoSearchProvider);
@@ -13,6 +18,11 @@ export function registerAllProviders(registry: SearchRegistry): void {
 	registry.register(chatSearchProvider);
 	registry.register(storageSearchProvider);
 	registry.register(cardsSearchProvider);
+	registry.register(pictureSearchProvider);
+	registry.register(presiSearchProvider);
+	registry.register(mukkeSearchProvider);
+	registry.register(zitareSearchProvider);
+	registry.register(clockSearchProvider);
 }
 
 export {
@@ -22,4 +32,9 @@ export {
 	chatSearchProvider,
 	storageSearchProvider,
 	cardsSearchProvider,
+	pictureSearchProvider,
+	presiSearchProvider,
+	mukkeSearchProvider,
+	zitareSearchProvider,
+	clockSearchProvider,
 };
