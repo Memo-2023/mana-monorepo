@@ -4,6 +4,42 @@
 > Eine IndexedDB, ein SyncEngine, ein Build, ein Deploy.
 > Games und Matrix bleiben separat.
 
+## Status (Stand: 2026-04-01)
+
+### Abgeschlossene Phasen
+
+- **Phase 0:** Vorbereitung abgeschlossen — Modul-Struktur definiert, Route-Namespaces geplant
+- **Phase 1:** Fundament steht — Unified Dexie-Datenbank mit 120+ Collections, Table-Name-Kollisionen aufgelöst, `SYNC_APP_MAP` definiert, SvelteKit-App unter `apps/manacore/apps/web/` existiert
+
+### Phase 2: Module migrieren — Fortschritt
+
+| # | App | Modul | Routen | Status |
+|---|-----|-------|--------|--------|
+| 1 | **calc** | collections, components (5 skins), engine, stores, queries | `/calc`, `/calc/standard` | **Done** |
+| 2 | **zitare** | collections, stores (5), components (2), queries | `/zitare` + 6 Sub-Routen | **Done** |
+| 3 | **clock** | collections, stores (6), components (2), queries | `/clock`, `/clock/alarms` | **Done** |
+| 4 | **skilltree** | collections, stores (2), components (9), queries | Ordner-Struktur, keine .svelte-Dateien | **Modul done, Routen fehlen** |
+| 5 | **moodlit** | collections, stores (2), components (3), queries | `/moodlit`, `/moodlit/moods`, `/moodlit/sequences` | **Done** |
+| 6 | **inventar** | collections, queries, types (kein stores/components-Ordner) | Ordner-Struktur, keine .svelte-Dateien | **Modul teilweise, Routen fehlen** |
+| 7-25 | times, planta, citycorners, photos, presi, uload, context, questions, nutriphi, storage, cards, contacts, todo, calendar, picture, chat, mukke, memoro, playground | Leere Modul-Ordner existieren | — | **Nicht begonnen** |
+
+### Offene Phasen
+
+- **Phase 3:** Split-Screen ohne iFrame — nicht begonnen
+- **Phase 4:** Dashboard-Widgets — nicht begonnen
+- **Phase 5:** Infrastruktur-Anpassungen (Docker, Cloudflare, CORS) — nicht begonnen
+- **Phase 6:** Aufräumen (alte Apps archivieren) — nicht begonnen
+- **Phase 7:** local-store Package anpassen — nicht begonnen
+
+### Nächste Schritte
+
+1. Skilltree + Inventar Route-Dateien erstellen (.svelte)
+2. Weiter mit **times** (#7), **planta** (#8), **citycorners** (#9) — alle ohne Backend
+3. Danach mittlere Apps: photos, presi, uload, context, questions
+4. Zuletzt komplexe Apps: contacts, todo, calendar, picture, chat, mukke, memoro
+
+---
+
 ## Scope: Was rein kommt, was draußen bleibt
 
 ### IN SCOPE — Unified App (22 Apps → 1)

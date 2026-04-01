@@ -1,0 +1,117 @@
+/**
+ * View Store — Client-side view preferences persisted to localStorage.
+ */
+
+import { browser } from '$app/environment';
+import type { ViewMode, SortOption, FilterCriteria } from '../queries';
+
+const VIEW_KEY = 'inventar_view_mode';
+const SORT_KEY = 'inventar_sort';
+
+interface SavedFilter {
+	id: string;
+	name: string;
+	criteria: FilterCriteria;
+	createdAt: string;
+}
+
+const FILTERS_KEY = 'inventar_saved_filters';
+
+function load<T>(key: string, fallback: T): T {
+	if (!browser) return fallback;
+	try {
+		const data = localStorage.getItem(key);
+		return data ? JSON.parse(data) : fallback;
+	} catch {
+		return fallback;
+	}
+}
+
+function save(key: string, value: unknown) {
+	if (!browser) return;
+	localStorage.setItem(key, JSON.stringify(value));
+}
+
+let viewMode = $state<ViewMode>('list');
+let sort = $state<SortOption>({ field: 'name', direction: 'asc' });
+let activeFilters = $state<FilterCriteria>({});
+let savedFilters = $state<SavedFilter[]>([]);
+let initialized = $state(false);
+
+export const viewStore = {
+	get viewMode() {
+		return viewMode;
+	},
+	get sort() {
+		return sort;
+	},
+	get activeFilters() {
+		return activeFilters;
+	},
+	get savedFilters() {
+		return savedFilters;
+	},
+	get hasActiveFilters() {
+		return !!(
+			activeFilters.search ||
+			activeFilters.status?.length ||
+			activeFilters.locationId ||
+			activeFilters.categoryId ||
+			activeFilters.tagIds?.length ||
+			activeFilters.collectionId
+		);
+	},
+
+	initialize() {
+		if (initialized) return;
+		viewMode = load<ViewMode>(VIEW_KEY, 'list');
+		sort = load<SortOption>(SORT_KEY, { field: 'name', direction: 'asc' });
+		savedFilters = load<SavedFilter[]>(FILTERS_KEY, []);
+		initialized = true;
+	},
+
+	setViewMode(mode: ViewMode) {
+		viewMode = mode;
+		save(VIEW_KEY, mode);
+	},
+
+	setSort(newSort: SortOption) {
+		sort = newSort;
+		save(SORT_KEY, newSort);
+	},
+
+	setFilters(filters: FilterCriteria) {
+		activeFilters = filters;
+	},
+
+	updateFilter<K extends keyof FilterCriteria>(key: K, value: FilterCriteria[K]) {
+		activeFilters = { ...activeFilters, [key]: value };
+	},
+
+	clearFilters() {
+		activeFilters = {};
+	},
+
+	saveFilter(name: string) {
+		const filter: SavedFilter = {
+			id: crypto.randomUUID(),
+			name,
+			criteria: { ...activeFilters },
+			createdAt: new Date().toISOString(),
+		};
+		savedFilters = [...savedFilters, filter];
+		save(FILTERS_KEY, savedFilters);
+	},
+
+	loadFilter(id: string) {
+		const filter = savedFilters.find((f) => f.id === id);
+		if (filter) {
+			activeFilters = { ...filter.criteria };
+		}
+	},
+
+	deleteSavedFilter(id: string) {
+		savedFilters = savedFilters.filter((f) => f.id !== id);
+		save(FILTERS_KEY, savedFilters);
+	},
+};
