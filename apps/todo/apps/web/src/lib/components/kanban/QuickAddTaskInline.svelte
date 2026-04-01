@@ -98,22 +98,27 @@
 	}
 
 	.add-checkbox {
-		width: 1.25rem;
-		height: 1.25rem;
-		border-radius: 9999px;
-		border: 2px dashed var(--color-muted-foreground);
-		opacity: 0.4;
+		width: 1.1rem;
+		height: 1.1rem;
+		border-radius: 50%;
+		border: 1.5px dashed rgba(0, 0, 0, 0.3);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
 		color: var(--color-muted-foreground);
 		transition: all 0.15s;
+		margin-top: 0.2rem;
+		/* Offset to align with task cards: priority-dot(3px) + gap(0.625rem) */
+		margin-left: calc(3px + 0.625rem);
+	}
+
+	:global(.dark) .add-checkbox {
+		border-color: rgba(255, 255, 255, 0.35);
 	}
 
 	.inline-add-row.active .add-checkbox,
 	.inline-add-trigger:hover .add-checkbox {
-		opacity: 0.6;
 		border-color: var(--color-primary);
 		color: var(--color-primary);
 	}
@@ -123,7 +128,8 @@
 		background: transparent;
 		border: none;
 		outline: none;
-		font-size: 0.875rem;
+		font-size: 0.9375rem;
+		font-weight: 400;
 		color: var(--color-foreground);
 		padding: 0;
 		line-height: 1.5;
@@ -131,13 +137,14 @@
 
 	.add-input::placeholder {
 		color: var(--color-muted-foreground);
-		opacity: 0.6;
+		opacity: 0.5;
 	}
 
 	.add-placeholder {
-		font-size: 0.875rem;
+		font-size: 0.9375rem;
+		font-weight: 400;
 		color: var(--color-muted-foreground);
-		opacity: 0.6;
+		opacity: 0.5;
 		transition: all 0.15s;
 	}
 
