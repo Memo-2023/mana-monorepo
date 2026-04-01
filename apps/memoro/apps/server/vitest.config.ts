@@ -7,7 +7,5 @@ export default defineConfig({
 		include: ['src/**/*.test.ts'],
 		setupFiles: ['./src/test-setup.ts'],
 		clearMocks: true,
-		mockReset: true,
-		restoreMocks: true,
 	},
 });
