@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
 	import { Plus, X } from '@manacore/shared-icons';
 
 	interface Props {
@@ -57,7 +58,7 @@
 					onclick={handleSubmit}
 				>
 					<Plus size={14} />
-					Hinzufügen
+					{$t('kanban.add')}
 				</button>
 				<button
 					class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
@@ -81,7 +82,7 @@
 			>
 				<Plus size={14} />
 			</div>
-			<span class="group-hover:text-foreground transition-colors">Aufgabe hinzufügen</span>
+			<span class="group-hover:text-foreground transition-colors">{$t('kanban.addTask')}</span>
 		</button>
 	{/if}
 </div>

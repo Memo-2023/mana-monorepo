@@ -5,6 +5,7 @@
 	import { todoSettings } from '$lib/stores/settings.svelte';
 	import { PillToolbarButton, PillToolbarDivider, PillViewSwitcher } from '@manacore/shared-ui';
 	import { CheckCircle, Columns, Funnel } from '@manacore/shared-icons';
+	import { t } from 'svelte-i18n';
 
 	interface Props {
 		/** Vertical layout (for sidebar mode) */
@@ -32,19 +33,19 @@
 	let selectedPriorityFilters = $state<TaskPriority[]>([]);
 	let selectedLabelFilters = $state<string[]>([]);
 
-	const priorities: { value: TaskPriority; label: string; color: string }[] = [
-		{ value: 'urgent', label: 'Dringend', color: '#ef4444' },
-		{ value: 'high', label: 'Hoch', color: '#f97316' },
-		{ value: 'medium', label: 'Normal', color: '#eab308' },
-		{ value: 'low', label: 'Niedrig', color: '#3b82f6' },
-	];
+	let priorities = $derived([
+		{ value: 'urgent' as TaskPriority, label: $t('priority.urgent'), color: '#ef4444' },
+		{ value: 'high' as TaskPriority, label: $t('priority.high'), color: '#f97316' },
+		{ value: 'medium' as TaskPriority, label: $t('priority.medium'), color: '#eab308' },
+		{ value: 'low' as TaskPriority, label: $t('priority.low'), color: '#3b82f6' },
+	]);
 
 	// Sort options
-	const sortOptions = [
-		{ id: 'dueDate', label: 'Datum', title: 'Nach Fälligkeitsdatum sortieren' },
-		{ id: 'priority', label: 'Priorität', title: 'Nach Priorität sortieren' },
-		{ id: 'title', label: 'Name', title: 'Alphabetisch sortieren' },
-	];
+	let sortOptions = $derived([
+		{ id: 'dueDate', label: $t('filters.date'), title: $t('filters.sortByDueDate') },
+		{ id: 'priority', label: $t('task.priority'), title: $t('filters.sortByPriority') },
+		{ id: 'title', label: $t('filters.name'), title: $t('filters.sortAlphabetical') },
+	]);
 
 	// Count active filters
 	let activeFilterCount = $derived(selectedPriorityFilters.length + selectedLabelFilters.length);
@@ -81,7 +82,7 @@
 			const idx = modes.indexOf(todoSettings.activeLayoutMode);
 			todoSettings.set('activeLayoutMode', modes[(idx + 1) % modes.length]);
 		}}
-		title="Ansicht wechseln"
+		title={$t('toolbar.switchView')}
 	>
 		<Columns size={20} />
 	</PillToolbarButton>
@@ -108,7 +109,7 @@
 		{#if showFilterDropdown}
 			<div class="filter-dropdown" class:vertical onclick={(e) => e.stopPropagation()}>
 				<div class="filter-section">
-					<div class="filter-section-header">Priorität</div>
+					<div class="filter-section-header">{$t('task.priority')}</div>
 					<div class="filter-chips">
 						{#each priorities as priority}
 							<button
@@ -126,7 +127,7 @@
 
 				{#if activeFilterCount > 0}
 					<button type="button" class="clear-filters-btn" onclick={clearAllFilters}>
-						Filter zurücksetzen
+						{$t('filters.resetAll')}
 					</button>
 				{/if}
 			</div>
@@ -153,7 +154,7 @@
 	<PillToolbarButton
 		onclick={onToggleShowCompleted}
 		active={showCompleted}
-		title={showCompleted ? 'Erledigte ausblenden' : 'Erledigte anzeigen'}
+		title={showCompleted ? $t('filters.hideCompleted') : $t('filters.showCompleted')}
 	>
 		<CheckCircle size={20} />
 	</PillToolbarButton>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from 'svelte-i18n';
 	import { X } from '@manacore/shared-icons';
 
 	interface Props {
@@ -32,7 +33,7 @@
 		</button>
 	{/each}
 	{#if value !== null}
-		<button type="button" class="storypoint-clear" onclick={handleClear} title="Zurücksetzen">
+		<button type="button" class="storypoint-clear" onclick={handleClear} title={$t('common.reset')}>
 			<X size={16} />
 		</button>
 	{/if}

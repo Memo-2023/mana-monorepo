@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Task, Subtask } from '@todo/shared';
+	import { t } from 'svelte-i18n';
 	import { isToday, isPast } from 'date-fns';
 	import { formatDueDate } from '$lib/utils/date-display';
 	import { getSubtaskProgress } from '$lib/utils/task-helpers';
@@ -166,7 +167,9 @@
 		const current = task.subtasks ?? [];
 		untrack(() => {
 			const newIds = new Set(current.map((s) => s.id));
-			const oldIds = new Set(subtaskItems.filter((s) => s.id !== SHADOW_PLACEHOLDER_ITEM_ID).map((s) => s.id));
+			const oldIds = new Set(
+				subtaskItems.filter((s) => s.id !== SHADOW_PLACEHOLDER_ITEM_ID).map((s) => s.id)
+			);
 			const idsChanged = newIds.size !== oldIds.size || current.some((s) => !oldIds.has(s.id));
 			if (idsChanged) {
 				subtaskItems = [...current];
@@ -186,7 +189,9 @@
 		subtaskItems = e.detail.items.filter((s) => s.id !== SHADOW_PLACEHOLDER_ITEM_ID);
 		onSave?.({ subtasks: subtaskItems });
 		subtaskDropInProgress = true;
-		setTimeout(() => { subtaskDropInProgress = false; }, 500);
+		setTimeout(() => {
+			subtaskDropInProgress = false;
+		}, 500);
 	}
 
 	function toggleSubtask(subtaskId: string) {
@@ -244,8 +249,8 @@
 			spellcheck="false"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={handleTitleKeydown}
-			onblur={handleTitleBlur}
-		>{task.title}</span>
+			onblur={handleTitleBlur}>{task.title}</span
+		>
 
 		<!-- Meta info -->
 		{#if dueDateText() || subtaskProgress() || (task.labels && task.labels.length > 0)}
@@ -283,7 +288,7 @@
 		type="button"
 		class="detail-btn"
 		onclick={handleOpenModal}
-		title="Details öffnen"
+		title={$t('taskForm.openDetails')}
 		tabindex="-1"
 	>
 		<ArrowsOutSimple size={14} />
@@ -293,7 +298,10 @@
 	{#if task.metadata?.assignee || (task.metadata?.involvedContacts && task.metadata.involvedContacts.length > 0)}
 		<div class="contacts-display">
 			{#if task.metadata?.assignee}
-				<div class="assignee-avatar" title="Zuständig: {task.metadata.assignee.displayName}">
+				<div
+					class="assignee-avatar"
+					title={$t('kanban.assignedTo', { values: { name: task.metadata.assignee.displayName } })}
+				>
 					<ContactAvatar
 						name={task.metadata.assignee.displayName}
 						photoUrl={task.metadata.assignee.photoUrl}
@@ -304,7 +312,10 @@
 			{#if task.metadata?.involvedContacts && task.metadata.involvedContacts.length > 0}
 				<div class="involved-avatars">
 					{#each task.metadata.involvedContacts.slice(0, 2) as contact}
-						<div class="involved-avatar" title="Beteiligt: {contact.displayName}">
+						<div
+							class="involved-avatar"
+							title={$t('kanban.involvedContact', { values: { name: contact.displayName } })}
+						>
 							<ContactAvatar name={contact.displayName} photoUrl={contact.photoUrl} size="xs" />
 						</div>
 					{/each}
@@ -322,7 +333,12 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="subtasks-inline"
-		use:dndzone={{ items: subtaskItems, flipDurationMs: 150, dropTargetStyle: {}, type: 'subtask-inline' }}
+		use:dndzone={{
+			items: subtaskItems,
+			flipDurationMs: 150,
+			dropTargetStyle: {},
+			type: 'subtask-inline',
+		}}
 		onconsider={handleSubtaskConsider}
 		onfinalize={handleSubtaskFinalize}
 	>
@@ -363,16 +379,16 @@
 	>
 		<button class="context-item" onclick={handleContextEdit}>
 			<Note size={20} class="context-icon" />
-			Bearbeiten
+			{$t('kanban.edit')}
 		</button>
 		<button class="context-item" onclick={handleContextToggleComplete}>
 			<ArrowsClockwise size={20} class="context-icon" />
-			{task.isCompleted ? 'Wiederherstellen' : 'Erledigen'}
+			{task.isCompleted ? $t('kanban.restore') : $t('kanban.complete')}
 		</button>
 		<div class="context-divider"></div>
 		<button class="context-item danger" onclick={handleContextDelete}>
 			<Trash size={20} class="context-icon" />
-			Löschen
+			{$t('common.delete')}
 		</button>
 	</div>
 {/if}
@@ -392,10 +408,10 @@
 	onClose={() => (showDeleteConfirm = false)}
 	onConfirm={confirmDelete}
 	variant="danger"
-	title="Aufgabe löschen?"
-	message="Diese Aufgabe wird unwiderruflich gelöscht."
-	confirmLabel="Löschen"
-	cancelLabel="Abbrechen"
+	title={$t('kanban.deleteTitle')}
+	message={$t('kanban.deleteMessage')}
+	confirmLabel={$t('common.delete')}
+	cancelLabel={$t('common.cancel')}
 />
 
 <style>
@@ -566,7 +582,6 @@
 		text-decoration: line-through;
 		opacity: 0.5;
 	}
-
 
 	/* Meta info */
 	.task-meta {

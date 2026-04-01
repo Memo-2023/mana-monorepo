@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ExpandableToolbar } from '@manacore/shared-ui';
 	import TodoToolbarContent from './TodoToolbarContent.svelte';
+	import { t } from 'svelte-i18n';
 
 	interface Props {
 		isCollapsed?: boolean;
@@ -15,8 +16,8 @@
 	{isCollapsed}
 	{onCollapsedChange}
 	{bottomOffset}
-	collapsedTitle="Aufgaben-Optionen"
-	expandedTitle="Schließen"
+	collapsedTitle={$t('toolbar.taskOptions')}
+	expandedTitle={$t('common.close')}
 >
 	{#snippet collapsedIcon()}
 		<!-- Task/list icon -->

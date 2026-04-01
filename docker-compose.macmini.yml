@@ -269,6 +269,7 @@ services:
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
       MANA_CREDITS_URL: http://mana-credits:3061
       MANA_SUBSCRIPTIONS_URL: http://mana-subscriptions:3063
+      SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-${JWT_SECRET:-your-jwt-secret-change-me}}
       SMTP_HOST: smtp-relay.brevo.com
       SMTP_PORT: 587

@@ -7,6 +7,7 @@
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 	import type { SortBy, SortOrder } from '$lib/stores/view.svelte';
 	import { CaretDown, Check, CheckCircle, MagnifyingGlass, X } from '@manacore/shared-icons';
+	import { t } from 'svelte-i18n';
 
 	interface Props {
 		// Layout
@@ -61,18 +62,38 @@
 		onToggleCompleted,
 	}: Props = $props();
 
-	const priorities: { value: TaskPriority; label: string; color: string; bgColor: string }[] = [
-		{ value: 'urgent', label: 'Dringend', color: '#ef4444', bgColor: 'bg-red-500' },
-		{ value: 'high', label: 'Hoch', color: '#f97316', bgColor: 'bg-orange-500' },
-		{ value: 'medium', label: 'Normal', color: '#eab308', bgColor: 'bg-yellow-500' },
-		{ value: 'low', label: 'Niedrig', color: '#3b82f6', bgColor: 'bg-blue-500' },
-	];
+	let priorities = $derived([
+		{
+			value: 'urgent' as TaskPriority,
+			label: $t('priority.urgent'),
+			color: '#ef4444',
+			bgColor: 'bg-red-500',
+		},
+		{
+			value: 'high' as TaskPriority,
+			label: $t('priority.high'),
+			color: '#f97316',
+			bgColor: 'bg-orange-500',
+		},
+		{
+			value: 'medium' as TaskPriority,
+			label: $t('priority.medium'),
+			color: '#eab308',
+			bgColor: 'bg-yellow-500',
+		},
+		{
+			value: 'low' as TaskPriority,
+			label: $t('priority.low'),
+			color: '#3b82f6',
+			bgColor: 'bg-blue-500',
+		},
+	]);
 
-	const sortOptions: { id: SortBy; label: string }[] = [
-		{ id: 'dueDate', label: 'Datum' },
-		{ id: 'priority', label: 'Priorit.' },
-		{ id: 'title', label: 'Name' },
-	];
+	let sortOptions = $derived([
+		{ id: 'dueDate' as SortBy, label: $t('filters.date') },
+		{ id: 'priority' as SortBy, label: $t('filters.priorityShort') },
+		{ id: 'title' as SortBy, label: $t('filters.name') },
+	]);
 
 	// Dropdown states
 	let showLabelsDropdown = $state(false);
@@ -107,7 +128,7 @@
 				class="clear-filter-pill glass-pill"
 				class:hidden={!hasActiveFilters}
 				onclick={onClearFilters}
-				title="Filter löschen"
+				title={$t('filters.clearFilter')}
 				disabled={!hasActiveFilters}
 			>
 				<X size={16} weight="bold" />
@@ -116,7 +137,11 @@
 
 			<!-- Tag Chips -->
 			{#if showTags}
-				<button class="label-pill glass-pill" onclick={() => goto('/tags')} title="Tags verwalten">
+				<button
+					class="label-pill glass-pill"
+					onclick={() => goto('/tags')}
+					title={$t('filters.manageTags')}
+				>
 					<span class="pill-label label-text">Tags:</span>
 				</button>
 				{#if tagsCtx.value.length > 0}
@@ -163,7 +188,7 @@
 						class="sort-pill glass-pill"
 						class:active={sortBy === option.id}
 						onclick={() => onSortChange(option.id)}
-						title="Nach {option.label} sortieren"
+						title={$t('tags.sortBy', { values: { field: option.label } })}
 					>
 						<span class="pill-label">{option.label}</span>
 					</button>
@@ -176,10 +201,10 @@
 					class="glass-pill"
 					class:active={isCompletedVisible}
 					onclick={onToggleCompleted}
-					title={isCompletedVisible ? 'Erledigte ausblenden' : 'Erledigte anzeigen'}
+					title={isCompletedVisible ? $t('filters.hideCompleted') : $t('filters.showCompleted')}
 				>
 					<CheckCircle size={20} class="pill-icon" />
-					<span class="pill-label">Erledigt</span>
+					<span class="pill-label">{$t('nav.completed')}</span>
 				</button>
 			{/if}
 		</div>
@@ -200,7 +225,7 @@
 							type="text"
 							value={searchQuery}
 							oninput={(e) => onSearchChange(e.currentTarget.value)}
-							placeholder="Aufgaben suchen..."
+							placeholder={$t('filters.searchTasks')}
 							class="w-full pl-10 pr-8 py-2 text-sm bg-background border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary placeholder:text-muted-foreground transition-all"
 						/>
 						{#if searchQuery}
@@ -219,7 +244,7 @@
 							onclick={onClearFilters}
 						>
 							<X size={16} />
-							Zurücksetzen
+							{$t('filters.resetFilters')}
 						</button>
 					{/if}
 				</div>
@@ -230,7 +255,7 @@
 				<!-- Priority filters -->
 				<div class="filter-group flex items-center gap-2">
 					<span class="text-xs font-medium text-muted-foreground uppercase tracking-wide"
-						>Priorität</span
+						>{$t('task.priority')}</span
 					>
 					<div class="flex items-center gap-1">
 						{#each priorities as priority}
@@ -277,7 +302,7 @@
 									{/if}
 								</div>
 							{:else}
-								<span class="text-muted-foreground">Auswählen</span>
+								<span class="text-muted-foreground">{$t('filters.select')}</span>
 							{/if}
 							<CaretDown
 								size={16}
@@ -294,7 +319,9 @@
 								class="absolute top-full left-0 mt-2 z-50 min-w-[220px] bg-popover border border-border rounded-xl shadow-lg p-2 animate-in fade-in slide-in-from-top-2 duration-150"
 							>
 								{#if tagsCtx.value.length === 0}
-									<p class="text-sm text-muted-foreground p-3 text-center">Keine Tags vorhanden</p>
+									<p class="text-sm text-muted-foreground p-3 text-center">
+										{$t('filters.noTagsAvailable')}
+									</p>
 								{:else}
 									<div class="max-h-[200px] overflow-y-auto">
 										{#each tagsCtx.value as label}

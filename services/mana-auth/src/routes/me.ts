@@ -1,49 +1,61 @@
 /**
  * Me routes — GDPR self-service data management
+ *
+ * GET  /data        — Full user data summary (auth, credits, projects)
+ * GET  /data/export — Download all data as JSON
+ * DELETE /data      — Delete all user data (right to be forgotten)
  */
 
 import { Hono } from 'hono';
-import { sql } from 'drizzle-orm';
 import type { AuthUser } from '../middleware/jwt-auth';
-import type { Database } from '../db/connection';
+import type { UserDataService } from '../services/user-data';
 import { sendAccountDeletionEmail } from '../email/send';
 
-export function createMeRoutes(db: Database) {
-	return new Hono<{ Variables: { user: AuthUser } }>()
-		.get('/data', async (c) => {
-			const user = c.get('user');
-			// Return basic user data summary
-			const result = await db.execute(
-				sql`SELECT id, email, name, role, created_at FROM auth.users WHERE id = ${user.userId}`
-			);
-			return c.json({ user: (result as any)[0] || null });
-		})
-		.get('/data/export', async (c) => {
-			const user = c.get('user');
-			const [userData] = (await db.execute(
-				sql`SELECT * FROM auth.users WHERE id = ${user.userId}`
-			)) as any[];
-			const sessions = await db.execute(
-				sql`SELECT id, created_at, expires_at, ip_address FROM auth.sessions WHERE user_id = ${user.userId}`
-			);
-			const securityEvents = await db.execute(
-				sql`SELECT event_type, ip_address, created_at FROM auth.security_events WHERE user_id = ${user.userId} ORDER BY created_at DESC LIMIT 100`
-			);
+export function createMeRoutes(userDataService: UserDataService) {
+	return (
+		new Hono<{ Variables: { user: AuthUser } }>()
 
-			return c.json({
-				exportedAt: new Date().toISOString(),
-				exportVersion: '1.0',
-				user: userData,
-				sessions,
-				securityEvents,
-			});
-		})
-		.delete('/data', async (c) => {
-			const user = c.get('user');
-			// Delete user (cascades via FK)
-			await db.execute(sql`DELETE FROM auth.users WHERE id = ${user.userId}`);
-			// Send confirmation email
-			sendAccountDeletionEmail(user.email).catch(() => {});
-			return c.json({ success: true, message: 'Account and all data deleted' });
-		});
+			// ─── Get full user data summary ─────────────────────────
+			.get('/data', async (c) => {
+				const user = c.get('user');
+				const summary = await userDataService.getUserDataSummary(user.userId);
+
+				if (!summary) {
+					return c.json({ error: 'User not found' }, 404);
+				}
+
+				return c.json(summary);
+			})
+
+			// ─── Export user data as JSON download ──────────────────
+			.get('/data/export', async (c) => {
+				const user = c.get('user');
+				const exportData = await userDataService.exportUserData(user.userId);
+
+				if (!exportData) {
+					return c.json({ error: 'User not found' }, 404);
+				}
+
+				const filename = `meine-daten-${new Date().toISOString().split('T')[0]}.json`;
+				const json = JSON.stringify(exportData, null, 2);
+
+				return new Response(json, {
+					headers: {
+						'Content-Type': 'application/json',
+						'Content-Disposition': `attachment; filename="${filename}"`,
+					},
+				});
+			})
+
+			// ─── Delete all user data ───────────────────────────────
+			.delete('/data', async (c) => {
+				const user = c.get('user');
+				const result = await userDataService.deleteUserData(user.userId, user.email);
+
+				// Send confirmation email (fire-and-forget)
+				sendAccountDeletionEmail(user.email).catch(() => {});
+
+				return c.json(result);
+			})
+	);
 }

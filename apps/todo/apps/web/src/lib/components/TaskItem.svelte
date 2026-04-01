@@ -17,8 +17,11 @@
 		DurationPicker,
 		FunRatingPicker,
 		TagSelector,
+		ReminderSelector,
 	} from './form';
 	import { PRIORITY_COLORS } from '$lib/constants/priority';
+	import { TodoEvents } from '@manacore/shared-utils/analytics';
+	import { t } from 'svelte-i18n';
 
 	interface Props {
 		task: Task;
@@ -124,6 +127,7 @@
 			form.funRating,
 			form.assignee,
 			form.involvedContacts,
+			form.reminderMinutes,
 		];
 		scheduleAutoSave();
 	});
@@ -208,6 +212,7 @@
 		try {
 			const data = form.buildUpdateInput(task);
 			onSave(data);
+			await form.persistReminder(task.id);
 		} finally {
 			form.isLoading = false;
 		}
@@ -228,6 +233,7 @@
 	function toggleSubtask(subtaskId: string) {
 		if (!onSave) return;
 		const subtasks = $state.snapshot(task.subtasks) ?? [];
+		const target = subtasks.find((s) => s.id === subtaskId);
 		const updated = subtasks.map((s) =>
 			s.id === subtaskId
 				? {
@@ -237,6 +243,7 @@
 					}
 				: s
 		);
+		if (target && !target.isCompleted) TodoEvents.subtaskCompleted();
 		onSave({ subtasks: updated });
 	}
 
@@ -343,11 +350,7 @@
 				/>
 			{:else}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<span
-					class="task-title"
-					class:line-through={task.isCompleted}
-					onclick={startTitleEdit}
-				>
+				<span class="task-title" class:line-through={task.isCompleted} onclick={startTitleEdit}>
 					{task.title}
 				</span>
 			{/if}
@@ -371,7 +374,12 @@
 		{#if task.metadata?.assignee || (task.metadata?.involvedContacts && task.metadata.involvedContacts.length > 0)}
 			<div class="contacts-display">
 				{#if task.metadata?.assignee}
-					<div class="assignee-avatar" title="Zuständig: {task.metadata.assignee.displayName}">
+					<div
+						class="assignee-avatar"
+						title={$t('kanban.assignedTo', {
+							values: { name: task.metadata.assignee.displayName },
+						})}
+					>
 						<ContactAvatar
 							name={task.metadata.assignee.displayName}
 							photoUrl={task.metadata.assignee.photoUrl}
@@ -382,7 +390,10 @@
 				{#if task.metadata?.involvedContacts && task.metadata.involvedContacts.length > 0}
 					<div class="involved-avatars">
 						{#each task.metadata.involvedContacts.slice(0, 2) as contact}
-							<div class="involved-avatar" title="Beteiligt: {contact.displayName}">
+							<div
+								class="involved-avatar"
+								title={$t('kanban.involvedContact', { values: { name: contact.displayName } })}
+							>
 								<ContactAvatar name={contact.displayName} photoUrl={contact.photoUrl} size="xs" />
 							</div>
 						{/each}
@@ -403,15 +414,15 @@
 					e.stopPropagation();
 					showCreatedDate = !showCreatedDate;
 				}}
-				title="Klicken für Erstellungsdatum"
+				title={$t('taskForm.clickForCreatedDate')}
 			>
 				{#if showCreatedDate}
-					<span class="date-label">Erstellt</span>
+					<span class="date-label">{$t('taskForm.created')}</span>
 					<span class="date-value"
 						>{format(new Date(task.createdAt), 'd. MMM yyyy', { locale: de })}</span
 					>
 				{/if}
-				<span class="date-label">Erledigt</span>
+				<span class="date-label">{$t('taskForm.completed')}</span>
 				<span class="date-value"
 					>{format(new Date(task.completedAt), 'd. MMM yyyy', { locale: de })}</span
 				>
@@ -431,7 +442,7 @@
 			type="button"
 			class="detail-btn"
 			onclick={handleOpenModal}
-			title="Details öffnen"
+			title={$t('taskForm.openDetails')}
 			tabindex="-1"
 		>
 			<ArrowsOutSimple size={14} />
@@ -470,35 +481,37 @@
 		<div class="expanded-form">
 			<!-- Title -->
 			<div class="form-section">
-				<label class="form-label" for="task-title-{task.id}">Titel</label>
+				<label class="form-label" for="task-title-{task.id}">{$t('task.title')}</label>
 				<input
 					bind:this={titleInputRef}
 					id="task-title-{task.id}"
 					type="text"
 					class="form-input"
 					bind:value={form.title}
-					placeholder="Aufgabentitel..."
+					placeholder={$t('taskForm.titlePlaceholder')}
 				/>
 			</div>
 
 			<!-- Description -->
 			<div class="form-section">
-				<label class="form-label" for="task-description-{task.id}">Beschreibung</label>
+				<label class="form-label" for="task-description-{task.id}"
+					>{$t('taskForm.description')}</label
+				>
 				<textarea
 					id="task-description-{task.id}"
 					class="form-textarea"
 					bind:value={form.description}
-					placeholder="Beschreibung hinzufügen..."
+					placeholder={$t('taskForm.addDescription')}
 					rows="2"
 				></textarea>
 			</div>
 
 			<!-- Time planning row -->
 			<div class="form-section">
-				<label class="form-label">Zeitplanung</label>
+				<label class="form-label">{$t('taskForm.scheduling')}</label>
 				<div class="form-row">
 					<div class="form-field">
-						<label class="form-sublabel" for="due-date-{task.id}">Fällig</label>
+						<label class="form-sublabel" for="due-date-{task.id}">{$t('taskForm.due')}</label>
 						<input
 							id="due-date-{task.id}"
 							type="date"
@@ -507,7 +520,7 @@
 						/>
 					</div>
 					<div class="form-field">
-						<label class="form-sublabel" for="due-time-{task.id}">Uhrzeit</label>
+						<label class="form-sublabel" for="due-time-{task.id}">{$t('taskForm.time')}</label>
 						<input
 							id="due-time-{task.id}"
 							type="time"
@@ -516,7 +529,7 @@
 						/>
 					</div>
 					<div class="form-field">
-						<label class="form-sublabel" for="start-date-{task.id}">Start</label>
+						<label class="form-sublabel" for="start-date-{task.id}">{$t('taskForm.start')}</label>
 						<input
 							id="start-date-{task.id}"
 							type="date"
@@ -529,13 +542,13 @@
 
 			<!-- Priority -->
 			<div class="form-section">
-				<label class="form-label">Priorität</label>
+				<label class="form-label">{$t('task.priority')}</label>
 				<PrioritySelector value={form.priority} onChange={(p) => (form.priority = p)} />
 			</div>
 
 			<!-- Status -->
 			<div class="form-section">
-				<label class="form-label" for="task-status-{task.id}">Status</label>
+				<label class="form-label" for="task-status-{task.id}">{$t('taskForm.status')}</label>
 				<select id="task-status-{task.id}" class="form-select" bind:value={form.status}>
 					{#each STATUS_OPTIONS as s}
 						<option value={s.value}>{s.label}</option>
@@ -545,7 +558,7 @@
 
 			<!-- Tags -->
 			<div class="form-section">
-				<label class="form-label">Tags</label>
+				<label class="form-label">{$t('taskForm.tags')}</label>
 				<TagSelector
 					selectedIds={form.selectedLabelIds}
 					onChange={(ids) => (form.selectedLabelIds = ids)}
@@ -554,13 +567,14 @@
 
 			<!-- Subtasks -->
 			<div class="form-section">
-				<label class="form-label">Subtasks</label>
+				<label class="form-label">{$t('taskForm.subtasks')}</label>
 				<SubtaskList subtasks={form.subtasks} onChange={handleSubtasksChange} />
 			</div>
 
 			<!-- Recurrence -->
 			<div class="form-section">
-				<label class="form-label" for="task-recurrence-{task.id}">Wiederholung</label>
+				<label class="form-label" for="task-recurrence-{task.id}">{$t('taskForm.recurrence')}</label
+				>
 				<select id="task-recurrence-{task.id}" class="form-select" bind:value={form.recurrenceRule}>
 					{#each RECURRENCE_OPTIONS as option}
 						<option value={option.value}>{option.label}</option>
@@ -568,33 +582,43 @@
 				</select>
 			</div>
 
+			<!-- Reminder -->
+			<div class="form-section">
+				<label class="form-label">{$t('reminders.label')}</label>
+				<ReminderSelector
+					value={form.reminderMinutes}
+					onChange={(v) => (form.reminderMinutes = v)}
+					disabled={!form.dueDate}
+				/>
+			</div>
+
 			<!-- Contacts: Assignee -->
 			<div class="form-section">
-				<label class="form-label">Zuständig</label>
+				<label class="form-label">{$t('taskForm.assignee')}</label>
 				<ContactSelector
 					selectedContacts={form.assignee}
 					onContactsChange={(contacts) => (form.assignee = contacts)}
 					onSearch={(q) => contactsStore.searchContacts(q)}
 					singleSelect={true}
 					allowManualEntry={false}
-					placeholder="Person zuweisen..."
-					addLabel="Zuweisen"
-					searchPlaceholder="Name oder E-Mail..."
+					placeholder={$t('taskForm.assignPerson')}
+					addLabel={$t('taskForm.assignLabel')}
+					searchPlaceholder={$t('taskForm.nameOrEmail')}
 					isAvailable={form.contactsAvailable ?? false}
 				/>
 			</div>
 
 			<!-- Contacts: Involved -->
 			<div class="form-section">
-				<label class="form-label">Beteiligte</label>
+				<label class="form-label">{$t('taskForm.involved')}</label>
 				<ContactSelector
 					selectedContacts={form.involvedContacts}
 					onContactsChange={(contacts) => (form.involvedContacts = contacts)}
 					onSearch={(q) => contactsStore.searchContacts(q)}
 					allowManualEntry={false}
-					placeholder="Personen hinzufügen..."
-					addLabel="Person hinzufügen"
-					searchPlaceholder="Name oder E-Mail..."
+					placeholder={$t('taskForm.addPeoplePlaceholder')}
+					addLabel={$t('taskForm.addPersonLabel')}
+					searchPlaceholder={$t('taskForm.nameOrEmail')}
 					isAvailable={form.contactsAvailable ?? false}
 				/>
 			</div>
@@ -602,18 +626,18 @@
 			<!-- Story Points & Duration & Fun Rating row -->
 			<div class="form-row-3">
 				<div class="form-section">
-					<label class="form-label">Storypoints</label>
+					<label class="form-label">{$t('taskForm.storypoints')}</label>
 					<StorypointsSelector value={form.storyPoints} onChange={(v) => (form.storyPoints = v)} />
 				</div>
 				<div class="form-section">
-					<label class="form-label">Dauer</label>
+					<label class="form-label">{$t('taskForm.duration')}</label>
 					<DurationPicker
 						value={form.effectiveDuration}
 						onChange={(v) => (form.effectiveDuration = v)}
 					/>
 				</div>
 				<div class="form-section">
-					<label class="form-label">Spaß</label>
+					<label class="form-label">{$t('taskForm.fun')}</label>
 					<FunRatingPicker value={form.funRating} onChange={(v) => (form.funRating = v)} />
 				</div>
 			</div>
@@ -626,7 +650,7 @@
 					onclick={handleDeleteClick}
 					disabled={form.isLoading}
 				>
-					{form.showDeleteConfirm ? 'Wirklich löschen?' : 'Löschen'}
+					{form.showDeleteConfirm ? $t('taskForm.confirmDelete') : $t('common.delete')}
 				</button>
 			</div>
 		</div>

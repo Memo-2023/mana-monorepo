@@ -10,11 +10,13 @@
 		DurationPicker,
 		FunRatingPicker,
 		TagSelector,
+		ReminderSelector,
 	} from './form';
 	import { ContactSelector, focusTrap } from '@manacore/shared-ui';
 	import { ManaLinkList, ManaLinkPicker } from '@manacore/shared-links/ui';
 	import { searchCrossApp } from '$lib/data/cross-app-search';
 	import { X, Trash } from '@manacore/shared-icons';
+	import { t } from 'svelte-i18n';
 
 	interface Props {
 		task: Task;
@@ -50,6 +52,7 @@
 		form.isLoading = true;
 		try {
 			onSave(form.buildUpdateInput(task));
+			await form.persistReminder(task.id);
 		} finally {
 			form.isLoading = false;
 		}
@@ -84,13 +87,15 @@
 			<div class="top-bar">
 				<div class="top-left">
 					{#if form.showDeleteConfirm}
-						<span class="delete-confirm-text">Wirklich löschen?</span>
-						<button class="btn-ghost-danger" onclick={handleDelete}>Ja, löschen</button>
+						<span class="delete-confirm-text">{$t('taskForm.confirmDelete')}</span>
+						<button class="btn-ghost-danger" onclick={handleDelete}
+							>{$t('taskForm.yesDelete')}</button
+						>
 						<button class="btn-ghost" onclick={() => (form.showDeleteConfirm = false)}
-							>Abbrechen</button
+							>{$t('common.cancel')}</button
 						>
 					{:else}
-						<button class="btn-icon-danger" onclick={handleDelete} title="Aufgabe löschen">
+						<button class="btn-icon-danger" onclick={handleDelete} title={$t('task.deleteTask')}>
 							<Trash size={16} />
 						</button>
 					{/if}
@@ -101,9 +106,11 @@
 						onclick={handleSave}
 						disabled={form.isLoading || !form.title.trim()}
 					>
-						{#if form.isLoading}<span class="spinner"></span>{:else}Speichern{/if}
+						{#if form.isLoading}<span class="spinner"></span>{:else}{$t('common.save')}{/if}
 					</button>
-					<button class="btn-close" onclick={onClose} title="Schließen"><X size={18} /></button>
+					<button class="btn-close" onclick={onClose} title={$t('common.close')}
+						><X size={18} /></button
+					>
 				</div>
 			</div>
 
@@ -112,7 +119,7 @@
 				<textarea
 					class="title-input"
 					bind:value={form.title}
-					placeholder="Aufgabentitel..."
+					placeholder={$t('taskForm.titlePlaceholder')}
 					rows="1"
 					use:autoGrow
 				></textarea>
@@ -121,23 +128,25 @@
 			<!-- Content: Description (left) + Subtasks/Links (right) -->
 			<div class="content-grid">
 				<div class="col-desc">
-					<span class="col-label">Beschreibung</span>
+					<span class="col-label">{$t('taskForm.description')}</span>
 					<textarea
 						class="desc-textarea"
 						bind:value={form.description}
-						placeholder="Beschreibung hinzufügen..."
+						placeholder={$t('taskForm.addDescription')}
 						rows="5"
 					></textarea>
 				</div>
 
 				<div class="col-subtasks">
-					<span class="col-label">Subtasks</span>
+					<span class="col-label">{$t('taskForm.subtasks')}</span>
 					<SubtaskList subtasks={form.subtasks} onChange={handleSubtasksChange} />
 
 					<div class="links-block">
 						<div class="links-header">
-							<span class="col-label">Verknüpfungen</span>
-							<button class="link-add" onclick={() => (showLinkPicker = true)}>+ Verknüpfen</button>
+							<span class="col-label">{$t('taskForm.links')}</span>
+							<button class="link-add" onclick={() => (showLinkPicker = true)}
+								>{$t('taskForm.addLink')}</button
+							>
 						</div>
 						<ManaLinkList recordRef={{ app: 'todo', collection: 'tasks', id: task.id }} editable />
 					</div>
@@ -148,7 +157,7 @@
 			<div class="props-strip">
 				<!-- Status -->
 				<div class="prop">
-					<span class="prop-label">Status</span>
+					<span class="prop-label">{$t('taskForm.status')}</span>
 					<select class="prop-select" bind:value={form.status}>
 						{#each STATUS_OPTIONS as s}
 							<option value={s.value}>{s.label}</option>
@@ -160,7 +169,7 @@
 
 				<!-- Priorität -->
 				<div class="prop prop-priority">
-					<span class="prop-label">Priorität</span>
+					<span class="prop-label">{$t('task.priority')}</span>
 					<PrioritySelector value={form.priority} onChange={(p) => (form.priority = p)} />
 				</div>
 
@@ -168,25 +177,25 @@
 
 				<!-- Fälligkeit -->
 				<div class="prop">
-					<span class="prop-label">Fälligkeit</span>
+					<span class="prop-label">{$t('taskForm.dueDate')}</span>
 					<input type="date" class="prop-input" bind:value={form.dueDate} />
 				</div>
 
 				<!-- Uhrzeit -->
 				<div class="prop">
-					<span class="prop-label">Uhrzeit</span>
+					<span class="prop-label">{$t('taskForm.time')}</span>
 					<input type="time" class="prop-input" bind:value={form.dueTime} />
 				</div>
 
 				<!-- Startdatum -->
 				<div class="prop">
-					<span class="prop-label">Startdatum</span>
+					<span class="prop-label">{$t('taskForm.startDate')}</span>
 					<input type="date" class="prop-input" bind:value={form.startDate} />
 				</div>
 
 				<!-- Wiederholung -->
 				<div class="prop">
-					<span class="prop-label">Wiederholung</span>
+					<span class="prop-label">{$t('taskForm.recurrence')}</span>
 					<select class="prop-select" bind:value={form.recurrenceRule}>
 						{#each RECURRENCE_OPTIONS as o}
 							<option value={o.value}>{o.label}</option>
@@ -194,11 +203,21 @@
 					</select>
 				</div>
 
+				<!-- Erinnerung -->
+				<div class="prop">
+					<span class="prop-label">{$t('reminders.label')}</span>
+					<ReminderSelector
+						value={form.reminderMinutes}
+						onChange={(v) => (form.reminderMinutes = v)}
+						disabled={!form.dueDate}
+					/>
+				</div>
+
 				<div class="prop-divider"></div>
 
 				<!-- Tags -->
 				<div class="prop prop-tags">
-					<span class="prop-label">Tags</span>
+					<span class="prop-label">{$t('taskForm.tags')}</span>
 					<TagSelector
 						selectedIds={form.selectedLabelIds}
 						onChange={(ids) => (form.selectedLabelIds = ids)}
@@ -209,31 +228,31 @@
 
 				<!-- Zuständig -->
 				<div class="prop prop-contact">
-					<span class="prop-label">Zuständig</span>
+					<span class="prop-label">{$t('taskForm.assignee')}</span>
 					<ContactSelector
 						selectedContacts={form.assignee}
 						onContactsChange={(c) => (form.assignee = c)}
 						onSearch={(q) => contactsStore.searchContacts(q)}
 						singleSelect={true}
 						allowManualEntry={false}
-						placeholder="Zuweisen..."
-						addLabel="Zuweisen"
-						searchPlaceholder="Name oder E-Mail..."
+						placeholder={$t('taskForm.assignPlaceholder')}
+						addLabel={$t('taskForm.assignLabel')}
+						searchPlaceholder={$t('taskForm.nameOrEmail')}
 						isAvailable={form.contactsAvailable ?? false}
 					/>
 				</div>
 
 				<!-- Beteiligte -->
 				<div class="prop prop-contact">
-					<span class="prop-label">Beteiligte</span>
+					<span class="prop-label">{$t('taskForm.involved')}</span>
 					<ContactSelector
 						selectedContacts={form.involvedContacts}
 						onContactsChange={(c) => (form.involvedContacts = c)}
 						onSearch={(q) => contactsStore.searchContacts(q)}
 						allowManualEntry={false}
-						placeholder="Hinzufügen..."
-						addLabel="Hinzufügen"
-						searchPlaceholder="Name oder E-Mail..."
+						placeholder={$t('taskForm.addPlaceholder')}
+						addLabel={$t('taskForm.addLabel')}
+						searchPlaceholder={$t('taskForm.nameOrEmail')}
 						isAvailable={form.contactsAvailable ?? false}
 					/>
 				</div>
@@ -242,13 +261,13 @@
 
 				<!-- Storypoints -->
 				<div class="prop">
-					<span class="prop-label">Storypoints</span>
+					<span class="prop-label">{$t('taskForm.storypoints')}</span>
 					<StorypointsSelector value={form.storyPoints} onChange={(v) => (form.storyPoints = v)} />
 				</div>
 
 				<!-- Effektive Dauer -->
 				<div class="prop">
-					<span class="prop-label">Dauer</span>
+					<span class="prop-label">{$t('taskForm.duration')}</span>
 					<DurationPicker
 						value={form.effectiveDuration}
 						onChange={(v) => (form.effectiveDuration = v)}
@@ -257,7 +276,8 @@
 
 				<!-- Spaß-Faktor -->
 				<div class="prop">
-					<span class="prop-label">Spaß{form.funRating !== null ? ` (${form.funRating})` : ''}</span
+					<span class="prop-label"
+						>{$t('taskForm.fun')}{form.funRating !== null ? ` (${form.funRating})` : ''}</span
 					>
 					<FunRatingPicker value={form.funRating} onChange={(v) => (form.funRating = v)} />
 				</div>

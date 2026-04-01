@@ -4,6 +4,7 @@
 	import { tagMutations } from '@manacore/shared-stores';
 	import { Plus, X, Check, Pencil, Trash, MagnifyingGlass } from '@manacore/shared-icons';
 	import { TagColorPicker, focusTrap } from '@manacore/shared-ui';
+	import { t } from 'svelte-i18n';
 
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
@@ -156,10 +157,10 @@
 		<div class="modal-header">
 			<h2 class="modal-title">Tags</h2>
 			<div class="header-actions">
-				<button class="header-btn" onclick={openNewTagForm} title="Neuer Tag">
+				<button class="header-btn" onclick={openNewTagForm} title={$t('tags.newTag')}>
 					<Plus size={18} weight="bold" />
 				</button>
-				<button class="header-btn close-btn" onclick={onClose} title="Schließen">
+				<button class="header-btn close-btn" onclick={onClose} title={$t('common.close')}>
 					<X size={18} weight="bold" />
 				</button>
 			</div>
@@ -169,10 +170,10 @@
 		<div class="modal-content">
 			{#if tagsCtx.value.length === 0 && !showNewTagForm}
 				<div class="empty-state">
-					<p>Keine Tags vorhanden</p>
+					<p>{$t('tags.noTagsAvailable')}</p>
 					<button class="create-btn" onclick={openNewTagForm}>
 						<Plus size={16} weight="bold" />
-						Tag erstellen
+						{$t('tags.createTag')}
 					</button>
 				</div>
 			{:else}
@@ -180,8 +181,8 @@
 				{#if showNewTagForm}
 					<div class="edit-form-section">
 						<div class="edit-form-header">
-							<span class="edit-form-title">Neuer Tag</span>
-							<button class="icon-btn" onclick={closeNewTagForm} title="Abbrechen">
+							<span class="edit-form-title">{$t('tags.newTag')}</span>
+							<button class="icon-btn" onclick={closeNewTagForm} title={$t('common.cancel')}>
 								<X size={14} weight="bold" />
 							</button>
 						</div>
@@ -192,7 +193,7 @@
 									type="text"
 									bind:value={newTagName}
 									onkeydown={handleNewTagKeydown}
-									placeholder="Tag Name"
+									placeholder={$t('tags.tagName')}
 									class="name-input"
 									autofocus
 								/>
@@ -210,7 +211,7 @@
 									disabled={!newTagName.trim() || isCreatingTag}
 								>
 									<Check size={14} weight="bold" />
-									Erstellen
+									{$t('tags.createTag')}
 								</button>
 							</div>
 						</div>
@@ -221,8 +222,8 @@
 				{#if editingTag}
 					<div class="edit-form-section">
 						<div class="edit-form-header">
-							<span class="edit-form-title">Tag bearbeiten</span>
-							<button class="icon-btn" onclick={closeEditTag} title="Abbrechen">
+							<span class="edit-form-title">{$t('tags.editTag')}</span>
+							<button class="icon-btn" onclick={closeEditTag} title={$t('common.cancel')}>
 								<X size={14} weight="bold" />
 							</button>
 						</div>
@@ -233,7 +234,7 @@
 									type="text"
 									bind:value={editTagName}
 									onkeydown={handleEditTagKeydown}
-									placeholder="Tag Name"
+									placeholder={$t('tags.tagName')}
 									class="name-input"
 									autofocus
 								/>
@@ -245,7 +246,11 @@
 								/>
 							</div>
 							<div class="form-actions">
-								<button class="btn btn-danger" onclick={handleDeleteTag} title="Tag löschen">
+								<button
+									class="btn btn-danger"
+									onclick={handleDeleteTag}
+									title={$t('tags.deleteTag')}
+								>
 									<Trash size={14} weight="bold" />
 								</button>
 								<button
@@ -254,7 +259,7 @@
 									disabled={!editTagName.trim() || isSavingTag}
 								>
 									<Check size={14} weight="bold" />
-									Speichern
+									{$t('common.save')}
 								</button>
 							</div>
 						</div>
@@ -276,7 +281,7 @@
 								<button
 									class="tag-edit-btn"
 									onclick={() => openEditTag(tag)}
-									title="Tag bearbeiten"
+									title={$t('tags.editTag')}
 								>
 									<Pencil size={10} weight="bold" />
 								</button>
@@ -286,7 +291,7 @@
 
 					{#if searchQuery && sortedTags.length === 0}
 						<div class="search-empty">
-							<p>Keine Tags gefunden für "{searchQuery}"</p>
+							<p>{$t('tags.noTagsFound', { values: { query: searchQuery } })}</p>
 						</div>
 					{/if}
 				{/if}
@@ -298,12 +303,16 @@
 			<MagnifyingGlass size={16} class="search-icon" />
 			<input
 				type="text"
-				placeholder="Tags suchen..."
+				placeholder={$t('tags.searchTags')}
 				bind:value={searchQuery}
 				class="search-input"
 			/>
 			{#if searchQuery}
-				<button class="search-clear" onclick={() => (searchQuery = '')} title="Suche leeren">
+				<button
+					class="search-clear"
+					onclick={() => (searchQuery = '')}
+					title={$t('tags.clearSearch')}
+				>
 					<X size={14} weight="bold" />
 				</button>
 			{/if}

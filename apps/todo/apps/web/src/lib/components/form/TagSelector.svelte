@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { t } from 'svelte-i18n';
 	import type { Tag } from '@manacore/shared-tags';
 	import { CaretDown, Check } from '@manacore/shared-icons';
 
@@ -37,7 +38,7 @@
 <div class="tag-selector">
 	<button type="button" class="tag-trigger" onclick={handleTriggerClick}>
 		{#if selectedIds.length === 0}
-			<span class="text-muted">Tags auswählen...</span>
+			<span class="text-muted">{$t('tags.selectTags')}</span>
 		{:else}
 			<div class="selected-tags">
 				{#each selectedIds.slice(0, 3) as tagId}
@@ -75,7 +76,7 @@
 				</button>
 			{/each}
 			{#if tagsCtx.value.length === 0}
-				<div class="no-tags">Keine Tags vorhanden</div>
+				<div class="no-tags">{$t('tags.noTagsAvailable')}</div>
 			{/if}
 		</div>
 	{/if}

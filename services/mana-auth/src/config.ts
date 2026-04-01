@@ -1,6 +1,7 @@
 export interface Config {
 	port: number;
 	databaseUrl: string;
+	syncDatabaseUrl: string;
 	baseUrl: string;
 	cookieDomain: string;
 	nodeEnv: string;
@@ -22,6 +23,10 @@ export function loadConfig(): Config {
 	return {
 		port: parseInt(env('PORT', '3001'), 10),
 		databaseUrl: env('DATABASE_URL', 'postgresql://manacore:devpassword@localhost:5432/mana_auth'),
+		syncDatabaseUrl: env(
+			'SYNC_DATABASE_URL',
+			'postgresql://manacore:devpassword@localhost:5432/mana_sync'
+		),
 		baseUrl: env('BASE_URL', 'http://localhost:3001'),
 		cookieDomain: env('COOKIE_DOMAIN'),
 		nodeEnv: env('NODE_ENV', 'development'),

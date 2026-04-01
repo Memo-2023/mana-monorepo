@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { DotsThree, Plus, X } from '@manacore/shared-icons';
 	import TagStripModal from './TagStripModal.svelte';
+	import { t } from 'svelte-i18n';
 
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
 
@@ -54,7 +55,7 @@
 			class="clear-filter-pill glass-tag"
 			class:hidden={!hasSelectedTags}
 			onclick={() => viewStore.setFilterLabelIds([])}
-			title="Filter löschen"
+			title={$t('filters.clearFilter')}
 			disabled={!hasSelectedTags}
 		>
 			<X size={16} weight="bold" />
@@ -62,15 +63,15 @@
 		</button>
 
 		<!-- More Pill (opens modal) -->
-		<button class="more-pill glass-tag" onclick={handleOpenModal} title="Alle Tags anzeigen">
+		<button class="more-pill glass-tag" onclick={handleOpenModal} title={$t('tags.showAllTags')}>
 			<DotsThree size={18} weight="bold" />
-			<span class="tag-name">Alle Tags</span>
+			<span class="tag-name">{$t('tags.allTags')}</span>
 		</button>
 
 		{#if !hasTags}
 			<button class="empty-state glass-tag" onclick={() => goto('/tags')}>
-				<span>Keine Tags vorhanden</span>
-				<span class="add-hint">+ Erstellen</span>
+				<span>{$t('tags.noTagsAvailable')}</span>
+				<span class="add-hint">{$t('tags.createShort')}</span>
 			</button>
 		{:else}
 			{#each sortedTags as tag (tag.id)}
@@ -90,10 +91,10 @@
 			<button
 				class="create-pill glass-tag"
 				onclick={() => goto('/tags?new=true')}
-				title="Neuer Tag"
+				title={$t('tags.newTag')}
 			>
 				<Plus size={16} weight="bold" />
-				<span class="tag-name">Neuer Tag</span>
+				<span class="tag-name">{$t('tags.newTag')}</span>
 			</button>
 		{/if}
 	</div>

@@ -40,6 +40,24 @@ Handled directly by Better Auth — includes sign-in, sign-up, session, 2FA, mag
 ### OIDC (`/.well-known/*`, `/api/auth/oauth2/*`)
 OpenID Connect provider for Matrix/Synapse SSO.
 
+### Me — GDPR Self-Service (`/api/v1/me/*`)
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/data` | Full user data summary (auth, credits, project entities) |
+| GET | `/data/export` | Download all data as JSON file |
+| DELETE | `/data` | Delete all user data across all services (right to be forgotten) |
+
+Aggregates data from 3 sources: auth DB (sessions, accounts, 2FA, passkeys), mana-credits (balance, transactions), mana-sync DB (entity counts per app).
+
+### Admin (`/api/v1/admin/*`)
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/users` | Paginated user list with search (`?page=1&limit=20&search=`) |
+| GET | `/users/:id/data` | Aggregated user data summary (same as /me/data) |
+| DELETE | `/users/:id/data` | Delete all user data (admin) |
+| GET | `/users/:id/tier` | Get user's access tier |
+| PUT | `/users/:id/tier` | Update user's access tier |
+
 ### Internal (`/api/v1/internal/*`)
 | Method | Path | Description |
 |--------|------|-------------|
@@ -54,11 +72,13 @@ Session cookies shared across `*.mana.how` via `COOKIE_DOMAIN=.mana.how`.
 ```env
 PORT=3001
 DATABASE_URL=postgresql://...
+SYNC_DATABASE_URL=postgresql://.../mana_sync  # mana-sync DB for entity counts (GDPR data view)
 BASE_URL=https://auth.mana.how
 COOKIE_DOMAIN=.mana.how
 NODE_ENV=production
 MANA_CORE_SERVICE_KEY=...
 MANA_CREDITS_URL=http://mana-credits:3061
+MANA_SUBSCRIPTIONS_URL=http://mana-subscriptions:3063
 SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=587
 SMTP_USER=...

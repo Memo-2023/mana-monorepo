@@ -4,8 +4,11 @@
 
 import en from './en.json';
 import de from './de.json';
+import es from './es.json';
+import fr from './fr.json';
+import it from './it.json';
 
-export { en, de };
+export { en, de, es, fr, it };
 
 /**
  * Common translations type
@@ -19,6 +22,12 @@ export function getCommonTranslations(locale: string): CommonTranslations {
 	switch (locale) {
 		case 'de':
 			return de;
+		case 'es':
+			return es;
+		case 'fr':
+			return fr;
+		case 'it':
+			return it;
 		case 'en':
 		default:
 			return en;

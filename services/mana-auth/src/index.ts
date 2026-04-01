@@ -17,6 +17,7 @@ import { initializeEmail } from './email/send';
 import { SecurityEventsService, AccountLockoutService } from './services/security';
 import { SignupLimitService } from './services/signup-limit';
 import { ApiKeysService } from './services/api-keys';
+import { UserDataService } from './services/user-data';
 import { createAuthRoutes } from './routes/auth';
 import { createGuildRoutes } from './routes/guilds';
 import { createApiKeyRoutes, createApiKeyValidationRoute } from './routes/api-keys';
@@ -35,6 +36,7 @@ const security = new SecurityEventsService(db);
 const lockout = new AccountLockoutService(db);
 const signupLimit = new SignupLimitService(db);
 const apiKeysService = new ApiKeysService(db);
+const userDataService = new UserDataService(db, config);
 
 // ─── App ────────────────────────────────────────────────────
 
@@ -80,12 +82,12 @@ app.route('/api/v1/api-keys', createApiKeyValidationRoute(apiKeysService));
 // ─── Me (GDPR) ──────────────────────────────────────────────
 
 app.use('/api/v1/me/*', jwtAuth(config.baseUrl));
-app.route('/api/v1/me', createMeRoutes(db));
+app.route('/api/v1/me', createMeRoutes(userDataService));
 
 // ─── Admin ──────────────────────────────────────────────────
 
 app.use('/api/v1/admin/*', jwtAuth(config.baseUrl));
-app.route('/api/v1/admin', createAdminRoutes(db));
+app.route('/api/v1/admin', createAdminRoutes(db, userDataService));
 
 // ─── Internal API ───────────────────────────────────────────
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { DurationUnit, EffectiveDuration } from '@todo/shared';
+	import { t } from 'svelte-i18n';
 	import { X } from '@manacore/shared-icons';
 
 	interface Props {
@@ -24,11 +25,11 @@
 		{ label: '2d', value: 2, unit: 'days' },
 	];
 
-	const unitOptions: { value: DurationUnit; label: string }[] = [
-		{ value: 'minutes', label: 'Minuten' },
-		{ value: 'hours', label: 'Stunden' },
-		{ value: 'days', label: 'Tage' },
-	];
+	let unitOptions = $derived([
+		{ value: 'minutes' as DurationUnit, label: $t('durationPicker.minutes') },
+		{ value: 'hours' as DurationUnit, label: $t('durationPicker.hours') },
+		{ value: 'days' as DurationUnit, label: $t('durationPicker.days') },
+	]);
 
 	// Sync custom inputs with value prop
 	$effect(() => {
@@ -96,7 +97,7 @@
 			...
 		</button>
 		{#if value !== null}
-			<button type="button" class="duration-clear" onclick={clear} title="Zurücksetzen">
+			<button type="button" class="duration-clear" onclick={clear} title={$t('common.reset')}>
 				<X size={16} />
 			</button>
 		{/if}
@@ -109,7 +110,7 @@
 				class="duration-input"
 				bind:value={customValue}
 				oninput={handleCustomChange}
-				placeholder="Wert"
+				placeholder={$t('durationPicker.value')}
 				min="1"
 			/>
 			<select class="duration-unit" bind:value={customUnit} onchange={handleCustomChange}>

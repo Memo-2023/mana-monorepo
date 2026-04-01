@@ -4,6 +4,8 @@
 	import { flip } from 'svelte/animate';
 	import { untrack } from 'svelte';
 	import { Check, Plus, X, DotsSixVertical } from '@manacore/shared-icons';
+	import { TodoEvents } from '@manacore/shared-utils/analytics';
+	import { t } from 'svelte-i18n';
 
 	interface Props {
 		subtasks: Subtask[];
@@ -20,7 +22,9 @@
 		const current = subtasks;
 		untrack(() => {
 			const currentIds = new Set(current.map((s) => s.id));
-			const itemIds = new Set(items.filter((i) => i.id !== SHADOW_PLACEHOLDER_ITEM_ID).map((i) => i.id));
+			const itemIds = new Set(
+				items.filter((i) => i.id !== SHADOW_PLACEHOLDER_ITEM_ID).map((i) => i.id)
+			);
 			const idsChanged =
 				currentIds.size !== itemIds.size || current.some((s) => !itemIds.has(s.id));
 
@@ -42,10 +46,13 @@
 		items = e.detail.items.filter((item) => item.id !== SHADOW_PLACEHOLDER_ITEM_ID);
 		onChange(items.map((item, index) => ({ ...item, order: index })));
 		dropInProgress = true;
-		setTimeout(() => { dropInProgress = false; }, 500);
+		setTimeout(() => {
+			dropInProgress = false;
+		}, 500);
 	}
 
 	function toggleComplete(id: string) {
+		const target = subtasks.find((s) => s.id === id);
 		const updated = subtasks.map((s) =>
 			s.id === id
 				? {
@@ -55,6 +62,7 @@
 					}
 				: s
 		);
+		if (target && !target.isCompleted) TodoEvents.subtaskCompleted();
 		onChange(updated);
 	}
 
@@ -122,7 +130,7 @@
 					}}
 				>
 					<!-- Drag handle -->
-					<div class="drag-handle" aria-label="Ziehen zum Sortieren">
+					<div class="drag-handle" aria-label={$t('subtasks.dragToSort')}>
 						<DotsSixVertical size={16} />
 					</div>
 
@@ -147,15 +155,15 @@
 						spellcheck="false"
 						onclick={(e) => e.stopPropagation()}
 						onkeydown={(e) => handleTitleKeydown(e, subtask)}
-						onblur={(e) => handleTitleBlur(e, subtask)}
-					>{subtask.title}</span>
+						onblur={(e) => handleTitleBlur(e, subtask)}>{subtask.title}</span
+					>
 
 					<!-- Delete button -->
 					<button
 						type="button"
 						class="subtask-delete"
 						onclick={() => deleteSubtask(subtask.id)}
-						title="Löschen"
+						title={$t('common.delete')}
 					>
 						<X size={16} />
 					</button>
@@ -172,12 +180,12 @@
 		<input
 			type="text"
 			class="add-input"
-			placeholder="Subtask hinzufügen..."
+			placeholder={$t('subtasks.addPlaceholder')}
 			bind:value={newSubtaskTitle}
 			onkeydown={handleAddKeydown}
 		/>
 		{#if newSubtaskTitle.trim()}
-			<button type="button" class="add-btn" onclick={addSubtask}> Hinzufügen </button>
+			<button type="button" class="add-btn" onclick={addSubtask}> {$t('subtasks.add')} </button>
 		{/if}
 	</div>
 </div>
