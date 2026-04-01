@@ -16,7 +16,9 @@
 		MapPin,
 		Cake,
 		Note,
+		ShareNetwork,
 	} from '@manacore/shared-icons';
+	import { ShareModal } from '@manacore/shared-uload';
 
 	const allContacts$: Observable<Contact[]> = getContext('contacts');
 
@@ -78,6 +80,15 @@
 		await contactsStore.deleteContact(contact.id);
 		goto('/contacts');
 	}
+
+	// Share modal
+	let showShare = $state(false);
+	let shareUrl = $derived(
+		contact
+			? `${typeof window !== 'undefined' ? window.location.origin : ''}/contacts/${contact.id}`
+			: ''
+	);
+	let shareTitle = $derived(contact ? getDisplayName(contact) : '');
 </script>
 
 <svelte:head>
@@ -143,6 +154,13 @@
 
 				<!-- Actions -->
 				<div class="flex gap-1">
+					<button
+						onclick={() => (showShare = true)}
+						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+						title="Kurzlink teilen"
+					>
+						<ShareNetwork size={18} />
+					</button>
 					<button
 						onclick={() => startEdit()}
 						class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -368,3 +386,13 @@
 		{/if}
 	{/if}
 </div>
+
+<!-- Share Modal (uLoad integration) -->
+<ShareModal
+	visible={showShare}
+	onClose={() => (showShare = false)}
+	url={shareUrl}
+	title={shareTitle}
+	source="contacts"
+	description={contact?.company ? `${contact.jobTitle ?? ''} @ ${contact.company}`.trim() : ''}
+/>

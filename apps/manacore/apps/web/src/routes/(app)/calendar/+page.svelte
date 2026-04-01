@@ -24,7 +24,8 @@
 		isToday,
 	} from 'date-fns';
 	import { de } from 'date-fns/locale';
-	import { CaretLeft, CaretRight, Plus } from '@manacore/shared-icons';
+	import { CaretLeft, CaretRight, Plus, ShareNetwork } from '@manacore/shared-icons';
+	import { ShareModal } from '@manacore/shared-uload';
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('calendarEvents');
@@ -163,6 +164,14 @@
 		await eventsStore.deleteEvent(editingEvent.id);
 		showEventForm = false;
 	}
+
+	// Share modal state
+	let shareEvent = $state<CalendarEvent | null>(null);
+	let shareUrl = $derived(
+		shareEvent
+			? `${typeof window !== 'undefined' ? window.location.origin : ''}/calendar?event=${shareEvent.id}`
+			: ''
+	);
 
 	// Hours for the week grid
 	const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -540,6 +549,18 @@
 						>
 							Löschen
 						</button>
+						<button
+							type="button"
+							onclick={() => {
+								shareEvent = editingEvent;
+								showEventForm = false;
+							}}
+							class="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+							title="Kurzlink teilen"
+						>
+							<ShareNetwork size={16} />
+							Teilen
+						</button>
 					{/if}
 					<div class="flex-1"></div>
 					<button
@@ -561,6 +582,16 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Share Modal (uLoad integration) -->
+<ShareModal
+	visible={shareEvent !== null}
+	onClose={() => (shareEvent = null)}
+	url={shareUrl}
+	title={shareEvent?.title ?? ''}
+	source="calendar"
+	description={shareEvent?.location ? `Ort: ${shareEvent.location}` : ''}
+/>
 
 <style>
 	.week-grid {
