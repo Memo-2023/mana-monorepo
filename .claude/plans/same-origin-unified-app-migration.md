@@ -30,16 +30,17 @@
 | 13 | **context** | queries, types | 5 routes (dashboard, spaces, documents) | **Done** |
 | 14 | **questions** | queries, types | 4 routes (list, collections, new, detail) | **Done** |
 | 15 | **nutriphi** | queries, types, constants | 4 routes (dashboard, add, history, goals) | **Done** |
-| 16 | **storage** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 17 | **cards** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 18 | **contacts** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 19 | **todo** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 20 | **calendar** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 21 | **picture** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 22 | **chat** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 23 | **mukke** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 24 | **memoro** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 25 | **playground** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 16 | **storage** | stores (2), queries, types | 7 routes (files, folders, favorites, search, trash) | **Done** |
+| 17 | **cards** | stores (2), components (2), queries | 6 routes (decks, study, explore, progress) | **Done** |
+| 18 | **contacts** | stores (3), queries, types | 3 routes (list, detail/edit) | **Done** |
+| 19 | **todo** | stores (4), queries, types | 2 routes (inbox + full task management) | **Done** |
+| 20 | **calendar** | stores (3), queries, types | 4 routes (week/month/agenda, event detail, calendars) | **Done** |
+| 21 | **picture** | stores (3), queries, types | 6 routes (gallery, generate, boards, archive) | **Done** |
+| 22 | **chat** | stores (3), queries, types | 5 routes (conversations, chat, archive, templates) | **Done** |
+| 23 | **mukke** | stores (4), queries, types | 6 routes (dashboard, library, playlists, projects) | **Done** |
+| 24 | **memoro** | stores (3), queries, types | 5 routes (memos, detail, archive, tags) | **Done** |
+| 25 | **playground** | index (stateless) | 1 route (LLM chat) | **Done** |
+| — | **guides** | index (static) | 1 route (guide listing) | **Done** |
 
 ### Offene Phasen
 
@@ -49,11 +50,16 @@
 - **Phase 6:** Aufräumen (alte Apps archivieren) — nicht begonnen
 - **Phase 7:** local-store Package anpassen — nicht begonnen
 
-### Nächste Schritte
+### Nächste Schritte — Phase 2 abgeschlossen!
 
-1. Backend-Apps: **storage** (#16), **cards** (#17)
-2. Komplexe Apps: **contacts**, **todo**, **calendar**, **picture**, **chat**, **mukke**, **memoro**
-3. Extra: **playground** (#25)
+Phase 2 (Module migrieren) ist vollständig. Alle 26 Module + guides sind migriert.
+
+**Nächste Phasen:**
+1. **Phase 3:** Split-Screen ohne iFrame — Svelte-Komponenten statt iFrame
+2. **Phase 4:** Dashboard-Widgets — Cross-App Dexie-Queries
+3. **Phase 5:** Infrastruktur — Docker, Cloudflare, CORS vereinfachen
+4. **Phase 6:** Aufräumen — Alte standalone Web-Apps archivieren
+5. **Phase 7:** local-store Package anpassen — Multi-App Sync in einer DB
 
 ---
 
