@@ -18,7 +18,7 @@ features:
   - Offline-Modus für unterwegs
   - Import/Export von Anki und Quizlet
 status: coming-soon
-releaseDate: Geplant Q2 2025
+releaseDate: Geplant Q3 2026
 order: 3
 website: https://cards.ai
 ---
