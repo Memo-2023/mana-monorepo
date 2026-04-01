@@ -4,6 +4,9 @@
 	import { BoardViewRenderer } from '$lib/components/board-views';
 	import { todoSettings, type PageWidth } from '$lib/stores/settings.svelte';
 	import { boardViewsStore } from '$lib/stores/board-views.svelte';
+	import { Plus } from '@manacore/shared-icons';
+	import PagePicker from '$lib/components/pages/PagePicker.svelte';
+	import SecondaryPage from '$lib/components/pages/SecondaryPage.svelte';
 
 	// Get active view + edit mode from layout context
 	const activeViewCtx: { readonly value: LocalBoardView | null } = getContext('activeView');
@@ -13,6 +16,31 @@
 	let editMode = $derived(editModeCtx.active);
 	let activeView = $derived(activeViewCtx.value);
 	let pageTitle = $derived(activeView?.name ?? 'Aufgaben');
+
+	// ── Secondary Pages ─────────────────────────────────────
+	let showPagePicker = $state(false);
+	let openPages = $state<string[]>([]);
+
+	function handleAddPage(pageId: string) {
+		if (!openPages.includes(pageId)) {
+			openPages = [...openPages, pageId];
+		}
+		showPagePicker = false;
+	}
+
+	function handleRemovePage(pageId: string) {
+		openPages = openPages.filter((p) => p !== pageId);
+	}
+
+	function togglePagePicker() {
+		showPagePicker = !showPagePicker;
+	}
+
+	function handleColumnClose(colIdx: number) {
+		if (!activeView || activeView.columns.length <= 1) return;
+		const columns = $state.snapshot(activeView.columns).filter((_, i) => i !== colIdx);
+		updateView({ columns });
+	}
 
 	// ── Edit helpers ────────────────────────────────────────
 
@@ -49,13 +77,15 @@
 
 	function updateColumn(colIdx: number, data: Record<string, unknown>) {
 		if (!activeView) return;
-		const cols = activeView.columns.map((c, i) => (i === colIdx ? { ...c, ...data } : { ...c }));
+		const raw = $state.snapshot(activeView.columns);
+		const cols = raw.map((c, i) => (i === colIdx ? { ...c, ...data } : c));
 		updateView({ columns: cols });
 	}
 
 	function removeColumn(colIdx: number) {
 		if (!activeView || activeView.columns.length <= 1) return;
-		updateView({ columns: activeView.columns.filter((_, i) => i !== colIdx) });
+		const columns = $state.snapshot(activeView.columns).filter((_, i) => i !== colIdx);
+		updateView({ columns });
 	}
 
 	function addColumn() {
@@ -66,12 +96,12 @@
 			color: COLUMN_COLORS[activeView.columns.length % COLUMN_COLORS.length],
 			match: { type: 'custom' as const, value: `custom-${Date.now()}` },
 		};
-		updateView({ columns: [...activeView.columns, newCol] });
+		updateView({ columns: [...$state.snapshot(activeView.columns), newCol] });
 	}
 
 	function moveColumn(colIdx: number, dir: -1 | 1) {
 		if (!activeView) return;
-		const cols = [...activeView.columns];
+		const cols = $state.snapshot(activeView.columns);
 		const target = colIdx + dir;
 		if (target < 0 || target >= cols.length) return;
 		[cols[colIdx], cols[target]] = [cols[target], cols[colIdx]];
@@ -148,8 +178,35 @@
 			onColumnColorChange={columnsEditable ? (i, color) => updateColumn(i, { color }) : undefined}
 			onColumnMove={columnsEditable ? moveColumn : undefined}
 			onColumnDelete={columnsEditable ? removeColumn : undefined}
+			onColumnClose={handleColumnClose}
 			onAddColumn={columnsEditable && editMode ? addColumn : undefined}
-		/>
+		>
+			{#snippet trailing()}
+				<!-- Secondary Pages -->
+				{#each openPages as pageId (pageId)}
+					<SecondaryPage {pageId} onClose={() => handleRemovePage(pageId)} />
+				{/each}
+
+				<!-- Neue Seite button (always last in track) -->
+				{#if !editMode}
+					{#if showPagePicker}
+						<PagePicker
+							onSelect={handleAddPage}
+							onClose={() => (showPagePicker = false)}
+							activePageIds={openPages}
+						/>
+					{:else}
+						<button
+							class="neue-seite-card"
+							onclick={togglePagePicker}
+							title="Neue Seite hinzufügen"
+						>
+							<Plus size={18} />
+						</button>
+					{/if}
+				{/if}
+			{/snippet}
+		</BoardViewRenderer>
 	{:else}
 		<div class="empty-state">
 			<p class="text-muted-foreground">Views werden geladen...</p>
@@ -162,6 +219,35 @@
 		min-height: calc(100vh - 140px);
 		display: flex;
 		flex-direction: column;
+	}
+
+	.neue-seite-card {
+		flex: 0 0 auto;
+		width: 48px;
+		align-self: stretch;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 2px dashed rgba(0, 0, 0, 0.08);
+		border-radius: 0.375rem;
+		background: transparent;
+		color: #9ca3af;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	.neue-seite-card:hover {
+		border-color: var(--color-primary, #8b5cf6);
+		color: var(--color-primary, #8b5cf6);
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 4%, transparent);
+	}
+	:global(.dark) .neue-seite-card {
+		border-color: rgba(255, 255, 255, 0.06);
+		color: #4b5563;
+	}
+	:global(.dark) .neue-seite-card:hover {
+		border-color: var(--color-primary, #8b5cf6);
+		color: var(--color-primary, #8b5cf6);
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 8%, transparent);
 	}
 
 	.empty-state {

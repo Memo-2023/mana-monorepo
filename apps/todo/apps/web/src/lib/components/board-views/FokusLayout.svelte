@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { dndzone, SHADOW_PLACEHOLDER_ITEM_ID, type DndEvent } from 'svelte-dnd-action';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { isToday } from 'date-fns';
 	import type { Task } from '@todo/shared';
 	import type { GroupedColumn } from '$lib/data/view-grouping';
@@ -9,6 +9,7 @@
 	import ViewColumnHeader from './ViewColumnHeader.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
+	import { X } from '@manacore/shared-icons';
 
 	interface Props {
 		columns: GroupedColumn[];
@@ -20,7 +21,9 @@
 		onColumnColorChange?: (colIdx: number, color: string) => void;
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
+		onColumnClose?: (colIdx: number) => void;
 		onAddColumn?: () => void;
+		trailing?: Snippet;
 	}
 
 	let {
@@ -33,7 +36,9 @@
 		onColumnColorChange,
 		onColumnMove,
 		onColumnDelete,
+		onColumnClose,
 		onAddColumn,
+		trailing,
 	}: Props = $props();
 
 	// Today's completed tasks — shown at the bottom of every sheet
@@ -130,17 +135,28 @@
 		{#each columns as column, i (column.id)}
 			{@const tasks = localTasksByColumn[column.id] || column.tasks}
 			<div class="fokus-sheet" class:sheet-completed={column.name === 'Erledigt'}>
-				<ViewColumnHeader
-					name={column.name}
-					color={column.color}
-					taskCount={tasks.length}
-					columnIndex={i}
-					totalColumns={columns.length}
-					onRename={onColumnRename ? (name) => onColumnRename(i, name) : undefined}
-					onColorChange={onColumnColorChange ? (c) => onColumnColorChange(i, c) : undefined}
-					onMove={onColumnMove ? (dir) => onColumnMove(i, dir) : undefined}
-					onDelete={onColumnDelete ? () => onColumnDelete(i) : undefined}
-				/>
+				<div class="sheet-header-row">
+					<ViewColumnHeader
+						name={column.name}
+						color={column.color}
+						taskCount={tasks.length}
+						columnIndex={i}
+						totalColumns={columns.length}
+						onRename={onColumnRename ? (name) => onColumnRename(i, name) : undefined}
+						onColorChange={onColumnColorChange ? (c) => onColumnColorChange(i, c) : undefined}
+						onMove={onColumnMove ? (dir) => onColumnMove(i, dir) : undefined}
+						onDelete={onColumnDelete ? () => onColumnDelete(i) : undefined}
+					/>
+					{#if onColumnClose}
+						<button
+							class="sheet-close-btn"
+							onclick={() => onColumnClose(i)}
+							title="Seite schließen"
+						>
+							<X size={14} />
+						</button>
+					{/if}
+				</div>
 
 				<div class="sheet-body">
 					<div
@@ -198,6 +214,11 @@
 				</button>
 			</div>
 		{/if}
+
+		<!-- Trailing content (Neue Seite, secondary pages) -->
+		{#if trailing}
+			{@render trailing()}
+		{/if}
 	</div>
 
 	<!-- Page dots -->
@@ -220,8 +241,10 @@
 		gap: 1.5rem;
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
-		scroll-padding: 1.5rem;
-		padding: 1rem 1.5rem 1rem;
+		/* Centering padding: pushes first sheet to viewport center.
+		   Works like a carousel — padding is scrollable. */
+		padding: 1rem calc(50% - var(--sheet-width) / 2);
+		scroll-padding: calc(50% - var(--sheet-width) / 2);
 		scrollbar-width: none;
 	}
 	.fokus-track::-webkit-scrollbar {
@@ -249,6 +272,44 @@
 	}
 	.sheet-completed {
 		opacity: 0.75;
+	}
+
+	.sheet-header-row {
+		display: flex;
+		align-items: center;
+	}
+
+	/* Let ViewColumnHeader fill available space */
+	.sheet-header-row > :global(:first-child) {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.sheet-close-btn {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		margin-right: 0.5rem;
+		border-radius: 0.25rem;
+		border: none;
+		background: transparent;
+		color: #d1d5db;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.sheet-close-btn:hover {
+		background: rgba(0, 0, 0, 0.06);
+		color: #6b7280;
+	}
+	:global(.dark) .sheet-close-btn {
+		color: #4b5563;
+	}
+	:global(.dark) .sheet-close-btn:hover {
+		background: rgba(255, 255, 255, 0.08);
+		color: #9ca3af;
 	}
 
 	.sheet-body {

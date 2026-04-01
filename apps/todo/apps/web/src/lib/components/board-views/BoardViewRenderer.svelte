@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import type { Task } from '@todo/shared';
 	import type { LocalBoardView } from '$lib/data/local-store';
 	import { groupTasksByView, getDropActionUpdate } from '$lib/data/view-grouping';
@@ -15,7 +15,9 @@
 		onColumnColorChange?: (colIdx: number, color: string) => void;
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
+		onColumnClose?: (colIdx: number) => void;
 		onAddColumn?: () => void;
+		trailing?: Snippet;
 	}
 
 	let {
@@ -25,7 +27,9 @@
 		onColumnColorChange,
 		onColumnMove,
 		onColumnDelete,
+		onColumnClose,
 		onAddColumn,
+		trailing,
 	}: Props = $props();
 
 	let activeLayout = $derived(layoutOverride || view.layout);
@@ -89,7 +93,9 @@
 		{onColumnColorChange}
 		{onColumnMove}
 		{onColumnDelete}
+		{onColumnClose}
 		{onAddColumn}
+		{trailing}
 	/>
 {:else if activeLayout === 'grid'}
 	<GridLayout
