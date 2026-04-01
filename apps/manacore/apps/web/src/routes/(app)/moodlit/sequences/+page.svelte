@@ -3,7 +3,7 @@
 	import { db } from '$lib/data/database';
 	import { sequencesStore } from '$lib/modules/moodlit/stores/sequences.svelte';
 	import type { LocalMood, LocalSequence } from '$lib/modules/moodlit/types';
-	import { toast } from 'svelte-sonner';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { Trash } from '@manacore/shared-icons';
 
 	const sequences = useLiveQuery(() =>

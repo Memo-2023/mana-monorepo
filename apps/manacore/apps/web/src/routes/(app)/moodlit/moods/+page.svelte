@@ -4,7 +4,7 @@
 	import { moodsStore } from '$lib/modules/moodlit/stores/moods.svelte';
 	import type { LocalMood } from '$lib/modules/moodlit/types';
 	import { db } from '$lib/data/database';
-	import { toast } from 'svelte-sonner';
+	import { toast } from '$lib/stores/toast.svelte';
 	import { X } from '@manacore/shared-icons';
 
 	const moods = useLiveQuery(() =>

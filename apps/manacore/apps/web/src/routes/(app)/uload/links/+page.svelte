@@ -24,7 +24,7 @@
 		MagnifyingGlass,
 		Link as LinkIcon,
 	} from '@manacore/shared-icons';
-	import { toast } from 'svelte-sonner';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const QR_API = 'https://api.qrserver.com/v1/create-qr-code';
 
