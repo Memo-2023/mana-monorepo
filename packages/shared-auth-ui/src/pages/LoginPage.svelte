@@ -460,341 +460,315 @@
 		</div>
 	{/if}
 
-	<main class="flex-1 flex flex-col">
-		<!-- Logo Section -->
-		<div class="flex flex-col items-center pt-12 max-[480px]:pt-8 px-4 pb-6 anim-fade-in-scale">
-			<button
-				type="button"
-				onclick={fillDevCredentials}
-				class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 cursor-pointer transition-transform shadow-lg hover:scale-105 active:scale-95"
-				class:success-pulse={showSuccess}
-				style:border-color={showSuccess ? '#22c55e' : primaryColor}
-				style:background-color={isDark ? '#000' : '#fff'}
-				aria-label="{appName} logo"
-			>
-				{#if showSuccess}
-					<Check size={55} class="text-green-500" />
-				{:else}
-					<Logo size={55} color={primaryColor} />
-				{/if}
-			</button>
-			<h1 class="text-2xl font-semibold" style:color={isDark ? '#fff' : '#000'}>{appName}</h1>
-		</div>
-
-		<!-- Form Section -->
-		<div class="flex-1 flex justify-center px-4 pt-4 pb-8">
-			<div
-				class="w-full max-w-[400px] rounded-2xl p-6 max-[480px]:p-5 border backdrop-blur-[10px] anim-fade-in-up"
-				class:shake={shakeError}
-				style:background-color={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)'}
-				style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
-			>
-				{#if showTwoFactor}
-					<!-- 2FA Verification -->
-					<div class="text-center mb-6">
-						<h2
-							class="text-xl font-semibold"
-							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
-						>
-							{t.twoFactorTitle}
-						</h2>
-						<p
-							class="text-sm mt-2"
-							style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
-						>
-							{useBackupCode ? t.twoFactorBackupSubtitle : t.twoFactorSubtitle}
-						</p>
-					</div>
-
-					{#if error}
-						<div
-							class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
-							role="alert"
-						>
-							<Warning size={18} class="text-red-500 shrink-0" />
-							<p>{error}</p>
-						</div>
+	<main class="flex-1 flex flex-col items-center justify-center">
+		<div class="w-full max-w-[480px] mx-auto px-4 flex flex-col items-center">
+			<!-- Logo Section -->
+			<div class="flex flex-col items-center pt-8 max-[480px]:pt-6 pb-4 anim-fade-in-scale">
+				<button
+					type="button"
+					onclick={fillDevCredentials}
+					class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 cursor-pointer transition-transform shadow-lg hover:scale-105 active:scale-95"
+					class:success-pulse={showSuccess}
+					style:border-color={showSuccess ? '#22c55e' : primaryColor}
+					style:background-color={isDark ? '#000' : '#fff'}
+					aria-label="{appName} logo"
+				>
+					{#if showSuccess}
+						<Check size={55} class="text-green-500" />
+					{:else}
+						<Logo size={55} color={primaryColor} />
 					{/if}
+				</button>
+				<h1 class="text-2xl font-semibold" style:color={isDark ? '#fff' : '#000'}>{appName}</h1>
+			</div>
 
-					<form
-						onsubmit={(e) => {
-							e.preventDefault();
-							handleTwoFactorVerify();
-						}}
-					>
-						<div class="mb-3">
-							<input
-								type="text"
-								bind:value={twoFactorCode}
-								placeholder={useBackupCode ? t.twoFactorBackupPlaceholder : '000000'}
-								required
-								autocomplete="one-time-code"
-								inputmode={useBackupCode ? 'text' : 'numeric'}
-								maxlength={useBackupCode ? 20 : 6}
-								class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
-								style:--ring-color={primaryColor}
-								style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
-								style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
-								style:color={isDark ? '#fff' : '#000'}
-								style:text-align="center"
-								style:font-size="1.5rem"
-								style:letter-spacing="0.5rem"
-								style:--tw-ring-color="var(--ring-color)"
-							/>
+			<!-- Form Section -->
+			<div class="w-full flex justify-center pt-2 pb-8">
+				<div
+					class="w-full max-w-[440px] rounded-2xl p-6 max-[480px]:p-5 border backdrop-blur-[10px] anim-fade-in-up"
+					class:shake={shakeError}
+					style:background-color={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)'}
+					style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+				>
+					{#if showTwoFactor}
+						<!-- 2FA Verification -->
+						<div class="text-center mb-6">
+							<h2
+								class="text-xl font-semibold"
+								style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
+							>
+								{t.twoFactorTitle}
+							</h2>
+							<p
+								class="text-sm mt-2"
+								style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+							>
+								{useBackupCode ? t.twoFactorBackupSubtitle : t.twoFactorSubtitle}
+							</p>
 						</div>
 
-						{#if !useBackupCode}
-							<label
-								class="remember-label flex items-center gap-2 cursor-pointer"
-								style:margin-bottom="1rem"
-								style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+						{#if error}
+							<div
+								class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
+								role="alert"
 							>
-								<input
-									type="checkbox"
-									bind:checked={trustDevice}
-									style:accent-color={primaryColor}
-								/>
-								<span>{t.twoFactorTrustDevice}</span>
-							</label>
+								<Warning size={18} class="text-red-500 shrink-0" />
+								<p>{error}</p>
+							</div>
 						{/if}
 
-						<button
-							type="submit"
-							disabled={loading || !twoFactorCode}
-							aria-disabled={loading || !twoFactorCode}
-							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
-							style:background-color={primaryColor + '60'}
-							style:border-color={primaryColor}
-							style:color={isDark ? '#fff' : '#000'}
+						<form
+							onsubmit={(e) => {
+								e.preventDefault();
+								handleTwoFactorVerify();
+							}}
 						>
-							{loading ? t.twoFactorVerifying : t.twoFactorConfirm}
-						</button>
-					</form>
+							<div class="mb-3">
+								<input
+									type="text"
+									bind:value={twoFactorCode}
+									placeholder={useBackupCode ? t.twoFactorBackupPlaceholder : '000000'}
+									required
+									autocomplete="one-time-code"
+									inputmode={useBackupCode ? 'text' : 'numeric'}
+									maxlength={useBackupCode ? 20 : 6}
+									class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+									style:--ring-color={primaryColor}
+									style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+									style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+									style:color={isDark ? '#fff' : '#000'}
+									style:text-align="center"
+									style:font-size="1.5rem"
+									style:letter-spacing="0.5rem"
+									style:--tw-ring-color="var(--ring-color)"
+								/>
+							</div>
 
-					<button
-						type="button"
-						class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70 block w-full text-center mt-4"
-						style:color={primaryColor}
-						onclick={() => {
-							useBackupCode = !useBackupCode;
-							twoFactorCode = '';
-							clearError();
-						}}
-					>
-						{useBackupCode ? t.twoFactorUseAuthenticator : t.twoFactorUseBackupCode}
-					</button>
+							{#if !useBackupCode}
+								<label
+									class="remember-label flex items-center gap-2 cursor-pointer"
+									style:margin-bottom="1rem"
+									style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+								>
+									<input
+										type="checkbox"
+										bind:checked={trustDevice}
+										style:accent-color={primaryColor}
+									/>
+									<span>{t.twoFactorTrustDevice}</span>
+								</label>
+							{/if}
 
-					<button
-						type="button"
-						class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70 block w-full text-center mt-2"
-						style:color={primaryColor}
-						onclick={() => {
-							showTwoFactor = false;
-							twoFactorCode = '';
-							useBackupCode = false;
-							clearError();
-						}}
-					>
-						{t.twoFactorBackToLogin}
-					</button>
-				{:else}
-					{#if showVerifiedBanner}
-						<div
-							class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
-							role="status"
-							aria-live="polite"
-						>
-							<Check size={18} class="text-green-500 shrink-0" />
-							<p>{t.emailVerified}</p>
 							<button
-								type="button"
-								class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
-								onclick={() => (showVerifiedBanner = false)}
-								aria-label="Close"
+								type="submit"
+								disabled={loading || !twoFactorCode}
+								aria-disabled={loading || !twoFactorCode}
+								class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+								style:background-color={primaryColor + '60'}
+								style:border-color={primaryColor}
+								style:color={isDark ? '#fff' : '#000'}
 							>
-								&times;
+								{loading ? t.twoFactorVerifying : t.twoFactorConfirm}
 							</button>
-						</div>
-					{/if}
+						</form>
 
-					<div class="text-center mb-6">
-						<h2
-							class="text-xl font-semibold"
-							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
-						>
-							{t.title}
-						</h2>
-						<p
-							class="text-sm mt-2"
-							style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
-						>
-							{t.subtitle}
-						</p>
-					</div>
-
-					{#if passkeyAvailable && onSignInWithPasskey}
 						<button
 							type="button"
-							onclick={handlePasskeySignIn}
-							disabled={loading || showSuccess}
-							aria-disabled={loading || showSuccess}
-							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity bg-transparent hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
-							style:border-color={primaryColor}
-							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
+							class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70 block w-full text-center mt-4"
+							style:color={primaryColor}
+							onclick={() => {
+								useBackupCode = !useBackupCode;
+								twoFactorCode = '';
+								clearError();
+							}}
 						>
-							<svg
-								width="20"
-								height="20"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
-								<circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
-							</svg>
-							<span>Passkey</span>
+							{useBackupCode ? t.twoFactorUseAuthenticator : t.twoFactorUseBackupCode}
 						</button>
-						<div class="divider flex items-center gap-4 my-5">
-							<span
-								class="text-xs"
-								style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
-								>{t.orDivider}</span
-							>
-						</div>
-					{/if}
 
-					{#if verificationEmailSent}
-						<div
-							class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
-							role="status"
-							aria-live="polite"
+						<button
+							type="button"
+							class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70 block w-full text-center mt-2"
+							style:color={primaryColor}
+							onclick={() => {
+								showTwoFactor = false;
+								twoFactorCode = '';
+								useBackupCode = false;
+								clearError();
+							}}
 						>
-							<Check size={18} class="text-green-500 shrink-0" />
-							<p>{t.verificationEmailSent}</p>
-							<button
-								type="button"
-								class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
-								onclick={() => (verificationEmailSent = false)}
-								aria-label="Close"
+							{t.twoFactorBackToLogin}
+						</button>
+					{:else}
+						{#if showVerifiedBanner}
+							<div
+								class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
+								role="status"
+								aria-live="polite"
 							>
-								&times;
-							</button>
-						</div>
-					{/if}
-
-					{#if isLockedOut}
-						<div
-							class="flex gap-3 p-4 mb-4 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500"
-							role="alert"
-							aria-live="assertive"
-						>
-							<div class="shrink-0 mt-0.5">
-								<Warning size={24} />
-							</div>
-							<div class="flex flex-col gap-1">
-								<p class="font-semibold text-[0.9rem]">{t.accountLocked}</p>
-								<p class="text-[0.8rem] opacity-90">
-									{t.tooManyAttempts}
-									{#if rateLimitCountdown > 0}
-										{t.retryIn} <strong>{formatCountdown(rateLimitCountdown)}</strong>
-									{/if}
-								</p>
+								<Check size={18} class="text-green-500 shrink-0" />
+								<p>{t.emailVerified}</p>
 								<button
 									type="button"
-									class="bg-transparent border-none cursor-pointer font-medium text-[0.8rem] p-0 text-left underline mt-1"
-									onclick={() => goto(forgotPasswordPath)}
-									style:color={primaryColor}
+									class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
+									onclick={() => (showVerifiedBanner = false)}
+									aria-label="Close"
 								>
-									{t.resetPassword}
+									&times;
 								</button>
 							</div>
+						{/if}
+
+						<div class="text-center mb-6">
+							<h2
+								class="text-xl font-semibold"
+								style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
+							>
+								{t.title}
+							</h2>
+							<p
+								class="text-sm mt-2"
+								style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+							>
+								{t.subtitle}
+							</p>
 						</div>
-					{:else if error}
-						<div
-							class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
-							id="form-error"
-							role="alert"
-							aria-live="assertive"
-						>
-							<Warning size={18} class="text-red-500 shrink-0" />
-							<div class="flex flex-col gap-1">
-								<p>{error}</p>
-								{#if showEmailNotVerified && onResendVerification}
+
+						{#if passkeyAvailable && onSignInWithPasskey}
+							<button
+								type="button"
+								onclick={handlePasskeySignIn}
+								disabled={loading || showSuccess}
+								aria-disabled={loading || showSuccess}
+								class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity bg-transparent hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+								style:border-color={primaryColor}
+								style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
+							>
+								<svg
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z" />
+									<circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
+								</svg>
+								<span>Passkey</span>
+							</button>
+							<div class="divider flex items-center gap-4 my-5">
+								<span
+									class="text-xs"
+									style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
+									>{t.orDivider}</span
+								>
+							</div>
+						{/if}
+
+						{#if verificationEmailSent}
+							<div
+								class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
+								role="status"
+								aria-live="polite"
+							>
+								<Check size={18} class="text-green-500 shrink-0" />
+								<p>{t.verificationEmailSent}</p>
+								<button
+									type="button"
+									class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
+									onclick={() => (verificationEmailSent = false)}
+									aria-label="Close"
+								>
+									&times;
+								</button>
+							</div>
+						{/if}
+
+						{#if isLockedOut}
+							<div
+								class="flex gap-3 p-4 mb-4 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500"
+								role="alert"
+								aria-live="assertive"
+							>
+								<div class="shrink-0 mt-0.5">
+									<Warning size={24} />
+								</div>
+								<div class="flex flex-col gap-1">
+									<p class="font-semibold text-[0.9rem]">{t.accountLocked}</p>
+									<p class="text-[0.8rem] opacity-90">
+										{t.tooManyAttempts}
+										{#if rateLimitCountdown > 0}
+											{t.retryIn} <strong>{formatCountdown(rateLimitCountdown)}</strong>
+										{/if}
+									</p>
 									<button
 										type="button"
-										class="bg-transparent border-none cursor-pointer font-medium text-sm p-0 text-left underline hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-										onclick={handleResendVerification}
-										disabled={resendingVerification}
-										aria-disabled={resendingVerification}
+										class="bg-transparent border-none cursor-pointer font-medium text-[0.8rem] p-0 text-left underline mt-1"
+										onclick={() => goto(forgotPasswordPath)}
 										style:color={primaryColor}
 									>
-										{resendingVerification ? t.resendingVerification : t.resendVerification}
+										{t.resetPassword}
 									</button>
-								{/if}
-								{#if rateLimitCountdown > 0}
-									<p class="font-semibold mt-1">
-										{t.retryIn}
-										{formatCountdown(rateLimitCountdown)}
-									</p>
-								{/if}
+								</div>
 							</div>
-						</div>
-					{/if}
+						{:else if error}
+							<div
+								class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
+								id="form-error"
+								role="alert"
+								aria-live="assertive"
+							>
+								<Warning size={18} class="text-red-500 shrink-0" />
+								<div class="flex flex-col gap-1">
+									<p>{error}</p>
+									{#if showEmailNotVerified && onResendVerification}
+										<button
+											type="button"
+											class="bg-transparent border-none cursor-pointer font-medium text-sm p-0 text-left underline hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+											onclick={handleResendVerification}
+											disabled={resendingVerification}
+											aria-disabled={resendingVerification}
+											style:color={primaryColor}
+										>
+											{resendingVerification ? t.resendingVerification : t.resendVerification}
+										</button>
+									{/if}
+									{#if rateLimitCountdown > 0}
+										<p class="font-semibold mt-1">
+											{t.retryIn}
+											{formatCountdown(rateLimitCountdown)}
+										</p>
+									{/if}
+								</div>
+							</div>
+						{/if}
 
-					<form
-						onsubmit={(e) => {
-							e.preventDefault();
-							handleLogin();
-						}}
-						aria-busy={loading}
-					>
-						<!-- Email -->
-						<div class="mb-3">
-							<label for="email" class="sr-only">{t.emailPlaceholder}</label>
-							<input
-								id="email"
-								type="email"
-								bind:this={emailInput}
-								bind:value={email}
-								placeholder={t.emailPlaceholder}
-								required
-								autocomplete={passkeyAvailable ? 'username webauthn' : 'email'}
-								aria-invalid={errorField === 'email'}
-								class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
-								class:border-red-500={errorField === 'email'}
-								style:--ring-color={errorField === 'email' ? '#ef4444' : primaryColor}
-								style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
-								style:border-color={errorField === 'email'
-									? '#ef4444'
-									: isDark
-										? 'rgba(255,255,255,0.2)'
-										: 'rgba(0,0,0,0.1)'}
-								style:color={isDark ? '#fff' : '#000'}
-								style:--tw-ring-color="var(--ring-color)"
-							/>
-						</div>
-
-						<!-- Password -->
-						<div class="mb-3">
-							<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
-							<div class="relative">
+						<form
+							onsubmit={(e) => {
+								e.preventDefault();
+								handleLogin();
+							}}
+							aria-busy={loading}
+						>
+							<!-- Email -->
+							<div class="mb-3">
+								<label for="email" class="sr-only">{t.emailPlaceholder}</label>
 								<input
-									id="password"
-									type={showPassword ? 'text' : 'password'}
-									bind:this={passwordInput}
-									bind:value={password}
-									placeholder={t.passwordPlaceholder}
+									id="email"
+									type="email"
+									bind:this={emailInput}
+									bind:value={email}
+									placeholder={t.emailPlaceholder}
 									required
-									autocomplete="current-password"
-									aria-invalid={errorField === 'password'}
-									class="w-full h-14 px-4 pr-12 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
-									class:border-red-500={errorField === 'password'}
-									style:--ring-color={errorField === 'password' ? '#ef4444' : primaryColor}
+									autocomplete={passkeyAvailable ? 'username webauthn' : 'email'}
+									aria-invalid={errorField === 'email'}
+									class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+									class:border-red-500={errorField === 'email'}
+									style:--ring-color={errorField === 'email' ? '#ef4444' : primaryColor}
 									style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
-									style:border-color={errorField === 'password'
+									style:border-color={errorField === 'email'
 										? '#ef4444'
 										: isDark
 											? 'rgba(255,255,255,0.2)'
@@ -802,149 +776,177 @@
 									style:color={isDark ? '#fff' : '#000'}
 									style:--tw-ring-color="var(--ring-color)"
 								/>
+							</div>
+
+							<!-- Password -->
+							<div class="mb-3">
+								<label for="password" class="sr-only">{t.passwordPlaceholder}</label>
+								<div class="relative">
+									<input
+										id="password"
+										type={showPassword ? 'text' : 'password'}
+										bind:this={passwordInput}
+										bind:value={password}
+										placeholder={t.passwordPlaceholder}
+										required
+										autocomplete="current-password"
+										aria-invalid={errorField === 'password'}
+										class="w-full h-14 px-4 pr-12 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+										class:border-red-500={errorField === 'password'}
+										style:--ring-color={errorField === 'password' ? '#ef4444' : primaryColor}
+										style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+										style:border-color={errorField === 'password'
+											? '#ef4444'
+											: isDark
+												? 'rgba(255,255,255,0.2)'
+												: 'rgba(0,0,0,0.1)'}
+										style:color={isDark ? '#fff' : '#000'}
+										style:--tw-ring-color="var(--ring-color)"
+									/>
+									<button
+										type="button"
+										onclick={() => (showPassword = !showPassword)}
+										class="absolute right-0 top-0 h-full w-12 flex items-center justify-center bg-transparent border-none cursor-pointer transition-opacity hover:opacity-80"
+										style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
+										aria-label={showPassword ? t.hidePassword : t.showPassword}
+									>
+										{#if showPassword}
+											<EyeSlash size={20} />
+										{:else}
+											<Eye size={20} />
+										{/if}
+									</button>
+								</div>
+							</div>
+
+							<!-- Remember & Forgot -->
+							<div class="flex justify-between items-center mb-4 text-sm">
+								<label
+									class="remember-label flex items-center gap-2 cursor-pointer"
+									style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+								>
+									<input
+										type="checkbox"
+										bind:checked={rememberMe}
+										style:accent-color={primaryColor}
+									/>
+									<span>{t.rememberMe}</span>
+								</label>
 								<button
 									type="button"
-									onclick={() => (showPassword = !showPassword)}
-									class="absolute right-0 top-0 h-full w-12 flex items-center justify-center bg-transparent border-none cursor-pointer transition-opacity hover:opacity-80"
-									style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
-									aria-label={showPassword ? t.hidePassword : t.showPassword}
+									onclick={() => goto(forgotPasswordPath)}
+									class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70"
+									style:color={primaryColor}
 								>
-									{#if showPassword}
-										<EyeSlash size={20} />
-									{:else}
-										<Eye size={20} />
-									{/if}
+									{t.forgotPassword}
 								</button>
 							</div>
-						</div>
 
-						<!-- Remember & Forgot -->
-						<div class="flex justify-between items-center mb-4 text-sm">
-							<label
-								class="remember-label flex items-center gap-2 cursor-pointer"
-								style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
-							>
-								<input
-									type="checkbox"
-									bind:checked={rememberMe}
-									style:accent-color={primaryColor}
-								/>
-								<span>{t.rememberMe}</span>
-							</label>
+							<!-- Submit -->
 							<button
-								type="button"
-								onclick={() => goto(forgotPasswordPath)}
-								class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70"
-								style:color={primaryColor}
+								type="submit"
+								disabled={loading || showSuccess || rateLimitCountdown > 0}
+								aria-disabled={loading || showSuccess || rateLimitCountdown > 0}
+								class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+								style:background-color={showSuccess ? '#22c55e' : primaryColor + '60'}
+								style:border-color={showSuccess ? '#22c55e' : primaryColor}
+								style:color={isDark ? '#fff' : '#000'}
 							>
-								{t.forgotPassword}
+								{#if loading}
+									<svg
+										class="spinner"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+									>
+										<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+										<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+									</svg>
+									<span>{t.signingIn}</span>
+								{:else if showSuccess}
+									<Check size={20} />
+									<span>{t.success}</span>
+								{:else}
+									<SignIn size={20} />
+									<span>{t.signInButton}</span>
+								{/if}
 							</button>
-						</div>
+						</form>
 
-						<!-- Submit -->
-						<button
-							type="submit"
-							disabled={loading || showSuccess || rateLimitCountdown > 0}
-							aria-disabled={loading || showSuccess || rateLimitCountdown > 0}
-							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
-							style:background-color={showSuccess ? '#22c55e' : primaryColor + '60'}
-							style:border-color={showSuccess ? '#22c55e' : primaryColor}
-							style:color={isDark ? '#fff' : '#000'}
-						>
-							{#if loading}
-								<svg
-									class="spinner"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
+						{#if onSendMagicLink}
+							{#if magicLinkSent}
+								<div
+									class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
+									role="status"
+									aria-live="polite"
 								>
-									<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
-									<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
-								</svg>
-								<span>{t.signingIn}</span>
-							{:else if showSuccess}
-								<Check size={20} />
-								<span>{t.success}</span>
+									<Check size={18} class="text-green-500 shrink-0" />
+									<p>{t.magicLinkSent?.replace('{email}', email)}</p>
+									<button
+										type="button"
+										class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
+										onclick={() => (magicLinkSent = false)}
+										aria-label="Close"
+									>
+										&times;
+									</button>
+								</div>
 							{:else}
-								<SignIn size={20} />
-								<span>{t.signInButton}</span>
-							{/if}
-						</button>
-					</form>
-
-					{#if onSendMagicLink}
-						{#if magicLinkSent}
-							<div
-								class="flex items-center gap-2 p-3 mb-4 rounded-xl relative text-sm bg-green-500/15 border border-green-500/30 text-green-500"
-								role="status"
-								aria-live="polite"
-							>
-								<Check size={18} class="text-green-500 shrink-0" />
-								<p>{t.magicLinkSent?.replace('{email}', email)}</p>
 								<button
 									type="button"
-									class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-green-500 text-xl cursor-pointer p-1 leading-none opacity-70 hover:opacity-100"
-									onclick={() => (magicLinkSent = false)}
-									aria-label="Close"
+									onclick={handleSendMagicLink}
+									disabled={sendingMagicLink || !email}
+									aria-disabled={sendingMagicLink || !email}
+									class="w-full bg-transparent border-none cursor-pointer font-medium text-sm p-3 text-center transition-opacity hover:opacity-70 disabled:opacity-40 disabled:cursor-not-allowed"
+									style:color={primaryColor}
 								>
-									&times;
+									{sendingMagicLink ? t.magicLinkSending : t.magicLinkButton}
 								</button>
-							</div>
-						{:else}
+							{/if}
+						{/if}
+
+						<p
+							class="text-center text-sm mt-4"
+							style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
+						>
+							{t.noAccount}
 							<button
 								type="button"
-								onclick={handleSendMagicLink}
-								disabled={sendingMagicLink || !email}
-								aria-disabled={sendingMagicLink || !email}
-								class="w-full bg-transparent border-none cursor-pointer font-medium text-sm p-3 text-center transition-opacity hover:opacity-70 disabled:opacity-40 disabled:cursor-not-allowed"
+								class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70"
+								onclick={() => goto(registerPath)}
 								style:color={primaryColor}
 							>
-								{sendingMagicLink ? t.magicLinkSending : t.magicLinkButton}
+								{t.createAccount}
 							</button>
-						{/if}
+						</p>
 					{/if}
-
-					<p
-						class="text-center text-sm mt-4"
-						style:color={isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)'}
-					>
-						{t.noAccount}
-						<button
-							type="button"
-							class="bg-transparent border-none cursor-pointer font-medium p-1 hover:opacity-70"
-							onclick={() => goto(registerPath)}
-							style:color={primaryColor}
-						>
-							{t.createAccount}
-						</button>
-					</p>
-				{/if}
+				</div>
 			</div>
+
+			{#if version}
+				<p
+					class="text-[10px] text-gray-400/60 select-none pointer-events-none m-0 pt-2 pb-1 text-center"
+				>
+					v{version}{#if buildTime}
+						· {new Date(buildTime).toLocaleDateString('de-DE', {
+							day: '2-digit',
+							month: '2-digit',
+							year: 'numeric',
+						})}
+						{new Date(buildTime).toLocaleTimeString('de-DE', {
+							hour: '2-digit',
+							minute: '2-digit',
+						})}{/if}
+				</p>
+			{/if}
 		</div>
 	</main>
 
 	{#if appSlider}
-		<footer class="w-full pb-4 anim-fade-in">
+		<footer class="w-full max-w-[640px] mx-auto pb-4 anim-fade-in">
 			{@render appSlider()}
 		</footer>
-	{/if}
-
-	{#if version}
-		<p
-			class="fixed bottom-2 right-3 text-[10px] text-gray-400/60 select-none pointer-events-none m-0"
-		>
-			v{version}{#if buildTime}
-				· {new Date(buildTime).toLocaleDateString('de-DE', {
-					day: '2-digit',
-					month: '2-digit',
-					year: 'numeric',
-				})}
-				{new Date(buildTime).toLocaleTimeString('de-DE', {
-					hour: '2-digit',
-					minute: '2-digit',
-				})}{/if}
-		</p>
 	{/if}
 </div>
 

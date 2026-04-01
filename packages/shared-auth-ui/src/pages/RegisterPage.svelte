@@ -286,321 +286,323 @@
 		</div>
 	{/if}
 
-	<main class="flex-1 flex flex-col">
-		<!-- Logo Section -->
-		<div class="flex flex-col items-center pt-12 max-[480px]:pt-8 px-4 pb-6 anim-fade-in-scale">
-			<div
-				class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 cursor-pointer transition-transform shadow-lg hover:scale-105"
-				style:border-color={primaryColor}
-				style:background-color={isDark ? '#000' : '#fff'}
-			>
-				<Logo size={55} color={primaryColor} />
-			</div>
-			<h1 class="text-2xl font-semibold" style:color={isDark ? '#fff' : '#000'}>{appName}</h1>
-		</div>
-
-		<!-- Form Section -->
-		<div class="flex-1 flex justify-center px-4 pt-4 pb-8">
-			<div
-				class="w-full max-w-[400px] rounded-2xl p-6 max-[480px]:p-5 border backdrop-blur-[10px] anim-fade-in-up"
-				style:background-color={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)'}
-				style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
-			>
-				<!-- Title -->
-				<div class="text-center mb-6">
-					<h2
-						class="text-xl font-semibold"
-						style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
-					>
-						{t.title}
-					</h2>
+	<main class="flex-1 flex flex-col items-center justify-center">
+		<div class="w-full max-w-[480px] mx-auto px-4 flex flex-col items-center">
+			<!-- Logo Section -->
+			<div class="flex flex-col items-center pt-8 max-[480px]:pt-6 pb-4 anim-fade-in-scale">
+				<div
+					class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 cursor-pointer transition-transform shadow-lg hover:scale-105"
+					style:border-color={primaryColor}
+					style:background-color={isDark ? '#000' : '#fff'}
+				>
+					<Logo size={55} color={primaryColor} />
 				</div>
+				<h1 class="text-2xl font-semibold" style:color={isDark ? '#fff' : '#000'}>{appName}</h1>
+			</div>
 
-				<!-- Error Message -->
-				{#if error}
-					<div
-						class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
-						role="alert"
-					>
-						<span>&#9888;</span>
-						<p>{error}</p>
-					</div>
-				{/if}
-
-				<!-- Verification Email Sent -->
-				{#if verificationEmailSent}
-					<div
-						class="flex items-center gap-2 p-3 mb-4 rounded-xl text-sm bg-green-500/15 border border-green-500/30 text-green-500"
-					>
-						<span>{t.verificationEmailSent}</span>
-					</div>
-				{/if}
-
-				<!-- Success: Needs Verification / Already Registered -->
-				{#if success && needsVerification}
-					<div
-						class="mb-6 rounded-xl p-5 border-2"
-						class:bg-green-500={false}
-						style:background-color={emailAlreadyRegistered
-							? 'color-mix(in srgb, #f59e0b 15%, transparent)'
-							: 'color-mix(in srgb, #22c55e 15%, transparent)'}
-						style:border-color={emailAlreadyRegistered
-							? 'color-mix(in srgb, #f59e0b 40%, transparent)'
-							: 'color-mix(in srgb, #22c55e 40%, transparent)'}
-					>
-						<div class="flex items-start gap-3 mb-4">
-							<div
-								class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
-								style:background-color={emailAlreadyRegistered
-									? 'color-mix(in srgb, #f59e0b 20%, transparent)'
-									: 'color-mix(in srgb, #22c55e 20%, transparent)'}
-							>
-								{#if emailAlreadyRegistered}
-									<svg
-										class="w-5 h-5"
-										style:color="#f59e0b"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-										></path>
-									</svg>
-								{:else}
-									<svg
-										class="w-5 h-5 text-green-500"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-										></path>
-									</svg>
-								{/if}
-							</div>
-							<div>
-								<h3
-									class="font-semibold text-base mb-1"
-									style:color={emailAlreadyRegistered
-										? isDark
-											? '#fbbf24'
-											: '#d97706'
-										: isDark
-											? '#22c55e'
-											: '#16a34a'}
-								>
-									{emailAlreadyRegistered
-										? t.emailAlreadyRegistered || 'Email already registered'
-										: t.checkYourEmail || 'Check your email'}
-								</h3>
-								<p
-									class="text-sm"
-									style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
-								>
-									{emailAlreadyRegistered
-										? t.emailAlreadyRegisteredMessage ||
-											"An account with this email already exists. If you haven't verified your email yet, resend the verification email."
-										: t.accountCreated}
-								</p>
-							</div>
-						</div>
-
-						<div
-							class="pt-3 border-t flex flex-col gap-2"
-							style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+			<!-- Form Section -->
+			<div class="w-full flex justify-center pt-2 pb-8">
+				<div
+					class="w-full max-w-[440px] rounded-2xl p-6 max-[480px]:p-5 border backdrop-blur-[10px] anim-fade-in-up"
+					style:background-color={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)'}
+					style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+				>
+					<!-- Title -->
+					<div class="text-center mb-6">
+						<h2
+							class="text-xl font-semibold"
+							style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
 						>
-							{#if onResendVerification}
-								<button
-									type="button"
-									onclick={handleResendVerification}
-									disabled={resendingVerification}
-									aria-disabled={resendingVerification}
-									class="w-full flex items-center justify-center gap-2 h-11 rounded-lg font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed border-[1.5px]"
-									style:background-color="{primaryColor}40"
-									style:border-color={primaryColor}
-									style:color={isDark ? '#fff' : '#000'}
+							{t.title}
+						</h2>
+					</div>
+
+					<!-- Error Message -->
+					{#if error}
+						<div
+							class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
+							role="alert"
+						>
+							<span>&#9888;</span>
+							<p>{error}</p>
+						</div>
+					{/if}
+
+					<!-- Verification Email Sent -->
+					{#if verificationEmailSent}
+						<div
+							class="flex items-center gap-2 p-3 mb-4 rounded-xl text-sm bg-green-500/15 border border-green-500/30 text-green-500"
+						>
+							<span>{t.verificationEmailSent}</span>
+						</div>
+					{/if}
+
+					<!-- Success: Needs Verification / Already Registered -->
+					{#if success && needsVerification}
+						<div
+							class="mb-6 rounded-xl p-5 border-2"
+							class:bg-green-500={false}
+							style:background-color={emailAlreadyRegistered
+								? 'color-mix(in srgb, #f59e0b 15%, transparent)'
+								: 'color-mix(in srgb, #22c55e 15%, transparent)'}
+							style:border-color={emailAlreadyRegistered
+								? 'color-mix(in srgb, #f59e0b 40%, transparent)'
+								: 'color-mix(in srgb, #22c55e 40%, transparent)'}
+						>
+							<div class="flex items-start gap-3 mb-4">
+								<div
+									class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+									style:background-color={emailAlreadyRegistered
+										? 'color-mix(in srgb, #f59e0b 20%, transparent)'
+										: 'color-mix(in srgb, #22c55e 20%, transparent)'}
 								>
-									{#if resendingVerification}
-										<svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
-											<circle
-												class="opacity-25"
-												cx="12"
-												cy="12"
-												r="10"
-												stroke="currentColor"
-												stroke-width="4"
-												fill="none"
-											></circle>
+									{#if emailAlreadyRegistered}
+										<svg
+											class="w-5 h-5"
+											style:color="#f59e0b"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
 											<path
-												class="opacity-75"
-												fill="currentColor"
-												d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 											></path>
 										</svg>
-										{t.resendingVerification}
 									{:else}
-										{t.resendVerification}
+										<svg
+											class="w-5 h-5 text-green-500"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+											></path>
+										</svg>
 									{/if}
-								</button>
-							{/if}
-							{#if emailAlreadyRegistered}
+								</div>
+								<div>
+									<h3
+										class="font-semibold text-base mb-1"
+										style:color={emailAlreadyRegistered
+											? isDark
+												? '#fbbf24'
+												: '#d97706'
+											: isDark
+												? '#22c55e'
+												: '#16a34a'}
+									>
+										{emailAlreadyRegistered
+											? t.emailAlreadyRegistered || 'Email already registered'
+											: t.checkYourEmail || 'Check your email'}
+									</h3>
+									<p
+										class="text-sm"
+										style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+									>
+										{emailAlreadyRegistered
+											? t.emailAlreadyRegisteredMessage ||
+												"An account with this email already exists. If you haven't verified your email yet, resend the verification email."
+											: t.accountCreated}
+									</p>
+								</div>
+							</div>
+
+							<div
+								class="pt-3 border-t flex flex-col gap-2"
+								style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+							>
+								{#if onResendVerification}
+									<button
+										type="button"
+										onclick={handleResendVerification}
+										disabled={resendingVerification}
+										aria-disabled={resendingVerification}
+										class="w-full flex items-center justify-center gap-2 h-11 rounded-lg font-medium transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed border-[1.5px]"
+										style:background-color="{primaryColor}40"
+										style:border-color={primaryColor}
+										style:color={isDark ? '#fff' : '#000'}
+									>
+										{#if resendingVerification}
+											<svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+												<circle
+													class="opacity-25"
+													cx="12"
+													cy="12"
+													r="10"
+													stroke="currentColor"
+													stroke-width="4"
+													fill="none"
+												></circle>
+												<path
+													class="opacity-75"
+													fill="currentColor"
+													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+												></path>
+											</svg>
+											{t.resendingVerification}
+										{:else}
+											{t.resendVerification}
+										{/if}
+									</button>
+								{/if}
+								{#if emailAlreadyRegistered}
+									<button
+										type="button"
+										onclick={() => goto(loginPath)}
+										class="w-full flex items-center justify-center h-11 rounded-lg font-medium transition-opacity hover:opacity-80 border-[1.5px]"
+										style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}
+										style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+										style:background-color="transparent"
+									>
+										{t.goToLogin || 'Sign in instead'}
+									</button>
+								{/if}
+							</div>
+						</div>
+					{/if}
+
+					<!-- Register Form -->
+					<form
+						onsubmit={(e) => {
+							e.preventDefault();
+							handleRegister();
+						}}
+					>
+						<!-- Email -->
+						<div class="mb-3">
+							<input
+								type="email"
+								bind:value={email}
+								placeholder={t.emailPlaceholder}
+								required
+								class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+								style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+								style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+								style:color={isDark ? '#fff' : '#000'}
+								style:--tw-ring-color={primaryColor}
+							/>
+						</div>
+
+						<!-- Password -->
+						<div class="mb-3">
+							<div class="relative">
+								<input
+									type={showPassword ? 'text' : 'password'}
+									bind:value={password}
+									placeholder={t.passwordPlaceholder}
+									required
+									minlength={8}
+									class="w-full h-14 px-4 pr-12 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+									style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+									style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+									style:color={isDark ? '#fff' : '#000'}
+									style:--tw-ring-color={primaryColor}
+								/>
 								<button
 									type="button"
-									onclick={() => goto(loginPath)}
-									class="w-full flex items-center justify-center h-11 rounded-lg font-medium transition-opacity hover:opacity-80 border-[1.5px]"
-									style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}
-									style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
-									style:background-color="transparent"
+									onclick={() => (showPassword = !showPassword)}
+									class="absolute right-0 top-0 h-full w-12 flex items-center justify-center bg-transparent border-none cursor-pointer transition-opacity"
+									style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
+									aria-label={showPassword ? t.hidePassword : t.showPassword}
 								>
-									{t.goToLogin || 'Sign in instead'}
+									{#if showPassword}
+										<EyeSlash size={20} />
+									{:else}
+										<Eye size={20} />
+									{/if}
 								</button>
-							{/if}
+							</div>
 						</div>
-					</div>
-				{/if}
 
-				<!-- Register Form -->
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						handleRegister();
-					}}
-				>
-					<!-- Email -->
-					<div class="mb-3">
-						<input
-							type="email"
-							bind:value={email}
-							placeholder={t.emailPlaceholder}
-							required
-							class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
-							style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
-							style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+						<PasswordStrength {password} {primaryColor} />
+
+						<!-- Confirm Password -->
+						<div class="mb-3">
+							<div class="relative">
+								<input
+									type={showConfirmPassword ? 'text' : 'password'}
+									bind:value={confirmPassword}
+									placeholder={t.confirmPasswordPlaceholder}
+									required
+									minlength={8}
+									class="w-full h-14 px-4 pr-12 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+									style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+									style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+									style:color={isDark ? '#fff' : '#000'}
+									style:--tw-ring-color={primaryColor}
+								/>
+								<button
+									type="button"
+									onclick={() => (showConfirmPassword = !showConfirmPassword)}
+									class="absolute right-0 top-0 h-full w-12 flex items-center justify-center bg-transparent border-none cursor-pointer transition-opacity"
+									style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
+									aria-label={showConfirmPassword ? t.hidePassword : t.showPassword}
+								>
+									{#if showConfirmPassword}
+										<EyeSlash size={20} />
+									{:else}
+										<Eye size={20} />
+									{/if}
+								</button>
+							</div>
+						</div>
+
+						<!-- Password Requirements -->
+						<p
+							class="text-xs mb-3"
+							style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
+						>
+							{t.passwordRequirements}
+						</p>
+
+						<!-- Submit -->
+						<button
+							type="submit"
+							disabled={loading}
+							aria-disabled={loading}
+							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+							style:background-color="{primaryColor}60"
+							style:border-color={primaryColor}
 							style:color={isDark ? '#fff' : '#000'}
-							style:--tw-ring-color={primaryColor}
-						/>
+						>
+							{#if loading}
+								<svg
+									class="w-5 h-5 animate-spin"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+									<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+								</svg>
+								<span>{t.creatingAccount}</span>
+							{:else}
+								<UserPlus size={20} />
+								<span>{t.createAccountButton}</span>
+							{/if}
+						</button>
+					</form>
+
+					<!-- Back to Login -->
+					<div class="text-center mt-4">
+						<button
+							type="button"
+							onclick={() => goto(loginPath)}
+							class="inline-flex items-center gap-2 bg-transparent border-none cursor-pointer font-medium transition-opacity hover:opacity-70"
+							style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+						>
+							<ArrowLeft size={20} />
+							{t.backToLogin}
+						</button>
 					</div>
-
-					<!-- Password -->
-					<div class="mb-3">
-						<div class="relative">
-							<input
-								type={showPassword ? 'text' : 'password'}
-								bind:value={password}
-								placeholder={t.passwordPlaceholder}
-								required
-								minlength={8}
-								class="w-full h-14 px-4 pr-12 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
-								style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
-								style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
-								style:color={isDark ? '#fff' : '#000'}
-								style:--tw-ring-color={primaryColor}
-							/>
-							<button
-								type="button"
-								onclick={() => (showPassword = !showPassword)}
-								class="absolute right-0 top-0 h-full w-12 flex items-center justify-center bg-transparent border-none cursor-pointer transition-opacity"
-								style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
-								aria-label={showPassword ? t.hidePassword : t.showPassword}
-							>
-								{#if showPassword}
-									<EyeSlash size={20} />
-								{:else}
-									<Eye size={20} />
-								{/if}
-							</button>
-						</div>
-					</div>
-
-					<PasswordStrength {password} {primaryColor} />
-
-					<!-- Confirm Password -->
-					<div class="mb-3">
-						<div class="relative">
-							<input
-								type={showConfirmPassword ? 'text' : 'password'}
-								bind:value={confirmPassword}
-								placeholder={t.confirmPasswordPlaceholder}
-								required
-								minlength={8}
-								class="w-full h-14 px-4 pr-12 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
-								style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
-								style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
-								style:color={isDark ? '#fff' : '#000'}
-								style:--tw-ring-color={primaryColor}
-							/>
-							<button
-								type="button"
-								onclick={() => (showConfirmPassword = !showConfirmPassword)}
-								class="absolute right-0 top-0 h-full w-12 flex items-center justify-center bg-transparent border-none cursor-pointer transition-opacity"
-								style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
-								aria-label={showConfirmPassword ? t.hidePassword : t.showPassword}
-							>
-								{#if showConfirmPassword}
-									<EyeSlash size={20} />
-								{:else}
-									<Eye size={20} />
-								{/if}
-							</button>
-						</div>
-					</div>
-
-					<!-- Password Requirements -->
-					<p
-						class="text-xs mb-3"
-						style:color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
-					>
-						{t.passwordRequirements}
-					</p>
-
-					<!-- Submit -->
-					<button
-						type="submit"
-						disabled={loading}
-						aria-disabled={loading}
-						class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
-						style:background-color="{primaryColor}60"
-						style:border-color={primaryColor}
-						style:color={isDark ? '#fff' : '#000'}
-					>
-						{#if loading}
-							<svg
-								class="w-5 h-5 animate-spin"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
-								<path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
-							</svg>
-							<span>{t.creatingAccount}</span>
-						{:else}
-							<UserPlus size={20} />
-							<span>{t.createAccountButton}</span>
-						{/if}
-					</button>
-				</form>
-
-				<!-- Back to Login -->
-				<div class="text-center mt-4">
-					<button
-						type="button"
-						onclick={() => goto(loginPath)}
-						class="inline-flex items-center gap-2 bg-transparent border-none cursor-pointer font-medium transition-opacity hover:opacity-70"
-						style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
-					>
-						<ArrowLeft size={20} />
-						{t.backToLogin}
-					</button>
 				</div>
 			</div>
 		</div>
@@ -608,7 +610,7 @@
 
 	<!-- App Slider -->
 	{#if appSlider}
-		<footer class="w-full pb-4 anim-fade-in">
+		<footer class="w-full max-w-[640px] mx-auto pb-4 anim-fade-in">
 			{@render appSlider()}
 		</footer>
 	{/if}

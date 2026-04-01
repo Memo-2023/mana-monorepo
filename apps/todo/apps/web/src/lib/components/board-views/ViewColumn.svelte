@@ -153,7 +153,7 @@
 	</div>
 
 	<!-- Quick Add Task -->
-	<div class="px-3 pb-3 pt-2">
+	<div class="pb-2">
 		<QuickAddTaskInline onAdd={handleAddTask} />
 	</div>
 </div>

@@ -159,7 +159,7 @@
 
 <style>
 	.board-page {
-		height: calc(100vh - 140px);
+		min-height: calc(100vh - 140px);
 		display: flex;
 		flex-direction: column;
 	}

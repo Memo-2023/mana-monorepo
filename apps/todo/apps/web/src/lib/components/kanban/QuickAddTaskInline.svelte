@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { t } from 'svelte-i18n';
-	import { Plus, X } from '@manacore/shared-icons';
+	import { Plus } from '@manacore/shared-icons';
 
 	interface Props {
 		onAdd: (title: string) => void;
@@ -33,88 +32,117 @@
 	}
 
 	function handleBlur() {
-		if (!title.trim()) {
-			isAdding = false;
+		if (title.trim()) {
+			handleSubmit();
 		}
+		isAdding = false;
 	}
+
+	function activate() {
+		isAdding = true;
+	}
+
+	$effect(() => {
+		if (isAdding && inputRef) {
+			inputRef.focus();
+		}
+	});
 </script>
 
-<div class="quick-add-inline">
+<div class="inline-add-row" class:active={isAdding}>
+	<!-- Circle matching TaskItem checkbox style -->
 	{#if isAdding}
-		<div class="add-form p-3">
-			<input
-				bind:this={inputRef}
-				bind:value={title}
-				onkeydown={handleKeydown}
-				onblur={handleBlur}
-				{placeholder}
-				class="w-full px-0 py-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-				autofocus
-			/>
-			<div class="flex justify-between items-center mt-2 pt-2 border-t border-border/50">
-				<button
-					class="px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all shadow-sm flex items-center gap-1.5"
-					onmousedown={(e) => e.preventDefault()}
-					onclick={handleSubmit}
-				>
-					<Plus size={14} />
-					{$t('kanban.add')}
-				</button>
-				<button
-					class="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
-					onmousedown={(e) => e.preventDefault()}
-					onclick={() => {
-						title = '';
-						isAdding = false;
-					}}
-				>
-					<X size={16} />
-				</button>
-			</div>
+		<div class="add-checkbox">
+			<Plus size={12} />
 		</div>
+		<input
+			bind:this={inputRef}
+			bind:value={title}
+			onkeydown={handleKeydown}
+			onblur={handleBlur}
+			{placeholder}
+			class="add-input"
+		/>
 	{:else}
-		<button
-			class="add-trigger group w-full p-2.5 text-sm text-muted-foreground hover:text-foreground transition-all flex items-center gap-2"
-			onclick={() => (isAdding = true)}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="inline-add-trigger"
+			onclick={activate}
+			onkeydown={(e) => e.key === 'Enter' && activate()}
+			role="button"
+			tabindex="0"
 		>
-			<div
-				class="w-5 h-5 rounded-full border-2 border-dashed border-current group-hover:border-primary group-hover:text-primary flex items-center justify-center transition-colors"
-			>
-				<Plus size={14} />
+			<div class="add-checkbox placeholder">
+				<Plus size={12} />
 			</div>
-			<span class="group-hover:text-foreground transition-colors">{$t('kanban.addTask')}</span>
-		</button>
+			<span class="add-placeholder">{placeholder}</span>
+		</div>
 	{/if}
 </div>
 
 <style>
-	/* Glass-Pill add form */
-	.add-form {
-		background: rgba(255, 255, 255, 0.85);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(0, 0, 0, 0.1);
-		border-radius: 1rem;
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	.inline-add-row {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		padding: 0.2rem 1rem;
+		transition: all 0.15s ease;
 	}
 
-	:global(.dark) .add-form {
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+	.inline-add-trigger {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		width: 100%;
+		cursor: text;
 	}
 
-	/* Trigger button with subtle glass effect */
-	.add-trigger {
+	.add-checkbox {
+		width: 1.25rem;
+		height: 1.25rem;
 		border-radius: 9999px;
+		border: 2px dashed var(--color-muted-foreground);
+		opacity: 0.4;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		color: var(--color-muted-foreground);
+		transition: all 0.15s;
 	}
 
-	.add-trigger:hover {
-		background: rgba(255, 255, 255, 0.5);
+	.inline-add-row.active .add-checkbox,
+	.inline-add-trigger:hover .add-checkbox {
+		opacity: 0.6;
+		border-color: var(--color-primary);
+		color: var(--color-primary);
 	}
 
-	:global(.dark) .add-trigger:hover {
-		background: rgba(255, 255, 255, 0.1);
+	.add-input {
+		flex: 1;
+		background: transparent;
+		border: none;
+		outline: none;
+		font-size: 0.875rem;
+		color: var(--color-foreground);
+		padding: 0;
+		line-height: 1.5;
+	}
+
+	.add-input::placeholder {
+		color: var(--color-muted-foreground);
+		opacity: 0.6;
+	}
+
+	.add-placeholder {
+		font-size: 0.875rem;
+		color: var(--color-muted-foreground);
+		opacity: 0.6;
+		transition: all 0.15s;
+	}
+
+	.inline-add-trigger:hover .add-placeholder {
+		opacity: 0.8;
+		color: var(--color-foreground);
 	}
 </style>

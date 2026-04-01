@@ -179,156 +179,160 @@
 		</div>
 	{/if}
 
-	<main class="flex-1 flex flex-col">
-		<!-- Logo Section -->
-		<div class="flex flex-col items-center pt-12 max-[480px]:pt-8 px-4 pb-6 anim-fade-in-scale">
-			<div
-				class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 shadow-lg"
-				style:border-color={primaryColor}
-				style:background-color={isDark ? '#000' : '#fff'}
-			>
-				<Logo size={55} color={primaryColor} />
-			</div>
-			<h1 class="text-2xl font-semibold" style:color={isDark ? '#fff' : '#000'}>{appName}</h1>
-		</div>
-
-		<!-- Form Section -->
-		<div class="flex-1 flex justify-center px-4 pt-4 pb-8">
-			<div
-				class="w-full max-w-[400px] rounded-2xl p-6 max-[480px]:p-5 border backdrop-blur-[10px] anim-fade-in-up"
-				style:background-color={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)'}
-				style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
-			>
-				<!-- Title -->
-				<h2
-					class="text-xl font-semibold text-center mb-6"
-					style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
+	<main class="flex-1 flex flex-col items-center justify-center">
+		<div class="w-full max-w-[480px] mx-auto px-4 flex flex-col items-center">
+			<!-- Logo Section -->
+			<div class="flex flex-col items-center pt-8 max-[480px]:pt-6 pb-4 anim-fade-in-scale">
+				<div
+					class="w-[100px] h-[100px] max-[480px]:w-[80px] max-[480px]:h-[80px] rounded-full border-[3px] flex items-center justify-center mb-3 shadow-lg"
+					style:border-color={primaryColor}
+					style:background-color={isDark ? '#000' : '#fff'}
 				>
-					{mode === 'form' ? t.titleForm : t.titleSuccess}
-				</h2>
+					<Logo size={55} color={primaryColor} />
+				</div>
+				<h1 class="text-2xl font-semibold" style:color={isDark ? '#fff' : '#000'}>{appName}</h1>
+			</div>
 
-				<!-- Error Messages -->
-				{#if error}
-					<div
-						class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
-						role="alert"
+			<!-- Form Section -->
+			<div class="w-full flex justify-center pt-2 pb-8">
+				<div
+					class="w-full max-w-[440px] rounded-2xl p-6 max-[480px]:p-5 border backdrop-blur-[10px] anim-fade-in-up"
+					style:background-color={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)'}
+					style:border-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}
+				>
+					<!-- Title -->
+					<h2
+						class="text-xl font-semibold text-center mb-6"
+						style:color={isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'}
 					>
-						<p>{error}</p>
-					</div>
-				{/if}
+						{mode === 'form' ? t.titleForm : t.titleSuccess}
+					</h2>
 
-				<!-- Form Mode -->
-				{#if mode === 'form'}
-					<form
-						onsubmit={(e) => {
-							e.preventDefault();
-							handleForgotPassword();
-						}}
-					>
-						<p
-							class="mb-4 text-sm"
-							style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+					<!-- Error Messages -->
+					{#if error}
+						<div
+							class="flex items-start gap-2 p-3 mb-4 rounded-xl text-sm bg-red-500/15 border border-red-500/30 text-red-500"
+							role="alert"
 						>
-							{t.description}
-						</p>
-
-						<div class="mb-4">
-							<input
-								type="email"
-								bind:value={email}
-								placeholder={t.emailPlaceholder}
-								required
-								class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
-								style:--ring-color={primaryColor}
-								style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
-								style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
-								style:color={isDark ? '#fff' : '#000'}
-								style:--tw-ring-color="var(--ring-color)"
-							/>
+							<p>{error}</p>
 						</div>
+					{/if}
 
-						<button
-							type="submit"
-							disabled={loading}
-							aria-disabled={loading}
-							class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
-							style:background-color={primaryColor + '60'}
-							style:border-color={primaryColor}
-							style:color={isDark ? '#fff' : '#000'}
+					<!-- Form Mode -->
+					{#if mode === 'form'}
+						<form
+							onsubmit={(e) => {
+								e.preventDefault();
+								handleForgotPassword();
+							}}
 						>
-							<Key size={20} />
-							{loading ? t.sending : t.sendResetLinkButton}
-						</button>
-					</form>
-
-					<!-- Back Button -->
-					<div class="mt-4">
-						<button
-							type="button"
-							onclick={() => goto(loginPath)}
-							class="w-full bg-transparent border-none cursor-pointer font-medium text-sm p-3 text-center flex items-center justify-center gap-2 transition-opacity hover:opacity-70"
-							style:color={isDark ? '#fff' : '#000'}
-						>
-							<ArrowLeft size={20} />
-							{t.backToLogin}
-						</button>
-					</div>
-
-					<!-- Success Mode -->
-				{:else}
-					<div class="pb-4">
-						<div class="flex flex-col items-center mb-6">
-							<div
-								class="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-								style:background-color={primaryColor + '30'}
-								style:color={primaryColor}
-							>
-								<EnvelopeOpen size={40} />
-							</div>
-
 							<p
-								class="text-sm text-center px-2"
+								class="mb-4 text-sm"
 								style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
 							>
-								{getSuccessMessage(resetEmail)}
+								{t.description}
 							</p>
-						</div>
 
-						<div class="flex flex-col gap-3">
+							<div class="mb-4">
+								<input
+									type="email"
+									bind:value={email}
+									placeholder={t.emailPlaceholder}
+									required
+									class="w-full h-14 px-4 border rounded-xl text-base transition-colors focus:outline-none focus:ring-2"
+									style:--ring-color={primaryColor}
+									style:background-color={isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)'}
+									style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+									style:color={isDark ? '#fff' : '#000'}
+									style:--tw-ring-color="var(--ring-color)"
+								/>
+							</div>
+
 							<button
-								type="button"
-								onclick={() => goto(loginPath)}
+								type="submit"
+								disabled={loading}
+								aria-disabled={loading}
 								class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
 								style:background-color={primaryColor + '60'}
 								style:border-color={primaryColor}
 								style:color={isDark ? '#fff' : '#000'}
 							>
-								<SignIn size={20} />
-								{t.backToLogin}
+								<Key size={20} />
+								{loading ? t.sending : t.sendResetLinkButton}
 							</button>
+						</form>
 
+						<!-- Back Button -->
+						<div class="mt-4">
 							<button
 								type="button"
-								onclick={() => {
-									mode = 'form';
-									error = null;
-								}}
-								class="w-full h-10 border rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-70"
-								style:background-color={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)'}
-								style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+								onclick={() => goto(loginPath)}
+								class="w-full bg-transparent border-none cursor-pointer font-medium text-sm p-3 text-center flex items-center justify-center gap-2 transition-opacity hover:opacity-70"
 								style:color={isDark ? '#fff' : '#000'}
 							>
-								{t.resendEmail}
+								<ArrowLeft size={20} />
+								{t.backToLogin}
 							</button>
 						</div>
-					</div>
-				{/if}
+
+						<!-- Success Mode -->
+					{:else}
+						<div class="pb-4">
+							<div class="flex flex-col items-center mb-6">
+								<div
+									class="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+									style:background-color={primaryColor + '30'}
+									style:color={primaryColor}
+								>
+									<EnvelopeOpen size={40} />
+								</div>
+
+								<p
+									class="text-sm text-center px-2"
+									style:color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'}
+								>
+									{getSuccessMessage(resetEmail)}
+								</p>
+							</div>
+
+							<div class="flex flex-col gap-3">
+								<button
+									type="button"
+									onclick={() => goto(loginPath)}
+									class="w-full h-14 border-2 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+									style:background-color={primaryColor + '60'}
+									style:border-color={primaryColor}
+									style:color={isDark ? '#fff' : '#000'}
+								>
+									<SignIn size={20} />
+									{t.backToLogin}
+								</button>
+
+								<button
+									type="button"
+									onclick={() => {
+										mode = 'form';
+										error = null;
+									}}
+									class="w-full h-10 border rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-opacity hover:opacity-70"
+									style:background-color={isDark
+										? 'rgba(255,255,255,0.1)'
+										: 'rgba(255,255,255,0.8)'}
+									style:border-color={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+									style:color={isDark ? '#fff' : '#000'}
+								>
+									{t.resendEmail}
+								</button>
+							</div>
+						</div>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</main>
 
 	{#if appSlider}
-		<footer class="w-full pb-4 anim-fade-in">
+		<footer class="w-full max-w-[640px] mx-auto pb-4 anim-fade-in">
 			{@render appSlider()}
 		</footer>
 	{/if}

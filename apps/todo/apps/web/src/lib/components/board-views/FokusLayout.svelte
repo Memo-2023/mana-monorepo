@@ -240,7 +240,6 @@
 			0 0 0 1px rgba(0, 0, 0, 0.04);
 		display: flex;
 		flex-direction: column;
-		overflow: hidden;
 	}
 	:global(.dark) .fokus-sheet {
 		background-color: #252220;
@@ -252,30 +251,10 @@
 		opacity: 0.75;
 	}
 
-	/* Scrollable wrapper for DnD zone + footer + completed section */
 	.sheet-body {
 		flex: 1;
-		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
-		scrollbar-width: thin;
-		scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
-	}
-	:global(.dark) .sheet-body {
-		scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
-	}
-	.sheet-body::-webkit-scrollbar {
-		width: 4px;
-	}
-	.sheet-body::-webkit-scrollbar-track {
-		background: transparent;
-	}
-	.sheet-body::-webkit-scrollbar-thumb {
-		background: rgba(0, 0, 0, 0.08);
-		border-radius: 2px;
-	}
-	:global(.dark) .sheet-body::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.1);
 	}
 
 	.sheet-content {
@@ -291,11 +270,7 @@
 	}
 
 	.sheet-footer {
-		padding: 0.5rem 1rem 0.75rem;
-		border-top: 1px solid rgba(0, 0, 0, 0.04);
-	}
-	:global(.dark) .sheet-footer {
-		border-top-color: rgba(255, 255, 255, 0.04);
+		padding: 0;
 	}
 
 	:global(.fokus-drop-target) {
