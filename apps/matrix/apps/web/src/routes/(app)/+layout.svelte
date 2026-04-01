@@ -21,7 +21,12 @@
 	import type { ThemeVariant } from '@manacore/shared-theme';
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation.svelte';
 	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		QuickInputItem,
+		SpotlightAction,
+	} from '@manacore/shared-ui';
 	import { tagStore } from '$lib/stores/tags.svelte';
 	import { MagnifyingGlass, X } from '@manacore/shared-icons';
 	import { getPillAppItems } from '@manacore/shared-branding';
@@ -130,6 +135,16 @@
 	function handleTagStripToggle() {
 		isTagStripVisible = !isTagStripVisible;
 	}
+
+	const spotlightActions: SpotlightAction[] = [
+		{ id: 'rooms', label: 'Räume', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
 
 	// Navigation items for Matrix
 	const navItems: PillNavItem[] = [
@@ -436,6 +451,7 @@
 				settingsHref="/settings"
 				helpHref="/help"
 				allAppsHref="https://mana.how"
+				{spotlightActions}
 			/>
 		{/if}
 

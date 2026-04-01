@@ -7,7 +7,7 @@
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, SpotlightAction } from '@manacore/shared-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { manacoreStore } from '$lib/data/local-store';
@@ -266,6 +266,24 @@
 
 		loading = false;
 	});
+
+	const spotlightActions: SpotlightAction[] = [
+		{ id: 'home', label: 'Home', category: 'Navigation', onExecute: () => goto('/home') },
+		{
+			id: 'dashboard',
+			label: 'Dashboard',
+			category: 'Navigation',
+			onExecute: () => goto('/dashboard'),
+		},
+		{ id: 'credits', label: 'Credits', category: 'Navigation', onExecute: () => goto('/credits') },
+		{ id: 'apps', label: 'Alle Apps', category: 'Navigation', onExecute: () => goto('/apps') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -321,6 +339,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			allAppsHref="/apps"
+			{spotlightActions}
 		/>
 
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->

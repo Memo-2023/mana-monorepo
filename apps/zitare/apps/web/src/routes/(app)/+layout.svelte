@@ -8,7 +8,12 @@
 		ImmersiveModeToggle,
 		TagStrip,
 	} from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		QuickInputItem,
+		SpotlightAction,
+	} from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
@@ -247,6 +252,23 @@
 		zitareSettings.togglePillNav();
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{ id: 'random', label: 'Zufälliges Zitat', category: 'Aktionen', onExecute: () => goto('/') },
+		{
+			id: 'favorites',
+			label: 'Favoriten',
+			category: 'Navigation',
+			onExecute: () => goto('/favorites'),
+		},
+		{ id: 'lists', label: 'Listen', category: 'Navigation', onExecute: () => goto('/lists') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		// Initialize local-first databases (app + shared tags)
 		await Promise.all([zitareStore.initialize(), tagLocalStore.initialize()]);
@@ -286,6 +308,7 @@
 					homeRoute="/"
 					onToggleTheme={handleToggleTheme}
 					{isDark}
+					{spotlightActions}
 					showThemeToggle={true}
 					showThemeVariants={true}
 					{themeVariantItems}

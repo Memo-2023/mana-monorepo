@@ -5,7 +5,7 @@
 	import { onMount, setContext } from 'svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, SpotlightAction } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { guidesStore } from '$lib/stores/guides.svelte';
@@ -28,8 +28,12 @@
 	// Context for child pages
 	let showCreateModal = $state(false);
 	let showImportModal = $state(false);
-	setContext('openCreateGuide', () => { showCreateModal = true; });
-	setContext('openImportGuide', () => { showImportModal = true; });
+	setContext('openCreateGuide', () => {
+		showCreateModal = true;
+	});
+	setContext('openImportGuide', () => {
+		showImportModal = true;
+	});
 
 	// App switcher
 	let appItems = $derived(getPillAppItems('guides', undefined, undefined, authStore.user?.tier));
@@ -96,12 +100,42 @@
 	function handleCollapsedChange(collapsed: boolean) {
 		isCollapsed = collapsed;
 	}
-	function handleToggleTheme() { theme.toggleMode(); }
-	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') { theme.setMode(mode); }
+	function handleToggleTheme() {
+		theme.toggleMode();
+	}
+	function handleThemeModeChange(mode: 'light' | 'dark' | 'system') {
+		theme.setMode(mode);
+	}
 	async function handleLogout() {
 		await authStore.signOut();
 		goto('/login');
 	}
+
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-guide',
+			label: 'Neuer Guide',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => {
+				showCreateModal = true;
+			},
+		},
+		{ id: 'all-guides', label: 'Alle Guides', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'collections',
+			label: 'Sammlungen',
+			category: 'Navigation',
+			onExecute: () => goto('/collections'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
 
 	async function handleAuthReady() {
 		await dbStore.initialize();
@@ -114,15 +148,17 @@
 	}
 </script>
 
-<svelte:window onkeydown={(e) => {
-	if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
-		const num = parseInt(e.key);
-		if (num >= 1 && num <= baseNavItems.length) {
-			e.preventDefault();
-			goto(baseNavItems[num - 1].href);
+<svelte:window
+	onkeydown={(e) => {
+		if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+			const num = parseInt(e.key);
+			if (num >= 1 && num <= baseNavItems.length) {
+				e.preventDefault();
+				goto(baseNavItems[num - 1].href);
+			}
 		}
-	}
-}} />
+	}}
+/>
 
 <AuthGate
 	{authStore}
@@ -158,6 +194,7 @@
 			showAppSwitcher={true}
 			{appItems}
 			{userEmail}
+			{spotlightActions}
 		/>
 
 		<main class="relative z-0 pb-24" style="padding-top: 0">
@@ -173,7 +210,11 @@
 		class="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
 		aria-label="Neue Anleitung erstellen"
 	>
-		<svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"><path d="M228 128a12 12 0 0 1-12 12h-76v76a12 12 0 0 1-24 0v-76H40a12 12 0 0 1 0-24h76V40a12 12 0 0 1 24 0v76h76a12 12 0 0 1 12 12Z"/></svg>
+		<svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor"
+			><path
+				d="M228 128a12 12 0 0 1-12 12h-76v76a12 12 0 0 1-24 0v-76H40a12 12 0 0 1 0-24h76V40a12 12 0 0 1 24 0v76h76a12 12 0 0 1 12 12Z"
+			/></svg
+		>
 	</button>
 
 	<!-- Guest Welcome -->

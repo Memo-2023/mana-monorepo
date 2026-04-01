@@ -20,6 +20,7 @@
 		PillDropdownItem,
 		QuickInputItem,
 		CreatePreview,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -305,6 +306,30 @@
 		previousOnboardingShow = showing;
 	});
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-contact',
+			label: 'Neuer Kontakt',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/new'),
+		},
+		{ id: 'all', label: 'Alle Kontakte', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'favorites',
+			label: 'Favoriten',
+			category: 'Navigation',
+			onExecute: () => goto('/favorites'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		// Initialize local-first databases (opens IndexedDB, seeds guest data)
 		await Promise.all([
@@ -394,6 +419,7 @@
 					allAppsHref="/apps"
 					onOpenInPanel={handleOpenInPanel}
 					ariaLabel="Hauptnavigation"
+					{spotlightActions}
 				/>
 
 				<!-- TagStrip (above PillNav, toggled via Tags pill) -->

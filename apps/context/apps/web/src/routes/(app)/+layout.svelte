@@ -10,6 +10,7 @@
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -180,6 +181,24 @@
 		filterHiddenNavItems('context', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-space',
+			label: 'Neuer Space',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/new'),
+		},
+		{ id: 'all-spaces', label: 'Alle Spaces', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	const navRoutes = baseNavItems.map((item) => item.href);
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -295,6 +314,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			allAppsHref="/apps"
+			{spotlightActions}
 		/>
 
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->

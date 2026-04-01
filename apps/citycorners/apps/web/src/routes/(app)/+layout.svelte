@@ -5,7 +5,12 @@
 	import { _, locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		QuickInputItem,
+		SpotlightAction,
+	} from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -207,6 +212,22 @@
 
 	let showGuestWelcome = $state(false);
 
+	const spotlightActions: SpotlightAction[] = [
+		{ id: 'explore', label: 'Entdecken', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'favorites',
+			label: 'Favoriten',
+			category: 'Navigation',
+			onExecute: () => goto('/favorites'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		await Promise.all([citycornersStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
@@ -259,6 +280,7 @@
 				themesHref="/themes"
 				helpHref="/help"
 				profileHref="/profile"
+				{spotlightActions}
 			/>
 		{/if}
 

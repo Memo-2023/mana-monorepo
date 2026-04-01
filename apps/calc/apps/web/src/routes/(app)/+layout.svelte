@@ -10,6 +10,7 @@
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -246,6 +247,27 @@
 		goto('/login');
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'calculator',
+			label: 'Rechner',
+			category: 'Navigation',
+			onExecute: () => goto('/standard'),
+		},
+		{
+			id: 'converter',
+			label: 'Umrechner',
+			category: 'Navigation',
+			onExecute: () => goto('/converter'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		await Promise.all([calcStore.initialize(), tagLocalStore.initialize()]);
 
@@ -316,6 +338,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			allAppsHref="/apps"
+			{spotlightActions}
 		/>
 
 		{#if isTagStripVisible}

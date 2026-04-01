@@ -4,7 +4,12 @@
 	import { _, locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		QuickInputItem,
+		SpotlightAction,
+	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { photoStore } from '$lib/stores/photos.svelte';
@@ -57,6 +62,23 @@
 	function handleTagClear() {
 		selectedTagIds = [];
 	}
+
+	const spotlightActions: SpotlightAction[] = [
+		{ id: 'all-photos', label: 'Alle Fotos', category: 'Navigation', onExecute: () => goto('/') },
+		{ id: 'albums', label: 'Alben', category: 'Navigation', onExecute: () => goto('/albums') },
+		{
+			id: 'favorites',
+			label: 'Favoriten',
+			category: 'Navigation',
+			onExecute: () => goto('/favorites'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
 
 	// Navigation items
 	const navItems: PillNavItem[] = [
@@ -164,6 +186,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			profileHref="/profile"
+			{spotlightActions}
 		/>
 
 		<!-- TagStrip (toggled via Tags pill) -->

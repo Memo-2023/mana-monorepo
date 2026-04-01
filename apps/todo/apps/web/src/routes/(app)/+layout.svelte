@@ -15,6 +15,7 @@
 		PillNavElement,
 		QuickInputItem,
 		CreatePreview,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -314,6 +315,36 @@
 		goto('/login');
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-task',
+			label: 'Neue Aufgabe',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/'),
+		},
+		{ id: 'today', label: 'Heute', category: 'Navigation', onExecute: () => goto('/today') },
+		{
+			id: 'upcoming',
+			label: 'Demnächst',
+			category: 'Navigation',
+			onExecute: () => goto('/upcoming'),
+		},
+		{
+			id: 'kanban',
+			label: 'Kanban Board',
+			category: 'Navigation',
+			onExecute: () => goto('/kanban'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		// Initialize local-first databases (opens IndexedDB, seeds guest data)
 		await Promise.all([
@@ -418,6 +449,7 @@
 						helpHref="/help"
 						onOpenInPanel={handleOpenInPanel}
 						ariaLabel="Hauptnavigation"
+						{spotlightActions}
 					/>
 
 					<!-- Unified filter strip (tags + priorities + sort, toggled via Filter pill) -->

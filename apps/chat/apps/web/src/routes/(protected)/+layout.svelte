@@ -17,7 +17,7 @@
 	import { setContext } from 'svelte';
 	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, SpotlightAction } from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -123,6 +123,30 @@
 	const navItems = $derived(
 		filterHiddenNavItems('chat', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
+
+	// Spotlight actions for PillNavigation
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-chat',
+			label: 'Neuer Chat',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/chat'),
+		},
+		{
+			id: 'templates',
+			label: 'Vorlagen',
+			category: 'Navigation',
+			onExecute: () => goto('/templates'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
 
 	// User email for user dropdown
 	let userEmail = $derived(authStore.user?.email);
@@ -254,6 +278,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			allAppsHref="/apps"
+			{spotlightActions}
 		/>
 
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->

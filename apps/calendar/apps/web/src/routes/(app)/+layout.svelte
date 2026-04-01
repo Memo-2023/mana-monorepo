@@ -16,6 +16,7 @@
 		QuickInputItem,
 		PillTagSelectorConfig,
 		PillNavElement,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -403,6 +404,31 @@
 		);
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-event',
+			label: 'Neues Event',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/new'),
+		},
+		{ id: 'today', label: 'Heute', category: 'Navigation', onExecute: () => goto('/') },
+		{ id: 'week', label: 'Wochenansicht', category: 'Navigation', onExecute: () => goto('/week') },
+		{
+			id: 'month',
+			label: 'Monatsansicht',
+			category: 'Navigation',
+			onExecute: () => goto('/month'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		// Initialize local-first databases (opens IndexedDB, seeds guest data)
 		await Promise.all([
@@ -498,6 +524,7 @@
 					allAppsHref="/apps"
 					onOpenInPanel={handleOpenInPanel}
 					ariaLabel="Hauptnavigation"
+					{spotlightActions}
 				/>
 			{/if}
 

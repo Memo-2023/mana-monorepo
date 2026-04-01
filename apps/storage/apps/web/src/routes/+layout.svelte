@@ -5,7 +5,7 @@
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, setupGlobalErrorHandler, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem } from '@manacore/shared-ui';
+	import type { PillNavItem, PillDropdownItem, SpotlightAction } from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { userSettings } from '$lib/stores/user-settings.svelte';
@@ -174,6 +174,24 @@
 		goto('/login');
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'upload',
+			label: 'Datei hochladen',
+			icon: 'plus',
+			shortcut: 'U',
+			category: 'Aktionen',
+			onExecute: () => goto('/'),
+		},
+		{ id: 'all-files', label: 'Alle Dateien', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		// Initialize local-first databases
 		await Promise.all([storageStore.initialize(), tagLocalStore.initialize()]);
@@ -237,6 +255,7 @@
 				homeRoute="/files"
 				onToggleTheme={handleToggleTheme}
 				{isDark}
+				{spotlightActions}
 				{isCollapsed}
 				onCollapsedChange={handleCollapsedChange}
 				showThemeToggle={true}

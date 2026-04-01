@@ -10,6 +10,7 @@
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -184,6 +185,36 @@
 	// User email for user dropdown — empty string for guests so PillNav shows login button
 	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
+	// Spotlight actions for PillNavigation
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-alarm',
+			label: 'Neuer Alarm',
+			icon: 'plus',
+			category: 'Erstellen',
+			onExecute: () => goto('/alarms'),
+		},
+		{
+			id: 'new-timer',
+			label: 'Neuer Timer',
+			icon: 'plus',
+			category: 'Erstellen',
+			onExecute: () => goto('/timers'),
+		},
+		{
+			id: 'world-clock',
+			label: 'Weltuhren',
+			category: 'Navigation',
+			onExecute: () => goto('/world-clock'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	// TagStrip visibility
 	let isTagStripVisible = $state(false);
 	function handleTagStripToggle() {
@@ -340,6 +371,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			allAppsHref="/apps"
+			{spotlightActions}
 		/>
 
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->

@@ -5,7 +5,12 @@
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		QuickInputItem,
+		SpotlightAction,
+	} from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -156,6 +161,29 @@
 		goto(`/deck/${item.id}`);
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-deck',
+			label: 'Neue Präsentation',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/new'),
+		},
+		{
+			id: 'all-decks',
+			label: 'Alle Präsentationen',
+			category: 'Navigation',
+			onExecute: () => goto('/'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		// Initialize local-first databases (opens IndexedDB, seeds guest data)
 		await Promise.all([presiStore.initialize(), tagLocalStore.initialize()]);
@@ -242,6 +270,7 @@
 				themesHref="/themes"
 				helpHref="/help"
 				allAppsHref="/apps"
+				{spotlightActions}
 			/>
 
 			<!-- TagStrip (above PillNav, toggled via Tags pill) -->

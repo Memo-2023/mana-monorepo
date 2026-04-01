@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem } from '@manacore/shared-ui';
+	import type { PillNavItem, SpotlightAction } from '@manacore/shared-ui';
 	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { AuthGate, GuestWelcomeModal, SessionExpiredBanner } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
@@ -21,6 +21,24 @@
 		{ href: '/my/tags', label: 'Tags', icon: 'tag' },
 		{ href: '/my/analytics', label: 'Analytics', icon: 'chart' },
 		{ href: '/settings', label: 'Settings', icon: 'settings' },
+	];
+
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-link',
+			label: 'Neuer Link',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/'),
+		},
+		{ id: 'all-links', label: 'Alle Links', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
 	];
 
 	let isSidebarMode = $state(false);
@@ -118,6 +136,7 @@
 			{appItems}
 			{userEmail}
 			settingsHref="/settings"
+			{spotlightActions}
 		>
 			{#snippet logo()}
 				<span class="text-xl">🔗</span>

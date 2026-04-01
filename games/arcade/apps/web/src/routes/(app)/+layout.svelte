@@ -8,6 +8,7 @@
 		PillDropdownItem,
 		CommandBarItem,
 		QuickAction,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -48,6 +49,24 @@
 	let appItems = $derived(getPillAppItems('arcade', undefined, undefined, authStore.user?.tier));
 
 	let { children } = $props();
+
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-game',
+			label: 'Neues Spiel erstellen',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/create'),
+		},
+		{ id: 'games', label: 'Alle Spiele', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
 
 	let commandBarOpen = $state(false);
 
@@ -223,6 +242,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			allAppsHref="/apps"
+			{spotlightActions}
 		/>
 
 		<main class="main-content bg-background">

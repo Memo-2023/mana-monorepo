@@ -9,6 +9,7 @@
 		PillDropdownItem,
 		QuickInputItem,
 		CreatePreview,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
@@ -194,6 +195,36 @@
 		goto('/projects');
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-project',
+			label: 'Neues Projekt',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/projects/new'),
+		},
+		{ id: 'songs', label: 'Songs', category: 'Navigation', onExecute: () => goto('/') },
+		{
+			id: 'playlists',
+			label: 'Playlists',
+			category: 'Navigation',
+			onExecute: () => goto('/playlists'),
+		},
+		{
+			id: 'projects',
+			label: 'Projekte',
+			category: 'Navigation',
+			onExecute: () => goto('/projects'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	let showGuestWelcome = $state(false);
 
 	async function handleAuthReady() {
@@ -248,6 +279,7 @@
 				profileHref="/profile"
 				onOpenInPanel={handleOpenInPanel}
 				ariaLabel="Main navigation"
+				{spotlightActions}
 			/>
 
 			<!-- TagStrip (above PillNav, toggled via Tags pill) -->

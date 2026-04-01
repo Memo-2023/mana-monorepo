@@ -5,7 +5,12 @@
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
-	import type { PillNavItem, PillNavElement, PillDropdownItem } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillNavElement,
+		PillDropdownItem,
+		SpotlightAction,
+	} from '@manacore/shared-ui';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -218,6 +223,31 @@
 	);
 	let currentLanguageLabel = $derived(getCurrentLanguageLabel(currentLocale));
 
+	// Spotlight actions for PillNavigation
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-image',
+			label: 'Neues Bild generieren',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/app/generate'),
+		},
+		{
+			id: 'gallery',
+			label: 'Galerie',
+			category: 'Navigation',
+			onExecute: () => goto('/app/gallery'),
+		},
+		{ id: 'boards', label: 'Boards', category: 'Navigation', onExecute: () => goto('/app/board') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/app/settings'),
+		},
+	];
+
 	// User email for user dropdown — empty string for guests so PillNav shows login button
 	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
@@ -346,6 +376,7 @@
 				helpHref="/app/help"
 				feedbackHref="/app/feedback"
 				allAppsHref="/app/apps"
+				{spotlightActions}
 			/>
 			<!-- TagStrip (toggled via Tags pill) -->
 			{#if isTagStripVisible}

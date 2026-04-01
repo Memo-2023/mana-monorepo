@@ -3,7 +3,12 @@
 	import { page } from '$app/stores';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import type { PillNavItem, QuickInputItem, CreatePreview } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		QuickInputItem,
+		CreatePreview,
+		SpotlightAction,
+	} from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -126,6 +131,29 @@
 		}
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-plant',
+			label: 'Neue Pflanze',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/add'),
+		},
+		{
+			id: 'all-plants',
+			label: 'Alle Pflanzen',
+			category: 'Navigation',
+			onExecute: () => goto('/dashboard'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		await Promise.all([plantaStore.initialize(), tagLocalStore.initialize()]);
 		if (authStore.isAuthenticated) {
@@ -156,6 +184,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			profileHref="/profile"
+			{spotlightActions}
 		/>
 
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->

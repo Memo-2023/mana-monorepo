@@ -9,7 +9,12 @@
 	import { isNavCollapsed as collapsedStore } from '$lib/stores/navigation';
 	import { PillNavigation, QuickInputBar, TagStrip } from '@manacore/shared-ui';
 	import { SyncIndicator } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem, QuickInputItem } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		QuickInputItem,
+		SpotlightAction,
+	} from '@manacore/shared-ui';
 	import {
 		tagLocalStore,
 		tagMutations,
@@ -190,6 +195,25 @@
 		goto(`/decks/${item.id}`);
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-deck',
+			label: 'Neues Deck',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/new'),
+		},
+		{ id: 'all-decks', label: 'Alle Decks', category: 'Navigation', onExecute: () => goto('/') },
+		{ id: 'study', label: 'Lernen', category: 'Navigation', onExecute: () => goto('/study') },
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	async function handleAuthReady() {
 		// Initialize local-first database and shared tag store
 		await Promise.all([cardsStore.initialize(), tagLocalStore.initialize()]);
@@ -246,6 +270,7 @@
 			onLogout={handleSignOut}
 			onToggleTheme={handleToggleTheme}
 			{isDark}
+			{spotlightActions}
 			{isCollapsed}
 			onCollapsedChange={handleCollapsedChange}
 			showThemeToggle={true}

@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { PillNavigation } from '@manacore/shared-ui';
-	import type { PillNavItem } from '@manacore/shared-ui';
+	import type { PillNavItem, SpotlightAction } from '@manacore/shared-ui';
 	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { AuthGate, GuestWelcomeModal, SessionExpiredBanner } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
@@ -37,6 +37,22 @@
 		goto('/auth/login');
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{ id: 'scenes', label: 'Szenen', category: 'Navigation', onExecute: () => goto('/moods') },
+		{
+			id: 'sequences',
+			label: 'Sequences',
+			category: 'Navigation',
+			onExecute: () => goto('/sequences'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	function handleAuthReady() {
 		if (authStore.isAuthenticated) moodlitStore.startSync(() => authStore.getValidToken());
 		if (!authStore.isAuthenticated && shouldShowGuestWelcome('moodlit')) showGuestWelcome = true;
@@ -69,6 +85,7 @@
 			showAppSwitcher={true}
 			{appItems}
 			{userEmail}
+			{spotlightActions}
 		>
 			{#snippet logo()}
 				<span class="text-xl">🌈</span>

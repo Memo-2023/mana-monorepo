@@ -22,6 +22,7 @@
 		PillDropdownItem,
 		QuickInputItem,
 		CreatePreview,
+		SpotlightAction,
 	} from '@manacore/shared-ui';
 	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import {
@@ -172,6 +173,29 @@
 		isTagStripVisible = !isTagStripVisible;
 	}
 
+	const spotlightActions: SpotlightAction[] = [
+		{
+			id: 'new-question',
+			label: 'Neue Frage',
+			icon: 'plus',
+			shortcut: 'N',
+			category: 'Erstellen',
+			onExecute: () => goto('/'),
+		},
+		{
+			id: 'collections',
+			label: 'Sammlungen',
+			category: 'Navigation',
+			onExecute: () => goto('/collections'),
+		},
+		{
+			id: 'settings',
+			label: 'Einstellungen',
+			category: 'Navigation',
+			onExecute: () => goto('/settings'),
+		},
+	];
+
 	// Navigation items
 	let navItems = $derived<PillNavItem[]>([
 		{ href: '/', label: 'Questions', icon: 'help-circle' },
@@ -235,6 +259,7 @@
 			themesHref="/themes"
 			helpHref="/help"
 			profileHref="/profile"
+			{spotlightActions}
 		/>
 
 		<!-- Quick Input Bar -->
