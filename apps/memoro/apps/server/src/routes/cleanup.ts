@@ -7,6 +7,8 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { runAudioCleanup } from '../services/cleanup';
+import { validateBody } from '../lib/validate';
+import { manualCleanupBody } from '../schemas';
 
 export const cleanupRoutes = new Hono();
 
@@ -28,9 +30,7 @@ cleanupRoutes.post('/run', async (c) => {
 
 	// Run cleanup asynchronously and return immediately
 	queueMicrotask(() => {
-		runAudioCleanup().catch((err) =>
-			console.error('[cleanup] Background cleanup failed:', err)
-		);
+		runAudioCleanup().catch((err) => console.error('[cleanup] Background cleanup failed:', err));
 	});
 
 	return c.json({ success: true, message: 'Cleanup started' });
@@ -38,8 +38,9 @@ cleanupRoutes.post('/run', async (c) => {
 
 // POST /manual — manual trigger with optional user IDs
 cleanupRoutes.post('/manual', async (c) => {
-	const body = await c.req.json<{ userIds?: string[] }>().catch(() => ({ userIds: undefined }));
-	const userIds = body.userIds ?? [];
+	const v = await validateBody(c, manualCleanupBody);
+	if (!v.success) return v.response;
+	const userIds = v.data.userIds ?? [];
 
 	console.log(
 		`[cleanup] Manual trigger${userIds.length > 0 ? ` for ${userIds.length} users` : ' for all opted-in users'}`
@@ -50,6 +51,6 @@ cleanupRoutes.post('/manual', async (c) => {
 		return c.json({ success: true, ...result });
 	} catch (err) {
 		console.error('[cleanup] Manual cleanup failed:', err);
-		return c.json({ error: 'Cleanup failed' }, 500);
+		return c.json({ success: false, error: 'Cleanup failed' }, 500);
 	}
 });

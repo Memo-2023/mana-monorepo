@@ -31,7 +31,7 @@ export function rateLimiter(options: RateLimiterOptions = {}): MiddlewareHandler
 		}
 	}, 5 * 60_000);
 
-	return async (c, next) => {
+	return async (c, next): Promise<void | Response> => {
 		const ip =
 			c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
 			c.req.header('x-real-ip') ||

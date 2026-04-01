@@ -14,26 +14,17 @@ import { processHeadlineForMemo } from '../services/headline';
 import { createServiceClient } from '../lib/supabase';
 import { validateCredits, consumeCredits, COSTS } from '../lib/credits';
 import { generateText } from '../lib/ai';
+import { validateBody } from '../lib/validate';
+import { createMemoBody, appendMemoBody, combineMemoBody, questionMemoBody } from '../schemas';
 
 export const memoRoutes = new Hono<{ Variables: AuthVariables }>();
 
 // POST / — create memo from uploaded file
 memoRoutes.post('/', async (c) => {
 	const userId = c.get('userId') as string;
-	const body = await c.req.json<{
-		filePath: string;
-		duration: number;
-		spaceId?: string;
-		blueprintId?: string;
-		memoId?: string;
-		recordingStartedAt?: string;
-		location?: unknown;
-		mediaType?: string;
-	}>();
-
-	if (!body.filePath || body.duration == null) {
-		return c.json({ error: 'filePath and duration are required' }, 400);
-	}
+	const v = await validateBody(c, createMemoBody);
+	if (!v.success) return v.response;
+	const body = v.data;
 
 	try {
 		const result = await createMemoFromUploadedFile({
@@ -47,12 +38,12 @@ memoRoutes.post('/', async (c) => {
 			...(body.location !== undefined ? { location: body.location } : {}),
 			...(body.mediaType ? { mediaType: body.mediaType } : {}),
 		});
-		return c.json(result, 201);
+		return c.json({ success: true, ...result }, 201);
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
-		if (msg.includes('Insufficient credits')) return c.json({ error: msg }, 402);
+		if (msg.includes('Insufficient credits')) return c.json({ success: false, error: msg }, 402);
 		console.error('[memos] Create error:', err);
-		return c.json({ error: 'Failed to create memo' }, 500);
+		return c.json({ success: false, error: 'Failed to create memo' }, 500);
 	}
 });
 
@@ -60,17 +51,9 @@ memoRoutes.post('/', async (c) => {
 memoRoutes.post('/:id/append', async (c) => {
 	const userId = c.get('userId') as string;
 	const memoId = c.req.param('id');
-	const body = await c.req.json<{
-		filePath: string;
-		duration: number;
-		recordingIndex?: number;
-		recordingLanguages?: string[];
-		enableDiarization?: boolean;
-	}>();
-
-	if (!body.filePath || body.duration == null) {
-		return c.json({ error: 'filePath and duration are required' }, 400);
-	}
+	const v = await validateBody(c, appendMemoBody);
+	if (!v.success) return v.response;
+	const body = v.data;
 
 	const supabase = createServiceClient();
 
@@ -83,14 +66,14 @@ memoRoutes.post('/:id/append', async (c) => {
 		.single();
 
 	if (memoError || !memo) {
-		return c.json({ error: 'Memo not found or access denied' }, 404);
+		return c.json({ success: false, error: 'Memo not found or access denied' }, 404);
 	}
 
 	// Validate credits
 	const cost = Math.max(Math.ceil((body.duration / 60) * COSTS.TRANSCRIPTION_PER_MINUTE), 2);
 	const creditCheck = await validateCredits(userId, 'transcription', cost);
 	if (!creditCheck.hasCredits) {
-		return c.json({ error: `Insufficient credits: need ${cost}` }, 402);
+		return c.json({ success: false, error: `Insufficient credits: need ${cost}` }, 402);
 	}
 
 	// Set processing status
@@ -123,7 +106,9 @@ memoRoutes.post('/:id/append', async (c) => {
 			duration: body.duration,
 			recordingIndex,
 			...(body.recordingLanguages ? { recordingLanguages: body.recordingLanguages } : {}),
-			...(body.enableDiarization !== undefined ? { enableDiarization: body.enableDiarization } : {}),
+			...(body.enableDiarization !== undefined
+				? { enableDiarization: body.enableDiarization }
+				: {}),
 			isAppend: true,
 		}).catch((err) => console.error(`[memos] Append transcription call failed: ${err}`));
 	});
@@ -144,7 +129,8 @@ memoRoutes.post('/:id/retry-transcription', async (c) => {
 		.eq('user_id', userId)
 		.single();
 
-	if (error || !memo) return c.json({ error: 'Memo not found or access denied' }, 404);
+	if (error || !memo)
+		return c.json({ success: false, error: 'Memo not found or access denied' }, 404);
 
 	const memoData = memo as {
 		source: { audio_path?: string; duration?: number };
@@ -153,7 +139,8 @@ memoRoutes.post('/:id/retry-transcription', async (c) => {
 	const filePath = memoData.source?.audio_path;
 	const duration = memoData.source?.duration ?? 0;
 
-	if (!filePath) return c.json({ error: 'No audio file associated with this memo' }, 400);
+	if (!filePath)
+		return c.json({ success: false, error: 'No audio file associated with this memo' }, 400);
 
 	await updateMemoProcessingStatus(memoId, 'transcription', 'pending');
 
@@ -180,29 +167,31 @@ memoRoutes.post('/:id/retry-headline', async (c) => {
 		.eq('user_id', userId)
 		.single();
 
-	if (error || !memo) return c.json({ error: 'Memo not found or access denied' }, 404);
+	if (error || !memo)
+		return c.json({ success: false, error: 'Memo not found or access denied' }, 404);
 
 	try {
 		const result = await processHeadlineForMemo(memoId);
-		return c.json(result);
+		return c.json({ success: true, ...result });
 	} catch (err) {
 		console.error(`[memos] Retry headline failed for ${memoId}:`, err);
-		return c.json({ error: 'Headline generation failed' }, 500);
+		return c.json({ success: false, error: 'Headline generation failed' }, 500);
 	}
 });
 
 // POST /combine — combine multiple memos with AI
 memoRoutes.post('/combine', async (c) => {
 	const userId = c.get('userId') as string;
-	const body = await c.req.json<{ memoIds: string[] }>();
-
-	if (!Array.isArray(body.memoIds) || body.memoIds.length < 2) {
-		return c.json({ error: 'At least 2 memoIds are required' }, 400);
-	}
+	const v = await validateBody(c, combineMemoBody);
+	if (!v.success) return v.response;
+	const { memoIds } = v.data;
 
 	const creditCheck = await validateCredits(userId, 'memo_combine', COSTS.MEMO_COMBINE);
 	if (!creditCheck.hasCredits) {
-		return c.json({ error: `Insufficient credits: need ${COSTS.MEMO_COMBINE}` }, 402);
+		return c.json(
+			{ success: false, error: `Insufficient credits: need ${COSTS.MEMO_COMBINE}` },
+			402
+		);
 	}
 
 	const supabase = createServiceClient();
@@ -211,11 +200,11 @@ memoRoutes.post('/combine', async (c) => {
 	const { data: memos, error: fetchError } = await supabase
 		.from('memos')
 		.select('id, title, source')
-		.in('id', body.memoIds)
+		.in('id', memoIds)
 		.eq('user_id', userId);
 
-	if (fetchError || !memos || memos.length !== body.memoIds.length) {
-		return c.json({ error: 'One or more memos not found or access denied' }, 404);
+	if (fetchError || !memos || memos.length !== memoIds.length) {
+		return c.json({ success: false, error: 'One or more memos not found or access denied' }, 404);
 	}
 
 	// Extract transcripts
@@ -248,7 +237,7 @@ CONTENT: <kombinierter Text>`;
 		const response = await generateText(prompt, { temperature: 0.7, maxTokens: 2048 });
 
 		await consumeCredits(userId, 'memo_combine', COSTS.MEMO_COMBINE, 'Combine memos', {
-			memoIds: body.memoIds,
+			memoIds,
 		});
 
 		// Create combined memo
@@ -270,7 +259,7 @@ CONTENT: <kombinierter Text>`;
 				source: {
 					type: 'combined',
 					transcript: content,
-					source_memo_ids: body.memoIds,
+					source_memo_ids: memoIds,
 				},
 				metadata: {
 					processing: {
@@ -285,10 +274,10 @@ CONTENT: <kombinierter Text>`;
 
 		if (createError) throw createError;
 
-		return c.json({ memo: combinedMemo, headline, intro });
+		return c.json({ success: true, memo: combinedMemo, headline, intro });
 	} catch (err) {
 		console.error('[memos] Combine failed:', err);
-		return c.json({ error: 'Failed to combine memos' }, 500);
+		return c.json({ success: false, error: 'Failed to combine memos' }, 500);
 	}
 });
 
@@ -296,15 +285,16 @@ CONTENT: <kombinierter Text>`;
 memoRoutes.post('/:id/question', async (c) => {
 	const userId = c.get('userId') as string;
 	const memoId = c.req.param('id');
-	const body = await c.req.json<{ question: string }>();
-
-	if (!body.question?.trim()) {
-		return c.json({ error: 'question is required' }, 400);
-	}
+	const v = await validateBody(c, questionMemoBody);
+	if (!v.success) return v.response;
+	const { question } = v.data;
 
 	const creditCheck = await validateCredits(userId, 'question_memo', COSTS.QUESTION_MEMO);
 	if (!creditCheck.hasCredits) {
-		return c.json({ error: `Insufficient credits: need ${COSTS.QUESTION_MEMO}` }, 402);
+		return c.json(
+			{ success: false, error: `Insufficient credits: need ${COSTS.QUESTION_MEMO}` },
+			402
+		);
 	}
 
 	const supabase = createServiceClient();
@@ -316,7 +306,8 @@ memoRoutes.post('/:id/question', async (c) => {
 		.eq('user_id', userId)
 		.single();
 
-	if (memoError || !memo) return c.json({ error: 'Memo not found or access denied' }, 404);
+	if (memoError || !memo)
+		return c.json({ success: false, error: 'Memo not found or access denied' }, 404);
 
 	const memoData = memo as { title: string; source: Record<string, unknown> };
 	const source = memoData.source ?? {};
@@ -333,14 +324,15 @@ memoRoutes.post('/:id/question', async (c) => {
 		transcript = (source.transcript as string | undefined) ?? memoData.title;
 	}
 
-	if (!transcript) return c.json({ error: 'No transcript available for this memo' }, 400);
+	if (!transcript)
+		return c.json({ success: false, error: 'No transcript available for this memo' }, 400);
 
 	const prompt = `Du bist ein hilfreicher Assistent. Beantworte die folgende Frage basierend auf dem Transkript der Sprachaufnahme.
 
 Transkript:
 ${transcript}
 
-Frage: ${body.question}
+Frage: ${question}
 
 Antworte präzise und klar. Falls die Frage nicht aus dem Transkript beantwortet werden kann, sage das explizit.`;
 
@@ -351,9 +343,9 @@ Antworte präzise und klar. Falls die Frage nicht aus dem Transkript beantwortet
 			memoId,
 		});
 
-		return c.json({ answer, memoId, question: body.question });
+		return c.json({ success: true, answer, memoId, question });
 	} catch (err) {
 		console.error('[memos] Q&A failed:', err);
-		return c.json({ error: 'Failed to answer question' }, 500);
+		return c.json({ success: false, error: 'Failed to answer question' }, 500);
 	}
 });

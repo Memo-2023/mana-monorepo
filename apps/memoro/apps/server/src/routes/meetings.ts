@@ -6,8 +6,9 @@
 import { Hono } from 'hono';
 import type { AuthVariables } from '@manacore/shared-hono';
 import { validateCredits, COSTS } from '../lib/credits';
+import { validateBody, validateQuery } from '../lib/validate';
+import { createBotBody, recordingToMemoBody, paginationQuery } from '../schemas';
 import {
-	validateMeetingUrl,
 	createBot,
 	stopBot,
 	getBots,
@@ -24,20 +25,16 @@ const MINIMUM_RECORDING_CREDITS = 10;
 // POST /bots — create a meeting bot
 meetingRoutes.post('/bots', async (c) => {
 	const userId = c.get('userId') as string;
-	const body = await c.req.json<{ meeting_url?: string; space_id?: string }>();
-
-	if (!body.meeting_url || !validateMeetingUrl(body.meeting_url)) {
-		return c.json(
-			{ error: 'Please provide a valid Teams, Google Meet, or Zoom meeting URL' },
-			400
-		);
-	}
+	const v = await validateBody(c, createBotBody);
+	if (!v.success) return v.response;
+	const { meeting_url, space_id } = v.data;
 
 	// Validate minimum credits
 	const creditCheck = await validateCredits(userId, 'meeting_recording', MINIMUM_RECORDING_CREDITS);
 	if (!creditCheck.hasCredits) {
 		return c.json(
 			{
+				success: false,
 				error: 'InsufficientCredits',
 				message: `Not enough credits to start recording. Need at least ${MINIMUM_RECORDING_CREDITS} credits.`,
 				details: {
@@ -50,8 +47,10 @@ meetingRoutes.post('/bots', async (c) => {
 	}
 
 	try {
-		const webhookBaseUrl = (process.env.MEMORO_SERVER_URL ?? `http://localhost:${process.env.PORT ?? 3015}`).replace(/\/$/, '');
-		const bot = await createBot(userId, body.meeting_url, webhookBaseUrl, body.space_id);
+		const webhookBaseUrl = (
+			process.env.MEMORO_SERVER_URL ?? `http://localhost:${process.env.PORT ?? 3015}`
+		).replace(/\/$/, '');
+		const bot = await createBot(userId, meeting_url, webhookBaseUrl, space_id);
 		return c.json({
 			success: true,
 			bot,
@@ -64,23 +63,24 @@ meetingRoutes.post('/bots', async (c) => {
 		});
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : 'Failed to create meeting bot';
-		return c.json({ error: msg }, 400);
+		return c.json({ success: false, error: msg }, 400);
 	}
 });
 
-// GET /bots — list bots
+// GET /bots — list bots (with pagination)
 meetingRoutes.get('/bots', async (c) => {
 	const userId = c.get('userId') as string;
 	const spaceId = c.req.query('space_id');
-	const limit = Number(c.req.query('limit') ?? 50);
-	const offset = Number(c.req.query('offset') ?? 0);
+	const q = validateQuery(c, paginationQuery);
+	if (!q.success) return q.response;
+	const { limit, offset } = q.data;
 
 	try {
 		const bots = await getBots(userId, spaceId, limit, offset);
-		return c.json({ success: true, bots, total: bots.length });
+		return c.json({ success: true, bots, total: bots.length, limit, offset });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : 'Failed to fetch bots';
-		return c.json({ error: msg }, 500);
+		return c.json({ success: false, error: msg }, 500);
 	}
 });
 
@@ -90,7 +90,7 @@ meetingRoutes.get('/bots/:id', async (c) => {
 	const botId = c.req.param('id');
 
 	const bot = await getBotById(botId, userId);
-	if (!bot) return c.json({ error: 'Bot not found' }, 404);
+	if (!bot) return c.json({ success: false, error: 'Bot not found' }, 404);
 
 	return c.json({ success: true, bot });
 });
@@ -106,23 +106,24 @@ meetingRoutes.post('/bots/:id/stop', async (c) => {
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : 'Failed to stop bot';
 		const status = msg === 'Bot not found' ? 404 : 400;
-		return c.json({ error: msg }, status);
+		return c.json({ success: false, error: msg }, status);
 	}
 });
 
-// GET /recordings — list recordings
+// GET /recordings — list recordings (with pagination)
 meetingRoutes.get('/recordings', async (c) => {
 	const userId = c.get('userId') as string;
 	const spaceId = c.req.query('space_id');
-	const limit = Number(c.req.query('limit') ?? 50);
-	const offset = Number(c.req.query('offset') ?? 0);
+	const q = validateQuery(c, paginationQuery);
+	if (!q.success) return q.response;
+	const { limit, offset } = q.data;
 
 	try {
 		const recordings = await getRecordings(userId, spaceId, limit, offset);
-		return c.json({ success: true, recordings, total: recordings.length });
+		return c.json({ success: true, recordings, total: recordings.length, limit, offset });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : 'Failed to fetch recordings';
-		return c.json({ error: msg }, 500);
+		return c.json({ success: false, error: msg }, 500);
 	}
 });
 
@@ -132,7 +133,7 @@ meetingRoutes.get('/recordings/:id', async (c) => {
 	const recordingId = c.req.param('id');
 
 	const recording = await getRecordingById(recordingId, userId);
-	if (!recording) return c.json({ error: 'Recording not found' }, 404);
+	if (!recording) return c.json({ success: false, error: 'Recording not found' }, 404);
 
 	return c.json({ success: true, recording });
 });
@@ -141,14 +142,19 @@ meetingRoutes.get('/recordings/:id', async (c) => {
 meetingRoutes.post('/recordings/:id/to-memo', async (c) => {
 	const userId = c.get('userId') as string;
 	const recordingId = c.req.param('id');
-	const body = await c.req.json<{ blueprintId?: string }>().catch(() => ({ blueprintId: undefined }));
+	const v = await validateBody(c, recordingToMemoBody).catch(() => ({
+		success: true as const,
+		data: { blueprintId: undefined },
+	}));
+	if (!v.success) return v.response;
 	const authHeader = c.req.header('Authorization');
 
 	const recording = await getRecordingById(recordingId, userId);
-	if (!recording) return c.json({ error: 'Recording not found' }, 404);
+	if (!recording) return c.json({ success: false, error: 'Recording not found' }, 404);
 
 	const filePath = recording.audio_url || recording.video_url;
-	if (!filePath) return c.json({ error: 'Recording has no audio or video file' }, 400);
+	if (!filePath)
+		return c.json({ success: false, error: 'Recording has no audio or video file' }, 400);
 
 	const duration = recording.duration_seconds ?? 45;
 
@@ -164,16 +170,22 @@ meetingRoutes.post('/recordings/:id/to-memo', async (c) => {
 				filePath,
 				duration,
 				spaceId: recording.space_id,
-				blueprintId: body.blueprintId,
+				blueprintId: v.data.blueprintId,
 			}),
 		});
 
 		if (!response.ok) {
-			const errData = await response.json().catch(() => ({ message: 'Unknown error' })) as Record<string, unknown>;
-			return c.json({ error: (errData.message as string) || 'Failed to process recording' }, 400);
+			const errData = (await response.json().catch(() => ({ message: 'Unknown error' }))) as Record<
+				string,
+				unknown
+			>;
+			return c.json(
+				{ success: false, error: (errData.message as string) || 'Failed to process recording' },
+				400
+			);
 		}
 
-		const result = await response.json() as Record<string, unknown>;
+		const result = (await response.json()) as Record<string, unknown>;
 		return c.json({
 			success: true,
 			memoId: result.memoId,
@@ -184,6 +196,6 @@ meetingRoutes.post('/recordings/:id/to-memo', async (c) => {
 		});
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : 'Failed to convert recording to memo';
-		return c.json({ error: msg }, 500);
+		return c.json({ success: false, error: msg }, 500);
 	}
 });

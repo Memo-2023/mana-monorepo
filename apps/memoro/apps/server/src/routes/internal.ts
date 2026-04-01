@@ -8,6 +8,12 @@ import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { handleTranscriptionCompleted } from '../services/memo';
 import { createServiceClient } from '../lib/supabase';
+import { validateBody } from '../lib/validate';
+import {
+	transcriptionCompletedBody,
+	appendTranscriptionCompletedBody,
+	batchMetadataBody,
+} from '../schemas';
 
 export const internalRoutes = new Hono();
 
@@ -25,68 +31,32 @@ internalRoutes.use('*', async (c, next) => {
 
 // POST /transcription-completed — called by audio server on completion
 internalRoutes.post('/transcription-completed', async (c) => {
-	const body = await c.req.json<{
-		memoId: string;
-		userId: string;
-		transcriptionResult?: {
-			transcript?: string;
-			utterances?: Array<{ offset: number; duration: number; text: string; speaker?: string }>;
-			speakers?: Record<string, unknown>;
-			speakerMap?: Record<string, unknown>;
-			languages?: string[];
-			primary_language?: string;
-			duration?: number;
-		};
-		route?: string;
-		success: boolean;
-		error?: string;
-		fallbackStage?: string;
-	}>();
-
-	if (!body.memoId || !body.userId) {
-		return c.json({ error: 'memoId and userId are required' }, 400);
-	}
+	const v = await validateBody(c, transcriptionCompletedBody);
+	if (!v.success) return v.response;
+	const body = v.data;
 
 	try {
 		await handleTranscriptionCompleted({
 			memoId: body.memoId,
 			userId: body.userId,
-			...(body.transcriptionResult ? { transcriptionResult: body.transcriptionResult } : {}),
+			...(body.transcriptionResult ? { transcriptionResult: body.transcriptionResult as any } : {}),
 			...(body.route ? { route: body.route } : {}),
 			success: body.success,
 			...(body.error ? { error: body.error } : {}),
 			...(body.fallbackStage ? { fallbackStage: body.fallbackStage } : {}),
-		});
+		} as any);
 		return c.json({ success: true, memoId: body.memoId });
 	} catch (err) {
 		console.error('[internal] Transcription completed handler failed:', err);
-		return c.json({ error: 'Failed to process transcription callback' }, 500);
+		return c.json({ success: false, error: 'Failed to process transcription callback' }, 500);
 	}
 });
 
 // POST /append-transcription-completed — called by audio server for append flow
 internalRoutes.post('/append-transcription-completed', async (c) => {
-	const body = await c.req.json<{
-		memoId: string;
-		userId: string;
-		recordingIndex: number;
-		transcriptionResult?: {
-			transcript?: string;
-			utterances?: Array<{ offset: number; duration: number; text: string; speaker?: string }>;
-			speakers?: Record<string, unknown>;
-			speakerMap?: Record<string, unknown>;
-			languages?: string[];
-			primary_language?: string;
-			duration?: number;
-		};
-		success: boolean;
-		error?: string;
-		route?: string;
-	}>();
-
-	if (!body.memoId || !body.userId) {
-		return c.json({ error: 'memoId and userId are required' }, 400);
-	}
+	const v = await validateBody(c, appendTranscriptionCompletedBody);
+	if (!v.success) return v.response;
+	const body = v.data;
 
 	const supabase = createServiceClient();
 	const now = new Date().toISOString();
@@ -100,32 +70,36 @@ internalRoutes.post('/append-transcription-completed', async (c) => {
 		.single();
 
 	if (fetchError || !memo) {
-		return c.json({ error: 'Memo not found' }, 404);
+		return c.json({ success: false, error: 'Memo not found' }, 404);
 	}
 
 	const source = (memo as { source: Record<string, unknown> }).source ?? {};
 	const additionalRecordings = [...((source.additional_recordings as unknown[]) ?? [])];
 
-	const recordingEntry = body.success && body.transcriptionResult
-		? {
-				path: (additionalRecordings[body.recordingIndex] as { path?: string } | undefined)?.path ?? '',
-				transcript: body.transcriptionResult.transcript ?? '',
-				utterances: body.transcriptionResult.utterances ?? [],
-				speakers: body.transcriptionResult.speakers ?? {},
-				speakerMap: body.transcriptionResult.speakerMap ?? {},
-				languages: body.transcriptionResult.languages ?? [],
-				primary_language: body.transcriptionResult.primary_language ?? 'de',
-				status: 'completed',
-				timestamp: now,
-				updated_at: now,
-				route: body.route,
-			}
-		: {
-				...(additionalRecordings[body.recordingIndex] as Record<string, unknown> | undefined ?? {}),
-				status: 'error',
-				error: body.error ?? 'Transcription failed',
-				updated_at: now,
-			};
+	const recordingEntry =
+		body.success && body.transcriptionResult
+			? {
+					path:
+						(additionalRecordings[body.recordingIndex] as { path?: string } | undefined)?.path ??
+						'',
+					transcript: body.transcriptionResult.transcript ?? '',
+					utterances: body.transcriptionResult.utterances ?? [],
+					speakers: body.transcriptionResult.speakers ?? {},
+					speakerMap: body.transcriptionResult.speakerMap ?? {},
+					languages: body.transcriptionResult.languages ?? [],
+					primary_language: body.transcriptionResult.primary_language ?? 'de',
+					status: 'completed',
+					timestamp: now,
+					updated_at: now,
+					route: body.route,
+				}
+			: {
+					...((additionalRecordings[body.recordingIndex] as Record<string, unknown> | undefined) ??
+						{}),
+					status: 'error',
+					error: body.error ?? 'Transcription failed',
+					updated_at: now,
+				};
 
 	additionalRecordings[body.recordingIndex] = recordingEntry;
 
@@ -139,7 +113,7 @@ internalRoutes.post('/append-transcription-completed', async (c) => {
 
 	if (updateError) {
 		console.error('[internal] Failed to update append transcription:', updateError);
-		return c.json({ error: 'Failed to update memo' }, 500);
+		return c.json({ success: false, error: 'Failed to update memo' }, 500);
 	}
 
 	return c.json({ success: true, memoId: body.memoId, recordingIndex: body.recordingIndex });
@@ -147,16 +121,9 @@ internalRoutes.post('/append-transcription-completed', async (c) => {
 
 // POST /batch-metadata — update memo with batch job metadata
 internalRoutes.post('/batch-metadata', async (c) => {
-	const body = await c.req.json<{
-		memoId: string;
-		jobId: string;
-		batchTranscription?: boolean;
-		userId?: string;
-	}>();
-
-	if (!body.memoId || !body.jobId) {
-		return c.json({ error: 'memoId and jobId are required' }, 400);
-	}
+	const v = await validateBody(c, batchMetadataBody);
+	if (!v.success) return v.response;
+	const body = v.data;
 
 	const supabase = createServiceClient();
 
@@ -167,7 +134,7 @@ internalRoutes.post('/batch-metadata', async (c) => {
 		.single();
 
 	if (fetchError || !memo) {
-		return c.json({ error: 'Memo not found' }, 404);
+		return c.json({ success: false, error: 'Memo not found' }, 404);
 	}
 
 	const metadata = (memo as { metadata: Record<string, unknown> }).metadata ?? {};
@@ -184,7 +151,7 @@ internalRoutes.post('/batch-metadata', async (c) => {
 		.eq('id', body.memoId);
 
 	if (updateError) {
-		return c.json({ error: 'Failed to update batch metadata' }, 500);
+		return c.json({ success: false, error: 'Failed to update batch metadata' }, 500);
 	}
 
 	return c.json({ success: true, memoId: body.memoId, jobId: body.jobId });

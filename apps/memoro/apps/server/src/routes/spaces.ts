@@ -5,6 +5,8 @@
 import { Hono } from 'hono';
 import type { AuthVariables } from '@manacore/shared-hono';
 import { createServiceClient } from '../lib/supabase';
+import { validateBody, validateQuery } from '../lib/validate';
+import { createSpaceBody, linkMemoBody, inviteBody, paginationQuery } from '../schemas';
 import {
 	getSpaces,
 	createSpace,
@@ -20,31 +22,37 @@ import {
 
 export const spaceRoutes = new Hono<{ Variables: AuthVariables }>();
 
-// GET / — list user's spaces
+// GET / — list user's spaces (with pagination)
 spaceRoutes.get('/', async (c) => {
 	const userId = c.get('userId') as string;
+	const q = validateQuery(c, paginationQuery);
+	if (!q.success) return q.response;
+	const { limit, offset } = q.data;
+
 	try {
-		const spaces = await getSpaces(userId);
-		return c.json({ spaces });
+		const allSpaces = await getSpaces(userId);
+		const total = allSpaces.length;
+		const spaces = allSpaces.slice(offset, offset + limit);
+		return c.json({ success: true, spaces, total, limit, offset });
 	} catch (err) {
 		console.error('[spaces] Get spaces error:', err);
-		return c.json({ error: 'Failed to get spaces' }, 500);
+		return c.json({ success: false, error: 'Failed to get spaces' }, 500);
 	}
 });
 
 // POST / — create space
 spaceRoutes.post('/', async (c) => {
 	const userId = c.get('userId') as string;
-	const body = await c.req.json<{ name: string; description?: string }>();
-
-	if (!body.name?.trim()) return c.json({ error: 'name is required' }, 400);
+	const v = await validateBody(c, createSpaceBody);
+	if (!v.success) return v.response;
+	const { name, description } = v.data;
 
 	try {
-		const space = await createSpace(userId, body.name, body.description);
-		return c.json({ space }, 201);
+		const space = await createSpace(userId, name, description);
+		return c.json({ success: true, space }, 201);
 	} catch (err) {
 		console.error('[spaces] Create error:', err);
-		return c.json({ error: 'Failed to create space' }, 500);
+		return c.json({ success: false, error: 'Failed to create space' }, 500);
 	}
 });
 
@@ -55,14 +63,14 @@ spaceRoutes.get('/:id', async (c) => {
 
 	try {
 		const space = await getSpaceDetails(spaceId, userId);
-		return c.json({ space });
+		return c.json({ success: true, space });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
 		if (msg.includes('Access denied') || msg.includes('not a member')) {
-			return c.json({ error: msg }, 403);
+			return c.json({ success: false, error: msg }, 403);
 		}
-		if (msg.includes('not found')) return c.json({ error: msg }, 404);
-		return c.json({ error: 'Failed to get space details' }, 500);
+		if (msg.includes('not found')) return c.json({ success: false, error: msg }, 404);
+		return c.json({ success: false, error: 'Failed to get space details' }, 500);
 	}
 });
 
@@ -72,13 +80,13 @@ spaceRoutes.delete('/:id', async (c) => {
 	const spaceId = c.req.param('id');
 
 	try {
-		const result = await deleteSpace(spaceId, userId);
-		return c.json(result);
+		await deleteSpace(spaceId, userId);
+		return c.json({ success: true });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
-		if (msg.includes('owner')) return c.json({ error: msg }, 403);
-		if (msg.includes('not found')) return c.json({ error: msg }, 404);
-		return c.json({ error: 'Failed to delete space' }, 500);
+		if (msg.includes('owner')) return c.json({ success: false, error: msg }, 403);
+		if (msg.includes('not found')) return c.json({ success: false, error: msg }, 404);
+		return c.json({ success: false, error: 'Failed to delete space' }, 500);
 	}
 });
 
@@ -88,13 +96,13 @@ spaceRoutes.post('/:id/leave', async (c) => {
 	const spaceId = c.req.param('id');
 
 	try {
-		const result = await leaveSpace(spaceId, userId);
-		return c.json(result);
+		await leaveSpace(spaceId, userId);
+		return c.json({ success: true });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
-		if (msg.includes('not a member')) return c.json({ error: msg }, 403);
-		if (msg.includes('owner')) return c.json({ error: msg }, 400);
-		return c.json({ error: 'Failed to leave space' }, 500);
+		if (msg.includes('not a member')) return c.json({ success: false, error: msg }, 403);
+		if (msg.includes('owner')) return c.json({ success: false, error: msg }, 400);
+		return c.json({ success: false, error: 'Failed to leave space' }, 500);
 	}
 });
 
@@ -102,20 +110,19 @@ spaceRoutes.post('/:id/leave', async (c) => {
 spaceRoutes.post('/:id/memos/link', async (c) => {
 	const userId = c.get('userId') as string;
 	const spaceId = c.req.param('id');
-	const body = await c.req.json<{ memoId: string }>();
-
-	if (!body.memoId) return c.json({ error: 'memoId is required' }, 400);
+	const v = await validateBody(c, linkMemoBody);
+	if (!v.success) return v.response;
 
 	try {
-		const result = await linkMemoToSpace(body.memoId, spaceId, userId);
-		return c.json(result);
+		await linkMemoToSpace(v.data.memoId, spaceId, userId);
+		return c.json({ success: true });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
 		if (msg.includes('access denied') || msg.includes('Not a member')) {
-			return c.json({ error: msg }, 403);
+			return c.json({ success: false, error: msg }, 403);
 		}
-		if (msg.includes('not found')) return c.json({ error: msg }, 404);
-		return c.json({ error: 'Failed to link memo to space' }, 500);
+		if (msg.includes('not found')) return c.json({ success: false, error: msg }, 404);
+		return c.json({ success: false, error: 'Failed to link memo to space' }, 500);
 	}
 });
 
@@ -123,33 +130,39 @@ spaceRoutes.post('/:id/memos/link', async (c) => {
 spaceRoutes.post('/:id/memos/unlink', async (c) => {
 	const userId = c.get('userId') as string;
 	const spaceId = c.req.param('id');
-	const body = await c.req.json<{ memoId: string }>();
-
-	if (!body.memoId) return c.json({ error: 'memoId is required' }, 400);
+	const v = await validateBody(c, linkMemoBody);
+	if (!v.success) return v.response;
 
 	try {
-		const result = await unlinkMemoFromSpace(body.memoId, spaceId, userId);
-		return c.json(result);
+		await unlinkMemoFromSpace(v.data.memoId, spaceId, userId);
+		return c.json({ success: true });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
-		if (msg.includes('access denied')) return c.json({ error: msg }, 403);
-		if (msg.includes('not found')) return c.json({ error: msg }, 404);
-		return c.json({ error: 'Failed to unlink memo from space' }, 500);
+		if (msg.includes('access denied')) return c.json({ success: false, error: msg }, 403);
+		if (msg.includes('not found')) return c.json({ success: false, error: msg }, 404);
+		return c.json({ success: false, error: 'Failed to unlink memo from space' }, 500);
 	}
 });
 
-// GET /:id/memos — list space memos
+// GET /:id/memos — list space memos (with pagination)
 spaceRoutes.get('/:id/memos', async (c) => {
 	const userId = c.get('userId') as string;
 	const spaceId = c.req.param('id');
+	const q = validateQuery(c, paginationQuery);
+	if (!q.success) return q.response;
+	const { limit, offset } = q.data;
 
 	try {
 		const result = await getSpaceMemos(spaceId, userId);
-		return c.json(result);
+		const allMemos = result.memos ?? result;
+		const memos = Array.isArray(allMemos) ? allMemos : [];
+		const total = memos.length;
+		const paginated = memos.slice(offset, offset + limit);
+		return c.json({ success: true, memos: paginated, total, limit, offset });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
-		if (msg.includes('Not a member')) return c.json({ error: msg }, 403);
-		return c.json({ error: 'Failed to get space memos' }, 500);
+		if (msg.includes('Not a member')) return c.json({ success: false, error: msg }, 403);
+		return c.json({ success: false, error: 'Failed to get space memos' }, 500);
 	}
 });
 
@@ -160,11 +173,11 @@ spaceRoutes.get('/:id/invites', async (c) => {
 
 	try {
 		const invites = await getSpaceInvites(spaceId, userId);
-		return c.json({ invites });
+		return c.json({ success: true, invites });
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
-		if (msg.includes('Not a member')) return c.json({ error: msg }, 403);
-		return c.json({ error: 'Failed to get invites' }, 500);
+		if (msg.includes('Not a member')) return c.json({ success: false, error: msg }, 403);
+		return c.json({ success: false, error: 'Failed to get invites' }, 500);
 	}
 });
 
@@ -172,25 +185,22 @@ spaceRoutes.get('/:id/invites', async (c) => {
 spaceRoutes.post('/:id/invite', async (c) => {
 	const userId = c.get('userId') as string;
 	const spaceId = c.req.param('id');
-	const body = await c.req.json<{ email: string }>();
-
-	if (!body.email?.trim()) return c.json({ error: 'email is required' }, 400);
+	const v = await validateBody(c, inviteBody);
+	if (!v.success) return v.response;
 
 	try {
-		const invite = await createInvite(spaceId, userId, body.email);
-		return c.json({ invite }, 201);
+		const invite = await createInvite(spaceId, userId, v.data.email);
+		return c.json({ success: true, invite }, 201);
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
-		if (msg.includes('Not a member')) return c.json({ error: msg }, 403);
-		return c.json({ error: 'Failed to create invite' }, 500);
+		if (msg.includes('Not a member')) return c.json({ success: false, error: msg }, 403);
+		return c.json({ success: false, error: 'Failed to create invite' }, 500);
 	}
 });
 
 // POST /invites/:inviteId/resend — resend invite
 spaceRoutes.post('/invites/:inviteId/resend', async (c) => {
 	const inviteId = c.req.param('inviteId');
-	// In a full implementation, this would resend the invite email via mana-notify
-	// For now, return success as the invite record already exists
 	console.log(`[spaces] Resend invite ${inviteId} (email notification not implemented here)`);
 	return c.json({ success: true, inviteId });
 });
@@ -208,7 +218,7 @@ spaceRoutes.delete('/invites/:inviteId', async (c) => {
 		.eq('id', inviteId)
 		.single();
 
-	if (error || !invite) return c.json({ error: 'Invite not found' }, 404);
+	if (error || !invite) return c.json({ success: false, error: 'Invite not found' }, 404);
 
 	const inv = invite as { inviter_id: string; space_id: string };
 
@@ -223,14 +233,11 @@ spaceRoutes.delete('/invites/:inviteId', async (c) => {
 	const isOwner = (spaceMember as { role: string } | null)?.role === 'owner';
 
 	if (inv.inviter_id !== userId && !isOwner) {
-		return c.json({ error: 'Not authorized to cancel this invite' }, 403);
+		return c.json({ success: false, error: 'Not authorized to cancel this invite' }, 403);
 	}
 
-	const { error: deleteError } = await supabase
-		.from('space_invites')
-		.delete()
-		.eq('id', inviteId);
+	const { error: deleteError } = await supabase.from('space_invites').delete().eq('id', inviteId);
 
-	if (deleteError) return c.json({ error: 'Failed to cancel invite' }, 500);
+	if (deleteError) return c.json({ success: false, error: 'Failed to cancel invite' }, 500);
 	return c.json({ success: true });
 });

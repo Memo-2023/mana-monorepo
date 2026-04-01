@@ -40,7 +40,7 @@ setInterval(() => {
 export function rateLimitMiddleware(options: RateLimitOptions = {}) {
 	const { max = 100, windowMs = 60_000, keyFn } = options;
 
-	return async (c: Context, next: Next) => {
+	return async (c: Context, next: Next): Promise<void | Response> => {
 		const key = keyFn
 			? keyFn(c)
 			: c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
