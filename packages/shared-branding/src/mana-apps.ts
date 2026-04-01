@@ -86,6 +86,23 @@ export interface ManaApp {
  */
 export const MANA_APPS: ManaApp[] = [
 	{
+		id: 'manacore',
+		name: 'ManaCore',
+		description: {
+			de: 'Multi-App Ecosystem',
+			en: 'Multi-App Ecosystem',
+		},
+		longDescription: {
+			de: 'Das zentrale Dashboard für alle Mana-Apps mit SSO, Credits und App-Verwaltung.',
+			en: 'The central dashboard for all Mana apps with SSO, credits, and app management.',
+		},
+		icon: APP_ICONS.manacore,
+		color: '#6366f1',
+		comingSoon: false,
+		status: 'beta',
+		requiredTier: 'alpha',
+	},
+	{
 		id: 'chat',
 		name: 'ManaChat',
 		description: {

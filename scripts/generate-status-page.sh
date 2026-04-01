@@ -176,10 +176,12 @@ get_tier_badge() {
   subdomain="${subdomain%/health}"
   # API-Subdomains skippen (z.B. todo-api, chat-api)
   case "$subdomain" in *-api) return ;; esac
-  # Spezialfall: mana.how selbst → manacore (kein Tier)
-  [ "$subdomain" = "mana.how" ] && return
-  # Subdomain-Aliase (alte Subdomains → aktuelle App-IDs)
-  case "$subdomain" in manadeck) subdomain="cards" ;; esac
+  # Subdomain-Aliase (Sonderfälle + alte Subdomains → aktuelle App-IDs)
+  case "$subdomain" in
+    mana.how)  subdomain="manacore" ;;
+    manadeck)  subdomain="cards" ;;
+    inventar)  subdomain="inventory" ;;
+  esac
 
   echo "$TIER_APPS" | while IFS='|' read -r id name tier st; do
     [ "$id" = "$subdomain" ] || continue
