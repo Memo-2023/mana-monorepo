@@ -101,6 +101,7 @@ const port = Number(process.env.PORT ?? 3015);
 
 console.log(`Memoro server (Hono + Bun) starting on port ${port}`);
 
+export { app };
 export default {
 	port,
 	fetch: app.fetch,
