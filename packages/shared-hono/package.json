@@ -13,7 +13,8 @@
 		"./health": "./src/health.ts",
 		"./admin": "./src/admin.ts",
 		"./error": "./src/error.ts",
-		"./credits": "./src/credits.ts"
+		"./credits": "./src/credits.ts",
+		"./rate-limit": "./src/rate-limit.ts"
 	},
 	"scripts": {
 		"type-check": "tsc --noEmit"
