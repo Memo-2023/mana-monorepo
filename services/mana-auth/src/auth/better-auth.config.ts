@@ -252,42 +252,18 @@ export function createBetterAuth(databaseUrl: string) {
 		// When adding a new app, add its production domain here AND to
 		// CORS_ORIGINS in docker-compose.macmini.yml.
 		trustedOrigins: [
-			// Production domains - auth service
-			'https://auth.mana.how',
+			// Unified app — all productivity apps are now under mana.how
 			'https://mana.how',
-			// Production domains - all apps (keep alphabetical)
-			'https://calc.mana.how',
-			'https://calendar.mana.how',
-			'https://chat.mana.how',
-			'https://clock.mana.how',
-			'https://contacts.mana.how',
-			'https://context.mana.how',
-			'https://docs.mana.how',
-			'https://element.mana.how',
-			'https://inventar.mana.how',
-			'https://link.mana.how',
-			'https://cards.mana.how',
-			'https://matrix.mana.how',
-			'https://mchat.mana.how',
-			'https://mukke.mana.how',
-			'https://nutriphi.mana.how',
-			'https://photos.mana.how',
-			'https://picture.mana.how',
-			'https://planta.mana.how',
-			'https://playground.mana.how',
-			'https://presi.mana.how',
-			'https://questions.mana.how',
-			'https://skilltree.mana.how',
-			'https://storage.mana.how',
-			'https://times.mana.how',
-			'https://todo.mana.how',
-			'https://traces.mana.how',
-			'https://zitare.mana.how',
+			'https://auth.mana.how',
+			// Separate apps (not part of unified app)
+			'https://arcade.mana.how', // Games
+			'https://whopxl.mana.how', // Games
+			'https://link.mana.how', // Matrix/Manalink
+			'https://element.mana.how', // Element (Matrix client)
+			'https://matrix.mana.how', // Matrix
 			// Local development
 			'http://localhost:3001',
 			'http://localhost:5173',
-			'http://localhost:5174',
-			'http://localhost:5190',
 		],
 
 		// Plugins

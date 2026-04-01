@@ -851,7 +851,7 @@ services:
     image: manacore-web:local
     container_name: mana-app-web
     restart: always
-    mem_limit: 128m
+    mem_limit: 256m
     depends_on:
       mana-auth:
         condition: service_healthy
@@ -860,13 +860,32 @@ services:
       PORT: 5000
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
+      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
+      # Backend API URLs (server-side → container, client-side → public domain)
       PUBLIC_TODO_API_URL: http://todo-backend:3031
       PUBLIC_TODO_API_URL_CLIENT: https://todo-api.mana.how
       PUBLIC_CALENDAR_API_URL: http://calendar-backend:3032
       PUBLIC_CALENDAR_API_URL_CLIENT: https://calendar-api.mana.how
-      # PUBLIC_CLOCK_API_URL: removed — migrated to local-first
       PUBLIC_CONTACTS_API_URL: http://contacts-backend:3033
       PUBLIC_CONTACTS_API_URL_CLIENT: https://contacts-api.mana.how
+      PUBLIC_CHAT_API_URL: http://chat-backend:3030
+      PUBLIC_CHAT_API_URL_CLIENT: https://chat-api.mana.how
+      PUBLIC_STORAGE_API_URL: http://storage-backend:3034
+      PUBLIC_STORAGE_API_URL_CLIENT: https://storage-api.mana.how
+      PUBLIC_CARDS_API_URL: http://cards-backend:3036
+      PUBLIC_CARDS_API_URL_CLIENT: https://cards-api.mana.how
+      PUBLIC_MUKKE_API_URL: http://mukke-backend:3037
+      PUBLIC_MUKKE_API_URL_CLIENT: https://mukke-api.mana.how
+      PUBLIC_NUTRIPHI_API_URL: http://nutriphi-backend:3038
+      PUBLIC_NUTRIPHI_API_URL_CLIENT: https://nutriphi-api.mana.how
+      PUBLIC_ULOAD_SERVER_URL: http://uload-server:3070
+      PUBLIC_ULOAD_SERVER_URL_CLIENT: https://uload-api.mana.how
+      PUBLIC_MEMORO_SERVER_URL: http://memoro-server:3015
+      PUBLIC_MEMORO_SERVER_URL_CLIENT: https://memoro-api.mana.how
+      PUBLIC_MANA_MEDIA_URL: http://mana-media:3011
+      PUBLIC_MANA_MEDIA_URL_CLIENT: https://media.mana.how
+      PUBLIC_MANA_LLM_URL: http://mana-llm:3025
+      PUBLIC_MANA_LLM_URL_CLIENT: https://llm.mana.how
     ports:
       - "5000:5000"
     healthcheck:
@@ -876,455 +895,13 @@ services:
       retries: 3
       start_period: 20s
 
-  chat-web:
-    build:
-      context: .
-      dockerfile: apps/chat/apps/web/Dockerfile
-    image: chat-web:local
-    container_name: mana-app-chat-web
-    restart: always
-    mem_limit: 128m
-    environment:
-      NODE_ENV: production
-      PORT: 5010
-      PUBLIC_BACKEND_URL: http://chat-backend:3030
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://chat-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5010:5010"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5010/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  todo-web:
-    build:
-      context: .
-      dockerfile: apps/todo/apps/web/Dockerfile
-    image: todo-web:local
-    container_name: mana-app-todo-web
-    restart: always
-    mem_limit: 128m
-    environment:
-      NODE_ENV: production
-      PORT: 5011
-      PUBLIC_BACKEND_URL: http://todo-backend:3031
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://todo-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5011:5011"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5011/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  zitare-web:
-    build:
-      context: .
-      dockerfile: apps/zitare/apps/web/Dockerfile
-    image: zitare-web:local
-    container_name: mana-app-zitare-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5026
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
-    ports:
-      - "5026:5026"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5026/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  calendar-web:
-    build:
-      context: .
-      dockerfile: apps/calendar/apps/web/Dockerfile
-    image: calendar-web:local
-    container_name: mana-app-calendar-web
-    restart: always
-    mem_limit: 128m
-    environment:
-      NODE_ENV: production
-      PORT: 5012
-      PUBLIC_BACKEND_URL: http://calendar-backend:3032
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://calendar-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_TODO_BACKEND_URL: https://todo-api.mana.how
-      PUBLIC_CONTACTS_API_URL: https://contacts-api.mana.how
-    ports:
-      - "5012:5012"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5012/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-  clock-web:
-    build:
-      context: .
-      dockerfile: apps/clock/apps/web/Dockerfile
-    image: clock-web:local
-    container_name: mana-app-clock-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5013
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
-    ports:
-      - "5013:5013"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5013/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-  contacts-web:
-    build:
-      context: .
-      dockerfile: apps/contacts/apps/web/Dockerfile
-      args:
-        PUBLIC_BACKEND_URL: http://contacts-backend:3033
-        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-    image: contacts-web:local
-    container_name: mana-app-contacts-web
-    restart: always
-    mem_limit: 128m
-    environment:
-      NODE_ENV: production
-      PORT: 5014
-      PUBLIC_BACKEND_URL: http://contacts-backend:3033
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://contacts-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_TODO_BACKEND_URL: https://todo-api.mana.how
-    ports:
-      - "5014:5014"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5014/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-  storage-web:
-    build:
-      context: .
-      dockerfile: apps/storage/apps/web/Dockerfile
-      args:
-        PUBLIC_BACKEND_URL: http://storage-backend:3034
-        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-    image: storage-web:local
-    container_name: mana-app-storage-web
-    restart: always
-    mem_limit: 128m
-    environment:
-      NODE_ENV: production
-      PORT: 5015
-      PUBLIC_BACKEND_URL: http://storage-backend:3034
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://storage-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5015:5015"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5015/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  presi-web:
-    build:
-      context: .
-      dockerfile: apps/presi/apps/web/Dockerfile
-    image: presi-web:local
-    container_name: mana-app-presi-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5016
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
-    ports:
-      - "5016:5016"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5016/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
-
-  cards-web:
-    build:
-      context: .
-      dockerfile: apps/cards/apps/web/Dockerfile
-    image: cards-web:local
-    container_name: mana-app-cards-web
-    restart: always
-    mem_limit: 128m
-    environment:
-      NODE_ENV: production
-      PORT: 5023
-      PUBLIC_BACKEND_URL: http://cards-backend:3036
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://cards-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5023:5023"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5023/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
-
-  nutriphi-web:
-    build:
-      context: .
-      dockerfile: apps/nutriphi/apps/web/Dockerfile
-    image: nutriphi-web:local
-    container_name: mana-app-nutriphi-web
-    restart: always
-    mem_limit: 128m
-    environment:
-      NODE_ENV: production
-      PORT: 5017
-      PUBLIC_BACKEND_URL: http://nutriphi-backend:3038
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://nutriphi-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5017:5017"
-    healthcheck:
-      test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://127.0.0.1:5017/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
-
-  skilltree-web:
-    build:
-      context: .
-      dockerfile: apps/skilltree/apps/web/Dockerfile
-      args:
-        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-    image: skilltree-web:local
-    container_name: mana-app-skilltree-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5020
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-core-sync:3010
-    ports:
-      - "5020:5020"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5020/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
-
-  photos-web:
-    build:
-      context: .
-      dockerfile: apps/photos/apps/web/Dockerfile
-      args:
-        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-        PUBLIC_MANA_MEDIA_URL: http://mana-media:3011
-    image: photos-web:local
-    container_name: mana-app-photos-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5019
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_MEDIA_URL: http://mana-media:3011
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_MANA_MEDIA_URL_CLIENT: https://media.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
-    ports:
-      - "5019:5019"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5019/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
-
-  mukke-web:
-    build:
-      context: .
-      dockerfile: apps/mukke/apps/web/Dockerfile
-      args:
-        PUBLIC_BACKEND_URL: http://mukke-backend:3037
-        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-    image: mukke-web:local
-    container_name: mana-app-mukke-web
-    restart: always
-    mem_limit: 128m
-    environment:
-      NODE_ENV: production
-      PORT: 5024
-      PUBLIC_BACKEND_URL: http://mukke-backend:3037
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://mukke-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5024:5024"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5024/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
-
-  citycorners-web:
-    build:
-      context: .
-      dockerfile: apps/citycorners/apps/web/Dockerfile
-      args:
-        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-    image: citycorners-web:local
-    container_name: mana-app-citycorners-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5022
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-core-sync:3010
-    ports:
-      - "5022:5022"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5022/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
+  # REMOVED standalone web containers — now served by unified mana-web container (mana.how):
+  # chat-web, todo-web, zitare-web, calendar-web, clock-web, contacts-web,
+  # storage-web, presi-web, cards-web, nutriphi-web, skilltree-web, photos-web,
+  # mukke-web, citycorners-web, picture-web, inventar-web, calc-web, times-web,
+  # uload-web, memoro-web
 
   # picture-backend: REMOVED — replaced by Hono server (apps/picture/apps/server)
-
-  picture-web:
-    build:
-      context: .
-      dockerfile: apps/picture/apps/web/Dockerfile
-      args:
-        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-    image: picture-web:local
-    container_name: mana-app-picture-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5021
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-core-sync:3010
-    ports:
-      - "5021:5021"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5021/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 35s
-
-  inventar-web:
-    build:
-      context: .
-      dockerfile: apps/inventar/apps/web/Dockerfile
-    image: inventar-web:local
-    container_name: mana-app-inventar-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5025
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-    ports:
-      - "5025:5025"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5025/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  calc-web:
-    build:
-      context: .
-      dockerfile: apps/calc/apps/web/Dockerfile
-    image: calc-web:local
-    container_name: mana-app-calc-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5031
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
-    ports:
-      - "5031:5031"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5031/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
 
   arcade-web:
     build:
@@ -1347,32 +924,6 @@ services:
       - "5210:5210"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5210/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  times-web:
-    build:
-      context: .
-      dockerfile: apps/times/apps/web/Dockerfile
-    image: times-web:local
-    container_name: mana-app-times-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5027
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
-    ports:
-      - "5027:5027"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5027/health"]
       interval: 180s
       timeout: 10s
       retries: 3
@@ -1420,7 +971,7 @@ services:
       PORT: 3070
       DATABASE_URL: postgresql://manacore:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/mana_sync
       MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: http://uload-web:5029,https://uload.mana.how,https://ulo.ad
+      CORS_ORIGINS: http://mana-web:5000,https://mana.how,https://uload.mana.how,https://ulo.ad
     ports:
       - "3070:3070"
     healthcheck:
@@ -1429,34 +980,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-
-  uload-web:
-    build:
-      context: .
-      dockerfile: apps/uload/apps/web/Dockerfile
-    image: uload-web:local
-    container_name: mana-app-uload-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5029
-      PUBLIC_ULOAD_SERVER_URL: http://uload-server:3070
-      PUBLIC_ULOAD_SERVER_URL_CLIENT: https://uload-api.mana.how
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_SYNC_SERVER_URL: ws://mana-sync:3010
-    ports:
-      - "5029:5029"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5029/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
 
   memoro-server:
     build:
@@ -1475,7 +998,7 @@ services:
       NODE_ENV: production
       PORT: 3015
       MANA_CORE_AUTH_URL: http://mana-auth:3001
-      CORS_ORIGINS: http://memoro-web:5038,https://memoro.mana.how
+      CORS_ORIGINS: http://mana-web:5000,https://mana.how,https://memoro.mana.how
       MEMORO_SUPABASE_URL: ${MEMORO_SUPABASE_URL}
       MEMORO_SUPABASE_SERVICE_KEY: ${MEMORO_SUPABASE_SERVICE_KEY}
       SERVICE_KEY: ${MEMORO_SERVICE_KEY}
@@ -1531,52 +1054,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-
-  memoro-web:
-    build:
-      context: .
-      dockerfile: apps/memoro/apps/web/Dockerfile
-      args:
-        PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-        PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-        PUBLIC_MEMORO_SERVER_URL: http://memoro-server:3015
-        PUBLIC_SUPABASE_URL: ${MEMORO_SUPABASE_URL}
-        PUBLIC_SUPABASE_ANON_KEY: ${MEMORO_SUPABASE_ANON_KEY}
-        PUBLIC_MANA_SYNC_URL: ws://mana-sync:3050
-    image: memoro-web:local
-    container_name: mana-app-memoro-web
-    restart: always
-    mem_limit: 128m
-    depends_on:
-      memoro-server:
-        condition: service_healthy
-      mana-auth:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5038
-      HOST: 0.0.0.0
-      PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
-      PUBLIC_MEMORO_SERVER_URL: http://memoro-server:3015
-      PUBLIC_SUPABASE_URL: ${MEMORO_SUPABASE_URL}
-      PUBLIC_SUPABASE_ANON_KEY: ${MEMORO_SUPABASE_ANON_KEY}
-      PUBLIC_MANA_SYNC_URL: ws://mana-sync:3050
-      PUBLIC_GLITCHTIP_DSN: ${MEMORO_GLITCHTIP_DSN:-}
-    ports:
-      - "5038:5038"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5038/health"]
-      interval: 180s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.memoro-web.rule=Host(`memoro.mana.how`)"
-      - "traefik.http.routers.memoro-web.entrypoints=websecure"
-      - "traefik.http.routers.memoro-web.tls.certresolver=letsencrypt"
-      - "traefik.http.services.memoro-web.loadbalancer.server.port=5038"
 
   mana-llm:
     build:

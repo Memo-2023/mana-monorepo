@@ -22,123 +22,43 @@ ingress:
   - hostname: git.mana.how
     service: http://localhost:3041
 
-  # Chat App
-  - hostname: chat.mana.how
-    service: http://localhost:5010
+  # ──────────────────────────────────────────────────────────
+  # Backend APIs (Hono/Bun compute servers — stay separate)
+  # ──────────────────────────────────────────────────────────
   - hostname: chat-api.mana.how
     service: http://localhost:3030
-
-  # Todo App
-  - hostname: todo.mana.how
-    service: http://localhost:5011
   - hostname: todo-api.mana.how
     service: http://localhost:3031
-
-  # Calendar App
-  - hostname: calendar.mana.how
-    service: http://localhost:5012
   - hostname: calendar-api.mana.how
     service: http://localhost:3032
-
-  # Clock App
-  - hostname: clock.mana.how
-    service: http://localhost:5013
   - hostname: clock-api.mana.how
     service: http://localhost:3033
+  - hostname: contacts-api.mana.how
+    service: http://localhost:3034
+  - hostname: zitare-api.mana.how
+    service: http://localhost:3007
+  - hostname: skilltree-api.mana.how
+    service: http://localhost:3038
+  - hostname: cards-api.mana.how
+    service: http://localhost:3009
+  - hostname: storage-api.mana.how
+    service: http://localhost:3035
+  - hostname: presi-api.mana.how
+    service: http://localhost:3036
+  - hostname: nutriphi-api.mana.how
+    service: http://localhost:3037
+  - hostname: photos-api.mana.how
+    service: http://localhost:3039
+  - hostname: mukke-api.mana.how
+    service: http://localhost:3010
+  - hostname: picture-api.mana.how
+    service: http://localhost:3040
   - hostname: clock-bot.mana.how
     service: http://localhost:4018
 
-  # Contacts App
-  - hostname: contacts.mana.how
-    service: http://localhost:5014
-  - hostname: contacts-api.mana.how
-    service: http://localhost:3034
-
-  # Zitare App
-  - hostname: zitare.mana.how
-    service: http://localhost:5026
-  - hostname: zitare-api.mana.how
-    service: http://localhost:3007
-
-  # SkillTree App
-  - hostname: skilltree.mana.how
-    service: http://localhost:5020
-  - hostname: skilltree-api.mana.how
-    service: http://localhost:3038
-
-  # Planta App (nicht aktiv deployt — Container fehlt noch)
-  # - hostname: planta.mana.how
-  #   service: http://localhost:XXXX
-
-  # Cards App
-  - hostname: cards.mana.how
-    service: http://localhost:5023
-  - hostname: cards-api.mana.how
-    service: http://localhost:3009
-
-  # Storage App
-  - hostname: storage.mana.how
-    service: http://localhost:5015
-  - hostname: storage-api.mana.how
-    service: http://localhost:3035
-
-  # Presi App
-  - hostname: presi.mana.how
-    service: http://localhost:5016
-  - hostname: presi-api.mana.how
-    service: http://localhost:3036
-
-  # NutriPhi App
-  - hostname: nutriphi.mana.how
-    service: http://localhost:5017
-  - hostname: nutriphi-api.mana.how
-    service: http://localhost:3037
-
-  # Photos App
-  - hostname: photos.mana.how
-    service: http://localhost:5019
-  - hostname: photos-api.mana.how
-    service: http://localhost:3039
-
-  # Mukke App
-  - hostname: mukke.mana.how
-    service: http://localhost:5024
-  - hostname: mukke-api.mana.how
-    service: http://localhost:3010
-
-  # Picture App
-  - hostname: picture.mana.how
-    service: http://localhost:5021
-  - hostname: picture-api.mana.how
-    service: http://localhost:3040
-
-  # Calc App
-  - hostname: calc.mana.how
-    service: http://localhost:5031
-
-  # CityCorners App
-  - hostname: citycorners.mana.how
-    service: http://localhost:5022
-
-  # Inventar App
-  - hostname: inventar.mana.how
-    service: http://localhost:5025
-
-  # Times App
-  - hostname: times.mana.how
-    service: http://localhost:5027
-
-  # ULoad App
-  - hostname: uload.mana.how
-    service: http://localhost:5029
-
-  # LLM Playground
-  - hostname: playground.mana.how
-    service: http://localhost:5050
-
-  # ManaVoxel App (Port TBD — Container läuft noch ohne Portexpose)
-  # - hostname: manavoxel.mana.how
-  #   service: http://localhost:5028
+  # NOTE: All web app subdomains (chat.mana.how, todo.mana.how, etc.)
+  # are removed — they now run as routes under the unified app at mana.how
+  # (e.g., mana.how/chat, mana.how/todo, etc.)
 
   # AI Voice Services (local STT/TTS, läuft über mana-service-llm)
   - hostname: stt-api.mana.how
