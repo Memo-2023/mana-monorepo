@@ -25,7 +25,46 @@ const PUBLIC_CONTACTS_API_URL_CLIENT =
 	process.env.PUBLIC_CONTACTS_API_URL_CLIENT || process.env.PUBLIC_CONTACTS_API_URL || '';
 const PUBLIC_GLITCHTIP_DSN = process.env.PUBLIC_GLITCHTIP_DSN || '';
 
+// Map of app subdomains to internal paths
+const APP_SUBDOMAINS = new Set([
+	'todo',
+	'chat',
+	'calendar',
+	'clock',
+	'contacts',
+	'zitare',
+	'skilltree',
+	'planta',
+	'cards',
+	'storage',
+	'presi',
+	'nutriphi',
+	'photos',
+	'mukke',
+	'picture',
+	'calc',
+	'citycorners',
+	'inventar',
+	'times',
+	'uload',
+	'memoro',
+	'context',
+	'questions',
+	'moodlit',
+]);
+
 export const handle: Handle = async ({ event, resolve }) => {
+	// Redirect app subdomains to their path equivalent
+	// e.g. todo.mana.how → mana.how/todo
+	const host = event.request.headers.get('host') || '';
+	const subdomain = host.split('.')[0];
+	if (APP_SUBDOMAINS.has(subdomain) && event.url.pathname === '/') {
+		return new Response(null, {
+			status: 302,
+			headers: { Location: `/${subdomain}` },
+		});
+	}
+
 	const response = await resolve(event, {
 		transformPageChunk: ({ html }) => {
 			const envScript = `<script>
