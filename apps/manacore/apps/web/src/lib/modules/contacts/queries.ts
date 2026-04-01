@@ -27,6 +27,7 @@ export function toContact(local: LocalContact): Contact {
 		photoUrl: local.photoUrl || null,
 		birthday: local.birthday || null,
 		tags: (local.tags || []).map((name, i) => ({ id: `tag-${i}`, name, color: null })),
+		tagIds: local.tagIds ?? [],
 		isFavorite: local.isFavorite ?? false,
 		isArchived: local.isArchived ?? false,
 		createdAt: local.createdAt ?? new Date().toISOString(),

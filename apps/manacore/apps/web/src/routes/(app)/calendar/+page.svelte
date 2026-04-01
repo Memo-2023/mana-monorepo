@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import type { DragPayload, TagDragData } from '@manacore/shared-ui/dnd';
+	import { useAllTags } from '$lib/stores/tags.svelte';
 	import { calendarViewStore } from '$lib/modules/calendar/stores/view.svelte';
 	import { eventsStore } from '$lib/modules/calendar/stores/events.svelte';
 	import {
@@ -25,6 +28,53 @@
 
 	const calendarsCtx: { readonly value: Calendar[] } = getContext('calendars');
 	const eventsCtx: { readonly value: CalendarEvent[] } = getContext('calendarEvents');
+
+	// ── DnD: tag support ────────────────────────────────────
+	const globalTags = useAllTags();
+	const tagMap = $derived(new Map((globalTags.value ?? []).map((t) => [t.id, t])));
+
+	function getEventTags(event: CalendarEvent) {
+		return (event.tagIds ?? [])
+			.map((id) => tagMap.get(id))
+			.filter((t): t is NonNullable<typeof t> => t != null);
+	}
+
+	function handleTagDrop(event: CalendarEvent, payload: DragPayload) {
+		const tagData = payload.data as TagDragData;
+		const current = event.tagIds ?? [];
+		if (!current.includes(tagData.id)) {
+			eventsStore.updateTagIds(event.id, [...current, tagData.id]);
+		}
+	}
+
+	function tagNotAlreadyOnEvent(event: CalendarEvent) {
+		return (payload: DragPayload) => {
+			const tagData = payload.data as TagDragData;
+			return !(event.tagIds ?? []).includes(tagData.id);
+		};
+	}
+
+	// Register passive handler for task→tag direction
+	const tagDropCtx = getContext<{
+		set: (handler: (tagId: string, payload: DragPayload) => void) => void;
+		clear: () => void;
+	}>('tagDropHandler');
+
+	onMount(() => {
+		tagDropCtx?.set(async (tagId: string, payload: DragPayload) => {
+			const data = payload.data as { id: string };
+			// Check if dropped item is an event
+			if (payload.type === 'event') {
+				const event = eventsCtx.value.find((e) => e.id === data.id);
+				if (!event) return;
+				const current = event.tagIds ?? [];
+				if (!current.includes(tagId)) {
+					eventsStore.updateTagIds(data.id, [...current, tagId]);
+				}
+			}
+		});
+		return () => tagDropCtx?.clear();
+	});
 
 	// Filtered events based on visible calendars
 	let visibleEvents = $derived(filterEventsByVisibleCalendars(eventsCtx.value, calendarsCtx.value));
@@ -339,6 +389,11 @@
 									<button
 										onclick={() => openEditEvent(event)}
 										class="flex w-full items-start gap-3 rounded-lg border border-border bg-card p-3 text-left hover:border-primary/50 transition-colors"
+										use:dropTarget={{
+											accepts: ['tag'],
+											onDrop: (payload) => handleTagDrop(event, payload),
+											canDrop: tagNotAlreadyOnEvent(event),
+										}}
 									>
 										<div
 											class="mt-1 h-3 w-3 flex-shrink-0 rounded-full"
@@ -349,7 +404,7 @@
 										></div>
 										<div class="flex-1 min-w-0">
 											<div class="font-medium text-foreground">{event.title}</div>
-											<div class="text-sm text-muted-foreground">
+											<div class="flex items-center gap-2 text-sm text-muted-foreground">
 												{#if event.isAllDay}
 													Ganztägig
 												{:else}
@@ -362,6 +417,18 @@
 													<span class="ml-2">📍 {event.location}</span>
 												{/if}
 											</div>
+											{#if getEventTags(event).length > 0}
+												<div class="mt-1 flex gap-1">
+													{#each getEventTags(event).slice(0, 3) as tag (tag.id)}
+														<span
+															class="inline-flex rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium"
+															style="background: color-mix(in srgb, {tag.color} 15%, transparent); color: {tag.color}"
+														>
+															{tag.name}
+														</span>
+													{/each}
+												</div>
+											{/if}
 										</div>
 									</button>
 								{/each}
@@ -495,5 +562,27 @@
 <style>
 	.week-grid {
 		min-height: 100%;
+	}
+
+	:global(.mana-drop-target-hover) {
+		outline: 2px solid var(--color-primary, #6366f1);
+		outline-offset: -2px;
+		border-radius: 0.5rem;
+		background: rgba(99, 102, 241, 0.06) !important;
+	}
+
+	:global(.mana-drop-target-success) {
+		animation: drop-success 400ms ease-out;
+	}
+
+	@keyframes drop-success {
+		0% {
+			outline-color: #10b981;
+			background: rgba(16, 185, 129, 0.1);
+		}
+		100% {
+			outline-color: transparent;
+			background: transparent;
+		}
 	}
 </style>

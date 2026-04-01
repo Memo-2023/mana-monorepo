@@ -41,6 +41,7 @@ export function toCalendarEvent(local: LocalEvent): CalendarEvent {
 		recurrenceRule: local.recurrenceRule ?? null,
 		parentEventId: null,
 		color: local.color ?? null,
+		tagIds: local.tagIds ?? [],
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};

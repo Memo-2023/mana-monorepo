@@ -23,6 +23,7 @@ export interface LocalEvent extends BaseRecord {
 	recurrenceRule?: string | null;
 	color?: string | null;
 	reminders?: unknown | null;
+	tagIds?: string[];
 }
 
 export type CalendarViewType = 'week' | 'month' | 'agenda';
@@ -40,6 +41,7 @@ export interface CalendarEvent {
 	recurrenceRule: string | null;
 	parentEventId: string | null;
 	color: string | null;
+	tagIds: string[];
 	createdAt: string;
 	updatedAt: string;
 }

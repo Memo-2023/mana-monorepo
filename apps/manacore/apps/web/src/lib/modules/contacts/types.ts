@@ -16,6 +16,7 @@ export interface LocalContact extends BaseRecord {
 	photoUrl?: string;
 	birthday?: string;
 	tags?: string[];
+	tagIds?: string[];
 	isFavorite?: boolean;
 	isArchived?: boolean;
 }
@@ -36,6 +37,7 @@ export interface Contact {
 	photoUrl?: string | null;
 	birthday?: string | null;
 	tags: Array<{ id: string; name: string; color: string | null }>;
+	tagIds: string[];
 	isFavorite: boolean;
 	isArchived: boolean;
 	createdAt: string;

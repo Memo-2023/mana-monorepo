@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import type { Observable } from 'dexie';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import type { DragPayload, TagDragData } from '@manacore/shared-ui/dnd';
+	import { useAllTags } from '$lib/stores/tags.svelte';
 	import {
 		type Contact,
 		contactsFilterStore,
@@ -52,6 +55,52 @@
 	// Alphabet grouping
 	let groups = $derived(groupByLetter(sorted, contactsFilterStore.sortField));
 	let letters = $derived(Object.keys(groups).sort());
+
+	// ── DnD: tag support ────────────────────────────────────
+	const globalTags = useAllTags();
+	const tagMap = $derived(new Map((globalTags.value ?? []).map((t) => [t.id, t])));
+
+	function getContactTags(contact: Contact) {
+		return (contact.tagIds ?? [])
+			.map((id) => tagMap.get(id))
+			.filter((t): t is NonNullable<typeof t> => t != null);
+	}
+
+	function handleTagDrop(contact: Contact, payload: DragPayload) {
+		const tagData = payload.data as TagDragData;
+		const current = contact.tagIds ?? [];
+		if (!current.includes(tagData.id)) {
+			contactsStore.updateTagIds(contact.id, [...current, tagData.id]);
+		}
+	}
+
+	function tagNotAlreadyOnContact(contact: Contact) {
+		return (payload: DragPayload) => {
+			const tagData = payload.data as TagDragData;
+			return !(contact.tagIds ?? []).includes(tagData.id);
+		};
+	}
+
+	// Register passive handler for contact→tag direction
+	const tagDropCtx = getContext<{
+		set: (handler: (tagId: string, payload: DragPayload) => void) => void;
+		clear: () => void;
+	}>('tagDropHandler');
+
+	onMount(() => {
+		tagDropCtx?.set(async (tagId: string, payload: DragPayload) => {
+			const data = payload.data as { id: string };
+			if (payload.type === 'contact') {
+				const contact = allContacts.find((c) => c.id === data.id);
+				if (!contact) return;
+				const current = contact.tagIds ?? [];
+				if (!current.includes(tagId)) {
+					contactsStore.updateTagIds(data.id, [...current, tagId]);
+				}
+			}
+		});
+		return () => tagDropCtx?.clear();
+	});
 
 	// Handlers
 	function handleToggleFavorite(e: MouseEvent, id: string) {
@@ -183,6 +232,11 @@
 						<a
 							href="/contacts/{contact.id}"
 							class="flex items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 transition-colors hover:border-border hover:bg-card group"
+							use:dropTarget={{
+								accepts: ['tag'],
+								onDrop: (payload) => handleTagDrop(contact, payload),
+								canDrop: tagNotAlreadyOnContact(contact),
+							}}
 						>
 							<!-- Avatar -->
 							<div
@@ -212,6 +266,18 @@
 								{#if contact.company || contact.jobTitle}
 									<div class="truncate text-xs text-muted-foreground">
 										{[contact.jobTitle, contact.company].filter(Boolean).join(' @ ')}
+									</div>
+								{/if}
+								{#if getContactTags(contact).length > 0}
+									<div class="mt-0.5 flex gap-1">
+										{#each getContactTags(contact).slice(0, 3) as tag (tag.id)}
+											<span
+												class="inline-flex rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium"
+												style="background: color-mix(in srgb, {tag.color} 15%, transparent); color: {tag.color}"
+											>
+												{tag.name}
+											</span>
+										{/each}
 									</div>
 								{/if}
 							</div>
@@ -342,3 +408,27 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	:global(.mana-drop-target-hover) {
+		outline: 2px solid var(--color-primary, #6366f1);
+		outline-offset: -2px;
+		border-radius: 0.5rem;
+		background: rgba(99, 102, 241, 0.06) !important;
+	}
+
+	:global(.mana-drop-target-success) {
+		animation: drop-success 400ms ease-out;
+	}
+
+	@keyframes drop-success {
+		0% {
+			outline-color: #10b981;
+			background: rgba(16, 185, 129, 0.1);
+		}
+		100% {
+			outline-color: transparent;
+			background: transparent;
+		}
+	}
+</style>

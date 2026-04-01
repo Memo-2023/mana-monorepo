@@ -69,6 +69,13 @@ export const contactsStore = {
 		});
 	},
 
+	async updateTagIds(id: string, tagIds: string[]) {
+		await contactTable.update(id, {
+			tagIds,
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
 	async toggleArchive(id: string) {
 		const local = await contactTable.get(id);
 		if (!local) return;

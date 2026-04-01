@@ -122,6 +122,16 @@ export const eventsStore = {
 		}
 	},
 
+	/**
+	 * Update tag IDs on an event (merge-safe).
+	 */
+	async updateTagIds(id: string, tagIds: string[]) {
+		await db.table('events').update(id, {
+			tagIds,
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
 	// ========== Draft Event Methods ==========
 
 	createDraftEvent(data: Partial<CalendarEvent>) {
@@ -138,6 +148,7 @@ export const eventsStore = {
 			recurrenceRule: null,
 			parentEventId: null,
 			color: data.color || null,
+			tagIds: data.tagIds || [],
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		};
