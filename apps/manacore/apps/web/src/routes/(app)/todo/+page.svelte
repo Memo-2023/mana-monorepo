@@ -39,7 +39,9 @@
 		CaretRight,
 		Folder,
 		CheckCircle,
+		ShareNetwork,
 	} from '@manacore/shared-icons';
+	import { ShareModal } from '@manacore/shared-uload';
 
 	// Get data from layout context
 	const allTasks$: Observable<Task[]> = getContext('tasks');
@@ -104,6 +106,14 @@
 		}
 		return sortTasks(tasks, viewStore.sortBy, viewStore.sortOrder);
 	});
+
+	// Share modal state
+	let shareTask = $state<Task | null>(null);
+	let shareUrl = $derived(
+		shareTask
+			? `${typeof window !== 'undefined' ? window.location.origin : ''}/todo?task=${shareTask.id}`
+			: ''
+	);
 
 	// Quick add task
 	let newTaskTitle = $state('');
@@ -456,6 +466,16 @@
 										class="rounded-md border border-border bg-background px-2 py-1 text-xs focus:border-primary focus:outline-none"
 									/>
 									<button
+										onclick={(e) => {
+											e.stopPropagation();
+											shareTask = task;
+										}}
+										class="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted"
+										title="Kurzlink teilen"
+									>
+										<ShareNetwork size={14} />
+									</button>
+									<button
 										onclick={(e) => handleDeleteTask(e, task)}
 										class="ml-auto rounded-md px-2 py-1 text-xs text-red-500 transition-colors hover:bg-red-500/10"
 									>
@@ -532,6 +552,16 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Share Modal (uLoad integration) -->
+<ShareModal
+	visible={shareTask !== null}
+	onClose={() => (shareTask = null)}
+	url={shareUrl}
+	title={shareTask?.title ?? ''}
+	source="todo"
+	description={shareTask?.description ?? ''}
+/>
 
 <style>
 	/* DnD: tag hovering over task item */

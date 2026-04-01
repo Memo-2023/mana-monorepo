@@ -14,7 +14,9 @@
 		PencilSimple,
 		Check,
 		X,
+		ShareNetwork,
 	} from '@manacore/shared-icons';
+	import { ShareModal } from '@manacore/shared-uload';
 
 	const conversationsCtx: { readonly value: Conversation[] } = getContext('conversations');
 
@@ -29,6 +31,10 @@
 	let isSending = $state(false);
 	let isEditingTitle = $state(false);
 	let editTitle = $state('');
+	let showShare = $state(false);
+	let shareUrl = $derived(
+		`${typeof window !== 'undefined' ? window.location.origin : ''}/chat/${conversationId}`
+	);
 
 	async function handleSend() {
 		const text = inputText.trim();
@@ -154,6 +160,13 @@
 				<PushPin size={18} weight={conversation?.isPinned ? 'fill' : 'regular'} />
 			</button>
 			<button
+				onclick={() => (showShare = true)}
+				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+				title="Kurzlink teilen"
+			>
+				<ShareNetwork size={18} />
+			</button>
+			<button
 				onclick={handleDelete}
 				class="rounded-lg p-1.5 text-[hsl(var(--muted-foreground))] hover:text-red-500"
 				title="Loschen"
@@ -214,3 +227,12 @@
 		</div>
 	</div>
 </div>
+
+<!-- Share Modal (uLoad integration) -->
+<ShareModal
+	visible={showShare}
+	onClose={() => (showShare = false)}
+	url={shareUrl}
+	title={conversation?.title ?? 'Chat'}
+	source="chat"
+/>

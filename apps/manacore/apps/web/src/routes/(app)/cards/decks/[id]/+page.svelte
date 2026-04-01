@@ -6,11 +6,16 @@
 	import { cardStore } from '$lib/modules/cards/stores/cards.svelte';
 	import { useDeck, useCardsByDeck } from '$lib/modules/cards/queries';
 	import type { Deck, Card } from '$lib/modules/cards/types';
-	import { ArrowLeft, Trash, Plus } from '@manacore/shared-icons';
+	import { ArrowLeft, Trash, Plus, ShareNetwork } from '@manacore/shared-icons';
+	import { ShareModal } from '@manacore/shared-uload';
 
 	let deckId = $derived($page.params.id);
 	let showDeleteConfirm = $state(false);
 	let deleting = $state(false);
+	let showShare = $state(false);
+	let shareUrl = $derived(
+		`${typeof window !== 'undefined' ? window.location.origin : ''}/cards/decks/${deckId}`
+	);
 
 	// New card form
 	let showNewCardForm = $state(false);
@@ -87,6 +92,13 @@
 						Offentlich
 					</span>
 				{/if}
+				<button
+					onclick={() => (showShare = true)}
+					class="rounded-lg border border-border p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+					title="Kurzlink teilen"
+				>
+					<ShareNetwork size={16} />
+				</button>
 				<button
 					class="rounded-lg border border-destructive/30 p-2 text-destructive transition-colors hover:bg-destructive/10"
 					onclick={() => (showDeleteConfirm = true)}
@@ -276,3 +288,13 @@
 		</button>
 	</div>
 {/if}
+
+<!-- Share Modal (uLoad integration) -->
+<ShareModal
+	visible={showShare}
+	onClose={() => (showShare = false)}
+	url={shareUrl}
+	title={deck?.title ?? ''}
+	source="cards"
+	description={deck?.description ?? ''}
+/>
