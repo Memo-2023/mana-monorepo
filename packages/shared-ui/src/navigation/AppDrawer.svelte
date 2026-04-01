@@ -76,7 +76,14 @@
 		} else if (app.isCurrent) {
 			window.location.href = '/';
 		} else if (app.url) {
-			window.open(app.url, '_blank', 'noopener,noreferrer');
+			const isInternal =
+				app.url.startsWith('/') ||
+				new URL(app.url, window.location.origin).origin === window.location.origin;
+			if (isInternal) {
+				window.location.href = app.url;
+			} else {
+				window.open(app.url, '_blank', 'noopener,noreferrer');
+			}
 		}
 
 		close();

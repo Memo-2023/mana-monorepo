@@ -170,7 +170,15 @@
 					// Navigate to home route for current app
 					window.location.href = '/';
 				} else if (app.url) {
-					window.open(app.url, '_blank', 'noopener,noreferrer');
+					// Internal paths (same-origin) navigate directly, external URLs open in new tab
+					const isInternal =
+						app.url.startsWith('/') ||
+						new URL(app.url, window.location.origin).origin === window.location.origin;
+					if (isInternal) {
+						window.location.href = app.url;
+					} else {
+						window.open(app.url, '_blank', 'noopener,noreferrer');
+					}
 				}
 			},
 			active: app.isCurrent,
@@ -292,6 +300,8 @@
 		spiralHref?: string;
 		/** Help page href (shown in user dropdown). Set to empty string to hide. */
 		helpHref?: string;
+		/** Bottom offset from viewport bottom (default: '0px'). Use to position above other fixed bars. */
+		bottomOffset?: string;
 	}
 
 	let {
@@ -340,6 +350,7 @@
 		themesHref,
 		spiralHref,
 		helpHref,
+		bottomOffset = '0px',
 	}: Props = $props();
 
 	// Type guards for elements
@@ -369,14 +380,6 @@
 		return localPart.substring(0, maxLength) + '…';
 	}
 
-	// Local state for uncontrolled mode
-	let internalCollapsed = $state(false);
-
-	// Use external or internal state
-	const isCollapsed = $derived(
-		onCollapsedChange !== undefined ? (externalCollapsed ?? false) : internalCollapsed
-	);
-
 	// Dropdown direction: always up since nav is always at bottom
 	const dropdownDirection = 'up' as const;
 
@@ -386,31 +389,17 @@
 	// Global spotlight (Cmd+K) — only active when spotlightActions are provided
 	const spotlight = spotlightActions ? createGlobalSpotlightState() : null;
 
-	function collapseNav() {
-		if (onCollapsedChange) {
-			onCollapsedChange(true);
-		} else {
-			internalCollapsed = true;
-		}
-	}
-
-	function expandNav() {
-		if (onCollapsedChange) {
-			onCollapsedChange(false);
-		} else {
-			internalCollapsed = false;
-		}
-	}
-
 	function isActive(path: string) {
 		return currentPath === path;
 	}
 </script>
 
-{#if !isCollapsed}
+{#if !(externalCollapsed ?? false)}
 	<nav
 		class="pill-nav"
-		style={primaryColor ? `--pill-primary-color: ${primaryColor}` : ''}
+		style="{primaryColor
+			? `--pill-primary-color: ${primaryColor};`
+			: ''}--pill-nav-bottom: {bottomOffset}"
 		aria-label={ariaLabel}
 	>
 		<div class="pill-nav-container">
@@ -803,20 +792,8 @@
 					<span class="pill-label">Anmelden</span>
 				</a>
 			{/if}
-
-			<!-- Collapse Button -->
-			<button onclick={collapseNav} class="pill glass-pill" title="Navigation minimieren">
-				<CaretRight size={18} class="pill-icon" />
-			</button>
 		</div>
 	</nav>
-{/if}
-
-<!-- FAB for collapsed state -->
-{#if isCollapsed}
-	<button onclick={expandNav} class="nav-fab glass-pill" title="Expand navigation">
-		<List size={18} class="pill-icon" />
-	</button>
 {/if}
 
 <!-- Global Spotlight (Cmd+K) -->
@@ -833,7 +810,7 @@
 <style>
 	.pill-nav {
 		position: fixed;
-		bottom: 0;
+		bottom: var(--pill-nav-bottom, 0px);
 		left: 0;
 		right: 0;
 		z-index: 1000;
@@ -989,22 +966,6 @@
 
 	.pill-label {
 		display: inline;
-	}
-
-	/* FAB for collapsed state - positioned at bottom right */
-	.nav-fab {
-		position: fixed;
-		bottom: 0;
-		right: 0;
-		z-index: 1001;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.875rem;
-		padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.875rem);
-		border-radius: 1rem 0 0 0;
-		cursor: pointer;
-		border: none;
 	}
 
 	/* Transitions */
