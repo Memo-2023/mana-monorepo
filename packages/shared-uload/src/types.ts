@@ -27,6 +27,7 @@ export interface CreateShortLinkOptions {
 	source: string;
 	tags?: string[];
 	expiresAt?: string;
+	password?: string;
 	description?: string;
 }
 

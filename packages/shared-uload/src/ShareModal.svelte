@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X, Copy, QrCode, Link, ArrowSquareOut } from '@manacore/shared-icons';
+	import { X, Copy, QrCode, Link, ArrowSquareOut, Lock, Clock } from '@manacore/shared-icons';
 	import type { CreatedLink, CreateShortLinkOptions } from './types';
 	import { createShortLink, isSharedUloadReady, getBaseUrl } from './create-link';
 	import { getQrCodeUrl, getShortUrl, downloadQrCode } from './utils';
@@ -18,20 +18,30 @@
 
 	let customCode = $state('');
 	let useCustomCode = $state(false);
+	let password = $state('');
+	let usePassword = $state(false);
+	let expiresAt = $state('');
+	let useExpiry = $state(false);
 	let createdLink = $state<CreatedLink | null>(null);
 	let creating = $state(false);
 	let error = $state('');
 	let copied = $state(false);
 	let showQr = $state(false);
+	let showAdvanced = $state(false);
 
 	function reset() {
 		customCode = '';
 		useCustomCode = false;
+		password = '';
+		usePassword = false;
+		expiresAt = '';
+		useExpiry = false;
 		createdLink = null;
 		creating = false;
 		error = '';
 		copied = false;
 		showQr = false;
+		showAdvanced = false;
 	}
 
 	function handleClose() {
@@ -55,6 +65,8 @@
 				source,
 				description: description || undefined,
 				customCode: useCustomCode && customCode ? customCode : undefined,
+				password: usePassword && password ? password : undefined,
+				expiresAt: useExpiry && expiresAt ? new Date(expiresAt).toISOString() : undefined,
 			};
 
 			const link = await createShortLink(options);
@@ -160,6 +172,61 @@
 							{/if}
 						</div>
 
+						<!-- Advanced Options Toggle -->
+						<button
+							type="button"
+							onclick={() => (showAdvanced = !showAdvanced)}
+							class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+						>
+							<span class="transition-transform {showAdvanced ? 'rotate-90' : ''}">&#9654;</span>
+							Erweiterte Optionen
+						</button>
+
+						{#if showAdvanced}
+							<div class="space-y-3 rounded-lg bg-white/5 p-3">
+								<!-- Password Protection -->
+								<div>
+									<label class="flex items-center gap-2 cursor-pointer">
+										<input
+											type="checkbox"
+											bind:checked={usePassword}
+											class="rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500"
+										/>
+										<Lock size={14} class="text-gray-400" />
+										<span class="text-sm text-gray-300">Passwortschutz</span>
+									</label>
+									{#if usePassword}
+										<input
+											type="text"
+											bind:value={password}
+											placeholder="Passwort eingeben"
+											class="mt-2 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+										/>
+									{/if}
+								</div>
+
+								<!-- Expiration -->
+								<div>
+									<label class="flex items-center gap-2 cursor-pointer">
+										<input
+											type="checkbox"
+											bind:checked={useExpiry}
+											class="rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500"
+										/>
+										<Clock size={14} class="text-gray-400" />
+										<span class="text-sm text-gray-300">Ablaufdatum</span>
+									</label>
+									{#if useExpiry}
+										<input
+											type="datetime-local"
+											bind:value={expiresAt}
+											class="mt-2 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+										/>
+									{/if}
+								</div>
+							</div>
+						{/if}
+
 						{#if error}
 							<p class="text-sm text-red-400">{error}</p>
 						{/if}
@@ -233,11 +300,22 @@
 				{/if}
 			</div>
 
-			<!-- Footer: Source badge -->
+			<!-- Footer: Source badge + protection info -->
 			<div class="border-t border-white/10 px-5 py-3">
-				<p class="text-xs text-gray-500">
-					Erstellt via <span class="text-gray-400">{source}</span> &middot; Sichtbar in uLoad
-				</p>
+				<div class="flex items-center gap-3 text-xs text-gray-500">
+					<span>via <span class="text-gray-400">{source}</span></span>
+					{#if createdLink && usePassword && password}
+						<span class="flex items-center gap-1 text-amber-500">
+							<Lock size={10} /> Passwortgeschützt
+						</span>
+					{/if}
+					{#if createdLink && useExpiry && expiresAt}
+						<span class="flex items-center gap-1 text-blue-400">
+							<Clock size={10} /> Läuft ab
+						</span>
+					{/if}
+					<span class="ml-auto">Sichtbar in uLoad</span>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -88,6 +88,7 @@ export async function createShortLink(options: CreateShortLinkOptions): Promise<
 		order: 0,
 		source: options.source,
 		expiresAt: options.expiresAt || null,
+		password: options.password || null,
 		qrCodeUrl,
 	} as UloadLink);
 
