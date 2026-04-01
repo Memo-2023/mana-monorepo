@@ -7,7 +7,6 @@
 	import {
 		CaretLeft,
 		Star,
-		StarFill,
 		Archive,
 		Trash,
 		PencilSimple,
@@ -132,7 +131,7 @@
 					<div class="flex items-center gap-2">
 						<h1 class="text-xl font-bold text-foreground">{getDisplayName(contact)}</h1>
 						{#if contact.isFavorite}
-							<StarFill size={18} class="text-amber-500" />
+							<Star weight="fill" size={18} class="text-amber-500" />
 						{/if}
 					</div>
 					{#if contact.company || contact.jobTitle}
@@ -157,7 +156,7 @@
 						title={contact.isFavorite ? 'Favorit entfernen' : 'Zu Favoriten'}
 					>
 						{#if contact.isFavorite}
-							<StarFill size={18} class="text-amber-500" />
+							<Star weight="fill" size={18} class="text-amber-500" />
 						{:else}
 							<Star size={18} />
 						{/if}

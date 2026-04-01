@@ -291,7 +291,10 @@
 											)}"
 											role="button"
 											tabindex="0"
-											onclick|stopPropagation={() => openEditEvent(event)}
+											onclick={(e) => {
+												e.stopPropagation();
+												openEditEvent(event);
+											}}
 											onkeydown={(e) => e.key === 'Enter' && openEditEvent(event)}
 										>
 											{event.title}

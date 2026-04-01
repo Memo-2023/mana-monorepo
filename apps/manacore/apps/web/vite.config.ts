@@ -5,6 +5,9 @@ import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { createPWAConfig } from '@manacore/shared-pwa';
 import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@manacore/shared-vite-config';
 
+/** App-specific shared packages used by migrated modules */
+const APP_SHARED_PACKAGES = ['@clock/shared', '@zitare/content', '@calc/shared'];
+
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
@@ -27,10 +30,10 @@ export default defineConfig({
 		strictPort: true,
 	},
 	ssr: {
-		noExternal: [...MANACORE_SHARED_PACKAGES],
+		noExternal: [...MANACORE_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
 	},
 	optimizeDeps: {
-		exclude: [...MANACORE_SHARED_PACKAGES],
+		exclude: [...MANACORE_SHARED_PACKAGES, ...APP_SHARED_PACKAGES],
 	},
 	define: {
 		...getBuildDefines(),

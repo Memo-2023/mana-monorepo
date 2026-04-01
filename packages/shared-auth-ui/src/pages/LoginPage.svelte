@@ -23,6 +23,7 @@
 		emailInvalid: string;
 		passwordRequired: string;
 		signInFailed: string;
+		invalidCredentials?: string;
 		signInSuccess: string;
 		emailVerified?: string;
 		emailNotVerified?: string;
@@ -68,6 +69,7 @@
 		emailInvalid: 'Please enter a valid email address',
 		passwordRequired: 'Password is required',
 		signInFailed: 'Sign in failed',
+		invalidCredentials: 'Invalid email or password',
 		signInSuccess: 'Successfully signed in. Redirecting...',
 		emailVerified: 'Email successfully verified! Please sign in.',
 		emailNotVerified: 'Email not verified.',
@@ -308,7 +310,12 @@
 			showEmailNotVerified = true;
 			setError(t.emailNotVerified || 'Email not verified.', 'general');
 		} else {
-			setError(result.error || t.signInFailed, 'general');
+			const errorMsg = (() => {
+				if (result.error === 'INVALID_CREDENTIALS') return t.invalidCredentials || t.signInFailed;
+				if (result.error === 'EMAIL_NOT_VERIFIED') return t.emailNotVerified || t.signInFailed;
+				return result.error || t.signInFailed;
+			})();
+			setError(errorMsg, 'general');
 
 			// Detect rate limiting vs account lockout
 			if (result.error?.includes('Too Many') || result.error?.includes('rate limit')) {

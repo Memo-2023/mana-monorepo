@@ -22,7 +22,6 @@
 		MagnifyingGlass,
 		Plus,
 		Star,
-		StarFill,
 		Archive,
 		Trash,
 		PencilSimple,
@@ -260,7 +259,7 @@
 										{getDisplayName(contact)}
 									</span>
 									{#if contact.isFavorite}
-										<StarFill size={14} class="flex-shrink-0 text-amber-500" />
+										<Star weight="fill" size={14} class="flex-shrink-0 text-amber-500" />
 									{/if}
 								</div>
 								{#if contact.company || contact.jobTitle}
@@ -290,7 +289,7 @@
 									title={contact.isFavorite ? 'Favorit entfernen' : 'Zu Favoriten'}
 								>
 									{#if contact.isFavorite}
-										<StarFill size={14} />
+										<Star weight="fill" size={14} />
 									{:else}
 										<Star size={14} />
 									{/if}

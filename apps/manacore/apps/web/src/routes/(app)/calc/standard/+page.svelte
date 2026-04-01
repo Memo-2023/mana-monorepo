@@ -10,7 +10,7 @@
 		CasioSkin,
 		TI84Skin,
 		MinimalSkin,
-	} from '$lib/modules/calc/components/skins';
+	} from '$lib/modules/calc/components';
 
 	const allCalculations = useAllCalculations();
 
