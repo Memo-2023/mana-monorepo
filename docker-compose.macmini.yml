@@ -845,6 +845,8 @@ services:
     build:
       context: .
       dockerfile: apps/manacore/apps/web/Dockerfile
+      args:
+        PUBLIC_SYNC_SERVER_URL: wss://sync.mana.how
     image: manacore-web:local
     container_name: mana-app-web
     restart: always
