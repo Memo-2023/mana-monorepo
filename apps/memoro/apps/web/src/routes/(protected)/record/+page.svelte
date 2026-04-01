@@ -6,6 +6,7 @@
 	import RecordingButton from '$lib/components/RecordingButton.svelte';
 	import BlueprintSelector from '$lib/components/BlueprintSelector.svelte';
 	import AdviceCarousel from '$lib/components/AdviceCarousel.svelte';
+	import { MemoroEvents } from '@manacore/shared-utils/analytics';
 
 	// Standard blueprint ID - matches the mobile app constant
 	const STANDARD_BLUEPRINT_ID = '11111111-2222-3333-4444-555555555555';
@@ -14,6 +15,7 @@
 
 	function handleSelectBlueprint(blueprintId: string | null) {
 		selectedBlueprintId = blueprintId;
+		if (blueprintId) MemoroEvents.blueprintSelected(blueprintId);
 	}
 
 	async function handleRecordingComplete(audioBlob: Blob) {
@@ -25,6 +27,7 @@
 
 		try {
 			recording.setStatus('uploading');
+			MemoroEvents.recordingCompleted($recording.duration);
 
 			const audioDuration = $recording.duration;
 

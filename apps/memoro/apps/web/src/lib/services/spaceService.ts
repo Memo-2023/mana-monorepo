@@ -4,6 +4,7 @@
  */
 
 import { env } from '$lib/config/env';
+import { MemoroEvents } from '@manacore/shared-utils/analytics';
 
 const API = () => env.server.memoroUrl.replace(/\/$/, '');
 
@@ -137,6 +138,7 @@ class SpaceService {
 		});
 		await throwOnError(r, 'Error creating space');
 		const d = await r.json();
+		MemoroEvents.spaceCreated();
 		return mapSpace(d.space);
 	}
 
@@ -156,6 +158,7 @@ class SpaceService {
 			headers: headers(token),
 		});
 		await throwOnError(r, 'Error deleting space');
+		MemoroEvents.spaceDeleted();
 		return true;
 	}
 
@@ -165,6 +168,7 @@ class SpaceService {
 			headers: headers(token),
 		});
 		await throwOnError(r, 'Error leaving space');
+		MemoroEvents.spaceLeft();
 		return true;
 	}
 
@@ -184,6 +188,7 @@ class SpaceService {
 			body: JSON.stringify({ memoId }),
 		});
 		await throwOnError(r, 'Error linking memo to space');
+		MemoroEvents.memoLinkedToSpace();
 		return true;
 	}
 
@@ -194,6 +199,7 @@ class SpaceService {
 			body: JSON.stringify({ memoId }),
 		});
 		await throwOnError(r, 'Error unlinking memo from space');
+		MemoroEvents.memoUnlinkedFromSpace();
 		return true;
 	}
 
@@ -219,6 +225,7 @@ class SpaceService {
 		});
 		await throwOnError(r, 'Error inviting user to space');
 		const d = await r.json();
+		MemoroEvents.inviteSent();
 		return d.invite?.id ?? d.inviteId;
 	}
 
@@ -247,6 +254,7 @@ class SpaceService {
 			body: JSON.stringify({ inviteId }),
 		});
 		await throwOnError(r, 'Error accepting invite');
+		MemoroEvents.inviteAccepted();
 		return true;
 	}
 
@@ -257,6 +265,7 @@ class SpaceService {
 			body: JSON.stringify({ inviteId }),
 		});
 		await throwOnError(r, 'Error declining invite');
+		MemoroEvents.inviteDeclined();
 		return true;
 	}
 

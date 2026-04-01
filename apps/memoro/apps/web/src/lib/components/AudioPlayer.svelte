@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Text from '$lib/components/atoms/Text.svelte';
+	import { MemoroEvents } from '@manacore/shared-utils/analytics';
 
 	let { src, duration }: { src: string; duration?: number } = $props();
 
@@ -44,6 +45,7 @@
 			audio.pause();
 		} else {
 			audio.play();
+			MemoroEvents.playbackStarted();
 		}
 		isPlaying = !isPlaying;
 	}

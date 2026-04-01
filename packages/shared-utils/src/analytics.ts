@@ -442,6 +442,39 @@ export const SubscriptionEvents = {
 };
 
 /**
+ * Memoro App Events
+ */
+export const MemoroEvents = {
+	memoCreated: (mediaType?: string) =>
+		trackEvent('memo_created', mediaType ? { media_type: mediaType } : undefined),
+	memoDeleted: () => trackEvent('memo_deleted'),
+	memoCombined: (count: number) => trackEvent('memo_combined', { memo_count: count }),
+	memoQuestioned: () => trackEvent('memo_questioned'),
+	recordingStarted: () => trackEvent('recording_started'),
+	recordingCompleted: (durationSeconds: number) =>
+		trackEvent('recording_completed', { duration_seconds: durationSeconds }),
+	recordingAppended: () => trackEvent('recording_appended'),
+	transcriptionRetried: () => trackEvent('transcription_retried'),
+	headlineRetried: () => trackEvent('headline_retried'),
+	spaceCreated: () => trackEvent('space_created'),
+	spaceDeleted: () => trackEvent('space_deleted'),
+	spaceLeft: () => trackEvent('space_left'),
+	memoLinkedToSpace: () => trackEvent('memo_linked_to_space'),
+	memoUnlinkedFromSpace: () => trackEvent('memo_unlinked_from_space'),
+	inviteSent: () => trackEvent('invite_sent'),
+	inviteAccepted: () => trackEvent('invite_accepted'),
+	inviteDeclined: () => trackEvent('invite_declined'),
+	meetingBotCreated: (platform: string) => trackEvent('meeting_bot_created', { platform }),
+	meetingBotStopped: () => trackEvent('meeting_bot_stopped'),
+	recordingToMemo: () => trackEvent('recording_to_memo'),
+	blueprintSelected: (blueprintId: string) =>
+		trackEvent('blueprint_selected', { blueprint_id: blueprintId }),
+	playbackStarted: () => trackEvent('playback_started'),
+	settingsUpdated: (setting: string) => trackEvent('settings_updated', { setting }),
+	themeChanged: (theme: string) => trackEvent('theme_changed', { theme }),
+};
+
+/**
  * General App Events
  */
 export const AppEvents = {

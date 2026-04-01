@@ -4,6 +4,7 @@
  */
 
 import { env } from '$lib/config/env';
+import { MemoroEvents } from '@manacore/shared-utils/analytics';
 
 const SERVER_URL = env.server.memoroUrl.replace(/\/$/, '');
 
@@ -75,6 +76,7 @@ export async function triggerTranscription({
 			};
 		}
 
+		MemoroEvents.memoCreated(mediaType);
 		return { success: true };
 	} catch (error) {
 		return {

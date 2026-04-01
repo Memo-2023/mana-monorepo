@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { MemoroEvents } from '@manacore/shared-utils/analytics';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type ThemeVariant = 'lume' | 'nature' | 'ocean' | 'stone';
@@ -63,6 +64,7 @@ function createThemeStore() {
 				if (browser) {
 					localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(newState));
 					applyTheme(newState);
+					MemoroEvents.themeChanged(mode);
 				}
 				return newState;
 			});
@@ -73,6 +75,7 @@ function createThemeStore() {
 				if (browser) {
 					localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(newState));
 					applyTheme(newState);
+					MemoroEvents.themeChanged(variant);
 				}
 				return newState;
 			});

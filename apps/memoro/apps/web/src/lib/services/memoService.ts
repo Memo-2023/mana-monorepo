@@ -16,6 +16,7 @@ import {
 } from '$lib/data/local-store';
 import type { Memo, Tag, Memory } from '$lib/types/memo.types';
 import { getCachedUrl, setCachedUrl, cleanupExpiredUrls } from '$lib/utils/indexedDBCache';
+import { MemoroEvents } from '@manacore/shared-utils/analytics';
 
 // ─── Type mappers ──────────────────────────────────────────────
 
@@ -269,6 +270,7 @@ export class MemoService {
 
 	async deleteMemo(memoId: string): Promise<void> {
 		await memoCollection.delete(memoId);
+		MemoroEvents.memoDeleted();
 	}
 
 	async addTagToMemo(memoId: string, tagId: string): Promise<void> {
