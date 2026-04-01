@@ -1,6 +1,0 @@
-/node_modules
-/dist
-pubsub-service-account-key.json
-# Deployment secrets
-.env.deploy
-DEPLOY.md
