@@ -528,7 +528,7 @@
 			{#if !isMinimized}
 				<!-- User Email -->
 				<div class="mb-2 px-3 py-2 text-xs text-theme-muted truncate">
-					{$user?.email || ''}
+					{authStore.user?.email || ''}
 				</div>
 			{/if}
 

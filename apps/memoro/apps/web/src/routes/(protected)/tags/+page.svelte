@@ -30,7 +30,7 @@
 
 	// Load tags and usage counts on mount
 	onMount(async () => {
-		if (!$user) {
+		if (!authStore.user) {
 			loadError = 'User not authenticated';
 			isLoadingTags = false;
 			return;
@@ -44,7 +44,7 @@
 			isLoadingTags = true;
 			loadError = null;
 
-			const loadedTags = await tagService.getTags($user!.id);
+			const loadedTags = await tagService.getTags(authStore.user!.id);
 			tags.setTags(loadedTags);
 
 			// Load usage counts for all tags
@@ -86,13 +86,17 @@
 
 	async function handleCreateTag(event: Event) {
 		event.preventDefault();
-		if (!$user || !newTagName.trim()) return;
+		if (!authStore.user || !newTagName.trim()) return;
 
 		try {
 			isCreatingTag = true;
 			actionError = null;
 
-			const createdTag = await tagService.createTag($user.id, newTagName.trim(), newTagColor);
+			const createdTag = await tagService.createTag(
+				authStore.user.id,
+				newTagName.trim(),
+				newTagColor
+			);
 
 			// Optimistic UI update
 			tags.addTag(createdTag);

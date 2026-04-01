@@ -17,7 +17,7 @@
 	}
 
 	async function handleRecordingComplete(audioBlob: Blob) {
-		if (!$user) {
+		if (!authStore.user) {
 			console.error('No user authenticated');
 			recording.setError($t('record.user_not_authenticated'));
 			return;
@@ -31,12 +31,12 @@
 			console.log('Uploading recording:', {
 				blobSize: audioBlob.size,
 				duration: audioDuration,
-				userId: $user.id,
+				userId: authStore.user.id,
 			});
 
 			const result = await uploadAndProcessAudio({
 				audioBlob,
-				userId: $user.id,
+				userId: authStore.user.id,
 				title: 'New Recording',
 				duration: audioDuration,
 				spaceId: null,

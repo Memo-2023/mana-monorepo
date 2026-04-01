@@ -146,13 +146,13 @@
 
 	// Load more memos for infinite scroll
 	async function loadMoreMemos() {
-		if ($isLoadingMore || !$hasMoreMemos || !$user) return;
+		if ($isLoadingMore || !$hasMoreMemos || !authStore.user) return;
 
 		isLoadingMore.set(true);
 		try {
 			const newOffset = $currentOffset + MEMOS_PER_PAGE;
 			const { memos: newMemos, hasMore } = await memoService.getMemosForList(
-				$user.id,
+				authStore.user.id,
 				MEMOS_PER_PAGE,
 				newOffset
 			);
@@ -174,7 +174,7 @@
 		currentOffset.set(0);
 
 		try {
-			if (!$user) {
+			if (!authStore.user) {
 				error = $t('memo.error_user_not_authenticated');
 				loading = false;
 				return;
@@ -182,8 +182,8 @@
 
 			// Load memos and tags in parallel using optimized list query
 			const [memosResult, tagsData] = await Promise.all([
-				memoService.getMemosForList($user.id, MEMOS_PER_PAGE, 0),
-				tagService.getTags($user.id),
+				memoService.getMemosForList(authStore.user.id, MEMOS_PER_PAGE, 0),
+				tagService.getTags(authStore.user.id),
 			]);
 
 			memos.setMemos(memosResult.memos);

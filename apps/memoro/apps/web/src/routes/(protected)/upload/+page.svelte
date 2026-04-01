@@ -119,7 +119,7 @@
 
 	// Upload file
 	async function handleUpload() {
-		if (!selectedFile || !$user) return;
+		if (!selectedFile || !authStore.user) return;
 
 		try {
 			uploading = true;
@@ -135,7 +135,7 @@
 			// Upload and process
 			const result = await uploadAndProcessAudio({
 				audioBlob: selectedFile,
-				userId: $user.id,
+				userId: authStore.user.id,
 				title: title || 'Uploaded Recording',
 				duration,
 				blueprintId: selectedBlueprint,

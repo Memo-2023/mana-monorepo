@@ -145,11 +145,11 @@
 	});
 
 	async function loadTags() {
-		if (!$user) return;
+		if (!authStore.user) return;
 
 		try {
 			isLoadingTags = true;
-			const tags = await tagService.getTags($user.id);
+			const tags = await tagService.getTags(authStore.user.id);
 			availableTags = tags;
 			tagsStore.setTags(tags);
 		} catch (err) {
@@ -369,10 +369,10 @@
 	}
 
 	async function handleCreateTag(name: string, color: string) {
-		if (!$user) return;
+		if (!authStore.user) return;
 
 		try {
-			const newTag = await tagService.createTag($user.id, name, color);
+			const newTag = await tagService.createTag(authStore.user.id, name, color);
 			availableTags = [...availableTags, newTag];
 			tagsStore.setTags(availableTags);
 		} catch (err) {
