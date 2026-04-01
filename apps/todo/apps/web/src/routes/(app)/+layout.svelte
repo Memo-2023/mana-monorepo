@@ -43,7 +43,12 @@
 	import { parseTaskInput, resolveTaskIds, formatParsedTaskPreview } from '$lib/utils/task-parser';
 	import { todoOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
-	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import {
+		SessionExpiredBanner,
+		AuthGate,
+		GuestWelcomeModal,
+		GuestRegistrationNudge,
+	} from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
 	import { TodoEvents } from '@manacore/shared-utils/analytics';
 	import { todoStore, taskCollection } from '$lib/data/local-store';
@@ -554,6 +559,13 @@
 
 	{#if authStore.isAuthenticated}
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
+	{:else}
+		<GuestRegistrationNudge
+			appId="todo"
+			onRegister={() => goto('/register')}
+			locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+			delayMinutes={3}
+		/>
 	{/if}
 </AuthGate>
 

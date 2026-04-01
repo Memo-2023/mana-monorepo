@@ -6,7 +6,7 @@
  */
 
 import { createLocalStore, type BaseRecord } from '@manacore/local-store';
-import { guestSkills, guestActivities } from './guest-seed';
+import { guestSkills, guestActivities, guestAchievements } from './guest-seed';
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -58,6 +58,7 @@ export const skilltreeStore = createLocalStore({
 		{
 			name: 'achievements',
 			indexes: ['key', 'unlockedAt'],
+			guestSeed: guestAchievements,
 		},
 	],
 	sync: {

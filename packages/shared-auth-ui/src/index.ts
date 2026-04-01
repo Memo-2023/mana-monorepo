@@ -5,6 +5,7 @@ export { default as ForgotPasswordPage } from './pages/ForgotPasswordPage.svelte
 
 // Components
 export { default as GuestWelcomeModal } from './components/GuestWelcomeModal.svelte';
+export { default as GuestRegistrationNudge } from './components/GuestRegistrationNudge.svelte';
 export { default as AuthGateModal } from './components/AuthGateModal.svelte';
 export { default as SessionExpiredBanner } from './components/SessionExpiredBanner.svelte';
 export { default as AuthGate } from './components/AuthGate.svelte';
@@ -23,6 +24,13 @@ export {
 	resetGuestWelcome,
 	resetAllGuestWelcome,
 } from './utils/guestWelcome';
+export {
+	startGuestSession,
+	shouldShowGuestNudge,
+	dismissGuestNudge,
+	resetGuestNudge,
+	resetAllGuestNudges,
+} from './utils/guestNudge';
 export { parseUserAgent, getDeviceType, formatUserAgent } from './utils/userAgent';
 
 // Types
