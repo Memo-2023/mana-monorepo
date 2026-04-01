@@ -4,6 +4,20 @@ export { default as Sidebar } from './Sidebar.svelte';
 export { default as SidebarSection } from './SidebarSection.svelte';
 export { default as PillNavigation } from './PillNavigation.svelte';
 export { default as PillDropdown } from './PillDropdown.svelte';
+export { default as AppDrawer } from './AppDrawer.svelte';
+export { default as GlobalSpotlight } from './GlobalSpotlight.svelte';
+export type { SpotlightAction } from './GlobalSpotlight.svelte';
+export { createGlobalSpotlightState } from './useGlobalSpotlight.svelte';
+export {
+	createAppNavigationStore,
+	getFavoriteApps,
+	getRecentApps,
+	getUsageCounts,
+	toggleFavoriteApp,
+	recordAppVisit,
+	clearRecentApps,
+} from './appNavigationStore.svelte';
+export type { RecentAppEntry } from './appNavigationStore.svelte';
 export { default as PillTabGroup } from './PillTabGroup.svelte';
 export { default as PillTagSelector } from './PillTagSelector.svelte';
 export { default as PillTimeRangeSelector } from './PillTimeRangeSelector.svelte';

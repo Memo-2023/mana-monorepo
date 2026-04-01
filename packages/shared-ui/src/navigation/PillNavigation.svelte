@@ -11,6 +11,9 @@
 	import PillDropdown from './PillDropdown.svelte';
 	import PillTabGroup from './PillTabGroup.svelte';
 	import PillTagSelector from './PillTagSelector.svelte';
+	import AppDrawer from './AppDrawer.svelte';
+	import GlobalSpotlight, { type SpotlightAction } from './GlobalSpotlight.svelte';
+	import { createGlobalSpotlightState } from './useGlobalSpotlight.svelte';
 	// Phosphor Icons (via shared-icons)
 	import {
 		Archive,
@@ -275,6 +278,10 @@
 		showA11yQuickToggles?: boolean;
 		/** Called when an app should be opened in a split panel */
 		onOpenInPanel?: (appId: string, url: string) => void;
+		/** Quick actions for Cmd+K spotlight (pass to enable spotlight) */
+		spotlightActions?: SpotlightAction[];
+		/** Placeholder text for spotlight search */
+		spotlightPlaceholder?: string;
 		/** Accessible label for the nav element */
 		ariaLabel?: string;
 		/** Feedback page href (shown in user dropdown). Set to empty string to hide. */
@@ -326,6 +333,8 @@
 		onA11yReduceMotionChange,
 		showA11yQuickToggles = false,
 		onOpenInPanel,
+		spotlightActions,
+		spotlightPlaceholder,
 		ariaLabel,
 		feedbackHref = '/feedback',
 		themesHref,
@@ -371,6 +380,12 @@
 	// Dropdown direction: always up since nav is always at bottom
 	const dropdownDirection = 'up' as const;
 
+	// App drawer state
+	let appDrawerOpen = $state(false);
+
+	// Global spotlight (Cmd+K) — only active when spotlightActions are provided
+	const spotlight = spotlightActions ? createGlobalSpotlightState() : null;
+
 	function collapseNav() {
 		if (onCollapsedChange) {
 			onCollapsedChange(true);
@@ -401,12 +416,14 @@
 		<div class="pill-nav-container">
 			<!-- Logo pill / App Switcher -->
 			{#if showAppSwitcher && appItems.length > 0}
-				<PillDropdown
-					items={createAppDropdownItems(appItems, allAppsHref, allAppsLabel, onOpenInPanel)}
-					direction={dropdownDirection}
-					label={appName}
-					icon="grid"
-					iconOnly={false}
+				<AppDrawer
+					apps={appItems}
+					isOpen={appDrawerOpen}
+					onToggle={(open) => (appDrawerOpen = open)}
+					{onOpenInPanel}
+					{allAppsHref}
+					{allAppsLabel}
+					triggerLabel={appName}
 				/>
 			{:else}
 				<a href={homeRoute} class="pill glass-pill logo-pill">
@@ -800,6 +817,17 @@
 	<button onclick={expandNav} class="nav-fab glass-pill" title="Expand navigation">
 		<List size={18} class="pill-icon" />
 	</button>
+{/if}
+
+<!-- Global Spotlight (Cmd+K) -->
+{#if spotlight && spotlightActions}
+	<GlobalSpotlight
+		open={spotlight.isOpen}
+		onClose={spotlight.close}
+		apps={appItems}
+		quickActions={spotlightActions}
+		placeholder={spotlightPlaceholder}
+	/>
 {/if}
 
 <style>

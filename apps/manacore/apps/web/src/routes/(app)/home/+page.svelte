@@ -1,16 +1,19 @@
 <script lang="ts">
-	import { _ } from 'svelte-i18n';
 	import { locale } from 'svelte-i18n';
 	import {
-		MANA_APPS,
 		APP_URLS,
 		APP_STATUS_LABELS,
 		getAccessibleManaApps,
 		type ManaApp,
 		type AppIconId,
 	} from '@manacore/shared-branding';
+	import { createAppNavigationStore } from '@manacore/shared-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
+	import AppRow from '$lib/components/AppRow.svelte';
+	import ActivityFeed from '$lib/components/ActivityFeed.svelte';
+
+	const store = createAppNavigationStore();
 
 	// Detect dev mode
 	const isDev =
@@ -25,56 +28,29 @@
 	let userTier = $derived(authStore.user?.tier || 'public');
 	let activeApps = $derived(getAccessibleManaApps(userTier));
 
-	// Group apps by category
-	interface AppCategory {
-		id: string;
-		titleDe: string;
-		titleEn: string;
-		descDe: string;
-		descEn: string;
-		icon: string;
-		apps: ManaApp[];
-	}
+	// Favorites resolved to ManaApp objects
+	let favoriteApps = $derived(
+		store.favorites
+			.map((id) => activeApps.find((a) => a.id === id))
+			.filter((a): a is ManaApp => !!a)
+	);
 
-	const aiAppIds: AppIconId[] = ['chat', 'picture', 'questions', 'context', 'presi', 'mail'];
-	const productivityIds: AppIconId[] = ['todo', 'calendar', 'contacts', 'cards', 'inventory'];
-	const utilityIds: AppIconId[] = ['clock', 'zitare', 'storage', 'moodlit', 'matrix'];
+	// Recently used resolved to ManaApp objects
+	let recentApps = $derived(
+		store.recentApps
+			.map((r) => activeApps.find((a) => a.id === r.id))
+			.filter((a): a is ManaApp => !!a)
+			.slice(0, 5)
+	);
 
-	function getAppsForCategory(ids: AppIconId[], apps: ManaApp[]): ManaApp[] {
-		return ids
-			.map((id) => apps.find((app) => app.id === id))
-			.filter((app): app is ManaApp => !!app);
-	}
-
-	let categories = $derived([
-		{
-			id: 'ai',
-			titleDe: 'KI & Kreativ',
-			titleEn: 'AI & Creative',
-			descDe: 'Intelligente Assistenten und kreative Werkzeuge',
-			descEn: 'Intelligent assistants and creative tools',
-			icon: '🤖',
-			apps: getAppsForCategory(aiAppIds, activeApps),
-		},
-		{
-			id: 'productivity',
-			titleDe: 'Produktivität',
-			titleEn: 'Productivity',
-			descDe: 'Organisiere deinen Alltag',
-			descEn: 'Organize your daily life',
-			icon: '📋',
-			apps: getAppsForCategory(productivityIds, activeApps),
-		},
-		{
-			id: 'utility',
-			titleDe: 'Tools & Utilities',
-			titleEn: 'Tools & Utilities',
-			descDe: 'Praktische Helferlein',
-			descEn: 'Handy helpers',
-			icon: '🔧',
-			apps: getAppsForCategory(utilityIds, activeApps),
-		},
-	] satisfies AppCategory[]);
+	// All apps sorted by usage frequency
+	let sortedApps = $derived(
+		[...activeApps].sort((a, b) => {
+			const countA = store.usageCounts[a.id] || 0;
+			const countB = store.usageCounts[b.id] || 0;
+			return countB - countA;
+		})
+	);
 
 	function getStatusColor(status: ManaApp['status']): string {
 		const colors = {
@@ -103,6 +79,7 @@
 	}
 
 	function handleAppClick(app: ManaApp) {
+		store.recordAppVisit(app.id);
 		ManaCoreEvents.appOpened(app.id);
 		const url = getAppUrl(app.id);
 		if (url) {
@@ -164,68 +141,78 @@
 		</div>
 	</div>
 
-	<!-- App Categories -->
-	{#each categories as category}
-		<section class="category">
-			<div class="category-header">
-				<span class="category-icon">{category.icon}</span>
-				<div>
-					<h2 class="category-title">
-						{currentLocale === 'en' ? category.titleEn : category.titleDe}
-					</h2>
-					<p class="category-desc">
-						{currentLocale === 'en' ? category.descEn : category.descDe}
-					</p>
-				</div>
-			</div>
+	<!-- Favorites -->
+	<AppRow
+		apps={favoriteApps}
+		title={currentLocale === 'en' ? 'Favorites' : 'Favoriten'}
+		showPin={true}
+		onAppClick={handleAppClick}
+		onTogglePin={(id) => store.toggleFavorite(id)}
+		pinnedIds={store.favorites}
+	/>
 
-			<div class="app-grid">
-				{#each category.apps as app}
-					<button
-						class="app-card"
-						style="--app-color: {app.color};"
-						onclick={() => handleAppClick(app)}
-					>
-						<div class="app-card-top">
-							<div class="app-icon-wrap">
-								{#if app.icon}
-									<img src={app.icon} alt={app.name} class="app-icon" />
-								{:else}
-									<div class="app-icon-fallback" style="color: {app.color};">
-										{app.name.charAt(0)}
-									</div>
-								{/if}
-							</div>
-							<div
-								class="status-badge"
-								style="color: {getStatusColor(app.status)}; background: {getStatusBgColor(
-									app.status
-								)};"
-							>
-								<span class="status-dot" style="background: {getStatusColor(app.status)};"></span>
-								{statusLabels[app.status]}
-							</div>
-						</div>
+	<!-- Recently Used -->
+	<AppRow
+		apps={recentApps}
+		title={currentLocale === 'en' ? 'Recently Used' : 'Zuletzt verwendet'}
+		onAppClick={handleAppClick}
+	/>
 
-						<h3 class="app-name">{app.name}</h3>
-						<p class="app-tagline">{app.description[currentLocale] || app.description.de}</p>
+	<!-- Activity Feed -->
+	<ActivityFeed locale={currentLocale} />
 
-						<div class="app-card-footer">
-							{#if app.comingSoon}
-								<span class="coming-soon-label">
-									{currentLocale === 'en' ? 'Coming Soon' : 'Demnächst'}
-								</span>
+	<!-- All Apps (sorted by usage) -->
+	<section class="category">
+		<h2 class="section-title">
+			{currentLocale === 'en' ? 'All Apps' : 'Alle Apps'}
+		</h2>
+
+		<div class="app-grid">
+			{#each sortedApps as app (app.id)}
+				<button
+					class="app-card"
+					style="--app-color: {app.color};"
+					onclick={() => handleAppClick(app)}
+				>
+					<div class="app-card-top">
+						<div class="app-icon-wrap">
+							{#if app.icon}
+								<img src={app.icon} alt={app.name} class="app-icon" />
 							{:else}
-								<span class="open-label" style="color: {app.color};">
-									{currentLocale === 'en' ? 'Open' : 'Öffnen'} →
-								</span>
+								<div class="app-icon-fallback" style="color: {app.color};">
+									{app.name.charAt(0)}
+								</div>
 							{/if}
 						</div>
-					</button>
-				{/each}
-			</div>
-		</section>
-	{/each}
+						<div
+							class="status-badge"
+							style="color: {getStatusColor(app.status)}; background: {getStatusBgColor(
+								app.status
+							)};"
+						>
+							<span class="status-dot" style="background: {getStatusColor(app.status)};"></span>
+							{statusLabels[app.status]}
+						</div>
+					</div>
+
+					<h3 class="app-name">{app.name}</h3>
+					<p class="app-tagline">{app.description[currentLocale] || app.description.de}</p>
+
+					<div class="app-card-footer">
+						{#if app.comingSoon}
+							<span class="coming-soon-label">
+								{currentLocale === 'en' ? 'Coming Soon' : 'Demnächst'}
+							</span>
+						{:else}
+							<span class="open-label" style="color: {app.color};">
+								{currentLocale === 'en' ? 'Open' : 'Öffnen'} →
+							</span>
+						{/if}
+					</div>
+				</button>
+			{/each}
+		</div>
+	</section>
 
 	<!-- Legend -->
 	<div class="legend">
@@ -318,33 +305,18 @@
 		color: hsl(var(--muted-foreground, 0 0% 45%));
 	}
 
-	/* Categories */
+	/* Sections */
 	.category {
 		margin-bottom: 2rem;
 	}
 
-	.category-header {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		margin-bottom: 1rem;
-	}
-
-	.category-icon {
-		font-size: 1.5rem;
-	}
-
-	.category-title {
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: hsl(var(--foreground, 0 0% 9%));
-		margin: 0;
-	}
-
-	.category-desc {
+	.section-title {
 		font-size: 0.8125rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 		color: hsl(var(--muted-foreground, 0 0% 45%));
-		margin: 0;
+		margin: 0 0 0.625rem;
 	}
 
 	/* App Grid */

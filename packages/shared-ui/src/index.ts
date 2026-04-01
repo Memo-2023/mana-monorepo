@@ -84,6 +84,9 @@ export {
 	SidebarSection,
 	PillNavigation,
 	PillDropdown,
+	AppDrawer,
+	GlobalSpotlight,
+	createGlobalSpotlightState,
 	PillTabGroup,
 	PillTagSelector,
 	PillTimeRangeSelector,
@@ -93,6 +96,13 @@ export {
 	PillToolbarDivider,
 	TagStrip,
 	ExpandableToolbar,
+	createAppNavigationStore,
+	getFavoriteApps,
+	getRecentApps,
+	getUsageCounts,
+	toggleFavoriteApp,
+	recordAppVisit,
+	clearRecentApps,
 } from './navigation';
 export type {
 	NavItem,
@@ -109,6 +119,8 @@ export type {
 	PillTagItem,
 	PillTagSelectorConfig,
 	ExpandableToolbarProps,
+	RecentAppEntry,
+	SpotlightAction,
 } from './navigation';
 
 // Settings
