@@ -120,6 +120,13 @@ func (e *Engine) SeedDefaults(ctx context.Context) {
 			body:    `<!DOCTYPE html><html><body><h1>{{.eventTitle}}</h1><p>Wann: {{.eventTime}}</p>{{if .eventLocation}}<p>Wo: {{.eventLocation}}</p>{{end}}<p><a href="{{.eventUrl}}">Termin anzeigen</a></p></body></html>`,
 			vars:    `{"eventTitle": "Titel", "eventTime": "Zeit", "eventLocation": "Ort (optional)", "eventUrl": "Link"}`,
 		},
+		{
+			slug:    "task-reminder",
+			channel: "email",
+			subject: "Erinnerung: {{.taskTitle}}",
+			body:    `<!DOCTYPE html><html><body><h1>{{.taskTitle}}</h1>{{if .dueDate}}<p>Fällig: {{.dueDate}}</p>{{end}}<p><a href="{{.taskUrl}}">Aufgabe anzeigen</a></p></body></html>`,
+			vars:    `{"taskTitle": "Aufgabentitel", "dueDate": "Fälligkeitsdatum (optional)", "taskUrl": "Link zur Aufgabe"}`,
+		},
 	}
 
 	for _, d := range defaults {

@@ -1,6 +1,6 @@
 """
 ManaCore STT API Service
-Speech-to-Text with Whisper (MLX), Voxtral (vLLM), and Mistral API (fallback)
+Speech-to-Text with Whisper (MLX), WhisperX (CUDA), Voxtral (vLLM), and Mistral API (fallback)
 
 Run with: uvicorn app.main:app --host 0.0.0.0 --port 3020
 """
@@ -38,6 +38,9 @@ CORS_ORIGINS = os.getenv(
 VLLM_URL = os.getenv("VLLM_URL", "http://localhost:8100")
 USE_VLLM = os.getenv("USE_VLLM", "false").lower() == "true"
 
+# WhisperX configuration (CUDA GPU server)
+USE_WHISPERX = os.getenv("USE_WHISPERX", "false").lower() == "true"
+
 
 # Response models
 class TranscriptionResponse(BaseModel):
@@ -48,9 +51,49 @@ class TranscriptionResponse(BaseModel):
     duration_seconds: Optional[float] = None
 
 
+class WordTimestampResponse(BaseModel):
+    word: str
+    start: float
+    end: float
+    score: float = 0.0
+    speaker: Optional[str] = None
+
+
+class SegmentResponse(BaseModel):
+    start: float
+    end: float
+    text: str
+    speaker: Optional[str] = None
+    words: list[WordTimestampResponse] = []
+
+
+class UtteranceResponse(BaseModel):
+    speaker: int
+    text: str
+    offset: int  # milliseconds
+    duration: int  # milliseconds
+
+
+class RichTranscriptionResponse(BaseModel):
+    """Extended response with segments, utterances, and speaker diarization."""
+    text: str
+    language: Optional[str] = None
+    model: str
+    latency_ms: Optional[float] = None
+    duration_seconds: Optional[float] = None
+    segments: list[SegmentResponse] = []
+    utterances: list[UtteranceResponse] = []
+    speakers: dict[str, str] = {}
+    speaker_map: dict[str, int] = {}
+    languages: list[str] = []
+    primary_language: Optional[str] = None
+    words: list[WordTimestampResponse] = []
+
+
 class HealthResponse(BaseModel):
     status: str
     whisper_loaded: bool
+    whisperx_available: bool
     vllm_available: bool
     vllm_url: Optional[str] = None
     mistral_api_available: bool
@@ -60,6 +103,7 @@ class HealthResponse(BaseModel):
 
 class ModelsResponse(BaseModel):
     whisper: list
+    whisperx: list
     voxtral_vllm: list
     default_whisper: str
 
@@ -67,6 +111,7 @@ class ModelsResponse(BaseModel):
 # Track loaded models
 models_status = {
     "whisper_loaded": False,
+    "whisperx_available": False,
     "vllm_available": False,
 }
 
@@ -85,6 +130,18 @@ async def lifespan(app: FastAPI):
             logger.info(f"vLLM server available at {VLLM_URL}")
         else:
             logger.warning(f"vLLM server not available: {health}")
+
+    # Check WhisperX availability
+    if USE_WHISPERX:
+        try:
+            from app.whisperx_service import is_available as whisperx_available
+            models_status["whisperx_available"] = whisperx_available()
+            if models_status["whisperx_available"]:
+                logger.info("WhisperX (CUDA) available")
+            else:
+                logger.warning("WhisperX not available (whisperx package not installed)")
+        except Exception as e:
+            logger.warning(f"WhisperX check failed: {e}")
 
     # Check Mistral API
     from app.voxtral_api_service import is_available as api_available
@@ -136,6 +193,7 @@ async def health_check():
     return HealthResponse(
         status="healthy",
         whisper_loaded=models_status["whisper_loaded"],
+        whisperx_available=models_status["whisperx_available"],
         vllm_available=vllm_health.get("status") == "healthy",
         vllm_url=VLLM_URL if USE_VLLM else None,
         mistral_api_available=api_available(),
@@ -154,8 +212,17 @@ async def list_models(auth: AuthResult = Depends(verify_api_key)):
 
     vllm_models = await get_models()
 
+    whisperx_models = []
+    if USE_WHISPERX:
+        try:
+            from app.whisperx_service import AVAILABLE_MODELS as wx_models
+            whisperx_models = wx_models
+        except ImportError:
+            pass
+
     return ModelsResponse(
         whisper=whisper_models,
+        whisperx=whisperx_models,
         voxtral_vllm=vllm_models,
         default_whisper=DEFAULT_WHISPER_MODEL,
     )
@@ -386,50 +453,216 @@ async def transcribe_voxtral_api(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/transcribe/whisperx", response_model=RichTranscriptionResponse)
+async def transcribe_whisperx(
+    response: Response,
+    file: UploadFile = File(..., description="Audio file to transcribe"),
+    language: Optional[str] = Form(None, description="Language code (auto-detect if not provided)"),
+    model: Optional[str] = Form(None, description="Whisper model to use"),
+    diarization: bool = Form(True, description="Enable speaker diarization"),
+    alignment: bool = Form(True, description="Enable word-level alignment"),
+    min_speakers: Optional[int] = Form(None, description="Minimum expected speakers"),
+    max_speakers: Optional[int] = Form(None, description="Maximum expected speakers"),
+    auth: AuthResult = Depends(verify_api_key),
+):
+    """
+    Transcribe audio using WhisperX (CUDA GPU).
+
+    Returns rich transcription with:
+    - Word-level timestamps (via forced alignment)
+    - Speaker diarization (via pyannote.audio)
+    - Memoro-compatible utterances with speaker IDs
+
+    Requires NVIDIA GPU with CUDA and USE_WHISPERX=true.
+    Diarization requires HF_TOKEN with pyannote model access.
+
+    Supported formats: mp3, wav, m4a, flac, ogg, webm, mp4
+    Max file size: 100MB
+    """
+    if auth.rate_limit_remaining is not None:
+        response.headers["X-RateLimit-Remaining"] = str(auth.rate_limit_remaining)
+
+    if not USE_WHISPERX:
+        raise HTTPException(
+            status_code=503,
+            detail="WhisperX not enabled. Set USE_WHISPERX=true on a CUDA-capable server."
+        )
+
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    allowed_extensions = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".webm", ".mp4"}
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type: {ext}. Allowed: {allowed_extensions}"
+        )
+
+    start_time = time.time()
+
+    try:
+        from app.whisperx_service import transcribe_audio_bytes
+
+        audio_bytes = await file.read()
+        if len(audio_bytes) > 100 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File too large (max 100MB)")
+
+        model_name = model or DEFAULT_WHISPER_MODEL
+
+        result = await transcribe_audio_bytes(
+            audio_bytes=audio_bytes,
+            filename=file.filename,
+            language=language,
+            model_name=model_name,
+            enable_diarization=diarization,
+            enable_alignment=alignment,
+            min_speakers=min_speakers,
+            max_speakers=max_speakers,
+        )
+
+        latency_ms = (time.time() - start_time) * 1000
+
+        return RichTranscriptionResponse(
+            text=result.text,
+            language=result.language,
+            model=f"whisperx-{model_name}",
+            latency_ms=latency_ms,
+            duration_seconds=result.duration_seconds,
+            segments=[
+                SegmentResponse(
+                    start=s.start,
+                    end=s.end,
+                    text=s.text,
+                    speaker=s.speaker,
+                    words=[
+                        WordTimestampResponse(
+                            word=w.word,
+                            start=w.start,
+                            end=w.end,
+                            score=w.score,
+                            speaker=w.speaker,
+                        )
+                        for w in s.words
+                    ],
+                )
+                for s in result.segments
+            ],
+            utterances=[
+                UtteranceResponse(
+                    speaker=u.speaker,
+                    text=u.text,
+                    offset=u.offset,
+                    duration=u.duration,
+                )
+                for u in result.utterances
+            ],
+            speakers=result.speakers,
+            speaker_map={k: v for k, v in result.speaker_map.items()},
+            languages=result.languages,
+            primary_language=result.primary_language,
+            words=[
+                WordTimestampResponse(
+                    word=w.word,
+                    start=w.start,
+                    end=w.end,
+                    score=w.score,
+                    speaker=w.speaker,
+                )
+                for w in result.words
+            ],
+        )
+
+    except HTTPException:
+        raise
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="WhisperX not installed. Install with: pip install -r requirements-cuda.txt"
+        )
+    except Exception as e:
+        logger.error(f"WhisperX transcription error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/transcribe/auto", response_model=TranscriptionResponse)
 async def transcribe_auto(
     response: Response,
     file: UploadFile = File(..., description="Audio file to transcribe"),
     language: Optional[str] = Form(None, description="Language hint"),
-    prefer: str = Form("whisper", description="Preferred: 'whisper' or 'voxtral'"),
+    prefer: str = Form("whisper", description="Preferred: 'whisper', 'whisperx', or 'voxtral'"),
     auth: AuthResult = Depends(verify_api_key),
 ):
     """
     Transcribe with automatic model selection and fallback.
 
     Fallback chain:
-    1. Preferred model (whisper or voxtral)
-    2. Alternative model
-    3. Mistral API
+    - whisper: Whisper → WhisperX → Voxtral → Mistral API
+    - whisperx: WhisperX → Whisper → Voxtral → Mistral API
+    - voxtral: Voxtral → WhisperX → Whisper → Mistral API
     """
     # Add rate limit headers
     if auth.rate_limit_remaining is not None:
         response.headers["X-RateLimit-Remaining"] = str(auth.rate_limit_remaining)
 
-    if prefer == "voxtral":
-        try:
-            return await transcribe_voxtral(file, language or "de", False)
-        except Exception as e:
-            logger.warning(f"Voxtral failed, trying Whisper: {e}")
-            await file.seek(0)
-            try:
-                return await transcribe_whisper(file, language, None)
-            except Exception as e2:
-                logger.warning(f"Whisper failed, trying API: {e2}")
-                await file.seek(0)
-                return await transcribe_voxtral_api(file, language, False)
+    async def try_whisperx_simple():
+        """Try WhisperX and return as simple TranscriptionResponse."""
+        if not USE_WHISPERX:
+            raise RuntimeError("WhisperX not enabled")
+        from app.whisperx_service import transcribe_audio_bytes as wx_transcribe
+        audio_bytes = await file.read()
+        result = await wx_transcribe(
+            audio_bytes=audio_bytes,
+            filename=file.filename or "audio.wav",
+            language=language,
+            enable_diarization=False,
+            enable_alignment=False,
+        )
+        return TranscriptionResponse(
+            text=result.text,
+            language=result.language,
+            model=f"whisperx-{DEFAULT_WHISPER_MODEL}",
+            latency_ms=None,
+            duration_seconds=result.duration_seconds,
+        )
+
+    # Build fallback chain based on preference
+    if prefer == "whisperx":
+        chain = [
+            ("WhisperX", try_whisperx_simple),
+            ("Whisper", lambda: transcribe_whisper(response, file, language, None, auth)),
+            ("Voxtral", lambda: transcribe_voxtral(response, file, language or "de", False, auth)),
+            ("Mistral API", lambda: transcribe_voxtral_api(response, file, language, False, auth)),
+        ]
+    elif prefer == "voxtral":
+        chain = [
+            ("Voxtral", lambda: transcribe_voxtral(response, file, language or "de", False, auth)),
+            ("WhisperX", try_whisperx_simple),
+            ("Whisper", lambda: transcribe_whisper(response, file, language, None, auth)),
+            ("Mistral API", lambda: transcribe_voxtral_api(response, file, language, False, auth)),
+        ]
     else:
+        chain = [
+            ("Whisper", lambda: transcribe_whisper(response, file, language, None, auth)),
+            ("WhisperX", try_whisperx_simple),
+            ("Voxtral", lambda: transcribe_voxtral(response, file, language or "de", False, auth)),
+            ("Mistral API", lambda: transcribe_voxtral_api(response, file, language, False, auth)),
+        ]
+
+    last_error = None
+    for name, fn in chain:
         try:
-            return await transcribe_whisper(file, language, None)
+            result = await fn()
+            return result
         except Exception as e:
-            logger.warning(f"Whisper failed, trying Voxtral: {e}")
+            last_error = e
+            logger.warning(f"{name} failed: {e}")
             await file.seek(0)
-            try:
-                return await transcribe_voxtral(file, language or "de", False)
-            except Exception as e2:
-                logger.warning(f"Voxtral failed, trying API: {e2}")
-                await file.seek(0)
-                return await transcribe_voxtral_api(file, language, False)
+
+    raise HTTPException(
+        status_code=503,
+        detail=f"All transcription backends failed. Last error: {last_error}"
+    )
 
 
 @app.exception_handler(Exception)

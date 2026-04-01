@@ -47,6 +47,9 @@ on:
           - mukke-web
           - storage-backend
           - storage-web
+          - memoro-server
+          - memoro-audio-server
+          - memoro-web
 
 concurrency:
   group: cd-macmini
@@ -92,6 +95,9 @@ jobs:
       mukke-web: ${{ steps.changes.outputs.mukke-web }}
       storage-backend: ${{ steps.changes.outputs.storage-backend }}
       storage-web: ${{ steps.changes.outputs.storage-web }}
+      memoro-server: ${{ steps.changes.outputs.memoro-server }}
+      memoro-audio-server: ${{ steps.changes.outputs.memoro-audio-server }}
+      memoro-web: ${{ steps.changes.outputs.memoro-web }}
       mana-matrix-bot: ${{ steps.changes.outputs.mana-matrix-bot }}
       any-changes: ${{ steps.changes.outputs.any-changes }}
     steps:
@@ -156,12 +162,15 @@ jobs:
           check_changes "mukke-web"         "apps/mukke/apps/web/" "apps/mukke/packages/"
           check_changes "storage-backend"   "apps/storage/apps/backend/" "apps/storage/packages/"
           check_changes "storage-web"       "apps/storage/apps/web/" "apps/storage/packages/"
+          check_changes "memoro-server"     "apps/memoro/apps/server/" "apps/memoro/packages/"
+          check_changes "memoro-audio-server" "apps/memoro/apps/audio-server/"
+          check_changes "memoro-web"        "apps/memoro/apps/web/" "apps/memoro/packages/"
           check_changes "mana-matrix-bot"   "services/mana-matrix-bot/"
           check_changes "mana-landing-builder" "services/mana-landing-builder/" "packages/shared-types/" "packages/shared-landing-ui/"
 
           # Check if anything needs deploying
           ANY="false"
-          for svc in matrix-web mana-auth mana-sync mana-media mana-notify mana-api-gateway mana-crawler mana-credits mana-search chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web mana-matrix-bot mana-landing-builder; do
+          for svc in matrix-web mana-auth mana-sync mana-media mana-notify mana-api-gateway mana-crawler mana-credits mana-search chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web memoro-server memoro-audio-server memoro-web mana-matrix-bot mana-landing-builder; do
             val=$(grep "^$svc=" $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
             if [ "$val" == "true" ]; then
               ANY="true"
@@ -245,6 +254,9 @@ jobs:
             if [ "${{ needs.detect-changes.outputs.mukke-web }}" == "true" ]; then SERVICES="$SERVICES mukke-web"; fi
             if [ "${{ needs.detect-changes.outputs.storage-backend }}" == "true" ]; then SERVICES="$SERVICES storage-backend"; fi
             if [ "${{ needs.detect-changes.outputs.storage-web }}" == "true" ]; then SERVICES="$SERVICES storage-web"; fi
+            if [ "${{ needs.detect-changes.outputs.memoro-server }}" == "true" ]; then SERVICES="$SERVICES memoro-server"; fi
+            if [ "${{ needs.detect-changes.outputs.memoro-audio-server }}" == "true" ]; then SERVICES="$SERVICES memoro-audio-server"; fi
+            if [ "${{ needs.detect-changes.outputs.memoro-web }}" == "true" ]; then SERVICES="$SERVICES memoro-web"; fi
             if [ "${{ needs.detect-changes.outputs.mana-matrix-bot }}" == "true" ]; then SERVICES="$SERVICES mana-matrix-bot"; fi
             if [ "${{ needs.detect-changes.outputs.mana-landing-builder }}" == "true" ]; then SERVICES="$SERVICES mana-landing-builder"; fi
           fi
@@ -347,6 +359,9 @@ jobs:
               mukke-web)         echo "http://localhost:5180/health" ;;
               storage-backend)   echo "http://localhost:3035/api/v1/health" ;;
               storage-web)       echo "http://localhost:5015/health" ;;
+              memoro-server)     echo "http://localhost:3015/health" ;;
+              memoro-audio-server) echo "http://localhost:3016/health" ;;
+              memoro-web)        echo "http://localhost:5038/health" ;;
               *)                 echo "" ;;
             esac
           }
@@ -356,7 +371,7 @@ jobs:
           SERVICES="${{ steps.services.outputs.services }}"
 
           if [ "$DEPLOY_ALL" == "true" ]; then
-            SERVICES="mana-auth matrix-web chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web"
+            SERVICES="mana-auth matrix-web chat-backend chat-web todo-backend todo-web calendar-backend calendar-web clock-web contacts-backend contacts-web mukke-backend mukke-web storage-backend storage-web memoro-server memoro-audio-server memoro-web"
           fi
 
           HEALTH_RESULTS=""
