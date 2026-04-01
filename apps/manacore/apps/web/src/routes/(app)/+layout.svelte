@@ -7,7 +7,12 @@
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import { locale } from 'svelte-i18n';
 	import { PillNavigation, TagStrip, DragPreview, ActionZone } from '@manacore/shared-ui';
-	import type { PillNavItem, PillDropdownItem, SpotlightAction } from '@manacore/shared-ui';
+	import type {
+		PillNavItem,
+		PillDropdownItem,
+		SpotlightAction,
+		ContentSearcher,
+	} from '@manacore/shared-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { manacoreStore } from '$lib/data/local-store';
@@ -43,6 +48,9 @@
 	import { onboardingStore } from '$lib/stores/onboarding.svelte';
 	import { OnboardingWizard } from '$lib/components/onboarding';
 	import { STORAGE_KEYS } from '$lib/config/storage-keys';
+	import { SearchRegistry } from '$lib/search/registry';
+	import { registerAllProviders } from '$lib/search/providers';
+	import { initSharedUload } from '@manacore/shared-uload';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -250,6 +258,9 @@
 			cardsReader.initialize(),
 		]);
 
+		// Initialize shared-uload (opens uLoad IndexedDB for cross-app link creation)
+		initSharedUload();
+
 		// Start syncing to server
 		const getToken = () => authStore.getValidToken();
 		manacoreStore.startSync(getToken);
@@ -279,6 +290,14 @@
 
 		loading = false;
 	});
+
+	// Cross-app search
+	const searchRegistry = new SearchRegistry();
+	registerAllProviders(searchRegistry);
+
+	const contentSearcher: ContentSearcher = async (query, signal) => {
+		return searchRegistry.search(query, { signal });
+	};
 
 	const spotlightActions: SpotlightAction[] = [
 		{ id: 'home', label: 'Home', category: 'Navigation', onExecute: () => goto('/home') },
@@ -353,6 +372,7 @@
 			helpHref="/help"
 			allAppsHref="/apps"
 			{spotlightActions}
+			{contentSearcher}
 		/>
 
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
