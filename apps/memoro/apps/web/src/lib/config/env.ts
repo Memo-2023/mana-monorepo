@@ -13,7 +13,7 @@ import {
 	PUBLIC_APPLE_REDIRECT_URI,
 	PUBLIC_POSTHOG_KEY,
 	PUBLIC_POSTHOG_HOST,
-	PUBLIC_SENTRY_DSN,
+	PUBLIC_GLITCHTIP_DSN,
 } from '$env/static/public';
 
 export const env = {
@@ -48,16 +48,16 @@ export const env = {
 		},
 	},
 
-	// Error tracking (optional)
-	sentry: {
-		dsn: PUBLIC_SENTRY_DSN || '',
+	// Error tracking (GlitchTip — Sentry-compatible, self-hosted)
+	glitchtip: {
+		dsn: PUBLIC_GLITCHTIP_DSN || '',
 	},
 } as const;
 
 // Helper to check if optional features are enabled
 export const features = {
 	hasPosthog: !!PUBLIC_POSTHOG_KEY,
-	hasSentry: !!PUBLIC_SENTRY_DSN,
+	hasGlitchtip: !!PUBLIC_GLITCHTIP_DSN,
 } as const;
 
 // Log environment configuration on startup (useful for debugging deployment issues)
@@ -69,7 +69,7 @@ if (typeof window !== 'undefined') {
 		appleRedirectUri: env.oauth.appleRedirectUri || '❌ NOT SET',
 		googleOAuth: !!env.oauth.googleClientId ? '✅ Configured' : '❌ Missing',
 		posthog: features.hasPosthog ? '✅ Enabled' : '⚪ Disabled',
-		sentry: features.hasSentry ? '✅ Enabled' : '⚪ Disabled',
+		glitchtip: features.hasGlitchtip ? '✅ Enabled' : '⚪ Disabled',
 	});
 
 	// Specific warning for Apple Sign-In if not configured

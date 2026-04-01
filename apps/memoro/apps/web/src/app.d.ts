@@ -27,11 +27,7 @@ declare module '$env/static/public' {
 	export const PUBLIC_APPLE_REDIRECT_URI: string;
 	export const PUBLIC_POSTHOG_KEY: string;
 	export const PUBLIC_POSTHOG_HOST: string;
-	export const PUBLIC_SENTRY_DSN: string;
-}
-
-declare module '$env/static/private' {
-	export const SENTRY_AUTH_TOKEN: string;
+	export const PUBLIC_GLITCHTIP_DSN: string;
 }
 
 export {};

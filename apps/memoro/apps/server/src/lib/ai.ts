@@ -1,17 +1,25 @@
 /**
- * AI text generation with Gemini (primary) → Azure OpenAI (fallback).
+ * AI text generation with mana-llm (primary) → Gemini → Azure OpenAI (fallbacks).
  *
- * Mirrors the NestJS AiService without the DI framework.
+ * Fallback chain:
+ *   1. mana-llm (self-hosted, OpenAI-compatible API on port 3025)
+ *   2. Gemini (Google Cloud)
+ *   3. Azure OpenAI (Microsoft Cloud)
  */
 
+// Self-hosted mana-llm service
+const MANA_LLM_URL = process.env.MANA_LLM_URL || '';
+const MANA_LLM_MODEL = process.env.MANA_LLM_MODEL || 'ollama/gemma3:4b';
+
+// Gemini (cloud fallback)
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_MODEL = 'gemini-2.0-flash-001';
-const GEMINI_DEFAULT_TEMPERATURE = 0.7;
-const GEMINI_DEFAULT_MAX_TOKENS = 1024;
 
+// Azure OpenAI (cloud fallback)
 const AZURE_API_VERSION = '2024-02-01';
-const AZURE_DEFAULT_TEMPERATURE = 0.7;
-const AZURE_DEFAULT_MAX_TOKENS = 1024;
+
+const DEFAULT_TEMPERATURE = 0.7;
+const DEFAULT_MAX_TOKENS = 1024;
 
 export interface GenerateOptions {
 	temperature?: number;
@@ -20,28 +28,79 @@ export interface GenerateOptions {
 }
 
 /**
- * Generate text using Gemini with Azure OpenAI as fallback.
+ * Generate text using mana-llm → Gemini → Azure OpenAI fallback chain.
  */
 export async function generateText(prompt: string, options?: GenerateOptions): Promise<string> {
-	const geminiKey = process.env.GEMINI_API_KEY;
+	// Attempt 1: Self-hosted mana-llm
+	if (MANA_LLM_URL) {
+		const result = await callManaLLM(prompt, options);
+		if (result !== null) return result;
+		console.warn('[ai] mana-llm failed, falling back to Gemini');
+	}
 
+	// Attempt 2: Gemini
+	const geminiKey = process.env.GEMINI_API_KEY;
 	if (geminiKey) {
 		const result = await callGemini(prompt, geminiKey, options);
 		if (result !== null) return result;
 		console.warn('[ai] Gemini failed, falling back to Azure OpenAI');
-	} else {
-		console.warn('[ai] No GEMINI_API_KEY, using Azure OpenAI directly');
 	}
 
+	// Attempt 3: Azure OpenAI
 	const azureKey = process.env.AZURE_OPENAI_KEY;
-	if (!azureKey) {
-		throw new Error('No AI provider available: both GEMINI_API_KEY and AZURE_OPENAI_KEY are missing');
+	if (azureKey) {
+		const result = await callAzure(prompt, azureKey, options);
+		if (result !== null) return result;
 	}
 
-	const result = await callAzure(prompt, azureKey, options);
-	if (result !== null) return result;
+	throw new Error('All AI providers failed (mana-llm, Gemini, Azure OpenAI)');
+}
 
-	throw new Error('All AI providers failed');
+/**
+ * Call self-hosted mana-llm service (OpenAI-compatible API).
+ */
+async function callManaLLM(prompt: string, options?: GenerateOptions): Promise<string | null> {
+	const temperature = options?.temperature ?? DEFAULT_TEMPERATURE;
+	const maxTokens = options?.maxTokens ?? DEFAULT_MAX_TOKENS;
+
+	try {
+		const url = `${MANA_LLM_URL}/v1/chat/completions`;
+		const start = Date.now();
+
+		const messages: Array<{ role: string; content: string }> = [];
+		if (options?.systemInstruction) {
+			messages.push({ role: 'system', content: options.systemInstruction });
+		}
+		messages.push({ role: 'user', content: prompt });
+
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				model: MANA_LLM_MODEL,
+				messages,
+				temperature,
+				max_tokens: maxTokens,
+				stream: false,
+			}),
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			console.error(`[ai] mana-llm error (${response.status}): ${errorText}`);
+			return null;
+		}
+
+		const data = (await response.json()) as {
+			choices?: Array<{ message?: { content?: string } }>;
+		};
+		const content = data.choices?.[0]?.message?.content?.trim() ?? '';
+		console.debug(`[ai] mana-llm responded in ${Date.now() - start}ms (${content.length} chars)`);
+		return content || null;
+	} catch (error) {
+		console.error(`[ai] mana-llm call failed: ${error instanceof Error ? error.message : error}`);
+		return null;
+	}
 }
 
 async function callGemini(
@@ -49,8 +108,8 @@ async function callGemini(
 	apiKey: string,
 	options?: GenerateOptions
 ): Promise<string | null> {
-	const temperature = options?.temperature ?? GEMINI_DEFAULT_TEMPERATURE;
-	const maxOutputTokens = options?.maxTokens ?? GEMINI_DEFAULT_MAX_TOKENS;
+	const temperature = options?.temperature ?? DEFAULT_TEMPERATURE;
+	const maxOutputTokens = options?.maxTokens ?? DEFAULT_MAX_TOKENS;
 
 	try {
 		const url = `${GEMINI_ENDPOINT}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
@@ -102,8 +161,8 @@ async function callAzure(
 		return null;
 	}
 
-	const temperature = options?.temperature ?? AZURE_DEFAULT_TEMPERATURE;
-	const maxTokens = options?.maxTokens ?? AZURE_DEFAULT_MAX_TOKENS;
+	const temperature = options?.temperature ?? DEFAULT_TEMPERATURE;
+	const maxTokens = options?.maxTokens ?? DEFAULT_MAX_TOKENS;
 
 	try {
 		const url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${AZURE_API_VERSION}`;
