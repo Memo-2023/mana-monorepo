@@ -11,6 +11,9 @@ ENV MIDDLEWARE_URL=$MIDDLEWARE_URL
 ENV PUBLIC_SYNC_SERVER_URL=$PUBLIC_SYNC_SERVER_URL
 
 COPY apps/manacore/apps/web ./apps/manacore/apps/web
+COPY apps/calc/packages/shared ./apps/calc/packages/shared
+COPY apps/clock/packages/shared ./apps/clock/packages/shared
+COPY apps/zitare/packages/content ./apps/zitare/packages/content
 
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --no-frozen-lockfile --ignore-scripts
