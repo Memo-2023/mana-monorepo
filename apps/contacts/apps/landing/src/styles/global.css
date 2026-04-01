@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--color-background-page: #0a0a0a;
+	--color-background-card: #1a1a1a;
+	--color-background-card-hover: #242424;
+	--color-text-primary: #ffffff;
+	--color-text-secondary: #d1d5db;
+	--color-text-muted: #9ca3af;
+	--color-border: #262626;
+	--color-border-hover: #3f3f3f;
+	--color-primary: #3b82f6;
+	--color-primary-hover: #2563eb;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	@apply bg-dark-bg text-white;
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	@apply bg-dark-bg;
+}
+
+::-webkit-scrollbar-thumb {
+	@apply bg-dark-border rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	@apply bg-gray-600;
+}
+
+/* Section padding */
+section {
+	@apply py-16 md:py-24;
+}
+
+/* Container */
+.container {
+	@apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Gradient text */
+.gradient-text {
+	@apply bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent;
+}
+
+/* Button styles */
+.btn {
+	@apply inline-flex items-center justify-center rounded-lg px-6 py-3 font-medium transition-all duration-200;
+}
+
+.btn-primary {
+	@apply bg-primary-500 text-white hover:bg-primary-600;
+}
+
+.btn-secondary {
+	@apply border border-dark-border bg-dark-card text-white hover:bg-dark-surface;
+}

@@ -1,0 +1,109 @@
+---
+// Footer component
+
+const currentYear = new Date().getFullYear();
+
+const links = {
+	product: [
+		{ name: 'Funktionen', href: '#features' },
+		{ name: 'Preise', href: '#pricing' },
+		{ name: 'Changelog', href: '/changelog' },
+		{ name: 'Roadmap', href: '/roadmap' },
+	],
+	legal: [
+		{ name: 'Impressum', href: '/impressum' },
+		{ name: 'Datenschutz', href: '/datenschutz' },
+		{ name: 'AGB', href: '/agb' },
+	],
+	support: [
+		{ name: 'FAQ', href: '/faq' },
+		{ name: 'Kontakt', href: '/kontakt' },
+		{ name: 'Status', href: '/status' },
+	],
+};
+---
+
+<footer class="border-t border-dark-border bg-dark-bg py-12">
+	<div class="container">
+		<div class="grid gap-8 md:grid-cols-4">
+			<!-- Brand -->
+			<div class="md:col-span-1">
+				<div class="mb-4 flex items-center gap-2">
+					<svg
+						class="h-8 w-8 text-primary-500"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+						></path>
+					</svg>
+					<span class="text-xl font-bold">ManaContacts</span>
+				</div>
+				<p class="text-sm text-gray-500">Smart Contact Management für bessere Beziehungen.</p>
+			</div>
+
+			<!-- Links -->
+			<div>
+				<h4 class="mb-4 font-semibold">Produkt</h4>
+				<ul class="space-y-2 text-sm text-gray-400">
+					{
+						links.product.map((link) => (
+							<li>
+								<a href={link.href} class="transition-colors hover:text-white">
+									{link.name}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<div>
+				<h4 class="mb-4 font-semibold">Rechtliches</h4>
+				<ul class="space-y-2 text-sm text-gray-400">
+					{
+						links.legal.map((link) => (
+							<li>
+								<a href={link.href} class="transition-colors hover:text-white">
+									{link.name}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<div>
+				<h4 class="mb-4 font-semibold">Support</h4>
+				<ul class="space-y-2 text-sm text-gray-400">
+					{
+						links.support.map((link) => (
+							<li>
+								<a href={link.href} class="transition-colors hover:text-white">
+									{link.name}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</div>
+
+		<!-- Bottom bar -->
+		<div
+			class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-dark-border pt-8 md:flex-row"
+		>
+			<p class="text-sm text-gray-500">
+				&copy; {currentYear} ManaContacts. Alle Rechte vorbehalten.
+			</p>
+			<p class="text-sm text-gray-500">
+				Ein <a href="https://mana.how" class="text-primary-400 hover:underline">Manacore</a> Produkt
+			</p>
+		</div>
+	</div>
+</footer>

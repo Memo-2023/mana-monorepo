@@ -1,0 +1,156 @@
+---
+// Hero section for Contacts landing page
+---
+
+<section class="relative overflow-hidden py-20 md:py-32">
+	<!-- Background gradient -->
+	<div class="absolute inset-0 bg-gradient-to-b from-primary-950/30 via-dark-bg to-dark-bg"></div>
+
+	<!-- Grid pattern -->
+	<div class="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-10"></div>
+
+	<div class="container relative">
+		<div class="mx-auto max-w-4xl text-center">
+			<!-- Badge -->
+			<div
+				class="mb-8 inline-flex items-center gap-2 rounded-full border border-primary-500/30 bg-primary-500/10 px-4 py-2 text-sm text-primary-400"
+			>
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+					></path>
+				</svg>
+				<span>Smart Contact Management</span>
+			</div>
+
+			<!-- Headline -->
+			<h1 class="mb-6 text-4xl font-bold leading-tight md:text-6xl lg:text-7xl">
+				Alle Kontakte an
+				<span class="gradient-text">einem Ort</span>
+			</h1>
+
+			<!-- Subheadline -->
+			<p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400 md:text-xl">
+				Verwalte deine Kontakte mit Tags, Gruppen und Notizen. Importiere aus Google, CSV oder vCard
+				und finde Duplikate automatisch.
+			</p>
+
+			<!-- CTA Buttons -->
+			<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+				<a href="#" class="btn btn-primary group text-lg">
+					Kostenlos starten
+					<svg
+						class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+					</svg>
+				</a>
+				<a href="#features" class="btn btn-secondary"> Funktionen entdecken </a>
+			</div>
+
+			<!-- Social proof -->
+			<div class="mt-16 flex flex-col items-center gap-4">
+				<div class="flex -space-x-2">
+					{
+						[1, 2, 3, 4, 5].map(() => (
+							<div class="h-10 w-10 rounded-full border-2 border-dark-bg bg-gradient-to-br from-primary-400 to-primary-600" />
+						))
+					}
+				</div>
+				<p class="text-sm text-gray-500">
+					<span class="font-semibold text-white">500+</span> Nutzer vertrauen ManaContacts
+				</p>
+			</div>
+		</div>
+
+		<!-- Preview mockup -->
+		<div class="relative mx-auto mt-16 max-w-5xl">
+			<div
+				class="absolute -inset-4 rounded-2xl bg-gradient-to-r from-primary-500/20 via-transparent to-primary-500/20 blur-3xl"
+			>
+			</div>
+			<div class="relative rounded-xl border border-dark-border bg-dark-card p-2 shadow-2xl">
+				<div class="flex gap-2 px-4 py-3">
+					<div class="h-3 w-3 rounded-full bg-red-500"></div>
+					<div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+					<div class="h-3 w-3 rounded-full bg-green-500"></div>
+				</div>
+				<div class="aspect-[16/9] overflow-hidden rounded-lg bg-dark-surface">
+					<!-- Contact list preview -->
+					<div class="p-6">
+						<div class="mb-4 flex items-center justify-between">
+							<h3 class="text-xl font-semibold">Kontakte</h3>
+							<div class="flex gap-2">
+								<button class="rounded-lg bg-dark-card px-3 py-1 text-sm text-gray-400">
+									Suchen...
+								</button>
+								<button class="rounded-lg bg-primary-500 px-3 py-1 text-sm">+ Neu</button>
+							</div>
+						</div>
+						<div class="space-y-3">
+							{
+								[
+									{
+										name: 'Anna Müller',
+										email: 'anna@example.com',
+										tags: ['Arbeit', 'Design'],
+									},
+									{
+										name: 'Max Schmidt',
+										email: 'max.schmidt@firma.de',
+										tags: ['Kunde'],
+									},
+									{
+										name: 'Sarah Weber',
+										email: 'sarah.w@startup.io',
+										tags: ['Arbeit', 'Dev'],
+									},
+									{
+										name: 'Tom Fischer',
+										email: 'tom@creative.de',
+										tags: ['Freelancer'],
+									},
+									{
+										name: 'Lisa Braun',
+										email: 'lisa.braun@uni.edu',
+										tags: ['Privat'],
+									},
+								].map((contact) => (
+									<div class="flex items-center gap-3 rounded-lg bg-dark-card p-3">
+										<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500/20 text-sm font-semibold text-primary-400">
+											{contact.name
+												.split(' ')
+												.map((n) => n[0])
+												.join('')}
+										</div>
+										<div class="flex-1">
+											<span class="text-white">{contact.name}</span>
+											<span class="ml-2 text-sm text-gray-500">{contact.email}</span>
+										</div>
+										<div class="flex gap-1">
+											{contact.tags.map((tag) => (
+												<span class="rounded-full bg-primary-500/10 px-2 py-0.5 text-xs text-primary-400">
+													{tag}
+												</span>
+											))}
+										</div>
+									</div>
+								))
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

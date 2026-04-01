@@ -1,0 +1,85 @@
+---
+// Features section for Contacts landing page
+
+const features = [
+	{
+		icon: `<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+		</svg>`,
+		title: 'Tags & Gruppen',
+		description:
+			'Organisiere deine Kontakte mit farbigen Tags und Gruppen. Filtere und finde Kontakte blitzschnell.',
+	},
+	{
+		icon: `<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+		</svg>`,
+		title: 'Import & Export',
+		description:
+			'Importiere Kontakte aus Google, CSV oder vCard. Exportiere jederzeit in gängige Formate.',
+	},
+	{
+		icon: `<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+		</svg>`,
+		title: 'Duplikaterkennung',
+		description:
+			'Finde und merge doppelte Kontakte automatisch. Halte dein Adressbuch sauber und aktuell.',
+	},
+	{
+		icon: `<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+		</svg>`,
+		title: 'Notizen & Aktivitäten',
+		description:
+			'Füge Notizen zu Kontakten hinzu und verfolge Aktivitäten. Vergiss nie wieder ein wichtiges Detail.',
+	},
+	{
+		icon: `<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+		</svg>`,
+		title: 'Kontaktfotos',
+		description:
+			'Lade Profilfotos hoch oder synchronisiere sie automatisch. Erkenne Kontakte auf einen Blick.',
+	},
+	{
+		icon: `<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+		</svg>`,
+		title: 'Offline-First',
+		description:
+			'Arbeite auch ohne Internet. Deine Kontakte werden lokal gespeichert und automatisch synchronisiert.',
+	},
+];
+---
+
+<section id="features" class="bg-dark-surface">
+	<div class="container">
+		<!-- Section header -->
+		<div class="mx-auto mb-16 max-w-3xl text-center">
+			<span class="mb-4 inline-block text-sm font-medium uppercase tracking-wider text-primary-400">
+				Funktionen
+			</span>
+			<h2 class="mb-6 text-3xl font-bold md:text-4xl lg:text-5xl">Kontaktverwaltung neu gedacht</h2>
+			<p class="text-lg text-gray-400">
+				ManaContacts bietet alles, was du brauchst, um deine Kontakte effizient zu verwalten.
+			</p>
+		</div>
+
+		<!-- Features grid -->
+		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+			{
+				features.map((feature) => (
+					<div class="group rounded-xl border border-dark-border bg-dark-card p-6 transition-all duration-300 hover:border-primary-500/50 hover:bg-dark-card/80">
+						<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary-500/10 text-primary-400 transition-colors group-hover:bg-primary-500/20">
+							<Fragment set:html={feature.icon} />
+						</div>
+						<h3 class="mb-3 text-xl font-semibold">{feature.title}</h3>
+						<p class="text-gray-400">{feature.description}</p>
+					</div>
+				))
+			}
+		</div>
+	</div>
+</section>

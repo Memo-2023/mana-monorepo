@@ -6,10 +6,24 @@
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { authMiddleware, healthRoute, errorHandler, notFoundHandler } from '@manacore/shared-hono';
+import {
+	authMiddleware,
+	healthRoute,
+	errorHandler,
+	notFoundHandler,
+	rateLimitMiddleware,
+} from '@manacore/shared-hono';
 
 const PORT = parseInt(process.env.PORT || '3004', 10);
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');
+
+const ALLOWED_AVATAR_TYPES = new Set([
+	'image/jpeg',
+	'image/png',
+	'image/gif',
+	'image/webp',
+	'image/svg+xml',
+]);
 
 const app = new Hono();
 
@@ -17,6 +31,7 @@ app.onError(errorHandler);
 app.notFound(notFoundHandler);
 app.use('*', cors({ origin: CORS_ORIGINS, credentials: true }));
 app.route('/health', healthRoute('contacts-server'));
+app.use('/api/*', rateLimitMiddleware({ max: 100, windowMs: 60_000 }));
 app.use('/api/*', authMiddleware());
 
 // ─── Avatar Upload (server-only: S3) ─────────────────────────
@@ -28,6 +43,9 @@ app.post('/api/v1/contacts/:id/avatar', async (c) => {
 
 	if (!file) return c.json({ error: 'No file' }, 400);
 	if (file.size > 5 * 1024 * 1024) return c.json({ error: 'Max 5MB' }, 400);
+	if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+		return c.json({ error: 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP, SVG' }, 400);
+	}
 
 	try {
 		const { createContactsStorage, generateUserFileKey, getContentType } = await import(
