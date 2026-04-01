@@ -125,7 +125,7 @@ GameEventBus          →  BehaviorRuntime         →  Action Executors
                                                       └── setVariable/sendEvent
 ```
 
-### Triggers (10 types)
+### Triggers (9 types)
 
 | Trigger | Fires when |
 |---------|-----------|
@@ -137,8 +137,7 @@ GameEventBus          →  BehaviorRuntime         →  Action Executors
 | `onHpBelow` | Player HP drops below threshold (with param check) |
 | `onAreaEnter` | Player enters a portal |
 | `onCustomEvent` | Fired by sendEvent action |
-| `onNearItem` | Item proximity (not yet wired) |
-| `onDayNight` | Day/night change (not yet implemented) |
+| `onDayNight` | Day/night change |
 
 ### Actions (11 implemented)
 
@@ -266,8 +265,9 @@ NPCs are spawned from EntityDef entries in area data. Place them via the NPC too
 - **Base64 encoding** — binary data (pixelData, spriteData) encoded for Dexie storage
 - **Svelte 5 runes** — `$state`, `$derived`, `$effect` for reactive UI state
 
-## Not Yet Implemented
+## Economy System
 
-- **Multiplayer** — 10+ message types defined, no WebSocket server
-- **Some triggers** — onNearItem not wired to game events yet
-- **Trading UI** — Merchant dialog opens but trade screen not yet implemented
+- **Gold** — Earned from defeating NPCs (hostile: 5-15g, guard: 10-25g)
+- **Merchants** — Buy items with gold, prices shown on buy button
+- **Persistence** — Gold saved/loaded with inventory in IndexedDB
+- **HUD** — Gold counter shown in top bar during gameplay

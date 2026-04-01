@@ -149,7 +149,8 @@ export async function deleteItem(itemId: string): Promise<void> {
 export async function saveInventory(
 	playerId: string,
 	slots: (GameItem | null)[],
-	heldSlot: number
+	heldSlot: number,
+	gold: number = 0
 ): Promise<void> {
 	// Clear existing inventory for this player
 	const existing = await inventoryCollection.getAll({ playerId });
@@ -167,7 +168,19 @@ export async function saveInventory(
 			itemId: item.id,
 			slot: i,
 			quantity: 1,
-			instanceData: JSON.stringify({ heldSlot }),
+			instanceData: JSON.stringify({ heldSlot, gold }),
+		});
+	}
+
+	// Save gold even if inventory is empty
+	if (slots.every((s) => s === null)) {
+		await inventoryCollection.insert({
+			id: `${playerId}_meta`,
+			playerId,
+			itemId: '',
+			slot: -1,
+			quantity: 0,
+			instanceData: JSON.stringify({ heldSlot, gold }),
 		});
 	}
 }
@@ -175,20 +188,22 @@ export async function saveInventory(
 /** Load inventory from IndexedDB */
 export async function loadInventory(
 	playerId: string
-): Promise<{ slots: (string | null)[]; heldSlot: number }> {
+): Promise<{ slots: (string | null)[]; heldSlot: number; gold: number }> {
 	const dbSlots = await inventoryCollection.getAll({ playerId });
 	const slots: (string | null)[] = Array(8).fill(null);
 	let heldSlot = -1;
+	let gold = 0;
 
 	for (const dbSlot of dbSlots) {
 		if (dbSlot.slot >= 0 && dbSlot.slot < slots.length) {
 			slots[dbSlot.slot] = dbSlot.itemId;
 		}
-		const data = safeJsonParse<{ heldSlot?: number }>(dbSlot.instanceData, {});
+		const data = safeJsonParse<{ heldSlot?: number; gold?: number }>(dbSlot.instanceData, {});
 		if (data.heldSlot !== undefined) heldSlot = data.heldSlot;
+		if (data.gold !== undefined) gold = data.gold;
 	}
 
-	return { slots, heldSlot };
+	return { slots, heldSlot, gold };
 }
 
 function dbItemToGameItem(dbItem: LocalItem): GameItem {

@@ -45,6 +45,7 @@ export const MAX_EQUIPMENT_SLOTS = 1; // Held item
 export class Inventory {
 	slots: (GameItem | null)[] = $state(Array(MAX_INVENTORY_SLOTS).fill(null));
 	heldSlot: number = $state(-1); // -1 = nothing held
+	gold: number = $state(0);
 
 	/** Called when an item is added to inventory */
 	onPickup: ((item: GameItem) => void) | null = null;
@@ -79,6 +80,11 @@ export class Inventory {
 	selectSlot(slot: number) {
 		if (slot < 0 || slot >= this.slots.length) return;
 		this.heldSlot = this.heldSlot === slot ? -1 : slot;
+	}
+
+	/** Check if an item with the given ID is in inventory */
+	hasItem(itemId: string): boolean {
+		return this.slots.some((s) => s !== null && s.id === itemId);
 	}
 
 	/** Check if inventory is full */

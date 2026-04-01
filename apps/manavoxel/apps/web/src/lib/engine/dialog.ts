@@ -20,7 +20,7 @@ export interface DialogOption {
 
 export interface TradeOffer {
 	item: GameItem;
-	cost: number; // durability points from held item as "currency"
+	cost: number; // gold cost
 }
 
 // ─── NPC Dialog Templates ─────────────────────────────────────
@@ -148,7 +148,7 @@ export class DialogManager {
 export interface MerchantOffer {
 	name: string;
 	description: string;
-	cost: number; // durability points from held item
+	cost: number; // gold cost
 	damage: number;
 	range: number;
 	speed: number;
@@ -295,6 +295,19 @@ const GUARD_LOOT: LootDrop[] = [
 		particle: 'sparks',
 	},
 ];
+
+/** Gold reward ranges per NPC type */
+const GOLD_REWARDS: Record<string, { min: number; max: number }> = {
+	hostile: { min: 5, max: 15 },
+	guard: { min: 10, max: 25 },
+};
+
+/** Roll gold reward for a defeated NPC */
+export function rollGold(npcBehavior: string): number {
+	const reward = GOLD_REWARDS[npcBehavior];
+	if (!reward) return 0;
+	return reward.min + Math.floor(Math.random() * (reward.max - reward.min + 1));
+}
 
 /** Roll loot for a defeated NPC. Returns null if nothing drops. */
 export function rollLoot(npcBehavior: string): LootDrop | null {

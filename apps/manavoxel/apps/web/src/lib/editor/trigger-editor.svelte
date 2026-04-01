@@ -16,7 +16,6 @@
 		{ value: 'onDrop', label: 'Item dropped' },
 		{ value: 'onTimer', label: 'Every X seconds' },
 		{ value: 'onHpBelow', label: 'HP below X' },
-		{ value: 'onNearItem', label: 'Item nearby' },
 		{ value: 'onAreaEnter', label: 'Entering area' },
 		{ value: 'onCustomEvent', label: 'Custom event' },
 		{ value: 'onDayNight', label: 'Day/Night change' },

@@ -18,7 +18,6 @@ export type GameEventType =
 	| 'onDrop'
 	| 'onTimer'
 	| 'onHpBelow'
-	| 'onNearItem'
 	| 'onAreaEnter'
 	| 'onCustomEvent'
 	| 'onDayNight';

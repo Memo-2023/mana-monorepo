@@ -130,10 +130,7 @@ export interface Item {
 	resolution: number; // 0.01 for detail items
 	properties: ItemProperties;
 	behavior: TriggerAction[];
-	script?: string;
-	wasmBinary?: Uint8Array;
 	rarity: Rarity;
-	capabilities: string[];
 	isPublished: boolean;
 	createdAt?: string;
 	updatedAt?: string;
@@ -152,53 +149,4 @@ export interface InventorySlot {
 	createdAt?: string;
 	updatedAt?: string;
 	deletedAt?: string;
-}
-
-// ─── Network Protocol ───────────────────────────────────────
-
-export type ClientMessage =
-	| { type: 'join'; worldId: string; areaId: string }
-	| { type: 'move'; x: number; y: number; direction: number }
-	| { type: 'setPixel'; x: number; y: number; floor: number; material: number }
-	| { type: 'useItem'; itemId: string; targetX: number; targetY: number }
-	| { type: 'enterPortal'; portalId: string }
-	| { type: 'chat'; message: string }
-	| { type: 'ping' };
-
-export type ServerMessage =
-	| { type: 'welcome'; playerId: string; areaState: Area; players: PlayerState[] }
-	| { type: 'playerJoin'; player: PlayerState }
-	| { type: 'playerLeave'; playerId: string }
-	| { type: 'playerMove'; playerId: string; x: number; y: number; direction: number }
-	| {
-			type: 'pixelChanged';
-			x: number;
-			y: number;
-			floor: number;
-			material: number;
-			playerId: string;
-	  }
-	| { type: 'itemUsed'; playerId: string; itemId: string; effects: Effect[] }
-	| { type: 'areaTransition'; areaId: string; areaState: Area; players: PlayerState[] }
-	| { type: 'chat'; playerId: string; name: string; message: string }
-	| { type: 'error'; message: string }
-	| { type: 'pong' };
-
-export interface PlayerState {
-	id: string;
-	name: string;
-	x: number;
-	y: number;
-	floor: number;
-	direction: number; // 0=up, 1=right, 2=down, 3=left
-	heldItemId?: string;
-	hp: number;
-	maxHp: number;
-}
-
-export interface Effect {
-	type: 'damage' | 'heal' | 'particle' | 'sound' | 'pixelDestroy';
-	x: number;
-	y: number;
-	params: Record<string, unknown>;
 }

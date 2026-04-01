@@ -247,9 +247,9 @@ export class GameEngine {
 			const dnResult = this.dayNight.update();
 			this.lighting.setAmbient(this.dayNight.ambientLevel);
 
-			// Fire onDayNight trigger
-			if (dnResult.changed && this.inventory?.heldItem) {
-				this._fireItemEvent('onDayNight', this.inventory.heldItem);
+			// Fire onDayNight trigger for all inventory items
+			if (dnResult.changed) {
+				this._fireEventForAllItems('onDayNight');
 			}
 		}
 
@@ -290,10 +290,15 @@ export class GameEngine {
 				this._currentFloor
 			);
 			if (portal && this.input.isKeyDown('KeyE')) {
-				this.areaManager.enterPortal(portal, this.player);
-				// Fire onAreaEnter for held item
-				if (this.inventory?.heldItem) {
-					this._fireItemEvent('onAreaEnter', this.inventory.heldItem);
+				// Check if portal requires a key item
+				if (portal.requiresKey && !this.inventory?.hasItem(portal.requiresKey)) {
+					this.showMessage('You need a key to enter here.');
+				} else {
+					this.areaManager.enterPortal(portal, this.player);
+					// Fire onAreaEnter for held item
+					if (this.inventory?.heldItem) {
+						this._fireItemEvent('onAreaEnter', this.inventory.heldItem);
+					}
 				}
 			}
 
@@ -372,9 +377,9 @@ export class GameEngine {
 				this.onStateChange?.();
 			}
 
-			// Fire onTouch for held item when touching NPCs
-			if (npcResult.touchingNpcs.length > 0 && this.inventory?.heldItem) {
-				this._fireItemEvent('onTouch', this.inventory.heldItem);
+			// Fire onTouch for all inventory items when touching NPCs
+			if (npcResult.touchingNpcs.length > 0) {
+				this._fireEventForAllItems('onTouch');
 			}
 
 			// Item-use damages NPCs in range
@@ -405,7 +410,7 @@ export class GameEngine {
 						if (died) {
 							playSound('explosion');
 							this.particles.spawn('shatter', target.worldX, target.worldY);
-							this._showMessage(`Defeated ${target.behavior} NPC!`);
+							this.showMessage(`Defeated ${target.behavior} NPC!`);
 							this.onNpcDeath?.(target.worldX, target.worldY, target.behavior);
 						}
 					}
@@ -526,6 +531,14 @@ export class GameEngine {
 		this.eventBus.emit(event);
 	}
 
+	/** Fire an event for all items in inventory (for passive triggers like onDayNight, onTouch) */
+	private _fireEventForAllItems(type: import('./behavior').GameEventType) {
+		if (!this.inventory) return;
+		for (const item of this.inventory.slots) {
+			if (item) this._fireItemEvent(type, item);
+		}
+	}
+
 	/** Create an ActionContext for behavior execution */
 	private _createActionContext(item: import('./inventory.svelte').GameItem): ActionContext {
 		return {
@@ -559,7 +572,7 @@ export class GameEngine {
 				this.camera.shake(intensity, duration);
 			},
 			showMessage: (text: string) => {
-				this._showMessage(text);
+				this.showMessage(text);
 			},
 			item,
 		};
@@ -634,13 +647,13 @@ export class GameEngine {
 					const slotIdx = this.inventory.slots.findIndex((s) => s?.id === item.id);
 					if (slotIdx >= 0) this.inventory.removeItem(slotIdx);
 				}
-				this._showMessage(`${item.name} broke!`);
+				this.showMessage(`${item.name} broke!`);
 			}
 		}
 	}
 
 	/** Show a floating message on screen */
-	private _showMessage(text: string) {
+	showMessage(text: string) {
 		if (this._messageText) {
 			this._messageText.destroy();
 		}

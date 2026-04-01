@@ -10,7 +10,13 @@
 	import TriggerEditor from '$lib/editor/trigger-editor.svelte';
 	import { Inventory, createItem, type GameItem } from '$lib/engine/inventory.svelte';
 	import { gameStore } from '$lib/data/local-store';
-	import { MERCHANT_OFFERS, rollLoot, type MerchantOffer, type LootDrop } from '$lib/engine/dialog';
+	import {
+		MERCHANT_OFFERS,
+		rollLoot,
+		rollGold,
+		type MerchantOffer,
+		type LootDrop,
+	} from '$lib/engine/dialog';
 	import {
 		loadWorld,
 		getAllWorlds,
@@ -130,6 +136,7 @@
 		if (savedInventory.heldSlot >= 0) {
 			inventory.heldSlot = savedInventory.heldSlot;
 		}
+		inventory.gold = savedInventory.gold;
 		itemCounter = savedItems.length;
 
 		const e = new GameEngine(canvasContainer, worldData ?? undefined);
@@ -138,8 +145,13 @@
 		engine = e;
 		loading = false;
 
-		// Loot drops when NPCs die
+		// Gold + loot drops when NPCs die
 		e.onNpcDeath = (npcX, npcY, behavior) => {
+			const gold = rollGold(behavior);
+			if (gold > 0) {
+				inventory.gold += gold;
+				e.showMessage(`+${gold} gold`);
+			}
 			const loot = rollLoot(behavior);
 			if (loot) {
 				groundItems = [...groundItems, { x: npcX, y: npcY, loot }];
@@ -235,7 +247,7 @@
 				}
 				engine.destroy();
 			}
-			saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
+			saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot, inventory.gold);
 			if (keydownHandler) window.removeEventListener('keydown', keydownHandler);
 		};
 	});
@@ -277,6 +289,9 @@
 				{#if !isEditing && engine?.player}
 					<div class="rounded-lg bg-gray-800/80 px-3 py-1.5 text-xs text-gray-300 backdrop-blur">
 						HP: {engine.player.hp}/{engine.player.maxHp}
+					</div>
+					<div class="rounded-lg bg-gray-800/80 px-3 py-1.5 text-xs text-yellow-400 backdrop-blur">
+						{inventory.gold}g
 					</div>
 					<div
 						class="rounded-lg px-3 py-1.5 text-xs backdrop-blur {isNight
@@ -433,7 +448,7 @@
 					{inventory}
 					onDrop={async (slot) => {
 						inventory.removeItem(slot);
-						await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
+						await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot, inventory.gold);
 					}}
 					onInspect={(item) => {
 						editingItem = item;
@@ -591,8 +606,10 @@
 							</div>
 							<button
 								class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs text-white hover:bg-emerald-500 disabled:opacity-30"
-								disabled={inventory.isFull}
+								disabled={inventory.isFull || inventory.gold < offer.cost}
 								onclick={async () => {
+									if (inventory.gold < offer.cost) return;
+									inventory.gold -= offer.cost;
 									const item = createItem(offer.name, generateTradeSprite(), {
 										damage: offer.damage,
 										range: offer.range,
@@ -608,11 +625,17 @@
 									if (slot >= 0) {
 										inventory.selectSlot(slot);
 										await saveItem(item);
-										await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
+										await saveInventory(
+											PLAYER_ID,
+											inventory.slots,
+											inventory.heldSlot,
+											inventory.gold
+										);
 									}
 								}}
 							>
-								{inventory.isFull ? 'Full' : 'Buy'}
+								{#if inventory.isFull}Full{:else if inventory.gold < offer.cost}Need {offer.cost}g{:else}Buy
+									({offer.cost}g){/if}
 							</button>
 						</div>
 					{/each}
@@ -647,7 +670,7 @@
 						});
 						inventory.addItem(item);
 						await saveItem(item);
-						await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
+						await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot, inventory.gold);
 						groundItems = groundItems.filter((g) => g !== nearby);
 					}}
 				>
@@ -671,7 +694,7 @@
 					}
 					// Persist item and inventory to IndexedDB
 					await saveItem(item);
-					await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot);
+					await saveInventory(PLAYER_ID, inventory.slots, inventory.heldSlot, inventory.gold);
 					showSpriteEditor = false;
 				}}
 				onClose={() => (showSpriteEditor = false)}
