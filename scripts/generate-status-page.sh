@@ -97,6 +97,7 @@ render_rows() {
     success="$(get_success "$inst")"
     ms="$(get_duration_ms "$inst")"
     name="$(friendly_name "$inst")"
+    tier_badge="$(get_tier_badge "$inst")"
     if [ "$success" = "1" ]; then
       status_class="up"
       status_text="UP"
@@ -106,8 +107,10 @@ render_rows() {
       status_text="DOWN"
       ms_html=""
     fi
-    printf '<tr class="%s"><td class="dot-cell"><span class="dot %s"></span></td><td class="name">%s<span class="url">%s</span></td><td class="status-cell">%s %s</td></tr>\n' \
-      "$status_class" "$status_class" "$name" "$inst" \
+    tier_html=""
+    [ -n "$tier_badge" ] && tier_html=" $tier_badge"
+    printf '<tr class="%s"><td class="dot-cell"><span class="dot %s"></span></td><td class="name">%s%s<span class="url">%s</span></td><td class="status-cell">%s %s</td></tr>\n' \
+      "$status_class" "$status_class" "$name" "$tier_html" "$inst" \
       "<span class=\"badge $status_class\">$status_text</span>" \
       "${ms_html:-}"
   done
@@ -142,7 +145,7 @@ TIMESTAMP="$(date -u '+%d. %B %Y, %H:%M Uhr UTC')"
 
 # ── App Release Tiers (automatisch aus mana-apps.ts) ────────────────────────
 # Gemountet als /mana-apps.ts (read-only) im Container.
-# Format je Zeile: name|tier|status
+# Format je Zeile: id|name|tier|status
 
 MANA_APPS_TS="${MANA_APPS_TS:-/mana-apps.ts}"
 
@@ -151,84 +154,36 @@ if [ -f "$MANA_APPS_TS" ]; then
     /^export const MANA_APPS/  { inside=1; next }
     /^];/                      { inside=0 }
     !inside                    { next }
-    /^\t\{/                    { name=""; tier=""; st=""; archived=0 }
+    /^\t\{/                    { id=""; name=""; tier=""; st=""; archived=0 }
+    /^\t\tid:/                 { gsub(/.*id:[[:space:]]*'\''/, ""); gsub(/'\''.*/, ""); id=$0 }
     /^\t\tname:/               { gsub(/.*name:[[:space:]]*'\''/, ""); gsub(/'\''.*/, ""); name=$0 }
     /^\t\trequiredTier:/       { gsub(/.*requiredTier:[[:space:]]*'\''/, ""); gsub(/'\''.*/, ""); tier=$0 }
     /^\t\tstatus:/             { gsub(/.*status:[[:space:]]*'\''/, ""); gsub(/'\''.*/, ""); st=$0 }
     /^\t\tarchived:[[:space:]]*true/ { archived=1 }
-    /^\t\},/                   { if (name != "" && tier != "" && archived == 0) print name "|" tier "|" st }
+    /^\t\},/                   { if (id != "" && tier != "" && archived == 0) print id "|" name "|" tier "|" st }
   ' "$MANA_APPS_TS")"
 else
-  echo "$(date '+%H:%M:%S') WARNUNG: $MANA_APPS_TS nicht gefunden — Tier-Sektion wird übersprungen"
+  echo "$(date '+%H:%M:%S') WARNUNG: $MANA_APPS_TS nicht gefunden — Tier-Badges deaktiviert"
   TIER_APPS=""
 fi
 
-render_tier_rows() {
-  tier="$1"
-  echo "$TIER_APPS" | while IFS='|' read -r name t status; do
-    [ -z "$name" ] && continue
-    [ "$t" != "$tier" ] && continue
-    case "$status" in
-      published)    status_class="published"; status_label="Published" ;;
-      beta)         status_class="beta-status"; status_label="Beta" ;;
-      development)  status_class="dev-status"; status_label="Development" ;;
-      planning)     status_class="plan-status"; status_label="Planned" ;;
-      *)            status_class="dev-status"; status_label="$status" ;;
-    esac
-    printf '<tr><td class="name">%s</td><td class="status-cell"><span class="badge %s">%s</span></td></tr>\n' \
-      "$name" "$status_class" "$status_label"
+# Gibt Tier-Badge-HTML für eine Blackbox-URL zurück (leer wenn kein Match)
+get_tier_badge() {
+  url="$1"
+  # Subdomain extrahieren: https://todo.mana.how → todo, https://todo-api.mana.how/health → todo-api
+  subdomain="${url#https://}"
+  subdomain="${subdomain%.mana.how*}"
+  subdomain="${subdomain%/health}"
+  # API-Subdomains skippen (z.B. todo-api, chat-api)
+  case "$subdomain" in *-api) return ;; esac
+  # Spezialfall: mana.how selbst → manacore (kein Tier)
+  [ "$subdomain" = "mana.how" ] && return
+
+  echo "$TIER_APPS" | while IFS='|' read -r id name tier st; do
+    [ "$id" = "$subdomain" ] || continue
+    printf '<span class="badge tier-%s">%s</span>' "$tier" "$tier"
+    break
   done
-}
-
-count_tier() {
-  tier="$1"
-  echo "$TIER_APPS" | grep -c "|${tier}|" || echo "0"
-}
-
-tier_founder_count="$(count_tier founder)"
-tier_alpha_count="$(count_tier alpha)"
-tier_beta_count="$(count_tier beta)"
-tier_public_count="$(count_tier public)"
-
-render_tier_section() {
-  [ -z "$TIER_APPS" ] && return
-  cat << TIEREOF
-  <div class="section">
-    <div class="section-header">
-      <h2>App Release Tiers</h2>
-      <span class="fraction">${tier_public_count} public · ${tier_beta_count} beta · ${tier_alpha_count} alpha · ${tier_founder_count} founder</span>
-    </div>
-    <div class="tier-grid">
-      <div class="tier-card tier-founder">
-        <div class="tier-card-header">
-          <h3>Founder</h3>
-          <span class="tier-count">${tier_founder_count} Apps</span>
-        </div>
-        <table>
-$(render_tier_rows founder)
-        </table>
-      </div>
-      <div class="tier-card tier-alpha">
-        <div class="tier-card-header">
-          <h3>Alpha</h3>
-          <span class="tier-count">${tier_alpha_count} Apps</span>
-        </div>
-        <table>
-$(render_tier_rows alpha)
-        </table>
-      </div>
-      <div class="tier-card tier-beta">
-        <div class="tier-card-header">
-          <h3>Beta</h3>
-          <span class="tier-count">${tier_beta_count} Apps</span>
-        </div>
-        <table>
-$(render_tier_rows beta)
-        </table>
-      </div>
-    </div>
-  </div>
-TIEREOF
 }
 
 # ── HTML generieren ──────────────────────────────────────────────────────────
@@ -370,33 +325,11 @@ cat > "${OUTPUT}.tmp" << HTMLEOF
 
     .no-data { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
 
-    /* ── Tier Section ── */
-    .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-    .tier-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .tier-card-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; border-bottom: 1px solid var(--border);
-    }
-    .tier-card-header h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
-    .tier-card-header .tier-count { font-size: 12px; color: var(--muted); }
-    .tier-card table { border: none; border-radius: 0; }
-    .tier-card tr:last-child { border-bottom: none; }
-    .tier-card td { padding: 8px 16px; }
-    .tier-card .name { font-size: 14px; }
-
-    .tier-founder .tier-card-header { background: rgba(168,85,247,.08); }
-    .tier-founder .tier-card-header h3 { color: #a855f7; }
-    .tier-alpha .tier-card-header { background: rgba(245,158,11,.08); }
-    .tier-alpha .tier-card-header h3 { color: #f59e0b; }
-    .tier-beta .tier-card-header { background: rgba(59,130,246,.08); }
-    .tier-beta .tier-card-header h3 { color: #3b82f6; }
-    .tier-public .tier-card-header { background: rgba(34,197,94,.08); }
-    .tier-public .tier-card-header h3 { color: var(--green); }
-
-    .badge.published    { background: rgba(34,197,94,.12); color: var(--green); }
-    .badge.beta-status  { background: rgba(59,130,246,.12); color: #3b82f6; }
-    .badge.dev-status   { background: rgba(245,158,11,.12); color: #f59e0b; }
-    .badge.plan-status  { background: rgba(102,102,102,.15); color: var(--muted); }
+    /* ── Tier Badges (inline) ── */
+    .badge.tier-founder { background: rgba(168,85,247,.12); color: #a855f7; margin-left: 8px; font-size: 10px; text-transform: uppercase; }
+    .badge.tier-alpha   { background: rgba(245,158,11,.12); color: #f59e0b; margin-left: 8px; font-size: 10px; text-transform: uppercase; }
+    .badge.tier-beta    { background: rgba(59,130,246,.12); color: #3b82f6; margin-left: 8px; font-size: 10px; text-transform: uppercase; }
+    .badge.tier-public  { background: rgba(34,197,94,.12); color: var(--green); margin-left: 8px; font-size: 10px; text-transform: uppercase; }
 
     /* ── Footer ── */
     footer {
@@ -480,8 +413,6 @@ $(render_rows blackbox-gpu)
     </table>
   </div>
 
-$(render_tier_section)
-
   <footer>
     <p>Powered by <a href="https://mana.how">ManaCore</a> · Metriken via Prometheus Blackbox Exporter</p>
   </footer>
@@ -505,7 +436,7 @@ if [ -n "$TIER_APPS" ]; then
   TIER_JSON="$(echo "$TIER_APPS" | awk -F'|' '
     BEGIN { printf "[" }
     NR>1  { printf "," }
-    { printf "{\"name\":\"%s\",\"tier\":\"%s\",\"status\":\"%s\"}", $1, $2, $3 }
+    { printf "{\"id\":\"%s\",\"name\":\"%s\",\"tier\":\"%s\",\"status\":\"%s\"}", $1, $2, $3, $4 }
     END   { printf "]" }
   ')"
 fi
