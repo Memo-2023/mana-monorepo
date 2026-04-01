@@ -25,11 +25,11 @@
 | 8 | **planta** | mutations, queries, utils (2), stores (1) | 4 routes (dashboard, add, detail, tags) | **Done** |
 | 9 | **citycorners** | stores (1), queries, utils (1) | 13 routes (cities, locations, map, favorites) | **Done** |
 | 10 | **photos** | stores (3), components (8), queries | 6 routes (gallery, favorites, albums, upload) | **Done** |
-| 11 | **presi** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 12 | **uload** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 13 | **context** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 14 | **questions** | leerer Modul-Ordner | — | **Nicht begonnen** |
-| 15 | **nutriphi** | leerer Modul-Ordner | — | **Nicht begonnen** |
+| 11 | **presi** | stores (1), queries, types | 3 routes (deck list, editor, presenter) | **Done** |
+| 12 | **uload** | queries (umfangreich), types | 3 routes (dashboard, links, analytics) | **Done** |
+| 13 | **context** | queries, types | 5 routes (dashboard, spaces, documents) | **Done** |
+| 14 | **questions** | queries, types | 4 routes (list, collections, new, detail) | **Done** |
+| 15 | **nutriphi** | queries, types, constants | 4 routes (dashboard, add, history, goals) | **Done** |
 | 16 | **storage** | leerer Modul-Ordner | — | **Nicht begonnen** |
 | 17 | **cards** | leerer Modul-Ordner | — | **Nicht begonnen** |
 | 18 | **contacts** | leerer Modul-Ordner | — | **Nicht begonnen** |
@@ -51,10 +51,9 @@
 
 ### Nächste Schritte
 
-1. Mittlere Apps: **presi** (#11), **uload** (#12), **context** (#13), **questions** (#14), **nutriphi** (#15)
-2. Backend-Apps: **storage** (#16), **cards** (#17)
-3. Komplexe Apps: **contacts**, **todo**, **calendar**, **picture**, **chat**, **mukke**, **memoro**
-4. Extra: **playground** (#25)
+1. Backend-Apps: **storage** (#16), **cards** (#17)
+2. Komplexe Apps: **contacts**, **todo**, **calendar**, **picture**, **chat**, **mukke**, **memoro**
+3. Extra: **playground** (#25)
 
 ---
 
