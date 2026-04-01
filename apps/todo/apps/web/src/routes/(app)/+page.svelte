@@ -6,49 +6,37 @@
 	import { Plus } from '@manacore/shared-icons';
 	import PagePicker from '$lib/components/pages/PagePicker.svelte';
 	import TodoPage from '$lib/components/pages/TodoPage.svelte';
-	import { minimizedPagesStore } from '$lib/stores/minimized-pages.svelte';
+	import type { MinimizedPagesContext } from '$lib/stores/minimized-pages.svelte';
 
 	// Get active view from layout context
 	const activeViewCtx: { readonly value: LocalBoardView | null } = getContext('activeView');
+	const minimizedPages: MinimizedPagesContext = getContext('minimizedPages');
 
 	let activeView = $derived(activeViewCtx.value);
 	let pageTitle = $derived(activeView?.name ?? 'Aufgaben');
 
 	// ── Pages ───────────────────────────────────────────────
 	let showPagePicker = $state(false);
-	let openPages = $state<{ id: string; minimized: boolean; customTitle?: string }[]>([
-		{ id: 'todo', minimized: false },
-	]);
+	let openPages = $state<
+		{ id: string; minimized: boolean; maximized?: boolean; customTitle?: string }[]
+	>([{ id: 'todo', minimized: false }]);
 
 	let expandedPages = $derived(openPages.filter((p) => !p.minimized));
 
-	// Sync minimized pages to shared store so layout can render tabs
+	// Sync minimized pages to layout via context
 	$effect(() => {
-		minimizedPagesStore.set(openPages);
+		minimizedPages.sync(openPages);
 	});
-	onDestroy(() => minimizedPagesStore.clear());
 
-	// Listen for events from layout's minimized tab bar
-	function onRestorePage(e: Event) {
-		handleRestorePage((e as CustomEvent).detail);
-	}
-	function onRemovePage(e: Event) {
-		handleRemovePage((e as CustomEvent).detail);
-	}
-	function onTogglePagePicker() {
-		togglePagePicker();
-	}
-
-	$effect(() => {
-		window.addEventListener('restore-page', onRestorePage);
-		window.addEventListener('remove-page', onRemovePage);
-		window.addEventListener('toggle-page-picker', onTogglePagePicker);
-		return () => {
-			window.removeEventListener('restore-page', onRestorePage);
-			window.removeEventListener('remove-page', onRemovePage);
-			window.removeEventListener('toggle-page-picker', onTogglePagePicker);
-		};
+	// Register handlers so layout can delegate tab actions back to us
+	minimizedPages.registerHandlers({
+		restore: (id) => handleRestorePage(id),
+		remove: (id) => handleRemovePage(id),
+		maximize: (id) => handleMaximizePage(id),
+		togglePicker: () => togglePagePicker(),
 	});
+
+	onDestroy(() => minimizedPages.clear());
 
 	function handleAddPage(pageId: string) {
 		if (!openPages.some((p) => p.id === pageId)) {
@@ -73,6 +61,12 @@
 
 	function handleRenamePage(pageId: string, name: string) {
 		openPages = openPages.map((p) => (p.id === pageId ? { ...p, customTitle: name } : p));
+	}
+
+	function handleMaximizePage(pageId: string) {
+		openPages = openPages.map((p) =>
+			p.id === pageId ? { ...p, maximized: !p.maximized, minimized: false } : p
+		);
 	}
 
 	// ── Page drag reorder ───────────────────────────────────
@@ -193,15 +187,37 @@
 						<TodoPage
 							pageId={page.id}
 							title={page.customTitle}
+							maximized={page.maximized}
 							onClose={() => handleRemovePage(page.id)}
 							onMinimize={() => handleMinimizePage(page.id)}
+							onMaximize={() => handleMaximizePage(page.id)}
 							onRename={(name) => handleRenamePage(page.id, name)}
 						/>
 					</div>
 				{/each}
 
-				<!-- Page picker -->
-				{#if showPagePicker}
+				<!-- Page picker / add button -->
+				{#if expandedPages.length === 0}
+					<!-- Wrapper matches sheet width so fokus-track centering works -->
+					<div class="empty-pages-wrapper">
+						{#if showPagePicker}
+							<PagePicker
+								onSelect={handleAddPage}
+								onClose={() => (showPagePicker = false)}
+								activePageIds={openPages.map((p) => p.id)}
+							/>
+						{:else}
+							<button
+								class="neue-seite-card alone"
+								onclick={togglePagePicker}
+								title="Neue Seite hinzufügen"
+							>
+								<Plus size={24} />
+								<span class="neue-seite-label">Seite hinzufügen</span>
+							</button>
+						{/if}
+					</div>
+				{:else if showPagePicker}
 					<div bind:this={pagePickerEl}>
 						<PagePicker
 							onSelect={handleAddPage}
@@ -243,14 +259,31 @@
 		width: 48px;
 		align-self: stretch;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		gap: 0.75rem;
 		border: 2px dashed rgba(0, 0, 0, 0.08);
 		border-radius: 0.375rem;
 		background: transparent;
 		color: #9ca3af;
 		cursor: pointer;
 		transition: all 0.2s;
+	}
+	.empty-pages-wrapper {
+		flex: 0 0 auto;
+		/* Match the sheet width from fokus-track so centering padding works */
+		width: var(--sheet-width, min(480px, 85vw));
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 60vh;
+	}
+
+	.neue-seite-card.alone {
+		width: 100%;
+		min-height: 60vh;
+		border-color: rgba(0, 0, 0, 0.12);
 	}
 	.neue-seite-card:hover {
 		border-color: var(--color-primary, #8b5cf6);
@@ -261,10 +294,20 @@
 		border-color: rgba(255, 255, 255, 0.06);
 		color: #4b5563;
 	}
+	:global(.dark) .neue-seite-card.alone {
+		border-color: rgba(255, 255, 255, 0.1);
+		color: #6b7280;
+	}
 	:global(.dark) .neue-seite-card:hover {
 		border-color: var(--color-primary, #8b5cf6);
 		color: var(--color-primary, #8b5cf6);
 		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 8%, transparent);
+	}
+
+	.neue-seite-label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		letter-spacing: 0.01em;
 	}
 
 	.empty-state {

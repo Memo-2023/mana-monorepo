@@ -9,7 +9,9 @@
 		ImmersiveModeToggle,
 		BottomStack,
 		MinimizedTabs,
+		NotificationBar,
 	} from '@manacore/shared-ui';
+	import type { BottomNotification } from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -52,14 +54,18 @@
 		SessionExpiredBanner,
 		AuthGate,
 		GuestWelcomeModal,
-		GuestRegistrationNudge,
+		startGuestSession,
+		shouldShowGuestNudge,
+		dismissGuestNudge,
 	} from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
+	import { UserPlus } from '@manacore/shared-icons';
 	import { TodoEvents } from '@manacore/shared-utils/analytics';
 	import { todoStore, taskCollection } from '$lib/data/local-store';
 	import type { LocalBoardView } from '$lib/data/local-store';
 	import { useAllTasks, useAllBoardViews } from '$lib/data/task-queries';
 	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
+	import { List, X } from '@manacore/shared-icons';
 	import { createMinimizedPagesContext } from '$lib/stores/minimized-pages.svelte';
 
 	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
@@ -118,6 +124,48 @@
 			return activeView;
 		},
 	});
+
+	// ── Bottom notifications ────────────────────────────────
+	let bottomNotifications = $state<BottomNotification[]>([]);
+	let guestNudgeInterval: ReturnType<typeof setInterval> | null = null;
+
+	function initGuestNudge() {
+		if (authStore.isAuthenticated) return;
+		startGuestSession('todo');
+
+		function checkNudge() {
+			if (shouldShowGuestNudge('todo', 3)) {
+				bottomNotifications = [
+					{
+						id: 'guest-nudge',
+						message:
+							($locale || 'de') === 'de'
+								? 'Gefällt es dir? Sichere deine Daten geräteübergreifend.'
+								: 'Like what you see? Save your data across devices.',
+						type: 'info' as const,
+						action: {
+							label: ($locale || 'de') === 'de' ? 'Konto erstellen' : 'Create account',
+							icon: UserPlus,
+							onClick: () => {
+								dismissGuestNudge('todo');
+								bottomNotifications = [];
+								goto('/register');
+							},
+						},
+						dismissible: true,
+						onDismiss: () => {
+							dismissGuestNudge('todo');
+							bottomNotifications = bottomNotifications.filter((n) => n.id !== 'guest-nudge');
+						},
+					},
+				];
+				if (guestNudgeInterval) clearInterval(guestNudgeInterval);
+			}
+		}
+
+		checkNudge();
+		guestNudgeInterval = setInterval(checkNudge, 30_000);
+	}
 
 	// Guest welcome modal state
 	let showGuestWelcome = $state(false);
@@ -200,12 +248,16 @@
 		}
 	}
 
+	// Bottom bar visibility (controlled by FAB)
+	let isBottomBarsVisible = $state(true);
+
 	// FilterStrip visibility (toggle via Filter button in PillNav)
 	let isFilterStripVisible = $derived(!todoSettings.filterStripCollapsed);
 
 	// BottomStack computes these offsets automatically
 	let pillNavOffset = $state('0px');
 	let tagStripOffset = $state('72px');
+	let fabOffset = $state('20px');
 
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
@@ -314,6 +366,10 @@
 		}
 	}
 
+	function handleBottomBarsToggle() {
+		isBottomBarsVisible = !isBottomBarsVisible;
+	}
+
 	function handleToggleTheme() {
 		theme.toggleMode();
 	}
@@ -377,6 +433,9 @@
 		// Show guest welcome modal on first visit
 		initGuestWelcome();
 
+		// Start guest registration nudge timer
+		initGuestNudge();
+
 		// Tags and projects are now loaded reactively via useLiveQuery — no fetch needed
 
 		// User settings need auth
@@ -415,10 +474,11 @@
 			{#if !todoSettings.immersiveModeEnabled}
 				<!-- BottomStack: computes offsets for the entire bottom bar stack -->
 				<BottomStack
-					pillNavVisible={true}
-					tagStripVisible={isFilterStripVisible}
+					pillNavVisible={isBottomBarsVisible}
+					tagStripVisible={isBottomBarsVisible && isFilterStripVisible}
 					bind:pillNavOffset
 					bind:tagStripOffset
+					bind:fabOffset
 				>
 					<MinimizedTabs
 						pages={minimizedPages.pages}
@@ -427,6 +487,9 @@
 						onMaximize={(id) => minimizedPages.maximize(id)}
 						onAdd={() => minimizedPages.togglePicker()}
 					/>
+					{#snippet top()}
+						<NotificationBar notifications={bottomNotifications} />
+					{/snippet}
 				</BottomStack>
 
 				<!-- 1. QuickInputBar (always at bottom) -->
@@ -444,51 +507,70 @@
 						deferSearch={true}
 						locale={$locale || 'de'}
 						appIcon="todo"
+						hasFabRight={true}
 						bottomOffset="16px"
 					/>
 				{/if}
 
-				<!-- 2. PillNav (above InputBar, always visible) -->
-				<PillNavigation
-					items={navItems}
-					currentPath={$page.url.pathname}
-					appName="Todo"
-					homeRoute="/"
-					onToggleTheme={handleToggleTheme}
-					{isDark}
-					showThemeToggle={true}
-					showThemeVariants={true}
-					{themeVariantItems}
-					{currentThemeVariantLabel}
-					themeMode={theme.mode}
-					onThemeModeChange={handleThemeModeChange}
-					showLanguageSwitcher={true}
-					{languageItems}
-					{currentLanguageLabel}
-					showLogout={authStore.isAuthenticated}
-					onLogout={handleLogout}
-					loginHref="/login"
-					primaryColor="#8b5cf6"
-					showAppSwitcher={true}
-					{appItems}
-					{userEmail}
-					settingsHref="/settings"
-					manaHref="/mana"
-					profileHref="/profile"
-					allAppsHref="/apps"
-					themesHref="/themes"
-					spiralHref="/spiral"
-					helpHref="/help"
-					onOpenInPanel={handleOpenInPanel}
-					ariaLabel="Hauptnavigation"
-					{spotlightActions}
-					bottomOffset={pillNavOffset}
-				/>
+				<!-- 2. PillNav + TagStrip (toggled by FAB) -->
+				{#if isBottomBarsVisible}
+					<PillNavigation
+						items={navItems}
+						currentPath={$page.url.pathname}
+						appName="Todo"
+						homeRoute="/"
+						onToggleTheme={handleToggleTheme}
+						{isDark}
+						showThemeToggle={true}
+						showThemeVariants={true}
+						{themeVariantItems}
+						{currentThemeVariantLabel}
+						themeMode={theme.mode}
+						onThemeModeChange={handleThemeModeChange}
+						showLanguageSwitcher={true}
+						{languageItems}
+						{currentLanguageLabel}
+						showLogout={authStore.isAuthenticated}
+						onLogout={handleLogout}
+						loginHref="/login"
+						primaryColor="#8b5cf6"
+						showAppSwitcher={true}
+						{appItems}
+						{userEmail}
+						settingsHref="/settings"
+						manaHref="/mana"
+						profileHref="/profile"
+						allAppsHref="/apps"
+						themesHref="/themes"
+						spiralHref="/spiral"
+						helpHref="/help"
+						onOpenInPanel={handleOpenInPanel}
+						ariaLabel="Hauptnavigation"
+						{spotlightActions}
+						bottomOffset={pillNavOffset}
+					/>
 
-				<!-- 3. TagStrip (above PillNav) -->
-				{#if isFilterStripVisible}
-					<TagStrip bottomOffset={tagStripOffset} />
+					<!-- 3. TagStrip (above PillNav) -->
+					{#if isFilterStripVisible}
+						<TagStrip bottomOffset={tagStripOffset} />
+					{/if}
 				{/if}
+
+				<!-- FAB to toggle bottom bars -->
+				<button
+					class="pillnav-fab"
+					style="--fab-bottom: {fabOffset}"
+					onclick={handleBottomBarsToggle}
+					title={isBottomBarsVisible ? 'Navigation ausblenden' : 'Navigation anzeigen'}
+					aria-label={isBottomBarsVisible ? 'Navigation ausblenden' : 'Navigation anzeigen'}
+					data-umami-event="bottom-bars-toggle"
+				>
+					{#if isBottomBarsVisible}
+						<X size={20} weight="bold" />
+					{:else}
+						<List size={20} weight="bold" />
+					{/if}
+				</button>
 
 				<!-- DnD: floating preview + action zones -->
 				<DragPreview />
@@ -543,13 +625,6 @@
 
 	{#if authStore.isAuthenticated}
 		<SessionExpiredBanner locale={$locale || 'de'} loginHref="/login" />
-	{:else}
-		<GuestRegistrationNudge
-			appId="todo"
-			onRegister={() => goto('/register')}
-			locale={($locale || 'de') === 'de' ? 'de' : 'en'}
-			delayMinutes={3}
-		/>
 	{/if}
 </AuthGate>
 
@@ -619,5 +694,43 @@
 		.main-content {
 			padding-bottom: calc(100px + env(safe-area-inset-bottom));
 		}
+	}
+
+	/* FAB to toggle bottom bars — next to QuickInputBar */
+	.pillnav-fab {
+		position: fixed;
+		bottom: calc(var(--fab-bottom, 20px) + env(safe-area-inset-bottom, 0px));
+		left: calc(50% + 350px + 0.75rem);
+		width: 56px;
+		height: 56px;
+		border-radius: 50%;
+		background: var(--color-surface-elevated-2);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-xl);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1002;
+		transition: all 0.2s ease;
+	}
+
+	@media (max-width: 900px) {
+		.pillnav-fab {
+			left: auto;
+			right: 1rem;
+		}
+	}
+
+	.pillnav-fab:hover {
+		transform: scale(1.05);
+	}
+
+	.pillnav-fab:active {
+		transform: scale(0.95);
+	}
+
+	.pillnav-fab :global(svg) {
+		color: var(--color-foreground);
 	}
 </style>

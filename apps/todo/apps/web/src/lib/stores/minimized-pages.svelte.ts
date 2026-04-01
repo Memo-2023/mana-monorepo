@@ -1,8 +1,8 @@
 /**
- * Minimized pages context — layout owns the state, page reads/writes via context.
+ * Minimized pages context — shared between layout and page via Svelte context.
  *
- * Layout calls `createMinimizedPagesContext()` + `setContext`.
- * Page calls `getContext('minimizedPages')` to get the same object.
+ * Layout creates the context, renders MinimizedTabs using its reactive state.
+ * Page registers callbacks (restore/remove/togglePicker) and syncs its openPages.
  */
 import type { MinimizedPage } from '@manacore/shared-ui';
 
@@ -18,16 +18,39 @@ export const PAGE_META: Record<string, { title: string; color: string }> = {
 };
 
 export interface MinimizedPagesContext {
+	/** Reactive list of minimized pages (read by layout for rendering) */
 	readonly pages: MinimizedPage[];
+	/** Whether there are any minimized pages */
 	readonly hasPages: boolean;
-	/** Called by page to sync its openPages state */
+	/** Sync open pages state from page component */
 	sync(openPages: { id: string; minimized: boolean }[]): void;
-	/** Called by page on unmount */
+	/** Clear all pages (called on page unmount) */
 	clear(): void;
+	/** Restore a minimized page — delegates to registered callback */
+	restore(pageId: string): void;
+	/** Remove a page — delegates to registered callback */
+	remove(pageId: string): void;
+	/** Maximize a minimized page — delegates to registered callback */
+	maximize(pageId: string): void;
+	/** Toggle page picker — delegates to registered callback */
+	togglePicker(): void;
+	/** Page registers its handlers here */
+	registerHandlers(handlers: {
+		restore: (id: string) => void;
+		remove: (id: string) => void;
+		maximize: (id: string) => void;
+		togglePicker: () => void;
+	}): void;
 }
 
 export function createMinimizedPagesContext(): MinimizedPagesContext {
 	let pages = $state<MinimizedPage[]>([]);
+	let handlers = $state<{
+		restore: (id: string) => void;
+		remove: (id: string) => void;
+		maximize: (id: string) => void;
+		togglePicker: () => void;
+	} | null>(null);
 
 	return {
 		get pages() {
@@ -36,7 +59,7 @@ export function createMinimizedPagesContext(): MinimizedPagesContext {
 		get hasPages() {
 			return pages.length > 0;
 		},
-		sync(openPages: { id: string; minimized: boolean }[]) {
+		sync(openPages) {
 			pages = openPages
 				.filter((p) => p.minimized)
 				.map((p) => {
@@ -46,6 +69,22 @@ export function createMinimizedPagesContext(): MinimizedPagesContext {
 		},
 		clear() {
 			pages = [];
+			handlers = null;
+		},
+		restore(pageId) {
+			handlers?.restore(pageId);
+		},
+		remove(pageId) {
+			handlers?.remove(pageId);
+		},
+		maximize(pageId) {
+			handlers?.maximize(pageId);
+		},
+		togglePicker() {
+			handlers?.togglePicker();
+		},
+		registerHandlers(h) {
+			handlers = h;
 		},
 	};
 }

@@ -3,7 +3,7 @@
 	import { isToday, isPast, startOfDay, addDays, subHours, format } from 'date-fns';
 	import { t } from 'svelte-i18n';
 	import type { Task } from '@todo/shared';
-	import { X, Circle, Minus, DotsSixVertical } from '@manacore/shared-icons';
+	import { X, Circle, Minus, DotsSixVertical, CornersOut, CornersIn } from '@manacore/shared-icons';
 	import KanbanTaskCard from '../kanban/KanbanTaskCard.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
@@ -11,12 +11,22 @@
 	interface Props {
 		pageId: string;
 		title?: string;
+		maximized?: boolean;
 		onClose: () => void;
 		onMinimize?: () => void;
+		onMaximize?: () => void;
 		onRename?: (name: string) => void;
 	}
 
-	let { pageId, title: customTitle, onClose, onMinimize, onRename }: Props = $props();
+	let {
+		pageId,
+		title: customTitle,
+		maximized = false,
+		onClose,
+		onMinimize,
+		onMaximize,
+		onRename,
+	}: Props = $props();
 
 	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
 
@@ -175,7 +185,7 @@
 	}
 </script>
 
-<div class="todo-page" style="width: {sheetWidth}">
+<div class="todo-page" class:maximized style="width: {maximized ? '100%' : sheetWidth}">
 	<div class="drag-handle-bar">
 		<span class="drag-handle">
 			<DotsSixVertical size={14} />
@@ -202,6 +212,19 @@
 			{#if onMinimize}
 				<button class="header-btn" onclick={onMinimize} title="Minimieren">
 					<Minus size={14} />
+				</button>
+			{/if}
+			{#if onMaximize}
+				<button
+					class="header-btn"
+					onclick={onMaximize}
+					title={maximized ? 'Verkleinern' : 'Maximieren'}
+				>
+					{#if maximized}
+						<CornersIn size={14} />
+					{:else}
+						<CornersOut size={14} />
+					{/if}
 				</button>
 			{/if}
 			<button class="header-btn" onclick={onClose} title="Seite schließen">
@@ -293,6 +316,42 @@
 		box-shadow:
 			0 2px 8px rgba(0, 0, 0, 0.25),
 			0 0 0 1px rgba(255, 255, 255, 0.06);
+	}
+
+	.todo-page.maximized {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		width: 100% !important;
+		min-height: 100vh;
+		border-radius: 0;
+		box-shadow: none;
+		animation: fadeInScale 0.2s ease-out;
+		align-items: center;
+	}
+
+	.todo-page.maximized .page-header,
+	.todo-page.maximized .page-body {
+		width: 100%;
+		max-width: 720px;
+	}
+
+	.todo-page.maximized .page-header {
+		margin: 0 auto;
+	}
+
+	.todo-page.maximized .page-body {
+		margin: 0 auto;
+	}
+	@keyframes fadeInScale {
+		from {
+			opacity: 0.8;
+			transform: scale(0.97);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
 	}
 
 	.drag-handle-bar {
