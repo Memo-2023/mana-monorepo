@@ -17,6 +17,7 @@
 	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
 
 	const PAGE_META: Record<string, { title: string; color: string }> = {
+		todo: { title: 'To Do', color: '#6B7280' },
 		completed: { title: 'Erledigt', color: '#22C55E' },
 		today: { title: 'Heute', color: '#F59E0B' },
 		overdue: { title: 'Überfällig', color: '#EF4444' },
@@ -34,6 +35,8 @@
 		const weekEnd = addDays(today, 7);
 
 		switch (pageId) {
+			case 'todo':
+				return tasks.filter((t) => !t.isCompleted);
 			case 'completed':
 				return tasks.filter((t) => t.isCompleted);
 			case 'today':
@@ -141,7 +144,6 @@
 	.secondary-page {
 		flex: 0 0 auto;
 		min-height: 60vh;
-		scroll-snap-align: center;
 		background: #fffef5;
 		border-radius: 0.375rem;
 		box-shadow:

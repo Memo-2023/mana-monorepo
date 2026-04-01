@@ -240,11 +240,8 @@
 		display: flex;
 		gap: 1.5rem;
 		overflow-x: auto;
-		scroll-snap-type: x mandatory;
-		/* Centering padding: pushes first sheet to viewport center.
-		   Works like a carousel — padding is scrollable. */
+		/* Centering padding: pushes first sheet to viewport center */
 		padding: 1rem calc(50% - var(--sheet-width) / 2);
-		scroll-padding: calc(50% - var(--sheet-width) / 2);
 		scrollbar-width: none;
 	}
 	.fokus-track::-webkit-scrollbar {
@@ -255,7 +252,6 @@
 		flex: 0 0 auto;
 		width: var(--sheet-width, min(840px, 85vw));
 		min-height: 60vh;
-		scroll-snap-align: center;
 		background: #fffef5;
 		border-radius: 0.375rem;
 		box-shadow:

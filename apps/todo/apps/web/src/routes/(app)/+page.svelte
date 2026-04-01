@@ -37,7 +37,7 @@
 	}
 
 	function handleColumnClose(colIdx: number) {
-		if (!activeView || activeView.columns.length <= 1) return;
+		if (!activeView) return;
 		const columns = $state.snapshot(activeView.columns).filter((_, i) => i !== colIdx);
 		updateView({ columns });
 	}
@@ -83,7 +83,7 @@
 	}
 
 	function removeColumn(colIdx: number) {
-		if (!activeView || activeView.columns.length <= 1) return;
+		if (!activeView) return;
 		const columns = $state.snapshot(activeView.columns).filter((_, i) => i !== colIdx);
 		updateView({ columns });
 	}

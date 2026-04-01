@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		Circle,
 		CheckCircle,
 		CalendarCheck,
 		Warning,
@@ -27,6 +28,13 @@
 	let { onSelect, onClose, activePageIds = [] }: Props = $props();
 
 	const PAGE_OPTIONS: PageOption[] = [
+		{
+			id: 'todo',
+			title: 'To Do',
+			description: 'Offene Aufgaben',
+			icon: Circle,
+			color: '#6B7280',
+		},
 		{
 			id: 'completed',
 			title: 'Erledigt',
@@ -118,7 +126,6 @@
 		flex: 0 0 auto;
 		width: min(320px, 85vw);
 		min-height: 60vh;
-		scroll-snap-align: center;
 		background: #fffef5;
 		border-radius: 0.375rem;
 		box-shadow:
