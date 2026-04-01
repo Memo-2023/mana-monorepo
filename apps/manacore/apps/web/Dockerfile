@@ -14,9 +14,14 @@ COPY apps/manacore/apps/web ./apps/manacore/apps/web
 COPY apps/calc/packages/shared ./apps/calc/packages/shared
 COPY apps/clock/packages/shared ./apps/clock/packages/shared
 COPY apps/zitare/packages/content ./apps/zitare/packages/content
+COPY packages/shared-uload ./packages/shared-uload
 
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --no-frozen-lockfile --ignore-scripts
+
+# Build dependencies that need compilation
+WORKDIR /app/apps/zitare/packages/content
+RUN pnpm build
 
 WORKDIR /app/apps/manacore/apps/web
 RUN pnpm exec svelte-kit sync

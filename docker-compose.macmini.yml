@@ -620,7 +620,7 @@ services:
     ports:
       - "3011:3011"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3011/health"]
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3011/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 120s
       timeout: 10s
       retries: 3
@@ -1083,7 +1083,7 @@ services:
     ports:
       - "3025:3025"
     healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:3025/health').raise_for_status()"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3025/health')"]
       interval: 120s
       timeout: 10s
       retries: 3
