@@ -104,4 +104,5 @@ function parseVCard(text: string): Array<Record<string, string>> {
 	return contacts;
 }
 
+export { app };
 export default { port: PORT, fetch: app.fetch };

@@ -134,4 +134,5 @@ function parseICS(text: string): Array<Record<string, string>> {
 	return events;
 }
 
+export { app };
 export default { port: PORT, fetch: app.fetch };
