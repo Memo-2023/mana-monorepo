@@ -41,6 +41,7 @@
 		"@manacore/shared-auth-stores": "workspace:*",
 		"@manacore/shared-auth-ui": "workspace:*",
 		"@manacore/shared-branding": "workspace:*",
+		"@manacore/shared-uload": "workspace:*",
 		"@manacore/shared-ui": "workspace:*",
 		"lucide-svelte": "^0.539.0",
 		"svelte-i18n": "^4.0.1",

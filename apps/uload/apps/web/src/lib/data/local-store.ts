@@ -23,6 +23,7 @@ export interface LocalLink extends BaseRecord {
 	utmCampaign?: string | null;
 	folderId?: string | null;
 	order: number;
+	source?: string | null;
 }
 
 export interface LocalTag extends BaseRecord {
@@ -66,6 +67,7 @@ export const uloadStore = createLocalStore({
 				'folderId',
 				'order',
 				'clickCount',
+				'source',
 				'[folderId+order]',
 				'[isActive+order]',
 			],

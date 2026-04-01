@@ -13,6 +13,7 @@
 		Trash,
 		X,
 	} from '@manacore/shared-icons';
+	import { APP_SOURCE_LABELS } from '@manacore/shared-uload';
 
 	const QR_API = 'https://api.qrserver.com/v1/create-qr-code';
 
@@ -29,6 +30,16 @@
 	let searchQuery = $state('');
 	let selectedStatus = $state<'all' | 'active' | 'inactive'>('all');
 	let selectedFolderId = $state<string | null>(null);
+	let selectedSource = $state<string | null>(null);
+
+	// Unique sources for filter dropdown
+	let availableSources = $derived.by(() => {
+		const sources = new Set<string>();
+		for (const link of links.value ?? []) {
+			if (link.source) sources.add(link.source);
+		}
+		return [...sources].sort();
+	});
 
 	// Create form state
 	let showCreateForm = $state(false);
@@ -78,6 +89,7 @@
 		if (selectedStatus === 'active') result = result.filter((l) => l.isActive);
 		if (selectedStatus === 'inactive') result = result.filter((l) => !l.isActive);
 		if (selectedFolderId) result = result.filter((l) => l.folderId === selectedFolderId);
+		if (selectedSource) result = result.filter((l) => l.source === selectedSource);
 		return result;
 	});
 
@@ -437,6 +449,14 @@
 					{/each}
 				</select>
 			{/if}
+			{#if availableSources.length > 0}
+				<select bind:value={selectedSource} class={inputSmClass} style="max-width: 160px">
+					<option value={null}>Alle Quellen</option>
+					{#each availableSources as source}
+						<option value={source}>{APP_SOURCE_LABELS[source] || source}</option>
+					{/each}
+				</select>
+			{/if}
 		</div>
 
 		<!-- Bulk Actions Bar -->
@@ -515,6 +535,13 @@
 									>
 										/{link.shortCode}
 									</span>
+									{#if link.source}
+										<span
+											class="shrink-0 rounded bg-purple-100 px-1.5 py-0.5 text-xs text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+											title="Erstellt via {APP_SOURCE_LABELS[link.source] || link.source}"
+											>{APP_SOURCE_LABELS[link.source] || link.source}</span
+										>
+									{/if}
 									{#if link.utmSource || link.utmMedium || link.utmCampaign}
 										<span
 											class="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-700 dark:bg-amber-900 dark:text-amber-300"
