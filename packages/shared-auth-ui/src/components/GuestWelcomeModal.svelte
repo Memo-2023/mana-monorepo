@@ -2,7 +2,6 @@
 	import { getManaApp, type AppIconId } from '@manacore/shared-branding';
 	import {
 		X,
-		Info,
 		SignIn,
 		UserPlus,
 		Question,
@@ -20,8 +19,7 @@
 		guestModeTitle: 'Sofort loslegen:',
 		whatYouCanDo: 'Was du als Gast tun kannst',
 		dataWarningTitle: 'Hinweis',
-		dataWarningText:
-			'Daten werden nur lokal in diesem Browser gespeichert. Melde dich an, um sie geräteübergreifend zu synchronisieren.',
+		dataWarningText: 'Lokal gespeichert. Anmelden zum Synchronisieren.',
 		loginButton: 'Anmelden',
 		registerButton: 'Konto erstellen',
 		helpButton: 'Hilfe & Erste Schritte',
@@ -33,7 +31,7 @@
 		guestModeTitle: 'Get started instantly:',
 		whatYouCanDo: 'What you can do as a guest',
 		dataWarningTitle: 'Note',
-		dataWarningText: 'Data is stored locally in this browser only. Sign in to sync across devices.',
+		dataWarningText: 'Stored locally. Sign in to sync.',
 		loginButton: 'Sign In',
 		registerButton: 'Sign Up',
 		helpButton: 'Help & Getting Started',
@@ -42,26 +40,26 @@
 
 	/** Default features per app (German) */
 	const defaultFeaturesDE: Record<string, string[]> = {
-		contacts: ['Alle Kontakte an einem Ort', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
-		chat: ['Dein persönlicher KI-Assistent', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
-		todo: ['Organisiere deinen Alltag', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
-		calendar: ['Dein Kalender, deine Regeln', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
-		clock: ['Zeit im Griff, überall', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
-		zitare: ['Tägliche Inspiration für dich', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
-		picture: ['Kreativität trifft KI', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
-		cards: ['Lernen leicht gemacht', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
+		contacts: ['Alle Kontakte an einem Ort', 'Quelloffen & unabhängig', 'Privat by Design'],
+		chat: ['Dein persönlicher KI-Assistent', 'Quelloffen & unabhängig', 'Privat by Design'],
+		todo: ['Organisiere deinen Alltag', 'Quelloffen & unabhängig', 'Privat by Design'],
+		calendar: ['Dein Kalender, deine Regeln', 'Quelloffen & unabhängig', 'Privat by Design'],
+		clock: ['Zeit im Griff, überall', 'Quelloffen & unabhängig', 'Privat by Design'],
+		zitare: ['Tägliche Inspiration für dich', 'Quelloffen & unabhängig', 'Privat by Design'],
+		picture: ['Kreativität trifft KI', 'Quelloffen & unabhängig', 'Privat by Design'],
+		cards: ['Lernen leicht gemacht', 'Quelloffen & unabhängig', 'Privat by Design'],
 	};
 
 	/** Default features per app (English) */
 	const defaultFeaturesEN: Record<string, string[]> = {
-		contacts: ['All your contacts in one place', 'No sign-up needed', 'Your data belongs to you'],
-		chat: ['Your personal AI assistant', 'No sign-up needed', 'Your data belongs to you'],
-		todo: ['Organize your day', 'No sign-up needed', 'Your data belongs to you'],
-		calendar: ['Your calendar, your rules', 'No sign-up needed', 'Your data belongs to you'],
-		clock: ['Time at your fingertips', 'No sign-up needed', 'Your data belongs to you'],
-		zitare: ['Daily inspiration for you', 'No sign-up needed', 'Your data belongs to you'],
-		picture: ['Where creativity meets AI', 'No sign-up needed', 'Your data belongs to you'],
-		cards: ['Learning made easy', 'No sign-up needed', 'Your data belongs to you'],
+		contacts: ['All your contacts in one place', 'Open-source & independent', 'Private by design'],
+		chat: ['Your personal AI assistant', 'Open-source & independent', 'Private by design'],
+		todo: ['Organize your day', 'Open-source & independent', 'Private by design'],
+		calendar: ['Your calendar, your rules', 'Open-source & independent', 'Private by design'],
+		clock: ['Time at your fingertips', 'Open-source & independent', 'Private by design'],
+		zitare: ['Daily inspiration for you', 'Open-source & independent', 'Private by design'],
+		picture: ['Where creativity meets AI', 'Open-source & independent', 'Private by design'],
+		cards: ['Learning made easy', 'Open-source & independent', 'Private by design'],
 	};
 
 	interface Props {
@@ -227,6 +225,7 @@
 			</div>
 
 			<!-- App Name -->
+			<span class="mana-label">Mana</span>
 			<h2 id="welcome-title" class="app-name">{appInfo.name}</h2>
 
 			<!-- Guest Features -->
@@ -281,22 +280,19 @@
 					<ArrowRight size={18} />
 				</button>
 
-				<!-- Data hint + learn more -->
-				<div class="footer-hints">
-					<p class="data-hint">
-						<Info size={14} class="data-hint-icon" />
-						<span>{t.dataWarningText}</span>
-					</p>
-					<a
-						href="https://manacore-landing.pages.dev"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="learn-more-link"
-					>
-						<span>{locale === 'de' ? 'Mehr über Mana erfahren' : 'Learn more about Mana'}</span>
-						<ArrowSquareOut size={12} />
-					</a>
-				</div>
+				<!-- Data hint -->
+				<p class="data-hint">{t.dataWarningText}</p>
+
+				<!-- Learn more -->
+				<a
+					href="https://manacore-landing.pages.dev"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="learn-more-link"
+				>
+					<span>{locale === 'de' ? 'Mehr über Mana erfahren' : 'Learn more about Mana'}</span>
+					<ArrowSquareOut size={14} />
+				</a>
 			</div>
 		</div>
 	</div>
@@ -382,13 +378,27 @@
 		color: rgba(255, 255, 255, 0.9);
 	}
 
+	.mana-label {
+		display: block;
+		text-align: center;
+		font-size: 0.875rem;
+		font-weight: 600;
+		letter-spacing: 0.03em;
+		color: rgba(0, 0, 0, 0.7);
+		margin-bottom: -0.25rem;
+	}
+
+	:global(.dark) .mana-label {
+		color: rgba(255, 255, 255, 0.7);
+	}
+
 	.icon-container {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		width: 56px;
 		height: 56px;
-		margin: 0 auto 0.75rem;
+		margin: 0 auto 0.5rem;
 		border-radius: 1.25rem;
 		background: linear-gradient(
 			145deg,
@@ -408,7 +418,7 @@
 	}
 
 	.app-name {
-		margin: 0 0 0.5rem;
+		margin: 0 0 0.25rem;
 		font-size: 1.5rem;
 		font-weight: 700;
 		text-align: center;
@@ -420,6 +430,8 @@
 	}
 
 	.features-section {
+		display: flex;
+		justify-content: center;
 		margin-bottom: 1rem;
 	}
 
@@ -457,60 +469,16 @@
 		gap: 0.625rem;
 	}
 
-	.footer-hints {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 0.25rem;
-	}
-
-	.learn-more-link {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		font-size: 0.75rem;
-		color: rgba(0, 0, 0, 0.4);
-		text-decoration: none;
-		transition: color 0.2s ease;
-	}
-
-	.learn-more-link:hover {
-		color: rgba(0, 0, 0, 0.7);
-	}
-
-	:global(.dark) .learn-more-link {
-		color: rgba(255, 255, 255, 0.4);
-	}
-
-	:global(.dark) .learn-more-link:hover {
-		color: rgba(255, 255, 255, 0.7);
-	}
-
 	.data-hint {
-		display: flex;
-		align-items: flex-start;
-		justify-content: center;
-		gap: 0.375rem;
-		margin: 0.25rem 0 0;
-		font-size: 0.75rem;
-		line-height: 1.4;
-		color: rgba(0, 0, 0, 0.4);
+		margin: 0;
+		font-size: 0.8rem;
+		line-height: 1.45;
+		color: rgba(0, 0, 0, 0.5);
 		text-align: center;
 	}
 
 	:global(.dark) .data-hint {
-		color: rgba(255, 255, 255, 0.4);
-	}
-
-	:global(.data-hint-icon) {
-		flex-shrink: 0;
-		margin-top: 0.1rem;
-		color: rgba(0, 0, 0, 0.3);
-	}
-
-	:global(.dark .data-hint-icon) {
-		color: rgba(255, 255, 255, 0.3);
+		color: rgba(255, 255, 255, 0.5);
 	}
 
 	.btn {
@@ -577,20 +545,45 @@
 
 	.btn-ghost {
 		background: transparent;
-		color: rgba(0, 0, 0, 0.5);
+		color: rgba(0, 0, 0, 0.6);
 		padding: 0.625rem 1rem;
 	}
 
 	.btn-ghost:hover {
-		color: rgba(0, 0, 0, 0.8);
+		color: rgba(0, 0, 0, 0.9);
 	}
 
 	:global(.dark) .btn-ghost {
-		color: rgba(255, 255, 255, 0.5);
+		color: rgba(255, 255, 255, 0.65);
 	}
 
 	:global(.dark) .btn-ghost:hover {
-		color: rgba(255, 255, 255, 0.8);
+		color: rgba(255, 255, 255, 0.95);
+	}
+
+	.learn-more-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		padding: 0.5rem 1rem;
+		font-size: 0.8rem;
+		font-weight: 500;
+		color: rgba(0, 0, 0, 0.45);
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	.learn-more-link:hover {
+		color: rgba(0, 0, 0, 0.75);
+	}
+
+	:global(.dark) .learn-more-link {
+		color: rgba(255, 255, 255, 0.45);
+	}
+
+	:global(.dark) .learn-more-link:hover {
+		color: rgba(255, 255, 255, 0.75);
 	}
 
 	/* Animations */
