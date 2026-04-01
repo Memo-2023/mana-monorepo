@@ -224,5 +224,11 @@
 	"toolbar": {
 		"taskOptions": "Aufgaben-Optionen",
 		"switchView": "Ansicht wechseln"
+	},
+	"secondaryPage": {
+		"recentlyCompleted": "Kürzlich erledigt",
+		"completedAtTime": "{time} Uhr",
+		"completedAtDateTime": "{date}, {time} Uhr",
+		"newTaskPlaceholder": "Neue Aufgabe…"
 	}
 }

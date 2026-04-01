@@ -4,7 +4,7 @@
 	import { BoardViewRenderer } from '$lib/components/board-views';
 	import { todoSettings, type PageWidth } from '$lib/stores/settings.svelte';
 	import { boardViewsStore } from '$lib/stores/board-views.svelte';
-	import { Plus } from '@manacore/shared-icons';
+	import { Plus, Minus, X } from '@manacore/shared-icons';
 	import PagePicker from '$lib/components/pages/PagePicker.svelte';
 	import SecondaryPage from '$lib/components/pages/SecondaryPage.svelte';
 
@@ -19,17 +19,31 @@
 
 	// ── Secondary Pages ─────────────────────────────────────
 	let showPagePicker = $state(false);
-	let openPages = $state<string[]>([]);
+	let openPages = $state<{ id: string; minimized: boolean }[]>([]);
+
+	let expandedPages = $derived(openPages.filter((p) => !p.minimized));
+	let minimizedPages = $derived(openPages.filter((p) => p.minimized));
 
 	function handleAddPage(pageId: string) {
-		if (!openPages.includes(pageId)) {
-			openPages = [...openPages, pageId];
+		if (!openPages.some((p) => p.id === pageId)) {
+			openPages = [...openPages, { id: pageId, minimized: false }];
+		} else {
+			// Restore if minimized
+			openPages = openPages.map((p) => (p.id === pageId ? { ...p, minimized: false } : p));
 		}
 		showPagePicker = false;
 	}
 
 	function handleRemovePage(pageId: string) {
-		openPages = openPages.filter((p) => p !== pageId);
+		openPages = openPages.filter((p) => p.id !== pageId);
+	}
+
+	function handleMinimizePage(pageId: string) {
+		openPages = openPages.map((p) => (p.id === pageId ? { ...p, minimized: true } : p));
+	}
+
+	function handleRestorePage(pageId: string) {
+		openPages = openPages.map((p) => (p.id === pageId ? { ...p, minimized: false } : p));
 	}
 
 	function togglePagePicker() {
@@ -112,6 +126,25 @@
 		activeView?.groupBy === 'status' || activeView?.groupBy === 'custom'
 	);
 
+	const PAGE_META: Record<string, { title: string; color: string }> = {
+		todo: { title: 'To Do', color: '#6B7280' },
+		completed: { title: 'Erledigt', color: '#22C55E' },
+		today: { title: 'Heute', color: '#F59E0B' },
+		overdue: { title: 'Überfällig', color: '#EF4444' },
+		all: { title: 'Alle Aufgaben', color: '#3B82F6' },
+		'high-priority': { title: 'Hohe Priorität', color: '#EF4444' },
+		'this-week': { title: 'Diese Woche', color: '#8B5CF6' },
+		'no-date': { title: 'Ohne Datum', color: '#6B7280' },
+	};
+
+	let pagePickerEl = $state<HTMLDivElement | null>(null);
+
+	$effect(() => {
+		if (showPagePicker && pagePickerEl) {
+			pagePickerEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+		}
+	});
+
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape' && editMode) {
 			editModeCtx.set(false);
@@ -169,6 +202,37 @@
 		</div>
 	{/if}
 
+	<!-- Minimized Page Tabs -->
+	{#if minimizedPages.length > 0}
+		<div class="minimized-tabs">
+			{#each minimizedPages as page (page.id)}
+				{@const meta = PAGE_META[page.id] ?? { title: page.id, color: '#6B7280' }}
+				<div
+					class="minimized-tab"
+					role="button"
+					tabindex="0"
+					onclick={() => handleRestorePage(page.id)}
+				>
+					<span class="minimized-tab-dot" style="background-color: {meta.color}"></span>
+					<span class="minimized-tab-title">{meta.title}</span>
+					<button
+						class="minimized-tab-close"
+						onclick={(e) => {
+							e.stopPropagation();
+							handleRemovePage(page.id);
+						}}
+						title="Schließen"
+					>
+						<X size={10} />
+					</button>
+				</div>
+			{/each}
+			<button class="minimized-tab-add" onclick={togglePagePicker} title="Neue Seite hinzufügen">
+				<Plus size={14} />
+			</button>
+		</div>
+	{/if}
+
 	<!-- Board Content -->
 	{#if activeView}
 		<BoardViewRenderer
@@ -183,18 +247,24 @@
 		>
 			{#snippet trailing()}
 				<!-- Secondary Pages -->
-				{#each openPages as pageId (pageId)}
-					<SecondaryPage {pageId} onClose={() => handleRemovePage(pageId)} />
+				{#each expandedPages as page (page.id)}
+					<SecondaryPage
+						pageId={page.id}
+						onClose={() => handleRemovePage(page.id)}
+						onMinimize={() => handleMinimizePage(page.id)}
+					/>
 				{/each}
 
 				<!-- Neue Seite button (always last in track) -->
 				{#if !editMode}
 					{#if showPagePicker}
-						<PagePicker
-							onSelect={handleAddPage}
-							onClose={() => (showPagePicker = false)}
-							activePageIds={openPages}
-						/>
+						<div bind:this={pagePickerEl}>
+							<PagePicker
+								onSelect={handleAddPage}
+								onClose={() => (showPagePicker = false)}
+								activePageIds={openPages.map((p) => p.id)}
+							/>
+						</div>
 					{:else}
 						<button
 							class="neue-seite-card"
@@ -245,6 +315,116 @@
 		color: #4b5563;
 	}
 	:global(.dark) .neue-seite-card:hover {
+		border-color: var(--color-primary, #8b5cf6);
+		color: var(--color-primary, #8b5cf6);
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 8%, transparent);
+	}
+
+	/* ── Minimized Tabs ──────────────────────────────────── */
+	.minimized-tabs {
+		display: flex;
+		justify-content: center;
+		gap: 0.375rem;
+		padding: 0.5rem 1.5rem 0.25rem;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+	.minimized-tabs::-webkit-scrollbar {
+		display: none;
+	}
+
+	.minimized-tab {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.4rem 0.75rem 0.4rem 0.75rem;
+		background: #fffef5;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		border-radius: 0.375rem;
+		cursor: pointer;
+		transition: all 0.15s;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+	.minimized-tab:hover {
+		background: #fffdf0;
+		border-color: rgba(0, 0, 0, 0.12);
+	}
+	:global(.dark) .minimized-tab {
+		background: #252220;
+		border-color: rgba(255, 255, 255, 0.08);
+	}
+	:global(.dark) .minimized-tab:hover {
+		background: #2a2725;
+		border-color: rgba(255, 255, 255, 0.14);
+	}
+
+	.minimized-tab-dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+
+	.minimized-tab-title {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #6b7280;
+	}
+	:global(.dark) .minimized-tab-title {
+		color: #9ca3af;
+	}
+
+	.minimized-tab-close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+		border: none;
+		background: transparent;
+		color: #d1d5db;
+		border-radius: 0.125rem;
+		cursor: pointer;
+		padding: 0;
+		transition: all 0.15s;
+	}
+	.minimized-tab-close:hover {
+		color: #6b7280;
+		background: rgba(0, 0, 0, 0.06);
+	}
+	:global(.dark) .minimized-tab-close {
+		color: #4b5563;
+	}
+	:global(.dark) .minimized-tab-close:hover {
+		color: #9ca3af;
+		background: rgba(255, 255, 255, 0.08);
+	}
+
+	.minimized-tab-add {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 0.375rem;
+		border: 1px dashed rgba(0, 0, 0, 0.15);
+		background: transparent;
+		color: #9ca3af;
+		cursor: pointer;
+		flex-shrink: 0;
+		transition: all 0.15s;
+	}
+	.minimized-tab-add:hover {
+		border-color: var(--color-primary, #8b5cf6);
+		color: var(--color-primary, #8b5cf6);
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 4%, transparent);
+	}
+	:global(.dark) .minimized-tab-add {
+		border-color: rgba(255, 255, 255, 0.1);
+		color: #4b5563;
+	}
+	:global(.dark) .minimized-tab-add:hover {
 		border-color: var(--color-primary, #8b5cf6);
 		color: var(--color-primary, #8b5cf6);
 		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 8%, transparent);

@@ -224,5 +224,11 @@
 	"toolbar": {
 		"taskOptions": "Options des tâches",
 		"switchView": "Changer de vue"
+	},
+	"secondaryPage": {
+		"recentlyCompleted": "Récemment terminées",
+		"completedAtTime": "{time} h",
+		"completedAtDateTime": "{date}, {time} h",
+		"newTaskPlaceholder": "Nouvelle tâche…"
 	}
 }

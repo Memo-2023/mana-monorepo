@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { isToday, isPast, startOfDay, addDays } from 'date-fns';
+	import { isToday, isPast, startOfDay, addDays, subHours, format } from 'date-fns';
+	import { t } from 'svelte-i18n';
 	import type { Task } from '@todo/shared';
-	import { X } from '@manacore/shared-icons';
+	import { X, Circle, Minus } from '@manacore/shared-icons';
 	import KanbanTaskCard from '../kanban/KanbanTaskCard.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
@@ -10,9 +11,10 @@
 	interface Props {
 		pageId: string;
 		onClose: () => void;
+		onMinimize?: () => void;
 	}
 
-	let { pageId, onClose }: Props = $props();
+	let { pageId, onClose, onMinimize }: Props = $props();
 
 	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
 
@@ -35,8 +37,14 @@
 		const weekEnd = addDays(today, 7);
 
 		switch (pageId) {
-			case 'todo':
-				return tasks.filter((t) => !t.isCompleted);
+			case 'todo': {
+				const recentCutoff = subHours(new Date(), 24);
+				return tasks.filter(
+					(t) =>
+						!t.isCompleted ||
+						(t.isCompleted && t.completedAt && new Date(t.completedAt) >= recentCutoff)
+				);
+			}
 			case 'completed':
 				return tasks.filter((t) => t.isCompleted);
 			case 'today':
@@ -106,6 +114,40 @@
 	};
 
 	let sheetWidth = $derived(PAGE_WIDTH_MAP[todoSettings.pageWidth] || PAGE_WIDTH_MAP.medium);
+
+	let openTasks = $derived(
+		pageId === 'todo' ? filteredTasks.filter((t) => !t.isCompleted) : filteredTasks
+	);
+	let recentlyCompleted = $derived(
+		pageId === 'todo' ? filteredTasks.filter((t) => t.isCompleted) : []
+	);
+
+	function formatCompletedTime(completedAt: string): string {
+		const date = new Date(completedAt);
+		const time = format(date, 'HH:mm');
+		if (pageId === 'completed') {
+			const dateStr = format(date, 'dd.MM.');
+			return $t('secondaryPage.completedAtDateTime', { values: { date: dateStr, time } });
+		}
+		return $t('secondaryPage.completedAtTime', { values: { time } });
+	}
+
+	let newTaskTitle = $state('');
+	let inputEl = $state<HTMLInputElement | null>(null);
+
+	async function handleInlineCreate() {
+		const title = newTaskTitle.trim();
+		if (!title) return;
+		const data: { title: string; dueDate?: string } = { title };
+		if (pageId === 'today') {
+			data.dueDate = new Date().toISOString();
+		} else if (pageId === 'this-week') {
+			data.dueDate = new Date().toISOString();
+		}
+		await tasksStore.createTask(data);
+		newTaskTitle = '';
+		inputEl?.focus();
+	}
 </script>
 
 <div class="secondary-page" style="width: {sheetWidth}">
@@ -115,18 +157,35 @@
 			<span class="page-title">{meta.title}</span>
 			<span class="task-count">{filteredTasks.length}</span>
 		</div>
-		<button class="close-btn" onclick={onClose} title="Seite schließen">
-			<X size={14} />
-		</button>
+		<div class="header-actions">
+			{#if onMinimize}
+				<button class="header-btn" onclick={onMinimize} title="Minimieren">
+					<Minus size={14} />
+				</button>
+			{/if}
+			<button class="header-btn" onclick={onClose} title="Seite schließen">
+				<X size={14} />
+			</button>
+		</div>
 	</div>
 
 	<div class="page-body">
-		{#if filteredTasks.length === 0}
-			<div class="empty-state">
-				<p>Keine Aufgaben</p>
-			</div>
-		{:else}
+		{#if pageId === 'completed'}
 			{#each filteredTasks as task (task.id)}
+				<div class="task-card-wrapper completed-task">
+					<KanbanTaskCard
+						{task}
+						onToggleComplete={() => handleToggle(task)}
+						onSave={(data) => handleUpdate(task.id, data)}
+						onDelete={() => handleDelete(task.id)}
+					/>
+					{#if task.completedAt}
+						<span class="completed-time">{formatCompletedTime(task.completedAt)}</span>
+					{/if}
+				</div>
+			{/each}
+		{:else}
+			{#each openTasks as task (task.id)}
 				<div class="task-card-wrapper">
 					<KanbanTaskCard
 						{task}
@@ -136,6 +195,40 @@
 					/>
 				</div>
 			{/each}
+
+			{#if recentlyCompleted.length > 0}
+				<div class="completed-section">
+					<span class="completed-label">{$t('secondaryPage.recentlyCompleted')}</span>
+					{#each recentlyCompleted as task (task.id)}
+						<div class="task-card-wrapper completed-task">
+							<KanbanTaskCard
+								{task}
+								onToggleComplete={() => handleToggle(task)}
+								onSave={(data) => handleUpdate(task.id, data)}
+								onDelete={() => handleDelete(task.id)}
+							/>
+							{#if task.completedAt}
+								<span class="completed-time">{formatCompletedTime(task.completedAt)}</span>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{/if}
+
+			<div class="inline-create">
+				<span class="inline-create-icon">
+					<Circle size={18} />
+				</span>
+				<input
+					bind:this={inputEl}
+					bind:value={newTaskTitle}
+					class="inline-create-input"
+					placeholder={$t('secondaryPage.newTaskPlaceholder')}
+					onkeydown={(e) => {
+						if (e.key === 'Enter') handleInlineCreate();
+					}}
+				/>
+			</div>
 		{/if}
 	</div>
 </div>
@@ -213,7 +306,13 @@
 		color: #6b7280;
 	}
 
-	.close-btn {
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.125rem;
+	}
+
+	.header-btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -226,11 +325,11 @@
 		cursor: pointer;
 		transition: all 0.15s;
 	}
-	.close-btn:hover {
+	.header-btn:hover {
 		background: rgba(0, 0, 0, 0.06);
 		color: #374151;
 	}
-	:global(.dark) .close-btn:hover {
+	:global(.dark) .header-btn:hover {
 		background: rgba(255, 255, 255, 0.1);
 		color: #f3f4f6;
 	}
@@ -248,14 +347,73 @@
 		margin-bottom: 0;
 	}
 
-	.empty-state {
+	.completed-section {
+		margin-top: 1rem;
+		padding-top: 0.75rem;
+		border-top: 1px solid rgba(0, 0, 0, 0.06);
+	}
+	:global(.dark) .completed-section {
+		border-top-color: rgba(255, 255, 255, 0.08);
+	}
+
+	.completed-label {
+		font-size: 0.6875rem;
+		font-weight: 500;
+		color: #9ca3af;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		margin-bottom: 0.5rem;
+		display: block;
+	}
+
+	.completed-task {
+		position: relative;
+		opacity: 0.6;
+	}
+
+	.completed-time {
+		position: absolute;
+		right: 0.5rem;
+		top: 0.5rem;
+		font-size: 0.6875rem;
+		color: #9ca3af;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	.inline-create {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		height: 120px;
+		gap: 0.5rem;
+		padding: 0.5rem 0.25rem;
+		margin-top: 0.25rem;
 	}
-	.empty-state p {
+
+	.inline-create-icon {
+		flex-shrink: 0;
+		color: #d1d5db;
+		display: flex;
+		align-items: center;
+	}
+	:global(.dark) .inline-create-icon {
+		color: #4b5563;
+	}
+
+	.inline-create-input {
+		flex: 1;
+		border: none;
+		background: transparent;
 		font-size: 0.8125rem;
-		color: #9ca3af;
+		color: #374151;
+		outline: none;
+	}
+	.inline-create-input::placeholder {
+		color: #c0bfba;
+	}
+	:global(.dark) .inline-create-input {
+		color: #f3f4f6;
+	}
+	:global(.dark) .inline-create-input::placeholder {
+		color: #4b5563;
 	}
 </style>
