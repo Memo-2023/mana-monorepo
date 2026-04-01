@@ -45,6 +45,7 @@ export const tasksStore = {
 					order: count,
 					recurrenceRule: data.recurrenceRule ?? null,
 					subtasks: data.subtasks,
+					...(data.labelIds?.length && { metadata: { labelIds: data.labelIds } }),
 				};
 
 				const inserted = await taskCollection.insert(newLocal);
@@ -159,8 +160,10 @@ export const tasksStore = {
 		return withErrorHandling(
 			setError,
 			async () => {
+				const existing = await taskCollection.get(id);
+				const existingMeta = (existing?.metadata as Record<string, unknown>) ?? {};
 				const updated = await taskCollection.update(id, {
-					metadata: { labelIds },
+					metadata: { ...existingMeta, labelIds },
 				} as Partial<LocalTask>);
 				if (updated) {
 					return toTask(updated);
