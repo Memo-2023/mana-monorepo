@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import { ArrowLeft, ArrowRight, Trash } from '@manacore/shared-icons';
 
 	interface Props {
@@ -26,11 +25,9 @@
 		onDelete,
 	}: Props = $props();
 
-	const editModeCtx: { readonly active: boolean } | undefined = getContext('editMode');
-	let editMode = $derived(editModeCtx?.active ?? false);
-	let editable = $derived(editMode && !!onRename);
-
 	let showColorPicker = $state(false);
+	let isEditingName = $state(false);
+	let editInputEl = $state<HTMLInputElement | null>(null);
 
 	const PRESET_COLORS = [
 		'#EF4444',
@@ -50,6 +47,25 @@
 		'#6B7280',
 		'#334155',
 	];
+
+	function startEditing() {
+		if (!onRename) return;
+		isEditingName = true;
+		requestAnimationFrame(() => {
+			editInputEl?.select();
+		});
+	}
+
+	function finishEditing() {
+		isEditingName = false;
+	}
+
+	function handleNameKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' || e.key === 'Escape') {
+			e.preventDefault();
+			finishEditing();
+		}
+	}
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -57,13 +73,12 @@
 	<div class="picker-backdrop" onclick={() => (showColorPicker = false)}></div>
 {/if}
 
-<div class="column-header" class:editing={editable}>
-	{#if editable}
-		<!-- Edit mode: same layout, color dot is clickable, name is input -->
-		<div class="header-left">
+<div class="column-header">
+	<div class="header-left">
+		{#if onColorChange}
 			<div class="color-dot-wrapper">
 				<button
-					class="color-dot editable"
+					class="color-dot clickable"
 					style="background-color: {color}"
 					onclick={() => (showColorPicker = !showColorPicker)}
 					title="Farbe ändern"
@@ -78,7 +93,7 @@
 									class:active={color === c}
 									style="background-color: {c}"
 									onclick={() => {
-										onColorChange?.(c);
+										onColorChange(c);
 										showColorPicker = false;
 									}}
 								></button>
@@ -89,56 +104,41 @@
 							<input
 								type="color"
 								value={color}
-								oninput={(e) => onColorChange?.(e.currentTarget.value)}
+								oninput={(e) => onColorChange(e.currentTarget.value)}
 								class="custom-color-input"
 							/>
 						</label>
 					</div>
 				{/if}
 			</div>
+		{:else}
+			<span class="color-dot" style="background-color: {color}"></span>
+		{/if}
 
+		{#if isEditingName && onRename}
 			<input
+				bind:this={editInputEl}
 				class="name-input"
 				type="text"
 				value={name}
-				oninput={(e) => onRename?.(e.currentTarget.value)}
+				oninput={(e) => onRename(e.currentTarget.value)}
+				onblur={finishEditing}
+				onkeydown={handleNameKeydown}
 			/>
-		</div>
-
-		<div class="edit-actions">
-			<button
-				class="act-btn"
-				onclick={() => onMove?.(-1)}
-				disabled={columnIndex === 0}
-				title="Nach links"
+		{:else}
+			<span
+				class="column-name"
+				class:editable={!!onRename}
+				role={onRename ? 'button' : undefined}
+				tabindex={onRename ? 0 : undefined}
+				onclick={startEditing}
+				onkeydown={(e) => {
+					if (e.key === 'Enter') startEditing();
+				}}>{name}</span
 			>
-				<ArrowLeft size={12} />
-			</button>
-			<button
-				class="act-btn"
-				onclick={() => onMove?.(1)}
-				disabled={columnIndex >= totalColumns - 1}
-				title="Nach rechts"
-			>
-				<ArrowRight size={12} />
-			</button>
-			<button
-				class="act-btn del-btn"
-				onclick={() => onDelete?.()}
-				disabled={totalColumns <= 1}
-				title="Spalte löschen"
-			>
-				<Trash size={12} />
-			</button>
-		</div>
-	{:else}
-		<!-- Normal mode -->
-		<div class="header-left">
-			<span class="color-dot" style="background-color: {color}"></span>
-			<span class="column-name">{name}</span>
-		</div>
-		<span class="task-count">{taskCount}</span>
-	{/if}
+		{/if}
+	</div>
+	<span class="task-count">{taskCount}</span>
 </div>
 
 <style>
@@ -164,6 +164,27 @@
 		flex-shrink: 0;
 	}
 
+	.color-dot-wrapper {
+		position: relative;
+		flex-shrink: 0;
+	}
+
+	.color-dot.clickable {
+		width: 0.75rem;
+		height: 0.75rem;
+		cursor: pointer;
+		border: none;
+		padding: 0;
+		transition: all 0.15s;
+	}
+	.color-dot.clickable:hover {
+		transform: scale(1.25);
+		box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+	}
+	:global(.dark) .color-dot.clickable:hover {
+		box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+	}
+
 	.column-name {
 		font-size: 0.875rem;
 		font-weight: 600;
@@ -172,8 +193,39 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
+	.column-name.editable {
+		cursor: text;
+		border-radius: 0.125rem;
+		padding: 0.0625rem 0.25rem;
+		margin: -0.0625rem -0.25rem;
+	}
+	.column-name.editable:hover {
+		background: rgba(0, 0, 0, 0.04);
+	}
+	:global(.dark) .column-name.editable:hover {
+		background: rgba(255, 255, 255, 0.06);
+	}
 
 	:global(.dark) .column-name {
+		color: #f3f4f6;
+	}
+
+	.name-input {
+		flex: 1;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+		background: transparent;
+		border: none;
+		border-bottom: 1px solid rgba(139, 92, 246, 0.4);
+		padding: 0.125rem 0;
+		outline: none;
+		min-width: 0;
+	}
+	.name-input:focus {
+		border-bottom-color: #8b5cf6;
+	}
+	:global(.dark) .name-input {
 		color: #f3f4f6;
 	}
 
@@ -190,80 +242,6 @@
 	:global(.dark) .task-count {
 		background: rgba(255, 255, 255, 0.1);
 		color: #6b7280;
-	}
-
-	/* ── Edit mode ────────────────────────────────────────── */
-
-	.color-dot-wrapper {
-		position: relative;
-		flex-shrink: 0;
-	}
-
-	.color-dot.editable {
-		width: 0.875rem;
-		height: 0.875rem;
-		cursor: pointer;
-		border: none;
-		padding: 0;
-		box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
-		transition: all 0.15s;
-	}
-	.color-dot.editable:hover {
-		box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.7);
-		transform: scale(1.15);
-	}
-
-	.name-input {
-		flex: 1;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: #374151;
-		background: transparent;
-		border: none;
-		border-bottom: 1px solid rgba(139, 92, 246, 0.3);
-		padding: 0.125rem 0;
-		outline: none;
-		min-width: 0;
-	}
-	.name-input:focus {
-		border-bottom-color: #8b5cf6;
-	}
-	:global(.dark) .name-input {
-		color: #f3f4f6;
-	}
-
-	.edit-actions {
-		display: flex;
-		gap: 0.125rem;
-		flex-shrink: 0;
-		margin-left: 0.375rem;
-	}
-
-	.act-btn {
-		padding: 0.2rem;
-		border-radius: 0.25rem;
-		color: #9ca3af;
-		cursor: pointer;
-		transition: all 0.15s;
-		background: transparent;
-		border: none;
-		line-height: 0;
-	}
-	.act-btn:hover:not(:disabled) {
-		color: #374151;
-		background: rgba(0, 0, 0, 0.06);
-	}
-	.act-btn:disabled {
-		opacity: 0.25;
-		cursor: not-allowed;
-	}
-	:global(.dark) .act-btn:hover:not(:disabled) {
-		color: #f3f4f6;
-		background: rgba(255, 255, 255, 0.1);
-	}
-	.del-btn:hover:not(:disabled) {
-		color: #ef4444 !important;
-		background: rgba(239, 68, 68, 0.1) !important;
 	}
 
 	/* ── Color Picker Popup ──────────────────────────────── */

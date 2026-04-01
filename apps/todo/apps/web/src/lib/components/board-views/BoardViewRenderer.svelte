@@ -16,7 +16,6 @@
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
 		onColumnClose?: (colIdx: number) => void;
-		onAddColumn?: () => void;
 		trailing?: Snippet;
 	}
 
@@ -28,7 +27,6 @@
 		onColumnMove,
 		onColumnDelete,
 		onColumnClose,
-		onAddColumn,
 		trailing,
 	}: Props = $props();
 
@@ -105,7 +103,6 @@
 		{onColumnMove}
 		{onColumnDelete}
 		{onColumnClose}
-		{onAddColumn}
 		{trailing}
 	/>
 {:else if activeLayout === 'grid'}
@@ -119,7 +116,6 @@
 		{onColumnColorChange}
 		{onColumnMove}
 		{onColumnDelete}
-		{onAddColumn}
 	/>
 {:else}
 	<KanbanLayout
@@ -132,6 +128,5 @@
 		{onColumnColorChange}
 		{onColumnMove}
 		{onColumnDelete}
-		{onAddColumn}
 	/>
 {/if}

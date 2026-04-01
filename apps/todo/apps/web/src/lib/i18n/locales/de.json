@@ -225,7 +225,7 @@
 		"taskOptions": "Aufgaben-Optionen",
 		"switchView": "Ansicht wechseln"
 	},
-	"secondaryPage": {
+	"page": {
 		"recentlyCompleted": "Kürzlich erledigt",
 		"completedAtTime": "{time} Uhr",
 		"completedAtDateTime": "{date}, {time} Uhr",

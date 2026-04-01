@@ -9,7 +9,7 @@
 	import ViewColumnHeader from './ViewColumnHeader.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
-	import { X } from '@manacore/shared-icons';
+	import { X, DotsSixVertical } from '@manacore/shared-icons';
 
 	interface Props {
 		columns: GroupedColumn[];
@@ -22,7 +22,6 @@
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
 		onColumnClose?: (colIdx: number) => void;
-		onAddColumn?: () => void;
 		trailing?: Snippet;
 	}
 
@@ -37,7 +36,6 @@
 		onColumnMove,
 		onColumnDelete,
 		onColumnClose,
-		onAddColumn,
 		trailing,
 	}: Props = $props();
 
@@ -135,6 +133,11 @@
 		{#each columns as column, i (column.id)}
 			{@const tasks = localTasksByColumn[column.id] || column.tasks}
 			<div class="fokus-sheet" class:sheet-completed={column.name === 'Erledigt'}>
+				<div class="drag-handle-bar">
+					<span class="drag-handle">
+						<DotsSixVertical size={14} />
+					</span>
+				</div>
 				<div class="sheet-header-row">
 					<ViewColumnHeader
 						name={column.name}
@@ -206,16 +209,7 @@
 			</div>
 		{/each}
 
-		{#if onAddColumn}
-			<div class="fokus-sheet add-sheet">
-				<button class="add-sheet-btn" onclick={onAddColumn}>
-					<span class="add-sheet-icon">+</span>
-					<span class="add-sheet-label">Neues Board</span>
-				</button>
-			</div>
-		{/if}
-
-		<!-- Trailing content (Neue Seite, secondary pages) -->
+		<!-- Trailing content (pages) -->
 		{#if trailing}
 			{@render trailing()}
 		{/if}
@@ -246,6 +240,36 @@
 	}
 	.fokus-track::-webkit-scrollbar {
 		display: none;
+	}
+
+	.drag-handle-bar {
+		display: flex;
+		justify-content: center;
+		padding: 0.25rem 0 0;
+	}
+
+	.drag-handle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 14px;
+		color: #d1d5db;
+		cursor: grab;
+		border-radius: 0.25rem;
+		transition: color 0.15s;
+	}
+	.drag-handle:hover {
+		color: #9ca3af;
+	}
+	.drag-handle:active {
+		cursor: grabbing;
+	}
+	:global(.dark) .drag-handle {
+		color: #3f3b38;
+	}
+	:global(.dark) .drag-handle:hover {
+		color: #6b7280;
 	}
 
 	.fokus-sheet {
@@ -335,42 +359,6 @@
 		outline-offset: -2px;
 		border-radius: 0.375rem;
 		background: color-mix(in srgb, var(--color-primary) 4%, transparent);
-	}
-
-	/* Add sheet */
-	.add-sheet {
-		border: 2px dashed color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
-		background: color-mix(in srgb, var(--color-primary) 2%, transparent) !important;
-		box-shadow: none !important;
-	}
-	.add-sheet:hover {
-		border-color: var(--color-primary) !important;
-		background: color-mix(in srgb, var(--color-primary) 6%, transparent) !important;
-	}
-
-	.add-sheet-btn {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		width: 100%;
-		height: 100%;
-		min-height: 200px;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-	}
-	.add-sheet-icon {
-		font-size: 2rem;
-		font-weight: 300;
-		color: var(--color-primary);
-		line-height: 1;
-	}
-	.add-sheet-label {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--color-primary);
 	}
 
 	/* Heute erledigt section */

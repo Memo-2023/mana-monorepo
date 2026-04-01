@@ -13,7 +13,6 @@
 		onColumnColorChange?: (colIdx: number, color: string) => void;
 		onColumnMove?: (colIdx: number, dir: -1 | 1) => void;
 		onColumnDelete?: (colIdx: number) => void;
-		onAddColumn?: () => void;
 	}
 
 	let {
@@ -26,7 +25,6 @@
 		onColumnColorChange,
 		onColumnMove,
 		onColumnDelete,
-		onAddColumn,
 	}: Props = $props();
 </script>
 
@@ -48,15 +46,6 @@
 			/>
 		</div>
 	{/each}
-
-	{#if onAddColumn}
-		<div class="grid-cell">
-			<button class="add-column-card" onclick={onAddColumn}>
-				<span class="add-icon">+</span>
-				<span class="add-label">Neues Board</span>
-			</button>
-		</div>
-	{/if}
 </div>
 
 <style>

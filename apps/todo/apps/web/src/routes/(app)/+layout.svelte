@@ -3,7 +3,13 @@
 	import { page } from '$app/stores';
 	import { setContext } from 'svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, QuickInputBar, ImmersiveModeToggle } from '@manacore/shared-ui';
+	import {
+		PillNavigation,
+		QuickInputBar,
+		ImmersiveModeToggle,
+		BottomStack,
+		MinimizedTabs,
+	} from '@manacore/shared-ui';
 	import {
 		SplitPaneContainer,
 		setSplitPanelContext,
@@ -54,6 +60,7 @@
 	import { useAllTasks, useAllBoardViews } from '$lib/data/task-queries';
 	import SyncIndicator from '$lib/components/SyncIndicator.svelte';
 	import { List, X } from '@manacore/shared-icons';
+	import { createMinimizedPagesContext } from '$lib/stores/minimized-pages.svelte';
 
 	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
 	const allTasks = useAllTasks();
@@ -83,20 +90,6 @@
 	setContext('activeView', {
 		get value() {
 			return activeView;
-		},
-	});
-
-	// Edit mode state — shared between layout (PillNav button) and page (editor)
-	let editMode = $state(false);
-	setContext('editMode', {
-		get active() {
-			return editMode;
-		},
-		toggle() {
-			editMode = !editMode;
-		},
-		set(val: boolean) {
-			editMode = val;
 		},
 	});
 
@@ -187,6 +180,10 @@
 	// FilterStrip visibility (toggle via Filter button in PillNav)
 	let isFilterStripVisible = $derived(!todoSettings.filterStripCollapsed);
 
+	// Minimized page tabs add extra height to the bottom bar stack
+	let hasMinimizedTabs = $derived(minimizedPagesStore.hasPages);
+	const MINIMIZED_TABS_HEIGHT = 36; // px
+
 	// Use theme store's isDark directly
 	let isDark = $derived(theme.isDark);
 
@@ -242,7 +239,7 @@
 	// Keep navRoutes for keyboard shortcuts (Ctrl+1-3)
 	const viewRoutes: Record<string, string> = { fokus: '/' };
 
-	// Tags and Layout stay as standalone pills (toggle behavior, not navigation)
+	// Tags pill (toggle behavior, not navigation)
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/',
@@ -251,19 +248,6 @@
 			onClick: handleTagStripToggle,
 			active: isFilterStripVisible,
 		},
-		...($page.url.pathname === '/' || $page.url.pathname === ''
-			? [
-					{
-						href: '/',
-						label: editMode ? 'Fertig' : 'Layout',
-						icon: editMode ? 'check' : 'grid',
-						onClick: () => {
-							editMode = !editMode;
-						},
-						active: editMode,
-					},
-				]
-			: []),
 	]);
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)
@@ -341,24 +325,17 @@
 			category: 'Erstellen',
 			onExecute: () => goto('/'),
 		},
-		{ id: 'today', label: 'Heute', category: 'Navigation', onExecute: () => goto('/today') },
-		{
-			id: 'upcoming',
-			label: 'Demnächst',
-			category: 'Navigation',
-			onExecute: () => goto('/upcoming'),
-		},
-		{
-			id: 'kanban',
-			label: 'Kanban Board',
-			category: 'Navigation',
-			onExecute: () => goto('/kanban'),
-		},
 		{
 			id: 'settings',
 			label: 'Einstellungen',
 			category: 'Navigation',
 			onExecute: () => goto('/settings'),
+		},
+		{
+			id: 'tags',
+			label: 'Tags verwalten',
+			category: 'Navigation',
+			onExecute: () => goto('/tags'),
 		},
 	];
 
@@ -476,8 +453,54 @@
 					{/if}
 				{/if}
 
+				<!-- Minimized Page Tabs (between PillNav and QuickInputBar) -->
+				{#if hasMinimizedTabs}
+					<div
+						class="minimized-tabs-bar"
+						style="--tabs-bottom: {(() => {
+							let offset = 16;
+							if (!isPillNavCollapsed) offset += 68;
+							if (!isPillNavCollapsed && isFilterStripVisible) offset += 50;
+							return `${offset}px`;
+						})()}"
+					>
+						<div class="minimized-tabs-inner">
+							{#each minimizedPagesStore.pages as pg (pg.id)}
+								<div
+									class="minimized-tab"
+									role="button"
+									tabindex="0"
+									onclick={() => {
+										window.dispatchEvent(new CustomEvent('restore-page', { detail: pg.id }));
+									}}
+								>
+									<span class="minimized-tab-dot" style="background-color: {pg.color}"></span>
+									<span class="minimized-tab-title">{pg.title}</span>
+									<button
+										class="minimized-tab-close"
+										onclick={(e) => {
+											e.stopPropagation();
+											window.dispatchEvent(new CustomEvent('remove-page', { detail: pg.id }));
+										}}
+										title="Schließen"
+									>
+										<X size={10} />
+									</button>
+								</div>
+							{/each}
+							<button
+								class="minimized-tab-add"
+								onclick={() => window.dispatchEvent(new CustomEvent('toggle-page-picker'))}
+								title="Neue Seite hinzufügen"
+							>
+								<Plus size={14} />
+							</button>
+						</div>
+					</div>
+				{/if}
+
 				<!-- Global Quick Input Bar -->
-				{#if $page.url.pathname === '/' || $page.url.pathname === '/statistics'}
+				{#if $page.url.pathname === '/'}
 					<QuickInputBar
 						onSearch={handleSearch}
 						onSelect={handleSelect}
@@ -492,13 +515,26 @@
 						locale={$locale || 'de'}
 						appIcon="todo"
 						hasFabRight={true}
-						bottomOffset={isPillNavCollapsed ? '16px' : isFilterStripVisible ? '180px' : '110px'}
+						bottomOffset={(() => {
+							let offset = 16;
+							if (!isPillNavCollapsed) offset += 68;
+							if (!isPillNavCollapsed && isFilterStripVisible) offset += 50;
+							if (hasMinimizedTabs) offset += MINIMIZED_TABS_HEIGHT;
+							return `${offset}px`;
+						})()}
 					/>
 				{/if}
 
 				<!-- FAB to toggle PillNav visibility -->
 				<button
 					class="pillnav-fab"
+					style="--fab-bottom: {(() => {
+						let offset = 20;
+						if (!isPillNavCollapsed) offset += 68;
+						if (!isPillNavCollapsed && isFilterStripVisible) offset += 50;
+						if (hasMinimizedTabs) offset += MINIMIZED_TABS_HEIGHT;
+						return `${offset}px`;
+					})()}"
 					onclick={handlePillNavToggle}
 					title={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
 					aria-label={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
@@ -506,10 +542,10 @@
 				>
 					{#if isPillNavCollapsed}
 						<!-- Menu icon -->
-						<List size={20} class="fab-icon" />
+						<List size="48" weight="bold" />
 					{:else}
 						<!-- Close icon -->
-						<X size={20} class="fab-icon" />
+						<X size="48" weight="bold" />
 					{/if}
 				</button>
 			{/if}
@@ -635,13 +671,14 @@
 		}
 	}
 
-	/* FAB to toggle PillNav */
+	/* FAB to toggle PillNav — sits right next to the centered QuickInputBar */
 	.pillnav-fab {
 		position: fixed;
-		bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-		right: 1rem;
-		width: 54px;
-		height: 54px;
+		bottom: calc(var(--fab-bottom, 16px) + env(safe-area-inset-bottom, 0px));
+		/* Anchor to center, then offset by half of InputBar max-width (350px) + gap */
+		left: calc(50% + 350px + 0.75rem);
+		width: 56px;
+		height: 56px;
 		border-radius: 50%;
 		background: var(--color-surface-elevated-2);
 		border: 1px solid var(--color-border);
@@ -654,6 +691,14 @@
 		transition: all 0.2s ease;
 	}
 
+	/* On narrower screens, FAB sits at the right edge of the padded input area */
+	@media (max-width: 900px) {
+		.pillnav-fab {
+			left: auto;
+			right: 1rem;
+		}
+	}
+
 	.pillnav-fab:hover {
 		transform: scale(1.05);
 	}
@@ -662,9 +707,112 @@
 		transform: scale(0.95);
 	}
 
-	.fab-icon {
+	.pillnav-fab :global(svg) {
+		color: var(--color-foreground);
+	}
+
+	/* ── Minimized Page Tabs Bar ─────────────────────────── */
+	.minimized-tabs-bar {
+		position: fixed;
+		bottom: calc(var(--tabs-bottom, 16px) + env(safe-area-inset-bottom, 0px));
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 1001;
+	}
+
+	.minimized-tabs-inner {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.3rem 0.5rem;
+		background: var(--color-surface-elevated, #fffef5);
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
+		border-radius: 0.625rem;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+	:global(.dark) .minimized-tabs-inner {
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+	}
+	.minimized-tabs-inner::-webkit-scrollbar {
+		display: none;
+	}
+
+	.minimized-tab {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.5rem;
+		background: transparent;
+		border: none;
+		border-radius: 0.3rem;
+		cursor: pointer;
+		transition: all 0.15s;
+		white-space: nowrap;
+		flex-shrink: 0;
+		font-family: inherit;
+	}
+	.minimized-tab:hover {
+		background: rgba(0, 0, 0, 0.05);
+	}
+	:global(.dark) .minimized-tab:hover {
+		background: rgba(255, 255, 255, 0.08);
+	}
+
+	.minimized-tab-dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+
+	.minimized-tab-title {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-muted-foreground, #6b7280);
+	}
+
+	.minimized-tab-close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+		border: none;
+		background: transparent;
+		color: var(--color-muted-foreground, #d1d5db);
+		border-radius: 0.125rem;
+		cursor: pointer;
+		padding: 0;
+		transition: all 0.15s;
+		opacity: 0.5;
+	}
+	.minimized-tab-close:hover {
+		opacity: 1;
+		background: rgba(0, 0, 0, 0.06);
+	}
+	:global(.dark) .minimized-tab-close:hover {
+		background: rgba(255, 255, 255, 0.08);
+	}
+
+	.minimized-tab-add {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		width: 24px;
 		height: 24px;
-		color: var(--color-foreground);
+		border-radius: 0.3rem;
+		border: none;
+		background: transparent;
+		color: var(--color-muted-foreground, #9ca3af);
+		cursor: pointer;
+		flex-shrink: 0;
+		transition: all 0.15s;
+		opacity: 0.6;
+	}
+	.minimized-tab-add:hover {
+		opacity: 1;
+		color: var(--color-primary, #8b5cf6);
 	}
 </style>

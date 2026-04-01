@@ -3,20 +3,44 @@
 	import { isToday, isPast, startOfDay, addDays, subHours, format } from 'date-fns';
 	import { t } from 'svelte-i18n';
 	import type { Task } from '@todo/shared';
-	import { X, Circle, Minus } from '@manacore/shared-icons';
+	import { X, Circle, Minus, DotsSixVertical } from '@manacore/shared-icons';
 	import KanbanTaskCard from '../kanban/KanbanTaskCard.svelte';
 	import { tasksStore } from '$lib/stores/tasks.svelte';
 	import { todoSettings } from '$lib/stores/settings.svelte';
 
 	interface Props {
 		pageId: string;
+		title?: string;
 		onClose: () => void;
 		onMinimize?: () => void;
+		onRename?: (name: string) => void;
 	}
 
-	let { pageId, onClose, onMinimize }: Props = $props();
+	let { pageId, title: customTitle, onClose, onMinimize, onRename }: Props = $props();
 
 	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
+
+	let titleEl = $state<HTMLSpanElement | null>(null);
+	let isTitleFocused = $state(false);
+
+	// Set initial text content without reactive binding (avoids cursor jump)
+	$effect(() => {
+		if (titleEl && !isTitleFocused) {
+			titleEl.textContent = displayTitle;
+		}
+	});
+
+	function handleTitleInput() {
+		const text = titleEl?.textContent?.trim() ?? '';
+		if (text && onRename) onRename(text);
+	}
+
+	function handleTitleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			(e.target as HTMLElement).blur();
+		}
+	}
 
 	const PAGE_META: Record<string, { title: string; color: string }> = {
 		todo: { title: 'To Do', color: '#6B7280' },
@@ -29,7 +53,8 @@
 		'no-date': { title: 'Ohne Datum', color: '#6B7280' },
 	};
 
-	let meta = $derived(PAGE_META[pageId] ?? { title: pageId, color: '#6B7280' });
+	let pageMeta = $derived(PAGE_META[pageId] ?? { title: pageId, color: '#6B7280' });
+	let displayTitle = $derived(customTitle ?? pageMeta.title);
 
 	let filteredTasks = $derived.by(() => {
 		const tasks = tasksCtx.value;
@@ -127,9 +152,9 @@
 		const time = format(date, 'HH:mm');
 		if (pageId === 'completed') {
 			const dateStr = format(date, 'dd.MM.');
-			return $t('secondaryPage.completedAtDateTime', { values: { date: dateStr, time } });
+			return $t('page.completedAtDateTime', { values: { date: dateStr, time } });
 		}
-		return $t('secondaryPage.completedAtTime', { values: { time } });
+		return $t('page.completedAtTime', { values: { time } });
 	}
 
 	let newTaskTitle = $state('');
@@ -150,11 +175,27 @@
 	}
 </script>
 
-<div class="secondary-page" style="width: {sheetWidth}">
-	<div class="page-header">
+<div class="todo-page" style="width: {sheetWidth}">
+	<div class="drag-handle-bar">
+		<span class="drag-handle">
+			<DotsSixVertical size={14} />
+		</span>
+	</div>
+
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="page-header" ondragstart={(e) => e.preventDefault()}>
 		<div class="header-left">
-			<span class="color-dot" style="background-color: {meta.color}"></span>
-			<span class="page-title">{meta.title}</span>
+			<span class="color-dot" style="background-color: {pageMeta.color}"></span>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<span
+				bind:this={titleEl}
+				class="page-title"
+				contenteditable={!!onRename}
+				oninput={handleTitleInput}
+				onkeydown={handleTitleKeydown}
+				onfocus={() => (isTitleFocused = true)}
+				onblur={() => (isTitleFocused = false)}
+			></span>
 			<span class="task-count">{filteredTasks.length}</span>
 		</div>
 		<div class="header-actions">
@@ -169,7 +210,8 @@
 		</div>
 	</div>
 
-	<div class="page-body">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="page-body" ondragstart={(e) => e.preventDefault()}>
 		{#if pageId === 'completed'}
 			{#each filteredTasks as task (task.id)}
 				<div class="task-card-wrapper completed-task">
@@ -198,7 +240,7 @@
 
 			{#if recentlyCompleted.length > 0}
 				<div class="completed-section">
-					<span class="completed-label">{$t('secondaryPage.recentlyCompleted')}</span>
+					<span class="completed-label">{$t('page.recentlyCompleted')}</span>
 					{#each recentlyCompleted as task (task.id)}
 						<div class="task-card-wrapper completed-task">
 							<KanbanTaskCard
@@ -223,7 +265,7 @@
 					bind:this={inputEl}
 					bind:value={newTaskTitle}
 					class="inline-create-input"
-					placeholder={$t('secondaryPage.newTaskPlaceholder')}
+					placeholder={$t('page.newTaskPlaceholder')}
 					onkeydown={(e) => {
 						if (e.key === 'Enter') handleInlineCreate();
 					}}
@@ -234,7 +276,7 @@
 </div>
 
 <style>
-	.secondary-page {
+	.todo-page {
 		flex: 0 0 auto;
 		min-height: 60vh;
 		background: #fffef5;
@@ -246,11 +288,41 @@
 		flex-direction: column;
 		animation: fadeIn 0.25s ease-out;
 	}
-	:global(.dark) .secondary-page {
+	:global(.dark) .todo-page {
 		background-color: #252220;
 		box-shadow:
 			0 2px 8px rgba(0, 0, 0, 0.25),
 			0 0 0 1px rgba(255, 255, 255, 0.06);
+	}
+
+	.drag-handle-bar {
+		display: flex;
+		justify-content: center;
+		padding: 0.25rem 0 0;
+	}
+
+	.drag-handle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 14px;
+		color: #d1d5db;
+		cursor: grab;
+		border-radius: 0.25rem;
+		transition: color 0.15s;
+	}
+	.drag-handle:hover {
+		color: #9ca3af;
+	}
+	.drag-handle:active {
+		cursor: grabbing;
+	}
+	:global(.dark) .drag-handle {
+		color: #3f3b38;
+	}
+	:global(.dark) .drag-handle:hover {
+		color: #6b7280;
 	}
 
 	@keyframes fadeIn {
@@ -288,6 +360,11 @@
 		font-size: 0.875rem;
 		font-weight: 600;
 		color: #374151;
+		outline: none;
+		border-radius: 0.125rem;
+	}
+	.page-title[contenteditable='true'] {
+		cursor: text;
 	}
 	:global(.dark) .page-title {
 		color: #f3f4f6;

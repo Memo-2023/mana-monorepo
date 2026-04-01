@@ -225,7 +225,7 @@
 		"taskOptions": "Opzioni attività",
 		"switchView": "Cambia vista"
 	},
-	"secondaryPage": {
+	"page": {
 		"recentlyCompleted": "Completate di recente",
 		"completedAtTime": "ore {time}",
 		"completedAtDateTime": "{date}, ore {time}",
