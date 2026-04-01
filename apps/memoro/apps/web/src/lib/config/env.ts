@@ -6,10 +6,7 @@
 import {
 	PUBLIC_SUPABASE_URL,
 	PUBLIC_SUPABASE_ANON_KEY,
-	PUBLIC_MEMORO_MIDDLEWARE_URL,
 	PUBLIC_MEMORO_SERVER_URL,
-	PUBLIC_MANA_MIDDLEWARE_URL,
-	PUBLIC_MIDDLEWARE_APP_ID,
 	PUBLIC_STORAGE_BUCKET,
 	PUBLIC_GOOGLE_CLIENT_ID,
 	PUBLIC_APPLE_CLIENT_ID,
@@ -29,13 +26,6 @@ export const env = {
 	// API servers
 	server: {
 		memoroUrl: PUBLIC_MEMORO_SERVER_URL,
-	},
-
-	// Middleware APIs (legacy — kept for authService compatibility during migration)
-	middleware: {
-		memoroUrl: PUBLIC_MEMORO_MIDDLEWARE_URL,
-		manaUrl: PUBLIC_MANA_MIDDLEWARE_URL,
-		appId: PUBLIC_MIDDLEWARE_APP_ID,
 	},
 
 	// Storage
@@ -74,7 +64,7 @@ export const features = {
 if (typeof window !== 'undefined') {
 	console.log('🔧 Memoro Environment Configuration:', {
 		supabase: !!env.supabase.url ? '✅ Configured' : '❌ Missing',
-		middleware: !!env.middleware.memoroUrl ? '✅ Configured' : '❌ Missing',
+		server: !!env.server.memoroUrl ? '✅ Configured' : '❌ Missing',
 		appleClientId: env.oauth.appleClientId || '❌ NOT SET',
 		appleRedirectUri: env.oauth.appleRedirectUri || '❌ NOT SET',
 		googleOAuth: !!env.oauth.googleClientId ? '✅ Configured' : '❌ Missing',

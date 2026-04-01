@@ -21,9 +21,6 @@ declare module '$env/static/public' {
 	export const PUBLIC_MEMORO_SERVER_URL: string;
 	export const PUBLIC_MANA_CORE_AUTH_URL: string;
 	export const PUBLIC_MANA_CORE_AUTH_URL_CLIENT: string;
-	export const PUBLIC_MEMORO_MIDDLEWARE_URL: string;
-	export const PUBLIC_MANA_MIDDLEWARE_URL: string;
-	export const PUBLIC_MIDDLEWARE_APP_ID: string;
 	export const PUBLIC_STORAGE_BUCKET: string;
 	export const PUBLIC_GOOGLE_CLIENT_ID: string;
 	export const PUBLIC_APPLE_CLIENT_ID: string;
