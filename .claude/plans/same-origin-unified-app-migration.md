@@ -50,11 +50,17 @@
 - **Phase 3:** Split-Screen (Svelte-Komponenten statt iFrame, Registry, AppView pro Modul)
 - **Phase 4:** Dashboard-Widgets (10 Cross-App-Widgets mit direkten Dexie-Queries)
 
-### Offene Phasen
+- **Phase 5:** Infrastruktur (Docker -20 Container, Cloudflare -60 Zeilen, mana-auth 30→8 Origins)
+- **Phase 6:** Navigation (APP_URLS auf Pfade, PillNav intern statt window.open)
+- **Phase 7:** Unified Sync (Multi-App Sync Manager, Change Tracker mit appId-Routing)
 
-- **Phase 5:** Infrastruktur-Anpassungen (Docker, Cloudflare, CORS) — nicht begonnen
-- **Phase 6:** Aufräumen (alte Apps archivieren) — nicht begonnen
-- **Phase 7:** local-store Package anpassen — nicht begonnen
+### Alle 7 Phasen abgeschlossen!
+
+**Verbleibende Arbeiten (nicht im Plan, aber empfohlen):**
+- Alte standalone Web-Apps in `apps-archived/` verschieben (nach Validierung)
+- E2E-Tests pro Modul (Routen erreichbar, CRUD funktioniert)
+- Build-Validierung der unified App (`pnpm --filter @manacore/web build`)
+- Production-Deploy + Cloudflare Tunnel Config auf Server aktualisieren
 
 ### Nächste Schritte — Phase 2 abgeschlossen!
 
