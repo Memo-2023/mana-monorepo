@@ -28,9 +28,7 @@
 	} from '@manacore/shared-stores';
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { theme } from '$lib/stores/theme';
-	import TaskFilters from '$lib/components/TaskFilters.svelte';
-	import { viewStore, type SortBy } from '$lib/stores/view.svelte';
-	import type { TaskPriority } from '@todo/shared';
+	import TagStrip from '$lib/components/TagStrip.svelte';
 	import {
 		THEME_DEFINITIONS,
 		DEFAULT_THEME_VARIANTS,
@@ -67,9 +65,21 @@
 	// Use first board view as the single active view
 	let activeView = $derived(boardViews.value[0] ?? null);
 
+	// ─── Active Tag Filter (shared between TagStrip + BoardViewRenderer) ───
+	let activeTagFilterIds = $state<string[]>([]);
+	const activeTagFilter = {
+		get ids() {
+			return activeTagFilterIds;
+		},
+		set(ids: string[]) {
+			activeTagFilterIds = ids;
+		},
+	};
+
 	// Provide data to child components via Svelte context
 	setContext('tasks', allTasks);
 	setContext('tags', allTags);
+	setContext('activeTagFilter', activeTagFilter);
 	setContext('activeView', {
 		get value() {
 			return activeView;
@@ -224,21 +234,21 @@
 	// User email for user dropdown — empty string for guests so PillNav shows login button
 	let userEmail = $derived(authStore.isAuthenticated ? authStore.user?.email || 'Menü' : '');
 
-	// Toggle FilterStrip visibility
-	function handleFilterToggle() {
+	// Toggle TagStrip visibility
+	function handleTagStripToggle() {
 		todoSettings.toggleFilterStrip();
 	}
 
 	// Keep navRoutes for keyboard shortcuts (Ctrl+1-3)
 	const viewRoutes: Record<string, string> = { fokus: '/' };
 
-	// Filter, Tags, and Layout stay as standalone pills (toggle behavior, not navigation)
+	// Tags and Layout stay as standalone pills (toggle behavior, not navigation)
 	let baseNavItems = $derived<PillNavItem[]>([
 		{
 			href: '/',
-			label: 'Filter',
-			icon: 'filter',
-			onClick: handleFilterToggle,
+			label: 'Tags',
+			icon: 'tag',
+			onClick: handleTagStripToggle,
 			active: isFilterStripVisible,
 		},
 		...($page.url.pathname === '/' || $page.url.pathname === ''
@@ -460,25 +470,9 @@
 						{spotlightActions}
 					/>
 
-					<!-- Unified filter strip (tags + priorities + sort, toggled via Filter pill) -->
+					<!-- Tag strip (toggled via Tags pill) -->
 					{#if isFilterStripVisible}
-						<TaskFilters
-							variant="strip"
-							selectedPriorities={viewStore.filterPriorities}
-							selectedLabelIds={viewStore.filterLabelIds}
-							searchQuery={viewStore.filterSearchQuery}
-							onPrioritiesChange={(p: TaskPriority[]) => viewStore.setFilterPriorities(p)}
-							onLabelsChange={(ids: string[]) => viewStore.setFilterLabelIds(ids)}
-							onSearchChange={(q: string) => viewStore.setFilterSearchQuery(q)}
-							onClearFilters={() => viewStore.clearFilters()}
-							sortBy={viewStore.sortBy}
-							onSortChange={(s: SortBy) => viewStore.setSort(s, viewStore.sortOrder)}
-							showSort={true}
-							showCompleted={true}
-							showTags={true}
-							isCompletedVisible={viewStore.showCompleted}
-							onToggleCompleted={() => viewStore.toggleShowCompleted()}
-						/>
+						<TagStrip />
 					{/if}
 				{/if}
 

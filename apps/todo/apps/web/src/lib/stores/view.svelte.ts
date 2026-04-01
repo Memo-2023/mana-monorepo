@@ -2,7 +2,6 @@
  * View Store - Manages current view state using Svelte 5 runes
  */
 
-import type { TaskPriority } from '@todo/shared';
 import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 export type ViewType = 'inbox' | 'today' | 'upcoming' | 'label' | 'completed' | 'search';
@@ -16,11 +15,6 @@ let searchQuery = $state('');
 let sortBy = $state<SortBy>('order');
 let sortOrder = $state<SortOrder>('asc');
 let showCompleted = $state(false);
-
-// Filter state (used by TaskFilters strip in list view)
-let filterPriorities = $state<TaskPriority[]>([]);
-let filterLabelIds = $state<string[]>([]);
-let filterSearchQuery = $state('');
 
 export const viewStore = {
 	// Getters
@@ -41,15 +35,6 @@ export const viewStore = {
 	},
 	get showCompleted() {
 		return showCompleted;
-	},
-	get filterPriorities() {
-		return filterPriorities;
-	},
-	get filterLabelIds() {
-		return filterLabelIds;
-	},
-	get filterSearchQuery() {
-		return filterSearchQuery;
 	},
 
 	/**
@@ -142,39 +127,6 @@ export const viewStore = {
 	},
 
 	/**
-	 * Set filter priorities
-	 */
-	setFilterPriorities(priorities: TaskPriority[]) {
-		filterPriorities = priorities;
-		if (priorities.length > 0) TodoEvents.filterUsed('priority');
-	},
-
-	/**
-	 * Set filter label IDs
-	 */
-	setFilterLabelIds(ids: string[]) {
-		filterLabelIds = ids;
-		if (ids.length > 0) TodoEvents.filterUsed('label');
-	},
-
-	/**
-	 * Set filter search query
-	 */
-	setFilterSearchQuery(query: string) {
-		filterSearchQuery = query;
-		if (query.trim()) TodoEvents.filterUsed('search');
-	},
-
-	/**
-	 * Clear all filters
-	 */
-	clearFilters() {
-		filterPriorities = [];
-		filterLabelIds = [];
-		filterSearchQuery = '';
-	},
-
-	/**
 	 * Reset to default state
 	 */
 	reset() {
@@ -184,8 +136,5 @@ export const viewStore = {
 		sortBy = 'order';
 		sortOrder = 'asc';
 		showCompleted = false;
-		filterPriorities = [];
-		filterLabelIds = [];
-		filterSearchQuery = '';
 	},
 };

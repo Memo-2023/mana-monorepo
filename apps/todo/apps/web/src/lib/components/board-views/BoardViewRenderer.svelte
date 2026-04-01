@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, type Snippet } from 'svelte';
+	import { getContext, hasContext, type Snippet } from 'svelte';
 	import type { Task } from '@todo/shared';
 	import type { LocalBoardView } from '$lib/data/local-store';
 	import { groupTasksByView, getDropActionUpdate } from '$lib/data/view-grouping';
@@ -37,8 +37,19 @@
 	// Get tasks from context (set by layout)
 	const tasksCtx: { readonly value: Task[] } = getContext('tasks');
 
-	// Group tasks by the current view configuration
-	let columns = $derived(groupTasksByView(view, tasksCtx.value));
+	// Active tag filter (set by TagStrip via layout context)
+	const activeTagFilter: { readonly ids: string[] } | null = hasContext('activeTagFilter')
+		? getContext('activeTagFilter')
+		: null;
+
+	// Filter tasks by selected tags, then group by view configuration
+	let filteredTasks = $derived.by(() => {
+		const tagIds = activeTagFilter?.ids ?? [];
+		if (tagIds.length === 0) return tasksCtx.value;
+		return tasksCtx.value.filter((t) => t.labels?.some((l) => tagIds.includes(l.id)));
+	});
+
+	let columns = $derived(groupTasksByView(view, filteredTasks));
 
 	// ─── Task Callbacks ──────────────────────────────────────
 

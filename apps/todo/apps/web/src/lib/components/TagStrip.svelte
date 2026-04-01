@@ -1,37 +1,31 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { Tag } from '@manacore/shared-tags';
-	import { viewStore } from '$lib/stores/view.svelte';
 	import { goto } from '$app/navigation';
 	import { DotsThree, Plus, X } from '@manacore/shared-icons';
 	import TagStripModal from './TagStripModal.svelte';
 	import { t } from 'svelte-i18n';
 
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
-
-	interface Props {
-		/** Whether the filter strip below is visible (affects vertical position) */
-		filterStripVisible?: boolean;
-	}
-
-	let { filterStripVisible = false }: Props = $props();
+	const activeTagFilter: { readonly ids: string[]; set(ids: string[]): void } =
+		getContext('activeTagFilter');
 
 	let showModal = $state(false);
 
 	function handleTagClick(tagId: string) {
-		const current = viewStore.filterLabelIds;
+		const current = activeTagFilter.ids;
 		if (current.includes(tagId)) {
-			viewStore.setFilterLabelIds(current.filter((id) => id !== tagId));
+			activeTagFilter.set(current.filter((id) => id !== tagId));
 		} else {
-			viewStore.setFilterLabelIds([...current, tagId]);
+			activeTagFilter.set([...current, tagId]);
 		}
 	}
 
 	function isTagSelected(tagId: string): boolean {
-		return viewStore.filterLabelIds.includes(tagId);
+		return activeTagFilter.ids.includes(tagId);
 	}
 
-	const hasSelectedTags = $derived(viewStore.filterLabelIds.length > 0);
+	const hasSelectedTags = $derived(activeTagFilter.ids.length > 0);
 
 	function handleOpenModal() {
 		showModal = true;
@@ -48,13 +42,13 @@
 	const hasTags = $derived(tagsCtx.value.length > 0);
 </script>
 
-<div class="tag-strip-wrapper" class:above-filter-strip={filterStripVisible}>
+<div class="tag-strip-wrapper">
 	<div class="tag-strip-container">
 		<!-- Clear Filter Button (always rendered to prevent layout shift) -->
 		<button
 			class="clear-filter-pill glass-tag"
 			class:hidden={!hasSelectedTags}
-			onclick={() => viewStore.setFilterLabelIds([])}
+			onclick={() => activeTagFilter.set([])}
 			title={$t('filters.clearFilter')}
 			disabled={!hasSelectedTags}
 		>
@@ -115,11 +109,6 @@
 		align-items: stretch;
 		pointer-events: none;
 		transition: bottom 0.2s ease;
-	}
-
-	/* When filter strip is also visible, stack above it */
-	.tag-strip-wrapper.above-filter-strip {
-		bottom: calc(110px + env(safe-area-inset-bottom, 0px));
 	}
 
 	.tag-strip-container {
