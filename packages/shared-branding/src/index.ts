@@ -17,7 +17,7 @@ export { default as ManaIcon } from './ManaIcon.svelte';
 export {
 	MemoroLogo,
 	ManaCoreLogo,
-	ManaDeckLogo,
+	CardsLogo,
 	UloadLogo,
 	ChatLogo,
 	PresiLogo,

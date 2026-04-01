@@ -1,9 +1,9 @@
 /**
- * ManaDeck Theme - Purple Dark Theme
- * Import this file in your landing page to use the ManaDeck color scheme
+ * Cards Theme - Purple Dark Theme
+ * Import this file in your landing page to use the Cards color scheme
  */
 :root {
-  /* Primary colors - ManaDeck Purple */
+  /* Primary colors - Cards Purple */
   --color-primary: #7C3AED;
   --color-primary-hover: #8B5CF6;
   --color-primary-glow: rgba(124, 58, 237, 0.3);

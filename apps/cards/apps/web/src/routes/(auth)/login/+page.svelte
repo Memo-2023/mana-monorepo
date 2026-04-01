@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
 	import { LoginPage } from '@manacore/shared-auth-ui';
-	import { ManaDeckLogo } from '@manacore/shared-branding';
+	import { CardsLogo } from '@manacore/shared-branding';
 	import { getLoginTranslations } from '@manacore/shared-i18n';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import LanguageSelector from '$lib/components/LanguageSelector.svelte';
@@ -27,8 +27,8 @@
 </script>
 
 <LoginPage
-	appName="ManaDeck"
-	logo={ManaDeckLogo}
+	appName="Cards"
+	logo={CardsLogo}
 	primaryColor="#8b5cf6"
 	onSignIn={handleSignIn}
 	onResendVerification={handleResendVerification}

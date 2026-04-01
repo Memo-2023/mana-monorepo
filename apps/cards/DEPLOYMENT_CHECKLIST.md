@@ -1,4 +1,4 @@
-# Manadeck Backend Deployment Checklist
+# Cards Backend Deployment Checklist
 
 This checklist ensures you have everything configured for automated deployment.
 
@@ -6,26 +6,26 @@ This checklist ensures you have everything configured for automated deployment.
 
 ### 1. GitHub Secrets (Required)
 
-Go to `https://github.com/Memo-2023/manadeck` → Settings → Secrets and variables → Actions
+Go to `https://github.com/Memo-2023/cards` → Settings → Secrets and variables → Actions
 
 Add these secrets:
 
-| Secret Name                 | Description                                       | How to Get                                               |
-| --------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
-| `GCP_SA_KEY_PROD`           | Service account JSON key for Cloud Run deployment | See "Create Service Account" below                       |
-| `CLOUD_RUN_SERVICE_ACCOUNT` | Service account email                             | `manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com` |
-| `GH_PERSONAL_TOKEN`         | GitHub Personal Access Token for private packages | See "Create GitHub PAT" below                            |
+| Secret Name                 | Description                                       | How to Get                                            |
+| --------------------------- | ------------------------------------------------- | ----------------------------------------------------- |
+| `GCP_SA_KEY_PROD`           | Service account JSON key for Cloud Run deployment | See "Create Service Account" below                    |
+| `CLOUD_RUN_SERVICE_ACCOUNT` | Service account email                             | `cards-backend-sa@memo-2c4c4.iam.gserviceaccount.com` |
+| `GH_PERSONAL_TOKEN`         | GitHub Personal Access Token for private packages | See "Create GitHub PAT" below                         |
 
 #### Create Service Account
 
 ```bash
 # 1. Create service account
-gcloud iam service-accounts create manadeck-backend-sa \
-  --display-name="Manadeck Backend Service Account" \
+gcloud iam service-accounts create cards-backend-sa \
+  --display-name="Cards Backend Service Account" \
   --project=memo-2c4c4
 
 # 2. Grant permissions
-SA_EMAIL="manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com"
+SA_EMAIL="cards-backend-sa@memo-2c4c4.iam.gserviceaccount.com"
 
 gcloud projects add-iam-policy-binding memo-2c4c4 \
   --member="serviceAccount:${SA_EMAIL}" \
@@ -40,22 +40,22 @@ gcloud projects add-iam-policy-binding memo-2c4c4 \
   --role="roles/artifactregistry.writer"
 
 # 3. Create and download key
-gcloud iam service-accounts keys create manadeck-sa-key.json \
+gcloud iam service-accounts keys create cards-sa-key.json \
   --iam-account=${SA_EMAIL} \
   --project=memo-2c4c4
 
-# 4. Copy contents of manadeck-sa-key.json to GCP_SA_KEY_PROD secret
-cat manadeck-sa-key.json
+# 4. Copy contents of cards-sa-key.json to GCP_SA_KEY_PROD secret
+cat cards-sa-key.json
 
 # 5. Delete local key file (security best practice)
-rm manadeck-sa-key.json
+rm cards-sa-key.json
 ```
 
 #### Create GitHub Personal Access Token
 
 1. Go to https://github.com/settings/tokens
 2. Click "Generate new token (classic)"
-3. Name: `Manadeck CI/CD`
+3. Name: `Cards CI/CD`
 4. Expiration: Choose appropriate timeframe
 5. Scopes: Select `repo` (Full control of private repositories)
 6. Click "Generate token"
@@ -65,11 +65,11 @@ rm manadeck-sa-key.json
 
 ```bash
 # Create repository for Docker images
-gcloud artifacts repositories create manadeck-backend \
+gcloud artifacts repositories create cards-backend \
   --repository-format=docker \
   --location=europe-west3 \
   --project=memo-2c4c4 \
-  --description="Docker images for Manadeck Backend"
+  --description="Docker images for Cards Backend"
 ```
 
 ### 3. GCP Secrets (Required)
@@ -91,17 +91,17 @@ PROJECT_ID="mana-core-453821"
 SERVICE_KEY=$(openssl rand -base64 32)
 
 # Create secrets
-echo "your-app-id" | gcloud secrets create MANADECK_APP_ID --data-file=- --project=$PROJECT_ID
-echo "$SERVICE_KEY" | gcloud secrets create MANADECK_SERVICE_KEY --data-file=- --project=$PROJECT_ID
-echo "https://xxx.supabase.co" | gcloud secrets create MANADECK_SUPABASE_URL --data-file=- --project=$PROJECT_ID
-echo "your-anon-key" | gcloud secrets create MANADECK_SUPABASE_ANON_KEY --data-file=- --project=$PROJECT_ID
-echo "your-service-key" | gcloud secrets create MANADECK_SUPABASE_SERVICE_KEY --data-file=- --project=$PROJECT_ID
-echo "https://app.com/welcome" | gcloud secrets create MANADECK_SIGNUP_REDIRECT_URL --data-file=- --project=$PROJECT_ID
+echo "your-app-id" | gcloud secrets create CARDS_APP_ID --data-file=- --project=$PROJECT_ID
+echo "$SERVICE_KEY" | gcloud secrets create CARDS_SERVICE_KEY --data-file=- --project=$PROJECT_ID
+echo "https://xxx.supabase.co" | gcloud secrets create CARDS_SUPABASE_URL --data-file=- --project=$PROJECT_ID
+echo "your-anon-key" | gcloud secrets create CARDS_SUPABASE_ANON_KEY --data-file=- --project=$PROJECT_ID
+echo "your-service-key" | gcloud secrets create CARDS_SUPABASE_SERVICE_KEY --data-file=- --project=$PROJECT_ID
+echo "https://app.com/welcome" | gcloud secrets create CARDS_SIGNUP_REDIRECT_URL --data-file=- --project=$PROJECT_ID
 
 # Grant access to service account
-SA_EMAIL="manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com"
+SA_EMAIL="cards-backend-sa@memo-2c4c4.iam.gserviceaccount.com"
 
-for SECRET in MANA_SERVICE_URL MANADECK_APP_ID MANADECK_SERVICE_KEY MANADECK_SUPABASE_URL MANADECK_SUPABASE_ANON_KEY MANADECK_SUPABASE_SERVICE_KEY MANADECK_SIGNUP_REDIRECT_URL; do
+for SECRET in MANA_SERVICE_URL CARDS_APP_ID CARDS_SERVICE_KEY CARDS_SUPABASE_URL CARDS_SUPABASE_ANON_KEY CARDS_SUPABASE_SERVICE_KEY CARDS_SIGNUP_REDIRECT_URL; do
   gcloud secrets add-iam-policy-binding $SECRET \
     --member="serviceAccount:${SA_EMAIL}" \
     --role="roles/secretmanager.secretAccessor" \
@@ -136,7 +136,7 @@ APP_SERVICE_KEYS=existing-apps,YOUR_APP_ID:YOUR_SERVICE_KEY
    - ✅ Rollback on failure
 
 3. Monitor deployment:
-   - Go to https://github.com/Memo-2023/manadeck/actions
+   - Go to https://github.com/Memo-2023/cards/actions
    - View workflow run progress
 
 ### Manual Deployment (Cloud Build)
@@ -150,8 +150,8 @@ cd backend
 gcloud builds submit --project=memo-2c4c4 --config=cloudbuild.yaml .
 
 # Deploy
-gcloud run deploy manadeck-backend \
-  --image=europe-west3-docker.pkg.dev/memo-2c4c4/manadeck-backend/manadeck-backend:v1.0.1 \
+gcloud run deploy cards-backend \
+  --image=europe-west3-docker.pkg.dev/memo-2c4c4/cards-backend/cards-backend:v1.0.1 \
   --project=memo-2c4c4 \
   --region=europe-west3
 ```
@@ -162,28 +162,28 @@ gcloud run deploy manadeck-backend \
 
 ```bash
 # Get service URL
-gcloud run services describe manadeck-backend \
+gcloud run services describe cards-backend \
   --project=memo-2c4c4 \
   --region=europe-west3 \
   --format='value(status.url)'
 
 # Test health endpoint
-curl https://manadeck-backend-xxx.run.app/health
+curl https://cards-backend-xxx.run.app/health
 
 # Test liveness
-curl https://manadeck-backend-xxx.run.app/health/live
+curl https://cards-backend-xxx.run.app/health/live
 ```
 
 ### View Logs
 
 ```bash
 # Recent logs
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=manadeck-backend" \
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=cards-backend" \
   --project=memo-2c4c4 \
   --limit=50
 
 # Error logs only
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=manadeck-backend AND severity>=ERROR" \
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=cards-backend AND severity>=ERROR" \
   --project=memo-2c4c4 \
   --limit=20
 ```
@@ -203,9 +203,9 @@ gcloud logging read "resource.type=cloud_run_revision AND resource.labels.servic
 **Solution**: Grant cross-project secret access:
 
 ```bash
-SA_EMAIL="manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com"
+SA_EMAIL="cards-backend-sa@memo-2c4c4.iam.gserviceaccount.com"
 
-gcloud secrets add-iam-policy-binding MANADECK_APP_ID \
+gcloud secrets add-iam-policy-binding CARDS_APP_ID \
   --member="serviceAccount:${SA_EMAIL}" \
   --role="roles/secretmanager.secretAccessor" \
   --project=mana-core-453821
@@ -225,12 +225,12 @@ gcloud secrets add-iam-policy-binding MANADECK_APP_ID \
 
 ```bash
 # Check service logs
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=manadeck-backend" \
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=cards-backend" \
   --project=memo-2c4c4 \
   --limit=20
 
 # Check secret values (if you have permissions)
-gcloud secrets versions access latest --secret=MANADECK_APP_ID --project=mana-core-453821
+gcloud secrets versions access latest --secret=CARDS_APP_ID --project=mana-core-453821
 ```
 
 ### Peer Dependency Warning
@@ -246,7 +246,7 @@ npm install --legacy-peer-deps
 ## 📊 Project Structure
 
 ```
-manadeck/
+cards/
 ├── .github/
 │   └── workflows/
 │       └── deploy-backend.yml        # GitHub Actions workflow
@@ -267,15 +267,15 @@ manadeck/
 
 ## 📝 Configuration Summary
 
-| Component              | Location          | Value                                                     |
-| ---------------------- | ----------------- | --------------------------------------------------------- |
-| **Deployment Project** | GCP               | `memo-2c4c4`                                              |
-| **Secrets Project**    | GCP               | `mana-core-453821`                                        |
-| **Region**             | GCP               | `europe-west3`                                            |
-| **Service Name**       | Cloud Run         | `manadeck-backend`                                        |
-| **Image Registry**     | Artifact Registry | `europe-west3-docker.pkg.dev/memo-2c4c4/manadeck-backend` |
-| **Port**               | Container         | `8080`                                                    |
-| **Repository**         | GitHub            | `Memo-2023/manadeck`                                      |
+| Component              | Location          | Value                                                  |
+| ---------------------- | ----------------- | ------------------------------------------------------ |
+| **Deployment Project** | GCP               | `memo-2c4c4`                                           |
+| **Secrets Project**    | GCP               | `mana-core-453821`                                     |
+| **Region**             | GCP               | `europe-west3`                                         |
+| **Service Name**       | Cloud Run         | `cards-backend`                                        |
+| **Image Registry**     | Artifact Registry | `europe-west3-docker.pkg.dev/memo-2c4c4/cards-backend` |
+| **Port**               | Container         | `8080`                                                 |
+| **Repository**         | GitHub            | `Memo-2023/cards`                                      |
 
 ## 🎯 Quick Start
 

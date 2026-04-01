@@ -39,22 +39,22 @@ Einer der größten Architektur-Umbauten im ManaCore-Monorepo: **21 separate Nes
 
 Jeder Matrix-Bot lief als eigenständiger NestJS-Service mit eigenem Docker-Container:
 
-| Bot                    | Funktion                                                                | Port |
-| ---------------------- | ----------------------------------------------------------------------- | ---- |
-| matrix-mana-bot        | Gateway: AI Chat + Todo + Calendar + Clock + Voice                      | 4010 |
-| matrix-ollama-bot      | LLM Chat (Ollama)                                                       | 4011 |
-| matrix-stats-bot       | System-Statistiken                                                      | 4012 |
-| matrix-project-doc-bot | Projekt-Dokumentation                                                   | 4013 |
-| matrix-todo-bot        | Aufgabenverwaltung                                                      | 4014 |
-| matrix-calendar-bot    | Kalender                                                                | 4015 |
-| matrix-nutriphi-bot    | Ernährungstracking                                                      | 4016 |
-| matrix-zitare-bot      | Zitate & Inspiration                                                    | 4017 |
-| matrix-clock-bot       | Timer, Alarme, Weltuhren                                                | 4018 |
-| matrix-tts-bot         | Text-to-Speech                                                          | 4019 |
-| matrix-stt-bot         | Speech-to-Text                                                          | 4021 |
-| matrix-onboarding-bot  | User Onboarding                                                         | 4020 |
-| matrix-planta-bot      | Pflanzenpflege                                                          | 4022 |
-| + 8 weitere            | Chat, Contacts, ManaDeck, Picture, Presi, Questions, Skilltree, Storage | —    |
+| Bot                    | Funktion                                                             | Port |
+| ---------------------- | -------------------------------------------------------------------- | ---- |
+| matrix-mana-bot        | Gateway: AI Chat + Todo + Calendar + Clock + Voice                   | 4010 |
+| matrix-ollama-bot      | LLM Chat (Ollama)                                                    | 4011 |
+| matrix-stats-bot       | System-Statistiken                                                   | 4012 |
+| matrix-project-doc-bot | Projekt-Dokumentation                                                | 4013 |
+| matrix-todo-bot        | Aufgabenverwaltung                                                   | 4014 |
+| matrix-calendar-bot    | Kalender                                                             | 4015 |
+| matrix-nutriphi-bot    | Ernährungstracking                                                   | 4016 |
+| matrix-zitare-bot      | Zitate & Inspiration                                                 | 4017 |
+| matrix-clock-bot       | Timer, Alarme, Weltuhren                                             | 4018 |
+| matrix-tts-bot         | Text-to-Speech                                                       | 4019 |
+| matrix-stt-bot         | Speech-to-Text                                                       | 4021 |
+| matrix-onboarding-bot  | User Onboarding                                                      | 4020 |
+| matrix-planta-bot      | Pflanzenpflege                                                       | 4022 |
+| + 8 weitere            | Chat, Contacts, Cards, Picture, Presi, Questions, Skilltree, Storage | —    |
 
 ### Ressourcenverbrauch vorher
 
@@ -224,7 +224,7 @@ Neues Plugin hinzufügen = 3 Schritte:
 
 ### Skeleton (Grundgerüst mit !help, !status)
 
-stats, chat, manadeck, nutriphi, picture, presi, questions, skilltree, storage, projectdoc, onboarding
+stats, chat, cards, nutriphi, picture, presi, questions, skilltree, storage, projectdoc, onboarding
 
 ---
 

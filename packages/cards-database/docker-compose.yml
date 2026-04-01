@@ -1,18 +1,18 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: manadeck-postgres
+    container_name: cards-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: manadeck
-      POSTGRES_PASSWORD: manadeck_dev_password
-      POSTGRES_DB: manadeck
+      POSTGRES_USER: cards
+      POSTGRES_PASSWORD: cards_dev_password
+      POSTGRES_DB: cards
     ports:
       - "5433:5432"
     volumes:
-      - manadeck_postgres_data:/var/lib/postgresql/data
+      - cards_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U manadeck -d manadeck"]
+      test: ["CMD-SHELL", "pg_isready -U cards -d cards"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -20,20 +20,20 @@ services:
   # Optional: pgAdmin for database management UI
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: manadeck-pgadmin
+    container_name: cards-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@manadeck.local
+      PGADMIN_DEFAULT_EMAIL: admin@cards.local
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "5050:80"
     volumes:
-      - manadeck_pgadmin_data:/var/lib/pgadmin
+      - cards_pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
 
 volumes:
-  manadeck_postgres_data:
-  manadeck_pgadmin_data:
+  cards_postgres_data:
+  cards_pgadmin_data:

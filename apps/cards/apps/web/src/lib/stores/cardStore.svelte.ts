@@ -9,7 +9,7 @@
 import type { Card, CreateCardInput, UpdateCardInput } from '$lib/types/card';
 import { cardCollection, deckCollection, type LocalCard } from '$lib/data/local-store';
 import { toCard } from '$lib/data/queries';
-import { ManaDeckEvents } from '@manacore/shared-utils/analytics';
+import { CardsEvents } from '@manacore/shared-utils/analytics';
 
 let error = $state<string | null>(null);
 
@@ -45,7 +45,7 @@ export const cardStore = {
 				});
 			}
 
-			ManaDeckEvents.cardCreated();
+			CardsEvents.cardCreated();
 			return toCard(inserted);
 		} catch (err: any) {
 			error = err.message || 'Failed to create card';
@@ -94,7 +94,7 @@ export const cardStore = {
 				}
 			}
 
-			ManaDeckEvents.cardDeleted();
+			CardsEvents.cardDeleted();
 		} catch (err: any) {
 			error = err.message || 'Failed to delete card';
 			console.error('Delete card error:', err);

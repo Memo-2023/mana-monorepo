@@ -10,4 +10,4 @@
 	let { size = 55, color, class: className = '' }: Props = $props();
 </script>
 
-<AppLogo app="manadeck" {size} {color} class={className} />
+<AppLogo app="cards" {size} {color} class={className} />

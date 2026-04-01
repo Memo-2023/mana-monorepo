@@ -11,8 +11,8 @@ export default defineConfig({
 		sveltekit(),
 		SvelteKitPWA(
 			createPWAConfig({
-				name: 'ManaDeck - Kartendecks',
-				shortName: 'ManaDeck',
+				name: 'Cards - Kartendecks',
+				shortName: 'Cards',
 				description: 'Kartendecks erstellen und lernen',
 				themeColor: '#f59e0b',
 			})

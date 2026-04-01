@@ -185,7 +185,7 @@ Use one of the pre-built theme CSS files for quick setup:
 /* OR */
 @import '@manacore/shared-landing-ui/themes/maerchenzauber';
 /* OR */
-@import '@manacore/shared-landing-ui/themes/manadeck';
+@import '@manacore/shared-landing-ui/themes/cards';
 ```
 
 Or import in your Astro layout:
@@ -320,7 +320,7 @@ src/
 │   ├── memoro.css
 │   ├── manacore.css
 │   ├── maerchenzauber.css
-│   └── manadeck.css
+│   └── cards.css
 └── utils/
     └── index.ts     # TypeScript types
 ```

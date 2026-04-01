@@ -167,6 +167,6 @@ export const APP_POSITIONS: Record<string, { x: number; y: number; lakeId: strin
 	traces: { x: 400, y: 385, lakeId: 'redis' },
 
 	// Around Stausee (minio) - storage-heavy
-	manadeck: { x: 1180, y: 385, lakeId: 'minio' },
+	cards: { x: 1180, y: 385, lakeId: 'minio' },
 	questions: { x: 1370, y: 400, lakeId: 'minio' },
 };

@@ -139,7 +139,7 @@ function checkWorkspaceProtocol(packagePath, packageJson) {
 		'@calendar/',
 		'@contacts/',
 		'@todo/',
-		'@manadeck/',
+		'@cards/',
 		'@zitare/',
 		'@voxel-lava/',
 		'@mana-games/',

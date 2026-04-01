@@ -324,7 +324,7 @@ Folgende Apps nutzen bereits die zentralen User Settings:
 - Chat (`chat`)
 - Contacts (`contacts`)
 - ManaCore (`manacore`)
-- ManaDeck (`manadeck`)
+- Cards (`cards`)
 - Picture (`picture`)
 - Presi (`presi`)
 - Storage (`storage`)

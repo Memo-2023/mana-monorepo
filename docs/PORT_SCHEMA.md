@@ -59,7 +59,7 @@ Pure CRUD apps use mana-sync directly.
 | 3033 | contacts-server | Hono/Bun | Google Contacts, vCard import/export |
 | 3034 | storage-server | Hono/Bun | S3 file ops, versioning, shares |
 | 3035 | picture-server | Hono/Bun | Replicate AI, generation orchestration |
-| 3036 | manadeck-server | Hono/Bun | AI card generation |
+| 3036 | cards-server | Hono/Bun | AI card generation |
 | 3037 | mukke-server | Hono/Bun | Audio processing, BPM, ID3 tags |
 | 3038 | nutriphi-server | Hono/Bun | Gemini meal analysis |
 | 3039 | planta-server | Hono/Bun | Gemini plant analysis |
@@ -94,7 +94,7 @@ Pure CRUD apps use mana-sync directly.
 | 5020 | skilltree-web | *(local-first only)* |
 | 5021 | picture-web | 3035 picture-server |
 | 5022 | citycorners-web | *(local-first only)* |
-| 5023 | manadeck-web | 3036 manadeck-server |
+| 5023 | cards-web | 3036 cards-server |
 | 5024 | mukke-web | 3037 mukke-server |
 | 5025 | inventar-web | *(local-first only)* |
 | 5026 | context-web | *(local-first only)* |

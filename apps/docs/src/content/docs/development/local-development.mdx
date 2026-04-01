@@ -86,7 +86,7 @@ This is useful when setting up a fresh environment or after pulling new schema c
 
 On first `pnpm docker:up`, the PostgreSQL container runs `docker/init-db/01-create-databases.sql` which creates all databases:
 
-- manacore, chat, zitare, contacts, calendar, clock, todo, manadeck
+- manacore, chat, zitare, contacts, calendar, clock, todo, cards
 - storage, mail, moodlit, finance, inventory, techbase, voxel_lava, figgos
 
 ### Setup Script
@@ -105,13 +105,13 @@ Some apps don't have backends or don't use Drizzle:
 | App | Reason |
 |-----|--------|
 | manacore | No backend (uses other services) |
-| manadeck | Backend exists but no db:push |
+| cards | Backend exists but no db:push |
 
 For these, use the regular dev commands:
 
 ```bash
 pnpm dev:manacore:web
-pnpm dev:manadeck:app
+pnpm dev:cards:app
 ```
 
 ## Troubleshooting

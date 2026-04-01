@@ -8,7 +8,7 @@ Dieses Dokument bietet eine umfassende Übersicht über alle Projekte im Manacor
 2. [Projekte](#projekte)
    - [Maerchenzauber](#maerchenzauber)
    - [Manacore](#manacore)
-   - [Manadeck](#manadeck)
+   - [Cards](#cards)
    - [Memoro](#memoro)
    - [Picture](#picture)
    - [uLoad](#uload)
@@ -46,7 +46,7 @@ pnpm run dev
 # Einzelnes Projekt starten
 pnpm run maerchenzauber:dev
 pnpm run manacore:dev
-pnpm run manadeck:dev
+pnpm run cards:dev
 pnpm run memoro:dev
 pnpm run picture:dev
 pnpm run uload:dev
@@ -129,7 +129,7 @@ Manacore ist die zentrale Plattform für Organisations-Management, Team-Kollabor
 #### Unterstützte Apps
 
 - **Memoro** - Sprachaufnahmen und Memory-Management
-- **ManaDeck** - KI-gestützte Lernkarten
+- **Cards** - KI-gestützte Lernkarten
 - **Storyteller** - Kreatives Schreiben mit KI
 - **ManaCore** - Zentrale Account- und Organisationsverwaltung
 
@@ -155,11 +155,11 @@ manacore/
 
 ---
 
-### Manadeck
+### Cards
 
 **KI-gestütztes Lernkarten-System**
 
-Manadeck ist ein Deck-Management-System mit KI-gestützter Kartenerstellung und dem integrierten Mana Credit-System.
+Cards ist ein Deck-Management-System mit KI-gestützter Kartenerstellung und dem integrierten Mana Credit-System.
 
 #### Features
 
@@ -191,7 +191,7 @@ Manadeck ist ein Deck-Management-System mit KI-gestützter Kartenerstellung und 
 #### Projektstruktur
 
 ```
-manadeck/
+cards/
 ├── backend/          # NestJS API Server
 ├── apps/
 │   ├── mobile/       # Expo React Native App
@@ -489,7 +489,7 @@ Alle Projekte teilen gemeinsame Packages unter `packages/`:
 
 | Package             | Beschreibung              |
 | ------------------- | ------------------------- |
-| `manadeck-database` | Manadeck Datenbank-Schema |
+| `cards-database` | Cards Datenbank-Schema |
 | `uload-database`    | uLoad Datenbank-Schema    |
 
 ### Verwendung
@@ -601,7 +601,7 @@ Siehe die jeweiligen CLAUDE.md Dateien in den Projektverzeichnissen für detaill
 
 - `maerchenzauber/CLAUDE.md`
 - `manacore/CLAUDE.md`
-- `manadeck/CLAUDE.md` (im Root)
+- `cards/CLAUDE.md` (im Root)
 - `memoro/CLAUDE.md`
 - `uload/CLAUDE.md`
 - `chat/apps/mobile/CLAUDE.md`
@@ -615,7 +615,7 @@ Siehe die jeweiligen CLAUDE.md Dateien in den Projektverzeichnissen für detaill
 - [i18n](./I18N.md) - Internationalisierungs-Guide
 - [Self-Hosting Guide](./SELF-HOSTING-GUIDE.md) - Self-Hosting Anleitung
 - [uLoad Deployment](./ULOAD-DEPLOYMENT.md) - uLoad Deployment Guide
-- [Manadeck Postgres Migration](./MANADECK_POSTGRES_MIGRATION.md) - Datenbank-Migration
+- [Cards Postgres Migration](./CARDS_POSTGRES_MIGRATION.md) - Datenbank-Migration
 
 ---
 
@@ -639,7 +639,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 
 - Kreatives Schreiben (Maerchenzauber)
 - Sprachaufnahmen & Transkription (Memoro)
-- Lernen & Wissensmanagement (Manadeck)
+- Lernen & Wissensmanagement (Cards)
 - Bildbearbeitung (Picture)
 - Link-Management (uLoad)
 - Kommunikation (Chat)
@@ -664,7 +664,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 **Synergien:**
 
 - **Memoro-Integration:** Audio-Memos werden automatisch als Notizen importiert
-- **Manadeck-Integration:** Aus Notizen Lernkarten generieren
+- **Cards-Integration:** Aus Notizen Lernkarten generieren
 - **Chat-Integration:** Chat-Verläufe als Notizen speichern
 
 **Credit-Modell:**
@@ -910,7 +910,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 
 **Synergien:**
 
-- **Manadeck-Integration:** Kursinhalte → Lernkarten
+- **Cards-Integration:** Kursinhalte → Lernkarten
 - **Memoro-Integration:** Vorlesungen aufnehmen und transkribieren
 - **ManaNote-Integration:** Kurs-Notizen
 - **ManaVideo-Integration:** Video-Lektionen
@@ -943,7 +943,7 @@ Dieser Abschnitt enthält durchdachte Ideen für neue Anwendungen, die das Manac
 
 **Synergien:**
 
-- **Manadeck-Integration:** Highlights → Lernkarten
+- **Cards-Integration:** Highlights → Lernkarten
 - **ManaNote-Integration:** Exzerpte in Notizen überführen
 - **ManaLearn-Integration:** Leselisten für Kurse
 
@@ -1403,7 +1403,7 @@ Basierend auf Synergien mit bestehenden Apps, Marktpotenzial und technischer Mac
 | ------------- | ------------------------------------------------- |
 | **ManaNote**  | Natürliche Erweiterung von Memoro, hohe Synergien |
 | **ManaWrite** | Nutzt bestehende KI-Infrastruktur, klarer Markt   |
-| **ManaRead**  | Ergänzt Manadeck perfekt, Bildungsmarkt           |
+| **ManaRead**  | Ergänzt Cards perfekt, Bildungsmarkt           |
 | **ManaMeet**  | Memoro-Technologie wiederverwendbar               |
 
 #### Mittlere Priorität (Strategisch wichtig)
@@ -1414,7 +1414,7 @@ Basierend auf Synergien mit bestehenden Apps, Marktpotenzial und technischer Mac
 | **ManaCalendar** | Verbindet alle Produktivitäts-Apps     |
 | **ManaPodcast**  | Wachsender Markt, Memoro-Basis         |
 | **ManaDesign**   | Picture erweitern, Marketing-Use-Cases |
-| **ManaLearn**    | Manadeck + Memoro + Video kombinieren  |
+| **ManaLearn**    | Cards + Memoro + Video kombinieren  |
 
 #### Langfristig (Exploration)
 
@@ -1456,9 +1456,9 @@ Basierend auf Synergien mit bestehenden Apps, Marktpotenzial und technischer Mac
 
 ### Fazit
 
-Das Manacore-Ökosystem hat enormes Potenzial für Erweiterungen. Die bestehende Infrastruktur (Credits, Auth, Shared Packages, KI-Integration) ermöglicht schnelle Entwicklung neuer Apps. Der Fokus sollte zunächst auf Produktivitäts-Tools liegen, die starke Synergien mit Memoro und Manadeck haben.
+Das Manacore-Ökosystem hat enormes Potenzial für Erweiterungen. Die bestehende Infrastruktur (Credits, Auth, Shared Packages, KI-Integration) ermöglicht schnelle Entwicklung neuer Apps. Der Fokus sollte zunächst auf Produktivitäts-Tools liegen, die starke Synergien mit Memoro und Cards haben.
 
-Die Vision: **Ein zusammenhängendes Ökosystem, in dem Daten nahtlos zwischen Apps fließen** - von der Sprachaufnahme (Memoro) über Notizen (ManaNote) zu Lernkarten (Manadeck), mit KI-Unterstützung auf jedem Schritt.
+Die Vision: **Ein zusammenhängendes Ökosystem, in dem Daten nahtlos zwischen Apps fließen** - von der Sprachaufnahme (Memoro) über Notizen (ManaNote) zu Lernkarten (Cards), mit KI-Unterstützung auf jedem Schritt.
 
 ---
 

@@ -87,7 +87,7 @@ Only servers that need their own database use Drizzle. Most apps rely on mana-sy
 
 **Servers with Drizzle:** chat, todo, moodlit, context, planta, presi, traces, uload, wisekeep, news
 
-**Servers without Drizzle (mana-sync only):** calendar, contacts, manadeck, mukke, nutriphi, picture, questions, storage
+**Servers without Drizzle (mana-sync only):** calendar, contacts, cards, mukke, nutriphi, picture, questions, storage
 
 ## Running Servers
 

@@ -2,7 +2,7 @@
 
 ## Übersicht
 
-Diese Anleitung beschreibt den Upgrade-Prozess von Expo SDK 53 auf SDK 54 für das Manadeck-Projekt.
+Diese Anleitung beschreibt den Upgrade-Prozess von Expo SDK 53 auf SDK 54 für das Cards-Projekt.
 
 ## Wichtige Änderungen in SDK 54
 
@@ -66,7 +66,7 @@ Da SDK 54 React Native 0.81 und React 19.1 benötigt:
 npm install react@19.1.0 react-native@0.81.x
 ```
 
-### 4. Spezifische Package-Updates für Manadeck
+### 4. Spezifische Package-Updates für Cards
 
 Basierend auf den aktuellen Dependencies:
 

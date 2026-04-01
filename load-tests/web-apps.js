@@ -19,7 +19,7 @@ const apps = [
 	{ name: 'contacts', url: `${BASE}:5176` },
 	{ name: 'storage', url: `${BASE}:5178` },
 	{ name: 'presi', url: `${BASE}:5180` },
-	{ name: 'manadeck', url: `${BASE}:5181` },
+	{ name: 'cards', url: `${BASE}:5181` },
 	{ name: 'nutriphi', url: `${BASE}:5182` },
 	{ name: 'skilltree', url: `${BASE}:5183` },
 	{ name: 'photos', url: `${BASE}:5184` },

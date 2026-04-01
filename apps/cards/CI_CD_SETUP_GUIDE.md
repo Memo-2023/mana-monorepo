@@ -1,7 +1,7 @@
 # Complete CI/CD Setup Guide for NestJS Backend with Private Packages
 
 **Last Updated**: 2025-09-30
-**Project**: Manadeck Backend
+**Project**: Cards Backend
 **Stack**: NestJS + Private GitHub Packages + Google Cloud Run
 
 ---
@@ -66,7 +66,7 @@ This guide documents the complete CI/CD setup for deploying a NestJS backend tha
 ### Project Structure
 
 ```
-manadeck/
+cards/
 ├── .github/
 │   └── workflows/
 │       └── deploy-backend.yml          # GitHub Actions workflow
@@ -120,12 +120,12 @@ manadeck/
 
 ```bash
 PROJECT_ID="mana-core-453821"
-SA_NAME="manadeck-backend-sa"
+SA_NAME="cards-backend-sa"
 SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 # Create service account
 gcloud iam service-accounts create $SA_NAME \
-  --display-name="Manadeck Backend Service Account" \
+  --display-name="Cards Backend Service Account" \
   --project=$PROJECT_ID
 
 # Grant required roles
@@ -151,14 +151,14 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 #### 1.2 Create Artifact Registry Repository
 
 ```bash
-gcloud artifacts repositories create manadeck-backend \
+gcloud artifacts repositories create cards-backend \
   --repository-format=docker \
   --location=europe-west3 \
   --project=mana-core-453821 \
-  --description="Docker images for Manadeck Backend"
+  --description="Docker images for Cards Backend"
 ```
 
-**Common Issue**: `name unknown: Repository "manadeck-backend" not found`
+**Common Issue**: `name unknown: Repository "cards-backend" not found`
 **Solution**: Create repository before first deployment (workflow will fail without it)
 
 #### 1.3 Create GCP Secrets (Same Project as Cloud Run)
@@ -182,23 +182,23 @@ PROJECT_ID="mana-core-453821"
 SERVICE_KEY=$(openssl rand -base64 32)
 
 # Create secrets in the SAME project where Cloud Run will be deployed
-echo "your-app-id" | gcloud secrets create MANADECK_APP_ID \
+echo "your-app-id" | gcloud secrets create CARDS_APP_ID \
   --data-file=- \
   --project=$PROJECT_ID
 
-echo "$SERVICE_KEY" | gcloud secrets create MANADECK_SERVICE_KEY \
+echo "$SERVICE_KEY" | gcloud secrets create CARDS_SERVICE_KEY \
   --data-file=- \
   --project=$PROJECT_ID
 
-echo "https://xxx.supabase.co" | gcloud secrets create MANADECK_SUPABASE_URL \
+echo "https://xxx.supabase.co" | gcloud secrets create CARDS_SUPABASE_URL \
   --data-file=- \
   --project=$PROJECT_ID
 
-echo "your-anon-key" | gcloud secrets create MANADECK_SUPABASE_ANON_KEY \
+echo "your-anon-key" | gcloud secrets create CARDS_SUPABASE_ANON_KEY \
   --data-file=- \
   --project=$PROJECT_ID
 
-echo "your-service-role-key" | gcloud secrets create MANADECK_SUPABASE_SERVICE_KEY \
+echo "your-service-role-key" | gcloud secrets create CARDS_SUPABASE_SERVICE_KEY \
   --data-file=- \
   --project=$PROJECT_ID
 ```
@@ -210,10 +210,10 @@ echo "your-service-role-key" | gcloud secrets create MANADECK_SUPABASE_SERVICE_K
 Since Cloud Run and secrets are in the **same project**, the service account automatically has access if it has the Cloud Run Admin role. However, it's best practice to explicitly grant access:
 
 ```bash
-SA_EMAIL="manadeck-backend-sa@mana-core-453821.iam.gserviceaccount.com"
+SA_EMAIL="cards-backend-sa@mana-core-453821.iam.gserviceaccount.com"
 PROJECT_ID="mana-core-453821"
 
-for SECRET in MANA_SERVICE_URL MANADECK_APP_ID MANADECK_SERVICE_KEY MANADECK_SUPABASE_URL MANADECK_SUPABASE_ANON_KEY MANADECK_SUPABASE_SERVICE_KEY; do
+for SECRET in MANA_SERVICE_URL CARDS_APP_ID CARDS_SERVICE_KEY CARDS_SUPABASE_URL CARDS_SUPABASE_ANON_KEY CARDS_SUPABASE_SERVICE_KEY; do
   gcloud secrets add-iam-policy-binding $SECRET \
     --member="serviceAccount:${SA_EMAIL}" \
     --role="roles/secretmanager.secretAccessor" \
@@ -233,7 +233,7 @@ done
 1. Go to: https://github.com/settings/tokens
 2. Click **"Generate new token (classic)"**
 3. Settings:
-   - **Name**: `Manadeck CI/CD`
+   - **Name**: `Cards CI/CD`
    - **Expiration**: Choose appropriate timeframe (90 days, 1 year, or no expiration)
    - **Scopes**: ✅ `repo` (Full control of private repositories)
 4. Click **"Generate token"**
@@ -245,22 +245,22 @@ done
 #### 2.2 Generate Service Account Key
 
 ```bash
-gcloud iam service-accounts keys create manadeck-sa-key.json \
-  --iam-account=manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com \
+gcloud iam service-accounts keys create cards-sa-key.json \
+  --iam-account=cards-backend-sa@memo-2c4c4.iam.gserviceaccount.com \
   --project=memo-2c4c4
 
 # Display the JSON (copy entire output)
-cat manadeck-sa-key.json
+cat cards-sa-key.json
 
 # IMPORTANT: Delete after adding to GitHub
-rm manadeck-sa-key.json
+rm cards-sa-key.json
 ```
 
 **Security Note**: Never commit this JSON to git. Delete local copy after adding to GitHub secrets.
 
 #### 2.3 Add GitHub Repository Secrets
 
-Go to: `https://github.com/Memo-2023/manadeck/settings/secrets/actions`
+Go to: `https://github.com/Memo-2023/cards/settings/secrets/actions`
 
 Add these secrets:
 
@@ -268,7 +268,7 @@ Add these secrets:
 |-------------|-------|-----------------|
 | `GH_PERSONAL_TOKEN` | `ghp_xxxxxxxxxxxx` | From step 2.1 |
 | `GCP_SA_KEY_PROD` | `{"type":"service_account",...}` | From step 2.2 (entire JSON) |
-| `CLOUD_RUN_SERVICE_ACCOUNT` | `manadeck-backend-sa@mana-core-453821.iam.gserviceaccount.com` | Service account email |
+| `CLOUD_RUN_SERVICE_ACCOUNT` | `cards-backend-sa@mana-core-453821.iam.gserviceaccount.com` | Service account email |
 
 **Common Issue**: Forgot which secret is which
 **Solution**: Use descriptive names and document in DEPLOYMENT_CHECKLIST.md
@@ -534,8 +534,8 @@ env:
   PROJECT_ID: mana-core-453821
   REGION: europe-west3
   ARTIFACT_REGISTRY: europe-west3-docker.pkg.dev
-  SERVICE_NAME: manadeck-backend
-  REPOSITORY_NAME: manadeck-backend
+  SERVICE_NAME: cards-backend
+  REPOSITORY_NAME: cards-backend
   WORKING_DIR: backend
 
 jobs:
@@ -691,7 +691,7 @@ jobs:
             --port=8080 \
             --service-account=${{ secrets.CLOUD_RUN_SERVICE_ACCOUNT }} \
             --set-env-vars="NODE_ENV=production" \
-            --update-secrets="MANA_SERVICE_URL=projects/mana-core-453821/secrets/MANA_SERVICE_URL:latest,APP_ID=projects/mana-core-453821/secrets/MANADECK_APP_ID:latest,SERVICE_KEY=projects/mana-core-453821/secrets/MANADECK_SERVICE_KEY:latest,SUPABASE_URL=projects/mana-core-453821/secrets/MANADECK_SUPABASE_URL:latest,SUPABASE_ANON_KEY=projects/mana-core-453821/secrets/MANADECK_SUPABASE_ANON_KEY:latest,SUPABASE_SERVICE_KEY=projects/mana-core-453821/secrets/MANADECK_SUPABASE_SERVICE_KEY:latest,SIGNUP_REDIRECT_URL=projects/mana-core-453821/secrets/MANADECK_SIGNUP_REDIRECT_URL:latest" \
+            --update-secrets="MANA_SERVICE_URL=projects/mana-core-453821/secrets/MANA_SERVICE_URL:latest,APP_ID=projects/mana-core-453821/secrets/CARDS_APP_ID:latest,SERVICE_KEY=projects/mana-core-453821/secrets/CARDS_SERVICE_KEY:latest,SUPABASE_URL=projects/mana-core-453821/secrets/CARDS_SUPABASE_URL:latest,SUPABASE_ANON_KEY=projects/mana-core-453821/secrets/CARDS_SUPABASE_ANON_KEY:latest,SUPABASE_SERVICE_KEY=projects/mana-core-453821/secrets/CARDS_SUPABASE_SERVICE_KEY:latest,SIGNUP_REDIRECT_URL=projects/mana-core-453821/secrets/CARDS_SIGNUP_REDIRECT_URL:latest" \
             --labels="environment=production,commit=${{ steps.version.outputs.short_sha }},version=${{ env.version }}"
 
           # Ensure 100% traffic goes to the new revision
@@ -842,14 +842,14 @@ npm ERR! fatal: Authentication failed
 
 **Error**:
 ```
-name unknown: Repository "manadeck-backend" not found
+name unknown: Repository "cards-backend" not found
 ```
 
 **Root Cause**: Artifact Registry repository doesn't exist
 
 **Solution**:
 ```bash
-gcloud artifacts repositories create manadeck-backend \
+gcloud artifacts repositories create cards-backend \
   --repository-format=docker \
   --location=europe-west3 \
   --project=memo-2c4c4
@@ -870,7 +870,7 @@ gcloud artifacts repositories create manadeck-backend \
 
 **Solution**: Use simple format `SECRET_NAME:latest` when secrets are in same project as Cloud Run:
 ```yaml
---set-secrets="MANA_SERVICE_URL=MANA_SERVICE_URL:latest,APP_ID=MANADECK_APP_ID:latest"
+--set-secrets="MANA_SERVICE_URL=MANA_SERVICE_URL:latest,APP_ID=CARDS_APP_ID:latest"
 ```
 
 **Prevention**: Always keep secrets in the same project as Cloud Run deployment. Use `--set-secrets="ENV_VAR=SECRET_NAME:version"` format (not full path)
@@ -950,12 +950,12 @@ Health check failed with HTTP 503
 **Debugging**:
 ```bash
 # Check service logs
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=manadeck-backend" \
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=cards-backend" \
   --project=memo-2c4c4 \
   --limit=50
 
 # Check if secrets are accessible
-gcloud run services describe manadeck-backend \
+gcloud run services describe cards-backend \
   --project=memo-2c4c4 \
   --region=europe-west3 \
   --format=yaml
@@ -1005,13 +1005,13 @@ export GH_TOKEN="your-github-token"
 # Build with secret
 DOCKER_BUILDKIT=1 docker build \
   --secret id=github_token,env=GH_TOKEN \
-  -t manadeck-backend:test \
+  -t cards-backend:test \
   .
 
 # Run locally
 docker run -p 8080:8080 \
   -e NODE_ENV=development \
-  manadeck-backend:test
+  cards-backend:test
 ```
 
 #### 2. Test npm ci Authentication
@@ -1040,7 +1040,7 @@ mv package-lock.json.bak package-lock.json
 
 #### 1. Verify GitHub Secrets
 
-Go to: `https://github.com/Memo-2023/manadeck/settings/secrets/actions`
+Go to: `https://github.com/Memo-2023/cards/settings/secrets/actions`
 
 Confirm these exist:
 - ✅ `GH_PERSONAL_TOKEN`
@@ -1064,14 +1064,14 @@ gh workflow run deploy-backend.yml
 gh run watch
 
 # Or view in browser
-# https://github.com/Memo-2023/manadeck/actions
+# https://github.com/Memo-2023/cards/actions
 ```
 
 #### 4. Check Deployment
 
 ```bash
 # Get service URL
-SERVICE_URL=$(gcloud run services describe manadeck-backend \
+SERVICE_URL=$(gcloud run services describe cards-backend \
   --project=memo-2c4c4 \
   --region=europe-west3 \
   --format='value(status.url)')
@@ -1083,7 +1083,7 @@ curl ${SERVICE_URL}/health
 curl ${SERVICE_URL}/health/live
 
 # View logs
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=manadeck-backend" \
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=cards-backend" \
   --project=memo-2c4c4 \
   --limit=20
 ```
@@ -1128,7 +1128,7 @@ echo "secret-value" | gcloud secrets create NEW_SECRET_NAME \
 
 # 2. Grant access
 gcloud secrets add-iam-policy-binding NEW_SECRET_NAME \
-  --member="serviceAccount:manadeck-backend-sa@memo-2c4c4.iam.gserviceaccount.com" \
+  --member="serviceAccount:cards-backend-sa@memo-2c4c4.iam.gserviceaccount.com" \
   --role="roles/secretmanager.secretAccessor" \
   --project=mana-core-453821
 
@@ -1150,7 +1150,7 @@ Adjust in workflow:
 ### Monitoring
 
 **Cloud Run Metrics**:
-- https://console.cloud.google.com/run/detail/europe-west3/manadeck-backend/metrics?project=memo-2c4c4
+- https://console.cloud.google.com/run/detail/europe-west3/cards-backend/metrics?project=memo-2c4c4
 
 **Key Metrics**:
 - Request count
@@ -1175,7 +1175,7 @@ Adjust in workflow:
 |----------|----------|---------|
 | `NODE_ENV` | Cloud Run | Set to `production` |
 | `MANA_SERVICE_URL` | GCP Secret | Mana Core API URL |
-| `APP_ID` | GCP Secret | Manadeck app identifier |
+| `APP_ID` | GCP Secret | Cards app identifier |
 | `SERVICE_KEY` | GCP Secret | Mana Core auth key |
 | `SUPABASE_URL` | GCP Secret | Supabase project URL |
 | `SUPABASE_ANON_KEY` | GCP Secret | Supabase anonymous key |
@@ -1200,9 +1200,9 @@ Adjust in workflow:
 
 ### Important URLs
 
-- **Repository**: https://github.com/Memo-2023/manadeck
-- **GitHub Actions**: https://github.com/Memo-2023/manadeck/actions
-- **GitHub Secrets**: https://github.com/Memo-2023/manadeck/settings/secrets/actions
+- **Repository**: https://github.com/Memo-2023/cards
+- **GitHub Actions**: https://github.com/Memo-2023/cards/actions
+- **GitHub Secrets**: https://github.com/Memo-2023/cards/settings/secrets/actions
 - **Cloud Run Console**: https://console.cloud.google.com/run?project=memo-2c4c4
 - **Artifact Registry**: https://console.cloud.google.com/artifacts?project=memo-2c4c4
 - **Secret Manager**: https://console.cloud.google.com/security/secret-manager?project=mana-core-453821

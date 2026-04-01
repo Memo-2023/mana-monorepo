@@ -200,7 +200,7 @@ export const theme = createThemeStore(APP_THEME_CONFIGS.memoro);
 // Available configs:
 // - APP_THEME_CONFIGS.memoro (Gold)
 // - APP_THEME_CONFIGS.manacore (Indigo)
-// - APP_THEME_CONFIGS.manadeck (Indigo)
+// - APP_THEME_CONFIGS.cards (Indigo)
 // - APP_THEME_CONFIGS.maerchenzauber (Purple)
 ```
 

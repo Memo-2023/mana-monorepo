@@ -1,23 +1,23 @@
 <script lang="ts">
 	/**
-	 * ManadeckProgressWidget - Learning progress (local-first)
+	 * CardsProgressWidget - Learning progress (local-first)
 	 */
 
 	import { _ } from 'svelte-i18n';
-	import { useManadeckProgress } from '$lib/data/cross-app-queries';
+	import { useCardsProgress } from '$lib/data/cross-app-queries';
 	import { APP_URLS } from '@manacore/shared-branding';
 
-	const progress = useManadeckProgress();
+	const progress = useCardsProgress();
 
 	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const manadeckUrl = isDev ? APP_URLS.manadeck.dev : APP_URLS.manadeck.prod;
+	const cardsUrl = isDev ? APP_URLS.cards.dev : APP_URLS.cards.prod;
 </script>
 
 <div>
 	<div class="mb-3">
 		<h3 class="flex items-center gap-2 text-lg font-semibold">
 			<span>🎴</span>
-			{$_('dashboard.widgets.manadeck.title')}
+			{$_('dashboard.widgets.cards.title')}
 		</h3>
 	</div>
 
@@ -49,7 +49,7 @@
 
 		{#if progress.value.dueForReview > 0}
 			<a
-				href={manadeckUrl}
+				href={cardsUrl}
 				target="_blank"
 				rel="noopener"
 				class="block rounded-lg bg-primary/10 py-2 text-center text-sm font-medium text-primary hover:bg-primary/20"

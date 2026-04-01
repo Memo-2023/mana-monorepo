@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ManaDeck Theme CSS Variables */
+/* Cards Theme CSS Variables */
 :root {
-  /* Primary colors - ManaDeck Purple */
+  /* Primary colors - Cards Purple */
   --color-primary: #7C3AED;
   --color-primary-hover: #8B5CF6;
   --color-primary-glow: rgba(124, 58, 237, 0.3);

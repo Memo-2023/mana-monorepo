@@ -1,4 +1,4 @@
-# Manadeck Frontend-Komponenten Plan
+# Cards Frontend-Komponenten Plan
 
 ## Architektur-Übersicht
 

@@ -1,4 +1,4 @@
-# Manadeck - Nächste Implementierungsschritte
+# Cards - Nächste Implementierungsschritte
 
 ## 🎯 Aktueller Status
 

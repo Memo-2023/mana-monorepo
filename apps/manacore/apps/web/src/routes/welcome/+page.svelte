@@ -134,7 +134,7 @@
 								</p>
 							</div>
 						</div>
-					{:else if appConfig.name === 'manadeck'}
+					{:else if appConfig.name === 'cards'}
 						<div class="flex items-start gap-3">
 							<div class="mt-1 text-xl">➕</div>
 							<div>

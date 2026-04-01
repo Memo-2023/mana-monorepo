@@ -17,7 +17,7 @@ import (
 	_ "github.com/manacore/mana-matrix-bot/internal/plugins/clock"
 	_ "github.com/manacore/mana-matrix-bot/internal/plugins/contacts"
 	_ "github.com/manacore/mana-matrix-bot/internal/plugins/gateway"
-	_ "github.com/manacore/mana-matrix-bot/internal/plugins/manadeck"
+	_ "github.com/manacore/mana-matrix-bot/internal/plugins/cards"
 	_ "github.com/manacore/mana-matrix-bot/internal/plugins/nutriphi"
 	_ "github.com/manacore/mana-matrix-bot/internal/plugins/ollama"
 	_ "github.com/manacore/mana-matrix-bot/internal/plugins/onboarding"

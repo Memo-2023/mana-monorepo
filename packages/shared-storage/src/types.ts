@@ -129,7 +129,7 @@ export const BUCKETS = {
 	MANACORE: 'manacore-storage',
 	PICTURE: 'picture-storage',
 	CHAT: 'chat-storage',
-	MANADECK: 'manadeck-storage',
+	CARDS: 'cards-storage',
 	PRESI: 'presi-storage',
 	CALENDAR: 'calendar-storage',
 	CONTACTS: 'contacts-storage',

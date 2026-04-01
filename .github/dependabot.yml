@@ -89,7 +89,7 @@ updates:
       - "automated"
 
   - package-ecosystem: "docker"
-    directory: "/apps/manadeck/apps/backend"
+    directory: "/apps/cards/apps/backend"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5

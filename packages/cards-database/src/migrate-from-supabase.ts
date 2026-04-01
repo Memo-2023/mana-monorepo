@@ -96,7 +96,7 @@ async function migrateTable<T>(
 }
 
 async function main() {
-	console.log('=== ManaDeck Data Migration ===');
+	console.log('=== Cards Data Migration ===');
 	console.log('From: Supabase');
 	console.log('To: PostgreSQL (Drizzle)');
 	console.log('==============================\n');

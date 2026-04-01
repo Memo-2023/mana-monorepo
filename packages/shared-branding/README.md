@@ -28,7 +28,7 @@ Display an app's logo:
 
 <AppLogo app="memoro" size={32} />
 <AppLogo app="manacore" size={32} />
-<AppLogo app="manadeck" size={32} />
+<AppLogo app="cards" size={32} />
 <AppLogo app="maerchenzauber" size={32} />
 ```
 
@@ -76,7 +76,7 @@ console.log(memoro.primaryColor); // "#f8d62b"
 | ---------------- | ------------- | ---------------- | ---------------- |
 | `memoro`         | Memoro        | #f8d62b (Gold)   | AI Voice Memos   |
 | `manacore`       | ManaCore      | #6366f1 (Indigo) | Central Hub      |
-| `manadeck`       | ManaDeck      | #8b5cf6 (Purple) | AI Flashcards    |
+| `cards`          | Cards         | #8b5cf6 (Purple) | AI Flashcards    |
 | `maerchenzauber` | Märchenzauber | #ec4899 (Pink)   | AI Story Creator |
 
 ## Props
@@ -113,7 +113,7 @@ console.log(memoro.primaryColor); // "#f8d62b"
 ## Types
 
 ```typescript
-type AppId = 'memoro' | 'manacore' | 'manadeck' | 'maerchenzauber';
+type AppId = 'memoro' | 'manacore' | 'cards' | 'maerchenzauber';
 
 interface AppBranding {
 	id: AppId;

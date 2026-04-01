@@ -100,7 +100,7 @@ export const networkLogger = {
 	},
 };
 
-// Individual function exports for backwards compatibility with manadeck pattern
+// Individual function exports for backwards compatibility with cards pattern
 export const debug = logger.debug;
 export const info = logger.info;
 export const warn = logger.warn;

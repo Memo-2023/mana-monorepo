@@ -65,7 +65,7 @@
 		contacts: 'Kontakte',
 		context: 'Context',
 		general: 'Allgemein',
-		manadeck: 'ManaDeck',
+		cards: 'Cards',
 		matrix: 'Matrix Bots',
 		nutriphi: 'NutriPhi',
 		picture: 'Picture',

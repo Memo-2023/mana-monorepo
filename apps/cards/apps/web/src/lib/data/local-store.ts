@@ -1,8 +1,8 @@
 /**
- * ManaDeck — Local-First Data Layer
+ * Cards — Local-First Data Layer
  *
  * Defines the IndexedDB database, collections, and guest seed data.
- * This is the single source of truth for all ManaDeck data.
+ * This is the single source of truth for all Cards data.
  */
 
 import { createLocalStore, type BaseRecord } from '@manacore/local-store';
@@ -33,8 +33,8 @@ export interface LocalCard extends BaseRecord {
 
 const SYNC_SERVER_URL = import.meta.env.PUBLIC_SYNC_SERVER_URL || 'http://localhost:3050';
 
-export const manadeckStore = createLocalStore({
-	appId: 'manadeck',
+export const cardsStore = createLocalStore({
+	appId: 'cards',
 	collections: [
 		{
 			name: 'decks',
@@ -53,5 +53,5 @@ export const manadeckStore = createLocalStore({
 });
 
 // Typed collection accessors
-export const deckCollection = manadeckStore.collection<LocalDeck>('decks');
-export const cardCollection = manadeckStore.collection<LocalCard>('cards');
+export const deckCollection = cardsStore.collection<LocalDeck>('decks');
+export const cardCollection = cardsStore.collection<LocalCard>('cards');

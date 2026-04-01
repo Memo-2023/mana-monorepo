@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>Themes | ManaDeck</title>
+	<title>Themes | Cards</title>
 </svelte:head>
 
 <ThemePage

@@ -1,5 +1,5 @@
 /**
- * User Settings Store for ManaDeck
+ * User Settings Store for Cards
  *
  * This store syncs settings with mana-core-auth and provides:
  * - Global settings that apply to all apps
@@ -21,7 +21,7 @@ function getAuthUrl(): string {
 }
 
 export const userSettings = createUserSettingsStore({
-	appId: 'manadeck',
+	appId: 'cards',
 	authUrl: getAuthUrl,
 	getAccessToken: () => authStore.getAccessToken(),
 });

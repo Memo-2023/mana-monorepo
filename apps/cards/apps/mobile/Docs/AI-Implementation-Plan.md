@@ -19,7 +19,7 @@ Vision API für Kartenerstellung
 ☐ AI Features Planning: Technische
 Architektur und API Integration
 
-⏺ 🤖 AI Features Implementation Plan - Manadeck
+⏺ 🤖 AI Features Implementation Plan - Cards
 
 Übersicht der AI-Features
 

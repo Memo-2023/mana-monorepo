@@ -190,7 +190,7 @@ Ein User gilt als "verified" wenn MINDESTENS EINS zutrifft:
 
 ### Reward-Struktur
 
-#### ManaDeck
+#### Cards
 
 | Metrik | Threshold | Credits | Max/Monat |
 |--------|-----------|---------|-----------|
@@ -566,7 +566,7 @@ CREATE TABLE community.bounty_pool (
   - [ ] Create Admin endpoints für Manual Review Queue
 
 - [ ] **Integration in Content Apps**
-  - [ ] ManaDeck: Track deck copies
+  - [ ] Cards: Track deck copies
   - [ ] Zitare: Track quote submissions/views
   - [ ] Presi: Track template usage
 

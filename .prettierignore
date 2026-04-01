@@ -69,8 +69,8 @@ packages/shared-landing-ui/src/sections/TestimonialSection.astro
 **/*ANDROID*.md
 **/*IOS*.md
 apps/chat/FEATURE_REQUIREMENTS.md
-apps/manadeck/CI_CD_SETUP_GUIDE.md
-apps/manadeck/MANA_CORE_INTEGRATION_CHECKLIST.md
+apps/cards/CI_CD_SETUP_GUIDE.md
+apps/cards/MANA_CORE_INTEGRATION_CHECKLIST.md
 apps/picture/DEPLOYMENT_COMPLETE.md
 apps/zitare/apps/web/THEMING.md
 BACKEND_DESIGN_PATTERN_AUDIT.md

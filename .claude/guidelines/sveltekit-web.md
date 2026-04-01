@@ -811,7 +811,7 @@ All web apps with backends now use the runtime injection pattern:
 
 ### Apps That May Need Fixing
 
-- ❓ `manadeck/apps/web` - Check if using dynamic URLs
+- ❓ `cards/apps/web` - Check if using dynamic URLs
 - ❓ `manacore/apps/web` - Check if using dynamic URLs
 
 ### Quick Checklist for New SvelteKit Apps

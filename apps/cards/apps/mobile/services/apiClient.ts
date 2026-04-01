@@ -1,5 +1,5 @@
 /**
- * API Client for ManaDeck Backend
+ * API Client for Cards Backend
  * Uses shared-auth TokenManager for automatic token handling
  */
 

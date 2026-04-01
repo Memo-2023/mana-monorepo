@@ -23,7 +23,7 @@ declare -A LANDINGS=(
     ["zitare"]="apps/zitare/apps/landing"
     ["presi"]="apps/presi/apps/landing"
     ["clock"]="apps/clock/apps/landing"
-    ["manadeck"]="apps/manadeck/apps/landing"
+    ["cards"]="apps/cards/apps/landing"
     ["nutriphi"]="apps/nutriphi/apps/landing"
     ["citycorners"]="apps/citycorners/apps/landing"
 )

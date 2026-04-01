@@ -84,7 +84,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 |--------|--------|-------|------------------|-------------------|
 | **Replicate** | Picture | Bildgenerierung (Flux, SDXL, SD) | `PICTURE_REPLICATE_API_TOKEN` | €20-100/Monat |
 | **OpenRouter** | Chat | Cloud LLMs (Claude, GPT, Llama, DeepSeek) | `OPENROUTER_API_KEY` | €10-50/Monat |
-| **Google Gemini** | Planta, Nutriphi, ManaDeck | Vision & Text AI | `GEMINI_API_KEY`, `PLANTA_GEMINI_API_KEY` | €5-20/Monat |
+| **Google Gemini** | Planta, Nutriphi, Cards | Vision & Text AI | `GEMINI_API_KEY`, `PLANTA_GEMINI_API_KEY` | €5-20/Monat |
 | **Azure OpenAI** | Chat (Docker) | GPT-4o via Azure | `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY` | Optional |
 | **Anthropic** | Mana Games | Claude API | `MANA_GAMES_ANTHROPIC_API_KEY` | Optional |
 | **Ollama** | Chat | Lokale LLMs (Gemma 3, Llama) | `OLLAMA_URL` | ✅ Bereits lokal |
@@ -102,7 +102,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 **Konfigurierte MinIO Buckets:**
 - `picture-storage` - AI-generierte Bilder
 - `chat-storage` - User-Uploads
-- `manadeck-storage` - Card/Deck Assets
+- `cards-storage` - Card/Deck Assets
 - `planta-storage` - Pflanzenfotos
 - `nutriphi-storage` - Mahlzeitenfotos
 - `presi-storage` - Präsentationsfolien
@@ -142,7 +142,7 @@ Legende: LOCAL = Self-hosted | CLOUD = Externer Dienst | FREE = Kostenlos
 - `chat-landing.pages.dev`
 - `picture-landing.pages.dev`
 - `manacore-landing.pages.dev`
-- `manadeck-landing.pages.dev`
+- `cards-landing.pages.dev`
 - `zitare-landing.pages.dev`
 
 ### 6. Monitoring
@@ -477,7 +477,7 @@ PICTURE_REPLICATE_API_TOKEN=r8_xxx
 # OpenRouter (Chat)
 OPENROUTER_API_KEY=sk-or-v1-xxx
 
-# Google Gemini (Planta, Nutriphi, ManaDeck)
+# Google Gemini (Planta, Nutriphi, Cards)
 GEMINI_API_KEY=AIza...
 PLANTA_GEMINI_API_KEY=AIza...
 NUTRIPHI_GEMINI_API_KEY=AIza...

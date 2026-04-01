@@ -124,7 +124,7 @@ Da bereits **mana-sync (Go)** als zentraler Sync-Server existiert und **local-fi
 - Schwer (~50 MB node_modules pro Backend)
 - Viel Boilerplate (Module, Controller, Service, DTO fuer jede Entity)
 - Overkill fuer simple CRUD-Operationen
-- NestJS Version-Drift: 18 Backends auf ^10.4.x, ManaDeck auf ^11.0.1
+- NestJS Version-Drift: 18 Backends auf ^10.4.x, Cards auf ^11.0.1
 
 ### Empfehlung
 
@@ -185,7 +185,7 @@ Mischt nicht beides halbfertig. Die angefangenen Go-Rewrites (api-gateway-go, se
 | App | Expo SDK | React Native | NativeWind |
 |-----|----------|-------------|------------|
 | context, chat | **52** | 0.76 | ^3.4.0 |
-| picture, manadeck, manacore | **54** | 0.81 | ^4.2.1 |
+| picture, cards, manacore | **54** | 0.81 | ^4.2.1 |
 | matrix | **55** | 0.83 | latest |
 
 ### Empfehlung
@@ -379,7 +379,7 @@ Zu granulare Packages (Konsolidierungskandidaten):
 | shared-help-content, shared-help-mobile, shared-help-types, shared-help-ui | `@manacore/help` |
 | shared-subscription-types, shared-subscription-ui | `@manacore/subscriptions` |
 | shared-nestjs-health, shared-nestjs-metrics, shared-nestjs-setup | `@manacore/nestjs-bootstrap` |
-| manadeck-database, nutriphi-database, spiral-db | Zurueck in die jeweiligen Apps |
+| cards-database, nutriphi-database, spiral-db | Zurueck in die jeweiligen Apps |
 
 ### Ziel: ~25-30 Packages statt 55
 
@@ -558,7 +558,7 @@ Diese Technologie-Entscheidungen sind gut und sollten beibehalten werden:
 
 ### Apps (24)
 
-calendar, chat, citycorners, clock, contacts, context, docs, inventar, manacore, manadeck, matrix, mukke, nutriphi, photos, picture, planta, playground, presi, questions, skilltree, storage, todo, traces, zitare
+calendar, chat, citycorners, clock, contacts, context, docs, inventar, manacore, cards, matrix, mukke, nutriphi, photos, picture, planta, playground, presi, questions, skilltree, storage, todo, traces, zitare
 
 ### Services (17)
 
@@ -566,7 +566,7 @@ it-landing, mana-api-gateway, mana-api-gateway-go, mana-core-auth, mana-crawler,
 
 ### Shared Packages (55)
 
-credit-operations, eslint-config, local-store, mana-core-nestjs-integration, manadeck-database, notify-client, nutriphi-database, qr-export, shared-api-client, shared-app-onboarding, shared-auth, shared-auth-stores, shared-auth-ui, shared-branding, shared-config, shared-credit-service, shared-credit-ui, shared-drizzle-config, shared-error-tracking, shared-errors, shared-feedback-service, shared-feedback-types, shared-feedback-ui, shared-gpu, shared-help-content, shared-help-mobile, shared-help-types, shared-help-ui, shared-i18n, shared-icons, shared-landing-ui, shared-llm, shared-logger, shared-nestjs-auth, shared-nestjs-health, shared-nestjs-metrics, shared-nestjs-setup, shared-profile-ui, shared-pwa, shared-splitscreen, shared-storage, shared-stores, shared-subscription-types, shared-subscription-ui, shared-tags, shared-tailwind, shared-theme, shared-theme-ui, shared-tsconfig, shared-types, shared-ui, shared-utils, shared-vite-config, spiral-db, test-config, wallpaper-generator
+credit-operations, eslint-config, local-store, mana-core-nestjs-integration, cards-database, notify-client, nutriphi-database, qr-export, shared-api-client, shared-app-onboarding, shared-auth, shared-auth-stores, shared-auth-ui, shared-branding, shared-config, shared-credit-service, shared-credit-ui, shared-drizzle-config, shared-error-tracking, shared-errors, shared-feedback-service, shared-feedback-types, shared-feedback-ui, shared-gpu, shared-help-content, shared-help-mobile, shared-help-types, shared-help-ui, shared-i18n, shared-icons, shared-landing-ui, shared-llm, shared-logger, shared-nestjs-auth, shared-nestjs-health, shared-nestjs-metrics, shared-nestjs-setup, shared-profile-ui, shared-pwa, shared-splitscreen, shared-storage, shared-stores, shared-subscription-types, shared-subscription-ui, shared-tags, shared-tailwind, shared-theme, shared-theme-ui, shared-tsconfig, shared-types, shared-ui, shared-utils, shared-vite-config, spiral-db, test-config, wallpaper-generator
 
 ### Games (3)
 

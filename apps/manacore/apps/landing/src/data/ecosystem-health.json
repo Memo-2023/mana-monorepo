@@ -93,7 +93,7 @@
 					"phosphor": 34,
 					"inlineSvg": 25
 				},
-				"manadeck": {
+				"cards": {
 					"phosphor": 2,
 					"inlineSvg": 1
 				},
@@ -262,7 +262,7 @@
 					"citycorners",
 					"clock",
 					"context",
-					"manadeck",
+					"cards",
 					"manavoxel",
 					"memoro",
 					"moodlit",
@@ -321,7 +321,7 @@
 				"context",
 				"inventar",
 				"manacore",
-				"manadeck",
+				"cards",
 				"manavoxel",
 				"matrix",
 				"moodlit",
@@ -430,7 +430,7 @@
 		"skeletons": {
 			"adoption": 77,
 			"appsWithSkeletons": 23,
-			"missing": ["citycorners", "manadeck", "manavoxel", "planta", "presi", "times", "zitare"]
+			"missing": ["citycorners", "cards", "manavoxel", "planta", "presi", "times", "zitare"]
 		},
 		"toasts": {
 			"adoption": 100,
@@ -473,7 +473,7 @@
 				"picture": 70,
 				"presi": 68,
 				"clock": 64,
-				"manadeck": 63,
+				"cards": 63,
 				"citycorners": 61,
 				"nutriphi": 56,
 				"photos": 56,
@@ -523,7 +523,7 @@
 		"context",
 		"inventar",
 		"manacore",
-		"manadeck",
+		"cards",
 		"manavoxel",
 		"matrix",
 		"memoro",

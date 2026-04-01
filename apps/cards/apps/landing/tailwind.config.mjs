@@ -7,7 +7,7 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				// ManaDeck Purple Theme
+				// Cards Purple Theme
 				primary: {
 					DEFAULT: '#7C3AED',
 					hover: '#8B5CF6',

@@ -2,7 +2,7 @@
 
 ## Überblick
 
-Manadeck implementiert ein wissenschaftlich fundiertes **Spaced Repetition System (SRS)** basierend auf dem **SuperMemo 2 (SM-2) Algorithmus**. Dieses System optimiert den Lernprozess durch intelligente Wiederholungsintervalle, die sich an die individuelle Lernleistung anpassen.
+Cards implementiert ein wissenschaftlich fundiertes **Spaced Repetition System (SRS)** basierend auf dem **SuperMemo 2 (SM-2) Algorithmus**. Dieses System optimiert den Lernprozess durch intelligente Wiederholungsintervalle, die sich an die individuelle Lernleistung anpassen.
 
 ## Was ist Spaced Repetition?
 
@@ -24,7 +24,7 @@ Der SM-2 Algorithmus berechnet optimale Wiederholungsintervalle basierend auf:
 
 ### Qualitätsstufen
 
-In Manadeck werden 4 Bewertungsstufen verwendet:
+In Cards werden 4 Bewertungsstufen verwendet:
 
 | Button | Qualität (Q) | Bedeutung | Typisches Intervall |
 |--------|--------------|-----------|-------------------|
@@ -55,7 +55,7 @@ if (Q < 3) {
 }
 ```
 
-## Implementation in Manadeck
+## Implementation in Cards
 
 ### Datenbankstruktur
 
@@ -233,7 +233,7 @@ organizeReviewQueue(cards: CardProgress[])
 
 ## Vergleich mit anderen Systemen
 
-| Feature | Manadeck | Anki | Quizlet |
+| Feature | Cards | Anki | Quizlet |
 |---------|----------|------|---------|
 | Algorithmus | SM-2 | SM-2+ | Proprietary |
 | Open Source | ✅ | ✅ | ❌ |
@@ -268,7 +268,7 @@ organizeReviewQueue(cards: CardProgress[])
 
 ## Fazit
 
-Das Spaced Repetition System in Manadeck bietet eine wissenschaftlich fundierte, effiziente Methode zum Langzeit-Lernen. Durch die SM-2 Implementation erreichen Nutzer optimale Lernresultate mit minimalem Zeitaufwand.
+Das Spaced Repetition System in Cards bietet eine wissenschaftlich fundierte, effiziente Methode zum Langzeit-Lernen. Durch die SM-2 Implementation erreichen Nutzer optimale Lernresultate mit minimalem Zeitaufwand.
 
 ---
 

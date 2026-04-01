@@ -65,7 +65,7 @@ func Load() *Config {
 	// Also supports legacy patterns: MATRIX_{NAME}_BOT_TOKEN
 	pluginNames := []string{
 		"gateway", "todo", "calendar", "clock", "ollama", "stats",
-		"contacts", "chat", "manadeck", "nutriphi", "picture", "planta",
+		"contacts", "chat", "cards", "nutriphi", "picture", "planta",
 		"presi", "questions", "skilltree", "storage", "projectdoc",
 		"stt", "tts", "zitare", "onboarding",
 	}
@@ -80,7 +80,7 @@ func Load() *Config {
 		"stats":      "MATRIX_STATS_BOT_TOKEN",
 		"contacts":   "MATRIX_CONTACTS_BOT_TOKEN",
 		"chat":       "MATRIX_CHAT_BOT_TOKEN",
-		"manadeck":   "MATRIX_MANADECK_BOT_TOKEN",
+		"cards":      "MATRIX_CARDS_BOT_TOKEN",
 		"nutriphi":   "MATRIX_NUTRIPHI_BOT_TOKEN",
 		"picture":    "MATRIX_PICTURE_BOT_TOKEN",
 		"planta":     "MATRIX_PLANTA_BOT_TOKEN",
@@ -104,7 +104,7 @@ func Load() *Config {
 		"stats":      "MATRIX_STATS_BOT_ROOMS",
 		"contacts":   "MATRIX_CONTACTS_BOT_ROOMS",
 		"chat":       "MATRIX_CHAT_BOT_ROOMS",
-		"manadeck":   "MATRIX_MANADECK_BOT_ROOMS",
+		"cards":      "MATRIX_CARDS_BOT_ROOMS",
 		"nutriphi":   "MATRIX_NUTRIPHI_BOT_ROOMS",
 		"picture":    "MATRIX_PICTURE_BOT_ROOMS",
 		"planta":     "MATRIX_PLANTA_BOT_ROOMS",
@@ -126,7 +126,7 @@ func Load() *Config {
 		"clock":      "CLOCK_BACKEND_URL",
 		"contacts":   "CONTACTS_BACKEND_URL",
 		"chat":       "CHAT_BACKEND_URL",
-		"manadeck":   "MANADECK_BACKEND_URL",
+		"cards":      "CARDS_BACKEND_URL",
 		"nutriphi":   "NUTRIPHI_BACKEND_URL",
 		"picture":    "PICTURE_BACKEND_URL",
 		"planta":     "PLANTA_BACKEND_URL",

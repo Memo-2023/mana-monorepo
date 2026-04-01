@@ -4,7 +4,7 @@
  */
 export { default as MemoroLogo } from './MemoroLogo.svelte';
 export { default as ManaCoreLogo } from './ManaCoreLogo.svelte';
-export { default as ManaDeckLogo } from './ManaDeckLogo.svelte';
+export { default as CardsLogo } from './CardsLogo.svelte';
 export { default as UloadLogo } from './UloadLogo.svelte';
 export { default as ChatLogo } from './ChatLogo.svelte';
 export { default as PresiLogo } from './PresiLogo.svelte';

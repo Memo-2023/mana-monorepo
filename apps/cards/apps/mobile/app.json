@@ -1,9 +1,9 @@
 {
 	"expo": {
-		"name": "manadeck",
-		"slug": "manadeck",
+		"name": "cards",
+		"slug": "cards",
 		"version": "1.0.0",
-		"scheme": "manadeck",
+		"scheme": "cards",
 		"runtimeVersion": {
 			"policy": "appVersion"
 		},
@@ -27,7 +27,7 @@
 		"assetBundlePatterns": ["**/*"],
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.tilljs.manadeck",
+			"bundleIdentifier": "com.tilljs.cards",
 			"infoPlist": {
 				"ITSAppUsesNonExemptEncryption": false,
 				"NSMicrophoneUsageDescription": "Diese App benötigt Zugriff auf das Mikrofon, um Sprachaufnahmen für die Lernkarten-Erstellung zu ermöglichen.",
@@ -43,7 +43,7 @@
 				"foregroundImage": "./assets/adaptive-icon.png",
 				"backgroundColor": "#ffffff"
 			},
-			"package": "com.tilljs.manadeck",
+			"package": "com.tilljs.cards",
 			"permissions": [
 				"android.permission.RECORD_AUDIO",
 				"android.permission.CAMERA",

@@ -2,7 +2,7 @@ import { get } from '../utils/apiClient';
 import type { CreditBalance } from '../types/credits';
 
 const BASE_API_URL =
-	process.env.EXPO_PUBLIC_API_URL || 'https://manadeck-backend-111768794939.europe-west3.run.app';
+	process.env.EXPO_PUBLIC_API_URL || 'https://cards-backend-111768794939.europe-west3.run.app';
 
 /**
  * Credit Service

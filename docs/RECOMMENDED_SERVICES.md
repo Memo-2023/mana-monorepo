@@ -874,7 +874,7 @@ Diese Apps existieren bereits im Monorepo, sind aber noch nicht auf dem Server:
 |-----|--------------|--------|-----------|
 | **Zitare** | Tägliche Inspirations-Zitate | Backend + Web fertig | Hoch |
 | **Picture** | AI-Bildgenerierung | Braucht GPU/API | Mittel |
-| **ManaDeck** | Kartenspiel/Deckbuilding | Backend + Web fertig | Niedrig |
+| **Cards** | Kartenspiel/Deckbuilding | Backend + Web fertig | Niedrig |
 | **Planta** | Pflanzenpflege-Tracker | In Entwicklung | Niedrig |
 
 ### Telegram Bots (nicht deployed)

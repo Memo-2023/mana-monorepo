@@ -41,11 +41,11 @@ const MANACORE_APPS: AppInfo[] = [
 		link_web: 'https://zitare.mana.how',
 	},
 	{
-		id: 'manadeck',
-		name: 'ManaDeck',
+		id: 'cards',
+		name: 'Cards',
 		description: 'Karten- und Deck-Verwaltung',
 		icon: 'layer-group',
-		link_web: 'https://manadeck.mana.how',
+		link_web: 'https://cards.mana.how',
 	},
 	{
 		id: 'contacts',

@@ -203,8 +203,8 @@ export const APP_THEME_CONFIGS = {
 			dark: '239 84% 67%' as HSLValue,
 		},
 	},
-	manadeck: {
-		appId: 'manadeck',
+	cards: {
+		appId: 'cards',
 		defaultVariant: 'ocean' as ThemeVariant,
 		primaryColor: {
 			light: '239 84% 67%' as HSLValue, // Indigo #6366f1

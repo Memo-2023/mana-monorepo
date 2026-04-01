@@ -2,7 +2,7 @@ import { initErrorTracking, handleSvelteError } from '@manacore/shared-error-tra
 import type { HandleClientError } from '@sveltejs/kit';
 
 initErrorTracking({
-	serviceName: 'manadeck-web',
+	serviceName: 'cards-web',
 	dsn: (window as any).__PUBLIC_GLITCHTIP_DSN__,
 	environment: import.meta.env.MODE,
 });

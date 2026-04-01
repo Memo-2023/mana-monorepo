@@ -14,7 +14,7 @@ export const colors = {
 	brand: {
 		memoro: '#f8d62b', // Gold
 		manacore: '#6366f1', // Indigo
-		manadeck: '#6366f1', // Indigo
+		cards: '#6366f1', // Indigo
 		storyteller: '#6366f1', // Indigo
 	},
 

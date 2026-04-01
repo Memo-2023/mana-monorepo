@@ -23,7 +23,7 @@
 		mukkeReader,
 		presiReader,
 		contextReader,
-		manadeckReader,
+		cardsReader,
 	} from '$lib/data/cross-app-stores';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import {
@@ -234,7 +234,7 @@
 			mukkeReader.initialize(),
 			presiReader.initialize(),
 			contextReader.initialize(),
-			manadeckReader.initialize(),
+			cardsReader.initialize(),
 		]);
 
 		// Start syncing to server

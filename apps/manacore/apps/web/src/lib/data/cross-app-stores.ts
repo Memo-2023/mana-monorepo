@@ -194,9 +194,9 @@ export interface CrossAppDocument extends BaseRecord {
 	pinned?: boolean;
 }
 
-// ─── ManaDeck Types ─────────────────────────────────────────
+// ─── Cards Types ───────────────────────────────────────────
 
-export interface CrossAppManadeckDeck extends BaseRecord {
+export interface CrossAppCardsDeck extends BaseRecord {
 	name: string;
 	description?: string;
 	color?: string;
@@ -205,7 +205,7 @@ export interface CrossAppManadeckDeck extends BaseRecord {
 	isPublic?: boolean;
 }
 
-export interface CrossAppManadeckCard extends BaseRecord {
+export interface CrossAppCardsCard extends BaseRecord {
 	deckId: string;
 	front: string;
 	back: string;
@@ -325,8 +325,8 @@ export const contextReader = createLocalStore({
 	],
 });
 
-export const manadeckReader = createLocalStore({
-	appId: 'manadeck',
+export const cardsReader = createLocalStore({
+	appId: 'cards',
 	collections: [
 		{ name: 'decks', indexes: ['isPublic'] },
 		{ name: 'cards', indexes: ['deckId', 'difficulty', 'nextReview', 'order', '[deckId+order]'] },
@@ -377,6 +377,6 @@ export const crossSlideCollection = presiReader.collection<CrossAppSlide>('slide
 export const crossSpaceCollection = contextReader.collection<CrossAppSpace>('spaces');
 export const crossDocumentCollection = contextReader.collection<CrossAppDocument>('documents');
 
-// ManaDeck
-export const crossManadeckDeckCollection = manadeckReader.collection<CrossAppManadeckDeck>('decks');
-export const crossManadeckCardCollection = manadeckReader.collection<CrossAppManadeckCard>('cards');
+// Cards
+export const crossCardsDeckCollection = cardsReader.collection<CrossAppCardsDeck>('decks');
+export const crossCardsCardCollection = cardsReader.collection<CrossAppCardsCard>('cards');

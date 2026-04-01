@@ -240,5 +240,5 @@ Registrierung:
 | context | Dokumente, Wissen | context = freie Dokumente, guides = strukturierte Ausführung |
 | todo | Aufgaben, Checklisten | todo = Tasks, guides = Prozesse mit History |
 | questions | Recherche | questions = Q&A, guides = How-To |
-| manadeck | Lernen | manadeck = Karteikarten/Spaced-Repetition, guides = Schritt-für-Schritt |
+| cards | Lernen | cards = Karteikarten/Spaced-Repetition, guides = Schritt-für-Schritt |
 | skilltree | Skill-Progression | skilltree = XP-Tracking, guides = Quelle von XP (optional) |

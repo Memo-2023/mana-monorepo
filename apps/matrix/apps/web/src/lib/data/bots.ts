@@ -372,9 +372,9 @@ export const BOTS: BotInfo[] = [
 		],
 	},
 	{
-		id: 'manadeck-bot',
-		name: 'ManaDeck Bot',
-		matrixUserId: '@manadeck-bot:matrix.mana.how',
+		id: 'cards-bot',
+		name: 'Cards Bot',
+		matrixUserId: '@cards-bot:matrix.mana.how',
 		description: 'Lernkarten und Spaced Repetition',
 		longDescription:
 			'Erstelle und lerne mit Karteikarten. Nutzt Spaced Repetition für optimales Lernen.',

@@ -18,7 +18,7 @@ http://localhost:5173/welcome?appName=memoro
 
 Try different apps:
 - `?appName=memoro` - Blue theme, voice memo features
-- `?appName=manadeck` - Purple theme, flashcard features
+- `?appName=cards` - Purple theme, flashcard features
 - `?appName=storyteller` - Amber theme, writing features
 - `?appName=manacore` - Indigo theme, account management
 - No parameter - Default Mana platform overview
@@ -46,7 +46,7 @@ Then:
 | App Name | Theme Color | Features |
 |----------|-------------|----------|
 | `memoro` | Blue #3B82F6 | Voice memos, AI transcription |
-| `manadeck` | Purple #8B5CF6 | Flashcards, spaced repetition |
+| `cards` | Purple #8B5CF6 | Flashcards, spaced repetition |
 | `storyteller` | Amber #F59E0B | Creative writing, AI assistant |
 | `manacore` | Indigo #6366F1 | Account management, SSO |
 | (none) | Indigo #6366F1 | Platform overview |

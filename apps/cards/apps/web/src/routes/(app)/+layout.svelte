@@ -26,14 +26,14 @@
 	import { getPillAppItems, getManaApp } from '@manacore/shared-branding';
 	import { setLocale, supportedLocales } from '$lib/i18n';
 	import { useAllDecks } from '$lib/data/queries';
-	import { manadeckOnboarding } from '$lib/stores/app-onboarding.svelte';
+	import { cardsOnboarding } from '$lib/stores/app-onboarding.svelte';
 	import { MiniOnboardingModal } from '@manacore/shared-app-onboarding';
 	import { SessionExpiredBanner, AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
 	import { shouldShowGuestWelcome } from '@manacore/shared-auth-ui';
-	import { manadeckStore } from '$lib/data/local-store';
+	import { cardsStore } from '$lib/data/local-store';
 
 	// App switcher items
-	let appItems = $derived(getPillAppItems('manadeck', undefined, undefined, authStore.user?.tier));
+	let appItems = $derived(getPillAppItems('cards', undefined, undefined, authStore.user?.tier));
 
 	// Live queries — auto-update when IndexedDB changes (local writes, sync, other tabs)
 	const allDecks = useAllDecks();
@@ -56,7 +56,7 @@
 		isTagStripVisible = !isTagStripVisible;
 	}
 
-	// Base navigation items for ManaDeck (Mana and Profile are in user dropdown)
+	// Base navigation items for Cards (Mana and Profile are in user dropdown)
 	const baseNavItems: PillNavItem[] = [
 		{ href: '/decks', label: 'Decks', icon: 'archive' },
 		{ href: '/explore', label: 'Explore', icon: 'search' },
@@ -72,7 +72,7 @@
 
 	// Navigation items filtered by visibility settings (with fallback for guest mode)
 	const navItems = $derived(
-		filterHiddenNavItems('manadeck', baseNavItems, userSettings.nav?.hiddenNavItems || {})
+		filterHiddenNavItems('cards', baseNavItems, userSettings.nav?.hiddenNavItems || {})
 	);
 
 	// Get pinned themes from user settings (extended themes only)
@@ -156,7 +156,7 @@
 		isCollapsed = collapsed;
 		collapsedStore.set(collapsed);
 		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('manadeck-nav-collapsed', String(collapsed));
+			localStorage.setItem('cards-nav-collapsed', String(collapsed));
 		}
 	}
 
@@ -192,17 +192,17 @@
 
 	async function handleAuthReady() {
 		// Initialize local-first database and shared tag store
-		await Promise.all([manadeckStore.initialize(), tagLocalStore.initialize()]);
+		await Promise.all([cardsStore.initialize(), tagLocalStore.initialize()]);
 
 		// If authenticated, start syncing to server
 		if (authStore.isAuthenticated) {
 			const getToken = () => authStore.getValidToken();
-			manadeckStore.startSync(getToken);
+			cardsStore.startSync(getToken);
 			tagMutations.startSync(getToken);
 		}
 
 		// Show guest welcome modal on first visit
-		if (!authStore.isAuthenticated && shouldShowGuestWelcome('manadeck')) {
+		if (!authStore.isAuthenticated && shouldShowGuestWelcome('cards')) {
 			showGuestWelcome = true;
 		}
 
@@ -218,7 +218,7 @@
 		}
 
 		// Initialize collapsed state from localStorage
-		const savedCollapsed = localStorage.getItem('manadeck-nav-collapsed');
+		const savedCollapsed = localStorage.getItem('cards-nav-collapsed');
 		if (savedCollapsed === 'true') {
 			isCollapsed = true;
 			collapsedStore.set(true);
@@ -233,15 +233,15 @@
 	{goto}
 	allowGuest={true}
 	onReady={handleAuthReady}
-	requiredTier={getManaApp('manadeck')?.requiredTier}
-	appName={getManaApp('manadeck')?.name}
+	requiredTier={getManaApp('cards')?.requiredTier}
+	appName={getManaApp('cards')?.name}
 >
 	<div class="min-h-screen bg-background">
 		<!-- Pill Navigation -->
 		<PillNavigation
 			items={navItems}
 			currentPath={$page.url.pathname}
-			appName="ManaDeck"
+			appName="Cards"
 			homeRoute="/decks"
 			onLogout={handleSignOut}
 			onToggleTheme={handleToggleTheme}
@@ -307,13 +307,13 @@
 	</div>
 
 	<!-- Onboarding Modal -->
-	{#if manadeckOnboarding.shouldShow}
-		<MiniOnboardingModal store={manadeckOnboarding} appName="ManaDeck" appEmoji="🃏" />
+	{#if cardsOnboarding.shouldShow}
+		<MiniOnboardingModal store={cardsOnboarding} appName="Cards" appEmoji="🃏" />
 	{/if}
 
 	<!-- Guest Welcome Modal -->
 	<GuestWelcomeModal
-		appId="manadeck"
+		appId="cards"
 		visible={showGuestWelcome}
 		onClose={() => (showGuestWelcome = false)}
 		onLogin={() => goto('/login')}

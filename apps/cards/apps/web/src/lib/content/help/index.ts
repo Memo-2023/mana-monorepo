@@ -1,11 +1,11 @@
 /**
- * Help content for ManaDeck app
+ * Help content for Cards app
  */
 
 import type { HelpContent } from '@manacore/help';
 import { getPrivacyFAQs } from '@manacore/help';
 
-export function getManaDeckHelpContent(locale: string): HelpContent {
+export function getCardsHelpContent(locale: string): HelpContent {
 	const isDE = locale === 'de';
 
 	return {
@@ -14,8 +14,8 @@ export function getManaDeckHelpContent(locale: string): HelpContent {
 				id: 'faq-create-decks',
 				question: isDE ? 'Wie erstelle ich Decks und Karten?' : 'How do I create decks and cards?',
 				answer: isDE
-					? '<p>So erstellst du Decks und Karten in ManaDeck:</p><ol><li>Klicke auf <strong>Neues Deck</strong> und gib einen Namen und eine Beschreibung ein</li><li>Öffne das Deck und klicke auf <strong>Karte hinzufügen</strong></li><li>Gib die <strong>Vorderseite</strong> (Frage) und <strong>Rückseite</strong> (Antwort) ein</li><li>Optional: Füge Bilder, Tags oder Notizen hinzu</li></ol><p>Du kannst auch mehrere Karten auf einmal importieren — siehe Import & Export.</p>'
-					: '<p>Here is how to create decks and cards in ManaDeck:</p><ol><li>Click <strong>New Deck</strong> and enter a name and description</li><li>Open the deck and click <strong>Add Card</strong></li><li>Enter the <strong>front</strong> (question) and <strong>back</strong> (answer)</li><li>Optional: Add images, tags, or notes</li></ol><p>You can also import multiple cards at once — see Import & Export.</p>',
+					? '<p>So erstellst du Decks und Karten in Cards:</p><ol><li>Klicke auf <strong>Neues Deck</strong> und gib einen Namen und eine Beschreibung ein</li><li>Öffne das Deck und klicke auf <strong>Karte hinzufügen</strong></li><li>Gib die <strong>Vorderseite</strong> (Frage) und <strong>Rückseite</strong> (Antwort) ein</li><li>Optional: Füge Bilder, Tags oder Notizen hinzu</li></ol><p>Du kannst auch mehrere Karten auf einmal importieren — siehe Import & Export.</p>'
+					: '<p>Here is how to create decks and cards in Cards:</p><ol><li>Click <strong>New Deck</strong> and enter a name and description</li><li>Open the deck and click <strong>Add Card</strong></li><li>Enter the <strong>front</strong> (question) and <strong>back</strong> (answer)</li><li>Optional: Add images, tags, or notes</li></ol><p>You can also import multiple cards at once — see Import & Export.</p>',
 				category: 'features',
 				order: 1,
 				language: isDE ? 'de' : 'en',
@@ -38,8 +38,8 @@ export function getManaDeckHelpContent(locale: string): HelpContent {
 				id: 'faq-study-sessions',
 				question: isDE ? 'Wie starte ich eine Lernsitzung?' : 'How do I start a study session?',
 				answer: isDE
-					? '<p>So startest du eine Lernsitzung:</p><ol><li>Wähle ein Deck aus deiner Bibliothek</li><li>Klicke auf <strong>Lernen</strong> — die fälligen Karten werden automatisch ausgewählt</li><li>Für jede Karte: Lies die Frage, überlege die Antwort, decke die Rückseite auf</li><li>Bewerte dein Wissen mit den Buttons: Nochmal, Schwer, Gut, Leicht</li></ol><p>ManaDeck zeigt dir an, wie viele Karten <strong>neu</strong>, <strong>fällig</strong> und <strong>zu wiederholen</strong> sind.</p>'
-					: '<p>Here is how to start a study session:</p><ol><li>Select a deck from your library</li><li>Click <strong>Study</strong> — due cards are automatically selected</li><li>For each card: Read the question, think of the answer, reveal the back</li><li>Rate your knowledge with the buttons: Again, Hard, Good, Easy</li></ol><p>ManaDeck shows you how many cards are <strong>new</strong>, <strong>due</strong>, and <strong>to review</strong>.</p>',
+					? '<p>So startest du eine Lernsitzung:</p><ol><li>Wähle ein Deck aus deiner Bibliothek</li><li>Klicke auf <strong>Lernen</strong> — die fälligen Karten werden automatisch ausgewählt</li><li>Für jede Karte: Lies die Frage, überlege die Antwort, decke die Rückseite auf</li><li>Bewerte dein Wissen mit den Buttons: Nochmal, Schwer, Gut, Leicht</li></ol><p>Cards zeigt dir an, wie viele Karten <strong>neu</strong>, <strong>fällig</strong> und <strong>zu wiederholen</strong> sind.</p>'
+					: '<p>Here is how to start a study session:</p><ol><li>Select a deck from your library</li><li>Click <strong>Study</strong> — due cards are automatically selected</li><li>For each card: Read the question, think of the answer, reveal the back</li><li>Rate your knowledge with the buttons: Again, Hard, Good, Easy</li></ol><p>Cards shows you how many cards are <strong>new</strong>, <strong>due</strong>, and <strong>to review</strong>.</p>',
 				category: 'features',
 				order: 3,
 				language: isDE ? 'de' : 'en',
@@ -51,8 +51,8 @@ export function getManaDeckHelpContent(locale: string): HelpContent {
 					? 'Kann ich Karten importieren und exportieren?'
 					: 'Can I import and export cards?',
 				answer: isDE
-					? '<p>ManaDeck unterstützt verschiedene Import- und Exportformate:</p><ul><li><strong>CSV</strong>: Importiere Karten aus Tabellenkalkulationen (Vorderseite, Rückseite, Tags)</li><li><strong>Anki-Format</strong>: Importiere bestehende Anki-Decks (.apkg)</li><li><strong>JSON</strong>: Für programmatischen Zugriff und Backup</li><li><strong>Export</strong>: Exportiere einzelne Decks oder deine gesamte Bibliothek</li></ul>'
-					: '<p>ManaDeck supports various import and export formats:</p><ul><li><strong>CSV</strong>: Import cards from spreadsheets (front, back, tags)</li><li><strong>Anki format</strong>: Import existing Anki decks (.apkg)</li><li><strong>JSON</strong>: For programmatic access and backup</li><li><strong>Export</strong>: Export individual decks or your entire library</li></ul>',
+					? '<p>Cards unterstützt verschiedene Import- und Exportformate:</p><ul><li><strong>CSV</strong>: Importiere Karten aus Tabellenkalkulationen (Vorderseite, Rückseite, Tags)</li><li><strong>Anki-Format</strong>: Importiere bestehende Anki-Decks (.apkg)</li><li><strong>JSON</strong>: Für programmatischen Zugriff und Backup</li><li><strong>Export</strong>: Exportiere einzelne Decks oder deine gesamte Bibliothek</li></ul>'
+					: '<p>Cards supports various import and export formats:</p><ul><li><strong>CSV</strong>: Import cards from spreadsheets (front, back, tags)</li><li><strong>Anki format</strong>: Import existing Anki decks (.apkg)</li><li><strong>JSON</strong>: For programmatic access and backup</li><li><strong>Export</strong>: Export individual decks or your entire library</li></ul>',
 				category: 'technical',
 				order: 4,
 				language: isDE ? 'de' : 'en',
@@ -129,8 +129,8 @@ export function getManaDeckHelpContent(locale: string): HelpContent {
 			id: 'contact-support',
 			title: isDE ? 'Support kontaktieren' : 'Contact Support',
 			content: isDE
-				? '<p>Unser Support-Team hilft dir bei allen Fragen rund um ManaDeck.</p>'
-				: '<p>Our support team is here to help you with any questions about ManaDeck.</p>',
+				? '<p>Unser Support-Team hilft dir bei allen Fragen rund um Cards.</p>'
+				: '<p>Our support team is here to help you with any questions about Cards.</p>',
 			language: isDE ? 'de' : 'en',
 			order: 1,
 			supportEmail: 'support@mana.how',

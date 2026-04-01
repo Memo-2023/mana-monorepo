@@ -18,7 +18,7 @@
 | 3   | Calendar        | calendars, events                                    | Ja (komplett)                                                |
 | 4   | Clock           | alarms, timers, worldClocks                          | Ja (komplett)                                                |
 | 5   | Contacts        | contacts                                             | Ja (komplett)                                                |
-| 6   | ManaDeck        | decks, cards                                         | Ja (komplett)                                                |
+| 6   | Cards           | decks, cards                                         | Ja (komplett)                                                |
 | 7   | **Presi**       | decks, slides                                        | Ja (Store + Pages umgeschrieben)                             |
 | 8   | **Picture**     | images, boards, boardItems, tags, imageTags          | Ja (Gallery + Boards umgeschrieben)                          |
 | 9   | **Inventar**    | collections, items, locations, categories            | Nein (local-store angelegt, Stores nutzen noch localStorage) |

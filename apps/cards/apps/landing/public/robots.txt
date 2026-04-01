@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://manadeck.app/sitemap-index.xml
+Sitemap: https://cards.app/sitemap-index.xml

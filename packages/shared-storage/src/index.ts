@@ -9,7 +9,7 @@ export {
 	createManaCoreStorage,
 	createPictureStorage,
 	createChatStorage,
-	createManaDeckStorage,
+	createCardsStorage,
 	createPresiStorage,
 	createCalendarStorage,
 	createContactsStorage,

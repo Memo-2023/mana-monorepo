@@ -79,7 +79,7 @@ In zwei intensiven Sessions wurde die gesamte ManaCore-Architektur von einem **A
 | Calendar | 3003 | 119 | RRULE Expansion, ICS Import |
 | Contacts | 3004 | 89 | Avatar Upload (S3), vCard Import |
 | Picture | 3006 | 144 | Replicate Image Gen + S3 Upload |
-| ManaDeck | 3009 | 130 | AI Deck/Card Generation |
+| Cards | 3009 | 130 | AI Deck/Card Generation |
 | Mukke | 3010 | 106 | S3 Upload/Download URLs |
 | Questions | 3011 | 121 | Web Research (mana-search) |
 | Storage | 3016 | 117 | File Upload/Download + Versions |
@@ -322,7 +322,7 @@ mana-analytics (Hono, 475 LOC)
 | 3 | Calendar | calendars, events | ✅ Komplett |
 | 4 | Clock | alarms, timers, worldClocks | ✅ Komplett |
 | 5 | Contacts | contacts | ✅ Komplett |
-| 6 | ManaDeck | decks, cards | ✅ Komplett |
+| 6 | Cards | decks, cards | ✅ Komplett |
 | 7 | Presi | decks, slides | ✅ Komplett |
 | 8 | Picture | images, boards, boardItems, tags, imageTags | ✅ Komplett |
 | 9 | Inventar | collections, items, locations, categories | ✅ Komplett |
@@ -484,7 +484,7 @@ Loesung: Explizites `AuthServiceInterface` mit allen 37 Methoden. Alle 5 Apps ha
 | RN 0.76 / 0.81 / 0.83 Mix | **RN 0.83.2** |
 | expo-router 4.x / 6.x / 55.x Mix | **expo-router ~55.0.5** |
 
-Alle 7 Mobile-Apps (chat, context, manacore, manadeck, matrix, picture, traces) auf einheitlichem Expo SDK 55.
+Alle 7 Mobile-Apps (chat, context, manacore, cards, matrix, picture, traces) auf einheitlichem Expo SDK 55.
 
 ---
 

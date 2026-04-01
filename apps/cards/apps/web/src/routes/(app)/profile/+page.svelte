@@ -25,7 +25,7 @@
 
 <ProfilePage
 	user={userProfile}
-	appName="Manadeck"
+	appName="Cards"
 	{actions}
 	pageTitle="Profil"
 	accountInfoTitle="Konto-Informationen"

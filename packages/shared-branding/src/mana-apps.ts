@@ -138,8 +138,8 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'alpha',
 	},
 	{
-		id: 'manadeck',
-		name: 'ManaDeck',
+		id: 'cards',
+		name: 'Cards',
 		description: {
 			de: 'KI Karteikarten',
 			en: 'AI Flashcards',
@@ -148,7 +148,7 @@ export const MANA_APPS: ManaApp[] = [
 			de: 'Lerne intelligenter mit KI-generierten Karteikarten und Spaced Repetition.',
 			en: 'Learn smarter with AI-generated flashcards and spaced repetition.',
 		},
-		icon: APP_ICONS.manadeck,
+		icon: APP_ICONS.cards,
 		color: '#8b5cf6',
 		comingSoon: true,
 		status: 'development',
@@ -609,7 +609,7 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	chat: { dev: 'http://localhost:5174', prod: 'https://chat.mana.how' },
 	memoro: { dev: 'http://localhost:5175', prod: 'https://memoro.mana.how' },
 	presi: { dev: 'http://localhost:5176', prod: 'https://presi.mana.how' },
-	manadeck: { dev: 'http://localhost:5177', prod: 'https://manadeck.mana.how' },
+	cards: { dev: 'http://localhost:5177', prod: 'https://cards.mana.how' },
 	picture: { dev: 'http://localhost:5185', prod: 'https://picture.mana.how' },
 	zitare: { dev: 'http://localhost:5180', prod: 'https://zitare.mana.how' },
 	wisekeep: { dev: 'http://localhost:5181', prod: 'https://wisekeep.mana.how' },

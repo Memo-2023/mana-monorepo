@@ -44,7 +44,7 @@ describe('WIDGET_REGISTRY', () => {
 			'contacts',
 			'zitare',
 			'picture',
-			'manadeck',
+			'cards',
 			'clock',
 			'storage',
 			'mukke',
@@ -70,7 +70,7 @@ describe('WIDGET_REGISTRY', () => {
 		expect(types).toContain('contacts-favorites');
 		expect(types).toContain('zitare-quote');
 		expect(types).toContain('picture-recent');
-		expect(types).toContain('manadeck-progress');
+		expect(types).toContain('cards-progress');
 		expect(types).toContain('clock-timers');
 		expect(types).toContain('storage-usage');
 		expect(types).toContain('mukke-library');

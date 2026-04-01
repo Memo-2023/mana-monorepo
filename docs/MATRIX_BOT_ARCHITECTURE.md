@@ -206,7 +206,7 @@ Die folgenden Services wurden aus den einzelnen Bots konsolidiert:
 
 | Service | Vorher | Nachher | Migrierte Bots |
 |---------|--------|---------|----------------|
-| `SessionService` | 11x dupliziert | 1x in bot-services | picture, contacts, chat, zitare, skilltree, presi, questions, storage, planta, manadeck, nutriphi |
+| `SessionService` | 11x dupliziert | 1x in bot-services | picture, contacts, chat, zitare, skilltree, presi, questions, storage, planta, cards, nutriphi |
 | `TranscriptionService` | 6x dupliziert | 1x in bot-services | todo, clock, zitare, nutriphi, project-doc |
 
 **Status: Vollständig migriert** - Alle 11 Bots mit SessionService und alle 5 Bots mit TranscriptionService nutzen jetzt die gemeinsamen Services aus `@manacore/bot-services`.
@@ -494,7 +494,7 @@ async handleCall(roomId: string, userId: string, index: number) {
 | **matrix-nutriphi-bot** | 3316 | nutriphi:3023 | Ernährungstracking |
 | **matrix-zitare-bot** | 3321 | zitare:3019 | Tägliche Zitate |
 | **matrix-questions-bot** | 3324 | questions:3011 | Q&A mit Web-Recherche |
-| **matrix-manadeck-bot** | 3321 | manadeck:3009 | Kartendecks & Lernen |
+| **matrix-cards-bot** | 3321 | cards:3009 | Kartendecks & Lernen |
 | **matrix-planta-bot** | 3322 | planta:3022 | Pflanzenpflege |
 | **matrix-skilltree-bot** | 3324 | skilltree:3024 | Skill Tree & XP |
 | **matrix-presi-bot** | 3308 | presi:3008 | Präsentationen |

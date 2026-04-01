@@ -266,7 +266,7 @@ export function createBetterAuth(databaseUrl: string) {
 			'https://element.mana.how',
 			'https://inventar.mana.how',
 			'https://link.mana.how',
-			'https://manadeck.mana.how',
+			'https://cards.mana.how',
 			'https://matrix.mana.how',
 			'https://mchat.mana.how',
 			'https://mukke.mana.how',

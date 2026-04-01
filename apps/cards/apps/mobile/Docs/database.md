@@ -1,8 +1,8 @@
-# Manadeck Datenbank-Dokumentation
+# Cards Datenbank-Dokumentation
 
 ## Übersicht
 
-Die Manadeck-Anwendung verwendet **Supabase** (PostgreSQL) als Backend-Datenbank. Die Datenbank ist für eine mobile Lern- und Karteikarten-Anwendung konzipiert und unterstützt Multi-User-Funktionalität mit Row Level Security (RLS).
+Die Cards-Anwendung verwendet **Supabase** (PostgreSQL) als Backend-Datenbank. Die Datenbank ist für eine mobile Lern- und Karteikarten-Anwendung konzipiert und unterstützt Multi-User-Funktionalität mit Row Level Security (RLS).
 
 ## Datenbankstruktur
 

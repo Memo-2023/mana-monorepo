@@ -104,7 +104,7 @@ Progressive Web App Dependencies wurden zu allen SvelteKit Web-Apps hinzugefügt
 | Todo       | ✅ Aktiviert |
 | Clock      | ✅ Aktiviert |
 | LightWrite | ✅ Aktiviert |
-| ManaDeck   | ✅ Aktiviert |
+| Cards      | ✅ Aktiviert |
 | Photos     | ✅ Aktiviert |
 | NutriPhi   | ✅ Aktiviert |
 | Mukke      | ✅ Aktiviert |

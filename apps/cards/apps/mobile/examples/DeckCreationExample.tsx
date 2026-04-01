@@ -17,7 +17,7 @@ import { useInsufficientCredits } from '../hooks/useInsufficientCredits';
 import { creditService } from '../services/creditService';
 
 const BASE_API_URL =
-	process.env.EXPO_PUBLIC_API_URL || 'https://manadeck-backend-111768794939.europe-west3.run.app';
+	process.env.EXPO_PUBLIC_API_URL || 'https://cards-backend-111768794939.europe-west3.run.app';
 
 export function DeckCreationExample() {
 	const [deckName, setDeckName] = useState('');

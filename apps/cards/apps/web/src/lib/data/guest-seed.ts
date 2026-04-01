@@ -1,5 +1,5 @@
 /**
- * Guest seed data for the ManaDeck app.
+ * Guest seed data for the Cards app.
  *
  * These records are loaded into IndexedDB when a new guest visits the app.
  * They serve as onboarding content that teaches the user how the app works.
@@ -13,7 +13,7 @@ export const guestDecks: LocalDeck[] = [
 	{
 		id: ONBOARDING_DECK_ID,
 		name: 'Erste Schritte',
-		description: 'Lerne ManaDeck kennen mit diesen Beispiel-Karteikarten.',
+		description: 'Lerne Cards kennen mit diesen Beispiel-Karteikarten.',
 		color: '#6366f1',
 		cardCount: 3,
 		isPublic: false,
@@ -24,8 +24,8 @@ export const guestCards: LocalCard[] = [
 	{
 		id: 'card-1',
 		deckId: ONBOARDING_DECK_ID,
-		front: 'Was ist ManaDeck?',
-		back: 'ManaDeck ist eine Karteikarten-App zum effizienten Lernen mit Spaced Repetition.',
+		front: 'Was ist Cards?',
+		back: 'Cards ist eine Karteikarten-App zum effizienten Lernen mit Spaced Repetition.',
 		difficulty: 1,
 		reviewCount: 0,
 		order: 0,

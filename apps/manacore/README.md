@@ -4,7 +4,7 @@ A unified application ecosystem built on a shared authentication system, support
 
 ## Overview
 
-ManaCore Apps is a monorepo containing web and mobile applications that provide organization management, team collaboration, and credit transfer capabilities. The system supports multiple branded applications (Memoro, ManaDeck, Storyteller, ManaCore) through a flexible multi-tenant architecture.
+ManaCore Apps is a monorepo containing web and mobile applications that provide organization management, team collaboration, and credit transfer capabilities. The system supports multiple branded applications (Memoro, Cards, Storyteller, ManaCore) through a flexible multi-tenant architecture.
 
 ### Applications
 
@@ -197,7 +197,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 The system supports multiple branded applications sharing the same authentication backend:
 
 - **Memoro** - Voice recordings and memory management
-- **ManaDeck** - AI-powered flashcard learning
+- **Cards** - AI-powered flashcard learning
 - **Storyteller** - Creative writing with AI assistance
 - **ManaCore** - Central account and organization management
 

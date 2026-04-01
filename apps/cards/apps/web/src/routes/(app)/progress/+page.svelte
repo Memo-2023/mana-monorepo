@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-	<title>Progress - Manadeck</title>
+	<title>Progress - Cards</title>
 </svelte:head>
 
 <div class="space-y-6">

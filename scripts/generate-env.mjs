@@ -130,26 +130,26 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Manadeck Server (Hono/Bun)
+	// Cards Server (Hono/Bun)
 	{
-		path: 'apps/manadeck/apps/server/.env',
+		path: 'apps/cards/apps/server/.env',
 		vars: {
 			NODE_ENV: () => 'development',
-			PORT: (env) => env.MANADECK_BACKEND_PORT || '3004',
-			DATABASE_URL: (env) => env.MANADECK_DATABASE_URL,
+			PORT: (env) => env.CARDS_BACKEND_PORT || '3004',
+			DATABASE_URL: (env) => env.CARDS_DATABASE_URL,
 			MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			APP_ID: (env) => env.MANADECK_APP_ID,
+			APP_ID: (env) => env.CARDS_APP_ID,
 			GOOGLE_GENAI_API_KEY: (env) => env.GOOGLE_GENAI_API_KEY,
 		},
 	},
 
-	// Manadeck Web
+	// Cards Web
 	{
-		path: 'apps/manadeck/apps/web/.env',
+		path: 'apps/cards/apps/web/.env',
 		vars: {
-			PUBLIC_API_URL: (env) => `http://localhost:${env.MANADECK_BACKEND_PORT || '3004'}`,
+			PUBLIC_API_URL: (env) => `http://localhost:${env.CARDS_BACKEND_PORT || '3004'}`,
 			PUBLIC_MANA_CORE_AUTH_URL: (env) => env.MANA_CORE_AUTH_URL,
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANADECK || '',
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CARDS || '',
 			PUBLIC_GLITCHTIP_DSN: (env) => env.PUBLIC_GLITCHTIP_DSN || '',
 		},
 	},
@@ -692,11 +692,11 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// ManaDeck Landing
+	// Cards Landing
 	{
-		path: 'apps/manadeck/apps/landing/.env',
+		path: 'apps/cards/apps/landing/.env',
 		vars: {
-			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_MANADECK_LANDING || '',
+			PUBLIC_UMAMI_WEBSITE_ID: (env) => env.UMAMI_WEBSITE_ID_CARDS_LANDING || '',
 		},
 	},
 

@@ -9,7 +9,7 @@
 import type { CreateDeckInput, UpdateDeckInput } from '$lib/types/deck';
 import { deckCollection, cardCollection, type LocalDeck } from '$lib/data/local-store';
 import { toDeck } from '$lib/data/queries';
-import { ManaDeckEvents } from '@manacore/shared-utils/analytics';
+import { CardsEvents } from '@manacore/shared-utils/analytics';
 import type { Deck } from '$lib/types/deck';
 
 let error = $state<string | null>(null);
@@ -35,7 +35,7 @@ export const deckStore = {
 			};
 
 			const inserted = await deckCollection.insert(newLocal);
-			ManaDeckEvents.deckCreated();
+			CardsEvents.deckCreated();
 			return toDeck(inserted);
 		} catch (err: any) {
 			error = err.message || 'Failed to create deck';
@@ -75,7 +75,7 @@ export const deckStore = {
 			}
 
 			await deckCollection.delete(id);
-			ManaDeckEvents.deckDeleted();
+			CardsEvents.deckDeleted();
 		} catch (err: any) {
 			error = err.message || 'Failed to delete deck';
 			console.error('Delete deck error:', err);

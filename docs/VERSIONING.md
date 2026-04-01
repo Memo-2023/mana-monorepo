@@ -36,7 +36,7 @@ All apps follow `MAJOR.MINOR.PATCH`:
 | Zitare | 0.2.0 | Beta |
 | Clock | 0.2.0 | Beta |
 | Nutriphi | 0.2.0 | Beta |
-| ManaDeck | 0.2.0 | Beta |
+| Cards | 0.2.0 | Beta |
 | ManaCore | 0.2.0 | Beta |
 | Matrix | 0.2.0 | Beta |
 | Photos | 0.2.0 | Beta |

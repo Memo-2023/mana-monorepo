@@ -11,7 +11,7 @@
 </script>
 
 <SubscriptionPage
-	appName="ManaDeck"
+	appName="Cards"
 	onSubscribe={handleSubscribe}
 	onBuyPackage={handleBuyPackage}
 	currentPlanId="free"

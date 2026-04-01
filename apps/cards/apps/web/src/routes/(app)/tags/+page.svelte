@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Tags | ManaDeck</title>
+	<title>Tags | Cards</title>
 </svelte:head>
 
 <div class="tags-page">

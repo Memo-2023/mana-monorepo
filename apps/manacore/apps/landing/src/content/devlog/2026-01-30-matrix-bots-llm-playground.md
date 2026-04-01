@@ -33,7 +33,7 @@ workingHours:
 
 Produktiver Tag mit **41 Commits** und Fokus auf Matrix Bot Expansion und Developer Experience:
 
-- **8 neue Matrix Bots** - Spezialisierte Bots für Planta, ManaDeck, Contacts, Picture, Chat, SkillTree, Presi, Questions
+- **8 neue Matrix Bots** - Spezialisierte Bots für Planta, Cards, Contacts, Picture, Chat, SkillTree, Presi, Questions
 - **LLM Playground** - SvelteKit UI für alle Mac Mini Ollama-Modelle
 - **Demo Mode Cleanup** - Entfernung aus 6 Apps für klarere Login-Flows
 - **OIDC-Fixes** - Matrix Synapse als Trusted Client
@@ -49,7 +49,7 @@ Produktiver Tag mit **41 Commits** und Fokus auf Matrix Bot Expansion und Develo
 | Bot                    | Port | Funktion                           |
 | ---------------------- | ---- | ---------------------------------- |
 | `matrix-planta-bot`    | 3319 | Pflanzenpflege & Gieß-Erinnerungen |
-| `matrix-manadeck-bot`  | 3320 | Kartendecks & Lernkarten           |
+| `matrix-cards-bot`     | 3320 | Kartendecks & Lernkarten           |
 | `matrix-contacts-bot`  | 3321 | Kontaktverwaltung                  |
 | `matrix-picture-bot`   | 3322 | AI-Bildgenerierung                 |
 | `matrix-chat-bot`      | 3323 | AI-Chat-Konversationen             |

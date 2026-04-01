@@ -298,8 +298,8 @@ const APP_DEFINITIONS: AppDefinition[] = [
 		},
 	},
 	{
-		id: 'manadeck',
-		displayName: 'ManaDeck',
+		id: 'cards',
+		displayName: 'Cards',
 		score: 48,
 		status: 'alpha',
 		categories: {

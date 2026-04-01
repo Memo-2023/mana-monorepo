@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Manadeck is a React Native/Expo application using Expo Router for navigation, TypeScript for type safety, NativeWind (Tailwind CSS) for styling, and Mana Core Auth for authentication. The app uses Zustand for state management and connects to the NestJS backend (port 3009).
+Cards is a React Native/Expo application using Expo Router for navigation, TypeScript for type safety, NativeWind (Tailwind CSS) for styling, and Mana Core Auth for authentication. The app uses Zustand for state management and connects to the NestJS backend (port 3009).
 
 ## Essential Commands
 
@@ -133,6 +133,6 @@ Project configured with EAS Build:
 
 ### Platform-Specific Setup
 
-- iOS: Bundle ID `com.tilljs.manadeck`
-- Android: Package `com.tilljs.manadeck`
+- iOS: Bundle ID `com.tilljs.cards`
+- Android: Package `com.tilljs.cards`
 - Uses Expo development build for custom native code

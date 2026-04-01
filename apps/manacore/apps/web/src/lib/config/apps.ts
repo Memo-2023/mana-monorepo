@@ -226,9 +226,9 @@ export const appConfigs: Record<string, AppConfig> = {
 	// ============================================
 	// PRODUCTIVITY APPS
 	// ============================================
-	manadeck: {
-		name: 'manadeck',
-		displayName: 'ManaDeck',
+	cards: {
+		name: 'cards',
+		displayName: 'Cards',
 		tagline: 'KI Karteikarten',
 		description: 'Lerne intelligenter mit KI-generierten Karteikarten und Spaced Repetition.',
 		logoEmoji: '🎴',
@@ -261,7 +261,7 @@ export const appConfigs: Record<string, AppConfig> = {
 			},
 		],
 		dashboardRoute: '/dashboard',
-		website: 'https://manadeck.mana.how',
+		website: 'https://cards.mana.how',
 	},
 
 	todo: {
@@ -602,7 +602,7 @@ export const defaultManaConfig: AppConfig = {
 		},
 		{
 			icon: '🎴',
-			title: 'ManaDeck',
+			title: 'Cards',
 			description: 'Intelligente Lernkarten',
 			color: '#8B5CF6',
 		},
@@ -661,7 +661,7 @@ export function getAppsByCategory(): {
 		core: [appConfigs.manacore],
 		ai: [appConfigs.chat, appConfigs.picture, appConfigs.presi, appConfigs.mail],
 		productivity: [
-			appConfigs.manadeck,
+			appConfigs.cards,
 			appConfigs.todo,
 			appConfigs.calendar,
 			appConfigs.contacts,

@@ -17,12 +17,12 @@
 </script>
 
 <svelte:head>
-	<title>Einstellungen - ManaDeck</title>
+	<title>Einstellungen - Cards</title>
 </svelte:head>
 
 <SettingsPage title="Einstellungen" subtitle="Passe die App an deine Vorlieben an.">
 	<!-- Global Settings Section (synced across all apps) -->
-	<GlobalSettingsSection {userSettings} appId="manadeck" />
+	<GlobalSettingsSection {userSettings} appId="cards" />
 
 	<!-- About Section -->
 	<SettingsSection title="Über">

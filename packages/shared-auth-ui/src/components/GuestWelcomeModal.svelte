@@ -1,72 +1,67 @@
 <script lang="ts">
 	import { getManaApp, type AppIconId } from '@manacore/shared-branding';
-	import { X, Info, Warning, SignIn, UserPlus, Question, ArrowRight } from '@manacore/shared-icons';
+	import {
+		X,
+		Info,
+		SignIn,
+		UserPlus,
+		Question,
+		ArrowRight,
+		Lightning,
+		ShieldCheck,
+		Sparkle,
+		ArrowSquareOut,
+	} from '@manacore/shared-icons';
 	import { markGuestWelcomeSeen } from '../utils/guestWelcome';
 	import type { GuestWelcomeTranslations } from '../types';
 
 	const defaultTranslationsDE: GuestWelcomeTranslations = {
 		title: 'Willkommen',
-		guestModeTitle: 'Als Gast kannst du:',
+		guestModeTitle: 'Sofort loslegen:',
 		whatYouCanDo: 'Was du als Gast tun kannst',
 		dataWarningTitle: 'Hinweis',
 		dataWarningText:
-			'Daten werden nur in diesem Browser-Tab gespeichert und gehen beim Schließen verloren.',
+			'Daten werden nur lokal in diesem Browser gespeichert. Melde dich an, um sie geräteübergreifend zu synchronisieren.',
 		loginButton: 'Anmelden',
-		registerButton: 'Kostenloses Konto erstellen',
+		registerButton: 'Konto erstellen',
 		helpButton: 'Hilfe & Erste Schritte',
 		continueAsGuest: 'Weiter als Gast',
 	};
 
 	const defaultTranslationsEN: GuestWelcomeTranslations = {
 		title: 'Welcome',
-		guestModeTitle: 'As a guest you can:',
+		guestModeTitle: 'Get started instantly:',
 		whatYouCanDo: 'What you can do as a guest',
 		dataWarningTitle: 'Note',
-		dataWarningText: 'Data is only stored in this browser tab and will be lost when you close it.',
+		dataWarningText: 'Data is stored locally in this browser only. Sign in to sync across devices.',
 		loginButton: 'Sign In',
-		registerButton: 'Create Free Account',
+		registerButton: 'Sign Up',
 		helpButton: 'Help & Getting Started',
 		continueAsGuest: 'Continue as Guest',
 	};
 
 	/** Default features per app (German) */
 	const defaultFeaturesDE: Record<string, string[]> = {
-		contacts: [
-			'Kontakte erstellen und bearbeiten',
-			'Tags und Gruppen verwenden',
-			'Alle Features ausprobieren',
-		],
-		chat: ['Mit der KI chatten', 'Verschiedene Modelle ausprobieren', 'Nachrichten formatieren'],
-		todo: [
-			'Aufgaben erstellen und organisieren',
-			'Projekte und Labels nutzen',
-			'Subtasks und Deadlines setzen',
-		],
-		calendar: [
-			'Termine erstellen und bearbeiten',
-			'Verschiedene Ansichten nutzen',
-			'Erinnerungen setzen',
-		],
-		clock: ['Weltzeituhr anzeigen', 'Timer und Stoppuhr nutzen', 'Wecker einrichten'],
-		zitare: ['Inspirierende Zitate entdecken', 'Favoriten markieren', 'Zitate teilen'],
-		picture: [
-			'Bilder mit KI generieren',
-			'Verschiedene Stile ausprobieren',
-			'Bilder herunterladen',
-		],
-		manadeck: ['Karteikarten erstellen', 'Decks organisieren', 'Lernmodus testen'],
+		contacts: ['Alle Kontakte an einem Ort', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
+		chat: ['Dein persönlicher KI-Assistent', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
+		todo: ['Organisiere deinen Alltag', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
+		calendar: ['Dein Kalender, deine Regeln', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
+		clock: ['Zeit im Griff, überall', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
+		zitare: ['Tägliche Inspiration für dich', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
+		picture: ['Kreativität trifft KI', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
+		cards: ['Lernen leicht gemacht', 'Keine Anmeldung nötig', 'Deine Daten gehören dir'],
 	};
 
 	/** Default features per app (English) */
 	const defaultFeaturesEN: Record<string, string[]> = {
-		contacts: ['Create and edit contacts', 'Use tags and groups', 'Try all features'],
-		chat: ['Chat with the AI', 'Try different models', 'Format messages'],
-		todo: ['Create and organize tasks', 'Use projects and labels', 'Set subtasks and deadlines'],
-		calendar: ['Create and edit events', 'Use different views', 'Set reminders'],
-		clock: ['View world clocks', 'Use timer and stopwatch', 'Set alarms'],
-		zitare: ['Discover inspiring quotes', 'Mark favorites', 'Share quotes'],
-		picture: ['Generate images with AI', 'Try different styles', 'Download images'],
-		manadeck: ['Create flashcards', 'Organize decks', 'Test learning mode'],
+		contacts: ['All your contacts in one place', 'No sign-up needed', 'Your data belongs to you'],
+		chat: ['Your personal AI assistant', 'No sign-up needed', 'Your data belongs to you'],
+		todo: ['Organize your day', 'No sign-up needed', 'Your data belongs to you'],
+		calendar: ['Your calendar, your rules', 'No sign-up needed', 'Your data belongs to you'],
+		clock: ['Time at your fingertips', 'No sign-up needed', 'Your data belongs to you'],
+		zitare: ['Daily inspiration for you', 'No sign-up needed', 'Your data belongs to you'],
+		picture: ['Where creativity meets AI', 'No sign-up needed', 'Your data belongs to you'],
+		cards: ['Learning made easy', 'No sign-up needed', 'Your data belongs to you'],
 	};
 
 	interface Props {
@@ -123,11 +118,6 @@
 				locale === 'de' ? 'Alle Features ausprobieren' : 'Try all features',
 				locale === 'de' ? 'Daten lokal speichern' : 'Store data locally',
 			]
-	);
-
-	// App description based on locale
-	const appDescription = $derived(
-		appInfo ? (locale === 'de' ? appInfo.longDescription.de : appInfo.longDescription.en) : ''
 	);
 
 	function handleContinueAsGuest() {
@@ -212,10 +202,10 @@
 	<div
 		class="modal-backdrop"
 		onclick={handleBackdropClick}
-		onkeydown={(e) => e.key === 'Enter' && handleBackdropClick(e as unknown as MouseEvent)}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="welcome-title"
+		aria-describedby="welcome-features"
 		tabindex="-1"
 	>
 		<!-- Modal Content -->
@@ -236,33 +226,25 @@
 				<img src={appInfo.icon} alt={appInfo.name} class="app-icon" />
 			</div>
 
-			<!-- App Name & Description -->
+			<!-- App Name -->
 			<h2 id="welcome-title" class="app-name">{appInfo.name}</h2>
-			<p class="app-description">{appDescription}</p>
-
-			<!-- Divider -->
-			<div class="divider"></div>
 
 			<!-- Guest Features -->
-			<div class="features-section">
-				<div class="section-header">
-					<Info size={18} class="section-icon info-icon" />
-					<span class="section-title">{t.guestModeTitle}</span>
-				</div>
+			<div id="welcome-features" class="features-section">
 				<ul class="features-list">
-					{#each featureList as feature}
+					{#each featureList as feature, i}
 						<li class="feature-item">
-							<span class="feature-bullet">•</span>
+							{#if i === 0}
+								<Sparkle size={16} weight="fill" class="feature-icon" />
+							{:else if i === 1}
+								<Lightning size={16} weight="fill" class="feature-icon" />
+							{:else}
+								<ShieldCheck size={16} weight="fill" class="feature-icon" />
+							{/if}
 							<span>{feature}</span>
 						</li>
 					{/each}
 				</ul>
-			</div>
-
-			<!-- Data Warning -->
-			<div class="warning-section">
-				<Warning size={18} class="section-icon warning-icon" />
-				<p class="warning-text">{t.dataWarningText}</p>
 			</div>
 
 			<!-- Action Buttons -->
@@ -271,20 +253,20 @@
 					type="button"
 					class="btn btn-primary"
 					style:--btn-color={appInfo.color}
-					onclick={handleLogin}
+					onclick={handleRegister}
 				>
-					<SignIn size={20} />
-					<span>{t.loginButton}</span>
+					<UserPlus size={20} />
+					<span>{t.registerButton}</span>
 				</button>
 
 				<button
 					type="button"
 					class="btn btn-secondary"
 					style:--btn-color={appInfo.color}
-					onclick={handleRegister}
+					onclick={handleLogin}
 				>
-					<UserPlus size={20} />
-					<span>{t.registerButton}</span>
+					<SignIn size={20} />
+					<span>{t.loginButton}</span>
 				</button>
 
 				{#if onHelp || helpHref}
@@ -298,6 +280,23 @@
 					<span>{t.continueAsGuest}</span>
 					<ArrowRight size={18} />
 				</button>
+
+				<!-- Data hint + learn more -->
+				<div class="footer-hints">
+					<p class="data-hint">
+						<Info size={14} class="data-hint-icon" />
+						<span>{t.dataWarningText}</span>
+					</p>
+					<a
+						href="https://manacore-landing.pages.dev"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="learn-more-link"
+					>
+						<span>{locale === 'de' ? 'Mehr über Mana erfahren' : 'Learn more about Mana'}</span>
+						<ArrowSquareOut size={12} />
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -387,9 +386,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 80px;
-		height: 80px;
-		margin: 0 auto 1rem;
+		width: 56px;
+		height: 56px;
+		margin: 0 auto 0.75rem;
 		border-radius: 1.25rem;
 		background: linear-gradient(
 			145deg,
@@ -403,8 +402,8 @@
 	}
 
 	.app-icon {
-		width: 48px;
-		height: 48px;
+		width: 36px;
+		height: 36px;
 		object-fit: contain;
 	}
 
@@ -420,59 +419,8 @@
 		color: rgba(255, 255, 255, 0.95);
 	}
 
-	.app-description {
-		margin: 0 0 1.25rem;
-		font-size: 0.9rem;
-		line-height: 1.5;
-		text-align: center;
-		color: rgba(0, 0, 0, 0.6);
-	}
-
-	:global(.dark) .app-description {
-		color: rgba(255, 255, 255, 0.6);
-	}
-
-	.divider {
-		height: 1px;
-		margin: 1rem 0;
-		background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
-	}
-
-	:global(.dark) .divider {
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-	}
-
 	.features-section {
 		margin-bottom: 1rem;
-	}
-
-	.section-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-
-	.section-title {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: rgba(0, 0, 0, 0.8);
-	}
-
-	:global(.dark) .section-title {
-		color: rgba(255, 255, 255, 0.8);
-	}
-
-	.section-icon {
-		flex-shrink: 0;
-	}
-
-	:global(.info-icon) {
-		color: #3b82f6;
-	}
-
-	:global(.warning-icon) {
-		color: #f59e0b;
 	}
 
 	.features-list {
@@ -483,7 +431,7 @@
 
 	.feature-item {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: 0.5rem;
 		padding: 0.35rem 0;
 		font-size: 0.875rem;
@@ -494,34 +442,13 @@
 		color: rgba(255, 255, 255, 0.7);
 	}
 
-	.feature-bullet {
-		color: rgba(0, 0, 0, 0.3);
+	:global(.feature-icon) {
+		flex-shrink: 0;
+		color: rgba(0, 0, 0, 0.4);
 	}
 
-	:global(.dark) .feature-bullet {
-		color: rgba(255, 255, 255, 0.4);
-	}
-
-	.warning-section {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.75rem;
-		padding: 0.875rem;
-		margin-bottom: 1.25rem;
-		border-radius: 0.875rem;
-		background: rgba(245, 158, 11, 0.1);
-		border: 1px solid rgba(245, 158, 11, 0.25);
-	}
-
-	.warning-text {
-		margin: 0;
-		font-size: 0.8rem;
-		line-height: 1.5;
-		color: rgba(0, 0, 0, 0.75);
-	}
-
-	:global(.dark) .warning-text {
-		color: rgba(255, 255, 255, 0.75);
+	:global(.dark .feature-icon) {
+		color: rgba(255, 255, 255, 0.45);
 	}
 
 	.buttons-section {
@@ -530,13 +457,69 @@
 		gap: 0.625rem;
 	}
 
+	.footer-hints {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 0.25rem;
+	}
+
+	.learn-more-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-size: 0.75rem;
+		color: rgba(0, 0, 0, 0.4);
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	.learn-more-link:hover {
+		color: rgba(0, 0, 0, 0.7);
+	}
+
+	:global(.dark) .learn-more-link {
+		color: rgba(255, 255, 255, 0.4);
+	}
+
+	:global(.dark) .learn-more-link:hover {
+		color: rgba(255, 255, 255, 0.7);
+	}
+
+	.data-hint {
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		gap: 0.375rem;
+		margin: 0.25rem 0 0;
+		font-size: 0.75rem;
+		line-height: 1.4;
+		color: rgba(0, 0, 0, 0.4);
+		text-align: center;
+	}
+
+	:global(.dark) .data-hint {
+		color: rgba(255, 255, 255, 0.4);
+	}
+
+	:global(.data-hint-icon) {
+		flex-shrink: 0;
+		margin-top: 0.1rem;
+		color: rgba(0, 0, 0, 0.3);
+	}
+
+	:global(.dark .data-hint-icon) {
+		color: rgba(255, 255, 255, 0.3);
+	}
+
 	.btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
 		width: 100%;
-		padding: 0.875rem 1rem;
+		padding: 0.75rem 1rem;
 		border: none;
 		border-radius: 0.875rem;
 		font-size: 0.9375rem;
@@ -652,13 +635,13 @@
 		}
 
 		.icon-container {
-			width: 70px;
-			height: 70px;
+			width: 48px;
+			height: 48px;
 		}
 
 		.app-icon {
-			width: 42px;
-			height: 42px;
+			width: 32px;
+			height: 32px;
 		}
 
 		.app-name {

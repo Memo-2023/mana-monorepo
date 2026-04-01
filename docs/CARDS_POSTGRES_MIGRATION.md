@@ -1,8 +1,8 @@
-# ManaDeck: Migration zu PostgreSQL + Drizzle ORM
+# Cards: Migration zu PostgreSQL + Drizzle ORM
 
 ## Übersicht
 
-Dieses Dokument beschreibt die Migration von ManaDeck von Supabase zu einer selbst-gehosteten PostgreSQL-Datenbank mit Drizzle ORM.
+Dieses Dokument beschreibt die Migration von Cards von Supabase zu einer selbst-gehosteten PostgreSQL-Datenbank mit Drizzle ORM.
 
 ---
 
@@ -10,14 +10,14 @@ Dieses Dokument beschreibt die Migration von ManaDeck von Supabase zu einer selb
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
-│  ManaDeck Web   │     │ ManaDeck Mobile │
+│  Cards Web   │     │ Cards Mobile │
 │   (SvelteKit)   │     │     (Expo)      │
 └────────┬────────┘     └────────┬────────┘
          │                       │
          └───────────┬───────────┘
                      │
          ┌───────────▼───────────┐
-         │   ManaDeck Backend    │
+         │   Cards Backend    │
          │      (NestJS)         │
          └───────────┬───────────┘
                      │
@@ -36,14 +36,14 @@ Dieses Dokument beschreibt die Migration von ManaDeck von Supabase zu einer selb
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
-│  ManaDeck Web   │     │ ManaDeck Mobile │
+│  Cards Web   │     │ Cards Mobile │
 │   (SvelteKit)   │     │     (Expo)      │
 └────────┬────────┘     └────────┬────────┘
          │                       │
          └───────────┬───────────┘
                      │
          ┌───────────▼───────────┐
-         │   ManaDeck Backend    │
+         │   Cards Backend    │
          │  (NestJS + Drizzle)   │
          └───────────┬───────────┘
                      │
@@ -214,7 +214,7 @@ CREATE TABLE user_stats (
 ### Dateistruktur
 
 ```
-manadeck/
+cards/
 ├── packages/
 │   └── database/                 # Neues shared database package
 │       ├── src/
@@ -355,10 +355,10 @@ export type Database = typeof db;
 
 # Option B: Docker lokal
 docker run -d \
-  --name manadeck-postgres \
-  -e POSTGRES_USER=manadeck \
+  --name cards-postgres \
+  -e POSTGRES_USER=cards \
   -e POSTGRES_PASSWORD=secure_password \
-  -e POSTGRES_DB=manadeck \
+  -e POSTGRES_DB=cards \
   -p 5432:5432 \
   postgres:16-alpine
 
@@ -370,8 +370,8 @@ docker run -d \
 
 ```bash
 cd /Users/tillschneider/Documents/__00__Code/manacore-monorepo
-mkdir -p packages/manadeck-database
-cd packages/manadeck-database
+mkdir -p packages/cards-database
+cd packages/cards-database
 pnpm init
 ```
 
@@ -415,7 +415,7 @@ pg_dump -h db.your-project.supabase.co \
   --table=deck_templates \
   --table=ai_generations \
   --table=user_stats \
-  > manadeck_data.sql
+  > cards_data.sql
 ```
 
 ### Phase 3: Backend Migration (Tag 3-5)
@@ -424,8 +424,8 @@ pg_dump -h db.your-project.supabase.co \
 
 ```typescript
 // repositories/deck.repository.ts
-import { db } from '@manadeck/database';
-import { decks, cards } from '@manadeck/database/schema';
+import { db } from '@cards/database';
+import { decks, cards } from '@cards/database/schema';
 import { eq, and, or, desc } from 'drizzle-orm';
 
 export class DeckRepository {
@@ -663,8 +663,8 @@ export const deckStore = createDeckStore();
 ```typescript
 // tests/deck.integration.test.ts
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { db } from '@manadeck/database';
-import { decks } from '@manadeck/database/schema';
+import { db } from '@cards/database';
+import { decks } from '@cards/database/schema';
 import { DeckService } from '../services/deck.service';
 
 describe('DeckService', () => {
@@ -696,9 +696,9 @@ describe('DeckService', () => {
 
 ```typescript
 // scripts/migrate-data.ts
-import { db as newDb } from '@manadeck/database';
+import { db as newDb } from '@cards/database';
 import { createClient } from '@supabase/supabase-js';
-import { decks, cards } from '@manadeck/database/schema';
+import { decks, cards } from '@cards/database/schema';
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
 

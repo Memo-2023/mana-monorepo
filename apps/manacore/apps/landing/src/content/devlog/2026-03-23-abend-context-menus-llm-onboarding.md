@@ -56,7 +56,7 @@ Das bestehende `ContextMenu`-Component aus `@manacore/shared-ui` wurde systemati
 | **Todo**     | TaskList         | Bearbeiten, Complete, Priorität, Projekt verschieben, Löschen    | `0893e47a` |
 | **Calendar** | WeekView Events  | Bearbeiten, Duplizieren, Löschen (i18n: DE/EN/FR/ES/IT)          | `e7bf58c5` |
 | **Presi**    | Deck-Karten      | Öffnen, Löschen                                                  | `28286d12` |
-| **ManaDeck** | Deck-Karten      | Öffnen, Löschen                                                  | `28286d12` |
+| **Cards**    | Deck-Karten      | Öffnen, Löschen                                                  | `28286d12` |
 | **Photos**   | PhotoGrid        | Anzeigen, Favorit toggle, Löschen                                | `28286d12` |
 | **Photos**   | AlbumGrid        | Öffnen, Löschen                                                  | `28286d12` |
 | **Zitare**   | Favoriten        | Aus Favoriten entfernen, Kopieren, Teilen                        | `28286d12` |
@@ -198,14 +198,14 @@ Save- und Cancel-Buttons entfernt. Tasks werden jetzt automatisch gespeichert mi
 
 Die `QuickInputBar`-Komponente wurde in 6 weitere Apps integriert:
 
-| App          | Zweck               |
-| ------------ | ------------------- |
-| **Mukke**    | Song-Suche          |
-| **Matrix**   | Room/Chat-Suche     |
-| **ManaDeck** | Deck-Suche          |
-| **Planta**   | Pflanzen-Suche      |
-| **Photos**   | Foto-Suche          |
-| **Presi**    | Präsentations-Suche |
+| App        | Zweck               |
+| ---------- | ------------------- |
+| **Mukke**  | Song-Suche          |
+| **Matrix** | Room/Chat-Suche     |
+| **Cards**  | Deck-Suche          |
+| **Planta** | Pflanzen-Suche      |
+| **Photos** | Foto-Suche          |
+| **Presi**  | Präsentations-Suche |
 
 ### Shared-UI Verbesserungen
 

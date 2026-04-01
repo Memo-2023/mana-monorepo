@@ -2,7 +2,7 @@
 
 ## Übersicht
 
-Diese Liste enthält Vorschläge für hochwertige öffentliche Decks, die der Manadeck-Community zugute kommen würden. Diese Decks können von Admins oder erfahrenen Benutzern erstellt und als Startinhalt für die Plattform verwendet werden.
+Diese Liste enthält Vorschläge für hochwertige öffentliche Decks, die der Cards-Community zugute kommen würden. Diese Decks können von Admins oder erfahrenen Benutzern erstellt und als Startinhalt für die Plattform verwendet werden.
 
 ## 🌍 Sprachen
 

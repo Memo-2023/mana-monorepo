@@ -56,7 +56,7 @@ User loggt sich in Calendar ein → ✓
 User öffnet Todo → ❌ Nicht eingeloggt (SSO fehlgeschlagen)
 ```
 
-10 Apps fehlten in `trustedOrigins`: Mukke, Photos, Planta, Questions, Todo, Traces, Context, Docs, ManaDeck, Zitare.
+10 Apps fehlten in `trustedOrigins`: Mukke, Photos, Planta, Questions, Todo, Traces, Context, Docs, Cards, Zitare.
 
 ### Der Fix
 
@@ -99,7 +99,7 @@ const APPS_WITH_SSO = [
 	'clock',
 	'contacts',
 	'context',
-	'manadeck',
+	'cards',
 	'matrix',
 	'mukke',
 	'nutriphi',
@@ -309,7 +309,7 @@ Alle 20 aktiven Apps wurden bewertet nach 8 Kategorien (Backend, Frontend, Datab
 | **Storage**   | 55    | Beta       | 10 Module, 0 Tests              |
 | **Presi**     | 55→81 | Beta       | Nach Hardening heute            |
 | **Planta**    | 50    | Alpha      | Gemini AI, keine Tests          |
-| **ManaDeck**  | 48    | Alpha      | Schwächste Codebase             |
+| **Cards**     | 48    | Alpha      | Schwächste Codebase             |
 | **Questions** | 48    | Alpha      | 32 Endpoints, kein Docker       |
 | **Traces**    | 35    | Alpha      | Mobile-first GPS, minimal       |
 

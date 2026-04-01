@@ -53,7 +53,7 @@ Neuer `Analytics Maturity`-Metrik in ManaScore und Custom Event Tracking in 8+ A
 | Storage | Upload, Download, Share, Preview |
 | Photos | Upload, Edit, Album-Create |
 | Context, SkillTree, Planta, Questions | App-spezifische Events |
-| NutriPhi, ManaDeck | Meal-Log, Card-Create |
+| NutriPhi, Cards | Meal-Log, Card-Create |
 
 ### Commits
 
@@ -61,7 +61,7 @@ Neuer `Analytics Maturity`-Metrik in ManaScore und Custom Event Tracking in 8+ A
 - `bade0a17` — Storage Event Tracking
 - `3075e515` — Photos Event Tracking
 - `12b3c4f0` — Context, SkillTree, Planta, Questions
-- `1fe8f890` — NutriPhi, ManaDeck
+- `1fe8f890` — NutriPhi, Cards
 
 ---
 
@@ -144,7 +144,7 @@ Help-Pages in 10+ bisher fehlende Apps nachgezogen, verbesserte Inhalte für all
 - `audit:deps` und `generate:dockerfiles --check` in PR-Workflow (`858b7f68`)
 - Dockerfile-Validator auf Backends und Services erweitert (`10524693`)
 - Docker Health-Check Start-Periods gestaffelt (`37b061f7`)
-- ManaDeck Docker Deployment für Backend + Web (`6c1b472e`)
+- Cards Docker Deployment für Backend + Web (`6c1b472e`)
 - ManaScore Extended Codebase-Metrics für alle App-Audits (`b9a9052a`)
 - Fehlende prom-client Dependency in 4 Backends (`422b4f9f`)
 - Onboarding-Modal in 8 Apps aus Flex-Layout rausgeschoben (`491c71e2`)

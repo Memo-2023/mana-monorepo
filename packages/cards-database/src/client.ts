@@ -10,10 +10,10 @@ let pgClient: ReturnType<typeof postgres> | null = null;
  * Get the database URL from environment variables
  */
 function getDatabaseUrl(): string {
-	const url = process.env.DATABASE_URL || process.env.MANADECK_DATABASE_URL;
+	const url = process.env.DATABASE_URL || process.env.CARDS_DATABASE_URL;
 	if (!url) {
 		throw new Error(
-			'Database URL not found. Set DATABASE_URL or MANADECK_DATABASE_URL environment variable.'
+			'Database URL not found. Set DATABASE_URL or CARDS_DATABASE_URL environment variable.'
 		);
 	}
 	return url;

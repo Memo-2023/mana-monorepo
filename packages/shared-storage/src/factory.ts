@@ -103,7 +103,7 @@ export function createStorage(bucketKey: keyof typeof BUCKETS, publicUrl?: strin
 export const createManaCoreStorage = (publicUrl?: string) => createStorage('MANACORE', publicUrl);
 export const createPictureStorage = (publicUrl?: string) => createStorage('PICTURE', publicUrl);
 export const createChatStorage = () => createStorage('CHAT');
-export const createManaDeckStorage = () => createStorage('MANADECK');
+export const createCardsStorage = () => createStorage('CARDS');
 export const createPresiStorage = () => createStorage('PRESI');
 export const createCalendarStorage = () => createStorage('CALENDAR');
 export const createContactsStorage = () => createStorage('CONTACTS');

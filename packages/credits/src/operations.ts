@@ -37,7 +37,7 @@ export enum CreditOperationType {
 	// NutriPhi - Food analysis
 	AI_FOOD_ANALYSIS = 'ai_food_analysis',
 
-	// ManaDeck - AI deck generation
+	// Cards - AI deck generation
 	AI_DECK_GENERATION = 'ai_deck_generation',
 	AI_CARD_GENERATION = 'ai_card_generation',
 
@@ -271,13 +271,13 @@ export const OPERATION_METADATA: Record<CreditOperationType, OperationMetadata> 
 		name: 'Generate AI Deck',
 		description: 'Generate a complete deck with AI (10 cards)',
 		category: CreditCategory.AI,
-		app: 'manadeck',
+		app: 'cards',
 	},
 	[CreditOperationType.AI_CARD_GENERATION]: {
 		name: 'Generate AI Card',
 		description: 'Generate a single card with AI',
 		category: CreditCategory.AI,
-		app: 'manadeck',
+		app: 'cards',
 	},
 
 	// Quote Explanation

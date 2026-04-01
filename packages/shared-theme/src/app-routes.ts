@@ -118,8 +118,8 @@ export const APP_ROUTES: Record<string, AppRouteConfig> = {
 		],
 	},
 
-	manadeck: {
-		appId: 'manadeck',
+	cards: {
+		appId: 'cards',
 		defaultRoute: '/decks',
 		availableRoutes: [
 			{ path: '/decks', label: 'Decks', icon: 'layers', alwaysVisible: true },

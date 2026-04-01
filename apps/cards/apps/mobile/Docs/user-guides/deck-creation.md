@@ -1,8 +1,8 @@
-# Decks erstellen in Manadeck
+# Decks erstellen in Cards
 
 ## Übersicht
 
-Manadeck ermöglicht es Benutzern, eigene Lernkarten-Decks zu erstellen und zu verwalten. Diese Anleitung zeigt dir, wie du neue Decks erstellen und konfigurieren kannst.
+Cards ermöglicht es Benutzern, eigene Lernkarten-Decks zu erstellen und zu verwalten. Diese Anleitung zeigt dir, wie du neue Decks erstellen und konfigurieren kannst.
 
 ## Deck-Erstellung Schritt für Schritt
 
@@ -35,7 +35,7 @@ Nach der Deck-Erstellung kannst du Karten hinzufügen:
 
 #### Kartentypen
 
-Manadeck unterstützt verschiedene Kartentypen:
+Cards unterstützt verschiedene Kartentypen:
 
 1. **Text-Karten**: Klassische Vorderseite/Rückseite Karten
 2. **Bild-Karten**: Karten mit Bildern
@@ -51,7 +51,7 @@ Manadeck unterstützt verschiedene Kartentypen:
 
 ### 4. KI-unterstützte Erstellung
 
-Manadeck bietet KI-Features zur Deck-Erstellung:
+Cards bietet KI-Features zur Deck-Erstellung:
 
 #### Smart Card Creator
 

@@ -13,7 +13,7 @@ Monorepo containing all Manacore projects — a self-hosted multi-app ecosystem 
 | **clock** | Pomodoro & time tracking | NestJS backend, SvelteKit web, Astro landing |
 | **contacts** | Contact management | NestJS backend, SvelteKit web |
 | **picture** | AI image generation | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
-| **manadeck** | Card/deck management | NestJS backend, Expo mobile, SvelteKit web |
+| **cards** | Card/deck management | NestJS backend, Expo mobile, SvelteKit web |
 | **zitare** | Daily inspiration quotes | NestJS backend, Expo mobile, SvelteKit web, Astro landing |
 | **mukke** | Music player | NestJS backend, SvelteKit web |
 | **planta** | Plant care tracker | NestJS backend, SvelteKit web |

@@ -2,27 +2,27 @@
 	import { goto } from '$app/navigation';
 	import { locale } from 'svelte-i18n';
 	import { HelpPage, getHelpTranslations } from '@manacore/help';
-	import { getManaDeckHelpContent } from '$lib/content/help/index.js';
+	import { getCardsHelpContent } from '$lib/content/help/index.js';
 
-	const content = $derived(getManaDeckHelpContent($locale ?? 'de'));
+	const content = $derived(getCardsHelpContent($locale ?? 'de'));
 	const translations = $derived(
 		getHelpTranslations($locale ?? 'de', {
 			subtitle:
 				$locale === 'de'
-					? 'Finde Antworten und lerne ManaDeck kennen'
-					: 'Find answers and learn how to use ManaDeck',
+					? 'Finde Antworten und lerne Cards kennen'
+					: 'Find answers and learn how to use Cards',
 		})
 	);
 </script>
 
 <svelte:head>
-	<title>{translations.title} | ManaDeck</title>
+	<title>{translations.title} | Cards</title>
 </svelte:head>
 
 <HelpPage
 	{content}
-	appName="ManaDeck"
-	appId="manadeck"
+	appName="Cards"
+	appId="cards"
 	{translations}
 	showBackButton
 	onBack={() => goto('/')}

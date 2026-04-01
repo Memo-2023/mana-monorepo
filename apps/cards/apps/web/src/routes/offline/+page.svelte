@@ -3,7 +3,7 @@
 </script>
 
 <OfflinePage
-	appName="ManaDeck"
-	offlineMessage="ManaDeck benötigt eine Internetverbindung für deine Kartendecks."
+	appName="Cards"
+	offlineMessage="Cards benötigt eine Internetverbindung für deine Kartendecks."
 	accentColor="#d97706"
 />

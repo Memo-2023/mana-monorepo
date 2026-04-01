@@ -207,7 +207,7 @@ Neue Übersichtsseite mit allen 19 Matrix Bots in Manalink.
 | matrix-zitare-bot    | Inspiration  | Tägliche Zitate        |
 | matrix-skilltree-bot | Gamification | Skill-Tracking         |
 | matrix-planta-bot    | Lifestyle    | Pflanzenpflege         |
-| matrix-manadeck-bot  | Learning     | Lernkarten             |
+| matrix-cards-bot     | Learning     | Lernkarten             |
 | matrix-presi-bot     | Productivity | Präsentationen         |
 | matrix-questions-bot | Research     | Q&A Management         |
 | matrix-chat-bot      | AI           | AI-Chat                |

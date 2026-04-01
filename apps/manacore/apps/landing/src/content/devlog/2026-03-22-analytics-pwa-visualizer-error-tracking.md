@@ -201,9 +201,9 @@ export const handleError: HandleClientError = ({ error }) => {
 
 ### Alle 19 Web-Apps angebunden
 
-| Apps                                                                                                                                                               |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Calendar, Chat, Clock, Contacts, Context, Manacore, ManaDeck, Matrix, Mukke, NutriPhi, Photos, Picture, Planta, Presi, Questions, Skilltree, Storage, Todo, Zitare |
+| Apps                                                                                                                                                            |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Calendar, Chat, Clock, Contacts, Context, Manacore, Cards, Matrix, Mukke, NutriPhi, Photos, Picture, Planta, Presi, Questions, Skilltree, Storage, Todo, Zitare |
 
 ### API
 

@@ -28,9 +28,9 @@ export const APP_BRANDING: Record<AppId, AppBranding> = {
 		logoStroke: true,
 		logoStrokeWidth: 2,
 	},
-	manadeck: {
-		id: 'manadeck',
-		name: 'ManaDeck',
+	cards: {
+		id: 'cards',
+		name: 'Cards',
 		tagline: 'AI Flashcards',
 		primaryColor: '#8b5cf6',
 		secondaryColor: '#a78bfa',

@@ -1,28 +1,28 @@
 # syntax=docker/dockerfile:1
 FROM sveltekit-base:local AS builder
 
-ARG PUBLIC_BACKEND_URL=http://manadeck-server
+ARG PUBLIC_BACKEND_URL=http://cards-server
 ARG PUBLIC_MANA_CORE_AUTH_URL=http://mana-auth:3001
-ARG PUBLIC_API_URL=http://manadeck-server
+ARG PUBLIC_API_URL=http://cards-server
 ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
 ENV PUBLIC_MANA_CORE_AUTH_URL=$PUBLIC_MANA_CORE_AUTH_URL
 ENV PUBLIC_API_URL=$PUBLIC_API_URL
 
-COPY apps/manadeck/apps/web ./apps/manadeck/apps/web
+COPY apps/cards/apps/web ./apps/cards/apps/web
 
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --no-frozen-lockfile --ignore-scripts
 
-WORKDIR /app/apps/manadeck/apps/web
+WORKDIR /app/apps/cards/apps/web
 RUN pnpm exec svelte-kit sync
 RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 FROM node:20-alpine AS production
-WORKDIR /app/apps/manadeck/apps/web
+WORKDIR /app/apps/cards/apps/web
 COPY --from=builder /app/node_modules/.pnpm /app/node_modules/.pnpm
-COPY --from=builder /app/apps/manadeck/apps/web/node_modules ./node_modules
-COPY --from=builder /app/apps/manadeck/apps/web/build ./build
-COPY --from=builder /app/apps/manadeck/apps/web/package.json ./
+COPY --from=builder /app/apps/cards/apps/web/node_modules ./node_modules
+COPY --from=builder /app/apps/cards/apps/web/build ./build
+COPY --from=builder /app/apps/cards/apps/web/package.json ./
 
 EXPOSE 5015
 ENV NODE_ENV=production PORT=5015 HOST=0.0.0.0

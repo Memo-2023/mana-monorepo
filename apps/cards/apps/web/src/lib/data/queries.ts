@@ -1,5 +1,5 @@
 /**
- * Reactive Queries & Pure Helpers for ManaDeck
+ * Reactive Queries & Pure Helpers for Cards
  *
  * Uses Dexie liveQuery to automatically re-render when IndexedDB changes
  * (local writes, sync updates, other tabs). Components call these hooks

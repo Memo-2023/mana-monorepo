@@ -19,7 +19,7 @@ Für jede Domain: **CNAME Record hinzufügen** (oder bestehenden ändern), Proxi
 | `it` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
 | `citycorners` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
 | `nutriphi` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
-| `manadeck` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
+| `cards` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
 | `docs` | CNAME | `bb0ea86d-8253-4a54-838b-107bb7945be9.cfargotunnel.com` | **Neu erstellen** |
 
 **Für bestehende Landing-Domains (aktuell auf CF Pages):**
@@ -41,7 +41,7 @@ Diese Domains zeigen noch auf Cloudflare Pages. Um sie auf Self-Hosted umzustell
 
 ### Reihenfolge
 
-1. **Zuerst:** Neue Domains erstellen (`it`, `citycorners`, `nutriphi`, `manadeck`, `docs`)
+1. **Zuerst:** Neue Domains erstellen (`it`, `citycorners`, `nutriphi`, `cards`, `docs`)
 2. **Danach:** Bestehende Landing-Domains von Pages auf Tunnel migrieren (eine nach der anderen, testen)
 3. **Zuletzt:** Alte CF Pages Projekte löschen (optional, kosten nichts)
 
@@ -110,7 +110,7 @@ Cloudflare Tunnel (bb0ea86d...)
 | `zitares.mana.how` | Zitare Landing | `/srv/landings/zitare` |
 | `presis.mana.how` | Presi Landing | `/srv/landings/presi` |
 | `clocks.mana.how` | Clock Landing | `/srv/landings/clock` |
-| `manadeck.mana.how` | ManaDeck Landing | `/srv/landings/manadeck` |
+| `cards.mana.how` | Cards Landing | `/srv/landings/cards` |
 | `nutriphi.mana.how` | NutriPhi Landing | `/srv/landings/nutriphi` |
 | `citycorners.mana.how` | CityCorners Landing | `/srv/landings/citycorners` |
 | `docs.mana.how` | Dokumentation | `/srv/landings/docs` |

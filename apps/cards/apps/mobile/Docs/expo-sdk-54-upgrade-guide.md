@@ -1,8 +1,8 @@
-# Expo SDK 54 Upgrade Guide für Manadeck
+# Expo SDK 54 Upgrade Guide für Cards
 
 ## 🎯 Übersicht
 
-Dieses Dokument beschreibt die notwendigen Schritte für das Upgrade von Manadeck von Expo SDK 53 auf SDK 54.
+Dieses Dokument beschreibt die notwendigen Schritte für das Upgrade von Cards von Expo SDK 53 auf SDK 54.
 
 **Aktueller Stand:**
 - Expo SDK: 53.0.20
@@ -233,5 +233,5 @@ Bei Problemen während des Upgrades:
 ---
 
 **Letzte Aktualisierung:** 24. September 2025
-**Erstellt für:** Manadeck Projekt
+**Erstellt für:** Cards Projekt
 **SDK Version:** 53 → 54

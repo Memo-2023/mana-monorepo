@@ -18,7 +18,7 @@ export type WidgetType =
 	| 'contacts-favorites' // Contacts API: favorite contacts
 	| 'zitare-quote' // Zitare API: daily inspiration quote
 	| 'picture-recent' // Picture API: recent generations
-	| 'manadeck-progress' // ManaDeck API: learning progress
+	| 'cards-progress' // Cards API: learning progress
 	| 'clock-timers' // Clock: active timers and alarms
 	| 'storage-usage' // Storage: file storage stats
 	| 'mukke-library' // Mukke: music library stats
@@ -115,7 +115,7 @@ export interface WidgetMeta {
 		| 'contacts'
 		| 'zitare'
 		| 'picture'
-		| 'manadeck'
+		| 'cards'
 		| 'clock'
 		| 'storage'
 		| 'mukke'
@@ -218,13 +218,13 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		requiredBackend: 'picture',
 	},
 	{
-		type: 'manadeck-progress',
-		nameKey: 'dashboard.widgets.manadeck.title',
-		descriptionKey: 'dashboard.widgets.manadeck.description',
+		type: 'cards-progress',
+		nameKey: 'dashboard.widgets.cards.title',
+		descriptionKey: 'dashboard.widgets.cards.description',
 		icon: '🎴',
 		defaultSize: 'medium',
 		allowMultiple: false,
-		requiredBackend: 'manadeck',
+		requiredBackend: 'cards',
 	},
 	{
 		type: 'clock-timers',

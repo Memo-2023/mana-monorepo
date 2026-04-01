@@ -14,7 +14,7 @@ ManaCore Apps is a monorepo containing multiple applications that share a unifie
 
 ### Multi-App Ecosystem
 
-This is a multi-tenant system where a single authentication backend supports multiple branded applications (Memoro, ManaDeck, Storyteller, ManaCore). Each app shares the same user database but can present different branding and features.
+This is a multi-tenant system where a single authentication backend supports multiple branded applications (Memoro, Cards, Storyteller, ManaCore). Each app shares the same user database but can present different branding and features.
 
 **Key concept**: App configuration is centralized in `apps/web/src/lib/config/apps.ts` and defines branding, features, and routing for each application in the ecosystem.
 

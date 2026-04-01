@@ -1,18 +1,18 @@
 /**
- * ManaDeck API Service
+ * Cards API Service
  *
- * Fetches learning progress and deck data from the ManaDeck backend for dashboard widgets.
+ * Fetches learning progress and deck data from the Cards backend for dashboard widgets.
  */
 
 import { createApiClient, type ApiResult } from '../base-client';
 
 // Backend URL - falls back to localhost for development
-const MANADECK_API_URL = import.meta.env.PUBLIC_MANADECK_API_URL || 'http://localhost:3009/api/v1';
+const CARDS_API_URL = import.meta.env.PUBLIC_CARDS_API_URL || 'http://localhost:3009/api/v1';
 
-const client = createApiClient(MANADECK_API_URL);
+const client = createApiClient(CARDS_API_URL);
 
 /**
- * Deck entity from ManaDeck backend
+ * Deck entity from Cards backend
  */
 export interface Deck {
 	id: string;
@@ -28,7 +28,7 @@ export interface Deck {
 }
 
 /**
- * Card entity from ManaDeck backend
+ * Card entity from Cards backend
  */
 export interface Card {
 	id: string;
@@ -57,9 +57,9 @@ export interface LearningProgress {
 }
 
 /**
- * ManaDeck service for dashboard widgets
+ * Cards service for dashboard widgets
  */
-export const manadeckService = {
+export const cardsService = {
 	/**
 	 * Get user's decks
 	 */

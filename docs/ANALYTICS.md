@@ -46,7 +46,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 |-----|-------------|
 | Chat | `UMAMI_WEBSITE_ID_CHAT_LANDING` |
 | ManaCore | `UMAMI_WEBSITE_ID_MANACORE_LANDING` |
-| ManaDeck | `UMAMI_WEBSITE_ID_MANADECK_LANDING` |
+| Cards | `UMAMI_WEBSITE_ID_CARDS_LANDING` |
 | Calendar | `UMAMI_WEBSITE_ID_CALENDAR_LANDING` |
 | Clock | `UMAMI_WEBSITE_ID_CLOCK_LANDING` |
 | Picture | `UMAMI_WEBSITE_ID_PICTURE_LANDING` |
@@ -66,7 +66,7 @@ injectUmamiAnalytics(html)    → <script defer src="stats.mana.how/script.js" d
 | Clock | `UMAMI_WEBSITE_ID_CLOCK` |
 | Contacts | `UMAMI_WEBSITE_ID_CONTACTS` |
 | Picture | `UMAMI_WEBSITE_ID_PICTURE` |
-| ManaDeck | `UMAMI_WEBSITE_ID_MANADECK` |
+| Cards | `UMAMI_WEBSITE_ID_CARDS` |
 | Planta | `UMAMI_WEBSITE_ID_PLANTA` |
 | Mukke | `UMAMI_WEBSITE_ID_MUKKE` |
 | Questions | `UMAMI_WEBSITE_ID_QUESTIONS` |
@@ -312,16 +312,16 @@ ContactsEvents.tagCreated();                 // tag_created
 ContactsEvents.searchPerformed();            // search_performed
 ```
 
-### ManaDeckEvents
+### CardsEvents
 
 ```typescript
-import { ManaDeckEvents } from '@manacore/shared-utils/analytics';
+import { CardsEvents } from '@manacore/shared-utils/analytics';
 
-ManaDeckEvents.deckCreated();            // deck_created
-ManaDeckEvents.deckStudied(25);          // deck_studied { cards: 25 }
-ManaDeckEvents.cardCreated();            // card_created
-ManaDeckEvents.cardReviewed(4);          // card_reviewed { rating: 4 }
-ManaDeckEvents.aiCardsGenerated(10);     // ai_cards_generated { count: 10 }
+CardsEvents.deckCreated();            // deck_created
+CardsEvents.deckStudied(25);          // deck_studied { cards: 25 }
+CardsEvents.cardCreated();            // card_created
+CardsEvents.cardReviewed(4);          // card_reviewed { rating: 4 }
+CardsEvents.aiCardsGenerated(10);     // ai_cards_generated { count: 10 }
 ```
 
 ### SubscriptionEvents

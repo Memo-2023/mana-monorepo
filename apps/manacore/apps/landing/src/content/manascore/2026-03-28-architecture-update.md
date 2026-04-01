@@ -54,7 +54,7 @@ Die Architektur-Migration hat alle Apps gleichzeitig verbessert:
 | **Calendar** | 85 | 92 | +7 | Local-First + RRULE Server |
 | **Contacts** | 78 | 87 | +9 | Local-First + vCard Import Server |
 | **Picture** | 76 | 85 | +9 | Local-First + Replicate Server |
-| **ManaDeck** | 80 | 89 | +9 | Local-First + AI Card Gen Server |
+| **Cards** | 80 | 89 | +9 | Local-First + AI Card Gen Server |
 | **Zitare** | 88 | 93 | +5 | Local-First, war schon solide |
 | **Clock** | 85 | 91 | +6 | Local-First + keine Backend-Dependency |
 | **Storage** | 72 | 82 | +10 | Local-First + S3 Server |

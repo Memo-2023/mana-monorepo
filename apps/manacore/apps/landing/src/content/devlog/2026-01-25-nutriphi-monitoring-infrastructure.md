@@ -138,7 +138,7 @@ export class AppModule {}
 - picture-backend (Port 3006)
 - zitare-backend (Port 3007)
 - presi-backend (Port 3008)
-- manadeck-backend (Port 3009)
+- cards-backend (Port 3009)
 - contacts-backend (Port 3010)
 - calendar-backend (Port 3016)
 - nutriphi-backend (Port 3027)
@@ -293,7 +293,7 @@ export async function GET() {
 
 - calendar-web, clock-web, contacts-web
 - chat-web, picture-web, zitare-web
-- todo-web, manadeck-web, manacore-web
+- todo-web, cards-web, manacore-web
 - presi-web, storage-web, nutriphi-web
 
 ---

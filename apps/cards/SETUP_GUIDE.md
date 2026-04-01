@@ -1,4 +1,4 @@
-# Manadeck Setup Guide
+# Cards Setup Guide
 
 ## What's Been Completed
 
@@ -59,12 +59,12 @@ npm run start:dev
 # Sign up a test user
 curl -X POST http://localhost:8080/v1/auth/signup \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@manadeck.com","password":"test123","username":"testuser"}'
+  -d '{"email":"test@cards.com","password":"test123","username":"testuser"}'
 
 # Sign in to get token
 curl -X POST http://localhost:8080/v1/auth/signin \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@manadeck.com","password":"test123"}'
+  -d '{"email":"test@cards.com","password":"test123"}'
 
 # Copy the appToken from response
 export TOKEN="paste-your-token-here"

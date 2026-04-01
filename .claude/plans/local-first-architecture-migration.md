@@ -328,7 +328,7 @@ Alle Web-Apps mit CRUD-Datenmodell wurden auf Local-First migriert:
 | **Zitare** | favorites, lists | Nur Sync |
 | **Calendar** | calendars, events | RRULE, Google Calendar OAuth |
 | **Clock** | alarms, timers, worldClocks | Nur Sync |
-| **ManaDeck** | decks, cards | Spaced Repetition, LLM |
+| **Cards** | decks, cards | Spaced Repetition, LLM |
 | **Contacts** | contacts | Google Import, vCard/CSV, Foto-Upload |
 | **Picture** | images, boards, boardItems, tags, imageTags | Replicate API, Upload, Explore |
 | **Presi** | decks, slides | Share-Links |

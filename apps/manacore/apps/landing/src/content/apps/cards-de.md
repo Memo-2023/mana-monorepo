@@ -1,5 +1,5 @@
 ---
-title: Manadeck
+title: Cards
 description: Die intelligente Lernkarten-App mit KI-Unterstützung. Erstellen Sie automatisch Karteikarten aus Ihren Unterlagen und lernen Sie effizient mit adaptiven Wiederholungen.
 category: productivity
 icon: ⚪
@@ -20,18 +20,18 @@ features:
 status: coming-soon
 releaseDate: Geplant Q2 2025
 order: 3
-website: https://manadeck.ai
+website: https://cards.ai
 ---
 
-## Was ist Manadeck?
+## Was ist Cards?
 
-Manadeck revolutioniert das Lernen mit Karteikarten durch KI-Unterstützung. Laden Sie einfach Ihre Lernmaterialien hoch - PDFs, Notizen, Präsentationen - und unsere KI erstellt automatisch effektive Lernkarten. Mit intelligenten Wiederholungsalgorithmen und personalisierten Lernpfaden meistern Sie jedes Thema schneller und nachhaltiger.
+Cards revolutioniert das Lernen mit Karteikarten durch KI-Unterstützung. Laden Sie einfach Ihre Lernmaterialien hoch - PDFs, Notizen, Präsentationen - und unsere KI erstellt automatisch effektive Lernkarten. Mit intelligenten Wiederholungsalgorithmen und personalisierten Lernpfaden meistern Sie jedes Thema schneller und nachhaltiger.
 
 ## Hauptfunktionen
 
 ### 🎯 KI-generierte Lernkarten
 
-Manadeck verwandelt Ihre Materialien intelligent in Lernkarten:
+Cards verwandelt Ihre Materialien intelligent in Lernkarten:
 
 - Automatische Extraktion von Schlüsselkonzepten
 - Generierung von Frage-Antwort-Paaren
@@ -150,7 +150,7 @@ Der Verbrauch richtet sich nach der Komplexität:
 
 ## Integration & Kompatibilität
 
-Manadeck arbeitet nahtlos mit:
+Cards arbeitet nahtlos mit:
 
 - Anki (Import/Export)
 - Quizlet (Import/Export)
@@ -187,11 +187,11 @@ Manadeck arbeitet nahtlos mit:
 
 ## Mit Mana flexibel lernen
 
-Nutzen Sie Manadeck genau nach Ihrem Bedarf. Erstellen Sie einmalig Karten für eine Prüfung oder nutzen Sie es täglich für kontinuierliches Lernen. Mit Mana-Credits zahlen Sie nur für die tatsächliche Nutzung - keine Abos, keine ungenutzten Features.
+Nutzen Sie Cards genau nach Ihrem Bedarf. Erstellen Sie einmalig Karten für eine Prüfung oder nutzen Sie es täglich für kontinuierliches Lernen. Mit Mana-Credits zahlen Sie nur für die tatsächliche Nutzung - keine Abos, keine ungenutzten Features.
 
 ## Verfügbarkeit
 
-Manadeck wird verfügbar sein als:
+Cards wird verfügbar sein als:
 
 - Progressive Web App (alle Browser)
 - iOS App (iPhone & iPad)

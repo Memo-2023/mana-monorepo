@@ -63,7 +63,7 @@ ALL_DATABASES=(
     "calendar"
     "clock"
     "todo"
-    "manadeck"
+    "cards"
     "storage"
     "presi"
     "moodlit"
@@ -125,8 +125,8 @@ setup_service() {
             create_db_if_not_exists "todo"
             push_schema "@todo/server" "todo"
             ;;
-        manadeck)
-            create_db_if_not_exists "manadeck"
+        cards)
+            create_db_if_not_exists "cards"
             # Schema managed by mana-sync (local-first)
             ;;
         moodlit)
@@ -203,7 +203,7 @@ setup_service() {
             ;;
         *)
             echo -e "${RED}Unknown service: $service${NC}"
-            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, manadeck, moodlit, picture, photos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, mukke, traces, context, citycorners, uload"
+            echo "Available services: auth, chat, zitare, contacts, calendar, clock, todo, cards, moodlit, picture, photos, planta, nutriphi, presi, storage, projectdoc, zitare_bot, todo_bot, nutriphi_bot, questions, skilltree, mukke, traces, context, citycorners, uload"
             exit 1
             ;;
     esac
@@ -227,7 +227,7 @@ echo -e "\n${GREEN}Step 2: Pushing schemas${NC}"
 echo "--------------------------------------"
 
 # Push schemas for all known services
-for service in auth chat zitare contacts calendar clock todo manadeck picture photos moodlit planta nutriphi presi storage questions skilltree mukke traces context citycorners; do
+for service in auth chat zitare contacts calendar clock todo cards picture photos moodlit planta nutriphi presi storage questions skilltree mukke traces context citycorners; do
     setup_service "$service" 2>/dev/null || true
 done
 

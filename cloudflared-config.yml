@@ -70,10 +70,10 @@ ingress:
   # - hostname: planta.mana.how
   #   service: http://localhost:XXXX
 
-  # ManaDeck App
-  - hostname: manadeck.mana.how
+  # Cards App
+  - hostname: cards.mana.how
     service: http://localhost:5023
-  - hostname: manadeck-api.mana.how
+  - hostname: cards-api.mana.how
     service: http://localhost:3009
 
   # Storage App

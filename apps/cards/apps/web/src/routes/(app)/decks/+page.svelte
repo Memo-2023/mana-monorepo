@@ -45,7 +45,7 @@
 </script>
 
 <svelte:head>
-	<title>My Decks - Manadeck</title>
+	<title>My Decks - Cards</title>
 </svelte:head>
 
 <div class="space-y-6">

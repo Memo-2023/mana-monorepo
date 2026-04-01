@@ -72,7 +72,7 @@ export const ui = {
 			'Deine persönliche KI für emotionales Wohlbefinden und mentale Gesundheit',
 		'app.zitare.description':
 			'Intelligente Zitatverwaltung und Literaturrecherche für akademisches Arbeiten',
-		'app.manadeck.description':
+		'app.cards.description':
 			'KI-gestützte Karteikarten-App für effektives Lernen und Wissensmanagement',
 		'app.pictus.description': 'Kreativer KI-Bildgenerator für beeindruckende Bilder und Kunstwerke',
 		'app.orakel.description': 'Intelligente KI-Chat-Assistentin für alle Lebenslagen',
@@ -152,7 +152,7 @@ export const ui = {
 		'app.moodlit.description': 'Your personal AI for emotional well-being and mental health',
 		'app.zitare.description':
 			'Intelligent citation management and literature research for academic work',
-		'app.manadeck.description':
+		'app.cards.description':
 			'AI-powered flashcard app for effective learning and knowledge management',
 		'app.pictus.description': 'Creative AI image generator for stunning pictures and artwork',
 		'app.orakel.description': 'Intelligent AI chat assistant for all aspects of life',
@@ -232,7 +232,7 @@ export const ui = {
 		'app.moodlit.description': 'La tua AI personale per il benessere emotivo e la salute mentale',
 		'app.zitare.description':
 			'Gestione intelligente delle citazioni e ricerca bibliografica per lavoro accademico',
-		'app.manadeck.description':
+		'app.cards.description':
 			'App di flashcard basata su AI per apprendimento efficace e gestione della conoscenza',
 		'app.pictus.description':
 			"Generatore di immagini AI creativo per immagini e opere d'arte straordinarie",
@@ -317,7 +317,7 @@ export const ui = {
 			'Votre IA personnelle pour le bien-être émotionnel et la santé mentale',
 		'app.zitare.description':
 			'Gestion intelligente des citations et recherche bibliographique pour le travail académique',
-		'app.manadeck.description':
+		'app.cards.description':
 			"Application de cartes mémoire basée sur l'IA pour un apprentissage efficace et la gestion des connaissances",
 		'app.pictus.description':
 			"Générateur d'images IA créatif pour des images et œuvres d'art époustouflantes",
@@ -400,7 +400,7 @@ export const ui = {
 		'app.moodlit.description': 'Tu IA personal para el bienestar emocional y la salud mental',
 		'app.zitare.description':
 			'Gestión inteligente de citas e investigación bibliográfica para trabajo académico',
-		'app.manadeck.description':
+		'app.cards.description':
 			'App de tarjetas de memoria impulsada por IA para aprendizaje efectivo y gestión del conocimiento',
 		'app.pictus.description':
 			'Generador de imágenes IA creativo para imágenes y obras de arte impresionantes',

@@ -21,8 +21,8 @@ env:
   PROJECT_ID: mana-core-453821
   REGION: europe-west3
   ARTIFACT_REGISTRY: europe-west3-docker.pkg.dev
-  SERVICE_NAME: manadeck-backend
-  REPOSITORY_NAME: manadeck-backend
+  SERVICE_NAME: cards-backend
+  REPOSITORY_NAME: cards-backend
   WORKING_DIR: backend
 
 jobs:
@@ -175,7 +175,7 @@ jobs:
             --port=8080 \
             --service-account=${{ secrets.CLOUD_RUN_SERVICE_ACCOUNT }} \
             --set-env-vars="NODE_ENV=production" \
-            --set-secrets="MANA_SERVICE_URL=MANA_SERVICE_URL:latest,APP_ID=MANADECK_APP_ID:latest,MANA_SUPABASE_SECRET_KEY=MANA_SUPABASE_SECRET_KEY:latest,SUPABASE_URL=MANADECK_SUPABASE_URL:latest,SUPABASE_ANON_KEY=MANADECK_SUPABASE_ANON_KEY:latest,SUPABASE_SERVICE_KEY=MANADECK_SUPABASE_SERVICE_KEY:latest" \
+            --set-secrets="MANA_SERVICE_URL=MANA_SERVICE_URL:latest,APP_ID=CARDS_APP_ID:latest,MANA_SUPABASE_SECRET_KEY=MANA_SUPABASE_SECRET_KEY:latest,SUPABASE_URL=CARDS_SUPABASE_URL:latest,SUPABASE_ANON_KEY=CARDS_SUPABASE_ANON_KEY:latest,SUPABASE_SERVICE_KEY=CARDS_SUPABASE_SERVICE_KEY:latest" \
             --labels="environment=production,commit=${{ steps.version.outputs.short_sha }},version=${{ env.version }}"
 
           # Ensure 100% traffic goes to the new revision

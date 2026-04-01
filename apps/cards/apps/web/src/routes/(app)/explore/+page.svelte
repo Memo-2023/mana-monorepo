@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>Explore - Manadeck</title>
+	<title>Explore - Cards</title>
 </svelte:head>
 
 <div class="space-y-6">

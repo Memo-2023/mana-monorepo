@@ -6,7 +6,7 @@
 |-----|----------|-------------|--------|--------|
 | matrix | **55** | 0.83.2 | ~55.0.5 | Target version |
 | manacore | 54 | 0.81.5 | ~6.0.15 | Needs upgrade |
-| manadeck | 54 | 0.81.4 | ~6.0.10 | Needs upgrade |
+| cards | 54 | 0.81.4 | ~6.0.10 | Needs upgrade |
 | picture | 54 | 0.81.4 | ~6.0.10 | Needs upgrade |
 | traces | 54 | 0.81.4 | ~6.0.0 | Needs upgrade |
 | chat | **52** | 0.76.7 | ~4.0.6 | Needs upgrade (2 majors!) |
@@ -59,7 +59,7 @@ npx expo start -c
 ## Recommended Upgrade Order
 
 1. **traces** (simplest app, minimal deps)
-2. **manadeck** (medium complexity)
+2. **cards** (medium complexity)
 3. **picture** (has image handling)
 4. **manacore** (hub app, important)
 5. **context** (SDK 52 → 55, bigger jump)

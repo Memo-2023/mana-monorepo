@@ -36,7 +36,7 @@ open http://localhost:9001
 |--------|---------|---------|
 | `picture-storage` | Picture | AI-generated images |
 | `chat-storage` | Chat | User file uploads |
-| `manadeck-storage` | ManaDeck | Card/deck assets |
+| `cards-storage` | Cards | Card/deck assets |
 | `nutriphi-storage` | NutriPhi | Meal photos |
 | `contacts-storage` | Contacts | Contact avatars |
 | `calendar-storage` | Calendar | Event attachments |
@@ -99,7 +99,7 @@ async function listUserFiles(userId: string) {
 import {
   createPictureStorage,
   createChatStorage,
-  createManaDeckStorage,
+  createCardsStorage,
   createContactsStorage,
 } from '@manacore/shared-storage';
 

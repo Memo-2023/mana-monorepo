@@ -17,7 +17,7 @@
 		"./themes/memoro": "./src/themes/memoro.css",
 		"./themes/manacore": "./src/themes/manacore.css",
 		"./themes/maerchenzauber": "./src/themes/maerchenzauber.css",
-		"./themes/manadeck": "./src/themes/manadeck.css",
+		"./themes/cards": "./src/themes/cards.css",
 		"./themes/picture": "./src/themes/picture.css",
 		"./themes/chat": "./src/themes/chat.css",
 		"./themes/zitare": "./src/themes/zitare.css",

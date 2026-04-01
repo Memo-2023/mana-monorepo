@@ -74,7 +74,7 @@
 				"create": "Bild erstellen",
 				"view_all": "Alle Bilder"
 			},
-			"manadeck": {
+			"cards": {
 				"title": "Lernfortschritt",
 				"description": "Deine Lernkarten",
 				"empty": "Noch keine Decks erstellt",
@@ -177,8 +177,8 @@
 		"memoro_long_desc": "Erfasse deine Gedanken durch Sprache und lasse sie von KI in strukturierte Notizen verwandeln.",
 		"maerchenzauber_desc": "Magische Kindergeschichten",
 		"maerchenzauber_long_desc": "Erstelle personalisierte Kindergeschichten mit KI-generierten Illustrationen.",
-		"manadeck_desc": "KI Lernkarten",
-		"manadeck_long_desc": "Erstelle und lerne mit smarten Lernkarten und KI-gestützter Wiederholung.",
+		"cards_desc": "KI Lernkarten",
+		"cards_long_desc": "Erstelle und lerne mit smarten Lernkarten und KI-gestützter Wiederholung.",
 		"moodlit_desc": "Stimmungslicht-Steuerung",
 		"moodlit_long_desc": "Steuere deine smarten Lichter basierend auf deiner Stimmung und Aktivität.",
 		"manacore_desc": "Zentrale Verwaltung",

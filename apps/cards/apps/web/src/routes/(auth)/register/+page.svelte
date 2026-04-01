@@ -3,7 +3,7 @@
 	import { locale } from 'svelte-i18n';
 	import { RegisterPage } from '@manacore/shared-auth-ui';
 	import { getRegisterTranslations } from '@manacore/shared-i18n';
-	import { ManaDeckLogo } from '@manacore/shared-branding';
+	import { CardsLogo } from '@manacore/shared-branding';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import '$lib/i18n';
@@ -21,12 +21,12 @@
 </script>
 
 <svelte:head>
-	<title>{translations.title} | ManaDeck</title>
+	<title>{translations.title} | Cards</title>
 </svelte:head>
 
 <RegisterPage
-	appName="ManaDeck"
-	logo={ManaDeckLogo}
+	appName="Cards"
+	logo={CardsLogo}
 	primaryColor="#8b5cf6"
 	onSignUp={handleSignUp}
 	onResendVerification={handleResendVerification}

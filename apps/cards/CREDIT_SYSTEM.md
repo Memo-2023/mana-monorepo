@@ -1,10 +1,10 @@
-# Manadeck Credit System
+# Cards Credit System
 
-This document explains how the Mana Core credit system is integrated into Manadeck.
+This document explains how the Mana Core credit system is integrated into Cards.
 
 ## Overview
 
-Manadeck uses **Mana** as its credit currency to charge for operations like deck creation, card generation, and AI features. The credit system is powered by [Mana Core](https://github.com/Memo-2023/mana-core-nestjs-package), which provides:
+Cards uses **Mana** as its credit currency to charge for operations like deck creation, card generation, and AI features. The credit system is powered by [Mana Core](https://github.com/Memo-2023/mana-core-nestjs-package), which provides:
 
 - Credit validation before operations
 - Credit consumption after successful operations
@@ -322,7 +322,7 @@ try {
 1. **Check credit balance**:
    ```bash
    curl -H "Authorization: Bearer $TOKEN" \
-     https://manadeck-backend-111768794939.europe-west3.run.app/api/credits/balance
+     https://cards-backend-111768794939.europe-west3.run.app/api/credits/balance
    ```
 
 2. **Create deck with sufficient credits**:
@@ -331,7 +331,7 @@ try {
      -H "Authorization: Bearer $TOKEN" \
      -H "Content-Type: application/json" \
      -d '{"name":"Test Deck","description":"Testing"}' \
-     https://manadeck-backend-111768794939.europe-west3.run.app/api/decks
+     https://cards-backend-111768794939.europe-west3.run.app/api/decks
    ```
 
 3. **Create deck with insufficient credits**:

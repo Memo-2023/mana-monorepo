@@ -37,7 +37,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **chat** | AI chat application | Backend, Mobile, Web, Landing |
 | **picture** | AI image generation | Backend, Mobile, Web, Landing |
 | **memoro** | AI voice recording & memo management | Backend, Audio-Backend, Mobile, Web, Landing |
-| **manadeck** | Card/deck management | Backend, Mobile, Web |
+| **cards** | Card/deck management | Backend, Mobile, Web |
 | **todo** | Task management | Backend, Web, Landing |
 | **calendar** | Calendar & scheduling | Backend, Web, Landing |
 | **contacts** | Contact management | Backend, Web |
@@ -117,7 +117,7 @@ pnpm setup:db:auth       # Setup just auth
 # Start specific project (runs all apps in project)
 pnpm run manacore:dev
 pnpm run memoro:dev
-pnpm run manadeck:dev
+pnpm run cards:dev
 pnpm run picture:dev
 pnpm run chat:dev
 pnpm run zitare:dev
@@ -151,7 +151,7 @@ manacore-monorepo/
 │   │   │   ├── web/         # SvelteKit web app
 │   │   │   └── landing/     # Astro marketing page
 │   │   └── packages/        # Project-specific shared code
-│   ├── manadeck/
+│   ├── cards/
 │   ├── picture/
 │   └── ...
 ├── apps-archived/           # Archived apps (excluded from workspace)
@@ -594,7 +594,7 @@ Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → Postg
 | Calendar | calendars, events | Done |
 | Clock | alarms, timers, worldClocks | Done |
 | Contacts | contacts | Done |
-| ManaDeck | decks, cards | Done |
+| Cards | decks, cards | Done |
 | Picture | images, boards, boardItems, tags, imageTags | Done |
 | Presi | decks, slides | Done |
 | Inventar | collections, items, locations, categories | Done |
@@ -695,7 +695,7 @@ pnpm docker:up
 |--------|---------|---------|
 | `picture-storage` | Picture | AI-generated images |
 | `chat-storage` | Chat | User file uploads |
-| `manadeck-storage` | ManaDeck | Card/deck assets |
+| `cards-storage` | Cards | Card/deck assets |
 | `nutriphi-storage` | NutriPhi | Meal photos |
 | `presi-storage` | Presi | Presentation slides |
 | `calendar-storage` | Calendar | Calendar attachments |
@@ -744,7 +744,7 @@ All landing pages are deployed to Cloudflare Pages using Direct Upload via Wrang
 | Chat | `@chat/landing` | `chat-landing` | https://chat-landing.pages.dev |
 | Picture | `@picture/landing` | `picture-landing` | https://picture-landing.pages.dev |
 | ManaCore | `@manacore/landing` | `manacore-landing` | https://manacore-landing.pages.dev |
-| ManaDeck | `@manadeck/landing` | `manadeck-landing` | https://manadeck-landing.pages.dev |
+| Cards | `@cards/landing` | `cards-landing` | https://cards-landing.pages.dev |
 | Zitare | `@zitare/landing` | `zitare-landing` | https://zitare-landing.pages.dev |
 
 ### Local Deployment
@@ -760,7 +760,7 @@ pnpm cf:projects:create
 pnpm deploy:landing:chat
 pnpm deploy:landing:picture
 pnpm deploy:landing:manacore
-pnpm deploy:landing:manadeck
+pnpm deploy:landing:cards
 pnpm deploy:landing:zitare
 
 # Deploy all landing pages
@@ -1004,7 +1004,7 @@ MANA_CORE_AUTH_URL=...
 Each project has its own `CLAUDE.md` with detailed information:
 
 - `apps/manacore/CLAUDE.md` - Multi-app ecosystem, auth details
-- `apps/manadeck/CLAUDE.md` - Card/deck management
+- `apps/cards/CLAUDE.md` - Card/deck management
 - `apps/chat/CLAUDE.md` - Chat API endpoints, AI models
 - `apps/picture/CLAUDE.md` - AI image generation
 - `services/mana-core-auth/` - Central authentication service

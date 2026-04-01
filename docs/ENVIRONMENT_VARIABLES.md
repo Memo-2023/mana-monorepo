@@ -46,8 +46,8 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 - `apps/chat/apps/web/.env`
 - `apps/manacore/apps/mobile/.env`
 - `apps/manacore/apps/web/.env`
-- `apps/manadeck/apps/server/.env`
-- `apps/manadeck/apps/web/.env`
+- `apps/cards/apps/server/.env`
+- `apps/cards/apps/web/.env`
 - `apps/*/apps/server/.env` (all apps with compute servers)
 - `apps/*/apps/web/.env` (all web apps)
 - `apps/*/apps/mobile/.env` (all mobile apps)
@@ -103,13 +103,13 @@ The generator reads `.env.development` and creates app-specific `.env` files wit
 | `MANACORE_SUPABASE_URL` | Supabase project URL |
 | `MANACORE_SUPABASE_ANON_KEY` | Supabase anonymous key |
 
-### Manadeck Project
+### Cards Project
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MANADECK_BACKEND_PORT` | Backend service port | `3004` |
-| `MANADECK_SUPABASE_URL` | Supabase project URL | - |
-| `MANADECK_SUPABASE_ANON_KEY` | Supabase anonymous key | - |
+| `CARDS_BACKEND_PORT` | Backend service port | `3004` |
+| `CARDS_SUPABASE_URL` | Supabase project URL | - |
+| `CARDS_SUPABASE_ANON_KEY` | Supabase anonymous key | - |
 
 ## Adding New Variables
 

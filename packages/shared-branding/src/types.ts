@@ -4,7 +4,7 @@
 export type AppId =
 	| 'memoro'
 	| 'manacore'
-	| 'manadeck'
+	| 'cards'
 	| 'uload'
 	| 'chat'
 	| 'presi'

@@ -24,7 +24,7 @@ manacore-monorepo/
 │   │   │   └── landing/
 │   │   └── packages/
 │   │
-│   ├── manadeck/
+│   ├── cards/
 │   │   ├── apps/
 │   │   │   ├── backend/
 │   │   │   ├── mobile/
@@ -131,7 +131,7 @@ mkdir -p services
 | ----------------- | ---------------------- |
 | `chat/`           | `apps/chat/`           |
 | `maerchenzauber/` | `apps/maerchenzauber/` |
-| `manadeck/`       | `apps/manadeck/`       |
+| `cards/`       | `apps/cards/`       |
 | `memoro/`         | `apps/memoro/`         |
 | `picture/`        | `apps/picture/`        |
 | `nutriphi/`       | `apps/nutriphi/`       |
@@ -143,7 +143,7 @@ mkdir -p services
 # Move all products to apps/
 git mv chat apps/chat
 git mv maerchenzauber apps/maerchenzauber
-git mv manadeck apps/manadeck
+git mv cards apps/cards
 git mv memoro apps/memoro
 git mv picture apps/picture
 git mv nutriphi apps/nutriphi
@@ -159,7 +159,7 @@ Projects with backends at root level need restructuring:
 | Source                   | Destination                   |
 | ------------------------ | ----------------------------- |
 | `apps/chat/backend/`     | `apps/chat/apps/backend/`     |
-| `apps/manadeck/backend/` | `apps/manadeck/apps/backend/` |
+| `apps/cards/backend/` | `apps/cards/apps/backend/` |
 | `apps/nutriphi/backend/` | `apps/nutriphi/apps/backend/` |
 
 ```bash
@@ -167,9 +167,9 @@ Projects with backends at root level need restructuring:
 mkdir -p apps/chat/apps
 git mv apps/chat/backend apps/chat/apps/backend
 
-# Manadeck: move backend into apps/
-mkdir -p apps/manadeck/apps
-git mv apps/manadeck/backend apps/manadeck/apps/backend
+# Cards: move backend into apps/
+mkdir -p apps/cards/apps
+git mv apps/cards/backend apps/cards/apps/backend
 
 # Nutriphi: move backend into apps/
 mkdir -p apps/nutriphi/apps
@@ -226,7 +226,7 @@ No changes needed - turbo.json uses task definitions, not paths.
 
 		"maerchenzauber:dev": "turbo run dev --filter=@maerchenzauber/*...",
 		"manacore:dev": "turbo run dev --filter=@manacore/*...",
-		"manadeck:dev": "turbo run dev --filter=@manadeck/*...",
+		"cards:dev": "turbo run dev --filter=@cards/*...",
 		"memoro:dev": "turbo run dev --filter=@memoro/*...",
 		"picture:dev": "turbo run dev --filter=@picture/*...",
 		"uload:dev": "turbo run dev --filter=@uload/*...",
@@ -244,11 +244,11 @@ No changes needed - turbo.json uses task definitions, not paths.
 		"dev:manacore:landing": "pnpm --filter @manacore/landing dev",
 		"dev:manacore:mobile": "pnpm --filter @manacore/mobile dev",
 
-		"dev:manadeck:web": "pnpm --filter @manadeck/web dev",
-		"dev:manadeck:landing": "pnpm --filter @manadeck/landing dev",
-		"dev:manadeck:backend": "pnpm --filter @manadeck/backend dev",
-		"dev:manadeck:mobile": "pnpm --filter @manadeck/mobile dev",
-		"dev:manadeck:app": "turbo run dev --filter=@manadeck/web --filter=@manadeck/backend",
+		"dev:cards:web": "pnpm --filter @cards/web dev",
+		"dev:cards:landing": "pnpm --filter @cards/landing dev",
+		"dev:cards:backend": "pnpm --filter @cards/backend dev",
+		"dev:cards:mobile": "pnpm --filter @cards/mobile dev",
+		"dev:cards:app": "turbo run dev --filter=@cards/web --filter=@cards/backend",
 
 		"dev:memoro:web": "pnpm --filter @memoro/web dev",
 		"dev:memoro:landing": "pnpm --filter @memoro/landing dev",

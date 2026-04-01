@@ -111,7 +111,7 @@ export type StandardOperationType =
 	| 'CHARACTER_IMPORT'
 	| 'STORY_CREATION'
 	| 'STORY_CONTINUATION'
-	// ManaDeck operations
+	// Cards operations
 	| 'DECK_CREATION'
 	| 'CARD_GENERATION'
 	| 'AI_REVIEW'
@@ -141,7 +141,7 @@ export const DEFAULT_OPERATION_PRICING: Record<string, number> = {
 	CHARACTER_IMPORT: 10,
 	STORY_CREATION: 10,
 	STORY_CONTINUATION: 5,
-	// ManaDeck
+	// Cards
 	DECK_CREATION: 5,
 	CARD_GENERATION: 2,
 	AI_REVIEW: 10,

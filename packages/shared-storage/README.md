@@ -20,7 +20,7 @@ Each app gets its own isolated bucket, created automatically by `minio-init`:
 | `manacore-storage` | ManaCore | Avatars, auth assets |
 | `picture-storage` | Picture | AI-generated images |
 | `chat-storage` | Chat | User file uploads |
-| `manadeck-storage` | ManaDeck | Card/deck assets |
+| `cards-storage` | Cards | Card/deck assets |
 | `presi-storage` | Presi | Presentation slides |
 | `calendar-storage` | Calendar | Calendar attachments |
 | `contacts-storage` | Contacts | Contact avatars/files |

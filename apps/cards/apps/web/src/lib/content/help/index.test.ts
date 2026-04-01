@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { getManaDeckHelpContent } from './index';
+import { getCardsHelpContent } from './index';
 
-describe('ManaDeck Help Content', () => {
+describe('Cards Help Content', () => {
 	it('returns valid German content', () => {
-		const content = getManaDeckHelpContent('de');
+		const content = getCardsHelpContent('de');
 
 		expect(content.faq.length).toBeGreaterThan(0);
 		content.faq.forEach((faq) => {
@@ -18,7 +18,7 @@ describe('ManaDeck Help Content', () => {
 	});
 
 	it('returns valid English content', () => {
-		const content = getManaDeckHelpContent('en');
+		const content = getCardsHelpContent('en');
 
 		expect(content.faq.length).toBeGreaterThan(0);
 		content.faq.forEach((faq) => {
@@ -32,15 +32,15 @@ describe('ManaDeck Help Content', () => {
 	});
 
 	it('returns same number of FAQ items for both languages', () => {
-		const de = getManaDeckHelpContent('de');
-		const en = getManaDeckHelpContent('en');
+		const de = getCardsHelpContent('de');
+		const en = getCardsHelpContent('en');
 
 		expect(de.faq.length).toBe(en.faq.length);
 		expect(de.features.length).toBe(en.features.length);
 	});
 
 	it('has unique FAQ IDs', () => {
-		const content = getManaDeckHelpContent('de');
+		const content = getCardsHelpContent('de');
 		const ids = content.faq.map((f) => f.id);
 		expect(new Set(ids).size).toBe(ids.length);
 	});

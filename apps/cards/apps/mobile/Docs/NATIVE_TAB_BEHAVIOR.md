@@ -1,8 +1,8 @@
-# Native Tab Behavior - Manadeck App
+# Native Tab Behavior - Cards App
 
 ## Übersicht
 
-Die Manadeck-App nutzt die **Native Tabs** von Expo Router (SDK 54+), um eine native iOS/Android Tab-Navigation zu implementieren. Diese Dokumentation beschreibt die Konfiguration und das Verhalten der Tabs in unserer App.
+Die Cards-App nutzt die **Native Tabs** von Expo Router (SDK 54+), um eine native iOS/Android Tab-Navigation zu implementieren. Diese Dokumentation beschreibt die Konfiguration und das Verhalten der Tabs in unserer App.
 
 ## Aktuelle Implementierung
 
@@ -110,7 +110,7 @@ Wir verwenden `minimizeBehavior="automatic"`, weil:
 2. **Tab-Leisten-Höhe nicht messbar** - Position variiert je nach Gerät (iPad, Vision Pro, etc.)
 3. **Keine verschachtelten Native Tabs** - JavaScript Tabs können aber innerhalb von Native Tabs verschachtelt werden
 
-## Best Practices für Manadeck
+## Best Practices für Cards
 
 ### Icons
 
@@ -154,4 +154,4 @@ npm run android
 
 **Status:** ✅ Experimentell (API kann sich ändern)
 **Plattform:** iOS (primär), Android (geplant)
-**Maintainer:** Manadeck Team
+**Maintainer:** Cards Team

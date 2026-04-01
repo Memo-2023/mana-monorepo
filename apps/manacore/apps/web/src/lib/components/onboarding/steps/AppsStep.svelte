@@ -60,8 +60,8 @@
 			category: 'Utility',
 		},
 		{
-			id: 'manadeck',
-			name: 'ManaDeck',
+			id: 'cards',
+			name: 'Cards',
 			description: 'Karteikarten für effektives Lernen',
 			icon: '📚',
 			color: 'bg-indigo-500',

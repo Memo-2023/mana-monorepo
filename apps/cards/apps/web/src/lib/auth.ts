@@ -1,7 +1,7 @@
 /**
- * Manadeck Web Auth Configuration
+ * Cards Web Auth Configuration
  *
- * This file initializes the shared auth package for the manadeck web app.
+ * This file initializes the shared auth package for the cards web app.
  * It replaces the previous individual auth files:
  * - services/authService.ts
  * - services/tokenManager.ts
@@ -28,11 +28,11 @@ const STORAGE_KEYS = {
 	APP_TOKEN: 'appToken',
 	REFRESH_TOKEN: 'refreshToken',
 	USER_EMAIL: 'userEmail',
-	DEVICE_ID: 'manadeck_device_id',
+	DEVICE_ID: 'cards_device_id',
 };
 
 /**
- * Session storage adapter for manadeck web
+ * Session storage adapter for cards web
  * Uses sessionStorage for tokens (clears on tab close)
  * Uses localStorage for device ID (persists)
  */

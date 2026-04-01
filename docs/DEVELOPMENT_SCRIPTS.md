@@ -25,9 +25,9 @@ Diese Befehle starten alle Apps eines bestimmten Typs gleichzeitig:
 
 | Befehl             | Beschreibung               | Apps                                       |
 | ------------------ | -------------------------- | ------------------------------------------ |
-| `pnpm dev:web`     | Startet alle Web-Apps      | maerchenzauber, manacore, manadeck, memoro |
-| `pnpm dev:landing` | Startet alle Landing Pages | maerchenzauber, manacore, manadeck, memoro |
-| `pnpm dev:mobile`  | Startet alle Mobile-Apps   | maerchenzauber, manacore, manadeck, memoro |
+| `pnpm dev:web`     | Startet alle Web-Apps      | maerchenzauber, manacore, cards, memoro |
+| `pnpm dev:landing` | Startet alle Landing Pages | maerchenzauber, manacore, cards, memoro |
+| `pnpm dev:mobile`  | Startet alle Mobile-Apps   | maerchenzauber, manacore, cards, memoro |
 
 ### Beispiel
 
@@ -50,7 +50,7 @@ Diese Befehle starten ein komplettes Projekt mit allen zugehörigen Apps und Dep
 | ------------------------- | ------------------------------------------------------ |
 | `pnpm maerchenzauber:dev` | Startet Maerchenzauber (Backend, Web, Mobile, Landing) |
 | `pnpm manacore:dev`       | Startet Manacore (Web, Mobile, Landing)                |
-| `pnpm manadeck:dev`       | Startet Manadeck (Web, Mobile, Landing)                |
+| `pnpm cards:dev`       | Startet Cards (Web, Mobile, Landing)                |
 | `pnpm memoro:dev`         | Startet Memoro (Web, Mobile, Landing)                  |
 
 ## Turbo Filter
@@ -73,7 +73,7 @@ Da die Package-Namen im Monorepo unterschiedlich sind, hier eine Übersicht:
 | -------------- | ------------------ | ---------------------- | --------------------- | ---------------------- |
 | maerchenzauber | `@storyteller/web` | `@storyteller/landing` | `@storyteller/mobile` | `@storyteller/backend` |
 | manacore       | `manacore-web`     | `manacore-landing`     | `manacore`            | -                      |
-| manadeck       | `web`              | `landing`              | `manadeck`            | -                      |
+| cards       | `web`              | `landing`              | `cards`            | -                      |
 | memoro         | `memoro-web`       | `memoro-landing`       | `memoro`              | -                      |
 
 ### Filter-Syntax
@@ -92,11 +92,11 @@ Wenn mehrere Apps gleichzeitig laufen, verwenden sie unterschiedliche Ports:
 | ------- | -------------- | ------------- |
 | Web     | maerchenzauber | 5173          |
 | Web     | manacore       | 5174          |
-| Web     | manadeck       | 5175          |
+| Web     | cards       | 5175          |
 | Web     | memoro         | 5176          |
 | Landing | maerchenzauber | 4321          |
 | Landing | manacore       | 4322          |
-| Landing | manadeck       | 4323          |
+| Landing | cards       | 4323          |
 | Landing | memoro         | 4324          |
 | Backend | maerchenzauber | 3000          |
 

@@ -43,7 +43,7 @@ Extrem produktiver Vormittag mit **61 Commits** über **695 Dateien** und netto 
 - **Manalink Live** - Matrix-Chat-Client auf Production gebracht und auf link.mana.how deployed
 - **CityCorners** - City Guide für Konstanz mit PWA, i18n, mana-search Integration und 31 Backend-Tests
 - **Spiral-DB** - 174 Tests, kritische PNG-Bugs gefixt, in Zitare und Contacts integriert
-- **Auth-Migration** - 3 Mobile-Apps (ManaCore, Context, ManaDeck) von Supabase auf mana-core-auth
+- **Auth-Migration** - 3 Mobile-Apps (ManaCore, Context, Cards) von Supabase auf mana-core-auth
 - **Massive Cleanup** - 50+ Legacy-Dateien gelöscht, Hetzner-Artefakte entfernt, API-Keys bereinigt
 - **Observability** - Prometheus Metrics für mana-search, mana-media und Synapse
 - **Mukke** - FullPlayer als immersives Fullscreen-Erlebnis, CSP- und CORS-Fixes
@@ -202,7 +202,7 @@ Komplette Migration von Supabase-Auth auf `@manacore/shared-auth`. 20 Dateien ge
 
 Migration von direktem Supabase-Zugriff auf Backend-API + mana-core-auth. `AuthContext.tsx` durch `AuthProvider.tsx` ersetzt, neuer `backendApi.ts` Service. 25 Dateien geändert.
 
-### ManaDeck Mobile (820+ / 3.014- Zeilen)
+### Cards Mobile (820+ / 3.014- Zeilen)
 
 Migration von Custom Auth auf `@manacore/shared-auth`. 8 Dateien geändert.
 
@@ -234,7 +234,7 @@ return import.meta.env.DEV ? DEV_AUTH_URL : '';
 **Root-Level Legacy Reports gelöscht:**
 
 - AUTH\_\*.md (5 Dateien) - Auth-Architektur-Reports, jetzt in CLAUDE.md
-- TESTING*STRATEGY*_.md, QA\__, TEST*CASES*\*.md - alte Testing-Pläne
+- TESTING*STRATEGY*\_.md, QA\_\_, TEST*CASES*\*.md - alte Testing-Pläne
 - BACKEND_DESIGN_PATTERN_AUDIT.md, COMPATIBILITY_MATRIX_AND_REMEDIATION.md
 - HISTORICAL-ANALYSIS.md, MERGE-FIX-SUMMARY.md, RELEASE-PLAN.md
 - MANACORE-TODOS.md, APP-IDEAS.md, COMMANDS.md
@@ -416,6 +416,6 @@ Umami-Tracking in Todo, Calendar und Contacts erweitert. ANALYTICS.md aktualisie
 3. **Manalink File Uploads** - Bilder und Dateien senden/empfangen
 4. **CityCorners Deploy** - Backend und Web auf Mac Mini deployen
 5. **Landing Builder Deploy** - Service auf Mac Mini deployen
-6. **Spiral-DB** - Weitere Apps integrieren (Calendar, ManaDeck)
+6. **Spiral-DB** - Weitere Apps integrieren (Calendar, Cards)
 7. **Auth-Migration** - Verbleibende Mobile-Apps migrieren
 8. **Test Coverage** - CityCorners Web, Manalink Store/Auth-Flow

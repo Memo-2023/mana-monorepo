@@ -37,7 +37,7 @@
 	}
 
 	const aiAppIds: AppIconId[] = ['chat', 'picture', 'questions', 'context', 'presi', 'mail'];
-	const productivityIds: AppIconId[] = ['todo', 'calendar', 'contacts', 'manadeck', 'inventory'];
+	const productivityIds: AppIconId[] = ['todo', 'calendar', 'contacts', 'cards', 'inventory'];
 	const utilityIds: AppIconId[] = ['clock', 'zitare', 'storage', 'moodlit', 'matrix'];
 
 	function getAppsForCategory(ids: AppIconId[], apps: ManaApp[]): ManaApp[] {

@@ -97,10 +97,10 @@ Brevo ist SPOF für alle Transaktions-Emails (Verifizierung, Passwort-Reset).
 **Status: ✅ ERLEDIGT** (2026-03-24)
 
 Alle 9 Backends nutzen jetzt `@manacore/shared-llm` → `mana-llm` Gateway:
-- Auth, Chat, Context, NutriPhi, Planta, Traces, ManaDeck, Bot Services, Matrix Bots
+- Auth, Chat, Context, NutriPhi, Planta, Traces, Cards, Bot Services, Matrix Bots
 - Google Gemini als automatischer Fallback wenn Ollama überlastet
 - OpenAI SDK komplett entfernt (Project Doc Bot)
-- Google Gemini SDK entfernt (ManaDeck)
+- Google Gemini SDK entfernt (Cards)
 
 #### 2.2 PostgreSQL Backup stärken
 
@@ -219,7 +219,7 @@ NutriPhi und Planta nutzen Google Gemini Vision. Alternativen via Ollama:
 - ✅ Prio 1: Picture App nutzt lokales `mana-image-gen` (FLUX.2 klein) als Default
 - ✅ Prio 2: Project Doc Bot: OpenAI SDK komplett entfernt, nutzt mana-llm + mana-stt
 - ✅ Prio 3: Alle LLM-Calls über `mana-llm` geroutet (10 Backends, `@manacore/shared-llm`)
-- ✅ Prio 3: Google Gemini Fallback in mana-llm + ManaDeck Gemini SDK entfernt
+- ✅ Prio 3: Google Gemini Fallback in mana-llm + Cards Gemini SDK entfernt
 - ✅ Prio 4: PostgreSQL Backup mit stündlichen Dumps + täglichen Base-Backups
 - ✅ Prio 6: Landing Pages self-hosted via Nginx (10 Domains, kein Cloudflare Pages mehr)
 - ✅ Prio 8: Cloudflare-Fallback Plan dokumentiert (WireGuard + Caddy)

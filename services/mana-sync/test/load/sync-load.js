@@ -44,13 +44,13 @@ const WS_URL = SYNC_URL.replace('http', 'ws');
 const AUTH_TOKEN = __ENV.AUTH_TOKEN || '';
 const SCENARIO = __ENV.SCENARIO || 'mixed';
 
-const APP_IDS = ['todo', 'contacts', 'calendar', 'chat', 'manadeck'];
+const APP_IDS = ['todo', 'contacts', 'calendar', 'chat', 'cards'];
 const TABLES = {
 	todo: ['tasks', 'projects', 'labels'],
 	contacts: ['contacts'],
 	calendar: ['calendars', 'events'],
 	chat: ['conversations', 'messages'],
-	manadeck: ['decks', 'cards'],
+	cards: ['decks', 'cards'],
 };
 
 // Scenarios

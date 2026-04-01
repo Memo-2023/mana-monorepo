@@ -1,4 +1,4 @@
-# Manadeck
+# Cards
 
 A deck management system with Mana Core authentication and credit system integration.
 
@@ -132,7 +132,7 @@ A deck management system with Mana Core authentication and credit system integra
 
 ## Credit System
 
-Manadeck uses **Mana** as its credit currency. Operations cost credits:
+Cards uses **Mana** as its credit currency. Operations cost credits:
 
 | Operation | Cost |
 |-----------|------|
@@ -208,7 +208,7 @@ function MyScreen() {
 ## Project Structure
 
 ```
-manadeck/
+cards/
 ├── backend/                    # NestJS backend
 │   ├── src/
 │   │   ├── config/

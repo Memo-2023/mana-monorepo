@@ -49,7 +49,7 @@
 </script>
 
 <svelte:head>
-	<title>{currentDeck.value?.title || 'Deck'} - Manadeck</title>
+	<title>{currentDeck.value?.title || 'Deck'} - Cards</title>
 </svelte:head>
 
 {#if currentDeck.value}

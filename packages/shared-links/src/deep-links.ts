@@ -42,7 +42,7 @@ const DEEP_LINK_PATTERNS: Record<string, Record<string, string>> = {
 		documents: '/documents/{id}',
 		spaces: '/spaces/{id}',
 	},
-	manadeck: {
+	cards: {
 		decks: '/decks/{id}',
 		cards: '/decks/{id}', // Navigate to deck containing the card
 	},

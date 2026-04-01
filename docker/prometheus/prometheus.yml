@@ -267,7 +267,7 @@ scrape_configs:
           - https://planta.mana.how
           - https://calc.mana.how
           - https://zitare.mana.how
-          - https://manadeck.mana.how
+          - https://cards.mana.how
           - https://skilltree.mana.how
           - https://mukke.mana.how
           - https://citycorners.mana.how

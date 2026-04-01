@@ -1,5 +1,5 @@
 /**
- * Credit-related types for Manadeck
+ * Credit-related types for Cards
  */
 
 export interface CreditBalance {

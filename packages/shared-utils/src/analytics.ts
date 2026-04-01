@@ -245,9 +245,9 @@ export const ContactsEvents = {
 };
 
 /**
- * ManaDeck App Events
+ * Cards App Events
  */
-export const ManaDeckEvents = {
+export const CardsEvents = {
 	deckCreated: () => trackEvent('deck_created'),
 	deckDeleted: () => trackEvent('deck_deleted'),
 	deckStudied: (cardsCount: number) => trackEvent('deck_studied', { cards: cardsCount }),

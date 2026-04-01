@@ -2,14 +2,14 @@ import { createAppOnboardingStore, type AppOnboardingStep } from '@manacore/shar
 import { userSettings } from './user-settings.svelte';
 
 /**
- * ManaDeck-specific onboarding steps
+ * Cards-specific onboarding steps
  */
-const manadeckOnboardingSteps: AppOnboardingStep[] = [
+const cardsOnboardingSteps: AppOnboardingStep[] = [
 	{
 		id: 'features',
 		type: 'info',
-		question: 'Willkommen bei ManaDeck!',
-		description: 'Das kann ManaDeck für dich tun:',
+		question: 'Willkommen bei Cards!',
+		description: 'Das kann Cards für dich tun:',
 		emoji: '🃏',
 		gradient: { from: 'blue-500', to: 'blue-700' },
 		bullets: [
@@ -51,7 +51,7 @@ const manadeckOnboardingSteps: AppOnboardingStep[] = [
 	{
 		id: 'welcome',
 		type: 'info',
-		question: 'ManaDeck ist bereit!',
+		question: 'Cards ist bereit!',
 		description: 'Hier sind einige Tipps:',
 		emoji: '🎉',
 		gradient: { from: 'primary', to: 'primary/70' },
@@ -65,11 +65,11 @@ const manadeckOnboardingSteps: AppOnboardingStep[] = [
 ];
 
 /**
- * ManaDeck app onboarding store
+ * Cards app onboarding store
  */
-export const manadeckOnboarding = createAppOnboardingStore({
-	appId: 'manadeck',
-	steps: manadeckOnboardingSteps,
+export const cardsOnboarding = createAppOnboardingStore({
+	appId: 'cards',
+	steps: cardsOnboardingSteps,
 	userSettings,
 	onComplete: async () => {},
 	onSkip: async () => {},

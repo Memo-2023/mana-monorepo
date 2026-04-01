@@ -1,5 +1,5 @@
 /**
- * ManaDeck Hono Server — AI card/deck generation
+ * Cards Hono Server — AI card/deck generation
  *
  * CRUD for decks/cards handled by mana-sync.
  */
@@ -18,7 +18,7 @@ const app = new Hono();
 app.onError(errorHandler);
 app.notFound(notFoundHandler);
 app.use('*', cors({ origin: CORS_ORIGINS, credentials: true }));
-app.route('/health', healthRoute('manadeck-server'));
+app.route('/health', healthRoute('cards-server'));
 app.use('/api/*', authMiddleware());
 
 // ─── AI Deck Generation (server-only: mana-llm + credits) ───

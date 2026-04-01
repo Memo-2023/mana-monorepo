@@ -60,7 +60,7 @@ Der neue vierte Tab zeigt alle 40+ Credit-Operationen des gesamten Mana-Ökosyst
 |-----|---------------------|--------|
 | **Chat** | GPT-4 Message, Claude Message, Ollama (lokal) | 5, 5, 0.1 |
 | **Picture** | Bild generieren, Upscale | 10, 5 |
-| **ManaDeck** | Deck generieren, Karte generieren | 20, 2 |
+| **Cards** | Deck generieren, Karte generieren | 20, 2 |
 | **Todo** | Task erstellen, Smart Scheduling | 0.02, 2 |
 | **Calendar** | Event erstellen, CalDAV Sync | 0.02, 0.5 |
 

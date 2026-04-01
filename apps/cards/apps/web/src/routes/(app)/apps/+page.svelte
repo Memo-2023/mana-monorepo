@@ -3,7 +3,7 @@
 </script>
 
 <div class="apps-page-wrapper">
-	<AppsPage currentAppId="manadeck" locale="de" title="Alle Apps" />
+	<AppsPage currentAppId="cards" locale="de" title="Alle Apps" />
 </div>
 
 <style>

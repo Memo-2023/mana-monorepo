@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { ForgotPasswordPage } from '@manacore/shared-auth-ui';
-	import { ManaDeckLogo } from '@manacore/shared-branding';
+	import { CardsLogo } from '@manacore/shared-branding';
 	import AppSlider from '$lib/components/AppSlider.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 
@@ -11,8 +11,8 @@
 </script>
 
 <ForgotPasswordPage
-	appName="ManaDeck"
-	logo={ManaDeckLogo}
+	appName="Cards"
+	logo={CardsLogo}
 	primaryColor="#8b5cf6"
 	onForgotPassword={handleForgotPassword}
 	{goto}

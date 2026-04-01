@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { ManaDeckLogo } from '@manacore/shared-branding';
+	import { CardsLogo } from '@manacore/shared-branding';
 	import { authStore } from '$lib/stores/auth.svelte';
 
 	let loading = $state(false);
@@ -53,7 +53,7 @@
 </script>
 
 <svelte:head>
-	<title>Reset Password - ManaDeck</title>
+	<title>Reset Password - Cards</title>
 </svelte:head>
 
 <div
@@ -61,8 +61,8 @@
 >
 	<header class="flex items-center justify-between p-4">
 		<a href="/" class="flex items-center gap-2">
-			<ManaDeckLogo class="h-8 w-8" />
-			<span class="text-xl font-semibold" style="color: #8b5cf6">ManaDeck</span>
+			<CardsLogo class="h-8 w-8" />
+			<span class="text-xl font-semibold" style="color: #8b5cf6">Cards</span>
 		</a>
 	</header>
 

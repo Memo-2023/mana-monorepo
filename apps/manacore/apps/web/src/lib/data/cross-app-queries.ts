@@ -22,8 +22,8 @@ import {
 	crossPresiDeckCollection,
 	crossSpaceCollection,
 	crossDocumentCollection,
-	crossManadeckDeckCollection,
-	crossManadeckCardCollection,
+	crossCardsDeckCollection,
+	crossCardsCardCollection,
 	type CrossAppTask,
 	type CrossAppEvent,
 	type CrossAppContact,
@@ -38,8 +38,8 @@ import {
 	type CrossAppDeck,
 	type CrossAppSpace,
 	type CrossAppDocument,
-	type CrossAppManadeckDeck,
-	type CrossAppManadeckCard,
+	type CrossAppCardsDeck,
+	type CrossAppCardsCard,
 } from './cross-app-stores';
 
 // ─── Todo Queries ───────────────────────────────────────────
@@ -276,14 +276,14 @@ export function useSpaces() {
 	}, [] as CrossAppSpace[]);
 }
 
-// ─── ManaDeck Queries ───────────────────────────────────────
+// ─── Cards Queries ─────────────────────────────────────────
 
-/** ManaDeck learning progress. */
-export function useManadeckProgress() {
+/** Cards learning progress. */
+export function useCardsProgress() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const decks = await crossManadeckDeckCollection.getAll();
-			const cards = await crossManadeckCardCollection.getAll();
+			const decks = await crossCardsDeckCollection.getAll();
+			const cards = await crossCardsCardCollection.getAll();
 			const activeDecks = decks.filter((d) => !d.deletedAt);
 			const activeCards = cards.filter((c) => !c.deletedAt);
 			const now = new Date().toISOString();
@@ -301,7 +301,7 @@ export function useManadeckProgress() {
 			totalCards: 0,
 			cardsLearned: 0,
 			dueForReview: 0,
-			decks: [] as CrossAppManadeckDeck[],
+			decks: [] as CrossAppCardsDeck[],
 		}
 	);
 }

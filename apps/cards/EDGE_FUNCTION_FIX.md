@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
 
 ## Critical: Disable Gateway JWT Verification
 
-The Supabase Edge Gateway tries to validate JWTs before passing requests to your function. Since you're using Mana Core JWTs (not Manadeck JWTs), you need to disable this.
+The Supabase Edge Gateway tries to validate JWTs before passing requests to your function. Since you're using Mana Core JWTs (not Cards JWTs), you need to disable this.
 
 Create `supabase/functions/generate-deck/config.toml`:
 

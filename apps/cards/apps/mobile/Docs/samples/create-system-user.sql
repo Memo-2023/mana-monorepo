@@ -21,11 +21,11 @@ INSERT INTO auth.users (
     '00000000-0000-0000-0000-000000000001',
     'authenticated',
     'authenticated',
-    'system@manadeck.app',
+    'system@cards.app',
     '$2a$10$dummyhashforpassword',  -- Dummy encrypted password
     now(),
     '{"provider": "system", "providers": ["system"]}',
-    '{"display_name": "Manadeck System", "is_system_user": true}',
+    '{"display_name": "Cards System", "is_system_user": true}',
     now(),
     now(),
     '',
@@ -45,8 +45,8 @@ INSERT INTO public.profiles (
     updated_at
 ) VALUES (
     '00000000-0000-0000-0000-000000000001',
-    'manadeck_system',
-    'Manadeck System',
+    'cards_system',
+    'Cards System',
     'System account for managing public sample decks and community content.',
     '{"is_system_account": true, "can_create_public_decks": true}',
     now(),
