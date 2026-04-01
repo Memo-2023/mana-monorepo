@@ -48,14 +48,14 @@ meetingWebhookRoutes.post('/bot-events', async (c) => {
 	const signature = c.req.header('x-webhook-signature') ?? '';
 
 	if (WEBHOOK_SECRET && !verifySignature(rawBody, signature)) {
-		return c.json({ error: 'Invalid webhook signature' }, 401);
+		return c.json({ success: false, error: 'Invalid webhook signature' }, 401);
 	}
 
 	let payload: WebhookEvent;
 	try {
 		payload = JSON.parse(rawBody) as WebhookEvent;
 	} catch {
-		return c.json({ error: 'Invalid JSON payload' }, 400);
+		return c.json({ success: false, error: 'Invalid JSON payload' }, 400);
 	}
 
 	const key = idempotencyKey(payload);
@@ -116,6 +116,6 @@ meetingWebhookRoutes.post('/bot-events', async (c) => {
 		// Remove from processed set so it can be retried
 		processedEvents.delete(key);
 		console.error('[meetings-webhook] Error processing event:', err);
-		return c.json({ error: 'Failed to process webhook event' }, 500);
+		return c.json({ success: false, error: 'Failed to process webhook event' }, 500);
 	}
 });

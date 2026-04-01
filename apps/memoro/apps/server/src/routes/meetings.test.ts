@@ -127,7 +127,7 @@ describe('POST /api/v1/meetings/bots', () => {
 		expect(res.status).toBe(402);
 
 		const data = await res.json();
-		expect(data.error).toBe('InsufficientCredits');
+		expect(data.error).toContain('Insufficient credits');
 	});
 });
 

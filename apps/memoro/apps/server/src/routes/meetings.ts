@@ -35,12 +35,9 @@ meetingRoutes.post('/bots', async (c) => {
 		return c.json(
 			{
 				success: false,
-				error: 'InsufficientCredits',
-				message: `Not enough credits to start recording. Need at least ${MINIMUM_RECORDING_CREDITS} credits.`,
-				details: {
-					requiredCredits: MINIMUM_RECORDING_CREDITS,
-					availableCredits: creditCheck.availableCredits,
-				},
+				error: `Insufficient credits: need at least ${MINIMUM_RECORDING_CREDITS}`,
+				requiredCredits: MINIMUM_RECORDING_CREDITS,
+				availableCredits: creditCheck.availableCredits,
 			},
 			402
 		);

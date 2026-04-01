@@ -13,13 +13,13 @@ export const supportedLocales = ['de', 'en', 'fr', 'it', 'es'] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 // Default locale
-const defaultLocale = 'en';
+const defaultLocale = 'de';
 
 // Get initial locale from browser or localStorage
 function getInitialLocale(): SupportedLocale {
 	if (browser) {
 		// Check localStorage first
-		const stored = localStorage.getItem('locale');
+		const stored = localStorage.getItem('memoro_locale');
 		if (stored && supportedLocales.includes(stored as SupportedLocale)) {
 			return stored as SupportedLocale;
 		}
@@ -46,7 +46,7 @@ export function initI18n() {
 export function setLocale(newLocale: SupportedLocale) {
 	locale.set(newLocale);
 	if (browser) {
-		localStorage.setItem('locale', newLocale);
+		localStorage.setItem('memoro_locale', newLocale);
 	}
 }
 
