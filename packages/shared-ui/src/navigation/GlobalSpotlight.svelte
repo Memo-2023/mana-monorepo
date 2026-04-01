@@ -12,12 +12,40 @@
 		onExecute: () => void;
 	}
 
+	export interface ContentSearchResult {
+		id: string;
+		type: string;
+		appId: string;
+		title: string;
+		subtitle?: string;
+		appIcon?: string;
+		appColor?: string;
+		href: string;
+		score: number;
+		matchedField?: string;
+	}
+
+	export interface ContentSearchGroup {
+		appId: string;
+		appName: string;
+		appIcon?: string;
+		appColor?: string;
+		results: ContentSearchResult[];
+	}
+
+	export type ContentSearcher = (
+		query: string,
+		signal: AbortSignal
+	) => Promise<ContentSearchGroup[]>;
+
 	interface Props {
 		open: boolean;
 		onClose: () => void;
 		apps: PillAppItem[];
 		quickActions?: SpotlightAction[];
 		placeholder?: string;
+		/** Content searcher for cross-app IndexedDB search */
+		contentSearcher?: ContentSearcher;
 	}
 
 	let {
@@ -26,6 +54,7 @@
 		apps,
 		quickActions = [],
 		placeholder = 'Was möchtest du tun?',
+		contentSearcher,
 	}: Props = $props();
 
 	const store = createAppNavigationStore();
@@ -33,10 +62,14 @@
 	let searchQuery = $state('');
 	let selectedIndex = $state(0);
 	let inputEl = $state<HTMLInputElement | undefined>(undefined);
+	let contentResults = $state<ContentSearchGroup[]>([]);
+	let contentLoading = $state(false);
+	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+	let abortController: AbortController | undefined;
 
-	// Build combined results list
+	// Build combined results list (apps + actions)
 	interface SpotlightResult {
-		type: 'app' | 'action';
+		type: 'app' | 'action' | 'content';
 		id: string;
 		label: string;
 		description?: string;
@@ -44,6 +77,8 @@
 		imageUrl?: string;
 		shortcut?: string;
 		category?: string;
+		href?: string;
+		appColor?: string;
 	}
 
 	const results = $derived.by(() => {
@@ -106,9 +141,56 @@
 					category: action.category || 'Aktionen',
 				});
 			}
+
+			// Append content search results
+			for (const group of contentResults) {
+				for (const result of group.results) {
+					items.push({
+						type: 'content',
+						id: result.id,
+						label: result.title,
+						description: result.subtitle,
+						imageUrl: group.appIcon,
+						category: group.appName,
+						href: result.href,
+						appColor: group.appColor,
+					});
+				}
+			}
 		}
 
 		return items;
+	});
+
+	// Trigger content search on query change
+	$effect(() => {
+		const q = searchQuery.trim();
+		if (!q || !contentSearcher) {
+			contentResults = [];
+			contentLoading = false;
+			return;
+		}
+
+		contentLoading = true;
+		clearTimeout(debounceTimer);
+		abortController?.abort();
+
+		debounceTimer = setTimeout(async () => {
+			abortController = new AbortController();
+			const { signal } = abortController;
+			try {
+				const groups = await contentSearcher!(q, signal);
+				if (!signal.aborted) {
+					contentResults = groups;
+					contentLoading = false;
+				}
+			} catch {
+				if (!signal.aborted) {
+					contentResults = [];
+					contentLoading = false;
+				}
+			}
+		}, 150);
 	});
 
 	// Group results by category for display
@@ -140,11 +222,19 @@
 		if (open) {
 			searchQuery = '';
 			selectedIndex = 0;
+			contentResults = [];
+			contentLoading = false;
 			requestAnimationFrame(() => inputEl?.focus());
 		}
 	});
 
 	function handleSelect(item: SpotlightResult) {
+		if (item.type === 'content' && item.href) {
+			window.location.href = item.href;
+			onClose();
+			return;
+		}
+
 		if (item.type === 'app') {
 			const app = apps.find((a) => a.id === item.id);
 			if (app) {
@@ -258,6 +348,8 @@
 												d={iconPaths[item.icon]}
 											/>
 										</svg>
+									{:else if item.type === 'content' && item.appColor}
+										<span class="spotlight-content-dot" style:background={item.appColor}></span>
 									{:else}
 										<span class="spotlight-item-dot">
 											{item.type === 'app' ? '\u{1F4F1}' : '\u{26A1}'}
@@ -272,13 +364,40 @@
 								</div>
 								{#if item.shortcut}
 									<kbd class="spotlight-shortcut">{item.shortcut}</kbd>
+								{:else if item.type === 'content'}
+									<svg
+										class="spotlight-item-arrow"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d={iconPaths.arrow}
+										/>
+									</svg>
 								{/if}
 							</button>
 						{/each}
 					{/each}
+					{#if contentLoading}
+						<div class="spotlight-loading">
+							<span class="spotlight-loading-dot"></span>
+							<span class="spotlight-loading-dot"></span>
+							<span class="spotlight-loading-dot"></span>
+						</div>
+					{/if}
 				</div>
-			{:else if searchQuery}
+			{:else if searchQuery && !contentLoading}
 				<div class="spotlight-empty">Keine Ergebnisse</div>
+			{:else if searchQuery && contentLoading}
+				<div class="spotlight-loading-full">
+					<span class="spotlight-loading-dot"></span>
+					<span class="spotlight-loading-dot"></span>
+					<span class="spotlight-loading-dot"></span>
+				</div>
 			{/if}
 
 			<!-- Footer hints -->
@@ -402,7 +521,7 @@
 
 	/* Results */
 	.spotlight-results {
-		max-height: 360px;
+		max-height: 50vh;
 		overflow-y: auto;
 		padding: 0.5rem;
 	}
@@ -547,6 +666,63 @@
 	:global(.dark) .spotlight-hint kbd {
 		background: rgba(255, 255, 255, 0.06);
 		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Content search dot (colored by app) */
+	.spotlight-content-dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		flex-shrink: 0;
+		margin: 0 0.25rem;
+	}
+
+	.spotlight-item-arrow {
+		width: 1rem;
+		height: 1rem;
+		opacity: 0.3;
+		flex-shrink: 0;
+	}
+
+	/* Loading indicator */
+	.spotlight-loading,
+	.spotlight-loading-full {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		padding: 0.75rem;
+	}
+
+	.spotlight-loading-full {
+		padding: 2rem;
+	}
+
+	.spotlight-loading-dot {
+		width: 0.375rem;
+		height: 0.375rem;
+		border-radius: 50%;
+		background: currentColor;
+		opacity: 0.3;
+		animation: spotlightPulse 1s ease-in-out infinite;
+	}
+
+	.spotlight-loading-dot:nth-child(2) {
+		animation-delay: 0.15s;
+	}
+
+	.spotlight-loading-dot:nth-child(3) {
+		animation-delay: 0.3s;
+	}
+
+	@keyframes spotlightPulse {
+		0%,
+		100% {
+			opacity: 0.3;
+		}
+		50% {
+			opacity: 0.8;
+		}
 	}
 
 	/* Mobile */

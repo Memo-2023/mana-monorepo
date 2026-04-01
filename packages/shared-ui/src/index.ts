@@ -121,6 +121,9 @@ export type {
 	ExpandableToolbarProps,
 	RecentAppEntry,
 	SpotlightAction,
+	ContentSearcher,
+	ContentSearchResult,
+	ContentSearchGroup,
 } from './navigation';
 
 // Settings

@@ -12,7 +12,10 @@
 	import PillTabGroup from './PillTabGroup.svelte';
 	import PillTagSelector from './PillTagSelector.svelte';
 	import AppDrawer from './AppDrawer.svelte';
-	import GlobalSpotlight, { type SpotlightAction } from './GlobalSpotlight.svelte';
+	import GlobalSpotlight, {
+		type SpotlightAction,
+		type ContentSearcher,
+	} from './GlobalSpotlight.svelte';
 	import { createGlobalSpotlightState } from './useGlobalSpotlight.svelte';
 	// Phosphor Icons (via shared-icons)
 	import {
@@ -290,6 +293,8 @@
 		spotlightActions?: SpotlightAction[];
 		/** Placeholder text for spotlight search */
 		spotlightPlaceholder?: string;
+		/** Content searcher for cross-app search in spotlight */
+		contentSearcher?: ContentSearcher;
 		/** Accessible label for the nav element */
 		ariaLabel?: string;
 		/** Feedback page href (shown in user dropdown). Set to empty string to hide. */
@@ -345,6 +350,7 @@
 		onOpenInPanel,
 		spotlightActions,
 		spotlightPlaceholder,
+		contentSearcher,
 		ariaLabel,
 		feedbackHref = '/feedback',
 		themesHref,
@@ -804,6 +810,7 @@
 		apps={appItems}
 		quickActions={spotlightActions}
 		placeholder={spotlightPlaceholder}
+		{contentSearcher}
 	/>
 {/if}
 
