@@ -6,21 +6,29 @@ const currentYear = new Date().getFullYear();
 // --- Data ---
 
 const ecosystemApps = [
-	{ label: 'Calendar', href: 'https://calendar.mana.how', status: 'mature' },
-	{ label: 'Todo', href: 'https://todo.mana.how', status: 'mature' },
-	{ label: 'Contacts', href: 'https://contacts.mana.how', status: 'production' },
-	{ label: 'Presi', href: 'https://presi.mana.how', status: 'mature' },
-	{ label: 'Storage', href: 'https://storage.mana.how', status: 'production' },
-	{ label: 'Chat', href: 'https://chat.mana.how', status: 'production' },
-	{ label: 'Picture', href: 'https://picture.mana.how', status: 'production' },
-	{ label: 'Mukke', href: 'https://mukke.mana.how', status: 'beta' },
+	// Beta tier (accessible to beta testers and above)
+	{ label: 'Todo', href: 'https://todo.mana.how', status: 'beta' },
+	{ label: 'Calendar', href: 'https://calendar.mana.how', status: 'beta' },
+	{ label: 'Contacts', href: 'https://contacts.mana.how', status: 'beta' },
 	{ label: 'Clock', href: 'https://clock.mana.how', status: 'beta' },
-	{ label: 'NutriPhi', href: 'https://nutriphi.mana.how', status: 'beta' },
-	{ label: 'Photos', href: 'https://photos.mana.how', status: 'beta' },
 	{ label: 'Zitare', href: 'https://zitare.mana.how', status: 'beta' },
-	{ label: 'Playground', href: 'https://playground.mana.how', status: 'beta' },
+	{ label: 'Calc', href: 'https://calc.mana.how', status: 'beta' },
+	{ label: 'Arcade', href: 'https://arcade.mana.how', status: 'beta' },
+	// Alpha tier (accessible to alpha testers and above)
+	{ label: 'Chat', href: 'https://chat.mana.how', status: 'alpha' },
+	{ label: 'Picture', href: 'https://picture.mana.how', status: 'alpha' },
+	{ label: 'Storage', href: 'https://storage.mana.how', status: 'alpha' },
+	{ label: 'Presi', href: 'https://presi.mana.how', status: 'alpha' },
 	{ label: 'Cards', href: 'https://cards.mana.how', status: 'alpha' },
-	{ label: 'Planta', href: 'https://planta.mana.how', status: 'alpha' },
+	{ label: 'Mukke', href: 'https://mukke.mana.how', status: 'alpha' },
+	{ label: 'Photos', href: 'https://photos.mana.how', status: 'alpha' },
+	{ label: 'SkillTree', href: 'https://skilltree.mana.how', status: 'alpha' },
+	{ label: 'CityCorners', href: 'https://citycorners.mana.how', status: 'alpha' },
+	{ label: 'Inventar', href: 'https://inventory.mana.how', status: 'alpha' },
+	{ label: 'Taktik', href: 'https://times.mana.how', status: 'alpha' },
+	{ label: 'uLoad', href: 'https://ulo.ad', status: 'alpha' },
+	{ label: 'Playground', href: 'https://playground.mana.how', status: 'alpha' },
+	{ label: 'Matrix', href: 'https://matrix.mana.how', status: 'alpha' },
 ];
 
 const platformLinks = [
@@ -32,6 +40,7 @@ const platformLinks = [
 ];
 
 const monitoringLinks = [
+	{ label: 'Status', href: 'https://status.mana.how' },
 	{ label: 'Grafana', href: 'https://grafana.mana.how' },
 	{ label: 'Analytics', href: 'https://stats.mana.how' },
 	{ label: 'Error Tracking', href: 'https://glitchtip.mana.how' },
@@ -58,7 +67,9 @@ const landingPages = [
 	{ label: 'Zitare Landing', href: 'https://zitares.mana.how' },
 	{ label: 'Presi Landing', href: 'https://presis.mana.how' },
 	{ label: 'Clock Landing', href: 'https://clocks.mana.how' },
-	{ label: 'IT Souveranitat', href: 'https://it.mana.how' },
+	{ label: 'Cards Landing', href: 'https://cards.mana.how' },
+	{ label: 'CityCorners Landing', href: 'https://citycorners.mana.how' },
+	{ label: 'IT Souveränität', href: 'https://it.mana.how' },
 ];
 
 const legalLinks = [
@@ -70,14 +81,10 @@ const legalLinks = [
 
 function statusColor(status: string) {
 	switch (status) {
-		case 'mature':
-			return '#34d399';
-		case 'production':
-			return '#60a5fa';
 		case 'beta':
-			return '#fbbf24';
+			return '#60a5fa';
 		case 'alpha':
-			return '#f97316';
+			return '#fbbf24';
 		default:
 			return '#94a3b8';
 	}
@@ -94,7 +101,7 @@ function statusColor(status: string) {
 				<h3 class="footer-heading">Okosystem</h3>
 				<ul class="footer-list">
 					{
-						ecosystemApps.slice(0, 8).map((app) => (
+						ecosystemApps.slice(0, 10).map((app) => (
 							<li>
 								<a href={app.href} class="footer-link" target="_blank" rel="noopener">
 									<span class="status-dot" style={`background: ${statusColor(app.status)}`} />
@@ -109,7 +116,7 @@ function statusColor(status: string) {
 					<summary class="more-toggle">Alle Apps anzeigen</summary>
 					<ul class="footer-list">
 						{
-							ecosystemApps.slice(8).map((app) => (
+							ecosystemApps.slice(10).map((app) => (
 								<li>
 									<a href={app.href} class="footer-link" target="_blank" rel="noopener">
 										<span class="status-dot" style={`background: ${statusColor(app.status)}`} />
@@ -123,10 +130,8 @@ function statusColor(status: string) {
 
 				<!-- Status legend -->
 				<div class="status-legend">
-					<span><span class="status-dot" style="background: #34d399"></span> Mature</span>
-					<span><span class="status-dot" style="background: #60a5fa"></span> Production</span>
-					<span><span class="status-dot" style="background: #fbbf24"></span> Beta</span>
-					<span><span class="status-dot" style="background: #f97316"></span> Alpha</span>
+					<span><span class="status-dot" style="background: #60a5fa"></span> Beta</span>
+					<span><span class="status-dot" style="background: #fbbf24"></span> Alpha</span>
 				</div>
 			</div>
 
