@@ -2,11 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { Snippet } from 'svelte';
-	import { onMount } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import { locale } from 'svelte-i18n';
-	import { PillNavigation, TagStrip } from '@manacore/shared-ui';
+	import { PillNavigation, TagStrip, DragPreview, ActionZone } from '@manacore/shared-ui';
 	import type { PillNavItem, PillDropdownItem, SpotlightAction } from '@manacore/shared-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
@@ -109,6 +109,19 @@
 	function handleTagStripToggle() {
 		isTagStripVisible = !isTagStripVisible;
 	}
+
+	// DnD: tag drop handler — set by child pages via context
+	import type { DragPayload } from '@manacore/shared-ui/dnd';
+
+	let tagDropHandler = $state<((tagId: string, payload: DragPayload) => void) | null>(null);
+	setContext('tagDropHandler', {
+		set(handler: (tagId: string, payload: DragPayload) => void) {
+			tagDropHandler = handler;
+		},
+		clear() {
+			tagDropHandler = null;
+		},
+	});
 
 	// Navigation items for ManaCore
 	const baseNavItems: PillNavItem[] = [
@@ -353,10 +366,14 @@
 				selectedIds={[]}
 				onToggle={() => {}}
 				onClear={() => {}}
+				onTagDrop={tagDropHandler ?? undefined}
 				managementHref="/tags"
 				loading={allTags.loading}
 			/>
 		{/if}
+
+		<!-- DnD: floating preview + action zones -->
+		<DragPreview />
 
 		<!-- Main content -->
 		<main class="pb-24">

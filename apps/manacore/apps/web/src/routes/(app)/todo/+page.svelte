@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { Observable } from 'dexie';
+	import { dropTarget } from '@manacore/shared-ui/dnd';
+	import type { DragPayload, TagDragData } from '@manacore/shared-ui/dnd';
+	import { useAllTags } from '$lib/stores/tags.svelte';
+	import { onMount } from 'svelte';
 	import {
 		type Task,
 		type LocalLabel,
@@ -8,6 +12,7 @@
 		type LocalTodoProject,
 		type TaskPriority,
 		tasksStore,
+		taskTable,
 		viewStore,
 		filterIncomplete,
 		filterCompleted,
@@ -66,6 +71,15 @@
 		return () => sub.unsubscribe();
 	});
 
+	// Global tags for resolving labelIds to names/colors
+	const globalTags = useAllTags();
+	const tagMap = $derived(new Map((globalTags.value ?? []).map((t) => [t.id, t])));
+
+	function getTaskTags(task: Task) {
+		const ids: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
+		return ids.map((id) => tagMap.get(id)).filter((t): t is NonNullable<typeof t> => t != null);
+	}
+
 	// Task stats
 	let stats = $derived(getTaskStats(allTasks));
 
@@ -112,6 +126,42 @@
 		e.stopPropagation();
 		e.preventDefault();
 		await tasksStore.deleteTask(task.id);
+	}
+
+	// ── DnD: register tag drop handler for passive drops (task→tag in TagStrip)
+	const tagDropCtx = getContext<{
+		set: (handler: (tagId: string, payload: DragPayload) => void) => void;
+		clear: () => void;
+	}>('tagDropHandler');
+
+	onMount(() => {
+		tagDropCtx?.set(async (tagId: string, payload: DragPayload) => {
+			const taskData = payload.data as TagDragData;
+			const task = await taskTable.get(taskData.id);
+			if (!task) return;
+			const currentLabels: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
+			if (!currentLabels.includes(tagId)) {
+				tasksStore.updateLabels(taskData.id, [...currentLabels, tagId]);
+			}
+		});
+		return () => tagDropCtx?.clear();
+	});
+
+	// ── DnD: tag dropped onto a task ────────────────────────
+	function handleTagDrop(task: Task, payload: DragPayload) {
+		const tagData = payload.data as TagDragData;
+		const currentLabels: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
+		if (!currentLabels.includes(tagData.id)) {
+			tasksStore.updateLabels(task.id, [...currentLabels, tagData.id]);
+		}
+	}
+
+	function tagNotAlreadyOnTask(task: Task) {
+		return (payload: DragPayload) => {
+			const tagData = payload.data as TagDragData;
+			const currentLabels: string[] = (task.metadata as { labelIds?: string[] })?.labelIds ?? [];
+			return !currentLabels.includes(tagData.id);
+		};
 	}
 
 	// View navigation items
@@ -293,6 +343,11 @@
 					role="button"
 					tabindex="0"
 					onclick={() => (selectedTaskId = selectedTaskId === task.id ? null : task.id)}
+					use:dropTarget={{
+						accepts: ['tag'],
+						onDrop: (payload) => handleTagDrop(task, payload),
+						canDrop: tagNotAlreadyOnTask(task),
+					}}
 				>
 					<!-- Completion Toggle -->
 					<button
@@ -337,6 +392,14 @@
 									{task.subtasks.filter((s) => s.isCompleted).length}/{task.subtasks.length} Teilaufgaben
 								</span>
 							{/if}
+							{#each getTaskTags(task).slice(0, 3) as tag (tag.id)}
+								<span
+									class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.625rem] font-medium"
+									style="background: color-mix(in srgb, {tag.color} 15%, transparent); color: {tag.color}"
+								>
+									{tag.name}
+								</span>
+							{/each}
 						</div>
 
 						<!-- Expanded Detail -->
@@ -469,3 +532,28 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	/* DnD: tag hovering over task item */
+	:global(.mana-drop-target-hover) {
+		outline: 2px solid var(--color-primary, #6366f1);
+		outline-offset: -2px;
+		border-radius: 0.5rem;
+		background: rgba(99, 102, 241, 0.06) !important;
+	}
+
+	:global(.mana-drop-target-success) {
+		animation: drop-success 400ms ease-out;
+	}
+
+	@keyframes drop-success {
+		0% {
+			outline-color: #10b981;
+			background: rgba(16, 185, 129, 0.1);
+		}
+		100% {
+			outline-color: transparent;
+			background: transparent;
+		}
+	}
+</style>

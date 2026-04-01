@@ -110,6 +110,15 @@ export const tasksStore = {
 		});
 	},
 
+	async updateLabels(id: string, labelIds: string[]) {
+		const existing = await taskTable.get(id);
+		const existingMeta = (existing?.metadata as Record<string, unknown>) ?? {};
+		await taskTable.update(id, {
+			metadata: { ...existingMeta, labelIds },
+			updatedAt: new Date().toISOString(),
+		});
+	},
+
 	async reorderTasks(taskIds: string[]) {
 		for (let i = 0; i < taskIds.length; i++) {
 			await taskTable.update(taskIds[i], {

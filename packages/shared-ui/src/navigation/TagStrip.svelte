@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { Tag, Plus, X } from '@manacore/shared-icons';
+	import { dragSource } from '../dnd/drag-source';
+	import { passiveDropZone } from '../dnd/passive-drop';
+	import type { DragPayload } from '../dnd/types';
 
 	interface TagItem {
 		id: string;
@@ -17,6 +20,10 @@
 		onToggle: (tagId: string) => void;
 		/** Called when filter is cleared */
 		onClear: () => void;
+		/** Called when an item (task, card, etc.) is dropped on a tag pill */
+		onTagDrop?: (tagId: string, payload: DragPayload) => void;
+		/** Drag types accepted for drop-on-tag (default: ['task']) */
+		dropAccepts?: string[];
 		/** Link for "Tags verwalten" pill */
 		managementHref?: string;
 		/** Loading state */
@@ -34,6 +41,8 @@
 		selectedIds,
 		onToggle,
 		onClear,
+		onTagDrop,
+		dropAccepts = ['task'],
 		managementHref = '/tags',
 		loading = false,
 		showCreateButton = true,
@@ -93,6 +102,16 @@
 					onclick={() => onToggle(tag.id)}
 					title={tag.name}
 					style="--tag-color: {tag.color || '#8b5cf6'}"
+					use:dragSource={{
+						type: 'tag',
+						data: () => ({ id: tag.id, name: tag.name, color: tag.color || '#8b5cf6' }),
+					}}
+					use:passiveDropZone={{
+						accepts: dropAccepts,
+						onDrop: (payload) => onTagDrop?.(tag.id, payload),
+						highlightClass: 'tag-drop-highlight',
+						disabled: !onTagDrop,
+					}}
 				>
 					<span class="tag-dot"></span>
 					<span class="tag-name">{tag.name}</span>
@@ -341,6 +360,45 @@
 		font-size: 0.875rem;
 		color: #8b5cf6;
 		font-weight: 500;
+	}
+
+	/* DnD: Tag is being dragged */
+	:global(.tag-pill.mana-drag-source-active) {
+		opacity: 0.5;
+		transform: scale(0.95) !important;
+	}
+
+	/* DnD: Item hovering over tag pill */
+	.tag-drop-highlight {
+		transform: scale(1.15) !important;
+		background: var(--tag-color) !important;
+		border-color: var(--tag-color) !important;
+		box-shadow: 0 0 16px color-mix(in srgb, var(--tag-color) 40%, transparent) !important;
+	}
+
+	.tag-drop-highlight .tag-dot {
+		background-color: white !important;
+	}
+
+	.tag-drop-highlight .tag-name {
+		color: white !important;
+	}
+
+	/* DnD: Success flash after drop */
+	:global(.tag-pill.mana-passive-zone-success) {
+		animation: tag-drop-success 400ms ease-out;
+	}
+
+	@keyframes tag-drop-success {
+		0% {
+			transform: scale(1.2);
+		}
+		50% {
+			transform: scale(0.95);
+		}
+		100% {
+			transform: scale(1);
+		}
 	}
 
 	/* Responsive */
