@@ -7,7 +7,14 @@
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { authMiddleware, healthRoute, errorHandler, notFoundHandler } from '@manacore/shared-hono';
+import {
+	authMiddleware,
+	healthRoute,
+	errorHandler,
+	notFoundHandler,
+	rateLimitMiddleware,
+} from '@manacore/shared-hono';
+import { z } from 'zod';
 
 const PORT = parseInt(process.env.PORT || '3003', 10);
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');
@@ -18,14 +25,25 @@ app.onError(errorHandler);
 app.notFound(notFoundHandler);
 app.use('*', cors({ origin: CORS_ORIGINS, credentials: true }));
 app.route('/health', healthRoute('calendar-server'));
+app.use('/api/*', rateLimitMiddleware({ max: 100, windowMs: 60_000 }));
 app.use('/api/*', authMiddleware());
 
 // ─── RRULE Expansion (server-only: DoS protection) ──────────
 
-app.post('/api/v1/events/expand', async (c) => {
-	const { rrule, dtstart, until, maxOccurrences } = await c.req.json();
+const ExpandSchema = z.object({
+	rrule: z.string().min(1).max(500),
+	dtstart: z.string().min(1),
+	until: z.string().optional(),
+	maxOccurrences: z.number().int().min(1).max(5000).optional(),
+});
 
-	if (!rrule || !dtstart) return c.json({ error: 'rrule and dtstart required' }, 400);
+app.post('/api/v1/events/expand', async (c) => {
+	const parsed = ExpandSchema.safeParse(await c.req.json());
+	if (!parsed.success) {
+		return c.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, 400);
+	}
+
+	const { rrule, dtstart, until, maxOccurrences } = parsed.data;
 
 	const max = Math.min(maxOccurrences || 365, 5000);
 
