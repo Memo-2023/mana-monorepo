@@ -42,10 +42,16 @@
 | 25 | **playground** | index (stateless) | 1 route (LLM chat) | **Done** |
 | — | **guides** | index (static) | 1 route (guide listing) | **Done** |
 
+### Abgeschlossene Phasen
+
+- **Phase 0:** Vorbereitung (Struktur, Namespaces, Table-Kollisionen)
+- **Phase 1:** Fundament (Unified Dexie-DB, SyncEngine-Map, SvelteKit-App)
+- **Phase 2:** Alle 26 Module migriert (collections, types, queries, stores, routes)
+- **Phase 3:** Split-Screen (Svelte-Komponenten statt iFrame, Registry, AppView pro Modul)
+- **Phase 4:** Dashboard-Widgets (10 Cross-App-Widgets mit direkten Dexie-Queries)
+
 ### Offene Phasen
 
-- **Phase 3:** Split-Screen ohne iFrame — nicht begonnen
-- **Phase 4:** Dashboard-Widgets — nicht begonnen
 - **Phase 5:** Infrastruktur-Anpassungen (Docker, Cloudflare, CORS) — nicht begonnen
 - **Phase 6:** Aufräumen (alte Apps archivieren) — nicht begonnen
 - **Phase 7:** local-store Package anpassen — nicht begonnen
