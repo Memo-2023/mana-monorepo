@@ -163,6 +163,25 @@ docker logs -f manacore-chat-backend  # Live-Logs
 Zeigt probe_success und probe_duration_seconds aller Dienste via Blackbox Exporter (Port 9115).
 Alerts: WebAppDown (2 min), APIDown (1 min), InfraToolDown (3 min), GPUServiceDown (5 min), SlowHTTPResponse (5 min > 5s).
 
+### Public Status Page (status.mana.how)
+
+Statische HTML-Seite, die alle 60 Sekunden vom Container `mana-status-gen` neu generiert wird.
+
+| Komponente | Pfad |
+|---|---|
+| Generator-Script | `scripts/generate-status-page.sh` |
+| Docker-Service | `status-page-gen` in `docker-compose.macmini.yml` |
+| Output | `/Volumes/ManaData/landings/status/index.html` + `status.json` |
+| Nginx-Config | `docker/nginx/landings.conf` → `status.mana.how` |
+
+**Datenquellen:**
+- **Service-Uptime:** VictoriaMetrics via Blackbox Exporter (`probe_success`, `probe_duration_seconds`)
+- **App Release Tiers:** Automatisch aus `packages/shared-branding/src/mana-apps.ts` geparst (per awk, read-only Volume-Mount). Zeigt welche Apps in welchem Tier (founder/alpha/beta/public) sind.
+
+**Automatische Aktualisierung:** Änderungen an `requiredTier` in `mana-apps.ts` werden nach dem nächsten `git pull` auf dem Server automatisch beim nächsten 60s-Refresh auf der Statusseite sichtbar — kein Container-Restart nötig, da die Datei live gemountet ist.
+
+**`status.json`** wird parallel generiert und enthält Service-Status + Tier-Daten als JSON (genutzt von ManaScore Live-Badges).
+
 ### Service Management
 
 ```bash

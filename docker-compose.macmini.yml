@@ -172,7 +172,7 @@ services:
       mc mb --ignore-existing myminio/manacore-storage;
       mc mb --ignore-existing myminio/picture-storage;
       mc mb --ignore-existing myminio/chat-storage;
-      mc mb --ignore-existing myminio/manadeck-storage;
+      mc mb --ignore-existing myminio/cards-storage;
       mc mb --ignore-existing myminio/presi-storage;
       mc mb --ignore-existing myminio/calendar-storage;
       mc mb --ignore-existing myminio/contacts-storage;
@@ -276,7 +276,7 @@ services:
       SMTP_PASS: ${SMTP_PASSWORD}
       SYNAPSE_OIDC_CLIENT_SECRET: ${SYNAPSE_OIDC_CLIENT_SECRET:-}
       MAX_DAILY_SIGNUPS: ${MAX_DAILY_SIGNUPS:-0}
-      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://inventar.mana.how,https://link.mana.how,https://manadeck.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://times.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
+      CORS_ORIGINS: https://mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://docs.mana.how,https://element.mana.how,https://inventar.mana.how,https://link.mana.how,https://cards.mana.how,https://matrix.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://playground.mana.how,https://presi.mana.how,https://questions.mana.how,https://skilltree.mana.how,https://storage.mana.how,https://times.mana.how,https://todo.mana.how,https://traces.mana.how,https://zitare.mana.how
     ports:
       - "3001:3001"
     healthcheck:
@@ -310,7 +310,7 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_CREDITS_WEBHOOK_SECRET:-}
       BASE_URL: https://credits.mana.how
-      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://picture.mana.how,https://todo.mana.how,https://zitare.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://manadeck.mana.how,https://presi.mana.how,https://storage.mana.how,https://nutriphi.mana.how,https://planta.mana.how,https://mukke.mana.how,https://context.mana.how,https://photos.mana.how,https://questions.mana.how,https://calc.mana.how
+      CORS_ORIGINS: https://mana.how,https://chat.mana.how,https://picture.mana.how,https://todo.mana.how,https://zitare.mana.how,https://calendar.mana.how,https://clock.mana.how,https://contacts.mana.how,https://cards.mana.how,https://presi.mana.how,https://storage.mana.how,https://nutriphi.mana.how,https://planta.mana.how,https://mukke.mana.how,https://context.mana.how,https://photos.mana.how,https://questions.mana.how,https://calc.mana.how
     ports:
       - "3002:3002"
     healthcheck:
@@ -341,7 +341,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_user
       MANA_CORE_AUTH_URL: http://mana-auth:3001
       MANA_CORE_SERVICE_KEY: ${MANA_CORE_SERVICE_KEY}
-      CORS_ORIGINS: https://mana.how,https://calc.mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://manadeck.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
+      CORS_ORIGINS: https://mana.how,https://calc.mana.how,https://calendar.mana.how,https://chat.mana.how,https://clock.mana.how,https://contacts.mana.how,https://context.mana.how,https://cards.mana.how,https://mukke.mana.how,https://nutriphi.mana.how,https://photos.mana.how,https://picture.mana.how,https://planta.mana.how,https://presi.mana.how,https://questions.mana.how,https://storage.mana.how,https://todo.mana.how,https://zitare.mana.how
     ports:
       - "3062:3062"
     healthcheck:
@@ -799,7 +799,7 @@ services:
       MATRIX_CONTACTS_BOT_TOKEN: ${MATRIX_CONTACTS_BOT_TOKEN:-}
       MATRIX_CONTACTS_BOT_ROOMS: ${MATRIX_CONTACTS_BOT_ROOMS:-}
       MATRIX_CHAT_BOT_TOKEN: ${MATRIX_CHAT_BOT_TOKEN:-}
-      MATRIX_MANADECK_BOT_TOKEN: ${MATRIX_MANADECK_BOT_TOKEN:-}
+      MATRIX_CARDS_BOT_TOKEN: ${MATRIX_CARDS_BOT_TOKEN:-}
       MATRIX_NUTRIPHI_BOT_TOKEN: ${MATRIX_NUTRIPHI_BOT_TOKEN}
       MATRIX_NUTRIPHI_BOT_ROOMS: ${MATRIX_NUTRIPHI_BOT_ROOMS:-}
       MATRIX_PICTURE_BOT_TOKEN: ${MATRIX_PICTURE_BOT_TOKEN:-}
@@ -1082,20 +1082,20 @@ services:
       retries: 3
       start_period: 45s
 
-  manadeck-web:
+  cards-web:
     build:
       context: .
-      dockerfile: apps/manadeck/apps/web/Dockerfile
-    image: manadeck-web:local
-    container_name: mana-app-manadeck-web
+      dockerfile: apps/cards/apps/web/Dockerfile
+    image: cards-web:local
+    container_name: mana-app-cards-web
     restart: always
     mem_limit: 128m
     environment:
       NODE_ENV: production
       PORT: 5023
-      PUBLIC_BACKEND_URL: http://manadeck-backend:3036
+      PUBLIC_BACKEND_URL: http://cards-backend:3036
       PUBLIC_MANA_CORE_AUTH_URL: http://mana-auth:3001
-      PUBLIC_BACKEND_URL_CLIENT: https://manadeck-api.mana.how
+      PUBLIC_BACKEND_URL_CLIENT: https://cards-api.mana.how
       PUBLIC_MANA_CORE_AUTH_URL_CLIENT: https://auth.mana.how
     ports:
       - "5023:5023"
@@ -1808,6 +1808,7 @@ services:
       OUTPUT_FILE: /output/index.html
     volumes:
       - ./scripts/generate-status-page.sh:/generate.sh:ro
+      - ./packages/shared-branding/src/mana-apps.ts:/mana-apps.ts:ro
       - /Volumes/ManaData/landings/status:/output
     command:
       - sh

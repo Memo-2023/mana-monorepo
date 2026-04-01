@@ -4,7 +4,11 @@
 # Läuft in einem Alpine-Container im Docker-Netz (http://victoriametrics:9090)
 # oder auf dem Host (http://localhost:9090).
 #
-# Ausgabe: /output/index.html (gemountet als /Volumes/ManaData/landings/status/)
+# Datenquellen:
+#   - Service-Uptime: Blackbox Exporter via VictoriaMetrics
+#   - App Release Tiers: Automatisch aus mana-apps.ts geparst (Volume-Mount)
+#
+# Ausgabe: /output/index.html + /output/status.json
 
 set -eu
 
@@ -135,6 +139,97 @@ else
 fi
 
 TIMESTAMP="$(date -u '+%d. %B %Y, %H:%M Uhr UTC')"
+
+# ── App Release Tiers (automatisch aus mana-apps.ts) ────────────────────────
+# Gemountet als /mana-apps.ts (read-only) im Container.
+# Format je Zeile: name|tier|status
+
+MANA_APPS_TS="${MANA_APPS_TS:-/mana-apps.ts}"
+
+if [ -f "$MANA_APPS_TS" ]; then
+  TIER_APPS="$(awk '
+    /^export const MANA_APPS/  { inside=1; next }
+    /^];/                      { inside=0 }
+    !inside                    { next }
+    /^\t\{/                    { name=""; tier=""; st=""; archived=0 }
+    /^\t\tname:/               { gsub(/.*name:[[:space:]]*'\''/, ""); gsub(/'\''.*/, ""); name=$0 }
+    /^\t\trequiredTier:/       { gsub(/.*requiredTier:[[:space:]]*'\''/, ""); gsub(/'\''.*/, ""); tier=$0 }
+    /^\t\tstatus:/             { gsub(/.*status:[[:space:]]*'\''/, ""); gsub(/'\''.*/, ""); st=$0 }
+    /^\t\tarchived:[[:space:]]*true/ { archived=1 }
+    /^\t\},/                   { if (name != "" && tier != "" && archived == 0) print name "|" tier "|" st }
+  ' "$MANA_APPS_TS")"
+else
+  echo "$(date '+%H:%M:%S') WARNUNG: $MANA_APPS_TS nicht gefunden — Tier-Sektion wird übersprungen"
+  TIER_APPS=""
+fi
+
+render_tier_rows() {
+  tier="$1"
+  echo "$TIER_APPS" | while IFS='|' read -r name t status; do
+    [ -z "$name" ] && continue
+    [ "$t" != "$tier" ] && continue
+    case "$status" in
+      published)    status_class="published"; status_label="Published" ;;
+      beta)         status_class="beta-status"; status_label="Beta" ;;
+      development)  status_class="dev-status"; status_label="Development" ;;
+      planning)     status_class="plan-status"; status_label="Planned" ;;
+      *)            status_class="dev-status"; status_label="$status" ;;
+    esac
+    printf '<tr><td class="name">%s</td><td class="status-cell"><span class="badge %s">%s</span></td></tr>\n' \
+      "$name" "$status_class" "$status_label"
+  done
+}
+
+count_tier() {
+  tier="$1"
+  echo "$TIER_APPS" | grep -c "|${tier}|" || echo "0"
+}
+
+tier_founder_count="$(count_tier founder)"
+tier_alpha_count="$(count_tier alpha)"
+tier_beta_count="$(count_tier beta)"
+tier_public_count="$(count_tier public)"
+
+render_tier_section() {
+  [ -z "$TIER_APPS" ] && return
+  cat << TIEREOF
+  <div class="section">
+    <div class="section-header">
+      <h2>App Release Tiers</h2>
+      <span class="fraction">${tier_public_count} public · ${tier_beta_count} beta · ${tier_alpha_count} alpha · ${tier_founder_count} founder</span>
+    </div>
+    <div class="tier-grid">
+      <div class="tier-card tier-founder">
+        <div class="tier-card-header">
+          <h3>Founder</h3>
+          <span class="tier-count">${tier_founder_count} Apps</span>
+        </div>
+        <table>
+$(render_tier_rows founder)
+        </table>
+      </div>
+      <div class="tier-card tier-alpha">
+        <div class="tier-card-header">
+          <h3>Alpha</h3>
+          <span class="tier-count">${tier_alpha_count} Apps</span>
+        </div>
+        <table>
+$(render_tier_rows alpha)
+        </table>
+      </div>
+      <div class="tier-card tier-beta">
+        <div class="tier-card-header">
+          <h3>Beta</h3>
+          <span class="tier-count">${tier_beta_count} Apps</span>
+        </div>
+        <table>
+$(render_tier_rows beta)
+        </table>
+      </div>
+    </div>
+  </div>
+TIEREOF
+}
 
 # ── HTML generieren ──────────────────────────────────────────────────────────
 
@@ -275,6 +370,34 @@ cat > "${OUTPUT}.tmp" << HTMLEOF
 
     .no-data { color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
 
+    /* ── Tier Section ── */
+    .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .tier-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .tier-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+    }
+    .tier-card-header h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+    .tier-card-header .tier-count { font-size: 12px; color: var(--muted); }
+    .tier-card table { border: none; border-radius: 0; }
+    .tier-card tr:last-child { border-bottom: none; }
+    .tier-card td { padding: 8px 16px; }
+    .tier-card .name { font-size: 14px; }
+
+    .tier-founder .tier-card-header { background: rgba(168,85,247,.08); }
+    .tier-founder .tier-card-header h3 { color: #a855f7; }
+    .tier-alpha .tier-card-header { background: rgba(245,158,11,.08); }
+    .tier-alpha .tier-card-header h3 { color: #f59e0b; }
+    .tier-beta .tier-card-header { background: rgba(59,130,246,.08); }
+    .tier-beta .tier-card-header h3 { color: #3b82f6; }
+    .tier-public .tier-card-header { background: rgba(34,197,94,.08); }
+    .tier-public .tier-card-header h3 { color: var(--green); }
+
+    .badge.published    { background: rgba(34,197,94,.12); color: var(--green); }
+    .badge.beta-status  { background: rgba(59,130,246,.12); color: #3b82f6; }
+    .badge.dev-status   { background: rgba(245,158,11,.12); color: #f59e0b; }
+    .badge.plan-status  { background: rgba(102,102,102,.15); color: var(--muted); }
+
     /* ── Footer ── */
     footer {
       margin-top: 40px;
@@ -357,6 +480,8 @@ $(render_rows blackbox-gpu)
     </table>
   </div>
 
+$(render_tier_section)
+
   <footer>
     <p>Powered by <a href="https://mana.how">ManaCore</a> · Metriken via Prometheus Blackbox Exporter</p>
   </footer>
@@ -374,10 +499,22 @@ echo "$(date '+%H:%M:%S') Status-Seite generiert → $OUTPUT (${total_up}/${tota
 JSON_OUTPUT="$(dirname "$OUTPUT")/status.json"
 TIMESTAMP_ISO="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
+# Tier-Daten als JSON-Array für jq
+TIER_JSON="[]"
+if [ -n "$TIER_APPS" ]; then
+  TIER_JSON="$(echo "$TIER_APPS" | awk -F'|' '
+    BEGIN { printf "[" }
+    NR>1  { printf "," }
+    { printf "{\"name\":\"%s\",\"tier\":\"%s\",\"status\":\"%s\"}", $1, $2, $3 }
+    END   { printf "]" }
+  ')"
+fi
+
 echo "$SUCCESS_JSON" | jq \
   --arg ts "$TIMESTAMP_ISO" \
   --argjson total_up "$total_up" \
   --argjson total_all "$total_all" \
+  --argjson tiers "$TIER_JSON" \
   '{
     updated: $ts,
     summary: { up: $total_up, total: $total_all },
@@ -394,7 +531,8 @@ echo "$SUCCESS_JSON" | jq \
         ),
         value: (.value[1] == "1")
       }) | from_entries
-    )
+    ),
+    tiers: ($tiers | group_by(.tier) | map({ key: .[0].tier, value: map({name, status}) }) | from_entries)
   }' > "${JSON_OUTPUT}.tmp" && mv "${JSON_OUTPUT}.tmp" "$JSON_OUTPUT"
 
 echo "$(date '+%H:%M:%S') status.json generiert → $JSON_OUTPUT"
