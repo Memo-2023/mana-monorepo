@@ -9,6 +9,8 @@ import type {
 import type { ContactReference, ContactOrManual } from '@manacore/shared-types';
 import { format } from 'date-fns';
 import { contactsStore } from '$lib/stores/contacts.svelte';
+import { reminderCollection, type LocalReminder } from '$lib/data/local-store';
+import { remindersStore } from '$lib/stores/reminders.svelte';
 
 /**
  * Shared composable for task form state and logic.
@@ -31,6 +33,7 @@ export function useTaskForm() {
 	let funRating = $state<number | null>(null);
 	let assignee = $state<ContactOrManual[]>([]);
 	let involvedContacts = $state<ContactOrManual[]>([]);
+	let reminderMinutes = $state<number | null>(null);
 
 	// UI state
 	let showDeleteConfirm = $state(false);
@@ -59,10 +62,35 @@ export function useTaskForm() {
 		involvedContacts = task.metadata?.involvedContacts || [];
 		showDeleteConfirm = false;
 
+		// Load existing reminder for this task
+		reminderMinutes = null;
+		reminderCollection.getAll().then((all) => {
+			const existing = all.find((r) => r.taskId === task.id);
+			if (existing) reminderMinutes = existing.minutesBefore;
+		});
+
 		// Check contacts availability
 		contactsStore.checkAvailability().then((available) => {
 			contactsAvailable = available;
 		});
+	}
+
+	/**
+	 * Persist reminder changes (create/delete based on form state).
+	 * Called after saving the task.
+	 */
+	async function persistReminder(taskId: string) {
+		const all = await reminderCollection.getAll();
+		const existing = all.find((r) => r.taskId === taskId);
+
+		if (reminderMinutes === null && existing) {
+			await remindersStore.deleteReminder(existing.id);
+		} else if (reminderMinutes !== null && !existing) {
+			await remindersStore.createReminder(taskId, reminderMinutes);
+		} else if (reminderMinutes !== null && existing && existing.minutesBefore !== reminderMinutes) {
+			await remindersStore.deleteReminder(existing.id);
+			await remindersStore.createReminder(taskId, reminderMinutes);
+		}
 	}
 
 	/**
@@ -199,6 +227,12 @@ export function useTaskForm() {
 		set involvedContacts(v: ContactOrManual[]) {
 			involvedContacts = v;
 		},
+		get reminderMinutes() {
+			return reminderMinutes;
+		},
+		set reminderMinutes(v: number | null) {
+			reminderMinutes = v;
+		},
 		get showDeleteConfirm() {
 			return showDeleteConfirm;
 		},
@@ -221,6 +255,7 @@ export function useTaskForm() {
 		// Functions
 		initFromTask,
 		buildUpdateInput,
+		persistReminder,
 		toContactReference,
 	};
 }

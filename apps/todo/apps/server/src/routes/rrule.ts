@@ -8,30 +8,28 @@
 
 import { Hono } from 'hono';
 import { rrulestr } from 'rrule';
-import { authMiddleware } from '../lib/auth';
+import { z } from 'zod';
 
 const rruleRoutes = new Hono();
 
-rruleRoutes.use('/*', authMiddleware());
+const NextOccurrenceSchema = z.object({
+	rrule: z.string().min(1, 'Missing rrule parameter').max(500, 'RRULE too long (max 500 chars)'),
+	recurrenceEndDate: z.string().datetime({ offset: true }).optional(),
+	after: z.string().datetime({ offset: true }).optional(),
+});
+
+const ValidateSchema = z.object({
+	rrule: z.string().min(1).max(500),
+});
 
 /** Validate an RRULE string and return the next occurrence. */
 rruleRoutes.post('/next-occurrence', async (c) => {
-	const body = await c.req.json<{
-		rrule: string;
-		recurrenceEndDate?: string;
-		after?: string;
-	}>();
-
-	const { rrule: rruleString, recurrenceEndDate, after } = body;
-
-	if (!rruleString) {
-		return c.json({ error: 'Missing rrule parameter' }, 400);
+	const parsed = NextOccurrenceSchema.safeParse(await c.req.json());
+	if (!parsed.success) {
+		return c.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, 400);
 	}
 
-	// DoS protection
-	if (rruleString.length > 500) {
-		return c.json({ error: 'RRULE too long (max 500 chars)' }, 400);
-	}
+	const { rrule: rruleString, recurrenceEndDate, after } = parsed.data;
 
 	try {
 		const rule = rrulestr(rruleString);
@@ -76,14 +74,15 @@ rruleRoutes.post('/next-occurrence', async (c) => {
 
 /** Validate an RRULE without computing next occurrence. */
 rruleRoutes.post('/validate', async (c) => {
-	const body = await c.req.json<{ rrule: string }>();
-
-	if (!body.rrule || body.rrule.length > 500) {
-		return c.json({ valid: false, error: 'Missing or too long' });
+	const parsed = ValidateSchema.safeParse(await c.req.json());
+	if (!parsed.success) {
+		return c.json({ valid: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' });
 	}
 
+	const { rrule: rruleString } = parsed.data;
+
 	try {
-		const rule = rrulestr(body.rrule);
+		const rule = rrulestr(rruleString);
 		const tenYearsFromNow = new Date();
 		tenYearsFromNow.setFullYear(tenYearsFromNow.getFullYear() + 10);
 

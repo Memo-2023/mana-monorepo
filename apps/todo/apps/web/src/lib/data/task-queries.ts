@@ -10,8 +10,10 @@ import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import {
 	taskCollection,
 	boardViewCollection,
+	reminderCollection,
 	type LocalTask,
 	type LocalBoardView,
+	type LocalReminder,
 } from './local-store';
 import type { Task } from '@todo/shared';
 import { isToday, isPast, isFuture, startOfDay, addDays } from 'date-fns';
@@ -63,6 +65,14 @@ export function useAllBoardViews() {
 		});
 		return locals;
 	}, [] as LocalBoardView[]);
+}
+
+/** All reminders, keyed by taskId. Auto-updates on any change. */
+export function useAllReminders() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await reminderCollection.getAll();
+		return locals;
+	}, [] as LocalReminder[]);
 }
 
 // ─── Pure Filter Functions (for $derived) ──────────────────

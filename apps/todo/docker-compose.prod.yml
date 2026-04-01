@@ -5,7 +5,9 @@ services:
   todo-backend:
     build:
       context: ../..
-      dockerfile: apps/todo/apps/backend/Dockerfile
+      dockerfile: docker/Dockerfile.hono-server
+      args:
+        APP: todo
     container_name: todo-backend
     restart: unless-stopped
     ports:

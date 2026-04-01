@@ -277,6 +277,7 @@
 				event.preventDefault();
 				const route = navRoutes[num - 1];
 				if (route) {
+					TodoEvents.keyboardShortcutUsed(`ctrl+${num}`);
 					goto(route);
 				}
 			}
@@ -291,6 +292,7 @@
 			!event.altKey
 		) {
 			event.preventDefault();
+			TodoEvents.keyboardShortcutUsed('f-immersive');
 			todoSettings.toggleImmersiveMode();
 		}
 	}
@@ -414,6 +416,7 @@
 			<a
 				href="#main-content"
 				class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+				data-umami-event="skip-to-content"
 			>
 				Zum Inhalt springen
 			</a>
@@ -505,6 +508,7 @@
 					onclick={handlePillNavToggle}
 					title={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
 					aria-label={isPillNavCollapsed ? 'Navigation anzeigen' : 'Navigation ausblenden'}
+					data-umami-event="pillnav-toggle"
 				>
 					{#if isPillNavCollapsed}
 						<!-- Menu icon -->

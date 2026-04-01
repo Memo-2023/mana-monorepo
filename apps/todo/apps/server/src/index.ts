@@ -12,13 +12,23 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import {
+	authMiddleware,
+	healthRoute,
+	errorHandler,
+	notFoundHandler,
+	rateLimitMiddleware,
+} from '@manacore/shared-hono';
 import { rruleRoutes } from './routes/rrule';
 import { reminderRoutes } from './routes/reminders';
 import { adminRoutes } from './routes/admin';
+import { startReminderWorker } from './lib/reminder-worker';
 
 const app = new Hono();
 
 // Middleware
+app.onError(errorHandler);
+app.notFound(notFoundHandler);
 app.use('*', logger());
 app.use(
 	'*',
@@ -29,24 +39,20 @@ app.use(
 		credentials: true,
 	})
 );
+app.route('/health', healthRoute('todo-server'));
+app.use('/api/*', rateLimitMiddleware({ max: 100, windowMs: 60_000 }));
+app.use('/api/*', authMiddleware());
 
 // Routes
 app.route('/api/v1/compute', rruleRoutes);
 app.route('/api/v1', reminderRoutes);
 app.route('/api/v1/admin', adminRoutes);
 
-// Health check
-app.get('/health', (c) =>
-	c.json({
-		status: 'ok',
-		service: 'todo-server',
-		runtime: 'bun',
-		timestamp: new Date().toISOString(),
-	})
-);
-
 // Start
 const port = Number(process.env.PORT ?? 3019);
+
+// Start background worker for reminder notifications
+startReminderWorker();
 
 console.log(`🚀 Todo server (Hono + Bun) starting on port ${port}`);
 

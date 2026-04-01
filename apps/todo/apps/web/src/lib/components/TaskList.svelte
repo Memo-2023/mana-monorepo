@@ -15,6 +15,7 @@
 		Lightning,
 		Trash,
 	} from '@manacore/shared-icons';
+	import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 	// Context menu state
 	let contextMenuVisible = $state(false);
@@ -93,6 +94,7 @@
 
 	async function handleSetPriority(taskId: string, priority: string) {
 		await tasksStore.updateTask(taskId, { priority: priority as Task['priority'] });
+		TodoEvents.priorityChanged(priority);
 	}
 
 	interface Props {

@@ -5,7 +5,7 @@
 
 import { Hono } from 'hono';
 import { eq, sql } from 'drizzle-orm';
-import { serviceAuthMiddleware } from '../lib/auth';
+import { serviceAuthMiddleware } from '@manacore/shared-hono';
 import { db, tasks, projects, reminders } from '../db';
 
 const adminRoutes = new Hono();

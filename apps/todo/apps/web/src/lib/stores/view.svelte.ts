@@ -3,6 +3,7 @@
  */
 
 import type { TaskPriority } from '@todo/shared';
+import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 export type ViewType = 'inbox' | 'today' | 'upcoming' | 'label' | 'completed' | 'search';
 export type SortBy = 'dueDate' | 'priority' | 'title' | 'createdAt' | 'order';
@@ -58,6 +59,7 @@ export const viewStore = {
 		currentView = 'inbox';
 		currentLabelId = null;
 		searchQuery = '';
+		TodoEvents.viewChanged('inbox');
 	},
 
 	/**
@@ -67,6 +69,7 @@ export const viewStore = {
 		currentView = 'today';
 		currentLabelId = null;
 		searchQuery = '';
+		TodoEvents.viewChanged('today');
 	},
 
 	/**
@@ -76,6 +79,7 @@ export const viewStore = {
 		currentView = 'upcoming';
 		currentLabelId = null;
 		searchQuery = '';
+		TodoEvents.viewChanged('upcoming');
 	},
 
 	/**
@@ -85,6 +89,7 @@ export const viewStore = {
 		currentView = 'label';
 		currentLabelId = labelId;
 		searchQuery = '';
+		TodoEvents.viewChanged('label');
 	},
 
 	/**
@@ -94,6 +99,7 @@ export const viewStore = {
 		currentView = 'completed';
 		currentLabelId = null;
 		searchQuery = '';
+		TodoEvents.viewChanged('completed');
 	},
 
 	/**
@@ -103,6 +109,7 @@ export const viewStore = {
 		currentView = 'search';
 		currentLabelId = null;
 		searchQuery = query;
+		TodoEvents.viewChanged('search');
 	},
 
 	/**
@@ -139,6 +146,7 @@ export const viewStore = {
 	 */
 	setFilterPriorities(priorities: TaskPriority[]) {
 		filterPriorities = priorities;
+		if (priorities.length > 0) TodoEvents.filterUsed('priority');
 	},
 
 	/**
@@ -146,6 +154,7 @@ export const viewStore = {
 	 */
 	setFilterLabelIds(ids: string[]) {
 		filterLabelIds = ids;
+		if (ids.length > 0) TodoEvents.filterUsed('label');
 	},
 
 	/**
@@ -153,6 +162,7 @@ export const viewStore = {
 	 */
 	setFilterSearchQuery(query: string) {
 		filterSearchQuery = query;
+		if (query.trim()) TodoEvents.filterUsed('search');
 	},
 
 	/**

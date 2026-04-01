@@ -5,6 +5,7 @@
 	import { MagnifyingGlass, Plus, CaretLeft, Check } from '@manacore/shared-icons';
 	import { tagMutations } from '@manacore/shared-stores';
 	import type { Tag } from '@manacore/shared-tags';
+	import { TodoEvents } from '@manacore/shared-utils/analytics';
 
 	// Live tags from layout context
 	const tagsCtx: { readonly value: Tag[] } = getContext('tags');
@@ -56,6 +57,7 @@
 		isCreating = true;
 		try {
 			await tagMutations.createTag({ name: newTagName.trim(), color: newTagColor });
+			TodoEvents.labelCreated();
 			newTagName = '';
 			newTagColor = '#8b5cf6';
 		} catch (e) {
@@ -137,7 +139,7 @@
 <div class="page-container">
 	<!-- Header -->
 	<header class="header">
-		<a href="/" class="back-button" aria-label="Zurück">
+		<a href="/" class="back-button" aria-label="Zurück" data-umami-event="tags-back-nav">
 			<CaretLeft size={20} weight="bold" />
 		</a>
 		<h1 class="title">Tags</h1>

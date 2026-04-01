@@ -7,12 +7,9 @@
 
 import { Hono } from 'hono';
 import { eq, and, asc } from 'drizzle-orm';
-import { authMiddleware } from '../lib/auth';
 import { db, reminders, tasks } from '../db';
 
 const reminderRoutes = new Hono();
-
-reminderRoutes.use('/*', authMiddleware());
 
 /** List reminders for a task. */
 reminderRoutes.get('/tasks/:taskId/reminders', async (c) => {

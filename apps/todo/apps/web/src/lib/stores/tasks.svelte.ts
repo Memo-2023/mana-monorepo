@@ -49,6 +49,7 @@ export const tasksStore = {
 
 				const inserted = await taskCollection.insert(newLocal);
 				TodoEvents.taskCreated(!!data.dueDate);
+				if (data.recurrenceRule) TodoEvents.recurringTaskCreated(data.recurrenceRule);
 				return toTask(inserted);
 			},
 			'Failed to create task'
@@ -80,6 +81,11 @@ export const tasksStore = {
 			async () => {
 				const updated = await taskCollection.update(id, data as Partial<LocalTask>);
 				if (updated) {
+					if (data.priority !== undefined) TodoEvents.priorityChanged(data.priority);
+					if (data.dueDate !== undefined) TodoEvents.dueDateSet();
+					if (data.recurrenceRule !== undefined && data.recurrenceRule) {
+						TodoEvents.recurringTaskCreated(data.recurrenceRule);
+					}
 					return toTask(updated);
 				}
 			},
@@ -184,6 +190,7 @@ export const tasksStore = {
 				for (let i = 0; i < taskIds.length; i++) {
 					await taskCollection.update(taskIds[i], { order: i } as Partial<LocalTask>);
 				}
+				TodoEvents.taskReordered();
 			},
 			'Failed to reorder tasks',
 			{ rethrow: false }
