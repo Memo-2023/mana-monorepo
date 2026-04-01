@@ -17,6 +17,8 @@ import { creditRoutes } from './routes/credits';
 import { internalRoutes } from './routes/internal';
 import { settingsRoutes } from './routes/settings';
 import { cleanupRoutes } from './routes/cleanup';
+import { meetingRoutes } from './routes/meetings';
+import { meetingWebhookRoutes } from './routes/meetings-webhooks';
 import { COSTS } from './lib/credits';
 
 const app = new Hono();
@@ -68,6 +70,9 @@ app.route('/api/v1/internal', internalRoutes);
 // Cleanup uses internal API key
 app.route('/api/v1/cleanup', cleanupRoutes);
 
+// Meeting bot webhooks — HMAC-verified, no JWT
+app.route('/meetings/webhooks', meetingWebhookRoutes);
+
 // ── Authenticated routes ───────────────────────────────────────────────────────
 
 app.use('/api/v1/*', authMiddleware());
@@ -77,6 +82,7 @@ app.route('/api/v1/spaces', spaceRoutes);
 app.route('/api/v1/invites', inviteRoutes);
 app.route('/api/v1/credits', creditRoutes);
 app.route('/api/v1/settings', settingsRoutes);
+app.route('/api/v1/meetings', meetingRoutes);
 
 // ── Start ──────────────────────────────────────────────────────────────────────
 
