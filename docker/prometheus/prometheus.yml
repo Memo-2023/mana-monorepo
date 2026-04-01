@@ -203,6 +203,15 @@ scrape_configs:
     metrics_path: '/health'
     scrape_interval: 30s
 
+  # GPU: Video Generation (LTX-Video)
+  - job_name: 'gpu-video-gen'
+    static_configs:
+      - targets: ['192.168.178.11:3026']
+        labels:
+          instance: 'gpu-server'
+    metrics_path: '/health'
+    scrape_interval: 30s
+
   # ============================================
   # Go Infrastructure Services
   # ============================================
@@ -339,6 +348,7 @@ scrape_configs:
           - https://gpu-stt.mana.how
           - https://gpu-tts.mana.how
           - https://gpu-img.mana.how
+          - https://gpu-video.mana.how
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

@@ -119,6 +119,8 @@ ingress:
     service: http://192.168.178.11:3022
   - hostname: gpu-img.mana.how
     service: http://192.168.178.11:3023
+  - hostname: gpu-video.mana.how
+    service: http://192.168.178.11:3026
   - hostname: gpu-ollama.mana.how
     service: http://192.168.178.11:11434
 

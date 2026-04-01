@@ -124,6 +124,7 @@ New-NetFirewallRule -DisplayName "Mana-STT" -Direction Inbound -LocalPort 3020 -
 New-NetFirewallRule -DisplayName "Mana-TTS" -Direction Inbound -LocalPort 3022 -Protocol TCP -Action Allow
 New-NetFirewallRule -DisplayName "Mana-Image-Gen" -Direction Inbound -LocalPort 3023 -Protocol TCP -Action Allow
 New-NetFirewallRule -DisplayName "Mana-LLM" -Direction Inbound -LocalPort 3025 -Protocol TCP -Action Allow
+New-NetFirewallRule -DisplayName "Mana-Video-Gen" -Direction Inbound -LocalPort 3026 -Protocol TCP -Action Allow
 ```
 
 ---
@@ -459,6 +460,7 @@ Internet → Cloudflare → Mac Mini (gpu-proxy.py) → GPU Server (LAN)
 | mana-stt | `https://gpu-stt.mana.how` |
 | mana-tts | `https://gpu-tts.mana.how` |
 | mana-image-gen | `https://gpu-img.mana.how` |
+| mana-video-gen | `https://gpu-video.mana.how` |
 | Ollama | `https://gpu-ollama.mana.how` |
 
 ```bash
@@ -484,6 +486,12 @@ curl -X POST https://gpu-img.mana.how/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt":"A cat","width":1024,"height":1024}'
 
+# Video Generation (LTX-Video)
+curl https://gpu-video.mana.how/health
+curl -X POST https://gpu-video.mana.how/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Ocean waves crashing on rocks","width":704,"height":480}'
+
 # Ollama direkt
 curl https://gpu-ollama.mana.how/api/tags
 ```
@@ -497,6 +505,7 @@ curl http://192.168.178.11:3025/health   # mana-llm
 curl http://192.168.178.11:3020/health   # mana-stt
 curl http://192.168.178.11:3022/health   # mana-tts
 curl http://192.168.178.11:3023/health   # mana-image-gen
+curl http://192.168.178.11:3026/health   # mana-video-gen
 curl http://192.168.178.11:11434/api/tags # Ollama
 ```
 
@@ -606,6 +615,7 @@ GPU Server (healthcheck.py → log-shipper.py)
 | GPU STT | `gpu-stt` | 3020 (`/health`) |
 | GPU TTS | `gpu-tts` | 3022 (`/health`) |
 | GPU Image Gen | `gpu-image-gen` | 3023 (`/health`) |
+| GPU Video Gen | `gpu-video-gen` | 3026 (`/health`) |
 
 ---
 

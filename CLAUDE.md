@@ -183,6 +183,7 @@ manacore-monorepo/
 │   ├── mana-media/          # Media platform: CAS, thumbnails (Hono + Bun)
 │   ├── mana-llm/            # LLM abstraction (Python/FastAPI)
 │   ├── mana-image-gen/      # AI image generation with FLUX (Python/FastAPI)
+│   ├── mana-video-gen/      # AI video generation with LTX-Video (Python/FastAPI)
 │   ├── mana-stt/            # Speech-to-text (Python/FastAPI)
 │   ├── mana-tts/            # Text-to-speech (Python/FastAPI)
 │   ├── mana-voice-bot/      # Voice assistant (Python/FastAPI)
@@ -920,6 +921,7 @@ Host mana-gpu
 - Mana STT (Speech-to-Text, Port 3020)
 - Mana TTS (Text-to-Speech, Port 3022)
 - Mana Image Gen (FLUX image generation, Port 3023)
+- Mana Video Gen (LTX-Video generation, Port 3026)
 
 For setup documentation, see **[docs/WINDOWS_GPU_SERVER_SETUP.md](docs/WINDOWS_GPU_SERVER_SETUP.md)**.
 

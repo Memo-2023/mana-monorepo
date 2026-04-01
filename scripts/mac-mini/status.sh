@@ -103,6 +103,7 @@ check_gpu_service "Ollama (LLM)" "http://192.168.178.11:11434/api/version"
 check_gpu_service "STT (Whisper)" "http://192.168.178.11:3020/health"
 check_gpu_service "TTS" "http://192.168.178.11:3022/health"
 check_gpu_service "Image Gen (FLUX)" "http://192.168.178.11:3023/health"
+check_gpu_service "Video Gen (LTX)" "http://192.168.178.11:3026/health"
 
 # ============================================
 # Network/Tunnel Status

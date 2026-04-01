@@ -264,6 +264,7 @@ check_service "GPU Ollama" "http://192.168.178.11:11434/api/version" 3
 check_service "GPU STT" "http://192.168.178.11:3020/health" 3
 check_service "GPU TTS" "http://192.168.178.11:3022/health" 3
 check_service "GPU Image Gen" "http://192.168.178.11:3023/health" 3
+check_service "GPU Video Gen" "http://192.168.178.11:3026/health" 3
 
 echo ""
 echo "Matrix:"
