@@ -3196,6 +3196,9 @@ importers:
 
   apps/memoro/apps/server:
     dependencies:
+      '@manacore/notify-client':
+        specifier: workspace:^
+        version: link:../../../../packages/notify-client
       '@manacore/shared-hono':
         specifier: workspace:*
         version: link:../../../../packages/shared-hono

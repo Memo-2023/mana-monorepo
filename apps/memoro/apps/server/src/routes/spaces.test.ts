@@ -58,6 +58,10 @@ vi.mock('../services/space', () => {
 const mockSingle = vi.fn().mockResolvedValue({ data: null, error: null });
 const mockDelete = vi.fn();
 
+vi.mock('../lib/notify', () => ({
+	sendInviteEmail: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('../lib/supabase', () => ({
 	createServiceClient: () => {
 		const chain: any = {};
@@ -283,12 +287,49 @@ describe('POST /api/v1/spaces/:id/invite', () => {
 });
 
 describe('POST /api/v1/spaces/invites/:inviteId/resend', () => {
-	it('returns success (stub)', async () => {
+	it('resends invite email', async () => {
+		mockSingle
+			.mockResolvedValueOnce({
+				data: {
+					id: 'invite-1',
+					inviter_id: 'test-user-id',
+					invitee_email: 'user@example.com',
+					space_id: 'space-1',
+					status: 'pending',
+				},
+				error: null,
+			})
+			.mockResolvedValueOnce({ data: { role: 'owner' }, error: null })
+			.mockResolvedValueOnce({ data: { name: 'Test Space' }, error: null });
+
 		const res = await post('/api/v1/spaces/invites/invite-1/resend', {});
 		expect(res.status).toBe(200);
 
 		const data = await res.json();
 		expect(data.success).toBe(true);
+	});
+
+	it('returns 404 for non-existent invite', async () => {
+		mockSingle.mockResolvedValueOnce({ data: null, error: { message: 'not found' } });
+
+		const res = await post('/api/v1/spaces/invites/nonexistent/resend', {});
+		expect(res.status).toBe(404);
+	});
+
+	it('returns 400 if invite is not pending', async () => {
+		mockSingle.mockResolvedValueOnce({
+			data: {
+				id: 'invite-1',
+				inviter_id: 'test-user-id',
+				invitee_email: 'user@example.com',
+				space_id: 'space-1',
+				status: 'accepted',
+			},
+			error: null,
+		});
+
+		const res = await post('/api/v1/spaces/invites/invite-1/resend', {});
+		expect(res.status).toBe(400);
 	});
 });
 

@@ -2,11 +2,50 @@
  * Tests for health check and public routes.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { app } from '../index';
 
+vi.mock('@manacore/shared-hono', () => ({
+	authMiddleware: () => async (c: any, next: any) => {
+		c.set('userId', 'test-user-id');
+		await next();
+	},
+	errorHandler: (err: any, c: any) => c.json({ error: err.message }, err.status ?? 500),
+	notFoundHandler: (c: any) => c.json({ error: 'Not found' }, 404),
+	validateCredits: vi.fn(),
+	consumeCredits: vi.fn(),
+	getBalance: vi.fn(),
+}));
+
+vi.mock('../services/memo', () => ({
+	createMemoFromUploadedFile: vi.fn(),
+	callAudioServer: vi.fn(),
+	handleTranscriptionCompleted: vi.fn(),
+	updateMemoProcessingStatus: vi.fn(),
+}));
+
+vi.mock('../services/headline', () => ({
+	processHeadlineForMemo: vi.fn(),
+}));
+
+vi.mock('../lib/ai', () => ({
+	generateText: vi.fn(),
+}));
+
+vi.mock('../lib/supabase', () => ({
+	createServiceClient: () => {
+		const chain: any = {};
+		chain.from = () => chain;
+		chain.select = () => chain;
+		chain.eq = () => chain;
+		chain.limit = () => Promise.resolve({ error: null });
+		chain.single = () => Promise.resolve({ data: null, error: null });
+		return chain;
+	},
+}));
+
 describe('GET /health', () => {
-	it('returns 200 with service info', async () => {
+	it('returns 200 with service info and checks', async () => {
 		const res = await app.request('/health');
 		expect(res.status).toBe(200);
 
@@ -15,6 +54,8 @@ describe('GET /health', () => {
 		expect(data.service).toBe('memoro-server');
 		expect(data.runtime).toBe('bun');
 		expect(data.timestamp).toBeDefined();
+		expect(data.checks).toBeDefined();
+		expect(data.checks.supabase).toBe('ok');
 	});
 });
 

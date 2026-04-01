@@ -59,14 +59,32 @@ app.use(
 
 // ── Health check ───────────────────────────────────────────────────────────────
 
-app.get('/health', (c) =>
-	c.json({
-		status: 'ok',
-		service: 'memoro-server',
-		runtime: 'bun',
-		timestamp: new Date().toISOString(),
-	})
-);
+app.get('/health', async (c) => {
+	const checks: Record<string, 'ok' | 'error'> = {};
+
+	// Check Supabase
+	try {
+		const { createServiceClient } = await import('./lib/supabase');
+		const supabase = createServiceClient();
+		const { error } = await supabase.from('memos').select('id').limit(1);
+		checks.supabase = error ? 'error' : 'ok';
+	} catch {
+		checks.supabase = 'error';
+	}
+
+	const allOk = Object.values(checks).every((v) => v === 'ok');
+
+	return c.json(
+		{
+			status: allOk ? 'ok' : 'degraded',
+			service: 'memoro-server',
+			runtime: 'bun',
+			timestamp: new Date().toISOString(),
+			checks,
+		},
+		allOk ? 200 : 503
+	);
+});
 
 // ── Public routes (no auth) ────────────────────────────────────────────────────
 

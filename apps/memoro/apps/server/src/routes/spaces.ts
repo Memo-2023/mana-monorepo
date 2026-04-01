@@ -19,6 +19,7 @@ import {
 	getSpaceInvites,
 	createInvite,
 } from '../services/space';
+import { sendInviteEmail } from '../lib/notify';
 
 export const spaceRoutes = new Hono<{ Variables: AuthVariables }>();
 
@@ -190,6 +191,14 @@ spaceRoutes.post('/:id/invite', async (c) => {
 
 	try {
 		const invite = await createInvite(spaceId, userId, v.data.email);
+
+		// Send invite email (fire-and-forget)
+		const space = await getSpaceDetails(spaceId, userId).catch(() => null);
+		const spaceName = (space as { name?: string } | null)?.name ?? 'a space';
+		queueMicrotask(() => {
+			sendInviteEmail({ email: v.data.email, spaceName }).catch(() => {});
+		});
+
 		return c.json({ success: true, invite }, 201);
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : String(err);
@@ -198,10 +207,49 @@ spaceRoutes.post('/:id/invite', async (c) => {
 	}
 });
 
-// POST /invites/:inviteId/resend — resend invite
+// POST /invites/:inviteId/resend — resend invite email
 spaceRoutes.post('/invites/:inviteId/resend', async (c) => {
+	const userId = c.get('userId') as string;
 	const inviteId = c.req.param('inviteId');
-	console.log(`[spaces] Resend invite ${inviteId} (email notification not implemented here)`);
+	const supabase = createServiceClient();
+
+	const { data: invite, error } = await supabase
+		.from('space_invites')
+		.select('id, inviter_id, invitee_email, space_id, status')
+		.eq('id', inviteId)
+		.single();
+
+	if (error || !invite) return c.json({ success: false, error: 'Invite not found' }, 404);
+
+	const inv = invite as {
+		inviter_id: string;
+		invitee_email: string;
+		space_id: string;
+		status: string;
+	};
+	if (inv.status !== 'pending') {
+		return c.json({ success: false, error: 'Invite is no longer pending' }, 400);
+	}
+
+	// Verify the requester is the inviter or space owner
+	const { data: member } = await supabase
+		.from('space_members')
+		.select('role')
+		.eq('space_id', inv.space_id)
+		.eq('user_id', userId)
+		.single();
+
+	const isOwner = (member as { role: string } | null)?.role === 'owner';
+	if (inv.inviter_id !== userId && !isOwner) {
+		return c.json({ success: false, error: 'Not authorized to resend this invite' }, 403);
+	}
+
+	const space = await supabase.from('spaces').select('name').eq('id', inv.space_id).single();
+
+	const spaceName = (space.data as { name?: string } | null)?.name ?? 'a space';
+
+	await sendInviteEmail({ email: inv.invitee_email, spaceName });
+
 	return c.json({ success: true, inviteId });
 });
 
