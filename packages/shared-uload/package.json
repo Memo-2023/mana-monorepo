@@ -1,0 +1,31 @@
+{
+	"name": "@manacore/shared-uload",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"svelte": "./src/index.ts",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"svelte": "./src/index.ts",
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"check": "svelte-check --tsconfig ./tsconfig.json"
+	},
+	"dependencies": {
+		"@manacore/local-store": "workspace:*",
+		"@manacore/shared-icons": "workspace:*"
+	},
+	"devDependencies": {
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"typescript": "^5.7.3"
+	},
+	"peerDependencies": {
+		"svelte": "^5.0.0"
+	}
+}
