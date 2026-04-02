@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { ManaApp, AppIconId } from '@manacore/shared-branding';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	interface Props {
 		apps: ManaApp[];

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { locale } from 'svelte-i18n';
 	import {
 		APP_URLS,
@@ -15,7 +16,10 @@
 
 	const store = createAppNavigationStore();
 
-	// Detect dev mode
+	// External apps that are hosted on separate subdomains
+	const EXTERNAL_APPS = new Set<string>(['matrix', 'arcade']);
+
+	// Detect dev mode (only needed for external app URLs)
 	const isDev =
 		typeof window !== 'undefined' &&
 		(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
@@ -72,18 +76,20 @@
 		return colors[status];
 	}
 
-	function getAppUrl(appId: AppIconId): string | undefined {
-		const urls = APP_URLS[appId];
-		if (!urls) return undefined;
-		return isDev ? urls.dev : urls.prod;
-	}
-
 	function handleAppClick(app: ManaApp) {
 		store.recordAppVisit(app.id);
 		ManaCoreEvents.appOpened(app.id);
-		const url = getAppUrl(app.id);
-		if (url) {
-			window.open(url, '_blank', 'noopener,noreferrer');
+
+		if (EXTERNAL_APPS.has(app.id)) {
+			// External apps open in a new tab
+			const urls = APP_URLS[app.id];
+			if (urls) {
+				const url = isDev ? urls.dev : urls.prod;
+				window.open(url, '_blank', 'noopener,noreferrer');
+			}
+		} else {
+			// Internal apps navigate within the unified app
+			goto(`/${app.id}`);
 		}
 	}
 

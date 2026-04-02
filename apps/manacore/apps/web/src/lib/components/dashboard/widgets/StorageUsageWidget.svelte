@@ -5,12 +5,8 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useStorageStats } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const stats = useStorageStats();
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const storageUrl = isDev ? APP_URLS.storage.dev : APP_URLS.storage.prod;
 
 	function formatSize(bytes: number): string {
 		if (bytes === 0) return '0 B';
@@ -71,12 +67,7 @@
 			</div>
 		{/if}
 
-		<a
-			href={storageUrl}
-			target="_blank"
-			rel="noopener"
-			class="mt-2 block text-center text-sm text-primary hover:underline"
-		>
+		<a href="/storage" class="mt-2 block text-center text-sm text-primary hover:underline">
 			Storage öffnen →
 		</a>
 	{/if}

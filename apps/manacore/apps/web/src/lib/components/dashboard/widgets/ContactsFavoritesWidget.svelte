@@ -8,13 +8,9 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useFavoriteContacts } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const MAX_DISPLAY = 5;
 	const contacts = useFavoriteContacts(MAX_DISPLAY);
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const contactsUrl = isDev ? APP_URLS.contacts.dev : APP_URLS.contacts.prod;
 
 	function getDisplayName(contact: any): string {
 		const parts = [contact.firstName, contact.lastName].filter(Boolean);
@@ -52,9 +48,7 @@
 				{$_('dashboard.widgets.contacts.empty')}
 			</p>
 			<a
-				href={contactsUrl}
-				target="_blank"
-				rel="noopener"
+				href="/contacts"
 				class="mt-3 inline-block rounded-lg bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20"
 			>
 				{$_('dashboard.widgets.contacts.add_favorites')}
@@ -64,9 +58,7 @@
 		<div class="space-y-2">
 			{#each contacts.value ?? [] as contact (contact.id)}
 				<a
-					href="{contactsUrl}/contacts/{contact.id}"
-					target="_blank"
-					rel="noopener"
+					href="/contacts/{contact.id}"
 					class="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-surface-hover"
 				>
 					<div
@@ -93,12 +85,7 @@
 			{/each}
 		</div>
 
-		<a
-			href={contactsUrl}
-			target="_blank"
-			rel="noopener"
-			class="mt-3 block text-center text-sm text-primary hover:underline"
-		>
+		<a href="/contacts" class="mt-3 block text-center text-sm text-primary hover:underline">
 			{$_('dashboard.widgets.contacts.view_all')} →
 		</a>
 	{/if}

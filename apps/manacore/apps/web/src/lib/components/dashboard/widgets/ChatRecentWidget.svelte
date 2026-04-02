@@ -5,12 +5,8 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useRecentConversations } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const conversations = useRecentConversations(5);
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const chatUrl = isDev ? APP_URLS.chat.dev : APP_URLS.chat.prod;
 
 	function formatTime(dateStr?: string): string {
 		if (!dateStr) return '';
@@ -46,9 +42,7 @@
 		<div class="space-y-1">
 			{#each conversations.value ?? [] as conv (conv.id)}
 				<a
-					href="{chatUrl}/chat/{conv.id}"
-					target="_blank"
-					rel="noopener"
+					href="/chat/{conv.id}"
 					class="flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
 				>
 					<div class="min-w-0 flex-1">

@@ -5,12 +5,8 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useCardsProgress } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const progress = useCardsProgress();
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const cardsUrl = isDev ? APP_URLS.cards.dev : APP_URLS.cards.prod;
 </script>
 
 <div>
@@ -49,9 +45,7 @@
 
 		{#if progress.value.dueForReview > 0}
 			<a
-				href={cardsUrl}
-				target="_blank"
-				rel="noopener"
+				href="/cards"
 				class="block rounded-lg bg-primary/10 py-2 text-center text-sm font-medium text-primary hover:bg-primary/20"
 			>
 				{progress.value.dueForReview} Karten wiederholen →

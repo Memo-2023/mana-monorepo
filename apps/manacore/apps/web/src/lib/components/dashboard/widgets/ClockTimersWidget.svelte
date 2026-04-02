@@ -5,13 +5,9 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useEnabledAlarms, useActiveTimers } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const alarms = useEnabledAlarms();
 	const timers = useActiveTimers();
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const clockUrl = isDev ? APP_URLS.clock.dev : APP_URLS.clock.prod;
 
 	const DAY_NAMES = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
@@ -87,12 +83,7 @@
 			</div>
 		{/if}
 
-		<a
-			href={clockUrl}
-			target="_blank"
-			rel="noopener"
-			class="mt-2 block text-center text-sm text-primary hover:underline"
-		>
+		<a href="/clock" class="mt-2 block text-center text-sm text-primary hover:underline">
 			Uhr öffnen →
 		</a>
 	{/if}

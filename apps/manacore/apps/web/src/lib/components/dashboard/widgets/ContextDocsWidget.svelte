@@ -5,13 +5,9 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useRecentDocuments, useSpaces } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const docs = useRecentDocuments(5);
 	const spaces = useSpaces();
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const contextUrl = isDev ? APP_URLS.context.dev : APP_URLS.context.prod;
 
 	function getSpaceName(spaceId: string): string {
 		const space = (spaces.value ?? []).find((s) => s.id === spaceId);
@@ -53,9 +49,7 @@
 		<div class="space-y-1">
 			{#each docs.value ?? [] as doc (doc.id)}
 				<a
-					href="{contextUrl}/spaces/{doc.spaceId}/documents/{doc.id}"
-					target="_blank"
-					rel="noopener"
+					href="/context/documents/{doc.id}"
 					class="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
 				>
 					<span>{typeIcons[doc.type ?? 'text'] ?? '📄'}</span>

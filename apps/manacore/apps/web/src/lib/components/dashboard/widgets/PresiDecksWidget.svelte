@@ -5,12 +5,8 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useRecentDecks } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const decks = useRecentDecks(5);
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const presiUrl = isDev ? APP_URLS.presi.dev : APP_URLS.presi.prod;
 
 	function formatDate(dateStr?: string): string {
 		if (!dateStr) return '';
@@ -41,9 +37,7 @@
 		<div class="space-y-1">
 			{#each decks.value ?? [] as deck (deck.id)}
 				<a
-					href="{presiUrl}/decks/{deck.id}"
-					target="_blank"
-					rel="noopener"
+					href="/presi/deck/{deck.id}"
 					class="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
 				>
 					<div class="min-w-0 flex-1">

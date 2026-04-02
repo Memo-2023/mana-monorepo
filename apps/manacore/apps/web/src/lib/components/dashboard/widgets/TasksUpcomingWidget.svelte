@@ -8,14 +8,10 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useUpcomingTasks } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const tasks = useUpcomingTasks(7);
 
 	const MAX_DISPLAY = 5;
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const todoUrl = isDev ? APP_URLS.todo.dev : APP_URLS.todo.prod;
 
 	const priorityColors: Record<string, string> = {
 		urgent: '#ef4444',
@@ -80,9 +76,7 @@
 		<div class="space-y-1">
 			{#each displayedTasks as task (task.id)}
 				<a
-					href={todoUrl}
-					target="_blank"
-					rel="noopener"
+					href="/todo"
 					class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-hover"
 				>
 					<!-- Priority dot -->
@@ -115,9 +109,7 @@
 
 			{#if remainingCount > 0}
 				<a
-					href={todoUrl}
-					target="_blank"
-					rel="noopener"
+					href="/todo"
 					class="block rounded-lg py-2 text-center text-sm text-primary hover:bg-primary/5"
 				>
 					+{remainingCount} weitere

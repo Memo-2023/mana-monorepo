@@ -5,12 +5,8 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useRecentImages } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
 
 	const images = useRecentImages(6);
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const pictureUrl = isDev ? APP_URLS.picture.dev : APP_URLS.picture.prod;
 </script>
 
 <div>
@@ -36,9 +32,7 @@
 		<div class="grid grid-cols-3 gap-2">
 			{#each images.value ?? [] as image (image.id)}
 				<a
-					href="{pictureUrl}/images/{image.id}"
-					target="_blank"
-					rel="noopener"
+					href="/picture"
 					class="group relative aspect-square overflow-hidden rounded-lg bg-surface-hover"
 				>
 					{#if image.publicUrl}

@@ -25,10 +25,10 @@ Local AI image generation using **FLUX.2 klein 4B** model via flux2.c.
 # 2. Start the service
 source .venv/bin/activate
 FLUX_BINARY=/opt/flux2/flux FLUX_MODEL_DIR=/opt/flux2/model \
-  uvicorn app.main:app --host 0.0.0.0 --port 3025
+  uvicorn app.main:app --host 0.0.0.0 --port 3026
 
 # 3. Generate an image
-curl -X POST http://localhost:3025/generate \
+curl -X POST http://localhost:3026/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt": "A cat wearing sunglasses"}' | jq
 ```
@@ -87,7 +87,7 @@ GET /models
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | `3025` | Service port |
+| `PORT` | `3026` | Service port |
 | `FLUX_BINARY` | `/opt/flux2/flux` | flux2.c binary path |
 | `FLUX_MODEL_DIR` | `/opt/flux2/model` | Model weights path |
 | `DEFAULT_STEPS` | `4` | Sampling steps |

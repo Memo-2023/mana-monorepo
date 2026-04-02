@@ -4,7 +4,7 @@
 
 AI image generation microservice using FLUX.2 klein 4B model via flux2.c:
 
-- **Port**: 3025
+- **Port**: 3026
 - **Framework**: Python + FastAPI
 - **Model**: FLUX.2 klein 4B (Black Forest Labs)
 - **Backend**: flux2.c (Pure C, MPS accelerated)
@@ -26,14 +26,14 @@ AI image generation microservice using FLUX.2 klein 4B model via flux2.c:
 # Development
 source .venv/bin/activate
 FLUX_BINARY=/opt/flux2/flux FLUX_MODEL_DIR=/opt/flux2/model \
-  uvicorn app.main:app --host 0.0.0.0 --port 3025 --reload
+  uvicorn app.main:app --host 0.0.0.0 --port 3026 --reload
 
 # Production
 ../../scripts/mac-mini/setup-image-gen.sh
 
 # Test
-curl http://localhost:3025/health
-curl -X POST http://localhost:3025/generate \
+curl http://localhost:3026/health
+curl -X POST http://localhost:3026/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt": "A cat in space"}' | jq
 ```
@@ -95,7 +95,7 @@ services/mana-image-gen/
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | `3025` | Service port |
+| `PORT` | `3026` | Service port |
 | `FLUX_BINARY` | `/opt/flux2/flux` | Path to flux2.c binary |
 | `FLUX_MODEL_DIR` | `/opt/flux2/model` | Path to model weights |
 | `DEFAULT_STEPS` | `4` | Default sampling steps |
@@ -128,7 +128,7 @@ The service is designed to be used by:
 ### Example Integration (TypeScript)
 
 ```typescript
-const response = await fetch('http://localhost:3025/generate', {
+const response = await fetch('http://localhost:3026/generate', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -139,7 +139,7 @@ const response = await fetch('http://localhost:3025/generate', {
 });
 
 const result = await response.json();
-const imageUrl = `http://localhost:3025${result.image_url}`;
+const imageUrl = `http://localhost:3026${result.image_url}`;
 ```
 
 ## Dependencies

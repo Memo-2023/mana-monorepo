@@ -8,10 +8,6 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useUpcomingEvents } from '$lib/data/cross-app-queries';
-	import { APP_URLS } from '@manacore/shared-branding';
-
-	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-	const calendarUrl = isDev ? APP_URLS.calendar.dev : APP_URLS.calendar.prod;
 
 	const events = useUpcomingEvents(7);
 
@@ -94,9 +90,7 @@
 
 			{#if remainingCount > 0}
 				<a
-					href={calendarUrl}
-					target="_blank"
-					rel="noopener"
+					href="/calendar"
 					class="block rounded-lg py-2 text-center text-sm text-primary hover:bg-primary/5"
 				>
 					+{remainingCount} weitere
