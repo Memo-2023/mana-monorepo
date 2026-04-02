@@ -25,8 +25,8 @@ export function getCityCornersHelpContent(locale: string): HelpContent {
 				id: 'faq-map',
 				question: isDE ? 'Wie funktioniert die Kartenansicht?' : 'How does the map view work?',
 				answer: isDE
-					? '<p>Die interaktive Leaflet-Karte zeigt alle Orte mit farbcodierten Markern nach Kategorie:</p><ul><li><strong>Blau</strong> — Sehenswürdigkeiten</li><li><strong>Rot</strong> — Restaurants</li><li><strong>Gelb</strong> — Cafés</li><li><strong>Orange</strong> — Bars</li><li><strong>Grün</strong> — Parks und Läden</li><li>Klicke auf einen Marker für Details und Wegbeschreibung</li></ul>'
-					: '<p>The interactive Leaflet map shows all locations with color-coded markers by category:</p><ul><li><strong>Blue</strong> — Sights</li><li><strong>Red</strong> — Restaurants</li><li><strong>Yellow</strong> — Cafés</li><li><strong>Orange</strong> — Bars</li><li><strong>Green</strong> — Parks and shops</li><li>Click a marker for details and directions</li></ul>',
+					? '<p>Die Karte zeigt alle Orte mit farbcodierten Markern nach Kategorie:</p><ul><li><strong>Blau</strong> — Sehenswürdigkeiten</li><li><strong>Rot</strong> — Restaurants</li><li><strong>Gelb</strong> — Cafés</li><li><strong>Orange</strong> — Bars</li><li><strong>Grün</strong> — Parks und Läden</li><li>Wähle eine Kategorie zum Filtern der Orte</li></ul>'
+					: '<p>The map shows all locations with color-coded markers by category:</p><ul><li><strong>Blue</strong> — Sights</li><li><strong>Red</strong> — Restaurants</li><li><strong>Yellow</strong> — Cafés</li><li><strong>Orange</strong> — Bars</li><li><strong>Green</strong> — Parks and shops</li><li>Select a category to filter locations</li></ul>',
 				category: 'features',
 				order: 2,
 				language: isDE ? 'de' : 'en',
@@ -122,8 +122,8 @@ export function getCityCornersHelpContent(locale: string): HelpContent {
 				id: 'feature-map',
 				title: isDE ? 'Interaktive Karte' : 'Interactive Map',
 				description: isDE
-					? 'Leaflet-basierte Karte mit farbcodierten Markern für alle Kategorien'
-					: 'Leaflet-based map with color-coded markers for all categories',
+					? 'OpenStreetMap-Karte mit farbcodierten Markern für alle Kategorien'
+					: 'OpenStreetMap-based map with color-coded markers for all categories',
 				icon: '🗺️',
 				category: 'core',
 				highlights: isDE

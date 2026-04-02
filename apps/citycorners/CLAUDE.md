@@ -22,7 +22,7 @@ apps/citycorners/
 ### Tech Stack
 - **Data Layer:** Local-first via @manacore/local-store (Dexie.js/IndexedDB)
 - **Sync:** mana-sync (Go, WebSocket) for server synchronization
-- **Web:** SvelteKit 2, Svelte 5 runes, Tailwind 4, Leaflet maps, svelte-i18n (DE/EN), PWA
+- **Web:** SvelteKit 2, Svelte 5 runes, Tailwind 4, OpenStreetMap embeds, svelte-i18n (DE/EN), PWA
 - **Landing:** Astro 5, Tailwind 3, static site generation
 - **Auth:** mana-core-auth (JWT, guest mode supported)
 
@@ -75,7 +75,7 @@ Three IndexedDB collections managed by `@manacore/local-store`:
 | `/` | City discovery — search & browse cities |
 | `/add-city` | Create a new city (auth required) |
 | `/cities/:slug` | City home — location grid with category filters |
-| `/cities/:slug/map` | Leaflet map with color-coded markers |
+| `/cities/:slug/map` | OpenStreetMap with location list |
 | `/cities/:slug/add` | Add a location to city (auth required) |
 | `/cities/:slug/locations/:id` | Location detail with map, timeline, nearby |
 | `/cities/:slug/locations/:id/edit` | Edit location (creator only) |

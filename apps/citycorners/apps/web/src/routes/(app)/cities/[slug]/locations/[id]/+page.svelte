@@ -2,7 +2,6 @@
 	import { onMount, getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { browser } from '$app/environment';
 	import {
 		CaretLeft,
 		Check,
@@ -91,7 +90,6 @@
 	let location = $state<Location | null>(null);
 	let nearbyLocations = $state<NearbyLocation[]>([]);
 	let loading = $state(true);
-	let mapContainer: HTMLDivElement;
 	let shareSuccess = $state(false);
 	let showDeleteConfirm = $state(false);
 	let deleting = $state(false);
@@ -203,35 +201,6 @@
 		return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	}
 
-	$effect(() => {
-		if (!browser || !location || !location.latitude || !location.longitude || !mapContainer) return;
-
-		const initMap = async () => {
-			const L = await import('leaflet');
-
-			const map = L.map(mapContainer, {
-				zoomControl: false,
-				attributionControl: false,
-			}).setView([location!.latitude!, location!.longitude!], 16);
-
-			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				maxZoom: 19,
-			}).addTo(map);
-
-			const color = categoryColors[location!.category] || '#6b7280';
-			const icon = L.divIcon({
-				className: 'custom-marker',
-				html: `<div style="background:${color};width:32px;height:32px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>`,
-				iconSize: [32, 32],
-				iconAnchor: [16, 16],
-			});
-
-			L.marker([location!.latitude!, location!.longitude!], { icon }).addTo(map);
-		};
-
-		initMap();
-	});
-
 	async function handleShare() {
 		const url = window.location.href;
 		const title = location?.name || 'CityCorners';
@@ -271,7 +240,6 @@
 
 <svelte:head>
 	<title>{location?.name || 'Location'} - {city?.name || 'CityCorners'}</title>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 </svelte:head>
 
 {#if loading}
@@ -669,7 +637,15 @@
 		<!-- Map + Directions -->
 		{#if location.latitude && location.longitude}
 			<div class="overflow-hidden rounded-xl border border-border">
-				<div bind:this={mapContainer} class="h-52 w-full"></div>
+				<iframe
+					title="Map"
+					src="https://www.openstreetmap.org/export/embed.html?bbox={location.longitude -
+						0.005},{location.latitude - 0.004},{location.longitude + 0.005},{location.latitude +
+						0.004}&layer=mapnik&marker={location.latitude},{location.longitude}"
+					class="h-52 w-full border-0"
+					loading="lazy"
+					referrerpolicy="no-referrer"
+				></iframe>
 				<div class="flex divide-x divide-border border-t border-border">
 					<a
 						href="/cities/{citySlug}/map"
@@ -762,10 +738,3 @@
 		{/if}
 	</div>
 {/if}
-
-<style>
-	:global(.custom-marker) {
-		background: transparent !important;
-		border: none !important;
-	}
-</style>
