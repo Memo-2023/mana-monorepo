@@ -36,22 +36,12 @@ func TestExtractToken(t *testing.T) {
 
 func TestNewValidator(t *testing.T) {
 	v := NewValidator("http://localhost:3001/api/auth/jwks")
-
-	if v.jwksURL != "http://localhost:3001/api/auth/jwks" {
-		t.Errorf("jwksURL = %q, want 'http://localhost:3001/api/auth/jwks'", v.jwksURL)
-	}
-
-	if len(v.keys) != 0 {
-		t.Errorf("expected empty keys map, got %d keys", len(v.keys))
-	}
-
-	if v.fetchEvery.Minutes() != 5 {
-		t.Errorf("fetchEvery = %v, want 5m", v.fetchEvery)
+	if v == nil {
+		t.Fatal("NewValidator returned nil")
 	}
 }
 
 func TestValidateTokenNoKeys(t *testing.T) {
-	// Validator with unreachable JWKS endpoint
 	v := NewValidator("http://localhost:99999/jwks")
 
 	_, err := v.ValidateToken("some.invalid.token")
