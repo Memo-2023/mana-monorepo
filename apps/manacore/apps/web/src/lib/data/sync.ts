@@ -201,30 +201,39 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		try {
 			for (const tableName of channel.tables) {
 				const syncName = toSyncName(tableName);
-				const cursor = await getSyncCursor(appId, tableName);
+				let cursor = await getSyncCursor(appId, tableName);
+				let hasMore = true;
 
-				const res = await fetch(
-					`${serverUrl}/sync/${appId}/pull?collection=${encodeURIComponent(syncName)}&since=${encodeURIComponent(cursor)}`,
-					{
-						headers: {
-							Authorization: `Bearer ${token}`,
-							'X-Client-Id': clientId,
-						},
+				// Paginated pull: continue fetching until server signals no more data
+				while (hasMore) {
+					const res = await fetch(
+						`${serverUrl}/sync/${appId}/pull?collection=${encodeURIComponent(syncName)}&since=${encodeURIComponent(cursor)}`,
+						{
+							headers: {
+								Authorization: `Bearer ${token}`,
+								'X-Client-Id': clientId,
+							},
+						}
+					);
+
+					if (!res.ok) break;
+
+					const data = await res.json();
+					hasMore = data.hasMore ?? false;
+
+					if (data.serverChanges && data.serverChanges.length > 0) {
+						await applyServerChanges(appId, data.serverChanges);
 					}
-				);
 
-				if (!res.ok) continue;
-
-				const data = await res.json();
-				if (!data.serverChanges || data.serverChanges.length === 0) continue;
-
-				// Apply changes to local DB
-				await applyServerChanges(appId, data.serverChanges);
-
-				// Update cursor
-				if (data.syncedUntil) {
-					await setSyncCursor(appId, tableName, data.syncedUntil);
+					if (data.syncedUntil) {
+						cursor = data.syncedUntil;
+					} else {
+						break;
+					}
 				}
+
+				// Update cursor after all pages fetched
+				await setSyncCursor(appId, tableName, cursor);
 			}
 
 			channel.lastError = null;

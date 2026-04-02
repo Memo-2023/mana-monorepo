@@ -206,11 +206,18 @@ func (h *Handler) HandlePull(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	serverChanges, err := h.store.GetChangesSince(ctx, userID, appID, collection, since, clientID)
+	const batchLimit = 1000
+	serverChanges, err := h.store.GetChangesSince(ctx, userID, appID, collection, since, clientID, batchLimit+1)
 	if err != nil {
 		slog.Error("failed to get changes", "error", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
+	}
+
+	// Check if there are more rows than the batch limit
+	hasMore := len(serverChanges) > batchLimit
+	if hasMore {
+		serverChanges = serverChanges[:batchLimit]
 	}
 
 	responseChanges := make([]Change, 0, len(serverChanges))
@@ -245,12 +252,19 @@ func (h *Handler) HandlePull(w http.ResponseWriter, r *http.Request) {
 		responseChanges = append(responseChanges, c)
 	}
 
-	now := time.Now().UTC().Format(time.RFC3339Nano)
+	// When paginating, use last row's timestamp as cursor; otherwise now()
+	var syncedUntil string
+	if hasMore && len(serverChanges) > 0 {
+		syncedUntil = serverChanges[len(serverChanges)-1].CreatedAt.UTC().Format(time.RFC3339Nano)
+	} else {
+		syncedUntil = time.Now().UTC().Format(time.RFC3339Nano)
+	}
 
 	resp := SyncResponse{
 		ServerChanges: responseChanges,
 		Conflicts:     []SyncConflict{},
-		SyncedUntil:   now,
+		SyncedUntil:   syncedUntil,
+		HasMore:       hasMore,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

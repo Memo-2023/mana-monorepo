@@ -84,9 +84,10 @@ func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, us
 	return err
 }
 
-// GetChangesSince returns all changes for a user+app+table since a given timestamp,
+// GetChangesSince returns changes for a user+app+table since a given timestamp,
 // excluding changes from the requesting client (to avoid echo).
-func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, since, excludeClientID string) ([]ChangeRow, error) {
+// The limit parameter controls maximum rows returned (caller should pass limit+1 to detect hasMore).
+func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, since, excludeClientID string, limit int) ([]ChangeRow, error) {
 	sinceTime, err := time.Parse(time.RFC3339Nano, since)
 	if err != nil {
 		sinceTime = time.Unix(0, 0)
@@ -98,10 +99,10 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 		WHERE user_id = $1 AND app_id = $2 AND table_name = $3
 			AND created_at > $4 AND client_id != $5
 		ORDER BY created_at ASC
-		LIMIT 1000
+		LIMIT $6
 	`
 
-	rows, err := s.pool.Query(ctx, query, userID, appID, tableName, sinceTime, excludeClientID)
+	rows, err := s.pool.Query(ctx, query, userID, appID, tableName, sinceTime, excludeClientID, limit)
 	if err != nil {
 		return nil, err
 	}

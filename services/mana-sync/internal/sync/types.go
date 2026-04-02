@@ -31,6 +31,7 @@ type SyncResponse struct {
 	ServerChanges []Change       `json:"serverChanges"`
 	Conflicts     []SyncConflict `json:"conflicts"`
 	SyncedUntil   string         `json:"syncedUntil"`
+	HasMore       bool           `json:"hasMore,omitempty"`
 }
 
 // SyncConflict describes a conflict that couldn't be auto-resolved.
