@@ -72,6 +72,7 @@
 	]);
 
 	const PAGE_META: Record<string, { title: string; color: string }> = {
+		'my-profile': { title: 'Mein Profil', color: '#8B5CF6' },
 		all: { title: 'Alle Kontakte', color: '#3B82F6' },
 		favorites: { title: 'Favoriten', color: '#F59E0B' },
 		'birthday-soon': { title: 'Bald Geburtstag', color: '#EC4899' },

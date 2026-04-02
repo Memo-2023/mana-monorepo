@@ -145,10 +145,15 @@
 
 	let meta = $derived(PAGE_META[pageId]);
 
+	let selfContact = $derived(allContacts.find((c) => c.id === SELF_CONTACT_ID && !c.isArchived));
+
 	let filtered = $derived.by(() => {
 		const active = allContacts.filter((c) => !c.isArchived);
 		const byPage = active.filter(meta.filterFn);
 		const searched = searchContacts(byPage, searchQuery);
+
+		// My-profile: just show the self contact
+		if (pageId === 'my-profile') return searched;
 
 		// Birthday-soon: sort by upcoming birthday
 		if (pageId === 'birthday-soon') {
@@ -167,7 +172,14 @@
 			);
 		}
 
-		return sortContacts(searched, 'firstName');
+		// Default: sort alphabetically, pin self-contact to top
+		const sorted = sortContacts(searched, 'firstName');
+		const selfIdx = sorted.findIndex((c) => c.id === SELF_CONTACT_ID);
+		if (selfIdx > 0) {
+			const [self] = sorted.splice(selfIdx, 1);
+			sorted.unshift(self);
+		}
+		return sorted;
 	});
 
 	let groups = $derived(
@@ -215,7 +227,10 @@
 	{/snippet}
 
 	<div class="page-content">
-		{#if filtered.length === 0}
+		{#if pageId === 'my-profile' && selfContact}
+			<!-- Profile card -->
+			{@render profileCard(selfContact)}
+		{:else if filtered.length === 0}
 			<div class="empty-state">
 				<meta.icon size={28} />
 				<span>Keine Kontakte</span>
@@ -238,6 +253,51 @@
 		{/if}
 	</div>
 </PageShell>
+
+{#snippet profileCard(contact: Contact)}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="profile-card" onclick={() => onOpenContact?.(contact)}>
+		<div class="profile-avatar">
+			{#if contact.photoUrl}
+				<img src={contact.photoUrl} alt={getDisplayName(contact)} class="profile-avatar-img" />
+			{:else}
+				{getInitials(contact)}
+			{/if}
+		</div>
+		<div class="profile-name">{getDisplayName(contact)}</div>
+		{#if contact.email}
+			<div class="profile-detail">
+				<Envelope size={14} />
+				<span>{contact.email}</span>
+			</div>
+		{/if}
+		{#if contact.phone || contact.mobile}
+			<div class="profile-detail">
+				<Phone size={14} />
+				<span>{contact.mobile || contact.phone}</span>
+			</div>
+		{/if}
+		{#if contact.company}
+			<div class="profile-detail">
+				<Briefcase size={14} />
+				<span>{[contact.jobTitle, contact.company].filter(Boolean).join(' @ ')}</span>
+			</div>
+		{/if}
+		{#if contact.city}
+			<div class="profile-detail">
+				<MapPin size={14} />
+				<span>{[contact.street, contact.postalCode, contact.city].filter(Boolean).join(', ')}</span>
+			</div>
+		{/if}
+		{#if contact.birthday}
+			<div class="profile-detail">
+				<Cake size={14} />
+				<span>{contact.birthday}</span>
+			</div>
+		{/if}
+		<div class="profile-hint">Tippe zum Bearbeiten</div>
+	</div>
+{/snippet}
 
 {#snippet contactRow(contact: Contact)}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -263,6 +323,9 @@
 		<div class="contact-info">
 			<div class="contact-name-row">
 				<span class="contact-name">{getDisplayName(contact)}</span>
+				{#if contact.id === SELF_CONTACT_ID}
+					<span class="self-badge">Du</span>
+				{/if}
 				{#if contact.isFavorite}
 					<Star weight="fill" size={12} class="favorite-star" />
 				{/if}
@@ -444,5 +507,77 @@
 	}
 	.contact-row:hover .row-actions {
 		opacity: 1;
+	}
+
+	/* Self badge */
+	.self-badge {
+		font-size: 0.5625rem;
+		font-weight: 600;
+		padding: 0.0625rem 0.375rem;
+		border-radius: 9999px;
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 12%, transparent);
+		color: var(--color-primary, #8b5cf6);
+		flex-shrink: 0;
+	}
+
+	/* Profile card */
+	.profile-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 1.5rem 1rem;
+		cursor: pointer;
+		border-radius: 0.375rem;
+		transition: background 0.15s;
+	}
+	.profile-card:hover {
+		background: rgba(0, 0, 0, 0.02);
+	}
+	:global(.dark) .profile-card:hover {
+		background: rgba(255, 255, 255, 0.03);
+	}
+	.profile-avatar {
+		width: 4.5rem;
+		height: 4.5rem;
+		border-radius: 9999px;
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 12%, transparent);
+		color: var(--color-primary, #8b5cf6);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.25rem;
+		font-weight: 600;
+		overflow: hidden;
+		margin-bottom: 0.75rem;
+	}
+	.profile-avatar-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.profile-name {
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: #374151;
+		margin-bottom: 0.75rem;
+	}
+	:global(.dark) .profile-name {
+		color: #f3f4f6;
+	}
+	.profile-detail {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.8125rem;
+		color: #6b7280;
+		padding: 0.25rem 0;
+	}
+	:global(.dark) .profile-detail {
+		color: #9ca3af;
+	}
+	.profile-hint {
+		margin-top: 1rem;
+		font-size: 0.6875rem;
+		color: #9ca3af;
 	}
 </style>

@@ -2,6 +2,7 @@
 	import { _ } from 'svelte-i18n';
 	import {
 		Users,
+		User,
 		Star,
 		Cake,
 		Envelope,
@@ -21,6 +22,13 @@
 	let { onSelect, onClose, activePageIds = [] }: Props = $props();
 
 	const PAGE_OPTIONS = [
+		{
+			id: 'my-profile',
+			title: 'Mein Profil',
+			description: 'Deine eigene Kontaktkarte',
+			icon: User,
+			color: '#8B5CF6',
+		},
 		{
 			id: 'all',
 			title: 'Alle Kontakte',
