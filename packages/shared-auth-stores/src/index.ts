@@ -3,26 +3,17 @@
  *
  * Svelte 5 auth store factories for the ManaCore monorepo.
  *
- * Provides two approaches:
- * 1. createAuthStore - Generic factory that works with any auth service adapter
- * 2. createSupabaseAuthStore - Direct Supabase integration for simpler setups
+ * @example ManaCore auth store (recommended)
+ * ```ts
+ * import { createManaAuthStore } from '@manacore/shared-auth-stores';
+ * export const authStore = createManaAuthStore();
+ * ```
  *
  * @example Generic auth store with custom adapter
  * ```ts
  * import { createAuthStore } from '@manacore/shared-auth-stores';
  * import { authService } from '$lib/auth';
- * import type { AppUser } from '$lib/types';
- *
  * export const authStore = createAuthStore<AppUser>(authService);
- * ```
- *
- * @example Supabase auth store
- * ```ts
- * import { createSupabaseAuthStore } from '@manacore/shared-auth-stores';
- * import { createBrowserClient } from '@supabase/ssr';
- *
- * const getClient = () => createBrowserClient(url, key);
- * export const authStore = createSupabaseAuthStore(getClient);
  * ```
  */
 
@@ -30,11 +21,6 @@
 export { createManaAuthStore } from './createManaAuthStore.svelte';
 export type { ManaAuthStoreConfig, ManaAuthStore } from './createManaAuthStore.svelte';
 export { createAuthStore } from './createAuthStore.svelte';
-export { createSupabaseAuthStore } from './createSupabaseAuthStore.svelte';
-export type {
-	CreateSupabaseAuthStoreOptions,
-	SupabaseUser,
-} from './createSupabaseAuthStore.svelte';
 
 // Types
 export type {
