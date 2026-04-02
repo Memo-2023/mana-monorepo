@@ -5,7 +5,6 @@
 		unloadLocalLlm,
 		isLocalLlmSupported,
 		generate,
-		generateText,
 		extractJson,
 		classify,
 		MODELS,
@@ -24,6 +23,7 @@
 	let userInput = $state('');
 	let messages: { role: 'user' | 'assistant'; content: string }[] = $state([]);
 	let streamingContent = $state('');
+	let chatContainer: HTMLDivElement | undefined = $state();
 	let isGenerating = $state(false);
 	let lastLatency = $state<number | null>(null);
 	let lastTokens = $state<{ prompt: number; completion: number } | null>(null);
@@ -50,7 +50,7 @@
 			status.current.state === 'checking'
 	);
 	let progress = $derived(status.current.state === 'downloading' ? status.current.progress : null);
-	let statusText = $derived(() => {
+	let statusText = $derived.by(() => {
 		const s = status.current;
 		switch (s.state) {
 			case 'idle':
@@ -71,6 +71,15 @@
 	});
 
 	let modelInfo = $derived(MODELS[selectedModel]);
+
+	// Auto-scroll chat to bottom on new messages/streaming
+	$effect(() => {
+		messages.length;
+		streamingContent;
+		if (chatContainer) {
+			chatContainer.scrollTop = chatContainer.scrollHeight;
+		}
+	});
 
 	// --- Actions ---
 	async function handleLoad() {
@@ -258,7 +267,7 @@
 									? 'bg-red-500'
 									: 'bg-muted-foreground/30'}"
 					></div>
-					<span class="text-xs text-muted-foreground">{statusText()}</span>
+					<span class="text-xs text-muted-foreground">{statusText}</span>
 				</div>
 			</div>
 
@@ -300,7 +309,10 @@
 				/>
 
 				<!-- Messages -->
-				<div class="min-h-[300px] space-y-3 rounded-xl border border-border bg-background/50 p-4">
+				<div
+					bind:this={chatContainer}
+					class="max-h-[60vh] min-h-[300px] space-y-3 overflow-y-auto rounded-xl border border-border bg-background/50 p-4"
+				>
 					{#if messages.length === 0 && !streamingContent}
 						<div class="flex flex-col items-center justify-center py-12 text-center">
 							<div class="mb-3 rounded-full bg-primary/10 p-3">
