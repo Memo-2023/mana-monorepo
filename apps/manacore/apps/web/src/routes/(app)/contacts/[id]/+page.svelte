@@ -12,10 +12,17 @@
 		PencilSimple,
 		Envelope,
 		Phone,
+		DeviceMobile,
 		Buildings,
+		Briefcase,
 		MapPin,
 		Cake,
 		Note,
+		Globe,
+		GithubLogo,
+		LinkedinLogo,
+		TwitterLogo,
+		InstagramLogo,
 		ShareNetwork,
 	} from '@manacore/shared-icons';
 	import { ShareModal } from '@manacore/shared-uload';
@@ -44,10 +51,20 @@
 			lastName: contact.lastName,
 			email: contact.email,
 			phone: contact.phone,
+			mobile: contact.mobile,
 			company: contact.company,
 			jobTitle: contact.jobTitle,
+			street: contact.street,
+			city: contact.city,
+			postalCode: contact.postalCode,
+			country: contact.country,
 			notes: contact.notes,
 			birthday: contact.birthday,
+			website: contact.website,
+			linkedin: contact.linkedin,
+			twitter: contact.twitter,
+			instagram: contact.instagram,
+			github: contact.github,
 		};
 		isEditing = true;
 	}
@@ -89,6 +106,9 @@
 			: ''
 	);
 	let shareTitle = $derived(contact ? getDisplayName(contact) : '');
+
+	const inputClass =
+		'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20';
 </script>
 
 <svelte:head>
@@ -200,137 +220,352 @@
 		<!-- Contact Details -->
 		{#if isEditing}
 			<!-- Edit Form -->
-			<div class="rounded-xl border border-border bg-card p-6">
-				<h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-					Bearbeiten
-				</h2>
-				<div class="space-y-3">
+			<div class="space-y-4">
+				<!-- Name -->
+				<div class="rounded-xl border border-border bg-card p-5">
+					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Name
+					</h2>
 					<div class="grid grid-cols-2 gap-3">
 						<input
 							type="text"
 							placeholder="Vorname"
 							value={editData.firstName ?? ''}
 							oninput={(e) => (editData.firstName = e.currentTarget.value || null)}
-							class="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+							class={inputClass}
 						/>
 						<input
 							type="text"
 							placeholder="Nachname"
 							value={editData.lastName ?? ''}
 							oninput={(e) => (editData.lastName = e.currentTarget.value || null)}
-							class="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+							class={inputClass}
 						/>
 					</div>
-					<input
-						type="email"
-						placeholder="E-Mail"
-						value={editData.email ?? ''}
-						oninput={(e) => (editData.email = e.currentTarget.value || null)}
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-					/>
-					<input
-						type="tel"
-						placeholder="Telefon"
-						value={editData.phone ?? ''}
-						oninput={(e) => (editData.phone = e.currentTarget.value || null)}
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-					/>
-					<input
-						type="text"
-						placeholder="Unternehmen"
-						value={editData.company ?? ''}
-						oninput={(e) => (editData.company = e.currentTarget.value || null)}
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-					/>
-					<input
-						type="text"
-						placeholder="Position"
-						value={editData.jobTitle ?? ''}
-						oninput={(e) => (editData.jobTitle = e.currentTarget.value || null)}
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-					/>
+				</div>
+
+				<!-- Contact -->
+				<div class="rounded-xl border border-border bg-card p-5">
+					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Kontakt
+					</h2>
+					<div class="space-y-3">
+						<input
+							type="email"
+							placeholder="E-Mail"
+							value={editData.email ?? ''}
+							oninput={(e) => (editData.email = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+						<div class="grid grid-cols-2 gap-3">
+							<input
+								type="tel"
+								placeholder="Mobil"
+								value={editData.mobile ?? ''}
+								oninput={(e) => (editData.mobile = e.currentTarget.value || null)}
+								class={inputClass}
+							/>
+							<input
+								type="tel"
+								placeholder="Telefon"
+								value={editData.phone ?? ''}
+								oninput={(e) => (editData.phone = e.currentTarget.value || null)}
+								class={inputClass}
+							/>
+						</div>
+					</div>
+				</div>
+
+				<!-- Work -->
+				<div class="rounded-xl border border-border bg-card p-5">
+					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Arbeit
+					</h2>
+					<div class="space-y-3">
+						<input
+							type="text"
+							placeholder="Unternehmen"
+							value={editData.company ?? ''}
+							oninput={(e) => (editData.company = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+						<input
+							type="text"
+							placeholder="Position"
+							value={editData.jobTitle ?? ''}
+							oninput={(e) => (editData.jobTitle = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+						<input
+							type="url"
+							placeholder="Website"
+							value={editData.website ?? ''}
+							oninput={(e) => (editData.website = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+					</div>
+				</div>
+
+				<!-- Address -->
+				<div class="rounded-xl border border-border bg-card p-5">
+					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Adresse
+					</h2>
+					<div class="space-y-3">
+						<input
+							type="text"
+							placeholder="Straße & Hausnummer"
+							value={editData.street ?? ''}
+							oninput={(e) => (editData.street = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+						<div class="grid grid-cols-[5rem_1fr] gap-3">
+							<input
+								type="text"
+								placeholder="PLZ"
+								value={editData.postalCode ?? ''}
+								oninput={(e) => (editData.postalCode = e.currentTarget.value || null)}
+								class={inputClass}
+							/>
+							<input
+								type="text"
+								placeholder="Stadt"
+								value={editData.city ?? ''}
+								oninput={(e) => (editData.city = e.currentTarget.value || null)}
+								class={inputClass}
+							/>
+						</div>
+						<input
+							type="text"
+							placeholder="Land"
+							value={editData.country ?? ''}
+							oninput={(e) => (editData.country = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+					</div>
+				</div>
+
+				<!-- Birthday -->
+				<div class="rounded-xl border border-border bg-card p-5">
+					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Geburtstag
+					</h2>
 					<input
 						type="date"
-						placeholder="Geburtstag"
 						value={editData.birthday ?? ''}
 						oninput={(e) => (editData.birthday = e.currentTarget.value || null)}
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						class={inputClass}
 					/>
+				</div>
+
+				<!-- Notes -->
+				<div class="rounded-xl border border-border bg-card p-5">
+					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Notizen
+					</h2>
 					<textarea
-						placeholder="Notizen"
+						placeholder="Notizen zum Kontakt..."
 						value={editData.notes ?? ''}
 						oninput={(e) => (editData.notes = e.currentTarget.value || null)}
-						rows="3"
-						class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						rows="4"
+						class={inputClass}
 					></textarea>
+				</div>
 
-					<div class="flex justify-end gap-2 pt-2">
-						<button
-							type="button"
-							onclick={cancelEdit}
-							class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
-						>
-							Abbrechen
-						</button>
-						<button
-							type="button"
-							onclick={saveEdit}
-							class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-						>
-							Speichern
-						</button>
+				<!-- Social Media -->
+				<div class="rounded-xl border border-border bg-card p-5">
+					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						Social Media
+					</h2>
+					<div class="space-y-3">
+						<input
+							type="url"
+							placeholder="LinkedIn URL"
+							value={editData.linkedin ?? ''}
+							oninput={(e) => (editData.linkedin = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+						<input
+							type="text"
+							placeholder="Twitter / X"
+							value={editData.twitter ?? ''}
+							oninput={(e) => (editData.twitter = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+						<input
+							type="text"
+							placeholder="Instagram"
+							value={editData.instagram ?? ''}
+							oninput={(e) => (editData.instagram = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
+						<input
+							type="text"
+							placeholder="GitHub"
+							value={editData.github ?? ''}
+							oninput={(e) => (editData.github = e.currentTarget.value || null)}
+							class={inputClass}
+						/>
 					</div>
+				</div>
+
+				<!-- Actions -->
+				<div class="flex justify-end gap-2">
+					<button
+						type="button"
+						onclick={cancelEdit}
+						class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+						>Abbrechen</button
+					>
+					<button
+						type="button"
+						onclick={saveEdit}
+						class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+						>Speichern</button
+					>
 				</div>
 			</div>
 		{:else}
+			<!-- Quick Actions -->
+			{#if contact.email || contact.phone || contact.mobile}
+				<div class="mb-4 flex gap-2">
+					{#if contact.phone}
+						<a
+							href="tel:{contact.phone}"
+							class="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+						>
+							<Phone size={16} /> Anrufen
+						</a>
+					{/if}
+					{#if contact.email}
+						<a
+							href="mailto:{contact.email}"
+							class="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+						>
+							<Envelope size={16} /> E-Mail
+						</a>
+					{/if}
+					{#if contact.mobile}
+						<a
+							href="sms:{contact.mobile}"
+							class="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+						>
+							<DeviceMobile size={16} /> SMS
+						</a>
+					{/if}
+				</div>
+			{/if}
+
 			<!-- Detail Cards -->
 			<div class="space-y-4">
 				<!-- Contact Info -->
 				<div class="rounded-xl border border-border bg-card p-5">
 					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-						Kontaktdaten
+						Kontakt
 					</h2>
 					<div class="space-y-3">
 						{#if contact.email}
 							<div class="flex items-center gap-3">
 								<Envelope size={16} class="flex-shrink-0 text-muted-foreground" />
-								<a href="mailto:{contact.email}" class="text-sm text-primary hover:underline">
-									{contact.email}
-								</a>
+								<a href="mailto:{contact.email}" class="text-sm text-primary hover:underline"
+									>{contact.email}</a
+								>
+							</div>
+						{/if}
+						{#if contact.mobile}
+							<div class="flex items-center gap-3">
+								<DeviceMobile size={16} class="flex-shrink-0 text-muted-foreground" />
+								<a href="tel:{contact.mobile}" class="text-sm text-primary hover:underline"
+									>{contact.mobile}</a
+								>
+								<span class="text-xs text-muted-foreground">Mobil</span>
 							</div>
 						{/if}
 						{#if contact.phone}
 							<div class="flex items-center gap-3">
 								<Phone size={16} class="flex-shrink-0 text-muted-foreground" />
-								<a href="tel:{contact.phone}" class="text-sm text-primary hover:underline">
-									{contact.phone}
-								</a>
-							</div>
-						{/if}
-						{#if contact.company}
-							<div class="flex items-center gap-3">
-								<Buildings size={16} class="flex-shrink-0 text-muted-foreground" />
-								<span class="text-sm text-foreground">{contact.company}</span>
-							</div>
-						{/if}
-						{#if contact.birthday}
-							<div class="flex items-center gap-3">
-								<Cake size={16} class="flex-shrink-0 text-muted-foreground" />
-								<span class="text-sm text-foreground">
-									{new Date(contact.birthday).toLocaleDateString('de-DE', {
-										day: 'numeric',
-										month: 'long',
-										year: 'numeric',
-									})}
-								</span>
+								<a href="tel:{contact.phone}" class="text-sm text-primary hover:underline"
+									>{contact.phone}</a
+								>
+								<span class="text-xs text-muted-foreground">Telefon</span>
 							</div>
 						{/if}
 					</div>
-
-					{#if !contact.email && !contact.phone && !contact.company && !contact.birthday}
+					{#if !contact.email && !contact.phone && !contact.mobile}
 						<p class="text-sm text-muted-foreground">Keine Kontaktdaten hinterlegt.</p>
 					{/if}
 				</div>
+
+				<!-- Work -->
+				{#if contact.company || contact.jobTitle || contact.website}
+					<div class="rounded-xl border border-border bg-card p-5">
+						<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+							Arbeit
+						</h2>
+						<div class="space-y-3">
+							{#if contact.company}
+								<div class="flex items-center gap-3">
+									<Buildings size={16} class="flex-shrink-0 text-muted-foreground" />
+									<span class="text-sm text-foreground">{contact.company}</span>
+								</div>
+							{/if}
+							{#if contact.jobTitle}
+								<div class="flex items-center gap-3">
+									<Briefcase size={16} class="flex-shrink-0 text-muted-foreground" />
+									<span class="text-sm text-foreground">{contact.jobTitle}</span>
+								</div>
+							{/if}
+							{#if contact.website}
+								<div class="flex items-center gap-3">
+									<Globe size={16} class="flex-shrink-0 text-muted-foreground" />
+									<a
+										href={contact.website.startsWith('http')
+											? contact.website
+											: `https://${contact.website}`}
+										target="_blank"
+										rel="noopener"
+										class="text-sm text-primary hover:underline">{contact.website}</a
+									>
+								</div>
+							{/if}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Address -->
+				{#if contact.street || contact.city || contact.postalCode || contact.country}
+					<div class="rounded-xl border border-border bg-card p-5">
+						<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+							Adresse
+						</h2>
+						<div class="flex items-start gap-3">
+							<MapPin size={16} class="mt-0.5 flex-shrink-0 text-muted-foreground" />
+							<div class="text-sm text-foreground">
+								{#if contact.street}<div>{contact.street}</div>{/if}
+								{#if contact.postalCode || contact.city}
+									<div>{[contact.postalCode, contact.city].filter(Boolean).join(' ')}</div>
+								{/if}
+								{#if contact.country}<div>{contact.country}</div>{/if}
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				<!-- Birthday -->
+				{#if contact.birthday}
+					<div class="rounded-xl border border-border bg-card p-5">
+						<div class="flex items-center gap-3">
+							<Cake size={16} class="flex-shrink-0 text-muted-foreground" />
+							<span class="text-sm text-foreground">
+								{new Date(contact.birthday).toLocaleDateString('de-DE', {
+									day: 'numeric',
+									month: 'long',
+									year: 'numeric',
+								})}
+							</span>
+						</div>
+					</div>
+				{/if}
 
 				<!-- Notes -->
 				{#if contact.notes}
@@ -342,6 +577,69 @@
 					</div>
 				{/if}
 
+				<!-- Social Media -->
+				{#if contact.linkedin || contact.twitter || contact.instagram || contact.github}
+					<div class="rounded-xl border border-border bg-card p-5">
+						<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+							Social Media
+						</h2>
+						<div class="space-y-3">
+							{#if contact.linkedin}
+								<div class="flex items-center gap-3">
+									<LinkedinLogo size={16} class="flex-shrink-0 text-muted-foreground" />
+									<a
+										href={contact.linkedin.startsWith('http')
+											? contact.linkedin
+											: `https://linkedin.com/in/${contact.linkedin}`}
+										target="_blank"
+										rel="noopener"
+										class="text-sm text-primary hover:underline">{contact.linkedin}</a
+									>
+								</div>
+							{/if}
+							{#if contact.twitter}
+								<div class="flex items-center gap-3">
+									<TwitterLogo size={16} class="flex-shrink-0 text-muted-foreground" />
+									<a
+										href={contact.twitter.startsWith('http')
+											? contact.twitter
+											: `https://x.com/${contact.twitter}`}
+										target="_blank"
+										rel="noopener"
+										class="text-sm text-primary hover:underline">{contact.twitter}</a
+									>
+								</div>
+							{/if}
+							{#if contact.instagram}
+								<div class="flex items-center gap-3">
+									<InstagramLogo size={16} class="flex-shrink-0 text-muted-foreground" />
+									<a
+										href={contact.instagram.startsWith('http')
+											? contact.instagram
+											: `https://instagram.com/${contact.instagram}`}
+										target="_blank"
+										rel="noopener"
+										class="text-sm text-primary hover:underline">{contact.instagram}</a
+									>
+								</div>
+							{/if}
+							{#if contact.github}
+								<div class="flex items-center gap-3">
+									<GithubLogo size={16} class="flex-shrink-0 text-muted-foreground" />
+									<a
+										href={contact.github.startsWith('http')
+											? contact.github
+											: `https://github.com/${contact.github}`}
+										target="_blank"
+										rel="noopener"
+										class="text-sm text-primary hover:underline">{contact.github}</a
+									>
+								</div>
+							{/if}
+						</div>
+					</div>
+				{/if}
+
 				<!-- Tags -->
 				{#if contact.tags.length > 0}
 					<div class="rounded-xl border border-border bg-card p-5">
@@ -350,9 +648,9 @@
 						</h2>
 						<div class="flex flex-wrap gap-2">
 							{#each contact.tags as tag (tag.id)}
-								<span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-									{tag.name}
-								</span>
+								<span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+									>{tag.name}</span
+								>
 							{/each}
 						</div>
 					</div>
@@ -360,26 +658,23 @@
 
 				<!-- Metadata -->
 				<div class="rounded-xl border border-border bg-card p-5">
-					<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-						Details
-					</h2>
 					<div class="grid grid-cols-2 gap-y-2 text-xs text-muted-foreground">
 						<span>Erstellt</span>
-						<span>
-							{new Date(contact.createdAt).toLocaleDateString('de-DE', {
+						<span
+							>{new Date(contact.createdAt).toLocaleDateString('de-DE', {
 								day: 'numeric',
 								month: 'short',
 								year: 'numeric',
-							})}
-						</span>
+							})}</span
+						>
 						<span>Aktualisiert</span>
-						<span>
-							{new Date(contact.updatedAt).toLocaleDateString('de-DE', {
+						<span
+							>{new Date(contact.updatedAt).toLocaleDateString('de-DE', {
 								day: 'numeric',
 								month: 'short',
 								year: 'numeric',
-							})}
-						</span>
+							})}</span
+						>
 					</div>
 				</div>
 			</div>

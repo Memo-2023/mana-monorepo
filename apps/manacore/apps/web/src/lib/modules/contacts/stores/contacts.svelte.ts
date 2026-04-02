@@ -45,17 +45,28 @@ export const contactsStore = {
 		return toContact(newLocal);
 	},
 
-	async updateContact(id: string, data: Partial<Contact>) {
+	async updateContact(id: string, data: Partial<Contact> & Record<string, unknown>) {
 		const updateData: Partial<LocalContact> = {};
 		if (data.firstName !== undefined) updateData.firstName = data.firstName ?? undefined;
 		if (data.lastName !== undefined) updateData.lastName = data.lastName ?? undefined;
 		if (data.email !== undefined) updateData.email = data.email ?? undefined;
 		if (data.phone !== undefined) updateData.phone = data.phone ?? undefined;
+		if (data.mobile !== undefined) updateData.mobile = data.mobile as string | undefined;
 		if (data.company !== undefined) updateData.company = data.company ?? undefined;
 		if (data.jobTitle !== undefined) updateData.jobTitle = data.jobTitle ?? undefined;
+		if (data.street !== undefined) updateData.street = data.street as string | undefined;
+		if (data.city !== undefined) updateData.city = data.city as string | undefined;
+		if (data.postalCode !== undefined)
+			updateData.postalCode = data.postalCode as string | undefined;
+		if (data.country !== undefined) updateData.country = data.country as string | undefined;
 		if (data.notes !== undefined) updateData.notes = data.notes ?? undefined;
 		if (data.photoUrl !== undefined) updateData.photoUrl = data.photoUrl ?? undefined;
 		if (data.birthday !== undefined) updateData.birthday = data.birthday ?? undefined;
+		if (data.website !== undefined) updateData.website = data.website as string | undefined;
+		if (data.linkedin !== undefined) updateData.linkedin = data.linkedin as string | undefined;
+		if (data.twitter !== undefined) updateData.twitter = data.twitter as string | undefined;
+		if (data.instagram !== undefined) updateData.instagram = data.instagram as string | undefined;
+		if (data.github !== undefined) updateData.github = data.github as string | undefined;
 		if (data.tags !== undefined) updateData.tags = data.tags?.map((t) => t.name) ?? [];
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 		if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
