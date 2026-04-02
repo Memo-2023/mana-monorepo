@@ -56,6 +56,14 @@ export {
 	type ArchiveOps,
 	type ArchiveOpsConfig,
 } from './archive';
+export { notificationService, type NotificationOptions } from './notifications';
+export {
+	createReminderScheduler,
+	type ReminderScheduler,
+	type ReminderSchedulerConfig,
+	type ReminderSource,
+	type DueReminder,
+} from './reminder-scheduler';
 
 export {
 	createGuestMode,

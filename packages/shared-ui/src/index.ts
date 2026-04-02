@@ -15,6 +15,7 @@ export {
 	COLORS_16,
 	DEFAULT_COLOR,
 	getRandomColor,
+	ReminderPicker,
 } from './molecules';
 export type { SelectOption, FilterDropdownOption } from './molecules';
 
