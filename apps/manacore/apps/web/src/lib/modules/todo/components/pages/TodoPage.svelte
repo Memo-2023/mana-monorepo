@@ -1,18 +1,12 @@
 <script lang="ts">
-	import { isToday, isTomorrow, isPast, startOfDay, addDays, subHours, format } from 'date-fns';
+	import { isToday, isTomorrow, isPast, startOfDay, addDays, subHours } from 'date-fns';
 	import type { Task } from '../../types';
 	import { tasksStore } from '../../stores/tasks.svelte';
-	import { todoSettings } from '../../stores/settings.svelte';
-	import type { PageConfig, PageIcon, PageWidth } from '../../stores/settings.svelte';
+	import type { PageConfig, PageIcon } from '../../stores/settings.svelte';
 	import PageEditBar from './PageEditBar.svelte';
 	import TaskItem from '../TaskItem.svelte';
 	import {
-		X,
 		Circle,
-		Minus,
-		DotsSixVertical,
-		CornersOut,
-		CornersIn,
 		Warning,
 		Calendar,
 		CalendarDots,
@@ -24,25 +18,23 @@
 		Leaf,
 		Heart,
 	} from '@manacore/shared-icons';
+	import { PageShell } from '$lib/components/page-carousel';
 
 	interface Props {
 		pageId: string;
 		allTasks: Task[];
+		widthPx: number;
 		title?: string;
 		maximized?: boolean;
-		editMode?: boolean;
 		filterConfig?: PageConfig['filter'];
 		pageIcon?: PageIcon;
 		customPageConfig?: PageConfig;
-		isFirst?: boolean;
-		isLast?: boolean;
 		onClose: () => void;
 		onMinimize?: () => void;
 		onMaximize?: () => void;
+		onResize?: (widthPx: number) => void;
 		onRename?: (name: string) => void;
 		onUpdateConfig?: (data: Partial<PageConfig>) => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
 		onDelete?: () => void;
 		onOpenTask?: (task: Task) => void;
 	}
@@ -50,21 +42,18 @@
 	let {
 		pageId,
 		allTasks,
+		widthPx,
 		title: customTitle,
 		maximized = false,
-		editMode = false,
 		filterConfig,
 		pageIcon,
 		customPageConfig,
-		isFirst = false,
-		isLast = false,
 		onClose,
 		onMinimize,
 		onMaximize,
+		onResize,
 		onRename,
 		onUpdateConfig,
-		onMoveLeft,
-		onMoveRight,
 		onDelete,
 		onOpenTask,
 	}: Props = $props();
@@ -205,15 +194,6 @@
 		}
 	});
 
-	const PAGE_WIDTH_MAP: Record<string, string> = {
-		narrow: 'min(360px, 85vw)',
-		medium: 'min(480px, 85vw)',
-		wide: 'min(640px, 90vw)',
-		full: 'min(840px, 95vw)',
-	};
-
-	let sheetWidth = $derived(PAGE_WIDTH_MAP[todoSettings.pageWidth] || PAGE_WIDTH_MAP.medium);
-
 	let showCompleted = $derived(filterConfig?.completed ?? false);
 	let openTasks = $derived(
 		pageId === 'todo' ? filteredTasks.filter((t) => !t.isCompleted) : filteredTasks
@@ -243,80 +223,48 @@
 	}
 </script>
 
-<div
-	class="todo-page"
-	class:maximized
-	class:editing={editMode}
-	style="width: {maximized ? '100%' : sheetWidth}"
+<PageShell
+	{widthPx}
+	{maximized}
+	color={displayColor}
+	icon={IconComponent}
+	{onClose}
+	{onMinimize}
+	{onMaximize}
+	{onResize}
 >
-	<div class="drag-handle-bar">
-		<span class="drag-handle"><DotsSixVertical size={14} /></span>
-	</div>
+	{#snippet header_left()}
+		{#if IconComponent}
+			<span class="header-icon" style="color: {displayColor}">
+				<IconComponent size={16} weight="fill" />
+			</span>
+		{:else}
+			<span class="color-dot" style="background-color: {displayColor}"></span>
+		{/if}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<span
+			bind:this={titleEl}
+			class="page-title"
+			contenteditable={!!onRename}
+			oninput={handleTitleInput}
+			onkeydown={handleTitleKeydown}
+			onfocus={() => (isTitleFocused = true)}
+			onblur={() => (isTitleFocused = false)}
+		></span>
+	{/snippet}
 
-	{#if editMode && isCustom && customPageConfig && onUpdateConfig && onDelete}
-		<PageEditBar
-			config={customPageConfig}
-			onUpdate={onUpdateConfig}
-			{onMoveLeft}
-			{onMoveRight}
-			{onDelete}
-			{isFirst}
-			{isLast}
-		/>
-	{/if}
+	{#snippet badge()}
+		<span class="task-count">{filteredTasks.length}</span>
+	{/snippet}
 
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="page-header" ondragstart={(e) => e.preventDefault()}>
-		<div class="header-left">
-			{#if IconComponent}
-				<span class="header-icon" style="color: {displayColor}">
-					<IconComponent size={16} weight="fill" />
-				</span>
-			{:else}
-				<span class="color-dot" style="background-color: {displayColor}"></span>
-			{/if}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<span
-				bind:this={titleEl}
-				class="page-title"
-				contenteditable={!!onRename}
-				oninput={handleTitleInput}
-				onkeydown={handleTitleKeydown}
-				onfocus={() => (isTitleFocused = true)}
-				onblur={() => (isTitleFocused = false)}
-			></span>
-			<span class="task-count">{filteredTasks.length}</span>
-		</div>
-		<div class="header-actions">
-			{#if editMode && !isCustom && onDelete}
-				<button class="header-btn delete-preset" onclick={onDelete} title="Seite entfernen">
-					<X size={14} />
-				</button>
-			{/if}
-			{#if !editMode}
-				{#if onMinimize}
-					<button class="header-btn" onclick={onMinimize} title="Minimieren">
-						<Minus size={14} />
-					</button>
-				{/if}
-				{#if onMaximize}
-					<button
-						class="header-btn"
-						onclick={onMaximize}
-						title={maximized ? 'Verkleinern' : 'Maximieren'}
-					>
-						{#if maximized}<CornersIn size={14} />{:else}<CornersOut size={14} />{/if}
-					</button>
-				{/if}
-				<button class="header-btn" onclick={onClose} title="Seite schließen">
-					<X size={14} />
-				</button>
-			{/if}
-		</div>
-	</div>
+	{#snippet toolbar()}
+		{#if isCustom && customPageConfig && onUpdateConfig && onDelete}
+			<PageEditBar config={customPageConfig} onUpdate={onUpdateConfig} {onDelete} />
+		{/if}
+	{/snippet}
 
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="page-body" ondragstart={(e) => e.preventDefault()}>
+	<div class="page-content" ondragstart={(e) => e.preventDefault()}>
 		{#each openTasks as task (task.id)}
 			<div class="task-card-wrapper" class:completed-task={task.isCompleted}>
 				<TaskItem
@@ -344,7 +292,7 @@
 			</div>
 		{/if}
 
-		{#if !editMode && !showCompleted && pageId !== 'completed'}
+		{#if !showCompleted && pageId !== 'completed'}
 			<div class="inline-create">
 				<span class="inline-create-icon"><Circle size={18} /></span>
 				<input
@@ -359,116 +307,9 @@
 			</div>
 		{/if}
 	</div>
-</div>
+</PageShell>
 
 <style>
-	.todo-page {
-		flex: 0 0 auto;
-		min-height: 60vh;
-		background: #fffef5;
-		border-radius: 0.375rem;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.08),
-			0 0 0 1px rgba(0, 0, 0, 0.04);
-		display: flex;
-		flex-direction: column;
-		animation: fadeIn 0.25s ease-out;
-	}
-	:global(.dark) .todo-page {
-		background-color: #252220;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.25),
-			0 0 0 1px rgba(255, 255, 255, 0.06);
-	}
-	.todo-page.editing {
-		box-shadow:
-			0 2px 12px rgba(139, 92, 246, 0.12),
-			0 0 0 2px rgba(139, 92, 246, 0.3);
-	}
-	:global(.dark) .todo-page.editing {
-		box-shadow:
-			0 2px 12px rgba(139, 92, 246, 0.2),
-			0 0 0 2px rgba(139, 92, 246, 0.4);
-	}
-	.todo-page.maximized {
-		position: fixed;
-		inset: 0;
-		z-index: 50;
-		width: 100% !important;
-		min-height: 100vh;
-		border-radius: 0;
-		box-shadow: none;
-		animation: fadeInScale 0.2s ease-out;
-		align-items: center;
-	}
-	.todo-page.maximized .page-header,
-	.todo-page.maximized .page-body {
-		width: 100%;
-		max-width: 720px;
-	}
-	.todo-page.maximized .page-header,
-	.todo-page.maximized .page-body {
-		margin: 0 auto;
-	}
-	@keyframes fadeInScale {
-		from {
-			opacity: 0.8;
-			transform: scale(0.97);
-		}
-		to {
-			opacity: 1;
-			transform: scale(1);
-		}
-	}
-	.drag-handle-bar {
-		display: flex;
-		justify-content: center;
-		padding: 0.25rem 0 0;
-	}
-	.drag-handle {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 14px;
-		color: #d1d5db;
-		cursor: grab;
-		border-radius: 0.25rem;
-		transition: color 0.15s;
-	}
-	.drag-handle:hover {
-		color: #9ca3af;
-	}
-	.drag-handle:active {
-		cursor: grabbing;
-	}
-	:global(.dark) .drag-handle {
-		color: #3f3b38;
-	}
-	:global(.dark) .drag-handle:hover {
-		color: #6b7280;
-	}
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateX(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0);
-		}
-	}
-	.page-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.75rem 1rem;
-	}
-	.header-left {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
 	.header-icon {
 		flex-shrink: 0;
 		display: flex;
@@ -505,44 +346,8 @@
 		background: rgba(255, 255, 255, 0.1);
 		color: #6b7280;
 	}
-	.header-actions {
-		display: flex;
-		align-items: center;
-		gap: 0.125rem;
-	}
-	.header-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: 0.25rem;
-		border: none;
-		background: transparent;
-		color: #9ca3af;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.header-btn:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: #374151;
-	}
-	:global(.dark) .header-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #f3f4f6;
-	}
-	.delete-preset:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.08);
-	}
-	:global(.dark) .delete-preset:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.15);
-	}
-	.page-body {
-		flex: 1;
+	.page-content {
 		padding: 0.75rem 1rem;
-		overflow-y: auto;
 	}
 	.task-card-wrapper {
 		margin-bottom: 0.5rem;

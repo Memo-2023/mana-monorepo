@@ -2,18 +2,9 @@
 	import { _ } from 'svelte-i18n';
 	import { getContext, onMount } from 'svelte';
 	import type { Observable } from 'dexie';
-	import { dropTarget } from '@manacore/shared-ui/dnd';
-	import type { DragPayload, TagDragData } from '@manacore/shared-ui/dnd';
-	import { useAllTags } from '$lib/stores/tags.svelte';
-	import {
-		type Task,
-		type LocalLabel,
-		type LocalBoardView,
-		type LocalTodoProject,
-		tasksStore,
-		taskTable,
-	} from '$lib/modules/todo';
-	import { Plus, PencilSimple, X, Gear, ArrowsOut } from '@manacore/shared-icons';
+	import type { DragPayload } from '@manacore/shared-ui/dnd';
+	import { type Task, type LocalLabel, tasksStore, taskTable } from '$lib/modules/todo';
+	import { Gear } from '@manacore/shared-icons';
 	import { ShareModal } from '@manacore/shared-uload';
 
 	// Components
@@ -25,8 +16,9 @@
 	import TodoPage from '$lib/modules/todo/components/pages/TodoPage.svelte';
 	import PagePicker from '$lib/modules/todo/components/pages/PagePicker.svelte';
 	import { todoSettings } from '$lib/modules/todo/stores/settings.svelte';
-	import type { PageConfig, PageWidth } from '$lib/modules/todo/stores/settings.svelte';
+	import type { PageConfig } from '$lib/modules/todo/stores/settings.svelte';
 	import { getTaskStats } from '$lib/modules/todo';
+	import { PageCarousel, type CarouselPage } from '$lib/components/page-carousel';
 
 	// Get data from layout context
 	const allTasks$: Observable<Task[]> = getContext('tasks');
@@ -91,19 +83,21 @@
 		return () => tagDropCtx?.clear();
 	});
 
-	// ── Edit mode ──────────────────────────────────────────
-	let editMode = $state(false);
-
 	// ── Pages ───────────────────────────────────────────────
+	const DEFAULT_WIDTH = 480;
 	let showPagePicker = $state(false);
 	let openPages = $state<
-		{ id: string; minimized: boolean; maximized?: boolean; customTitle?: string }[]
+		{
+			id: string;
+			minimized: boolean;
+			maximized?: boolean;
+			widthPx?: number;
+			customTitle?: string;
+		}[]
 	>([{ id: 'todo', minimized: false }]);
 
-	let expandedPages = $derived(openPages.filter((p) => !p.minimized));
 	let customPages = $derived(todoSettings.customPages);
 
-	// Minimized pages for tab bar
 	const PAGE_META: Record<string, { title: string; color: string }> = {
 		todo: { title: 'To Do', color: '#6B7280' },
 		completed: { title: 'Erledigt', color: '#22C55E' },
@@ -128,18 +122,24 @@
 		heart: '#EC4899',
 	};
 
-	let minimizedPages = $derived(
-		openPages
-			.filter((p) => p.minimized)
-			.map((p) => {
-				const config = getCustomPageConfig(p.id);
-				const preset = PAGE_META[p.id];
-				const title = p.customTitle ?? config?.label ?? preset?.title ?? p.id;
-				const color = config?.icon
-					? (ICON_COLORS[config.icon] ?? '#8B5CF6')
-					: (preset?.color ?? '#6B7280');
-				return { id: p.id, title, color };
-			})
+	// Map to CarouselPage[]
+	let carouselPages = $derived<CarouselPage[]>(
+		openPages.map((p) => {
+			const config = getCustomPageConfig(p.id);
+			const preset = PAGE_META[p.id];
+			const title = p.customTitle ?? config?.label ?? preset?.title ?? p.id;
+			const color = config?.icon
+				? (ICON_COLORS[config.icon] ?? '#8B5CF6')
+				: (preset?.color ?? '#6B7280');
+			return {
+				id: p.id,
+				minimized: p.minimized,
+				maximized: p.maximized,
+				widthPx: p.widthPx ?? DEFAULT_WIDTH,
+				title,
+				color,
+			};
+		})
 	);
 
 	function handleAddPage(pageId: string) {
@@ -151,22 +151,26 @@
 		showPagePicker = false;
 	}
 
-	function handleRemovePage(pageId: string) {
-		openPages = openPages.filter((p) => p.id !== pageId);
+	function handleRemovePage(id: string) {
+		openPages = openPages.filter((p) => p.id !== id);
 	}
 
-	function handleMinimizePage(pageId: string) {
-		openPages = openPages.map((p) => (p.id === pageId ? { ...p, minimized: true } : p));
+	function handleMinimizePage(id: string) {
+		openPages = openPages.map((p) => (p.id === id ? { ...p, minimized: true } : p));
 	}
 
-	function handleRestorePage(pageId: string) {
-		openPages = openPages.map((p) => (p.id === pageId ? { ...p, minimized: false } : p));
+	function handleRestorePage(id: string) {
+		openPages = openPages.map((p) => (p.id === id ? { ...p, minimized: false } : p));
 	}
 
-	function handleMaximizePage(pageId: string) {
+	function handleMaximizePage(id: string) {
 		openPages = openPages.map((p) =>
-			p.id === pageId ? { ...p, maximized: !p.maximized, minimized: false } : p
+			p.id === id ? { ...p, maximized: !p.maximized, minimized: false } : p
 		);
+	}
+
+	function handleResize(id: string, widthPx: number) {
+		openPages = openPages.map((p) => (p.id === id ? { ...p, widthPx } : p));
 	}
 
 	function handleRenamePage(pageId: string, name: string) {
@@ -177,6 +181,16 @@
 		}
 	}
 
+	function handleReorder(fromId: string, toId: string) {
+		const fromIdx = openPages.findIndex((p) => p.id === fromId);
+		const toIdx = openPages.findIndex((p) => p.id === toId);
+		if (fromIdx === -1 || toIdx === -1) return;
+		const pages = [...openPages];
+		const [moved] = pages.splice(fromIdx, 1);
+		pages.splice(toIdx, 0, moved);
+		openPages = pages;
+	}
+
 	// ── Custom page CRUD ────────────────────────────────────
 	function handleCreateCustomPage() {
 		const id = `custom-${crypto.randomUUID().slice(0, 8)}`;
@@ -184,7 +198,6 @@
 		todoSettings.update({ customPages: [...customPages, newPage] });
 		openPages = [...openPages, { id, minimized: false }];
 		showPagePicker = false;
-		editMode = true;
 	}
 
 	function handleUpdateCustomPage(pageId: string, data: Partial<PageConfig>) {
@@ -205,95 +218,6 @@
 	function getCustomPageConfig(pageId: string): PageConfig | undefined {
 		return customPages.find((cp) => cp.id === pageId);
 	}
-
-	// ── Page reorder ────────────────────────────────────────
-	function handleMovePageLeft(pageId: string) {
-		const idx = openPages.findIndex((p) => p.id === pageId);
-		if (idx <= 0) return;
-		const pages = [...openPages];
-		[pages[idx - 1], pages[idx]] = [pages[idx], pages[idx - 1]];
-		openPages = pages;
-	}
-
-	function handleMovePageRight(pageId: string) {
-		const idx = openPages.findIndex((p) => p.id === pageId);
-		if (idx === -1 || idx >= openPages.length - 1) return;
-		const pages = [...openPages];
-		[pages[idx], pages[idx + 1]] = [pages[idx + 1], pages[idx]];
-		openPages = pages;
-	}
-
-	// ── Page drag reorder ───────────────────────────────────
-	let dragPageId = $state<string | null>(null);
-
-	function handlePageDragStart(e: DragEvent, pageId: string) {
-		dragPageId = pageId;
-		if (e.dataTransfer) {
-			e.dataTransfer.effectAllowed = 'move';
-			e.dataTransfer.setData('text/plain', pageId);
-		}
-	}
-
-	function handlePageDragOver(e: DragEvent) {
-		if (!dragPageId) return;
-		e.preventDefault();
-		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-	}
-
-	function handlePageDrop(e: DragEvent, targetPageId: string) {
-		e.preventDefault();
-		if (!dragPageId || dragPageId === targetPageId) return;
-		const fromIdx = openPages.findIndex((p) => p.id === dragPageId);
-		const toIdx = openPages.findIndex((p) => p.id === targetPageId);
-		if (fromIdx === -1 || toIdx === -1) return;
-		const pages = [...openPages];
-		const [moved] = pages.splice(fromIdx, 1);
-		pages.splice(toIdx, 0, moved);
-		openPages = pages;
-		dragPageId = null;
-	}
-
-	function handlePageDragEnd() {
-		dragPageId = null;
-	}
-
-	function togglePagePicker() {
-		showPagePicker = !showPagePicker;
-	}
-
-	function toggleEditMode() {
-		editMode = !editMode;
-		if (!editMode) showPagePicker = false;
-	}
-
-	// ── Width pills ─────────────────────────────────────────
-	const WIDTH_OPTIONS: { id: PageWidth; label: string }[] = [
-		{ id: 'narrow', label: 'S' },
-		{ id: 'medium', label: 'M' },
-		{ id: 'wide', label: 'L' },
-		{ id: 'full', label: 'XL' },
-	];
-
-	function setPageWidth(width: PageWidth) {
-		todoSettings.update({ pageWidth: width });
-	}
-
-	const PAGE_WIDTH_MAP: Record<string, string> = {
-		narrow: 'min(360px, 85vw)',
-		medium: 'min(480px, 85vw)',
-		wide: 'min(640px, 90vw)',
-		full: 'min(840px, 95vw)',
-	};
-
-	let sheetWidthVar = $derived(PAGE_WIDTH_MAP[todoSettings.pageWidth] || PAGE_WIDTH_MAP.medium);
-
-	let pagePickerEl = $state<HTMLDivElement | null>(null);
-
-	$effect(() => {
-		if (showPagePicker && pagePickerEl) {
-			pagePickerEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-		}
-	});
 </script>
 
 <svelte:head>
@@ -328,143 +252,49 @@
 		<QuickAddTask labels={allLabels} onShowSyntaxHelp={() => (showSyntaxHelp = true)} />
 	</div>
 
-	<!-- Width pills (visible in edit mode) -->
-	{#if editMode}
-		<div class="edit-toolbar">
-			<div class="width-pills">
-				{#each WIDTH_OPTIONS as opt (opt.id)}
-					<button
-						class="width-pill"
-						class:active={todoSettings.pageWidth === opt.id}
-						onclick={() => setPageWidth(opt.id)}
-					>
-						{opt.label}
-					</button>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
 	<!-- Pages carousel -->
-	<div class="fokus-track" style="--sheet-width: {sheetWidthVar}">
-		{#each expandedPages as page, pageIdx (page.id)}
-			{@const config = getCustomPageConfig(page.id)}
-			{@const isCustom = page.id.startsWith('custom-')}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div
-				class="page-drag-wrapper"
-				class:dragging={dragPageId === page.id}
-				draggable={!editMode}
-				ondragstart={(e) => handlePageDragStart(e, page.id)}
-				ondragover={handlePageDragOver}
-				ondrop={(e) => handlePageDrop(e, page.id)}
-				ondragend={handlePageDragEnd}
-			>
-				<TodoPage
-					pageId={page.id}
-					{allTasks}
-					title={page.customTitle ?? config?.label}
-					maximized={page.maximized}
-					{editMode}
-					filterConfig={isCustom ? config?.filter : undefined}
-					pageIcon={isCustom ? config?.icon : undefined}
-					customPageConfig={isCustom ? config : undefined}
-					isFirst={pageIdx === 0}
-					isLast={pageIdx === expandedPages.length - 1}
-					onClose={() => handleRemovePage(page.id)}
-					onMinimize={() => handleMinimizePage(page.id)}
-					onMaximize={() => handleMaximizePage(page.id)}
-					onRename={(name) => handleRenamePage(page.id, name)}
-					onUpdateConfig={isCustom ? (data) => handleUpdateCustomPage(page.id, data) : undefined}
-					onMoveLeft={editMode ? () => handleMovePageLeft(page.id) : undefined}
-					onMoveRight={editMode ? () => handleMovePageRight(page.id) : undefined}
-					onDelete={editMode ? () => handleDeletePage(page.id) : undefined}
-					onOpenTask={(task) => (editTask = task)}
-				/>
-			</div>
-		{/each}
-
-		<!-- Page picker / add button -->
-		{#if expandedPages.length === 0}
-			<div class="empty-pages-wrapper">
-				{#if showPagePicker}
-					<PagePicker
-						onSelect={handleAddPage}
-						onClose={() => (showPagePicker = false)}
-						onCreateCustom={handleCreateCustomPage}
-						activePageIds={openPages.map((p) => p.id)}
-					/>
-				{:else}
-					<button
-						class="neue-seite-card alone"
-						onclick={togglePagePicker}
-						title="Neue Seite hinzufügen"
-					>
-						<Plus size={24} />
-						<span class="neue-seite-label">Seite hinzufügen</span>
-					</button>
-				{/if}
-			</div>
-		{:else if showPagePicker}
-			<div bind:this={pagePickerEl}>
-				<PagePicker
-					onSelect={handleAddPage}
-					onClose={() => (showPagePicker = false)}
-					onCreateCustom={handleCreateCustomPage}
-					activePageIds={openPages.map((p) => p.id)}
-				/>
-			</div>
-		{:else}
-			<button class="neue-seite-card" onclick={togglePagePicker} title="Neue Seite hinzufügen">
-				<Plus size={18} />
-			</button>
-		{/if}
-	</div>
-
-	<!-- Minimized tabs bar -->
-	{#if minimizedPages.length > 0}
-		<div class="minimized-tabs">
-			{#each minimizedPages as page (page.id)}
-				<div class="minimized-tab group">
-					<span class="tab-dot" style="background-color: {page.color}"></span>
-					<button class="tab-title" onclick={() => handleRestorePage(page.id)}>
-						{page.title}
-					</button>
-					<button
-						class="tab-maximize"
-						onclick={() => handleMaximizePage(page.id)}
-						title="Maximieren"
-					>
-						<ArrowsOut size={12} />
-					</button>
-					<button
-						class="tab-close"
-						onclick={() => handleRemovePage(page.id)}
-						title={$_('common.close')}
-					>
-						<X size={12} />
-					</button>
-				</div>
-			{/each}
-			<button class="tab-add" onclick={togglePagePicker} title="Seite hinzufügen">
-				<Plus size={14} />
-			</button>
-		</div>
-	{/if}
-
-	<!-- Edit FAB -->
-	<button
-		class="edit-fab"
-		class:active={editMode}
-		onclick={toggleEditMode}
-		title={editMode ? 'Bearbeitung beenden' : 'Seiten bearbeiten'}
+	<PageCarousel
+		pages={carouselPages}
+		defaultWidth={DEFAULT_WIDTH}
+		showPicker={showPagePicker}
+		onReorder={handleReorder}
+		onRestore={handleRestorePage}
+		onMaximize={handleMaximizePage}
+		onRemove={handleRemovePage}
+		onTogglePicker={() => (showPagePicker = !showPagePicker)}
+		addLabel="Seite hinzufügen"
 	>
-		{#if editMode}
-			<X size={20} />
-		{:else}
-			<PencilSimple size={20} />
-		{/if}
-	</button>
+		{#snippet page(p)}
+			{@const config = getCustomPageConfig(p.id)}
+			{@const isCustom = p.id.startsWith('custom-')}
+			<TodoPage
+				pageId={p.id}
+				{allTasks}
+				widthPx={p.widthPx}
+				title={openPages.find((op) => op.id === p.id)?.customTitle ?? config?.label}
+				maximized={p.maximized}
+				filterConfig={isCustom ? config?.filter : undefined}
+				pageIcon={isCustom ? config?.icon : undefined}
+				customPageConfig={isCustom ? config : undefined}
+				onClose={() => handleRemovePage(p.id)}
+				onMinimize={() => handleMinimizePage(p.id)}
+				onMaximize={() => handleMaximizePage(p.id)}
+				onResize={(w) => handleResize(p.id, w)}
+				onRename={(name) => handleRenamePage(p.id, name)}
+				onUpdateConfig={isCustom ? (data) => handleUpdateCustomPage(p.id, data) : undefined}
+				onDelete={() => handleDeletePage(p.id)}
+				onOpenTask={(task) => (editTask = task)}
+			/>
+		{/snippet}
+		{#snippet picker()}
+			<PagePicker
+				onSelect={handleAddPage}
+				onClose={() => (showPagePicker = false)}
+				onCreateCustom={handleCreateCustomPage}
+				activePageIds={openPages.map((p) => p.id)}
+			/>
+		{/snippet}
+	</PageCarousel>
 </div>
 
 <!-- Task Edit Modal -->
@@ -541,317 +371,6 @@
 	.quick-add-wrapper {
 		padding: 0 1rem;
 		margin-bottom: 1rem;
-	}
-
-	/* Edit toolbar */
-	.edit-toolbar {
-		display: flex;
-		justify-content: center;
-		padding: 0.5rem 1rem;
-		animation: fadeDown 0.2s ease-out;
-	}
-	@keyframes fadeDown {
-		from {
-			opacity: 0;
-			transform: translateY(-8px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-	.width-pills {
-		display: flex;
-		gap: 0.25rem;
-		background: rgba(0, 0, 0, 0.04);
-		border-radius: 0.5rem;
-		padding: 0.125rem;
-	}
-	:global(.dark) .width-pills {
-		background: rgba(255, 255, 255, 0.06);
-	}
-	.width-pill {
-		padding: 0.25rem 0.75rem;
-		border: none;
-		border-radius: 0.375rem;
-		background: transparent;
-		color: #6b7280;
-		font-size: 0.75rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.width-pill:hover {
-		color: #374151;
-		background: rgba(0, 0, 0, 0.04);
-	}
-	.width-pill.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-	}
-	:global(.dark) .width-pill {
-		color: #9ca3af;
-	}
-	:global(.dark) .width-pill:hover {
-		color: #e5e7eb;
-		background: rgba(255, 255, 255, 0.08);
-	}
-	:global(.dark) .width-pill.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
-	}
-
-	/* Pages carousel */
-	.fokus-track {
-		display: flex;
-		gap: 1.5rem;
-		overflow-x: auto;
-		padding: 1rem calc(50% - var(--sheet-width) / 2);
-		scrollbar-width: none;
-		flex: 1;
-	}
-	.fokus-track::-webkit-scrollbar {
-		display: none;
-	}
-
-	.page-drag-wrapper {
-		flex: 0 0 auto;
-		transition: opacity 0.15s;
-	}
-	.page-drag-wrapper.dragging {
-		opacity: 0.4;
-	}
-
-	/* Add page button */
-	.neue-seite-card {
-		flex: 0 0 auto;
-		width: 48px;
-		align-self: stretch;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		border: 2px dashed rgba(0, 0, 0, 0.08);
-		border-radius: 0.375rem;
-		background: transparent;
-		color: #9ca3af;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-	.empty-pages-wrapper {
-		flex: 0 0 auto;
-		width: var(--sheet-width, min(480px, 85vw));
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 60vh;
-	}
-	.neue-seite-card.alone {
-		width: 100%;
-		min-height: 60vh;
-		border-color: rgba(0, 0, 0, 0.12);
-	}
-	.neue-seite-card:hover {
-		border-color: var(--color-primary, #8b5cf6);
-		color: var(--color-primary, #8b5cf6);
-		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 4%, transparent);
-	}
-	:global(.dark) .neue-seite-card {
-		border-color: rgba(255, 255, 255, 0.06);
-		color: #4b5563;
-	}
-	:global(.dark) .neue-seite-card.alone {
-		border-color: rgba(255, 255, 255, 0.1);
-		color: #6b7280;
-	}
-	:global(.dark) .neue-seite-card:hover {
-		border-color: var(--color-primary, #8b5cf6);
-		color: var(--color-primary, #8b5cf6);
-		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 8%, transparent);
-	}
-	.neue-seite-label {
-		font-size: 0.875rem;
-		font-weight: 500;
-		letter-spacing: 0.01em;
-	}
-
-	/* Minimized tabs */
-	.minimized-tabs {
-		position: fixed;
-		bottom: 4.5rem;
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 45;
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.375rem 0.5rem;
-		border-radius: 0.75rem;
-		background: #fffef5;
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-		animation: slideUp 0.25s ease-out;
-	}
-	:global(.dark) .minimized-tabs {
-		background: #252220;
-		border-color: rgba(255, 255, 255, 0.08);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-	}
-	@keyframes slideUp {
-		from {
-			opacity: 0;
-			transform: translateX(-50%) translateY(12px);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(-50%) translateY(0);
-		}
-	}
-
-	.minimized-tab {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.375rem;
-		transition: background 0.15s;
-	}
-	.minimized-tab:hover {
-		background: rgba(0, 0, 0, 0.04);
-	}
-	:global(.dark) .minimized-tab:hover {
-		background: rgba(255, 255, 255, 0.06);
-	}
-
-	.tab-dot {
-		width: 8px;
-		height: 8px;
-		border-radius: 9999px;
-		flex-shrink: 0;
-	}
-
-	.tab-title {
-		border: none;
-		background: none;
-		color: #374151;
-		font-size: 0.8125rem;
-		font-weight: 500;
-		cursor: pointer;
-		max-width: 120px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		padding: 0;
-	}
-	.tab-title:hover {
-		color: var(--color-primary, #8b5cf6);
-	}
-	:global(.dark) .tab-title {
-		color: #e5e7eb;
-	}
-	:global(.dark) .tab-title:hover {
-		color: var(--color-primary, #8b5cf6);
-	}
-
-	.tab-maximize,
-	.tab-close {
-		border: none;
-		background: none;
-		color: #9ca3af;
-		cursor: pointer;
-		padding: 0.125rem;
-		border-radius: 0.25rem;
-		display: flex;
-		align-items: center;
-		opacity: 0;
-		transition: all 0.15s;
-	}
-	:global(.group:hover) .tab-maximize,
-	:global(.group:hover) .tab-close,
-	.minimized-tab:hover .tab-maximize,
-	.minimized-tab:hover .tab-close {
-		opacity: 1;
-	}
-	.tab-maximize:hover {
-		color: var(--color-primary, #8b5cf6);
-		background: rgba(139, 92, 246, 0.08);
-	}
-	.tab-close:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.08);
-	}
-
-	.tab-add {
-		border: none;
-		background: none;
-		color: #9ca3af;
-		cursor: pointer;
-		padding: 0.25rem;
-		border-radius: 0.25rem;
-		display: flex;
-		align-items: center;
-		transition: all 0.15s;
-		margin-left: 0.125rem;
-	}
-	.tab-add:hover {
-		color: var(--color-primary, #8b5cf6);
-		background: rgba(139, 92, 246, 0.08);
-	}
-
-	/* Edit FAB */
-	.edit-fab {
-		position: fixed;
-		bottom: 5.5rem;
-		right: 1.25rem;
-		width: 44px;
-		height: 44px;
-		border-radius: 9999px;
-		border: none;
-		background: #fffef5;
-		color: #6b7280;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.12),
-			0 0 0 1px rgba(0, 0, 0, 0.06);
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s;
-		z-index: 40;
-	}
-	.edit-fab:hover {
-		color: var(--color-primary, #8b5cf6);
-		box-shadow:
-			0 4px 12px rgba(0, 0, 0, 0.15),
-			0 0 0 1px rgba(0, 0, 0, 0.08);
-		transform: scale(1.05);
-	}
-	.edit-fab.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
-		box-shadow:
-			0 4px 12px rgba(139, 92, 246, 0.3),
-			0 0 0 1px rgba(139, 92, 246, 0.5);
-	}
-	.edit-fab.active:hover {
-		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 85%, black);
-		color: white;
-	}
-	:global(.dark) .edit-fab {
-		background: #252220;
-		color: #9ca3af;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.3),
-			0 0 0 1px rgba(255, 255, 255, 0.08);
-	}
-	:global(.dark) .edit-fab:hover {
-		color: var(--color-primary, #8b5cf6);
-	}
-	:global(.dark) .edit-fab.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
 	}
 
 	:global(.mana-drop-target-hover) {

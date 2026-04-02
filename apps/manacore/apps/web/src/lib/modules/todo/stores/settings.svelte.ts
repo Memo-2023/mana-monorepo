@@ -10,7 +10,6 @@ import type { TaskPriority } from '../types';
 export type TodoView = 'inbox' | 'today' | 'upcoming' | 'kanban' | 'completed';
 export type KanbanCardSize = 'compact' | 'normal' | 'large';
 export type LayoutMode = 'fokus' | 'uebersicht' | 'matrix';
-export type PageWidth = 'narrow' | 'medium' | 'wide' | 'full';
 
 export type PageIcon =
 	| 'warning'
@@ -78,9 +77,6 @@ export interface TodoAppSettings extends Record<string, unknown> {
 	// View layout
 	activeLayoutMode: LayoutMode;
 
-	// Page width
-	pageWidth: PageWidth;
-
 	// Custom pages
 	customPages: PageConfig[];
 }
@@ -116,7 +112,6 @@ const DEFAULT_SETTINGS: TodoAppSettings = {
 	immersiveModeEnabled: false,
 	filterStripCollapsed: false,
 	activeLayoutMode: 'fokus' as LayoutMode,
-	pageWidth: 'medium' as PageWidth,
 	customPages: [] as PageConfig[],
 };
 
@@ -165,9 +160,6 @@ export const todoSettings = {
 	},
 	get focusMode() {
 		return baseStore.settings.focusMode;
-	},
-	get pageWidth() {
-		return baseStore.settings.pageWidth;
 	},
 	get activeLayoutMode() {
 		return baseStore.settings.activeLayoutMode;

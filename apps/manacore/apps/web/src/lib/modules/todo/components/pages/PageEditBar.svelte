@@ -10,8 +10,6 @@
 		Fire,
 		Leaf,
 		Heart,
-		ArrowLeft,
-		ArrowRight,
 		Trash,
 	} from '@manacore/shared-icons';
 	import type { PageIcon, PageConfig } from '../../stores/settings.svelte';
@@ -19,14 +17,10 @@
 	interface Props {
 		config: PageConfig;
 		onUpdate: (data: Partial<PageConfig>) => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
 		onDelete: () => void;
-		isFirst: boolean;
-		isLast: boolean;
 	}
 
-	let { config, onUpdate, onMoveLeft, onMoveRight, onDelete, isFirst, isLast }: Props = $props();
+	let { config, onUpdate, onDelete }: Props = $props();
 
 	const ICONS: { id: PageIcon; component: typeof Warning }[] = [
 		{ id: 'warning', component: Warning },
@@ -148,18 +142,6 @@
 	{/if}
 
 	<div class="edit-row actions-row">
-		<div class="move-btns">
-			{#if !isFirst && onMoveLeft}
-				<button class="action-btn" onclick={onMoveLeft} title="Nach links">
-					<ArrowLeft size={14} />
-				</button>
-			{/if}
-			{#if !isLast && onMoveRight}
-				<button class="action-btn" onclick={onMoveRight} title="Nach rechts">
-					<ArrowRight size={14} />
-				</button>
-			{/if}
-		</div>
 		<button class="action-btn delete-btn" onclick={onDelete} title="Seite löschen">
 			<Trash size={14} />
 		</button>
@@ -331,11 +313,7 @@
 		color: #9ca3af;
 	}
 	.actions-row {
-		justify-content: space-between;
-	}
-	.move-btns {
-		display: flex;
-		gap: 0.25rem;
+		justify-content: flex-end;
 	}
 	.action-btn {
 		display: flex;
