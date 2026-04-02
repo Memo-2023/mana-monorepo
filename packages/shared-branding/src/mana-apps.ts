@@ -479,23 +479,6 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'alpha',
 	},
 	{
-		id: 'reader',
-		name: 'Reader',
-		description: {
-			de: 'Text-to-Speech mit Offline-Audio',
-			en: 'Text-to-Speech with Offline Audio',
-		},
-		longDescription: {
-			de: 'Texte in hochwertige Sprache umwandeln und offline anhören.',
-			en: 'Convert text to high-quality speech and listen offline.',
-		},
-		icon: APP_ICONS.reader,
-		color: '#f97316',
-		comingSoon: false,
-		status: 'planning',
-		requiredTier: 'founder',
-	},
-	{
 		id: 'news',
 		name: 'News Hub',
 		description: {
@@ -610,23 +593,6 @@ export const MANA_APPS: ManaApp[] = [
 		},
 		icon: APP_ICONS.skilltree,
 		color: '#f59e0b',
-		comingSoon: false,
-		status: 'beta',
-		requiredTier: 'alpha',
-	},
-	{
-		id: 'playground',
-		name: 'Playground',
-		description: {
-			de: 'LLM Playground',
-			en: 'LLM Playground',
-		},
-		longDescription: {
-			de: 'Experimentiere mit verschiedenen KI-Modellen in einer interaktiven Spielwiese.',
-			en: 'Experiment with different AI models in an interactive playground.',
-		},
-		icon: APP_ICONS.playground,
-		color: '#06b6d4',
 		comingSoon: false,
 		status: 'beta',
 		requiredTier: 'alpha',
@@ -758,12 +724,10 @@ export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = {
 	calc: { dev: 'http://localhost:5173/calc', prod: 'https://mana.how/calc' },
 	moodlit: { dev: 'http://localhost:5173/moodlit', prod: 'https://mana.how/moodlit' },
 	memoro: { dev: 'http://localhost:5173/memoro', prod: 'https://mana.how/memoro' },
-	playground: { dev: 'http://localhost:5173/playground', prod: 'https://mana.how/playground' },
 	guides: { dev: 'http://localhost:5173/guides', prod: 'https://mana.how/guides' },
 	wisekeep: { dev: 'http://localhost:5173/wisekeep', prod: 'https://mana.how/wisekeep' },
 	news: { dev: 'http://localhost:5173/news', prod: 'https://mana.how/news' },
 	mail: { dev: 'http://localhost:5173/mail', prod: 'https://mana.how/mail' },
-	reader: { dev: 'exp://localhost:8081', prod: 'https://reader.mana.how' },
 	// ─── Separate Apps (own subdomains) ───────────────────────
 	matrix: { dev: 'http://localhost:5180', prod: 'https://matrix.mana.how' },
 	arcade: { dev: 'http://localhost:5201', prod: 'https://arcade.mana.how' },

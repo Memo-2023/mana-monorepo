@@ -1,8 +1,0 @@
-{
-	"name": "@manacore/reader",
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"dev": "turbo run dev"
-	}
-}

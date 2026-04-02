@@ -69,9 +69,6 @@ const questionsSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fi
 // Matrix icon (network/federated chat with purple gradient)
 const matrixSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#matrixGrad)"/><circle cx="512" cy="400" r="80" fill="white"/><circle cx="340" cy="580" r="60" fill="white" fill-opacity="0.8"/><circle cx="684" cy="580" r="60" fill="white" fill-opacity="0.8"/><circle cx="420" cy="720" r="50" fill="white" fill-opacity="0.6"/><circle cx="604" cy="720" r="50" fill="white" fill-opacity="0.6"/><path d="M512 480V640M512 640L420 700M512 640L604 700" stroke="white" stroke-width="16" stroke-linecap="round"/><path d="M450 440L370 540M574 440L654 540" stroke="white" stroke-width="16" stroke-linecap="round"/><path d="M340 640L400 700M684 640L624 700" stroke="white" stroke-width="12" stroke-linecap="round" stroke-opacity="0.6"/><defs><linearGradient id="matrixGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs></svg>`;
 
-// Playground icon (code/terminal with cyan gradient)
-const playgroundSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#playgroundGrad)"/><path d="M380 340L260 512L380 684" stroke="white" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/><path d="M644 340L764 512L644 684" stroke="white" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/><path d="M560 280L464 744" stroke="white" stroke-width="40" stroke-linecap="round"/><defs><linearGradient id="playgroundGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#06b6d4"/><stop offset="1" stop-color="#0891b2"/></linearGradient></defs></svg>`;
-
 // CityCorners icon (map pin with blue gradient)
 const citycornersSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="130" y="130" width="764" height="764" rx="382" fill="url(#ccGrad)"/><path d="M512 200C408.3 200 324 284.3 324 388C324 536 512 800 512 800C512 800 700 536 700 388C700 284.3 615.7 200 512 200ZM512 468C467.8 468 432 432.2 432 388C432 343.8 467.8 308 512 308C556.2 308 592 343.8 592 388C592 432.2 556.2 468 512 468Z" fill="white"/><circle cx="512" cy="388" r="60" fill="#2563eb" fill-opacity="0.4"/><defs><linearGradient id="ccGrad" x1="130" y1="130" x2="894" y2="894" gradientUnits="userSpaceOnUse"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs></svg>`;
 
@@ -109,16 +106,12 @@ export const APP_ICONS = {
 	inventory: svgToDataUrl(inventorySvg),
 	questions: svgToDataUrl(questionsSvg),
 	matrix: svgToDataUrl(matrixSvg),
-	playground: svgToDataUrl(playgroundSvg),
 	context: svgToDataUrl(contextSvg),
 	citycorners: svgToDataUrl(citycornersSvg),
 	times: svgToDataUrl(timesSvg),
 	calc: svgToDataUrl(calcSvg),
 	uload: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ug" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#818cf8"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ug)"/><path d="M35 45a10 10 0 0 1 10-10h0a10 10 0 0 1 0 20h0M65 55a10 10 0 0 1-10 10h0a10 10 0 0 1 0-20h0M42 58l16-16" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/></svg>`
-	),
-	reader: svgToDataUrl(
-		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f97316"/><stop offset="100%" style="stop-color:#fb923c"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#rg)"/><path d="M35 30h30a5 5 0 0 1 5 5v30a5 5 0 0 1-5 5H35a5 5 0 0 1-5-5V35a5 5 0 0 1 5-5z" stroke="white" stroke-width="3" fill="none"/><line x1="38" y1="42" x2="62" y2="42" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="38" y1="50" x2="58" y2="50" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="38" y1="58" x2="54" y2="58" stroke="white" stroke-width="2.5" stroke-linecap="round"/><circle cx="65" cy="65" r="10" fill="white" opacity="0.9"/><path d="M62 65l4.5 3v-6z" fill="#f97316"/></svg>`
 	),
 	news: svgToDataUrl(
 		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#34d399"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#ng)"/><rect x="22" y="25" width="56" height="50" rx="4" stroke="white" stroke-width="4" fill="none"/><line x1="30" y1="38" x2="55" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="48" x2="70" y2="48" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="58" x2="65" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`

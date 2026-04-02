@@ -22,7 +22,6 @@ export type AppId =
 	| 'questions'
 	| 'skilltree'
 	| 'planta'
-	| 'playground'
 	| 'lightwrite'
 	| 'context'
 	| 'mukke'

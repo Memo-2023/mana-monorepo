@@ -1,7 +1,0 @@
-{
-	"name": "playground",
-	"private": true,
-	"scripts": {
-		"dev": "turbo run dev"
-	}
-}
