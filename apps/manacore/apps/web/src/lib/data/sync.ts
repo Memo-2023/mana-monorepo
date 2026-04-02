@@ -40,7 +40,6 @@ interface SyncMeta {
 interface SyncChannelState {
 	appId: string;
 	tables: string[];
-	ws: WebSocket | null;
 	pushTimer: ReturnType<typeof setTimeout> | null;
 	pullTimer: ReturnType<typeof setInterval> | null;
 	lastError: string | null;
@@ -53,8 +52,6 @@ export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
 const PUSH_DEBOUNCE = 1000;
 const PULL_INTERVAL = 30_000;
 const WS_RECONNECT_DELAY = 5000;
-const WS_AUTH_TIMEOUT = 10_000;
-
 // ─── Unified Sync Manager ─────────────────────────────────────
 
 export function createUnifiedSync(serverUrl: string, getToken: () => Promise<string | null>) {
@@ -63,6 +60,7 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	let status: SyncStatus = 'idle';
 	let online = typeof navigator !== 'undefined' ? navigator.onLine : true;
 	let _statusListeners: Array<(s: SyncStatus) => void> = [];
+	let unifiedWs: WebSocket | null = null;
 
 	// ─── Lifecycle ──────────────────────────────────────────
 
@@ -71,7 +69,6 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			const channel: SyncChannelState = {
 				appId,
 				tables,
-				ws: null,
 				pushTimer: null,
 				pullTimer: null,
 				lastError: null,
@@ -81,10 +78,10 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			// Initial pull, then start periodic sync
 			pull(appId).catch(() => {});
 			channel.pullTimer = setInterval(() => pull(appId).catch(() => {}), PULL_INTERVAL);
-
-			// Connect WebSocket for real-time push notifications
-			connectWs(appId);
 		}
+
+		// Single unified WebSocket for all apps
+		connectUnifiedWs();
 
 		// Listen for online/offline
 		if (typeof window !== 'undefined') {
@@ -97,13 +94,14 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		for (const [, channel] of channels) {
 			if (channel.pushTimer) clearTimeout(channel.pushTimer);
 			if (channel.pullTimer) clearInterval(channel.pullTimer);
-			if (channel.ws) {
-				channel.ws.close();
-				channel.ws = null;
-			}
 		}
 		channels.clear();
 		_statusListeners = [];
+
+		if (unifiedWs) {
+			unifiedWs.close();
+			unifiedWs = null;
+		}
 
 		if (typeof window !== 'undefined') {
 			window.removeEventListener('online', handleOnline);
@@ -237,19 +235,18 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		}
 	}
 
-	// ─── WebSocket ──────────────────────────────────────────
+	// ─── WebSocket (unified — one connection for all apps) ──
 
-	function connectWs(appId: string): void {
-		const channel = channels.get(appId);
-		if (!channel || !online) return;
+	function connectUnifiedWs(): void {
+		if (!online) return;
 
-		const wsUrl = serverUrl.replace(/^http/, 'ws') + `/ws/${appId}`;
+		const wsUrl = serverUrl.replace(/^http/, 'ws') + '/ws';
 
 		try {
 			const ws = new WebSocket(wsUrl);
 
 			ws.onopen = async () => {
-				channel.ws = ws;
+				unifiedWs = ws;
 				// Authenticate — backend requires auth within 10 seconds
 				const token = await getToken();
 				if (token && ws.readyState === WebSocket.OPEN) {
@@ -260,9 +257,9 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			ws.onmessage = (event) => {
 				try {
 					const msg = JSON.parse(event.data);
-					if (msg.type === 'sync-available') {
-						// Server notifies us of new changes — trigger pull
-						pull(appId).catch(() => {});
+					if (msg.type === 'sync-available' && msg.appId) {
+						// Server notifies us of changes for a specific app — pull only that app
+						pull(msg.appId).catch(() => {});
 					}
 				} catch {
 					// Ignore malformed messages
@@ -270,10 +267,10 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			};
 
 			ws.onclose = () => {
-				channel.ws = null;
+				unifiedWs = null;
 				// Reconnect after delay
-				if (channels.has(appId) && online) {
-					setTimeout(() => connectWs(appId), WS_RECONNECT_DELAY);
+				if (channels.size > 0 && online) {
+					setTimeout(() => connectUnifiedWs(), WS_RECONNECT_DELAY);
 				}
 			};
 
@@ -427,19 +424,20 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		// Resume sync for all channels
 		for (const appId of channels.keys()) {
 			pull(appId).catch(() => {});
-			connectWs(appId);
+		}
+		// Reconnect unified WebSocket
+		if (!unifiedWs) {
+			connectUnifiedWs();
 		}
 	}
 
 	function handleOffline() {
 		online = false;
 		setStatus('offline');
-		// Close all WebSockets
-		for (const channel of channels.values()) {
-			if (channel.ws) {
-				channel.ws.close();
-				channel.ws = null;
-			}
+		// Close unified WebSocket
+		if (unifiedWs) {
+			unifiedWs.close();
+			unifiedWs = null;
 		}
 	}
 

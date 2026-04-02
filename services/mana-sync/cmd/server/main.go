@@ -59,7 +59,12 @@ func main() {
 	mux.HandleFunc("POST /sync/{appId}", handler.HandleSync)
 	mux.HandleFunc("GET /sync/{appId}/pull", handler.HandlePull)
 
-	// WebSocket endpoint
+	// WebSocket endpoints
+	// Unified: one connection per user, receives all app notifications with appId in payload
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		hub.HandleWebSocket(w, r, "") // empty appID = unified mode
+	})
+	// Legacy: one connection per app (backward-compatible)
 	mux.HandleFunc("/ws/{appId}", func(w http.ResponseWriter, r *http.Request) {
 		appID := r.PathValue("appId")
 		hub.HandleWebSocket(w, r, appID)

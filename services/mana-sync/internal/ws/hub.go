@@ -15,6 +15,7 @@ import (
 // Message types sent over WebSocket.
 type Message struct {
 	Type   string   `json:"type"`
+	AppID  string   `json:"appId,omitempty"`
 	Tables []string `json:"tables,omitempty"`
 	Token  string   `json:"token,omitempty"`
 }
@@ -45,6 +46,7 @@ func NewHub(validator *auth.Validator) *Hub {
 
 // HandleWebSocket upgrades an HTTP connection to WebSocket and registers the client.
 // The client must send an auth message with a valid JWT before receiving notifications.
+// Supports both unified (/ws) and legacy per-app (/ws/{appId}) connections.
 func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request, appID string) {
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
 		OriginPatterns: []string{"*"},
@@ -56,7 +58,7 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request, appID stri
 
 	ctx, cancel := context.WithCancel(r.Context())
 	client := &Client{
-		AppID:  appID,
+		AppID:  appID, // empty for unified connections, set for legacy per-app
 		Conn:   conn,
 		cancel: cancel,
 	}
@@ -67,6 +69,8 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request, appID stri
 
 // NotifyUser sends a sync-available message to all connected clients of a user,
 // except the client that originated the change.
+// For unified connections (AppID==""), all clients receive the notification with appId in the payload.
+// For legacy per-app connections, only clients matching the appId are notified.
 func (h *Hub) NotifyUser(userID, appID, excludeClientID string, tables []string) {
 	h.mu.RLock()
 	clients, ok := h.clients[userID]
@@ -78,7 +82,9 @@ func (h *Hub) NotifyUser(userID, appID, excludeClientID string, tables []string)
 	// Copy the client set under read lock to avoid holding lock during writes
 	clientsCopy := make([]*Client, 0, len(clients))
 	for client := range clients {
-		if client.AppID == appID {
+		// Unified clients (AppID=="") receive all notifications.
+		// Legacy per-app clients only receive notifications for their app.
+		if client.AppID == "" || client.AppID == appID {
 			clientsCopy = append(clientsCopy, client)
 		}
 	}
@@ -90,6 +96,7 @@ func (h *Hub) NotifyUser(userID, appID, excludeClientID string, tables []string)
 
 	msg := Message{
 		Type:   "sync-available",
+		AppID:  appID,
 		Tables: tables,
 	}
 	data, err := json.Marshal(msg)
@@ -175,7 +182,11 @@ func (h *Hub) readLoop(ctx context.Context, client *Client) {
 			ackData, _ := json.Marshal(ackMsg)
 			client.Conn.Write(ctx, websocket.MessageText, ackData)
 
-			slog.Info("websocket authenticated", "userID", client.UserID, "appID", client.AppID)
+			mode := "unified"
+			if client.AppID != "" {
+				mode = "legacy:" + client.AppID
+			}
+			slog.Info("websocket authenticated", "userID", client.UserID, "mode", mode)
 
 		case "ping":
 			pongMsg := Message{Type: "pong"}
@@ -221,7 +232,7 @@ func (h *Hub) addClient(client *Client) {
 	}
 	h.clients[client.UserID][client] = struct{}{}
 
-	slog.Info("client connected", "userID", client.UserID, "appID", client.AppID)
+	slog.Info("client connected", "userID", client.UserID, "appID", client.AppID, "unified", client.AppID == "")
 }
 
 func (h *Hub) removeClient(client *Client) {

@@ -82,20 +82,30 @@ Header: X-Client-Id: chrome-tab-abc123
 Header: Authorization: Bearer <jwt>
 ```
 
-### WebSocket (GET /ws/{appId})
+### WebSocket — Unified (GET /ws) [Recommended]
 
-Real-time notifications when other clients sync. Client must authenticate first.
+Single connection per user. Receives notifications for all apps with `appId` in the payload.
 
 ```
 CLIENT -> SERVER: { "type": "auth", "token": "<jwt>" }
 SERVER -> CLIENT: { "type": "auth-ok" }
 
 // When another client syncs:
-SERVER -> CLIENT: { "type": "sync-available", "tables": ["todos"] }
+SERVER -> CLIENT: { "type": "sync-available", "appId": "todo", "tables": ["tasks"] }
 
 // Keepalive:
 CLIENT -> SERVER: { "type": "ping" }
 SERVER -> CLIENT: { "type": "pong" }
+```
+
+### WebSocket — Legacy (GET /ws/{appId})
+
+One connection per app. Only receives notifications for that specific app. Backward-compatible.
+
+```
+CLIENT -> SERVER: { "type": "auth", "token": "<jwt>" }
+SERVER -> CLIENT: { "type": "auth-ok" }
+SERVER -> CLIENT: { "type": "sync-available", "appId": "todo", "tables": ["tasks"] }
 ```
 
 ## Conflict Resolution: Field-Level LWW
@@ -119,7 +129,8 @@ Result:   title="Buy eggs", completed=true  (merged — different fields)
 |----------|--------|------|-------------|
 | `POST /sync/{appId}` | POST | JWT | Push changes, get server delta |
 | `GET /sync/{appId}/pull` | GET | JWT | Pull changes for a collection |
-| `GET /ws/{appId}` | WS | JWT (in-band) | Real-time sync notifications |
+| `GET /ws` | WS | JWT (in-band) | Unified real-time sync (all apps, one connection) |
+| `GET /ws/{appId}` | WS | JWT (in-band) | Legacy per-app sync notifications |
 | `GET /health` | GET | No | Health check with connection stats |
 | `GET /metrics` | GET | No | Prometheus metrics |
 
