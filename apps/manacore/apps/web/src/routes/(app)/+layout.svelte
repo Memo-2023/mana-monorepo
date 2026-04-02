@@ -22,7 +22,9 @@
 	import type { InputBarAdapter } from '$lib/quick-input/types';
 	import { getAdapterLoader } from '$lib/quick-input/registry';
 	import { createFallbackAdapter } from '$lib/quick-input/fallback-adapter';
-	import { AuthGate } from '@manacore/shared-auth-ui';
+	import { AuthGate, GuestWelcomeModal } from '@manacore/shared-auth-ui';
+	import { createGuestMode, type GuestMode } from '$lib/stores/guest-mode.svelte';
+	import { NotificationBar } from '@manacore/shared-ui';
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { manacoreStore } from '$lib/data/local-store';
@@ -199,7 +201,7 @@
 	}
 
 	// ── Guest Mode ──────────────────────────────────────────
-	let guestMode: { destroy: () => void } | null = null;
+	let guestMode: GuestMode | null = null;
 
 	// ── Onboarding ──────────────────────────────────────────
 	function handleOnboardingComplete() {
@@ -434,5 +436,24 @@
 
 		<!-- Keyboard shortcuts modal -->
 		<KeyboardShortcutsModal open={showShortcuts} onclose={() => (showShortcuts = false)} />
+
+		<!-- Guest notifications (nudge) -->
+		{#if guestMode && guestMode.notifications.length > 0}
+			<div class="fixed bottom-20 left-1/2 z-50 -translate-x-1/2">
+				<NotificationBar notifications={guestMode.notifications} />
+			</div>
+		{/if}
 	</div>
+
+	<!-- Guest Welcome Modal -->
+	{#if guestMode}
+		<GuestWelcomeModal
+			appId="manacore"
+			visible={guestMode.showWelcome}
+			onClose={() => guestMode?.dismissWelcome()}
+			onLogin={() => goto('/login')}
+			onRegister={() => goto('/register')}
+			locale={($locale || 'de') === 'de' ? 'de' : 'en'}
+		/>
+	{/if}
 </AuthGate>
