@@ -3,6 +3,8 @@
 	import { page } from '$app/stores';
 	import type { Snippet } from 'svelte';
 	import { onDestroy, setContext } from 'svelte';
+	import { createReminderScheduler, notificationService } from '@manacore/shared-stores';
+	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import SessionWarning from '$lib/components/SessionWarning.svelte';
 	import { locale, _ } from 'svelte-i18n';
@@ -207,6 +209,9 @@
 		import.meta.env.PUBLIC_SYNC_SERVER_URL ||
 		'http://localhost:3050';
 	let unifiedSync: ReturnType<typeof createUnifiedSync> | null = null;
+	const reminderScheduler = createReminderScheduler({
+		sources: [todoReminderSource],
+	});
 
 	async function handleSignOut() {
 		unifiedSync?.stopAll();
@@ -271,6 +276,10 @@
 			}
 		}
 
+		// Phase B2: Start reminder scheduler
+		reminderScheduler.start();
+		notificationService.requestPermission();
+
 		// Phase C: Guest mode — welcome modal + nudge
 		if (!authStore.isAuthenticated) {
 			markAsGuest();
@@ -283,6 +292,7 @@
 
 	onDestroy(() => {
 		unifiedSync?.stopAll();
+		reminderScheduler.stop();
 		guestMode?.destroy();
 	});
 
