@@ -151,6 +151,80 @@ export function createQuoteSchema(): SchemaDefinition {
 }
 
 /**
+ * Create a schema for Mana Activity events (cross-app unified spiral)
+ *
+ * Stores activity highlights from all apps in a single spiral.
+ * Each record is a compact activity event: which app, what happened, when.
+ */
+export function createManaActivitySchema(): SchemaDefinition {
+	return {
+		version: 1,
+		name: 'mana_activity',
+		fields: [
+			{ name: 'id', type: 'int', maxLength: 12 }, // 0-4095
+			{ name: 'app', type: 'int', maxLength: 5 }, // 0-31 (app index)
+			{ name: 'eventType', type: 'int', maxLength: 4 }, // 0-15 (event type)
+			{ name: 'value', type: 'int', maxLength: 12 }, // 0-4095 (count/score/etc)
+			{ name: 'createdAt', type: 'timestamp', maxLength: 24 },
+			{ name: 'label', type: 'string', maxLength: 80 },
+		],
+	};
+}
+
+/**
+ * App index mapping for Mana Activity schema
+ */
+export const MANA_APP_INDEX: Record<string, number> = {
+	todo: 0,
+	calendar: 1,
+	contacts: 2,
+	chat: 3,
+	zitare: 4,
+	picture: 5,
+	clock: 6,
+	storage: 7,
+	mukke: 8,
+	presi: 9,
+	context: 10,
+	cards: 11,
+	photos: 12,
+	skilltree: 13,
+	citycorners: 14,
+	inventar: 15,
+	times: 16,
+	nutriphi: 17,
+	planta: 18,
+	questions: 19,
+	moodlit: 20,
+	uload: 21,
+	calc: 22,
+	manacore: 31,
+};
+
+export const MANA_APP_NAMES: Record<number, string> = Object.fromEntries(
+	Object.entries(MANA_APP_INDEX).map(([k, v]) => [v, k])
+);
+
+/**
+ * Event type mapping for Mana Activity schema
+ */
+export const MANA_EVENT_TYPE: Record<string, number> = {
+	created: 0,
+	completed: 1,
+	favorited: 2,
+	deleted: 3,
+	imported: 4,
+	exported: 5,
+	milestone: 6,
+	streak: 7,
+	snapshot: 8,
+};
+
+export const MANA_EVENT_NAMES: Record<number, string> = Object.fromEntries(
+	Object.entries(MANA_EVENT_TYPE).map(([k, v]) => [v, k])
+);
+
+/**
  * Validate that a record matches a schema
  */
 export function validateRecord(
