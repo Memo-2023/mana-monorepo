@@ -7,12 +7,10 @@ import { db } from '$lib/data/database';
 import type {
 	LocalMemo,
 	LocalMemory,
-	LocalTag,
 	LocalMemoTag,
 	LocalSpace,
 	Memo,
 	Memory,
-	Tag,
 	Space,
 } from './types';
 
@@ -41,18 +39,6 @@ export function toMemory(local: LocalMemory): Memory {
 		memoId: local.memoId,
 		title: local.title,
 		content: local.content,
-		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
-	};
-}
-
-export function toTag(local: LocalTag): Tag {
-	return {
-		id: local.id,
-		name: local.name,
-		color: local.color,
-		isPinned: local.isPinned ?? false,
-		sortOrder: local.sortOrder ?? 0,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};
@@ -98,16 +84,8 @@ export function useMemoriesByMemo(memoId: string) {
 	});
 }
 
-/** All tags, sorted by sortOrder. */
-export function useAllTags() {
-	return liveQuery(async () => {
-		const locals = await db.table<LocalTag>('memoroTags').toArray();
-		return locals
-			.filter((t) => !t.deletedAt)
-			.map(toTag)
-			.sort((a, b) => a.sortOrder - b.sortOrder);
-	});
-}
+// Tags: use shared global tags from @manacore/shared-stores
+export { useAllTags } from '@manacore/shared-stores';
 
 /** All memo-tag associations. */
 export function useAllMemoTags() {

@@ -3,7 +3,14 @@
  */
 
 export { filesStore } from './stores/files.svelte';
-export { storageTagStore } from './stores/tags.svelte';
+export {
+	tagMutations,
+	useAllTags,
+	getTagById,
+	getTagsByIds,
+	getTagColor,
+	fileTagOps,
+} from './stores/tags.svelte';
 export {
 	useAllFiles,
 	useAllFolders,
@@ -22,11 +29,5 @@ export {
 	formatFileSize,
 } from './queries';
 export type { StorageFile, StorageFolder, StorageTag } from './queries';
-export {
-	fileTable,
-	storageFolderTable,
-	storageTagTable,
-	fileTagTable,
-	STORAGE_GUEST_SEED,
-} from './collections';
-export type { LocalFile, LocalFolder, LocalTag, LocalFileTag } from './types';
+export { fileTable, storageFolderTable, fileTagTable, STORAGE_GUEST_SEED } from './collections';
+export type { LocalFile, LocalFolder, LocalFileTag } from './types';

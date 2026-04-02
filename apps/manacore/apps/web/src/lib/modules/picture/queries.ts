@@ -13,7 +13,6 @@ import type {
 	LocalImage,
 	LocalBoard,
 	LocalBoardItem,
-	LocalPictureTag,
 	LocalImageTag,
 	Image,
 	Board,
@@ -113,13 +112,8 @@ export function useAllBoards() {
 	}, [] as BoardWithCount[]);
 }
 
-/** All picture tags. */
-export function useAllPictureTags() {
-	return useLiveQueryWithDefault(async () => {
-		const locals = await db.table<LocalPictureTag>('pictureTags').toArray();
-		return locals.filter((t) => !t.deletedAt);
-	}, [] as LocalPictureTag[]);
-}
+// Tags: use shared global tags from @manacore/shared-stores
+export { useAllTags as useAllPictureTags } from '@manacore/shared-stores';
 
 /** All image-tag associations. */
 export function useAllImageTags() {

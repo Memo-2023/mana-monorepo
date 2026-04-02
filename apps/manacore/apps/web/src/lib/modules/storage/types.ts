@@ -30,11 +30,6 @@ export interface LocalFolder extends BaseRecord {
 	isDeleted: boolean;
 }
 
-export interface LocalTag extends BaseRecord {
-	name: string;
-	color?: string | null;
-}
-
 export interface LocalFileTag extends BaseRecord {
 	fileId: string;
 	tagId: string;

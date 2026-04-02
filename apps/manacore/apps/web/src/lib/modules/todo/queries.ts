@@ -6,7 +6,6 @@ import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
 import type {
 	LocalTask,
-	LocalLabel,
 	LocalBoardView,
 	LocalReminder,
 	LocalTodoProject,
@@ -50,12 +49,8 @@ export function useAllTasks() {
 	});
 }
 
-export function useAllLabels() {
-	return liveQuery(async () => {
-		const locals = await db.table<LocalLabel>('labels').toArray();
-		return locals.filter((l) => !l.deletedAt);
-	});
-}
+// Labels/Tags: use shared global tags from @manacore/shared-stores
+export { useAllTags as useAllLabels } from '@manacore/shared-stores';
 
 export function useAllBoardViews() {
 	return liveQuery(async () => {

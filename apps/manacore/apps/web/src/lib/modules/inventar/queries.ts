@@ -75,7 +75,7 @@ export interface Category {
 export type ViewMode = 'list' | 'grid' | 'table';
 
 export interface SortOption {
-	field: 'name' | 'createdAt' | 'updatedAt' | 'status' | 'quantity';
+	field: string;
 	direction: 'asc' | 'desc';
 }
 

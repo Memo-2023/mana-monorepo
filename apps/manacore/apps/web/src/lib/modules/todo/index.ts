@@ -37,8 +37,7 @@ export {
 export {
 	taskTable,
 	todoProjectTable,
-	labelTable,
-	taskLabelTable,
+	taskTagTable,
 	reminderTable,
 	boardViewTable,
 	TODO_GUEST_SEED,
@@ -66,7 +65,7 @@ export { useTaskForm } from './composables/useTaskForm.svelte';
 export type {
 	LocalTask,
 	LocalLabel,
-	LocalTaskLabel,
+	LocalTaskTag,
 	LocalReminder,
 	LocalBoardView,
 	LocalTodoProject,

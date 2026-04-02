@@ -23,15 +23,6 @@ export interface LocalLink extends BaseRecord {
 	order: number;
 }
 
-export interface LocalTag extends BaseRecord {
-	name: string;
-	slug: string;
-	color?: string | null;
-	icon?: string | null;
-	isPublic: boolean;
-	usageCount: number;
-}
-
 export interface LocalFolder extends BaseRecord {
 	name: string;
 	color?: string | null;

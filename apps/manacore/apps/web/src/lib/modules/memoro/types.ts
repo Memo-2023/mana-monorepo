@@ -51,14 +51,6 @@ export interface LocalMemory extends BaseRecord {
 	metadata?: Record<string, unknown>;
 }
 
-export interface LocalTag extends BaseRecord {
-	name: string;
-	color: string | null;
-	userId?: string;
-	isPinned?: boolean;
-	sortOrder?: number;
-}
-
 export interface LocalMemoTag extends BaseRecord {
 	memoId: string;
 	tagId: string;

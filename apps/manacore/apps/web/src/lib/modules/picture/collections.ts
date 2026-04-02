@@ -5,20 +5,13 @@
  */
 
 import { db } from '$lib/data/database';
-import type {
-	LocalImage,
-	LocalBoard,
-	LocalBoardItem,
-	LocalPictureTag,
-	LocalImageTag,
-} from './types';
+import type { LocalImage, LocalBoard, LocalBoardItem, LocalImageTag } from './types';
 
 // ─── Collection Accessors ──────────────────────────────────
 
 export const imageTable = db.table<LocalImage>('images');
 export const boardTable = db.table<LocalBoard>('boards');
 export const boardItemTable = db.table<LocalBoardItem>('boardItems');
-export const pictureTagTable = db.table<LocalPictureTag>('pictureTags');
 export const imageTagTable = db.table<LocalImageTag>('imageTags');
 
 // ─── Guest Seed ────────────────────────────────────────────
@@ -75,9 +68,4 @@ export const PICTURE_GUEST_SEED = {
 			properties: { fontFamily: 'Arial', fontWeight: 'normal', textAlign: 'center' },
 		},
 	] satisfies LocalBoardItem[],
-	pictureTags: [
-		{ id: 'tag-landscape', name: 'Landschaft', color: '#22c55e' },
-		{ id: 'tag-portrait', name: 'Portrait', color: '#3b82f6' },
-		{ id: 'tag-abstract', name: 'Abstrakt', color: '#a855f7' },
-	] satisfies LocalPictureTag[],
 };

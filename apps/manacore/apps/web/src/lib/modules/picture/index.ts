@@ -24,7 +24,6 @@ export {
 	imageTable,
 	boardTable,
 	boardItemTable,
-	pictureTagTable,
 	imageTagTable,
 	PICTURE_GUEST_SEED,
 } from './collections';
@@ -32,7 +31,6 @@ export type {
 	LocalImage,
 	LocalBoard,
 	LocalBoardItem,
-	LocalPictureTag,
 	LocalImageTag,
 	ViewMode,
 	Image,

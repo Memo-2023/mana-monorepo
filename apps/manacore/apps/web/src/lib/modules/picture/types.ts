@@ -55,11 +55,6 @@ export interface LocalBoardItem extends BaseRecord {
 	properties: Record<string, unknown>;
 }
 
-export interface LocalPictureTag extends BaseRecord {
-	name: string;
-	color?: string | null;
-}
-
 export interface LocalImageTag extends BaseRecord {
 	imageId: string;
 	tagId: string;

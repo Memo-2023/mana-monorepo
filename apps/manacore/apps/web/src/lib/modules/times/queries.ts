@@ -11,7 +11,6 @@ import type {
 	LocalClient,
 	LocalProject,
 	LocalTimeEntry,
-	LocalTag,
 	LocalTemplate,
 	LocalSettings,
 	LocalAlarm,
@@ -83,17 +82,6 @@ export function toTimeEntry(local: LocalTimeEntry): TimeEntry {
 		visibility: local.visibility,
 		guildId: local.guildId ?? undefined,
 		source: local.source ?? undefined,
-		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
-	};
-}
-
-export function toTag(local: LocalTag): Tag {
-	return {
-		id: local.id,
-		name: local.name,
-		color: local.color,
-		order: local.order,
 		createdAt: local.createdAt ?? new Date().toISOString(),
 		updatedAt: local.updatedAt ?? new Date().toISOString(),
 	};
@@ -200,12 +188,8 @@ export function useAllTimeEntries() {
 	});
 }
 
-export function useAllTags() {
-	return liveQuery(async () => {
-		const locals = await db.table<LocalTag>('timeTags').toArray();
-		return locals.filter((t) => !t.deletedAt).map(toTag);
-	});
-}
+// Tags: use shared global tags from @manacore/shared-stores
+export { useAllTags } from '@manacore/shared-stores';
 
 export function useAllTemplates() {
 	return liveQuery(async () => {

@@ -6,7 +6,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
-import type { LocalFile, LocalFolder, LocalTag, LocalFileTag } from './types';
+import type { LocalFile, LocalFolder, LocalFileTag } from './types';
 
 // ─── Shared Types (inline to avoid @storage/shared dependency) ───
 
@@ -92,7 +92,12 @@ export function toFolder(local: LocalFolder): StorageFolder {
 	};
 }
 
-export function toTag(local: LocalTag): StorageTag {
+export function toTag(local: {
+	id: string;
+	name: string;
+	color?: string | null;
+	createdAt?: string;
+}): StorageTag {
 	return {
 		id: local.id,
 		userId: 'local',
@@ -126,16 +131,8 @@ export function useAllFolders() {
 	});
 }
 
-/** All tags, sorted by name. Auto-updates on any change. */
-export function useAllStorageTags() {
-	return liveQuery(async () => {
-		const locals = await db.table<LocalTag>('storageTags').toArray();
-		return locals
-			.filter((t) => !t.deletedAt)
-			.map(toTag)
-			.sort((a, b) => a.name.localeCompare(b.name));
-	});
-}
+// Tags: use shared global tags from @manacore/shared-stores
+export { useAllTags as useAllStorageTags } from '@manacore/shared-stores';
 
 // ─── Pure Helper Functions (for $derived) ─────────────────
 

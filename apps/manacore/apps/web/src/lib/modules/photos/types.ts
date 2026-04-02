@@ -23,11 +23,6 @@ export interface LocalFavorite extends BaseRecord {
 	mediaId: string;
 }
 
-export interface LocalTag extends BaseRecord {
-	name: string;
-	color?: string | null;
-}
-
 export interface LocalPhotoTag extends BaseRecord {
 	mediaId: string;
 	tagId: string;

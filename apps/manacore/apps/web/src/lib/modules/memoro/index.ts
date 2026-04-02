@@ -3,18 +3,23 @@
  */
 
 export { memosStore } from './stores/memos.svelte';
-export { tagsStore } from './stores/tags.svelte';
+export {
+	tagMutations,
+	useAllTags,
+	getTagById,
+	getTagsByIds,
+	getTagColor,
+	memoTagOps,
+} from './stores/tags.svelte';
 export { memoriesStore } from './stores/memories.svelte';
 export {
 	useAllMemos,
 	useArchivedMemos,
 	useMemoriesByMemo,
-	useAllTags,
 	useAllMemoTags,
 	useAllSpaces,
 	toMemo,
 	toMemory,
-	toTag,
 	toSpace,
 	sortMemos,
 	filterBySearch,
@@ -26,7 +31,6 @@ export {
 export {
 	memoTable,
 	memoryTable,
-	memoroTagTable,
 	memoTagTable,
 	memoroSpaceTable,
 	spaceMemberTable,
@@ -36,7 +40,6 @@ export {
 export type {
 	LocalMemo,
 	LocalMemory,
-	LocalTag,
 	LocalMemoTag,
 	LocalSpace,
 	LocalSpaceMember,

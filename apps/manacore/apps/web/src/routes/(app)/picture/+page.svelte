@@ -3,7 +3,8 @@
 	import { imagesStore } from '$lib/modules/picture/stores/images.svelte';
 	import { pictureViewStore } from '$lib/modules/picture/stores/view.svelte';
 	import { getFavoriteImages, getImagesByTags } from '$lib/modules/picture/queries';
-	import type { Image, LocalPictureTag, LocalImageTag } from '$lib/modules/picture/types';
+	import type { Image, LocalImageTag } from '$lib/modules/picture/types';
+	import type { Tag } from '@manacore/shared-tags';
 	import {
 		Heart,
 		SquaresFour,
@@ -16,7 +17,7 @@
 	} from '@manacore/shared-icons';
 
 	const allImages: { value: Image[] } = getContext('allImages');
-	const allPictureTags: { value: LocalPictureTag[] } = getContext('pictureTags');
+	const allPictureTags: { value: Tag[] } = getContext('pictureTags');
 	const allImageTags: { value: LocalImageTag[] } = getContext('allImageTags');
 
 	let searchQuery = $state('');

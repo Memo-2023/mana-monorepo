@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { tagsStore } from '$lib/modules/memoro/stores/tags.svelte';
-	import type { Tag } from '$lib/modules/memoro/types';
+	import { tagMutations } from '$lib/modules/memoro/stores/tags.svelte';
+	import type { Tag } from '@manacore/shared-tags';
 	import {
 		ArrowLeft,
 		Plus,
@@ -48,21 +48,17 @@
 	async function handleSubmit() {
 		if (!formName.trim()) return;
 		if (editingId) {
-			await tagsStore.update(editingId, { name: formName.trim(), color: formColor });
+			await tagMutations.updateTag(editingId, { name: formName.trim(), color: formColor });
 		} else {
-			await tagsStore.create({ name: formName.trim(), color: formColor });
+			await tagMutations.createTag({ name: formName.trim(), color: formColor });
 		}
 		showCreateForm = false;
 	}
 
 	async function handleDelete(id: string) {
 		if (confirm('Tag wirklich loschen?')) {
-			await tagsStore.delete(id);
+			await tagMutations.deleteTag(id);
 		}
-	}
-
-	async function handleTogglePin(tag: Tag) {
-		await tagsStore.update(tag.id, { isPinned: !tag.isPinned });
 	}
 </script>
 
@@ -123,17 +119,7 @@
 						style="background-color: {tag.color || '#888'}"
 					></span>
 					<span class="flex-1 font-medium text-[hsl(var(--foreground))]">{tag.name}</span>
-					{#if tag.isPinned}
-						<PushPin size={14} weight="fill" class="text-[hsl(var(--primary))]" />
-					{/if}
 					<div class="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-						<button
-							onclick={() => handleTogglePin(tag)}
-							class="rounded p-1 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
-							title={tag.isPinned ? 'Loslosen' : 'Anpinnen'}
-						>
-							<PushPin size={16} weight={tag.isPinned ? 'fill' : 'regular'} />
-						</button>
 						<button
 							onclick={() => openEditForm(tag)}
 							class="rounded p-1 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"

@@ -4,7 +4,7 @@
 	import { getContext } from 'svelte';
 	import { memosStore } from '$lib/modules/memoro/stores/memos.svelte';
 	import { memoriesStore } from '$lib/modules/memoro/stores/memories.svelte';
-	import { tagsStore } from '$lib/modules/memoro/stores/tags.svelte';
+	import { memoTagOps } from '$lib/modules/memoro/stores/tags.svelte';
 	import {
 		useMemoriesByMemo,
 		getTagsForMemo,
@@ -75,12 +75,12 @@
 	}
 
 	async function handleAddTag(tagId: string) {
-		await tagsStore.addToMemo(memoId, tagId);
+		await memoTagOps.addTag(memoId, tagId);
 		showTagPicker = false;
 	}
 
 	async function handleRemoveTag(tagId: string) {
-		await tagsStore.removeFromMemo(memoId, tagId);
+		await memoTagOps.removeTag(memoId, tagId);
 	}
 
 	// Available tags (not already assigned)

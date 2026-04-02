@@ -10,7 +10,6 @@ import type {
 	LocalClient,
 	LocalProject,
 	LocalTimeEntry,
-	LocalTag,
 	LocalTemplate,
 	LocalSettings,
 	LocalAlarm,
@@ -23,7 +22,6 @@ import type {
 export const clientTable = db.table<LocalClient>('timeClients');
 export const projectTable = db.table<LocalProject>('timeProjects');
 export const timeEntryTable = db.table<LocalTimeEntry>('timeEntries');
-export const tagTable = db.table<LocalTag>('timeTags');
 export const templateTable = db.table<LocalTemplate>('timeTemplates');
 export const settingsTable = db.table<LocalSettings>('timeSettings');
 
@@ -180,12 +178,6 @@ export const TIMES_GUEST_SEED = {
 			visibility: 'private' as const,
 			source: { app: 'manual' as const },
 		},
-	],
-	timeTags: [
-		{ id: 'times-tag-design', name: 'design', color: '#f59e0b', order: 0 },
-		{ id: 'times-tag-dev', name: 'development', color: '#3b82f6', order: 1 },
-		{ id: 'times-tag-meeting', name: 'meeting', color: '#6b7280', order: 2 },
-		{ id: 'times-tag-review', name: 'review', color: '#22c55e', order: 3 },
 	],
 	timeSettings: [
 		{

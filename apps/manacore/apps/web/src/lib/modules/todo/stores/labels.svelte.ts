@@ -1,32 +1,35 @@
 /**
- * Labels Store — Mutation-Only Service
+ * Todo Tags (formerly Labels) — Uses shared global tags + module-specific junction table.
  */
 
-import { labelTable } from '../collections';
-import type { LocalLabel } from '../types';
+import { db } from '$lib/data/database';
+import { createTagLinkOps } from '@manacore/shared-stores';
 
+export {
+	tagMutations,
+	useAllTags,
+	getTagById,
+	getTagsByIds,
+	getTagColor,
+} from '@manacore/shared-stores';
+
+export const taskTagOps = createTagLinkOps({
+	table: () => db.table('taskLabels'), // DB table still 'taskLabels' until schema migration
+	entityIdField: 'taskId',
+});
+
+// Backward-compat alias
 export const labelsStore = {
-	async createLabel(data: { name: string; color: string }) {
-		const newLabel: LocalLabel = {
-			id: crypto.randomUUID(),
-			name: data.name,
-			color: data.color,
-		};
-		await labelTable.add(newLabel);
-		return newLabel;
+	createLabel: async (data: { name: string; color: string }) => {
+		const { tagMutations } = await import('@manacore/shared-stores');
+		return tagMutations.createTag({ name: data.name, color: data.color });
 	},
-
-	async updateLabel(id: string, data: Partial<Pick<LocalLabel, 'name' | 'color'>>) {
-		await labelTable.update(id, {
-			...data,
-			updatedAt: new Date().toISOString(),
-		});
+	updateLabel: async (id: string, data: { name?: string; color?: string }) => {
+		const { tagMutations } = await import('@manacore/shared-stores');
+		return tagMutations.updateTag(id, data);
 	},
-
-	async deleteLabel(id: string) {
-		await labelTable.update(id, {
-			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
-		});
+	deleteLabel: async (id: string) => {
+		const { tagMutations } = await import('@manacore/shared-stores');
+		return tagMutations.deleteTag(id);
 	},
 };

@@ -5,7 +5,7 @@
 export { photoStore } from './stores/photos.svelte';
 export { albumMutations } from './stores/albums.svelte';
 export {
-	useAllPhotoTags,
+	useAllTags,
 	getTagById,
 	getTagsByIds,
 	tagMutations,
@@ -28,7 +28,6 @@ export {
 	albumTable,
 	albumItemTable,
 	photoFavoriteTable,
-	photoTagTable,
 	photoMediaTagTable,
 	PHOTOS_GUEST_SEED,
 } from './collections';
@@ -36,7 +35,6 @@ export type {
 	LocalAlbum,
 	LocalAlbumItem,
 	LocalFavorite,
-	LocalTag,
 	LocalPhotoTag,
 	Photo,
 	PhotoFilters,

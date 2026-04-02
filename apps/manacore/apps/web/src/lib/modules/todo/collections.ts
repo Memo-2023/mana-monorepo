@@ -7,8 +7,7 @@
 import { db } from '$lib/data/database';
 import type {
 	LocalTask,
-	LocalLabel,
-	LocalTaskLabel,
+	LocalTaskTag,
 	LocalReminder,
 	LocalBoardView,
 	LocalTodoProject,
@@ -18,8 +17,7 @@ import type {
 
 export const taskTable = db.table<LocalTask>('tasks');
 export const todoProjectTable = db.table<LocalTodoProject>('todoProjects');
-export const labelTable = db.table<LocalLabel>('labels');
-export const taskLabelTable = db.table<LocalTaskLabel>('taskLabels');
+export const taskTagTable = db.table<LocalTaskTag>('taskLabels'); // DB table still 'taskLabels' until schema migration
 export const reminderTable = db.table<LocalReminder>('reminders');
 export const boardViewTable = db.table<LocalBoardView>('boardViews');
 
@@ -32,19 +30,6 @@ const nextWeek = new Date(now);
 nextWeek.setDate(nextWeek.getDate() + 7);
 
 export const TODO_GUEST_SEED = {
-	labels: [
-		{
-			id: 'label-important',
-			name: 'Wichtig',
-			color: '#ef4444',
-		},
-		{
-			id: 'label-idea',
-			name: 'Idee',
-			color: '#f59e0b',
-		},
-	] satisfies LocalLabel[],
-
 	boardViews: [
 		{
 			id: 'view-kanban',

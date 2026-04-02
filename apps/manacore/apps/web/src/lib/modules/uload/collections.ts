@@ -5,12 +5,11 @@
  */
 
 import { db } from '$lib/data/database';
-import type { LocalLink, LocalTag, LocalFolder, LocalLinkTag } from './types';
+import type { LocalLink, LocalFolder, LocalLinkTag } from './types';
 
 // ─── Collection Accessors ──────────────────────────────────
 
 export const linkTable = db.table<LocalLink>('links');
-export const uloadTagTable = db.table<LocalTag>('uloadTags');
 export const uloadFolderTable = db.table<LocalFolder>('uloadFolders');
 export const linkTagTable = db.table<LocalLinkTag>('linkTags');
 
@@ -31,35 +30,6 @@ export const ULOAD_GUEST_SEED = {
 			order: 1,
 		},
 	] satisfies LocalFolder[],
-	uloadTags: [
-		{
-			id: 'tag-social',
-			name: 'Social Media',
-			slug: 'social-media',
-			color: '#8b5cf6',
-			icon: null,
-			isPublic: false,
-			usageCount: 2,
-		},
-		{
-			id: 'tag-docs',
-			name: 'Dokumentation',
-			slug: 'dokumentation',
-			color: '#f59e0b',
-			icon: null,
-			isPublic: false,
-			usageCount: 1,
-		},
-		{
-			id: 'tag-marketing',
-			name: 'Marketing',
-			slug: 'marketing',
-			color: '#ef4444',
-			icon: null,
-			isPublic: false,
-			usageCount: 1,
-		},
-	] satisfies LocalTag[],
 	links: [
 		{
 			id: 'link-welcome',
@@ -109,10 +79,5 @@ export const ULOAD_GUEST_SEED = {
 			order: 1,
 		},
 	] satisfies LocalLink[],
-	linkTags: [
-		{ id: 'lt-1', linkId: 'link-github', tagId: 'tag-social' },
-		{ id: 'lt-2', linkId: 'link-docs', tagId: 'tag-docs' },
-		{ id: 'lt-3', linkId: 'link-welcome', tagId: 'tag-social' },
-		{ id: 'lt-4', linkId: 'link-expired', tagId: 'tag-marketing' },
-	] satisfies LocalLinkTag[],
+	linkTags: [] as LocalLinkTag[],
 };

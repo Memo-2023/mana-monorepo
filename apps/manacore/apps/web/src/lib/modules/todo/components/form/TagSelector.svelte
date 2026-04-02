@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { Observable } from 'dexie';
-	import type { LocalLabel } from '../../types';
 	import { TagSelector as SharedTagSelector } from '@manacore/shared-ui';
 	import type { Tag } from '@manacore/shared-ui';
 
@@ -12,14 +11,15 @@
 
 	let { selectedIds, onChange }: Props = $props();
 
-	const allLabels$: Observable<LocalLabel[]> = getContext('labels');
-	let allLabels = $state<LocalLabel[]>([]);
+	// Labels come from context (set in todo +layout.svelte via useAllLabels → shared useAllTags)
+	const allLabels$: Observable<Array<{ id: string; name: string; color: string }>> =
+		getContext('labels');
+	let allLabels = $state<Array<{ id: string; name: string; color: string }>>([]);
 	$effect(() => {
-		const sub = allLabels$.subscribe((l) => (allLabels = l));
+		const sub = allLabels$.subscribe((l) => (allLabels = l ?? []));
 		return () => sub.unsubscribe();
 	});
 
-	// Adapt LocalLabel[] to Tag[] for the shared component
 	const tags: Tag[] = $derived(allLabels.map((l) => ({ id: l.id, name: l.name, color: l.color })));
 	const selectedTags: Tag[] = $derived(
 		selectedIds.map((id) => tags.find((t) => t.id === id)).filter((t): t is Tag => t != null)

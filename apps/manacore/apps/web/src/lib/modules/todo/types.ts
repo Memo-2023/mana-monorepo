@@ -3,6 +3,10 @@
  */
 
 import type { BaseRecord } from '@manacore/local-store';
+import type { Tag } from '@manacore/shared-tags';
+
+/** @deprecated Use Tag from @manacore/shared-tags. Kept for backward compatibility. */
+export type LocalLabel = Tag;
 
 // ─── Local Types (IndexedDB) ──────────────────────────────
 
@@ -35,15 +39,9 @@ export interface LocalTask extends BaseRecord {
 	metadata?: Record<string, unknown>;
 }
 
-export interface LocalLabel extends BaseRecord {
-	name: string;
-	color: string;
-	userId?: string;
-}
-
-export interface LocalTaskLabel extends BaseRecord {
+export interface LocalTaskTag extends BaseRecord {
 	taskId: string;
-	labelId: string;
+	tagId: string;
 }
 
 export interface LocalReminder extends BaseRecord {

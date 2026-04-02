@@ -8,7 +8,6 @@ import { db } from '$lib/data/database';
 import type {
 	LocalMemo,
 	LocalMemory,
-	LocalTag,
 	LocalMemoTag,
 	LocalSpace,
 	LocalSpaceMember,
@@ -19,7 +18,6 @@ import type {
 
 export const memoTable = db.table<LocalMemo>('memos');
 export const memoryTable = db.table<LocalMemory>('memories');
-export const memoroTagTable = db.table<LocalTag>('memoroTags');
 export const memoTagTable = db.table<LocalMemoTag>('memoTags');
 export const memoroSpaceTable = db.table<LocalSpace>('memoroSpaces');
 export const spaceMemberTable = db.table<LocalSpaceMember>('spaceMembers');
@@ -55,29 +53,7 @@ export const MEMORO_GUEST_SEED = {
 				'Memoro bietet Sprachaufnahme, automatische Transkription, KI-gestützte Zusammenfassungen und Tagging.',
 		},
 	],
-	memoroTags: [
-		{
-			id: 'tag-ideen',
-			name: 'Ideen',
-			color: '#3b82f6',
-			isPinned: true,
-			sortOrder: 0,
-		},
-		{
-			id: 'tag-notizen',
-			name: 'Notizen',
-			color: '#10b981',
-			isPinned: false,
-			sortOrder: 1,
-		},
-	],
-	memoTags: [
-		{
-			id: 'mt-demo-1',
-			memoId: DEMO_MEMO_ID,
-			tagId: 'tag-notizen',
-		},
-	],
+	memoTags: [] as Record<string, unknown>[],
 	memoroSpaces: [] as Record<string, unknown>[],
 	spaceMembers: [] as Record<string, unknown>[],
 	memoSpaces: [] as Record<string, unknown>[],

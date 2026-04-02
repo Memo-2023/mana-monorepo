@@ -33,8 +33,8 @@ export interface ProjectBudget {
 }
 
 export interface SortOption {
-	field: SortField;
-	direction: SortDirection;
+	field: string;
+	direction: 'asc' | 'desc';
 }
 
 export interface FilterCriteria {
@@ -193,12 +193,6 @@ export interface LocalTimeEntry extends BaseRecord {
 	visibility: ProjectVisibility;
 	guildId?: string | null;
 	source?: EntrySourceRef | null;
-}
-
-export interface LocalTag extends BaseRecord {
-	name: string;
-	color: string;
-	order: number;
 }
 
 export interface LocalTemplate extends BaseRecord {
