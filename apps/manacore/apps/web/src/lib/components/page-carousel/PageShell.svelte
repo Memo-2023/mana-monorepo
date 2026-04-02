@@ -10,11 +10,12 @@
 
 	interface Props {
 		widthPx: number;
+		heightPx?: number;
 		maximized?: boolean;
 		onClose: () => void;
 		onMinimize?: () => void;
 		onMaximize?: () => void;
-		onResize?: (widthPx: number) => void;
+		onResize?: (widthPx: number, heightPx?: number) => void;
 		// Default header
 		title?: string;
 		color?: string;
@@ -28,6 +29,7 @@
 
 	let {
 		widthPx,
+		heightPx,
 		maximized = false,
 		onClose,
 		onMinimize,
@@ -44,20 +46,31 @@
 
 	const MIN_WIDTH = 280;
 	const MAX_WIDTH = 1200;
+	const MIN_HEIGHT = 200;
+	const MAX_HEIGHT = 2000;
 
 	let resizing = $state(false);
 
-	function handleResizeStart(startX: number) {
+	function handleResizeStart(startX: number, startY: number) {
 		if (!onResize) return;
 		const startWidth = widthPx;
+		const startHeight = heightPx ?? 0;
 		resizing = true;
 		document.body.style.userSelect = 'none';
-		document.body.style.cursor = 'ew-resize';
+		document.body.style.cursor = 'nwse-resize';
 
-		function onMove(clientX: number) {
-			const delta = clientX - startX;
-			const newWidth = Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + delta)));
-			onResize!(newWidth);
+		function onMove(clientX: number, clientY: number) {
+			const deltaX = clientX - startX;
+			const newWidth = Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + deltaX)));
+			if (startHeight > 0) {
+				const deltaY = clientY - startY;
+				const newHeight = Math.round(
+					Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, startHeight + deltaY))
+				);
+				onResize!(newWidth, newHeight);
+			} else {
+				onResize!(newWidth);
+			}
 		}
 
 		function onEnd() {
@@ -71,10 +84,10 @@
 		}
 
 		function onMouseMove(e: MouseEvent) {
-			onMove(e.clientX);
+			onMove(e.clientX, e.clientY);
 		}
 		function onTouchMove(e: TouchEvent) {
-			onMove(e.touches[0].clientX);
+			onMove(e.touches[0].clientX, e.touches[0].clientY);
 		}
 
 		window.addEventListener('mousemove', onMouseMove);
@@ -85,12 +98,12 @@
 
 	function onMouseDown(e: MouseEvent) {
 		e.preventDefault();
-		handleResizeStart(e.clientX);
+		handleResizeStart(e.clientX, e.clientY);
 	}
 
 	function onTouchStartHandle(e: TouchEvent) {
 		e.preventDefault();
-		handleResizeStart(e.touches[0].clientX);
+		handleResizeStart(e.touches[0].clientX, e.touches[0].clientY);
 	}
 </script>
 
@@ -98,7 +111,9 @@
 	class="page-shell"
 	class:maximized
 	class:resizing
-	style="width: {maximized ? '100%' : `${widthPx}px`}"
+	style="width: {maximized ? '100%' : `${widthPx}px`}; {heightPx && !maximized
+		? `height: ${heightPx}px; min-height: 0;`
+		: ''}"
 >
 	<div class="drag-handle-bar">
 		<span class="drag-handle"><DotsSixVertical size={14} /></span>
@@ -334,7 +349,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		cursor: ew-resize;
+		cursor: nwse-resize;
 		color: #d1d5db;
 		transition: color 0.15s;
 		border-radius: 0.25rem 0 0.375rem 0;

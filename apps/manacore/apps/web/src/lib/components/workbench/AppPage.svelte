@@ -12,16 +12,18 @@
 	interface Props {
 		appId: string;
 		widthPx: number;
+		heightPx?: number;
 		maximized?: boolean;
 		onClose: () => void;
 		onMinimize?: () => void;
 		onMaximize?: () => void;
-		onResize?: (widthPx: number) => void;
+		onResize?: (widthPx: number, heightPx?: number) => void;
 	}
 
 	let {
 		appId,
 		widthPx,
+		heightPx,
 		maximized = false,
 		onClose,
 		onMinimize,
@@ -165,6 +167,7 @@
 	<!-- Base: PageShell with list view (always visible) -->
 	<PageShell
 		{widthPx}
+		{heightPx}
 		{maximized}
 		title={appName}
 		color={appColor}

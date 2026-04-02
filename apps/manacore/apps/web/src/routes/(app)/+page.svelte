@@ -9,7 +9,13 @@
 	const DEFAULT_WIDTH = 480;
 
 	interface WorkbenchSettings extends Record<string, unknown> {
-		openApps: { appId: string; minimized: boolean; maximized?: boolean; widthPx?: number }[];
+		openApps: {
+			appId: string;
+			minimized: boolean;
+			maximized?: boolean;
+			widthPx?: number;
+			heightPx?: number;
+		}[];
 	}
 
 	const workbenchStore = createAppSettingsStore<WorkbenchSettings>('workbench-settings', {
@@ -21,7 +27,13 @@
 	});
 
 	let openApps = $state<
-		{ appId: string; minimized: boolean; maximized?: boolean; widthPx?: number }[]
+		{
+			appId: string;
+			minimized: boolean;
+			maximized?: boolean;
+			widthPx?: number;
+			heightPx?: number;
+		}[]
 	>([
 		{ appId: 'todo', minimized: false },
 		{ appId: 'calendar', minimized: false },
@@ -40,6 +52,7 @@
 				minimized: a.minimized,
 				maximized: a.maximized,
 				widthPx: a.widthPx,
+				heightPx: a.heightPx,
 			})),
 		});
 	}
@@ -53,6 +66,7 @@
 				minimized: a.minimized,
 				maximized: a.maximized,
 				widthPx: a.widthPx ?? DEFAULT_WIDTH,
+				heightPx: a.heightPx,
 				title: entry?.name ?? a.appId,
 				color: entry?.color ?? '#6B7280',
 			};
@@ -94,8 +108,10 @@
 		persistState();
 	}
 
-	function handleResize(id: string, widthPx: number) {
-		openApps = openApps.map((a) => (a.appId === id ? { ...a, widthPx } : a));
+	function handleResize(id: string, widthPx: number, heightPx?: number) {
+		openApps = openApps.map((a) =>
+			a.appId === id ? { ...a, widthPx, ...(heightPx !== undefined ? { heightPx } : {}) } : a
+		);
 		persistState();
 	}
 
@@ -131,11 +147,12 @@
 			<AppPage
 				appId={p.id}
 				widthPx={p.widthPx}
+				heightPx={p.heightPx}
 				maximized={p.maximized}
 				onClose={() => handleRemoveApp(p.id)}
 				onMinimize={() => handleMinimizeApp(p.id)}
 				onMaximize={() => handleMaximizeApp(p.id)}
-				onResize={(w) => handleResize(p.id, w)}
+				onResize={(w, h) => handleResize(p.id, w, h)}
 			/>
 		{/snippet}
 		{#snippet picker()}
