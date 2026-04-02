@@ -8,7 +8,6 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useUpcomingEvents } from '$lib/data/cross-app-queries';
-	import type { CrossAppEvent } from '$lib/data/cross-app-stores';
 	import { APP_URLS } from '@manacore/shared-branding';
 
 	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
@@ -18,7 +17,7 @@
 
 	const MAX_DISPLAY = 5;
 
-	function formatEventTime(event: CrossAppEvent): string {
+	function formatEventTime(event: any): string {
 		const start = new Date(event.startDate);
 		const today = new Date();
 		const tomorrow = new Date(today);

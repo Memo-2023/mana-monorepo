@@ -1,58 +1,21 @@
 /**
  * Cross-App Reactive Queries
  *
- * Live queries that read directly from other apps' IndexedDB databases.
- * Auto-update when data changes (local writes, sync, other tabs).
- * Replaces REST API polling with instant reactive reads.
+ * Live queries on the unified IndexedDB. Auto-update when data changes
+ * (local writes, sync, other tabs) via Dexie's liveQuery.
  */
 
 import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
-import {
-	crossTaskCollection,
-	crossEventCollection,
-	crossContactCollection,
-	crossConversationCollection,
-	crossFavoriteCollection,
-	crossImageCollection,
-	crossAlarmCollection,
-	crossTimerCollection,
-	crossFileCollection,
-	crossSongCollection,
-	crossPlaylistCollection,
-	crossPresiDeckCollection,
-	crossSpaceCollection,
-	crossDocumentCollection,
-	crossCardsDeckCollection,
-	crossCardsCardCollection,
-	type CrossAppTask,
-	type CrossAppEvent,
-	type CrossAppContact,
-	type CrossAppConversation,
-	type CrossAppFavorite,
-	type CrossAppImage,
-	type CrossAppAlarm,
-	type CrossAppTimer,
-	type CrossAppFile,
-	type CrossAppSong,
-	type CrossAppPlaylist,
-	type CrossAppDeck,
-	type CrossAppSpace,
-	type CrossAppDocument,
-	type CrossAppCardsDeck,
-	type CrossAppCardsCard,
-} from './cross-app-stores';
+import { db } from './database';
 
 // ─── Todo Queries ───────────────────────────────────────────
 
 /** All open (incomplete) tasks, sorted by order. */
 export function useOpenTasks() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossTaskCollection.getAll(undefined, {
-			sortBy: 'order',
-			sortDirection: 'asc',
-		});
-		return all.filter((t) => !t.isCompleted && !t.deletedAt);
-	}, [] as CrossAppTask[]);
+		const all = await db.table('tasks').orderBy('order').toArray();
+		return all.filter((t: any) => !t.isCompleted && !t.deletedAt);
+	}, [] as any[]);
 }
 
 /** Tasks due today or overdue. */
@@ -62,18 +25,13 @@ export function useTodayTasks() {
 		today.setHours(0, 0, 0, 0);
 		const todayStr = today.toISOString().slice(0, 10);
 
-		const all = await crossTaskCollection.getAll(undefined, {
-			sortBy: 'order',
-			sortDirection: 'asc',
-		});
-
-		return all.filter((t) => {
+		const all = await db.table('tasks').orderBy('order').toArray();
+		return all.filter((t: any) => {
 			if (t.isCompleted || t.deletedAt) return false;
 			if (!t.dueDate) return false;
-			const due = t.dueDate.slice(0, 10);
-			return due <= todayStr;
+			return t.dueDate.slice(0, 10) <= todayStr;
 		});
-	}, [] as CrossAppTask[]);
+	}, [] as any[]);
 }
 
 /** Tasks upcoming in the next N days. */
@@ -87,18 +45,14 @@ export function useUpcomingTasks(days = 7) {
 		future.setDate(future.getDate() + days);
 		const futureStr = future.toISOString().slice(0, 10);
 
-		const all = await crossTaskCollection.getAll(undefined, {
-			sortBy: 'dueDate',
-			sortDirection: 'asc',
-		});
-
-		return all.filter((t) => {
+		const all = await db.table('tasks').orderBy('dueDate').toArray();
+		return all.filter((t: any) => {
 			if (t.isCompleted || t.deletedAt) return false;
 			if (!t.dueDate) return false;
 			const due = t.dueDate.slice(0, 10);
 			return due > todayStr && due <= futureStr;
 		});
-	}, [] as CrossAppTask[]);
+	}, [] as any[]);
 }
 
 // ─── Calendar Queries ───────────────────────────────────────
@@ -113,16 +67,12 @@ export function useUpcomingEvents(days = 7) {
 		const nowStr = now.toISOString();
 		const futureStr = future.toISOString();
 
-		const all = await crossEventCollection.getAll(undefined, {
-			sortBy: 'startDate',
-			sortDirection: 'asc',
-		});
-
-		return all.filter((e) => {
+		const all = await db.table('events').orderBy('startDate').toArray();
+		return all.filter((e: any) => {
 			if (e.deletedAt) return false;
 			return e.startDate >= nowStr && e.startDate <= futureStr;
 		});
-	}, [] as CrossAppEvent[]);
+	}, [] as any[]);
 }
 
 // ─── Contacts Queries ───────────────────────────────────────
@@ -130,13 +80,9 @@ export function useUpcomingEvents(days = 7) {
 /** Favorite contacts. */
 export function useFavoriteContacts(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossContactCollection.getAll(undefined, {
-			sortBy: 'firstName',
-			sortDirection: 'asc',
-		});
-
-		return all.filter((c) => c.isFavorite && !c.isArchived && !c.deletedAt).slice(0, limit);
-	}, [] as CrossAppContact[]);
+		const all = await db.table('contacts').orderBy('firstName').toArray();
+		return all.filter((c: any) => c.isFavorite && !c.isArchived && !c.deletedAt).slice(0, limit);
+	}, [] as any[]);
 }
 
 // ─── Chat Queries ───────────────────────────────────────────
@@ -144,27 +90,24 @@ export function useFavoriteContacts(limit = 5) {
 /** Recent conversations, sorted by updatedAt desc. */
 export function useRecentConversations(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossConversationCollection.getAll(undefined, {
-			sortBy: 'updatedAt',
-			sortDirection: 'desc',
-		});
-		return all.filter((c) => !c.isArchived && !c.deletedAt).slice(0, limit);
-	}, [] as CrossAppConversation[]);
+		const all = await db.table('conversations').toArray();
+		return all
+			.filter((c: any) => !c.isArchived && !c.deletedAt)
+			.sort((a: any, b: any) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+			.slice(0, limit);
+	}, [] as any[]);
 }
 
 // ─── Zitare Queries ─────────────────────────────────────────
 
 /** A random favorite quote. */
 export function useRandomFavorite() {
-	return useLiveQueryWithDefault(
-		async () => {
-			const all = await crossFavoriteCollection.getAll();
-			const active = all.filter((f) => !f.deletedAt);
-			if (active.length === 0) return null;
-			return active[Math.floor(Math.random() * active.length)];
-		},
-		null as CrossAppFavorite | null
-	);
+	return useLiveQueryWithDefault(async () => {
+		const all = await db.table('zitareFavorites').toArray();
+		const active = all.filter((f: any) => !f.deletedAt);
+		if (active.length === 0) return null;
+		return active[Math.floor(Math.random() * active.length)];
+	}, null as any);
 }
 
 // ─── Picture Queries ────────────────────────────────────────
@@ -172,12 +115,12 @@ export function useRandomFavorite() {
 /** Recent generated images. */
 export function useRecentImages(limit = 6) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossImageCollection.getAll(undefined, {
-			sortBy: 'createdAt',
-			sortDirection: 'desc',
-		});
-		return all.filter((i) => !i.archivedAt && !i.deletedAt).slice(0, limit);
-	}, [] as CrossAppImage[]);
+		const all = await db.table('images').toArray();
+		return all
+			.filter((i: any) => !i.archivedAt && !i.deletedAt)
+			.sort((a: any, b: any) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+			.slice(0, limit);
+	}, [] as any[]);
 }
 
 // ─── Clock Queries ──────────────────────────────────────────
@@ -185,17 +128,19 @@ export function useRecentImages(limit = 6) {
 /** Enabled alarms. */
 export function useEnabledAlarms() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossAlarmCollection.getAll();
-		return all.filter((a) => a.enabled && !a.deletedAt);
-	}, [] as CrossAppAlarm[]);
+		const all = await db.table('alarms').toArray();
+		return all.filter((a: any) => a.enabled && !a.deletedAt);
+	}, [] as any[]);
 }
 
 /** Active/running timers. */
 export function useActiveTimers() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossTimerCollection.getAll();
-		return all.filter((t) => (t.status === 'running' || t.status === 'paused') && !t.deletedAt);
-	}, [] as CrossAppTimer[]);
+		const all = await db.table('timers').toArray();
+		return all.filter(
+			(t: any) => (t.status === 'running' || t.status === 'paused') && !t.deletedAt
+		);
+	}, [] as any[]);
 }
 
 // ─── Storage Queries ────────────────────────────────────────
@@ -204,15 +149,15 @@ export function useActiveTimers() {
 export function useStorageStats() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const files = await crossFileCollection.getAll();
-			const active = files.filter((f) => !f.isDeleted && !f.deletedAt);
-			const totalSize = active.reduce((sum, f) => sum + (f.size || 0), 0);
+			const files = await db.table('files').toArray();
+			const active = files.filter((f: any) => !f.isDeleted && !f.deletedAt);
+			const totalSize = active.reduce((sum: number, f: any) => sum + (f.size || 0), 0);
 			const recent = active
-				.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+				.sort((a: any, b: any) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
 				.slice(0, 5);
 			return { totalFiles: active.length, totalSize, recentFiles: recent };
 		},
-		{ totalFiles: 0, totalSize: 0, recentFiles: [] as CrossAppFile[] }
+		{ totalFiles: 0, totalSize: 0, recentFiles: [] as any[] }
 	);
 }
 
@@ -222,21 +167,21 @@ export function useStorageStats() {
 export function useMukkeStats() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const songs = await crossSongCollection.getAll();
-			const playlists = await crossPlaylistCollection.getAll();
-			const activeSongs = songs.filter((s) => !s.deletedAt);
-			const activePlaylists = playlists.filter((p) => !p.deletedAt);
+			const songs = await db.table('songs').toArray();
+			const playlists = await db.table('mukkePlaylists').toArray();
+			const activeSongs = songs.filter((s: any) => !s.deletedAt);
+			const activePlaylists = playlists.filter((p: any) => !p.deletedAt);
 			const recent = activeSongs
-				.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+				.sort((a: any, b: any) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
 				.slice(0, 5);
 			return {
 				totalSongs: activeSongs.length,
 				totalPlaylists: activePlaylists.length,
-				favoriteCount: activeSongs.filter((s) => s.favorite).length,
+				favoriteCount: activeSongs.filter((s: any) => s.favorite).length,
 				recentSongs: recent,
 			};
 		},
-		{ totalSongs: 0, totalPlaylists: 0, favoriteCount: 0, recentSongs: [] as CrossAppSong[] }
+		{ totalSongs: 0, totalPlaylists: 0, favoriteCount: 0, recentSongs: [] as any[] }
 	);
 }
 
@@ -245,12 +190,12 @@ export function useMukkeStats() {
 /** Recent presentation decks. */
 export function useRecentDecks(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossPresiDeckCollection.getAll(undefined, {
-			sortBy: 'updatedAt',
-			sortDirection: 'desc',
-		});
-		return all.filter((d) => !d.deletedAt).slice(0, limit);
-	}, [] as CrossAppDeck[]);
+		const all = await db.table('presiDecks').toArray();
+		return all
+			.filter((d: any) => !d.deletedAt)
+			.sort((a: any, b: any) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+			.slice(0, limit);
+	}, [] as any[]);
 }
 
 // ─── Context Queries ────────────────────────────────────────
@@ -258,22 +203,25 @@ export function useRecentDecks(limit = 5) {
 /** Recent documents + spaces. */
 export function useRecentDocuments(limit = 5) {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossDocumentCollection.getAll(undefined, {
-			sortBy: 'updatedAt',
-			sortDirection: 'desc',
-		});
-		return all.filter((d) => !d.deletedAt).slice(0, limit);
-	}, [] as CrossAppDocument[]);
+		const all = await db.table('documents').toArray();
+		return all
+			.filter((d: any) => !d.deletedAt)
+			.sort((a: any, b: any) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
+			.slice(0, limit);
+	}, [] as any[]);
 }
 
 export function useSpaces() {
 	return useLiveQueryWithDefault(async () => {
-		const all = await crossSpaceCollection.getAll(undefined, {
-			sortBy: 'pinned',
-			sortDirection: 'desc',
-		});
-		return all.filter((s) => !s.deletedAt);
-	}, [] as CrossAppSpace[]);
+		const all = await db.table('contextSpaces').toArray();
+		return all
+			.filter((s: any) => !s.deletedAt)
+			.sort((a: any, b: any) => {
+				if (a.pinned && !b.pinned) return -1;
+				if (!a.pinned && b.pinned) return 1;
+				return 0;
+			});
+	}, [] as any[]);
 }
 
 // ─── Cards Queries ─────────────────────────────────────────
@@ -282,16 +230,16 @@ export function useSpaces() {
 export function useCardsProgress() {
 	return useLiveQueryWithDefault(
 		async () => {
-			const decks = await crossCardsDeckCollection.getAll();
-			const cards = await crossCardsCardCollection.getAll();
-			const activeDecks = decks.filter((d) => !d.deletedAt);
-			const activeCards = cards.filter((c) => !c.deletedAt);
+			const decks = await db.table('cardDecks').toArray();
+			const cards = await db.table('cards').toArray();
+			const activeDecks = decks.filter((d: any) => !d.deletedAt);
+			const activeCards = cards.filter((c: any) => !c.deletedAt);
 			const now = new Date().toISOString();
-			const dueCards = activeCards.filter((c) => c.nextReview && c.nextReview <= now);
+			const dueCards = activeCards.filter((c: any) => c.nextReview && c.nextReview <= now);
 			return {
 				totalDecks: activeDecks.length,
 				totalCards: activeCards.length,
-				cardsLearned: activeCards.filter((c) => (c.reviewCount ?? 0) > 0).length,
+				cardsLearned: activeCards.filter((c: any) => (c.reviewCount ?? 0) > 0).length,
 				dueForReview: dueCards.length,
 				decks: activeDecks,
 			};
@@ -301,7 +249,7 @@ export function useCardsProgress() {
 			totalCards: 0,
 			cardsLearned: 0,
 			dueForReview: 0,
-			decks: [] as CrossAppCardsDeck[],
+			decks: [] as any[],
 		}
 	);
 }

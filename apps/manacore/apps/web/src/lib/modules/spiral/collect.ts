@@ -1,34 +1,28 @@
 /**
  * Cross-App Activity Collector
  *
- * Reads from all cross-app IndexedDB readers and produces
+ * Reads from the unified IndexedDB and produces
  * AppSnapshot objects for the Mana Spiral.
  */
 
 import { MANA_APP_INDEX } from '@manacore/spiral-db';
-import {
-	crossTaskCollection,
-	crossEventCollection,
-	crossContactCollection,
-	crossConversationCollection,
-	crossFavoriteCollection,
-	crossImageCollection,
-	crossAlarmCollection,
-	crossFileCollection,
-	crossSongCollection,
-	crossPresiDeckCollection,
-	crossSpaceCollection,
-	crossCardsDeckCollection,
-	crossCardsCardCollection,
-	type CrossAppTask,
-	type CrossAppContact,
-	type CrossAppImage,
-} from '$lib/data/cross-app-stores';
+import { db } from '$lib/data/database';
 import type { AppSnapshot } from './stores/mana-spiral.svelte';
 
 /**
- * Collect snapshots from all cross-app readers.
- * Each collection is read once and summarized into an AppSnapshot.
+ * Safe wrapper for db.table().toArray() — returns empty array on error.
+ */
+async function safeGetAll(tableName: string): Promise<any[]> {
+	try {
+		return await db.table(tableName).toArray();
+	} catch {
+		return [];
+	}
+}
+
+/**
+ * Collect snapshots from all app tables in the unified DB.
+ * Each table is read once and summarized into an AppSnapshot.
  */
 export async function collectAppSnapshots(): Promise<AppSnapshot[]> {
 	const snapshots: AppSnapshot[] = [];
@@ -49,24 +43,24 @@ export async function collectAppSnapshots(): Promise<AppSnapshot[]> {
 		cardDecks,
 		cards,
 	] = await Promise.all([
-		safeGetAll(crossTaskCollection),
-		safeGetAll(crossEventCollection),
-		safeGetAll(crossContactCollection),
-		safeGetAll(crossConversationCollection),
-		safeGetAll(crossFavoriteCollection),
-		safeGetAll(crossImageCollection),
-		safeGetAll(crossAlarmCollection),
-		safeGetAll(crossFileCollection),
-		safeGetAll(crossSongCollection),
-		safeGetAll(crossPresiDeckCollection),
-		safeGetAll(crossSpaceCollection),
-		safeGetAll(crossCardsDeckCollection),
-		safeGetAll(crossCardsCardCollection),
+		safeGetAll('tasks'),
+		safeGetAll('events'),
+		safeGetAll('contacts'),
+		safeGetAll('conversations'),
+		safeGetAll('zitareFavorites'),
+		safeGetAll('images'),
+		safeGetAll('alarms'),
+		safeGetAll('files'),
+		safeGetAll('songs'),
+		safeGetAll('presiDecks'),
+		safeGetAll('contextSpaces'),
+		safeGetAll('cardDecks'),
+		safeGetAll('cards'),
 	]);
 
 	// Todo
 	if (tasks.length > 0) {
-		const completed = (tasks as CrossAppTask[]).filter((t) => t.isCompleted).length;
+		const completed = tasks.filter((t: any) => t.isCompleted).length;
 		snapshots.push({
 			app: 'Todo',
 			appIndex: MANA_APP_INDEX.todo,
@@ -91,7 +85,7 @@ export async function collectAppSnapshots(): Promise<AppSnapshot[]> {
 
 	// Contacts
 	if (contacts.length > 0) {
-		const favs = (contacts as CrossAppContact[]).filter((c) => c.isFavorite).length;
+		const favs = contacts.filter((c: any) => c.isFavorite).length;
 		snapshots.push({
 			app: 'Contacts',
 			appIndex: MANA_APP_INDEX.contacts,
@@ -128,7 +122,7 @@ export async function collectAppSnapshots(): Promise<AppSnapshot[]> {
 
 	// Picture
 	if (images.length > 0) {
-		const favs = (images as CrossAppImage[]).filter((i) => i.isFavorite).length;
+		const favs = images.filter((i: any) => i.isFavorite).length;
 		snapshots.push({
 			app: 'Picture',
 			appIndex: MANA_APP_INDEX.picture,
@@ -212,16 +206,4 @@ export async function collectAppSnapshots(): Promise<AppSnapshot[]> {
 	}
 
 	return snapshots;
-}
-
-/**
- * Safe wrapper for collection.getAll() — returns empty array on error
- * (e.g. if the other app's DB doesn't exist yet)
- */
-async function safeGetAll(collection: { getAll: () => Promise<unknown[]> }): Promise<unknown[]> {
-	try {
-		return await collection.getAll();
-	} catch {
-		return [];
-	}
 }

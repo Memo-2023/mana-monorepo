@@ -1,9 +1,5 @@
 <script lang="ts">
-	import {
-		crossTaskCollection,
-		crossEventCollection,
-		crossContactCollection,
-	} from '$lib/data/cross-app-stores';
+	import { db } from '$lib/data/database';
 
 	interface Props {
 		maxItems?: number;
@@ -38,7 +34,7 @@
 			today.setHours(0, 0, 0, 0);
 			const todayStr = today.toISOString();
 
-			const tasks = await crossTaskCollection.getAll();
+			const tasks = await db.table('tasks').toArray();
 			recentTasks = tasks
 				.filter((t) => t.isCompleted && t.completedAt && t.completedAt >= todayStr)
 				.sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''))
@@ -61,7 +57,7 @@
 			const now = new Date().toISOString();
 			const tomorrow = new Date(Date.now() + 86400000).toISOString();
 
-			const events = await crossEventCollection.getAll();
+			const events = await db.table('events').toArray();
 			upcomingEvents = events
 				.filter((e) => e.startDate >= now && e.startDate <= tomorrow)
 				.sort((a, b) => a.startDate.localeCompare(b.startDate))
@@ -81,7 +77,7 @@
 
 		try {
 			// Recently added contacts
-			const contacts = await crossContactCollection.getAll();
+			const contacts = await db.table('contacts').toArray();
 			recentContacts = contacts
 				.filter((c) => !c.isArchived)
 				.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))

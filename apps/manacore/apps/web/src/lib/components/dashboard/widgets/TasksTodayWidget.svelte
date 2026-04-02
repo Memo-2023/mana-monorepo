@@ -8,7 +8,7 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useOpenTasks } from '$lib/data/cross-app-queries';
-	import { crossTaskCollection, type CrossAppTask } from '$lib/data/cross-app-stores';
+	import { db } from '$lib/data/database';
 	import { APP_URLS } from '@manacore/shared-branding';
 	import { format, isToday, isTomorrow, isPast } from 'date-fns';
 	import { de } from 'date-fns/locale';
@@ -48,7 +48,7 @@
 	// Track tasks being toggled (for optimistic UI)
 	let togglingIds: Set<string> = $state(new Set());
 
-	async function handleToggleComplete(e: MouseEvent, task: CrossAppTask) {
+	async function handleToggleComplete(e: MouseEvent, task: any) {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -56,18 +56,19 @@
 
 		togglingIds = new Set([...togglingIds, task.id]);
 
-		// Write directly to IndexedDB — sync engine will push to server
-		await crossTaskCollection.update(task.id, {
+		// Write directly to unified IndexedDB — Dexie hooks track the change for sync
+		await db.table('tasks').update(task.id, {
 			isCompleted: !task.isCompleted,
 			completedAt: task.isCompleted ? null : new Date().toISOString(),
-		} as Partial<CrossAppTask>);
+			updatedAt: new Date().toISOString(),
+		});
 
 		togglingIds = new Set([...togglingIds].filter((id) => id !== task.id));
 	}
 
-	function getSubtaskProgress(task: CrossAppTask): string | null {
+	function getSubtaskProgress(task: any): string | null {
 		if (!task.subtasks || task.subtasks.length === 0) return null;
-		const done = task.subtasks.filter((s) => s.isCompleted).length;
+		const done = task.subtasks.filter((s: any) => s.isCompleted).length;
 		return `${done}/${task.subtasks.length}`;
 	}
 </script>

@@ -1,14 +1,17 @@
 /**
  * ManaCore App — Local-First Data Layer
  *
- * Defines the IndexedDB database, collections, and guest seed data.
+ * Provides typed collection accessors on the unified DB for core ManaCore data.
+ * Uses the unified `manacore` Dexie database (not a separate per-app DB).
+ *
  * Collections: userSettings, dashboardConfigs
  * Tags use the shared tagLocalStore from @manacore/shared-stores.
  */
 
-import { createLocalStore, type BaseRecord } from '@manacore/local-store';
+import type { BaseRecord } from '@manacore/local-store';
 import type { WidgetConfig } from '$lib/types/dashboard';
 import type { TileNode } from '$lib/types/tiling';
+import { db } from './database';
 import { guestSettings, guestDashboardConfigs } from './guest-seed.js';
 
 // ─── Types ──────────────────────────────────────────────────
@@ -33,30 +36,96 @@ export interface LocalDashboardConfig extends BaseRecord {
 	tiling?: TileNode;
 }
 
-// ─── Store ──────────────────────────────────────────────────
+// ─── Collection Wrappers ────────────────────────────────────
+// Wraps Dexie tables with a LocalCollection-compatible API so existing
+// consumers (queries.ts, dashboard.svelte.ts, tiling.svelte.ts) work unchanged.
 
-const SYNC_SERVER_URL = import.meta.env.PUBLIC_SYNC_SERVER_URL || 'http://localhost:3050';
+function createCollectionWrapper<T extends BaseRecord>(tableName: string) {
+	const table = db.table<T>(tableName);
 
-export const manacoreStore = createLocalStore({
-	appId: 'manacore',
-	collections: [
-		{
-			name: 'userSettings',
-			indexes: ['key'],
-			guestSeed: guestSettings,
+	return {
+		async get(id: string): Promise<T | undefined> {
+			const record = await table.get(id);
+			if (record && (record as any).deletedAt) return undefined;
+			return record;
 		},
-		{
-			name: 'dashboardConfigs',
-			indexes: [],
-			guestSeed: guestDashboardConfigs,
-		},
-	],
-	sync: {
-		serverUrl: SYNC_SERVER_URL,
-	},
-});
 
-// Typed collection accessors
-export const settingsCollection = manacoreStore.collection<LocalUserSettings>('userSettings');
+		async getAll(
+			_filter?: unknown,
+			options?: { sortBy?: string; sortDirection?: 'asc' | 'desc' }
+		): Promise<T[]> {
+			let results = await table.toArray();
+			results = results.filter((r) => !(r as any).deletedAt);
+			if (options?.sortBy) {
+				const key = options.sortBy as keyof T;
+				const dir = options.sortDirection === 'desc' ? -1 : 1;
+				results.sort((a, b) => {
+					const aVal = String(a[key] ?? '');
+					const bVal = String(b[key] ?? '');
+					return aVal.localeCompare(bVal) * dir;
+				});
+			}
+			return results;
+		},
+
+		async insert(record: T): Promise<void> {
+			const now = new Date().toISOString();
+			await table.put({
+				...record,
+				createdAt: record.createdAt ?? now,
+				updatedAt: now,
+			});
+		},
+
+		async update(id: string, changes: Partial<T>): Promise<void> {
+			await table.update(id, {
+				...changes,
+				updatedAt: new Date().toISOString(),
+			} as any);
+		},
+
+		async delete(id: string): Promise<void> {
+			await table.update(id, {
+				deletedAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+			} as any);
+		},
+
+		async count(): Promise<number> {
+			const all = await table.toArray();
+			return all.filter((r) => !(r as any).deletedAt).length;
+		},
+	};
+}
+
+export const settingsCollection = createCollectionWrapper<LocalUserSettings>('userSettings');
 export const dashboardCollection =
-	manacoreStore.collection<LocalDashboardConfig>('dashboardConfigs');
+	createCollectionWrapper<LocalDashboardConfig>('dashboardConfigs');
+
+// ─── Store-compatible facade ────────────────────────────────
+// Provides initialize() / startSync() / stopSync() so the layout
+// can call manacoreStore.initialize() without breaking.
+
+let _initialized = false;
+
+export const manacoreStore = {
+	async initialize(): Promise<void> {
+		if (_initialized) return;
+		_initialized = true;
+
+		// Seed guest data if tables are empty
+		const settingsCount = await db.table('userSettings').count();
+		if (settingsCount === 0 && guestSettings.length > 0) {
+			await db.table('userSettings').bulkPut(guestSettings);
+		}
+
+		const dashboardCount = await db.table('dashboardConfigs').count();
+		if (dashboardCount === 0 && guestDashboardConfigs.length > 0) {
+			await db.table('dashboardConfigs').bulkPut(guestDashboardConfigs);
+		}
+	},
+
+	// No-ops — sync is handled by the unified sync engine
+	startSync(_getToken: () => Promise<string | null>): void {},
+	stopSync(): void {},
+};

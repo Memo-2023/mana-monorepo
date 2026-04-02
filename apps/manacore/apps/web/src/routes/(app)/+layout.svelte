@@ -16,20 +16,8 @@
 	import { tagLocalStore, tagMutations, useAllTags } from '$lib/stores/tags.svelte';
 	import { linkLocalStore, linkMutations } from '@manacore/shared-links';
 	import { manacoreStore } from '$lib/data/local-store';
-	import {
-		todoReader,
-		calendarReader,
-		contactsReader,
-		chatReader,
-		zitareReader,
-		pictureReader,
-		clockReader,
-		storageReader,
-		mukkeReader,
-		presiReader,
-		contextReader,
-		cardsReader,
-	} from '$lib/data/cross-app-stores';
+	import { createUnifiedSync } from '$lib/data/sync';
+	import { migrateFromLegacyDbs } from '$lib/data/legacy-migration';
 	import { dashboardStore } from '$lib/stores/dashboard.svelte';
 	import {
 		THEME_DEFINITIONS,
@@ -203,9 +191,12 @@
 		AppEvents.themeChanged(mode);
 	}
 
+	// Unified sync manager — one sync engine for all apps
+	const SYNC_SERVER_URL = import.meta.env.PUBLIC_SYNC_SERVER_URL || 'http://localhost:3050';
+	let unifiedSync: ReturnType<typeof createUnifiedSync> | null = null;
+
 	async function handleSignOut() {
-		manacoreStore.stopSync();
-		tagMutations.stopSync();
+		unifiedSync?.stopAll();
 		await authStore.signOut();
 		goto('/login');
 	}
@@ -244,29 +235,18 @@
 			manacoreStore.initialize(),
 			tagLocalStore.initialize(),
 			linkLocalStore.initialize(),
-			// Cross-app readers (read-only, no sync — owning apps handle sync)
-			todoReader.initialize(),
-			calendarReader.initialize(),
-			contactsReader.initialize(),
-			chatReader.initialize(),
-			zitareReader.initialize(),
-			pictureReader.initialize(),
-			clockReader.initialize(),
-			storageReader.initialize(),
-			mukkeReader.initialize(),
-			presiReader.initialize(),
-			contextReader.initialize(),
-			cardsReader.initialize(),
 		]);
+
+		// Migrate data from legacy per-app databases (one-time, idempotent)
+		await migrateFromLegacyDbs();
 
 		// Initialize shared-uload (opens uLoad IndexedDB for cross-app link creation)
 		initSharedUload();
 
-		// Start syncing to server
+		// Start unified sync — one engine for all apps via Dexie hooks
 		const getToken = () => authStore.getValidToken();
-		manacoreStore.startSync(getToken);
-		tagMutations.startSync(getToken);
-		linkMutations.startSync(getToken);
+		unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken);
+		unifiedSync.startAll();
 
 		// Initialize dashboard from IndexedDB
 		await dashboardStore.initialize();

@@ -570,51 +570,67 @@ $: doubled = count * 2;
 
 All web apps use a **local-first** data layer: reads/writes go to IndexedDB (Dexie.js) first, sync to server in the background. This enables guest mode, offline CRUD, and instant UI.
 
-### Key Components
+### Unified IndexedDB Architecture
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `@manacore/local-store` | `packages/local-store/` | Dexie.js collections, sync engine, Svelte 5 reactive queries |
-| `mana-sync` | `services/mana-sync/` | Go sync server (WebSocket push, field-level LWW conflict resolution) |
-| Todo Hono Server | `apps/todo/apps/server/` | Lightweight compute server (RRULE, reminders, admin) on Bun |
-
-### Data Flow
+The ManaCore unified app uses a **single IndexedDB** (`manacore`) containing all 120+ collections from all apps. Table names that collide across apps are prefixed (e.g., `todoProjects`, `cardDecks`, `presiDecks`).
 
 ```
-Guest:      App → IndexedDB (Dexie.js) → UI            (no sync)
-Logged in:  App → IndexedDB → UI → SyncEngine → mana-sync (Go) → PostgreSQL
-                                  ← WebSocket push ←
+┌─────────────────────────────────────────────┐
+│  Unified IndexedDB: "manacore"              │
+│                                             │
+│  tasks, todoProjects, labels, ...    (todo) │
+│  calendars, events                (calendar) │
+│  contacts                        (contacts)  │
+│  conversations, messages              (chat) │
+│  ... 120+ collections across 27 apps         │
+│                                             │
+│  _pendingChanges  (tagged with appId)       │
+│  _syncMeta        (keyed by [appId+coll])   │
+└──────────────────┬──────────────────────────┘
+                   │ Dexie hooks auto-track
+                   │ all writes as pending changes
+                   ▼
+┌──────────────────────────────────────────────┐
+│  Unified Sync Engine (sync.ts)               │
+│  One sync channel per appId                  │
+│  POST /sync/{appId} (push)                   │
+│  GET /sync/{appId}/pull (pull)               │
+│  WS /ws/{appId} (real-time notifications)    │
+└──────────────────┬───────────────────────────┘
+                   ▼
+            mana-sync (Go)
+            PostgreSQL (sync_changes)
 ```
 
-### Migrated Apps (21/23)
+#### Key Files
 
-| App | Collections | Status |
-|-----|------------|--------|
-| Todo | tasks, projects, labels, taskLabels, reminders | Done |
-| Zitare | favorites, lists | Done |
-| Calendar | calendars, events | Done |
-| Clock | alarms, timers, worldClocks | Done |
-| Contacts | contacts | Done |
-| Cards | decks, cards | Done |
-| Picture | images, boards, boardItems, tags, imageTags | Done |
-| Presi | decks, slides | Done |
-| Inventar | collections, items, locations, categories | Done |
-| NutriPhi | meals, goals, favorites | Done |
-| Planta | plants, plantPhotos, wateringSchedules, wateringLogs | Done |
-| Storage | files, folders, tags, fileTags | Done |
-| Chat | conversations, messages, templates | Done |
-| Questions | collections, questions, answers | Done |
-| Mukke | songs, playlists, playlistSongs, projects, markers | Done |
-| Context | spaces, documents | Done |
-| Photos | albums, albumItems, favorites, tags, photoTags | Done |
-| SkilltTree | skills, activities, achievements | Done |
-| CityCorners | locations, favorites | Done |
-| Times | clients, projects, timeEntries, tags, templates, settings | Done |
-| uLoad | links, tags, folders, linkTags | Done |
-| Calc | calculations, savedFormulas | Done |
-| ManaCore | userSettings, dashboardConfigs | Done |
+| File | Purpose |
+|------|---------|
+| `apps/manacore/apps/web/src/lib/data/database.ts` | Unified Dexie DB, SYNC_APP_MAP, table name mappings, Dexie hooks |
+| `apps/manacore/apps/web/src/lib/data/sync.ts` | Unified sync engine (push/pull/WS per appId) |
+| `apps/manacore/apps/web/src/lib/data/legacy-migration.ts` | One-time migration from old per-app DBs |
+| `packages/local-store/` | Standalone local-store (used by individual apps, not the unified app) |
+| `services/mana-sync/` | Go sync server (WebSocket push, field-level LWW) |
 
-**Not migrated (no CRUD data model):** Matrix (protocol client), Playground (stateless)
+#### How Sync Works
+
+1. Module stores write directly to Dexie tables (`db.table('tasks').add(...)`)
+2. Dexie hooks in `database.ts` automatically record each write to `_pendingChanges` with the correct `appId`
+3. The unified sync engine groups pending changes by `appId` and pushes to `POST /sync/{appId}`
+4. Table names are mapped between unified names (e.g., `todoProjects`) and backend names (e.g., `projects`) via `TABLE_TO_SYNC_NAME`
+5. Server changes are pulled per collection and applied with a guard flag to prevent re-sync loops
+
+#### Adding a New App Module
+
+1. Add table definitions to `database.ts` schema (in `db.version(1).stores({...})`)
+2. Add table-to-appId mapping in `SYNC_APP_MAP`
+3. Add any renamed tables to `TABLE_TO_SYNC_NAME`
+4. Create module in `src/lib/modules/{app}/` with collections, queries, stores
+5. Dexie hooks automatically handle change tracking — no manual `trackChange()` needed
+
+### Standalone Apps (Legacy)
+
+Individual apps in `apps/*/apps/web/` still use `@manacore/local-store` with per-app IndexedDB databases (`manacore-{appId}`). When users first open the unified ManaCore app, `legacy-migration.ts` migrates data from these old DBs into the unified DB.
 
 ### Dev Commands (Local-First Stack)
 
@@ -625,19 +641,6 @@ pnpm dev:todo:server       # Hono/Bun compute server (port 3019)
 pnpm dev:todo:local        # Web + sync + server (no auth needed)
 pnpm dev:todo:full         # Everything incl. auth + DB setup
 ```
-
-### Adding Local-First to a New App
-
-1. Create `apps/{app}/apps/web/src/lib/data/local-store.ts` — define collections with `createLocalStore()`
-2. Create `apps/{app}/apps/web/src/lib/data/guest-seed.ts` — onboarding data
-3. Rewrite stores to use `collection.getAll()` / `collection.insert()` instead of API calls
-4. In layout: `await store.initialize()`, `store.startSync()` on login, `allowGuest={true}` on AuthGate
-5. Set `userEmail = ''` for guests so PillNav shows login button
-6. Add `GuestWelcomeModal` for first-visit experience
-
-### Architecture Plan
-
-Full migration plan: `.claude/plans/local-first-architecture-migration.md`
 
 ## Shared Packages (`packages/`)
 

@@ -7,10 +7,14 @@
  * Architecture:
  *   Unified DB → PendingChange (tagged with appId) → SyncChannel per appId → mana-sync /sync/{appId}
  *   mana-sync /sync/{appId} → WebSocket push → SyncChannel → applies to Unified DB
+ *
+ * Backend protocol (mana-sync Go):
+ *   Push:  POST /sync/{appId}  — body: { clientId, since, changes: [{ table, id, op, fields, data }] }
+ *   Pull:  GET  /sync/{appId}/pull?collection={name}&since={cursor}
+ *   WS:    GET  /ws/{appId}    — auth: { type: "auth", token: "..." }
  */
 
-import { db, SYNC_APP_MAP, TABLE_TO_APP } from './database';
-import type Dexie from 'dexie';
+import { db, SYNC_APP_MAP, toSyncName, fromSyncName, setApplyingServerChanges } from './database';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -42,21 +46,23 @@ interface SyncChannelState {
 	lastError: string | null;
 }
 
-type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
+export type SyncStatus = 'idle' | 'syncing' | 'error' | 'offline';
 
 // ─── Config ───────────────────────────────────────────────────
 
 const PUSH_DEBOUNCE = 1000;
 const PULL_INTERVAL = 30_000;
 const WS_RECONNECT_DELAY = 5000;
+const WS_AUTH_TIMEOUT = 10_000;
 
 // ─── Unified Sync Manager ─────────────────────────────────────
 
 export function createUnifiedSync(serverUrl: string, getToken: () => Promise<string | null>) {
 	const channels = new Map<string, SyncChannelState>();
-	let clientId = getOrCreateClientId();
+	const clientId = getOrCreateClientId();
 	let status: SyncStatus = 'idle';
 	let online = typeof navigator !== 'undefined' ? navigator.onLine : true;
+	let _statusListeners: Array<(s: SyncStatus) => void> = [];
 
 	// ─── Lifecycle ──────────────────────────────────────────
 
@@ -80,17 +86,6 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			connectWs(appId);
 		}
 
-		// Watch _pendingChanges for new writes
-		db.table('_pendingChanges').hook('creating', (primKey, obj) => {
-			// Auto-tag with appId based on collection
-			if (!obj.appId && obj.collection) {
-				obj.appId = TABLE_TO_APP[obj.collection] || 'manacore';
-			}
-			// Debounced push
-			const appId = obj.appId;
-			if (appId) schedulePush(appId);
-		});
-
 		// Listen for online/offline
 		if (typeof window !== 'undefined') {
 			window.addEventListener('online', handleOnline);
@@ -99,7 +94,7 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 	}
 
 	function stopAll(): void {
-		for (const [appId, channel] of channels) {
+		for (const [, channel] of channels) {
 			if (channel.pushTimer) clearTimeout(channel.pushTimer);
 			if (channel.pullTimer) clearInterval(channel.pullTimer);
 			if (channel.ws) {
@@ -108,6 +103,7 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			}
 		}
 		channels.clear();
+		_statusListeners = [];
 
 		if (typeof window !== 'undefined') {
 			window.removeEventListener('online', handleOnline);
@@ -123,6 +119,11 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 
 		if (channel.pushTimer) clearTimeout(channel.pushTimer);
 		channel.pushTimer = setTimeout(() => push(appId).catch(() => {}), PUSH_DEBOUNCE);
+	}
+
+	/** Called from Dexie hooks when a pending change is recorded. */
+	function onPendingChange(appId: string): void {
+		schedulePush(appId);
 	}
 
 	async function push(appId: string): Promise<void> {
@@ -141,30 +142,50 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 
 		if (pending.length === 0) return;
 
-		status = 'syncing';
+		setStatus('syncing');
 
 		try {
-			const changeset = buildChangeset(pending, clientId);
-			const res = await fetch(`${serverUrl}/sync/${appId}/push`, {
+			// Get oldest sync cursor for the `since` field
+			const oldestCursor = await getOldestSyncCursor(appId);
+
+			// Build changeset in backend protocol format
+			const changeset = buildChangeset(pending, clientId, oldestCursor);
+
+			const res = await fetch(`${serverUrl}/sync/${appId}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${token}`,
+					'X-Client-Id': clientId,
 				},
 				body: JSON.stringify(changeset),
 			});
 
 			if (!res.ok) throw new Error(`Push failed: ${res.status}`);
 
+			const data = await res.json();
+
+			// Apply server changes from the response
+			if (data.serverChanges?.length > 0) {
+				await applyServerChanges(appId, data.serverChanges);
+			}
+
+			// Update sync cursor
+			if (data.syncedUntil) {
+				for (const tableName of channel.tables) {
+					await setSyncCursor(appId, tableName, data.syncedUntil);
+				}
+			}
+
 			// Clear synced pending changes
 			const ids = pending.map((p) => p.id).filter((id): id is number => id !== undefined);
 			await db.table('_pendingChanges').bulkDelete(ids);
 
 			channel.lastError = null;
-			status = 'idle';
+			setStatus('idle');
 		} catch (err) {
 			channel.lastError = err instanceof Error ? err.message : 'Push failed';
-			status = 'error';
+			setStatus('error');
 		}
 	}
 
@@ -177,26 +198,30 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		const token = await getToken();
 		if (!token) return;
 
-		status = 'syncing';
+		setStatus('syncing');
 
 		try {
 			for (const tableName of channel.tables) {
+				const syncName = toSyncName(tableName);
 				const cursor = await getSyncCursor(appId, tableName);
 
 				const res = await fetch(
-					`${serverUrl}/sync/${appId}/pull?collection=${tableName}&since=${encodeURIComponent(cursor)}&clientId=${clientId}`,
+					`${serverUrl}/sync/${appId}/pull?collection=${encodeURIComponent(syncName)}&since=${encodeURIComponent(cursor)}`,
 					{
-						headers: { Authorization: `Bearer ${token}` },
+						headers: {
+							Authorization: `Bearer ${token}`,
+							'X-Client-Id': clientId,
+						},
 					}
 				);
 
 				if (!res.ok) continue;
 
 				const data = await res.json();
-				if (!data.changes || data.changes.length === 0) continue;
+				if (!data.serverChanges || data.serverChanges.length === 0) continue;
 
 				// Apply changes to local DB
-				await applyServerChanges(tableName, data.changes);
+				await applyServerChanges(appId, data.serverChanges);
 
 				// Update cursor
 				if (data.syncedUntil) {
@@ -205,10 +230,10 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			}
 
 			channel.lastError = null;
-			status = 'idle';
+			setStatus('idle');
 		} catch (err) {
 			channel.lastError = err instanceof Error ? err.message : 'Pull failed';
-			status = 'error';
+			setStatus('error');
 		}
 	}
 
@@ -218,23 +243,30 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		const channel = channels.get(appId);
 		if (!channel || !online) return;
 
-		const wsUrl = serverUrl.replace(/^http/, 'ws') + `/sync/${appId}/ws?clientId=${clientId}`;
+		const wsUrl = serverUrl.replace(/^http/, 'ws') + `/ws/${appId}`;
 
 		try {
 			const ws = new WebSocket(wsUrl);
 
-			ws.onopen = () => {
+			ws.onopen = async () => {
 				channel.ws = ws;
+				// Authenticate — backend requires auth within 10 seconds
+				const token = await getToken();
+				if (token && ws.readyState === WebSocket.OPEN) {
+					ws.send(JSON.stringify({ type: 'auth', token }));
+				}
 			};
 
 			ws.onmessage = (event) => {
 				try {
 					const msg = JSON.parse(event.data);
-					if (msg.type === 'push') {
+					if (msg.type === 'sync-available') {
 						// Server notifies us of new changes — trigger pull
 						pull(appId).catch(() => {});
 					}
-				} catch {}
+				} catch {
+					// Ignore malformed messages
+				}
 			};
 
 			ws.onclose = () => {
@@ -250,6 +282,91 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 			};
 		} catch {
 			// WebSocket not available or blocked
+		}
+	}
+
+	// ─── Apply Server Changes ───────────────────────────────
+
+	async function applyServerChanges(appId: string, changes: any[]): Promise<void> {
+		setApplyingServerChanges(true);
+		try {
+			// Group changes by table (server returns backend collection names)
+			const byTable = new Map<string, any[]>();
+			for (const change of changes) {
+				const serverTable = change.table;
+				// Map backend collection name → unified table name
+				const unifiedTable = fromSyncName(appId, serverTable);
+				if (!byTable.has(unifiedTable)) byTable.set(unifiedTable, []);
+				byTable.get(unifiedTable)!.push(change);
+			}
+
+			for (const [tableName, tableChanges] of byTable) {
+				const table = db.table(tableName);
+
+				await db.transaction('rw', table, async () => {
+					for (const change of tableChanges) {
+						const recordId = change.id;
+
+						if (change.deletedAt || change.op === 'delete') {
+							// Soft delete or hard delete
+							const existing = await table.get(recordId);
+							if (existing) {
+								if (change.deletedAt) {
+									await table.update(recordId, {
+										deletedAt: change.deletedAt,
+										updatedAt: change.deletedAt,
+									});
+								} else {
+									await table.delete(recordId);
+								}
+							}
+						} else if (change.op === 'insert') {
+							// Upsert for inserts
+							const existing = await table.get(recordId);
+							if (!existing) {
+								await table.put(change.data ?? { id: recordId, ...change });
+							} else {
+								// Record exists — merge with LWW
+								const updates: Record<string, unknown> = {};
+								const changeData = change.data ?? change;
+								for (const [key, val] of Object.entries(changeData)) {
+									if (key === 'id') continue;
+									updates[key] = val;
+								}
+								if (Object.keys(updates).length > 0) {
+									await table.update(recordId, updates);
+								}
+							}
+						} else if (change.op === 'update' && change.fields) {
+							// Field-level LWW update
+							const existing = await table.get(recordId);
+							if (!existing) {
+								// Record doesn't exist locally — reconstruct from fields
+								const record: Record<string, unknown> = { id: recordId };
+								for (const [key, fc] of Object.entries(change.fields as Record<string, any>)) {
+									record[key] = fc.value;
+								}
+								await table.put(record);
+							} else {
+								// Merge — only update fields that are newer
+								const updates: Record<string, unknown> = {};
+								for (const [key, fc] of Object.entries(change.fields as Record<string, any>)) {
+									const serverTime = fc.updatedAt ?? '';
+									const localTime = (existing as any).updatedAt ?? '';
+									if (serverTime >= localTime) {
+										updates[key] = fc.value;
+									}
+								}
+								if (Object.keys(updates).length > 0) {
+									await table.update(recordId, updates);
+								}
+							}
+						}
+					}
+				});
+			}
+		} finally {
+			setApplyingServerChanges(false);
 		}
 	}
 
@@ -273,66 +390,40 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		});
 	}
 
-	async function applyServerChanges(tableName: string, changes: any[]): Promise<void> {
-		const table = db.table(tableName);
+	async function getOldestSyncCursor(appId: string): Promise<string> {
+		const channel = channels.get(appId);
+		if (!channel) return '1970-01-01T00:00:00.000Z';
 
-		await db.transaction('rw', table, async () => {
-			for (const change of changes) {
-				if (change.deletedAt) {
-					// Soft delete
-					const existing = await table.get(change.id);
-					if (existing) {
-						await table.update(change.id, {
-							deletedAt: change.deletedAt,
-							updatedAt: change.updatedAt,
-						});
-					}
-				} else if (change.op === 'delete') {
-					await table.delete(change.id);
-				} else {
-					// Upsert — field-level LWW
-					const existing = await table.get(change.id);
-					if (!existing) {
-						await table.put(change.data ?? change);
-					} else {
-						// Only update fields that are newer
-						const updates: Record<string, unknown> = {};
-						const changeData = change.data ?? change;
-						for (const [key, val] of Object.entries(changeData)) {
-							if (key === 'id') continue;
-							const serverTime = change.fields?.[key]?.updatedAt ?? change.updatedAt;
-							const localTime = (existing as any).updatedAt ?? '';
-							if (serverTime >= localTime) {
-								updates[key] = val;
-							}
-						}
-						if (Object.keys(updates).length > 0) {
-							await table.update(change.id, updates);
-						}
-					}
-				}
-			}
-		});
+		let oldest = new Date().toISOString();
+		for (const tableName of channel.tables) {
+			const cursor = await getSyncCursor(appId, tableName);
+			if (cursor < oldest) oldest = cursor;
+		}
+		return oldest;
 	}
 
-	function buildChangeset(pending: PendingChange[], cid: string) {
+	/**
+	 * Build changeset in backend protocol format.
+	 * Maps unified table names to backend collection names.
+	 */
+	function buildChangeset(pending: PendingChange[], cid: string, since: string) {
 		return {
 			clientId: cid,
+			since,
 			changes: pending.map((p) => ({
-				collection: p.collection,
-				recordId: p.recordId,
+				table: toSyncName(p.collection),
+				id: p.recordId,
 				op: p.op,
 				fields: p.fields,
 				data: p.data,
 				deletedAt: p.deletedAt,
-				createdAt: p.createdAt,
 			})),
 		};
 	}
 
 	function handleOnline() {
 		online = true;
-		status = 'idle';
+		setStatus('idle');
 		// Resume sync for all channels
 		for (const appId of channels.keys()) {
 			pull(appId).catch(() => {});
@@ -342,7 +433,7 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 
 	function handleOffline() {
 		online = false;
-		status = 'offline';
+		setStatus('offline');
 		// Close all WebSockets
 		for (const channel of channels.values()) {
 			if (channel.ws) {
@@ -352,14 +443,28 @@ export function createUnifiedSync(serverUrl: string, getToken: () => Promise<str
 		}
 	}
 
+	function setStatus(s: SyncStatus) {
+		status = s;
+		for (const listener of _statusListeners) {
+			listener(s);
+		}
+	}
+
 	return {
 		startAll,
 		stopAll,
+		onPendingChange,
 		get status() {
 			return status;
 		},
 		get online() {
 			return online;
+		},
+		onStatusChange(listener: (s: SyncStatus) => void) {
+			_statusListeners.push(listener);
+			return () => {
+				_statusListeners = _statusListeners.filter((l) => l !== listener);
+			};
 		},
 		getChannel: (appId: string) => channels.get(appId),
 		pushNow: push,

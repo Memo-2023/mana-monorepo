@@ -8,7 +8,6 @@
 
 	import { _ } from 'svelte-i18n';
 	import { useFavoriteContacts } from '$lib/data/cross-app-queries';
-	import type { CrossAppContact } from '$lib/data/cross-app-stores';
 	import { APP_URLS } from '@manacore/shared-branding';
 
 	const MAX_DISPLAY = 5;
@@ -17,12 +16,12 @@
 	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 	const contactsUrl = isDev ? APP_URLS.contacts.dev : APP_URLS.contacts.prod;
 
-	function getDisplayName(contact: CrossAppContact): string {
+	function getDisplayName(contact: any): string {
 		const parts = [contact.firstName, contact.lastName].filter(Boolean);
 		return parts.length > 0 ? parts.join(' ') : contact.email || 'Unbekannt';
 	}
 
-	function getInitials(contact: CrossAppContact): string {
+	function getInitials(contact: any): string {
 		const name = getDisplayName(contact);
 		const parts = name.split(' ');
 		if (parts.length >= 2) {

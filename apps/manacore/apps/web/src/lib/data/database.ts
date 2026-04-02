@@ -229,3 +229,139 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 export const TABLE_TO_APP: Record<string, string> = Object.fromEntries(
 	Object.entries(SYNC_APP_MAP).flatMap(([appId, tables]) => tables.map((table) => [table, appId]))
 );
+
+// ─── Table Name Mapping (Unified ↔ Backend) ──────────────────
+// The unified DB renames tables to avoid collisions (e.g., todoProjects, cardDecks).
+// The backend (mana-sync) knows the original names from standalone apps.
+
+/** Unified table name → backend collection name (only renamed tables). */
+export const TABLE_TO_SYNC_NAME: Record<string, string> = {
+	// todo
+	todoProjects: 'projects',
+	// chat
+	chatTemplates: 'templates',
+	// picture
+	pictureTags: 'tags',
+	// cards
+	cardDecks: 'decks',
+	// zitare
+	zitareFavorites: 'favorites',
+	zitareLists: 'lists',
+	// mukke
+	mukkePlaylists: 'playlists',
+	mukkeProjects: 'projects',
+	// storage
+	storageFolders: 'folders',
+	storageTags: 'tags',
+	// presi
+	presiDecks: 'decks',
+	// inventar
+	invCollections: 'collections',
+	invItems: 'items',
+	invLocations: 'locations',
+	invCategories: 'categories',
+	// photos
+	photoFavorites: 'favorites',
+	photoTags: 'tags',
+	photoMediaTags: 'photoTags',
+	// citycorners
+	ccLocations: 'locations',
+	ccFavorites: 'favorites',
+	// times
+	timeClients: 'clients',
+	timeProjects: 'projects',
+	timeTags: 'tags',
+	timeTemplates: 'templates',
+	timeSettings: 'settings',
+	// context
+	contextSpaces: 'spaces',
+	// questions
+	qCollections: 'collections',
+	// nutriphi
+	nutriFavorites: 'favorites',
+	// memoro
+	memoroTags: 'tags',
+	memoroSpaces: 'spaces',
+	// uload
+	uloadTags: 'tags',
+	uloadFolders: 'folders',
+	// guides
+	guideCollections: 'collections',
+	// shared: tags
+	globalTags: 'tags',
+	tagGroups: 'tagGroups',
+	// shared: links
+	manaLinks: 'links',
+};
+
+/** Get the backend collection name for a unified table. */
+export function toSyncName(tableName: string): string {
+	return TABLE_TO_SYNC_NAME[tableName] ?? tableName;
+}
+
+/** Build reverse map: for a given appId, maps backend collection name → unified table name. */
+export const SYNC_NAME_TO_TABLE: Record<string, Record<string, string>> = {};
+for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
+	const map: Record<string, string> = {};
+	for (const tableName of tables) {
+		const syncName = toSyncName(tableName);
+		map[syncName] = tableName;
+	}
+	SYNC_NAME_TO_TABLE[appId] = map;
+}
+
+/** Get the unified table name for a backend collection + appId. */
+export function fromSyncName(appId: string, syncCollection: string): string {
+	return SYNC_NAME_TO_TABLE[appId]?.[syncCollection] ?? syncCollection;
+}
+
+// ─── Change Tracking via Dexie Hooks ─────────────────────────
+// Automatically records pending changes for every write to sync-relevant tables.
+// This means module stores (taskTable.add(), etc.) don't need manual trackChange() calls.
+
+let _applyingServerChanges = false;
+
+/** Set to true while applying server changes to prevent sync loops. */
+export function setApplyingServerChanges(v: boolean): void {
+	_applyingServerChanges = v;
+}
+
+const pendingChangesTable = db.table('_pendingChanges');
+
+for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
+	for (const tableName of tables) {
+		const table = db.table(tableName);
+
+		table.hook('creating', function (_primKey, obj) {
+			if (_applyingServerChanges) return;
+			const now = new Date().toISOString();
+			pendingChangesTable.add({
+				appId,
+				collection: tableName,
+				recordId: obj.id,
+				op: 'insert',
+				data: { ...obj },
+				createdAt: now,
+			});
+		});
+
+		table.hook('updating', function (modifications, primKey) {
+			if (_applyingServerChanges) return;
+			const now = new Date().toISOString();
+			const fields: Record<string, { value: unknown; updatedAt: string }> = {};
+			for (const [key, value] of Object.entries(modifications)) {
+				if (key === 'id') continue;
+				fields[key] = { value, updatedAt: now };
+			}
+			pendingChangesTable.add({
+				appId,
+				collection: tableName,
+				recordId: primKey as string,
+				op: (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update',
+				fields,
+				deletedAt: (modifications as Record<string, unknown>).deletedAt as string | undefined,
+				createdAt: now,
+			});
+		});
+	}
+}
