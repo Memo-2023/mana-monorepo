@@ -74,6 +74,12 @@ export {
 	type ExportCSVOptions,
 	type ImportJSONOptions,
 } from './data-export';
+export {
+	createKeyboardShortcuts,
+	keyboardShortcuts,
+	type ShortcutBinding,
+	type KeyboardShortcutRegistry,
+} from './keyboard-shortcuts';
 
 export {
 	createGuestMode,
