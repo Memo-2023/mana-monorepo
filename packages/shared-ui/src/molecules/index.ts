@@ -5,6 +5,8 @@ export { default as Textarea } from './Textarea.svelte';
 export { default as Checkbox } from './Checkbox.svelte';
 export { default as FilterDropdown } from './FilterDropdown.svelte';
 export { default as FavoriteButton } from './FavoriteButton.svelte';
+export { default as ColorPicker } from './ColorPicker.svelte';
+export { COLORS_12, COLORS_16, DEFAULT_COLOR, getRandomColor } from './ColorPicker.constants';
 export type { SelectOption } from './Select.types';
 export type { FilterDropdownOption } from './FilterDropdown.types';
 
