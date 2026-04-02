@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { plantMutations } from '$lib/modules/planta/mutations';
-	import { trackEvent } from '@manacore/shared-utils/analytics';
 
 	let plantName = $state('');
 	let scientificName = $state('');
@@ -30,7 +29,6 @@
 			return;
 		}
 
-		trackEvent('plant_created');
 		goto(`/planta/${plant.id}`);
 	}
 </script>

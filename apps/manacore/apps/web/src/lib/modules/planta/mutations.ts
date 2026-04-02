@@ -6,7 +6,7 @@
 
 import { db } from '$lib/data/database';
 import { toPlant, toWateringSchedule } from './queries';
-import { trackEvent } from '@manacore/shared-utils/analytics';
+import { PlantaEvents } from '@manacore/shared-utils/analytics';
 import type {
 	LocalPlant,
 	LocalWateringSchedule,
@@ -39,7 +39,7 @@ export const plantMutations = {
 				updatedAt: now,
 			};
 			await db.table('plants').add(newLocal);
-			trackEvent('plant_created');
+			PlantaEvents.plantCreated();
 			return toPlant(newLocal);
 		} catch (e) {
 			console.error('Failed to create plant:', e);
@@ -78,7 +78,7 @@ export const plantMutations = {
 				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			});
-			trackEvent('plant_deleted');
+			PlantaEvents.plantDeleted();
 			return true;
 		} catch (e) {
 			console.error('Failed to delete plant:', e);
@@ -117,7 +117,7 @@ export const wateringMutations = {
 				});
 			}
 
-			trackEvent('plant_watered');
+			PlantaEvents.plantWatered();
 			return true;
 		} catch (e) {
 			console.error('Failed to log watering:', e);

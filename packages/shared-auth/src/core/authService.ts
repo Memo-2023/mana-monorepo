@@ -28,7 +28,7 @@ import {
 function trackAuth(event: string, data?: Record<string, string | number | boolean>): void {
 	if (typeof window !== 'undefined' && (window as any).umami?.track) {
 		try {
-			(window as any).umami.track(event, data);
+			(window as any).umami.track(event, { ...data, module: 'auth' });
 		} catch {
 			// Silently ignore tracking errors
 		}

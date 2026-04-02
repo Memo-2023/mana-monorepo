@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
-	import { trackEvent } from '@manacore/shared-utils/analytics';
 	import { wateringMutations } from '$lib/modules/planta/mutations';
 	import {
 		getActivePlants,
@@ -49,10 +48,7 @@
 
 	async function handleWater(plantId: string, e: Event) {
 		e.stopPropagation();
-		const success = await wateringMutations.logWatering(plantId);
-		if (success) {
-			trackEvent('plant_watered');
-		}
+		await wateringMutations.logWatering(plantId);
 	}
 </script>
 

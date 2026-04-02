@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
-	import { trackEvent } from '@manacore/shared-utils/analytics';
 	import { plantMutations, wateringMutations } from '$lib/modules/planta/mutations';
 	import {
 		getPlantById,
@@ -31,10 +30,7 @@
 	async function handleWater() {
 		if (!plant) return;
 		watering = true;
-		const success = await wateringMutations.logWatering(plant.id);
-		if (success) {
-			trackEvent('plant_watered');
-		}
+		await wateringMutations.logWatering(plant.id);
 		watering = false;
 	}
 
@@ -43,10 +39,7 @@
 		if (!confirm(`Moechtest du "${plant.name}" wirklich loeschen?`)) return;
 
 		const success = await plantMutations.delete(plant.id);
-		if (success) {
-			trackEvent('plant_deleted');
-			goto('/planta');
-		}
+		if (success) goto('/planta');
 	}
 
 	function formatDate(date: Date | string | undefined | null): string {

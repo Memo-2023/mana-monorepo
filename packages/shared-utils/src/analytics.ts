@@ -125,18 +125,58 @@ export function trackError(errorType: string, message?: string): void {
 }
 
 // =============================================================================
+// Module Tracker
+// =============================================================================
+
+type EventData = Record<string, string | number | boolean>;
+
+/**
+ * Creates a module-scoped tracker that automatically includes `module` in every event.
+ * This resolves event name collisions in the unified app (e.g. `view_changed` from todo vs calendar).
+ */
+function createModuleTracker(module: string) {
+	return (event: string, data?: EventData) => trackEvent(event, { ...data, module });
+}
+
+// =============================================================================
 // App-Specific Event Helpers
 // =============================================================================
+
+const track = {
+	auth: createModuleTracker('auth'),
+	landing: createModuleTracker('landing'),
+	chat: createModuleTracker('chat'),
+	picture: createModuleTracker('picture'),
+	todo: createModuleTracker('todo'),
+	calendar: createModuleTracker('calendar'),
+	times: createModuleTracker('times'),
+	contacts: createModuleTracker('contacts'),
+	cards: createModuleTracker('cards'),
+	manacore: createModuleTracker('manacore'),
+	context: createModuleTracker('context'),
+	skilltree: createModuleTracker('skilltree'),
+	nutriphi: createModuleTracker('nutriphi'),
+	planta: createModuleTracker('planta'),
+	questions: createModuleTracker('questions'),
+	photos: createModuleTracker('photos'),
+	storage: createModuleTracker('storage'),
+	mukke: createModuleTracker('mukke'),
+	zitare: createModuleTracker('zitare'),
+	presi: createModuleTracker('presi'),
+	subscription: createModuleTracker('subscription'),
+	memoro: createModuleTracker('memoro'),
+	app: createModuleTracker('app'),
+};
 
 /**
  * Auth Events
  */
 export const AuthEvents = {
-	login: (method: 'email' | 'google' | 'github' = 'email') => trackEvent('login', { method }),
-	logout: () => trackEvent('logout'),
-	signup: (method: 'email' | 'google' | 'github' = 'email') => trackEvent('signup', { method }),
-	signupCompleted: () => trackEvent('signup_completed'),
-	passwordReset: () => trackEvent('password_reset'),
+	login: (method: 'email' | 'google' | 'github' = 'email') => track.auth('login', { method }),
+	logout: () => track.auth('logout'),
+	signup: (method: 'email' | 'google' | 'github' = 'email') => track.auth('signup', { method }),
+	signupCompleted: () => track.auth('signup_completed'),
+	passwordReset: () => track.auth('password_reset'),
 };
 
 /**
@@ -144,27 +184,27 @@ export const AuthEvents = {
  */
 export const LandingEvents = {
 	ctaClick: (location: 'hero' | 'pricing' | 'features' | 'footer' | string) =>
-		trackEvent('cta_click', { location }),
-	pricingViewed: () => trackEvent('pricing_viewed'),
-	pricingPlanSelected: (plan: string) => trackEvent('pricing_plan_selected', { plan }),
-	demoStarted: () => trackEvent('demo_started'),
-	featureExplored: (feature: string) => trackEvent('feature_explored', { feature }),
+		track.landing('cta_click', { location }),
+	pricingViewed: () => track.landing('pricing_viewed'),
+	pricingPlanSelected: (plan: string) => track.landing('pricing_plan_selected', { plan }),
+	demoStarted: () => track.landing('demo_started'),
+	featureExplored: (feature: string) => track.landing('feature_explored', { feature }),
 	faqOpened: (question: string) =>
-		trackEvent('faq_opened', { question: question.substring(0, 50) }),
-	contactFormSubmitted: () => trackEvent('contact_form_submitted'),
-	newsletterSubscribed: () => trackEvent('newsletter_subscribed'),
+		track.landing('faq_opened', { question: question.substring(0, 50) }),
+	contactFormSubmitted: () => track.landing('contact_form_submitted'),
+	newsletterSubscribed: () => track.landing('newsletter_subscribed'),
 };
 
 /**
  * Chat App Events
  */
 export const ChatEvents = {
-	conversationCreated: () => trackEvent('conversation_created'),
+	conversationCreated: () => track.chat('conversation_created'),
 	messageSent: (modelId?: string) =>
-		trackEvent('message_sent', modelId ? { model: modelId } : undefined),
-	modelChanged: (modelId: string) => trackEvent('model_changed', { model: modelId }),
-	conversationDeleted: () => trackEvent('conversation_deleted'),
-	conversationShared: () => trackEvent('conversation_shared'),
+		track.chat('message_sent', modelId ? { model: modelId } : undefined),
+	modelChanged: (modelId: string) => track.chat('model_changed', { model: modelId }),
+	conversationDeleted: () => track.chat('conversation_deleted'),
+	conversationShared: () => track.chat('conversation_shared'),
 };
 
 /**
@@ -172,138 +212,144 @@ export const ChatEvents = {
  */
 export const PictureEvents = {
 	imageGenerated: (model: string, style?: string) =>
-		trackEvent('image_generated', { model, ...(style && { style }) }),
-	imageDownloaded: () => trackEvent('image_downloaded'),
-	imageFavorited: () => trackEvent('image_favorited'),
-	imageShared: () => trackEvent('image_shared'),
-	modelSelected: (model: string) => trackEvent('model_selected', { model }),
-	styleSelected: (style: string) => trackEvent('style_selected', { style }),
+		track.picture('image_generated', { model, ...(style && { style }) }),
+	imageDownloaded: () => track.picture('image_downloaded'),
+	imageFavorited: () => track.picture('image_favorited'),
+	imageShared: () => track.picture('image_shared'),
+	modelSelected: (model: string) => track.picture('model_selected', { model }),
+	styleSelected: (style: string) => track.picture('style_selected', { style }),
 	generationFailed: (reason?: string) =>
-		trackEvent('generation_failed', { reason: reason || 'unknown' }),
+		track.picture('generation_failed', { reason: reason || 'unknown' }),
 };
 
 /**
  * Todo App Events
  */
 export const TodoEvents = {
-	taskCreated: (hasDeadline = false) => trackEvent('task_created', { has_deadline: hasDeadline }),
-	taskCompleted: () => trackEvent('task_completed'),
-	taskDeleted: () => trackEvent('task_deleted'),
-	taskUncompleted: () => trackEvent('task_uncompleted'),
-	subtaskCompleted: () => trackEvent('subtask_completed'),
-	projectCreated: () => trackEvent('project_created'),
-	projectDeleted: () => trackEvent('project_deleted'),
-	labelCreated: () => trackEvent('label_created'),
-	viewChanged: (view: string) => trackEvent('view_changed', { view }),
-	quickAddUsed: () => trackEvent('quick_add_used'),
-	filterUsed: (filterType: string) => trackEvent('filter_used', { filter: filterType }),
-	reminderCreated: (type: 'relative' | 'absolute') => trackEvent('reminder_created', { type }),
-	recurringTaskCreated: (pattern: string) => trackEvent('recurring_task_created', { pattern }),
-	taskReordered: () => trackEvent('task_reordered'),
-	keyboardShortcutUsed: (shortcut: string) => trackEvent('keyboard_shortcut_used', { shortcut }),
-	taskEdited: () => trackEvent('task_edited'),
-	dueDateSet: () => trackEvent('due_date_set'),
-	priorityChanged: (priority: string) => trackEvent('priority_changed', { priority }),
+	taskCreated: (hasDeadline = false) => track.todo('task_created', { has_deadline: hasDeadline }),
+	taskCompleted: () => track.todo('task_completed'),
+	taskDeleted: () => track.todo('task_deleted'),
+	taskUncompleted: () => track.todo('task_uncompleted'),
+	subtaskCompleted: () => track.todo('subtask_completed'),
+	projectCreated: () => track.todo('project_created'),
+	projectDeleted: () => track.todo('project_deleted'),
+	labelCreated: () => track.todo('label_created'),
+	viewChanged: (view: string) => track.todo('view_changed', { view }),
+	quickAddUsed: () => track.todo('quick_add_used'),
+	filterUsed: (filterType: string) => track.todo('filter_used', { filter: filterType }),
+	reminderCreated: (type: 'relative' | 'absolute') => track.todo('reminder_created', { type }),
+	recurringTaskCreated: (pattern: string) => track.todo('recurring_task_created', { pattern }),
+	taskReordered: () => track.todo('task_reordered'),
+	keyboardShortcutUsed: (shortcut: string) => track.todo('keyboard_shortcut_used', { shortcut }),
+	taskEdited: () => track.todo('task_edited'),
+	dueDateSet: () => track.todo('due_date_set'),
+	priorityChanged: (priority: string) => track.todo('priority_changed', { priority }),
 };
 
 /**
  * Calendar App Events
  */
 export const CalendarEvents = {
-	eventCreated: (isRecurring = false) => trackEvent('event_created', { recurring: isRecurring }),
-	eventUpdated: () => trackEvent('event_updated'),
-	eventDeleted: () => trackEvent('event_deleted'),
-	calendarCreated: () => trackEvent('calendar_created'),
-	calendarDeleted: () => trackEvent('calendar_deleted'),
-	calendarShared: () => trackEvent('calendar_shared'),
-	viewChanged: (view: string) => trackEvent('view_changed', { view }),
-	reminderSet: (minutesBefore: number) => trackEvent('reminder_set', { minutes: minutesBefore }),
-	eventDragged: () => trackEvent('event_dragged'),
+	eventCreated: (isRecurring = false) =>
+		track.calendar('event_created', { recurring: isRecurring }),
+	eventUpdated: () => track.calendar('event_updated'),
+	eventDeleted: () => track.calendar('event_deleted'),
+	calendarCreated: () => track.calendar('calendar_created'),
+	calendarDeleted: () => track.calendar('calendar_deleted'),
+	calendarShared: () => track.calendar('calendar_shared'),
+	viewChanged: (view: string) => track.calendar('view_changed', { view }),
+	reminderSet: (minutesBefore: number) =>
+		track.calendar('reminder_set', { minutes: minutesBefore }),
+	eventDragged: () => track.calendar('event_dragged'),
 };
 
 /**
- * Clock App Events
+ * Times App Events (formerly Clock)
  */
 export const ClockEvents = {
 	timerStarted: (type: 'pomodoro' | 'stopwatch' | 'countdown') =>
-		trackEvent('timer_started', { type }),
+		track.times('timer_started', { type }),
 	timerCompleted: (type: 'pomodoro' | 'stopwatch' | 'countdown', duration: number) =>
-		trackEvent('timer_completed', { type, duration_seconds: duration }),
-	timerCanceled: () => trackEvent('timer_canceled'),
-	focusSessionStarted: () => trackEvent('focus_session_started'),
+		track.times('timer_completed', { type, duration_seconds: duration }),
+	timerCanceled: () => track.times('timer_canceled'),
+	focusSessionStarted: () => track.times('focus_session_started'),
 	focusSessionCompleted: (duration: number) =>
-		trackEvent('focus_session_completed', { duration_minutes: duration }),
+		track.times('focus_session_completed', { duration_minutes: duration }),
 };
 
 /**
  * Contacts App Events
  */
 export const ContactsEvents = {
-	contactCreated: () => trackEvent('contact_created'),
-	contactUpdated: () => trackEvent('contact_updated'),
-	contactDeleted: () => trackEvent('contact_deleted'),
-	contactFavorited: () => trackEvent('contact_favorited'),
-	contactArchived: () => trackEvent('contact_archived'),
+	contactCreated: () => track.contacts('contact_created'),
+	contactUpdated: () => track.contacts('contact_updated'),
+	contactDeleted: () => track.contacts('contact_deleted'),
+	contactFavorited: () => track.contacts('contact_favorited'),
+	contactArchived: () => track.contacts('contact_archived'),
 	contactImported: (source: 'google' | 'csv' | 'vcard', count?: number) =>
-		trackEvent('contact_imported', { source, ...(count !== undefined && { count }) }),
-	contactExported: (format: 'csv' | 'vcard') => trackEvent('contact_exported', { format }),
-	tagCreated: () => trackEvent('tag_created'),
-	searchPerformed: () => trackEvent('search_performed'),
+		track.contacts('contact_imported', {
+			source,
+			...(count !== undefined && { count }),
+		}),
+	contactExported: (format: 'csv' | 'vcard') => track.contacts('contact_exported', { format }),
+	tagCreated: () => track.contacts('tag_created'),
+	searchPerformed: () => track.contacts('search_performed'),
 };
 
 /**
  * Cards App Events
  */
 export const CardsEvents = {
-	deckCreated: () => trackEvent('deck_created'),
-	deckDeleted: () => trackEvent('deck_deleted'),
-	deckStudied: (cardsCount: number) => trackEvent('deck_studied', { cards: cardsCount }),
-	cardCreated: () => trackEvent('card_created'),
-	cardDeleted: () => trackEvent('card_deleted'),
-	cardReviewed: (rating: 1 | 2 | 3 | 4 | 5) => trackEvent('card_reviewed', { rating }),
-	aiCardsGenerated: (count: number) => trackEvent('ai_cards_generated', { count }),
+	deckCreated: () => track.cards('deck_created'),
+	deckDeleted: () => track.cards('deck_deleted'),
+	deckStudied: (cardsCount: number) => track.cards('deck_studied', { cards: cardsCount }),
+	cardCreated: () => track.cards('card_created'),
+	cardDeleted: () => track.cards('card_deleted'),
+	cardReviewed: (rating: 1 | 2 | 3 | 4 | 5) => track.cards('card_reviewed', { rating }),
+	aiCardsGenerated: (count: number) => track.cards('ai_cards_generated', { count }),
 };
 
 /**
  * ManaCore Platform Events
  */
 export const ManaCoreEvents = {
-	appOpened: (appId: string) => trackEvent('app_opened', { app: appId }),
-	navClicked: (destination: string) => trackEvent('nav_clicked', { destination }),
-	onboardingStarted: () => trackEvent('onboarding_started'),
+	appOpened: (appId: string) => track.manacore('app_opened', { app: appId }),
+	navClicked: (destination: string) => track.manacore('nav_clicked', { destination }),
+	onboardingStarted: () => track.manacore('onboarding_started'),
 	onboardingStepCompleted: (step: string, stepNumber: number) =>
-		trackEvent('onboarding_step_completed', { step, step_number: stepNumber }),
-	onboardingCompleted: () => trackEvent('onboarding_completed'),
-	onboardingSkipped: (atStep: number) => trackEvent('onboarding_skipped', { at_step: atStep }),
-	dashboardEditToggled: (editing: boolean) => trackEvent('dashboard_edit_toggled', { editing }),
-	widgetAdded: (widgetType: string) => trackEvent('widget_added', { widget_type: widgetType }),
-	widgetRemoved: (widgetType: string) => trackEvent('widget_removed', { widget_type: widgetType }),
+		track.manacore('onboarding_step_completed', { step, step_number: stepNumber }),
+	onboardingCompleted: () => track.manacore('onboarding_completed'),
+	onboardingSkipped: (atStep: number) => track.manacore('onboarding_skipped', { at_step: atStep }),
+	dashboardEditToggled: (editing: boolean) => track.manacore('dashboard_edit_toggled', { editing }),
+	widgetAdded: (widgetType: string) => track.manacore('widget_added', { widget_type: widgetType }),
+	widgetRemoved: (widgetType: string) =>
+		track.manacore('widget_removed', { widget_type: widgetType }),
 	widgetResized: (widgetType: string, size: string) =>
-		trackEvent('widget_resized', { widget_type: widgetType, size }),
-	creditsTabViewed: (tab: string) => trackEvent('credits_tab_viewed', { tab }),
-	profileUpdated: () => trackEvent('profile_updated'),
+		track.manacore('widget_resized', { widget_type: widgetType, size }),
+	creditsTabViewed: (tab: string) => track.manacore('credits_tab_viewed', { tab }),
+	profileUpdated: () => track.manacore('profile_updated'),
 };
 
 /**
  * Context App Events
  */
 export const ContextEvents = {
-	documentCreated: (type: string) => trackEvent('document_created', { type }),
-	documentDeleted: () => trackEvent('document_deleted'),
-	documentPinned: (pinned: boolean) => trackEvent('document_pinned', { pinned }),
-	spaceCreated: () => trackEvent('space_created'),
-	spaceDeleted: () => trackEvent('space_deleted'),
-	aiGenerated: () => trackEvent('ai_generated'),
+	documentCreated: (type: string) => track.context('document_created', { type }),
+	documentDeleted: () => track.context('document_deleted'),
+	documentPinned: (pinned: boolean) => track.context('document_pinned', { pinned }),
+	spaceCreated: () => track.context('space_created'),
+	spaceDeleted: () => track.context('space_deleted'),
+	aiGenerated: () => track.context('ai_generated'),
 };
 
 /**
  * SkillTree App Events
  */
 export const SkillTreeEvents = {
-	skillCreated: (branch: string) => trackEvent('skill_created', { branch }),
-	skillDeleted: () => trackEvent('skill_deleted'),
+	skillCreated: (branch: string) => track.skilltree('skill_created', { branch }),
+	skillDeleted: () => track.skilltree('skill_deleted'),
 	xpAdded: (xp: number, leveledUp: boolean) =>
-		trackEvent('xp_added', { xp, leveled_up: leveledUp }),
+		track.skilltree('xp_added', { xp, leveled_up: leveledUp }),
 };
 
 /**
@@ -311,134 +357,137 @@ export const SkillTreeEvents = {
  */
 export const NutriPhiEvents = {
 	mealAdded: (mealType: string, inputType: string) =>
-		trackEvent('meal_added', { meal_type: mealType, input_type: inputType }),
-	mealDeleted: () => trackEvent('meal_deleted'),
-	photoAnalyzed: () => trackEvent('photo_analyzed'),
-	textAnalyzed: () => trackEvent('text_analyzed'),
-	goalsUpdated: () => trackEvent('goals_updated'),
-	favoriteSaved: () => trackEvent('favorite_saved'),
-	favoriteUsed: () => trackEvent('favorite_used'),
+		track.nutriphi('meal_added', { meal_type: mealType, input_type: inputType }),
+	mealDeleted: () => track.nutriphi('meal_deleted'),
+	photoAnalyzed: () => track.nutriphi('photo_analyzed'),
+	textAnalyzed: () => track.nutriphi('text_analyzed'),
+	goalsUpdated: () => track.nutriphi('goals_updated'),
+	favoriteSaved: () => track.nutriphi('favorite_saved'),
+	favoriteUsed: () => track.nutriphi('favorite_used'),
 };
 
 /**
  * Planta App Events
  */
 export const PlantaEvents = {
-	plantAnalyzed: () => trackEvent('plant_analyzed'),
-	plantCreated: () => trackEvent('plant_created'),
-	plantDeleted: () => trackEvent('plant_deleted'),
-	plantWatered: () => trackEvent('plant_watered'),
+	plantAnalyzed: () => track.planta('plant_analyzed'),
+	plantCreated: () => track.planta('plant_created'),
+	plantDeleted: () => track.planta('plant_deleted'),
+	plantWatered: () => track.planta('plant_watered'),
 };
 
 /**
  * Questions App Events
  */
 export const QuestionsEvents = {
-	questionCreated: (depth: string) => trackEvent('question_created', { depth }),
-	questionDeleted: () => trackEvent('question_deleted'),
-	researchStarted: (depth: string) => trackEvent('research_started', { depth }),
-	collectionCreated: () => trackEvent('collection_created'),
-	collectionDeleted: () => trackEvent('collection_deleted'),
+	questionCreated: (depth: string) => track.questions('question_created', { depth }),
+	questionDeleted: () => track.questions('question_deleted'),
+	researchStarted: (depth: string) => track.questions('research_started', { depth }),
+	collectionCreated: () => track.questions('collection_created'),
+	collectionDeleted: () => track.questions('collection_deleted'),
 };
 
 /**
  * Photos App Events
  */
 export const PhotosEvents = {
-	photoUploaded: () => trackEvent('photo_uploaded'),
-	photoFavorited: (favorited: boolean) => trackEvent('photo_favorited', { favorited }),
-	photoDeleted: () => trackEvent('photo_deleted'),
-	albumCreated: () => trackEvent('album_created'),
-	albumDeleted: () => trackEvent('album_deleted'),
-	photosAddedToAlbum: (count: number) => trackEvent('photos_added_to_album', { count }),
-	photoRemovedFromAlbum: () => trackEvent('photo_removed_from_album'),
-	filtersApplied: () => trackEvent('filters_applied'),
+	photoUploaded: () => track.photos('photo_uploaded'),
+	photoFavorited: (favorited: boolean) => track.photos('photo_favorited', { favorited }),
+	photoDeleted: () => track.photos('photo_deleted'),
+	albumCreated: () => track.photos('album_created'),
+	albumDeleted: () => track.photos('album_deleted'),
+	photosAddedToAlbum: (count: number) => track.photos('photos_added_to_album', { count }),
+	photoRemovedFromAlbum: () => track.photos('photo_removed_from_album'),
+	filtersApplied: () => track.photos('filters_applied'),
 };
 
 /**
  * Storage App Events
  */
 export const StorageEvents = {
-	fileDownloaded: () => trackEvent('file_downloaded'),
-	fileDeleted: () => trackEvent('file_deleted'),
-	fileFavorited: (favorited: boolean) => trackEvent('file_favorited', { favorited }),
-	folderDeleted: () => trackEvent('folder_deleted'),
-	folderFavorited: (favorited: boolean) => trackEvent('folder_favorited', { favorited }),
-	shareLinkCopied: () => trackEvent('share_link_copied'),
-	shareLinkDeleted: () => trackEvent('share_link_deleted'),
-	trashRestored: (type: string) => trackEvent('trash_restored', { type }),
-	trashEmptied: () => trackEvent('trash_emptied'),
+	fileDownloaded: () => track.storage('file_downloaded'),
+	fileDeleted: () => track.storage('file_deleted'),
+	fileFavorited: (favorited: boolean) => track.storage('file_favorited', { favorited }),
+	folderDeleted: () => track.storage('folder_deleted'),
+	folderFavorited: (favorited: boolean) => track.storage('folder_favorited', { favorited }),
+	shareLinkCopied: () => track.storage('share_link_copied'),
+	shareLinkDeleted: () => track.storage('share_link_deleted'),
+	trashRestored: (type: string) => track.storage('trash_restored', { type }),
+	trashEmptied: () => track.storage('trash_emptied'),
 	searchPerformed: (resultsCount: number) =>
-		trackEvent('search_performed', { results: resultsCount }),
-	viewModeChanged: (mode: string) => trackEvent('view_mode_changed', { mode }),
+		track.storage('search_performed', { results: resultsCount }),
+	viewModeChanged: (mode: string) => track.storage('view_mode_changed', { mode }),
 };
 
 /**
  * Mukke App Events
  */
 export const MukkeEvents = {
-	songUploaded: () => trackEvent('song_uploaded'),
-	songUploadFailed: () => trackEvent('song_upload_failed'),
-	songPlayed: () => trackEvent('song_played'),
-	songFavorited: (favorited: boolean) => trackEvent('song_favorited', { favorited }),
-	songDeleted: () => trackEvent('song_deleted'),
-	playlistCreated: () => trackEvent('playlist_created'),
-	playlistDeleted: () => trackEvent('playlist_deleted'),
-	playlistPlayAll: () => trackEvent('playlist_play_all'),
-	playlistShufflePlay: () => trackEvent('playlist_shuffle_play'),
-	projectCreated: () => trackEvent('project_created'),
-	projectDeleted: () => trackEvent('project_deleted'),
-	projectExported: (format: string) => trackEvent('project_exported', { format }),
+	songUploaded: () => track.mukke('song_uploaded'),
+	songUploadFailed: () => track.mukke('song_upload_failed'),
+	songPlayed: () => track.mukke('song_played'),
+	songFavorited: (favorited: boolean) => track.mukke('song_favorited', { favorited }),
+	songDeleted: () => track.mukke('song_deleted'),
+	playlistCreated: () => track.mukke('playlist_created'),
+	playlistDeleted: () => track.mukke('playlist_deleted'),
+	playlistPlayAll: () => track.mukke('playlist_play_all'),
+	playlistShufflePlay: () => track.mukke('playlist_shuffle_play'),
+	projectCreated: () => track.mukke('project_created'),
+	projectDeleted: () => track.mukke('project_deleted'),
+	projectExported: (format: string) => track.mukke('project_exported', { format }),
 };
 
 /**
  * Zitare App Events
  */
 export const ZitareEvents = {
-	randomQuoteLoaded: () => trackEvent('random_quote_loaded'),
-	quoteShared: (category: string) => trackEvent('quote_shared', { category }),
-	quoteFavorited: (category: string) => trackEvent('quote_favorited', { category }),
-	quoteUnfavorited: () => trackEvent('quote_unfavorited'),
-	categoryViewed: (category: string) => trackEvent('category_viewed', { category }),
+	randomQuoteLoaded: () => track.zitare('random_quote_loaded'),
+	quoteShared: (category: string) => track.zitare('quote_shared', { category }),
+	quoteFavorited: (category: string) => track.zitare('quote_favorited', { category }),
+	quoteUnfavorited: () => track.zitare('quote_unfavorited'),
+	categoryViewed: (category: string) => track.zitare('category_viewed', { category }),
 	searchPerformed: (resultsCount: number) =>
-		trackEvent('search_performed', { results: resultsCount }),
-	listCreated: () => trackEvent('list_created'),
-	listDeleted: () => trackEvent('list_deleted'),
-	quoteLanguageChanged: (language: string) => trackEvent('quote_language_changed', { language }),
+		track.zitare('search_performed', { results: resultsCount }),
+	listCreated: () => track.zitare('list_created'),
+	listDeleted: () => track.zitare('list_deleted'),
+	quoteLanguageChanged: (language: string) => track.zitare('quote_language_changed', { language }),
 };
 
 /**
  * Presi App Events
  */
 export const PresiEvents = {
-	deckCreated: () => trackEvent('deck_created'),
-	deckDeleted: () => trackEvent('deck_deleted'),
-	slideCreated: () => trackEvent('slide_created'),
-	slideEdited: () => trackEvent('slide_edited'),
-	slideDeleted: () => trackEvent('slide_deleted'),
-	slideReordered: (direction: 'up' | 'down') => trackEvent('slide_reordered', { direction }),
+	deckCreated: () => track.presi('deck_created'),
+	deckDeleted: () => track.presi('deck_deleted'),
+	slideCreated: () => track.presi('slide_created'),
+	slideEdited: () => track.presi('slide_edited'),
+	slideDeleted: () => track.presi('slide_deleted'),
+	slideReordered: (direction: 'up' | 'down') => track.presi('slide_reordered', { direction }),
 	presentationStarted: (slideCount: number) =>
-		trackEvent('presentation_started', { slide_count: slideCount }),
+		track.presi('presentation_started', { slide_count: slideCount }),
 	presentationExited: (duration: number, slidesViewed: number) =>
-		trackEvent('presentation_exited', { duration_seconds: duration, slides_viewed: slidesViewed }),
-	shareLinkCreated: () => trackEvent('share_link_created'),
-	shareLinkCopied: () => trackEvent('share_link_copied'),
-	shareLinkDeleted: () => trackEvent('share_link_deleted'),
-	sharedDeckViewed: () => trackEvent('shared_deck_viewed'),
+		track.presi('presentation_exited', {
+			duration_seconds: duration,
+			slides_viewed: slidesViewed,
+		}),
+	shareLinkCreated: () => track.presi('share_link_created'),
+	shareLinkCopied: () => track.presi('share_link_copied'),
+	shareLinkDeleted: () => track.presi('share_link_deleted'),
+	sharedDeckViewed: () => track.presi('shared_deck_viewed'),
 };
 
 /**
  * Subscription/Payment Events
  */
 export const SubscriptionEvents = {
-	pricingViewed: () => trackEvent('pricing_viewed'),
-	planSelected: (plan: string) => trackEvent('plan_selected', { plan }),
-	checkoutStarted: (plan: string) => trackEvent('checkout_started', { plan }),
-	checkoutCompleted: (plan: string) => trackEvent('checkout_completed', { plan }),
-	checkoutAbandoned: (plan: string) => trackEvent('checkout_abandoned', { plan }),
-	subscriptionCanceled: (plan: string) => trackEvent('subscription_canceled', { plan }),
-	trialStarted: () => trackEvent('trial_started'),
-	trialEnded: (converted: boolean) => trackEvent('trial_ended', { converted }),
+	pricingViewed: () => track.subscription('pricing_viewed'),
+	planSelected: (plan: string) => track.subscription('plan_selected', { plan }),
+	checkoutStarted: (plan: string) => track.subscription('checkout_started', { plan }),
+	checkoutCompleted: (plan: string) => track.subscription('checkout_completed', { plan }),
+	checkoutAbandoned: (plan: string) => track.subscription('checkout_abandoned', { plan }),
+	subscriptionCanceled: (plan: string) => track.subscription('subscription_canceled', { plan }),
+	trialStarted: () => track.subscription('trial_started'),
+	trialEnded: (converted: boolean) => track.subscription('trial_ended', { converted }),
 };
 
 /**
@@ -446,44 +495,44 @@ export const SubscriptionEvents = {
  */
 export const MemoroEvents = {
 	memoCreated: (mediaType?: string) =>
-		trackEvent('memo_created', mediaType ? { media_type: mediaType } : undefined),
-	memoDeleted: () => trackEvent('memo_deleted'),
-	memoCombined: (count: number) => trackEvent('memo_combined', { memo_count: count }),
-	memoQuestioned: () => trackEvent('memo_questioned'),
-	recordingStarted: () => trackEvent('recording_started'),
+		track.memoro('memo_created', mediaType ? { media_type: mediaType } : undefined),
+	memoDeleted: () => track.memoro('memo_deleted'),
+	memoCombined: (count: number) => track.memoro('memo_combined', { memo_count: count }),
+	memoQuestioned: () => track.memoro('memo_questioned'),
+	recordingStarted: () => track.memoro('recording_started'),
 	recordingCompleted: (durationSeconds: number) =>
-		trackEvent('recording_completed', { duration_seconds: durationSeconds }),
-	recordingAppended: () => trackEvent('recording_appended'),
-	transcriptionRetried: () => trackEvent('transcription_retried'),
-	headlineRetried: () => trackEvent('headline_retried'),
-	spaceCreated: () => trackEvent('space_created'),
-	spaceDeleted: () => trackEvent('space_deleted'),
-	spaceLeft: () => trackEvent('space_left'),
-	memoLinkedToSpace: () => trackEvent('memo_linked_to_space'),
-	memoUnlinkedFromSpace: () => trackEvent('memo_unlinked_from_space'),
-	inviteSent: () => trackEvent('invite_sent'),
-	inviteAccepted: () => trackEvent('invite_accepted'),
-	inviteDeclined: () => trackEvent('invite_declined'),
-	meetingBotCreated: (platform: string) => trackEvent('meeting_bot_created', { platform }),
-	meetingBotStopped: () => trackEvent('meeting_bot_stopped'),
-	recordingToMemo: () => trackEvent('recording_to_memo'),
+		track.memoro('recording_completed', { duration_seconds: durationSeconds }),
+	recordingAppended: () => track.memoro('recording_appended'),
+	transcriptionRetried: () => track.memoro('transcription_retried'),
+	headlineRetried: () => track.memoro('headline_retried'),
+	spaceCreated: () => track.memoro('space_created'),
+	spaceDeleted: () => track.memoro('space_deleted'),
+	spaceLeft: () => track.memoro('space_left'),
+	memoLinkedToSpace: () => track.memoro('memo_linked_to_space'),
+	memoUnlinkedFromSpace: () => track.memoro('memo_unlinked_from_space'),
+	inviteSent: () => track.memoro('invite_sent'),
+	inviteAccepted: () => track.memoro('invite_accepted'),
+	inviteDeclined: () => track.memoro('invite_declined'),
+	meetingBotCreated: (platform: string) => track.memoro('meeting_bot_created', { platform }),
+	meetingBotStopped: () => track.memoro('meeting_bot_stopped'),
+	recordingToMemo: () => track.memoro('recording_to_memo'),
 	blueprintSelected: (blueprintId: string) =>
-		trackEvent('blueprint_selected', { blueprint_id: blueprintId }),
-	playbackStarted: () => trackEvent('playback_started'),
-	settingsUpdated: (setting: string) => trackEvent('settings_updated', { setting }),
-	themeChanged: (theme: string) => trackEvent('theme_changed', { theme }),
+		track.memoro('blueprint_selected', { blueprint_id: blueprintId }),
+	playbackStarted: () => track.memoro('playback_started'),
+	settingsUpdated: (setting: string) => track.memoro('settings_updated', { setting }),
+	themeChanged: (theme: string) => track.memoro('theme_changed', { theme }),
 };
 
 /**
- * General App Events
+ * General App Events (cross-module, e.g. theme/language changes)
  */
 export const AppEvents = {
-	appOpened: (app: string) => trackEvent('app_opened', { app }),
-	themeChanged: (theme: 'light' | 'dark' | 'system') => trackEvent('theme_changed', { theme }),
-	languageChanged: (language: string) => trackEvent('language_changed', { language }),
+	appOpened: (app: string) => track.app('app_opened', { app }),
+	themeChanged: (theme: 'light' | 'dark' | 'system') => track.app('theme_changed', { theme }),
+	languageChanged: (language: string) => track.app('language_changed', { language }),
 	feedbackSubmitted: (type: 'bug' | 'feature' | 'other') =>
-		trackEvent('feedback_submitted', { type }),
-	helpOpened: () => trackEvent('help_opened'),
-	settingsOpened: () => trackEvent('settings_opened'),
-	shareClicked: (platform: string) => trackEvent('share_clicked', { platform }),
+		track.app('feedback_submitted', { type }),
+	helpOpened: () => track.app('help_opened'),
+	settingsOpened: () => track.app('settings_opened'),
+	shareClicked: (platform: string) => track.app('share_clicked', { platform }),
 };
