@@ -1,0 +1,23 @@
+{
+	"app": {
+		"name": "Clock"
+	},
+	"common": {
+		"back": "Zurück",
+		"cancel": "Abbrechen",
+		"loading": "Lade..."
+	},
+	"nav": {
+		"home": "Startseite",
+		"settings": "Einstellungen"
+	},
+	"clock": {
+		"title": "Life Clock",
+		"remaining": "Verbleibende Zeit",
+		"elapsed": "Vergangene Zeit"
+	},
+	"messages": {
+		"saved": "Gespeichert",
+		"error": "Ein Fehler ist aufgetreten"
+	}
+}

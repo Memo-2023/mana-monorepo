@@ -1,0 +1,23 @@
+{
+	"app": {
+		"name": "Clock"
+	},
+	"common": {
+		"back": "Back",
+		"cancel": "Cancel",
+		"loading": "Loading..."
+	},
+	"nav": {
+		"home": "Home",
+		"settings": "Settings"
+	},
+	"clock": {
+		"title": "Life Clock",
+		"remaining": "Time remaining",
+		"elapsed": "Time elapsed"
+	},
+	"messages": {
+		"saved": "Saved",
+		"error": "An error occurred"
+	}
+}
