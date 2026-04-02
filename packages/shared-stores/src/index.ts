@@ -64,6 +64,16 @@ export {
 	type ReminderSource,
 	type DueReminder,
 } from './reminder-scheduler';
+export {
+	exportToJSON,
+	exportToCSV,
+	importFromJSON,
+	downloadFile,
+	timestampedFilename,
+	type ExportJSONOptions,
+	type ExportCSVOptions,
+	type ImportJSONOptions,
+} from './data-export';
 
 export {
 	createGuestMode,
