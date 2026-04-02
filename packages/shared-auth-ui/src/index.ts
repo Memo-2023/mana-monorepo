@@ -33,6 +33,18 @@ export {
 } from './utils/guestNudge';
 export { parseUserAgent, getDeviceType, formatUserAgent } from './utils/userAgent';
 
+// Auth Stores (absorbed from @manacore/shared-auth-stores)
+export { createManaAuthStore } from './stores/createManaAuthStore.svelte';
+export type { ManaAuthStoreConfig, ManaAuthStore } from './stores/createManaAuthStore.svelte';
+export { createAuthStore } from './stores/createAuthStore.svelte';
+export type {
+	BaseUser,
+	AuthServiceAdapter,
+	AuthStoreState,
+	AuthStoreActions,
+	AuthStore,
+} from './stores/store-types';
+
 // Types
 export type {
 	AuthUIConfig,
