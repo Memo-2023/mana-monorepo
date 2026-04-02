@@ -1,486 +1,624 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { locale } from 'svelte-i18n';
-	import {
-		APP_URLS,
-		APP_STATUS_LABELS,
-		getAccessibleManaApps,
-		type ManaApp,
-		type AppIconId,
-	} from '@manacore/shared-branding';
-	import { createAppNavigationStore } from '@manacore/shared-ui';
-	import { authStore } from '$lib/stores/auth.svelte';
-	import { ManaCoreEvents } from '@manacore/shared-utils/analytics';
-	import AppRow from '$lib/components/AppRow.svelte';
-	import ActivityFeed from '$lib/components/ActivityFeed.svelte';
+	import { Plus, PencilSimple, X, ArrowsOut } from '@manacore/shared-icons';
+	import AppPage from '$lib/components/workbench/AppPage.svelte';
+	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
+	import { getAppEntry, APP_REGISTRY } from '$lib/components/workbench/app-registry';
+	import { createAppSettingsStore } from '@manacore/shared-stores';
 
-	const store = createAppNavigationStore();
+	// ── Persisted workbench state ───────────────────────────
+	type PageWidth = 'narrow' | 'medium' | 'wide' | 'full';
 
-	// External apps that are hosted on separate subdomains
-	const EXTERNAL_APPS = new Set<string>(['matrix', 'arcade']);
-
-	// Detect dev mode (only needed for external app URLs)
-	const isDev =
-		typeof window !== 'undefined' &&
-		(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-	// Current locale
-	let currentLocale = $derived(($locale as 'de' | 'en') || 'de');
-	let statusLabels = $derived(APP_STATUS_LABELS[currentLocale] || APP_STATUS_LABELS['de']);
-
-	// Filter apps by user's access tier
-	let userTier = $derived(authStore.user?.tier || 'public');
-	let activeApps = $derived(getAccessibleManaApps(userTier));
-
-	// Favorites resolved to ManaApp objects
-	let favoriteApps = $derived(
-		store.favorites
-			.map((id) => activeApps.find((a) => a.id === id))
-			.filter((a): a is ManaApp => !!a)
-	);
-
-	// Recently used resolved to ManaApp objects
-	let recentApps = $derived(
-		store.recentApps
-			.map((r) => activeApps.find((a) => a.id === r.id))
-			.filter((a): a is ManaApp => !!a)
-			.slice(0, 5)
-	);
-
-	// All apps sorted by usage frequency
-	let sortedApps = $derived(
-		[...activeApps].sort((a, b) => {
-			const countA = store.usageCounts[a.id] || 0;
-			const countB = store.usageCounts[b.id] || 0;
-			return countB - countA;
-		})
-	);
-
-	function getStatusColor(status: ManaApp['status']): string {
-		const colors = {
-			published: '#22c55e',
-			beta: '#eab308',
-			development: '#f97316',
-			planning: '#6b7280',
-		};
-		return colors[status];
+	interface WorkbenchSettings extends Record<string, unknown> {
+		openApps: { appId: string; minimized: boolean; maximized?: boolean }[];
+		pageWidth: PageWidth;
 	}
 
-	function getStatusBgColor(status: ManaApp['status']): string {
-		const colors = {
-			published: 'rgba(34, 197, 94, 0.1)',
-			beta: 'rgba(234, 179, 8, 0.1)',
-			development: 'rgba(249, 115, 22, 0.1)',
-			planning: 'rgba(107, 114, 128, 0.1)',
-		};
-		return colors[status];
+	const workbenchStore = createAppSettingsStore<WorkbenchSettings>('workbench-settings', {
+		openApps: [
+			{ appId: 'todo', minimized: false },
+			{ appId: 'calendar', minimized: false },
+			{ appId: 'contacts', minimized: false },
+		],
+		pageWidth: 'medium' as PageWidth,
+	});
+
+	// Local reactive state synced from persisted store
+	let openApps = $state<{ appId: string; minimized: boolean; maximized?: boolean }[]>([
+		{ appId: 'todo', minimized: false },
+		{ appId: 'calendar', minimized: false },
+		{ appId: 'contacts', minimized: false },
+	]);
+	let pageWidth = $state<PageWidth>('medium');
+
+	// Initialize from persisted settings
+	$effect(() => {
+		const s = workbenchStore.settings;
+		if (s.openApps?.length) openApps = [...s.openApps];
+		if (s.pageWidth) pageWidth = s.pageWidth;
+	});
+
+	// Persist changes (debounced via store)
+	function persistState() {
+		workbenchStore.update({
+			openApps: openApps.map((a) => ({
+				appId: a.appId,
+				minimized: a.minimized,
+				maximized: a.maximized,
+			})),
+			pageWidth,
+		});
 	}
 
-	function handleAppClick(app: ManaApp) {
-		store.recordAppVisit(app.id);
-		ManaCoreEvents.appOpened(app.id);
+	let expandedApps = $derived(openApps.filter((a) => !a.minimized));
 
-		if (EXTERNAL_APPS.has(app.id)) {
-			// External apps open in a new tab
-			const urls = APP_URLS[app.id];
-			if (urls) {
-				const url = isDev ? urls.dev : urls.prod;
-				window.open(url, '_blank', 'noopener,noreferrer');
-			}
+	// ── Edit mode ──────────────────────────────────────────
+	let editMode = $state(false);
+	let showPicker = $state(false);
+
+	// ── App CRUD ────────────────────────────────────────────
+	function handleAddApp(appId: string) {
+		if (!openApps.some((a) => a.appId === appId)) {
+			openApps = [...openApps, { appId, minimized: false }];
 		} else {
-			// Internal apps navigate within the unified app
-			goto(`/${app.id}`);
+			openApps = openApps.map((a) => (a.appId === appId ? { ...a, minimized: false } : a));
+		}
+		showPicker = false;
+		persistState();
+	}
+
+	function handleRemoveApp(appId: string) {
+		openApps = openApps.filter((a) => a.appId !== appId);
+		persistState();
+	}
+
+	function handleMinimizeApp(appId: string) {
+		openApps = openApps.map((a) => (a.appId === appId ? { ...a, minimized: true } : a));
+		persistState();
+	}
+
+	function handleRestoreApp(appId: string) {
+		openApps = openApps.map((a) => (a.appId === appId ? { ...a, minimized: false } : a));
+		persistState();
+	}
+
+	function handleMaximizeApp(appId: string) {
+		openApps = openApps.map((a) =>
+			a.appId === appId ? { ...a, maximized: !a.maximized, minimized: false } : a
+		);
+		persistState();
+	}
+
+	// ── Reorder ─────────────────────────────────────────────
+	function handleMoveLeft(appId: string) {
+		const idx = openApps.findIndex((a) => a.appId === appId);
+		if (idx <= 0) return;
+		const apps = [...openApps];
+		[apps[idx - 1], apps[idx]] = [apps[idx], apps[idx - 1]];
+		openApps = apps;
+		persistState();
+	}
+
+	function handleMoveRight(appId: string) {
+		const idx = openApps.findIndex((a) => a.appId === appId);
+		if (idx === -1 || idx >= openApps.length - 1) return;
+		const apps = [...openApps];
+		[apps[idx], apps[idx + 1]] = [apps[idx + 1], apps[idx]];
+		openApps = apps;
+		persistState();
+	}
+
+	// ── Drag reorder ────────────────────────────────────────
+	let dragAppId = $state<string | null>(null);
+
+	function handleDragStart(e: DragEvent, appId: string) {
+		dragAppId = appId;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/plain', appId);
 		}
 	}
 
-	// Stats
-	let totalApps = $derived(activeApps.length);
-	let liveApps = $derived(
-		activeApps.filter((a) => a.status === 'published' || a.status === 'beta').length
+	function handleDragOver(e: DragEvent) {
+		if (!dragAppId) return;
+		e.preventDefault();
+		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+	}
+
+	function handleDrop(e: DragEvent, targetAppId: string) {
+		e.preventDefault();
+		if (!dragAppId || dragAppId === targetAppId) return;
+		const fromIdx = openApps.findIndex((a) => a.appId === dragAppId);
+		const toIdx = openApps.findIndex((a) => a.appId === targetAppId);
+		if (fromIdx === -1 || toIdx === -1) return;
+		const apps = [...openApps];
+		const [moved] = apps.splice(fromIdx, 1);
+		apps.splice(toIdx, 0, moved);
+		openApps = apps;
+		dragAppId = null;
+		persistState();
+	}
+
+	function handleDragEnd() {
+		dragAppId = null;
+	}
+
+	// ── Width pills ─────────────────────────────────────────
+	const WIDTH_OPTIONS: { id: PageWidth; label: string }[] = [
+		{ id: 'narrow', label: 'S' },
+		{ id: 'medium', label: 'M' },
+		{ id: 'wide', label: 'L' },
+		{ id: 'full', label: 'XL' },
+	];
+
+	const PAGE_WIDTH_MAP: Record<string, string> = {
+		narrow: 'min(360px, 85vw)',
+		medium: 'min(480px, 85vw)',
+		wide: 'min(640px, 90vw)',
+		full: 'min(840px, 95vw)',
+	};
+
+	let sheetWidthVar = $derived(PAGE_WIDTH_MAP[pageWidth] || PAGE_WIDTH_MAP.medium);
+	let sheetWidthValue = $derived(PAGE_WIDTH_MAP[pageWidth] || PAGE_WIDTH_MAP.medium);
+
+	function setPageWidth(w: PageWidth) {
+		pageWidth = w;
+		persistState();
+	}
+
+	// ── Minimized tabs ──────────────────────────────────────
+	let minimizedApps = $derived(
+		openApps
+			.filter((a) => a.minimized)
+			.map((a) => {
+				const entry = getAppEntry(a.appId);
+				return {
+					appId: a.appId,
+					name: entry?.name ?? a.appId,
+					color: entry?.color ?? '#6B7280',
+				};
+			})
 	);
 
-	// Greeting based on time
-	function getGreeting(): string {
-		const hour = new Date().getHours();
-		if (currentLocale === 'en') {
-			if (hour < 12) return 'Good morning';
-			if (hour < 18) return 'Good afternoon';
-			return 'Good evening';
-		}
-		if (hour < 12) return 'Guten Morgen';
-		if (hour < 18) return 'Guten Tag';
-		return 'Guten Abend';
-	}
+	let pickerEl = $state<HTMLDivElement | null>(null);
 
-	let greeting = $derived(getGreeting());
-	let userName = $derived(authStore.user?.email?.split('@')[0] || 'User');
+	$effect(() => {
+		if (showPicker && pickerEl) {
+			pickerEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+		}
+	});
 </script>
 
-<div class="home-page">
-	<!-- Hero Section -->
-	<div class="hero">
-		<div class="hero-content">
-			<h1 class="hero-title">
-				{greeting}, <span class="hero-name">{userName}</span>
-			</h1>
-			<p class="hero-subtitle">
-				{#if currentLocale === 'en'}
-					Your Mana ecosystem — {totalApps} apps, {liveApps} live
-				{:else}
-					Dein Mana-Ökosystem — {totalApps} Apps, {liveApps} live
-				{/if}
-			</p>
+<svelte:head>
+	<title>Home - ManaCore</title>
+</svelte:head>
+
+<div class="workbench">
+	<!-- Width pills (edit mode) -->
+	{#if editMode}
+		<div class="edit-toolbar">
+			<div class="width-pills">
+				{#each WIDTH_OPTIONS as opt (opt.id)}
+					<button
+						class="width-pill"
+						class:active={pageWidth === opt.id}
+						onclick={() => setPageWidth(opt.id)}
+					>
+						{opt.label}
+					</button>
+				{/each}
+			</div>
 		</div>
-		<div class="hero-stats">
-			<a href="/dashboard" class="stat-card">
-				<span class="stat-icon">📊</span>
-				<span class="stat-label">Dashboard</span>
-			</a>
-			<a href="/credits" class="stat-card">
-				<span class="stat-icon">💳</span>
-				<span class="stat-label">Credits</span>
-			</a>
-			<a href="/settings" class="stat-card">
-				<span class="stat-icon">⚙️</span>
-				<span class="stat-label">{currentLocale === 'en' ? 'Settings' : 'Einstellungen'}</span>
-			</a>
-		</div>
-	</div>
+	{/if}
 
-	<!-- Favorites -->
-	<AppRow
-		apps={favoriteApps}
-		title={currentLocale === 'en' ? 'Favorites' : 'Favoriten'}
-		showPin={true}
-		onAppClick={handleAppClick}
-		onTogglePin={(id) => store.toggleFavorite(id)}
-		pinnedIds={store.favorites}
-	/>
-
-	<!-- Recently Used -->
-	<AppRow
-		apps={recentApps}
-		title={currentLocale === 'en' ? 'Recently Used' : 'Zuletzt verwendet'}
-		onAppClick={handleAppClick}
-	/>
-
-	<!-- Activity Feed -->
-	<ActivityFeed locale={currentLocale} />
-
-	<!-- All Apps (sorted by usage) -->
-	<section class="category">
-		<h2 class="section-title">
-			{currentLocale === 'en' ? 'All Apps' : 'Alle Apps'}
-		</h2>
-
-		<div class="app-grid">
-			{#each sortedApps as app (app.id)}
-				<button
-					class="app-card"
-					style="--app-color: {app.color};"
-					onclick={() => handleAppClick(app)}
-				>
-					<div class="app-card-top">
-						<div class="app-icon-wrap">
-							{#if app.icon}
-								<img src={app.icon} alt={app.name} class="app-icon" />
-							{:else}
-								<div class="app-icon-fallback" style="color: {app.color};">
-									{app.name.charAt(0)}
-								</div>
-							{/if}
-						</div>
-						<div
-							class="status-badge"
-							style="color: {getStatusColor(app.status)}; background: {getStatusBgColor(
-								app.status
-							)};"
-						>
-							<span class="status-dot" style="background: {getStatusColor(app.status)};"></span>
-							{statusLabels[app.status]}
-						</div>
-					</div>
-
-					<h3 class="app-name">{app.name}</h3>
-					<p class="app-tagline">{app.description[currentLocale] || app.description.de}</p>
-
-					<div class="app-card-footer">
-						{#if app.comingSoon}
-							<span class="coming-soon-label">
-								{currentLocale === 'en' ? 'Coming Soon' : 'Demnächst'}
-							</span>
-						{:else}
-							<span class="open-label" style="color: {app.color};">
-								{currentLocale === 'en' ? 'Open' : 'Öffnen'} →
-							</span>
-						{/if}
-					</div>
-				</button>
-			{/each}
-		</div>
-	</section>
-
-	<!-- Legend -->
-	<div class="legend">
-		<span class="legend-title">{currentLocale === 'en' ? 'Status' : 'Status'}:</span>
-		{#each Object.entries(statusLabels) as [status, label]}
-			<span class="legend-item">
-				<span class="legend-dot" style="background: {getStatusColor(status as ManaApp['status'])};"
-				></span>
-				{label}
-			</span>
+	<!-- App carousel -->
+	<div class="fokus-track" style="--sheet-width: {sheetWidthVar}">
+		{#each expandedApps as app, idx (app.appId)}
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="page-drag-wrapper"
+				class:dragging={dragAppId === app.appId}
+				draggable={!editMode}
+				ondragstart={(e) => handleDragStart(e, app.appId)}
+				ondragover={handleDragOver}
+				ondrop={(e) => handleDrop(e, app.appId)}
+				ondragend={handleDragEnd}
+			>
+				<AppPage
+					appId={app.appId}
+					pageWidth={sheetWidthValue}
+					maximized={app.maximized}
+					{editMode}
+					isFirst={idx === 0}
+					isLast={idx === expandedApps.length - 1}
+					onClose={() => handleRemoveApp(app.appId)}
+					onMinimize={() => handleMinimizeApp(app.appId)}
+					onMaximize={() => handleMaximizeApp(app.appId)}
+					onMoveLeft={editMode ? () => handleMoveLeft(app.appId) : undefined}
+					onMoveRight={editMode ? () => handleMoveRight(app.appId) : undefined}
+				/>
+			</div>
 		{/each}
+
+		<!-- Picker / add button -->
+		{#if expandedApps.length === 0}
+			<div class="empty-wrapper">
+				{#if showPicker}
+					<AppPagePicker
+						onSelect={handleAddApp}
+						onClose={() => (showPicker = false)}
+						activeAppIds={openApps.map((a) => a.appId)}
+					/>
+				{:else}
+					<button class="add-card alone" onclick={() => (showPicker = true)}>
+						<Plus size={24} />
+						<span class="add-label">App hinzufügen</span>
+					</button>
+				{/if}
+			</div>
+		{:else if showPicker}
+			<div bind:this={pickerEl}>
+				<AppPagePicker
+					onSelect={handleAddApp}
+					onClose={() => (showPicker = false)}
+					activeAppIds={openApps.map((a) => a.appId)}
+				/>
+			</div>
+		{:else}
+			<button class="add-card" onclick={() => (showPicker = true)} title="App hinzufügen">
+				<Plus size={18} />
+			</button>
+		{/if}
 	</div>
+
+	<!-- Minimized tabs -->
+	{#if minimizedApps.length > 0}
+		<div class="minimized-tabs">
+			{#each minimizedApps as app (app.appId)}
+				<div class="minimized-tab">
+					<span class="tab-dot" style="background-color: {app.color}"></span>
+					<button class="tab-title" onclick={() => handleRestoreApp(app.appId)}>
+						{app.name}
+					</button>
+					<button
+						class="tab-maximize"
+						onclick={() => handleMaximizeApp(app.appId)}
+						title="Maximieren"
+					>
+						<ArrowsOut size={12} />
+					</button>
+					<button class="tab-close" onclick={() => handleRemoveApp(app.appId)} title="Schließen">
+						<X size={12} />
+					</button>
+				</div>
+			{/each}
+			<button class="tab-add" onclick={() => (showPicker = true)} title="App hinzufügen">
+				<Plus size={14} />
+			</button>
+		</div>
+	{/if}
+
+	<!-- Edit FAB -->
+	<button
+		class="edit-fab"
+		class:active={editMode}
+		onclick={() => {
+			editMode = !editMode;
+			if (!editMode) showPicker = false;
+		}}
+		title={editMode ? 'Bearbeitung beenden' : 'Workbench bearbeiten'}
+	>
+		{#if editMode}<X size={20} />{:else}<PencilSimple size={20} />{/if}
+	</button>
 </div>
 
 <style>
-	.home-page {
-		max-width: 100%;
-	}
-
-	/* Hero */
-	.hero {
+	.workbench {
+		min-height: calc(100vh - 140px);
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
-		margin-bottom: 2.5rem;
+		position: relative;
 	}
 
-	@media (min-width: 768px) {
-		.hero {
-			flex-direction: row;
-			align-items: center;
-			justify-content: space-between;
+	/* Edit toolbar */
+	.edit-toolbar {
+		display: flex;
+		justify-content: center;
+		padding: 0.75rem 1rem 0;
+		animation: fadeDown 0.2s ease-out;
+	}
+	@keyframes fadeDown {
+		from {
+			opacity: 0;
+			transform: translateY(-8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
-
-	.hero-title {
-		font-size: 1.75rem;
-		font-weight: 700;
-		color: hsl(var(--foreground, 0 0% 9%));
-		margin: 0 0 0.25rem;
-	}
-
-	.hero-name {
-		background: linear-gradient(135deg, #6366f1, #8b5cf6);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-
-	.hero-subtitle {
-		font-size: 0.9375rem;
-		color: hsl(var(--muted-foreground, 0 0% 45%));
-		margin: 0;
-	}
-
-	.hero-stats {
+	.width-pills {
 		display: flex;
-		gap: 0.75rem;
-		flex-shrink: 0;
-	}
-
-	.stat-card {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
 		gap: 0.25rem;
-		padding: 0.75rem 1rem;
-		border-radius: 0.75rem;
-		border: 1px solid hsl(var(--border, 0 0% 90%));
-		background: hsl(var(--card, 0 0% 100%));
-		text-decoration: none;
-		color: hsl(var(--foreground, 0 0% 9%));
-		transition: all 0.15s ease;
-		min-width: 5rem;
-	}
-
-	.stat-card:hover {
-		border-color: hsl(var(--primary, 239 84% 67%));
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	}
-
-	.stat-icon {
-		font-size: 1.25rem;
-	}
-
-	.stat-label {
-		font-size: 0.75rem;
-		font-weight: 500;
-		color: hsl(var(--muted-foreground, 0 0% 45%));
-	}
-
-	/* Sections */
-	.category {
-		margin-bottom: 2rem;
-	}
-
-	.section-title {
-		font-size: 0.8125rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: hsl(var(--muted-foreground, 0 0% 45%));
-		margin: 0 0 0.625rem;
-	}
-
-	/* App Grid */
-	.app-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: 0.75rem;
-	}
-
-	@media (min-width: 1024px) {
-		.app-grid {
-			grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-		}
-	}
-
-	/* App Card */
-	.app-card {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		padding: 1rem;
-		border-radius: 0.875rem;
-		border: 1px solid hsl(var(--border, 0 0% 90%));
-		background: hsl(var(--card, 0 0% 100%));
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: left;
-		width: 100%;
-	}
-
-	.app-card:hover {
-		transform: translateY(-3px);
-		box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.1);
-		border-color: color-mix(in srgb, var(--app-color) 40%, hsl(var(--border, 0 0% 90%)));
-	}
-
-	:global(.dark) .app-card:hover {
-		box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.3);
-	}
-
-	.app-card-top {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		width: 100%;
-		margin-bottom: 0.75rem;
-	}
-
-	.app-icon-wrap {
-		width: 2.5rem;
-		height: 2.5rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.app-icon {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-	}
-
-	.app-icon-fallback {
-		width: 2.5rem;
-		height: 2.5rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1.25rem;
-		font-weight: 700;
+		background: rgba(0, 0, 0, 0.04);
 		border-radius: 0.5rem;
+		padding: 0.125rem;
 	}
-
-	.status-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.125rem 0.5rem;
-		border-radius: 1rem;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		white-space: nowrap;
+	:global(.dark) .width-pills {
+		background: rgba(255, 255, 255, 0.06);
 	}
-
-	.status-dot {
-		width: 0.375rem;
-		height: 0.375rem;
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
-
-	.app-name {
-		font-size: 0.9375rem;
+	.width-pill {
+		padding: 0.25rem 0.75rem;
+		border: none;
+		border-radius: 0.375rem;
+		background: transparent;
+		color: #6b7280;
+		font-size: 0.75rem;
 		font-weight: 600;
-		color: hsl(var(--foreground, 0 0% 9%));
-		margin: 0 0 0.25rem;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.width-pill:hover {
+		color: #374151;
+		background: rgba(0, 0, 0, 0.04);
+	}
+	.width-pill.active {
+		background: var(--color-primary, #8b5cf6);
+		color: white;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+	}
+	:global(.dark) .width-pill {
+		color: #9ca3af;
+	}
+	:global(.dark) .width-pill:hover {
+		color: #e5e7eb;
+		background: rgba(255, 255, 255, 0.08);
+	}
+	:global(.dark) .width-pill.active {
+		background: var(--color-primary, #8b5cf6);
+		color: white;
 	}
 
-	.app-tagline {
-		font-size: 0.8125rem;
-		color: hsl(var(--muted-foreground, 0 0% 45%));
-		margin: 0;
-		line-height: 1.4;
+	/* Carousel */
+	.fokus-track {
+		display: flex;
+		gap: 1.5rem;
+		overflow-x: auto;
+		padding: 1rem calc(50% - var(--sheet-width) / 2);
+		scrollbar-width: none;
 		flex: 1;
 	}
-
-	.app-card-footer {
-		margin-top: 0.75rem;
+	.fokus-track::-webkit-scrollbar {
+		display: none;
 	}
 
-	.open-label {
-		font-size: 0.8125rem;
-		font-weight: 600;
+	.page-drag-wrapper {
+		flex: 0 0 auto;
 		transition: opacity 0.15s;
 	}
-
-	.app-card:hover .open-label {
-		opacity: 0.8;
+	.page-drag-wrapper.dragging {
+		opacity: 0.4;
 	}
 
-	.coming-soon-label {
-		font-size: 0.75rem;
-		font-weight: 500;
-		color: hsl(var(--muted-foreground, 0 0% 45%));
-		padding: 0.125rem 0.5rem;
-		border-radius: 0.25rem;
-		background: hsl(var(--muted, 0 0% 96%));
+	/* Add button */
+	.add-card {
+		flex: 0 0 auto;
+		width: 48px;
+		align-self: stretch;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		border: 2px dashed rgba(0, 0, 0, 0.08);
+		border-radius: 0.375rem;
+		background: transparent;
+		color: #9ca3af;
+		cursor: pointer;
+		transition: all 0.2s;
 	}
-
-	/* Legend */
-	.legend {
+	.empty-wrapper {
+		flex: 0 0 auto;
+		width: var(--sheet-width, min(480px, 85vw));
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		padding: 1rem 0;
-		border-top: 1px solid hsl(var(--border, 0 0% 90%));
-		margin-top: 1rem;
-		flex-wrap: wrap;
+		justify-content: center;
+		min-height: 60vh;
+	}
+	.add-card.alone {
+		width: 100%;
+		min-height: 60vh;
+		border-color: rgba(0, 0, 0, 0.12);
+	}
+	.add-card:hover {
+		border-color: var(--color-primary, #8b5cf6);
+		color: var(--color-primary, #8b5cf6);
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 4%, transparent);
+	}
+	:global(.dark) .add-card {
+		border-color: rgba(255, 255, 255, 0.06);
+		color: #4b5563;
+	}
+	:global(.dark) .add-card.alone {
+		border-color: rgba(255, 255, 255, 0.1);
+		color: #6b7280;
+	}
+	:global(.dark) .add-card:hover {
+		border-color: var(--color-primary, #8b5cf6);
+		color: var(--color-primary, #8b5cf6);
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 8%, transparent);
+	}
+	.add-label {
+		font-size: 0.875rem;
+		font-weight: 500;
 	}
 
-	.legend-title {
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: hsl(var(--muted-foreground, 0 0% 45%));
+	/* Minimized tabs */
+	.minimized-tabs {
+		position: fixed;
+		bottom: 4.5rem;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 45;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.75rem;
+		background: #fffef5;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+		animation: slideUp 0.25s ease-out;
 	}
-
-	.legend-item {
-		display: inline-flex;
+	:global(.dark) .minimized-tabs {
+		background: #252220;
+		border-color: rgba(255, 255, 255, 0.08);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+	}
+	@keyframes slideUp {
+		from {
+			opacity: 0;
+			transform: translateX(-50%) translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(-50%) translateY(0);
+		}
+	}
+	.minimized-tab {
+		display: flex;
 		align-items: center;
 		gap: 0.375rem;
-		font-size: 0.75rem;
-		color: hsl(var(--muted-foreground, 0 0% 45%));
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.375rem;
+		transition: background 0.15s;
+	}
+	.minimized-tab:hover {
+		background: rgba(0, 0, 0, 0.04);
+	}
+	:global(.dark) .minimized-tab:hover {
+		background: rgba(255, 255, 255, 0.06);
+	}
+	.tab-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+	.tab-title {
+		border: none;
+		background: none;
+		color: #374151;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		cursor: pointer;
+		max-width: 120px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		padding: 0;
+	}
+	.tab-title:hover {
+		color: var(--color-primary, #8b5cf6);
+	}
+	:global(.dark) .tab-title {
+		color: #e5e7eb;
+	}
+	:global(.dark) .tab-title:hover {
+		color: var(--color-primary, #8b5cf6);
+	}
+	.tab-maximize,
+	.tab-close {
+		border: none;
+		background: none;
+		color: #9ca3af;
+		cursor: pointer;
+		padding: 0.125rem;
+		border-radius: 0.25rem;
+		display: flex;
+		align-items: center;
+		opacity: 0;
+		transition: all 0.15s;
+	}
+	.minimized-tab:hover .tab-maximize,
+	.minimized-tab:hover .tab-close {
+		opacity: 1;
+	}
+	.tab-maximize:hover {
+		color: var(--color-primary, #8b5cf6);
+		background: rgba(139, 92, 246, 0.08);
+	}
+	.tab-close:hover {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.08);
+	}
+	.tab-add {
+		border: none;
+		background: none;
+		color: #9ca3af;
+		cursor: pointer;
+		padding: 0.25rem;
+		border-radius: 0.25rem;
+		display: flex;
+		align-items: center;
+		transition: all 0.15s;
+		margin-left: 0.125rem;
+	}
+	.tab-add:hover {
+		color: var(--color-primary, #8b5cf6);
+		background: rgba(139, 92, 246, 0.08);
 	}
 
-	.legend-dot {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 50%;
-		flex-shrink: 0;
+	/* Edit FAB */
+	.edit-fab {
+		position: fixed;
+		bottom: 5.5rem;
+		right: 1.25rem;
+		width: 44px;
+		height: 44px;
+		border-radius: 9999px;
+		border: none;
+		background: #fffef5;
+		color: #6b7280;
+		box-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.12),
+			0 0 0 1px rgba(0, 0, 0, 0.06);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s;
+		z-index: 40;
+	}
+	.edit-fab:hover {
+		color: var(--color-primary, #8b5cf6);
+		box-shadow:
+			0 4px 12px rgba(0, 0, 0, 0.15),
+			0 0 0 1px rgba(0, 0, 0, 0.08);
+		transform: scale(1.05);
+	}
+	.edit-fab.active {
+		background: var(--color-primary, #8b5cf6);
+		color: white;
+		box-shadow:
+			0 4px 12px rgba(139, 92, 246, 0.3),
+			0 0 0 1px rgba(139, 92, 246, 0.5);
+	}
+	.edit-fab.active:hover {
+		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 85%, black);
+		color: white;
+	}
+	:global(.dark) .edit-fab {
+		background: #252220;
+		color: #9ca3af;
+		box-shadow:
+			0 2px 8px rgba(0, 0, 0, 0.3),
+			0 0 0 1px rgba(255, 255, 255, 0.08);
+	}
+	:global(.dark) .edit-fab:hover {
+		color: var(--color-primary, #8b5cf6);
+	}
+	:global(.dark) .edit-fab.active {
+		background: var(--color-primary, #8b5cf6);
+		color: white;
 	}
 </style>
