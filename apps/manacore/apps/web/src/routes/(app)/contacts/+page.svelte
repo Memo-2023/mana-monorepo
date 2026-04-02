@@ -27,6 +27,11 @@
 		PencilSimple,
 		Funnel,
 		Users,
+		User,
+		Envelope,
+		Briefcase,
+		MapPin,
+		X,
 	} from '@manacore/shared-icons';
 
 	// Get contacts from layout context
@@ -317,78 +322,184 @@
 <!-- New/Edit Contact Modal -->
 {#if contactModalStore.isOpen}
 	{@const isEditing = !!contactModalStore.editContactId}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-		role="dialog"
-		aria-modal="true"
+		onclick={(e) => e.target === e.currentTarget && contactModalStore.close()}
 	>
-		<div class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
-			<h2 class="mb-4 text-lg font-bold text-foreground">
-				{isEditing ? 'Kontakt bearbeiten' : 'Neuer Kontakt'}
-			</h2>
+		<div
+			class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-card shadow-xl"
+			role="dialog"
+			aria-modal="true"
+		>
+			<!-- Header -->
+			<div
+				class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-5 py-3"
+			>
+				<h2 class="text-lg font-bold text-foreground">
+					{isEditing ? 'Kontakt bearbeiten' : 'Neuer Kontakt'}
+				</h2>
+				<button
+					onclick={() => contactModalStore.close()}
+					class="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"
+				>
+					<X size={20} />
+				</button>
+			</div>
 
 			<form
 				onsubmit={(e) => {
 					e.preventDefault();
-					const formData = new FormData(e.currentTarget);
-					const data = {
-						firstName: (formData.get('firstName') as string) || undefined,
-						lastName: (formData.get('lastName') as string) || undefined,
-						email: (formData.get('email') as string) || undefined,
-						phone: (formData.get('phone') as string) || undefined,
-						company: (formData.get('company') as string) || undefined,
-						jobTitle: (formData.get('jobTitle') as string) || undefined,
-					};
-					contactsStore.createContact(data);
+					const fd = new FormData(e.currentTarget);
+					const val = (name: string) => (fd.get(name) as string) || undefined;
+					contactsStore.createContact({
+						firstName: val('firstName'),
+						lastName: val('lastName'),
+						email: val('email'),
+						phone: val('phone'),
+						mobile: val('mobile'),
+						company: val('company'),
+						jobTitle: val('jobTitle'),
+						street: val('street'),
+						city: val('city'),
+						postalCode: val('postalCode'),
+						country: val('country'),
+						notes: val('notes'),
+						birthday: val('birthday'),
+						linkedin: val('linkedin'),
+						twitter: val('twitter'),
+						instagram: val('instagram'),
+						github: val('github'),
+						website: val('website'),
+					});
 					contactModalStore.close();
 				}}
-				class="space-y-3"
+				class="space-y-0"
 			>
-				<div class="grid grid-cols-2 gap-3">
-					<input
-						name="firstName"
-						type="text"
-						placeholder="Vorname"
-						value={contactModalStore.prefillData?.firstName ?? ''}
-						class="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-					/>
-					<input
-						name="lastName"
-						type="text"
-						placeholder="Nachname"
-						value={contactModalStore.prefillData?.lastName ?? ''}
-						class="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-					/>
+				<!-- Name Section -->
+				<div class="contact-section">
+					<div class="section-icon-row">
+						<User size={18} class="text-muted-foreground" />
+						<span class="section-label">Name</span>
+					</div>
+					<div class="grid grid-cols-2 gap-2">
+						<input
+							name="firstName"
+							type="text"
+							placeholder="Vorname"
+							value={contactModalStore.prefillData?.firstName ?? ''}
+							class="contact-input"
+						/>
+						<input
+							name="lastName"
+							type="text"
+							placeholder="Nachname"
+							value={contactModalStore.prefillData?.lastName ?? ''}
+							class="contact-input"
+						/>
+					</div>
 				</div>
-				<input
-					name="email"
-					type="email"
-					placeholder="E-Mail"
-					value={contactModalStore.prefillData?.email ?? ''}
-					class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-				/>
-				<input
-					name="phone"
-					type="tel"
-					placeholder="Telefon"
-					value={contactModalStore.prefillData?.phone ?? ''}
-					class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-				/>
-				<input
-					name="company"
-					type="text"
-					placeholder="Unternehmen"
-					value={contactModalStore.prefillData?.company ?? ''}
-					class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-				/>
-				<input
-					name="jobTitle"
-					type="text"
-					placeholder="Position"
-					class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-				/>
 
-				<div class="flex justify-end gap-2 pt-2">
+				<!-- Contact Section -->
+				<div class="contact-section">
+					<div class="section-icon-row">
+						<Envelope size={18} class="text-muted-foreground" />
+						<span class="section-label">Kontakt</span>
+					</div>
+					<input
+						name="email"
+						type="email"
+						placeholder="E-Mail"
+						value={contactModalStore.prefillData?.email ?? ''}
+						class="contact-input"
+					/>
+					<div class="grid grid-cols-2 gap-2">
+						<input name="mobile" type="tel" placeholder="Mobil" class="contact-input" />
+						<input
+							name="phone"
+							type="tel"
+							placeholder="Telefon"
+							value={contactModalStore.prefillData?.phone ?? ''}
+							class="contact-input"
+						/>
+					</div>
+				</div>
+
+				<!-- Work Section -->
+				<div class="contact-section">
+					<div class="section-icon-row">
+						<Briefcase size={18} class="text-muted-foreground" />
+						<span class="section-label">Arbeit</span>
+					</div>
+					<input
+						name="company"
+						type="text"
+						placeholder="Unternehmen"
+						value={contactModalStore.prefillData?.company ?? ''}
+						class="contact-input"
+					/>
+					<input name="jobTitle" type="text" placeholder="Position" class="contact-input" />
+					<input name="website" type="url" placeholder="Website" class="contact-input" />
+				</div>
+
+				<!-- Address Section -->
+				<div class="contact-section">
+					<div class="section-icon-row">
+						<MapPin size={18} class="text-muted-foreground" />
+						<span class="section-label">Adresse</span>
+					</div>
+					<input
+						name="street"
+						type="text"
+						placeholder="Straße & Hausnummer"
+						class="contact-input"
+					/>
+					<div class="grid grid-cols-[5rem_1fr] gap-2">
+						<input name="postalCode" type="text" placeholder="PLZ" class="contact-input" />
+						<input name="city" type="text" placeholder="Stadt" class="contact-input" />
+					</div>
+					<input name="country" type="text" placeholder="Land" class="contact-input" />
+				</div>
+
+				<!-- Birthday -->
+				<div class="contact-section">
+					<div class="section-icon-row">
+						<span class="text-muted-foreground text-sm">🎂</span>
+						<span class="section-label">Geburtstag</span>
+					</div>
+					<input name="birthday" type="date" class="contact-input" />
+				</div>
+
+				<!-- Notes Section -->
+				<div class="contact-section">
+					<div class="section-icon-row">
+						<PencilSimple size={18} class="text-muted-foreground" />
+						<span class="section-label">Notizen</span>
+					</div>
+					<textarea
+						name="notes"
+						rows="3"
+						placeholder="Notizen zum Kontakt..."
+						class="contact-input resize-none"
+					></textarea>
+				</div>
+
+				<!-- Social Media (collapsed by default) -->
+				<details class="contact-section">
+					<summary class="section-icon-row cursor-pointer select-none">
+						<span class="text-muted-foreground text-sm">🔗</span>
+						<span class="section-label">Social Media</span>
+					</summary>
+					<div class="mt-2 space-y-2">
+						<input name="linkedin" type="url" placeholder="LinkedIn URL" class="contact-input" />
+						<input name="twitter" type="text" placeholder="Twitter / X" class="contact-input" />
+						<input name="instagram" type="text" placeholder="Instagram" class="contact-input" />
+						<input name="github" type="text" placeholder="GitHub" class="contact-input" />
+					</div>
+				</details>
+
+				<!-- Actions -->
+				<div class="flex justify-end gap-2 border-t border-border px-5 py-3">
 					<button
 						type="button"
 						onclick={() => contactModalStore.close()}
@@ -409,6 +520,50 @@
 {/if}
 
 <style>
+	/* Contact Modal Form Styles */
+	.contact-section {
+		padding: 0.75rem 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
+	}
+
+	.section-icon-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.section-label {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: hsl(var(--color-muted-foreground));
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	.contact-input {
+		width: 100%;
+		border-radius: 0.5rem;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-background));
+		padding: 0.5rem 0.75rem;
+		font-size: 0.875rem;
+		color: hsl(var(--color-foreground));
+		outline: none;
+		transition: border-color 0.15s;
+	}
+
+	.contact-input:focus {
+		border-color: hsl(var(--color-primary));
+		box-shadow: 0 0 0 2px hsl(var(--color-primary) / 0.15);
+	}
+
+	.contact-input::placeholder {
+		color: hsl(var(--color-muted-foreground) / 0.5);
+	}
+
 	:global(.mana-drop-target-hover) {
 		outline: 2px solid var(--color-primary, #6366f1);
 		outline-offset: -2px;

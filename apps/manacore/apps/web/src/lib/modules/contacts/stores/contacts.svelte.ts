@@ -10,18 +10,28 @@ import { toContact } from '../queries';
 import type { LocalContact, Contact } from '../types';
 
 export const contactsStore = {
-	async createContact(data: Partial<Contact>) {
+	async createContact(data: Partial<Contact> & Record<string, unknown>) {
 		const newLocal: LocalContact = {
 			id: crypto.randomUUID(),
 			firstName: data.firstName ?? undefined,
 			lastName: data.lastName ?? undefined,
 			email: data.email ?? undefined,
 			phone: data.phone ?? undefined,
+			mobile: (data.mobile as string) ?? undefined,
 			company: data.company ?? undefined,
 			jobTitle: data.jobTitle ?? undefined,
+			street: (data.street as string) ?? undefined,
+			city: (data.city as string) ?? undefined,
+			postalCode: (data.postalCode as string) ?? undefined,
+			country: (data.country as string) ?? undefined,
 			notes: data.notes ?? undefined,
 			photoUrl: data.photoUrl ?? undefined,
 			birthday: data.birthday ?? undefined,
+			linkedin: (data.linkedin as string) ?? undefined,
+			twitter: (data.twitter as string) ?? undefined,
+			instagram: (data.instagram as string) ?? undefined,
+			github: (data.github as string) ?? undefined,
+			website: (data.website as string) ?? undefined,
 			tags: data.tags?.map((t) => t.name) ?? [],
 			isFavorite: false,
 			isArchived: false,
