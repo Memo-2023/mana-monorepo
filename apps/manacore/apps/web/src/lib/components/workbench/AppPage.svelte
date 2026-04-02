@@ -10,8 +10,6 @@
 		DotsSixVertical,
 		CornersOut,
 		CornersIn,
-		ArrowLeft,
-		ArrowRight,
 		SpinnerGap,
 	} from '@manacore/shared-icons';
 	import { getAppEntry } from './app-registry';
@@ -19,31 +17,26 @@
 
 	interface Props {
 		appId: string;
-		pageWidth: string;
+		widthPx: number;
 		maximized?: boolean;
-		editMode?: boolean;
-		isFirst?: boolean;
-		isLast?: boolean;
 		onClose: () => void;
 		onMinimize?: () => void;
 		onMaximize?: () => void;
-		onMoveLeft?: () => void;
-		onMoveRight?: () => void;
+		onResize?: (widthPx: number) => void;
 	}
 
 	let {
 		appId,
-		pageWidth,
+		widthPx,
 		maximized = false,
-		editMode = false,
-		isFirst = false,
-		isLast = false,
 		onClose,
 		onMinimize,
 		onMaximize,
-		onMoveLeft,
-		onMoveRight,
+		onResize,
 	}: Props = $props();
+
+	const MIN_WIDTH = 280;
+	const MAX_WIDTH = 1200;
 
 	let appEntry = $derived(getAppEntry(appId));
 	let appName = $derived(appEntry?.name ?? appId);
@@ -52,6 +45,7 @@
 	// Lazy-load app component
 	let AppComponent = $state<Component | null>(null);
 	let loadError = $state(false);
+	let resizing = $state(false);
 
 	$effect(() => {
 		AppComponent = null;
@@ -63,38 +57,63 @@
 			);
 		}
 	});
+
+	function handleResizeStart(startX: number) {
+		if (!onResize) return;
+		const startWidth = widthPx;
+		resizing = true;
+		document.body.style.userSelect = 'none';
+		document.body.style.cursor = 'ew-resize';
+
+		function onMove(clientX: number) {
+			const delta = clientX - startX;
+			const newWidth = Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + delta)));
+			onResize!(newWidth);
+		}
+
+		function onEnd() {
+			resizing = false;
+			document.body.style.userSelect = '';
+			document.body.style.cursor = '';
+			window.removeEventListener('mousemove', onMouseMove);
+			window.removeEventListener('mouseup', onEnd);
+			window.removeEventListener('touchmove', onTouchMove);
+			window.removeEventListener('touchend', onEnd);
+		}
+
+		function onMouseMove(e: MouseEvent) {
+			onMove(e.clientX);
+		}
+		function onTouchMove(e: TouchEvent) {
+			onMove(e.touches[0].clientX);
+		}
+
+		window.addEventListener('mousemove', onMouseMove);
+		window.addEventListener('mouseup', onEnd);
+		window.addEventListener('touchmove', onTouchMove);
+		window.addEventListener('touchend', onEnd);
+	}
+
+	function onMouseDown(e: MouseEvent) {
+		e.preventDefault();
+		handleResizeStart(e.clientX);
+	}
+
+	function onTouchStart(e: TouchEvent) {
+		e.preventDefault();
+		handleResizeStart(e.touches[0].clientX);
+	}
 </script>
 
 <div
 	class="app-page"
 	class:maximized
-	class:editing={editMode}
-	style="width: {maximized ? '100%' : pageWidth}"
+	class:resizing
+	style="width: {maximized ? '100%' : `${widthPx}px`}"
 >
 	<div class="drag-handle-bar">
 		<span class="drag-handle"><DotsSixVertical size={14} /></span>
 	</div>
-
-	<!-- Edit controls -->
-	{#if editMode}
-		<div class="edit-controls">
-			<div class="move-btns">
-				{#if !isFirst && onMoveLeft}
-					<button class="edit-btn" onclick={onMoveLeft} title="Nach links">
-						<ArrowLeft size={14} />
-					</button>
-				{/if}
-				{#if !isLast && onMoveRight}
-					<button class="edit-btn" onclick={onMoveRight} title="Nach rechts">
-						<ArrowRight size={14} />
-					</button>
-				{/if}
-			</div>
-			<button class="edit-btn delete-btn" onclick={onClose} title="App entfernen">
-				<X size={14} />
-			</button>
-		</div>
-	{/if}
 
 	<!-- Header -->
 	<div class="page-header">
@@ -102,27 +121,25 @@
 			<span class="app-dot" style="background-color: {appColor}"></span>
 			<span class="app-name">{appName}</span>
 		</div>
-		{#if !editMode}
-			<div class="header-actions">
-				{#if onMinimize}
-					<button class="header-btn" onclick={onMinimize} title="Minimieren">
-						<Minus size={14} />
-					</button>
-				{/if}
-				{#if onMaximize}
-					<button
-						class="header-btn"
-						onclick={onMaximize}
-						title={maximized ? 'Verkleinern' : 'Maximieren'}
-					>
-						{#if maximized}<CornersIn size={14} />{:else}<CornersOut size={14} />{/if}
-					</button>
-				{/if}
-				<button class="header-btn" onclick={onClose} title={$_('common.close')}>
-					<X size={14} />
+		<div class="header-actions">
+			{#if onMinimize}
+				<button class="header-btn" onclick={onMinimize} title="Minimieren">
+					<Minus size={14} />
 				</button>
-			</div>
-		{/if}
+			{/if}
+			{#if onMaximize}
+				<button
+					class="header-btn"
+					onclick={onMaximize}
+					title={maximized ? 'Verkleinern' : 'Maximieren'}
+				>
+					{#if maximized}<CornersIn size={14} />{:else}<CornersOut size={14} />{/if}
+				</button>
+			{/if}
+			<button class="header-btn" onclick={onClose} title={$_('common.close')}>
+				<X size={14} />
+			</button>
+		</div>
 	</div>
 
 	<!-- App content -->
@@ -139,6 +156,21 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Resize handle -->
+	{#if onResize && !maximized}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="resize-handle"
+			onmousedown={onMouseDown}
+			ontouchstart={onTouchStart}
+		>
+			<svg width="10" height="10" viewBox="0 0 10 10">
+				<line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.2" />
+				<line x1="9" y1="5" x2="5" y2="9" stroke="currentColor" stroke-width="1.2" />
+			</svg>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -154,6 +186,7 @@
 		flex-direction: column;
 		animation: fadeIn 0.25s ease-out;
 		overflow: hidden;
+		position: relative;
 	}
 	:global(.dark) .app-page {
 		background-color: #252220;
@@ -161,12 +194,12 @@
 			0 2px 8px rgba(0, 0, 0, 0.25),
 			0 0 0 1px rgba(255, 255, 255, 0.06);
 	}
-	.app-page.editing {
+	.app-page.resizing {
 		box-shadow:
 			0 2px 12px rgba(139, 92, 246, 0.12),
 			0 0 0 2px rgba(139, 92, 246, 0.3);
 	}
-	:global(.dark) .app-page.editing {
+	:global(.dark) .app-page.resizing {
 		box-shadow:
 			0 2px 12px rgba(139, 92, 246, 0.2),
 			0 0 0 2px rgba(139, 92, 246, 0.4);
@@ -229,47 +262,6 @@
 	}
 	:global(.dark) .drag-handle:hover {
 		color: #6b7280;
-	}
-
-	/* Edit controls */
-	.edit-controls {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.25rem 0.75rem;
-		border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-	}
-	:global(.dark) .edit-controls {
-		border-bottom-color: rgba(255, 255, 255, 0.08);
-	}
-	.move-btns {
-		display: flex;
-		gap: 0.25rem;
-	}
-	.edit-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 26px;
-		height: 26px;
-		border-radius: 0.25rem;
-		border: none;
-		background: transparent;
-		color: #9ca3af;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.edit-btn:hover {
-		background: rgba(0, 0, 0, 0.06);
-		color: #374151;
-	}
-	:global(.dark) .edit-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #e5e7eb;
-	}
-	.delete-btn:hover {
-		color: #ef4444;
-		background: rgba(239, 68, 68, 0.08);
 	}
 
 	/* Header */
@@ -354,5 +346,31 @@
 		to {
 			transform: rotate(360deg);
 		}
+	}
+
+	/* Resize handle */
+	.resize-handle {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		width: 16px;
+		height: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: ew-resize;
+		color: #d1d5db;
+		transition: color 0.15s;
+		border-radius: 0.25rem 0 0.375rem 0;
+		touch-action: none;
+	}
+	.resize-handle:hover {
+		color: #9ca3af;
+	}
+	:global(.dark) .resize-handle {
+		color: #3f3b38;
+	}
+	:global(.dark) .resize-handle:hover {
+		color: #6b7280;
 	}
 </style>

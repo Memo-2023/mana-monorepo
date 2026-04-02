@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { Plus, PencilSimple, X, ArrowsOut } from '@manacore/shared-icons';
+	import { Plus, X, ArrowsOut } from '@manacore/shared-icons';
 	import AppPage from '$lib/components/workbench/AppPage.svelte';
 	import AppPagePicker from '$lib/components/workbench/AppPagePicker.svelte';
 	import { getAppEntry, APP_REGISTRY } from '$lib/components/workbench/app-registry';
 	import { createAppSettingsStore } from '@manacore/shared-stores';
 
 	// ── Persisted workbench state ───────────────────────────
-	type PageWidth = 'narrow' | 'medium' | 'wide' | 'full';
+	const DEFAULT_WIDTH = 480;
 
 	interface WorkbenchSettings extends Record<string, unknown> {
-		openApps: { appId: string; minimized: boolean; maximized?: boolean }[];
-		pageWidth: PageWidth;
+		openApps: { appId: string; minimized: boolean; maximized?: boolean; widthPx?: number }[];
 	}
 
 	const workbenchStore = createAppSettingsStore<WorkbenchSettings>('workbench-settings', {
@@ -20,22 +19,21 @@
 			{ appId: 'calendar', minimized: false },
 			{ appId: 'contacts', minimized: false },
 		],
-		pageWidth: 'medium' as PageWidth,
 	});
 
 	// Local reactive state synced from persisted store
-	let openApps = $state<{ appId: string; minimized: boolean; maximized?: boolean }[]>([
+	let openApps = $state<
+		{ appId: string; minimized: boolean; maximized?: boolean; widthPx?: number }[]
+	>([
 		{ appId: 'todo', minimized: false },
 		{ appId: 'calendar', minimized: false },
 		{ appId: 'contacts', minimized: false },
 	]);
-	let pageWidth = $state<PageWidth>('medium');
 
 	// Initialize from persisted settings
 	$effect(() => {
 		const s = workbenchStore.settings;
 		if (s.openApps?.length) openApps = [...s.openApps];
-		if (s.pageWidth) pageWidth = s.pageWidth;
 	});
 
 	// Persist changes (debounced via store)
@@ -45,15 +43,13 @@
 				appId: a.appId,
 				minimized: a.minimized,
 				maximized: a.maximized,
+				widthPx: a.widthPx,
 			})),
-			pageWidth,
 		});
 	}
 
 	let expandedApps = $derived(openApps.filter((a) => !a.minimized));
 
-	// ── Edit mode ──────────────────────────────────────────
-	let editMode = $state(false);
 	let showPicker = $state(false);
 
 	// ── App CRUD ────────────────────────────────────────────
@@ -89,22 +85,8 @@
 		persistState();
 	}
 
-	// ── Reorder ─────────────────────────────────────────────
-	function handleMoveLeft(appId: string) {
-		const idx = openApps.findIndex((a) => a.appId === appId);
-		if (idx <= 0) return;
-		const apps = [...openApps];
-		[apps[idx - 1], apps[idx]] = [apps[idx], apps[idx - 1]];
-		openApps = apps;
-		persistState();
-	}
-
-	function handleMoveRight(appId: string) {
-		const idx = openApps.findIndex((a) => a.appId === appId);
-		if (idx === -1 || idx >= openApps.length - 1) return;
-		const apps = [...openApps];
-		[apps[idx], apps[idx + 1]] = [apps[idx + 1], apps[idx]];
-		openApps = apps;
+	function handleResize(appId: string, widthPx: number) {
+		openApps = openApps.map((a) => (a.appId === appId ? { ...a, widthPx } : a));
 		persistState();
 	}
 
@@ -143,29 +125,6 @@
 		dragAppId = null;
 	}
 
-	// ── Width pills ─────────────────────────────────────────
-	const WIDTH_OPTIONS: { id: PageWidth; label: string }[] = [
-		{ id: 'narrow', label: 'S' },
-		{ id: 'medium', label: 'M' },
-		{ id: 'wide', label: 'L' },
-		{ id: 'full', label: 'XL' },
-	];
-
-	const PAGE_WIDTH_MAP: Record<string, string> = {
-		narrow: 'min(360px, 85vw)',
-		medium: 'min(480px, 85vw)',
-		wide: 'min(640px, 90vw)',
-		full: 'min(840px, 95vw)',
-	};
-
-	let sheetWidthVar = $derived(PAGE_WIDTH_MAP[pageWidth] || PAGE_WIDTH_MAP.medium);
-	let sheetWidthValue = $derived(PAGE_WIDTH_MAP[pageWidth] || PAGE_WIDTH_MAP.medium);
-
-	function setPageWidth(w: PageWidth) {
-		pageWidth = w;
-		persistState();
-	}
-
 	// ── Minimized tabs ──────────────────────────────────────
 	let minimizedApps = $derived(
 		openApps
@@ -194,31 +153,14 @@
 </svelte:head>
 
 <div class="workbench">
-	<!-- Width pills (edit mode) -->
-	{#if editMode}
-		<div class="edit-toolbar">
-			<div class="width-pills">
-				{#each WIDTH_OPTIONS as opt (opt.id)}
-					<button
-						class="width-pill"
-						class:active={pageWidth === opt.id}
-						onclick={() => setPageWidth(opt.id)}
-					>
-						{opt.label}
-					</button>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
 	<!-- App carousel -->
-	<div class="fokus-track" style="--sheet-width: {sheetWidthVar}">
-		{#each expandedApps as app, idx (app.appId)}
+	<div class="fokus-track" style="--sheet-width: {DEFAULT_WIDTH}px">
+		{#each expandedApps as app (app.appId)}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				class="page-drag-wrapper"
 				class:dragging={dragAppId === app.appId}
-				draggable={!editMode}
+				draggable={true}
 				ondragstart={(e) => handleDragStart(e, app.appId)}
 				ondragover={handleDragOver}
 				ondrop={(e) => handleDrop(e, app.appId)}
@@ -226,16 +168,12 @@
 			>
 				<AppPage
 					appId={app.appId}
-					pageWidth={sheetWidthValue}
+					widthPx={app.widthPx ?? DEFAULT_WIDTH}
 					maximized={app.maximized}
-					{editMode}
-					isFirst={idx === 0}
-					isLast={idx === expandedApps.length - 1}
 					onClose={() => handleRemoveApp(app.appId)}
 					onMinimize={() => handleMinimizeApp(app.appId)}
 					onMaximize={() => handleMaximizeApp(app.appId)}
-					onMoveLeft={editMode ? () => handleMoveLeft(app.appId) : undefined}
-					onMoveRight={editMode ? () => handleMoveRight(app.appId) : undefined}
+					onResize={(w) => handleResize(app.appId, w)}
 				/>
 			</div>
 		{/each}
@@ -301,19 +239,6 @@
 			</button>
 		</div>
 	{/if}
-
-	<!-- Edit FAB -->
-	<button
-		class="edit-fab"
-		class:active={editMode}
-		onclick={() => {
-			editMode = !editMode;
-			if (!editMode) showPicker = false;
-		}}
-		title={editMode ? 'Bearbeitung beenden' : 'Workbench bearbeiten'}
-	>
-		{#if editMode}<X size={20} />{:else}<PencilSimple size={20} />{/if}
-	</button>
 </div>
 
 <style>
@@ -322,65 +247,6 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
-	}
-
-	/* Edit toolbar */
-	.edit-toolbar {
-		display: flex;
-		justify-content: center;
-		padding: 0.75rem 1rem 0;
-		animation: fadeDown 0.2s ease-out;
-	}
-	@keyframes fadeDown {
-		from {
-			opacity: 0;
-			transform: translateY(-8px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-	.width-pills {
-		display: flex;
-		gap: 0.25rem;
-		background: rgba(0, 0, 0, 0.04);
-		border-radius: 0.5rem;
-		padding: 0.125rem;
-	}
-	:global(.dark) .width-pills {
-		background: rgba(255, 255, 255, 0.06);
-	}
-	.width-pill {
-		padding: 0.25rem 0.75rem;
-		border: none;
-		border-radius: 0.375rem;
-		background: transparent;
-		color: #6b7280;
-		font-size: 0.75rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.width-pill:hover {
-		color: #374151;
-		background: rgba(0, 0, 0, 0.04);
-	}
-	.width-pill.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-	}
-	:global(.dark) .width-pill {
-		color: #9ca3af;
-	}
-	:global(.dark) .width-pill:hover {
-		color: #e5e7eb;
-		background: rgba(255, 255, 255, 0.08);
-	}
-	:global(.dark) .width-pill.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
 	}
 
 	/* Carousel */
@@ -573,57 +439,4 @@
 		background: rgba(139, 92, 246, 0.08);
 	}
 
-	/* Edit FAB */
-	.edit-fab {
-		position: fixed;
-		bottom: 5.5rem;
-		right: 1.25rem;
-		width: 44px;
-		height: 44px;
-		border-radius: 9999px;
-		border: none;
-		background: #fffef5;
-		color: #6b7280;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.12),
-			0 0 0 1px rgba(0, 0, 0, 0.06);
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s;
-		z-index: 40;
-	}
-	.edit-fab:hover {
-		color: var(--color-primary, #8b5cf6);
-		box-shadow:
-			0 4px 12px rgba(0, 0, 0, 0.15),
-			0 0 0 1px rgba(0, 0, 0, 0.08);
-		transform: scale(1.05);
-	}
-	.edit-fab.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
-		box-shadow:
-			0 4px 12px rgba(139, 92, 246, 0.3),
-			0 0 0 1px rgba(139, 92, 246, 0.5);
-	}
-	.edit-fab.active:hover {
-		background: color-mix(in srgb, var(--color-primary, #8b5cf6) 85%, black);
-		color: white;
-	}
-	:global(.dark) .edit-fab {
-		background: #252220;
-		color: #9ca3af;
-		box-shadow:
-			0 2px 8px rgba(0, 0, 0, 0.3),
-			0 0 0 1px rgba(255, 255, 255, 0.08);
-	}
-	:global(.dark) .edit-fab:hover {
-		color: var(--color-primary, #8b5cf6);
-	}
-	:global(.dark) .edit-fab.active {
-		background: var(--color-primary, #8b5cf6);
-		color: white;
-	}
 </style>
