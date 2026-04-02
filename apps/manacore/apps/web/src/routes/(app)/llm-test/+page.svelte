@@ -10,6 +10,7 @@
 		MODELS,
 		type ModelKey,
 	} from '@manacore/local-llm';
+	import { hasModelInCache } from '@manacore/local-llm';
 	import { marked } from 'marked';
 	import { Robot, Trash, PaperPlaneRight, ClockCounterClockwise } from '@manacore/shared-icons';
 
@@ -29,7 +30,6 @@
 		if (typeof caches === 'undefined') return;
 		for (const [key, config] of Object.entries(MODELS)) {
 			try {
-				const { hasModelInCache } = await import('@mlc-ai/web-llm');
 				modelCacheStatus[key] = await hasModelInCache(config.modelId);
 			} catch {
 				modelCacheStatus[key] = false;

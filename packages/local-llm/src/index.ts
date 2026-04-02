@@ -14,6 +14,9 @@ export type {
 	LoadingStatus,
 } from './types';
 
+// Cache utilities
+export { hasModelInCache } from './cache';
+
 // Svelte 5 reactive helpers
 export {
 	getLocalLlmStatus,
