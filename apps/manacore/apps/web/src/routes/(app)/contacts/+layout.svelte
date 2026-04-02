@@ -20,13 +20,15 @@
 
 	// Ensure self-contact exists and stays synced with profile
 	onMount(async () => {
-		if (!authStore.isAuthenticated) return;
-		try {
-			const profile = await profileService.getProfile();
-			await contactsStore.ensureSelfContact(profile);
-		} catch {
-			// Profile fetch may fail for guest users — that's OK
+		let profile = null;
+		if (authStore.isAuthenticated) {
+			try {
+				profile = await profileService.getProfile();
+			} catch {
+				// Profile fetch may fail — continue with guest self-contact
+			}
 		}
+		await contactsStore.ensureSelfContact(profile);
 	});
 </script>
 

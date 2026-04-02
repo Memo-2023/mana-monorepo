@@ -115,9 +115,10 @@ export const contactsStore = {
 	/**
 	 * Ensure the self-contact exists and is synced with the user's profile.
 	 * Creates the contact if missing, updates it if profile data changed.
+	 * Works without profile data (guest mode) — creates a minimal self-contact.
 	 */
-	async ensureSelfContact(profile: UserProfile): Promise<void> {
-		const nameParts = (profile.name || '').split(' ');
+	async ensureSelfContact(profile?: UserProfile | null): Promise<void> {
+		const nameParts = (profile?.name || '').split(' ');
 		const firstName = nameParts[0] || undefined;
 		const lastName = nameParts.slice(1).join(' ') || undefined;
 
@@ -126,10 +127,10 @@ export const contactsStore = {
 		if (!existing) {
 			const self: LocalContact = {
 				id: SELF_CONTACT_ID,
-				firstName,
+				firstName: firstName || 'Ich',
 				lastName,
-				email: profile.email || undefined,
-				photoUrl: profile.image || undefined,
+				email: profile?.email || undefined,
+				photoUrl: profile?.image || undefined,
 				isFavorite: true,
 				isArchived: false,
 				createdAt: new Date().toISOString(),
@@ -139,7 +140,9 @@ export const contactsStore = {
 			return;
 		}
 
-		// Sync profile fields if they changed
+		// Only sync if we have profile data
+		if (!profile) return;
+
 		const needsUpdate =
 			existing.firstName !== firstName ||
 			existing.lastName !== lastName ||
