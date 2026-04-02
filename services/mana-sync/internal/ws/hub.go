@@ -28,12 +28,14 @@ type Client struct {
 	cancel context.CancelFunc
 }
 
-// Hub manages WebSocket connections and broadcasts sync notifications.
+// Hub manages WebSocket connections, SSE subscribers, and broadcasts sync notifications.
 type Hub struct {
-	// clients maps userID -> set of clients
-	clients   map[string]map[*Client]struct{}
-	mu        sync.RWMutex
-	validator *auth.Validator
+	// clients maps userID -> set of WebSocket clients
+	clients map[string]map[*Client]struct{}
+	// sseSubscribers maps userID -> set of SSE notification channels
+	sseSubscribers map[string][]chan Notification
+	mu             sync.RWMutex
+	validator      *auth.Validator
 }
 
 // NewHub creates a new WebSocket hub.
@@ -113,6 +115,22 @@ func (h *Hub) NotifyUser(userID, appID, excludeClientID string, tables []string)
 				h.removeClient(c)
 			}
 		}(client)
+	}
+
+	// Also notify SSE subscribers
+	h.mu.RLock()
+	sseSubs := h.sseSubscribers[userID]
+	h.mu.RUnlock()
+
+	if len(sseSubs) > 0 {
+		notification := Notification{AppID: appID, Tables: tables}
+		for _, ch := range sseSubs {
+			select {
+			case ch <- notification:
+			default:
+				// Drop if channel full (subscriber is slow)
+			}
+		}
 	}
 }
 
@@ -250,6 +268,39 @@ func (h *Hub) removeClient(client *Client) {
 	}
 
 	slog.Info("client disconnected", "userID", client.UserID, "appID", client.AppID)
+}
+
+// Notification is sent to SSE subscribers when a sync event occurs.
+type Notification struct {
+	AppID  string
+	Tables []string
+}
+
+// Subscribe creates a channel that receives notifications for a user.
+// Used by SSE stream handlers to get notified of changes.
+func (h *Hub) Subscribe(userID string) chan Notification {
+	ch := make(chan Notification, 32)
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.sseSubscribers == nil {
+		h.sseSubscribers = make(map[string][]chan Notification)
+	}
+	h.sseSubscribers[userID] = append(h.sseSubscribers[userID], ch)
+	return ch
+}
+
+// Unsubscribe removes an SSE subscriber channel.
+func (h *Hub) Unsubscribe(userID string, ch chan Notification) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	subs := h.sseSubscribers[userID]
+	for i, sub := range subs {
+		if sub == ch {
+			h.sseSubscribers[userID] = append(subs[:i], subs[i+1:]...)
+			break
+		}
+	}
+	close(ch)
 }
 
 // ConnectedUsers returns the number of unique connected users.

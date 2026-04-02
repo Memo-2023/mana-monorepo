@@ -58,6 +58,7 @@ func main() {
 	// Sync endpoints (Go 1.22+ routing patterns)
 	mux.HandleFunc("POST /sync/{appId}", handler.HandleSync)
 	mux.HandleFunc("GET /sync/{appId}/pull", handler.HandlePull)
+	mux.HandleFunc("GET /sync/{appId}/stream", handler.HandleStream)
 
 	// WebSocket endpoints
 	// Unified: one connection per user, receives all app notifications with appId in payload
@@ -106,7 +107,7 @@ func main() {
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
 		Handler:      c.Handler(mux),
 		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		WriteTimeout: 0, // Disabled for SSE streaming (long-lived connections)
 		IdleTimeout:  120 * time.Second,
 	}
 
