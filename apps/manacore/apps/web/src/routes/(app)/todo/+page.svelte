@@ -13,7 +13,7 @@
 		tasksStore,
 		taskTable,
 	} from '$lib/modules/todo';
-	import { Plus, PencilSimple, X, Gear } from '@manacore/shared-icons';
+	import { Plus, PencilSimple, X, Gear, ArrowsOut } from '@manacore/shared-icons';
 	import { ShareModal } from '@manacore/shared-uload';
 
 	// Components
@@ -103,6 +103,45 @@
 	let expandedPages = $derived(openPages.filter((p) => !p.minimized));
 	let customPages = $derived(todoSettings.customPages);
 
+	// Minimized pages for tab bar
+	const PAGE_META: Record<string, { title: string; color: string }> = {
+		todo: { title: 'To Do', color: '#6B7280' },
+		completed: { title: 'Erledigt', color: '#22C55E' },
+		today: { title: 'Heute', color: '#F59E0B' },
+		overdue: { title: 'Überfällig', color: '#EF4444' },
+		all: { title: 'Alle Aufgaben', color: '#3B82F6' },
+		'high-priority': { title: 'Hohe Priorität', color: '#EF4444' },
+		'this-week': { title: 'Diese Woche', color: '#8B5CF6' },
+		'no-date': { title: 'Ohne Datum', color: '#6B7280' },
+	};
+
+	const ICON_COLORS: Record<string, string> = {
+		warning: '#EF4444',
+		calendar: '#3B82F6',
+		'calendar-dots': '#8B5CF6',
+		check: '#22C55E',
+		star: '#F59E0B',
+		lightning: '#F97316',
+		clock: '#6B7280',
+		fire: '#EF4444',
+		leaf: '#22C55E',
+		heart: '#EC4899',
+	};
+
+	let minimizedPages = $derived(
+		openPages
+			.filter((p) => p.minimized)
+			.map((p) => {
+				const config = getCustomPageConfig(p.id);
+				const preset = PAGE_META[p.id];
+				const title = p.customTitle ?? config?.label ?? preset?.title ?? p.id;
+				const color = config?.icon
+					? (ICON_COLORS[config.icon] ?? '#8B5CF6')
+					: (preset?.color ?? '#6B7280');
+				return { id: p.id, title, color };
+			})
+	);
+
 	function handleAddPage(pageId: string) {
 		if (!openPages.some((p) => p.id === pageId)) {
 			openPages = [...openPages, { id: pageId, minimized: false }];
@@ -118,6 +157,10 @@
 
 	function handleMinimizePage(pageId: string) {
 		openPages = openPages.map((p) => (p.id === pageId ? { ...p, minimized: true } : p));
+	}
+
+	function handleRestorePage(pageId: string) {
+		openPages = openPages.map((p) => (p.id === pageId ? { ...p, minimized: false } : p));
 	}
 
 	function handleMaximizePage(pageId: string) {
@@ -378,6 +421,33 @@
 		{/if}
 	</div>
 
+	<!-- Minimized tabs bar -->
+	{#if minimizedPages.length > 0}
+		<div class="minimized-tabs">
+			{#each minimizedPages as page (page.id)}
+				<div class="minimized-tab group">
+					<span class="tab-dot" style="background-color: {page.color}"></span>
+					<button class="tab-title" onclick={() => handleRestorePage(page.id)}>
+						{page.title}
+					</button>
+					<button
+						class="tab-maximize"
+						onclick={() => handleMaximizePage(page.id)}
+						title="Maximieren"
+					>
+						<ArrowsOut size={12} />
+					</button>
+					<button class="tab-close" onclick={() => handleRemovePage(page.id)} title="Schließen">
+						<X size={12} />
+					</button>
+				</div>
+			{/each}
+			<button class="tab-add" onclick={togglePagePicker} title="Seite hinzufügen">
+				<Plus size={14} />
+			</button>
+		</div>
+	{/if}
+
 	<!-- Edit FAB -->
 	<button
 		class="edit-fab"
@@ -601,6 +671,129 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		letter-spacing: 0.01em;
+	}
+
+	/* Minimized tabs */
+	.minimized-tabs {
+		position: fixed;
+		bottom: 4.5rem;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 45;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.75rem;
+		background: #fffef5;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+		animation: slideUp 0.25s ease-out;
+	}
+	:global(.dark) .minimized-tabs {
+		background: #252220;
+		border-color: rgba(255, 255, 255, 0.08);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+	}
+	@keyframes slideUp {
+		from {
+			opacity: 0;
+			transform: translateX(-50%) translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(-50%) translateY(0);
+		}
+	}
+
+	.minimized-tab {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.375rem;
+		transition: background 0.15s;
+	}
+	.minimized-tab:hover {
+		background: rgba(0, 0, 0, 0.04);
+	}
+	:global(.dark) .minimized-tab:hover {
+		background: rgba(255, 255, 255, 0.06);
+	}
+
+	.tab-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 9999px;
+		flex-shrink: 0;
+	}
+
+	.tab-title {
+		border: none;
+		background: none;
+		color: #374151;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		cursor: pointer;
+		max-width: 120px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		padding: 0;
+	}
+	.tab-title:hover {
+		color: var(--color-primary, #8b5cf6);
+	}
+	:global(.dark) .tab-title {
+		color: #e5e7eb;
+	}
+	:global(.dark) .tab-title:hover {
+		color: var(--color-primary, #8b5cf6);
+	}
+
+	.tab-maximize,
+	.tab-close {
+		border: none;
+		background: none;
+		color: #9ca3af;
+		cursor: pointer;
+		padding: 0.125rem;
+		border-radius: 0.25rem;
+		display: flex;
+		align-items: center;
+		opacity: 0;
+		transition: all 0.15s;
+	}
+	:global(.group:hover) .tab-maximize,
+	:global(.group:hover) .tab-close,
+	.minimized-tab:hover .tab-maximize,
+	.minimized-tab:hover .tab-close {
+		opacity: 1;
+	}
+	.tab-maximize:hover {
+		color: var(--color-primary, #8b5cf6);
+		background: rgba(139, 92, 246, 0.08);
+	}
+	.tab-close:hover {
+		color: #ef4444;
+		background: rgba(239, 68, 68, 0.08);
+	}
+
+	.tab-add {
+		border: none;
+		background: none;
+		color: #9ca3af;
+		cursor: pointer;
+		padding: 0.25rem;
+		border-radius: 0.25rem;
+		display: flex;
+		align-items: center;
+		transition: all 0.15s;
+		margin-left: 0.125rem;
+	}
+	.tab-add:hover {
+		color: var(--color-primary, #8b5cf6);
+		background: rgba(139, 92, 246, 0.08);
 	}
 
 	/* Edit FAB */
