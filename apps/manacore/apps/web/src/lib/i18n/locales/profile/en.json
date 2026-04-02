@@ -1,0 +1,16 @@
+{
+	"title": "Profile",
+	"edit": "Edit profile",
+	"change_password": "Change password",
+	"delete_account": "Delete account",
+	"logout": "Log out",
+	"name": "Name",
+	"email": "Email",
+	"save": "Save",
+	"cancel": "Cancel",
+	"current_password": "Current password",
+	"new_password": "New password",
+	"confirm_password": "Confirm password",
+	"password_changed": "Password changed successfully",
+	"profile_updated": "Profile updated successfully"
+}

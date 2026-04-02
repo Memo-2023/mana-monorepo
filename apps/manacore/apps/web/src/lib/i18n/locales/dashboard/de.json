@@ -1,0 +1,139 @@
+{
+	"title": "Dashboard",
+	"welcome": "Willkommen zurück",
+	"customize": "Anpassen",
+	"done": "Fertig",
+	"no_data": "Keine Daten verfügbar",
+	"retry": "Erneut versuchen",
+	"widget_error": "Fehler beim Laden",
+	"remove_widget": "Entfernen",
+	"widgets": {
+		"credits": {
+			"title": "Credits",
+			"description": "Dein Kontostand",
+			"available": "Verfügbar",
+			"free_today": "Gratis heute",
+			"manage": "Verwalten"
+		},
+		"quick_actions": {
+			"title": "Schnellzugriff",
+			"description": "Schnelle Aktionen"
+		},
+		"transactions": {
+			"title": "Transaktionen",
+			"description": "Letzte Aktivitäten",
+			"empty": "Keine Transaktionen"
+		},
+		"tasks_today": {
+			"title": "Aufgaben",
+			"description": "Deine offenen Aufgaben",
+			"empty": "Keine offenen Aufgaben"
+		},
+		"tasks_upcoming": {
+			"title": "Kommende Aufgaben",
+			"description": "Die nächsten 7 Tage",
+			"empty": "Keine kommenden Aufgaben"
+		},
+		"calendar": {
+			"title": "Kalender",
+			"description": "Anstehende Termine",
+			"empty": "Keine Termine"
+		},
+		"chat": {
+			"title": "Chat",
+			"description": "Letzte Unterhaltungen",
+			"empty": "Keine Unterhaltungen"
+		},
+		"contacts": {
+			"title": "Kontakte",
+			"description": "Deine Favoriten",
+			"empty": "Keine Favoriten",
+			"add_favorites": "Favoriten hinzufügen",
+			"view_all": "Alle anzeigen"
+		},
+		"zitare": {
+			"title": "Inspiration",
+			"description": "Zitat des Tages",
+			"empty": "Keine Favoriten",
+			"explore": "Zitate entdecken",
+			"refresh": "Neues Zitat",
+			"view_all": "Alle Zitate"
+		},
+		"picture": {
+			"title": "Bilder",
+			"description": "Letzte KI-Generierungen",
+			"empty": "Noch keine Bilder erstellt",
+			"create": "Bild erstellen",
+			"view_all": "Alle Bilder"
+		},
+		"cards": {
+			"title": "Lernfortschritt",
+			"description": "Deine Lernkarten",
+			"empty": "Noch keine Decks erstellt",
+			"create_deck": "Deck erstellen",
+			"streak": "Tage Serie",
+			"due": "fällig",
+			"today": "heute gelernt",
+			"learned": "Gelernt",
+			"start_study": "Lernen starten"
+		},
+		"clock": {
+			"title": "Timer & Wecker",
+			"description": "Aktive Timer und Wecker",
+			"empty": "Keine aktiven Timer oder Wecker",
+			"open": "Clock öffnen",
+			"active_timers": "Aktive Timer",
+			"alarms": "Wecker"
+		},
+		"storage": {
+			"title": "Speicher",
+			"description": "Dein Cloud-Speicher",
+			"total_size": "Genutzt",
+			"files": "Dateien",
+			"recent": "Kürzlich",
+			"empty": "Keine Dateien",
+			"open": "Storage öffnen"
+		},
+		"mukke": {
+			"title": "Musik",
+			"description": "Deine Musikbibliothek",
+			"songs": "Songs",
+			"playlists": "Playlists",
+			"favorites": "Favoriten",
+			"empty": "Keine Songs",
+			"open": "Mukke öffnen"
+		},
+		"presi": {
+			"title": "Präsentationen",
+			"description": "Deine Slide Decks",
+			"decks": "Decks",
+			"empty": "Keine Präsentationen",
+			"create": "Deck erstellen",
+			"open": "Presi öffnen"
+		},
+		"context": {
+			"title": "Context",
+			"description": "Deine Dokumente & Spaces",
+			"spaces": "Spaces",
+			"documents": "Dokumente",
+			"empty": "Keine Dokumente",
+			"open": "Context öffnen"
+		},
+		"contacts_recent": {
+			"title": "Letzte Kontakte",
+			"description": "Kürzlich aktualisierte Kontakte"
+		},
+		"active_timer": {
+			"title": "Zeiterfassung",
+			"description": "Laufender Timer"
+		},
+		"nutrition": {
+			"title": "Ernährung",
+			"description": "Heutiger Kalorienfortschritt"
+		},
+		"plant_watering": {
+			"title": "Pflanzenpflege",
+			"description": "Pflanzen die gegossen werden müssen"
+		}
+	}
+}

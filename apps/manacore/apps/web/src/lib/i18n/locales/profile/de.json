@@ -1,0 +1,16 @@
+{
+	"title": "Profil",
+	"edit": "Profil bearbeiten",
+	"change_password": "Passwort ändern",
+	"delete_account": "Konto löschen",
+	"logout": "Abmelden",
+	"name": "Name",
+	"email": "E-Mail",
+	"save": "Speichern",
+	"cancel": "Abbrechen",
+	"current_password": "Aktuelles Passwort",
+	"new_password": "Neues Passwort",
+	"confirm_password": "Passwort bestätigen",
+	"password_changed": "Passwort erfolgreich geändert",
+	"profile_updated": "Profil erfolgreich aktualisiert"
+}

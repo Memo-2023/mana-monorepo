@@ -1,0 +1,16 @@
+{
+	"title": "Perfil",
+	"edit": "Editar perfil",
+	"change_password": "Cambiar contraseña",
+	"delete_account": "Eliminar cuenta",
+	"logout": "Cerrar sesión",
+	"name": "Nombre",
+	"email": "Correo electrónico",
+	"save": "Guardar",
+	"cancel": "Cancelar",
+	"current_password": "Contraseña actual",
+	"new_password": "Nueva contraseña",
+	"confirm_password": "Confirmar contraseña",
+	"password_changed": "Contraseña cambiada correctamente",
+	"profile_updated": "Perfil actualizado correctamente"
+}

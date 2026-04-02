@@ -1,0 +1,139 @@
+{
+	"title": "Dashboard",
+	"welcome": "Welcome back",
+	"customize": "Customize",
+	"done": "Done",
+	"no_data": "No data available",
+	"retry": "Try again",
+	"widget_error": "Failed to load",
+	"remove_widget": "Remove",
+	"widgets": {
+		"credits": {
+			"title": "Credits",
+			"description": "Your balance",
+			"available": "Available",
+			"free_today": "Free today",
+			"manage": "Manage"
+		},
+		"quick_actions": {
+			"title": "Quick Actions",
+			"description": "Quick access"
+		},
+		"transactions": {
+			"title": "Transactions",
+			"description": "Recent activity",
+			"empty": "No transactions"
+		},
+		"tasks_today": {
+			"title": "Tasks",
+			"description": "Your open tasks",
+			"empty": "No open tasks"
+		},
+		"tasks_upcoming": {
+			"title": "Upcoming Tasks",
+			"description": "Next 7 days",
+			"empty": "No upcoming tasks"
+		},
+		"calendar": {
+			"title": "Calendar",
+			"description": "Upcoming events",
+			"empty": "No events"
+		},
+		"chat": {
+			"title": "Chat",
+			"description": "Recent conversations",
+			"empty": "No conversations"
+		},
+		"contacts": {
+			"title": "Contacts",
+			"description": "Your favorites",
+			"empty": "No favorites",
+			"add_favorites": "Add favorites",
+			"view_all": "View all"
+		},
+		"zitare": {
+			"title": "Inspiration",
+			"description": "Quote of the day",
+			"empty": "No favorites",
+			"explore": "Explore quotes",
+			"refresh": "New quote",
+			"view_all": "All quotes"
+		},
+		"picture": {
+			"title": "Images",
+			"description": "Recent AI generations",
+			"empty": "No images created yet",
+			"create": "Create image",
+			"view_all": "View all images"
+		},
+		"cards": {
+			"title": "Learning Progress",
+			"description": "Your flashcards",
+			"empty": "No decks created yet",
+			"create_deck": "Create deck",
+			"streak": "Day streak",
+			"due": "due",
+			"today": "learned today",
+			"learned": "Learned",
+			"start_study": "Start studying"
+		},
+		"clock": {
+			"title": "Timers & Alarms",
+			"description": "Active timers and alarms",
+			"empty": "No active timers or alarms",
+			"open": "Open Clock",
+			"active_timers": "Active Timers",
+			"alarms": "Alarms"
+		},
+		"storage": {
+			"title": "Storage",
+			"description": "Your cloud storage",
+			"total_size": "Used",
+			"files": "Files",
+			"recent": "Recent",
+			"empty": "No files",
+			"open": "Open Storage"
+		},
+		"mukke": {
+			"title": "Music",
+			"description": "Your music library",
+			"songs": "Songs",
+			"playlists": "Playlists",
+			"favorites": "Favorites",
+			"empty": "No songs",
+			"open": "Open Mukke"
+		},
+		"presi": {
+			"title": "Presentations",
+			"description": "Your slide decks",
+			"decks": "Decks",
+			"empty": "No presentations",
+			"create": "Create deck",
+			"open": "Open Presi"
+		},
+		"context": {
+			"title": "Context",
+			"description": "Your documents & spaces",
+			"spaces": "Spaces",
+			"documents": "Documents",
+			"empty": "No documents",
+			"open": "Open Context"
+		},
+		"contacts_recent": {
+			"title": "Recent Contacts",
+			"description": "Recently updated contacts"
+		},
+		"active_timer": {
+			"title": "Time Tracking",
+			"description": "Running timer"
+		},
+		"nutrition": {
+			"title": "Nutrition",
+			"description": "Today's calorie progress"
+		},
+		"plant_watering": {
+			"title": "Plant Care",
+			"description": "Plants that need watering"
+		}
+	}
+}

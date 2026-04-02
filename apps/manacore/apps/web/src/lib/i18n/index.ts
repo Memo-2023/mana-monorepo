@@ -2,13 +2,6 @@ import { browser } from '$app/environment';
 import { init, register, locale, waitLocale } from 'svelte-i18n';
 import { STORAGE_KEYS } from '$lib/config/storage-keys';
 
-// Register all available locales
-register('de', () => import('./locales/de.json'));
-register('en', () => import('./locales/en.json'));
-register('it', () => import('./locales/it.json'));
-register('fr', () => import('./locales/fr.json'));
-register('es', () => import('./locales/es.json'));
-
 // List of supported locales
 export const supportedLocales = ['de', 'en', 'it', 'fr', 'es'] as const;
 export type SupportedLocale = (typeof supportedLocales)[number];
@@ -16,10 +9,45 @@ export type SupportedLocale = (typeof supportedLocales)[number];
 // Default locale
 const defaultLocale = 'de';
 
-// Get initial locale from browser or localStorage
+// ─── Per-module locale registration ──────────────────────────
+// Each module has its own JSON file per language.
+// They get merged into a single dictionary at registration time.
+
+function registerLocale(lang: SupportedLocale) {
+	register(lang, async () => {
+		const [common, dashboard, credits, profile, subscription, todo, app_slider] = await Promise.all(
+			[
+				import(`./locales/common/${lang}.json`),
+				import(`./locales/dashboard/${lang}.json`),
+				import(`./locales/credits/${lang}.json`),
+				import(`./locales/profile/${lang}.json`),
+				import(`./locales/subscription/${lang}.json`),
+				import(`./locales/todo/${lang}.json`),
+				import(`./locales/app_slider/${lang}.json`),
+			]
+		);
+
+		return {
+			common: common.default,
+			dashboard: dashboard.default,
+			credits: credits.default,
+			profile: profile.default,
+			subscription: subscription.default,
+			todo: todo.default,
+			app_slider: app_slider.default,
+		};
+	});
+}
+
+for (const lang of supportedLocales) {
+	registerLocale(lang);
+}
+
+// ─── Initialization ──────────────────────────────────────────
+
 function getInitialLocale(): SupportedLocale {
 	if (browser) {
-		// Check localStorage first
+		// Check localStorage first (pre-login fallback)
 		const stored = localStorage.getItem(STORAGE_KEYS.LOCALE);
 		if (stored && supportedLocales.includes(stored as SupportedLocale)) {
 			return stored as SupportedLocale;
@@ -35,19 +63,10 @@ function getInitialLocale(): SupportedLocale {
 	return defaultLocale;
 }
 
-// Initialize i18n at module scope (required for SSR)
 init({
 	fallbackLocale: defaultLocale,
 	initialLocale: getInitialLocale(),
 });
-
-// Also export initI18n for backwards compatibility
-export function initI18n() {
-	init({
-		fallbackLocale: defaultLocale,
-		initialLocale: getInitialLocale(),
-	});
-}
 
 // Set locale and persist to localStorage
 export function setLocale(newLocale: SupportedLocale) {

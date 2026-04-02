@@ -1,0 +1,20 @@
+{
+	"title": "Abonnement",
+	"current_plan": "Plan actuel",
+	"free_plan": "Plan gratuit",
+	"upgrade": "Passer au supérieur",
+	"cancel": "Annuler",
+	"reactivate": "Réactiver",
+	"billing_portal": "Gérer le moyen de paiement",
+	"monthly": "Mensuel",
+	"yearly": "Annuel",
+	"save_percent": "Économise {percent}%",
+	"per_month": "/ mois",
+	"per_year": "/ an",
+	"mana_per_month": "Mana / mois",
+	"features": "Fonctionnalités",
+	"select_plan": "Sélectionner",
+	"current": "Actuel",
+	"invoices": "Factures",
+	"no_invoices": "Pas encore de factures"
+}

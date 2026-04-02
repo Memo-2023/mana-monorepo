@@ -1,0 +1,139 @@
+{
+	"title": "Dashboard",
+	"welcome": "Bienvenido de nuevo",
+	"customize": "Personalizar",
+	"done": "Listo",
+	"no_data": "Sin datos disponibles",
+	"retry": "Reintentar",
+	"widget_error": "Error al cargar",
+	"remove_widget": "Eliminar",
+	"widgets": {
+		"credits": {
+			"title": "Créditos",
+			"description": "Tu saldo",
+			"available": "Disponibles",
+			"free_today": "Gratis hoy",
+			"manage": "Gestionar"
+		},
+		"quick_actions": {
+			"title": "Acciones rápidas",
+			"description": "Acceso rápido"
+		},
+		"transactions": {
+			"title": "Transacciones",
+			"description": "Actividad reciente",
+			"empty": "Sin transacciones"
+		},
+		"tasks_today": {
+			"title": "Tareas",
+			"description": "Tus tareas abiertas",
+			"empty": "Sin tareas abiertas"
+		},
+		"tasks_upcoming": {
+			"title": "Próximas tareas",
+			"description": "Próximos 7 días",
+			"empty": "Sin tareas próximas"
+		},
+		"calendar": {
+			"title": "Calendario",
+			"description": "Próximos eventos",
+			"empty": "Sin eventos"
+		},
+		"chat": {
+			"title": "Chat",
+			"description": "Conversaciones recientes",
+			"empty": "Sin conversaciones"
+		},
+		"contacts": {
+			"title": "Contactos",
+			"description": "Tus favoritos",
+			"empty": "Sin favoritos",
+			"add_favorites": "Añadir favoritos",
+			"view_all": "Ver todos"
+		},
+		"zitare": {
+			"title": "Inspiración",
+			"description": "Cita del día",
+			"empty": "Sin favoritos",
+			"explore": "Explorar citas",
+			"refresh": "Nueva cita",
+			"view_all": "Todas las citas"
+		},
+		"picture": {
+			"title": "Imágenes",
+			"description": "Generaciones IA recientes",
+			"empty": "Aún no hay imágenes",
+			"create": "Crear imagen",
+			"view_all": "Ver todas"
+		},
+		"cards": {
+			"title": "Progreso de estudio",
+			"description": "Tus flashcards",
+			"empty": "Aún no hay mazos",
+			"create_deck": "Crear mazo",
+			"streak": "Días seguidos",
+			"due": "pendientes",
+			"today": "aprendidas hoy",
+			"learned": "Aprendidas",
+			"start_study": "Empezar a estudiar"
+		},
+		"clock": {
+			"title": "Temporizadores y alarmas",
+			"description": "Temporizadores y alarmas activos",
+			"empty": "Sin temporizadores ni alarmas activos",
+			"open": "Abrir reloj",
+			"active_timers": "Temporizadores activos",
+			"alarms": "Alarmas"
+		},
+		"storage": {
+			"title": "Almacenamiento",
+			"description": "Tu almacenamiento en la nube",
+			"total_size": "Usado",
+			"files": "Archivos",
+			"recent": "Recientes",
+			"empty": "Sin archivos",
+			"open": "Abrir Storage"
+		},
+		"mukke": {
+			"title": "Música",
+			"description": "Tu biblioteca musical",
+			"songs": "Canciones",
+			"playlists": "Playlists",
+			"favorites": "Favoritos",
+			"empty": "Sin canciones",
+			"open": "Abrir Mukke"
+		},
+		"presi": {
+			"title": "Presentaciones",
+			"description": "Tus diapositivas",
+			"decks": "Decks",
+			"empty": "Sin presentaciones",
+			"create": "Crear deck",
+			"open": "Abrir Presi"
+		},
+		"context": {
+			"title": "Context",
+			"description": "Tus documentos y espacios",
+			"spaces": "Espacios",
+			"documents": "Documentos",
+			"empty": "Sin documentos",
+			"open": "Abrir Context"
+		},
+		"contacts_recent": {
+			"title": "Contactos recientes",
+			"description": "Contactos actualizados recientemente"
+		},
+		"active_timer": {
+			"title": "Registro de tiempo",
+			"description": "Temporizador activo"
+		},
+		"nutrition": {
+			"title": "Nutrición",
+			"description": "Progreso calórico de hoy"
+		},
+		"plant_watering": {
+			"title": "Cuidado de plantas",
+			"description": "Plantas que necesitan riego"
+		}
+	}
+}
