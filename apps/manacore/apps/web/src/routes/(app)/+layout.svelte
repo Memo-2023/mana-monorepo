@@ -429,7 +429,18 @@
 			defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
 			onDefaultChange={inputBarAdapter.onDefaultChange}
 			highlightPatterns={inputBarAdapter.highlightPatterns}
+			bottomOffset={isCollapsed ? '12px' : '70px'}
 		/>
+
+		<!-- PillNav toggle button (next to QuickInputBar) -->
+		<button
+			class="pill-nav-toggle"
+			style:bottom={isCollapsed ? '20px' : '78px'}
+			onclick={() => handleCollapsedChange(!isCollapsed)}
+			title={isCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'}
+		>
+			<span class="pill-nav-toggle-icon" class:collapsed={isCollapsed}>▼</span>
+		</button>
 
 		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
 		{#if isTagStripVisible}
@@ -486,3 +497,41 @@
 		/>
 	{/if}
 </AuthGate>
+
+<style>
+	.pill-nav-toggle {
+		position: fixed;
+		right: 16px;
+		z-index: 91;
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(8px);
+		color: rgba(255, 255, 255, 0.5);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition:
+			bottom 0.3s ease,
+			background 0.2s ease,
+			color 0.2s ease;
+	}
+
+	.pill-nav-toggle:hover {
+		background: rgba(0, 0, 0, 0.8);
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.pill-nav-toggle-icon {
+		font-size: 10px;
+		transition: transform 0.3s ease;
+		display: inline-block;
+	}
+
+	.pill-nav-toggle-icon.collapsed {
+		transform: rotate(180deg);
+	}
+</style>
