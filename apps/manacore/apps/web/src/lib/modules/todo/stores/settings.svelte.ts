@@ -12,6 +12,29 @@ export type KanbanCardSize = 'compact' | 'normal' | 'large';
 export type LayoutMode = 'fokus' | 'uebersicht' | 'matrix';
 export type PageWidth = 'narrow' | 'medium' | 'wide' | 'full';
 
+export type PageIcon =
+	| 'warning'
+	| 'calendar'
+	| 'calendar-dots'
+	| 'check'
+	| 'star'
+	| 'lightning'
+	| 'clock'
+	| 'fire'
+	| 'leaf'
+	| 'heart';
+
+export interface PageConfig {
+	id: string;
+	label: string;
+	icon?: PageIcon;
+	filter: {
+		priorities?: ('low' | 'medium' | 'high' | 'urgent')[];
+		completed?: boolean;
+		dateRange?: 'overdue' | 'today' | 'tomorrow' | 'upcoming' | 'any';
+	};
+}
+
 export interface TodoAppSettings extends Record<string, unknown> {
 	// Task Behavior
 	defaultPriority: TaskPriority;
@@ -57,6 +80,9 @@ export interface TodoAppSettings extends Record<string, unknown> {
 
 	// Page width
 	pageWidth: PageWidth;
+
+	// Custom pages
+	customPages: PageConfig[];
 }
 
 const DEFAULT_SETTINGS: TodoAppSettings = {
@@ -91,6 +117,7 @@ const DEFAULT_SETTINGS: TodoAppSettings = {
 	filterStripCollapsed: false,
 	activeLayoutMode: 'fokus' as LayoutMode,
 	pageWidth: 'medium' as PageWidth,
+	customPages: [] as PageConfig[],
 };
 
 const baseStore = createAppSettingsStore<TodoAppSettings>('todo-settings', DEFAULT_SETTINGS);
@@ -147,6 +174,10 @@ export const todoSettings = {
 	},
 	get filterStripCollapsed() {
 		return baseStore.settings.filterStripCollapsed;
+	},
+
+	get customPages() {
+		return baseStore.settings.customPages;
 	},
 
 	toggleFilterStrip() {
