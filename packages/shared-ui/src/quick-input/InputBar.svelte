@@ -75,6 +75,8 @@
 		onShowSyntaxHelp?: () => void;
 		/** Snippet for left action button (e.g., voice input) - rendered inside the input bar on the left */
 		leftAction?: Snippet;
+		/** Snippet for right action button (e.g., nav toggle) - rendered inside the input bar on the right */
+		rightAction?: Snippet;
 		/** Custom highlight patterns. If not provided, uses locale-based defaults. */
 		highlightPatterns?: HighlightPattern[];
 		/** Locale for syntax highlighting keywords (e.g., 'de', 'en'). Default: 'de'. */
@@ -107,6 +109,7 @@
 		onShowShortcuts,
 		onShowSyntaxHelp,
 		leftAction,
+		rightAction,
 		highlightPatterns,
 		locale = 'de',
 		positioning = 'fixed',
@@ -538,6 +541,13 @@
 				{/if}
 			</button>
 		{/if}
+
+		<!-- Right action slot (e.g., nav toggle) -->
+		{#if rightAction}
+			<div class="right-action">
+				{@render rightAction()}
+			</div>
+		{/if}
 	</div>
 
 	<!-- Context Menu -->
@@ -663,7 +673,8 @@
 		}
 	}
 
-	.left-action {
+	.left-action,
+	.right-action {
 		display: flex;
 		align-items: center;
 		justify-content: center;

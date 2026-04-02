@@ -408,7 +408,7 @@
 				highlightPatterns={inputBarAdapter.highlightPatterns}
 				positioning="static"
 			>
-				{#snippet leftAction()}
+				{#snippet rightAction()}
 					<button
 						class="pill-nav-toggle"
 						onclick={() => handleCollapsedChange(!isCollapsed)}
@@ -533,8 +533,8 @@
 	}
 
 	.pill-nav-toggle {
-		width: 28px;
-		height: 28px;
+		width: 36px;
+		height: 36px;
 		flex-shrink: 0;
 		border-radius: 50%;
 		border: none;
