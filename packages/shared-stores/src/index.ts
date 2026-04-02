@@ -45,3 +45,10 @@ export {
 	type LocalTagGroup,
 } from './tags-local.svelte';
 export { createTagLinkOps, type TagLinkOps, type TagLinkOpsConfig } from './tag-links';
+export { toggleField } from './toggle-field';
+export {
+	createGuestMode,
+	type GuestMode,
+	type GuestModeOptions,
+	type GuestModeNotification,
+} from './guest-mode.svelte';

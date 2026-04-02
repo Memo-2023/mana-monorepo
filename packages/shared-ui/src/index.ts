@@ -2,7 +2,15 @@
 export { Text, Button, Badge, Card } from './atoms';
 
 // Molecules
-export { Toggle, Input, Select, Textarea, Checkbox, FilterDropdown } from './molecules';
+export {
+	Toggle,
+	Input,
+	Select,
+	Textarea,
+	Checkbox,
+	FilterDropdown,
+	FavoriteButton,
+} from './molecules';
 export type { SelectOption, FilterDropdownOption } from './molecules';
 
 // Stats

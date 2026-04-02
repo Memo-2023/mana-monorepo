@@ -4,6 +4,7 @@ export { default as Select } from './Select.svelte';
 export { default as Textarea } from './Textarea.svelte';
 export { default as Checkbox } from './Checkbox.svelte';
 export { default as FilterDropdown } from './FilterDropdown.svelte';
+export { default as FavoriteButton } from './FavoriteButton.svelte';
 export type { SelectOption } from './Select.types';
 export type { FilterDropdownOption } from './FilterDropdown.types';
 
