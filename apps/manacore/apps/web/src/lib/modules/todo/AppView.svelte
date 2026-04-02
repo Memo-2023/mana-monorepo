@@ -1,9 +1,8 @@
 <!--
-  Todo — Split-Screen AppView
+  Todo — Workbench AppView
   Compact task list with quick add, filter by inbox/today/overdue.
 -->
 <script lang="ts">
-	import { liveQuery } from 'dexie';
 	import {
 		useAllTasks,
 		filterIncomplete,
@@ -13,6 +12,7 @@
 		getTaskStats,
 	} from './queries';
 	import { tasksStore } from './stores/tasks.svelte';
+	import { Circle, Check } from '@manacore/shared-icons';
 
 	type ViewFilter = 'inbox' | 'today' | 'overdue';
 
@@ -44,7 +44,9 @@
 	async function addTask() {
 		const title = newTitle.trim();
 		if (!title) return;
-		await tasksStore.createTask({ title });
+		const data: Record<string, unknown> = { title };
+		if (filter === 'today') data.dueDate = new Date().toISOString();
+		await tasksStore.createTask(data as { title: string; dueDate?: string });
 		newTitle = '';
 	}
 
@@ -53,75 +55,218 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
-	<!-- Stats -->
-	<div class="flex gap-3 text-xs text-white/50">
+<div class="app-view">
+	<div class="stats">
 		<span>{stats.total} gesamt</span>
 		<span>{stats.today} heute</span>
-		<span class:text-red-400={stats.overdue > 0}>{stats.overdue} überfällig</span>
+		<span class:overdue={stats.overdue > 0}>{stats.overdue} überfällig</span>
 	</div>
 
-	<!-- Filter tabs -->
-	<div class="flex gap-1">
+	<div class="filter-tabs">
 		{#each ['inbox', 'today', 'overdue'] as f}
 			<button
 				onclick={() => (filter = f as ViewFilter)}
-				class="rounded-md px-2.5 py-1 text-xs transition-colors
-					{filter === f ? 'bg-white/15 text-white' : 'text-white/50 hover:text-white/70'}"
+				class="filter-tab"
+				class:active={filter === f}
 			>
 				{f === 'inbox' ? 'Inbox' : f === 'today' ? 'Heute' : 'Überfällig'}
 			</button>
 		{/each}
 	</div>
 
-	<!-- Quick add -->
 	<form
 		onsubmit={(e) => {
 			e.preventDefault();
 			addTask();
 		}}
-		class="flex gap-2"
+		class="quick-add"
 	>
-		<input
-			bind:value={newTitle}
-			placeholder="Neue Aufgabe..."
-			class="flex-1 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
-		/>
-		<button
-			type="submit"
-			class="rounded-md bg-white/10 px-3 py-1.5 text-sm text-white/70 transition-colors hover:bg-white/15"
-			>+</button
-		>
+		<span class="add-icon"><Circle size={18} /></span>
+		<input bind:value={newTitle} placeholder="Neue Aufgabe..." class="add-input" />
 	</form>
 
-	<!-- Task list -->
-	<div class="flex-1 overflow-auto">
+	<div class="task-list">
 		{#each filtered() as task (task.id)}
-			<button
-				onclick={() => toggle(task.id)}
-				class="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5"
-			>
-				<div
-					class="mt-0.5 h-4 w-4 shrink-0 rounded border transition-colors
-						{task.isCompleted ? 'border-green-500 bg-green-500/20' : 'border-white/20'}"
-				></div>
-				<div class="min-w-0 flex-1">
-					<p
-						class="truncate text-sm {task.isCompleted
-							? 'text-white/30 line-through'
-							: 'text-white/80'}"
-					>
-						{task.title}
-					</p>
+			<button onclick={() => toggle(task.id)} class="task-item">
+				<div class="checkbox" class:checked={task.isCompleted}>
+					{#if task.isCompleted}<Check size={12} />{/if}
+				</div>
+				<div class="task-content">
+					<p class="task-title" class:completed={task.isCompleted}>{task.title}</p>
 					{#if task.dueDate}
-						<p class="text-xs text-white/30">{new Date(task.dueDate).toLocaleDateString('de')}</p>
+						<p class="task-due">{new Date(task.dueDate).toLocaleDateString('de')}</p>
 					{/if}
 				</div>
 			</button>
 		{/each}
 
 		{#if filtered().length === 0}
-			<p class="py-8 text-center text-sm text-white/30">Keine Aufgaben</p>
+			<p class="empty">Keine Aufgaben</p>
 		{/if}
 	</div>
 </div>
+
+<style>
+	.app-view {
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+		padding: 1rem;
+		height: 100%;
+	}
+	.stats {
+		display: flex;
+		gap: 0.75rem;
+		font-size: 0.75rem;
+		color: #9ca3af;
+	}
+	.overdue {
+		color: #ef4444;
+	}
+	:global(.dark) .stats {
+		color: #6b7280;
+	}
+	.filter-tabs {
+		display: flex;
+		gap: 0.25rem;
+	}
+	.filter-tab {
+		padding: 0.25rem 0.625rem;
+		border-radius: 0.375rem;
+		border: none;
+		background: transparent;
+		color: #9ca3af;
+		font-size: 0.75rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.filter-tab:hover {
+		color: #374151;
+		background: rgba(0, 0, 0, 0.04);
+	}
+	.filter-tab.active {
+		background: rgba(0, 0, 0, 0.06);
+		color: #374151;
+	}
+	:global(.dark) .filter-tab:hover {
+		color: #e5e7eb;
+		background: rgba(255, 255, 255, 0.06);
+	}
+	:global(.dark) .filter-tab.active {
+		background: rgba(255, 255, 255, 0.1);
+		color: #f3f4f6;
+	}
+	.quick-add {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.375rem;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		background: transparent;
+	}
+	:global(.dark) .quick-add {
+		border-color: rgba(255, 255, 255, 0.08);
+	}
+	.add-icon {
+		color: #d1d5db;
+		display: flex;
+	}
+	:global(.dark) .add-icon {
+		color: #4b5563;
+	}
+	.add-input {
+		flex: 1;
+		border: none;
+		background: transparent;
+		outline: none;
+		font-size: 0.8125rem;
+		color: #374151;
+	}
+	.add-input::placeholder {
+		color: #c0bfba;
+	}
+	:global(.dark) .add-input {
+		color: #f3f4f6;
+	}
+	:global(.dark) .add-input::placeholder {
+		color: #4b5563;
+	}
+	.task-list {
+		flex: 1;
+		overflow-y: auto;
+	}
+	.task-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.375rem 0.25rem;
+		border: none;
+		background: transparent;
+		text-align: left;
+		border-radius: 0.25rem;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+	.task-item:hover {
+		background: rgba(0, 0, 0, 0.03);
+	}
+	:global(.dark) .task-item:hover {
+		background: rgba(255, 255, 255, 0.04);
+	}
+	.checkbox {
+		margin-top: 0.125rem;
+		width: 16px;
+		height: 16px;
+		border-radius: 0.25rem;
+		border: 1.5px solid #d1d5db;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		transition: all 0.15s;
+	}
+	.checkbox.checked {
+		border-color: #22c55e;
+		background: #22c55e;
+		color: white;
+	}
+	:global(.dark) .checkbox {
+		border-color: #4b5563;
+	}
+	.task-content {
+		min-width: 0;
+		flex: 1;
+	}
+	.task-title {
+		font-size: 0.8125rem;
+		color: #374151;
+		margin: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.task-title.completed {
+		color: #9ca3af;
+		text-decoration: line-through;
+	}
+	:global(.dark) .task-title {
+		color: #e5e7eb;
+	}
+	:global(.dark) .task-title.completed {
+		color: #6b7280;
+	}
+	.task-due {
+		font-size: 0.6875rem;
+		color: #9ca3af;
+		margin: 0;
+	}
+	.empty {
+		padding: 2rem 0;
+		text-align: center;
+		font-size: 0.8125rem;
+		color: #9ca3af;
+	}
+</style>
