@@ -13,12 +13,18 @@ import {
 	tagCollection,
 	templateCollection,
 	settingsCollection,
+	alarmCollection,
+	countdownTimerCollection,
+	worldClockCollection,
 	type LocalClient,
 	type LocalProject,
 	type LocalTimeEntry,
 	type LocalTag,
 	type LocalTemplate,
 	type LocalSettings,
+	type LocalAlarm,
+	type LocalCountdownTimer,
+	type LocalWorldClock,
 } from './local-store';
 import type {
 	Client,
@@ -29,6 +35,9 @@ import type {
 	TimesSettings,
 	FilterCriteria,
 	SortOption,
+	Alarm,
+	CountdownTimer,
+	WorldClock,
 } from '@times/shared';
 
 // ─── Type Converters ───────────────────────────────────────
@@ -335,4 +344,89 @@ export function getClientById(clients: Client[], id: string): Client | undefined
 /** Get projects for a client */
 export function getProjectsByClient(projects: Project[], clientId: string): Project[] {
 	return projects.filter((p) => p.clientId === clientId);
+}
+
+// ─── Clock Type Converters ───────────────────────────────────
+
+export function toAlarm(local: LocalAlarm): Alarm {
+	return {
+		id: local.id,
+		userId: 'local',
+		label: local.label,
+		time: local.time,
+		enabled: local.enabled,
+		repeatDays: local.repeatDays,
+		snoozeMinutes: local.snoozeMinutes,
+		sound: local.sound,
+		vibrate: local.vibrate ?? null,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+export function toCountdownTimer(local: LocalCountdownTimer): CountdownTimer {
+	return {
+		id: local.id,
+		userId: 'local',
+		label: local.label,
+		durationSeconds: local.durationSeconds,
+		remainingSeconds: local.remainingSeconds,
+		status: local.status,
+		startedAt: local.startedAt,
+		pausedAt: local.pausedAt,
+		sound: local.sound,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+export function toWorldClock(local: LocalWorldClock): WorldClock {
+	return {
+		id: local.id,
+		userId: 'local',
+		timezone: local.timezone,
+		cityName: local.cityName,
+		sortOrder: local.sortOrder,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
+}
+
+// ─── Clock Live Query Hooks ──────────────────────────────────
+
+export function useAllAlarms() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await alarmCollection.getAll();
+		return locals.map(toAlarm);
+	}, [] as Alarm[]);
+}
+
+export function useAllCountdownTimers() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await countdownTimerCollection.getAll();
+		return locals.map(toCountdownTimer);
+	}, [] as CountdownTimer[]);
+}
+
+export function useAllWorldClocks() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await worldClockCollection.getAll(undefined, {
+			sortBy: 'sortOrder',
+			sortDirection: 'asc',
+		});
+		return locals.map(toWorldClock);
+	}, [] as WorldClock[]);
+}
+
+// ─── Clock Pure Helpers ──────────────────────────────────────
+
+export function filterEnabledAlarms(alarms: Alarm[]): Alarm[] {
+	return alarms.filter((a) => a.enabled);
+}
+
+export function filterActiveCountdownTimers(timers: CountdownTimer[]): CountdownTimer[] {
+	return timers.filter((t) => t.status === 'running' || t.status === 'paused');
+}
+
+export function sortWorldClocksByOrder(clocks: WorldClock[]): WorldClock[] {
+	return [...clocks].sort((a, b) => a.sortOrder - b.sortOrder);
 }

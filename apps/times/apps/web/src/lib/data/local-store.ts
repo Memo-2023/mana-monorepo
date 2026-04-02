@@ -12,8 +12,15 @@ import {
 	guestTimeEntries,
 	guestTags,
 	guestSettings,
+	guestAlarms,
+	guestWorldClocks,
 } from './guest-seed';
-import type { BillingRate, ProjectVisibility, EntrySourceRef } from '@times/shared';
+import type {
+	BillingRate,
+	ProjectVisibility,
+	EntrySourceRef,
+	CountdownTimerStatus,
+} from '@times/shared';
 
 // ─── Types ──────────────────────────────────────────────────
 
@@ -93,6 +100,34 @@ export interface LocalSettings extends BaseRecord {
 	autoStopTimerHours: number;
 }
 
+// ─── Clock Types ────────────────────────────────────────────
+
+export interface LocalAlarm extends BaseRecord {
+	label: string | null;
+	time: string; // HH:mm format
+	enabled: boolean;
+	repeatDays: number[] | null; // [0-6] where 0 = Sunday
+	snoozeMinutes: number | null;
+	sound: string | null;
+	vibrate: boolean | null;
+}
+
+export interface LocalCountdownTimer extends BaseRecord {
+	label: string | null;
+	durationSeconds: number;
+	remainingSeconds: number | null;
+	status: CountdownTimerStatus;
+	startedAt: string | null;
+	pausedAt: string | null;
+	sound: string | null;
+}
+
+export interface LocalWorldClock extends BaseRecord {
+	timezone: string; // IANA timezone e.g. 'America/New_York'
+	cityName: string;
+	sortOrder: number;
+}
+
 // ─── Store ──────────────────────────────────────────────────
 
 const SYNC_SERVER_URL = import.meta.env.PUBLIC_SYNC_SERVER_URL || 'http://localhost:3050';
@@ -138,6 +173,21 @@ export const timesStore = createLocalStore({
 			indexes: [],
 			guestSeed: guestSettings,
 		},
+		// ─── Clock Collections ───
+		{
+			name: 'alarms',
+			indexes: ['enabled', 'time'],
+			guestSeed: guestAlarms,
+		},
+		{
+			name: 'countdownTimers',
+			indexes: ['status'],
+		},
+		{
+			name: 'worldClocks',
+			indexes: ['sortOrder', 'timezone'],
+			guestSeed: guestWorldClocks,
+		},
 	],
 	sync: {
 		serverUrl: SYNC_SERVER_URL,
@@ -151,3 +201,9 @@ export const timeEntryCollection = timesStore.collection<LocalTimeEntry>('timeEn
 export const tagCollection = timesStore.collection<LocalTag>('tags');
 export const templateCollection = timesStore.collection<LocalTemplate>('templates');
 export const settingsCollection = timesStore.collection<LocalSettings>('settings');
+
+// Clock collection accessors
+export const alarmCollection = timesStore.collection<LocalAlarm>('alarms');
+export const countdownTimerCollection =
+	timesStore.collection<LocalCountdownTimer>('countdownTimers');
+export const worldClockCollection = timesStore.collection<LocalWorldClock>('worldClocks');

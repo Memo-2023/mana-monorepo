@@ -44,7 +44,6 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **storage** | Cloud file storage | Backend, Web |
 | **mukke** | Music production | Backend, Web, Landing |
 | **zitare** | Daily inspiration quotes | Web, Landing |
-| **clock** | World clock, alarms, timers | Web, Landing |
 | **presi** | Presentations | Mobile, Web, Landing |
 | **questions** | Research assistant | Backend, Web |
 | **context** | Document workspace | Backend, Mobile, Web |
@@ -55,7 +54,7 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 | **citycorners** | City guide for Konstanz | Web, Landing |
 | **inventar** | Inventory management | Web |
 | **traces** | City exploration | Backend, Mobile |
-| **times** | Time tracking | Web |
+| **times** | Time tracking, clocks, alarms, timers, stopwatch | Web |
 | **uload** | URL shortener & link management | Server, Web, Landing |
 | **news** | AI news reader & personal library | Server, Web, Landing |
 | **wisekeep** | AI transcription & wisdom library | Server, Web, Landing |
@@ -76,7 +75,11 @@ For comprehensive guidelines on code patterns and conventions, see the `.claude/
 
 ### Archived Projects (`apps-archived/`)
 
-Currently empty. To archive a project, move it from `apps/` to `apps-archived/` (excluded from workspace).
+Archived apps are excluded from the pnpm workspace.
+
+| Project | Reason |
+|---------|--------|
+| **clock** | Consolidated into Times |
 
 ## Development Commands
 
@@ -92,7 +95,7 @@ pnpm dev:chat:full       # Start chat with auth + auto DB setup
 pnpm dev:zitare:full     # Start zitare with auth + auto DB setup
 pnpm dev:contacts:full   # Start contacts with auth + auto DB setup
 pnpm dev:calendar:full   # Start calendar with auth + auto DB setup
-pnpm dev:clock:full      # Start clock with auth + auto DB setup
+pnpm dev:times:full      # Start times with auth + auto DB setup
 pnpm dev:todo:full       # Start todo with auth + auto DB setup
 pnpm dev:picture:full    # Start picture with auth + auto DB setup
 pnpm dev:uload:full      # Start uload with auth + auto DB setup

@@ -58,11 +58,6 @@ db.version(1).stores({
 	zitareFavorites: 'id, quoteId',
 	zitareLists: 'id',
 
-	// ─── Clock (appId: 'clock') ───
-	alarms: 'id, enabled, time',
-	timers: 'id, status',
-	worldClocks: 'id, sortOrder, timezone',
-
 	// ─── Mukke (appId: 'mukke') ───
 	songs: 'id, artist, album, genre, favorite, title',
 	mukkePlaylists: 'id, name',
@@ -111,6 +106,9 @@ db.version(1).stores({
 	timeTags: 'id, name, order',
 	timeTemplates: 'id, usageCount, lastUsedAt, projectId',
 	timeSettings: 'id',
+	timeAlarms: 'id, enabled, time',
+	timeCountdownTimers: 'id, status',
+	timeWorldClocks: 'id, sortOrder, timezone',
 
 	// ─── Context (appId: 'context') ───
 	contextSpaces: 'id, pinned, prefix',
@@ -186,7 +184,6 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 	picture: ['images', 'boards', 'boardItems', 'pictureTags', 'imageTags'],
 	cards: ['cardDecks', 'cards'],
 	zitare: ['zitareFavorites', 'zitareLists'],
-	clock: ['alarms', 'timers', 'worldClocks'],
 	mukke: ['songs', 'mukkePlaylists', 'playlistSongs', 'mukkeProjects', 'markers'],
 	storage: ['files', 'storageFolders', 'storageTags', 'fileTags'],
 	presi: ['presiDecks', 'slides'],
@@ -201,6 +198,9 @@ export const SYNC_APP_MAP: Record<string, string[]> = {
 		'timeTags',
 		'timeTemplates',
 		'timeSettings',
+		'timeAlarms',
+		'timeCountdownTimers',
+		'timeWorldClocks',
 	],
 	context: ['contextSpaces', 'documents'],
 	questions: ['qCollections', 'questions', 'answers'],
@@ -273,6 +273,9 @@ export const TABLE_TO_SYNC_NAME: Record<string, string> = {
 	timeTags: 'tags',
 	timeTemplates: 'templates',
 	timeSettings: 'settings',
+	timeAlarms: 'alarms',
+	timeCountdownTimers: 'countdownTimers',
+	timeWorldClocks: 'worldClocks',
 	// context
 	contextSpaces: 'spaces',
 	// questions

@@ -6,6 +6,7 @@
 
 import { liveQuery } from 'dexie';
 import { db } from '$lib/data/database';
+import { useLiveQueryWithDefault } from '@manacore/local-store/svelte';
 import type {
 	LocalClient,
 	LocalProject,
@@ -13,6 +14,9 @@ import type {
 	LocalTag,
 	LocalTemplate,
 	LocalSettings,
+	LocalAlarm,
+	LocalCountdownTimer,
+	LocalWorldClock,
 	Client,
 	Project,
 	TimeEntry,
@@ -22,6 +26,7 @@ import type {
 	FilterCriteria,
 	SortOption,
 } from './types';
+import type { Alarm, Timer, WorldClock } from './types';
 
 // ─── Type Converters ───────────────────────────────────────
 
@@ -127,6 +132,51 @@ export function toSettings(local: LocalSettings): TimesSettings {
 	};
 }
 
+// ─── Clock Type Converters (merged from clock module) ─────
+
+export function toAlarm(local: LocalAlarm): Alarm {
+	return {
+		id: local.id,
+		userId: 'local',
+		label: local.label,
+		time: local.time,
+		enabled: local.enabled,
+		repeatDays: local.repeatDays,
+		snoozeMinutes: local.snoozeMinutes,
+		sound: local.sound,
+		vibrate: local.vibrate ?? null,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+export function toCountdownTimer(local: LocalCountdownTimer): Timer {
+	return {
+		id: local.id,
+		userId: 'local',
+		label: local.label,
+		durationSeconds: local.durationSeconds,
+		remainingSeconds: local.remainingSeconds,
+		status: local.status,
+		startedAt: local.startedAt,
+		pausedAt: local.pausedAt,
+		sound: local.sound,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+		updatedAt: local.updatedAt ?? new Date().toISOString(),
+	};
+}
+
+export function toWorldClock(local: LocalWorldClock): WorldClock {
+	return {
+		id: local.id,
+		userId: 'local',
+		timezone: local.timezone,
+		cityName: local.cityName,
+		sortOrder: local.sortOrder,
+		createdAt: local.createdAt ?? new Date().toISOString(),
+	};
+}
+
 // ─── Live Queries ──────────────────────────────────────────
 
 export function useAllClients() {
@@ -170,6 +220,78 @@ export function useSettings() {
 		const active = locals.filter((s) => !s.deletedAt);
 		return active.length > 0 ? toSettings(active[0]) : null;
 	});
+}
+
+// ─── Clock Raw Observable Queries ─────────────────────────
+
+/** All alarms as raw observable. */
+export function allAlarms$() {
+	return liveQuery(async () => {
+		const locals = await db.table<LocalAlarm>('timeAlarms').toArray();
+		return locals.filter((a) => !a.deletedAt).map(toAlarm);
+	});
+}
+
+/** All countdown timers as raw observable. */
+export function allCountdownTimers$() {
+	return liveQuery(async () => {
+		const locals = await db.table<LocalCountdownTimer>('timeCountdownTimers').toArray();
+		return locals.filter((t) => !t.deletedAt).map(toCountdownTimer);
+	});
+}
+
+/** All world clocks as raw observable, sorted by sortOrder. */
+export function allWorldClocks$() {
+	return liveQuery(async () => {
+		const locals = await db
+			.table<LocalWorldClock>('timeWorldClocks')
+			.orderBy('sortOrder')
+			.toArray();
+		return locals.filter((wc) => !wc.deletedAt).map(toWorldClock);
+	});
+}
+
+// ─── Clock Svelte 5 Reactive Hooks ────────────────────────
+
+/** All alarms, auto-updates on any change. Returns { value, loading, error }. */
+export function useAllAlarms() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalAlarm>('timeAlarms').toArray();
+		return locals.filter((a) => !a.deletedAt).map(toAlarm);
+	}, [] as Alarm[]);
+}
+
+/** All countdown timers, auto-updates on any change. Returns { value, loading, error }. */
+export function useAllCountdownTimers() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db.table<LocalCountdownTimer>('timeCountdownTimers').toArray();
+		return locals.filter((t) => !t.deletedAt).map(toCountdownTimer);
+	}, [] as Timer[]);
+}
+
+/** All world clocks, sorted by sortOrder. Returns { value, loading, error }. */
+export function useAllWorldClocks() {
+	return useLiveQueryWithDefault(async () => {
+		const locals = await db
+			.table<LocalWorldClock>('timeWorldClocks')
+			.orderBy('sortOrder')
+			.toArray();
+		return locals.filter((wc) => !wc.deletedAt).map(toWorldClock);
+	}, [] as WorldClock[]);
+}
+
+// ─── Clock Pure Filter Functions ──────────────────────────
+
+export function filterEnabledAlarms(alarms: Alarm[]): Alarm[] {
+	return alarms.filter((a) => a.enabled);
+}
+
+export function filterActiveCountdownTimers(timers: Timer[]): Timer[] {
+	return timers.filter((t) => t.status === 'running' || t.status === 'paused');
+}
+
+export function sortWorldClocksByOrder(clocks: WorldClock[]): WorldClock[] {
+	return [...clocks].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 // ─── Pure Helpers ──────────────────────────────────────────

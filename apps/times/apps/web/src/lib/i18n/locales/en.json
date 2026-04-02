@@ -11,7 +11,11 @@
 		"clients": "Clients",
 		"reports": "Reports",
 		"settings": "Settings",
-		"templates": "Templates"
+		"templates": "Templates",
+		"alarms": "Alarms",
+		"countdown": "Countdown",
+		"stopwatch": "Stopwatch",
+		"worldClock": "World Clock"
 	},
 	"timer": {
 		"start": "Start Timer",
@@ -130,6 +134,46 @@
 		"total": "Total",
 		"hours": "Hours",
 		"minutes": "Minutes"
+	},
+	"clock": {
+		"alarm": {
+			"title": "Alarms",
+			"custom": "Custom Alarms",
+			"edit": "Edit Alarm",
+			"time": "Time",
+			"label": "Label",
+			"repeat": "Repeat",
+			"sound": "Sound",
+			"snooze": "Snooze"
+		},
+		"timer": {
+			"title": "Countdown Timer",
+			"finished": "Timer finished!"
+		},
+		"stopwatch": {
+			"title": "Stopwatch",
+			"new": "New Stopwatch",
+			"start": "Start",
+			"stop": "Stop",
+			"continue": "Continue",
+			"reset": "Reset",
+			"lap": "Lap",
+			"laps": "Laps",
+			"total": "Total",
+			"best": "Best",
+			"worst": "Worst",
+			"noStopwatches": "No Stopwatches",
+			"noStopwatchesDescription": "Create a new stopwatch to start timing.",
+			"startFirst": "Start First Stopwatch",
+			"otherStopwatches": "Other Stopwatches"
+		},
+		"worldClock": {
+			"title": "World Clock",
+			"add": "Add City",
+			"search": "Search city...",
+			"noClocks": "No world clocks added",
+			"same": "Same time"
+		}
 	},
 	"error": {
 		"notFound": "Page not found",

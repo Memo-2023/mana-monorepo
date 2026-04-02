@@ -13,6 +13,9 @@ import type {
 	LocalTag,
 	LocalTemplate,
 	LocalSettings,
+	LocalAlarm,
+	LocalCountdownTimer,
+	LocalWorldClock,
 } from './types';
 
 // ─── Collection Accessors ──────────────────────────────────
@@ -23,6 +26,11 @@ export const timeEntryTable = db.table<LocalTimeEntry>('timeEntries');
 export const tagTable = db.table<LocalTag>('timeTags');
 export const templateTable = db.table<LocalTemplate>('timeTemplates');
 export const settingsTable = db.table<LocalSettings>('timeSettings');
+
+// Clock collections (merged from clock module)
+export const alarmTable = db.table<LocalAlarm>('timeAlarms');
+export const countdownTimerTable = db.table<LocalCountdownTimer>('timeCountdownTimers');
+export const worldClockTable = db.table<LocalWorldClock>('timeWorldClocks');
 
 // ─── Guest Seed ────────────────────────────────────────────
 
@@ -192,4 +200,31 @@ export const TIMES_GUEST_SEED = {
 			autoStopTimerHours: 0,
 		},
 	],
+	// Clock guest seed (merged from clock module)
+	timeAlarms: [
+		{
+			id: 'alarm-weekday-morning',
+			label: 'Wecker Wochentags',
+			time: '07:00',
+			enabled: true,
+			repeatDays: [1, 2, 3, 4, 5], // Mon-Fri
+			snoozeMinutes: 5,
+			sound: null,
+			vibrate: true,
+		},
+	] satisfies LocalAlarm[],
+	timeWorldClocks: [
+		{
+			id: 'wc-new-york',
+			timezone: 'America/New_York',
+			cityName: 'New York',
+			sortOrder: 0,
+		},
+		{
+			id: 'wc-tokyo',
+			timezone: 'Asia/Tokyo',
+			cityName: 'Tokio',
+			sortOrder: 1,
+		},
+	] satisfies LocalWorldClock[],
 };

@@ -3,21 +3,21 @@ import { getManaApp } from '@manacore/shared-branding';
 import { scoreRecord } from '../scoring';
 import type { SearchProvider, SearchResult, SearchOptions } from '../types';
 
-const app = getManaApp('clock');
+const app = getManaApp('times');
 
 export const clockSearchProvider: SearchProvider = {
-	appId: 'clock',
-	appName: 'Clock',
+	appId: 'times',
+	appName: 'Times',
 	appIcon: app?.icon,
 	appColor: app?.color,
-	searchableTypes: ['alarm', 'timer', 'worldClock'],
+	searchableTypes: ['alarm', 'countdownTimer', 'worldClock'],
 
 	async search(query: string, options?: SearchOptions): Promise<SearchResult[]> {
 		const limit = options?.limit ?? 5;
 		const results: SearchResult[] = [];
 
 		// Search alarms by label
-		const alarms = await db.table('alarms').toArray();
+		const alarms = await db.table('timeAlarms').toArray();
 		for (const alarm of alarms) {
 			if (alarm.deletedAt || !alarm.label) continue;
 			const { score, matchedField } = scoreRecord(
@@ -28,20 +28,20 @@ export const clockSearchProvider: SearchProvider = {
 				results.push({
 					id: alarm.id,
 					type: 'alarm',
-					appId: 'clock',
+					appId: 'times',
 					title: alarm.label,
 					subtitle: 'Alarm',
 					appIcon: app?.icon,
 					appColor: app?.color,
-					href: '/clock',
+					href: '/times/clock/alarms',
 					score,
 					matchedField,
 				});
 			}
 		}
 
-		// Search timers by label
-		const timers = await db.table('timers').toArray();
+		// Search countdown timers by label
+		const timers = await db.table('timeCountdownTimers').toArray();
 		for (const timer of timers) {
 			if (timer.deletedAt || !timer.label) continue;
 			const { score, matchedField } = scoreRecord(
@@ -51,13 +51,13 @@ export const clockSearchProvider: SearchProvider = {
 			if (score > 0) {
 				results.push({
 					id: timer.id,
-					type: 'timer',
-					appId: 'clock',
+					type: 'countdownTimer',
+					appId: 'times',
 					title: timer.label,
 					subtitle: 'Timer',
 					appIcon: app?.icon,
 					appColor: app?.color,
-					href: '/clock',
+					href: '/times/clock/timers',
 					score,
 					matchedField,
 				});
@@ -65,7 +65,7 @@ export const clockSearchProvider: SearchProvider = {
 		}
 
 		// Search world clocks by city name
-		const worldClocks = await db.table('worldClocks').toArray();
+		const worldClocks = await db.table('timeWorldClocks').toArray();
 		for (const wc of worldClocks) {
 			if (wc.deletedAt) continue;
 			const { score, matchedField } = scoreRecord(
@@ -76,12 +76,12 @@ export const clockSearchProvider: SearchProvider = {
 				results.push({
 					id: wc.id,
 					type: 'worldClock',
-					appId: 'clock',
+					appId: 'times',
 					title: wc.cityName,
 					subtitle: 'Weltzeit',
 					appIcon: app?.icon,
 					appColor: app?.color,
-					href: '/clock',
+					href: '/times/clock/world-clock',
 					score,
 					matchedField,
 				});

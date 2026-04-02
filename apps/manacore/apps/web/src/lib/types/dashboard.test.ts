@@ -45,7 +45,7 @@ describe('WIDGET_REGISTRY', () => {
 			'zitare',
 			'picture',
 			'cards',
-			'clock',
+			'times',
 			'storage',
 			'mukke',
 			'presi',
@@ -103,7 +103,7 @@ describe('getWidgetMeta', () => {
 		const meta = getWidgetMeta('clock-timers');
 		expect(meta).toBeDefined();
 		expect(meta!.defaultSize).toBe('small');
-		expect(meta!.requiredBackend).toBe('clock');
+		expect(meta!.requiredBackend).toBe('times');
 		expect(meta!.allowMultiple).toBe(false);
 	});
 

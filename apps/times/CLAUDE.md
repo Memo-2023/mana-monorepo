@@ -1,12 +1,14 @@
 # Times
 
-Zeiterfassung & Timetracking - Dein Arbeitsrhythmus, messbar gemacht.
+Zeiterfassung, Uhren & Timer - Dein Arbeitsrhythmus, messbar gemacht.
 
 **Web App Port:** 5197
 
 ## Project Overview
 
-Times is a professional time tracking app with timer, manual entry, projects, clients, reports, templates, and guild (team) integration. Built local-first for offline capability and instant UI.
+Times is a combined time tracking and clock app with timer, manual entry, projects, clients, reports, templates, alarms, countdown timers, stopwatch, world clock, and guild (team) integration. Built local-first for offline capability and instant UI.
+
+The Clock app was consolidated into Times — all clock features live under `/clock/*` routes.
 
 ### Tech Stack
 
@@ -105,6 +107,35 @@ Recognized patterns:
 - Default billing rate with currency (EUR/CHF/USD/GBP)
 - Timer reminder and auto-stop configuration
 
+### Clock Features (under /clock/*)
+
+#### Alarms
+- Create, edit, delete alarms with time, label, repeat days
+- Quick preset alarms (06:00-22:00)
+- Sound selection, snooze configuration
+- Enable/disable toggle
+
+#### Countdown Timers
+- Create countdown timers with custom durations
+- Quick presets (1-60 min)
+- Start, pause, reset controls
+- Browser notifications on completion
+
+#### Stopwatch
+- Multiple parallel stopwatches with lap tracking
+- Color-coded, focus/unfocus individual stopwatches
+- Best/worst lap highlighting
+- Local-only (no sync)
+
+#### World Clock
+- Track time in multiple timezones
+- Interactive world map with city markers
+- 30+ popular timezone cities
+- Day/night indicator, offset display
+
+#### Pomodoro Presets
+- Classic (25/5/15), Short Focus (15/3/10), Deep Work (50/10/30)
+
 ### Keyboard Shortcuts
 | Key | Action |
 |-----|--------|
@@ -122,6 +153,9 @@ Recognized patterns:
 | tags | Entry categorization | name, order |
 | templates | Quick-start templates | usageCount, lastUsedAt |
 | settings | App configuration | (single record) |
+| alarms | Clock alarms/wecker | enabled, time |
+| countdownTimers | Countdown timers | status |
+| worldClocks | World clock cities | sortOrder, timezone |
 
 ## Project Structure
 
@@ -146,7 +180,13 @@ apps/times/
 │       │   │   │   ├── feedback/       # Feedback form
 │       │   │   │   ├── profile/        # User profile
 │       │   │   │   ├── themes/         # Theme selection
-│       │   │   │   └── help/           # Help & docs
+│       │   │   │   ├── help/           # Help & docs
+│       │   │   │   └── clock/          # Clock features (consolidated from Clock app)
+│       │   │   │       ├── +page.svelte    # Clock dashboard
+│       │   │   │       ├── alarms/         # Alarm management
+│       │   │   │       ├── timers/         # Countdown timers
+│       │   │   │       ├── stopwatch/      # Stopwatch with laps
+│       │   │   │       └── world-clock/    # World clock with map
 │       │   │   ├── +layout.svelte      # Root layout (i18n, theme, auth init)
 │       │   │   ├── +layout.ts          # SSR disabled
 │       │   │   ├── +error.svelte       # Error page
@@ -154,17 +194,23 @@ apps/times/
 │       │   │   └── offline/            # Offline fallback
 │       │   └── lib/
 │       │       ├── data/
-│       │       │   ├── local-store.ts  # 6 collections + typed accessors
+│       │       │   ├── local-store.ts  # 9 collections + typed accessors
 │       │       │   ├── queries.ts      # Live queries + pure helpers
 │       │       │   ├── queries.test.ts # Unit tests
-│       │       │   └── guest-seed.ts   # Demo data (2 clients, 3 projects, 5 entries)
+│       │       │   └── guest-seed.ts   # Demo data (2 clients, 3 projects, 5 entries, 1 alarm, 2 world clocks)
 │       │       ├── stores/
 │       │       │   ├── auth.svelte.ts  # Mana auth factory
 │       │       │   ├── timer.svelte.ts # Timer start/stop/resume/auto-save
 │       │       │   ├── view.svelte.ts  # View mode, filters, sort
 │       │       │   ├── theme.ts        # Theme store (ocean default)
 │       │       │   ├── navigation.ts   # Nav collapse state
-│       │       │   └── user-settings.svelte.ts
+│       │       │   ├── user-settings.svelte.ts
+│       │       │   ├── alarms.svelte.ts           # Clock: alarm CRUD
+│       │       │   ├── countdown-timers.svelte.ts  # Clock: countdown timer CRUD
+│       │       │   ├── world-clocks.svelte.ts      # Clock: world clock CRUD
+│       │       │   ├── stopwatch.svelte.ts         # Clock: stopwatch (local-only)
+│       │       │   ├── session-alarms.svelte.ts    # Clock: guest session alarms
+│       │       │   └── session-timers.svelte.ts    # Clock: guest session timers
 │       │       ├── components/
 │       │       │   ├── TimerCard.svelte       # Main timer widget
 │       │       │   ├── TimerIndicator.svelte  # Compact navbar indicator

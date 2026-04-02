@@ -120,7 +120,6 @@ export interface WidgetMeta {
 		| 'zitare'
 		| 'picture'
 		| 'cards'
-		| 'clock'
 		| 'storage'
 		| 'mukke'
 		| 'presi'
@@ -240,7 +239,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 		icon: '⏰',
 		defaultSize: 'small',
 		allowMultiple: false,
-		requiredBackend: 'clock',
+		requiredBackend: 'times',
 	},
 	{
 		type: 'storage-usage',

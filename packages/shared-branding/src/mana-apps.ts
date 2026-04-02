@@ -291,23 +291,7 @@ export const MANA_APPS: ManaApp[] = [
 		status: 'beta',
 		requiredTier: 'alpha',
 	},
-	{
-		id: 'clock',
-		name: 'Clock',
-		description: {
-			de: 'Uhren & Wecker',
-			en: 'Clocks & Alarms',
-		},
-		longDescription: {
-			de: 'Weltzeituhr, Wecker, Timer und stilvolle Uhren-Widgets in einer App.',
-			en: 'World clock, alarms, timers, and stylish clock widgets in one app.',
-		},
-		icon: APP_ICONS.clock,
-		color: '#f59e0b',
-		comingSoon: false,
-		status: 'beta',
-		requiredTier: 'beta',
-	},
+	// Clock consolidated into Times
 	{
 		id: 'todo',
 		name: 'Todo',
@@ -429,14 +413,14 @@ export const MANA_APPS: ManaApp[] = [
 	},
 	{
 		id: 'times',
-		name: 'Taktik',
+		name: 'Times',
 		description: {
-			de: 'Zeiterfassung & Timetracking',
-			en: 'Time Tracking',
+			de: 'Zeiterfassung, Uhren & Timer',
+			en: 'Time Tracking, Clocks & Timers',
 		},
 		longDescription: {
-			de: 'Professionelle Zeiterfassung mit Timer, Projekten, Kunden, Reports und Gilden-Integration.',
-			en: 'Professional time tracking with timer, projects, clients, reports, and guild integration.',
+			de: 'Professionelle Zeiterfassung mit Timer, Projekten, Kunden, Reports, Weltzeituhr, Wecker, Stoppuhr und Pomodoro.',
+			en: 'Professional time tracking with timer, projects, clients, reports, world clock, alarms, stopwatch, and pomodoro.',
 		},
 		icon: APP_ICONS.times,
 		color: '#f59e0b',

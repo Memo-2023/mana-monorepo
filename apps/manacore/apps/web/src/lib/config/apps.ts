@@ -421,43 +421,7 @@ export const appConfigs: Record<string, AppConfig> = {
 	// ============================================
 	// UTILITY APPS
 	// ============================================
-	clock: {
-		name: 'clock',
-		displayName: 'ManaClock',
-		tagline: 'Uhren & Timer',
-		description: 'Weltzeituhr, Wecker, Timer und stilvolle Uhren-Widgets in einer App.',
-		logoEmoji: '⏰',
-		primaryColor: '#F59E0B',
-		accentColor: '#FBBF24',
-		features: [
-			{
-				icon: '🌍',
-				title: 'Weltzeituhr',
-				description: 'Zeitzonen weltweit im Blick',
-				color: '#0EA5E9',
-			},
-			{
-				icon: '⏰',
-				title: 'Wecker',
-				description: 'Flexible Alarm-Einstellungen',
-				color: '#F59E0B',
-			},
-			{
-				icon: '⏱️',
-				title: 'Timer & Stoppuhr',
-				description: 'Für alle Timing-Aufgaben',
-				color: '#10B981',
-			},
-			{
-				icon: '🍅',
-				title: 'Pomodoro',
-				description: 'Fokussiertes Arbeiten',
-				color: '#EF4444',
-			},
-		],
-		dashboardRoute: '/dashboard',
-		website: 'https://clock.mana.how',
-	},
+	// clock: consolidated into times
 
 	zitare: {
 		name: 'zitare',

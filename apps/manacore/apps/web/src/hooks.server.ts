@@ -30,7 +30,6 @@ const APP_SUBDOMAINS = new Set([
 	'todo',
 	'chat',
 	'calendar',
-	'clock',
 	'contacts',
 	'zitare',
 	'skilltree',

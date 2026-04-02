@@ -43,7 +43,6 @@
 	},
 	"dependencies": {
 		"@calc/shared": "workspace:*",
-		"@clock/shared": "workspace:*",
 		"@manacore/credits": "workspace:^",
 		"@manacore/feedback": "workspace:*",
 		"@manacore/help": "workspace:*",

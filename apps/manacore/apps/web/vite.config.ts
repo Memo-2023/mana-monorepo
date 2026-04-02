@@ -6,7 +6,7 @@ import { createPWAConfig } from '@manacore/shared-pwa';
 import { MANACORE_SHARED_PACKAGES, getBuildDefines } from '@manacore/shared-vite-config';
 
 /** App-specific shared packages used by migrated modules */
-const APP_SHARED_PACKAGES = ['@clock/shared', '@zitare/content', '@calc/shared'];
+const APP_SHARED_PACKAGES = ['@zitare/content', '@calc/shared'];
 
 export default defineConfig({
 	plugins: [

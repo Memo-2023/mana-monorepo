@@ -22,6 +22,9 @@
 		useAllTags,
 		useAllTemplates,
 		useSettings,
+		useAllAlarms,
+		useAllCountdownTimers,
+		useAllWorldClocks,
 	} from '$lib/data/queries';
 
 	let { children } = $props();
@@ -30,13 +33,18 @@
 	let initialized = $state(false);
 	let showGuestWelcome = $state(false);
 
-	// Live queries
+	// Live queries — Time Tracking
 	const allClients = useAllClients();
 	const allProjects = useAllProjects();
 	const allTimeEntries = useAllTimeEntries();
 	const allTags = useAllTags();
 	const allTemplates = useAllTemplates();
 	const settings = useSettings();
+
+	// Live queries — Clock
+	const allAlarms = useAllAlarms();
+	const allCountdownTimers = useAllCountdownTimers();
+	const allWorldClocks = useAllWorldClocks();
 
 	// Provide data to child components
 	setContext('clients', allClients);
@@ -45,6 +53,9 @@
 	setContext('tags', allTags);
 	setContext('templates', allTemplates);
 	setContext('settings', settings);
+	setContext('alarms', allAlarms);
+	setContext('countdownTimers', allCountdownTimers);
+	setContext('worldClocks', allWorldClocks);
 
 	async function handleAuthReady() {
 		await timesStore.initialize();
@@ -69,6 +80,11 @@
 		{ href: '/clients', label: $_('nav.clients'), icon: 'buildings' },
 		{ href: '/reports', label: $_('nav.reports'), icon: 'chart-bar' },
 		{ href: '/templates', label: $_('nav.templates'), icon: 'bookmark' },
+		{ href: '/clock', label: 'Clock', icon: 'clock', separator: true },
+		{ href: '/clock/alarms', label: $_('nav.alarms'), icon: 'bell' },
+		{ href: '/clock/timers', label: $_('nav.countdown'), icon: 'timer' },
+		{ href: '/clock/stopwatch', label: $_('nav.stopwatch'), icon: 'hourglass' },
+		{ href: '/clock/world-clock', label: $_('nav.worldClock'), icon: 'globe' },
 		{ href: '/settings', label: $_('nav.settings'), icon: 'settings' },
 		{ href: '/mana', label: 'Mana', icon: 'star' },
 		{ href: '/feedback', label: 'Feedback', icon: 'chat' },
@@ -111,7 +127,7 @@
 
 					<!-- Nav Items -->
 					<div class="hidden items-center gap-1 md:flex">
-						{#each navItems.slice(0, 5) as item}
+						{#each navItems.slice(0, 11) as item}
 							<a
 								href={item.href}
 								class="rounded-lg px-3 py-1.5 text-sm transition-colors {$page.url.pathname ===
@@ -158,7 +174,7 @@
 
 				<!-- Mobile nav -->
 				<div class="flex gap-1 overflow-x-auto px-4 pb-2 md:hidden">
-					{#each navItems.slice(0, 5) as item}
+					{#each navItems.slice(0, 11) as item}
 						<a
 							href={item.href}
 							class="shrink-0 rounded-full px-3 py-1 text-xs transition-colors {$page.url

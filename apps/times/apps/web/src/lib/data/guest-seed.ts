@@ -10,6 +10,8 @@ import type {
 	LocalTimeEntry,
 	LocalTag,
 	LocalSettings,
+	LocalAlarm,
+	LocalWorldClock,
 } from './local-store';
 
 const DEMO_CLIENT_ID = 'demo-client-acme';
@@ -179,5 +181,35 @@ export const guestSettings: LocalSettings[] = [
 		weekStartsOn: 1,
 		timerReminderMinutes: 0,
 		autoStopTimerHours: 0,
+	},
+];
+
+// ─── Clock Guest Seed ───────────────────────────────────────
+
+export const guestAlarms: LocalAlarm[] = [
+	{
+		id: 'alarm-weekday-morning',
+		label: 'Wecker Wochentags',
+		time: '07:00',
+		enabled: true,
+		repeatDays: [1, 2, 3, 4, 5],
+		snoozeMinutes: 5,
+		sound: null,
+		vibrate: true,
+	},
+];
+
+export const guestWorldClocks: LocalWorldClock[] = [
+	{
+		id: 'wc-new-york',
+		timezone: 'America/New_York',
+		cityName: 'New York',
+		sortOrder: 0,
+	},
+	{
+		id: 'wc-tokyo',
+		timezone: 'Asia/Tokyo',
+		cityName: 'Tokio',
+		sortOrder: 1,
 	},
 ];

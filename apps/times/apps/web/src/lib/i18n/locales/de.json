@@ -11,7 +11,11 @@
 		"clients": "Kunden",
 		"reports": "Reports",
 		"settings": "Einstellungen",
-		"templates": "Vorlagen"
+		"templates": "Vorlagen",
+		"alarms": "Wecker",
+		"countdown": "Countdown",
+		"stopwatch": "Stoppuhr",
+		"worldClock": "Weltuhr"
 	},
 	"timer": {
 		"start": "Timer starten",
@@ -130,6 +134,46 @@
 		"total": "Gesamt",
 		"hours": "Stunden",
 		"minutes": "Minuten"
+	},
+	"clock": {
+		"alarm": {
+			"title": "Wecker",
+			"custom": "Eigene Wecker",
+			"edit": "Wecker bearbeiten",
+			"time": "Uhrzeit",
+			"label": "Bezeichnung",
+			"repeat": "Wiederholung",
+			"sound": "Ton",
+			"snooze": "Schlummern"
+		},
+		"timer": {
+			"title": "Countdown Timer",
+			"finished": "Timer abgelaufen!"
+		},
+		"stopwatch": {
+			"title": "Stoppuhr",
+			"new": "Neue Stoppuhr",
+			"start": "Start",
+			"stop": "Stopp",
+			"continue": "Weiter",
+			"reset": "Reset",
+			"lap": "Runde",
+			"laps": "Runden",
+			"total": "Gesamt",
+			"best": "Beste",
+			"worst": "Langsamste",
+			"noStopwatches": "Keine Stoppuhren",
+			"noStopwatchesDescription": "Erstelle eine neue Stoppuhr um Zeit zu messen.",
+			"startFirst": "Erste Stoppuhr starten",
+			"otherStopwatches": "Weitere Stoppuhren"
+		},
+		"worldClock": {
+			"title": "Weltzeituhr",
+			"add": "Stadt hinzufügen",
+			"search": "Stadt suchen...",
+			"noClocks": "Keine Weltuhren hinzugefügt",
+			"same": "Gleiche Zeit"
+		}
 	},
 	"error": {
 		"notFound": "Seite nicht gefunden",
