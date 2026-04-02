@@ -235,7 +235,7 @@
 	/* Minimized tabs */
 	.minimized-tabs {
 		position: fixed;
-		bottom: 4.5rem;
+		bottom: var(--bottom-chrome-height, 4.5rem);
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 91;

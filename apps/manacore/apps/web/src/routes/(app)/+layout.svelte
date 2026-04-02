@@ -66,6 +66,17 @@
 	let isCollapsed = $state(false);
 	let showShortcuts = $state(false);
 	let showOnboarding = $state(false);
+	let bottomStackHeight = $state(0);
+
+	// Expose bottom stack height as CSS custom property for components outside the stack
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			document.documentElement.style.setProperty(
+				'--bottom-chrome-height',
+				`${bottomStackHeight}px`
+			);
+		}
+	});
 
 	// ── Theme ───────────────────────────────────────────────
 	let isDark = $derived(theme.isDark);
@@ -376,7 +387,7 @@
 
 	<div class="min-h-screen bg-background">
 		<!-- Bottom Stack: all fixed-bottom elements in one flex container -->
-		<div class="bottom-stack">
+		<div class="bottom-stack" bind:clientHeight={bottomStackHeight}>
 			<!-- QuickInputBar + toggle button row -->
 			<div class="bottom-stack-row">
 				<QuickInputBar
@@ -467,7 +478,7 @@
 		<DragPreview />
 
 		<!-- Main content -->
-		<main class="pb-24">
+		<main style="padding-bottom: calc(var(--bottom-chrome-height, 6rem) + 2rem)">
 			<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 				{@render children()}
 			</div>
@@ -483,7 +494,7 @@
 
 		<!-- Guest notifications (nudge) -->
 		{#if guestMode && guestMode.notifications.length > 0}
-			<div class="fixed bottom-20 left-1/2 z-50 -translate-x-1/2">
+			<div class="notification-float">
 				<NotificationBar notifications={guestMode.notifications} />
 			</div>
 		{/if}
@@ -569,5 +580,14 @@
 
 	.pill-nav-toggle-icon.collapsed {
 		transform: rotate(180deg);
+	}
+
+	.notification-float {
+		position: fixed;
+		bottom: var(--bottom-chrome-height, 8rem);
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 100;
+		pointer-events: auto;
 	}
 </style>
