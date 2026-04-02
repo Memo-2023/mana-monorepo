@@ -19,6 +19,7 @@
 	import AgendaView from '$lib/modules/calendar/components/AgendaView.svelte';
 	import EventDetailModal from '$lib/modules/calendar/components/EventDetailModal.svelte';
 	import EventForm from '$lib/modules/calendar/components/EventForm.svelte';
+	import QuickEventPopover from '$lib/modules/calendar/components/QuickEventPopover.svelte';
 
 	import { ShareNetwork } from '@manacore/shared-icons';
 	import { ShareModal } from '@manacore/shared-uload';
@@ -70,6 +71,12 @@
 	let createStartTime = $state<Date | null>(null);
 	let createEndTime = $state<Date | null>(null);
 
+	// Quick create popover (inline in calendar grid)
+	let showQuickCreate = $state(false);
+	let quickCreateStart = $state<Date>(new Date());
+	let quickCreateEnd = $state<Date>(new Date());
+	let quickCreatePosition = $state({ x: 0, y: 0 });
+
 	function handleEventClick(event: CalendarEvent) {
 		selectedEvent = event;
 	}
@@ -80,9 +87,39 @@
 		showCreateForm = true;
 	}
 
-	function handleQuickCreate(startTime: Date, endTime: Date) {
-		createStartTime = startTime;
-		createEndTime = endTime;
+	function handleQuickCreate(startTime: Date, endTime: Date, position: { x: number; y: number }) {
+		quickCreateStart = startTime;
+		quickCreateEnd = endTime;
+		quickCreatePosition = position;
+		showQuickCreate = true;
+	}
+
+	function handleQuickSave(data: {
+		title: string;
+		calendarId: string;
+		startTime: string;
+		endTime: string;
+		isAllDay: boolean;
+		location: string | null;
+	}) {
+		eventsStore.createEvent({
+			calendarId: data.calendarId,
+			title: data.title,
+			description: null,
+			startTime: data.startTime,
+			endTime: data.endTime,
+			isAllDay: data.isAllDay,
+			location: data.location,
+			recurrenceRule: null,
+		});
+		showQuickCreate = false;
+	}
+
+	function expandQuickCreate() {
+		// Transfer quick create data to full modal
+		createStartTime = quickCreateStart;
+		createEndTime = quickCreateEnd;
+		showQuickCreate = false;
 		showCreateForm = true;
 	}
 
@@ -139,12 +176,24 @@
 	<DateStrip />
 </div>
 
+<!-- Quick Event Popover (inline in calendar grid) -->
+{#if showQuickCreate}
+	<QuickEventPopover
+		startTime={quickCreateStart}
+		endTime={quickCreateEnd}
+		position={quickCreatePosition}
+		onSave={handleQuickSave}
+		onClose={() => (showQuickCreate = false)}
+		onExpand={expandQuickCreate}
+	/>
+{/if}
+
 <!-- Event Detail Modal -->
 {#if selectedEvent}
 	<EventDetailModal event={selectedEvent} onClose={() => (selectedEvent = null)} />
 {/if}
 
-<!-- Create Event Modal -->
+<!-- Create Event Modal (full form, via header button or "Weitere Optionen") -->
 {#if showCreateForm}
 	<div class="modal-backdrop" role="presentation">
 		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->

@@ -33,7 +33,7 @@
 
 	interface Props {
 		onEventClick?: (event: CalendarEvent) => void;
-		onQuickCreate?: (startTime: Date, endTime: Date) => void;
+		onQuickCreate?: (startTime: Date, endTime: Date, position: { x: number; y: number }) => void;
 	}
 
 	let { onEventClick, onQuickCreate }: Props = $props();
@@ -85,9 +85,9 @@
 		hourHeight: HOUR_HEIGHT_PX,
 		minutesToPercent,
 		isOtherOperationActive: () => eventDragDrop.isDragging || eventDragDrop.isResizing,
-		onCreateEnd: (startTime, endTime, _position) => {
+		onCreateEnd: (startTime, endTime, position) => {
 			if (onQuickCreate) {
-				onQuickCreate(startTime, endTime);
+				onQuickCreate(startTime, endTime, position);
 			}
 		},
 	}));
