@@ -1,5 +1,5 @@
 <!--
-  Moodlit — Split-Screen AppView
+  Moodlit — Workbench ListView
   Ambient mood selector with color preview.
 -->
 <script lang="ts">

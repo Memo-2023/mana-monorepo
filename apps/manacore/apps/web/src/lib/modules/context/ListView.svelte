@@ -1,5 +1,5 @@
 <!--
-  Context — Split-Screen AppView
+  Context — Workbench ListView
   Spaces and recent documents.
 -->
 <script lang="ts">

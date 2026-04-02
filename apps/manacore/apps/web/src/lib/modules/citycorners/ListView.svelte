@@ -1,5 +1,5 @@
 <!--
-  CityCorners — Split-Screen AppView
+  CityCorners — Workbench ListView
   Locations list grouped by category with favorites.
 -->
 <script lang="ts">

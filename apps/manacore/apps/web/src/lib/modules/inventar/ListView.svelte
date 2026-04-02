@@ -1,5 +1,5 @@
 <!--
-  Inventar — Split-Screen AppView
+  Inventar — Workbench ListView
   Collections and items overview.
 -->
 <script lang="ts">

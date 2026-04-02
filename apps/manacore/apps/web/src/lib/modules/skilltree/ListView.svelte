@@ -1,5 +1,5 @@
 <!--
-  SkillTree — Split-Screen AppView
+  SkillTree — Workbench ListView
   Skills overview with XP and levels.
 -->
 <script lang="ts">

@@ -2,34 +2,34 @@
  * Split-Screen App Registry
  *
  * Lazy-import registry for all app modules.
- * Each app has an AppView.svelte component that renders in split-screen.
+ * Each app has an ListView.svelte component that renders in split-screen.
  */
 
 const APP_COMPONENTS = {
-	todo: () => import('$lib/modules/todo/AppView.svelte'),
-	calendar: () => import('$lib/modules/calendar/AppView.svelte'),
-	contacts: () => import('$lib/modules/contacts/AppView.svelte'),
-	chat: () => import('$lib/modules/chat/AppView.svelte'),
-	picture: () => import('$lib/modules/picture/AppView.svelte'),
-	cards: () => import('$lib/modules/cards/AppView.svelte'),
-	zitare: () => import('$lib/modules/zitare/AppView.svelte'),
-	mukke: () => import('$lib/modules/mukke/AppView.svelte'),
-	storage: () => import('$lib/modules/storage/AppView.svelte'),
-	presi: () => import('$lib/modules/presi/AppView.svelte'),
-	inventar: () => import('$lib/modules/inventar/AppView.svelte'),
-	photos: () => import('$lib/modules/photos/AppView.svelte'),
-	skilltree: () => import('$lib/modules/skilltree/AppView.svelte'),
-	citycorners: () => import('$lib/modules/citycorners/AppView.svelte'),
-	times: () => import('$lib/modules/times/AppView.svelte'),
-	context: () => import('$lib/modules/context/AppView.svelte'),
-	questions: () => import('$lib/modules/questions/AppView.svelte'),
-	nutriphi: () => import('$lib/modules/nutriphi/AppView.svelte'),
-	planta: () => import('$lib/modules/planta/AppView.svelte'),
-	uload: () => import('$lib/modules/uload/AppView.svelte'),
-	calc: () => import('$lib/modules/calc/AppView.svelte'),
-	moodlit: () => import('$lib/modules/moodlit/AppView.svelte'),
-	memoro: () => import('$lib/modules/memoro/AppView.svelte'),
-	playground: () => import('$lib/modules/playground/AppView.svelte'),
+	todo: () => import('$lib/modules/todo/ListView.svelte'),
+	calendar: () => import('$lib/modules/calendar/ListView.svelte'),
+	contacts: () => import('$lib/modules/contacts/ListView.svelte'),
+	chat: () => import('$lib/modules/chat/ListView.svelte'),
+	picture: () => import('$lib/modules/picture/ListView.svelte'),
+	cards: () => import('$lib/modules/cards/ListView.svelte'),
+	zitare: () => import('$lib/modules/zitare/ListView.svelte'),
+	mukke: () => import('$lib/modules/mukke/ListView.svelte'),
+	storage: () => import('$lib/modules/storage/ListView.svelte'),
+	presi: () => import('$lib/modules/presi/ListView.svelte'),
+	inventar: () => import('$lib/modules/inventar/ListView.svelte'),
+	photos: () => import('$lib/modules/photos/ListView.svelte'),
+	skilltree: () => import('$lib/modules/skilltree/ListView.svelte'),
+	citycorners: () => import('$lib/modules/citycorners/ListView.svelte'),
+	times: () => import('$lib/modules/times/ListView.svelte'),
+	context: () => import('$lib/modules/context/ListView.svelte'),
+	questions: () => import('$lib/modules/questions/ListView.svelte'),
+	nutriphi: () => import('$lib/modules/nutriphi/ListView.svelte'),
+	planta: () => import('$lib/modules/planta/ListView.svelte'),
+	uload: () => import('$lib/modules/uload/ListView.svelte'),
+	calc: () => import('$lib/modules/calc/ListView.svelte'),
+	moodlit: () => import('$lib/modules/moodlit/ListView.svelte'),
+	memoro: () => import('$lib/modules/memoro/ListView.svelte'),
+	playground: () => import('$lib/modules/playground/ListView.svelte'),
 };
 
 export type SplitAppId = keyof typeof APP_COMPONENTS;

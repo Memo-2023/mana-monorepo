@@ -1,5 +1,5 @@
 <!--
-  Questions — Split-Screen AppView
+  Questions — Workbench ListView
   Research questions list with status badges.
 -->
 <script lang="ts">

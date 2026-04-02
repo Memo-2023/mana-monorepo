@@ -1,5 +1,5 @@
 <!--
-  Contacts — Workbench AppView (List View)
+  Contacts — Workbench ListView
   Contact list with search + quick create.
   Clicking a contact opens the detail view.
 -->

@@ -1,5 +1,5 @@
 <!--
-  Storage — Split-Screen AppView
+  Storage — Workbench ListView
   File browser with recent files and folders.
 -->
 <script lang="ts">

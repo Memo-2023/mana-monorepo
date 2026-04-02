@@ -1,5 +1,5 @@
 <!--
-  Calendar — Workbench AppView (List View)
+  Calendar — Workbench ListView
   Mini week view with today's events + quick event creation.
   Clicking an event opens the detail view.
 -->

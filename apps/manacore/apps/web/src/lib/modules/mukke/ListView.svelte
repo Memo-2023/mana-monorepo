@@ -1,5 +1,5 @@
 <!--
-  Mukke — Split-Screen AppView
+  Mukke — Workbench ListView
   Song library with recent plays and playlists.
 -->
 <script lang="ts">

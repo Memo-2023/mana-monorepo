@@ -1,5 +1,5 @@
 <!--
-  Chat — Split-Screen AppView
+  Chat — Workbench ListView
   Recent conversations list.
 -->
 <script lang="ts">

@@ -1,5 +1,5 @@
 <!--
-  NutriPhi — Split-Screen AppView
+  NutriPhi — Workbench ListView
   Today's nutrition progress with meal log.
 -->
 <script lang="ts">

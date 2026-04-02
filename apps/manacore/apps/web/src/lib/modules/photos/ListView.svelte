@@ -1,5 +1,5 @@
 <!--
-  Photos — Split-Screen AppView
+  Photos — Workbench ListView
   Photo albums and recent uploads.
 -->
 <script lang="ts">

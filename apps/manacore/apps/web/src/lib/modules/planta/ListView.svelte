@@ -1,5 +1,5 @@
 <!--
-  Planta — Split-Screen AppView
+  Planta — Workbench ListView
   Plant overview with watering schedule.
 -->
 <script lang="ts">

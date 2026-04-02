@@ -1,5 +1,5 @@
 <!--
-  uLoad — Split-Screen AppView
+  uLoad — Workbench ListView
   Short links list with click counts.
 -->
 <script lang="ts">

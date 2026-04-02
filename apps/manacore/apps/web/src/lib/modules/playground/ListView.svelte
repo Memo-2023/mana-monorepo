@@ -1,5 +1,5 @@
 <!--
-  Playground — Split-Screen AppView
+  Playground — Workbench ListView
   Minimal LLM prompt interface with model selector.
 -->
 <script lang="ts">

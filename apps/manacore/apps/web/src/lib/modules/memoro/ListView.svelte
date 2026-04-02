@@ -1,5 +1,5 @@
 <!--
-  Memoro — Split-Screen AppView
+  Memoro — Workbench ListView
   Recent memos with transcription status.
 -->
 <script lang="ts">

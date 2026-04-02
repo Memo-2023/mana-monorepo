@@ -1,5 +1,5 @@
 <!--
-  Todo — Workbench AppView (List View)
+  Todo — Workbench ListView
   Compact task list with quick add, filter by inbox/today/overdue.
   Clicking a task opens the detail view; checkbox toggles completion.
 -->

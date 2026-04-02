@@ -1,5 +1,5 @@
 <!--
-  Picture — Split-Screen AppView
+  Picture — Workbench ListView
   Recent images grid with favorites.
 -->
 <script lang="ts">

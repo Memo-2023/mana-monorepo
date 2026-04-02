@@ -1,5 +1,5 @@
 <!--
-  Calc — Split-Screen AppView
+  Calc — Workbench ListView
   Simple calculator with expression input and history.
 -->
 <script lang="ts">

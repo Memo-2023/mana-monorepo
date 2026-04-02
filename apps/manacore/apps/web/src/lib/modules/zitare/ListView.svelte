@@ -1,5 +1,5 @@
 <!--
-  Zitare — Split-Screen AppView
+  Zitare — Workbench ListView
   Quote of the day with favorites count.
 -->
 <script lang="ts">

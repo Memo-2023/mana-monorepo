@@ -1,5 +1,5 @@
 <!--
-  Times — Split-Screen AppView
+  Times — Workbench ListView
   Today's time entries with running timer and daily total.
 -->
 <script lang="ts">

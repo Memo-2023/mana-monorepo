@@ -1,22 +1,22 @@
 <!--
-  Cards — Split-Screen AppView
-  Deck list with card counts and study info.
+  Presi — Workbench ListView
+  Presentation decks list with slide count.
 -->
 <script lang="ts">
 	import { liveQuery } from 'dexie';
 	import { db } from '$lib/data/database';
-	import type { LocalDeck, LocalCard } from './types';
+	import type { LocalDeck, LocalSlide } from './types';
 	import type { ViewProps } from '$lib/components/workbench/nav-stack';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
 	let decks = $state<LocalDeck[]>([]);
-	let cards = $state<LocalCard[]>([]);
+	let slides = $state<LocalSlide[]>([]);
 
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			return db
-				.table<LocalDeck>('decks')
+				.table<LocalDeck>('presiDecks')
 				.toArray()
 				.then((all) => all.filter((d) => !d.deletedAt));
 		}).subscribe((val) => {
@@ -28,30 +28,22 @@
 	$effect(() => {
 		const sub = liveQuery(async () => {
 			return db
-				.table<LocalCard>('cards')
+				.table<LocalSlide>('slides')
 				.toArray()
-				.then((all) => all.filter((c) => !c.deletedAt));
+				.then((all) => all.filter((s) => !s.deletedAt));
 		}).subscribe((val) => {
-			cards = val ?? [];
+			slides = val ?? [];
 		});
 		return () => sub.unsubscribe();
 	});
 
-	const dueForReview = $derived(() => {
-		const now = new Date().toISOString();
-		return cards.filter((c) => c.nextReview && c.nextReview <= now).length;
-	});
-
-	function cardsInDeck(deckId: string): number {
-		return cards.filter((c) => c.deckId === deckId).length;
+	function slideCount(deckId: string): number {
+		return slides.filter((s) => s.deckId === deckId).length;
 	}
 </script>
 
 <div class="flex h-full flex-col gap-3 p-4">
-	<div class="flex items-center justify-between">
-		<p class="text-xs text-white/40">{decks.length} Decks</p>
-		<p class="text-xs text-amber-400/70">{dueForReview()} fällig</p>
-	</div>
+	<p class="text-xs text-white/40">{decks.length} Präsentationen</p>
 
 	<div class="flex-1 overflow-auto">
 		{#each decks as deck (deck.id)}
@@ -64,19 +56,21 @@
 					})}
 				class="mb-2 w-full rounded-md border border-white/10 px-3 py-2.5 text-left transition-colors hover:bg-white/5"
 			>
-				<div class="flex items-center gap-2">
-					<div class="h-3 w-3 rounded" style="background: {deck.color}"></div>
-					<p class="flex-1 truncate text-sm font-medium text-white/80">{deck.name}</p>
-					<span class="text-xs text-white/40">{cardsInDeck(deck.id)}</span>
+				<p class="truncate text-sm font-medium text-white/80">{deck.title}</p>
+				<div class="mt-1 flex items-center gap-2 text-xs text-white/40">
+					<span>{slideCount(deck.id)} Folien</span>
+					{#if deck.isPublic}
+						<span class="rounded bg-white/10 px-1.5 py-0.5 text-[10px]">Öffentlich</span>
+					{/if}
 				</div>
 				{#if deck.description}
-					<p class="mt-1 truncate text-xs text-white/40">{deck.description}</p>
+					<p class="mt-1 truncate text-xs text-white/30">{deck.description}</p>
 				{/if}
 			</button>
 		{/each}
 
 		{#if decks.length === 0}
-			<p class="py-8 text-center text-sm text-white/30">Keine Decks</p>
+			<p class="py-8 text-center text-sm text-white/30">Keine Präsentationen</p>
 		{/if}
 	</div>
 </div>
