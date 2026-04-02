@@ -1,5 +1,5 @@
 /**
- * Planta Tags — Uses shared global tags + module-specific junction table.
+ * Utimes Tags — Uses shared global tags + module-specific junction table.
  */
 
 import { db } from '$lib/data/database';
@@ -11,10 +11,9 @@ export {
 	getTagById,
 	getTagsByIds,
 	getTagColor,
-	getTagsByGroup,
 } from '@manacore/shared-stores';
 
-export const plantTagOps = createTagLinkOps({
-	table: () => db.table('plantTags'),
-	entityIdField: 'plantId',
+export const entryTagOps = createTagLinkOps({
+	table: () => db.table('entryTags'),
+	entityIdField: 'entryId',
 });
