@@ -15,6 +15,7 @@ COPY apps/calc/packages/shared ./apps/calc/packages/shared
 COPY apps/clock/packages/shared ./apps/clock/packages/shared
 COPY apps/zitare/packages/content ./apps/zitare/packages/content
 COPY packages/shared-uload ./packages/shared-uload
+COPY packages/local-llm ./packages/local-llm
 
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --no-frozen-lockfile --ignore-scripts
