@@ -268,18 +268,25 @@
 
 <style>
 	.date-strip-wrapper {
-		width: 100%;
-		flex-shrink: 0;
+		position: fixed;
+		bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+		left: 0;
+		right: 0;
+		z-index: 48;
+		pointer-events: none;
 	}
 
 	.date-strip-container {
 		display: flex;
 		flex-direction: column;
-		background: hsl(var(--color-card));
-		border-bottom: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card) / 0.92);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border-top: 1px solid hsl(var(--color-border));
 		padding: 0.375rem 0;
 		width: 100%;
 		overflow: hidden;
+		pointer-events: auto;
 	}
 
 	.month-header {

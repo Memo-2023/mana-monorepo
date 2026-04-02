@@ -17,7 +17,6 @@
 	import WeekView from '$lib/modules/calendar/components/WeekView.svelte';
 	import MonthView from '$lib/modules/calendar/components/MonthView.svelte';
 	import AgendaView from '$lib/modules/calendar/components/AgendaView.svelte';
-	import MiniCalendar from '$lib/modules/calendar/components/MiniCalendar.svelte';
 	import EventDetailModal from '$lib/modules/calendar/components/EventDetailModal.svelte';
 	import EventForm from '$lib/modules/calendar/components/EventForm.svelte';
 
@@ -119,53 +118,25 @@
 	<!-- Header -->
 	<CalendarHeader onNewEvent={handleNewEvent} />
 
-	<!-- Date Strip -->
-	<DateStrip />
-
-	<!-- Main content area -->
+	<!-- Calendar view (full width) -->
 	<div class="calendar-content">
-		<!-- Sidebar (desktop only) -->
-		<aside class="calendar-sidebar">
-			<MiniCalendar
-				selectedDate={calendarViewStore.currentDate}
-				onDateSelect={(date) => {
-					calendarViewStore.setDate(date);
-					if (calendarViewStore.viewType === 'month') {
-						calendarViewStore.setViewType('week');
-					}
+		{#if calendarViewStore.viewType === 'week'}
+			<WeekView onEventClick={handleEventClick} onQuickCreate={handleQuickCreate} />
+		{:else if calendarViewStore.viewType === 'month'}
+			<MonthView
+				onEventClick={handleEventClick}
+				onDayClick={(day) => {
+					calendarViewStore.setDate(day);
+					calendarViewStore.setViewType('week');
 				}}
 			/>
-
-			<!-- Calendar list -->
-			<div class="sidebar-section">
-				<h3 class="sidebar-title">Kalender</h3>
-				{#each calendarsCtx.value as cal (cal.id)}
-					<div class="calendar-item">
-						<div class="calendar-dot" style="background-color: {cal.color}"></div>
-						<span class="calendar-name" class:muted={!cal.isVisible}>{cal.name}</span>
-					</div>
-				{/each}
-				<a href="/calendar/calendars" class="sidebar-link">Verwalten</a>
-			</div>
-		</aside>
-
-		<!-- Calendar view -->
-		<main class="calendar-main">
-			{#if calendarViewStore.viewType === 'week'}
-				<WeekView onEventClick={handleEventClick} onQuickCreate={handleQuickCreate} />
-			{:else if calendarViewStore.viewType === 'month'}
-				<MonthView
-					onEventClick={handleEventClick}
-					onDayClick={(day) => {
-						calendarViewStore.setDate(day);
-						calendarViewStore.setViewType('week');
-					}}
-				/>
-			{:else}
-				<AgendaView onEventClick={handleEventClick} />
-			{/if}
-		</main>
+		{:else}
+			<AgendaView onEventClick={handleEventClick} />
+		{/if}
 	</div>
+
+	<!-- Floating Date Strip (above PillNav/InputBar) -->
+	<DateStrip />
 </div>
 
 <!-- Event Detail Modal -->
@@ -214,81 +185,7 @@
 
 	.calendar-content {
 		flex: 1;
-		display: flex;
 		min-height: 0;
-	}
-
-	.calendar-sidebar {
-		width: 240px;
-		flex-shrink: 0;
-		border-right: 1px solid hsl(var(--color-border));
-		padding: 0.75rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		overflow-y: auto;
-	}
-
-	/* Hide sidebar on small screens */
-	@media (max-width: 768px) {
-		.calendar-sidebar {
-			display: none;
-		}
-	}
-
-	.sidebar-section {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-	}
-
-	.sidebar-title {
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: hsl(var(--color-muted-foreground));
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin: 0;
-	}
-
-	.calendar-item {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.25rem 0;
-	}
-
-	.calendar-dot {
-		width: 10px;
-		height: 10px;
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
-
-	.calendar-name {
-		font-size: 0.8125rem;
-		color: hsl(var(--color-foreground));
-	}
-
-	.calendar-name.muted {
-		opacity: 0.5;
-		text-decoration: line-through;
-	}
-
-	.sidebar-link {
-		font-size: 0.75rem;
-		color: hsl(var(--color-primary));
-		text-decoration: none;
-		margin-top: 0.25rem;
-	}
-
-	.sidebar-link:hover {
-		text-decoration: underline;
-	}
-
-	.calendar-main {
-		flex: 1;
-		min-width: 0;
 		overflow: hidden;
 	}
 
