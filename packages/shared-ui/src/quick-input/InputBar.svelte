@@ -79,6 +79,8 @@
 		highlightPatterns?: HighlightPattern[];
 		/** Locale for syntax highlighting keywords (e.g., 'de', 'en'). Default: 'de'. */
 		locale?: string;
+		/** Use 'static' when inside a flex container (bottom-stack pattern). Default: 'fixed'. */
+		positioning?: 'fixed' | 'static';
 	}
 
 	let {
@@ -107,6 +109,7 @@
 		leftAction,
 		highlightPatterns,
 		locale = 'de',
+		positioning = 'fixed',
 	}: Props = $props();
 
 	// Use settings for autoFocus
@@ -382,6 +385,7 @@
 	class="quick-input-bar"
 	class:has-fab-right={hasFabRight}
 	class:has-fab-left={hasFabLeft}
+	class:quick-input-static={positioning === 'static'}
 	style="--bottom-offset: {bottomOffset}"
 >
 	<!-- Results Panel (above input) -->
@@ -564,6 +568,12 @@
 		/* Fixed height to prevent layout shift when results appear */
 		height: 72px;
 		transition: bottom 0.3s ease;
+	}
+
+	.quick-input-static {
+		position: relative;
+		bottom: auto;
+		z-index: auto;
 	}
 
 	/* Leave space for FAB on mobile */

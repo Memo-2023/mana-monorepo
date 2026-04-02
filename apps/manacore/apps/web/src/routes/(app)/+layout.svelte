@@ -375,89 +375,93 @@
 	{/if}
 
 	<div class="min-h-screen bg-background">
-		<!-- Pill Navigation -->
-		<PillNavigation
-			items={navItems}
-			currentPath={$page.url.pathname}
-			appName="ManaCore"
-			homeRoute="/"
-			onLogout={handleSignOut}
-			onToggleTheme={handleToggleTheme}
-			{isDark}
-			{isCollapsed}
-			onCollapsedChange={handleCollapsedChange}
-			showThemeToggle={true}
-			showThemeVariants={true}
-			{themeVariantItems}
-			{currentThemeVariantLabel}
-			themeMode={theme.mode}
-			onThemeModeChange={handleThemeModeChange}
-			showLanguageSwitcher={true}
-			{languageItems}
-			{currentLanguageLabel}
-			showLogout={authStore.isAuthenticated}
-			loginHref="/login"
-			primaryColor="#6366f1"
-			showAppSwitcher={true}
-			{appItems}
-			{userEmail}
-			settingsHref="/settings"
-			manaHref="/mana"
-			profileHref="/profile"
-			themesHref="/themes"
-			helpHref="/help"
-			allAppsHref="/apps"
-			{spotlightActions}
-			{contentSearcher}
-		/>
+		<!-- Bottom Stack: all fixed-bottom elements in one flex container -->
+		<div class="bottom-stack">
+			<!-- QuickInputBar + toggle button row -->
+			<div class="bottom-stack-row">
+				<QuickInputBar
+					onSearch={inputBarAdapter.onSearch}
+					onSelect={inputBarAdapter.onSelect}
+					onParseCreate={inputBarAdapter.onParseCreate}
+					onCreate={inputBarAdapter.onCreate}
+					onSearchChange={inputBarAdapter.onSearchChange}
+					placeholder={inputBarAdapter.placeholder}
+					appIcon={inputBarAdapter.appIcon}
+					emptyText={inputBarAdapter.emptyText}
+					createText={inputBarAdapter.createText}
+					deferSearch={inputBarAdapter.deferSearch}
+					locale={$locale || 'de'}
+					defaultOptions={inputBarAdapter.defaultOptions}
+					selectedDefaultId={inputBarAdapter.selectedDefaultId}
+					defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
+					onDefaultChange={inputBarAdapter.onDefaultChange}
+					highlightPatterns={inputBarAdapter.highlightPatterns}
+					positioning="static"
+				/>
+				<button
+					class="pill-nav-toggle"
+					onclick={() => handleCollapsedChange(!isCollapsed)}
+					title={isCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'}
+				>
+					<span class="pill-nav-toggle-icon" class:collapsed={isCollapsed}>▼</span>
+				</button>
+			</div>
 
-		<!-- QuickInputBar (context-aware per module) -->
-		<QuickInputBar
-			onSearch={inputBarAdapter.onSearch}
-			onSelect={inputBarAdapter.onSelect}
-			onParseCreate={inputBarAdapter.onParseCreate}
-			onCreate={inputBarAdapter.onCreate}
-			onSearchChange={inputBarAdapter.onSearchChange}
-			placeholder={inputBarAdapter.placeholder}
-			appIcon={inputBarAdapter.appIcon}
-			emptyText={inputBarAdapter.emptyText}
-			createText={inputBarAdapter.createText}
-			deferSearch={inputBarAdapter.deferSearch}
-			locale={$locale || 'de'}
-			defaultOptions={inputBarAdapter.defaultOptions}
-			selectedDefaultId={inputBarAdapter.selectedDefaultId}
-			defaultOptionLabel={inputBarAdapter.defaultOptionLabel}
-			onDefaultChange={inputBarAdapter.onDefaultChange}
-			highlightPatterns={inputBarAdapter.highlightPatterns}
-			bottomOffset={isCollapsed ? '12px' : '70px'}
-		/>
+			<!-- TagStrip (between QuickInputBar and PillNav) -->
+			{#if isTagStripVisible}
+				<TagStrip
+					tags={(allTags.value ?? []).map((t) => ({
+						id: t.id,
+						name: t.name,
+						color: t.color || '#3b82f6',
+					}))}
+					selectedIds={[]}
+					onToggle={() => {}}
+					onClear={() => {}}
+					onTagDrop={tagDropHandler ?? undefined}
+					managementHref="/tags"
+					loading={allTags.loading}
+					positioning="static"
+				/>
+			{/if}
 
-		<!-- PillNav toggle button (next to QuickInputBar) -->
-		<button
-			class="pill-nav-toggle"
-			style:bottom={isCollapsed ? '20px' : '78px'}
-			onclick={() => handleCollapsedChange(!isCollapsed)}
-			title={isCollapsed ? 'Navigation einblenden' : 'Navigation ausblenden'}
-		>
-			<span class="pill-nav-toggle-icon" class:collapsed={isCollapsed}>▼</span>
-		</button>
-
-		<!-- TagStrip (above PillNav, toggled via Tags pill) -->
-		{#if isTagStripVisible}
-			<TagStrip
-				tags={(allTags.value ?? []).map((t) => ({
-					id: t.id,
-					name: t.name,
-					color: t.color || '#3b82f6',
-				}))}
-				selectedIds={[]}
-				onToggle={() => {}}
-				onClear={() => {}}
-				onTagDrop={tagDropHandler ?? undefined}
-				managementHref="/tags"
-				loading={allTags.loading}
+			<!-- PillNav (bottom of stack) -->
+			<PillNavigation
+				items={navItems}
+				currentPath={$page.url.pathname}
+				appName="ManaCore"
+				homeRoute="/"
+				onLogout={handleSignOut}
+				onToggleTheme={handleToggleTheme}
+				{isDark}
+				{isCollapsed}
+				onCollapsedChange={handleCollapsedChange}
+				showThemeToggle={true}
+				showThemeVariants={true}
+				{themeVariantItems}
+				{currentThemeVariantLabel}
+				themeMode={theme.mode}
+				onThemeModeChange={handleThemeModeChange}
+				showLanguageSwitcher={true}
+				{languageItems}
+				{currentLanguageLabel}
+				showLogout={authStore.isAuthenticated}
+				loginHref="/login"
+				primaryColor="#6366f1"
+				showAppSwitcher={true}
+				{appItems}
+				{userEmail}
+				settingsHref="/settings"
+				manaHref="/mana"
+				profileHref="/profile"
+				themesHref="/themes"
+				helpHref="/help"
+				allAppsHref="/apps"
+				{spotlightActions}
+				{contentSearcher}
+				positioning="static"
 			/>
-		{/if}
+		</div>
 
 		<!-- DnD: floating preview -->
 		<DragPreview />
@@ -499,12 +503,44 @@
 </AuthGate>
 
 <style>
-	.pill-nav-toggle {
+	.bottom-stack {
 		position: fixed;
-		right: 16px;
-		z-index: 91;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 90;
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		pointer-events: none;
+		padding-bottom: env(safe-area-inset-bottom, 0px);
+	}
+
+	.bottom-stack > :global(*) {
+		pointer-events: auto;
+	}
+
+	.bottom-stack-row {
+		display: flex;
+		align-items: flex-end;
+		gap: 8px;
+		padding-right: 8px;
+		pointer-events: none;
+	}
+
+	.bottom-stack-row > :global(*) {
+		pointer-events: auto;
+	}
+
+	.bottom-stack-row > :global(:first-child) {
+		flex: 1;
+	}
+
+	.pill-nav-toggle {
 		width: 32px;
 		height: 32px;
+		flex-shrink: 0;
+		margin-bottom: 20px;
 		border-radius: 50%;
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		background: rgba(0, 0, 0, 0.6);
@@ -515,9 +551,9 @@
 		align-items: center;
 		justify-content: center;
 		transition:
-			bottom 0.3s ease,
 			background 0.2s ease,
 			color 0.2s ease;
+		pointer-events: auto;
 	}
 
 	.pill-nav-toggle:hover {

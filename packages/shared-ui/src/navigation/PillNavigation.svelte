@@ -228,6 +228,8 @@
 		onToggleTheme?: () => void;
 		/** Whether dark mode is active */
 		isDark?: boolean;
+		/** Use 'static' when inside a flex container (bottom-stack pattern). Default: 'fixed'. */
+		positioning?: 'fixed' | 'static';
 		/** Whether navigation is collapsed */
 		isCollapsed?: boolean;
 		/** Called when collapsed state changes */
@@ -318,6 +320,7 @@
 		onLogout,
 		onToggleTheme,
 		isDark = false,
+		positioning = 'fixed',
 		isCollapsed: externalCollapsed,
 		onCollapsedChange,
 		languageItems = [],
@@ -403,6 +406,7 @@
 {#if !(externalCollapsed ?? false)}
 	<nav
 		class="pill-nav"
+		class:pill-nav-static={positioning === 'static'}
 		style="{primaryColor
 			? `--pill-primary-color: ${primaryColor};`
 			: ''}--pill-nav-bottom: {bottomOffset}"
@@ -826,6 +830,12 @@
 		/* Container query context */
 		container-type: inline-size;
 		container-name: pillnav;
+	}
+
+	.pill-nav-static {
+		position: relative;
+		bottom: auto;
+		z-index: auto;
 	}
 
 	.pill-nav-container {

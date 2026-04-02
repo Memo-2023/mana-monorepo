@@ -34,6 +34,8 @@
 		createHref?: string;
 		/** Whether the filter strip below is visible (adjusts bottom position) */
 		aboveFilterStrip?: boolean;
+		/** Use 'static' when inside a flex container (bottom-stack pattern). Default: 'fixed'. */
+		positioning?: 'fixed' | 'static';
 	}
 
 	let {
@@ -48,6 +50,7 @@
 		showCreateButton = true,
 		createHref,
 		aboveFilterStrip = false,
+		positioning = 'fixed',
 	}: Props = $props();
 
 	const resolvedCreateHref = $derived(createHref ?? managementHref + '?new=true');
@@ -63,7 +66,11 @@
 	}
 </script>
 
-<div class="tag-strip-wrapper" class:above-filter-strip={aboveFilterStrip}>
+<div
+	class="tag-strip-wrapper"
+	class:above-filter-strip={aboveFilterStrip}
+	class:tag-strip-static={positioning === 'static'}
+>
 	<div class="tag-strip-container">
 		<!-- Clear Filter Button (always rendered to prevent layout shift) -->
 		<button
@@ -140,6 +147,12 @@
 		left: 0;
 		right: 0;
 		z-index: 49;
+	}
+
+	.tag-strip-static {
+		position: relative;
+		bottom: auto;
+		z-index: auto;
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
